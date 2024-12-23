@@ -3,7 +3,7 @@
   "dependencies": {
     "@expo/server": "^0.4.3"
   },
-  "packageManager": "pnpm@9.15.0",
+  "packageManager": "pnpm@9.15.1",
   "pnpm": {
     "patchedDependencies": {
       "@expo/server@0.4.3": "patches/@expo__server@0.4.3.patch"
