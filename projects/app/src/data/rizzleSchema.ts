@@ -140,7 +140,7 @@ const rSrsState = memoize(
 // TODO: doesn't support non-object keys.
 // });
 
-export const skillReview = r.entity(`sr/[skill]/[when]`, {
+export const skillRating = r.entity(`sr/[skill]/[when]`, {
   skill: rSkillId(),
   when: r.datetime(),
 
@@ -166,7 +166,12 @@ export const reviewSkill = r.mutator({
   now: r.timestamp().alias(`n`),
 });
 
-export const schema = { skillReview, skillState, addSkillState, reviewSkill };
+export const schema = {
+  skillReview: skillRating,
+  skillState,
+  addSkillState,
+  reviewSkill,
+};
 
 // export const pinyinInitialAssociation = rizzle.keyValue(`pi/[initial]`, {
 //   initial: rizzle.string(),

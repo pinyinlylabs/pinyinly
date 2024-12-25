@@ -1,13 +1,16 @@
-import { authOAuth2 } from "@/server/schema";
 import { invariant } from "@haohaohow/lib/invariant";
 import { DrizzlePostgreSQLAdapter } from "@lucia-auth/adapter-drizzle";
 import { and, eq } from "drizzle-orm";
 import { Lucia, TimeSpan } from "lucia";
-import { authSession, user } from "../schema";
+import * as schema from "../schema";
 import { Drizzle } from "./db";
 
 export function getLucia(db: Drizzle) {
-  const adapter = new DrizzlePostgreSQLAdapter(db, authSession, user);
+  const adapter = new DrizzlePostgreSQLAdapter(
+    db,
+    schema.authSession,
+    schema.user,
+  );
   return new Lucia(adapter, {
     sessionExpiresIn: new TimeSpan(365, `d`),
   });
@@ -22,8 +25,8 @@ export async function getOrCreateUser(
 ) {
   const existingOAuth2 = await db.query.authOAuth2.findFirst({
     where: and(
-      eq(authOAuth2.provider, options.provider),
-      eq(authOAuth2.providerUserId, options.providerUserId),
+      eq(schema.authOAuth2.provider, options.provider),
+      eq(schema.authOAuth2.providerUserId, options.providerUserId),
     ),
   });
 
@@ -34,13 +37,13 @@ export async function getOrCreateUser(
   }
 
   // Create a new user
-  const [newUser] = await db.insert(user).values({}).returning();
+  const [newUser] = await db.insert(schema.user).values({}).returning();
 
   invariant(newUser !== undefined);
 
   // create a new OAuth2
   const [newOAuth2] = await db
-    .insert(authOAuth2)
+    .insert(schema.authOAuth2)
     .values({
       provider: options.provider,
       providerUserId: options.providerUserId,

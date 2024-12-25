@@ -1,0 +1,1 @@
+ALTER TABLE "haohaohow"."skillRating" ALTER COLUMN "rating" SET DATA TYPE text;
