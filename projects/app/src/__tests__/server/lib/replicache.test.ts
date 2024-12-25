@@ -3,8 +3,9 @@ import * as r from "@/data/rizzleSchema";
 import { MarshaledSkillId } from "@/data/rizzleSchema";
 import { computeCvrEntities, pull, push } from "@/server/lib/replicache";
 import * as schema from "@/server/schema";
+import { Rating } from "@/util/fsrs";
 import { invariant } from "@haohaohow/lib/invariant";
-import { sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import assert from "node:assert/strict";
 import { test } from "node:test";
@@ -503,6 +504,139 @@ void test(`pull()`, async (t) => {
       ],
     });
   });
+
+  await txTest(`handles deletes for skillState`, async (tx) => {
+    const clientGroupId = nanoid();
+
+    // Create a user
+    const [user] = await tx
+      .insert(schema.user)
+      .values([{ id: `1` }])
+      .returning();
+    invariant(user != null);
+
+    const now = new Date();
+
+    const [skillState] = await tx
+      .insert(schema.skillState)
+      .values([
+        {
+          userId: user.id,
+          dueAt: now,
+          srs: null,
+          skillId: r.rSkillId().marshal({
+            type: SkillType.EnglishToHanzi,
+            hanzi: `我`,
+          }),
+        },
+      ])
+      .returning();
+    invariant(skillState != null);
+
+    const pull1 = await pull(tx, user.id, {
+      profileId: ``,
+      clientGroupId,
+      pullVersion: 1,
+      schemaVersion: `3`,
+      cookie: null,
+    });
+
+    await tx
+      .delete(schema.skillState)
+      .where(eq(schema.skillState.id, skillState.id));
+
+    assert.ok(`cookie` in pull1);
+
+    const pull2 = await pull(tx, user.id, {
+      profileId: ``,
+      clientGroupId,
+      pullVersion: 1,
+      schemaVersion: `3`,
+      cookie: pull1.cookie,
+    });
+
+    assert.partialDeepStrictEqual(pull2, {
+      cookie: {
+        order: 2,
+      },
+      lastMutationIDChanges: {},
+      patch: [
+        {
+          op: `del`,
+          key: r.skillState.marshalKey({
+            skill: skillState.skillId as MarshaledSkillId,
+          }),
+        },
+      ],
+    });
+  });
+
+  await txTest(`handles deletes for skillRating`, async (tx) => {
+    const clientGroupId = nanoid();
+
+    // Create a user
+    const [user] = await tx
+      .insert(schema.user)
+      .values([{ id: `1` }])
+      .returning();
+    invariant(user != null);
+
+    const now = new Date();
+
+    const [skillRating] = await tx
+      .insert(schema.skillRating)
+      .values([
+        {
+          userId: user.id,
+          skillId: r.rSkillId().marshal({
+            type: SkillType.EnglishToHanzi,
+            hanzi: `我`,
+          }),
+          rating: r.rFsrsRating.marshal(Rating.Good),
+          createdAt: now,
+        },
+      ])
+      .returning();
+    invariant(skillRating != null);
+
+    const pull1 = await pull(tx, user.id, {
+      profileId: ``,
+      clientGroupId,
+      pullVersion: 1,
+      schemaVersion: `3`,
+      cookie: null,
+    });
+
+    await tx
+      .delete(schema.skillRating)
+      .where(eq(schema.skillRating.id, skillRating.id));
+
+    assert.ok(`cookie` in pull1);
+
+    const pull2 = await pull(tx, user.id, {
+      profileId: ``,
+      clientGroupId,
+      pullVersion: 1,
+      schemaVersion: `3`,
+      cookie: pull1.cookie,
+    });
+
+    assert.partialDeepStrictEqual(pull2, {
+      cookie: {
+        order: 2,
+      },
+      lastMutationIDChanges: {},
+      patch: [
+        {
+          op: `del`,
+          key: r.skillRating.marshalKey({
+            skill: skillRating.skillId as MarshaledSkillId,
+            when: now,
+          }),
+        },
+      ],
+    });
+  });
 });
 
 void test(`dbTest() examples`, async (t) => {
@@ -522,8 +656,9 @@ void test(`computeCvr()`, async (t) => {
 
   await txTest(`works for non-existant user and client group`, async (tx) => {
     assert.deepEqual(await computeCvrEntities(tx, `1`, ``), {
-      skillState: {},
       client: {},
+      skillState: {},
+      skillRating: {},
     });
   });
 
@@ -535,12 +670,13 @@ void test(`computeCvr()`, async (t) => {
     invariant(user != null);
 
     assert.deepEqual(await computeCvrEntities(tx, user.id, ``), {
-      skillState: {},
       client: {},
+      skillState: {},
+      skillRating: {},
     });
   });
 
-  await txTest(`only includes results for the user`, async (tx) => {
+  await txTest(`only includes skillState for the user`, async (tx) => {
     const [user1, user2] = await tx
       .insert(schema.user)
       .values([{ id: `1` }, { id: `2` }])
@@ -572,14 +708,73 @@ void test(`computeCvr()`, async (t) => {
         },
       ])
       .returning({
-        id: schema.skillState.skillId,
+        id: schema.skillState.id,
+        skillId: schema.skillState.skillId,
         version: sql<string>`${schema.skillState}.xmin`,
       });
     invariant(user1SkillState != null);
 
     assert.deepEqual(await computeCvrEntities(tx, user1.id, ``), {
       client: {},
-      skillState: { [user1SkillState.id]: user1SkillState.version },
+      skillRating: {},
+      skillState: {
+        [user1SkillState.id]:
+          user1SkillState.version +
+          `:` +
+          r.skillState.marshalKey({
+            skill: user1SkillState.skillId as MarshaledSkillId,
+          }),
+      },
+    });
+  });
+
+  await txTest(`only includes skillRating for the user`, async (tx) => {
+    const [user1, user2] = await tx
+      .insert(schema.user)
+      .values([{ id: `1` }, { id: `2` }])
+      .returning();
+    invariant(user1 != null && user2 != null);
+
+    const [user1SkillRating] = await tx
+      .insert(schema.skillRating)
+      .values([
+        {
+          userId: user1.id,
+          skillId: r.rSkillId().marshal({
+            type: SkillType.EnglishToHanzi,
+            hanzi: `我`,
+          }),
+          rating: r.rFsrsRating.marshal(Rating.Again),
+        },
+        {
+          userId: user2.id,
+          skillId: r.rSkillId().marshal({
+            type: SkillType.EnglishToHanzi,
+            hanzi: `我`,
+          }),
+          rating: r.rFsrsRating.marshal(Rating.Good),
+        },
+      ])
+      .returning({
+        id: schema.skillRating.id,
+        skillId: schema.skillRating.skillId,
+        createdAt: schema.skillRating.createdAt,
+        version: sql<string>`${schema.skillRating}.xmin`,
+      });
+    invariant(user1SkillRating != null);
+
+    assert.deepEqual(await computeCvrEntities(tx, user1.id, ``), {
+      client: {},
+      skillRating: {
+        [user1SkillRating.id]:
+          user1SkillRating.version +
+          `:` +
+          r.skillRating.marshalKey({
+            skill: user1SkillRating.skillId as MarshaledSkillId,
+            when: user1SkillRating.createdAt,
+          }),
+      },
+      skillState: {},
     });
   });
 });

@@ -10,6 +10,7 @@ import { MarshaledSkillId } from "@/data/rizzleSchema";
 import { invariant } from "@haohaohow/lib/invariant";
 import makeDebug from "debug";
 import { eq, inArray, sql } from "drizzle-orm";
+import mapValues from "lodash/mapValues";
 import { basename } from "node:path";
 import {
   ClientStateNotFoundResponse,
@@ -18,14 +19,9 @@ import {
   VersionNotSupportedResponse,
 } from "replicache";
 import { z } from "zod";
-import {
-  replicacheClient,
-  replicacheClientGroup,
-  replicacheCvr,
-  skillState,
-} from "../schema";
+import * as schema from "../schema";
 import type { Drizzle } from "./db";
-import { json_object_agg } from "./db";
+import { json_build_object, json_object_agg } from "./db";
 
 const debug = makeDebug(basename(import.meta.filename));
 
@@ -60,6 +56,7 @@ export async function push(
 const cvrEntriesSchema = z
   .object({
     skillState: z.record(z.string()),
+    skillRating: z.record(z.string()),
     client: z.record(z.string()),
   })
   .partial();
@@ -88,9 +85,15 @@ function diffCvrEntities(
         (id) =>
           prevEntries[id] === undefined || prevEntries[id] !== nextEntries[id],
       ),
-      dels: Object.keys(prevEntries).filter(
-        (id) => nextEntries[id] === undefined,
-      ),
+      dels: Object.keys(prevEntries)
+        .filter((id) => nextEntries[id] === undefined)
+        .map((id) => {
+          const parts = prevEntries[id]?.match(/^(.+?):(.+)$/);
+          invariant(parts != null);
+          const [, _xmin, key] = parts;
+          invariant(key != null);
+          return key;
+        }),
     };
   }
   return r;
@@ -172,9 +175,12 @@ export async function pull(
     }
 
     // 11: get entities
-    const [skillStates, clients] = await Promise.all([
+    const [skillStates, skillRatings, clients] = await Promise.all([
       tx.query.skillState.findMany({
-        where: (t) => inArray(t.skillId, diff.skillState?.puts ?? []),
+        where: (t) => inArray(t.id, diff.skillState?.puts ?? []),
+      }),
+      tx.query.skillRating.findMany({
+        where: (t) => inArray(t.id, diff.skillRating?.puts ?? []),
       }),
       tx.query.replicacheClient.findMany({
         where: (t) => inArray(t.id, diff.client?.puts ?? []),
@@ -201,6 +207,7 @@ export async function pull(
     return {
       entities: {
         skillState: { dels: diff.skillState?.dels ?? [], puts: skillStates },
+        skillRating: { dels: diff.skillRating?.dels ?? [], puts: skillRatings },
         client: { dels: diff.client?.dels ?? [], puts: clients },
       },
       nextCvrEntities,
@@ -221,7 +228,7 @@ export async function pull(
 
   // 16-17: store cvr
   const [cvr] = await tx
-    .insert(replicacheCvr)
+    .insert(schema.replicacheCvr)
     .values([
       {
         lastMutationIds: Object.fromEntries(
@@ -230,7 +237,7 @@ export async function pull(
         entities: nextCvrEntities,
       },
     ])
-    .returning({ id: replicacheCvr.id });
+    .returning({ id: schema.replicacheCvr.id });
   invariant(cvr != null);
 
   // 18(i): build patch
@@ -239,6 +246,7 @@ export async function pull(
     patch.push({ op: `clear` });
   }
 
+  // 18(i)(skillState):
   for (const s of entities.skillState.puts) {
     patch.push({
       op: `put`,
@@ -250,11 +258,29 @@ export async function pull(
       }),
     });
   }
-
-  for (const id of entities.skillState.dels) {
+  for (const key of entities.skillState.dels) {
     patch.push({
       op: `del`,
-      key: r.skillState.marshalKey({ skill: id as MarshaledSkillId }),
+      key,
+    });
+  }
+  // 18(i)(skillRating):
+  for (const s of entities.skillRating.puts) {
+    patch.push({
+      op: `put`,
+      key: r.skillRating.marshalKey({
+        skill: s.skillId as MarshaledSkillId,
+        when: s.createdAt,
+      }),
+      value: r.skillRating.marshalValue({
+        rating: r.rFsrsRating.unmarshal(s.rating),
+      }),
+    });
+  }
+  for (const key of entities.skillRating.dels) {
+    patch.push({
+      op: `del`,
+      key,
     });
   }
 
@@ -361,14 +387,14 @@ export async function putClient(db: Drizzle, client: ClientRecord) {
   } = client;
 
   await db
-    .insert(replicacheClient)
+    .insert(schema.replicacheClient)
     .values({
       id,
       clientGroupId,
       lastMutationId,
     })
     .onConflictDoUpdate({
-      target: replicacheClient.id,
+      target: schema.replicacheClient.id,
       set: { lastMutationId, updatedAt: new Date() },
     });
 }
@@ -380,10 +406,10 @@ export async function putClientGroup(
   const { id, userId, cvrVersion } = clientGroup;
 
   await db
-    .insert(replicacheClientGroup)
+    .insert(schema.replicacheClientGroup)
     .values({ id, userId, cvrVersion })
     .onConflictDoUpdate({
-      target: replicacheClientGroup.id,
+      target: schema.replicacheClientGroup.id,
       set: { userId, cvrVersion, updatedAt: new Date() },
     });
 }
@@ -450,7 +476,7 @@ const mutate = makeDrizzleMutationHandler<typeof r.schema, Drizzle>(r.schema, {
   async addSkillState(db, userId, { skill, now }) {
     const skillId = r.rSkillId().marshal(skill);
     await db
-      .insert(skillState)
+      .insert(schema.skillState)
       .values({
         userId,
         skillId,
@@ -460,8 +486,15 @@ const mutate = makeDrizzleMutationHandler<typeof r.schema, Drizzle>(r.schema, {
       })
       .onConflictDoNothing();
   },
-  reviewSkill() {
-    throw new Error(`Not implemented`);
+  async reviewSkill(db, userId, { skill, rating, now }) {
+    await db.insert(schema.skillRating).values([
+      {
+        userId,
+        skillId: r.rSkillId().marshal(skill),
+        rating: r.rFsrsRating.marshal(rating),
+        createdAt: now,
+      },
+    ]);
   },
 });
 
@@ -473,33 +506,73 @@ export async function computeCvrEntities(
   const skillStateVersions = db
     .select({
       map: json_object_agg(
-        skillState.skillId,
-        sql<string>`${skillState}.xmin`,
+        schema.skillRating.id,
+        json_build_object({
+          skillId: schema.skillState.skillId,
+          xmin: sql<string>`${schema.skillState}.xmin`,
+        }),
       ).as(`skillStateVersions`),
     })
-    .from(skillState)
-    .where(eq(skillState.userId, userId))
+    .from(schema.skillState)
+    .where(eq(schema.skillState.userId, userId))
     .as(`skillStateVersions`);
+
+  const skillRatingVersions = db
+    .select({
+      map: json_object_agg(
+        schema.skillRating.id,
+        json_build_object({
+          skillId: schema.skillRating.skillId,
+          createdAt: sql<string>`${schema.skillRating.createdAt}::timestamptz`,
+          xmin: sql<string>`${schema.skillRating}.xmin`,
+        }),
+      ).as(`skillRatingVersions`),
+    })
+    .from(schema.skillRating)
+    .where(eq(schema.skillRating.userId, userId))
+    .as(`skillRatingVersions`);
 
   const clientVersions = db
     .select({
       map: json_object_agg(
-        replicacheClient.id,
-        sql<string>`${replicacheClient}.xmin`,
+        schema.replicacheClient.id,
+        sql<string>`${schema.replicacheClient}.xmin`,
       ).as(`clientVersions`),
     })
-    .from(replicacheClient)
-    .where(eq(replicacheClient.clientGroupId, clientGroupId))
+    .from(schema.replicacheClient)
+    .where(eq(schema.replicacheClient.clientGroupId, clientGroupId))
     .as(`clientVersions`);
 
   const [result] = await db
     .select({
       skillState: skillStateVersions.map,
+      skillRating: skillRatingVersions.map,
       client: clientVersions.map,
     })
     .from(skillStateVersions)
-    .leftJoin(clientVersions, sql`true`);
+    .leftJoin(clientVersions, sql`true`)
+    .leftJoin(skillRatingVersions, sql`true`);
 
   invariant(result != null);
-  return result;
+
+  return {
+    skillState: mapValues(
+      result.skillState,
+      (v) =>
+        v.xmin +
+        `:` +
+        r.skillState.marshalKey({ skill: v.skillId as MarshaledSkillId }),
+    ),
+    skillRating: mapValues(
+      result.skillRating,
+      (v) =>
+        v.xmin +
+        `:` +
+        r.skillRating.marshalKey({
+          skill: v.skillId as MarshaledSkillId,
+          when: new Date(v.createdAt),
+        }),
+    ),
+    client: result.client,
+  };
 }

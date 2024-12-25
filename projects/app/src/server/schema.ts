@@ -45,13 +45,13 @@ export const authOAuth2 = schema.table(
 );
 
 export const skillRating = schema.table(`skillRating`, {
-  id: p.text(`id`).primaryKey(),
+  id: p.text(`id`).primaryKey().$defaultFn(nanoid),
   userId: p
     .text(`userId`)
     .references(() => user.id)
     .notNull(),
   skillId: p.text(`skillId`).notNull(),
-  rating: p.integer(`rating`).notNull(),
+  rating: p.text(`rating`).notNull(),
   createdAt: p.timestamp(`timestamp`).defaultNow().notNull(),
 });
 
@@ -115,7 +115,7 @@ export const replicacheCvr = schema.table(`replicacheCvr`, {
    * table name.
    *
    * ```json
-   * { <tableName>: { <primaryKey>: <version> } }
+   * { <tableName>: { "<primaryKey>": "<version>:<replicacheId>" } }
    * ```
    */
   entities: p.json(`entities`).notNull(),
