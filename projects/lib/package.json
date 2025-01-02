@@ -13,7 +13,7 @@
     "@types/lodash": "4.17.x",
     "prettier": "^3.4.2",
     "tsx": "^4.15.7",
-    "typescript": "^5.7.2"
+    "typescript": "patch:typescript@npm%3A5.7.2#~/.yarn/patches/typescript-npm-5.7.2-b1f84a8b28.patch"
   },
   "private": true
 }

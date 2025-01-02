@@ -2782,7 +2782,7 @@ __metadata:
     tailwindcss: "npm:^3.4.14"
     ts-essentials: "npm:^10.0.3"
     tsx: "npm:^4.15.7"
-    typescript: "npm:^5.7.2"
+    typescript: "patch:typescript@npm%3A5.7.2#~/.yarn/patches/typescript-npm-5.7.2-b1f84a8b28.patch"
     typescript-eslint: "npm:^8.14.0"
     ucd-full: "npm:^16.0.0"
     ws: "npm:^8.17.1"
@@ -2812,7 +2812,7 @@ __metadata:
     nanoid: "npm:^5.0.9"
     prettier: "npm:^3.4.2"
     tsx: "npm:^4.15.7"
-    typescript: "npm:^5.7.2"
+    typescript: "patch:typescript@npm%3A5.7.2#~/.yarn/patches/typescript-npm-5.7.2-b1f84a8b28.patch"
     zod: "npm:^3.23.8"
   languageName: unknown
   linkType: soft
@@ -2825,7 +2825,7 @@ __metadata:
     "@types/yargs": "npm:^17 <=17.7.x"
     prettier: "npm:^3.4.2"
     ts-node: "npm:^10.9.2"
-    typescript: "npm:^5.7.2"
+    typescript: "patch:typescript@npm%3A5.7.2#~/.yarn/patches/typescript-npm-5.7.2-b1f84a8b28.patch"
     yargs: "npm:^17.7.2"
   languageName: unknown
   linkType: soft
@@ -11686,7 +11686,7 @@ __metadata:
     "@yarnpkg/types": "npm:^4.0.0"
     prettier: "npm:^3.4.2"
     semver: "npm:^7.5.0"
-    typescript: "npm:^5.7.2"
+    typescript: "patch:typescript@npm%3A5.7.2#~/.yarn/patches/typescript-npm-5.7.2-b1f84a8b28.patch"
   languageName: unknown
   linkType: soft
 
@@ -18387,17 +18387,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:5.1.6":
-  version: 5.1.6
-  resolution: "typescript@npm:5.1.6"
-  bin:
-    tsc: bin/tsc
-    tsserver: bin/tsserver
-  checksum: 10c0/45ac28e2df8365fd28dac42f5d62edfe69a7203d5ec646732cadc04065331f34f9078f81f150fde42ed9754eed6fa3b06a8f3523c40b821e557b727f1992e025
-  languageName: node
-  linkType: hard
-
-"typescript@npm:^5.5.2, typescript@npm:^5.7.2":
+"typescript@npm:5.7.2":
   version: 5.7.2
   resolution: "typescript@npm:5.7.2"
   bin:
@@ -18407,23 +18397,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@npm%3A5.1.6#optional!builtin<compat/typescript>":
-  version: 5.1.6
-  resolution: "typescript@patch:typescript@npm%3A5.1.6#optional!builtin<compat/typescript>::version=5.1.6&hash=5da071"
+"typescript@patch:typescript@npm%3A5.7.2#~/.yarn/patches/typescript-npm-5.7.2-b1f84a8b28.patch":
+  version: 5.7.2
+  resolution: "typescript@patch:typescript@npm%3A5.7.2#~/.yarn/patches/typescript-npm-5.7.2-b1f84a8b28.patch::version=5.7.2&hash=ce4ca0"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 10c0/c2bded58ab897a8341fdbb0c1d92ea2362f498cfffebdc8a529d03e15ea2454142dfbf122dabbd9a5cb79b7123790d27def16e11844887d20636226773ed329a
+  checksum: 10c0/d6e9c5ed32e197d2754a0c1222ccfe02ac4148dd3803a6729aa8db974345170d1a72b50ab17415b178b87e818a045bd7795c5ebcaeabae72a9f32b90c9bc36b4
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@npm%3A^5.5.2#optional!builtin<compat/typescript>, typescript@patch:typescript@npm%3A^5.7.2#optional!builtin<compat/typescript>":
+"typescript@patch:typescript@patch%3Atypescript@npm%253A5.7.2%23~/.yarn/patches/typescript-npm-5.7.2-b1f84a8b28.patch#optional!builtin<compat/typescript>":
   version: 5.7.2
-  resolution: "typescript@patch:typescript@npm%3A5.7.2#optional!builtin<compat/typescript>::version=5.7.2&hash=5786d5"
+  resolution: "typescript@patch:typescript@patch%3Atypescript@npm%253A5.7.2%23~/.yarn/patches/typescript-npm-5.7.2-b1f84a8b28.patch%3A%3Aversion=5.7.2&hash=ce4ca0#optional!builtin<compat/typescript>::version=5.7.2&hash=5786d5"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 10c0/f3b8082c9d1d1629a215245c9087df56cb784f9fb6f27b5d55577a20e68afe2a889c040aacff6d27e35be165ecf9dca66e694c42eb9a50b3b2c451b36b5675cb
+  checksum: 10c0/a521a05d76915c5287d4c780fe1b110d4ff04737e0e8de1994e3d4f7f75bd344e13ebee33f7fd4b12e8ed97ede8c507ecc1bced8de1331f8a8f3108bab213c0c
   languageName: node
   linkType: hard
 

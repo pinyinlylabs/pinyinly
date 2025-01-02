@@ -95,7 +95,7 @@
     "prettier-plugin-tailwindcss": "^0.6.9",
     "ts-essentials": "^10.0.3",
     "tsx": "^4.15.7",
-    "typescript": "^5.7.2",
+    "typescript": "patch:typescript@npm%3A5.7.2#~/.yarn/patches/typescript-npm-5.7.2-b1f84a8b28.patch",
     "typescript-eslint": "^8.14.0",
     "ucd-full": "^16.0.0",
     "yargs": "^17.7.2"
