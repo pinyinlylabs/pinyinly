@@ -861,22 +861,30 @@ const replicache = <
 export const mutationSchema = z
   .object({
     id: z.number(),
-    clientID: z.string(),
     name: z.string(),
     args: z.unknown(),
     timestamp: z.number(),
+    clientID: z.string(),
+    clientId: z.string(),
+  })
+  // HACK: allow this schema to parse the original and transformed version.
+  .partial({
+    clientID: true,
+    clientId: true,
   })
   .strict()
-  .transform((x) =>
+  .transform((x) => {
     // Translate convention of initialisms, e.g. `ID` to `Id`
-    ({
+    const clientId = x.clientID ?? x.clientId;
+    invariant(clientId != null);
+    return {
       id: x.id,
-      clientId: x.clientID,
+      clientId,
       name: x.name,
       args: x.args,
       timestamp: x.timestamp,
-    }),
-  );
+    };
+  });
 
 export type Mutation = z.infer<typeof mutationSchema>;
 
