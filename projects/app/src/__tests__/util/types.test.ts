@@ -1,4 +1,6 @@
 import { IsEqual } from "@/util/types";
+import assert from "node:assert/strict";
+import test from "node:test";
 
 function typeChecks(..._args: unknown[]) {
   // This function is only used for type checking, so it should never be called.
@@ -25,4 +27,20 @@ typeChecks(`IsEqual`, () => {
   // @ts-expect-error object isn't equal to never
   true satisfies IsEqual<{ key: `value` }, never>;
   false satisfies IsEqual<{ key: `value` }, never>;
+});
+
+void test(`lib.dom.d.ts patches`, async () => {
+  // Passing `undefined` throws, but in lib.dom.d.ts `Response.json()` takes an
+  // `any`, so it's not caught by the type checker. So we've patched
+  // lib.dom.d.ts to remove the `any` so this test ensures that the patch is
+  // working.
+  assert.throws(() => Response.json(undefined as unknown as string));
+
+  typeChecks(() => {
+    // @ts-expect-error passing `undefined` throws, but in lib.dom.d.ts
+    // `Response.json()` takes an `any`, so it's not caught by the type checker.
+    // So we've patched lib.dom.d.ts to remove the `any` so this test ensures
+    // that the patch is working.
+    Response.json(undefined);
+  });
 });
