@@ -1,6 +1,12 @@
+import { invariant } from "@haohaohow/lib/invariant";
 import { sql, SQL, SQLWrapper } from "drizzle-orm";
 import { drizzle, NodePgDatabase } from "drizzle-orm/node-postgres";
-import { AnyPgTable, PgColumn, PgTable } from "drizzle-orm/pg-core";
+import {
+  AnyPgTable,
+  PgColumn,
+  PgTable,
+  PgTransactionConfig,
+} from "drizzle-orm/pg-core";
 import type { Pool as PgPool } from "pg";
 import z from "zod";
 import * as schema from "../schema";
@@ -42,9 +48,6 @@ async function withDrizzleAndPool<R>(
   const client = await pool.connect();
 
   try {
-    await client.query(
-      `SET SESSION CHARACTERISTICS AS TRANSACTION ISOLATION LEVEL SERIALIZABLE`,
-    );
     const db = drizzle(client, { schema });
     return await f(db);
   } finally {
@@ -151,4 +154,32 @@ export function json_build_object<const T extends Record<string, SQLWrapper>>(
           ? T
           : never;
   }>;
+}
+
+export type PgTransactionIsolationLevel = NonNullable<
+  PgTransactionConfig[`isolationLevel`]
+>;
+
+const pgIsolationLevelPower = {
+  [`read uncommitted`]: 0,
+  [`read committed`]: 1,
+  [`repeatable read`]: 2,
+  [`serializable`]: 3,
+};
+
+export async function assertMinimumIsolationLevel(
+  tx: Drizzle,
+  isolationLevel: PgTransactionIsolationLevel,
+): Promise<void> {
+  const result = await tx.execute<{
+    transaction_isolation: PgTransactionIsolationLevel;
+  }>(sql`SHOW TRANSACTION ISOLATION LEVEL`);
+  const currentIsolationLevel = result.rows[0]?.transaction_isolation;
+  invariant(currentIsolationLevel != null);
+
+  invariant(
+    pgIsolationLevelPower[currentIsolationLevel] >=
+      pgIsolationLevelPower[isolationLevel],
+    `incorrect transaction_isolation, expected "${isolationLevel}", actual "${currentIsolationLevel}"`,
+  );
 }

@@ -17,6 +17,7 @@ import {
   useSubscribe as replicacheReactUseSubscribe,
   UseSubscribeOptions,
 } from "replicache-react";
+import { useAuth } from "./auth";
 import { kvStore } from "./replicacheOptions";
 
 export type Rizzle = RizzleReplicache<typeof schema>;
@@ -24,6 +25,7 @@ export type Rizzle = RizzleReplicache<typeof schema>;
 const ReplicacheContext = createContext<Rizzle | null>(null);
 
 export function ReplicacheProvider({ children }: React.PropsWithChildren) {
+  const auth = useAuth();
   const rizzle = useMemo(
     () =>
       r.replicache(
@@ -31,7 +33,10 @@ export function ReplicacheProvider({ children }: React.PropsWithChildren) {
           name: `hao`,
           schemaVersion: `3`,
           licenseKey: replicacheLicenseKey,
+          auth: auth.sessionId ?? undefined,
           kvStore,
+          pushURL: auth.sessionId != null ? `/api/replicache/push` : undefined,
+          pullURL: auth.sessionId != null ? `/api/replicache/pull` : undefined,
           // async pusher(requestBody, requestID) {
           //   const postResult = await fetch(`/api/replicache/push`, {
           //     method: `POST`,
@@ -107,7 +112,7 @@ export function ReplicacheProvider({ children }: React.PropsWithChildren) {
           },
         },
       ),
-    [],
+    [auth.sessionId],
   );
 
   return (

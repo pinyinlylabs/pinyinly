@@ -1,6 +1,7 @@
 import { Transaction } from "@/server/lib/db";
 import * as schema from "@/server/schema";
 import { PGlite } from "@electric-sql/pglite";
+import { PgTransactionConfig } from "drizzle-orm/pg-core";
 import { drizzle } from "drizzle-orm/pglite";
 import { migrate } from "drizzle-orm/pglite/migrator";
 import { TestContext } from "node:test";
@@ -38,7 +39,7 @@ async function createTestDb(t: TestContext) {
 
 export type TestDb = Awaited<ReturnType<typeof createTestDb>>;
 
-export const withTxTest = (t: TestContext) => {
+export const withTxTest = (t: TestContext, config?: PgTransactionConfig) => {
   let db: TestDb | undefined;
 
   type TestFn = (tx: Transaction, t: TestContext) => Promise<void>;
@@ -55,7 +56,7 @@ export const withTxTest = (t: TestContext) => {
         .transaction(async (tx) => {
           await fn(tx as Transaction, t2);
           throw new TestRollback();
-        })
+        }, config)
         .catch((e: unknown) => {
           if (!(e instanceof TestRollback)) {
             throw e;

@@ -148,3 +148,17 @@ export function sortComparatorString<T>(
   fn ??= (x) => x as unknown as string;
   return (a, b) => fn(a).localeCompare(fn(b));
 }
+
+export function mergeSortComparators<T>(
+  ...comparators: SortComparator<T>[]
+): SortComparator<T> {
+  return (a, b) => {
+    for (const comparator of comparators) {
+      const result = comparator(a, b);
+      if (result != 0) {
+        return result;
+      }
+    }
+    return 0;
+  };
+}

@@ -6,4 +6,4 @@ export const appRouter = router({
 });
 
 // export type definition of API
-export type ApiRouter = typeof appRouter;
+export type AppRouter = typeof appRouter;

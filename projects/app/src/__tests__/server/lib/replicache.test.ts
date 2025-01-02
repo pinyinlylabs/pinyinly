@@ -1,6 +1,7 @@
 import { SkillType } from "@/data/model";
 import * as r from "@/data/rizzleSchema";
 import { MarshaledSkillId } from "@/data/rizzleSchema";
+import { Drizzle } from "@/server/lib/db";
 import { computeCvrEntities, pull, push } from "@/server/lib/replicache";
 import * as schema from "@/server/schema";
 import { Rating } from "@/util/fsrs";
@@ -11,8 +12,30 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { withDbTest, withTxTest } from "./db";
 
+async function createUser(tx: Drizzle, id: string = nanoid()) {
+  const [user] = await tx.insert(schema.user).values([{ id }]).returning();
+  assert.ok(user != null);
+  return user;
+}
+
 void test(`push()`, async (t) => {
-  const txTest = withTxTest(t);
+  const txTest = withTxTest(t, { isolationLevel: `repeatable read` });
+
+  await test(`database transaction isolation level`, async (t) => {
+    const txTest = withTxTest(t, { isolationLevel: `read committed` });
+
+    await txTest(`fails when using the default`, async (tx) => {
+      const result = push(tx, `1`, {
+        profileId: ``,
+        clientGroupId: ``,
+        pushVersion: 1,
+        schemaVersion: `3`,
+        mutations: [],
+      });
+
+      await assert.rejects(result, /transaction_isolation/);
+    });
+  });
 
   await txTest(`handles no mutations`, async (tx) => {
     await push(tx, `1`, {
@@ -27,20 +50,8 @@ void test(`push()`, async (t) => {
   await txTest(
     `only allows a client group if it matches the user`,
     async (tx) => {
-      const mut = {
-        id: 1,
-        name: `noop`,
-        args: {},
-        timestamp: 10123,
-        clientId: `c0f86dc7-4d49-4f37-a25b-4d06c9f1cb37`,
-      };
-
-      // Create a user
-      const [user1, user2] = await tx
-        .insert(schema.user)
-        .values([{ id: `1` }, { id: `2` }])
-        .returning();
-      invariant(user1 != null && user2 != null);
+      const user1 = await createUser(tx);
+      const user2 = await createUser(tx);
 
       // Create a client group
       const [clientGroup] = await tx
@@ -54,6 +65,14 @@ void test(`push()`, async (t) => {
         ])
         .returning();
       invariant(clientGroup != null);
+
+      const mut = {
+        id: 1,
+        name: `noop`,
+        args: {},
+        timestamp: 10123,
+        clientId: `c0f86dc7-4d49-4f37-a25b-4d06c9f1cb37`,
+      };
 
       // User 2 doesn't own the clientGroup
       await assert.rejects(
@@ -83,12 +102,7 @@ void test(`push()`, async (t) => {
       const clientId = `clientid`;
       const clientGroupId = `clientgroupid`;
 
-      // Create a user
-      const [user] = await tx
-        .insert(schema.user)
-        .values([{ id: `1` }])
-        .returning();
-      invariant(user != null);
+      const user = await createUser(tx);
 
       const mut = {
         id: 1,
@@ -122,12 +136,7 @@ void test(`push()`, async (t) => {
     const clientId = `clientid`;
     const clientGroupId = `clientgroupid`;
 
-    // Create a user
-    const [user] = await tx
-      .insert(schema.user)
-      .values([{ id: `1` }])
-      .returning();
-    invariant(user != null);
+    const user = await createUser(tx);
 
     const now = new Date();
 
@@ -170,12 +179,7 @@ void test(`push()`, async (t) => {
   });
 
   await txTest(`skips already processed mutations`, async (tx) => {
-    // Create a user
-    const [user] = await tx
-      .insert(schema.user)
-      .values([{ id: `1` }])
-      .returning();
-    invariant(user != null);
+    const user = await createUser(tx);
 
     // Create a client group
     const [clientGroup] = await tx
@@ -223,12 +227,7 @@ void test(`push()`, async (t) => {
   });
 
   await txTest(`does not process mutations from the future`, async (tx) => {
-    // Create a user
-    const [user] = await tx
-      .insert(schema.user)
-      .values([{ id: `1` }])
-      .returning();
-    invariant(user != null);
+    const user = await createUser(tx);
 
     // Create a client group
     const [clientGroup] = await tx
@@ -263,17 +262,10 @@ void test(`push()`, async (t) => {
     );
   });
 
-  await txTest.todo(`mutations return affected row IDs for CVR`);
-
   await txTest(
-    `invalid mutations must still increment client.lastMutationID`,
+    `invalid mutations must still update client.lastMutationID`,
     async (tx) => {
-      // Create a user
-      const [user] = await tx
-        .insert(schema.user)
-        .values([{ id: `1` }])
-        .returning();
-      invariant(user != null);
+      const user = await createUser(tx);
 
       // Create a client group
       const [clientGroup] = await tx
@@ -349,17 +341,27 @@ void test(`push()`, async (t) => {
 });
 
 void test(`pull()`, async (t) => {
-  const txTest = withTxTest(t);
+  const txTest = withTxTest(t, { isolationLevel: `repeatable read` });
+
+  await test(`database transaction isolation level`, async (t) => {
+    const txTest = withTxTest(t, { isolationLevel: `read committed` });
+
+    await txTest(`fails when using the default`, async (tx) => {
+      const result = pull(tx, `xxx`, {
+        profileId: ``,
+        clientGroupId: ``,
+        pullVersion: 1,
+        schemaVersion: `3`,
+        cookie: null,
+      });
+
+      await assert.rejects(result, /transaction_isolation/);
+    });
+  });
 
   await txTest(`creates a CVR with lastMutationIds`, async (tx) => {
     const clientGroupId = nanoid();
-
-    // Create a user
-    const [user] = await tx
-      .insert(schema.user)
-      .values([{ id: `1` }])
-      .returning();
-    invariant(user != null);
+    const user = await createUser(tx);
 
     await pull(tx, user.id, {
       profileId: ``,
@@ -379,12 +381,7 @@ void test(`pull()`, async (t) => {
   await txTest(
     `non-existant client group creates one and stores cvrVersion`,
     async (tx) => {
-      // Create a user
-      const [user] = await tx
-        .insert(schema.user)
-        .values([{ id: `1` }])
-        .returning();
-      invariant(user != null);
+      const user = await createUser(tx);
 
       // Create a client group
       const [clientGroup] = await tx
@@ -431,11 +428,7 @@ void test(`pull()`, async (t) => {
         where: (t, { eq }) => eq(t.id, cookie.cvrId),
       });
 
-      const expectedEntities = await computeCvrEntities(
-        tx,
-        user.id,
-        clientGroup.id,
-      );
+      const expectedEntities = await computeCvrEntities(tx, user.id);
 
       // The CVR should have the lastMutationIds for the clients in the group
       assert.partialDeepStrictEqual(cvr, {
@@ -445,17 +438,108 @@ void test(`pull()`, async (t) => {
     },
   );
 
-  await txTest.todo(`returns lastMutationIDChanges only for changed clients`);
+  await txTest(
+    `returns lastMutationIDChanges only for changed clients`,
+    async (tx) => {
+      const clientGroupId = nanoid();
+      const clientId1 = nanoid();
+      const clientId2 = nanoid();
+
+      const user = await createUser(tx);
+
+      // Push a mutation from client 1
+      await push(tx, user.id, {
+        profileId: ``,
+        clientGroupId,
+        pushVersion: 1,
+        schemaVersion: `3`,
+        mutations: [
+          {
+            id: 1,
+            name: `noop`,
+            args: {},
+            timestamp: 1,
+            clientId: clientId1,
+          },
+        ],
+      });
+
+      // A pull without a cookie should return all clients (at this point just
+      // client 1).
+      const pull1 = await pull(tx, user.id, {
+        profileId: ``,
+        clientGroupId,
+        pullVersion: 1,
+        schemaVersion: `3`,
+        cookie: null,
+      });
+      assert.ok(`cookie` in pull1);
+      assert.deepEqual(pull1.lastMutationIDChanges, {
+        [clientId1]: 1,
+      });
+
+      // Do a new mutation from client 2
+      await push(tx, user.id, {
+        profileId: ``,
+        clientGroupId,
+        pushVersion: 1,
+        schemaVersion: `3`,
+        mutations: [
+          {
+            id: 1,
+            name: `noop`,
+            args: {},
+            timestamp: 1,
+            clientId: clientId2,
+          },
+        ],
+      });
+
+      // A pull without a cookie should return all clients (now client 1 +
+      // client 2).
+      const pull2 = await pull(tx, user.id, {
+        profileId: ``,
+        clientGroupId,
+        pullVersion: 1,
+        schemaVersion: `3`,
+        cookie: null,
+      });
+      assert.ok(`cookie` in pull2);
+      assert.deepEqual(pull2.lastMutationIDChanges, {
+        [clientId1]: 1,
+        [clientId2]: 1,
+      });
+
+      // A pull using cookie1 should only report client 2 as changed.
+      const pull3 = await pull(tx, user.id, {
+        profileId: ``,
+        clientGroupId,
+        pullVersion: 1,
+        schemaVersion: `3`,
+        cookie: pull1.cookie,
+      });
+      assert.ok(`cookie` in pull3);
+      assert.deepEqual(pull3.lastMutationIDChanges, {
+        [clientId2]: 1,
+      });
+
+      // A pull using cookie3 should report no changes.
+      const pull4 = await pull(tx, user.id, {
+        profileId: ``,
+        clientGroupId,
+        pullVersion: 1,
+        schemaVersion: `3`,
+        cookie: pull3.cookie,
+      });
+      assert.ok(`cookie` in pull4);
+      assert.deepEqual(pull4.lastMutationIDChanges, {});
+    },
+  );
 
   await txTest(`null cookie, returns skillState patches`, async (tx) => {
     const clientGroupId = nanoid();
 
-    // Create a user
-    const [user] = await tx
-      .insert(schema.user)
-      .values([{ id: `1` }])
-      .returning();
-    invariant(user != null);
+    const user = await createUser(tx);
 
     const now = new Date();
 
@@ -487,7 +571,6 @@ void test(`pull()`, async (t) => {
       cookie: {
         order: 1,
       },
-      lastMutationIDChanges: {},
       patch: [
         { op: `clear` },
         {
@@ -508,12 +591,7 @@ void test(`pull()`, async (t) => {
   await txTest(`handles deletes for skillState`, async (tx) => {
     const clientGroupId = nanoid();
 
-    // Create a user
-    const [user] = await tx
-      .insert(schema.user)
-      .values([{ id: `1` }])
-      .returning();
-    invariant(user != null);
+    const user = await createUser(tx);
 
     const now = new Date();
 
@@ -559,7 +637,6 @@ void test(`pull()`, async (t) => {
       cookie: {
         order: 2,
       },
-      lastMutationIDChanges: {},
       patch: [
         {
           op: `del`,
@@ -574,12 +651,7 @@ void test(`pull()`, async (t) => {
   await txTest(`handles deletes for skillRating`, async (tx) => {
     const clientGroupId = nanoid();
 
-    // Create a user
-    const [user] = await tx
-      .insert(schema.user)
-      .values([{ id: `1` }])
-      .returning();
-    invariant(user != null);
+    const user = await createUser(tx);
 
     const now = new Date();
 
@@ -625,7 +697,6 @@ void test(`pull()`, async (t) => {
       cookie: {
         order: 2,
       },
-      lastMutationIDChanges: {},
       patch: [
         {
           op: `del`,
@@ -655,33 +726,24 @@ void test(`computeCvr()`, async (t) => {
   const txTest = withTxTest(t);
 
   await txTest(`works for non-existant user and client group`, async (tx) => {
-    assert.deepEqual(await computeCvrEntities(tx, `1`, ``), {
-      client: {},
+    assert.deepEqual(await computeCvrEntities(tx, `1`), {
       skillState: {},
       skillRating: {},
     });
   });
 
   await txTest(`works for user`, async (tx) => {
-    const [user] = await tx
-      .insert(schema.user)
-      .values([{ id: `1` }])
-      .returning();
-    invariant(user != null);
+    const user = await createUser(tx);
 
-    assert.deepEqual(await computeCvrEntities(tx, user.id, ``), {
-      client: {},
+    assert.deepEqual(await computeCvrEntities(tx, user.id), {
       skillState: {},
       skillRating: {},
     });
   });
 
   await txTest(`only includes skillState for the user`, async (tx) => {
-    const [user1, user2] = await tx
-      .insert(schema.user)
-      .values([{ id: `1` }, { id: `2` }])
-      .returning();
-    invariant(user1 != null && user2 != null);
+    const user1 = await createUser(tx);
+    const user2 = await createUser(tx);
 
     const [user1SkillState] = await tx
       .insert(schema.skillState)
@@ -714,8 +776,7 @@ void test(`computeCvr()`, async (t) => {
       });
     invariant(user1SkillState != null);
 
-    assert.deepEqual(await computeCvrEntities(tx, user1.id, ``), {
-      client: {},
+    assert.deepEqual(await computeCvrEntities(tx, user1.id), {
       skillRating: {},
       skillState: {
         [user1SkillState.id]:
@@ -729,11 +790,8 @@ void test(`computeCvr()`, async (t) => {
   });
 
   await txTest(`only includes skillRating for the user`, async (tx) => {
-    const [user1, user2] = await tx
-      .insert(schema.user)
-      .values([{ id: `1` }, { id: `2` }])
-      .returning();
-    invariant(user1 != null && user2 != null);
+    const user1 = await createUser(tx);
+    const user2 = await createUser(tx);
 
     const [user1SkillRating] = await tx
       .insert(schema.skillRating)
@@ -763,8 +821,7 @@ void test(`computeCvr()`, async (t) => {
       });
     invariant(user1SkillRating != null);
 
-    assert.deepEqual(await computeCvrEntities(tx, user1.id, ``), {
-      client: {},
+    assert.deepEqual(await computeCvrEntities(tx, user1.id), {
       skillRating: {
         [user1SkillRating.id]:
           user1SkillRating.version +

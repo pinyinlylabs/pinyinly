@@ -11,6 +11,7 @@ import { invariant } from "@haohaohow/lib/invariant";
 import makeDebug from "debug";
 import { eq, inArray, sql } from "drizzle-orm";
 import mapValues from "lodash/mapValues";
+import pickBy from "lodash/pickBy";
 import { basename } from "node:path";
 import {
   ClientStateNotFoundResponse,
@@ -21,7 +22,11 @@ import {
 import { z } from "zod";
 import * as schema from "../schema";
 import type { Drizzle } from "./db";
-import { json_build_object, json_object_agg } from "./db";
+import {
+  assertMinimumIsolationLevel,
+  json_build_object,
+  json_object_agg,
+} from "./db";
 
 const debug = makeDebug(basename(import.meta.filename));
 
@@ -44,12 +49,31 @@ export async function push(
     } satisfies VersionNotSupportedResponse;
   }
 
+  // Required as per https://doc.replicache.dev/concepts/db-isolation-level
+  await assertMinimumIsolationLevel(tx, `repeatable read`);
+
   for (const mutation of push.mutations) {
+    let success;
     try {
       await processMutation(tx, userId, push.clientGroupId, mutation, false);
-    } catch {
+      success = true;
+    } catch (err) {
       await processMutation(tx, userId, push.clientGroupId, mutation, true);
+      success = false;
     }
+
+    // Save the mutations as a backup in case they need to be replayed later or
+    // transferred to another database (e.g. local <-> production).
+    //
+    // This also needs to be done _last_ so that foreign keys to other tables
+    // exist (e.g. client).
+    await tx.insert(schema.replicacheMutation).values([
+      {
+        clientId: mutation.clientId,
+        mutation,
+        success,
+      },
+    ]);
   }
 }
 
@@ -57,7 +81,6 @@ const cvrEntriesSchema = z
   .object({
     skillState: z.record(z.string()),
     skillRating: z.record(z.string()),
-    client: z.record(z.string()),
   })
   .partial();
 
@@ -68,6 +91,13 @@ export type CvrEntityDiff = {
   puts: string[];
   dels: string[];
 };
+
+function diffLastMutationIds(
+  prev: Record<string, number>,
+  next: Record<string, number>,
+) {
+  return pickBy(next, (v, k) => prev[k] !== v);
+}
 
 function diffCvrEntities(
   prev: CvrEntities,
@@ -105,6 +135,10 @@ function isCvrDiffEmpty(diff: CvrEntitiesDiff) {
   );
 }
 
+function isCvrLastMutationIdsDiffEmpty(diff: Record<string, number>) {
+  return Object.keys(diff).length === 0;
+}
+
 type PullResponse =
   | {
       cookie: Cookie;
@@ -121,96 +155,110 @@ export async function pull(
 ): Promise<PullResponse> {
   invariant(pull.schemaVersion === `3`);
 
+  // Required as per https://doc.replicache.dev/concepts/db-isolation-level
+  await assertMinimumIsolationLevel(tx, `repeatable read`);
+
   const { clientGroupId, cookie } = pull;
+
   // 1: Fetch prevCVR
-  const prevCvrEntities = cookie
-    ? ((
-        await tx.query.replicacheCvr.findFirst({
-          columns: { entities: true },
+  const prevCvr =
+    cookie != null
+      ? await tx.query.replicacheCvr.findFirst({
           where: (p, { eq }) => eq(p.id, cookie.cvrId),
         })
-      )?.entities as CvrEntities)
-    : undefined;
+      : null;
 
   // 2: Init baseCVR
-  const baseCvrEntries: CvrEntities = prevCvrEntities ?? { skillState: {} };
-  debug(`%o`, { prevCvrEntities, baseCvrEntries });
+  // n/a
 
   // 3: begin transaction
   const txResult = await tx.transaction(async (tx) => {
     // 4-5: getClientGroup(body.clientGroupID), verify user
-    const baseClientGroup = await getClientGroup(tx, clientGroupId, userId);
+    const prevClientGroup = await getClientGroup(tx, { userId, clientGroupId });
+    debug(`%o`, { prevClientGroup });
 
-    const [nextCvrEntities, clientMeta] = await Promise.all([
-      // 6: Read all domain data, just ids and versions
-      computeCvrEntities(tx, userId, clientGroupId),
-      // 7: Read all clients in CG
-      tx.query.replicacheClient.findMany({
-        where: (t) => eq(t.clientGroupId, clientGroupId),
-      }),
-    ]);
+    // 6: Read all domain data, just ids and versions
+    // n/a
 
-    debug(`%o`, {
-      baseClientGroup,
-      clientMeta,
-      nextCvrEntities,
+    // 7: Read all clients in CG
+    const clients = await tx.query.replicacheClient.findMany({
+      where: (t) => eq(t.clientGroupId, clientGroupId),
     });
 
     // 8: Build nextCVR
-    // const nextCVR: CVR = {
-    //   list: cvrEntriesFromSearch(listMeta),
-    //   todo: cvrEntriesFromSearch(todoMeta),
-    //   share: cvrEntriesFromSearch(shareMeta),
-    //   client: cvrEntriesFromSearch(clientMeta),
-    // };
-    debug(`%o`, { nextCvrEntities });
+    const nextCvrEntities = await computeCvrEntities(tx, userId);
+    const nextCvrLastMutationIds = Object.fromEntries(
+      clients.map((c) => [c.id, c.lastMutationId]),
+    );
+    debug(`%o`, { nextCvrEntities, nextCvrLastMutationIds });
 
     // 9: calculate diffs
-    const diff = diffCvrEntities(baseCvrEntries, nextCvrEntities);
-    debug(`%o`, { diff });
+    const entitiesDiff = diffCvrEntities(
+      prevCvr?.entities ?? {},
+      nextCvrEntities,
+    );
+    const prevCvrLastMutationIds = // TODO: refactor to just use drizzle custom type
+      prevCvr != null
+        ? (prevCvr.lastMutationIds as Record<string, number>)
+        : null;
+    const lastMutationIdsDiff = diffLastMutationIds(
+      prevCvrLastMutationIds ?? {},
+      nextCvrLastMutationIds,
+    );
+    debug(`%o`, { entitiesDiff, lastMutationIdsDiff });
 
     // 10: If diff is empty, return no-op PR
-    if (prevCvrEntities && isCvrDiffEmpty(diff)) {
+    if (
+      prevCvr &&
+      isCvrDiffEmpty(entitiesDiff) &&
+      isCvrLastMutationIdsDiffEmpty(lastMutationIdsDiff)
+    ) {
       return null;
     }
 
     // 11: get entities
-    const [skillStates, skillRatings, clients] = await Promise.all([
+    const [skillStates, skillRatings] = await Promise.all([
       tx.query.skillState.findMany({
-        where: (t) => inArray(t.id, diff.skillState?.puts ?? []),
+        where: (t) => inArray(t.id, entitiesDiff.skillState?.puts ?? []),
       }),
       tx.query.skillRating.findMany({
-        where: (t) => inArray(t.id, diff.skillRating?.puts ?? []),
-      }),
-      tx.query.replicacheClient.findMany({
-        where: (t) => inArray(t.id, diff.client?.puts ?? []),
+        where: (t) => inArray(t.id, entitiesDiff.skillRating?.puts ?? []),
       }),
     ]);
-    debug(`%o`, { skillStates, clients });
+    debug(`%o`, { skillStates, skillRatings });
 
-    // 12: changed clients - no need to re-read clients from database,
-    // n/a
+    // 12: changed clients
+    // n/a (done above)
 
     // 13: newCVRVersion
-    const baseCvrVersion = pull.cookie?.order ?? 0;
+    const prevCvrVersion = pull.cookie?.order ?? 0;
     const nextCvrVersion =
-      Math.max(baseCvrVersion, baseClientGroup.cvrVersion) + 1;
+      Math.max(prevCvrVersion, prevClientGroup.cvrVersion) + 1;
 
     // 14: Write ClientGroupRecord
     const nextClientGroup = {
-      ...baseClientGroup,
+      ...prevClientGroup,
       cvrVersion: nextCvrVersion,
     };
     debug(`%o`, { nextClientGroup });
     await putClientGroup(tx, nextClientGroup);
 
     return {
-      entities: {
-        skillState: { dels: diff.skillState?.dels ?? [], puts: skillStates },
-        skillRating: { dels: diff.skillRating?.dels ?? [], puts: skillRatings },
-        client: { dels: diff.client?.dels ?? [], puts: clients },
+      entityPatches: {
+        skillState: {
+          dels: entitiesDiff.skillState?.dels ?? [],
+          puts: skillStates,
+        },
+        skillRating: {
+          dels: entitiesDiff.skillRating?.dels ?? [],
+          puts: skillRatings,
+        },
       },
-      nextCvrEntities,
+      nextCvr: {
+        lastMutationIds: nextCvrLastMutationIds,
+        entities: nextCvrEntities,
+      },
+      lastMutationIDChanges: lastMutationIdsDiff,
       nextCvrVersion,
     };
   });
@@ -224,17 +272,16 @@ export async function pull(
     };
   }
 
-  const { entities, nextCvrEntities, nextCvrVersion } = txResult;
+  const { entityPatches, nextCvr, nextCvrVersion, lastMutationIDChanges } =
+    txResult;
 
   // 16-17: store cvr
   const [cvr] = await tx
     .insert(schema.replicacheCvr)
     .values([
       {
-        lastMutationIds: Object.fromEntries(
-          entities.client.puts.map((p) => [p.id, p.lastMutationId]),
-        ),
-        entities: nextCvrEntities,
+        lastMutationIds: nextCvr.lastMutationIds,
+        entities: nextCvr.entities,
       },
     ])
     .returning({ id: schema.replicacheCvr.id });
@@ -242,12 +289,12 @@ export async function pull(
 
   // 18(i): build patch
   const patch: PatchOperation[] = [];
-  if (prevCvrEntities === undefined) {
+  if (prevCvr == null) {
     patch.push({ op: `clear` });
   }
 
   // 18(i)(skillState):
-  for (const s of entities.skillState.puts) {
+  for (const s of entityPatches.skillState.puts) {
     patch.push({
       op: `put`,
       key: r.skillState.marshalKey({ skill: s.skillId as MarshaledSkillId }),
@@ -258,14 +305,14 @@ export async function pull(
       }),
     });
   }
-  for (const key of entities.skillState.dels) {
+  for (const key of entityPatches.skillState.dels) {
     patch.push({
       op: `del`,
       key,
     });
   }
   // 18(i)(skillRating):
-  for (const s of entities.skillRating.puts) {
+  for (const s of entityPatches.skillRating.puts) {
     patch.push({
       op: `put`,
       key: r.skillRating.marshalKey({
@@ -277,7 +324,7 @@ export async function pull(
       }),
     });
   }
-  for (const key of entities.skillRating.dels) {
+  for (const key of entityPatches.skillRating.dels) {
     patch.push({
       op: `del`,
       key,
@@ -291,10 +338,7 @@ export async function pull(
   };
 
   // 17(iii): lastMutationIDChanges
-  const lastMutationIDChanges = nextCvrEntities.client as unknown as Record<
-    string,
-    number
-  >; // todo: does it matter that the client versions are not numbers?;
+  // n/a
 
   return {
     cookie: nextCookie,
@@ -305,7 +349,7 @@ export async function pull(
 
 // Implements the push algorithm from
 // https://doc.replicache.dev/strategies/row-version#push
-async function processMutation(
+export async function processMutation(
   tx: Drizzle,
   userId: string,
   clientGroupId: string,
@@ -320,13 +364,13 @@ async function processMutation(
 
     // 3: `getClientGroup(body.clientGroupID)`
     // 4: Verify requesting user owns cg (in function)
-    const clientGroup = await getClientGroup(tx, clientGroupId, userId);
+    const clientGroup = await getClientGroup(tx, { userId, clientGroupId });
     // 5: `getClient(mutation.clientID)`
     // 6: Verify requesting client group owns requested client
-    const baseClient = await getClient(tx, mutation.clientId, clientGroupId);
+    const prevClient = await getClient(tx, mutation.clientId, clientGroupId);
 
     // 7: init nextMutationID
-    const nextMutationId = baseClient.lastMutationId + 1;
+    const nextMutationId = prevClient.lastMutationId + 1;
 
     // 8: rollback and skip if already processed.
     if (mutation.id < nextMutationId) {
@@ -345,7 +389,7 @@ async function processMutation(
       try {
         // 10(i): Run business logic
         // 10(i)(a): xmin column is automatically updated by Postgres for any affected rows.
-        await mutate(tx, userId, mutation);
+        await _mutate(tx, userId, mutation);
       } catch (e) {
         // 10(ii)(a-c): log error, abort, and retry
         debug(`Error executing mutation: %o %o`, mutation, e);
@@ -416,27 +460,29 @@ export async function putClientGroup(
 
 export async function getClientGroup(
   db: Drizzle,
-  clientGroupId: string,
-  userId: string,
+  opts: {
+    userId: string;
+    clientGroupId: string;
+  },
 ): Promise<ClientGroupRecord> {
   const r = await db.query.replicacheClientGroup.findFirst({
-    where: (p, { eq }) => eq(p.id, clientGroupId),
+    where: (p, { eq }) => eq(p.id, opts.clientGroupId),
   });
 
   if (!r) {
     return {
-      id: clientGroupId,
-      userId,
+      id: opts.clientGroupId,
+      userId: opts.userId,
       cvrVersion: 0,
     };
   }
 
-  if (r.userId !== userId) {
+  if (r.userId !== opts.userId) {
     throw new Error(`Authorization error - user does not own client group`);
   }
 
   return {
-    id: clientGroupId,
+    id: opts.clientGroupId,
     userId: r.userId,
     cvrVersion: r.cvrVersion,
   };
@@ -472,37 +518,36 @@ export async function getClient(
   };
 }
 
-const mutate = makeDrizzleMutationHandler<typeof r.schema, Drizzle>(r.schema, {
-  async addSkillState(db, userId, { skill, now }) {
-    const skillId = r.rSkillId().marshal(skill);
-    await db
-      .insert(schema.skillState)
-      .values({
-        userId,
-        skillId,
-        srs: null,
-        dueAt: now,
-        createdAt: now,
-      })
-      .onConflictDoNothing();
+export const _mutate = makeDrizzleMutationHandler<typeof r.schema, Drizzle>(
+  r.schema,
+  {
+    async addSkillState(db, userId, { skill, now }) {
+      const skillId = r.rSkillId().marshal(skill);
+      await db
+        .insert(schema.skillState)
+        .values({
+          userId,
+          skillId,
+          srs: null,
+          dueAt: now,
+          createdAt: now,
+        })
+        .onConflictDoNothing();
+    },
+    async reviewSkill(db, userId, { skill, rating, now }) {
+      await db.insert(schema.skillRating).values([
+        {
+          userId,
+          skillId: r.rSkillId().marshal(skill),
+          rating: r.rFsrsRating.marshal(rating),
+          createdAt: now,
+        },
+      ]);
+    },
   },
-  async reviewSkill(db, userId, { skill, rating, now }) {
-    await db.insert(schema.skillRating).values([
-      {
-        userId,
-        skillId: r.rSkillId().marshal(skill),
-        rating: r.rFsrsRating.marshal(rating),
-        createdAt: now,
-      },
-    ]);
-  },
-});
+);
 
-export async function computeCvrEntities(
-  db: Drizzle,
-  userId: string,
-  clientGroupId: string,
-) {
+export async function computeCvrEntities(db: Drizzle, userId: string) {
   const skillStateVersions = db
     .select({
       map: json_object_agg(
@@ -532,25 +577,12 @@ export async function computeCvrEntities(
     .where(eq(schema.skillRating.userId, userId))
     .as(`skillRatingVersions`);
 
-  const clientVersions = db
-    .select({
-      map: json_object_agg(
-        schema.replicacheClient.id,
-        sql<string>`${schema.replicacheClient}.xmin`,
-      ).as(`clientVersions`),
-    })
-    .from(schema.replicacheClient)
-    .where(eq(schema.replicacheClient.clientGroupId, clientGroupId))
-    .as(`clientVersions`);
-
   const [result] = await db
     .select({
       skillState: skillStateVersions.map,
       skillRating: skillRatingVersions.map,
-      client: clientVersions.map,
     })
     .from(skillStateVersions)
-    .leftJoin(clientVersions, sql`true`)
     .leftJoin(skillRatingVersions, sql`true`);
 
   invariant(result != null);
@@ -573,6 +605,5 @@ export async function computeCvrEntities(
           when: new Date(v.createdAt),
         }),
     ),
-    client: result.client,
   };
 }
