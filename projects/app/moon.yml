@@ -134,7 +134,7 @@ tasks:
       runInCI: false
 
   dev:
-    command: yarn expo start --web # --tunnel
+    command: yarn expo start
     local: true
     env:
       # Fixes: (node:97180) Warning: To load an ES module, set "type": "module"
@@ -229,7 +229,7 @@ tasks:
       envFile: .env.test
 
   testWatch:
-    command: node --test --watch --import tsx "**/*.test.ts"
+    command: node --test --watch --import tsx "src/**/*.test.ts"
     local: true
     options:
       envFile: .env.test
