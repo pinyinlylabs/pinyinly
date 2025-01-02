@@ -1,3 +1,4 @@
+import { useAuth } from "@/components/auth";
 import { Link, Slot } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { ScrollView, View } from "react-native";
@@ -5,6 +6,7 @@ import { useMediaQuery } from "react-responsive";
 
 export default function SideNavLayout() {
   const isLg = useMediaQuery({ minWidth: 1024 });
+  const auth = useAuth();
 
   return (
     <View className="flex-1 flex-col-reverse items-stretch self-stretch lg:flex-row">
@@ -12,7 +14,7 @@ export default function SideNavLayout() {
         horizontal={!isLg}
         centerContent={!isLg}
         className="flex-grow-0 border-t-2 border-primary-4 pt-2 pb-safe-or-2 lg:max-h-full lg:border-t-0"
-        contentContainerClassName="items-center gap-4 px-safe-or-4 lg:px-4 lg:pt-4"
+        contentContainerClassName="h-full  items-center gap-4 px-safe-or-4 lg:px-4 lg:pt-4"
       >
         <Link
           href="/"
@@ -59,6 +61,19 @@ export default function SideNavLayout() {
           className="items-center rounded-md px-2 py-1 text-xl font-bold tracking-wide text-text hover:bg-primary-4 lg:self-stretch"
         >
           UI
+        </Link>
+
+        <View className="flex-1" />
+
+        <Link
+          href="/login"
+          className="items-center rounded-md px-2 py-1 text-xl font-bold tracking-wide text-text hover:bg-primary-4 lg:self-stretch"
+        >
+          {auth.isAuthenticated ? (
+            <View className="size-10 rounded-full bg-[green]"></View>
+          ) : (
+            <View className="size-10 rounded-full border-2 border-solid border-[white] bg-[grey]"></View>
+          )}
         </Link>
       </ScrollView>
       <Slot />

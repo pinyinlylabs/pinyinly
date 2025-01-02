@@ -1,0 +1,308 @@
+diff --git a/lib/index.esm.mjs b/lib/index.esm.mjs
+index 41c9282f77485b5bf77f19f97e1b2ba6a0c9ad19..dea4010ae73f096ba6b106d990af9bdb6145230c 100644
+--- a/lib/index.esm.mjs
++++ b/lib/index.esm.mjs
+@@ -23,8 +23,13 @@ function index () {
+                 if (target !== 'CommonJS' && target !== 'ES6') {
+                     throw new Error('Invalid target, must be one of: "CommonJS" or "ES6"');
+                 }
+-                var metas = [];
+-                var identifiers = new Set();
++                var urlMetas = [];
++                var filenameMetas = [];
++                var dirnameMetas = [];
++                var resolveMetas = [];
++                var urlScopeIdentifiers = new Set();
++                var resolveScopeIdentifiers = new Set();
++                // Gather all of the relevant data for import.meta's that we're going to replace later.
+                 path.traverse({
+                     MemberExpression: function (memberExpPath) {
+                         var node = memberExpPath.node;
+@@ -33,41 +38,111 @@ function index () {
+                             node.object.property.name === 'meta' &&
+                             node.property.type === 'Identifier' &&
+                             node.property.name === 'url') {
+-                            metas.push(memberExpPath);
++                            urlMetas.push(memberExpPath);
+                             for (var _i = 0, _a = Object.keys(memberExpPath.scope.getAllBindings()); _i < _a.length; _i++) {
+                                 var name = _a[_i];
+-                                identifiers.add(name);
++                                urlScopeIdentifiers.add(name);
++                            }
++                        }
++                        if (node.object.type === 'MetaProperty' &&
++                            node.object.meta.name === 'import' &&
++                            node.object.property.name === 'meta' &&
++                            node.property.type === 'Identifier' &&
++                            node.property.name === 'filename') {
++                            filenameMetas.push(memberExpPath);
++                        }
++                        if (node.object.type === 'MetaProperty' &&
++                            node.object.meta.name === 'import' &&
++                            node.object.property.name === 'meta' &&
++                            node.property.type === 'Identifier' &&
++                            node.property.name === 'dirname') {
++                            dirnameMetas.push(memberExpPath);
++                        }
++                    },
++                    CallExpression: function (callExpPath) {
++                        var node = callExpPath.node;
++                        if (node.type === 'CallExpression' &&
++                            node.callee.type === 'MemberExpression' &&
++                            node.callee.object.type === 'MetaProperty' &&
++                            node.callee.object.meta.name === 'import' &&
++                            node.callee.object.property.name === 'meta' &&
++                            node.callee.property.type === 'Identifier' &&
++                            node.callee.property.name === 'resolve') {
++                            resolveMetas.push(callExpPath);
++                            for (var _i = 0, _a = Object.keys(callExpPath.scope.getAllBindings()); _i < _a.length; _i++) {
++                                var name = _a[_i];
++                                resolveScopeIdentifiers.add(name);
++                            }
++                        }
++                    },
++                    OptionalCallExpression: function (callExpPath) {
++                        var node = callExpPath.node;
++                        if (node.type === 'OptionalCallExpression' &&
++                            node.callee.type === 'MemberExpression' &&
++                            node.callee.object.type === 'MetaProperty' &&
++                            node.callee.object.meta.name === 'import' &&
++                            node.callee.object.property.name === 'meta' &&
++                            node.callee.property.type === 'Identifier' &&
++                            node.callee.property.name === 'resolve') {
++                            resolveMetas.push(callExpPath);
++                            for (var _i = 0, _a = Object.keys(callExpPath.scope.getAllBindings()); _i < _a.length; _i++) {
++                                var name = _a[_i];
++                                resolveScopeIdentifiers.add(name);
+                             }
+                         }
+                     }
+                 });
+-                if (metas.length === 0) {
+-                    return;
+-                }
+-                var metaUrlReplacement;
+-                switch (target) {
+-                    case 'CommonJS': {
+-                        metaUrlReplacement = smart.ast(templateObject_1 || (templateObject_1 = __makeTemplateObject(["require('url').pathToFileURL(__filename).toString()"], ["require('url').pathToFileURL(__filename).toString()"])));
+-                        break;
+-                    }
+-                    case 'ES6': {
+-                        var urlId = 'url';
+-                        while (identifiers.has(urlId)) {
+-                            urlId = path.scope.generateUidIdentifier('url').name;
++                // For url and resolve, we'll potentially need to add imports, depending on the target.
++                if ((urlMetas.length !== 0) || (resolveMetas.length !== 0)) {
++                    var metaUrlReplacement = void 0;
++                    var metaResolveReplacement = void 0;
++                    switch (target) {
++                        case 'CommonJS': {
++                            metaUrlReplacement = smart.ast(templateObject_1 || (templateObject_1 = __makeTemplateObject(["require('url').pathToFileURL(__filename).toString()"], ["require('url').pathToFileURL(__filename).toString()"])));
++                            metaResolveReplacement = function (args) { return smart.ast(templateObject_2 || (templateObject_2 = __makeTemplateObject(["require('url').pathToFileURL(require.resolve(", ")).toString()"], ["require('url').pathToFileURL(require.resolve(", ")).toString()"])), args); };
++                            break;
++                        }
++                        case 'ES6': {
++                            var urlId_1 = 'url';
++                            var createRequireId_1 = 'createRequire';
++                            while (urlScopeIdentifiers.has(urlId_1) || resolveScopeIdentifiers.has(urlId_1)) {
++                                urlId_1 = path.scope.generateUidIdentifier('url').name;
++                            }
++                            while (resolveScopeIdentifiers.has(createRequireId_1)) {
++                                createRequireId_1 = path.scope.generateUidIdentifier('createRequire').name;
++                            }
++                            path.node.body.unshift(smart.ast(templateObject_3 || (templateObject_3 = __makeTemplateObject(["import ", " from 'url';"], ["import ", " from 'url';"])), urlId_1));
++                            if (resolveMetas.length !== 0) {
++                                path.node.body.unshift(smart.ast(templateObject_4 || (templateObject_4 = __makeTemplateObject(["import { createRequire as ", " } from 'module';"], ["import { createRequire as ", " } from 'module';"])), createRequireId_1));
++                            }
++                            metaUrlReplacement = smart.ast(templateObject_5 || (templateObject_5 = __makeTemplateObject(["", ".pathToFileURL(__filename).toString()"], ["", ".pathToFileURL(__filename).toString()"])), urlId_1);
++                            metaResolveReplacement = function (args) { return smart.ast(templateObject_6 || (templateObject_6 = __makeTemplateObject(["", ".pathToFileURL(", "(", ".pathToFileURL(__filename).toString()).resolve(", ")).toString()"], ["", ".pathToFileURL(", "(", ".pathToFileURL(__filename).toString()).resolve(", ")).toString()"])), urlId_1, createRequireId_1, urlId_1, args); };
++                            break;
+                         }
+-                        path.node.body.unshift(smart.ast(templateObject_2 || (templateObject_2 = __makeTemplateObject(["import ", " from 'url';"], ["import ", " from 'url';"])), urlId));
+-                        metaUrlReplacement = smart.ast(templateObject_3 || (templateObject_3 = __makeTemplateObject(["", ".pathToFileURL(__filename).toString()"], ["", ".pathToFileURL(__filename).toString()"])), urlId);
+-                        break;
+                     }
++                    for (var _i = 0, urlMetas_1 = urlMetas; _i < urlMetas_1.length; _i++) {
++                        var meta = urlMetas_1[_i];
++                        meta.replaceWith(metaUrlReplacement);
++                    }
++                    for (var _c = 0, resolveMetas_1 = resolveMetas; _c < resolveMetas_1.length; _c++) {
++                        var meta = resolveMetas_1[_c];
++                        meta.replaceWith(metaResolveReplacement(meta.node.arguments));
++                    }
++                }
++                var metaFilenameReplacement = smart.ast(templateObject_7 || (templateObject_7 = __makeTemplateObject(["__filename"], ["__filename"])));
++                var metaDirnameReplacement = smart.ast(templateObject_8 || (templateObject_8 = __makeTemplateObject(["__dirname"], ["__dirname"])));
++                for (var _d = 0, filenameMetas_1 = filenameMetas; _d < filenameMetas_1.length; _d++) {
++                    var meta = filenameMetas_1[_d];
++                    meta.replaceWith(metaFilenameReplacement);
+                 }
+-                for (var _i = 0, metas_1 = metas; _i < metas_1.length; _i++) {
+-                    var meta = metas_1[_i];
+-                    meta.replaceWith(metaUrlReplacement);
++                for (var _e = 0, dirnameMetas_1 = dirnameMetas; _e < dirnameMetas_1.length; _e++) {
++                    var meta = dirnameMetas_1[_e];
++                    meta.replaceWith(metaDirnameReplacement);
+                 }
+             }
+         }
+     };
+ }
+-var templateObject_1, templateObject_2, templateObject_3;
++var templateObject_1, templateObject_2, templateObject_3, templateObject_4, templateObject_5, templateObject_6, templateObject_7, templateObject_8;
+ 
+ export { index as default };
+diff --git a/lib/index.js b/lib/index.js
+index 6d4b084c16187a72b8bd55a441c3a0745de3d32d..2719409ceda00bb9db10a29af318ad6d7a06f7f3 100644
+--- a/lib/index.js
++++ b/lib/index.js
+@@ -27,8 +27,13 @@ function index () {
+                 if (target !== 'CommonJS' && target !== 'ES6') {
+                     throw new Error('Invalid target, must be one of: "CommonJS" or "ES6"');
+                 }
+-                var metas = [];
+-                var identifiers = new Set();
++                var urlMetas = [];
++                var filenameMetas = [];
++                var dirnameMetas = [];
++                var resolveMetas = [];
++                var urlScopeIdentifiers = new Set();
++                var resolveScopeIdentifiers = new Set();
++                // Gather all of the relevant data for import.meta's that we're going to replace later.
+                 path.traverse({
+                     MemberExpression: function (memberExpPath) {
+                         var node = memberExpPath.node;
+@@ -37,41 +42,111 @@ function index () {
+                             node.object.property.name === 'meta' &&
+                             node.property.type === 'Identifier' &&
+                             node.property.name === 'url') {
+-                            metas.push(memberExpPath);
++                            urlMetas.push(memberExpPath);
+                             for (var _i = 0, _a = Object.keys(memberExpPath.scope.getAllBindings()); _i < _a.length; _i++) {
+                                 var name = _a[_i];
+-                                identifiers.add(name);
++                                urlScopeIdentifiers.add(name);
++                            }
++                        }
++                        if (node.object.type === 'MetaProperty' &&
++                            node.object.meta.name === 'import' &&
++                            node.object.property.name === 'meta' &&
++                            node.property.type === 'Identifier' &&
++                            node.property.name === 'filename') {
++                            filenameMetas.push(memberExpPath);
++                        }
++                        if (node.object.type === 'MetaProperty' &&
++                            node.object.meta.name === 'import' &&
++                            node.object.property.name === 'meta' &&
++                            node.property.type === 'Identifier' &&
++                            node.property.name === 'dirname') {
++                            dirnameMetas.push(memberExpPath);
++                        }
++                    },
++                    CallExpression: function (callExpPath) {
++                        var node = callExpPath.node;
++                        if (node.type === 'CallExpression' &&
++                            node.callee.type === 'MemberExpression' &&
++                            node.callee.object.type === 'MetaProperty' &&
++                            node.callee.object.meta.name === 'import' &&
++                            node.callee.object.property.name === 'meta' &&
++                            node.callee.property.type === 'Identifier' &&
++                            node.callee.property.name === 'resolve') {
++                            resolveMetas.push(callExpPath);
++                            for (var _i = 0, _a = Object.keys(callExpPath.scope.getAllBindings()); _i < _a.length; _i++) {
++                                var name = _a[_i];
++                                resolveScopeIdentifiers.add(name);
++                            }
++                        }
++                    },
++                    OptionalCallExpression: function (callExpPath) {
++                        var node = callExpPath.node;
++                        if (node.type === 'OptionalCallExpression' &&
++                            node.callee.type === 'MemberExpression' &&
++                            node.callee.object.type === 'MetaProperty' &&
++                            node.callee.object.meta.name === 'import' &&
++                            node.callee.object.property.name === 'meta' &&
++                            node.callee.property.type === 'Identifier' &&
++                            node.callee.property.name === 'resolve') {
++                            resolveMetas.push(callExpPath);
++                            for (var _i = 0, _a = Object.keys(callExpPath.scope.getAllBindings()); _i < _a.length; _i++) {
++                                var name = _a[_i];
++                                resolveScopeIdentifiers.add(name);
+                             }
+                         }
+                     }
+                 });
+-                if (metas.length === 0) {
+-                    return;
+-                }
+-                var metaUrlReplacement;
+-                switch (target) {
+-                    case 'CommonJS': {
+-                        metaUrlReplacement = template.smart.ast(templateObject_1 || (templateObject_1 = tslib.__makeTemplateObject(["require('url').pathToFileURL(__filename).toString()"], ["require('url').pathToFileURL(__filename).toString()"])));
+-                        break;
+-                    }
+-                    case 'ES6': {
+-                        var urlId = 'url';
+-                        while (identifiers.has(urlId)) {
+-                            urlId = path.scope.generateUidIdentifier('url').name;
++                // For url and resolve, we'll potentially need to add imports, depending on the target.
++                if ((urlMetas.length !== 0) || (resolveMetas.length !== 0)) {
++                    var metaUrlReplacement = void 0;
++                    var metaResolveReplacement = void 0;
++                    switch (target) {
++                        case 'CommonJS': {
++                            metaUrlReplacement = template.smart.ast(templateObject_1 || (templateObject_1 = tslib.__makeTemplateObject(["require('url').pathToFileURL(__filename).toString()"], ["require('url').pathToFileURL(__filename).toString()"])));
++                            metaResolveReplacement = function (args) { return template.smart.ast(templateObject_2 || (templateObject_2 = tslib.__makeTemplateObject(["require('url').pathToFileURL(require.resolve(", ")).toString()"], ["require('url').pathToFileURL(require.resolve(", ")).toString()"])), args); };
++                            break;
++                        }
++                        case 'ES6': {
++                            var urlId_1 = 'url';
++                            var createRequireId_1 = 'createRequire';
++                            while (urlScopeIdentifiers.has(urlId_1) || resolveScopeIdentifiers.has(urlId_1)) {
++                                urlId_1 = path.scope.generateUidIdentifier('url').name;
++                            }
++                            while (resolveScopeIdentifiers.has(createRequireId_1)) {
++                                createRequireId_1 = path.scope.generateUidIdentifier('createRequire').name;
++                            }
++                            path.node.body.unshift(template.smart.ast(templateObject_3 || (templateObject_3 = tslib.__makeTemplateObject(["import ", " from 'url';"], ["import ", " from 'url';"])), urlId_1));
++                            if (resolveMetas.length !== 0) {
++                                path.node.body.unshift(template.smart.ast(templateObject_4 || (templateObject_4 = tslib.__makeTemplateObject(["import { createRequire as ", " } from 'module';"], ["import { createRequire as ", " } from 'module';"])), createRequireId_1));
++                            }
++                            metaUrlReplacement = template.smart.ast(templateObject_5 || (templateObject_5 = tslib.__makeTemplateObject(["", ".pathToFileURL(__filename).toString()"], ["", ".pathToFileURL(__filename).toString()"])), urlId_1);
++                            metaResolveReplacement = function (args) { return template.smart.ast(templateObject_6 || (templateObject_6 = tslib.__makeTemplateObject(["", ".pathToFileURL(", "(", ".pathToFileURL(__filename).toString()).resolve(", ")).toString()"], ["", ".pathToFileURL(", "(", ".pathToFileURL(__filename).toString()).resolve(", ")).toString()"])), urlId_1, createRequireId_1, urlId_1, args); };
++                            break;
+                         }
+-                        path.node.body.unshift(template.smart.ast(templateObject_2 || (templateObject_2 = tslib.__makeTemplateObject(["import ", " from 'url';"], ["import ", " from 'url';"])), urlId));
+-                        metaUrlReplacement = template.smart.ast(templateObject_3 || (templateObject_3 = tslib.__makeTemplateObject(["", ".pathToFileURL(__filename).toString()"], ["", ".pathToFileURL(__filename).toString()"])), urlId);
+-                        break;
+                     }
++                    for (var _i = 0, urlMetas_1 = urlMetas; _i < urlMetas_1.length; _i++) {
++                        var meta = urlMetas_1[_i];
++                        meta.replaceWith(metaUrlReplacement);
++                    }
++                    for (var _c = 0, resolveMetas_1 = resolveMetas; _c < resolveMetas_1.length; _c++) {
++                        var meta = resolveMetas_1[_c];
++                        meta.replaceWith(metaResolveReplacement(meta.node.arguments));
++                    }
++                }
++                var metaFilenameReplacement = template.smart.ast(templateObject_7 || (templateObject_7 = tslib.__makeTemplateObject(["__filename"], ["__filename"])));
++                var metaDirnameReplacement = template.smart.ast(templateObject_8 || (templateObject_8 = tslib.__makeTemplateObject(["__dirname"], ["__dirname"])));
++                for (var _d = 0, filenameMetas_1 = filenameMetas; _d < filenameMetas_1.length; _d++) {
++                    var meta = filenameMetas_1[_d];
++                    meta.replaceWith(metaFilenameReplacement);
+                 }
+-                for (var _i = 0, metas_1 = metas; _i < metas_1.length; _i++) {
+-                    var meta = metas_1[_i];
+-                    meta.replaceWith(metaUrlReplacement);
++                for (var _e = 0, dirnameMetas_1 = dirnameMetas; _e < dirnameMetas_1.length; _e++) {
++                    var meta = dirnameMetas_1[_e];
++                    meta.replaceWith(metaDirnameReplacement);
+                 }
+             }
+         }
+     };
+ }
+-var templateObject_1, templateObject_2, templateObject_3;
++var templateObject_1, templateObject_2, templateObject_3, templateObject_4, templateObject_5, templateObject_6, templateObject_7, templateObject_8;
+ 
+ exports["default"] = index;

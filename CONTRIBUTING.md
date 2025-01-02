@@ -117,7 +117,7 @@ Example: to write `hǎo` type <kbd>h</kbd> <kbd>a</kbd> <kbd>o</kbd> <kbd>Tab</k
    `https://<EXPO_TUNNEL_SUBDOMAIN>.ngrok.io/api/auth/login/apple/callback`
    (replace `<EXPO_TUNNEL_SUBDOMAIN>` with the value you chose).
 1. Save the changes.
-1. Start Expo via `moon run app:dev`.
+1. Start Expo via `moon run app:dev -- --tunnel`.
 
 ## iOS Device Enrolment
 

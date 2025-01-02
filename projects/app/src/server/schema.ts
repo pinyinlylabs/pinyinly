@@ -95,6 +95,17 @@ export const replicacheClient = schema.table(`replicacheClient`, {
   updatedAt: p.timestamp(`timestamp`).defaultNow().notNull(),
 });
 
+export const replicacheMutation = schema.table(`replicacheMutation`, {
+  id: p.text(`id`).primaryKey().$defaultFn(nanoid),
+  clientId: p
+    .text(`clientId`)
+    .references(() => replicacheClient.id)
+    .notNull(),
+  mutation: p.json(`mutation`).notNull(),
+  success: p.boolean(),
+  processedAt: p.timestamp(`processedAt`).defaultNow().notNull(),
+});
+
 /**
  * CVRs are stored keyed under a random unique ID which becomes the cookie
  * sent to Replicache.

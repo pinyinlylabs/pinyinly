@@ -82,6 +82,7 @@
     "@types/react-dom": "18.3.x",
     "@types/ws": "^8 <=8.17.x",
     "@typescript-eslint/utils": "^8.12.1",
+    "babel-plugin-transform-import-meta": "patch:babel-plugin-transform-import-meta@npm%3A2.2.1#~/.yarn/patches/babel-plugin-transform-import-meta-npm-2.2.1-0927fef047.patch",
     "debug": "^4.3.7",
     "drizzle-kit": "^0.30.1",
     "eslint": "^9.13.0",
@@ -95,7 +96,7 @@
     "prettier-plugin-tailwindcss": "^0.6.9",
     "ts-essentials": "^10.0.3",
     "tsx": "^4.15.7",
-    "typescript": "^5.7.2",
+    "typescript": "patch:typescript@npm%3A5.7.2#~/.yarn/patches/typescript-npm-5.7.2-b1f84a8b28.patch",
     "typescript-eslint": "^8.14.0",
     "ucd-full": "^16.0.0",
     "yargs": "^17.7.2"

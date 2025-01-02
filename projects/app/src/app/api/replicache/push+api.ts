@@ -3,12 +3,31 @@ import { withDrizzle } from "@/server/lib/db";
 import { push } from "@/server/lib/replicache";
 
 export async function POST(request: Request) {
-  const userId = null as unknown as string; // TODO
+  // Get the sessionId from the Authorization header.
+  const sessionId = request.headers.get(`Authorization`);
+  if (sessionId === null) {
+    return httpUnauthorized();
+  }
+
   const pushRequest = pushRequestSchema.parse(await request.json());
 
   const response = await withDrizzle(async (db) => {
-    return await push(db, userId, pushRequest);
+    const session = await db.query.authSession.findFirst({
+      where: (t, { eq }) => eq(t.id, sessionId),
+    });
+
+    if (session == null || session.expiresAt < new Date()) {
+      return httpUnauthorized();
+    }
+
+    return await db.transaction((tx) => push(tx, session.userId, pushRequest), {
+      isolationLevel: `repeatable read`,
+    });
   });
 
-  return Response.json(response);
+  return response != null ? Response.json(response) : new Response();
+}
+
+function httpUnauthorized() {
+  return new Response(undefined, { status: 401 });
 }
