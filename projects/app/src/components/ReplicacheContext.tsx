@@ -1,9 +1,12 @@
 import { SrsType } from "@/data/model";
-import { r, RizzleReplicache } from "@/data/rizzle";
+import { cookieSchema, r, RizzleReplicache } from "@/data/rizzle";
 import { schema } from "@/data/rizzleSchema";
 import { replicacheLicenseKey } from "@/env";
+import { AppRouter } from "@/server/routers/_app";
 import { nextReview, UpcomingReview } from "@/util/fsrs";
+import { trpc } from "@/util/trpc";
 import { invariant } from "@haohaohow/lib/invariant";
+import { TRPCClientError } from "@trpc/client";
 import {
   createContext,
   useContext,
@@ -12,13 +15,14 @@ import {
   useRef,
   useState,
 } from "react";
-import { ReadTransaction } from "replicache";
+import { HTTPRequestInfo, PullResponseV1, ReadTransaction } from "replicache";
 import {
   useSubscribe as replicacheReactUseSubscribe,
   UseSubscribeOptions,
 } from "replicache-react";
 import { useAuth } from "./auth";
 import { kvStore } from "./replicacheOptions";
+import { sentryCaptureException } from "./util";
 
 export type Rizzle = RizzleReplicache<typeof schema>;
 
@@ -26,94 +30,108 @@ const ReplicacheContext = createContext<Rizzle | null>(null);
 
 export function ReplicacheProvider({ children }: React.PropsWithChildren) {
   const auth = useAuth();
-  const rizzle = useMemo(
-    () =>
-      r.replicache(
-        {
-          name: `hao`,
-          schemaVersion: `3`,
-          licenseKey: replicacheLicenseKey,
-          auth: auth.sessionId ?? undefined,
-          kvStore,
-          pushURL: auth.sessionId != null ? `/api/replicache/push` : undefined,
-          pullURL: auth.sessionId != null ? `/api/replicache/pull` : undefined,
-          // async pusher(requestBody, requestID) {
-          //   const postResult = await fetch(`/api/replicache/push`, {
-          //     method: `POST`,
-          //     body: JSON.stringify(requestBody),
-          //     // TODO: send JWT with user ID
-          //   });
 
-          //   console.log(`postResult=`, postResult);
-          //   // eslint-disable-next-line no-console
-          //   console.log(
-          //     `pusher(${JSON.stringify({ requestBody, requestID })})`,
-          //   );
-          //   throw new Error(`pushing not implemented`);
-          // },
-          // puller(req, requestID) {
-          //   invariant(req.pullVersion === 1);
+  // Pull out stable references to the mutate functions to avoid reinstanciating
+  // replicache each time the mutation state changes (e.g. pending -> success).
+  const { mutateAsync: pushMutate } = trpc.replicache.push.useMutation();
+  const { mutateAsync: pullMutate } = trpc.replicache.pull.useMutation();
 
-          //   // eslint-disable-next-line no-console
-          //   console.log(`puller: rep.clientID =`, rep.clientID);
+  const rizzle = useMemo(() => {
+    return r.replicache(
+      {
+        name: `hao`,
+        schemaVersion: `3`,
+        licenseKey: replicacheLicenseKey,
+        kvStore,
+        pusher: auth.isAuthenticated
+          ? async (requestBody) => {
+              invariant(requestBody.pushVersion === 1);
 
-          //   // eslint-disable-next-line no-console
-          //   console.log(`puller: puller(…) requestId=${requestID} req=`, req);
+              const response = pushMutate({
+                // Map ID to Id to match this project's naming conventions.
+                clientGroupId: requestBody.clientGroupID,
+                mutations: requestBody.mutations.map(
+                  ({ clientID: clientId, ...rest }) => ({
+                    ...rest,
+                    clientId,
+                  }),
+                ),
+                profileId: requestBody.profileID,
+                pushVersion: requestBody.pushVersion,
+                schemaVersion: requestBody.schemaVersion,
+              });
 
-          //   return Promise.resolve({
-          //     response: {
-          //       cookie: req.cookie,
-          //       lastMutationIDChanges: { [rep.clientID]: 0 },
-          //       patch: [],
-          //     },
-          //     httpRequestInfo: {
-          //       errorMessage: ``,
-          //       httpStatusCode: 200,
-          //     },
-          //   } satisfies PullerResultV1);
-          // },
-        },
-        schema,
-        {
-          async addSkillState(db, { skill, now }) {
-            const exists = await db.skillState.has({ skill });
-            if (!exists) {
-              await db.skillState.set(
-                { skill },
-                { due: now, created: now, srs: null },
+              return await trpcToReplicache(response);
+            }
+          : undefined,
+        puller: auth.isAuthenticated
+          ? async (requestBody) => {
+              invariant(requestBody.pullVersion === 1);
+              const cookie = cookieSchema.parse(requestBody.cookie);
+              invariant(typeof requestBody.cookie === `object`);
+
+              const response = pullMutate({
+                // Map ID to Id to match this project's naming conventions.
+                clientGroupId: requestBody.clientGroupID,
+                cookie,
+                profileId: requestBody.profileID,
+                pullVersion: requestBody.pullVersion,
+                schemaVersion: requestBody.schemaVersion,
+              }).then(
+                (r) =>
+                  (`error` in r
+                    ? r
+                    : {
+                        lastMutationIDChanges: r.lastMutationIdChanges,
+                        patch: r.patch,
+                        cookie: r.cookie,
+                      }) satisfies PullResponseV1,
               );
+
+              return await trpcToReplicache(response);
             }
-          },
-          async reviewSkill(tx, { skill, rating, now }) {
-            // Save a record of the review.
-            await tx.skillReview.set({ skill, when: now }, { rating });
-
-            let state: UpcomingReview | null = null;
-            for await (const [{ when }, { rating }] of tx.skillReview.scan({
-              skill,
-            })) {
-              state = nextReview(state, rating, when);
-            }
-
-            invariant(state !== null);
-
-            await tx.skillState.set(
+          : undefined,
+      },
+      schema,
+      {
+        async addSkillState(db, { skill, now }) {
+          const exists = await db.skillState.has({ skill });
+          if (!exists) {
+            await db.skillState.set(
               { skill },
-              {
-                created: state.created,
-                srs: {
-                  type: SrsType.FsrsFourPointFive,
-                  stability: state.stability,
-                  difficulty: state.difficulty,
-                },
-                due: state.due,
-              },
+              { due: now, created: now, srs: null },
             );
-          },
+          }
         },
-      ),
-    [auth.sessionId],
-  );
+        async reviewSkill(tx, { skill, rating, now }) {
+          // Save a record of the review.
+          await tx.skillReview.set({ skill, when: now }, { rating });
+
+          let state: UpcomingReview | null = null;
+          for await (const [{ when }, { rating }] of tx.skillReview.scan({
+            skill,
+          })) {
+            state = nextReview(state, rating, when);
+          }
+
+          invariant(state !== null);
+
+          await tx.skillState.set(
+            { skill },
+            {
+              created: state.created,
+              srs: {
+                type: SrsType.FsrsFourPointFive,
+                stability: state.stability,
+                difficulty: state.difficulty,
+              },
+              due: state.due,
+            },
+          );
+        },
+      },
+    );
+  }, [auth.isAuthenticated, pushMutate, pullMutate]);
 
   return (
     <ReplicacheContext.Provider value={rizzle}>
@@ -178,4 +196,38 @@ export function useQueryOnce<QueryRet>(
   }, [r]);
 
   return result;
+}
+
+async function trpcToReplicache<T>(responsePromise: Promise<T>): Promise<{
+  response?: T;
+  httpRequestInfo: HTTPRequestInfo;
+}> {
+  try {
+    const response = await responsePromise;
+    return {
+      response,
+      httpRequestInfo: {
+        errorMessage: ``,
+        httpStatusCode: 200,
+      },
+    };
+  } catch (err) {
+    sentryCaptureException(err);
+    if (err instanceof TRPCClientError) {
+      const trpcError = TRPCClientError.from<AppRouter>(err);
+      return {
+        httpRequestInfo: {
+          errorMessage: trpcError.message,
+          httpStatusCode: trpcError.data?.httpStatus ?? 1,
+        },
+      };
+    }
+
+    return {
+      httpRequestInfo: {
+        errorMessage: `unknown tRPC error`,
+        httpStatusCode: 0,
+      },
+    };
+  }
 }

@@ -439,7 +439,7 @@ void test(`pull()`, async (t) => {
   );
 
   await txTest(
-    `returns lastMutationIDChanges only for changed clients`,
+    `returns lastMutationIdChanges only for changed clients`,
     async (tx) => {
       const clientGroupId = nanoid();
       const clientId1 = nanoid();
@@ -474,7 +474,7 @@ void test(`pull()`, async (t) => {
         cookie: null,
       });
       assert.ok(`cookie` in pull1);
-      assert.deepEqual(pull1.lastMutationIDChanges, {
+      assert.deepEqual(pull1.lastMutationIdChanges, {
         [clientId1]: 1,
       });
 
@@ -505,7 +505,7 @@ void test(`pull()`, async (t) => {
         cookie: null,
       });
       assert.ok(`cookie` in pull2);
-      assert.deepEqual(pull2.lastMutationIDChanges, {
+      assert.deepEqual(pull2.lastMutationIdChanges, {
         [clientId1]: 1,
         [clientId2]: 1,
       });
@@ -519,7 +519,7 @@ void test(`pull()`, async (t) => {
         cookie: pull1.cookie,
       });
       assert.ok(`cookie` in pull3);
-      assert.deepEqual(pull3.lastMutationIDChanges, {
+      assert.deepEqual(pull3.lastMutationIdChanges, {
         [clientId2]: 1,
       });
 
@@ -532,7 +532,7 @@ void test(`pull()`, async (t) => {
         cookie: pull3.cookie,
       });
       assert.ok(`cookie` in pull4);
-      assert.deepEqual(pull4.lastMutationIDChanges, {});
+      assert.deepEqual(pull4.lastMutationIdChanges, {});
     },
   );
 

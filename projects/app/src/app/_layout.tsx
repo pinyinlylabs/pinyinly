@@ -1,3 +1,4 @@
+import { getSessionId } from "@/components/auth";
 import { ReplicacheProvider } from "@/components/ReplicacheContext";
 import { trpc } from "@/util/trpc";
 import {
@@ -7,7 +8,7 @@ import {
 } from "@react-navigation/native";
 import * as Sentry from "@sentry/react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { httpBatchLink } from "@trpc/client";
+import { httpBatchLink, HTTPHeaders } from "@trpc/client";
 import { useFonts } from "expo-font";
 import { Image } from "expo-image";
 import { Slot, SplashScreen, useNavigationContainerRef } from "expo-router";
@@ -84,12 +85,15 @@ function RootLayout() {
         httpBatchLink({
           url: `/api/trpc`,
 
-          // You can pass any HTTP headers you wish here
-          // eslint-disable-next-line @typescript-eslint/require-await
           async headers() {
-            return {
-              // authorization: getAuthCookie(),
-            };
+            const result: HTTPHeaders = {};
+
+            const sessionId = await getSessionId();
+            if (sessionId != null) {
+              result[`authorization`] = `HhhSessionId ${sessionId}`;
+            }
+
+            return result;
           },
         }),
       ],

@@ -133,3 +133,12 @@ Add the device to the provisioning profile:
 ```
 npx -y eas-cli build --profile=preview --platform=ios
 ```
+
+## Manually marking a Drizzle migration as "run"
+
+In local development it can be useful to merge together migrations without
+losing local data. In this case you can manually modify the Drizzle migration
+state in `drizzle.__drizzle_migrations`.
+
+Copy the timestamp from `_journal.json`, and the hash is the lower-case SHA256
+of the `.sql` migration file.

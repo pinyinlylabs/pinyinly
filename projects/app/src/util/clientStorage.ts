@@ -9,7 +9,6 @@ import { windowEventListenerEffect } from "./hooks";
 const QUERY_KEY_PREFIX = `hhh.`;
 
 /**
- *
  * @param storageKey Using the prefixed key ("storageKey") as the query key (as
  * opposed to the unprefixed key) makes it simpler to synchronise
  * @returns
@@ -44,21 +43,54 @@ export const useClientStorageQuery = (key: string) => {
 
   return useQuery({
     queryKey,
-    queryFn: async () => {
-      switch (Platform.OS) {
-        case `web`: {
-          return localStorage.getItem(storageKey);
-        }
-        case `ios`:
-        case `android`:
-          return SecureStore.getItemAsync(storageKey);
-        case `macos`:
-        case `windows`:
-          throw new Error(`unsupported platform ${Platform.OS}`);
-      }
-    },
+    queryFn: () => clientStorageGet(key),
   });
 };
+
+export async function clientStorageGet(key: string): Promise<string | null> {
+  const storageKey = getStorageKey(key);
+
+  switch (Platform.OS) {
+    case `web`: {
+      return localStorage.getItem(storageKey);
+    }
+    case `ios`:
+    case `android`:
+      return SecureStore.getItemAsync(storageKey);
+    case `macos`:
+    case `windows`:
+      throw new Error(`unsupported platform ${Platform.OS}`);
+  }
+}
+
+export async function clientStorageSet(
+  key: string,
+  value: string | null,
+): Promise<void> {
+  const storageKey = getStorageKey(key);
+
+  switch (Platform.OS) {
+    case `web`: {
+      if (value === null) {
+        localStorage.removeItem(storageKey);
+      } else {
+        localStorage.setItem(storageKey, value);
+      }
+      break;
+    }
+    case `ios`:
+    case `android`:
+      if (value === null) {
+        await SecureStore.deleteItemAsync(storageKey);
+      } else {
+        await SecureStore.setItemAsync(storageKey, value);
+      }
+      break;
+    case `macos`:
+    case `windows`:
+      throw new Error(`unsupported platform ${Platform.OS}`);
+  }
+}
 
 /**
  * Set a value (string), or null to delete the item.
@@ -69,27 +101,7 @@ export const useClientStorageMutation = (key: string) => {
 
   return useMutation({
     mutationFn: async (value: string | null) => {
-      switch (Platform.OS) {
-        case `web`: {
-          if (value === null) {
-            localStorage.removeItem(storageKey);
-          } else {
-            localStorage.setItem(storageKey, value);
-          }
-          break;
-        }
-        case `ios`:
-        case `android`:
-          if (value === null) {
-            await SecureStore.deleteItemAsync(storageKey);
-          } else {
-            await SecureStore.setItemAsync(storageKey, value);
-          }
-          break;
-        case `macos`:
-        case `windows`:
-          throw new Error(`unsupported platform ${Platform.OS}`);
-      }
+      await clientStorageSet(key, value);
 
       // Passes through to `onSuccess`.
       return value;
