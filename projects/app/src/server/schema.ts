@@ -10,6 +10,13 @@ export const schema = p.pgSchema(`haohaohow`);
 
 export const user = schema.table(`user`, {
   id: p.text(`id`).primaryKey().$defaultFn(nanoid),
+  createdAt: p
+    .timestamp(`createdAt`, {
+      mode: `date`,
+      withTimezone: true,
+    })
+    .defaultNow()
+    .notNull(),
 });
 
 export const authSession = schema.table(`authSession`, {
