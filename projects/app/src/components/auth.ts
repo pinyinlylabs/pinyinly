@@ -1,4 +1,5 @@
 import {
+  clientStorageGet,
   useClientStorageMutation,
   useClientStorageQuery,
 } from "@/util/clientStorage";
@@ -41,4 +42,8 @@ export function useAuth(): AuthState {
     signIn,
     signOut,
   };
+}
+
+export async function getSessionId(): Promise<string | null> {
+  return await clientStorageGet(SESSION_ID_KEY);
 }

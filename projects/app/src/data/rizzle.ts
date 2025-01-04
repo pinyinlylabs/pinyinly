@@ -864,51 +864,11 @@ export const mutationSchema = z
     name: z.string(),
     args: z.unknown(),
     timestamp: z.number(),
-    clientID: z.string(),
     clientId: z.string(),
   })
-  // HACK: allow this schema to parse the original and transformed version.
-  .partial({
-    clientID: true,
-    clientId: true,
-  })
-  .strict()
-  .transform((x) => {
-    // Translate convention of initialisms, e.g. `ID` to `Id`
-    const clientId = x.clientID ?? x.clientId;
-    invariant(clientId != null);
-    return {
-      id: x.id,
-      clientId,
-      name: x.name,
-      args: x.args,
-      timestamp: x.timestamp,
-    };
-  });
+  .strict();
 
 export type Mutation = z.infer<typeof mutationSchema>;
-
-export const pushRequestSchema = z
-  .object({
-    profileID: z.string(),
-    clientGroupID: z.string(),
-    pushVersion: z.number(),
-    schemaVersion: z.string(),
-    mutations: z.array(mutationSchema),
-  })
-  .strict()
-  .transform((v) =>
-    // Translate convention of initialisms, e.g. `ID` to `Id`
-    ({
-      profileId: v.profileID,
-      clientGroupId: v.clientGroupID,
-      pushVersion: v.pushVersion,
-      schemaVersion: v.schemaVersion,
-      mutations: v.mutations,
-    }),
-  );
-
-export type PushRequest = z.infer<typeof pushRequestSchema>;
 
 export const cookieSchema = z
   .object({
@@ -919,27 +879,96 @@ export const cookieSchema = z
 
 export type Cookie = z.infer<typeof cookieSchema>;
 
+export const clientStateNotFoundSchema = z.object({
+  error: z.literal(`ClientStateNotFound`),
+});
+
+export type ClientStateNotFoundResponse = z.infer<
+  typeof clientStateNotFoundSchema
+>;
+
+export const versionNotSupportedResponseSchema = z
+  .object({
+    error: z.literal(`VersionNotSupported`),
+    versionType: z.union([
+      z.literal(`pull`),
+      z.literal(`push`),
+      z.literal(`schema`),
+    ]),
+  })
+  .partial({ versionType: true });
+
+export type VersionNotSupportedResponse = z.infer<
+  typeof versionNotSupportedResponseSchema
+>;
+
+export const pushRequestSchema = z
+  .object({
+    profileId: z.string(),
+    clientGroupId: z.string(),
+    pushVersion: z.number(),
+    schemaVersion: z.string(),
+    mutations: z.array(mutationSchema),
+  })
+  .strict();
+
+export type PushRequest = z.infer<typeof pushRequestSchema>;
+
+export const pushResponseSchema = z
+  .union([clientStateNotFoundSchema, versionNotSupportedResponseSchema])
+  .optional();
+
+export type PushResponse = z.infer<typeof pushResponseSchema>;
+
 export const pullRequestSchema = z
   .object({
     pullVersion: z.literal(1),
-    clientGroupID: z.string(),
+    clientGroupId: z.string(),
     cookie: cookieSchema.nullable(),
-    profileID: z.string(),
+    profileId: z.string(),
     schemaVersion: z.string(),
   })
-  .strict()
-  .transform((v) =>
-    // Translate convention of initialisms, e.g. `ID` to `Id`
-    ({
-      pullVersion: v.pullVersion,
-      clientGroupId: v.clientGroupID,
-      cookie: v.cookie,
-      profileId: v.profileID,
-      schemaVersion: v.schemaVersion,
-    }),
-  );
+  .strict();
 
 export type PullRequest = z.infer<typeof pullRequestSchema>;
+
+export const pullOkResponseSchema = z.object({
+  cookie: cookieSchema,
+  lastMutationIdChanges: z.record(z.number()),
+  patch: z.array(
+    z.discriminatedUnion(`op`, [
+      z.object({
+        op: z.literal(`put`),
+        key: z.string(),
+        value: z.union([
+          z.null(),
+          z.string(),
+          z.boolean(),
+          z.number(),
+          z.array(z.unknown()),
+          z.record(z.unknown()),
+        ]),
+      }),
+      z.object({
+        op: z.literal(`del`),
+        key: z.string(),
+      }),
+      z.object({
+        op: z.literal(`clear`),
+      }),
+    ]),
+  ),
+});
+
+export type PullOkResponse = z.infer<typeof pullOkResponseSchema>;
+
+export const pullResponseSchema = z.union([
+  clientStateNotFoundSchema,
+  versionNotSupportedResponseSchema,
+  pullOkResponseSchema,
+]);
+
+export type PullResponse = z.infer<typeof pullResponseSchema>;
 
 export const makeDrizzleMutationHandler = <S extends RizzleRawSchema, Tx>(
   schema: S,

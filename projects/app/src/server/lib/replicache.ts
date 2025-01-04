@@ -1,9 +1,13 @@
 import {
+  ClientStateNotFoundResponse,
   Cookie,
   makeDrizzleMutationHandler,
   Mutation,
+  PullOkResponse,
   PullRequest,
   PushRequest,
+  PushResponse,
+  VersionNotSupportedResponse,
 } from "@/data/rizzle";
 import * as r from "@/data/rizzleSchema";
 import { MarshaledSkillId } from "@/data/rizzleSchema";
@@ -13,12 +17,7 @@ import { eq, inArray, sql } from "drizzle-orm";
 import mapValues from "lodash/mapValues";
 import pickBy from "lodash/pickBy";
 import { basename } from "node:path";
-import {
-  ClientStateNotFoundResponse,
-  PatchOperation,
-  PushResponse,
-  VersionNotSupportedResponse,
-} from "replicache";
+import { DatabaseError } from "pg-protocol";
 import { z } from "zod";
 import * as schema from "../schema";
 import type { Drizzle } from "./db";
@@ -34,7 +33,7 @@ export async function push(
   tx: Drizzle,
   userId: string,
   push: PushRequest,
-): Promise<PushResponse | undefined> {
+): Promise<PushResponse> {
   if (push.schemaVersion !== `3`) {
     return {
       error: `VersionNotSupported`,
@@ -139,20 +138,13 @@ function isCvrLastMutationIdsDiffEmpty(diff: Record<string, number>) {
   return Object.keys(diff).length === 0;
 }
 
-type PullResponse =
-  | {
-      cookie: Cookie;
-      lastMutationIDChanges: Record<string, number>;
-      patch: PatchOperation[];
-    }
-  | ClientStateNotFoundResponse
-  | VersionNotSupportedResponse;
-
 export async function pull(
   tx: Drizzle,
   userId: string,
   pull: PullRequest,
-): Promise<PullResponse> {
+): Promise<
+  PullOkResponse | VersionNotSupportedResponse | ClientStateNotFoundResponse
+> {
   invariant(pull.schemaVersion === `3`);
 
   // Required as per https://doc.replicache.dev/concepts/db-isolation-level
@@ -171,108 +163,137 @@ export async function pull(
   // 2: Init baseCVR
   // n/a
 
-  // 3: begin transaction
-  const txResult = await tx.transaction(async (tx) => {
-    // 4-5: getClientGroup(body.clientGroupID), verify user
-    const prevClientGroup = await getClientGroup(tx, { userId, clientGroupId });
-    debug(`%o`, { prevClientGroup });
-
-    // 6: Read all domain data, just ids and versions
-    // n/a
-
-    // 7: Read all clients in CG
-    const clients = await tx.query.replicacheClient.findMany({
-      where: (t) => eq(t.clientGroupId, clientGroupId),
-    });
-
-    // 8: Build nextCVR
-    const nextCvrEntities = await computeCvrEntities(tx, userId);
-    const nextCvrLastMutationIds = Object.fromEntries(
-      clients.map((c) => [c.id, c.lastMutationId]),
-    );
-    debug(`%o`, { nextCvrEntities, nextCvrLastMutationIds });
-
-    // 9: calculate diffs
-    const entitiesDiff = diffCvrEntities(
-      prevCvr?.entities ?? {},
-      nextCvrEntities,
-    );
-    const prevCvrLastMutationIds = // TODO: refactor to just use drizzle custom type
-      prevCvr != null
-        ? (prevCvr.lastMutationIds as Record<string, number>)
-        : null;
-    const lastMutationIdsDiff = diffLastMutationIds(
-      prevCvrLastMutationIds ?? {},
-      nextCvrLastMutationIds,
-    );
-    debug(`%o`, { entitiesDiff, lastMutationIdsDiff });
-
-    // 10: If diff is empty, return no-op PR
-    if (
-      prevCvr &&
-      isCvrDiffEmpty(entitiesDiff) &&
-      isCvrLastMutationIdsDiffEmpty(lastMutationIdsDiff)
+  async function withSerializationRetries<T>(
+    result: Promise<T>,
+    retryCount = 3,
+  ): Promise<T> {
+    for (
+      let remainingRetries = retryCount;
+      remainingRetries > 0;
+      remainingRetries--
     ) {
-      return null;
+      try {
+        return await result;
+      } catch (e) {
+        if (e instanceof DatabaseError && e.code === `40001`) {
+          // Serialization failure, retry
+          if (remainingRetries === 0) {
+            throw e;
+          }
+        }
+      }
     }
 
-    // 11: get entities
-    const [skillStates, skillRatings] = await Promise.all([
-      tx.query.skillState.findMany({
-        where: (t) => inArray(t.id, entitiesDiff.skillState?.puts ?? []),
-      }),
-      tx.query.skillRating.findMany({
-        where: (t) => inArray(t.id, entitiesDiff.skillRating?.puts ?? []),
-      }),
-    ]);
-    debug(`%o`, { skillStates, skillRatings });
+    return await result;
+  }
 
-    // 12: changed clients
-    // n/a (done above)
+  // 3: begin transaction
+  const txResult = await withSerializationRetries(
+    tx.transaction(async (tx) => {
+      // 4-5: getClientGroup(body.clientGroupID), verify user
+      const prevClientGroup = await getClientGroup(tx, {
+        userId,
+        clientGroupId,
+      });
+      debug(`%o`, { prevClientGroup });
 
-    // 13: newCVRVersion
-    const prevCvrVersion = pull.cookie?.order ?? 0;
-    const nextCvrVersion =
-      Math.max(prevCvrVersion, prevClientGroup.cvrVersion) + 1;
+      // 6: Read all domain data, just ids and versions
+      // n/a
 
-    // 14: Write ClientGroupRecord
-    const nextClientGroup = {
-      ...prevClientGroup,
-      cvrVersion: nextCvrVersion,
-    };
-    debug(`%o`, { nextClientGroup });
-    await putClientGroup(tx, nextClientGroup);
+      // 7: Read all clients in CG
+      const clients = await tx.query.replicacheClient.findMany({
+        where: (t) => eq(t.clientGroupId, clientGroupId),
+      });
 
-    return {
-      entityPatches: {
-        skillState: {
-          dels: entitiesDiff.skillState?.dels ?? [],
-          puts: skillStates,
+      // 8: Build nextCVR
+      const nextCvrEntities = await computeCvrEntities(tx, userId);
+      const nextCvrLastMutationIds = Object.fromEntries(
+        clients.map((c) => [c.id, c.lastMutationId]),
+      );
+      debug(`%o`, { nextCvrEntities, nextCvrLastMutationIds });
+
+      // 9: calculate diffs
+      const entitiesDiff = diffCvrEntities(
+        prevCvr?.entities ?? {},
+        nextCvrEntities,
+      );
+      const prevCvrLastMutationIds = // TODO: refactor to just use drizzle custom type
+        prevCvr != null
+          ? (prevCvr.lastMutationIds as Record<string, number>)
+          : null;
+      const lastMutationIdsDiff = diffLastMutationIds(
+        prevCvrLastMutationIds ?? {},
+        nextCvrLastMutationIds,
+      );
+      debug(`%o`, { entitiesDiff, lastMutationIdsDiff });
+
+      // 10: If diff is empty, return no-op PR
+      if (
+        prevCvr &&
+        isCvrDiffEmpty(entitiesDiff) &&
+        isCvrLastMutationIdsDiffEmpty(lastMutationIdsDiff)
+      ) {
+        return null;
+      }
+
+      // 11: get entities
+      const [skillStates, skillRatings] = await Promise.all([
+        tx.query.skillState.findMany({
+          where: (t) => inArray(t.id, entitiesDiff.skillState?.puts ?? []),
+        }),
+        tx.query.skillRating.findMany({
+          where: (t) => inArray(t.id, entitiesDiff.skillRating?.puts ?? []),
+        }),
+      ]);
+      debug(`%o`, { skillStates, skillRatings });
+
+      // 12: changed clients
+      // n/a (done above)
+
+      // 13: newCVRVersion
+      const prevCvrVersion = pull.cookie?.order ?? 0;
+      const nextCvrVersion =
+        Math.max(prevCvrVersion, prevClientGroup.cvrVersion) + 1;
+
+      // 14: Write ClientGroupRecord
+      const nextClientGroup = {
+        ...prevClientGroup,
+        cvrVersion: nextCvrVersion,
+      };
+      debug(`%o`, { nextClientGroup });
+      await putClientGroup(tx, nextClientGroup);
+
+      return {
+        entityPatches: {
+          skillState: {
+            dels: entitiesDiff.skillState?.dels ?? [],
+            puts: skillStates,
+          },
+          skillRating: {
+            dels: entitiesDiff.skillRating?.dels ?? [],
+            puts: skillRatings,
+          },
         },
-        skillRating: {
-          dels: entitiesDiff.skillRating?.dels ?? [],
-          puts: skillRatings,
+        nextCvr: {
+          lastMutationIds: nextCvrLastMutationIds,
+          entities: nextCvrEntities,
         },
-      },
-      nextCvr: {
-        lastMutationIds: nextCvrLastMutationIds,
-        entities: nextCvrEntities,
-      },
-      lastMutationIDChanges: lastMutationIdsDiff,
-      nextCvrVersion,
-    };
-  });
+        lastMutationIdChanges: lastMutationIdsDiff,
+        nextCvrVersion,
+      };
+    }),
+  );
 
   // 10: If diff is empty, return no-op PR
   if (txResult === null) {
     return {
       cookie: pull.cookie,
-      lastMutationIDChanges: {},
+      lastMutationIdChanges: {},
       patch: [],
     };
   }
 
-  const { entityPatches, nextCvr, nextCvrVersion, lastMutationIDChanges } =
+  const { entityPatches, nextCvr, nextCvrVersion, lastMutationIdChanges } =
     txResult;
 
   // 16-17: store cvr
@@ -288,7 +309,7 @@ export async function pull(
   invariant(cvr != null);
 
   // 18(i): build patch
-  const patch: PatchOperation[] = [];
+  const patch: PullOkResponse[`patch`] = [];
   if (prevCvr == null) {
     patch.push({ op: `clear` });
   }
@@ -342,7 +363,7 @@ export async function pull(
 
   return {
     cookie: nextCookie,
-    lastMutationIDChanges,
+    lastMutationIdChanges,
     patch,
   };
 }
