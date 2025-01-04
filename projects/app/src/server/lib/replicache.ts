@@ -26,6 +26,7 @@ import {
   json_build_object,
   json_object_agg,
 } from "./db";
+import { updateSkillState } from "./queries";
 
 const debug = makeDebug(basename(import.meta.filename));
 
@@ -556,14 +557,18 @@ export const _mutate = makeDrizzleMutationHandler<typeof r.schema, Drizzle>(
         .onConflictDoNothing();
     },
     async reviewSkill(db, userId, { skill, rating, now }) {
+      const skillId = r.rSkillId().marshal(skill);
+
       await db.insert(schema.skillRating).values([
         {
           userId,
-          skillId: r.rSkillId().marshal(skill),
+          skillId,
           rating: r.rFsrsRating.marshal(rating),
           createdAt: now,
         },
       ]);
+
+      await updateSkillState(db, skillId, userId);
     },
   },
 );

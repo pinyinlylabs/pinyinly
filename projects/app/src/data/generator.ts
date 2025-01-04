@@ -7,6 +7,7 @@ import {
   lookupRadicalNameMnemonic,
   lookupRadicalPinyinMnemonic,
   lookupWord,
+  Radical,
 } from "@/dictionary/dictionary";
 import { randomOne } from "@/util/collections";
 import { invariant } from "@haohaohow/lib/invariant";
@@ -16,6 +17,7 @@ import {
   OneCorrectPairQuestionChoice,
   Question,
   QuestionType,
+  RadicalSkill,
   Skill,
   SkillType,
 } from "./model";
@@ -265,6 +267,34 @@ function getOtherChoices<
   );
 
   return [...result];
+}
+
+export function skillsForRadical(radical: Radical): RadicalSkill[] {
+  const skills: RadicalSkill[] = [];
+
+  for (const hanzi of radical.hanzi) {
+    for (const name of radical.name) {
+      skills.push({
+        type: SkillType.RadicalToEnglish,
+        hanzi,
+        name,
+      });
+      skills.push({
+        type: SkillType.EnglishToRadical,
+        hanzi,
+        name,
+      });
+    }
+    for (const pinyin of radical.pinyin) {
+      skills.push({
+        type: SkillType.RadicalToPinyin,
+        hanzi,
+        pinyin,
+      });
+    }
+  }
+
+  return skills;
 }
 
 async function getOtherWords(hanzi: string, count: number) {

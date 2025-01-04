@@ -170,6 +170,8 @@ export const loadRadicals = memoize(async () =>
     .parse((await import(`./radicals.asset.json`)).default),
 );
 
+export type Radical = Awaited<ReturnType<typeof loadRadicals>>[number];
+
 export const allRadicalPrimaryForms = memoize(async () =>
   deepReadonly(
     (await allRadicals()).map((r) => {
