@@ -167,7 +167,7 @@ export const reviewSkill = r.mutator({
 });
 
 export const schema = {
-  skillReview: skillRating,
+  skillRating,
   skillState,
   addSkillState,
   reviewSkill,

@@ -23,7 +23,7 @@ export default function HistoryPage() {
   });
 
   const skillReviews = useReplicacheSubscribe(async (tx) =>
-    Array.fromAsync(db.query.skillReview.scan(tx)).then((reviews) =>
+    Array.fromAsync(db.query.skillRating.scan(tx)).then((reviews) =>
       reverse(sortBy(reviews, (x) => x[0].when.getTime())),
     ),
   );

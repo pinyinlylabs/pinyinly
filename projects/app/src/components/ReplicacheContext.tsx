@@ -105,10 +105,10 @@ export function ReplicacheProvider({ children }: React.PropsWithChildren) {
         },
         async reviewSkill(tx, { skill, rating, now }) {
           // Save a record of the review.
-          await tx.skillReview.set({ skill, when: now }, { rating });
+          await tx.skillRating.set({ skill, when: now }, { rating });
 
           let state: UpcomingReview | null = null;
-          for await (const [{ when }, { rating }] of tx.skillReview.scan({
+          for await (const [{ when }, { rating }] of tx.skillRating.scan({
             skill,
           })) {
             state = nextReview(state, rating, when);
