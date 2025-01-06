@@ -3,7 +3,7 @@ import * as r from "@/data/rizzleSchema";
 import { MarshaledSkillId } from "@/data/rizzleSchema";
 import { Drizzle } from "@/server/lib/db";
 import { computeCvrEntities, pull, push } from "@/server/lib/replicache";
-import * as schema from "@/server/schema";
+import * as s from "@/server/schema";
 import { Rating } from "@/util/fsrs";
 import { invariant } from "@haohaohow/lib/invariant";
 import { eq, sql } from "drizzle-orm";
@@ -13,7 +13,7 @@ import { test } from "node:test";
 import { withDbTest, withTxTest } from "./db";
 
 async function createUser(tx: Drizzle, id: string = nanoid()) {
-  const [user] = await tx.insert(schema.user).values([{ id }]).returning();
+  const [user] = await tx.insert(s.user).values([{ id }]).returning();
   assert.ok(user != null);
   return user;
 }
@@ -55,7 +55,7 @@ void test(`push()`, async (t) => {
 
       // Create a client group
       const [clientGroup] = await tx
-        .insert(schema.replicacheClientGroup)
+        .insert(s.replicacheClientGroup)
         .values([
           {
             id: `1`,
@@ -183,14 +183,14 @@ void test(`push()`, async (t) => {
 
     // Create a client group
     const [clientGroup] = await tx
-      .insert(schema.replicacheClientGroup)
+      .insert(s.replicacheClientGroup)
       .values([{ userId: user.id }])
       .returning();
     invariant(clientGroup != null);
 
     // Create a client
     const [client] = await tx
-      .insert(schema.replicacheClient)
+      .insert(s.replicacheClient)
       .values([{ clientGroupId: clientGroup.id, lastMutationId: 1 }])
       .returning();
     invariant(client != null);
@@ -231,14 +231,14 @@ void test(`push()`, async (t) => {
 
     // Create a client group
     const [clientGroup] = await tx
-      .insert(schema.replicacheClientGroup)
+      .insert(s.replicacheClientGroup)
       .values([{ userId: user.id }])
       .returning();
     invariant(clientGroup != null);
 
     // Create a client
     const [client] = await tx
-      .insert(schema.replicacheClient)
+      .insert(s.replicacheClient)
       .values([{ clientGroupId: clientGroup.id, lastMutationId: 1 }])
       .returning();
     invariant(client != null);
@@ -269,14 +269,14 @@ void test(`push()`, async (t) => {
 
       // Create a client group
       const [clientGroup] = await tx
-        .insert(schema.replicacheClientGroup)
+        .insert(s.replicacheClientGroup)
         .values([{ userId: user.id }])
         .returning();
       invariant(clientGroup != null);
 
       // Create a client
       const [client] = await tx
-        .insert(schema.replicacheClient)
+        .insert(s.replicacheClient)
         .values([{ clientGroupId: clientGroup.id, lastMutationId: 1 }])
         .returning();
       invariant(client != null);
@@ -385,20 +385,20 @@ void test(`pull()`, async (t) => {
 
       // Create a client group
       const [clientGroup] = await tx
-        .insert(schema.replicacheClientGroup)
+        .insert(s.replicacheClientGroup)
         .values([{ userId: user.id }])
         .returning();
       invariant(clientGroup != null);
 
       // Create a client with a specific lastMutationId
       const [client] = await tx
-        .insert(schema.replicacheClient)
+        .insert(s.replicacheClient)
         .values([{ clientGroupId: clientGroup.id, lastMutationId: 66 }])
         .returning();
       invariant(client != null);
 
       const [skillState] = await tx
-        .insert(schema.skillState)
+        .insert(s.skillState)
         .values([
           {
             userId: user.id,
@@ -544,7 +544,7 @@ void test(`pull()`, async (t) => {
     const now = new Date();
 
     const [skillState] = await tx
-      .insert(schema.skillState)
+      .insert(s.skillState)
       .values([
         {
           userId: user.id,
@@ -596,7 +596,7 @@ void test(`pull()`, async (t) => {
     const now = new Date();
 
     const [skillState] = await tx
-      .insert(schema.skillState)
+      .insert(s.skillState)
       .values([
         {
           userId: user.id,
@@ -619,9 +619,7 @@ void test(`pull()`, async (t) => {
       cookie: null,
     });
 
-    await tx
-      .delete(schema.skillState)
-      .where(eq(schema.skillState.id, skillState.id));
+    await tx.delete(s.skillState).where(eq(s.skillState.id, skillState.id));
 
     assert.ok(`cookie` in pull1);
 
@@ -656,7 +654,7 @@ void test(`pull()`, async (t) => {
     const now = new Date();
 
     const [skillRating] = await tx
-      .insert(schema.skillRating)
+      .insert(s.skillRating)
       .values([
         {
           userId: user.id,
@@ -679,9 +677,7 @@ void test(`pull()`, async (t) => {
       cookie: null,
     });
 
-    await tx
-      .delete(schema.skillRating)
-      .where(eq(schema.skillRating.id, skillRating.id));
+    await tx.delete(s.skillRating).where(eq(s.skillRating.id, skillRating.id));
 
     assert.ok(`cookie` in pull1);
 
@@ -714,10 +710,10 @@ void test(`dbTest() examples`, async (t) => {
   const dbTest = withDbTest(t);
 
   await dbTest(`should work with inline fixtures 1`, async (db) => {
-    await db.insert(schema.user).values([{ id: `1` }]);
+    await db.insert(s.user).values([{ id: `1` }]);
 
     // Your test logic here
-    const users = await db.select().from(schema.user);
+    const users = await db.select().from(s.user);
     assert.equal(users.length, 1);
   });
 });
@@ -727,6 +723,8 @@ void test(`computeCvr()`, async (t) => {
 
   await txTest(`works for non-existant user and client group`, async (tx) => {
     assert.deepEqual(await computeCvrEntities(tx, `1`), {
+      pinyinFinalAssociation: {},
+      pinyinInitialAssociation: {},
       skillState: {},
       skillRating: {},
     });
@@ -736,6 +734,8 @@ void test(`computeCvr()`, async (t) => {
     const user = await createUser(tx);
 
     assert.deepEqual(await computeCvrEntities(tx, user.id), {
+      pinyinFinalAssociation: {},
+      pinyinInitialAssociation: {},
       skillState: {},
       skillRating: {},
     });
@@ -746,7 +746,7 @@ void test(`computeCvr()`, async (t) => {
     const user2 = await createUser(tx);
 
     const [user1SkillState] = await tx
-      .insert(schema.skillState)
+      .insert(s.skillState)
       .values([
         {
           userId: user1.id,
@@ -770,13 +770,15 @@ void test(`computeCvr()`, async (t) => {
         },
       ])
       .returning({
-        id: schema.skillState.id,
-        skillId: schema.skillState.skillId,
-        version: sql<string>`${schema.skillState}.xmin`,
+        id: s.skillState.id,
+        skillId: s.skillState.skillId,
+        version: sql<string>`${s.skillState}.xmin`,
       });
     invariant(user1SkillState != null);
 
     assert.deepEqual(await computeCvrEntities(tx, user1.id), {
+      pinyinFinalAssociation: {},
+      pinyinInitialAssociation: {},
       skillRating: {},
       skillState: {
         [user1SkillState.id]:
@@ -794,7 +796,7 @@ void test(`computeCvr()`, async (t) => {
     const user2 = await createUser(tx);
 
     const [user1SkillRating] = await tx
-      .insert(schema.skillRating)
+      .insert(s.skillRating)
       .values([
         {
           userId: user1.id,
@@ -814,14 +816,16 @@ void test(`computeCvr()`, async (t) => {
         },
       ])
       .returning({
-        id: schema.skillRating.id,
-        skillId: schema.skillRating.skillId,
-        createdAt: schema.skillRating.createdAt,
-        version: sql<string>`${schema.skillRating}.xmin`,
+        id: s.skillRating.id,
+        skillId: s.skillRating.skillId,
+        createdAt: s.skillRating.createdAt,
+        version: sql<string>`${s.skillRating}.xmin`,
       });
     invariant(user1SkillRating != null);
 
     assert.deepEqual(await computeCvrEntities(tx, user1.id), {
+      pinyinFinalAssociation: {},
+      pinyinInitialAssociation: {},
       skillRating: {
         [user1SkillRating.id]:
           user1SkillRating.version +
@@ -834,4 +838,88 @@ void test(`computeCvr()`, async (t) => {
       skillState: {},
     });
   });
+
+  await txTest(
+    `only includes pinyinFinalAssociation for the user`,
+    async (tx) => {
+      const user1 = await createUser(tx);
+      const user2 = await createUser(tx);
+
+      const [user1PinyinFinalAssociation] = await tx
+        .insert(s.pinyinFinalAssociation)
+        .values([
+          {
+            userId: user1.id,
+            final: `p`,
+            name: `p1`,
+          },
+          {
+            userId: user2.id,
+            final: `p`,
+            name: `p2`,
+          },
+        ])
+        .returning({
+          id: s.pinyinFinalAssociation.id,
+          final: s.pinyinFinalAssociation.final,
+          version: sql<string>`${s.pinyinFinalAssociation}.xmin`,
+        });
+      invariant(user1PinyinFinalAssociation != null);
+
+      assert.deepEqual(await computeCvrEntities(tx, user1.id), {
+        pinyinFinalAssociation: {
+          [user1PinyinFinalAssociation.id]:
+            user1PinyinFinalAssociation.version +
+            `:` +
+            r.pinyinFinalAssociation.marshalKey(user1PinyinFinalAssociation),
+        },
+        pinyinInitialAssociation: {},
+        skillRating: {},
+        skillState: {},
+      });
+    },
+  );
+
+  await txTest(
+    `only includes pinyinInitialAssociation for the user`,
+    async (tx) => {
+      const user1 = await createUser(tx);
+      const user2 = await createUser(tx);
+
+      const [user1PinyinInitialAssociation] = await tx
+        .insert(s.pinyinInitialAssociation)
+        .values([
+          {
+            userId: user1.id,
+            initial: `p`,
+            name: `p1`,
+          },
+          {
+            userId: user2.id,
+            initial: `p`,
+            name: `p2`,
+          },
+        ])
+        .returning({
+          id: s.pinyinInitialAssociation.id,
+          initial: s.pinyinInitialAssociation.initial,
+          version: sql<string>`${s.pinyinInitialAssociation}.xmin`,
+        });
+      invariant(user1PinyinInitialAssociation != null);
+
+      assert.deepEqual(await computeCvrEntities(tx, user1.id), {
+        pinyinFinalAssociation: {},
+        pinyinInitialAssociation: {
+          [user1PinyinInitialAssociation.id]:
+            user1PinyinInitialAssociation.version +
+            `:` +
+            r.pinyinInitialAssociation.marshalKey(
+              user1PinyinInitialAssociation,
+            ),
+        },
+        skillRating: {},
+        skillState: {},
+      });
+    },
+  );
 });

@@ -26,7 +26,7 @@ export interface SkillState {
   due: Date;
 }
 
-export interface SkillReview {
+export interface SkillRating {
   rating: Rating;
 }
 

@@ -6,6 +6,7 @@ import { AppRouter } from "@/server/routers/_app";
 import { nextReview, UpcomingReview } from "@/util/fsrs";
 import { trpc } from "@/util/trpc";
 import { invariant } from "@haohaohow/lib/invariant";
+import { QueryKey, useQuery, useQueryClient } from "@tanstack/react-query";
 import { TRPCClientError } from "@trpc/client";
 import {
   createContext,
@@ -16,10 +17,6 @@ import {
   useState,
 } from "react";
 import { HTTPRequestInfo, PullResponseV1, ReadTransaction } from "replicache";
-import {
-  useSubscribe as replicacheReactUseSubscribe,
-  UseSubscribeOptions,
-} from "replicache-react";
 import { useAuth } from "./auth";
 import { kvStore } from "./replicacheOptions";
 import { sentryCaptureException } from "./util";
@@ -105,10 +102,10 @@ export function ReplicacheProvider({ children }: React.PropsWithChildren) {
         },
         async reviewSkill(tx, { skill, rating, now }) {
           // Save a record of the review.
-          await tx.skillReview.set({ skill, when: now }, { rating });
+          await tx.skillRating.set({ skill, when: now }, { rating });
 
           let state: UpcomingReview | null = null;
-          for await (const [{ when }, { rating }] of tx.skillReview.scan({
+          for await (const [{ when }, { rating }] of tx.skillRating.scan({
             skill,
           })) {
             state = nextReview(state, rating, when);
@@ -129,6 +126,12 @@ export function ReplicacheProvider({ children }: React.PropsWithChildren) {
             },
           );
         },
+        async setPinyinInitialAssociation(tx, { initial, name }) {
+          await tx.pinyinInitialAssociation.set({ initial }, { name });
+        },
+        async setPinyinFinalAssociation(tx, { final, name }) {
+          await tx.pinyinFinalAssociation.set({ final }, { name });
+        },
       },
     );
   }, [auth.isAuthenticated, pushMutate, pullMutate]);
@@ -146,18 +149,42 @@ export function useReplicache() {
   return r;
 }
 
-export function useReplicacheSubscribe<QueryRet, Default = undefined>(
-  query: (tx: ReadTransaction) => Promise<QueryRet>,
-  options?: UseSubscribeOptions<QueryRet, Default>,
+export function useRizzleQuery<QueryRet>(
+  key: QueryKey,
+  query: (r: Rizzle, tx: ReadTransaction) => Promise<QueryRet>,
 ) {
+  const queryClient = useQueryClient();
   const r = useReplicache();
-  // The types of replicache-react seem wonky and don't support passing in a
-  // replicache instance.
-  return replicacheReactUseSubscribe<ReadTransaction, QueryRet, Default>(
-    r.replicache,
-    query,
-    options,
-  );
+
+  // The reference for `query` usually changes on every render because the
+  // function is written inline and the reference changes.
+  //
+  // eslint-disable-next-line react-compiler/react-compiler
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const stableQuery = useMemo(() => query, [key]);
+
+  useEffect(() => {
+    const unsubscribe = r.replicache.subscribe((tx) => stableQuery(r, tx), {
+      onData: (data) => {
+        queryClient.setQueryData(key, data);
+      },
+      onError: (e) => {
+        sentryCaptureException(e);
+      },
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [key, stableQuery, queryClient, r]);
+
+  const result = useQuery({
+    queryKey: key,
+    queryFn: () => r.replicache.query((tx) => query(r, tx)),
+    throwOnError: true,
+  });
+
+  return result;
 }
 
 type Result<QueryRet> =
