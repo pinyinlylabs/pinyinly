@@ -155,10 +155,15 @@ export const skillState = r.entity(`s/[skill]`, {
   due: r.timestamp().alias(`d`).indexed(`byDue`),
 });
 
-export const addSkillState = r.mutator({
-  skill: rSkillId().alias(`s`),
-  now: r.timestamp().alias(`n`),
-});
+export const initSkillState = r
+  .mutator({
+    skill: rSkillId().alias(`s`),
+    now: r.timestamp().alias(`n`),
+  })
+  .alias(
+    // Original deprecated name, kept for compatibility.
+    `addSkillState`,
+  );
 
 export const reviewSkill = r.mutator({
   skill: rSkillId().alias(`s`),
@@ -195,7 +200,7 @@ export const setPinyinFinalAssociation = r.mutator({
 // --
 
 export const schema = {
-  addSkillState,
+  initSkillState,
   pinyinFinalAssociation,
   pinyinInitialAssociation,
   setPinyinInitialAssociation,

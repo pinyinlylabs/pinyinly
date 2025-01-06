@@ -581,7 +581,7 @@ export async function getClient(
 export const _mutate = makeDrizzleMutationHandler<typeof r.schema, Drizzle>(
   r.schema,
   {
-    async addSkillState(db, userId, { skill, now }) {
+    async initSkillState(db, userId, { skill, now }) {
       const skillId = r.rSkillId().marshal(skill);
       await db
         .insert(s.skillState)
@@ -673,7 +673,7 @@ export async function computeCvrEntities(db: Drizzle, userId: string) {
       map: json_object_agg(
         s.skillRating.id,
         json_build_object({
-          skillId: s.skillState.skillId,
+          skill: sql<MarshaledSkillId>`${s.skillState.skillId}`,
           xmin: sql<string>`${s.skillState}.xmin`,
         }),
       ).as(`skillStateVersions`),
@@ -714,22 +714,15 @@ export async function computeCvrEntities(db: Drizzle, userId: string) {
   return {
     pinyinInitialAssociation: mapValues(
       result.pinyinInitialAssociation,
-      (v) =>
-        v.xmin +
-        `:` +
-        r.pinyinInitialAssociation.marshalKey({ initial: v.initial }),
+      (v) => v.xmin + `:` + r.pinyinInitialAssociation.marshalKey(v),
     ),
     pinyinFinalAssociation: mapValues(
       result.pinyinFinalAssociation,
-      (v) =>
-        v.xmin + `:` + r.pinyinFinalAssociation.marshalKey({ final: v.final }),
+      (v) => v.xmin + `:` + r.pinyinFinalAssociation.marshalKey(v),
     ),
     skillState: mapValues(
       result.skillState,
-      (v) =>
-        v.xmin +
-        `:` +
-        r.skillState.marshalKey({ skill: v.skillId as MarshaledSkillId }),
+      (v) => v.xmin + `:` + r.skillState.marshalKey(v),
     ),
     skillRating: mapValues(
       result.skillRating,

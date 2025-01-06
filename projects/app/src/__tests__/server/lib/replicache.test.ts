@@ -132,7 +132,7 @@ void test(`push()`, async (t) => {
     },
   );
 
-  await txTest(`addSkillState() should insert to the db`, async (tx) => {
+  await txTest(`initSkillState() should insert to the db`, async (tx) => {
     const clientId = `clientid`;
     const clientGroupId = `clientgroupid`;
 
@@ -143,7 +143,7 @@ void test(`push()`, async (t) => {
     const mut = {
       id: 1,
       name: `addSkillState`,
-      args: r.addSkillState.marshalArgs({
+      args: r.initSkillState.marshalArgs({
         skill: {
           type: SkillType.EnglishToHanzi,
           hanzi: `我`,
@@ -198,7 +198,7 @@ void test(`push()`, async (t) => {
     const mut = {
       id: client.lastMutationId, // use the same ID
       name: `addSkillState`,
-      args: r.addSkillState.marshalArgs({
+      args: r.initSkillState.marshalArgs({
         skill: {
           type: SkillType.EnglishToHanzi,
           hanzi: `我`,
