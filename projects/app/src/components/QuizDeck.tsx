@@ -4,7 +4,6 @@ import {
   QuestionType,
   SkillRating,
 } from "@/data/model";
-import { saveSkillRating } from "@/data/mutators";
 import { readonlyMapSet } from "@/util/collections";
 import { Rating } from "@/util/fsrs";
 import { StackNavigationFor } from "@/util/types";
@@ -109,7 +108,13 @@ export const QuizDeck = ({ questions }: { questions: readonly Question[] }) => {
       const success = ratings.every(({ rating }) => rating !== Rating.Again);
 
       for (const { skill, rating } of ratings) {
-        saveSkillRating(r, skill, rating).catch(sentryCaptureException);
+        r.mutate
+          .reviewSkill({
+            now: Date.now(),
+            skill,
+            rating,
+          })
+          .catch(sentryCaptureException);
       }
 
       setStreakCount((prev) => (success ? prev + 1 : 0));

@@ -10,7 +10,6 @@ import {
   VersionNotSupportedResponse,
 } from "@/data/rizzle";
 import * as r from "@/data/rizzleSchema";
-import { MarshaledSkillId } from "@/data/rizzleSchema";
 import { invariant } from "@haohaohow/lib/invariant";
 import makeDebug from "debug";
 import { eq, inArray, sql } from "drizzle-orm";
@@ -353,9 +352,9 @@ export async function pull(
   for (const s of entityPatches.skillState.puts) {
     patch.push({
       op: `put`,
-      key: r.skillState.marshalKey({ skill: s.skillId as MarshaledSkillId }),
+      key: r.skillState.marshalKey(s),
       value: r.skillState.marshalValue({
-        created: s.createdAt,
+        createdAt: s.createdAt,
         srs: null,
         due: s.dueAt,
       }),
@@ -365,10 +364,7 @@ export async function pull(
   for (const s of entityPatches.skillRating.puts) {
     patch.push({
       op: `put`,
-      key: r.skillRating.marshalKey({
-        skill: s.skillId as MarshaledSkillId,
-        when: s.createdAt,
-      }),
+      key: r.skillRating.marshalKey(s),
       value: r.skillRating.marshalValue({
         rating: r.rFsrsRating.unmarshal(s.rating),
       }),
@@ -484,11 +480,7 @@ export interface ClientGroupRecord {
 }
 
 export async function putClient(db: Drizzle, client: ClientRecord) {
-  const {
-    id,
-    clientGroupId: clientGroupId,
-    lastMutationId: lastMutationId,
-  } = client;
+  const { id, clientGroupId, lastMutationId } = client;
 
   await db
     .insert(s.replicacheClient)
@@ -582,12 +574,11 @@ export const _mutate = makeDrizzleMutationHandler<typeof r.schema, Drizzle>(
   r.schema,
   {
     async initSkillState(db, userId, { skill, now }) {
-      const skillId = r.rSkillId().marshal(skill);
       await db
         .insert(s.skillState)
         .values({
           userId,
-          skillId,
+          skill,
           srs: null,
           dueAt: now,
           createdAt: now,
@@ -595,18 +586,16 @@ export const _mutate = makeDrizzleMutationHandler<typeof r.schema, Drizzle>(
         .onConflictDoNothing();
     },
     async reviewSkill(db, userId, { skill, rating, now }) {
-      const skillId = r.rSkillId().marshal(skill);
-
       await db.insert(s.skillRating).values([
         {
           userId,
-          skillId,
+          skill,
           rating: r.rFsrsRating.marshal(rating),
           createdAt: now,
         },
       ]);
 
-      await updateSkillState(db, skillId, userId);
+      await updateSkillState(db, skill, userId);
     },
     async setPinyinInitialAssociation(db, userId, { initial, name, now }) {
       const updatedAt = now;
@@ -673,7 +662,7 @@ export async function computeCvrEntities(db: Drizzle, userId: string) {
       map: json_object_agg(
         s.skillRating.id,
         json_build_object({
-          skill: sql<MarshaledSkillId>`${s.skillState.skillId}`,
+          skill: s.skillState.skill,
           xmin: sql<string>`${s.skillState}.xmin`,
         }),
       ).as(`skillStateVersions`),
@@ -687,7 +676,7 @@ export async function computeCvrEntities(db: Drizzle, userId: string) {
       map: json_object_agg(
         s.skillRating.id,
         json_build_object({
-          skillId: s.skillRating.skillId,
+          skill: s.skillRating.skill,
           createdAt: sql<string>`${s.skillRating.createdAt}::timestamptz`,
           xmin: sql<string>`${s.skillRating}.xmin`,
         }),
@@ -730,8 +719,8 @@ export async function computeCvrEntities(db: Drizzle, userId: string) {
         v.xmin +
         `:` +
         r.skillRating.marshalKey({
-          skill: v.skillId as MarshaledSkillId,
-          when: new Date(v.createdAt),
+          skill: v.skill,
+          createdAt: new Date(v.createdAt),
         }),
     ),
   };

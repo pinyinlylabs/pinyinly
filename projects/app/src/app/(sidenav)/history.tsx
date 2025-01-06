@@ -25,7 +25,7 @@ export default function HistoryPage() {
     [`HistoryPage`, `skillRatings`],
     async (r, tx) =>
       Array.fromAsync(r.query.skillRating.scan(tx)).then((reviews) =>
-        reverse(sortBy(reviews, (x) => x[0].when.getTime())),
+        reverse(sortBy(reviews, (x) => x[0].createdAt.getTime())),
       ),
   );
 
@@ -66,7 +66,7 @@ export default function HistoryPage() {
                     ? `✅`
                     : value.rating}
                 {` `}
-                {key.skill.hanzi}: {key.when.toISOString()}
+                {key.skill.hanzi}: {key.createdAt.toISOString()}
               </Text>
             </View>
           ))}

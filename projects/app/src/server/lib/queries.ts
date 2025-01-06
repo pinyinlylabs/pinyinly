@@ -1,4 +1,4 @@
-import { SrsType } from "@/data/model";
+import { Skill, SrsType } from "@/data/model";
 import * as r from "@/data/rizzleSchema";
 import { UpcomingReview, nextReview } from "@/util/fsrs";
 import { invariant } from "@haohaohow/lib/invariant";
@@ -8,7 +8,7 @@ import { Drizzle } from "./db";
 
 export async function updateSkillState(
   tx: Drizzle,
-  skillId: string,
+  skill: Skill,
   userId: string,
 ) {
   // WARNING: very inefficient, but stable. Reading all historical ratings just
@@ -18,7 +18,7 @@ export async function updateSkillState(
   // Read all historical skill ratings.
   const ratings = await tx.query.skillRating.findMany({
     where: and(
-      eq(schema.skillRating.skillId, skillId),
+      eq(schema.skillRating.skill, skill),
       eq(schema.skillRating.userId, userId),
     ),
     orderBy: [asc(schema.skillRating.createdAt)],
@@ -44,17 +44,9 @@ export async function updateSkillState(
 
     await tx
       .insert(schema.skillState)
-      .values([
-        {
-          userId,
-          skillId,
-          srs,
-          dueAt,
-          createdAt,
-        },
-      ])
+      .values([{ userId, skill, srs, dueAt, createdAt }])
       .onConflictDoUpdate({
-        target: [schema.skillState.userId, schema.skillState.skillId],
+        target: [schema.skillState.userId, schema.skillState.skill],
         set: { srs, dueAt, createdAt },
       });
   }

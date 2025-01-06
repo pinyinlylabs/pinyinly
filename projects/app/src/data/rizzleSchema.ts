@@ -26,92 +26,113 @@ export const rFsrsRating = r.enum(Rating, {
 });
 
 // Skill ID e.g. `he:好`
-export type MarshaledSkillId = string & z.BRAND<`SkillId`>;
+export type MarshaledSkill = string & z.BRAND<`SkillId`>;
 
-export const rSkillId = memoize(() =>
-  RizzleCustom.create(
-    z.custom<Skill | MarshaledSkillId>().transform((x) => {
-      if (typeof x === `string`) {
-        return x;
-      }
-
-      const skillTypeM = rSkillType.marshal(x.type);
-      switch (x.type) {
-        // Radical skills
-        case SkillType.RadicalToEnglish:
-        case SkillType.EnglishToRadical:
-          return `${skillTypeM}:${x.hanzi}:${x.name}` as MarshaledSkillId;
-        case SkillType.RadicalToPinyin:
-        case SkillType.PinyinToRadical:
-          return `${skillTypeM}:${x.hanzi}:${x.pinyin}` as MarshaledSkillId;
-        // Hanzi skills
-        case SkillType.HanziWordToEnglish:
-        case SkillType.HanziWordToPinyinInitial:
-        case SkillType.HanziWordToPinyinFinal:
-        case SkillType.HanziWordToPinyinTone:
-        case SkillType.EnglishToHanzi:
-        case SkillType.PinyinToHanzi:
-        case SkillType.ImageToHanzi:
-          return `${skillTypeM}:${x.hanzi}` as MarshaledSkillId;
-      }
-    }),
-    z.string().transform((x, ctx): Skill => {
-      const result = /^(.+?):(.+)$/.exec(x);
-      if (result === null) {
-        return invalid(ctx, `doesn't match *:* pattern`);
-      }
-
-      const [, marshaledSkillType, rest] = result;
-      if (marshaledSkillType == null) {
-        return invalid(ctx, `couldn't parse skill type (before :)`);
-      }
-      if (rest == null) {
-        return invalid(ctx, `couldn't parse skill params (after :)`);
-      }
-
-      const skillType_ = rSkillType.getUnmarshal().parse(marshaledSkillType);
-
-      switch (skillType_) {
-        case SkillType.RadicalToEnglish:
-        case SkillType.EnglishToRadical: {
-          const result = /^(.+):(.+)$/.exec(rest);
-          if (result == null) {
-            return invalid(ctx, `couldn't parse ${marshaledSkillType}: params`);
-          }
-          const [, hanzi, name] = result;
-          if (hanzi == null) {
-            return invalid(ctx, `couldn't parse ${marshaledSkillType}: hanzi`);
-          }
-          if (name == null) {
-            return invalid(ctx, `couldn't parse ${marshaledSkillType}: name`);
-          }
-          return { type: skillType_, hanzi, name };
+export const rSkill = memoize(() =>
+  RizzleCustom.create<Skill | MarshaledSkill, MarshaledSkill, Skill>(
+    z
+      .custom<Skill | MarshaledSkill>(
+        (x) => typeof x === `string` || (typeof x === `object` && `type` in x),
+      )
+      .transform((x): MarshaledSkill => {
+        if (typeof x === `string`) {
+          return x;
         }
-        case SkillType.RadicalToPinyin:
-        case SkillType.PinyinToRadical: {
-          const result = /^(.+):(.+)$/.exec(rest);
-          if (result == null) {
-            return invalid(ctx, `couldn't parse ${marshaledSkillType}: params`);
-          }
-          const [, hanzi, pinyin] = result;
-          if (hanzi == null) {
-            return invalid(ctx, `couldn't parse ${marshaledSkillType}: hanzi`);
-          }
-          if (pinyin == null) {
-            return invalid(ctx, `couldn't parse ${marshaledSkillType}: pinyin`);
-          }
-          return { type: skillType_, hanzi, pinyin };
+
+        const skillTypeM = rSkillType.marshal(x.type);
+        switch (x.type) {
+          // Radical skills
+          case SkillType.RadicalToEnglish:
+          case SkillType.EnglishToRadical:
+            return `${skillTypeM}:${x.hanzi}:${x.name}` as MarshaledSkill;
+          case SkillType.RadicalToPinyin:
+          case SkillType.PinyinToRadical:
+            return `${skillTypeM}:${x.hanzi}:${x.pinyin}` as MarshaledSkill;
+          // Hanzi skills
+          case SkillType.HanziWordToEnglish:
+          case SkillType.HanziWordToPinyinInitial:
+          case SkillType.HanziWordToPinyinFinal:
+          case SkillType.HanziWordToPinyinTone:
+          case SkillType.EnglishToHanzi:
+          case SkillType.PinyinToHanzi:
+          case SkillType.ImageToHanzi:
+            return `${skillTypeM}:${x.hanzi}` as MarshaledSkill;
         }
-        case SkillType.HanziWordToEnglish:
-        case SkillType.HanziWordToPinyinInitial:
-        case SkillType.HanziWordToPinyinFinal:
-        case SkillType.HanziWordToPinyinTone:
-        case SkillType.EnglishToHanzi:
-        case SkillType.PinyinToHanzi:
-        case SkillType.ImageToHanzi:
-          return { type: skillType_, hanzi: rest };
-      }
-    }),
+      }),
+    z
+      .custom<MarshaledSkill>((x) => typeof x === `string`)
+      .transform((x, ctx): Skill => {
+        const result = /^(.+?):(.+)$/.exec(x);
+        if (result === null) {
+          return invalid(ctx, `doesn't match *:* pattern`);
+        }
+
+        const [, marshaledSkillType, rest] = result;
+        if (marshaledSkillType == null) {
+          return invalid(ctx, `couldn't parse skill type (before :)`);
+        }
+        if (rest == null) {
+          return invalid(ctx, `couldn't parse skill params (after :)`);
+        }
+
+        const skillType_ = rSkillType.getUnmarshal().parse(marshaledSkillType);
+
+        switch (skillType_) {
+          case SkillType.RadicalToEnglish:
+          case SkillType.EnglishToRadical: {
+            const result = /^(.+):(.+)$/.exec(rest);
+            if (result == null) {
+              return invalid(
+                ctx,
+                `couldn't parse ${marshaledSkillType}: params`,
+              );
+            }
+            const [, hanzi, name] = result;
+            if (hanzi == null) {
+              return invalid(
+                ctx,
+                `couldn't parse ${marshaledSkillType}: hanzi`,
+              );
+            }
+            if (name == null) {
+              return invalid(ctx, `couldn't parse ${marshaledSkillType}: name`);
+            }
+            return { type: skillType_, hanzi, name };
+          }
+          case SkillType.RadicalToPinyin:
+          case SkillType.PinyinToRadical: {
+            const result = /^(.+):(.+)$/.exec(rest);
+            if (result == null) {
+              return invalid(
+                ctx,
+                `couldn't parse ${marshaledSkillType}: params`,
+              );
+            }
+            const [, hanzi, pinyin] = result;
+            if (hanzi == null) {
+              return invalid(
+                ctx,
+                `couldn't parse ${marshaledSkillType}: hanzi`,
+              );
+            }
+            if (pinyin == null) {
+              return invalid(
+                ctx,
+                `couldn't parse ${marshaledSkillType}: pinyin`,
+              );
+            }
+            return { type: skillType_, hanzi, pinyin };
+          }
+          case SkillType.HanziWordToEnglish:
+          case SkillType.HanziWordToPinyinInitial:
+          case SkillType.HanziWordToPinyinFinal:
+          case SkillType.HanziWordToPinyinTone:
+          case SkillType.EnglishToHanzi:
+          case SkillType.PinyinToHanzi:
+          case SkillType.ImageToHanzi:
+            return { type: skillType_, hanzi: rest };
+        }
+      }),
   ),
 );
 
@@ -140,24 +161,24 @@ const rSrsState = memoize(
 // Skills
 //
 
-export const skillRating = r.entity(`sr/[skill]/[when]`, {
-  skill: rSkillId(),
-  when: r.datetime(),
+export const skillRating = r.entity(`sr/[skill]/[createdAt]`, {
+  skill: rSkill(),
+  createdAt: r.datetime(),
 
   rating: rFsrsRating.alias(`r`),
 });
 
 export const skillState = r.entity(`s/[skill]`, {
-  skill: rSkillId(),
+  skill: rSkill(),
 
-  created: r.timestamp().alias(`c`),
+  createdAt: r.timestamp().alias(`c`),
   srs: rSrsState().nullable().alias(`s`),
   due: r.timestamp().alias(`d`).indexed(`byDue`),
 });
 
 export const initSkillState = r
   .mutator({
-    skill: rSkillId().alias(`s`),
+    skill: rSkill().alias(`s`),
     now: r.timestamp().alias(`n`),
   })
   .alias(
@@ -166,7 +187,7 @@ export const initSkillState = r
   );
 
 export const reviewSkill = r.mutator({
-  skill: rSkillId().alias(`s`),
+  skill: rSkill().alias(`s`),
   rating: rFsrsRating.alias(`r`),
   now: r.timestamp().alias(`n`),
 });

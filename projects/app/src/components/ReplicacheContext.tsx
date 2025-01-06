@@ -96,18 +96,19 @@ export function ReplicacheProvider({ children }: React.PropsWithChildren) {
           if (!exists) {
             await db.skillState.set(
               { skill },
-              { due: now, created: now, srs: null },
+              { due: now, createdAt: now, srs: null },
             );
           }
         },
         async reviewSkill(tx, { skill, rating, now }) {
           // Save a record of the review.
-          await tx.skillRating.set({ skill, when: now }, { rating });
+          await tx.skillRating.set({ skill, createdAt: now }, { rating });
 
           let state: UpcomingReview | null = null;
-          for await (const [{ when }, { rating }] of tx.skillRating.scan({
-            skill,
-          })) {
+          for await (const [
+            { createdAt: when },
+            { rating },
+          ] of tx.skillRating.scan({ skill })) {
             state = nextReview(state, rating, when);
           }
 
@@ -116,7 +117,7 @@ export function ReplicacheProvider({ children }: React.PropsWithChildren) {
           await tx.skillState.set(
             { skill },
             {
-              created: state.created,
+              createdAt: state.created,
               srs: {
                 type: SrsType.FsrsFourPointFive,
                 stability: state.stability,

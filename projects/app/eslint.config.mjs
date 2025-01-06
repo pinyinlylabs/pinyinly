@@ -117,7 +117,7 @@ export default tseslint.config(
           ],
         },
       ],
-
+      "no-useless-rename": `error`,
       "object-shorthand": `error`,
 
       //

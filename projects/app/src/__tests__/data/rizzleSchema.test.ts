@@ -1,6 +1,6 @@
 import { SkillType } from "@/data/model";
 import { r } from "@/data/rizzle";
-import { rSkillId, rSkillType } from "@/data/rizzleSchema";
+import { rSkill, rSkillType } from "@/data/rizzleSchema";
 import assert from "node:assert/strict";
 import test, { TestContext } from "node:test";
 import { ReadTransaction, WriteTransaction } from "replicache";
@@ -40,7 +40,7 @@ function makeMockTx(t: TestContext) {
 
 void test(`skillId as key`, async (t) => {
   const posts = r.entity(`foo/[skill]`, {
-    skill: rSkillId(),
+    skill: rSkill(),
     text: r.string(),
   });
 
@@ -102,7 +102,7 @@ void test(`skillType()`, async (t) => {
 void test(`skillId()`, async (t) => {
   const posts = r.entity(`foo/[id]`, {
     id: r.string(),
-    skill: rSkillId(),
+    skill: rSkill(),
   });
 
   // Marshal and unmarshal round tripping
