@@ -1,4 +1,7 @@
+import { Skill } from "@/data/model";
+import * as r from "@/data/rizzleSchema";
 import * as s from "drizzle-orm/pg-core";
+import { customType } from "drizzle-orm/pg-core";
 import { customAlphabet } from "nanoid";
 
 const alphabet = `0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz`;
@@ -7,6 +10,21 @@ const length = 12;
 const nanoid = customAlphabet(alphabet, length);
 
 export const schema = s.pgSchema(`haohaohow`);
+
+const skill = (name: string) => {
+  const marshaler = r.rSkill();
+  return customType<{ data: Skill; driverData: r.MarshaledSkill }>({
+    dataType() {
+      return `text`;
+    },
+    fromDriver(value): Skill {
+      return marshaler.unmarshal(value);
+    },
+    toDriver(value): r.MarshaledSkill {
+      return marshaler.marshal(value);
+    },
+  })(name);
+};
 
 export const user = schema.table(`user`, {
   id: s.text(`id`).primaryKey().$defaultFn(nanoid),
@@ -57,7 +75,7 @@ export const skillRating = schema.table(`skillRating`, {
     .text(`userId`)
     .references(() => user.id)
     .notNull(),
-  skillId: s.text(`skillId`).notNull(),
+  skill: skill(`skillId`).notNull(),
   rating: s.text(`rating`).notNull(),
   createdAt: s.timestamp(`timestamp`).defaultNow().notNull(),
 });
@@ -70,12 +88,12 @@ export const skillState = schema.table(
       .text(`userId`)
       .references(() => user.id)
       .notNull(),
-    skillId: s.text(`skillId`).notNull(),
+    skill: skill(`skillId`).notNull(),
     srs: s.json(`srs`),
     dueAt: s.timestamp(`dueAt`).notNull(),
     createdAt: s.timestamp(`createdAt`).defaultNow().notNull(),
   },
-  (t) => [s.unique().on(t.userId, t.skillId)],
+  (t) => [s.unique().on(t.userId, t.skill)],
 );
 
 export const pinyinInitialAssociation = schema.table(

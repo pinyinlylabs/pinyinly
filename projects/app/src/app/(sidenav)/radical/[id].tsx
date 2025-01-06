@@ -85,7 +85,7 @@ export default function RadicalPage() {
                           {i}: {skill.hanzi} {skill.type} ::{` `}
                           {skillState == null
                             ? `no data`
-                            : `due: ` + skillState.created.toISOString()}
+                            : `due: ` + skillState.createdAt.toISOString()}
                         </Text>
                       </View>
                     ))}

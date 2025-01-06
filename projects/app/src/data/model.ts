@@ -20,7 +20,7 @@ export type SrsState = SrsNullState | SrsFourPointFiveState;
 // TODO: "SkillUpcomingReview" maybe?
 export interface SkillState {
   // TODO: this shoudl be "last reviewed"
-  created: Date;
+  createdAt: Date;
   /** When null, it means it's never been reviewed. */
   srs: SrsState | null;
   due: Date;

@@ -1,6 +1,5 @@
 import { SkillType } from "@/data/model";
 import * as r from "@/data/rizzleSchema";
-import { MarshaledSkillId } from "@/data/rizzleSchema";
 import { Drizzle } from "@/server/lib/db";
 import { computeCvrEntities, pull, push } from "@/server/lib/replicache";
 import * as s from "@/server/schema";
@@ -169,13 +168,10 @@ void test(`push()`, async (t) => {
     assert.deepEqual(skillState.dueAt, now);
     assert.deepEqual(skillState.createdAt, now);
     assert.equal(skillState.srs, null);
-    assert.equal(
-      skillState.skillId,
-      r.rSkillId().marshal({
-        type: SkillType.EnglishToHanzi,
-        hanzi: `我`,
-      }),
-    );
+    assert.deepEqual(skillState.skill, {
+      type: SkillType.EnglishToHanzi,
+      hanzi: `我`,
+    });
   });
 
   await txTest(`skips already processed mutations`, async (tx) => {
@@ -404,10 +400,10 @@ void test(`pull()`, async (t) => {
             userId: user.id,
             dueAt: new Date(),
             srs: null,
-            skillId: r.rSkillId().marshal({
+            skill: {
               type: SkillType.EnglishToHanzi,
               hanzi: `我`,
-            }),
+            },
           },
         ])
         .returning();
@@ -550,10 +546,10 @@ void test(`pull()`, async (t) => {
           userId: user.id,
           dueAt: now,
           srs: null,
-          skillId: r.rSkillId().marshal({
+          skill: {
             type: SkillType.EnglishToHanzi,
             hanzi: `我`,
-          }),
+          },
         },
       ])
       .returning();
@@ -575,11 +571,9 @@ void test(`pull()`, async (t) => {
         { op: `clear` },
         {
           op: `put`,
-          key: r.skillState.marshalKey({
-            skill: skillState.skillId as MarshaledSkillId,
-          }),
+          key: r.skillState.marshalKey(skillState),
           value: r.skillState.marshalValue({
-            created: skillState.createdAt,
+            createdAt: skillState.createdAt,
             srs: null,
             due: skillState.dueAt,
           }),
@@ -602,10 +596,10 @@ void test(`pull()`, async (t) => {
           userId: user.id,
           dueAt: now,
           srs: null,
-          skillId: r.rSkillId().marshal({
+          skill: {
             type: SkillType.EnglishToHanzi,
             hanzi: `我`,
-          }),
+          },
         },
       ])
       .returning();
@@ -638,9 +632,7 @@ void test(`pull()`, async (t) => {
       patch: [
         {
           op: `del`,
-          key: r.skillState.marshalKey({
-            skill: skillState.skillId as MarshaledSkillId,
-          }),
+          key: r.skillState.marshalKey(skillState),
         },
       ],
     });
@@ -658,10 +650,10 @@ void test(`pull()`, async (t) => {
       .values([
         {
           userId: user.id,
-          skillId: r.rSkillId().marshal({
+          skill: {
             type: SkillType.EnglishToHanzi,
             hanzi: `我`,
-          }),
+          },
           rating: r.rFsrsRating.marshal(Rating.Good),
           createdAt: now,
         },
@@ -697,8 +689,8 @@ void test(`pull()`, async (t) => {
         {
           op: `del`,
           key: r.skillRating.marshalKey({
-            skill: skillRating.skillId as MarshaledSkillId,
-            when: now,
+            skill: skillRating.skill,
+            createdAt: now,
           }),
         },
       ],
@@ -750,20 +742,20 @@ void test(`computeCvr()`, async (t) => {
       .values([
         {
           userId: user1.id,
-          skillId: r.rSkillId().marshal({
+          skill: {
             type: SkillType.EnglishToHanzi,
             hanzi: `我`,
-          }),
+          },
           srs: null,
           dueAt: new Date(),
           createdAt: new Date(),
         },
         {
           userId: user2.id,
-          skillId: r.rSkillId().marshal({
+          skill: {
             type: SkillType.EnglishToHanzi,
             hanzi: `我`,
-          }),
+          },
           srs: null,
           dueAt: new Date(),
           createdAt: new Date(),
@@ -771,7 +763,7 @@ void test(`computeCvr()`, async (t) => {
       ])
       .returning({
         id: s.skillState.id,
-        skillId: s.skillState.skillId,
+        skill: s.skillState.skill,
         version: sql<string>`${s.skillState}.xmin`,
       });
     invariant(user1SkillState != null);
@@ -784,9 +776,7 @@ void test(`computeCvr()`, async (t) => {
         [user1SkillState.id]:
           user1SkillState.version +
           `:` +
-          r.skillState.marshalKey({
-            skill: user1SkillState.skillId as MarshaledSkillId,
-          }),
+          r.skillState.marshalKey(user1SkillState),
       },
     });
   });
@@ -800,24 +790,24 @@ void test(`computeCvr()`, async (t) => {
       .values([
         {
           userId: user1.id,
-          skillId: r.rSkillId().marshal({
+          skill: {
             type: SkillType.EnglishToHanzi,
             hanzi: `我`,
-          }),
+          },
           rating: r.rFsrsRating.marshal(Rating.Again),
         },
         {
           userId: user2.id,
-          skillId: r.rSkillId().marshal({
+          skill: {
             type: SkillType.EnglishToHanzi,
             hanzi: `我`,
-          }),
+          },
           rating: r.rFsrsRating.marshal(Rating.Good),
         },
       ])
       .returning({
         id: s.skillRating.id,
-        skillId: s.skillRating.skillId,
+        skill: s.skillRating.skill,
         createdAt: s.skillRating.createdAt,
         version: sql<string>`${s.skillRating}.xmin`,
       });
@@ -831,8 +821,8 @@ void test(`computeCvr()`, async (t) => {
           user1SkillRating.version +
           `:` +
           r.skillRating.marshalKey({
-            skill: user1SkillRating.skillId as MarshaledSkillId,
-            when: user1SkillRating.createdAt,
+            skill: user1SkillRating.skill,
+            createdAt: user1SkillRating.createdAt,
           }),
       },
       skillState: {},
