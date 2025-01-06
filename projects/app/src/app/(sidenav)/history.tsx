@@ -1,7 +1,4 @@
-import {
-  useReplicache,
-  useReplicacheSubscribe,
-} from "@/components/ReplicacheContext";
+import { useRizzleQuery } from "@/components/ReplicacheContext";
 import { Rating } from "@/util/fsrs";
 import reverse from "lodash/reverse";
 import sortBy from "lodash/sortBy";
@@ -9,23 +6,27 @@ import { ScrollView, Text, View } from "react-native";
 
 export default function HistoryPage() {
   const start = Date.now();
-  const db = useReplicache();
 
-  const data = useReplicacheSubscribe(async (tx) => {
-    const result = [];
-    for await (const [key, value] of db.query.skillState.byDue(tx)) {
-      result.push([key, value] as const);
-      if (result.length >= 50) {
-        break;
+  const dataQuery = useRizzleQuery(
+    [`HistoryPage`, `skillState`],
+    async (r, tx) => {
+      const result = [];
+      for await (const [key, value] of r.query.skillState.byDue(tx)) {
+        result.push([key, value] as const);
+        if (result.length >= 50) {
+          break;
+        }
       }
-    }
-    return result;
-  });
+      return result;
+    },
+  );
 
-  const skillReviews = useReplicacheSubscribe(async (tx) =>
-    Array.fromAsync(db.query.skillRating.scan(tx)).then((reviews) =>
-      reverse(sortBy(reviews, (x) => x[0].when.getTime())),
-    ),
+  const skillRatingsQuery = useRizzleQuery(
+    [`HistoryPage`, `skillRatings`],
+    async (r, tx) =>
+      Array.fromAsync(r.query.skillRating.scan(tx)).then((reviews) =>
+        reverse(sortBy(reviews, (x) => x[0].when.getTime())),
+      ),
   );
 
   const renderTime = Date.now() - start;
@@ -44,7 +45,7 @@ export default function HistoryPage() {
         <View className="flex-1 items-center gap-[10px]">
           <Text className="text-xl text-text">upcoming</Text>
 
-          {data?.map(([key, value], i) => (
+          {dataQuery.data?.map(([key, value], i) => (
             <View key={i}>
               <Text className="text-text">
                 {key.skill.hanzi}: {value.due.toISOString()}
@@ -56,7 +57,7 @@ export default function HistoryPage() {
         <View>
           <Text className="self-center text-xl text-text">history</Text>
 
-          {skillReviews?.map(([key, value], i) => (
+          {skillRatingsQuery.data?.map(([key, value], i) => (
             <View key={i}>
               <Text className="text-text">
                 {value.rating === Rating.Again

@@ -136,9 +136,9 @@ const rSrsState = memoize(
   // ]),
 );
 
-// export const counter = keyValue(`counter`, {
-// TODO: doesn't support non-object keys.
-// });
+//
+// Skills
+//
 
 export const skillRating = r.entity(`sr/[skill]/[when]`, {
   skill: rSkillId(),
@@ -166,14 +166,41 @@ export const reviewSkill = r.mutator({
   now: r.timestamp().alias(`n`),
 });
 
+//
+// Pinyin mnemonics
+//
+
+export const pinyinInitialAssociation = r.entity(`pi/[initial]`, {
+  initial: r.string(),
+  name: r.string().alias(`n`),
+});
+
+export const pinyinFinalAssociation = r.entity(`pf/[final]`, {
+  final: r.string(),
+  name: r.string().alias(`n`),
+});
+
+export const setPinyinInitialAssociation = r.mutator({
+  initial: r.string().alias(`i`),
+  name: r.string().alias(`n`),
+  now: r.timestamp().alias(`t`),
+});
+
+export const setPinyinFinalAssociation = r.mutator({
+  final: r.string().alias(`f`),
+  name: r.string().alias(`n`),
+  now: r.timestamp().alias(`t`),
+});
+
+// --
+
 export const schema = {
+  addSkillState,
+  pinyinFinalAssociation,
+  pinyinInitialAssociation,
+  setPinyinInitialAssociation,
+  setPinyinFinalAssociation,
+  reviewSkill,
   skillRating,
   skillState,
-  addSkillState,
-  reviewSkill,
 };
-
-// export const pinyinInitialAssociation = rizzle.keyValue(`pi/[initial]`, {
-//   initial: rizzle.string(),
-//   name: rizzle.string().alias(`n`),
-// });

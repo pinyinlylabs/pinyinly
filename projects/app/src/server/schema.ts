@@ -1,4 +1,4 @@
-import * as p from "drizzle-orm/pg-core";
+import * as s from "drizzle-orm/pg-core";
 import { customAlphabet } from "nanoid";
 
 const alphabet = `0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz`;
@@ -6,11 +6,11 @@ const length = 12;
 
 const nanoid = customAlphabet(alphabet, length);
 
-export const schema = p.pgSchema(`haohaohow`);
+export const schema = s.pgSchema(`haohaohow`);
 
 export const user = schema.table(`user`, {
-  id: p.text(`id`).primaryKey().$defaultFn(nanoid),
-  createdAt: p
+  id: s.text(`id`).primaryKey().$defaultFn(nanoid),
+  createdAt: s
     .timestamp(`createdAt`, {
       mode: `date`,
       withTimezone: true,
@@ -20,12 +20,12 @@ export const user = schema.table(`user`, {
 });
 
 export const authSession = schema.table(`authSession`, {
-  id: p.text(`id`).primaryKey(),
-  userId: p
+  id: s.text(`id`).primaryKey(),
+  userId: s
     .text(`userId`)
     .notNull()
     .references(() => user.id),
-  expiresAt: p
+  expiresAt: s
     .timestamp(`expiresAt`, {
       mode: `date`,
       withTimezone: true,
@@ -36,51 +36,83 @@ export const authSession = schema.table(`authSession`, {
 export const authOAuth2 = schema.table(
   `authOAuth2`,
   {
-    id: p.text(`id`).primaryKey().$defaultFn(nanoid),
-    userId: p
+    id: s.text(`id`).primaryKey().$defaultFn(nanoid),
+    userId: s
       .text(`userId`)
       .references(() => user.id)
       .notNull(),
-    provider: p.text(`provider`).notNull(),
+    provider: s.text(`provider`).notNull(),
     /**
      * The ID that the provider uses to identify the user.
      */
-    providerUserId: p.text(`providerUserId`).notNull(),
-    createdAt: p.timestamp(`timestamp`).defaultNow().notNull(),
+    providerUserId: s.text(`providerUserId`).notNull(),
+    createdAt: s.timestamp(`timestamp`).defaultNow().notNull(),
   },
-  (t) => [p.unique().on(t.provider, t.providerUserId)],
+  (t) => [s.unique().on(t.provider, t.providerUserId)],
 );
 
 export const skillRating = schema.table(`skillRating`, {
-  id: p.text(`id`).primaryKey().$defaultFn(nanoid),
-  userId: p
+  id: s.text(`id`).primaryKey().$defaultFn(nanoid),
+  userId: s
     .text(`userId`)
     .references(() => user.id)
     .notNull(),
-  skillId: p.text(`skillId`).notNull(),
-  rating: p.text(`rating`).notNull(),
-  createdAt: p.timestamp(`timestamp`).defaultNow().notNull(),
+  skillId: s.text(`skillId`).notNull(),
+  rating: s.text(`rating`).notNull(),
+  createdAt: s.timestamp(`timestamp`).defaultNow().notNull(),
 });
 
 export const skillState = schema.table(
   `skillState`,
   {
-    id: p.text(`id`).primaryKey().$defaultFn(nanoid),
-    userId: p
+    id: s.text(`id`).primaryKey().$defaultFn(nanoid),
+    userId: s
       .text(`userId`)
       .references(() => user.id)
       .notNull(),
-    skillId: p.text(`skillId`).notNull(),
-    srs: p.json(`srs`),
-    dueAt: p.timestamp(`dueAt`).notNull(),
-    createdAt: p.timestamp(`createdAt`).defaultNow().notNull(),
+    skillId: s.text(`skillId`).notNull(),
+    srs: s.json(`srs`),
+    dueAt: s.timestamp(`dueAt`).notNull(),
+    createdAt: s.timestamp(`createdAt`).defaultNow().notNull(),
   },
-  (t) => [p.unique().on(t.userId, t.skillId)],
+  (t) => [s.unique().on(t.userId, t.skillId)],
+);
+
+export const pinyinInitialAssociation = schema.table(
+  `pinyinInitialAssociation`,
+  {
+    id: s.text(`id`).primaryKey().$defaultFn(nanoid),
+    userId: s
+      .text(`userId`)
+      .references(() => user.id)
+      .notNull(),
+    initial: s.text(`initial`).notNull(),
+    name: s.text(`name`).notNull(),
+    updatedAt: s.timestamp(`updatedAt`).defaultNow().notNull(),
+    createdAt: s.timestamp(`createdAt`).defaultNow().notNull(),
+  },
+  (t) => [s.unique().on(t.userId, t.initial)],
+);
+
+export const pinyinFinalAssociation = schema.table(
+  `pinyinFinalAssociation`,
+  {
+    id: s.text(`id`).primaryKey().$defaultFn(nanoid),
+    userId: s
+      .text(`userId`)
+      .references(() => user.id)
+      .notNull(),
+    final: s.text(`final`).notNull(),
+    name: s.text(`name`).notNull(),
+    updatedAt: s.timestamp(`updatedAt`).defaultNow().notNull(),
+    createdAt: s.timestamp(`createdAt`).defaultNow().notNull(),
+  },
+  (t) => [s.unique().on(t.userId, t.final)],
 );
 
 export const replicacheClientGroup = schema.table(`replicacheClientGroup`, {
-  id: p.text(`id`).primaryKey().$defaultFn(nanoid),
-  userId: p
+  id: s.text(`id`).primaryKey().$defaultFn(nanoid),
+  userId: s
     .text(`userId`)
     .references(() => user.id)
     .notNull(),
@@ -88,29 +120,29 @@ export const replicacheClientGroup = schema.table(`replicacheClientGroup`, {
    * Replicache requires that cookies are ordered within a client group. To
    * establish this order we simply keep a counter.
    */
-  cvrVersion: p.integer(`cvrVersion`).notNull().default(0),
-  updatedAt: p.timestamp(`timestamp`).defaultNow().notNull(),
+  cvrVersion: s.integer(`cvrVersion`).notNull().default(0),
+  updatedAt: s.timestamp(`timestamp`).defaultNow().notNull(),
 });
 
 export const replicacheClient = schema.table(`replicacheClient`, {
-  id: p.text(`id`).primaryKey().$defaultFn(nanoid),
-  clientGroupId: p
+  id: s.text(`id`).primaryKey().$defaultFn(nanoid),
+  clientGroupId: s
     .text(`clientGroupId`)
     .references(() => replicacheClientGroup.id)
     .notNull(),
-  lastMutationId: p.integer(`lastMutationId`).notNull(),
-  updatedAt: p.timestamp(`timestamp`).defaultNow().notNull(),
+  lastMutationId: s.integer(`lastMutationId`).notNull(),
+  updatedAt: s.timestamp(`timestamp`).defaultNow().notNull(),
 });
 
 export const replicacheMutation = schema.table(`replicacheMutation`, {
-  id: p.text(`id`).primaryKey().$defaultFn(nanoid),
-  clientId: p
+  id: s.text(`id`).primaryKey().$defaultFn(nanoid),
+  clientId: s
     .text(`clientId`)
     .references(() => replicacheClient.id)
     .notNull(),
-  mutation: p.json(`mutation`).notNull(),
-  success: p.boolean(),
-  processedAt: p.timestamp(`processedAt`).defaultNow().notNull(),
+  mutation: s.json(`mutation`).notNull(),
+  success: s.boolean(),
+  processedAt: s.timestamp(`processedAt`).defaultNow().notNull(),
 });
 
 /**
@@ -118,7 +150,7 @@ export const replicacheMutation = schema.table(`replicacheMutation`, {
  * sent to Replicache.
  */
 export const replicacheCvr = schema.table(`replicacheCvr`, {
-  id: p.text(`id`).primaryKey().$defaultFn(nanoid),
+  id: s.text(`id`).primaryKey().$defaultFn(nanoid),
   /**
    * Map of clientID->lastMutationID pairs, one for each client in the client
    * group.
@@ -127,7 +159,7 @@ export const replicacheCvr = schema.table(`replicacheCvr`, {
    * { <clientId>: <lastMutationId> }
    * ```
    */
-  lastMutationIds: p.json(`lastMutationIds`).notNull(),
+  lastMutationIds: s.json(`lastMutationIds`).notNull(),
   /**
    * For each entity visible to the user, map of key->version pairs, grouped by
    * table name.
@@ -136,6 +168,6 @@ export const replicacheCvr = schema.table(`replicacheCvr`, {
    * { <tableName>: { "<primaryKey>": "<version>:<replicacheId>" } }
    * ```
    */
-  entities: p.json(`entities`).notNull(),
-  createdAt: p.timestamp(`createdAt`).defaultNow().notNull(),
+  entities: s.json(`entities`).notNull(),
+  createdAt: s.timestamp(`createdAt`).defaultNow().notNull(),
 });

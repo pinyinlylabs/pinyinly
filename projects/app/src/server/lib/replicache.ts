@@ -19,7 +19,7 @@ import pickBy from "lodash/pickBy";
 import { basename } from "node:path";
 import { DatabaseError } from "pg-protocol";
 import { z } from "zod";
-import * as schema from "../schema";
+import * as s from "../schema";
 import type { Drizzle } from "./db";
 import {
   assertMinimumIsolationLevel,
@@ -67,7 +67,7 @@ export async function push(
     //
     // This also needs to be done _last_ so that foreign keys to other tables
     // exist (e.g. client).
-    await tx.insert(schema.replicacheMutation).values([
+    await tx.insert(s.replicacheMutation).values([
       {
         clientId: mutation.clientId,
         mutation,
@@ -79,6 +79,8 @@ export async function push(
 
 const cvrEntriesSchema = z
   .object({
+    pinyinInitialAssociation: z.record(z.string()),
+    pinyinFinalAssociation: z.record(z.string()),
     skillState: z.record(z.string()),
     skillRating: z.record(z.string()),
   })
@@ -238,7 +240,20 @@ export async function pull(
       }
 
       // 11: get entities
-      const [skillStates, skillRatings] = await Promise.all([
+      const [
+        pinyinFinalAssociations,
+        pinyinInitialAssociations,
+        skillStates,
+        skillRatings,
+      ] = await Promise.all([
+        tx.query.pinyinFinalAssociation.findMany({
+          where: (t) =>
+            inArray(t.id, entitiesDiff.pinyinFinalAssociation?.puts ?? []),
+        }),
+        tx.query.pinyinInitialAssociation.findMany({
+          where: (t) =>
+            inArray(t.id, entitiesDiff.pinyinInitialAssociation?.puts ?? []),
+        }),
         tx.query.skillState.findMany({
           where: (t) => inArray(t.id, entitiesDiff.skillState?.puts ?? []),
         }),
@@ -266,6 +281,14 @@ export async function pull(
 
       return {
         entityPatches: {
+          pinyinInitialAssociation: {
+            dels: entitiesDiff.pinyinInitialAssociation?.dels ?? [],
+            puts: pinyinInitialAssociations,
+          },
+          pinyinFinalAssociation: {
+            dels: entitiesDiff.pinyinFinalAssociation?.dels ?? [],
+            puts: pinyinFinalAssociations,
+          },
           skillState: {
             dels: entitiesDiff.skillState?.dels ?? [],
             puts: skillStates,
@@ -299,14 +322,14 @@ export async function pull(
 
   // 16-17: store cvr
   const [cvr] = await tx
-    .insert(schema.replicacheCvr)
+    .insert(s.replicacheCvr)
     .values([
       {
         lastMutationIds: nextCvr.lastMutationIds,
         entities: nextCvr.entities,
       },
     ])
-    .returning({ id: schema.replicacheCvr.id });
+    .returning({ id: s.replicacheCvr.id });
   invariant(cvr != null);
 
   // 18(i): build patch
@@ -315,7 +338,18 @@ export async function pull(
     patch.push({ op: `clear` });
   }
 
-  // 18(i)(skillState):
+  // 18(i): dels
+  for (const entity of Object.values(entityPatches)) {
+    for (const key of entity.dels) {
+      patch.push({
+        op: `del`,
+        key,
+      });
+    }
+  }
+
+  // 18(ii): puts
+  // skillState
   for (const s of entityPatches.skillState.puts) {
     patch.push({
       op: `put`,
@@ -327,13 +361,7 @@ export async function pull(
       }),
     });
   }
-  for (const key of entityPatches.skillState.dels) {
-    patch.push({
-      op: `del`,
-      key,
-    });
-  }
-  // 18(i)(skillRating):
+  // skillRating
   for (const s of entityPatches.skillRating.puts) {
     patch.push({
       op: `put`,
@@ -346,10 +374,20 @@ export async function pull(
       }),
     });
   }
-  for (const key of entityPatches.skillRating.dels) {
+  // pinyinFinalAssociation
+  for (const s of entityPatches.pinyinFinalAssociation.puts) {
     patch.push({
-      op: `del`,
-      key,
+      op: `put`,
+      key: r.pinyinFinalAssociation.marshalKey(s),
+      value: r.pinyinFinalAssociation.marshalValue(s),
+    });
+  }
+  // pinyinInitialAssociation
+  for (const s of entityPatches.pinyinInitialAssociation.puts) {
+    patch.push({
+      op: `put`,
+      key: r.pinyinInitialAssociation.marshalKey(s),
+      value: r.pinyinInitialAssociation.marshalValue(s),
     });
   }
 
@@ -453,14 +491,14 @@ export async function putClient(db: Drizzle, client: ClientRecord) {
   } = client;
 
   await db
-    .insert(schema.replicacheClient)
+    .insert(s.replicacheClient)
     .values({
       id,
       clientGroupId,
       lastMutationId,
     })
     .onConflictDoUpdate({
-      target: schema.replicacheClient.id,
+      target: s.replicacheClient.id,
       set: { lastMutationId, updatedAt: new Date() },
     });
 }
@@ -472,10 +510,10 @@ export async function putClientGroup(
   const { id, userId, cvrVersion } = clientGroup;
 
   await db
-    .insert(schema.replicacheClientGroup)
+    .insert(s.replicacheClientGroup)
     .values({ id, userId, cvrVersion })
     .onConflictDoUpdate({
-      target: schema.replicacheClientGroup.id,
+      target: s.replicacheClientGroup.id,
       set: { userId, cvrVersion, updatedAt: new Date() },
     });
 }
@@ -546,7 +584,7 @@ export const _mutate = makeDrizzleMutationHandler<typeof r.schema, Drizzle>(
     async addSkillState(db, userId, { skill, now }) {
       const skillId = r.rSkillId().marshal(skill);
       await db
-        .insert(schema.skillState)
+        .insert(s.skillState)
         .values({
           userId,
           skillId,
@@ -559,7 +597,7 @@ export const _mutate = makeDrizzleMutationHandler<typeof r.schema, Drizzle>(
     async reviewSkill(db, userId, { skill, rating, now }) {
       const skillId = r.rSkillId().marshal(skill);
 
-      await db.insert(schema.skillRating).values([
+      await db.insert(s.skillRating).values([
         {
           userId,
           skillId,
@@ -570,50 +608,122 @@ export const _mutate = makeDrizzleMutationHandler<typeof r.schema, Drizzle>(
 
       await updateSkillState(db, skillId, userId);
     },
+    async setPinyinInitialAssociation(db, userId, { initial, name, now }) {
+      const updatedAt = now;
+      const createdAt = now;
+      await db
+        .insert(s.pinyinInitialAssociation)
+        .values([{ userId, initial, name, updatedAt, createdAt }])
+        .onConflictDoUpdate({
+          target: [
+            s.pinyinInitialAssociation.userId,
+            s.pinyinInitialAssociation.initial,
+          ],
+          set: { name, updatedAt },
+        });
+    },
+    async setPinyinFinalAssociation(db, userId, { final, name, now }) {
+      const updatedAt = now;
+      const createdAt = now;
+      await db
+        .insert(s.pinyinFinalAssociation)
+        .values([{ userId, final, name, updatedAt, createdAt }])
+        .onConflictDoUpdate({
+          target: [
+            s.pinyinFinalAssociation.userId,
+            s.pinyinFinalAssociation.final,
+          ],
+          set: { name, updatedAt },
+        });
+    },
   },
 );
 
 export async function computeCvrEntities(db: Drizzle, userId: string) {
+  const pinyinFinalAssociationVersions = db
+    .select({
+      map: json_object_agg(
+        s.pinyinFinalAssociation.id,
+        json_build_object({
+          final: s.pinyinFinalAssociation.final,
+          xmin: sql<string>`${s.pinyinFinalAssociation}.xmin`,
+        }),
+      ).as(`pinyinFinalAssociationVersions`),
+    })
+    .from(s.pinyinFinalAssociation)
+    .where(eq(s.pinyinFinalAssociation.userId, userId))
+    .as(`pinyinFinalAssociationVersions`);
+
+  const pinyinInitialAssociationVersions = db
+    .select({
+      map: json_object_agg(
+        s.pinyinInitialAssociation.id,
+        json_build_object({
+          initial: s.pinyinInitialAssociation.initial,
+          xmin: sql<string>`${s.pinyinInitialAssociation}.xmin`,
+        }),
+      ).as(`pinyinInitialAssociationVersions`),
+    })
+    .from(s.pinyinInitialAssociation)
+    .where(eq(s.pinyinInitialAssociation.userId, userId))
+    .as(`pinyinInitialAssociationVersions`);
+
   const skillStateVersions = db
     .select({
       map: json_object_agg(
-        schema.skillRating.id,
+        s.skillRating.id,
         json_build_object({
-          skillId: schema.skillState.skillId,
-          xmin: sql<string>`${schema.skillState}.xmin`,
+          skillId: s.skillState.skillId,
+          xmin: sql<string>`${s.skillState}.xmin`,
         }),
       ).as(`skillStateVersions`),
     })
-    .from(schema.skillState)
-    .where(eq(schema.skillState.userId, userId))
+    .from(s.skillState)
+    .where(eq(s.skillState.userId, userId))
     .as(`skillStateVersions`);
 
   const skillRatingVersions = db
     .select({
       map: json_object_agg(
-        schema.skillRating.id,
+        s.skillRating.id,
         json_build_object({
-          skillId: schema.skillRating.skillId,
-          createdAt: sql<string>`${schema.skillRating.createdAt}::timestamptz`,
-          xmin: sql<string>`${schema.skillRating}.xmin`,
+          skillId: s.skillRating.skillId,
+          createdAt: sql<string>`${s.skillRating.createdAt}::timestamptz`,
+          xmin: sql<string>`${s.skillRating}.xmin`,
         }),
       ).as(`skillRatingVersions`),
     })
-    .from(schema.skillRating)
-    .where(eq(schema.skillRating.userId, userId))
+    .from(s.skillRating)
+    .where(eq(s.skillRating.userId, userId))
     .as(`skillRatingVersions`);
 
   const [result] = await db
     .select({
-      skillState: skillStateVersions.map,
+      pinyinFinalAssociation: pinyinFinalAssociationVersions.map,
+      pinyinInitialAssociation: pinyinInitialAssociationVersions.map,
       skillRating: skillRatingVersions.map,
+      skillState: skillStateVersions.map,
     })
-    .from(skillStateVersions)
-    .leftJoin(skillRatingVersions, sql`true`);
+    .from(pinyinFinalAssociationVersions)
+    .leftJoin(pinyinInitialAssociationVersions, sql`true`)
+    .leftJoin(skillRatingVersions, sql`true`)
+    .leftJoin(skillStateVersions, sql`true`);
 
   invariant(result != null);
 
   return {
+    pinyinInitialAssociation: mapValues(
+      result.pinyinInitialAssociation,
+      (v) =>
+        v.xmin +
+        `:` +
+        r.pinyinInitialAssociation.marshalKey({ initial: v.initial }),
+    ),
+    pinyinFinalAssociation: mapValues(
+      result.pinyinFinalAssociation,
+      (v) =>
+        v.xmin + `:` + r.pinyinFinalAssociation.marshalKey({ final: v.final }),
+    ),
     skillState: mapValues(
       result.skillState,
       (v) =>

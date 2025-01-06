@@ -1,3 +1,4 @@
+import { useReplicache, useRizzleQuery } from "@/components/ReplicacheContext";
 import {
   loadMmPinyinChart,
   loadMnemonicThemeChoices,
@@ -8,6 +9,7 @@ import { ScrollView, Text, View } from "react-native";
 
 export default function MnemonicIdPage() {
   const { id } = useLocalSearchParams<`/explore/mnemonics/[id]`>();
+  const r = useReplicache();
 
   const query = useQuery({
     queryKey: [MnemonicIdPage.name, `chart`],
@@ -18,12 +20,22 @@ export default function MnemonicIdPage() {
   });
 
   const choicesQuery = useQuery({
-    queryKey: [`MnemonicIdPage.name`, `mnemonicThemeChoices`],
+    queryKey: [MnemonicIdPage.name, `mnemonicThemeChoices`],
     queryFn: async () => {
       return await loadMnemonicThemeChoices();
     },
     throwOnError: true,
   });
+
+  const associationQuery = useRizzleQuery(
+    [MnemonicIdPage.name, `association`, id],
+    async (r, tx) => {
+      const res = await r.query.pinyinInitialAssociation.get(tx, {
+        initial: id,
+      });
+      return res ?? null;
+    },
+  );
 
   const group = query.data?.initials.find((x) =>
     x.initials.find((y) => y.includes(id)),
@@ -37,6 +49,7 @@ export default function MnemonicIdPage() {
       <View>
         <Text className="text-3xl text-text">{id}-</Text>
       </View>
+
       <View className="gap-2">
         <Text className="text-lg text-text">
           others in this group ({group?.id}) — {group?.desc}
@@ -66,8 +79,26 @@ export default function MnemonicIdPage() {
                     <Text className="text-lg text-text">{theme}</Text>
                     {[...initials.entries()].map(([name, desc], i) => (
                       <View key={i}>
-                        <Text className="text-md font-bold text-text">
-                          {name}
+                        <Text
+                          className="text-md font-bold text-text"
+                          onPress={() => {
+                            void r.mutate.setPinyinInitialAssociation({
+                              initial: id,
+                              name,
+                              now: new Date(),
+                            });
+                          }}
+                        >
+                          <Text
+                            className={
+                              associationQuery.data?.name === name
+                                ? `text-[green]`
+                                : undefined
+                            }
+                          >
+                            {name}
+                          </Text>
+
                           {` `}
                           <Text className="text-sm font-normal text-primary-10">
                             {desc}

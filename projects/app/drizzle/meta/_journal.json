@@ -57,6 +57,13 @@
       "when": 1735978130893,
       "tag": "0007_productive_sphinx",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1736061761676,
+      "tag": "0008_fancy_pet_avengers",
+      "breakpoints": true
     }
   ]
 }
