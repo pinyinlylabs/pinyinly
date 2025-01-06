@@ -91,7 +91,7 @@ export function ReplicacheProvider({ children }: React.PropsWithChildren) {
       },
       schema,
       {
-        async addSkillState(db, { skill, now }) {
+        async initSkillState(db, { skill, now }) {
           const exists = await db.skillState.has({ skill });
           if (!exists) {
             await db.skillState.set(

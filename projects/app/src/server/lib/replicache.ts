@@ -581,7 +581,7 @@ export async function getClient(
 export const _mutate = makeDrizzleMutationHandler<typeof r.schema, Drizzle>(
   r.schema,
   {
-    async addSkillState(db, userId, { skill, now }) {
+    async initSkillState(db, userId, { skill, now }) {
       const skillId = r.rSkillId().marshal(skill);
       await db
         .insert(s.skillState)
