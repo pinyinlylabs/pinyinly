@@ -1,5 +1,6 @@
 {
   "cli": {
+    "appVersionSource": "remote",
     "version": ">= 7.3.0"
   },
   "build": {
@@ -13,6 +14,7 @@
       "channel": "staging"
     },
     "production": {
+      "autoIncrement": true,
       "channel": "production"
     }
   },
