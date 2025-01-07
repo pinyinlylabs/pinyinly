@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "./src/main.js",
   "type": "module",
+  "scripts": {},
   "dependencies": {
     "@expo/metro-runtime": "~4.0.0",
     "@haohaohow/lib": "workspace:*",
