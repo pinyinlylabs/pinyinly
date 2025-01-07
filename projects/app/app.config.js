@@ -99,6 +99,7 @@ export const expo = {
       `expo-asset`,
       `expo-font`,
       `expo-secure-store`,
+      `expo-sqlite`,
     ],
     experiments: {
       typedRoutes: true,
