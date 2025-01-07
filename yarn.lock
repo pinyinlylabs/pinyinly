@@ -2752,7 +2752,7 @@ __metadata:
     expo-screen-orientation: "npm:^8.0.2"
     expo-secure-store: "npm:~14.0.0"
     expo-splash-screen: "npm:~0.29.18"
-    expo-sqlite: "npm:~15.0.3"
+    expo-sqlite: "npm:~15.0.5"
     expo-status-bar: "npm:~2.0.0"
     expo-system-ui: "npm:~4.0.6"
     expo-updates: "npm:~0.26.10"
@@ -11118,14 +11118,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-sqlite@npm:~15.0.3":
-  version: 15.0.3
-  resolution: "expo-sqlite@npm:15.0.3"
+"expo-sqlite@npm:~15.0.5":
+  version: 15.0.5
+  resolution: "expo-sqlite@npm:15.0.5"
   peerDependencies:
     expo: "*"
     react: "*"
     react-native: "*"
-  checksum: 10c0/4d2ef1fca23bebaefc37e9f015c67465e115c01c2fc2deaa7c524f85d2f9f0bf9c337008d92d41416f4813bc85c7681eb919e1df28f3d2a493ca97b94aee01bc
+  checksum: 10c0/bc8153b406f4df281743d9924411e660f10ca2883b1052a2fa771fc1e6b2aaa293d22b0c81b0b1426fb51577ebff245be197861ed51fef78c47a7b509b5c79bd
   languageName: node
   linkType: hard
 
