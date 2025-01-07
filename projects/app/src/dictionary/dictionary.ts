@@ -79,7 +79,7 @@ const pinyinChartSchema = z
         typeof initial === `string` ? ([initial, initial] as const) : initial,
       ),
     })),
-    finals: finals.map((x) => (typeof x === `string` ? [x, x] : x)),
+    finals: finals.map((x) => (typeof x === `string` ? ([x, x] as const) : x)),
     overrides,
   }));
 

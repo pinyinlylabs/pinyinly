@@ -19,7 +19,7 @@ import {
 import { HTTPRequestInfo, PullResponseV1, ReadTransaction } from "replicache";
 import { useAuth } from "./auth";
 import { kvStore } from "./replicacheOptions";
-import { sentryCaptureException } from "./util";
+import { sentryCaptureException, useRenderGuard } from "./util";
 
 export type Rizzle = RizzleReplicache<typeof schema>;
 
@@ -157,17 +157,27 @@ export function useRizzleQuery<QueryRet>(
   const queryClient = useQueryClient();
   const r = useReplicache();
 
+  // Improve debugging.
+  useRenderGuard?.(useRizzleQuery.name);
+
+  // The reference for `key` usually changes on every render because the array
+  // is written inline and changes on every render.
+  //
+  // eslint-disable-next-line react-compiler/react-compiler
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const stableKey = useMemo(() => key, key);
+
   // The reference for `query` usually changes on every render because the
   // function is written inline and the reference changes.
   //
   // eslint-disable-next-line react-compiler/react-compiler
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const stableQuery = useMemo(() => query, [key]);
+  const stableQuery = useMemo(() => query, stableKey);
 
   useEffect(() => {
     const unsubscribe = r.replicache.subscribe((tx) => stableQuery(r, tx), {
       onData: (data) => {
-        queryClient.setQueryData(key, data);
+        queryClient.setQueryData(stableKey, data);
       },
       onError: (e) => {
         sentryCaptureException(e);
@@ -177,7 +187,7 @@ export function useRizzleQuery<QueryRet>(
     return () => {
       unsubscribe();
     };
-  }, [key, stableQuery, queryClient, r]);
+  }, [stableKey, stableQuery, queryClient, r]);
 
   const result = useQuery({
     queryKey: key,

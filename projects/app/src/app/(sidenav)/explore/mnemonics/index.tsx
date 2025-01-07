@@ -1,3 +1,4 @@
+import { useRizzleQuery } from "@/components/ReplicacheContext";
 import { loadMmPinyinChart } from "@/dictionary/dictionary";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "expo-router";
@@ -38,6 +39,27 @@ export default function MnemonicsPage() {
     },
     throwOnError: true,
   });
+
+  const initialAssociationsQuery = useRizzleQuery(
+    [MnemonicsPage.name, `pinyinInitialAssociations`],
+    async (r, tx) =>
+      await Array.fromAsync(r.query.pinyinInitialAssociation.scan(tx)).then(
+        (x) =>
+          new Map(x.map(([key, value]) => [key.initial, value.name] as const)),
+      ),
+  );
+
+  const finalAssociationsQuery = useRizzleQuery(
+    [MnemonicsPage.name, `pinyinfinalAssociations`],
+    async (r, tx) => {
+      return await Array.fromAsync(
+        r.query.pinyinFinalAssociation.scan(tx),
+      ).then(
+        (x) =>
+          new Map(x.map(([key, value]) => [key.final, value.name] as const)),
+      );
+    },
+  );
 
   return (
     <ScrollView
@@ -106,7 +128,13 @@ export default function MnemonicsPage() {
                           href={`/explore/mnemonics/${initial}`}
                           asChild
                         >
-                          <View className="size-24 justify-center gap-2 rounded-xl bg-primary-3 px-2 hover:bg-primary-5 lg:size-24">
+                          <View
+                            className={pinyinPartBox({
+                              hasAssociation:
+                                initialAssociationsQuery.data?.has(initial) ??
+                                false,
+                            })}
+                          >
                             <Text className="text-center font-cursive text-2xl text-text">
                               {initial}-
                             </Text>
@@ -139,7 +167,10 @@ export default function MnemonicsPage() {
               {query.data.finals.map(([final, ...alts], i) => (
                 <View
                   key={i}
-                  className="size-24 justify-center gap-1 rounded-xl bg-primary-3 px-2 hover:bg-primary-5 lg:size-24"
+                  className={pinyinPartBox({
+                    hasAssociation:
+                      finalAssociationsQuery.data?.has(final) ?? false,
+                  })}
                 >
                   <Text className="text-center font-cursive text-2xl text-text">
                     -{final}
@@ -167,4 +198,13 @@ export default function MnemonicsPage() {
 
 const altText = tv({
   base: `text-md text-md text-center text-primary-10`,
+});
+
+const pinyinPartBox = tv({
+  base: `size-24 justify-center gap-2 rounded-xl bg-primary-3 px-2 hover:bg-primary-5 lg:size-24`,
+  variants: {
+    hasAssociation: {
+      true: `border-accent-10 border-2`,
+    },
+  },
 });
