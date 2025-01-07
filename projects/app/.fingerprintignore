@@ -1,0 +1,4 @@
+# Fix a bug in expo-sqlite where running `pod install` mutates the `ios`
+# directory by copying in sqlite3.* files from the vendor directory which
+# ends up changing the fingerprint hash because local and EAS build server.
+**/expo-sqlite/ios/sqlite3.{c,h}
