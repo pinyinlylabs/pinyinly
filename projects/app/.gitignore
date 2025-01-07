@@ -6,9 +6,6 @@ node_modules/
 # Expo
 .expo/
 dist/
-# Ignoring ios/ and android/ is required for EAS Build to ensure stable runtimeVersion fingerprinting.
-ios/
-android/
 
 # Native
 *.orig.*
