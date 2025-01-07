@@ -22,3 +22,8 @@ node_modules
 
 # bin caches
 projects/app/bin/*.db
+
+# Expo
+# Ignoring ios/ and android/ is required for EAS Build to ensure stable runtimeVersion fingerprinting.
+ios/
+android/
