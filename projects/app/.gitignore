@@ -2,10 +2,17 @@
 
 # dependencies
 node_modules/
+# A bit weird, but Expo also uses the gitignore to determine which files to
+# ignore from fingerprinting, and in a monorepo it ends up looking up to the root
+# node_modules.
+../../node_modules/
 
 # Expo
 .expo/
 dist/
+# Ignoring ios/ and android/ is required for EAS Build to ensure stable runtimeVersion fingerprinting.
+ios/
+android/
 
 # Native
 *.orig.*
