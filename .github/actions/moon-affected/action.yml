@@ -12,13 +12,16 @@
 #   - run: moon run app:deploy --color --affected --remote
 #     if: steps.moon-deploy-query.target-affected
 
-name: Query Moon's `--affected` knowledge
+name: moon-affected
+description: Query Moon's `--affected` knowledge
 inputs:
-  target: # id of input
+  target:
+    description: Moon task ID, e.g. app:deploy
     required: true
     default: ""
 outputs:
   target-affected:
+    description: Boolean result of whether the target is affected
     value: ${{ steps.moon-query.outputs.match == inputs.target }}
 runs:
   using: composite
