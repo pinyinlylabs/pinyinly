@@ -2,10 +2,7 @@
   "name": "haohaohow",
   "packageManager": "yarn@4.6.0",
   "workspaces": [
-    "./projects/app",
-    "./projects/emails",
-    "./projects/lib",
-    "./projects/static"
+    "projects/*"
   ],
   "devDependencies": {
     "@types/semver": "7.5.x",

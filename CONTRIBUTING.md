@@ -134,6 +134,10 @@ Add the device to the provisioning profile:
 npx -y eas-cli build --profile=preview --platform=ios
 ```
 
+It's important that this is done using the interactive version of the command so
+that you can authenticate your Apple Developer account and have it synchronize
+the provisioning profile.
+
 ## Manually marking a Drizzle migration as "run"
 
 In local development it can be useful to merge together migrations without
