@@ -67,8 +67,14 @@ jobs:
 
       - uses: ./.github/actions/setup-tools
 
+      - uses: ./.github/actions/moon-affected
+        id: moon-deploy-query
+        with:
+          target: static:deploy
+
       - name: 🚀 Deploy to Vercel (preview)
         run: moon run static:deploy --color --affected --remote
+        if: steps.moon-deploy-query.target-affected
         env:
           HHH_VERCEL_PREVIEW:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
