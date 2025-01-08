@@ -14,7 +14,7 @@
     "typescript": "patch:typescript@npm%3A5.7.2#~/.yarn/patches/typescript-npm-5.7.2-b1f84a8b28.patch"
   },
   "engines": {
-    "node": "~23.5.0"
+    "node": "~23.6.0"
   },
   "resolutions": {
     "@testing-library/user-event@npm:14.3.0": "npm:@testing-library/user-event@^14.5.0",
