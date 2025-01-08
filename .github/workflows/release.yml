@@ -21,8 +21,14 @@ jobs:
 
       - uses: ./.github/actions/setup-tools
 
+      - uses: ./.github/actions/moon-affected
+        id: moon-dbMigrate-query
+        with:
+          target: app:dbMigrate
+
       - name: 🚀 Migrate database
         run: moon run app:dbMigrate --color --affected --remote
+        if: steps.moon-dbMigrate-query.target-affected
         env:
           DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
 
@@ -36,8 +42,14 @@ jobs:
 
       - uses: ./.github/actions/setup-tools
 
+      - uses: ./.github/actions/moon-affected
+        id: moon-deployVercel-query
+        with:
+          target: app:deployVercel
+
       - name: 🚀 Deploy to Vercel (production)
         run: moon run app:deployVercel --color --affected --remote
+        if: steps.moon-deployVercel-query.target-affected
         env:
           EXPO_PUBLIC_REPLICACHE_LICENSE_KEY: ${{ secrets.EXPO_PUBLIC_REPLICACHE_LICENSE_KEY }}
           HHH_VERCEL_PROD:
@@ -56,8 +68,14 @@ jobs:
 
       - uses: ./.github/actions/setup-tools
 
+      - uses: ./.github/actions/moon-affected
+        id: moon-deploy-query
+        with:
+          target: static:deploy
+
       - name: 🚀 Deploy to Vercel (production)
         run: moon run static:deploy --color --affected --remote
+        if: steps.moon-deploy-query.target-affected
         env:
           HHH_VERCEL_PROD:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -74,8 +92,14 @@ jobs:
 
       - uses: ./.github/actions/setup-tools
 
+      - uses: ./.github/actions/moon-affected
+        id: moon-deployEasUpdate-query
+        with:
+          target: app:deployEasUpdate
+
       - name: 🚀 Build and deploy
         run: moon run app:deployEasUpdate --color --affected --remote
+        if: steps.moon-deployEasUpdate-query.target-affected
         env:
           EXPO_PUBLIC_REPLICACHE_LICENSE_KEY: ${{ secrets.EXPO_PUBLIC_REPLICACHE_LICENSE_KEY }}
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
