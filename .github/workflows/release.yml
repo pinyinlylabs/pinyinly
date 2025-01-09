@@ -28,7 +28,7 @@ jobs:
 
       - name: 🚀 Migrate database
         run: moon run app:dbMigrate --color --affected --remote
-        if: steps.moon-dbMigrate-query.target-affected
+        # if: steps.moon-dbMigrate-query.target-affected
         env:
           DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
 
@@ -49,7 +49,7 @@ jobs:
 
       - name: 🚀 Deploy to Vercel (production)
         run: moon run app:deployVercel --color --affected --remote
-        if: steps.moon-deployVercel-query.target-affected
+        # if: steps.moon-deployVercel-query.target-affected
         env:
           EXPO_PUBLIC_REPLICACHE_LICENSE_KEY: ${{ secrets.EXPO_PUBLIC_REPLICACHE_LICENSE_KEY }}
           HHH_VERCEL_PROD:
@@ -99,7 +99,7 @@ jobs:
 
       - name: 🚀 Build and deploy
         run: moon run app:deployEasUpdate --color --affected --remote
-        if: steps.moon-deployEasUpdate-query.target-affected
+        # if: steps.moon-deployEasUpdate-query.target-affected
         env:
           EXPO_PUBLIC_REPLICACHE_LICENSE_KEY: ${{ secrets.EXPO_PUBLIC_REPLICACHE_LICENSE_KEY }}
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
