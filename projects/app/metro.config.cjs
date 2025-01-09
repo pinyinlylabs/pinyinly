@@ -11,8 +11,11 @@ config.transformer.dynamicDepsInPackages = `reject`;
 // Fixes "Metro has encountered an error: While trying to resolve module `replicache-react`"
 config.resolver.unstable_enablePackageExports = true;
 
-config = withSentryConfig(config);
-
 config = withNativeWind(config, { input: `./src/global.css`, inlineRem: 16 });
+
+// Doing Sentry last is probably important so that the hashed debug IDs are
+// based on the final content of the final and aren't stripped by any other
+// processors.
+config = withSentryConfig(config);
 
 module.exports = config;
