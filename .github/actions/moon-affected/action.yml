@@ -28,7 +28,7 @@ runs:
   steps:
     - id: moon-query
       run: |
-        ALL_AFFECTED=$(moon query tasks --json --affected | jq '.tasks.[].[] | select(.options.runInCI == true) | .target')
+        ALL_AFFECTED=$(moon query tasks --json --affected | jq '.tasks.[].[] | .target')
         echo $ALL_AFFECTED;
         MATCH=$(echo $ALL_AFFECTED | jq --raw-output 'select(. == "'"$TARGET"'")')
         echo match=$MATCH;
