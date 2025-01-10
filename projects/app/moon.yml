@@ -5,13 +5,13 @@ fileGroups:
     - "$EXPO_*"
   # WARNING: these must end in trialing slash to be rsync
   buildVercelExpoOutdir:
-    - dist/.cache/vercel-expo/
+    - dist/.cache/vercel-expo
   buildVercelExpoSentryOutdir:
-    - dist/.cache/vercel-expo-sentry/
+    - dist/.cache/vercel-expo-sentry
   buildVercelOutdir:
-    - dist/vercel/
+    - dist/vercel
   buildEasUpdateOutdir:
-    - dist/eas/
+    - dist/eas
 
 workspace:
   inheritedTasks:
@@ -27,7 +27,7 @@ tasks:
   buildEasUpdate:
     command: yarn expo export -p ios -p android --source-maps --output-dir @group(buildEasUpdateOutdir)
     outputs:
-      - "@group(buildEasUpdateOutdir)"
+      - "@group(buildEasUpdateOutdir)/**/*"
 
   buildVercel:
     # Copy to final destination.
@@ -35,7 +35,7 @@ tasks:
     deps:
       - buildVercelExpoSentry
     outputs:
-      - "@group(buildVercelOutdir)"
+      - "@group(buildVercelOutdir)/**/*"
 
   buildVercelExpo:
     command: |
@@ -48,7 +48,7 @@ tasks:
     options:
       shell: true
     outputs:
-      - "@group(buildVercelExpoOutdir)"
+      - "@group(buildVercelExpoOutdir)/**/*"
 
   buildVercelExpoSentry:
     command: |
@@ -61,7 +61,7 @@ tasks:
     options:
       shell: true
     outputs:
-      - "@group(buildVercelExpoSentryOutdir)"
+      - "@group(buildVercelExpoSentryOutdir)/**/*"
 
   dbCheck:
     command: yarn run drizzle-kit check
