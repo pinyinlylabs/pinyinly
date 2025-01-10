@@ -5,13 +5,13 @@ fileGroups:
     - "$EXPO_*"
   # WARNING: these must end in trialing slash to be rsync
   buildVercelExpoOutdir:
-    - dist/.cache/vercel-expo
+    - dist/.cache/vercel-expo/
   buildVercelExpoSentryOutdir:
-    - dist/.cache/vercel-expo-sentry
+    - dist/.cache/vercel-expo-sentry/
   buildVercelOutdir:
-    - dist/vercel
+    - dist/vercel/
   buildEasUpdateOutdir:
-    - dist/eas
+    - dist/eas/
 
 workspace:
   inheritedTasks:
@@ -27,7 +27,7 @@ tasks:
   buildEasUpdate:
     command: yarn expo export -p ios -p android --source-maps --output-dir @group(buildEasUpdateOutdir)
     outputs:
-      - "@group(buildEasUpdateOutdir)/**/*"
+      - "@group(buildEasUpdateOutdir)"
 
   buildVercel:
     # Copy to final destination.
@@ -35,7 +35,7 @@ tasks:
     deps:
       - buildVercelExpoSentry
     outputs:
-      - "@group(buildVercelOutdir)/**/*"
+      - "@group(buildVercelOutdir)"
 
   buildVercelExpo:
     command: |
@@ -48,7 +48,7 @@ tasks:
     options:
       shell: true
     outputs:
-      - "@group(buildVercelExpoOutdir)/**/*"
+      - "@group(buildVercelExpoOutdir)"
 
   buildVercelExpoSentry:
     command: |
@@ -61,7 +61,7 @@ tasks:
     options:
       shell: true
     outputs:
-      - "@group(buildVercelExpoSentryOutdir)/**/*"
+      - "@group(buildVercelExpoSentryOutdir)"
 
   dbCheck:
     command: yarn run drizzle-kit check
@@ -79,7 +79,9 @@ tasks:
     inputs:
       - drizzle/**/*
     options:
-      envFile: .env.local
+      envFile:
+        - ".env"
+        - ".env.local"
       runInCI: false
 
   deploy:
@@ -147,7 +149,9 @@ tasks:
     command: yarn tsx ./bin/formatAssetJson.ts
     options:
       runInCI: false
-      envFile: .env.local
+      envFile:
+        - ".env"
+        - ".env.local"
       cache: false
     env:
       NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
@@ -156,7 +160,9 @@ tasks:
     command: yarn tsx ./bin/generateHanziDecomposition.ts
     options:
       runInCI: false
-      envFile: .env.local
+      envFile:
+        - ".env"
+        - ".env.local"
       cache: false
     env:
       NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
@@ -165,7 +171,9 @@ tasks:
     command: yarn tsx ./bin/generateMnemonicTheme.ts
     options:
       runInCI: false
-      envFile: .env.local
+      envFile:
+        - ".env"
+        - ".env.local"
       cache: false
     env:
       NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
@@ -174,7 +182,9 @@ tasks:
     command: yarn tsx ./bin/generateRadicalNameMnemonics.ts
     options:
       runInCI: false
-      envFile: .env.local
+      envFile:
+        - ".env"
+        - ".env.local"
       cache: false
     env:
       NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
@@ -183,7 +193,9 @@ tasks:
     command: yarn tsx ./bin/generateRadicalPinyinMnemonics.ts
     options:
       runInCI: false
-      envFile: .env.local
+      envFile:
+        - ".env"
+        - ".env.local"
       cache: false
     env:
       NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
@@ -192,7 +204,9 @@ tasks:
     command: yarn tsx ./bin/generateWordDictionary.ts
     options:
       runInCI: false
-      envFile: .env.local
+      envFile:
+        - ".env"
+        - ".env.local"
       cache: false
 
   expoDoctor:
@@ -226,13 +240,19 @@ tasks:
       - "src"
       - "*.{json,cjs,js,ts}"
     options:
-      envFile: .env.test
+      envFile:
+        - ".env"
+        - ".env.local"
+        - ".env.test"
 
   testWatch:
     command: node --test --watch --import tsx "src/**/*.test.ts"
     local: true
     options:
-      envFile: .env.test
+      envFile:
+        - ".env"
+        - ".env.local"
+        - ".env.test"
 
   typecheck:
     deps:
