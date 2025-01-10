@@ -16,14 +16,6 @@ tasks:
   prettier:
     args:
       - "'!./projects/**/*'"
-  doctor:
-    command: yarn doctor .
-    inputs:
-      - "@group(yarnConfig)"
-    env:
-      # make `node:sqlite` a valid module to import
-      NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
-
   yarnConstraints:
     command: yarn constraints
     inputs:
