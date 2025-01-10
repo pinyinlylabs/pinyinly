@@ -11,6 +11,15 @@ const helloWorld = inngest.createFunction(
   async ({ event, step }) => {
     await step.sleep(`wait-a-moment`, `1s`);
 
+    const data2 = await step.run(`validateData`, () =>
+      z
+        .object({
+          email: z.string(),
+        })
+        .partial({ email: true })
+        .parse(event.data),
+    );
+
     const data = z
       .object({
         email: z.string(),
@@ -18,7 +27,10 @@ const helloWorld = inngest.createFunction(
       .partial({ email: true })
       .parse(event.data);
 
-    return { message: `Hello ${data.email ?? `world`}!` };
+    return {
+      message: `Hello ${data.email ?? `world`}!`,
+      message2: `Hello ${data2.email ?? `world`}!`,
+    };
   },
 );
 
