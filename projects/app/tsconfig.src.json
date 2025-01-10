@@ -4,27 +4,31 @@
     "allowJs": true,
     "baseUrl": ".",
     "esModuleInterop": true,
+    "composite": true,
     "jsx": "preserve",
-    "lib": [],
+    "lib": ["DOM", "ES2022"],
     "module": "ES2020",
     "moduleResolution": "Bundler",
     "noPropertyAccessFromIndexSignature": true,
-    "outDir": "../../.moon/cache/types/projects/app",
+    "outDir": "../../.moon/cache/types/projects/app-src",
     "paths": {
       "@/*": ["src/*"],
       "@haohaohow/lib/*": ["../lib/src/*"]
     },
+    "resolveJsonModule": true,
     "target": "ESNext"
   },
-  "include": [".expo/types/**/*.ts", "expo-env.d.ts", "nativewind-env.d.ts"],
-  "exclude": [],
+  "include": [
+    ".expo/types/**/*.ts",
+    "*",
+    "api/**/*",
+    "expo-env.d.ts",
+    "nativewind-env.d.ts",
+    "src/**/*.json",
+    "src/**/*"
+  ],
+  "exclude": ["src/__tests__/**/*"],
   "references": [
-    {
-      "path": "./src/__tests__"
-    },
-    {
-      "path": "./tsconfig.src.json"
-    },
     {
       "path": "../lib"
     }

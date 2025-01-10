@@ -1,5 +1,5 @@
-import { Transaction } from "@/server/lib/db";
-import * as schema from "@/server/schema";
+import { Transaction } from "#server/lib/db.ts";
+import * as schema from "#server/schema.ts";
 import { PGlite } from "@electric-sql/pglite";
 import { PgTransactionConfig } from "drizzle-orm/pg-core";
 import { drizzle } from "drizzle-orm/pglite";

@@ -1,4 +1,4 @@
-import { IsEqual } from "@/util/types";
+import { IsEqual } from "#util/types.ts";
 import assert from "node:assert/strict";
 import test from "node:test";
 

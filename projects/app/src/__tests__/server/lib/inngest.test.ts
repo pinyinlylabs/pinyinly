@@ -1,4 +1,4 @@
-import { inngest } from "@/server/lib/inngest";
+import { inngest } from "#server/lib/inngest.ts";
 
 function typeChecks(..._args: unknown[]) {
   // This function is only used for type checking, so it should never be called.

@@ -2584,6 +2584,7 @@ __metadata:
     "@types/react-dom": "npm:18.3.x"
     "@types/ws": "npm:^8 <=8.17.x"
     "@typescript-eslint/utils": "npm:^8.12.1"
+    array-from-async: "npm:^3.0.0"
     babel-plugin-transform-import-meta: "patch:babel-plugin-transform-import-meta@npm%3A2.2.1#~/.yarn/patches/babel-plugin-transform-import-meta-npm-2.2.1-0927fef047.patch"
     color: "npm:^4.2.3"
     date-fns: "npm:^3.6.0"
@@ -7155,6 +7156,13 @@ __metadata:
     call-bound: "npm:^1.0.3"
     is-array-buffer: "npm:^3.0.5"
   checksum: 10c0/74e1d2d996941c7a1badda9cabb7caab8c449db9086407cad8a1b71d2604cc8abf105db8ca4e02c04579ec58b7be40279ddb09aea4784832984485499f48432d
+  languageName: node
+  linkType: hard
+
+"array-from-async@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "array-from-async@npm:3.0.0"
+  checksum: 10c0/fbe00d7970f39e5e91944c9ba859a89800846e9208b5ef7bc1efd8ae7d49bb98af5bf06eb4b7cc0cbf429befc57ea24e451119fd73f32332f594f6fe8866a56e
   languageName: node
   linkType: hard
 

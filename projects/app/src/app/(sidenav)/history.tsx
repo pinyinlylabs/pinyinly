@@ -1,5 +1,6 @@
 import { useRizzleQuery } from "@/components/ReplicacheContext";
 import { Rating } from "@/util/fsrs";
+import fromAsync from "array-from-async";
 import reverse from "lodash/reverse";
 import sortBy from "lodash/sortBy";
 import { ScrollView, Text, View } from "react-native";
@@ -24,7 +25,7 @@ export default function HistoryPage() {
   const skillRatingsQuery = useRizzleQuery(
     [`HistoryPage`, `skillRatings`],
     async (r, tx) =>
-      Array.fromAsync(r.query.skillRating.scan(tx)).then((reviews) =>
+      fromAsync(r.query.skillRating.scan(tx)).then((reviews) =>
         reverse(sortBy(reviews, (x) => x[0].createdAt.getTime())),
       ),
   );

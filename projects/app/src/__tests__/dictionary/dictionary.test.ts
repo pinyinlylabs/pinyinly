@@ -22,8 +22,8 @@ import {
   loadWords,
   parseIds,
   walkIdsNode,
-} from "@/dictionary/dictionary";
-import { sortComparatorNumber } from "@/util/collections";
+} from "#dictionary/dictionary.ts";
+import { sortComparatorNumber } from "#util/collections.ts";
 import assert from "node:assert/strict";
 import test from "node:test";
 import { DeepReadonly } from "ts-essentials";

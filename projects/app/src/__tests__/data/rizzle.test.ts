@@ -15,8 +15,8 @@ import {
   RizzleReplicacheMutators,
   RizzleReplicacheQuery,
   RizzleTypeAlias,
-} from "@/data/rizzle";
-import { IsEqual } from "@/util/types";
+} from "#data/rizzle.ts";
+import { IsEqual } from "#util/types.ts";
 import mapValues from "lodash/mapValues";
 import assert from "node:assert/strict";
 import test, { TestContext } from "node:test";
