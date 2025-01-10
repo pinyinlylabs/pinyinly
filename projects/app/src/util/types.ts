@@ -40,3 +40,15 @@ export type IsEqual<T, U> =
   (<G>() => G extends T ? 1 : 2) extends <G>() => G extends U ? 1 : 2
     ? true
     : false | { [debug]: Prettify<T> };
+
+function typeChecks<_T>(..._args: unknown[]) {
+  // This function is only used for type checking, so it should never be called.
+}
+
+typeChecks(() => {
+  // @ts-expect-error Array.fromAsync isn't available in hermes, so the TypeScript
+  // `lib` for it should not be included.
+  //
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+  Array.fromAsync();
+});
