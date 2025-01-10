@@ -19,7 +19,11 @@ import {
 import { HTTPRequestInfo, PullResponseV1, ReadTransaction } from "replicache";
 import { useAuth } from "./auth";
 import { kvStore } from "./replicacheOptions";
-import { sentryCaptureException, useRenderGuard } from "./util";
+import {
+  sentryCaptureException,
+  sentryCaptureMessage,
+  useRenderGuard,
+} from "./util";
 
 export type Rizzle = RizzleReplicache<typeof schema>;
 
@@ -40,6 +44,19 @@ export function ReplicacheProvider({ children }: React.PropsWithChildren) {
         schemaVersion: `3`,
         licenseKey: replicacheLicenseKey,
         kvStore,
+        logSinks: [
+          {
+            log(level, ...args) {
+              const mapLevel = {
+                warn: `warning`,
+                error: `error`,
+                info: `info`,
+                debug: `debug`,
+              } as const;
+              sentryCaptureMessage(JSON.stringify(args), mapLevel[level]);
+            },
+          },
+        ],
         pusher: auth.isAuthenticated
           ? async (requestBody) => {
               invariant(requestBody.pushVersion === 1);

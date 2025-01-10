@@ -12,6 +12,26 @@ export function sentryCaptureException(e: unknown) {
   Sentry.captureException(e);
 }
 
+/**
+ * Alias for {@link Sentry.captureMessage}.
+ */
+export function sentryCaptureMessage(
+  message: string,
+  level: Sentry.SeverityLevel,
+) {
+  if (level === `error`) {
+    // eslint-disable-next-line no-console
+    console.error(message);
+  } else if (level === `warning`) {
+    // eslint-disable-next-line no-console
+    console.warn(message);
+  } else {
+    // eslint-disable-next-line no-console
+    console.log(message);
+  }
+  Sentry.captureMessage(message, level);
+}
+
 export function hapticImpactIfMobile() {
   if (Platform.OS === `ios` || Platform.OS === `android`) {
     // Calling impactAsync on an unsupported platform (e.g. web) throws an
