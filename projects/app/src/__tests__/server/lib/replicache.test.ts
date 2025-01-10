@@ -1,9 +1,9 @@
-import { SkillType } from "@/data/model";
-import * as r from "@/data/rizzleSchema";
-import { Drizzle } from "@/server/lib/db";
-import { computeCvrEntities, pull, push } from "@/server/lib/replicache";
-import * as s from "@/server/schema";
-import { Rating } from "@/util/fsrs";
+import { SkillType } from "#data/model.ts";
+import * as r from "#data/rizzleSchema.ts";
+import { Drizzle } from "#server/lib/db.ts";
+import { computeCvrEntities, pull, push } from "#server/lib/replicache.ts";
+import * as s from "#server/schema.ts";
+import { Rating } from "#util/fsrs.ts";
 import { invariant } from "@haohaohow/lib/invariant";
 import { eq, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";

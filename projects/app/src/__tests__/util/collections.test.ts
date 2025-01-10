@@ -5,7 +5,7 @@ import {
   objectInvert,
   sortComparatorNumber,
   sortComparatorString,
-} from "@/util/collections";
+} from "#util/collections.ts";
 import assert from "node:assert/strict";
 import test from "node:test";
 

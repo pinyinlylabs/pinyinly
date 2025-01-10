@@ -1,0 +1,27 @@
+{
+  "extends": "../../../../tsconfig.base",
+  "compilerOptions": {
+    "allowJs": true,
+    "baseUrl": ".",
+    "composite": true,
+    "esModuleInterop": true,
+    "jsx": "preserve",
+    "lib": ["DOM", "ESNext"],
+    "module": "ES2020",
+    "moduleResolution": "Bundler",
+    "noPropertyAccessFromIndexSignature": true,
+    "outDir": "../../../../.moon/cache/types/projects/app-test",
+    "resolveJsonModule": true,
+    "target": "ESNext",
+    "types": ["node"]
+  },
+  "include": ["**/*"],
+  "references": [
+    {
+      "path": "../../../lib"
+    },
+    {
+      "path": "../../tsconfig.src.json"
+    }
+  ]
+}

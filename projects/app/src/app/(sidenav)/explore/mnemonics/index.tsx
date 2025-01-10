@@ -1,6 +1,7 @@
 import { useRizzleQuery } from "@/components/ReplicacheContext";
 import { loadMmPinyinChart } from "@/dictionary/dictionary";
 import { useQuery } from "@tanstack/react-query";
+import fromAsync from "array-from-async";
 import { Link } from "expo-router";
 import { Fragment } from "react";
 import { ScrollView, Text, View } from "react-native";
@@ -43,7 +44,7 @@ export default function MnemonicsPage() {
   const initialAssociationsQuery = useRizzleQuery(
     [MnemonicsPage.name, `pinyinInitialAssociations`],
     async (r, tx) =>
-      await Array.fromAsync(r.query.pinyinInitialAssociation.scan(tx)).then(
+      await fromAsync(r.query.pinyinInitialAssociation.scan(tx)).then(
         (x) =>
           new Map(x.map(([key, value]) => [key.initial, value.name] as const)),
       ),
@@ -52,9 +53,7 @@ export default function MnemonicsPage() {
   const finalAssociationsQuery = useRizzleQuery(
     [MnemonicsPage.name, `pinyinfinalAssociations`],
     async (r, tx) => {
-      return await Array.fromAsync(
-        r.query.pinyinFinalAssociation.scan(tx),
-      ).then(
+      return await fromAsync(r.query.pinyinFinalAssociation.scan(tx)).then(
         (x) =>
           new Map(x.map(([key, value]) => [key.final, value.name] as const)),
       );
