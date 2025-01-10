@@ -29,7 +29,7 @@ runs:
     - id: moon-query
       run: |
         ALL_AFFECTED=$(moon query tasks --json --affected | jq '.tasks.[].[] | .target')
-        echo $ALL_AFFECTED;
+        echo ALL_AFFECTED=$ALL_AFFECTED;
         MATCH=$(echo $ALL_AFFECTED | jq --raw-output 'select(. == "'"$TARGET"'")')
         echo match=$MATCH;
         echo "match=$MATCH" >> $GITHUB_OUTPUT
