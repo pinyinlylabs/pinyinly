@@ -1,12 +1,13 @@
-import url from "node:url";
-
+// @ts-check
 import { FlatCompat } from "@eslint/eslintrc";
+import inngestPlugin from "@inngest/eslint-plugin";
 import stylisticPlugin from "@stylistic/eslint-plugin";
 import importPlugin from "eslint-plugin-import";
 import reactPlugin from "eslint-plugin-react";
 import reactCompilerPlugin from "eslint-plugin-react-compiler";
 import reactHooksPlugin from "eslint-plugin-react-hooks";
 import globals from "globals";
+import url from "node:url";
 import tseslint from "typescript-eslint";
 
 const __dirname = url.fileURLToPath(new URL(`.`, import.meta.url));
@@ -20,6 +21,7 @@ export default tseslint.config(
       [`react-compiler`]: reactCompilerPlugin,
       [`@typescript-eslint`]: tseslint.plugin,
       [`@stylistic`]: stylisticPlugin,
+      [`@inngest`]: inngestPlugin,
       // ['@typescript-eslint/internal']: tseslintInternalPlugin,
       // ['eslint-comments']: eslintCommentsPlugin,
       // ['eslint-plugin']: eslintPluginPlugin,
@@ -55,6 +57,11 @@ export default tseslint.config(
         projectService: true,
       },
     },
+  },
+
+  // inngest
+  {
+    extends: [...compat.config(inngestPlugin.configs.recommended)],
   },
 
   {
