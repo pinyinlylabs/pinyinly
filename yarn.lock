@@ -2560,6 +2560,7 @@ __metadata:
     "@expo/metro-runtime": "npm:~4.0.0"
     "@haohaohow/lib": "workspace:*"
     "@inngest/eslint-plugin": "npm:^0.0.7"
+    "@inngest/middleware-sentry": "npm:^0.1.1"
     "@lucia-auth/adapter-drizzle": "npm:^1.1.0"
     "@neondatabase/serverless": "npm:^0.9.4"
     "@react-native-replicache/deep-freeze": "npm:^1.1.0"
@@ -2740,6 +2741,17 @@ __metadata:
     "@typescript-eslint/utils": "npm:^6.11.0"
     typescript: "npm:~5.5.2"
   checksum: 10c0/ad060c32b61d2cc2e8151b4dccf7aa3e25875fa0201fe5756169c10d52b1e6a5cd565241c3715bc7d1fbc6d26767d42ca25309486efca6e22c38da008899d015
+  languageName: node
+  linkType: hard
+
+"@inngest/middleware-sentry@npm:^0.1.1":
+  version: 0.1.1
+  resolution: "@inngest/middleware-sentry@npm:0.1.1"
+  peerDependencies:
+    "@sentry/core": ">=8.0.0"
+    "@sentry/types": ">=8.0.0"
+    inngest: ">=3.0.0"
+  checksum: 10c0/a35c9708ba5b56ba5945453964b3873b7863e6f4e62558df0365739cc80809d3e8b1da4c325f36eecee90236dcea500bbae775a6cc39c9ffb994d7444c96e935
   languageName: node
   linkType: hard
 

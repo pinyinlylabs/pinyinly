@@ -16,6 +16,7 @@
   "dependencies": {
     "@expo/metro-runtime": "~4.0.0",
     "@haohaohow/lib": "workspace:*",
+    "@inngest/middleware-sentry": "^0.1.1",
     "@lucia-auth/adapter-drizzle": "^1.1.0",
     "@neondatabase/serverless": "^0.9.4",
     "@react-native-replicache/deep-freeze": "^1.1.0",
