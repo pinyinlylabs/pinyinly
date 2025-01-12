@@ -38,5 +38,30 @@ const helloWorld = inngest.createFunction(
   },
 );
 
+// Your new function:
+const helloWorld2 = inngest.createFunction(
+  { id: `hello-world2` },
+  { event: `test/hello.world2` },
+  async ({ step }) => {
+    await step.sleep(`wait-a-moment`, `1s`);
+    await step.sleep(`wait-a-moment`, `1s`);
+
+    const data2 = await step.run(`getData2`, () => `data2`);
+
+    const data3 = await step.run(`getData3`, () =>
+      z
+        .object({
+          email: z.string(),
+        })
+        .parse({ email: `hardcoded email` }),
+    );
+
+    return {
+      data2,
+      data3,
+    };
+  },
+);
+
 // Create an empty array where we'll export future Inngest functions
-export const functions = [helloWorld];
+export const functions = [helloWorld, helloWorld2];
