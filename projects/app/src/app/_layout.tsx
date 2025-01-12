@@ -5,6 +5,7 @@
 // ------------------------------
 
 import * as Sentry from "@sentry/react-native";
+import { isRunningInExpoGo } from "expo";
 import * as Updates from "expo-updates";
 
 // Via the guide: https://docs.expo.dev/guides/using-sentry/
@@ -15,11 +16,14 @@ const updateGroup =
   metadata && `updateGroup` in metadata ? metadata.updateGroup : undefined;
 
 // Construct a new instrumentation instance. This is needed to communicate between the integration and React
-const routingIntegration = Sentry.reactNavigationIntegration();
+const routingIntegration = Sentry.reactNavigationIntegration({
+  enableTimeToInitialDisplay: !isRunningInExpoGo(),
+});
 
 Sentry.init({
   dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
   integrations: [routingIntegration],
+  enableNativeFramesTracking: !isRunningInExpoGo(), // Tracks slow and frozen frames in the application
 });
 
 // ------------------------------

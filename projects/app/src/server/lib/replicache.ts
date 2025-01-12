@@ -15,7 +15,6 @@ import makeDebug from "debug";
 import { eq, inArray, sql } from "drizzle-orm";
 import mapValues from "lodash/mapValues";
 import pickBy from "lodash/pickBy";
-import { basename } from "node:path";
 import { DatabaseError } from "pg-protocol";
 import { z } from "zod";
 import * as s from "../schema";
@@ -27,7 +26,9 @@ import {
 } from "./db";
 import { updateSkillState } from "./queries";
 
-const debug = makeDebug(basename(import.meta.filename));
+const loggerName = import.meta.filename.split(`/`).slice(-1)[0];
+invariant(loggerName != null);
+const debug = makeDebug(loggerName);
 
 export async function push(
   tx: Drizzle,

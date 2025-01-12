@@ -1,4 +1,4 @@
-// eslint-disable-next-line no-restricted-imports
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import hanzi, { Definition } from "hanzi";
 import { writeFile } from "node:fs/promises";
 import { join } from "node:path";

@@ -5,6 +5,7 @@
 const { defineConfig } = require("@yarnpkg/types");
 const { parseSyml } = require("@yarnpkg/parsers");
 const fs = require("node:fs/promises");
+const YAML = require("yaml");
 
 const semver = require("semver");
 
@@ -76,6 +77,48 @@ function enforceConsistentDependenciesAcrossTheProject({ Yarn }) {
         continue;
 
       dependency.update(otherDependency.range);
+    }
+  }
+}
+
+/**
+ * This rule will enforce that a the app API server and the app itself use
+ * consistent versions of things. This seems like a sensible idea for things
+ * like Sentry.
+ *
+ * @param {Context} context
+ */
+async function enforceConsistentAppPnpmAndYarnDependencies({ Yarn }) {
+  // Read the pnpm-lock.yaml file and ensure that the dependencies are the same
+  // as the ones in the yarn.lock file.
+  const pnpmLock = await fs.readFile(
+    __dirname + "/projects/app/api/pnpm-lock.yaml",
+    { encoding: "utf-8" },
+  );
+
+  // Parse the pnpm-lock.yaml content into an object and query all directly
+  // declared dependencies.
+  const pnpmLockParsed = YAML.parse(pnpmLock);
+  /** @type {Record<String, { specifier: string; version: string}>} */
+  const pnpmDeps = pnpmLockParsed.importers["."].dependencies;
+
+  const appWorkspace = Yarn.workspace({ cwd: "projects/app" });
+  invariant(appWorkspace != null);
+  const appDeps = Yarn.dependencies({ workspace: appWorkspace });
+
+  // Ensure that any app dependencies that are also declared in the API server have the
+  // same versions. This isn't totally bulletproof because it doesn't account
+  // for transitive packages.
+  for (const appDep of appDeps) {
+    const pnpmDep = pnpmDeps[appDep.ident];
+    if (pnpmDep != null) {
+      invariant(appDep.resolution != null);
+      if (appDep.resolution.version !== pnpmDep.version) {
+        reportRootError(
+          { Yarn },
+          `projects/app dependency inconsistency (pnpm/yarn has locked different versions). Dependency ${appDep.ident} has different versions in ./api/pnpm-lock.yaml (${pnpmDep.version}) and ./yarn.lock (${appDep.resolution.version})`,
+        );
+      }
     }
   }
 }
@@ -242,5 +285,6 @@ module.exports = defineConfig({
       "yargs@^17.7.2": "^17 <=17.7.x",
     });
     await enforceMoonToolchainVersion(ctx);
+    await enforceConsistentAppPnpmAndYarnDependencies(ctx);
   },
 });

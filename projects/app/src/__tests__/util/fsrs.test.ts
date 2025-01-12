@@ -1,10 +1,10 @@
+import { Rating, UpcomingReview, nextReview } from "#util/fsrs.ts";
+import { RepeatedSequence2 } from "#util/types.ts";
 import { differenceInMilliseconds } from "date-fns/differenceInMilliseconds";
 import { intervalToDuration } from "date-fns/intervalToDuration";
 import assert from "node:assert/strict";
 import test, { TestContext } from "node:test";
 import z from "zod";
-import { Rating, UpcomingReview, nextReview } from "./fsrs";
-import { RepeatedSequence2 } from "./types";
 
 const expectedReviewSchema = z.object({
   stability: z.number(),

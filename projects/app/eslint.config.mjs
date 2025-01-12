@@ -6,6 +6,7 @@ import importPlugin from "eslint-plugin-import";
 import reactPlugin from "eslint-plugin-react";
 import reactCompilerPlugin from "eslint-plugin-react-compiler";
 import reactHooksPlugin from "eslint-plugin-react-hooks";
+import { builtinModules } from "node:module";
 import tseslint from "typescript-eslint";
 
 const compat = new FlatCompat({ baseDirectory: import.meta.dirname });
@@ -21,11 +22,12 @@ export default tseslint.config(
   {
     // note - intentionally uses computed syntax to make it easy to sort the keys
     plugins: {
-      [`react-compiler`]: reactCompilerPlugin,
-      [`@typescript-eslint`]: tseslint.plugin,
-      [`@stylistic`]: stylisticPlugin,
       [`@inngest`]: inngestPlugin,
+      [`@noNodeImports`]: tseslint.plugin, // an extra scope for no-restricted-imports so they don't clobber other configs
+      [`@stylistic`]: stylisticPlugin,
+      [`@typescript-eslint`]: tseslint.plugin,
       [`import`]: importPlugin,
+      [`react-compiler`]: reactCompilerPlugin,
       [`react-hooks`]: reactHooksPlugin,
       [`react`]: reactPlugin,
     },
@@ -95,7 +97,7 @@ export default tseslint.config(
       ],
       "one-var": [`error`, `never`],
 
-      "no-restricted-imports": [
+      "@typescript-eslint/no-restricted-imports": [
         `error`,
         {
           paths: [
@@ -237,6 +239,21 @@ export default tseslint.config(
     rules: {
       "import/no-named-export": `error`, // The only exports should be a default for the page
       "import/no-default-export": `off`,
+    },
+  },
+
+  // Files not run in Node.js environment shouldn't do any Node.js imports. Expo
+  // pulls in the `node` types.
+  {
+    files: [`**/*.{cjs,js,mjs,ts,tsx}`],
+    ignores: [`*.*`, `bin/**/*`, `src/__tests__/**/*`],
+    rules: {
+      "@noNodeImports/no-restricted-imports": [
+        `error`,
+        ...builtinModules.flatMap((x) =>
+          x.startsWith(`node:`) ? [x] : [x, `node:` + x],
+        ),
+      ],
     },
   },
 );
