@@ -1,12 +1,6 @@
-import { sentryDsn } from "@/env";
 import { sentryMiddleware } from "@inngest/middleware-sentry";
-import * as Sentry from "@sentry/node";
 import { Inngest } from "inngest";
 import { z } from "zod";
-
-Sentry.init({
-  dsn: sentryDsn,
-});
 
 // Create a client to send and receive events
 export const inngest = new Inngest({

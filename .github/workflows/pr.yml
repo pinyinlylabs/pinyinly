@@ -99,7 +99,6 @@ jobs:
     env:
       # <.env.test>
       EXPO_PUBLIC_REPLICACHE_LICENSE_KEY: HHH_TEST_LICENSE_KEY
-      EXPO_PUBLIC_SENTRY_DSN: HHH_TEST_DSN
       # </.env.test>
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_STATIC }}

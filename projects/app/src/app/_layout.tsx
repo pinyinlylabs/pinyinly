@@ -1,24 +1,11 @@
-import { getSessionId } from "@/components/auth";
-import { ReplicacheProvider } from "@/components/ReplicacheContext";
-import { sentryDsn } from "@/env";
-import { trpc } from "@/util/trpc";
-import {
-  DefaultTheme,
-  Theme as ReactNavigationTheme,
-  ThemeProvider,
-} from "@react-navigation/native";
+/* eslint-disable import/first */
+
+// ------------------------------
+// Sentry instrumentation setup for react-native (but not API routes).
+// ------------------------------
+
 import * as Sentry from "@sentry/react-native";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { HTTPHeaders, httpLink } from "@trpc/client";
-import { useFonts } from "expo-font";
-import { Image } from "expo-image";
-import { Slot, SplashScreen, useNavigationContainerRef } from "expo-router";
 import * as Updates from "expo-updates";
-import { cssInterop } from "nativewind";
-import { useEffect, useState } from "react";
-import { Platform, useColorScheme, View } from "react-native";
-import Animated from "react-native-reanimated";
-import "../global.css";
 
 // Via the guide: https://docs.expo.dev/guides/using-sentry/
 const manifest = Updates.manifest;
@@ -31,10 +18,34 @@ const updateGroup =
 const routingIntegration = Sentry.reactNavigationIntegration();
 
 Sentry.init({
-  enabled: !__DEV__,
-  dsn: sentryDsn,
+  dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
   integrations: [routingIntegration],
 });
+
+// ------------------------------
+// Continue on with the rest of the file as normal. It's important that
+// `Sentry.init()` comes first as it hooks into require()/import calls so it
+// needs to be very early on in the setup.
+// ------------------------------
+
+import { getSessionId } from "@/components/auth";
+import { ReplicacheProvider } from "@/components/ReplicacheContext";
+import { trpc } from "@/util/trpc";
+import {
+  DefaultTheme,
+  Theme as ReactNavigationTheme,
+  ThemeProvider,
+} from "@react-navigation/native";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { HTTPHeaders, httpLink } from "@trpc/client";
+import { useFonts } from "expo-font";
+import { Image } from "expo-image";
+import { Slot, SplashScreen, useNavigationContainerRef } from "expo-router";
+import { cssInterop } from "nativewind";
+import { useEffect, useState } from "react";
+import { Platform, useColorScheme, View } from "react-native";
+import Animated from "react-native-reanimated";
+import "../global.css";
 
 {
   const scope = Sentry.getCurrentScope();

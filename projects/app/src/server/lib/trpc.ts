@@ -1,11 +1,6 @@
-import { sentryDsn } from "@/env";
 import * as Sentry from "@sentry/node";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { Context } from "./trpcContext";
-
-Sentry.init({
-  dsn: sentryDsn,
-});
 
 // Avoid exporting the entire t-object since it's not very descriptive. For
 // instance, the use of a t variable is common in i18n libraries.
