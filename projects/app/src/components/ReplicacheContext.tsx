@@ -19,11 +19,7 @@ import {
 import { HTTPRequestInfo, PullResponseV1, ReadTransaction } from "replicache";
 import { useAuth } from "./auth";
 import { kvStore } from "./replicacheOptions";
-import {
-  sentryCaptureException,
-  sentryCaptureMessage,
-  useRenderGuard,
-} from "./util";
+import { sentryCaptureException, useRenderGuard } from "./util";
 
 export type Rizzle = RizzleReplicache<typeof schema>;
 
@@ -44,19 +40,11 @@ export function ReplicacheProvider({ children }: React.PropsWithChildren) {
         schemaVersion: `3`,
         licenseKey: replicacheLicenseKey,
         kvStore,
-        logSinks: [
-          {
-            log(level, ...args) {
-              const mapLevel = {
-                warn: `warning`,
-                error: `error`,
-                info: `info`,
-                debug: `debug`,
-              } as const;
-              sentryCaptureMessage(JSON.stringify(args), mapLevel[level]);
-            },
-          },
-        ],
+        // No need for a custom logSink here, just using normal console.*
+        // functions are fine because `Sentry.captureConsoleIntegration`
+        // captures them. See
+        // https://docs.sentry.io/platforms/javascript/configuration/integrations/captureconsole/
+        logSinks: undefined,
         pusher: auth.isAuthenticated
           ? async (requestBody) => {
               invariant(requestBody.pushVersion === 1);

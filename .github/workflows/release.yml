@@ -52,6 +52,7 @@ jobs:
         # if: steps.moon-deployVercel-query.target-affected
         env:
           EXPO_PUBLIC_REPLICACHE_LICENSE_KEY: ${{ secrets.EXPO_PUBLIC_REPLICACHE_LICENSE_KEY }}
+          EXPO_PUBLIC_SENTRY_DSN: ${{ secrets.EXPO_PUBLIC_SENTRY_DSN }}
           HHH_VERCEL_PROD:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -102,5 +103,6 @@ jobs:
         # if: steps.moon-deployEasUpdate-query.target-affected
         env:
           EXPO_PUBLIC_REPLICACHE_LICENSE_KEY: ${{ secrets.EXPO_PUBLIC_REPLICACHE_LICENSE_KEY }}
+          EXPO_PUBLIC_SENTRY_DSN: ${{ secrets.EXPO_PUBLIC_SENTRY_DSN }}
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}

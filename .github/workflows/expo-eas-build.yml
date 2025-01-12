@@ -38,3 +38,4 @@ jobs:
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
           EXPO_PUBLIC_REPLICACHE_LICENSE_KEY: ${{ secrets.EXPO_PUBLIC_REPLICACHE_LICENSE_KEY }}
+          EXPO_PUBLIC_SENTRY_DSN: ${{ secrets.EXPO_PUBLIC_SENTRY_DSN }}
