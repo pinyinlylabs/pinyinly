@@ -1,5 +1,6 @@
 import { getSessionId } from "@/components/auth";
 import { ReplicacheProvider } from "@/components/ReplicacheContext";
+import { sentryDsn } from "@/env";
 import { trpc } from "@/util/trpc";
 import {
   DefaultTheme,
@@ -31,7 +32,7 @@ const routingIntegration = Sentry.reactNavigationIntegration();
 
 Sentry.init({
   enabled: !__DEV__,
-  dsn: `https://88e3787d84756d748f01113cc6a01fde@o4506645802909696.ingest.us.sentry.io/4506645804679168`,
+  dsn: sentryDsn,
   integrations: [routingIntegration],
 });
 
