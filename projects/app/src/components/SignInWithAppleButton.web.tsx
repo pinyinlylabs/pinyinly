@@ -123,7 +123,6 @@ export function SignInWithAppleButton({
       documentEventListenerEffect(`AppleIDSignInOnFailure`, (event) => {
         const error = event.detail.error;
         if (error !== `popup_closed_by_user`) {
-          // eslint-disable-next-line no-console
           console.error(`Failed to sign in with Apple, error:`, error);
         }
       }),

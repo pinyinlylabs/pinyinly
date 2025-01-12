@@ -1,6 +1,5 @@
 import { QuizDeck } from "@/components/QuizDeck";
 import { useReplicache } from "@/components/ReplicacheContext";
-import { sentryCaptureException } from "@/components/util";
 import { generateQuestionForSkillOrThrow } from "@/data/generator";
 import { HanziSkill, Question, QuestionType, SkillType } from "@/data/model";
 import { questionsForReview } from "@/data/query";
@@ -59,7 +58,7 @@ export default function LearnHsk1Page() {
               try {
                 questions.push(await generateQuestionForSkillOrThrow(skill));
               } catch (e) {
-                sentryCaptureException(e);
+                console.error(e);
                 continue;
               }
 

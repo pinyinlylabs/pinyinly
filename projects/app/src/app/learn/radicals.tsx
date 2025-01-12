@@ -1,7 +1,6 @@
 import { QuizDeck } from "@/components/QuizDeck";
 import { RectButton } from "@/components/RectButton";
 import { useReplicache } from "@/components/ReplicacheContext";
-import { sentryCaptureException } from "@/components/util";
 import { generateQuestionForSkillOrThrow } from "@/data/generator";
 import { Question, RadicalSkill, SkillType } from "@/data/model";
 import { questionsForReview } from "@/data/query";
@@ -62,7 +61,7 @@ export default function RadicalsPage() {
               try {
                 questions.push(await generateQuestionForSkillOrThrow(skill));
               } catch (e) {
-                sentryCaptureException(e);
+                console.error(e);
                 continue;
               }
 

@@ -1,36 +1,6 @@
-import * as Sentry from "@sentry/react-native";
 import * as Haptics from "expo-haptics";
 import { useCallback, useEffect, useInsertionEffect, useRef } from "react";
 import { Platform } from "react-native";
-
-/**
- * Alias for {@link Sentry.captureException}.
- */
-export function sentryCaptureException(e: unknown) {
-  // eslint-disable-next-line no-console
-  console.error(e);
-  Sentry.captureException(e);
-}
-
-/**
- * Alias for {@link Sentry.captureMessage}.
- */
-export function sentryCaptureMessage(
-  message: string,
-  level: Sentry.SeverityLevel,
-) {
-  if (level === `error`) {
-    // eslint-disable-next-line no-console
-    console.error(message);
-  } else if (level === `warning`) {
-    // eslint-disable-next-line no-console
-    console.warn(message);
-  } else {
-    // eslint-disable-next-line no-console
-    console.log(message);
-  }
-  Sentry.captureMessage(message, level);
-}
 
 export function hapticImpactIfMobile() {
   if (Platform.OS === `ios` || Platform.OS === `android`) {
@@ -38,7 +8,7 @@ export function hapticImpactIfMobile() {
     // exception and will crash the app.
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(
       (e: unknown) => {
-        sentryCaptureException(e);
+        console.error(e);
       },
     );
   }
