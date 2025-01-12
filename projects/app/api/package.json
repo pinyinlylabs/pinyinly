@@ -2,7 +2,8 @@
   "module": "commonjs",
   "dependencies": {
     "@expo/server": "^0.4.3",
-    "@sentry/node": "^8.47.0"
+    "@sentry/core": "^8.48.0",
+    "@sentry/node": "^8.48.0"
   },
   "packageManager": "pnpm@9.15.3",
   "pnpm": {

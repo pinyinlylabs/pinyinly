@@ -1,4 +1,4 @@
-import * as Sentry from "@sentry/node";
+import { trpcMiddleware } from "@sentry/core";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { Context } from "./trpcContext";
 
@@ -7,7 +7,7 @@ import { Context } from "./trpcContext";
 const t = initTRPC.context<Context>().create();
 
 const sentryMiddleware = t.middleware(
-  Sentry.trpcMiddleware({
+  trpcMiddleware({
     attachRpcInput: true,
   }),
 );

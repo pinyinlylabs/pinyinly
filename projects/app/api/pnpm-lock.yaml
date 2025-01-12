@@ -16,8 +16,11 @@ importers:
       '@expo/server':
         specifier: ^0.4.3
         version: 0.4.3(patch_hash=at4fdynffkaw4r7ro4imf5psye)
+      '@sentry/core':
+        specifier: ^8.48.0
+        version: 8.48.0
       '@sentry/node':
-        specifier: ^8.47.0
+        specifier: ^8.48.0
         version: 8.48.0
 
 packages:

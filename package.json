@@ -10,7 +10,8 @@
     "@yarnpkg/types": "^4.0.0",
     "prettier": "^3.4.2",
     "semver": "^7.5.0",
-    "typescript": "patch:typescript@npm%3A5.7.2#~/.yarn/patches/typescript-npm-5.7.2-b1f84a8b28.patch"
+    "typescript": "patch:typescript@npm%3A5.7.2#~/.yarn/patches/typescript-npm-5.7.2-b1f84a8b28.patch",
+    "yaml": "^2.7.0"
   },
   "engines": {
     "node": "~23.6.0"
