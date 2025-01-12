@@ -6,12 +6,9 @@ import importPlugin from "eslint-plugin-import";
 import reactPlugin from "eslint-plugin-react";
 import reactCompilerPlugin from "eslint-plugin-react-compiler";
 import reactHooksPlugin from "eslint-plugin-react-hooks";
-import globals from "globals";
-import url from "node:url";
 import tseslint from "typescript-eslint";
 
-const __dirname = url.fileURLToPath(new URL(`.`, import.meta.url));
-const compat = new FlatCompat({ baseDirectory: __dirname });
+const compat = new FlatCompat({ baseDirectory: import.meta.dirname });
 
 // Based on https://github.com/typescript-eslint/typescript-eslint/blob/41323746de299e6d62b4d6122975301677d7c8e0/eslint.config.mjs
 export default tseslint.config(
@@ -38,34 +35,34 @@ export default tseslint.config(
 
   {
     // config with just ignores is the replacement for `.eslintignore`
-    ignores: [`.expo/`, `.vercel/`, `dist/`, `node_modules/`],
+    ignores: [`.expo/`, `.vercel/`, `dist/`, `drizzle/`, `node_modules/`],
   },
 
-  // extends ...
-  ...tseslint.configs.strictTypeChecked,
-  ...tseslint.configs.stylisticTypeChecked,
-
-  // expo/metro files config
+  // All files that should use TypeScript rules.
   {
-    files: [`{api,src}/**/*.{cjs,js,mjs,ts,tsx}`, `*.{cjs,js,mjs,ts,tsx}`],
+    files: [`**/*.{cjs,js,mjs,ts,tsx}`],
     languageOptions: {
-      globals: {
-        ...globals.es2020,
-        ...globals.node,
-      },
       parserOptions: {
         projectService: true,
       },
     },
   },
 
-  // inngest
+  // extends ...
+  ...tseslint.configs.strictTypeChecked,
+  ...tseslint.configs.stylisticTypeChecked,
+
+  // Ban CommonJS globals in ESM files, use import.meta.* instead
   {
-    extends: [...compat.config(inngestPlugin.configs.recommended)],
+    files: [`**/*.{js,mjs,ts,tsx}`],
+    rules: {
+      "no-restricted-globals": [`error`, `__dirname`, `__filename`],
+    },
   },
 
   {
     extends: [
+      ...compat.config(inngestPlugin.configs.recommended),
       ...compat.config(reactPlugin.configs.recommended),
       ...compat.config(reactHooksPlugin.configs.recommended),
     ],
@@ -209,15 +206,6 @@ export default tseslint.config(
   // bin scripts
   {
     files: [`bin/**/*`],
-    languageOptions: {
-      globals: {
-        ...globals.es2022,
-        ...globals.node,
-      },
-      parserOptions: {
-        projectService: true,
-      },
-    },
     rules: {
       "no-console": `off`,
     },
