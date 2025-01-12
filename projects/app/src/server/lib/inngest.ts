@@ -44,7 +44,7 @@ const helloWorld2 = inngest.createFunction(
   { event: `test/hello.world2` },
   async ({ step }) => {
     await step.sleep(`wait-a-moment`, `1s`);
-    await step.sleep(`wait-a-moment`, `1s`);
+    await step.sleep(`wait-a-moment2`, `1s`);
 
     const data2 = await step.run(`getData2`, () => `data2`);
 
