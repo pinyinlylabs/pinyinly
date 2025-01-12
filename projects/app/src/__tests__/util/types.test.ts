@@ -44,3 +44,10 @@ void test(`lib.dom.d.ts patches`, async () => {
     Response.json(undefined);
   });
 });
+
+typeChecks(`banned CommonJS globals, use import.meta.* instead`, () => {
+  // eslint-disable-next-line no-restricted-globals
+  void __dirname;
+  // eslint-disable-next-line no-restricted-globals
+  void __filename;
+});
