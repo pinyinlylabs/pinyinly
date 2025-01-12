@@ -1,5 +1,6 @@
 import { getSessionId } from "@/components/auth";
 import { ReplicacheProvider } from "@/components/ReplicacheContext";
+import { sentryDsn } from "@/env";
 import { trpc } from "@/util/trpc";
 import {
   DefaultTheme,
@@ -8,7 +9,7 @@ import {
 } from "@react-navigation/native";
 import * as Sentry from "@sentry/react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { httpBatchLink, HTTPHeaders } from "@trpc/client";
+import { HTTPHeaders, httpLink } from "@trpc/client";
 import { useFonts } from "expo-font";
 import { Image } from "expo-image";
 import { Slot, SplashScreen, useNavigationContainerRef } from "expo-router";
@@ -31,7 +32,7 @@ const routingIntegration = Sentry.reactNavigationIntegration();
 
 Sentry.init({
   enabled: !__DEV__,
-  dsn: `https://88e3787d84756d748f01113cc6a01fde@o4506645802909696.ingest.us.sentry.io/4506645804679168`,
+  dsn: sentryDsn,
   integrations: [routingIntegration],
 });
 
@@ -82,7 +83,7 @@ function RootLayout() {
   const [trpcClient] = useState(() =>
     trpc.createClient({
       links: [
-        httpBatchLink({
+        httpLink({
           url: `/api/trpc`,
 
           async headers() {
