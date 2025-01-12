@@ -3,8 +3,8 @@ tasks:
     command: yarn eslint .
     inputs:
       # Config files anywhere within the project
-      - "src/**/*.{js,mjs,json,ts,tsx}"
-      - "*.{js,mjs,json,ts,tsx}"
+      - "**/*.{cjs,js,mjs,json,ts,tsx}"
+      - "*.{cjs,js,mjs,json,ts,tsx}"
       # Environment variables
       - "$ESLINT_CACHE"
       - "$ESLINT_*"

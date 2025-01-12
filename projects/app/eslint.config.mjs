@@ -13,23 +13,21 @@ const compat = new FlatCompat({ baseDirectory: import.meta.dirname });
 // Based on https://github.com/typescript-eslint/typescript-eslint/blob/41323746de299e6d62b4d6122975301677d7c8e0/eslint.config.mjs
 export default tseslint.config(
   {
+    linterOptions: {
+      reportUnusedDisableDirectives: `error`,
+    },
+  },
+
+  {
     // note - intentionally uses computed syntax to make it easy to sort the keys
     plugins: {
       [`react-compiler`]: reactCompilerPlugin,
       [`@typescript-eslint`]: tseslint.plugin,
       [`@stylistic`]: stylisticPlugin,
       [`@inngest`]: inngestPlugin,
-      // ['@typescript-eslint/internal']: tseslintInternalPlugin,
-      // ['eslint-comments']: eslintCommentsPlugin,
-      // ['eslint-plugin']: eslintPluginPlugin,
       [`import`]: importPlugin,
-      // ['jest']: jestPlugin,
-      // ['jsdoc']: jsdocPlugin,
-      // ['jsx-a11y']: jsxA11yPlugin,
       [`react-hooks`]: reactHooksPlugin,
       [`react`]: reactPlugin,
-      // ['simple-import-sort']: simpleImportSortPlugin,
-      // ['unicorn']: unicornPlugin,
     },
   },
 
@@ -60,6 +58,7 @@ export default tseslint.config(
     },
   },
 
+  // Rules for all lintable files.
   {
     extends: [
       ...compat.config(inngestPlugin.configs.recommended),
