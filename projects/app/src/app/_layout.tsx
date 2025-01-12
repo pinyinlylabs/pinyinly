@@ -9,7 +9,7 @@ import {
 } from "@react-navigation/native";
 import * as Sentry from "@sentry/react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { httpBatchLink, HTTPHeaders } from "@trpc/client";
+import { HTTPHeaders, httpLink } from "@trpc/client";
 import { useFonts } from "expo-font";
 import { Image } from "expo-image";
 import { Slot, SplashScreen, useNavigationContainerRef } from "expo-router";
@@ -83,7 +83,7 @@ function RootLayout() {
   const [trpcClient] = useState(() =>
     trpc.createClient({
       links: [
-        httpBatchLink({
+        httpLink({
           url: `/api/trpc`,
 
           async headers() {
