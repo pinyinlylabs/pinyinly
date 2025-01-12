@@ -73,8 +73,7 @@ export async function transactWithExecutor<R>(
       return await tx.transaction(body);
     } catch (e) {
       if (retries > 0 && shouldRetryTransaction(e)) {
-        // eslint-disable-next-line no-console
-        console.log(
+        console.warn(
           `Retrying transaction due to SERIALIZABLE isolation error (attempt ${retries})`,
           e,
         );

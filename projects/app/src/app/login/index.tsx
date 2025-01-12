@@ -73,22 +73,16 @@ export default function LoginPage() {
                 switch (err.data.code) {
                   case `ERR_REQUEST_CANCELED`:
                     // handle that the user canceled the sign-in flow
-                    // eslint-disable-next-line no-console
-                    console.log(`request canceled`);
+                    console.error(`request canceled`);
                     break;
                   default:
-                    // eslint-disable-next-line no-console
-                    console.log(
+                    console.error(
                       `unknown error code=${err.data.code}, error=`,
                       err.data,
                     );
                 }
               } else {
-                // eslint-disable-next-line no-console
-                console.log(
-                  `unknown error (no code), error=`,
-                  JSON.stringify(e),
-                );
+                console.error(`unknown error (no code), error=`, e);
               }
 
               return;
