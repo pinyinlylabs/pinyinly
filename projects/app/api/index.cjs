@@ -1,3 +1,9 @@
+const Sentry = require(`@sentry/node`);
+
+Sentry.init({
+  dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
+});
+
 const { createRequestHandler } = require(`@expo/server/adapter/vercel`);
 
 module.exports = createRequestHandler({
