@@ -32,7 +32,7 @@ import { QuizDeckOneCorrectPairQuestion } from "./QuizDeckOneCorrectPairQuestion
 import { QuizProgressBar } from "./QuizProgressBar";
 import { RectButton2 } from "./RectButton2";
 import { useReplicache } from "./ReplicacheContext";
-import { sentryCaptureException, useEventCallback } from "./util";
+import { useEventCallback } from "./util";
 
 const buttonThickness = 4;
 const gap = 16;
@@ -114,7 +114,9 @@ export const QuizDeck = ({ questions }: { questions: readonly Question[] }) => {
             skill,
             rating,
           })
-          .catch(sentryCaptureException);
+          .catch((e: unknown) => {
+            console.error(e);
+          });
       }
 
       setStreakCount((prev) => (success ? prev + 1 : 0));

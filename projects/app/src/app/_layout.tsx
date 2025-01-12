@@ -4,6 +4,7 @@
 // Sentry instrumentation setup for react-native (but not API routes).
 // ------------------------------
 
+import { captureConsoleIntegration } from "@sentry/core";
 import * as Sentry from "@sentry/react-native";
 import { isRunningInExpoGo } from "expo";
 import * as Updates from "expo-updates";
@@ -22,8 +23,12 @@ const routingIntegration = Sentry.reactNavigationIntegration({
 
 Sentry.init({
   dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
-  integrations: [routingIntegration],
   enableNativeFramesTracking: !isRunningInExpoGo(), // Tracks slow and frozen frames in the application
+  environment: __DEV__ ? `development` : `production`,
+  integrations: [
+    captureConsoleIntegration() as typeof routingIntegration,
+    routingIntegration,
+  ],
 });
 
 // ------------------------------

@@ -34,7 +34,6 @@ export async function createPool(): Promise<PgPool> {
   // the pool will emit an error on behalf of any idle clients
   // it contains if a backend error or network partition happens
   pool.on(`error`, (err) => {
-    // eslint-disable-next-line no-console
     console.error(`Unexpected error on idle pool client`, err);
   });
 

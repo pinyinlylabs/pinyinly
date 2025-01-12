@@ -19,7 +19,7 @@ import {
 import { HTTPRequestInfo, PullResponseV1, ReadTransaction } from "replicache";
 import { useAuth } from "./auth";
 import { kvStore } from "./replicacheOptions";
-import { sentryCaptureException, useRenderGuard } from "./util";
+import { useRenderGuard } from "./util";
 
 export type Rizzle = RizzleReplicache<typeof schema>;
 
@@ -185,7 +185,7 @@ export function useRizzleQuery<QueryRet>(
         queryClient.setQueryData(stableKey, data);
       },
       onError: (e) => {
-        sentryCaptureException(e);
+        console.error(e);
       },
     });
 
@@ -255,7 +255,7 @@ async function trpcToReplicache<T>(responsePromise: Promise<T>): Promise<{
       },
     };
   } catch (err) {
-    sentryCaptureException(err);
+    console.error(err);
     if (err instanceof TRPCClientError) {
       const trpcError = TRPCClientError.from<AppRouter>(err);
       return {

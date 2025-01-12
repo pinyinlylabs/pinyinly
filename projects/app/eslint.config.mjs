@@ -89,7 +89,7 @@ export default tseslint.config(
       curly: [`error`, `all`],
       "logical-assignment-operators": `error`,
       "no-else-return": `error`,
-      "no-console": `error`,
+      "no-console": [`error`, { allow: [`warn`, `error`] }],
       "no-process-exit": `error`,
       "no-fallthrough": [
         `error`,

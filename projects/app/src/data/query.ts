@@ -1,5 +1,4 @@
 import { Rizzle } from "@/components/ReplicacheContext";
-import { sentryCaptureException } from "@/components/util";
 import shuffle from "lodash/shuffle";
 import take from "lodash/take";
 import { ReadTransaction } from "replicache";
@@ -43,7 +42,7 @@ export async function questionsForReview(
         await generateQuestionForSkillOrThrow(skill),
       ]);
     } catch (e) {
-      sentryCaptureException(e);
+      console.error(e);
       continue;
     }
 
