@@ -79,9 +79,7 @@ tasks:
     inputs:
       - drizzle/**/*
     options:
-      envFile:
-        - ".env"
-        - ".env.local"
+      envFile: .env.local
       runInCI: false
 
   deploy:
@@ -149,9 +147,7 @@ tasks:
     command: yarn tsx ./bin/formatAssetJson.ts
     options:
       runInCI: false
-      envFile:
-        - ".env"
-        - ".env.local"
+      envFile: .env.local
       cache: false
     env:
       NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
@@ -160,9 +156,7 @@ tasks:
     command: yarn tsx ./bin/generateHanziDecomposition.ts
     options:
       runInCI: false
-      envFile:
-        - ".env"
-        - ".env.local"
+      envFile: .env.local
       cache: false
     env:
       NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
@@ -171,9 +165,7 @@ tasks:
     command: yarn tsx ./bin/generateMnemonicTheme.ts
     options:
       runInCI: false
-      envFile:
-        - ".env"
-        - ".env.local"
+      envFile: .env.local
       cache: false
     env:
       NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
@@ -182,9 +174,7 @@ tasks:
     command: yarn tsx ./bin/generateRadicalNameMnemonics.ts
     options:
       runInCI: false
-      envFile:
-        - ".env"
-        - ".env.local"
+      envFile: .env.local
       cache: false
     env:
       NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
@@ -193,9 +183,7 @@ tasks:
     command: yarn tsx ./bin/generateRadicalPinyinMnemonics.ts
     options:
       runInCI: false
-      envFile:
-        - ".env"
-        - ".env.local"
+      envFile: .env.local
       cache: false
     env:
       NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
@@ -204,9 +192,7 @@ tasks:
     command: yarn tsx ./bin/generateWordDictionary.ts
     options:
       runInCI: false
-      envFile:
-        - ".env"
-        - ".env.local"
+      envFile: .env.local
       cache: false
 
   expoDoctor:
@@ -241,18 +227,16 @@ tasks:
       - "*.{json,cjs,js,ts}"
     options:
       envFile:
-        - ".env"
-        - ".env.local"
-        - ".env.test"
+        - .env.local
+        - .env.test
 
   testWatch:
     command: node --test --watch --import tsx "src/**/*.test.ts"
     local: true
     options:
       envFile:
-        - ".env"
-        - ".env.local"
-        - ".env.test"
+        - .env.local
+        - .env.test
 
   typecheck:
     deps:
