@@ -5,6 +5,9 @@
     "@sentry/core": "^8.48.0",
     "@sentry/node": "^8.48.0"
   },
+  "engines": {
+    "node": "22.x"
+  },
   "packageManager": "pnpm@9.15.3",
   "pnpm": {
     "patchedDependencies": {
