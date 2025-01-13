@@ -3,36 +3,45 @@
   "extends": ["config:recommended"],
   "packageRules": [
     {
-      "description": "Don't update non-dev dependencies, too risky of it breaking something.",
-      "matchManagers": ["npm"],
-      "matchDepTypes": ["dependencies"],
-      "enabled": false
-    },
-    {
-      "description": "Only non-major (less risky) updates for devDependencies ala tooling.",
-      "matchManagers": ["npm"],
-      "matchDepTypes": ["devDependencies"],
-      "matchUpdateTypes": ["major"],
-      "enabled": false
-    },
-    {
-      "description": "Be conservative and wait a while after a new release to settle (often bugs are found).",
-      "matchDatasources": ["npm"],
-      "minimumReleaseAge": "3 days",
-      "internalChecksFilter": "strict"
-    },
-    {
+      "description": "Don't let @types/* packages get ahead of the actual package it's providing types for.",
       "matchDatasources": ["npm"],
       "matchDepNames": ["@types/*"],
       "rangeStrategy": "in-range-only"
     },
     {
-      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "description": "devDependencies defaults: automerge, wait 3 days",
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["devDependencies"],
+      "minimumReleaseAge": "3 days",
+      "internalChecksFilter": "strict",
       "automerge": true
+    },
+    {
+      "description": "Major devDependencies: manual merge",
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["major"],
+      "automerge": false
+    },
+    {
+      "description": "dependencies defaults: automerge, wait 7 days",
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["dependencies"],
+      "minimumReleaseAge": "7 days",
+      "internalChecksFilter": "strict",
+      "automerge": true
+    },
+    {
+      "description": "Major dependencies: manual merge",
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["dependencies"],
+      "matchUpdateTypes": ["major"],
+      "automerge": false
     }
   ],
   "customManagers": [
     {
+      "description": "Update version in moon/github actions/proto configs",
       "customType": "regex",
       "fileMatch": [
         "^.moon/.*.ya?ml$",
@@ -41,11 +50,12 @@
       ],
       "matchStrings": [
         ".*?(:|=)\\s+('|\\\")(=?)(?<currentValue>.*)('|\\\")\\s+#\\s+renovate: datasource=(?<datasource>.+?) depName=(?<depName>.+?)( versioning=(?<versioning>.*?))?( extractVersion=(?<extractVersion>.*?))?\\n"
-      ]
+      ],
+      "depTypeTemplate": "devDependencies"
     },
     {
+      "description": "Update pinned npx/yarn dlx packages",
       "customType": "regex",
-      "description": "Update pinned npx packages",
       "fileMatch": [
         "^.moon/.*.ya?ml$",
         "^.github/.*.ya?ml$",
@@ -54,16 +64,18 @@
       "matchStrings": [
         "(npx|npm exec|yarn dlx|pnpm dlx)( -[-a-z]+?)* (?<depName>(@[a-z0-9-~][a-z0-9-._~]*\\/)?[a-z0-9-~][a-z0-9-._~]*)@(?<currentValue>\\S+)"
       ],
-      "datasourceTemplate": "npm"
+      "datasourceTemplate": "npm",
+      "depTypeTemplate": "devDependencies"
     },
     {
-      "customType": "regex",
       "description": "Update Vercel runtimes",
+      "customType": "regex",
       "fileMatch": ["/vercel.json$"],
       "matchStrings": [
         "\"runtime\": \"(?<depName>(@[a-z0-9-~][a-z0-9-._~]*\\/)?[a-z0-9-~][a-z0-9-._~]*)@(?<currentValue>.+?)\""
       ],
-      "datasourceTemplate": "npm"
+      "datasourceTemplate": "npm",
+      "depTypeTemplate": "dependencies"
     }
   ]
 }
