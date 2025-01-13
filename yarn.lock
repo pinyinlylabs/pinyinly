@@ -2654,7 +2654,7 @@ __metadata:
     "@inngest/eslint-plugin": "npm:^0.0.7"
     "@inngest/middleware-sentry": "npm:^0.1.1"
     "@lucia-auth/adapter-drizzle": "npm:^1.1.0"
-    "@neondatabase/serverless": "npm:^0.9.4"
+    "@neondatabase/serverless": "npm:^0.10.0"
     "@react-native-replicache/deep-freeze": "npm:^1.1.0"
     "@react-navigation/native": "npm:^7.0.0"
     "@react-navigation/stack": "npm:^7.0.0"
@@ -3107,12 +3107,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@neondatabase/serverless@npm:^0.9.4":
-  version: 0.9.4
-  resolution: "@neondatabase/serverless@npm:0.9.4"
+"@neondatabase/serverless@npm:^0.10.0":
+  version: 0.10.4
+  resolution: "@neondatabase/serverless@npm:0.10.4"
   dependencies:
     "@types/pg": "npm:8.11.6"
-  checksum: 10c0/871b30515fec97598da06ea0c7e0d7c5a7f35bd0ee2c2f0e1f3b5a051d1c8157c601687e7baeb708bac50ab0cb72aa4127e8fa3d37086a168d8af885fc71dccc
+  checksum: 10c0/699364f923cf24baf72a0ba87018227b3c0ec3771069d4507b42ac059e657ed5074da7e96afa8d45683f27eb380fad41e63238c566f9709e52ee38d791b51fe7
   languageName: node
   linkType: hard
 
