@@ -3907,6 +3907,39 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@oslojs/asn1@npm:1.0.0":
+  version: 1.0.0
+  resolution: "@oslojs/asn1@npm:1.0.0"
+  dependencies:
+    "@oslojs/binary": "npm:1.0.0"
+  checksum: 10c0/993856b931cb0087fa6a6323f09de388aa20fbab3322acdb178a7c35fcd05983c44c7a47bac7364cd96b45125c27586265e8fc9fec733d3183ffc56b6bec2634
+  languageName: node
+  linkType: hard
+
+"@oslojs/binary@npm:1.0.0":
+  version: 1.0.0
+  resolution: "@oslojs/binary@npm:1.0.0"
+  checksum: 10c0/d416a393af23f42b50c6f8412a3a6d94a84707c2006511abce1c4bed680c22ed2247ccb442b09237fa78ca06c355875573d1c08ccba2942f292ec0534310e4f8
+  languageName: node
+  linkType: hard
+
+"@oslojs/crypto@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "@oslojs/crypto@npm:1.0.1"
+  dependencies:
+    "@oslojs/asn1": "npm:1.0.0"
+    "@oslojs/binary": "npm:1.0.0"
+  checksum: 10c0/a1b3e4875f3df8bf357dd2b59e1d55ced099227bbeb0975b48bf8e001002780575c5df9e7c174bcc42f89713ed9ad4a965e181e835ff569ccaa3b258781a615b
+  languageName: node
+  linkType: hard
+
+"@oslojs/encoding@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "@oslojs/encoding@npm:1.1.0"
+  checksum: 10c0/5553a0974dca60e1a8b247b7b97abcb141cc7ee4e22444f424a07921d6a5f76a43c316f3ee669222787fdef6549f8749cc6d68ff5a631e2542521c56fe36417f
+  languageName: node
+  linkType: hard
+
 "@pkgjs/parseargs@npm:^0.11.0":
   version: 0.11.0
   resolution: "@pkgjs/parseargs@npm:0.11.0"
@@ -12904,11 +12937,12 @@ __metadata:
   linkType: hard
 
 "lucia@npm:^3.2.0":
-  version: 3.2.0
-  resolution: "lucia@npm:3.2.0"
+  version: 3.2.2
+  resolution: "lucia@npm:3.2.2"
   dependencies:
-    oslo: "npm:1.2.0"
-  checksum: 10c0/f4667785c59a365b0251b8f25eb55110aa0c2716bb05c6e01b072b476b6f0a29f5b9c48739a02eaba65dd0690accddec6ab0038fb47bdcd11773434195531c91
+    "@oslojs/crypto": "npm:^1.0.1"
+    "@oslojs/encoding": "npm:^1.1.0"
+  checksum: 10c0/e62530f8b9d949116a5cf9c71f28dcb10f3dbd5420695e6e4556f7c9057b84a17067277e51bd5ea0bdedd756bc5956410aa5a97893d98a5ba2143ffa954275e1
   languageName: node
   linkType: hard
 
@@ -14169,16 +14203,6 @@ __metadata:
     os-homedir: "npm:^1.0.0"
     os-tmpdir: "npm:^1.0.0"
   checksum: 10c0/b33ed4b77e662f3ee2a04bf4b56cad2107ab069dee982feb9e39ad44feb9aa0cf1016b9ac6e05d0d84c91fa496798fe48dd05a33175d624e51668068b9805302
-  languageName: node
-  linkType: hard
-
-"oslo@npm:1.2.0":
-  version: 1.2.0
-  resolution: "oslo@npm:1.2.0"
-  dependencies:
-    "@node-rs/argon2": "npm:1.7.0"
-    "@node-rs/bcrypt": "npm:1.9.0"
-  checksum: 10c0/5f6971dfacf20e742d9422eddb63668b2063aadc6ef3a0c81150072487273ff2570a34e31234982b5590d0947c15242b6418ae50f1954bc4f13c38fb44f39be6
   languageName: node
   linkType: hard
 
