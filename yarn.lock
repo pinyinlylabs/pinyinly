@@ -8845,8 +8845,8 @@ __metadata:
   linkType: hard
 
 "drizzle-orm@npm:^0.38.2":
-  version: 0.38.2
-  resolution: "drizzle-orm@npm:0.38.2"
+  version: 0.38.3
+  resolution: "drizzle-orm@npm:0.38.3"
   peerDependencies:
     "@aws-sdk/client-rds-data": ">=3"
     "@cloudflare/workers-types": ">=4"
@@ -8935,7 +8935,7 @@ __metadata:
       optional: true
     sqlite3:
       optional: true
-  checksum: 10c0/9907de2fc7cf78b006703b91ad4428d4bb59111598af49492139f99585e5c7f0d9278b4266dc53ffcb0ea7e290db7b21f697f364389919f72b8c3dd9d139337b
+  checksum: 10c0/c95aaa5b696961bfb9a30abfcad0ac67fbdbc3caaaa0d23993e7f706677d910b613becdd0067abdabc65491505aa912f5426620cad82abf30ca1001f6bab002d
   languageName: node
   linkType: hard
 
