@@ -146,3 +146,31 @@ state in `drizzle.__drizzle_migrations`.
 
 Copy the timestamp from `_journal.json`, and the hash is the lower-case SHA256
 of the `.sql` migration file.
+
+## Debugging API server running on Vercel
+
+There have been compatibility issues between @expo/server and Vercel in the
+past. To help debug these it's useful to run the Vercel server locally in a
+JavaScript Debug Terminal.
+
+To do this you need build the Expo web output, and then point `app/api/index.cjs` to the output directory, then run the vercel dev server.
+
+For example you can run something like this:
+
+```sh
+cd projects/app
+moon run buildVercelExpo --cache=write
+```
+
+Now edit `app/api/index.cjs` to point to it:
+
+```diff
+-build: require(`path`).join(__dirname, `../dist/vercel/server`),
++build: require(`path`).join(__dirname, `../dist/.cache/vercel-expo/server`),
+```
+
+Finally run the vercel dev server: (e.g. with extra logging)
+
+```sh
+DEBUG=inngest:* INNGEST_DEV=1 npx vercel dev --listen 8081
+```

@@ -4,18 +4,13 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-patchedDependencies:
-  '@expo/server@0.4.3':
-    hash: at4fdynffkaw4r7ro4imf5psye
-    path: patches/@expo__server@0.4.3.patch
-
 importers:
 
   .:
     dependencies:
       '@expo/server':
-        specifier: ^0.4.3
-        version: 0.4.3(patch_hash=at4fdynffkaw4r7ro4imf5psye)
+        specifier: ^0.5.0
+        version: 0.5.0
       '@sentry/core':
         specifier: ^8.48.0
         version: 8.48.0
@@ -25,8 +20,8 @@ importers:
 
 packages:
 
-  '@expo/server@0.4.3':
-    resolution: {integrity: sha512-5mzMLGLfh3vAYrzO00ujpclk/N8j4xIBeFNyNURYyqa+q/gSUqRuJdHC0i/w8At1cITFGJGiId0eXlu7/S4jRw==}
+  '@expo/server@0.5.0':
+    resolution: {integrity: sha512-bfo5udr9C2feCn+vGQ9LvjRD2zFjMyBEnMWDZLYr5D8eCjqLjazGBpPKOVjWOhFR2SshKA3hUBkWEYrVpun0NQ==}
 
   '@opentelemetry/api-logs@0.53.0':
     resolution: {integrity: sha512-8HArjKx+RaAI8uEIgcORbZIPklyh1YLjPSBus8hjRmvLi6DeFzgOcdZ7KwPabKj8mXF8dX0hyfAyGfycz0DbFw==}
@@ -247,8 +242,8 @@ packages:
   '@prisma/instrumentation@5.22.0':
     resolution: {integrity: sha512-LxccF392NN37ISGxIurUljZSh1YWnphO34V5a0+T7FVQG2u9bhAXRTJpgmQ3483woVhkraQZFF7cbRrpbw/F4Q==}
 
-  '@remix-run/node@2.10.1':
-    resolution: {integrity: sha512-kuKh9bbivrAEbsiYNlm3x03O1Jpgi+Ux8zR2cig5U2DIbG43ylgX9vQiLp2ZNhQ0xoJ0C241x7d7DpdPfyrgEA==}
+  '@remix-run/node@2.15.2':
+    resolution: {integrity: sha512-NS/h5uxje7DYCNgcKqKAiUhf0r2HVnoYUBWLyIIMmCUP1ddWurBP6xTPcWzGhEvV/EvguniYi1wJZ5+X8sonWw==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       typescript: ^5.1.0
@@ -256,12 +251,12 @@ packages:
       typescript:
         optional: true
 
-  '@remix-run/router@1.17.1':
-    resolution: {integrity: sha512-mCOMec4BKd6BRGBZeSnGiIgwsbLGp3yhVqAD8H+PxiRNEHgDpZb8J1TnrSDlg97t0ySKMQJTHCWBCmBpSmkF6Q==}
+  '@remix-run/router@1.21.0':
+    resolution: {integrity: sha512-xfSkCAchbdG5PnbrKqFWwia4Bi61nH+wm8wLEqfHDyp7Y3dZzgqS2itV8i4gAq9pC2HsTpwyBC6Ds8VHZ96JlA==}
     engines: {node: '>=14.0.0'}
 
-  '@remix-run/server-runtime@2.10.1':
-    resolution: {integrity: sha512-jINOmovnwPdllhOm2PU0iTDP9MXwKLit9Ifq3EWjdqs+Bu1zwA3TTRDRX6x9V0OGpM3wiByd80zEmHZ5sZy7hQ==}
+  '@remix-run/server-runtime@2.15.2':
+    resolution: {integrity: sha512-OqiPcvEnnU88B8b1LIWHHkQ3Tz2GDAmQ1RihFNQsbrFKpDsQLkw0lJlnfgKA/uHd0CEEacpfV7C9qqJT3V6Z2g==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       typescript: ^5.1.0
@@ -545,8 +540,8 @@ packages:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
 
-  turbo-stream@2.2.0:
-    resolution: {integrity: sha512-FKFg7A0To1VU4CH9YmSMON5QphK0BXjSoiC7D9yMh+mEEbXLUP9qJ4hEt1qcjKtzncs1OpcnjZO8NgrlVbZH+g==}
+  turbo-stream@2.4.0:
+    resolution: {integrity: sha512-FHncC10WpBd2eOmGwpmQsWLDoK4cqsA/UT/GqNoaKOQnT8uzhtCbg3EoUDMvqpOSAI0S26mr0rkjzbOO6S3v1g==}
 
   undici-types@6.20.0:
     resolution: {integrity: sha512-Ny6QZ2Nju20vw1SRHe3d9jVu6gJ+4e3+MMpqu7pqE5HT6WsTSlce++GQmK5UXS8mzV8DSYHrQH+Xrf2jVcuKNg==}
@@ -575,9 +570,9 @@ packages:
 
 snapshots:
 
-  '@expo/server@0.4.3(patch_hash=at4fdynffkaw4r7ro4imf5psye)':
+  '@expo/server@0.5.0':
     dependencies:
-      '@remix-run/node': 2.10.1
+      '@remix-run/node': 2.15.2
       abort-controller: 3.0.0
       debug: 4.3.5
       source-map-support: 0.5.21
@@ -873,9 +868,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@remix-run/node@2.10.1':
+  '@remix-run/node@2.15.2':
     dependencies:
-      '@remix-run/server-runtime': 2.10.1
+      '@remix-run/server-runtime': 2.15.2
       '@remix-run/web-fetch': 4.4.2
       '@web3-storage/multipart-parser': 1.0.0
       cookie-signature: 1.2.1
@@ -883,17 +878,17 @@ snapshots:
       stream-slice: 0.1.2
       undici: 6.19.2
 
-  '@remix-run/router@1.17.1': {}
+  '@remix-run/router@1.21.0': {}
 
-  '@remix-run/server-runtime@2.10.1':
+  '@remix-run/server-runtime@2.15.2':
     dependencies:
-      '@remix-run/router': 1.17.1
+      '@remix-run/router': 1.21.0
       '@types/cookie': 0.6.0
       '@web3-storage/multipart-parser': 1.0.0
       cookie: 0.6.0
       set-cookie-parser: 2.6.0
       source-map: 0.7.4
-      turbo-stream: 2.2.0
+      turbo-stream: 2.4.0
 
   '@remix-run/web-blob@3.1.0':
     dependencies:
@@ -1197,7 +1192,7 @@ snapshots:
 
   supports-preserve-symlinks-flag@1.0.0: {}
 
-  turbo-stream@2.2.0: {}
+  turbo-stream@2.4.0: {}
 
   undici-types@6.20.0: {}
 
