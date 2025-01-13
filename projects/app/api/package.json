@@ -1,17 +1,12 @@
 {
   "module": "commonjs",
   "dependencies": {
-    "@expo/server": "^0.4.3",
+    "@expo/server": "^0.5.0",
     "@sentry/core": "^8.48.0",
     "@sentry/node": "^8.48.0"
   },
   "engines": {
     "node": "22.x"
   },
-  "packageManager": "pnpm@9.15.3",
-  "pnpm": {
-    "patchedDependencies": {
-      "@expo/server@0.4.3": "patches/@expo__server@0.4.3.patch"
-    }
-  }
+  "packageManager": "pnpm@9.15.3"
 }
