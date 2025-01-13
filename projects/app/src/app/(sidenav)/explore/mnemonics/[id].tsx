@@ -38,7 +38,7 @@ export default function MnemonicIdPage() {
   );
 
   const group = query.data?.initials.find((x) =>
-    x.initials.find((y) => y.includes(id)),
+    x.initials.some((y) => y.includes(id)),
   );
 
   return (
