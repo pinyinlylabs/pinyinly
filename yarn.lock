@@ -4828,11 +4828,11 @@ __metadata:
   linkType: hard
 
 "@react-native-replicache/deep-freeze@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "@react-native-replicache/deep-freeze@npm:1.1.0"
+  version: 1.3.0
+  resolution: "@react-native-replicache/deep-freeze@npm:1.3.0"
   peerDependencies:
-    replicache: ">=12.2.0"
-  checksum: 10c0/438e21631f178264bdae342231cbe9af719ae862ad9b4bfc84ca8db787672ea951cd7bf896128c4c4146f6ea95f9aa68d1ec86f4350b34c6e788e9f48767bd55
+    replicache: ">=15.0.0"
+  checksum: 10c0/288226e16e7e64f8c70f6097438c070b68315e4e69ea1200b5bee00abf58e3893185d95af17c02338c92fcceb2ec795360ec542861b98b42b58d59d2b35ae999
   languageName: node
   linkType: hard
 
