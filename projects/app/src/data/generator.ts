@@ -251,7 +251,7 @@ function getOtherChoices<
   for (const radical of shuffle(choices)) {
     if (!result.has(radical)) {
       const newKeys = uniqueBy.fn(radical);
-      if (!newKeys.some((k, i) => seenKeys[i]?.has(k))) {
+      if (!newKeys.some((k, i) => seenKeys[i]?.has(k) ?? false)) {
         newKeys.forEach((k, i) => seenKeys[i]?.add(k));
         result.add(radical);
       }
