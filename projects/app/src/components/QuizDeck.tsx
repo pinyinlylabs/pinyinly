@@ -115,7 +115,7 @@ export const QuizDeck = ({ questions }: { questions: readonly Question[] }) => {
             rating,
           })
           .catch((e: unknown) => {
-            console.error(e);
+            console.error(`Could not add skill review`, e);
           });
       }
 
