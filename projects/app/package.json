@@ -31,7 +31,7 @@
     "@types/apple-signin-api": "^1.5.3",
     "array-from-async": "^3.0.0",
     "color": "^4.2.3",
-    "date-fns": "^3.6.0",
+    "date-fns": "^4.0.0",
     "drizzle-orm": "^0.38.2",
     "expo": "~52.0.23",
     "expo-apple-authentication": "^7.1.2",
