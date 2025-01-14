@@ -8,7 +8,7 @@ export function hapticImpactIfMobile() {
     // exception and will crash the app.
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(
       (e: unknown) => {
-        console.error(e);
+        console.error(`Could not run haptic impact.`, e);
       },
     );
   }

@@ -128,9 +128,9 @@ function RootLayout() {
 
   useEffect(() => {
     if (fontsLoaded || fontError) {
-      SplashScreen.hideAsync().catch((e: unknown) =>
-        Sentry.captureException(e),
-      );
+      SplashScreen.hideAsync().catch((e: unknown) => {
+        console.error(`Could not hide splash screen`, e);
+      });
     }
   }, [fontsLoaded, fontError]);
 
