@@ -1,9 +1,9 @@
 import { SrsType } from "@/data/model";
-import { cookieSchema, r, RizzleReplicache } from "@/data/rizzle";
 import { schema } from "@/data/rizzleSchema";
 import { replicacheLicenseKey } from "@/env";
 import { AppRouter } from "@/server/routers/_app";
 import { nextReview, UpcomingReview } from "@/util/fsrs";
+import { cookieSchema, r, RizzleReplicache } from "@/util/rizzle";
 import { trpc } from "@/util/trpc";
 import { invariant } from "@haohaohow/lib/invariant";
 import { QueryKey, useQuery, useQueryClient } from "@tanstack/react-query";

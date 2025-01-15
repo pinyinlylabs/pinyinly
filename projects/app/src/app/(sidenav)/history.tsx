@@ -1,4 +1,5 @@
 import { useRizzleQuery } from "@/components/ReplicacheContext";
+import { sortComparatorNumber } from "@/util/collections";
 import { Rating } from "@/util/fsrs";
 import fromAsync from "array-from-async";
 import reverse from "lodash/reverse";
@@ -12,13 +13,13 @@ export default function HistoryPage() {
     [`HistoryPage`, `skillState`],
     async (r, tx) => {
       const result = [];
-      for await (const [key, value] of r.query.skillState.byDue(tx)) {
+      for await (const [key, value] of r.query.skillState.scan(tx)) {
         result.push([key, value] as const);
         if (result.length >= 50) {
           break;
         }
       }
-      return result;
+      return result.sort(sortComparatorNumber((x) => x[1].due.getTime()));
     },
   );
 

@@ -27,7 +27,7 @@ export default function ReviewsPage() {
 
   const nextNotYetDueSkillState = useQueryOnce(async (tx) => {
     const now = new Date();
-    for await (const [{ skill }, skillState] of r.query.skillState.byDue(tx)) {
+    for await (const [{ skill }, skillState] of r.query.skillState.scan(tx)) {
       if (skillState.due <= now) {
         continue;
       }

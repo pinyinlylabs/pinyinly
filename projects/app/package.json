@@ -7,11 +7,7 @@
     "noop": "echo 1"
   },
   "imports": {
-    "#data/*.ts": "./src/data/*.ts",
-    "#dictionary/*.ts": "./src/dictionary/*.ts",
-    "#server/*.ts": "./src/server/*.ts",
-    "#server/lib/*.ts": "./src/server/lib/*.ts",
-    "#util/*.ts": "./src/util/*.ts"
+    "#*.ts": "./src/*.ts"
   },
   "dependencies": {
     "@expo/metro-runtime": "~4.0.0",

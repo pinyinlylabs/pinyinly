@@ -20,7 +20,7 @@ export async function questionsForReview(
   const now = new Date();
   const skillTypesFilter =
     options?.skillTypes != null ? new Set(options.skillTypes) : null;
-  for await (const [{ skill }, skillState] of r.query.skillState.byDue(tx)) {
+  for await (const [{ skill }, skillState] of r.query.skillState.scan(tx)) {
     // Only consider skills that are due for review.
     if (options?.dueBeforeNow === true && skillState.due > now) {
       continue;

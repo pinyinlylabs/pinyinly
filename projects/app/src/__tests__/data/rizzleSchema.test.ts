@@ -1,6 +1,6 @@
 import { SkillType } from "#data/model.ts";
-import { r } from "#data/rizzle.ts";
 import { rSkill, rSkillType } from "#data/rizzleSchema.ts";
+import { r } from "#util/rizzle.ts";
 import assert from "node:assert/strict";
 import test, { TestContext } from "node:test";
 import { ReadTransaction, WriteTransaction } from "replicache";
