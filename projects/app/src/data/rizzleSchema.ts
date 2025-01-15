@@ -157,76 +157,63 @@ const rSrsState = memoize(
   // ]),
 );
 
-//
-// Skills
-//
-
-export const skillRating = r.entity(`sr/[skill]/[createdAt]`, {
-  skill: rSkill(),
-  createdAt: r.datetime(),
-
-  rating: rFsrsRating.alias(`r`),
-});
-
-export const skillState = r.entity(`s/[skill]`, {
-  skill: rSkill(),
-
-  createdAt: r.timestamp().alias(`c`),
-  srs: rSrsState().nullable().alias(`s`),
-  due: r.timestamp().alias(`d`),
-});
-
-export const initSkillState = r
-  .mutator({
-    skill: rSkill().alias(`s`),
-    now: r.timestamp().alias(`n`),
-  })
-  .alias(
-    // Original deprecated name, kept for compatibility.
-    `addSkillState`,
-  );
-
-export const reviewSkill = r.mutator({
-  skill: rSkill().alias(`s`),
-  rating: rFsrsRating.alias(`r`),
-  now: r.timestamp().alias(`n`),
-});
-
-//
-// Pinyin mnemonics
-//
-
-export const pinyinInitialAssociation = r.entity(`pi/[initial]`, {
-  initial: r.string(),
-  name: r.string().alias(`n`),
-});
-
-export const pinyinFinalAssociation = r.entity(`pf/[final]`, {
-  final: r.string(),
-  name: r.string().alias(`n`),
-});
-
-export const setPinyinInitialAssociation = r.mutator({
-  initial: r.string().alias(`i`),
-  name: r.string().alias(`n`),
-  now: r.timestamp().alias(`t`),
-});
-
-export const setPinyinFinalAssociation = r.mutator({
-  final: r.string().alias(`f`),
-  name: r.string().alias(`n`),
-  now: r.timestamp().alias(`t`),
-});
-
 // --
 
 export const schema = {
-  initSkillState,
-  pinyinFinalAssociation,
-  pinyinInitialAssociation,
-  setPinyinInitialAssociation,
-  setPinyinFinalAssociation,
-  reviewSkill,
-  skillRating,
-  skillState,
+  version: `3`,
+
+  //
+  // Skills
+  //
+  skillRating: r.entity(`sr/[skill]/[createdAt]`, {
+    skill: rSkill(),
+    createdAt: r.datetime(),
+
+    rating: rFsrsRating.alias(`r`),
+  }),
+  skillState: r.entity(`s/[skill]`, {
+    skill: rSkill(),
+
+    createdAt: r.timestamp().alias(`c`),
+    srs: rSrsState().nullable().alias(`s`),
+    due: r.timestamp().alias(`d`),
+  }),
+
+  //
+  // Pinyin mnemonics
+  //
+  pinyinFinalAssociation: r.entity(`pf/[final]`, {
+    final: r.string(),
+    name: r.string().alias(`n`),
+  }),
+  pinyinInitialAssociation: r.entity(`pi/[initial]`, {
+    initial: r.string(),
+    name: r.string().alias(`n`),
+  }),
+
+  // Mutators
+  setPinyinInitialAssociation: r.mutator({
+    initial: r.string().alias(`i`),
+    name: r.string().alias(`n`),
+    now: r.timestamp().alias(`t`),
+  }),
+  setPinyinFinalAssociation: r.mutator({
+    final: r.string().alias(`f`),
+    name: r.string().alias(`n`),
+    now: r.timestamp().alias(`t`),
+  }),
+  reviewSkill: r.mutator({
+    skill: rSkill().alias(`s`),
+    rating: rFsrsRating.alias(`r`),
+    now: r.timestamp().alias(`n`),
+  }),
+  initSkillState: r
+    .mutator({
+      skill: rSkill().alias(`s`),
+      now: r.timestamp().alias(`n`),
+    })
+    .alias(
+      // Original deprecated name, kept for compatibility.
+      `addSkillState`,
+    ),
 };

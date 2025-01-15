@@ -497,7 +497,7 @@ export type RizzleAnyEntity = RizzleEntity<string, any>;
 
 export type RizzleRawObject = Record<string, RizzleType>;
 
-export type RizzleRawSchema = Record<string, RizzleRoot>;
+export type RizzleRawSchema = Record<string, RizzleRoot | string>;
 
 export type RizzleObjectInput<T extends RizzleRawObject> = {
   [K in keyof T]: T[K][`_input`];
@@ -736,10 +736,13 @@ export type RizzleReplicache<
 };
 
 const replicache = <
-  S extends RizzleRawSchema,
+  S extends { version: string; [key: string]: RizzleRoot | string },
   _MutatorDefs extends MutatorDefs = MutatorDefs,
 >(
-  replicacheOptions: Omit<ReplicacheOptions<never>, `indexes` | `mutators`>,
+  replicacheOptions: Omit<
+    ReplicacheOptions<never>,
+    `indexes` | `mutators` | `schemaVersion`
+  >,
   schema: S,
   mutators: RizzleReplicacheMutators<S>,
   ctor?: (options: ReplicacheOptions<MutatorDefs>) => Replicache<_MutatorDefs>,
@@ -846,6 +849,7 @@ const replicache = <
 
   const options = {
     ...replicacheOptions,
+    schemaVersion: schema.version,
     indexes,
     mutators: mutatorsWithMarshaling as _MutatorDefs,
   };

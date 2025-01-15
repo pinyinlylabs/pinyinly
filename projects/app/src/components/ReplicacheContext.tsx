@@ -37,7 +37,6 @@ export function ReplicacheProvider({ children }: React.PropsWithChildren) {
     return r.replicache(
       {
         name: `hao`,
-        schemaVersion: `3`,
         licenseKey: replicacheLicenseKey,
         kvStore,
         // No need for a custom logSink here, just using normal console.*
