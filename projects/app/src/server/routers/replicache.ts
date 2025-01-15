@@ -1,10 +1,10 @@
+import { withDrizzle } from "@/server/lib/db";
 import {
   pullRequestSchema,
   pullResponseSchema,
   pushRequestSchema,
   pushResponseSchema,
-} from "@/data/rizzle";
-import { withDrizzle } from "@/server/lib/db";
+} from "@/util/rizzle";
 import { pull, push } from "../lib/replicache";
 import { authedProcedure, router } from "../lib/trpc";
 

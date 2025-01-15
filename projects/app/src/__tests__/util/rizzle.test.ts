@@ -15,7 +15,7 @@ import {
   RizzleReplicacheMutators,
   RizzleReplicacheQuery,
   RizzleTypeAlias,
-} from "#data/rizzle.ts";
+} from "#util/rizzle.ts";
 import { IsEqual } from "#util/types.ts";
 import mapValues from "lodash/mapValues";
 import assert from "node:assert/strict";
@@ -1238,6 +1238,14 @@ typeChecks<RizzleIndexNames<never>>(() => {
     >,
     `byDate`
   >;
+});
+
+typeChecks(`.indexed() not allowed a non-string marshaling properties`, () => {
+  r.entity(`foo/[id]`, {
+    id: r.string(),
+    // @ts-expect-error can't index numbers
+    count: r.literal(5, r.number()).indexed(`c`),
+  });
 });
 
 typeChecks<RizzleObjectInput<never>>(() => {

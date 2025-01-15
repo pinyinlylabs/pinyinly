@@ -1,8 +1,8 @@
 import { Rating } from "@/util/fsrs";
+import { invalid, r, RizzleCustom } from "@/util/rizzle";
 import memoize from "lodash/memoize";
 import { z } from "zod";
 import { Skill, SkillType, SrsType } from "./model";
-import { invalid, r, RizzleCustom } from "./rizzle";
 
 export const rSkillType = r.enum(SkillType, {
   [SkillType.RadicalToEnglish]: `re`,

@@ -1,3 +1,4 @@
+import * as r from "@/data/rizzleSchema";
 import {
   ClientStateNotFoundResponse,
   Cookie,
@@ -8,8 +9,7 @@ import {
   PushRequest,
   PushResponse,
   VersionNotSupportedResponse,
-} from "@/data/rizzle";
-import * as r from "@/data/rizzleSchema";
+} from "@/util/rizzle";
 import { invariant } from "@haohaohow/lib/invariant";
 import makeDebug from "debug";
 import { eq, inArray, sql } from "drizzle-orm";
