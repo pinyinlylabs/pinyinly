@@ -10,7 +10,7 @@
     },
     {
       "description": "tooling deps defaults: automerge, wait 3 days",
-      "matchManagers": ["npm"],
+      "matchDatasources": ["npm"],
       "matchDepTypes": ["devDependencies", "packageManager"],
       "minimumReleaseAge": "3 days",
       "internalChecksFilter": "strict",
@@ -18,14 +18,14 @@
     },
     {
       "description": "tooling deps major updates: manual merge",
-      "matchManagers": ["npm"],
+      "matchDatasources": ["npm"],
       "matchDepTypes": ["devDependencies", "packageManager"],
       "matchUpdateTypes": ["major"],
       "automerge": false
     },
     {
       "description": "runtime deps defaults: automerge, wait 7 days",
-      "matchManagers": ["npm"],
+      "matchDatasources": ["npm"],
       "matchDepTypes": ["dependencies"],
       "minimumReleaseAge": "7 days",
       "internalChecksFilter": "strict",
@@ -33,7 +33,7 @@
     },
     {
       "description": "runtime deps major updates: manual merge",
-      "matchManagers": ["npm"],
+      "matchDatasources": ["npm"],
       "matchDepTypes": ["dependencies"],
       "matchUpdateTypes": ["major"],
       "automerge": false
