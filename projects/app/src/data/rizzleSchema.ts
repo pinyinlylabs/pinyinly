@@ -173,7 +173,7 @@ export const skillState = r.entity(`s/[skill]`, {
 
   createdAt: r.timestamp().alias(`c`),
   srs: rSrsState().nullable().alias(`s`),
-  due: r.timestamp().alias(`d`).indexed(`byDue`),
+  due: r.timestamp().alias(`d`),
 });
 
 export const initSkillState = r

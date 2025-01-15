@@ -59,9 +59,12 @@ abstract class RizzleType<
     return RizzleNullable.create(this);
   }
 
-  indexed<IndexName extends string>(
-    indexName: IndexName,
-  ): RizzleIndexed<this, IndexName> {
+  indexed<
+    // Replicache only supports indexing string values (i.e. so the Marshaled
+    // value must be string)
+    This extends RizzleType<RizzleTypeDef, unknown, string>,
+    IndexName extends string,
+  >(this: This, indexName: IndexName) {
     return RizzleIndexed.create(this, indexName);
   }
 }
@@ -697,7 +700,7 @@ const literal = <T extends RizzleType, const V extends T[`_input`]>(
   value: V,
   type: T,
 ) =>
-  RizzleCustom.create(
+  RizzleCustom.create<V, T[`_marshaled`], V>(
     z.literal(value).pipe(type.getMarshal()),
     type
       .getUnmarshal()

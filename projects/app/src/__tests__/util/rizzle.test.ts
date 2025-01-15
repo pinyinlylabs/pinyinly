@@ -511,7 +511,7 @@ void test(`object() with alias`, async (t) => {
     author: r.object({
       name: r.string(),
       email: r.string(`e`),
-      id: r.number(`i`).indexed(`byAuthorId`),
+      id: r.string(`i`).indexed(`byAuthorId`),
     }),
   });
 
@@ -521,16 +521,16 @@ void test(`object() with alias`, async (t) => {
   await posts.set(
     tx,
     { id: `1` },
-    { author: { name: `foo`, email: `f@o`, id: 1 } },
+    { author: { name: `foo`, email: `f@o`, id: `1` } },
   );
   const [, marshaledData] = tx.set.mock.calls[0]!.arguments;
   assert.deepEqual(marshaledData, {
-    author: { name: `foo`, e: `f@o`, i: 1 },
+    author: { name: `foo`, e: `f@o`, i: `1` },
   });
 
   tx.get.mock.mockImplementationOnce(async () => marshaledData);
   assert.deepEqual(await posts.get(tx, { id: `1` }), {
-    author: { name: `foo`, email: `f@o`, id: 1 },
+    author: { name: `foo`, email: `f@o`, id: `1` },
   });
 });
 
@@ -673,7 +673,7 @@ typeChecks<RizzleReplicacheMutators<never>>(
     const schema = {
       posts: r.entity(`p/[id]`, {
         id: r.string(),
-        rank: r.number(`r`).indexed(`byRank`),
+        rank: r.number(`r`),
       }),
       createPost: r
         .mutator({
@@ -735,12 +735,12 @@ void test(`replicache()`, async (t) => {
   const schema = {
     posts: r.entity(`p/[id]`, {
       id: r.string(),
-      rank: r.number(`r`).indexed(`byRank`),
+      title: r.string(`r`).indexed(`byTitle`),
     }),
     createPost: r
       .mutator({
         id: r.string(),
-        rank: r.number(`r`),
+        title: r.string(`r`),
       })
       .alias(`cp`),
   };
@@ -753,10 +753,10 @@ void test(`replicache()`, async (t) => {
     {
       async createPost(db, options) {
         true satisfies IsEqual<typeof db.tx, WriteTransaction>;
-        true satisfies IsEqual<typeof options, { id: string; rank: number }>;
+        true satisfies IsEqual<typeof options, { id: string; title: string }>;
         assert.deepEqual(await db.posts.get({ id: `2` }), undefined);
-        assert.deepEqual(options, { id: `1`, rank: 5 });
-        await db.posts.set({ id: options.id }, { rank: options.rank });
+        assert.deepEqual(options, { id: `1`, title: `hello world` });
+        await db.posts.set({ id: options.id }, { title: options.title });
         checkPointsReached++;
       },
     },
@@ -766,7 +766,7 @@ void test(`replicache()`, async (t) => {
         { cp: `function` },
       );
       assert.deepEqual(options.indexes, {
-        "posts.byRank": {
+        "posts.byTitle": {
           allowEmpty: false,
           jsonPointer: `/r`,
           prefix: `p/`,
@@ -778,7 +778,7 @@ void test(`replicache()`, async (t) => {
     },
   );
 
-  await db.mutate.createPost({ id: `1`, rank: 5 });
+  await db.mutate.createPost({ id: `1`, title: `hello world` });
   true satisfies IsEqual<
     ReturnType<typeof db.mutate.createPost>,
     Promise<void>
@@ -794,12 +794,12 @@ void test(`replicache()`, async (t) => {
     tx.scan.mock.mockImplementationOnce((options: any): any => {
       checkPointsReached++;
       assert.deepEqual(options, {
-        indexName: `posts.byRank`,
+        indexName: `posts.byTitle`,
         start: undefined,
       });
       return {
         async *entries() {
-          const value = [[5, `p/1`], { r: 5 }];
+          const value = [[`hello world`, `p/1`], { r: `hello world` }];
           yield await Promise.resolve(value);
         },
       };
@@ -808,10 +808,10 @@ void test(`replicache()`, async (t) => {
     tx.scan.mock.mockImplementationOnce((options: any): any => {
       checkPointsReached++;
       assert.deepEqual(options, {
-        indexName: `posts.byRank`,
+        indexName: `posts.byTitle`,
         start: {
           exclusive: true,
-          key: 5,
+          key: `hello world`,
         },
       });
       return {
@@ -822,10 +822,10 @@ void test(`replicache()`, async (t) => {
     }, 1);
 
     const results = [];
-    for await (const post of db.query.posts.byRank(tx)) {
+    for await (const post of db.query.posts.byTitle(tx)) {
       results.push(post);
     }
-    assert.deepEqual(results, [[{ id: `1` }, { rank: 5 }]]);
+    assert.deepEqual(results, [[{ id: `1` }, { title: `hello world` }]]);
   }
 
   {
@@ -847,11 +847,11 @@ void test(`replicache()`, async (t) => {
     using tx = makeMockTx(t);
 
     tx.get.mock.mockImplementationOnce(async (x: unknown) =>
-      x === `p/1` ? { r: 5 } : undefined,
+      x === `p/1` ? { r: `hello world` } : undefined,
     );
 
     const post = await db.query.posts.get(tx, { id: `1` });
-    assert.deepEqual(post, { rank: 5 });
+    assert.deepEqual(post, { title: `hello world` });
   }
 
   {
@@ -861,11 +861,11 @@ void test(`replicache()`, async (t) => {
     using tx = makeMockTx(t);
 
     tx.get.mock.mockImplementationOnce(async (x: unknown) =>
-      x === `p/1` ? { r: 5 } : undefined,
+      x === `p/1` ? { r: `hello world` } : undefined,
     );
 
     const post = await db.query.posts.get(tx, { id: `1` });
-    assert.deepEqual(post, { rank: 5 });
+    assert.deepEqual(post, { title: `hello world` });
   }
 
   assert.equal(checkPointsReached, 4);
@@ -1241,11 +1241,26 @@ typeChecks<RizzleIndexNames<never>>(() => {
 });
 
 typeChecks(`.indexed() not allowed a non-string marshaling properties`, () => {
-  r.entity(`foo/[id]`, {
-    id: r.string(),
-    // @ts-expect-error can't index numbers
-    count: r.literal(5, r.number()).indexed(`c`),
-  });
+  // @ts-expect-error can't index numbers
+  r.number().indexed(`c`);
+  // @ts-expect-error can't index literal number
+  r.literal(5, r.number()).indexed(`c`);
+
+  // can strings
+  r.string().indexed(`c`);
+  // can index literal strings
+  r.literal(`5`, r.string()).indexed(`c`);
+  // can index enum with string values
+  {
+    enum Colors {
+      RED,
+      BLUE,
+    }
+    r.enum(Colors, {
+      [Colors.RED]: `r`,
+      [Colors.BLUE]: `b`,
+    });
+  }
 });
 
 typeChecks<RizzleObjectInput<never>>(() => {
