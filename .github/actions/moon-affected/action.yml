@@ -36,3 +36,19 @@ runs:
       env:
         TARGET: ${{ inputs.target }}
       shell: bash
+
+    - name: Log match output
+      run: |
+        echo "Match output: ${{ steps.moon-query.outputs.match }}"
+      shell: bash
+
+    - name: Log target input
+      run: |
+        echo "Target input: ${{ inputs.target }}"
+      shell: bash
+
+    - name: Check if target is affected
+      id: target-affected
+      run: |
+        echo "Target affected: ${{ steps.moon-query.outputs.match == inputs.target }}"
+      shell: bash
