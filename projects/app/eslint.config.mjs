@@ -23,7 +23,7 @@ export default tseslint.config(
     // note - intentionally uses computed syntax to make it easy to sort the keys
     plugins: {
       [`@inngest`]: inngestPlugin,
-      [`@noNodeImports`]: tseslint.plugin, // an extra scope for no-restricted-imports so they don't clobber other configs
+      [`@expoCodeImports`]: tseslint.plugin, // an extra scope for no-restricted-imports so they don't clobber other configs
       [`@stylistic`]: stylisticPlugin,
       [`@typescript-eslint`]: tseslint.plugin,
       [`import`]: importPlugin,
@@ -248,11 +248,22 @@ export default tseslint.config(
     files: [`**/*.{cjs,js,mjs,ts,tsx}`],
     ignores: [`*.*`, `bin/**/*`, `src/__tests__/**/*`],
     rules: {
-      "@noNodeImports/no-restricted-imports": [
+      "@expoCodeImports/no-restricted-imports": [
         `error`,
-        ...builtinModules.flatMap((x) =>
-          x.startsWith(`node:`) ? [x] : [x, `node:` + x],
-        ),
+        {
+          paths: builtinModules
+            .flatMap((x) => (x.startsWith(`node:`) ? [x] : [x, `node:` + x]))
+            .map((name) => ({
+              name,
+              message: `Expo code is universal and doesn't support Node.js packages`,
+            })),
+          patterns: [
+            {
+              regex: `^#`,
+              message: `Expo code doesn't support subpath imports`,
+            },
+          ],
+        },
       ],
     },
   },

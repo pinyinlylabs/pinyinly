@@ -1,5 +1,5 @@
-import { sortComparatorNumber } from "#util/collections.ts";
 import { useRizzleQuery } from "@/components/ReplicacheContext";
+import { sortComparatorNumber } from "@/util/collections";
 import { Rating } from "@/util/fsrs";
 import fromAsync from "array-from-async";
 import reverse from "lodash/reverse";
