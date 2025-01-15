@@ -1,5 +1,5 @@
 import { SkillType } from "#data/model.ts";
-import * as r from "#data/rizzleSchema.ts";
+import { schema as r, rFsrsRating } from "#data/rizzleSchema.ts";
 import { Drizzle } from "#server/lib/db.ts";
 import { computeCvrEntities, pull, push } from "#server/lib/replicache.ts";
 import * as s from "#server/schema.ts";
@@ -28,7 +28,7 @@ void test(`push()`, async (t) => {
         profileId: ``,
         clientGroupId: ``,
         pushVersion: 1,
-        schemaVersion: `3`,
+        schemaVersion: r.version,
         mutations: [],
       });
 
@@ -41,7 +41,7 @@ void test(`push()`, async (t) => {
       profileId: ``,
       clientGroupId: ``,
       pushVersion: 1,
-      schemaVersion: `3`,
+      schemaVersion: r.version,
       mutations: [],
     });
   });
@@ -79,7 +79,7 @@ void test(`push()`, async (t) => {
           profileId: ``,
           clientGroupId: clientGroup.id,
           pushVersion: 1,
-          schemaVersion: `3`,
+          schemaVersion: r.version,
           mutations: [mut],
         }),
       );
@@ -89,7 +89,7 @@ void test(`push()`, async (t) => {
         profileId: ``,
         clientGroupId: clientGroup.id,
         pushVersion: 1,
-        schemaVersion: `3`,
+        schemaVersion: r.version,
         mutations: [mut],
       });
     },
@@ -115,7 +115,7 @@ void test(`push()`, async (t) => {
         profileId: ``,
         clientGroupId,
         pushVersion: 1,
-        schemaVersion: `3`,
+        schemaVersion: r.version,
         mutations: [mut],
       });
 
@@ -157,7 +157,7 @@ void test(`push()`, async (t) => {
       profileId: ``,
       clientGroupId,
       pushVersion: 1,
-      schemaVersion: `3`,
+      schemaVersion: r.version,
       mutations: [mut],
     });
 
@@ -209,7 +209,7 @@ void test(`push()`, async (t) => {
       profileId: ``,
       clientGroupId: clientGroup.id,
       pushVersion: 1,
-      schemaVersion: `3`,
+      schemaVersion: r.version,
       mutations: [mut],
     });
 
@@ -252,7 +252,7 @@ void test(`push()`, async (t) => {
         profileId: ``,
         clientGroupId: clientGroup.id,
         pushVersion: 1,
-        schemaVersion: `3`,
+        schemaVersion: r.version,
         mutations: [mut],
       }),
     );
@@ -289,7 +289,7 @@ void test(`push()`, async (t) => {
         profileId: ``,
         clientGroupId: clientGroup.id,
         pushVersion: 1,
-        schemaVersion: `3`,
+        schemaVersion: r.version,
         mutations: [mut],
       });
 
@@ -325,7 +325,7 @@ void test(`push()`, async (t) => {
       profileId: ``,
       clientGroupId: ``,
       pushVersion: 666,
-      schemaVersion: `3`,
+      schemaVersion: r.version,
       mutations: [],
     });
 
@@ -347,7 +347,7 @@ void test(`pull()`, async (t) => {
         profileId: ``,
         clientGroupId: ``,
         pullVersion: 1,
-        schemaVersion: `3`,
+        schemaVersion: r.version,
         cookie: null,
       });
 
@@ -363,7 +363,7 @@ void test(`pull()`, async (t) => {
       profileId: ``,
       clientGroupId,
       pullVersion: 1,
-      schemaVersion: `3`,
+      schemaVersion: r.version,
       cookie: null,
     });
 
@@ -413,7 +413,7 @@ void test(`pull()`, async (t) => {
         profileId: ``,
         clientGroupId: clientGroup.id,
         pullVersion: 1,
-        schemaVersion: `3`,
+        schemaVersion: r.version,
         cookie: null,
       });
 
@@ -448,7 +448,7 @@ void test(`pull()`, async (t) => {
         profileId: ``,
         clientGroupId,
         pushVersion: 1,
-        schemaVersion: `3`,
+        schemaVersion: r.version,
         mutations: [
           {
             id: 1,
@@ -466,7 +466,7 @@ void test(`pull()`, async (t) => {
         profileId: ``,
         clientGroupId,
         pullVersion: 1,
-        schemaVersion: `3`,
+        schemaVersion: r.version,
         cookie: null,
       });
       assert.ok(`cookie` in pull1);
@@ -479,7 +479,7 @@ void test(`pull()`, async (t) => {
         profileId: ``,
         clientGroupId,
         pushVersion: 1,
-        schemaVersion: `3`,
+        schemaVersion: r.version,
         mutations: [
           {
             id: 1,
@@ -497,7 +497,7 @@ void test(`pull()`, async (t) => {
         profileId: ``,
         clientGroupId,
         pullVersion: 1,
-        schemaVersion: `3`,
+        schemaVersion: r.version,
         cookie: null,
       });
       assert.ok(`cookie` in pull2);
@@ -511,7 +511,7 @@ void test(`pull()`, async (t) => {
         profileId: ``,
         clientGroupId,
         pullVersion: 1,
-        schemaVersion: `3`,
+        schemaVersion: r.version,
         cookie: pull1.cookie,
       });
       assert.ok(`cookie` in pull3);
@@ -524,7 +524,7 @@ void test(`pull()`, async (t) => {
         profileId: ``,
         clientGroupId,
         pullVersion: 1,
-        schemaVersion: `3`,
+        schemaVersion: r.version,
         cookie: pull3.cookie,
       });
       assert.ok(`cookie` in pull4);
@@ -559,7 +559,7 @@ void test(`pull()`, async (t) => {
       profileId: ``,
       clientGroupId,
       pullVersion: 1,
-      schemaVersion: `3`,
+      schemaVersion: r.version,
       cookie: null,
     });
 
@@ -609,7 +609,7 @@ void test(`pull()`, async (t) => {
       profileId: ``,
       clientGroupId,
       pullVersion: 1,
-      schemaVersion: `3`,
+      schemaVersion: r.version,
       cookie: null,
     });
 
@@ -621,7 +621,7 @@ void test(`pull()`, async (t) => {
       profileId: ``,
       clientGroupId,
       pullVersion: 1,
-      schemaVersion: `3`,
+      schemaVersion: r.version,
       cookie: pull1.cookie,
     });
 
@@ -654,7 +654,7 @@ void test(`pull()`, async (t) => {
             type: SkillType.EnglishToHanzi,
             hanzi: `我`,
           },
-          rating: r.rFsrsRating.marshal(Rating.Good),
+          rating: rFsrsRating.marshal(Rating.Good),
           createdAt: now,
         },
       ])
@@ -665,7 +665,7 @@ void test(`pull()`, async (t) => {
       profileId: ``,
       clientGroupId,
       pullVersion: 1,
-      schemaVersion: `3`,
+      schemaVersion: r.version,
       cookie: null,
     });
 
@@ -677,7 +677,7 @@ void test(`pull()`, async (t) => {
       profileId: ``,
       clientGroupId,
       pullVersion: 1,
-      schemaVersion: `3`,
+      schemaVersion: r.version,
       cookie: pull1.cookie,
     });
 
@@ -794,7 +794,7 @@ void test(`computeCvr()`, async (t) => {
             type: SkillType.EnglishToHanzi,
             hanzi: `我`,
           },
-          rating: r.rFsrsRating.marshal(Rating.Again),
+          rating: rFsrsRating.marshal(Rating.Again),
         },
         {
           userId: user2.id,
@@ -802,7 +802,7 @@ void test(`computeCvr()`, async (t) => {
             type: SkillType.EnglishToHanzi,
             hanzi: `我`,
           },
-          rating: r.rFsrsRating.marshal(Rating.Good),
+          rating: rFsrsRating.marshal(Rating.Good),
         },
       ])
       .returning({

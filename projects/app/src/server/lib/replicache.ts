@@ -1,4 +1,4 @@
-import * as r from "@/data/rizzleSchema";
+import { schema as r, rFsrsRating } from "@/data/rizzleSchema";
 import {
   ClientStateNotFoundResponse,
   Cookie,
@@ -35,7 +35,7 @@ export async function push(
   userId: string,
   push: PushRequest,
 ): Promise<PushResponse> {
-  if (push.schemaVersion !== `3`) {
+  if (push.schemaVersion !== r.version) {
     return {
       error: `VersionNotSupported`,
       versionType: `schema`,
@@ -148,7 +148,7 @@ export async function pull(
 ): Promise<
   PullOkResponse | VersionNotSupportedResponse | ClientStateNotFoundResponse
 > {
-  invariant(pull.schemaVersion === `3`);
+  invariant(pull.schemaVersion === r.version);
 
   // Required as per https://doc.replicache.dev/concepts/db-isolation-level
   await assertMinimumIsolationLevel(tx, `repeatable read`);
@@ -367,7 +367,7 @@ export async function pull(
       op: `put`,
       key: r.skillRating.marshalKey(s),
       value: r.skillRating.marshalValue({
-        rating: r.rFsrsRating.unmarshal(s.rating),
+        rating: rFsrsRating.unmarshal(s.rating),
       }),
     });
   }
@@ -571,63 +571,60 @@ export async function getClient(
   };
 }
 
-export const _mutate = makeDrizzleMutationHandler<typeof r.schema, Drizzle>(
-  r.schema,
-  {
-    async initSkillState(db, userId, { skill, now }) {
-      await db
-        .insert(s.skillState)
-        .values({
-          userId,
-          skill,
-          srs: null,
-          dueAt: now,
-          createdAt: now,
-        })
-        .onConflictDoNothing();
-    },
-    async reviewSkill(db, userId, { skill, rating, now }) {
-      await db.insert(s.skillRating).values([
-        {
-          userId,
-          skill,
-          rating: r.rFsrsRating.marshal(rating),
-          createdAt: now,
-        },
-      ]);
-
-      await updateSkillState(db, skill, userId);
-    },
-    async setPinyinInitialAssociation(db, userId, { initial, name, now }) {
-      const updatedAt = now;
-      const createdAt = now;
-      await db
-        .insert(s.pinyinInitialAssociation)
-        .values([{ userId, initial, name, updatedAt, createdAt }])
-        .onConflictDoUpdate({
-          target: [
-            s.pinyinInitialAssociation.userId,
-            s.pinyinInitialAssociation.initial,
-          ],
-          set: { name, updatedAt },
-        });
-    },
-    async setPinyinFinalAssociation(db, userId, { final, name, now }) {
-      const updatedAt = now;
-      const createdAt = now;
-      await db
-        .insert(s.pinyinFinalAssociation)
-        .values([{ userId, final, name, updatedAt, createdAt }])
-        .onConflictDoUpdate({
-          target: [
-            s.pinyinFinalAssociation.userId,
-            s.pinyinFinalAssociation.final,
-          ],
-          set: { name, updatedAt },
-        });
-    },
+export const _mutate = makeDrizzleMutationHandler<typeof r, Drizzle>(r, {
+  async initSkillState(db, userId, { skill, now }) {
+    await db
+      .insert(s.skillState)
+      .values({
+        userId,
+        skill,
+        srs: null,
+        dueAt: now,
+        createdAt: now,
+      })
+      .onConflictDoNothing();
   },
-);
+  async reviewSkill(db, userId, { skill, rating, now }) {
+    await db.insert(s.skillRating).values([
+      {
+        userId,
+        skill,
+        rating: rFsrsRating.marshal(rating),
+        createdAt: now,
+      },
+    ]);
+
+    await updateSkillState(db, skill, userId);
+  },
+  async setPinyinInitialAssociation(db, userId, { initial, name, now }) {
+    const updatedAt = now;
+    const createdAt = now;
+    await db
+      .insert(s.pinyinInitialAssociation)
+      .values([{ userId, initial, name, updatedAt, createdAt }])
+      .onConflictDoUpdate({
+        target: [
+          s.pinyinInitialAssociation.userId,
+          s.pinyinInitialAssociation.initial,
+        ],
+        set: { name, updatedAt },
+      });
+  },
+  async setPinyinFinalAssociation(db, userId, { final, name, now }) {
+    const updatedAt = now;
+    const createdAt = now;
+    await db
+      .insert(s.pinyinFinalAssociation)
+      .values([{ userId, final, name, updatedAt, createdAt }])
+      .onConflictDoUpdate({
+        target: [
+          s.pinyinFinalAssociation.userId,
+          s.pinyinFinalAssociation.final,
+        ],
+        set: { name, updatedAt },
+      });
+  },
+});
 
 export async function computeCvrEntities(db: Drizzle, userId: string) {
   const pinyinFinalAssociationVersions = db

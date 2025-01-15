@@ -733,6 +733,7 @@ typeChecks<RizzleReplicacheQuery<never>>(async () => {
 
 void test(`replicache()`, async (t) => {
   const schema = {
+    version: `1`,
     posts: r.entity(`p/[id]`, {
       id: r.string(),
       title: r.string(`r`).indexed(`byTitle`),
@@ -875,6 +876,7 @@ void test.todo(`replicache() errors if two mutators have the same alias`);
 
 void test(`replicache() disallows unknown mutator implementations`, async () => {
   const schema = {
+    version: `1`,
     posts: r.entity(`p/[id]`, { id: r.string() }),
     createPost: r.mutator({ id: r.string() }),
   };
@@ -902,6 +904,7 @@ void test(`replicache() disallows unknown mutator implementations`, async () => 
 
 void test(`replicache() mutator tx`, async () => {
   const schema = {
+    version: `1`,
     counter: r.entity(`counter/[id]`, {
       id: r.string(),
       count: r.number(`c`),
@@ -936,6 +939,7 @@ void test(`replicache() mutator tx`, async () => {
 
 void test(`replicache() entity()`, async (t) => {
   const schema = {
+    version: `1`,
     text: r.entity(`text/[id]:[id2].`, {
       id: r.string(),
       id2: r.string(),
@@ -1088,6 +1092,7 @@ void test(`replicache() entity()`, async (t) => {
 
 void test(`replicache() index scan`, async () => {
   const schema = {
+    version: `1`,
     text: r.entity(`text/[id]`, {
       id: r.string(),
       body: r.string(`b`).indexed(`byCount`),
