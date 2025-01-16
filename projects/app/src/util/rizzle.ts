@@ -977,10 +977,16 @@ export const pullResponseSchema = z.union([
 
 export type PullResponse = z.infer<typeof pullResponseSchema>;
 
+export type MutateHandler<Tx> = (
+  tx: Tx,
+  userId: string,
+  mutation: Mutation,
+) => Promise<void>;
+
 export const makeDrizzleMutationHandler = <S extends RizzleRawSchema, Tx>(
   schema: S,
   mutators: RizzleDrizzleMutators<S, Tx>,
-) => {
+): MutateHandler<Tx> => {
   const handlersWithUnmarshaling = Object.fromEntries(
     Object.entries(schema).flatMap(([k, v]) =>
       v instanceof RizzleMutator

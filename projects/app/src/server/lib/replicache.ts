@@ -1,13 +1,15 @@
-import { schema as r, rFsrsRating } from "@/data/rizzleSchema";
+import { rFsrsRating, SupportedSchema, v3, v4 } from "@/data/rizzleSchema";
 import {
   ClientStateNotFoundResponse,
   Cookie,
   makeDrizzleMutationHandler,
+  MutateHandler,
   Mutation,
   PullOkResponse,
   PullRequest,
   PushRequest,
   PushResponse,
+  RizzleDrizzleMutators,
   VersionNotSupportedResponse,
 } from "@/util/rizzle";
 import { invariant } from "@haohaohow/lib/invariant";
@@ -30,12 +32,80 @@ const loggerName = import.meta.filename.split(`/`).slice(-1)[0];
 invariant(loggerName != null);
 const debug = makeDebug(loggerName);
 
+const mutators: RizzleDrizzleMutators<SupportedSchema, Drizzle> = {
+  async initSkillState(db, userId, { skill, now }) {
+    await db
+      .insert(s.skillState)
+      .values({
+        userId,
+        skill,
+        srs: null,
+        dueAt: now,
+        createdAt: now,
+      })
+      .onConflictDoNothing();
+  },
+  async reviewSkill(db, userId, { skill, rating, now }) {
+    await db.insert(s.skillRating).values([
+      {
+        userId,
+        skill,
+        rating: rFsrsRating.marshal(rating),
+        createdAt: now,
+      },
+    ]);
+
+    await updateSkillState(db, skill, userId);
+  },
+  async setPinyinInitialAssociation(db, userId, { initial, name, now }) {
+    const updatedAt = now;
+    const createdAt = now;
+    await db
+      .insert(s.pinyinInitialAssociation)
+      .values([{ userId, initial, name, updatedAt, createdAt }])
+      .onConflictDoUpdate({
+        target: [
+          s.pinyinInitialAssociation.userId,
+          s.pinyinInitialAssociation.initial,
+        ],
+        set: { name, updatedAt },
+      });
+  },
+  async setPinyinFinalAssociation(db, userId, { final, name, now }) {
+    const updatedAt = now;
+    const createdAt = now;
+    await db
+      .insert(s.pinyinFinalAssociation)
+      .values([{ userId, final, name, updatedAt, createdAt }])
+      .onConflictDoUpdate({
+        target: [
+          s.pinyinFinalAssociation.userId,
+          s.pinyinFinalAssociation.final,
+        ],
+        set: { name, updatedAt },
+      });
+  },
+};
+
+const mutateV3 = makeDrizzleMutationHandler(v3, mutators);
+const mutateV4 = makeDrizzleMutationHandler(v4, mutators);
+
+function getSchemaImpl(schemaVersion: string) {
+  if (schemaVersion === v3.version) {
+    return { schema: v3, mutate: mutateV3 };
+  } else if (schemaVersion === v4.version) {
+    return { schema: v4, mutate: mutateV4 };
+  }
+  return null;
+}
+
 export async function push(
   tx: Drizzle,
   userId: string,
   push: PushRequest,
 ): Promise<PushResponse> {
-  if (push.schemaVersion !== r.version) {
+  const mutate = getSchemaImpl(push.schemaVersion)?.mutate;
+  if (mutate == null) {
     return {
       error: `VersionNotSupported`,
       versionType: `schema`,
@@ -55,10 +125,24 @@ export async function push(
   for (const mutation of push.mutations) {
     let success;
     try {
-      await processMutation(tx, userId, push.clientGroupId, mutation, false);
+      await processMutation(
+        tx,
+        userId,
+        push.clientGroupId,
+        mutation,
+        false,
+        mutate,
+      );
       success = true;
     } catch (err) {
-      await processMutation(tx, userId, push.clientGroupId, mutation, true);
+      await processMutation(
+        tx,
+        userId,
+        push.clientGroupId,
+        mutation,
+        true,
+        mutate,
+      );
       success = false;
     }
 
@@ -148,7 +232,13 @@ export async function pull(
 ): Promise<
   PullOkResponse | VersionNotSupportedResponse | ClientStateNotFoundResponse
 > {
-  invariant(pull.schemaVersion === r.version);
+  const schema = getSchemaImpl(pull.schemaVersion)?.schema;
+  if (schema == null) {
+    return {
+      error: `VersionNotSupported`,
+      versionType: `schema`,
+    } satisfies VersionNotSupportedResponse;
+  }
 
   // Required as per https://doc.replicache.dev/concepts/db-isolation-level
   await assertMinimumIsolationLevel(tx, `repeatable read`);
@@ -209,7 +299,7 @@ export async function pull(
       });
 
       // 8: Build nextCVR
-      const nextCvrEntities = await computeCvrEntities(tx, userId);
+      const nextCvrEntities = await computeCvrEntities(tx, userId, schema);
       const nextCvrLastMutationIds = Object.fromEntries(
         clients.map((c) => [c.id, c.lastMutationId]),
       );
@@ -353,8 +443,8 @@ export async function pull(
   for (const s of entityPatches.skillState.puts) {
     patch.push({
       op: `put`,
-      key: r.skillState.marshalKey(s),
-      value: r.skillState.marshalValue({
+      key: schema.skillState.marshalKey(s),
+      value: schema.skillState.marshalValue({
         createdAt: s.createdAt,
         srs: null,
         due: s.dueAt,
@@ -365,8 +455,8 @@ export async function pull(
   for (const s of entityPatches.skillRating.puts) {
     patch.push({
       op: `put`,
-      key: r.skillRating.marshalKey(s),
-      value: r.skillRating.marshalValue({
+      key: schema.skillRating.marshalKey(s),
+      value: schema.skillRating.marshalValue({
         rating: rFsrsRating.unmarshal(s.rating),
       }),
     });
@@ -375,16 +465,16 @@ export async function pull(
   for (const s of entityPatches.pinyinFinalAssociation.puts) {
     patch.push({
       op: `put`,
-      key: r.pinyinFinalAssociation.marshalKey(s),
-      value: r.pinyinFinalAssociation.marshalValue(s),
+      key: schema.pinyinFinalAssociation.marshalKey(s),
+      value: schema.pinyinFinalAssociation.marshalValue(s),
     });
   }
   // pinyinInitialAssociation
   for (const s of entityPatches.pinyinInitialAssociation.puts) {
     patch.push({
       op: `put`,
-      key: r.pinyinInitialAssociation.marshalKey(s),
-      value: r.pinyinInitialAssociation.marshalValue(s),
+      key: schema.pinyinInitialAssociation.marshalKey(s),
+      value: schema.pinyinInitialAssociation.marshalValue(s),
     });
   }
 
@@ -414,6 +504,7 @@ export async function processMutation(
   // 1: `let errorMode = false`. In JS, we implement this step naturally
   // as a param. In case of failure, caller will call us again with `true`.
   errorMode: boolean,
+  mutate: MutateHandler<Drizzle>,
 ): Promise<void> {
   // 2: beginTransaction
   await tx.transaction(async (tx) => {
@@ -446,7 +537,7 @@ export async function processMutation(
       try {
         // 10(i): Run business logic
         // 10(i)(a): xmin column is automatically updated by Postgres for any affected rows.
-        await _mutate(tx, userId, mutation);
+        await mutate(tx, userId, mutation);
       } catch (e) {
         // 10(ii)(a-c): log error, abort, and retry
         debug(`Error executing mutation: %o %o`, mutation, e);
@@ -571,62 +662,11 @@ export async function getClient(
   };
 }
 
-export const _mutate = makeDrizzleMutationHandler<typeof r, Drizzle>(r, {
-  async initSkillState(db, userId, { skill, now }) {
-    await db
-      .insert(s.skillState)
-      .values({
-        userId,
-        skill,
-        srs: null,
-        dueAt: now,
-        createdAt: now,
-      })
-      .onConflictDoNothing();
-  },
-  async reviewSkill(db, userId, { skill, rating, now }) {
-    await db.insert(s.skillRating).values([
-      {
-        userId,
-        skill,
-        rating: rFsrsRating.marshal(rating),
-        createdAt: now,
-      },
-    ]);
-
-    await updateSkillState(db, skill, userId);
-  },
-  async setPinyinInitialAssociation(db, userId, { initial, name, now }) {
-    const updatedAt = now;
-    const createdAt = now;
-    await db
-      .insert(s.pinyinInitialAssociation)
-      .values([{ userId, initial, name, updatedAt, createdAt }])
-      .onConflictDoUpdate({
-        target: [
-          s.pinyinInitialAssociation.userId,
-          s.pinyinInitialAssociation.initial,
-        ],
-        set: { name, updatedAt },
-      });
-  },
-  async setPinyinFinalAssociation(db, userId, { final, name, now }) {
-    const updatedAt = now;
-    const createdAt = now;
-    await db
-      .insert(s.pinyinFinalAssociation)
-      .values([{ userId, final, name, updatedAt, createdAt }])
-      .onConflictDoUpdate({
-        target: [
-          s.pinyinFinalAssociation.userId,
-          s.pinyinFinalAssociation.final,
-        ],
-        set: { name, updatedAt },
-      });
-  },
-});
-
-export async function computeCvrEntities(db: Drizzle, userId: string) {
+export async function computeCvrEntities(
+  db: Drizzle,
+  userId: string,
+  schema: SupportedSchema,
+) {
   const pinyinFinalAssociationVersions = db
     .select({
       map: json_object_agg(
@@ -701,22 +741,22 @@ export async function computeCvrEntities(db: Drizzle, userId: string) {
   return {
     pinyinInitialAssociation: mapValues(
       result.pinyinInitialAssociation,
-      (v) => v.xmin + `:` + r.pinyinInitialAssociation.marshalKey(v),
+      (v) => v.xmin + `:` + schema.pinyinInitialAssociation.marshalKey(v),
     ),
     pinyinFinalAssociation: mapValues(
       result.pinyinFinalAssociation,
-      (v) => v.xmin + `:` + r.pinyinFinalAssociation.marshalKey(v),
+      (v) => v.xmin + `:` + schema.pinyinFinalAssociation.marshalKey(v),
     ),
     skillState: mapValues(
       result.skillState,
-      (v) => v.xmin + `:` + r.skillState.marshalKey(v),
+      (v) => v.xmin + `:` + schema.skillState.marshalKey(v),
     ),
     skillRating: mapValues(
       result.skillRating,
       (v) =>
         v.xmin +
         `:` +
-        r.skillRating.marshalKey({
+        schema.skillRating.marshalKey({
           skill: v.skill,
           createdAt: new Date(v.createdAt),
         }),
