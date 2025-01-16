@@ -159,7 +159,14 @@ const rSrsState = memoize(
 
 // --
 
-export const schema = {
+export type SkillState = {
+  skill: Skill;
+  createdAt: Date;
+  srs: { type: SrsType; stability: number; difficulty: number } | null;
+  due: Date;
+};
+
+export const v3 = {
   version: `3`,
 
   //
@@ -217,3 +224,41 @@ export const schema = {
       `addSkillState`,
     ),
 };
+
+/**
+ * Changelog
+ *
+ * - `skillState` has properties changed from `timestamp()` to `datetime()` so
+ *   that they're indexable.
+ */
+export const v4 = {
+  version: `4`,
+
+  //
+  // Skills
+  //
+  skillRating: v3.skillRating,
+  skillState: r.entity(`s/[skill]`, {
+    skill: rSkill(),
+
+    createdAt: r.datetime().alias(`c`),
+    srs: rSrsState().nullable().alias(`s`),
+    due: r.datetime().alias(`d`).indexed(`byDue`),
+  }),
+
+  //
+  // Pinyin mnemonics
+  //
+  pinyinFinalAssociation: v3.pinyinFinalAssociation,
+  pinyinInitialAssociation: v3.pinyinInitialAssociation,
+
+  // Mutators
+  setPinyinInitialAssociation: v3.setPinyinInitialAssociation,
+  setPinyinFinalAssociation: v3.setPinyinFinalAssociation,
+  reviewSkill: v3.reviewSkill,
+  initSkillState: v3.initSkillState,
+};
+
+export const supportedSchemas = [v3, v4] as const;
+
+export type SupportedSchema = (typeof supportedSchemas)[number];

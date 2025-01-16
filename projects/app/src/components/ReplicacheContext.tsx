@@ -1,5 +1,5 @@
 import { SrsType } from "@/data/model";
-import { schema } from "@/data/rizzleSchema";
+import { v4 } from "@/data/rizzleSchema";
 import { replicacheLicenseKey } from "@/env";
 import { AppRouter } from "@/server/routers/_app";
 import { nextReview, UpcomingReview } from "@/util/fsrs";
@@ -21,7 +21,7 @@ import { useAuth } from "./auth";
 import { kvStore } from "./replicacheOptions";
 import { useRenderGuard } from "./util";
 
-export type Rizzle = RizzleReplicache<typeof schema>;
+export type Rizzle = RizzleReplicache<typeof v4>;
 
 const ReplicacheContext = createContext<Rizzle | null>(null);
 
@@ -93,7 +93,7 @@ export function ReplicacheProvider({ children }: React.PropsWithChildren) {
             }
           : undefined,
       },
-      schema,
+      v4,
       {
         async initSkillState(db, { skill, now }) {
           const exists = await db.skillState.has({ skill });
