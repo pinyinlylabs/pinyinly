@@ -658,7 +658,7 @@ export async function computeCvrEntities(db: Drizzle, userId: string) {
   const skillStateVersions = db
     .select({
       map: json_object_agg(
-        s.skillRating.id,
+        s.skillState.id,
         json_build_object({
           skill: s.skillState.skill,
           xmin: sql<string>`${s.skillState}.xmin`,
