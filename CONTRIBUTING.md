@@ -11,6 +11,7 @@ proto use
 
 Now you can start the app:
 
+1. `npx inngest-cli@latest dev`
 1. `moon run app:dev`.
 1. Scan the QR code on your phone.
 
