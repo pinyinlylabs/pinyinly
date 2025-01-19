@@ -64,7 +64,6 @@ export const RectButton2 = forwardRef<
         setPressed(false);
         pressableProps.onPressOut?.(e);
       }}
-      data-my-attr="foofoo"
       ref={ref}
       className={pressable({ flat, variant, inFlexRowParent, className })}
     >
