@@ -43,6 +43,49 @@ export const expo = {
           : []),
       ],
       usesAppleSignIn: true,
+      // https://docs.sentry.io/platforms/react-native/data-management/apple-privacy-manifest/#create-privacy-manifest-in-expo
+      privacyManifests: {
+        NSPrivacyCollectedDataTypes: [
+          {
+            NSPrivacyCollectedDataType: `NSPrivacyCollectedDataTypeCrashData`,
+            NSPrivacyCollectedDataTypeLinked: false,
+            NSPrivacyCollectedDataTypeTracking: false,
+            NSPrivacyCollectedDataTypePurposes: [
+              `NSPrivacyCollectedDataTypePurposeAppFunctionality`,
+            ],
+          },
+          {
+            NSPrivacyCollectedDataType: `NSPrivacyCollectedDataTypePerformanceData`,
+            NSPrivacyCollectedDataTypeLinked: false,
+            NSPrivacyCollectedDataTypeTracking: false,
+            NSPrivacyCollectedDataTypePurposes: [
+              `NSPrivacyCollectedDataTypePurposeAppFunctionality`,
+            ],
+          },
+          {
+            NSPrivacyCollectedDataType: `NSPrivacyCollectedDataTypeOtherDiagnosticData`,
+            NSPrivacyCollectedDataTypeLinked: false,
+            NSPrivacyCollectedDataTypeTracking: false,
+            NSPrivacyCollectedDataTypePurposes: [
+              `NSPrivacyCollectedDataTypePurposeAppFunctionality`,
+            ],
+          },
+        ],
+        NSPrivacyAccessedAPITypes: [
+          {
+            NSPrivacyAccessedAPIType: `NSPrivacyAccessedAPICategoryUserDefaults`,
+            NSPrivacyAccessedAPITypeReasons: [`CA92.1`],
+          },
+          {
+            NSPrivacyAccessedAPIType: `NSPrivacyAccessedAPICategorySystemBootTime`,
+            NSPrivacyAccessedAPITypeReasons: [`35F9.1`],
+          },
+          {
+            NSPrivacyAccessedAPIType: `NSPrivacyAccessedAPICategoryFileTimestamp`,
+            NSPrivacyAccessedAPITypeReasons: [`C617.1`],
+          },
+        ],
+      },
     },
     android: {
       adaptiveIcon: {
