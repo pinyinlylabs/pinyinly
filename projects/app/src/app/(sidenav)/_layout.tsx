@@ -57,6 +57,13 @@ export default function SideNavLayout() {
         </Link>
 
         <Link
+          href="/connections"
+          className="items-center rounded-md px-2 py-1 text-xl font-bold tracking-wide text-text hover:bg-primary-4 lg:self-stretch"
+        >
+          Connections
+        </Link>
+
+        <Link
           href="/dev/ui"
           className="items-center rounded-md px-2 py-1 text-xl font-bold tracking-wide text-text hover:bg-primary-4 lg:self-stretch"
         >
