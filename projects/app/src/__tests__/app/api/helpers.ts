@@ -35,16 +35,9 @@ export function testExpoServer(t: TestContext) {
     throw err;
   });
 
-  const _fetch = async (input: RequestInfo, init?: RequestInit) => {
-    const inputWithPrefixedUrl =
-      typeof input === `string`
-        ? `${SERVER_URL}${input}`
-        : {
-            ...input,
-            url: `${SERVER_URL}${input.url}`,
-          };
-    return await fetch(
-      inputWithPrefixedUrl,
+  const _fetch = async (input: string, init?: RequestInit) =>
+    await fetch(
+      `${SERVER_URL}${input}`,
       Object.assign(
         { ...init },
         {
@@ -55,7 +48,6 @@ export function testExpoServer(t: TestContext) {
         },
       ),
     );
-  };
 
   return {
     fetch: _fetch,
