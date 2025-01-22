@@ -60,6 +60,18 @@ export default function MnemonicsPage() {
     },
   );
 
+  const initialGroupThemes = useRizzleQuery(
+    [MnemonicsPage.name, `initialGroupThemes`],
+    async (r, tx) => {
+      return await fromAsync(r.query.pinyinInitialGroupTheme.scan(tx)).then(
+        (x) =>
+          new Map(
+            x.map(([key, value]) => [key.groupId, value.themeId] as const),
+          ),
+      );
+    },
+  );
+
   return (
     <ScrollView
       className="flex-1"
@@ -115,10 +127,13 @@ export default function MnemonicsPage() {
 
             <View className="gap-3.5 lg:gap-4">
               {Object.entries(query.data.initials).map(
-                ([, { initials, desc }], i) => (
+                ([, { initials, desc, id }], i) => (
                   <Fragment key={desc}>
-                    <View className="flex-0">
+                    <View className="flex-0 flex-row gap-2">
                       <Text className="text-md text-text">{desc}</Text>
+                      <Text className="text-md text-primary-8">
+                        {initialGroupThemes.data?.get(id) ?? `no theme`}
+                      </Text>
                     </View>
                     <View className="flex-0 flex-row flex-wrap gap-3.5">
                       {initials.map(([initial, ...alts]) => (

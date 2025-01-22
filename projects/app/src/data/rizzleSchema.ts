@@ -2,7 +2,13 @@ import { Rating } from "@/util/fsrs";
 import { invalid, r, RizzleCustom } from "@/util/rizzle";
 import memoize from "lodash/memoize";
 import { z } from "zod";
-import { Skill, SkillType, SrsType } from "./model";
+import {
+  MnemonicThemeId,
+  PinyinInitialGroupId,
+  Skill,
+  SkillType,
+  SrsType,
+} from "./model";
 
 export const rSkillType = r.enum(SkillType, {
   [SkillType.RadicalToEnglish]: `re`,
@@ -23,6 +29,24 @@ export const rFsrsRating = r.enum(Rating, {
   [Rating.Hard]: `2`,
   [Rating.Good]: `3`,
   [Rating.Easy]: `4`,
+});
+
+export const rPinyinInitialGroupId = r.enum(PinyinInitialGroupId, {
+  [PinyinInitialGroupId.Basic]: `basic`,
+  [PinyinInitialGroupId._i]: `-i`,
+  [PinyinInitialGroupId._u]: `-u`,
+  [PinyinInitialGroupId._v]: `-ü`,
+  [PinyinInitialGroupId.Null]: `∅`,
+  [PinyinInitialGroupId.Everything]: `everything`,
+});
+
+export const rMnemonicThemeId = r.enum(MnemonicThemeId, {
+  [MnemonicThemeId.AnimalSpecies]: `AnimalSpecies`,
+  [MnemonicThemeId.GreekMythologyCharacter]: `GreekMythologyCharacter`,
+  [MnemonicThemeId.MythologyCharacter]: `MythologyCharacter`,
+  [MnemonicThemeId.WesternCultureFamousMen]: `WesternCultureFamousMen`,
+  [MnemonicThemeId.WesternCultureFamousWomen]: `WesternCultureFamousWomen`,
+  [MnemonicThemeId.WesternMythologyCharacter]: `WesternMythologyCharacter`,
 });
 
 // Skill ID e.g. `he:好`
@@ -251,10 +275,19 @@ export const v4 = {
   //
   pinyinFinalAssociation: v3.pinyinFinalAssociation,
   pinyinInitialAssociation: v3.pinyinInitialAssociation,
+  pinyinInitialGroupTheme: r.entity(`pigt/[groupId]`, {
+    groupId: rPinyinInitialGroupId,
+    themeId: rMnemonicThemeId.alias(`t`),
+  }),
 
   // Mutators
   setPinyinInitialAssociation: v3.setPinyinInitialAssociation,
   setPinyinFinalAssociation: v3.setPinyinFinalAssociation,
+  setPinyinInitialGroupTheme: r.mutator({
+    groupId: rPinyinInitialGroupId.alias(`g`),
+    themeId: rMnemonicThemeId.alias(`t`),
+    now: r.timestamp().alias(`n`),
+  }),
   reviewSkill: v3.reviewSkill,
   initSkillState: v3.initSkillState,
 };

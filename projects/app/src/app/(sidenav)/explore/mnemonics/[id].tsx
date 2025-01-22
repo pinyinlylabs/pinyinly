@@ -1,4 +1,6 @@
+import { RectButton2 } from "@/components/RectButton2";
 import { useReplicache, useRizzleQuery } from "@/components/ReplicacheContext";
+import { rMnemonicThemeId } from "@/data/rizzleSchema";
 import {
   loadMmPinyinChart,
   loadMnemonicThemeChoices,
@@ -41,6 +43,19 @@ export default function MnemonicIdPage() {
     x.initials.some((y) => y.includes(id)),
   );
 
+  const groupTheme = useRizzleQuery(
+    [MnemonicIdPage.name, `groupTheme`, group?.id],
+    async (r, tx) => {
+      if (group?.id == null) {
+        return null;
+      }
+      const res = await r.query.pinyinInitialGroupTheme.get(tx, {
+        groupId: group.id,
+      });
+      return res ?? null;
+    },
+  );
+
   return (
     <ScrollView
       className="flex-1 items-center pt-safe-offset-4 px-safe-or-4"
@@ -70,13 +85,37 @@ export default function MnemonicIdPage() {
           {choicesQuery.data == null
             ? null
             : [...choicesQuery.data.entries()]
-                .flatMap(([theme, initials]) => {
+                .flatMap(([themeId, initials]) => {
                   const initial = initials.get(id);
-                  return initial ? ([[theme, initial]] as const) : [];
+                  const themeName = rMnemonicThemeId
+                    .getMarshal()
+                    .parse(themeId);
+                  return initial
+                    ? ([[themeId, themeName, initial]] as const)
+                    : [];
                 })
-                .map(([theme, initials], i) => (
+                .map(([themeId, themeName, initials], i) => (
                   <View key={i} className="">
-                    <Text className="text-lg text-text">{theme}</Text>
+                    <Text className="text-lg text-text">
+                      {themeName}
+                      {themeId === groupTheme.data?.themeId ? (
+                        ` ✅`
+                      ) : (
+                        <RectButton2
+                          onPress={() => {
+                            if (group?.id != null) {
+                              void r.mutate.setPinyinInitialGroupTheme({
+                                groupId: group.id,
+                                themeId,
+                                now: new Date(),
+                              });
+                            }
+                          }}
+                        >
+                          Use
+                        </RectButton2>
+                      )}
+                    </Text>
                     {[...initials.entries()].map(([name, desc], i) => (
                       <View key={i}>
                         <Text

@@ -1,3 +1,4 @@
+import { PinyinInitialGroupId } from "#data/model.ts";
 import {
   allHsk1Words,
   allHsk2Words,
@@ -255,7 +256,9 @@ function splitPinyin(
 }
 
 interface PinyinChart {
-  initials: DeepReadonly<{ id: string; desc: string; initials: string[][] }[]>;
+  initials: DeepReadonly<
+    { id: PinyinInitialGroupId; desc: string; initials: string[][] }[]
+  >;
   finals: readonly PinyinProduction[];
   overrides?: DeepReadonly<Record<string, [initial: string, final: string]>>;
 }

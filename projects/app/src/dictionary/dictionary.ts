@@ -1,3 +1,4 @@
+import { rMnemonicThemeId, rPinyinInitialGroupId } from "@/data/rizzleSchema";
 import { deepReadonly } from "@/util/collections";
 import { invariant } from "@haohaohow/lib/invariant";
 import memoize from "lodash/memoize";
@@ -38,7 +39,7 @@ export const loadMnemonicThemeChoices = memoize(async () =>
       (x) =>
         new Map(
           Object.entries(x).map(([k, v]) => [
-            k,
+            rMnemonicThemeId.unmarshal(k),
             new Map(
               Object.entries(v).map(([k2, v2]) => [
                 k2,
@@ -64,7 +65,7 @@ const pinyinChartSchema = z
   .object({
     initials: z.array(
       z.object({
-        id: z.string(),
+        id: rPinyinInitialGroupId.getUnmarshal(),
         desc: z.string(),
         initials: z.array(z.union([z.string(), z.array(z.string())])),
       }),
