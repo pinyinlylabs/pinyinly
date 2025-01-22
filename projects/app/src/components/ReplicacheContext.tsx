@@ -6,6 +6,7 @@ import { nextReview, UpcomingReview } from "@/util/fsrs";
 import { cookieSchema, r, RizzleReplicache } from "@/util/rizzle";
 import { trpc } from "@/util/trpc";
 import { invariant } from "@haohaohow/lib/invariant";
+import * as Sentry from "@sentry/core";
 import { QueryKey, useQuery, useQueryClient } from "@tanstack/react-query";
 import { TRPCClientError } from "@trpc/client";
 import {
@@ -45,8 +46,13 @@ export function ReplicacheProvider({ children }: React.PropsWithChildren) {
         // https://docs.sentry.io/platforms/javascript/configuration/integrations/captureconsole/
         logSinks: undefined,
         pusher: auth.isAuthenticated
-          ? async (requestBody) => {
+          ? async (requestBody, requestId) => {
               invariant(requestBody.pushVersion === 1);
+
+              Sentry.getActiveSpan()?.setAttribute(
+                `replicache.requestId`,
+                requestId,
+              );
 
               const response = pushMutate({
                 // Map ID to Id to match this project's naming conventions.
@@ -66,10 +72,15 @@ export function ReplicacheProvider({ children }: React.PropsWithChildren) {
             }
           : undefined,
         puller: auth.isAuthenticated
-          ? async (requestBody) => {
+          ? async (requestBody, requestId) => {
               invariant(requestBody.pullVersion === 1);
               const cookie = cookieSchema.parse(requestBody.cookie);
               invariant(typeof requestBody.cookie === `object`);
+
+              Sentry.getActiveSpan()?.setAttribute(
+                `replicache.requestId`,
+                requestId,
+              );
 
               const response = pullMutate({
                 // Map ID to Id to match this project's naming conventions.

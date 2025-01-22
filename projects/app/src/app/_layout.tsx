@@ -29,6 +29,7 @@ Sentry.init({
     captureConsoleIntegration() as typeof routingIntegration,
     routingIntegration,
   ],
+  tracesSampleRate: 1.0, // Keep in sync with the other Sentry.init()
 });
 
 // ------------------------------
