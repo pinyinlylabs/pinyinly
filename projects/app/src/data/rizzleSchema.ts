@@ -160,14 +160,14 @@ export const rSkill = memoize(() =>
   ),
 );
 
-const rSrsType = memoize(() =>
+export const rSrsType = memoize(() =>
   r.enum(SrsType, {
     [SrsType.Null]: `0`,
     [SrsType.FsrsFourPointFive]: `1`,
   }),
 );
 
-const rSrsState = memoize(
+export const rSrsState = memoize(
   () =>
     // r.discriminatedUnion(`type`, [
     //   r.object({
@@ -182,13 +182,6 @@ const rSrsState = memoize(
 );
 
 // --
-
-export type SkillState = {
-  skill: Skill;
-  createdAt: Date;
-  srs: { type: SrsType; stability: number; difficulty: number } | null;
-  due: Date;
-};
 
 export const v3 = {
   version: `3`,

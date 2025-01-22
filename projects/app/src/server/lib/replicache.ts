@@ -1,5 +1,4 @@
 import {
-  rFsrsRating,
   rPinyinInitialGroupId,
   SupportedSchema,
   v3,
@@ -46,20 +45,15 @@ const mutators: RizzleDrizzleMutators<SupportedSchema, Drizzle> = {
         userId,
         skill,
         srs: null,
-        dueAt: now,
+        due: now,
         createdAt: now,
       })
       .onConflictDoNothing();
   },
   async reviewSkill(db, userId, { skill, rating, now }) {
-    await db.insert(s.skillRating).values([
-      {
-        userId,
-        skill,
-        rating: rFsrsRating.marshal(rating),
-        createdAt: now,
-      },
-    ]);
+    await db
+      .insert(s.skillRating)
+      .values([{ userId, skill, rating, createdAt: now }]);
 
     await updateSkillState(db, skill, userId);
   },
@@ -457,36 +451,21 @@ export async function pull(
   // 18(i): dels
   for (const entity of Object.values(entityPatches)) {
     for (const key of entity.dels) {
-      patch.push({
-        op: `del`,
-        key,
-      });
+      patch.push({ op: `del`, key });
     }
   }
 
   // 18(ii): puts
   if (`skillState` in schema) {
+    const e = schema.skillState;
     for (const s of entityPatches.skillState.puts) {
-      patch.push({
-        op: `put`,
-        key: schema.skillState.marshalKey(s),
-        value: schema.skillState.marshalValue({
-          createdAt: s.createdAt,
-          srs: null,
-          due: s.dueAt,
-        }),
-      });
+      patch.push({ op: `put`, key: e.marshalKey(s), value: e.marshalValue(s) });
     }
   }
   if (`skillRating` in schema) {
+    const e = schema.skillRating;
     for (const s of entityPatches.skillRating.puts) {
-      patch.push({
-        op: `put`,
-        key: schema.skillRating.marshalKey(s),
-        value: schema.skillRating.marshalValue({
-          rating: rFsrsRating.unmarshal(s.rating),
-        }),
-      });
+      patch.push({ op: `put`, key: e.marshalKey(s), value: e.marshalValue(s) });
     }
   }
   if (`pinyinFinalAssociation` in schema) {

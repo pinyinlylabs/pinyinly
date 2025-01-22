@@ -1,5 +1,5 @@
 import { SkillType } from "#data/model.ts";
-import { rFsrsRating, supportedSchemas } from "#data/rizzleSchema.ts";
+import { supportedSchemas } from "#data/rizzleSchema.ts";
 import { Drizzle } from "#server/lib/db.ts";
 import { computeCvrEntities, pull, push } from "#server/lib/replicache.ts";
 import * as s from "#server/schema.ts";
@@ -167,7 +167,7 @@ void test(`push()`, async (t) => {
           where: (t, { eq }) => eq(t.userId, user.id),
         });
         assert.ok(skillState != null);
-        assert.deepEqual(skillState.dueAt, now);
+        assert.deepEqual(skillState.due, now);
         assert.deepEqual(skillState.createdAt, now);
         assert.equal(skillState.srs, null);
         assert.deepEqual(skillState.skill, {
@@ -407,7 +407,7 @@ void test(`pull()`, async (t) => {
             .values([
               {
                 userId: user.id,
-                dueAt: new Date(),
+                due: new Date(),
                 srs: null,
                 skill: {
                   type: SkillType.EnglishToHanzi,
@@ -557,7 +557,7 @@ void test(`pull()`, async (t) => {
           .values([
             {
               userId: user.id,
-              dueAt: now,
+              due: now,
               srs: null,
               skill: {
                 type: SkillType.EnglishToHanzi,
@@ -588,7 +588,7 @@ void test(`pull()`, async (t) => {
               value: schema.skillState.marshalValue({
                 createdAt: skillState.createdAt,
                 srs: null,
-                due: skillState.dueAt,
+                due: skillState.due,
               }),
             },
           ],
@@ -607,7 +607,7 @@ void test(`pull()`, async (t) => {
           .values([
             {
               userId: user.id,
-              dueAt: now,
+              due: now,
               srs: null,
               skill: {
                 type: SkillType.EnglishToHanzi,
@@ -667,7 +667,7 @@ void test(`pull()`, async (t) => {
                 type: SkillType.EnglishToHanzi,
                 hanzi: `我`,
               },
-              rating: rFsrsRating.marshal(Rating.Good),
+              rating: Rating.Good,
               createdAt: now,
             },
           ])
@@ -771,7 +771,7 @@ void test(`computeCvr()`, async (t) => {
                 hanzi: `我`,
               },
               srs: null,
-              dueAt: new Date(),
+              due: new Date(),
               createdAt: new Date(),
             },
             {
@@ -781,7 +781,7 @@ void test(`computeCvr()`, async (t) => {
                 hanzi: `我`,
               },
               srs: null,
-              dueAt: new Date(),
+              due: new Date(),
               createdAt: new Date(),
             },
           ])
@@ -819,7 +819,7 @@ void test(`computeCvr()`, async (t) => {
                 type: SkillType.EnglishToHanzi,
                 hanzi: `我`,
               },
-              rating: rFsrsRating.marshal(Rating.Again),
+              rating: Rating.Again,
             },
             {
               userId: user2.id,
@@ -827,7 +827,7 @@ void test(`computeCvr()`, async (t) => {
                 type: SkillType.EnglishToHanzi,
                 hanzi: `我`,
               },
-              rating: rFsrsRating.marshal(Rating.Good),
+              rating: Rating.Good,
             },
           ])
           .returning({
