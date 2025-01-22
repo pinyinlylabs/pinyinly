@@ -1,12 +1,12 @@
 import { QuizDeck } from "@/components/QuizDeck";
-import { RectButton } from "@/components/RectButton";
+import { RectButton2 } from "@/components/RectButton2";
 import { useReplicache } from "@/components/ReplicacheContext";
 import { generateQuestionForSkillOrThrow } from "@/data/generator";
 import { Question, RadicalSkill, SkillType } from "@/data/model";
 import { questionsForReview } from "@/data/query";
 import { allRadicals } from "@/dictionary/dictionary";
 import { useQuery } from "@tanstack/react-query";
-import { router } from "expo-router";
+import { Link } from "expo-router";
 import { Text, View } from "react-native";
 
 export default function RadicalsPage() {
@@ -118,15 +118,10 @@ export default function RadicalsPage() {
 
 const GoHomeButton = () => (
   <View style={{ height: 44 }}>
-    <RectButton
-      onPressIn={() => {
-        router.push(`/`);
-      }}
-      color={`#333`}
-    >
-      <Text style={{ fontWeight: `bold`, color: `white`, fontSize: 20 }}>
+    <Link href="/" asChild>
+      <RectButton2 textClassName="font-bold text-text text-xl">
         Back
-      </Text>
-    </RectButton>
+      </RectButton2>
+    </Link>
   </View>
 );

@@ -7,6 +7,7 @@ import {
 import { trpc } from "@/util/trpc";
 import { invariant } from "@haohaohow/lib/invariant";
 import * as AppleAuthentication from "expo-apple-authentication";
+import { Link } from "expo-router";
 import { useCallback } from "react";
 import { Platform, Text, View } from "react-native";
 import z from "zod";
@@ -94,6 +95,18 @@ export default function LoginPage() {
           }}
         />
       ) : null}
+
+      <GoHomeButton />
     </View>
   );
 }
+
+const GoHomeButton = () => (
+  <View style={{ height: 44 }}>
+    <Link href="/" asChild>
+      <RectButton2 textClassName="font-bold text-text text-xl">
+        Back
+      </RectButton2>
+    </Link>
+  </View>
+);
