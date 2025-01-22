@@ -19,6 +19,7 @@
   "resolutions": {
     "@testing-library/user-event@npm:14.3.0": "npm:@testing-library/user-event@^14.5.0",
     "@types/pg@npm:8.11.6": "npm:^8 <=8.12.x",
+    "@sentry/types@npm:^8.48.0": "8.48.0",
     "debug@npm:^4.1.0": "4.3.4",
     "debug@npm:^4.1.1": "4.3.4",
     "debug@npm:4.1.1": "4.3.4",
