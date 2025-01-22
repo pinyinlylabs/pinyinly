@@ -4,6 +4,7 @@ const { captureConsoleIntegration } = require(`@sentry/core`);
 Sentry.init({
   dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
   integrations: [captureConsoleIntegration()],
+  tracesSampleRate: 1.0, // Keep in sync with the other Sentry.init()
 });
 
 const { createRequestHandler } = require(`@expo/server/adapter/vercel`);
