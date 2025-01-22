@@ -1,12 +1,12 @@
 import { QuizDeck } from "@/components/QuizDeck";
-import { RectButton } from "@/components/RectButton";
+import { RectButton2 } from "@/components/RectButton2";
 import { useQueryOnce, useReplicache } from "@/components/ReplicacheContext";
 import { generateQuestionForSkillOrThrow } from "@/data/generator";
 import { questionsForReview } from "@/data/query";
 import { formatDuration } from "date-fns/formatDuration";
 import { interval } from "date-fns/interval";
 import { intervalToDuration } from "date-fns/intervalToDuration";
-import { router } from "expo-router";
+import { Link } from "expo-router";
 import { Text, View } from "react-native";
 
 export default function ReviewsPage() {
@@ -88,15 +88,10 @@ export default function ReviewsPage() {
 
 const GoHomeButton = () => (
   <View style={{ height: 44 }}>
-    <RectButton
-      onPressIn={() => {
-        router.push(`/`);
-      }}
-      color={`#333`}
-    >
-      <Text style={{ fontWeight: `bold`, color: `white`, fontSize: 20 }}>
+    <Link href="/" asChild>
+      <RectButton2 textClassName="font-bold text-text text-xl">
         Back
-      </Text>
-    </RectButton>
+      </RectButton2>
+    </Link>
   </View>
 );

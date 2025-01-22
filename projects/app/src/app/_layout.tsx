@@ -99,6 +99,12 @@ cssInterop(Image, {
 });
 cssInterop(Animated.View, { className: `style` });
 
+import * as AppleAuthentication from "expo-apple-authentication";
+
+cssInterop(AppleAuthentication.AppleAuthenticationButton, {
+  className: `style`,
+});
+
 function RootLayout() {
   // Capture the NavigationContainer ref and register it with the instrumentation.
   const ref = useNavigationContainerRef();
