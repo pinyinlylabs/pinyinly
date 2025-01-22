@@ -331,12 +331,8 @@ export async function pull(
         prevCvr?.entities ?? {},
         nextCvrEntities,
       );
-      const prevCvrLastMutationIds = // TODO: refactor to just use drizzle custom type
-        prevCvr != null
-          ? (prevCvr.lastMutationIds as Record<string, number>)
-          : null;
       const lastMutationIdsDiff = diffLastMutationIds(
-        prevCvrLastMutationIds ?? {},
+        prevCvr?.lastMutationIds ?? {},
         nextCvrLastMutationIds,
       );
       debug(`%o`, { entitiesDiff, lastMutationIdsDiff });

@@ -3,6 +3,7 @@ import * as r from "@/data/rizzleSchema";
 import * as s from "drizzle-orm/pg-core";
 import { customType } from "drizzle-orm/pg-core";
 import { customAlphabet } from "nanoid";
+import { z } from "zod";
 
 const alphabet = `0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz`;
 const length = 12;
@@ -10,6 +11,20 @@ const length = 12;
 const nanoid = customAlphabet(alphabet, length);
 
 export const schema = s.pgSchema(`haohaohow`);
+
+const zodJson = <T extends z.ZodTypeAny>(name: string, schema: T) =>
+  customType<{ data: z.infer<T>; driverData: string }>({
+    dataType() {
+      return `json`;
+    },
+    fromDriver(value) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+      return schema.parse(value);
+    },
+    toDriver(value): string {
+      return JSON.stringify(value);
+    },
+  })(name);
 
 const skill = (name: string) => {
   const marshaler = r.rSkill();
@@ -218,12 +233,14 @@ export const replicacheCvr = schema.table(`replicacheCvr`, {
   /**
    * Map of clientID->lastMutationID pairs, one for each client in the client
    * group.
-   *
-   * ```json
-   * { <clientId>: <lastMutationId> }
-   * ```
    */
-  lastMutationIds: s.json(`lastMutationIds`).notNull(),
+  lastMutationIds: zodJson(
+    `lastMutationIds`,
+    z.record(
+      z.string(), // clientId
+      z.number(), // lastMutationId
+    ),
+  ).notNull(),
   /**
    * For each entity visible to the user, map of key->version pairs, grouped by
    * table name.
