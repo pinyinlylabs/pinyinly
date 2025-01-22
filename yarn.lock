@@ -2581,6 +2581,7 @@ __metadata:
     "@sentry/core": "npm:^8.48.0"
     "@sentry/node": "npm:^8.48.0"
     "@sentry/react-native": "npm:~6.3.0"
+    "@sentry/types": "npm:^8.48.0"
     "@stylistic/eslint-plugin": "npm:^2.9.0"
     "@tanstack/react-query": "npm:^5.56.2"
     "@trpc/client": "npm:11.0.0-rc.700"
@@ -5115,6 +5116,15 @@ __metadata:
   version: 8.40.0
   resolution: "@sentry/types@npm:8.40.0"
   checksum: 10c0/00f8d326a797891fde5a58d395c929aaa3bd4fd1d9c9d623f5b4cfcd603c3606168e37c4431a68753b26a1fcdd3c201fc3821d0f81f0cd74d13c4d0a1d4030aa
+  languageName: node
+  linkType: hard
+
+"@sentry/types@npm:8.48.0":
+  version: 8.48.0
+  resolution: "@sentry/types@npm:8.48.0"
+  dependencies:
+    "@sentry/core": "npm:8.48.0"
+  checksum: 10c0/f4cd7128997c2d70954dbdf2d1ab78ec16325439f45b25053c12854d1c54c762972ed07715e15c204057811699170bde3eb407ac5f28ad1df2d19e3e072ec670
   languageName: node
   linkType: hard
 
