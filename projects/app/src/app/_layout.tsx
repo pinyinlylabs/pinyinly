@@ -40,6 +40,7 @@ Sentry.init({
 import { getSessionId } from "@/components/auth";
 import { ReplicacheProvider } from "@/components/ReplicacheContext";
 import { trpc } from "@/util/trpc";
+import { invariant } from "@haohaohow/lib/invariant";
 import {
   DefaultTheme,
   Theme as ReactNavigationTheme,
@@ -57,6 +58,15 @@ import Animated from "react-native-reanimated";
 import "../global.css";
 
 {
+  // Regression test for
+  // https://github.com/getsentry/sentry-react-native/issues/2851#issuecomment-1628559234.
+  // The problem happened when calling `Sentry.init` as it presumably resolved
+  // to an old version of 'promise'.
+  invariant(
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    Promise.allSettled != null,
+  );
+
   const scope = Sentry.getCurrentScope();
   scope.setTag(`expo-update-id`, Updates.updateId);
   scope.setTag(`expo-is-embedded-update`, Updates.isEmbeddedLaunch);
