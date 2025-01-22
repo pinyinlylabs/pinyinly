@@ -1,90 +1,144 @@
-import { CircleButton } from "@/components/CircleButton";
-import {
-  SectionHeaderButton,
-  SectionHeaderButtonProps,
-} from "@/components/SectionHeaderButton";
-import { GradientAqua, GradientPurple, GradientRed } from "@/components/styles";
+import { ScrollView, Text, View } from "react-native";
+
+import { RectButton2 } from "@/components/RectButton2";
+import { useRizzleQuery } from "@/components/ReplicacheContext";
+import fromAsync from "array-from-async";
+import { differenceInCalendarDays } from "date-fns";
 import { Link } from "expo-router";
-import { ColorValue, ScrollView, View } from "react-native";
+import reverse from "lodash/reverse";
+import sortBy from "lodash/sortBy";
+import Animated, { FadeIn } from "react-native-reanimated";
 
 export default function IndexPage() {
+  const recentCharacters = useRizzleQuery(
+    [`IndexPage`, `recentCharacters`],
+    async (r, tx) => {
+      const recentCharacters: string[] = [];
+      const ratingHistory = await fromAsync(r.query.skillRating.scan(tx)).then(
+        (reviews) => reverse(sortBy(reviews, (x) => x[0].createdAt.getTime())),
+      );
+      for (const [key, _value] of ratingHistory) {
+        if (!recentCharacters.includes(key.skill.hanzi)) {
+          recentCharacters.push(key.skill.hanzi);
+          if (recentCharacters.length === 10) {
+            break;
+          }
+        }
+      }
+      return recentCharacters;
+    },
+  );
+
+  const streakQuery = useRizzleQuery(
+    [`IndexPage`, `streakQuery`],
+    async (r, tx) => {
+      const ratingHistory = await fromAsync(r.query.skillRating.scan(tx)).then(
+        (reviews) => reverse(sortBy(reviews, (x) => x[0].createdAt.getTime())),
+      );
+
+      const firstDate = ratingHistory[0]?.[0].createdAt;
+      let lastDate: Date | undefined;
+
+      for (const [{ createdAt }, _value] of ratingHistory) {
+        if (
+          lastDate == null ||
+          differenceInCalendarDays(lastDate, createdAt) <= 1
+        ) {
+          lastDate = createdAt;
+        } else {
+          break;
+        }
+      }
+
+      const streakDayCount =
+        lastDate != null && firstDate != null
+          ? differenceInCalendarDays(lastDate, firstDate) + 1
+          : 0;
+
+      const isActive =
+        lastDate != null &&
+        differenceInCalendarDays(new Date(), lastDate) === 0;
+
+      return { streakDayCount, isActive };
+    },
+  );
+
   return (
     <ScrollView
       className="flex-1"
       contentContainerClassName="pt-safe-offset-4 px-safe-or-4 items-center gap-[10px] padding-[10px]"
     >
-      <Section
-        title="Section 4, Unit 1"
-        subtitle="Chat over dinner, communicate travel issues, describe people, talk about people"
-        color="#53ADF0"
-      />
-      <Section
-        title="Section 4, Unit 2"
-        subtitle="Identify tableware, describe health issues, refer to body parts, refer to colors"
-        color="#EF8CCD"
-      />
-      <Section
-        title="Section 4, Unit 3"
-        subtitle="Ask someone out, shop for clothes, talk about the weather, discuss sport events"
-        color="#78C93D"
-      />
-      <Section
-        title="Section 4, Unit 4"
-        subtitle="Talk about seasons, describe travel needs, make plans, talk about hobbies"
-        color="#F19B38"
-      />
-      <Section
-        title="Section 4, Unit 5"
-        subtitle="Communicate at school, talk about habits, express feelings, describe the environment"
-        color="#E95952"
-      />
-      <Section
-        title="Section 4, Unit 6"
-        subtitle="Learn useful phrases, discuss communication, refer to business documents, tell time"
-        color="#78C93D"
-      />
+      <View className="self-start">
+        {streakQuery.data != null ? (
+          <Animated.View entering={FadeIn}>
+            <Text
+              className={
+                `font-bold text-text` +
+                (streakQuery.data.isActive ? `` : ` opacity-50`)
+              }
+            >
+              {streakQuery.data.isActive ? `🔥` : `❄️`}
+              {` `}
+              {streakQuery.data.streakDayCount} day streak
+            </Text>
+          </Animated.View>
+        ) : (
+          <Text className="font-bold">{` `}</Text>
+        )}
+      </View>
+
+      {recentCharacters.data != null ? (
+        <Animated.View entering={FadeIn} style={{ alignSelf: `stretch` }}>
+          <View className="items-stretch gap-2 self-stretch">
+            <View className="items-center">
+              <Text className="text-2xl font-bold text-text">
+                {recentCharacters.data.length > 0
+                  ? `Continue learning`
+                  : `Start learning`}
+              </Text>
+
+              {recentCharacters.data.length > 0 ? (
+                <>
+                  <Text className="text-md text-primary-9">
+                    A few things from last time
+                  </Text>
+                  <View className="mt-2 flex-row gap-2">
+                    {recentCharacters.data.map((char, i) => (
+                      <View
+                        key={i}
+                        className="rounded border border-primary-7 bg-primary-3 p-2"
+                      >
+                        <Text className="text-text">{char}</Text>
+                      </View>
+                    ))}
+                  </View>
+                </>
+              ) : (
+                <>
+                  <Text className="text-md text-primary-9">
+                    There’s no time like the present
+                  </Text>
+                </>
+              )}
+            </View>
+
+            <Link href="/learn/reviews" asChild>
+              <RectButton2
+                variant="filled"
+                className="success-theme mt-2 self-stretch"
+                accent
+                textClassName="py-1"
+              >
+                Start
+              </RectButton2>
+            </Link>
+          </View>
+        </Animated.View>
+      ) : (
+        <View className="bg-[red]">
+          <Text>hello</Text>
+        </View>
+      )}
     </ScrollView>
   );
 }
-
-const Section = ({
-  title,
-  color,
-  subtitle,
-}: Pick<SectionHeaderButtonProps, `title` | `subtitle` | `color`>) => {
-  const disabledColor: ColorValue = `#AAA`;
-  return (
-    <>
-      <View className="flex-1 self-stretch lg:self-center">
-        <SectionHeaderButton title={title} subtitle={subtitle} color={color} />
-      </View>
-      <CircleButton color={color} />
-      <Link href="/learn" asChild>
-        <CircleButton
-          color={disabledColor}
-          style={{ transform: [{ translateX: 20 }] }}
-        />
-      </Link>
-      <Link href="/radical/手" asChild>
-        <CircleButton color={GradientAqua[0]} />
-      </Link>
-      <Link href="/character/手" asChild>
-        <CircleButton color={GradientRed[0]} />
-      </Link>
-      <Link href="/word/手" asChild>
-        <CircleButton color={GradientPurple[0]} />
-      </Link>
-      <Link href="/login" asChild>
-        <CircleButton color={GradientPurple[0]} />
-      </Link>
-      <Link href="/dev/ui" asChild>
-        <CircleButton
-          color={disabledColor}
-          style={{ transform: [{ translateX: -20 }] }}
-        />
-      </Link>
-      <CircleButton color={disabledColor} />
-      <View style={{ height: 50 }} />
-    </>
-  );
-};
