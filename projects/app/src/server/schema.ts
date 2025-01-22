@@ -1,4 +1,4 @@
-import { Skill } from "@/data/model";
+import { MnemonicThemeId, PinyinInitialGroupId, Skill } from "@/data/model";
 import * as r from "@/data/rizzleSchema";
 import * as s from "drizzle-orm/pg-core";
 import { customType } from "drizzle-orm/pg-core";
@@ -21,6 +21,36 @@ const skill = (name: string) => {
       return marshaler.unmarshal(value);
     },
     toDriver(value): r.MarshaledSkill {
+      return marshaler.marshal(value);
+    },
+  })(name);
+};
+
+const mnemonicThemeId = (name: string) => {
+  const marshaler = r.rMnemonicThemeId;
+  return customType<{ data: MnemonicThemeId; driverData: string }>({
+    dataType() {
+      return `text`;
+    },
+    fromDriver(value): MnemonicThemeId {
+      return marshaler.unmarshal(value);
+    },
+    toDriver(value): string {
+      return marshaler.marshal(value);
+    },
+  })(name);
+};
+
+const pinyinInitialGroupId = (name: string) => {
+  const marshaler = r.rPinyinInitialGroupId;
+  return customType<{ data: PinyinInitialGroupId; driverData: string }>({
+    dataType() {
+      return `text`;
+    },
+    fromDriver(value): PinyinInitialGroupId {
+      return marshaler.unmarshal(value);
+    },
+    toDriver(value): string {
       return marshaler.marshal(value);
     },
   })(name);
@@ -126,6 +156,22 @@ export const pinyinFinalAssociation = schema.table(
     createdAt: s.timestamp(`createdAt`).defaultNow().notNull(),
   },
   (t) => [s.unique().on(t.userId, t.final)],
+);
+
+export const pinyinInitialGroupTheme = schema.table(
+  `pinyinInitialGroupTheme`,
+  {
+    id: s.text(`id`).primaryKey().$defaultFn(nanoid),
+    userId: s
+      .text(`userId`)
+      .references(() => user.id)
+      .notNull(),
+    groupId: pinyinInitialGroupId(`groupId`).notNull(),
+    themeId: mnemonicThemeId(`themeId`).notNull(),
+    updatedAt: s.timestamp(`updatedAt`).defaultNow().notNull(),
+    createdAt: s.timestamp(`createdAt`).defaultNow().notNull(),
+  },
+  (t) => [s.unique().on(t.userId, t.groupId)],
 );
 
 export const replicacheClientGroup = schema.table(`replicacheClientGroup`, {

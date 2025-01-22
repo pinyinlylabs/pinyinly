@@ -1,5 +1,23 @@
 import { Rating } from "@/util/fsrs";
 
+export enum PinyinInitialGroupId {
+  Basic,
+  _i,
+  _u,
+  _v,
+  Null,
+  Everything,
+}
+
+export enum MnemonicThemeId {
+  AnimalSpecies,
+  GreekMythologyCharacter,
+  MythologyCharacter,
+  WesternCultureFamousMen,
+  WesternCultureFamousWomen,
+  WesternMythologyCharacter,
+}
+
 export enum SrsType {
   Null,
   FsrsFourPointFive,

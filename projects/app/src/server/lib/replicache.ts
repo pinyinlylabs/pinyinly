@@ -1,4 +1,10 @@
-import { rFsrsRating, SupportedSchema, v3, v4 } from "@/data/rizzleSchema";
+import {
+  rFsrsRating,
+  rPinyinInitialGroupId,
+  SupportedSchema,
+  v3,
+  v4,
+} from "@/data/rizzleSchema";
 import {
   ClientStateNotFoundResponse,
   Cookie,
@@ -85,6 +91,20 @@ const mutators: RizzleDrizzleMutators<SupportedSchema, Drizzle> = {
         set: { name, updatedAt },
       });
   },
+  async setPinyinInitialGroupTheme(db, userId, { groupId, themeId, now }) {
+    const updatedAt = now;
+    const createdAt = now;
+    await db
+      .insert(s.pinyinInitialGroupTheme)
+      .values([{ userId, groupId, themeId, updatedAt, createdAt }])
+      .onConflictDoUpdate({
+        target: [
+          s.pinyinInitialGroupTheme.userId,
+          s.pinyinInitialGroupTheme.groupId,
+        ],
+        set: { themeId, updatedAt },
+      });
+  },
 };
 
 const mutateV3 = makeDrizzleMutationHandler(v3, mutators);
@@ -165,6 +185,7 @@ const cvrEntriesSchema = z
   .object({
     pinyinInitialAssociation: z.record(z.string()),
     pinyinFinalAssociation: z.record(z.string()),
+    pinyinInitialGroupTheme: z.record(z.string()),
     skillState: z.record(z.string()),
     skillRating: z.record(z.string()),
   })
@@ -333,6 +354,7 @@ export async function pull(
       const [
         pinyinFinalAssociations,
         pinyinInitialAssociations,
+        pinyinInitialGroupThemes,
         skillStates,
         skillRatings,
       ] = await Promise.all([
@@ -343,6 +365,10 @@ export async function pull(
         tx.query.pinyinInitialAssociation.findMany({
           where: (t) =>
             inArray(t.id, entitiesDiff.pinyinInitialAssociation?.puts ?? []),
+        }),
+        tx.query.pinyinInitialGroupTheme.findMany({
+          where: (t) =>
+            inArray(t.id, entitiesDiff.pinyinInitialGroupTheme?.puts ?? []),
         }),
         tx.query.skillState.findMany({
           where: (t) => inArray(t.id, entitiesDiff.skillState?.puts ?? []),
@@ -378,6 +404,10 @@ export async function pull(
           pinyinFinalAssociation: {
             dels: entitiesDiff.pinyinFinalAssociation?.dels ?? [],
             puts: pinyinFinalAssociations,
+          },
+          pinyinInitialGroupTheme: {
+            dels: entitiesDiff.pinyinInitialGroupTheme?.dels ?? [],
+            puts: pinyinInitialGroupThemes,
           },
           skillState: {
             dels: entitiesDiff.skillState?.dels ?? [],
@@ -439,43 +469,47 @@ export async function pull(
   }
 
   // 18(ii): puts
-  // skillState
-  for (const s of entityPatches.skillState.puts) {
-    patch.push({
-      op: `put`,
-      key: schema.skillState.marshalKey(s),
-      value: schema.skillState.marshalValue({
-        createdAt: s.createdAt,
-        srs: null,
-        due: s.dueAt,
-      }),
-    });
+  if (`skillState` in schema) {
+    for (const s of entityPatches.skillState.puts) {
+      patch.push({
+        op: `put`,
+        key: schema.skillState.marshalKey(s),
+        value: schema.skillState.marshalValue({
+          createdAt: s.createdAt,
+          srs: null,
+          due: s.dueAt,
+        }),
+      });
+    }
   }
-  // skillRating
-  for (const s of entityPatches.skillRating.puts) {
-    patch.push({
-      op: `put`,
-      key: schema.skillRating.marshalKey(s),
-      value: schema.skillRating.marshalValue({
-        rating: rFsrsRating.unmarshal(s.rating),
-      }),
-    });
+  if (`skillRating` in schema) {
+    for (const s of entityPatches.skillRating.puts) {
+      patch.push({
+        op: `put`,
+        key: schema.skillRating.marshalKey(s),
+        value: schema.skillRating.marshalValue({
+          rating: rFsrsRating.unmarshal(s.rating),
+        }),
+      });
+    }
   }
-  // pinyinFinalAssociation
-  for (const s of entityPatches.pinyinFinalAssociation.puts) {
-    patch.push({
-      op: `put`,
-      key: schema.pinyinFinalAssociation.marshalKey(s),
-      value: schema.pinyinFinalAssociation.marshalValue(s),
-    });
+  if (`pinyinFinalAssociation` in schema) {
+    const e = schema.pinyinFinalAssociation;
+    for (const s of entityPatches.pinyinFinalAssociation.puts) {
+      patch.push({ op: `put`, key: e.marshalKey(s), value: e.marshalValue(s) });
+    }
   }
-  // pinyinInitialAssociation
-  for (const s of entityPatches.pinyinInitialAssociation.puts) {
-    patch.push({
-      op: `put`,
-      key: schema.pinyinInitialAssociation.marshalKey(s),
-      value: schema.pinyinInitialAssociation.marshalValue(s),
-    });
+  if (`pinyinInitialAssociation` in schema) {
+    const e = schema.pinyinInitialAssociation;
+    for (const s of entityPatches.pinyinInitialAssociation.puts) {
+      patch.push({ op: `put`, key: e.marshalKey(s), value: e.marshalValue(s) });
+    }
+  }
+  if (`pinyinInitialGroupTheme` in schema) {
+    const e = schema.pinyinInitialGroupTheme;
+    for (const s of entityPatches.pinyinInitialGroupTheme.puts) {
+      patch.push({ op: `put`, key: e.marshalKey(s), value: e.marshalValue(s) });
+    }
   }
 
   // 18(ii): construct cookie
@@ -695,6 +729,20 @@ export async function computeCvrEntities(
     .where(eq(s.pinyinInitialAssociation.userId, userId))
     .as(`pinyinInitialAssociationVersions`);
 
+  const pinyinInitialGroupThemeVersions = db
+    .select({
+      map: json_object_agg(
+        s.pinyinInitialGroupTheme.id,
+        json_build_object({
+          groupId: sql<string>`${s.pinyinInitialGroupTheme.groupId}`,
+          xmin: sql<string>`${s.pinyinInitialGroupTheme}.xmin`,
+        }),
+      ).as(`pinyinInitialGroupThemeVersions`),
+    })
+    .from(s.pinyinInitialGroupTheme)
+    .where(eq(s.pinyinInitialGroupTheme.userId, userId))
+    .as(`pinyinInitialGroupThemeVersions`);
+
   const skillStateVersions = db
     .select({
       map: json_object_agg(
@@ -728,11 +776,13 @@ export async function computeCvrEntities(
     .select({
       pinyinFinalAssociation: pinyinFinalAssociationVersions.map,
       pinyinInitialAssociation: pinyinInitialAssociationVersions.map,
+      pinyinInitialGroupTheme: pinyinInitialGroupThemeVersions.map,
       skillRating: skillRatingVersions.map,
       skillState: skillStateVersions.map,
     })
     .from(pinyinFinalAssociationVersions)
     .leftJoin(pinyinInitialAssociationVersions, sql`true`)
+    .leftJoin(pinyinInitialGroupThemeVersions, sql`true`)
     .leftJoin(skillRatingVersions, sql`true`)
     .leftJoin(skillStateVersions, sql`true`);
 
@@ -747,6 +797,18 @@ export async function computeCvrEntities(
       result.pinyinFinalAssociation,
       (v) => v.xmin + `:` + schema.pinyinFinalAssociation.marshalKey(v),
     ),
+    pinyinInitialGroupTheme:
+      `pinyinInitialGroupTheme` in schema
+        ? mapValues(
+            result.pinyinInitialGroupTheme,
+            (v) =>
+              v.xmin +
+              `:` +
+              schema.pinyinInitialGroupTheme.marshalKey({
+                groupId: rPinyinInitialGroupId.unmarshal(v.groupId),
+              }),
+          )
+        : {},
     skillState: mapValues(
       result.skillState,
       (v) => v.xmin + `:` + schema.skillState.marshalKey(v),

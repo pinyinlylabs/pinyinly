@@ -148,6 +148,9 @@ export function ReplicacheProvider({ children }: React.PropsWithChildren) {
         async setPinyinFinalAssociation(tx, { final, name }) {
           await tx.pinyinFinalAssociation.set({ final }, { name });
         },
+        async setPinyinInitialGroupTheme(tx, { groupId, themeId }) {
+          await tx.pinyinInitialGroupTheme.set({ groupId }, { themeId });
+        },
       },
     );
   }, [auth.isAuthenticated, pushMutate, pullMutate]);

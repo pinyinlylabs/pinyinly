@@ -738,6 +738,7 @@ void test(`computeCvr()`, async (t) => {
           assert.deepEqual(await computeCvrEntities(tx, `1`, schema), {
             pinyinFinalAssociation: {},
             pinyinInitialAssociation: {},
+            pinyinInitialGroupTheme: {},
             skillState: {},
             skillRating: {},
           });
@@ -750,6 +751,7 @@ void test(`computeCvr()`, async (t) => {
         assert.deepEqual(await computeCvrEntities(tx, user.id, schema), {
           pinyinFinalAssociation: {},
           pinyinInitialAssociation: {},
+          pinyinInitialGroupTheme: {},
           skillState: {},
           skillRating: {},
         });
@@ -793,6 +795,7 @@ void test(`computeCvr()`, async (t) => {
         assert.deepEqual(await computeCvrEntities(tx, user1.id, schema), {
           pinyinFinalAssociation: {},
           pinyinInitialAssociation: {},
+          pinyinInitialGroupTheme: {},
           skillRating: {},
           skillState: {
             [user1SkillState.id]:
@@ -838,6 +841,7 @@ void test(`computeCvr()`, async (t) => {
         assert.deepEqual(await computeCvrEntities(tx, user1.id, schema), {
           pinyinFinalAssociation: {},
           pinyinInitialAssociation: {},
+          pinyinInitialGroupTheme: {},
           skillRating: {
             [user1SkillRating.id]:
               user1SkillRating.version +
@@ -888,6 +892,7 @@ void test(`computeCvr()`, async (t) => {
                 ),
             },
             pinyinInitialAssociation: {},
+            pinyinInitialGroupTheme: {},
             skillRating: {},
             skillState: {},
           });
@@ -931,6 +936,7 @@ void test(`computeCvr()`, async (t) => {
                   user1PinyinInitialAssociation,
                 ),
             },
+            pinyinInitialGroupTheme: {},
             skillRating: {},
             skillState: {},
           });
