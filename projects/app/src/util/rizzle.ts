@@ -18,11 +18,11 @@ import {
 import { AnyFunction } from "ts-essentials";
 import { z } from "zod";
 
-interface RizzleTypeDef {
+export interface RizzleTypeDef {
   description?: string;
 }
 
-abstract class RizzleType<
+export abstract class RizzleType<
   Def extends RizzleTypeDef = RizzleTypeDef,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Input = any,

@@ -1,5 +1,4 @@
 import { Skill, SrsType } from "@/data/model";
-import * as r from "@/data/rizzleSchema";
 import { UpcomingReview, nextReview } from "@/util/fsrs";
 import { invariant } from "@haohaohow/lib/invariant";
 import { and, asc, eq } from "drizzle-orm";
@@ -27,7 +26,7 @@ export async function updateSkillState(
   // Starting from the null state, apply each skill rating.
   let state: UpcomingReview | null = null;
   for (const rr of ratings) {
-    state = nextReview(state, r.rFsrsRating.unmarshal(rr.rating), rr.createdAt);
+    state = nextReview(state, rr.rating, rr.createdAt);
   }
 
   invariant(state !== null);
@@ -38,16 +37,16 @@ export async function updateSkillState(
       type: SrsType.FsrsFourPointFive,
       stability: state.stability,
       difficulty: state.difficulty,
-    };
-    const dueAt = state.due;
+    } as const;
+    const due = state.due;
     const createdAt = state.created;
 
     await tx
       .insert(schema.skillState)
-      .values([{ userId, skill, srs, dueAt, createdAt }])
+      .values([{ userId, skill, srs, due, createdAt }])
       .onConflictDoUpdate({
         target: [schema.skillState.userId, schema.skillState.skill],
-        set: { srs, dueAt, createdAt },
+        set: { srs, due, createdAt },
       });
   }
 }

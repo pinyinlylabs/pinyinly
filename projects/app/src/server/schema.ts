@@ -1,5 +1,5 @@
-import { MnemonicThemeId, PinyinInitialGroupId, Skill } from "@/data/model";
 import * as r from "@/data/rizzleSchema";
+import { RizzleType, RizzleTypeDef } from "@/util/rizzle";
 import * as s from "drizzle-orm/pg-core";
 import { customType } from "drizzle-orm/pg-core";
 import { customAlphabet } from "nanoid";
@@ -21,55 +21,42 @@ const zodJson = <T extends z.ZodTypeAny>(name: string, schema: T) =>
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return schema.parse(value);
     },
-    toDriver(value): string {
+    toDriver(value) {
       return JSON.stringify(value);
     },
   })(name);
 
-const skill = (name: string) => {
-  const marshaler = r.rSkill();
-  return customType<{ data: Skill; driverData: r.MarshaledSkill }>({
+const rizzleCustomType = <
+  DataType extends `text` | `json`,
+  I,
+  M extends DataType extends `text` ? string : unknown,
+  O,
+  T extends RizzleType<RizzleTypeDef, I, M, O>,
+>(
+  rizzleType: T,
+  dataType: DataType,
+) =>
+  customType<{ data: T[`_output`]; driverData: string }>({
     dataType() {
-      return `text`;
+      return dataType;
     },
-    fromDriver(value): Skill {
-      return marshaler.unmarshal(value);
+    fromDriver(value) {
+      return rizzleType.getUnmarshal().parse(value);
     },
-    toDriver(value): r.MarshaledSkill {
-      return marshaler.marshal(value);
+    toDriver(value: T[`_output`]) {
+      const marshaled = rizzleType.getMarshal().parse(value);
+      return dataType === `json`
+        ? JSON.stringify(marshaled)
+        : (marshaled as string);
     },
-  })(name);
-};
+  });
 
-const mnemonicThemeId = (name: string) => {
-  const marshaler = r.rMnemonicThemeId;
-  return customType<{ data: MnemonicThemeId; driverData: string }>({
-    dataType() {
-      return `text`;
-    },
-    fromDriver(value): MnemonicThemeId {
-      return marshaler.unmarshal(value);
-    },
-    toDriver(value): string {
-      return marshaler.marshal(value);
-    },
-  })(name);
-};
-
-const pinyinInitialGroupId = (name: string) => {
-  const marshaler = r.rPinyinInitialGroupId;
-  return customType<{ data: PinyinInitialGroupId; driverData: string }>({
-    dataType() {
-      return `text`;
-    },
-    fromDriver(value): PinyinInitialGroupId {
-      return marshaler.unmarshal(value);
-    },
-    toDriver(value): string {
-      return marshaler.marshal(value);
-    },
-  })(name);
-};
+// The "s" prefix follows the convention of "s" being drizzle things. This helps
+// differentiate them from rizzle schema things.
+const sSkill = rizzleCustomType(r.rSkill(), `text`);
+const sMnemonicThemeId = rizzleCustomType(r.rMnemonicThemeId, `text`);
+const sPinyinInitialGroupId = rizzleCustomType(r.rPinyinInitialGroupId, `text`);
+const sFsrsRating = rizzleCustomType(r.rFsrsRating, `text`);
 
 export const user = schema.table(`user`, {
   id: s.text(`id`).primaryKey().$defaultFn(nanoid),
@@ -120,8 +107,8 @@ export const skillRating = schema.table(`skillRating`, {
     .text(`userId`)
     .references(() => user.id)
     .notNull(),
-  skill: skill(`skillId`).notNull(),
-  rating: s.text(`rating`).notNull(),
+  skill: sSkill(`skillId`).notNull(),
+  rating: sFsrsRating(`rating`).notNull(),
   createdAt: s.timestamp(`timestamp`).defaultNow().notNull(),
 });
 
@@ -133,9 +120,9 @@ export const skillState = schema.table(
       .text(`userId`)
       .references(() => user.id)
       .notNull(),
-    skill: skill(`skillId`).notNull(),
-    srs: s.json(`srs`),
-    dueAt: s.timestamp(`dueAt`).notNull(),
+    skill: sSkill(`skillId`).notNull(),
+    srs: rizzleCustomType(r.rSrsState(), `json`)(`srs`),
+    due: s.timestamp(`dueAt`).notNull(),
     createdAt: s.timestamp(`createdAt`).defaultNow().notNull(),
   },
   (t) => [s.unique().on(t.userId, t.skill)],
@@ -181,8 +168,8 @@ export const pinyinInitialGroupTheme = schema.table(
       .text(`userId`)
       .references(() => user.id)
       .notNull(),
-    groupId: pinyinInitialGroupId(`groupId`).notNull(),
-    themeId: mnemonicThemeId(`themeId`).notNull(),
+    groupId: sPinyinInitialGroupId(`groupId`).notNull(),
+    themeId: sMnemonicThemeId(`themeId`).notNull(),
     updatedAt: s.timestamp(`updatedAt`).defaultNow().notNull(),
     createdAt: s.timestamp(`createdAt`).defaultNow().notNull(),
   },
@@ -242,13 +229,23 @@ export const replicacheCvr = schema.table(`replicacheCvr`, {
     ),
   ).notNull(),
   /**
-   * For each entity visible to the user, map of key->version pairs, grouped by
-   * table name.
+   * For each entity visible to the user, map of key->version:id pairs, grouped
+   * by table name.
    *
-   * ```json
-   * { <tableName>: { "<primaryKey>": "<version>:<replicacheId>" } }
-   * ```
+   * It's necessary to store `replicacheEntityKey` within this value so that
+   * `del` ops can be constructed and sent to the client. Otherwise it would be
+   * necessary to keep a copy of the whole entity because keys can be encoded
+   * using arbitrary inputs.
    */
-  entities: s.json(`entities`).notNull(),
+  entities: zodJson(
+    `entities`,
+    z.record(
+      z.string(), // tableName
+      z.record(
+        z.string(), // primaryKey
+        z.string(), // <version>:<replicacheEntityKey>
+      ),
+    ),
+  ).notNull(),
   createdAt: s.timestamp(`createdAt`).defaultNow().notNull(),
 });
