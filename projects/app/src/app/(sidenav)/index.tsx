@@ -2,6 +2,7 @@ import { ScrollView, Text, View } from "react-native";
 
 import { RectButton2 } from "@/components/RectButton2";
 import { useRizzleQuery } from "@/components/ReplicacheContext";
+import { invariant } from "@haohaohow/lib/invariant";
 import fromAsync from "array-from-async";
 import { differenceInCalendarDays } from "date-fns";
 import { Link } from "expo-router";
@@ -36,28 +37,42 @@ export default function IndexPage() {
         (reviews) => reverse(sortBy(reviews, (x) => x[0].createdAt.getTime())),
       );
 
-      const firstDate = ratingHistory[0]?.[0].createdAt;
-      let lastDate: Date | undefined;
+      const streakEnd = ratingHistory[0]?.[0].createdAt;
+      let streakStart: Date | undefined;
 
       for (const [{ createdAt }, _value] of ratingHistory) {
+        invariant(
+          streakStart == null || createdAt <= streakStart,
+          `Expected rating history to be in descending order`,
+        );
+        invariant(
+          streakStart == null || streakEnd == null || streakStart <= streakEnd,
+          `Expected streakStart to be before streakEnd`,
+        );
+
         if (
-          lastDate == null ||
-          differenceInCalendarDays(lastDate, createdAt) <= 1
+          streakStart == null ||
+          differenceInCalendarDays(streakStart, createdAt) <= 1
         ) {
-          lastDate = createdAt;
+          streakStart = createdAt;
         } else {
           break;
         }
       }
 
       const streakDayCount =
-        lastDate != null && firstDate != null
-          ? differenceInCalendarDays(lastDate, firstDate) + 1
+        streakStart != null && streakEnd != null
+          ? differenceInCalendarDays(streakEnd, streakStart) + 1
           : 0;
 
+      invariant(
+        streakDayCount >= 0,
+        `Expected streakDayCount to be non-negative`,
+      );
+
       const isActive =
-        lastDate != null &&
-        differenceInCalendarDays(new Date(), lastDate) === 0;
+        streakEnd != null &&
+        differenceInCalendarDays(new Date(), streakEnd) === 0;
 
       return { streakDayCount, isActive };
     },
@@ -87,7 +102,13 @@ export default function IndexPage() {
         )}
       </View>
 
-      {recentCharacters.data != null ? (
+      {recentCharacters.isLoading ? null : recentCharacters.isError ? (
+        <View>
+          <Text className="danger-theme text-text">
+            Oops something went wrong.
+          </Text>
+        </View>
+      ) : recentCharacters.data == null ? null : (
         <Animated.View entering={FadeIn} style={{ alignSelf: `stretch` }}>
           <View className="items-stretch gap-2 self-stretch">
             <View className="items-center">
@@ -134,10 +155,6 @@ export default function IndexPage() {
             </Link>
           </View>
         </Animated.View>
-      ) : (
-        <View className="bg-[red]">
-          <Text>hello</Text>
-        </View>
       )}
     </ScrollView>
   );
