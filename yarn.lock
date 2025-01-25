@@ -15497,21 +15497,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tailwind-merge@npm:^2.5.4":
-  version: 2.6.0
-  resolution: "tailwind-merge@npm:2.6.0"
-  checksum: 10c0/fc8a5535524de9f4dacf1c16ab298581c7bb757d68a95faaf28942b1c555a619bba9d4c6726fe83986e44973b315410c1a5226e5354c30ba82353bd6d2288fa5
+"tailwind-merge@npm:2.5.4":
+  version: 2.5.4
+  resolution: "tailwind-merge@npm:2.5.4"
+  checksum: 10c0/6c3d2a1d44344f373859f005e6366f0dbd7f66131d330a51dbe823dab08f71c388b2efcbb2b6a2170ca469581d27079c25cd40c234ca1356c4893ae99c2febb3
   languageName: node
   linkType: hard
 
 "tailwind-variants@npm:^0.3.0":
-  version: 0.3.0
-  resolution: "tailwind-variants@npm:0.3.0"
+  version: 0.3.1
+  resolution: "tailwind-variants@npm:0.3.1"
   dependencies:
-    tailwind-merge: "npm:^2.5.4"
+    tailwind-merge: "npm:2.5.4"
   peerDependencies:
     tailwindcss: "*"
-  checksum: 10c0/115b0efb5ca5b76d4dfe6148e3f2f314f5af8490d0d2be8bdb6f062c0963ead87227ffd7340c6fb38cd95c0c751e2f65b04f3c0d833bf058d8cfe25210777bc7
+  checksum: 10c0/2ad4a9282ea3d9b66443329ede844bd86b6737b98ede3f31d6b495e3d1f210677c57ba360af2dbffede00cce0026dd1105eeb1af936e825ebd14e715eb6cbc11
   languageName: node
   linkType: hard
 
