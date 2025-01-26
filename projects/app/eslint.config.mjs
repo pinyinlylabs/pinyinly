@@ -2,6 +2,7 @@
 import { FlatCompat } from "@eslint/eslintrc";
 import inngestPlugin from "@inngest/eslint-plugin";
 import stylisticPlugin from "@stylistic/eslint-plugin";
+import drizzlePlugin from "eslint-plugin-drizzle";
 import importPlugin from "eslint-plugin-import";
 import reactPlugin from "eslint-plugin-react";
 import reactCompilerPlugin from "eslint-plugin-react-compiler";
@@ -22,10 +23,11 @@ export default tseslint.config(
   {
     // note - intentionally uses computed syntax to make it easy to sort the keys
     plugins: {
-      [`@inngest`]: inngestPlugin,
       [`@expoCodeImports`]: tseslint.plugin, // an extra scope for no-restricted-imports so they don't clobber other configs
+      [`@inngest`]: inngestPlugin,
       [`@stylistic`]: stylisticPlugin,
       [`@typescript-eslint`]: tseslint.plugin,
+      [`drizzle`]: drizzlePlugin,
       [`import`]: importPlugin,
       [`react-compiler`]: reactCompilerPlugin,
       [`react-hooks`]: reactHooksPlugin,
@@ -63,9 +65,10 @@ export default tseslint.config(
   // Rules for all lintable files.
   {
     extends: [
+      ...compat.config(drizzlePlugin.configs.recommended),
       ...compat.config(inngestPlugin.configs.recommended),
-      ...compat.config(reactPlugin.configs.recommended),
       ...compat.config(reactHooksPlugin.configs.recommended),
+      ...compat.config(reactPlugin.configs.recommended),
     ],
     settings: {
       react: {
