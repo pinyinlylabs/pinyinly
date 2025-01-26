@@ -1,9 +1,15 @@
 import * as r from "@/data/rizzleSchema";
-import { RizzleType, RizzleTypeDef } from "@/util/rizzle";
 import * as s from "drizzle-orm/pg-core";
-import { customType } from "drizzle-orm/pg-core";
 import { customAlphabet } from "nanoid";
 import { z } from "zod";
+import {
+  rizzleCustomType,
+  sFsrsRating,
+  sMnemonicThemeId,
+  sPinyinInitialGroupId,
+  sSkill,
+  zodJson,
+} from "./schemaUtil";
 
 const alphabet = `0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz`;
 const length = 12;
@@ -11,52 +17,6 @@ const length = 12;
 const nanoid = customAlphabet(alphabet, length);
 
 export const schema = s.pgSchema(`haohaohow`);
-
-const zodJson = <T extends z.ZodTypeAny>(name: string, schema: T) =>
-  customType<{ data: z.infer<T>; driverData: string }>({
-    dataType() {
-      return `json`;
-    },
-    fromDriver(value) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      return schema.parse(value);
-    },
-    toDriver(value) {
-      return JSON.stringify(value);
-    },
-  })(name);
-
-const rizzleCustomType = <
-  DataType extends `text` | `json`,
-  I,
-  M extends DataType extends `text` ? string : unknown,
-  O,
-  T extends RizzleType<RizzleTypeDef, I, M, O>,
->(
-  rizzleType: T,
-  dataType: DataType,
-) =>
-  customType<{ data: T[`_output`]; driverData: string }>({
-    dataType() {
-      return dataType;
-    },
-    fromDriver(value) {
-      return rizzleType.getUnmarshal().parse(value);
-    },
-    toDriver(value: T[`_output`]) {
-      const marshaled = rizzleType.getMarshal().parse(value);
-      return dataType === `json`
-        ? JSON.stringify(marshaled)
-        : (marshaled as string);
-    },
-  });
-
-// The "s" prefix follows the convention of "s" being drizzle things. This helps
-// differentiate them from rizzle schema things.
-const sSkill = rizzleCustomType(r.rSkill(), `text`);
-const sMnemonicThemeId = rizzleCustomType(r.rMnemonicThemeId, `text`);
-const sPinyinInitialGroupId = rizzleCustomType(r.rPinyinInitialGroupId, `text`);
-const sFsrsRating = rizzleCustomType(r.rFsrsRating, `text`);
 
 export const user = schema.table(`user`, {
   id: s.text(`id`).primaryKey().$defaultFn(nanoid),
