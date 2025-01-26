@@ -92,7 +92,7 @@ export default function RadicalPage() {
   return (
     <View className="flex-1 items-center">
       <View className="w-[100%] max-w-[600px] flex-row items-center gap-3 pt-safe-offset-4 px-safe-or-4">
-        <CloseButton href="/" tintColor="#3C464D" />
+        <CloseButton href="/dashboard" tintColor="#3C464D" />
         <QuizProgressBar
           progress={0.5}
           colors={

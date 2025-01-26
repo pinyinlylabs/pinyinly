@@ -147,7 +147,7 @@ export const QuizDeck = ({ questions }: { questions: readonly Question[] }) => {
       }}
     >
       <View className="flex-row items-center gap-[24px] px-[16px]">
-        <CloseButton href="/" tintColor="#3C464D" />
+        <CloseButton href="/dashboard" tintColor="#3C464D" />
         <QuizProgressBar
           progress={progress}
           colors={
@@ -225,7 +225,7 @@ export const QuizDeck = ({ questions }: { questions: readonly Question[] }) => {
                         Keep learning
                       </RectButton2>
                     </Link>
-                    <Link href="/" asChild>
+                    <Link href="/dashboard" asChild>
                       <RectButton2 variant="bare">
                         That’s enough for now
                       </RectButton2>
