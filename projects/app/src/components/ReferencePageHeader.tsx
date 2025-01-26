@@ -28,7 +28,7 @@ export const ReferencePageHeader = ({
           </Text>
         </View>
         <View className="absolute left-[16px] top-safe-or-[16px]">
-          <CloseButton href="/" tintColor="white" />
+          <CloseButton href="/dashboard" tintColor="white" />
         </View>
       </LinearGradient>
 

@@ -103,7 +103,7 @@ export default function LoginPage() {
 
 const GoHomeButton = () => (
   <View style={{ height: 44 }}>
-    <Link href="/" asChild>
+    <Link href="/dashboard" asChild>
       <RectButton2 textClassName="font-bold text-text text-xl">
         Back
       </RectButton2>
