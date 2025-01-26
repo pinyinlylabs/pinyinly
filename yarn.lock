@@ -2607,6 +2607,7 @@ __metadata:
     drizzle-kit: "npm:^0.30.1"
     drizzle-orm: "npm:^0.38.2"
     eslint: "npm:^9.13.0"
+    eslint-plugin-drizzle: "npm:^0.2.3"
     eslint-plugin-import: "npm:^2.31.0"
     eslint-plugin-react: "npm:^7.37.2"
     eslint-plugin-react-compiler: "npm:19.0.0-beta-df7b47d-20241124"
@@ -8569,6 +8570,15 @@ __metadata:
     eslint:
       optional: true
   checksum: 10c0/4d8b46dcd525d71276f9be9ffac1d2be61c9d54cc53c992e6333cf957840dee09381842b1acbbb15fc6b255ebab99cd481c5007ab438e5455a14abe1a0468558
+  languageName: node
+  linkType: hard
+
+"eslint-plugin-drizzle@npm:^0.2.3":
+  version: 0.2.3
+  resolution: "eslint-plugin-drizzle@npm:0.2.3"
+  peerDependencies:
+    eslint: ">=8.0.0"
+  checksum: 10c0/e747b712e74049034e747d6825400cf2122d2b53da46bdf64f3b221da13410d84f53ca050515d9174ae65e287803ae2a48403a3492bb664a8fa65ec9540f658a
   languageName: node
   linkType: hard
 
