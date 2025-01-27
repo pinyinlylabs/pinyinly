@@ -10,7 +10,7 @@
     },
     {
       "description": "tooling deps defaults: automerge, wait 3 days",
-      "matchDatasources": ["npm"],
+      "matchDatasources": ["npm", "github-releases"],
       "matchDepTypes": ["devDependencies", "packageManager"],
       "minimumReleaseAge": "3 days",
       "internalChecksFilter": "strict",
@@ -18,7 +18,7 @@
     },
     {
       "description": "tooling deps major updates: manual merge",
-      "matchDatasources": ["npm"],
+      "matchDatasources": ["npm", "github-releases"],
       "matchDepTypes": ["devDependencies", "packageManager"],
       "matchUpdateTypes": ["major"],
       "automerge": false
