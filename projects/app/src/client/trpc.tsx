@@ -1,6 +1,6 @@
 import type { AppRouter } from "@/server/routers/_app";
 import { QueryClient } from "@tanstack/react-query";
-import { HTTPHeaders, httpLink } from "@trpc/client";
+import { HTTPHeaders, httpLink, retryLink } from "@trpc/client";
 import { createTRPCReact } from "@trpc/react-query";
 import { ReactNode, useState } from "react";
 
@@ -18,6 +18,21 @@ export const TrpcProvider = ({
   const [trpcClient] = useState(() =>
     trpc.createClient({
       links: [
+        retryLink({
+          retry(opts) {
+            // Retry Vercel timeouts. These often happen on cold starts.
+            if (
+              opts.error.cause instanceof HhhVercelError &&
+              opts.error.cause.code === `FUNCTION_INVOCATION_TIMEOUT`
+            ) {
+              // Retry twice, the second attempt should work.
+              return opts.attempts < 2;
+            }
+
+            // Keep the tRPC default.
+            return false;
+          },
+        }),
         httpLink({
           url: `/api/trpc`,
 
