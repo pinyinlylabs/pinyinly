@@ -18,7 +18,6 @@ export const TrpcProvider = ({
   const [trpcClient] = useState(() =>
     trpc.createClient({
       links: [
-        vercelErrorTransformLink,
         httpLink({
           url: `/api/trpc`,
 
@@ -32,6 +31,21 @@ export const TrpcProvider = ({
 
             return result;
           },
+
+          fetch: async (input, init) => {
+            // Add error parsing for Vercel errors that don't conform to the
+            // tRPC spec and would otherwise be swallowed as:
+            //
+            // > The string did not match the expected pattern.
+            const res = await fetch(input, init);
+            if (!res.ok) {
+              const vercelError = maybeParseVercelError(res);
+              if (vercelError != null) {
+                throw vercelError;
+              }
+            }
+            return res;
+          },
         }),
       ],
     }),
@@ -43,3 +57,25 @@ export const TrpcProvider = ({
     </trpc.Provider>
   );
 };
+
+class HhhVercelError extends Error {
+  code: string;
+  id: string;
+
+  constructor(code: string, id: string) {
+    super(`Vercel error ${code} (id=${id})`);
+    this.name = this.constructor.name;
+    this.code = code;
+    this.id = id;
+  }
+}
+
+export function maybeParseVercelError(
+  response: Response,
+): HhhVercelError | undefined {
+  const errorCode = response.headers.get(`x-vercel-error`);
+  if (errorCode != null) {
+    const errorId = response.headers.get(`x-vercel-id`) ?? ``;
+    return new HhhVercelError(errorCode, errorId);
+  }
+}
