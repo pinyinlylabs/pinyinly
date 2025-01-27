@@ -175,3 +175,28 @@ Finally run the vercel dev server: (e.g. with extra logging)
 ```sh
 DEBUG=inngest:* INNGEST_DEV=1 npx vercel dev --listen 8081
 ```
+
+## Testing Vercel gateway errors locally
+
+Create a `app/api/trpc/replicache.push+api.ts` file containing:
+
+```ts
+export function POST() {
+  return new Response(
+    `An error occurred with your deployment
+
+FUNCTION_INVOCATION_TIMEOUT
+
+syd1::m6bjf-1738011631946-6a41c1b3d99c`,
+    {
+      status: 504,
+      headers: {
+        "x-vercel-error": `FUNCTION_INVOCATION_TIMEOUT`,
+        "x-vercel-id": `syd1::gqwrj-1738016771255-d9363c982187`,
+      },
+    },
+  );
+}
+```
+
+Customise this to suit your scenario.
