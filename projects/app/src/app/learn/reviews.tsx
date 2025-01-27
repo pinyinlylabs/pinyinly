@@ -1,6 +1,6 @@
-import { QuizDeck } from "@/components/QuizDeck";
-import { RectButton2 } from "@/components/RectButton2";
-import { useQueryOnce, useReplicache } from "@/components/ReplicacheContext";
+import { QuizDeck } from "@/client/ui/QuizDeck";
+import { RectButton2 } from "@/client/ui/RectButton2";
+import { useQueryOnce, useReplicache } from "@/client/ui/ReplicacheContext";
 import { generateQuestionForSkillOrThrow } from "@/data/generator";
 import { questionsForReview } from "@/data/query";
 import { formatDuration } from "date-fns/formatDuration";

@@ -1,6 +1,6 @@
-import { QuizDeck } from "@/components/QuizDeck";
-import { RectButton2 } from "@/components/RectButton2";
-import { useReplicache } from "@/components/ReplicacheContext";
+import { QuizDeck } from "@/client/ui/QuizDeck";
+import { RectButton2 } from "@/client/ui/RectButton2";
+import { useReplicache } from "@/client/ui/ReplicacheContext";
 import { generateQuestionForSkillOrThrow } from "@/data/generator";
 import { Question, RadicalSkill, SkillType } from "@/data/model";
 import { questionsForReview } from "@/data/query";

@@ -1,8 +1,8 @@
-import { AnswerButton, AnswerButtonState } from "@/components/AnswerButton";
-import { HanziText } from "@/components/HanziText";
-import { RadicalText } from "@/components/RadicalText";
-import { RectButton2 } from "@/components/RectButton2";
-import { PropsOf } from "@/components/types";
+import { AnswerButton, AnswerButtonState } from "@/client/ui/AnswerButton";
+import { HanziText } from "@/client/ui/HanziText";
+import { RadicalText } from "@/client/ui/RadicalText";
+import { RectButton2 } from "@/client/ui/RectButton2";
+import { PropsOf } from "@/client/ui/types";
 import { Link } from "expo-router";
 import shuffle from "lodash/shuffle";
 import { ReactNode, useRef, useState } from "react";

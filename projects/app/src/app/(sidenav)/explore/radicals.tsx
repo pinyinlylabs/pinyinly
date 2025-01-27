@@ -1,4 +1,4 @@
-import { RectButton2 } from "@/components/RectButton2";
+import { RectButton2 } from "@/client/ui/RectButton2";
 import { allRadicalsByStrokes, radicalStrokes } from "@/dictionary/dictionary";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "expo-router";

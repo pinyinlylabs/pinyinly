@@ -1,5 +1,5 @@
-import { QuizDeck } from "@/components/QuizDeck";
-import { useReplicache } from "@/components/ReplicacheContext";
+import { QuizDeck } from "@/client/ui/QuizDeck";
+import { useReplicache } from "@/client/ui/ReplicacheContext";
 import { generateQuestionForSkillOrThrow } from "@/data/generator";
 import { HanziSkill, Question, QuestionType, SkillType } from "@/data/model";
 import { questionsForReview } from "@/data/query";
