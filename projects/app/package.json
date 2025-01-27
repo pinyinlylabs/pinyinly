@@ -7,7 +7,8 @@
     "noop": "echo 1"
   },
   "imports": {
-    "#*.ts": "./src/*.ts"
+    "#*.ts": "./src/*.ts",
+    "#*.tsx": "./src/*.tsx"
   },
   "dependencies": {
     "@expo/metro-runtime": "~4.0.0",

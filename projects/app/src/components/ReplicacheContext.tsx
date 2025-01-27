@@ -1,10 +1,10 @@
+import { trpc } from "@/client/trpc";
 import { SrsType } from "@/data/model";
 import { v4 } from "@/data/rizzleSchema";
 import { replicacheLicenseKey } from "@/env";
 import { AppRouter } from "@/server/routers/_app";
 import { nextReview, UpcomingReview } from "@/util/fsrs";
 import { cookieSchema, r, RizzleReplicache } from "@/util/rizzle";
-import { trpc } from "@/util/trpc";
 import { invariant } from "@haohaohow/lib/invariant";
 import * as Sentry from "@sentry/core";
 import { QueryKey, useQuery, useQueryClient } from "@tanstack/react-query";

@@ -1,36 +1,10 @@
 /* eslint-disable import/first */
 
 // ------------------------------
-// Sentry instrumentation setup for react-native (but not API routes).
+// MUST COME FIRST. Sentry instrumentation setup for react-native (but not API
+// routes).
 // ------------------------------
-
-import { captureConsoleIntegration } from "@sentry/core";
-import * as Sentry from "@sentry/react-native";
-import { isRunningInExpoGo } from "expo";
-import * as Updates from "expo-updates";
-
-// Via the guide: https://docs.expo.dev/guides/using-sentry/
-const manifest = Updates.manifest;
-const metadata = `metadata` in manifest ? manifest.metadata : undefined;
-const extra = `extra` in manifest ? manifest.extra : undefined;
-const updateGroup =
-  metadata && `updateGroup` in metadata ? metadata.updateGroup : undefined;
-
-// Construct a new instrumentation instance. This is needed to communicate between the integration and React
-const routingIntegration = Sentry.reactNavigationIntegration({
-  enableTimeToInitialDisplay: !isRunningInExpoGo(),
-});
-
-Sentry.init({
-  dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
-  enableNativeFramesTracking: !isRunningInExpoGo(), // Tracks slow and frozen frames in the application
-  environment: __DEV__ ? `development` : `production`,
-  integrations: [
-    captureConsoleIntegration() as typeof routingIntegration,
-    routingIntegration,
-  ],
-  tracesSampleRate: 1.0, // Keep in sync with the other Sentry.init()
-});
+import { routingIntegration } from "@/client/sentry";
 
 // ------------------------------
 // Continue on with the rest of the file as normal. It's important that
@@ -38,17 +12,16 @@ Sentry.init({
 // needs to be very early on in the setup.
 // ------------------------------
 
+import { TrpcProvider } from "@/client/trpc";
 import { getSessionId } from "@/components/auth";
 import { ReplicacheProvider } from "@/components/ReplicacheContext";
-import { trpc } from "@/util/trpc";
-import { invariant } from "@haohaohow/lib/invariant";
 import {
   DefaultTheme,
   Theme as ReactNavigationTheme,
   ThemeProvider,
 } from "@react-navigation/native";
+import * as Sentry from "@sentry/react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { HTTPHeaders, httpLink } from "@trpc/client";
 import { useFonts } from "expo-font";
 import { Image } from "expo-image";
 import { Slot, SplashScreen, useNavigationContainerRef } from "expo-router";
@@ -57,40 +30,6 @@ import { useEffect, useState } from "react";
 import { Platform, useColorScheme, View } from "react-native";
 import Animated from "react-native-reanimated";
 import "../global.css";
-
-{
-  // Regression test for
-  // https://github.com/getsentry/sentry-react-native/issues/2851#issuecomment-1628559234.
-  // The problem happened when calling `Sentry.init` as it presumably resolved
-  // to an old version of 'promise'.
-  invariant(
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    Promise.allSettled != null,
-  );
-
-  const scope = Sentry.getCurrentScope();
-  scope.setTag(`expo-update-id`, Updates.updateId);
-  scope.setTag(`expo-is-embedded-update`, Updates.isEmbeddedLaunch);
-  scope.setTag(`platform-os`, Platform.OS);
-  scope.setTag(`platform-version`, Platform.Version);
-
-  if (typeof updateGroup === `string`) {
-    scope.setTag(`expo-update-group-id`, updateGroup);
-
-    const owner = extra?.expoClient?.owner ?? `[account]`;
-    const slug = extra?.expoClient?.slug ?? `[project]`;
-    scope.setTag(
-      `expo-update-debug-url`,
-      `https://expo.dev/accounts/${owner}/projects/${slug}/updates/${updateGroup}`,
-    );
-  } else if (Updates.isEmbeddedLaunch) {
-    // This will be `true` if the update is the one embedded in the build, and not one downloaded from the updates server.
-    scope.setTag(
-      `expo-update-debug-url`,
-      `not applicable for embedded updates`,
-    );
-  }
-}
 
 // NativeWind adapters for third party components
 
@@ -117,27 +56,6 @@ function RootLayout() {
 
   const [queryClient] = useState(() => new QueryClient());
 
-  const [trpcClient] = useState(() =>
-    trpc.createClient({
-      links: [
-        httpLink({
-          url: `/api/trpc`,
-
-          async headers() {
-            const result: HTTPHeaders = {};
-
-            const sessionId = await getSessionId();
-            if (sessionId != null) {
-              result[`authorization`] = `HhhSessionId ${sessionId}`;
-            }
-
-            return result;
-          },
-        }),
-      ],
-    }),
-  );
-
   const [fontsLoaded, fontError] = useFonts({
     "MaShanZheng-Regular": require(`@/assets/fonts/MaShanZheng-Regular.ttf`),
     "NotoSerifSC-Medium": require(`@/assets/fonts/NotoSerifSC-Medium.otf`),
@@ -156,7 +74,7 @@ function RootLayout() {
   }
 
   return (
-    <trpc.Provider client={trpcClient} queryClient={queryClient}>
+    <TrpcProvider queryClient={queryClient} getSessionId={getSessionId}>
       <QueryClientProvider client={queryClient}>
         <ReplicacheProvider>
           <ThemeProvider
@@ -195,7 +113,7 @@ function RootLayout() {
           </ThemeProvider>
         </ReplicacheProvider>
       </QueryClientProvider>
-    </trpc.Provider>
+    </TrpcProvider>
   );
 }
 
