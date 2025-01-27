@@ -13,8 +13,8 @@ import { routingIntegration } from "@/client/sentry";
 // ------------------------------
 
 import { TrpcProvider } from "@/client/trpc";
-import { getSessionId } from "@/components/auth";
-import { ReplicacheProvider } from "@/components/ReplicacheContext";
+import { getSessionId } from "@/client/ui/auth";
+import { ReplicacheProvider } from "@/client/ui/ReplicacheContext";
 import {
   DefaultTheme,
   Theme as ReactNavigationTheme,

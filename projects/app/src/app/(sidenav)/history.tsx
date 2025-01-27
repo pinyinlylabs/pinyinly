@@ -1,4 +1,4 @@
-import { useRizzleQuery } from "@/components/ReplicacheContext";
+import { useRizzleQuery } from "@/client/ui/ReplicacheContext";
 import { Rating } from "@/util/fsrs";
 import fromAsync from "array-from-async";
 import reverse from "lodash/reverse";

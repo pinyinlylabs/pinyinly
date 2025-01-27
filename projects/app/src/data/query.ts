@@ -1,4 +1,4 @@
-import { Rizzle } from "@/components/ReplicacheContext";
+import { Rizzle } from "@/client/ui/ReplicacheContext";
 import shuffle from "lodash/shuffle";
 import take from "lodash/take";
 import { ReadTransaction } from "replicache";

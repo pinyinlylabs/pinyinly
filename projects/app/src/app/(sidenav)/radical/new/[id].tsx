@@ -1,10 +1,10 @@
-import { CloseButton } from "@/components/CloseButton";
-import { QuizProgressBar } from "@/components/QuizProgressBar";
-import { RectButton2 } from "@/components/RectButton2";
-import { ReferencePage } from "@/components/ReferencePage";
-import { ReferencePageBodySection } from "@/components/ReferencePageBodySection";
-import { ReferencePageHeader } from "@/components/ReferencePageHeader";
-import { GradientAqua, GradientPink } from "@/components/styles";
+import { CloseButton } from "@/client/ui/CloseButton";
+import { QuizProgressBar } from "@/client/ui/QuizProgressBar";
+import { RectButton2 } from "@/client/ui/RectButton2";
+import { ReferencePage } from "@/client/ui/ReferencePage";
+import { ReferencePageBodySection } from "@/client/ui/ReferencePageBodySection";
+import { ReferencePageHeader } from "@/client/ui/ReferencePageHeader";
+import { GradientAqua, GradientPink } from "@/client/ui/styles";
 import {
   lookupRadicalByHanzi,
   lookupRadicalNameMnemonics,

@@ -1,4 +1,4 @@
-import type { PropsOf } from "@/components/types";
+import type { PropsOf } from "@/client/ui/types";
 import type { TypedNavigator } from "@react-navigation/native";
 import type { AnyFunction, Prettify } from "ts-essentials";
 

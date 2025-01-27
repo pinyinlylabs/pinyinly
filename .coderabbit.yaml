@@ -10,7 +10,7 @@ reviews:
   high_level_summary_placeholder: "@coderabbitai summary"
   auto_title_placeholder: "@coderabbitai"
   auto_title_instructions: ""
-  review_status: true
+  review_status: false # Hide the noisey comment on every PR with coderabbit instructions.
   commit_status: true
   fail_commit_status: false
   collapse_walkthrough: false

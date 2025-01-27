@@ -1,7 +1,7 @@
 import { ScrollView, Text, View } from "react-native";
 
-import { RectButton2 } from "@/components/RectButton2";
-import { useRizzleQuery } from "@/components/ReplicacheContext";
+import { RectButton2 } from "@/client/ui/RectButton2";
+import { useRizzleQuery } from "@/client/ui/ReplicacheContext";
 import { invariant } from "@haohaohow/lib/invariant";
 import fromAsync from "array-from-async";
 import { differenceInCalendarDays } from "date-fns";

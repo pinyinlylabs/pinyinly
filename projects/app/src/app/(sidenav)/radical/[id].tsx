@@ -1,8 +1,8 @@
-import { ReferencePage } from "@/components/ReferencePage";
-import { ReferencePageBodySection } from "@/components/ReferencePageBodySection";
-import { ReferencePageHeader } from "@/components/ReferencePageHeader";
-import { useReplicache } from "@/components/ReplicacheContext";
-import { GradientAqua } from "@/components/styles";
+import { ReferencePage } from "@/client/ui/ReferencePage";
+import { ReferencePageBodySection } from "@/client/ui/ReferencePageBodySection";
+import { ReferencePageHeader } from "@/client/ui/ReferencePageHeader";
+import { useReplicache } from "@/client/ui/ReplicacheContext";
+import { GradientAqua } from "@/client/ui/styles";
 import { skillsForRadical } from "@/data/generator";
 import {
   lookupRadicalByHanzi,

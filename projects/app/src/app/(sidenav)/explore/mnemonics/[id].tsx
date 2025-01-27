@@ -1,5 +1,5 @@
-import { RectButton2 } from "@/components/RectButton2";
-import { useReplicache, useRizzleQuery } from "@/components/ReplicacheContext";
+import { RectButton2 } from "@/client/ui/RectButton2";
+import { useReplicache, useRizzleQuery } from "@/client/ui/ReplicacheContext";
 import { rMnemonicThemeId } from "@/data/rizzleSchema";
 import {
   loadMmPinyinChart,

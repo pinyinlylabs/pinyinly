@@ -1,6 +1,6 @@
 import { trpc } from "@/client/trpc";
-import { RectButton2 } from "@/components/RectButton2";
-import { SignInWithAppleButton } from "@/components/SignInWithAppleButton";
+import { RectButton2 } from "@/client/ui/RectButton2";
+import { SignInWithAppleButton } from "@/client/ui/SignInWithAppleButton";
 import {
   useClientStorageMutation,
   useClientStorageQuery,

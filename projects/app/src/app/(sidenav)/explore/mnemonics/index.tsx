@@ -1,4 +1,4 @@
-import { useRizzleQuery } from "@/components/ReplicacheContext";
+import { useRizzleQuery } from "@/client/ui/ReplicacheContext";
 import { loadMmPinyinChart } from "@/dictionary/dictionary";
 import { useQuery } from "@tanstack/react-query";
 import fromAsync from "array-from-async";

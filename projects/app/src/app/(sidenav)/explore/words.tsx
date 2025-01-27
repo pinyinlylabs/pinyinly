@@ -1,4 +1,4 @@
-import { RectButton2 } from "@/components/RectButton2";
+import { RectButton2 } from "@/client/ui/RectButton2";
 import {
   allHsk1Words,
   allHsk2Words,

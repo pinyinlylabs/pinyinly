@@ -1,7 +1,7 @@
-import { ReferencePage } from "@/components/ReferencePage";
-import { ReferencePageBodySection } from "@/components/ReferencePageBodySection";
-import { ReferencePageHeader } from "@/components/ReferencePageHeader";
-import { GradientRed } from "@/components/styles";
+import { ReferencePage } from "@/client/ui/ReferencePage";
+import { ReferencePageBodySection } from "@/client/ui/ReferencePageBodySection";
+import { ReferencePageHeader } from "@/client/ui/ReferencePageHeader";
+import { GradientRed } from "@/client/ui/styles";
 import { lookupWord } from "@/dictionary/dictionary";
 import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams } from "expo-router";

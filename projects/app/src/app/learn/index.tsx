@@ -1,4 +1,4 @@
-import { CircleButton } from "@/components/CircleButton";
+import { CircleButton } from "@/client/ui/CircleButton";
 import { Link } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { View } from "react-native";

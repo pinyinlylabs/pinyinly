@@ -1,5 +1,5 @@
-import { RectButton2 } from "@/components/RectButton2";
-import { useQueryOnce, useReplicache } from "@/components/ReplicacheContext";
+import { RectButton2 } from "@/client/ui/RectButton2";
+import { useQueryOnce, useReplicache } from "@/client/ui/ReplicacheContext";
 import { questionsForReview } from "@/data/query";
 import chunk from "lodash/chunk";
 import shuffle from "lodash/shuffle";

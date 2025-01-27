@@ -1,4 +1,4 @@
-import { useAuth } from "@/components/auth";
+import { useAuth } from "@/client/ui/auth";
 import { Link, Slot } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { ScrollView, View } from "react-native";
@@ -17,7 +17,7 @@ export default function SideNavLayout() {
         contentContainerClassName="h-full  items-center gap-4 px-safe-or-4 lg:px-4 lg:pt-4"
       >
         <Link
-          href="/"
+          href="/dashboard"
           className="px-2 py-1 text-2xl font-bold tracking-wide text-primary-10"
         >
           {isLg ? `haohaohow` : `好`}
