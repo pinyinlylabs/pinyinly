@@ -1,5 +1,7 @@
+import { invariant } from "@haohaohow/lib/invariant";
 import { sentryMiddleware } from "@inngest/middleware-sentry";
 import { Inngest } from "inngest";
+import * as postmark from "postmark";
 import { z } from "zod";
 
 // Create a client to send and receive events
@@ -63,5 +65,33 @@ const helloWorld2 = inngest.createFunction(
   },
 );
 
+const helloWorldEmail = inngest.createFunction(
+  { id: `hello-world-email` },
+  { event: `test/hello.world.email` },
+  async ({ step }) => {
+    invariant(
+      process.env.POSTMARK_SERVER_TOKEN != null,
+      `POSTMARK_SERVER_TOKEN is required`,
+    );
+
+    const client = new postmark.ServerClient(process.env.POSTMARK_SERVER_TOKEN);
+
+    const response = await step.run(`sendEmail`, () =>
+      client.sendEmail({
+        From: `hello@haohao.how`,
+        To: `brad@haohao.how`,
+        Subject: `Hello World`,
+        TextBody: `Hello World`,
+        HtmlBody: `<strong>Hello</strong> World`,
+        MessageStream: `outbound`,
+      }),
+    );
+
+    return {
+      response,
+    };
+  },
+);
+
 // Create an empty array where we'll export future Inngest functions
-export const functions = [helloWorld, helloWorld2];
+export const functions = [helloWorld, helloWorld2, helloWorldEmail];
