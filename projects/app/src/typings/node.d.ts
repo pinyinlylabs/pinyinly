@@ -16,6 +16,7 @@ declare global {
       EXPO_PUBLIC_USE_STATIC?: string | boolean; // boolean during static render, string on web
       NEON_DATABASE_URL?: string;
       NODE_ENV?: string;
+      POSTMARK_SERVER_TOKEN?: string;
     }
   }
 }
