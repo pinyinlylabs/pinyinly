@@ -1,9 +1,9 @@
+import { trpc } from "@/client/trpc";
 import {
   clientStorageGet,
   useClientStorageMutation,
   useClientStorageQuery,
 } from "@/util/clientStorage";
-import { trpc } from "@/util/trpc";
 import { useCallback } from "react";
 
 const SESSION_ID_KEY = `sessionId`;

@@ -38,9 +38,9 @@ Sentry.init({
 // needs to be very early on in the setup.
 // ------------------------------
 
+import { TrpcProvider } from "@/client/trpc";
 import { getSessionId } from "@/components/auth";
 import { ReplicacheProvider } from "@/components/ReplicacheContext";
-import { trpc } from "@/util/trpc";
 import { invariant } from "@haohaohow/lib/invariant";
 import {
   DefaultTheme,
@@ -48,7 +48,6 @@ import {
   ThemeProvider,
 } from "@react-navigation/native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { HTTPHeaders, httpLink } from "@trpc/client";
 import { useFonts } from "expo-font";
 import { Image } from "expo-image";
 import { Slot, SplashScreen, useNavigationContainerRef } from "expo-router";
@@ -117,27 +116,6 @@ function RootLayout() {
 
   const [queryClient] = useState(() => new QueryClient());
 
-  const [trpcClient] = useState(() =>
-    trpc.createClient({
-      links: [
-        httpLink({
-          url: `/api/trpc`,
-
-          async headers() {
-            const result: HTTPHeaders = {};
-
-            const sessionId = await getSessionId();
-            if (sessionId != null) {
-              result[`authorization`] = `HhhSessionId ${sessionId}`;
-            }
-
-            return result;
-          },
-        }),
-      ],
-    }),
-  );
-
   const [fontsLoaded, fontError] = useFonts({
     "MaShanZheng-Regular": require(`@/assets/fonts/MaShanZheng-Regular.ttf`),
     "NotoSerifSC-Medium": require(`@/assets/fonts/NotoSerifSC-Medium.otf`),
@@ -156,7 +134,7 @@ function RootLayout() {
   }
 
   return (
-    <trpc.Provider client={trpcClient} queryClient={queryClient}>
+    <TrpcProvider queryClient={queryClient} getSessionId={getSessionId}>
       <QueryClientProvider client={queryClient}>
         <ReplicacheProvider>
           <ThemeProvider
@@ -195,7 +173,7 @@ function RootLayout() {
           </ThemeProvider>
         </ReplicacheProvider>
       </QueryClientProvider>
-    </trpc.Provider>
+    </TrpcProvider>
   );
 }
 

@@ -1,10 +1,10 @@
+import { trpc } from "@/client/trpc";
 import { RectButton2 } from "@/components/RectButton2";
 import { SignInWithAppleButton } from "@/components/SignInWithAppleButton";
 import {
   useClientStorageMutation,
   useClientStorageQuery,
 } from "@/util/clientStorage";
-import { trpc } from "@/util/trpc";
 import { invariant } from "@haohaohow/lib/invariant";
 import * as AppleAuthentication from "expo-apple-authentication";
 import { Link } from "expo-router";
