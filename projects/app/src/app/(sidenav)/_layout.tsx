@@ -1,4 +1,5 @@
 import { useAuth } from "@/client/ui/auth";
+import { Image } from "expo-image";
 import { Link, Slot } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { ScrollView, View } from "react-native";
@@ -14,13 +15,27 @@ export default function SideNavLayout() {
         horizontal={!isLg}
         centerContent={!isLg}
         className="flex-grow-0 border-t-2 border-primary-4 pt-2 pb-safe-or-2 lg:max-h-full lg:border-t-0"
-        contentContainerClassName="h-full  items-center gap-4 px-safe-or-4 lg:px-4 lg:pt-4"
+        contentContainerClassName="h-full items-center lg:items-start gap-4 px-safe-or-4 lg:px-4 lg:pt-4"
       >
         <Link
           href="/dashboard"
           className="px-2 py-1 text-2xl font-bold tracking-wide text-primary-10"
         >
-          {isLg ? `haohaohow` : `好`}
+          {isLg ? (
+            <Image
+              source={require(`@/assets/logo/logotype.svg`)}
+              className="h-[40px] w-[140px] flex-shrink text-primary-12"
+              tintColor="currentColor"
+              contentFit="fill"
+            />
+          ) : (
+            <Image
+              source={require(`@/assets/logo/logomark.svg`)}
+              className="h-[40px] w-[40px] flex-shrink text-primary-12"
+              tintColor="currentColor"
+              contentFit="fill"
+            />
+          )}
         </Link>
 
         <Link
