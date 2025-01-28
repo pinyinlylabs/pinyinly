@@ -3,4 +3,5 @@
 /projects/app/api/*.json
 /projects/app/api/*.yaml
 /projects/app/.vercel
+/projects/app/src/assets/*.svg
 *.asset.json

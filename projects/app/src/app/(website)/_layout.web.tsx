@@ -1,6 +1,6 @@
 import { Image } from "expo-image";
 import { Link, Slot } from "expo-router";
-import { ScrollView, Text, View } from "react-native";
+import { ScrollView, View } from "react-native";
 import { tv } from "tailwind-variants";
 
 export default function WebsiteLayout() {
@@ -13,10 +13,11 @@ export default function WebsiteLayout() {
           <View className="w-full flex-col gap-0 md:flex-row md:gap-8">
             <View className="flex-row items-center gap-2">
               <Image
-                source={require(`@/assets/adaptive-icon.png`)}
-                style={[{ flexShrink: 1, width: 32, height: 32 }]}
+                source={require(`@/assets/logo/logo-row.svg`)}
+                className="h-[40px] w-[200px] flex-shrink text-primary-12"
+                tintColor="currentColor"
+                contentFit="fill"
               />
-              <Text className="font-body text-2xl text-text">haohaohow</Text>
             </View>
 
             <View className="flex-1 flex-row items-center justify-end gap-2">
