@@ -8,7 +8,7 @@ const devDomain =
 /** @type {import('expo/config').ExpoConfig} */
 export const expo = {
   expo: {
-    name: `Hao`,
+    name: `haohǎohow`,
     slug: `hao`,
     version: `1.9.0`,
     scheme: `hao`,
