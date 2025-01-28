@@ -5,7 +5,6 @@ import {
   allRadicals,
   lookupRadicalByHanzi,
   lookupRadicalNameMnemonic,
-  lookupRadicalPinyinMnemonic,
   lookupWord,
   Radical,
 } from "@/dictionary/dictionary";
@@ -165,15 +164,12 @@ export async function generateQuestionForSkillOrThrow(
         ),
       );
 
-      const hint = await lookupRadicalPinyinMnemonic(skill.hanzi);
-
       return validQuestionInvariant({
         type: QuestionType.OneCorrectPair,
         prompt: `Match a radical with its pinyin`,
         groupA: shuffle([answer, ...wrongA]),
         groupB: shuffle([answer, ...wrongB]),
         answer,
-        hint: hint?.mnemonic,
       });
     }
     case SkillType.HanziWordToEnglish: {
