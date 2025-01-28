@@ -8,7 +8,7 @@ const devDomain =
 /** @type {import('expo/config').ExpoConfig} */
 export const expo = {
   expo: {
-    name: `Hao`,
+    name: `haohǎohow`,
     slug: `hao`,
     version: `1.9.0`,
     scheme: `hao`,
@@ -22,7 +22,7 @@ export const expo = {
     splash: {
       image: `./src/assets/splash.png`,
       resizeMode: `contain`,
-      backgroundColor: `#ffffff`,
+      backgroundColor: `#DE6447`,
     },
     assetBundlePatterns: [`**/*`],
     ios: {
@@ -90,7 +90,7 @@ export const expo = {
     android: {
       adaptiveIcon: {
         foregroundImage: `./src/assets/adaptive-icon.png`,
-        backgroundColor: `#ffffff`,
+        backgroundColor: `#DE6447`,
       },
       intentFilters: [
         {
