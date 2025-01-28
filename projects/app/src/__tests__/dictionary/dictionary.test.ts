@@ -1,4 +1,3 @@
-import { PinyinInitialGroupId } from "#data/model.ts";
 import {
   allHsk1Words,
   allHsk2Words,
@@ -22,12 +21,13 @@ import {
   loadStandardPinyinChart,
   loadWords,
   parseIds,
+  parsePinyinTone,
+  PinyinChart,
+  splitTonelessPinyin,
   walkIdsNode,
 } from "#dictionary/dictionary.ts";
-import { sortComparatorNumber } from "#util/collections.ts";
 import assert from "node:assert/strict";
 import test from "node:test";
-import { DeepReadonly } from "ts-essentials";
 
 void test(`radical groups have the right number of elements`, async () => {
   // Data integrity test to ensure that the number of characters in each group
@@ -195,6 +195,21 @@ void test(`convertPinyinWithToneNumberToToneMark`, () => {
   }
 });
 
+void test(parsePinyinTone.name, async () => {
+  await test(`static test cases`, () => {
+    for (const [input, expected] of [
+      [`hǎo`, [`hao`, 3]],
+      [`ǖ`, [`v`, 1]],
+      [`ǘ`, [`v`, 2]],
+      [`ǚ`, [`v`, 3]],
+      [`ǜ`, [`v`, 4]],
+      [`ü`, [`v`, 5]],
+    ] as const) {
+      assert.deepEqual(parsePinyinTone(input), expected);
+    }
+  });
+});
+
 void test(`flattenIds handles ⿱⿱ to ⿳ and ⿰⿰ to ⿲`, () => {
   for (const [input, expected] of [
     [`⿱⿱abc`, `⿳abc`],
@@ -206,80 +221,27 @@ void test(`flattenIds handles ⿱⿱ to ⿳ and ⿰⿰ to ⿲`, () => {
   }
 });
 
-/**
- * `[label, match1, match2, ...]`
- */
-type PinyinProduction = readonly string[];
-
-function expandCombinations(
-  rules: readonly PinyinProduction[],
-): readonly [string, string][] {
-  return rules.flatMap(([label, ...xs]): [string, string][] =>
-    xs.map((x) => [label!, x] as const),
-  );
-}
-
-function splitPinyin(
-  pinyin: string,
-  chart: PinyinChart,
-): readonly [initial: string, final: string] | null {
-  const initialsList = expandCombinations(
-    chart.initials.flatMap((x) => x.initials),
-  )
-    // There's some overlap with initials and finals, the algorithm should use
-    // the longest possible initial.
-    .toSorted(sortComparatorNumber(([, x]) => x.length))
-    .reverse();
-  const finalsList = expandCombinations(chart.finals)
-    // There's some overlap with initials and finals, the algorithm should use
-    // the longest possible initial.
-    .toSorted(sortComparatorNumber((x) => x.length))
-    .reverse();
-
-  const override = chart.overrides?.[pinyin];
-  if (override) {
-    return override;
-  }
-
-  for (const [initialLabel, initial] of initialsList) {
-    if (pinyin.startsWith(initial)) {
-      const final = pinyin.slice(initial.length);
-      for (const [finalLabel, finalCandiate] of finalsList) {
-        if (final === finalCandiate) {
-          return [initialLabel, finalLabel];
-        }
-      }
-    }
-  }
-
-  return null;
-}
-
-interface PinyinChart {
-  initials: DeepReadonly<
-    { id: PinyinInitialGroupId; desc: string; initials: string[][] }[]
-  >;
-  finals: readonly PinyinProduction[];
-  overrides?: DeepReadonly<Record<string, [initial: string, final: string]>>;
-}
-
 async function testPinyinChart(
   chart: PinyinChart,
-  testCases: readonly [string, string, string][] = [],
+  testCases: readonly [
+    input: string,
+    expectedInitial: string,
+    expectedFinal: string,
+  ][] = [],
 ): Promise<void> {
   const pinyinWords = await loadPinyinWords();
 
   // Start with test cases first as these are easier to debug.
   for (const [input, initial, final] of testCases) {
     assert.deepEqual(
-      splitPinyin(input, chart),
+      splitTonelessPinyin(input, chart),
       [initial, final],
       `${input} didn't split as expected`,
     );
   }
 
   for (const x of pinyinWords) {
-    assert.notEqual(splitPinyin(x, chart), null, `couldn't split ${x}`);
+    assert.notEqual(splitTonelessPinyin(x, chart), null, `couldn't split ${x}`);
   }
 
   // Ensure that there are no duplicates initials or finals.
