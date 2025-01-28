@@ -18,7 +18,7 @@ import {
   useState,
 } from "react";
 import { HTTPRequestInfo, PullResponseV1, ReadTransaction } from "replicache";
-import { useAuth } from "./auth";
+import { useAuth, UseAuth2Data } from "./auth";
 import { kvStore } from "./replicacheOptions";
 import { useRenderGuard } from "./util";
 
@@ -26,18 +26,21 @@ export type Rizzle = RizzleReplicache<typeof v4>;
 
 const ReplicacheContext = createContext<Rizzle | null>(null);
 
-export function ReplicacheProvider({ children }: React.PropsWithChildren) {
-  const auth = useAuth();
-
+function ReplicacheProviderWithDeps({
+  children,
+  auth,
+}: React.PropsWithChildren<{ auth: UseAuth2Data }>) {
   // Pull out stable references to the mutate functions to avoid reinstanciating
   // replicache each time the mutation state changes (e.g. pending -> success).
   const { mutateAsync: pushMutate } = trpc.replicache.push.useMutation();
   const { mutateAsync: pullMutate } = trpc.replicache.pull.useMutation();
 
+  const { replicacheDbName, serverSessionId } = auth.clientSession;
+  const isAuthenticated = serverSessionId != null;
   const rizzle = useMemo(() => {
     return r.replicache(
       {
-        name: `hao`,
+        name: replicacheDbName,
         licenseKey: replicacheLicenseKey,
         kvStore,
         // No need for a custom logSink here, just using normal console.*
@@ -45,7 +48,7 @@ export function ReplicacheProvider({ children }: React.PropsWithChildren) {
         // captures them. See
         // https://docs.sentry.io/platforms/javascript/configuration/integrations/captureconsole/
         logSinks: undefined,
-        pusher: auth.isAuthenticated
+        pusher: isAuthenticated
           ? async (requestBody, requestId) => {
               invariant(requestBody.pushVersion === 1);
 
@@ -71,7 +74,7 @@ export function ReplicacheProvider({ children }: React.PropsWithChildren) {
               return await trpcToReplicache(response);
             }
           : undefined,
-        puller: auth.isAuthenticated
+        puller: isAuthenticated
           ? async (requestBody, requestId) => {
               invariant(requestBody.pullVersion === 1);
               const cookie = cookieSchema.parse(requestBody.cookie);
@@ -91,6 +94,7 @@ export function ReplicacheProvider({ children }: React.PropsWithChildren) {
                 schemaVersion: requestBody.schemaVersion,
               }).then(
                 (r) =>
+                  // More casing conventions mapping.
                   (`error` in r
                     ? r
                     : {
@@ -153,13 +157,31 @@ export function ReplicacheProvider({ children }: React.PropsWithChildren) {
         },
       },
     );
-  }, [auth.isAuthenticated, pushMutate, pullMutate]);
+  }, [replicacheDbName, isAuthenticated, pushMutate, pullMutate]);
+
+  // Reset state when
+  useEffect(() => {
+    return () => {
+      // Close the previous Replicache instance to avoid it making requests
+      // using the wrong session.
+      void rizzle.replicache.close();
+    };
+  }, [rizzle]);
 
   return (
     <ReplicacheContext.Provider value={rizzle}>
       {children}
     </ReplicacheContext.Provider>
   );
+}
+
+export function ReplicacheProvider({ children }: React.PropsWithChildren) {
+  const auth = useAuth();
+  return auth.data ? (
+    <ReplicacheProviderWithDeps auth={auth.data}>
+      {children}
+    </ReplicacheProviderWithDeps>
+  ) : null;
 }
 
 export function useReplicache() {
