@@ -5,7 +5,12 @@ import {
   QuestionFlag,
   SkillRating,
 } from "@/data/model";
-import { lookupRadicalByHanzi, lookupWord } from "@/dictionary/dictionary";
+import {
+  loadStandardPinyinChart,
+  lookupRadicalByHanzi,
+  lookupWord,
+  splitPinyin,
+} from "@/dictionary/dictionary";
 import { arrayFilterUniqueWithKey } from "@/util/collections";
 import { Rating } from "@/util/fsrs";
 import { invariant } from "@haohaohow/lib/invariant";
@@ -37,6 +42,7 @@ import { AnswerButton } from "./AnswerButton";
 import { HanziText } from "./HanziText";
 import { RadicalText } from "./RadicalText";
 import { RectButton2 } from "./RectButton2";
+import { useRizzleQuery } from "./ReplicacheContext";
 import { PropsOf } from "./types";
 
 const buttonThickness = 4;
@@ -106,6 +112,53 @@ export const QuizDeckOneCorrectPairQuestion = memo(
     const showResult = rating !== undefined;
     const isCorrect = rating !== Rating.Again;
 
+    const pinyinChartQuery = useQuery({
+      queryKey: [QuizDeckOneCorrectPairQuestion.name, `pinyinChart`],
+      queryFn: async () => {
+        return await loadStandardPinyinChart();
+      },
+      throwOnError: true,
+    });
+
+    const answerPinyin = answer.b.type === `pinyin` ? answer.b.pinyin : null;
+    const splitAnswerPinyin =
+      answerPinyin != null && pinyinChartQuery.data
+        ? splitPinyin(answerPinyin, pinyinChartQuery.data)
+        : null;
+
+    const pinyinNewHintQuery = useRizzleQuery(
+      [
+        QuizDeckOneCorrectPairQuestion.name,
+        `association`,
+        splitAnswerPinyin?.join(`.`),
+      ],
+      async (r, tx) => {
+        if (splitAnswerPinyin != null) {
+          const [initial, final, tone] = splitAnswerPinyin;
+          const initialRes = await r.query.pinyinInitialAssociation.get(tx, {
+            initial: `${initial}-`,
+          });
+          const finalRes = await r.query.pinyinFinalAssociation.get(tx, {
+            final: `-${final}`,
+          });
+          return {
+            initial,
+            initialMnemonic: initialRes?.name,
+            final,
+            finalMnemonic: finalRes?.name,
+            tone,
+            toneMnemonic: null as unknown as string | undefined, // TODO: implement
+          };
+        }
+        return null;
+      },
+    );
+
+    const pinyinHint =
+      pinyinNewHintQuery.data != null
+        ? `${pinyinNewHintQuery.data.initial}${pinyinNewHintQuery.data.initialMnemonic != null ? ` (${pinyinNewHintQuery.data.initialMnemonic})` : ``} + ${pinyinNewHintQuery.data.final}${pinyinNewHintQuery.data.finalMnemonic != null ? ` (${pinyinNewHintQuery.data.finalMnemonic})` : ``} + ${pinyinNewHintQuery.data.tone}${pinyinNewHintQuery.data.toneMnemonic != null ? ` (${pinyinNewHintQuery.data.toneMnemonic})` : ``}.`
+        : null;
+
     return (
       <Skeleton
         toast={
@@ -144,9 +197,11 @@ export const QuizDeckOneCorrectPairQuestion = memo(
 
                   <ShowAnswer answer={answer} includeAlternatives />
 
-                  {hint != null ? (
+                  {hint != null || pinyinHint != null ? (
                     <Text className="text-md leading-snug text-accent-10">
-                      <Text className="font-bold">Hint:</Text> {hint}
+                      <Text className="font-bold">Hint:</Text> {pinyinHint}
+                      {` `}
+                      {hint}
                     </Text>
                   ) : null}
                   {selectedAAnswer != null && selectedBAnswer != null ? (

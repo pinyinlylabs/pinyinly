@@ -1,9 +1,111 @@
+import { PinyinInitialGroupId } from "@/data/model";
 import { rMnemonicThemeId, rPinyinInitialGroupId } from "@/data/rizzleSchema";
-import { deepReadonly } from "@/util/collections";
+import { deepReadonly, sortComparatorNumber } from "@/util/collections";
 import { invariant } from "@haohaohow/lib/invariant";
 import memoize from "lodash/memoize";
-import { StrictExtract } from "ts-essentials";
+import { DeepReadonly, StrictExtract } from "ts-essentials";
 import { z } from "zod";
+
+/**
+ * `[label, match1, match2, ...]`
+ */
+export type PinyinProduction = readonly string[];
+
+export interface PinyinChart {
+  initials: DeepReadonly<
+    { id: PinyinInitialGroupId; desc: string; initials: string[][] }[]
+  >;
+  finals: readonly PinyinProduction[];
+  overrides?: DeepReadonly<Record<string, [initial: string, final: string]>>;
+}
+
+function expandCombinations(
+  rules: readonly PinyinProduction[],
+): [string, string][] {
+  return rules.flatMap(([label, ...xs]): [string, string][] =>
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    xs.map((x) => [label!, x] as const),
+  );
+}
+
+/**
+ * Given a toneless pinyin (i.e. `hao` not `hǎo`) split into an initial and
+ * final using a given chart.
+ */
+export function splitTonelessPinyin(
+  pinyin: string,
+  chart: PinyinChart,
+): readonly [initial: string, final: string] | null {
+  const initialsList = expandCombinations(
+    chart.initials.flatMap((x) => x.initials),
+  )
+    // There's some overlap with initials and finals, the algorithm should use
+    // the longest possible initial.
+    .sort(sortComparatorNumber(([, x]) => x.length))
+    .reverse();
+
+  const finalsList = expandCombinations(chart.finals)
+    // There's some overlap with initials and finals, the algorithm should use
+    // the longest possible initial.
+    .sort(sortComparatorNumber((x) => x.length))
+    .reverse();
+
+  const override = chart.overrides?.[pinyin];
+  if (override) {
+    return override;
+  }
+
+  for (const [initialLabel, initial] of initialsList) {
+    if (pinyin.startsWith(initial)) {
+      const final = pinyin.slice(initial.length);
+      for (const [finalLabel, finalCandiate] of finalsList) {
+        if (final === finalCandiate) {
+          return [initialLabel, finalLabel];
+        }
+      }
+    }
+  }
+
+  return null;
+}
+
+export function parsePinyinTone(
+  pinyin: string,
+): [tonelessPinyin: string, tone: number] | null {
+  for (const [key, value] of Object.entries(toneMap)) {
+    for (let tone = 1; tone <= 5; tone++) {
+      const char = value[tone];
+      invariant(char != null);
+
+      const index = pinyin.indexOf(char);
+      if (index !== -1) {
+        const withoutTone = pinyin.replace(char, key);
+        return [withoutTone, tone];
+      }
+    }
+  }
+
+  return null;
+}
+
+export function splitPinyin(
+  pinyin: string,
+  chart: PinyinChart,
+): readonly [initial: string, final: string, tone: number] | null {
+  const toneResult = parsePinyinTone(pinyin);
+  invariant(toneResult != null, `Could not parse tone for pinyin ${pinyin}`);
+  const [tonelessPinyin, tone] = toneResult;
+
+  const initialFinalResult = splitTonelessPinyin(tonelessPinyin, chart);
+  invariant(
+    initialFinalResult != null,
+    `Could not split pinyin ${tonelessPinyin}`,
+  );
+
+  const [initial, final] = initialFinalResult;
+
+  return [initial, final, tone];
+}
 
 export const loadPinyinWords = memoize(async () =>
   z
