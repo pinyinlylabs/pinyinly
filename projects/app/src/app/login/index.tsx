@@ -1,42 +1,47 @@
-import { trpc } from "@/client/trpc";
+import { useAuth } from "@/client/ui/auth";
 import { RectButton2 } from "@/client/ui/RectButton2";
 import { SignInWithAppleButton } from "@/client/ui/SignInWithAppleButton";
-import {
-  useClientStorageMutation,
-  useClientStorageQuery,
-} from "@/util/clientStorage";
 import { invariant } from "@haohaohow/lib/invariant";
 import * as AppleAuthentication from "expo-apple-authentication";
 import { Link } from "expo-router";
-import { useCallback } from "react";
 import { Platform, Text, View } from "react-native";
 import z from "zod";
 
-const SESSION_ID_KEY = `sessionId`;
-
 export default function LoginPage() {
-  const sessionIdQuery = useClientStorageQuery(SESSION_ID_KEY);
-  const sessionIdMutation = useClientStorageMutation(SESSION_ID_KEY);
-  const signInWithAppleMutate = trpc.auth.signInWithApple.useMutation();
-
-  const createSession = useCallback(
-    async (identityToken: string) => {
-      const { session } = await signInWithAppleMutate.mutateAsync({
-        identityToken,
-      });
-      sessionIdMutation.mutate(session.id);
-    },
-    [sessionIdMutation, signInWithAppleMutate],
-  );
+  const auth = useAuth();
 
   return (
     <View className="flex-1 items-center justify-center gap-[10px]">
-      <Text>Login</Text>
-      <Text>Session ID: {sessionIdQuery.data}</Text>
+      <Text className="font-bold text-text">Login</Text>
+      <View className="gap-2">
+        {auth.data?.allClientSessions.map((x, i) => (
+          <View key={i} className="flex-row gap-2 border-y">
+            <View className="flex-1">
+              <Text className="text-text">Session ID: {x.serverSessionId}</Text>
+              <Text className="text-text">DB name: {x.replicacheDbName}</Text>
+            </View>
+            <RectButton2
+              onPressIn={() => {
+                auth.signInExisting(
+                  (s) => s.replicacheDbName === x.replicacheDbName,
+                );
+              }}
+            >
+              Log in
+            </RectButton2>
+          </View>
+        ))}
+      </View>
+      <Text className="text-text">
+        Session ID: {auth.data?.clientSession.serverSessionId}
+      </Text>
+      <Text className="text-text">
+        DB name: {auth.data?.clientSession.replicacheDbName}
+      </Text>
 
       <RectButton2
         onPressIn={() => {
-          sessionIdMutation.mutate(null);
+          auth.signOut();
         }}
       >
         Logout
@@ -46,7 +51,7 @@ export default function LoginPage() {
         <SignInWithAppleButton
           clientId="how.haohao.app"
           onSuccess={(data) => {
-            void createSession(data.authorization.id_token);
+            void auth.signInWithApple(data.authorization.id_token);
           }}
           redirectUri={`https://${location.hostname}/api/auth/login/apple/callback`}
         />
@@ -91,7 +96,7 @@ export default function LoginPage() {
 
             invariant(credential.identityToken != null);
 
-            void createSession(credential.identityToken);
+            void auth.signInWithApple(credential.identityToken);
           }}
         />
       ) : null}

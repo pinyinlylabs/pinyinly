@@ -6,7 +6,7 @@ import { useMediaQuery } from "react-responsive";
 
 export default function SideNavLayout() {
   const isLg = useMediaQuery({ minWidth: 1024 });
-  const auth = useAuth();
+  const isAuthenticated = useAuth().data?.clientSession.serverSessionId != null;
 
   return (
     <View className="flex-1 flex-col-reverse items-stretch self-stretch lg:flex-row">
@@ -76,7 +76,7 @@ export default function SideNavLayout() {
           href="/login"
           className="items-center rounded-md px-2 py-1 text-xl font-bold tracking-wide text-text hover:bg-primary-4 lg:self-stretch"
         >
-          {auth.isAuthenticated ? (
+          {isAuthenticated ? (
             <View className="size-10 rounded-full bg-[green]"></View>
           ) : (
             <View className="size-10 rounded-full border-2 border-solid border-[white] bg-[grey]"></View>
