@@ -13,7 +13,7 @@ importers:
         version: 0.5.0
       '@sentry/core':
         specifier: ^8.48.0
-        version: 8.48.0
+        version: 8.51.0
       '@sentry/node':
         specifier: ^8.48.0
         version: 8.48.0
@@ -282,6 +282,10 @@ packages:
 
   '@sentry/core@8.48.0':
     resolution: {integrity: sha512-VGwYgTfLpvJ5LRO5A+qWo1gpo6SfqaGXL9TOzVgBucAdpzbrYHpZ87sEarDVq/4275uk1b0S293/mfsskFczyw==}
+    engines: {node: '>=14.18'}
+
+  '@sentry/core@8.51.0':
+    resolution: {integrity: sha512-Go0KxCYLw+OBIlLSv5YsYX+x9NW43fNVcyB6rhkSp2Q5Zme3tAE6KtZFvyu4SO7G/903wisW5Q6qV6UuK/ee4A==}
     engines: {node: '>=14.18'}
 
   '@sentry/node@8.48.0':
@@ -919,6 +923,8 @@ snapshots:
       web-streams-polyfill: 3.3.3
 
   '@sentry/core@8.48.0': {}
+
+  '@sentry/core@8.51.0': {}
 
   '@sentry/node@8.48.0':
     dependencies:
