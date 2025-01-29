@@ -15,6 +15,7 @@ import { routingIntegration } from "@/client/sentry";
 import { TrpcProvider } from "@/client/trpc";
 import { getSessionId } from "@/client/ui/auth";
 import { ReplicacheProvider } from "@/client/ui/ReplicacheContext";
+import { SplashScreen } from "@/client/ui/SplashScreen";
 import {
   DefaultTheme,
   Theme as ReactNavigationTheme,
@@ -22,9 +23,8 @@ import {
 } from "@react-navigation/native";
 import * as Sentry from "@sentry/react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useFonts } from "expo-font";
 import { Image } from "expo-image";
-import { Slot, SplashScreen, useNavigationContainerRef } from "expo-router";
+import { Slot, useNavigationContainerRef } from "expo-router";
 import { cssInterop } from "nativewind";
 import { useEffect, useState } from "react";
 import { Platform, useColorScheme, View } from "react-native";
@@ -55,23 +55,6 @@ function RootLayout() {
   }, [ref]);
 
   const [queryClient] = useState(() => new QueryClient());
-
-  const [fontsLoaded, fontError] = useFonts({
-    "MaShanZheng-Regular": require(`@/assets/fonts/MaShanZheng-Regular.ttf`),
-    "NotoSerifSC-Medium": require(`@/assets/fonts/NotoSerifSC-Medium.otf`),
-  });
-
-  useEffect(() => {
-    if (fontsLoaded || fontError) {
-      SplashScreen.hideAsync().catch((e: unknown) => {
-        console.error(`Could not hide splash screen`, e);
-      });
-    }
-  }, [fontsLoaded, fontError]);
-
-  if (!fontsLoaded && !fontError) {
-    return null;
-  }
 
   return (
     <TrpcProvider queryClient={queryClient} getSessionId={getSessionId}>
@@ -109,6 +92,7 @@ function RootLayout() {
               } flex-1 bg-background`}
             >
               <Slot />
+              <SplashScreen />
             </View>
           </ThemeProvider>
         </ReplicacheProvider>

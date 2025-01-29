@@ -2619,6 +2619,7 @@ __metadata:
     "@haohaohow/lib": "workspace:*"
     "@inngest/eslint-plugin": "npm:^0.0.7"
     "@inngest/middleware-sentry": "npm:^0.1.1"
+    "@lottiefiles/dotlottie-react": "npm:^0.12.3"
     "@lucia-auth/adapter-drizzle": "npm:^1.1.0"
     "@neondatabase/serverless": "npm:^0.10.0"
     "@react-native-replicache/deep-freeze": "npm:^1.1.0"
@@ -2683,6 +2684,7 @@ __metadata:
     hanzi: "patch:hanzi@npm%3A2.1.5#~/.yarn/patches/hanzi-npm-2.1.5-506390bb41.patch"
     inngest: "npm:^3.29.2"
     lodash: "npm:^4.17.21"
+    lottie-react-native: "npm:7.1.0"
     lucia: "npm:^3.2.0"
     moti: "npm:^0.29.0"
     nanoid: "npm:^5.0.9"
@@ -3184,6 +3186,24 @@ __metadata:
     "@jridgewell/resolve-uri": "npm:^3.1.0"
     "@jridgewell/sourcemap-codec": "npm:^1.4.14"
   checksum: 10c0/3d1ce6ebc69df9682a5a8896b414c6537e428a1d68b02fcc8363b04284a8ca0df04d0ee3013132252ab14f2527bc13bea6526a912ecb5658f0e39fd2860b4df4
+  languageName: node
+  linkType: hard
+
+"@lottiefiles/dotlottie-react@npm:^0.12.3":
+  version: 0.12.3
+  resolution: "@lottiefiles/dotlottie-react@npm:0.12.3"
+  dependencies:
+    "@lottiefiles/dotlottie-web": "npm:0.40.1"
+  peerDependencies:
+    react: ^17 || ^18 || ^19
+  checksum: 10c0/2b92c1af4c0c1dcc1bbab5ad11904a5ec6e2d13c3b2b67c83f3b97669a565086ef06c5dd496365790b425d57898613b0d5b8daff57c09e864e2ccb414fc7f0f8
+  languageName: node
+  linkType: hard
+
+"@lottiefiles/dotlottie-web@npm:0.40.1":
+  version: 0.40.1
+  resolution: "@lottiefiles/dotlottie-web@npm:0.40.1"
+  checksum: 10c0/1815bf92befaf887229a34b64f67acef4a3433aff951695d9e0d449f3dc098042d2e9c37275a6281768bab9a5a1dd91ff70646fe60f8d5abe8d4b525a380277d
   languageName: node
   linkType: hard
 
@@ -11703,6 +11723,23 @@ __metadata:
   bin:
     loose-envify: cli.js
   checksum: 10c0/655d110220983c1a4b9c0c679a2e8016d4b67f6e9c7b5435ff5979ecdb20d0813f4dec0a08674fcbdd4846a3f07edbb50a36811fd37930b94aaa0d9daceb017e
+  languageName: node
+  linkType: hard
+
+"lottie-react-native@npm:7.1.0":
+  version: 7.1.0
+  resolution: "lottie-react-native@npm:7.1.0"
+  peerDependencies:
+    "@lottiefiles/dotlottie-react": ^0.6.5
+    react: "*"
+    react-native: ">=0.46"
+    react-native-windows: ">=0.63.x"
+  peerDependenciesMeta:
+    "@lottiefiles/dotlottie-react":
+      optional: true
+    react-native-windows:
+      optional: true
+  checksum: 10c0/0e224d5ebaaa71fe4313cfa0ac3fab25e0779b0fcbb58dd490821e73426dcd59af1a990a6b52b25e6d9dc18e1a129279bfdc44809112bc21c6b3c59ad443097d
   languageName: node
   linkType: hard
 

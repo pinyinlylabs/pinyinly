@@ -4,7 +4,7 @@ declare global {
   interface NodeRequire {
     // Support for asset files. Anything that starts with a dot and ends with a
     // known extension.
-    (id: `${string}.${`ttf` | `otf` | `svg` | `png`}`): string;
+    (id: `${string}.${`ttf` | `otf` | `svg` | `png` | `json`}`): string;
   }
 
   namespace NodeJS {
