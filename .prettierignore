@@ -1,7 +1,9 @@
 # This file must be in the root to be used by VS Code auto save.
+package.json
+pnpm-lock.yaml
+
 /projects/app/drizzle/meta
-/projects/app/api/*.json
-/projects/app/api/*.yaml
 /projects/app/.vercel
-/projects/app/src/assets/*.svg
+/projects/app/src/assets/**/*.svg
+/projects/app/src/assets/**/*.json
 *.asset.json
