@@ -2619,7 +2619,7 @@ __metadata:
     "@haohaohow/lib": "workspace:*"
     "@inngest/eslint-plugin": "npm:^0.0.7"
     "@inngest/middleware-sentry": "npm:^0.1.1"
-    "@lottiefiles/dotlottie-react": "npm:^0.12.3"
+    "@lottiefiles/dotlottie-react": "npm:^0.6.5"
     "@lucia-auth/adapter-drizzle": "npm:^1.1.0"
     "@neondatabase/serverless": "npm:^0.10.0"
     "@react-native-replicache/deep-freeze": "npm:^1.1.0"
@@ -3189,21 +3189,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@lottiefiles/dotlottie-react@npm:^0.12.3":
-  version: 0.12.3
-  resolution: "@lottiefiles/dotlottie-react@npm:0.12.3"
+"@lottiefiles/dotlottie-react@npm:^0.6.5":
+  version: 0.6.5
+  resolution: "@lottiefiles/dotlottie-react@npm:0.6.5"
   dependencies:
-    "@lottiefiles/dotlottie-web": "npm:0.40.1"
+    "@lottiefiles/dotlottie-web": "npm:0.25.0"
+    debounce: "npm:^2.0.0"
   peerDependencies:
-    react: ^17 || ^18 || ^19
-  checksum: 10c0/2b92c1af4c0c1dcc1bbab5ad11904a5ec6e2d13c3b2b67c83f3b97669a565086ef06c5dd496365790b425d57898613b0d5b8daff57c09e864e2ccb414fc7f0f8
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
+  checksum: 10c0/9ec50e94ffc39e69f4a7d7c6834e991ab47a53ecfeece791913707935dac00c4f23f4e593d5f5da676f23e4ffc1685850fdc5b85452f610da887415cb1312cdd
   languageName: node
   linkType: hard
 
-"@lottiefiles/dotlottie-web@npm:0.40.1":
-  version: 0.40.1
-  resolution: "@lottiefiles/dotlottie-web@npm:0.40.1"
-  checksum: 10c0/1815bf92befaf887229a34b64f67acef4a3433aff951695d9e0d449f3dc098042d2e9c37275a6281768bab9a5a1dd91ff70646fe60f8d5abe8d4b525a380277d
+"@lottiefiles/dotlottie-web@npm:0.25.0":
+  version: 0.25.0
+  resolution: "@lottiefiles/dotlottie-web@npm:0.25.0"
+  checksum: 10c0/8befc2384113555ba7c24210c03eba8adf819ed01f7c732f67e841d1ce790a489e16bc96f8181f894c37936bfcc2e3a70e3a3c4fcc9778badf6c82fa83db93e2
   languageName: node
   linkType: hard
 
@@ -7578,6 +7580,13 @@ __metadata:
   version: 2.0.0
   resolution: "debounce@npm:2.0.0"
   checksum: 10c0/35a492f7f4f346f0539d486d7e68a68bd2eaa0c7fb159df8e59f89a20afd9b0ed024d0dc5a6f283b6963f5f032dacd66d805a325e9d8338511e77b505b76f26e
+  languageName: node
+  linkType: hard
+
+"debounce@npm:^2.0.0":
+  version: 2.2.0
+  resolution: "debounce@npm:2.2.0"
+  checksum: 10c0/684536fe9a04c9eea46cf02f119f69aa4071813ba25b9b43370e1503ea60b34fd38d694c7145fa2be504f9d40e7e39354cb9ed155c70954a0eefa391aefe271c
   languageName: node
   linkType: hard
 
