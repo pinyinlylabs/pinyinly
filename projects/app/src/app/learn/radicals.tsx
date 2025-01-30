@@ -84,7 +84,7 @@ export default function RadicalsPage() {
   });
 
   return (
-    <View className="flex-1 items-center pt-safe-offset-[20px]">
+    <View className="flex-1 items-center bg-background pt-safe-offset-[20px]">
       {newQuizQuery.isLoading ? (
         <View className="my-auto">
           <Text className="text-text">Loading…</Text>
@@ -118,7 +118,7 @@ export default function RadicalsPage() {
 
 const GoHomeButton = () => (
   <View style={{ height: 44 }}>
-    <Link href="/dashboard" asChild>
+    <Link dismissTo href="/dashboard" asChild>
       <RectButton2 textClassName="font-bold text-text text-xl">
         Back
       </RectButton2>

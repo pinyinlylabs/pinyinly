@@ -34,7 +34,7 @@ export default function HistoryPage() {
 
   return (
     <ScrollView
-      className="flex-1"
+      className="flex-1 bg-background"
       contentContainerClassName="pt-safe-offset-4 px-safe-or-4 items-center gap-[10px] padding-[10px]"
     >
       <View className="flex-row gap-2">

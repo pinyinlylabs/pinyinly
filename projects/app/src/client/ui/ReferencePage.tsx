@@ -9,7 +9,7 @@ export const ReferencePage = ({
   body: ReactNode;
 }) => {
   return (
-    <View className="flex-1">
+    <View className="flex-1 bg-background">
       <View className="w-full max-w-[600px] flex-col self-center overflow-hidden lg:my-4 lg:rounded-t-lg">
         {header}
 
