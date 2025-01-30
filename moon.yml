@@ -20,6 +20,9 @@ tasks:
     command: yarn constraints
     inputs:
       - "@group(yarnConfig)"
+      - "projects/app/api/package.json"
+      - "projects/app/api/pnpm-lock.yaml"
+
   renovateCheck:
     command: npx -y -p renovate@37.424.1 renovate-config-validator --strict
     inputs:
