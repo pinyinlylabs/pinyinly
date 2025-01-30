@@ -1,5 +1,5 @@
 import { useRizzleQuery } from "@/client/ui/ReplicacheContext";
-import { loadStandardPinyinChart } from "@/dictionary/dictionary";
+import { loadMmPinyinChart } from "@/dictionary/dictionary";
 import { useQuery } from "@tanstack/react-query";
 import fromAsync from "array-from-async";
 import { Link } from "expo-router";
@@ -36,7 +36,7 @@ export default function MnemonicsPage() {
   const query = useQuery({
     queryKey: [MnemonicsPage.name, `chart`],
     queryFn: async () => {
-      return await loadStandardPinyinChart();
+      return await loadMmPinyinChart();
     },
     throwOnError: true,
   });
