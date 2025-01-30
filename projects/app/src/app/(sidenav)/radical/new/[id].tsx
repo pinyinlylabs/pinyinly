@@ -90,7 +90,7 @@ export default function RadicalPage() {
   const [showExplanation, setShowExplanation] = useState(false);
 
   return (
-    <View className="flex-1 items-center">
+    <View className="flex-1 items-center bg-background">
       <View className="w-[100%] max-w-[600px] flex-row items-center gap-3 pt-safe-offset-4 px-safe-or-4">
         <CloseButton href="/dashboard" tintColor="#3C464D" />
         <QuizProgressBar

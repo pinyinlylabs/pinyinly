@@ -1,6 +1,6 @@
 import { useAuth } from "@/client/ui/auth";
 import { Image } from "expo-image";
-import { Link, Slot } from "expo-router";
+import { Link, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { ScrollView, View } from "react-native";
 import { useMediaQuery } from "react-responsive";
@@ -10,7 +10,7 @@ export default function SideNavLayout() {
   const isAuthenticated = useAuth().data?.clientSession.serverSessionId != null;
 
   return (
-    <View className="flex-1 flex-col-reverse items-stretch self-stretch lg:flex-row">
+    <View className="flex-1 flex-col-reverse items-stretch self-stretch bg-background lg:flex-row">
       <ScrollView
         horizontal={!isLg}
         centerContent={!isLg}
@@ -98,7 +98,9 @@ export default function SideNavLayout() {
           )}
         </Link>
       </ScrollView>
-      <Slot />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="login" options={{ presentation: `modal` }} />
+      </Stack>
       <StatusBar style="auto" />
     </View>
   );

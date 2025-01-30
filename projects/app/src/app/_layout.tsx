@@ -89,7 +89,7 @@ function RootLayout() {
                     ? `dark-theme`
                     : `light-theme`
                   : ``
-              } flex-1 bg-background`}
+              } flex-1`}
             >
               <Slot />
               <SplashScreen />

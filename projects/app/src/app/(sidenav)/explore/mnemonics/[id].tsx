@@ -58,7 +58,7 @@ export default function MnemonicIdPage() {
 
   return (
     <ScrollView
-      className="flex-1 items-center pt-safe-offset-4 px-safe-or-4"
+      className="flex-1 items-center bg-background pt-safe-offset-4 px-safe-or-4"
       contentContainerClassName="px-safe-or-4 pb-2"
     >
       <View>

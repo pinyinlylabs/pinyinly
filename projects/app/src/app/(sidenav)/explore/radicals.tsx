@@ -15,7 +15,7 @@ export default function RadicalsPage() {
 
   return (
     <ScrollView
-      className="flex-1"
+      className="flex-1 bg-background"
       contentContainerClassName="py-safe-offset-4 items-center"
     >
       <View className="max-w-[600px] gap-4">

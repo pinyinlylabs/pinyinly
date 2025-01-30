@@ -11,7 +11,7 @@ export default function LoginPage() {
   const auth = useAuth();
 
   return (
-    <View className="flex-1 items-center justify-center gap-[10px]">
+    <View className="flex-1 items-center justify-center gap-[10px] bg-background">
       <Text className="font-bold text-text">Login</Text>
       <View className="gap-2">
         {auth.data?.allClientSessions.map((x, i) => (
@@ -108,7 +108,7 @@ export default function LoginPage() {
 
 const GoHomeButton = () => (
   <View style={{ height: 44 }}>
-    <Link href="/dashboard" asChild>
+    <Link dismissTo href="/dashboard" asChild>
       <RectButton2 textClassName="font-bold text-text text-xl">
         Back
       </RectButton2>

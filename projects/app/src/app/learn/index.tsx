@@ -5,7 +5,7 @@ import { View } from "react-native";
 
 export default function LearnPage() {
   return (
-    <View className="flex-1 items-center justify-center gap-[8px]">
+    <View className="flex-1 items-center justify-center gap-[8px] bg-background">
       <Link href="/dashboard" asChild>
         <CircleButton color="purple" />
       </Link>

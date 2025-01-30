@@ -73,7 +73,7 @@ export default function ConnectionsPage() {
   const wordsBy4 = chunk(unmatchedWords, 4);
 
   return (
-    <View className="flex-1 items-center pt-safe-offset-[20px]">
+    <View className="flex-1 items-center bg-background pt-safe-offset-[20px]">
       {questions.loading ? (
         <View className="my-auto">
           <Text className="text-text">Loading…</Text>

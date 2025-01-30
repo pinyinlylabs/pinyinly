@@ -81,7 +81,7 @@ export default function LearnHsk1Page() {
   });
 
   return (
-    <View className="flex-1 items-center pt-safe-offset-[20px]">
+    <View className="flex-1 items-center bg-background pt-safe-offset-[20px]">
       {newQuizQuery.isLoading ? (
         <View className="my-auto">
           <Text className="text-text">Loading…</Text>

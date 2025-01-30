@@ -53,7 +53,7 @@ export default function RadicalPage() {
   });
 
   return (
-    <ScrollView>
+    <ScrollView className="bg-background">
       <ReferencePage
         header={
           <ReferencePageHeader
