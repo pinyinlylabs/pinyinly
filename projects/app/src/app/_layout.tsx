@@ -24,7 +24,7 @@ import {
 import * as Sentry from "@sentry/react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Image } from "expo-image";
-import { Slot, useNavigationContainerRef } from "expo-router";
+import { Stack, useNavigationContainerRef } from "expo-router";
 import { cssInterop } from "nativewind";
 import { useEffect, useState } from "react";
 import { Platform, useColorScheme, View } from "react-native";
@@ -91,7 +91,12 @@ function RootLayout() {
                   : ``
               } flex-1`}
             >
-              <Slot />
+              <Stack screenOptions={{ headerShown: false }}>
+                <Stack.Screen
+                  name="login"
+                  options={{ presentation: `modal` }}
+                />
+              </Stack>
               <SplashScreen />
             </View>
           </ThemeProvider>
@@ -101,7 +106,7 @@ function RootLayout() {
   );
 }
 
-const BUG_DETECTOR_COLOR = `pink`;
+const BUG_DETECTOR_COLOR = `#ff0000`;
 
 // Wrap the Root Layout route component with `Sentry.wrap` to capture gesture info and profiling data.
 export default Sentry.wrap(RootLayout);
