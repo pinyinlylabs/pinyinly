@@ -1,8 +1,15 @@
+import { failFastIfMissingEnvVars } from "@/util/env";
 import { invariant } from "@haohaohow/lib/invariant";
 import { sentryMiddleware } from "@inngest/middleware-sentry";
 import { Inngest } from "inngest";
 import * as postmark from "postmark";
 import { z } from "zod";
+
+const { POSTMARK_SERVER_TOKEN } = process.env;
+
+if (failFastIfMissingEnvVars) {
+  invariant(POSTMARK_SERVER_TOKEN != null, `POSTMARK_SERVER_TOKEN is required`);
+}
 
 // Create a client to send and receive events
 export const inngest = new Inngest({
@@ -69,12 +76,8 @@ const helloWorldEmail = inngest.createFunction(
   { id: `hello-world-email` },
   { event: `test/hello.world.email` },
   async ({ step }) => {
-    invariant(
-      process.env.POSTMARK_SERVER_TOKEN != null,
-      `POSTMARK_SERVER_TOKEN is required`,
-    );
-
-    const client = new postmark.ServerClient(process.env.POSTMARK_SERVER_TOKEN);
+    invariant(POSTMARK_SERVER_TOKEN != null);
+    const client = new postmark.ServerClient(POSTMARK_SERVER_TOKEN);
 
     const response = await step.run(`sendEmail`, () =>
       client.sendEmail({

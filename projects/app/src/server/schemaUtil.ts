@@ -1,4 +1,5 @@
 import * as r from "@/data/rizzleSchema";
+import { isRunningTests } from "@/util/env";
 import { RizzleType, RizzleTypeDef } from "@/util/rizzle";
 import { invariant } from "@haohaohow/lib/invariant";
 import { ColumnBaseConfig, Table } from "drizzle-orm";
@@ -37,7 +38,7 @@ function unstable__columnName(column: PgCustomColumn): string {
  * Adds the table and column name to Zod parsing errors to help debugging.
  */
 function drizzleColumnTypeEnhancedErrors(column: PgCustomColumn) {
-  if (`NODE_TEST_CONTEXT` in process.env || __DEV__) {
+  if (isRunningTests || __DEV__) {
     // *always* run this code path so that it fails loudly in tests/dev, rather
     // than only in the case of a zod parsing.
     unstable__columnName(column);

@@ -1,8 +1,8 @@
 import { trpc } from "@/client/trpc";
 import { SrsType } from "@/data/model";
 import { v4 } from "@/data/rizzleSchema";
-import { replicacheLicenseKey } from "@/env";
 import { AppRouter } from "@/server/routers/_app";
+import { failFastIfMissingEnvVars } from "@/util/env";
 import { nextReview, UpcomingReview } from "@/util/fsrs";
 import { cookieSchema, r, RizzleReplicache } from "@/util/rizzle";
 import { invariant } from "@haohaohow/lib/invariant";
@@ -17,12 +17,21 @@ import {
   useRef,
   useState,
 } from "react";
-import { HTTPRequestInfo, PullResponseV1, ReadTransaction } from "replicache";
+import {
+  HTTPRequestInfo,
+  PullResponseV1,
+  ReadTransaction,
+  TEST_LICENSE_KEY,
+} from "replicache";
 import { useAuth, UseAuth2Data } from "./auth";
 import { kvStore } from "./replicacheOptions";
 import { useRenderGuard } from "./util";
 
 export type Rizzle = RizzleReplicache<typeof v4>;
+
+if (failFastIfMissingEnvVars) {
+  invariant(process.env.EXPO_PUBLIC_REPLICACHE_LICENSE_KEY != null);
+}
 
 const ReplicacheContext = createContext<Rizzle | null>(null);
 
@@ -41,7 +50,8 @@ function ReplicacheProviderWithDeps({
     return r.replicache(
       {
         name: replicacheDbName,
-        licenseKey: replicacheLicenseKey,
+        licenseKey:
+          process.env.EXPO_PUBLIC_REPLICACHE_LICENSE_KEY ?? TEST_LICENSE_KEY,
         kvStore,
         // No need for a custom logSink here, just using normal console.*
         // functions are fine because `Sentry.captureConsoleIntegration`

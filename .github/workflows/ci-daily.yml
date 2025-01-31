@@ -30,9 +30,6 @@ jobs:
       - run: moon ci --color --base $HHH_EMPTY_GIT_TREE
         env:
           CHROMATIC_PROJECT_TOKEN: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
-          # <.env.test>
-          EXPO_PUBLIC_REPLICACHE_LICENSE_KEY: HHH_TEST_LICENSE_KEY
-          # </.env.test>
           # Magic "empty" tree https://jiby.tech/post/git-diff-empty-repo/, so
           # that all files are seen as "affected" by moon ci, and thus all CI
           # tests are run.

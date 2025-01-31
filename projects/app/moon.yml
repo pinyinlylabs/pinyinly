@@ -228,7 +228,6 @@ tasks:
     options:
       envFile:
         - .env.local
-        - .env.test
 
   testWatch:
     command: node --test --watch --import tsx "src/**/*.test.ts"
@@ -236,7 +235,6 @@ tasks:
     options:
       envFile:
         - .env.local
-        - .env.test
 
   typecheck:
     deps:
