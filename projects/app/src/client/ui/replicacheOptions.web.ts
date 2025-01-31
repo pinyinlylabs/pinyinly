@@ -1,6 +1,6 @@
 import { ReplicacheOptions } from "replicache";
 
-// Intentionally DO NOT allow Expo top inline the environment variable,
+// Intentionally DO NOT allow Expo to inline the environment variable,
 // otherwise it will leak into the browser bundle otherwise the browser code
 // will also think it's in static render mode and use the
 // ExperimentalMemKVStore.
