@@ -57,7 +57,7 @@ type AuthApi = {
   signOut: () => void;
 };
 
-// TODO: how to handle beind anonymous then logging in but there's an existing
+// TODO: how to handle being anonymous then logging in but there's an existing
 // user. It's more like "switch user" than it is anything else. Maybe even in
 // the anonymous case you should have to give your name? Only after you actually
 // save some useful state.

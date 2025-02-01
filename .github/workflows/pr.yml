@@ -97,9 +97,6 @@ jobs:
   moon-ci:
     runs-on: ubuntu-latest
     env:
-      # <.env.test>
-      EXPO_PUBLIC_REPLICACHE_LICENSE_KEY: HHH_TEST_LICENSE_KEY
-      # </.env.test>
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_STATIC }}
     strategy:
