@@ -2579,6 +2579,7 @@ __metadata:
     "@react-native-replicache/deep-freeze": "npm:^1.1.0"
     "@react-navigation/native": "npm:^7.0.0"
     "@react-navigation/stack": "npm:^7.0.0"
+    "@revenuecat/purchases-js": "npm:^0.15.2"
     "@sentry/core": "npm:^8.52.0"
     "@sentry/node": "npm:^8.52.0"
     "@sentry/react-native": "npm:~6.3.0"
@@ -2655,6 +2656,7 @@ __metadata:
     react-dom: "npm:~18.3.1"
     react-native: "npm:0.76.5"
     react-native-gesture-handler: "npm:~2.20.2"
+    react-native-purchases: "npm:^8.5.2"
     react-native-reanimated: "npm:3.16.7"
     react-native-safe-area-context: "npm:4.12.0"
     react-native-screens: "npm:~4.4.0"
@@ -4822,6 +4824,20 @@ __metadata:
   dependencies:
     web-streams-polyfill: "npm:^3.1.1"
   checksum: 10c0/5f59ba3a86832d146dcf59b92a4fb22a21f2f8c2843f0b814ef41605237498b8372240cf4efdcd86458a08d9451ef0574c3d127b6f82117f77ad6110034973d3
+  languageName: node
+  linkType: hard
+
+"@revenuecat/purchases-js@npm:^0.15.2":
+  version: 0.15.2
+  resolution: "@revenuecat/purchases-js@npm:0.15.2"
+  checksum: 10c0/ea2ee05558cb77a9722411e338160a10e5ad80e108eb28494357f996f3a530692057fd8a7a3c1f331418c20eaf18c7e46087719573e7cf89bfd25b3bc7132b26
+  languageName: node
+  linkType: hard
+
+"@revenuecat/purchases-typescript-internal@npm:13.16.2":
+  version: 13.16.2
+  resolution: "@revenuecat/purchases-typescript-internal@npm:13.16.2"
+  checksum: 10c0/b1bd9949b39bad017f1e454870223824053f943178c07508286faabc2c1b94cae44f10f9b0bf2428d06a1998baa12292a5bb42c100ae4e6e25ba8b8afd37293c
   languageName: node
   linkType: hard
 
@@ -13961,6 +13977,18 @@ __metadata:
     react: ">=18.2.0"
     react-native: ">=0.73.0"
   checksum: 10c0/5690e521e8310d21643634a8d0dacd524e19b76695f347b26f649fcac156a7a901fd6daef7f78482381a41e8445f4552f40ade13790fdf112fab15b0f54dbabd
+  languageName: node
+  linkType: hard
+
+"react-native-purchases@npm:^8.5.2":
+  version: 8.5.2
+  resolution: "react-native-purchases@npm:8.5.2"
+  dependencies:
+    "@revenuecat/purchases-typescript-internal": "npm:13.16.2"
+  peerDependencies:
+    react: ">= 16.6.3"
+    react-native: "*"
+  checksum: 10c0/87c13ab45d967dc83bb5ed0fd7756176d4536d3f388cee95273f54278a502b296bc3c03eda7215fbb07236ed2a8b0815441b45446408b0a9e47b30b2cba5d9d9
   languageName: node
   linkType: hard
 
