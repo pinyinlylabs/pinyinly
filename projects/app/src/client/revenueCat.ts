@@ -1,7 +1,17 @@
-import Purchases from "react-native-purchases";
+import { isRunningInExpoGo } from "expo";
 
-export const revenueCat = {
-  configure(opts: { apiKey: string; userId: string | null }) {
-    Purchases.configure({ ...opts, diagnosticsEnabled: __DEV__ });
-  },
-};
+// react-native-purchases uses native modules that don't work in Expo Go. It's
+// useful to still be able to use Expo Go in the simulator for quick testing, so
+// in that case we use a mock implementation.
+
+export const revenueCat = isRunningInExpoGo()
+  ? (
+      require(
+        `./revenueCat.hhh-expogo`,
+      ) as typeof import("./revenueCat.hhh-expogo")
+    ).revenueCat
+  : (
+      require(
+        `./revenueCat.hhh-native`,
+      ) as typeof import("./revenueCat.hhh-native")
+    ).revenueCat;

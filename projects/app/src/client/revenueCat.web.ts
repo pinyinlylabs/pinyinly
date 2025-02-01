@@ -1,5 +1,5 @@
 import { Purchases } from "@revenuecat/purchases-js";
-import type { revenueCat as baseRevenueCat } from "./revenueCat";
+import type { revenueCat as baseRevenueCat } from "./revenueCat.hhh-native";
 
 export const revenueCat: typeof baseRevenueCat = {
   configure(opts) {
