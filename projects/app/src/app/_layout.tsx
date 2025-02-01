@@ -15,12 +15,10 @@ import { routingIntegration } from "@/client/sentry";
 import { TrpcProvider } from "@/client/trpc";
 import { getSessionId } from "@/client/ui/auth";
 import { ReplicacheProvider } from "@/client/ui/ReplicacheContext";
+import { RevenueCatProvider } from "@/client/ui/RevenueCatProvider";
 import { SplashScreen } from "@/client/ui/SplashScreen";
-import {
-  DefaultTheme,
-  Theme as ReactNavigationTheme,
-  ThemeProvider,
-} from "@react-navigation/native";
+import type { Theme as ReactNavigationTheme } from "@react-navigation/native";
+import { DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import * as Sentry from "@sentry/react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Image } from "expo-image";
@@ -98,6 +96,7 @@ function RootLayout() {
                 />
               </Stack>
               <SplashScreen />
+              <RevenueCatProvider />
             </View>
           </ThemeProvider>
         </ReplicacheProvider>
