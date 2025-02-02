@@ -92,7 +92,7 @@ export default function RadicalPage() {
   return (
     <View className="flex-1 items-center bg-background">
       <View className="w-[100%] max-w-[600px] flex-row items-center gap-3 pt-safe-offset-4 px-safe-or-4">
-        <CloseButton href="/dashboard" tintColor="#3C464D" />
+        <CloseButton tintColor="#3C464D" />
         <QuizProgressBar
           progress={0.5}
           colors={
@@ -100,10 +100,7 @@ export default function RadicalPage() {
           }
         />
       </View>
-      <ScrollView
-        className=""
-        contentContainerClassName="px-safe-or-4 flex-1 pb-2"
-      >
+      <ScrollView contentContainerClassName="px-safe-or-4 flex-1 pb-2">
         <View className="flex-row items-center gap-2 self-center py-4">
           <Image
             className="h-[32px] w-[32px] flex-shrink text-[#04ABF6]"

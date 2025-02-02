@@ -1,18 +1,14 @@
 import { Image } from "expo-image";
-import { Href, router } from "expo-router";
+import { useRouter } from "expo-router";
 import { Pressable } from "react-native";
 
-export const CloseButton = ({
-  tintColor,
-  href,
-}: {
-  tintColor: string;
-  href: Href;
-}) => {
-  return (
+export const CloseButton = ({ tintColor }: { tintColor: string }) => {
+  const router = useRouter();
+
+  return router.canDismiss() ? (
     <Pressable
       onPressIn={() => {
-        router.push(href);
+        router.dismiss();
       }}
     >
       <Image
@@ -21,5 +17,5 @@ export const CloseButton = ({
         tintColor={tintColor}
       />
     </Pressable>
-  );
+  ) : null;
 };

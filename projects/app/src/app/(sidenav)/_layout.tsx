@@ -9,34 +9,46 @@ import {
   TabTriggerSlotProps,
 } from "expo-router/ui";
 import { StatusBar } from "expo-status-bar";
-import { ElementRef, forwardRef } from "react";
+import { ElementRef, forwardRef, ReactNode } from "react";
 import { Pressable, Text, View } from "react-native";
-import { useMediaQuery } from "react-responsive";
 import { tv } from "tailwind-variants";
 
 export default function SideNavLayout() {
-  const isLg = useMediaQuery({ minWidth: 1024 });
   const isAuthenticated = useAuth().data?.clientSession.serverSessionId != null;
 
   return (
-    <Tabs className="flex-1 flex-col-reverse items-stretch self-stretch bg-background lg:flex-row">
+    <Tabs className="flex-1 flex-col-reverse items-stretch self-stretch lg:flex-row">
       <TabList className="flex-grow-0 items-center gap-4 justify-self-stretch border-t-2 border-primary-4 pt-2 pb-safe-or-2 px-safe-or-4 lg:flex-col lg:items-start lg:border-t-0 lg:px-4 lg:pt-6">
-        {isLg ? (
-          <Link
-            href="/dashboard"
-            className="px-2 py-1 text-2xl font-bold tracking-wide text-primary-10"
-          >
-            <Image
-              source={require(`@/assets/logo/logotype.svg`)}
-              className="h-[40px] w-[140px] flex-shrink text-primary-12"
-              tintColor="currentColor"
-              contentFit="fill"
-            />
-          </Link>
-        ) : null}
+        <Link
+          href="/dashboard"
+          className="hidden px-2 py-1 text-2xl font-bold tracking-wide text-primary-10 lg:flex"
+        >
+          <Image
+            source={require(`@/assets/logo/logotype.svg`)}
+            className="h-[40px] w-[140px] flex-shrink text-primary-12"
+            tintColor="currentColor"
+            contentFit="fill"
+          />
+        </Link>
 
-        <TabTrigger name="Dashboard" href="/dashboard" asChild>
-          <TabButton>{isLg ? `Dashboard` : `D`}</TabButton>
+        <TabTrigger name="Learn" href="/dashboard" asChild>
+          <TabButton className={buttonClass()}>
+            {({ isFocused }) => (
+              <>
+                <Image
+                  source={
+                    isFocused
+                      ? require(`@/assets/icons/home-filled.svg`)
+                      : require(`@/assets/icons/home.svg`)
+                  }
+                  className={iconClass({ isFocused })}
+                  tintColor="currentColor"
+                  contentFit="fill"
+                />
+                <Text className={buttonTextClass({ isFocused })}>Learn</Text>
+              </>
+            )}
+          </TabButton>
         </TabTrigger>
 
         {/* Required to allow these routes to work. */}
@@ -44,23 +56,57 @@ export default function SideNavLayout() {
         <TabTrigger name="Word" href="/word/[id]" asChild></TabTrigger>
 
         <TabTrigger name="Connections" href="/connections" asChild>
-          <TabButton>{isLg ? `Connections` : `C`}</TabButton>
+          <TabButton className={buttonClass()}>
+            {({ isFocused }) => (
+              <>
+                <Image
+                  source={
+                    isFocused
+                      ? require(`@/assets/icons/bookmark-filled.svg`)
+                      : require(`@/assets/icons/bookmark.svg`)
+                  }
+                  className={iconClass({ isFocused })}
+                  tintColor="currentColor"
+                  contentFit="fill"
+                />
+                <Text className={buttonTextClass({ isFocused })}>
+                  Connections
+                </Text>
+              </>
+            )}
+          </TabButton>
         </TabTrigger>
 
         <TabTrigger name="Radicals" href="/explore/radicals" asChild>
-          <TabButton>{isLg ? `Radicals` : `R`}</TabButton>
+          <TabButton>Radicals</TabButton>
         </TabTrigger>
 
         <TabTrigger name="Words" href="/explore/words" asChild>
-          <TabButton>{isLg ? `Words` : `W`}</TabButton>
+          <TabButton>Words</TabButton>
         </TabTrigger>
 
         <TabTrigger name="Mnemonics" href="/explore/mnemonics" asChild>
-          <TabButton>{isLg ? `Mnemonics` : `M`}</TabButton>
+          <TabButton>Mnemonics</TabButton>
         </TabTrigger>
 
         <TabTrigger name="History" href="/history" asChild>
-          <TabButton>{isLg ? `History` : `H`}</TabButton>
+          <TabButton className={buttonClass()}>
+            {({ isFocused }) => (
+              <>
+                <Image
+                  source={
+                    isFocused
+                      ? require(`@/assets/icons/badge-filled.svg`)
+                      : require(`@/assets/icons/badge.svg`)
+                  }
+                  className={iconClass({ isFocused })}
+                  tintColor="currentColor"
+                  contentFit="fill"
+                />
+                <Text className={buttonTextClass({ isFocused })}>History</Text>
+              </>
+            )}
+          </TabButton>
         </TabTrigger>
 
         <Link href="/dev/ui">
@@ -81,36 +127,62 @@ export default function SideNavLayout() {
         </Link>
       </TabList>
 
-      <View className="flex-1">
-        <TabSlot />
-      </View>
+      <TabSlot />
 
       <StatusBar style="auto" />
     </Tabs>
   );
 }
 
-const TabButton = forwardRef<ElementRef<typeof Pressable>, TabTriggerSlotProps>(
+type TabButtonProps = Omit<TabTriggerSlotProps, `children`> & {
+  children: ReactNode | ((options: { isFocused: boolean }) => ReactNode);
+};
+
+const TabButton = forwardRef<ElementRef<typeof Pressable>, TabButtonProps>(
   (
     {
       children,
-      isFocused,
+      isFocused = false,
       style, // pull out of `...props` and don't pass to <Pressable>
       ...props
     },
     forwardedRef,
   ) => (
     <Pressable {...props} ref={forwardedRef}>
-      <Text className={buttonClass({ focused: isFocused })}>{children}</Text>
+      {typeof children === `function` ? (
+        children({ isFocused })
+      ) : (
+        <Text
+          className={buttonClass({
+            className: buttonTextClass({ isFocused }),
+          })}
+        >
+          {children}
+        </Text>
+      )}
     </Pressable>
   ),
 );
 TabButton.displayName = `TabButton`;
 
-const buttonClass = tv({
-  base: `rounded-md px-2 py-1 text-xl font-bold text-text`,
+const iconClass = tv({
+  base: `h-[24px] w-[24px] flex-shrink`,
   variants: {
-    focused: {
+    isFocused: {
+      true: `text-primary-12`,
+      false: `text-primary-10`,
+    },
+  },
+});
+
+const buttonClass = tv({
+  base: `rounded-md px-2 py-1 flex-row gap-2`,
+});
+
+const buttonTextClass = tv({
+  base: `text-xl font-bold text-text hidden lg:flex transition-colors`,
+  variants: {
+    isFocused: {
       true: `text-primary-12`,
       false: `text-primary-10`,
     },
