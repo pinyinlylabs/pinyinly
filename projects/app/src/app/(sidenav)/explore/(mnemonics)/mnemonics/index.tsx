@@ -101,11 +101,9 @@ export default function MnemonicsPage() {
                   key={tone}
                   className="size-24 justify-center gap-2 rounded-xl bg-primary-3 px-2 hover:bg-primary-5 lg:size-24"
                 >
-                  <Text className="text-center font-cursive text-2xl text-text">
-                    {tone}
-                  </Text>
+                  <Text className="text-center text-2xl text-text">{tone}</Text>
                   <Text
-                    className="text-md text-md text-center text-primary-10"
+                    className="text-center text-primary-10"
                     numberOfLines={1}
                   >
                     {desc}
@@ -130,8 +128,8 @@ export default function MnemonicsPage() {
                 ([, { initials, desc, id }], i) => (
                   <Fragment key={desc}>
                     <View className="flex-0 flex-row gap-2">
-                      <Text className="text-md text-text">{desc}</Text>
-                      <Text className="text-md text-primary-8">
+                      <Text className="text-text">{desc}</Text>
+                      <Text className="text-primary-8">
                         {initialGroupThemes.data?.get(id) ?? `no theme`}
                       </Text>
                     </View>
@@ -211,7 +209,7 @@ export default function MnemonicsPage() {
 }
 
 const altText = tv({
-  base: `text-md text-md text-center text-primary-10`,
+  base: `text-center text-primary-10`,
 });
 
 const pinyinPartBox = tv({

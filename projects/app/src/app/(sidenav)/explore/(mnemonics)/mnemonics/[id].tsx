@@ -72,7 +72,7 @@ export default function MnemonicIdPage() {
         <View className="flex-row flex-wrap gap-1">
           {group?.initials.map(([i]) => (
             <Link key={i} href={`/explore/mnemonics/${i}`}>
-              <Text className="text-md text-text">{i}-</Text>
+              <Text className="text-text">{i}-</Text>
             </Link>
           ))}
         </View>
@@ -119,7 +119,7 @@ export default function MnemonicIdPage() {
                     {[...initials.entries()].map(([name, desc], i) => (
                       <View key={i}>
                         <Text
-                          className="text-md font-bold text-text"
+                          className="font-bold text-text"
                           onPress={() => {
                             void r.mutate.setPinyinInitialAssociation({
                               initial: id,

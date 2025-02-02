@@ -20,7 +20,7 @@ export default function RadicalsPage() {
           <Text className="text-center text-2xl font-bold text-text">
             Kangxi Radicals
           </Text>
-          <Text className="text-md text-center leading-relaxed text-text">
+          <Text className="text-center leading-relaxed text-text">
             The building blocks of Chinese characters, representing core
             meanings and structures. Familiarizing yourself with these radicals
             will help you recognize patterns, understand character meanings, and
