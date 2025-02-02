@@ -26,8 +26,9 @@ if (!isExpoGo) {
 
 export const SplashScreen = ({}: { children?: never }) => {
   const [fontsLoaded, fontError] = useFonts({
-    "MaShanZheng-Regular": require(`@/assets/fonts/MaShanZheng-Regular.ttf`),
-    "NotoSerifSC-Medium": require(`@/assets/fonts/NotoSerifSC-Medium.otf`),
+    [`Karla`]: require(`@/assets/fonts/Karla.ttf`),
+    [`MaShanZheng-Regular`]: require(`@/assets/fonts/MaShanZheng-Regular.ttf`),
+    [`NotoSerifSC-Medium`]: require(`@/assets/fonts/NotoSerifSC-Medium.otf`),
   });
 
   const [hide, setHide] = useState(false);

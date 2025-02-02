@@ -79,10 +79,7 @@ export default function IndexPage() {
   );
 
   return (
-    <ScrollView
-      className="flex-1 bg-background"
-      contentContainerClassName="pt-safe-offset-4 px-safe-or-4 items-center gap-[10px] padding-[10px]"
-    >
+    <ScrollView contentContainerClassName="pt-safe-offset-4 px-safe-or-4 items-center gap-[10px] padding-[10px]">
       <View className="self-start">
         {streakQuery.data != null ? (
           <Animated.View entering={FadeIn}>
@@ -120,7 +117,7 @@ export default function IndexPage() {
 
               {recentCharacters.data.length > 0 ? (
                 <>
-                  <Text className="text-md text-primary-9">
+                  <Text className="text-primary-9">
                     A few things from last time
                   </Text>
                   <View className="mt-2 flex-row gap-2">
@@ -136,7 +133,7 @@ export default function IndexPage() {
                 </>
               ) : (
                 <>
-                  <Text className="text-md text-primary-9">
+                  <Text className="text-primary-9">
                     There’s no time like the present
                   </Text>
                 </>

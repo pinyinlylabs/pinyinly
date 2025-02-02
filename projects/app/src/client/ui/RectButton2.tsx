@@ -206,7 +206,7 @@ const roundedRect = tv({
 });
 
 const text = tv({
-  base: `font-bold select-none text-sm uppercase`,
+  base: `hhh-text-button select-none`,
   variants: {
     variant: {
       filled: `text-primary-2`,

@@ -33,44 +33,43 @@ export default function HistoryPage() {
   const renderTime = Date.now() - start;
 
   return (
-    <ScrollView
-      className="flex-1 bg-background"
-      contentContainerClassName="pt-safe-offset-4 px-safe-or-4 items-center gap-[10px] padding-[10px]"
-    >
-      <View className="flex-row gap-2">
-        <View>
-          <Text className="text-text">
-            Render time {Math.round(renderTime)}ms
-          </Text>
-        </View>
-        <View className="flex-1 items-center gap-[10px]">
-          <Text className="text-xl text-text">upcoming</Text>
+    <ScrollView contentContainerClassName="py-safe-offset-4 px-safe-or-4 items-center">
+      <View className="max-w-[600px] gap-4">
+        <View className="flex-row gap-2">
+          <View>
+            <Text className="text-text">
+              Render time {Math.round(renderTime)}ms
+            </Text>
+          </View>
+          <View className="flex-1 items-center gap-[10px]">
+            <Text className="text-xl text-text">upcoming</Text>
 
-          {dataQuery.data?.map(([key, value], i) => (
-            <View key={i}>
-              <Text className="text-text">
-                {key.skill.hanzi}: {value.due.toISOString()}
-              </Text>
-            </View>
-          ))}
-        </View>
+            {dataQuery.data?.map(([key, value], i) => (
+              <View key={i}>
+                <Text className="text-text">
+                  {key.skill.hanzi}: {value.due.toISOString()}
+                </Text>
+              </View>
+            ))}
+          </View>
 
-        <View>
-          <Text className="self-center text-xl text-text">history</Text>
+          <View>
+            <Text className="self-center text-xl text-text">history</Text>
 
-          {skillRatingsQuery.data?.map(([key, value], i) => (
-            <View key={i}>
-              <Text className="text-text">
-                {value.rating === Rating.Again
-                  ? `❌`
-                  : value.rating === Rating.Good
-                    ? `✅`
-                    : value.rating}
-                {` `}
-                {key.skill.hanzi}: {key.createdAt.toISOString()}
-              </Text>
-            </View>
-          ))}
+            {skillRatingsQuery.data?.map(([key, value], i) => (
+              <View key={i}>
+                <Text className="text-text">
+                  {value.rating === Rating.Again
+                    ? `❌`
+                    : value.rating === Rating.Good
+                      ? `✅`
+                      : value.rating}
+                  {` `}
+                  {key.skill.hanzi}: {key.createdAt.toISOString()}
+                </Text>
+              </View>
+            ))}
+          </View>
         </View>
       </View>
     </ScrollView>

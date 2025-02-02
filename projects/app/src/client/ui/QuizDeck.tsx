@@ -147,7 +147,7 @@ export const QuizDeck = ({ questions }: { questions: readonly Question[] }) => {
       }}
     >
       <View className="flex-row items-center gap-[24px] px-[16px]">
-        <CloseButton href="/dashboard" tintColor="#3C464D" />
+        <CloseButton tintColor="#3C464D" />
         <QuizProgressBar
           progress={progress}
           colors={

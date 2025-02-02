@@ -198,7 +198,7 @@ export const QuizDeckOneCorrectPairQuestion = memo(
                   <ShowAnswer answer={answer} includeAlternatives />
 
                   {hint != null || pinyinHint != null ? (
-                    <Text className="text-md leading-snug text-accent-10">
+                    <Text className="leading-snug text-accent-10">
                       <Text className="font-bold">Hint:</Text> {pinyinHint}
                       {` `}
                       {hint}
@@ -206,12 +206,12 @@ export const QuizDeckOneCorrectPairQuestion = memo(
                   ) : null}
                   {selectedAAnswer != null && selectedBAnswer != null ? (
                     <View className="flex-row flex-wrap items-center gap-2">
-                      <Text className="text-md flex-shrink-0 font-bold leading-snug text-accent-10">
+                      <Text className="flex-shrink-0 font-bold leading-snug text-accent-10">
                         Your answer:
                       </Text>
                       <View className="flex-1 flex-row flex-wrap items-center">
                         <ShowAnswer answer={selectedAAnswer} small />
-                        <Text className="text-md flex-shrink-0 flex-grow-0 px-1 leading-snug text-accent-10 opacity-50">
+                        <Text className="flex-shrink-0 flex-grow-0 px-1 leading-snug text-accent-10 opacity-50">
                           +
                         </Text>
                         <ShowAnswer answer={selectedBAnswer} small />
@@ -247,7 +247,7 @@ export const QuizDeckOneCorrectPairQuestion = memo(
               style={{ flexShrink: 1, width: 33, height: 30 }}
             /> */}
                 <View className="danger-theme">
-                  <Text className="text-md font-bold uppercase text-accent-10">
+                  <Text className="font-bold uppercase text-accent-10">
                     Weak word
                   </Text>
                 </View>
@@ -255,7 +255,7 @@ export const QuizDeckOneCorrectPairQuestion = memo(
             ) : null}
             {flag === QuestionFlag.PreviousMistake ? (
               <View className="warning-theme">
-                <Text className="text-md font-bold uppercase text-accent-10">
+                <Text className="font-bold uppercase text-accent-10">
                   Previous mistake
                 </Text>
               </View>
@@ -631,7 +631,7 @@ const choiceButtonText = tv({
   variants: {
     length: {
       short: `text-lg lg:text-xl`,
-      medium: `text-md lg:text-lg`,
+      medium: `lg:text-lg`,
       long: `text-xs lg:text-md`,
     },
     isRadical: {

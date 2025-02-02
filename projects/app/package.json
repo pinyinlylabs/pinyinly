@@ -42,7 +42,7 @@
     "expo-crypto": "^14.0.1",
     "expo-font": "~13.0.1",
     "expo-haptics": "~14.0.0",
-    "expo-image": "~2.0.3",
+    "expo-image": "patch:expo-image@npm%3A2.0.3#~/.yarn/patches/expo-image-npm-2.0.3-4656875bbd.patch",
     "expo-insights": "~0.8.1",
     "expo-linear-gradient": "^14.0.1",
     "expo-linking": "~7.0.3",
@@ -82,8 +82,10 @@
     "replicache-react": "^5.0.1",
     "tailwind-variants": "^0.3.0",
     "tailwindcss": "^3.4.14",
+    "usehooks-ts": "^3.1.0",
     "ws": "^8.17.1",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "zustand": "^5.0.3"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

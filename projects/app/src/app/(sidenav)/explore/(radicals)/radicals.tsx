@@ -14,16 +14,13 @@ export default function RadicalsPage() {
   });
 
   return (
-    <ScrollView
-      className="flex-1 bg-background"
-      contentContainerClassName="py-safe-offset-4 items-center"
-    >
+    <ScrollView contentContainerClassName="py-safe-offset-4 px-safe-or-4 items-center">
       <View className="max-w-[600px] gap-4">
         <View className="gap-2 px-safe-or-4 lg:px-0">
           <Text className="text-center text-2xl font-bold text-text">
             Kangxi Radicals
           </Text>
-          <Text className="text-md text-center leading-relaxed text-text">
+          <Text className="text-center leading-relaxed text-text">
             The building blocks of Chinese characters, representing core
             meanings and structures. Familiarizing yourself with these radicals
             will help you recognize patterns, understand character meanings, and
