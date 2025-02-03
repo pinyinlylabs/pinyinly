@@ -8,7 +8,7 @@ import { useLocalSearchParams } from "expo-router";
 import { ScrollView } from "react-native";
 
 export default function WordPage() {
-  const { id } = useLocalSearchParams<`/word/[id]`>();
+  const { id } = useLocalSearchParams<`/explore/words/[id]`>();
 
   const query = useQuery({
     queryKey: [`word`, id],

@@ -7,10 +7,20 @@ import { formatDuration } from "date-fns/formatDuration";
 import { interval } from "date-fns/interval";
 import { intervalToDuration } from "date-fns/intervalToDuration";
 import { Link } from "expo-router";
+import { useCallback, useState } from "react";
 import { Text, View } from "react-native";
+import { useTimeout } from "usehooks-ts";
 
 export default function ReviewsPage() {
   const r = useReplicache();
+
+  const [visible, setVisible] = useState(false);
+
+  const show = useCallback(() => {
+    setVisible(true);
+  }, []);
+
+  useTimeout(show, 2000);
 
   const questions = useQueryOnce(async (tx) => {
     const result = await questionsForReview(r, tx, {
@@ -44,7 +54,7 @@ export default function ReviewsPage() {
 
   return (
     <View className="flex-1 items-center bg-background pt-safe-offset-[20px]">
-      {questions.loading ? (
+      {questions.loading || !visible ? (
         <View className="my-auto">
           <Text className="text-text">Loading…</Text>
         </View>
@@ -88,7 +98,7 @@ export default function ReviewsPage() {
 
 const GoHomeButton = () => (
   <View style={{ height: 44 }}>
-    <Link dismissTo href="/dashboard" asChild>
+    <Link dismissTo href="/learn" asChild>
       <RectButton2 textClassName="font-bold text-text text-xl">
         Back
       </RectButton2>

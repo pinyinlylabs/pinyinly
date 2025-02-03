@@ -4,7 +4,7 @@ import { useEffect } from "react";
 export default () => {
   useEffect(() => {
     const x = setTimeout(() => {
-      router.replace(`/dashboard`);
+      router.replace(`/learn`);
     }, 0);
     return () => {
       clearTimeout(x);

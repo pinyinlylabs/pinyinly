@@ -1,5 +1,5 @@
 import { Stack } from "expo-router";
 
-export default function TabLayout() {
+export default function ExploreLayout() {
   return <Stack screenOptions={{ headerShown: false }} />;
 }

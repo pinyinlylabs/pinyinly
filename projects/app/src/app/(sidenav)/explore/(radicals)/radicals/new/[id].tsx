@@ -73,7 +73,7 @@ const svgData = {
 };
 
 export default function RadicalPage() {
-  const { id } = useLocalSearchParams<`/radical/[id]`>();
+  const { id } = useLocalSearchParams<`/explore/radicals/[id]`>();
 
   const query = useQuery({
     queryKey: [`character.radical`, id],

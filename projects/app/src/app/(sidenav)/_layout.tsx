@@ -20,7 +20,7 @@ export default function SideNavLayout() {
     <Tabs className="flex-1 flex-col-reverse items-stretch self-stretch lg:flex-row">
       <TabList className="flex-grow-0 items-center gap-4 justify-self-stretch border-t-2 border-primary-4 pt-2 pb-safe-or-2 px-safe-or-4 lg:flex-col lg:items-start lg:border-t-0 lg:px-4 lg:pt-6">
         <Link
-          href="/dashboard"
+          href="/learn"
           className="hidden px-2 py-1 text-2xl font-bold tracking-wide text-primary-10 lg:flex"
         >
           <Image
@@ -31,7 +31,7 @@ export default function SideNavLayout() {
           />
         </Link>
 
-        <TabTrigger name="Learn" href="/dashboard" asChild>
+        <TabTrigger name="Learn" href="/learn" asChild>
           <TabButton className={buttonClass()}>
             {({ isFocused }) => (
               <>
@@ -51,11 +51,7 @@ export default function SideNavLayout() {
           </TabButton>
         </TabTrigger>
 
-        {/* Required to allow these routes to work. */}
-        <TabTrigger name="Radical" href="/radical/" asChild></TabTrigger>
-        <TabTrigger name="Word" href="/word/[id]" asChild></TabTrigger>
-
-        <TabTrigger name="Connections" href="/connections" asChild>
+        <TabTrigger name="Explore" href="/explore" asChild>
           <TabButton className={buttonClass()}>
             {({ isFocused }) => (
               <>
@@ -69,49 +65,11 @@ export default function SideNavLayout() {
                   tintColor="currentColor"
                   contentFit="fill"
                 />
-                <Text className={buttonTextClass({ isFocused })}>
-                  Connections
-                </Text>
+                <Text className={buttonTextClass({ isFocused })}>Explore</Text>
               </>
             )}
           </TabButton>
         </TabTrigger>
-
-        <TabTrigger name="Radicals" href="/explore/radicals" asChild>
-          <TabButton>Radicals</TabButton>
-        </TabTrigger>
-
-        <TabTrigger name="Words" href="/explore/words" asChild>
-          <TabButton>Words</TabButton>
-        </TabTrigger>
-
-        <TabTrigger name="Mnemonics" href="/explore/mnemonics" asChild>
-          <TabButton>Mnemonics</TabButton>
-        </TabTrigger>
-
-        <TabTrigger name="History" href="/history" asChild>
-          <TabButton className={buttonClass()}>
-            {({ isFocused }) => (
-              <>
-                <Image
-                  source={
-                    isFocused
-                      ? require(`@/assets/icons/badge-filled.svg`)
-                      : require(`@/assets/icons/badge.svg`)
-                  }
-                  className={iconClass({ isFocused })}
-                  tintColor="currentColor"
-                  contentFit="fill"
-                />
-                <Text className={buttonTextClass({ isFocused })}>History</Text>
-              </>
-            )}
-          </TabButton>
-        </TabTrigger>
-
-        <Link href="/dev/ui">
-          <Text className={buttonClass()}>UI</Text>
-        </Link>
 
         <View className="flex-1" />
 
@@ -176,11 +134,11 @@ const iconClass = tv({
 });
 
 const buttonClass = tv({
-  base: `rounded-md px-2 py-1 flex-row gap-2`,
+  base: `rounded-md px-2 py-1 flex-row gap-2 items-center`,
 });
 
 const buttonTextClass = tv({
-  base: `text-xl font-bold text-text hidden lg:flex transition-colors`,
+  base: `text-xl font-sans font-bold text-text hidden lg:flex transition-colors`,
   variants: {
     isFocused: {
       true: `text-primary-12`,
