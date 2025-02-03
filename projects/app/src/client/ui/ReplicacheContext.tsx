@@ -2,7 +2,6 @@ import { trpc } from "@/client/trpc";
 import { SrsType } from "@/data/model";
 import { v4 } from "@/data/rizzleSchema";
 import { AppRouter } from "@/server/routers/_app";
-import { failFastIfMissingEnvVars } from "@/util/env";
 import { nextReview, UpcomingReview } from "@/util/fsrs";
 import { cookieSchema, r, RizzleReplicache } from "@/util/rizzle";
 import { invariant } from "@haohaohow/lib/invariant";
@@ -28,10 +27,6 @@ import { kvStore } from "./replicacheOptions";
 import { useRenderGuard } from "./util";
 
 export type Rizzle = RizzleReplicache<typeof v4>;
-
-if (failFastIfMissingEnvVars) {
-  invariant(process.env.EXPO_PUBLIC_REPLICACHE_LICENSE_KEY != null);
-}
 
 const ReplicacheContext = createContext<Rizzle | null>(null);
 

@@ -15,7 +15,7 @@ Now you can start the app:
 1. `moon run app:dev`.
 1. Scan the QR code on your phone.
 
-# Cookbook
+# Guides
 
 ## Writing a backend database migration
 
@@ -200,3 +200,24 @@ syd1::m6bjf-1738011631946-6a41c1b3d99c`,
 ```
 
 Customise this to suit your scenario.
+
+## Environment variables
+
+- **Vercel**: There should be no `EXPO_PUBLIC_` environment variables configured
+  in Vercel's environment variables. `EXPO_PUBLIC_` are inlined at build-time by
+  metro so there's no effect from having them defined in the environment at
+  runtime too. However other environment variables like `DATABASE_URL`
+  **should** be defined here as they are read at run-time.
+
+- **EXPO*PUBLIC***: These are inlined into the build and exposed publicly. These
+  need to be configured anywhere that builds are done:
+
+  - `.github/workflows/release.yml`
+  - `.github/workflows/expo-eas-build.yml`
+  - `.github/workflows/pr.yml`
+
+  This means they need to be declared in Github's Action Secrets too.
+
+  Expo's Metro plugin is patched to error if `HHH_STRICT_EXPO_ENV_VARS` is set
+  when a `PUBLIC_EXPO_` variable is missing. This helps catch errors during
+  build before they reach users.

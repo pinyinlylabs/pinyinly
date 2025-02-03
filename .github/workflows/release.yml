@@ -52,7 +52,10 @@ jobs:
         # if: steps.moon-deployVercel-query.target-affected
         env:
           EXPO_PUBLIC_REPLICACHE_LICENSE_KEY: ${{ secrets.EXPO_PUBLIC_REPLICACHE_LICENSE_KEY }}
+          EXPO_PUBLIC_REVENUECAT_APPLE_KEY: ${{ secrets.EXPO_PUBLIC_REVENUECAT_APPLE_KEY }}
+          EXPO_PUBLIC_REVENUECAT_WEB_KEY: ${{ secrets.EXPO_PUBLIC_REVENUECAT_WEB_KEY }}
           EXPO_PUBLIC_SENTRY_DSN: ${{ secrets.EXPO_PUBLIC_SENTRY_DSN }}
+          HHH_STRICT_EXPO_ENV_VARS:
           HHH_VERCEL_PROD:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -103,6 +106,9 @@ jobs:
         # if: steps.moon-deployEasUpdate-query.target-affected
         env:
           EXPO_PUBLIC_REPLICACHE_LICENSE_KEY: ${{ secrets.EXPO_PUBLIC_REPLICACHE_LICENSE_KEY }}
+          EXPO_PUBLIC_REVENUECAT_APPLE_KEY: ${{ secrets.EXPO_PUBLIC_REVENUECAT_APPLE_KEY }}
+          EXPO_PUBLIC_REVENUECAT_WEB_KEY: ${{ secrets.EXPO_PUBLIC_REVENUECAT_WEB_KEY }}
           EXPO_PUBLIC_SENTRY_DSN: ${{ secrets.EXPO_PUBLIC_SENTRY_DSN }}
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          HHH_STRICT_EXPO_ENV_VARS:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}

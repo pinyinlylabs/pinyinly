@@ -2674,6 +2674,7 @@ __metadata:
     ucd-full: "npm:^16.0.0"
     usehooks-ts: "npm:^3.1.0"
     ws: "npm:^8.17.1"
+    yaml: "npm:^2.7.0"
     yargs: "npm:^17.7.2"
     zod: "npm:^3.23.8"
     zustand: "npm:^5.0.3"
@@ -6597,7 +6598,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"babel-preset-expo@npm:~12.0.4":
+"babel-preset-expo@npm:12.0.4":
   version: 12.0.4
   resolution: "babel-preset-expo@npm:12.0.4"
   dependencies:
@@ -6619,6 +6620,31 @@ __metadata:
     react-compiler-runtime:
       optional: true
   checksum: 10c0/5fac764b42fb23f62ed0143d82bb76ed077b13f44f920041da48d9313eaf6308eaeab155da782611a50af9fc3af862caf5067768dd4dc1361fd001d3d461c7f9
+  languageName: node
+  linkType: hard
+
+"babel-preset-expo@patch:babel-preset-expo@npm%3A12.0.4#~/.yarn/patches/babel-preset-expo-npm-12.0.4-a1ecc381d7.patch":
+  version: 12.0.4
+  resolution: "babel-preset-expo@patch:babel-preset-expo@npm%3A12.0.4#~/.yarn/patches/babel-preset-expo-npm-12.0.4-a1ecc381d7.patch::version=12.0.4&hash=c2b82f"
+  dependencies:
+    "@babel/plugin-proposal-decorators": "npm:^7.12.9"
+    "@babel/plugin-transform-export-namespace-from": "npm:^7.22.11"
+    "@babel/plugin-transform-object-rest-spread": "npm:^7.12.13"
+    "@babel/plugin-transform-parameters": "npm:^7.22.15"
+    "@babel/preset-react": "npm:^7.22.15"
+    "@babel/preset-typescript": "npm:^7.23.0"
+    "@react-native/babel-preset": "npm:0.76.5"
+    babel-plugin-react-native-web: "npm:~0.19.13"
+    react-refresh: "npm:^0.14.2"
+  peerDependencies:
+    babel-plugin-react-compiler: ^19.0.0-beta-9ee70a1-20241017
+    react-compiler-runtime: ^19.0.0-beta-8a03594-20241020
+  peerDependenciesMeta:
+    babel-plugin-react-compiler:
+      optional: true
+    react-compiler-runtime:
+      optional: true
+  checksum: 10c0/b7f8efeaa44926f4cd4f913c94905b903e01c8507900ad8a33c67d5606157858b78fdebd51e5e2f9b17d1439abde87a3969464d326790623c56e97ec7df89f82
   languageName: node
   linkType: hard
 
