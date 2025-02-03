@@ -1,13 +1,18 @@
 name: 📦 Install dependencies
+description: Install dependencies used for all other workflows.
 
 runs:
   using: composite
   steps:
+    - name: Enable Corepack
+      run: npm i -g corepack@0.31.0
+      shell: bash
+
     # Necessary to run pnpm as part of building the projects/app/api functions
     # for Vercel, because it includes a patch on one of the dependencies. It
     # uses pnpm because Vercel only supports Yarn 1 which doesn't have patch
     # support.
-    - name: Enable Corepack
+    - name: Enable pnpm
       run: corepack enable pnpm
       shell: bash
 

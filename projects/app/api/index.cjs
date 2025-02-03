@@ -2,7 +2,7 @@ const Sentry = require(`@sentry/node`);
 const { captureConsoleIntegration } = require(`@sentry/core`);
 
 Sentry.init({
-  dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
+  dsn: process.env.SENTRY_DSN, // Must be provided at runtime.
   integrations: [captureConsoleIntegration()],
   tracesSampleRate: 1.0, // Keep in sync with the other Sentry.init()
 });

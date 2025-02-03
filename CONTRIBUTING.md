@@ -209,7 +209,12 @@ Customise this to suit your scenario.
   runtime too. However other environment variables like `DATABASE_URL`
   **should** be defined here as they are read at run-time.
 
-- **EXPO*PUBLIC***: These are inlined into the build and exposed publicly. These
+  **`SENTRY_DSN`**: Needs to be defined here, even though it's typically defined
+  using `EXPO_PUBLIC_SENTRY_DSN` in other places, the `Sentry.init()` call is
+  not in code compiled by Metro and instead is in the entry-point
+  `projects/app/api/index.cjs`.
+
+- **`EXPO_PUBLIC_`**: These are inlined into the build and exposed publicly. These
   need to be configured anywhere that builds are done:
 
   - `.github/workflows/release.yml`
