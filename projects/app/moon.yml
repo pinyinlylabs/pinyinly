@@ -26,6 +26,8 @@ tasks:
 
   buildEasUpdate:
     command: yarn expo export -p ios -p android --source-maps --output-dir @group(buildEasUpdateOutdir)
+    options:
+      envFile: .env.local
     outputs:
       - "@group(buildEasUpdateOutdir)"
 
@@ -47,6 +49,7 @@ tasks:
       - "{api,assets,public,src}/**/*"
     options:
       shell: true
+      envFile: .env.local
     outputs:
       - "@group(buildVercelExpoOutdir)"
 
@@ -226,15 +229,13 @@ tasks:
       - "src"
       - "*.{json,cjs,js,ts}"
     options:
-      envFile:
-        - .env.local
+      envFile: .env.local
 
   testWatch:
     command: node --test --watch --import tsx "src/**/*.test.ts"
     local: true
     options:
-      envFile:
-        - .env.local
+      envFile: .env.local
 
   typecheck:
     deps:
