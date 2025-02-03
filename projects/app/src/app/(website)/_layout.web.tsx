@@ -43,7 +43,7 @@ export default function WebsiteLayout() {
                   entering={FadeIn.duration(100)}
                   exiting={FadeOut.duration(100)}
                 >
-                  <Link href="/dashboard" asChild>
+                  <Link href="/learn" asChild>
                     <RectButton2
                       variant="filled"
                       accent

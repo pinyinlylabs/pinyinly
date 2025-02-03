@@ -15,7 +15,7 @@ import { ScrollView, Text, View } from "react-native";
 
 export default function RadicalPage() {
   const r = useReplicache();
-  const { id } = useLocalSearchParams<`/radical/[id]`>();
+  const { id } = useLocalSearchParams<`/explore/radicals/[id]`>();
 
   const query = useQuery({
     queryKey: [`character.radical`, id],

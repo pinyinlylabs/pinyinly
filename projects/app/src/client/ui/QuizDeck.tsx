@@ -225,7 +225,7 @@ export const QuizDeck = ({ questions }: { questions: readonly Question[] }) => {
                         Keep learning
                       </RectButton2>
                     </Link>
-                    <Link href="/dashboard" asChild>
+                    <Link href="/learn" asChild>
                       <RectButton2 variant="bare">
                         That’s enough for now
                       </RectButton2>

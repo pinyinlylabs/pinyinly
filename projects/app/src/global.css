@@ -9,19 +9,23 @@
   
   */
   .hhh-text-base {
-    @apply font-karla text-primary-12;
+    @apply font-karla leading-normal text-primary-12;
   }
 
   .hhh-text-button {
-    @apply hhh-text-base font-medium uppercase;
+    @apply hhh-text-base font-sans font-bold uppercase;
   }
 
   .hhh-text-title {
-    @apply hhh-text-base font-bold;
+    @apply hhh-text-base text-2xl font-bold tracking-tight;
   }
 
   .hhh-text-body {
-    @apply hhh-text-base;
+    @apply hhh-text-base font-sans;
+  }
+
+  .hhh-text-caption {
+    @apply hhh-text-base text-primary-11;
   }
 
   /* www */

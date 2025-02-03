@@ -28,7 +28,7 @@ export default function WebsitePage() {
         </View>
 
         <View className="w-[350px] items-stretch gap-2">
-          <Link href="/dashboard" asChild>
+          <Link href="/learn" asChild>
             <RectButton2
               variant="filled"
               accent
@@ -40,7 +40,7 @@ export default function WebsitePage() {
             </RectButton2>
           </Link>
 
-          <Link href="/dashboard" asChild>
+          <Link href="/learn" asChild>
             <RectButton2 variant="outline" textClassName="www-text-button">
               I already have an account
             </RectButton2>

@@ -89,10 +89,13 @@ function RootLayout() {
                   : ``
               } flex-1`}
             >
-              <Stack screenOptions={{ headerShown: false }}>
+              <Stack screenOptions={{ headerShown: false, animation: `fade` }}>
                 <Stack.Screen
                   name="login"
-                  options={{ presentation: `modal` }}
+                  options={{
+                    presentation: `modal`,
+                    animation: `slide_from_bottom`,
+                  }}
                 />
               </Stack>
               <SplashScreen />

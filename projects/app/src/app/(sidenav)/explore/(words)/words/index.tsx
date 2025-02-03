@@ -93,7 +93,7 @@ const WordList = ({ words }: { words: readonly string[] }) => {
   return (
     <View className="flex-row flex-wrap gap-2">
       {words.map((word, i) => (
-        <Link href={`/word/${word}`} asChild key={i}>
+        <Link href={`/explore/words/${word}`} asChild key={i}>
           <RectButton2 textClassName="text-xl font-normal">{word}</RectButton2>
         </Link>
       ))}

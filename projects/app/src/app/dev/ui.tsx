@@ -21,7 +21,7 @@ export default function DesignSystemPage() {
   return (
     <View style={{ flex: 1, paddingTop: insets.top }}>
       <View className="flex-row p-2">
-        <Link href="/dashboard" asChild>
+        <Link href="/learn" asChild>
           <Text className="text-text hover:underline">Home</Text>
         </Link>
       </View>

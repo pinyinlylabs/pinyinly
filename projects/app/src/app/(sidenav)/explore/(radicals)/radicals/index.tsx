@@ -54,7 +54,9 @@ export default function RadicalsPage() {
                 {query.data.get(strokes)?.characters.map((char, i) => (
                   <Link
                     href={
-                      strokes > 1 ? `/radical/new/${char}` : `/radical/${char}`
+                      strokes > 1
+                        ? `/explore/radicals/new/${char}`
+                        : `/explore/radicals/${char}`
                     }
                     asChild
                     key={i}
