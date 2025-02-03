@@ -54,7 +54,7 @@
       "depTypeTemplate": "devDependencies"
     },
     {
-      "description": "Update pinned npx/yarn dlx packages",
+      "description": "Update pinned npx/npm i -g/yarn dlx packages",
       "customType": "regex",
       "fileMatch": [
         "^.moon/.*.ya?ml$",
@@ -62,7 +62,7 @@
         "^projects/[^/]+/[^/]+.ya?ml$"
       ],
       "matchStrings": [
-        "(npx|npm exec|yarn dlx|pnpm dlx)( -[-a-z]+?)* (?<depName>(@[a-z0-9-~][a-z0-9-._~]*\\/)?[a-z0-9-~][a-z0-9-._~]*)@(?<currentValue>\\S+)"
+        "(npx|npm exec|yarn dlx|pnpm dlx|npm i -g)( -[-a-z]+?)* (?<depName>(@[a-z0-9-~][a-z0-9-._~]*\\/)?[a-z0-9-~][a-z0-9-._~]*)@(?<currentValue>\\S+)"
       ],
       "datasourceTemplate": "npm",
       "depTypeTemplate": "devDependencies"
