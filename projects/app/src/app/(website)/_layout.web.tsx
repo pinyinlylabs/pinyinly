@@ -4,6 +4,7 @@ import { invariant } from "@haohaohow/lib/invariant";
 import { Image } from "expo-image";
 import { Link, Slot } from "expo-router";
 import { ScrollView, View } from "react-native";
+import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { tv } from "tailwind-variants";
 import { useIntersectionObserver } from "usehooks-ts";
 
@@ -36,19 +37,24 @@ export default function WebsiteLayout() {
               contentFit="fill"
             />
 
-            <View
-              className={`flex-1 flex-row items-center justify-end gap-2 ${isBodyGetStartedVisible ? `hidden` : ``}`}
-            >
-              <Link href="/dashboard" asChild>
-                <RectButton2
-                  variant="filled"
-                  accent
-                  textClassName="www-text-button"
+            {isBodyGetStartedVisible ? null : (
+              <View className="flex-1 flex-row items-center justify-end gap-2">
+                <Animated.View
+                  entering={FadeIn.duration(100)}
+                  exiting={FadeOut.duration(100)}
                 >
-                  Get Started
-                </RectButton2>
-              </Link>
-            </View>
+                  <Link href="/dashboard" asChild>
+                    <RectButton2
+                      variant="filled"
+                      accent
+                      textClassName="www-text-button"
+                    >
+                      Get Started
+                    </RectButton2>
+                  </Link>
+                </Animated.View>
+              </View>
+            )}
           </View>
         </View>
       </header>
