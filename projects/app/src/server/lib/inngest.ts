@@ -1,4 +1,4 @@
-import { failFastIfMissingEnvVars } from "@/util/env";
+import { preflightCheckEnvVars } from "@/util/env";
 import { invariant } from "@haohaohow/lib/invariant";
 import { sentryMiddleware } from "@inngest/middleware-sentry";
 import { Inngest } from "inngest";
@@ -7,7 +7,7 @@ import { z } from "zod";
 
 const { POSTMARK_SERVER_TOKEN } = process.env;
 
-if (failFastIfMissingEnvVars) {
+if (preflightCheckEnvVars) {
   invariant(POSTMARK_SERVER_TOKEN != null, `POSTMARK_SERVER_TOKEN is required`);
 }
 

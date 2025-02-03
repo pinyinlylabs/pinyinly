@@ -228,6 +228,7 @@ tasks:
     inputs:
       - "src"
       - "*.{json,cjs,js,ts}"
+      - "/.github/workflows" # There is a test that checks workflow environment variables.
     options:
       envFile: .env.local
 
