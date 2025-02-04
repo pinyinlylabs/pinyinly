@@ -92,6 +92,7 @@
     "@electric-sql/pglite": "^0.2.15",
     "@eslint/eslintrc": "^3.1.0",
     "@inngest/eslint-plugin": "^0.0.7",
+    "@lottiefiles/lottie-js": "^0.4.2",
     "@sentry/node": "^8.52.0",
     "@stylistic/eslint-plugin": "^2.9.0",
     "@types/babel__core": "7.20.x",

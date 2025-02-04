@@ -2574,6 +2574,7 @@ __metadata:
     "@inngest/eslint-plugin": "npm:^0.0.7"
     "@inngest/middleware-sentry": "npm:^0.1.1"
     "@lottiefiles/dotlottie-react": "npm:^0.6.5"
+    "@lottiefiles/lottie-js": "npm:^0.4.2"
     "@lucia-auth/adapter-drizzle": "npm:^1.1.0"
     "@neondatabase/serverless": "npm:^0.10.0"
     "@react-native-replicache/deep-freeze": "npm:^1.1.0"
@@ -3165,6 +3166,17 @@ __metadata:
   version: 0.25.0
   resolution: "@lottiefiles/dotlottie-web@npm:0.25.0"
   checksum: 10c0/8befc2384113555ba7c24210c03eba8adf819ed01f7c732f67e841d1ce790a489e16bc96f8181f894c37936bfcc2e3a70e3a3c4fcc9778badf6c82fa83db93e2
+  languageName: node
+  linkType: hard
+
+"@lottiefiles/lottie-js@npm:^0.4.2":
+  version: 0.4.2
+  resolution: "@lottiefiles/lottie-js@npm:0.4.2"
+  dependencies:
+    cross-fetch: "npm:^3.0.6"
+    typedoc-github-wiki-theme: "npm:0.2.0"
+    typedoc-plugin-markdown: "npm:3.6.1"
+  checksum: 10c0/e2675f098679afd68f5a50fe076a9504b4aa8d57a4c26a3cf7dd3ed079def53aaa3c8f925ad19eb94b137cd2ec6fa275b87d10dd0ef96b2fa526f7398e72f24a
   languageName: node
   linkType: hard
 
@@ -7409,12 +7421,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cross-fetch@npm:^3.1.5":
-  version: 3.1.8
-  resolution: "cross-fetch@npm:3.1.8"
+"cross-fetch@npm:^3.0.6, cross-fetch@npm:^3.1.5":
+  version: 3.2.0
+  resolution: "cross-fetch@npm:3.2.0"
   dependencies:
-    node-fetch: "npm:^2.6.12"
-  checksum: 10c0/4c5e022ffe6abdf380faa6e2373c0c4ed7ef75e105c95c972b6f627c3f083170b6886f19fb488a7fa93971f4f69dcc890f122b0d97f0bf5f41ca1d9a8f58c8af
+    node-fetch: "npm:^2.7.0"
+  checksum: 10c0/d8596adf0269130098a676f6739a0922f3cc7b71cc89729925411ebe851a87026171c82ea89154c4811c9867c01c44793205a52e618ce2684650218c7fbeeb9f
   languageName: node
   linkType: hard
 
@@ -10087,6 +10099,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"handlebars@npm:^4.7.7":
+  version: 4.7.8
+  resolution: "handlebars@npm:4.7.8"
+  dependencies:
+    minimist: "npm:^1.2.5"
+    neo-async: "npm:^2.6.2"
+    source-map: "npm:^0.6.1"
+    uglify-js: "npm:^3.1.4"
+    wordwrap: "npm:^1.0.0"
+  dependenciesMeta:
+    uglify-js:
+      optional: true
+  bin:
+    handlebars: bin/handlebars
+  checksum: 10c0/7aff423ea38a14bb379316f3857fe0df3c5d66119270944247f155ba1f08e07a92b340c58edaa00cfe985c21508870ee5183e0634dcb53dd405f35c93ef7f10d
+  languageName: node
+  linkType: hard
+
 "hanzi@npm:2.1.5":
   version: 2.1.5
   resolution: "hanzi@npm:2.1.5"
@@ -12279,7 +12309,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minimist@npm:^1.2.0, minimist@npm:^1.2.6":
+"minimist@npm:^1.2.0, minimist@npm:^1.2.5, minimist@npm:^1.2.6":
   version: 1.2.8
   resolution: "minimist@npm:1.2.8"
   checksum: 10c0/19d3fcdca050087b84c2029841a093691a91259a47def2f18222f41e7645a0b7c44ef4b40e88a1e58a40c84d2ef0ee6047c55594d298146d0eb3f6b737c20ce6
@@ -12532,7 +12562,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"neo-async@npm:^2.5.0":
+"neo-async@npm:^2.5.0, neo-async@npm:^2.6.2":
   version: 2.6.2
   resolution: "neo-async@npm:2.6.2"
   checksum: 10c0/c2f5a604a54a8ec5438a342e1f356dff4bc33ccccdb6dc668d94fe8e5eccfc9d2c2eea6064b0967a767ba63b33763f51ccf2cd2441b461a7322656c1f06b3f5d
@@ -12637,7 +12667,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-fetch@npm:^2.2.0, node-fetch@npm:^2.6.1, node-fetch@npm:^2.6.12, node-fetch@npm:^2.6.7, node-fetch@npm:^2.7.0":
+"node-fetch@npm:^2.2.0, node-fetch@npm:^2.6.1, node-fetch@npm:^2.6.7, node-fetch@npm:^2.7.0":
   version: 2.7.0
   resolution: "node-fetch@npm:2.7.0"
   dependencies:
@@ -16072,6 +16102,27 @@ __metadata:
   languageName: node
   linkType: hard
 
+"typedoc-github-wiki-theme@npm:0.2.0":
+  version: 0.2.0
+  resolution: "typedoc-github-wiki-theme@npm:0.2.0"
+  peerDependencies:
+    typedoc: ">=0.20.0"
+    typedoc-plugin-markdown: ">=3.4.0"
+  checksum: 10c0/9f203cc7787aefe0e86fbbe7cf3afd6c7029f9c458be6f03a6f0e9d703cbc3ce5c5b6e1a9f77377583f0f77c19769f7055ef94d704b7fa95721a4286ed7dcfdb
+  languageName: node
+  linkType: hard
+
+"typedoc-plugin-markdown@npm:3.6.1":
+  version: 3.6.1
+  resolution: "typedoc-plugin-markdown@npm:3.6.1"
+  dependencies:
+    handlebars: "npm:^4.7.7"
+  peerDependencies:
+    typedoc: ">=0.20.0"
+  checksum: 10c0/a5e91914654998432decad7d720deb70e7665f1a4f68fec516838864474b77722cbd5d8d9e17877cda8f2095cc17fc125926244dc6b8a246a7ad786a11903e19
+  languageName: node
+  linkType: hard
+
 "typescript-eslint@npm:^8.14.0":
   version: 8.21.0
   resolution: "typescript-eslint@npm:8.21.0"
@@ -16167,6 +16218,15 @@ __metadata:
   version: 16.0.0
   resolution: "ucd-full@npm:16.0.0"
   checksum: 10c0/ed79f46c908e869d0e776b99d971e3c71f74c1dee5a7a6a7373e2108ed6771125ec0ac07b31a06220fb926c0d00fdc423dd45832bc33ec9c702858d514b5753d
+  languageName: node
+  linkType: hard
+
+"uglify-js@npm:^3.1.4":
+  version: 3.19.3
+  resolution: "uglify-js@npm:3.19.3"
+  bin:
+    uglifyjs: bin/uglifyjs
+  checksum: 10c0/83b0a90eca35f778e07cad9622b80c448b6aad457c9ff8e568afed978212b42930a95f9e1be943a1ffa4258a3340fbb899f41461131c05bb1d0a9c303aed8479
   languageName: node
   linkType: hard
 
@@ -16607,6 +16667,13 @@ __metadata:
   version: 6.3.4
   resolution: "wonka@npm:6.3.4"
   checksum: 10c0/77329eea673da07717476e1b8f1a22f1e1a4f261bb9a58fa446c03d3da13dbd5b254664f8aded5928d953f33ee5b399a17a4f70336e8b236e478209c0e78cda4
+  languageName: node
+  linkType: hard
+
+"wordwrap@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "wordwrap@npm:1.0.0"
+  checksum: 10c0/7ed2e44f3c33c5c3e3771134d2b0aee4314c9e49c749e37f464bf69f2bcdf0cbf9419ca638098e2717cff4875c47f56a007532f6111c3319f557a2ca91278e92
   languageName: node
   linkType: hard
 
