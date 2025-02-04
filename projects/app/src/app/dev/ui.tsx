@@ -1,6 +1,5 @@
 import { AnswerButton, AnswerButtonState } from "@/client/ui/AnswerButton";
 import { HanziText } from "@/client/ui/HanziText";
-import { RadicalText } from "@/client/ui/RadicalText";
 import { RectButton2 } from "@/client/ui/RectButton2";
 import { PropsOf } from "@/client/ui/types";
 import { Link } from "expo-router";
@@ -28,10 +27,6 @@ export default function DesignSystemPage() {
       <ScrollView style={{ flex: 1 }} ref={scrollViewRef}>
         <Section title="HanziText" scrollTo={scrollTo}>
           <HanziTextExamples />
-        </Section>
-
-        <Section title="RadicalText" scrollTo={scrollTo}>
-          <RadicalTextExamples />
         </Section>
 
         <Section title="AnswerButton" scrollTo={scrollTo}>
@@ -183,6 +178,9 @@ const HanziTextExamples = () => (
       <View className="items-start border-2 border-dashed border-primary-8">
         <HanziText hanzi="你好" />
       </View>
+      <View className="items-start border-2 border-dashed border-primary-8">
+        <HanziText hanzi="乚" />
+      </View>
     </ExampleStack>
 
     <ExampleStack title="pinyin" className="gap-5">
@@ -193,33 +191,19 @@ const HanziTextExamples = () => (
       <View className="items-start border-2 border-dashed border-primary-8">
         <HanziText pinyin="bie2 de5" hanzi="别的" />
       </View>
+
+      <View className="items-start border-2 border-dashed border-primary-8">
+        <HanziText pinyin="yǐ" hanzi="乚" />
+      </View>
     </ExampleStack>
 
     <ExampleStack title="accented" className="gap-5">
       <View className="items-start border-2 border-dashed border-primary-8">
         <HanziText pinyin="nǐhǎo" hanzi="你好" accented />
       </View>
-    </ExampleStack>
-  </>
-);
 
-const RadicalTextExamples = () => (
-  <>
-    <ExampleStack title="bare" className="gap-5">
       <View className="items-start border-2 border-dashed border-primary-8">
-        <RadicalText radical="乚" />
-      </View>
-    </ExampleStack>
-
-    <ExampleStack title="pinyin" className="gap-5">
-      <View className="items-start border-2 border-dashed border-primary-8">
-        <RadicalText pinyin="yǐ" radical="乚" />
-      </View>
-    </ExampleStack>
-
-    <ExampleStack title="accented" className="gap-5">
-      <View className="items-start border-2 border-dashed border-primary-8">
-        <RadicalText pinyin="yǐ" radical="乚" accented />
+        <HanziText pinyin="yǐ" hanzi="乚" accented />
       </View>
     </ExampleStack>
   </>

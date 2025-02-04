@@ -9,6 +9,7 @@ import { intervalToDuration } from "date-fns/intervalToDuration";
 import { Link } from "expo-router";
 import { useCallback, useState } from "react";
 import { Text, View } from "react-native";
+import Animated, { FadeIn } from "react-native-reanimated";
 import { useTimeout } from "usehooks-ts";
 
 export default function ReviewsPage() {
@@ -55,9 +56,9 @@ export default function ReviewsPage() {
   return (
     <View className="flex-1 items-center bg-background pt-safe-offset-[20px]">
       {questions.loading || !visible ? (
-        <View className="my-auto">
+        <Animated.View entering={FadeIn} className="my-auto">
           <Text className="text-text">Loading…</Text>
-        </View>
+        </Animated.View>
       ) : questions.error ? (
         <Text className="text-text">Oops something broken</Text>
       ) : questions.data.length > 0 ? (
