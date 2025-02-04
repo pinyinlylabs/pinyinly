@@ -5,58 +5,46 @@ export const HanziText = ({
   pinyin,
   hanzi,
   accented,
-  hanziClassName,
+  small = false,
 }: {
   pinyin?: string;
   hanzi: string;
   accented?: boolean;
-  hanziClassName?: string;
+  small?: boolean;
 }) => {
   return (
-    <View className="flex-0 items-center">
-      <Text className={hanziText({ accented, className: hanziClassName })}>
-        {hanzi}
-      </Text>
+    <View
+      className={`flex-0 flex-col items-center ${small ? `gap-0.5` : `gap-1`}`}
+    >
       {pinyin != null ? (
-        <>
-          <Text
-            className={pinyinText({
-              accented,
-              className: `absolute bottom-[100%] left-0 right-0 text-center`,
-            })}
-          >
-            {pinyin}
-          </Text>
-          <Text
-            className={pinyinText({
-              accented,
-              // Hide the pinyin text, but keep it in the layout to give enough
-              // space for absolute positioned floating one.
-              className: `h-[0] opacity-0`,
-            })}
-          >
-            {pinyin}
-          </Text>
-        </>
+        <Text className={pinyinText({ accented, small })}>{pinyin}</Text>
       ) : null}
+      <Text className={hanziText({ accented, small })}>{hanzi}</Text>
     </View>
   );
 };
 
 const pinyinText = tv({
-  base: `text-xs text-primary-9 text-nowrap`,
+  base: `text-base leading-none text-primary-9 w-full text-center`,
   variants: {
     accented: {
       true: `text-accent-10 opacity-80`,
+    },
+    small: {
+      true: `text-xs leading-none`,
     },
   },
 });
 
 const hanziText = tv({
-  base: `text-xl text-text`,
+  base: `text-2xl leading-none text-text`,
+
   variants: {
     accented: {
       true: `text-accent-10`,
+    },
+    small: {
+      true: `text-xl leading-none`,
     },
   },
 });

@@ -40,7 +40,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { tv } from "tailwind-variants";
 import { AnswerButton } from "./AnswerButton";
 import { HanziText } from "./HanziText";
-import { RadicalText } from "./RadicalText";
 import { RectButton2 } from "./RectButton2";
 import { useRizzleQuery } from "./ReplicacheContext";
 import { PropsOf } from "./types";
@@ -347,22 +346,25 @@ const ShowChoice = ({
         ? radicalQuery.data?.hanzi
         : null) ?? [choice.hanzi];
       const pinyin = radicalQuery.data?.pinyin[0];
+      const name = radicalQuery.data?.name[0];
       return (
-        <View className="flex-row items-end gap-1">
+        <View className={`flex-row items-center ${small ? `gap-1` : `gap-2`}`}>
           {hanzis.map((hanzi, i) => {
             return (
               <View
                 key={i}
                 className={hanzi !== choice.hanzi ? `opacity-50` : undefined}
               >
-                <RadicalText
-                  pinyin={!small && hanzi === choice.hanzi ? pinyin : undefined}
-                  radical={hanzi}
+                <HanziText
+                  pinyin={hanzi === choice.hanzi ? pinyin : undefined}
+                  hanzi={hanzi}
+                  small={small}
                   accented
                 />
               </View>
             );
           })}
+          <Text className={choiceEnglishText({ small })}>{name}</Text>
         </View>
       );
     }
@@ -389,13 +391,19 @@ const ShowChoice = ({
     }
     case `hanzi`: {
       const pinyin = small ? undefined : hanziQuery.data?.pinyin;
+      const definition = small
+        ? undefined
+        : hanziQuery.data?.definitions.join(`, `);
       return (
-        <HanziText
-          pinyin={pinyin?.join(` `)}
-          hanzi={choice.hanzi}
-          accented
-          hanziClassName={small ? `text-md` : undefined}
-        />
+        <View className={`flex-row items-center ${small ? `gap-1` : `gap-2`}`}>
+          <HanziText
+            pinyin={pinyin?.join(` `)}
+            hanzi={choice.hanzi}
+            small={small}
+            accented
+          />
+          <Text className={choiceEnglishText({ small })}>{definition}</Text>
+        </View>
       );
     }
     case `pinyin`:
@@ -417,8 +425,6 @@ const choiceEnglishText = tv({
   },
 });
 
-const choicesWithPinyinRendering = new Set([`radical`, `hanzi`]);
-
 const ShowAnswer = ({
   answer: { a, b },
   includeAlternatives = false,
@@ -428,21 +434,15 @@ const ShowAnswer = ({
   includeAlternatives?: boolean;
   small?: boolean;
 }) => {
-  const needPaddingForFloatingPinyin =
-    !small &&
-    (choicesWithPinyinRendering.has(a.type) ||
-      choicesWithPinyinRendering.has(b.type));
+  // Pick the radical or hanzi to show, as it is easier to query the name,
+  // pinyin, etc.
+  const choice =
+    [a, b].find((x) => x.type === `radical` || x.type === `hanzi`) ?? a;
+
   return (
-    <View
-      className={`flex-row items-center ${small ? `gap-1` : `gap-2`} ${needPaddingForFloatingPinyin ? `pt-4` : ``}`}
-    >
+    <View className="items-start">
       <ShowChoice
-        choice={a}
-        includeAlternatives={includeAlternatives}
-        small={small}
-      />
-      <ShowChoice
-        choice={b}
+        choice={choice}
         includeAlternatives={includeAlternatives}
         small={small}
       />
