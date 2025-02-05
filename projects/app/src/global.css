@@ -30,11 +30,11 @@
 
   /* www */
   .www-text-hero {
-    @apply hhh-text-base text-[60px] font-bold leading-tight tracking-tighter;
+    @apply hhh-text-base text-5xl font-bold leading-tight tracking-tighter transition-all md:text-6xl md:leading-tight;
   }
 
   .www-text-title {
-    @apply hhh-text-base text-4xl;
+    @apply hhh-text-base text-3xl font-bold tracking-tighter transition-all md:text-4xl;
   }
 
   .www-text-subtitle {
