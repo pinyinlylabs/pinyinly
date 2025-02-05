@@ -13,15 +13,19 @@ import { ElementRef, forwardRef, ReactNode } from "react";
 import { Pressable, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 
+export const unstable_settings = {
+  initialRouteName: `learn`,
+};
+
 export default function SideNavLayout() {
   const isAuthenticated = useAuth().data?.clientSession.serverSessionId != null;
 
   return (
-    <Tabs className="flex-1 flex-col-reverse items-stretch self-stretch lg:flex-row">
-      <TabList className="flex-grow-0 items-center gap-4 justify-self-stretch border-t-2 border-primary-4 pt-2 pb-safe-or-2 px-safe-or-4 lg:flex-col lg:items-start lg:border-t-0 lg:px-4 lg:pt-6">
+    <Tabs className="flex-1 flex-col-reverse items-stretch self-stretch md:flex-row">
+      <TabList className="flex-grow-0 items-center gap-4 justify-self-stretch border-t-2 border-primary-4 pt-2 pb-safe-or-2 px-safe-or-4 md:flex-col md:items-start md:border-t-0 md:px-4 md:pt-6">
         <Link
           href="/learn"
-          className="hidden px-2 py-1 text-2xl font-bold tracking-wide text-primary-10 lg:flex"
+          className="hidden px-2 py-1 text-2xl font-bold tracking-wide text-primary-10 md:flex"
         >
           <Image
             source={require(`@/assets/logo/logotype.svg`)}
@@ -75,7 +79,7 @@ export default function SideNavLayout() {
 
         <Link
           href="/login"
-          className="items-center rounded-md px-2 py-1 text-xl font-bold tracking-wide text-text hover:bg-primary-4 lg:self-stretch"
+          className="items-center rounded-md px-2 py-1 text-xl font-bold tracking-wide text-text hover:bg-primary-4 md:self-stretch"
         >
           {isAuthenticated ? (
             <View className="size-10 rounded-full bg-[green]"></View>
@@ -138,7 +142,7 @@ const buttonClass = tv({
 });
 
 const buttonTextClass = tv({
-  base: `text-xl font-sans font-bold text-text hidden lg:flex transition-colors`,
+  base: `text-sm uppercase font-sans font-bold text-text hidden md:flex transition-colors`,
   variants: {
     isFocused: {
       true: `text-primary-12`,
