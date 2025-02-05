@@ -92,7 +92,7 @@ function RootLayout() {
                     ? `dark-theme`
                     : `light-theme`
                   : ``
-              } flex-1`}
+              } flex-1 bg-background`}
             >
               <Stack screenOptions={{ headerShown: false, animation: `fade` }}>
                 <Stack.Screen
