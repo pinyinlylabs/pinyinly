@@ -18,7 +18,8 @@
   /*
   Karla on iOS font-bold looks like font-medium, so we have to bump it up to
   800, normally we could use the nativewind variants `native:` or `ios:`, but
-  using these causes tailwind to hang.
+  using these causes tailwind to error. See
+  https://github.com/nativewind/nativewind/issues/1400
   */
   /* web */
   @media (display-mode: browser) {
