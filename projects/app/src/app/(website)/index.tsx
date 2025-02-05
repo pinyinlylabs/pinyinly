@@ -1,7 +1,7 @@
 import { router } from "expo-router";
 import { useEffect } from "react";
 
-export default () => {
+export default function NativeHomeRedirect() {
   useEffect(() => {
     const x = setTimeout(() => {
       router.replace(`/learn`);
@@ -11,4 +11,4 @@ export default () => {
     };
   }, []);
   return null;
-};
+}

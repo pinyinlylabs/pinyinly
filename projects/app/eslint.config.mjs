@@ -240,8 +240,12 @@ export default tseslint.config(
       `**/*+api.*`, // API routes should use named exports
     ],
     rules: {
-      "import/no-named-export": `error`, // The only exports should be a default for the page
       "import/no-default-export": `off`,
+      // Ensuring that default exports are named helps improve the grepability
+      // of the codebase by encouraging the re-use of the same identifier for
+      // the module's default export at its declaration site and at its import
+      // sites.
+      "import/no-anonymous-default-export": `error`,
     },
   },
 
