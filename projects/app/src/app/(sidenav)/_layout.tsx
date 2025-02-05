@@ -75,7 +75,7 @@ export default function SideNavLayout() {
           </TabButton>
         </TabTrigger>
 
-        <View className="flex-1" />
+        <View className="hidden md:flex md:flex-1" />
 
         <Link
           href="/login"

@@ -38,6 +38,7 @@ cssInterop(Image, {
 cssInterop(Animated.View, { className: `style` });
 
 import * as AppleAuthentication from "expo-apple-authentication";
+import Head from "expo-router/head";
 
 cssInterop(AppleAuthentication.AppleAuthenticationButton, {
   className: `style`,
@@ -78,6 +79,10 @@ function RootLayout() {
               } satisfies ReactNavigationTheme
             }
           >
+            <Head>
+              <title>haohaohow - Teach yourself Chinese</title>
+            </Head>
+
             <View
               className={`${
                 // This is the native equivalent of adding a class to the body
@@ -87,7 +92,7 @@ function RootLayout() {
                     ? `dark-theme`
                     : `light-theme`
                   : ``
-              } flex-1`}
+              } flex-1 bg-background`}
             >
               <Stack screenOptions={{ headerShown: false, animation: `fade` }}>
                 <Stack.Screen

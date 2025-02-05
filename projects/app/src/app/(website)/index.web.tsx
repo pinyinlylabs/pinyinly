@@ -20,7 +20,7 @@ export default function WebsitePage() {
 
   return (
     <>
-      <View className="mb-[100px] h-screen flex-col items-center justify-center pt-[100px]">
+      <View className="www-px-comfortable mb-[100px] h-screen flex-col items-center justify-center pt-[100px]">
         <View className="mb-[100px] items-center">
           <Text className="www-text-hero text-center lg:text-left">
             Teach yourself Chinese.
@@ -47,11 +47,12 @@ export default function WebsitePage() {
           </Link>
         </View>
       </View>
+
       <View className="www-px-comfortable min-h-[500px] w-full pt-[100px]">
         <View className="max-w-www-col gap-40 self-center">
           <View>
             <Text className="www-text-subtitle">Chinese characters</Text>
-            <Text className="font-title mb-4 text-4xl font-bold text-text">
+            <Text className="www-text-title mb-4">
               Crack the code of Chinese characters, one piece at a time.
             </Text>
 
@@ -66,7 +67,7 @@ export default function WebsitePage() {
 
           <View>
             <Text className="www-text-subtitle">Radicals</Text>
-            <Text className="font-title mb-4 text-4xl font-bold text-text">
+            <Text className="www-text-title mb-4">
               Recognize hundreds of radicals.
             </Text>
 
@@ -80,7 +81,7 @@ export default function WebsitePage() {
 
           <View>
             <Text className="www-text-subtitle">Pinyin</Text>
-            <Text className="font-title mb-4 text-4xl font-bold text-text">
+            <Text className="www-text-title mb-4">
               Turn pinyin into second nature.
             </Text>
 
@@ -94,7 +95,7 @@ export default function WebsitePage() {
 
           <View>
             <Text className="www-text-subtitle">Mnemonics</Text>
-            <Text className="font-title mb-4 text-4xl font-bold text-text">
+            <Text className="www-text-title mb-4">
               Make Chinese characters unforgettable.
             </Text>
 
@@ -109,7 +110,7 @@ export default function WebsitePage() {
 
           <View>
             <Text className="www-text-subtitle">Your own pace</Text>
-            <Text className="font-title mb-4 text-4xl font-bold text-text">
+            <Text className="www-text-title mb-4">
               Master Chinese characters in the most efficient order.
             </Text>
 

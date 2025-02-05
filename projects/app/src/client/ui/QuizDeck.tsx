@@ -159,7 +159,7 @@ export const QuizDeck = ({ questions }: { questions: readonly Question[] }) => {
       </View>
 
       <NavigationIndependentTree>
-        <NavigationContainer theme={theme}>
+        <NavigationContainer theme={theme} documentTitle={{ enabled: false }}>
           <Stack.Navigator
             screenOptions={{
               gestureEnabled: false,
