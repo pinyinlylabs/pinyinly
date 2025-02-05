@@ -24,7 +24,7 @@ import { Asset } from "expo-asset";
 import { Image } from "expo-image";
 import { Href, Link, usePathname } from "expo-router";
 import sortBy from "lodash/sortBy";
-import { useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { Animated, Platform, View } from "react-native";
 import { CloseButton } from "./CloseButton";
 import { QuizDeckMultipleChoiceQuestion } from "./QuizDeckMultipleChoiceQuestion";
@@ -33,9 +33,6 @@ import { QuizProgressBar } from "./QuizProgressBar";
 import { RectButton2 } from "./RectButton2";
 import { useReplicache } from "./ReplicacheContext";
 import { useEventCallback } from "./util";
-
-const buttonThickness = 4;
-const gap = 16;
 
 interface QuestionState {
   type: QuestionStateType;
@@ -57,7 +54,13 @@ const Stack = createStackNavigator<{
 
 type Navigation = StackNavigationFor<typeof Stack>;
 
-export const QuizDeck = ({ questions }: { questions: readonly Question[] }) => {
+export const QuizDeck = ({
+  questions,
+  className,
+}: {
+  questions: readonly Question[];
+  className?: string;
+}) => {
   const theme = useTheme();
   const navigationRef = useRef<Navigation>();
   const [questionStateMap, setQuestionStateMap] = useState<
@@ -140,13 +143,8 @@ export const QuizDeck = ({ questions }: { questions: readonly Question[] }) => {
   const pathname = usePathname();
 
   return (
-    <View
-      style={{
-        flex: 1,
-        gap: gap + buttonThickness,
-      }}
-    >
-      <View className="flex-row items-center gap-[24px] px-[16px]">
+    <View className={className}>
+      <View className="mb-[20px] w-full max-w-[600px] flex-row items-center gap-[24px] self-center px-[16px]">
         <CloseButton tintColor="#3C464D" />
         <QuizProgressBar
           progress={progress}
@@ -166,7 +164,7 @@ export const QuizDeck = ({ questions }: { questions: readonly Question[] }) => {
               headerShown: false,
               animation: `slide_from_right`,
               ...TransitionPresets.SlideFromRightIOS,
-              cardStyleInterpolator: forHorizontalIOS,
+              cardStyleInterpolator: horizontalCardStyleInterpolator,
             }}
             screenListeners={({ navigation }) => ({
               // Hack to get the navigation object.
@@ -194,17 +192,21 @@ export const QuizDeck = ({ questions }: { questions: readonly Question[] }) => {
                   question != null && questions.includes(question),
                   `Stack.Screen called with wrong question`,
                 );
+
+                let screen: React.ReactNode;
+
                 switch (question.type) {
                   case QuestionType.MultipleChoice:
-                    return (
+                    screen = (
                       <QuizDeckMultipleChoiceQuestion
                         question={question}
                         onNext={handleNext}
                         onRating={handleRating}
                       />
                     );
+                    break;
                   case QuestionType.OneCorrectPair:
-                    return (
+                    screen = (
                       <QuizDeckOneCorrectPairQuestion
                         question={question}
                         flag={flag}
@@ -213,6 +215,12 @@ export const QuizDeck = ({ questions }: { questions: readonly Question[] }) => {
                       />
                     );
                 }
+
+                return (
+                  <View className="h-full w-full max-w-[600px] flex-1 self-center">
+                    {screen}
+                  </View>
+                );
               }}
             />
             <Stack.Screen
@@ -241,42 +249,43 @@ export const QuizDeck = ({ questions }: { questions: readonly Question[] }) => {
   );
 };
 
-function forHorizontalIOS({
+function horizontalCardStyleInterpolator({
   current,
   next,
   inverted,
   layouts: { screen },
 }: StackCardInterpolationProps): StackCardInterpolatedStyle {
-  const translateFocused = Animated.multiply(
+  const distance =
+    screen.width >= 768
+      ? 40 // on big screens sliding the whole screen across is too distracting, so instead we just do a small slide
+      : screen.width;
+
+  const translateEntering = Animated.multiply(
     current.progress.interpolate({
       inputRange: [0, 1],
-      outputRange: [screen.width, 0],
-      extrapolate: `clamp`,
+      outputRange: [distance, 0],
     }),
     inverted,
   );
 
-  const translateUnfocused = next
+  const translateExiting = next
     ? Animated.multiply(
         next.progress.interpolate({
           inputRange: [0, 1],
-          outputRange: [0, screen.width * -1],
-          extrapolate: `clamp`,
+          outputRange: [0, -distance],
         }),
         inverted,
       )
-    : 0;
-  const opacityUnfocused = next ? Animated.subtract(1, next.progress) : 1;
+    : translateEntering;
+
+  const opacity = next
+    ? Animated.subtract(1, next.progress)
+    : Animated.add(0, current.progress);
 
   return {
     cardStyle: {
-      transform: [
-        // Translation for the animation of the current card
-        { translateX: translateFocused },
-        // Translation for the animation of the card on top of this
-        { translateX: translateUnfocused },
-      ],
-      opacity: opacityUnfocused,
+      transform: [{ translateX: translateExiting }],
+      opacity,
     },
   };
 }

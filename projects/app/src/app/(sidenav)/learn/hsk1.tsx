@@ -89,9 +89,7 @@ export default function LearnHsk1Page() {
       ) : newQuizQuery.error ? (
         <Text className="text-text">Oops something went wrong</Text>
       ) : newQuizQuery.isSuccess ? (
-        <View className="w-full max-w-[600px] flex-1 items-stretch">
-          <QuizDeck questions={newQuizQuery.data} />
-        </View>
+        <QuizDeck questions={newQuizQuery.data} className="h-full w-full" />
       ) : null}
     </View>
   );

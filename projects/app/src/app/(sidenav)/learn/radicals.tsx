@@ -92,9 +92,7 @@ export default function RadicalsPage() {
       ) : newQuizQuery.error ? (
         <Text className="text-text">Oops something broken</Text>
       ) : newQuizQuery.isSuccess ? (
-        <View className="w-full max-w-[600px] flex-1 items-stretch">
-          <QuizDeck questions={newQuizQuery.data} />
-        </View>
+        <QuizDeck questions={newQuizQuery.data} className="h-full w-full" />
       ) : (
         <View
           style={{
