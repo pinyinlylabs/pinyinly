@@ -233,5 +233,5 @@ export default function IndexPage() {
 }
 
 const boxClass = tv({
-  base: `max-w-[400px] w-full rounded-xl bg-primary-3 px-4 py-4 overflow-hidden`,
+  base: `md:max-w-[400px] w-full rounded-xl bg-primary-3 px-4 py-4 overflow-hidden`,
 });
