@@ -62,9 +62,7 @@ export default function ReviewsPage() {
       ) : questions.error ? (
         <Text className="text-text">Oops something broken</Text>
       ) : questions.data.length > 0 ? (
-        <View className="w-full max-w-[600px] flex-1 items-stretch">
-          <QuizDeck questions={questions.data} />
-        </View>
+        <QuizDeck questions={questions.data} className="h-full w-full" />
       ) : (
         <View
           style={{
