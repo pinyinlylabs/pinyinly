@@ -92,7 +92,7 @@ export default function IndexPage() {
           <Animated.View entering={FadeIn} style={{ alignSelf: `stretch` }}>
             <View className="items-stretch self-stretch">
               <View className="flex-row items-center justify-between">
-                <Text className={boxTitleClass()}>
+                <Text className="hhh-text-title mb-1">
                   {recentCharacters.data.length > 0
                     ? `Continue learning`
                     : `Start learning`}
@@ -154,7 +154,7 @@ export default function IndexPage() {
       </View>
 
       <View className={boxClass()}>
-        <Text className={boxTitleClass()}>Connections</Text>
+        <Text className="hhh-text-title mb-1">Connections</Text>
         <Text className="hhh-text-caption mb-4">
           Strengthen your understanding through this interactive game that
           challenges you to make the right connections!
@@ -173,7 +173,7 @@ export default function IndexPage() {
       </View>
 
       <View className={boxClass()}>
-        <Text className={boxTitleClass()}>Radicals</Text>
+        <Text className="hhh-text-title mb-1">Radicals</Text>
         <Text className="hhh-text-caption mb-4">
           Radicals are the key to recognizing and understanding characters.
           Learn them with memorable stories to boost your reading and recall.
@@ -192,7 +192,7 @@ export default function IndexPage() {
       </View>
 
       <View className={boxClass()}>
-        <Text className={boxTitleClass()}>HSK1</Text>
+        <Text className="hhh-text-title mb-1">HSK1</Text>
         <Text className="hhh-text-caption mb-4">
           Test your knowledge with interactive exercises designed to help you
           prepare for the HSK 1 exam with confidence.
@@ -211,7 +211,7 @@ export default function IndexPage() {
       </View>
 
       <View className={boxClass()}>
-        <Text className={boxTitleClass()}>History</Text>
+        <Text className="hhh-text-title mb-1">History</Text>
         <Text className="hhh-text-caption mb-4">
           See your past studies, review characters and words, and reinforce your
           knowledge with spaced repetition.
@@ -234,8 +234,4 @@ export default function IndexPage() {
 
 const boxClass = tv({
   base: `max-w-[400px] w-full rounded-xl bg-primary-3 px-4 py-4 overflow-hidden`,
-});
-
-const boxTitleClass = tv({
-  base: `hhh-text-title mb-1`,
 });

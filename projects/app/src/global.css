@@ -8,46 +8,61 @@
   TEXT STYLES
   
   */
-  .hhh-text-base {
-    @apply font-karla leading-normal text-primary-12;
-  }
-
   .hhh-text-button {
-    @apply hhh-text-base font-sans font-bold uppercase;
+    @apply font-sans font-bold uppercase text-primary-12;
   }
 
   .hhh-text-title {
-    @apply hhh-text-base text-2xl font-bold tracking-tight;
+    @apply font-karla text-2xl leading-normal tracking-tight text-primary-12;
+  }
+  /*
+  Karla on iOS font-bold looks like font-medium, so we have to bump it up to
+  800, normally we could use the nativewind variants `native:` or `ios:`, but
+  using these causes tailwind to hang.
+  */
+  /* web */
+  @media (display-mode: browser) {
+    .hhh-text-title {
+      @apply font-bold;
+    }
   }
 
+  @media not (display-mode: browser) {
+    /* native */
+    .hhh-text-title {
+      @apply font-[800];
+    }
+  }
+  /* end .hhh-text-title */
+
   .hhh-text-body {
-    @apply hhh-text-base font-sans;
+    @apply font-sans text-primary-12;
   }
 
   .hhh-text-caption {
-    @apply hhh-text-base text-primary-11;
+    @apply font-karla text-sm leading-normal text-primary-11;
   }
 
   /* www */
   .www-text-hero {
-    @apply hhh-text-base text-5xl font-bold leading-tight tracking-tighter transition-all md:text-6xl md:leading-tight;
+    @apply font-karla text-5xl font-bold leading-tight tracking-tighter text-primary-12 transition-all md:text-6xl md:leading-tight;
   }
 
   .www-text-title {
-    @apply hhh-text-base text-3xl font-bold tracking-tighter transition-all md:text-4xl;
+    @apply font-karla text-3xl font-bold leading-normal tracking-tighter text-primary-12 transition-all md:text-4xl md:leading-normal;
   }
 
   .www-text-subtitle {
-    @apply hhh-text-base text-base uppercase text-accent-10;
+    @apply font-karla text-base uppercase text-accent-10;
   }
 
   .www-text-body {
-    @apply hhh-text-base;
+    @apply font-karla text-primary-12;
     @apply text-[17px]/[24px];
   }
 
   .www-text-button {
-    @apply hhh-text-base px-2 py-1 text-center font-sans text-base font-bold uppercase leading-normal;
+    @apply px-2 py-1 text-center font-sans text-base font-bold uppercase leading-normal text-primary-12;
   }
 
   .www-px-comfortable {
@@ -55,11 +70,11 @@
   }
 
   .www-text-footer-title {
-    @apply hhh-text-base text-[19px] font-medium leading-normal;
+    @apply font-karla text-[19px] font-medium leading-normal text-primary-12;
   }
 
   .www-text-footer-link {
-    @apply hhh-text-base text-[15px] font-medium leading-normal text-accent-10 antialiased;
+    @apply font-karla text-[15px] font-medium leading-normal text-primary-12 antialiased;
   }
 
   /* 
