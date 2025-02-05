@@ -78,9 +78,13 @@ export const RectButton2 = forwardRef<
           className,
         })}
       >
-        <Text className={text({ variant, accent, class: textClassName })}>
-          {children}
-        </Text>
+        {typeof children === `string` ? (
+          <Text className={text({ variant, accent, class: textClassName })}>
+            {children}
+          </Text>
+        ) : (
+          children
+        )}
       </View>
     </Pressable>
   );
