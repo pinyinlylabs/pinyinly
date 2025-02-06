@@ -1,0 +1,30 @@
+diff --git a/lib/module/views/NativeStackView.js b/lib/module/views/NativeStackView.js
+index 9171235745e27a5b630601ffc1fc8bf09fe75ffe..d0590b1807346baa1a716a45838e064b9b96ca28 100644
+--- a/lib/module/views/NativeStackView.js
++++ b/lib/module/views/NativeStackView.js
+@@ -3,10 +3,11 @@
+ import { getHeaderTitle, Header, HeaderBackButton, HeaderBackContext, SafeAreaProviderCompat, Screen, useHeaderHeight } from '@react-navigation/elements';
+ import { useLinkBuilder } from '@react-navigation/native';
+ import * as React from 'react';
+-import { Animated, Image, StyleSheet, View } from 'react-native';
++import { Animated, Image, Platform, StyleSheet, View } from 'react-native';
+ import { AnimatedHeaderHeightContext } from "../utils/useAnimatedHeaderHeight.js";
+ import { jsx as _jsx } from "react/jsx-runtime";
+ const TRANSPARENT_PRESENTATIONS = ['transparentModal', 'containedTransparentModal'];
++const MODAL_PRESENTATIONS = ['modal', 'transparentModal', 'containedTransparentModal', 'fullScreenModal'];
+ export function NativeStackView({
+   state,
+   descriptors,
+@@ -89,7 +90,11 @@ export function NativeStackView({
+           }) : headerLeft,
+           headerTransparent: headerTransparent
+         }),
+-        style: [StyleSheet.absoluteFill, {
++        style: [StyleSheet.absoluteFill,
++        // Always fill the whole screen, even in the case of nested navigators.
++        Platform.OS === 'web' && presentation != null && MODAL_PRESENTATIONS.includes(presentation) ? {
++          position: 'fixed'
++        } : null, {
+           display: (isFocused || nextPresentation != null && TRANSPARENT_PRESENTATIONS.includes(nextPresentation)) && !isPreloaded ? 'flex' : 'none'
+         }, presentation != null && TRANSPARENT_PRESENTATIONS.includes(presentation) ? {
+           backgroundColor: 'transparent'

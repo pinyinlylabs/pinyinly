@@ -48,6 +48,7 @@
     "typescript@npm:^5.5.2": "patch:typescript@npm%3A5.7.2#~/.yarn/patches/typescript-npm-5.7.2-b1f84a8b28.patch",
     "typescript@npm:5.1.6": "patch:typescript@npm%3A5.7.2#~/.yarn/patches/typescript-npm-5.7.2-b1f84a8b28.patch",
     "@expo/cli@npm:0.22.7": "patch:@expo/cli@npm%3A0.22.7#~/.yarn/patches/@expo-cli-npm-0.22.7-9efc9f6be8.patch",
-    "babel-preset-expo@npm:~12.0.4": "patch:babel-preset-expo@npm%3A12.0.4#~/.yarn/patches/babel-preset-expo-npm-12.0.4-a1ecc381d7.patch"
+    "babel-preset-expo@npm:~12.0.4": "patch:babel-preset-expo@npm%3A12.0.4#~/.yarn/patches/babel-preset-expo-npm-12.0.4-a1ecc381d7.patch",
+    "@react-navigation/native-stack@npm:^7.2.0": "patch:@react-navigation/native-stack@npm%3A7.2.0#~/.yarn/patches/@react-navigation-native-stack-npm-7.2.0-17adc45a3e.patch"
   }
 }
