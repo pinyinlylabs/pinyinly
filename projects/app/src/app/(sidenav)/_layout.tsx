@@ -13,10 +13,6 @@ import { ElementRef, forwardRef, ReactNode } from "react";
 import { Pressable, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 
-export const unstable_settings = {
-  initialRouteName: `learn`,
-};
-
 export default function SideNavLayout() {
   const isAuthenticated = useAuth().data?.clientSession.serverSessionId != null;
 
