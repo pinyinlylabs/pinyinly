@@ -170,7 +170,14 @@ void test(`convertPinyinWithToneNumberToToneMark`, () => {
     [`u3`, `ǔ`],
     [`u4`, `ù`],
     [`u5`, `u`],
-    // u
+    // ü
+    [`ü`, `ü`],
+    [`ü1`, `ǖ`],
+    [`ü2`, `ǘ`],
+    [`ü3`, `ǚ`],
+    [`ü4`, `ǜ`],
+    [`ü5`, `ü`],
+    // ü (as ascii v)
     [`v`, `ü`],
     [`v1`, `ǖ`],
     [`v2`, `ǘ`],
@@ -198,12 +205,13 @@ void test(`convertPinyinWithToneNumberToToneMark`, () => {
 void test(parsePinyinTone.name, async () => {
   await test(`static test cases`, () => {
     for (const [input, expected] of [
+      [`niú`, [`niu`, 2]],
       [`hǎo`, [`hao`, 3]],
-      [`ǖ`, [`v`, 1]],
-      [`ǘ`, [`v`, 2]],
-      [`ǚ`, [`v`, 3]],
-      [`ǜ`, [`v`, 4]],
-      [`ü`, [`v`, 5]],
+      [`ǖ`, [`ü`, 1]],
+      [`ǘ`, [`ü`, 2]],
+      [`ǚ`, [`ü`, 3]],
+      [`ǜ`, [`ü`, 4]],
+      [`ü`, [`ü`, 5]],
     ] as const) {
       assert.deepEqual(parsePinyinTone(input), expected);
     }
@@ -281,6 +289,7 @@ void test(`standard pinyin covers kangxi pinyin`, async () => {
     [`du`, `d`, `u`],
     [`tu`, `t`, `u`],
     [`nu`, `n`, `u`],
+    [`niu`, `n`, `iu`],
     [`lu`, `l`, `u`],
     [`gu`, `g`, `u`],
     [`ku`, `k`, `u`],
@@ -369,6 +378,7 @@ void test(`hh pinyin covers kangxi pinyin`, async () => {
   await testPinyinChart(chart, [
     [`a`, `_`, `a`],
     [`bi`, `bi`, `_`],
+    [`niu`, `ni`, `(o)u`],
     [`tie`, `ti`, `e`],
     [`zhou`, `zh`, `(o)u`],
     [`zhuo`, `zhu`, `o`],
@@ -395,6 +405,7 @@ void test(`hmm pinyin covers kangxi pinyin`, async () => {
     [`ming`, `mi`, `(e)ng`],
     [`li`, `li`, `∅`],
     [`diu`, `di`, `ou`],
+    [`niu`, `ni`, `ou`],
     [`lu`, `lu`, `∅`],
     [`lü`, `lü`, `∅`],
     [`tie`, `ti`, `e`],
