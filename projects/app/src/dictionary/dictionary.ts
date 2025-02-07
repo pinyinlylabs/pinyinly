@@ -73,7 +73,7 @@ export function parsePinyinTone(
   pinyin: string,
 ): [tonelessPinyin: string, tone: number] | null {
   for (const [key, value] of Object.entries(toneMap)) {
-    for (let tone = 1; tone <= 5; tone++) {
+    for (let tone = 1; tone <= 4; tone++) {
       const char = value[tone];
       invariant(char != null);
 
@@ -85,7 +85,7 @@ export function parsePinyinTone(
     }
   }
 
-  return null;
+  return [pinyin, 5];
 }
 
 export function splitPinyin(
@@ -438,12 +438,14 @@ const toneMap = {
   i: `_īíǐìi`,
   o: `_ōóǒòo`,
   u: `_ūúǔùu`,
+  // The order of `ü` and `v` is significant.
+  ü: `_ǖǘǚǜü`,
   v: `_ǖǘǚǜü`,
 } as const;
 
 const isPinyinVowel = (
   char: string | null | undefined,
-): char is `a` | `e` | `i` | `o` | `u` | `v` => char != null && char in toneMap;
+): char is `a` | `e` | `i` | `o` | `u` | `ü` => char != null && char in toneMap;
 
 export type IdsNode =
   | {
