@@ -230,7 +230,6 @@ export function useRizzleQuery<QueryRet>(
   const result = useQuery({
     queryKey: key,
     queryFn: () => r.replicache.query((tx) => query(r, tx)),
-    throwOnError: true,
   });
 
   return result;

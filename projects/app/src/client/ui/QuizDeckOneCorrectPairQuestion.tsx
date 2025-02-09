@@ -116,7 +116,6 @@ export const QuizDeckOneCorrectPairQuestion = memo(
       queryFn: async () => {
         return await loadStandardPinyinChart();
       },
-      throwOnError: true,
     });
 
     const answerPinyin = answer.b.type === `pinyin` ? answer.b.pinyin : null;

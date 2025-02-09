@@ -19,7 +19,6 @@ export default function WordsPage() {
       ]);
       return { hsk1Words, hsk2Words, hsk3Words };
     },
-    throwOnError: true,
   });
 
   return (

@@ -14,7 +14,6 @@ export default function CharacterPage() {
     queryFn: async () => {
       return await lookupWord(id);
     },
-    throwOnError: true,
   });
 
   return (

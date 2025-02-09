@@ -53,7 +53,16 @@ function RootLayout() {
     routingIntegration.registerNavigationContainer(ref);
   }, [ref]);
 
-  const [queryClient] = useState(() => new QueryClient());
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            throwOnError: true,
+          },
+        },
+      }),
+  );
 
   return (
     <TrpcProvider queryClient={queryClient} getSessionId={getSessionId}>

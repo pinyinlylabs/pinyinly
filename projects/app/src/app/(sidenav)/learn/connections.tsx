@@ -26,7 +26,6 @@ export default function ConnectionsPage() {
 
       return result.map(([, , question]) => question);
     },
-    throwOnError: true,
   });
 
   const [shuffleCount, setShuffleCount] = useState(1);

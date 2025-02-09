@@ -76,7 +76,6 @@ export default function LearnHsk1Page() {
     // that `answer` objects are comparable to groups.
     structuralSharing: false,
     staleTime: Infinity,
-    throwOnError: true,
   });
 
   return (
