@@ -35,6 +35,7 @@ export default function ReviewsPage() {
 
       return result.map(([, , question]) => question);
     },
+    staleTime: Infinity, // Don't regenerate the quiz after re-focusing the page.
   });
 
   const nextNotYetDueSkillState = useQuery({
