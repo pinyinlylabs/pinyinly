@@ -1,6 +1,7 @@
 import {
   Question,
   QuestionFlag,
+  QuestionFlagType,
   QuestionType,
   SkillRating,
 } from "@/data/model";
@@ -93,7 +94,10 @@ export const QuizDeck = ({
     if (next != null) {
       const [question, state] = next;
       const attempts = state?.attempts ?? 0;
-      const flag = attempts > 0 ? QuestionFlag.PreviousMistake : question.flag;
+      const flag: QuestionFlag | undefined =
+        attempts > 0
+          ? { type: QuestionFlagType.PreviousMistake }
+          : question.flag;
       navigationRef.current?.replace(`question`, { question, flag });
     } else {
       navigationRef.current?.replace(`results`);
@@ -184,10 +188,12 @@ export const QuizDeck = ({
               }}
               children={({
                 route: {
-                  params: { question: q, flag },
+                  params: { question: q, flag: f },
                 },
               }) => {
                 const question = q ?? questions[0];
+                const flag = f ?? question?.flag;
+
                 invariant(
                   question != null && questions.includes(question),
                   `Stack.Screen called with wrong question`,

@@ -1,4 +1,5 @@
 import { Rating } from "@/util/fsrs";
+import type { Interval } from "date-fns";
 
 export enum PinyinInitialGroupId {
   Basic,
@@ -49,17 +50,17 @@ export interface SkillRating {
 }
 
 export enum SkillType {
-  RadicalToEnglish,
-  EnglishToRadical,
-  RadicalToPinyin,
-  PinyinToRadical,
-  HanziWordToEnglish,
-  HanziWordToPinyinInitial,
-  HanziWordToPinyinFinal,
-  HanziWordToPinyinTone,
-  EnglishToHanzi,
-  PinyinToHanzi,
-  ImageToHanzi,
+  RadicalToEnglish = `RadicalToEnglish`,
+  EnglishToRadical = `EnglishToRadical`,
+  RadicalToPinyin = `RadicalToPinyin`,
+  PinyinToRadical = `PinyinToRadical`,
+  HanziWordToEnglish = `HanziWordToEnglish`,
+  HanziWordToPinyinInitial = `HanziWordToPinyinInitial`,
+  HanziWordToPinyinFinal = `HanziWordToPinyinFinal`,
+  HanziWordToPinyinTone = `HanziWordToPinyinTone`,
+  EnglishToHanzi = `EnglishToHanzi`,
+  PinyinToHanzi = `PinyinToHanzi`,
+  ImageToHanzi = `ImageToHanzi`,
 }
 
 export interface HanziSkill {
@@ -91,10 +92,29 @@ export type RadicalSkill = RadicalNameSkill | RadicalPinyinSkill;
 /** Data that forms the unique key for a skill */
 export type Skill = HanziSkill | RadicalSkill;
 
-export enum QuestionFlag {
-  WeakWord,
+export enum QuestionFlagType {
+  Overdue,
   PreviousMistake,
+  WeakWord,
 }
+
+export interface QuestionFlagPreviousMistake {
+  type: QuestionFlagType.PreviousMistake;
+}
+
+export interface QuestionFlagOverdue {
+  type: QuestionFlagType.Overdue;
+  interval: Interval;
+}
+
+export interface QuestionFlagWeakWord {
+  type: QuestionFlagType.WeakWord;
+}
+
+export type QuestionFlag =
+  | QuestionFlagWeakWord
+  | QuestionFlagOverdue
+  | QuestionFlagPreviousMistake;
 
 export enum QuestionType {
   MultipleChoice,

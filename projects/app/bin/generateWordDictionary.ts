@@ -7,22 +7,12 @@ import {
   allHsk2Words,
   allHsk3Words,
   convertPinyinWithToneNumberToToneMark,
+  loadRadicals,
 } from "../src/dictionary/dictionary.js";
 import "../src/typings/hanzi.d.ts";
 import { jsonStringifyIndentOneLevel } from "../src/util/json.js";
 
 hanzi.start();
-
-const [hsk1Words, hsk2Words, hsk3Words] = await Promise.all([
-  allHsk1Words(),
-  allHsk2Words(),
-  allHsk3Words(),
-]);
-
-const dictionary = new Map<
-  string,
-  { pinyin: string[]; definitions: string[] }
->();
 
 const lookupFallback: Record<string, Definition> = {
   // hsk1
@@ -121,7 +111,19 @@ const overrides: Record<string, Partial<Definition>> = {
 
 const missing: string[] = [];
 
-for (const word of [...hsk1Words, ...hsk2Words, ...hsk3Words]) {
+const dictionary = new Map<
+  string,
+  { pinyin: string[]; definitions: string[] }
+>();
+
+const itemsToInclude = new Set<string>([
+  ...(await allHsk1Words()),
+  ...(await allHsk2Words()),
+  ...(await allHsk3Words()),
+  ...(await loadRadicals()).flatMap((x) => x.hanzi),
+]);
+
+for (const word of itemsToInclude) {
   const result =
     hanzi.definitionLookup(word, `s`)?.[0] ?? lookupFallback[word] ?? null;
 
@@ -136,7 +138,7 @@ for (const word of [...hsk1Words, ...hsk2Words, ...hsk3Words]) {
 
   const { pinyin, definition } = result;
 
-  const definitions = [];
+  let definitions = [];
   const classifiers = [];
   for (const x of definition.split(`/`)) {
     // Separate out classifiers (measure words), see https://cc-cedict.org/wiki/format:syntax
@@ -147,6 +149,10 @@ for (const word of [...hsk1Words, ...hsk2Words, ...hsk3Words]) {
       definitions.push(x);
     }
   }
+
+  // Clean up cruft we don't want to include
+  definitions = definitions.filter((d) => !d.startsWith(`also pr`));
+  definitions = definitions.filter((d) => !d.includes(`pronunciation `));
 
   dictionary.set(word, {
     pinyin: pinyin
