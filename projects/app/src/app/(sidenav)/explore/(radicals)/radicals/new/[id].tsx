@@ -84,7 +84,6 @@ export default function RadicalPage() {
       ]);
       return { radical, nameMnemonics };
     },
-    throwOnError: true,
   });
 
   const [showExplanation, setShowExplanation] = useState(false);

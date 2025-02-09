@@ -8,14 +8,7 @@ import { invariant } from "@haohaohow/lib/invariant";
 import * as Sentry from "@sentry/core";
 import { QueryKey, useQuery, useQueryClient } from "@tanstack/react-query";
 import { TRPCClientError } from "@trpc/client";
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { createContext, useContext, useEffect, useMemo } from "react";
 import {
   HTTPRequestInfo,
   PullResponseV1,
@@ -237,45 +230,7 @@ export function useRizzleQuery<QueryRet>(
   const result = useQuery({
     queryKey: key,
     queryFn: () => r.replicache.query((tx) => query(r, tx)),
-    throwOnError: true,
   });
-
-  return result;
-}
-
-type Result<QueryRet> =
-  | {
-      loading: true;
-    }
-  | {
-      loading: false;
-      data: QueryRet;
-      error: false;
-    }
-  | {
-      loading: false;
-      data: undefined;
-      error: true;
-    };
-
-export function useQueryOnce<QueryRet>(
-  query: (tx: ReadTransaction) => Promise<QueryRet>,
-): Result<QueryRet> {
-  const r = useReplicache();
-  const [result, setResult] = useState<Result<QueryRet>>({ loading: true });
-  const queryRef = useRef(query);
-
-  useEffect(() => {
-    r.replicache.query(queryRef.current).then(
-      (data) => {
-        setResult({ loading: false, data, error: false });
-      },
-      (e: unknown) => {
-        console.error(e);
-        setResult({ loading: false, data: undefined, error: true });
-      },
-    );
-  }, [r]);
 
   return result;
 }

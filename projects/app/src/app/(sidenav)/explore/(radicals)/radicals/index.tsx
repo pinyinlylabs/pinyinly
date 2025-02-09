@@ -10,7 +10,6 @@ export default function RadicalsPage() {
     queryFn: async () => {
       return await allRadicalsByStrokes();
     },
-    throwOnError: true,
   });
 
   return (

@@ -1,8 +1,16 @@
 import { Rizzle } from "@/client/ui/ReplicacheContext";
+import { interval } from "date-fns/interval";
 import shuffle from "lodash/shuffle";
 import take from "lodash/take";
 import { generateQuestionForSkillOrThrow } from "./generator";
-import { Question, Skill, SkillState, SkillType } from "./model";
+import {
+  Question,
+  QuestionFlag,
+  QuestionFlagType,
+  Skill,
+  SkillState,
+  SkillType,
+} from "./model";
 
 export async function questionsForReview(
   r: Rizzle,
@@ -35,13 +43,14 @@ export async function questionsForReview(
     }
 
     try {
-      result.push([
-        skill,
-        skillState,
-        await generateQuestionForSkillOrThrow(skill),
-      ]);
+      const question = await generateQuestionForSkillOrThrow(skill);
+      question.flag ??= flagsForSkillState(skillState);
+      result.push([skill, skillState, question]);
     } catch (e) {
-      console.error(`Error while generating a question for a skill`, e);
+      console.error(
+        `Error while generating a question for a skill ${JSON.stringify(skill)}`,
+        e,
+      );
       continue;
     }
 
@@ -59,4 +68,20 @@ export async function questionsForReview(
   }
 
   return result;
+}
+
+function flagsForSkillState(skillState: SkillState): QuestionFlag | undefined {
+  {
+    const now = new Date();
+    const overdueDate = new Date(
+      skillState.due.getTime() + 24 * 60 * 60 * 1000,
+    );
+
+    if (now >= overdueDate) {
+      return {
+        type: QuestionFlagType.Overdue,
+        interval: interval(overdueDate.getTime(), now),
+      };
+    }
+  }
 }

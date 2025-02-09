@@ -18,7 +18,6 @@ export default function MnemonicIdPage() {
     queryFn: async () => {
       return await loadMmPinyinChart();
     },
-    throwOnError: true,
   });
 
   const choicesQuery = useQuery({
@@ -26,7 +25,6 @@ export default function MnemonicIdPage() {
     queryFn: async () => {
       return await loadMnemonicThemeChoices();
     },
-    throwOnError: true,
   });
 
   const associationQuery = useRizzleQuery(

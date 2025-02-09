@@ -9,7 +9,7 @@ export default function HistoryPage() {
   const start = Date.now();
 
   const dataQuery = useRizzleQuery(
-    [`HistoryPage`, `skillState`],
+    [HistoryPage.name, `skillState`],
     async (r, tx) => {
       const result = [];
       for await (const [key, value] of r.query.skillState.byDue(tx)) {
@@ -23,7 +23,7 @@ export default function HistoryPage() {
   );
 
   const skillRatingsQuery = useRizzleQuery(
-    [`HistoryPage`, `skillRatings`],
+    [HistoryPage.name, `skillRatings`],
     async (r, tx) =>
       fromAsync(r.query.skillRating.scan(tx)).then((reviews) =>
         reverse(sortBy(reviews, (x) => x[0].createdAt.getTime())),

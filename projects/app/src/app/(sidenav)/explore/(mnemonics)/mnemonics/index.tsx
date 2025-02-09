@@ -38,7 +38,6 @@ export default function MnemonicsPage() {
     queryFn: async () => {
       return await loadMmPinyinChart();
     },
-    throwOnError: true,
   });
 
   const initialAssociationsQuery = useRizzleQuery(

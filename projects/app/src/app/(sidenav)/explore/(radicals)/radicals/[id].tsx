@@ -27,7 +27,6 @@ export default function RadicalPage() {
       ]);
       return { radical, nameMnemonics, pinyinMnemonics };
     },
-    throwOnError: true,
   });
 
   const radical = query.data?.radical;
@@ -49,7 +48,6 @@ export default function RadicalPage() {
       );
       return skillStates;
     },
-    throwOnError: true,
   });
 
   return (

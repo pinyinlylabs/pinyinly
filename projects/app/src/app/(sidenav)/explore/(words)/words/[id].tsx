@@ -15,7 +15,6 @@ export default function WordPage() {
     queryFn: async () => {
       return await lookupWord(id);
     },
-    throwOnError: true,
   });
 
   return (

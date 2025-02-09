@@ -3,6 +3,7 @@ import {
   OneCorrectPairQuestionAnswer,
   OneCorrectPairQuestionChoice,
   QuestionFlag,
+  QuestionFlagType,
   SkillRating,
 } from "@/data/model";
 import {
@@ -15,6 +16,8 @@ import { arrayFilterUniqueWithKey } from "@/util/collections";
 import { Rating } from "@/util/fsrs";
 import { invariant } from "@haohaohow/lib/invariant";
 import { useQuery } from "@tanstack/react-query";
+import { formatDuration } from "date-fns/formatDuration";
+import { intervalToDuration } from "date-fns/intervalToDuration";
 import { Image } from "expo-image";
 import {
   ElementRef,
@@ -116,7 +119,6 @@ export const QuizDeckOneCorrectPairQuestion = memo(
       queryFn: async () => {
         return await loadStandardPinyinChart();
       },
-      throwOnError: true,
     });
 
     const answerPinyin = answer.b.type === `pinyin` ? answer.b.pinyin : null;
@@ -238,8 +240,36 @@ export const QuizDeckOneCorrectPairQuestion = memo(
         }
       >
         {flag != null ? (
-          <View className="flex-row items-center gap-[10px]">
-            {flag === QuestionFlag.WeakWord ? (
+          <View className="flex-row items-center gap-1">
+            {flag.type === QuestionFlagType.Overdue ? (
+              <>
+                <Image
+                  source={require(`@/assets/icons/alarm.svg`)}
+                  className="danger-theme h-[24px] w-[24px] flex-shrink text-accent-10"
+                  tintColor="currentColor"
+                />
+                <View className="danger-theme">
+                  <Text className="font-bold uppercase text-accent-10">
+                    Overdue by{` `}
+                    {
+                      formatDuration(intervalToDuration(flag.interval), {
+                        format: [
+                          `years`,
+                          `months`,
+                          `weeks`,
+                          `days`,
+                          `hours`,
+                          `minutes`,
+                        ],
+                        zero: false,
+                        delimiter: `, `,
+                      }).split(`, `)[0]
+                    }
+                  </Text>
+                </View>
+              </>
+            ) : null}
+            {flag.type === QuestionFlagType.WeakWord ? (
               <>
                 {/* <Image
               source={require("@/assets/target-red.svg")}
@@ -252,7 +282,7 @@ export const QuizDeckOneCorrectPairQuestion = memo(
                 </View>
               </>
             ) : null}
-            {flag === QuestionFlag.PreviousMistake ? (
+            {flag.type === QuestionFlagType.PreviousMistake ? (
               <View className="warning-theme">
                 <Text className="font-bold uppercase text-accent-10">
                   Previous mistake

@@ -217,7 +217,7 @@ export default function IndexPage() {
           knowledge with spaced repetition.
         </Text>
 
-        <Link href="/history" asChild>
+        <Link href="/learn/history" asChild>
           <RectButton2
             variant="filled"
             className="self-start"

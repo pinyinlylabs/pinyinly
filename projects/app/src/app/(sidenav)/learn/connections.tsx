@@ -10,9 +10,10 @@ import { tv } from "tailwind-variants";
 
 export default function ConnectionsPage() {
   const r = useReplicache();
+  const id = useId();
 
   const questions = useQuery({
-    queryKey: [ConnectionsPage.name, `quiz`, useId()],
+    queryKey: [ConnectionsPage.name, `quiz`, id],
     queryFn: async () => {
       const result = await questionsForReview(r, {
         limit: 10,
@@ -25,7 +26,6 @@ export default function ConnectionsPage() {
 
       return result.map(([, , question]) => question);
     },
-    throwOnError: true,
   });
 
   const [shuffleCount, setShuffleCount] = useState(1);

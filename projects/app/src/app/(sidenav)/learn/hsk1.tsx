@@ -11,9 +11,10 @@ import { Text, View } from "react-native";
 
 export default function LearnHsk1Page() {
   const r = useReplicache();
+  const id = useId();
 
   const newQuizQuery = useQuery({
-    queryKey: [LearnHsk1Page.name, `quiz`, useId()],
+    queryKey: [LearnHsk1Page.name, `quiz`, id],
     queryFn: async () => {
       const quizSize = 10;
 
@@ -75,7 +76,6 @@ export default function LearnHsk1Page() {
     // that `answer` objects are comparable to groups.
     structuralSharing: false,
     staleTime: Infinity,
-    throwOnError: true,
   });
 
   return (
