@@ -1,6 +1,6 @@
 import { QuizDeck } from "@/client/ui/QuizDeck";
 import { RectButton2 } from "@/client/ui/RectButton2";
-import { useQueryOnce, useReplicache } from "@/client/ui/ReplicacheContext";
+import { useReplicache } from "@/client/ui/ReplicacheContext";
 import { generateQuestionForSkillOrThrow } from "@/data/generator";
 import { questionsForReview } from "@/data/query";
 import { useQuery } from "@tanstack/react-query";
@@ -15,6 +15,7 @@ import { useTimeout } from "usehooks-ts";
 
 export default function ReviewsPage() {
   const r = useReplicache();
+  const id = useId();
 
   const [visible, setVisible] = useState(false);
 
@@ -25,36 +26,38 @@ export default function ReviewsPage() {
   useTimeout(show, 2000);
 
   const questions = useQuery({
-    queryKey: [ReviewsPage.name, `quiz`, useId()],
+    queryKey: [ReviewsPage.name, `quiz`, id],
     queryFn: async () => {
       const result = await questionsForReview(r, {
         limit: 10,
         dueBeforeNow: true,
-        // Look ahead at the next 50 skills, shuffle them and take 10. This way
-        // you don't end up with the same set over and over again (which happens a
-        // lot in development).
-        sampleSize: 50,
       });
 
       return result.map(([, , question]) => question);
     },
   });
 
-  const nextNotYetDueSkillState = useQueryOnce(async (tx) => {
-    const now = new Date();
-    for await (const [{ skill }, skillState] of r.query.skillState.byDue(tx)) {
-      if (skillState.due <= now) {
-        continue;
-      }
+  const nextNotYetDueSkillState = useQuery({
+    queryKey: [ReviewsPage.name, `nextNotYetDueSkillState`, id],
+    queryFn: async () => {
+      const now = new Date();
+      for await (const [
+        { skill },
+        skillState,
+      ] of r.queryPaged.skillState.byDue()) {
+        if (skillState.due <= now) {
+          continue;
+        }
 
-      try {
-        await generateQuestionForSkillOrThrow(skill);
-      } catch {
-        continue;
-      }
+        try {
+          await generateQuestionForSkillOrThrow(skill);
+        } catch {
+          continue;
+        }
 
-      return skillState;
-    }
+        return skillState;
+      }
+    },
   });
 
   return (
@@ -82,7 +85,7 @@ export default function ReviewsPage() {
             👏 You’re all caught up on your reviews!
           </Text>
           <GoHomeButton />
-          {nextNotYetDueSkillState.loading ||
+          {nextNotYetDueSkillState.isLoading ||
           nextNotYetDueSkillState.data === undefined ? null : (
             <Text style={{ color: `#AAA`, textAlign: `center` }}>
               Next review in{` `}
