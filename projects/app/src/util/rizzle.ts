@@ -604,11 +604,31 @@ export type RizzleReplicacheEntityQuery<T extends RizzleAnyEntity> =
         }
     : never;
 
+export type RizzleReplicachePagedEntityQuery<T extends RizzleAnyEntity> =
+  T extends RizzleEntity<infer KeyPath, infer Schema>
+    ? Record<
+        RizzleIndexNames<T[`_def`][`valueType`]>,
+        () => RizzleScanResult<T>
+      > & {
+        scan: (
+          options?: Partial<EntityKeyType<Schema, KeyPath>[`_input`]>,
+        ) => RizzleScanResult<T>;
+      }
+    : never;
+
 export type RizzleReplicacheQuery<S extends RizzleRawSchema> = {
   [K in keyof S as S[K] extends RizzleAnyEntity
     ? K
     : never]: S[K] extends RizzleAnyEntity
     ? RizzleReplicacheEntityQuery<S[K]>
+    : never;
+};
+
+export type RizzleReplicachePagedQuery<S extends RizzleRawSchema> = {
+  [K in keyof S as S[K] extends RizzleAnyEntity
+    ? K
+    : never]: S[K] extends RizzleAnyEntity
+    ? RizzleReplicachePagedEntityQuery<S[K]>
     : never;
 };
 
@@ -732,6 +752,7 @@ export type RizzleReplicache<
   replicache: Replicache<_MutatorDefs>;
   mutate: RizzleReplicacheMutate<S>;
   query: RizzleReplicacheQuery<S>;
+  queryPaged: RizzleReplicachePagedQuery<S>;
   [Symbol.asyncDispose]: () => Promise<void>;
 };
 
@@ -857,9 +878,54 @@ const replicache = <
 
   const query = entityApi as unknown as RizzleReplicacheQuery<S>;
 
+  const entityPagedApi = Object.fromEntries(
+    Object.entries(schema).flatMap(([k, e]) =>
+      e instanceof RizzleEntity
+        ? [
+            [
+              k,
+              Object.assign(
+                {
+                  // prefix scan
+                  scan: (partialKey = {}) => {
+                    return scanPagedIter(
+                      (fn) => replicache.query(fn),
+                      e._def.interpolatePartialKey(partialKey),
+                      (k) => e.unmarshalKey(k),
+                      (x) =>
+                        e.unmarshalValue(
+                          x as (typeof e)[`_def`][`valueType`][`_marshaled`],
+                        ),
+                    );
+                  },
+                },
+                // paged index scans
+                mapValues(
+                  e.getIndexes(),
+                  (_v, indexName) => () =>
+                    indexScanPagedIter(
+                      (fn) => replicache.query(fn),
+                      `${k}.${indexName}`,
+                      (k) => e.unmarshalKey(k),
+                      (x) =>
+                        e.unmarshalValue(
+                          x as (typeof e)[`_def`][`valueType`][`_marshaled`],
+                        ),
+                    ),
+                ),
+              ),
+            ],
+          ]
+        : [],
+    ),
+  );
+
+  const queryPaged = entityPagedApi as unknown as RizzleReplicachePagedQuery<S>;
+
   return {
     replicache,
     query,
+    queryPaged,
     mutate,
     [Symbol.asyncDispose]: () => replicache.close(),
   };
@@ -1087,27 +1153,9 @@ export async function* indexScanIter<K, V>(
   indexName: string,
   unmarshalKey: (k: string) => K,
   unmarshalValue: (v: unknown) => V,
-): AsyncGenerator<[K, V]> {
-  // HACK: convoluted workaround to fix a bug in Safari where the transaction
-  // would be prematurely closed with:
-  //
-  // > InvalidStateError: Failed to execute 'objectStore' on 'IDBTransaction':
-  // > The transaction finished.
-  //
-  // See also https://github.com/rocicorp/replicache/issues/486
-  //
-  // This approach synchronously loads a page of results at a time and then
-  // releases the transaction. This is not ideal, but seems better than using
-  // `.toArray()` which doesn't honor `limit` when using an index, so it would
-  // load the entire index at a time (see
-  // https://github.com/rocicorp/replicache/issues/1039).
-
-  const pageSize = 50;
-  let page: [string, ReadonlyJSONValue][];
-  let startKey: string | undefined;
-
-  do {
-    page = [];
+  startKey?: string,
+): AsyncGenerator<[K, V, string]> {
+  try {
     for await (const [[indexKey, key], value] of tx
       .scan({
         indexName,
@@ -1115,15 +1163,53 @@ export async function* indexScanIter<K, V>(
           startKey != null ? { key: startKey, exclusive: true } : undefined,
       })
       .entries()) {
-      startKey = indexKey;
-      page.push([key, value]);
-      if (page.length === pageSize) {
-        break;
-      }
+      yield [unmarshalKey(key), unmarshalValue(value), indexKey] as const;
     }
+  } catch (e) {
+    diagnoseError(e);
+    throw e;
+  }
+}
 
+/**
+ * Scan over an index in a paged manner. Each page uses a separate transaction
+ * so it's safe to do expensive things while looping over the results without it
+ * holding open a transaction for too long and risk having it prematurely close.
+ */
+export async function* indexScanPagedIter<K, V>(
+  query: <R>(body: (tx: ReadTransaction) => R) => Promise<R>,
+  indexName: string,
+  unmarshalKey: (k: string) => K,
+  unmarshalValue: (v: unknown) => V,
+  startKey?: string,
+): AsyncGenerator<[K, V]> {
+  const pageSize = 50;
+  let page: [K, V][];
+
+  do {
+    try {
+      page = [];
+      await query(async (tx) => {
+        for await (const [key, value, indexKey] of indexScanIter(
+          tx,
+          indexName,
+          unmarshalKey,
+          unmarshalValue,
+          startKey,
+        )) {
+          page.push([key, value]);
+          startKey = indexKey;
+          if (page.length === pageSize) {
+            break;
+          }
+        }
+      });
+    } catch (e) {
+      diagnoseError(e);
+      throw e;
+    }
     for (const [k, v] of page) {
-      yield [unmarshalKey(k), unmarshalValue(v)] as const;
+      yield [k, v] as const;
     }
   } while (page.length > 0);
 }
@@ -1133,15 +1219,9 @@ export async function* scanIter<K, V>(
   prefix: string,
   unmarshalKey: (k: string) => K,
   unmarshalValue: (v: unknown) => V,
-): AsyncGenerator<[K, V]> {
-  /** HACK: convoluted workaround, @see {indexScanIter} for details */
-
-  const pageSize = 50;
-  let page: [string, ReadonlyJSONValue][];
-  let startKey: string | undefined;
-
-  do {
-    page = [];
+  startKey?: string,
+): AsyncGenerator<[K, V, string]> {
+  try {
     for await (const [key, value] of tx
       .scan({
         prefix,
@@ -1149,15 +1229,64 @@ export async function* scanIter<K, V>(
           startKey != null ? { key: startKey, exclusive: true } : undefined,
       })
       .entries()) {
-      startKey = key;
-      page.push([key, value]);
-      if (page.length === pageSize) {
-        break;
-      }
+      yield [unmarshalKey(key), unmarshalValue(value), key] as const;
     }
+  } catch (e) {
+    diagnoseError(e);
+    throw e;
+  }
+}
 
+export async function* scanPagedIter<K, V>(
+  query: <R>(body: (tx: ReadTransaction) => R) => Promise<R>,
+  prefix: string,
+  unmarshalKey: (k: string) => K,
+  unmarshalValue: (v: unknown) => V,
+  startKey?: string,
+): AsyncGenerator<[K, V]> {
+  const pageSize = 50;
+  let page: [K, V][];
+
+  do {
+    try {
+      page = [];
+      await query(async (tx) => {
+        for await (const [key, value, indexKey] of scanIter(
+          tx,
+          prefix,
+          unmarshalKey,
+          unmarshalValue,
+          startKey,
+        )) {
+          page.push([key, value]);
+          startKey = indexKey;
+          if (page.length === pageSize) {
+            break;
+          }
+        }
+      });
+    } catch (e) {
+      diagnoseError(e);
+      throw e;
+    }
     for (const [k, v] of page) {
-      yield [unmarshalKey(k), unmarshalValue(v)] as const;
+      yield [k, v] as const;
     }
   } while (page.length > 0);
+}
+
+function diagnoseError(e: unknown): void {
+  if (isUseAfterTransactionFinishedError(e)) {
+    console.error(
+      `Attempted to use replicache's IDB transaction after it finished. This can happen when a transaction is idle for a whole event loop tick. This can be due to \`await\`-ing a fetch() or other async operation that isn't queued as a microtask. To fix it await the slow promise outside the transaction.`,
+    );
+  }
+}
+
+function isUseAfterTransactionFinishedError(e: unknown): e is DOMException {
+  return (
+    e instanceof DOMException &&
+    e.name === `InvalidStateError` &&
+    e.message.includes(`The transaction finished.`)
+  );
 }

@@ -1,26 +1,31 @@
 import { RectButton2 } from "@/client/ui/RectButton2";
-import { useQueryOnce, useReplicache } from "@/client/ui/ReplicacheContext";
+import { useReplicache } from "@/client/ui/ReplicacheContext";
 import { questionsForReview } from "@/data/query";
+import { useQuery } from "@tanstack/react-query";
 import chunk from "lodash/chunk";
 import shuffle from "lodash/shuffle";
-import { useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 
 export default function ConnectionsPage() {
   const r = useReplicache();
 
-  const questions = useQueryOnce(async (tx) => {
-    const result = await questionsForReview(r, tx, {
-      limit: 10,
-      dueBeforeNow: true,
-      // Look ahead at the next 50 skills, shuffle them and take 10. This way
-      // you don't end up with the same set over and over again (which happens a
-      // lot in development).
-      sampleSize: 50,
-    });
+  const questions = useQuery({
+    queryKey: [ConnectionsPage.name, `quiz`, useId()],
+    queryFn: async () => {
+      const result = await questionsForReview(r, {
+        limit: 10,
+        dueBeforeNow: true,
+        // Look ahead at the next 50 skills, shuffle them and take 10. This way
+        // you don't end up with the same set over and over again (which happens a
+        // lot in development).
+        sampleSize: 50,
+      });
 
-    return result.map(([, , question]) => question);
+      return result.map(([, , question]) => question);
+    },
+    throwOnError: true,
   });
 
   const [shuffleCount, setShuffleCount] = useState(1);
@@ -74,7 +79,7 @@ export default function ConnectionsPage() {
 
   return (
     <View className="flex-1 items-center bg-background pt-safe-offset-[20px]">
-      {questions.loading ? (
+      {questions.isLoading ? (
         <View className="my-auto">
           <Text className="text-text">Loading…</Text>
         </View>
