@@ -731,6 +731,19 @@ typeChecks<RizzleReplicacheQuery<never>>(async () => {
   true satisfies IsEqual<keyof RizzleReplicacheQuery<typeof schema>, `posts`>;
 });
 
+class CheckpointLog {
+  #logs: string[] = [];
+
+  log(name: string) {
+    this.#logs.push(name);
+  }
+
+  assert(...expected: string[]) {
+    assert.deepEqual(this.#logs, expected);
+    this.#logs = [];
+  }
+}
+
 void test(`replicache()`, async (t) => {
   const schema = {
     version: `1`,
@@ -746,7 +759,7 @@ void test(`replicache()`, async (t) => {
       .alias(`cp`),
   };
 
-  let checkPointsReached = 0;
+  const checkPoints = new CheckpointLog();
 
   await using db = r.replicache(
     testReplicacheOptions,
@@ -758,7 +771,7 @@ void test(`replicache()`, async (t) => {
         assert.deepEqual(await db.posts.get({ id: `2` }), undefined);
         assert.deepEqual(options, { id: `1`, title: `hello world` });
         await db.posts.set({ id: options.id }, { title: options.title });
-        checkPointsReached++;
+        checkPoints.log(`createPost.end`);
       },
     },
     (options) => {
@@ -773,17 +786,20 @@ void test(`replicache()`, async (t) => {
           prefix: `p/`,
         },
       });
-      checkPointsReached++;
+      checkPoints.log(`replicacheOptions`);
 
       return new Replicache(options);
     },
   );
+
+  checkPoints.assert(`replicacheOptions`);
 
   await db.mutate.createPost({ id: `1`, title: `hello world` });
   true satisfies IsEqual<
     ReturnType<typeof db.mutate.createPost>,
     Promise<void>
   >;
+  checkPoints.assert(`createPost.end`);
 
   {
     //
@@ -793,7 +809,42 @@ void test(`replicache()`, async (t) => {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     tx.scan.mock.mockImplementationOnce((options: any): any => {
-      checkPointsReached++;
+      checkPoints.log(`tx.scan`);
+      assert.deepEqual(options, {
+        indexName: `posts.byTitle`,
+        start: undefined,
+      });
+      return {
+        async *entries() {
+          const value = [[`hello world`, `p/1`], { r: `hello world` }];
+          yield await Promise.resolve(value);
+        },
+      };
+    });
+
+    const results = [];
+    for await (const post of db.query.posts.byTitle(tx)) {
+      results.push(post);
+    }
+    assert.deepEqual(results, [
+      [{ id: `1` }, { title: `hello world` }, `hello world`],
+    ]);
+
+    checkPoints.assert(`tx.scan`);
+  }
+
+  {
+    //
+    // Paged index scans
+    //
+    using tx = makeMockTx(t);
+
+    const query = t.mock.method(db.replicache, `query`);
+    query.mock.mockImplementation(async (fn) => fn(tx));
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    tx.scan.mock.mockImplementationOnce((options: any): any => {
+      checkPoints.log(`tx.scan 0`);
       assert.deepEqual(options, {
         indexName: `posts.byTitle`,
         start: undefined,
@@ -807,7 +858,7 @@ void test(`replicache()`, async (t) => {
     }, 0);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     tx.scan.mock.mockImplementationOnce((options: any): any => {
-      checkPointsReached++;
+      checkPoints.log(`tx.scan 1`);
       assert.deepEqual(options, {
         indexName: `posts.byTitle`,
         start: {
@@ -823,10 +874,12 @@ void test(`replicache()`, async (t) => {
     }, 1);
 
     const results = [];
-    for await (const post of db.query.posts.byTitle(tx)) {
+    for await (const post of db.queryPaged.posts.byTitle()) {
       results.push(post);
     }
     assert.deepEqual(results, [[{ id: `1` }, { title: `hello world` }]]);
+
+    checkPoints.assert(`tx.scan 0`, `tx.scan 1`);
   }
 
   {
@@ -869,7 +922,7 @@ void test(`replicache()`, async (t) => {
     assert.deepEqual(post, { title: `hello world` });
   }
 
-  assert.equal(checkPointsReached, 4);
+  checkPoints.assert();
 });
 
 void test.todo(`replicache() errors if two mutators have the same alias`);
@@ -975,11 +1028,11 @@ void test(`replicache() entity()`, async (t) => {
 
     using tx = makeMockTx(t);
 
-    let checkPointsReached = 0;
+    let checkPointsReached = ``;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     tx.scan.mock.mockImplementationOnce((options: any): any => {
-      checkPointsReached++;
+      checkPointsReached += `1`;
       assert.deepEqual(options, {
         prefix: `text/`,
         start: undefined,
@@ -990,33 +1043,18 @@ void test(`replicache() entity()`, async (t) => {
           yield await Promise.resolve(value);
         },
       };
-    }, 0);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    tx.scan.mock.mockImplementationOnce((options: any): any => {
-      checkPointsReached++;
-      assert.deepEqual(options, {
-        prefix: `text/`,
-        start: {
-          exclusive: true,
-          key: `text/1:2.`,
-        },
-      });
-      return {
-        async *entries() {
-          return;
-        },
-      };
-    }, 1);
+    });
 
     for await (const result of db.query.text.scan(tx)) {
-      checkPointsReached++;
+      checkPointsReached += `2`;
       assert.deepEqual(result, [
         { id: `1`, id2: `2` },
         { body: `hello world` },
+        `text/1:2.`,
       ]);
     }
 
-    assert.equal(checkPointsReached, 3);
+    assert.equal(checkPointsReached, `12`);
   });
 
   await t.test(`.scan() supports non-empty partial key`, async () => {
@@ -1043,33 +1081,18 @@ void test(`replicache() entity()`, async (t) => {
           yield await Promise.resolve(value);
         },
       };
-    }, 0);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    tx.scan.mock.mockImplementationOnce((options: any): any => {
-      checkPointsReached++;
-      assert.deepEqual(options, {
-        prefix: `text/abc:`,
-        start: {
-          exclusive: true,
-          key: `text/abc:1.`,
-        },
-      });
-      return {
-        async *entries() {
-          return;
-        },
-      };
-    }, 1);
+    });
 
     for await (const result of db.query.text.scan(tx, { id: `abc` })) {
       checkPointsReached++;
       assert.deepEqual(result, [
         { id: `abc`, id2: `1` },
         { body: `hello world` },
+        `text/abc:1.`,
       ]);
     }
 
-    assert.equal(checkPointsReached, 3);
+    assert.equal(checkPointsReached, 2);
   });
 
   await t.test(`.scan() works inside mutator`, async () => {
@@ -1087,6 +1110,116 @@ void test(`replicache() entity()`, async (t) => {
     await db.mutate.appendText({ id: `1`, text: `hello world` });
 
     assert.equal(checkPointsReached, 1);
+  });
+
+  await t.test(`paged .scan() supports empty partial key`, async () => {
+    await using db = r.replicache(testReplicacheOptions, schema, {
+      async appendText() {
+        // noop
+      },
+    });
+
+    using tx = makeMockTx(t);
+    const query = t.mock.method(db.replicache, `query`);
+    query.mock.mockImplementation(async (fn) => fn(tx));
+
+    const checkPoints = new CheckpointLog();
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    tx.scan.mock.mockImplementationOnce((options: any): any => {
+      checkPoints.log(`tx.scan 0`);
+      assert.deepEqual(options, {
+        prefix: `text/`,
+        start: undefined,
+      });
+      return {
+        async *entries() {
+          const value = [`text/1:2.`, { b: `hello world` }];
+          yield await Promise.resolve(value);
+        },
+      };
+    }, 0);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    tx.scan.mock.mockImplementationOnce((options: any): any => {
+      checkPoints.log(`tx.scan 1`);
+      assert.deepEqual(options, {
+        prefix: `text/`,
+        start: {
+          exclusive: true,
+          key: `text/1:2.`,
+        },
+      });
+      return {
+        async *entries() {
+          return;
+        },
+      };
+    }, 1);
+
+    for await (const result of db.queryPaged.text.scan()) {
+      checkPoints.log(`loop`);
+      assert.deepEqual(result, [
+        { id: `1`, id2: `2` },
+        { body: `hello world` },
+      ]);
+    }
+
+    checkPoints.assert(`tx.scan 0`, `loop`, `tx.scan 1`);
+  });
+
+  await t.test(`paged .scan() supports non-empty partial key`, async () => {
+    await using db = r.replicache(testReplicacheOptions, schema, {
+      async appendText() {
+        // noop
+      },
+    });
+
+    using tx = makeMockTx(t);
+    const query = t.mock.method(db.replicache, `query`);
+    query.mock.mockImplementation(async (fn) => fn(tx));
+
+    const checkPoint = new CheckpointLog();
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    tx.scan.mock.mockImplementationOnce((options: any): any => {
+      checkPoint.log(`tx.scan 0`);
+      assert.deepEqual(options, {
+        prefix: `text/abc:`,
+        start: undefined,
+      });
+      return {
+        async *entries() {
+          const value = [`text/abc:1.`, { b: `hello world` }];
+          yield await Promise.resolve(value);
+        },
+      };
+    }, 0);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    tx.scan.mock.mockImplementationOnce((options: any): any => {
+      checkPoint.log(`tx.scan 1`);
+      assert.deepEqual(options, {
+        prefix: `text/abc:`,
+        start: {
+          exclusive: true,
+          key: `text/abc:1.`,
+        },
+      });
+      return {
+        async *entries() {
+          return;
+        },
+      };
+    }, 1);
+
+    for await (const result of db.queryPaged.text.scan({ id: `abc` })) {
+      checkPoint.log(`loop`);
+      assert.deepEqual(result, [
+        { id: `abc`, id2: `1` },
+        { body: `hello world` },
+      ]);
+    }
+
+    checkPoint.assert(`tx.scan 0`, `loop`, `tx.scan 1`);
   });
 });
 
@@ -1126,8 +1259,8 @@ void test(`replicache() index scan`, async () => {
       results.push(counter);
     }
     assert.deepEqual(results, [
-      [{ id: `1` }, { body: `aaa` }],
-      [{ id: `2` }, { body: `bbb` }],
+      [{ id: `1` }, { body: `aaa` }, `aaa`],
+      [{ id: `2` }, { body: `bbb` }, `bbb`],
     ]);
   });
 });

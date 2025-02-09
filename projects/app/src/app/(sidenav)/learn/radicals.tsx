@@ -19,17 +19,15 @@ export default function RadicalsPage() {
     queryFn: async () => {
       const limit = 10;
       const questions: Question[] = (
-        await r.replicache.query((tx) =>
-          questionsForReview(r, tx, {
-            limit,
-            sampleSize: 50,
-            skillTypes: [
-              // SkillType.EnglishToRadical,
-              SkillType.RadicalToEnglish,
-              SkillType.RadicalToPinyin,
-            ],
-          }),
-        )
+        await questionsForReview(r, {
+          limit,
+          sampleSize: 50,
+          skillTypes: [
+            // SkillType.EnglishToRadical,
+            SkillType.RadicalToEnglish,
+            SkillType.RadicalToPinyin,
+          ],
+        })
       ).map(([, , question]) => question);
       // Fill the rest with new skills
       // Create skills to pad out the rest of the quiz

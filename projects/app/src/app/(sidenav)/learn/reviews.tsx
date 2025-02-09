@@ -3,11 +3,12 @@ import { RectButton2 } from "@/client/ui/RectButton2";
 import { useQueryOnce, useReplicache } from "@/client/ui/ReplicacheContext";
 import { generateQuestionForSkillOrThrow } from "@/data/generator";
 import { questionsForReview } from "@/data/query";
+import { useQuery } from "@tanstack/react-query";
 import { formatDuration } from "date-fns/formatDuration";
 import { interval } from "date-fns/interval";
 import { intervalToDuration } from "date-fns/intervalToDuration";
 import { Link } from "expo-router";
-import { useCallback, useState } from "react";
+import { useCallback, useId, useState } from "react";
 import { Text, View } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { useTimeout } from "usehooks-ts";
@@ -23,17 +24,20 @@ export default function ReviewsPage() {
 
   useTimeout(show, 2000);
 
-  const questions = useQueryOnce(async (tx) => {
-    const result = await questionsForReview(r, tx, {
-      limit: 10,
-      dueBeforeNow: true,
-      // Look ahead at the next 50 skills, shuffle them and take 10. This way
-      // you don't end up with the same set over and over again (which happens a
-      // lot in development).
-      sampleSize: 50,
-    });
+  const questions = useQuery({
+    queryKey: [ReviewsPage.name, `quiz`, useId()],
+    queryFn: async () => {
+      const result = await questionsForReview(r, {
+        limit: 10,
+        dueBeforeNow: true,
+        // Look ahead at the next 50 skills, shuffle them and take 10. This way
+        // you don't end up with the same set over and over again (which happens a
+        // lot in development).
+        sampleSize: 50,
+      });
 
-    return result.map(([, , question]) => question);
+      return result.map(([, , question]) => question);
+    },
   });
 
   const nextNotYetDueSkillState = useQueryOnce(async (tx) => {
@@ -55,11 +59,11 @@ export default function ReviewsPage() {
 
   return (
     <View className="flex-1 items-center bg-background pt-safe-offset-[20px]">
-      {questions.loading || !visible ? (
+      {questions.isLoading || !visible ? (
         <Animated.View entering={FadeIn} className="my-auto">
           <Text className="text-text">Loading…</Text>
         </Animated.View>
-      ) : questions.error ? (
+      ) : questions.error || questions.data == null ? (
         <Text className="text-text">Oops something broken</Text>
       ) : questions.data.length > 0 ? (
         <QuizDeck questions={questions.data} className="h-full w-full" />
