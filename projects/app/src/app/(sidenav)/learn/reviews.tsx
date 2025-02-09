@@ -1,3 +1,4 @@
+import { ErrorBoundary } from "@/client/ui/ErrorBoundary";
 import { QuizDeck } from "@/client/ui/QuizDeck";
 import { RectButton2 } from "@/client/ui/RectButton2";
 import { useReplicache } from "@/client/ui/ReplicacheContext";
@@ -70,7 +71,9 @@ export default function ReviewsPage() {
       ) : questions.error || questions.data == null ? (
         <Text className="hhh-text-body">Oops something broken</Text>
       ) : questions.data.length > 0 ? (
-        <QuizDeck questions={questions.data} className="h-full w-full" />
+        <ErrorBoundary>
+          <QuizDeck questions={questions.data} className="h-full w-full" />
+        </ErrorBoundary>
       ) : (
         <View
           style={{
