@@ -152,7 +152,8 @@ const allCharacters = new Set(
     .concat(await allHsk1Words())
     .concat(await allHsk2Words())
     .concat(await allHsk3Words())
-    .filter((x) => x.length === 1),
+    // Split words into characters because decomposition is per-character.
+    .flatMap((x) => Array.from(x)),
 );
 
 const existingData = await loadHanziDecomposition();
