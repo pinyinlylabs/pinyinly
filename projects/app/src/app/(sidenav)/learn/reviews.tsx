@@ -1,3 +1,4 @@
+import { ErrorBoundary } from "@/client/ui/ErrorBoundary";
 import { QuizDeck } from "@/client/ui/QuizDeck";
 import { RectButton2 } from "@/client/ui/RectButton2";
 import { useReplicache } from "@/client/ui/ReplicacheContext";
@@ -35,6 +36,7 @@ export default function ReviewsPage() {
 
       return result.map(([, , question]) => question);
     },
+    staleTime: Infinity, // Don't regenerate the quiz after re-focusing the page.
   });
 
   const nextNotYetDueSkillState = useQuery({
@@ -64,12 +66,14 @@ export default function ReviewsPage() {
     <View className="flex-1 items-center bg-background pt-safe-offset-[20px]">
       {questions.isLoading || !visible ? (
         <Animated.View entering={FadeIn} className="my-auto">
-          <Text className="text-text">Loading…</Text>
+          <Text className="hhh-text-body">Loading…</Text>
         </Animated.View>
       ) : questions.error || questions.data == null ? (
-        <Text className="text-text">Oops something broken</Text>
+        <Text className="hhh-text-body">Oops something broken</Text>
       ) : questions.data.length > 0 ? (
-        <QuizDeck questions={questions.data} className="h-full w-full" />
+        <ErrorBoundary>
+          <QuizDeck questions={questions.data} className="h-full w-full" />
+        </ErrorBoundary>
       ) : (
         <View
           style={{
@@ -81,13 +85,12 @@ export default function ReviewsPage() {
             paddingRight: 20,
           }}
         >
-          <Text style={{ color: `white`, fontSize: 30, textAlign: `center` }}>
+          <Text className="hhh-text-title">
             👏 You’re all caught up on your reviews!
           </Text>
-          <GoHomeButton />
           {nextNotYetDueSkillState.isLoading ||
           nextNotYetDueSkillState.data === undefined ? null : (
-            <Text style={{ color: `#AAA`, textAlign: `center` }}>
+            <Text className="hhh-text-caption">
               Next review in{` `}
               {formatDuration(
                 intervalToDuration(
@@ -96,18 +99,11 @@ export default function ReviewsPage() {
               )}
             </Text>
           )}
+          <Link dismissTo href="/learn" asChild>
+            <RectButton2>Back</RectButton2>
+          </Link>
         </View>
       )}
     </View>
   );
 }
-
-const GoHomeButton = () => (
-  <View style={{ height: 44 }}>
-    <Link dismissTo href="/learn" asChild>
-      <RectButton2 textClassName="font-bold text-text text-xl">
-        Back
-      </RectButton2>
-    </Link>
-  </View>
-);
