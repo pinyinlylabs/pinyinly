@@ -233,7 +233,7 @@ tasks:
       envFile: .env.local
 
   testWatch:
-    command: node --test --watch --import tsx "src/**/*.test.ts"
+    command: node --test --watch --test-only --import tsx "src/**/*.test.ts"
     local: true
     options:
       envFile: .env.local
