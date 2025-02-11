@@ -4,6 +4,7 @@ import {
   radicalToEnglish,
   skillId,
   skillLearningGraph,
+  skillReviewQueue,
 } from "#data/skills.ts";
 import {
   allHsk1Words,
@@ -85,4 +86,24 @@ void test(skillLearningGraph.name, async () => {
   });
 
   await test.todo(`splits words into characters`);
+});
+
+void test(skillReviewQueue.name, async () => {
+  await test(`no skills gives an empty queue`, async () => {
+    const graph = await skillLearningGraph({ targetSkills: [] });
+    assert.deepEqual(skillReviewQueue(graph), []);
+  });
+
+  await test(`works for 好`, async () => {
+    const graph = await skillLearningGraph({
+      targetSkills: [hanziWordToEnglish(`好`)],
+    });
+    assert.deepEqual(skillReviewQueue(graph), [
+      skillId(hanziWordToEnglish(`子`)),
+      skillId(hanziWordToEnglish(`女`)),
+      skillId(radicalToEnglish(`子`, `child`)),
+      skillId(radicalToEnglish(`女`, `woman`)),
+      skillId(hanziWordToEnglish(`好`)),
+    ]);
+  });
 });

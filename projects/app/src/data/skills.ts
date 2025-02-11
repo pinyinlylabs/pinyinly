@@ -7,6 +7,7 @@ import {
   splitPinyin,
   walkIdsNode,
 } from "@/dictionary/dictionary";
+import { invariant } from "@haohaohow/lib/invariant";
 import { HanziSkill, RadicalSkill, Skill, SkillType } from "./model";
 import { MarshaledSkill, rSkill } from "./rizzleSchema";
 
@@ -251,4 +252,50 @@ export function hanziWordToEnglish(hanzi: string): HanziSkill {
     hanzi,
     type: SkillType.HanziWordToEnglish,
   };
+}
+
+export function skillReviewQueue(graph: Graph): MarshaledSkill[] {
+  // Kahn topological sort
+  const inDegree = new Map<MarshaledSkill, number>();
+  const queue: MarshaledSkill[] = [];
+  const learningOrder: MarshaledSkill[] = [];
+
+  // Compute in-degree
+  for (const [marshaledSkill, node] of graph.entries()) {
+    if (!inDegree.has(marshaledSkill)) {
+      inDegree.set(marshaledSkill, 0);
+    }
+
+    for (const dependency of node.dependencies) {
+      inDegree.set(dependency, (inDegree.get(dependency) ?? 0) + 1);
+    }
+  }
+
+  // Find skills that have no prerequisites
+  for (const [skill, deg] of inDegree.entries()) {
+    if (deg === 0) {
+      queue.push(skill);
+    }
+  }
+
+  // Process queue
+  while (queue.length > 0) {
+    const skill = queue.shift();
+    invariant(skill != null);
+    learningOrder.push(skill);
+
+    const node = graph.get(skill);
+    invariant(node != null);
+    for (const dependent of node.dependencies) {
+      const cur = inDegree.get(dependent);
+      invariant(cur != null);
+      const newValue = cur - 1;
+      inDegree.set(dependent, newValue);
+      if (newValue === 0) {
+        queue.push(dependent);
+      }
+    }
+  }
+
+  return learningOrder.reverse();
 }
