@@ -226,6 +226,8 @@ export async function generateQuestionForSkillOrThrow(
     case SkillType.EnglishToHanzi:
     case SkillType.PinyinToHanzi:
     case SkillType.ImageToHanzi:
+    case SkillType.PinyinFinalAssociation:
+    case SkillType.PinyinInitialAssociation:
       throw new Error(`todo: not implemented`);
   }
 }
