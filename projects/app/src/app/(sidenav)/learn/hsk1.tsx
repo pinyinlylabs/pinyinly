@@ -25,7 +25,8 @@ export default function LearnHsk1Page() {
         await questionsForReview(r, {
           limit: quizSize,
           sampleSize: 50,
-          filter: (skill) => hsk1Words.includes(skill.hanzi),
+          filter: (skill) =>
+            `hanzi` in skill && hsk1Words.includes(skill.hanzi),
           skillTypes: [SkillType.HanziWordToEnglish],
         })
       ).map(([, , question]) => question);

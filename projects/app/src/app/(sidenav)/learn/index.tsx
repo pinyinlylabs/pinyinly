@@ -20,7 +20,10 @@ export default function IndexPage() {
         (reviews) => reverse(sortBy(reviews, (x) => x[0].createdAt.getTime())),
       );
       for (const [key, _value] of ratingHistory) {
-        if (!recentCharacters.includes(key.skill.hanzi)) {
+        if (
+          `hanzi` in key.skill &&
+          !recentCharacters.includes(key.skill.hanzi)
+        ) {
           recentCharacters.push(key.skill.hanzi);
           if (recentCharacters.length === 10) {
             break;

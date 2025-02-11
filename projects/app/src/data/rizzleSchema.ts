@@ -22,6 +22,8 @@ export const rSkillType = r.enum(SkillType, {
   [SkillType.EnglishToHanzi]: `eh`,
   [SkillType.PinyinToHanzi]: `ph`,
   [SkillType.ImageToHanzi]: `ih`,
+  [SkillType.PinyinInitialAssociation]: `pia`,
+  [SkillType.PinyinFinalAssociation]: `pfa`,
 });
 
 export const rFsrsRating = r.enum(Rating, {
@@ -81,6 +83,11 @@ export const rSkill = memoize(() =>
           case SkillType.PinyinToHanzi:
           case SkillType.ImageToHanzi:
             return `${skillTypeM}:${x.hanzi}` as MarshaledSkill;
+          // Pinyin association skills
+          case SkillType.PinyinInitialAssociation:
+            return `${skillTypeM}:${x.initial}` as MarshaledSkill;
+          case SkillType.PinyinFinalAssociation:
+            return `${skillTypeM}:${x.final}` as MarshaledSkill;
         }
       }),
     z
@@ -155,6 +162,10 @@ export const rSkill = memoize(() =>
           case SkillType.PinyinToHanzi:
           case SkillType.ImageToHanzi:
             return { type: skillType_, hanzi: rest };
+          case SkillType.PinyinInitialAssociation:
+            return { type: skillType_, initial: rest };
+          case SkillType.PinyinFinalAssociation:
+            return { type: skillType_, final: rest };
         }
       }),
   ),
@@ -217,11 +228,19 @@ export const v3 = {
 
   // Mutators
   setPinyinInitialAssociation: r.mutator({
+    /**
+     * The initial component as defined by the pinyin chart. No trailing dash.
+     * e.g. `yu`, `ch`, `p`
+     */
     initial: r.string().alias(`i`),
     name: r.string().alias(`n`),
     now: r.timestamp().alias(`t`),
   }),
   setPinyinFinalAssociation: r.mutator({
+    /**
+     * The initial component as defined by the pinyin chart. No leading dash.
+     * e.g. `ia`, `ê`, `∅`
+     */
     final: r.string().alias(`f`),
     name: r.string().alias(`n`),
     now: r.timestamp().alias(`t`),

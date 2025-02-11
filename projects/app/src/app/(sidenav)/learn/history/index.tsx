@@ -1,4 +1,5 @@
 import { useRizzleQuery } from "@/client/ui/ReplicacheContext";
+import { SkillType } from "@/data/model";
 import { Rating } from "@/util/fsrs";
 import fromAsync from "array-from-async";
 import reverse from "lodash/reverse";
@@ -47,7 +48,12 @@ export default function HistoryPage() {
             {dataQuery.data?.map(([key, value], i) => (
               <View key={i}>
                 <Text className="text-text">
-                  {key.skill.hanzi}: {value.due.toISOString()}
+                  {key.skill.type === SkillType.PinyinInitialAssociation
+                    ? `${key.skill.initial}-`
+                    : key.skill.type === SkillType.PinyinFinalAssociation
+                      ? `-${key.skill.final}`
+                      : key.skill.hanzi}
+                  : {value.due.toISOString()}
                 </Text>
               </View>
             ))}
@@ -65,7 +71,12 @@ export default function HistoryPage() {
                       ? `✅`
                       : value.rating}
                   {` `}
-                  {key.skill.hanzi}: {key.createdAt.toISOString()}
+                  {key.skill.type === SkillType.PinyinInitialAssociation
+                    ? `${key.skill.initial}-`
+                    : key.skill.type === SkillType.PinyinFinalAssociation
+                      ? `-${key.skill.final}`
+                      : key.skill.hanzi}
+                  : {key.createdAt.toISOString()}
                 </Text>
               </View>
             ))}

@@ -54,13 +54,28 @@ export enum SkillType {
   EnglishToRadical = `EnglishToRadical`,
   RadicalToPinyin = `RadicalToPinyin`,
   PinyinToRadical = `PinyinToRadical`,
+  /**
+   * When shown a hanzi word, write the english translation.
+   */
   HanziWordToEnglish = `HanziWordToEnglish`,
   HanziWordToPinyinInitial = `HanziWordToPinyinInitial`,
   HanziWordToPinyinFinal = `HanziWordToPinyinFinal`,
   HanziWordToPinyinTone = `HanziWordToPinyinTone`,
+  /**
+   * When shown an english word, write the hanzi characters.
+   */
   EnglishToHanzi = `EnglishToHanzi`,
+  /**
+   * Given a pinyin word, write the hanzi character.
+   */
   PinyinToHanzi = `PinyinToHanzi`,
   ImageToHanzi = `ImageToHanzi`,
+  /**
+   * Given an initial like `p`, remember the name of the associated
+   * character/actor/entity etc.
+   */
+  PinyinInitialAssociation = `PinyinInitialAssociation`,
+  PinyinFinalAssociation = `PinyinFinalAssociation`,
 }
 
 export interface HanziSkill {
@@ -87,10 +102,24 @@ export interface RadicalPinyinSkill {
   pinyin: string;
 }
 
+export interface PinyinInitialAssociationSkill {
+  type: SkillType.PinyinInitialAssociation;
+  initial: string;
+}
+
+export interface PinyinFinalAssociationSkill {
+  type: SkillType.PinyinFinalAssociation;
+  final: string;
+}
+
+export type PinyinAssociationSkill =
+  | PinyinInitialAssociationSkill
+  | PinyinFinalAssociationSkill;
+
 export type RadicalSkill = RadicalNameSkill | RadicalPinyinSkill;
 
 /** Data that forms the unique key for a skill */
-export type Skill = HanziSkill | RadicalSkill;
+export type Skill = HanziSkill | RadicalSkill | PinyinAssociationSkill;
 
 export enum QuestionFlagType {
   Overdue,
@@ -192,5 +221,10 @@ export type Question = MultipleChoiceQuestion | OneCorrectPairQuestion;
 
 export interface PinyinInitialAssociation {
   initial: string;
+  name: string;
+}
+
+export interface PinyinFinalAssociation {
+  final: string;
   name: string;
 }
