@@ -16,7 +16,13 @@ import test from "node:test";
 
 void test(skillLearningGraph.name, async () => {
   await test(`no targets gives an empty graph`, async () => {
-    assert.deepEqual(await skillLearningGraph({ targetSkills: [] }), new Map());
+    assert.deepEqual(
+      await skillLearningGraph({
+        targetSkills: [],
+        isSkillLearned: () => false,
+      }),
+      new Map(),
+    );
   });
 
   await test(`includes the target skill in the graph`, async () => {
@@ -26,7 +32,10 @@ void test(skillLearningGraph.name, async () => {
     };
 
     assert.deepEqual(
-      await skillLearningGraph({ targetSkills: [skill] }),
+      await skillLearningGraph({
+        targetSkills: [skill],
+        isSkillLearned: () => false,
+      }),
       new Map([[skillId(skill), { skill, dependencies: new Set() }]]),
     );
   });
@@ -37,7 +46,10 @@ void test(skillLearningGraph.name, async () => {
     const childRadicalToEnglish = radicalToEnglish(`子`, `child`);
 
     assert.deepEqual(
-      await skillLearningGraph({ targetSkills: [goodHanziWordToEnglish] }),
+      await skillLearningGraph({
+        targetSkills: [goodHanziWordToEnglish],
+        isSkillLearned: () => false,
+      }),
       new Map([
         [
           skillId(goodHanziWordToEnglish),
@@ -82,6 +94,7 @@ void test(skillLearningGraph.name, async () => {
         ...(await allHsk2Words()).map((w) => hanziWordToEnglish(w)),
         ...(await allHsk3Words()).map((w) => hanziWordToEnglish(w)),
       ],
+      isSkillLearned: () => false,
     });
   });
 
@@ -90,18 +103,36 @@ void test(skillLearningGraph.name, async () => {
 
 void test(skillReviewQueue.name, async () => {
   await test(`no skills gives an empty queue`, async () => {
-    const graph = await skillLearningGraph({ targetSkills: [] });
+    const graph = await skillLearningGraph({
+      targetSkills: [],
+      isSkillLearned: () => false,
+    });
     assert.deepEqual(skillReviewQueue(graph), []);
   });
 
   await test(`works for 好`, async () => {
     const graph = await skillLearningGraph({
       targetSkills: [hanziWordToEnglish(`好`)],
+      isSkillLearned: () => false,
     });
     assert.deepEqual(skillReviewQueue(graph), [
       skillId(hanziWordToEnglish(`子`)),
       skillId(hanziWordToEnglish(`女`)),
       skillId(radicalToEnglish(`子`, `child`)),
+      skillId(radicalToEnglish(`女`, `woman`)),
+      skillId(hanziWordToEnglish(`好`)),
+    ]);
+  });
+
+  await test(`skips learned skills and their dependencies`, async () => {
+    const graph = await skillLearningGraph({
+      targetSkills: [hanziWordToEnglish(`好`)],
+      isSkillLearned: (skill) =>
+        [skillId(radicalToEnglish(`子`, `child`))].includes(skill),
+    });
+
+    assert.deepEqual(skillReviewQueue(graph), [
+      skillId(hanziWordToEnglish(`女`)),
       skillId(radicalToEnglish(`女`, `woman`)),
       skillId(hanziWordToEnglish(`好`)),
     ]);

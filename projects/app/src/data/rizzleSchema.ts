@@ -1,5 +1,12 @@
-import { Rating } from "@/util/fsrs";
-import { invalid, r, RizzleCustom } from "@/util/rizzle";
+import { nextReview, Rating, UpcomingReview } from "@/util/fsrs";
+import {
+  invalid,
+  r,
+  RizzleCustom,
+  RizzleReplicache,
+  RizzleReplicacheMutators,
+} from "@/util/rizzle";
+import { invariant } from "@haohaohow/lib/invariant";
 import memoize from "lodash/memoize";
 import { z } from "zod";
 import {
@@ -307,3 +314,52 @@ export const v4 = {
 export const supportedSchemas = [v3, v4] as const;
 
 export type SupportedSchema = (typeof supportedSchemas)[number];
+
+export type Rizzle = RizzleReplicache<typeof v4>;
+
+export const v4Mutators: RizzleReplicacheMutators<typeof v4> = {
+  async initSkillState(db, { skill, now }) {
+    const exists = await db.skillState.has({ skill });
+    if (!exists) {
+      await db.skillState.set(
+        { skill },
+        { due: now, createdAt: now, srs: null },
+      );
+    }
+  },
+  async reviewSkill(tx, { skill, rating, now }) {
+    // Save a record of the review.
+    await tx.skillRating.set({ skill, createdAt: now }, { rating });
+
+    let state: UpcomingReview | null = null;
+    for await (const [{ createdAt: when }, { rating }] of tx.skillRating.scan({
+      skill,
+    })) {
+      state = nextReview(state, rating, when);
+    }
+
+    invariant(state !== null);
+
+    await tx.skillState.set(
+      { skill },
+      {
+        createdAt: state.created,
+        srs: {
+          type: SrsType.FsrsFourPointFive,
+          stability: state.stability,
+          difficulty: state.difficulty,
+        },
+        due: state.due,
+      },
+    );
+  },
+  async setPinyinInitialAssociation(tx, { initial, name }) {
+    await tx.pinyinInitialAssociation.set({ initial }, { name });
+  },
+  async setPinyinFinalAssociation(tx, { final, name }) {
+    await tx.pinyinFinalAssociation.set({ final }, { name });
+  },
+  async setPinyinInitialGroupTheme(tx, { groupId, themeId }) {
+    await tx.pinyinInitialGroupTheme.set({ groupId }, { themeId });
+  },
+};

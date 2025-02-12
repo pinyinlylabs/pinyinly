@@ -1,8 +1,8 @@
+import { questionsForReview } from "@/client/query";
 import { QuizDeck } from "@/client/ui/QuizDeck";
 import { useReplicache } from "@/client/ui/ReplicacheContext";
 import { generateQuestionForSkillOrThrow } from "@/data/generator";
 import { HanziSkill, Question, QuestionType, SkillType } from "@/data/model";
-import { questionsForReview } from "@/data/query";
 import { allHsk1Words } from "@/dictionary/dictionary";
 import { useQuery } from "@tanstack/react-query";
 import isEqual from "lodash/isEqual";

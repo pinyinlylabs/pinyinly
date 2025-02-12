@@ -1,6 +1,6 @@
+import { questionsForReview } from "@/client/query";
 import { RectButton2 } from "@/client/ui/RectButton2";
 import { useReplicache } from "@/client/ui/ReplicacheContext";
-import { questionsForReview } from "@/data/query";
 import { useQuery } from "@tanstack/react-query";
 import chunk from "lodash/chunk";
 import shuffle from "lodash/shuffle";

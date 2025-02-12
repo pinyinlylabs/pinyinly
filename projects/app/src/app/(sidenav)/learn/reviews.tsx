@@ -1,9 +1,9 @@
+import { questionsForReview } from "@/client/query";
 import { ErrorBoundary } from "@/client/ui/ErrorBoundary";
 import { QuizDeck } from "@/client/ui/QuizDeck";
 import { RectButton2 } from "@/client/ui/RectButton2";
 import { useReplicache } from "@/client/ui/ReplicacheContext";
 import { generateQuestionForSkillOrThrow } from "@/data/generator";
-import { questionsForReview } from "@/data/query";
 import { useQuery } from "@tanstack/react-query";
 import { formatDuration } from "date-fns/formatDuration";
 import { interval } from "date-fns/interval";

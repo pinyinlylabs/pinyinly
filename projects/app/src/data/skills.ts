@@ -29,6 +29,7 @@ export interface LearningOptions {
 
 export async function skillLearningGraph(options: {
   targetSkills: Skill[];
+  isSkillLearned: (skill: MarshaledSkill) => boolean;
   learningOptions?: LearningOptions;
 }): Promise<Graph> {
   const learningOptions = options.learningOptions ?? {};
@@ -37,12 +38,21 @@ export async function skillLearningGraph(options: {
   async function addSkill(skill: Skill): Promise<void> {
     const id = skillId(skill);
 
+    // Skip over any skills (and its dependency tree) that have already been
+    // learned.
+    if (options.isSkillLearned(id)) {
+      return;
+    }
+
     // Skip doing any work if the skill is already in the graph.
     if (graph.has(id)) {
       return;
     }
 
-    const dependencies = await skillDependencies(skill, learningOptions);
+    const dependencies = (
+      await skillDependencies(skill, learningOptions)
+    ).filter((s) => !options.isSkillLearned(skillId(s)));
+
     const node: Node = {
       skill,
       dependencies: new Set(dependencies.map(skillId)),

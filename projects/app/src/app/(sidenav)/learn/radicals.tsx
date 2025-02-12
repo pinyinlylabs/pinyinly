@@ -1,9 +1,9 @@
+import { questionsForReview } from "@/client/query";
 import { QuizDeck } from "@/client/ui/QuizDeck";
 import { RectButton2 } from "@/client/ui/RectButton2";
 import { useReplicache } from "@/client/ui/ReplicacheContext";
 import { generateQuestionForSkillOrThrow } from "@/data/generator";
 import { Question, RadicalSkill, SkillType } from "@/data/model";
-import { questionsForReview } from "@/data/query";
 import { allRadicals } from "@/dictionary/dictionary";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "expo-router";
