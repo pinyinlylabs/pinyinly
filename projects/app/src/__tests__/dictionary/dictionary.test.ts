@@ -57,6 +57,12 @@ void test(`json data can be loaded and passes the schema validation`, async () =
   await loadWords();
 });
 
+void test(`there are no alternative character/punctuations mixed into hsk words`, async () => {
+  const words = await allHsk1Words();
+  const violatingWords = new Set(words.filter((w) => /[｜（）]/u.test(w)));
+  assert.deepEqual(violatingWords, new Set());
+});
+
 void test(`there are no pronunciations mixed into word definitions`, async () => {
   const words = await loadWords();
 
