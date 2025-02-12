@@ -1,8 +1,6 @@
 import { trpc } from "@/client/trpc";
-import { SrsType } from "@/data/model";
-import { v4 } from "@/data/rizzleSchema";
+import { v4, v4Mutators } from "@/data/rizzleSchema";
 import { AppRouter } from "@/server/routers/_app";
-import { nextReview, UpcomingReview } from "@/util/fsrs";
 import { cookieSchema, r, RizzleReplicache } from "@/util/rizzle";
 import { invariant } from "@haohaohow/lib/invariant";
 import * as Sentry from "@sentry/core";
@@ -107,53 +105,7 @@ function ReplicacheProviderWithDeps({
           : undefined,
       },
       v4,
-      {
-        async initSkillState(db, { skill, now }) {
-          const exists = await db.skillState.has({ skill });
-          if (!exists) {
-            await db.skillState.set(
-              { skill },
-              { due: now, createdAt: now, srs: null },
-            );
-          }
-        },
-        async reviewSkill(tx, { skill, rating, now }) {
-          // Save a record of the review.
-          await tx.skillRating.set({ skill, createdAt: now }, { rating });
-
-          let state: UpcomingReview | null = null;
-          for await (const [
-            { createdAt: when },
-            { rating },
-          ] of tx.skillRating.scan({ skill })) {
-            state = nextReview(state, rating, when);
-          }
-
-          invariant(state !== null);
-
-          await tx.skillState.set(
-            { skill },
-            {
-              createdAt: state.created,
-              srs: {
-                type: SrsType.FsrsFourPointFive,
-                stability: state.stability,
-                difficulty: state.difficulty,
-              },
-              due: state.due,
-            },
-          );
-        },
-        async setPinyinInitialAssociation(tx, { initial, name }) {
-          await tx.pinyinInitialAssociation.set({ initial }, { name });
-        },
-        async setPinyinFinalAssociation(tx, { final, name }) {
-          await tx.pinyinFinalAssociation.set({ final }, { name });
-        },
-        async setPinyinInitialGroupTheme(tx, { groupId, themeId }) {
-          await tx.pinyinInitialGroupTheme.set({ groupId }, { themeId });
-        },
-      },
+      v4Mutators,
     );
   }, [replicacheDbName, isAuthenticated, pushMutate, pullMutate]);
 

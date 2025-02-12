@@ -1,8 +1,5 @@
 import { Rizzle } from "@/client/ui/ReplicacheContext";
-import { interval } from "date-fns/interval";
-import shuffle from "lodash/shuffle";
-import take from "lodash/take";
-import { generateQuestionForSkillOrThrow } from "./generator";
+import { generateQuestionForSkillOrThrow } from "@/data/generator";
 import {
   Question,
   QuestionFlag,
@@ -10,7 +7,18 @@ import {
   Skill,
   SkillState,
   SkillType,
-} from "./model";
+} from "@/data/model";
+import { MarshaledSkill, rSkill } from "@/data/rizzleSchema";
+import {
+  hanziWordToEnglish,
+  skillId,
+  skillLearningGraph,
+  skillReviewQueue,
+} from "@/data/skills";
+import { allHsk1Words } from "@/dictionary/dictionary";
+import { interval } from "date-fns/interval";
+import shuffle from "lodash/shuffle";
+import take from "lodash/take";
 
 export async function questionsForReview(
   r: Rizzle,
@@ -84,4 +92,28 @@ function flagsForSkillState(skillState: SkillState): QuestionFlag | undefined {
       };
     }
   }
+}
+
+export async function hsk1SkillReview(r: Rizzle): Promise<Skill[]> {
+  const learnedSkills = await r.replicache.query(async (tx) => {
+    const now = new Date();
+    const res = new Set<MarshaledSkill>();
+    for await (const [k, v] of r.query.skillState.scan(tx)) {
+      if (v.due > now) {
+        res.add(skillId(k.skill));
+      }
+    }
+    return res;
+  });
+
+  const hsk1Words = await allHsk1Words();
+
+  const graph = await skillLearningGraph({
+    targetSkills: hsk1Words.map((w) => hanziWordToEnglish(w)),
+    isSkillLearned: (skill) => learnedSkills.has(skill),
+  });
+
+  const x = rSkill();
+
+  return skillReviewQueue(graph).map((s) => x.unmarshal(s));
 }
