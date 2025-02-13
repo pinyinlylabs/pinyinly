@@ -114,6 +114,16 @@ export const loadPinyinWords = memoize(async () =>
     .parse((await import(`./pinyinWords.asset.json`)).default),
 );
 
+export const loadMissingFontGlyphs = memoize(async () =>
+  z
+    .record(z.array(z.string()))
+    .transform(
+      (x) => new Map(Object.entries(x).map(([k, v]) => [k, new Set(v)])),
+    )
+    .transform(deepReadonly)
+    .parse((await import(`./missingFontGlyphs.asset.json`)).default),
+);
+
 export const loadMnemonicThemes = memoize(async () =>
   z
     .record(
@@ -562,10 +572,10 @@ export function parseIds(
   ids: string,
   cursor: { index: number } = { index: 0 },
 ): IdsNode {
-  const char = ids[cursor.index++];
-  invariant(char != null);
-  const charCodePoint = char.codePointAt(0);
+  const charCodePoint = ids.codePointAt(cursor.index);
   invariant(charCodePoint != null);
+  const char = String.fromCodePoint(charCodePoint);
+  cursor.index += char.length;
 
   if (charCodePoint >= /* ⿰ */ 12272 && charCodePoint <= /* ⿿ */ 12287) {
     const operator = idsOperatorSchema.parse(char);
@@ -899,4 +909,17 @@ export function idsNodeToString(ids: IdsNode): string {
     case `LeafUnknownCharacter`:
       return strokeCountToCharacter(ids.strokeCount);
   }
+}
+
+/**
+ * Return true if the character can be rendered (i.e. it has a font glyph).
+ */
+export async function characterHasGlyph(character: string): Promise<boolean> {
+  const missingFontGlyphs = await loadMissingFontGlyphs();
+  for (const [_platform, missingGlyphs] of missingFontGlyphs.entries()) {
+    if (missingGlyphs.has(character)) {
+      return false;
+    }
+  }
+  return true;
 }

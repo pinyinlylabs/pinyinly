@@ -1,4 +1,5 @@
 import {
+  characterHasGlyph,
   loadHanziDecomposition,
   loadRadicals,
   loadStandardPinyinChart,
@@ -97,7 +98,11 @@ export async function skillDependencies(
       if (ids != null) {
         const idsNode = parseIds(ids);
         for (const leaf of walkIdsNode(idsNode)) {
-          if (leaf.type === `LeafCharacter` && leaf.character !== skill.hanzi) {
+          if (
+            leaf.type === `LeafCharacter` &&
+            leaf.character !== skill.hanzi &&
+            (await characterHasGlyph(leaf.character))
+          ) {
             const radicalName = await ifRadicalReturnName(leaf.character);
             const dep: Skill =
               radicalName != null
@@ -308,4 +313,24 @@ export function skillReviewQueue(graph: Graph): MarshaledSkill[] {
   }
 
   return learningOrder.reverse();
+}
+
+const skillTypeShorthandMapping: Record<SkillType, string> = {
+  [SkillType.EnglishToHanzi]: `EN → 中文`,
+  [SkillType.EnglishToRadical]: `EN → ⺅`,
+  [SkillType.HanziWordToEnglish]: `中文 → EN`,
+  [SkillType.HanziWordToPinyinFinal]: `中文 → PY⁻ᶠ`,
+  [SkillType.HanziWordToPinyinInitial]: `中文 → PYⁱ⁻`,
+  [SkillType.HanziWordToPinyinTone]: `中文 → PYⁿ`,
+  [SkillType.ImageToHanzi]: `🏞️ → 中文`,
+  [SkillType.PinyinFinalAssociation]: `PY⁻ᶠ → ✦`,
+  [SkillType.PinyinInitialAssociation]: `PYⁱ⁻ → ✦`,
+  [SkillType.RadicalToEnglish]: `⺅ → EN`,
+  [SkillType.RadicalToPinyin]: `⺅ → PY`,
+  [SkillType.PinyinToHanzi]: `PY → 中文`,
+  [SkillType.PinyinToRadical]: `PY → ⺅`,
+};
+
+export function skillTypeToShorthand(skillType: SkillType): string {
+  return skillTypeShorthandMapping[skillType];
 }
