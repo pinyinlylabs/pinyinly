@@ -81,7 +81,6 @@ export async function skillDependencies(
     case SkillType.EnglishToRadical:
     case SkillType.PinyinToRadical:
     case SkillType.RadicalToPinyin:
-    case SkillType.RadicalToEnglish:
     case SkillType.EnglishToHanzi: {
       // Learn the Hanzi -> English first. It's easier to read than write (for chinese characters).
       const dep: Skill = {
@@ -91,6 +90,7 @@ export async function skillDependencies(
       deps.push(dep);
       break;
     }
+    case SkillType.RadicalToEnglish:
     case SkillType.HanziWordToEnglish: {
       // Learn the components of a hanzi word first.
       const decompositions = await loadHanziDecomposition();
@@ -100,7 +100,7 @@ export async function skillDependencies(
         for (const leaf of walkIdsNode(idsNode)) {
           if (
             leaf.type === `LeafCharacter` &&
-            leaf.character !== skill.hanzi &&
+            leaf.character !== skill.hanzi && // todo turn into invariant?
             (await characterHasGlyph(leaf.character))
           ) {
             const radicalName = await ifRadicalReturnName(leaf.character);

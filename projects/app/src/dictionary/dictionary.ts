@@ -818,7 +818,11 @@ export function unicodeShortIdentifier(character: string): string {
   );
   return `U+${codePoint.toString(16).toUpperCase()}`;
 }
-
+/**
+ * Remove unnecessary nesting in an IDS tree.
+ *
+ * For example `⿰x⿰yz` can be flattened to `⿲xyz`.
+ */
 export function flattenIds(ids: IdsNode): IdsNode {
   if (ids.type === IdsOperator.AboveToBelow) {
     if (ids.above.type === IdsOperator.AboveToBelow) {

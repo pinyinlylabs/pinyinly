@@ -78,6 +78,41 @@ export async function questionsForReview(
   return result;
 }
 
+export async function questionsForReview2(
+  r: Rizzle,
+  options?: {
+    limit?: number;
+  },
+): Promise<Question[]> {
+  const result: Question[] = [];
+
+  for (const skill of await hsk1SkillReview(r)) {
+    const skillState = await r.replicache.query((tx) =>
+      r.query.skillState.get(tx, { skill }),
+    );
+
+    try {
+      const question = await generateQuestionForSkillOrThrow(skill);
+      if (skillState != null) {
+        question.flag ??= flagsForSkillState(skillState);
+      }
+      result.push(question);
+    } catch (e) {
+      console.error(
+        `Error while generating a question for a skill ${JSON.stringify(skill)}`,
+        e,
+      );
+      continue;
+    }
+
+    if (options?.limit != null && result.length === options.limit) {
+      break;
+    }
+  }
+
+  return result;
+}
+
 function flagsForSkillState(skillState: SkillState): QuestionFlag | undefined {
   {
     const now = new Date();

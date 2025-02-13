@@ -1,4 +1,3 @@
-import { HanziSkill, SkillType } from "#data/model.ts";
 import {
   hanziWordToEnglish,
   radicalToEnglish,
@@ -26,10 +25,7 @@ void test(skillLearningGraph.name, async () => {
   });
 
   await test(`includes the target skill in the graph`, async () => {
-    const skill: HanziSkill = {
-      type: SkillType.HanziWordToEnglish,
-      hanzi: `我`,
-    };
+    const skill = hanziWordToEnglish(`我`);
 
     assert.deepEqual(
       await skillLearningGraph({
@@ -65,23 +61,67 @@ void test(skillLearningGraph.name, async () => {
           skillId(womanRadicalToEnglish),
           {
             skill: womanRadicalToEnglish,
-            dependencies: new Set([skillId(hanziWordToEnglish(`女`))]),
+            dependencies: new Set(),
           },
         ],
         [
           skillId(childRadicalToEnglish),
           {
             skill: childRadicalToEnglish,
-            dependencies: new Set([skillId(hanziWordToEnglish(`子`))]),
+            dependencies: new Set(),
+          },
+        ],
+      ]),
+    );
+  });
+
+  await test(`includes multiple levels of decomposition for a character`, async () => {
+    assert.deepEqual(
+      await skillLearningGraph({
+        targetSkills: [hanziWordToEnglish(`外`)],
+        isSkillLearned: () => false,
+      }),
+      new Map([
+        [
+          skillId(hanziWordToEnglish(`外`)),
+          {
+            skill: hanziWordToEnglish(`外`),
+            dependencies: new Set([
+              skillId(radicalToEnglish(`夕`, `evening`)),
+              skillId(radicalToEnglish(`卜`, `divination`)),
+            ]),
           },
         ],
         [
-          skillId(hanziWordToEnglish(`女`)),
-          { skill: hanziWordToEnglish(`女`), dependencies: new Set() },
+          skillId(radicalToEnglish(`夕`, `evening`)),
+          {
+            skill: radicalToEnglish(`夕`, `evening`),
+            dependencies: new Set([
+              skillId(radicalToEnglish(`丶`, `dot`)),
+              skillId(hanziWordToEnglish(`𠂊`)),
+            ]),
+          },
         ],
         [
-          skillId(hanziWordToEnglish(`子`)),
-          { skill: hanziWordToEnglish(`子`), dependencies: new Set() },
+          skillId(radicalToEnglish(`丶`, `dot`)),
+          {
+            skill: radicalToEnglish(`丶`, `dot`),
+            dependencies: new Set([]),
+          },
+        ],
+        [
+          skillId(radicalToEnglish(`卜`, `divination`)),
+          {
+            skill: radicalToEnglish(`卜`, `divination`),
+            dependencies: new Set([]),
+          },
+        ],
+        [
+          skillId(hanziWordToEnglish(`𠂊`)),
+          {
+            skill: hanziWordToEnglish(`𠂊`),
+            dependencies: new Set([]),
+          },
         ],
       ]),
     );
@@ -116,8 +156,6 @@ void test(skillReviewQueue.name, async () => {
       isSkillLearned: () => false,
     });
     assert.deepEqual(skillReviewQueue(graph), [
-      skillId(hanziWordToEnglish(`子`)),
-      skillId(hanziWordToEnglish(`女`)),
       skillId(radicalToEnglish(`子`, `child`)),
       skillId(radicalToEnglish(`女`, `woman`)),
       skillId(hanziWordToEnglish(`好`)),
@@ -132,7 +170,6 @@ void test(skillReviewQueue.name, async () => {
     });
 
     assert.deepEqual(skillReviewQueue(graph), [
-      skillId(hanziWordToEnglish(`女`)),
       skillId(radicalToEnglish(`女`, `woman`)),
       skillId(hanziWordToEnglish(`好`)),
     ]);
