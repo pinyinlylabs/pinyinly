@@ -93,9 +93,7 @@ export async function questionsForReview2(
 
     try {
       const question = await generateQuestionForSkillOrThrow(skill);
-      if (skillState != null) {
-        question.flag ??= flagsForSkillState(skillState);
-      }
+      question.flag ??= flagsForSkillState(skillState);
       result.push(question);
     } catch (e) {
       console.error(
@@ -113,19 +111,22 @@ export async function questionsForReview2(
   return result;
 }
 
-function flagsForSkillState(skillState: SkillState): QuestionFlag | undefined {
-  {
-    const now = new Date();
-    const overdueDate = new Date(
-      skillState.due.getTime() + 24 * 60 * 60 * 1000,
-    );
+function flagsForSkillState(
+  skillState: SkillState | undefined,
+): QuestionFlag | undefined {
+  if (skillState == null) {
+    return {
+      type: QuestionFlagType.NewSkill,
+    };
+  }
+  const now = new Date();
+  const overdueDate = new Date(skillState.due.getTime() + 24 * 60 * 60 * 1000);
 
-    if (now >= overdueDate) {
-      return {
-        type: QuestionFlagType.Overdue,
-        interval: interval(overdueDate.getTime(), now),
-      };
-    }
+  if (now >= overdueDate) {
+    return {
+      type: QuestionFlagType.Overdue,
+      interval: interval(overdueDate.getTime(), now),
+    };
   }
 }
 
