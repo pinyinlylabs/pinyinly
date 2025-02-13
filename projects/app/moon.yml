@@ -164,6 +164,15 @@ tasks:
     env:
       NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
 
+  generateMissingFontGlyphs:
+    command: yarn tsx ./bin/generateMissingFontGlyphs.ts
+    options:
+      runInCI: false
+      envFile: .env.local
+      cache: false
+    env:
+      NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
+
   generateMnemonicTheme:
     command: yarn tsx ./bin/generateMnemonicTheme.ts
     options:

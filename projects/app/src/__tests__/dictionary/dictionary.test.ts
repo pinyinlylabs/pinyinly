@@ -11,6 +11,7 @@ import {
   loadHanziDecomposition,
   loadHhPinyinChart,
   loadHmmPinyinChart,
+  loadMissingFontGlyphs,
   loadMmPinyinChart,
   loadMnemonicThemeChoices,
   loadMnemonicThemes,
@@ -24,8 +25,10 @@ import {
   parsePinyinTone,
   PinyinChart,
   splitTonelessPinyin,
+  unicodeShortIdentifier,
   walkIdsNode,
 } from "#dictionary/dictionary.ts";
+import { invariant } from "@haohaohow/lib/invariant";
 import assert from "node:assert/strict";
 import test from "node:test";
 
@@ -55,6 +58,44 @@ void test(`json data can be loaded and passes the schema validation`, async () =
   await loadRadicals();
   await loadStandardPinyinChart();
   await loadWords();
+});
+
+void test(`expect missing glyphs to be included decomposition data`, async () => {
+  const allChars = new Set(
+    (await allRadicalPrimaryForms())
+      .concat(await allHsk1Words())
+      .concat(await allHsk2Words())
+      .concat(await allHsk3Words())
+      // Split words into characters because decomposition is per-character.
+      .flatMap((x) => Array.from(x)),
+  );
+  const allComponents = new Set<string>();
+  const decompositions = await loadHanziDecomposition();
+
+  for (const char of allChars) {
+    allComponents.add(char);
+    const ids = decompositions.get(char);
+    invariant(
+      ids != null,
+      `character "${char}" (${unicodeShortIdentifier(char)}) has no decomposition`,
+    );
+    const idsNode = parseIds(ids);
+    for (const leaf of walkIdsNode(idsNode)) {
+      if (leaf.type === `LeafCharacter`) {
+        allComponents.add(leaf.character);
+      }
+    }
+  }
+
+  const knownMissingGlyphs = new Set<string>([
+    ...(await loadMissingFontGlyphs()).values().flatMap((x) => Array.from(x)),
+  ]);
+  for (const char of allComponents) {
+    // eslint-disable-next-line drizzle/enforce-delete-with-where
+    knownMissingGlyphs.delete(char);
+  }
+
+  assert.deepEqual(knownMissingGlyphs, new Set());
 });
 
 void test(`there are no alternative character/punctuations mixed into hsk words`, async () => {
@@ -673,6 +714,14 @@ void test(`parseIds handles 2 depth`, () => {
     });
     assert.deepEqual(cursor, { index: 8 });
   }
+});
+
+void test(`parseIds regression tests`, () => {
+  assert.deepEqual(parseIds(`⿱丿𭕄`), {
+    type: IdsOperator.AboveToBelow,
+    above: { type: `LeafCharacter`, character: `丿` },
+    below: { type: `LeafCharacter`, character: `𭕄` },
+  });
 });
 
 void test(`walkIdsNode`, () => {
