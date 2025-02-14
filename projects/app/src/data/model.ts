@@ -122,6 +122,7 @@ export type RadicalSkill = RadicalNameSkill | RadicalPinyinSkill;
 export type Skill = HanziSkill | RadicalSkill | PinyinAssociationSkill;
 
 export enum QuestionFlagType {
+  NewSkill,
   Overdue,
   PreviousMistake,
   WeakWord,
@@ -140,8 +141,13 @@ export interface QuestionFlagWeakWord {
   type: QuestionFlagType.WeakWord;
 }
 
+export interface QuestionFlagNewSkill {
+  type: QuestionFlagType.NewSkill;
+}
+
 export type QuestionFlag =
   | QuestionFlagWeakWord
+  | QuestionFlagNewSkill
   | QuestionFlagOverdue
   | QuestionFlagPreviousMistake;
 

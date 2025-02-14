@@ -27,7 +27,7 @@ export default function ReviewsPage() {
   useTimeout(show, 2000);
 
   const questions2 = useQuery({
-    queryKey: [ReviewsPage.name, `hsk1SkillReview`],
+    queryKey: [ReviewsPage.name, `hsk1SkillReview`, id],
     queryFn: async () => {
       return await questionsForReview2(r, { limit: 10 });
     },
@@ -54,6 +54,7 @@ export default function ReviewsPage() {
 
         return skillState;
       }
+      return null;
     },
   });
 
@@ -84,7 +85,7 @@ export default function ReviewsPage() {
             👏 You’re all caught up on your reviews!
           </Text>
           {nextNotYetDueSkillState.isLoading ||
-          nextNotYetDueSkillState.data === undefined ? null : (
+          nextNotYetDueSkillState.data == null ? null : (
             <Text className="hhh-text-caption">
               Next review in{` `}
               {formatDuration(

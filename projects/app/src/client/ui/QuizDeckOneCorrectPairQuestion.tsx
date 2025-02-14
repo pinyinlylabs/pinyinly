@@ -239,58 +239,7 @@ export const QuizDeckOneCorrectPairQuestion = memo(
           />
         }
       >
-        {flag != null ? (
-          <View className="flex-row items-center gap-1">
-            {flag.type === QuestionFlagType.Overdue ? (
-              <>
-                <Image
-                  source={require(`@/assets/icons/alarm.svg`)}
-                  className="danger-theme h-[24px] w-[24px] flex-shrink text-accent-10"
-                  tintColor="currentColor"
-                />
-                <View className="danger-theme">
-                  <Text className="font-bold uppercase text-accent-10">
-                    Overdue by{` `}
-                    {
-                      formatDuration(intervalToDuration(flag.interval), {
-                        format: [
-                          `years`,
-                          `months`,
-                          `weeks`,
-                          `days`,
-                          `hours`,
-                          `minutes`,
-                        ],
-                        zero: false,
-                        delimiter: `, `,
-                      }).split(`, `)[0]
-                    }
-                  </Text>
-                </View>
-              </>
-            ) : null}
-            {flag.type === QuestionFlagType.WeakWord ? (
-              <>
-                {/* <Image
-              source={require("@/assets/target-red.svg")}
-              style={{ flexShrink: 1, width: 33, height: 30 }}
-            /> */}
-                <View className="danger-theme">
-                  <Text className="font-bold uppercase text-accent-10">
-                    Weak word
-                  </Text>
-                </View>
-              </>
-            ) : null}
-            {flag.type === QuestionFlagType.PreviousMistake ? (
-              <View className="warning-theme">
-                <Text className="font-bold uppercase text-accent-10">
-                  Previous mistake
-                </Text>
-              </View>
-            ) : null}
-          </View>
-        ) : null}
+        {flag != null ? <FlagText flag={flag} /> : null}
         <View>
           <Text className="text-xl font-bold text-text">{prompt}</Text>
         </View>
@@ -333,6 +282,83 @@ export const QuizDeckOneCorrectPairQuestion = memo(
     );
   },
 );
+
+const FlagText = ({ flag }: { flag: QuestionFlag }) => {
+  switch (flag.type) {
+    case QuestionFlagType.NewSkill:
+      return (
+        <View className={flagViewClass({ class: `success-theme` })}>
+          <Image
+            source={require(`@/assets/icons/plant-filled.svg`)}
+            className={flagIconClass()}
+            tintColor="currentColor"
+          />
+          <Text className={flagTextClass()}>New skill</Text>
+        </View>
+      );
+    case QuestionFlagType.Overdue:
+      return (
+        <View className={flagViewClass({ class: `danger-theme` })}>
+          <Image
+            source={require(`@/assets/icons/alarm.svg`)}
+            className={flagIconClass()}
+            tintColor="currentColor"
+          />
+          <Text className={flagTextClass()}>
+            Overdue by{` `}
+            {
+              formatDuration(intervalToDuration(flag.interval), {
+                format: [
+                  `years`,
+                  `months`,
+                  `weeks`,
+                  `days`,
+                  `hours`,
+                  `minutes`,
+                ],
+                zero: false,
+                delimiter: `, `,
+              }).split(`, `)[0]
+            }
+          </Text>
+        </View>
+      );
+    case QuestionFlagType.PreviousMistake:
+      return (
+        <View className={flagViewClass({ class: `warning-theme` })}>
+          <Image
+            source={require(`@/assets/icons/repeat.svg`)}
+            className={flagIconClass()}
+            tintColor="currentColor"
+          />
+          <Text className={flagTextClass()}>Previous mistake</Text>
+        </View>
+      );
+    case QuestionFlagType.WeakWord:
+      return (
+        <View className={flagViewClass({ class: `danger-theme` })}>
+          <Image
+            source={require(`@/assets/icons/flag.svg`)}
+            className={flagIconClass()}
+            tintColor="currentColor"
+          />
+          <Text className={flagTextClass()}>Weak word</Text>
+        </View>
+      );
+  }
+};
+
+const flagViewClass = tv({
+  base: `flex-row items-center gap-1`,
+});
+
+const flagIconClass = tv({
+  base: `h-[24px] w-[24px] flex-shrink text-accent-10`,
+});
+
+const flagTextClass = tv({
+  base: `font-bold uppercase text-accent-10`,
+});
 
 const ShowChoice = ({
   choice,
