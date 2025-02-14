@@ -15,13 +15,14 @@ import {
   useTheme,
 } from "@react-navigation/native";
 import {
+  createStackNavigator,
   StackCardInterpolatedStyle,
   StackCardInterpolationProps,
   TransitionPresets,
-  createStackNavigator,
 } from "@react-navigation/stack";
 import { useQueries } from "@tanstack/react-query";
 import { Asset } from "expo-asset";
+import { Audio } from "expo-av";
 import { Image } from "expo-image";
 import { Href, Link, usePathname } from "expo-router";
 import sortBy from "lodash/sortBy";
@@ -69,6 +70,19 @@ export const QuizDeck = ({
   >(() => new Map());
   const r = useReplicache();
 
+  const successSound = useMemo(
+    () => Audio.Sound.createAsync(require(`@/assets/audio/sparkle.mp3`)),
+    [],
+  );
+
+  const playSuccessSound = () => {
+    successSound
+      .then((x) => x.sound.playAsync())
+      .catch((e: unknown) => {
+        console.error(`Failed to play \`sparkle.mp3\` sound`, e);
+      });
+  };
+
   // The number of questions in a row correctly answered.
   const [streakCount, setStreakCount] = useState(0);
 
@@ -113,6 +127,10 @@ export const QuizDeck = ({
       invariant(ratings.length > 0, `ratings must not be empty`);
 
       const success = ratings.every(({ rating }) => rating !== Rating.Again);
+
+      if (success) {
+        playSuccessSound();
+      }
 
       for (const { skill, rating } of ratings) {
         r.mutate
