@@ -6,7 +6,7 @@ import { drizzle } from "drizzle-orm/pglite";
 import { migrate } from "drizzle-orm/pglite/migrator";
 import { TestContext } from "node:test";
 
-const migrationsFolder = import.meta.dirname + `/../../../../drizzle`;
+const migrationsFolder = import.meta.dirname + `/../../../drizzle`;
 
 let dataDir: File | Blob | undefined;
 async function createTestDb(t: TestContext) {

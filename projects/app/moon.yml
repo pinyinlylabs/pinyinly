@@ -13,6 +13,9 @@ fileGroups:
   buildEasUpdateOutdir:
     - dist/eas/
 
+toolchain:
+  default: "node"
+
 workspace:
   inheritedTasks:
     rename:
@@ -201,11 +204,10 @@ tasks:
       NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
 
   generateWordDictionary:
-    command: yarn tsx ./bin/generateWordDictionary.ts
+    command: yarn tsx ./bin/generateWordDictionary.tsx
+    preset: watcher
     options:
-      runInCI: false
       envFile: .env.local
-      cache: false
 
   expoDoctor:
     command: npx -y expo-doctor@1.12.5
@@ -233,16 +235,17 @@ tasks:
       NODE_OPTIONS: --import tsx $NODE_OPTIONS
 
   test:
-    command: node --test --test-reporter=spec --import tsx "src/**/*.test.ts"
+    command: node --test --test-reporter=spec --import tsx "test/**/*.test.ts"
     inputs:
       - "src"
+      - "test"
       - "*.{json,cjs,js,ts}"
       - "/.github/workflows" # There is a test that checks workflow environment variables.
     options:
       envFile: .env.local
 
   testWatch:
-    command: node --test --watch --import tsx "src/**/*.test.ts"
+    command: node --test --watch --import tsx "test/**/*.test.ts"
     local: true
     options:
       envFile: .env.local

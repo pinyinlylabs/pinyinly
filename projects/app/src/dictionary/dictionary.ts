@@ -1,4 +1,4 @@
-import { PinyinInitialGroupId } from "@/data/model";
+import { HanziWord, PartOfSpeech, PinyinInitialGroupId } from "@/data/model";
 import { rMnemonicThemeId, rPinyinInitialGroupId } from "@/data/rizzleSchema";
 import { deepReadonly, sortComparatorNumber } from "@/util/collections";
 import { invariant } from "@haohaohow/lib/invariant";
@@ -91,7 +91,7 @@ export function parsePinyinTone(
 export function splitPinyin(
   pinyin: string,
   chart: PinyinChart,
-): readonly [initial: string, final: string, tone: number] | null {
+): { initial: string; final: string; tone: number } | null {
   const toneResult = parsePinyinTone(pinyin);
   invariant(toneResult != null, `Could not parse tone for pinyin ${pinyin}`);
   const [tonelessPinyin, tone] = toneResult;
@@ -104,7 +104,7 @@ export function splitPinyin(
 
   const [initial, final] = initialFinalResult;
 
-  return [initial, final, tone];
+  return { initial, final, tone };
 }
 
 export const loadPinyinWords = memoize(async () =>
@@ -233,11 +233,20 @@ export const loadRadicalNameMnemonics = memoize(async () =>
     .parse((await import(`./radicalNameMnemonics.asset.json`)).default),
 );
 
-export const allHsk1Words = memoize(async () =>
-  z
-    .array(z.string())
+export const wordListSchema = z.array(
+  z.string().transform((x) => x as HanziWord),
+);
+
+export const allRadicalHanziWords = memoize(async () =>
+  wordListSchema
     .transform(deepReadonly)
-    .parse((await import(`./hsk1Words.asset.json`)).default),
+    .parse((await import(`./radicalsHanziWords.asset.json`)).default),
+);
+
+export const allHsk1HanziWords = memoize(async () =>
+  wordListSchema
+    .transform(deepReadonly)
+    .parse((await import(`./hsk1HanziWords.asset.json`)).default),
 );
 
 export const allHsk2Words = memoize(async () =>
@@ -268,6 +277,89 @@ export const loadWords = memoize(async () =>
     .transform((x) => new Map(x))
     .transform(deepReadonly)
     .parse((await import(`./words.asset.json`)).default),
+);
+
+export const hanziWordMeaningSchema = z.object({
+  gloss: z.array(z.string()),
+  pinyin: z
+    .array(z.string({ description: `space separated pinyin for each word` }), {
+      description: `all valid pinyin variations for this meaning (might be omitted for radicals without pronunciation)`,
+    })
+    .optional(),
+  example: z.string().optional(),
+  partOfSpeech: z.enum([
+    `noun`,
+    `verb`,
+    `adjective`,
+    `adverb`,
+    `pronoun`,
+    `preposition`,
+    `conjunction`,
+    `interjection`,
+    `measureWord`,
+    `particle`,
+    `radical`,
+  ]),
+  visualVariants: z
+    .array(
+      z.string({
+        description: `Hanzi with the same meaning but visually different.`,
+      }),
+      {
+        description: `Only included in rare cases (e.g. radicals with multiple visual forms). `,
+      },
+    )
+    .optional(),
+  definition: z.string(),
+});
+
+export type HanziWordMeaning = z.infer<typeof hanziWordMeaningSchema>;
+
+export const hanziWordsSchema = z
+  .array(
+    z.tuple([
+      z.string(), // hanzi
+      z.array(
+        z.tuple([
+          z.string(), // meaning key
+          hanziWordMeaningSchema,
+        ]),
+      ),
+    ]),
+  )
+  .transform((x) => new Map(x.map(([k, v]) => [k, new Map(v)])));
+
+export const dictionarySchema = z
+  .array(
+    z.tuple([
+      z.string().transform((x) => x as HanziWord),
+      hanziWordMeaningSchema,
+    ]),
+  )
+  .transform((x) => new Map(x));
+
+export const loadDictionary = memoize(async () =>
+  dictionarySchema
+    .transform(deepReadonly)
+    .parse((await import(`./dictionary.asset.json`)).default),
+);
+
+export const manualWordsSchema = z
+  .array(
+    z.tuple([
+      z.string(),
+      z.object({
+        pinyin: z.array(z.string()).optional(),
+        definitions: z.array(z.string()).optional(),
+      }),
+    ]),
+  )
+  .transform((x) => new Map(x));
+
+export const loadManualWords = memoize(async () =>
+  manualWordsSchema
+    .transform(deepReadonly)
+    .parse((await import(`./wordsManual.asset.json`)).default),
 );
 
 export const loadRadicals = memoize(async () =>
@@ -373,6 +465,11 @@ export const lookupRadicalPinyinMnemonics = async (hanzi: string) =>
 
 export const lookupWord = async (hanzi: string) =>
   (await loadWords()).get(hanzi) ?? null;
+
+export const lookupHanziWord = async (
+  hanziWord: HanziWord,
+): Promise<DeepReadonly<HanziWordMeaning> | null> =>
+  (await loadDictionary()).get(hanziWord) ?? null;
 
 export const lookupRadicalByHanzi = async (hanzi: string) =>
   (await loadRadicalsByHanzi()).get(hanzi) ?? null;
@@ -926,4 +1023,48 @@ export async function characterHasGlyph(character: string): Promise<boolean> {
     }
   }
   return true;
+}
+
+export function shorthandPartOfSpeech(partOfSpeech: PartOfSpeech) {
+  switch (partOfSpeech) {
+    case PartOfSpeech.Adjective:
+      return `adj.`;
+    case PartOfSpeech.Adverb:
+      return `adv.`;
+    case PartOfSpeech.Noun:
+      return `noun`;
+    case PartOfSpeech.Verb:
+      return `verb`;
+    case PartOfSpeech.Pronoun:
+      return `pron.`;
+    case PartOfSpeech.Preposition:
+      return `prep.`;
+    case PartOfSpeech.Conjunction:
+      return `conj.`;
+    case PartOfSpeech.Interjection:
+      return `intj.`;
+    case PartOfSpeech.MeasureWord:
+      return `mw.`;
+    case PartOfSpeech.Particle:
+      return `part.`;
+  }
+}
+
+export function hanziFromHanziWord(hanziWord: HanziWord): string {
+  const result = /^(.+?):/.exec(hanziWord);
+  invariant(result != null, `couldn't parse HanziWord ${hanziWord}`);
+
+  const [, hanzi] = result;
+  invariant(hanzi != null, `couldn't parse hanzi (before :)`);
+
+  return hanzi;
+}
+
+export function meaningKeyFromHanziWord(hanziWord: HanziWord): string {
+  const hanzi = hanziFromHanziWord(hanziWord);
+  return hanziWord.slice(hanzi.length + 1 /* skip the : */);
+}
+
+export function buildHanziWord(hanzi: string, meaningKey: string): HanziWord {
+  return `${hanzi}:${meaningKey}`;
 }

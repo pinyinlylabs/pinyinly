@@ -1,5 +1,5 @@
-import { SkillType } from "#data/model.ts";
 import { supportedSchemas } from "#data/rizzleSchema.ts";
+import { englishToHanziWord } from "#data/skills.ts";
 import { Drizzle } from "#server/lib/db.ts";
 import { computeCvrEntities, pull, push } from "#server/lib/replicache.ts";
 import * as s from "#server/schema.ts";
@@ -145,10 +145,7 @@ void test(`push()`, async (t) => {
           id: 1,
           name: `addSkillState`,
           args: schema.initSkillState.marshalArgs({
-            skill: {
-              type: SkillType.EnglishToHanzi,
-              hanzi: `我`,
-            },
+            skill: englishToHanziWord(`我:i`),
             now,
           }),
           timestamp: 1,
@@ -170,10 +167,7 @@ void test(`push()`, async (t) => {
         assert.deepEqual(skillState.due, now);
         assert.deepEqual(skillState.createdAt, now);
         assert.equal(skillState.srs, null);
-        assert.deepEqual(skillState.skill, {
-          type: SkillType.EnglishToHanzi,
-          hanzi: `我`,
-        });
+        assert.deepEqual(skillState.skill, englishToHanziWord(`我:i`));
       });
 
       await txTest(`skips already processed mutations`, async (tx) => {
@@ -197,10 +191,7 @@ void test(`push()`, async (t) => {
           id: client.lastMutationId, // use the same ID
           name: `addSkillState`,
           args: schema.initSkillState.marshalArgs({
-            skill: {
-              type: SkillType.EnglishToHanzi,
-              hanzi: `我`,
-            },
+            skill: englishToHanziWord(`我:i`),
             now: new Date(),
           }),
           timestamp: 1,
@@ -409,10 +400,7 @@ void test(`pull()`, async (t) => {
                 userId: user.id,
                 due: new Date(),
                 srs: null,
-                skill: {
-                  type: SkillType.EnglishToHanzi,
-                  hanzi: `我`,
-                },
+                skill: englishToHanziWord(`我:i`),
               },
             ])
             .returning();
@@ -559,10 +547,7 @@ void test(`pull()`, async (t) => {
               userId: user.id,
               due: now,
               srs: null,
-              skill: {
-                type: SkillType.EnglishToHanzi,
-                hanzi: `我`,
-              },
+              skill: englishToHanziWord(`我:i`),
             },
           ])
           .returning();
@@ -609,10 +594,7 @@ void test(`pull()`, async (t) => {
               userId: user.id,
               due: now,
               srs: null,
-              skill: {
-                type: SkillType.EnglishToHanzi,
-                hanzi: `我`,
-              },
+              skill: englishToHanziWord(`我:i`),
             },
           ])
           .returning();
@@ -663,10 +645,7 @@ void test(`pull()`, async (t) => {
           .values([
             {
               userId: user.id,
-              skill: {
-                type: SkillType.EnglishToHanzi,
-                hanzi: `我`,
-              },
+              skill: englishToHanziWord(`我:i`),
               rating: Rating.Good,
               createdAt: now,
             },
@@ -766,20 +745,14 @@ void test(`computeCvr()`, async (t) => {
           .values([
             {
               userId: user1.id,
-              skill: {
-                type: SkillType.EnglishToHanzi,
-                hanzi: `我`,
-              },
+              skill: englishToHanziWord(`我:i`),
               srs: null,
               due: new Date(),
               createdAt: new Date(),
             },
             {
               userId: user2.id,
-              skill: {
-                type: SkillType.EnglishToHanzi,
-                hanzi: `我`,
-              },
+              skill: englishToHanziWord(`我:i`),
               srs: null,
               due: new Date(),
               createdAt: new Date(),
@@ -815,18 +788,12 @@ void test(`computeCvr()`, async (t) => {
           .values([
             {
               userId: user1.id,
-              skill: {
-                type: SkillType.EnglishToHanzi,
-                hanzi: `我`,
-              },
+              skill: englishToHanziWord(`我:i`),
               rating: Rating.Again,
             },
             {
               userId: user2.id,
-              skill: {
-                type: SkillType.EnglishToHanzi,
-                hanzi: `我`,
-              },
+              skill: englishToHanziWord(`我:i`),
               rating: Rating.Good,
             },
           ])

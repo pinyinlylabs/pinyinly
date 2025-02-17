@@ -6,7 +6,7 @@ import test from "node:test";
 import { z } from "zod";
 
 void test(`no luminance layers in lottie animations (incompatible with lottie-ios)`, async () => {
-  const projectRoot = path.join(import.meta.dirname, `../../..`);
+  const projectRoot = path.join(import.meta.dirname, `../..`);
   const assetsPath = path.join(projectRoot, `src/assets`);
 
   // Find all files in `assetsPath` ending in .lottie.json using glob.

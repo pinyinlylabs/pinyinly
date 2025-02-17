@@ -1,5 +1,6 @@
 import { SkillType } from "#data/model.ts";
 import { rSkill, rSkillType } from "#data/rizzleSchema.ts";
+import { englishToHanziWord, hanziWordToEnglish } from "#data/skills.ts";
 import { r } from "#util/rizzle.ts";
 import assert from "node:assert/strict";
 import test, { TestContext } from "node:test";
@@ -46,15 +47,8 @@ void test(`skillId as key`, async (t) => {
 
   // Marshal and unmarshal round tripping
   for (const [skill, skillId] of [
-    [{ type: SkillType.EnglishToHanzi, hanzi: `好` }, `eh:好`],
-    [
-      { type: SkillType.RadicalToEnglish, hanzi: `好`, name: `good` },
-      `re:好:good`,
-    ],
-    [
-      { type: SkillType.RadicalToPinyin, hanzi: `好`, pinyin: `hǎo` },
-      `rp:好:hǎo`,
-    ],
+    [englishToHanziWord(`好:good`), `eh:好:good`],
+    [hanziWordToEnglish(`好:good`), `he:好:good`],
   ] as const) {
     using tx = makeMockTx(t);
     await posts.set(tx, { skill }, { text: `hello` });
@@ -76,17 +70,18 @@ void test(`skillType()`, async (t) => {
 
   // Marshal and unmarshal round tripping
   for (const skillType of [
-    SkillType.RadicalToEnglish,
-    SkillType.EnglishToRadical,
-    SkillType.RadicalToPinyin,
-    SkillType.PinyinToRadical,
+    SkillType.Deprecated_EnglishToRadical,
+    SkillType.Deprecated_PinyinToRadical,
+    SkillType.Deprecated_RadicalToEnglish,
+    SkillType.Deprecated_RadicalToPinyin,
+    SkillType.Deprecated,
+    SkillType.EnglishToHanziWord,
     SkillType.HanziWordToEnglish,
-    SkillType.HanziWordToPinyinInitial,
     SkillType.HanziWordToPinyinFinal,
+    SkillType.HanziWordToPinyinInitial,
     SkillType.HanziWordToPinyinTone,
-    SkillType.EnglishToHanzi,
-    SkillType.PinyinToHanzi,
-    SkillType.ImageToHanzi,
+    SkillType.ImageToHanziWord,
+    SkillType.PinyinToHanziWord,
   ] as const) {
     using tx = makeMockTx(t);
 
@@ -106,9 +101,7 @@ void test(`skillId()`, async (t) => {
   });
 
   // Marshal and unmarshal round tripping
-  for (const skill of [
-    { type: SkillType.EnglishToHanzi, hanzi: `好` },
-  ] as const) {
+  for (const skill of [hanziWordToEnglish(`好:good`)] as const) {
     using tx = makeMockTx(t);
     await posts.set(tx, { id: `1` }, { skill });
     const [, marshaledData] = tx.set.mock.calls[0]!.arguments;

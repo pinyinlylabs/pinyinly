@@ -1,8 +1,9 @@
 import {
-  allHsk1Words,
+  allHsk1HanziWords,
   allHsk2Words,
   allHsk3Words,
   allRadicalPrimaryForms,
+  hanziFromHanziWord,
   loadHanziDecomposition,
   parseIds,
   unicodeShortIdentifier,
@@ -38,7 +39,7 @@ invariant(pingFang != null);
 
 const allChars = new Set(
   (await allRadicalPrimaryForms())
-    .concat(await allHsk1Words())
+    .concat((await allHsk1HanziWords()).map((w) => hanziFromHanziWord(w)))
     .concat(await allHsk2Words())
     .concat(await allHsk3Words())
     // Split words into characters because decomposition is per-character.

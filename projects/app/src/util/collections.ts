@@ -162,3 +162,15 @@ export function mergeSortComparators<T>(
     return 0;
   };
 }
+
+export function inverseSortComparator<T>(
+  comparator: SortComparator<T>,
+): SortComparator<T> {
+  return (a, b) => {
+    const result = comparator(a, b);
+    if (result != 0) {
+      return -1 * result;
+    }
+    return 0;
+  };
+}

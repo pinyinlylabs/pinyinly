@@ -3,7 +3,7 @@ declare global {
     // Support for asset files. Anything that starts with a dot and ends with a
     // known extension.
     (id: `${string}.${`ttf` | `otf` | `svg` | `png` | `json`}`): string;
-    (id: `${string}.${`mp3`}`): import("expo-av").AVPlaybackSource;
+    (id: `${string}.mp3`): import("expo-av").AVPlaybackSource;
   }
 
   namespace NodeJS {

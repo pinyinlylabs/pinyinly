@@ -1,5 +1,5 @@
 import { trpc } from "@/client/trpc";
-import { v4, v4Mutators } from "@/data/rizzleSchema";
+import { v5, v5Mutators } from "@/data/rizzleSchema";
 import { AppRouter } from "@/server/routers/_app";
 import { cookieSchema, r, RizzleReplicache } from "@/util/rizzle";
 import { invariant } from "@haohaohow/lib/invariant";
@@ -17,7 +17,7 @@ import { useAuth, UseAuth2Data } from "./auth";
 import { kvStore } from "./replicacheOptions";
 import { useRenderGuard } from "./util";
 
-export type Rizzle = RizzleReplicache<typeof v4>;
+export type Rizzle = RizzleReplicache<typeof v5>;
 
 const ReplicacheContext = createContext<Rizzle | null>(null);
 
@@ -104,8 +104,8 @@ function ReplicacheProviderWithDeps({
             }
           : undefined,
       },
-      v4,
-      v4Mutators,
+      v5,
+      v5Mutators,
     );
   }, [replicacheDbName, isAuthenticated, pushMutate, pullMutate]);
 

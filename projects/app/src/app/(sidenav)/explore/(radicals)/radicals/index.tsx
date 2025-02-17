@@ -25,11 +25,6 @@ export default function RadicalsPage() {
             will help you recognize patterns, understand character meanings, and
             build a solid foundation for learning Chinese.
           </Text>
-          <Link href="/learn/radicals" asChild>
-            <RectButton2 variant="filled" accent>
-              Practice
-            </RectButton2>
-          </Link>
         </View>
 
         {query.data == null ? (

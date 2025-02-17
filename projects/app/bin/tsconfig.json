@@ -3,6 +3,7 @@
     "module": "NodeNext",
     "target": "ESNext",
     "moduleResolution": "NodeNext",
+    "jsx": "react",
     "noEmit": true,
     "emitDeclarationOnly": false,
     "noUncheckedIndexedAccess": true,

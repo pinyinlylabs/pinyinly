@@ -709,7 +709,7 @@ const enum_ = <T extends EnumType, U extends string = string>(
     z.string().transform((x, ctx) => {
       const unmarshaled = unmarshalMap.get(x as U);
       if (unmarshaled == null) {
-        return invalid(ctx, `couldn't unmarshaled value for ${x}`);
+        return invalid(ctx, `couldn't unmarshal value for ${x}`);
       }
       return unmarshaled;
     }),

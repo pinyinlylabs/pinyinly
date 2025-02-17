@@ -6,10 +6,7 @@ export function jsonStringifyIndentOneLevel(
   indentString = ``,
 ): string {
   if (Array.isArray(obj)) {
-    // Leave arrays of numbers/strings on one line.
-    if (typeof obj[0] === `object`) {
-      return `[\n${obj.map((x) => indentString + JSON.stringify(x)).join(`,\n`)}\n]`;
-    }
+    return `[\n${obj.map((x) => indentString + JSON.stringify(x)).join(`,\n`)}\n]`;
   } else if (typeof obj === `object` && obj !== null) {
     return `{\n${Object.entries(obj)
       .map(

@@ -2,10 +2,14 @@ import { questionsForReview } from "@/client/query";
 import { QuizDeck } from "@/client/ui/QuizDeck";
 import { useReplicache } from "@/client/ui/ReplicacheContext";
 import { generateQuestionForSkillOrThrow } from "@/data/generator";
-import { HanziSkill, Question, QuestionType, SkillType } from "@/data/model";
-import { allHsk1Words } from "@/dictionary/dictionary";
+import {
+  HanziWordSkill,
+  Question,
+  QuestionType,
+  SkillType,
+} from "@/data/model";
+import { allHsk1HanziWords } from "@/dictionary/dictionary";
 import { useQuery } from "@tanstack/react-query";
-import isEqual from "lodash/isEqual";
 import { useId } from "react";
 import { Text, View } from "react-native";
 
@@ -18,7 +22,7 @@ export default function LearnHsk1Page() {
     queryFn: async () => {
       const quizSize = 10;
 
-      const hsk1Words = await allHsk1Words();
+      const hsk1HanziWords = await allHsk1HanziWords();
 
       // Start with practicing skills that are due
       const questions: Question[] = (
@@ -26,7 +30,7 @@ export default function LearnHsk1Page() {
           limit: quizSize,
           sampleSize: 50,
           filter: (skill) =>
-            `hanzi` in skill && hsk1Words.includes(skill.hanzi),
+            `hanziWord` in skill && hsk1HanziWords.includes(skill.hanziWord),
           skillTypes: [SkillType.HanziWordToEnglish],
         })
       ).map(([, , question]) => question);
@@ -34,11 +38,11 @@ export default function LearnHsk1Page() {
       // Fill the rest with new skills
       // Create skills to pad out the rest of the quiz
       if (questions.length < quizSize) {
-        const hsk1Skills: HanziSkill[] = [];
-        for (const hanzi of hsk1Words) {
+        const hsk1Skills: HanziWordSkill[] = [];
+        for (const hanziWord of hsk1HanziWords) {
           hsk1Skills.push({
             type: SkillType.HanziWordToEnglish,
-            hanzi,
+            hanziWord,
           });
         }
 
@@ -49,8 +53,12 @@ export default function LearnHsk1Page() {
               !questions.some(
                 (q) =>
                   q.type === QuestionType.OneCorrectPair &&
-                  (isEqual(q.answer.a.skill, skill.hanzi) ||
-                    isEqual(q.answer.b.skill, skill.hanzi)),
+                  ((q.answer.a.skill != null &&
+                    `hanziWord` in q.answer.a.skill &&
+                    q.answer.a.skill.hanziWord === skill.hanziWord) ||
+                    (q.answer.b.skill != null &&
+                      `hanziWord` in q.answer.b.skill &&
+                      q.answer.b.skill.hanziWord === skill.hanziWord)),
               ) &&
               // Don't include skills that are already practiced
               !(await r.query.skillState.has(tx, { skill }))

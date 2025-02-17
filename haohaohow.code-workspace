@@ -30,5 +30,12 @@
     "files.exclude": {
       ".yarn/releases/*.*": true,
     },
+    "tailwindCSS.files.exclude": [
+      "**/.git/**",
+      "**/node_modules/**",
+      "**/.hg/**",
+      "**/.svn/**",
+      "**/.moon/cache/**",
+    ],
   },
 }

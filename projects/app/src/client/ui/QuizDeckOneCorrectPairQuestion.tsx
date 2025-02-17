@@ -128,14 +128,10 @@ export const QuizDeckOneCorrectPairQuestion = memo(
         : null;
 
     const pinyinNewHintQuery = useRizzleQuery(
-      [
-        QuizDeckOneCorrectPairQuestion.name,
-        `association`,
-        splitAnswerPinyin?.join(`.`),
-      ],
+      [QuizDeckOneCorrectPairQuestion.name, `association`, splitAnswerPinyin],
       async (r, tx) => {
         if (splitAnswerPinyin != null) {
-          const [initial, final, tone] = splitAnswerPinyin;
+          const { initial, final, tone } = splitAnswerPinyin;
           const initialRes = await r.query.pinyinInitialAssociation.get(tx, {
             initial: `${initial}-`,
           });
