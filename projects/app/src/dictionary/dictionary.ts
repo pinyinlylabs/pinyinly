@@ -249,18 +249,16 @@ export const allHsk1HanziWords = memoize(async () =>
     .parse((await import(`./hsk1HanziWords.asset.json`)).default),
 );
 
-export const allHsk2Words = memoize(async () =>
-  z
-    .array(z.string())
+export const allHsk2HanziWords = memoize(async () =>
+  wordListSchema
     .transform(deepReadonly)
-    .parse((await import(`./hsk2Words.asset.json`)).default),
+    .parse((await import(`./hsk2HanziWords.asset.json`)).default),
 );
 
-export const allHsk3Words = memoize(async () =>
-  z
-    .array(z.string())
+export const allHsk3HanziWords = memoize(async () =>
+  wordListSchema
     .transform(deepReadonly)
-    .parse((await import(`./hsk3Words.asset.json`)).default),
+    .parse((await import(`./hsk3HanziWords.asset.json`)).default),
 );
 
 export const loadWords = memoize(async () =>
@@ -309,6 +307,7 @@ export const hanziWordMeaningSchema = z.object({
         description: `Only included in rare cases (e.g. radicals with multiple visual forms). `,
       },
     )
+    // .min(1) // TODO enable
     .optional(),
   definition: z.string(),
 });
@@ -465,6 +464,13 @@ export const lookupRadicalPinyinMnemonics = async (hanzi: string) =>
 
 export const lookupWord = async (hanzi: string) =>
   (await loadWords()).get(hanzi) ?? null;
+
+export const lookupHanzi = async (
+  hanzi: string,
+): Promise<DeepReadonly<[HanziWord, HanziWordMeaning][]>> =>
+  [...(await loadDictionary())].filter(
+    ([hanziWord]) => hanziFromHanziWord(hanziWord) === hanzi,
+  );
 
 export const lookupHanziWord = async (
   hanziWord: HanziWord,

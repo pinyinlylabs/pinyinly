@@ -1,7 +1,7 @@
 import {
   allHsk1HanziWords,
-  allHsk2Words,
-  allHsk3Words,
+  allHsk2HanziWords,
+  allHsk3HanziWords,
   allRadicalHanziWords,
   allRadicalPrimaryForms,
   allRadicalsByStrokes,
@@ -53,8 +53,8 @@ void test(`radical groups have the right number of elements`, async () => {
 
 void test(`json data can be loaded and passes the schema validation`, async () => {
   await allHsk1HanziWords();
-  await allHsk2Words();
-  await allHsk3Words();
+  await allHsk2HanziWords();
+  await allHsk3HanziWords();
   await allRadicalPrimaryForms();
   await loadHanziDecomposition();
   await loadHhPinyinChart();
@@ -221,8 +221,8 @@ void test(`expect missing glyphs to be included decomposition data`, async () =>
   const allChars = new Set(
     (await allRadicalPrimaryForms())
       .concat((await allHsk1HanziWords()).map((x) => hanziFromHanziWord(x)))
-      .concat(await allHsk2Words())
-      .concat(await allHsk3Words())
+      .concat((await allHsk2HanziWords()).map((x) => hanziFromHanziWord(x)))
+      .concat((await allHsk3HanziWords()).map((x) => hanziFromHanziWord(x)))
       // Split words into characters because decomposition is per-character.
       .flatMap((x) => Array.from(x)),
   );

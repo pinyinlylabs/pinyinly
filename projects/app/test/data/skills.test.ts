@@ -6,8 +6,8 @@ import {
 } from "#data/skills.ts";
 import {
   allHsk1HanziWords,
-  allHsk2Words,
-  allHsk3Words,
+  allHsk2HanziWords,
+  allHsk3HanziWords,
 } from "#dictionary/dictionary.ts";
 import assert from "node:assert/strict";
 import test from "node:test";
@@ -130,8 +130,8 @@ void test(skillLearningGraph.name, async () => {
     await skillLearningGraph({
       targetSkills: [
         ...(await allHsk1HanziWords()).map((w) => hanziWordToEnglish(w)),
-        ...(await allHsk2Words()).map((w) => hanziWordToEnglish(`${w}:mock`)),
-        ...(await allHsk3Words()).map((w) => hanziWordToEnglish(`${w}:mock`)),
+        ...(await allHsk2HanziWords()).map((w) => hanziWordToEnglish(w)),
+        ...(await allHsk3HanziWords()).map((w) => hanziWordToEnglish(w)),
       ],
       isSkillLearned: () => false,
     });

@@ -5,8 +5,8 @@ import { join } from "node:path";
 import yargs from "yargs";
 import {
   allHsk1HanziWords,
-  allHsk2Words,
-  allHsk3Words,
+  allHsk2HanziWords,
+  allHsk3HanziWords,
   allRadicalPrimaryForms,
   hanziFromHanziWord,
   IdsNode,
@@ -151,8 +151,8 @@ const allDecompositions = parseIdsTxt(rawJson);
 const allCharacters = new Set(
   (await allRadicalPrimaryForms())
     .concat((await allHsk1HanziWords()).map((w) => hanziFromHanziWord(w)))
-    .concat(await allHsk2Words())
-    .concat(await allHsk3Words())
+    .concat((await allHsk2HanziWords()).map((w) => hanziFromHanziWord(w)))
+    .concat((await allHsk3HanziWords()).map((w) => hanziFromHanziWord(w)))
     // Split words into characters because decomposition is per-character.
     .flatMap((x) => Array.from(x)),
 );
