@@ -14,7 +14,7 @@
     "@expo/metro-runtime": "~4.0.1",
     "@haohaohow/lib": "workspace:*",
     "@inngest/middleware-sentry": "^0.1.1",
-    "@lottiefiles/dotlottie-react": "^0.6.5",
+    "@lottiefiles/dotlottie-react": "^0.13.0",
     "@lucia-auth/adapter-drizzle": "^1.1.0",
     "@neondatabase/serverless": "^0.10.0",
     "@react-native-replicache/deep-freeze": "^1.1.0",
