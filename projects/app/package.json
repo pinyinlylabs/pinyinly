@@ -75,7 +75,7 @@
     "react-native-reanimated": "3.16.7",
     "react-native-safe-area-context": "4.12.0",
     "react-native-screens": "~4.4.0",
-    "react-native-svg": "15.8.0",
+    "react-native-svg": "15.11.1",
     "react-native-web": "^0.19.13",
     "react-responsive": "^10.0.0",
     "replicache": "patch:replicache@patch%3Areplicache@npm%253A15.0.1%23~/.yarn/patches/replicache-npm-15.0.1-daaa5044ba.patch%3A%3Aversion=15.0.1&hash=c643a4#~/.yarn/patches/replicache-patch-1cf70e7f66.patch",
