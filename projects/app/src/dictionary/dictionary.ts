@@ -261,22 +261,6 @@ export const allHsk3HanziWords = memoize(async () =>
     .parse((await import(`./hsk3HanziWords.asset.json`)).default),
 );
 
-export const loadWords = memoize(async () =>
-  z
-    .array(
-      z.tuple([
-        z.string(),
-        z.object({
-          pinyin: z.array(z.string()),
-          definitions: z.array(z.string()),
-        }),
-      ]),
-    )
-    .transform((x) => new Map(x))
-    .transform(deepReadonly)
-    .parse((await import(`./words.asset.json`)).default),
-);
-
 export const hanziWordMeaningSchema = z.object({
   gloss: z.array(z.string()),
   pinyin: z
@@ -461,9 +445,6 @@ export const lookupRadicalPinyinMnemonics = async (hanzi: string) =>
   (await loadRadicalPinyinMnemonics()).get(
     await normalizeRadicalOrThrow(hanzi),
   ) ?? null;
-
-export const lookupWord = async (hanzi: string) =>
-  (await loadWords()).get(hanzi) ?? null;
 
 export const lookupHanzi = async (
   hanzi: string,

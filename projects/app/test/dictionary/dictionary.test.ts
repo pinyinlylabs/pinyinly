@@ -23,7 +23,6 @@ import {
   loadRadicalPinyinMnemonics,
   loadRadicals,
   loadStandardPinyinChart,
-  loadWords,
   lookupHanziWord,
   meaningKeyFromHanziWord,
   parseIds,
@@ -67,7 +66,6 @@ void test(`json data can be loaded and passes the schema validation`, async () =
   await loadRadicalPinyinMnemonics();
   await loadRadicals();
   await loadStandardPinyinChart();
-  await loadWords(); // TODO: delete
   await loadDictionary();
 });
 
@@ -252,18 +250,6 @@ void test(`expect missing glyphs to be included decomposition data`, async () =>
   }
 
   assert.deepEqual(knownMissingGlyphs, new Set());
-});
-
-void test(`there are no pronunciations mixed into word definitions`, async () => {
-  const words = await loadWords();
-
-  for (const [, { definitions }] of words) {
-    for (const definition of definitions) {
-      assert.doesNotMatch(definition, /also pr[a-z]*\.? \[/);
-      assert.doesNotMatch(definition, /pronunciation /);
-      // assert.doesNotMatch(definition, /\[/); // TODO
-    }
-  }
 });
 
 void test(`there are 214 radicals to match official kangxi radicals`, async () => {
