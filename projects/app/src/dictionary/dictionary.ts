@@ -133,7 +133,14 @@ export const loadMnemonicThemes = memoize(async () =>
         description: z.string(),
       }),
     )
-    .transform((x) => new Map(Object.entries(x)))
+    .transform(
+      (x) =>
+        new Map(
+          Object.entries(x).map(
+            ([k, v]) => [rMnemonicThemeId.unmarshal(k), v] as const,
+          ),
+        ),
+    )
     .transform(deepReadonly)
     .parse((await import(`./mnemonicThemes.asset.json`)).default),
 );
@@ -220,22 +227,22 @@ export const loadHmmPinyinChart = memoize(async () =>
     .parse((await import(`./hmmPinyinChart.asset.json`)).default),
 );
 
-export const loadRadicalNameMnemonics = memoize(async () =>
+export const loadHanziWordGlossMnemonics = memoize(async () =>
   z
     .array(
       z.tuple([
-        z.string(),
+        hanziWordSchema,
         z.array(z.object({ mnemonic: z.string(), rationale: z.string() })),
       ]),
     )
     .transform((x) => new Map(x))
     .transform(deepReadonly)
-    .parse((await import(`./radicalNameMnemonics.asset.json`)).default),
+    .parse((await import(`./hanziWordGlossMnemonics.asset.json`)).default),
 );
 
-export const wordListSchema = z.array(
-  z.string().transform((x) => x as HanziWord),
-);
+export const hanziWordSchema = z.string().transform((x) => x as HanziWord);
+
+export const wordListSchema = z.array(hanziWordSchema);
 
 export const allRadicalHanziWords = memoize(async () =>
   wordListSchema
@@ -345,37 +352,6 @@ export const loadManualWords = memoize(async () =>
     .parse((await import(`./wordsManual.asset.json`)).default),
 );
 
-export const loadRadicals = memoize(async () =>
-  z
-    .array(
-      z.object({
-        hanzi: z.array(z.string()),
-        name: z.array(z.string()),
-        pinyin: z.array(z.string()),
-      }),
-    )
-    .transform(deepReadonly)
-    .parse((await import(`./radicals.asset.json`)).default),
-);
-
-export type Radical = Awaited<ReturnType<typeof loadRadicals>>[number];
-
-export const allRadicalPrimaryForms = memoize(async () =>
-  deepReadonly(
-    (await allRadicals()).map((r) => {
-      const first = r.hanzi[0];
-      invariant(first != null);
-      return first;
-    }),
-  ),
-);
-
-export const loadRadicalsByHanzi = memoize(async () =>
-  deepReadonly(
-    new Map((await loadRadicals()).flatMap((r) => r.hanzi.map((h) => [h, r]))),
-  ),
-);
-
 const loadRadicalStrokes = memoize(async () =>
   z
     .array(
@@ -390,7 +366,7 @@ const loadRadicalStrokes = memoize(async () =>
     .parse((await import(`./radicalStrokes.asset.json`)).default),
 );
 
-export const loadRadicalPinyinMnemonics = memoize(async () =>
+export const loadHanziWordPinyinMnemonics = memoize(async () =>
   z
     .array(
       z.tuple([
@@ -408,49 +384,21 @@ export const loadRadicalPinyinMnemonics = memoize(async () =>
     .parse((await import(`./radicalPinyinMnemonics.asset.json`)).default),
 );
 
-export const allRadicalNormalizations = memoize(async () =>
-  deepReadonly(
-    new Map(
-      (await loadRadicals()).flatMap(({ hanzi }) =>
-        hanzi.map((h) => [h, hanzi[0]]),
-      ),
-    ),
-  ),
-);
-
-export const normalizeRadicalOrThrow = async (
-  radical: string,
-): Promise<string> => {
-  const result = (await allRadicalNormalizations()).get(radical);
-  invariant(result != null, `couldn't find a normalization for ${radical}`);
-  return result;
-};
-
-export const allRadicals = async () => await loadRadicals();
-
 export const allRadicalsByStrokes = async () => await loadRadicalStrokes();
 
-export const lookupRadicalNameMnemonic = async (hanzi: string) =>
-  (await lookupRadicalNameMnemonics(hanzi))?.[0] ?? null;
+export const lookupHanziWordGlossMnemonics = async (hanziWord: HanziWord) =>
+  (await loadHanziWordGlossMnemonics()).get(hanziWord) ?? null;
 
-export const lookupRadicalNameMnemonics = async (hanzi: string) =>
-  (await loadRadicalNameMnemonics()).get(
-    await normalizeRadicalOrThrow(hanzi),
-  ) ?? null;
-
-export const lookupRadicalPinyinMnemonic = async (hanzi: string) =>
-  (await lookupRadicalPinyinMnemonics(hanzi))?.[0] ?? null;
-
-export const lookupRadicalPinyinMnemonics = async (hanzi: string) =>
-  (await loadRadicalPinyinMnemonics()).get(
-    await normalizeRadicalOrThrow(hanzi),
-  ) ?? null;
+export const lookupHanziWordPinyinMnemonics = async (hanziWord: HanziWord) =>
+  (await loadHanziWordPinyinMnemonics()).get(hanziWord) ?? null;
 
 export const lookupHanzi = async (
   hanzi: string,
 ): Promise<DeepReadonly<[HanziWord, HanziWordMeaning][]>> =>
   [...(await loadDictionary())].filter(
-    ([hanziWord]) => hanziFromHanziWord(hanziWord) === hanzi,
+    ([hanziWord, meaning]) =>
+      hanziFromHanziWord(hanziWord) === hanzi ||
+      meaning.visualVariants?.includes(hanzi) === true,
   );
 
 export const lookupHanziWord = async (
@@ -458,11 +406,19 @@ export const lookupHanziWord = async (
 ): Promise<DeepReadonly<HanziWordMeaning> | null> =>
   (await loadDictionary()).get(hanziWord) ?? null;
 
-export const lookupRadicalByHanzi = async (hanzi: string) =>
-  (await loadRadicalsByHanzi()).get(hanzi) ?? null;
-
 export const lookupRadicalsByStrokes = async (strokes: number) =>
   (await loadRadicalStrokes()).get(strokes) ?? null;
+
+export const allHanziCharacters = async () =>
+  new Set(
+    (await allRadicalHanziWords())
+      .concat(await allHsk1HanziWords())
+      .concat(await allHsk2HanziWords())
+      .concat(await allHsk3HanziWords())
+      .map((x) => hanziFromHanziWord(x))
+      // Split words into characters because decomposition is per-character.
+      .flatMap((x) => Array.from(x)),
+  );
 
 export const radicalStrokes = [
   1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,

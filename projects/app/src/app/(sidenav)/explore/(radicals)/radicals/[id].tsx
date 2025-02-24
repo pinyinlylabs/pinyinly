@@ -2,10 +2,11 @@ import { ReferencePage } from "@/client/ui/ReferencePage";
 import { ReferencePageBodySection } from "@/client/ui/ReferencePageBodySection";
 import { ReferencePageHeader } from "@/client/ui/ReferencePageHeader";
 import { GradientAqua } from "@/client/ui/styles";
+import { HanziWord } from "@/data/model";
 import {
-  lookupRadicalByHanzi,
-  lookupRadicalNameMnemonics,
-  lookupRadicalPinyinMnemonics,
+  lookupHanziWord,
+  lookupHanziWordGlossMnemonics,
+  lookupHanziWordPinyinMnemonics,
 } from "@/dictionary/dictionary";
 import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams } from "expo-router";
@@ -18,9 +19,9 @@ export default function RadicalPage() {
     queryKey: [`character.radical`, id],
     queryFn: async () => {
       const [radical, nameMnemonics, pinyinMnemonics] = await Promise.all([
-        lookupRadicalByHanzi(id),
-        lookupRadicalNameMnemonics(id),
-        lookupRadicalPinyinMnemonics(id),
+        lookupHanziWord(id as HanziWord),
+        lookupHanziWordGlossMnemonics(id as HanziWord),
+        lookupHanziWordPinyinMnemonics(id as HanziWord),
       ]);
       return { radical, nameMnemonics, pinyinMnemonics };
     },
@@ -33,7 +34,7 @@ export default function RadicalPage() {
           <ReferencePageHeader
             gradientColors={GradientAqua}
             title={id}
-            subtitle={query.data?.radical?.name[0] ?? null}
+            subtitle={query.data?.radical?.gloss[0] ?? null}
           />
         }
         body={
@@ -77,7 +78,7 @@ export default function RadicalPage() {
               ) : null}
               {query.data?.radical != null ? (
                 <ReferencePageBodySection title="Meaning">
-                  {query.data.radical.name.join(`, `)}
+                  {query.data.radical.gloss.join(`, `)}
                 </ReferencePageBodySection>
               ) : null}
               {query.data?.radical?.pinyin != null ? (

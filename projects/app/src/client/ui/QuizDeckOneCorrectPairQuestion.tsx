@@ -9,7 +9,6 @@ import {
 import {
   loadStandardPinyinChart,
   lookupHanzi,
-  lookupRadicalByHanzi,
   splitPinyin,
 } from "@/dictionary/dictionary";
 import { arrayFilterUniqueWithKey } from "@/util/collections";
@@ -365,18 +364,7 @@ const ShowChoice = ({
   includeAlternatives?: boolean;
   small?: boolean;
 }) => {
-  const radical = choice.type === `radical` ? choice.hanzi : null;
   const hanzi = choice.type === `hanzi` ? choice.hanzi : null;
-
-  const radicalQuery = useQuery({
-    queryKey: [`radical`, radical],
-    queryFn: async () => {
-      if (radical != null) {
-        return await lookupRadicalByHanzi(radical);
-      }
-    },
-    enabled: radical != null,
-  });
 
   const hanziWordQuery = useQuery({
     queryKey: [`hanzi`, hanzi],
@@ -393,42 +381,15 @@ const ShowChoice = ({
     enabled: hanzi != null,
   });
 
-  if (radicalQuery.isLoading || hanziWordQuery.isLoading) {
+  if (hanziWordQuery.isLoading) {
     return null;
   }
 
   switch (choice.type) {
-    case `radical`: {
-      const hanzis = (includeAlternatives
-        ? radicalQuery.data?.hanzi
-        : null) ?? [choice.hanzi];
-      const pinyin = radicalQuery.data?.pinyin[0];
-      const name = radicalQuery.data?.name[0];
-      return (
-        <View className={`flex-row items-center ${small ? `gap-1` : `gap-2`}`}>
-          {hanzis.map((hanzi, i) => {
-            return (
-              <View
-                key={i}
-                className={hanzi !== choice.hanzi ? `opacity-50` : undefined}
-              >
-                <HanziText
-                  pinyin={hanzi === choice.hanzi ? pinyin : undefined}
-                  hanzi={hanzi}
-                  small={small}
-                  accented
-                />
-              </View>
-            );
-          })}
-          <Text className={choiceEnglishText({ small })}>{name}</Text>
-        </View>
-      );
-    }
     case `name`: {
-      const names = (includeAlternatives ? radicalQuery.data?.name : null) ?? [
-        choice.english,
-      ];
+      const names = (includeAlternatives
+        ? hanziWordQuery.data?.meaning.gloss
+        : null) ?? [choice.english];
       return (
         <Text className={choiceEnglishText({ small })}>
           {names.map((n, i, { length }) => (
@@ -447,19 +408,31 @@ const ShowChoice = ({
       );
     }
     case `hanzi`: {
-      const pinyin = small ? undefined : hanziWordQuery.data?.meaning.pinyin;
-      const definition = small
+      const hanzis = (includeAlternatives
+        ? [choice.hanzi, ...(hanziWordQuery.data?.meaning.visualVariants ?? [])]
+        : null) ?? [choice.hanzi];
+      const pinyin = small
         ? undefined
-        : hanziWordQuery.data?.meaning.definition;
+        : hanziWordQuery.data?.meaning.pinyin?.[0];
+      const gloss = small ? undefined : hanziWordQuery.data?.meaning.gloss[0];
       return (
         <View className={`flex-row items-center ${small ? `gap-1` : `gap-2`}`}>
-          <HanziText
-            pinyin={pinyin?.join(` `)}
-            hanzi={choice.hanzi}
-            small={small}
-            accented
-          />
-          <Text className={choiceEnglishText({ small })}>{definition}</Text>
+          {hanzis.map((hanzi, i) => {
+            return (
+              <View
+                key={i}
+                className={hanzi !== choice.hanzi ? `opacity-50` : undefined}
+              >
+                <HanziText
+                  pinyin={hanzi === choice.hanzi ? pinyin : undefined}
+                  hanzi={hanzi}
+                  small={small}
+                  accented
+                />
+              </View>
+            );
+          })}
+          <Text className={choiceEnglishText({ small })}>{gloss}</Text>
         </View>
       );
     }
@@ -491,10 +464,8 @@ const ShowAnswer = ({
   includeAlternatives?: boolean;
   small?: boolean;
 }) => {
-  // Pick the radical or hanzi to show, as it is easier to query the name,
-  // pinyin, etc.
-  const choice =
-    [a, b].find((x) => x.type === `radical` || x.type === `hanzi`) ?? a;
+  // Pick the hanzi to show, as it is easier to query the name, pinyin, etc.
+  const choice = [a, b].find((x) => x.type === `hanzi`) ?? a;
 
   return (
     <View className="items-start">
@@ -636,8 +607,6 @@ const SubmitButton = forwardRef<
 
 function choiceText(choice: OneCorrectPairQuestionChoice): string {
   switch (choice.type) {
-    case `radical`:
-      return choice.hanzi;
     case `hanzi`:
       return choice.hanzi;
     case `pinyin`:
@@ -670,7 +639,6 @@ const ChoiceButton = ({
       state={selected ? `selected` : `default`}
       className="flex-1"
       textClassName={choiceButtonText({
-        isRadical: choice.type === `radical`,
         length:
           text.length <= 20 ? `short` : text.length <= 40 ? `medium` : `long`,
       })}
@@ -690,9 +658,6 @@ const choiceButtonText = tv({
       short: `text-lg lg:text-xl`,
       medium: `lg:text-lg`,
       long: `text-xs lg:text-md`,
-    },
-    isRadical: {
-      true: `border-[1px] border-primary-10 border-dashed px-1`,
     },
   },
 });

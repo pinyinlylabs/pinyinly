@@ -204,11 +204,6 @@ export interface SkillRating {
 
 export type OneCorrectPairQuestionChoice =
   | {
-      type: `radical`;
-      hanzi: string;
-      skill?: Skill;
-    }
-  | {
       type: `hanzi`;
       hanzi: string;
       skill?: Skill;

@@ -6,10 +6,9 @@ import { zodResponseFormat } from "openai/helpers/zod";
 import yargs from "yargs";
 import { z } from "zod";
 import {
-  allRadicalPrimaryForms,
   loadHanziDecomposition,
-  loadRadicalPinyinMnemonics,
-  loadRadicalsByHanzi,
+  loadHanziWordPinyinMnemonics,
+  lookupHanzi,
 } from "../src/dictionary/dictionary.js";
 import {
   mergeMaps,
@@ -70,24 +69,27 @@ const openAiSchema = z.object({
 
 const openai = new OpenAI();
 
-const radicalsToCheck = argv.update ?? [
-  ...new Set((await loadRadicalPinyinMnemonics()).keys()).difference(
-    new Set(await allRadicalPrimaryForms()),
-  ),
-];
+const radicalsToCheck =
+  argv.update ??
+  [
+    // ...new Set((await loadHanziWordPinyinMnemonics()).keys()).difference(
+    //   new Set(await allRadicalPrimaryForms()),
+    // ),
+  ];
 
 const updates = new Map<string, { mnemonic: string; strategy: string }[]>();
 
 const decompositions = await loadHanziDecomposition();
 
-for (const char of radicalsToCheck) {
-  const lookup = (await loadRadicalsByHanzi()).get(char);
-  const name = lookup?.name[0];
-  const pinyin = lookup?.pinyin[0];
-  const decomposition = decompositions.get(char);
-  invariant(name != null, `Missing name data for ${char}`);
-  invariant(pinyin != null, `Missing pinyin data for ${char}`);
-  invariant(decomposition != null, `Missing decomposition data for ${char}`);
+for (const hanzi of radicalsToCheck) {
+  const lookup = (await lookupHanzi(hanzi))[0]?.[1];
+
+  const name = lookup?.gloss[0];
+  const pinyin = lookup?.pinyin?.[0];
+  const decomposition = decompositions.get(hanzi);
+  invariant(name != null, `Missing name data for ${hanzi}`);
+  invariant(pinyin != null, `Missing pinyin data for ${hanzi}`);
+  invariant(decomposition != null, `Missing decomposition data for ${hanzi}`);
 
   const rawJson = await openAiWithCache(
     {
@@ -100,7 +102,7 @@ for (const char of radicalsToCheck) {
         {
           role: `user`,
           content: `
-Create a mnemonic to help remember that the pinyin of the Chinese radical ${char} (${name}) is "${pinyin}".
+Create a mnemonic to help remember that the pinyin of the Chinese radical ${hanzi} (${name}) is "${pinyin}".
 
 Use the following strategy:
 
@@ -178,7 +180,7 @@ Each mnemonic must:
 
 ---
 
-Write 5 mnemonic variations for ${char} (${pinyin}).
+Write 5 mnemonic variations for ${hanzi} (${pinyin}).
 `,
         },
       ],
@@ -202,13 +204,13 @@ Write 5 mnemonic variations for ${char} (${pinyin}).
 Mnemonics:\n${r.mnemonics.map((m, i) => `  ${i + 1}. ${m.mnemonic}\n    Rationale:\n${m.reasoning_steps.map((x, i) => `    ${i + 1}. ${x}`).join(`\n`)}`).join(`\n`)}`,
     );
   } catch (e) {
-    console.error(`Failed to parse response for ${char}, skipping…`, e);
+    console.error(`Failed to parse response for ${hanzi}, skipping…`, e);
     continue;
   }
 }
 
 if (argv[`force-write`] || updates.size > 0) {
-  const existingData = await loadRadicalPinyinMnemonics();
+  const existingData = await loadHanziWordPinyinMnemonics();
 
   const updatedData = [...mergeMaps(existingData, updates).entries()]
     // Sort the map for minimal diffs in PR

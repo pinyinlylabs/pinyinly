@@ -1,5 +1,7 @@
 import {
   allHsk1HanziWords,
+  allHsk2HanziWords,
+  allHsk3HanziWords,
   hanziFromHanziWord,
   HanziWordMeaning,
   lookupHanziWord,
@@ -19,22 +21,19 @@ import {
 import { hanziWordToEnglish } from "./skills";
 
 type BuilderChoice =
-  | { radical: string; skill: Skill }
   | { hanzi: string; skill: Skill }
   | { pinyin: string; skill: Skill }
   | { definition: string; skill: Skill }
   | { name: string; skill: Skill };
 
 const choice = (x: BuilderChoice): OneCorrectPairQuestionChoice =>
-  `radical` in x
-    ? { type: `radical`, hanzi: x.radical, skill: x.skill }
-    : `hanzi` in x
-      ? { type: `hanzi`, hanzi: x.hanzi, skill: x.skill }
-      : `pinyin` in x
-        ? { type: `pinyin`, pinyin: x.pinyin, skill: x.skill }
-        : `definition` in x
-          ? { type: `definition`, english: x.definition, skill: x.skill }
-          : { type: `name`, english: x.name, skill: x.skill };
+  `hanzi` in x
+    ? { type: `hanzi`, hanzi: x.hanzi, skill: x.skill }
+    : `pinyin` in x
+      ? { type: `pinyin`, pinyin: x.pinyin, skill: x.skill }
+      : `definition` in x
+        ? { type: `definition`, english: x.definition, skill: x.skill }
+        : { type: `name`, english: x.name, skill: x.skill };
 
 const choicePair = (
   a: BuilderChoice,
@@ -150,11 +149,10 @@ async function getOtherHanzi(
 ): Promise<OtherHanziResult> /* hanzi */ {
   const result: OtherHanziResult = [];
 
-  const [
-    hsk1HanziWords,
-    // hsk2Words, hsk3Words
-  ] = await Promise.all([
+  const [hsk1HanziWords, hsk2Words, hsk3Words] = await Promise.all([
     allHsk1HanziWords(),
+    allHsk2HanziWords(),
+    allHsk3HanziWords(),
     // TODO: re-enable
     // allHsk2Words(),
     // allHsk3Words(),
@@ -163,13 +161,9 @@ async function getOtherHanzi(
   // Use words from the same HSK word list if possible, so that they're more
   // likely to be familiar by being in a similar skill level. Otherwise fallback
   // all HSK words.
-  const allHanziWords = [
-    hsk1HanziWords,
-    //  hsk2Words, hsk3Words
-  ].find((words) => words.includes(hanziWord)) ?? [
-    ...hsk1HanziWords,
-    //  ...hsk2Words, ...hsk3Words
-  ];
+  const allHanziWords = [hsk1HanziWords, hsk2Words, hsk3Words].find((words) =>
+    words.includes(hanziWord),
+  ) ?? [...hsk1HanziWords, ...hsk2Words, ...hsk3Words];
 
   const seenHanziWords = new Set(hanziWord);
   for (const x of shuffle(allHanziWords)) {

@@ -5,9 +5,8 @@ import { zodResponseFormat } from "openai/helpers/zod";
 import yargs from "yargs";
 import { z } from "zod";
 import {
-  allRadicalPrimaryForms,
-  loadRadicalNameMnemonics,
-  lookupRadicalByHanzi,
+  loadHanziWordGlossMnemonics,
+  lookupHanzi,
 } from "../src/dictionary/dictionary.js";
 import { mergeMaps, sortComparatorString } from "../src/util/collections.js";
 import { jsonStringifyIndentOneLevel } from "../src/util/json.js";
@@ -55,11 +54,13 @@ const openAiSchema = z.object({
 
 const openai = new OpenAI();
 
-const radicalsToCheck = argv.update ?? [
-  ...new Set((await loadRadicalNameMnemonics()).keys()).difference(
-    new Set(await allRadicalPrimaryForms()),
-  ),
-];
+const radicalsToCheck =
+  argv.update ??
+  [
+    // ...new Set((await loadHanziWordGlossMnemonics()).keys()).difference(
+    //   new Set(await allRadicalPrimaryForms()),
+    // ),
+  ];
 
 console.log(`Radicals to check: ${[...radicalsToCheck].join(`,`)}`);
 
@@ -70,7 +71,7 @@ const decompositions: Record<string, string> = {
 const updates = new Map<string, { mnemonic: string; rationale: string }[]>();
 
 for (const hanzi of radicalsToCheck) {
-  const name = (await lookupRadicalByHanzi(hanzi))?.name[0];
+  const name = (await lookupHanzi(hanzi))[0]?.[1].gloss[0];
   if (name == null) {
     console.warn(`No name lookup data for ${hanzi}, skipping…`);
     continue;
@@ -150,7 +151,7 @@ Write 10 mnemonic variations for ${hanzi} (${name}).
 }
 
 if (argv[`force-write`] || updates.size > 0) {
-  const existingData = await loadRadicalNameMnemonics();
+  const existingData = await loadHanziWordGlossMnemonics();
 
   const updatedData = [...mergeMaps(existingData, updates).entries()]
     // Sort the map for minimal diffs in PR
