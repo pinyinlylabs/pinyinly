@@ -1,9 +1,7 @@
 import { ReferencePage } from "@/client/ui/ReferencePage";
 import { ReferencePageBodySection } from "@/client/ui/ReferencePageBodySection";
 import { ReferencePageHeader } from "@/client/ui/ReferencePageHeader";
-import { useReplicache } from "@/client/ui/ReplicacheContext";
 import { GradientAqua } from "@/client/ui/styles";
-import { skillsForRadical } from "@/data/generator";
 import {
   lookupRadicalByHanzi,
   lookupRadicalNameMnemonics,
@@ -14,7 +12,6 @@ import { useLocalSearchParams } from "expo-router";
 import { ScrollView, Text, View } from "react-native";
 
 export default function RadicalPage() {
-  const r = useReplicache();
   const { id } = useLocalSearchParams<`/explore/radicals/[id]`>();
 
   const query = useQuery({
@@ -26,27 +23,6 @@ export default function RadicalPage() {
         lookupRadicalPinyinMnemonics(id),
       ]);
       return { radical, nameMnemonics, pinyinMnemonics };
-    },
-  });
-
-  const radical = query.data?.radical;
-  const skills = radical != null ? skillsForRadical(radical) : null;
-
-  const skillStatesQuery = useQuery({
-    queryKey: [`radical.skills`, id, radical?.name.join(`, `)],
-    queryFn: async () => {
-      if (skills == null) {
-        return null;
-      }
-      const skillStates = await r.replicache.query(async (tx) =>
-        Promise.all(
-          skills.map(
-            async (skill) =>
-              [skill, await r.query.skillState.get(tx, { skill })] as const,
-          ),
-        ),
-      );
-      return skillStates;
     },
   });
 
@@ -67,30 +43,6 @@ export default function RadicalPage() {
             <Text className="text-text">Error</Text>
           ) : (
             <>
-              {skillStatesQuery.isLoading ? (
-                <Text className="text-text">Loading</Text>
-              ) : skillStatesQuery.isError ? (
-                <Text className="text-text">Error</Text>
-              ) : (
-                <View>
-                  <Text className="text-text">
-                    {skillStatesQuery.data?.length ?? 0} skills:
-                  </Text>
-                  <View>
-                    {skillStatesQuery.data?.map(([skill, skillState], i) => (
-                      <View key={i}>
-                        <Text className="text-text">
-                          {i}: {skill.hanzi} {skill.type} ::{` `}
-                          {skillState == null
-                            ? `no data`
-                            : `due: ` + skillState.createdAt.toISOString()}
-                        </Text>
-                      </View>
-                    ))}
-                  </View>
-                </View>
-              )}
-
               {query.data?.nameMnemonics != null ? (
                 <ReferencePageBodySection title="Name mnemonics">
                   <View className="flex-col gap-2">

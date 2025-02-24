@@ -1,8 +1,9 @@
 import { RectButton2 } from "@/client/ui/RectButton2";
 import {
-  allHsk1Words,
-  allHsk2Words,
-  allHsk3Words,
+  allHsk1HanziWords,
+  allHsk2HanziWords,
+  allHsk3HanziWords,
+  hanziFromHanziWord,
 } from "@/dictionary/dictionary";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "expo-router";
@@ -13,9 +14,9 @@ export default function WordsPage() {
     queryKey: [WordsPage.name, `words`],
     queryFn: async () => {
       const [hsk1Words, hsk2Words, hsk3Words] = await Promise.all([
-        allHsk1Words(),
-        allHsk2Words(),
-        allHsk3Words(),
+        allHsk1HanziWords().then((x) => x.map((y) => hanziFromHanziWord(y))),
+        allHsk2HanziWords().then((x) => x.map((y) => hanziFromHanziWord(y))),
+        allHsk3HanziWords().then((x) => x.map((y) => hanziFromHanziWord(y))),
       ]);
       return { hsk1Words, hsk2Words, hsk3Words };
     },

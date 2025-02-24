@@ -8,8 +8,8 @@ import {
 } from "@/data/model";
 import {
   loadStandardPinyinChart,
+  lookupHanzi,
   lookupRadicalByHanzi,
-  lookupWord,
   splitPinyin,
 } from "@/dictionary/dictionary";
 import { arrayFilterUniqueWithKey } from "@/util/collections";
@@ -128,14 +128,10 @@ export const QuizDeckOneCorrectPairQuestion = memo(
         : null;
 
     const pinyinNewHintQuery = useRizzleQuery(
-      [
-        QuizDeckOneCorrectPairQuestion.name,
-        `association`,
-        splitAnswerPinyin?.join(`.`),
-      ],
+      [QuizDeckOneCorrectPairQuestion.name, `association`, splitAnswerPinyin],
       async (r, tx) => {
         if (splitAnswerPinyin != null) {
-          const [initial, final, tone] = splitAnswerPinyin;
+          const { initial, final, tone } = splitAnswerPinyin;
           const initialRes = await r.query.pinyinInitialAssociation.get(tx, {
             initial: `${initial}-`,
           });
@@ -382,17 +378,22 @@ const ShowChoice = ({
     enabled: radical != null,
   });
 
-  const hanziQuery = useQuery({
+  const hanziWordQuery = useQuery({
     queryKey: [`hanzi`, hanzi],
     queryFn: async () => {
       if (hanzi != null) {
-        return await lookupWord(hanzi);
+        const [firstResult] = await lookupHanzi(hanzi);
+        if (firstResult != null) {
+          const [hanziWord, meaning] = firstResult;
+          return { hanziWord, meaning };
+        }
       }
+      return null;
     },
     enabled: hanzi != null,
   });
 
-  if (radicalQuery.isLoading || hanziQuery.isLoading) {
+  if (radicalQuery.isLoading || hanziWordQuery.isLoading) {
     return null;
   }
 
@@ -446,10 +447,10 @@ const ShowChoice = ({
       );
     }
     case `hanzi`: {
-      const pinyin = small ? undefined : hanziQuery.data?.pinyin;
+      const pinyin = small ? undefined : hanziWordQuery.data?.meaning.pinyin;
       const definition = small
         ? undefined
-        : hanziQuery.data?.definitions.join(`, `);
+        : hanziWordQuery.data?.meaning.definition;
       return (
         <View className={`flex-row items-center ${small ? `gap-1` : `gap-2`}`}>
           <HanziText

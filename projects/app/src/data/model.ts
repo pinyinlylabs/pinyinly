@@ -1,5 +1,6 @@
 import { Rating } from "@/util/fsrs";
 import type { Interval } from "date-fns";
+import { z } from "zod";
 
 export enum PinyinInitialGroupId {
   Basic,
@@ -49,11 +50,9 @@ export interface SkillRating {
   rating: Rating;
 }
 
+// The values of this enum should only be used for debugging, they should never
+// be persisted.
 export enum SkillType {
-  RadicalToEnglish = `RadicalToEnglish`,
-  EnglishToRadical = `EnglishToRadical`,
-  RadicalToPinyin = `RadicalToPinyin`,
-  PinyinToRadical = `PinyinToRadical`,
   /**
    * When shown a hanzi word, write the english translation.
    */
@@ -64,42 +63,63 @@ export enum SkillType {
   /**
    * When shown an english word, write the hanzi characters.
    */
-  EnglishToHanzi = `EnglishToHanzi`,
+  EnglishToHanziWord = `EnglishToHanzi`,
   /**
    * Given a pinyin word, write the hanzi character.
    */
-  PinyinToHanzi = `PinyinToHanzi`,
-  ImageToHanzi = `ImageToHanzi`,
+  PinyinToHanziWord = `PinyinToHanzi`,
+  ImageToHanziWord = `ImageToHanzi`,
   /**
    * Given an initial like `p`, remember the name of the associated
    * character/actor/entity etc.
    */
   PinyinInitialAssociation = `PinyinInitialAssociation`,
   PinyinFinalAssociation = `PinyinFinalAssociation`,
+
+  //
+  // Deprecated
+  //
+  Deprecated = `Deprecated`,
+  Deprecated_RadicalToEnglish = `RadicalToEnglish`,
+  Deprecated_EnglishToRadical = `EnglishToRadical`,
+  Deprecated_RadicalToPinyin = `RadicalToPinyin`,
+  Deprecated_PinyinToRadical = `PinyinToRadical`,
 }
 
-export interface HanziSkill {
+export enum PartOfSpeech {
+  Noun,
+  Verb,
+  Adjective,
+  Adverb,
+  Pronoun,
+  Preposition,
+  Conjunction,
+  Interjection,
+  MeasureWord,
+  Particle,
+}
+
+/**
+ * A hanzi character or word with a specific meaning.
+ * @deprecated Use {@link HanziWord} instead.
+ */
+export interface HanziWordObj {
+  hanzi: string;
+  meaningKey: string;
+}
+
+export type HanziWord = (string & z.BRAND<`HanziWord`>) | `${string}:${string}`; // useful when writing literal strings in tests
+
+export interface HanziWordSkill {
   type:
     | SkillType.HanziWordToEnglish
     | SkillType.HanziWordToPinyinInitial
     | SkillType.HanziWordToPinyinFinal
     | SkillType.HanziWordToPinyinTone
-    | SkillType.EnglishToHanzi
-    | SkillType.PinyinToHanzi
-    | SkillType.ImageToHanzi;
-  hanzi: string;
-}
-
-export interface RadicalNameSkill {
-  type: SkillType.RadicalToEnglish | SkillType.EnglishToRadical;
-  hanzi: string;
-  name: string;
-}
-
-export interface RadicalPinyinSkill {
-  type: SkillType.RadicalToPinyin | SkillType.PinyinToRadical;
-  hanzi: string;
-  pinyin: string;
+    | SkillType.EnglishToHanziWord
+    | SkillType.PinyinToHanziWord
+    | SkillType.ImageToHanziWord;
+  hanziWord: HanziWord;
 }
 
 export interface PinyinInitialAssociationSkill {
@@ -112,14 +132,15 @@ export interface PinyinFinalAssociationSkill {
   final: string;
 }
 
+export interface DeprecatedSkill {
+  type: SkillType.Deprecated;
+}
+
 export type PinyinAssociationSkill =
   | PinyinInitialAssociationSkill
   | PinyinFinalAssociationSkill;
 
-export type RadicalSkill = RadicalNameSkill | RadicalPinyinSkill;
-
-/** Data that forms the unique key for a skill */
-export type Skill = HanziSkill | RadicalSkill | PinyinAssociationSkill;
+export type Skill = HanziWordSkill | PinyinAssociationSkill | DeprecatedSkill;
 
 export enum QuestionFlagType {
   NewSkill,

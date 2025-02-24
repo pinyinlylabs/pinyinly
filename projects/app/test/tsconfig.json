@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../tsconfig.base",
+  "extends": "../../../tsconfig.base",
   "compilerOptions": {
     "allowJs": true,
     "baseUrl": ".",
@@ -10,7 +10,7 @@
     "module": "ES2020",
     "moduleResolution": "Bundler",
     "noPropertyAccessFromIndexSignature": true,
-    "outDir": "../../../../.moon/cache/types/projects/app-test",
+    "outDir": "../../../.moon/cache/types/projects/app-test",
     "resolveJsonModule": true,
     "target": "ESNext",
     "types": ["node"]
@@ -18,10 +18,10 @@
   "include": ["**/*"],
   "references": [
     {
-      "path": "../../../lib"
+      "path": "../tsconfig.src.json"
     },
     {
-      "path": "../../tsconfig.src.json"
+      "path": "../../lib"
     }
   ]
 }

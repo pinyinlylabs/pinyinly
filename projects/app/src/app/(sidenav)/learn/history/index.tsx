@@ -55,7 +55,9 @@ export default function HistoryPage() {
                     ? `${key.skill.initial}-`
                     : key.skill.type === SkillType.PinyinFinalAssociation
                       ? `-${key.skill.final}`
-                      : key.skill.hanzi}
+                      : key.skill.type === SkillType.Deprecated
+                        ? skillTypeToShorthand(key.skill.type)
+                        : key.skill.hanziWord}
                   : {value.due.toISOString()}
                 </Text>
               </View>
@@ -71,7 +73,9 @@ export default function HistoryPage() {
                     ? `${skill.initial}-`
                     : skill.type === SkillType.PinyinFinalAssociation
                       ? `-${skill.final}`
-                      : skill.hanzi}
+                      : skill.type === SkillType.Deprecated
+                        ? skillTypeToShorthand(skill.type)
+                        : skill.hanziWord}
                 </Text>
                 <Text className="hhh-text-caption">
                   {skillTypeToShorthand(skill.type)}
@@ -96,7 +100,9 @@ export default function HistoryPage() {
                     ? `${key.skill.initial}-`
                     : key.skill.type === SkillType.PinyinFinalAssociation
                       ? `-${key.skill.final}`
-                      : key.skill.hanzi}
+                      : key.skill.type === SkillType.Deprecated
+                        ? skillTypeToShorthand(key.skill.type)
+                        : key.skill.hanziWord}
                   : {key.createdAt.toISOString()}
                 </Text>
               </View>

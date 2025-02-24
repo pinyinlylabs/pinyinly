@@ -2,6 +2,7 @@ import {
   deepTransform,
   mapInvert,
   merge,
+  mergeSortComparators,
   objectInvert,
   sortComparatorNumber,
   sortComparatorString,
@@ -43,6 +44,17 @@ void test(`sortComparatorNumber`, () => {
     arr.sort(sortComparatorNumber(([x]) => x!));
     assert.deepEqual(arr, [[1], [2], [3]]);
   }
+});
+
+void test(`mergeSortComparators`, () => {
+  const arr = [`金`, `现金`, `金`, `金牌`];
+  arr.sort(
+    mergeSortComparators(
+      sortComparatorNumber((x) => x.length),
+      sortComparatorString((x) => x),
+    ),
+  );
+  assert.deepEqual(arr, [`金`, `金`, `现金`, `金牌`]);
 });
 
 void test(`merge`, () => {

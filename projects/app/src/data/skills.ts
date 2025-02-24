@@ -1,19 +1,19 @@
 import {
+  buildHanziWord,
   characterHasGlyph,
+  hanziFromHanziWord,
+  loadDictionary,
   loadHanziDecomposition,
-  loadRadicals,
   loadStandardPinyinChart,
-  lookupWord,
+  lookupHanziWord,
+  meaningKeyFromHanziWord,
   parseIds,
   splitPinyin,
   walkIdsNode,
 } from "@/dictionary/dictionary";
 import { invariant } from "@haohaohow/lib/invariant";
-import { HanziSkill, RadicalSkill, Skill, SkillType } from "./model";
-import { MarshaledSkill, rSkill } from "./rizzleSchema";
-
-const _skillId = rSkill();
-export const skillId = (skill: Skill) => _skillId.marshal(skill);
+import { HanziWord, HanziWordSkill, Skill, SkillType } from "./model";
+import { MarshaledSkill, rSkillMarshal } from "./rizzleSchema";
 
 export interface Node {
   skill: Skill;
@@ -37,7 +37,7 @@ export async function skillLearningGraph(options: {
   const graph = new Map<MarshaledSkill, Node>();
 
   async function addSkill(skill: Skill): Promise<void> {
-    const id = skillId(skill);
+    const id = rSkillMarshal(skill);
 
     // Skip over any skills (and its dependency tree) that have already been
     // learned.
@@ -52,11 +52,11 @@ export async function skillLearningGraph(options: {
 
     const dependencies = (
       await skillDependencies(skill, learningOptions)
-    ).filter((s) => !options.isSkillLearned(skillId(s)));
+    ).filter((s) => !options.isSkillLearned(rSkillMarshal(s)));
 
     const node: Node = {
       skill,
-      dependencies: new Set(dependencies.map(skillId)),
+      dependencies: new Set(dependencies.map((dep) => rSkillMarshal(dep))),
     };
     graph.set(id, node);
 
@@ -78,44 +78,35 @@ export async function skillDependencies(
 ): Promise<Skill[]> {
   const deps: Skill[] = [];
   switch (skill.type) {
-    case SkillType.EnglishToRadical:
-    case SkillType.PinyinToRadical:
-    case SkillType.RadicalToPinyin:
-    case SkillType.EnglishToHanzi: {
+    case SkillType.EnglishToHanziWord: {
       // Learn the Hanzi -> English first. It's easier to read than write (for chinese characters).
-      const dep: Skill = {
+      deps.push({
         type: SkillType.HanziWordToEnglish,
-        hanzi: skill.hanzi,
-      };
-      deps.push(dep);
+        hanziWord: skill.hanziWord,
+      });
       break;
     }
-    case SkillType.RadicalToEnglish:
     case SkillType.HanziWordToEnglish: {
       // Learn the components of a hanzi word first.
       const decompositions = await loadHanziDecomposition();
-      const ids = decompositions.get(skill.hanzi);
+      const hanzi = hanziFromHanziWord(skill.hanziWord);
+      const ids = decompositions.get(hanzi);
       if (ids != null) {
         const idsNode = parseIds(ids);
         for (const leaf of walkIdsNode(idsNode)) {
           if (
             leaf.type === `LeafCharacter` &&
-            leaf.character !== skill.hanzi && // todo turn into invariant?
+            leaf.character !== hanzi && // todo turn into invariant?
             (await characterHasGlyph(leaf.character))
           ) {
-            const radicalName = await ifRadicalReturnName(leaf.character);
-            const dep: Skill =
-              radicalName != null
-                ? {
-                    type: SkillType.RadicalToEnglish,
-                    hanzi: leaf.character,
-                    name: radicalName,
-                  }
-                : {
-                    type: SkillType.HanziWordToEnglish,
-                    hanzi: leaf.character,
-                  };
-            deps.push(dep);
+            // TODO: need to a better way to choose the meaning key.
+            const meaningKey = await guessHanziMeaningKey(leaf.character);
+            if (meaningKey != null) {
+              deps.push({
+                type: SkillType.HanziWordToEnglish,
+                hanziWord: buildHanziWord(leaf.character, meaningKey),
+              });
+            }
           }
         }
       }
@@ -125,34 +116,33 @@ export async function skillDependencies(
       // Learn the mnemonic associations for the final first.
 
       // Only do this for single characters
-      if (Array.from(skill.hanzi).length > 1) {
+      const hanzi = hanziFromHanziWord(skill.hanziWord);
+      if (Array.from(hanzi).length > 1) {
         break;
       }
 
       if (learningOptions.learnPinyinInitialBeforeFinal === true) {
-        const dep: Skill = {
+        deps.push({
           type: SkillType.HanziWordToPinyinInitial,
-          hanzi: skill.hanzi,
-        };
-        deps.push(dep);
+          hanziWord: skill.hanziWord,
+        });
       }
 
-      const res = await lookupWord(skill.hanzi);
+      const res = await lookupHanziWord(skill.hanziWord);
       if (!res) {
         break;
       }
 
       const chart = await loadStandardPinyinChart();
-      const [pinyin, _] = res.pinyin;
+      // TODO: when there are multiple pinyin, what should happen?
+      const pinyin = res.pinyin?.[0];
 
-      if (pinyin == null || _ == null) {
-        console.error(
-          new Error(`there should only be one pinyin for ${skill.hanzi}`),
-        );
+      if (pinyin == null) {
+        console.error(new Error(`no pinyin for ${skill.hanziWord}`));
         break;
       }
 
-      const final = splitPinyin(pinyin, chart)?.[1];
+      const final = splitPinyin(pinyin, chart)?.final;
       if (final == null) {
         console.error(
           new Error(`could not extract pinyin final for ${pinyin} `),
@@ -160,37 +150,35 @@ export async function skillDependencies(
         break;
       }
 
-      const dep: Skill = {
+      deps.push({
         type: SkillType.PinyinFinalAssociation,
         final,
-      };
-      deps.push(dep);
+      });
       break;
     }
     case SkillType.HanziWordToPinyinInitial: {
       // Learn the mnemonic associations for the final first.
 
       // Only do this for single characters
-      if (Array.from(skill.hanzi).length > 1) {
+      const hanzi = hanziFromHanziWord(skill.hanziWord);
+      if (Array.from(hanzi).length > 1) {
         break;
       }
 
-      const res = await lookupWord(skill.hanzi);
+      const res = await lookupHanziWord(skill.hanziWord);
       if (!res) {
         break;
       }
 
       const chart = await loadStandardPinyinChart();
-      const [pinyin, _] = res.pinyin;
 
-      if (pinyin == null || _ == null) {
-        console.error(
-          new Error(`there should only be one pinyin for ${skill.hanzi}`),
-        );
+      const pinyin = res.pinyin?.[0];
+      if (pinyin == null) {
+        console.error(new Error(`no pinyin for ${skill.hanziWord}`));
         break;
       }
 
-      const initial = splitPinyin(pinyin, chart)?.[0];
+      const initial = splitPinyin(pinyin, chart)?.initial;
       if (initial == null) {
         console.error(
           new Error(`could not extract pinyin initial for ${pinyin} `),
@@ -198,47 +186,47 @@ export async function skillDependencies(
         break;
       }
 
-      const dep: Skill = {
+      deps.push({
         type: SkillType.PinyinInitialAssociation,
         initial,
-      };
-      deps.push(dep);
+      });
 
       break;
     }
-    case SkillType.PinyinToHanzi:
+    case SkillType.PinyinToHanziWord:
       // Learn going from Hanzi -> Pinyin first.
       deps.push({
         type: SkillType.HanziWordToPinyinInitial,
-        hanzi: skill.hanzi,
+        hanziWord: skill.hanziWord,
       });
       deps.push({
         type: SkillType.HanziWordToPinyinFinal,
-        hanzi: skill.hanzi,
+        hanziWord: skill.hanziWord,
       });
       deps.push({
         type: SkillType.HanziWordToPinyinTone,
-        hanzi: skill.hanzi,
+        hanziWord: skill.hanziWord,
       });
       break;
     case SkillType.HanziWordToPinyinTone: {
       // Learn the mnemonic associations for the final first.
 
       // Only do this for single characters
-      if (Array.from(skill.hanzi).length > 1) {
+      const hanzi = hanziFromHanziWord(skill.hanziWord);
+      if (Array.from(hanzi).length > 1) {
         break;
       }
 
       if (learningOptions.learnPinyinFinalBeforeTone === true) {
-        const dep: Skill = {
+        deps.push({
           type: SkillType.HanziWordToPinyinFinal,
-          hanzi: skill.hanzi,
-        };
-        deps.push(dep);
+          hanziWord: skill.hanziWord,
+        });
       }
       break;
     }
-    case SkillType.ImageToHanzi:
+    case SkillType.Deprecated:
+    case SkillType.ImageToHanziWord:
     case SkillType.PinyinInitialAssociation:
     case SkillType.PinyinFinalAssociation:
       // Leaf skills (no dependencies).
@@ -247,25 +235,28 @@ export async function skillDependencies(
   return deps;
 }
 
-async function ifRadicalReturnName(
-  character: string,
+async function guessHanziMeaningKey(
+  hanzi: string,
 ): Promise<string | undefined> {
-  return (await loadRadicals()).find((x) => x.hanzi.includes(character))
-    ?.name[0];
+  const dict = await loadDictionary();
+  for (const key of dict.keys()) {
+    if (hanziFromHanziWord(key) === hanzi) {
+      return meaningKeyFromHanziWord(key);
+    }
+  }
 }
 
-export function radicalToEnglish(hanzi: string, name: string): RadicalSkill {
+export function hanziWordToEnglish(hanziWord: HanziWord): HanziWordSkill {
   return {
-    hanzi,
-    name,
-    type: SkillType.RadicalToEnglish,
+    type: SkillType.HanziWordToEnglish,
+    hanziWord,
   };
 }
 
-export function hanziWordToEnglish(hanzi: string): HanziSkill {
+export function englishToHanziWord(hanziWord: HanziWord): HanziWordSkill {
   return {
-    hanzi,
-    type: SkillType.HanziWordToEnglish,
+    type: SkillType.EnglishToHanziWord,
+    hanziWord,
   };
 }
 
@@ -316,19 +307,20 @@ export function skillReviewQueue(graph: Graph): MarshaledSkill[] {
 }
 
 const skillTypeShorthandMapping: Record<SkillType, string> = {
-  [SkillType.EnglishToHanzi]: `EN → 中文`,
-  [SkillType.EnglishToRadical]: `EN → ⺅`,
+  [SkillType.Deprecated_EnglishToRadical]: `[deprecated]`,
+  [SkillType.Deprecated_PinyinToRadical]: `[deprecated]`,
+  [SkillType.Deprecated_RadicalToEnglish]: `[deprecated]`,
+  [SkillType.Deprecated_RadicalToPinyin]: `[deprecated]`,
+  [SkillType.Deprecated]: `[deprecated]`,
+  [SkillType.EnglishToHanziWord]: `EN → 中文`,
   [SkillType.HanziWordToEnglish]: `中文 → EN`,
   [SkillType.HanziWordToPinyinFinal]: `中文 → PY⁻ᶠ`,
   [SkillType.HanziWordToPinyinInitial]: `中文 → PYⁱ⁻`,
   [SkillType.HanziWordToPinyinTone]: `中文 → PYⁿ`,
-  [SkillType.ImageToHanzi]: `🏞️ → 中文`,
+  [SkillType.ImageToHanziWord]: `🏞️ → 中文`,
   [SkillType.PinyinFinalAssociation]: `PY⁻ᶠ → ✦`,
   [SkillType.PinyinInitialAssociation]: `PYⁱ⁻ → ✦`,
-  [SkillType.RadicalToEnglish]: `⺅ → EN`,
-  [SkillType.RadicalToPinyin]: `⺅ → PY`,
-  [SkillType.PinyinToHanzi]: `PY → 中文`,
-  [SkillType.PinyinToRadical]: `PY → ⺅`,
+  [SkillType.PinyinToHanziWord]: `PY → 中文`,
 };
 
 export function skillTypeToShorthand(skillType: SkillType): string {

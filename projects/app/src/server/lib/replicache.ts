@@ -1,8 +1,8 @@
 import {
   rPinyinInitialGroupId,
   SupportedSchema,
-  v3,
-  v4,
+  v5,
+  v5_1,
 } from "@/data/rizzleSchema";
 import {
   ClientStateNotFoundResponse,
@@ -101,14 +101,14 @@ const mutators: RizzleDrizzleMutators<SupportedSchema, Drizzle> = {
   },
 };
 
-const mutateV3 = makeDrizzleMutationHandler(v3, mutators);
-const mutateV4 = makeDrizzleMutationHandler(v4, mutators);
+const mutateV5_1 = makeDrizzleMutationHandler(v5_1, mutators);
+const mutateV5 = makeDrizzleMutationHandler(v5, mutators);
 
 function getSchemaImpl(schemaVersion: string) {
-  if (schemaVersion === v3.version) {
-    return { schema: v3, mutate: mutateV3 };
-  } else if (schemaVersion === v4.version) {
-    return { schema: v4, mutate: mutateV4 };
+  if (schemaVersion === v5_1.version) {
+    return { schema: v5_1, mutate: mutateV5_1 };
+  } else if (schemaVersion === v5.version) {
+    return { schema: v5, mutate: mutateV5 };
   }
   return null;
 }

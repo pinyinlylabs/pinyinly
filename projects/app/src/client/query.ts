@@ -8,14 +8,17 @@ import {
   SkillState,
   SkillType,
 } from "@/data/model";
-import { MarshaledSkill, rSkill } from "@/data/rizzleSchema";
+import {
+  MarshaledSkill,
+  rSkillMarshal,
+  rSkillUnmarshal,
+} from "@/data/rizzleSchema";
 import {
   hanziWordToEnglish,
-  skillId,
   skillLearningGraph,
   skillReviewQueue,
 } from "@/data/skills";
-import { allHsk1Words } from "@/dictionary/dictionary";
+import { allHsk1HanziWords } from "@/dictionary/dictionary";
 import { interval } from "date-fns/interval";
 import shuffle from "lodash/shuffle";
 import take from "lodash/take";
@@ -136,20 +139,18 @@ export async function hsk1SkillReview(r: Rizzle): Promise<Skill[]> {
     const res = new Set<MarshaledSkill>();
     for await (const [k, v] of r.query.skillState.scan(tx)) {
       if (v.due > now) {
-        res.add(skillId(k.skill));
+        res.add(rSkillMarshal(k.skill));
       }
     }
     return res;
   });
 
-  const hsk1Words = await allHsk1Words();
+  const hsk1HanziWords = await allHsk1HanziWords();
 
   const graph = await skillLearningGraph({
-    targetSkills: hsk1Words.map((w) => hanziWordToEnglish(w)),
+    targetSkills: hsk1HanziWords.map((w) => hanziWordToEnglish(w)),
     isSkillLearned: (skill) => learnedSkills.has(skill),
   });
 
-  const x = rSkill();
-
-  return skillReviewQueue(graph).map((s) => x.unmarshal(s));
+  return skillReviewQueue(graph).map((s) => rSkillUnmarshal(s));
 }

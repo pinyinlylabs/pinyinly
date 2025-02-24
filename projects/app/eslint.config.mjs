@@ -199,11 +199,23 @@ export default tseslint.config(
       // Often only having one usage of a type parameter is fine because it's
       // the only way to use "_ extends _".
       "@typescript-eslint/no-unnecessary-type-parameters": `off`,
+      // It's broken when using generic inferred return types. Too much noise
+      // means it's often turned off even when it perhaps shouldn't be, so it's
+      // better to just disable it completely.
+      "@typescript-eslint/no-unsafe-return": `off`,
 
       //
       // @stylistic
       //
       "@stylistic/quotes": [`error`, `backtick`],
+
+      //
+      // drizzle
+      //
+      "drizzle/enforce-delete-with-where": [
+        `error`,
+        { drizzleObjectName: [`db`, `tx`] },
+      ],
     },
   },
 
@@ -253,7 +265,7 @@ export default tseslint.config(
   // pulls in the `node` types.
   {
     files: [`**/*.{cjs,js,mjs,ts,tsx}`],
-    ignores: [`*.*`, `bin/**/*`, `src/__tests__/**/*`],
+    ignores: [`*.*`, `bin/**/*`, `test/**/*`],
     rules: {
       "@expoCodeImports/no-restricted-imports": [
         `error`,

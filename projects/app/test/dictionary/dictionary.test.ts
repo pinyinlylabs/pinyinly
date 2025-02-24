@@ -1,13 +1,16 @@
 import {
-  allHsk1Words,
-  allHsk2Words,
-  allHsk3Words,
+  allHsk1HanziWords,
+  allHsk2HanziWords,
+  allHsk3HanziWords,
+  allRadicalHanziWords,
   allRadicalPrimaryForms,
   allRadicalsByStrokes,
   convertPinyinWithToneNumberToToneMark,
   flattenIds,
+  hanziFromHanziWord,
   idsNodeToString,
   IdsOperator,
+  loadDictionary,
   loadHanziDecomposition,
   loadHhPinyinChart,
   loadHmmPinyinChart,
@@ -20,7 +23,8 @@ import {
   loadRadicalPinyinMnemonics,
   loadRadicals,
   loadStandardPinyinChart,
-  loadWords,
+  lookupHanziWord,
+  meaningKeyFromHanziWord,
   parseIds,
   parsePinyinTone,
   PinyinChart,
@@ -28,6 +32,11 @@ import {
   unicodeShortIdentifier,
   walkIdsNode,
 } from "#dictionary/dictionary.ts";
+import {
+  mergeSortComparators,
+  sortComparatorNumber,
+  sortComparatorString,
+} from "#util/collections.ts";
 import { invariant } from "@haohaohow/lib/invariant";
 import assert from "node:assert/strict";
 import test from "node:test";
@@ -42,9 +51,9 @@ void test(`radical groups have the right number of elements`, async () => {
 });
 
 void test(`json data can be loaded and passes the schema validation`, async () => {
-  await allHsk1Words();
-  await allHsk2Words();
-  await allHsk3Words();
+  await allHsk1HanziWords();
+  await allHsk2HanziWords();
+  await allHsk3HanziWords();
   await allRadicalPrimaryForms();
   await loadHanziDecomposition();
   await loadHhPinyinChart();
@@ -57,15 +66,161 @@ void test(`json data can be loaded and passes the schema validation`, async () =
   await loadRadicalPinyinMnemonics();
   await loadRadicals();
   await loadStandardPinyinChart();
-  await loadWords();
+  await loadDictionary();
+});
+
+const wordLists = [allHsk1HanziWords, allRadicalHanziWords];
+
+void test(`hanzi word meaning-keys are not too similar`, async () => {
+  const dict = await loadDictionary();
+
+  const hanziToMeaningKey = new Map<string, string[]>();
+
+  // Group by hanzi, and keep a sorted array of meaning-keys.
+  for (const hanziWord of dict.keys()) {
+    const hanzi = hanziFromHanziWord(hanziWord);
+    const meaningKey = meaningKeyFromHanziWord(hanziWord);
+
+    const meaningKeys = hanziToMeaningKey.get(hanzi) ?? [];
+    meaningKeys.push(meaningKey);
+    meaningKeys.sort(
+      mergeSortComparators(
+        sortComparatorNumber((x) => x.length),
+        sortComparatorString(),
+      ),
+    );
+    hanziToMeaningKey.set(hanzi, meaningKeys);
+  }
+
+  // no meaning-key is just a prefix of a sibling meaning-key
+  for (const [hanzi, meaningKeys] of hanziToMeaningKey) {
+    for (let i = 0; i < meaningKeys.length - 1; i++) {
+      for (let j = i + 1; j < meaningKeys.length; j++) {
+        const a = meaningKeys[i];
+        const b = meaningKeys[j];
+        invariant(a != null && b != null);
+
+        assert.notEqual(
+          b.startsWith(a),
+          true,
+          `${hanzi} meaning-keys ${a} and ${b} are too similar`,
+        );
+      }
+    }
+  }
+});
+
+void test(`hanzi word meaning-keys use valid characters`, async () => {
+  const dict = await loadDictionary();
+
+  for (const hanziWord of dict.keys()) {
+    const meaningKey = meaningKeyFromHanziWord(hanziWord);
+    assert.match(meaningKey, /^[a-zA-Z]+$/);
+  }
+});
+
+void test(`hanzi word without pinyin omit the property rather than use an empty array`, async () => {
+  const dict = await loadDictionary();
+
+  const hanziWordWithEmptyArray = [...dict]
+    .filter(([, { pinyin }]) => pinyin?.length === 0)
+    .map(([hanziWord]) => hanziWord);
+
+  assert.deepEqual(hanziWordWithEmptyArray, []);
+});
+
+void test(`hanzi word without visual variants omit the property rather than use an empty array`, async () => {
+  const dict = await loadDictionary();
+
+  const hanziWordWithEmptyArray = [...dict]
+    .filter(([, { visualVariants }]) => visualVariants?.length === 0)
+    .map(([hanziWord]) => hanziWord);
+
+  assert.deepEqual(hanziWordWithEmptyArray, []);
+});
+
+void test(`hanzi word meanings actually include the hanzi in the example`, async () => {
+  const dict = await loadDictionary();
+
+  const hanziWordWithBadExamples = [...dict]
+    .filter(
+      ([hanziWord, { example }]) =>
+        example != null && !example.includes(hanziFromHanziWord(hanziWord)),
+    )
+    .map(([hanziWord]) => hanziWord);
+
+  assert.deepEqual(hanziWordWithBadExamples, []);
+});
+
+void test(`hanzi word visual variants shouldn't include the hanzi`, async () => {
+  const dict = await loadDictionary();
+
+  const hanziWordWithBadVisualVariants = [...dict]
+    .filter(
+      ([hanziWord, { visualVariants }]) =>
+        visualVariants?.includes(hanziFromHanziWord(hanziWord)) === true,
+    )
+    .map(([hanziWord]) => hanziWord);
+
+  assert.deepEqual(hanziWordWithBadVisualVariants, []);
+});
+
+void test(`there are no hanzi words with the same meaning key and pinyin`, async () => {
+  const exceptions = new Set([[`⺿:grass`, `草:grass`]].map((x) => new Set(x)));
+
+  const dict = await loadDictionary();
+
+  const byMeaningKeyAndPinyin = new Map<string, Set<string>>();
+  for (const [hanziWord, { pinyin }] of dict) {
+    const meaningKey = meaningKeyFromHanziWord(hanziWord);
+    const key = `${meaningKey}:${pinyin}`;
+    const set = byMeaningKeyAndPinyin.get(key) ?? new Set();
+    set.add(hanziWord);
+    byMeaningKeyAndPinyin.set(key, set);
+  }
+
+  // Make sure that there is only one hanzi word for each meaning key and
+  // pinyin, but do it in a way to give a helpful error message.
+  const duplicates = [...byMeaningKeyAndPinyin.values()].filter(
+    (x) => x.size > 1,
+  );
+
+  // Check that all exceptions are actually used.
+  for (const exception of exceptions) {
+    assert(
+      duplicates.some((x) => x.symmetricDifference(exception).size === 0),
+      `exception ${Array.from(exception)} is not used`,
+    );
+  }
+
+  // Check that there are no duplicates (except for the exceptions).
+  assert.deepEqual(
+    duplicates.filter(
+      (x) =>
+        !exceptions.values().some((e) => x.symmetricDifference(e).size === 0),
+    ),
+    [],
+  );
+});
+
+void test(`all word lists only reference valid hanzi words`, async () => {
+  for (const wordList of wordLists) {
+    for (const hanziWord of await wordList()) {
+      assert.notEqual(
+        await lookupHanziWord(hanziWord),
+        null,
+        `missing hanzi word lookup for ${hanziWord} in word list`,
+      );
+    }
+  }
 });
 
 void test(`expect missing glyphs to be included decomposition data`, async () => {
   const allChars = new Set(
     (await allRadicalPrimaryForms())
-      .concat(await allHsk1Words())
-      .concat(await allHsk2Words())
-      .concat(await allHsk3Words())
+      .concat((await allHsk1HanziWords()).map((x) => hanziFromHanziWord(x)))
+      .concat((await allHsk2HanziWords()).map((x) => hanziFromHanziWord(x)))
+      .concat((await allHsk3HanziWords()).map((x) => hanziFromHanziWord(x)))
       // Split words into characters because decomposition is per-character.
       .flatMap((x) => Array.from(x)),
   );
@@ -91,29 +246,10 @@ void test(`expect missing glyphs to be included decomposition data`, async () =>
     ...(await loadMissingFontGlyphs()).values().flatMap((x) => Array.from(x)),
   ]);
   for (const char of allComponents) {
-    // eslint-disable-next-line drizzle/enforce-delete-with-where
     knownMissingGlyphs.delete(char);
   }
 
   assert.deepEqual(knownMissingGlyphs, new Set());
-});
-
-void test(`there are no alternative character/punctuations mixed into hsk words`, async () => {
-  const words = await allHsk1Words();
-  const violatingWords = new Set(words.filter((w) => /[｜（）]/u.test(w)));
-  assert.deepEqual(violatingWords, new Set());
-});
-
-void test(`there are no pronunciations mixed into word definitions`, async () => {
-  const words = await loadWords();
-
-  for (const [, { definitions }] of words) {
-    for (const definition of definitions) {
-      assert.doesNotMatch(definition, /also pr[a-z]*\.? \[/);
-      assert.doesNotMatch(definition, /pronunciation /);
-      // assert.doesNotMatch(definition, /\[/); // TODO
-    }
-  }
 });
 
 void test(`there are 214 radicals to match official kangxi radicals`, async () => {

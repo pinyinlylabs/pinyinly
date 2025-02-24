@@ -81,7 +81,6 @@ export const zodJson = <T extends z.ZodTypeAny>(name: string, schema: T) =>
       this: PgCustomColumn, // hack: expose drizzle internals
       value,
     ) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return schema.catch(drizzleColumnTypeEnhancedErrors(this)).parse(value);
     },
     toDriver(

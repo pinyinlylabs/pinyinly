@@ -2,7 +2,6 @@ import { ReferencePage } from "@/client/ui/ReferencePage";
 import { ReferencePageBodySection } from "@/client/ui/ReferencePageBodySection";
 import { ReferencePageHeader } from "@/client/ui/ReferencePageHeader";
 import { GradientRed } from "@/client/ui/styles";
-import { lookupWord } from "@/dictionary/dictionary";
 import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams } from "expo-router";
 
@@ -11,8 +10,9 @@ export default function CharacterPage() {
 
   const query = useQuery({
     queryKey: [`character`, id],
+    // eslint-disable-next-line @typescript-eslint/require-await
     queryFn: async () => {
-      return await lookupWord(id);
+      return null;
     },
   });
 

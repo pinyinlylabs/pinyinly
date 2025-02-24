@@ -1,36 +1,36 @@
-import { ScrollView, Text, View } from "react-native";
-
 import { RectButton2 } from "@/client/ui/RectButton2";
 import { useRizzleQuery } from "@/client/ui/ReplicacheContext";
+import { HanziWord } from "@/data/model";
+import { hanziFromHanziWord } from "@/dictionary/dictionary";
 import { invariant } from "@haohaohow/lib/invariant";
 import fromAsync from "array-from-async";
 import { differenceInCalendarDays } from "date-fns";
 import { Link } from "expo-router";
 import reverse from "lodash/reverse";
 import sortBy from "lodash/sortBy";
+import { ScrollView, Text, View } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { tv } from "tailwind-variants";
 
 export default function IndexPage() {
-  const recentCharacters = useRizzleQuery(
+  const recentHanzi = useRizzleQuery(
     [`IndexPage`, `recentCharacters`],
     async (r, tx) => {
-      const recentCharacters: string[] = [];
+      const recentHanziWords: HanziWord[] = [];
       const ratingHistory = await fromAsync(r.query.skillRating.scan(tx)).then(
         (reviews) => reverse(sortBy(reviews, (x) => x[0].createdAt.getTime())),
       );
       for (const [key, _value] of ratingHistory) {
-        if (
-          `hanzi` in key.skill &&
-          !recentCharacters.includes(key.skill.hanzi)
-        ) {
-          recentCharacters.push(key.skill.hanzi);
-          if (recentCharacters.length === 10) {
-            break;
+        if (`hanziWord` in key.skill) {
+          if (!recentHanziWords.includes(key.skill.hanziWord)) {
+            recentHanziWords.push(key.skill.hanziWord);
+            if (recentHanziWords.length === 10) {
+              break;
+            }
           }
         }
       }
-      return recentCharacters;
+      return recentHanziWords.map((x) => hanziFromHanziWord(x));
     },
   );
 
@@ -85,18 +85,18 @@ export default function IndexPage() {
   return (
     <ScrollView contentContainerClassName="pt-safe-offset-4 px-safe-or-4 items-center gap-[10px] padding-[10px]">
       <View className={boxClass()}>
-        {recentCharacters.isLoading ? null : recentCharacters.isError ? (
+        {recentHanzi.isLoading ? null : recentHanzi.isError ? (
           <View>
             <Text className="danger-theme text-text">
               Oops something went wrong.
             </Text>
           </View>
-        ) : recentCharacters.data == null ? null : (
+        ) : recentHanzi.data == null ? null : (
           <Animated.View entering={FadeIn} style={{ alignSelf: `stretch` }}>
             <View className="items-stretch self-stretch">
               <View className="flex-row items-center justify-between">
                 <Text className="hhh-text-title mb-1">
-                  {recentCharacters.data.length > 0
+                  {recentHanzi.data.length > 0
                     ? `Continue learning`
                     : `Start learning`}
                 </Text>
@@ -117,13 +117,13 @@ export default function IndexPage() {
                 ) : null}
               </View>
 
-              {recentCharacters.data.length > 0 ? (
+              {recentHanzi.data.length > 0 ? (
                 <>
                   <Text className="hhh-text-caption">
                     A few things from last time
                   </Text>
                   <View className="mt-2 flex-row gap-2">
-                    {recentCharacters.data.map((char, i) => (
+                    {recentHanzi.data.map((char, i) => (
                       <View
                         key={i}
                         className="rounded border border-primary-7 bg-primary-3 p-2"
@@ -171,25 +171,6 @@ export default function IndexPage() {
             textClassName="py-1 px-2"
           >
             Play connections
-          </RectButton2>
-        </Link>
-      </View>
-
-      <View className={boxClass()}>
-        <Text className="hhh-text-title mb-1">Radicals</Text>
-        <Text className="hhh-text-caption mb-4">
-          Radicals are the key to recognizing and understanding characters.
-          Learn them with memorable stories to boost your reading and recall.
-        </Text>
-
-        <Link href="/learn/radicals" asChild>
-          <RectButton2
-            variant="filled"
-            className="self-start"
-            accent
-            textClassName="py-1 px-2"
-          >
-            Practice radicals
           </RectButton2>
         </Link>
       </View>
