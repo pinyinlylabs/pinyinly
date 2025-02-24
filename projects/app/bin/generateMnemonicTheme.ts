@@ -1,3 +1,4 @@
+import { rMnemonicThemeId, rPinyinInitialGroupId } from "#data/rizzleSchema.ts";
 import { invariant } from "@haohaohow/lib/invariant";
 import makeDebug from "debug";
 import { join } from "node:path";
@@ -31,13 +32,21 @@ const argv = await yargs(process.argv.slice(2))
     type: `string`,
     describe: `only update a specific pinyin group`,
     choices: groupIds,
-    coerce: (x: string) => x.split(`,`).filter((x) => x !== ``),
+    coerce: (x: string) =>
+      x
+        .split(`,`)
+        .filter((x) => x !== ``)
+        .map((x) => rPinyinInitialGroupId.unmarshal(x)),
   })
   .option(`theme`, {
     type: `string`,
     describe: `only update a specific theme`,
     choices: [...themes.keys()],
-    coerce: (x: string) => x.split(`,`).filter((x) => x !== ``),
+    coerce: (x: string) =>
+      x
+        .split(`,`)
+        .filter((x) => x !== ``)
+        .map((x) => rMnemonicThemeId.unmarshal(x)),
   })
   .option(`debug`, {
     type: `boolean`,

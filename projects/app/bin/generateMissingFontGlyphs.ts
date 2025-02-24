@@ -1,9 +1,5 @@
 import {
-  allHsk1HanziWords,
-  allHsk2HanziWords,
-  allHsk3HanziWords,
-  allRadicalPrimaryForms,
-  hanziFromHanziWord,
+  allHanziCharacters,
   loadHanziDecomposition,
   parseIds,
   unicodeShortIdentifier,
@@ -37,14 +33,7 @@ invariant(pingFangCollection.type === `TTC`, `expected a TTC font`);
 const pingFang = pingFangCollection.fonts[0];
 invariant(pingFang != null);
 
-const allChars = new Set(
-  (await allRadicalPrimaryForms())
-    .concat((await allHsk1HanziWords()).map((w) => hanziFromHanziWord(w)))
-    .concat((await allHsk2HanziWords()).map((w) => hanziFromHanziWord(w)))
-    .concat((await allHsk3HanziWords()).map((w) => hanziFromHanziWord(w)))
-    // Split words into characters because decomposition is per-character.
-    .flatMap((x) => Array.from(x)),
-);
+const allChars = await allHanziCharacters();
 
 const allComponents = new Set<string>();
 const decompositions = await loadHanziDecomposition();

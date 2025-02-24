@@ -4,11 +4,7 @@ import assert from "node:assert/strict";
 import { join } from "node:path";
 import yargs from "yargs";
 import {
-  allHsk1HanziWords,
-  allHsk2HanziWords,
-  allHsk3HanziWords,
-  allRadicalPrimaryForms,
-  hanziFromHanziWord,
+  allHanziCharacters,
   IdsNode,
   loadHanziDecomposition,
   parseIds,
@@ -148,14 +144,7 @@ const rawJson = await fetchWithCache(
 );
 const allDecompositions = parseIdsTxt(rawJson);
 
-const allCharacters = new Set(
-  (await allRadicalPrimaryForms())
-    .concat((await allHsk1HanziWords()).map((w) => hanziFromHanziWord(w)))
-    .concat((await allHsk2HanziWords()).map((w) => hanziFromHanziWord(w)))
-    .concat((await allHsk3HanziWords()).map((w) => hanziFromHanziWord(w)))
-    // Split words into characters because decomposition is per-character.
-    .flatMap((x) => Array.from(x)),
-);
+const allCharacters = await allHanziCharacters();
 
 const existingData = await loadHanziDecomposition();
 
