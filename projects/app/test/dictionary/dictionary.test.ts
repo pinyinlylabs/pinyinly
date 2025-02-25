@@ -121,6 +121,22 @@ void test(`hanzi word meaning-keys use valid characters`, async () => {
   }
 });
 
+void test(`hanzi word meaning example is not in english`, async () => {
+  const dict = await loadDictionary();
+
+  const violations = new Set(
+    [...dict]
+      .filter(([, { example }]) => {
+        // Only check for lower-case english letters, because sometimes examples
+        // have words like APP in them.
+        return example != null && /[a-z]/u.test(example);
+      })
+      .map(([hanziWord, meaning]) => `${hanziWord} ${meaning.example}`),
+  );
+
+  assert.deepEqual(violations, new Set());
+});
+
 void test(`hanzi word without pinyin omit the property rather than use an empty array`, async () => {
   const dict = await loadDictionary();
 
