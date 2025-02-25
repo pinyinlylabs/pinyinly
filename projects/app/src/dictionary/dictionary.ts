@@ -269,11 +269,12 @@ export const allHsk3HanziWords = memoize(async () =>
 );
 
 export const hanziWordMeaningSchema = z.object({
-  gloss: z.array(z.string()),
+  gloss: z.array(z.string()).min(1),
   pinyin: z
     .array(z.string({ description: `space separated pinyin for each word` }), {
       description: `all valid pinyin variations for this meaning (might be omitted for radicals without pronunciation)`,
     })
+    .min(1)
     .optional(),
   example: z.string().optional(),
   partOfSpeech: z.enum([
@@ -298,7 +299,7 @@ export const hanziWordMeaningSchema = z.object({
         description: `Only included in rare cases (e.g. radicals with multiple visual forms). `,
       },
     )
-    // .min(1) // TODO enable
+    .min(1)
     .optional(),
   definition: z.string(),
 });
@@ -332,24 +333,6 @@ export const loadDictionary = memoize(async () =>
   dictionarySchema
     .transform(deepReadonly)
     .parse((await import(`./dictionary.asset.json`)).default),
-);
-
-export const manualWordsSchema = z
-  .array(
-    z.tuple([
-      z.string(),
-      z.object({
-        pinyin: z.array(z.string()).optional(),
-        definitions: z.array(z.string()).optional(),
-      }),
-    ]),
-  )
-  .transform((x) => new Map(x));
-
-export const loadManualWords = memoize(async () =>
-  manualWordsSchema
-    .transform(deepReadonly)
-    .parse((await import(`./wordsManual.asset.json`)).default),
 );
 
 const loadRadicalStrokes = memoize(async () =>
