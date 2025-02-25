@@ -104,7 +104,7 @@ export async function generateQuestionForSkillOrThrow(
         invariant(gloss != null, `missing gloss for hanzi word ${hanziWord}`);
         otherAnswers.push(
           choicePair(
-            { hanzi: hanziWord, skill },
+            { hanzi: hanziFromHanziWord(hanziWord), skill },
             {
               definition: gloss,
               skill,
@@ -153,9 +153,6 @@ async function getOtherHanzi(
     allHsk1HanziWords(),
     allHsk2HanziWords(),
     allHsk3HanziWords(),
-    // TODO: re-enable
-    // allHsk2Words(),
-    // allHsk3Words(),
   ]);
 
   // Use words from the same HSK word list if possible, so that they're more

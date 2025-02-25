@@ -12,12 +12,15 @@ export const HanziText = ({
   accented?: boolean;
   small?: boolean;
 }) => {
+  const pinyinWithoutSpaces = pinyin?.split(` `).join(``);
   return (
     <View
       className={`flex-0 flex-col items-center ${small ? `gap-0.5` : `gap-1`}`}
     >
-      {pinyin != null ? (
-        <Text className={pinyinText({ accented, small })}>{pinyin}</Text>
+      {pinyinWithoutSpaces != null ? (
+        <Text className={pinyinText({ accented, small })}>
+          {pinyinWithoutSpaces}
+        </Text>
       ) : null}
       <Text className={hanziText({ accented, small })}>{hanzi}</Text>
     </View>
