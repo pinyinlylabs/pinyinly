@@ -104,7 +104,7 @@ export async function generateQuestionForSkillOrThrow(
         invariant(gloss != null, `missing gloss for hanzi word ${hanziWord}`);
         otherAnswers.push(
           choicePair(
-            { hanzi: hanziWord, skill },
+            { hanzi: hanziFromHanziWord(hanziWord), skill },
             {
               definition: gloss,
               skill,
