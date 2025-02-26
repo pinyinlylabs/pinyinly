@@ -1332,6 +1332,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@bufbuild/protobuf@npm:^2.2.3":
+  version: 2.2.3
+  resolution: "@bufbuild/protobuf@npm:2.2.3"
+  checksum: 10c0/546c38b924c4a8dd79ec457928cfb99a5aab2945d11f15f4f06894bdc148ea37a1ae8b78cf17de9bb5354cbb896f6af4099073690b5b2089e1b196cec963d6ec
+  languageName: node
+  linkType: hard
+
 "@cspotcode/source-map-support@npm:^0.8.0":
   version: 0.8.1
   resolution: "@cspotcode/source-map-support@npm:0.8.1"
@@ -3048,13 +3055,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@inngest/ai@npm:^0.0.0":
-  version: 0.0.0
-  resolution: "@inngest/ai@npm:0.0.0"
+"@inngest/ai@npm:0.0.4":
+  version: 0.0.4
+  resolution: "@inngest/ai@npm:0.0.4"
   dependencies:
     "@types/node": "npm:^22.10.5"
     typescript: "npm:^5.7.3"
-  checksum: 10c0/6620b3f37e80904cb4579078b315618da95bbf273ee083a9dbac3ba6fb552bdfde94abf8d18f1fedd9d54d5e4ad5640dc59e25905448ca0aa704cc04f79ef823
+  checksum: 10c0/cf7e91c3c2048c1821f4346794277aa2e96a8c89333df81441f899fca54377e04dc2d5f7392e35608e7136c3c2391a2572cce15d768263eb0584e8427b561160
   languageName: node
   linkType: hard
 
@@ -3198,6 +3205,13 @@ __metadata:
     "@types/yargs": "npm:^17.0.8"
     chalk: "npm:^4.0.0"
   checksum: 10c0/ea4e493dd3fb47933b8ccab201ae573dcc451f951dc44ed2a86123cd8541b82aa9d2b1031caf9b1080d6673c517e2dcc25a44b2dc4f3fbc37bfc965d444888c0
+  languageName: node
+  linkType: hard
+
+"@jpwilliams/waitgroup@npm:^2.1.1":
+  version: 2.1.1
+  resolution: "@jpwilliams/waitgroup@npm:2.1.1"
+  checksum: 10c0/9217e0b187fd57fbb485de51f2768fae81637803363954ccb2b95543ea2d2af653a846c912da2e0c5071840bf35c84b1bcdafdab4ac808232a55ba417d28302a
   languageName: node
   linkType: hard
 
@@ -10958,10 +10972,12 @@ __metadata:
   linkType: hard
 
 "inngest@npm:^3.29.2":
-  version: 3.30.0
-  resolution: "inngest@npm:3.30.0"
+  version: 3.31.11
+  resolution: "inngest@npm:3.31.11"
   dependencies:
-    "@inngest/ai": "npm:^0.0.0"
+    "@bufbuild/protobuf": "npm:^2.2.3"
+    "@inngest/ai": "npm:0.0.4"
+    "@jpwilliams/waitgroup": "npm:^2.1.1"
     "@types/debug": "npm:^4.1.12"
     canonicalize: "npm:^1.0.8"
     chalk: "npm:^4.1.2"
@@ -10972,6 +10988,7 @@ __metadata:
     ms: "npm:^2.1.3"
     serialize-error-cjs: "npm:^0.1.3"
     strip-ansi: "npm:^5.2.0"
+    ulid: "npm:^2.3.0"
     zod: "npm:~3.22.3"
   peerDependencies:
     "@sveltejs/kit": ">=1.27.3"
@@ -11005,7 +11022,7 @@ __metadata:
       optional: true
     typescript:
       optional: true
-  checksum: 10c0/90d7e6fcbc0eb795c64afd5b3b9ba86717451544785b8ff5f29b434f7ca4e3a4f997f3f4b55fd4012bdd92429c042f1d6b07fde4f25151ea5d39ddf86f21ef6f
+  checksum: 10c0/eb422aabb39c2c04f57c987dde6cd0e4e7564e1441b45c35d23c43ba2e7243de0a8265a23e4892c3456b4235eeffbecc4b9364a76a8eabf869e56752c32072e0
   languageName: node
   linkType: hard
 
@@ -16786,6 +16803,15 @@ __metadata:
   bin:
     uglifyjs: bin/uglifyjs
   checksum: 10c0/83b0a90eca35f778e07cad9622b80c448b6aad457c9ff8e568afed978212b42930a95f9e1be943a1ffa4258a3340fbb899f41461131c05bb1d0a9c303aed8479
+  languageName: node
+  linkType: hard
+
+"ulid@npm:^2.3.0":
+  version: 2.3.0
+  resolution: "ulid@npm:2.3.0"
+  bin:
+    ulid: ./bin/cli.js
+  checksum: 10c0/070d237502781085e59cf3d8ece752ff96cd3a0990cf1c1be57273f4550597daeb72e9a7db8e5a320de31102509bb3321d280b54bfc44e98025e4628a9629773
   languageName: node
   linkType: hard
 
