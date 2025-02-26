@@ -5,7 +5,7 @@
   "functions": {
     "api/index.cjs": {
       "maxDuration": 25,
-      "runtime": "@vercel/node@5.0.2",
+      "runtime": "@vercel/node@5.1.7",
       "includeFiles": "dist/vercel/server/**"
     }
   },
