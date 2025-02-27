@@ -266,7 +266,7 @@ void test(skillLearningGraph.name, async () => {
           he:卜:divine
         he:儿:son
       he:儿:son
-        he:丿:radicalSlash
+        he:丿:slash
       `,
     );
   });
