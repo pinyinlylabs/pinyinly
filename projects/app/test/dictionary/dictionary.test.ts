@@ -357,48 +357,16 @@ void test(`zod schemas are compatible with OpenAI API`, async () => {
 });
 
 void test(`hanzi uses consistent unicode characters`, async () => {
-  {
-    const dict = await loadDictionary();
-    const violations = [...dict.keys()]
-      .map((x) => hanziFromHanziWord(x))
-      .flatMap((x) => Array.from(x))
-      .filter(isNotCjkUnifiedIdeograph);
-    assert.deepEqual(
-      violations,
-      [],
-      await debugNonCjkUnifiedIdeographs(violations),
-    );
-  }
-
-  // const primary = await allRadicalPrimaryForms();
-  // const primarySet = new Set(primary);
-  // {
-  //   const violations = primary.filter(isNotCjkUnifiedIdeograph);
-  //   assert.deepEqual(
-  //     violations,
-  //     [],
-  //     await debugNonCjkUnifiedIdeographs(violations),
-  //   );
-  // }
-  // {
-  //   const sample = [...(await loadHanziWordGlossMnemonics()).keys()];
-  //   assert.deepEqual(new Set(sample).difference(primarySet), new Set());
-  //   assert.deepEqual(sample.filter(isNotCjkUnifiedIdeograph), []);
-  // }
-  // {
-  //   const sample = (await allRadicalsByStrokes())
-  //     .values()
-  //     .flatMap((r) => r.characters);
-  //   {
-  //     const diff = new Set(sample).difference(primarySet);
-  //     assert.deepEqual(
-  //       diff,
-  //       new Set(),
-  //       await debugNonCjkUnifiedIdeographs([...diff]),
-  //     );
-  //   }
-  //   assert.deepEqual([...sample].filter(isNotCjkUnifiedIdeograph), []);
-  // }
+  const dict = await loadDictionary();
+  const violations = [...dict.keys()]
+    .map((x) => hanziFromHanziWord(x))
+    .flatMap((x) => Array.from(x))
+    .filter(isNotCjkUnifiedIdeograph);
+  assert.deepEqual(
+    violations,
+    [],
+    await debugNonCjkUnifiedIdeographs(violations),
+  );
 });
 
 void test(`convertPinyinWithToneNumberToToneMark`, () => {
