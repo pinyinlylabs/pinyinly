@@ -15,6 +15,7 @@ import {
   lookupHanziWord,
   meaningKeyFromHanziWord,
   parseIds,
+  partOfSpeechSchema,
   walkIdsNode,
   wordListSchema,
 } from "#dictionary/dictionary.ts";
@@ -650,6 +651,11 @@ const HanziWordEditor = ({
                   value: meaning.visualVariants?.join(`;`) ?? ``,
                 },
                 {
+                  id: `partOfSpeech`,
+                  label: `Part of speech`,
+                  value: meaning.partOfSpeech,
+                },
+                {
                   id: `example`,
                   label: `Example`,
                   value: meaning.example ?? ``,
@@ -674,6 +680,22 @@ const HanziWordEditor = ({
                 }),
               );
               edits.delete(`example`);
+            }
+
+            if (edits.has(`partOfSpeech`)) {
+              const newValue = edits.get(`partOfSpeech`)?.trim();
+              invariant(newValue != null);
+
+              const newPartOfSpeech =
+                newValue === ``
+                  ? undefined
+                  : partOfSpeechSchema.parse(newValue);
+              mutations.push(() =>
+                upsertHanziWordMeaning(hanziWord, {
+                  partOfSpeech: newPartOfSpeech,
+                }),
+              );
+              edits.delete(`partOfSpeech`);
             }
 
             if (edits.has(`gloss`)) {
@@ -1334,19 +1356,6 @@ ${existingChoices
   });
 
   return res;
-
-  // return new Map(
-  //   [...queriesWithIds].map(([id, query]) => [
-  //     query,
-  //     results
-  //       .filter((x) => x.referenceId === id)
-  //       .map((x) => ({
-  //         type: `new`,
-  //         hanziWord: buildHanziWord(query.hanzi, x.meaningKey),
-  //         meaning: x.meaning,
-  //       })),
-  //   ]),
-  // );
 }
 
 const DictionaryPicker = ({

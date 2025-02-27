@@ -221,15 +221,28 @@ void test(`there are no hanzi words with the same meaning key and pinyin`, async
   );
 });
 
-void test(`there are no hanzi words with the same hanzi and pinyin`, async () => {
-  const exceptions = new Set([].map((x) => new Set(x)));
+void test(`there are no hanzi words with the same hanzi + part-of-speech + pinyin`, async () => {
+  const exceptions = new Set(
+    [
+      [`行:okay`, `行:walk`],
+      [`从来:always`, `从来:never`],
+      [`家:family`, `家:home`],
+      [`提:carry`, `提:mention`],
+      [`要:must`, `要:want`],
+      [`面:face`, `面:surface`],
+      [`米:rice`, `米:meter`],
+      [`表:surface`, `表:watch`],
+      [`菜:dish`, `菜:vegetable`],
+      [`块:currency`, `块:pieces`],
+    ].map((x) => new Set(x)),
+  );
 
   const dict = await loadDictionary();
 
   const byHanziAndPinyin = new Map<string, Set<string>>();
-  for (const [hanziWord, { pinyin }] of dict) {
+  for (const [hanziWord, { partOfSpeech, pinyin }] of dict) {
     const hanzi = hanziFromHanziWord(hanziWord);
-    const key = `${hanzi}:${pinyin}`;
+    const key = `${hanzi}:${partOfSpeech}:${pinyin}`;
     const set = byHanziAndPinyin.get(key) ?? new Set();
     set.add(hanziWord);
     byHanziAndPinyin.set(key, set);
