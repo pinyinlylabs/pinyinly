@@ -127,7 +127,9 @@ void test(`hanzi word meaning-keys use valid characters`, async () => {
 void test(`meaning-key lint`, async () => {
   const dict = await loadDictionary();
 
-  const isViolating = (x: string) => /measureword/i.exec(x) != null;
+  const isViolating = (x: string) =>
+    // no "measure word" or "radical"
+    /measure ?word|radical/i.exec(x) != null;
 
   const violations = new Set(
     [...dict]
@@ -149,8 +151,8 @@ void test(`meaning gloss lint`, async () => {
   const isViolating = (x: string) =>
     // no comma
     /,/.exec(x) != null ||
-    // no "measure word"
-    /measure word/i.exec(x) != null ||
+    // no "measure word" or "radical"
+    /measure ?word|radical/i.exec(x) != null ||
     // doesn't start with "to "
     x.startsWith(`to `) ||
     (x.match(/\s+/g)?.length ?? 0) > maxSpaces;
