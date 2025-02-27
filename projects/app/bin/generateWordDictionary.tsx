@@ -10,6 +10,7 @@ import {
   hanziFromHanziWord,
   HanziWordMeaning,
   hanziWordMeaningSchema,
+  loadDictionary,
   loadHanziDecomposition,
   lookupHanzi,
   lookupHanziWord,
@@ -651,6 +652,11 @@ const HanziWordEditor = ({
                   value: meaning.visualVariants?.join(`;`) ?? ``,
                 },
                 {
+                  id: `definition`,
+                  label: `Definition`,
+                  value: meaning.definition,
+                },
+                {
                   id: `partOfSpeech`,
                   label: `Part of speech`,
                   value: meaning.partOfSpeech,
@@ -696,6 +702,19 @@ const HanziWordEditor = ({
                 }),
               );
               edits.delete(`partOfSpeech`);
+            }
+
+            if (edits.has(`definition`)) {
+              const newValue = edits.get(`definition`)?.trim();
+              invariant(newValue != null);
+
+              const newDefinition = newValue === `` ? undefined : newValue;
+              mutations.push(() =>
+                upsertHanziWordMeaning(hanziWord, {
+                  definition: newDefinition,
+                }),
+              );
+              edits.delete(`definition`);
             }
 
             if (edits.has(`gloss`)) {
@@ -1295,7 +1314,8 @@ async function generateHanziWordResults(
   const existingChoices = query.existingItems
     ?.toSorted(sortComparatorString(([k]) => k))
     .map(
-      ([hanziWord, meaning], i) => [`7a2fe4${i}`, hanziWord, meaning] as const,
+      ([hanziWord, meaning], i) =>
+        [parseInt(`782634${i}`, 10), hanziWord, meaning] as const,
     );
 
   const { suggestions: results } = await openai(
@@ -1335,7 +1355,7 @@ ${existingChoices
           }),
           z.object({
             type: z.literal(`existing`),
-            referenceId: z.string(),
+            referenceId: z.number(),
           }),
         ]),
       ),
@@ -1345,7 +1365,10 @@ ${existingChoices
   const res: HanziWordCreateResult[] = results.map((x) => {
     if (x.type === `existing`) {
       const existing = existingChoices?.find(([id]) => id === x.referenceId);
-      invariant(existing != null, `Missing existing choice`);
+      invariant(
+        existing != null,
+        `Missing existing choice ${JSON.stringify({ existingChoices, x })}`,
+      );
       return { type: `existing`, hanziWord: existing[1] };
     }
     return {
@@ -2254,3 +2277,19 @@ const FormFieldEditor = ({
     </Box>
   );
 };
+
+{
+  const dict = await loadDictionary();
+
+  const isViolating = (x: string) => x.startsWith(`to `);
+
+  for (const [hanziWord, { gloss }] of dict) {
+    if (gloss.some(isViolating)) {
+      await upsertHanziWordMeaning(hanziWord, {
+        gloss: gloss.map((x) =>
+          isViolating(x) ? x.substring(`to `.length) : x,
+        ),
+      });
+    }
+  }
+}

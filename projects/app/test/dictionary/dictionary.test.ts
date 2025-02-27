@@ -124,6 +124,64 @@ void test(`hanzi word meaning-keys use valid characters`, async () => {
   }
 });
 
+void test(`meaning gloss don't have too many words`, async () => {
+  const dict = await loadDictionary();
+  const maxWords = 4;
+  const maxSpaces = maxWords - 1;
+
+  const isTooManyWords = (x: string) =>
+    (x.match(/\s+/g)?.length ?? 0) > maxSpaces;
+
+  const violations = new Set(
+    [...dict]
+      .filter(([, { gloss }]) =>
+        // Find glosses that have too many words
+        gloss.some((x) => isTooManyWords(x)),
+      )
+      .map(([hanziWord, { gloss }]) => ({
+        hanziWord,
+        gloss: gloss.filter(isTooManyWords),
+      })),
+  );
+
+  assert.deepEqual(violations, new Set());
+});
+
+void test(`meaning gloss don't have commas`, async () => {
+  const dict = await loadDictionary();
+  const maxCommas = 0;
+
+  const isViolating = (x: string) => (x.match(/,/g)?.length ?? 0) > maxCommas;
+
+  const violations = new Set(
+    [...dict]
+      .filter(([, { gloss }]) => gloss.some((x) => isViolating(x)))
+      .map(([hanziWord, { gloss }]) => ({
+        hanziWord,
+        gloss: gloss.filter(isViolating),
+      })),
+  );
+
+  assert.deepEqual(violations, new Set());
+});
+
+void test(`meaning gloss don't start with "to "`, async () => {
+  const dict = await loadDictionary();
+
+  const isViolating = (x: string) => x.startsWith(`to `);
+
+  const violations = new Set(
+    [...dict]
+      .filter(([, { gloss }]) => gloss.some((x) => isViolating(x)))
+      .map(([hanziWord, { gloss }]) => ({
+        hanziWord,
+        gloss: gloss.filter(isViolating),
+      })),
+  );
+
+  assert.deepEqual(violations, new Set());
+});
+
 void test(`hanzi word meaning example is not in english`, async () => {
   const dict = await loadDictionary();
 
@@ -187,7 +245,12 @@ void test(`hanzi word visual variants shouldn't include the hanzi`, async () => 
 });
 
 void test(`there are no hanzi words with the same meaning key and pinyin`, async () => {
-  const exceptions = new Set([[`艹:grass`, `草:grass`]].map((x) => new Set(x)));
+  const exceptions = new Set(
+    [
+      [`艹:grass`, `草:grass`],
+      [`他们:they`, `它们:they`, `她们:they`],
+    ].map((x) => new Set(x)),
+  );
 
   const dict = await loadDictionary();
 
@@ -206,14 +269,6 @@ void test(`there are no hanzi words with the same meaning key and pinyin`, async
     (x) => x.size > 1,
   );
 
-  // Check that all exceptions are actually used.
-  for (const exception of exceptions) {
-    assert(
-      duplicates.some((x) => x.symmetricDifference(exception).size === 0),
-      `exception ${Array.from(exception)} is not used`,
-    );
-  }
-
   // Check that there are no duplicates (except for the exceptions).
   assert.deepEqual(
     duplicates.filter(
@@ -222,21 +277,30 @@ void test(`there are no hanzi words with the same meaning key and pinyin`, async
     ),
     [],
   );
+
+  // Check that all exceptions are actually used.
+  for (const exception of exceptions) {
+    assert(
+      duplicates.some((x) => x.symmetricDifference(exception).size === 0),
+      `exception ${Array.from(exception)} is not used`,
+    );
+  }
 });
 
 void test(`there are no hanzi words with the same hanzi + part-of-speech + pinyin`, async () => {
   const exceptions = new Set(
     [
-      [`行:okay`, `行:walk`],
       [`从来:always`, `从来:never`],
+      [`块:currency`, `块:pieces`],
+      [`天:day`, `天:sky`],
       [`家:family`, `家:home`],
       [`提:carry`, `提:mention`],
+      [`米:rice`, `米:meter`],
+      [`菜:dish`, `菜:vegetable`],
+      [`行:okay`, `行:walk`],
+      [`表:surface`, `表:watch`],
       [`要:must`, `要:want`],
       [`面:face`, `面:surface`],
-      [`米:rice`, `米:meter`],
-      [`表:surface`, `表:watch`],
-      [`菜:dish`, `菜:vegetable`],
-      [`块:currency`, `块:pieces`],
     ].map((x) => new Set(x)),
   );
 
