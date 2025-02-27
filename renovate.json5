@@ -30,7 +30,9 @@
       minimumReleaseAge: "7 days",
       matchPackageNames: [
         // exclude expo managed packages because they'll fail the expo-doctor check
-        "!*react-native*",
+        "!react-native-*",
+        "!*-react-native",
+        "!react-native",
         "!expo-updates",
       ],
       internalChecksFilter: "strict",
