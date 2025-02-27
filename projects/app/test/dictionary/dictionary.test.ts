@@ -8,6 +8,7 @@ import {
   convertPinyinWithToneNumberToToneMark,
   flattenIds,
   hanziFromHanziWord,
+  hanziWordMeaningSchema,
   idsNodeToString,
   IdsOperator,
   loadDictionary,
@@ -39,6 +40,8 @@ import {
 import { invariant } from "@haohaohow/lib/invariant";
 import assert from "node:assert/strict";
 import test from "node:test";
+import { zodResponseFormat } from "openai/helpers/zod";
+import { z } from "zod";
 
 void test(`radical groups have the right number of elements`, async () => {
   // Data integrity test to ensure that the number of characters in each group
@@ -331,6 +334,27 @@ void test.todo(
     // assert.deepEqual(radicalsWithNameMnemonics.difference(primarySet), new Set());
   },
 );
+
+void test(`zod schemas are compatible with OpenAI API`, async () => {
+  function assertCompatible(schema: z.ZodType): void {
+    const jsonSchema = JSON.stringify(
+      zodResponseFormat(schema, `result_shape`).json_schema,
+    );
+
+    assert.doesNotMatch(
+      jsonSchema,
+      /"minItems":/g,
+      `z.array(…).min(…) is not supported by OpenAI API`,
+    );
+    assert.doesNotMatch(
+      jsonSchema,
+      /"maxItems":/g,
+      `z.array(…).max(…) is not supported by OpenAI API`,
+    );
+  }
+
+  assertCompatible(hanziWordMeaningSchema);
+});
 
 void test(`hanzi uses consistent unicode characters`, async () => {
   {
