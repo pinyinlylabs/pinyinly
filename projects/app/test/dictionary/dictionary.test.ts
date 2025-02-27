@@ -124,51 +124,36 @@ void test(`hanzi word meaning-keys use valid characters`, async () => {
   }
 });
 
-void test(`meaning gloss don't have too many words`, async () => {
+void test(`meaning-key lint`, async () => {
   const dict = await loadDictionary();
+
+  const isViolating = (x: string) => /measureword/i.exec(x) != null;
+
+  const violations = new Set(
+    [...dict]
+      .filter(([hanziWord]) => isViolating(meaningKeyFromHanziWord(hanziWord)))
+      .map(([hanziWord]) => ({
+        hanziWord,
+      })),
+  );
+
+  assert.deepEqual(violations, new Set());
+});
+
+void test(`meaning gloss lint`, async () => {
+  const dict = await loadDictionary();
+
   const maxWords = 4;
   const maxSpaces = maxWords - 1;
 
-  const isTooManyWords = (x: string) =>
+  const isViolating = (x: string) =>
+    // no comma
+    /,/.exec(x) != null ||
+    // no "measure word"
+    /measure word/i.exec(x) != null ||
+    // doesn't start with "to "
+    x.startsWith(`to `) ||
     (x.match(/\s+/g)?.length ?? 0) > maxSpaces;
-
-  const violations = new Set(
-    [...dict]
-      .filter(([, { gloss }]) =>
-        // Find glosses that have too many words
-        gloss.some((x) => isTooManyWords(x)),
-      )
-      .map(([hanziWord, { gloss }]) => ({
-        hanziWord,
-        gloss: gloss.filter(isTooManyWords),
-      })),
-  );
-
-  assert.deepEqual(violations, new Set());
-});
-
-void test(`meaning gloss don't have commas`, async () => {
-  const dict = await loadDictionary();
-  const maxCommas = 0;
-
-  const isViolating = (x: string) => (x.match(/,/g)?.length ?? 0) > maxCommas;
-
-  const violations = new Set(
-    [...dict]
-      .filter(([, { gloss }]) => gloss.some((x) => isViolating(x)))
-      .map(([hanziWord, { gloss }]) => ({
-        hanziWord,
-        gloss: gloss.filter(isViolating),
-      })),
-  );
-
-  assert.deepEqual(violations, new Set());
-});
-
-void test(`meaning gloss don't start with "to "`, async () => {
-  const dict = await loadDictionary();
-
-  const isViolating = (x: string) => x.startsWith(`to `);
 
   const violations = new Set(
     [...dict]
