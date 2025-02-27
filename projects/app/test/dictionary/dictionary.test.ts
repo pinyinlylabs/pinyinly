@@ -8,6 +8,7 @@ import {
   convertPinyinWithToneNumberToToneMark,
   flattenIds,
   hanziFromHanziWord,
+  hanziWordMeaningSchema,
   idsNodeToString,
   IdsOperator,
   loadDictionary,
@@ -39,6 +40,8 @@ import {
 import { invariant } from "@haohaohow/lib/invariant";
 import assert from "node:assert/strict";
 import test from "node:test";
+import { zodResponseFormat } from "openai/helpers/zod";
+import { z } from "zod";
 
 void test(`radical groups have the right number of elements`, async () => {
   // Data integrity test to ensure that the number of characters in each group
@@ -221,6 +224,55 @@ void test(`there are no hanzi words with the same meaning key and pinyin`, async
   );
 });
 
+void test(`there are no hanzi words with the same hanzi + part-of-speech + pinyin`, async () => {
+  const exceptions = new Set(
+    [
+      [`行:okay`, `行:walk`],
+      [`从来:always`, `从来:never`],
+      [`家:family`, `家:home`],
+      [`提:carry`, `提:mention`],
+      [`要:must`, `要:want`],
+      [`面:face`, `面:surface`],
+      [`米:rice`, `米:meter`],
+      [`表:surface`, `表:watch`],
+      [`菜:dish`, `菜:vegetable`],
+      [`块:currency`, `块:pieces`],
+    ].map((x) => new Set(x)),
+  );
+
+  const dict = await loadDictionary();
+
+  const byHanziAndPinyin = new Map<string, Set<string>>();
+  for (const [hanziWord, { partOfSpeech, pinyin }] of dict) {
+    const hanzi = hanziFromHanziWord(hanziWord);
+    const key = `${hanzi}:${partOfSpeech}:${pinyin}`;
+    const set = byHanziAndPinyin.get(key) ?? new Set();
+    set.add(hanziWord);
+    byHanziAndPinyin.set(key, set);
+  }
+
+  // Make sure that there is only one hanzi word for each hanzi and
+  // pinyin, but do it in a way to give a helpful error message.
+  const duplicates = [...byHanziAndPinyin.values()].filter((x) => x.size > 1);
+
+  // Check that all exceptions are actually used.
+  for (const exception of exceptions) {
+    assert(
+      duplicates.some((x) => x.symmetricDifference(exception).size === 0),
+      `exception ${Array.from(exception)} is not used`,
+    );
+  }
+
+  // Check that there are no duplicates (except for the exceptions).
+  assert.deepEqual(
+    duplicates.filter(
+      (x) =>
+        !exceptions.values().some((e) => x.symmetricDifference(e).size === 0),
+    ),
+    [],
+  );
+});
+
 void test(`all word lists only reference valid hanzi words`, async () => {
   for (const wordList of wordLists) {
     for (const hanziWord of await wordList()) {
@@ -282,6 +334,27 @@ void test.todo(
     // assert.deepEqual(radicalsWithNameMnemonics.difference(primarySet), new Set());
   },
 );
+
+void test(`zod schemas are compatible with OpenAI API`, async () => {
+  function assertCompatible(schema: z.ZodType): void {
+    const jsonSchema = JSON.stringify(
+      zodResponseFormat(schema, `result_shape`).json_schema,
+    );
+
+    assert.doesNotMatch(
+      jsonSchema,
+      /"minItems":/g,
+      `z.array(…).min(…) is not supported by OpenAI API`,
+    );
+    assert.doesNotMatch(
+      jsonSchema,
+      /"maxItems":/g,
+      `z.array(…).max(…) is not supported by OpenAI API`,
+    );
+  }
+
+  assertCompatible(hanziWordMeaningSchema);
+});
 
 void test(`hanzi uses consistent unicode characters`, async () => {
   {

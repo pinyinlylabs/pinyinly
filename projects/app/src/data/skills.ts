@@ -20,7 +20,7 @@ export interface Node {
   dependencies: Set<MarshaledSkill>; // todo: when are weights added?
 }
 
-export type Graph = Map<MarshaledSkill, Node>;
+export type SkillLearningGraph = Map<MarshaledSkill, Node>;
 
 export interface LearningOptions {
   learnNameBeforePinyin?: boolean;
@@ -32,9 +32,9 @@ export async function skillLearningGraph(options: {
   targetSkills: Skill[];
   isSkillLearned: (skill: MarshaledSkill) => boolean;
   learningOptions?: LearningOptions;
-}): Promise<Graph> {
+}): Promise<SkillLearningGraph> {
   const learningOptions = options.learningOptions ?? {};
-  const graph = new Map<MarshaledSkill, Node>();
+  const graph: SkillLearningGraph = new Map();
 
   async function addSkill(skill: Skill): Promise<void> {
     const id = rSkillMarshal(skill);
@@ -89,24 +89,41 @@ export async function skillDependencies(
     case SkillType.HanziWordToEnglish: {
       // Learn the components of a hanzi word first.
       const decompositions = await loadHanziDecomposition();
-      const hanzi = hanziFromHanziWord(skill.hanziWord);
-      const ids = decompositions.get(hanzi);
-      if (ids != null) {
-        const idsNode = parseIds(ids);
-        for (const leaf of walkIdsNode(idsNode)) {
-          if (
-            leaf.type === `LeafCharacter` &&
-            leaf.character !== hanzi && // todo turn into invariant?
-            (await characterHasGlyph(leaf.character))
-          ) {
-            // TODO: need to a better way to choose the meaning key.
-            const meaningKey = await guessHanziMeaningKey(leaf.character);
-            if (meaningKey != null) {
-              deps.push({
-                type: SkillType.HanziWordToEnglish,
-                hanziWord: buildHanziWord(leaf.character, meaningKey),
-              });
+      const hanzi = Array.from(hanziFromHanziWord(skill.hanziWord));
+
+      // For multi-character hanzi, learn each character, but for for
+      // single-character hanzi, decompose it into radicals and learn those.
+      const hanziToLearn = [];
+      if (hanzi.length > 1) {
+        for (const char of hanzi) {
+          hanziToLearn.push(char);
+        }
+      } else {
+        for (const char of hanzi) {
+          const ids = decompositions.get(char);
+          if (ids != null) {
+            const idsNode = parseIds(ids);
+            for (const leaf of walkIdsNode(idsNode)) {
+              if (
+                leaf.type === `LeafCharacter` &&
+                leaf.character !== char // todo turn into invariant?
+              ) {
+                hanziToLearn.push(leaf.character);
+              }
             }
+          }
+        }
+      }
+
+      for (const hanzi of hanziToLearn) {
+        if (await characterHasGlyph(hanzi)) {
+          // TODO: need to a better way to choose the meaning key.
+          const meaningKey = await guessHanziMeaningKey(hanzi);
+          if (meaningKey != null) {
+            deps.push({
+              type: SkillType.HanziWordToEnglish,
+              hanziWord: buildHanziWord(hanzi, meaningKey),
+            });
           }
         }
       }
@@ -260,7 +277,7 @@ export function englishToHanziWord(hanziWord: HanziWord): HanziWordSkill {
   };
 }
 
-export function skillReviewQueue(graph: Graph): MarshaledSkill[] {
+export function skillReviewQueue(graph: SkillLearningGraph): MarshaledSkill[] {
   // Kahn topological sort
   const inDegree = new Map<MarshaledSkill, number>();
   const queue: MarshaledSkill[] = [];

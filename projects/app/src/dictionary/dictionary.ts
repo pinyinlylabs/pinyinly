@@ -268,28 +268,29 @@ export const allHsk3HanziWords = memoize(async () =>
     .parse((await import(`./hsk3HanziWords.asset.json`)).default),
 );
 
+export const partOfSpeechSchema = z.enum([
+  `noun`,
+  `verb`,
+  `adjective`,
+  `adverb`,
+  `pronoun`,
+  `preposition`,
+  `conjunction`,
+  `interjection`,
+  `measureWord`,
+  `particle`,
+  `radical`,
+]);
+
 export const hanziWordMeaningSchema = z.object({
-  gloss: z.array(z.string()).min(1),
+  gloss: z.array(z.string()),
   pinyin: z
     .array(z.string({ description: `space separated pinyin for each word` }), {
       description: `all valid pinyin variations for this meaning (might be omitted for radicals without pronunciation)`,
     })
-    .min(1)
     .optional(),
   example: z.string().optional(),
-  partOfSpeech: z.enum([
-    `noun`,
-    `verb`,
-    `adjective`,
-    `adverb`,
-    `pronoun`,
-    `preposition`,
-    `conjunction`,
-    `interjection`,
-    `measureWord`,
-    `particle`,
-    `radical`,
-  ]),
+  partOfSpeech: partOfSpeechSchema,
   visualVariants: z
     .array(
       z.string({
@@ -299,7 +300,6 @@ export const hanziWordMeaningSchema = z.object({
         description: `Only included in rare cases (e.g. radicals with multiple visual forms). `,
       },
     )
-    .min(1)
     .optional(),
   definition: z.string(),
 });
