@@ -221,6 +221,42 @@ void test(`there are no hanzi words with the same meaning key and pinyin`, async
   );
 });
 
+void test(`there are no hanzi words with the same hanzi and pinyin`, async () => {
+  const exceptions = new Set([].map((x) => new Set(x)));
+
+  const dict = await loadDictionary();
+
+  const byHanziAndPinyin = new Map<string, Set<string>>();
+  for (const [hanziWord, { pinyin }] of dict) {
+    const hanzi = hanziFromHanziWord(hanziWord);
+    const key = `${hanzi}:${pinyin}`;
+    const set = byHanziAndPinyin.get(key) ?? new Set();
+    set.add(hanziWord);
+    byHanziAndPinyin.set(key, set);
+  }
+
+  // Make sure that there is only one hanzi word for each hanzi and
+  // pinyin, but do it in a way to give a helpful error message.
+  const duplicates = [...byHanziAndPinyin.values()].filter((x) => x.size > 1);
+
+  // Check that all exceptions are actually used.
+  for (const exception of exceptions) {
+    assert(
+      duplicates.some((x) => x.symmetricDifference(exception).size === 0),
+      `exception ${Array.from(exception)} is not used`,
+    );
+  }
+
+  // Check that there are no duplicates (except for the exceptions).
+  assert.deepEqual(
+    duplicates.filter(
+      (x) =>
+        !exceptions.values().some((e) => x.symmetricDifference(e).size === 0),
+    ),
+    [],
+  );
+});
+
 void test(`all word lists only reference valid hanzi words`, async () => {
   for (const wordList of wordLists) {
     for (const hanziWord of await wordList()) {
