@@ -133,6 +133,8 @@ void test(skillLearningGraph.name, async () => {
   /**
    * Parses a text representation of a graph.
    *
+   * Convenient when writing test cases.
+   *
    * @example
    *
    * ```ts
