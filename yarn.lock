@@ -2361,7 +2361,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@expo/config-plugins@npm:~9.0.15":
+"@expo/config-plugins@npm:~9.0.15, @expo/config-plugins@npm:~9.0.16":
   version: 9.0.16
   resolution: "@expo/config-plugins@npm:9.0.16"
   dependencies:
@@ -2735,7 +2735,7 @@ __metadata:
     expo-sqlite: "npm:~15.1.2"
     expo-status-bar: "npm:~2.0.1"
     expo-system-ui: "npm:~4.0.8"
-    expo-updates: "npm:~0.26.19"
+    expo-updates: "npm:~0.27.0"
     fontkit: "npm:^2.0.4"
     globals: "npm:^15.0.0"
     hanzi: "patch:hanzi@npm%3A2.1.5#~/.yarn/patches/hanzi-npm-2.1.5-506390bb41.patch"
@@ -9357,7 +9357,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-eas-client@npm:~0.13.2":
+"expo-eas-client@npm:~0.13.2, expo-eas-client@npm:~0.13.3":
   version: 0.13.3
   resolution: "expo-eas-client@npm:0.13.3"
   checksum: 10c0/6b24ce7afd4f69ccd2d7bb367047945749ddff46543420083e30a633b22e97ece94966d69450c5e82e94e6e70af11ad265725b5ec6030bb4d74473803e1f9b5b
@@ -9479,7 +9479,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-manifests@npm:~0.15.6":
+"expo-manifests@npm:~0.15.7":
   version: 0.15.7
   resolution: "expo-manifests@npm:0.15.7"
   dependencies:
@@ -9638,18 +9638,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-updates@npm:~0.26.19":
-  version: 0.26.19
-  resolution: "expo-updates@npm:0.26.19"
+"expo-updates@npm:~0.27.0":
+  version: 0.27.2
+  resolution: "expo-updates@npm:0.27.2"
   dependencies:
     "@expo/code-signing-certificates": "npm:0.0.5"
     "@expo/config": "npm:~10.0.10"
-    "@expo/config-plugins": "npm:~9.0.15"
+    "@expo/config-plugins": "npm:~9.0.16"
     "@expo/spawn-async": "npm:^1.7.2"
     arg: "npm:4.1.0"
     chalk: "npm:^4.1.2"
-    expo-eas-client: "npm:~0.13.2"
-    expo-manifests: "npm:~0.15.6"
+    expo-eas-client: "npm:~0.13.3"
+    expo-manifests: "npm:~0.15.7"
     expo-structured-headers: "npm:~4.0.0"
     expo-updates-interface: "npm:~1.0.0"
     fast-glob: "npm:^3.3.2"
@@ -9661,7 +9661,7 @@ __metadata:
     react: "*"
   bin:
     expo-updates: bin/cli.js
-  checksum: 10c0/bcee45f2c8f3b5977b09a82eff1341df0d4c0bc175a812a99479f1d4c370db80fe2efcb8fd8ca5da853708886f2884bf549eff0cfbb6e81cdd90b90784b8c89a
+  checksum: 10c0/5de1f40eb7163cd6c0a47e81f239bc5c256495b31fdb9d785a69d7c26a9fdee42b4a968a1c5c93561ebe95fc4066903bfea50e68f6150e3610afa6a54c16bce3
   languageName: node
   linkType: hard
 
