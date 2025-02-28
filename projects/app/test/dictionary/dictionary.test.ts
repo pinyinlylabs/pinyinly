@@ -151,8 +151,8 @@ void test(`meaning gloss lint`, async () => {
   const isViolating = (x: string) =>
     // no comma
     /,/.exec(x) != null ||
-    // no "measure word" or "radical" or "particle"
-    /measure ?word|radical|particle/i.exec(x) != null ||
+    // no "measure word" or "radical" or "particle" or "("
+    /measure ?word|radical|particle|\(/i.exec(x) != null ||
     // doesn't start with "to "
     x.startsWith(`to `) ||
     (x.match(/\s+/g)?.length ?? 0) > maxSpaces;
