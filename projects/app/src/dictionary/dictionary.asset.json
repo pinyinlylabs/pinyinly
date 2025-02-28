@@ -1476,7 +1476,7 @@
 ["汽车:automobile",{"gloss":["car","automobile"],"pinyin":["qì chē"],"example":"他的汽车很新。","partOfSpeech":"noun","definition":"A road vehicle, typically with four wheels, powered by an internal combustion engine or electric motor."}],
 ["沙发:sofa",{"gloss":["sofa","couch"],"pinyin":["shā fā"],"example":"客厅里有一个大沙发。","partOfSpeech":"noun","definition":"A comfortable seating item typically found in a living room."}],
 ["沙子:sand",{"gloss":["sand"],"pinyin":["shā zi"],"partOfSpeech":"noun","definition":"Small grains of weathered rock, typically found on beaches or in deserts."}],
-["没:not",{"gloss":["not have","there is not"],"pinyin":["méi"],"example":"我没去过北京。","partOfSpeech":"adverb","definition":"Used to indicate the nonexistence of something; not having done something."}],
+["没:not",{"gloss":["without","don't have","not have","there is not"],"pinyin":["méi"],"example":"我没去过北京。","partOfSpeech":"adverb","definition":"Used to indicate the non-existence of something; not having done something."}],
 ["没事儿:noProblem",{"gloss":["no problem","it doesn't matter","it's okay"],"pinyin":["méi shì er"],"example":"没事儿，别担心。","partOfSpeech":"interjection","definition":"Expression used to calm someone or indicate that an issue is trivial."}],
 ["没什么:nothing",{"gloss":["nothing","it's nothing"],"pinyin":["méi shén me"],"example":"这没什么。","partOfSpeech":"interjection","definition":"Used to indicate that something is of no importance."}],
 ["没关系:noProblem",{"gloss":["no problem","never mind","doesn't matter"],"pinyin":["méi guān xi"],"example":"没关系，我能等。","partOfSpeech":"interjection","definition":"Used to express that there is no problem or it's not a bother."}],
