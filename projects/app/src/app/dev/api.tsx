@@ -5,26 +5,45 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function DevApiPage() {
   const insets = useSafeAreaInsets();
-  const { mutateAsync: debugAnonymousError } =
-    trpc.debug.anonymousError.useMutation();
-  const { mutateAsync: debugAuthedError } =
-    trpc.debug.authedError.useMutation();
+  const { mutateAsync: anonymousThrowError } =
+    trpc.debug.anonymousThrowError.useMutation();
+  const { mutateAsync: authedThrowError } =
+    trpc.debug.authedThrowError.useMutation();
+  const { mutateAsync: anonymousLogError } =
+    trpc.debug.anonymousLogError.useMutation();
+  const { mutateAsync: authedLogError } =
+    trpc.debug.authedLogError.useMutation();
 
   return (
     <View style={{ flex: 1, paddingTop: insets.top }}>
+      <View className="max-w-[600px]"></View>
       <RectButton2
         onPress={() => {
-          void debugAnonymousError();
+          void anonymousThrowError();
         }}
       >
-        debug error auth
+        anonymousThrowError
       </RectButton2>
       <RectButton2
         onPress={() => {
-          void debugAuthedError();
+          void authedThrowError();
         }}
       >
-        debug error anonymous
+        authedThrowError
+      </RectButton2>
+      <RectButton2
+        onPress={() => {
+          void anonymousLogError();
+        }}
+      >
+        anonymousLogError
+      </RectButton2>
+      <RectButton2
+        onPress={() => {
+          void authedLogError();
+        }}
+      >
+        authedLogError
       </RectButton2>
     </View>
   );
