@@ -15,7 +15,11 @@ export async function createContext({ req }: FetchCreateContextFnOptions) {
         });
       }
 
+      console.debug(`process.env=`, JSON.stringify(process.env));
+
+      console.debug(`checkpoint 1`);
       const session = await withDrizzle(async (db) => {
+        console.debug(`checkpoint 2`);
         const session = await db.query.authSession.findFirst({
           where: (t, { eq }) => eq(t.id, sessionId),
         });
@@ -34,12 +38,16 @@ export async function createContext({ req }: FetchCreateContextFnOptions) {
 
     return null;
   }
+  try {
+    const session = await getSessionFromHeader();
 
-  const session = await getSessionFromHeader();
-
-  return {
-    session,
-  };
+    return {
+      session,
+    };
+  } catch (e: unknown) {
+    console.error(`error getting session from header:`, e);
+    throw e;
+  }
 }
 
 export type Context = Awaited<ReturnType<typeof createContext>>;
