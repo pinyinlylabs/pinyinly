@@ -191,7 +191,7 @@ const syncRemote = inngest.createFunction(
                   // You can pass any HTTP headers you wish here
                   headers() {
                     return {
-                      authorization: `HhhSessionId ${remoteSync.remoteSessionId}`,
+                      [`x-hhh-session`]: remoteSync.remoteSessionId,
                     };
                   },
                 }),

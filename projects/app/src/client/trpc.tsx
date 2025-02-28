@@ -41,7 +41,7 @@ export const TrpcProvider = ({
 
             const sessionId = await getSessionId();
             if (sessionId != null) {
-              result[`authorization`] = `HhhSessionId ${sessionId}`;
+              result[`x-hhh-session`] = sessionId;
             }
 
             return result;
