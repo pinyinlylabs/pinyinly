@@ -1,13 +1,23 @@
 import { authedProcedure, procedure, router } from "../lib/trpc";
 
 export const debugRouter = router({
-  anonymousError: procedure.mutation(async () => {
+  anonymousThrowError: procedure.mutation(async () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
-    throw new Error(`debug error`);
+    throw new Error(`anonymousThrowError`);
   }),
 
-  authedError: authedProcedure.mutation(async () => {
+  authedThrowError: authedProcedure.mutation(async () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
-    throw new Error(`debug error`);
+    throw new Error(`authedThrowError`);
+  }),
+
+  anonymousLogError: procedure.mutation(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    console.error(new Error(`anonymousLogError`));
+  }),
+
+  authedLogError: authedProcedure.mutation(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    console.error(new Error(`authedLogError`));
   }),
 });
