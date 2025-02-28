@@ -4,21 +4,12 @@ import { withDrizzle } from "./db";
 
 export async function createContext({ req }: FetchCreateContextFnOptions) {
   async function getSessionFromHeader() {
-    const authorization = req.headers.get(`Authorization`);
+    const sessionId = req.headers.get(`x-hhh-session`);
 
-    if (authorization != null) {
-      const [scheme, sessionId] = authorization.split(` `, 2);
-
-      if (scheme != `HhhSessionId`) {
+    if (sessionId != null) {
+      if (sessionId.length === 0) {
         throw new TRPCError({
-          message: `unknown authorization header scheme`,
-          code: `BAD_REQUEST`,
-        });
-      }
-
-      if (sessionId == null || sessionId.length === 0) {
-        throw new TRPCError({
-          message: `missing HhhSessionId value`,
+          message: `empty x-hhh-session value`,
           code: `BAD_REQUEST`,
         });
       }
