@@ -1,0 +1,1 @@
+ALTER TABLE "haohaohow"."replicacheClientGroup" ADD COLUMN "schemaVersion" text;

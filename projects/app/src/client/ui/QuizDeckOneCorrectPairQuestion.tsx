@@ -155,6 +155,16 @@ export const QuizDeckOneCorrectPairQuestion = memo(
         ? `${pinyinNewHintQuery.data.initial}${pinyinNewHintQuery.data.initialMnemonic != null ? ` (${pinyinNewHintQuery.data.initialMnemonic})` : ``} + ${pinyinNewHintQuery.data.final}${pinyinNewHintQuery.data.finalMnemonic != null ? ` (${pinyinNewHintQuery.data.finalMnemonic})` : ``} + ${pinyinNewHintQuery.data.tone}${pinyinNewHintQuery.data.toneMnemonic != null ? ` (${pinyinNewHintQuery.data.toneMnemonic})` : ``}.`
         : null;
 
+    // Show a lesson for new skills.
+    // const isNewSkill = flag?.type === QuestionFlagType.NewSkill;
+    // const skill = question.answer.a.skill ?? question.answer.b.skill;
+    // useEffect(() => {
+    //   if (isNewSkill && skill != null) {
+    //     // push modal screen
+    //     // router.push(`/learn/skill/${rSkillMarshal(skill)}`);
+    //   }
+    // }, [isNewSkill, skill]);
+
     return (
       <Skeleton
         toast={

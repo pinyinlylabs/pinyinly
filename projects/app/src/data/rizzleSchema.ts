@@ -108,8 +108,7 @@ const rSkillMarshalSchema = z
     }
   });
 
-export const rSkillMarshal =
-  rSkillMarshalSchema.parse.bind(rSkillMarshalSchema);
+export const rSkillMarshal = (skill: Skill) => rSkillMarshalSchema.parse(skill);
 
 const rSkillUnmarshalSchema = z
   .custom<MarshaledSkill>((x) => typeof x === `string`)

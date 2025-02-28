@@ -136,12 +136,26 @@ export const pinyinInitialGroupTheme = schema.table(
   (t) => [s.unique().on(t.userId, t.groupId)],
 );
 
+/**
+ * A replicache "client group".
+ *
+ * From the docs:
+ *
+ * > A client group is a set of clients that share data locally. Changes made by
+ * > one client are visible to other clients, even while offline. Client groups
+ * > are identified by a unique, randomly generated clientGroupID.
+ */
 export const replicacheClientGroup = schema.table(`replicacheClientGroup`, {
   id: s.text(`id`).primaryKey().$defaultFn(nanoid),
   userId: s
     .text(`userId`)
     .references(() => user.id)
     .notNull(),
+  /**
+   * The schema version that this client group is using, it's set when the first
+   * push is made and can be used when syncing mutations between servers.
+   */
+  schemaVersion: s.text(),
   /**
    * Replicache requires that cookies are ordered within a client group. To
    * establish this order we simply keep a counter.
@@ -172,8 +186,12 @@ export const replicacheMutation = schema.table(`replicacheMutation`, {
 });
 
 /**
- * CVRs are stored keyed under a random unique ID which becomes the cookie
- * sent to Replicache.
+ * CVRs are stored keyed under a random unique ID which becomes the cookie sent
+ * to Replicache.
+ *
+ * This is temporary server-side record of what entity versions a client has
+ * seen, it's used to calculate which rows are "new" and need to be sent to the
+ * client.
  */
 export const replicacheCvr = schema.table(`replicacheCvr`, {
   id: s.text(`id`).primaryKey().$defaultFn(nanoid),
@@ -209,3 +227,62 @@ export const replicacheCvr = schema.table(`replicacheCvr`, {
   ).notNull(),
   createdAt: s.timestamp(`createdAt`).defaultNow().notNull(),
 });
+
+export const remoteSync = schema.table(
+  `remoteSync`,
+  {
+    id: s.text(`id`).primaryKey().$defaultFn(nanoid),
+    /**
+     * The local user which will be synced to the remote server.
+     */
+    userId: s
+      .text(`userId`)
+      .references(() => user.id)
+      .notNull(),
+    /**
+     * The URL to the remote server tRPC endpoint.
+     */
+    remoteUrl: s.text(`remoteUrl`).notNull(),
+    /**
+     * The client group ID that this server will identify as when sending
+     * mutations to the remote server. Only one client group will be used. All
+     * client groups that are associated with the local user are smoothed
+     * together. However the original client IDs are used to avoid needing to
+     * re-map values and provide a bit of traceability.
+     */
+    remoteClientGroupId: s.text(`remoteClientGroupId`).notNull(),
+    /**
+     * The profile ID that this server will identify as when sending mutations to
+     * the remote server. This is value has no effect.
+     *
+     * In the context of a browser this is an ID of the browser, the docs say
+     *
+     * > The browser profile ID for this browser profile. Every instance of
+     * > Replicache browser-profile-wide shares the same profile ID.
+     */
+    remoteProfileId: s.text(`remoteProfileId`).notNull(),
+    /**
+     * The session ID used to authenticate with the remote server.
+     */
+    remoteSessionId: s.text(`remoteSessionId`).notNull(),
+    /**
+     * The state of what mutations have been sent to the remote server.
+     *
+     * It's not viable to use `replicacheMutation.processedAt` to identify
+     * mutations and just keep the "last timestamp" because there many cases of
+     * duplicates. Instead the mutation ID for each client is used. This is the
+     * same strategy used in CVR for `lastMutationIds`
+     */
+    lastSyncedMutationIds: zodJson(
+      `lastSyncedMutationIds`,
+      z.record(
+        z.string(), // clientId
+        z.number(), // lastMutationId
+      ),
+    ).notNull(),
+  },
+  (t) => [
+    // Only one sync per user per remote server.
+    s.unique().on(t.remoteUrl, t.userId),
+  ],
+);

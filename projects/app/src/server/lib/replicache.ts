@@ -143,6 +143,7 @@ export async function push(
         tx,
         userId,
         push.clientGroupId,
+        push.schemaVersion,
         mutation,
         false,
         mutate,
@@ -153,6 +154,7 @@ export async function push(
         tx,
         userId,
         push.clientGroupId,
+        push.schemaVersion,
         mutation,
         true,
         mutate,
@@ -302,6 +304,7 @@ export async function pull(
       const prevClientGroup = await getClientGroup(tx, {
         userId,
         clientGroupId,
+        schemaVersion: pull.schemaVersion,
       });
       debug(`%o`, { prevClientGroup });
 
@@ -509,6 +512,7 @@ export async function processMutation(
   tx: Drizzle,
   userId: string,
   clientGroupId: string,
+  clientGroupSchemaVersion: string,
   mutation: Mutation,
   // 1: `let errorMode = false`. In JS, we implement this step naturally
   // as a param. In case of failure, caller will call us again with `true`.
@@ -521,7 +525,11 @@ export async function processMutation(
 
     // 3: `getClientGroup(body.clientGroupID)`
     // 4: Verify requesting user owns cg (in function)
-    const clientGroup = await getClientGroup(tx, { userId, clientGroupId });
+    const clientGroup = await getClientGroup(tx, {
+      userId,
+      clientGroupId,
+      schemaVersion: clientGroupSchemaVersion,
+    });
     // 5: `getClient(mutation.clientID)`
     // 6: Verify requesting client group owns requested client
     const prevClient = await getClient(tx, mutation.clientId, clientGroupId);
@@ -574,12 +582,6 @@ export interface ClientRecord {
   lastMutationId: number;
 }
 
-export interface ClientGroupRecord {
-  id: string;
-  userId: string;
-  cvrVersion: number;
-}
-
 export async function putClient(db: Drizzle, client: ClientRecord) {
   const { id, clientGroupId, lastMutationId } = client;
 
@@ -596,18 +598,25 @@ export async function putClient(db: Drizzle, client: ClientRecord) {
     });
 }
 
+export interface ClientGroupRecord {
+  id: string;
+  userId: string;
+  schemaVersion: string | null;
+  cvrVersion: number;
+}
+
 export async function putClientGroup(
   db: Drizzle,
   clientGroup: ClientGroupRecord,
 ) {
-  const { id, userId, cvrVersion } = clientGroup;
+  const { id, userId, cvrVersion, schemaVersion } = clientGroup;
 
   await db
     .insert(s.replicacheClientGroup)
-    .values({ id, userId, cvrVersion })
+    .values({ id, userId, cvrVersion, schemaVersion })
     .onConflictDoUpdate({
       target: s.replicacheClientGroup.id,
-      set: { userId, cvrVersion, updatedAt: new Date() },
+      set: { cvrVersion, updatedAt: new Date() },
     });
 }
 
@@ -616,6 +625,7 @@ export async function getClientGroup(
   opts: {
     userId: string;
     clientGroupId: string;
+    schemaVersion: string;
   },
 ): Promise<ClientGroupRecord> {
   const r = await db.query.replicacheClientGroup.findFirst({
@@ -627,6 +637,7 @@ export async function getClientGroup(
       id: opts.clientGroupId,
       userId: opts.userId,
       cvrVersion: 0,
+      schemaVersion: opts.schemaVersion,
     };
   }
 
@@ -638,6 +649,7 @@ export async function getClientGroup(
     id: opts.clientGroupId,
     userId: r.userId,
     cvrVersion: r.cvrVersion,
+    schemaVersion: r.schemaVersion,
   };
 }
 
