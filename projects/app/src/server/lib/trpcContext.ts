@@ -13,21 +13,10 @@ export async function createContext({ req }: FetchCreateContextFnOptions) {
         });
       }
 
-      console.debug(`checkpoint 1`);
       const session = await withDrizzle(async (db) => {
-        console.debug(`checkpoint 2`);
-        console.debug(
-          `running query`,
-          db.query.authSession
-            .findFirst({
-              where: (t, { eq }) => eq(t.id, sessionId),
-            })
-            .toSQL().sql,
-        );
         const session = await db.query.authSession.findFirst({
           where: (t, { eq }) => eq(t.id, sessionId),
         });
-        console.debug(`checkpoint 3`);
 
         if (session == null || session.expiresAt < new Date()) {
           return null;
