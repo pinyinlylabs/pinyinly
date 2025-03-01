@@ -574,7 +574,7 @@
 ["句:sentence",{"gloss":["sentence"],"pinyin":["jù"],"example":"这句话很长。","partOfSpeech":"noun","definition":"A set of words that is complete in itself and typically contains a subject and predicate."}],
 ["句子:sentenceStructure",{"gloss":["sentence"],"pinyin":["jù zi"],"example":"请翻译这个句子。","partOfSpeech":"noun","definition":"A sentence or a string of words."}],
 ["另一方面:onTheOtherHand",{"gloss":["on the other hand"],"pinyin":["lìng yī fāng miàn"],"example":"一方面，他的成绩很好，另一方面，他爱帮助别人。","partOfSpeech":"conjunction","definition":"Used to present a contrasting point of view or aspect."}],
-["另外:inAddition",{"gloss":["in addition","besides"],"pinyin":["lìng wài"],"example":"他很聪明，另外他也很努力。","partOfSpeech":"adverb","definition":"Used to mention another item or point; besides."}],
+["另外:additional",{"gloss":["in addition","besides"],"pinyin":["lìng wài"],"example":"他很聪明，另外他也很努力。","partOfSpeech":"adverb","definition":"Used to mention another item or point; besides."}],
 ["只:only",{"gloss":["only","just"],"pinyin":["zhǐ"],"example":"我只想休息。","partOfSpeech":"adverb","definition":"No more than; exclusively."}],
 ["只好:haveTo",{"gloss":["have to","be forced"],"pinyin":["zhǐ hǎo"],"example":"他没有车，只好走路去。","partOfSpeech":"verb","definition":"Indicates a situation where one is left with no choice but to do something."}],
 ["只是:onlyJust",{"gloss":["only","just"],"pinyin":["zhǐ shì"],"example":"我只是开玩笑。","partOfSpeech":"adverb","definition":"Used to indicate that something is merely or only the case."}],
