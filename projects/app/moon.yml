@@ -235,7 +235,7 @@ tasks:
       NODE_OPTIONS: --import tsx $NODE_OPTIONS
 
   test:
-    command: node --test --test-reporter=spec --import tsx "test/**/*.test.ts"
+    command: node --test --test-reporter=spec --import tsx 'test/**/*.test.ts'
     inputs:
       - "src"
       - "test"
