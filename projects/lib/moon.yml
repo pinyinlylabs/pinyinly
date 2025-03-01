@@ -1,8 +1,8 @@
 tasks:
   test:
-    command: node --test --test-reporter=spec --import tsx '**/*.test.ts'
+    command: node --test --test-reporter=spec --import tsx "'**/*.test.ts'"
   testWatch:
-    command: node --test --watch --import tsx '**/*.test.ts'
+    command: node --test --watch --import tsx "'**/*.test.ts'"
     local: true
 
 tags:

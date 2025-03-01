@@ -234,46 +234,6 @@ tasks:
       # Pass $NODE_OPTIONS to support VS Code "JavaScript Debug Terminal".
       NODE_OPTIONS: --import tsx $NODE_OPTIONS
 
-  test2:
-    command: node -e "console.log(process.argv)" -- --test --test-reporter=spec --import tsx 'test/**/*.test.ts'
-    inputs:
-      - "src"
-      - "test"
-      - "*.{json,cjs,js,ts}"
-      - "/.github/workflows" # There is a test that checks workflow environment variables.
-    options:
-      envFile: .env.local
-
-  test3:
-    command: node -e "console.log(process.argv)" -- --test --test-reporter=spec --import tsx "test/**/*.test.ts"
-    inputs:
-      - "src"
-      - "test"
-      - "*.{json,cjs,js,ts}"
-      - "/.github/workflows" # There is a test that checks workflow environment variables.
-    options:
-      envFile: .env.local
-
-  test4:
-    command: node -e "console.log(process.argv)" -- --test --test-reporter=spec --import tsx test/**/*.test.ts
-    inputs:
-      - "src"
-      - "test"
-      - "*.{json,cjs,js,ts}"
-      - "/.github/workflows" # There is a test that checks workflow environment variables.
-    options:
-      envFile: .env.local
-
-  test5:
-    command: node -e "console.log(process.argv)" -- --test --test-reporter=spec --import tsx "'test/**/*.test.ts'"
-    inputs:
-      - "src"
-      - "test"
-      - "*.{json,cjs,js,ts}"
-      - "/.github/workflows" # There is a test that checks workflow environment variables.
-    options:
-      envFile: .env.local
-
   test:
     command: node --test --test-reporter=spec --import tsx "'test/**/*.test.ts'"
     inputs:
