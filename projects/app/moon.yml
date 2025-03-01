@@ -245,7 +245,7 @@ tasks:
       envFile: .env.local
 
   testWatch:
-    command: node --test --watch --import tsx "test/**/*.test.ts"
+    command: node --test --watch --import tsx "'test/**/*.test.ts'"
     local: true
     options:
       envFile: .env.local
