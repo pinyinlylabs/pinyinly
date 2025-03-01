@@ -1,9 +1,5 @@
 import { v5 } from "@/data/rizzleSchema";
 import { AppRouter } from "@/server/routers/_app";
-import {
-  arrayFilterUniqueWithKey,
-  sortComparatorNumber,
-} from "@/util/collections";
 import { preflightCheckEnvVars } from "@/util/env";
 import { mutationSchema } from "@/util/rizzle";
 import { invariant } from "@haohaohow/lib/invariant";
@@ -121,7 +117,7 @@ const syncRemote = inngest.createFunction(
 
     // Iterate over each remote sync rule and process it one by one.
     for (const remoteSync of remoteSyncs) {
-      const clientSyncStates = await step.run(
+      const remoteSyncClients = await step.run(
         // Putting the user ID in is unnecessary but it helps debugging.
         `fetchRemoteSyncState-${remoteSync.id}-${remoteSync.userId}`,
         async () => {
@@ -152,95 +148,134 @@ const syncRemote = inngest.createFunction(
         clientId,
         lastMutationId,
         schemaVersion,
-      } of clientSyncStates) {
+      } of remoteSyncClients) {
         if (schemaVersion !== v5.version) {
-          console.error(
-            `Unable to sync client without schemaVersion, skipping…`,
-            { clientId, lastMutationId, schemaVersion },
-          );
           continue;
         }
 
-        const prevLastMutationId =
+        let lastSyncedMutationId =
+          // For new clients that have never been synced, there won't be a
+          // lastSyncedMutationIds entry, so we default to 0.
           remoteSync.lastSyncedMutationIds[clientId] ?? 0;
 
-        // fetch all mutations for the client
-        if (prevLastMutationId < lastMutationId) {
-          await step.run(`syncRemoteClient-${clientId}`, async () => {
-            // Fetch mutations that need to be sent.
-            const mutations = await withDrizzle(async (db) => {
-              return await db.query.replicacheMutation.findMany({
-                where: and(
-                  eq(schema.replicacheMutation.clientId, clientId),
-                  sql`${schema.replicacheMutation.mutation}->>'id' > ${prevLastMutationId}`,
-                ),
-              });
-            });
-
-            // push to server
-
-            const sortedMutations = mutations
-              .map((x) => mutationSchema.parse(x.mutation))
-              .filter(arrayFilterUniqueWithKey((x) => x.id))
-              .sort(sortComparatorNumber((x) => x.id));
-
-            const client = createTRPCClient<AppRouter>({
-              links: [
-                httpLink({
-                  url: remoteSync.remoteUrl,
-                  // You can pass any HTTP headers you wish here
-                  headers() {
-                    return {
-                      [`x-hhh-session`]: remoteSync.remoteSessionId,
-                    };
-                  },
-                }),
-              ],
-            });
-
-            await client.replicache.push.mutate({
-              mutations: sortedMutations,
-              profileId: remoteSync.remoteProfileId,
-              clientGroupId: remoteSync.remoteClientGroupId,
-              pushVersion: 1,
-              schemaVersion,
-            });
-
-            const newLastMutationId =
-              sortedMutations[sortedMutations.length - 1]?.id;
-            invariant(newLastMutationId != null, `newLastMutationId is null`);
-
-            // Update the remoteSync record with the new lastMutationId for
-            // the client, so that in the future only mutations after that are
-            // sent.
-            await withDrizzle(async (db) => {
-              await db.transaction(
-                async (tx) => {
-                  // Get a fresh copy since we're overwriting it but we only
-                  // want to update one key. This could probably be done more
-                  // efficiently in raw SQL.
-                  const res = await tx.query.remoteSync.findFirst({
-                    where: eq(schema.remoteSync.id, remoteSync.id),
-                  });
-                  invariant(
-                    res != null,
-                    `could not find remoteSync id=${remoteSync.id}`,
-                  );
-
-                  await tx
-                    .update(schema.remoteSync)
-                    .set({
-                      lastSyncedMutationIds: {
-                        ...res.lastSyncedMutationIds,
-                        [clientId]: newLastMutationId,
-                      },
+        const mutationBatchSize = 20;
+        while (lastSyncedMutationId < lastMutationId) {
+          const newLastSyncedMutationId = await step.run(
+            `syncRemoteClient-${clientId}-${lastSyncedMutationId}`,
+            async () => {
+              // Fetch mutations that need to be sent.
+              const mutationsFromDb = await withDrizzle(async (db) => {
+                const muts = db.$with(`muts`).as(
+                  db
+                    .select({
+                      id: sql<number>`(${schema.replicacheMutation.mutation}->>'id')::int`.as(
+                        `id`,
+                      ),
+                      mutation: schema.replicacheMutation.mutation,
                     })
-                    .where(eq(schema.remoteSync.id, remoteSync.id));
-                },
-                { isolationLevel: `repeatable read` },
+                    .from(schema.replicacheMutation)
+                    .where(
+                      and(
+                        eq(schema.replicacheMutation.clientId, clientId),
+                        sql`(${schema.replicacheMutation.mutation}->>'id')::int > ${lastSyncedMutationId}`,
+                      ),
+                    ),
+                );
+
+                return await db
+                  .with(muts)
+                  .selectDistinctOn([muts.id], {
+                    mutation: muts.mutation,
+                  })
+                  .from(muts)
+                  .orderBy(muts.id)
+                  .limit(mutationBatchSize);
+              });
+
+              const mutations = mutationsFromDb.map((x) =>
+                mutationSchema.parse(x.mutation),
               );
-            });
-          });
+
+              invariant(mutations.length > 0);
+
+              // Check the invariant that mutations are ordered in ascending
+              // order by ID from the database.
+              for (let i = 1; i < mutations.length; i++) {
+                invariant(
+                  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                  mutations[i]!.id > mutations[i - 1]!.id,
+                  `mutations not ordered correctly`,
+                );
+              }
+
+              // push to server
+
+              const client = createTRPCClient<AppRouter>({
+                links: [
+                  httpLink({
+                    url: remoteSync.remoteUrl,
+                    // You can pass any HTTP headers you wish here
+                    headers() {
+                      return {
+                        [`x-hhh-session`]: remoteSync.remoteSessionId,
+                      };
+                    },
+                  }),
+                ],
+              });
+
+              await client.replicache.push.mutate({
+                mutations,
+                profileId: remoteSync.remoteProfileId,
+                clientGroupId: remoteSync.remoteClientGroupId,
+                pushVersion: 1,
+                schemaVersion,
+              });
+
+              const newLastSyncedMutationId =
+                mutations[mutations.length - 1]?.id;
+              invariant(
+                newLastSyncedMutationId != null,
+                `newLastMutationId is null`,
+              );
+
+              // Update the remoteSync record with the new lastMutationId for
+              // the client, so that in the future only mutations after that are
+              // sent.
+              await withDrizzle(async (db) => {
+                await db.transaction(
+                  async (tx) => {
+                    // Get a fresh copy since we're overwriting it but we only
+                    // want to update one key. This could probably be done more
+                    // efficiently in raw SQL.
+                    const res = await tx.query.remoteSync.findFirst({
+                      where: eq(schema.remoteSync.id, remoteSync.id),
+                    });
+                    invariant(
+                      res != null,
+                      `could not find remoteSync id=${remoteSync.id}`,
+                    );
+
+                    await tx
+                      .update(schema.remoteSync)
+                      .set({
+                        lastSyncedMutationIds: {
+                          ...res.lastSyncedMutationIds,
+                          [clientId]: newLastSyncedMutationId,
+                        },
+                      })
+                      .where(eq(schema.remoteSync.id, remoteSync.id));
+                  },
+                  { isolationLevel: `repeatable read` },
+                );
+              });
+
+              return newLastSyncedMutationId;
+            },
+          );
+
+          invariant(newLastSyncedMutationId > lastSyncedMutationId);
+          lastSyncedMutationId = newLastSyncedMutationId;
         }
       }
     }
