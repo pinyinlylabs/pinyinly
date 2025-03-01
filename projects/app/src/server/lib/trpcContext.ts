@@ -15,7 +15,7 @@ export async function createContext({ req }: FetchCreateContextFnOptions) {
         });
       }
 
-      console.debug(`process.env=`, JSON.stringify(process.env));
+      console.debug(`process.env.DATABASE_URL=`, process.env[`DATABASE_URL`]);
 
       console.debug(`checkpoint 1`);
       const session = await withDrizzle(async (db) => {
@@ -23,6 +23,7 @@ export async function createContext({ req }: FetchCreateContextFnOptions) {
         const session = await db.query.authSession.findFirst({
           where: (t, { eq }) => eq(t.id, sessionId),
         });
+        console.debug(`checkpoint 3`);
 
         if (session == null || session.expiresAt < new Date()) {
           return null;
