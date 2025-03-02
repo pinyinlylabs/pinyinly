@@ -176,14 +176,14 @@ async function enforceSingleDependencyVersion({ Yarn }, packagePatterns) {
       const sources = dependencySources.get(packageName);
       invariant(sources != null, `missing sources for package ${packageName}`);
 
+      const errorMessage = `${packageName} has multiple versions (${[...sources].join(", ")})`;
       const dep = Yarn.dependency({ ident: packageName });
-      invariant(
-        dep != null,
-        `Could not find Yarn dependency ${packageName} (maybe it's pnpm only?)`,
-      );
-      dep.error(
-        `${packageName} has multiple versions (${[...sources].join(", ")})`,
-      );
+      if (dep != null) {
+        dep.error(errorMessage);
+      } else {
+        // It's probably a pnpm-only package.
+        reportRootError({ Yarn }, errorMessage);
+      }
     }
   }
 }
