@@ -114,10 +114,13 @@ export default tseslint.config(
               message: `Please use @/dictionary/hanzi instead.`,
             },
             {
-              name: `lodash`,
-              message: `Please use lodash/* instead.`,
+              name: `date-fns`,
+              message: `Please use date-fns/* instead for smaller bundle size.`,
             },
-
+            {
+              name: `lodash`,
+              message: `Please use lodash/* instead for smaller bundle size.`,
+            },
             {
               name: `node:assert`,
               message: `Please use node:assert/strict`,
@@ -262,7 +265,8 @@ export default tseslint.config(
   },
 
   // Files not run in Node.js environment shouldn't do any Node.js imports. Expo
-  // pulls in the `node` types.
+  // pulls in the `node` types so it doesn't fail type checking on "missing
+  // imports", so this lint rule catches them.
   {
     files: [`**/*.{cjs,js,mjs,ts,tsx}`],
     ignores: [`*.*`, `bin/**/*`, `test/**/*`],

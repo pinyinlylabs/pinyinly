@@ -116,6 +116,7 @@
     "eslint-plugin-react": "^7.37.2",
     "eslint-plugin-react-compiler": "19.0.0-beta-e1e972c-20250221",
     "eslint-plugin-react-hooks": "^5.0.0",
+    "expo-atlas": "^0.4.0",
     "fontkit": "^2.0.4",
     "globals": "^16.0.0",
     "ink": "patch:ink@npm%3A5.1.0#~/.yarn/patches/ink-npm-5.1.0-5eb899d847.patch",
