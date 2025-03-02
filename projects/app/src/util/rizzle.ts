@@ -6,6 +6,7 @@ import memoize from "lodash/memoize";
 import omit from "lodash/omit";
 import pick from "lodash/pick";
 import {
+  DeepReadonly,
   IndexDefinition,
   IndexDefinitions,
   MutatorDefs,
@@ -192,28 +193,33 @@ export class RizzleObject<T extends RizzleRawObject> extends RizzleType<
 > {
   #keyToAlias: Record<string, string>;
   #aliasToKey: Record<string, string>;
+  #marshal: z.ZodType<
+    RizzleObjectMarshaled<T>,
+    z.ZodAnyDef,
+    RizzleObjectInput<T>
+  >;
+  #unmarshal: z.ZodType<
+    RizzleObjectOutput<T>,
+    z.ZodAnyDef,
+    RizzleObjectMarshaled<T>
+  >;
+  #indexes: DeepReadonly<Record<string, IndexDefinition>>;
 
   constructor(def: RizzleObjectDef<T>) {
     super(def);
 
     this.#keyToAlias = mapValues(this._def.shape, (v, k) => v._getAlias() ?? k);
     this.#aliasToKey = objectInvert(this.#keyToAlias);
-  }
-
-  getMarshal() {
-    return z
+    this.#marshal = z
       .object(mapValues(this._def.shape, (v) => v.getMarshal()))
       .transform((x) =>
         mapKeys(x, (_v, k) => this.#keyToAlias[k]),
       ) as unknown as z.ZodType<
-      this[`_marshaled`],
+      RizzleObjectMarshaled<T>,
       z.ZodAnyDef,
-      this[`_input`]
+      RizzleObjectInput<T>
     >;
-  }
-
-  getUnmarshal() {
-    return z
+    this.#unmarshal = z
       .object(
         mapValues(
           mapKeys(this._def.shape, (_v, k) => this.#keyToAlias[k]),
@@ -223,14 +229,11 @@ export class RizzleObject<T extends RizzleRawObject> extends RizzleType<
       .transform((x) =>
         mapKeys(x, (_v, k) => this.#aliasToKey[k]),
       ) as unknown as z.ZodType<
-      this[`_output`],
+      RizzleObjectOutput<T>,
       z.ZodAnyDef,
-      this[`_marshaled`]
+      RizzleObjectMarshaled<T>
     >;
-  }
-
-  _getIndexes() {
-    return Object.entries(this._def.shape).reduce<IndexDefinitions>(
+    this.#indexes = Object.entries(this._def.shape).reduce<IndexDefinitions>(
       (acc, [key, codec]) => ({
         ...acc,
         ...mapValues(codec._getIndexes(), (v) => ({
@@ -240,6 +243,18 @@ export class RizzleObject<T extends RizzleRawObject> extends RizzleType<
       }),
       {},
     );
+  }
+
+  getMarshal() {
+    return this.#marshal;
+  }
+
+  getUnmarshal() {
+    return this.#unmarshal;
+  }
+
+  _getIndexes() {
+    return this.#indexes;
   }
 
   static create = <T extends RizzleRawObject>(shape: T): RizzleObject<T> => {
