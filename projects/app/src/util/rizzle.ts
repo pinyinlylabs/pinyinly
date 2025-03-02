@@ -40,8 +40,10 @@ export abstract class RizzleType<
   abstract getMarshal(): z.ZodType<Marshaled, z.ZodTypeDef, Input>;
   abstract getUnmarshal(): z.ZodType<Output, z.ZodTypeDef, Marshaled>;
 
+  static #indexes = {};
+
   _getIndexes(): IndexDefinitions {
-    return {};
+    return RizzleType.#indexes;
   }
 
   _getAlias(): string | undefined {
@@ -81,11 +83,18 @@ export class RizzleNullable<T extends RizzleType> extends RizzleType<
   T[`_marshaled`] | null,
   T[`_output`] | null
 > {
+  #marshal?: z.ZodNullable<
+    z.ZodType<T[`_marshaled`], z.ZodTypeDef, T[`_input`]>
+  >;
+  #unmarshal?: z.ZodNullable<
+    z.ZodType<T[`_output`], z.ZodTypeDef, T[`_marshaled`]>
+  >;
+
   getMarshal() {
-    return this._def.innerType.getMarshal().nullable();
+    return (this.#marshal ??= this._def.innerType.getMarshal().nullable());
   }
   getUnmarshal() {
-    return this._def.innerType.getUnmarshal().nullable();
+    return (this.#unmarshal ??= this._def.innerType.getUnmarshal().nullable());
   }
   _getIndexes() {
     return this._def.innerType._getIndexes();
@@ -148,6 +157,8 @@ export class RizzleIndexed<
   T[`_marshaled`],
   T[`_output`]
 > {
+  #indexes?: DeepReadonly<Record<string, IndexDefinition>>;
+
   getMarshal() {
     return this._def.innerType.getMarshal();
   }
@@ -155,13 +166,13 @@ export class RizzleIndexed<
     return this._def.innerType.getUnmarshal();
   }
   _getIndexes() {
-    return {
+    return (this.#indexes ??= {
       [this._def.indexName]: {
         allowEmpty: false,
         jsonPointer: ``,
       },
       ...this._def.innerType._getIndexes(),
-    };
+    });
   }
   _getAlias() {
     return this._def.innerType._getAlias();
@@ -193,24 +204,27 @@ export class RizzleObject<T extends RizzleRawObject> extends RizzleType<
 > {
   #keyToAlias: Record<string, string>;
   #aliasToKey: Record<string, string>;
-  #marshal: z.ZodType<
+  #marshal?: z.ZodType<
     RizzleObjectMarshaled<T>,
     z.ZodAnyDef,
     RizzleObjectInput<T>
   >;
-  #unmarshal: z.ZodType<
+  #unmarshal?: z.ZodType<
     RizzleObjectOutput<T>,
     z.ZodAnyDef,
     RizzleObjectMarshaled<T>
   >;
-  #indexes: DeepReadonly<Record<string, IndexDefinition>>;
+  #indexes?: DeepReadonly<Record<string, IndexDefinition>>;
 
   constructor(def: RizzleObjectDef<T>) {
     super(def);
 
     this.#keyToAlias = mapValues(this._def.shape, (v, k) => v._getAlias() ?? k);
     this.#aliasToKey = objectInvert(this.#keyToAlias);
-    this.#marshal = z
+  }
+
+  getMarshal() {
+    return (this.#marshal ??= z
       .object(mapValues(this._def.shape, (v) => v.getMarshal()))
       .transform((x) =>
         mapKeys(x, (_v, k) => this.#keyToAlias[k]),
@@ -218,8 +232,11 @@ export class RizzleObject<T extends RizzleRawObject> extends RizzleType<
       RizzleObjectMarshaled<T>,
       z.ZodAnyDef,
       RizzleObjectInput<T>
-    >;
-    this.#unmarshal = z
+    >);
+  }
+
+  getUnmarshal() {
+    return (this.#unmarshal ??= z
       .object(
         mapValues(
           mapKeys(this._def.shape, (_v, k) => this.#keyToAlias[k]),
@@ -232,8 +249,13 @@ export class RizzleObject<T extends RizzleRawObject> extends RizzleType<
       RizzleObjectOutput<T>,
       z.ZodAnyDef,
       RizzleObjectMarshaled<T>
-    >;
-    this.#indexes = Object.entries(this._def.shape).reduce<IndexDefinitions>(
+    >);
+  }
+
+  _getIndexes() {
+    return (this.#indexes ??= Object.entries(
+      this._def.shape,
+    ).reduce<IndexDefinitions>(
       (acc, [key, codec]) => ({
         ...acc,
         ...mapValues(codec._getIndexes(), (v) => ({
@@ -242,19 +264,7 @@ export class RizzleObject<T extends RizzleRawObject> extends RizzleType<
         })),
       }),
       {},
-    );
-  }
-
-  getMarshal() {
-    return this.#marshal;
-  }
-
-  getUnmarshal() {
-    return this.#unmarshal;
-  }
-
-  _getIndexes() {
-    return this.#indexes;
+    ));
   }
 
   static create = <T extends RizzleRawObject>(shape: T): RizzleObject<T> => {
@@ -277,6 +287,8 @@ export class RizzleCustom<I, M, O = I> extends RizzleType<
   M,
   O
 > {
+  static #indexes = {};
+
   getMarshal() {
     return this._def.marshal;
   }
@@ -286,7 +298,7 @@ export class RizzleCustom<I, M, O = I> extends RizzleType<
   }
 
   _getIndexes() {
-    return {};
+    return RizzleCustom.#indexes;
   }
 
   _getAlias(): string | undefined {
@@ -351,6 +363,11 @@ export class RizzleEntity<
   KeyPath extends string,
   S extends RizzleRawObject,
 > extends RizzleRoot<RizzleEntityDef<KeyPath, S>> {
+  #indexes?: Record<
+    RizzleIndexNames<EntityValueType<S, KeyPath>>,
+    IndexDefinition
+  >;
+
   async has(
     tx: ReadTransaction,
     key: EntityKeyType<S, KeyPath>[`_input`],
@@ -381,19 +398,22 @@ export class RizzleEntity<
   }
 
   getIndexes() {
-    return mapValues(this._def.valueType._getIndexes(), (v) => {
-      const firstVarIndex = this._def.keyPath.indexOf(`[`);
-      return {
-        ...v,
-        prefix:
-          firstVarIndex > 0
-            ? this._def.keyPath.slice(0, firstVarIndex)
-            : this._def.keyPath,
-      };
-    }) as Record<
+    return (this.#indexes ??= mapValues(
+      this._def.valueType._getIndexes(),
+      (v) => {
+        const firstVarIndex = this._def.keyPath.indexOf(`[`);
+        return {
+          ...v,
+          prefix:
+            firstVarIndex > 0
+              ? this._def.keyPath.slice(0, firstVarIndex)
+              : this._def.keyPath,
+        };
+      },
+    ) as Record<
       RizzleIndexNames<EntityValueType<S, KeyPath>>,
       IndexDefinition
-    >;
+    >);
   }
 
   marshalKey(options: EntityKeyType<S, KeyPath>[`_input`]) {
