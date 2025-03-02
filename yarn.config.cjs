@@ -91,16 +91,9 @@ function enforceConsistentDependenciesAcrossTheProject({ Yarn }) {
 async function enforceConsistentAppPnpmAndYarnDependencies({ Yarn }) {
   // Read the pnpm-lock.yaml file and ensure that the dependencies are the same
   // as the ones in the yarn.lock file.
-  const pnpmLock = await fs.readFile(
-    __dirname + "/projects/app/api/pnpm-lock.yaml",
-    { encoding: "utf-8" },
-  );
-
-  // Parse the pnpm-lock.yaml content into an object and query all directly
-  // declared dependencies.
-  const pnpmLockParsed = YAML.parse(pnpmLock);
-  /** @type {Record<String, { specifier: string; version: string}>} */
-  const pnpmDeps = pnpmLockParsed.importers["."].dependencies;
+  const pnpmLock = await readPnpmLock();
+  const pnpmDeps = pnpmLock.importers["."]?.dependencies;
+  invariant(pnpmDeps != null);
 
   const appWorkspace = Yarn.workspace({ cwd: "projects/app" });
   invariant(appWorkspace != null);
@@ -121,6 +114,91 @@ async function enforceConsistentAppPnpmAndYarnDependencies({ Yarn }) {
       }
     }
   }
+}
+
+/**
+ * Enforce only one version of a package.
+ *
+ * @param {Context} context
+ * @param {RegExp[]} packagePatterns Glob patterns for packages to enforce a single version for.
+ */
+async function enforceSingleDependencyVersion({ Yarn }, packagePatterns) {
+  /** @type Map<string, Set<string>> */
+  const dependencyVersions = new Map();
+  /** @type Map<string, Set<"yarn:${string}" | "pnpm:${string}">> */
+  const dependencySources = new Map();
+
+  // Read all pnpm dependencies (including transitive).
+  {
+    const pnpmLock = await readPnpmLock();
+    for (const [key] of Object.entries(pnpmLock.packages)) {
+      const match = /^(@?.+?)@(.+)$/.exec(key);
+      invariant(
+        match != null,
+        `Could not extract package ident from pnpm ${key}`,
+      );
+      const [, packageIdent, version] = match;
+      invariant(packageIdent != null && version != null);
+
+      if (packagePatterns.some((pattern) => pattern.test(packageIdent))) {
+        mapSetAdd(dependencyVersions, packageIdent, version);
+        mapSetAdd(dependencySources, packageIdent, `pnpm:${version}`);
+      }
+    }
+  }
+
+  // Read all the Yarn dependencies (including transitive).
+  {
+    const yarnLock = await readYarnLock();
+
+    for (const [key, value] of Object.entries(yarnLock)) {
+      if (key === "__metadata") continue;
+      invariant(!("cacheKey" in value));
+
+      const match = /^(@?.+?)@(?:npm:)?(.+)$/.exec(value.resolution);
+      invariant(
+        match != null,
+        `Could not extract package ident from ${value.resolution} (key: ${key})`,
+      );
+      const [, packageIdent, version] = match;
+      invariant(packageIdent != null && version != null);
+
+      if (packagePatterns.some((pattern) => pattern.test(packageIdent))) {
+        mapSetAdd(dependencyVersions, packageIdent, version);
+        mapSetAdd(dependencySources, packageIdent, `yarn:${version}`);
+      }
+    }
+  }
+
+  // Finally check that there's only one version for each package.
+  for (const [packageName, versions] of dependencyVersions) {
+    if (versions.size > 1) {
+      const sources = dependencySources.get(packageName);
+      invariant(sources != null, `missing sources for package ${packageName}`);
+
+      const dep = Yarn.dependency({ ident: packageName });
+      invariant(
+        dep != null,
+        `Could not find Yarn dependency ${packageName} (maybe it's pnpm only?)`,
+      );
+      dep.error(
+        `${packageName} has multiple versions (${[...sources].join(", ")})`,
+      );
+    }
+  }
+}
+
+/**
+ * Convenient helper for working with Map of Set values.
+ *
+ * @param {Map<string, Set<string>>} map
+ * @param {string} key
+ * @param {string} value
+ */
+function mapSetAdd(map, key, value) {
+  const versions = map.get(key) ?? new Set();
+  versions.add(value);
+  map.set(key, versions);
 }
 
 /**
@@ -152,11 +230,12 @@ function enforceScopedDependencyVersions({ Yarn }, scope) {
 
 /**
  * @param {boolean} condition
+ * @param {string} [message]
  * @returns {asserts condition}
  */
-function invariant(condition) {
+function invariant(condition, message) {
   if (!condition) {
-    throw new Error(`invariant failed`);
+    throw new Error(`invariant failed: ${message ?? "<no message>"}`);
   }
 }
 
@@ -213,14 +292,16 @@ function enforceStrictTypesCompatibility(ctx, resolutions = {}) {
  * @param {Context} ctx
  */
 async function enforceAllPatchesAreUsed(ctx) {
-  const lockFileParsed = parseSyml(
-    await fs.readFile(__dirname + "/yarn.lock", { encoding: "utf-8" }),
-  );
+  const yarnLock = await readYarnLock();
 
   const usedPatchPaths = new Set();
 
-  for (const [, { resolution }] of Object.entries(lockFileParsed)) {
-    const x = /#~\/(\.yarn\/patches\/@?[a-z0-9-\.]+\.patch)/g.exec(resolution);
+  for (const [key, value] of Object.entries(yarnLock)) {
+    if (key === "__metadata") continue;
+    invariant(!("cacheKey" in value));
+    const x = /#~\/(\.yarn\/patches\/@?[a-z0-9-\.]+\.patch)/g.exec(
+      value.resolution,
+    );
     if (x != null) {
       for (const patchPath of x.slice(1)) {
         usedPatchPaths.add(patchPath);
@@ -271,6 +352,49 @@ function reportRootError({ Yarn }, message) {
   rootWorkspace.error(message);
 }
 
+/**
+ * @typedef {Record<string, { resolution: string; version: string } | { cacheKey: string }>} YarnLock
+ */
+
+/**
+ * @returns {Promise<YarnLock>}
+ */
+async function readYarnLock() {
+  return parseSyml(
+    await fs.readFile(__dirname + "/yarn.lock", { encoding: "utf-8" }),
+  );
+}
+
+/**
+ * @returns {Promise<{
+ *  lockFileVersion: number;
+ *  importers: Record<string, {
+ *    dependencies: Record<string, {
+ *      resolution: string;
+ *      version: string;
+ *    }>;
+ *  }>;
+ *  packages: Record<string, {
+ *   resolution: string;
+ *   engines?: Record<string, string>;
+ *   peerDependencies?: Record<string, string>;
+ *  }>;
+ *  settings: {
+ *    autoInstallPeers?: boolean;
+ *    excludeLinksFromLockfile?: boolean;
+ *  };
+ *  snapshots: Record<string, unknown>;
+ * }>}
+ */
+async function readPnpmLock() {
+  const pnpmLock = await fs.readFile(
+    __dirname + "/projects/app/api/pnpm-lock.yaml",
+    { encoding: "utf-8" },
+  );
+
+  return YAML.parse(pnpmLock);
+}
+
 module.exports = defineConfig({
   async constraints(ctx) {
     await enforceAllPatchesAreUsed(ctx);
@@ -286,5 +410,6 @@ module.exports = defineConfig({
     });
     await enforceMoonToolchainVersion(ctx);
     await enforceConsistentAppPnpmAndYarnDependencies(ctx);
+    await enforceSingleDependencyVersion(ctx, [/^@sentry\//]);
   },
 });
