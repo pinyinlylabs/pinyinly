@@ -1,4 +1,5 @@
 import { Rating } from "@/util/fsrs";
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type { Interval } from "date-fns";
 import { z } from "zod";
 

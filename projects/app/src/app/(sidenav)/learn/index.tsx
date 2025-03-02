@@ -4,7 +4,7 @@ import { HanziWord } from "@/data/model";
 import { hanziFromHanziWord } from "@/dictionary/dictionary";
 import { invariant } from "@haohaohow/lib/invariant";
 import fromAsync from "array-from-async";
-import { differenceInCalendarDays } from "date-fns";
+import { differenceInCalendarDays } from "date-fns/differenceInCalendarDays";
 import { Link } from "expo-router";
 import reverse from "lodash/reverse";
 import sortBy from "lodash/sortBy";
