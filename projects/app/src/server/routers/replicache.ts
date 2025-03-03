@@ -19,7 +19,7 @@ export const replicacheRouter = router({
       // Commit mutations in batches, rather than trying to do it all at once
       // and timing out or locking the database. Each batch can be processed and
       // committed separately.
-      for (const batch of chunk(opts.input.mutations, 5)) {
+      for (const batch of chunk(opts.input.mutations, 2)) {
         const inputBatch: typeof opts.input = {
           ...opts.input,
           mutations: batch,
