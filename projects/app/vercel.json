@@ -6,7 +6,7 @@
     "api/index.cjs": {
       "maxDuration": 25,
       "runtime": "@vercel/node@5.1.8",
-      "includeFiles": "dist/vercel/server/**"
+      "includeFiles": "dist/vercel/server/**,node_modules/@sentry/profiling-node/**"
     }
   },
   "rewrites": [
