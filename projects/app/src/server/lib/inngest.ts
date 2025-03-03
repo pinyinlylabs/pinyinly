@@ -105,7 +105,10 @@ const helloWorldEmail = inngest.createFunction(
 
 const syncRemote = inngest.createFunction(
   { id: `sync-remote` },
-  { event: `test/sync.remote` },
+  {
+    // Sync every 5 minutes
+    cron: `*/5 * * * *`,
+  },
   async ({ step }) => {
     // Find all sync rules
     const remoteSyncs = await step.run(`findSyncRules`, async () => {
