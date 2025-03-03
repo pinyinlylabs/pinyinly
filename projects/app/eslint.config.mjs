@@ -1,4 +1,3 @@
-// @ts-check
 import { FlatCompat } from "@eslint/eslintrc";
 import inngestPlugin from "@inngest/eslint-plugin";
 import stylisticPlugin from "@stylistic/eslint-plugin";

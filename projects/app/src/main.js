@@ -1,5 +1,3 @@
-// @ts-check
-
 import { installCryptoPolyfill } from "@/polyfill/crypto";
 import { installSymbolAsyncInteratorPolyfill } from "@/polyfill/symbolAsyncIterator";
 

@@ -1,5 +1,3 @@
-// @ts-check
-
 /// <reference types="node" />
 
 const { defineConfig } = require("@yarnpkg/types");

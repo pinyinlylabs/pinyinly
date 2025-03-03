@@ -15,9 +15,11 @@ declare global {
       EXPO_PUBLIC_REVENUECAT_WEB_KEY?: string;
       EXPO_PUBLIC_SENTRY_DSN?: string;
       EXPO_PUBLIC_USE_STATIC?: string | boolean; // boolean during static render, string on web
+      EXPO_TUNNEL_SUBDOMAIN?: string;
       HHH_PREFLIGHT_CHECK_ENV_VARS?: string;
       NODE_ENV?: string;
       POSTMARK_SERVER_TOKEN?: string;
+      SENTRY_DSN?: string;
     }
   }
 }
