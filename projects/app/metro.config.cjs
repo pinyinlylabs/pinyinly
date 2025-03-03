@@ -5,13 +5,28 @@ const { withNativeWind } = require(`nativewind/metro`);
 
 let config = getDefaultConfig(__dirname);
 
-// Force invalid require(…) calls to error on build rather than runtime.
-config.transformer.dynamicDepsInPackages = `reject`;
+config = {
+  ...config,
 
-// Fixes "Metro has encountered an error: While trying to resolve module `replicache-react`"
-config.resolver.unstable_enablePackageExports = true;
+  // Force invalid require(…) calls to error on build rather than runtime.
+  transformer: {
+    ...config.transformer,
+    dynamicDepsInPackages: `reject`,
+  },
 
-config = withNativeWind(config, { input: `./src/global.css`, inlineRem: 16 });
+  // Fixes "Metro has encountered an error: While trying to resolve module `replicache-react`"
+  resolver: {
+    ...config.resolver,
+    unstable_enablePackageExports: true,
+  },
+};
+
+config = withNativeWind(config, {
+  input: `./src/global.css`,
+  inlineRem: 16,
+  // @ts-expect-error this is overriden, see https://github.com/nativewind/nativewind/pull/1371
+  getCSSForPlatform: undefined,
+});
 
 // Doing Sentry last is probably important so that the hashed debug IDs are
 // based on the final content of the final and aren't stripped by any other

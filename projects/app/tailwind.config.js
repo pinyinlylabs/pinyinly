@@ -1,11 +1,14 @@
-// ts-check
 /* eslint-disable @typescript-eslint/unbound-method */
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [`./src/**/*.{js,jsx,ts,tsx}`],
   darkMode: `class`,
-  presets: [require(`nativewind/preset`)],
+  presets: [
+    // @ts-expect-error this is correct as per the docs, but the TS config seems
+    // wrong I guess.
+    require(`nativewind/preset`),
+  ],
   theme: {
     screens: {
       sm: `640px`,
@@ -24,7 +27,6 @@ module.exports = {
       // => @media (min-width: 1536px) { ... }
     },
     colors: {
-      primary: `rgb(var(--color-primary) / <alpha-value>)`,
       background: `rgb(var(--color-primary-2) / <alpha-value>)`,
       text: `rgb(var(--color-primary-12) / <alpha-value>)`,
 
