@@ -1,16 +1,15 @@
 import {
+  HanziWordSkill,
   OneCorrectPairQuestion,
   OneCorrectPairQuestionAnswer,
   OneCorrectPairQuestionChoice,
   QuestionFlag,
   QuestionFlagType,
+  Skill,
   SkillRating,
+  SkillType,
 } from "@/data/model";
-import {
-  loadStandardPinyinChart,
-  lookupHanzi,
-  splitPinyin,
-} from "@/dictionary/dictionary";
+import { hanziFromHanziWord, lookupHanziWord } from "@/dictionary/dictionary";
 import { arrayFilterUniqueWithKey } from "@/util/collections";
 import { Rating } from "@/util/fsrs";
 import { invariant } from "@haohaohow/lib/invariant";
@@ -20,7 +19,6 @@ import { intervalToDuration } from "date-fns/intervalToDuration";
 import { Image } from "expo-image";
 import {
   ElementRef,
-  Fragment,
   ReactNode,
   forwardRef,
   memo,
@@ -43,7 +41,6 @@ import { tv } from "tailwind-variants";
 import { AnswerButton } from "./AnswerButton";
 import { HanziText } from "./HanziText";
 import { RectButton2 } from "./RectButton2";
-import { useRizzleQuery } from "./ReplicacheContext";
 import { PropsOf } from "./types";
 
 const buttonThickness = 4;
@@ -65,6 +62,8 @@ export const QuizDeckOneCorrectPairQuestion = memo(
     ) => void;
   }) {
     const { prompt, answer, hint, groupA, groupB } = question;
+    const answerSkill = answer.a.skill;
+
     const [selectedAAnswer, setSelectedAAnswer] =
       useState<OneCorrectPairQuestionAnswer>();
     const [selectedBAnswer, setSelectedBAnswer] =
@@ -113,47 +112,47 @@ export const QuizDeckOneCorrectPairQuestion = memo(
     const showResult = rating !== undefined;
     const isCorrect = rating !== Rating.Again;
 
-    const pinyinChartQuery = useQuery({
-      queryKey: [QuizDeckOneCorrectPairQuestion.name, `pinyinChart`],
-      queryFn: async () => {
-        return await loadStandardPinyinChart();
-      },
-    });
+    // const pinyinChartQuery = useQuery({
+    //   queryKey: [QuizDeckOneCorrectPairQuestion.name, `pinyinChart`],
+    //   queryFn: async () => {
+    //     return await loadStandardPinyinChart();
+    //   },
+    // });
 
-    const answerPinyin = answer.b.type === `pinyin` ? answer.b.pinyin : null;
-    const splitAnswerPinyin =
-      answerPinyin != null && pinyinChartQuery.data
-        ? splitPinyin(answerPinyin, pinyinChartQuery.data)
-        : null;
+    // const answerPinyin = answer.b.type === `pinyin` ? answer.b.pinyin : null;
+    // const splitAnswerPinyin =
+    //   answerPinyin != null && pinyinChartQuery.data
+    //     ? splitPinyin(answerPinyin, pinyinChartQuery.data)
+    //     : null;
 
-    const pinyinNewHintQuery = useRizzleQuery(
-      [QuizDeckOneCorrectPairQuestion.name, `association`, splitAnswerPinyin],
-      async (r, tx) => {
-        if (splitAnswerPinyin != null) {
-          const { initial, final, tone } = splitAnswerPinyin;
-          const initialRes = await r.query.pinyinInitialAssociation.get(tx, {
-            initial: `${initial}-`,
-          });
-          const finalRes = await r.query.pinyinFinalAssociation.get(tx, {
-            final: `-${final}`,
-          });
-          return {
-            initial,
-            initialMnemonic: initialRes?.name,
-            final,
-            finalMnemonic: finalRes?.name,
-            tone,
-            toneMnemonic: null as unknown as string | undefined, // TODO: implement
-          };
-        }
-        return null;
-      },
-    );
+    // const pinyinNewHintQuery = useRizzleQuery(
+    //   [QuizDeckOneCorrectPairQuestion.name, `association`, splitAnswerPinyin],
+    //   async (r, tx) => {
+    //     if (splitAnswerPinyin != null) {
+    //       const { initial, final, tone } = splitAnswerPinyin;
+    //       const initialRes = await r.query.pinyinInitialAssociation.get(tx, {
+    //         initial: `${initial}-`,
+    //       });
+    //       const finalRes = await r.query.pinyinFinalAssociation.get(tx, {
+    //         final: `-${final}`,
+    //       });
+    //       return {
+    //         initial,
+    //         initialMnemonic: initialRes?.name,
+    //         final,
+    //         finalMnemonic: finalRes?.name,
+    //         tone,
+    //         toneMnemonic: null as unknown as string | undefined, // TODO: implement
+    //       };
+    //     }
+    //     return null;
+    //   },
+    // );
 
-    const pinyinHint =
-      pinyinNewHintQuery.data != null
-        ? `${pinyinNewHintQuery.data.initial}${pinyinNewHintQuery.data.initialMnemonic != null ? ` (${pinyinNewHintQuery.data.initialMnemonic})` : ``} + ${pinyinNewHintQuery.data.final}${pinyinNewHintQuery.data.finalMnemonic != null ? ` (${pinyinNewHintQuery.data.finalMnemonic})` : ``} + ${pinyinNewHintQuery.data.tone}${pinyinNewHintQuery.data.toneMnemonic != null ? ` (${pinyinNewHintQuery.data.toneMnemonic})` : ``}.`
-        : null;
+    // const pinyinHint =
+    //   pinyinNewHintQuery.data != null
+    //     ? `${pinyinNewHintQuery.data.initial}${pinyinNewHintQuery.data.initialMnemonic != null ? ` (${pinyinNewHintQuery.data.initialMnemonic})` : ``} + ${pinyinNewHintQuery.data.final}${pinyinNewHintQuery.data.finalMnemonic != null ? ` (${pinyinNewHintQuery.data.finalMnemonic})` : ``} + ${pinyinNewHintQuery.data.tone}${pinyinNewHintQuery.data.toneMnemonic != null ? ` (${pinyinNewHintQuery.data.toneMnemonic})` : ``}.`
+    //     : null;
 
     // Show a lesson for new skills.
     // const isNewSkill = flag?.type === QuestionFlagType.NewSkill;
@@ -201,12 +200,11 @@ export const QuizDeckOneCorrectPairQuestion = memo(
                     Correct answer:
                   </Text>
 
-                  <ShowAnswer answer={answer} includeAlternatives />
+                  <ShowSkillAnswer skill={answerSkill} includeAlternatives />
 
-                  {hint != null || pinyinHint != null ? (
+                  {hint != null ? (
                     <Text className="leading-snug text-accent-10">
-                      <Text className="font-bold">Hint:</Text> {pinyinHint}
-                      {` `}
+                      <Text className="font-bold">Hint:</Text>
                       {hint}
                     </Text>
                   ) : null}
@@ -216,11 +214,17 @@ export const QuizDeckOneCorrectPairQuestion = memo(
                         Your answer:
                       </Text>
                       <View className="flex-1 flex-row flex-wrap items-center">
-                        <ShowAnswer answer={selectedAAnswer} small />
+                        <ShowSkillAnswer
+                          skill={selectedAAnswer.a.skill}
+                          small
+                        />
                         <Text className="flex-shrink-0 flex-grow-0 px-1 leading-snug text-accent-10 opacity-50">
                           +
                         </Text>
-                        <ShowAnswer answer={selectedBAnswer} small />
+                        <ShowSkillAnswer
+                          skill={selectedBAnswer.b.skill}
+                          small
+                        />
                       </View>
                     </View>
                   ) : null}
@@ -365,97 +369,6 @@ const flagTextClass = tv({
   base: `font-bold uppercase text-accent-10`,
 });
 
-const ShowChoice = ({
-  choice,
-  includeAlternatives = false,
-  small = false,
-}: {
-  choice: OneCorrectPairQuestionChoice;
-  includeAlternatives?: boolean;
-  small?: boolean;
-}) => {
-  const hanzi = choice.type === `hanzi` ? choice.hanzi : null;
-
-  const hanziWordQuery = useQuery({
-    queryKey: [`hanzi`, hanzi],
-    queryFn: async () => {
-      if (hanzi != null) {
-        const [firstResult] = await lookupHanzi(hanzi);
-        if (firstResult != null) {
-          const [hanziWord, meaning] = firstResult;
-          return { hanziWord, meaning };
-        }
-      }
-      return null;
-    },
-    enabled: hanzi != null,
-  });
-
-  if (hanziWordQuery.isLoading) {
-    return null;
-  }
-
-  switch (choice.type) {
-    case `name`: {
-      const names = (includeAlternatives
-        ? hanziWordQuery.data?.meaning.gloss
-        : null) ?? [choice.english];
-      return (
-        <Text className={choiceEnglishText({ small })}>
-          {names.map((n, i, { length }) => (
-            <Fragment key={i}>
-              {i > 0 ? `, ` : null}
-              <Text
-                className={
-                  length > 1 && n === choice.english ? `underline` : undefined
-                }
-              >
-                {n}
-              </Text>
-            </Fragment>
-          ))}
-        </Text>
-      );
-    }
-    case `hanzi`: {
-      const hanzis = (includeAlternatives
-        ? [choice.hanzi, ...(hanziWordQuery.data?.meaning.visualVariants ?? [])]
-        : null) ?? [choice.hanzi];
-      const pinyin = small
-        ? undefined
-        : hanziWordQuery.data?.meaning.pinyin?.[0];
-      const gloss = small ? undefined : hanziWordQuery.data?.meaning.gloss[0];
-      return (
-        <View className={`flex-row items-center ${small ? `gap-1` : `gap-2`}`}>
-          {hanzis.map((hanzi, i) => {
-            return (
-              <View
-                key={i}
-                className={hanzi !== choice.hanzi ? `opacity-50` : undefined}
-              >
-                <HanziText
-                  pinyin={hanzi === choice.hanzi ? pinyin : undefined}
-                  hanzi={hanzi}
-                  small={small}
-                  accented
-                />
-              </View>
-            );
-          })}
-          <Text className={choiceEnglishText({ small })}>{gloss}</Text>
-        </View>
-      );
-    }
-    case `pinyin`:
-    case `definition`:
-      return (
-        <Text className={choiceEnglishText({ small })}>
-          {choiceText(choice)}
-        </Text>
-      );
-  }
-};
-
 const choiceEnglishText = tv({
   base: `text-xl leading-none text-accent-10`,
   variants: {
@@ -465,25 +378,86 @@ const choiceEnglishText = tv({
   },
 });
 
-const ShowAnswer = ({
-  answer: { a, b },
+const ShowSkillAnswer = ({
+  skill,
   includeAlternatives = false,
   small = false,
 }: {
-  answer: OneCorrectPairQuestionAnswer;
+  skill: Skill;
   includeAlternatives?: boolean;
   small?: boolean;
 }) => {
-  // Pick the hanzi to show, as it is easier to query the name, pinyin, etc.
-  const choice = [a, b].find((x) => x.type === `hanzi`) ?? a;
+  switch (skill.type) {
+    case SkillType.HanziWordToPinyinInitial:
+    case SkillType.HanziWordToPinyinFinal:
+    case SkillType.HanziWordToPinyinTone:
+    case SkillType.EnglishToHanziWord:
+    case SkillType.PinyinToHanziWord:
+    case SkillType.ImageToHanziWord:
+    case SkillType.Deprecated:
+    case SkillType.PinyinInitialAssociation:
+    case SkillType.PinyinFinalAssociation:
+      throw new Error(`ShowSkillAnswer not implemented for ${skill.type}`);
+    case SkillType.HanziWordToEnglish:
+      return (
+        <ShowHanziWordSkillAnswer
+          skill={skill}
+          includeAlternatives={includeAlternatives}
+          small={small}
+        />
+      );
+  }
+};
+
+const ShowHanziWordSkillAnswer = ({
+  skill,
+  includeAlternatives = false,
+  small = false,
+}: {
+  skill: HanziWordSkill;
+  includeAlternatives?: boolean;
+  small?: boolean;
+}) => {
+  const meaningQuery = useQuery({
+    queryKey: [ShowSkillAnswer.name, `skill`, skill],
+    queryFn: async () => {
+      invariant(`hanziWord` in skill);
+      const meaning = await lookupHanziWord(skill.hanziWord);
+      return meaning;
+    },
+    enabled: `hanziWord` in skill,
+  });
+
+  const meaning = meaningQuery.data;
+
+  if (meaning == null) {
+    return null;
+  }
+
+  const primaryHanzi = hanziFromHanziWord(skill.hanziWord);
+  const pinyin = meaning.pinyin?.[0];
+  const gloss = meaning.gloss[0];
+  const hanzis = [primaryHanzi];
+  if (includeAlternatives && meaning.visualVariants != null) {
+    hanzis.push(...meaning.visualVariants);
+  }
 
   return (
-    <View className="items-start">
-      <ShowChoice
-        choice={choice}
-        includeAlternatives={includeAlternatives}
-        small={small}
-      />
+    <View className={`flex-row items-center ${small ? `gap-1` : `gap-2`}`}>
+      {hanzis.map((hanzi, i) => (
+        <View
+          key={i}
+          className={hanzi !== primaryHanzi ? `opacity-50` : undefined}
+        >
+          <HanziText
+            pinyin={hanzi === primaryHanzi ? pinyin : undefined}
+            hanzi={hanzi}
+            small={small}
+            accented
+          />
+        </View>
+      ))}
+      <Text className={choiceEnglishText({ small })}>{gloss}</Text>
     </View>
   );
 };
@@ -615,19 +589,6 @@ const SubmitButton = forwardRef<
   );
 });
 
-function choiceText(choice: OneCorrectPairQuestionChoice): string {
-  switch (choice.type) {
-    case `hanzi`:
-      return choice.hanzi;
-    case `pinyin`:
-      return choice.pinyin;
-    case `definition`:
-      return choice.english;
-    case `name`:
-      return choice.english;
-  }
-}
-
 const ChoiceButton = ({
   selected,
   choice,
@@ -641,7 +602,44 @@ const ChoiceButton = ({
     onPress(choice);
   }, [onPress, choice]);
 
-  const text = choiceText(choice);
+  const textQuery = useQuery({
+    queryKey: [QuizDeckOneCorrectPairQuestion.name, `choiceText`, choice],
+    queryFn: async (): Promise<string> => {
+      const meaning = await lookupHanziWord(choice.hanziWord);
+      invariant(
+        meaning != null,
+        `missing meaning for hanzi word ${choice.hanziWord}`,
+      );
+
+      switch (choice.type) {
+        case `hanzi`: {
+          return hanziFromHanziWord(choice.hanziWord);
+        }
+        case `pinyin`: {
+          invariant(
+            meaning.pinyin != null,
+            `missing pinyin array for hanzi word ${choice.hanziWord}`,
+          );
+          const [pinyin] = meaning.pinyin;
+          invariant(
+            pinyin != null,
+            `missing pinyin for hanzi word ${choice.hanziWord}`,
+          );
+          return pinyin;
+        }
+        case `gloss`: {
+          const [gloss] = meaning.gloss;
+          invariant(
+            gloss != null,
+            `missing gloss for hanzi word ${choice.hanziWord}`,
+          );
+          return gloss;
+        }
+      }
+    },
+  });
+
+  const text = textQuery.data ?? ``;
 
   return (
     <AnswerButton

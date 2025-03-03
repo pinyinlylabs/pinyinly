@@ -53,11 +53,9 @@ export default function LearnHsk1Page() {
               !questions.some(
                 (q) =>
                   q.type === QuestionType.OneCorrectPair &&
-                  ((q.answer.a.skill != null &&
-                    `hanziWord` in q.answer.a.skill &&
+                  ((`hanziWord` in q.answer.a.skill &&
                     q.answer.a.skill.hanziWord === skill.hanziWord) ||
-                    (q.answer.b.skill != null &&
-                      `hanziWord` in q.answer.b.skill &&
+                    (`hanziWord` in q.answer.b.skill &&
                       q.answer.b.skill.hanziWord === skill.hanziWord)),
               ) &&
               // Don't include skills that are already practiced
