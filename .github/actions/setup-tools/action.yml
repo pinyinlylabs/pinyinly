@@ -5,7 +5,7 @@ runs:
   using: composite
   steps:
     - name: Enable Corepack
-      run: npm i -g corepack@0.31.0
+      run: npm i -g corepack@0.32.0
       shell: bash
 
     # Necessary to run pnpm as part of building the projects/app/api functions
