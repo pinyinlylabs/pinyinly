@@ -203,27 +203,16 @@ export interface SkillRating {
 //   definition: string;
 // }
 
-export type OneCorrectPairQuestionChoice =
-  | {
-      type: `hanzi`;
-      hanzi: string;
-      skill?: Skill;
-    }
-  | {
-      type: `name`;
-      english: string;
-      skill?: Skill;
-    }
-  | {
-      type: `pinyin`;
-      pinyin: string;
-      skill?: Skill;
-    }
-  | {
-      type: `definition`;
-      english: string;
-      skill?: Skill;
-    };
+export type OneCorrectPairQuestionChoice = {
+  type: `hanzi` | `gloss` | `pinyin`;
+  hanziWord: HanziWord;
+  /**
+   * Having the skill here allows making the skill "wrong" if the user submits
+   * it. It means they've regressed on this skill as well as getting the primary
+   * question skill wrong.
+   */
+  skill: Skill;
+};
 
 export interface OneCorrectPairQuestionAnswer {
   a: OneCorrectPairQuestionChoice;

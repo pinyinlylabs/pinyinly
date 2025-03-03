@@ -1760,7 +1760,7 @@
 ["笔:pen",{"gloss":["pen"],"pinyin":["bǐ"],"example":"请给我一支笔。","partOfSpeech":"noun","definition":"A tool used for writing or drawing with ink."}],
 ["笔记:notes",{"gloss":["notes"],"pinyin":["bǐ jì"],"example":"上课时我记了很多笔记。","partOfSpeech":"noun","definition":"A record of written information, often taken to assist with memory and understanding."}],
 ["笔记本:notebook",{"gloss":["notebook"],"pinyin":["bǐ jì běn"],"example":"我买了一个新笔记本。","partOfSpeech":"noun","definition":"A book or binder for writing notes."}],
-["第:ordinal",{"gloss":["ordinal number indicator"],"pinyin":["dì"],"example":"这是我第一次去。","partOfSpeech":"particle","definition":"Used before numerals to form ordinal numbers."}],
+["第:ordinal",{"gloss":["ordinal number","ordinal"],"pinyin":["dì"],"example":"这是我第一次去。","partOfSpeech":"particle","definition":"Used before numerals to form ordinal numbers."}],
 ["等:wait",{"gloss":["wait"],"pinyin":["děng"],"example":"请你等一下。","partOfSpeech":"verb","definition":"To stay in one place until a particular time or event."}],
 ["等于:equal",{"gloss":["equal","equivalent"],"pinyin":["děng yú"],"example":"一加一等于二。","partOfSpeech":"verb","definition":"To be the same as in value or amount."}],
 ["等到:until",{"gloss":["wait until","when"],"pinyin":["děng dào"],"example":"等到天亮我们再走。","partOfSpeech":"verb","definition":"To wait until a particular time or event."}],

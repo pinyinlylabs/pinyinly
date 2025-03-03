@@ -2,7 +2,6 @@ import {
   allHsk1HanziWords,
   allHsk2HanziWords,
   allHsk3HanziWords,
-  hanziFromHanziWord,
   HanziWordMeaning,
   lookupHanziWord,
 } from "@/dictionary/dictionary";
@@ -19,29 +18,6 @@ import {
   SkillType,
 } from "./model";
 import { hanziWordToEnglish } from "./skills";
-
-type BuilderChoice =
-  | { hanzi: string; skill: Skill }
-  | { pinyin: string; skill: Skill }
-  | { definition: string; skill: Skill }
-  | { name: string; skill: Skill };
-
-const choice = (x: BuilderChoice): OneCorrectPairQuestionChoice =>
-  `hanzi` in x
-    ? { type: `hanzi`, hanzi: x.hanzi, skill: x.skill }
-    : `pinyin` in x
-      ? { type: `pinyin`, pinyin: x.pinyin, skill: x.skill }
-      : `definition` in x
-        ? { type: `definition`, english: x.definition, skill: x.skill }
-        : { type: `name`, english: x.name, skill: x.skill };
-
-const choicePair = (
-  a: BuilderChoice,
-  b: BuilderChoice,
-): OneCorrectPairQuestionAnswer => ({
-  a: choice(a),
-  b: choice(b),
-});
 
 function keyForChoice(choice: OneCorrectPairQuestionChoice) {
   const { skill, type, ...rest } = choice;
@@ -87,30 +63,23 @@ export async function generateQuestionForSkillOrThrow(
         `missing gloss for hanzi word ${skill.hanziWord}`,
       );
       const rowCount = 5;
-      const answer = choicePair(
-        { hanzi: hanziFromHanziWord(skill.hanziWord), skill },
-        {
-          definition: gloss,
-          skill,
-        },
-      );
+      const answer: OneCorrectPairQuestionAnswer = {
+        a: { type: `hanzi`, hanziWord: skill.hanziWord, skill },
+        b: { type: `gloss`, hanziWord: skill.hanziWord, skill },
+      };
+
       const otherAnswers: OneCorrectPairQuestionAnswer[] = [];
-      for (const [hanziWord, meaning] of await getOtherHanzi(
+      for (const [hanziWord, meaning] of await getWrongHanziWordAnswers(
         skill.hanziWord,
         (rowCount - 1) * 2,
       )) {
         const skill = hanziWordToEnglish(hanziWord);
         const gloss = meaning.gloss[0];
         invariant(gloss != null, `missing gloss for hanzi word ${hanziWord}`);
-        otherAnswers.push(
-          choicePair(
-            { hanzi: hanziFromHanziWord(hanziWord), skill },
-            {
-              definition: gloss,
-              skill,
-            },
-          ),
-        );
+        otherAnswers.push({
+          a: { type: `hanzi`, hanziWord, skill },
+          b: { type: `gloss`, hanziWord, skill },
+        });
       }
       const [wrongA, wrongB] = evenHalve(otherAnswers);
       return validQuestionInvariant({
@@ -143,7 +112,7 @@ function evenHalve<T>(items: T[]): [T[], T[]] {
 
 type OtherHanziResult = [HanziWord, DeepReadonly<HanziWordMeaning>][];
 
-async function getOtherHanzi(
+async function getWrongHanziWordAnswers(
   hanziWord: HanziWord,
   count: number,
 ): Promise<OtherHanziResult> /* hanzi */ {
