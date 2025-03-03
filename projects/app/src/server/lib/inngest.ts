@@ -104,7 +104,7 @@ const helloWorldEmail = inngest.createFunction(
 );
 
 const syncRemote = inngest.createFunction(
-  { id: `sync-remote` },
+  { id: `sync-remote`, concurrency: 1 },
   {
     // Sync every 5 minutes
     cron: `*/5 * * * *`,
