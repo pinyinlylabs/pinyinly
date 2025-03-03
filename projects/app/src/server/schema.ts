@@ -61,16 +61,20 @@ export const authOAuth2 = schema.table(
   (t) => [s.unique().on(t.provider, t.providerUserId)],
 );
 
-export const skillRating = schema.table(`skillRating`, {
-  id: s.text(`id`).primaryKey().$defaultFn(nanoid),
-  userId: s
-    .text(`userId`)
-    .references(() => user.id)
-    .notNull(),
-  skill: sSkill(`skillId`).notNull(),
-  rating: sFsrsRating(`rating`).notNull(),
-  createdAt: s.timestamp(`timestamp`).defaultNow().notNull(),
-});
+export const skillRating = schema.table(
+  `skillRating`,
+  {
+    id: s.text(`id`).primaryKey().$defaultFn(nanoid),
+    userId: s
+      .text(`userId`)
+      .references(() => user.id)
+      .notNull(),
+    skill: sSkill(`skillId`).notNull(),
+    rating: sFsrsRating(`rating`).notNull(),
+    createdAt: s.timestamp(`timestamp`).defaultNow().notNull(),
+  },
+  (t) => [s.index().on(t.userId, t.skill)],
+);
 
 export const skillState = schema.table(
   `skillState`,
@@ -145,45 +149,57 @@ export const pinyinInitialGroupTheme = schema.table(
  * > one client are visible to other clients, even while offline. Client groups
  * > are identified by a unique, randomly generated clientGroupID.
  */
-export const replicacheClientGroup = schema.table(`replicacheClientGroup`, {
-  id: s.text(`id`).primaryKey().$defaultFn(nanoid),
-  userId: s
-    .text(`userId`)
-    .references(() => user.id)
-    .notNull(),
-  /**
-   * The schema version that this client group is using, it's set when the first
-   * push is made and can be used when syncing mutations between servers.
-   */
-  schemaVersion: s.text(),
-  /**
-   * Replicache requires that cookies are ordered within a client group. To
-   * establish this order we simply keep a counter.
-   */
-  cvrVersion: s.integer(`cvrVersion`).notNull().default(0),
-  updatedAt: s.timestamp(`timestamp`).defaultNow().notNull(),
-});
+export const replicacheClientGroup = schema.table(
+  `replicacheClientGroup`,
+  {
+    id: s.text(`id`).primaryKey().$defaultFn(nanoid),
+    userId: s
+      .text(`userId`)
+      .references(() => user.id)
+      .notNull(),
+    /**
+     * The schema version that this client group is using, it's set when the first
+     * push is made and can be used when syncing mutations between servers.
+     */
+    schemaVersion: s.text(),
+    /**
+     * Replicache requires that cookies are ordered within a client group. To
+     * establish this order we simply keep a counter.
+     */
+    cvrVersion: s.integer(`cvrVersion`).notNull().default(0),
+    updatedAt: s.timestamp(`timestamp`).defaultNow().notNull(),
+  },
+  (t) => [s.index().on(t.userId)],
+);
 
-export const replicacheClient = schema.table(`replicacheClient`, {
-  id: s.text(`id`).primaryKey().$defaultFn(nanoid),
-  clientGroupId: s
-    .text(`clientGroupId`)
-    .references(() => replicacheClientGroup.id)
-    .notNull(),
-  lastMutationId: s.integer(`lastMutationId`).notNull(),
-  updatedAt: s.timestamp(`timestamp`).defaultNow().notNull(),
-});
+export const replicacheClient = schema.table(
+  `replicacheClient`,
+  {
+    id: s.text(`id`).primaryKey().$defaultFn(nanoid),
+    clientGroupId: s
+      .text(`clientGroupId`)
+      .references(() => replicacheClientGroup.id)
+      .notNull(),
+    lastMutationId: s.integer(`lastMutationId`).notNull(),
+    updatedAt: s.timestamp(`timestamp`).defaultNow().notNull(),
+  },
+  (t) => [s.index().on(t.clientGroupId)],
+);
 
-export const replicacheMutation = schema.table(`replicacheMutation`, {
-  id: s.text(`id`).primaryKey().$defaultFn(nanoid),
-  clientId: s
-    .text(`clientId`)
-    .references(() => replicacheClient.id)
-    .notNull(),
-  mutation: s.json(`mutation`).notNull(),
-  success: s.boolean(),
-  processedAt: s.timestamp(`processedAt`).defaultNow().notNull(),
-});
+export const replicacheMutation = schema.table(
+  `replicacheMutation`,
+  {
+    id: s.text(`id`).primaryKey().$defaultFn(nanoid),
+    clientId: s
+      .text(`clientId`)
+      .references(() => replicacheClient.id)
+      .notNull(),
+    mutation: s.json(`mutation`).notNull(),
+    success: s.boolean(),
+    processedAt: s.timestamp(`processedAt`).defaultNow().notNull(),
+  },
+  (t) => [s.index().on(t.clientId)],
+);
 
 /**
  * CVRs are stored keyed under a random unique ID which becomes the cookie sent
