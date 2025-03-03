@@ -72,8 +72,11 @@ function jsonStringifyEnhancedErrors(
   }
 }
 
-export const zodJson = <T extends z.ZodTypeAny>(name: string, schema: T) =>
-  customType<{ data: z.infer<T>; driverData: string }>({
+export const zodJson = <T extends z.ZodTypeAny>(name: string, schema: T) => {
+  // Avoid creating a new Zod schema each time a value is decoded.
+  let fromDriverSchemaMemo: z.ZodCatch<T> | undefined;
+
+  return customType<{ data: z.infer<T>; driverData: string }>({
     dataType() {
       return `json`;
     },
@@ -81,7 +84,9 @@ export const zodJson = <T extends z.ZodTypeAny>(name: string, schema: T) =>
       this: PgCustomColumn, // hack: expose drizzle internals
       value,
     ) {
-      return schema.catch(drizzleColumnTypeEnhancedErrors(this)).parse(value);
+      return (fromDriverSchemaMemo ??= schema.catch(
+        drizzleColumnTypeEnhancedErrors(this),
+      )).parse(value);
     },
     toDriver(
       this: PgCustomColumn, // hack: expose drizzle internals
@@ -90,6 +95,7 @@ export const zodJson = <T extends z.ZodTypeAny>(name: string, schema: T) =>
       return jsonStringifyEnhancedErrors(this, value);
     },
   })(name);
+};
 
 export const rizzleCustomType = <
   DataType extends `text` | `json`,
@@ -100,8 +106,15 @@ export const rizzleCustomType = <
 >(
   rizzleType: T,
   dataType: DataType,
-) =>
-  customType<{ data: T[`_output`]; driverData: string }>({
+) => {
+  const unmarshalSchema = rizzleType.getUnmarshal();
+  const marshalSchema = rizzleType.getMarshal();
+
+  // Avoid creating a new Zod schema each time a value is decoded.
+  let fromDriverSchemaMemo: z.ZodCatch<typeof unmarshalSchema> | undefined;
+  let toDriverSchemaMemo: z.ZodCatch<typeof marshalSchema> | undefined;
+
+  return customType<{ data: T[`_output`]; driverData: string }>({
     dataType() {
       return dataType;
     },
@@ -109,24 +122,23 @@ export const rizzleCustomType = <
       this: PgCustomColumn, // hack
       value,
     ) {
-      return rizzleType
-        .getUnmarshal()
-        .catch(drizzleColumnTypeEnhancedErrors(this))
-        .parse(value);
+      return (fromDriverSchemaMemo ??= unmarshalSchema.catch(
+        drizzleColumnTypeEnhancedErrors(this),
+      )).parse(value);
     },
     toDriver(
       this: PgCustomColumn, // hack
       value: T[`_output`],
     ) {
-      const marshaled = rizzleType
-        .getMarshal()
-        .catch(drizzleColumnTypeEnhancedErrors(this))
-        .parse(value);
+      const marshaled = (toDriverSchemaMemo ??= marshalSchema.catch(
+        drizzleColumnTypeEnhancedErrors(this),
+      )).parse(value);
       return dataType === `json`
         ? jsonStringifyEnhancedErrors(this, marshaled)
         : (marshaled as string);
     },
   });
+};
 
 // The "s" prefix follows the convention of "s" being drizzle things. This helps
 // differentiate them from rizzle schema things.
