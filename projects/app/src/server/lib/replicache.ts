@@ -136,6 +136,8 @@ export async function push(
   // Required as per https://doc.replicache.dev/concepts/db-isolation-level
   await assertMinimumIsolationLevel(tx, `repeatable read`);
 
+  const mutationRecords: (typeof s.replicacheMutation.$inferInsert)[] = [];
+
   for (const mutation of push.mutations) {
     let success;
     try {
@@ -167,13 +169,16 @@ export async function push(
     //
     // This also needs to be done _last_ so that foreign keys to other tables
     // exist (e.g. client).
-    await tx.insert(s.replicacheMutation).values([
-      {
-        clientId: mutation.clientId,
-        mutation,
-        success,
-      },
-    ]);
+    mutationRecords.push({
+      clientId: mutation.clientId,
+      mutation,
+      success,
+      processedAt: new Date(),
+    });
+  }
+
+  if (mutationRecords.length > 0) {
+    await tx.insert(s.replicacheMutation).values(mutationRecords);
   }
 }
 
