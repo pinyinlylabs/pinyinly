@@ -10,7 +10,6 @@ import {
   hanziFromHanziWord,
   HanziWordMeaning,
   hanziWordMeaningSchema,
-  loadDictionary,
   loadHanziDecomposition,
   lookupHanzi,
   lookupHanziWord,
@@ -2277,19 +2276,3 @@ const FormFieldEditor = ({
     </Box>
   );
 };
-
-{
-  const dict = await loadDictionary();
-
-  const isViolating = (x: string) => x.startsWith(`to `);
-
-  for (const [hanziWord, { gloss }] of dict) {
-    if (gloss.some(isViolating)) {
-      await upsertHanziWordMeaning(hanziWord, {
-        gloss: gloss.map((x) =>
-          isViolating(x) ? x.substring(`to `.length) : x,
-        ),
-      });
-    }
-  }
-}

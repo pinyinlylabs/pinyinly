@@ -1,6 +1,6 @@
 import * as r from "@/data/rizzleSchema";
 import { sql } from "drizzle-orm";
-import * as s from "drizzle-orm/pg-core";
+import * as pg from "drizzle-orm/pg-core";
 import { customAlphabet } from "nanoid";
 import { z } from "zod";
 import {
@@ -17,11 +17,11 @@ const length = 12;
 
 const nanoid = customAlphabet(alphabet, length);
 
-export const schema = s.pgSchema(`haohaohow`);
+export const schema = pg.pgSchema(`haohaohow`);
 
 export const user = schema.table(`user`, {
-  id: s.text(`id`).primaryKey().$defaultFn(nanoid),
-  createdAt: s
+  id: pg.text(`id`).primaryKey().$defaultFn(nanoid),
+  createdAt: pg
     .timestamp(`createdAt`, {
       mode: `date`,
       withTimezone: true,
@@ -31,12 +31,12 @@ export const user = schema.table(`user`, {
 });
 
 export const authSession = schema.table(`authSession`, {
-  id: s.text(`id`).primaryKey(),
-  userId: s
+  id: pg.text(`id`).primaryKey(),
+  userId: pg
     .text(`userId`)
     .notNull()
     .references(() => user.id),
-  expiresAt: s
+  expiresAt: pg
     .timestamp(`expiresAt`, {
       mode: `date`,
       withTimezone: true,
@@ -47,98 +47,98 @@ export const authSession = schema.table(`authSession`, {
 export const authOAuth2 = schema.table(
   `authOAuth2`,
   {
-    id: s.text(`id`).primaryKey().$defaultFn(nanoid),
-    userId: s
+    id: pg.text(`id`).primaryKey().$defaultFn(nanoid),
+    userId: pg
       .text(`userId`)
       .references(() => user.id)
       .notNull(),
-    provider: s.text(`provider`).notNull(),
+    provider: pg.text(`provider`).notNull(),
     /**
      * The ID that the provider uses to identify the user.
      */
-    providerUserId: s.text(`providerUserId`).notNull(),
-    createdAt: s.timestamp(`timestamp`).defaultNow().notNull(),
+    providerUserId: pg.text(`providerUserId`).notNull(),
+    createdAt: pg.timestamp(`timestamp`).defaultNow().notNull(),
   },
-  (t) => [s.unique().on(t.provider, t.providerUserId)],
+  (t) => [pg.unique().on(t.provider, t.providerUserId)],
 );
 
 export const skillRating = schema.table(
   `skillRating`,
   {
-    id: s.text(`id`).primaryKey().$defaultFn(nanoid),
-    userId: s
+    id: pg.text(`id`).primaryKey().$defaultFn(nanoid),
+    userId: pg
       .text(`userId`)
       .references(() => user.id)
       .notNull(),
     skill: sSkill(`skillId`).notNull(),
     rating: sFsrsRating(`rating`).notNull(),
-    createdAt: s.timestamp(`timestamp`).defaultNow().notNull(),
+    createdAt: pg.timestamp(`timestamp`).defaultNow().notNull(),
   },
-  (t) => [s.index().on(t.userId, t.skill)],
+  (t) => [pg.index().on(t.userId, t.skill)],
 );
 
 export const skillState = schema.table(
   `skillState`,
   {
-    id: s.text(`id`).primaryKey().$defaultFn(nanoid),
-    userId: s
+    id: pg.text(`id`).primaryKey().$defaultFn(nanoid),
+    userId: pg
       .text(`userId`)
       .references(() => user.id)
       .notNull(),
     skill: sSkill(`skillId`).notNull(),
     srs: rizzleCustomType(r.rSrsState(), `json`)(`srs`),
-    due: s.timestamp(`dueAt`).notNull(),
-    createdAt: s.timestamp(`createdAt`).defaultNow().notNull(),
+    due: pg.timestamp(`dueAt`).notNull(),
+    createdAt: pg.timestamp(`createdAt`).defaultNow().notNull(),
   },
-  (t) => [s.unique().on(t.userId, t.skill)],
+  (t) => [pg.unique().on(t.userId, t.skill)],
 );
 
 export const pinyinInitialAssociation = schema.table(
   `pinyinInitialAssociation`,
   {
-    id: s.text(`id`).primaryKey().$defaultFn(nanoid),
-    userId: s
+    id: pg.text(`id`).primaryKey().$defaultFn(nanoid),
+    userId: pg
       .text(`userId`)
       .references(() => user.id)
       .notNull(),
-    initial: s.text(`initial`).notNull(),
-    name: s.text(`name`).notNull(),
-    updatedAt: s.timestamp(`updatedAt`).defaultNow().notNull(),
-    createdAt: s.timestamp(`createdAt`).defaultNow().notNull(),
+    initial: pg.text(`initial`).notNull(),
+    name: pg.text(`name`).notNull(),
+    updatedAt: pg.timestamp(`updatedAt`).defaultNow().notNull(),
+    createdAt: pg.timestamp(`createdAt`).defaultNow().notNull(),
   },
-  (t) => [s.unique().on(t.userId, t.initial)],
+  (t) => [pg.unique().on(t.userId, t.initial)],
 );
 
 export const pinyinFinalAssociation = schema.table(
   `pinyinFinalAssociation`,
   {
-    id: s.text(`id`).primaryKey().$defaultFn(nanoid),
-    userId: s
+    id: pg.text(`id`).primaryKey().$defaultFn(nanoid),
+    userId: pg
       .text(`userId`)
       .references(() => user.id)
       .notNull(),
-    final: s.text(`final`).notNull(),
-    name: s.text(`name`).notNull(),
-    updatedAt: s.timestamp(`updatedAt`).defaultNow().notNull(),
-    createdAt: s.timestamp(`createdAt`).defaultNow().notNull(),
+    final: pg.text(`final`).notNull(),
+    name: pg.text(`name`).notNull(),
+    updatedAt: pg.timestamp(`updatedAt`).defaultNow().notNull(),
+    createdAt: pg.timestamp(`createdAt`).defaultNow().notNull(),
   },
-  (t) => [s.unique().on(t.userId, t.final)],
+  (t) => [pg.unique().on(t.userId, t.final)],
 );
 
 export const pinyinInitialGroupTheme = schema.table(
   `pinyinInitialGroupTheme`,
   {
-    id: s.text(`id`).primaryKey().$defaultFn(nanoid),
-    userId: s
+    id: pg.text(`id`).primaryKey().$defaultFn(nanoid),
+    userId: pg
       .text(`userId`)
       .references(() => user.id)
       .notNull(),
     groupId: sPinyinInitialGroupId(`groupId`).notNull(),
     themeId: sMnemonicThemeId(`themeId`).notNull(),
-    updatedAt: s.timestamp(`updatedAt`).defaultNow().notNull(),
-    createdAt: s.timestamp(`createdAt`).defaultNow().notNull(),
+    updatedAt: pg.timestamp(`updatedAt`).defaultNow().notNull(),
+    createdAt: pg.timestamp(`createdAt`).defaultNow().notNull(),
   },
-  (t) => [s.unique().on(t.userId, t.groupId)],
+  (t) => [pg.unique().on(t.userId, t.groupId)],
 );
 
 /**
@@ -153,8 +153,8 @@ export const pinyinInitialGroupTheme = schema.table(
 export const replicacheClientGroup = schema.table(
   `replicacheClientGroup`,
   {
-    id: s.text(`id`).primaryKey().$defaultFn(nanoid),
-    userId: s
+    id: pg.text(`id`).primaryKey().$defaultFn(nanoid),
+    userId: pg
       .text(`userId`)
       .references(() => user.id)
       .notNull(),
@@ -162,45 +162,45 @@ export const replicacheClientGroup = schema.table(
      * The schema version that this client group is using, it's set when the first
      * push is made and can be used when syncing mutations between servers.
      */
-    schemaVersion: s.text().notNull(),
+    schemaVersion: pg.text().notNull(),
     /**
      * Replicache requires that cookies are ordered within a client group. To
      * establish this order we simply keep a counter.
      */
-    cvrVersion: s.integer(`cvrVersion`).notNull().default(0),
-    updatedAt: s.timestamp(`timestamp`).defaultNow().notNull(),
+    cvrVersion: pg.integer(`cvrVersion`).notNull().default(0),
+    updatedAt: pg.timestamp(`timestamp`).defaultNow().notNull(),
   },
-  (t) => [s.index().on(t.userId)],
+  (t) => [pg.index().on(t.userId)],
 );
 
 export const replicacheClient = schema.table(
   `replicacheClient`,
   {
-    id: s.text(`id`).primaryKey().$defaultFn(nanoid),
-    clientGroupId: s
+    id: pg.text(`id`).primaryKey().$defaultFn(nanoid),
+    clientGroupId: pg
       .text(`clientGroupId`)
       .references(() => replicacheClientGroup.id)
       .notNull(),
-    lastMutationId: s.integer(`lastMutationId`).notNull(),
-    updatedAt: s.timestamp(`timestamp`).defaultNow().notNull(),
+    lastMutationId: pg.integer(`lastMutationId`).notNull(),
+    updatedAt: pg.timestamp(`timestamp`).defaultNow().notNull(),
   },
-  (t) => [s.index().on(t.clientGroupId)],
+  (t) => [pg.index().on(t.clientGroupId)],
 );
 
 export const replicacheMutation = schema.table(
   `replicacheMutation`,
   {
-    id: s.text(`id`).primaryKey().$defaultFn(nanoid),
-    clientId: s
+    id: pg.text(`id`).primaryKey().$defaultFn(nanoid),
+    clientId: pg
       .text(`clientId`)
       .references(() => replicacheClient.id)
       .notNull(),
-    mutationId: s.integer(`mutationId`).notNull(),
-    mutation: s.json(`mutation`).notNull(),
-    success: s.boolean(),
-    processedAt: s.timestamp(`processedAt`).defaultNow().notNull(),
+    mutationId: pg.integer(`mutationId`).notNull(),
+    mutation: pg.json(`mutation`).notNull(),
+    success: pg.boolean(),
+    processedAt: pg.timestamp(`processedAt`).defaultNow().notNull(),
   },
-  (t) => [s.unique().on(t.clientId, t.mutationId)],
+  (t) => [pg.unique().on(t.clientId, t.mutationId)],
 );
 
 /**
@@ -212,7 +212,7 @@ export const replicacheMutation = schema.table(
  * client.
  */
 export const replicacheCvr = schema.table(`replicacheCvr`, {
-  id: s.text(`id`).primaryKey().$defaultFn(nanoid),
+  id: pg.text(`id`).primaryKey().$defaultFn(nanoid),
   /**
    * Map of clientID->lastMutationID pairs, one for each client in the client
    * group.
@@ -243,24 +243,24 @@ export const replicacheCvr = schema.table(`replicacheCvr`, {
       ),
     ),
   ).notNull(),
-  createdAt: s.timestamp(`createdAt`).defaultNow().notNull(),
+  createdAt: pg.timestamp(`createdAt`).defaultNow().notNull(),
 });
 
 export const remoteSync = schema.table(
   `remoteSync`,
   {
-    id: s.text(`id`).primaryKey().$defaultFn(nanoid),
+    id: pg.text(`id`).primaryKey().$defaultFn(nanoid),
     /**
      * The local user which will be synced to the remote server.
      */
-    userId: s
+    userId: pg
       .text(`userId`)
       .references(() => user.id)
       .notNull(),
     /**
      * The URL to the remote server tRPC endpoint.
      */
-    remoteUrl: s.text(`remoteUrl`).notNull(),
+    remoteUrl: pg.text(`remoteUrl`).notNull(),
     /**
      * The client group ID that this server will identify as when sending
      * mutations to the remote server. Only one client group will be used. All
@@ -268,7 +268,7 @@ export const remoteSync = schema.table(
      * together. However the original client IDs are used to avoid needing to
      * re-map values and provide a bit of traceability.
      */
-    remoteClientGroupId: s.text(`remoteClientGroupId`).notNull(),
+    remoteClientGroupId: pg.text(`remoteClientGroupId`).notNull(),
     /**
      * The profile ID that this server will identify as when sending mutations to
      * the remote server. This is value has no effect.
@@ -278,11 +278,11 @@ export const remoteSync = schema.table(
      * > The browser profile ID for this browser profile. Every instance of
      * > Replicache browser-profile-wide shares the same profile ID.
      */
-    remoteProfileId: s.text(`remoteProfileId`).notNull(),
+    remoteProfileId: pg.text(`remoteProfileId`).notNull(),
     /**
      * The session ID used to authenticate with the remote server.
      */
-    remoteSessionId: s.text(`remoteSessionId`).notNull(),
+    remoteSessionId: pg.text(`remoteSessionId`).notNull(),
     /**
      * The state of what mutations have been sent to the remote server.
      *
@@ -308,6 +308,6 @@ export const remoteSync = schema.table(
   },
   (t) => [
     // Only one sync per user per remote server.
-    s.unique().on(t.remoteUrl, t.userId),
+    pg.unique().on(t.remoteUrl, t.userId),
   ],
 );

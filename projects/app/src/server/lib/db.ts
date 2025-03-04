@@ -111,6 +111,10 @@ export function json_agg<TTable extends PgTable>(col: TTable) {
   return sql<TTable[`$inferSelect`][]>`coalesce(json_agg(${col}),'[]')`;
 }
 
+export function substring<TCol extends PgColumn>(col: TCol, regex: RegExp) {
+  return sql<string>`substring(${col} from ${regex.source})`;
+}
+
 export function array_agg<TCol extends PgColumn>(col: TCol) {
   return sql<
     TCol[`_`][`data`][]

@@ -1,14 +1,17 @@
-import { v5 } from "@/data/rizzleSchema";
+import { rSkillMarshal, v5 } from "@/data/rizzleSchema";
+import { loadDictionary } from "@/dictionary/dictionary";
 import { AppRouter } from "@/server/routers/_app";
 import { preflightCheckEnvVars } from "@/util/env";
 import { httpSessionHeader } from "@/util/http";
 import { invariant } from "@haohaohow/lib/invariant";
 import { sentryMiddleware } from "@inngest/middleware-sentry";
 import { createTRPCClient, httpLink } from "@trpc/client";
+import { notInArray } from "drizzle-orm";
 import { Inngest } from "inngest";
 import * as postmark from "postmark";
 import { z } from "zod";
-import { withDrizzle } from "./db";
+import * as s from "../schema";
+import { substring, withDrizzle } from "./db";
 import {
   getReplicacheClientMutationsSince,
   getReplicacheClientStateForUser,
@@ -321,11 +324,70 @@ const syncRemotePull = inngest.createFunction(
   },
 );
 
+const dataIntegrityDictionary = inngest.createFunction(
+  { id: `dataIntegrityDictionary` },
+  { cron: `30 * * * *` },
+  async ({ step }) => {
+    const dict = await loadDictionary();
+    const allHanziWords = [...dict.keys()];
+
+    await step.run(`check skillRating.skill`, async () => {
+      const unknownSkills = (
+        await withDrizzle(
+          async (db) =>
+            await db
+              .selectDistinct({ skill: s.skillRating.skill })
+              .from(s.skillRating)
+              .where(
+                notInArray(
+                  substring(s.skillRating.skill, /^\w+:(.+)$/),
+                  allHanziWords,
+                ),
+              ),
+        )
+      ).map((r) => rSkillMarshal(r.skill));
+
+      if (unknownSkills.length > 0) {
+        console.error(
+          `unknown hanzi word in skillRating.skill:`,
+          unknownSkills,
+        );
+      }
+
+      return unknownSkills;
+    });
+
+    await step.run(`check skillState.skill`, async () => {
+      const unknownSkills = (
+        await withDrizzle(
+          async (db) =>
+            await db
+              .selectDistinct({ skill: s.skillState.skill })
+              .from(s.skillState)
+              .where(
+                notInArray(
+                  substring(s.skillState.skill, /^\w+:(.+)$/),
+                  allHanziWords,
+                ),
+              ),
+        )
+      ).map((r) => rSkillMarshal(r.skill));
+
+      if (unknownSkills.length > 0) {
+        console.error(`unknown hanzi word in skillState.skill:`, unknownSkills);
+      }
+
+      return unknownSkills;
+    });
+  },
+);
+
 // Create an empty array where we'll export future Inngest functions
 export const functions = [
+  dataIntegrityDictionary,
   helloWorld,
   helloWorld2,
   helloWorldEmail,
-  syncRemotePush,
   syncRemotePull,
+  syncRemotePush,
 ];
