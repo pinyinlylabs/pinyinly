@@ -21,7 +21,7 @@ import {
 } from "@/util/rizzle";
 import { invariant } from "@haohaohow/lib/invariant";
 import makeDebug from "debug";
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, eq, gt, inArray, sql } from "drizzle-orm";
 import chunk from "lodash/chunk";
 import mapValues from "lodash/mapValues";
 import pickBy from "lodash/pickBy";
@@ -944,38 +944,19 @@ export async function getReplicacheClientMutationsSince(
 ) {
   const { clientId, sinceMutationId, limit = 20 } = opts;
 
-  const muts = db.$with(`muts`).as(
-    db
-      .select({
-        id: sql<number>`(${s.replicacheMutation.mutation}->>'id')::int`.as(
-          `id`,
-        ),
-        mutation: s.replicacheMutation.mutation,
-      })
-      .from(s.replicacheMutation)
-      .where(
-        and(
-          eq(s.replicacheMutation.clientId, clientId),
-          sql`(${s.replicacheMutation.mutation}->>'id')::int > ${sinceMutationId}`,
-        ),
-      ),
-  );
-
-  const mutationsFromDb = await db
-    .with(muts)
-    .selectDistinctOn([muts.id], {
-      mutation: muts.mutation,
-    })
-    .from(muts)
-    .orderBy(muts.id)
-    .limit(limit);
+  const mutationsFromDb = await db.query.replicacheMutation.findMany({
+    where: and(
+      eq(s.replicacheMutation.clientId, clientId),
+      gt(s.replicacheMutation.mutationId, sinceMutationId),
+    ),
+    orderBy: s.replicacheMutation.mutationId,
+    limit,
+  });
 
   // Parse and verify the data.
   const mutations = mutationsFromDb.map((x) =>
     replicacheMutationSchema.parse(x.mutation),
   );
-
-  invariant(mutations.length > 0);
 
   // Check the invariant that mutations are ordered in ascending
   // order by ID from the database.
