@@ -196,7 +196,7 @@ export const QuizDeckOneCorrectPairQuestion = memo(
                       Incorrect
                     </Text>
                   </View>
-                  <Text className="text-xl font-bold leading-none text-accent-10">
+                  <Text className="text-xl/none font-bold text-accent-10">
                     Correct answer:
                   </Text>
 
@@ -370,7 +370,7 @@ const flagTextClass = tv({
 });
 
 const choiceEnglishText = tv({
-  base: `text-xl leading-none text-accent-10`,
+  base: `text-xl/none text-accent-10`,
   variants: {
     small: {
       true: `text-md`,
@@ -660,12 +660,12 @@ const choiceButtonText = tv({
   // px-1: Horizontal padding is necessary to give first and last letters on a
   // line with accents enough space to not be clipped. Without this words like
   // "lǐ" will have half the accent clipped.
-  base: `text-lg lg:text-xl px-1`,
+  base: `px-1`,
   variants: {
     length: {
-      short: `text-lg lg:text-xl`,
-      medium: `lg:text-lg`,
-      long: `text-xs lg:text-md`,
+      short: `text-lg/tight lg:text-xl/tight`,
+      medium: `lg:text-lg/tight`,
+      long: `text-xs lg:text-md/tight`,
     },
   },
 });
