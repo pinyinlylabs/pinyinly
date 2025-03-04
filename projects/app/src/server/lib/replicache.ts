@@ -144,8 +144,9 @@ export async function push(
 
   for (const mutation of push.mutations) {
     let success;
+    let notSkipped;
     try {
-      await processMutation(
+      notSkipped = await processMutation(
         tx,
         userId,
         push.clientGroupId,
@@ -156,7 +157,7 @@ export async function push(
       );
       success = true;
     } catch (err) {
-      await processMutation(
+      notSkipped = await processMutation(
         tx,
         userId,
         push.clientGroupId,
@@ -173,12 +174,15 @@ export async function push(
     //
     // This also needs to be done _last_ so that foreign keys to other tables
     // exist (e.g. client).
-    mutationRecords.push({
-      clientId: mutation.clientId,
-      mutation,
-      success,
-      processedAt: new Date(),
-    });
+    if (notSkipped) {
+      mutationRecords.push({
+        clientId: mutation.clientId,
+        mutationId: mutation.id,
+        mutation,
+        success,
+        processedAt: new Date(),
+      });
+    }
   }
 
   if (mutationRecords.length > 0) {
@@ -527,9 +531,9 @@ export async function processMutation(
   // as a param. In case of failure, caller will call us again with `true`.
   errorMode: boolean,
   mutate: MutateHandler<Drizzle>,
-): Promise<void> {
+): Promise<boolean> {
   // 2: beginTransaction
-  await tx.transaction(async (tx) => {
+  return await tx.transaction(async (tx) => {
     debug(`Processing mutation errorMode=%o %o`, errorMode, mutation);
 
     // 3: `getClientGroup(body.clientGroupID)`
@@ -549,7 +553,7 @@ export async function processMutation(
     // 8: rollback and skip if already processed.
     if (mutation.id < nextMutationId) {
       debug(`Mutation %s has already been processed - skipping`, mutation.id);
-      return;
+      return false;
     }
 
     // 9: Rollback and error if from future.
@@ -582,6 +586,8 @@ export async function processMutation(
     await putClient(tx, nextClient);
 
     debug(`Processed mutation in %s`, Date.now() - t1);
+
+    return true;
   });
 }
 
@@ -1040,4 +1046,38 @@ export async function withDrizzlePushChunked(
       return result;
     }
   }
+}
+
+export async function withDrizzleIgnoreRemoteClientForRemoteSync(
+  remoteSyncId: string,
+  clientIds: string[],
+) {
+  // Find the new remote client IDs that we haven't seen before and
+  // add them to the remoteSync record.
+  await withDrizzle(async (db) => {
+    await db.transaction(
+      async (tx) => {
+        const freshRemoteSync = await tx.query.remoteSync.findFirst({
+          where: eq(s.remoteSync.id, remoteSyncId),
+        });
+        invariant(freshRemoteSync != null, `remoteSync not found`);
+
+        const knownRemoteClientIds = new Set(freshRemoteSync.pulledClientIds);
+
+        const newRemoteClientIds = clientIds.filter(
+          (x) => !knownRemoteClientIds.has(x),
+        );
+
+        if (newRemoteClientIds.length > 0) {
+          await tx
+            .update(s.remoteSync)
+            .set({
+              pulledClientIds: [...knownRemoteClientIds, ...newRemoteClientIds],
+            })
+            .where(eq(s.remoteSync.id, remoteSyncId));
+        }
+      },
+      { isolationLevel: `repeatable read` },
+    );
+  });
 }

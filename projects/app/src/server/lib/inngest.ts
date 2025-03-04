@@ -5,16 +5,15 @@ import { httpSessionHeader } from "@/util/http";
 import { invariant } from "@haohaohow/lib/invariant";
 import { sentryMiddleware } from "@inngest/middleware-sentry";
 import { createTRPCClient, httpLink } from "@trpc/client";
-import { eq } from "drizzle-orm";
 import { Inngest } from "inngest";
 import * as postmark from "postmark";
 import { z } from "zod";
-import * as s from "../schema";
 import { withDrizzle } from "./db";
 import {
   getReplicacheClientMutationsSince,
   getReplicacheClientStateForUser,
   updateRemoteSyncClientLastMutationId,
+  withDrizzleIgnoreRemoteClientForRemoteSync,
   withDrizzlePushChunked,
 } from "./replicache";
 
@@ -162,6 +161,12 @@ const syncRemotePush = inngest.createFunction(
           continue;
         }
 
+        // Don't push any clients that originate from the remote server (these
+        // would exist locally from being pull syncing).
+        if (remoteSync.pulledClientIds.includes(clientId)) {
+          continue;
+        }
+
         let lastSyncedMutationId =
           // For new clients that have never been synced, there won't be a
           // lastSyncedMutationIds entry, so we default to 0.
@@ -242,24 +247,19 @@ const syncRemotePull = inngest.createFunction(
 
     // Iterate over each remote sync rule and process it one by one.
     for (const remoteSync of remoteSyncs) {
-      const clientsState = await step.run(
-        // Putting the user ID in is unnecessary but it helps debugging.
-        `getClientsState-${remoteSync.id}-${remoteSync.userId}`,
-        async () =>
-          // calculate which replicache clients need to be synced
-          await withDrizzle(
-            async (db) =>
-              await getReplicacheClientStateForUser(db, remoteSync.userId),
-          ),
-      );
-
       const schemaVersions = [v5.version];
 
-      for (let batchNumber = 1; ; batchNumber++) {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      while (true) {
         const fetchedMutations = await step.run(
           // Putting the user ID in is unnecessary but it helps debugging.
-          `fetchMutations-${remoteSync.id}-${remoteSync.userId}-${batchNumber}`,
+          `fetchMutations-${remoteSync.id}-${remoteSync.userId}`,
           async () => {
+            const clientsState = await withDrizzle(
+              async (db) =>
+                await getReplicacheClientStateForUser(db, remoteSync.userId),
+            );
+
             const lastMutationIds = Object.fromEntries(
               clientsState.map((c) => [c.clientId, c.lastMutationId]),
             );
@@ -276,152 +276,49 @@ const syncRemotePull = inngest.createFunction(
           },
         );
 
-        // Make sure remote clients aren't pushed back to the remote server
-        // during syncing.
+        // if (Math.random() > 0) {
+        //   return;
+        // }
+
         await step.run(
-          `ignoreRemoteClientsFromPushes-${remoteSync.id}-${remoteSync.userId}-${batchNumber}`,
+          `applyMutations-${remoteSync.id}-${remoteSync.userId}`,
           async () => {
-            const remoteClientIds = new Set(
-              fetchedMutations.mutations.flatMap((m) =>
-                m.mutations.map((m) => m.clientId),
-              ),
-            );
+            for (const {
+              clientGroupId,
+              schemaVersion,
+              mutations,
+            } of fetchedMutations.mutations) {
+              // Make sure remote clients aren't pushed back to the remote
+              // server during syncing. Find the new remote client IDs that we
+              // haven't seen before and add them to the remoteSync record.
+              {
+                const remoteClientIds = [
+                  ...new Set(mutations.map((m) => m.clientId)),
+                ];
+                await withDrizzleIgnoreRemoteClientForRemoteSync(
+                  remoteSync.id,
+                  remoteClientIds,
+                );
+              }
 
-            // Find the new remote client IDs that we haven't seen before and
-            // add them to the remoteSync record.
-            await withDrizzle(async (db) => {
-              await db.transaction(
-                async (tx) => {
-                  const freshRemoteSync = await tx.query.remoteSync.findFirst({
-                    where: eq(s.remoteSync.id, remoteSync.id),
-                  });
-                  invariant(freshRemoteSync != null, `remoteSync not found`);
-
-                  const knownRemoteClientIds = new Set(
-                    freshRemoteSync.pulledClientIds,
-                  );
-
-                  const newRemoteClientIds = [...remoteClientIds].filter(
-                    (x) => !knownRemoteClientIds.has(x),
-                  );
-
-                  if (newRemoteClientIds.length > 0) {
-                    await tx
-                      .update(s.remoteSync)
-                      .set({
-                        pulledClientIds: [
-                          ...knownRemoteClientIds,
-                          ...newRemoteClientIds,
-                        ],
-                      })
-                      .where(eq(s.remoteSync.id, remoteSync.id));
-                  }
-                },
-                { isolationLevel: `repeatable read` },
-              );
-            });
-          },
-        );
-
-        for (const {
-          clientGroupId,
-          schemaVersion,
-          mutations,
-        } of fetchedMutations.mutations) {
-          if (!schemaVersions.includes(schemaVersion)) {
-            console.warn(
-              `Received mutations for schema version ${schemaVersion}, but we only support ${schemaVersions.join(
-                `, `,
-              )}`,
-            );
-            continue;
-          }
-
-          const result = await step.run(
-            `applyMutations-${remoteSync.id}-${remoteSync.userId}-${batchNumber}-${clientGroupId}`,
-            async () =>
-              await withDrizzlePushChunked(remoteSync.userId, {
+              // Finally apply the mutations.
+              const result = await withDrizzlePushChunked(remoteSync.userId, {
                 schemaVersion,
                 profileId: remoteSync.remoteProfileId,
                 clientGroupId,
                 pushVersion: 1,
                 mutations,
-              }),
-          );
+              });
 
-          if (result != null) {
-            console.error(`Error applying remote mutations for:`, result);
-          }
-        }
+              if (result != null) {
+                console.error(`Error applying remote mutations for:`, result);
+              }
+            }
+          },
+        );
 
         if (!fetchedMutations.hasMore) {
           break;
-        }
-      }
-
-      for (const { clientId, lastMutationId, schemaVersion } of clientsState) {
-        if (schemaVersion !== v5.version) {
-          continue;
-        }
-
-        let lastSyncedMutationId =
-          // For new clients that have never been synced, there won't be a
-          // lastSyncedMutationIds entry, so we default to 0.
-          remoteSync.lastSyncedMutationIds[clientId] ?? 0;
-
-        const mutationBatchSize = 20;
-        while (lastSyncedMutationId < lastMutationId) {
-          const newLastSyncedMutationId = await step.run(
-            `syncRemoteClient-${clientId}-${lastSyncedMutationId}`,
-            async () => {
-              // Fetch mutations that need to be sent.
-              const mutationsFromDb = await withDrizzle(async (db) =>
-                getReplicacheClientMutationsSince(db, {
-                  clientId,
-                  sinceMutationId: lastSyncedMutationId,
-                  limit: mutationBatchSize,
-                }),
-              );
-
-              // push to server
-
-              const trpcClient = createTrpcClient(
-                remoteSync.remoteUrl,
-                remoteSync.remoteSessionId,
-              );
-
-              await trpcClient.replicache.push.mutate({
-                mutations: mutationsFromDb,
-                profileId: remoteSync.remoteProfileId,
-                clientGroupId: remoteSync.remoteClientGroupId,
-                pushVersion: 1,
-                schemaVersion,
-              });
-
-              const newLastSyncedMutationId =
-                mutationsFromDb[mutationsFromDb.length - 1]?.id;
-              invariant(
-                newLastSyncedMutationId != null,
-                `newLastMutationId is null`,
-              );
-
-              // Update the remoteSync record with the new lastMutationId for
-              // the client, so that in the future only mutations after that are
-              // sent.
-              await withDrizzle(async (db) => {
-                await updateRemoteSyncClientLastMutationId(db, {
-                  remoteSyncId: remoteSync.id,
-                  clientId,
-                  lastMutationId: newLastSyncedMutationId,
-                });
-              });
-
-              return newLastSyncedMutationId;
-            },
-          );
-
-          invariant(newLastSyncedMutationId > lastSyncedMutationId);
-          lastSyncedMutationId = newLastSyncedMutationId;
         }
       }
     }

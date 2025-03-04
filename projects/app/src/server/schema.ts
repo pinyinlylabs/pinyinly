@@ -195,6 +195,7 @@ export const replicacheMutation = schema.table(
       .text(`clientId`)
       .references(() => replicacheClient.id)
       .notNull(),
+    mutationId: s.integer(`mutationId`),
     mutation: s.json(`mutation`).notNull(),
     success: s.boolean(),
     processedAt: s.timestamp(`processedAt`).defaultNow().notNull(),
