@@ -1,3 +1,4 @@
+import { weakMemoize1 } from "@/util/collections";
 import { nextReview, Rating, UpcomingReview } from "@/util/fsrs";
 import {
   invalid,
@@ -108,7 +109,9 @@ const rSkillMarshalSchema = z
     }
   });
 
-export const rSkillMarshal = (skill: Skill) => rSkillMarshalSchema.parse(skill);
+export const rSkillMarshal = weakMemoize1((skill: Skill) =>
+  rSkillMarshalSchema.parse(skill),
+);
 
 const rSkillUnmarshalSchema = z
   .custom<MarshaledSkill>((x) => typeof x === `string`)
