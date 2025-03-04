@@ -1,0 +1,1 @@
+ALTER TABLE "haohaohow"."replicacheMutation" ADD COLUMN "mutationId" integer;
