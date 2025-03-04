@@ -1,4 +1,5 @@
 import * as r from "@/data/rizzleSchema";
+import { sql } from "drizzle-orm";
 import * as s from "drizzle-orm/pg-core";
 import { customAlphabet } from "nanoid";
 import { z } from "zod";
@@ -296,6 +297,13 @@ export const remoteSync = schema.table(
         z.number(), // lastMutationId
       ),
     ).notNull(),
+    /**
+     * An array of client IDs that have been pulled from the remote server.
+     * These are ignored when pushing.
+     */
+    pulledClientIds: zodJson(`pulledClientIds`, z.array(z.string()))
+      .default(sql`'[]'::json`)
+      .notNull(),
   },
   (t) => [
     // Only one sync per user per remote server.

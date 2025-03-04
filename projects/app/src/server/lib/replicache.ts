@@ -9,17 +9,20 @@ import {
   Cookie,
   makeDrizzleMutationHandler,
   MutateHandler,
-  Mutation,
   PullOkResponse,
   PullRequest,
   PushRequest,
+  pushRequestSchema,
   PushResponse,
+  ReplicacheMutation,
+  replicacheMutationSchema,
   RizzleDrizzleMutators,
   VersionNotSupportedResponse,
 } from "@/util/rizzle";
 import { invariant } from "@haohaohow/lib/invariant";
 import makeDebug from "debug";
-import { eq, inArray, sql } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
+import chunk from "lodash/chunk";
 import mapValues from "lodash/mapValues";
 import pickBy from "lodash/pickBy";
 import { DatabaseError } from "pg-protocol";
@@ -30,6 +33,7 @@ import {
   assertMinimumIsolationLevel,
   json_build_object,
   json_object_agg,
+  withDrizzle,
 } from "./db";
 import { updateSkillState } from "./queries";
 
@@ -518,7 +522,7 @@ export async function processMutation(
   userId: string,
   clientGroupId: string,
   clientGroupSchemaVersion: string,
-  mutation: Mutation,
+  mutation: ReplicacheMutation,
   // 1: `let errorMode = false`. In JS, we implement this step naturally
   // as a param. In case of failure, caller will call us again with `true`.
   errorMode: boolean,
@@ -816,4 +820,224 @@ export async function computeCvrEntities(
         }),
     ),
   };
+}
+
+export const fetchedMutationSchema = pushRequestSchema.omit({
+  // `profileId` isn't stored in the DB so we can't return it.
+  profileId: true,
+  // `pushVersion` isn't stored in the DB nor is it really needed as the
+  // requester can build their own push request.
+  pushVersion: true,
+});
+
+export type FetchedMutation = z.infer<typeof fetchedMutationSchema>;
+
+export async function fetchMutations(
+  tx: Drizzle,
+  userId: string,
+  opts: {
+    schemaVersions: string[];
+    lastMutationIds: Record<string, number>;
+    limit?: number;
+  },
+): Promise<{ mutations: FetchedMutation[]; hasMore: boolean }> {
+  let remainingMutations = opts.limit ?? 100;
+
+  const clientState = await getReplicacheClientStateForUser(tx, userId);
+
+  // Compare the state provided by the caller with state from the database to
+  // determine which clients have new mutations.
+  const clientsWithNewData = clientState.flatMap((c) => {
+    // Make sure the client is using a supported schema.
+    if (
+      c.schemaVersion == null ||
+      !opts.schemaVersions.includes(c.schemaVersion)
+    ) {
+      return [];
+    }
+
+    const sinceMutationId = opts.lastMutationIds[c.clientId] ?? 0;
+    // Skip the client if it doesn't have newer data than what has already
+    // been seen.
+    if (sinceMutationId >= c.lastMutationId) {
+      return [];
+    }
+
+    return {
+      client: c,
+      clientId: c.clientId,
+      clientGroupId: c.clientGroupId,
+      schemaVersion: c.schemaVersion,
+      lastMutationId: c.lastMutationId,
+      sinceMutationId,
+    };
+  });
+
+  const pushes: FetchedMutation[] = [];
+  let hasMore = false;
+  for (const client of clientsWithNewData) {
+    const mutations = await getReplicacheClientMutationsSince(tx, {
+      clientId: client.clientId,
+      sinceMutationId: client.sinceMutationId,
+      limit: remainingMutations,
+    });
+
+    pushes.push({
+      clientGroupId: client.clientGroupId,
+      schemaVersion: client.schemaVersion,
+      mutations,
+    });
+
+    remainingMutations -= mutations.length;
+    hasMore ||=
+      client.sinceMutationId + mutations.length < client.lastMutationId;
+
+    if (remainingMutations <= 0) {
+      break;
+    }
+  }
+
+  return { mutations: pushes, hasMore };
+}
+
+/**
+ * Fetch the current state of the replicache clients from the DB (in terms of
+ * their last mutation and schema version) for a given user.
+ */
+export async function getReplicacheClientStateForUser(
+  db: Drizzle,
+  userId: string,
+) {
+  return await db
+    .select({
+      clientId: s.replicacheClient.id,
+      clientGroupId: s.replicacheClient.clientGroupId,
+      schemaVersion: s.replicacheClientGroup.schemaVersion,
+      lastMutationId: s.replicacheClient.lastMutationId,
+    })
+    .from(s.replicacheClient)
+    .leftJoin(
+      s.replicacheClientGroup,
+      and(
+        eq(s.replicacheClient.clientGroupId, s.replicacheClientGroup.id),
+        eq(s.replicacheClientGroup.userId, userId),
+      ),
+    );
+}
+
+/**
+ * Get the mutations for a given client that are newer than a given mutation ID.
+ */
+export async function getReplicacheClientMutationsSince(
+  db: Drizzle,
+  opts: {
+    clientId: string;
+    sinceMutationId: number;
+    limit?: number;
+  },
+) {
+  const { clientId, sinceMutationId, limit = 20 } = opts;
+
+  const muts = db.$with(`muts`).as(
+    db
+      .select({
+        id: sql<number>`(${s.replicacheMutation.mutation}->>'id')::int`.as(
+          `id`,
+        ),
+        mutation: s.replicacheMutation.mutation,
+      })
+      .from(s.replicacheMutation)
+      .where(
+        and(
+          eq(s.replicacheMutation.clientId, clientId),
+          sql`(${s.replicacheMutation.mutation}->>'id')::int > ${sinceMutationId}`,
+        ),
+      ),
+  );
+
+  const mutationsFromDb = await db
+    .with(muts)
+    .selectDistinctOn([muts.id], {
+      mutation: muts.mutation,
+    })
+    .from(muts)
+    .orderBy(muts.id)
+    .limit(limit);
+
+  // Parse and verify the data.
+  const mutations = mutationsFromDb.map((x) =>
+    replicacheMutationSchema.parse(x.mutation),
+  );
+
+  invariant(mutations.length > 0);
+
+  // Check the invariant that mutations are ordered in ascending
+  // order by ID from the database.
+  for (let i = 1; i < mutations.length; i++) {
+    invariant(
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      mutations[i]!.id > mutations[i - 1]!.id,
+      `mutations not ordered correctly`,
+    );
+  }
+
+  return mutations;
+}
+
+export async function updateRemoteSyncClientLastMutationId(
+  db: Drizzle,
+  opts: { remoteSyncId: string; clientId: string; lastMutationId: number },
+) {
+  await db.transaction(
+    async (tx) => {
+      // Get a fresh copy since we're overwriting it but we only
+      // want to update one key. This could probably be done more
+      // efficiently in raw SQL.
+      const res = await tx.query.remoteSync.findFirst({
+        where: eq(s.remoteSync.id, opts.remoteSyncId),
+      });
+      invariant(
+        res != null,
+        `could not find remoteSync id=${opts.remoteSyncId}`,
+      );
+
+      await tx
+        .update(s.remoteSync)
+        .set({
+          lastSyncedMutationIds: {
+            ...res.lastSyncedMutationIds,
+            [opts.clientId]: opts.lastMutationId,
+          },
+        })
+        .where(eq(s.remoteSync.id, opts.remoteSyncId));
+    },
+    { isolationLevel: `repeatable read` },
+  );
+}
+
+export async function withDrizzlePushChunked(
+  userId: string,
+  input: PushRequest,
+) {
+  // Commit mutations in batches, rather than trying to do it all at once
+  // and timing out or locking the database. Each batch can be processed and
+  // committed separately.
+  for (const batch of chunk(input.mutations, 2)) {
+    const inputBatch: typeof input = {
+      ...input,
+      mutations: batch,
+    };
+
+    const result = await withDrizzle(
+      async (db) =>
+        await db.transaction((tx) => push(tx, userId, inputBatch), {
+          isolationLevel: `repeatable read`,
+        }),
+    );
+
+    // Return any errors immediately
+    if (result != null) {
+      return result;
+    }
+  }
 }

@@ -5,8 +5,13 @@ import {
   pushRequestSchema,
   pushResponseSchema,
 } from "@/util/rizzle";
-import chunk from "lodash/chunk";
-import { pull, push } from "../lib/replicache";
+import { z } from "zod";
+import {
+  fetchedMutationSchema,
+  fetchMutations,
+  pull,
+  withDrizzlePushChunked,
+} from "../lib/replicache";
 import { authedProcedure, router } from "../lib/trpc";
 
 export const replicacheRouter = router({
@@ -16,27 +21,7 @@ export const replicacheRouter = router({
     .mutation(async (opts) => {
       const { userId } = opts.ctx.session;
 
-      // Commit mutations in batches, rather than trying to do it all at once
-      // and timing out or locking the database. Each batch can be processed and
-      // committed separately.
-      for (const batch of chunk(opts.input.mutations, 2)) {
-        const inputBatch: typeof opts.input = {
-          ...opts.input,
-          mutations: batch,
-        };
-
-        const result = await withDrizzle(
-          async (db) =>
-            await db.transaction((tx) => push(tx, userId, inputBatch), {
-              isolationLevel: `repeatable read`,
-            }),
-        );
-
-        // Return any errors immediately
-        if (result != null) {
-          return result;
-        }
-      }
+      return await withDrizzlePushChunked(userId, opts.input);
     }),
 
   pull: authedProcedure
@@ -45,12 +30,44 @@ export const replicacheRouter = router({
     .mutation(async (opts) => {
       const { userId } = opts.ctx.session;
 
-      const result = await withDrizzle(
+      return await withDrizzle(
         async (db) =>
           await db.transaction((tx) => pull(tx, userId, opts.input), {
             isolationLevel: `repeatable read`,
           }),
       );
-      return result;
+    }),
+
+  fetchMutations: authedProcedure
+    .input(
+      z
+        .object({
+          schemaVersions: z.array(z.string()),
+          /**
+           * The client last mutation ID as seen by the requester. This is used
+           * to determine which mutations to return to the client.
+           */
+          lastMutationIds: z.record(z.string(), z.number()),
+        })
+        .strict(),
+    )
+    .output(
+      z
+        .object({
+          mutations: z.array(fetchedMutationSchema),
+          /**
+           * Whether there are more pushes to fetch. If `false`, the client should
+           * wait a bit before fetching again.
+           */
+          hasMore: z.boolean(),
+        })
+        .strict(),
+    )
+    .mutation(async (opts) => {
+      const { userId } = opts.ctx.session;
+
+      return await withDrizzle(
+        async (db) => await fetchMutations(db, userId, opts.input),
+      );
     }),
 });
