@@ -162,7 +162,7 @@ export const replicacheClientGroup = schema.table(
      * The schema version that this client group is using, it's set when the first
      * push is made and can be used when syncing mutations between servers.
      */
-    schemaVersion: s.text(),
+    schemaVersion: s.text().notNull(),
     /**
      * Replicache requires that cookies are ordered within a client group. To
      * establish this order we simply keep a counter.

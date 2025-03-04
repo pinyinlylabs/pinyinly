@@ -1,0 +1,1 @@
+ALTER TABLE "haohaohow"."replicacheClientGroup" ALTER COLUMN "schemaVersion" SET NOT NULL;
