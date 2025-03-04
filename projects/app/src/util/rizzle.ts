@@ -1,4 +1,9 @@
-import { mapInvert, objectInvert } from "@/util/collections";
+import {
+  mapInvert,
+  memoize0,
+  objectInvert,
+  weakMemoize1,
+} from "@/util/collections";
 import { invariant } from "@haohaohow/lib/invariant";
 import mapKeys from "lodash/mapKeys";
 import mapValues from "lodash/mapValues";
@@ -6,7 +11,6 @@ import memoize from "lodash/memoize";
 import omit from "lodash/omit";
 import pick from "lodash/pick";
 import {
-  DeepReadonly,
   IndexDefinition,
   IndexDefinitions,
   MutatorDefs,
@@ -39,6 +43,8 @@ export abstract class RizzleType<
 
   abstract getMarshal(): z.ZodType<Marshaled, z.ZodTypeDef, Input>;
   abstract getUnmarshal(): z.ZodType<Output, z.ZodTypeDef, Marshaled>;
+  abstract marshal(input: Input): Marshaled;
+  abstract unmarshal(marshaled: Marshaled): Output;
 
   static #indexes = {};
 
@@ -83,22 +89,35 @@ export class RizzleNullable<T extends RizzleType> extends RizzleType<
   T[`_marshaled`] | null,
   T[`_output`] | null
 > {
-  #marshal?: z.ZodNullable<
-    z.ZodType<T[`_marshaled`], z.ZodTypeDef, T[`_input`]>
-  >;
-  #unmarshal?: z.ZodNullable<
-    z.ZodType<T[`_output`], z.ZodTypeDef, T[`_marshaled`]>
-  >;
+  constructor(def: RizzleNullableDef<T>) {
+    super(def);
+
+    this.getMarshal = memoize0(this.getMarshal.bind(this));
+    this.getUnmarshal = memoize0(this.getUnmarshal.bind(this));
+    this.marshal = weakMemoize1(this.marshal.bind(this));
+    this.unmarshal = weakMemoize1(this.unmarshal.bind(this));
+  }
 
   getMarshal() {
-    return (this.#marshal ??= this._def.innerType.getMarshal().nullable());
+    return this._def.innerType.getMarshal().nullable();
   }
+
   getUnmarshal() {
-    return (this.#unmarshal ??= this._def.innerType.getUnmarshal().nullable());
+    return this._def.innerType.getUnmarshal().nullable();
   }
+
+  marshal(input: this[`_input`]): this[`_marshaled`] {
+    return this.getMarshal().parse(input);
+  }
+
+  unmarshal(marshaled: T[`_marshaled`]): T[`_output`] {
+    return this.getUnmarshal().parse(marshaled);
+  }
+
   _getIndexes() {
     return this._def.innerType._getIndexes();
   }
+
   _getAlias(): string | undefined {
     return this._def.innerType._getAlias();
   }
@@ -125,6 +144,12 @@ export class RizzleTypeAlias<T extends RizzleType> extends RizzleType<
   }
   getUnmarshal() {
     return this._def.innerType.getUnmarshal();
+  }
+  marshal(input: T[`_input`]): T[`_marshaled`] {
+    return this._def.innerType.marshal(input);
+  }
+  unmarshal(marshaled: T[`_marshaled`]): T[`_output`] {
+    return this._def.innerType.unmarshal(marshaled);
   }
   _getIndexes() {
     return this._def.innerType._getIndexes();
@@ -157,7 +182,11 @@ export class RizzleIndexed<
   T[`_marshaled`],
   T[`_output`]
 > {
-  #indexes?: DeepReadonly<Record<string, IndexDefinition>>;
+  constructor(def: RizzleIndexedDef<T, IndexName>) {
+    super(def);
+
+    this._getIndexes = memoize0(this._getIndexes.bind(this));
+  }
 
   getMarshal() {
     return this._def.innerType.getMarshal();
@@ -165,14 +194,20 @@ export class RizzleIndexed<
   getUnmarshal() {
     return this._def.innerType.getUnmarshal();
   }
+  marshal(input: T[`_input`]): T[`_marshaled`] {
+    return this._def.innerType.marshal(input);
+  }
+  unmarshal(marshaled: T[`_marshaled`]): T[`_output`] {
+    return this._def.innerType.unmarshal(marshaled);
+  }
   _getIndexes() {
-    return (this.#indexes ??= {
+    return {
       [this._def.indexName]: {
         allowEmpty: false,
         jsonPointer: ``,
       },
       ...this._def.innerType._getIndexes(),
-    });
+    };
   }
   _getAlias() {
     return this._def.innerType._getAlias();
@@ -204,27 +239,22 @@ export class RizzleObject<T extends RizzleRawObject> extends RizzleType<
 > {
   #keyToAlias: Record<string, string>;
   #aliasToKey: Record<string, string>;
-  #marshal?: z.ZodType<
-    RizzleObjectMarshaled<T>,
-    z.ZodAnyDef,
-    RizzleObjectInput<T>
-  >;
-  #unmarshal?: z.ZodType<
-    RizzleObjectOutput<T>,
-    z.ZodAnyDef,
-    RizzleObjectMarshaled<T>
-  >;
-  #indexes?: DeepReadonly<Record<string, IndexDefinition>>;
 
   constructor(def: RizzleObjectDef<T>) {
     super(def);
 
     this.#keyToAlias = mapValues(this._def.shape, (v, k) => v._getAlias() ?? k);
     this.#aliasToKey = objectInvert(this.#keyToAlias);
+
+    this.getMarshal = memoize0(this.getMarshal.bind(this));
+    this.getUnmarshal = memoize0(this.getUnmarshal.bind(this));
+    this._getIndexes = memoize0(this._getIndexes.bind(this));
+    this.marshal = weakMemoize1(this.marshal.bind(this));
+    this.unmarshal = weakMemoize1(this.unmarshal.bind(this));
   }
 
   getMarshal() {
-    return (this.#marshal ??= z
+    return z
       .object(mapValues(this._def.shape, (v) => v.getMarshal()))
       .transform((x) =>
         mapKeys(x, (_v, k) => this.#keyToAlias[k]),
@@ -232,11 +262,11 @@ export class RizzleObject<T extends RizzleRawObject> extends RizzleType<
       RizzleObjectMarshaled<T>,
       z.ZodAnyDef,
       RizzleObjectInput<T>
-    >);
+    >;
   }
 
   getUnmarshal() {
-    return (this.#unmarshal ??= z
+    return z
       .object(
         mapValues(
           mapKeys(this._def.shape, (_v, k) => this.#keyToAlias[k]),
@@ -249,13 +279,19 @@ export class RizzleObject<T extends RizzleRawObject> extends RizzleType<
       RizzleObjectOutput<T>,
       z.ZodAnyDef,
       RizzleObjectMarshaled<T>
-    >);
+    >;
+  }
+
+  marshal(input: RizzleObjectInput<T>): RizzleObjectMarshaled<T> {
+    return this.getMarshal().parse(input);
+  }
+
+  unmarshal(input: RizzleObjectMarshaled<T>): RizzleObjectOutput<T> {
+    return this.getUnmarshal().parse(input);
   }
 
   _getIndexes() {
-    return (this.#indexes ??= Object.entries(
-      this._def.shape,
-    ).reduce<IndexDefinitions>(
+    return Object.entries(this._def.shape).reduce<IndexDefinitions>(
       (acc, [key, codec]) => ({
         ...acc,
         ...mapValues(codec._getIndexes(), (v) => ({
@@ -264,7 +300,7 @@ export class RizzleObject<T extends RizzleRawObject> extends RizzleType<
         })),
       }),
       {},
-    ));
+    );
   }
 
   static create = <T extends RizzleRawObject>(shape: T): RizzleObject<T> => {
@@ -287,7 +323,14 @@ export class RizzleCustom<I, M, O = I> extends RizzleType<
   M,
   O
 > {
-  static #indexes = {};
+  static #defaultIndexes = {};
+
+  constructor(def: RizzleCustomDef<I, M, O>) {
+    super(def);
+
+    this.marshal = weakMemoize1(this.marshal.bind(this));
+    this.unmarshal = weakMemoize1(this.unmarshal.bind(this));
+  }
 
   getMarshal() {
     return this._def.marshal;
@@ -298,7 +341,7 @@ export class RizzleCustom<I, M, O = I> extends RizzleType<
   }
 
   _getIndexes() {
-    return RizzleCustom.#indexes;
+    return RizzleCustom.#defaultIndexes;
   }
 
   _getAlias(): string | undefined {
@@ -368,6 +411,18 @@ export class RizzleEntity<
     IndexDefinition
   >;
 
+  constructor(def: RizzleEntityDef<KeyPath, S>) {
+    super(def);
+
+    this.marshalKey = weakMemoize1(this.marshalKey.bind(this));
+    // There's `unmarshalKey` works on strings so weakMemoize1 doens't help.
+    // Perhaps consider an LRU cache or removing unmarshaling of keys entirely.
+    //
+    // this.unmarshalKey = weakMemoize1(this.unmarshalKey.bind(this));
+    this.marshalValue = weakMemoize1(this.marshalValue.bind(this));
+    this.unmarshalValue = weakMemoize1(this.unmarshalValue.bind(this));
+  }
+
   async has(
     tx: ReadTransaction,
     key: EntityKeyType<S, KeyPath>[`_input`],
@@ -383,7 +438,9 @@ export class RizzleEntity<
     if (valueData === undefined) {
       return valueData;
     }
-    return this._def.valueType.getUnmarshal().parse(valueData);
+    return this._def.valueType.unmarshal(
+      valueData as typeof this._def.valueType._marshaled,
+    );
   }
 
   async set(
@@ -421,21 +478,21 @@ export class RizzleEntity<
   }
 
   unmarshalKey(key: string) {
-    return this._def.keyType
-      .getUnmarshal()
-      .parse(this._def.uninterpolateKey(key));
+    return this._def.keyType.unmarshal(
+      this._def.uninterpolateKey(key) as typeof this._def.keyType._marshaled,
+    );
   }
 
   marshalValue(
     options: EntityValueType<S, KeyPath>[`_input`],
   ): EntityValueType<S, KeyPath>[`_marshaled`] {
-    return this._def.valueType.getMarshal().parse(options);
+    return this._def.valueType.marshal(options);
   }
 
   unmarshalValue(
     options: EntityValueType<S, KeyPath>[`_marshaled`],
   ): EntityValueType<S, KeyPath>[`_output`] {
-    return this._def.valueType.getUnmarshal().parse(options);
+    return this._def.valueType.unmarshal(options);
   }
 
   static create = <
@@ -453,7 +510,7 @@ export class RizzleEntity<
     const interpolateKey = (
       key: EntityKeyType<S, KeyPath>[`_input`],
     ): string => {
-      return Object.entries(keyType.getMarshal().parse(key)).reduce<string>(
+      return Object.entries(keyType.marshal(key)).reduce<string>(
         (acc, [k, v]): string => acc.replace(`[${k}]`, v as string),
         keyPath,
       );
@@ -471,7 +528,7 @@ export class RizzleEntity<
         const varName = keyPathVars[i];
         invariant(varName != null);
         if (varName in partialKey) {
-          result += shape[varName].getMarshal().parse(partialKey[varName]);
+          result += shape[varName].marshal(partialKey[varName]);
           const nextFiller = filler[i + 1];
           invariant(nextFiller != null);
           result += nextFiller;
@@ -515,7 +572,7 @@ export class RizzleMutator<P extends RizzleRawObject> extends RizzleRoot<
   }
 
   marshalArgs(options: RizzleObjectInput<P>): RizzleObjectMarshaled<P> {
-    return this._def.args.getMarshal().parse(options);
+    return this._def.args.marshal(options);
   }
 
   static create = <P extends RizzleRawObject>(
@@ -867,7 +924,7 @@ const replicache = <
               (options: typeof v._def.args._input) => {
                 const mutator = replicache.mutate[v._def.alias ?? k];
                 invariant(mutator != null, `mutator ${k} not found`);
-                return mutator(v._def.args.getMarshal().parse(options));
+                return mutator(v._def.args.marshal(options));
               },
             ],
           ]
@@ -895,7 +952,7 @@ const replicache = <
                   ),
                 ) as RizzleReplicacheMutatorTx<S>;
 
-                return mutator(db, v._def.args.getUnmarshal().parse(options));
+                return mutator(db, v._def.args.unmarshal(options));
               },
             ],
           ]
@@ -1102,7 +1159,9 @@ export const makeDrizzleMutationHandler = <S extends RizzleRawSchema, Tx>(
                 return mutator(
                   tx,
                   userId,
-                  v._def.args.getUnmarshal().parse(mutation.args),
+                  v._def.args.unmarshal(
+                    mutation.args as typeof v._def.args._marshaled,
+                  ),
                 );
               },
             ],

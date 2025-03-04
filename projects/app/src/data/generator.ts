@@ -57,11 +57,6 @@ export async function generateQuestionForSkillOrThrow(
 ): Promise<Question> {
   switch (skill.type) {
     case SkillType.HanziWordToEnglish: {
-      const gloss = (await lookupHanziWord(skill.hanziWord))?.gloss[0];
-      invariant(
-        gloss != null,
-        `missing gloss for hanzi word ${skill.hanziWord}`,
-      );
       const rowCount = 5;
       const answer: OneCorrectPairQuestionAnswer = {
         a: { type: `hanzi`, hanziWord: skill.hanziWord, skill },
@@ -115,10 +110,16 @@ type OtherHanziResult = [HanziWord, DeepReadonly<HanziWordMeaning>][];
 async function getWrongHanziWordAnswers(
   hanziWord: HanziWord,
   count: number,
-): Promise<OtherHanziResult> /* hanzi */ {
+): Promise<OtherHanziResult> {
+  const hanziWordMeaning = await lookupHanziWord(hanziWord);
+  invariant(
+    hanziWordMeaning != null,
+    `missing meaning for hanzi word ${hanziWord}`,
+  );
+
   const result: OtherHanziResult = [];
 
-  const [hsk1HanziWords, hsk2Words, hsk3Words] = await Promise.all([
+  const [hsk1HanziWords, hsk2HanziWords, hsk3HanziWords] = await Promise.all([
     allHsk1HanziWords(),
     allHsk2HanziWords(),
     allHsk3HanziWords(),
@@ -127,23 +128,32 @@ async function getWrongHanziWordAnswers(
   // Use words from the same HSK word list if possible, so that they're more
   // likely to be familiar by being in a similar skill level. Otherwise fallback
   // all HSK words.
-  const allHanziWords = [hsk1HanziWords, hsk2Words, hsk3Words].find((words) =>
-    words.includes(hanziWord),
-  ) ?? [...hsk1HanziWords, ...hsk2Words, ...hsk3Words];
+  const allHanziWords = [hsk1HanziWords, hsk2HanziWords, hsk3HanziWords].find(
+    (words) => words.includes(hanziWord),
+  ) ?? [...hsk1HanziWords, ...hsk2HanziWords, ...hsk3HanziWords];
 
-  const seenHanziWords = new Set(hanziWord);
+  // Keep track of which glosses have been used so that we don't have multiple
+  // choices in the quiz that have the same meaning. Otherwise there could be a
+  // pair of "wrong choices" that have overlapping meanings and if picked would
+  // be marked incorrect.
+  const usedGlosses = new Set(hanziWordMeaning.gloss);
+
   for (const x of shuffle(allHanziWords)) {
-    if (seenHanziWords.has(x)) {
-      continue;
-    }
-
     const meaning = await lookupHanziWord(x);
     if (meaning == null) {
       continue;
     }
 
-    seenHanziWords.add(x);
+    // Don't use any words that have meanings that are too similar and could be
+    // confusing.
+    if (meaning.gloss.some((x) => usedGlosses.has(x))) {
+      continue;
+    }
+
     result.push([x, meaning]);
+    for (const gloss of meaning.gloss) {
+      usedGlosses.add(gloss);
+    }
 
     if (result.length === count) {
       break;
