@@ -174,3 +174,41 @@ export function inverseSortComparator<T>(
     return 0;
   };
 }
+
+export function addRefCount<K extends object>(map: WeakMap<K, number>, key: K) {
+  const newCount = (map.get(key) ?? 0) + 1;
+  map.set(key, newCount);
+  return newCount;
+}
+
+export function weakMemoize1<T, R>(fn: (input: T) => R): typeof fn {
+  const cache = new WeakMap<object, R>();
+
+  return function <This>(this: This, input: T) {
+    if (typeof input !== `object` || input == null) {
+      return fn.call(this, input);
+    }
+
+    if (cache.has(input)) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      return cache.get(input)!;
+    }
+    const ret = fn.call(this, input);
+    cache.set(input, ret);
+    return ret;
+  };
+}
+
+export function memoize0<R>(fn: () => R): () => R {
+  let cache: R | undefined;
+  let cacheSet = false;
+  return function <This>(this: This) {
+    if (cacheSet) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      return cache!;
+    }
+    cache = fn.call(this);
+    cacheSet = true;
+    return cache;
+  };
+}
