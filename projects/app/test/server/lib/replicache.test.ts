@@ -67,6 +67,7 @@ void test(`push()`, async (t) => {
                 id: `1`,
                 userId: user1.id,
                 cvrVersion: 1,
+                schemaVersion: schema.version,
               },
             ])
             .returning();
@@ -181,7 +182,7 @@ void test(`push()`, async (t) => {
         // Create a client group
         const [clientGroup] = await tx
           .insert(s.replicacheClientGroup)
-          .values([{ userId: user.id }])
+          .values([{ userId: user.id, schemaVersion: schema.version }])
           .returning();
         invariant(clientGroup != null);
 
@@ -226,7 +227,7 @@ void test(`push()`, async (t) => {
         // Create a client group
         const [clientGroup] = await tx
           .insert(s.replicacheClientGroup)
-          .values([{ userId: user.id }])
+          .values([{ userId: user.id, schemaVersion: schema.version }])
           .returning();
         invariant(clientGroup != null);
 
@@ -264,7 +265,7 @@ void test(`push()`, async (t) => {
           // Create a client group
           const [clientGroup] = await tx
             .insert(s.replicacheClientGroup)
-            .values([{ userId: user.id }])
+            .values([{ userId: user.id, schemaVersion: schema.version }])
             .returning();
           invariant(clientGroup != null);
 
@@ -387,7 +388,7 @@ void test(`pull()`, async (t) => {
           // Create a client group
           const [clientGroup] = await tx
             .insert(s.replicacheClientGroup)
-            .values([{ userId: user.id }])
+            .values([{ userId: user.id, schemaVersion: schema.version }])
             .returning();
           invariant(clientGroup != null);
 

@@ -610,7 +610,7 @@ export async function putClient(db: Drizzle, client: ClientRecord) {
 export interface ClientGroupRecord {
   id: string;
   userId: string;
-  schemaVersion: string | null;
+  schemaVersion: string;
   cvrVersion: number;
 }
 
