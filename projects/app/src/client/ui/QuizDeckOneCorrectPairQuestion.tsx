@@ -649,6 +649,7 @@ const ChoiceButton = ({
       textClassName={choiceButtonText({
         length:
           text.length <= 20 ? `short` : text.length <= 40 ? `medium` : `long`,
+        className: choice.type === `hanzi` ? `font-normal` : undefined,
       })}
     >
       {text}
