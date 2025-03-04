@@ -1023,7 +1023,7 @@ const replicache = <
   };
 };
 
-export const mutationSchema = z
+export const replicacheMutationSchema = z
   .object({
     id: z.number(),
     name: z.string(),
@@ -1033,7 +1033,7 @@ export const mutationSchema = z
   })
   .strict();
 
-export type Mutation = z.infer<typeof mutationSchema>;
+export type ReplicacheMutation = z.infer<typeof replicacheMutationSchema>;
 
 export const cookieSchema = z
   .object({
@@ -1073,7 +1073,7 @@ export const pushRequestSchema = z
     clientGroupId: z.string(),
     pushVersion: z.number(),
     schemaVersion: z.string(),
-    mutations: z.array(mutationSchema),
+    mutations: z.array(replicacheMutationSchema),
   })
   .strict();
 
@@ -1138,7 +1138,7 @@ export type PullResponse = z.infer<typeof pullResponseSchema>;
 export type MutateHandler<Tx> = (
   tx: Tx,
   userId: string,
-  mutation: Mutation,
+  mutation: ReplicacheMutation,
 ) => Promise<void>;
 
 export const makeDrizzleMutationHandler = <S extends RizzleRawSchema, Tx>(
@@ -1151,7 +1151,7 @@ export const makeDrizzleMutationHandler = <S extends RizzleRawSchema, Tx>(
         ? [
             [
               v._def.alias ?? k,
-              (tx: Tx, userId: string, mutation: Mutation) => {
+              (tx: Tx, userId: string, mutation: ReplicacheMutation) => {
                 const mutator =
                   k in mutators ? mutators[k as keyof typeof mutators] : null;
                 invariant(mutator != null, `mutator ${k} not found`);
@@ -1170,7 +1170,11 @@ export const makeDrizzleMutationHandler = <S extends RizzleRawSchema, Tx>(
     ),
   );
 
-  return async (tx: Tx, userId: string, mutation: Mutation): Promise<void> => {
+  return async (
+    tx: Tx,
+    userId: string,
+    mutation: ReplicacheMutation,
+  ): Promise<void> => {
     const mutator = handlersWithUnmarshaling[mutation.name];
     invariant(mutator != null);
     await mutator(tx, userId, mutation);

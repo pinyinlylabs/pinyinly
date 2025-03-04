@@ -1,0 +1,1 @@
+ALTER TABLE "haohaohow"."remoteSync" ADD COLUMN "pulledClientIds" json DEFAULT '[]'::json NOT NULL;

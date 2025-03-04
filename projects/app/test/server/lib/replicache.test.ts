@@ -1,7 +1,12 @@
-import { supportedSchemas } from "#data/rizzleSchema.ts";
+import { supportedSchemas, v5 } from "#data/rizzleSchema.ts";
 import { englishToHanziWord } from "#data/skills.ts";
 import { Drizzle } from "#server/lib/db.ts";
-import { computeCvrEntities, pull, push } from "#server/lib/replicache.ts";
+import {
+  computeCvrEntities,
+  fetchMutations,
+  pull,
+  push,
+} from "#server/lib/replicache.ts";
 import * as s from "#server/schema.ts";
 import { Rating } from "#util/fsrs.ts";
 import { invariant } from "@haohaohow/lib/invariant";
@@ -911,4 +916,57 @@ void test(`computeCvr()`, async (t) => {
       );
     });
   }
+});
+
+void test(`fetchPushes()`, async (t) => {
+  const txTest = withTxTest(t, { isolationLevel: `repeatable read` });
+
+  await txTest(`works for non-existant user and client group`, async (tx) => {
+    const clientGroupId = nanoid();
+    const clientId = nanoid();
+
+    const user = await createUser(tx);
+
+    // Push a mutation from client 1
+    await push(tx, user.id, {
+      profileId: ``,
+      clientGroupId,
+      pushVersion: 1,
+      schemaVersion: v5.version,
+      mutations: [
+        {
+          id: 1,
+          name: `noop`,
+          args: { arg1: `value1` },
+          timestamp: 1,
+          clientId,
+        },
+      ],
+    });
+
+    assert.deepEqual(
+      await fetchMutations(tx, user.id, {
+        schemaVersions: [v5.version],
+        lastMutationIds: {},
+      }),
+      {
+        mutations: [
+          {
+            clientGroupId,
+            mutations: [
+              {
+                args: { arg1: `value1` },
+                clientId,
+                id: 1,
+                name: `noop`,
+                timestamp: 1,
+              },
+            ],
+            schemaVersion: v5.version,
+          },
+        ],
+        hasMore: false,
+      },
+    );
+  });
 });

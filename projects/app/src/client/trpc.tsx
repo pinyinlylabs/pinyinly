@@ -1,4 +1,5 @@
 import type { AppRouter } from "@/server/routers/_app";
+import { httpSessionHeader } from "@/util/http";
 import { QueryClient } from "@tanstack/react-query";
 import { HTTPHeaders, httpLink, retryLink } from "@trpc/client";
 import { createTRPCReact } from "@trpc/react-query";
@@ -41,7 +42,7 @@ export const TrpcProvider = ({
 
             const sessionId = await getSessionId();
             if (sessionId != null) {
-              result[`x-hhh-session`] = sessionId;
+              result[httpSessionHeader] = sessionId;
             }
 
             return result;

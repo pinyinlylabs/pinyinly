@@ -28,26 +28,26 @@ export const HanziText = ({
 };
 
 const pinyinText = tv({
-  base: `text-base leading-none text-primary-9 w-full text-center`,
+  base: `text-base/none text-primary-9 w-full text-center`,
   variants: {
     accented: {
       true: `text-accent-10 opacity-80`,
     },
     small: {
-      true: `text-xs leading-none`,
+      true: `text-xs/none`,
     },
   },
 });
 
 const hanziText = tv({
-  base: `text-2xl leading-none text-text`,
+  base: `text-2xl/none text-text`,
 
   variants: {
     accented: {
       true: `text-accent-10`,
     },
     small: {
-      true: `text-xl leading-none`,
+      true: `text-xl/none`,
     },
   },
 });
