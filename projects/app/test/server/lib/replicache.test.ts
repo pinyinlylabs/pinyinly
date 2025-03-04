@@ -966,7 +966,6 @@ void test(`fetchPushes()`, async (t) => {
             schemaVersion: v5.version,
           },
         ],
-        hasMore: false,
       },
     );
   });

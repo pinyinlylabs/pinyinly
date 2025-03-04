@@ -276,6 +276,10 @@ const syncRemotePull = inngest.createFunction(
           },
         );
 
+        if (fetchedMutations.mutations.length === 0) {
+          break;
+        }
+
         await step.run(
           `applyMutations-${remoteSync.id}-${remoteSync.userId}`,
           async () => {
@@ -312,10 +316,6 @@ const syncRemotePull = inngest.createFunction(
             }
           },
         );
-
-        if (!fetchedMutations.hasMore) {
-          break;
-        }
       }
     }
   },
