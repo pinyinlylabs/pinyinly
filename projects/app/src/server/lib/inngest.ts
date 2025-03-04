@@ -276,10 +276,6 @@ const syncRemotePull = inngest.createFunction(
           },
         );
 
-        // if (Math.random() > 0) {
-        //   return;
-        // }
-
         await step.run(
           `applyMutations-${remoteSync.id}-${remoteSync.userId}`,
           async () => {
