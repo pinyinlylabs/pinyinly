@@ -162,6 +162,12 @@ const syncRemotePush = inngest.createFunction(
           continue;
         }
 
+        // Don't push any clients that originate from the remote server (these
+        // would exist locally from being pull syncing).
+        if (remoteSync.pulledClientIds.includes(clientId)) {
+          continue;
+        }
+
         let lastSyncedMutationId =
           // For new clients that have never been synced, there won't be a
           // lastSyncedMutationIds entry, so we default to 0.
