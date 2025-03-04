@@ -55,11 +55,6 @@ export const replicacheRouter = router({
       z
         .object({
           mutations: z.array(fetchedMutationSchema),
-          /**
-           * Whether there are more pushes to fetch. If `false`, the client should
-           * wait a bit before fetching again.
-           */
-          hasMore: z.boolean(),
         })
         .strict(),
     )

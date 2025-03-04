@@ -846,8 +846,8 @@ export async function fetchMutations(
     lastMutationIds: Record<string, number>;
     limit?: number;
   },
-): Promise<{ mutations: FetchedMutation[]; hasMore: boolean }> {
-  let remainingMutations = opts.limit ?? 100;
+): Promise<{ mutations: FetchedMutation[] }> {
+  let remainingLimit = opts.limit ?? 100;
 
   const clientState = await getReplicacheClientStateForUser(tx, userId);
 
@@ -879,31 +879,29 @@ export async function fetchMutations(
     };
   });
 
-  const pushes: FetchedMutation[] = [];
-  let hasMore = false;
+  const result: FetchedMutation[] = [];
+
   for (const client of clientsWithNewData) {
     const mutations = await getReplicacheClientMutationsSince(tx, {
       clientId: client.clientId,
       sinceMutationId: client.sinceMutationId,
-      limit: remainingMutations,
+      limit: remainingLimit,
     });
 
-    pushes.push({
+    result.push({
       clientGroupId: client.clientGroupId,
       schemaVersion: client.schemaVersion,
       mutations,
     });
 
-    remainingMutations -= mutations.length;
-    hasMore ||=
-      client.sinceMutationId + mutations.length < client.lastMutationId;
+    remainingLimit -= mutations.length;
 
-    if (remainingMutations <= 0) {
+    if (remainingLimit <= 0) {
       break;
     }
   }
 
-  return { mutations: pushes, hasMore };
+  return { mutations: result };
 }
 
 /**
