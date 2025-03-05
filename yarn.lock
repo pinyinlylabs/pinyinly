@@ -2630,9 +2630,9 @@ __metadata:
     "@sentry/types": "npm:~8.40.0"
     "@stylistic/eslint-plugin": "npm:^4.0.0"
     "@tanstack/react-query": "npm:^5.66.0"
-    "@trpc/client": "npm:11.0.0-rc.808"
-    "@trpc/react-query": "npm:11.0.0-rc.808"
-    "@trpc/server": "npm:11.0.0-rc.808"
+    "@trpc/client": "npm:11.0.0-rc.814"
+    "@trpc/react-query": "npm:11.0.0-rc.814"
+    "@trpc/server": "npm:11.0.0-rc.814"
     "@types/apple-signin-api": "npm:^1.5.3"
     "@types/babel__core": "npm:7.20.x"
     "@types/color": "npm:^3"
@@ -5402,36 +5402,36 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@trpc/client@npm:11.0.0-rc.808":
-  version: 11.0.0-rc.808
-  resolution: "@trpc/client@npm:11.0.0-rc.808"
+"@trpc/client@npm:11.0.0-rc.814":
+  version: 11.0.0-rc.814
+  resolution: "@trpc/client@npm:11.0.0-rc.814"
   peerDependencies:
-    "@trpc/server": 11.0.0-rc.808+4df1eb8fa
+    "@trpc/server": 11.0.0-rc.814+f490f467f
     typescript: ">=5.7.2"
-  checksum: 10c0/5519079fb39483b106a66092616ab3e2f3ef5a7d1b9478e3a3469a69074b733ad2d742a1f3465c7c1ac11c03a7709538a0e2590bc8a67648b0028a38cda8d247
+  checksum: 10c0/a90e604968617abcd75fec30105966e333b9df515858565b7e756e40e9ecf7d3a6445d245a18fb91290b1eb0a6a5a684d7310668ba0cdb00313f20e8beca9d20
   languageName: node
   linkType: hard
 
-"@trpc/react-query@npm:11.0.0-rc.808":
-  version: 11.0.0-rc.808
-  resolution: "@trpc/react-query@npm:11.0.0-rc.808"
+"@trpc/react-query@npm:11.0.0-rc.814":
+  version: 11.0.0-rc.814
+  resolution: "@trpc/react-query@npm:11.0.0-rc.814"
   peerDependencies:
     "@tanstack/react-query": ^5.62.8
-    "@trpc/client": 11.0.0-rc.808+4df1eb8fa
-    "@trpc/server": 11.0.0-rc.808+4df1eb8fa
+    "@trpc/client": 11.0.0-rc.814+f490f467f
+    "@trpc/server": 11.0.0-rc.814+f490f467f
     react: ">=18.2.0"
     react-dom: ">=18.2.0"
     typescript: ">=5.7.2"
-  checksum: 10c0/5c70e497f772a1d9fa47965147f853c7f2c8fcc828737a9346eea7cc9c3c04508df3e7102b7e8c18f863b9b342d2c2e61c7b932b023fd55a589c2e1fc8d3f487
+  checksum: 10c0/78bb5f6ce113d83536a74c03f8ed973779e0cd9942d8975aed7db3642835a418e2d443b38bf11a68e21b052e703441f43c170177d499a363b0b552c7f480183a
   languageName: node
   linkType: hard
 
-"@trpc/server@npm:11.0.0-rc.808":
-  version: 11.0.0-rc.808
-  resolution: "@trpc/server@npm:11.0.0-rc.808"
+"@trpc/server@npm:11.0.0-rc.814":
+  version: 11.0.0-rc.814
+  resolution: "@trpc/server@npm:11.0.0-rc.814"
   peerDependencies:
     typescript: ">=5.7.2"
-  checksum: 10c0/69a7cdfab232ef606a1d2dcfaee5f0b2816607a9c7c2513f108e7a1cfd278cc4ac774ca88a256f450331492e8f13aafc167ec85cf747846a81940e4e6aed66dc
+  checksum: 10c0/568212dbdc29b3d9848fdb11c2c97d6d92a80f88e6392fd63be830eb657d4cfbb3263dd0e98f7cae5b009fed4e604f2362859e22fa51fc82dac817fdb65f4166
   languageName: node
   linkType: hard
 
