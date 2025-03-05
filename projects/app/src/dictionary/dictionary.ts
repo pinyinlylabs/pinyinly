@@ -280,6 +280,7 @@ export const partOfSpeechSchema = z.enum([
   `measureWord`,
   `particle`,
   `radical`,
+  `unknown`,
 ]);
 
 export const hanziWordMeaningSchema = z.object({
@@ -289,7 +290,11 @@ export const hanziWordMeaningSchema = z.object({
       description: `all valid pinyin variations for this meaning (might be omitted for radicals without pronunciation)`,
     })
     .optional(),
-  example: z.string().optional(),
+  example: z
+    .string({
+      description: `a Chinese sentence that includes this hanzi`,
+    })
+    .optional(),
   partOfSpeech: partOfSpeechSchema,
   visualVariants: z
     .array(
@@ -392,13 +397,18 @@ export const lookupHanziWord = async (
 export const lookupRadicalsByStrokes = async (strokes: number) =>
   (await loadRadicalStrokes()).get(strokes) ?? null;
 
-export const allHanziCharacters = async () =>
+export const allHanziWordsHanzi = async () =>
   new Set(
     (await allRadicalHanziWords())
       .concat(await allHsk1HanziWords())
       .concat(await allHsk2HanziWords())
       .concat(await allHsk3HanziWords())
-      .map((x) => hanziFromHanziWord(x))
+      .map((x) => hanziFromHanziWord(x)),
+  );
+
+export const allHanziCharacters = async () =>
+  new Set(
+    [...(await allHanziWordsHanzi())]
       // Split words into characters because decomposition is per-character.
       .flatMap((x) => Array.from(x)),
   );
@@ -993,4 +1003,38 @@ export function meaningKeyFromHanziWord(hanziWord: HanziWord): string {
 
 export function buildHanziWord(hanzi: string, meaningKey: string): HanziWord {
   return `${hanzi}:${meaningKey}`;
+}
+
+export async function hanziToLearnForHanzi(hanzi: string[]): Promise<string[]> {
+  const decompositions = await loadHanziDecomposition();
+
+  // For multi-character hanzi, learn each character, but for for
+  // single-character hanzi, decompose it into radicals and learn those.
+  const hanziToLearn = [];
+  if (hanzi.length > 1) {
+    for (const char of hanzi) {
+      hanziToLearn.push(char);
+    }
+  } else {
+    for (const char of hanzi) {
+      const ids = decompositions.get(char);
+      if (ids != null) {
+        const idsNode = parseIds(ids);
+        for (const leaf of walkIdsNode(idsNode)) {
+          if (
+            leaf.type === `LeafCharacter` &&
+            leaf.character !== char // todo turn into invariant?
+          ) {
+            hanziToLearn.push(leaf.character);
+          }
+        }
+      }
+    }
+  }
+
+  return hanziToLearn;
+}
+
+export async function hanziToLearnForHanziWord(hanziWord: HanziWord) {
+  return await hanziToLearnForHanzi(Array.from(hanziFromHanziWord(hanziWord)));
 }

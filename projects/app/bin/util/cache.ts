@@ -3,7 +3,7 @@ import { DatabaseSync } from "node:sqlite";
 
 export function makeDbCache<K, V>(
   scriptFilename: string,
-  tableName: string,
+  tableName = `cache`,
   parentDebug?: Debugger,
 ) {
   const debug = parentDebug?.extend(`makeDbCache`);

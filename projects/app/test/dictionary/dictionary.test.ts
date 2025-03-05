@@ -1,5 +1,7 @@
+import { HanziWord } from "#data/model.ts";
 import {
   allHanziCharacters,
+  allHanziWordsHanzi,
   allHsk1HanziWords,
   allHsk2HanziWords,
   allHsk3HanziWords,
@@ -8,6 +10,7 @@ import {
   convertPinyinWithToneNumberToToneMark,
   flattenIds,
   hanziFromHanziWord,
+  hanziToLearnForHanzi,
   hanziWordMeaningSchema,
   idsNodeToString,
   IdsOperator,
@@ -23,6 +26,7 @@ import {
   loadMnemonicThemes,
   loadPinyinWords,
   loadStandardPinyinChart,
+  lookupHanzi,
   lookupHanziWord,
   meaningKeyFromHanziWord,
   parseIds,
@@ -33,6 +37,7 @@ import {
   walkIdsNode,
 } from "#dictionary/dictionary.ts";
 import {
+  mapSetAdd,
   mergeSortComparators,
   sortComparatorNumber,
   sortComparatorString,
@@ -120,7 +125,7 @@ void test(`hanzi word meaning-key lint`, async () => {
 
   const isViolating = (x: string) =>
     // no "measure word" or "radical"
-    /measure ?word|radical/i.exec(x) != null ||
+    /measure ?word| radical/i.exec(x) != null ||
     // only allow english alphabet
     !/^[a-zA-Z]+$/.test(x);
 
@@ -237,6 +242,10 @@ void test(`hanzi words are unique on (meaning key, pinyin)`, async () => {
   const byMeaningKeyAndPinyin = new Map<string, Set<string>>();
   for (const [hanziWord, { pinyin }] of dict) {
     const meaningKey = meaningKeyFromHanziWord(hanziWord);
+    // special case allow "radical" to have overlaps
+    if (meaningKey === `radical`) {
+      continue;
+    }
     const key = `${meaningKey}:${pinyin}`;
     const set = byMeaningKeyAndPinyin.get(key) ?? new Set();
     set.add(hanziWord);
@@ -487,7 +496,7 @@ void test(`convertPinyinWithToneNumberToToneMark`, () => {
   }
 });
 
-void test(parsePinyinTone.name, async () => {
+void test(`parsePinyinTone`, async () => {
   await test(`static test cases`, () => {
     for (const [input, expected] of [
       [`niú`, [`niu`, 2]],
@@ -952,6 +961,38 @@ void test(`idsNodeToString roundtrips`, () => {
   }
 });
 
+void test(`dictionary contains entries for decomposition`, async () => {
+  const unknownHanzi = new Map<
+    /* hanzi */ string,
+    /* sources */ Set<HanziWord>
+  >();
+
+  for (const hanzi of await allHanziWordsHanzi()) {
+    for (const character of Array.from(hanzi)) {
+      const lookup = await lookupHanzi(character);
+      if (lookup.length === 0) {
+        mapSetAdd(unknownHanzi, character, hanzi);
+      }
+
+      for (const component of await hanziToLearnForHanzi([character])) {
+        const lookup = await lookupHanzi(component);
+        if (lookup.length === 0) {
+          mapSetAdd(unknownHanzi, component, character);
+        }
+      }
+    }
+  }
+
+  // There's not much value in learning components that are only used once, so
+  // we only test that there are dictionary entries for components that are used
+  // multiple times.
+  const unknownWithMultipleSources = [...unknownHanzi].filter(
+    ([, sources]) => sources.size >= 3,
+  );
+
+  assert.deepEqual(unknownWithMultipleSources, []);
+});
+
 async function debugNonCjkUnifiedIdeographs(chars: string[]): Promise<string> {
   const swaps = [];
 
@@ -975,7 +1016,9 @@ function isCjkUnifiedIdeograph(char: string): boolean {
     // CJK Unified Ideographs U+4E00 to U+9FFF
     ((codePoint >= 0x4e00 && codePoint <= 0x9fff) ||
       // CJK Unified Ideographs Extension B U+20000 to U+2A6DF
-      (codePoint >= 0x20000 && codePoint <= 0x2a6df))
+      (codePoint >= 0x20000 && codePoint <= 0x2a6df) ||
+      // CJK Unified Ideographs Extension F U+2CEB0 to U+2EBEF
+      (codePoint >= 0x2ceb0 && codePoint <= 0x2ebef))
   );
 }
 

@@ -55,6 +55,12 @@ import { DeepReadonly } from "ts-essentials";
 import yargs from "yargs";
 import { z } from "zod";
 import { makeDbCache } from "./util/cache.js";
+import {
+  dongChineseData,
+  getDongChineseGloss,
+  getDongChineseMeaningKey,
+  getDongChinesePinyin,
+} from "./util/dongChinese.js";
 import { readFileWithSchema, writeUtf8FileIfChanged } from "./util/fs.js";
 import { makeSimpleAiClient } from "./util/openai.js";
 
@@ -906,7 +912,8 @@ const Select2 = <T,>({
           })}
       </Box>
       <Text dimColor>
-        Showing {scrollIndexStart + 1}-{scrollIndexEnd}
+        Showing {Math.min(scrollIndexStart + 1, filteredItems.length)}-
+        {scrollIndexEnd}
         {` `}
         of{` `}
         {filteredItems.length}
@@ -1043,6 +1050,7 @@ const DictionaryEditor = ({ onCancel }: { onCancel: () => void }) => {
     return (
       <Box flexDirection="column" gap={1}>
         <DictionaryHanziWordEntry hanziWord={location.hanziWord} />
+        <DongChineseHanziEntry hanzi={hanziFromHanziWord(location.hanziWord)} />
         <Shortcuts>
           <Button
             label="Edit…"
@@ -1179,6 +1187,102 @@ const DictionaryEditor = ({ onCancel }: { onCancel: () => void }) => {
   }
 };
 
+const DongChineseHanziEntry = ({ hanzi }: { hanzi: string }) => {
+  const dongChinese = useQuery({
+    queryKey: [`dongChineseData`],
+    queryFn: dongChineseData,
+  });
+
+  const lookup = useMemo(
+    () => dongChinese.data?.lookupChar(hanzi),
+    [dongChinese, hanzi],
+  );
+
+  if (dongChinese.isLoading) {
+    return (
+      <Box gap={1}>
+        <Text dimColor>
+          <Spinner /> Loading Dong Chinese data…
+        </Text>
+      </Box>
+    );
+  }
+
+  if (lookup == null) {
+    return (
+      <Box gap={1}>
+        <Text color="red">No Dong Chinese data for {hanzi}</Text>
+      </Box>
+    );
+  }
+
+  return (
+    <Box flexDirection="column" gap={0}>
+      <Text>
+        <Text italic>Dong Chinese</Text>
+        {` `}
+        {lookup.isVerified === true ? (
+          <Text color="green" dimColor>
+            (verified)
+          </Text>
+        ) : (
+          <Text dimColor>(not verified)</Text>
+        )}
+      </Text>
+      <Box
+        paddingLeft={1}
+        flexDirection="column"
+        borderLeft
+        borderTop={false}
+        borderRight={false}
+        borderBottom={false}
+        borderStyle="single"
+        borderLeftDimColor
+      >
+        {lookup.gloss == null ? null : (
+          <Text>
+            <Text dimColor>gloss:</Text> {lookup.gloss}
+          </Text>
+        )}
+        {lookup.pinyinFrequencies == null ? null : (
+          <Text>
+            <Text dimColor>pinyin:</Text>
+            {` `}
+            <SemiColonList items={getDongChinesePinyin(lookup) ?? empty} />
+          </Text>
+        )}
+        {lookup.hint == null ? null : (
+          <Text>
+            <Text dimColor>hint:</Text> {lookup.hint}
+          </Text>
+        )}
+        {lookup.variantOf == null ? null : (
+          <Text>
+            <Text dimColor>variant of:</Text> {lookup.variantOf}
+          </Text>
+        )}
+        {lookup.simpVariants == null ? null : (
+          <Text>
+            <Text dimColor>simpVariants:</Text>
+            {` `}
+            <SemiColonList items={lookup.simpVariants} />
+          </Text>
+        )}
+        {lookup.originalMeaning == null ? null : (
+          <Text>
+            <Text dimColor>original meaning:</Text> {lookup.originalMeaning}
+          </Text>
+        )}
+        {lookup.images == null ? null : (
+          <Text>
+            <Text dimColor>images:</Text> {lookup.images.length}
+          </Text>
+        )}
+      </Box>
+    </Box>
+  );
+};
+
 const WordListEditor = ({
   wordListName,
   onCancel,
@@ -1274,20 +1378,10 @@ const WordListHanziPicker = ({
   );
 };
 
-interface HanziWordBulkInputNew {
-  type: `new`;
-  query: GenerateHanziWordQuery;
-}
-
-interface HanziWordBulkInputExisting {
-  type: `existing`;
-  hanziWord: HanziWord;
-}
-
-type HanziWordBulkInput = HanziWordBulkInputNew | HanziWordBulkInputExisting;
-
 interface HanziWordCreateNewResult {
   type: `new`;
+  sources: (`dongChinese` | `openai`)[];
+  isVerified?: boolean;
   hanziWord: HanziWord;
   meaning: HanziWordMeaning;
 }
@@ -1303,79 +1397,103 @@ type HanziWordCreateResult =
 
 interface GenerateHanziWordQuery {
   hanzi: string;
-  description?: string;
+  description?: string | null;
   existingItems?: DeepReadonly<[HanziWord, HanziWordMeaning][]>;
 }
 
 async function generateHanziWordResults(
   query: GenerateHanziWordQuery,
 ): Promise<HanziWordCreateResult[]> {
-  const existingChoices = query.existingItems
-    ?.toSorted(sortComparatorString(([k]) => k))
-    .map(
-      ([hanziWord, meaning], i) =>
-        [parseInt(`782634${i}`, 10), hanziWord, meaning] as const,
-    );
+  async function queryOpenAi(query: unknown) {
+    const { suggestions } = await openai(
+      [`curriculum.md`, `word-representation.md`, `skill-types.md`],
+      `
+  I have a hanzi I want to add to a word list, can fill in the rest of the data for me?
 
-  const { suggestions: results } = await openai(
-    [`curriculum.md`, `word-representation.md`, `skill-types.md`],
-    `
-I have a hanzi I want to add to a word list:
-
-${JSON.stringify(query)}
-
-${
-  existingChoices == null
-    ? `There aren't any existing dictionary entries for this hanzi, so I'll need to create a new one.`
-    : `
-There are already some existing entries in the dictionary for this hanzi, but I need to decide if one of them is suitable, or if I need to create a new entry because it should have a different meaning.
-
-Here are the existing items:
-
-${existingChoices
-  .map(
-    ([id, hanzi, meaning]) => `
-- Hanzi: ${hanzi}
-  Gloss: ${meaning.gloss.join(`;`)}
-  Definition: ${meaning.definition}
-  referenceId: ${id}`,
-  )
-  .join(``)}
-`
-}
-`,
-    z.object({
-      suggestions: z.array(
-        z.discriminatedUnion(`type`, [
+  ${JSON.stringify(query)}
+  `,
+      z.object({
+        suggestions: z.array(
           z.object({
             type: z.literal(`new`),
+            hanzi: z.string(),
             meaning: hanziWordMeaningSchema,
             meaningKey: z.string(),
           }),
-          z.object({
-            type: z.literal(`existing`),
-            referenceId: z.number(),
-          }),
-        ]),
-      ),
-    }),
-  );
+        ),
+      }),
+    );
 
-  const res: HanziWordCreateResult[] = results.map((x) => {
-    if (x.type === `existing`) {
-      const existing = existingChoices?.find(([id]) => id === x.referenceId);
-      invariant(
-        existing != null,
-        `Missing existing choice ${JSON.stringify({ existingChoices, x })}`,
-      );
-      return { type: `existing`, hanziWord: existing[1] };
+    return suggestions;
+  }
+
+  const res: HanziWordCreateResult[] = [];
+
+  // Give existing dictionary options
+  if (query.existingItems != null) {
+    for (const [hanziWord] of query.existingItems) {
+      res.push({ type: `existing`, hanziWord });
     }
-    return {
+  }
+
+  for (const x of await queryOpenAi(query)) {
+    res.push({
       type: `new`,
+      sources: [`openai`],
       hanziWord: buildHanziWord(query.hanzi, x.meaningKey),
       meaning: x.meaning,
-    };
-  });
+    });
+  }
+
+  // Check dong chinese
+  {
+    const dongChinese = await dongChineseData();
+    const lookup = dongChinese.lookupChar(query.hanzi);
+
+    if (lookup != null) {
+      const meaningKey = getDongChineseMeaningKey(lookup);
+      const gloss = getDongChineseGloss(lookup);
+
+      if (meaningKey != null && gloss != null) {
+        // const gloss = cleanGloss(lookup.gloss);
+        const hanziWord = buildHanziWord(query.hanzi, meaningKey);
+
+        res.push({
+          type: `new`,
+          sources: [`dongChinese`],
+          isVerified: lookup.isVerified,
+          hanziWord,
+          meaning: {
+            gloss,
+            pinyin: getDongChinesePinyin(lookup),
+            definition: lookup.hint ?? `<no def>`,
+            partOfSpeech: `unknown`,
+          },
+        });
+
+        // Add a mixed version with OpenAI
+        for (const openAiResult of await queryOpenAi({
+          hanzi: query.hanzi,
+          gloss: lookup.gloss,
+          hint: lookup.hint,
+        })) {
+          res.splice(0, 0, {
+            type: `new`,
+            sources: [`dongChinese`, `openai`],
+            isVerified: lookup.isVerified,
+            hanziWord,
+            meaning: {
+              gloss,
+              pinyin: getDongChinesePinyin(lookup),
+              definition: openAiResult.meaning.definition,
+              partOfSpeech: openAiResult.meaning.partOfSpeech,
+              example: openAiResult.meaning.example,
+            },
+          });
+        }
+      }
+    }
+  }
 
   return res;
 }
@@ -1414,7 +1532,7 @@ const DictionaryPicker = ({
     | { type: `bulkCreateInput` }
     | {
         type: `bulkCreateTriage`;
-        queue: HanziWordBulkInput[];
+        queue: GenerateHanziWordQuery[];
         result: HanziWord[];
       }
     | {
@@ -1464,7 +1582,7 @@ const DictionaryPicker = ({
         label="One or more lines of <hanzi>[: <description>]"
         onSubmit={(lines) => {
           void (async () => {
-            const inputs: HanziWordBulkInput[] = [];
+            const queries: GenerateHanziWordQuery[] = [];
 
             linesLoop: for (const line of lines) {
               if (line.trim() === ``) {
@@ -1478,26 +1596,13 @@ const DictionaryPicker = ({
               const description =
                 rest == null || rest.trim() === `` ? null : rest.trim();
 
-              if (description === null) {
-                // there's no description or further information, so if there
-                // are existing hanzi word matches just take the first one.
-                for (const res of await lookupHanzi(hanzi)) {
-                  inputs.push({ type: `existing`, hanziWord: res[0] });
-                  continue linesLoop;
-                }
-                inputs.push({ type: `new`, query: { hanzi } });
-              } else {
-                const existingItems = await lookupHanzi(hanzi);
-                inputs.push({
-                  type: `new`,
-                  query: { hanzi, description, existingItems },
-                });
-              }
+              const existingItems = await lookupHanzi(hanzi);
+              queries.push({ hanzi, description, existingItems });
             }
 
             setLocation({
               type: `bulkCreateTriage`,
-              queue: inputs,
+              queue: queries,
               result: [],
             });
           })();
@@ -1532,65 +1637,37 @@ const DictionaryPicker = ({
         <>
           <Alert variant="info">
             <Text>
-              {item.type === `new` ? (
-                <>
-                  <Text>New: </Text>
-                  {item.query.hanzi}
-                  {item.query.description == null ? null : (
-                    <>{item.query.description}</>
-                  )}
-                </>
-              ) : (
-                <>
-                  <Text>Existing: </Text>
-                  {item.hanziWord}
-                </>
-              )}
+              {item.hanzi}
+              {item.description}
               {` `}
               <Text dimColor>({location.queue.length - 1} remaining)</Text>
             </Text>
           </Alert>
 
-          {item.type === `new` ? (
-            <>
-              <Text bold>Pick an option:</Text>
-              <GenerateHanziWordOptions
-                query={item.query}
-                onSubmit={(result) => {
-                  void (async () => {
-                    const newResults = [...location.result];
-                    if (result.type === `new`) {
-                      await upsertHanziWordMeaning(
-                        result.hanziWord,
-                        result.meaning,
-                      );
-                      newResults.push(result.hanziWord);
-                    } else {
-                      newResults.push(result.hanziWord);
-                    }
+          <Text bold>Pick an option:</Text>
+          <GenerateHanziWordOptions
+            query={item}
+            onSubmit={(result) => {
+              void (async () => {
+                const newResults = [...location.result];
+                if (result.type === `new`) {
+                  await upsertHanziWordMeaning(
+                    result.hanziWord,
+                    result.meaning,
+                  );
+                  newResults.push(result.hanziWord);
+                } else {
+                  newResults.push(result.hanziWord);
+                }
 
-                    setLocation({
-                      type: `bulkCreateTriage`,
-                      queue: location.queue.slice(1),
-                      result: newResults,
-                    });
-                  })();
-                }}
-              />
-            </>
-          ) : (
-            <AfterDelay
-              delay={0}
-              action={() => {
-                const newResults = [...location.result, item.hanziWord];
                 setLocation({
                   type: `bulkCreateTriage`,
                   queue: location.queue.slice(1),
                   result: newResults,
                 });
-              }}
-            />
-          )}
+              })();
+            }}
+          />
         </>
       )}
 
@@ -1650,14 +1727,34 @@ const GenerateHanziWordOptions = ({
           <DictionaryHanziWordEntry
             hanziWord={item.hanziWord}
             meaning={item.type === `new` ? item.meaning : undefined}
+            flags={
+              item.type === `new` ? (
+                <>
+                  {item.sources.includes(`openai`) ? (
+                    <Text bold backgroundColor="white" color="black">
+                      {` `}OpenAI{` `}
+                    </Text>
+                  ) : null}
+                  {item.sources.includes(`dongChinese`) ? (
+                    <Text bold backgroundColor="red" color="white">
+                      {` `}DongChinese{` `}
+                    </Text>
+                  ) : null}
+
+                  {item.isVerified === true ? (
+                    <Text bold backgroundColor="green">
+                      {` `}verified{` `}
+                    </Text>
+                  ) : null}
+                  <Text bold backgroundColor="yellow">
+                    {` `}
+                    {item.type}
+                    {` `}
+                  </Text>
+                </>
+              ) : null
+            }
           />
-          {item.type === `new` ? (
-            <Text bold backgroundColor="yellow">
-              {` `}
-              {item.type}
-              {` `}
-            </Text>
-          ) : null}
         </Box>
       )}
       onChange={(value) => {
@@ -1832,9 +1929,11 @@ function useDictionary() {
 const DictionaryHanziWordEntry = ({
   hanziWord,
   meaning,
+  flags,
 }: {
   hanziWord: HanziWord;
   meaning?: HanziWordMeaning;
+  flags?: ReactNode;
 }) => {
   const res = useDictionary();
 
@@ -1844,6 +1943,20 @@ const DictionaryHanziWordEntry = ({
   const hsk2WordList = useHanziWordList(`hsk2HanziWords`).data;
   const hsk3WordList = useHanziWordList(`hsk3HanziWords`).data;
   const radicalsWordList = useHanziWordList(`radicalsHanziWords`).data;
+
+  const flagElement = useMemo(() => {
+    const nonNullChilds = Children.map(flags, (child) => child);
+    return nonNullChilds == null || nonNullChilds.length === 0 ? null : (
+      <Box gap={1}>
+        {nonNullChilds.map((child, index) => (
+          <Fragment key={index}>
+            {index > 0 ? <Text>{` `}</Text> : null}
+            {child}
+          </Fragment>
+        ))}
+      </Box>
+    );
+  }, [flags]);
 
   const refs = useMemo(() => {
     const refs: string[] = [];
@@ -1861,11 +1974,14 @@ const DictionaryHanziWordEntry = ({
   }, [hanziWord, hsk1WordList, hsk2WordList, hsk3WordList, radicalsWordList]);
 
   return (
-    <Box flexDirection="column">
-      <Text>
-        <Text color="cyan">{hanziWord}</Text>
-        {refs.length > 0 ? <Text dimColor> ({refs.join(`, `)})</Text> : ``}
-      </Text>
+    <Box flexDirection="column" width="100%">
+      <Box justifyContent="space-between">
+        <Text>
+          <Text color="cyan">{hanziWord}</Text>
+          {refs.length > 0 ? <Text dimColor> ({refs.join(`, `)})</Text> : ``}
+        </Text>
+        {flagElement}
+      </Box>
       {meaning == null ? null : (
         <Box
           paddingLeft={1}
@@ -1882,20 +1998,16 @@ const DictionaryHanziWordEntry = ({
               gloss:
             </Text>
             {` `}
-            {meaning.gloss.map((g, i) => (
-              <Text key={i}>
-                {g}
-                <Text dimColor>; </Text>
-              </Text>
-            ))}
+            <SemiColonList items={meaning.gloss} />
           </Text>
+
           {meaning.pinyin == null ? null : (
             <Text>
               <Text bold dimColor>
                 pinyin:
               </Text>
               {` `}
-              {meaning.pinyin.join(` `)}
+              <SemiColonList items={meaning.pinyin} />
             </Text>
           )}
           <Text>
@@ -1925,12 +2037,7 @@ const DictionaryHanziWordEntry = ({
                 visual variants:
               </Text>
               {` `}
-              {meaning.visualVariants.map((x, i) => (
-                <Text key={i}>
-                  {x}
-                  <Text dimColor>; </Text>
-                </Text>
-              ))}
+              <SemiColonList items={meaning.visualVariants} />
             </Text>
           )}
         </Box>
@@ -1938,6 +2045,17 @@ const DictionaryHanziWordEntry = ({
     </Box>
   );
 };
+
+const SemiColonList = ({ items }: { items: readonly string[] }) => (
+  <>
+    {items.map((x, i) => (
+      <Text key={i}>
+        {i > 0 ? <Text dimColor>; </Text> : null}
+        {x}
+      </Text>
+    ))}
+  </>
+);
 
 const dictionaryPath = join(import.meta.dirname, `../src/dictionary/`);
 
@@ -2276,3 +2394,5 @@ const FormFieldEditor = ({
     </Box>
   );
 };
+
+const empty = [] as const;
