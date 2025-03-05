@@ -212,3 +212,12 @@ export function memoize0<R>(fn: () => R): () => R {
     return cache;
   };
 }
+
+/**
+ * Add a value to a set in a map without having to check if the set exists.
+ */
+export function mapSetAdd<K, V>(map: Map<K, Set<V>>, key: K, value: V) {
+  const versions = map.get(key) ?? new Set();
+  versions.add(value);
+  map.set(key, versions);
+}

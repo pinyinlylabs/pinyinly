@@ -19,6 +19,3 @@ node_modules
 # moon
 .moon/cache
 .moon/docker
-
-# bin caches
-projects/app/bin/*.db

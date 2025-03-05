@@ -1,5 +1,7 @@
+import { HanziWord } from "#data/model.ts";
 import {
   allHanziCharacters,
+  allHanziWordsHanzi,
   allHsk1HanziWords,
   allHsk2HanziWords,
   allHsk3HanziWords,
@@ -8,6 +10,7 @@ import {
   convertPinyinWithToneNumberToToneMark,
   flattenIds,
   hanziFromHanziWord,
+  hanziToLearnForHanzi,
   hanziWordMeaningSchema,
   idsNodeToString,
   IdsOperator,
@@ -23,6 +26,7 @@ import {
   loadMnemonicThemes,
   loadPinyinWords,
   loadStandardPinyinChart,
+  lookupHanzi,
   lookupHanziWord,
   meaningKeyFromHanziWord,
   parseIds,
@@ -33,6 +37,7 @@ import {
   walkIdsNode,
 } from "#dictionary/dictionary.ts";
 import {
+  mapSetAdd,
   mergeSortComparators,
   sortComparatorNumber,
   sortComparatorString,
@@ -115,21 +120,14 @@ void test(`hanzi word meaning-keys are not too similar`, async () => {
   }
 });
 
-void test(`hanzi word meaning-keys use valid characters`, async () => {
-  const dict = await loadDictionary();
-
-  for (const hanziWord of dict.keys()) {
-    const meaningKey = meaningKeyFromHanziWord(hanziWord);
-    assert.match(meaningKey, /^[a-zA-Z]+$/);
-  }
-});
-
-void test(`meaning-key lint`, async () => {
+void test(`hanzi word meaning-key lint`, async () => {
   const dict = await loadDictionary();
 
   const isViolating = (x: string) =>
     // no "measure word" or "radical"
-    /measure ?word|radical/i.exec(x) != null;
+    /measure ?word| radical/i.exec(x) != null ||
+    // only allow english alphabet
+    !/^[a-zA-Z]+$/.test(x);
 
   const violations = new Set(
     [...dict]
@@ -142,7 +140,7 @@ void test(`meaning-key lint`, async () => {
   assert.deepEqual(violations, new Set());
 });
 
-void test(`meaning gloss lint`, async () => {
+void test(`hanzi word meaning gloss lint`, async () => {
   const dict = await loadDictionary();
 
   const maxWords = 4;
@@ -231,7 +229,7 @@ void test(`hanzi word visual variants shouldn't include the hanzi`, async () => 
   assert.deepEqual(hanziWordWithBadVisualVariants, []);
 });
 
-void test(`there are no hanzi words with the same meaning key and pinyin`, async () => {
+void test(`hanzi words are unique on (meaning key, pinyin)`, async () => {
   const exceptions = new Set(
     [
       [`艹:grass`, `草:grass`],
@@ -244,6 +242,10 @@ void test(`there are no hanzi words with the same meaning key and pinyin`, async
   const byMeaningKeyAndPinyin = new Map<string, Set<string>>();
   for (const [hanziWord, { pinyin }] of dict) {
     const meaningKey = meaningKeyFromHanziWord(hanziWord);
+    // special case allow "radical" to have overlaps
+    if (meaningKey === `radical`) {
+      continue;
+    }
     const key = `${meaningKey}:${pinyin}`;
     const set = byMeaningKeyAndPinyin.get(key) ?? new Set();
     set.add(hanziWord);
@@ -274,7 +276,7 @@ void test(`there are no hanzi words with the same meaning key and pinyin`, async
   }
 });
 
-void test(`there are no hanzi words with the same hanzi + part-of-speech + pinyin`, async () => {
+void test(`hanzi words are unique on (hanzi, part-of-speech, pinyin)`, async () => {
   const exceptions = new Set(
     [
       [`从来:always`, `从来:never`],
@@ -494,7 +496,7 @@ void test(`convertPinyinWithToneNumberToToneMark`, () => {
   }
 });
 
-void test(parsePinyinTone.name, async () => {
+void test(`parsePinyinTone`, async () => {
   await test(`static test cases`, () => {
     for (const [input, expected] of [
       [`niú`, [`niu`, 2]],
@@ -520,49 +522,6 @@ void test(`flattenIds handles ⿱⿱ to ⿳ and ⿰⿰ to ⿲`, () => {
     assert.equal(idsNodeToString(flattenIds(parseIds(input))), expected);
   }
 });
-
-async function testPinyinChart(
-  chart: PinyinChart,
-  testCases: readonly [
-    input: string,
-    expectedInitial: string,
-    expectedFinal: string,
-  ][] = [],
-): Promise<void> {
-  const pinyinWords = await loadPinyinWords();
-
-  // Start with test cases first as these are easier to debug.
-  for (const [input, initial, final] of testCases) {
-    assert.deepEqual(
-      splitTonelessPinyin(input, chart),
-      [initial, final],
-      `${input} didn't split as expected`,
-    );
-  }
-
-  for (const x of pinyinWords) {
-    assert.notEqual(splitTonelessPinyin(x, chart), null, `couldn't split ${x}`);
-  }
-
-  // Ensure that there are no duplicates initials or finals.
-  assertUniqueArray(
-    chart.initials.map((x) => x.initials).flatMap(([, ...x]) => x),
-  );
-  assertUniqueArray(chart.finals.flatMap(([, ...x]) => x));
-}
-
-function assertUniqueArray<T>(items: readonly T[]): void {
-  const seen = new Set();
-  const duplicates = [];
-  for (const x of items) {
-    if (!seen.has(x)) {
-      seen.add(x);
-    } else {
-      duplicates.push(x);
-    }
-  }
-  assert.deepEqual(duplicates, [], `expected no duplicates`);
-}
 
 void test(`standard pinyin covers kangxi pinyin`, async () => {
   const chart = await loadStandardPinyinChart();
@@ -1002,6 +961,38 @@ void test(`idsNodeToString roundtrips`, () => {
   }
 });
 
+void test(`dictionary contains entries for decomposition`, async () => {
+  const unknownHanzi = new Map<
+    /* hanzi */ string,
+    /* sources */ Set<HanziWord>
+  >();
+
+  for (const hanzi of await allHanziWordsHanzi()) {
+    for (const character of Array.from(hanzi)) {
+      const lookup = await lookupHanzi(character);
+      if (lookup.length === 0) {
+        mapSetAdd(unknownHanzi, character, hanzi);
+      }
+
+      for (const component of await hanziToLearnForHanzi([character])) {
+        const lookup = await lookupHanzi(component);
+        if (lookup.length === 0) {
+          mapSetAdd(unknownHanzi, component, character);
+        }
+      }
+    }
+  }
+
+  // There's not much value in learning components that are only used once, so
+  // we only test that there are dictionary entries for components that are used
+  // multiple times.
+  const unknownWithMultipleSources = [...unknownHanzi].filter(
+    ([, sources]) => sources.size >= 3,
+  );
+
+  assert.deepEqual(unknownWithMultipleSources, []);
+});
+
 async function debugNonCjkUnifiedIdeographs(chars: string[]): Promise<string> {
   const swaps = [];
 
@@ -1025,7 +1016,9 @@ function isCjkUnifiedIdeograph(char: string): boolean {
     // CJK Unified Ideographs U+4E00 to U+9FFF
     ((codePoint >= 0x4e00 && codePoint <= 0x9fff) ||
       // CJK Unified Ideographs Extension B U+20000 to U+2A6DF
-      (codePoint >= 0x20000 && codePoint <= 0x2a6df))
+      (codePoint >= 0x20000 && codePoint <= 0x2a6df) ||
+      // CJK Unified Ideographs Extension F U+2CEB0 to U+2EBEF
+      (codePoint >= 0x2ceb0 && codePoint <= 0x2ebef))
   );
 }
 
@@ -1055,4 +1048,47 @@ async function kangxiRadicalToCjkRadical(
   if (newCodePoint != null) {
     return String.fromCodePoint(parseInt(newCodePoint, 16));
   }
+}
+
+async function testPinyinChart(
+  chart: PinyinChart,
+  testCases: readonly [
+    input: string,
+    expectedInitial: string,
+    expectedFinal: string,
+  ][] = [],
+): Promise<void> {
+  const pinyinWords = await loadPinyinWords();
+
+  // Start with test cases first as these are easier to debug.
+  for (const [input, initial, final] of testCases) {
+    assert.deepEqual(
+      splitTonelessPinyin(input, chart),
+      [initial, final],
+      `${input} didn't split as expected`,
+    );
+  }
+
+  for (const x of pinyinWords) {
+    assert.notEqual(splitTonelessPinyin(x, chart), null, `couldn't split ${x}`);
+  }
+
+  // Ensure that there are no duplicates initials or finals.
+  assertUniqueArray(
+    chart.initials.map((x) => x.initials).flatMap(([, ...x]) => x),
+  );
+  assertUniqueArray(chart.finals.flatMap(([, ...x]) => x));
+}
+
+function assertUniqueArray<T>(items: readonly T[]): void {
+  const seen = new Set();
+  const duplicates = [];
+  for (const x of items) {
+    if (!seen.has(x)) {
+      seen.add(x);
+    } else {
+      duplicates.push(x);
+    }
+  }
+  assert.deepEqual(duplicates, [], `expected no duplicates`);
 }
