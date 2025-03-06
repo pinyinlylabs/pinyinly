@@ -1,4 +1,4 @@
-import { rSkillMarshal, v5 } from "@/data/rizzleSchema";
+import { rSkillMarshal, v6 } from "@/data/rizzleSchema";
 import { loadDictionary } from "@/dictionary/dictionary";
 import { AppRouter } from "@/server/routers/_app";
 import { preflightCheckEnvVars } from "@/util/env";
@@ -160,7 +160,7 @@ const syncRemotePush = inngest.createFunction(
         lastMutationId,
         schemaVersion,
       } of remoteSyncClients) {
-        if (schemaVersion !== v5.version) {
+        if (schemaVersion !== v6.version) {
           continue;
         }
 
@@ -250,7 +250,7 @@ const syncRemotePull = inngest.createFunction(
 
     // Iterate over each remote sync rule and process it one by one.
     for (const remoteSync of remoteSyncs) {
-      const schemaVersions = [v5.version];
+      const schemaVersions = [v6.version];
 
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       while (true) {

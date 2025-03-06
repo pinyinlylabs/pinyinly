@@ -113,6 +113,10 @@ export default tseslint.config(
               message: `Please use @/dictionary/hanzi instead.`,
             },
             {
+              name: `nanoid`,
+              message: `Please use @/util/nanoid instead.`,
+            },
+            {
               name: `date-fns`,
               message: `Please use date-fns/* instead for smaller bundle size.`,
             },

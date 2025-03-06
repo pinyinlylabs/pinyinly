@@ -1,4 +1,4 @@
-import { weakMemoize1 } from "@/util/collections";
+import { memoize0, weakMemoize1 } from "@/util/collections";
 import { nextReview, Rating, UpcomingReview } from "@/util/fsrs";
 import {
   invalid,
@@ -8,7 +8,6 @@ import {
   RizzleReplicacheMutators,
 } from "@/util/rizzle";
 import { invariant } from "@haohaohow/lib/invariant";
-import memoize from "lodash/memoize";
 import { z } from "zod";
 import {
   HanziWord,
@@ -164,21 +163,21 @@ export const rSkillUnmarshal = rSkillUnmarshalSchema.parse.bind(
   rSkillUnmarshalSchema,
 );
 
-export const rSkill = memoize(() =>
+export const rSkill = memoize0(() =>
   RizzleCustom.create<Skill | MarshaledSkill, MarshaledSkill, Skill>(
     rSkillMarshalSchema,
     rSkillUnmarshalSchema,
   ),
 );
 
-export const rSrsType = memoize(() =>
+export const rSrsType = memoize0(() =>
   r.enum(SrsType, {
     [SrsType.Null]: `0`,
     [SrsType.FsrsFourPointFive]: `1`,
   }),
 );
 
-export const rSrsState = memoize(
+export const rSrsState = memoize0(
   () =>
     // r.discriminatedUnion(`type`, [
     //   r.object({
@@ -193,6 +192,14 @@ export const rSrsState = memoize(
 );
 
 /**
+ * # v6 change log
+ *
+ * - **Breaking**: entity values no longer exclude the key-path fields, so you
+ *   don't need to juggle pulling values sometimes from the key and sometimes
+ *   from the value.
+ * - **Breaking**: `skillRating` now uses an nanoid in the key rather than
+ *   having the `skill` and `createdAt` as a composite-key.
+ *
  * # v5 change log
  *
  * - **Breaking**: `rSkill` changes how "hanzi word" skills are encoded. It now
@@ -204,23 +211,22 @@ export const rSrsState = memoize(
  * - `skillState` has properties changed from `timestamp()` to `datetime()` so
  *   that they're indexable.
  */
-export const v5 = {
-  version: `5`,
+export const v6 = {
+  version: `6`,
 
   //
   // Skills
   //
-  skillRating: r.entity(`sr/[skill]/[createdAt]`, {
-    skill: rSkill(),
-    createdAt: r.datetime(),
-
+  skillRating: r.entity(`sr/[id]`, {
+    id: r.string().alias(`i`),
+    skill: rSkill().alias(`s`).indexed(`bySkill`),
+    createdAt: r.datetime().alias(`c`),
     rating: rFsrsRating.alias(`r`),
   }),
   skillState: r.entity(`s/[skill]`, {
-    skill: rSkill(),
-
+    skill: rSkill().alias(`s`),
     createdAt: r.datetime().alias(`c`),
-    srs: rSrsState().nullable().alias(`s`),
+    srs: rSrsState().nullable().alias(`r`),
     due: r.datetime().alias(`d`).indexed(`byDue`),
   }),
 
@@ -228,15 +234,15 @@ export const v5 = {
   // Pinyin mnemonics
   //
   pinyinFinalAssociation: r.entity(`pf/[final]`, {
-    final: r.string(),
+    final: r.string().alias(`f`),
     name: r.string().alias(`n`),
   }),
   pinyinInitialAssociation: r.entity(`pi/[initial]`, {
-    initial: r.string(),
+    initial: r.string().alias(`i`),
     name: r.string().alias(`n`),
   }),
   pinyinInitialGroupTheme: r.entity(`pigt/[groupId]`, {
-    groupId: rPinyinInitialGroupId,
+    groupId: rPinyinInitialGroupId.alias(`g`),
     themeId: rMnemonicThemeId.alias(`t`),
   }),
 
@@ -265,6 +271,7 @@ export const v5 = {
     now: r.timestamp().alias(`n`),
   }),
   reviewSkill: r.mutator({
+    id: r.string().alias(`i`),
     skill: rSkill().alias(`s`),
     rating: rFsrsRating.alias(`r`),
     now: r.timestamp().alias(`n`),
@@ -282,35 +289,36 @@ export const v5 = {
 
 // This is a placeholder to keep code around that demonstrates how to support
 // multiple schema versions at the same time.
-export const v5_1 = {
-  ...v5,
-  version: `5.1`,
+export const v6_1 = {
+  ...v6,
+  version: `6.1`,
 };
 
-export const supportedSchemas = [v5] as const;
+export const supportedSchemas = [v6] as const;
 
 export type SupportedSchema = (typeof supportedSchemas)[number];
 
-export type Rizzle = RizzleReplicache<typeof v5>;
+export type Rizzle = RizzleReplicache<typeof v6>;
 
-export const v5Mutators: RizzleReplicacheMutators<typeof v5> = {
+export const v6Mutators: RizzleReplicacheMutators<typeof v6> = {
   async initSkillState(db, { skill, now }) {
     const exists = await db.skillState.has({ skill });
     if (!exists) {
       await db.skillState.set(
         { skill },
-        { due: now, createdAt: now, srs: null },
+        { skill, due: now, createdAt: now, srs: null },
       );
     }
   },
-  async reviewSkill(tx, { skill, rating, now }) {
+  async reviewSkill(tx, { id, skill, rating, now }) {
     // Save a record of the review.
-    await tx.skillRating.set({ skill, createdAt: now }, { rating });
+    await tx.skillRating.set({ id }, { id, rating, skill, createdAt: now });
 
     let state: UpcomingReview | null = null;
-    for await (const [{ createdAt: when }, { rating }] of tx.skillRating.scan({
-      skill,
-    })) {
+    for await (const [
+      _key,
+      { rating, createdAt: when },
+    ] of tx.skillRating.bySkill(skill)) {
       state = nextReview(state, rating, when);
     }
 
@@ -319,6 +327,7 @@ export const v5Mutators: RizzleReplicacheMutators<typeof v5> = {
     await tx.skillState.set(
       { skill },
       {
+        skill,
         createdAt: state.created,
         srs: {
           type: SrsType.FsrsFourPointFive,
@@ -330,12 +339,12 @@ export const v5Mutators: RizzleReplicacheMutators<typeof v5> = {
     );
   },
   async setPinyinInitialAssociation(tx, { initial, name }) {
-    await tx.pinyinInitialAssociation.set({ initial }, { name });
+    await tx.pinyinInitialAssociation.set({ initial }, { initial, name });
   },
   async setPinyinFinalAssociation(tx, { final, name }) {
-    await tx.pinyinFinalAssociation.set({ final }, { name });
+    await tx.pinyinFinalAssociation.set({ final }, { final, name });
   },
   async setPinyinInitialGroupTheme(tx, { groupId, themeId }) {
-    await tx.pinyinInitialGroupTheme.set({ groupId }, { themeId });
+    await tx.pinyinInitialGroupTheme.set({ groupId }, { groupId, themeId });
   },
 };

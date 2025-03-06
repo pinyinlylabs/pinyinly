@@ -1,12 +1,10 @@
 import {
   ExtractVariableNames,
   keyPathVariableNames,
-  parseKeyPath,
   r,
   RizzleCustom,
   RizzleIndexed,
-  RizzleIndexNames,
-  RizzleNullable,
+  RizzleIndexNamesAndValues,
   RizzleObject,
   RizzleObjectInput,
   RizzleObjectMarshaled,
@@ -14,7 +12,6 @@ import {
   RizzleReplicache,
   RizzleReplicacheMutators,
   RizzleReplicacheQuery,
-  RizzleTypeAlias,
 } from "#util/rizzle.ts";
 import { IsEqual } from "#util/types.ts";
 import mapValues from "lodash/mapValues";
@@ -87,13 +84,18 @@ void test(`string() key and value`, async (t) => {
   assert.deepEqual(tx.get.mock.calls[0]?.arguments, [`foo/1`]);
 
   // Check that a ReadonlyJSONValue is parsed correctly.
-  tx.get.mock.mockImplementationOnce(() => Promise.resolve({ name: `foo` }));
-  assert.deepEqual(await posts.get(tx, { id: `1` }), { name: `foo` });
+  tx.get.mock.mockImplementationOnce(() =>
+    Promise.resolve({ id: `1`, name: `foo` }),
+  );
+  assert.deepEqual(await posts.get(tx, { id: `1` }), { id: `1`, name: `foo` });
 
   // Check that a value is encoded correctly.
-  await posts.set(tx, { id: `1` }, { name: `foo` });
+  await posts.set(tx, { id: `1` }, { id: `1`, name: `foo` });
   assert.equal(tx.set.mock.callCount(), 1);
-  assert.deepEqual(tx.set.mock.calls[0]?.arguments, [`foo/1`, { name: `foo` }]);
+  assert.deepEqual(tx.set.mock.calls[0]?.arguments, [
+    `foo/1`,
+    { id: `1`, name: `foo` },
+  ]);
 
   typeChecks(async () => {
     // .get()
@@ -102,13 +104,16 @@ void test(`string() key and value`, async (t) => {
     void posts.get(tx.readonly, { name: `1` });
     {
       const post = await posts.get(tx.readonly, { id: `1` });
-      true satisfies IsEqual<typeof post, { name: string } | undefined>;
+      true satisfies IsEqual<
+        typeof post,
+        { id: string; name: string } | undefined
+      >;
     }
 
     // .set()
-    void posts.set(tx, { id: `1` }, { name: `foo` });
+    void posts.set(tx, { id: `1` }, { id: `1`, name: `foo` });
     // @ts-expect-error `id` is the key, not `name`
-    void posts.set(tx, { name: `1` }, { name: `foo` });
+    void posts.set(tx, { name: `1` }, { id: `1`, name: `foo` });
   });
 });
 
@@ -120,22 +125,25 @@ void test(`string() .nullable()`, async (t) => {
 
   using tx = makeMockTx(t);
 
-  tx.get.mock.mockImplementationOnce(async () => ({ n: `foo` }));
-  assert.deepEqual(await posts.get(tx, { id: `1` }), { name: `foo` });
+  tx.get.mock.mockImplementationOnce(async () => ({ id: `1`, n: `foo` }));
+  assert.deepEqual(await posts.get(tx, { id: `1` }), { id: `1`, name: `foo` });
 
-  tx.get.mock.mockImplementationOnce(async () => ({ n: null }));
-  assert.deepEqual(await posts.get(tx, { id: `1` }), { name: null });
+  tx.get.mock.mockImplementationOnce(async () => ({ id: `1`, n: null }));
+  assert.deepEqual(await posts.get(tx, { id: `1` }), { id: `1`, name: null });
 
   typeChecks(async () => {
     // .get()
     {
       const x = await posts.get(tx, { id: `1` });
-      true satisfies IsEqual<typeof x, { name: string | null } | undefined>;
+      true satisfies IsEqual<
+        typeof x,
+        { id: string; name: string | null } | undefined
+      >;
     }
 
     // .set()
-    void posts.set(tx, { id: `1` }, { name: `foo` });
-    void posts.set(tx, { id: `1` }, { name: null });
+    void posts.set(tx, { id: `1` }, { id: `1`, name: `foo` });
+    void posts.set(tx, { id: `1` }, { id: `1`, name: null });
   });
 });
 
@@ -154,14 +162,16 @@ void test(`object() .nullable()`, async (t) => {
   using tx = makeMockTx(t);
 
   tx.get.mock.mockImplementationOnce(async () => ({
+    id: `1`,
     n: { first: `a`, last: `b` },
   }));
   assert.deepEqual(await posts.get(tx, { id: `1` }), {
+    id: `1`,
     name: { first: `a`, last: `b` },
   });
 
-  tx.get.mock.mockImplementationOnce(async () => ({ n: null }));
-  assert.deepEqual(await posts.get(tx, { id: `1` }), { name: null });
+  tx.get.mock.mockImplementationOnce(async () => ({ id: `1`, n: null }));
+  assert.deepEqual(await posts.get(tx, { id: `1` }), { id: `1`, name: null });
 
   typeChecks(async () => {
     // .get()
@@ -169,13 +179,17 @@ void test(`object() .nullable()`, async (t) => {
       const x = await posts.get(tx, { id: `1` });
       true satisfies IsEqual<
         typeof x,
-        { name: { first: string; last: string } | null } | undefined
+        { id: string; name: { first: string; last: string } | null } | undefined
       >;
     }
 
     // .set()
-    void posts.set(tx, { id: `1` }, { name: { first: `a`, last: `b` } });
-    void posts.set(tx, { id: `1` }, { name: null });
+    void posts.set(
+      tx,
+      { id: `1` },
+      { id: `1`, name: { first: `a`, last: `b` } },
+    );
+    void posts.set(tx, { id: `1` }, { id: `1`, name: null });
   });
 });
 
@@ -194,13 +208,21 @@ void test(`object()`, async (t) => {
     assert.deepEqual(tx.get.mock.calls[0]?.arguments, [`foo/1`]);
 
     // Check that a ReadonlyJSONValue is parsed correctly.
-    tx.get.mock.mockImplementationOnce(() => Promise.resolve({ n: `foo` }));
-    assert.deepEqual(await posts.get(tx, { id: `1` }), { name: `foo` });
+    tx.get.mock.mockImplementationOnce(() =>
+      Promise.resolve({ id: `1`, n: `foo` }),
+    );
+    assert.deepEqual(await posts.get(tx, { id: `1` }), {
+      id: `1`,
+      name: `foo`,
+    });
 
     // Check that a value is encoded correctly.
-    await posts.set(tx, { id: `1` }, { name: `foo` });
+    await posts.set(tx, { id: `1` }, { id: `1`, name: `foo` });
     assert.equal(tx.set.mock.callCount(), 1);
-    assert.deepEqual(tx.set.mock.calls[0]?.arguments, [`foo/1`, { n: `foo` }]);
+    assert.deepEqual(tx.set.mock.calls[0]?.arguments, [
+      `foo/1`,
+      { id: `1`, n: `foo` },
+    ]);
   }
 
   typeChecks(`simple, no aliases`, async () => {
@@ -215,13 +237,16 @@ void test(`object()`, async (t) => {
     void posts.get(tx.readonly, { name: `1` });
     {
       const post = await posts.get(tx.readonly, { id: `1` });
-      true satisfies IsEqual<typeof post, { name: string } | undefined>;
+      true satisfies IsEqual<
+        typeof post,
+        { id: string; name: string } | undefined
+      >;
     }
 
     // .set()
-    void posts.set(tx, { id: `1` }, { name: `foo` });
+    void posts.set(tx, { id: `1` }, { id: `1`, name: `foo` });
     // @ts-expect-error `id` is the key, not `name`
-    void posts.set(tx, { name: `1` }, { name: `foo` });
+    void posts.set(tx, { name: `1` }, { id: `1`, name: `foo` });
   });
 
   typeChecks(`nested with aliases`, async () => {
@@ -241,16 +266,28 @@ void test(`object()`, async (t) => {
       const post = await posts.get(tx, { id: `1` });
       true satisfies IsEqual<
         typeof post,
-        { author: { name: string; email: string } } | undefined
+        { id: string; author: { name: string; email: string } } | undefined
       >;
     }
 
     // .set()
-    void posts.set(tx, { id: `1` }, { author: { name: `foo`, email: `` } });
-    // @ts-expect-error `id` is the key, not `name`
-    void posts.set(tx, { name: `1` }, { author: { id: `foo`, email: `` } });
-    // @ts-expect-error `email` alias should not be used as the input
-    void posts.set(tx, { name: `1` }, { author: { name: `foo`, e: `` } });
+    void posts.set(
+      tx,
+      { id: `1` },
+      { id: `1`, author: { name: `foo`, email: `` } },
+    );
+    void posts.set(
+      tx,
+      // @ts-expect-error `id` is the key, not `name`
+      { name: `1` },
+      { id: `1`, author: { id: `foo`, email: `` } },
+    );
+    void posts.set(
+      tx,
+      // @ts-expect-error `email` alias should not be used as the input
+      { name: `1` },
+      { id: `1`, author: { name: `foo`, e: `` } },
+    );
   });
 });
 
@@ -275,11 +312,13 @@ void test(`timestamp()`, async (t) => {
       [date.getTime().toString(), date], // timestamp as string
     ]) {
       tx.get.mock.mockImplementationOnce(() =>
-        Promise.resolve({ due: marshaled }),
+        Promise.resolve({ id: `1`, due: marshaled }),
       );
+
       assert.deepEqual(
         await posts.get(tx, { id: `1` }),
         {
+          id: `1`,
           due: unmarshaled,
         },
         JSON.stringify([marshaled, unmarshaled]),
@@ -294,11 +333,11 @@ void test(`timestamp()`, async (t) => {
       [date.getTime(), date], // Date
       [date.getTime(), date.getTime()], // timestamp as number
     ] as const) {
-      await posts.set(tx, { id: `1` }, { due: unmarshaled });
+      await posts.set(tx, { id: `1` }, { id: `1`, due: unmarshaled });
       assert.equal(tx.set.mock.callCount(), 1);
       assert.deepEqual(tx.set.mock.calls[0]?.arguments, [
         `foo/1`,
-        { due: marshaled },
+        { id: `1`, due: marshaled },
       ]);
       tx.set.mock.resetCalls();
     }
@@ -313,10 +352,11 @@ void test(`entity() one variable`, async (t) => {
 
   using tx = makeMockTx(t);
 
-  await posts.set(tx, { id1: `1` }, { text: `hello` });
+  await posts.set(tx, { id1: `1` }, { id1: `1`, text: `hello` });
   const [, marshaledData] = tx.set.mock.calls[0]!.arguments;
   tx.get.mock.mockImplementationOnce(async () => marshaledData);
   assert.deepEqual(await posts.get(tx, { id1: `1` }), {
+    id1: `1`,
     text: `hello`,
   });
   assert.equal(tx.get.mock.callCount(), 1);
@@ -341,10 +381,16 @@ void test(`entity() two variables`, async (t) => {
 
   using tx = makeMockTx(t);
 
-  await posts.set(tx, { id1: `1`, id2: `2` }, { text: `hello` });
+  await posts.set(
+    tx,
+    { id1: `1`, id2: `2` },
+    { id1: `1`, id2: `2`, text: `hello` },
+  );
   const [, marshaledData] = tx.set.mock.calls[0]!.arguments;
   tx.get.mock.mockImplementationOnce(async () => marshaledData);
   assert.deepEqual(await posts.get(tx, { id1: `1`, id2: `2` }), {
+    id1: `1`,
+    id2: `2`,
     text: `hello`,
   });
   assert.equal(tx.get.mock.callCount(), 1);
@@ -374,15 +420,57 @@ void test(`entity() non-string key codec`, async (t) => {
     [[`c`, 3], `c:3`],
   ] as const) {
     using tx = makeMockTx(t);
-    await posts.set(tx, { complex: unmarshaled }, { text: `hello` });
+    await posts.set(
+      tx,
+      { complex: unmarshaled },
+      { complex: unmarshaled, text: `hello` },
+    );
     const [, marshaledData] = tx.set.mock.calls[0]!.arguments;
     tx.get.mock.mockImplementationOnce(async () => marshaledData);
     assert.deepEqual(await posts.get(tx, { complex: unmarshaled }), {
+      complex: unmarshaled,
       text: `hello`,
     });
     assert.equal(tx.get.mock.callCount(), 1);
     assert.deepEqual(tx.get.mock.calls[0]?.arguments, [`foo/${marshaled}`]);
   }
+});
+
+void test(`entity() key marshaling`, async () => {
+  const posts = r.entity(`posts/[id]`, {
+    id: r.string(),
+  });
+
+  assert.equal(posts.marshalKey({ id: `1` }), `posts/1`);
+
+  const aliased = r.entity(`posts/[id]`, {
+    id: r.string().alias(`i`),
+  });
+
+  assert.equal(aliased.marshalKey({ id: `1` }), `posts/1`);
+
+  // @ts-expect-error missing `id` key
+  assert.throws(() => aliased.marshalKey({}), /missing/);
+});
+
+void test(`entity() alias duplicates`, async () => {
+  assert.throws(
+    () =>
+      r.entity(`posts/[id]`, {
+        id: r.string().alias(`x`),
+        foo: r.string().alias(`x`),
+      }),
+    /alias conflict/,
+  );
+
+  assert.throws(
+    () =>
+      r.entity(`posts/[id]`, {
+        id: r.string(),
+        foo: r.string().alias(`id`),
+      }),
+    /alias conflict/,
+  );
 });
 
 void test(`entity() .has()`, async (t) => {
@@ -422,9 +510,9 @@ void test(`entity() distinguishing between input/output types`, async (t) => {
   // .get()
   {
     const x1 = await posts.get(tx, { id: `1` });
-    true satisfies IsEqual<typeof x1, { text: string } | undefined>;
+    true satisfies IsEqual<typeof x1, { id: string; text: string } | undefined>;
     const x2 = await posts.get(tx, { id: 1 });
-    true satisfies IsEqual<typeof x2, { text: string } | undefined>;
+    true satisfies IsEqual<typeof x2, { id: string; text: string } | undefined>;
   }
 
   // .has()
@@ -432,16 +520,16 @@ void test(`entity() distinguishing between input/output types`, async (t) => {
   await posts.has(tx, { id: 1 });
 
   // .set()
-  await posts.set(tx, { id: `1` }, { text: `1` });
-  await posts.set(tx, { id: 1 }, { text: 1 });
+  await posts.set(tx, { id: `1` }, { id: `1`, text: `1` });
+  await posts.set(tx, { id: 1 }, { id: 1, text: 1 });
 
   // index scan
   typeChecks(async () => {
     const schema = { posts };
     const r = null as unknown as RizzleReplicache<typeof schema>;
     for await (const [key, value] of r.query.posts.byText(tx)) {
-      true satisfies IsEqual<typeof key, { id: string }>;
-      true satisfies IsEqual<typeof value, { text: string }>;
+      true satisfies IsEqual<typeof key, string>;
+      true satisfies IsEqual<typeof value, { id: string; text: string }>;
     }
   });
 });
@@ -465,14 +553,12 @@ void test(`number()`, async (t) => {
   using tx = makeMockTx(t);
 
   // Marshal and unmarshal round tripping
-  await posts.set(tx, { id: `1` }, { count: 5 });
+  await posts.set(tx, { id: `1` }, { id: `1`, count: 5 });
   const [, marshaledData] = tx.set.mock.calls[0]!.arguments;
-  assert.deepEqual(marshaledData, { c: 5 });
+  assert.deepEqual(marshaledData, { id: `1`, c: 5 });
 
   tx.get.mock.mockImplementationOnce(async () => marshaledData);
-  assert.deepEqual(await posts.get(tx, { id: `1` }), {
-    count: 5,
-  });
+  assert.deepEqual(await posts.get(tx, { id: `1` }), { id: `1`, count: 5 });
 });
 void test(`enum()`, async (t) => {
   enum Colors {
@@ -492,7 +578,7 @@ void test(`enum()`, async (t) => {
   for (const color of [Colors.BLUE, Colors.RED]) {
     using tx = makeMockTx(t);
 
-    await posts.set(tx, { id: `1` }, { color });
+    await posts.set(tx, { id: `1` }, { id: `1`, color });
     const [, marshaledData] = tx.set.mock.calls[0]!.arguments;
     tx.get.mock.mockImplementationOnce(async () => marshaledData);
     // Make sure the enum isn't just being marshaled to its runtime value,
@@ -500,6 +586,7 @@ void test(`enum()`, async (t) => {
     // a separate explicit marshaled value.
     assert.notEqual(Object.values(marshaledData as object), [color]);
     assert.deepEqual(await posts.get(tx, { id: `1` }), {
+      id: `1`,
       color,
     });
   }
@@ -521,15 +608,17 @@ void test(`object() with alias`, async (t) => {
   await posts.set(
     tx,
     { id: `1` },
-    { author: { name: `foo`, email: `f@o`, id: `1` } },
+    { id: `1`, author: { name: `foo`, email: `f@o`, id: `1` } },
   );
   const [, marshaledData] = tx.set.mock.calls[0]!.arguments;
   assert.deepEqual(marshaledData, {
+    id: `1`,
     author: { name: `foo`, e: `f@o`, i: `1` },
   });
 
   tx.get.mock.mockImplementationOnce(async () => marshaledData);
   assert.deepEqual(await posts.get(tx, { id: `1` }), {
+    id: `1`,
     author: { name: `foo`, email: `f@o`, id: `1` },
   });
 });
@@ -545,12 +634,14 @@ void test(`object()`, async (t) => {
   using tx = makeMockTx(t);
 
   // Marshal and unmarshal round tripping
-  await posts.set(tx, { id: `1` }, { author: { name: `foo` } });
+  const id = `1`;
+  await posts.set(tx, { id }, { id, author: { name: `foo` } });
   const [, marshaledData] = tx.set.mock.calls[0]!.arguments;
-  assert.deepEqual(marshaledData, { author: { name: `foo` } });
+  assert.deepEqual(marshaledData, { id, author: { name: `foo` } });
 
   tx.get.mock.mockImplementationOnce(async () => marshaledData);
-  assert.deepEqual(await posts.get(tx, { id: `1` }), {
+  assert.deepEqual(await posts.get(tx, { id }), {
+    id,
     author: { name: `foo` },
   });
 });
@@ -582,7 +673,7 @@ void test(`.getIndexes()`, () => {
       }),
     });
 
-    assert.deepEqual(posts._def.valueType._getIndexes(), {
+    assert.partialDeepStrictEqual(posts._def.valueType._getIndexes(), {
       byAuthorName: {
         allowEmpty: false,
         jsonPointer: `/author/name`,
@@ -646,16 +737,6 @@ void test(`.getIndexes()`, () => {
   }
 });
 
-void test(`${parseKeyPath.name}()`, () => {
-  assert.deepEqual(parseKeyPath(`foo/$[id]`, `foo/$1`), { id: `1` });
-  assert.deepEqual(parseKeyPath(`^foo/$[id]`, `^foo/$1`), { id: `1` });
-  assert.deepEqual(parseKeyPath(`foo/[id]`, `foo/1`), { id: `1` });
-  assert.deepEqual(parseKeyPath(`foo/[id1]/[id2]`, `foo/1/2`), {
-    id1: `1`,
-    id2: `2`,
-  });
-});
-
 void test(`mutator()`, async () => {
   const fn = r
     .mutator({
@@ -696,10 +777,10 @@ typeChecks<RizzleReplicacheMutators<never>>(
 
         // rizzle convenience API
         await db.posts.get({ id });
-        await db.posts.set({ id }, { rank });
+        await db.posts.set({ id }, { id, rank });
 
         // @ts-expect-error there's no rank2 in the schema
-        await db.posts.set({ id }, { rank2: 2 });
+        await db.posts.set({ id }, { id, rank2: 2 });
       });
     };
 
@@ -770,7 +851,7 @@ void test(`replicache()`, async (t) => {
         true satisfies IsEqual<typeof options, { id: string; title: string }>;
         assert.deepEqual(await db.posts.get({ id: `2` }), undefined);
         assert.deepEqual(options, { id: `1`, title: `hello world` });
-        await db.posts.set({ id: options.id }, { title: options.title });
+        await db.posts.set({ id: options.id }, options);
         checkPoints.log(`createPost.end`);
       },
     },
@@ -779,7 +860,7 @@ void test(`replicache()`, async (t) => {
         mapValues(options.mutators, (v) => typeof v),
         { cp: `function` },
       );
-      assert.deepEqual(options.indexes, {
+      assert.partialDeepStrictEqual(options.indexes, {
         "posts.byTitle": {
           allowEmpty: false,
           jsonPointer: `/r`,
@@ -816,7 +897,7 @@ void test(`replicache()`, async (t) => {
       });
       return {
         async *entries() {
-          const value = [[`hello world`, `p/1`], { r: `hello world` }];
+          const value = [[`hello world`, `p/1`], { id: `1`, r: `hello world` }];
           yield await Promise.resolve(value);
         },
       };
@@ -827,7 +908,7 @@ void test(`replicache()`, async (t) => {
       results.push(post);
     }
     assert.deepEqual(results, [
-      [{ id: `1` }, { title: `hello world` }, `hello world`],
+      [`p/1`, { id: `1`, title: `hello world` }, `hello world`],
     ]);
 
     checkPoints.assert(`tx.scan`);
@@ -851,7 +932,7 @@ void test(`replicache()`, async (t) => {
       });
       return {
         async *entries() {
-          const value = [[`hello world`, `p/1`], { r: `hello world` }];
+          const value = [[`hello world`, `p/1`], { id: `1`, r: `hello world` }];
           yield await Promise.resolve(value);
         },
       };
@@ -877,7 +958,9 @@ void test(`replicache()`, async (t) => {
     for await (const post of db.queryPaged.posts.byTitle()) {
       results.push(post);
     }
-    assert.deepEqual(results, [[{ id: `1` }, { title: `hello world` }]]);
+    assert.deepEqual(results, [
+      [`p/1`, { id: `1`, title: `hello world` }, `hello world`],
+    ]);
 
     checkPoints.assert(`tx.scan 0`, `tx.scan 1`);
   }
@@ -901,11 +984,11 @@ void test(`replicache()`, async (t) => {
     using tx = makeMockTx(t);
 
     tx.get.mock.mockImplementationOnce(async (x: unknown) =>
-      x === `p/1` ? { r: `hello world` } : undefined,
+      x === `p/1` ? { id: `1`, r: `hello world` } : undefined,
     );
 
     const post = await db.query.posts.get(tx, { id: `1` });
-    assert.deepEqual(post, { title: `hello world` });
+    assert.deepEqual(post, { id: `1`, title: `hello world` });
   }
 
   {
@@ -915,11 +998,11 @@ void test(`replicache()`, async (t) => {
     using tx = makeMockTx(t);
 
     tx.get.mock.mockImplementationOnce(async (x: unknown) =>
-      x === `p/1` ? { r: `hello world` } : undefined,
+      x === `p/1` ? { id: `1`, r: `hello world` } : undefined,
     );
 
     const post = await db.query.posts.get(tx, { id: `1` });
-    assert.deepEqual(post, { title: `hello world` });
+    assert.deepEqual(post, { id: `1`, title: `hello world` });
   }
 
   checkPoints.assert();
@@ -974,19 +1057,22 @@ void test(`replicache() mutator tx`, async () => {
       const { id } = options;
       const existingCount = await db.counter.get({ id });
 
-      await db.counter.set({ id }, { count: (existingCount?.count ?? 0) + 1 });
+      await db.counter.set(
+        { id },
+        { id, count: (existingCount?.count ?? 0) + 1 },
+      );
     },
   });
 
   await db.mutate.incrementCounter({ id: `1` });
   assert.deepEqual(
     await db.replicache.query((tx) => db.query.counter.get(tx, { id: `1` })),
-    { count: 1 },
+    { id: `1`, count: 1 },
   );
   await db.mutate.incrementCounter({ id: `1` });
   assert.deepEqual(
     await db.replicache.query((tx) => db.query.counter.get(tx, { id: `1` })),
-    { count: 2 },
+    { id: `1`, count: 2 },
   );
 });
 
@@ -1039,7 +1125,7 @@ void test(`replicache() entity()`, async (t) => {
       });
       return {
         async *entries() {
-          const value = [`text/1:2.`, { b: `hello world` }];
+          const value = [`text/1:2.`, { id: `1`, id2: `2`, b: `hello world` }];
           yield await Promise.resolve(value);
         },
       };
@@ -1048,9 +1134,8 @@ void test(`replicache() entity()`, async (t) => {
     for await (const result of db.query.text.scan(tx)) {
       checkPointsReached += `2`;
       assert.deepEqual(result, [
-        { id: `1`, id2: `2` },
-        { body: `hello world` },
         `text/1:2.`,
+        { id: `1`, id2: `2`, body: `hello world` },
       ]);
     }
 
@@ -1077,7 +1162,10 @@ void test(`replicache() entity()`, async (t) => {
       });
       return {
         async *entries() {
-          const value = [`text/abc:1.`, { b: `hello world` }];
+          const value = [
+            `text/abc:1.`,
+            { id: `abc`, id2: `1`, b: `hello world` },
+          ];
           yield await Promise.resolve(value);
         },
       };
@@ -1086,9 +1174,8 @@ void test(`replicache() entity()`, async (t) => {
     for await (const result of db.query.text.scan(tx, { id: `abc` })) {
       checkPointsReached++;
       assert.deepEqual(result, [
-        { id: `abc`, id2: `1` },
-        { body: `hello world` },
         `text/abc:1.`,
+        { id: `abc`, id2: `1`, body: `hello world` },
       ]);
     }
 
@@ -1134,7 +1221,7 @@ void test(`replicache() entity()`, async (t) => {
       });
       return {
         async *entries() {
-          const value = [`text/1:2.`, { b: `hello world` }];
+          const value = [`text/1:2.`, { id: `1`, id2: `2`, b: `hello world` }];
           yield await Promise.resolve(value);
         },
       };
@@ -1159,8 +1246,8 @@ void test(`replicache() entity()`, async (t) => {
     for await (const result of db.queryPaged.text.scan()) {
       checkPoints.log(`loop`);
       assert.deepEqual(result, [
-        { id: `1`, id2: `2` },
-        { body: `hello world` },
+        `text/1:2.`,
+        { id: `1`, id2: `2`, body: `hello world` },
       ]);
     }
 
@@ -1189,7 +1276,10 @@ void test(`replicache() entity()`, async (t) => {
       });
       return {
         async *entries() {
-          const value = [`text/abc:1.`, { b: `hello world` }];
+          const value = [
+            `text/abc:1.`,
+            { id: `abc`, id2: `1`, b: `hello world` },
+          ];
           yield await Promise.resolve(value);
         },
       };
@@ -1214,8 +1304,8 @@ void test(`replicache() entity()`, async (t) => {
     for await (const result of db.queryPaged.text.scan({ id: `abc` })) {
       checkPoint.log(`loop`);
       assert.deepEqual(result, [
-        { id: `abc`, id2: `1` },
-        { body: `hello world` },
+        `text/abc:1.`,
+        { id: `abc`, id2: `1`, body: `hello world` },
       ]);
     }
 
@@ -1245,7 +1335,7 @@ void test(`replicache() index scan`, async () => {
 
       await db.text.set(
         { id },
-        { body: (existing?.body ?? ``) + options.text },
+        { id, body: (existing?.body ?? ``) + options.text },
       );
     },
   });
@@ -1254,13 +1344,13 @@ void test(`replicache() index scan`, async () => {
   await db.mutate.appendText({ id: `2`, text: `bbb` });
 
   await db.replicache.query(async (tx) => {
-    const results = [];
+    const results: unknown[] = [];
     for await (const counter of db.query.text.byCount(tx)) {
       results.push(counter);
     }
     assert.deepEqual(results, [
-      [{ id: `1` }, { body: `aaa` }, `aaa`],
-      [{ id: `2` }, { body: `bbb` }, `bbb`],
+      [`text/1`, { id: `1`, body: `aaa` }, `aaa`],
+      [`text/2`, { id: `2`, body: `bbb` }, `bbb`],
     ]);
   });
 });
@@ -1274,14 +1364,13 @@ void test(`number()`, async (t) => {
   using tx = makeMockTx(t);
 
   // Marshal and unmarshal round tripping
-  await posts.set(tx, { id: `1` }, { count: 5 });
+  const id = `1`;
+  await posts.set(tx, { id }, { id, count: 5 });
   const [, marshaledData] = tx.set.mock.calls[0]!.arguments;
-  assert.deepEqual(marshaledData, { c: 5 });
+  assert.deepEqual(marshaledData, { c: 5, id });
 
   tx.get.mock.mockImplementationOnce(async () => marshaledData);
-  assert.deepEqual(await posts.get(tx, { id: `1` }), {
-    count: 5,
-  });
+  assert.deepEqual(await posts.get(tx, { id }), { id, count: 5 });
 });
 
 void test(`literal()`, async (t) => {
@@ -1328,53 +1417,42 @@ void test(`literal()`, async (t) => {
   using tx = makeMockTx(t);
 
   // Marshal and unmarshal round tripping
-  await posts.set(tx, { id: `1` }, { count: 5 });
+  const id = `1`;
+  await posts.set(tx, { id }, { id, count: 5 });
   const [, marshaledData] = tx.set.mock.calls[0]!.arguments;
-  assert.deepEqual(marshaledData, { c: 5 });
+  assert.deepEqual(marshaledData, { c: 5, id });
 
   tx.get.mock.mockImplementationOnce(async () => marshaledData);
-  assert.deepEqual(await posts.get(tx, { id: `1` }), {
-    count: 5,
-  });
+  assert.deepEqual(await posts.get(tx, { id }), { id, count: 5 });
 });
 
-typeChecks<RizzleIndexNames<never>>(() => {
-  // .string().indexed(…)
+typeChecks<RizzleIndexNamesAndValues<never>>(() => {
   true satisfies IsEqual<
-    RizzleIndexNames<
+    RizzleIndexNamesAndValues<RizzleCustom<string, string>>,
+    never
+  >;
+
+  true satisfies IsEqual<
+    RizzleIndexNamesAndValues<
+      RizzleIndexed<RizzleCustom<Date, string>, `byDate`>
+    >,
+    { byDate: Date }
+  >;
+
+  true satisfies IsEqual<
+    RizzleIndexNamesAndValues<
       RizzleObject<{
         id: RizzleCustom<string, string>;
         date: RizzleIndexed<RizzleCustom<Date, string>, `byDate`>;
-        name: RizzleIndexed<RizzleCustom<Date, string>, `byName`>;
+        name: RizzleIndexed<RizzleCustom<number, string>, `byName`>;
       }>
     >,
-    `byDate` | `byName`
-  >;
-
-  // .string().indexed(…).alias()
-  true satisfies IsEqual<
-    RizzleIndexNames<
-      RizzleObject<{
-        id: RizzleCustom<string, string>;
-        date: RizzleTypeAlias<
-          RizzleIndexed<RizzleCustom<Date, string>, `byDate`>
-        >;
-      }>
-    >,
-    `byDate`
-  >;
-
-  // .string().indexed(…).nullable()
-  true satisfies IsEqual<
-    RizzleIndexNames<
-      RizzleObject<{
-        id: RizzleCustom<string, string>;
-        date: RizzleNullable<
-          RizzleIndexed<RizzleCustom<Date, string>, `byDate`>
-        >;
-      }>
-    >,
-    `byDate`
+    | {
+        byDate: Date;
+      }
+    | {
+        byName: number;
+      }
   >;
 });
 

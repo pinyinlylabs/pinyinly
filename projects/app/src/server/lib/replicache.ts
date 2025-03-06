@@ -1,8 +1,8 @@
 import {
   rPinyinInitialGroupId,
   SupportedSchema,
-  v5,
-  v5_1,
+  v6,
+  v6_1,
 } from "@/data/rizzleSchema";
 import {
   ClientStateNotFoundResponse,
@@ -54,10 +54,10 @@ const mutators: RizzleDrizzleMutators<SupportedSchema, Drizzle> = {
       })
       .onConflictDoNothing();
   },
-  async reviewSkill(db, userId, { skill, rating, now }) {
+  async reviewSkill(db, userId, { id, skill, rating, now }) {
     await db
       .insert(s.skillRating)
-      .values([{ userId, skill, rating, createdAt: now }]);
+      .values([{ id, userId, skill, rating, createdAt: now }]);
 
     await updateSkillState(db, skill, userId);
   },
@@ -105,14 +105,14 @@ const mutators: RizzleDrizzleMutators<SupportedSchema, Drizzle> = {
   },
 };
 
-const mutateV5_1 = makeDrizzleMutationHandler(v5_1, mutators);
-const mutateV5 = makeDrizzleMutationHandler(v5, mutators);
+const mutateV6_1 = makeDrizzleMutationHandler(v6_1, mutators);
+const mutateV6 = makeDrizzleMutationHandler(v6, mutators);
 
 function getSchemaImpl(schemaVersion: string) {
-  if (schemaVersion === v5_1.version) {
-    return { schema: v5_1, mutate: mutateV5_1 };
-  } else if (schemaVersion === v5.version) {
-    return { schema: v5, mutate: mutateV5 };
+  if (schemaVersion === v6_1.version) {
+    return { schema: v6_1, mutate: mutateV6_1 };
+  } else if (schemaVersion === v6.version) {
+    return { schema: v6, mutate: mutateV6 };
   }
   return null;
 }
@@ -764,8 +764,7 @@ export async function computeCvrEntities(
       map: json_object_agg(
         s.skillRating.id,
         json_build_object({
-          skill: s.skillRating.skill,
-          createdAt: sql<string>`${s.skillRating.createdAt}::timestamptz`,
+          id: s.skillRating.id,
           xmin: sql<string>`${s.skillRating}.xmin`,
         }),
       ).as(`skillRatingVersions`),
@@ -817,13 +816,7 @@ export async function computeCvrEntities(
     ),
     skillRating: mapValues(
       result.skillRating,
-      (v) =>
-        v.xmin +
-        `:` +
-        schema.skillRating.marshalKey({
-          skill: v.skill,
-          createdAt: new Date(v.createdAt),
-        }),
+      (v) => v.xmin + `:` + schema.skillRating.marshalKey(v),
     ),
   };
 }

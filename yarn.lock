@@ -2694,7 +2694,7 @@ __metadata:
     lottie-react-native: "npm:7.1.0"
     lucia: "npm:^3.2.0"
     moti: "npm:^0.30.0"
-    nanoid: "npm:^5.0.9"
+    nanoid: "patch:nanoid@npm%3A5.1.2#~/.yarn/patches/nanoid-npm-5.1.2-40381f6f88.patch"
     nativewind: "patch:nativewind@npm%3A4.1.23#~/.yarn/patches/nativewind-npm-4.1.23-ea5a3f1461.patch"
     openai: "npm:^4.68.4"
     oslo: "npm:^1.2.1"
@@ -2751,7 +2751,7 @@ __metadata:
   dependencies:
     "@types/lodash": "npm:4.17.x"
     lodash: "npm:^4.17.21"
-    nanoid: "npm:^5.0.9"
+    nanoid: "patch:nanoid@npm%3A5.1.2#~/.yarn/patches/nanoid-npm-5.1.2-40381f6f88.patch"
     prettier: "npm:^3.4.2"
     tsx: "npm:^4.15.7"
     typescript: "patch:typescript@npm%3A5.7.2#~/.yarn/patches/typescript-npm-5.7.2-b1f84a8b28.patch"
@@ -13172,21 +13172,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nanoid@npm:3.3.8, nanoid@npm:^3.3.6, nanoid@npm:^3.3.7":
-  version: 3.3.8
-  resolution: "nanoid@npm:3.3.8"
-  bin:
-    nanoid: bin/nanoid.cjs
-  checksum: 10c0/4b1bb29f6cfebf3be3bc4ad1f1296fb0a10a3043a79f34fbffe75d1621b4318319211cd420549459018ea3592f0d2f159247a6f874911d6d26eaaadda2478120
-  languageName: node
-  linkType: hard
-
-"nanoid@npm:^5.0.9":
+"nanoid@npm:5.1.2":
   version: 5.1.2
   resolution: "nanoid@npm:5.1.2"
   bin:
     nanoid: bin/nanoid.js
   checksum: 10c0/60b3d30d1629704f4b156f79e53a454d10440a38f4ab14cda1c9aa08091389212d03afb35fbc09c11f4619f83bcf5076abc4719295e3b79c57abad0e40297177
+  languageName: node
+  linkType: hard
+
+"nanoid@patch:nanoid@npm%3A5.1.2#~/.yarn/patches/nanoid-npm-5.1.2-40381f6f88.patch":
+  version: 5.1.2
+  resolution: "nanoid@patch:nanoid@npm%3A5.1.2#~/.yarn/patches/nanoid-npm-5.1.2-40381f6f88.patch::version=5.1.2&hash=46520e"
+  bin:
+    nanoid: bin/nanoid.js
+  checksum: 10c0/5c21cd9b65ba5f60bab1b80f2b34f7458055596b006138ab12c4023a114be75f7ce32b2111a4c1b07c39829d54f082a3e2adc069b2daf58701f1a9c7e9a3e431
   languageName: node
   linkType: hard
 

@@ -7,6 +7,7 @@ import {
 } from "@/data/model";
 import { readonlyMapSet } from "@/util/collections";
 import { Rating } from "@/util/fsrs";
+import { nanoid } from "@/util/nanoid";
 import { StackNavigationFor } from "@/util/types";
 import { invariant } from "@haohaohow/lib/invariant";
 import {
@@ -126,6 +127,7 @@ export const QuizDeck = ({
       for (const { skill, rating } of ratings) {
         r.mutate
           .reviewSkill({
+            id: nanoid(),
             now: Date.now(),
             skill,
             rating,

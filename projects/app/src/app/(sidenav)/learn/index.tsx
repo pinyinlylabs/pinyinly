@@ -18,12 +18,12 @@ export default function IndexPage() {
     async (r, tx) => {
       const recentHanziWords: HanziWord[] = [];
       const ratingHistory = await fromAsync(r.query.skillRating.scan(tx)).then(
-        (reviews) => reverse(sortBy(reviews, (x) => x[0].createdAt.getTime())),
+        (reviews) => reverse(sortBy(reviews, ([, { createdAt }]) => createdAt)),
       );
-      for (const [key, _value] of ratingHistory) {
-        if (`hanziWord` in key.skill) {
-          if (!recentHanziWords.includes(key.skill.hanziWord)) {
-            recentHanziWords.push(key.skill.hanziWord);
+      for (const [, { skill }] of ratingHistory) {
+        if (`hanziWord` in skill) {
+          if (!recentHanziWords.includes(skill.hanziWord)) {
+            recentHanziWords.push(skill.hanziWord);
             if (recentHanziWords.length === 10) {
               break;
             }
@@ -38,13 +38,13 @@ export default function IndexPage() {
     [`IndexPage`, `streakQuery`],
     async (r, tx) => {
       const ratingHistory = await fromAsync(r.query.skillRating.scan(tx)).then(
-        (reviews) => reverse(sortBy(reviews, (x) => x[0].createdAt.getTime())),
+        (reviews) => reverse(sortBy(reviews, ([, { createdAt }]) => createdAt)),
       );
 
-      const streakEnd = ratingHistory[0]?.[0].createdAt;
+      const streakEnd = ratingHistory[0]?.[1].createdAt;
       let streakStart: Date | undefined;
 
-      for (const [{ createdAt }, _value] of ratingHistory) {
+      for (const [, { createdAt }] of ratingHistory) {
         invariant(
           streakStart == null || createdAt <= streakStart,
           `Expected rating history to be in descending order`,
