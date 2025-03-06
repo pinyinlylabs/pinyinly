@@ -2999,13 +2999,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@inngest/ai@npm:0.0.4":
-  version: 0.0.4
-  resolution: "@inngest/ai@npm:0.0.4"
+"@inngest/ai@npm:0.0.5":
+  version: 0.0.5
+  resolution: "@inngest/ai@npm:0.0.5"
   dependencies:
     "@types/node": "npm:^22.10.5"
     typescript: "npm:^5.7.3"
-  checksum: 10c0/cf7e91c3c2048c1821f4346794277aa2e96a8c89333df81441f899fca54377e04dc2d5f7392e35608e7136c3c2391a2572cce15d768263eb0584e8427b561160
+  checksum: 10c0/605b4cd8f6879b5158a68ea2c5a8dbbeb5cd7be25d87d2d93ea4bdd055fb3a22f86cbfd924d2e310307df8a7654b17bffbaf0312ccdf859de876193c6b24ae58
   languageName: node
   linkType: hard
 
@@ -11129,11 +11129,11 @@ __metadata:
   linkType: hard
 
 "inngest@npm:^3.29.2":
-  version: 3.31.11
-  resolution: "inngest@npm:3.31.11"
+  version: 3.32.1
+  resolution: "inngest@npm:3.32.1"
   dependencies:
     "@bufbuild/protobuf": "npm:^2.2.3"
-    "@inngest/ai": "npm:0.0.4"
+    "@inngest/ai": "npm:0.0.5"
     "@jpwilliams/waitgroup": "npm:^2.1.1"
     "@types/debug": "npm:^4.1.12"
     canonicalize: "npm:^1.0.8"
@@ -11145,7 +11145,7 @@ __metadata:
     ms: "npm:^2.1.3"
     serialize-error-cjs: "npm:^0.1.3"
     strip-ansi: "npm:^5.2.0"
-    ulid: "npm:^2.3.0"
+    ulidx: "npm:^2.4.1"
     zod: "npm:~3.22.3"
   peerDependencies:
     "@sveltejs/kit": ">=1.27.3"
@@ -11179,7 +11179,7 @@ __metadata:
       optional: true
     typescript:
       optional: true
-  checksum: 10c0/eb422aabb39c2c04f57c987dde6cd0e4e7564e1441b45c35d23c43ba2e7243de0a8265a23e4892c3456b4235eeffbecc4b9364a76a8eabf869e56752c32072e0
+  checksum: 10c0/76b664e0e4a7e449c5ef96e5ea6b6bf179551a1e6743f9e8d86cf5f126de8bc741fc4e369af7926308db4d5d7e31ee6de2ce810bbecc6605cceedb5f85c22c68
   languageName: node
   linkType: hard
 
@@ -12064,6 +12064,13 @@ __metadata:
   version: 3.0.3
   resolution: "kleur@npm:3.0.3"
   checksum: 10c0/cd3a0b8878e7d6d3799e54340efe3591ca787d9f95f109f28129bdd2915e37807bf8918bb295ab86afb8c82196beec5a1adcaf29042ce3f2bd932b038fe3aa4b
+  languageName: node
+  linkType: hard
+
+"layerr@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "layerr@npm:3.0.0"
+  checksum: 10c0/320c9b9cf1392c73c9ff8f8d1bb7a782093ac7341fe5d7fea6ebfeea6d785af8e0fc573541431b6ffcb268577f8aea66168757e73a15035568a00ab9e4370705
   languageName: node
   linkType: hard
 
@@ -17088,12 +17095,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ulid@npm:^2.3.0":
-  version: 2.3.0
-  resolution: "ulid@npm:2.3.0"
-  bin:
-    ulid: ./bin/cli.js
-  checksum: 10c0/070d237502781085e59cf3d8ece752ff96cd3a0990cf1c1be57273f4550597daeb72e9a7db8e5a320de31102509bb3321d280b54bfc44e98025e4628a9629773
+"ulidx@npm:^2.4.1":
+  version: 2.4.1
+  resolution: "ulidx@npm:2.4.1"
+  dependencies:
+    layerr: "npm:^3.0.0"
+  checksum: 10c0/3cbe05123b4b49d262e26cd0edd3ac38a4f9e97f043d47ae7daa88502748881d1615d832e3bcb29698ca2429947c24494929ba35b40d6bf38df891cb15642d2e
   languageName: node
   linkType: hard
 
