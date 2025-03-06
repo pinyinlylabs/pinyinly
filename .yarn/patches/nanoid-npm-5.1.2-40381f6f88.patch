@@ -1,0 +1,13 @@
+diff --git a/package.json b/package.json
+index 64c52bad379897dc7ccca28473d6326acbb5d5e4..60de02c39329948b1d50f8de4f61a84ffd3ef29e 100644
+--- a/package.json
++++ b/package.json
+@@ -24,7 +24,8 @@
+   "exports": {
+     ".": {
++      "react-native": "./index.browser.js",
+       "browser": "./index.browser.js",
+       "default": "./index.js"
+     },
+     "./non-secure": "./non-secure/index.js",
+     "./package.json": "./package.json"

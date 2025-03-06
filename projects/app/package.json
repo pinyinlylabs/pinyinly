@@ -61,7 +61,7 @@
     "lottie-react-native": "7.1.0",
     "lucia": "^3.2.0",
     "moti": "^0.30.0",
-    "nanoid": "^5.0.9",
+    "nanoid": "patch:nanoid@npm%3A5.1.2#~/.yarn/patches/nanoid-npm-5.1.2-40381f6f88.patch",
     "nativewind": "patch:nativewind@npm%3A4.1.23#~/.yarn/patches/nativewind-npm-4.1.23-ea5a3f1461.patch",
     "oslo": "^1.2.1",
     "pg": "^8.12.0",
