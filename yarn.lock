@@ -4969,9 +4969,9 @@ __metadata:
   linkType: hard
 
 "@revenuecat/purchases-js@npm:^0.18.0":
-  version: 0.18.1
-  resolution: "@revenuecat/purchases-js@npm:0.18.1"
-  checksum: 10c0/78023dc21d59178f9fdbdd377ae52ace589560bd528aa47d1751040519961bbff63f75baff54884d924ba91a9a514c00ba919f2e5de7cf280957cce3d335aac0
+  version: 0.18.2
+  resolution: "@revenuecat/purchases-js@npm:0.18.2"
+  checksum: 10c0/92257ab82b9d8493db8bfdfcfb40c446607ec3e99894d8a1d62eb6e7e56368a0dffa63cf6789064a8ab8056608dd3c8ff807aad7725897d80c41877788b7fcd7
   languageName: node
   linkType: hard
 
