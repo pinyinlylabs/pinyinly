@@ -37,7 +37,7 @@ export default function HistoryPage() {
     [HistoryPage.name, `skillRatings`],
     async (r, tx) =>
       fromAsync(r.query.skillRating.scan(tx)).then((reviews) =>
-        reverse(sortBy(reviews, (x) => x[0].createdAt.getTime())),
+        reverse(sortBy(reviews, ([, x]) => x.createdAt.getTime())),
       ),
   );
 
@@ -48,20 +48,23 @@ export default function HistoryPage() {
           <View className="flex-1 items-center gap-[10px]">
             <Text className="text-xl text-text">upcoming</Text>
 
-            {dataQuery.data?.map(([key, value], i) => (
-              <View key={i}>
-                <Text className="text-text">
-                  {key.skill.type === SkillType.PinyinInitialAssociation
-                    ? `${key.skill.initial}-`
-                    : key.skill.type === SkillType.PinyinFinalAssociation
-                      ? `-${key.skill.final}`
-                      : key.skill.type === SkillType.Deprecated
-                        ? skillTypeToShorthand(key.skill.type)
-                        : key.skill.hanziWord}
-                  : {value.due.toISOString()}
-                </Text>
-              </View>
-            ))}
+            {dataQuery.data?.map(([_key, value], i) => {
+              const { skill } = value;
+              return (
+                <View key={i}>
+                  <Text className="text-text">
+                    {skill.type === SkillType.PinyinInitialAssociation
+                      ? `${skill.initial}-`
+                      : skill.type === SkillType.PinyinFinalAssociation
+                        ? `-${skill.final}`
+                        : skill.type === SkillType.Deprecated
+                          ? skillTypeToShorthand(skill.type)
+                          : skill.hanziWord}
+                    : {value.due.toISOString()}
+                  </Text>
+                </View>
+              );
+            })}
           </View>
           <View className="flex-1 items-center gap-[10px]">
             <Text className="text-xl text-text">upcoming2</Text>
@@ -87,26 +90,29 @@ export default function HistoryPage() {
           <View>
             <Text className="self-center text-xl text-text">history</Text>
 
-            {skillRatingsQuery.data?.map(([key, value], i) => (
-              <View key={i}>
-                <Text className="text-text">
-                  {value.rating === Rating.Again
-                    ? `❌`
-                    : value.rating === Rating.Good
-                      ? `✅`
-                      : value.rating}
-                  {` `}
-                  {key.skill.type === SkillType.PinyinInitialAssociation
-                    ? `${key.skill.initial}-`
-                    : key.skill.type === SkillType.PinyinFinalAssociation
-                      ? `-${key.skill.final}`
-                      : key.skill.type === SkillType.Deprecated
-                        ? skillTypeToShorthand(key.skill.type)
-                        : key.skill.hanziWord}
-                  : {key.createdAt.toISOString()}
-                </Text>
-              </View>
-            ))}
+            {skillRatingsQuery.data?.map(([_key, value], i) => {
+              const { skill, createdAt } = value;
+              return (
+                <View key={i}>
+                  <Text className="text-text">
+                    {value.rating === Rating.Again
+                      ? `❌`
+                      : value.rating === Rating.Good
+                        ? `✅`
+                        : value.rating}
+                    {` `}
+                    {skill.type === SkillType.PinyinInitialAssociation
+                      ? `${skill.initial}-`
+                      : skill.type === SkillType.PinyinFinalAssociation
+                        ? `-${skill.final}`
+                        : skill.type === SkillType.Deprecated
+                          ? skillTypeToShorthand(skill.type)
+                          : skill.hanziWord}
+                    : {createdAt.toISOString()}
+                  </Text>
+                </View>
+              );
+            })}
           </View>
         </View>
       </View>

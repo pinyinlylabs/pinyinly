@@ -1,4 +1,4 @@
-import { supportedSchemas, v5 } from "#data/rizzleSchema.ts";
+import { supportedSchemas, v6 } from "#data/rizzleSchema.ts";
 import { englishToHanziWord } from "#data/skills.ts";
 import { Drizzle } from "#server/lib/db.ts";
 import {
@@ -9,9 +9,9 @@ import {
 } from "#server/lib/replicache.ts";
 import * as s from "#server/schema.ts";
 import { Rating } from "#util/fsrs.ts";
+import { nanoid } from "#util/nanoid.ts";
 import { invariant } from "@haohaohow/lib/invariant";
 import { eq, sql } from "drizzle-orm";
-import { nanoid } from "nanoid";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { withDbTest, withTxTest } from "./db";
@@ -577,6 +577,7 @@ void test(`pull()`, async (t) => {
               op: `put`,
               key: schema.skillState.marshalKey(skillState),
               value: schema.skillState.marshalValue({
+                skill: skillState.skill,
                 createdAt: skillState.createdAt,
                 srs: null,
                 due: skillState.due,
@@ -688,10 +689,7 @@ void test(`pull()`, async (t) => {
           patch: [
             {
               op: `del`,
-              key: schema.skillRating.marshalKey({
-                skill: skillRating.skill,
-                createdAt: now,
-              }),
+              key: schema.skillRating.marshalKey({ id: skillRating.id }),
             },
           ],
         });
@@ -819,10 +817,7 @@ void test(`computeCvr()`, async (t) => {
             [user1SkillRating.id]:
               user1SkillRating.version +
               `:` +
-              schema.skillRating.marshalKey({
-                skill: user1SkillRating.skill,
-                createdAt: user1SkillRating.createdAt,
-              }),
+              schema.skillRating.marshalKey({ id: user1SkillRating.id }),
           },
           skillState: {},
         });
@@ -933,7 +928,7 @@ void test(`fetchPushes()`, async (t) => {
       profileId: ``,
       clientGroupId,
       pushVersion: 1,
-      schemaVersion: v5.version,
+      schemaVersion: v6.version,
       mutations: [
         {
           id: 1,
@@ -947,7 +942,7 @@ void test(`fetchPushes()`, async (t) => {
 
     assert.deepEqual(
       await fetchMutations(tx, user.id, {
-        schemaVersions: [v5.version],
+        schemaVersions: [v6.version],
         lastMutationIds: {},
       }),
       {
@@ -963,7 +958,7 @@ void test(`fetchPushes()`, async (t) => {
                 timestamp: 1,
               },
             ],
-            schemaVersion: v5.version,
+            schemaVersion: v6.version,
           },
         ],
       },

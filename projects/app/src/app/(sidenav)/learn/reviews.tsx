@@ -38,16 +38,13 @@ export default function ReviewsPage() {
     queryKey: [ReviewsPage.name, `nextNotYetDueSkillState`, id],
     queryFn: async () => {
       const now = new Date();
-      for await (const [
-        { skill },
-        skillState,
-      ] of r.queryPaged.skillState.byDue()) {
+      for await (const [, skillState] of r.queryPaged.skillState.byDue()) {
         if (skillState.due <= now) {
           continue;
         }
 
         try {
-          await generateQuestionForSkillOrThrow(skill);
+          await generateQuestionForSkillOrThrow(skillState.skill);
         } catch {
           continue;
         }

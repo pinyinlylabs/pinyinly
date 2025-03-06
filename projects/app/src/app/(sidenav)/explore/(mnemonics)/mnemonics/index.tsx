@@ -45,7 +45,11 @@ export default function MnemonicsPage() {
     async (r, tx) =>
       await fromAsync(r.query.pinyinInitialAssociation.scan(tx)).then(
         (x) =>
-          new Map(x.map(([key, value]) => [key.initial, value.name] as const)),
+          new Map(
+            x.map(([, { initial, name }]) => {
+              return [initial, name] as const;
+            }),
+          ),
       ),
   );
 
@@ -53,8 +57,7 @@ export default function MnemonicsPage() {
     [MnemonicsPage.name, `pinyinfinalAssociations`],
     async (r, tx) => {
       return await fromAsync(r.query.pinyinFinalAssociation.scan(tx)).then(
-        (x) =>
-          new Map(x.map(([key, value]) => [key.final, value.name] as const)),
+        (x) => new Map(x.map(([, { final, name }]) => [final, name] as const)),
       );
     },
   );
@@ -65,7 +68,7 @@ export default function MnemonicsPage() {
       return await fromAsync(r.query.pinyinInitialGroupTheme.scan(tx)).then(
         (x) =>
           new Map(
-            x.map(([key, value]) => [key.groupId, value.themeId] as const),
+            x.map(([, { groupId, themeId }]) => [groupId, themeId] as const),
           ),
       );
     },

@@ -51,10 +51,11 @@ void test(`skillId as key`, async (t) => {
     [hanziWordToEnglish(`好:good`), `he:好:good`],
   ] as const) {
     using tx = makeMockTx(t);
-    await posts.set(tx, { skill }, { text: `hello` });
+    await posts.set(tx, { skill }, { skill, text: `hello` });
     const [, marshaledData] = tx.set.mock.calls[0]!.arguments;
     tx.get.mock.mockImplementationOnce(async () => marshaledData);
     assert.deepEqual(await posts.get(tx, { skill }), {
+      skill,
       text: `hello`,
     });
     assert.equal(tx.get.mock.callCount(), 1);
@@ -85,10 +86,11 @@ void test(`skillType()`, async (t) => {
   ] as const) {
     using tx = makeMockTx(t);
 
-    await posts.set(tx, { id: `1` }, { skill: skillType });
+    await posts.set(tx, { id: `1` }, { id: `1`, skill: skillType });
     const [, marshaledData] = tx.set.mock.calls[0]!.arguments;
     tx.get.mock.mockImplementationOnce(async () => marshaledData);
     assert.deepEqual(await posts.get(tx, { id: `1` }), {
+      id: `1`,
       skill: skillType,
     });
   }
@@ -103,11 +105,10 @@ void test(`skillId()`, async (t) => {
   // Marshal and unmarshal round tripping
   for (const skill of [hanziWordToEnglish(`好:good`)] as const) {
     using tx = makeMockTx(t);
-    await posts.set(tx, { id: `1` }, { skill });
+    const id = `1`;
+    await posts.set(tx, { id }, { id, skill });
     const [, marshaledData] = tx.set.mock.calls[0]!.arguments;
     tx.get.mock.mockImplementationOnce(async () => marshaledData);
-    assert.deepEqual(await posts.get(tx, { id: `1` }), {
-      skill,
-    });
+    assert.deepEqual(await posts.get(tx, { id }), { id, skill });
   }
 });

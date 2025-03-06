@@ -1,5 +1,5 @@
 import { hsk1SkillReview } from "#client/query.ts";
-import { v5, v5Mutators } from "#data/rizzleSchema.ts";
+import { v6, v6Mutators } from "#data/rizzleSchema.ts";
 import { r } from "#util/rizzle.ts";
 import assert from "node:assert/strict";
 import test from "node:test";
@@ -15,8 +15,7 @@ const testReplicacheOptions = {
 
 void test(hsk1SkillReview.name, async () => {
   await test(`returns everything when no skills have state`, async () => {
-    await using rizzle = r.replicache(testReplicacheOptions, v5, v5Mutators);
-
+    await using rizzle = r.replicache(testReplicacheOptions, v6, v6Mutators);
     // Sanity check that there should be a bunch in the queue
     assert.ok((await hsk1SkillReview(rizzle)).length > 100);
   });

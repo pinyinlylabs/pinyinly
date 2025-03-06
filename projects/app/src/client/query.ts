@@ -38,28 +38,31 @@ export async function questionsForReview(
   const skillTypesFilter =
     options?.skillTypes != null ? new Set(options.skillTypes) : null;
 
-  for await (const [{ skill }, skillState] of r.queryPaged.skillState.byDue()) {
+  for await (const [, skillState] of r.queryPaged.skillState.byDue()) {
     // Only consider skills that are due for review.
     if (options?.dueBeforeNow === true && skillState.due > now) {
       continue;
     }
 
     // Only consider radical skills
-    if (skillTypesFilter != null && !skillTypesFilter.has(skill.type)) {
+    if (
+      skillTypesFilter != null &&
+      !skillTypesFilter.has(skillState.skill.type)
+    ) {
       continue;
     }
 
-    if (options?.filter && !options.filter(skill, skillState)) {
+    if (options?.filter && !options.filter(skillState.skill, skillState)) {
       continue;
     }
 
     try {
-      const question = await generateQuestionForSkillOrThrow(skill);
+      const question = await generateQuestionForSkillOrThrow(skillState.skill);
       question.flag ??= flagsForSkillState(skillState);
-      result.push([skill, skillState, question]);
+      result.push([skillState.skill, skillState, question]);
     } catch (e) {
       console.error(
-        `Error while generating a question for a skill ${JSON.stringify(skill)}`,
+        `Error while generating a question for a skill ${JSON.stringify(skillState.skill)}`,
         e,
       );
       continue;
@@ -137,9 +140,9 @@ export async function hsk1SkillReview(r: Rizzle): Promise<Skill[]> {
   const learnedSkills = await r.replicache.query(async (tx) => {
     const now = new Date();
     const res = new Set<MarshaledSkill>();
-    for await (const [k, v] of r.query.skillState.scan(tx)) {
+    for await (const [, v] of r.query.skillState.scan(tx)) {
       if (v.due > now) {
-        res.add(rSkillMarshal(k.skill));
+        res.add(rSkillMarshal(v.skill));
       }
     }
     return res;

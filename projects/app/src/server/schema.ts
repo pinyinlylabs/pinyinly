@@ -1,7 +1,7 @@
 import * as r from "@/data/rizzleSchema";
+import { nanoid } from "@/util/nanoid";
 import { sql } from "drizzle-orm";
 import * as pg from "drizzle-orm/pg-core";
-import { customAlphabet } from "nanoid";
 import { z } from "zod";
 import {
   rizzleCustomType,
@@ -11,11 +11,6 @@ import {
   sSkill,
   zodJson,
 } from "./schemaUtil";
-
-const alphabet = `0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz`;
-const length = 12;
-
-const nanoid = customAlphabet(alphabet, length);
 
 export const schema = pg.pgSchema(`haohaohow`);
 
