@@ -33,10 +33,14 @@ export const useSoundEffect = (source: AVPlaybackSource) => {
   const play = useEventCallback(() => {
     (async () => {
       const { sound } = await soundObject;
-      await sound.playAsync();
+      void sound.playAsync().catch((e: unknown) => {
+        console.error(`Failed in .playAsync()`, e);
+      });
       // Unmuting the sound immediately to avoid the start being cut off because
       // `onPlaybackStatusUpdate` is async.
-      await sound.setIsMutedAsync(false);
+      void sound.setIsMutedAsync(false).catch((e: unknown) => {
+        console.error(`Failed in .setIsMutedAsync(false)`, e);
+      });
     })().catch((e: unknown) => {
       console.error(`Failed to play sound`, e);
     });

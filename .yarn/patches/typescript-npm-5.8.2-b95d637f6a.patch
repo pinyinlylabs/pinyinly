@@ -1,8 +1,8 @@
 diff --git a/lib/lib.dom.d.ts b/lib/lib.dom.d.ts
-index a0d19a52c40a44bb9c94615481544074a628dbbf..c754a86799c9be5981bfad180247036f310a18ae 100644
+index edf900a5de22fd63305f87e32d5974716eda7ddd..5424fbf6e03778151b444b9907f35aab0e773370 100644
 --- a/lib/lib.dom.d.ts
 +++ b/lib/lib.dom.d.ts
-@@ -19431,7 +19431,7 @@ declare var Response: {
+@@ -19901,7 +19901,7 @@ declare var Response: {
      /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/Response/error_static) */
      error(): Response;
      /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/Response/json_static) */

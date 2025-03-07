@@ -229,11 +229,11 @@ interface RizzleObjectDef<T extends RizzleRawObject = RizzleRawObject>
   typeName: `object`;
 }
 
-interface RizzleIndexDefinition extends IndexDefinition {
-  marshal: (input: unknown) => string;
+interface RizzleIndexDefinition<T> extends IndexDefinition {
+  marshal: (input: T) => string;
 }
 
-type RizzleIndexDefinitions = Record<string, RizzleIndexDefinition>;
+type RizzleIndexDefinitions = Record<string, RizzleIndexDefinition<unknown>>;
 
 export class RizzleObject<T extends RizzleRawObject> extends RizzleType<
   RizzleObjectDef<T>,
@@ -459,7 +459,7 @@ export class RizzleEntity<
     return mapValues(this._def.valueType._getIndexes(), (v) => {
       const firstVarIndex = this._def.keyPath.indexOf(`[`);
       return {
-        // ...v,
+        ...v,
         jsonPointer: v.jsonPointer,
         allowEmpty: v.allowEmpty,
         prefix:
@@ -467,11 +467,7 @@ export class RizzleEntity<
             ? this._def.keyPath.slice(0, firstVarIndex)
             : this._def.keyPath,
       };
-    }) as {
-      [K in keyof RizzleIndexNamesAndValues<
-        EntityValueType<S>
-      >]: RizzleIndexDefinition;
-    };
+    }) as RizzleIndexTypes<EntityValueType<S>>;
   }
 
   marshalKey(input: EntityKeyType<S, KeyPath>[`_input`]) {
@@ -583,17 +579,35 @@ export type RizzleObjectOutput<T extends RizzleRawObject> = {
   [K in keyof T]: T[K][`_output`];
 };
 
-export type RizzleIndexNamesAndValues<T extends RizzleType> =
+export type RizzleIndexNames<T extends RizzleType> =
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   T extends RizzleIndexed<any, infer IndexName>
-    ? Record<IndexName, T[`_input`]>
+    ? IndexName
     : T extends RizzleTypeAlias<infer Wrapped>
-      ? RizzleIndexNamesAndValues<Wrapped>
+      ? RizzleIndexNames<Wrapped>
       : T extends RizzleNullable<infer Wrapped>
-        ? RizzleIndexNamesAndValues<Wrapped>
+        ? RizzleIndexNames<Wrapped>
         : T extends RizzleObject<infer Shape>
           ? {
-              [K in keyof Shape]: RizzleIndexNamesAndValues<Shape[K]>;
+              [K in keyof Shape]: RizzleIndexNames<Shape[K]>;
+            }[keyof Shape]
+          : never;
+
+export type RizzleIndexTypes<T extends RizzleType> = {
+  [K in RizzleIndexTypesInner<T> as K[0]]: K[1];
+};
+
+export type RizzleIndexTypesInner<T extends RizzleType> =
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  T extends RizzleIndexed<any, infer IndexName>
+    ? [IndexName, T[`_input`]]
+    : T extends RizzleTypeAlias<infer Wrapped>
+      ? RizzleIndexTypesInner<Wrapped>
+      : T extends RizzleNullable<infer Wrapped>
+        ? RizzleIndexTypesInner<Wrapped>
+        : T extends RizzleObject<infer Shape>
+          ? {
+              [K in keyof Shape]: RizzleIndexTypesInner<Shape[K]>;
             }[keyof Shape]
           : never;
 
@@ -664,9 +678,9 @@ export type RizzleReplicacheEntityMutate<T extends RizzleAnyEntity> =
 export type RizzleReplicacheEntityQuery<T extends RizzleAnyEntity> =
   T extends RizzleEntity<infer KeyPath, infer Schema>
     ? {
-        [K in keyof RizzleIndexNamesAndValues<T[`_def`][`valueType`]>]: (
+        [K in keyof RizzleIndexTypes<T[`_def`][`valueType`]>]: (
           tx: ReadTransaction,
-          indexValue?: RizzleIndexNamesAndValues<T[`_def`][`valueType`]>[K],
+          indexValue?: RizzleIndexTypes<T[`_def`][`valueType`]>[K],
         ) => RizzleScanResult<T>;
       } & Pick<T, `get` | `has`> & {
           scan: (
@@ -679,8 +693,8 @@ export type RizzleReplicacheEntityQuery<T extends RizzleAnyEntity> =
 export type RizzleReplicachePagedEntityQuery<T extends RizzleAnyEntity> =
   T extends RizzleEntity<infer KeyPath, infer Schema>
     ? {
-        [K in keyof RizzleIndexNamesAndValues<T[`_def`][`valueType`]>]: (
-          indexValue?: RizzleIndexNamesAndValues<T[`_def`][`valueType`]>[K],
+        [K in keyof RizzleIndexTypes<T[`_def`][`valueType`]>]: (
+          indexValue?: RizzleIndexTypes<T[`_def`][`valueType`]>[K],
         ) => RizzleScanResult<T>;
       } & {
         scan: (
@@ -845,8 +859,13 @@ const replicache = <
     Object.entries(schema).flatMap(([k, v]) =>
       v instanceof RizzleEntity
         ? Object.entries(
-            mapKeys(v.getIndexes(), (_v, indexName) => `${k}.${indexName}`),
-          )
+            v.getIndexes() as Record<string, RizzleIndexDefinition<unknown>>,
+            // mapKeys(v.getIndexes(), (_v, indexName) => `${k}.${indexName}`),
+          ).map(([indexName, { prefix, allowEmpty, jsonPointer }]) => [
+            `${k}.${indexName}`,
+            // Omit `marshal` and any other properties that replicache doesn't support.
+            { prefix, allowEmpty, jsonPointer },
+          ])
         : [],
     ),
   );
@@ -876,7 +895,10 @@ const replicache = <
                 },
                 // index scans
                 mapValues(
-                  e.getIndexes(),
+                  e.getIndexes() as Record<
+                    string,
+                    RizzleIndexDefinition<unknown>
+                  >,
                   (_v, indexName) => (tx: ReadTransaction, value: unknown) =>
                     indexScanIter(
                       tx,
@@ -886,6 +908,7 @@ const replicache = <
                           x as (typeof e)[`_def`][`valueType`][`_marshaled`],
                         ),
                       value != null ? _v.marshal(value) : undefined,
+                      true,
                     ),
                 ),
               ),
@@ -972,31 +995,21 @@ const replicache = <
                 },
                 // paged index scans
                 mapValues(
-                  e.getIndexes(),
-                  (_v, indexName) =>
-                    async function* (indexValue?: unknown) {
-                      const startKey =
-                        indexValue != null ? _v.marshal(indexValue) : undefined;
-
-                      for await (const val of indexScanPagedIter(
-                        (fn) => replicache.query(fn),
-                        `${k}.${indexName}`,
-                        (x) =>
-                          e.unmarshalValue(
-                            x as (typeof e)[`_def`][`valueType`][`_marshaled`],
-                          ),
-                        startKey,
-                      )) {
-                        // Enforce the `indexValue` filter if provided. Reading
-                        // from the index with `startKey` doesn't implement a
-                        // `stopKey`, so we need to break out of the loop when
-                        // needed.
-                        if (startKey != null && val[2] != startKey) {
-                          break;
-                        }
-                        yield val;
-                      }
-                    },
+                  e.getIndexes() as Record<
+                    string,
+                    RizzleIndexDefinition<unknown>
+                  >,
+                  (_v, indexName) => (indexValue?: unknown) =>
+                    indexScanPagedIter(
+                      (fn) => replicache.query(fn),
+                      `${k}.${indexName}`,
+                      (x) =>
+                        e.unmarshalValue(
+                          x as (typeof e)[`_def`][`valueType`][`_marshaled`],
+                        ),
+                      indexValue != null ? _v.marshal(indexValue) : undefined,
+                      true,
+                    ),
                 ),
               ),
             ],
@@ -1211,21 +1224,41 @@ export const keyPathVariableNames = <T extends string>(
   );
 };
 
-export async function* indexScanIter<V>(
+type IndexModeStartKey = [secondaryKey: string, primaryKey: string | undefined];
+
+async function* indexScanIter<V>(
   tx: ReadTransaction,
   indexName: string,
   unmarshalValue: (v: unknown) => V,
-  startKey?: string,
-): AsyncGenerator<[string, V, string]> {
+  startKey?: string | IndexModeStartKey,
+  endAfterStartKey?: boolean,
+): AsyncGenerator<[key: string, value: V, secondaryKey: string]> {
+  if (typeof startKey === `string`) {
+    // key must be passed an as array because we've passed
+    // `indexName`, check the replicache docs for details.
+    startKey = [startKey, undefined];
+  }
   try {
-    for await (const [[indexKey, key], value] of tx
+    for await (const [[secondaryKey, key], value] of tx
       .scan({
         indexName,
         start:
-          startKey != null ? { key: startKey, exclusive: true } : undefined,
+          startKey != null
+            ? {
+                key: startKey,
+                exclusive: startKey[1] != null,
+              }
+            : undefined,
       })
       .entries()) {
-      yield [key, unmarshalValue(value), indexKey];
+      if (
+        startKey != null &&
+        endAfterStartKey === true &&
+        secondaryKey !== startKey[0]
+      ) {
+        break;
+      }
+      yield [key, unmarshalValue(value), secondaryKey];
     }
   } catch (e) {
     diagnoseError(e);
@@ -1243,10 +1276,17 @@ export async function* indexScanPagedIter<Value>(
   indexName: string,
   unmarshalValue: (v: unknown) => Value,
   startKey?: string,
+  endAfterStartKey?: boolean,
 ): AsyncGenerator<readonly [key: string, value: Value, indexKey: string]> {
+  if (startKey == null) {
+    endAfterStartKey = undefined;
+  }
   const pageSize = 50;
   type Item = readonly [key: string, value: Value, indexKey: string];
   let page: Item[];
+
+  let indexStartKey: IndexModeStartKey | undefined =
+    startKey != null ? [startKey, undefined] : undefined;
 
   do {
     try {
@@ -1256,10 +1296,11 @@ export async function* indexScanPagedIter<Value>(
           tx,
           indexName,
           unmarshalValue,
-          startKey,
+          indexStartKey,
+          endAfterStartKey,
         )) {
           page.push(item);
-          startKey = item[2];
+          indexStartKey = [item[2], item[0]];
           if (page.length === pageSize) {
             break;
           }
