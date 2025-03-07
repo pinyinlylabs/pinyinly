@@ -221,7 +221,7 @@ export const v6 = {
   skillRating: r.entity(`sr/[id]`, {
     id: r.string().alias(`i`),
     skill: rSkill().alias(`s`).indexed(`bySkill`),
-    createdAt: r.datetime().alias(`c`),
+    createdAt: r.datetime().alias(`c`).indexed(`byCreatedAt`),
     rating: rFsrsRating.alias(`r`),
   }),
   skillState: r.entity(`s/[skill]`, {

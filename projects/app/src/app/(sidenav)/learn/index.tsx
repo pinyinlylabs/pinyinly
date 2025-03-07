@@ -6,8 +6,6 @@ import { invariant } from "@haohaohow/lib/invariant";
 import fromAsync from "array-from-async";
 import { differenceInCalendarDays } from "date-fns/differenceInCalendarDays";
 import { Link } from "expo-router";
-import reverse from "lodash/reverse";
-import sortBy from "lodash/sortBy";
 import { ScrollView, Text, View } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { tv } from "tailwind-variants";
@@ -17,9 +15,9 @@ export default function IndexPage() {
     [`IndexPage`, `recentCharacters`],
     async (r, tx) => {
       const recentHanziWords: HanziWord[] = [];
-      const ratingHistory = await fromAsync(r.query.skillRating.scan(tx)).then(
-        (reviews) => reverse(sortBy(reviews, ([, { createdAt }]) => createdAt)),
-      );
+      const ratingHistory = (
+        await fromAsync(r.query.skillRating.byCreatedAt(tx))
+      ).reverse();
       for (const [, { skill }] of ratingHistory) {
         if (`hanziWord` in skill) {
           if (!recentHanziWords.includes(skill.hanziWord)) {
@@ -37,9 +35,10 @@ export default function IndexPage() {
   const streakQuery = useRizzleQuery(
     [`IndexPage`, `streakQuery`],
     async (r, tx) => {
-      const ratingHistory = await fromAsync(r.query.skillRating.scan(tx)).then(
-        (reviews) => reverse(sortBy(reviews, ([, { createdAt }]) => createdAt)),
+      const allSkillRatings = await fromAsync(
+        r.query.skillRating.byCreatedAt(tx),
       );
+      const ratingHistory = allSkillRatings.reverse();
 
       const streakEnd = ratingHistory[0]?.[1].createdAt;
       let streakStart: Date | undefined;
