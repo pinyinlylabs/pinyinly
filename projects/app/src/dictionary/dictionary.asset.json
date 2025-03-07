@@ -393,7 +393,7 @@
 ["共:shared",{"gloss":["together with"],"pinyin":["gòng"],"example":"我们一起共度这段时间。","partOfSpeech":"preposition","definition":"Indicates being together or doing something jointly."}],
 ["共同:common",{"gloss":["common","shared"],"pinyin":["gòng tóng"],"example":"我们有一个共同的目标。","partOfSpeech":"adjective","definition":"Belonging to or shared by two or more individuals or things."}],
 ["共有:altogether",{"gloss":["altogether","in total"],"pinyin":["gòng yǒu"],"example":"我们共有三十个学生。","partOfSpeech":"adverb","definition":"In total; all together."}],
-["关:close",{"gloss":["close","shut"],"pinyin":["guān"],"example":"请把门关上。","partOfSpeech":"verb","definition":"To move so that an opening is covered."}],
+["关:close",{"gloss":["shut","close"],"pinyin":["guān"],"example":"请把门关上。","partOfSpeech":"verb","definition":"To move so that an opening is covered."}],
 ["关上:close",{"gloss":["close","shut","turn off"],"pinyin":["guān shàng"],"example":"把灯关上。","partOfSpeech":"verb","definition":"To move or turn to cover an opening or turn off a device."}],
 ["关心:concern",{"gloss":["be concerned about","care for"],"pinyin":["guān xīn"],"example":"父母很关心孩子。","partOfSpeech":"verb","definition":"To show concern or care for someone or something."}],
 ["关机:turnOffMachine",{"gloss":["turn off a machine"],"pinyin":["guān jī"],"example":"请关机。","partOfSpeech":"verb","definition":"To turn off a machine or device."}],
