@@ -271,12 +271,14 @@ export const v6 = {
     themeId: rMnemonicThemeId.alias(`t`),
     now: r.timestamp().alias(`n`),
   }),
-  reviewSkill: r.mutator({
-    id: r.string().alias(`i`),
-    skill: rSkill().alias(`s`),
-    rating: rFsrsRating.alias(`r`),
-    now: r.timestamp().alias(`n`),
-  }),
+  rateSkill: r
+    .mutator({
+      id: r.string().alias(`i`),
+      skill: rSkill().alias(`s`),
+      rating: rFsrsRating.alias(`r`),
+      now: r.timestamp().alias(`n`),
+    })
+    .alias(`reviewSkill`),
   initSkillState: r
     .mutator({
       skill: rSkill().alias(`s`),
@@ -311,8 +313,8 @@ export const v6Mutators: RizzleReplicacheMutators<typeof v6> = {
       );
     }
   },
-  async reviewSkill(tx, { id, skill, rating, now }) {
-    // Save a record of the review.
+  async rateSkill(tx, { id, skill, rating, now }) {
+    // Save a record of the rating.
     await tx.skillRating.set({ id }, { id, rating, skill, createdAt: now });
 
     const skillRatingsByDate = (

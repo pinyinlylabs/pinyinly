@@ -54,7 +54,7 @@ const mutators: RizzleDrizzleMutators<SupportedSchema, Drizzle> = {
       })
       .onConflictDoNothing();
   },
-  async reviewSkill(db, userId, { id, skill, rating, now }) {
+  async rateSkill(db, userId, { id, skill, rating, now }) {
     await db
       .insert(s.skillRating)
       .values([{ id, userId, skill, rating, createdAt: now }]);
