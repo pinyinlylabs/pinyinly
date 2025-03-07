@@ -149,6 +149,17 @@ export function sortComparatorString<T>(
   return (a, b) => fn(a).localeCompare(fn(b));
 }
 
+export function sortComparatorDate(): (a: Date, b: Date) => number;
+export function sortComparatorDate<T>(fn: (x: T) => Date): SortComparator<T>;
+export function sortComparatorDate<T>(fn?: (x: T) => Date): SortComparator<T> {
+  fn ??= (x) => x as unknown as Date;
+  return (aInput, bInput) => {
+    const a = fn(aInput);
+    const b = fn(bInput);
+    return a > b ? 1 : a < b ? -1 : 0;
+  };
+}
+
 export function mergeSortComparators<T>(
   ...comparators: SortComparator<T>[]
 ): SortComparator<T> {

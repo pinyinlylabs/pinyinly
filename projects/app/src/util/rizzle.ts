@@ -459,7 +459,7 @@ export class RizzleEntity<
     return mapValues(this._def.valueType._getIndexes(), (v) => {
       const firstVarIndex = this._def.keyPath.indexOf(`[`);
       return {
-        // ...v,
+        ...v,
         jsonPointer: v.jsonPointer,
         allowEmpty: v.allowEmpty,
         prefix:
@@ -845,8 +845,13 @@ const replicache = <
     Object.entries(schema).flatMap(([k, v]) =>
       v instanceof RizzleEntity
         ? Object.entries(
-            mapKeys(v.getIndexes(), (_v, indexName) => `${k}.${indexName}`),
-          )
+            v.getIndexes(),
+            // mapKeys(v.getIndexes(), (_v, indexName) => `${k}.${indexName}`),
+          ).map(([indexName, { prefix, allowEmpty, jsonPointer }]) => [
+            `${k}.${indexName}`,
+            // Omit `marshal` and any other properties that replicache doesn't support.
+            { prefix, allowEmpty, jsonPointer },
+          ])
         : [],
     ),
   );
@@ -886,6 +891,7 @@ const replicache = <
                           x as (typeof e)[`_def`][`valueType`][`_marshaled`],
                         ),
                       value != null ? _v.marshal(value) : undefined,
+                      true,
                     ),
                 ),
               ),
@@ -973,30 +979,17 @@ const replicache = <
                 // paged index scans
                 mapValues(
                   e.getIndexes(),
-                  (_v, indexName) =>
-                    async function* (indexValue?: unknown) {
-                      const startKey =
-                        indexValue != null ? _v.marshal(indexValue) : undefined;
-
-                      for await (const val of indexScanPagedIter(
-                        (fn) => replicache.query(fn),
-                        `${k}.${indexName}`,
-                        (x) =>
-                          e.unmarshalValue(
-                            x as (typeof e)[`_def`][`valueType`][`_marshaled`],
-                          ),
-                        startKey,
-                      )) {
-                        // Enforce the `indexValue` filter if provided. Reading
-                        // from the index with `startKey` doesn't implement a
-                        // `stopKey`, so we need to break out of the loop when
-                        // needed.
-                        if (startKey != null && val[2] != startKey) {
-                          break;
-                        }
-                        yield val;
-                      }
-                    },
+                  (_v, indexName) => (indexValue?: unknown) =>
+                    indexScanPagedIter(
+                      (fn) => replicache.query(fn),
+                      `${k}.${indexName}`,
+                      (x) =>
+                        e.unmarshalValue(
+                          x as (typeof e)[`_def`][`valueType`][`_marshaled`],
+                        ),
+                      indexValue != null ? _v.marshal(indexValue) : undefined,
+                      true,
+                    ),
                 ),
               ),
             ],
@@ -1211,21 +1204,41 @@ export const keyPathVariableNames = <T extends string>(
   );
 };
 
-export async function* indexScanIter<V>(
+type IndexModeStartKey = [secondaryKey: string, primaryKey: string | undefined];
+
+async function* indexScanIter<V>(
   tx: ReadTransaction,
   indexName: string,
   unmarshalValue: (v: unknown) => V,
-  startKey?: string,
-): AsyncGenerator<[string, V, string]> {
+  startKey?: string | IndexModeStartKey,
+  endAfterStartKey?: boolean,
+): AsyncGenerator<[key: string, value: V, secondaryKey: string]> {
+  if (typeof startKey === `string`) {
+    // key must be passed an as array because we've passed
+    // `indexName`, check the replicache docs for details.
+    startKey = [startKey, undefined];
+  }
   try {
-    for await (const [[indexKey, key], value] of tx
+    for await (const [[secondaryKey, key], value] of tx
       .scan({
         indexName,
         start:
-          startKey != null ? { key: startKey, exclusive: true } : undefined,
+          startKey != null
+            ? {
+                key: startKey,
+                exclusive: startKey[1] != null,
+              }
+            : undefined,
       })
       .entries()) {
-      yield [key, unmarshalValue(value), indexKey];
+      if (
+        startKey != null &&
+        endAfterStartKey === true &&
+        secondaryKey !== startKey[0]
+      ) {
+        break;
+      }
+      yield [key, unmarshalValue(value), secondaryKey];
     }
   } catch (e) {
     diagnoseError(e);
@@ -1243,10 +1256,17 @@ export async function* indexScanPagedIter<Value>(
   indexName: string,
   unmarshalValue: (v: unknown) => Value,
   startKey?: string,
+  endAfterStartKey?: boolean,
 ): AsyncGenerator<readonly [key: string, value: Value, indexKey: string]> {
+  if (startKey == null) {
+    endAfterStartKey = undefined;
+  }
   const pageSize = 50;
   type Item = readonly [key: string, value: Value, indexKey: string];
   let page: Item[];
+
+  let indexStartKey: IndexModeStartKey | undefined =
+    startKey != null ? [startKey, undefined] : undefined;
 
   do {
     try {
@@ -1256,10 +1276,11 @@ export async function* indexScanPagedIter<Value>(
           tx,
           indexName,
           unmarshalValue,
-          startKey,
+          indexStartKey,
+          endAfterStartKey,
         )) {
           page.push(item);
-          startKey = item[2];
+          indexStartKey = [item[2], item[0]];
           if (page.length === pageSize) {
             break;
           }

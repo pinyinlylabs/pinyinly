@@ -1,3 +1,4 @@
+import { nanoid } from "#util/nanoid.ts";
 import {
   ExtractVariableNames,
   keyPathVariableNames,
@@ -15,6 +16,7 @@ import {
 } from "#util/rizzle.ts";
 import { IsEqual } from "#util/types.ts";
 import mapValues from "lodash/mapValues";
+import shuffle from "lodash/shuffle";
 import assert from "node:assert/strict";
 import test, { TestContext } from "node:test";
 import {
@@ -655,7 +657,7 @@ void test(`.getIndexes()`, () => {
         name: r.string().indexed(`byAuthorName`),
       }),
     });
-    assert.deepEqual(posts.getIndexes(), {
+    assert.partialDeepStrictEqual(posts.getIndexes(), {
       byAuthorName: {
         allowEmpty: false,
         prefix: `foo`,
@@ -679,7 +681,7 @@ void test(`.getIndexes()`, () => {
         jsonPointer: `/author/name`,
       },
     });
-    assert.deepEqual(posts.getIndexes(), {
+    assert.partialDeepStrictEqual(posts.getIndexes(), {
       byAuthorName: {
         allowEmpty: false,
         prefix: `foo/`,
@@ -695,7 +697,7 @@ void test(`.getIndexes()`, () => {
       name: r.string().indexed(`byAuthorName`).nullable(),
     });
 
-    assert.deepEqual(posts.getIndexes(), {
+    assert.partialDeepStrictEqual(posts.getIndexes(), {
       byAuthorName: {
         allowEmpty: false,
         prefix: `foo/`,
@@ -711,7 +713,7 @@ void test(`.getIndexes()`, () => {
       name: r.string().alias(`n`).indexed(`byAuthorName`).nullable(),
     });
 
-    assert.deepEqual(posts.getIndexes(), {
+    assert.partialDeepStrictEqual(posts.getIndexes(), {
       byAuthorName: {
         allowEmpty: false,
         prefix: `foo/`,
@@ -727,7 +729,7 @@ void test(`.getIndexes()`, () => {
       name: r.string().indexed(`byAuthorName`).alias(`n`),
     });
 
-    assert.deepEqual(posts.getIndexes(), {
+    assert.partialDeepStrictEqual(posts.getIndexes(), {
       byAuthorName: {
         allowEmpty: false,
         prefix: `foo/`,
@@ -944,7 +946,7 @@ void test(`replicache()`, async (t) => {
         indexName: `posts.byTitle`,
         start: {
           exclusive: true,
-          key: `hello world`,
+          key: [`hello world`, `p/1`],
         },
       });
       return {
@@ -1318,7 +1320,7 @@ void test(`replicache() index scan`, async () => {
     version: `1`,
     text: r.entity(`text/[id]`, {
       id: r.string(),
-      body: r.string(`b`).indexed(`byCount`),
+      body: r.string(`b`).indexed(`byBody`),
     }),
     appendText: r
       .mutator({
@@ -1345,7 +1347,7 @@ void test(`replicache() index scan`, async () => {
 
   await db.replicache.query(async (tx) => {
     const results: unknown[] = [];
-    for await (const counter of db.query.text.byCount(tx)) {
+    for await (const counter of db.query.text.byBody(tx)) {
       results.push(counter);
     }
     assert.deepEqual(results, [
@@ -1353,6 +1355,81 @@ void test(`replicache() index scan`, async () => {
       [`text/2`, { id: `2`, body: `bbb` }, `bbb`],
     ]);
   });
+});
+
+void test(`replicache() index scan functional test`, async () => {
+  const schema = {
+    version: `1`,
+    text: r.entity(`text/[id]`, {
+      id: r.string(),
+      tag: r.string(`b`).indexed(`byTag`),
+    }),
+    upsertText: r.mutator({
+      id: r.string(),
+      tag: r.string(),
+    }),
+  };
+
+  await using db = r.replicache(testReplicacheOptions, schema, {
+    async upsertText(db, options) {
+      const { id, tag } = options;
+      await db.text.set({ id }, { id, tag });
+    },
+  });
+
+  // Test that the paged index scan correctly works when there are more items
+  // than the page size (50). This makes sure it paginates internally properly.
+  const tag1 = `aaa`;
+  const tag1Items: { id: string; tag: string }[] = [];
+  for (let i = 0; i < 120; i++) {
+    tag1Items.push({ id: `${i}`, tag: tag1 });
+  }
+  const otherItems = [];
+  for (let i = 120; i < 300; i++) {
+    otherItems.push({ id: `${i}`, tag: nanoid() });
+  }
+  const allItems = shuffle([...tag1Items, ...otherItems]);
+  // Insert the items shuffled so that we don't rely on the order of insertion
+  // and instead are testing the index actually works.
+  for (const item of allItems) {
+    await db.mutate.upsertText(item);
+  }
+
+  // Test index scan (unpaged)
+  await db.replicache.query(async (tx) => {
+    const results: unknown[] = [];
+    for await (const [_key, item] of db.query.text.byTag(tx, tag1)) {
+      results.push(item);
+    }
+    assert.deepEqual(new Set(results), new Set(tag1Items));
+  });
+
+  // Test index scan (paged)
+  {
+    const results: unknown[] = [];
+    for await (const [_key, item] of db.queryPaged.text.byTag(tag1)) {
+      results.push(item);
+    }
+    assert.deepEqual(new Set(results), new Set(tag1Items));
+  }
+
+  // Test entity scan (unpaged)
+  await db.replicache.query(async (tx) => {
+    const results: unknown[] = [];
+    for await (const [_key, item] of db.query.text.scan(tx)) {
+      results.push(item);
+    }
+    assert.deepEqual(new Set(results), new Set(allItems));
+  });
+
+  // Test entity scan (paged)
+  {
+    const results: unknown[] = [];
+    for await (const [_key, item] of db.queryPaged.text.scan()) {
+      results.push(item);
+    }
+    assert.deepEqual(new Set(results), new Set(allItems));
+  }
 });
 
 void test(`number()`, async (t) => {

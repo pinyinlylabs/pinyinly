@@ -1,4 +1,4 @@
-import { memoize0, weakMemoize1 } from "@/util/collections";
+import { memoize0, sortComparatorDate, weakMemoize1 } from "@/util/collections";
 import { nextReview, Rating, UpcomingReview } from "@/util/fsrs";
 import {
   invalid,
@@ -8,6 +8,7 @@ import {
   RizzleReplicacheMutators,
 } from "@/util/rizzle";
 import { invariant } from "@haohaohow/lib/invariant";
+import fromAsync from "array-from-async";
 import { z } from "zod";
 import {
   HanziWord,
@@ -314,12 +315,12 @@ export const v6Mutators: RizzleReplicacheMutators<typeof v6> = {
     // Save a record of the review.
     await tx.skillRating.set({ id }, { id, rating, skill, createdAt: now });
 
+    const skillRatingsByDate = (
+      await fromAsync(tx.skillRating.bySkill(skill))
+    ).sort(sortComparatorDate((x) => x[1].createdAt));
     let state: UpcomingReview | null = null;
-    for await (const [
-      _key,
-      { rating, createdAt: when },
-    ] of tx.skillRating.bySkill(skill)) {
-      state = nextReview(state, rating, when);
+    for (const [, { rating, createdAt }] of skillRatingsByDate) {
+      state = nextReview(state, rating, createdAt);
     }
 
     invariant(state !== null);
