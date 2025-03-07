@@ -229,11 +229,11 @@ interface RizzleObjectDef<T extends RizzleRawObject = RizzleRawObject>
   typeName: `object`;
 }
 
-interface RizzleIndexDefinition extends IndexDefinition {
-  marshal: (input: unknown) => string;
+interface RizzleIndexDefinition<T> extends IndexDefinition {
+  marshal: (input: T) => string;
 }
 
-type RizzleIndexDefinitions = Record<string, RizzleIndexDefinition>;
+type RizzleIndexDefinitions = Record<string, RizzleIndexDefinition<unknown>>;
 
 export class RizzleObject<T extends RizzleRawObject> extends RizzleType<
   RizzleObjectDef<T>,
@@ -467,11 +467,7 @@ export class RizzleEntity<
             ? this._def.keyPath.slice(0, firstVarIndex)
             : this._def.keyPath,
       };
-    }) as {
-      [K in keyof RizzleIndexNamesAndValues<
-        EntityValueType<S>
-      >]: RizzleIndexDefinition;
-    };
+    }) as RizzleIndexTypes<EntityValueType<S>>;
   }
 
   marshalKey(input: EntityKeyType<S, KeyPath>[`_input`]) {
@@ -583,17 +579,35 @@ export type RizzleObjectOutput<T extends RizzleRawObject> = {
   [K in keyof T]: T[K][`_output`];
 };
 
-export type RizzleIndexNamesAndValues<T extends RizzleType> =
+export type RizzleIndexNames<T extends RizzleType> =
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   T extends RizzleIndexed<any, infer IndexName>
-    ? Record<IndexName, T[`_input`]>
+    ? IndexName
     : T extends RizzleTypeAlias<infer Wrapped>
-      ? RizzleIndexNamesAndValues<Wrapped>
+      ? RizzleIndexNames<Wrapped>
       : T extends RizzleNullable<infer Wrapped>
-        ? RizzleIndexNamesAndValues<Wrapped>
+        ? RizzleIndexNames<Wrapped>
         : T extends RizzleObject<infer Shape>
           ? {
-              [K in keyof Shape]: RizzleIndexNamesAndValues<Shape[K]>;
+              [K in keyof Shape]: RizzleIndexNames<Shape[K]>;
+            }[keyof Shape]
+          : never;
+
+export type RizzleIndexTypes<T extends RizzleType> = {
+  [K in RizzleIndexTypesInner<T> as K[0]]: K[1];
+};
+
+export type RizzleIndexTypesInner<T extends RizzleType> =
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  T extends RizzleIndexed<any, infer IndexName>
+    ? [IndexName, T[`_input`]]
+    : T extends RizzleTypeAlias<infer Wrapped>
+      ? RizzleIndexTypesInner<Wrapped>
+      : T extends RizzleNullable<infer Wrapped>
+        ? RizzleIndexTypesInner<Wrapped>
+        : T extends RizzleObject<infer Shape>
+          ? {
+              [K in keyof Shape]: RizzleIndexTypesInner<Shape[K]>;
             }[keyof Shape]
           : never;
 
@@ -664,9 +678,9 @@ export type RizzleReplicacheEntityMutate<T extends RizzleAnyEntity> =
 export type RizzleReplicacheEntityQuery<T extends RizzleAnyEntity> =
   T extends RizzleEntity<infer KeyPath, infer Schema>
     ? {
-        [K in keyof RizzleIndexNamesAndValues<T[`_def`][`valueType`]>]: (
+        [K in keyof RizzleIndexTypes<T[`_def`][`valueType`]>]: (
           tx: ReadTransaction,
-          indexValue?: RizzleIndexNamesAndValues<T[`_def`][`valueType`]>[K],
+          indexValue?: RizzleIndexTypes<T[`_def`][`valueType`]>[K],
         ) => RizzleScanResult<T>;
       } & Pick<T, `get` | `has`> & {
           scan: (
@@ -679,8 +693,8 @@ export type RizzleReplicacheEntityQuery<T extends RizzleAnyEntity> =
 export type RizzleReplicachePagedEntityQuery<T extends RizzleAnyEntity> =
   T extends RizzleEntity<infer KeyPath, infer Schema>
     ? {
-        [K in keyof RizzleIndexNamesAndValues<T[`_def`][`valueType`]>]: (
-          indexValue?: RizzleIndexNamesAndValues<T[`_def`][`valueType`]>[K],
+        [K in keyof RizzleIndexTypes<T[`_def`][`valueType`]>]: (
+          indexValue?: RizzleIndexTypes<T[`_def`][`valueType`]>[K],
         ) => RizzleScanResult<T>;
       } & {
         scan: (
@@ -845,7 +859,7 @@ const replicache = <
     Object.entries(schema).flatMap(([k, v]) =>
       v instanceof RizzleEntity
         ? Object.entries(
-            v.getIndexes(),
+            v.getIndexes() as Record<string, RizzleIndexDefinition<unknown>>,
             // mapKeys(v.getIndexes(), (_v, indexName) => `${k}.${indexName}`),
           ).map(([indexName, { prefix, allowEmpty, jsonPointer }]) => [
             `${k}.${indexName}`,
@@ -881,7 +895,10 @@ const replicache = <
                 },
                 // index scans
                 mapValues(
-                  e.getIndexes(),
+                  e.getIndexes() as Record<
+                    string,
+                    RizzleIndexDefinition<unknown>
+                  >,
                   (_v, indexName) => (tx: ReadTransaction, value: unknown) =>
                     indexScanIter(
                       tx,
@@ -978,7 +995,10 @@ const replicache = <
                 },
                 // paged index scans
                 mapValues(
-                  e.getIndexes(),
+                  e.getIndexes() as Record<
+                    string,
+                    RizzleIndexDefinition<unknown>
+                  >,
                   (_v, indexName) => (indexValue?: unknown) =>
                     indexScanPagedIter(
                       (fn) => replicache.query(fn),

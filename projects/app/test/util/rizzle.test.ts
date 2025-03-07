@@ -5,7 +5,7 @@ import {
   r,
   RizzleCustom,
   RizzleIndexed,
-  RizzleIndexNamesAndValues,
+  RizzleIndexTypes,
   RizzleObject,
   RizzleObjectInput,
   RizzleObjectMarshaled,
@@ -533,6 +533,78 @@ void test(`entity() distinguishing between input/output types`, async (t) => {
       true satisfies IsEqual<typeof key, string>;
       true satisfies IsEqual<typeof value, { id: string; text: string }>;
     }
+  });
+});
+
+void test(`entity() multiple indexes types work`, async (t) => {
+  const posts = r.entity(`posts/[id]`, {
+    id: r.string().alias(`i`).indexed(`byId`),
+    date: r.datetime().alias(`d`).indexed(`byDate`),
+    text: r.string(),
+  });
+  const users = r.entity(`users/[id]`, {
+    id: r.string().alias(`i`).indexed(`byId`),
+  });
+
+  using tx = makeMockTx(t);
+
+  // index scan
+  typeChecks(async () => {
+    const schema = { posts, users };
+    const r = null as unknown as RizzleReplicache<typeof schema>;
+
+    type Value = { id: string; date: Date; text: string };
+
+    // byId()
+    for await (const [key, value] of r.query.posts.byId(tx)) {
+      true satisfies IsEqual<typeof key, string>;
+      true satisfies IsEqual<typeof value, Value>;
+    }
+    // byId(value)
+    for await (const [key, value] of r.query.posts.byId(tx, `1`)) {
+      true satisfies IsEqual<typeof key, string>;
+      true satisfies IsEqual<typeof value, Value>;
+    }
+    // @ts-expect-error number is the wrong type for the parameter
+    r.query.posts.byId(tx, 1);
+
+    // [paged] byId()
+    for await (const [key, value] of r.queryPaged.posts.byId()) {
+      true satisfies IsEqual<typeof key, string>;
+      true satisfies IsEqual<typeof value, Value>;
+    }
+    // [paged] byId(value)
+    for await (const [key, value] of r.queryPaged.posts.byId(`1`)) {
+      true satisfies IsEqual<typeof key, string>;
+      true satisfies IsEqual<typeof value, Value>;
+    }
+    // @ts-expect-error number is the wrong type for the parameter
+    r.queryPaged.posts.byId(tx, 1);
+
+    // byDate()
+    for await (const [key, value] of r.query.posts.byDate(tx)) {
+      true satisfies IsEqual<typeof key, string>;
+      true satisfies IsEqual<typeof value, Value>;
+    }
+    // byDate(value)
+    for await (const [key, value] of r.query.posts.byDate(tx, new Date())) {
+      true satisfies IsEqual<typeof key, string>;
+      true satisfies IsEqual<typeof value, Value>;
+    }
+    // @ts-expect-error number is the wrong type for the parameter
+    r.query.posts.byDate(tx, 1);
+    // [paged] byDate()
+    for await (const [key, value] of r.queryPaged.posts.byDate()) {
+      true satisfies IsEqual<typeof key, string>;
+      true satisfies IsEqual<typeof value, Value>;
+    }
+    // [paged] byDate(value)
+    for await (const [key, value] of r.queryPaged.posts.byDate(new Date())) {
+      true satisfies IsEqual<typeof key, string>;
+      true satisfies IsEqual<typeof value, Value>;
+    }
+    // @ts-expect-error number is the wrong type for the parameter
+    r.query.posts.byDate(tx, 1);
   });
 });
 
@@ -1503,33 +1575,24 @@ void test(`literal()`, async (t) => {
   assert.deepEqual(await posts.get(tx, { id }), { id, count: 5 });
 });
 
-typeChecks<RizzleIndexNamesAndValues<never>>(() => {
+typeChecks<RizzleIndexTypes<never>>(() => {
   true satisfies IsEqual<
-    RizzleIndexNamesAndValues<RizzleCustom<string, string>>,
-    never
-  >;
-
-  true satisfies IsEqual<
-    RizzleIndexNamesAndValues<
-      RizzleIndexed<RizzleCustom<Date, string>, `byDate`>
-    >,
+    RizzleIndexTypes<RizzleIndexed<RizzleCustom<Date, string>, `byDate`>>,
     { byDate: Date }
   >;
 
   true satisfies IsEqual<
-    RizzleIndexNamesAndValues<
+    RizzleIndexTypes<
       RizzleObject<{
         id: RizzleCustom<string, string>;
         date: RizzleIndexed<RizzleCustom<Date, string>, `byDate`>;
-        name: RizzleIndexed<RizzleCustom<number, string>, `byName`>;
+        name: RizzleIndexed<RizzleCustom<number, string>, `byNumber`>;
       }>
     >,
-    | {
-        byDate: Date;
-      }
-    | {
-        byName: number;
-      }
+    {
+      byDate: Date;
+      byNumber: number;
+    }
   >;
 });
 
