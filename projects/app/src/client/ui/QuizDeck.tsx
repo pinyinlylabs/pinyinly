@@ -125,16 +125,24 @@ export const QuizDeck = ({
       }
 
       for (const { skill, rating } of ratings) {
-        r.mutate
-          .reviewSkill({
-            id: nanoid(),
-            now: Date.now(),
-            skill,
-            rating,
-          })
-          .catch((e: unknown) => {
-            console.error(`Could not add skill review`, e);
-          });
+        // Schedule the update to happen in an idle period to avoid affecting UI
+        // responsiveness. Do each rating separately to avoid long tasks.
+        const now = Date.now();
+        requestIdleCallback(
+          () => {
+            void r.mutate
+              .rateSkill({
+                id: nanoid(),
+                now,
+                skill,
+                rating,
+              })
+              .catch((e: unknown) => {
+                console.error(`Could not add skill rating`, e);
+              });
+          },
+          { timeout: 2000 },
+        );
       }
 
       setStreakCount((prev) => (success ? prev + 1 : 0));

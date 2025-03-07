@@ -640,6 +640,7 @@ const ChoiceButton = ({
   });
 
   const text = textQuery.data ?? ``;
+  const charCount = useMemo(() => Array.from(text).length, [text]);
 
   return (
     <AnswerButton
@@ -648,7 +649,13 @@ const ChoiceButton = ({
       className="flex-1"
       textClassName={choiceButtonText({
         length:
-          text.length <= 20 ? `short` : text.length <= 40 ? `medium` : `long`,
+          charCount <= 5
+            ? `tiny`
+            : charCount <= 20
+              ? `short`
+              : charCount <= 40
+                ? `medium`
+                : `long`,
         className: choice.type === `hanzi` ? `font-normal` : undefined,
       })}
     >
@@ -664,6 +671,7 @@ const choiceButtonText = tv({
   base: `px-1`,
   variants: {
     length: {
+      tiny: `text-xl/tight lg:text-2xl/tight`,
       short: `text-lg/tight lg:text-xl/tight`,
       medium: `lg:text-lg/tight`,
       long: `text-xs lg:text-md/tight`,
