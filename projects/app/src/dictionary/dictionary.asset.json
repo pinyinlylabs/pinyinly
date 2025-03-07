@@ -1400,7 +1400,7 @@
 ["文明:civilization",{"gloss":["civilization","culture"],"pinyin":["wén míng"],"example":"我们要爱护环境，保持文明。","partOfSpeech":"noun","definition":"The society, culture, and way of life of a particular area."}],
 ["文章:article",{"gloss":["article","essay"],"pinyin":["wén zhāng"],"example":"这是一篇很好的文章。","partOfSpeech":"noun","definition":"A piece of writing included with others in a newspaper, magazine, or other publication."}],
 ["斗:measurement",{"gloss":["measurement"],"pinyin":["dǒu"],"partOfSpeech":"radical","definition":"Associated with measurement or quantities."}],
-["斤:catty",{"gloss":["jin","catty"],"pinyin":["jīn"],"example":"一斤苹果。","partOfSpeech":"measureWord","definition":"A measure word representing half a kilogram."}],
+["斤:catty",{"gloss":["500 grams","jin","catty"],"pinyin":["jīn"],"example":"一斤苹果。","partOfSpeech":"measureWord","definition":"A measure word representing half a kilogram."}],
 ["断:break",{"gloss":["break"],"pinyin":["duàn"],"example":"他不小心把笔断了。","partOfSpeech":"verb","definition":"To separate into parts, especially through force."}],
 ["新:new",{"gloss":["new"],"pinyin":["xīn"],"example":"这是一辆新车。","partOfSpeech":"adjective","definition":"Not existing before; made, introduced, or discovered recently or now for the first time."}],
 ["新年:newYear",{"gloss":["new year"],"pinyin":["xīn nián"],"example":"新年快乐！","partOfSpeech":"noun","definition":"The first day of the year in the Gregorian calendar."}],
