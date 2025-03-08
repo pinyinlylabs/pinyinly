@@ -1504,7 +1504,7 @@ void test(`replicache() index scan functional test`, async () => {
   }
 });
 
-void test(`replicache() index scan supports starting from non-existant values`, async () => {
+void test(`replicache() index scan supports starting from non-existent values`, async () => {
   const schema = {
     version: `1`,
     text: r.entity(`text/[id]`, {
