@@ -3,7 +3,6 @@ import { useRizzleQuery } from "@/client/ui/ReplicacheContext";
 import { HanziWord } from "@/data/model";
 import { hanziFromHanziWord } from "@/dictionary/dictionary";
 import { invariant } from "@haohaohow/lib/invariant";
-import fromAsync from "array-from-async";
 import { differenceInCalendarDays } from "date-fns/differenceInCalendarDays";
 import { Link } from "expo-router";
 import { ScrollView, Text, View } from "react-native";
@@ -16,7 +15,7 @@ export default function IndexPage() {
     async (r) => {
       const recentHanziWords: HanziWord[] = [];
       const ratingHistory = (
-        await fromAsync(r.queryPaged.skillRating.byCreatedAt())
+        await r.queryPaged.skillRating.byCreatedAt().toArray()
       ).reverse();
       for (const [, { skill }] of ratingHistory) {
         if (`hanziWord` in skill) {
@@ -35,10 +34,9 @@ export default function IndexPage() {
   const streakQuery = useRizzleQuery(
     [`IndexPage`, `streakQuery`],
     async (r) => {
-      const allSkillRatings = await fromAsync(
-        r.queryPaged.skillRating.byCreatedAt(),
-      );
-      const ratingHistory = allSkillRatings.reverse();
+      const ratingHistory = (
+        await r.queryPaged.skillRating.byCreatedAt().toArray()
+      ).reverse();
 
       const streakEnd = ratingHistory[0]?.[1].createdAt;
       let streakStart: Date | undefined;

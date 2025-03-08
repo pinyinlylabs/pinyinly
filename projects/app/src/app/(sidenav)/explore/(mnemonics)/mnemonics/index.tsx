@@ -1,7 +1,6 @@
 import { useRizzleQuery } from "@/client/ui/ReplicacheContext";
 import { loadMmPinyinChart } from "@/dictionary/dictionary";
 import { useQuery } from "@tanstack/react-query";
-import fromAsync from "array-from-async";
 import { Link } from "expo-router";
 import { Fragment } from "react";
 import { ScrollView, Text, View } from "react-native";
@@ -43,34 +42,44 @@ export default function MnemonicsPage() {
   const initialAssociationsQuery = useRizzleQuery(
     [MnemonicsPage.name, `pinyinInitialAssociations`],
     async (r, tx) =>
-      await fromAsync(r.query.pinyinInitialAssociation.scan(tx)).then(
-        (x) =>
-          new Map(
-            x.map(([, { initial, name }]) => {
-              return [initial, name] as const;
-            }),
-          ),
-      ),
+      await r.query.pinyinInitialAssociation
+        .scan(tx)
+        .toArray()
+        .then(
+          (x) =>
+            new Map(
+              x.map(([, { initial, name }]) => {
+                return [initial, name] as const;
+              }),
+            ),
+        ),
   );
 
   const finalAssociationsQuery = useRizzleQuery(
     [MnemonicsPage.name, `pinyinfinalAssociations`],
     async (r, tx) => {
-      return await fromAsync(r.query.pinyinFinalAssociation.scan(tx)).then(
-        (x) => new Map(x.map(([, { final, name }]) => [final, name] as const)),
-      );
+      return await r.query.pinyinFinalAssociation
+        .scan(tx)
+        .toArray()
+        .then(
+          (x) =>
+            new Map(x.map(([, { final, name }]) => [final, name] as const)),
+        );
     },
   );
 
   const initialGroupThemes = useRizzleQuery(
     [MnemonicsPage.name, `initialGroupThemes`],
     async (r, tx) => {
-      return await fromAsync(r.query.pinyinInitialGroupTheme.scan(tx)).then(
-        (x) =>
-          new Map(
-            x.map(([, { groupId, themeId }]) => [groupId, themeId] as const),
-          ),
-      );
+      return await r.query.pinyinInitialGroupTheme
+        .scan(tx)
+        .toArray()
+        .then(
+          (x) =>
+            new Map(
+              x.map(([, { groupId, themeId }]) => [groupId, themeId] as const),
+            ),
+        );
     },
   );
 
