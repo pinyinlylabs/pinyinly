@@ -1,50 +1,59 @@
-import { Audio, AVPlaybackSource } from "expo-av";
-import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { AudioSource, useAudioPlayer } from "expo-audio";
 import { useEventCallback } from "./util";
 
-export const useSoundEffect = (source: AVPlaybackSource) => {
-  const soundObject = useMemo(
-    () =>
-      Audio.Sound.createAsync(
-        source,
-        undefined,
-        // Keep the sound muted unless it's actually playing. Without this the
-        // sound would take focus of keyboard media keys (play/pause,
-        // next/previous).
-        (status) => {
-          if (status.isLoaded) {
-            const targetIsMuted = !status.isPlaying;
-            if (status.isMuted !== targetIsMuted) {
-              soundObject
-                .then(({ sound }) => sound.setIsMutedAsync(targetIsMuted))
-                .catch((e: unknown) => {
-                  console.error(
-                    `Failed to async set sound isMuted to ${targetIsMuted}`,
-                    e,
-                  );
-                });
-            }
-          }
-        },
-      ),
-    [source],
-  );
+const audioContext =
+  typeof AudioContext === `undefined` ? null : new AudioContext();
+
+export type UseSoundEffect = (source: AudioSource) => () => void;
+
+const useSoundEffectExpoAudio: UseSoundEffect = (source) => {
+  const player = useAudioPlayer(source);
 
   const play = useEventCallback(() => {
-    (async () => {
-      const { sound } = await soundObject;
-      void sound.playAsync().catch((e: unknown) => {
-        console.error(`Failed in .playAsync()`, e);
-      });
-      // Unmuting the sound immediately to avoid the start being cut off because
-      // `onPlaybackStatusUpdate` is async.
-      void sound.setIsMutedAsync(false).catch((e: unknown) => {
-        console.error(`Failed in .setIsMutedAsync(false)`, e);
-      });
-    })().catch((e: unknown) => {
-      console.error(`Failed to play sound`, e);
-    });
+    player.play();
   });
 
   return play;
 };
+
+// Use the Web Audio API on web (instead of expo-audio's <audio> element) so
+// that sound effects don't take Audio Focus and take control of the media keys
+// on the OS.
+const useSoundEffectWebApi: UseSoundEffect = (source) => {
+  const sourceUri = typeof source === `string` ? source : null;
+
+  // Download and cache the audio buffer.
+  const { data: audioBuffer } = useQuery({
+    queryKey: [`useSoundEffect`, sourceUri],
+    queryFn: async () => {
+      if (sourceUri == null) {
+        console.error(`failed to resolve URI for audio source`, source);
+        return null;
+      }
+
+      return await fetch(sourceUri)
+        .then((res) => res.arrayBuffer())
+        .then((arrayBuffer) => audioContext?.decodeAudioData(arrayBuffer));
+    },
+    // Don't refetch on browser blur->focus.
+    staleTime: Infinity,
+  });
+
+  const play = useEventCallback(() => {
+    if (audioBuffer != null && audioContext != null) {
+      const source = audioContext.createBufferSource();
+      source.buffer = audioBuffer;
+      source.connect(audioContext.destination);
+      source.onended = () => {
+        source.disconnect();
+      };
+      source.start();
+    }
+  });
+
+  return play;
+};
+
+export const useSoundEffect: UseSoundEffect =
+  audioContext == null ? useSoundEffectWebApi : useSoundEffectExpoAudio;
