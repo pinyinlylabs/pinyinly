@@ -124,25 +124,19 @@ export const QuizDeck = ({
         playSuccessSound();
       }
 
+      const now = Date.now();
+
       for (const { skill, rating } of ratings) {
-        // Schedule the update to happen in an idle period to avoid affecting UI
-        // responsiveness. Do each rating separately to avoid long tasks.
-        const now = Date.now();
-        requestIdleCallback(
-          () => {
-            void r.mutate
-              .rateSkill({
-                id: nanoid(),
-                now,
-                skill,
-                rating,
-              })
-              .catch((e: unknown) => {
-                console.error(`Could not add skill rating`, e);
-              });
-          },
-          { timeout: 2000 },
-        );
+        void r.mutate
+          .rateSkill({
+            id: nanoid(),
+            now,
+            skill,
+            rating,
+          })
+          .catch((e: unknown) => {
+            console.error(`Could not add skill rating`, e);
+          });
       }
 
       setStreakCount((prev) => (success ? prev + 1 : 0));
