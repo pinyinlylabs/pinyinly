@@ -982,16 +982,15 @@ const replicache = <
               Object.assign(
                 {
                   // prefix scan
-                  scan: (partialKey = {}) => {
-                    return scanPagedIter(
+                  scan: (partialKey = {}) =>
+                    scanPagedIter(
                       (fn) => replicache.query(fn),
                       e._def.interpolateKey(partialKey, true),
                       (x) =>
                         e.unmarshalValue(
                           x as (typeof e)[`_def`][`valueType`][`_marshaled`],
                         ),
-                    );
-                  },
+                    ),
                 },
                 // paged index scans
                 mapValues(
@@ -1267,6 +1266,32 @@ async function* indexScanIter<V>(
 }
 
 /**
+ * The maximum amount of time a paged scan iterator is allowed to run before
+ * yielding to the event loop.
+ */
+const pagedScanIterTimeoutMs = 2;
+
+/**
+ * A utility to yield to the event loop every `timeoutMs` milliseconds. This
+ * helps keep the UI responsive by spreading expensive tasks over multiple main
+ * loop ticks.
+ *
+ * The returned function needs to be called in a loop to be effective.
+ *
+ * @param timeoutMs
+ * @returns
+ */
+function eventLoopThrottle(timeoutMs: number) {
+  let deadline = performance.now() + timeoutMs;
+  return async () => {
+    if (performance.now() > deadline) {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      deadline = performance.now() + timeoutMs;
+    }
+  };
+}
+
+/**
  * Scan over an index in a paged manner. Each page uses a separate transaction
  * so it's safe to do expensive things while looping over the results without it
  * holding open a transaction for too long and risk having it prematurely close.
@@ -1281,6 +1306,7 @@ export async function* indexScanPagedIter<Value>(
   if (startKey == null) {
     endAfterStartKey = undefined;
   }
+  const checkEventLoop = eventLoopThrottle(pagedScanIterTimeoutMs);
   const pageSize = 50;
   type Item = readonly [key: string, value: Value, indexKey: string];
   let page: Item[];
@@ -1311,6 +1337,7 @@ export async function* indexScanPagedIter<Value>(
       throw e;
     }
     for (const entry of page) {
+      await checkEventLoop();
       yield entry;
     }
   } while (page.length > 0);
@@ -1346,8 +1373,9 @@ export async function* scanPagedIter<V>(
 ): AsyncGenerator<[key: string, value: V]> {
   type Item = [key: string, value: V];
   const pageSize = 50;
-  let page: Item[];
+  const checkEventLoop = eventLoopThrottle(pagedScanIterTimeoutMs);
 
+  let page: Item[];
   do {
     try {
       page = [];
@@ -1370,6 +1398,7 @@ export async function* scanPagedIter<V>(
       throw e;
     }
     for (const item of page) {
+      await checkEventLoop();
       yield item;
     }
   } while (page.length > 0);

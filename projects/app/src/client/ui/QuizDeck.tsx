@@ -127,8 +127,6 @@ export const QuizDeck = ({
       const now = Date.now();
 
       for (const { skill, rating } of ratings) {
-        // Schedule the update to happen in an idle period to avoid affecting UI
-        // responsiveness. Do each rating separately to avoid long tasks.
         void r.mutate
           .rateSkill({
             id: nanoid(),

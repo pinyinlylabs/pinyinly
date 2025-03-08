@@ -351,3 +351,7 @@ export const v6Mutators: RizzleReplicacheMutators<typeof v6> = {
     await tx.pinyinInitialGroupTheme.set({ groupId }, { groupId, themeId });
   },
 };
+
+export type SkillRating = NonNullable<
+  Awaited<ReturnType<typeof v6.skillRating.get>>
+>;

@@ -13,10 +13,10 @@ import { tv } from "tailwind-variants";
 export default function IndexPage() {
   const recentHanzi = useRizzleQuery(
     [`IndexPage`, `recentCharacters`],
-    async (r, tx) => {
+    async (r) => {
       const recentHanziWords: HanziWord[] = [];
       const ratingHistory = (
-        await fromAsync(r.query.skillRating.byCreatedAt(tx))
+        await fromAsync(r.queryPaged.skillRating.byCreatedAt())
       ).reverse();
       for (const [, { skill }] of ratingHistory) {
         if (`hanziWord` in skill) {
@@ -34,9 +34,9 @@ export default function IndexPage() {
 
   const streakQuery = useRizzleQuery(
     [`IndexPage`, `streakQuery`],
-    async (r, tx) => {
+    async (r) => {
       const allSkillRatings = await fromAsync(
-        r.query.skillRating.byCreatedAt(tx),
+        r.queryPaged.skillRating.byCreatedAt(),
       );
       const ratingHistory = allSkillRatings.reverse();
 
