@@ -2622,7 +2622,6 @@ __metadata:
     "@react-native-replicache/deep-freeze": "npm:^1.1.0"
     "@react-navigation/native": "npm:^7.0.0"
     "@react-navigation/stack": "npm:^7.0.0"
-    "@revenuecat/purchases-js": "npm:^0.18.0"
     "@sentry/core": "npm:~8.40.0"
     "@sentry/node": "npm:~8.40.0"
     "@sentry/profiling-node": "npm:~8.40.0"
@@ -4966,13 +4965,6 @@ __metadata:
   dependencies:
     web-streams-polyfill: "npm:^3.1.1"
   checksum: 10c0/5f59ba3a86832d146dcf59b92a4fb22a21f2f8c2843f0b814ef41605237498b8372240cf4efdcd86458a08d9451ef0574c3d127b6f82117f77ad6110034973d3
-  languageName: node
-  linkType: hard
-
-"@revenuecat/purchases-js@npm:^0.18.0":
-  version: 0.18.2
-  resolution: "@revenuecat/purchases-js@npm:0.18.2"
-  checksum: 10c0/92257ab82b9d8493db8bfdfcfb40c446607ec3e99894d8a1d62eb6e7e56368a0dffa63cf6789064a8ab8056608dd3c8ff807aad7725897d80c41877788b7fcd7
   languageName: node
   linkType: hard
 

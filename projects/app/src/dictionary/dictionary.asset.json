@@ -104,7 +104,7 @@
 ["东部:east",{"gloss":["east","eastern region"],"pinyin":["dōng bù"],"example":"城市的东部发展迅速。","partOfSpeech":"noun","definition":"The eastern region or part of a location."}],
 ["两:pair",{"gloss":["pair"],"pinyin":["liǎng"],"example":"我买了两本书。","partOfSpeech":"measureWord","definition":"Used as a measure word to indicate two of something; a pair."}],
 ["丨:line",{"gloss":["line"],"pinyin":["gǔn"],"partOfSpeech":"radical","definition":"Refers to a basic line, often used as a component in other characters."}],
-["个:things",{"gloss":["things"],"pinyin":["gè"],"example":"一个苹果。","partOfSpeech":"measureWord","definition":"A general measure word used for counting."}],
+["个:things",{"gloss":["thing"],"pinyin":["gè"],"example":"一个苹果。","partOfSpeech":"measureWord","definition":"A general measure word used for counting."}],
 ["个人:individual",{"gloss":["individual"],"pinyin":["gè rén"],"example":"这些意见是我的个人看法。","partOfSpeech":"noun","definition":"A single person as distinct from a group."}],
 ["个子:stature",{"gloss":["stature","height"],"pinyin":["gè zi"],"example":"他的个子很高。","partOfSpeech":"noun","definition":"The height or size of a person."}],
 ["个性:personality",{"gloss":["personality"],"pinyin":["gè xìng"],"example":"她的个性很开朗。","partOfSpeech":"noun","definition":"The combination of characteristics or qualities that form an individual's distinctive character."}],

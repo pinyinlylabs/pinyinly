@@ -56,4 +56,4 @@ const useSoundEffectWebApi: UseSoundEffect = (source) => {
 };
 
 export const useSoundEffect: UseSoundEffect =
-  audioContext == null ? useSoundEffectWebApi : useSoundEffectExpoAudio;
+  audioContext == null ? useSoundEffectExpoAudio : useSoundEffectWebApi;
