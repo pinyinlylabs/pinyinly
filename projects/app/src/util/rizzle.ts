@@ -1288,9 +1288,9 @@ function eventLoopThrottle(timeoutMs: number) {
   };
 }
 
-// Only allow a 6 ms budget for paged scans, this leaves 10 ms for everything
-// else in a frame to achieve 60 fps
-const scanPagedIterThrottle = eventLoopThrottle(6);
+// Enforce a fixed budget for paged scans, this leaves time for everything else
+// that needs to run within 16 ms in a frame to achieve 60 fps.
+const scanPagedIterThrottle = eventLoopThrottle(4);
 
 /**
  * Scan over an index in a paged manner. Each page uses a separate transaction
