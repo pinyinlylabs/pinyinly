@@ -4,7 +4,6 @@ import { SkillType } from "@/data/model";
 import { skillTypeToShorthand } from "@/data/skills";
 import { Rating } from "@/util/fsrs";
 import { useQuery } from "@tanstack/react-query";
-import fromAsync from "array-from-async";
 import reverse from "lodash/reverse";
 import sortBy from "lodash/sortBy";
 import { ScrollView, Text, View } from "react-native";
@@ -36,9 +35,12 @@ export default function HistoryPage() {
   const skillRatingsQuery = useRizzleQuery(
     [HistoryPage.name, `skillRatings`],
     async (r, tx) =>
-      fromAsync(r.query.skillRating.scan(tx)).then((reviews) =>
-        reverse(sortBy(reviews, ([, x]) => x.createdAt.getTime())),
-      ),
+      r.query.skillRating
+        .scan(tx)
+        .toArray()
+        .then((reviews) =>
+          reverse(sortBy(reviews, ([, x]) => x.createdAt.getTime())),
+        ),
   );
 
   return (

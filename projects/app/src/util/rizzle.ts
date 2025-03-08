@@ -5,6 +5,7 @@ import {
   weakMemoize1,
 } from "@/util/collections";
 import { invariant } from "@haohaohow/lib/invariant";
+import fromAsync from "array-from-async";
 import mapKeys from "lodash/mapKeys";
 import mapValues from "lodash/mapValues";
 import memoize from "lodash/memoize";
@@ -670,7 +671,7 @@ export type RizzleReplicacheMutate<S extends RizzleRawSchema> = {
 
 export type RizzleScanResult<T extends RizzleAnyEntity> = AsyncGenerator<
   [string, T[`_def`][`valueType`][`_output`]]
->;
+> & { toArray: () => Promise<[string, T[`_def`][`valueType`][`_output`]][]> };
 
 export type RizzleReplicacheEntityMutate<T extends RizzleAnyEntity> =
   T extends RizzleAnyEntity ? Pick<T, `set`> : never;
@@ -681,6 +682,11 @@ export type RizzleReplicacheEntityQuery<T extends RizzleAnyEntity> =
         [K in keyof RizzleIndexTypes<T[`_def`][`valueType`]>]: (
           tx: ReadTransaction,
           indexValue?: RizzleIndexTypes<T[`_def`][`valueType`]>[K],
+          /**
+           * If true (default), only return values that exactly match this
+           * value. When false all values gte this value are returned.
+           */
+          exact?: boolean,
         ) => RizzleScanResult<T>;
       } & Pick<T, `get` | `has`> & {
           scan: (
@@ -695,6 +701,11 @@ export type RizzleReplicachePagedEntityQuery<T extends RizzleAnyEntity> =
     ? {
         [K in keyof RizzleIndexTypes<T[`_def`][`valueType`]>]: (
           indexValue?: RizzleIndexTypes<T[`_def`][`valueType`]>[K],
+          /**
+           * If true (default), only return values that exactly match this
+           * value. When false all values gte this value are returned.
+           */
+          exact?: boolean,
         ) => RizzleScanResult<T>;
       } & {
         scan: (
@@ -882,16 +893,17 @@ const replicache = <
                   get: e.get.bind(e),
                   set: e.set.bind(e),
                   // prefix scan
-                  scan: (tx: ReadTransaction, partialKey = {}) => {
-                    return scanIter(
-                      tx,
-                      e._def.interpolateKey(partialKey, true),
-                      (x) =>
-                        e.unmarshalValue(
-                          x as (typeof e)[`_def`][`valueType`][`_marshaled`],
-                        ),
-                    );
-                  },
+                  scan: (tx: ReadTransaction, partialKey = {}) =>
+                    withToArray(
+                      scanIter(
+                        tx,
+                        e._def.interpolateKey(partialKey, true),
+                        (x) =>
+                          e.unmarshalValue(
+                            x as (typeof e)[`_def`][`valueType`][`_marshaled`],
+                          ),
+                      ),
+                    ),
                 },
                 // index scans
                 mapValues(
@@ -899,17 +911,20 @@ const replicache = <
                     string,
                     RizzleIndexDefinition<unknown>
                   >,
-                  (_v, indexName) => (tx: ReadTransaction, value: unknown) =>
-                    indexScanIter(
-                      tx,
-                      `${k}.${indexName}`,
-                      (x) =>
-                        e.unmarshalValue(
-                          x as (typeof e)[`_def`][`valueType`][`_marshaled`],
+                  (_v, indexName) =>
+                    (tx: ReadTransaction, value: unknown, exact = true) =>
+                      withToArray(
+                        indexScanIter(
+                          tx,
+                          `${k}.${indexName}`,
+                          (x) =>
+                            e.unmarshalValue(
+                              x as (typeof e)[`_def`][`valueType`][`_marshaled`],
+                            ),
+                          value != null ? _v.marshal(value) : undefined,
+                          exact,
                         ),
-                      value != null ? _v.marshal(value) : undefined,
-                      true,
-                    ),
+                      ),
                 ),
               ),
             ],
@@ -983,13 +998,15 @@ const replicache = <
                 {
                   // prefix scan
                   scan: (partialKey = {}) =>
-                    scanPagedIter(
-                      (fn) => replicache.query(fn),
-                      e._def.interpolateKey(partialKey, true),
-                      (x) =>
-                        e.unmarshalValue(
-                          x as (typeof e)[`_def`][`valueType`][`_marshaled`],
-                        ),
+                    withToArray(
+                      scanPagedIter(
+                        (fn) => replicache.query(fn),
+                        e._def.interpolateKey(partialKey, true),
+                        (x) =>
+                          e.unmarshalValue(
+                            x as (typeof e)[`_def`][`valueType`][`_marshaled`],
+                          ),
+                      ),
                     ),
                 },
                 // paged index scans
@@ -998,17 +1015,22 @@ const replicache = <
                     string,
                     RizzleIndexDefinition<unknown>
                   >,
-                  (_v, indexName) => (indexValue?: unknown) =>
-                    indexScanPagedIter(
-                      (fn) => replicache.query(fn),
-                      `${k}.${indexName}`,
-                      (x) =>
-                        e.unmarshalValue(
-                          x as (typeof e)[`_def`][`valueType`][`_marshaled`],
+                  (_v, indexName) =>
+                    (indexValue?: unknown, exact = true) =>
+                      withToArray(
+                        indexScanPagedIter(
+                          (fn) => replicache.query(fn),
+                          `${k}.${indexName}`,
+                          (x) =>
+                            e.unmarshalValue(
+                              x as (typeof e)[`_def`][`valueType`][`_marshaled`],
+                            ),
+                          indexValue != null
+                            ? _v.marshal(indexValue)
+                            : undefined,
+                          exact,
                         ),
-                      indexValue != null ? _v.marshal(indexValue) : undefined,
-                      true,
-                    ),
+                      ),
                 ),
               ),
             ],
@@ -1342,6 +1364,17 @@ export async function* indexScanPagedIter<Value>(
       yield entry;
     }
   } while (page.length > 0);
+}
+
+/**
+ * Helper to convert an async generator to an array (until Array.fromAsync is
+ * available in hermes).
+ * @param iter @returns
+ */
+function withToArray<T>(
+  iter: AsyncGenerator<T>,
+): AsyncGenerator<T> & { toArray: () => Promise<T[]> } {
+  return Object.assign(iter, { toArray: () => fromAsync(iter) });
 }
 
 export async function* scanIter<Value>(

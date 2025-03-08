@@ -8,7 +8,6 @@ import {
   RizzleReplicacheMutators,
 } from "@/util/rizzle";
 import { invariant } from "@haohaohow/lib/invariant";
-import fromAsync from "array-from-async";
 import { z } from "zod";
 import {
   HanziWord,
@@ -318,7 +317,7 @@ export const v6Mutators: RizzleReplicacheMutators<typeof v6> = {
     await tx.skillRating.set({ id }, { id, rating, skill, createdAt: now });
 
     const skillRatingsByDate = (
-      await fromAsync(tx.skillRating.bySkill(skill))
+      await tx.skillRating.bySkill(skill).toArray()
     ).sort(sortComparatorDate((x) => x[1].createdAt));
     let state: UpcomingReview | null = null;
     for (const [, { rating, createdAt }] of skillRatingsByDate) {

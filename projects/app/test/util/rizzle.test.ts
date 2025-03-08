@@ -1504,6 +1504,64 @@ void test(`replicache() index scan functional test`, async () => {
   }
 });
 
+void test(`replicache() index scan supports starting from non-existent values`, async () => {
+  const schema = {
+    version: `1`,
+    text: r.entity(`text/[id]`, {
+      id: r.string(),
+      tag: r.string(`b`).indexed(`byTag`),
+    }),
+    upsertText: r.mutator({
+      id: r.string(),
+      tag: r.string(),
+    }),
+  };
+
+  await using db = r.replicache(testReplicacheOptions, schema, {
+    async upsertText(db, options) {
+      const { id, tag } = options;
+      await db.text.set({ id }, { id, tag });
+    },
+  });
+
+  const allItems = shuffle([
+    { id: `1`, tag: `1` },
+    { id: `2`, tag: `2` },
+    { id: `4`, tag: `4` },
+    { id: `5`, tag: `5` },
+  ]);
+
+  // Insert the items shuffled so that we don't rely on the order of insertion
+  // and instead are testing the index actually works.
+  for (const item of allItems) {
+    await db.mutate.upsertText(item);
+  }
+
+  // Index scan (unpaged)
+  await db.replicache.query(async (tx) => {
+    assert.deepEqual(
+      new Set(
+        (await db.query.text.byTag(tx, `3`, false).toArray()).map((x) => x[1]),
+      ),
+      new Set([
+        { id: `4`, tag: `4` },
+        { id: `5`, tag: `5` },
+      ]),
+    );
+  });
+
+  // Index scan (paged)
+  assert.deepEqual(
+    new Set(
+      (await db.queryPaged.text.byTag(`3`, false).toArray()).map((x) => x[1]),
+    ),
+    new Set([
+      { id: `4`, tag: `4` },
+      { id: `5`, tag: `5` },
+    ]),
+  );
+});
+
 void test(`number()`, async (t) => {
   const posts = r.entity(`foo/[id]`, {
     id: r.string(),
