@@ -1,6 +1,5 @@
 import { MultipleChoiceQuestion, SkillRating } from "@/data/model";
-import { Asset } from "expo-asset";
-import { Audio } from "expo-av";
+import { setAudioModeAsync, useAudioPlayer } from "expo-audio";
 import chunk from "lodash/chunk";
 import {
   ElementRef,
@@ -31,42 +30,20 @@ export const QuizDeckMultipleChoiceQuestion = memo(
   }) {
     const { prompt, choices } = question;
     const [selectedChoice, setSelectedChoice] = useState<string>();
-    const [sound, setSound] = useState<Audio.Sound>();
-
-    async function playSound() {
-      const soundAsset = Asset.fromURI(
-        // `https://static-ruddy.vercel.app/speech/1/1-40525355adb34c563f09cf8ff2a4679a.aac`,
-        `https://static-ruddy.vercel.app/speech/1/2-1d2454055c29d34e69979f8873769672.aac`,
-        // `https://static-ruddy.vercel.app/speech/2/1-9bd7c3e09e439f99f0d761583f37c020.aac`,
-        // `https://static-ruddy.vercel.app/speech/2/2-44b3d90b3a91a4a75f7de0e63581cca6.aac`,
-      );
-
-      const { sound } = await Audio.Sound.createAsync(soundAsset);
-      try {
-        await Audio.setAudioModeAsync({ playsInSilentModeIOS: true });
-      } catch (e) {
-        console.error(`Could not set playsInSilentModeIOS: true`, e);
-      }
-      setSound(sound);
-      await sound.setRateAsync(2, true, Audio.PitchCorrectionQuality.High);
-      await sound.playAsync();
-    }
 
     useEffect(() => {
-      return sound
-        ? () => {
-            sound.unloadAsync().catch((e: unknown) => {
-              console.error(`Error unloading sound`, e);
-            });
-          }
-        : undefined;
-    }, [sound]);
-
-    useEffect(() => {
-      playSound().catch((e: unknown) => {
-        console.error(`Error playing sound`, e);
+      setAudioModeAsync({ playsInSilentMode: true }).catch((e: unknown) => {
+        console.error(`Error setting audio mode`, e);
       });
-    }, [selectedChoice]);
+    }, []);
+
+    const player = useAudioPlayer(
+      `https://static-ruddy.vercel.app/speech/1/2-1d2454055c29d34e69979f8873769672.aac`,
+    );
+
+    useEffect(() => {
+      player.play();
+    }, [player]);
 
     const choicesRows = chunk(choices, 2);
     const handleSubmit = () => {
