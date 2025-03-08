@@ -1266,12 +1266,6 @@ async function* indexScanIter<V>(
 }
 
 /**
- * The maximum amount of time a paged scan iterator is allowed to run before
- * yielding to the event loop.
- */
-const pagedScanIterTimeoutMs = 2;
-
-/**
  * A utility to yield to the event loop every `timeoutMs` milliseconds. This
  * helps keep the UI responsive by spreading expensive tasks over multiple main
  * loop ticks.
@@ -1282,14 +1276,21 @@ const pagedScanIterTimeoutMs = 2;
  * @returns
  */
 function eventLoopThrottle(timeoutMs: number) {
-  let deadline = performance.now() + timeoutMs;
+  let deadline: number | undefined;
   return async () => {
-    if (performance.now() > deadline) {
+    if (deadline != null && performance.now() > deadline) {
+      deadline = undefined;
+    }
+    if (deadline == null) {
       await new Promise((resolve) => setTimeout(resolve, 0));
-      deadline = performance.now() + timeoutMs;
+      deadline ??= performance.now() + timeoutMs;
     }
   };
 }
+
+// Only allow a 6 ms budget for paged scans, this leaves 10 ms for everything
+// else in a frame to achieve 60 fps
+const scanPagedIterThrottle = eventLoopThrottle(6);
 
 /**
  * Scan over an index in a paged manner. Each page uses a separate transaction
@@ -1306,7 +1307,6 @@ export async function* indexScanPagedIter<Value>(
   if (startKey == null) {
     endAfterStartKey = undefined;
   }
-  const checkEventLoop = eventLoopThrottle(pagedScanIterTimeoutMs);
   const pageSize = 50;
   type Item = readonly [key: string, value: Value, indexKey: string];
   let page: Item[];
@@ -1315,6 +1315,7 @@ export async function* indexScanPagedIter<Value>(
     startKey != null ? [startKey, undefined] : undefined;
 
   do {
+    await scanPagedIterThrottle();
     try {
       page = [];
       await query(async (tx) => {
@@ -1337,7 +1338,7 @@ export async function* indexScanPagedIter<Value>(
       throw e;
     }
     for (const entry of page) {
-      await checkEventLoop();
+      await scanPagedIterThrottle();
       yield entry;
     }
   } while (page.length > 0);
@@ -1373,10 +1374,10 @@ export async function* scanPagedIter<V>(
 ): AsyncGenerator<[key: string, value: V]> {
   type Item = [key: string, value: V];
   const pageSize = 50;
-  const checkEventLoop = eventLoopThrottle(pagedScanIterTimeoutMs);
 
   let page: Item[];
   do {
+    await scanPagedIterThrottle();
     try {
       page = [];
       await query(async (tx) => {
@@ -1398,7 +1399,7 @@ export async function* scanPagedIter<V>(
       throw e;
     }
     for (const item of page) {
-      await checkEventLoop();
+      await scanPagedIterThrottle();
       yield item;
     }
   } while (page.length > 0);
