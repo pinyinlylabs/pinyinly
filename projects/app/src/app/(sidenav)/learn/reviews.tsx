@@ -24,7 +24,7 @@ export default function ReviewsPage() {
     setVisible(true);
   }, []);
 
-  useTimeout(show, 2000);
+  useTimeout(show, 500);
 
   const questions2 = useQuery({
     queryKey: [ReviewsPage.name, `hsk1SkillReview`, id],
