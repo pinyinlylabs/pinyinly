@@ -962,7 +962,11 @@ void test(`idsNodeToString roundtrips`, () => {
 });
 
 void test(`dictionary contains entries for decomposition`, async () => {
-  const unknownHanzi = new Map<
+  const unknownCharacters = new Map<
+    /* hanzi */ string,
+    /* sources */ Set<HanziWord>
+  >();
+  const unknownComponents = new Map<
     /* hanzi */ string,
     /* sources */ Set<HanziWord>
   >();
@@ -971,13 +975,13 @@ void test(`dictionary contains entries for decomposition`, async () => {
     for (const character of Array.from(hanzi)) {
       const lookup = await lookupHanzi(character);
       if (lookup.length === 0) {
-        mapSetAdd(unknownHanzi, character, hanzi);
+        mapSetAdd(unknownCharacters, character, hanzi);
       }
 
       for (const component of await hanziToLearnForHanzi([character])) {
         const lookup = await lookupHanzi(component);
         if (lookup.length === 0) {
-          mapSetAdd(unknownHanzi, component, character);
+          mapSetAdd(unknownComponents, component, character);
         }
       }
     }
@@ -986,9 +990,12 @@ void test(`dictionary contains entries for decomposition`, async () => {
   // There's not much value in learning components that are only used once, so
   // we only test that there are dictionary entries for components that are used
   // multiple times.
-  const unknownWithMultipleSources = [...unknownHanzi].filter(
-    ([, sources]) => sources.size >= 3,
-  );
+  const unknownWithMultipleSources = [
+    // always learn characters of a word
+    ...unknownCharacters,
+    // only learn components that are used at least 3 times
+    ...[...unknownComponents].filter(([, sources]) => sources.size >= 3),
+  ];
 
   assert.deepEqual(unknownWithMultipleSources, []);
 });
