@@ -2,14 +2,12 @@ import {
   buildHanziWord,
   characterHasGlyph,
   hanziFromHanziWord,
+  hanziToLearnForHanzi,
   loadDictionary,
-  loadHanziDecomposition,
   loadStandardPinyinChart,
   lookupHanziWord,
   meaningKeyFromHanziWord,
-  parseIds,
   splitPinyin,
-  walkIdsNode,
 } from "@/dictionary/dictionary";
 import { invariant } from "@haohaohow/lib/invariant";
 import { HanziWord, HanziWordSkill, Skill, SkillType } from "./model";
@@ -88,33 +86,9 @@ export async function skillDependencies(
     }
     case SkillType.HanziWordToEnglish: {
       // Learn the components of a hanzi word first.
-      const decompositions = await loadHanziDecomposition();
-      const hanzi = Array.from(hanziFromHanziWord(skill.hanziWord));
-
-      // For multi-character hanzi, learn each character, but for for
-      // single-character hanzi, decompose it into radicals and learn those.
-      const hanziToLearn = [];
-      if (hanzi.length > 1) {
-        for (const char of hanzi) {
-          hanziToLearn.push(char);
-        }
-      } else {
-        for (const char of hanzi) {
-          const ids = decompositions.get(char);
-          if (ids != null) {
-            const idsNode = parseIds(ids);
-            for (const leaf of walkIdsNode(idsNode)) {
-              if (
-                leaf.type === `LeafCharacter` &&
-                leaf.character !== char // todo turn into invariant?
-              ) {
-                hanziToLearn.push(leaf.character);
-              }
-            }
-          }
-        }
-      }
-
+      const hanziToLearn = await hanziToLearnForHanzi(
+        Array.from(hanziFromHanziWord(skill.hanziWord)),
+      );
       for (const hanzi of hanziToLearn) {
         if (await characterHasGlyph(hanzi)) {
           // TODO: need to a better way to choose the meaning key.
@@ -277,10 +251,17 @@ export function englishToHanziWord(hanziWord: HanziWord): HanziWordSkill {
   };
 }
 
-export function skillReviewQueue(graph: SkillLearningGraph): MarshaledSkill[] {
+export function skillReviewQueue({
+  graph,
+  isSkillDue,
+}: {
+  graph: SkillLearningGraph;
+  isSkillDue: (skill: MarshaledSkill) => boolean;
+}): MarshaledSkill[] {
   // Kahn topological sort
   const inDegree = new Map<MarshaledSkill, number>();
   const queue: MarshaledSkill[] = [];
+  const learningOrderDue: MarshaledSkill[] = [];
   const learningOrder: MarshaledSkill[] = [];
 
   // Compute in-degree
@@ -305,7 +286,11 @@ export function skillReviewQueue(graph: SkillLearningGraph): MarshaledSkill[] {
   while (queue.length > 0) {
     const skill = queue.shift();
     invariant(skill != null);
-    learningOrder.push(skill);
+    if (isSkillDue(skill)) {
+      learningOrderDue.push(skill);
+    } else {
+      learningOrder.push(skill);
+    }
 
     const node = graph.get(skill);
     invariant(node != null);
@@ -320,7 +305,7 @@ export function skillReviewQueue(graph: SkillLearningGraph): MarshaledSkill[] {
     }
   }
 
-  return learningOrder.reverse();
+  return [...learningOrder, ...learningOrderDue].reverse();
 }
 
 const skillTypeShorthandMapping: Record<SkillType, string> = {

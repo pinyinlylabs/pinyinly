@@ -126,6 +126,7 @@ function flagsForSkillState(
     };
   }
   const now = new Date();
+  // Something is overdue if its due date was more than 1 day ago.
   const overdueDate = new Date(skillState.due.getTime() + 24 * 60 * 60 * 1000);
 
   if (now >= overdueDate) {
@@ -137,17 +138,19 @@ function flagsForSkillState(
 }
 
 export async function hsk1SkillReview(r: Rizzle): Promise<Skill[]> {
-  const learnedSkills = await r.replicache.query(async (tx) => {
-    const now = new Date();
-    const res = new Set<MarshaledSkill>();
-    for await (const [, v] of r.query.skillState.scan(tx)) {
-      if (v.due > now) {
-        res.add(rSkillMarshal(v.skill));
-      }
+  const now = new Date();
+  const learnedSkills = new Set<MarshaledSkill>();
+  const dueSkills = new Set<MarshaledSkill>();
+  for await (const [, v] of r.queryPaged.skillState.scan()) {
+    const skillId = rSkillMarshal(v.skill);
+    if (v.due >= now) {
+      learnedSkills.add(skillId);
+    } else {
+      dueSkills.add(skillId);
     }
-    return res;
-  });
+  }
 
+  // TODO: change to be based on the user's actual learning targets.
   const hsk1HanziWords = await allHsk1HanziWords();
 
   const graph = await skillLearningGraph({
@@ -155,5 +158,8 @@ export async function hsk1SkillReview(r: Rizzle): Promise<Skill[]> {
     isSkillLearned: (skill) => learnedSkills.has(skill),
   });
 
-  return skillReviewQueue(graph).map((s) => rSkillUnmarshal(s));
+  return skillReviewQueue({
+    graph,
+    isSkillDue: (skill) => dueSkills.has(skill),
+  }).map((s) => rSkillUnmarshal(s));
 }

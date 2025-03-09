@@ -291,7 +291,7 @@ void test(skillReviewQueue.name, async () => {
       targetSkills: [],
       isSkillLearned: () => false,
     });
-    assert.deepEqual(skillReviewQueue(graph), []);
+    assert.deepEqual(skillReviewQueue({ graph, isSkillDue: () => false }), []);
   });
 
   await test(`works for 好`, async () => {
@@ -299,7 +299,7 @@ void test(skillReviewQueue.name, async () => {
       targetSkills: [hanziWordToEnglish(`好:good`)],
       isSkillLearned: () => false,
     });
-    assert.deepEqual(skillReviewQueue(graph), [
+    assert.deepEqual(skillReviewQueue({ graph, isSkillDue: () => false }), [
       rSkillMarshal(hanziWordToEnglish(`子:child`)),
       rSkillMarshal(hanziWordToEnglish(`女:woman`)),
       rSkillMarshal(hanziWordToEnglish(`好:good`)),
@@ -313,9 +313,35 @@ void test(skillReviewQueue.name, async () => {
         [rSkillMarshal(hanziWordToEnglish(`子:child`))].includes(skill),
     });
 
-    assert.deepEqual(skillReviewQueue(graph), [
+    assert.deepEqual(skillReviewQueue({ graph, isSkillDue: () => false }), [
       rSkillMarshal(hanziWordToEnglish(`女:woman`)),
       rSkillMarshal(hanziWordToEnglish(`好:good`)),
     ]);
+  });
+
+  await test(`prioritises due skills with highest value (not most overdue)`, async () => {
+    debugger;
+    const graph = await skillLearningGraph({
+      targetSkills: [hanziWordToEnglish(`分:divide`)],
+      isSkillLearned: () => false,
+    });
+
+    assert.deepEqual(
+      skillReviewQueue({
+        graph,
+        isSkillDue: (skill) =>
+          [
+            rSkillMarshal(hanziWordToEnglish(`八:eight`)),
+            rSkillMarshal(hanziWordToEnglish(`刀:knife`)),
+          ].includes(skill),
+      }),
+      [
+        rSkillMarshal(hanziWordToEnglish(`刀:knife`)),
+        rSkillMarshal(hanziWordToEnglish(`八:eight`)),
+        rSkillMarshal(hanziWordToEnglish(`丿:slash`)),
+        rSkillMarshal(hanziWordToEnglish(`𠃌:radical`)),
+        rSkillMarshal(hanziWordToEnglish(`分:divide`)),
+      ],
+    );
   });
 });
