@@ -137,6 +137,12 @@ export const expo = {
         url: `https://sentry.io/`,
       },
     ],
+    [
+      `expo-dev-client`,
+      {
+        launchMode: `most-recent`,
+      },
+    ],
     `expo-apple-authentication`,
     `expo-asset`,
     `expo-font`,

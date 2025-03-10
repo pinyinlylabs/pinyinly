@@ -40,6 +40,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { tv } from "tailwind-variants";
 import { AnswerButton } from "./AnswerButton";
 import { HanziText } from "./HanziText";
+import { NewSkillModal } from "./NewSkillModal";
 import { RectButton2 } from "./RectButton2";
 import { PropsOf } from "./types";
 
@@ -248,6 +249,9 @@ export const QuizDeckOneCorrectPairQuestion = memo(
           />
         }
       >
+        {flag?.type === QuestionFlagType.NewSkill ? (
+          <NewSkillModal skill={question.answer.a.skill} />
+        ) : null}
         {flag != null ? <FlagText flag={flag} /> : null}
         <View>
           <Text className="text-xl font-bold text-text">{prompt}</Text>
