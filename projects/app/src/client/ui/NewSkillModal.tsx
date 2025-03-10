@@ -31,12 +31,12 @@ export const NewSkillModal = ({ skill }: { skill: Skill }) => {
         setIsModalVisible(false);
       }}
     >
-      <View className="rounded-lg bg-primary-3">
+      <View className="max-h-[400px] w-[500px] flex-1 grow rounded-lg bg-primary-3 px-4 py-4">
         {hanziWord == null || hanziWordSkillData.data == null ? (
           <Text className="text-text">Not implemented</Text>
         ) : (
           <>
-            <View className="success-theme mx-2 flex-row items-center gap-2 self-center py-4">
+            <View className="success-theme flex-row items-center gap-2">
               <Image
                 source={require(`@/assets/icons/plant-filled.svg`)}
                 className="h-[48px] w-[48px] flex-shrink text-accent-10"
@@ -46,24 +46,46 @@ export const NewSkillModal = ({ skill }: { skill: Skill }) => {
                 New Word
               </Text>
             </View>
-            <View className="flex-column mx-4 gap-1">
-              <Text className="center text-center text-2xl text-text">
-                {hanziFromHanziWord(hanziWord)}
-                {` `}
-                <Text className="text-lg text-primary-9">
-                  {hanziWordSkillData.data.pinyin?.[0]?.split(` `).join(``)}
+
+            <View className="flex-column my-4 gap-4">
+              <View className="flex-row items-center">
+                <Text className="text-2xl text-text">
+                  {hanziFromHanziWord(hanziWord)}
                   {` `}
-                  {hanziWordSkillData.data.gloss[0]}
                 </Text>
-              </Text>
-              <Text className="text-center text-text">
-                {hanziWordSkillData.data.definition}
-              </Text>
+                <Text className="text-lg font-bold text-text">
+                  ({hanziWordSkillData.data.pinyin?.[0]?.split(` `).join(``)}
+                  {`, `}
+                  {hanziWordSkillData.data.gloss[0]})
+                </Text>
+              </View>
+
+              <View className="gap-1">
+                <Text className="font-karla font-medium uppercase text-primary-9">
+                  Definition
+                </Text>
+                <Text className="font-karla text-text">
+                  {hanziWordSkillData.data.definition}
+                </Text>
+              </View>
+
+              {hanziWordSkillData.data.gloss.length === 1 ? null : (
+                <View className="gap-1">
+                  <Text className="font-karla font-medium uppercase text-primary-9">
+                    Synonyms
+                  </Text>
+                  <Text className="font-karla text-text">
+                    {hanziWordSkillData.data.gloss.slice(1).join(`, `)}
+                  </Text>
+                </View>
+              )}
             </View>
           </>
         )}
 
-        <View className="mx-4 my-4">
+        <View className="flex-1" />
+
+        <View className="">
           <RectButton2
             variant="filled"
             accent
