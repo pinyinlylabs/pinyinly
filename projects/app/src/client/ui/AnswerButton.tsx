@@ -1,4 +1,3 @@
-import { cssInterop } from "nativewind";
 import { ElementRef, forwardRef, useEffect, useState } from "react";
 import { Pressable, Text, View, ViewProps } from "react-native";
 import Animated, {
@@ -11,6 +10,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { tv } from "tailwind-variants";
+import { AnimatedPressable } from "./AnimatedPressable";
 import { PropsOf } from "./types";
 import { hapticImpactIfMobile } from "./util";
 
@@ -24,9 +24,6 @@ export type AnswerButtonProps = {
   textClassName?: string;
   disabled?: boolean;
 } & Omit<PropsOf<typeof Pressable>, `children` | `disabled`>;
-
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
-cssInterop(AnimatedPressable, { className: `style` });
 
 export const AnswerButton = forwardRef<
   ElementRef<typeof Pressable>,
@@ -78,30 +75,31 @@ export const AnswerButton = forwardRef<
       switch (state) {
         case `default`:
           setBgFilled(false);
-          bgScale.value = 0.5;
-          bgOpacity.value = 0;
+          bgScale.set(0.5);
+          bgOpacity.set(0);
           break;
         case `selected`: {
-          scale.value = withClamp({ min: 1 }, withScaleAnimation());
-          bgScale.value = withClamp({ max: 1 }, withScaleAnimation());
-          bgOpacity.value = withTiming(1, { duration: 100 * animationFactor });
+          scale.set(withClamp({ min: 1 }, withScaleAnimation()));
+          bgScale.set(withClamp({ max: 1 }, withScaleAnimation()));
+          bgOpacity.set(withTiming(1, { duration: 100 * animationFactor }));
           break;
         }
         case `error`: {
-          scale.value = withClamp({ min: 1 }, withScaleAnimation());
-          bgScale.value = withClamp({ max: 1 }, withScaleAnimation());
-          bgOpacity.value = withTiming(1, { duration: 100 * animationFactor });
+          scale.set(withClamp({ min: 1 }, withScaleAnimation()));
+          bgScale.set(withClamp({ max: 1 }, withScaleAnimation()));
+          bgOpacity.set(withTiming(1, { duration: 100 * animationFactor }));
           break;
         }
         case `success`: {
-          scale.value = withClamp({ min: scale.value }, withScaleAnimation());
-          bgScale.value = withClamp(
-            { min: bgScale.value, max: 1 },
-            withScaleAnimation(),
+          scale.set(withClamp({ min: scale.get() }, withScaleAnimation()));
+          bgScale.set(
+            withClamp({ min: bgScale.get(), max: 1 }, withScaleAnimation()),
           );
-          bgOpacity.value = withClamp(
-            { min: bgOpacity.value },
-            withTiming(1, { duration: 100 * animationFactor }),
+          bgOpacity.set(
+            withClamp(
+              { min: bgOpacity.get() },
+              withTiming(1, { duration: 100 * animationFactor }),
+            ),
           );
           break;
         }
@@ -112,7 +110,7 @@ export const AnswerButton = forwardRef<
   // When the background scale reaches 100% update `bgFilled` to make the border
   // bright.
   useAnimatedReaction(
-    () => bgScale.value,
+    () => bgScale.get(),
     (currentValue, previousValue) => {
       if (currentValue < 1 && (previousValue === null || previousValue >= 1)) {
         runOnJS(setBgFilled)(false);
@@ -123,7 +121,7 @@ export const AnswerButton = forwardRef<
         runOnJS(setBgFilled)(true);
       }
     },
-    [bgScale.value],
+    [bgScale],
   );
 
   const flat = pressed || disabled;
