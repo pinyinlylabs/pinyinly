@@ -254,7 +254,6 @@ export default tseslint.config(
       "unicorn/no-anonymous-default-export": `off`, // TODO evaluate
       "unicorn/prefer-string-replace-all": `off`, // TODO evaluate
       "unicorn/no-unreadable-array-destructuring": `off`, // TODO evaluate
-      "unicorn/no-array-method-this-argument": `off`, // TODO evaluate
       "unicorn/prefer-array-flat-map": `off`, // TODO evaluate
       "unicorn/prefer-top-level-await": `off`, // TODO evaluate
     },

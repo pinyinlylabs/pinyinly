@@ -52,7 +52,7 @@ export async function questionsForReview(
       continue;
     }
 
-    // eslint-disable-next-line unicorn/no-array-callback-reference
+    // eslint-disable-next-line unicorn/no-array-callback-reference, unicorn/no-array-method-this-argument
     if (options?.filter && !options.filter(skillState.skill, skillState)) {
       continue;
     }
