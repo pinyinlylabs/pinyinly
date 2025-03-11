@@ -1019,170 +1019,180 @@ const DictionaryEditor = ({ onCancel }: { onCancel: () => void }) => {
     | null
   >({ type: `list` });
 
-  if (location?.type === `list`) {
-    return (
-      <Box flexDirection="column" gap={1}>
-        <Text bold>Dictionary editor</Text>
+  switch (location?.type) {
+    case `list`: {
+      return (
+        <Box flexDirection="column" gap={1}>
+          <Text bold>Dictionary editor</Text>
 
-        <Box paddingX={1} borderStyle="round" borderDimColor>
-          <DictionaryPicker
-            onSubmit={(hanziWords) => {
-              const hanziWord = hanziWords[0];
-              if (hanziWord != null) {
-                setLocation({ type: `view`, hanziWord });
-              }
-            }}
-          />
-        </Box>
-
-        <Shortcuts>
-          <Button
-            label="Cancel"
-            action={() => {
-              onCancel();
-            }}
-          />
-        </Shortcuts>
-      </Box>
-    );
-  } else if (location?.type === `view`) {
-    return (
-      <Box flexDirection="column" gap={1}>
-        <DictionaryHanziWordEntry hanziWord={location.hanziWord} />
-        <DongChineseHanziEntry hanzi={hanziFromHanziWord(location.hanziWord)} />
-        <Shortcuts>
-          <Button
-            label="Edit…"
-            action={() => {
-              setLocation({ type: `edit`, hanziWord: location.hanziWord });
-            }}
-          />
-          <Button
-            label="Merge…"
-            action={() => {
-              setLocation({ type: `merge`, hanziWord: location.hanziWord });
-            }}
-          />
-          <Button
-            label="Back"
-            action={() => {
-              setLocation({ type: `list` });
-            }}
-          />
-        </Shortcuts>
-      </Box>
-    );
-  } else if (location?.type === `edit`) {
-    return (
-      <Box flexDirection="column" gap={1}>
-        <HanziWordEditor
-          hanziWord={location.hanziWord}
-          onSave={() => {
-            setLocation({ type: `view`, hanziWord: location.hanziWord });
-          }}
-          onCancel={() => {
-            setLocation({ type: `list` });
-          }}
-        />
-      </Box>
-    );
-  } else if (location?.type === `merge`) {
-    return (
-      <Box flexDirection="column" gap={1}>
-        <Text bold>Merge:</Text>
-
-        <Box borderStyle="round" paddingX={1} borderDimColor>
-          <DictionaryHanziWordEntry hanziWord={location.hanziWord} />
-        </Box>
-
-        <Text bold>With:</Text>
-
-        <Box borderStyle="round" paddingX={1}>
-          {location.otherHanziWord == null ? (
+          <Box paddingX={1} borderStyle="round" borderDimColor>
             <DictionaryPicker
-              readonly
-              visibleOptionCount={2}
               onSubmit={(hanziWords) => {
-                setLocation({
-                  type: `merge`,
-                  hanziWord: location.hanziWord,
-                  otherHanziWord: hanziWords[0],
-                });
-              }}
-            />
-          ) : (
-            <DictionaryHanziWordEntry hanziWord={location.otherHanziWord} />
-          )}
-        </Box>
-
-        {location.otherHanziWord == null ? null : (
-          <Box
-            borderStyle="round"
-            paddingX={1}
-            borderColor="yellow"
-            flexDirection="column"
-          >
-            <Text bold>Merge strategy</Text>
-
-            <Select2
-              items={[`keepOther`, `deleteOther`] as const}
-              renderItem={(item, isSelected) => {
-                invariant(
-                  location.otherHanziWord != null,
-                  `Missing other word`,
-                );
-                return (
-                  <Box>
-                    <Text color={isSelected ? `blueBright` : undefined}>
-                      {item === `keepOther` ? (
-                        <Text>
-                          Keep {location.otherHanziWord} and delete{` `}
-                          <Text strikethrough>{location.hanziWord}</Text>
-                        </Text>
-                      ) : (
-                        <Text>
-                          Keep {location.hanziWord} and delete{` `}
-                          <Text strikethrough>{location.otherHanziWord}</Text>
-                        </Text>
-                      )}
-                    </Text>
-                  </Box>
-                );
-              }}
-              onChange={(value) => {
-                void (async () => {
-                  const hanziWordToKeep =
-                    value === `deleteOther`
-                      ? location.hanziWord
-                      : location.otherHanziWord;
-                  const hanziWordToRemove =
-                    value === `deleteOther`
-                      ? location.otherHanziWord
-                      : location.hanziWord;
-                  invariant(
-                    hanziWordToKeep != null && hanziWordToRemove != null,
-                    `Missing hanzi words`,
-                  );
-
-                  await mergeHanziWord(hanziWordToRemove, hanziWordToKeep);
-
-                  setLocation({ type: `view`, hanziWord: hanziWordToKeep });
-                })();
+                const hanziWord = hanziWords[0];
+                if (hanziWord != null) {
+                  setLocation({ type: `view`, hanziWord });
+                }
               }}
             />
           </Box>
-        )}
 
-        <Shortcuts>
-          <Button
-            label="Back"
-            action={() => {
+          <Shortcuts>
+            <Button
+              label="Cancel"
+              action={() => {
+                onCancel();
+              }}
+            />
+          </Shortcuts>
+        </Box>
+      );
+    }
+    case `view`: {
+      return (
+        <Box flexDirection="column" gap={1}>
+          <DictionaryHanziWordEntry hanziWord={location.hanziWord} />
+          <DongChineseHanziEntry
+            hanzi={hanziFromHanziWord(location.hanziWord)}
+          />
+          <Shortcuts>
+            <Button
+              label="Edit…"
+              action={() => {
+                setLocation({ type: `edit`, hanziWord: location.hanziWord });
+              }}
+            />
+            <Button
+              label="Merge…"
+              action={() => {
+                setLocation({ type: `merge`, hanziWord: location.hanziWord });
+              }}
+            />
+            <Button
+              label="Back"
+              action={() => {
+                setLocation({ type: `list` });
+              }}
+            />
+          </Shortcuts>
+        </Box>
+      );
+    }
+    case `edit`: {
+      return (
+        <Box flexDirection="column" gap={1}>
+          <HanziWordEditor
+            hanziWord={location.hanziWord}
+            onSave={() => {
+              setLocation({ type: `view`, hanziWord: location.hanziWord });
+            }}
+            onCancel={() => {
               setLocation({ type: `list` });
             }}
           />
-        </Shortcuts>
-      </Box>
-    );
+        </Box>
+      );
+    }
+    case `merge`: {
+      return (
+        <Box flexDirection="column" gap={1}>
+          <Text bold>Merge:</Text>
+
+          <Box borderStyle="round" paddingX={1} borderDimColor>
+            <DictionaryHanziWordEntry hanziWord={location.hanziWord} />
+          </Box>
+
+          <Text bold>With:</Text>
+
+          <Box borderStyle="round" paddingX={1}>
+            {location.otherHanziWord == null ? (
+              <DictionaryPicker
+                readonly
+                visibleOptionCount={2}
+                onSubmit={(hanziWords) => {
+                  setLocation({
+                    type: `merge`,
+                    hanziWord: location.hanziWord,
+                    otherHanziWord: hanziWords[0],
+                  });
+                }}
+              />
+            ) : (
+              <DictionaryHanziWordEntry hanziWord={location.otherHanziWord} />
+            )}
+          </Box>
+
+          {location.otherHanziWord == null ? null : (
+            <Box
+              borderStyle="round"
+              paddingX={1}
+              borderColor="yellow"
+              flexDirection="column"
+            >
+              <Text bold>Merge strategy</Text>
+
+              <Select2
+                items={[`keepOther`, `deleteOther`] as const}
+                renderItem={(item, isSelected) => {
+                  invariant(
+                    location.otherHanziWord != null,
+                    `Missing other word`,
+                  );
+                  return (
+                    <Box>
+                      <Text color={isSelected ? `blueBright` : undefined}>
+                        {item === `keepOther` ? (
+                          <Text>
+                            Keep {location.otherHanziWord} and delete{` `}
+                            <Text strikethrough>{location.hanziWord}</Text>
+                          </Text>
+                        ) : (
+                          <Text>
+                            Keep {location.hanziWord} and delete{` `}
+                            <Text strikethrough>{location.otherHanziWord}</Text>
+                          </Text>
+                        )}
+                      </Text>
+                    </Box>
+                  );
+                }}
+                onChange={(value) => {
+                  void (async () => {
+                    const hanziWordToKeep =
+                      value === `deleteOther`
+                        ? location.hanziWord
+                        : location.otherHanziWord;
+                    const hanziWordToRemove =
+                      value === `deleteOther`
+                        ? location.otherHanziWord
+                        : location.hanziWord;
+                    invariant(
+                      hanziWordToKeep != null && hanziWordToRemove != null,
+                      `Missing hanzi words`,
+                    );
+
+                    await mergeHanziWord(hanziWordToRemove, hanziWordToKeep);
+
+                    setLocation({ type: `view`, hanziWord: hanziWordToKeep });
+                  })();
+                }}
+              />
+            </Box>
+          )}
+
+          <Shortcuts>
+            <Button
+              label="Back"
+              action={() => {
+                setLocation({ type: `list` });
+              }}
+            />
+          </Shortcuts>
+        </Box>
+      );
+    }
+    case undefined: {
+      return null;
+    }
   }
 };
 
@@ -1296,56 +1306,63 @@ const WordListEditor = ({
     | null
   >({ type: `list` });
 
-  if (location?.type === `list`) {
-    return (
-      <Box gap={1} flexDirection="column">
-        <WordListHanziPicker
-          wordListName={wordListName}
-          onSubmit={(hanziWord) => {
-            setLocation({ type: `edit`, hanziWord });
-          }}
-        />
-
-        <Box flexGrow={1} />
-
-        <Shortcuts>
-          <Shortcut letter="esc" label="Back" action={onCancel} />
-          <Shortcut
-            letter="a"
-            label="Add"
-            action={() => {
-              setLocation({ type: `add` });
+  switch (location?.type) {
+    case `list`: {
+      return (
+        <Box gap={1} flexDirection="column">
+          <WordListHanziPicker
+            wordListName={wordListName}
+            onSubmit={(hanziWord) => {
+              setLocation({ type: `edit`, hanziWord });
             }}
           />
-        </Shortcuts>
-      </Box>
-    );
-  } else if (location?.type === `edit`) {
-    return (
-      <HanziEditor
-        hanzi={hanziFromHanziWord(location.hanziWord)}
-        wordListFileBaseName={wordListName}
-        onCloseAction={() => {
-          setLocation({ type: `list` });
-        }}
-      />
-    );
-  } else if (location?.type === `add`) {
-    return (
-      <DictionaryPicker
-        onSubmit={(hanziWords) => {
-          void (async () => {
-            for (const hanziWord of hanziWords) {
-              await upsertHanziWordWordList(hanziWord, wordListName);
-            }
+
+          <Box flexGrow={1} />
+
+          <Shortcuts>
+            <Shortcut letter="esc" label="Back" action={onCancel} />
+            <Shortcut
+              letter="a"
+              label="Add"
+              action={() => {
+                setLocation({ type: `add` });
+              }}
+            />
+          </Shortcuts>
+        </Box>
+      );
+    }
+    case `edit`: {
+      return (
+        <HanziEditor
+          hanzi={hanziFromHanziWord(location.hanziWord)}
+          wordListFileBaseName={wordListName}
+          onCloseAction={() => {
             setLocation({ type: `list` });
-          })();
-        }}
-        onCancel={() => {
-          setLocation({ type: `list` });
-        }}
-      />
-    );
+          }}
+        />
+      );
+    }
+    case `add`: {
+      return (
+        <DictionaryPicker
+          onSubmit={(hanziWords) => {
+            void (async () => {
+              for (const hanziWord of hanziWords) {
+                await upsertHanziWordWordList(hanziWord, wordListName);
+              }
+              setLocation({ type: `list` });
+            })();
+          }}
+          onCancel={() => {
+            setLocation({ type: `list` });
+          }}
+        />
+      );
+    }
+    case undefined: {
+      return null;
+    }
   }
 };
 
@@ -1868,32 +1885,52 @@ const App = () => {
             },
           ]}
           onChange={(value) => {
-            if (value === `checkHsk1HanziWords`) {
-              setLocation({ type: `checkHsk1HanziWords` });
-            } else if (value === `hsk1WordList`) {
-              setLocation({
-                type: `wordListEditor`,
-                wordListName: `hsk1HanziWords`,
-              });
-            } else if (value === `hsk2WordList`) {
-              setLocation({
-                type: `wordListEditor`,
-                wordListName: `hsk2HanziWords`,
-              });
-            } else if (value === `hsk3WordList`) {
-              setLocation({
-                type: `wordListEditor`,
-                wordListName: `hsk3HanziWords`,
-              });
-            } else if (value === `editRadicalsWordList`) {
-              setLocation({
-                type: `wordListEditor`,
-                wordListName: `radicalsHanziWords`,
-              });
-            } else if (value === `dictionaryEditor`) {
-              setLocation({
-                type: `dictionaryEditor`,
-              });
+            switch (value) {
+              case `checkHsk1HanziWords`: {
+                setLocation({ type: `checkHsk1HanziWords` });
+
+                break;
+              }
+              case `hsk1WordList`: {
+                setLocation({
+                  type: `wordListEditor`,
+                  wordListName: `hsk1HanziWords`,
+                });
+
+                break;
+              }
+              case `hsk2WordList`: {
+                setLocation({
+                  type: `wordListEditor`,
+                  wordListName: `hsk2HanziWords`,
+                });
+
+                break;
+              }
+              case `hsk3WordList`: {
+                setLocation({
+                  type: `wordListEditor`,
+                  wordListName: `hsk3HanziWords`,
+                });
+
+                break;
+              }
+              case `editRadicalsWordList`: {
+                setLocation({
+                  type: `wordListEditor`,
+                  wordListName: `radicalsHanziWords`,
+                });
+
+                break;
+              }
+              case `dictionaryEditor`: {
+                setLocation({
+                  type: `dictionaryEditor`,
+                });
+
+                break;
+              }
+              // No default
             }
           }}
         />

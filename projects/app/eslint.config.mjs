@@ -250,7 +250,6 @@ export default tseslint.config(
       "unicorn/prefer-add-event-listener": `off`, // TODO evaluate
       "unicorn/prefer-dom-node-append": `off`, // TODO evaluate
       "unicorn/no-for-loop": `off`, // TODO evaluate
-      "unicorn/prefer-switch": `off`, // TODO evaluate
       "unicorn/no-anonymous-default-export": `off`, // TODO evaluate
       "unicorn/prefer-string-replace-all": `off`, // TODO evaluate
       "unicorn/no-unreadable-array-destructuring": `off`, // TODO evaluate
