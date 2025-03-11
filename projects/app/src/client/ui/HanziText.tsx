@@ -17,11 +17,11 @@ export const HanziText = ({
     <View
       className={`flex-0 flex-col items-center ${small ? `gap-0.5` : `gap-1`}`}
     >
-      {pinyinWithoutSpaces != null ? (
+      {pinyinWithoutSpaces == null ? null : (
         <Text className={pinyinText({ accented, small })}>
           {pinyinWithoutSpaces}
         </Text>
-      ) : null}
+      )}
       <Text className={hanziText({ accented, small })}>{hanzi}</Text>
     </View>
   );

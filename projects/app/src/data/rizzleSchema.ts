@@ -316,9 +316,10 @@ export const v6Mutators: RizzleReplicacheMutators<typeof v6> = {
     // Save a record of the rating.
     await tx.skillRating.set({ id }, { id, rating, skill, createdAt: now });
 
-    const skillRatingsByDate = (
-      await tx.skillRating.bySkill(skill).toArray()
-    ).sort(sortComparatorDate((x) => x[1].createdAt));
+    const skillRatingsByDate = await tx.skillRating
+      .bySkill(skill)
+      .toArray()
+      .then((x) => x.sort(sortComparatorDate((x) => x[1].createdAt)));
     let state: UpcomingReview | null = null;
     for (const [, { rating, createdAt }] of skillRatingsByDate) {
       state = nextReview(state, rating, createdAt);

@@ -92,8 +92,12 @@ async function systemRoleMessageWithProjectContext(
     );
 
     for (const fileName of docsFileNames) {
-      messageLines.push(``, `<!---`, fileName, `-->`, ``);
       messageLines.push(
+        ``,
+        `<!---`,
+        fileName,
+        `-->`,
+        ``,
         await readFile(join(docsPath, fileName), { encoding: `utf-8` }),
       );
     }

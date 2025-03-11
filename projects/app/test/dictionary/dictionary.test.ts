@@ -161,7 +161,7 @@ void test(`hanzi word meaning gloss lint`, async () => {
       .filter(([, { gloss }]) => gloss.some((x) => isViolating(x)))
       .map(([hanziWord, { gloss }]) => ({
         hanziWord,
-        gloss: gloss.filter(isViolating),
+        gloss: gloss.filter((x) => isViolating(x)),
       })),
   );
 
@@ -360,7 +360,9 @@ void test(`expect missing glyphs to be included decomposition data`, async () =>
   }
 
   const knownMissingGlyphs = new Set<string>(
-    (await loadMissingFontGlyphs()).values().flatMap((x) => [...x]),
+    await loadMissingFontGlyphs().then((fontGlyphs) =>
+      fontGlyphs.values().flatMap((x) => [...x]),
+    ),
   );
   for (const char of allComponents) {
     knownMissingGlyphs.delete(char);
@@ -415,7 +417,7 @@ void test(`hanzi uses consistent unicode characters`, async () => {
   const violations = [...dict.keys()]
     .map((x) => hanziFromHanziWord(x))
     .flatMap((x) => splitCharacters(x))
-    .filter(isNotCjkUnifiedIdeograph);
+    .filter((x) => isNotCjkUnifiedIdeograph(x));
   assert.deepEqual(
     violations,
     [],
@@ -1092,10 +1094,10 @@ function assertUniqueArray<T>(items: readonly T[]): void {
   const seen = new Set();
   const duplicates = [];
   for (const x of items) {
-    if (!seen.has(x)) {
-      seen.add(x);
-    } else {
+    if (seen.has(x)) {
       duplicates.push(x);
+    } else {
+      seen.add(x);
     }
   }
   assert.deepEqual(duplicates, [], `expected no duplicates`);

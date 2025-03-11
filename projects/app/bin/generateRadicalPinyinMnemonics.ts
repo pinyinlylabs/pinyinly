@@ -82,7 +82,7 @@ const updates = new Map<string, { mnemonic: string; strategy: string }[]>();
 const decompositions = await loadHanziDecomposition();
 
 for (const hanzi of radicalsToCheck) {
-  const lookup = (await lookupHanzi(hanzi))[0]?.[1];
+  const lookup = await lookupHanzi(hanzi).then((x) => x[0]?.[1]);
 
   const name = lookup?.gloss[0];
   const pinyin = lookup?.pinyin?.[0];

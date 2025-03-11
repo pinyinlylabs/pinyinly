@@ -16,7 +16,9 @@ const testReplicacheOptions = {
 void test(hsk1SkillReview.name, async () => {
   await test(`returns everything when no skills have state`, async () => {
     await using rizzle = r.replicache(testReplicacheOptions, v6, v6Mutators);
+
     // Sanity check that there should be a bunch in the queue
-    assert.ok((await hsk1SkillReview(rizzle)).length > 100);
+    const skills = await hsk1SkillReview(rizzle);
+    assert.ok(skills.length > 100);
   });
 });

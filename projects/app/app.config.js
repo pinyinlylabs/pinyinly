@@ -33,13 +33,13 @@ export const expo = {
     associatedDomains: [
       `applinks:${prodDomain}`,
       // Development
-      ...(devDomain != null
-        ? [
+      ...(devDomain == null
+        ? []
+        : [
             `applinks:${devDomain}`,
             `activitycontinuation:${devDomain}`,
             `webcredentials:${devDomain}`,
-          ]
-        : []),
+          ]),
     ],
     usesAppleSignIn: true,
     // https://docs.sentry.io/platforms/react-native/data-management/apple-privacy-manifest/#create-privacy-manifest-in-expo

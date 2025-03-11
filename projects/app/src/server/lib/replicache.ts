@@ -156,7 +156,7 @@ export async function push(
         mutate,
       );
       success = true;
-    } catch (err) {
+    } catch {
       notSkipped = await processMutation(
         tx,
         userId,
@@ -277,11 +277,11 @@ export async function pull(
 
   // 1: Fetch prevCVR
   const prevCvr =
-    cookie != null
-      ? await tx.query.replicacheCvr.findFirst({
+    cookie == null
+      ? null
+      : await tx.query.replicacheCvr.findFirst({
           where: (p, { eq }) => eq(p.id, cookie.cvrId),
-        })
-      : null;
+        });
 
   // 2: Init baseCVR
   // n/a
@@ -298,11 +298,12 @@ export async function pull(
       try {
         return await result;
       } catch (e) {
-        if (e instanceof DatabaseError && e.code === `40001`) {
-          // Serialization failure, retry
-          if (remainingRetries === 0) {
-            throw e;
-          }
+        if (
+          e instanceof DatabaseError &&
+          e.code === `40001` && // Serialization failure, retry
+          remainingRetries === 0
+        ) {
+          throw e;
         }
       }
     }

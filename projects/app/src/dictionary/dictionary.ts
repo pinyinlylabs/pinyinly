@@ -111,6 +111,7 @@ export const loadPinyinWords = memoize(async () =>
   z
     .array(z.string())
     .transform(deepReadonly)
+    // eslint-disable-next-line unicorn/no-await-expression-member
     .parse((await import(`./pinyinWords.asset.json`)).default),
 );
 
@@ -121,6 +122,7 @@ export const loadMissingFontGlyphs = memoize(async () =>
       (x) => new Map(Object.entries(x).map(([k, v]) => [k, new Set(v)])),
     )
     .transform(deepReadonly)
+    // eslint-disable-next-line unicorn/no-await-expression-member
     .parse((await import(`./missingFontGlyphs.asset.json`)).default),
 );
 
@@ -142,6 +144,7 @@ export const loadMnemonicThemes = memoize(async () =>
         ),
     )
     .transform(deepReadonly)
+    // eslint-disable-next-line unicorn/no-await-expression-member
     .parse((await import(`./mnemonicThemes.asset.json`)).default),
 );
 
@@ -169,6 +172,7 @@ export const loadMnemonicThemeChoices = memoize(async () =>
         ),
     )
     .transform(deepReadonly)
+    // eslint-disable-next-line unicorn/no-await-expression-member
     .parse((await import(`./mnemonicThemeChoices.asset.json`)).default),
 );
 
@@ -177,6 +181,7 @@ export const loadHanziDecomposition = memoize(async () =>
     .array(z.tuple([z.string(), z.string()]))
     .transform((x) => new Map(x))
     .transform(deepReadonly)
+    // eslint-disable-next-line unicorn/no-await-expression-member
     .parse((await import(`./hanziDecomposition.asset.json`)).default),
 );
 
@@ -206,24 +211,28 @@ const pinyinChartSchema = z
 export const loadStandardPinyinChart = memoize(async () =>
   pinyinChartSchema
     .transform(deepReadonly)
+    // eslint-disable-next-line unicorn/no-await-expression-member
     .parse((await import(`./standardPinyinChart.asset.json`)).default),
 );
 
 export const loadMmPinyinChart = memoize(async () =>
   pinyinChartSchema
     .transform(deepReadonly)
+    // eslint-disable-next-line unicorn/no-await-expression-member
     .parse((await import(`./mmPinyinChart.asset.json`)).default),
 );
 
 export const loadHhPinyinChart = memoize(async () =>
   pinyinChartSchema
     .transform(deepReadonly)
+    // eslint-disable-next-line unicorn/no-await-expression-member
     .parse((await import(`./hhPinyinChart.asset.json`)).default),
 );
 
 export const loadHmmPinyinChart = memoize(async () =>
   pinyinChartSchema
     .transform(deepReadonly)
+    // eslint-disable-next-line unicorn/no-await-expression-member
     .parse((await import(`./hmmPinyinChart.asset.json`)).default),
 );
 
@@ -237,6 +246,7 @@ export const loadHanziWordGlossMnemonics = memoize(async () =>
     )
     .transform((x) => new Map(x))
     .transform(deepReadonly)
+    // eslint-disable-next-line unicorn/no-await-expression-member
     .parse((await import(`./hanziWordGlossMnemonics.asset.json`)).default),
 );
 
@@ -247,24 +257,28 @@ export const wordListSchema = z.array(hanziWordSchema);
 export const allRadicalHanziWords = memoize(async () =>
   wordListSchema
     .transform(deepReadonly)
+    // eslint-disable-next-line unicorn/no-await-expression-member
     .parse((await import(`./radicalsHanziWords.asset.json`)).default),
 );
 
 export const allHsk1HanziWords = memoize(async () =>
   wordListSchema
     .transform(deepReadonly)
+    // eslint-disable-next-line unicorn/no-await-expression-member
     .parse((await import(`./hsk1HanziWords.asset.json`)).default),
 );
 
 export const allHsk2HanziWords = memoize(async () =>
   wordListSchema
     .transform(deepReadonly)
+    // eslint-disable-next-line unicorn/no-await-expression-member
     .parse((await import(`./hsk2HanziWords.asset.json`)).default),
 );
 
 export const allHsk3HanziWords = memoize(async () =>
   wordListSchema
     .transform(deepReadonly)
+    // eslint-disable-next-line unicorn/no-await-expression-member
     .parse((await import(`./hsk3HanziWords.asset.json`)).default),
 );
 
@@ -337,6 +351,7 @@ export const dictionarySchema = z
 export const loadDictionary = memoize(async () =>
   dictionarySchema
     .transform(deepReadonly)
+    // eslint-disable-next-line unicorn/no-await-expression-member
     .parse((await import(`./dictionary.asset.json`)).default),
 );
 
@@ -351,6 +366,7 @@ const loadRadicalStrokes = memoize(async () =>
     )
     .transform((x) => new Map(x.map((r) => [r.strokes, r])))
     .transform(deepReadonly)
+    // eslint-disable-next-line unicorn/no-await-expression-member
     .parse((await import(`./radicalStrokes.asset.json`)).default),
 );
 
@@ -369,16 +385,17 @@ export const loadHanziWordPinyinMnemonics = memoize(async () =>
     )
     .transform((x) => new Map(x))
     .transform(deepReadonly)
+    // eslint-disable-next-line unicorn/no-await-expression-member
     .parse((await import(`./radicalPinyinMnemonics.asset.json`)).default),
 );
 
 export const allRadicalsByStrokes = async () => await loadRadicalStrokes();
 
 export const lookupHanziWordGlossMnemonics = async (hanziWord: HanziWord) =>
-  (await loadHanziWordGlossMnemonics()).get(hanziWord) ?? null;
+  await loadHanziWordGlossMnemonics().then((x) => x.get(hanziWord) ?? null);
 
 export const lookupHanziWordPinyinMnemonics = async (hanziWord: HanziWord) =>
-  (await loadHanziWordPinyinMnemonics()).get(hanziWord) ?? null;
+  await loadHanziWordPinyinMnemonics().then((x) => x.get(hanziWord) ?? null);
 
 export const lookupHanzi = async (
   hanzi: string,
@@ -392,10 +409,10 @@ export const lookupHanzi = async (
 export const lookupHanziWord = async (
   hanziWord: HanziWord,
 ): Promise<DeepReadonly<HanziWordMeaning> | null> =>
-  (await loadDictionary()).get(hanziWord) ?? null;
+  await loadDictionary().then((x) => x.get(hanziWord) ?? null);
 
 export const lookupRadicalsByStrokes = async (strokes: number) =>
-  (await loadRadicalStrokes()).get(strokes) ?? null;
+  await loadRadicalStrokes().then((x) => x.get(strokes) ?? null);
 
 export const allHanziWordsHanzi = async () =>
   new Set(

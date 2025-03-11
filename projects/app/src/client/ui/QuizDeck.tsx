@@ -97,7 +97,9 @@ export const QuizDeck = ({
       .filter(([, state]) => state?.type !== QuestionStateType.Correct);
     const [next] = sortBy(remainingQuestions, ([, s]) => s?.attempts ?? 0);
 
-    if (next != null) {
+    if (next == null) {
+      navigationRef.current?.replace(`results`);
+    } else {
       const [question, state] = next;
       const attempts = state?.attempts ?? 0;
       const flag: QuestionFlag | undefined =
@@ -105,8 +107,6 @@ export const QuizDeck = ({
           ? { type: QuestionFlagType.PreviousMistake }
           : question.flag;
       navigationRef.current?.replace(`question`, { question, flag });
-    } else {
-      navigationRef.current?.replace(`results`);
     }
   });
 

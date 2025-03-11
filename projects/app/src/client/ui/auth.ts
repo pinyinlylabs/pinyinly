@@ -85,20 +85,18 @@ export function useAuth(): AuthApi {
   const legacySessionId = legacySessionIdQuery.data ?? undefined;
   useEffect(() => {
     if (doInitFirstSession) {
-      let clientSession: ClientSession;
-      // Migrate a legacy session ID to the new format.
-      if (legacySessionId != null) {
-        clientSession = {
-          replicacheDbName: `hao`, // This was the previously hard-coded name of the database.
-          serverSessionId: legacySessionId,
-        };
-      } else {
-        // Create a fresh blank session.
-        clientSession = {
-          // Putting the date in the DB name makes it easier to debug.
-          replicacheDbName: `hao-${new Date().toISOString()}`,
-        };
-      }
+      const clientSession: ClientSession =
+        legacySessionId == null
+          ? // Migrate a legacy session ID to the new format.
+            {
+              // Putting the date in the DB name makes it easier to debug.
+              replicacheDbName: `hao-${new Date().toISOString()}`,
+            }
+          : // Create a fresh blank session.
+            {
+              replicacheDbName: `hao`, // This was the previously hard-coded name of the database.
+              serverSessionId: legacySessionId,
+            };
 
       authStateMutation.mutate(
         JSON.stringify({
@@ -169,7 +167,7 @@ export function useAuth(): AuthApi {
       invariant(data != null, `expected auth state to be initialized`);
 
       // Activate an existing session if one exists with a matching session ID.
-      const existingSession = data.allClientSessions.find(predicate);
+      const existingSession = data.allClientSessions.find((x) => predicate(x));
       invariant(existingSession != null, `no session matched the predicate`);
 
       const newState: AuthState2 = {

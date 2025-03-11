@@ -274,10 +274,10 @@ void test(skillLearningGraph.name, async () => {
   await test(`works for hsk words`, async () => {
     await skillLearningGraph({
       targetSkills: [
-        ...(await allHsk1HanziWords()).map((w) => hanziWordToEnglish(w)),
-        ...(await allHsk2HanziWords()).map((w) => hanziWordToEnglish(w)),
-        ...(await allHsk3HanziWords()).map((w) => hanziWordToEnglish(w)),
-      ],
+        ...(await allHsk1HanziWords()),
+        ...(await allHsk2HanziWords()),
+        ...(await allHsk3HanziWords()),
+      ].map((w) => hanziWordToEnglish(w)),
       isSkillLearned: () => false,
     });
   });

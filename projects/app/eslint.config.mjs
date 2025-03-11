@@ -231,29 +231,21 @@ export default tseslint.config(
       "unicorn/consistent-existence-index-check": `off`, // TODO evaluate
       "unicorn/consistent-function-scoping": `off`, // TODO evaluate
       "unicorn/import-style": `off`, // TODO evaluate
-      "unicorn/no-array-callback-reference": `off`, // TODO evaluate
       "unicorn/no-array-for-each": `off`, // TODO evaluate
-      "unicorn/no-await-expression-member": `off`, // TODO evaluate
-      "unicorn/no-negated-condition": `off`, // TODO evaluate
       "unicorn/no-null": `off`, // TODO evaluate
       "unicorn/no-useless-undefined": `off`, // TODO evaluate
-      "unicorn/number-literal-case": `off`, // TODO evaluate
+      "unicorn/number-literal-case": `off`, // overwritten by prettier
       "unicorn/numeric-separators-style": `off`, // TODO evaluate
       "unicorn/prefer-array-flat": `off`, // TODO evaluate
-      "unicorn/prefer-date-now": `off`, // TODO evaluate
       "unicorn/prefer-module": `off`, // TODO evaluate
       "unicorn/prefer-number-properties": `off`, // TODO evaluate
       "unicorn/prevent-abbreviations": `off`, // TODO evaluate
       "unicorn/switch-case-braces": `off`, // TODO evaluate
       "unicorn/no-nested-ternary": `off`, // TODO evaluate
-      "unicorn/prefer-ternary": `off`, // TODO evaluate
       "unicorn/filename-case": `off`, // TODO evaluate
       "unicorn/no-array-reduce": `off`, // TODO evaluate
       "unicorn/prefer-global-this": `off`, // TODO evaluate
-      "unicorn/prefer-optional-catch-binding": `off`, // TODO evaluate
-      "unicorn/no-lonely-if": `off`, // TODO evaluate
       "unicorn/no-object-as-default-parameter": `off`, // TODO evaluate
-      "unicorn/no-array-push-push": `off`, // TODO evaluate
       "unicorn/prefer-query-selector": `off`, // TODO evaluate
       "unicorn/prefer-dom-node-remove": `off`, // TODO evaluate
       "unicorn/prefer-add-event-listener": `off`, // TODO evaluate

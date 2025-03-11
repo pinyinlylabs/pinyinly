@@ -23,11 +23,13 @@ export async function createPool(): Promise<PgPool> {
 
   let Pool: typeof PgPool;
   if (IS_NEON) {
+    // eslint-disable-next-line unicorn/no-await-expression-member
     Pool = (await import(`@neondatabase/serverless`)).Pool;
     const { neonConfig } = await import(`@neondatabase/serverless`);
     const { default: ws } = await import(`ws`);
     neonConfig.webSocketConstructor = ws;
   } else {
+    // eslint-disable-next-line unicorn/no-await-expression-member
     Pool = (await import(`pg`)).default.Pool;
   }
 

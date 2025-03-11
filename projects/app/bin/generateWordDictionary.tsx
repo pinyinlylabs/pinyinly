@@ -314,7 +314,7 @@ const CheckHsk1HanziWordsApp = ({ onCancel }: { onCancel: () => void }) => {
         </>
       ) : null}
 
-      {focusItem != null ? (
+      {focusItem == null ? null : (
         <Box flexDirection="column" gap={1}>
           <Text>
             <Text bold>Item:</Text> {focusItem.hanziWord}
@@ -346,7 +346,7 @@ const CheckHsk1HanziWordsApp = ({ onCancel }: { onCancel: () => void }) => {
             key={focusItem.hanziWord}
           />
         </Box>
-      ) : null}
+      )}
     </Box>
   );
 };
@@ -594,7 +594,7 @@ Can you give me a few options to pick from.`,
         </>
       ) : null}
 
-      {newHanziWordList != null ? (
+      {newHanziWordList == null ? null : (
         <Shortcuts>
           <Shortcut
             letter="s"
@@ -610,7 +610,7 @@ Can you give me a few options to pick from.`,
             }}
           />
         </Shortcuts>
-      ) : null}
+      )}
     </Box>
   );
 };
@@ -989,14 +989,13 @@ const Shortcut = ({
   action: () => void;
 }) => {
   useInput((input, k) => {
-    if (!disabled) {
-      if (
-        (letter === `esc` && k.escape) ||
+    if (
+      !disabled &&
+      ((letter === `esc` && k.escape) ||
         (letter === `enter` && k.return) ||
-        (input === letter && k.ctrl)
-      ) {
-        action();
-      }
+        (input === letter && k.ctrl))
+    ) {
+      action();
     }
   });
 
@@ -1564,7 +1563,7 @@ const DictionaryPicker = ({
       </Box>
 
       <Shortcuts>
-        {onCancel != null ? <Button label="Cancel" action={onCancel} /> : null}
+        {onCancel == null ? null : <Button label="Cancel" action={onCancel} />}
         {readonly ? null : (
           <Button
             label="Add"
@@ -2303,10 +2302,8 @@ const FormViewMode = ({
         const index = form.findIndex((x) => x.id === id);
         return form[Math.min(form.length - 1, index + 1)]?.id ?? id;
       });
-    } else if (key.return) {
-      if (focusedFieldId != null) {
-        onEditField(focusedFieldId);
-      }
+    } else if (key.return && focusedFieldId != null) {
+      onEditField(focusedFieldId);
     }
   });
 

@@ -49,9 +49,9 @@ export async function skillLearningGraph(options: {
       return;
     }
 
-    const dependencies = (
-      await skillDependencies(skill, learningOptions)
-    ).filter((s) => !options.isSkillLearned(rSkillMarshal(s)));
+    const dependencies = await skillDependencies(skill, learningOptions).then(
+      (x) => x.filter((s) => !options.isSkillLearned(rSkillMarshal(s))),
+    );
 
     const node: Node = {
       skill,
@@ -187,18 +187,20 @@ export async function skillDependencies(
     }
     case SkillType.PinyinToHanziWord:
       // Learn going from Hanzi -> Pinyin first.
-      deps.push({
-        type: SkillType.HanziWordToPinyinInitial,
-        hanziWord: skill.hanziWord,
-      });
-      deps.push({
-        type: SkillType.HanziWordToPinyinFinal,
-        hanziWord: skill.hanziWord,
-      });
-      deps.push({
-        type: SkillType.HanziWordToPinyinTone,
-        hanziWord: skill.hanziWord,
-      });
+      deps.push(
+        {
+          type: SkillType.HanziWordToPinyinInitial,
+          hanziWord: skill.hanziWord,
+        },
+        {
+          type: SkillType.HanziWordToPinyinFinal,
+          hanziWord: skill.hanziWord,
+        },
+        {
+          type: SkillType.HanziWordToPinyinTone,
+          hanziWord: skill.hanziWord,
+        },
+      );
       break;
     case SkillType.HanziWordToPinyinTone: {
       // Learn the mnemonic associations for the final first.

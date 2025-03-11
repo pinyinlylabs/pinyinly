@@ -14,16 +14,18 @@ export default function IndexPage() {
     [`IndexPage`, `recentCharacters`],
     async (r) => {
       const recentHanziWords: HanziWord[] = [];
-      const ratingHistory = (
-        await r.queryPaged.skillRating.byCreatedAt().toArray()
-      ).reverse();
+      const ratingHistory = await r.queryPaged.skillRating
+        .byCreatedAt()
+        .toArray()
+        .then((x) => x.reverse());
       for (const [, { skill }] of ratingHistory) {
-        if (`hanziWord` in skill) {
-          if (!recentHanziWords.includes(skill.hanziWord)) {
-            recentHanziWords.push(skill.hanziWord);
-            if (recentHanziWords.length === 10) {
-              break;
-            }
+        if (
+          `hanziWord` in skill &&
+          !recentHanziWords.includes(skill.hanziWord)
+        ) {
+          recentHanziWords.push(skill.hanziWord);
+          if (recentHanziWords.length === 10) {
+            break;
           }
         }
       }
@@ -34,9 +36,10 @@ export default function IndexPage() {
   const streakQuery = useRizzleQueryPaged(
     [`IndexPage`, `streakQuery`],
     async (r) => {
-      const ratingHistory = (
-        await r.queryPaged.skillRating.byCreatedAt().toArray()
-      ).reverse();
+      const ratingHistory = await r.queryPaged.skillRating
+        .byCreatedAt()
+        .toArray()
+        .then((x) => x.reverse());
 
       const streakEnd = ratingHistory[0]?.[1].createdAt;
       let streakStart: Date | undefined;
@@ -98,7 +101,7 @@ export default function IndexPage() {
                     : `Start learning`}
                 </Text>
 
-                {streakQuery.data != null ? (
+                {streakQuery.data == null ? null : (
                   <Animated.View entering={FadeIn}>
                     <Text
                       className={
@@ -111,7 +114,7 @@ export default function IndexPage() {
                       {streakQuery.data.streakDayCount} day streak
                     </Text>
                   </Animated.View>
-                ) : null}
+                )}
               </View>
 
               {recentHanzi.data.length > 0 ? (
