@@ -243,7 +243,6 @@ export default tseslint.config(
       "unicorn/prefer-date-now": `off`, // TODO evaluate
       "unicorn/prefer-module": `off`, // TODO evaluate
       "unicorn/prefer-number-properties": `off`, // TODO evaluate
-      "unicorn/prefer-spread": `off`, // TODO evaluate
       "unicorn/prevent-abbreviations": `off`, // TODO evaluate
       "unicorn/switch-case-braces": `off`, // TODO evaluate
       "unicorn/no-nested-ternary": `off`, // TODO evaluate

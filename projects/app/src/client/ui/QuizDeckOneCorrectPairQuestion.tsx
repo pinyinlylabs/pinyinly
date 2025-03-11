@@ -9,7 +9,11 @@ import {
   SkillRating,
   SkillType,
 } from "@/data/model";
-import { hanziFromHanziWord, lookupHanziWord } from "@/dictionary/dictionary";
+import {
+  hanziFromHanziWord,
+  lookupHanziWord,
+  splitCharacters,
+} from "@/dictionary/dictionary";
 import { arrayFilterUniqueWithKey } from "@/util/collections";
 import { Rating } from "@/util/fsrs";
 import { invariant } from "@haohaohow/lib/invariant";
@@ -644,7 +648,7 @@ const ChoiceButton = ({
   });
 
   const text = textQuery.data ?? ``;
-  const charCount = useMemo(() => Array.from(text).length, [text]);
+  const charCount = useMemo(() => splitCharacters(text).length, [text]);
 
   return (
     <AnswerButton

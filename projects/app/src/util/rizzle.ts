@@ -256,10 +256,7 @@ export class RizzleObject<T extends RizzleRawObject> extends RizzleType<
     const keyNames = new Set(Object.keys(this._def.shape));
     if (aliasNames.size < keyNames.size) {
       const missing = new Set([...keyNames].filter((x) => !aliasNames.has(x)));
-      invariant(
-        false,
-        `alias conflict for fields: ${Array.from(missing).join(`, `)}`,
-      );
+      invariant(false, `alias conflict for fields: ${[...missing].join(`, `)}`);
     }
 
     this.getMarshal = memoize0(this.getMarshal.bind(this));
