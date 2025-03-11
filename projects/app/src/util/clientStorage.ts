@@ -55,11 +55,13 @@ export async function clientStorageGet(key: string): Promise<string | null> {
       return localStorage.getItem(storageKey);
     }
     case `ios`:
-    case `android`:
+    case `android`: {
       return SecureStore.getItemAsync(storageKey);
+    }
     case `macos`:
-    case `windows`:
+    case `windows`: {
       throw new Error(`unsupported platform ${Platform.OS}`);
+    }
   }
 }
 
@@ -79,7 +81,7 @@ export async function clientStorageSet(
       break;
     }
     case `ios`:
-    case `android`:
+    case `android`: {
       // eslint-disable-next-line unicorn/prefer-ternary
       if (value === null) {
         await SecureStore.deleteItemAsync(storageKey);
@@ -87,9 +89,11 @@ export async function clientStorageSet(
         await SecureStore.setItemAsync(storageKey, value);
       }
       break;
+    }
     case `macos`:
-    case `windows`:
+    case `windows`: {
       throw new Error(`unsupported platform ${Platform.OS}`);
+    }
   }
 }
 

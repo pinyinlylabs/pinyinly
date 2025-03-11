@@ -240,7 +240,6 @@ export default tseslint.config(
       "unicorn/prefer-module": `off`, // TODO evaluate
       "unicorn/prefer-number-properties": `off`, // TODO evaluate
       "unicorn/prevent-abbreviations": `off`, // TODO evaluate
-      "unicorn/switch-case-braces": `off`, // TODO evaluate
       "unicorn/no-nested-ternary": `off`, // TODO evaluate
       "unicorn/filename-case": `off`, // TODO evaluate
       "unicorn/no-array-reduce": `off`, // TODO evaluate

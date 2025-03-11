@@ -84,14 +84,17 @@ export function nextReview(
  */
 function nextDueDuration(stability: number, rating: Rating): Duration {
   switch (rating) {
-    case Rating.Again:
+    case Rating.Again: {
       return { minutes: 1 };
-    case Rating.Hard:
+    }
+    case Rating.Hard: {
       return { minutes: 5 };
+    }
     case Rating.Good:
-    case Rating.Easy:
+    case Rating.Easy: {
       // Fall-through and use the curve.
       break;
+    }
   }
 
   return {

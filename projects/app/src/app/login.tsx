@@ -77,15 +77,17 @@ export default function LoginPage() {
               const err = z.object({ code: z.string() }).safeParse(e);
               if (err.success) {
                 switch (err.data.code) {
-                  case `ERR_REQUEST_CANCELED`:
+                  case `ERR_REQUEST_CANCELED`: {
                     // handle that the user canceled the sign-in flow
                     console.error(`request canceled`);
                     break;
-                  default:
+                  }
+                  default: {
                     console.error(
                       `unknown error code=${err.data.code}, error=`,
                       err.data,
                     );
+                  }
                 }
               } else {
                 console.error(`unknown error (no code), error=`, e);

@@ -185,7 +185,7 @@ export async function skillDependencies(
 
       break;
     }
-    case SkillType.PinyinToHanziWord:
+    case SkillType.PinyinToHanziWord: {
       // Learn going from Hanzi -> Pinyin first.
       deps.push(
         {
@@ -202,6 +202,7 @@ export async function skillDependencies(
         },
       );
       break;
+    }
     case SkillType.HanziWordToPinyinTone: {
       // Learn the mnemonic associations for the final first.
 
@@ -222,9 +223,10 @@ export async function skillDependencies(
     case SkillType.Deprecated:
     case SkillType.ImageToHanziWord:
     case SkillType.PinyinInitialAssociation:
-    case SkillType.PinyinFinalAssociation:
+    case SkillType.PinyinFinalAssociation: {
       // Leaf skills (no dependencies).
       break;
+    }
   }
   return deps;
 }

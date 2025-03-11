@@ -936,10 +936,12 @@ void test(`walkIdsNode`, () => {
 
   const leafs = [...walkIdsNode(ids)].map((x) => {
     switch (x.type) {
-      case `LeafCharacter`:
+      case `LeafCharacter`: {
         return x.character;
-      case `LeafUnknownCharacter`:
+      }
+      case `LeafUnknownCharacter`: {
         return x.strokeCount;
+      }
     }
   });
 

@@ -44,8 +44,9 @@ function validQuestionInvariant(question: Question) {
       invariant(question.groupB.includes(question.answer));
       break;
     }
-    case QuestionType.MultipleChoice:
+    case QuestionType.MultipleChoice: {
       break;
+    }
   }
 
   return question;
@@ -93,8 +94,9 @@ export async function generateQuestionForSkillOrThrow(
     case SkillType.ImageToHanziWord:
     case SkillType.PinyinFinalAssociation:
     case SkillType.PinyinInitialAssociation:
-    case SkillType.Deprecated:
+    case SkillType.Deprecated: {
       throw new Error(`todo: not implemented`);
+    }
   }
 }
 

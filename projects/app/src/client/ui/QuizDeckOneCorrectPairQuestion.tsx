@@ -302,7 +302,7 @@ export const QuizDeckOneCorrectPairQuestion = memo(
 
 const FlagText = ({ flag }: { flag: QuestionFlag }) => {
   switch (flag.type) {
-    case QuestionFlagType.NewSkill:
+    case QuestionFlagType.NewSkill: {
       return (
         <View className={flagViewClass({ class: `success-theme` })}>
           <Image
@@ -313,7 +313,8 @@ const FlagText = ({ flag }: { flag: QuestionFlag }) => {
           <Text className={flagTextClass()}>New skill</Text>
         </View>
       );
-    case QuestionFlagType.Overdue:
+    }
+    case QuestionFlagType.Overdue: {
       return (
         <View className={flagViewClass({ class: `danger-theme` })}>
           <Image
@@ -340,7 +341,8 @@ const FlagText = ({ flag }: { flag: QuestionFlag }) => {
           </Text>
         </View>
       );
-    case QuestionFlagType.PreviousMistake:
+    }
+    case QuestionFlagType.PreviousMistake: {
       return (
         <View className={flagViewClass({ class: `warning-theme` })}>
           <Image
@@ -351,7 +353,8 @@ const FlagText = ({ flag }: { flag: QuestionFlag }) => {
           <Text className={flagTextClass()}>Previous mistake</Text>
         </View>
       );
-    case QuestionFlagType.WeakWord:
+    }
+    case QuestionFlagType.WeakWord: {
       return (
         <View className={flagViewClass({ class: `danger-theme` })}>
           <Image
@@ -362,6 +365,7 @@ const FlagText = ({ flag }: { flag: QuestionFlag }) => {
           <Text className={flagTextClass()}>Weak word</Text>
         </View>
       );
+    }
   }
 };
 
@@ -404,9 +408,10 @@ const ShowSkillAnswer = ({
     case SkillType.ImageToHanziWord:
     case SkillType.Deprecated:
     case SkillType.PinyinInitialAssociation:
-    case SkillType.PinyinFinalAssociation:
+    case SkillType.PinyinFinalAssociation: {
       throw new Error(`ShowSkillAnswer not implemented for ${skill.type}`);
-    case SkillType.HanziWordToEnglish:
+    }
+    case SkillType.HanziWordToEnglish: {
       return (
         <ShowHanziWordSkillAnswer
           skill={skill}
@@ -414,6 +419,7 @@ const ShowSkillAnswer = ({
           small={small}
         />
       );
+    }
   }
 };
 
@@ -572,15 +578,18 @@ const SubmitButton = forwardRef<
 
   switch (state) {
     case SubmitButtonState.Disabled:
-    case SubmitButtonState.Check:
+    case SubmitButtonState.Check: {
       text = `Check`;
       break;
-    case SubmitButtonState.Correct:
+    }
+    case SubmitButtonState.Correct: {
       text = `Continue`;
       break;
-    case SubmitButtonState.Incorrect:
+    }
+    case SubmitButtonState.Incorrect: {
       text = `Got it`;
       break;
+    }
   }
 
   return (
