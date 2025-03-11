@@ -187,7 +187,7 @@ const IosContainer = ({
           // For debugging the background is set to purple, but this should
           // never be seen. If you see a purple line on iOS then this is the
           // cause and needs to be set more carefully.
-          `flex-1 bg-[purple] pb-[72px]`
+          `flex-1 pb-[72px] ${__DEV__ ? `bg-[purple]` : ``}`
         }
       >
         <View className={`flex-1 bg-${backdropColor}`}>{children(api)}</View>
@@ -197,7 +197,7 @@ const IosContainer = ({
 };
 
 const NoOpContainer = ({
-  backdropColor: backgroundClassName,
+  backdropColor,
   children,
   onDismiss,
 }: PlatformModalProps) => {
@@ -214,7 +214,7 @@ const NoOpContainer = ({
       presentationStyle="pageSheet"
       onRequestClose={api.dismiss}
     >
-      <View className={`flex-1 ${backgroundClassName}`}>{children(api)}</View>
+      <View className={`flex-1 bg-${backdropColor}`}>{children(api)}</View>
     </Modal>
   );
 };

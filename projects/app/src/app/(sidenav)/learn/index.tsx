@@ -1,5 +1,5 @@
 import { RectButton2 } from "@/client/ui/RectButton2";
-import { useRizzleQuery } from "@/client/ui/ReplicacheContext";
+import { useRizzleQueryPaged } from "@/client/ui/ReplicacheContext";
 import { HanziWord } from "@/data/model";
 import { hanziFromHanziWord } from "@/dictionary/dictionary";
 import { invariant } from "@haohaohow/lib/invariant";
@@ -10,7 +10,7 @@ import Animated, { FadeIn } from "react-native-reanimated";
 import { tv } from "tailwind-variants";
 
 export default function IndexPage() {
-  const recentHanzi = useRizzleQuery(
+  const recentHanzi = useRizzleQueryPaged(
     [`IndexPage`, `recentCharacters`],
     async (r) => {
       const recentHanziWords: HanziWord[] = [];
@@ -31,7 +31,7 @@ export default function IndexPage() {
     },
   );
 
-  const streakQuery = useRizzleQuery(
+  const streakQuery = useRizzleQueryPaged(
     [`IndexPage`, `streakQuery`],
     async (r) => {
       const ratingHistory = (

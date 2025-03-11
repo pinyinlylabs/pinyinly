@@ -15,7 +15,11 @@ Sentry.init({
   enableNativeFramesTracking: !isRunningInExpoGo(), // Tracks slow and frozen frames in the application
   environment: __DEV__ ? `development` : `production`,
   integrations: [
-    captureConsoleIntegration() as typeof routingIntegration,
+    captureConsoleIntegration({
+      // Only send "problems" to Sentry, the others are often used in
+      // development and are too noisey to send to Sentry.
+      levels: [`warn`, `error`],
+    }),
     routingIntegration,
   ],
   tracesSampleRate: 1.0, // Keep in sync with the other Sentry.init()

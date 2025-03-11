@@ -2,6 +2,7 @@ import { trpc } from "@/client/trpc";
 import { v6, v6Mutators } from "@/data/rizzleSchema";
 import { AppRouter } from "@/server/routers/_app";
 import { cookieSchema, r, RizzleReplicache } from "@/util/rizzle";
+import { ReactQueryValue } from "@/util/types";
 import { invariant } from "@haohaohow/lib/invariant";
 import * as Sentry from "@sentry/core";
 import { QueryKey, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -140,15 +141,15 @@ export function useReplicache() {
   return r;
 }
 
-export function useRizzleQuery<QueryRet>(
+export function useRizzleQuery<T extends ReactQueryValue>(
   key: QueryKey,
-  query: (r: Rizzle, tx: ReadTransaction) => Promise<QueryRet>,
+  query: (r: Rizzle, tx: ReadTransaction) => Promise<T>,
 ) {
   const queryClient = useQueryClient();
   const r = useReplicache();
 
   // Improve debugging.
-  useRenderGuard?.(useRizzleQuery.name);
+  useRenderGuard(useRizzleQuery.name);
 
   // The reference for `key` usually changes on every render because the array
   // is written inline and changes on every render.
@@ -182,6 +183,23 @@ export function useRizzleQuery<QueryRet>(
   const result = useQuery({
     queryKey: key,
     queryFn: () => r.replicache.query((tx) => query(r, tx)),
+  });
+
+  return result;
+}
+
+export function useRizzleQueryPaged<T extends ReactQueryValue>(
+  key: QueryKey,
+  query: (r: Rizzle) => Promise<T>,
+) {
+  const r = useReplicache();
+
+  // Improve debugging.
+  useRenderGuard(useRizzleQueryPaged.name);
+
+  const result = useQuery({
+    queryKey: key,
+    queryFn: () => query(r),
   });
 
   return result;

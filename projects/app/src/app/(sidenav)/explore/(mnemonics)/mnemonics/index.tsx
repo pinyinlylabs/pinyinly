@@ -1,4 +1,7 @@
-import { useRizzleQuery } from "@/client/ui/ReplicacheContext";
+import {
+  useRizzleQuery,
+  useRizzleQueryPaged,
+} from "@/client/ui/ReplicacheContext";
 import { loadMmPinyinChart } from "@/dictionary/dictionary";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "expo-router";
@@ -34,16 +37,14 @@ const widths = [
 export default function MnemonicsPage() {
   const query = useQuery({
     queryKey: [MnemonicsPage.name, `chart`],
-    queryFn: async () => {
-      return await loadMmPinyinChart();
-    },
+    queryFn: async () => await loadMmPinyinChart(),
   });
 
   const initialAssociationsQuery = useRizzleQuery(
     [MnemonicsPage.name, `pinyinInitialAssociations`],
-    async (r, tx) =>
-      await r.query.pinyinInitialAssociation
-        .scan(tx)
+    async (r) =>
+      await r.queryPaged.pinyinInitialAssociation
+        .scan()
         .toArray()
         .then(
           (x) =>
@@ -55,32 +56,30 @@ export default function MnemonicsPage() {
         ),
   );
 
-  const finalAssociationsQuery = useRizzleQuery(
+  const finalAssociationsQuery = useRizzleQueryPaged(
     [MnemonicsPage.name, `pinyinfinalAssociations`],
-    async (r, tx) => {
-      return await r.query.pinyinFinalAssociation
-        .scan(tx)
+    async (r) =>
+      await r.queryPaged.pinyinFinalAssociation
+        .scan()
         .toArray()
         .then(
           (x) =>
             new Map(x.map(([, { final, name }]) => [final, name] as const)),
-        );
-    },
+        ),
   );
 
-  const initialGroupThemes = useRizzleQuery(
+  const initialGroupThemes = useRizzleQueryPaged(
     [MnemonicsPage.name, `initialGroupThemes`],
-    async (r, tx) => {
-      return await r.query.pinyinInitialGroupTheme
-        .scan(tx)
+    async (r) =>
+      await r.queryPaged.pinyinInitialGroupTheme
+        .scan()
         .toArray()
         .then(
           (x) =>
             new Map(
               x.map(([, { groupId, themeId }]) => [groupId, themeId] as const),
             ),
-        );
-    },
+        ),
   );
 
   return (
