@@ -36,5 +36,5 @@ void test(`no luminance layers in lottie animations (incompatible with lottie-io
     });
   }
 
-  assert(foundFiles, `no lottie files found, wrong path set?`);
+  assert.ok(foundFiles, `no lottie files found, wrong path set?`);
 });

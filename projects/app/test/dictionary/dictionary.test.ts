@@ -54,7 +54,7 @@ void test(`radical groups have the right number of elements`, async () => {
   // matches the expected range.
   const radicalsByStrokes = await allRadicalsByStrokes();
   for (const [, group] of radicalsByStrokes.entries()) {
-    assert(group.characters.length === group.range[1] - group.range[0] + 1);
+    assert.ok(group.characters.length === group.range[1] - group.range[0] + 1);
   }
 });
 
@@ -270,7 +270,7 @@ void test(`hanzi words are unique on (meaning key, pinyin)`, async () => {
 
   // Check that all exceptions are actually used.
   for (const exception of exceptions) {
-    assert(
+    assert.ok(
       duplicates.some((x) => x.symmetricDifference(exception).size === 0),
       `exception ${[...exception]} is not used`,
     );
@@ -311,7 +311,7 @@ void test(`hanzi words are unique on (hanzi, part-of-speech, pinyin)`, async () 
 
   // Check that all exceptions are actually used.
   for (const exception of exceptions) {
-    assert(
+    assert.ok(
       duplicates.some((x) => x.symmetricDifference(exception).size === 0),
       `exception ${[...exception]} is not used`,
     );
