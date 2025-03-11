@@ -161,7 +161,7 @@ void test(`hanzi word meaning gloss lint`, async () => {
       .filter(([, { gloss }]) => gloss.some((x) => isViolating(x)))
       .map(([hanziWord, { gloss }]) => ({
         hanziWord,
-        gloss: gloss.filter(isViolating),
+        gloss: gloss.filter((x) => isViolating(x)),
       })),
   );
 
@@ -417,7 +417,7 @@ void test(`hanzi uses consistent unicode characters`, async () => {
   const violations = [...dict.keys()]
     .map((x) => hanziFromHanziWord(x))
     .flatMap((x) => splitCharacters(x))
-    .filter(isNotCjkUnifiedIdeograph);
+    .filter((x) => isNotCjkUnifiedIdeograph(x));
   assert.deepEqual(
     violations,
     [],

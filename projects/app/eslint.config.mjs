@@ -231,7 +231,6 @@ export default tseslint.config(
       "unicorn/consistent-existence-index-check": `off`, // TODO evaluate
       "unicorn/consistent-function-scoping": `off`, // TODO evaluate
       "unicorn/import-style": `off`, // TODO evaluate
-      "unicorn/no-array-callback-reference": `off`, // TODO evaluate
       "unicorn/no-array-for-each": `off`, // TODO evaluate
       "unicorn/no-null": `off`, // TODO evaluate
       "unicorn/no-useless-undefined": `off`, // TODO evaluate

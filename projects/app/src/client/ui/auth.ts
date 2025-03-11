@@ -169,7 +169,7 @@ export function useAuth(): AuthApi {
       invariant(data != null, `expected auth state to be initialized`);
 
       // Activate an existing session if one exists with a matching session ID.
-      const existingSession = data.allClientSessions.find(predicate);
+      const existingSession = data.allClientSessions.find((x) => predicate(x));
       invariant(existingSession != null, `no session matched the predicate`);
 
       const newState: AuthState2 = {
