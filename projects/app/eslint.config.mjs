@@ -248,7 +248,6 @@ export default tseslint.config(
       "unicorn/prefer-optional-catch-binding": `off`, // TODO evaluate
       "unicorn/no-lonely-if": `off`, // TODO evaluate
       "unicorn/no-object-as-default-parameter": `off`, // TODO evaluate
-      "unicorn/no-array-push-push": `off`, // TODO evaluate
       "unicorn/prefer-query-selector": `off`, // TODO evaluate
       "unicorn/prefer-dom-node-remove": `off`, // TODO evaluate
       "unicorn/prefer-add-event-listener": `off`, // TODO evaluate
