@@ -250,7 +250,6 @@ export default tseslint.config(
       "unicorn/prefer-ternary": `off`, // TODO evaluate
       "unicorn/filename-case": `off`, // TODO evaluate
       "unicorn/no-array-reduce": `off`, // TODO evaluate
-      "unicorn/no-useless-spread": `off`, // TODO evaluate
       "unicorn/prefer-global-this": `off`, // TODO evaluate
       "unicorn/prefer-optional-catch-binding": `off`, // TODO evaluate
       "unicorn/no-lonely-if": `off`, // TODO evaluate
