@@ -45,9 +45,9 @@ const useSoundEffectWebApi: UseSoundEffect = (source) => {
       const source = audioContext.createBufferSource();
       source.buffer = audioBuffer;
       source.connect(audioContext.destination);
-      source.onended = () => {
+      source.addEventListener(`ended`, () => {
         source.disconnect();
-      };
+      });
       source.start();
     }
   });
