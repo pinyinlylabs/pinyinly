@@ -961,7 +961,7 @@ void test(`idsNodeToString roundtrips`, () => {
     [`⿿凹`],
     [`①`, `②`, `③`, `④`, `⑤`, `⑥`, `⑦`, `⑧`, `⑨`, `⑩`],
     [`⑪`, `⑫`, `⑬`, `⑭`, `⑮`, `⑯`, `⑰`, `⑱`, `⑲`, `⑳`],
-  ].flatMap((x) => x)) {
+  ].flat()) {
     assert.equal(idsNodeToString(parseIds(input)), input);
   }
 });

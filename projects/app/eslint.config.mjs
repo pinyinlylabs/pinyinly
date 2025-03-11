@@ -238,7 +238,6 @@ export default tseslint.config(
           number: { onlyIfContainsSeparator: false },
         },
       ],
-      "unicorn/prefer-array-flat": `off`, // TODO evaluate
       "unicorn/prefer-module": `off`, // TODO evaluate
       "unicorn/prevent-abbreviations": `off`, // TODO evaluate
       "unicorn/no-nested-ternary": `off`, // TODO evaluate
