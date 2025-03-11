@@ -42,7 +42,7 @@ export const NewSkillModal = ({ skill }: { skill: Skill }) => {
     }
   }, [hanziWord, pinyin]);
 
-  return !isModalVisible ? null : (
+  return isModalVisible ? (
     <PageSheetModal
       backdropColor="primary-3"
       onDismiss={() => {
@@ -124,5 +124,5 @@ export const NewSkillModal = ({ skill }: { skill: Skill }) => {
         </>
       )}
     </PageSheetModal>
-  );
+  ) : null;
 };

@@ -314,7 +314,7 @@ const CheckHsk1HanziWordsApp = ({ onCancel }: { onCancel: () => void }) => {
         </>
       ) : null}
 
-      {focusItem != null ? (
+      {focusItem == null ? null : (
         <Box flexDirection="column" gap={1}>
           <Text>
             <Text bold>Item:</Text> {focusItem.hanziWord}
@@ -346,7 +346,7 @@ const CheckHsk1HanziWordsApp = ({ onCancel }: { onCancel: () => void }) => {
             key={focusItem.hanziWord}
           />
         </Box>
-      ) : null}
+      )}
     </Box>
   );
 };
@@ -594,7 +594,7 @@ Can you give me a few options to pick from.`,
         </>
       ) : null}
 
-      {newHanziWordList != null ? (
+      {newHanziWordList == null ? null : (
         <Shortcuts>
           <Shortcut
             letter="s"
@@ -610,7 +610,7 @@ Can you give me a few options to pick from.`,
             }}
           />
         </Shortcuts>
-      ) : null}
+      )}
     </Box>
   );
 };
@@ -1564,7 +1564,7 @@ const DictionaryPicker = ({
       </Box>
 
       <Shortcuts>
-        {onCancel != null ? <Button label="Cancel" action={onCancel} /> : null}
+        {onCancel == null ? null : <Button label="Cancel" action={onCancel} />}
         {readonly ? null : (
           <Button
             label="Add"

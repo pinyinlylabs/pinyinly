@@ -277,11 +277,11 @@ export async function pull(
 
   // 1: Fetch prevCVR
   const prevCvr =
-    cookie != null
-      ? await tx.query.replicacheCvr.findFirst({
+    cookie == null
+      ? null
+      : await tx.query.replicacheCvr.findFirst({
           where: (p, { eq }) => eq(p.id, cookie.cvrId),
-        })
-      : null;
+        });
 
   // 2: Init baseCVR
   // n/a

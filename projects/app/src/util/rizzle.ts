@@ -729,12 +729,12 @@ export type RizzleReplicachePagedQuery<S extends RizzleRawSchema> = {
 
 const string = (alias?: string) => {
   const result = RizzleCustom.create(z.string(), z.string());
-  return alias != null ? result.alias(alias) : result;
+  return alias == null ? result : result.alias(alias);
 };
 
 const number = (alias?: string) => {
   const result = RizzleCustom.create(z.number(), z.number());
-  return alias != null ? result.alias(alias) : result;
+  return alias == null ? result : result.alias(alias);
 };
 
 /**
@@ -918,7 +918,7 @@ const replicache = <
                             e.unmarshalValue(
                               x as (typeof e)[`_def`][`valueType`][`_marshaled`],
                             ),
-                          value != null ? _v.marshal(value) : undefined,
+                          value == null ? undefined : _v.marshal(value),
                           exact,
                         ),
                       ),
@@ -1022,9 +1022,9 @@ const replicache = <
                             e.unmarshalValue(
                               x as (typeof e)[`_def`][`valueType`][`_marshaled`],
                             ),
-                          indexValue != null
-                            ? _v.marshal(indexValue)
-                            : undefined,
+                          indexValue == null
+                            ? undefined
+                            : _v.marshal(indexValue),
                           exact,
                         ),
                       ),
@@ -1261,12 +1261,12 @@ async function* indexScanIter<V>(
       .scan({
         indexName,
         start:
-          startKey != null
-            ? {
+          startKey == null
+            ? undefined
+            : {
                 key: startKey,
                 exclusive: startKey[1] != null,
-              }
-            : undefined,
+              },
       })
       .entries()) {
       if (
@@ -1331,7 +1331,7 @@ export async function* indexScanPagedIter<Value>(
   let page: Item[];
 
   let indexStartKey: IndexModeStartKey | undefined =
-    startKey != null ? [startKey, undefined] : undefined;
+    startKey == null ? undefined : [startKey, undefined];
 
   do {
     await scanPagedIterThrottle();
@@ -1385,7 +1385,7 @@ export async function* scanIter<Value>(
       .scan({
         prefix,
         start:
-          startKey != null ? { key: startKey, exclusive: true } : undefined,
+          startKey == null ? undefined : { key: startKey, exclusive: true },
       })
       .entries()) {
       yield [key, unmarshalValue(value)] as const;

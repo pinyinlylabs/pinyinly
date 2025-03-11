@@ -207,12 +207,12 @@ export const QuizDeckOneCorrectPairQuestion = memo(
 
                   <ShowSkillAnswer skill={answerSkill} includeAlternatives />
 
-                  {hint != null ? (
+                  {hint == null ? null : (
                     <Text className="leading-snug text-accent-10">
                       <Text className="font-bold">Hint:</Text>
                       {hint}
                     </Text>
-                  ) : null}
+                  )}
                   {selectedAAnswer != null && selectedBAnswer != null ? (
                     <View className="flex-row flex-wrap items-center gap-2">
                       <Text className="flex-shrink-0 font-bold leading-snug text-accent-10">
@@ -243,11 +243,11 @@ export const QuizDeckOneCorrectPairQuestion = memo(
             state={
               selectedAAnswer === undefined || selectedBAnswer === undefined
                 ? SubmitButtonState.Disabled
-                : !showResult
-                  ? SubmitButtonState.Check
-                  : isCorrect
+                : showResult
+                  ? isCorrect
                     ? SubmitButtonState.Correct
                     : SubmitButtonState.Incorrect
+                  : SubmitButtonState.Check
             }
             onPress={handleSubmit}
           />
@@ -256,7 +256,7 @@ export const QuizDeckOneCorrectPairQuestion = memo(
         {flag?.type === QuestionFlagType.NewSkill ? (
           <NewSkillModal skill={question.answer.a.skill} />
         ) : null}
-        {flag != null ? <FlagText flag={flag} /> : null}
+        {flag == null ? null : <FlagText flag={flag} />}
         <View>
           <Text className="text-xl font-bold text-text">{prompt}</Text>
         </View>
@@ -455,7 +455,7 @@ const ShowHanziWordSkillAnswer = ({
       {hanzis.map((hanzi, i) => (
         <View
           key={i}
-          className={hanzi !== primaryHanzi ? `opacity-50` : undefined}
+          className={hanzi === primaryHanzi ? undefined : `opacity-50`}
         >
           <HanziText
             pinyin={hanzi === primaryHanzi ? pinyin : undefined}
@@ -539,11 +539,11 @@ const Skeleton = ({
       >
         {children}
       </View>
-      {toast !== null ? (
+      {toast === null ? null : (
         <View className="absolute inset-x-0 bottom-0">
           <Animated.View style={slideInStyle}>{toast}</Animated.View>
         </View>
-      ) : null}
+      )}
       <View
         className="absolute inset-x-quiz-px flex-row items-stretch"
         style={{

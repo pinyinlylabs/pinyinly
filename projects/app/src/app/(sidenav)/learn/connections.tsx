@@ -58,11 +58,11 @@ export default function ConnectionsPage() {
       g.words.every((w) => newSelectedTiles.includes(w)),
     );
 
-    if (matchedGroup != null) {
+    if (matchedGroup == null) {
+      setSelectedTiles(newSelectedTiles);
+    } else {
       setMatchedGroups((existing) => [...existing, matchedGroup]);
       setSelectedTiles([]);
-    } else {
-      setSelectedTiles(newSelectedTiles);
     }
   };
 

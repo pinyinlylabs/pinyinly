@@ -111,7 +111,7 @@ function parseIdsTxt(txt: string): ReadonlyMap<string, Decomposition[]> {
       parsedDecompositions.push({
         ids,
         idsNode: parsed,
-        tags: tags != null ? new Set(tags.split(``)) : emptySet,
+        tags: tags == null ? emptySet : new Set(tags.split(``)),
       });
     }
 
@@ -212,16 +212,16 @@ for (const character of decompositionQueue) {
 
   // If there's an existing character to use, fall back to it.
   if (bestDecompositionScoreConflict) {
-    if (existing != null) {
-      debug(
-        `the best decomposition for ${character} (${unicodeShortIdentifier(character)}) is ambiguous, using existing`,
-      );
-      continue;
-    } else {
+    if (existing == null) {
       charactersWithAmbiguousDecomposition.add([
         character,
         bestDecompositions.map(({ ids }) => ids),
       ]);
+    } else {
+      debug(
+        `the best decomposition for ${character} (${unicodeShortIdentifier(character)}) is ambiguous, using existing`,
+      );
+      continue;
     }
   } else {
     const bestDecomposition = bestDecompositions[0];

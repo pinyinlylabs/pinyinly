@@ -309,7 +309,7 @@ export default function RadicalPage() {
                 <Text className="text-text">Error</Text>
               ) : (
                 <>
-                  {query.data?.nameMnemonics != null ? (
+                  {query.data?.nameMnemonics == null ? null : (
                     <ReferencePageBodySection title="Mnemonics">
                       <View className="flex-col gap-2">
                         {query.data.nameMnemonics.map(
@@ -324,17 +324,17 @@ export default function RadicalPage() {
                         )}
                       </View>
                     </ReferencePageBodySection>
-                  ) : null}
-                  {query.data?.radical != null ? (
+                  )}
+                  {query.data?.radical == null ? null : (
                     <ReferencePageBodySection title="Meaning">
                       {query.data.radical.gloss.join(`, `)}
                     </ReferencePageBodySection>
-                  ) : null}
-                  {query.data?.radical?.pinyin != null ? (
+                  )}
+                  {query.data?.radical?.pinyin == null ? null : (
                     <ReferencePageBodySection title="Pinyin">
                       {query.data.radical.pinyin.join(`, `)}
                     </ReferencePageBodySection>
-                  ) : null}
+                  )}
                 </>
               )
             }

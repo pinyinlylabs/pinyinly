@@ -26,7 +26,7 @@ export default function WebsiteLayout() {
   return (
     <>
       <header
-        className={`www-px-comfortable fixed left-0 right-0 top-0 z-50 flex h-[72px] justify-center border-0 bg-background transition-all ${!isIntersecting ? `border-b-2 border-solid border-primary-5` : ``}`}
+        className={`www-px-comfortable fixed left-0 right-0 top-0 z-50 flex h-[72px] justify-center border-0 bg-background transition-all ${isIntersecting ? `` : `border-b-2 border-solid border-primary-5`}`}
       >
         <View className="flex w-full max-w-www-col justify-between">
           <View className="h-full w-full flex-row justify-center md:justify-start">

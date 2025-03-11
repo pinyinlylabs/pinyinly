@@ -44,7 +44,7 @@ export default function RadicalPage() {
             <Text className="text-text">Error</Text>
           ) : (
             <>
-              {query.data?.nameMnemonics != null ? (
+              {query.data?.nameMnemonics == null ? null : (
                 <ReferencePageBodySection title="Name mnemonics">
                   <View className="flex-col gap-2">
                     {query.data.nameMnemonics.map(
@@ -59,8 +59,8 @@ export default function RadicalPage() {
                     )}
                   </View>
                 </ReferencePageBodySection>
-              ) : null}
-              {query.data?.pinyinMnemonics != null ? (
+              )}
+              {query.data?.pinyinMnemonics == null ? null : (
                 <ReferencePageBodySection title="Pinyin mnemonics">
                   <View className="flex-col gap-2">
                     {query.data.pinyinMnemonics.map(
@@ -75,17 +75,17 @@ export default function RadicalPage() {
                     )}
                   </View>
                 </ReferencePageBodySection>
-              ) : null}
-              {query.data?.radical != null ? (
+              )}
+              {query.data?.radical == null ? null : (
                 <ReferencePageBodySection title="Meaning">
                   {query.data.radical.gloss.join(`, `)}
                 </ReferencePageBodySection>
-              ) : null}
-              {query.data?.radical?.pinyin != null ? (
+              )}
+              {query.data?.radical?.pinyin == null ? null : (
                 <ReferencePageBodySection title="Pinyin">
                   {query.data.radical.pinyin.join(`, `)}
                 </ReferencePageBodySection>
-              ) : null}
+              )}
             </>
           )
         }

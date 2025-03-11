@@ -30,7 +30,7 @@ export function makeDbCache<K, V>(
         | { request: string; response: string; created_at: string }
         | undefined;
 
-      return result != null ? (JSON.parse(result.response) as V) : undefined;
+      return result == null ? undefined : (JSON.parse(result.response) as V);
     },
     set(key: K, value: V): void {
       const keyText = JSON.stringify(key);

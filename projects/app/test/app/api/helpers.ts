@@ -42,9 +42,9 @@ export function testExpoServer(t: TestContext) {
         { ...init },
         {
           signal:
-            init?.signal != null
-              ? AbortSignal.any([t.signal, init.signal])
-              : t.signal,
+            init?.signal == null
+              ? t.signal
+              : AbortSignal.any([t.signal, init.signal]),
         },
       ),
     );

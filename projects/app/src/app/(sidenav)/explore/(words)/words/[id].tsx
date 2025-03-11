@@ -50,11 +50,11 @@ export default function WordPage() {
                 {query.data?.meaning.definition}
               </ReferencePageBodySection>
 
-              {query.data?.meaning.pinyin !== undefined ? (
+              {query.data?.meaning.pinyin === undefined ? null : (
                 <ReferencePageBodySection title="Pronunciation">
                   {query.data.meaning.pinyin}
                 </ReferencePageBodySection>
-              ) : null}
+              )}
 
               <ReferencePageBodySection title="Characters">
                 {[].join(`, `)}

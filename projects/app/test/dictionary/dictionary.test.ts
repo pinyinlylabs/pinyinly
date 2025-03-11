@@ -1092,10 +1092,10 @@ function assertUniqueArray<T>(items: readonly T[]): void {
   const seen = new Set();
   const duplicates = [];
   for (const x of items) {
-    if (!seen.has(x)) {
-      seen.add(x);
-    } else {
+    if (seen.has(x)) {
       duplicates.push(x);
+    } else {
+      seen.add(x);
     }
   }
   assert.deepEqual(duplicates, [], `expected no duplicates`);

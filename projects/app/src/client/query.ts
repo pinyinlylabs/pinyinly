@@ -36,7 +36,7 @@ export async function questionsForReview(
   const result: [Skill, SkillState, Question][] = [];
   const now = new Date();
   const skillTypesFilter =
-    options?.skillTypes != null ? new Set(options.skillTypes) : null;
+    options?.skillTypes == null ? null : new Set(options.skillTypes);
 
   for await (const [, skillState] of r.queryPaged.skillState.byDue()) {
     // Only consider skills that are due for review.

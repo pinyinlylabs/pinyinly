@@ -98,7 +98,7 @@ export default function IndexPage() {
                     : `Start learning`}
                 </Text>
 
-                {streakQuery.data != null ? (
+                {streakQuery.data == null ? null : (
                   <Animated.View entering={FadeIn}>
                     <Text
                       className={
@@ -111,7 +111,7 @@ export default function IndexPage() {
                       {streakQuery.data.streakDayCount} day streak
                     </Text>
                   </Animated.View>
-                ) : null}
+                )}
               </View>
 
               {recentHanzi.data.length > 0 ? (
