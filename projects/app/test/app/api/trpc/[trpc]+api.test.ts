@@ -14,7 +14,7 @@ void test.skip(`API smoke tests`, { timeout: 20_000 }, async (t) => {
   await using server = testExpoServer(t);
   await server.untilReady();
 
-  await t.test(`/api/trpc/invalid`, { timeout: 5_000 }, async () => {
+  await t.test(`/api/trpc/invalid`, { timeout: 50_000 }, async () => {
     const response = await server.fetch(`/api/trpc/invalid`);
     assert.equal(response.status, 404);
   });

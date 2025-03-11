@@ -317,7 +317,7 @@ void test(`timestamp()`, async (t) => {
 
   // Unmarshalling
   {
-    const date = new Date(1601856000000);
+    const date = new Date(1_601_856_000_000);
     for (const [marshaled, unmarshaled] of [
       [date.toISOString(), date], // ISO8601 string
       [date.getTime(), date], // timestamp as number
@@ -340,7 +340,7 @@ void test(`timestamp()`, async (t) => {
 
   // Marshalling
   {
-    const date = new Date(1601856000000);
+    const date = new Date(1_601_856_000_000);
     for (const [marshaled, unmarshaled] of [
       [date.getTime(), date], // Date
       [date.getTime(), date.getTime()], // timestamp as number

@@ -628,7 +628,7 @@ export function parseIds(
   const char = String.fromCodePoint(charCodePoint);
   cursor.index += char.length;
 
-  if (charCodePoint >= /* ⿰ */ 12272 && charCodePoint <= /* ⿿ */ 12287) {
+  if (charCodePoint >= /* ⿰ */ 12_272 && charCodePoint <= /* ⿿ */ 12_287) {
     const operator = idsOperatorSchema.parse(char);
     switch (operator) {
       case IdsOperator.LeftToRight: {

@@ -232,7 +232,13 @@ export default tseslint.config(
       "unicorn/no-null": `off`, // TODO evaluate
       "unicorn/no-useless-undefined": `off`, // TODO evaluate
       "unicorn/number-literal-case": `off`, // overwritten by prettier
-      "unicorn/numeric-separators-style": `off`, // TODO evaluate
+      "unicorn/numeric-separators-style": [
+        `error`,
+        {
+          onlyIfContainsSeparator: true,
+          number: { onlyIfContainsSeparator: false },
+        },
+      ],
       "unicorn/prefer-array-flat": `off`, // TODO evaluate
       "unicorn/prefer-module": `off`, // TODO evaluate
       "unicorn/prevent-abbreviations": `off`, // TODO evaluate

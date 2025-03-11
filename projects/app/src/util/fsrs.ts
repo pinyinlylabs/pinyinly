@@ -104,7 +104,7 @@ function nextDueDuration(stability: number, rating: Rating): Duration {
         // This returns in "days", multiply by 24*60 to turn into minutes.
         Math.min(
           stability * intervalModifier(0.9 /* 90% */),
-          36500 /* 100 years */,
+          36_500 /* 100 years */,
         ),
     ),
   };

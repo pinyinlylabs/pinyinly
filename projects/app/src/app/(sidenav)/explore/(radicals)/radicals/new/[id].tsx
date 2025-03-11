@@ -191,7 +191,7 @@ export default function RadicalPage() {
             <View className="flex-row items-center gap-2 px-2">
               <Svg height={260 / 3.5} width={260 / 3.5}>
                 <G
-                  transform={`translate(${0 / 3.5}, ${228.515625 / 3.5}) scale(${0.25390625 / 3.5}, ${-0.25390625 / 3.5})`}
+                  transform={`translate(${0 / 3.5}, ${228.515_625 / 3.5}) scale(${0.253_906_25 / 3.5}, ${-0.253_906_25 / 3.5})`}
                   fill={`none`}
                 >
                   {svgData.strokes.slice(1).map((d, i) => (
@@ -224,7 +224,7 @@ export default function RadicalPage() {
             <View className="flex-row items-center gap-2 px-2">
               <Svg height={260 / 3.5} width={260 / 3.5}>
                 <G
-                  transform={`translate(${0 / 3.5}, ${228.515625 / 3.5}) scale(${0.25390625 / 3.5}, ${-0.25390625 / 3.5})`}
+                  transform={`translate(${0 / 3.5}, ${228.515_625 / 3.5}) scale(${0.253_906_25 / 3.5}, ${-0.253_906_25 / 3.5})`}
                   fill={`none`}
                 >
                   {svgData.strokes.slice(0, 1).map((d, i) => (
@@ -259,7 +259,7 @@ export default function RadicalPage() {
             <View className="flex-row items-center gap-2 px-2">
               <Svg height={260 / 3.5} width={260 / 3.5}>
                 <G
-                  transform={`translate(${0 / 3.5}, ${228.515625 / 3.5}) scale(${0.25390625 / 3.5}, ${-0.25390625 / 3.5})`}
+                  transform={`translate(${0 / 3.5}, ${228.515_625 / 3.5}) scale(${0.253_906_25 / 3.5}, ${-0.253_906_25 / 3.5})`}
                   fill={`none`}
                 >
                   {svgData.strokes.map((d, i) => (
