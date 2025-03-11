@@ -32,6 +32,7 @@ import {
   parseIds,
   parsePinyinTone,
   PinyinChart,
+  splitCharacters,
   splitTonelessPinyin,
   unicodeShortIdentifier,
   walkIdsNode,
@@ -271,7 +272,7 @@ void test(`hanzi words are unique on (meaning key, pinyin)`, async () => {
   for (const exception of exceptions) {
     assert(
       duplicates.some((x) => x.symmetricDifference(exception).size === 0),
-      `exception ${Array.from(exception)} is not used`,
+      `exception ${[...exception]} is not used`,
     );
   }
 });
@@ -312,7 +313,7 @@ void test(`hanzi words are unique on (hanzi, part-of-speech, pinyin)`, async () 
   for (const exception of exceptions) {
     assert(
       duplicates.some((x) => x.symmetricDifference(exception).size === 0),
-      `exception ${Array.from(exception)} is not used`,
+      `exception ${[...exception]} is not used`,
     );
   }
 
@@ -358,9 +359,9 @@ void test(`expect missing glyphs to be included decomposition data`, async () =>
     }
   }
 
-  const knownMissingGlyphs = new Set<string>([
-    ...(await loadMissingFontGlyphs()).values().flatMap((x) => Array.from(x)),
-  ]);
+  const knownMissingGlyphs = new Set<string>(
+    (await loadMissingFontGlyphs()).values().flatMap((x) => [...x]),
+  );
   for (const char of allComponents) {
     knownMissingGlyphs.delete(char);
   }
@@ -413,7 +414,7 @@ void test(`hanzi uses consistent unicode characters`, async () => {
   const dict = await loadDictionary();
   const violations = [...dict.keys()]
     .map((x) => hanziFromHanziWord(x))
-    .flatMap((x) => Array.from(x))
+    .flatMap((x) => splitCharacters(x))
     .filter(isNotCjkUnifiedIdeograph);
   assert.deepEqual(
     violations,
@@ -972,7 +973,7 @@ void test(`dictionary contains entries for decomposition`, async () => {
   >();
 
   for (const hanzi of await allHanziWordsHanzi()) {
-    for (const character of Array.from(hanzi)) {
+    for (const character of splitCharacters(hanzi)) {
       const lookup = await lookupHanzi(character);
       if (lookup.length === 0) {
         mapSetAdd(unknownCharacters, character, hanzi);

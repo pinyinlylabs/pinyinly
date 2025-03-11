@@ -37,7 +37,7 @@ import {
 } from "./db";
 import { updateSkillState } from "./queries";
 
-const loggerName = import.meta.filename.split(`/`).slice(-1)[0];
+const loggerName = import.meta.filename.split(`/`).at(-1);
 invariant(loggerName != null);
 const debug = makeDebug(loggerName);
 

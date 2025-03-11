@@ -7,6 +7,7 @@ import {
   loadStandardPinyinChart,
   lookupHanziWord,
   meaningKeyFromHanziWord,
+  splitCharacters,
   splitPinyin,
 } from "@/dictionary/dictionary";
 import { invariant } from "@haohaohow/lib/invariant";
@@ -87,7 +88,7 @@ export async function skillDependencies(
     case SkillType.HanziWordToEnglish: {
       // Learn the components of a hanzi word first.
       const hanziToLearn = await hanziToLearnForHanzi(
-        Array.from(hanziFromHanziWord(skill.hanziWord)),
+        splitCharacters(hanziFromHanziWord(skill.hanziWord)),
       );
       for (const hanzi of hanziToLearn) {
         if (await characterHasGlyph(hanzi)) {
@@ -108,7 +109,7 @@ export async function skillDependencies(
 
       // Only do this for single characters
       const hanzi = hanziFromHanziWord(skill.hanziWord);
-      if (Array.from(hanzi).length > 1) {
+      if (splitCharacters(hanzi).length > 1) {
         break;
       }
 
@@ -152,7 +153,7 @@ export async function skillDependencies(
 
       // Only do this for single characters
       const hanzi = hanziFromHanziWord(skill.hanziWord);
-      if (Array.from(hanzi).length > 1) {
+      if (splitCharacters(hanzi).length > 1) {
         break;
       }
 
@@ -204,7 +205,7 @@ export async function skillDependencies(
 
       // Only do this for single characters
       const hanzi = hanziFromHanziWord(skill.hanziWord);
-      if (Array.from(hanzi).length > 1) {
+      if (splitCharacters(hanzi).length > 1) {
         break;
       }
 

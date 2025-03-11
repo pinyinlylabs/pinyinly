@@ -141,7 +141,7 @@ tasks:
 
   dev:
     command: yarn expo start
-    local: true
+    preset: watcher
     env:
       # Fixes: (node:97180) Warning: To load an ES module, set "type": "module"
       # in the package.json or use the .mjs extension.
@@ -246,7 +246,7 @@ tasks:
 
   testWatch:
     command: node --test --watch --import tsx "'test/**/*.test.ts'"
-    local: true
+    preset: watcher
     options:
       envFile: .env.local
 

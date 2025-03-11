@@ -5,7 +5,7 @@ fileGroups:
 tasks:
   storybook:
     command: yarn storybook dev --port=6006
-    local: true
+    preset: watcher
   storybook-build:
     command: yarn storybook build --output-dir=storybook-static
     inputs:

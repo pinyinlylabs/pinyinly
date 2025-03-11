@@ -1,5 +1,9 @@
 import { Skill, SkillType } from "@/data/model";
-import { hanziFromHanziWord, lookupHanziWord } from "@/dictionary/dictionary";
+import {
+  hanziFromHanziWord,
+  lookupHanziWord,
+  splitCharacters,
+} from "@/dictionary/dictionary";
 import { useQuery } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { useMemo, useState } from "react";
@@ -28,7 +32,7 @@ export const NewSkillModal = ({ skill }: { skill: Skill }) => {
 
   const charactersWithPinyin = useMemo((): [string, string][] | undefined => {
     if (hanziWord != null && pinyin != null) {
-      const characters = Array.from(hanziFromHanziWord(hanziWord));
+      const characters = splitCharacters(hanziFromHanziWord(hanziWord));
       const pinyins = pinyin.split(` `);
       if (characters.length !== pinyins.length) {
         console.error(`characters.length !== pinyins.length for ${hanziWord}`);

@@ -65,13 +65,23 @@ function makeMockTx(t: TestContext) {
   };
 }
 
-const testReplicacheOptions = {
-  name: `test`,
+let _testReplicacheNameId = 0;
+/**
+ * Create a @see ReplicacheOptions object suitable for testing.
+ *
+ * @param name The name of the database. By default it will be unique for each
+ * call but can a value can be passed in if you want to share a database.
+ * @returns
+ */
+const testReplicacheOptions = (
+  name = `test${_testReplicacheNameId++}`,
+): ReplicacheOptions<never> => ({
+  name,
   licenseKey: TEST_LICENSE_KEY,
   kvStore: `mem`,
   pullInterval: null,
   logLevel: `error`,
-} satisfies ReplicacheOptions<never>;
+});
 
 void test(`string() key and value`, async (t) => {
   const posts = r.entity(`foo/[id]`, {
@@ -917,7 +927,7 @@ void test(`replicache()`, async (t) => {
   const checkPoints = new CheckpointLog();
 
   await using db = r.replicache(
-    testReplicacheOptions,
+    testReplicacheOptions(),
     schema,
     {
       async createPost(db, options) {
@@ -1100,7 +1110,7 @@ void test(`replicache() disallows unknown mutator implementations`, async () => 
   true satisfies IsEqual<keyof RizzleReplicacheQuery<typeof schema>, `posts`>;
 
   typeChecks(async () => {
-    r.replicache(testReplicacheOptions, schema, {
+    r.replicache(testReplicacheOptions(), schema, {
       async createPost() {
         // stub
       },
@@ -1126,7 +1136,7 @@ void test(`replicache() mutator tx`, async () => {
       .alias(`ic`),
   };
 
-  await using db = r.replicache(testReplicacheOptions, schema, {
+  await using db = r.replicache(testReplicacheOptions(), schema, {
     async incrementCounter(db, options) {
       const { id } = options;
       const existingCount = await db.counter.get({ id });
@@ -1167,7 +1177,7 @@ void test(`replicache() entity()`, async (t) => {
   };
 
   await t.test(`.set() only exposed to mutators`, async () => {
-    await using db = r.replicache(testReplicacheOptions, schema, {
+    await using db = r.replicache(testReplicacheOptions(), schema, {
       async appendText(db) {
         // eslint-disable-next-line @typescript-eslint/no-unused-expressions
         db.text.set;
@@ -1180,7 +1190,7 @@ void test(`replicache() entity()`, async (t) => {
   });
 
   await t.test(`.scan() supports empty partial key`, async () => {
-    await using db = r.replicache(testReplicacheOptions, schema, {
+    await using db = r.replicache(testReplicacheOptions(), schema, {
       async appendText() {
         // noop
       },
@@ -1217,7 +1227,7 @@ void test(`replicache() entity()`, async (t) => {
   });
 
   await t.test(`.scan() supports non-empty partial key`, async () => {
-    await using db = r.replicache(testReplicacheOptions, schema, {
+    await using db = r.replicache(testReplicacheOptions(), schema, {
       async appendText() {
         // noop
       },
@@ -1259,7 +1269,7 @@ void test(`replicache() entity()`, async (t) => {
   await t.test(`.scan() works inside mutator`, async () => {
     let checkPointsReached = 0;
 
-    await using db = r.replicache(testReplicacheOptions, schema, {
+    await using db = r.replicache(testReplicacheOptions(), schema, {
       async appendText(db) {
         checkPointsReached++;
         for await (const _ of db.text.scan({ id: `abc` })) {
@@ -1274,7 +1284,7 @@ void test(`replicache() entity()`, async (t) => {
   });
 
   await t.test(`paged .scan() supports empty partial key`, async () => {
-    await using db = r.replicache(testReplicacheOptions, schema, {
+    await using db = r.replicache(testReplicacheOptions(), schema, {
       async appendText() {
         // noop
       },
@@ -1329,7 +1339,7 @@ void test(`replicache() entity()`, async (t) => {
   });
 
   await t.test(`paged .scan() supports non-empty partial key`, async () => {
-    await using db = r.replicache(testReplicacheOptions, schema, {
+    await using db = r.replicache(testReplicacheOptions(), schema, {
       async appendText() {
         // noop
       },
@@ -1402,7 +1412,7 @@ void test(`replicache() index scan`, async () => {
       .alias(`at`),
   };
 
-  await using db = r.replicache(testReplicacheOptions, schema, {
+  await using db = r.replicache(testReplicacheOptions(), schema, {
     async appendText(db, options) {
       const { id } = options;
       const existing = await db.text.get({ id });
@@ -1442,7 +1452,7 @@ void test(`replicache() index scan functional test`, async () => {
     }),
   };
 
-  await using db = r.replicache(testReplicacheOptions, schema, {
+  await using db = r.replicache(testReplicacheOptions(), schema, {
     async upsertText(db, options) {
       const { id, tag } = options;
       await db.text.set({ id }, { id, tag });
@@ -1517,7 +1527,7 @@ void test(`replicache() index scan supports starting from non-existent values`, 
     }),
   };
 
-  await using db = r.replicache(testReplicacheOptions, schema, {
+  await using db = r.replicache(testReplicacheOptions(), schema, {
     async upsertText(db, options) {
       const { id, tag } = options;
       await db.text.set({ id }, { id, tag });

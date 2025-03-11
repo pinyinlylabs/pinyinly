@@ -399,18 +399,19 @@ export const lookupRadicalsByStrokes = async (strokes: number) =>
 
 export const allHanziWordsHanzi = async () =>
   new Set(
-    (await allRadicalHanziWords())
-      .concat(await allHsk1HanziWords())
-      .concat(await allHsk2HanziWords())
-      .concat(await allHsk3HanziWords())
-      .map((x) => hanziFromHanziWord(x)),
+    [
+      ...(await allRadicalHanziWords()),
+      ...(await allHsk1HanziWords()),
+      ...(await allHsk2HanziWords()),
+      ...(await allHsk3HanziWords()),
+    ].map((x) => hanziFromHanziWord(x)),
   );
 
 export const allHanziCharacters = async () =>
   new Set(
     [...(await allHanziWordsHanzi())]
       // Split words into characters because decomposition is per-character.
-      .flatMap((x) => Array.from(x)),
+      .flatMap((x) => splitCharacters(x)),
   );
 
 export const radicalStrokes = [
@@ -433,7 +434,7 @@ export function convertPinyinWithToneNumberToToneMark(pinyin: string): string {
   // 3. Otherwise, the second vowel takes the tone mark
 
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  let tone = `012345`.indexOf(pinyin[pinyin.length - 1]!);
+  let tone = `012345`.indexOf(pinyin.at(-1)!);
 
   const pinyinLengthWithoutTone = tone > 0 ? pinyin.length - 1 : pinyin.length;
 
@@ -1036,5 +1037,12 @@ export async function hanziToLearnForHanzi(hanzi: string[]): Promise<string[]> {
 }
 
 export async function hanziToLearnForHanziWord(hanziWord: HanziWord) {
-  return await hanziToLearnForHanzi(Array.from(hanziFromHanziWord(hanziWord)));
+  return await hanziToLearnForHanzi(
+    splitCharacters(hanziFromHanziWord(hanziWord)),
+  );
+}
+
+export function splitCharacters(text: string): string[] {
+  // eslint-disable-next-line @typescript-eslint/no-misused-spread
+  return [...text];
 }
