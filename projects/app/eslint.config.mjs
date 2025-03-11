@@ -245,7 +245,6 @@ export default tseslint.config(
       "unicorn/no-array-reduce": `off`, // TODO evaluate
       "unicorn/prefer-global-this": `off`, // TODO evaluate
       "unicorn/no-object-as-default-parameter": `off`, // TODO evaluate
-      "unicorn/no-for-loop": `off`, // TODO evaluate
       "unicorn/no-anonymous-default-export": `off`, // TODO evaluate
       "unicorn/prefer-string-replace-all": `off`, // TODO evaluate
       "unicorn/no-unreadable-array-destructuring": `off`, // TODO evaluate

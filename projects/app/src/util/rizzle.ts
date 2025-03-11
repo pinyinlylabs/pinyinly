@@ -503,9 +503,7 @@ export class RizzleEntity<
     ): string => {
       let result = filler[0];
       invariant(result != null);
-      for (let i = 0; i < keyPathVars.length; i++) {
-        const varName = keyPathVars[i];
-        invariant(varName != null);
+      for (const [i, varName] of keyPathVars.entries()) {
         if (varName in keyInput) {
           result += shape[varName].marshal(keyInput[varName]);
           const nextFiller = filler[i + 1];
