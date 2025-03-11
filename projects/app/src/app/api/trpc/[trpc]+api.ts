@@ -10,9 +10,9 @@ const handler = (req: Request) => {
       router: appRouter,
       createContext,
     });
-  } catch (e) {
-    console.error(e);
-    throw e;
+  } catch (error) {
+    console.error(error);
+    throw error;
   }
 };
 

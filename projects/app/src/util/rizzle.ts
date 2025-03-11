@@ -1278,9 +1278,9 @@ async function* indexScanIter<V>(
       }
       yield [key, unmarshalValue(value), secondaryKey];
     }
-  } catch (e) {
-    diagnoseError(e);
-    throw e;
+  } catch (error) {
+    diagnoseError(error);
+    throw error;
   }
 }
 
@@ -1352,9 +1352,9 @@ export async function* indexScanPagedIter<Value>(
           }
         }
       });
-    } catch (e) {
-      diagnoseError(e);
-      throw e;
+    } catch (error) {
+      diagnoseError(error);
+      throw error;
     }
     for (const entry of page) {
       await scanPagedIterThrottle();
@@ -1390,9 +1390,9 @@ export async function* scanIter<Value>(
       .entries()) {
       yield [key, unmarshalValue(value)] as const;
     }
-  } catch (e) {
-    diagnoseError(e);
-    throw e;
+  } catch (error) {
+    diagnoseError(error);
+    throw error;
   }
 }
 
@@ -1424,9 +1424,9 @@ export async function* scanPagedIter<V>(
           }
         }
       });
-    } catch (e) {
-      diagnoseError(e);
-      throw e;
+    } catch (error) {
+      diagnoseError(error);
+      throw error;
     }
     for (const item of page) {
       await scanPagedIterThrottle();

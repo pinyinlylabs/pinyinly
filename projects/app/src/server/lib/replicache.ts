@@ -297,13 +297,13 @@ export async function pull(
     ) {
       try {
         return await result;
-      } catch (e) {
+      } catch (error) {
         if (
-          e instanceof DatabaseError &&
-          e.code === `40001` && // Serialization failure, retry
+          error instanceof DatabaseError &&
+          error.code === `40001` && // Serialization failure, retry
           remainingRetries === 0
         ) {
-          throw e;
+          throw error;
         }
       }
     }
@@ -569,10 +569,10 @@ export async function processMutation(
         // 10(i): Run business logic
         // 10(i)(a): xmin column is automatically updated by Postgres for any affected rows.
         await mutate(tx, userId, mutation);
-      } catch (e) {
+      } catch (error) {
         // 10(ii)(a-c): log error, abort, and retry
-        debug(`Error executing mutation: %o %o`, mutation, e);
-        throw e;
+        debug(`Error executing mutation: %o %o`, mutation, error);
+        throw error;
       }
     }
 

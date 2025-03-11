@@ -73,8 +73,8 @@ export default function LoginPage() {
                   AppleAuthentication.AppleAuthenticationScope.EMAIL,
                 ],
               });
-            } catch (e) {
-              const err = z.object({ code: z.string() }).safeParse(e);
+            } catch (error) {
+              const err = z.object({ code: z.string() }).safeParse(error);
               if (err.success) {
                 switch (err.data.code) {
                   case `ERR_REQUEST_CANCELED`: {
@@ -90,7 +90,7 @@ export default function LoginPage() {
                   }
                 }
               } else {
-                console.error(`unknown error (no code), error=`, e);
+                console.error(`unknown error (no code), error=`, error);
               }
 
               return;

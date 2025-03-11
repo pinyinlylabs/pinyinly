@@ -226,7 +226,6 @@ export default tseslint.config(
       //
       // unicorn
       //
-      "unicorn/catch-error-name": `off`, // TODO evaluate
       "unicorn/consistent-function-scoping": `off`, // TODO evaluate
       "unicorn/import-style": `off`, // TODO evaluate
       "unicorn/no-array-for-each": `off`, // TODO evaluate

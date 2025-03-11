@@ -134,8 +134,8 @@ export const QuizDeck = ({
             skill,
             rating,
           })
-          .catch((e: unknown) => {
-            console.error(`Could not add skill rating`, e);
+          .catch((error: unknown) => {
+            console.error(`Could not add skill rating`, error);
           });
       }
 

@@ -144,8 +144,8 @@ Write 10 mnemonic variations for ${hanzi} (${name}).
     console.log(
       `Success for ${hanzi} (${name}), mnemonics:\n${json.mnemonics.map((m) => `  - ${m.mnemonic}\n    Rationale:\n${m.reasoning_steps.map((x, i) => `    ${i + 1}. ${x}`).join(`\n`)}`).join(`\n`)}`,
     );
-  } catch (e) {
-    console.error(`Failed to parse response, skipping…`, e);
+  } catch (error) {
+    console.error(`Failed to parse response, skipping…`, error);
     continue;
   }
 }

@@ -10,8 +10,8 @@ const isExpoGo =
   Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
 
 // Keep the splash screen visible while we fetch resources
-ExpoSplashScreen.preventAutoHideAsync().catch((e: unknown) => {
-  console.error(`Could not prevent splash screen auto hide`, e);
+ExpoSplashScreen.preventAutoHideAsync().catch((error: unknown) => {
+  console.error(`Could not prevent splash screen auto hide`, error);
 });
 
 // 'Splashscreen.setOptions' cannot be used in Expo Go. To customize the splash

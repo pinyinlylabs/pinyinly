@@ -61,8 +61,8 @@ export default function LearnHsk1Page() {
             ) {
               try {
                 questions.push(await generateQuestionForSkillOrThrow(skill));
-              } catch (e) {
-                console.error(e);
+              } catch (error) {
+                console.error(error);
                 continue;
               }
 

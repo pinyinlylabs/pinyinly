@@ -147,8 +147,11 @@ For each item, come up with 20 ${theme.noun} ideas, then narrow it down to the m
           ],
         ]),
       );
-    } catch (e) {
-      console.error(`Failed to parse response for ${groupId}, skipping…`, e);
+    } catch (error) {
+      console.error(
+        `Failed to parse response for ${groupId}, skipping…`,
+        error,
+      );
       continue;
     }
   }

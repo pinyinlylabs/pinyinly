@@ -203,8 +203,8 @@ Write 5 mnemonic variations for ${hanzi} (${pinyin}).
       `Radical ${r.character} [${r.initial === `` ? `_` : r.initial}- + -${r.final} + ${r.tone}] "${r.meaning}"
 Mnemonics:\n${r.mnemonics.map((m, i) => `  ${i + 1}. ${m.mnemonic}\n    Rationale:\n${m.reasoning_steps.map((x, i) => `    ${i + 1}. ${x}`).join(`\n`)}`).join(`\n`)}`,
     );
-  } catch (e) {
-    console.error(`Failed to parse response for ${hanzi}, skipping…`, e);
+  } catch (error) {
+    console.error(`Failed to parse response for ${hanzi}, skipping…`, error);
     continue;
   }
 }

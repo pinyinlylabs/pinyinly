@@ -65,9 +65,9 @@ export function testExpoServer(t: TestContext) {
             assert.deepEqual(data, { healthcheck: `ok` });
             break;
           }
-        } catch (err) {
+        } catch (error) {
           // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-          t.diagnostic(`Error: ${err}`);
+          t.diagnostic(`Error: ${error}`);
         }
 
         // Check every 500ms
