@@ -5,8 +5,8 @@ const { nodeProfilingIntegration } = require(`@sentry/profiling-node`);
 Sentry.init({
   dsn: process.env.SENTRY_DSN, // Must be provided at runtime.
   integrations: [captureConsoleIntegration(), nodeProfilingIntegration()],
-  tracesSampleRate: 1.0, // Keep in sync with the other Sentry.init()
-  profilesSampleRate: 1.0,
+  tracesSampleRate: 1, // Keep in sync with the other Sentry.init()
+  profilesSampleRate: 1,
 });
 
 const { createRequestHandler } = require(`@expo/server/adapter/vercel`);
