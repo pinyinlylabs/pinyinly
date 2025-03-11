@@ -197,7 +197,7 @@ const IosContainer = ({
 };
 
 const NoOpContainer = ({
-  backdropColor: backgroundClassName,
+  backdropColor,
   children,
   onDismiss,
 }: PlatformModalProps) => {
@@ -214,7 +214,7 @@ const NoOpContainer = ({
       presentationStyle="pageSheet"
       onRequestClose={api.dismiss}
     >
-      <View className={`flex-1 ${backgroundClassName}`}>{children(api)}</View>
+      <View className={`flex-1 bg-${backdropColor}`}>{children(api)}</View>
     </Modal>
   );
 };
