@@ -331,20 +331,18 @@ const dataIntegrityDictionary = inngest.createFunction(
     const allHanziWords = [...dict.keys()];
 
     await step.run(`check skillRating.skill`, async () => {
-      const unknownSkills = (
-        await withDrizzle(
-          async (db) =>
-            await db
-              .selectDistinct({ skill: s.skillRating.skill })
-              .from(s.skillRating)
-              .where(
-                notInArray(
-                  substring(s.skillRating.skill, /^\w+:(.+)$/),
-                  allHanziWords,
-                ),
+      const unknownSkills = await withDrizzle(
+        async (db) =>
+          await db
+            .selectDistinct({ skill: s.skillRating.skill })
+            .from(s.skillRating)
+            .where(
+              notInArray(
+                substring(s.skillRating.skill, /^\w+:(.+)$/),
+                allHanziWords,
               ),
-        )
-      ).map((r) => rSkillMarshal(r.skill));
+            ),
+      ).then((x) => x.map((r) => rSkillMarshal(r.skill)));
 
       if (unknownSkills.length > 0) {
         console.error(
@@ -357,20 +355,18 @@ const dataIntegrityDictionary = inngest.createFunction(
     });
 
     await step.run(`check skillState.skill`, async () => {
-      const unknownSkills = (
-        await withDrizzle(
-          async (db) =>
-            await db
-              .selectDistinct({ skill: s.skillState.skill })
-              .from(s.skillState)
-              .where(
-                notInArray(
-                  substring(s.skillState.skill, /^\w+:(.+)$/),
-                  allHanziWords,
-                ),
+      const unknownSkills = await withDrizzle(
+        async (db) =>
+          await db
+            .selectDistinct({ skill: s.skillState.skill })
+            .from(s.skillState)
+            .where(
+              notInArray(
+                substring(s.skillState.skill, /^\w+:(.+)$/),
+                allHanziWords,
               ),
-        )
-      ).map((r) => rSkillMarshal(r.skill));
+            ),
+      ).then((x) => x.map((r) => rSkillMarshal(r.skill)));
 
       if (unknownSkills.length > 0) {
         console.error(`unknown hanzi word in skillState.skill:`, unknownSkills);

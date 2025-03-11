@@ -25,15 +25,13 @@ export default function LearnHsk1Page() {
       const hsk1HanziWords = await allHsk1HanziWords();
 
       // Start with practicing skills that are due
-      const questions: Question[] = (
-        await questionsForReview(r, {
-          limit: quizSize,
-          sampleSize: 50,
-          filter: (skill) =>
-            `hanziWord` in skill && hsk1HanziWords.includes(skill.hanziWord),
-          skillTypes: [SkillType.HanziWordToEnglish],
-        })
-      ).map(([, , question]) => question);
+      const questions: Question[] = await questionsForReview(r, {
+        limit: quizSize,
+        sampleSize: 50,
+        filter: (skill) =>
+          `hanziWord` in skill && hsk1HanziWords.includes(skill.hanziWord),
+        skillTypes: [SkillType.HanziWordToEnglish],
+      }).then((x) => x.map(([, , question]) => question));
 
       // Fill the rest with new skills
       // Create skills to pad out the rest of the quiz

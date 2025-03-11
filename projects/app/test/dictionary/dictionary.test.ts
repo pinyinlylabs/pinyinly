@@ -360,7 +360,9 @@ void test(`expect missing glyphs to be included decomposition data`, async () =>
   }
 
   const knownMissingGlyphs = new Set<string>(
-    (await loadMissingFontGlyphs()).values().flatMap((x) => [...x]),
+    await loadMissingFontGlyphs().then((fontGlyphs) =>
+      fontGlyphs.values().flatMap((x) => [...x]),
+    ),
   );
   for (const char of allComponents) {
     knownMissingGlyphs.delete(char);

@@ -49,9 +49,9 @@ export async function skillLearningGraph(options: {
       return;
     }
 
-    const dependencies = (
-      await skillDependencies(skill, learningOptions)
-    ).filter((s) => !options.isSkillLearned(rSkillMarshal(s)));
+    const dependencies = await skillDependencies(skill, learningOptions).then(
+      (x) => x.filter((s) => !options.isSkillLearned(rSkillMarshal(s))),
+    );
 
     const node: Node = {
       skill,

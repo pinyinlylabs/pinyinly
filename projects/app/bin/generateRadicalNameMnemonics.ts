@@ -71,7 +71,7 @@ const decompositions: Record<string, string> = {
 const updates = new Map<string, { mnemonic: string; rationale: string }[]>();
 
 for (const hanzi of radicalsToCheck) {
-  const name = (await lookupHanzi(hanzi))[0]?.[1].gloss[0];
+  const name = await lookupHanzi(hanzi).then((x) => x[0]?.[1].gloss[0]);
   if (name == null) {
     console.warn(`No name lookup data for ${hanzi}, skipping…`);
     continue;

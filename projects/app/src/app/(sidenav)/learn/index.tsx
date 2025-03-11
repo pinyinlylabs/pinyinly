@@ -14,9 +14,10 @@ export default function IndexPage() {
     [`IndexPage`, `recentCharacters`],
     async (r) => {
       const recentHanziWords: HanziWord[] = [];
-      const ratingHistory = (
-        await r.queryPaged.skillRating.byCreatedAt().toArray()
-      ).reverse();
+      const ratingHistory = await r.queryPaged.skillRating
+        .byCreatedAt()
+        .toArray()
+        .then((x) => x.reverse());
       for (const [, { skill }] of ratingHistory) {
         if (`hanziWord` in skill) {
           if (!recentHanziWords.includes(skill.hanziWord)) {
@@ -34,9 +35,10 @@ export default function IndexPage() {
   const streakQuery = useRizzleQueryPaged(
     [`IndexPage`, `streakQuery`],
     async (r) => {
-      const ratingHistory = (
-        await r.queryPaged.skillRating.byCreatedAt().toArray()
-      ).reverse();
+      const ratingHistory = await r.queryPaged.skillRating
+        .byCreatedAt()
+        .toArray()
+        .then((x) => x.reverse());
 
       const streakEnd = ratingHistory[0]?.[1].createdAt;
       let streakStart: Date | undefined;

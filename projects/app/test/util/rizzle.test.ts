@@ -1551,7 +1551,10 @@ void test(`replicache() index scan supports starting from non-existent values`, 
   await db.replicache.query(async (tx) => {
     assert.deepEqual(
       new Set(
-        (await db.query.text.byTag(tx, `3`, false).toArray()).map((x) => x[1]),
+        await db.query.text
+          .byTag(tx, `3`, false)
+          .toArray()
+          .then((x) => x.map((x) => x[1])),
       ),
       new Set([
         { id: `4`, tag: `4` },
@@ -1563,7 +1566,10 @@ void test(`replicache() index scan supports starting from non-existent values`, 
   // Index scan (paged)
   assert.deepEqual(
     new Set(
-      (await db.queryPaged.text.byTag(`3`, false).toArray()).map((x) => x[1]),
+      await db.queryPaged.text
+        .byTag(`3`, false)
+        .toArray()
+        .then((items) => items.map((x) => x[1])),
     ),
     new Set([
       { id: `4`, tag: `4` },
