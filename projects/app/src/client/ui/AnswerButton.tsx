@@ -4,6 +4,7 @@ import Animated, {
   Easing,
   runOnJS,
   useAnimatedReaction,
+  useAnimatedStyle,
   useSharedValue,
   withClamp,
   withSequence,
@@ -124,6 +125,10 @@ export const AnswerButton = forwardRef<
     [bgScale],
   );
 
+  const bgAnimatedStyle = useAnimatedStyle(() => {
+    return { opacity: bgOpacity.get(), transform: [{ scale: bgScale.get() }] };
+  });
+
   const flat = pressed || disabled;
 
   return (
@@ -155,7 +160,7 @@ export const AnswerButton = forwardRef<
       className={pressable({ flat, inFlexRowParent, className })}
     >
       <Animated.View
-        style={{ opacity: bgOpacity, transform: [{ scale: bgScale }] }}
+        style={bgAnimatedStyle}
         className="pointer-events-none absolute bottom-[2px] left-[1px] right-[1px] top-[2px] rounded-lg bg-accent-4"
       />
       <View
