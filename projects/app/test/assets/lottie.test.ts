@@ -27,13 +27,13 @@ void test(`no luminance layers in lottie animations (incompatible with lottie-io
     );
 
     // Check each layer to make sure it's not a luminance mask.
-    anim.layers.forEach((layer) => {
+    for (const layer of anim.layers) {
       assert.notEqual(
         layer.matteMode,
         MatteMode.LUMA,
         `luminance layer in ${lottieFile} (id=${layer.id})`,
       );
-    });
+    }
   }
 
   assert.ok(foundFiles, `no lottie files found, wrong path set?`);
