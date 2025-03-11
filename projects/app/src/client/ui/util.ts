@@ -73,6 +73,9 @@ function useRenderGuardImpl(debugName: string) {
   });
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+const noOp = () => {};
+
 /**
  * A hook that monitors the number of re-renders occurs and throws an error if
  * too many happened. This makes it very obvious when there are re-rendering
@@ -80,4 +83,4 @@ function useRenderGuardImpl(debugName: string) {
  *
  * Only runs in dev mode.
  */
-export const useRenderGuard = __DEV__ ? useRenderGuardImpl : null;
+export const useRenderGuard = __DEV__ ? useRenderGuardImpl : () => noOp;

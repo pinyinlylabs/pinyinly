@@ -1,11 +1,12 @@
 import { hsk1SkillReview } from "@/client/query";
-import { useReplicache, useRizzleQuery } from "@/client/ui/ReplicacheContext";
+import {
+  useReplicache,
+  useRizzleQueryPaged,
+} from "@/client/ui/ReplicacheContext";
 import { SkillType } from "@/data/model";
 import { skillTypeToShorthand } from "@/data/skills";
 import { Rating } from "@/util/fsrs";
 import { useQuery } from "@tanstack/react-query";
-import reverse from "lodash/reverse";
-import sortBy from "lodash/sortBy";
 import { ScrollView, Text, View } from "react-native";
 
 export default function HistoryPage() {
@@ -18,11 +19,11 @@ export default function HistoryPage() {
     },
   });
 
-  const dataQuery = useRizzleQuery(
+  const dataQuery = useRizzleQueryPaged(
     [HistoryPage.name, `skillState`],
-    async (r, tx) => {
+    async (r) => {
       const result = [];
-      for await (const [key, value] of r.query.skillState.byDue(tx)) {
+      for await (const [key, value] of r.queryPaged.skillState.byDue()) {
         result.push([key, value] as const);
         if (result.length >= 50) {
           break;
@@ -32,15 +33,12 @@ export default function HistoryPage() {
     },
   );
 
-  const skillRatingsQuery = useRizzleQuery(
+  const skillRatingsQuery = useRizzleQueryPaged(
     [HistoryPage.name, `skillRatings`],
-    async (r, tx) =>
-      r.query.skillRating
-        .scan(tx)
-        .toArray()
-        .then((reviews) =>
-          reverse(sortBy(reviews, ([, x]) => x.createdAt.getTime())),
-        ),
+    async (r) => {
+      const res = await r.queryPaged.skillRating.byCreatedAt().toArray();
+      return res.reverse();
+    },
   );
 
   return (

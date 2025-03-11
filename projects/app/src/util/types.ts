@@ -2,6 +2,12 @@ import type { PropsOf } from "@/client/ui/types";
 import type { TypedNavigator } from "@react-navigation/native";
 import type { AnyFunction, Prettify } from "ts-essentials";
 
+/**
+ * react-query strictly forbids returning `undefined`, but this isn't enforced
+ * by its types. This type is used to enforce that rule.
+ */
+export type ReactQueryValue = object | string | null | unknown[] | number;
+
 type MaximumAllowedBoundary = 50;
 
 // See https://stackoverflow.com/a/69787886
