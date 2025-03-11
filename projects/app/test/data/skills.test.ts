@@ -177,7 +177,7 @@ void test(skillLearningGraph.name, async () => {
       }
 
       // If there's a parent, add this as a child.
-      const parentId = parentStack[parentStack.length - 1]?.id;
+      const parentId = parentStack.at(-1)?.id;
       if (parentId != null) {
         const children = graph.get(parentId);
         invariant(children != null);

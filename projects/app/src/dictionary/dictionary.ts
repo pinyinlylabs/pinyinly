@@ -433,7 +433,7 @@ export function convertPinyinWithToneNumberToToneMark(pinyin: string): string {
   // 3. Otherwise, the second vowel takes the tone mark
 
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  let tone = `012345`.indexOf(pinyin[pinyin.length - 1]!);
+  let tone = `012345`.indexOf(pinyin.at(-1)!);
 
   const pinyinLengthWithoutTone = tone > 0 ? pinyin.length - 1 : pinyin.length;
 

@@ -204,8 +204,7 @@ const syncRemotePush = inngest.createFunction(
                 schemaVersion,
               });
 
-              const newLastSyncedMutationId =
-                mutationBatchToPush[mutationBatchToPush.length - 1]?.id;
+              const newLastSyncedMutationId = mutationBatchToPush.at(-1)?.id;
               invariant(
                 newLastSyncedMutationId != null,
                 `newLastMutationId is null`,
