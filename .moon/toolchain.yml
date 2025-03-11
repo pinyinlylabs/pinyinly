@@ -12,8 +12,9 @@ typescript:
   #
   # As such each project has its own `:typecheck` task and task dependencies can
   # be configured on a per-project basis.
-  root: ./non-existent-directory
-  rootOptionsConfigFileName: tsconfig.base
+  #
+  # See https://github.com/moonrepo/moon/issues/1858#issuecomment-2715810074
+  rootConfigFileName: non-existent-file.json
   routeOutDirToCache: true
   syncProjectReferences: true
   syncProjectReferencesToPaths: false
