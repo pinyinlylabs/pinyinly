@@ -85,20 +85,18 @@ export function useAuth(): AuthApi {
   const legacySessionId = legacySessionIdQuery.data ?? undefined;
   useEffect(() => {
     if (doInitFirstSession) {
-      let clientSession: ClientSession;
-      // Migrate a legacy session ID to the new format.
-      if (legacySessionId == null) {
-        // Create a fresh blank session.
-        clientSession = {
-          // Putting the date in the DB name makes it easier to debug.
-          replicacheDbName: `hao-${new Date().toISOString()}`,
-        };
-      } else {
-        clientSession = {
-          replicacheDbName: `hao`, // This was the previously hard-coded name of the database.
-          serverSessionId: legacySessionId,
-        };
-      }
+      const clientSession: ClientSession =
+        legacySessionId == null
+          ? // Migrate a legacy session ID to the new format.
+            {
+              // Putting the date in the DB name makes it easier to debug.
+              replicacheDbName: `hao-${new Date().toISOString()}`,
+            }
+          : // Create a fresh blank session.
+            {
+              replicacheDbName: `hao`, // This was the previously hard-coded name of the database.
+              serverSessionId: legacySessionId,
+            };
 
       authStateMutation.mutate(
         JSON.stringify({

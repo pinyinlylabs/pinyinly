@@ -234,7 +234,7 @@ export default tseslint.config(
       "unicorn/no-array-for-each": `off`, // TODO evaluate
       "unicorn/no-null": `off`, // TODO evaluate
       "unicorn/no-useless-undefined": `off`, // TODO evaluate
-      "unicorn/number-literal-case": `off`, // TODO evaluate
+      "unicorn/number-literal-case": `off`, // overwritten by prettier
       "unicorn/numeric-separators-style": `off`, // TODO evaluate
       "unicorn/prefer-array-flat": `off`, // TODO evaluate
       "unicorn/prefer-module": `off`, // TODO evaluate
@@ -242,7 +242,6 @@ export default tseslint.config(
       "unicorn/prevent-abbreviations": `off`, // TODO evaluate
       "unicorn/switch-case-braces": `off`, // TODO evaluate
       "unicorn/no-nested-ternary": `off`, // TODO evaluate
-      "unicorn/prefer-ternary": `off`, // TODO evaluate
       "unicorn/filename-case": `off`, // TODO evaluate
       "unicorn/no-array-reduce": `off`, // TODO evaluate
       "unicorn/prefer-global-this": `off`, // TODO evaluate
