@@ -238,7 +238,6 @@ export default tseslint.config(
       "unicorn/numeric-separators-style": `off`, // TODO evaluate
       "unicorn/prefer-array-flat": `off`, // TODO evaluate
       "unicorn/prefer-module": `off`, // TODO evaluate
-      "unicorn/prefer-number-properties": `off`, // TODO evaluate
       "unicorn/prevent-abbreviations": `off`, // TODO evaluate
       "unicorn/no-nested-ternary": `off`, // TODO evaluate
       "unicorn/filename-case": `off`, // TODO evaluate

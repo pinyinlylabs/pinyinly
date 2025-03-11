@@ -89,7 +89,10 @@ function parseIdsTxt(txt: string): ReadonlyMap<string, Decomposition[]> {
     assert.match(unicodeShortIdentifier, /^U\+/);
 
     // Convert the U+ identifier to a Unicode character
-    const codePoint = parseInt(unicodeShortIdentifier.replace(`U+`, ``), 16);
+    const codePoint = Number.parseInt(
+      unicodeShortIdentifier.replace(`U+`, ``),
+      16,
+    );
     const characterFromCodePoint = String.fromCodePoint(codePoint);
 
     assert.equal(character, characterFromCodePoint);

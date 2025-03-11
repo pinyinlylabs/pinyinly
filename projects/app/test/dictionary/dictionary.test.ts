@@ -1051,14 +1051,14 @@ async function kangxiRadicalToCjkRadical(
     const minHex = rule.range[0]!;
     const maxHex = rule.range[1] ?? rule.range[0]!;
 
-    const min = parseInt(minHex, 16);
-    const max = parseInt(maxHex, 16);
+    const min = Number.parseInt(minHex, 16);
+    const max = Number.parseInt(maxHex, 16);
 
     return xCodePoint >= min && xCodePoint <= max;
   })?.unified;
 
   if (newCodePoint != null) {
-    return String.fromCodePoint(parseInt(newCodePoint, 16));
+    return String.fromCodePoint(Number.parseInt(newCodePoint, 16));
   }
 }
 

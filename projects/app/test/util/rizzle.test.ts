@@ -417,7 +417,7 @@ void test(`entity() non-string key codec`, async (t) => {
       .transform((v) => v.join(`:`)),
     z.string().transform((s) => {
       const [a, b] = s.split(`:`);
-      return [a, parseInt(b!, 10)] as const;
+      return [a, Number.parseInt(b!, 10)] as const;
     }),
   );
 
