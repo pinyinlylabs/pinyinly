@@ -6,7 +6,7 @@ fileGroups:
 tasks:
   dev:
     command: yarn email dev
-    local: true
+    preset: watcher
   build:
     command: yarn email build
     inputs:
@@ -15,7 +15,7 @@ tasks:
     command: yarn email start
     deps:
       - build
-    local: true
+    preset: watcher
 
 tags:
   - prettier
