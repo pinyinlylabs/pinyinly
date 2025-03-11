@@ -156,7 +156,7 @@ export async function push(
         mutate,
       );
       success = true;
-    } catch (err) {
+    } catch {
       notSkipped = await processMutation(
         tx,
         userId,
