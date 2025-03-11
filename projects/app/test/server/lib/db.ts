@@ -12,7 +12,7 @@ let dataDir: File | Blob | undefined;
 async function createTestDb(t: TestContext) {
   let start = new Date();
   const client = await PGlite.create({ loadDataDir: dataDir });
-  t.diagnostic(`created pglite (${new Date().getTime() - start.getTime()}ms)`);
+  t.diagnostic(`created pglite (${Date.now() - start.getTime()}ms)`);
 
   const db = drizzle(client, { schema });
 
@@ -20,14 +20,10 @@ async function createTestDb(t: TestContext) {
   if (dataDir == null) {
     start = new Date();
     await migrate(db, { migrationsFolder });
-    t.diagnostic(
-      `applied migrations (${new Date().getTime() - start.getTime()}ms)`,
-    );
+    t.diagnostic(`applied migrations (${Date.now() - start.getTime()}ms)`);
     start = new Date();
     dataDir = await client.dumpDataDir();
-    t.diagnostic(
-      `cached pglite snapshot (${new Date().getTime() - start.getTime()}ms)`,
-    );
+    t.diagnostic(`cached pglite snapshot (${Date.now() - start.getTime()}ms)`);
   }
 
   return Object.assign(db, {

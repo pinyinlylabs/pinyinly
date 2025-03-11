@@ -237,7 +237,6 @@ export default tseslint.config(
       "unicorn/number-literal-case": `off`, // TODO evaluate
       "unicorn/numeric-separators-style": `off`, // TODO evaluate
       "unicorn/prefer-array-flat": `off`, // TODO evaluate
-      "unicorn/prefer-date-now": `off`, // TODO evaluate
       "unicorn/prefer-module": `off`, // TODO evaluate
       "unicorn/prefer-number-properties": `off`, // TODO evaluate
       "unicorn/prevent-abbreviations": `off`, // TODO evaluate
