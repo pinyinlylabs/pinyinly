@@ -238,11 +238,10 @@ export default tseslint.config(
           number: { onlyIfContainsSeparator: false },
         },
       ],
-      "unicorn/prefer-module": `off`, // TODO evaluate
-      "unicorn/prevent-abbreviations": `off`, // TODO evaluate
+      "unicorn/prefer-module": `off`, // still need to use require(…) with metro
+      "unicorn/prevent-abbreviations": `off`, // abbreviations are fine
       "unicorn/no-nested-ternary": `off`, // TODO evaluate
       "unicorn/filename-case": `off`, // TODO evaluate
-      "unicorn/no-array-reduce": `off`, // TODO evaluate
       "unicorn/prefer-global-this": `off`, // TODO evaluate
       "unicorn/no-object-as-default-parameter": `off`, // TODO evaluate
       "unicorn/no-anonymous-default-export": `off`, // TODO evaluate
