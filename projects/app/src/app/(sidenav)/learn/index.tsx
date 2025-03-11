@@ -19,12 +19,13 @@ export default function IndexPage() {
         .toArray()
         .then((x) => x.reverse());
       for (const [, { skill }] of ratingHistory) {
-        if (`hanziWord` in skill) {
-          if (!recentHanziWords.includes(skill.hanziWord)) {
-            recentHanziWords.push(skill.hanziWord);
-            if (recentHanziWords.length === 10) {
-              break;
-            }
+        if (
+          `hanziWord` in skill &&
+          !recentHanziWords.includes(skill.hanziWord)
+        ) {
+          recentHanziWords.push(skill.hanziWord);
+          if (recentHanziWords.length === 10) {
+            break;
           }
         }
       }

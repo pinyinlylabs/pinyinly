@@ -298,11 +298,12 @@ export async function pull(
       try {
         return await result;
       } catch (e) {
-        if (e instanceof DatabaseError && e.code === `40001`) {
-          // Serialization failure, retry
-          if (remainingRetries === 0) {
-            throw e;
-          }
+        if (
+          e instanceof DatabaseError &&
+          e.code === `40001` && // Serialization failure, retry
+          remainingRetries === 0
+        ) {
+          throw e;
         }
       }
     }

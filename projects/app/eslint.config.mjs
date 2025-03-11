@@ -246,7 +246,6 @@ export default tseslint.config(
       "unicorn/no-array-reduce": `off`, // TODO evaluate
       "unicorn/prefer-global-this": `off`, // TODO evaluate
       "unicorn/prefer-optional-catch-binding": `off`, // TODO evaluate
-      "unicorn/no-lonely-if": `off`, // TODO evaluate
       "unicorn/no-object-as-default-parameter": `off`, // TODO evaluate
       "unicorn/prefer-query-selector": `off`, // TODO evaluate
       "unicorn/prefer-dom-node-remove": `off`, // TODO evaluate

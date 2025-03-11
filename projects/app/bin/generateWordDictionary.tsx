@@ -989,14 +989,13 @@ const Shortcut = ({
   action: () => void;
 }) => {
   useInput((input, k) => {
-    if (!disabled) {
-      if (
-        (letter === `esc` && k.escape) ||
+    if (
+      !disabled &&
+      ((letter === `esc` && k.escape) ||
         (letter === `enter` && k.return) ||
-        (input === letter && k.ctrl)
-      ) {
-        action();
-      }
+        (input === letter && k.ctrl))
+    ) {
+      action();
     }
   });
 
@@ -2303,10 +2302,8 @@ const FormViewMode = ({
         const index = form.findIndex((x) => x.id === id);
         return form[Math.min(form.length - 1, index + 1)]?.id ?? id;
       });
-    } else if (key.return) {
-      if (focusedFieldId != null) {
-        onEditField(focusedFieldId);
-      }
+    } else if (key.return && focusedFieldId != null) {
+      onEditField(focusedFieldId);
     }
   });
 
