@@ -6,6 +6,7 @@ import importPlugin from "eslint-plugin-import";
 import reactPlugin from "eslint-plugin-react";
 import reactCompilerPlugin from "eslint-plugin-react-compiler";
 import reactHooksPlugin from "eslint-plugin-react-hooks";
+import unicornPlugin from "eslint-plugin-unicorn";
 import { builtinModules } from "node:module";
 import tseslint from "typescript-eslint";
 
@@ -52,6 +53,11 @@ export default tseslint.config(
   // extends ...
   ...tseslint.configs.strictTypeChecked,
   ...tseslint.configs.stylisticTypeChecked,
+  ...compat.config(drizzlePlugin.configs.recommended),
+  ...compat.config(inngestPlugin.configs.recommended),
+  ...compat.config(reactHooksPlugin.configs.recommended),
+  ...compat.config(reactPlugin.configs.recommended),
+  unicornPlugin.configs.recommended,
 
   // Ban CommonJS globals in ESM files, use import.meta.* instead
   {
@@ -63,12 +69,6 @@ export default tseslint.config(
 
   // Rules for all lintable files.
   {
-    extends: [
-      ...compat.config(drizzlePlugin.configs.recommended),
-      ...compat.config(inngestPlugin.configs.recommended),
-      ...compat.config(reactHooksPlugin.configs.recommended),
-      ...compat.config(reactPlugin.configs.recommended),
-    ],
     settings: {
       react: {
         version: `detect`,
@@ -222,6 +222,54 @@ export default tseslint.config(
         `error`,
         { drizzleObjectName: [`db`, `tx`] },
       ],
+
+      //
+      // unicorn
+      //
+      "unicorn/catch-error-name": `off`, // TODO evaluate
+      "unicorn/consistent-assert": `off`, // TODO evaluate
+      "unicorn/consistent-existence-index-check": `off`, // TODO evaluate
+      "unicorn/consistent-function-scoping": `off`, // TODO evaluate
+      "unicorn/import-style": `off`, // TODO evaluate
+      "unicorn/no-array-callback-reference": `off`, // TODO evaluate
+      "unicorn/no-array-for-each": `off`, // TODO evaluate
+      "unicorn/no-await-expression-member": `off`, // TODO evaluate
+      "unicorn/no-negated-condition": `off`, // TODO evaluate
+      "unicorn/no-null": `off`, // TODO evaluate
+      "unicorn/no-useless-undefined": `off`, // TODO evaluate
+      "unicorn/number-literal-case": `off`, // TODO evaluate
+      "unicorn/numeric-separators-style": `off`, // TODO evaluate
+      "unicorn/prefer-array-flat": `off`, // TODO evaluate
+      "unicorn/prefer-at": `off`, // TODO evaluate
+      "unicorn/prefer-date-now": `off`, // TODO evaluate
+      "unicorn/prefer-module": `off`, // TODO evaluate
+      "unicorn/prefer-number-properties": `off`, // TODO evaluate
+      "unicorn/prefer-spread": `off`, // TODO evaluate
+      "unicorn/prevent-abbreviations": `off`, // TODO evaluate
+      "unicorn/switch-case-braces": `off`, // TODO evaluate
+      "unicorn/no-nested-ternary": `off`, // TODO evaluate
+      "unicorn/prefer-ternary": `off`, // TODO evaluate
+      "unicorn/filename-case": `off`, // TODO evaluate
+      "unicorn/no-array-reduce": `off`, // TODO evaluate
+      "unicorn/no-useless-spread": `off`, // TODO evaluate
+      "unicorn/prefer-global-this": `off`, // TODO evaluate
+      "unicorn/prefer-optional-catch-binding": `off`, // TODO evaluate
+      "unicorn/no-lonely-if": `off`, // TODO evaluate
+      "unicorn/no-object-as-default-parameter": `off`, // TODO evaluate
+      "unicorn/no-array-push-push": `off`, // TODO evaluate
+      "unicorn/prefer-query-selector": `off`, // TODO evaluate
+      "unicorn/prefer-dom-node-remove": `off`, // TODO evaluate
+      "unicorn/prefer-add-event-listener": `off`, // TODO evaluate
+      "unicorn/prefer-dom-node-append": `off`, // TODO evaluate
+      "unicorn/no-for-loop": `off`, // TODO evaluate
+      "unicorn/no-zero-fractions": `off`, // TODO evaluate
+      "unicorn/prefer-switch": `off`, // TODO evaluate
+      "unicorn/no-anonymous-default-export": `off`, // TODO evaluate
+      "unicorn/prefer-string-replace-all": `off`, // TODO evaluate
+      "unicorn/no-unreadable-array-destructuring": `off`, // TODO evaluate
+      "unicorn/no-array-method-this-argument": `off`, // TODO evaluate
+      "unicorn/prefer-array-flat-map": `off`, // TODO evaluate
+      "unicorn/prefer-top-level-await": `off`, // TODO evaluate
     },
   },
 
