@@ -96,7 +96,7 @@ function RootLayout() {
                 // This is the native equivalent of adding a class to the body
                 // element, without this the root color scheme is not set.
                 Platform.OS === `web` ? `` : dark ? `dark-theme` : `light-theme`
-              } flex-1 bg-background`}
+              } default-theme flex-1 bg-background`}
             >
               <Stack screenOptions={{ headerShown: false, animation: `fade` }}>
                 <Stack.Screen

@@ -1,10 +1,6 @@
+import { useHanziWordMeaning } from "@/client/query";
 import { HanziWordSkill, Skill, SkillType } from "@/data/model";
-import {
-  hanziFromHanziWord,
-  lookupHanziWord,
-  splitCharacters,
-} from "@/dictionary/dictionary";
-import { useQuery } from "@tanstack/react-query";
+import { hanziFromHanziWord, splitCharacters } from "@/dictionary/dictionary";
 import { Image } from "expo-image";
 import { useMemo, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
@@ -57,13 +53,7 @@ const NewHanziToEnglishSkillContent = ({
   dismiss: () => void;
 }) => {
   const hanziWord = skill.hanziWord;
-
-  const hanziWordSkillData = useQuery({
-    queryKey: [`NewSkillModal`, skill],
-    queryFn: async () => {
-      return await lookupHanziWord(hanziWord);
-    },
-  });
+  const hanziWordSkillData = useHanziWordMeaning(hanziWord);
 
   const characters = useMemo(
     (): string[] => splitCharacters(hanziFromHanziWord(hanziWord)),
