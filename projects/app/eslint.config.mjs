@@ -240,7 +240,6 @@ export default tseslint.config(
       "unicorn/prevent-abbreviations": `off`, // abbreviations are fine
       "unicorn/no-nested-ternary": `off`, // TODO evaluate
       "unicorn/filename-case": `off`, // TODO evaluate
-      "unicorn/no-anonymous-default-export": `off`, // TODO evaluate
     },
   },
 
