@@ -1,5 +1,5 @@
 import makeDebug from "debug";
-import { join } from "node:path";
+import path from "node:path";
 import OpenAI from "openai";
 import { zodResponseFormat } from "openai/helpers/zod";
 import yargs from "yargs";
@@ -158,7 +158,7 @@ if (argv[`force-write`] || updates.size > 0) {
     .sort(sortComparatorString(([key]) => key));
 
   await writeUtf8FileIfChanged(
-    join(
+    path.join(
       import.meta.dirname,
       `../src/dictionary/radicalNameMnemonics.asset.json`,
     ),

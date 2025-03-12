@@ -41,7 +41,7 @@ import Spinner from "ink-spinner";
 import TextInput from "ink-text-input";
 import chunk from "lodash/chunk.js";
 import isEqual from "lodash/isEqual.js";
-import { join } from "node:path";
+import path from "node:path";
 import React, {
   Children,
   Fragment,
@@ -2093,9 +2093,9 @@ const SemiColonList = ({ items }: { items: readonly string[] }) => (
   </>
 );
 
-const dictionaryPath = join(import.meta.dirname, `../src/dictionary/`);
+const dictionaryPath = path.join(import.meta.dirname, `../src/dictionary/`);
 
-const dictionaryFilePath = join(dictionaryPath, `dictionary.asset.json`);
+const dictionaryFilePath = path.join(dictionaryPath, `dictionary.asset.json`);
 
 const readDictionary = () =>
   readFileWithSchema(dictionaryFilePath, dictionarySchema, new Map());
@@ -2219,7 +2219,7 @@ function useHanziWordList(wordListFileName: string) {
 
 async function readHanziWordList(name: string) {
   return await readFileWithSchema(
-    join(dictionaryPath, `${name}.asset.json`),
+    path.join(dictionaryPath, `${name}.asset.json`),
     wordListSchema,
     [],
   );
@@ -2227,7 +2227,7 @@ async function readHanziWordList(name: string) {
 
 async function writeHanziWordList(wordListFileName: string, data: HanziWord[]) {
   await writeUtf8FileIfChanged(
-    join(dictionaryPath, `${wordListFileName}.asset.json`),
+    path.join(dictionaryPath, `${wordListFileName}.asset.json`),
     jsonStringifyIndentOneLevel(data.sort()),
   );
 }

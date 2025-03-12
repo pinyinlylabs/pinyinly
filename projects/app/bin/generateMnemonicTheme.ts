@@ -1,7 +1,7 @@
 import { rMnemonicThemeId, rPinyinInitialGroupId } from "#data/rizzleSchema.ts";
 import { invariant } from "@haohaohow/lib/invariant";
 import makeDebug from "debug";
-import { join } from "node:path";
+import path from "node:path";
 import OpenAI from "openai";
 import { zodResponseFormat } from "openai/helpers/zod";
 import yargs from "yargs";
@@ -173,7 +173,7 @@ async function saveUpdates(updates: MnemonicThemeChoices) {
   );
 
   await writeUtf8FileIfChanged(
-    join(
+    path.join(
       import.meta.dirname,
       `../src/dictionary/mnemonicThemeChoices.asset.json`,
     ),
