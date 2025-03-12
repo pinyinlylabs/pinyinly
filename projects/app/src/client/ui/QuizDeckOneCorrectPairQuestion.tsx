@@ -1,3 +1,4 @@
+import { useHanziWordMeaning } from "@/client/query";
 import {
   HanziWordSkill,
   OneCorrectPairQuestion,
@@ -205,7 +206,11 @@ export const QuizDeckOneCorrectPairQuestion = memo(
                     Correct answer:
                   </Text>
 
-                  <ShowSkillAnswer skill={answerSkill} includeAlternatives />
+                  <ShowSkillAnswer
+                    skill={answerSkill}
+                    includeHint
+                    includeAlternatives
+                  />
 
                   {hint == null ? null : (
                     <Text className="leading-snug text-accent-10">
@@ -213,6 +218,7 @@ export const QuizDeckOneCorrectPairQuestion = memo(
                       {hint}
                     </Text>
                   )}
+
                   {selectedAAnswer != null && selectedBAnswer != null ? (
                     <View className="flex-row flex-wrap items-center gap-2">
                       <Text className="flex-shrink-0 font-bold leading-snug text-accent-10">
@@ -280,8 +286,14 @@ export const QuizDeckOneCorrectPairQuestion = memo(
                     selectedAAnswer === undefined
                       ? `default`
                       : a === selectedAAnswer
-                        ? `selected`
-                        : `dimmed`
+                        ? showResult
+                          ? isCorrect
+                            ? `success`
+                            : `error`
+                          : `selected`
+                        : selectedBAnswer === undefined
+                          ? `default`
+                          : `dimmed`
                   }
                   onPress={() => {
                     if (!showResult) {
@@ -295,8 +307,14 @@ export const QuizDeckOneCorrectPairQuestion = memo(
                     selectedBAnswer === undefined
                       ? `default`
                       : b === selectedBAnswer
-                        ? `selected`
-                        : `dimmed`
+                        ? showResult
+                          ? isCorrect
+                            ? `success`
+                            : `error`
+                          : `selected`
+                        : selectedAAnswer === undefined
+                          ? `default`
+                          : `dimmed`
                   }
                   onPress={() => {
                     if (!showResult) {
@@ -406,14 +424,25 @@ const choiceEnglishText = tv({
 const ShowSkillAnswer = ({
   skill,
   includeAlternatives = false,
+  includeHint = false,
   small = false,
 }: {
   skill: Skill;
   includeAlternatives?: boolean;
+  includeHint?: boolean;
   small?: boolean;
 }) => {
   switch (skill.type) {
-    case SkillType.HanziWordToPinyinInitial:
+    case SkillType.HanziWordToPinyinInitial: {
+      return (
+        <HanziWordToPinyinInitialSkillAnswer
+          skill={skill}
+          includeAlternatives={includeAlternatives}
+          includeHint={includeHint}
+          small={small}
+        />
+      );
+    }
     case SkillType.HanziWordToPinyinFinal:
     case SkillType.HanziWordToPinyinTone:
     case SkillType.EnglishToHanziWord:
@@ -426,9 +455,10 @@ const ShowSkillAnswer = ({
     }
     case SkillType.HanziWordToEnglish: {
       return (
-        <ShowHanziWordSkillAnswer
+        <HanziWordToEnglishSkillAnswer
           skill={skill}
           includeAlternatives={includeAlternatives}
+          includeHint={includeHint}
           small={small}
         />
       );
@@ -436,24 +466,64 @@ const ShowSkillAnswer = ({
   }
 };
 
-const ShowHanziWordSkillAnswer = ({
+const HanziWordToEnglishSkillAnswer = ({
   skill,
   includeAlternatives = false,
+  includeHint = false,
   small = false,
 }: {
   skill: HanziWordSkill;
+  includeHint?: boolean;
   includeAlternatives?: boolean;
   small?: boolean;
 }) => {
-  const meaningQuery = useQuery({
-    queryKey: [ShowSkillAnswer.name, `skill`, skill],
-    queryFn: async () => {
-      invariant(`hanziWord` in skill);
-      const meaning = await lookupHanziWord(skill.hanziWord);
-      return meaning;
-    },
-    enabled: `hanziWord` in skill,
-  });
+  const meaningQuery = useHanziWordMeaning(skill.hanziWord);
+
+  const meaning = meaningQuery.data;
+
+  if (meaning == null) {
+    return null;
+  }
+
+  const primaryHanzi = hanziFromHanziWord(skill.hanziWord);
+  const gloss = meaning.gloss[0];
+  const hanzis = [primaryHanzi];
+  if (includeAlternatives && meaning.visualVariants != null) {
+    hanzis.push(...meaning.visualVariants);
+  }
+
+  return (
+    <>
+      <View className={`flex-row items-center ${small ? `gap-1` : `gap-2`}`}>
+        {hanzis.map((hanzi, i) => (
+          <View
+            key={i}
+            className={hanzi === primaryHanzi ? undefined : `opacity-50`}
+          >
+            <HanziText hanzi={hanzi} small={small} accented />
+          </View>
+        ))}
+        <Text className={choiceEnglishText({ small })}>{gloss}</Text>
+      </View>
+      {includeHint && meaning.glossHint != null ? (
+        <Text className="leading-snug text-accent-10">{meaning.glossHint}</Text>
+      ) : null}
+    </>
+  );
+};
+
+const HanziWordToPinyinInitialSkillAnswer = ({
+  skill,
+  includeAlternatives = false,
+  includeHint = false,
+  small = false,
+}: {
+  skill: HanziWordSkill;
+  includeHint?: boolean;
+  includeAlternatives?: boolean;
+  small?: boolean;
+}) => {
+  const meaningQuery = useHanziWordMeaning(skill.hanziWord);
 
   const meaning = meaningQuery.data;
 
@@ -470,22 +540,30 @@ const ShowHanziWordSkillAnswer = ({
   }
 
   return (
-    <View className={`flex-row items-center ${small ? `gap-1` : `gap-2`}`}>
-      {hanzis.map((hanzi, i) => (
-        <View
-          key={i}
-          className={hanzi === primaryHanzi ? undefined : `opacity-50`}
-        >
-          <HanziText
-            pinyin={hanzi === primaryHanzi ? pinyin : undefined}
-            hanzi={hanzi}
-            small={small}
-            accented
-          />
-        </View>
-      ))}
-      <Text className={choiceEnglishText({ small })}>{gloss}</Text>
-    </View>
+    <>
+      <View className={`flex-row items-center ${small ? `gap-1` : `gap-2`}`}>
+        {hanzis.map((hanzi, i) => (
+          <View
+            key={i}
+            className={hanzi === primaryHanzi ? undefined : `opacity-50`}
+          >
+            <HanziText
+              pinyin={hanzi === primaryHanzi ? pinyin : undefined}
+              hanzi={hanzi}
+              small={small}
+              accented
+            />
+          </View>
+        ))}
+        <Text className={choiceEnglishText({ small })}>{gloss}</Text>
+      </View>
+      {includeHint && meaning.glossHint != null ? (
+        <Text className="leading-snug text-accent-10">
+          <Text className="font-bold">Hint:</Text>
+          {meaning.glossHint}
+        </Text>
+      ) : null}
+    </>
   );
 };
 
