@@ -168,6 +168,34 @@ void test(`hanzi word meaning gloss lint`, async () => {
   assert.deepEqual(violations, new Set());
 });
 
+void test(`hanzi word meaning glossHint lint`, async () => {
+  const dict = await loadDictionary();
+
+  const maxWords = 100;
+  const maxSpaces = maxWords - 1;
+
+  const isViolating = (x: string) =>
+    // no double space
+    /  /.exec(x) != null ||
+    // no new lines
+    /\n/.exec(x) != null ||
+    // doesn't exceed word limit
+    (x.match(/\s+/g)?.length ?? 0) > maxSpaces;
+
+  const violations = new Set(
+    [...dict]
+      .filter(
+        ([, { glossHint }]) => glossHint != null && isViolating(glossHint),
+      )
+      .map(([hanziWord, { glossHint }]) => ({
+        hanziWord,
+        glossHint,
+      })),
+  );
+
+  assert.deepEqual(violations, new Set());
+});
+
 void test(`hanzi word meaning example is not in english`, async () => {
   const dict = await loadDictionary();
 
