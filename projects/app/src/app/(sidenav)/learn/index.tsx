@@ -157,25 +157,6 @@ export default function IndexPage() {
       </View>
 
       <View className={boxClass()}>
-        <Text className="hhh-text-title mb-1">HSK1</Text>
-        <Text className="hhh-text-caption mb-4">
-          Test your knowledge with interactive exercises designed to help you
-          prepare for the HSK 1 exam with confidence.
-        </Text>
-
-        <Link href="/learn/hsk1" asChild>
-          <RectButton2
-            variant="filled"
-            className="self-start"
-            accent
-            textClassName="py-1 px-2"
-          >
-            Practice HSK1
-          </RectButton2>
-        </Link>
-      </View>
-
-      <View className={boxClass()}>
         <Text className="hhh-text-title mb-1">History</Text>
         <Text className="hhh-text-caption mb-4">
           See your past studies, review characters and words, and reinforce your

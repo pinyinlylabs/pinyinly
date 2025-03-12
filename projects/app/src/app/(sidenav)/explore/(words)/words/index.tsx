@@ -50,11 +50,6 @@ export default function WordsPage() {
         ) : (
           <>
             <WordList words={query.data.hsk1Words} />
-            <Link href="/learn/hsk1" asChild>
-              <RectButton2 variant="filled" accent>
-                Practice
-              </RectButton2>
-            </Link>
 
             <View className="gap-2 px-safe-or-4 lg:px-0">
               <Text className="text-center text-2xl font-bold text-text">
