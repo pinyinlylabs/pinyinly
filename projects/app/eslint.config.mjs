@@ -227,7 +227,7 @@ export default tseslint.config(
       //
       // unicorn
       //
-      "unicorn/no-null": `off`, // TODO evaluate
+      "unicorn/no-null": `off`, // null used extensively
       "unicorn/number-literal-case": `off`, // overwritten by prettier
       "unicorn/numeric-separators-style": [
         `error`,
