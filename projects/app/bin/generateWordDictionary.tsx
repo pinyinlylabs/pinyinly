@@ -652,6 +652,11 @@ const HanziWordEditor = ({
                   value: meaning.pinyin?.join(`;`) ?? ``,
                 },
                 {
+                  id: `glossHint`,
+                  label: `glossHint`,
+                  value: meaning.glossHint ?? ``,
+                },
+                {
                   id: `visualVariants`,
                   label: `Visual variants`,
                   value: meaning.visualVariants?.join(`;`) ?? ``,
@@ -681,10 +686,9 @@ const HanziWordEditor = ({
             const mutations = [];
 
             if (edits.has(`example`)) {
-              const newValue = edits.get(`example`);
-              invariant(newValue != null);
+              const newExample = edits.get(`example`);
+              invariant(newExample != null);
 
-              const newExample = newValue.trim() === `` ? undefined : newValue;
               mutations.push(() =>
                 upsertHanziWordMeaning(hanziWord, {
                   example: newExample,
@@ -710,10 +714,9 @@ const HanziWordEditor = ({
             }
 
             if (edits.has(`definition`)) {
-              const newValue = edits.get(`definition`)?.trim();
-              invariant(newValue != null);
+              const newDefinition = edits.get(`definition`)?.trim();
+              invariant(newDefinition != null);
 
-              const newDefinition = newValue === `` ? undefined : newValue;
               mutations.push(() =>
                 upsertHanziWordMeaning(hanziWord, {
                   definition: newDefinition,
@@ -740,6 +743,18 @@ const HanziWordEditor = ({
               edits.delete(`gloss`);
             }
 
+            if (edits.has(`glossHint`)) {
+              const newGlossHint = edits.get(`glossHint`);
+              invariant(newGlossHint != null);
+
+              mutations.push(() =>
+                upsertHanziWordMeaning(hanziWord, {
+                  glossHint: newGlossHint,
+                }),
+              );
+              edits.delete(`glossHint`);
+            }
+
             if (edits.has(`visualVariants`)) {
               const newValue = edits.get(`visualVariants`);
               invariant(newValue != null);
@@ -763,11 +778,10 @@ const HanziWordEditor = ({
               const newValue = edits.get(`pinyin`);
               invariant(newValue != null);
 
-              const newArray = newValue
+              const newPinyin = newValue
                 .split(`;`)
                 .map((x) => x.trim())
                 .filter((x) => x !== ``);
-              const newPinyin = newArray.length > 0 ? newArray : undefined;
 
               mutations.push(() =>
                 upsertHanziWordMeaning(hanziWord, {
@@ -2157,6 +2171,18 @@ async function upsertHanziWordMeaning(
 
   if (patch.pinyin?.length === 0) {
     patch.pinyin = undefined;
+  }
+
+  if (patch.definition?.trim().length === 0) {
+    patch.definition = undefined;
+  }
+
+  if (patch.example?.trim().length === 0) {
+    patch.example = undefined;
+  }
+
+  if (patch.glossHint?.trim().length === 0) {
+    patch.glossHint = undefined;
   }
 
   if (patch.visualVariants?.length === 0) {

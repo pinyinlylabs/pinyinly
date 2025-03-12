@@ -104,11 +104,13 @@ const NewHanziToEnglishSkillContent = ({
               </Text>
             </View>
 
-            <View className="gap-1">
-              <Text className="text-center font-karla text-lg text-text">
-                {hanziWordSkillData.data.definition}
-              </Text>
-            </View>
+            {hanziWordSkillData.data.glossHint == null ? null : (
+              <View className="gap-1">
+                <Text className="text-center font-karla text-lg text-primary-11">
+                  {hanziWordSkillData.data.glossHint}
+                </Text>
+              </View>
+            )}
           </View>
         </>
       )}

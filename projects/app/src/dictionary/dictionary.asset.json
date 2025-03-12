@@ -1,5 +1,5 @@
 [
-["一:one",{"gloss":["one","single"],"pinyin":["yī"],"example":"他一个苹果都没吃。","partOfSpeech":"noun","definition":"The smallest whole number, a single unit."}],
+["一:one",{"gloss":["one","single"],"pinyin":["yī"],"example":"他一个苹果都没吃。","partOfSpeech":"noun","definition":"The smallest whole number, a single unit.","glossHint":"A single horizontal stroke, representing the number one."}],
 ["一下儿:aBit",{"gloss":["a bit","a little while"],"pinyin":["yí xià ér"],"example":"请等一下儿。","partOfSpeech":"adverb","definition":"For a short time or in small amounts."}],
 ["一些:some",{"gloss":["some","a few"],"pinyin":["yì xiē"],"example":"我有一些朋友在中国。","partOfSpeech":"noun","definition":"An unspecified quantity or degree, often a small one."}],
 ["一会儿:aWhile",{"gloss":["a while","a short time"],"pinyin":["yī huì er"],"example":"请等一会儿。","partOfSpeech":"noun","definition":"A short period of time."}],
@@ -455,8 +455,8 @@
 ["凉:cool",{"gloss":["cool","cold"],"pinyin":["liáng"],"example":"秋天的风很凉。","partOfSpeech":"adjective","definition":"Moderately cold; neither warm nor very cold."}],
 ["凉快:pleasantlyCool",{"gloss":["cool","pleasantly cool"],"pinyin":["liáng kuai"],"example":"晚上外面凉快。","partOfSpeech":"adjective","definition":"(of weather) pleasantly low in temperature."}],
 ["凉水:coldWater",{"gloss":["cold water"],"pinyin":["liáng shuǐ"],"example":"请给我一杯凉水。","partOfSpeech":"noun","definition":"Water that is cool in temperature."}],
-["几:howMany",{"gloss":["how many","a few"],"pinyin":["jī"],"example":"你有几本书？","partOfSpeech":"pronoun","definition":"Used to ask about or refer to some small number."}],
-["几:table",{"gloss":["small table","several"],"pinyin":["jī"],"example":"那是一张茶几。","partOfSpeech":"noun","definition":"Refers to a small table, such as a tea table."}],
+["几:howMany",{"gloss":["how many","a few"],"pinyin":["jǐ"],"example":"你有几本书？","partOfSpeech":"pronoun","definition":"Used to ask about or refer to some small number."}],
+["几:table",{"gloss":["small table"],"pinyin":["jī"],"example":"那是一张茶几。","partOfSpeech":"noun","definition":"Refers to a small table, such as a tea table."}],
 ["凵:box",{"gloss":["open box"],"pinyin":["kǎn"],"example":"古文字中，凵常用于表示容器的概念。","partOfSpeech":"radical","definition":"A radical representing an open container."}],
 ["出:exit",{"gloss":["exit"],"pinyin":["chū"],"example":"他出门了。","partOfSpeech":"verb","definition":"To leave a place."}],
 ["出去:goOut",{"gloss":["go out"],"pinyin":["chū qù"],"example":"他已经出去了。","partOfSpeech":"verb","definition":"To leave a place or person and move to a more external location."}],
