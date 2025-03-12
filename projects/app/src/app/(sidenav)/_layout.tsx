@@ -51,25 +51,29 @@ export default function SideNavLayout() {
           </TabButton>
         </TabTrigger>
 
-        <TabTrigger name="Explore" href="/explore" asChild>
-          <TabButton className={buttonClass()}>
-            {({ isFocused }) => (
-              <>
-                <Image
-                  source={
-                    isFocused
-                      ? require(`@/assets/icons/bookmark-filled.svg`)
-                      : require(`@/assets/icons/bookmark.svg`)
-                  }
-                  className={iconClass({ isFocused })}
-                  tintColor="currentColor"
-                  contentFit="fill"
-                />
-                <Text className={buttonTextClass({ isFocused })}>Explore</Text>
-              </>
-            )}
-          </TabButton>
-        </TabTrigger>
+        {__DEV__ ? (
+          <TabTrigger name="Explore" href="/explore" asChild>
+            <TabButton className={buttonClass()}>
+              {({ isFocused }) => (
+                <>
+                  <Image
+                    source={
+                      isFocused
+                        ? require(`@/assets/icons/bookmark-filled.svg`)
+                        : require(`@/assets/icons/bookmark.svg`)
+                    }
+                    className={iconClass({ isFocused })}
+                    tintColor="currentColor"
+                    contentFit="fill"
+                  />
+                  <Text className={buttonTextClass({ isFocused })}>
+                    Explore
+                  </Text>
+                </>
+              )}
+            </TabButton>
+          </TabTrigger>
+        ) : null}
 
         <View className="hidden md:flex md:flex-1" />
 
