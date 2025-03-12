@@ -19,6 +19,7 @@ import {
   skillReviewQueue,
 } from "@/data/skills";
 import { allHsk1HanziWords } from "@/dictionary/dictionary";
+import { fsrsIsLearned } from "@/util/fsrs";
 import { interval } from "date-fns/interval";
 import shuffle from "lodash/shuffle";
 import take from "lodash/take";
@@ -144,9 +145,10 @@ export async function hsk1SkillReview(r: Rizzle): Promise<Skill[]> {
   const dueSkills = new Set<MarshaledSkill>();
   for await (const [, v] of r.queryPaged.skillState.scan()) {
     const skillId = rSkillMarshal(v.skill);
-    if (v.due >= now) {
+    if (v.srs != null && fsrsIsLearned(v.srs)) {
       learnedSkills.add(skillId);
-    } else {
+    }
+    if (v.due <= now) {
       dueSkills.add(skillId);
     }
   }
