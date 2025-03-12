@@ -15,7 +15,6 @@ export default function LearnLayout() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="reviews" options={modalScreenOptions} />
       <Stack.Screen name="hsk1" options={modalScreenOptions} />
-      <Stack.Screen name="connections" options={modalScreenOptions} />
     </Stack>
   );
 }

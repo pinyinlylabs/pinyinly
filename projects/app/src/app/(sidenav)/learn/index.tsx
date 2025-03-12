@@ -157,25 +157,6 @@ export default function IndexPage() {
       </View>
 
       <View className={boxClass()}>
-        <Text className="hhh-text-title mb-1">Connections</Text>
-        <Text className="hhh-text-caption mb-4">
-          Strengthen your understanding through this interactive game that
-          challenges you to make the right connections!
-        </Text>
-
-        <Link href="/learn/connections" asChild>
-          <RectButton2
-            variant="filled"
-            className="self-start"
-            accent
-            textClassName="py-1 px-2"
-          >
-            Play connections
-          </RectButton2>
-        </Link>
-      </View>
-
-      <View className={boxClass()}>
         <Text className="hhh-text-title mb-1">HSK1</Text>
         <Text className="hhh-text-caption mb-4">
           Test your knowledge with interactive exercises designed to help you
