@@ -24,7 +24,7 @@ export default function ConnectionsPage() {
         sampleSize: 50,
       });
 
-      return result.map(([, , question]) => question);
+      return result.map(([_skill, _skillState, question]) => question);
     },
   });
 

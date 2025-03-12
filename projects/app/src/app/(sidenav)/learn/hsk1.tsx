@@ -31,7 +31,7 @@ export default function LearnHsk1Page() {
         filter: (skill) =>
           `hanziWord` in skill && hsk1HanziWords.includes(skill.hanziWord),
         skillTypes: [SkillType.HanziWordToEnglish],
-      }).then((x) => x.map(([, , question]) => question));
+      }).then((x) => x.map(([_skill, _skillState, question]) => question));
 
       // Fill the rest with new skills
       // Create skills to pad out the rest of the quiz
