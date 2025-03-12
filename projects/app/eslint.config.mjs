@@ -226,7 +226,6 @@ export default tseslint.config(
       //
       // unicorn
       //
-      "unicorn/consistent-function-scoping": `off`, // TODO evaluate
       "unicorn/no-null": `off`, // TODO evaluate
       "unicorn/no-useless-undefined": `off`, // TODO evaluate
       "unicorn/number-literal-case": `off`, // overwritten by prettier
@@ -265,6 +264,7 @@ export default tseslint.config(
       "@typescript-eslint/no-non-null-assertion": `off`,
       "@typescript-eslint/restrict-template-expressions": `off`,
       "@typescript-eslint/require-await": `off`, // this is annoying when you want a little function to return a promise
+      "unicorn/consistent-function-scoping": `off`, // it's useful to write functions in the scope of a test
     },
   },
 
