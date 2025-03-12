@@ -84,30 +84,6 @@
 
   */
   .dark-theme {
-    --color-primary-1: var(--color-slate-dark-1);
-    --color-primary-2: var(--color-slate-dark-2);
-    --color-primary-3: var(--color-slate-dark-3);
-    --color-primary-4: var(--color-slate-dark-4);
-    --color-primary-5: var(--color-slate-dark-5);
-    --color-primary-6: var(--color-slate-dark-6);
-    --color-primary-7: var(--color-slate-dark-7);
-    --color-primary-8: var(--color-slate-dark-8);
-    --color-primary-9: var(--color-slate-dark-9);
-    --color-primary-10: var(--color-slate-dark-10);
-    --color-primary-11: var(--color-slate-dark-11);
-    --color-primary-12: var(--color-slate-dark-12);
-    --color-accent-1: var(--color-cyan-dark-1);
-    --color-accent-2: var(--color-cyan-dark-2);
-    --color-accent-3: var(--color-cyan-dark-3);
-    --color-accent-4: var(--color-cyan-dark-4);
-    --color-accent-5: var(--color-cyan-dark-5);
-    --color-accent-6: var(--color-cyan-dark-6);
-    --color-accent-7: var(--color-cyan-dark-7);
-    --color-accent-8: var(--color-cyan-dark-8);
-    --color-accent-9: var(--color-cyan-dark-9);
-    --color-accent-10: var(--color-cyan-dark-10);
-    --color-accent-11: var(--color-cyan-dark-11);
-    --color-accent-12: var(--color-cyan-dark-12);
     --color-slate-1: var(--color-slate-dark-1);
     --color-slate-2: var(--color-slate-dark-2);
     --color-slate-3: var(--color-slate-dark-3);
@@ -171,30 +147,6 @@
   }
 
   .light-theme {
-    --color-primary-1: var(--color-slate-light-1);
-    --color-primary-2: var(--color-slate-light-2);
-    --color-primary-3: var(--color-slate-light-3);
-    --color-primary-4: var(--color-slate-light-4);
-    --color-primary-5: var(--color-slate-light-5);
-    --color-primary-6: var(--color-slate-light-6);
-    --color-primary-7: var(--color-slate-light-7);
-    --color-primary-8: var(--color-slate-light-8);
-    --color-primary-9: var(--color-slate-light-9);
-    --color-primary-10: var(--color-slate-light-10);
-    --color-primary-11: var(--color-slate-light-11);
-    --color-primary-12: var(--color-slate-light-12);
-    --color-accent-1: var(--color-cyan-light-1);
-    --color-accent-2: var(--color-cyan-light-2);
-    --color-accent-3: var(--color-cyan-light-3);
-    --color-accent-4: var(--color-cyan-light-4);
-    --color-accent-5: var(--color-cyan-light-5);
-    --color-accent-6: var(--color-cyan-light-6);
-    --color-accent-7: var(--color-cyan-light-7);
-    --color-accent-8: var(--color-cyan-light-8);
-    --color-accent-9: var(--color-cyan-light-9);
-    --color-accent-10: var(--color-cyan-light-10);
-    --color-accent-11: var(--color-cyan-light-11);
-    --color-accent-12: var(--color-cyan-light-12);
     --color-slate-1: var(--color-slate-light-1);
     --color-slate-2: var(--color-slate-light-2);
     --color-slate-3: var(--color-slate-light-3);
@@ -257,6 +209,33 @@
     --color-amber-12: var(--color-amber-light-12);
   }
 
+  .default-theme {
+    --color-primary-1: var(--color-slate-1);
+    --color-primary-2: var(--color-slate-2);
+    --color-primary-3: var(--color-slate-3);
+    --color-primary-4: var(--color-slate-4);
+    --color-primary-5: var(--color-slate-5);
+    --color-primary-6: var(--color-slate-6);
+    --color-primary-7: var(--color-slate-7);
+    --color-primary-8: var(--color-slate-8);
+    --color-primary-9: var(--color-slate-9);
+    --color-primary-10: var(--color-slate-10);
+    --color-primary-11: var(--color-slate-11);
+    --color-primary-12: var(--color-slate-12);
+    --color-accent-1: var(--color-cyan-1);
+    --color-accent-2: var(--color-cyan-2);
+    --color-accent-3: var(--color-cyan-3);
+    --color-accent-4: var(--color-cyan-4);
+    --color-accent-5: var(--color-cyan-5);
+    --color-accent-6: var(--color-cyan-6);
+    --color-accent-7: var(--color-cyan-7);
+    --color-accent-8: var(--color-cyan-8);
+    --color-accent-9: var(--color-cyan-9);
+    --color-accent-10: var(--color-cyan-10);
+    --color-accent-11: var(--color-cyan-11);
+    --color-accent-12: var(--color-cyan-12);
+  }
+
   .danger-theme {
     --color-accent-1: var(--color-red-1);
     --color-accent-2: var(--color-red-2);
@@ -309,6 +288,7 @@ body {
 
 :root {
   @apply light-theme;
+  @apply default-theme;
 }
 
 @media (prefers-color-scheme: dark) {
