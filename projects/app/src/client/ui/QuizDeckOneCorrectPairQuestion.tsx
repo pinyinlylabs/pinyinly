@@ -1,5 +1,6 @@
 import { useHanziWordMeaning } from "@/client/query";
 import {
+  HanziWord,
   HanziWordSkill,
   OneCorrectPairQuestion,
   OneCorrectPairQuestionAnswer,
@@ -36,6 +37,8 @@ import {
   Animated,
   Easing,
   Platform,
+  Pressable,
+  ScrollView,
   StyleProp,
   Text,
   View,
@@ -46,6 +49,7 @@ import { tv } from "tailwind-variants";
 import { AnswerButton, AnswerButtonState } from "./AnswerButton";
 import { HanziText } from "./HanziText";
 import { NewSkillModal } from "./NewSkillModal";
+import { PageSheetModal } from "./PageSheetModal";
 import { RectButton2 } from "./RectButton2";
 import { PropsOf } from "./types";
 
@@ -418,6 +422,9 @@ const choiceEnglishText = tv({
     small: {
       true: `text-md`,
     },
+    underline: {
+      true: ``,
+    },
   },
 });
 
@@ -426,10 +433,14 @@ const ShowSkillAnswer = ({
   includeAlternatives = false,
   includeHint = false,
   small = false,
+  // hideA = false,
+  // hideB = false,
 }: {
   skill: Skill;
   includeAlternatives?: boolean;
   includeHint?: boolean;
+  hideA?: boolean;
+  hideB?: boolean;
   small?: boolean;
 }) => {
   switch (skill.type) {
@@ -470,14 +481,19 @@ const HanziWordToEnglishSkillAnswer = ({
   skill,
   includeAlternatives = false,
   includeHint = false,
+  includeGloss = true,
+  includeHanzi = true,
   small = false,
 }: {
   skill: HanziWordSkill;
   includeHint?: boolean;
   includeAlternatives?: boolean;
+  includeGloss?: boolean;
+  includeHanzi?: boolean;
   small?: boolean;
 }) => {
   const meaningQuery = useHanziWordMeaning(skill.hanziWord);
+  const [showModal, setShowModal] = useState(false);
 
   const meaning = meaningQuery.data;
 
@@ -494,19 +510,39 @@ const HanziWordToEnglishSkillAnswer = ({
 
   return (
     <>
-      <View className={`flex-row items-center ${small ? `gap-1` : `gap-2`}`}>
-        {hanzis.map((hanzi, i) => (
-          <View
-            key={i}
-            className={hanzi === primaryHanzi ? undefined : `opacity-50`}
-          >
-            <HanziText hanzi={hanzi} small={small} accented />
-          </View>
-        ))}
-        <Text className={choiceEnglishText({ small })}>{gloss}</Text>
-      </View>
+      <Pressable
+        onPress={() => {
+          setShowModal(true);
+        }}
+        className={`flex-row items-center ${small ? `gap-1` : `gap-2`}`}
+      >
+        {includeHanzi
+          ? hanzis.map((hanzi, i) => (
+              <View
+                key={i}
+                className={hanzi === primaryHanzi ? undefined : `opacity-50`}
+              >
+                <HanziText hanzi={hanzi} small={small} underline accented />
+              </View>
+            ))
+          : null}
+        {includeGloss ? (
+          <Text className={choiceEnglishText({ small, underline: true })}>
+            {gloss}
+          </Text>
+        ) : null}
+      </Pressable>
+
       {includeHint && meaning.glossHint != null ? (
         <Text className="leading-snug text-accent-10">{meaning.glossHint}</Text>
+      ) : null}
+      {showModal ? (
+        <HanziWordModal
+          hanziWord={skill.hanziWord}
+          onDismiss={() => {
+            setShowModal(false);
+          }}
+        />
       ) : null}
     </>
   );
@@ -564,6 +600,107 @@ const HanziWordToPinyinInitialSkillAnswer = ({
         </Text>
       ) : null}
     </>
+  );
+};
+
+const HanziWordModal = ({
+  hanziWord,
+  onDismiss,
+}: {
+  hanziWord: HanziWord;
+  onDismiss: () => void;
+}) => {
+  const hanziWordSkillData = useHanziWordMeaning(hanziWord);
+
+  const characters = useMemo(
+    (): string[] => splitCharacters(hanziFromHanziWord(hanziWord)),
+    [hanziWord],
+  );
+
+  return (
+    <PageSheetModal onDismiss={onDismiss}>
+      {({ dismiss }) =>
+        hanziWordSkillData.data == null ? null : (
+          <>
+            <ScrollView
+              className="flex-1"
+              contentContainerClassName="px-4 py-4"
+            >
+              <View className="my-4 gap-4">
+                <View className="items-center gap-2">
+                  <View className="flex-row gap-1">
+                    {characters.map((character) => (
+                      <View key={character} className="items-center">
+                        <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-text">
+                          {character}
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
+
+                  <Text className="text-4xl font-bold text-primary-12">
+                    {hanziWordSkillData.data.gloss[0]}
+                  </Text>
+                </View>
+
+                {hanziWordSkillData.data.glossHint == null ? null : (
+                  <View className="gap-1">
+                    <Text className="text-xs uppercase text-primary-10">
+                      Hint
+                    </Text>
+                    <Text className="text-md font-karla text-text">
+                      {hanziWordSkillData.data.glossHint}
+                    </Text>
+                  </View>
+                )}
+
+                {hanziWordSkillData.data.pinyin == null ? null : (
+                  <View className="gap-1">
+                    <Text className="text-xs uppercase text-primary-10">
+                      Pinyin
+                    </Text>
+                    <Text className="text-md font-karla text-text">
+                      {hanziWordSkillData.data.pinyin.join(`, `)}
+                    </Text>
+                  </View>
+                )}
+
+                {hanziWordSkillData.data.gloss.length === 1 ? null : (
+                  <View className="gap-1">
+                    <Text className="text-xs uppercase text-primary-10">
+                      Gloss
+                    </Text>
+                    <Text className="text-md font-karla text-text">
+                      {hanziWordSkillData.data.gloss.join(`, `)}
+                    </Text>
+                  </View>
+                )}
+
+                <View className="gap-1">
+                  <Text className="text-xs uppercase text-primary-10">
+                    Definition
+                  </Text>
+                  <Text className="text-md font-karla text-text">
+                    {hanziWordSkillData.data.definition}
+                  </Text>
+                </View>
+              </View>
+            </ScrollView>
+
+            <View className="border-t-2 border-primary-5 px-4 py-4 mb-safe">
+              <RectButton2
+                textClassName="px-2 py-1"
+                variant="filled"
+                accent
+                onPress={dismiss}
+              >
+                Close
+              </RectButton2>
+            </View>
+          </>
+        )
+      }
+    </PageSheetModal>
   );
 };
 

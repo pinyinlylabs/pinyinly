@@ -6,11 +6,13 @@ export const HanziText = ({
   hanzi,
   accented,
   small = false,
+  underline = false,
 }: {
   pinyin?: string;
   hanzi: string;
   accented?: boolean;
   small?: boolean;
+  underline?: boolean;
 }) => {
   const pinyinWithoutSpaces = pinyin?.split(` `).join(``);
   return (
@@ -22,7 +24,7 @@ export const HanziText = ({
           {pinyinWithoutSpaces}
         </Text>
       )}
-      <Text className={hanziText({ accented, small })}>{hanzi}</Text>
+      <Text className={hanziText({ accented, small, underline })}>{hanzi}</Text>
     </View>
   );
 };
@@ -48,6 +50,9 @@ const hanziText = tv({
     },
     small: {
       true: `text-xl/none`,
+    },
+    underline: {
+      true: ``,
     },
   },
 });
