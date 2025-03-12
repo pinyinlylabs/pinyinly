@@ -1,4 +1,4 @@
-import { Skill, SkillType } from "@/data/model";
+import { HanziWordSkill, Skill, SkillType } from "@/data/model";
 import {
   hanziFromHanziWord,
   lookupHanziWord,
@@ -12,118 +12,133 @@ import { PageSheetModal } from "./PageSheetModal";
 import { RectButton2 } from "./RectButton2";
 
 export const NewSkillModal = ({ skill }: { skill: Skill }) => {
-  const hanziWord =
-    skill.type === SkillType.HanziWordToEnglish ? skill.hanziWord : null;
-
   const [isModalVisible, setIsModalVisible] = useState(true);
-
-  const hanziWordSkillData = useQuery({
-    queryKey: [`NewSkillModal`, skill],
-    queryFn: async () => {
-      if (hanziWord != null) {
-        return await lookupHanziWord(hanziWord);
-      }
-
-      return null;
-    },
-  });
-
-  const pinyin = hanziWordSkillData.data?.pinyin?.[0];
-
-  const charactersWithPinyin = useMemo((): [string, string][] | undefined => {
-    if (hanziWord != null && pinyin != null) {
-      const characters = splitCharacters(hanziFromHanziWord(hanziWord));
-      const pinyins = pinyin.split(` `);
-      if (characters.length !== pinyins.length) {
-        console.error(`characters.length !== pinyins.length for ${hanziWord}`);
-      }
-
-      return characters.map((c, i) => [c, pinyins[i] ?? ``]);
-    }
-  }, [hanziWord, pinyin]);
 
   return isModalVisible ? (
     <PageSheetModal
-      backdropColor="primary-3"
       disableBackgroundDismiss
       onDismiss={() => {
         setIsModalVisible(false);
       }}
     >
-      {({ dismiss }) => (
+      {({ dismiss }) => {
+        switch (skill.type) {
+          case SkillType.HanziWordToEnglish: {
+            return (
+              <NewHanziToEnglishSkillContent skill={skill} dismiss={dismiss} />
+            );
+          }
+          case SkillType.HanziWordToPinyinInitial:
+          case SkillType.HanziWordToPinyinFinal:
+          case SkillType.HanziWordToPinyinTone:
+          case SkillType.EnglishToHanziWord:
+          case SkillType.PinyinToHanziWord:
+          case SkillType.ImageToHanziWord:
+          case SkillType.PinyinInitialAssociation:
+          case SkillType.PinyinFinalAssociation:
+          case SkillType.Deprecated: {
+            return (
+              <ContainerWithContinueButton onContinue={dismiss}>
+                <Text>Not implemented</Text>
+              </ContainerWithContinueButton>
+            );
+          }
+        }
+      }}
+    </PageSheetModal>
+  ) : null;
+};
+
+const NewHanziToEnglishSkillContent = ({
+  skill,
+  dismiss,
+}: {
+  skill: HanziWordSkill;
+  dismiss: () => void;
+}) => {
+  const hanziWord = skill.hanziWord;
+
+  const hanziWordSkillData = useQuery({
+    queryKey: [`NewSkillModal`, skill],
+    queryFn: async () => {
+      return await lookupHanziWord(hanziWord);
+    },
+  });
+
+  const characters = useMemo(
+    (): string[] => splitCharacters(hanziFromHanziWord(hanziWord)),
+    [hanziWord],
+  );
+
+  return (
+    <ContainerWithContinueButton onContinue={dismiss}>
+      {hanziWordSkillData.data == null ? (
+        <Text className="text-text">Not implemented</Text>
+      ) : (
         <>
-          <ScrollView className="flex-1" contentContainerClassName="px-4 py-4">
-            {hanziWord == null || hanziWordSkillData.data == null ? (
-              <Text className="text-text">Not implemented</Text>
-            ) : (
-              <>
-                <View className="success-theme flex-row items-center gap-2 self-center">
-                  <Image
-                    source={require(`@/assets/icons/plant-filled.svg`)}
-                    className="my-[-0px] h-[24px] w-[24px] flex-shrink text-accent-10"
-                    tintColor="currentColor"
-                  />
-                  <Text className="text-md font-bold uppercase text-accent-10">
-                    New Word
-                  </Text>
-                </View>
+          <View className="success-theme flex-row items-center gap-2 self-center">
+            <Image
+              source={require(`@/assets/icons/plant-filled.svg`)}
+              className="my-[-0px] h-[24px] w-[24px] flex-shrink text-accent-10"
+              tintColor="currentColor"
+            />
+            <Text className="text-md font-bold uppercase text-accent-10">
+              New Word
+            </Text>
+          </View>
 
-                <View className="my-4 gap-4">
-                  <View className="items-center gap-2">
-                    <View className="flex-row gap-1">
-                      {charactersWithPinyin?.map(([character, pinyin]) => (
-                        <View key={character} className="items-center">
-                          <Text className="text-[20px] text-primary-9">
-                            {pinyin}
-                          </Text>
-                          <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-text">
-                            {character}
-                          </Text>
-                        </View>
-                      ))}
-                    </View>
-
-                    <Text className="text-4xl font-bold text-primary-12">
-                      {hanziWordSkillData.data.gloss[0]}
+          <View className="my-4 gap-4">
+            <View className="items-center gap-2">
+              <View className="flex-row gap-1">
+                {characters.map((character) => (
+                  <View key={character} className="items-center">
+                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-text">
+                      {character}
                     </Text>
                   </View>
+                ))}
+              </View>
 
-                  <View className="gap-1">
-                    <Text className="font-karla font-medium uppercase text-primary-9">
-                      Definition
-                    </Text>
-                    <Text className="font-karla text-text">
-                      {hanziWordSkillData.data.definition}
-                    </Text>
-                  </View>
+              <Text className="text-4xl font-bold text-primary-12">
+                {hanziWordSkillData.data.gloss[0]}
+              </Text>
+            </View>
 
-                  {hanziWordSkillData.data.gloss.length === 1 ? null : (
-                    <View className="gap-1">
-                      <Text className="font-karla font-medium uppercase text-primary-9">
-                        Synonyms
-                      </Text>
-                      <Text className="font-karla text-text">
-                        {hanziWordSkillData.data.gloss.slice(1).join(`, `)}
-                      </Text>
-                    </View>
-                  )}
-                </View>
-              </>
-            )}
-          </ScrollView>
-
-          <View className="border-t-2 border-primary-5 px-4 py-4 mb-safe">
-            <RectButton2
-              variant="filled"
-              accent
-              textClassName="py-1 px-2"
-              onPress={dismiss}
-            >
-              Continue
-            </RectButton2>
+            <View className="gap-1">
+              <Text className="text-center font-karla text-lg text-text">
+                {hanziWordSkillData.data.definition}
+              </Text>
+            </View>
           </View>
         </>
       )}
-    </PageSheetModal>
-  ) : null;
+    </ContainerWithContinueButton>
+  );
+};
+
+const ContainerWithContinueButton = ({
+  children,
+  onContinue,
+}: {
+  children: React.ReactNode;
+  onContinue: () => void;
+}) => {
+  return (
+    <>
+      <ScrollView className="flex-1" contentContainerClassName="px-4 py-4">
+        {children}
+      </ScrollView>
+
+      <View className="border-t-2 border-primary-5 px-4 py-4 mb-safe">
+        <RectButton2
+          variant="filled"
+          accent
+          textClassName="py-1 px-2"
+          onPress={onContinue}
+        >
+          Continue
+        </RectButton2>
+      </View>
+    </>
+  );
 };
