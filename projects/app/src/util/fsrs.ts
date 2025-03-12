@@ -222,3 +222,13 @@ function intervalModifier(requestRetentionPercentile: number): number {
     8,
   );
 }
+
+/**
+ * Return true if the skill is "learned" and doesn't need to be reviewed
+ * anymore.
+ */
+export function fsrsIsLearned(
+  options: Pick<UpcomingReview, `stability`>,
+): boolean {
+  return options.stability >= 100;
+}

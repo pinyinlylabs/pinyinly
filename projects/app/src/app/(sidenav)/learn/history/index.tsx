@@ -19,20 +19,6 @@ export default function HistoryPage() {
     },
   });
 
-  const dataQuery = useRizzleQueryPaged(
-    [HistoryPage.name, `skillState`],
-    async (r) => {
-      const result = [];
-      for await (const [key, value] of r.queryPaged.skillState.byDue()) {
-        result.push([key, value] as const);
-        if (result.length >= 50) {
-          break;
-        }
-      }
-      return result;
-    },
-  );
-
   const skillRatingsQuery = useRizzleQueryPaged(
     [HistoryPage.name, `skillRatings`],
     async (r) => {
@@ -45,27 +31,6 @@ export default function HistoryPage() {
     <ScrollView contentContainerClassName="py-safe-offset-4 px-safe-or-4 items-center">
       <View className="max-w-[600px] gap-4">
         <View className="flex-row gap-2">
-          <View className="flex-1 items-center gap-[10px]">
-            <Text className="text-xl text-text">upcoming</Text>
-
-            {dataQuery.data?.map(([_key, value], i) => {
-              const { skill } = value;
-              return (
-                <View key={i}>
-                  <Text className="text-text">
-                    {skill.type === SkillType.PinyinInitialAssociation
-                      ? `${skill.initial}-`
-                      : skill.type === SkillType.PinyinFinalAssociation
-                        ? `-${skill.final}`
-                        : skill.type === SkillType.Deprecated
-                          ? skillTypeToShorthand(skill.type)
-                          : skill.hanziWord}
-                    : {value.due.toISOString()}
-                  </Text>
-                </View>
-              );
-            })}
-          </View>
           <View className="flex-1 items-center gap-[10px]">
             <Text className="text-xl text-text">upcoming2</Text>
 

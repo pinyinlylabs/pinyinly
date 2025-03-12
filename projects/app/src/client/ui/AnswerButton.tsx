@@ -1,10 +1,9 @@
-import { ElementRef, forwardRef, useEffect, useState } from "react";
+import { ElementRef, forwardRef, useEffect, useMemo, useState } from "react";
 import { Pressable, Text, View, ViewProps } from "react-native";
 import Animated, {
   Easing,
   runOnJS,
   useAnimatedReaction,
-  useAnimatedStyle,
   useSharedValue,
   withClamp,
   withSequence,
@@ -132,9 +131,17 @@ export const AnswerButton = forwardRef<
     [bgScale],
   );
 
-  const bgAnimatedStyle = useAnimatedStyle(() => {
-    return { opacity: bgOpacity.get(), transform: [{ scale: bgScale.get() }] };
-  });
+  // TODO [react-native-reanimated@>=3.17] try using `useAnimatedStyle`
+  //
+  // It wasn't working in 3.16 on iOS, the styles just weren't applied.
+  // perhaps the babel plugin isn't working properly or something else?
+  const bgAnimatedStyle = useMemo(
+    () => ({
+      opacity: bgOpacity,
+      transform: [{ scale: bgScale }],
+    }),
+    [bgOpacity, bgScale],
+  );
 
   const flat = pressed || disabled;
 
@@ -164,18 +171,17 @@ export const AnswerButton = forwardRef<
       }}
       ref={ref}
       style={{ transform: [{ scale }] }}
-      className={pressable({ flat, inFlexRowParent, className })}
+      className={pressable({ flat, state, inFlexRowParent, className })}
     >
       <Animated.View
         style={bgAnimatedStyle}
-        className="pointer-events-none absolute bottom-[2px] left-[1px] right-[1px] top-[2px] rounded-lg bg-accent-4"
+        className={bgAnimatedClass({ state })}
       />
       <View
         className={roundedRect({
           flat,
           pressed,
           disabled,
-          state,
           filled: state !== `default` && bgFilled,
           hovered,
           className,
@@ -193,6 +199,19 @@ export const AnswerButton = forwardRef<
   );
 });
 
+const bgAnimatedClass = tv({
+  base: `pointer-events-none absolute bottom-[2px] left-[1px] right-[1px] top-[2px] rounded-lg bg-accent-4`,
+  variants: {
+    state: {
+      default: ``,
+      dimmed: ``,
+      selected: ``,
+      success: `bg-transparent`,
+      error: `bg-transparent`,
+    },
+  },
+});
+
 const pressable = tv({
   base: ``,
   variants: {
@@ -201,6 +220,13 @@ const pressable = tv({
     },
     inFlexRowParent: {
       true: `flex-row`,
+    },
+    state: {
+      default: ``,
+      dimmed: ``,
+      selected: ``,
+      success: `success-theme`,
+      error: `danger-theme`,
     },
   },
   compoundVariants: [
@@ -231,13 +257,6 @@ const text = tv({
 const roundedRect = tv({
   base: `items-center select-none justify-center border-2 px-3 py-1 rounded-lg`,
   variants: {
-    state: {
-      default: ``,
-      dimmed: ``,
-      selected: ``,
-      success: `success-theme`,
-      error: `danger-theme`,
-    },
     disabled: {
       true: `opacity-50 select-none cursor-default`,
     },

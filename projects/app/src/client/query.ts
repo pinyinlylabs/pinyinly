@@ -1,6 +1,7 @@
 import { Rizzle } from "@/client/ui/ReplicacheContext";
 import { generateQuestionForSkillOrThrow } from "@/data/generator";
 import {
+  HanziWord,
   Question,
   QuestionFlag,
   QuestionFlagType,
@@ -18,7 +19,9 @@ import {
   skillLearningGraph,
   skillReviewQueue,
 } from "@/data/skills";
-import { allHsk1HanziWords } from "@/dictionary/dictionary";
+import { allHsk1HanziWords, lookupHanziWord } from "@/dictionary/dictionary";
+import { fsrsIsLearned } from "@/util/fsrs";
+import { useQuery } from "@tanstack/react-query";
 import { interval } from "date-fns/interval";
 import shuffle from "lodash/shuffle";
 import take from "lodash/take";
@@ -144,9 +147,10 @@ export async function hsk1SkillReview(r: Rizzle): Promise<Skill[]> {
   const dueSkills = new Set<MarshaledSkill>();
   for await (const [, v] of r.queryPaged.skillState.scan()) {
     const skillId = rSkillMarshal(v.skill);
-    if (v.due >= now) {
+    if (v.srs != null && fsrsIsLearned(v.srs)) {
       learnedSkills.add(skillId);
-    } else {
+    }
+    if (v.due <= now) {
       dueSkills.add(skillId);
     }
   }
@@ -164,3 +168,13 @@ export async function hsk1SkillReview(r: Rizzle): Promise<Skill[]> {
     isSkillDue: (skill) => dueSkills.has(skill),
   }).map((s) => rSkillUnmarshal(s));
 }
+
+export const useHanziWordMeaning = (hanziWord: HanziWord) => {
+  return useQuery({
+    queryKey: [useHanziWordMeaning.name, hanziWord],
+    queryFn: async () => {
+      return await lookupHanziWord(hanziWord);
+    },
+    staleTime: Infinity,
+  });
+};
