@@ -1,3 +1,4 @@
+import { DevLozenge } from "@/client/ui/DevLozenge";
 import { useAuth } from "@/client/ui/auth";
 import { Image } from "expo-image";
 import { Link } from "expo-router";
@@ -69,6 +70,7 @@ export default function SideNavLayout() {
                   <Text className={buttonTextClass({ isFocused })}>
                     Explore
                   </Text>
+                  <DevLozenge />
                 </>
               )}
             </TabButton>
