@@ -1,10 +1,9 @@
-import { ElementRef, forwardRef, useEffect, useState } from "react";
+import { ElementRef, forwardRef, useEffect, useMemo, useState } from "react";
 import { Pressable, Text, View, ViewProps } from "react-native";
 import Animated, {
   Easing,
   runOnJS,
   useAnimatedReaction,
-  useAnimatedStyle,
   useSharedValue,
   withClamp,
   withSequence,
@@ -132,9 +131,17 @@ export const AnswerButton = forwardRef<
     [bgScale],
   );
 
-  const bgAnimatedStyle = useAnimatedStyle(() => {
-    return { opacity: bgOpacity.get(), transform: [{ scale: bgScale.get() }] };
-  });
+  // TODO [react-native-reanimated@>=3.17] try using `useAnimatedStyle`
+  //
+  // It wasn't working in 3.16 on iOS, the styles just weren't applied.
+  // perhaps the babel plugin isn't working properly or something else?
+  const bgAnimatedStyle = useMemo(
+    () => ({
+      opacity: bgOpacity,
+      transform: [{ scale: bgScale }],
+    }),
+    [bgOpacity, bgScale],
+  );
 
   const flat = pressed || disabled;
 
