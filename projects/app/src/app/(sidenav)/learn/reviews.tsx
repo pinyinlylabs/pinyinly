@@ -59,7 +59,7 @@ export default function ReviewsPage() {
     <View className="flex-1 items-center bg-background pt-safe-offset-[20px]">
       {questions2.isLoading || !visible ? (
         <Animated.View entering={FadeIn} className="my-auto">
-          <Text className="hhh-text-body">Loading…</Text>
+          <Text className="font-karla text-lg text-primary-10">Loading</Text>
         </Animated.View>
       ) : questions2.error || questions2.data == null ? (
         <Text className="hhh-text-body">Oops something broken</Text>
