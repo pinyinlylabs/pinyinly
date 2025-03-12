@@ -75,15 +75,15 @@ export async function transactWithExecutor<R>(
   do {
     try {
       return await tx.transaction(body);
-    } catch (e) {
-      if (retries > 0 && shouldRetryTransaction(e)) {
+    } catch (error) {
+      if (retries > 0 && shouldRetryTransaction(error)) {
         console.warn(
           `Retrying transaction due to SERIALIZABLE isolation error (attempt ${retries})`,
-          e,
+          error,
         );
         continue;
       }
-      throw e;
+      throw error;
     }
   } while (retries-- > 0);
 }

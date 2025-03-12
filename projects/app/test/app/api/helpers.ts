@@ -10,7 +10,7 @@ export function testExpoServer(t: TestContext) {
 
   // Use a different port each time to avoid conflicts. Sometimes the port isn't
   // released properly when running multiple tests in sequence.
-  const PORT = 42000 + Math.round(Math.random() * 10000);
+  const PORT = 42_000 + Math.round(Math.random() * 10_000);
   const SERVER_URL = `http://localhost:${PORT}`; // Default Expo server URL
 
   const server = _spawn(
@@ -65,9 +65,9 @@ export function testExpoServer(t: TestContext) {
             assert.deepEqual(data, { healthcheck: `ok` });
             break;
           }
-        } catch (err) {
+        } catch (error) {
           // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-          t.diagnostic(`Error: ${err}`);
+          t.diagnostic(`Error: ${error}`);
         }
 
         // Check every 500ms

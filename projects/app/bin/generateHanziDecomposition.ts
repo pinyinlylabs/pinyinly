@@ -1,7 +1,7 @@
 import { invariant } from "@haohaohow/lib/invariant";
 import makeDebug from "debug";
 import assert from "node:assert/strict";
-import { join } from "node:path";
+import path from "node:path";
 import yargs from "yargs";
 import {
   allHanziCharacters,
@@ -89,7 +89,10 @@ function parseIdsTxt(txt: string): ReadonlyMap<string, Decomposition[]> {
     assert.match(unicodeShortIdentifier, /^U\+/);
 
     // Convert the U+ identifier to a Unicode character
-    const codePoint = parseInt(unicodeShortIdentifier.replace(`U+`, ``), 16);
+    const codePoint = Number.parseInt(
+      unicodeShortIdentifier.replace(`U+`, ``),
+      16,
+    );
     const characterFromCodePoint = String.fromCodePoint(codePoint);
 
     assert.equal(character, characterFromCodePoint);
@@ -259,7 +262,7 @@ if (argv[`force-write`] || updates.size > 0) {
     .sort(sortComparatorString(([key]) => key));
 
   await writeUtf8FileIfChanged(
-    join(
+    path.join(
       import.meta.dirname,
       `../src/dictionary/hanziDecomposition.asset.json`,
     ),

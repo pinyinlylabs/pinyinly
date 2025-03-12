@@ -32,8 +32,8 @@ export const QuizDeckMultipleChoiceQuestion = memo(
     const [selectedChoice, setSelectedChoice] = useState<string>();
 
     useEffect(() => {
-      setAudioModeAsync({ playsInSilentMode: true }).catch((e: unknown) => {
-        console.error(`Error setting audio mode`, e);
+      setAudioModeAsync({ playsInSilentMode: true }).catch((error: unknown) => {
+        console.error(`Error setting audio mode`, error);
       });
     }, []);
 

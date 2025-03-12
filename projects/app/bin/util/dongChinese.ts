@@ -234,7 +234,7 @@ export function getDongChinesePinyin(record: DongChineseRecord) {
 }
 
 function cleanGloss(gloss: string): string {
-  return gloss.replace(/^to /g, ``);
+  return gloss.replaceAll(/^to /g, ``);
 }
 
 export function getDongChineseMeaningKey(
@@ -242,7 +242,7 @@ export function getDongChineseMeaningKey(
 ): string | undefined {
   return getDongChineseGloss(record)?.[0]
     ?.replace(/^a /g, ``)
-    .replace(/ ([a-z])/g, (_, c: string) => c.toUpperCase());
+    .replaceAll(/ ([a-z])/g, (_, c: string) => c.toUpperCase());
 }
 
 export function getDongChineseGloss(

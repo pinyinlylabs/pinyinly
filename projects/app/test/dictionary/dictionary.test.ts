@@ -54,7 +54,7 @@ void test(`radical groups have the right number of elements`, async () => {
   // matches the expected range.
   const radicalsByStrokes = await allRadicalsByStrokes();
   for (const [, group] of radicalsByStrokes.entries()) {
-    assert(group.characters.length === group.range[1] - group.range[0] + 1);
+    assert.ok(group.characters.length === group.range[1] - group.range[0] + 1);
   }
 });
 
@@ -270,7 +270,7 @@ void test(`hanzi words are unique on (meaning key, pinyin)`, async () => {
 
   // Check that all exceptions are actually used.
   for (const exception of exceptions) {
-    assert(
+    assert.ok(
       duplicates.some((x) => x.symmetricDifference(exception).size === 0),
       `exception ${[...exception]} is not used`,
     );
@@ -311,7 +311,7 @@ void test(`hanzi words are unique on (hanzi, part-of-speech, pinyin)`, async () 
 
   // Check that all exceptions are actually used.
   for (const exception of exceptions) {
-    assert(
+    assert.ok(
       duplicates.some((x) => x.symmetricDifference(exception).size === 0),
       `exception ${[...exception]} is not used`,
     );
@@ -936,10 +936,12 @@ void test(`walkIdsNode`, () => {
 
   const leafs = [...walkIdsNode(ids)].map((x) => {
     switch (x.type) {
-      case `LeafCharacter`:
+      case `LeafCharacter`: {
         return x.character;
-      case `LeafUnknownCharacter`:
+      }
+      case `LeafUnknownCharacter`: {
         return x.strokeCount;
+      }
     }
   });
 
@@ -959,7 +961,7 @@ void test(`idsNodeToString roundtrips`, () => {
     [`⿿凹`],
     [`①`, `②`, `③`, `④`, `⑤`, `⑥`, `⑦`, `⑧`, `⑨`, `⑩`],
     [`⑪`, `⑫`, `⑬`, `⑭`, `⑮`, `⑯`, `⑰`, `⑱`, `⑲`, `⑳`],
-  ].flatMap((x) => x)) {
+  ].flat()) {
     assert.equal(idsNodeToString(parseIds(input)), input);
   }
 });
@@ -1049,14 +1051,14 @@ async function kangxiRadicalToCjkRadical(
     const minHex = rule.range[0]!;
     const maxHex = rule.range[1] ?? rule.range[0]!;
 
-    const min = parseInt(minHex, 16);
-    const max = parseInt(maxHex, 16);
+    const min = Number.parseInt(minHex, 16);
+    const max = Number.parseInt(maxHex, 16);
 
     return xCodePoint >= min && xCodePoint <= max;
   })?.unified;
 
   if (newCodePoint != null) {
-    return String.fromCodePoint(parseInt(newCodePoint, 16));
+    return String.fromCodePoint(Number.parseInt(newCodePoint, 16));
   }
 }
 

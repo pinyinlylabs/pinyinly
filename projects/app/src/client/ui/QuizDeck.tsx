@@ -134,8 +134,8 @@ export const QuizDeck = ({
             skill,
             rating,
           })
-          .catch((e: unknown) => {
-            console.error(`Could not add skill rating`, e);
+          .catch((error: unknown) => {
+            console.error(`Could not add skill rating`, error);
           });
       }
 
@@ -215,7 +215,7 @@ export const QuizDeck = ({
                 let screen: React.ReactNode;
 
                 switch (question.type) {
-                  case QuestionType.MultipleChoice:
+                  case QuestionType.MultipleChoice: {
                     screen = (
                       <QuizDeckMultipleChoiceQuestion
                         question={question}
@@ -224,7 +224,8 @@ export const QuizDeck = ({
                       />
                     );
                     break;
-                  case QuestionType.OneCorrectPair:
+                  }
+                  case QuestionType.OneCorrectPair: {
                     screen = (
                       <QuizDeckOneCorrectPairQuestion
                         question={question}
@@ -233,6 +234,7 @@ export const QuizDeck = ({
                         onRating={handleRating}
                       />
                     );
+                  }
                 }
 
                 return (

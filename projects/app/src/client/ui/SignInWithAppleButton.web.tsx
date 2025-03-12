@@ -135,7 +135,7 @@ export function SignInWithAppleButton({
 
     // Remove any old scripts (e.g. if the locale changed).
     // eslint-disable-next-line unicorn/prefer-spread
-    const existingScripts = Array.from(document.getElementsByTagName(`script`));
+    const existingScripts = Array.from(document.querySelectorAll(`script`));
     const needsReset = existingScripts.some(
       (e) => e.src.endsWith(suffix) && e.src !== scriptUrl,
     );
@@ -143,20 +143,20 @@ export function SignInWithAppleButton({
       setAppleApi(undefined);
       (window.AppleID as unknown) = undefined;
       for (const script of existingScripts) {
-        script.parentElement?.removeChild(script);
+        script.remove();
       }
     }
 
     if ((window.AppleID as unknown) === undefined) {
       const script = document.createElement(`script`);
-      script.onload = () => {
+      script.addEventListener(`load`, () => {
         invariant((window.AppleID as unknown) !== undefined);
         setAppleApi(window.AppleID);
-      };
+      });
       script.src = scriptUrl;
-      const head = document.getElementsByTagName(`head`)[0];
+      const head = document.querySelectorAll(`head`)[0];
       invariant(head != null);
-      head.appendChild(script);
+      head.append(script);
     }
   }, [locale]);
 

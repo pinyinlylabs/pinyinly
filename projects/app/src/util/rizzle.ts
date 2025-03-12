@@ -304,6 +304,7 @@ export class RizzleObject<T extends RizzleRawObject> extends RizzleType<
   }
 
   _getIndexes(): RizzleIndexDefinitions {
+    // eslint-disable-next-line unicorn/no-array-reduce
     return Object.entries(this._def.shape).reduce<RizzleIndexDefinitions>(
       (acc, [key, rizzleType]) => ({
         ...acc,
@@ -503,9 +504,7 @@ export class RizzleEntity<
     ): string => {
       let result = filler[0];
       invariant(result != null);
-      for (let i = 0; i < keyPathVars.length; i++) {
-        const varName = keyPathVars[i];
-        invariant(varName != null);
+      for (const [i, varName] of keyPathVars.entries()) {
         if (varName in keyInput) {
           result += shape[varName].marshal(keyInput[varName]);
           const nextFiller = filler[i + 1];
@@ -1278,9 +1277,9 @@ async function* indexScanIter<V>(
       }
       yield [key, unmarshalValue(value), secondaryKey];
     }
-  } catch (e) {
-    diagnoseError(e);
-    throw e;
+  } catch (error) {
+    diagnoseError(error);
+    throw error;
   }
 }
 
@@ -1352,9 +1351,9 @@ export async function* indexScanPagedIter<Value>(
           }
         }
       });
-    } catch (e) {
-      diagnoseError(e);
-      throw e;
+    } catch (error) {
+      diagnoseError(error);
+      throw error;
     }
     for (const entry of page) {
       await scanPagedIterThrottle();
@@ -1390,9 +1389,9 @@ export async function* scanIter<Value>(
       .entries()) {
       yield [key, unmarshalValue(value)] as const;
     }
-  } catch (e) {
-    diagnoseError(e);
-    throw e;
+  } catch (error) {
+    diagnoseError(error);
+    throw error;
   }
 }
 
@@ -1424,9 +1423,9 @@ export async function* scanPagedIter<V>(
           }
         }
       });
-    } catch (e) {
-      diagnoseError(e);
-      throw e;
+    } catch (error) {
+      diagnoseError(error);
+      throw error;
     }
     for (const item of page) {
       await scanPagedIterThrottle();

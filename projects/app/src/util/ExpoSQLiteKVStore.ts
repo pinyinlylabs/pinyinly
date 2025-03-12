@@ -81,7 +81,7 @@ export class ExpoSQLiteKVStore implements KVStore {
     log?.(`ExpoSQLiteKVStore#release()`);
     const index = this._busyDbs.indexOf(db);
     log?.(`index =`, index);
-    if (index > -1) {
+    if (index !== -1) {
       log?.(`this._idleDbs.length =`, this._idleDbs.length);
       log?.(`this._busyDbs.length =`, this._busyDbs.length);
       log?.(`shift`);

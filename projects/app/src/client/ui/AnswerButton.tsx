@@ -74,11 +74,12 @@ export const AnswerButton = forwardRef<
   useEffect(() => {
     if (stateChanged) {
       switch (state) {
-        case `default`:
+        case `default`: {
           setBgFilled(false);
           bgScale.set(0.5);
           bgOpacity.set(0);
           break;
+        }
         case `selected`: {
           scale.set(withClamp({ min: 1 }, withScaleAnimation()));
           bgScale.set(withClamp({ max: 1 }, withScaleAnimation()));

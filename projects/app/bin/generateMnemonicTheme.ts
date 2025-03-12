@@ -1,7 +1,7 @@
 import { rMnemonicThemeId, rPinyinInitialGroupId } from "#data/rizzleSchema.ts";
 import { invariant } from "@haohaohow/lib/invariant";
 import makeDebug from "debug";
-import { join } from "node:path";
+import path from "node:path";
 import OpenAI from "openai";
 import { zodResponseFormat } from "openai/helpers/zod";
 import yargs from "yargs";
@@ -147,8 +147,11 @@ For each item, come up with 20 ${theme.noun} ideas, then narrow it down to the m
           ],
         ]),
       );
-    } catch (e) {
-      console.error(`Failed to parse response for ${groupId}, skipping…`, e);
+    } catch (error) {
+      console.error(
+        `Failed to parse response for ${groupId}, skipping…`,
+        error,
+      );
       continue;
     }
   }
@@ -170,7 +173,7 @@ async function saveUpdates(updates: MnemonicThemeChoices) {
   );
 
   await writeUtf8FileIfChanged(
-    join(
+    path.join(
       import.meta.dirname,
       `../src/dictionary/mnemonicThemeChoices.asset.json`,
     ),

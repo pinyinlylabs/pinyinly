@@ -95,16 +95,20 @@ const rSkillMarshalSchema = z
       case SkillType.HanziWordToPinyinTone:
       case SkillType.EnglishToHanziWord:
       case SkillType.PinyinToHanziWord:
-      case SkillType.ImageToHanziWord:
+      case SkillType.ImageToHanziWord: {
         return `${skillTypeM}:${x.hanziWord}` as MarshaledSkill;
+      }
       // Pinyin association skills
-      case SkillType.PinyinInitialAssociation:
+      case SkillType.PinyinInitialAssociation: {
         return `${skillTypeM}:${x.initial}` as MarshaledSkill;
-      case SkillType.PinyinFinalAssociation:
+      }
+      case SkillType.PinyinFinalAssociation: {
         return `${skillTypeM}:${x.final}` as MarshaledSkill;
+      }
       // Deprecated
-      case SkillType.Deprecated:
+      case SkillType.Deprecated: {
         return skillTypeM as MarshaledSkill;
+      }
     }
   });
 
@@ -141,21 +145,25 @@ const rSkillUnmarshalSchema = z
       case SkillType.HanziWordToPinyinTone:
       case SkillType.EnglishToHanziWord:
       case SkillType.PinyinToHanziWord:
-      case SkillType.ImageToHanziWord:
+      case SkillType.ImageToHanziWord: {
         return {
           type: skillType,
           hanziWord: rest as HanziWord,
         };
-      case SkillType.PinyinInitialAssociation:
+      }
+      case SkillType.PinyinInitialAssociation: {
         return { type: skillType, initial: rest };
-      case SkillType.PinyinFinalAssociation:
+      }
+      case SkillType.PinyinFinalAssociation: {
         return { type: skillType, final: rest };
+      }
       case SkillType.Deprecated:
       case SkillType.Deprecated_RadicalToEnglish:
       case SkillType.Deprecated_EnglishToRadical:
       case SkillType.Deprecated_RadicalToPinyin:
-      case SkillType.Deprecated_PinyinToRadical:
+      case SkillType.Deprecated_PinyinToRadical: {
         return { type: SkillType.Deprecated };
+      }
     }
   });
 

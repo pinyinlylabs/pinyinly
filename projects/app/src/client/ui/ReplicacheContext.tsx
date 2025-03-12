@@ -218,10 +218,10 @@ async function trpcToReplicache<T>(responsePromise: Promise<T>): Promise<{
         httpStatusCode: 200,
       },
     };
-  } catch (err) {
-    console.error(err);
-    if (err instanceof TRPCClientError) {
-      const trpcError = TRPCClientError.from<AppRouter>(err);
+  } catch (error) {
+    console.error(error);
+    if (error instanceof TRPCClientError) {
+      const trpcError = TRPCClientError.from<AppRouter>(error);
       return {
         httpRequestInfo: {
           errorMessage: trpcError.message,

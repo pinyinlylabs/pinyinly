@@ -1,6 +1,6 @@
 import { invariant } from "@haohaohow/lib/invariant";
 import makeDebug from "debug";
-import { join } from "node:path";
+import path from "node:path";
 import OpenAI from "openai";
 import { zodResponseFormat } from "openai/helpers/zod";
 import yargs from "yargs";
@@ -203,8 +203,8 @@ Write 5 mnemonic variations for ${hanzi} (${pinyin}).
       `Radical ${r.character} [${r.initial === `` ? `_` : r.initial}- + -${r.final} + ${r.tone}] "${r.meaning}"
 Mnemonics:\n${r.mnemonics.map((m, i) => `  ${i + 1}. ${m.mnemonic}\n    Rationale:\n${m.reasoning_steps.map((x, i) => `    ${i + 1}. ${x}`).join(`\n`)}`).join(`\n`)}`,
     );
-  } catch (e) {
-    console.error(`Failed to parse response for ${hanzi}, skipping…`, e);
+  } catch (error) {
+    console.error(`Failed to parse response for ${hanzi}, skipping…`, error);
     continue;
   }
 }
@@ -217,7 +217,7 @@ if (argv[`force-write`] || updates.size > 0) {
     .sort(sortComparatorString(([key]) => key));
 
   await writeUtf8FileIfChanged(
-    join(
+    path.join(
       import.meta.dirname,
       `../src/dictionary/radicalPinyinMnemonics.asset.json`,
     ),

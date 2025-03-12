@@ -628,7 +628,7 @@ export function parseIds(
   const char = String.fromCodePoint(charCodePoint);
   cursor.index += char.length;
 
-  if (charCodePoint >= /* ⿰ */ 12272 && charCodePoint <= /* ⿿ */ 12287) {
+  if (charCodePoint >= /* ⿰ */ 12_272 && charCodePoint <= /* ⿿ */ 12_287) {
     const operator = idsOperatorSchema.parse(char);
     switch (operator) {
       case IdsOperator.LeftToRight: {
@@ -732,8 +732,9 @@ export function parseIds(
         const rotated = parseIds(ids, cursor);
         return { type: IdsOperator.Rotation, rotated };
       }
-      default:
+      default: {
         throw new Error(`unexpected combining character ${char}`);
+      }
     }
   }
 
@@ -856,8 +857,9 @@ export function* walkIdsNode(
       yield ids;
       return;
     }
-    default:
+    default: {
       throw new Error(`unexpected ids node type: ${(ids as IdsNode).type}`);
+    }
   }
 }
 
@@ -913,56 +915,74 @@ export function flattenIds(ids: IdsNode): IdsNode {
 
 export function idsNodeToString(ids: IdsNode): string {
   switch (ids.type) {
-    case IdsOperator.LeftToRight:
+    case IdsOperator.LeftToRight: {
       return `${ids.type}${idsNodeToString(ids.left)}${idsNodeToString(ids.right)}`;
-    case IdsOperator.AboveToBelow:
+    }
+    case IdsOperator.AboveToBelow: {
       return `${ids.type}${idsNodeToString(ids.above)}${idsNodeToString(ids.below)}`;
-    case IdsOperator.LeftToMiddleToRight:
+    }
+    case IdsOperator.LeftToMiddleToRight: {
       return `${ids.type}${idsNodeToString(ids.left)}${idsNodeToString(
         ids.middle,
       )}${idsNodeToString(ids.right)}`;
-    case IdsOperator.AboveToMiddleAndBelow:
+    }
+    case IdsOperator.AboveToMiddleAndBelow: {
       return `${ids.type}${idsNodeToString(ids.above)}${idsNodeToString(
         ids.middle,
       )}${idsNodeToString(ids.below)}`;
-    case IdsOperator.FullSurround:
+    }
+    case IdsOperator.FullSurround: {
       return `${ids.type}${idsNodeToString(ids.surrounding)}${idsNodeToString(
         ids.surrounded,
       )}`;
-    case IdsOperator.SurroundFromAbove:
+    }
+    case IdsOperator.SurroundFromAbove: {
       return `${ids.type}${idsNodeToString(ids.above)}${idsNodeToString(ids.surrounded)}`;
-    case IdsOperator.SurroundFromBelow:
+    }
+    case IdsOperator.SurroundFromBelow: {
       return `${ids.type}${idsNodeToString(ids.below)}${idsNodeToString(ids.surrounded)}`;
-    case IdsOperator.SurroundFromLeft:
+    }
+    case IdsOperator.SurroundFromLeft: {
       return `${ids.type}${idsNodeToString(ids.left)}${idsNodeToString(ids.surrounded)}`;
-    case IdsOperator.SurroundFromRight:
+    }
+    case IdsOperator.SurroundFromRight: {
       return `${ids.type}${idsNodeToString(ids.right)}${idsNodeToString(ids.surrounded)}`;
-    case IdsOperator.SurroundFromUpperLeft:
+    }
+    case IdsOperator.SurroundFromUpperLeft: {
       return `${ids.type}${idsNodeToString(ids.upperLeft)}${idsNodeToString(
         ids.surrounded,
       )}`;
-    case IdsOperator.SurroundFromUpperRight:
+    }
+    case IdsOperator.SurroundFromUpperRight: {
       return `${ids.type}${idsNodeToString(ids.upperRight)}${idsNodeToString(
         ids.surrounded,
       )}`;
-    case IdsOperator.SurroundFromLowerLeft:
+    }
+    case IdsOperator.SurroundFromLowerLeft: {
       return `${ids.type}${idsNodeToString(ids.lowerLeft)}${idsNodeToString(
         ids.surrounded,
       )}`;
-    case IdsOperator.SurroundFromLowerRight:
+    }
+    case IdsOperator.SurroundFromLowerRight: {
       return `${ids.type}${idsNodeToString(ids.lowerRight)}${idsNodeToString(
         ids.surrounded,
       )}`;
-    case IdsOperator.Overlaid:
+    }
+    case IdsOperator.Overlaid: {
       return `${ids.type}${idsNodeToString(ids.overlay)}${idsNodeToString(ids.underlay)}`;
-    case IdsOperator.HorizontalReflection:
+    }
+    case IdsOperator.HorizontalReflection: {
       return `${ids.type}${idsNodeToString(ids.reflected)}`;
-    case IdsOperator.Rotation:
+    }
+    case IdsOperator.Rotation: {
       return `${ids.type}${idsNodeToString(ids.rotated)}`;
-    case `LeafCharacter`:
+    }
+    case `LeafCharacter`: {
       return ids.character;
-    case `LeafUnknownCharacter`:
+    }
+    case `LeafUnknownCharacter`: {
       return strokeCountToCharacter(ids.strokeCount);
+    }
   }
 }
 
@@ -981,26 +1001,36 @@ export async function characterHasGlyph(character: string): Promise<boolean> {
 
 export function shorthandPartOfSpeech(partOfSpeech: PartOfSpeech) {
   switch (partOfSpeech) {
-    case PartOfSpeech.Adjective:
+    case PartOfSpeech.Adjective: {
       return `adj.`;
-    case PartOfSpeech.Adverb:
+    }
+    case PartOfSpeech.Adverb: {
       return `adv.`;
-    case PartOfSpeech.Noun:
+    }
+    case PartOfSpeech.Noun: {
       return `noun`;
-    case PartOfSpeech.Verb:
+    }
+    case PartOfSpeech.Verb: {
       return `verb`;
-    case PartOfSpeech.Pronoun:
+    }
+    case PartOfSpeech.Pronoun: {
       return `pron.`;
-    case PartOfSpeech.Preposition:
+    }
+    case PartOfSpeech.Preposition: {
       return `prep.`;
-    case PartOfSpeech.Conjunction:
+    }
+    case PartOfSpeech.Conjunction: {
       return `conj.`;
-    case PartOfSpeech.Interjection:
+    }
+    case PartOfSpeech.Interjection: {
       return `intj.`;
-    case PartOfSpeech.MeasureWord:
+    }
+    case PartOfSpeech.MeasureWord: {
       return `mw.`;
-    case PartOfSpeech.Particle:
+    }
+    case PartOfSpeech.Particle: {
       return `part.`;
+    }
   }
 }
 

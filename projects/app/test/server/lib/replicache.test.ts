@@ -77,7 +77,7 @@ void test(`push()`, async (t) => {
             id: 1,
             name: `noop`,
             args: {},
-            timestamp: 10123,
+            timestamp: 10_123,
             clientId: `c0f86dc7-4d49-4f37-a25b-4d06c9f1cb37`,
           };
 

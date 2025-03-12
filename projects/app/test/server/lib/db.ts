@@ -51,9 +51,9 @@ export const withTxTest = (t: TestContext, config?: PgTransactionConfig) => {
           await fn(tx as Transaction, t2);
           throw new TestRollback();
         }, config)
-        .catch((e: unknown) => {
-          if (!(e instanceof TestRollback)) {
-            throw e;
+        .catch((error: unknown) => {
+          if (!(error instanceof TestRollback)) {
+            throw error;
           }
         });
     });

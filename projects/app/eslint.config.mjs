@@ -226,37 +226,25 @@ export default tseslint.config(
       //
       // unicorn
       //
-      "unicorn/catch-error-name": `off`, // TODO evaluate
-      "unicorn/consistent-assert": `off`, // TODO evaluate
-      "unicorn/consistent-existence-index-check": `off`, // TODO evaluate
       "unicorn/consistent-function-scoping": `off`, // TODO evaluate
-      "unicorn/import-style": `off`, // TODO evaluate
-      "unicorn/no-array-for-each": `off`, // TODO evaluate
       "unicorn/no-null": `off`, // TODO evaluate
       "unicorn/no-useless-undefined": `off`, // TODO evaluate
       "unicorn/number-literal-case": `off`, // overwritten by prettier
-      "unicorn/numeric-separators-style": `off`, // TODO evaluate
-      "unicorn/prefer-array-flat": `off`, // TODO evaluate
-      "unicorn/prefer-module": `off`, // TODO evaluate
-      "unicorn/prefer-number-properties": `off`, // TODO evaluate
-      "unicorn/prevent-abbreviations": `off`, // TODO evaluate
-      "unicorn/switch-case-braces": `off`, // TODO evaluate
+      "unicorn/numeric-separators-style": [
+        `error`,
+        {
+          onlyIfContainsSeparator: true,
+          number: { onlyIfContainsSeparator: false },
+        },
+      ],
+      "unicorn/prefer-module": `off`, // still need to use require(…) with metro
+      "unicorn/prevent-abbreviations": `off`, // abbreviations are fine
       "unicorn/no-nested-ternary": `off`, // TODO evaluate
       "unicorn/filename-case": `off`, // TODO evaluate
-      "unicorn/no-array-reduce": `off`, // TODO evaluate
       "unicorn/prefer-global-this": `off`, // TODO evaluate
       "unicorn/no-object-as-default-parameter": `off`, // TODO evaluate
-      "unicorn/prefer-query-selector": `off`, // TODO evaluate
-      "unicorn/prefer-dom-node-remove": `off`, // TODO evaluate
-      "unicorn/prefer-add-event-listener": `off`, // TODO evaluate
-      "unicorn/prefer-dom-node-append": `off`, // TODO evaluate
-      "unicorn/no-for-loop": `off`, // TODO evaluate
-      "unicorn/no-zero-fractions": `off`, // TODO evaluate
-      "unicorn/prefer-switch": `off`, // TODO evaluate
       "unicorn/no-anonymous-default-export": `off`, // TODO evaluate
-      "unicorn/prefer-string-replace-all": `off`, // TODO evaluate
       "unicorn/no-unreadable-array-destructuring": `off`, // TODO evaluate
-      "unicorn/no-array-method-this-argument": `off`, // TODO evaluate
       "unicorn/prefer-array-flat-map": `off`, // TODO evaluate
       "unicorn/prefer-top-level-await": `off`, // TODO evaluate
     },

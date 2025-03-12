@@ -1,7 +1,7 @@
 import { Animation, MatteMode } from "@lottiefiles/lottie-js";
 import assert from "node:assert/strict";
 import * as fs from "node:fs/promises";
-import * as path from "node:path";
+import path from "node:path";
 import test from "node:test";
 import { z } from "zod";
 
@@ -27,14 +27,14 @@ void test(`no luminance layers in lottie animations (incompatible with lottie-io
     );
 
     // Check each layer to make sure it's not a luminance mask.
-    anim.layers.forEach((layer) => {
+    for (const layer of anim.layers) {
       assert.notEqual(
         layer.matteMode,
         MatteMode.LUMA,
         `luminance layer in ${lottieFile} (id=${layer.id})`,
       );
-    });
+    }
   }
 
-  assert(foundFiles, `no lottie files found, wrong path set?`);
+  assert.ok(foundFiles, `no lottie files found, wrong path set?`);
 });

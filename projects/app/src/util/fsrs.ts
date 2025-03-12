@@ -84,14 +84,17 @@ export function nextReview(
  */
 function nextDueDuration(stability: number, rating: Rating): Duration {
   switch (rating) {
-    case Rating.Again:
+    case Rating.Again: {
       return { minutes: 1 };
-    case Rating.Hard:
+    }
+    case Rating.Hard: {
       return { minutes: 5 };
+    }
     case Rating.Good:
-    case Rating.Easy:
+    case Rating.Easy: {
       // Fall-through and use the curve.
       break;
+    }
   }
 
   return {
@@ -101,7 +104,7 @@ function nextDueDuration(stability: number, rating: Rating): Duration {
         // This returns in "days", multiply by 24*60 to turn into minutes.
         Math.min(
           stability * intervalModifier(0.9 /* 90% */),
-          36500 /* 100 years */,
+          36_500 /* 100 years */,
         ),
     ),
   };

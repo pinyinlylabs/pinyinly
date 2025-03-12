@@ -54,14 +54,14 @@ testFsrsSequence([
   },
   Rating.Hard,
   {
-    difficulty: 7.13290854,
-    stability: 1.44564795,
+    difficulty: 7.132_908_54,
+    stability: 1.445_647_95,
     delay: { minutes: 5 },
   },
   Rating.Hard,
   {
-    difficulty: 7.89239117,
-    stability: 1.4473489,
+    difficulty: 7.892_391_17,
+    stability: 1.447_348_9,
     delay: { minutes: 5 },
   },
 ]);
@@ -76,19 +76,19 @@ testFsrsSequence([
   Rating.Good,
   {
     difficulty: 5.1443,
-    stability: 15.06698051,
+    stability: 15.066_980_51,
     delay: { days: 15, hours: 1, minutes: 36 },
   },
   Rating.Good,
   {
     difficulty: 5.1443,
-    stability: 48.5160313,
+    stability: 48.516_031_3,
     delay: { days: 17, hours: 12, minutes: 23, months: 1 },
   },
   Rating.Good,
   {
     difficulty: 5.1443,
-    stability: 140.58130087,
+    stability: 140.581_300_87,
     delay: { days: 18, hours: 13, minutes: 57, months: 4 },
   },
 ]);
@@ -102,14 +102,14 @@ testFsrsSequence([
   },
   Rating.Easy,
   {
-    difficulty: 3.15569146,
-    stability: 97.17319159,
+    difficulty: 3.155_691_46,
+    stability: 97.173_191_59,
     delay: { days: 7, hours: 4, minutes: 9, months: 3 },
   },
   Rating.Easy,
   {
-    difficulty: 2.39620883,
-    stability: 732.60340194,
+    difficulty: 2.396_208_83,
+    stability: 732.603_401_94,
     delay: { days: 1, hours: 14, minutes: 29, years: 2 },
   },
 ]);
@@ -124,25 +124,25 @@ testFsrsSequence([
   Rating.Good,
   {
     difficulty: 5.1443,
-    stability: 15.06698051,
+    stability: 15.066_980_51,
     delay: { days: 15, hours: 1, minutes: 36 },
   },
   Rating.Hard,
   {
-    difficulty: 5.97577026,
-    stability: 22.39232263,
+    difficulty: 5.975_770_26,
+    stability: 22.392_322_63,
     delay: { minutes: 5 },
   },
   Rating.Hard,
   {
-    difficulty: 6.7771413,
-    stability: 22.3938533,
+    difficulty: 6.777_141_3,
+    stability: 22.393_853_3,
     delay: { minutes: 5 },
   },
   Rating.Hard,
   {
-    difficulty: 7.5495027,
-    stability: 22.3951392,
+    difficulty: 7.549_502_7,
+    stability: 22.395_139_2,
     delay: { minutes: 5 },
   },
 ]);
@@ -168,8 +168,8 @@ testFsrsSequence([
   },
   Rating.Easy,
   {
-    difficulty: 4.31282974,
-    stability: 4.14436918,
+    difficulty: 4.312_829_74,
+    stability: 4.144_369_18,
     delay: { days: 4, hours: 3, minutes: 28 },
   },
 ]);
@@ -183,26 +183,26 @@ testFsrsSequence([
   },
   Rating.Good,
   {
-    difficulty: 7.45857656,
-    stability: 0.57167237,
+    difficulty: 7.458_576_56,
+    stability: 0.571_672_37,
     delay: { hours: 13, minutes: 43 },
   },
   Rating.Good,
   {
-    difficulty: 7.37479975,
-    stability: 1.76207836,
+    difficulty: 7.374_799_75,
+    stability: 1.762_078_36,
     delay: { days: 1, hours: 18, minutes: 17 },
   },
   Rating.Good,
   {
-    difficulty: 7.29405566,
-    stability: 4.99174844,
+    difficulty: 7.294_055_66,
+    stability: 4.991_748_44,
     delay: { days: 4, hours: 23, minutes: 48 },
   },
   Rating.Good,
   {
-    difficulty: 7.21623451,
-    stability: 13.12600151,
+    difficulty: 7.216_234_51,
+    stability: 13.126_001_51,
     delay: { days: 13, hours: 3, minutes: 1 },
   },
 ]);

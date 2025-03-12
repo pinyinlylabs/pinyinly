@@ -52,7 +52,7 @@ export async function questionsForReview(
       continue;
     }
 
-    // eslint-disable-next-line unicorn/no-array-callback-reference
+    // eslint-disable-next-line unicorn/no-array-callback-reference, unicorn/no-array-method-this-argument
     if (options?.filter && !options.filter(skillState.skill, skillState)) {
       continue;
     }
@@ -61,10 +61,10 @@ export async function questionsForReview(
       const question = await generateQuestionForSkillOrThrow(skillState.skill);
       question.flag ??= flagsForSkillState(skillState);
       result.push([skillState.skill, skillState, question]);
-    } catch (e) {
+    } catch (error) {
       console.error(
         `Error while generating a question for a skill ${JSON.stringify(skillState.skill)}`,
-        e,
+        error,
       );
       continue;
     }
@@ -102,10 +102,10 @@ export async function questionsForReview2(
       const question = await generateQuestionForSkillOrThrow(skill);
       question.flag ??= flagsForSkillState(skillState);
       result.push(question);
-    } catch (e) {
+    } catch (error) {
       console.error(
         `Error while generating a question for a skill ${JSON.stringify(skill)}`,
-        e,
+        error,
       );
       continue;
     }

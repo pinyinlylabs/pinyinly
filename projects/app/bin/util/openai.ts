@@ -1,7 +1,7 @@
 import { invariant } from "@haohaohow/lib/invariant";
 import { Debugger } from "debug";
 import { readFile } from "node:fs/promises";
-import { join } from "node:path";
+import path from "node:path";
 import OpenAI from "openai";
 import { zodResponseFormat } from "openai/helpers/zod";
 import { ChatCompletionCreateParamsNonStreaming } from "openai/resources/index.mjs";
@@ -78,7 +78,7 @@ async function systemRoleMessageWithProjectContext(
   role: `system`;
   content: string;
 }> {
-  const docsPath = join(import.meta.dirname + `../../../../../docs`);
+  const docsPath = path.join(import.meta.dirname + `../../../../../docs`);
 
   const messageLines = [
     `You are helping someone build a Chinese language learning app.`,
@@ -98,7 +98,7 @@ async function systemRoleMessageWithProjectContext(
         fileName,
         `-->`,
         ``,
-        await readFile(join(docsPath, fileName), { encoding: `utf-8` }),
+        await readFile(path.join(docsPath, fileName), { encoding: `utf-8` }),
       );
     }
   }

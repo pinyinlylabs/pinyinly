@@ -37,9 +37,9 @@ export async function createContext({ req }: FetchCreateContextFnOptions) {
     return {
       session,
     };
-  } catch (e: unknown) {
-    console.error(`error getting session from header:`, e);
-    throw e;
+  } catch (error: unknown) {
+    console.error(`error getting session from header:`, error);
+    throw error;
   }
 }
 

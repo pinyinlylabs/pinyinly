@@ -7,8 +7,8 @@ export function hapticImpactIfMobile() {
     // Calling impactAsync on an unsupported platform (e.g. web) throws an
     // exception and will crash the app.
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(
-      (e: unknown) => {
-        console.error(`Could not run haptic impact.`, e);
+      (error: unknown) => {
+        console.error(`Could not run haptic impact.`, error);
       },
     );
   }
