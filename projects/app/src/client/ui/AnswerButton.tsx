@@ -15,7 +15,12 @@ import { AnimatedPressable } from "./AnimatedPressable";
 import { PropsOf } from "./types";
 import { hapticImpactIfMobile } from "./util";
 
-export type AnswerButtonState = `default` | `selected` | `success` | `error`;
+export type AnswerButtonState =
+  | `default`
+  | `selected`
+  | `success`
+  | `error`
+  | `dimmed`;
 
 export type AnswerButtonProps = {
   children?: ViewProps[`children`];
@@ -74,6 +79,7 @@ export const AnswerButton = forwardRef<
   useEffect(() => {
     if (stateChanged) {
       switch (state) {
+        case `dimmed`:
         case `default`: {
           setBgFilled(false);
           bgScale.set(0.5);
@@ -214,6 +220,7 @@ const text = tv({
   variants: {
     state: {
       default: `text-text`,
+      dimmed: `text-primary-9`,
       selected: `text-accent-9`,
       success: `text-accent-9`,
       error: `text-accent-9`,
@@ -226,6 +233,7 @@ const roundedRect = tv({
   variants: {
     state: {
       default: ``,
+      dimmed: ``,
       selected: ``,
       success: `success-theme`,
       error: `danger-theme`,

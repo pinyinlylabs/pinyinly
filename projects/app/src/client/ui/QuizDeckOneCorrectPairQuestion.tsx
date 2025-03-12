@@ -42,7 +42,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { tv } from "tailwind-variants";
-import { AnswerButton } from "./AnswerButton";
+import { AnswerButton, AnswerButtonState } from "./AnswerButton";
 import { HanziText } from "./HanziText";
 import { NewSkillModal } from "./NewSkillModal";
 import { RectButton2 } from "./RectButton2";
@@ -256,6 +256,7 @@ export const QuizDeckOneCorrectPairQuestion = memo(
         {flag?.type === QuestionFlagType.NewSkill ? (
           <NewSkillModal skill={question.answer.a.skill} />
         ) : null}
+
         {flag == null ? null : <FlagText flag={flag} />}
         <View>
           <Text className="text-xl font-bold text-text">{prompt}</Text>
@@ -275,19 +276,31 @@ export const QuizDeckOneCorrectPairQuestion = memo(
               <View className="flex-1 flex-row gap-[28px]" key={i}>
                 <ChoiceButton
                   choice={a.a}
-                  selected={a === selectedAAnswer}
+                  state={
+                    selectedAAnswer === undefined
+                      ? `default`
+                      : a === selectedAAnswer
+                        ? `selected`
+                        : `dimmed`
+                  }
                   onPress={() => {
                     if (!showResult) {
-                      setSelectedAAnswer(a);
+                      setSelectedAAnswer((x) => (x === a ? undefined : a));
                     }
                   }}
                 />
                 <ChoiceButton
                   choice={b.b}
-                  selected={b === selectedBAnswer}
+                  state={
+                    selectedBAnswer === undefined
+                      ? `default`
+                      : b === selectedBAnswer
+                        ? `selected`
+                        : `dimmed`
+                  }
                   onPress={() => {
                     if (!showResult) {
-                      setSelectedBAnswer(b);
+                      setSelectedBAnswer((x) => (x === b ? undefined : b));
                     }
                   }}
                 />
@@ -607,11 +620,11 @@ const SubmitButton = forwardRef<
 });
 
 const ChoiceButton = ({
-  selected,
+  state,
   choice,
   onPress,
 }: {
-  selected: boolean;
+  state: AnswerButtonState;
   choice: OneCorrectPairQuestionChoice;
   onPress: (choice: OneCorrectPairQuestionChoice) => void;
 }) => {
@@ -662,7 +675,7 @@ const ChoiceButton = ({
   return (
     <AnswerButton
       onPress={handlePress}
-      state={selected ? `selected` : `default`}
+      state={state}
       className="flex-1"
       textClassName={choiceButtonText({
         length:
