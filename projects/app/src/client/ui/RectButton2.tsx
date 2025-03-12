@@ -91,7 +91,7 @@ export const RectButton2 = forwardRef<
 });
 
 const pressable = tv({
-  base: ``,
+  base: `web:transition-all`,
   variants: {
     flat: {
       true: ``,
@@ -120,7 +120,7 @@ const pressable = tv({
 });
 
 const roundedRect = tv({
-  base: `rounded-lg px-3 py-[4px] items-center justify-center`,
+  base: `rounded-lg px-3 py-[4px] items-center justify-center web:transition-all`,
   variants: {
     variant: {
       filled: `py-[5px]`,
