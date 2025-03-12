@@ -242,7 +242,6 @@ export default tseslint.config(
       "unicorn/filename-case": `off`, // TODO evaluate
       "unicorn/no-anonymous-default-export": `off`, // TODO evaluate
       "unicorn/no-unreadable-array-destructuring": `off`, // TODO evaluate
-      "unicorn/prefer-array-flat-map": `off`, // TODO evaluate
       "unicorn/prefer-top-level-await": `off`, // TODO evaluate
     },
   },

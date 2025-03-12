@@ -67,7 +67,7 @@ export default function ConnectionsPage() {
   };
 
   const shuffledWords = useMemo(() => {
-    const words = groups.map((x) => x.words).flat();
+    const words = groups.flatMap((x) => x.words);
     return shuffleCount > 0 ? shuffle(words) : words;
   }, [shuffleCount, groups]);
 
