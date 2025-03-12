@@ -141,17 +141,17 @@ export function SignInWithAppleButton({
     );
     if (needsReset) {
       setAppleApi(undefined);
-      (window.AppleID as unknown) = undefined;
+      (globalThis.AppleID as unknown) = undefined;
       for (const script of existingScripts) {
         script.remove();
       }
     }
 
-    if ((window.AppleID as unknown) === undefined) {
+    if ((globalThis.AppleID as unknown) === undefined) {
       const script = document.createElement(`script`);
       script.addEventListener(`load`, () => {
-        invariant((window.AppleID as unknown) !== undefined);
-        setAppleApi(window.AppleID);
+        invariant((globalThis.AppleID as unknown) !== undefined);
+        setAppleApi(globalThis.AppleID);
       });
       script.src = scriptUrl;
       const head = document.querySelectorAll(`head`)[0];
