@@ -45,6 +45,7 @@ export const NewSkillModal = ({ skill }: { skill: Skill }) => {
   return isModalVisible ? (
     <PageSheetModal
       backdropColor="primary-3"
+      disableBackgroundDismiss
       onDismiss={() => {
         setIsModalVisible(false);
       }}

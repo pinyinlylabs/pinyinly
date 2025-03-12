@@ -14,33 +14,36 @@ import Animated, {
 import { AnimatedPressable } from "./AnimatedPressable";
 import { useEventCallback } from "./util";
 
+interface PageSheetModalProps {
+  backdropColor: string;
+  children: (options: { dismiss: () => void }) => ReactNode;
+  disableBackgroundDismiss?: boolean;
+  onDismiss: () => void;
+}
+
 export const PageSheetModal = ({
   children,
   backdropColor,
+  disableBackgroundDismiss,
   onDismiss,
-}: {
-  backdropColor: string;
-  children: (options: { dismiss: () => void }) => ReactNode;
-  onDismiss: () => void;
-}) => {
+}: PageSheetModalProps) => {
   return (
-    <PlatformModal onDismiss={onDismiss} backdropColor={backdropColor}>
+    <PageSheetModalImpl
+      onDismiss={onDismiss}
+      backdropColor={backdropColor}
+      disableBackgroundDismiss={disableBackgroundDismiss}
+    >
       {children}
-    </PlatformModal>
+    </PageSheetModalImpl>
   );
 };
 
-type PlatformModalProps = {
-  backdropColor: string;
-  children: (options: { dismiss: () => void }) => ReactNode;
-  onDismiss: () => void;
-};
-
-const WebModal = ({
+const WebImpl = ({
   children,
   backdropColor,
+  disableBackgroundDismiss,
   onDismiss,
-}: PlatformModalProps) => {
+}: PageSheetModalProps) => {
   const backgroundAnimation = useSharedValue(0);
   const contentAnimation = useSharedValue(0);
   const [dismissing, setDismissing] = useState(false);
@@ -58,7 +61,7 @@ const WebModal = ({
     NonNullable<PressableProps[`onPress`]>
   >((e) => {
     // Don't trigger on any bubbling events.
-    if (e.target === e.currentTarget) {
+    if (disableBackgroundDismiss !== true && e.target === e.currentTarget) {
       api.dismiss();
     }
   });
@@ -160,11 +163,11 @@ const WebModal = ({
   );
 };
 
-const IosContainer = ({
+const IosImpl = ({
   onDismiss,
   backdropColor,
   children,
-}: PlatformModalProps) => {
+}: PageSheetModalProps) => {
   const api = useMemo(
     () => ({
       dismiss: onDismiss,
@@ -196,11 +199,11 @@ const IosContainer = ({
   );
 };
 
-const NoOpContainer = ({
+const DefaultImpl = ({
   backdropColor,
   children,
   onDismiss,
-}: PlatformModalProps) => {
+}: PageSheetModalProps) => {
   const api = useMemo(
     () => ({
       dismiss: onDismiss,
@@ -219,8 +222,8 @@ const NoOpContainer = ({
   );
 };
 
-const PlatformModal = Platform.select({
-  web: WebModal,
-  ios: IosContainer,
-  default: NoOpContainer,
+const PageSheetModalImpl = Platform.select({
+  web: WebImpl,
+  ios: IosImpl,
+  default: DefaultImpl,
 });
