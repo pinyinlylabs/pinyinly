@@ -15,7 +15,7 @@ import { AnimatedPressable } from "./AnimatedPressable";
 import { useEventCallback } from "./util";
 
 interface PageSheetModalProps {
-  backdropColor: string;
+  backdropColor?: string;
   children: (options: { dismiss: () => void }) => ReactNode;
   disableBackgroundDismiss?: boolean;
   onDismiss: () => void;
@@ -23,8 +23,8 @@ interface PageSheetModalProps {
 
 export const PageSheetModal = ({
   children,
-  backdropColor,
-  disableBackgroundDismiss,
+  backdropColor = `primary-3`,
+  disableBackgroundDismiss = false,
   onDismiss,
 }: PageSheetModalProps) => {
   return (
@@ -38,12 +38,14 @@ export const PageSheetModal = ({
   );
 };
 
+type ImplProps = Required<PageSheetModalProps>;
+
 const WebImpl = ({
   children,
   backdropColor,
   disableBackgroundDismiss,
   onDismiss,
-}: PageSheetModalProps) => {
+}: ImplProps) => {
   const backgroundAnimation = useSharedValue(0);
   const contentAnimation = useSharedValue(0);
   const [dismissing, setDismissing] = useState(false);
@@ -61,7 +63,7 @@ const WebImpl = ({
     NonNullable<PressableProps[`onPress`]>
   >((e) => {
     // Don't trigger on any bubbling events.
-    if (disableBackgroundDismiss !== true && e.target === e.currentTarget) {
+    if (!disableBackgroundDismiss && e.target === e.currentTarget) {
       api.dismiss();
     }
   });
@@ -163,11 +165,7 @@ const WebImpl = ({
   );
 };
 
-const IosImpl = ({
-  onDismiss,
-  backdropColor,
-  children,
-}: PageSheetModalProps) => {
+const IosImpl = ({ onDismiss, backdropColor, children }: ImplProps) => {
   const api = useMemo(
     () => ({
       dismiss: onDismiss,
@@ -199,11 +197,7 @@ const IosImpl = ({
   );
 };
 
-const DefaultImpl = ({
-  backdropColor,
-  children,
-  onDismiss,
-}: PageSheetModalProps) => {
+const DefaultImpl = ({ backdropColor, children, onDismiss }: ImplProps) => {
   const api = useMemo(
     () => ({
       dismiss: onDismiss,
