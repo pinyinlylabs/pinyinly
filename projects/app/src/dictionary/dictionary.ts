@@ -619,10 +619,8 @@ export enum IdsOperator {
 
 const idsOperatorSchema = z.nativeEnum(IdsOperator);
 
-export function parseIds(
-  ids: string,
-  cursor: { index: number } = { index: 0 },
-): IdsNode {
+export function parseIds(ids: string, cursor?: { index: number }): IdsNode {
+  cursor ??= { index: 0 };
   const charCodePoint = ids.codePointAt(cursor.index);
   invariant(charCodePoint != null);
   const char = String.fromCodePoint(charCodePoint);
