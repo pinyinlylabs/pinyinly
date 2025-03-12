@@ -299,6 +299,7 @@ export const partOfSpeechSchema = z.enum([
 
 export const hanziWordMeaningSchema = z.object({
   gloss: z.array(z.string()),
+  glossHint: z.string().optional(),
   pinyin: z
     .array(z.string({ description: `space separated pinyin for each word` }), {
       description: `all valid pinyin variations for this meaning (might be omitted for radicals without pronunciation)`,
