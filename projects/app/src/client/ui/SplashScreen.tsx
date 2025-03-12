@@ -10,6 +10,8 @@ const isExpoGo =
   Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
 
 // Keep the splash screen visible while we fetch resources
+//
+// eslint-disable-next-line unicorn/prefer-top-level-await
 ExpoSplashScreen.preventAutoHideAsync().catch((error: unknown) => {
   console.error(`Could not prevent splash screen auto hide`, error);
 });

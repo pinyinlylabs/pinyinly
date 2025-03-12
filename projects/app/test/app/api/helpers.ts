@@ -66,7 +66,6 @@ export function testExpoServer(t: TestContext) {
             break;
           }
         } catch (error) {
-          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
           t.diagnostic(`Error: ${error}`);
         }
 
@@ -77,7 +76,6 @@ export function testExpoServer(t: TestContext) {
       assert.equal(response?.ok, true);
     },
 
-    // eslint-disable-next-line @typescript-eslint/require-await
     [Symbol.asyncDispose]: async () => {
       // The sockets need to be destroyed otherwise the process hangs the test.
       server.stdin.destroy();

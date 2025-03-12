@@ -160,6 +160,15 @@ function nextStability(
 
 /**
  * The formula used is:
+ * $$\min \lbrace \max \lbrace D_0,1 \rbrace,10\rbrace$$
+ * @param {number} difficulty $$D \in [1,10]$$
+ */
+function constrainDifficulty(difficulty: number): number {
+  return Math.min(Math.max(round(difficulty, 8), 1), 10);
+}
+
+/**
+ * The formula used is:
  * $$\text{next}_d = D - w_6 \cdot (R - 2)$$
  * $$D^\prime(D,R) = w_5 \cdot D_0(2) +(1 - w_5) \cdot \text{next}_d$$
  * @param {number} lastDifficulty Difficulty $$D \in [1,10]$$
@@ -171,14 +180,6 @@ function nextDifficulty(lastDifficulty: number, rating: Rating): number {
     return lastDifficulty;
   }
 
-  /**
-   * The formula used is:
-   * $$\min \lbrace \max \lbrace D_0,1 \rbrace,10\rbrace$$
-   * @param {number} difficulty $$D \in [1,10]$$
-   */
-  function constrainDifficulty(difficulty: number): number {
-    return Math.min(Math.max(round(difficulty, 8), 1), 10);
-  }
   /**
    * The formula used is :
    * $$w_7 \cdot \text{init} +(1 - w_7) \cdot \text{current}$$

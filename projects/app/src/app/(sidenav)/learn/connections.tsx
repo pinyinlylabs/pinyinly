@@ -24,7 +24,7 @@ export default function ConnectionsPage() {
         sampleSize: 50,
       });
 
-      return result.map(([, , question]) => question);
+      return result.map(([_skill, _skillState, question]) => question);
     },
   });
 
@@ -67,7 +67,7 @@ export default function ConnectionsPage() {
   };
 
   const shuffledWords = useMemo(() => {
-    const words = groups.map((x) => x.words).flat();
+    const words = groups.flatMap((x) => x.words);
     return shuffleCount > 0 ? shuffle(words) : words;
   }, [shuffleCount, groups]);
 

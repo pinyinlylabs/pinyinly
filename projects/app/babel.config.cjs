@@ -1,5 +1,5 @@
 /** @type {import('@babel/core').ConfigFunction} */
-module.exports = function (api) {
+module.exports = function babelConfig(api) {
   api.cache.never();
 
   return {

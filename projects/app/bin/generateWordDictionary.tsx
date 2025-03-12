@@ -1417,32 +1417,32 @@ interface GenerateHanziWordQuery {
   existingItems?: DeepReadonly<[HanziWord, HanziWordMeaning][]>;
 }
 
+async function queryOpenAi(query: unknown) {
+  const { suggestions } = await openai(
+    [`curriculum.md`, `word-representation.md`, `skill-types.md`],
+    `
+I have a hanzi I want to add to a word list, can fill in the rest of the data for me?
+
+${JSON.stringify(query)}
+`,
+    z.object({
+      suggestions: z.array(
+        z.object({
+          type: z.literal(`new`),
+          hanzi: z.string(),
+          meaning: hanziWordMeaningSchema,
+          meaningKey: z.string(),
+        }),
+      ),
+    }),
+  );
+
+  return suggestions;
+}
+
 async function generateHanziWordResults(
   query: GenerateHanziWordQuery,
 ): Promise<HanziWordCreateResult[]> {
-  async function queryOpenAi(query: unknown) {
-    const { suggestions } = await openai(
-      [`curriculum.md`, `word-representation.md`, `skill-types.md`],
-      `
-  I have a hanzi I want to add to a word list, can fill in the rest of the data for me?
-
-  ${JSON.stringify(query)}
-  `,
-      z.object({
-        suggestions: z.array(
-          z.object({
-            type: z.literal(`new`),
-            hanzi: z.string(),
-            meaning: hanziWordMeaningSchema,
-            meaningKey: z.string(),
-          }),
-        ),
-      }),
-    );
-
-    return suggestions;
-  }
-
   const res: HanziWordCreateResult[] = [];
 
   // Give existing dictionary options

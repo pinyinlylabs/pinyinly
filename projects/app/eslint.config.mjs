@@ -91,6 +91,7 @@ export default tseslint.config(
       curly: [`error`, `all`],
       "logical-assignment-operators": `error`,
       "no-else-return": `error`,
+      "no-empty-function": `off`, // handled by @typescript-eslint/no-empty-function
       "no-console": [`error`, { allow: [`warn`, `error`] }],
       "no-process-exit": `error`,
       "no-fallthrough": [
@@ -226,9 +227,7 @@ export default tseslint.config(
       //
       // unicorn
       //
-      "unicorn/consistent-function-scoping": `off`, // TODO evaluate
-      "unicorn/no-null": `off`, // TODO evaluate
-      "unicorn/no-useless-undefined": `off`, // TODO evaluate
+      "unicorn/no-null": `off`, // null used extensively
       "unicorn/number-literal-case": `off`, // overwritten by prettier
       "unicorn/numeric-separators-style": [
         `error`,
@@ -239,14 +238,8 @@ export default tseslint.config(
       ],
       "unicorn/prefer-module": `off`, // still need to use require(…) with metro
       "unicorn/prevent-abbreviations": `off`, // abbreviations are fine
-      "unicorn/no-nested-ternary": `off`, // TODO evaluate
-      "unicorn/filename-case": `off`, // TODO evaluate
-      "unicorn/prefer-global-this": `off`, // TODO evaluate
-      "unicorn/no-object-as-default-parameter": `off`, // TODO evaluate
-      "unicorn/no-anonymous-default-export": `off`, // TODO evaluate
-      "unicorn/no-unreadable-array-destructuring": `off`, // TODO evaluate
-      "unicorn/prefer-array-flat-map": `off`, // TODO evaluate
-      "unicorn/prefer-top-level-await": `off`, // TODO evaluate
+      "unicorn/no-nested-ternary": `off`, // nested ternaries are not so bad
+      "unicorn/filename-case": `off`, // using camelCase for filenames
     },
   },
 
@@ -260,11 +253,13 @@ export default tseslint.config(
 
   // test files
   {
-    files: [`**/*.test.*`],
+    files: [`test/**`],
     rules: {
       "@typescript-eslint/no-non-null-assertion": `off`,
       "@typescript-eslint/restrict-template-expressions": `off`,
       "@typescript-eslint/require-await": `off`, // this is annoying when you want a little function to return a promise
+      "unicorn/consistent-function-scoping": `off`, // it's useful to write functions in the scope of a test
+      "unicorn/no-useless-undefined": `off`, // writing undefined can be useful when writing mocks
     },
   },
 

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/require-await */
 import { TestContext } from "node:test";
 import { ReadTransaction, WriteTransaction } from "replicache";
 

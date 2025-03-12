@@ -19,7 +19,7 @@ export function windowEventListenerEffect<K extends keyof WindowEventMap>(
 ): undefined | (() => void) {
   if (Platform.OS === `web`) {
     const ac = new AbortController();
-    window.addEventListener(type, listener, { signal: ac.signal });
+    globalThis.addEventListener(type, listener, { signal: ac.signal });
     return () => {
       ac.abort();
     };
