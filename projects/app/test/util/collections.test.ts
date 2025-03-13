@@ -18,7 +18,7 @@ void test.skip(`type checks only`, () => {
   [1, 2].sort(sortComparatorString());
 });
 
-void test(`sortComparatorString`, () => {
+await test(`${sortComparatorString.name} fixtures`, () => {
   {
     const arr = [`c`, `a`, `b`];
     arr.sort(sortComparatorString());
@@ -32,7 +32,7 @@ void test(`sortComparatorString`, () => {
   }
 });
 
-void test(`sortComparatorNumber`, () => {
+await test(`${sortComparatorNumber.name} suite`, () => {
   {
     const arr = [3, 1, 2];
     arr.sort(sortComparatorNumber());
@@ -46,7 +46,7 @@ void test(`sortComparatorNumber`, () => {
   }
 });
 
-void test(`mergeSortComparators`, () => {
+await test(`${mergeSortComparators.name} suite`, () => {
   const arr = [`金`, `现金`, `金`, `金牌`];
   arr.sort(
     mergeSortComparators(
@@ -57,7 +57,7 @@ void test(`mergeSortComparators`, () => {
   assert.deepEqual(arr, [`金`, `金`, `现金`, `金牌`]);
 });
 
-void test(`merge`, () => {
+await test(`${merge.name} suite`, () => {
   assert.deepEqual(merge(null, null), null);
   assert.deepEqual(merge(null, 1), 1);
   assert.deepEqual(merge(1, null), 1);
@@ -86,7 +86,7 @@ void test(`merge`, () => {
   );
 });
 
-void test(`deepTransform`, () => {
+await test(`${deepTransform.name} suite`, () => {
   assert.deepEqual(
     deepTransform(null, (x) => x),
     null,
@@ -99,12 +99,12 @@ void test(`deepTransform`, () => {
   );
 });
 
-void test(`objectInvert`, () => {
+await test(`${objectInvert.name} fixtures`, () => {
   assert.deepEqual(objectInvert({}), {});
   assert.deepEqual(objectInvert({ a: 1, b: 2 }), { 1: `a`, 2: `b` });
 });
 
-void test(`mapInvert`, () => {
+await test(`${mapInvert.name} fixtures`, () => {
   assert.deepEqual(mapInvert(new Map()), new Map());
   assert.deepEqual(
     mapInvert(

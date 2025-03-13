@@ -60,7 +60,7 @@ function makeMockTx(t: TestContext) {
   };
 }
 
-void test(`string() key and value`, async (t) => {
+await test(`string() key and value`, async (t) => {
   const posts = r.entity(`foo/[id]`, {
     id: r.string(),
     name: r.string(),
@@ -106,7 +106,7 @@ void test(`string() key and value`, async (t) => {
   });
 });
 
-void test(`string() .nullable()`, async (t) => {
+await test(`string() .nullable()`, async (t) => {
   const posts = r.entity(`foo/[id]`, {
     id: r.string(),
     name: r.string().nullable().alias(`n`),
@@ -136,7 +136,7 @@ void test(`string() .nullable()`, async (t) => {
   });
 });
 
-void test(`object() .nullable()`, async (t) => {
+await test(`object() .nullable()`, async (t) => {
   const posts = r.entity(`foo/[id]`, {
     id: r.string(),
     name: r
@@ -182,7 +182,7 @@ void test(`object() .nullable()`, async (t) => {
   });
 });
 
-void test(`object()`, async (t) => {
+await test(`object()`, async (t) => {
   using tx = makeMockTx(t);
 
   {
@@ -280,7 +280,7 @@ void test(`object()`, async (t) => {
   });
 });
 
-void test(`timestamp()`, async (t) => {
+await test(`timestamp()`, async (t) => {
   const posts = r.entity(`foo/[id]`, {
     id: r.string(),
     due: r.timestamp(),
@@ -333,7 +333,7 @@ void test(`timestamp()`, async (t) => {
   }
 });
 
-void test(`entity() one variable`, async (t) => {
+await test(`entity() one variable`, async (t) => {
   const posts = r.entity(`foo/[id1]`, {
     id1: r.string(),
     text: r.string(),
@@ -352,7 +352,7 @@ void test(`entity() one variable`, async (t) => {
   assert.deepEqual(tx.get.mock.calls[0]?.arguments, [`foo/1`]);
 });
 
-void test(`entity() variables requires string marshaler`, async () => {
+await test(`entity() variables requires string marshaler`, async () => {
   typeChecks(() => {
     r.entity(`foo/[id]`, { id: r.string() });
     r.entity(`foo/[id]`, { id: r.literal(`foo`, r.string()) });
@@ -361,7 +361,7 @@ void test(`entity() variables requires string marshaler`, async () => {
   });
 });
 
-void test(`entity() two variables`, async (t) => {
+await test(`entity() two variables`, async (t) => {
   const posts = r.entity(`foo/[id1]/[id2]`, {
     id1: r.string(),
     id2: r.string(),
@@ -386,7 +386,7 @@ void test(`entity() two variables`, async (t) => {
   assert.deepEqual(tx.get.mock.calls[0]?.arguments, [`foo/1/2`]);
 });
 
-void test(`entity() non-string key codec`, async (t) => {
+await test(`entity() non-string key codec`, async (t) => {
   const rComplex = r.custom(
     z
       .tuple([z.string(), z.number()])
@@ -425,7 +425,7 @@ void test(`entity() non-string key codec`, async (t) => {
   }
 });
 
-void test(`entity() key marshaling`, async () => {
+await test(`entity() key marshaling`, async () => {
   const posts = r.entity(`posts/[id]`, {
     id: r.string(),
   });
@@ -442,7 +442,7 @@ void test(`entity() key marshaling`, async () => {
   assert.throws(() => aliased.marshalKey({}), /missing/);
 });
 
-void test(`entity() alias duplicates`, async () => {
+await test(`entity() alias duplicates`, async () => {
   assert.throws(
     () =>
       r.entity(`posts/[id]`, {
@@ -462,7 +462,7 @@ void test(`entity() alias duplicates`, async () => {
   );
 });
 
-void test(`entity() .has()`, async (t) => {
+await test(`entity() .has()`, async (t) => {
   const posts = r.entity(`foo/[id]`, { id: r.string() });
 
   using tx = makeMockTx(t);
@@ -478,7 +478,7 @@ void test(`entity() .has()`, async (t) => {
   assert.deepEqual(await posts.has(tx, { id: `2` }), false);
 });
 
-void test(`entity() distinguishing between input/output types`, async (t) => {
+await test(`entity() distinguishing between input/output types`, async (t) => {
   const rCoerciveString = () =>
     r.custom(
       // takes in a number or string
@@ -523,7 +523,7 @@ void test(`entity() distinguishing between input/output types`, async (t) => {
   });
 });
 
-void test(`entity() multiple indexes types work`, async (t) => {
+await test(`entity() multiple indexes types work`, async (t) => {
   const posts = r.entity(`posts/[id]`, {
     id: r.string().alias(`i`).indexed(`byId`),
     date: r.datetime().alias(`d`).indexed(`byDate`),
@@ -595,7 +595,7 @@ void test(`entity() multiple indexes types work`, async (t) => {
   });
 });
 
-void test(`entity() requires variables to be declared`, () => {
+await test(`entity() requires variables to be declared`, () => {
   typeChecks(() => {
     r.entity(
       `foo/[id]`,
@@ -605,7 +605,7 @@ void test(`entity() requires variables to be declared`, () => {
   });
 });
 
-void test(`number()`, async (t) => {
+await test(`number()`, async (t) => {
   const posts = r.entity(`foo/[id]`, {
     id: r.string(),
     count: r.number(`c`),
@@ -621,7 +621,7 @@ void test(`number()`, async (t) => {
   tx.get.mock.mockImplementationOnce(async () => marshaledData);
   assert.deepEqual(await posts.get(tx, { id: `1` }), { id: `1`, count: 5 });
 });
-void test(`enum()`, async (t) => {
+await test(`enum()`, async (t) => {
   enum Colors {
     RED,
     BLUE,
@@ -653,7 +653,7 @@ void test(`enum()`, async (t) => {
   }
 });
 
-void test(`object() with alias`, async (t) => {
+await test(`object() with alias`, async (t) => {
   const posts = r.entity(`foo/[id]`, {
     id: r.string(),
     author: r.object({
@@ -684,7 +684,7 @@ void test(`object() with alias`, async (t) => {
   });
 });
 
-void test(`object()`, async (t) => {
+await test(`object()`, async (t) => {
   const posts = r.entity(`foo/[id]`, {
     id: r.string(),
     author: r.object({
@@ -707,7 +707,7 @@ void test(`object()`, async (t) => {
   });
 });
 
-void test(`.getIndexes()`, () => {
+await test(`.getIndexes()`, () => {
   // no key path variables
   {
     const posts = r.entity(`foo`, {
@@ -798,7 +798,7 @@ void test(`.getIndexes()`, () => {
   }
 });
 
-void test(`mutator()`, async () => {
+await test(`mutator()`, async () => {
   const fn = r
     .mutator({
       id: r.string(),
@@ -886,7 +886,7 @@ class CheckpointLog {
   }
 }
 
-void test(`replicache()`, async (t) => {
+await test(`replicache()`, async (t) => {
   const schema = {
     version: `1`,
     posts: r.entity(`p/[id]`, {
@@ -1071,7 +1071,7 @@ void test(`replicache()`, async (t) => {
 
 void test.todo(`replicache() errors if two mutators have the same alias`);
 
-void test(`replicache() disallows unknown mutator implementations`, async () => {
+await test(`replicache() disallows unknown mutator implementations`, async () => {
   const schema = {
     version: `1`,
     posts: r.entity(`p/[id]`, { id: r.string() }),
@@ -1099,7 +1099,7 @@ void test(`replicache() disallows unknown mutator implementations`, async () => 
   });
 });
 
-void test(`replicache() mutator tx`, async () => {
+await test(`replicache() mutator tx`, async () => {
   const schema = {
     version: `1`,
     counter: r.entity(`counter/[id]`, {
@@ -1137,7 +1137,7 @@ void test(`replicache() mutator tx`, async () => {
   );
 });
 
-void test(`replicache() entity()`, async (t) => {
+await test(`replicache() entity()`, async (t) => {
   const schema = {
     version: `1`,
     text: r.entity(`text/[id]:[id2].`, {
@@ -1374,7 +1374,7 @@ void test(`replicache() entity()`, async (t) => {
   });
 });
 
-void test(`replicache() index scan`, async () => {
+await test(`replicache() index scan`, async () => {
   const schema = {
     version: `1`,
     text: r.entity(`text/[id]`, {
@@ -1416,7 +1416,7 @@ void test(`replicache() index scan`, async () => {
   });
 });
 
-void test(`replicache() index scan functional test`, async () => {
+await test(`replicache() index scan functional test`, async () => {
   const schema = {
     version: `1`,
     text: r.entity(`text/[id]`, {
@@ -1491,7 +1491,7 @@ void test(`replicache() index scan functional test`, async () => {
   }
 });
 
-void test(`replicache() index scan supports starting from non-existent values`, async () => {
+await test(`replicache() index scan supports starting from non-existent values`, async () => {
   const schema = {
     version: `1`,
     text: r.entity(`text/[id]`, {
@@ -1555,7 +1555,7 @@ void test(`replicache() index scan supports starting from non-existent values`, 
   );
 });
 
-void test(`number()`, async (t) => {
+await test(`number()`, async (t) => {
   const posts = r.entity(`foo/[id]`, {
     id: r.string(),
     count: r.number(`c`),
@@ -1573,7 +1573,7 @@ void test(`number()`, async (t) => {
   assert.deepEqual(await posts.get(tx, { id }), { id, count: 5 });
 });
 
-void test(`literal()`, async (t) => {
+await test(`literal()`, async (t) => {
   typeChecks(async () => {
     r.literal(1, r.number());
     r.literal(``, r.string());
@@ -1721,7 +1721,7 @@ typeChecks<RizzleObjectOutput<never>>(() => {
   >;
 });
 
-void test(`${keyPathVariableNames.name}()`, () => {
+await test(`${keyPathVariableNames.name}()`, () => {
   assert.deepEqual(keyPathVariableNames(`foo/[id]`), [`id`]);
   assert.deepEqual(keyPathVariableNames(`foo/[id]/[bar]`), [`id`, `bar`]);
 });

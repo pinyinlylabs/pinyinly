@@ -19,7 +19,7 @@ const workflowSchema = z.object({
   ),
 });
 
-void test(`no missing EXPO_PUBLIC_ environment variables`, async () => {
+await test(`no missing EXPO_PUBLIC_ environment variables`, async () => {
   const projectRoot = import.meta.dirname + `/..`;
   const workspaceRoot = projectRoot + `/../..`;
   const githubWorkflowsPath = `.github/workflows`;

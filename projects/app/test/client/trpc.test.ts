@@ -2,7 +2,7 @@ import { maybeParseVercelError } from "#client/trpc.tsx";
 import assert from "node:assert/strict";
 import test from "node:test";
 
-void test(`${maybeParseVercelError.name} suite`, async () => {
+await test(`${maybeParseVercelError.name} suite`, async () => {
   await test(`ignores normal responses`, () => {
     const result = maybeParseVercelError(
       Response.json({ message: `Hello, world!` }),

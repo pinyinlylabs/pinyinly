@@ -18,7 +18,7 @@ typeChecks(`eslint-plugin-drizzle tests`, (t: TestContext) => {
   });
 });
 
-void test(`${substring.name} suite`, async (t) => {
+await test(`${substring.name} suite`, async (t) => {
   const txTest = withTxTest(t);
 
   await txTest(`static query`, async (tx) => {

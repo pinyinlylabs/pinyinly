@@ -14,7 +14,7 @@ import { invariant } from "@haohaohow/lib/invariant";
 import assert from "node:assert/strict";
 import test from "node:test";
 
-void test(`${skillLearningGraph.name} suite`, async () => {
+await test(`${skillLearningGraph.name} suite`, async () => {
   await test(`no targets gives an empty graph`, async () => {
     assert.deepEqual(
       await skillLearningGraph({
@@ -285,7 +285,7 @@ void test(`${skillLearningGraph.name} suite`, async () => {
   await test.todo(`splits words into characters`);
 });
 
-void test(`${skillReviewQueue.name} suite`, async () => {
+await test(`${skillReviewQueue.name} suite`, async () => {
   await test(`no skills gives an empty queue`, async () => {
     const graph = await skillLearningGraph({
       targetSkills: [],

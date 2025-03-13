@@ -20,7 +20,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { testReplicacheOptions } from "../util/rizzleHelpers";
 
-void test(`${hsk1SkillReview.name} suite`, async () => {
+await test(`${hsk1SkillReview.name} suite`, async () => {
   await test(`returns everything when no skills have state`, async () => {
     await using rizzle = r.replicache(testReplicacheOptions(), v6, v6Mutators);
 
@@ -30,7 +30,7 @@ void test(`${hsk1SkillReview.name} suite`, async () => {
   });
 });
 
-void test(`${simulateSkillReviews.name} returns a review queue`, async () => {
+await test(`${simulateSkillReviews.name} returns a review queue`, async () => {
   const reviewQueue = await simulateSkillReviews({
     targetSkills: [`he:分:divide`],
     history: [],
@@ -45,7 +45,7 @@ void test(`${simulateSkillReviews.name} returns a review queue`, async () => {
   ]);
 });
 
-void test(`${computeSkillReviewQueue.name} suite`, async () => {
+await test(`${computeSkillReviewQueue.name} suite`, async () => {
   await test(`incorrect answers in a quiz don't get scheduled prematurely`, async () => {
     const reviewQueue = await simulateSkillReviews({
       targetSkills: [`he:分:divide`],
@@ -68,7 +68,7 @@ void test(`${computeSkillReviewQueue.name} suite`, async () => {
   });
 });
 
-void test(`${flagsForSkillState.name} suite`, async () => {
+await test(`${flagsForSkillState.name} suite`, async () => {
   await test(`marks a question as new if it has no srs`, async () => {
     assert.deepEqual(
       flagsForSkillState({ srs: null, createdAt: new Date(), due: new Date() }),
