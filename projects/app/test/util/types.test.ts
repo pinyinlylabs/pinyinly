@@ -29,7 +29,7 @@ typeChecks(`IsEqual`, () => {
   false satisfies IsEqual<{ key: `value` }, never>;
 });
 
-void test(`lib.dom.d.ts patches`, async () => {
+await test(`lib.dom.d.ts patches`, async () => {
   // Passing `undefined` throws, but in lib.dom.d.ts `Response.json()` takes an
   // `any`, so it's not caught by the type checker. So we've patched
   // lib.dom.d.ts to remove the `any` so this test ensures that the patch is

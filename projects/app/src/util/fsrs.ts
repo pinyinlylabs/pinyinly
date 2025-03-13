@@ -232,3 +232,17 @@ export function fsrsIsLearned(
 ): boolean {
   return options.stability >= 100;
 }
+
+/**
+ * Return true if the skill has been introduced and is ready for review. This is
+ * used to determine whether a skill should be included in the review queue. A
+ * skill can be "marked incorrect" even if it's never been introduced, because
+ * it can be presented as one of the wrong answers in a quiz. If it's submitted
+ * as a wrong answer it will be marked as incorrect, however it's important not
+ * to prematurely introduce it into the review queue.
+ */
+export function fsrsIsIntroduced(
+  options: Pick<UpcomingReview, `stability`>,
+): boolean {
+  return options.stability > 1;
+}

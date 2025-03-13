@@ -5,7 +5,7 @@ import path from "node:path";
 import test from "node:test";
 import { z } from "zod";
 
-void test(`no luminance layers in lottie animations (incompatible with lottie-ios)`, async () => {
+await test(`no luminance layers in lottie animations (incompatible with lottie-ios)`, async () => {
   const projectRoot = path.join(import.meta.dirname, `../..`);
   const assetsPath = path.join(projectRoot, `src/assets`);
 

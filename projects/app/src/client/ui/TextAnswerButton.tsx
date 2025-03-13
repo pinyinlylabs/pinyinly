@@ -1,5 +1,6 @@
+import { splitCharacters } from "@/dictionary/dictionary";
 import { ElementRef, forwardRef, useEffect, useMemo, useState } from "react";
-import { Pressable, Text, View, ViewProps } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import Animated, {
   Easing,
   runOnJS,
@@ -14,29 +15,29 @@ import { AnimatedPressable } from "./AnimatedPressable";
 import { PropsOf } from "./types";
 import { hapticImpactIfMobile } from "./util";
 
-export type AnswerButtonState =
+export type TextAnswerButtonState =
   | `default`
   | `selected`
   | `success`
   | `error`
   | `dimmed`;
 
-export type AnswerButtonProps = {
-  children?: ViewProps[`children`];
-  state?: AnswerButtonState;
+export type TextAnswerButtonProps = {
+  text: string;
+  state?: TextAnswerButtonState;
   className?: string;
   inFlexRowParent?: boolean;
   textClassName?: string;
   disabled?: boolean;
 } & Omit<PropsOf<typeof Pressable>, `children` | `disabled`>;
 
-export const AnswerButton = forwardRef<
+export const TextAnswerButton = forwardRef<
   ElementRef<typeof Pressable>,
-  AnswerButtonProps
->(function AnswerButton(
+  TextAnswerButtonProps
+>(function TextAnswerButton(
   {
     disabled = false,
-    children,
+    text,
     state = `default`,
     inFlexRowParent = false,
     className,
@@ -143,6 +144,17 @@ export const AnswerButton = forwardRef<
     [bgOpacity, bgScale],
   );
 
+  const textLength = useMemo(() => {
+    const charCount = splitCharacters(text).length;
+    return charCount <= 5
+      ? (`tiny` as const)
+      : charCount <= 20
+        ? (`short` as const)
+        : charCount <= 40
+          ? (`medium` as const)
+          : (`long` as const);
+  }, [text]);
+
   const flat = pressed || disabled;
 
   return (
@@ -171,14 +183,14 @@ export const AnswerButton = forwardRef<
       }}
       ref={ref}
       style={{ transform: [{ scale }] }}
-      className={pressable({ flat, state, inFlexRowParent, className })}
+      className={pressableClass({ flat, state, inFlexRowParent, className })}
     >
       <Animated.View
         style={bgAnimatedStyle}
         className={bgAnimatedClass({ state })}
       />
       <View
-        className={roundedRect({
+        className={roundedRectClass({
           flat,
           pressed,
           disabled,
@@ -188,11 +200,15 @@ export const AnswerButton = forwardRef<
         })}
       >
         <Text
-          className={text({ state, className: textClassName })}
+          className={textClass({
+            state,
+            length: textLength,
+            className: textClassName,
+          })}
           numberOfLines={2}
           ellipsizeMode="tail"
         >
-          {children}
+          {text}
         </Text>
       </View>
     </AnimatedPressable>
@@ -212,7 +228,7 @@ const bgAnimatedClass = tv({
   },
 });
 
-const pressable = tv({
+const pressableClass = tv({
   base: ``,
   variants: {
     flat: {
@@ -241,8 +257,11 @@ const pressable = tv({
   ],
 });
 
-const text = tv({
-  base: `text-center text-sm font-bold text-text web:transition-all`,
+const textClass = tv({
+  // px-1: Horizontal padding is necessary to give first and last letters on a
+  // line with accents enough space to not be clipped. Without this words like
+  // "lǐ" will have half the accent clipped.
+  base: `px-1 text-center font-bold text-text web:transition-color`,
   variants: {
     state: {
       default: `text-text`,
@@ -251,10 +270,16 @@ const text = tv({
       success: `text-accent-9`,
       error: `text-accent-9`,
     },
+    length: {
+      tiny: `text-xl/tight lg:text-2xl/tight`,
+      short: `text-lg/tight lg:text-xl/tight`,
+      medium: `text-sm lg:text-lg/tight`,
+      long: `text-xs lg:text-md/tight`,
+    },
   },
 });
 
-const roundedRect = tv({
+const roundedRectClass = tv({
   base: `items-center select-none justify-center border-2 px-3 py-1 rounded-lg`,
   variants: {
     disabled: {

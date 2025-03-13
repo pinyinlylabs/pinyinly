@@ -15,6 +15,7 @@ import {
   PartOfSpeech,
   PinyinInitialGroupId,
   Skill,
+  SkillState,
   SkillType,
   SrsType,
 } from "./model";
@@ -75,7 +76,9 @@ export const rMnemonicThemeId = r.enum(MnemonicThemeId, {
 });
 
 // Skill ID e.g. `he:好:good`
-export type MarshaledSkill = string & z.BRAND<`SkillId`>;
+export type MarshaledSkill =
+  | (string & z.BRAND<`SkillId`>)
+  | `he:${string}:${string}`;
 
 const rSkillMarshalSchema = z
   .custom<Skill | MarshaledSkill>(
@@ -297,6 +300,18 @@ export const v6 = {
     ),
 };
 
+export function skillStateFromFsrsReview(review: UpcomingReview) {
+  return {
+    srs: {
+      type: SrsType.FsrsFourPointFive,
+      stability: review.stability,
+      difficulty: review.difficulty,
+    },
+    due: review.due,
+    createdAt: review.created,
+  } satisfies SkillState;
+}
+
 // This is a placeholder to keep code around that demonstrates how to support
 // multiple schema versions at the same time.
 export const v6_1 = {
@@ -337,16 +352,7 @@ export const v6Mutators: RizzleReplicacheMutators<typeof v6> = {
 
     await tx.skillState.set(
       { skill },
-      {
-        skill,
-        createdAt: state.created,
-        srs: {
-          type: SrsType.FsrsFourPointFive,
-          stability: state.stability,
-          difficulty: state.difficulty,
-        },
-        due: state.due,
-      },
+      { skill, ...skillStateFromFsrsReview(state) },
     );
   },
   async setPinyinInitialAssociation(tx, { initial, name }) {

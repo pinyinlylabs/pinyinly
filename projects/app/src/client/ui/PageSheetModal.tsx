@@ -18,6 +18,11 @@ interface PageSheetModalProps {
   backdropColor?: string;
   children: (options: { dismiss: () => void }) => ReactNode;
   disableBackgroundDismiss?: boolean;
+  /**
+   * If `true`, the modal will be presented with a slower animation so it is not
+   * as jarring.
+   */
+  passivePresentation?: boolean;
   onDismiss: () => void;
 }
 
@@ -26,11 +31,13 @@ export const PageSheetModal = ({
   backdropColor = `primary-3`,
   disableBackgroundDismiss = false,
   onDismiss,
+  passivePresentation = false,
 }: PageSheetModalProps) => {
   return (
     <PageSheetModalImpl
       onDismiss={onDismiss}
       backdropColor={backdropColor}
+      passivePresentation={passivePresentation}
       disableBackgroundDismiss={disableBackgroundDismiss}
     >
       {children}
@@ -44,8 +51,12 @@ const WebImpl = ({
   children,
   backdropColor,
   disableBackgroundDismiss,
+  passivePresentation,
   onDismiss,
 }: ImplProps) => {
+  // snapshot the value so that changes to it don't cause show/dismiss
+  // animations to repeat.
+  const [passivePresentationSnapshot] = useState(passivePresentation);
   const backgroundAnimation = useSharedValue(0);
   const contentAnimation = useSharedValue(0);
   const [dismissing, setDismissing] = useState(false);
@@ -92,21 +103,27 @@ const WebImpl = ({
     } else {
       backgroundAnimation.set(
         withTiming(1, {
-          duration: 500,
+          duration: passivePresentationSnapshot ? 500 : 250,
           easing: Easing.inOut(Easing.quad),
         }),
       );
 
       contentAnimation.set(
         withDelay(
-          500,
+          passivePresentationSnapshot ? 500 : 0,
           withSpring(1, {
-            duration: 500,
+            duration: passivePresentationSnapshot ? 500 : 250,
           }),
         ),
       );
     }
-  }, [backgroundAnimation, contentAnimation, dismissing, onDismiss]);
+  }, [
+    backgroundAnimation,
+    contentAnimation,
+    dismissing,
+    onDismiss,
+    passivePresentationSnapshot,
+  ]);
 
   const animatedBackgroundStyle = useAnimatedStyle(() => {
     return {

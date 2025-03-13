@@ -24,7 +24,7 @@ const expectedReviewSchema = z.object({
 
 const ratingSchema = z.nativeEnum(Rating);
 
-testFsrsSequence([
+await testFsrsSequence([
   Rating.Again,
   {
     difficulty: 7.5455,
@@ -45,7 +45,7 @@ testFsrsSequence([
   },
 ]);
 
-testFsrsSequence([
+await testFsrsSequence([
   Rating.Hard,
   {
     difficulty: 6.3449,
@@ -66,7 +66,7 @@ testFsrsSequence([
   },
 ]);
 
-testFsrsSequence([
+await testFsrsSequence([
   Rating.Good,
   {
     difficulty: 5.1443,
@@ -93,7 +93,7 @@ testFsrsSequence([
   },
 ]);
 
-testFsrsSequence([
+await testFsrsSequence([
   Rating.Easy,
   {
     difficulty: 3.9437,
@@ -114,7 +114,7 @@ testFsrsSequence([
   },
 ]);
 
-testFsrsSequence([
+await testFsrsSequence([
   Rating.Good,
   {
     difficulty: 5.1443,
@@ -147,7 +147,7 @@ testFsrsSequence([
   },
 ]);
 
-testFsrsSequence([
+await testFsrsSequence([
   Rating.Good,
   {
     difficulty: 5.1443,
@@ -172,9 +172,20 @@ testFsrsSequence([
     stability: 4.144_369_18,
     delay: { days: 4, hours: 3, minutes: 28 },
   },
+  Rating.Easy,
+  {
+    difficulty: 3.511_458_7,
+    stability: 39.425_421_47,
+    delay: {
+      days: 8,
+      hours: 10,
+      minutes: 13,
+      months: 1,
+    },
+  },
 ]);
 
-testFsrsSequence([
+await testFsrsSequence([
   Rating.Again,
   {
     difficulty: 7.5455,
@@ -224,7 +235,7 @@ type FsrsSequence = RepeatedSequence2<[Rating, ExpectedReview]>;
  * Create a test case for an FSRS sequence based on ratings.
  * @param sequence
  */
-function testFsrsSequence(sequence: FsrsSequence) {
+async function testFsrsSequence(sequence: FsrsSequence) {
   const name = sequence
     .flatMap((x) => {
       const rating = ratingSchema.safeParse(x);
@@ -232,7 +243,7 @@ function testFsrsSequence(sequence: FsrsSequence) {
     })
     .join(` → `);
 
-  void test(name, assertFsrsSequence(sequence));
+  await test(name, assertFsrsSequence(sequence));
 }
 
 function assertFsrsSequence(sequence: readonly (ExpectedReview | Rating)[]) {

@@ -14,7 +14,7 @@ import { invariant } from "@haohaohow/lib/invariant";
 import { eq, sql } from "drizzle-orm";
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { withDbTest, withTxTest } from "./db";
+import { withDbTest, withTxTest } from "./dbHelpers";
 
 async function createUser(tx: Drizzle, id: string = nanoid()) {
   const [user] = await tx.insert(s.user).values([{ id }]).returning();
@@ -22,9 +22,9 @@ async function createUser(tx: Drizzle, id: string = nanoid()) {
   return user;
 }
 
-void test(`push()`, async (t) => {
+await test(`${push.name} suite`, async (t) => {
   for (const schema of supportedSchemas) {
-    await t.test(`schemaVersion: ${schema.version}`, async (t) => {
+    await t.test(`schema ${schema.version}`, async (t) => {
       const txTest = withTxTest(t, { isolationLevel: `repeatable read` });
 
       await test(`database transaction isolation level`, async (t) => {
@@ -340,9 +340,9 @@ void test(`push()`, async (t) => {
   }
 });
 
-void test(`pull()`, async (t) => {
+await test(`${pull.name} suite`, async (t) => {
   for (const schema of supportedSchemas) {
-    await t.test(`schemaVersion: ${schema.version}`, async (t) => {
+    await t.test(`schema ${schema.version}`, async (t) => {
       const txTest = withTxTest(t, { isolationLevel: `repeatable read` });
 
       await test(`database transaction isolation level`, async (t) => {
@@ -698,7 +698,7 @@ void test(`pull()`, async (t) => {
   }
 });
 
-void test(`dbTest() examples`, async (t) => {
+await test(`${withDbTest.name} examples`, async (t) => {
   const dbTest = withDbTest(t);
 
   await dbTest(`should work with inline fixtures 1`, async (db) => {
@@ -710,9 +710,9 @@ void test(`dbTest() examples`, async (t) => {
   });
 });
 
-void test(`computeCvr()`, async (t) => {
+await test(`${computeCvrEntities.name} suite`, async (t) => {
   for (const schema of supportedSchemas) {
-    await t.test(`schemaVersion: ${schema.version}`, async (t) => {
+    await t.test(`schema ${schema.version}`, async (t) => {
       const txTest = withTxTest(t);
 
       await txTest(
@@ -914,7 +914,7 @@ void test(`computeCvr()`, async (t) => {
   }
 });
 
-void test(`fetchPushes()`, async (t) => {
+await test(`${fetchMutations.name} suite`, async (t) => {
   const txTest = withTxTest(t, { isolationLevel: `repeatable read` });
 
   await txTest(`works for non-existant user and client group`, async (tx) => {

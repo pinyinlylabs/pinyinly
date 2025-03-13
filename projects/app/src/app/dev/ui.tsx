@@ -1,6 +1,9 @@
-import { AnswerButton, AnswerButtonState } from "@/client/ui/AnswerButton";
 import { HanziText } from "@/client/ui/HanziText";
 import { RectButton2 } from "@/client/ui/RectButton2";
+import {
+  TextAnswerButton,
+  TextAnswerButtonState,
+} from "@/client/ui/TextAnswerButton";
 import { PropsOf } from "@/client/ui/types";
 import { Link } from "expo-router";
 import shuffle from "lodash/shuffle";
@@ -30,7 +33,7 @@ export default function DesignSystemPage() {
         </Section>
 
         <Section title="AnswerButton" scrollTo={scrollTo}>
-          <AnswerButtonExamples />
+          <TextAnswerButtonExamples />
         </Section>
 
         <Section title="RectButton2" scrollTo={scrollTo}>
@@ -487,28 +490,20 @@ const RectButton2Examples = (props: Partial<PropsOf<typeof RectButton2>>) => (
   </View>
 );
 
-const AnswerButtonExamples = (props: Partial<PropsOf<typeof AnswerButton>>) => (
+const TextAnswerButtonExamples = (
+  props: Partial<PropsOf<typeof TextAnswerButton>>,
+) => (
   <View className="flex-1">
     <View className="flex-row flex-wrap">
       <ExampleStack title="state">
-        <AnswerButton state="default" {...props}>
-          default
-        </AnswerButton>
-        <AnswerButton state="error" {...props}>
-          error
-        </AnswerButton>
-        <AnswerButton state="selected" {...props}>
-          selected
-        </AnswerButton>
-        <AnswerButton state="success" {...props}>
-          success
-        </AnswerButton>
+        <TextAnswerButton state="default" text="default" {...props} />
+        <TextAnswerButton state="error" text="error" {...props} />
+        <TextAnswerButton state="selected" text="selected" {...props} />
+        <TextAnswerButton state="success" text="success" {...props} />
       </ExampleStack>
 
       <ExampleStack title="disabled">
-        <AnswerButton disabled {...props}>
-          Disabled
-        </AnswerButton>
+        <TextAnswerButton disabled text="Disabled" {...props} />
       </ExampleStack>
 
       <ExampleStack title="synced">
@@ -517,12 +512,17 @@ const AnswerButtonExamples = (props: Partial<PropsOf<typeof AnswerButton>>) => (
 
       <ExampleStack title="text overflow">
         <View className="h-[120px] w-[120px] gap-2 border-2 border-dashed border-primary-8">
-          <AnswerButton className="flex-1" {...props}>
-            one two three four five six seven eight nine ten
-          </AnswerButton>
-          <AnswerButton className="flex-1" disabled {...props}>
-            one two three four five six seven eight nine ten
-          </AnswerButton>
+          <TextAnswerButton
+            className="flex-1"
+            text="one two three four five six seven eight nine ten"
+            {...props}
+          />
+          <TextAnswerButton
+            className="flex-1"
+            disabled
+            text="one two three four five six seven eight nine ten"
+            {...props}
+          />
         </View>
       </ExampleStack>
     </View>
@@ -641,11 +641,13 @@ const AnswerButtonExamples = (props: Partial<PropsOf<typeof AnswerButton>>) => (
   </View>
 );
 
-function SyncedAnswerButtonExample(props: PropsOf<typeof AnswerButton>) {
-  const [state, setState] = useState<AnswerButtonState>(`default`);
+function SyncedAnswerButtonExample(
+  props: Omit<PropsOf<typeof TextAnswerButton>, `text`>,
+) {
+  const [state, setState] = useState<TextAnswerButtonState>(`default`);
   return (
     <>
-      <AnswerButton
+      <TextAnswerButton
         state={state}
         onPress={() => {
           setState(
@@ -657,18 +659,15 @@ function SyncedAnswerButtonExample(props: PropsOf<typeof AnswerButton>) {
                     `success`,
                     `error`,
                     `default`,
-                  ] as AnswerButtonState[]
+                  ] as TextAnswerButtonState[]
                 ).filter((x) => x !== prev),
               )[0] ?? `default`,
           );
         }}
         {...props}
-      >
-        Primary
-      </AnswerButton>
-      <AnswerButton state={state} {...props}>
-        Mirror
-      </AnswerButton>
+        text="Primary"
+      />
+      <TextAnswerButton state={state} {...props} text="Mirror" />
     </>
   );
 }

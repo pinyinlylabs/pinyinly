@@ -7,7 +7,13 @@ import { ScrollView, Text, View } from "react-native";
 import { PageSheetModal } from "./PageSheetModal";
 import { RectButton2 } from "./RectButton2";
 
-export const NewSkillModal = ({ skill }: { skill: Skill }) => {
+export const NewSkillModal = ({
+  skill,
+  passivePresentation,
+}: {
+  skill: Skill;
+  passivePresentation?: boolean;
+}) => {
   const [isModalVisible, setIsModalVisible] = useState(true);
 
   return isModalVisible ? (
@@ -16,6 +22,7 @@ export const NewSkillModal = ({ skill }: { skill: Skill }) => {
       onDismiss={() => {
         setIsModalVisible(false);
       }}
+      passivePresentation={passivePresentation}
     >
       {({ dismiss }) => {
         switch (skill.type) {

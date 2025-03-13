@@ -14,7 +14,7 @@ import { invariant } from "@haohaohow/lib/invariant";
 import assert from "node:assert/strict";
 import test from "node:test";
 
-void test(skillLearningGraph.name, async () => {
+await test(`${skillLearningGraph.name} suite`, async () => {
   await test(`no targets gives an empty graph`, async () => {
     assert.deepEqual(
       await skillLearningGraph({
@@ -206,7 +206,7 @@ void test(skillLearningGraph.name, async () => {
     return textGraph;
   }
 
-  await test(parseTextGraph.name, () => {
+  await test(`${parseTextGraph.name} basics`, () => {
     assert.deepEqual(
       parseTextGraph(`
       he:一下儿:aBit
@@ -285,7 +285,7 @@ void test(skillLearningGraph.name, async () => {
   await test.todo(`splits words into characters`);
 });
 
-void test(skillReviewQueue.name, async () => {
+await test(`${skillReviewQueue.name} suite`, async () => {
   await test(`no skills gives an empty queue`, async () => {
     const graph = await skillLearningGraph({
       targetSkills: [],
@@ -320,7 +320,6 @@ void test(skillReviewQueue.name, async () => {
   });
 
   await test(`prioritises due skills with highest value (not most overdue)`, async () => {
-    debugger;
     const graph = await skillLearningGraph({
       targetSkills: [hanziWordToEnglish(`分:divide`)],
       isSkillLearned: () => false,
@@ -340,6 +339,27 @@ void test(skillReviewQueue.name, async () => {
         rSkillMarshal(hanziWordToEnglish(`八:eight`)),
         rSkillMarshal(hanziWordToEnglish(`丿:slash`)),
         rSkillMarshal(hanziWordToEnglish(`𠃌:radical`)),
+        rSkillMarshal(hanziWordToEnglish(`分:divide`)),
+      ],
+    );
+  });
+
+  await test(`schedules skills in dependency order`, async () => {
+    const graph = await skillLearningGraph({
+      targetSkills: [hanziWordToEnglish(`分:divide`)],
+      isSkillLearned: () => false,
+    });
+
+    assert.deepEqual(
+      skillReviewQueue({
+        graph,
+        isSkillDue: () => false,
+      }),
+      [
+        rSkillMarshal(hanziWordToEnglish(`丿:slash`)),
+        rSkillMarshal(hanziWordToEnglish(`𠃌:radical`)),
+        rSkillMarshal(hanziWordToEnglish(`刀:knife`)),
+        rSkillMarshal(hanziWordToEnglish(`八:eight`)),
         rSkillMarshal(hanziWordToEnglish(`分:divide`)),
       ],
     );

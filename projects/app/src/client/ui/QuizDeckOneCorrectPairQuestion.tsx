@@ -1,6 +1,5 @@
 import { useHanziWordMeaning } from "@/client/query";
 import {
-  HanziWord,
   HanziWordSkill,
   OneCorrectPairQuestion,
   OneCorrectPairQuestionAnswer,
@@ -11,11 +10,7 @@ import {
   SkillRating,
   SkillType,
 } from "@/data/model";
-import {
-  hanziFromHanziWord,
-  lookupHanziWord,
-  splitCharacters,
-} from "@/dictionary/dictionary";
+import { hanziFromHanziWord, lookupHanziWord } from "@/dictionary/dictionary";
 import { arrayFilterUniqueWithKey } from "@/util/collections";
 import { Rating } from "@/util/fsrs";
 import { invariant } from "@haohaohow/lib/invariant";
@@ -38,7 +33,6 @@ import {
   Easing,
   Platform,
   Pressable,
-  ScrollView,
   StyleProp,
   Text,
   View,
@@ -46,11 +40,11 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { tv } from "tailwind-variants";
-import { AnswerButton, AnswerButtonState } from "./AnswerButton";
 import { HanziText } from "./HanziText";
+import { HanziWordModal } from "./HanziWordModal";
 import { NewSkillModal } from "./NewSkillModal";
-import { PageSheetModal } from "./PageSheetModal";
 import { RectButton2 } from "./RectButton2";
+import { TextAnswerButton, TextAnswerButtonState } from "./TextAnswerButton";
 import { PropsOf } from "./types";
 
 const buttonThickness = 4;
@@ -264,7 +258,7 @@ export const QuizDeckOneCorrectPairQuestion = memo(
         }
       >
         {flag?.type === QuestionFlagType.NewSkill ? (
-          <NewSkillModal skill={question.answer.a.skill} />
+          <NewSkillModal passivePresentation skill={question.answer.a.skill} />
         ) : null}
 
         {flag == null ? null : <FlagText flag={flag} />}
@@ -603,107 +597,6 @@ const HanziWordToPinyinInitialSkillAnswer = ({
   );
 };
 
-const HanziWordModal = ({
-  hanziWord,
-  onDismiss,
-}: {
-  hanziWord: HanziWord;
-  onDismiss: () => void;
-}) => {
-  const hanziWordSkillData = useHanziWordMeaning(hanziWord);
-
-  const characters = useMemo(
-    (): string[] => splitCharacters(hanziFromHanziWord(hanziWord)),
-    [hanziWord],
-  );
-
-  return (
-    <PageSheetModal onDismiss={onDismiss}>
-      {({ dismiss }) =>
-        hanziWordSkillData.data == null ? null : (
-          <>
-            <ScrollView
-              className="flex-1"
-              contentContainerClassName="px-4 py-4"
-            >
-              <View className="my-4 gap-4">
-                <View className="items-center gap-2">
-                  <View className="flex-row gap-1">
-                    {characters.map((character) => (
-                      <View key={character} className="items-center">
-                        <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-text">
-                          {character}
-                        </Text>
-                      </View>
-                    ))}
-                  </View>
-
-                  <Text className="text-4xl font-bold text-primary-12">
-                    {hanziWordSkillData.data.gloss[0]}
-                  </Text>
-                </View>
-
-                {hanziWordSkillData.data.glossHint == null ? null : (
-                  <View className="gap-1">
-                    <Text className="text-xs uppercase text-primary-10">
-                      Hint
-                    </Text>
-                    <Text className="text-md font-karla text-text">
-                      {hanziWordSkillData.data.glossHint}
-                    </Text>
-                  </View>
-                )}
-
-                {hanziWordSkillData.data.pinyin == null ? null : (
-                  <View className="gap-1">
-                    <Text className="text-xs uppercase text-primary-10">
-                      Pinyin
-                    </Text>
-                    <Text className="text-md font-karla text-text">
-                      {hanziWordSkillData.data.pinyin.join(`, `)}
-                    </Text>
-                  </View>
-                )}
-
-                {hanziWordSkillData.data.gloss.length === 1 ? null : (
-                  <View className="gap-1">
-                    <Text className="text-xs uppercase text-primary-10">
-                      Gloss
-                    </Text>
-                    <Text className="text-md font-karla text-text">
-                      {hanziWordSkillData.data.gloss.join(`, `)}
-                    </Text>
-                  </View>
-                )}
-
-                <View className="gap-1">
-                  <Text className="text-xs uppercase text-primary-10">
-                    Definition
-                  </Text>
-                  <Text className="text-md font-karla text-text">
-                    {hanziWordSkillData.data.definition}
-                  </Text>
-                </View>
-              </View>
-            </ScrollView>
-
-            <View className="border-t-2 border-primary-5 px-4 py-4 mb-safe">
-              <RectButton2
-                textClassName="px-2 py-1"
-                variant="filled"
-                accent
-                onPress={dismiss}
-              >
-                Close
-              </RectButton2>
-            </View>
-          </>
-        )
-      }
-    </PageSheetModal>
-  );
-};
-
 const Skeleton = ({
   children,
   toast,
@@ -839,7 +732,7 @@ const ChoiceButton = ({
   choice,
   onPress,
 }: {
-  state: AnswerButtonState;
+  state: TextAnswerButtonState;
   choice: OneCorrectPairQuestionChoice;
   onPress: (choice: OneCorrectPairQuestionChoice) => void;
 }) => {
@@ -885,41 +778,14 @@ const ChoiceButton = ({
   });
 
   const text = textQuery.data ?? ``;
-  const charCount = useMemo(() => splitCharacters(text).length, [text]);
 
   return (
-    <AnswerButton
+    <TextAnswerButton
       onPress={handlePress}
       state={state}
       className="flex-1"
-      textClassName={choiceButtonText({
-        length:
-          charCount <= 5
-            ? `tiny`
-            : charCount <= 20
-              ? `short`
-              : charCount <= 40
-                ? `medium`
-                : `long`,
-        className: choice.type === `hanzi` ? `font-normal` : undefined,
-      })}
-    >
-      {text}
-    </AnswerButton>
+      textClassName={choice.type === `hanzi` ? `font-normal` : undefined}
+      text={text}
+    />
   );
 };
-
-const choiceButtonText = tv({
-  // px-1: Horizontal padding is necessary to give first and last letters on a
-  // line with accents enough space to not be clipped. Without this words like
-  // "lǐ" will have half the accent clipped.
-  base: `px-1`,
-  variants: {
-    length: {
-      tiny: `text-xl/tight lg:text-2xl/tight`,
-      short: `text-lg/tight lg:text-xl/tight`,
-      medium: `lg:text-lg/tight`,
-      long: `text-xs lg:text-md/tight`,
-    },
-  },
-});
