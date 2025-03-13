@@ -1,33 +1,33 @@
 {
-  "extends": "../../../tsconfig.base",
+  "extends": "../../tsconfig.base",
   "compilerOptions": {
     "allowJs": true,
     "baseUrl": ".",
+    "rootDir": ".",
+    "composite": false,
     "esModuleInterop": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
     "lib": ["DOM", "ESNext"],
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "outDir": "../../../.moon/cache/types/projects/app-test",
+    "outDir": "../../.moon/cache/types/projects/app-tsx-test",
+    "paths": {
+      "@/*": ["src/*"],
+      "@haohaohow/lib/*": ["../lib/src/*"]
+    },
+    "resolveJsonModule": true,
     "target": "ESNext",
     "types": ["node"]
   },
   "include": [
-    "**/*"
+    "test/**/*",
     // Testing JSX requires `jsx: react-jsx` otherwise Node.js will complain
     // that "React is not defined" because there are no `import React from
     // "react"` lines in all the files. And `tsx` doesn't seem to handle
     // multiple project files so this test project needs to include the `src/`
     // files too.
-    // "../src/**/*",
-    // "../src/**/*.json"
-  ],
-  "references": [
-    {
-      "path": "../src"
-    },
-    {
-      "path": "../../lib"
-    }
+    "src/**/*",
+    "src/**/*.json"
   ]
 }

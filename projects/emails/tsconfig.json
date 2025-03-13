@@ -10,7 +10,6 @@
     "jsx": "react",
     "module": "esnext",
     "moduleResolution": "bundler",
-    "noPropertyAccessFromIndexSignature": true,
     "outDir": "../../.moon/cache/types/projects/emails",
     "resolveJsonModule": true,
     "rootDirs": ["."],

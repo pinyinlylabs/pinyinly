@@ -7,25 +7,36 @@
     "jsx": "preserve",
     "module": "ES2020",
     "moduleResolution": "Bundler",
-    "noPropertyAccessFromIndexSignature": true,
     "outDir": "../../.moon/cache/types/projects/app",
+    // HACK: `expo export` doesn't work properly with tsconfig project
+    // references so it just compiles using this tsconfig file instead of the
+    // one in `src/`.
     "paths": {
       "@/*": ["src/*"],
       "@haohaohow/lib/*": ["../lib/src/*"]
     },
     "target": "ESNext"
   },
-  "include": [".expo/types/**/*.ts", "expo-env.d.ts", "nativewind-env.d.ts"],
+  "include": [
+    "*",
+    ".expo/types/**/*.ts",
+    "src/types/**/*.ts",
+    "expo-env.d.ts",
+    "nativewind-env.d.ts"
+  ],
   "exclude": [],
   "references": [
+    {
+      "path": "./src"
+    },
     {
       "path": "./test"
     },
     {
-      "path": "./bin"
+      "path": "./api"
     },
     {
-      "path": "./tsconfig.src.json"
+      "path": "./bin"
     },
     {
       "path": "../lib"

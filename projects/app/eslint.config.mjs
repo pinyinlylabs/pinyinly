@@ -287,6 +287,18 @@ export default tseslint.config(
     },
   },
 
+  // TypeScript declaration files
+  {
+    files: [`**/*.d.ts`],
+    rules: {
+      // See https://github.com/typescript-eslint/typescript-eslint/issues/7941
+      "no-var": `off`,
+      // Conflicts when augmenting an interface by adding ` extends …` but
+      // leaving the body empty.
+      "@typescript-eslint/no-empty-object-type": `off`,
+    },
+  },
+
   // Files not run in Node.js environment shouldn't do any Node.js imports. Expo
   // pulls in the `node` types so it doesn't fail type checking on "missing
   // imports", so this lint rule catches them.

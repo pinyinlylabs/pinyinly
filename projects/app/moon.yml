@@ -235,17 +235,19 @@ tasks:
       NODE_OPTIONS: --import tsx $NODE_OPTIONS
 
   test:
-    command: node --test --test-reporter=spec --import tsx "'test/**/*.test.ts'"
+    # tsx seems to load the tsconfig.json from the current directory, so it's
+    # necessary to `cd test/` first.
+    command: tsx --tsconfig tsconfig.test.json --test --test-reporter=spec --import ./test/setup.ts --experimental-test-module-mocks "'test/**/*.test.{ts,tsx}'"
     inputs:
       - "src"
       - "test"
-      - "*.{json,cjs,js,ts}"
+      - "*.{json,cjs,js,ts,tsx}"
       - "/.github/workflows" # There is a test that checks workflow environment variables.
     options:
       envFile: .env.local
 
   testWatch:
-    command: node --test --watch --import tsx "'test/**/*.test.ts'"
+    command: tsx --tsconfig tsconfig.test.json --test --watch --import ./test/setup.ts --experimental-test-module-mocks "'test/**/*.test.{ts,tsx}'"
     preset: watcher
     options:
       envFile: .env.local

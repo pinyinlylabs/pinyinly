@@ -408,6 +408,6 @@ module.exports = defineConfig({
     });
     await enforceMoonToolchainVersion(ctx);
     await enforceConsistentAppPnpmAndYarnDependencies(ctx);
-    await enforceSingleDependencyVersion(ctx, [/^@sentry\//]);
+    await enforceSingleDependencyVersion(ctx, [/^@sentry\//, /^react-native$/]);
   },
 });

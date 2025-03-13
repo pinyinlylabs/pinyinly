@@ -12,6 +12,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { tv } from "tailwind-variants";
 import { AnimatedPressable } from "./AnimatedPressable";
+import { Hhhmark } from "./Hhhmark";
 import { PropsOf } from "./types";
 import { hapticImpactIfMobile } from "./util";
 
@@ -208,7 +209,7 @@ export const TextAnswerButton = forwardRef<
           numberOfLines={2}
           ellipsizeMode="tail"
         >
-          {text}
+          <Hhhmark source={text} />
         </Text>
       </View>
     </AnimatedPressable>

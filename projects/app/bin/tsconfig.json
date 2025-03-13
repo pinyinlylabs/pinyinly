@@ -11,10 +11,10 @@
     "noUncheckedIndexedAccess": true,
     "strict": true
   },
-  "include": ["**/*"],
+  "include": ["**/*", "../src/types/**/*.ts"],
   "references": [
     {
-      "path": "../tsconfig.src.json"
+      "path": "../src"
     }
   ]
 }
