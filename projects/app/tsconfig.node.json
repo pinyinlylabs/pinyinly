@@ -11,7 +11,7 @@
     "lib": ["DOM", "ESNext"],
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "outDir": "../../.moon/cache/types/projects/app-tsx-test",
+    "outDir": "../../.moon/cache/types/projects/app-node",
     "paths": {
       "@/*": ["src/*"],
       "@haohaohow/lib/*": ["../lib/src/*"]
@@ -21,6 +21,7 @@
     "types": ["node"]
   },
   "include": [
+    "bin/**/*",
     "test/**/*",
     // Testing JSX requires `jsx: react-jsx` otherwise Node.js will complain
     // that "React is not defined" because there are no `import React from

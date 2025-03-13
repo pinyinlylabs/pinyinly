@@ -19,7 +19,7 @@ import {
   walkIdsNode,
   wordListSchema,
 } from "#dictionary/dictionary.ts";
-import "#typings/hanzi.d.ts";
+import "#types/hanzi.d.ts";
 import {
   arrayFilterUniqueWithKey,
   mergeSortComparators,
@@ -42,7 +42,7 @@ import TextInput from "ink-text-input";
 import chunk from "lodash/chunk.js";
 import isEqual from "lodash/isEqual.js";
 import path from "node:path";
-import React, {
+import {
   Children,
   Fragment,
   ReactNode,
