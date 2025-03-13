@@ -100,10 +100,6 @@ export const TextAnswerButton = forwardRef<
           break;
         }
         case `success`: {
-          scale.set(withClamp({ min: scale.get() }, withScaleAnimation()));
-          bgScale.set(
-            withClamp({ min: bgScale.get(), max: 1 }, withScaleAnimation()),
-          );
           bgOpacity.set(
             withClamp(
               { min: bgOpacity.get() },
@@ -223,7 +219,7 @@ const bgAnimatedClass = tv({
       default: ``,
       dimmed: ``,
       selected: ``,
-      success: `bg-transparent`,
+      success: `bg-accent-10`,
       error: `bg-transparent`,
     },
   },
@@ -268,7 +264,7 @@ const textClass = tv({
       default: `text-text`,
       dimmed: `text-primary-9`,
       selected: `text-accent-9`,
-      success: `text-accent-9`,
+      success: `text-accent-8`,
       error: `text-accent-9`,
     },
     length: {
