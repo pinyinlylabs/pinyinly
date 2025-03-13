@@ -264,7 +264,7 @@ export const QuizDeckOneCorrectPairQuestion = memo(
         }
       >
         {flag?.type === QuestionFlagType.NewSkill ? (
-          <NewSkillModal skill={question.answer.a.skill} />
+          <NewSkillModal passivePresentation skill={question.answer.a.skill} />
         ) : null}
 
         {flag == null ? null : <FlagText flag={flag} />}
@@ -626,7 +626,7 @@ const HanziWordModal = ({
               className="flex-1"
               contentContainerClassName="px-4 py-4"
             >
-              <View className="my-4 gap-4">
+              <View className="gap-4">
                 <View className="items-center gap-2">
                   <View className="flex-row gap-1">
                     {characters.map((character) => (
