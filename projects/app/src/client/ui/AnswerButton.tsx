@@ -242,7 +242,7 @@ const pressable = tv({
 });
 
 const text = tv({
-  base: `text-center text-sm font-bold text-text web:transition-all`,
+  base: `text-center text-sm font-bold text-text web:transition-color`,
   variants: {
     state: {
       default: `text-text`,
