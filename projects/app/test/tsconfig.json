@@ -12,16 +12,7 @@
     "target": "ESNext",
     "types": ["node"]
   },
-  "include": [
-    "**/*"
-    // Testing JSX requires `jsx: react-jsx` otherwise Node.js will complain
-    // that "React is not defined" because there are no `import React from
-    // "react"` lines in all the files. And `tsx` doesn't seem to handle
-    // multiple project files so this test project needs to include the `src/`
-    // files too.
-    // "../src/**/*",
-    // "../src/**/*.json"
-  ],
+  "include": ["**/*"],
   "references": [
     {
       "path": "../src"

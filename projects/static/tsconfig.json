@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.base",
   "ts-node": {
-    // Include `.d.ts` files (e.g. `src/typings/*`)
+    // Include `.d.ts` files (e.g. `src/types/*`)
     "files": true
   },
   "compilerOptions": {

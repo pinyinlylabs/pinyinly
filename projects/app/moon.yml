@@ -149,65 +149,52 @@ tasks:
       # Pass $NODE_OPTIONS to support VS Code "JavaScript Debug Terminal".
       NODE_OPTIONS: --import tsx $NODE_OPTIONS
 
-  formatAssetJson:
-    command: yarn tsx ./bin/formatAssetJson.ts
-    options:
-      runInCI: false
-      envFile: .env.local
-      cache: false
-    env:
-      NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
-
-  generateHanziDecomposition:
-    command: yarn tsx ./bin/generateHanziDecomposition.ts
-    options:
-      runInCI: false
-      envFile: .env.local
-      cache: false
-    env:
-      NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
-
-  generateMissingFontGlyphs:
-    command: yarn tsx ./bin/generateMissingFontGlyphs.ts
-    options:
-      runInCI: false
-      envFile: .env.local
-      cache: false
-    env:
-      NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
-
-  generateMnemonicTheme:
-    command: yarn tsx ./bin/generateMnemonicTheme.ts
-    options:
-      runInCI: false
-      envFile: .env.local
-      cache: false
-    env:
-      NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
-
-  generateRadicalNameMnemonics:
-    command: yarn tsx ./bin/generateRadicalNameMnemonics.ts
-    options:
-      runInCI: false
-      envFile: .env.local
-      cache: false
-    env:
-      NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
-
-  generateRadicalPinyinMnemonics:
-    command: yarn tsx ./bin/generateRadicalPinyinMnemonics.ts
-    options:
-      runInCI: false
-      envFile: .env.local
-      cache: false
-    env:
-      NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
-
-  generateWordDictionary:
-    command: yarn tsx ./bin/generateWordDictionary.tsx
+  tsx:
+    # tsx seems to load the tsconfig.json from the current directory, so it's
+    # necessary explicitly specify it. It also doesn't seem to respect project
+    # references so there just needs to be one tsconfig that is used for all
+    # files.
+    command: tsx --tsconfig tsconfig.node.json
     preset: watcher
     options:
       envFile: .env.local
+    env:
+      NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
+
+  formatAssetJson:
+    extends: tsx
+    args: ./bin/formatAssetJson.ts
+    preset: watcher
+
+  generateHanziDecomposition:
+    extends: tsx
+    args: ./bin/generateHanziDecomposition.ts
+    preset: watcher
+
+  generateMissingFontGlyphs:
+    extends: tsx
+    args: ./bin/generateMissingFontGlyphs.ts
+    preset: watcher
+
+  generateMnemonicTheme:
+    extends: tsx
+    args: ./bin/generateMnemonicTheme.ts
+    preset: watcher
+
+  generateRadicalNameMnemonics:
+    extends: tsx
+    args: ./bin/generateRadicalNameMnemonics.ts
+    preset: watcher
+
+  generateRadicalPinyinMnemonics:
+    extends: tsx
+    args: ./bin/generateRadicalPinyinMnemonics.ts
+    preset: watcher
+
+  generateWordDictionary:
+    extends: tsx
+    args: ./bin/generateWordDictionary.tsx
+    preset: watcher
 
   expoDoctor:
     command: npx -y expo-doctor@1.12.7
@@ -235,22 +222,18 @@ tasks:
       NODE_OPTIONS: --import tsx $NODE_OPTIONS
 
   test:
-    # tsx seems to load the tsconfig.json from the current directory, so it's
-    # necessary to `cd test/` first.
-    command: tsx --tsconfig tsconfig.test.json --test --test-reporter=spec --import ./test/setup.ts --experimental-test-module-mocks "'test/**/*.test.{ts,tsx}'"
+    extends: tsx
+    args: --test --test-reporter=spec --import ./test/setup.ts --experimental-test-module-mocks "'test/**/*.test.{ts,tsx}'"
     inputs:
       - "src"
       - "test"
       - "*.{json,cjs,js,ts,tsx}"
       - "/.github/workflows" # There is a test that checks workflow environment variables.
-    options:
-      envFile: .env.local
 
   testWatch:
-    command: tsx --tsconfig tsconfig.test.json --test --watch --import ./test/setup.ts --experimental-test-module-mocks "'test/**/*.test.{ts,tsx}'"
+    extends: tsx
+    args: --test --watch --import ./test/setup.ts --experimental-test-module-mocks "'test/**/*.test.{ts,tsx}'"
     preset: watcher
-    options:
-      envFile: .env.local
 
   typecheck:
     deps:
