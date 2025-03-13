@@ -3014,13 +3014,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@inngest/ai@npm:0.0.5":
-  version: 0.0.5
-  resolution: "@inngest/ai@npm:0.0.5"
+"@inngest/ai@npm:^0.1.3":
+  version: 0.1.3
+  resolution: "@inngest/ai@npm:0.1.3"
   dependencies:
     "@types/node": "npm:^22.10.5"
     typescript: "npm:^5.7.3"
-  checksum: 10c0/605b4cd8f6879b5158a68ea2c5a8dbbeb5cd7be25d87d2d93ea4bdd055fb3a22f86cbfd924d2e310307df8a7654b17bffbaf0312ccdf859de876193c6b24ae58
+  checksum: 10c0/5327e34886391ae4cfe6058ebc31fc5f0492aec0463f351a90bead9a8e3f074348461754aa261fa79bfe44ab3714bbeda3061ca0247fbadb604b2abc296b4f52
   languageName: node
   linkType: hard
 
@@ -11321,11 +11321,11 @@ __metadata:
   linkType: hard
 
 "inngest@npm:^3.29.2":
-  version: 3.32.1
-  resolution: "inngest@npm:3.32.1"
+  version: 3.32.7
+  resolution: "inngest@npm:3.32.7"
   dependencies:
     "@bufbuild/protobuf": "npm:^2.2.3"
-    "@inngest/ai": "npm:0.0.5"
+    "@inngest/ai": "npm:^0.1.3"
     "@jpwilliams/waitgroup": "npm:^2.1.1"
     "@types/debug": "npm:^4.1.12"
     canonicalize: "npm:^1.0.8"
@@ -11371,7 +11371,7 @@ __metadata:
       optional: true
     typescript:
       optional: true
-  checksum: 10c0/76b664e0e4a7e449c5ef96e5ea6b6bf179551a1e6743f9e8d86cf5f126de8bc741fc4e369af7926308db4d5d7e31ee6de2ce810bbecc6605cceedb5f85c22c68
+  checksum: 10c0/ee2b4b1f3b81c80fad943e656faa7bafa9a035da02a47d1c4e8c101db3322fc5ccab6f0f62db6eaf9e25594099efe023e68fd279aeec4194e2b38b57ec514c32
   languageName: node
   linkType: hard
 
