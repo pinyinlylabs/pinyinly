@@ -7,7 +7,6 @@
     "target": "ESNext",
     "moduleResolution": "nodenext",
     "module": "NodeNext",
-    "noPropertyAccessFromIndexSignature": true,
     "typeRoots": []
   },
   "include": ["**/*"],

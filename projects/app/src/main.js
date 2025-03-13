@@ -1,5 +1,5 @@
-import { installCryptoPolyfill } from "@/polyfill/crypto";
-import { installSymbolAsyncInteratorPolyfill } from "@/polyfill/symbolAsyncIterator";
+import { installCryptoPolyfill } from "./polyfill/crypto";
+import { installSymbolAsyncInteratorPolyfill } from "./polyfill/symbolAsyncIterator";
 
 installCryptoPolyfill();
 installSymbolAsyncInteratorPolyfill();

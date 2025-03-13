@@ -2,6 +2,7 @@ tasks:
   typecheck:
     command: yarn tsc --build
     inputs:
+      - "!dist/"
       - "*.{ts,cts,mts,tsx,mtsx,js,cjs,mjs,json}"
-      - "{api,src,drizzle}/**/*.{ts,cts,mts,tsx,mtsx,js,cjs,mjs,json}"
+      - "**/*.{ts,cts,mts,tsx,mtsx,js,cjs,mjs,json}"
       - /tsconfig.base.json

@@ -42,6 +42,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { tv } from "tailwind-variants";
 import { HanziText } from "./HanziText";
 import { HanziWordModal } from "./HanziWordModal";
+import { Hhhmark } from "./Hhhmark";
 import { NewSkillModal } from "./NewSkillModal";
 import { RectButton2 } from "./RectButton2";
 import { TextAnswerButton, TextAnswerButtonState } from "./TextAnswerButton";
@@ -520,15 +521,17 @@ const HanziWordToEnglishSkillAnswer = ({
               </View>
             ))
           : null}
-        {includeGloss ? (
+        {includeGloss && gloss != null ? (
           <Text className={choiceEnglishText({ small, underline: true })}>
-            {gloss}
+            <Hhhmark source={gloss} />
           </Text>
         ) : null}
       </Pressable>
 
       {includeHint && meaning.glossHint != null ? (
-        <Text className="leading-snug text-accent-10">{meaning.glossHint}</Text>
+        <Text className="leading-snug text-accent-10">
+          <Hhhmark source={meaning.glossHint} />
+        </Text>
       ) : null}
       {showModal ? (
         <HanziWordModal

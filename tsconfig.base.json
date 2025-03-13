@@ -4,6 +4,8 @@
     "checkJs": true,
     "strict": true,
     "noUncheckedIndexedAccess": true,
+    "noPropertyAccessFromIndexSignature": true,
+    // "verbatimModuleSyntax": true, // TODO enable
     "lib": [],
     "types": [],
 

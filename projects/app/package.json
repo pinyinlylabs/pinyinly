@@ -89,6 +89,10 @@
     "zod": "^3.23.8",
     "zustand": "^5.0.3"
   },
+  "peerDependencies": {
+    "@types/react-native-web": "*",
+    "@types/react-test-renderer": "*"
+  },
   "devDependencies": {
     "@babel/core": "^7.20.0",
     "@electric-sql/pglite": "^0.2.15",
@@ -97,6 +101,7 @@
     "@inngest/eslint-plugin": "^0.0.7",
     "@lottiefiles/lottie-js": "^0.4.2",
     "@stylistic/eslint-plugin": "^4.0.0",
+    "@testing-library/react-native": "^13.2.0",
     "@types/babel__core": "7.20.x",
     "@types/color": "^3",
     "@types/debug": "^4 <=4.3.x",
@@ -119,6 +124,7 @@
     "eslint-plugin-react-compiler": "19.0.0-beta-e552027-20250112",
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-unicorn": "^57.0.0",
+    "expect": "^29.7.0",
     "expo-atlas": "^0.4.0",
     "fontkit": "^2.0.4",
     "globals": "^16.0.0",
@@ -131,6 +137,7 @@
     "openai": "^4.68.4",
     "prettier": "^3.4.2",
     "prettier-plugin-tailwindcss": "^0.6.9",
+    "react-test-renderer": "18.x",
     "ts-essentials": "^10.0.3",
     "tsx": "^4.15.7",
     "typescript": "patch:typescript@npm%3A5.8.2#~/.yarn/patches/typescript-npm-5.8.2-b95d637f6a.patch",
