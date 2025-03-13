@@ -19,14 +19,9 @@ import mapValues from "lodash/mapValues";
 import shuffle from "lodash/shuffle";
 import assert from "node:assert/strict";
 import test, { TestContext } from "node:test";
-import {
-  ReadTransaction,
-  Replicache,
-  ReplicacheOptions,
-  TEST_LICENSE_KEY,
-  WriteTransaction,
-} from "replicache";
+import { ReadTransaction, Replicache, WriteTransaction } from "replicache";
 import { z } from "zod";
+import { testReplicacheOptions } from "./rizzleHelpers";
 
 function typeChecks<_T>(..._args: unknown[]) {
   // This function is only used for type checking, so it should never be called.
@@ -64,24 +59,6 @@ function makeMockTx(t: TestContext) {
     },
   };
 }
-
-let _testReplicacheNameId = 0;
-/**
- * Create a @see ReplicacheOptions object suitable for testing.
- *
- * @param name The name of the database. By default it will be unique for each
- * call but can a value can be passed in if you want to share a database.
- * @returns
- */
-const testReplicacheOptions = (
-  name = `test${_testReplicacheNameId++}`,
-): ReplicacheOptions<never> => ({
-  name,
-  licenseKey: TEST_LICENSE_KEY,
-  kvStore: `mem`,
-  pullInterval: null,
-  logLevel: `error`,
-});
 
 void test(`string() key and value`, async (t) => {
   const posts = r.entity(`foo/[id]`, {

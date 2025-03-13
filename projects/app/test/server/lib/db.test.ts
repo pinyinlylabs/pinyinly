@@ -3,7 +3,7 @@ import * as s from "#server/schema.ts";
 import * as pg from "drizzle-orm/pg-core";
 import assert from "node:assert/strict";
 import test, { TestContext } from "node:test";
-import { withDbTest, withTxTest } from "./db";
+import { withDbTest, withTxTest } from "./dbHelpers";
 
 function typeChecks(..._args: unknown[]) {
   // This function is only used for type checking, so it should never be called.
@@ -18,7 +18,7 @@ typeChecks(`eslint-plugin-drizzle tests`, (t: TestContext) => {
   });
 });
 
-void test(substring.name, async (t) => {
+void test(`${substring.name} suite`, async (t) => {
   const txTest = withTxTest(t);
 
   await txTest(`static query`, async (tx) => {

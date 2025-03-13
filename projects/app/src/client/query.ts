@@ -8,6 +8,7 @@ import {
   Skill,
   SkillState,
   SkillType,
+  SrsType,
 } from "@/data/model";
 import {
   MarshaledSkill,
@@ -20,7 +21,7 @@ import {
   skillReviewQueue,
 } from "@/data/skills";
 import { allHsk1HanziWords, lookupHanziWord } from "@/dictionary/dictionary";
-import { fsrsIsLearned } from "@/util/fsrs";
+import { fsrsIsIntroduced, fsrsIsLearned } from "@/util/fsrs";
 import { useQuery } from "@tanstack/react-query";
 import { interval } from "date-fns/interval";
 import shuffle from "lodash/shuffle";
@@ -121,10 +122,13 @@ export async function questionsForReview2(
   return result;
 }
 
-function flagsForSkillState(
+export function flagsForSkillState(
   skillState: SkillState | undefined,
 ): QuestionFlag | undefined {
-  if (skillState == null) {
+  if (
+    skillState?.srs?.type !== SrsType.FsrsFourPointFive ||
+    !fsrsIsIntroduced(skillState.srs)
+  ) {
     return {
       type: QuestionFlagType.NewSkill,
     };
@@ -142,7 +146,21 @@ function flagsForSkillState(
 }
 
 export async function hsk1SkillReview(r: Rizzle): Promise<Skill[]> {
-  const now = new Date();
+  const targetSkills = await allHsk1HanziWords().then((words) =>
+    words.map((w) => hanziWordToEnglish(w)),
+  );
+
+  return await computeSkillReviewQueue(r, targetSkills);
+}
+
+export async function computeSkillReviewQueue(
+  r: Rizzle,
+  targetSkills: Skill[],
+  /**
+   * exposed for testing/simulating different times
+   */
+  now = new Date(),
+): Promise<Skill[]> {
   const learnedSkills = new Set<MarshaledSkill>();
   const dueSkills = new Set<MarshaledSkill>();
   for await (const [, v] of r.queryPaged.skillState.scan()) {
@@ -150,16 +168,13 @@ export async function hsk1SkillReview(r: Rizzle): Promise<Skill[]> {
     if (v.srs != null && fsrsIsLearned(v.srs)) {
       learnedSkills.add(skillId);
     }
-    if (v.due <= now) {
+    if (v.srs && fsrsIsIntroduced(v.srs) && v.due <= now) {
       dueSkills.add(skillId);
     }
   }
 
-  // TODO: change to be based on the user's actual learning targets.
-  const hsk1HanziWords = await allHsk1HanziWords();
-
   const graph = await skillLearningGraph({
-    targetSkills: hsk1HanziWords.map((w) => hanziWordToEnglish(w)),
+    targetSkills,
     isSkillLearned: (skill) => learnedSkills.has(skill),
   });
 

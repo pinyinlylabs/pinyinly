@@ -14,7 +14,7 @@ import { invariant } from "@haohaohow/lib/invariant";
 import { eq, sql } from "drizzle-orm";
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { withDbTest, withTxTest } from "./db";
+import { withDbTest, withTxTest } from "./dbHelpers";
 
 async function createUser(tx: Drizzle, id: string = nanoid()) {
   const [user] = await tx.insert(s.user).values([{ id }]).returning();

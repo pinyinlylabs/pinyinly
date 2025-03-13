@@ -172,6 +172,17 @@ testFsrsSequence([
     stability: 4.144_369_18,
     delay: { days: 4, hours: 3, minutes: 28 },
   },
+  Rating.Easy,
+  {
+    difficulty: 3.511_458_7,
+    stability: 39.425_421_47,
+    delay: {
+      days: 8,
+      hours: 10,
+      minutes: 13,
+      months: 1,
+    },
+  },
 ]);
 
 testFsrsSequence([
