@@ -10,7 +10,11 @@ import {
 import assert from "node:assert/strict";
 import test from "node:test";
 
-void test.skip(`type checks only`, () => {
+function typeChecks<_T>(..._args: unknown[]) {
+  // This function is only used for type checking, so it should never be called.
+}
+
+typeChecks(`type checks only`, () => {
   // @ts-expect-error without arguments it only works on string elements
   [`a`, `b`].sort(sortComparatorNumber());
 
