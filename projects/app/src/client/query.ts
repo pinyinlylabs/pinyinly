@@ -162,14 +162,15 @@ export async function computeSkillReviewQueue(
   now = new Date(),
 ): Promise<Skill[]> {
   const learnedSkills = new Set<MarshaledSkill>();
-  const dueSkills = new Set<MarshaledSkill>();
+  const dueSkillDates = new Map<MarshaledSkill, Date>();
   for await (const [, v] of r.queryPaged.skillState.scan()) {
     const skillId = rSkillMarshal(v.skill);
-    if (v.srs != null && fsrsIsLearned(v.srs)) {
-      learnedSkills.add(skillId);
-    }
-    if (v.srs && fsrsIsIntroduced(v.srs) && v.due <= now) {
-      dueSkills.add(skillId);
+    if (v.srs) {
+      if (fsrsIsLearned(v.srs)) {
+        learnedSkills.add(skillId);
+      } else if (fsrsIsIntroduced(v.srs)) {
+        dueSkillDates.set(skillId, v.due);
+      }
     }
   }
 
@@ -180,7 +181,8 @@ export async function computeSkillReviewQueue(
 
   return skillReviewQueue({
     graph,
-    isSkillDue: (skill) => dueSkills.has(skill),
+    getSkillDueDate: (skill) => dueSkillDates.get(skill),
+    now,
   }).map((s) => rSkillUnmarshal(s));
 }
 

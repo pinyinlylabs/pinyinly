@@ -10,6 +10,10 @@ import {
   splitCharacters,
   splitPinyin,
 } from "@/dictionary/dictionary";
+import {
+  inverseSortComparator,
+  sortComparatorNumber,
+} from "@/util/collections";
 import { invariant } from "@haohaohow/lib/invariant";
 import { HanziWord, HanziWordSkill, Skill, SkillType } from "./model";
 import { MarshaledSkill, rSkillMarshal } from "./rizzleSchema";
@@ -258,16 +262,19 @@ export function englishToHanziWord(hanziWord: HanziWord): HanziWordSkill {
 
 export function skillReviewQueue({
   graph,
-  isSkillDue,
+  getSkillDueDate,
+  now = new Date(),
 }: {
   graph: SkillLearningGraph;
-  isSkillDue: (skill: MarshaledSkill) => boolean;
+  getSkillDueDate: (skill: MarshaledSkill) => Date | undefined;
+  now?: Date;
 }): MarshaledSkill[] {
   // Kahn topological sort
   const inDegree = new Map<MarshaledSkill, number>();
   const queue: MarshaledSkill[] = [];
-  const learningOrderDue: MarshaledSkill[] = [];
-  const learningOrder: MarshaledSkill[] = [];
+  const learningOrderDue: [MarshaledSkill, number][] = [];
+  const learningOrderNew: MarshaledSkill[] = [];
+  const learningOrderNotDue: [MarshaledSkill, number][] = [];
 
   // Compute in-degree
   for (const [marshaledSkill, node] of graph.entries()) {
@@ -291,10 +298,13 @@ export function skillReviewQueue({
   while (queue.length > 0) {
     const skill = queue.shift();
     invariant(skill != null);
-    if (isSkillDue(skill)) {
-      learningOrderDue.push(skill);
+    const dueDate = getSkillDueDate(skill);
+    if (dueDate == undefined) {
+      learningOrderNew.push(skill);
+    } else if (dueDate > now) {
+      learningOrderNotDue.push([skill, dueDate.getTime()]);
     } else {
-      learningOrder.push(skill);
+      learningOrderDue.push([skill, dueDate.getTime()]);
     }
 
     const node = graph.get(skill);
@@ -310,7 +320,15 @@ export function skillReviewQueue({
     }
   }
 
-  return [...learningOrder, ...learningOrderDue].reverse();
+  return [
+    ...learningOrderNotDue
+      .sort(inverseSortComparator(sortComparatorNumber(([, due]) => due)))
+      .map(([skill]) => skill),
+    ...learningOrderNew,
+    ...learningOrderDue
+      .sort(inverseSortComparator(sortComparatorNumber(([, due]) => due)))
+      .map(([skill]) => skill),
+  ].reverse();
 }
 
 const skillTypeShorthandMapping: Record<SkillType, string> = {

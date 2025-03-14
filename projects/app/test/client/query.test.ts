@@ -66,6 +66,21 @@ await test(`${computeSkillReviewQueue.name} suite`, async () => {
       `he:𠃌:radical should be scheduled before he:八:eight`,
     );
   });
+
+  await test(`learns new skills first (stable sorted to maintain graph order) rather than reviewing not-due skills`, async () => {
+    const reviewQueue = await simulateSkillReviews({
+      targetSkills: [`he:分:divide`],
+      history: [`✅ he:丿:slash`, `💤 1m`],
+    });
+
+    assert.deepEqual(reviewQueue, [
+      `he:𠃌:radical`,
+      `he:刀:knife`,
+      `he:八:eight`,
+      `he:分:divide`,
+      `he:丿:slash`,
+    ]);
+  });
 });
 
 await test(`${flagsForSkillState.name} suite`, async () => {
