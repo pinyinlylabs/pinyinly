@@ -291,7 +291,10 @@ await test(`${skillReviewQueue.name} suite`, async () => {
       targetSkills: [],
       isSkillLearned: () => false,
     });
-    assert.deepEqual(skillReviewQueue({ graph, isSkillDue: () => false }), []);
+    assert.deepEqual(
+      skillReviewQueue({ graph, getSkillDueDate: () => undefined }),
+      [],
+    );
   });
 
   await test(`works for 好`, async () => {
@@ -299,11 +302,14 @@ await test(`${skillReviewQueue.name} suite`, async () => {
       targetSkills: [hanziWordToEnglish(`好:good`)],
       isSkillLearned: () => false,
     });
-    assert.deepEqual(skillReviewQueue({ graph, isSkillDue: () => false }), [
-      rSkillMarshal(hanziWordToEnglish(`子:child`)),
-      rSkillMarshal(hanziWordToEnglish(`女:woman`)),
-      rSkillMarshal(hanziWordToEnglish(`好:good`)),
-    ]);
+    assert.deepEqual(
+      skillReviewQueue({ graph, getSkillDueDate: () => undefined }),
+      [
+        rSkillMarshal(hanziWordToEnglish(`子:child`)),
+        rSkillMarshal(hanziWordToEnglish(`女:woman`)),
+        rSkillMarshal(hanziWordToEnglish(`好:good`)),
+      ],
+    );
   });
 
   await test(`skips learned skills and their dependencies`, async () => {
@@ -313,10 +319,13 @@ await test(`${skillReviewQueue.name} suite`, async () => {
         [rSkillMarshal(hanziWordToEnglish(`子:child`))].includes(skill),
     });
 
-    assert.deepEqual(skillReviewQueue({ graph, isSkillDue: () => false }), [
-      rSkillMarshal(hanziWordToEnglish(`女:woman`)),
-      rSkillMarshal(hanziWordToEnglish(`好:good`)),
-    ]);
+    assert.deepEqual(
+      skillReviewQueue({ graph, getSkillDueDate: () => undefined }),
+      [
+        rSkillMarshal(hanziWordToEnglish(`女:woman`)),
+        rSkillMarshal(hanziWordToEnglish(`好:good`)),
+      ],
+    );
   });
 
   await test(`prioritises due skills with highest value (not most overdue)`, async () => {
@@ -325,14 +334,17 @@ await test(`${skillReviewQueue.name} suite`, async () => {
       isSkillLearned: () => false,
     });
 
+    const isDue = new Date(Date.now() - 5 * 60 * 1000);
     assert.deepEqual(
       skillReviewQueue({
         graph,
-        isSkillDue: (skill) =>
+        getSkillDueDate: (skill) =>
           [
             rSkillMarshal(hanziWordToEnglish(`八:eight`)),
             rSkillMarshal(hanziWordToEnglish(`刀:knife`)),
-          ].includes(skill),
+          ].includes(skill)
+            ? isDue
+            : undefined,
       }),
       [
         rSkillMarshal(hanziWordToEnglish(`刀:knife`)),
@@ -353,7 +365,7 @@ await test(`${skillReviewQueue.name} suite`, async () => {
     assert.deepEqual(
       skillReviewQueue({
         graph,
-        isSkillDue: () => false,
+        getSkillDueDate: () => undefined,
       }),
       [
         rSkillMarshal(hanziWordToEnglish(`丿:slash`)),
