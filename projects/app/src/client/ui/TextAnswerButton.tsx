@@ -8,6 +8,7 @@ import Animated, {
   useSharedValue,
   withClamp,
   withSequence,
+  withSpring,
   withTiming,
 } from "react-native-reanimated";
 import { tv } from "tailwind-variants";
@@ -53,29 +54,15 @@ export const TextAnswerButton = forwardRef<
   const [hovered, setHovered] = useState(false);
 
   const scale = useSharedValue(1);
+  const rotation = useSharedValue(`0deg`);
   const bgScale = useSharedValue(0.5);
   const bgOpacity = useSharedValue(0);
-
-  const animationFactor = 1;
 
   useEffect(() => {
     setPrevState(state);
   }, [state]);
 
   const stateChanged = state !== prevState;
-
-  const withScaleAnimation = () =>
-    withSequence(
-      withTiming(0.5, { duration: 0 }),
-      withTiming(1.03, {
-        duration: 200 * animationFactor,
-        easing: Easing.inOut(Easing.quad),
-      }),
-      withTiming(1, {
-        duration: 100 * animationFactor,
-        easing: Easing.out(Easing.quad),
-      }),
-    );
 
   useEffect(() => {
     if (stateChanged) {
@@ -90,27 +77,23 @@ export const TextAnswerButton = forwardRef<
         case `selected`: {
           scale.set(withClamp({ min: 1 }, withScaleAnimation()));
           bgScale.set(withClamp({ max: 1 }, withScaleAnimation()));
-          bgOpacity.set(withTiming(1, { duration: 100 * animationFactor }));
+          bgOpacity.set(withTiming(1, { duration }));
           break;
         }
         case `error`: {
-          scale.set(withClamp({ min: 1 }, withScaleAnimation()));
-          bgScale.set(withClamp({ max: 1 }, withScaleAnimation()));
-          bgOpacity.set(withTiming(1, { duration: 100 * animationFactor }));
+          rotation.set(withIncorrectWobbleAnimation());
+          bgOpacity.set(withTiming(1, { duration }));
           break;
         }
         case `success`: {
           bgOpacity.set(
-            withClamp(
-              { min: bgOpacity.get() },
-              withTiming(1, { duration: 100 * animationFactor }),
-            ),
+            withClamp({ min: bgOpacity.get() }, withTiming(1, { duration })),
           );
           break;
         }
       }
     }
-  }, [bgOpacity, bgScale, scale, stateChanged, state]);
+  }, [bgOpacity, bgScale, scale, stateChanged, state, rotation]);
 
   // When the background scale reaches 100% update `bgFilled` to make the border
   // bright.
@@ -139,6 +122,11 @@ export const TextAnswerButton = forwardRef<
       transform: [{ scale: bgScale }],
     }),
     [bgOpacity, bgScale],
+  );
+
+  const pressableAnimatedStyle = useMemo(
+    () => ({ transform: [{ scale }, { rotateZ: rotation }] }),
+    [rotation, scale],
   );
 
   const textLength = useMemo(() => {
@@ -179,7 +167,7 @@ export const TextAnswerButton = forwardRef<
         pressableProps.onPress?.(e);
       }}
       ref={ref}
-      style={{ transform: [{ scale }] }}
+      style={pressableAnimatedStyle}
       className={pressableClass({ flat, state, inFlexRowParent, className })}
     >
       <Animated.View
@@ -211,6 +199,28 @@ export const TextAnswerButton = forwardRef<
     </AnimatedPressable>
   );
 });
+
+const duration = 100;
+
+const withScaleAnimation = () =>
+  withSequence(
+    withTiming(0.5, { duration: 0 }),
+    withTiming(1.03, {
+      duration: 2 * duration,
+      easing: Easing.inOut(Easing.quad),
+    }),
+    withTiming(1, {
+      duration,
+      easing: Easing.out(Easing.quad),
+    }),
+  );
+
+const withIncorrectWobbleAnimation = () => {
+  let offset = Math.random() * 4 - 2;
+  offset += offset < 0 ? -0.5 : 0.5;
+
+  return withSpring(`${offset}deg`, { duration: 2 * duration });
+};
 
 const bgAnimatedClass = tv({
   base: `pointer-events-none absolute bottom-[2px] left-[1px] right-[1px] top-[2px] rounded-lg bg-accent-4`,
