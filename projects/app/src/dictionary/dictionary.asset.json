@@ -660,7 +660,7 @@
 ["另:bones",{"gloss":["bones"],"pinyin":["lìng"],"example":"他摔倒后，医生说没有伤到另骨。","partOfSpeech":"radical","definition":"A variant of 冎, historically a pictograph of bones."}],
 ["另一方面:onTheOtherHand",{"gloss":["on the other hand"],"pinyin":["lìng yī fāng miàn"],"example":"一方面，他的成绩很好，另一方面，他爱帮助别人。","partOfSpeech":"conjunction","definition":"Used to present a contrasting point of view or aspect."}],
 ["另外:additional",{"gloss":["in addition","besides"],"pinyin":["lìng wài"],"example":"他很聪明，另外他也很努力。","partOfSpeech":"adverb","definition":"Used to mention another item or point; besides."}],
-["只:only",{"gloss":["only","just"],"pinyin":["zhǐ"],"example":"我只想休息。","partOfSpeech":"adverb","definition":"No more than; exclusively."}],
+["只:only",{"gloss":["only","just"],"pinyin":["zhǐ"],"example":"我只想休息。","partOfSpeech":"adverb","definition":"No more than; exclusively.","glossHint":"**Only** one mouth to feed, not eight!\nImagine a person with a single *口 (mouth)* looking at *八 (eight)* hungry people. They can only feed themselves, reinforcing the meaning of **only**."}],
 ["只好:haveTo",{"gloss":["have to","be forced"],"pinyin":["zhǐ hǎo"],"example":"他没有车，只好走路去。","partOfSpeech":"verb","definition":"Indicates a situation where one is left with no choice but to do something."}],
 ["只是:onlyJust",{"gloss":["only","just"],"pinyin":["zhǐ shì"],"example":"我只是开玩笑。","partOfSpeech":"adverb","definition":"Used to indicate that something is merely or only the case."}],
 ["只有:only",{"gloss":["only"],"pinyin":["zhǐ yǒu"],"example":"只有努力才能成功。","partOfSpeech":"adverb","definition":"Indicating that there is nothing else; just."}],

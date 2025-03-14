@@ -233,6 +233,8 @@ export function fsrsIsLearned(
   return options.stability >= 100;
 }
 
+const { stability: isIntroducedStability } = nextReview(null, Rating.Again);
+
 /**
  * Return true if the skill has been introduced and is ready for review. This is
  * used to determine whether a skill should be included in the review queue. A
@@ -244,7 +246,7 @@ export function fsrsIsLearned(
 export function fsrsIsIntroduced(
   options: Pick<UpcomingReview, `stability`>,
 ): boolean {
-  return options.stability > 1;
+  return options.stability > isIntroducedStability;
 }
 
 export function ratingName(rating: Rating) {
