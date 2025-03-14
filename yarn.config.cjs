@@ -399,7 +399,7 @@ module.exports = defineConfig({
     await enforceConsistentDependenciesAcrossTheProject(ctx);
     await enforceScopedDependencyVersions(ctx, `@trpc/`);
     await enforceStrictTypesCompatibility(ctx, {
-      "color@^4.2.3": "^3",
+      "color@^5.0.0": "4.x || 5.x",
       "debug@^4.3.7": "^4 <=4.3.x",
       "eslint@^9.13.0": "^9 <=9.13.x",
       "pg@^8.12.0": "^8 <=8.12.x",
