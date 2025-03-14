@@ -1,4 +1,10 @@
-import { Rating, UpcomingReview, nextReview, ratingName } from "#util/fsrs.ts";
+import {
+  Rating,
+  UpcomingReview,
+  fsrsIsIntroduced,
+  nextReview,
+  ratingName,
+} from "#util/fsrs.ts";
 import { RepeatedSequence2 } from "#util/types.ts";
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type { Duration } from "date-fns";
@@ -298,6 +304,34 @@ await test(`reviewing before due`, async () => {
     },
     { minutes: 20 },
   ]);
+});
+
+await test(`${fsrsIsIntroduced.name} suite`, async () => {
+  await test(`treats Again → Good as introduced`, ({ mock }) => {
+    mock.timers.enable({ apis: [`Date`] });
+    let state = nextReview(null, Rating.Again);
+    mock.timers.tick(5000);
+    state = nextReview(state, Rating.Good);
+
+    assert.equal(fsrsIsIntroduced(state), true);
+  });
+
+  await test(`treats Again → Again → Good as introduced`, ({ mock }) => {
+    mock.timers.enable({ apis: [`Date`] });
+    let state = nextReview(null, Rating.Again);
+    mock.timers.tick(5000);
+    state = nextReview(state, Rating.Again);
+    mock.timers.tick(5000);
+    state = nextReview(state, Rating.Good);
+
+    assert.equal(fsrsIsIntroduced(state), true);
+  });
+
+  await test(`treats Again as not introduced`, () => {
+    const state = nextReview(null, Rating.Again);
+
+    assert.equal(fsrsIsIntroduced(state), false);
+  });
 });
 
 type ExpectedReview = z.TypeOf<typeof expectedReviewSchema>;
