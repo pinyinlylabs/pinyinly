@@ -4,7 +4,20 @@ import {
   useRizzleQueryPaged,
 } from "@/client/ui/ReplicacheContext";
 import { SkillType } from "@/data/model";
-import { skillTypeToShorthand } from "@/data/skills";
+import {
+  DeprecatedSkill,
+  HanziWordSkill,
+  PinyinFinalAssociationSkill,
+  PinyinInitialAssociationSkill,
+  Skill,
+} from "@/data/rizzleSchema";
+import {
+  finalFromPinyinFinalAssociationSkill,
+  hanziWordFromSkill,
+  initialFromPinyinInitialAssociationSkill,
+  skillType,
+  skillTypeToShorthand,
+} from "@/data/skills";
 import { Rating } from "@/util/fsrs";
 import { useQuery } from "@tanstack/react-query";
 import { ScrollView, Text, View } from "react-native";
@@ -36,17 +49,9 @@ export default function HistoryPage() {
 
             {data2Query.data?.map((skill, i) => (
               <View key={i} className="flex-col items-center">
-                <Text className="hhh-text-body">
-                  {skill.type === SkillType.PinyinInitialAssociation
-                    ? `${skill.initial}-`
-                    : skill.type === SkillType.PinyinFinalAssociation
-                      ? `-${skill.final}`
-                      : skill.type === SkillType.Deprecated
-                        ? skillTypeToShorthand(skill.type)
-                        : skill.hanziWord}
-                </Text>
+                <Text className="hhh-text-body">{skillParam(skill)}</Text>
                 <Text className="hhh-text-caption">
-                  {skillTypeToShorthand(skill.type)}
+                  {skillTypeToShorthand(skillType(skill))}
                 </Text>
               </View>
             ))}
@@ -66,14 +71,7 @@ export default function HistoryPage() {
                         ? `✅`
                         : value.rating}
                     {` `}
-                    {skill.type === SkillType.PinyinInitialAssociation
-                      ? `${skill.initial}-`
-                      : skill.type === SkillType.PinyinFinalAssociation
-                        ? `-${skill.final}`
-                        : skill.type === SkillType.Deprecated
-                          ? skillTypeToShorthand(skill.type)
-                          : skill.hanziWord}
-                    : {createdAt.toISOString()}
+                    {skillParam(skill)}: {createdAt.toISOString()}
                   </Text>
                 </View>
               );
@@ -84,3 +82,34 @@ export default function HistoryPage() {
     </ScrollView>
   );
 }
+
+const skillParam = (skill: Skill): string => {
+  switch (skillType(skill)) {
+    case SkillType.PinyinFinalAssociation: {
+      skill = skill as PinyinFinalAssociationSkill;
+      return `-${finalFromPinyinFinalAssociationSkill(skill)}`;
+    }
+    case SkillType.PinyinInitialAssociation: {
+      skill = skill as PinyinInitialAssociationSkill;
+      return `${initialFromPinyinInitialAssociationSkill(skill)}-`;
+    }
+    case SkillType.Deprecated_RadicalToEnglish:
+    case SkillType.Deprecated_EnglishToRadical:
+    case SkillType.Deprecated_RadicalToPinyin:
+    case SkillType.Deprecated_PinyinToRadical:
+    case SkillType.Deprecated: {
+      skill = skill as DeprecatedSkill;
+      return skillTypeToShorthand(skillType(skill));
+    }
+    case SkillType.HanziWordToEnglish:
+    case SkillType.HanziWordToPinyinInitial:
+    case SkillType.HanziWordToPinyinFinal:
+    case SkillType.HanziWordToPinyinTone:
+    case SkillType.EnglishToHanziWord:
+    case SkillType.PinyinToHanziWord:
+    case SkillType.ImageToHanziWord: {
+      skill = skill as HanziWordSkill;
+      return hanziWordFromSkill(skill);
+    }
+  }
+};

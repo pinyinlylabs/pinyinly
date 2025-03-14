@@ -10,20 +10,23 @@ import {
   splitCharacters,
   splitPinyin,
 } from "@/dictionary/dictionary";
-import {
-  inverseSortComparator,
-  sortComparatorNumber,
-} from "@/util/collections";
+import { sortComparatorNumber } from "@/util/collections";
 import { invariant } from "@haohaohow/lib/invariant";
-import { HanziWord, HanziWordSkill, Skill, SkillType } from "./model";
-import { MarshaledSkill, rSkillMarshal } from "./rizzleSchema";
+import { HanziWord, HanziWordSkillType, SkillType } from "./model";
+import {
+  HanziWordSkill,
+  PinyinFinalAssociationSkill,
+  PinyinInitialAssociationSkill,
+  Skill,
+  rSkillType,
+} from "./rizzleSchema";
 
 export interface Node {
   skill: Skill;
-  dependencies: Set<MarshaledSkill>; // todo: when are weights added?
+  dependencies: Set<Skill>; // todo: when are weights added?
 }
 
-export type SkillLearningGraph = Map<MarshaledSkill, Node>;
+export type SkillLearningGraph = Map<Skill, Node>;
 
 export interface LearningOptions {
   learnNameBeforePinyin?: boolean;
@@ -33,35 +36,33 @@ export interface LearningOptions {
 
 export async function skillLearningGraph(options: {
   targetSkills: Skill[];
-  isSkillLearned: (skill: MarshaledSkill) => boolean;
+  isSkillLearned: (skill: Skill) => boolean;
   learningOptions?: LearningOptions;
 }): Promise<SkillLearningGraph> {
   const learningOptions = options.learningOptions ?? {};
   const graph: SkillLearningGraph = new Map();
 
   async function addSkill(skill: Skill): Promise<void> {
-    const id = rSkillMarshal(skill);
-
     // Skip over any skills (and its dependency tree) that have already been
     // learned.
-    if (options.isSkillLearned(id)) {
+    if (options.isSkillLearned(skill)) {
       return;
     }
 
     // Skip doing any work if the skill is already in the graph.
-    if (graph.has(id)) {
+    if (graph.has(skill)) {
       return;
     }
 
     const dependencies = await skillDependencies(skill, learningOptions).then(
-      (x) => x.filter((s) => !options.isSkillLearned(rSkillMarshal(s))),
+      (x) => x.filter((s) => !options.isSkillLearned(s)),
     );
 
     const node: Node = {
       skill,
-      dependencies: new Set(dependencies.map((dep) => rSkillMarshal(dep))),
+      dependencies: new Set(dependencies),
     };
-    graph.set(id, node);
+    graph.set(skill, node);
 
     for (const dependency of dependencies) {
       await addSkill(dependency);
@@ -75,56 +76,107 @@ export async function skillLearningGraph(options: {
   return graph;
 }
 
+export const skillType = (skill: Skill): SkillType => {
+  const result = /^(.+?):/.exec(skill);
+  invariant(result != null, `doesn't match *:* pattern`);
+
+  const [, marshaledSkillType] = result;
+  invariant(marshaledSkillType != null, `couldn't parse skill type (before :)`);
+
+  return rSkillType().unmarshal(marshaledSkillType);
+};
+
+export const hanziWordFromSkill = (skill: HanziWordSkill): HanziWord => {
+  const result = /^(.+?):(.+)$/.exec(skill);
+  invariant(result != null, `doesn't match *:* pattern`);
+
+  const [, marshaledSkillType, hanziWord] = result;
+  invariant(marshaledSkillType != null, `couldn't parse skill type (before :)`);
+  invariant(hanziWord != null, `couldn't parse hanzi word (after :)`);
+
+  return hanziWord as HanziWord;
+};
+
+export const initialFromPinyinInitialAssociationSkill = (
+  skill: PinyinInitialAssociationSkill,
+): string => {
+  const result = /^(.+?):(.+)$/.exec(skill);
+  invariant(result != null, `doesn't match *:* pattern`);
+
+  const [, marshaledSkillType, initial] = result;
+  invariant(marshaledSkillType != null, `couldn't parse skill type (before :)`);
+  invariant(initial != null, `couldn't parse pinyin initial (after :)`);
+
+  return initial;
+};
+
+export const finalFromPinyinFinalAssociationSkill = (
+  skill: PinyinFinalAssociationSkill,
+): string => {
+  const result = /^(.+?):(.+)$/.exec(skill);
+  invariant(result != null, `doesn't match *:* pattern`);
+
+  const [, marshaledSkillType, final] = result;
+  invariant(marshaledSkillType != null, `couldn't parse skill type (before :)`);
+  invariant(final != null, `couldn't parse pinyin final (after :)`);
+
+  return final;
+};
+
+export const hanziWordToEnglishHanziWord = (
+  skill: Skill,
+): HanziWord | undefined => {
+  if (skill.startsWith(`he:`)) {
+    return skill.slice(3) as HanziWord;
+  }
+};
+
 export async function skillDependencies(
   skill: Skill,
   learningOptions: LearningOptions,
 ): Promise<Skill[]> {
   const deps: Skill[] = [];
-  switch (skill.type) {
+
+  switch (skillType(skill)) {
     case SkillType.EnglishToHanziWord: {
+      skill = skill as HanziWordSkill;
       // Learn the Hanzi -> English first. It's easier to read than write (for chinese characters).
-      deps.push({
-        type: SkillType.HanziWordToEnglish,
-        hanziWord: skill.hanziWord,
-      });
+      deps.push(hanziWordToEnglish(hanziWordFromSkill(skill)));
       break;
     }
     case SkillType.HanziWordToEnglish: {
+      skill = skill as HanziWordSkill;
       // Learn the components of a hanzi word first.
       const hanziToLearn = await hanziToLearnForHanzi(
-        splitCharacters(hanziFromHanziWord(skill.hanziWord)),
+        splitCharacters(hanziFromHanziWord(hanziWordFromSkill(skill))),
       );
       for (const hanzi of hanziToLearn) {
         if (await characterHasGlyph(hanzi)) {
           // TODO: need to a better way to choose the meaning key.
           const meaningKey = await guessHanziMeaningKey(hanzi);
           if (meaningKey != null) {
-            deps.push({
-              type: SkillType.HanziWordToEnglish,
-              hanziWord: buildHanziWord(hanzi, meaningKey),
-            });
+            deps.push(hanziWordToEnglish(buildHanziWord(hanzi, meaningKey)));
           }
         }
       }
       break;
     }
     case SkillType.HanziWordToPinyinFinal: {
+      skill = skill as HanziWordSkill;
+      const hanziWord = hanziWordFromSkill(skill);
       // Learn the mnemonic associations for the final first.
 
       // Only do this for single characters
-      const hanzi = hanziFromHanziWord(skill.hanziWord);
+      const hanzi = hanziFromHanziWord(hanziWordFromSkill(skill));
       if (splitCharacters(hanzi).length > 1) {
         break;
       }
 
       if (learningOptions.learnPinyinInitialBeforeFinal === true) {
-        deps.push({
-          type: SkillType.HanziWordToPinyinInitial,
-          hanziWord: skill.hanziWord,
-        });
+        deps.push(hanziWordToPinyinInitial(hanziWord));
       }
 
-      const res = await lookupHanziWord(skill.hanziWord);
+      const res = await lookupHanziWord(hanziWord);
       if (!res) {
         break;
       }
@@ -134,7 +186,7 @@ export async function skillDependencies(
       const pinyin = res.pinyin?.[0];
 
       if (pinyin == null) {
-        console.error(new Error(`no pinyin for ${skill.hanziWord}`));
+        console.error(new Error(`no pinyin for ${hanziWord}`));
         break;
       }
 
@@ -146,22 +198,21 @@ export async function skillDependencies(
         break;
       }
 
-      deps.push({
-        type: SkillType.PinyinFinalAssociation,
-        final,
-      });
+      deps.push(pinyinFinalAssociation(final));
       break;
     }
     case SkillType.HanziWordToPinyinInitial: {
+      skill = skill as HanziWordSkill;
+      const hanziWord = hanziWordFromSkill(skill);
       // Learn the mnemonic associations for the final first.
 
       // Only do this for single characters
-      const hanzi = hanziFromHanziWord(skill.hanziWord);
+      const hanzi = hanziFromHanziWord(hanziWord);
       if (splitCharacters(hanzi).length > 1) {
         break;
       }
 
-      const res = await lookupHanziWord(skill.hanziWord);
+      const res = await lookupHanziWord(hanziWord);
       if (!res) {
         break;
       }
@@ -170,7 +221,7 @@ export async function skillDependencies(
 
       const pinyin = res.pinyin?.[0];
       if (pinyin == null) {
-        console.error(new Error(`no pinyin for ${skill.hanziWord}`));
+        console.error(new Error(`no pinyin for ${hanziWord}`));
         break;
       }
 
@@ -182,49 +233,42 @@ export async function skillDependencies(
         break;
       }
 
-      deps.push({
-        type: SkillType.PinyinInitialAssociation,
-        initial,
-      });
+      deps.push(pinyinInitialAssociation(initial));
 
       break;
     }
     case SkillType.PinyinToHanziWord: {
+      skill = skill as HanziWordSkill;
+      const hanziWord = hanziWordFromSkill(skill);
       // Learn going from Hanzi -> Pinyin first.
       deps.push(
-        {
-          type: SkillType.HanziWordToPinyinInitial,
-          hanziWord: skill.hanziWord,
-        },
-        {
-          type: SkillType.HanziWordToPinyinFinal,
-          hanziWord: skill.hanziWord,
-        },
-        {
-          type: SkillType.HanziWordToPinyinTone,
-          hanziWord: skill.hanziWord,
-        },
+        hanziWordToPinyinInitial(hanziWord),
+        hanziWordToPinyinFinal(hanziWord),
+        hanziWordToPinyinTone(hanziWord),
       );
       break;
     }
     case SkillType.HanziWordToPinyinTone: {
+      skill = skill as HanziWordSkill;
+      const hanziWord = hanziWordFromSkill(skill);
       // Learn the mnemonic associations for the final first.
 
       // Only do this for single characters
-      const hanzi = hanziFromHanziWord(skill.hanziWord);
+      const hanzi = hanziFromHanziWord(hanziWord);
       if (splitCharacters(hanzi).length > 1) {
         break;
       }
 
       if (learningOptions.learnPinyinFinalBeforeTone === true) {
-        deps.push({
-          type: SkillType.HanziWordToPinyinFinal,
-          hanziWord: skill.hanziWord,
-        });
+        deps.push(hanziWordToPinyinFinal(hanziWord));
       }
       break;
     }
     case SkillType.Deprecated:
+    case SkillType.Deprecated_RadicalToEnglish:
+    case SkillType.Deprecated_EnglishToRadical:
+    case SkillType.Deprecated_RadicalToPinyin:
+    case SkillType.Deprecated_PinyinToRadical:
     case SkillType.ImageToHanziWord:
     case SkillType.PinyinInitialAssociation:
     case SkillType.PinyinFinalAssociation: {
@@ -246,18 +290,38 @@ async function guessHanziMeaningKey(
   }
 }
 
-export function hanziWordToEnglish(hanziWord: HanziWord): HanziWordSkill {
-  return {
-    type: SkillType.HanziWordToEnglish,
-    hanziWord,
-  };
+export function hanziWordSkill(
+  type: HanziWordSkillType,
+  hanziWord: HanziWord,
+): HanziWordSkill {
+  return `${rSkillType().marshal(type)}:${hanziWord}` as HanziWordSkill;
 }
 
-export function englishToHanziWord(hanziWord: HanziWord): HanziWordSkill {
-  return {
-    type: SkillType.EnglishToHanziWord,
-    hanziWord,
-  };
+export const hanziWordToEnglish = (hanziWord: HanziWord) =>
+  hanziWordSkill(SkillType.HanziWordToEnglish, hanziWord);
+
+export const hanziWordToPinyinInitial = (hanziWord: HanziWord) =>
+  hanziWordSkill(SkillType.HanziWordToPinyinInitial, hanziWord);
+
+export const hanziWordToPinyinFinal = (hanziWord: HanziWord) =>
+  hanziWordSkill(SkillType.HanziWordToPinyinFinal, hanziWord);
+
+export const hanziWordToPinyinTone = (hanziWord: HanziWord) =>
+  hanziWordSkill(SkillType.HanziWordToPinyinTone, hanziWord);
+
+export const englishToHanziWord = (hanziWord: HanziWord) =>
+  hanziWordSkill(SkillType.EnglishToHanziWord, hanziWord);
+
+export function pinyinFinalAssociation(
+  final: string,
+): PinyinInitialAssociationSkill {
+  return `${rSkillType().marshal(SkillType.PinyinFinalAssociation)}:${final}` as PinyinInitialAssociationSkill;
+}
+
+export function pinyinInitialAssociation(
+  initial: string,
+): PinyinInitialAssociationSkill {
+  return `${rSkillType().marshal(SkillType.PinyinInitialAssociation)}:${initial}` as PinyinInitialAssociationSkill;
 }
 
 export function skillReviewQueue({
@@ -266,20 +330,20 @@ export function skillReviewQueue({
   now = new Date(),
 }: {
   graph: SkillLearningGraph;
-  getSkillDueDate: (skill: MarshaledSkill) => Date | undefined;
+  getSkillDueDate: (skill: Skill) => Date | undefined;
   now?: Date;
-}): MarshaledSkill[] {
+}): Skill[] {
   // Kahn topological sort
-  const inDegree = new Map<MarshaledSkill, number>();
-  const queue: MarshaledSkill[] = [];
-  const learningOrderDue: [MarshaledSkill, number][] = [];
-  const learningOrderNew: MarshaledSkill[] = [];
-  const learningOrderNotDue: [MarshaledSkill, number][] = [];
+  const inDegree = new Map<Skill, number>();
+  const queue: Skill[] = [];
+  const learningOrderDue: [Skill, number][] = [];
+  const learningOrderNew: Skill[] = [];
+  const learningOrderNotDue: [Skill, number][] = [];
 
   // Compute in-degree
-  for (const [marshaledSkill, node] of graph.entries()) {
-    if (!inDegree.has(marshaledSkill)) {
-      inDegree.set(marshaledSkill, 0);
+  for (const [skill, node] of graph.entries()) {
+    if (!inDegree.has(skill)) {
+      inDegree.set(skill, 0);
     }
 
     for (const dependency of node.dependencies) {
@@ -299,6 +363,7 @@ export function skillReviewQueue({
     const skill = queue.shift();
     invariant(skill != null);
     const dueDate = getSkillDueDate(skill);
+
     if (dueDate == undefined) {
       learningOrderNew.push(skill);
     } else if (dueDate > now) {
@@ -321,14 +386,17 @@ export function skillReviewQueue({
   }
 
   return [
-    ...learningOrderNotDue
-      .sort(inverseSortComparator(sortComparatorNumber(([, due]) => due)))
-      .map(([skill]) => skill),
-    ...learningOrderNew,
+    // First do due skills, by the most due (oldest date) first.
     ...learningOrderDue
-      .sort(inverseSortComparator(sortComparatorNumber(([, due]) => due)))
+      .sort(sortComparatorNumber(([, due]) => due))
       .map(([skill]) => skill),
-  ].reverse();
+    // Then do new skills in the order of the learning graph.
+    ...learningOrderNew.reverse(),
+    // Finally do not due skills, in the order that they're due (closest first).
+    ...learningOrderNotDue
+      .sort(sortComparatorNumber(([, due]) => due))
+      .map(([skill]) => skill),
+  ];
 }
 
 const skillTypeShorthandMapping: Record<SkillType, string> = {

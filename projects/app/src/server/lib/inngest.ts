@@ -1,4 +1,4 @@
-import { rSkillMarshal, v6 } from "@/data/rizzleSchema";
+import { v6 } from "@/data/rizzleSchema";
 import { loadDictionary } from "@/dictionary/dictionary";
 import { AppRouter } from "@/server/routers/_app";
 import { preflightCheckEnvVars } from "@/util/env";
@@ -342,7 +342,7 @@ const dataIntegrityDictionary = inngest.createFunction(
                 allHanziWords,
               ),
             ),
-      ).then((x) => x.map((r) => rSkillMarshal(r.skill)));
+      ).then((x) => x.map((r) => r.skill));
 
       if (unknownSkills.length > 0) {
         console.error(
@@ -366,7 +366,7 @@ const dataIntegrityDictionary = inngest.createFunction(
                 allHanziWords,
               ),
             ),
-      ).then((x) => x.map((r) => rSkillMarshal(r.skill)));
+      ).then((x) => x.map((r) => r.skill));
 
       if (unknownSkills.length > 0) {
         console.error(`unknown hanzi word in skillState.skill:`, unknownSkills);

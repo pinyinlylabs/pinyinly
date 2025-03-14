@@ -2,6 +2,7 @@ import { Rating } from "@/util/fsrs";
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type { Interval } from "date-fns";
 import { z } from "zod";
+import { HanziWordSkill, Skill } from "./rizzleSchema";
 
 export enum PinyinInitialGroupId {
   Basic,
@@ -45,10 +46,6 @@ export interface SkillState {
   /** When null, it means it's never been reviewed. */
   srs: SrsState | null;
   due: Date;
-}
-
-export interface SkillRating {
-  rating: Rating;
 }
 
 // The values of this enum should only be used for debugging, they should never
@@ -111,37 +108,14 @@ export interface HanziWordObj {
 
 export type HanziWord = (string & z.BRAND<`HanziWord`>) | `${string}:${string}`; // useful when writing literal strings in tests
 
-export interface HanziWordSkill {
-  type:
-    | SkillType.HanziWordToEnglish
-    | SkillType.HanziWordToPinyinInitial
-    | SkillType.HanziWordToPinyinFinal
-    | SkillType.HanziWordToPinyinTone
-    | SkillType.EnglishToHanziWord
-    | SkillType.PinyinToHanziWord
-    | SkillType.ImageToHanziWord;
-  hanziWord: HanziWord;
-}
-
-export interface PinyinInitialAssociationSkill {
-  type: SkillType.PinyinInitialAssociation;
-  initial: string;
-}
-
-export interface PinyinFinalAssociationSkill {
-  type: SkillType.PinyinFinalAssociation;
-  final: string;
-}
-
-export interface DeprecatedSkill {
-  type: SkillType.Deprecated;
-}
-
-export type PinyinAssociationSkill =
-  | PinyinInitialAssociationSkill
-  | PinyinFinalAssociationSkill;
-
-export type Skill = HanziWordSkill | PinyinAssociationSkill | DeprecatedSkill;
+export type HanziWordSkillType =
+  | SkillType.HanziWordToEnglish
+  | SkillType.HanziWordToPinyinInitial
+  | SkillType.HanziWordToPinyinFinal
+  | SkillType.HanziWordToPinyinTone
+  | SkillType.EnglishToHanziWord
+  | SkillType.PinyinToHanziWord
+  | SkillType.ImageToHanziWord;
 
 export enum QuestionFlagType {
   NewSkill,
@@ -191,18 +165,6 @@ export interface SkillRating {
   rating: Rating;
 }
 
-// export interface OneCorrectPairQuestionRadicalAnswer {
-//   type: `radical`;
-//   hanzi: string;
-//   nameOrPinyin: string;
-// }
-
-// export interface OneCorrectPairQuestionWordAnswer {
-//   type: `word`;
-//   hanzi: string;
-//   definition: string;
-// }
-
 export type OneCorrectPairQuestionChoice = {
   type: `hanzi` | `gloss` | `pinyin`;
   hanziWord: HanziWord;
@@ -211,7 +173,7 @@ export type OneCorrectPairQuestionChoice = {
    * it. It means they've regressed on this skill as well as getting the primary
    * question skill wrong.
    */
-  skill: Skill;
+  skill: HanziWordSkill;
 };
 
 export interface OneCorrectPairQuestionAnswer {

@@ -14,10 +14,10 @@ import {
   OneCorrectPairQuestionChoice,
   Question,
   QuestionType,
-  Skill,
   SkillType,
 } from "./model";
-import { hanziWordToEnglish } from "./skills";
+import { HanziWordSkill, Skill } from "./rizzleSchema";
+import { hanziWordFromSkill, hanziWordToEnglish, skillType } from "./skills";
 
 function keyForChoice(choice: OneCorrectPairQuestionChoice) {
   const { skill, type, ...rest } = choice;
@@ -56,25 +56,27 @@ function validQuestionInvariant(question: Question) {
 export async function generateQuestionForSkillOrThrow(
   skill: Skill,
 ): Promise<Question> {
-  switch (skill.type) {
+  switch (skillType(skill)) {
     case SkillType.HanziWordToEnglish: {
+      skill = skill as HanziWordSkill;
+      const hanziWord = hanziWordFromSkill(skill);
       const rowCount = 5;
       const answer: OneCorrectPairQuestionAnswer = {
-        a: { type: `hanzi`, hanziWord: skill.hanziWord, skill },
-        b: { type: `gloss`, hanziWord: skill.hanziWord, skill },
+        a: { type: `hanzi`, hanziWord, skill },
+        b: { type: `gloss`, hanziWord, skill },
       };
 
       const otherAnswers: OneCorrectPairQuestionAnswer[] = [];
-      for (const [hanziWord, meaning] of await getWrongHanziWordAnswers(
-        skill.hanziWord,
+      for (const [hanziWord2, meaning] of await getWrongHanziWordAnswers(
+        hanziWord,
         (rowCount - 1) * 2,
       )) {
-        const skill = hanziWordToEnglish(hanziWord);
+        const skill2 = hanziWordToEnglish(hanziWord2);
         const gloss = meaning.gloss[0];
-        invariant(gloss != null, `missing gloss for hanzi word ${hanziWord}`);
+        invariant(gloss != null, `missing gloss for hanzi word ${hanziWord2}`);
         otherAnswers.push({
-          a: { type: `hanzi`, hanziWord, skill },
-          b: { type: `gloss`, hanziWord, skill },
+          a: { type: `hanzi`, hanziWord: hanziWord2, skill: skill2 },
+          b: { type: `gloss`, hanziWord: hanziWord2, skill: skill2 },
         });
       }
       const [wrongA, wrongB] = evenHalve(otherAnswers);
@@ -86,15 +88,19 @@ export async function generateQuestionForSkillOrThrow(
         answer,
       });
     }
-    case SkillType.HanziWordToPinyinInitial:
-    case SkillType.HanziWordToPinyinFinal:
-    case SkillType.HanziWordToPinyinTone:
+    case SkillType.Deprecated_EnglishToRadical:
+    case SkillType.Deprecated_PinyinToRadical:
+    case SkillType.Deprecated_RadicalToEnglish:
+    case SkillType.Deprecated_RadicalToPinyin:
+    case SkillType.Deprecated:
     case SkillType.EnglishToHanziWord:
-    case SkillType.PinyinToHanziWord:
+    case SkillType.HanziWordToPinyinFinal:
+    case SkillType.HanziWordToPinyinInitial:
+    case SkillType.HanziWordToPinyinTone:
     case SkillType.ImageToHanziWord:
     case SkillType.PinyinFinalAssociation:
     case SkillType.PinyinInitialAssociation:
-    case SkillType.Deprecated: {
+    case SkillType.PinyinToHanziWord: {
       throw new Error(`todo: not implemented`);
     }
   }

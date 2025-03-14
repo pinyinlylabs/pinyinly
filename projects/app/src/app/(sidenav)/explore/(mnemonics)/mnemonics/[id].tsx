@@ -85,13 +85,13 @@ export default function MnemonicIdPage() {
             : [...choicesQuery.data.entries()]
                 .flatMap(([themeId, initials]) => {
                   const initial = initials.get(id);
-                  const themeName = rMnemonicThemeId.marshal(themeId);
+                  const themeName = rMnemonicThemeId().marshal(themeId);
                   return initial
                     ? ([[themeId, themeName, initial]] as const)
                     : [];
                 })
                 .map(([themeId, themeName, initials], i) => (
-                  <View key={i} className="">
+                  <View key={i}>
                     <Text className="text-lg text-text">
                       {themeName}
                       {themeId === groupTheme.data?.themeId ? (

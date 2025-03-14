@@ -1,6 +1,8 @@
 import { RectButton2 } from "@/client/ui/RectButton2";
 import { useRizzleQueryPaged } from "@/client/ui/ReplicacheContext";
-import { HanziWord } from "@/data/model";
+import { HanziWord, SkillType } from "@/data/model";
+import { HanziWordSkill } from "@/data/rizzleSchema";
+import { hanziWordFromSkill, skillType } from "@/data/skills";
 import { hanziFromHanziWord } from "@/dictionary/dictionary";
 import { invariant } from "@haohaohow/lib/invariant";
 import { differenceInCalendarDays } from "date-fns/differenceInCalendarDays";
@@ -18,13 +20,34 @@ export default function IndexPage() {
         .byCreatedAt()
         .toArray()
         .then((x) => x.reverse());
-      for (const [, { skill }] of ratingHistory) {
-        if (
-          `hanziWord` in skill &&
-          !recentHanziWords.includes(skill.hanziWord)
-        ) {
-          recentHanziWords.push(skill.hanziWord);
-          if (recentHanziWords.length === 10) {
+      pushLoop: for (let [, { skill }] of ratingHistory) {
+        switch (skillType(skill)) {
+          case SkillType.EnglishToHanziWord:
+          case SkillType.HanziWordToEnglish:
+          case SkillType.HanziWordToEnglish:
+          case SkillType.HanziWordToPinyinFinal:
+          case SkillType.HanziWordToPinyinInitial:
+          case SkillType.HanziWordToPinyinTone:
+          case SkillType.ImageToHanziWord:
+          case SkillType.PinyinToHanziWord: {
+            skill = skill as HanziWordSkill;
+            const hanziWord = hanziWordFromSkill(skill);
+            if (!recentHanziWords.includes(hanziWord)) {
+              recentHanziWords.push(hanziWord);
+              if (recentHanziWords.length === 10) {
+                break pushLoop;
+              }
+            }
+            break;
+          }
+
+          case SkillType.Deprecated_EnglishToRadical:
+          case SkillType.Deprecated_PinyinToRadical:
+          case SkillType.Deprecated_RadicalToEnglish:
+          case SkillType.Deprecated_RadicalToPinyin:
+          case SkillType.Deprecated:
+          case SkillType.PinyinFinalAssociation:
+          case SkillType.PinyinInitialAssociation: {
             break;
           }
         }

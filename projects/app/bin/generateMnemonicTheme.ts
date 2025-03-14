@@ -36,7 +36,7 @@ const argv = await yargs(process.argv.slice(2))
       x
         .split(`,`)
         .filter((x) => x !== ``)
-        .map((x) => rPinyinInitialGroupId.unmarshal(x)),
+        .map((x) => rPinyinInitialGroupId().unmarshal(x)),
   })
   .option(`theme`, {
     type: `string`,
@@ -46,7 +46,7 @@ const argv = await yargs(process.argv.slice(2))
       x
         .split(`,`)
         .filter((x) => x !== ``)
-        .map((x) => rMnemonicThemeId.unmarshal(x)),
+        .map((x) => rMnemonicThemeId().unmarshal(x)),
   })
   .option(`debug`, {
     type: `boolean`,

@@ -1,5 +1,7 @@
 import { useHanziWordMeaning } from "@/client/query";
-import { HanziWordSkill, Skill, SkillType } from "@/data/model";
+import { SkillType } from "@/data/model";
+import { HanziWordSkill, Skill } from "@/data/rizzleSchema";
+import { hanziWordFromSkill, skillType } from "@/data/skills";
 import { hanziFromHanziWord, splitCharacters } from "@/dictionary/dictionary";
 import { Image } from "expo-image";
 import { useMemo, useState } from "react";
@@ -26,21 +28,26 @@ export const NewSkillModal = ({
       passivePresentation={passivePresentation}
     >
       {({ dismiss }) => {
-        switch (skill.type) {
+        switch (skillType(skill)) {
           case SkillType.HanziWordToEnglish: {
+            skill = skill as HanziWordSkill;
             return (
               <NewHanziToEnglishSkillContent skill={skill} dismiss={dismiss} />
             );
           }
-          case SkillType.HanziWordToPinyinInitial:
-          case SkillType.HanziWordToPinyinFinal:
-          case SkillType.HanziWordToPinyinTone:
+          case SkillType.Deprecated_EnglishToRadical:
+          case SkillType.Deprecated_PinyinToRadical:
+          case SkillType.Deprecated_RadicalToEnglish:
+          case SkillType.Deprecated_RadicalToPinyin:
+          case SkillType.Deprecated:
           case SkillType.EnglishToHanziWord:
-          case SkillType.PinyinToHanziWord:
+          case SkillType.HanziWordToPinyinFinal:
+          case SkillType.HanziWordToPinyinInitial:
+          case SkillType.HanziWordToPinyinTone:
           case SkillType.ImageToHanziWord:
-          case SkillType.PinyinInitialAssociation:
           case SkillType.PinyinFinalAssociation:
-          case SkillType.Deprecated: {
+          case SkillType.PinyinInitialAssociation:
+          case SkillType.PinyinToHanziWord: {
             return (
               <ContainerWithContinueButton onContinue={dismiss}>
                 <Text>Not implemented</Text>
@@ -60,7 +67,7 @@ const NewHanziToEnglishSkillContent = ({
   skill: HanziWordSkill;
   dismiss: () => void;
 }) => {
-  const hanziWord = skill.hanziWord;
+  const hanziWord = hanziWordFromSkill(skill);
   const hanziWordSkillData = useHanziWordMeaning(hanziWord);
 
   const characters = useMemo(

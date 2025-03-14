@@ -1,15 +1,15 @@
 import { useHanziWordMeaning } from "@/client/query";
 import {
-  HanziWordSkill,
   OneCorrectPairQuestion,
   OneCorrectPairQuestionAnswer,
   OneCorrectPairQuestionChoice,
   QuestionFlag,
   QuestionFlagType,
-  Skill,
   SkillRating,
   SkillType,
 } from "@/data/model";
+import { HanziWordSkill, Skill } from "@/data/rizzleSchema";
+import { hanziWordFromSkill, skillType } from "@/data/skills";
 import { hanziFromHanziWord, lookupHanziWord } from "@/dictionary/dictionary";
 import { arrayFilterUniqueWithKey } from "@/util/collections";
 import { Rating } from "@/util/fsrs";
@@ -166,7 +166,7 @@ export const QuizDeckOneCorrectPairQuestion = memo(
     // useEffect(() => {
     //   if (isNewSkill && skill != null) {
     //     // push modal screen
-    //     // router.push(`/learn/skill/${rSkillMarshal(skill)}`);
+    //     // router.push(`/learn/skill/${skill}`);
     //   }
     // }, [isNewSkill, skill]);
 
@@ -439,8 +439,9 @@ const ShowSkillAnswer = ({
   hideB?: boolean;
   small?: boolean;
 }) => {
-  switch (skill.type) {
+  switch (skillType(skill)) {
     case SkillType.HanziWordToPinyinInitial: {
+      skill = skill as HanziWordSkill;
       return (
         <HanziWordToPinyinInitialSkillAnswer
           skill={skill}
@@ -450,17 +451,24 @@ const ShowSkillAnswer = ({
         />
       );
     }
+    case SkillType.Deprecated_EnglishToRadical:
+    case SkillType.Deprecated_PinyinToRadical:
+    case SkillType.Deprecated_RadicalToEnglish:
+    case SkillType.Deprecated_RadicalToPinyin:
+    case SkillType.Deprecated:
+    case SkillType.EnglishToHanziWord:
     case SkillType.HanziWordToPinyinFinal:
     case SkillType.HanziWordToPinyinTone:
-    case SkillType.EnglishToHanziWord:
-    case SkillType.PinyinToHanziWord:
     case SkillType.ImageToHanziWord:
-    case SkillType.Deprecated:
+    case SkillType.PinyinFinalAssociation:
     case SkillType.PinyinInitialAssociation:
-    case SkillType.PinyinFinalAssociation: {
-      throw new Error(`ShowSkillAnswer not implemented for ${skill.type}`);
+    case SkillType.PinyinToHanziWord: {
+      throw new Error(
+        `ShowSkillAnswer not implemented for ${skillType(skill)}`,
+      );
     }
     case SkillType.HanziWordToEnglish: {
+      skill = skill as HanziWordSkill;
       return (
         <HanziWordToEnglishSkillAnswer
           skill={skill}
@@ -488,7 +496,8 @@ const HanziWordToEnglishSkillAnswer = ({
   includeHanzi?: boolean;
   small?: boolean;
 }) => {
-  const meaningQuery = useHanziWordMeaning(skill.hanziWord);
+  const hanziWord = hanziWordFromSkill(skill);
+  const meaningQuery = useHanziWordMeaning(hanziWord);
   const [showModal, setShowModal] = useState(false);
 
   const meaning = meaningQuery.data;
@@ -497,7 +506,7 @@ const HanziWordToEnglishSkillAnswer = ({
     return null;
   }
 
-  const primaryHanzi = hanziFromHanziWord(skill.hanziWord);
+  const primaryHanzi = hanziFromHanziWord(hanziWord);
   const gloss = meaning.gloss[0];
   const hanzis = [primaryHanzi];
   if (includeAlternatives && meaning.visualVariants != null) {
@@ -540,7 +549,7 @@ const HanziWordToEnglishSkillAnswer = ({
 
       {showModal ? (
         <HanziWordModal
-          hanziWord={skill.hanziWord}
+          hanziWord={hanziWord}
           onDismiss={() => {
             setShowModal(false);
           }}
@@ -561,7 +570,8 @@ const HanziWordToPinyinInitialSkillAnswer = ({
   includeAlternatives?: boolean;
   small?: boolean;
 }) => {
-  const meaningQuery = useHanziWordMeaning(skill.hanziWord);
+  const hanziWord = hanziWordFromSkill(skill);
+  const meaningQuery = useHanziWordMeaning(hanziWord);
 
   const meaning = meaningQuery.data;
 
@@ -569,7 +579,7 @@ const HanziWordToPinyinInitialSkillAnswer = ({
     return null;
   }
 
-  const primaryHanzi = hanziFromHanziWord(skill.hanziWord);
+  const primaryHanzi = hanziFromHanziWord(hanziWord);
   const pinyin = meaning.pinyin?.[0];
   const gloss = meaning.gloss[0];
   const hanzis = [primaryHanzi];

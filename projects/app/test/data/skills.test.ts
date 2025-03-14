@@ -1,4 +1,3 @@
-import { rSkillMarshal } from "#data/rizzleSchema.ts";
 import {
   hanziWordToEnglish,
   SkillLearningGraph,
@@ -11,6 +10,7 @@ import {
   allHsk3HanziWords,
 } from "#dictionary/dictionary.ts";
 import { invariant } from "@haohaohow/lib/invariant";
+import { add } from "date-fns/add";
 import assert from "node:assert/strict";
 import test from "node:test";
 
@@ -26,21 +26,21 @@ await test(`${skillLearningGraph.name} suite`, async () => {
   });
 
   await test(`includes the target skill in the graph`, async () => {
-    const skill = hanziWordToEnglish(`我:i`);
+    const skill = `he:我:i`;
 
     assert.deepEqual(
       await skillLearningGraph({
         targetSkills: [skill],
         isSkillLearned: () => false,
       }),
-      new Map([[rSkillMarshal(skill), { skill, dependencies: new Set() }]]),
+      new Map([[skill, { skill, dependencies: new Set() }]]),
     );
   });
 
   await test(`includes decomposition dependencies when learning 好`, async () => {
-    const goodHanziWordToEnglish = hanziWordToEnglish(`好:good`);
-    const womanRadicalToEnglish = hanziWordToEnglish(`女:woman`);
-    const childRadicalToEnglish = hanziWordToEnglish(`子:child`);
+    const goodHanziWordToEnglish = `he:好:good`;
+    const womanRadicalToEnglish = `he:女:woman`;
+    const childRadicalToEnglish = `he:子:child`;
 
     assert.deepEqual(
       await skillLearningGraph({
@@ -49,24 +49,24 @@ await test(`${skillLearningGraph.name} suite`, async () => {
       }),
       new Map([
         [
-          rSkillMarshal(goodHanziWordToEnglish),
+          goodHanziWordToEnglish,
           {
             skill: goodHanziWordToEnglish,
             dependencies: new Set([
-              rSkillMarshal(womanRadicalToEnglish),
-              rSkillMarshal(childRadicalToEnglish),
+              womanRadicalToEnglish,
+              childRadicalToEnglish,
             ]),
           },
         ],
         [
-          rSkillMarshal(womanRadicalToEnglish),
+          womanRadicalToEnglish,
           {
             skill: womanRadicalToEnglish,
             dependencies: new Set(),
           },
         ],
         [
-          rSkillMarshal(childRadicalToEnglish),
+          childRadicalToEnglish,
           {
             skill: childRadicalToEnglish,
             dependencies: new Set(),
@@ -79,48 +79,42 @@ await test(`${skillLearningGraph.name} suite`, async () => {
   await test(`includes multiple levels of decomposition for a character`, async () => {
     assert.deepEqual(
       await skillLearningGraph({
-        targetSkills: [hanziWordToEnglish(`外:outside`)],
+        targetSkills: [`he:外:outside`],
         isSkillLearned: () => false,
       }),
       new Map([
         [
-          rSkillMarshal(hanziWordToEnglish(`外:outside`)),
+          `he:外:outside`,
           {
-            skill: hanziWordToEnglish(`外:outside`),
-            dependencies: new Set([
-              rSkillMarshal(hanziWordToEnglish(`夕:evening`)),
-              rSkillMarshal(hanziWordToEnglish(`卜:divine`)),
-            ]),
+            skill: `he:外:outside`,
+            dependencies: new Set([`he:夕:evening`, `he:卜:divine`]),
           },
         ],
         [
-          rSkillMarshal(hanziWordToEnglish(`夕:evening`)),
+          `he:夕:evening`,
           {
-            skill: hanziWordToEnglish(`夕:evening`),
-            dependencies: new Set([
-              rSkillMarshal(hanziWordToEnglish(`丶:dot`)),
-              rSkillMarshal(hanziWordToEnglish(`𠂊:hands`)),
-            ]),
+            skill: `he:夕:evening`,
+            dependencies: new Set([`he:丶:dot`, `he:𠂊:hands`]),
           },
         ],
         [
-          rSkillMarshal(hanziWordToEnglish(`丶:dot`)),
+          `he:丶:dot`,
           {
-            skill: hanziWordToEnglish(`丶:dot`),
+            skill: `he:丶:dot`,
             dependencies: new Set([]),
           },
         ],
         [
-          rSkillMarshal(hanziWordToEnglish(`卜:divine`)),
+          `he:卜:divine`,
           {
-            skill: hanziWordToEnglish(`卜:divine`),
+            skill: `he:卜:divine`,
             dependencies: new Set([]),
           },
         ],
         [
-          rSkillMarshal(hanziWordToEnglish(`𠂊:hands`)),
+          `he:𠂊:hands`,
           {
-            skill: hanziWordToEnglish(`𠂊:hands`),
+            skill: `he:𠂊:hands`,
             dependencies: new Set([]),
           },
         ],
@@ -255,7 +249,7 @@ await test(`${skillLearningGraph.name} suite`, async () => {
   await test(`supports multi-character words`, async () => {
     assertLearningGraphEqual(
       await skillLearningGraph({
-        targetSkills: [hanziWordToEnglish(`一下儿:aBit`)],
+        targetSkills: [`he:一下儿:aBit`],
         isSkillLearned: () => false,
       }),
       `
@@ -299,38 +293,30 @@ await test(`${skillReviewQueue.name} suite`, async () => {
 
   await test(`works for 好`, async () => {
     const graph = await skillLearningGraph({
-      targetSkills: [hanziWordToEnglish(`好:good`)],
+      targetSkills: [`he:好:good`],
       isSkillLearned: () => false,
     });
     assert.deepEqual(
       skillReviewQueue({ graph, getSkillDueDate: () => undefined }),
-      [
-        rSkillMarshal(hanziWordToEnglish(`子:child`)),
-        rSkillMarshal(hanziWordToEnglish(`女:woman`)),
-        rSkillMarshal(hanziWordToEnglish(`好:good`)),
-      ],
+      [`he:子:child`, `he:女:woman`, `he:好:good`],
     );
   });
 
   await test(`skips learned skills and their dependencies`, async () => {
     const graph = await skillLearningGraph({
-      targetSkills: [hanziWordToEnglish(`好:good`)],
-      isSkillLearned: (skill) =>
-        [rSkillMarshal(hanziWordToEnglish(`子:child`))].includes(skill),
+      targetSkills: [`he:好:good`],
+      isSkillLearned: (skill) => [`he:子:child`].includes(skill),
     });
 
     assert.deepEqual(
       skillReviewQueue({ graph, getSkillDueDate: () => undefined }),
-      [
-        rSkillMarshal(hanziWordToEnglish(`女:woman`)),
-        rSkillMarshal(hanziWordToEnglish(`好:good`)),
-      ],
+      [`he:女:woman`, `he:好:good`],
     );
   });
 
   await test(`prioritises due skills with highest value (not most overdue)`, async () => {
     const graph = await skillLearningGraph({
-      targetSkills: [hanziWordToEnglish(`分:divide`)],
+      targetSkills: [`he:分:divide`],
       isSkillLearned: () => false,
     });
 
@@ -339,26 +325,21 @@ await test(`${skillReviewQueue.name} suite`, async () => {
       skillReviewQueue({
         graph,
         getSkillDueDate: (skill) =>
-          [
-            rSkillMarshal(hanziWordToEnglish(`八:eight`)),
-            rSkillMarshal(hanziWordToEnglish(`刀:knife`)),
-          ].includes(skill)
-            ? isDue
-            : undefined,
+          [`he:八:eight`, `he:刀:knife`].includes(skill) ? isDue : undefined,
       }),
       [
-        rSkillMarshal(hanziWordToEnglish(`刀:knife`)),
-        rSkillMarshal(hanziWordToEnglish(`八:eight`)),
-        rSkillMarshal(hanziWordToEnglish(`丿:slash`)),
-        rSkillMarshal(hanziWordToEnglish(`𠃌:radical`)),
-        rSkillMarshal(hanziWordToEnglish(`分:divide`)),
+        `he:八:eight`,
+        `he:刀:knife`,
+        `he:丿:slash`,
+        `he:𠃌:radical`,
+        `he:分:divide`,
       ],
     );
   });
 
-  await test(`schedules skills in dependency order`, async () => {
+  await test(`schedules new skills in dependency order`, async () => {
     const graph = await skillLearningGraph({
-      targetSkills: [hanziWordToEnglish(`分:divide`)],
+      targetSkills: [`he:分:divide`],
       isSkillLearned: () => false,
     });
 
@@ -368,11 +349,40 @@ await test(`${skillReviewQueue.name} suite`, async () => {
         getSkillDueDate: () => undefined,
       }),
       [
-        rSkillMarshal(hanziWordToEnglish(`丿:slash`)),
-        rSkillMarshal(hanziWordToEnglish(`𠃌:radical`)),
-        rSkillMarshal(hanziWordToEnglish(`刀:knife`)),
-        rSkillMarshal(hanziWordToEnglish(`八:eight`)),
-        rSkillMarshal(hanziWordToEnglish(`分:divide`)),
+        `he:丿:slash`,
+        `he:𠃌:radical`,
+        `he:刀:knife`,
+        `he:八:eight`,
+        `he:分:divide`,
+      ],
+    );
+  });
+
+  await test(`schedules skill reviews in order of due`, async () => {
+    const graph = await skillLearningGraph({
+      targetSkills: [`he:分:divide`, `he:一:one`],
+      isSkillLearned: () => false,
+    });
+
+    const now = new Date();
+    assert.deepEqual(
+      skillReviewQueue({
+        graph,
+        getSkillDueDate: (skill) =>
+          ({
+            [`he:一:one`]: add(now, { hours: -2 }), // due two hours ago
+            [`he:𠃌:radical`]: add(now, { hours: -1 }), // due one hour ago
+            [`he:八:eight`]: add(now, { hours: 1 }), // due in one hour,
+            [`he:刀:knife`]: add(now, { hours: 2 }), // due in two hours,
+          })[skill as string],
+      }),
+      [
+        `he:一:one`,
+        `he:𠃌:radical`,
+        `he:丿:slash`,
+        `he:分:divide`,
+        `he:八:eight`,
+        `he:刀:knife`,
       ],
     );
   });

@@ -807,7 +807,7 @@ export async function computeCvrEntities(
               v.xmin +
               `:` +
               schema.pinyinInitialGroupTheme.marshalKey({
-                groupId: rPinyinInitialGroupId.unmarshal(v.groupId),
+                groupId: rPinyinInitialGroupId().unmarshal(v.groupId),
               }),
           )
         : {},
