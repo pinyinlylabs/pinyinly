@@ -253,6 +253,53 @@ await testFsrsSequence(`Again → Good → Good → Good → Good`, [
   { days: 13, hours: 3, minutes: 1 },
 ]);
 
+await test(`reviewing before due`, async () => {
+  await testFsrsSequence(`Good → Good → Good → Good → Good → Good`, [
+    Rating.Good,
+    {
+      difficulty: 5.1443,
+      stability: 4.1386,
+      delay: { days: 4, hours: 3, minutes: 20 },
+    },
+    { hours: 14, minutes: 40, seconds: 48 },
+    Rating.Good,
+    {
+      difficulty: 5.1443,
+      stability: 5.907_832_47,
+      delay: { days: 5, hours: 21, minutes: 47 },
+    },
+    { days: 6, minutes: 50, seconds: 59 },
+    Rating.Good,
+    {
+      difficulty: 5.1443,
+      stability: 21.067_636_55,
+      delay: { days: 21, hours: 1, minutes: 37 },
+    },
+    { days: 7, hours: 13, minutes: 18, seconds: 44 },
+    Rating.Good,
+    {
+      difficulty: 5.1443,
+      stability: 38.222_650_6,
+      delay: { months: 1, days: 7, hours: 5, minutes: 21 },
+    },
+    { seconds: 20 },
+    Rating.Good,
+    {
+      difficulty: 5.1443,
+      stability: 38.223_155_76,
+      delay: { months: 1, days: 7, hours: 5, minutes: 21 },
+    },
+    { seconds: 32 },
+    Rating.Good,
+    {
+      difficulty: 5.1443,
+      stability: 38.223_966_87,
+      delay: { months: 1, days: 7, hours: 5, minutes: 23 },
+    },
+    { minutes: 20 },
+  ]);
+});
+
 type ExpectedReview = z.TypeOf<typeof expectedReviewSchema>;
 
 type FsrsSequence = RepeatedSequence2<[Rating, ExpectedReview, Duration]>;
@@ -297,20 +344,6 @@ function assertFsrsSequence(
           delay: intervalToDuration({ start: review.created, end: review.due }),
         },
         expectedReview,
-      );
-
-      if (lastReview !== null) {
-        const lastReviewDue: Date = lastReview.due; // HACK: work around TS bug
-        assert.deepEqual(
-          review.created,
-          lastReviewDue,
-          `index ${i / 3} item was not created at the expected time`,
-        );
-      }
-
-      assert.deepEqual(
-        intervalToDuration({ start: review.created, end: review.due }),
-        waitDuration,
       );
 
       // Use .setTime() instead of .tick() to avoid differences in calculations
