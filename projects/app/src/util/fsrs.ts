@@ -246,3 +246,12 @@ export function fsrsIsIntroduced(
 ): boolean {
   return options.stability > 1;
 }
+
+export function ratingName(rating: Rating) {
+  return {
+    [Rating.Again]: `Again`,
+    [Rating.Hard]: `Hard`,
+    [Rating.Good]: `Good`,
+    [Rating.Easy]: `Easy`,
+  }[rating];
+}
