@@ -178,7 +178,7 @@ await test(`hanzi word meaning glossHint lint`, async () => {
     // no double space
     /  /.exec(x) != null ||
     // no new lines
-    /\n/.exec(x) != null ||
+    // /\n/.exec(x) != null ||
     // doesn't exceed word limit
     (x.match(/\s+/g)?.length ?? 0) > maxSpaces;
 

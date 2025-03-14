@@ -1671,7 +1671,7 @@
 ["正式:formal",{"gloss":["formal","official"],"pinyin":["zhèng shì"],"example":"他的正式服装很得体。","partOfSpeech":"adjective","definition":"Describes something that is formal or relates to official matters."}],
 ["正是:exactly",{"gloss":["exactly"],"pinyin":["zhèng shì"],"example":"这正是我们需要的。","partOfSpeech":"adverb","definition":"Used to emphasize precise accuracy or exactness."}],
 ["正确:correct",{"gloss":["correct","right"],"pinyin":["zhèng què"],"example":"这个答案是正确的。","partOfSpeech":"adjective","definition":"Free from error; in accordance with fact or truth."}],
-["此:this",{"gloss":["this"],"pinyin":["cǐ"],"example":"此事非常重要。","partOfSpeech":"pronoun","definition":"Refers to something close by or just mentioned; equivalent to 'this' in English."}],
+["此:this",{"gloss":["this"],"pinyin":["cǐ"],"example":"此事非常重要。","partOfSpeech":"pronoun","definition":"Refers to something close by or just mentioned; equivalent to 'this' in English.","glossHint":"Stop! **This** is my spoon!\nImagine someone pointing at a *匕 (spoon)* and telling someone else to *止 (stop)* because it belongs to them."}],
 ["步:step",{"gloss":["step","pace"],"pinyin":["bù"],"example":"他迈出了坚定的步伐。","partOfSpeech":"noun","definition":"A single movement of the foot while walking or running."}],
 ["武:military",{"gloss":["military"],"pinyin":["wǔ"],"example":"他对军事武器很感兴趣。","partOfSpeech":"noun","definition":"Related to the army or armed forces, from the Ancient form depicting marching (止) with a weapon (戈)."}],
 ["武器:weapon",{"gloss":["weapon"],"pinyin":["wǔ qì"],"example":"他携带了一些武器。","partOfSpeech":"noun","definition":"A thing designed or used for inflicting bodily harm or physical damage."}],

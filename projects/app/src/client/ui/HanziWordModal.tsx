@@ -3,6 +3,8 @@ import { HanziWord } from "@/data/model";
 import { hanziFromHanziWord, splitCharacters } from "@/dictionary/dictionary";
 import { useMemo } from "react";
 import { ScrollView, Text, View } from "react-native";
+import { GlossHint } from "./GlossHint";
+import { Hhhmark } from "./Hhhmark";
 import { PageSheetModal } from "./PageSheetModal";
 import { RectButton2 } from "./RectButton2";
 
@@ -46,25 +48,27 @@ export const HanziWordModal = ({
                   </Text>
                 </View>
 
-                {hanziWordSkillData.data.glossHint == null ? null : (
-                  <View className="gap-1">
-                    <Text className="text-xs uppercase text-primary-10">
-                      Hint
-                    </Text>
-                    <Text className="text-md font-karla text-text">
-                      {hanziWordSkillData.data.glossHint}
-                    </Text>
-                  </View>
-                )}
-
                 {hanziWordSkillData.data.pinyin == null ? null : (
                   <View className="gap-1">
                     <Text className="text-xs uppercase text-primary-10">
                       Pinyin
                     </Text>
-                    <Text className="text-md font-karla text-text">
+                    <Text className="font-karla text-text">
                       {hanziWordSkillData.data.pinyin.join(`, `)}
                     </Text>
+                  </View>
+                )}
+
+                {hanziWordSkillData.data.glossHint == null ? null : (
+                  <View className="gap-1">
+                    <Text className="text-xs uppercase text-primary-10">
+                      Hint
+                    </Text>
+                    <GlossHint
+                      glossHint={hanziWordSkillData.data.glossHint}
+                      headlineClassName="font-karla text-text"
+                      explanationClassName="font-karla text-text opacity-80"
+                    />
                   </View>
                 )}
 
@@ -73,7 +77,7 @@ export const HanziWordModal = ({
                     <Text className="text-xs uppercase text-primary-10">
                       Gloss
                     </Text>
-                    <Text className="text-md font-karla text-text">
+                    <Text className="font-karla text-text">
                       {hanziWordSkillData.data.gloss.join(`, `)}
                     </Text>
                   </View>
@@ -83,8 +87,8 @@ export const HanziWordModal = ({
                   <Text className="text-xs uppercase text-primary-10">
                     Definition
                   </Text>
-                  <Text className="text-md font-karla text-text">
-                    {hanziWordSkillData.data.definition}
+                  <Text className="font-karla text-text">
+                    <Hhhmark source={hanziWordSkillData.data.definition} />
                   </Text>
                 </View>
               </View>
