@@ -40,6 +40,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { tv } from "tailwind-variants";
+import { GlossHint } from "./GlossHint";
 import { HanziText } from "./HanziText";
 import { HanziWordModal } from "./HanziWordModal";
 import { Hhhmark } from "./Hhhmark";
@@ -529,10 +530,14 @@ const HanziWordToEnglishSkillAnswer = ({
       </Pressable>
 
       {includeHint && meaning.glossHint != null ? (
-        <Text className="leading-snug text-accent-10">
-          <Hhhmark source={meaning.glossHint} />
-        </Text>
+        <GlossHint
+          glossHint={meaning.glossHint}
+          hideExplanation
+          headlineClassName="leading-snug text-accent-10"
+          explanationClassName="leading-snug text-accent-9"
+        />
       ) : null}
+
       {showModal ? (
         <HanziWordModal
           hanziWord={skill.hanziWord}
