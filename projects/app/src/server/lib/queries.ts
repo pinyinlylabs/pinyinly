@@ -1,4 +1,5 @@
-import { Skill, SrsType } from "@/data/model";
+import { SrsType } from "@/data/model";
+import { Skill } from "@/data/rizzleSchema";
 import { UpcomingReview, nextReview } from "@/util/fsrs";
 import { invariant } from "@haohaohow/lib/invariant";
 import { and, asc, eq } from "drizzle-orm";

@@ -143,9 +143,9 @@ export const rizzleCustomType = <
 // The "s" prefix follows the convention of "s" being drizzle things. This helps
 // differentiate them from rizzle schema things.
 export const sSkill = rizzleCustomType(r.rSkill(), `text`);
-export const sMnemonicThemeId = rizzleCustomType(r.rMnemonicThemeId, `text`);
+export const sMnemonicThemeId = rizzleCustomType(r.rMnemonicThemeId(), `text`);
 export const sPinyinInitialGroupId = rizzleCustomType(
-  r.rPinyinInitialGroupId,
+  r.rPinyinInitialGroupId(),
   `text`,
 );
-export const sFsrsRating = rizzleCustomType(r.rFsrsRating, `text`);
+export const sFsrsRating = rizzleCustomType(r.rFsrsRating(), `text`);

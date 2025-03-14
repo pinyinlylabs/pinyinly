@@ -1,6 +1,6 @@
 import { SkillType } from "#data/model.ts";
 import { rSkill, rSkillType } from "#data/rizzleSchema.ts";
-import { englishToHanziWord, hanziWordToEnglish } from "#data/skills.ts";
+import { hanziWordToEnglish } from "#data/skills.ts";
 import { r } from "#util/rizzle.ts";
 import assert from "node:assert/strict";
 import test, { TestContext } from "node:test";
@@ -39,17 +39,14 @@ function makeMockTx(t: TestContext) {
   };
 }
 
-await test(`skillId as key`, async (t) => {
+await test(`skill as key`, async (t) => {
   const posts = r.entity(`foo/[skill]`, {
     skill: rSkill(),
     text: r.string(),
   });
 
   // Marshal and unmarshal round tripping
-  for (const [skill, skillId] of [
-    [englishToHanziWord(`好:good`), `eh:好:good`],
-    [hanziWordToEnglish(`好:good`), `he:好:good`],
-  ] as const) {
+  for (const skill of [`eh:好:good`, `he:好:good`] as const) {
     using tx = makeMockTx(t);
     await posts.set(tx, { skill }, { skill, text: `hello` });
     const [, marshaledData] = tx.set.mock.calls[0]!.arguments;
@@ -59,14 +56,14 @@ await test(`skillId as key`, async (t) => {
       text: `hello`,
     });
     assert.equal(tx.get.mock.callCount(), 1);
-    assert.deepEqual(tx.get.mock.calls[0]?.arguments, [`foo/${skillId}`]);
+    assert.deepEqual(tx.get.mock.calls[0]?.arguments, [`foo/${skill}`]);
   }
 });
 
-await test(`skillType()`, async (t) => {
+await test(`${rSkillType.name}()`, async (t) => {
   const posts = r.entity(`foo/[id]`, {
     id: r.string(),
-    skill: rSkillType,
+    skill: rSkillType(),
   });
 
   // Marshal and unmarshal round tripping
@@ -96,7 +93,7 @@ await test(`skillType()`, async (t) => {
   }
 });
 
-await test(`skillId()`, async (t) => {
+await test(`${rSkill.name}()`, async (t) => {
   const posts = r.entity(`foo/[id]`, {
     id: r.string(),
     skill: rSkill(),

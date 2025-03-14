@@ -5,9 +5,7 @@ import {
 } from "#client/query.ts";
 import { QuestionFlagType } from "#data/model.ts";
 import {
-  MarshaledSkill,
-  rSkillMarshal,
-  rSkillUnmarshal,
+  Skill,
   skillStateFromFsrsReview,
   v6,
   v6Mutators,
@@ -109,9 +107,9 @@ async function simulateSkillReviews({
   targetSkills,
   history,
 }: {
-  targetSkills: MarshaledSkill[];
-  history: (`${`✅` | `❌`} ${MarshaledSkill}` | `💤 ${string}`)[];
-}): Promise<MarshaledSkill[]> {
+  targetSkills: Skill[];
+  history: (`${`✅` | `❌`} ${Skill}` | `💤 ${string}`)[];
+}): Promise<Skill[]> {
   await using rizzle = r.replicache(testReplicacheOptions(), v6, v6Mutators);
   let now = new Date();
 
@@ -138,7 +136,7 @@ async function simulateSkillReviews({
       case `❌`:
       case `✅`: {
         const rating = op === `✅` ? Rating.Easy : Rating.Again;
-        const skills = args.map((x) => rSkillUnmarshal(x)); // TODO: shuffle the skills to see if it's sensitive to ordering?
+        const skills = args as Skill[]; // TODO: shuffle the skills to see if it's sensitive to ordering?
 
         for (const skill of skills) {
           await rizzle.mutate.rateSkill({ id: nanoid(), skill, rating, now });
@@ -151,10 +149,6 @@ async function simulateSkillReviews({
     }
   }
 
-  const reviewQueue = await computeSkillReviewQueue(
-    rizzle,
-    targetSkills.map((x) => rSkillUnmarshal(x)),
-    now,
-  );
-  return reviewQueue.map((x) => rSkillMarshal(x));
+  const reviewQueue = await computeSkillReviewQueue(rizzle, targetSkills, now);
+  return reviewQueue;
 }

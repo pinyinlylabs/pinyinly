@@ -1,7 +1,6 @@
-import { memoize0, sortComparatorDate, weakMemoize1 } from "@/util/collections";
+import { memoize0, sortComparatorDate } from "@/util/collections";
 import { nextReview, Rating, UpcomingReview } from "@/util/fsrs";
 import {
-  invalid,
   r,
   RizzleCustom,
   RizzleReplicache,
@@ -10,186 +9,118 @@ import {
 import { invariant } from "@haohaohow/lib/invariant";
 import { z } from "zod";
 import {
-  HanziWord,
   MnemonicThemeId,
   PartOfSpeech,
   PinyinInitialGroupId,
-  Skill,
   SkillState,
   SkillType,
   SrsType,
 } from "./model";
 
-export const rSkillType = r.enum(SkillType, {
-  [SkillType.Deprecated_RadicalToEnglish]: `re`,
-  [SkillType.Deprecated_EnglishToRadical]: `er`,
-  [SkillType.Deprecated_RadicalToPinyin]: `rp`,
-  [SkillType.Deprecated_PinyinToRadical]: `pr`,
-  [SkillType.Deprecated]: `xx`,
-  [SkillType.HanziWordToEnglish]: `he`,
-  [SkillType.HanziWordToPinyinInitial]: `hpi`,
-  [SkillType.HanziWordToPinyinFinal]: `hpf`,
-  [SkillType.HanziWordToPinyinTone]: `hpt`,
-  [SkillType.EnglishToHanziWord]: `eh`,
-  [SkillType.PinyinToHanziWord]: `ph`,
-  [SkillType.ImageToHanziWord]: `ih`,
-  [SkillType.PinyinInitialAssociation]: `pia`,
-  [SkillType.PinyinFinalAssociation]: `pfa`,
-});
-
-export const rPartOfSpeech = r.enum(PartOfSpeech, {
-  [PartOfSpeech.Noun]: `n`,
-  [PartOfSpeech.Verb]: `v`,
-  [PartOfSpeech.Adjective]: `adj`,
-  [PartOfSpeech.Adverb]: `adv`,
-  [PartOfSpeech.Pronoun]: `pron`,
-  [PartOfSpeech.Preposition]: `prep`,
-  [PartOfSpeech.Conjunction]: `conj`,
-  [PartOfSpeech.Interjection]: `int`,
-  [PartOfSpeech.MeasureWord]: `mw`,
-  [PartOfSpeech.Particle]: `part`,
-});
-
-export const rFsrsRating = r.enum(Rating, {
-  [Rating.Again]: `1`,
-  [Rating.Hard]: `2`,
-  [Rating.Good]: `3`,
-  [Rating.Easy]: `4`,
-});
-
-export const rPinyinInitialGroupId = r.enum(PinyinInitialGroupId, {
-  [PinyinInitialGroupId.Basic]: `basic`,
-  [PinyinInitialGroupId._i]: `-i`,
-  [PinyinInitialGroupId._u]: `-u`,
-  [PinyinInitialGroupId._v]: `-ü`,
-  [PinyinInitialGroupId.Null]: `∅`,
-  [PinyinInitialGroupId.Everything]: `everything`,
-});
-
-export const rMnemonicThemeId = r.enum(MnemonicThemeId, {
-  [MnemonicThemeId.AnimalSpecies]: `AnimalSpecies`,
-  [MnemonicThemeId.GreekMythologyCharacter]: `GreekMythologyCharacter`,
-  [MnemonicThemeId.MythologyCharacter]: `MythologyCharacter`,
-  [MnemonicThemeId.WesternCultureFamousMen]: `WesternCultureFamousMen`,
-  [MnemonicThemeId.WesternCultureFamousWomen]: `WesternCultureFamousWomen`,
-  [MnemonicThemeId.WesternMythologyCharacter]: `WesternMythologyCharacter`,
-});
-
-// Skill ID e.g. `he:好:good`
-export type MarshaledSkill =
-  | (string & z.BRAND<`SkillId`>)
-  | `he:${string}:${string}`;
-
-const rSkillMarshalSchema = z
-  .custom<Skill | MarshaledSkill>(
-    (x) => typeof x === `string` || (typeof x === `object` && `type` in x),
-  )
-  .transform((x): MarshaledSkill => {
-    if (typeof x === `string`) {
-      return x;
-    }
-
-    const skillTypeM = rSkillType.marshal(x.type);
-    switch (x.type) {
-      // Hanzi word skills
-      case SkillType.HanziWordToEnglish:
-      case SkillType.HanziWordToPinyinInitial:
-      case SkillType.HanziWordToPinyinFinal:
-      case SkillType.HanziWordToPinyinTone:
-      case SkillType.EnglishToHanziWord:
-      case SkillType.PinyinToHanziWord:
-      case SkillType.ImageToHanziWord: {
-        return `${skillTypeM}:${x.hanziWord}` as MarshaledSkill;
-      }
-      // Pinyin association skills
-      case SkillType.PinyinInitialAssociation: {
-        return `${skillTypeM}:${x.initial}` as MarshaledSkill;
-      }
-      case SkillType.PinyinFinalAssociation: {
-        return `${skillTypeM}:${x.final}` as MarshaledSkill;
-      }
-      // Deprecated
-      case SkillType.Deprecated: {
-        return skillTypeM as MarshaledSkill;
-      }
-    }
+export const rSkillType = memoize0(function rSkillType() {
+  return r.enum(SkillType, {
+    [SkillType.Deprecated_RadicalToEnglish]: `re`,
+    [SkillType.Deprecated_EnglishToRadical]: `er`,
+    [SkillType.Deprecated_RadicalToPinyin]: `rp`,
+    [SkillType.Deprecated_PinyinToRadical]: `pr`,
+    [SkillType.Deprecated]: `xx`,
+    [SkillType.HanziWordToEnglish]: `he`,
+    [SkillType.HanziWordToPinyinInitial]: `hpi`,
+    [SkillType.HanziWordToPinyinFinal]: `hpf`,
+    [SkillType.HanziWordToPinyinTone]: `hpt`,
+    [SkillType.EnglishToHanziWord]: `eh`,
+    [SkillType.PinyinToHanziWord]: `ph`,
+    [SkillType.ImageToHanziWord]: `ih`,
+    [SkillType.PinyinInitialAssociation]: `pia`,
+    [SkillType.PinyinFinalAssociation]: `pfa`,
   });
+});
 
-export const rSkillMarshal = weakMemoize1((skill: Skill) =>
-  rSkillMarshalSchema.parse(skill),
-);
+// Skill e.g. `he:好:good`
+export type Skill =
+  | DeprecatedSkill
+  | HanziWordSkill
+  | PinyinInitialAssociationSkill
+  | PinyinFinalAssociationSkill;
 
-const rSkillUnmarshalSchema = z
-  .custom<MarshaledSkill>((x) => typeof x === `string`)
-  .transform((x, ctx): Skill => {
-    if (x === rSkillType.marshal(SkillType.Deprecated)) {
-      return { type: SkillType.Deprecated };
-    }
+export type DeprecatedSkill =
+  | (string & z.BRAND<`DeprecatedSkill`>)
+  | `${`xx` | `re` | `er` | `rp` | `pr`}:${string}:${string}`;
 
-    const result = /^(.+?):(.+)$/.exec(x);
-    if (result === null) {
-      return invalid(ctx, `doesn't match *:* pattern`);
-    }
+export type HanziWordSkill =
+  | (string & z.BRAND<`HanziWordSkill`>)
+  | `${`he` | `hpi` | `hpf` | `hpt` | `eh` | `ph` | `ih`}:${string}:${string}`;
 
-    const [, marshaledSkillType, rest] = result;
-    if (marshaledSkillType == null) {
-      return invalid(ctx, `couldn't parse skill type (before :)`);
-    }
-    if (rest == null) {
-      return invalid(ctx, `couldn't parse skill params (after :)`);
-    }
+export type PinyinInitialAssociationSkill =
+  | (string & z.BRAND<`PinyinInitialAssociationSkill`>)
+  | `pia:${string}:${string}`;
 
-    const skillType = rSkillType.unmarshal(marshaledSkillType);
+export type PinyinFinalAssociationSkill =
+  | (string & z.BRAND<`PinyinFinalAssociationSkill`>)
+  | `pfa:${string}:${string}`;
 
-    switch (skillType) {
-      case SkillType.HanziWordToEnglish:
-      case SkillType.HanziWordToPinyinInitial:
-      case SkillType.HanziWordToPinyinFinal:
-      case SkillType.HanziWordToPinyinTone:
-      case SkillType.EnglishToHanziWord:
-      case SkillType.PinyinToHanziWord:
-      case SkillType.ImageToHanziWord: {
-        return {
-          type: skillType,
-          hanziWord: rest as HanziWord,
-        };
-      }
-      case SkillType.PinyinInitialAssociation: {
-        return { type: skillType, initial: rest };
-      }
-      case SkillType.PinyinFinalAssociation: {
-        return { type: skillType, final: rest };
-      }
-      case SkillType.Deprecated:
-      case SkillType.Deprecated_RadicalToEnglish:
-      case SkillType.Deprecated_EnglishToRadical:
-      case SkillType.Deprecated_RadicalToPinyin:
-      case SkillType.Deprecated_PinyinToRadical: {
-        return { type: SkillType.Deprecated };
-      }
-    }
+export const rPartOfSpeech = memoize0(function rPartOfSpeech() {
+  return r.enum(PartOfSpeech, {
+    [PartOfSpeech.Noun]: `n`,
+    [PartOfSpeech.Verb]: `v`,
+    [PartOfSpeech.Adjective]: `adj`,
+    [PartOfSpeech.Adverb]: `adv`,
+    [PartOfSpeech.Pronoun]: `pron`,
+    [PartOfSpeech.Preposition]: `prep`,
+    [PartOfSpeech.Conjunction]: `conj`,
+    [PartOfSpeech.Interjection]: `int`,
+    [PartOfSpeech.MeasureWord]: `mw`,
+    [PartOfSpeech.Particle]: `part`,
   });
+});
 
-export const rSkillUnmarshal = rSkillUnmarshalSchema.parse.bind(
-  rSkillUnmarshalSchema,
-);
+export const rFsrsRating = memoize0(function rFsrsRating() {
+  return r.enum(Rating, {
+    [Rating.Again]: `1`,
+    [Rating.Hard]: `2`,
+    [Rating.Good]: `3`,
+    [Rating.Easy]: `4`,
+  });
+});
 
-export const rSkill = memoize0(() =>
-  RizzleCustom.create<Skill | MarshaledSkill, MarshaledSkill, Skill>(
-    rSkillMarshalSchema,
-    rSkillUnmarshalSchema,
-  ),
-);
+export const rPinyinInitialGroupId = memoize0(function rPinyinInitialGroupId() {
+  return r.enum(PinyinInitialGroupId, {
+    [PinyinInitialGroupId.Basic]: `basic`,
+    [PinyinInitialGroupId._i]: `-i`,
+    [PinyinInitialGroupId._u]: `-u`,
+    [PinyinInitialGroupId._v]: `-ü`,
+    [PinyinInitialGroupId.Null]: `∅`,
+    [PinyinInitialGroupId.Everything]: `everything`,
+  });
+});
 
-export const rSrsType = memoize0(() =>
-  r.enum(SrsType, {
+export const rMnemonicThemeId = memoize0(function rMnemonicThemeId() {
+  return r.enum(MnemonicThemeId, {
+    [MnemonicThemeId.AnimalSpecies]: `AnimalSpecies`,
+    [MnemonicThemeId.GreekMythologyCharacter]: `GreekMythologyCharacter`,
+    [MnemonicThemeId.MythologyCharacter]: `MythologyCharacter`,
+    [MnemonicThemeId.WesternCultureFamousMen]: `WesternCultureFamousMen`,
+    [MnemonicThemeId.WesternCultureFamousWomen]: `WesternCultureFamousWomen`,
+    [MnemonicThemeId.WesternMythologyCharacter]: `WesternMythologyCharacter`,
+  });
+});
+
+export const rSkill = memoize0(function rSkill() {
+  return RizzleCustom.create<Skill, Skill, Skill>(
+    z.custom<Skill>((x) => typeof x === `string`),
+    z.custom<Skill>((x) => typeof x === `string`),
+  );
+});
+
+export const rSrsType = memoize0(function rSrsType() {
+  return r.enum(SrsType, {
     [SrsType.Null]: `0`,
     [SrsType.FsrsFourPointFive]: `1`,
-  }),
-);
+  });
+});
 
-export const rSrsState = memoize0(
-  () =>
+export const rSrsState = memoize0(function rSrsState() {
+  return (
     // r.discriminatedUnion(`type`, [
     //   r.object({
     //     type: r.literal(SrsType.Null),
@@ -198,9 +129,10 @@ export const rSrsState = memoize0(
       type: r.literal(SrsType.FsrsFourPointFive, rSrsType()),
       stability: r.number(),
       difficulty: r.number(),
-    }),
-  // ]),
-);
+    })
+    // ]),
+  );
+});
 
 /**
  * # v6 change log
@@ -232,7 +164,7 @@ export const v6 = {
     id: r.string().alias(`i`),
     skill: rSkill().alias(`s`).indexed(`bySkill`),
     createdAt: r.datetime().alias(`c`).indexed(`byCreatedAt`),
-    rating: rFsrsRating.alias(`r`),
+    rating: rFsrsRating().alias(`r`),
   }),
   skillState: r.entity(`s/[skill]`, {
     skill: rSkill().alias(`s`),
@@ -253,8 +185,8 @@ export const v6 = {
     name: r.string().alias(`n`),
   }),
   pinyinInitialGroupTheme: r.entity(`pigt/[groupId]`, {
-    groupId: rPinyinInitialGroupId.alias(`g`),
-    themeId: rMnemonicThemeId.alias(`t`),
+    groupId: rPinyinInitialGroupId().alias(`g`),
+    themeId: rMnemonicThemeId().alias(`t`),
   }),
 
   // Mutators
@@ -277,15 +209,15 @@ export const v6 = {
     now: r.timestamp().alias(`t`),
   }),
   setPinyinInitialGroupTheme: r.mutator({
-    groupId: rPinyinInitialGroupId.alias(`g`),
-    themeId: rMnemonicThemeId.alias(`t`),
+    groupId: rPinyinInitialGroupId().alias(`g`),
+    themeId: rMnemonicThemeId().alias(`t`),
     now: r.timestamp().alias(`n`),
   }),
   rateSkill: r
     .mutator({
       id: r.string().alias(`i`),
       skill: rSkill().alias(`s`),
-      rating: rFsrsRating.alias(`r`),
+      rating: rFsrsRating().alias(`r`),
       now: r.timestamp().alias(`n`),
     })
     .alias(`reviewSkill`),

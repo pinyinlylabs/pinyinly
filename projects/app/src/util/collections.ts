@@ -195,7 +195,7 @@ export function addRefCount<K extends object>(map: WeakMap<K, number>, key: K) {
 export function weakMemoize1<T, R>(fn: (input: T) => R): typeof fn {
   const cache = new WeakMap<object, R>();
 
-  return function <This>(this: This, input: T) {
+  const memoFn = function <This>(this: This, input: T) {
     if (typeof input !== `object` || input == null) {
       return fn.call(this, input);
     }
@@ -208,12 +208,14 @@ export function weakMemoize1<T, R>(fn: (input: T) => R): typeof fn {
     cache.set(input, ret);
     return ret;
   };
+  Object.defineProperty(memoFn, `name`, { value: fn.name });
+  return memoFn;
 }
 
 export function memoize0<R>(fn: () => R): () => R {
   let cache: R | undefined;
   let cacheSet = false;
-  return function <This>(this: This) {
+  const memoFn = function <This>(this: This) {
     if (cacheSet) {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       return cache!;
@@ -222,6 +224,8 @@ export function memoize0<R>(fn: () => R): () => R {
     cacheSet = true;
     return cache;
   };
+  Object.defineProperty(memoFn, `name`, { value: fn.name });
+  return memoFn;
 }
 
 /**

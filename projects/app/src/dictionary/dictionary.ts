@@ -1,8 +1,11 @@
 import { HanziWord, PartOfSpeech, PinyinInitialGroupId } from "@/data/model";
 import { rMnemonicThemeId, rPinyinInitialGroupId } from "@/data/rizzleSchema";
-import { deepReadonly, sortComparatorNumber } from "@/util/collections";
+import {
+  deepReadonly,
+  memoize0,
+  sortComparatorNumber,
+} from "@/util/collections";
 import { invariant } from "@haohaohow/lib/invariant";
-import memoize from "lodash/memoize";
 import { DeepReadonly, StrictExtract } from "ts-essentials";
 import { z } from "zod";
 
@@ -107,7 +110,7 @@ export function splitPinyin(
   return { initial, final, tone };
 }
 
-export const loadPinyinWords = memoize(async () =>
+export const loadPinyinWords = memoize0(async () =>
   z
     .array(z.string())
     .transform(deepReadonly)
@@ -115,7 +118,7 @@ export const loadPinyinWords = memoize(async () =>
     .parse((await import(`./pinyinWords.asset.json`)).default),
 );
 
-export const loadMissingFontGlyphs = memoize(async () =>
+export const loadMissingFontGlyphs = memoize0(async () =>
   z
     .record(z.array(z.string()))
     .transform(
@@ -126,7 +129,7 @@ export const loadMissingFontGlyphs = memoize(async () =>
     .parse((await import(`./missingFontGlyphs.asset.json`)).default),
 );
 
-export const loadMnemonicThemes = memoize(async () =>
+export const loadMnemonicThemes = memoize0(async () =>
   z
     .record(
       z.string(), // themeId
@@ -139,7 +142,7 @@ export const loadMnemonicThemes = memoize(async () =>
       (x) =>
         new Map(
           Object.entries(x).map(
-            ([k, v]) => [rMnemonicThemeId.unmarshal(k), v] as const,
+            ([k, v]) => [rMnemonicThemeId().unmarshal(k), v] as const,
           ),
         ),
     )
@@ -148,7 +151,7 @@ export const loadMnemonicThemes = memoize(async () =>
     .parse((await import(`./mnemonicThemes.asset.json`)).default),
 );
 
-export const loadMnemonicThemeChoices = memoize(async () =>
+export const loadMnemonicThemeChoices = memoize0(async () =>
   z
     .record(
       z.string(), // themeId
@@ -161,7 +164,7 @@ export const loadMnemonicThemeChoices = memoize(async () =>
       (x) =>
         new Map(
           Object.entries(x).map(([k, v]) => [
-            rMnemonicThemeId.unmarshal(k),
+            rMnemonicThemeId().unmarshal(k),
             new Map(
               Object.entries(v).map(([k2, v2]) => [
                 k2,
@@ -176,7 +179,7 @@ export const loadMnemonicThemeChoices = memoize(async () =>
     .parse((await import(`./mnemonicThemeChoices.asset.json`)).default),
 );
 
-export const loadHanziDecomposition = memoize(async () =>
+export const loadHanziDecomposition = memoize0(async () =>
   z
     .array(z.tuple([z.string(), z.string()]))
     .transform((x) => new Map(x))
@@ -189,7 +192,7 @@ const pinyinChartSchema = z
   .object({
     initials: z.array(
       z.object({
-        id: rPinyinInitialGroupId.getUnmarshal(),
+        id: rPinyinInitialGroupId().getUnmarshal(),
         desc: z.string(),
         initials: z.array(z.union([z.string(), z.array(z.string())])),
       }),
@@ -208,35 +211,35 @@ const pinyinChartSchema = z
     overrides,
   }));
 
-export const loadStandardPinyinChart = memoize(async () =>
+export const loadStandardPinyinChart = memoize0(async () =>
   pinyinChartSchema
     .transform(deepReadonly)
     // eslint-disable-next-line unicorn/no-await-expression-member
     .parse((await import(`./standardPinyinChart.asset.json`)).default),
 );
 
-export const loadMmPinyinChart = memoize(async () =>
+export const loadMmPinyinChart = memoize0(async () =>
   pinyinChartSchema
     .transform(deepReadonly)
     // eslint-disable-next-line unicorn/no-await-expression-member
     .parse((await import(`./mmPinyinChart.asset.json`)).default),
 );
 
-export const loadHhPinyinChart = memoize(async () =>
+export const loadHhPinyinChart = memoize0(async () =>
   pinyinChartSchema
     .transform(deepReadonly)
     // eslint-disable-next-line unicorn/no-await-expression-member
     .parse((await import(`./hhPinyinChart.asset.json`)).default),
 );
 
-export const loadHmmPinyinChart = memoize(async () =>
+export const loadHmmPinyinChart = memoize0(async () =>
   pinyinChartSchema
     .transform(deepReadonly)
     // eslint-disable-next-line unicorn/no-await-expression-member
     .parse((await import(`./hmmPinyinChart.asset.json`)).default),
 );
 
-export const loadHanziWordGlossMnemonics = memoize(async () =>
+export const loadHanziWordGlossMnemonics = memoize0(async () =>
   z
     .array(
       z.tuple([
@@ -254,28 +257,28 @@ export const hanziWordSchema = z.string().transform((x) => x as HanziWord);
 
 export const wordListSchema = z.array(hanziWordSchema);
 
-export const allRadicalHanziWords = memoize(async () =>
+export const allRadicalHanziWords = memoize0(async () =>
   wordListSchema
     .transform(deepReadonly)
     // eslint-disable-next-line unicorn/no-await-expression-member
     .parse((await import(`./radicalsHanziWords.asset.json`)).default),
 );
 
-export const allHsk1HanziWords = memoize(async () =>
+export const allHsk1HanziWords = memoize0(async () =>
   wordListSchema
     .transform(deepReadonly)
     // eslint-disable-next-line unicorn/no-await-expression-member
     .parse((await import(`./hsk1HanziWords.asset.json`)).default),
 );
 
-export const allHsk2HanziWords = memoize(async () =>
+export const allHsk2HanziWords = memoize0(async () =>
   wordListSchema
     .transform(deepReadonly)
     // eslint-disable-next-line unicorn/no-await-expression-member
     .parse((await import(`./hsk2HanziWords.asset.json`)).default),
 );
 
-export const allHsk3HanziWords = memoize(async () =>
+export const allHsk3HanziWords = memoize0(async () =>
   wordListSchema
     .transform(deepReadonly)
     // eslint-disable-next-line unicorn/no-await-expression-member
@@ -349,14 +352,14 @@ export const dictionarySchema = z
   )
   .transform((x) => new Map(x));
 
-export const loadDictionary = memoize(async () =>
+export const loadDictionary = memoize0(async () =>
   dictionarySchema
     .transform(deepReadonly)
     // eslint-disable-next-line unicorn/no-await-expression-member
     .parse((await import(`./dictionary.asset.json`)).default),
 );
 
-const loadRadicalStrokes = memoize(async () =>
+const loadRadicalStrokes = memoize0(async () =>
   z
     .array(
       z.object({
@@ -371,7 +374,7 @@ const loadRadicalStrokes = memoize(async () =>
     .parse((await import(`./radicalStrokes.asset.json`)).default),
 );
 
-export const loadHanziWordPinyinMnemonics = memoize(async () =>
+export const loadHanziWordPinyinMnemonics = memoize0(async () =>
   z
     .array(
       z.tuple([

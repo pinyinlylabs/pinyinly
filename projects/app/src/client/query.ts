@@ -5,20 +5,16 @@ import {
   Question,
   QuestionFlag,
   QuestionFlagType,
-  Skill,
   SkillState,
   SkillType,
   SrsType,
 } from "@/data/model";
-import {
-  MarshaledSkill,
-  rSkillMarshal,
-  rSkillUnmarshal,
-} from "@/data/rizzleSchema";
+import { Skill } from "@/data/rizzleSchema";
 import {
   hanziWordToEnglish,
   skillLearningGraph,
   skillReviewQueue,
+  skillType,
 } from "@/data/skills";
 import { allHsk1HanziWords, lookupHanziWord } from "@/dictionary/dictionary";
 import { fsrsIsIntroduced, fsrsIsLearned } from "@/util/fsrs";
@@ -51,7 +47,7 @@ export async function questionsForReview(
     // Only consider radical skills
     if (
       skillTypesFilter != null &&
-      !skillTypesFilter.has(skillState.skill.type)
+      !skillTypesFilter.has(skillType(skillState.skill))
     ) {
       continue;
     }
@@ -161,15 +157,14 @@ export async function computeSkillReviewQueue(
    */
   now = new Date(),
 ): Promise<Skill[]> {
-  const learnedSkills = new Set<MarshaledSkill>();
-  const dueSkillDates = new Map<MarshaledSkill, Date>();
+  const learnedSkills = new Set<Skill>();
+  const dueSkillDates = new Map<Skill, Date>();
   for await (const [, v] of r.queryPaged.skillState.scan()) {
-    const skillId = rSkillMarshal(v.skill);
     if (v.srs) {
       if (fsrsIsLearned(v.srs)) {
-        learnedSkills.add(skillId);
+        learnedSkills.add(v.skill);
       } else if (fsrsIsIntroduced(v.srs)) {
-        dueSkillDates.set(skillId, v.due);
+        dueSkillDates.set(v.skill, v.due);
       }
     }
   }
@@ -183,7 +178,7 @@ export async function computeSkillReviewQueue(
     graph,
     getSkillDueDate: (skill) => dueSkillDates.get(skill),
     now,
-  }).map((s) => rSkillUnmarshal(s));
+  });
 }
 
 export const useHanziWordMeaning = (hanziWord: HanziWord) => {
