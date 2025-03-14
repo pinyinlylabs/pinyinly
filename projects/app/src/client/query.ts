@@ -165,11 +165,12 @@ export async function computeSkillReviewQueue(
   const dueSkills = new Set<MarshaledSkill>();
   for await (const [, v] of r.queryPaged.skillState.scan()) {
     const skillId = rSkillMarshal(v.skill);
-    if (v.srs != null && fsrsIsLearned(v.srs)) {
-      learnedSkills.add(skillId);
-    }
-    if (v.srs && fsrsIsIntroduced(v.srs) && v.due <= now) {
-      dueSkills.add(skillId);
+    if (v.srs) {
+      if (fsrsIsLearned(v.srs)) {
+        learnedSkills.add(skillId);
+      } else if (fsrsIsIntroduced(v.srs) && v.due <= now) {
+        dueSkills.add(skillId);
+      }
     }
   }
 
