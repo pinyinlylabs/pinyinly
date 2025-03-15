@@ -224,9 +224,8 @@ tasks:
     extends: tsx
     args: --test --test-reporter=spec --import ./test/setup.ts --experimental-test-module-mocks "'test/**/*.test.{ts,tsx}'"
     inputs:
-      - "src"
-      - "test"
-      - "*.{json,cjs,js,ts,tsx}"
+      - "!dist/"
+      - "**/*"
       - "/.github/workflows" # There is a test that checks workflow environment variables.
 
   testWatch:
