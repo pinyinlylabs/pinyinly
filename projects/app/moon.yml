@@ -196,7 +196,7 @@ tasks:
     preset: watcher
 
   expoDoctor:
-    command: npx -y expo-doctor@1.12.7
+    command: npx -y expo-doctor@1.12.8
     env:
       # Don't check that all the expo-* packages are the latest versions. That's
       # already handled by renovate in a way that doesn't break PR builds when a
