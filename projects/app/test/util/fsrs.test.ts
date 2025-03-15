@@ -1,6 +1,6 @@
 import {
+  FsrsState,
   Rating,
-  UpcomingReview,
   fsrsIsIntroduced,
   nextReview,
   ratingName,
@@ -304,6 +304,33 @@ await test(`reviewing before due`, async () => {
     },
     { minutes: 20 },
   ]);
+
+  // Reviewing the same skill repeatedly shouldn't push its scheduled review
+  // date by a large amount, and it shouldn't increase the stability much either
+  // because learning takes time, it can't be crammed.
+  await testFsrsSequence(`Good → Good → Good`, [
+    Rating.Good,
+    {
+      difficulty: 5.1443,
+      stability: 4.1386,
+      delay: { days: 4, hours: 3, minutes: 20 },
+    },
+    { minutes: 5 },
+    Rating.Good,
+    {
+      difficulty: 5.1443,
+      stability: 4.148_813_98,
+      delay: { days: 4, hours: 3, minutes: 34 },
+    },
+    { minutes: 5 },
+    Rating.Good,
+    {
+      difficulty: 5.1443,
+      stability: 4.159_024_81,
+      delay: { days: 4, hours: 3, minutes: 49 },
+    },
+    { minutes: 5 },
+  ]);
 });
 
 await test(`${fsrsIsIntroduced.name} suite`, async () => {
@@ -361,21 +388,24 @@ function assertFsrsSequence(
   return function ({ mock }: TestContext) {
     mock.timers.enable({ apis: [`Date`] });
 
-    let review: UpcomingReview | null = null;
+    let review: FsrsState | null = null;
 
     for (let i = 0; i < sequence.length; i += 3) {
       const rating = ratingSchema.parse(sequence[i + 0]);
       const expectedReview = expectedReviewSchema.parse(sequence[i + 1]);
       const waitDuration = sequence[i + 2]! as Duration;
 
-      const lastReview: UpcomingReview | null = review;
+      const lastReview: FsrsState | null = review;
       review = nextReview(lastReview, rating);
 
       assert.deepEqual(
         {
           difficulty: review.difficulty,
           stability: review.stability,
-          delay: intervalToDuration({ start: review.created, end: review.due }),
+          delay: intervalToDuration({
+            start: review.prevReviewAt,
+            end: review.nextReviewAt,
+          }),
         },
         expectedReview,
       );

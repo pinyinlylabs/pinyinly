@@ -1,0 +1,1 @@
+ALTER TABLE "haohaohow"."skillState" ALTER COLUMN "srs" SET NOT NULL;

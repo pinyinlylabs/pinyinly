@@ -70,23 +70,20 @@ tasks:
       - "@group(buildVercelExpoSentryOutdir)"
 
   dbCheck:
-    command: yarn run drizzle-kit check
+    command: drizzle-kit check
     description: |
       Check the database schema for consistency, also makes sure the version of
       `drizzle-kit` and `drizzle-orm` are compatible.
 
   dbGenerate:
-    command: yarn run drizzle-kit generate
+    command: drizzle-kit generate
     options:
       runInCI: false
 
   dbMigrate:
-    command: yarn tsx ./bin/dbMigrate.ts
-    inputs:
-      - drizzle/**/*
-    options:
-      envFile: .env.local
-      runInCI: false
+    extends: tsx
+    args: ./bin/dbMigrate.ts
+    preset: watcher
 
   deploy:
     deps:

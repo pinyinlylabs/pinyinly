@@ -1,4 +1,8 @@
-import { supportedSchemas, v6 } from "#data/rizzleSchema.ts";
+import {
+  srsStateFromFsrsState,
+  supportedSchemas,
+  v7,
+} from "#data/rizzleSchema.ts";
 import { englishToHanziWord } from "#data/skills.ts";
 import { Drizzle } from "#server/lib/db.ts";
 import {
@@ -8,7 +12,7 @@ import {
   push,
 } from "#server/lib/replicache.ts";
 import * as s from "#server/schema.ts";
-import { Rating } from "#util/fsrs.ts";
+import { nextReview, Rating } from "#util/fsrs.ts";
 import { nanoid } from "#util/nanoid.ts";
 import { invariant } from "@haohaohow/lib/invariant";
 import { eq, sql } from "drizzle-orm";
@@ -139,43 +143,6 @@ await test(`${push.name} suite`, async (t) => {
         },
       );
 
-      await txTest(`initSkillState() should insert to the db`, async (tx) => {
-        const clientId = `clientid`;
-        const clientGroupId = `clientgroupid`;
-
-        const user = await createUser(tx);
-
-        const now = new Date();
-
-        const mut = {
-          id: 1,
-          name: `addSkillState`,
-          args: schema.initSkillState.marshalArgs({
-            skill: englishToHanziWord(`我:i`),
-            now,
-          }),
-          timestamp: 1,
-          clientId,
-        };
-
-        await push(tx, user.id, {
-          profileId: ``,
-          clientGroupId,
-          pushVersion: 1,
-          schemaVersion: schema.version,
-          mutations: [mut],
-        });
-
-        const skillState = await tx.query.skillState.findFirst({
-          where: (t, { eq }) => eq(t.userId, user.id),
-        });
-        assert.ok(skillState != null);
-        assert.deepEqual(skillState.due, now);
-        assert.deepEqual(skillState.createdAt, now);
-        assert.equal(skillState.srs, null);
-        assert.deepEqual(skillState.skill, englishToHanziWord(`我:i`));
-      });
-
       await txTest(`skips already processed mutations`, async (tx) => {
         const user = await createUser(tx);
 
@@ -195,9 +162,11 @@ await test(`${push.name} suite`, async (t) => {
 
         const mut = {
           id: client.lastMutationId, // use the same ID
-          name: `addSkillState`,
-          args: schema.initSkillState.marshalArgs({
+          name: schema.rateSkill._def.alias!,
+          args: schema.rateSkill.marshalArgs({
+            id: nanoid(),
             skill: englishToHanziWord(`我:i`),
+            rating: Rating.Good,
             now: new Date(),
           }),
           timestamp: 1,
@@ -404,8 +373,7 @@ await test(`${pull.name} suite`, async (t) => {
             .values([
               {
                 userId: user.id,
-                due: new Date(),
-                srs: null,
+                srs: srsStateFromFsrsState(nextReview(null, Rating.Good)),
                 skill: englishToHanziWord(`我:i`),
               },
             ])
@@ -544,15 +512,12 @@ await test(`${pull.name} suite`, async (t) => {
 
         const user = await createUser(tx);
 
-        const now = new Date();
-
         const [skillState] = await tx
           .insert(s.skillState)
           .values([
             {
               userId: user.id,
-              due: now,
-              srs: null,
+              srs: srsStateFromFsrsState(nextReview(null, Rating.Good)),
               skill: englishToHanziWord(`我:i`),
             },
           ])
@@ -578,9 +543,7 @@ await test(`${pull.name} suite`, async (t) => {
               key: schema.skillState.marshalKey(skillState),
               value: schema.skillState.marshalValue({
                 skill: skillState.skill,
-                createdAt: skillState.createdAt,
-                srs: null,
-                due: skillState.due,
+                srs: skillState.srs,
               }),
             },
           ],
@@ -592,15 +555,12 @@ await test(`${pull.name} suite`, async (t) => {
 
         const user = await createUser(tx);
 
-        const now = new Date();
-
         const [skillState] = await tx
           .insert(s.skillState)
           .values([
             {
               userId: user.id,
-              due: now,
-              srs: null,
+              srs: srsStateFromFsrsState(nextReview(null, Rating.Good)),
               skill: englishToHanziWord(`我:i`),
             },
           ])
@@ -750,16 +710,12 @@ await test(`${computeCvrEntities.name} suite`, async (t) => {
             {
               userId: user1.id,
               skill: englishToHanziWord(`我:i`),
-              srs: null,
-              due: new Date(),
-              createdAt: new Date(),
+              srs: srsStateFromFsrsState(nextReview(null, Rating.Good)),
             },
             {
               userId: user2.id,
               skill: englishToHanziWord(`我:i`),
-              srs: null,
-              due: new Date(),
-              createdAt: new Date(),
+              srs: srsStateFromFsrsState(nextReview(null, Rating.Good)),
             },
           ])
           .returning({
@@ -928,7 +884,7 @@ await test(`${fetchMutations.name} suite`, async (t) => {
       profileId: ``,
       clientGroupId,
       pushVersion: 1,
-      schemaVersion: v6.version,
+      schemaVersion: v7.version,
       mutations: [
         {
           id: 1,
@@ -942,7 +898,7 @@ await test(`${fetchMutations.name} suite`, async (t) => {
 
     assert.deepEqual(
       await fetchMutations(tx, user.id, {
-        schemaVersions: [v6.version],
+        schemaVersions: [v7.version],
         lastMutationIds: {},
       }),
       {
@@ -958,7 +914,7 @@ await test(`${fetchMutations.name} suite`, async (t) => {
                 timestamp: 1,
               },
             ],
-            schemaVersion: v6.version,
+            schemaVersion: v7.version,
           },
         ],
       },

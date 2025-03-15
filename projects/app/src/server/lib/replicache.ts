@@ -1,8 +1,8 @@
 import {
   rPinyinInitialGroupId,
   SupportedSchema,
-  v6,
-  v6_1,
+  v7,
+  v7_1,
 } from "@/data/rizzleSchema";
 import {
   ClientStateNotFoundResponse,
@@ -42,18 +42,6 @@ invariant(loggerName != null);
 const debug = makeDebug(loggerName);
 
 const mutators: RizzleDrizzleMutators<SupportedSchema, Drizzle> = {
-  async initSkillState(db, userId, { skill, now }) {
-    await db
-      .insert(s.skillState)
-      .values({
-        userId,
-        skill,
-        srs: null,
-        due: now,
-        createdAt: now,
-      })
-      .onConflictDoNothing();
-  },
   async rateSkill(db, userId, { id, skill, rating, now }) {
     await db
       .insert(s.skillRating)
@@ -105,14 +93,14 @@ const mutators: RizzleDrizzleMutators<SupportedSchema, Drizzle> = {
   },
 };
 
-const mutateV6_1 = makeDrizzleMutationHandler(v6_1, mutators);
-const mutateV6 = makeDrizzleMutationHandler(v6, mutators);
+const mutateV7_1 = makeDrizzleMutationHandler(v7_1, mutators);
+const mutateV7 = makeDrizzleMutationHandler(v7, mutators);
 
 function getSchemaImpl(schemaVersion: string) {
-  if (schemaVersion === v6_1.version) {
-    return { schema: v6_1, mutate: mutateV6_1 };
-  } else if (schemaVersion === v6.version) {
-    return { schema: v6, mutate: mutateV6 };
+  if (schemaVersion === v7_1.version) {
+    return { schema: v7_1, mutate: mutateV7_1 };
+  } else if (schemaVersion === v7.version) {
+    return { schema: v7, mutate: mutateV7 };
   }
   return null;
 }

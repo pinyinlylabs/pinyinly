@@ -1,14 +1,14 @@
 import {
   computeSkillReviewQueue,
-  flagsForSkillState,
+  flagsForSrsState,
   hsk1SkillReview,
 } from "#client/query.ts";
-import { QuestionFlagType } from "#data/model.ts";
+import { QuestionFlagType, SrsType } from "#data/model.ts";
 import {
   Skill,
-  skillStateFromFsrsReview,
-  v6,
-  v6Mutators,
+  srsStateFromFsrsState,
+  v7,
+  v7Mutators,
 } from "#data/rizzleSchema.ts";
 import { nextReview, Rating } from "#util/fsrs.ts";
 import { nanoid } from "#util/nanoid.ts";
@@ -20,7 +20,7 @@ import { testReplicacheOptions } from "../util/rizzleHelpers";
 
 await test(`${hsk1SkillReview.name} suite`, async () => {
   await test(`returns everything when no skills have state`, async () => {
-    await using rizzle = r.replicache(testReplicacheOptions(), v6, v6Mutators);
+    await using rizzle = r.replicache(testReplicacheOptions(), v7, v7Mutators);
 
     // Sanity check that there should be a bunch in the queue
     const skills = await hsk1SkillReview(rizzle);
@@ -79,21 +79,54 @@ await test(`${computeSkillReviewQueue.name} suite`, async () => {
       `he:丿:slash`,
     ]);
   });
+
+  await test(`doesn't get stuck reviewing the same skill after all due skills are done`, async () => {
+    const reviewQueue = await simulateSkillReviews({
+      targetSkills: [`he:分:divide`],
+      history: [
+        `❌ he:𠃌:radical`, // Get it wrong initially (so after all the reviews it will have lower "stability" than the others).
+        `💤 5s`,
+        `✅ he:𠃌:radical`, // Then answer it correctly.
+        `💤 5s`,
+        `✅ he:刀:knife`,
+        `💤 5s`,
+        `✅ he:八:eight`,
+        `💤 5s`,
+        `✅ he:分:divide`,
+        `💤 5s`,
+        `✅ he:丿:slash`,
+        // Finished all the reviews, now we can start reviewing things that
+        // aren't due yet. he:𠃌:radical was incorrect so it should be reviewed
+        // again, but then reviewing it as "easy" should mean it shouldn't be
+        // next to review after this.
+        `💤 4h`,
+        `✅(easy) he:𠃌:radical`,
+        `💤 4h`,
+        `✅(easy) he:𠃌:radical`,
+        `💤 4h`,
+        `✅(easy) he:𠃌:radical`,
+      ],
+    });
+
+    assert.notEqual(reviewQueue[0], `he:𠃌:radical`);
+  });
 });
 
-await test(`${flagsForSkillState.name} suite`, async () => {
+await test(`${flagsForSrsState.name} suite`, async () => {
   await test(`marks a question as new if it has no srs`, async () => {
     assert.deepEqual(
-      flagsForSkillState({ srs: null, createdAt: new Date(), due: new Date() }),
+      flagsForSrsState({
+        type: SrsType.Mock,
+        prevReviewAt: new Date(),
+        nextReviewAt: new Date(),
+      }),
       { type: QuestionFlagType.NewSkill },
     );
   });
 
   await test(`marks a question as new if it has fsrs state but is not stable enough to be introduced`, async () => {
     assert.deepEqual(
-      flagsForSkillState(
-        skillStateFromFsrsReview(nextReview(null, Rating.Again)),
-      ),
+      flagsForSrsState(srsStateFromFsrsState(nextReview(null, Rating.Again))),
       { type: QuestionFlagType.NewSkill },
     );
   });
@@ -108,9 +141,12 @@ async function simulateSkillReviews({
   history,
 }: {
   targetSkills: Skill[];
-  history: (`${`✅` | `❌`} ${Skill}` | `💤 ${string}`)[];
+  history: (
+    | `${`✅` | `✅(easy)` | `✅(hard)` | `❌`} ${Skill}`
+    | `💤 ${string}`
+  )[];
 }): Promise<Skill[]> {
-  await using rizzle = r.replicache(testReplicacheOptions(), v6, v6Mutators);
+  await using rizzle = r.replicache(testReplicacheOptions(), v7, v7Mutators);
   let now = new Date();
 
   for (const event of history) {
@@ -122,20 +158,31 @@ async function simulateSkillReviews({
       case `💤`: {
         const durationString = args[0];
         invariant(durationString != null);
-        const durationParseResult = /^(\d+)([smh])$/.exec(durationString);
+        const durationParseResult = /^(\d+)([smhd])$/.exec(durationString);
         invariant(
           durationParseResult != null,
           `invalid duration ${durationString}`,
         );
         const [, multiple, unit] = durationParseResult;
-        const duration = Number(multiple) * { s: 1, m: 60, h: 3600 }[unit!]!;
+        const duration =
+          Number(multiple) *
+          { s: 1, m: 60 * 1, h: 60 * 60, d: 60 * 60 * 24 }[unit!]!;
         now = new Date(now.getTime() + duration * 1000);
         break;
       }
       // skill rating
       case `❌`:
-      case `✅`: {
-        const rating = op === `✅` ? Rating.Easy : Rating.Again;
+      case `✅`:
+      case `✅(easy)`:
+      case `✅(hard)`: {
+        const rating =
+          op === `✅`
+            ? Rating.Good
+            : op === `✅(easy)`
+              ? Rating.Easy
+              : op === `✅(hard)`
+                ? Rating.Hard
+                : Rating.Again;
         const skills = args as Skill[]; // TODO: shuffle the skills to see if it's sensitive to ordering?
 
         for (const skill of skills) {
