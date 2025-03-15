@@ -90,6 +90,7 @@ export default tseslint.config(
 
       curly: [`error`, `all`],
       "logical-assignment-operators": `error`,
+      "no-debugger": `error`,
       "no-else-return": `error`,
       "no-empty-function": `off`, // handled by @typescript-eslint/no-empty-function
       "no-console": [`error`, { allow: [`warn`, `error`] }],

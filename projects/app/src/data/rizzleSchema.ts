@@ -1,5 +1,5 @@
 import { memoize0, sortComparatorDate } from "@/util/collections";
-import { nextReview, Rating, UpcomingReview } from "@/util/fsrs";
+import { FsrsState, nextReview, Rating } from "@/util/fsrs";
 import {
   r,
   RizzleCustom,
@@ -12,8 +12,8 @@ import {
   MnemonicThemeId,
   PartOfSpeech,
   PinyinInitialGroupId,
-  SkillState,
   SkillType,
+  SrsState,
   SrsType,
 } from "./model";
 
@@ -114,27 +114,35 @@ export const rSkill = memoize0(function rSkill() {
 
 export const rSrsType = memoize0(function rSrsType() {
   return r.enum(SrsType, {
-    [SrsType.Null]: `0`,
+    [SrsType.Mock]: `0`,
     [SrsType.FsrsFourPointFive]: `1`,
   });
 });
 
-export const rSrsState = memoize0(function rSrsState() {
+export const rSrsState = memoize0(function rSrsParams() {
   return (
     // r.discriminatedUnion(`type`, [
     //   r.object({
     //     type: r.literal(SrsType.Null),
     //   }),
     r.object({
-      type: r.literal(SrsType.FsrsFourPointFive, rSrsType()),
-      stability: r.number(),
-      difficulty: r.number(),
+      type: r.literal(SrsType.FsrsFourPointFive, rSrsType()).alias(`t`),
+      stability: r.number().alias(`s` /* (F)SRS (S)tability */),
+      difficulty: r.number().alias(`d` /* (F)SRS (D)ifficulty */),
+      prevReviewAt: r.datetime().alias(`p`),
+      nextReviewAt: r.datetime().alias(`n`).indexed(`byNextReviewAt`),
     })
     // ]),
   );
 });
 
 /**
+ * # v7 change log
+ *
+ * - **Breaking**: `skillState` `createdAt` and `due` values are now part of
+ *   `srs` instead of being separate fields. It's also now non-nullable.
+ * - **Breaking**: `initSkillState` mutator is removed.
+ *
  * # v6 change log
  *
  * - **Breaking**: entity values no longer exclude the key-path fields, so you
@@ -154,8 +162,8 @@ export const rSrsState = memoize0(function rSrsState() {
  * - `skillState` has properties changed from `timestamp()` to `datetime()` so
  *   that they're indexable.
  */
-export const v6 = {
-  version: `6`,
+export const v7 = {
+  version: `v7`,
 
   //
   // Skills
@@ -168,9 +176,7 @@ export const v6 = {
   }),
   skillState: r.entity(`s/[skill]`, {
     skill: rSkill().alias(`s`),
-    createdAt: r.datetime().alias(`c`),
-    srs: rSrsState().nullable().alias(`r`),
-    due: r.datetime().alias(`d`).indexed(`byDue`),
+    srs: rSrsState().alias(`r`),
   }),
 
   //
@@ -221,52 +227,32 @@ export const v6 = {
       now: r.timestamp().alias(`n`),
     })
     .alias(`reviewSkill`),
-  initSkillState: r
-    .mutator({
-      skill: rSkill().alias(`s`),
-      now: r.timestamp().alias(`n`),
-    })
-    .alias(
-      // Original deprecated name, kept for compatibility.
-      `addSkillState`,
-    ),
 };
 
-export function skillStateFromFsrsReview(review: UpcomingReview) {
+export function srsStateFromFsrsState(fsrsState: FsrsState) {
   return {
-    srs: {
-      type: SrsType.FsrsFourPointFive,
-      stability: review.stability,
-      difficulty: review.difficulty,
-    },
-    due: review.due,
-    createdAt: review.created,
-  } satisfies SkillState;
+    type: SrsType.FsrsFourPointFive,
+    stability: fsrsState.stability,
+    difficulty: fsrsState.difficulty,
+    nextReviewAt: fsrsState.nextReviewAt,
+    prevReviewAt: fsrsState.prevReviewAt,
+  } satisfies SrsState;
 }
 
 // This is a placeholder to keep code around that demonstrates how to support
 // multiple schema versions at the same time.
-export const v6_1 = {
-  ...v6,
+export const v7_1 = {
+  ...v7,
   version: `6.1`,
 };
 
-export const supportedSchemas = [v6] as const;
+export const supportedSchemas = [v7] as const;
 
 export type SupportedSchema = (typeof supportedSchemas)[number];
 
-export type Rizzle = RizzleReplicache<typeof v6>;
+export type Rizzle = RizzleReplicache<typeof v7>;
 
-export const v6Mutators: RizzleReplicacheMutators<typeof v6> = {
-  async initSkillState(db, { skill, now }) {
-    const exists = await db.skillState.has({ skill });
-    if (!exists) {
-      await db.skillState.set(
-        { skill },
-        { skill, due: now, createdAt: now, srs: null },
-      );
-    }
-  },
+export const v7Mutators: RizzleReplicacheMutators<typeof v7> = {
   async rateSkill(tx, { id, skill, rating, now }) {
     // Save a record of the rating.
     await tx.skillRating.set({ id }, { id, rating, skill, createdAt: now });
@@ -275,16 +261,16 @@ export const v6Mutators: RizzleReplicacheMutators<typeof v6> = {
       .bySkill(skill)
       .toArray()
       .then((x) => x.sort(sortComparatorDate((x) => x[1].createdAt)));
-    let state: UpcomingReview | null = null;
+    let fsrsState: FsrsState | null = null;
     for (const [, { rating, createdAt }] of skillRatingsByDate) {
-      state = nextReview(state, rating, createdAt);
+      fsrsState = nextReview(fsrsState, rating, createdAt);
     }
 
-    invariant(state !== null);
+    invariant(fsrsState !== null);
 
     await tx.skillState.set(
       { skill },
-      { skill, ...skillStateFromFsrsReview(state) },
+      { skill, srs: srsStateFromFsrsState(fsrsState) },
     );
   },
   async setPinyinInitialAssociation(tx, { initial, name }) {
@@ -299,5 +285,5 @@ export const v6Mutators: RizzleReplicacheMutators<typeof v6> = {
 };
 
 export type SkillRating = NonNullable<
-  Awaited<ReturnType<typeof v6.skillRating.get>>
+  Awaited<ReturnType<typeof v7.skillRating.get>>
 >;

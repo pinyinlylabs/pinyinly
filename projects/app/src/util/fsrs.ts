@@ -16,11 +16,11 @@ const w = [
   0.1342, 1.0166, 2.1174, 0.0839, 0.3204, 1.4676, 0.219, 2.8237,
 ] as const;
 
-export interface UpcomingReview {
-  created: Date;
+export interface FsrsState {
+  prevReviewAt: Date;
+  nextReviewAt: Date;
   stability: number;
   difficulty: number;
-  due: Date;
 }
 
 /**
@@ -49,7 +49,7 @@ function initStability(rating: Rating) {
 }
 
 export function nextReview(
-  lastReview: UpcomingReview | null,
+  currentState: FsrsState | null,
   rating: Rating,
   /**
    * When the rating was made.
@@ -58,23 +58,23 @@ export function nextReview(
    * ratings.
    */
   now = new Date(),
-): UpcomingReview {
+): FsrsState {
   const created = now;
   const stability =
-    lastReview === null
+    currentState === null
       ? initStability(rating)
-      : nextStability(lastReview, created, rating);
+      : nextStability(currentState, created, rating);
   const difficulty =
-    lastReview === null
+    currentState === null
       ? initDifficulty(rating)
-      : nextDifficulty(lastReview.difficulty, rating);
+      : nextDifficulty(currentState.difficulty, rating);
   const dueDuration = nextDueDuration(stability, rating);
 
   return {
-    created,
+    prevReviewAt: created,
     difficulty,
     stability,
-    due: add(created, dueDuration),
+    nextReviewAt: add(created, dueDuration),
   };
 }
 
@@ -131,7 +131,7 @@ function forgettingCurve(elapsedDays: number, stability: number): number {
  * @return {number} S^\prime_r new stability after recall
  */
 function nextStability(
-  lastReview: UpcomingReview,
+  lastReview: FsrsState,
   nextCreated: Date,
   rating: Rating,
 ): number {
@@ -139,7 +139,7 @@ function nextStability(
     return lastReview.stability;
   }
 
-  const elapsedDays = daysDiff(lastReview.created, nextCreated);
+  const elapsedDays = daysDiff(lastReview.prevReviewAt, nextCreated);
   const retrievability = forgettingCurve(elapsedDays, lastReview.stability);
 
   const hardPenalty = rating === Rating.Hard ? w[15] : 1;
@@ -227,9 +227,7 @@ function intervalModifier(requestRetentionPercentile: number): number {
  * Return true if the skill is "learned" and doesn't need to be reviewed
  * anymore.
  */
-export function fsrsIsLearned(
-  options: Pick<UpcomingReview, `stability`>,
-): boolean {
+export function fsrsIsLearned(options: Pick<FsrsState, `stability`>): boolean {
   return options.stability >= 100;
 }
 
@@ -244,7 +242,7 @@ const { stability: isIntroducedStability } = nextReview(null, Rating.Again);
  * to prematurely introduce it into the review queue.
  */
 export function fsrsIsIntroduced(
-  options: Pick<UpcomingReview, `stability`>,
+  options: Pick<FsrsState, `stability`>,
 ): boolean {
   return options.stability > isIntroducedStability;
 }

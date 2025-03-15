@@ -80,9 +80,8 @@ export const skillState = schema.table(
       .text(`userId`)
       .references(() => user.id)
       .notNull(),
-    skill: sSkill(`skillId`).notNull(),
-    srs: rizzleCustomType(r.rSrsState(), `json`)(`srs`),
-    due: pg.timestamp(`dueAt`).notNull(),
+    skill: sSkill(`skill`).notNull(),
+    srs: rizzleCustomType(r.rSrsState(), `json`)(`srs`).notNull(),
     createdAt: pg.timestamp(`createdAt`).defaultNow().notNull(),
   },
   (t) => [pg.unique().on(t.userId, t.skill)],

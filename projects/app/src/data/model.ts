@@ -22,31 +22,34 @@ export enum MnemonicThemeId {
   WesternMythologyCharacter,
 }
 
+export interface BaseSrsState {
+  prevReviewAt: Date;
+  nextReviewAt: Date;
+}
+
 export enum SrsType {
-  Null,
+  Mock,
   FsrsFourPointFive,
 }
 
-export interface SrsNullState {
-  type: SrsType.Null;
+/**
+ * A placeholder to force the code to be structured to allow multiple SRS
+ * algorithms. This is not used for anything.
+ */
+export interface SrsStateMock extends BaseSrsState {
+  type: SrsType.Mock;
 }
 
-export interface SrsFourPointFiveState {
+/**
+ * FSRS 4.5 specific parameters.
+ */
+export interface SrsStateFsrsFourPointFive extends BaseSrsState {
   type: SrsType.FsrsFourPointFive;
   stability: number;
   difficulty: number;
 }
 
-export type SrsState = SrsNullState | SrsFourPointFiveState;
-
-// TODO: "SkillUpcomingReview" maybe?
-export interface SkillState {
-  // TODO: this shoudl be "last reviewed"
-  createdAt: Date;
-  /** When null, it means it's never been reviewed. */
-  srs: SrsState | null;
-  due: Date;
-}
+export type SrsState = SrsStateMock | SrsStateFsrsFourPointFive;
 
 // The values of this enum should only be used for debugging, they should never
 // be persisted.

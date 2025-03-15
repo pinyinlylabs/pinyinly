@@ -38,8 +38,11 @@ export default function ReviewsPage() {
     queryKey: [ReviewsPage.name, `nextNotYetDueSkillState`, id],
     queryFn: async () => {
       const now = new Date();
-      for await (const [, skillState] of r.queryPaged.skillState.byDue()) {
-        if (skillState.due <= now) {
+      for await (const [
+        ,
+        skillState,
+      ] of r.queryPaged.skillState.byNextReviewAt()) {
+        if (skillState.srs.nextReviewAt <= now) {
           continue;
         }
 
@@ -87,7 +90,10 @@ export default function ReviewsPage() {
               Next review in{` `}
               {formatDuration(
                 intervalToDuration(
-                  interval(new Date(), nextNotYetDueSkillState.data.due),
+                  interval(
+                    new Date(),
+                    nextNotYetDueSkillState.data.srs.nextReviewAt,
+                  ),
                 ),
               )}
             </Text>

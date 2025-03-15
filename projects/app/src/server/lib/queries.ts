@@ -1,6 +1,6 @@
-import { SrsType } from "@/data/model";
+import { SrsState, SrsType } from "@/data/model";
 import { Skill } from "@/data/rizzleSchema";
-import { UpcomingReview, nextReview } from "@/util/fsrs";
+import { FsrsState, nextReview } from "@/util/fsrs";
 import { invariant } from "@haohaohow/lib/invariant";
 import { and, asc, eq } from "drizzle-orm";
 import * as schema from "../schema";
@@ -16,7 +16,7 @@ export async function updateSkillState(
   // `skillState` should be used as the starting point.
 
   // Read all historical skill ratings.
-  const ratings = await tx.query.skillRating.findMany({
+  const skillRatings = await tx.query.skillRating.findMany({
     where: and(
       eq(schema.skillRating.skill, skill),
       eq(schema.skillRating.userId, userId),
@@ -25,29 +25,26 @@ export async function updateSkillState(
   });
 
   // Starting from the null state, apply each skill rating.
-  let state: UpcomingReview | null = null;
-  for (const rr of ratings) {
-    state = nextReview(state, rr.rating, rr.createdAt);
+  let fsrsState: FsrsState | null = null;
+  for (const { rating, createdAt } of skillRatings) {
+    fsrsState = nextReview(fsrsState, rating, createdAt);
   }
 
-  invariant(state !== null);
+  invariant(fsrsState !== null);
 
   // Save the new state.
   {
     const srs = {
       type: SrsType.FsrsFourPointFive,
-      stability: state.stability,
-      difficulty: state.difficulty,
-    } as const;
-    const due = state.due;
-    const createdAt = state.created;
+      ...fsrsState,
+    } satisfies SrsState;
 
     await tx
       .insert(schema.skillState)
-      .values([{ userId, skill, srs, due, createdAt }])
+      .values([{ userId, skill, srs }])
       .onConflictDoUpdate({
         target: [schema.skillState.userId, schema.skillState.skill],
-        set: { srs, due, createdAt },
+        set: { srs },
       });
   }
 }

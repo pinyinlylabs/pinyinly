@@ -5,8 +5,8 @@ import {
   Question,
   QuestionFlag,
   QuestionFlagType,
-  SkillState,
   SkillType,
+  SrsState,
   SrsType,
 } from "@/data/model";
 import { Skill } from "@/data/rizzleSchema";
@@ -29,18 +29,18 @@ export async function questionsForReview(
     skillTypes?: readonly SkillType[];
     sampleSize?: number;
     dueBeforeNow?: boolean;
-    filter?: (skill: Skill, skillState: SkillState) => boolean;
+    filter?: (skill: Skill, srsState: SrsState) => boolean;
     limit?: number;
   },
-): Promise<[Skill, SkillState, Question][]> {
-  const result: [Skill, SkillState, Question][] = [];
+): Promise<[Skill, SrsState, Question][]> {
+  const result: [Skill, SrsState, Question][] = [];
   const now = new Date();
   const skillTypesFilter =
     options?.skillTypes == null ? null : new Set(options.skillTypes);
 
-  for await (const [, skillState] of r.queryPaged.skillState.byDue()) {
+  for await (const [, skillState] of r.queryPaged.skillState.byNextReviewAt()) {
     // Only consider skills that are due for review.
-    if (options?.dueBeforeNow === true && skillState.due > now) {
+    if (options?.dueBeforeNow === true && skillState.srs.nextReviewAt > now) {
       continue;
     }
 
@@ -53,14 +53,14 @@ export async function questionsForReview(
     }
 
     // eslint-disable-next-line unicorn/no-array-callback-reference, unicorn/no-array-method-this-argument
-    if (options?.filter && !options.filter(skillState.skill, skillState)) {
+    if (options?.filter && !options.filter(skillState.skill, skillState.srs)) {
       continue;
     }
 
     try {
       const question = await generateQuestionForSkillOrThrow(skillState.skill);
-      question.flag ??= flagsForSkillState(skillState);
-      result.push([skillState.skill, skillState, question]);
+      question.flag ??= flagsForSrsState(skillState.srs);
+      result.push([skillState.skill, skillState.srs, question]);
     } catch (error) {
       console.error(
         `Error while generating a question for a skill ${JSON.stringify(skillState.skill)}`,
@@ -100,7 +100,7 @@ export async function questionsForReview2(
 
     try {
       const question = await generateQuestionForSkillOrThrow(skill);
-      question.flag ??= flagsForSkillState(skillState);
+      question.flag ??= flagsForSrsState(skillState?.srs);
       result.push(question);
     } catch (error) {
       console.error(
@@ -118,12 +118,12 @@ export async function questionsForReview2(
   return result;
 }
 
-export function flagsForSkillState(
-  skillState: SkillState | undefined,
+export function flagsForSrsState(
+  srsState: SrsState | undefined,
 ): QuestionFlag | undefined {
   if (
-    skillState?.srs?.type !== SrsType.FsrsFourPointFive ||
-    !fsrsIsIntroduced(skillState.srs)
+    srsState?.type !== SrsType.FsrsFourPointFive ||
+    !fsrsIsIntroduced(srsState)
   ) {
     return {
       type: QuestionFlagType.NewSkill,
@@ -131,7 +131,9 @@ export function flagsForSkillState(
   }
   const now = new Date();
   // Something is overdue if its due date was more than 1 day ago.
-  const overdueDate = new Date(skillState.due.getTime() + 24 * 60 * 60 * 1000);
+  const overdueDate = new Date(
+    srsState.nextReviewAt.getTime() + 24 * 60 * 60 * 1000,
+  );
 
   if (now >= overdueDate) {
     return {
@@ -160,12 +162,10 @@ export async function computeSkillReviewQueue(
   const learnedSkills = new Set<Skill>();
   const dueSkillDates = new Map<Skill, Date>();
   for await (const [, v] of r.queryPaged.skillState.scan()) {
-    if (v.srs) {
-      if (fsrsIsLearned(v.srs)) {
-        learnedSkills.add(v.skill);
-      } else if (fsrsIsIntroduced(v.srs)) {
-        dueSkillDates.set(v.skill, v.due);
-      }
+    if (fsrsIsLearned(v.srs)) {
+      learnedSkills.add(v.skill);
+    } else if (fsrsIsIntroduced(v.srs)) {
+      dueSkillDates.set(v.skill, v.srs.nextReviewAt);
     }
   }
 
