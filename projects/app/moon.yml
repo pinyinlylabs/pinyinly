@@ -155,7 +155,6 @@ tasks:
     # references so there just needs to be one tsconfig that is used for all
     # files.
     command: tsx --tsconfig tsconfig.node.json
-    preset: watcher
     options:
       envFile: .env.local
     env:
