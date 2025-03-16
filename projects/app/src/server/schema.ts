@@ -12,6 +12,26 @@ import {
   zodJson,
 } from "./schemaUtil";
 
+export const cvrEntity = z.record(
+  z.string({ description: `DB \`id\` primary keys` }),
+  z
+    .string({
+      description: `in the format <xmin>:<replicacheEntityKey>. storing \`replicacheEntityKey>\` makes it possible to construct \`dels\` after the row is deleted`,
+    })
+    .optional(),
+);
+
+export const cvrEntitiesSchema = z.record(
+  z.union([
+    z.literal(`pinyinInitialAssociation`),
+    z.literal(`pinyinFinalAssociation`),
+    z.literal(`pinyinInitialGroupTheme`),
+    z.literal(`skillState`),
+    z.literal(`skillRating`),
+  ]),
+  cvrEntity,
+);
+
 export const schema = pg.pgSchema(`haohaohow`);
 
 export const user = schema.table(`user`, {
@@ -175,6 +195,9 @@ export const replicacheClient = schema.table(
       .text(`clientGroupId`)
       .references(() => replicacheClientGroup.id)
       .notNull(),
+    /**
+     * The most recently accepted-by-the-server mutation ID for that client.
+     */
     lastMutationId: pg.integer(`lastMutationId`).notNull(),
     updatedAt: pg.timestamp(`timestamp`).defaultNow().notNull(),
   },
@@ -227,16 +250,7 @@ export const replicacheCvr = schema.table(`replicacheCvr`, {
    * necessary to keep a copy of the whole entity because keys can be encoded
    * using arbitrary inputs.
    */
-  entities: zodJson(
-    `entities`,
-    z.record(
-      z.string(), // tableName
-      z.record(
-        z.string(), // primaryKey
-        z.string(), // <version>:<replicacheEntityKey>
-      ),
-    ),
-  ).notNull(),
+  entities: zodJson(`entities`, cvrEntitiesSchema).notNull(),
   createdAt: pg.timestamp(`createdAt`).defaultNow().notNull(),
 });
 

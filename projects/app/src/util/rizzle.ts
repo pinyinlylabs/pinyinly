@@ -1121,6 +1121,9 @@ export const pullRequestSchema = z
 export type PullRequest = z.infer<typeof pullRequestSchema>;
 
 export const pullOkResponseSchema = z.object({
+  partial: z.boolean({
+    description: `if true only partial results were returned and another pull request should be made`,
+  }),
   cookie: cookieSchema,
   lastMutationIdChanges: z.record(z.number()),
   patch: z.array(

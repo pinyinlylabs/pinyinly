@@ -181,59 +181,77 @@ export async function push(
   });
 }
 
-const cvrEntriesSchema = z
-  .object({
-    pinyinInitialAssociation: z.record(z.string()),
-    pinyinFinalAssociation: z.record(z.string()),
-    pinyinInitialGroupTheme: z.record(z.string()),
-    skillState: z.record(z.string()),
-    skillRating: z.record(z.string()),
-  })
-  .partial();
-
-type CvrEntities = z.infer<typeof cvrEntriesSchema>;
-
-export type CvrEntitiesDiff = { [K in keyof CvrEntities]?: CvrEntityDiff };
-export type CvrEntityDiff = {
+type CvrEntity = z.infer<typeof s.cvrEntity>;
+type CvrEntities = z.infer<typeof s.cvrEntitiesSchema>;
+type CvrEntityDiff = {
   puts: string[];
   dels: string[];
 };
+type CvrEntitiesDiff = { [K in keyof CvrEntities]?: CvrEntityDiff };
+
+function computeCvrEntitiesDiff(
+  prev: CvrEntities,
+  all: CvrEntities,
+  opLimit = 100,
+): {
+  nextEntitiesDiff: CvrEntitiesDiff;
+  nextCvrEntities: CvrEntities;
+  partial: boolean;
+} {
+  const next: CvrEntities = {};
+  const nextEntitiesDiff: CvrEntitiesDiff = {};
+  const entityNames = [
+    ...new Set([...Object.keys(prev), ...Object.keys(all)]),
+  ] as (keyof CvrEntities)[];
+
+  let opCount = 0;
+  // Enforce a finite number of operations to avoid unbounded server work and
+  // subsequent request timeouts.
+  for (const entityName of entityNames) {
+    const prevEntries: CvrEntity = prev[entityName] ?? {};
+    const nextEntries = (next[entityName] = { ...prevEntries } as CvrEntity);
+    const allEntries = all[entityName] ?? {};
+    const puts = [];
+    const dels = [];
+
+    for (const [id, value] of Object.entries(allEntries)) {
+      if (prevEntries[id] !== allEntries[id]) {
+        opCount++;
+        if (opCount <= opLimit) {
+          nextEntries[id] = value;
+          puts.push(id);
+        }
+      }
+    }
+
+    for (const id of Object.keys(prevEntries)) {
+      if (allEntries[id] === undefined) {
+        opCount++;
+        if (opCount <= opLimit) {
+          const parts = prevEntries[id]?.match(/^(.+?):(.+)$/);
+          invariant(parts != null);
+          const [, _xmin, key] = parts;
+          invariant(key != null);
+          dels.push(key);
+          nextEntries[id] = undefined;
+        }
+      }
+    }
+
+    nextEntitiesDiff[entityName] = { puts, dels };
+  }
+  return {
+    nextEntitiesDiff,
+    nextCvrEntities: next,
+    partial: opCount > opLimit,
+  };
+}
 
 function diffLastMutationIds(
   prev: Record<string, number>,
   next: Record<string, number>,
 ) {
   return pickBy(next, (v, k) => prev[k] !== v);
-}
-
-function diffCvrEntities(
-  prev: CvrEntities,
-  next: CvrEntities,
-): CvrEntitiesDiff {
-  const r: CvrEntitiesDiff = {};
-  const names = [
-    ...new Set([...Object.keys(prev), ...Object.keys(next)]),
-  ] as (keyof CvrEntities)[];
-  for (const name of names) {
-    const prevEntries = prev[name] ?? {};
-    const nextEntries = next[name] ?? {};
-    r[name] = {
-      puts: Object.keys(nextEntries).filter(
-        (id) =>
-          prevEntries[id] === undefined || prevEntries[id] !== nextEntries[id],
-      ),
-      dels: Object.keys(prevEntries)
-        .filter((id) => nextEntries[id] === undefined)
-        .map((id) => {
-          const parts = prevEntries[id]?.match(/^(.+?):(.+)$/);
-          invariant(parts != null);
-          const [, _xmin, key] = parts;
-          invariant(key != null);
-          return key;
-        }),
-    };
-  }
-  return r;
 }
 
 function isCvrDiffEmpty(diff: CvrEntitiesDiff) {
@@ -324,17 +342,20 @@ export async function pull(
         });
 
         // 8: Build nextCVR
-        const nextCvrEntities = await computeCvrEntities(tx, userId, schema);
+        const allCvrEntities = await computeCvrEntities(tx, userId, schema);
+
+        const {
+          nextEntitiesDiff: entitiesDiff,
+          nextCvrEntities,
+          partial,
+        } = computeCvrEntitiesDiff(prevCvr?.entities ?? {}, allCvrEntities);
+
         const nextCvrLastMutationIds = Object.fromEntries(
           clients.map((c) => [c.id, c.lastMutationId]),
         );
         debug(`%o`, { nextCvrEntities, nextCvrLastMutationIds });
 
         // 9: calculate diffs
-        const entitiesDiff = diffCvrEntities(
-          prevCvr?.entities ?? {},
-          nextCvrEntities,
-        );
         const lastMutationIdsDiff = diffLastMutationIds(
           prevCvr?.lastMutationIds ?? {},
           nextCvrLastMutationIds,
@@ -424,6 +445,7 @@ export async function pull(
           },
           lastMutationIdChanges: lastMutationIdsDiff,
           nextCvrVersion,
+          partial,
         };
       }),
     );
@@ -434,11 +456,17 @@ export async function pull(
         cookie: pullRequest.cookie,
         lastMutationIdChanges: {},
         patch: [],
+        partial: false,
       };
     }
 
-    const { entityPatches, nextCvr, nextCvrVersion, lastMutationIdChanges } =
-      txResult;
+    const {
+      entityPatches,
+      nextCvr,
+      nextCvrVersion,
+      lastMutationIdChanges,
+      partial,
+    } = txResult;
 
     // 16-17: store cvr
     const [cvr] = await tx
@@ -530,6 +558,7 @@ export async function pull(
       cookie: nextCookie,
       lastMutationIdChanges,
       patch,
+      partial,
     };
   });
 }

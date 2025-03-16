@@ -34,7 +34,7 @@ function ReplicacheProviderWithDeps({
   const { replicacheDbName, serverSessionId } = auth.clientSession;
   const isAuthenticated = serverSessionId != null;
   const rizzle = useMemo(() => {
-    return r.replicache(
+    const rizzle = r.replicache(
       {
         name: replicacheDbName,
         licenseKey:
@@ -89,17 +89,33 @@ function ReplicacheProviderWithDeps({
                 profileId: requestBody.profileID,
                 pullVersion: requestBody.pullVersion,
                 schemaVersion: requestBody.schemaVersion,
-              }).then(
-                (r) =>
-                  // More casing conventions mapping.
-                  (`error` in r
-                    ? r
-                    : {
-                        lastMutationIDChanges: r.lastMutationIdChanges,
-                        patch: r.patch,
-                        cookie: r.cookie,
-                      }) satisfies PullResponseV1,
-              );
+              }).then((r): PullResponseV1 => {
+                // More casing conventions mapping.
+                if (`error` in r) {
+                  return r;
+                }
+
+                if (r.partial) {
+                  setTimeout(() => {
+                    if (!rizzle.replicache.closed) {
+                      rizzle.replicache
+                        .pull({ now: true })
+                        .catch((error: unknown) => {
+                          console.error(
+                            `Error pulling after partial pull`,
+                            error,
+                          );
+                        });
+                    }
+                  }, 0);
+                }
+
+                return {
+                  lastMutationIDChanges: r.lastMutationIdChanges,
+                  patch: r.patch,
+                  cookie: r.cookie,
+                };
+              });
 
               return await trpcToReplicache(response);
             }
@@ -108,6 +124,7 @@ function ReplicacheProviderWithDeps({
       v7,
       v7Mutators,
     );
+    return rizzle;
   }, [replicacheDbName, isAuthenticated, pushMutate, pullMutate]);
 
   // Reset state when
