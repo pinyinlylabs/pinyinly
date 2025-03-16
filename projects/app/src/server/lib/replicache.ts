@@ -193,7 +193,7 @@ type CvrEntitiesDiff = { [K in keyof CvrEntities]?: CvrEntityDiff };
 function computeCvrEntitiesDiff(
   prev: CvrEntities,
   all: CvrEntities,
-  opLimit = 100,
+  opLimit = 1000,
 ): {
   nextEntitiesDiff: CvrEntitiesDiff;
   nextCvrEntities: CvrEntities;
