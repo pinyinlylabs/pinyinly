@@ -2648,7 +2648,7 @@ __metadata:
     "@types/fontkit": "npm:2.0.x"
     "@types/lodash": "npm:4.17.x"
     "@types/node": "patch:@types/node@patch%3A@types/node@npm%253A22.10.2%23~/.yarn/patches/@types-node-npm-22.10.2-572466b048.patch%3A%3Aversion=22.10.2&hash=819d81#~/.yarn/patches/@types-node-patch-8935673d40.patch"
-    "@types/pg": "npm:^8 <=8.12.x"
+    "@types/pg": "patch:@types/pg@npm%3A8.11.11#~/.yarn/patches/@types-pg-npm-8.11.11-c5a8a91498.patch"
     "@types/react": "npm:18.3.x"
     "@types/react-dom": "npm:18.3.x"
     "@types/ws": "npm:^8 <=8.17.x"
@@ -2709,8 +2709,8 @@ __metadata:
     nativewind: "patch:nativewind@npm%3A4.1.23#~/.yarn/patches/nativewind-npm-4.1.23-ea5a3f1461.patch"
     openai: "npm:^4.68.4"
     oslo: "npm:^1.2.1"
-    pg: "npm:^8.12.0"
-    pg-protocol: "npm:^1.7.0"
+    pg: "npm:^8.14.0"
+    pg-protocol: "npm:^1.8.0"
     postmark: "npm:^4.0.5"
     prettier: "npm:^3.4.2"
     prettier-plugin-tailwindcss: "npm:^0.6.9"
@@ -5691,7 +5691,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/pg@npm:*, @types/pg@npm:^8 <=8.12.x":
+"@types/pg@npm:8.11.11":
   version: 8.11.11
   resolution: "@types/pg@npm:8.11.11"
   dependencies:
@@ -5702,14 +5702,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/pg@npm:8.6.1":
-  version: 8.6.1
-  resolution: "@types/pg@npm:8.6.1"
+"@types/pg@patch:@types/pg@npm%3A8.11.11#~/.yarn/patches/@types-pg-npm-8.11.11-c5a8a91498.patch":
+  version: 8.11.11
+  resolution: "@types/pg@patch:@types/pg@npm%3A8.11.11#~/.yarn/patches/@types-pg-npm-8.11.11-c5a8a91498.patch::version=8.11.11&hash=0c5458"
   dependencies:
     "@types/node": "npm:*"
     pg-protocol: "npm:*"
-    pg-types: "npm:^2.2.0"
-  checksum: 10c0/8d16660c9a4f050d6d5e391c59f9a62e9d377a2a6a7eb5865f8828082dbdfeab700fd707e585f42d67b29e796b32863aea5bd6d5cbb8ceda2d598da5d0c61693
+    pg-types: "npm:^4.0.1"
+  checksum: 10c0/f6147a75ebb7d623d2b159e282727b0c103285550e9c4a3bb3db4c14eb6a802a93eb2f1af9fab763c10d70d97f5826f2000e3cd19718948f4b2999fff3525efd
   languageName: node
   linkType: hard
 
@@ -14145,23 +14145,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pg-pool@npm:^3.7.1":
-  version: 3.7.1
-  resolution: "pg-pool@npm:3.7.1"
+"pg-pool@npm:^3.8.0":
+  version: 3.8.0
+  resolution: "pg-pool@npm:3.8.0"
   peerDependencies:
     pg: ">=8.0"
-  checksum: 10c0/65bff013102684774f4cfdffbfe0a2b0614252234561d391608f7fd915477e44f5fd0e1968ecc2f42032dcf8bac241d2f724c4f3df90384567d22df37dd3b6ba
+  checksum: 10c0/c05287b0caafeab43807e6ad22d153c09c473dbeb5b2cea13b83102376e9a56f46b91fa9adf9d53885ce198280c6a95555390987c42b3858d1936d3e0cdc83aa
   languageName: node
   linkType: hard
 
-"pg-protocol@npm:*, pg-protocol@npm:^1.7.0, pg-protocol@npm:^1.7.1":
-  version: 1.7.1
-  resolution: "pg-protocol@npm:1.7.1"
-  checksum: 10c0/3168d407ddc4c0fa2403eb9b49205399d4bc53dadbafdfcc5d25fa61b860a31c25df25704cf14c8140c80f0a41061d586e5fd5ce9bf800dfb91e9ce810bc2c37
+"pg-protocol@npm:*, pg-protocol@npm:^1.8.0":
+  version: 1.8.0
+  resolution: "pg-protocol@npm:1.8.0"
+  checksum: 10c0/2be784955599d84b564795952cee52cc2b8eab0be43f74fc1061506353801e282c1d52c9e0691a9b72092c1f3fde370e9b181e80fef6bb82a9b8d1618bfa91e6
   languageName: node
   linkType: hard
 
-"pg-types@npm:^2.1.0, pg-types@npm:^2.2.0":
+"pg-types@npm:^2.1.0":
   version: 2.2.0
   resolution: "pg-types@npm:2.2.0"
   dependencies:
@@ -14189,14 +14189,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pg@npm:^8.12.0":
-  version: 8.13.3
-  resolution: "pg@npm:8.13.3"
+"pg@npm:^8.14.0":
+  version: 8.14.0
+  resolution: "pg@npm:8.14.0"
   dependencies:
     pg-cloudflare: "npm:^1.1.1"
     pg-connection-string: "npm:^2.7.0"
-    pg-pool: "npm:^3.7.1"
-    pg-protocol: "npm:^1.7.1"
+    pg-pool: "npm:^3.8.0"
+    pg-protocol: "npm:^1.8.0"
     pg-types: "npm:^2.1.0"
     pgpass: "npm:1.x"
   peerDependencies:
@@ -14207,7 +14207,7 @@ __metadata:
   peerDependenciesMeta:
     pg-native:
       optional: true
-  checksum: 10c0/7296f0e5930b35faef471be2673210cda553b30f1b8e9d176fcc286aa43248e17e09336032bf5a6bba55d2cc2d03afb8a407b5a6e6bc56ebb331c02d1a7ccc05
+  checksum: 10c0/14d9fe726189107b028d5603b299776d039e36ed657c99057bcc1c125f889cb46536e0c48c6d98952231733c788f98c631bf74d5f8c9cbf85c4ac7c0a119b8b4
   languageName: node
   linkType: hard
 

@@ -48,7 +48,7 @@ tasks:
       yarn expo export -p web --source-maps --output-dir @group(buildVercelExpoOutdir)
     inputs:
       - "@group(expoCliEnv)"
-      - "*.{json,js}"
+      - "*.*"
       - "{api,assets,public,src}/**/*"
     options:
       shell: true
@@ -81,9 +81,12 @@ tasks:
       runInCI: false
 
   dbMigrate:
-    extends: tsx
-    args: ./bin/dbMigrate.ts
+    command: tsx --tsconfig tsconfig.node.json ./bin/dbMigrate.ts
     preset: watcher
+    options:
+      envFile: .env.local
+    env:
+      NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
 
   deploy:
     deps:
@@ -146,51 +149,61 @@ tasks:
       # Pass $NODE_OPTIONS to support VS Code "JavaScript Debug Terminal".
       NODE_OPTIONS: --import tsx $NODE_OPTIONS
 
-  tsx:
-    # tsx seems to load the tsconfig.json from the current directory, so it's
-    # necessary explicitly specify it. It also doesn't seem to respect project
-    # references so there just needs to be one tsconfig that is used for all
-    # files.
-    command: tsx --tsconfig tsconfig.node.json
+  formatAssetJson:
+    command: tsx --tsconfig tsconfig.node.json ./bin/formatAssetJson.ts
+    preset: watcher
     options:
       envFile: .env.local
     env:
       NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
 
-  formatAssetJson:
-    extends: tsx
-    args: ./bin/formatAssetJson.ts
-    preset: watcher
-
   generateHanziDecomposition:
-    extends: tsx
-    args: ./bin/generateHanziDecomposition.ts
+    command: tsx --tsconfig tsconfig.node.json ./bin/generateHanziDecomposition.ts
     preset: watcher
+    options:
+      envFile: .env.local
+    env:
+      NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
 
   generateMissingFontGlyphs:
-    extends: tsx
-    args: ./bin/generateMissingFontGlyphs.ts
+    command: tsx --tsconfig tsconfig.node.json ./bin/generateMissingFontGlyphs.ts
     preset: watcher
+    options:
+      envFile: .env.local
+    env:
+      NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
 
   generateMnemonicTheme:
-    extends: tsx
-    args: ./bin/generateMnemonicTheme.ts
+    command: tsx --tsconfig tsconfig.node.json ./bin/generateMnemonicTheme.ts
     preset: watcher
+    options:
+      envFile: .env.local
+    env:
+      NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
 
   generateRadicalNameMnemonics:
-    extends: tsx
-    args: ./bin/generateRadicalNameMnemonics.ts
+    command: tsx --tsconfig tsconfig.node.json ./bin/generateRadicalNameMnemonics.ts
     preset: watcher
+    options:
+      envFile: .env.local
+    env:
+      NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
 
   generateRadicalPinyinMnemonics:
-    extends: tsx
-    args: ./bin/generateRadicalPinyinMnemonics.ts
+    command: tsx --tsconfig tsconfig.node.json ./bin/generateRadicalPinyinMnemonics.ts
     preset: watcher
+    options:
+      envFile: .env.local
+    env:
+      NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
 
   generateWordDictionary:
-    extends: tsx
-    args: ./bin/generateWordDictionary.tsx
+    command: tsx --tsconfig tsconfig.node.json ./bin/generateWordDictionary.tsx
     preset: watcher
+    options:
+      envFile: .env.local
+    env:
+      NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
 
   expoDoctor:
     command: npx -y expo-doctor@1.12.8
@@ -218,17 +231,27 @@ tasks:
       NODE_OPTIONS: --import tsx $NODE_OPTIONS
 
   test:
-    extends: tsx
-    args: --test --test-reporter=spec --import ./test/setup.ts --experimental-test-module-mocks "'test/**/*.test.{ts,tsx}'"
+    # tsx seems to load the tsconfig.json from the current directory, so it's
+    # necessary explicitly specify it as `tsconfig.node.json`. It also doesn't
+    # seem to respect project references so there just needs to be one tsconfig
+    # that is used for all files.
+    command: tsx --tsconfig tsconfig.node.json --test --test-reporter=spec --import ./test/setup.ts --experimental-test-module-mocks "'test/**/*.test.{ts,tsx}'"
     inputs:
       - "!dist/"
       - "**/*"
       - "/.github/workflows" # There is a test that checks workflow environment variables.
+    options:
+      envFile: .env.local
+    env:
+      NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
 
   testWatch:
-    extends: tsx
-    args: --test --watch --import ./test/setup.ts --experimental-test-module-mocks "'test/**/*.test.{ts,tsx}'"
+    command: tsx --tsconfig tsconfig.node.json --test --watch --import ./test/setup.ts --experimental-test-module-mocks "'test/**/*.test.{ts,tsx}'"
     preset: watcher
+    options:
+      envFile: .env.local
+    env:
+      NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
 
   typecheck:
     deps:

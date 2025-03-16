@@ -18,7 +18,7 @@
   },
   "resolutions": {
     "@testing-library/user-event@npm:14.3.0": "npm:@testing-library/user-event@^14.5.0",
-    "@types/pg@npm:8.11.6": "npm:^8 <=8.12.x",
+    "@types/pg@npm:8.11.6": "patch:@types/pg@npm%3A8.11.11#~/.yarn/patches/@types-pg-npm-8.11.11-c5a8a91498.patch",
     "@sentry/types@npm:^8.48.0": "8.48.0",
     "debug@npm:^4.1.0": "4.3.4",
     "debug@npm:^4.1.1": "4.3.4",
@@ -57,6 +57,8 @@
     "nanoid@npm:^3.3.7": "patch:nanoid@npm%3A5.1.2#~/.yarn/patches/nanoid-npm-5.1.2-40381f6f88.patch",
     "typescript@npm:~5.5.2": "patch:typescript@npm%3A5.8.2#~/.yarn/patches/typescript-npm-5.8.2-b95d637f6a.patch",
     "typescript@npm:^5.7.3": "patch:typescript@npm%3A5.8.2#~/.yarn/patches/typescript-npm-5.8.2-b95d637f6a.patch",
-    "@expo/cli@npm:0.22.20": "patch:@expo/cli@npm%3A0.22.20#~/.yarn/patches/@expo-cli-npm-0.22.20-0232ba978d.patch"
+    "@expo/cli@npm:0.22.20": "patch:@expo/cli@npm%3A0.22.20#~/.yarn/patches/@expo-cli-npm-0.22.20-0232ba978d.patch",
+    "@types/pg@npm:8.6.1": "patch:@types/pg@npm%3A8.11.11#~/.yarn/patches/@types-pg-npm-8.11.11-c5a8a91498.patch",
+    "@types/pg@npm:*": "patch:@types/pg@npm%3A8.11.11#~/.yarn/patches/@types-pg-npm-8.11.11-c5a8a91498.patch"
   }
 }
