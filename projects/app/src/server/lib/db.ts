@@ -16,11 +16,11 @@ export type Drizzle = NodePgDatabase<typeof schema>;
 export type Transaction = Parameters<Parameters<Drizzle[`transaction`]>[0]>[0];
 export type TransactionBodyFn<R> = (tx: Transaction) => Promise<R>;
 
-const envSchema = z.object({ DATABASE_URL: z.string() });
+const envSchema = z.object({ DATABASE_URL: z.string().optional() });
 
 export async function createPool(): Promise<PgPool> {
   const env = envSchema.parse(process.env);
-  const IS_NEON = env.DATABASE_URL.includes(`neon.tech`);
+  const IS_NEON = env.DATABASE_URL?.includes(`neon.tech`) === true;
 
   let Pool: typeof PgPool;
   if (IS_NEON) {

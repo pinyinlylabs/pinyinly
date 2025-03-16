@@ -5,10 +5,8 @@
     "target": "ESNext",
     "moduleResolution": "NodeNext",
     "lib": ["ESNext"],
-    "composite": true,
     "jsx": "react-jsx",
-    "outDir": "../../../.moon/cache/types/projects/app-bin",
-    "strict": true
+    "outDir": "../../../.moon/cache/types/projects/app-bin"
   },
   "include": ["**/*", "../src/types/**/*.ts"],
   "references": [

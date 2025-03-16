@@ -1,0 +1,12 @@
+# `vercel dev` has a filesystem watcher that opens a file descriptor for every
+# file in scope, which can easily exhaust the limit on open file descriptors and
+# cause problems like "Error: spawn EBADF" when trying to start a child process
+# because when it tries to create a pipe to communicate with the child process,
+# it needs a file descriptor, but it can't get one because the limit has been
+# reached.
+# 
+# The `ios` and `android` directories are used when building a development build
+# with the expo-dev-client and contain a large number of files which causes this
+# problem to occur.
+ios
+android

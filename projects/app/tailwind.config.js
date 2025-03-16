@@ -150,7 +150,7 @@ module.exports = {
     },
   },
   plugins: [
-    /** @param {import('tailwindcss/types/config').PluginAPI} api */
+    /** @param {import('tailwindcss/types/config.d.ts').PluginAPI} api */
     ({ addBase }) => {
       // Set a default value on the `:root` element
       addBase({
