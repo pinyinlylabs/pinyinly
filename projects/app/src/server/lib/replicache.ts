@@ -20,6 +20,7 @@ import {
   VersionNotSupportedResponse,
 } from "@/util/rizzle";
 import { invariant } from "@haohaohow/lib/invariant";
+import { startSpan } from "@sentry/core";
 import makeDebug from "debug";
 import { and, eq, gt, inArray, sql } from "drizzle-orm";
 import chunk from "lodash/chunk";
@@ -108,74 +109,76 @@ function getSchemaImpl(schemaVersion: string) {
 export async function push(
   tx: Drizzle,
   userId: string,
-  push: PushRequest,
+  pushRequest: PushRequest,
 ): Promise<PushResponse> {
-  const mutate = getSchemaImpl(push.schemaVersion)?.mutate;
-  if (mutate == null) {
-    return {
-      error: `VersionNotSupported`,
-      versionType: `schema`,
-    } satisfies VersionNotSupportedResponse;
-  }
-
-  if (push.pushVersion !== 1) {
-    return {
-      error: `VersionNotSupported`,
-      versionType: `push`,
-    } satisfies VersionNotSupportedResponse;
-  }
-
-  // Required as per https://doc.replicache.dev/concepts/db-isolation-level
-  await assertMinimumIsolationLevel(tx, `repeatable read`);
-
-  const mutationRecords: (typeof s.replicacheMutation.$inferInsert)[] = [];
-
-  for (const mutation of push.mutations) {
-    let success;
-    let notSkipped;
-    try {
-      notSkipped = await processMutation(
-        tx,
-        userId,
-        push.clientGroupId,
-        push.schemaVersion,
-        mutation,
-        false,
-        mutate,
-      );
-      success = true;
-    } catch {
-      notSkipped = await processMutation(
-        tx,
-        userId,
-        push.clientGroupId,
-        push.schemaVersion,
-        mutation,
-        true,
-        mutate,
-      );
-      success = false;
+  return await startSpan({ name: push.name }, async () => {
+    const mutate = getSchemaImpl(pushRequest.schemaVersion)?.mutate;
+    if (mutate == null) {
+      return {
+        error: `VersionNotSupported`,
+        versionType: `schema`,
+      } satisfies VersionNotSupportedResponse;
     }
 
-    // Save the mutations as a backup in case they need to be replayed later or
-    // transferred to another database (e.g. local <-> production).
-    //
-    // This also needs to be done _last_ so that foreign keys to other tables
-    // exist (e.g. client).
-    if (notSkipped) {
-      mutationRecords.push({
-        clientId: mutation.clientId,
-        mutationId: mutation.id,
-        mutation,
-        success,
-        processedAt: new Date(),
-      });
+    if (pushRequest.pushVersion !== 1) {
+      return {
+        error: `VersionNotSupported`,
+        versionType: `push`,
+      } satisfies VersionNotSupportedResponse;
     }
-  }
 
-  if (mutationRecords.length > 0) {
-    await tx.insert(s.replicacheMutation).values(mutationRecords);
-  }
+    // Required as per https://doc.replicache.dev/concepts/db-isolation-level
+    await assertMinimumIsolationLevel(tx, `repeatable read`);
+
+    const mutationRecords: (typeof s.replicacheMutation.$inferInsert)[] = [];
+
+    for (const mutation of pushRequest.mutations) {
+      let success;
+      let notSkipped;
+      try {
+        notSkipped = await processMutation(
+          tx,
+          userId,
+          pushRequest.clientGroupId,
+          pushRequest.schemaVersion,
+          mutation,
+          false,
+          mutate,
+        );
+        success = true;
+      } catch {
+        notSkipped = await processMutation(
+          tx,
+          userId,
+          pushRequest.clientGroupId,
+          pushRequest.schemaVersion,
+          mutation,
+          true,
+          mutate,
+        );
+        success = false;
+      }
+
+      // Save the mutations as a backup in case they need to be replayed later or
+      // transferred to another database (e.g. local <-> production).
+      //
+      // This also needs to be done _last_ so that foreign keys to other tables
+      // exist (e.g. client).
+      if (notSkipped) {
+        mutationRecords.push({
+          clientId: mutation.clientId,
+          mutationId: mutation.id,
+          mutation,
+          success,
+          processedAt: new Date(),
+        });
+      }
+    }
+
+    if (mutationRecords.length > 0) {
+      await tx.insert(s.replicacheMutation).values(mutationRecords);
+    }
+  });
 }
 
 const cvrEntriesSchema = z
@@ -246,266 +249,289 @@ function isCvrLastMutationIdsDiffEmpty(diff: Record<string, number>) {
 export async function pull(
   tx: Drizzle,
   userId: string,
-  pull: PullRequest,
+  pullRequest: PullRequest,
 ): Promise<
   PullOkResponse | VersionNotSupportedResponse | ClientStateNotFoundResponse
 > {
-  const schema = getSchemaImpl(pull.schemaVersion)?.schema;
-  if (schema == null) {
-    return {
-      error: `VersionNotSupported`,
-      versionType: `schema`,
-    } satisfies VersionNotSupportedResponse;
-  }
+  return await startSpan({ name: pull.name }, async () => {
+    const schema = getSchemaImpl(pullRequest.schemaVersion)?.schema;
+    if (schema == null) {
+      return {
+        error: `VersionNotSupported`,
+        versionType: `schema`,
+      } satisfies VersionNotSupportedResponse;
+    }
 
-  // Required as per https://doc.replicache.dev/concepts/db-isolation-level
-  await assertMinimumIsolationLevel(tx, `repeatable read`);
+    // Required as per https://doc.replicache.dev/concepts/db-isolation-level
+    await assertMinimumIsolationLevel(tx, `repeatable read`);
 
-  const { clientGroupId, cookie } = pull;
+    const { clientGroupId, cookie } = pullRequest;
 
-  // 1: Fetch prevCVR
-  const prevCvr =
-    cookie == null
-      ? null
-      : await tx.query.replicacheCvr.findFirst({
-          where: (p, { eq }) => eq(p.id, cookie.cvrId),
-        });
+    // 1: Fetch prevCVR
+    const prevCvr =
+      cookie == null
+        ? null
+        : await tx.query.replicacheCvr.findFirst({
+            where: (p, { eq }) => eq(p.id, cookie.cvrId),
+          });
 
-  // 2: Init baseCVR
-  // n/a
+    // 2: Init baseCVR
+    // n/a
 
-  async function withSerializationRetries<T>(
-    result: Promise<T>,
-    retryCount = 3,
-  ): Promise<T> {
-    for (
-      let remainingRetries = retryCount;
-      remainingRetries > 0;
-      remainingRetries--
-    ) {
-      try {
-        return await result;
-      } catch (error) {
-        if (
-          error instanceof DatabaseError &&
-          error.code === `40001` && // Serialization failure, retry
-          remainingRetries === 0
-        ) {
-          throw error;
+    // eslint-disable-next-line unicorn/consistent-function-scoping
+    async function withSerializationRetries<T>(
+      result: Promise<T>,
+      retryCount = 3,
+    ): Promise<T> {
+      for (
+        let remainingRetries = retryCount;
+        remainingRetries > 0;
+        remainingRetries--
+      ) {
+        try {
+          return await result;
+        } catch (error) {
+          if (
+            error instanceof DatabaseError &&
+            error.code === `40001` && // Serialization failure, retry
+            remainingRetries === 0
+          ) {
+            throw error;
+          }
         }
       }
+
+      return await result;
     }
 
-    return await result;
-  }
+    // 3: begin transaction
+    const txResult = await withSerializationRetries(
+      tx.transaction(async (tx) => {
+        // 4-5: getClientGroup(body.clientGroupID), verify user
+        const prevClientGroup = await getClientGroup(tx, {
+          userId,
+          clientGroupId,
+          schemaVersion: pullRequest.schemaVersion,
+        });
+        debug(`%o`, { prevClientGroup });
 
-  // 3: begin transaction
-  const txResult = await withSerializationRetries(
-    tx.transaction(async (tx) => {
-      // 4-5: getClientGroup(body.clientGroupID), verify user
-      const prevClientGroup = await getClientGroup(tx, {
-        userId,
-        clientGroupId,
-        schemaVersion: pull.schemaVersion,
-      });
-      debug(`%o`, { prevClientGroup });
+        // 6: Read all domain data, just ids and versions
+        // n/a
 
-      // 6: Read all domain data, just ids and versions
-      // n/a
+        // 7: Read all clients in CG
+        const clients = await tx.query.replicacheClient.findMany({
+          where: (t) => eq(t.clientGroupId, clientGroupId),
+        });
 
-      // 7: Read all clients in CG
-      const clients = await tx.query.replicacheClient.findMany({
-        where: (t) => eq(t.clientGroupId, clientGroupId),
-      });
+        // 8: Build nextCVR
+        const nextCvrEntities = await computeCvrEntities(tx, userId, schema);
+        const nextCvrLastMutationIds = Object.fromEntries(
+          clients.map((c) => [c.id, c.lastMutationId]),
+        );
+        debug(`%o`, { nextCvrEntities, nextCvrLastMutationIds });
 
-      // 8: Build nextCVR
-      const nextCvrEntities = await computeCvrEntities(tx, userId, schema);
-      const nextCvrLastMutationIds = Object.fromEntries(
-        clients.map((c) => [c.id, c.lastMutationId]),
-      );
-      debug(`%o`, { nextCvrEntities, nextCvrLastMutationIds });
+        // 9: calculate diffs
+        const entitiesDiff = diffCvrEntities(
+          prevCvr?.entities ?? {},
+          nextCvrEntities,
+        );
+        const lastMutationIdsDiff = diffLastMutationIds(
+          prevCvr?.lastMutationIds ?? {},
+          nextCvrLastMutationIds,
+        );
+        debug(`%o`, { entitiesDiff, lastMutationIdsDiff });
 
-      // 9: calculate diffs
-      const entitiesDiff = diffCvrEntities(
-        prevCvr?.entities ?? {},
-        nextCvrEntities,
-      );
-      const lastMutationIdsDiff = diffLastMutationIds(
-        prevCvr?.lastMutationIds ?? {},
-        nextCvrLastMutationIds,
-      );
-      debug(`%o`, { entitiesDiff, lastMutationIdsDiff });
+        // 10: If diff is empty, return no-op PR
+        if (
+          prevCvr &&
+          isCvrDiffEmpty(entitiesDiff) &&
+          isCvrLastMutationIdsDiffEmpty(lastMutationIdsDiff)
+        ) {
+          return null;
+        }
 
-      // 10: If diff is empty, return no-op PR
-      if (
-        prevCvr &&
-        isCvrDiffEmpty(entitiesDiff) &&
-        isCvrLastMutationIdsDiffEmpty(lastMutationIdsDiff)
-      ) {
-        return null;
-      }
+        // 11: get entities
+        const [
+          pinyinFinalAssociations,
+          pinyinInitialAssociations,
+          pinyinInitialGroupThemes,
+          skillStates,
+          skillRatings,
+        ] = await Promise.all([
+          tx.query.pinyinFinalAssociation.findMany({
+            where: (t) =>
+              inArray(t.id, entitiesDiff.pinyinFinalAssociation?.puts ?? []),
+          }),
+          tx.query.pinyinInitialAssociation.findMany({
+            where: (t) =>
+              inArray(t.id, entitiesDiff.pinyinInitialAssociation?.puts ?? []),
+          }),
+          tx.query.pinyinInitialGroupTheme.findMany({
+            where: (t) =>
+              inArray(t.id, entitiesDiff.pinyinInitialGroupTheme?.puts ?? []),
+          }),
+          tx.query.skillState.findMany({
+            where: (t) => inArray(t.id, entitiesDiff.skillState?.puts ?? []),
+          }),
+          tx.query.skillRating.findMany({
+            where: (t) => inArray(t.id, entitiesDiff.skillRating?.puts ?? []),
+          }),
+        ]);
+        debug(`%o`, { skillStates, skillRatings });
 
-      // 11: get entities
-      const [
-        pinyinFinalAssociations,
-        pinyinInitialAssociations,
-        pinyinInitialGroupThemes,
-        skillStates,
-        skillRatings,
-      ] = await Promise.all([
-        tx.query.pinyinFinalAssociation.findMany({
-          where: (t) =>
-            inArray(t.id, entitiesDiff.pinyinFinalAssociation?.puts ?? []),
-        }),
-        tx.query.pinyinInitialAssociation.findMany({
-          where: (t) =>
-            inArray(t.id, entitiesDiff.pinyinInitialAssociation?.puts ?? []),
-        }),
-        tx.query.pinyinInitialGroupTheme.findMany({
-          where: (t) =>
-            inArray(t.id, entitiesDiff.pinyinInitialGroupTheme?.puts ?? []),
-        }),
-        tx.query.skillState.findMany({
-          where: (t) => inArray(t.id, entitiesDiff.skillState?.puts ?? []),
-        }),
-        tx.query.skillRating.findMany({
-          where: (t) => inArray(t.id, entitiesDiff.skillRating?.puts ?? []),
-        }),
-      ]);
-      debug(`%o`, { skillStates, skillRatings });
+        // 12: changed clients
+        // n/a (done above)
 
-      // 12: changed clients
-      // n/a (done above)
+        // 13: newCVRVersion
+        const prevCvrVersion = pullRequest.cookie?.order ?? 0;
+        const nextCvrVersion =
+          Math.max(prevCvrVersion, prevClientGroup.cvrVersion) + 1;
 
-      // 13: newCVRVersion
-      const prevCvrVersion = pull.cookie?.order ?? 0;
-      const nextCvrVersion =
-        Math.max(prevCvrVersion, prevClientGroup.cvrVersion) + 1;
+        // 14: Write ClientGroupRecord
+        const nextClientGroup = {
+          ...prevClientGroup,
+          cvrVersion: nextCvrVersion,
+        };
+        debug(`%o`, { nextClientGroup });
+        await putClientGroup(tx, nextClientGroup);
 
-      // 14: Write ClientGroupRecord
-      const nextClientGroup = {
-        ...prevClientGroup,
-        cvrVersion: nextCvrVersion,
-      };
-      debug(`%o`, { nextClientGroup });
-      await putClientGroup(tx, nextClientGroup);
+        return {
+          entityPatches: {
+            pinyinInitialAssociation: {
+              dels: entitiesDiff.pinyinInitialAssociation?.dels ?? [],
+              puts: pinyinInitialAssociations,
+            },
+            pinyinFinalAssociation: {
+              dels: entitiesDiff.pinyinFinalAssociation?.dels ?? [],
+              puts: pinyinFinalAssociations,
+            },
+            pinyinInitialGroupTheme: {
+              dels: entitiesDiff.pinyinInitialGroupTheme?.dels ?? [],
+              puts: pinyinInitialGroupThemes,
+            },
+            skillState: {
+              dels: entitiesDiff.skillState?.dels ?? [],
+              puts: skillStates,
+            },
+            skillRating: {
+              dels: entitiesDiff.skillRating?.dels ?? [],
+              puts: skillRatings,
+            },
+          },
+          nextCvr: {
+            lastMutationIds: nextCvrLastMutationIds,
+            entities: nextCvrEntities,
+          },
+          lastMutationIdChanges: lastMutationIdsDiff,
+          nextCvrVersion,
+        };
+      }),
+    );
 
+    // 10: If diff is empty, return no-op PR
+    if (txResult === null) {
       return {
-        entityPatches: {
-          pinyinInitialAssociation: {
-            dels: entitiesDiff.pinyinInitialAssociation?.dels ?? [],
-            puts: pinyinInitialAssociations,
-          },
-          pinyinFinalAssociation: {
-            dels: entitiesDiff.pinyinFinalAssociation?.dels ?? [],
-            puts: pinyinFinalAssociations,
-          },
-          pinyinInitialGroupTheme: {
-            dels: entitiesDiff.pinyinInitialGroupTheme?.dels ?? [],
-            puts: pinyinInitialGroupThemes,
-          },
-          skillState: {
-            dels: entitiesDiff.skillState?.dels ?? [],
-            puts: skillStates,
-          },
-          skillRating: {
-            dels: entitiesDiff.skillRating?.dels ?? [],
-            puts: skillRatings,
-          },
-        },
-        nextCvr: {
-          lastMutationIds: nextCvrLastMutationIds,
-          entities: nextCvrEntities,
-        },
-        lastMutationIdChanges: lastMutationIdsDiff,
-        nextCvrVersion,
+        cookie: pullRequest.cookie,
+        lastMutationIdChanges: {},
+        patch: [],
       };
-    }),
-  );
+    }
 
-  // 10: If diff is empty, return no-op PR
-  if (txResult === null) {
-    return {
-      cookie: pull.cookie,
-      lastMutationIdChanges: {},
-      patch: [],
+    const { entityPatches, nextCvr, nextCvrVersion, lastMutationIdChanges } =
+      txResult;
+
+    // 16-17: store cvr
+    const [cvr] = await tx
+      .insert(s.replicacheCvr)
+      .values([
+        {
+          lastMutationIds: nextCvr.lastMutationIds,
+          entities: nextCvr.entities,
+        },
+      ])
+      .returning({ id: s.replicacheCvr.id });
+    invariant(cvr != null);
+
+    // 18(i): build patch
+    const patch: PullOkResponse[`patch`] = [];
+    if (prevCvr == null) {
+      patch.push({ op: `clear` });
+    }
+
+    // 18(i): dels
+    for (const entity of Object.values(entityPatches)) {
+      for (const key of entity.dels) {
+        patch.push({ op: `del`, key });
+      }
+    }
+
+    // 18(ii): puts
+    if (`skillState` in schema) {
+      const e = schema.skillState;
+      for (const s of entityPatches.skillState.puts) {
+        patch.push({
+          op: `put`,
+          key: e.marshalKey(s),
+          value: e.marshalValue(s),
+        });
+      }
+    }
+    if (`skillRating` in schema) {
+      const e = schema.skillRating;
+      for (const s of entityPatches.skillRating.puts) {
+        patch.push({
+          op: `put`,
+          key: e.marshalKey(s),
+          value: e.marshalValue(s),
+        });
+      }
+    }
+    if (`pinyinFinalAssociation` in schema) {
+      const e = schema.pinyinFinalAssociation;
+      for (const s of entityPatches.pinyinFinalAssociation.puts) {
+        patch.push({
+          op: `put`,
+          key: e.marshalKey(s),
+          value: e.marshalValue(s),
+        });
+      }
+    }
+    if (`pinyinInitialAssociation` in schema) {
+      const e = schema.pinyinInitialAssociation;
+      for (const s of entityPatches.pinyinInitialAssociation.puts) {
+        patch.push({
+          op: `put`,
+          key: e.marshalKey(s),
+          value: e.marshalValue(s),
+        });
+      }
+    }
+    if (`pinyinInitialGroupTheme` in schema) {
+      const e = schema.pinyinInitialGroupTheme;
+      for (const s of entityPatches.pinyinInitialGroupTheme.puts) {
+        patch.push({
+          op: `put`,
+          key: e.marshalKey(s),
+          value: e.marshalValue(s),
+        });
+      }
+    }
+
+    // 18(ii): construct cookie
+    const nextCookie: Cookie = {
+      order: nextCvrVersion,
+      cvrId: cvr.id,
     };
-  }
 
-  const { entityPatches, nextCvr, nextCvrVersion, lastMutationIdChanges } =
-    txResult;
+    // 17(iii): lastMutationIDChanges
+    // n/a
 
-  // 16-17: store cvr
-  const [cvr] = await tx
-    .insert(s.replicacheCvr)
-    .values([
-      {
-        lastMutationIds: nextCvr.lastMutationIds,
-        entities: nextCvr.entities,
-      },
-    ])
-    .returning({ id: s.replicacheCvr.id });
-  invariant(cvr != null);
-
-  // 18(i): build patch
-  const patch: PullOkResponse[`patch`] = [];
-  if (prevCvr == null) {
-    patch.push({ op: `clear` });
-  }
-
-  // 18(i): dels
-  for (const entity of Object.values(entityPatches)) {
-    for (const key of entity.dels) {
-      patch.push({ op: `del`, key });
-    }
-  }
-
-  // 18(ii): puts
-  if (`skillState` in schema) {
-    const e = schema.skillState;
-    for (const s of entityPatches.skillState.puts) {
-      patch.push({ op: `put`, key: e.marshalKey(s), value: e.marshalValue(s) });
-    }
-  }
-  if (`skillRating` in schema) {
-    const e = schema.skillRating;
-    for (const s of entityPatches.skillRating.puts) {
-      patch.push({ op: `put`, key: e.marshalKey(s), value: e.marshalValue(s) });
-    }
-  }
-  if (`pinyinFinalAssociation` in schema) {
-    const e = schema.pinyinFinalAssociation;
-    for (const s of entityPatches.pinyinFinalAssociation.puts) {
-      patch.push({ op: `put`, key: e.marshalKey(s), value: e.marshalValue(s) });
-    }
-  }
-  if (`pinyinInitialAssociation` in schema) {
-    const e = schema.pinyinInitialAssociation;
-    for (const s of entityPatches.pinyinInitialAssociation.puts) {
-      patch.push({ op: `put`, key: e.marshalKey(s), value: e.marshalValue(s) });
-    }
-  }
-  if (`pinyinInitialGroupTheme` in schema) {
-    const e = schema.pinyinInitialGroupTheme;
-    for (const s of entityPatches.pinyinInitialGroupTheme.puts) {
-      patch.push({ op: `put`, key: e.marshalKey(s), value: e.marshalValue(s) });
-    }
-  }
-
-  // 18(ii): construct cookie
-  const nextCookie: Cookie = {
-    order: nextCvrVersion,
-    cvrId: cvr.id,
-  };
-
-  // 17(iii): lastMutationIDChanges
-  // n/a
-
-  return {
-    cookie: nextCookie,
-    lastMutationIdChanges,
-    patch,
-  };
+    return {
+      cookie: nextCookie,
+      lastMutationIdChanges,
+      patch,
+    };
+  });
 }
 
 // Implements the push algorithm from
@@ -521,62 +547,66 @@ export async function processMutation(
   errorMode: boolean,
   mutate: MutateHandler<Drizzle>,
 ): Promise<boolean> {
-  // 2: beginTransaction
-  return await tx.transaction(async (tx) => {
-    debug(`Processing mutation errorMode=%o %o`, errorMode, mutation);
+  return await startSpan({ name: processMutation.name }, async () => {
+    // 2: beginTransaction
+    return await tx.transaction(async (tx) => {
+      debug(`Processing mutation errorMode=%o %o`, errorMode, mutation);
 
-    // 3: `getClientGroup(body.clientGroupID)`
-    // 4: Verify requesting user owns cg (in function)
-    const clientGroup = await getClientGroup(tx, {
-      userId,
-      clientGroupId,
-      schemaVersion: clientGroupSchemaVersion,
-    });
-    // 5: `getClient(mutation.clientID)`
-    // 6: Verify requesting client group owns requested client
-    const prevClient = await getClient(tx, mutation.clientId, clientGroupId);
+      // 3: `getClientGroup(body.clientGroupID)`
+      // 4: Verify requesting user owns cg (in function)
+      const clientGroup = await getClientGroup(tx, {
+        userId,
+        clientGroupId,
+        schemaVersion: clientGroupSchemaVersion,
+      });
+      // 5: `getClient(mutation.clientID)`
+      // 6: Verify requesting client group owns requested client
+      const prevClient = await getClient(tx, mutation.clientId, clientGroupId);
 
-    // 7: init nextMutationID
-    const nextMutationId = prevClient.lastMutationId + 1;
+      // 7: init nextMutationID
+      const nextMutationId = prevClient.lastMutationId + 1;
 
-    // 8: rollback and skip if already processed.
-    if (mutation.id < nextMutationId) {
-      debug(`Mutation %s has already been processed - skipping`, mutation.id);
-      return false;
-    }
-
-    // 9: Rollback and error if from future.
-    if (mutation.id > nextMutationId) {
-      throw new Error(`Mutation ${mutation.id} is from the future - aborting`);
-    }
-
-    const t1 = Date.now();
-
-    if (!errorMode) {
-      try {
-        // 10(i): Run business logic
-        // 10(i)(a): xmin column is automatically updated by Postgres for any affected rows.
-        await mutate(tx, userId, mutation);
-      } catch (error) {
-        // 10(ii)(a-c): log error, abort, and retry
-        debug(`Error executing mutation: %o %o`, mutation, error);
-        throw error;
+      // 8: rollback and skip if already processed.
+      if (mutation.id < nextMutationId) {
+        debug(`Mutation %s has already been processed - skipping`, mutation.id);
+        return false;
       }
-    }
 
-    // 11-12: put client and client group
-    const nextClient = {
-      id: mutation.clientId,
-      clientGroupId,
-      lastMutationId: nextMutationId,
-    };
+      // 9: Rollback and error if from future.
+      if (mutation.id > nextMutationId) {
+        throw new Error(
+          `Mutation ${mutation.id} is from the future - aborting`,
+        );
+      }
 
-    await putClientGroup(tx, clientGroup);
-    await putClient(tx, nextClient);
+      const t1 = Date.now();
 
-    debug(`Processed mutation in %s`, Date.now() - t1);
+      if (!errorMode) {
+        try {
+          // 10(i): Run business logic
+          // 10(i)(a): xmin column is automatically updated by Postgres for any affected rows.
+          await mutate(tx, userId, mutation);
+        } catch (error) {
+          // 10(ii)(a-c): log error, abort, and retry
+          debug(`Error executing mutation: %o %o`, mutation, error);
+          throw error;
+        }
+      }
 
-    return true;
+      // 11-12: put client and client group
+      const nextClient = {
+        id: mutation.clientId,
+        clientGroupId,
+        lastMutationId: nextMutationId,
+      };
+
+      await putClientGroup(tx, clientGroup);
+      await putClient(tx, nextClient);
+
+      debug(`Processed mutation in %s`, Date.now() - t1);
+
+      return true;
+    });
   });
 }
 
@@ -692,122 +722,124 @@ export async function computeCvrEntities(
   userId: string,
   schema: SupportedSchema,
 ) {
-  const pinyinFinalAssociationVersions = db
-    .select({
-      map: json_object_agg(
-        s.pinyinFinalAssociation.id,
-        json_build_object({
-          final: s.pinyinFinalAssociation.final,
-          xmin: sql<string>`${s.pinyinFinalAssociation}.xmin`,
-        }),
-      ).as(`pinyinFinalAssociationVersions`),
-    })
-    .from(s.pinyinFinalAssociation)
-    .where(eq(s.pinyinFinalAssociation.userId, userId))
-    .as(`pinyinFinalAssociationVersions`);
+  return await startSpan({ name: computeCvrEntities.name }, async () => {
+    const pinyinFinalAssociationVersions = db
+      .select({
+        map: json_object_agg(
+          s.pinyinFinalAssociation.id,
+          json_build_object({
+            final: s.pinyinFinalAssociation.final,
+            xmin: sql<string>`${s.pinyinFinalAssociation}.xmin`,
+          }),
+        ).as(`pinyinFinalAssociationVersions`),
+      })
+      .from(s.pinyinFinalAssociation)
+      .where(eq(s.pinyinFinalAssociation.userId, userId))
+      .as(`pinyinFinalAssociationVersions`);
 
-  const pinyinInitialAssociationVersions = db
-    .select({
-      map: json_object_agg(
-        s.pinyinInitialAssociation.id,
-        json_build_object({
-          initial: s.pinyinInitialAssociation.initial,
-          xmin: sql<string>`${s.pinyinInitialAssociation}.xmin`,
-        }),
-      ).as(`pinyinInitialAssociationVersions`),
-    })
-    .from(s.pinyinInitialAssociation)
-    .where(eq(s.pinyinInitialAssociation.userId, userId))
-    .as(`pinyinInitialAssociationVersions`);
+    const pinyinInitialAssociationVersions = db
+      .select({
+        map: json_object_agg(
+          s.pinyinInitialAssociation.id,
+          json_build_object({
+            initial: s.pinyinInitialAssociation.initial,
+            xmin: sql<string>`${s.pinyinInitialAssociation}.xmin`,
+          }),
+        ).as(`pinyinInitialAssociationVersions`),
+      })
+      .from(s.pinyinInitialAssociation)
+      .where(eq(s.pinyinInitialAssociation.userId, userId))
+      .as(`pinyinInitialAssociationVersions`);
 
-  const pinyinInitialGroupThemeVersions = db
-    .select({
-      map: json_object_agg(
-        s.pinyinInitialGroupTheme.id,
-        json_build_object({
-          groupId: sql<string>`${s.pinyinInitialGroupTheme.groupId}`,
-          xmin: sql<string>`${s.pinyinInitialGroupTheme}.xmin`,
-        }),
-      ).as(`pinyinInitialGroupThemeVersions`),
-    })
-    .from(s.pinyinInitialGroupTheme)
-    .where(eq(s.pinyinInitialGroupTheme.userId, userId))
-    .as(`pinyinInitialGroupThemeVersions`);
+    const pinyinInitialGroupThemeVersions = db
+      .select({
+        map: json_object_agg(
+          s.pinyinInitialGroupTheme.id,
+          json_build_object({
+            groupId: sql<string>`${s.pinyinInitialGroupTheme.groupId}`,
+            xmin: sql<string>`${s.pinyinInitialGroupTheme}.xmin`,
+          }),
+        ).as(`pinyinInitialGroupThemeVersions`),
+      })
+      .from(s.pinyinInitialGroupTheme)
+      .where(eq(s.pinyinInitialGroupTheme.userId, userId))
+      .as(`pinyinInitialGroupThemeVersions`);
 
-  const skillStateVersions = db
-    .select({
-      map: json_object_agg(
-        s.skillState.id,
-        json_build_object({
-          skill: s.skillState.skill,
-          xmin: sql<string>`${s.skillState}.xmin`,
-        }),
-      ).as(`skillStateVersions`),
-    })
-    .from(s.skillState)
-    .where(eq(s.skillState.userId, userId))
-    .as(`skillStateVersions`);
+    const skillStateVersions = db
+      .select({
+        map: json_object_agg(
+          s.skillState.id,
+          json_build_object({
+            skill: s.skillState.skill,
+            xmin: sql<string>`${s.skillState}.xmin`,
+          }),
+        ).as(`skillStateVersions`),
+      })
+      .from(s.skillState)
+      .where(eq(s.skillState.userId, userId))
+      .as(`skillStateVersions`);
 
-  const skillRatingVersions = db
-    .select({
-      map: json_object_agg(
-        s.skillRating.id,
-        json_build_object({
-          id: s.skillRating.id,
-          xmin: sql<string>`${s.skillRating}.xmin`,
-        }),
-      ).as(`skillRatingVersions`),
-    })
-    .from(s.skillRating)
-    .where(eq(s.skillRating.userId, userId))
-    .as(`skillRatingVersions`);
+    const skillRatingVersions = db
+      .select({
+        map: json_object_agg(
+          s.skillRating.id,
+          json_build_object({
+            id: s.skillRating.id,
+            xmin: sql<string>`${s.skillRating}.xmin`,
+          }),
+        ).as(`skillRatingVersions`),
+      })
+      .from(s.skillRating)
+      .where(eq(s.skillRating.userId, userId))
+      .as(`skillRatingVersions`);
 
-  const [result] = await db
-    .select({
-      pinyinFinalAssociation: pinyinFinalAssociationVersions.map,
-      pinyinInitialAssociation: pinyinInitialAssociationVersions.map,
-      pinyinInitialGroupTheme: pinyinInitialGroupThemeVersions.map,
-      skillRating: skillRatingVersions.map,
-      skillState: skillStateVersions.map,
-    })
-    .from(pinyinFinalAssociationVersions)
-    .leftJoin(pinyinInitialAssociationVersions, sql`true`)
-    .leftJoin(pinyinInitialGroupThemeVersions, sql`true`)
-    .leftJoin(skillRatingVersions, sql`true`)
-    .leftJoin(skillStateVersions, sql`true`);
+    const [result] = await db
+      .select({
+        pinyinFinalAssociation: pinyinFinalAssociationVersions.map,
+        pinyinInitialAssociation: pinyinInitialAssociationVersions.map,
+        pinyinInitialGroupTheme: pinyinInitialGroupThemeVersions.map,
+        skillRating: skillRatingVersions.map,
+        skillState: skillStateVersions.map,
+      })
+      .from(pinyinFinalAssociationVersions)
+      .leftJoin(pinyinInitialAssociationVersions, sql`true`)
+      .leftJoin(pinyinInitialGroupThemeVersions, sql`true`)
+      .leftJoin(skillRatingVersions, sql`true`)
+      .leftJoin(skillStateVersions, sql`true`);
 
-  invariant(result != null);
+    invariant(result != null);
 
-  return {
-    pinyinInitialAssociation: mapValues(
-      result.pinyinInitialAssociation,
-      (v) => v.xmin + `:` + schema.pinyinInitialAssociation.marshalKey(v),
-    ),
-    pinyinFinalAssociation: mapValues(
-      result.pinyinFinalAssociation,
-      (v) => v.xmin + `:` + schema.pinyinFinalAssociation.marshalKey(v),
-    ),
-    pinyinInitialGroupTheme:
-      `pinyinInitialGroupTheme` in schema
-        ? mapValues(
-            result.pinyinInitialGroupTheme,
-            (v) =>
-              v.xmin +
-              `:` +
-              schema.pinyinInitialGroupTheme.marshalKey({
-                groupId: rPinyinInitialGroupId().unmarshal(v.groupId),
-              }),
-          )
-        : {},
-    skillState: mapValues(
-      result.skillState,
-      (v) => v.xmin + `:` + schema.skillState.marshalKey(v),
-    ),
-    skillRating: mapValues(
-      result.skillRating,
-      (v) => v.xmin + `:` + schema.skillRating.marshalKey(v),
-    ),
-  };
+    return {
+      pinyinInitialAssociation: mapValues(
+        result.pinyinInitialAssociation,
+        (v) => v.xmin + `:` + schema.pinyinInitialAssociation.marshalKey(v),
+      ),
+      pinyinFinalAssociation: mapValues(
+        result.pinyinFinalAssociation,
+        (v) => v.xmin + `:` + schema.pinyinFinalAssociation.marshalKey(v),
+      ),
+      pinyinInitialGroupTheme:
+        `pinyinInitialGroupTheme` in schema
+          ? mapValues(
+              result.pinyinInitialGroupTheme,
+              (v) =>
+                v.xmin +
+                `:` +
+                schema.pinyinInitialGroupTheme.marshalKey({
+                  groupId: rPinyinInitialGroupId().unmarshal(v.groupId),
+                }),
+            )
+          : {},
+      skillState: mapValues(
+        result.skillState,
+        (v) => v.xmin + `:` + schema.skillState.marshalKey(v),
+      ),
+      skillRating: mapValues(
+        result.skillRating,
+        (v) => v.xmin + `:` + schema.skillRating.marshalKey(v),
+      ),
+    };
+  });
 }
 
 export const fetchedMutationSchema = pushRequestSchema.omit({
@@ -829,61 +861,63 @@ export async function fetchMutations(
     limit?: number;
   },
 ): Promise<{ mutations: FetchedMutation[] }> {
-  let remainingLimit = opts.limit ?? 100;
+  return await startSpan({ name: fetchMutations.name }, async () => {
+    let remainingLimit = opts.limit ?? 100;
 
-  const clientState = await getReplicacheClientStateForUser(tx, userId);
+    const clientState = await getReplicacheClientStateForUser(tx, userId);
 
-  // Compare the state provided by the caller with state from the database to
-  // determine which clients have new mutations.
-  const clientsWithNewData = clientState.flatMap((c) => {
-    // Make sure the client is using a supported schema.
-    if (
-      c.schemaVersion == null ||
-      !opts.schemaVersions.includes(c.schemaVersion)
-    ) {
-      return [];
+    // Compare the state provided by the caller with state from the database to
+    // determine which clients have new mutations.
+    const clientsWithNewData = clientState.flatMap((c) => {
+      // Make sure the client is using a supported schema.
+      if (
+        c.schemaVersion == null ||
+        !opts.schemaVersions.includes(c.schemaVersion)
+      ) {
+        return [];
+      }
+
+      const sinceMutationId = opts.lastMutationIds[c.clientId] ?? 0;
+      // Skip the client if it doesn't have newer data than what has already
+      // been seen.
+      if (sinceMutationId >= c.lastMutationId) {
+        return [];
+      }
+
+      return {
+        client: c,
+        clientId: c.clientId,
+        clientGroupId: c.clientGroupId,
+        schemaVersion: c.schemaVersion,
+        lastMutationId: c.lastMutationId,
+        sinceMutationId,
+      };
+    });
+
+    const result: FetchedMutation[] = [];
+
+    for (const client of clientsWithNewData) {
+      const mutations = await getReplicacheClientMutationsSince(tx, {
+        clientId: client.clientId,
+        sinceMutationId: client.sinceMutationId,
+        limit: remainingLimit,
+      });
+
+      result.push({
+        clientGroupId: client.clientGroupId,
+        schemaVersion: client.schemaVersion,
+        mutations,
+      });
+
+      remainingLimit -= mutations.length;
+
+      if (remainingLimit <= 0) {
+        break;
+      }
     }
 
-    const sinceMutationId = opts.lastMutationIds[c.clientId] ?? 0;
-    // Skip the client if it doesn't have newer data than what has already
-    // been seen.
-    if (sinceMutationId >= c.lastMutationId) {
-      return [];
-    }
-
-    return {
-      client: c,
-      clientId: c.clientId,
-      clientGroupId: c.clientGroupId,
-      schemaVersion: c.schemaVersion,
-      lastMutationId: c.lastMutationId,
-      sinceMutationId,
-    };
+    return { mutations: result };
   });
-
-  const result: FetchedMutation[] = [];
-
-  for (const client of clientsWithNewData) {
-    const mutations = await getReplicacheClientMutationsSince(tx, {
-      clientId: client.clientId,
-      sinceMutationId: client.sinceMutationId,
-      limit: remainingLimit,
-    });
-
-    result.push({
-      clientGroupId: client.clientGroupId,
-      schemaVersion: client.schemaVersion,
-      mutations,
-    });
-
-    remainingLimit -= mutations.length;
-
-    if (remainingLimit <= 0) {
-      break;
-    }
-  }
-
-  return { mutations: result };
 }
 
 /**
