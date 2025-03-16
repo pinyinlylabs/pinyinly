@@ -2631,7 +2631,6 @@ __metadata:
     "@react-navigation/stack": "npm:^7.0.0"
     "@sentry/core": "npm:~8.40.0"
     "@sentry/node": "npm:~8.40.0"
-    "@sentry/profiling-node": "npm:~8.40.0"
     "@sentry/react-native": "npm:~6.3.0"
     "@sentry/types": "npm:~8.40.0"
     "@stylistic/eslint-plugin": "npm:^4.0.0"
@@ -5107,7 +5106,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/node@npm:8.40.0, @sentry/node@npm:~8.40.0":
+"@sentry/node@npm:~8.40.0":
   version: 8.40.0
   resolution: "@sentry/node@npm:8.40.0"
   dependencies:
@@ -5164,22 +5163,6 @@ __metadata:
     "@opentelemetry/sdk-trace-base": ^1.26.0
     "@opentelemetry/semantic-conventions": ^1.27.0
   checksum: 10c0/b29b387296a00bd8869a7972c6087532235b410c8f7739fc0392cf2f75e4bc705587944dca45b986a5c8782415cf51d55cf418d927e359a7630065ba2ba79a93
-  languageName: node
-  linkType: hard
-
-"@sentry/profiling-node@npm:~8.40.0":
-  version: 8.40.0
-  resolution: "@sentry/profiling-node@npm:8.40.0"
-  dependencies:
-    "@sentry/core": "npm:8.40.0"
-    "@sentry/node": "npm:8.40.0"
-    "@sentry/types": "npm:8.40.0"
-    detect-libc: "npm:^2.0.2"
-    node-abi: "npm:^3.61.0"
-    node-gyp: "npm:latest"
-  bin:
-    sentry-prune-profiler-binaries: scripts/prune-profiler-binaries.js
-  checksum: 10c0/505ed64a35cf2065d57b3539f7486af064a262a8eee07540d86e52489403ddd405d56b3ae7a247c30a71ba9ce21a6f347740bc0138909fa11eebe723530bafde
   languageName: node
   linkType: hard
 
@@ -8037,7 +8020,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"detect-libc@npm:^2.0.2, detect-libc@npm:^2.0.3":
+"detect-libc@npm:^2.0.3":
   version: 2.0.3
   resolution: "detect-libc@npm:2.0.3"
   checksum: 10c0/88095bda8f90220c95f162bf92cad70bd0e424913e655c20578600e35b91edc261af27531cf160a331e185c0ced93944bc7e09939143225f56312d7fd800fdb7
@@ -13460,15 +13443,6 @@ __metadata:
   version: 1.0.5
   resolution: "nice-try@npm:1.0.5"
   checksum: 10c0/95568c1b73e1d0d4069a3e3061a2102d854513d37bcfda73300015b7ba4868d3b27c198d1dbbd8ebdef4112fc2ed9e895d4a0f2e1cce0bd334f2a1346dc9205f
-  languageName: node
-  linkType: hard
-
-"node-abi@npm:^3.61.0":
-  version: 3.74.0
-  resolution: "node-abi@npm:3.74.0"
-  dependencies:
-    semver: "npm:^7.3.5"
-  checksum: 10c0/a6c83c448d5e8b591f749a0157c9ec02f653021cdf3415c1a44fcb5fc8afc124acad186bc1ec76cb4db2485cc2dcdda187aacd382c54b6e3093ffc0389603643
   languageName: node
   linkType: hard
 

@@ -3,8 +3,7 @@
   "dependencies": {
     "@expo/server": "^0.5.3",
     "@sentry/core": "~8.40.0",
-    "@sentry/node": "~8.40.0",
-    "@sentry/profiling-node": "~8.40.0"
+    "@sentry/node": "~8.40.0"
   },
   "engines": {
     "node": "22.x"
