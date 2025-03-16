@@ -8,6 +8,7 @@ import {
   PgTransactionConfig,
 } from "drizzle-orm/pg-core";
 import type { Pool as PgPool } from "pg";
+import { DatabaseError } from "pg-protocol";
 import z from "zod";
 import * as schema from "../schema";
 
@@ -188,4 +189,39 @@ export async function assertMinimumIsolationLevel(
       pgIsolationLevelPower[isolationLevel],
     `incorrect transaction_isolation, expected "${isolationLevel}", actual "${currentIsolationLevel}"`,
   );
+}
+
+export function xmin<TFrom extends PgTable>(source: TFrom) {
+  return sql<string>`${source}.xmin`;
+}
+
+export async function withSerializationRetries<T>(
+  result: Promise<T>,
+  retryCount = 3,
+): Promise<T> {
+  for (
+    let remainingRetries = retryCount;
+    remainingRetries > 0;
+    remainingRetries--
+  ) {
+    try {
+      return await result;
+    } catch (error) {
+      if (
+        error instanceof DatabaseError &&
+        error.code === `40001` && // Serialization failure, retry
+        remainingRetries > 0
+      ) {
+        console.warn(
+          `database serialization error, retrying (${remainingRetries} remaining)`,
+          error,
+        );
+        continue;
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  return await result;
 }

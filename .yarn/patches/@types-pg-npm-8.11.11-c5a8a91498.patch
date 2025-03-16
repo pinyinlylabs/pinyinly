@@ -1,0 +1,10 @@
+diff --git a/index.d.ts b/index.d.ts
+index bcc487a8f513a01a81cdce8fcce5d16216539d45..bf475515270736a3f487562a148e5fca584c40d2 100644
+--- a/index.d.ts
++++ b/index.d.ts
+@@ -323,4 +323,4 @@ import * as Pg from ".";
+ 
+ export const native: typeof Pg | null;
+ 
+-export { DatabaseError } from "pg-protocol";
++export type { DatabaseError } from "pg-protocol";

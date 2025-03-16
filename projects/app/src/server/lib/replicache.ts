@@ -26,7 +26,6 @@ import { and, eq, gt, inArray, sql } from "drizzle-orm";
 import chunk from "lodash/chunk";
 import mapValues from "lodash/mapValues";
 import pickBy from "lodash/pickBy";
-import { DatabaseError } from "pg-protocol";
 import { z } from "zod";
 import * as s from "../schema";
 import type { Drizzle } from "./db";
@@ -35,6 +34,8 @@ import {
   json_build_object,
   json_object_agg,
   withDrizzle,
+  withSerializationRetries,
+  xmin,
 } from "./db";
 import { updateSkillState } from "./queries";
 
@@ -295,32 +296,6 @@ export async function pull(
 
     // 2: Init baseCVR
     // n/a
-
-    // eslint-disable-next-line unicorn/consistent-function-scoping
-    async function withSerializationRetries<T>(
-      result: Promise<T>,
-      retryCount = 3,
-    ): Promise<T> {
-      for (
-        let remainingRetries = retryCount;
-        remainingRetries > 0;
-        remainingRetries--
-      ) {
-        try {
-          return await result;
-        } catch (error) {
-          if (
-            error instanceof DatabaseError &&
-            error.code === `40001` && // Serialization failure, retry
-            remainingRetries === 0
-          ) {
-            throw error;
-          }
-        }
-      }
-
-      return await result;
-    }
 
     // 3: begin transaction
     const txResult = await withSerializationRetries(
@@ -758,7 +733,7 @@ export async function computeCvrEntities(
           s.pinyinFinalAssociation.id,
           json_build_object({
             final: s.pinyinFinalAssociation.final,
-            xmin: sql<string>`${s.pinyinFinalAssociation}.xmin`,
+            xmin: xmin(s.pinyinFinalAssociation),
           }),
         ).as(`pinyinFinalAssociationVersions`),
       })
@@ -772,7 +747,7 @@ export async function computeCvrEntities(
           s.pinyinInitialAssociation.id,
           json_build_object({
             initial: s.pinyinInitialAssociation.initial,
-            xmin: sql<string>`${s.pinyinInitialAssociation}.xmin`,
+            xmin: xmin(s.pinyinInitialAssociation),
           }),
         ).as(`pinyinInitialAssociationVersions`),
       })
@@ -786,7 +761,7 @@ export async function computeCvrEntities(
           s.pinyinInitialGroupTheme.id,
           json_build_object({
             groupId: sql<string>`${s.pinyinInitialGroupTheme.groupId}`,
-            xmin: sql<string>`${s.pinyinInitialGroupTheme}.xmin`,
+            xmin: xmin(s.pinyinInitialGroupTheme),
           }),
         ).as(`pinyinInitialGroupThemeVersions`),
       })
@@ -800,7 +775,7 @@ export async function computeCvrEntities(
           s.skillState.id,
           json_build_object({
             skill: s.skillState.skill,
-            xmin: sql<string>`${s.skillState}.xmin`,
+            xmin: xmin(s.skillState),
           }),
         ).as(`skillStateVersions`),
       })
@@ -814,7 +789,7 @@ export async function computeCvrEntities(
           s.skillRating.id,
           json_build_object({
             id: s.skillRating.id,
-            xmin: sql<string>`${s.skillRating}.xmin`,
+            xmin: xmin(s.skillRating),
           }),
         ).as(`skillRatingVersions`),
       })
