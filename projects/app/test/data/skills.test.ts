@@ -10,16 +10,16 @@ import {
   allHsk3HanziWords,
 } from "#dictionary/dictionary.ts";
 import { invariant } from "@haohaohow/lib/invariant";
-import { add } from "date-fns/add";
 import assert from "node:assert/strict";
 import test from "node:test";
+import { mockSrsState } from "./helpers";
 
 await test(`${skillLearningGraph.name} suite`, async () => {
   await test(`no targets gives an empty graph`, async () => {
     assert.deepEqual(
       await skillLearningGraph({
         targetSkills: [],
-        isSkillLearned: () => false,
+        shouldSkipSubTree: () => false,
       }),
       new Map(),
     );
@@ -31,7 +31,7 @@ await test(`${skillLearningGraph.name} suite`, async () => {
     assert.deepEqual(
       await skillLearningGraph({
         targetSkills: [skill],
-        isSkillLearned: () => false,
+        shouldSkipSubTree: () => false,
       }),
       new Map([[skill, { skill, dependencies: new Set() }]]),
     );
@@ -45,7 +45,7 @@ await test(`${skillLearningGraph.name} suite`, async () => {
     assert.deepEqual(
       await skillLearningGraph({
         targetSkills: [goodHanziWordToEnglish],
-        isSkillLearned: () => false,
+        shouldSkipSubTree: () => false,
       }),
       new Map([
         [
@@ -80,7 +80,7 @@ await test(`${skillLearningGraph.name} suite`, async () => {
     assert.deepEqual(
       await skillLearningGraph({
         targetSkills: [`he:外:outside`],
-        isSkillLearned: () => false,
+        shouldSkipSubTree: () => false,
       }),
       new Map([
         [
@@ -250,7 +250,7 @@ await test(`${skillLearningGraph.name} suite`, async () => {
     assertLearningGraphEqual(
       await skillLearningGraph({
         targetSkills: [`he:一下儿:aBit`],
-        isSkillLearned: () => false,
+        shouldSkipSubTree: () => false,
       }),
       `
       he:一下儿:aBit
@@ -272,7 +272,7 @@ await test(`${skillLearningGraph.name} suite`, async () => {
         ...(await allHsk2HanziWords()),
         ...(await allHsk3HanziWords()),
       ].map((w) => hanziWordToEnglish(w)),
-      isSkillLearned: () => false,
+      shouldSkipSubTree: () => false,
     });
   });
 
@@ -283,10 +283,10 @@ await test(`${skillReviewQueue.name} suite`, async () => {
   await test(`no skills gives an empty queue`, async () => {
     const graph = await skillLearningGraph({
       targetSkills: [],
-      isSkillLearned: () => false,
+      shouldSkipSubTree: () => false,
     });
     assert.deepEqual(
-      skillReviewQueue({ graph, getSkillDueDate: () => undefined }),
+      skillReviewQueue({ graph, skillSrsStates: new Map() }),
       [],
     );
   });
@@ -294,38 +294,40 @@ await test(`${skillReviewQueue.name} suite`, async () => {
   await test(`works for 好`, async () => {
     const graph = await skillLearningGraph({
       targetSkills: [`he:好:good`],
-      isSkillLearned: () => false,
+      shouldSkipSubTree: () => false,
     });
-    assert.deepEqual(
-      skillReviewQueue({ graph, getSkillDueDate: () => undefined }),
-      [`he:子:child`, `he:女:woman`, `he:好:good`],
-    );
+    assert.deepEqual(skillReviewQueue({ graph, skillSrsStates: new Map() }), [
+      `he:子:child`,
+      `he:女:woman`,
+      `he:好:good`,
+    ]);
   });
 
   await test(`skips learned skills and their dependencies`, async () => {
     const graph = await skillLearningGraph({
       targetSkills: [`he:好:good`],
-      isSkillLearned: (skill) => [`he:子:child`].includes(skill),
+      shouldSkipSubTree: (skill) => [`he:子:child`].includes(skill),
     });
 
-    assert.deepEqual(
-      skillReviewQueue({ graph, getSkillDueDate: () => undefined }),
-      [`he:女:woman`, `he:好:good`],
-    );
+    assert.deepEqual(skillReviewQueue({ graph, skillSrsStates: new Map() }), [
+      `he:女:woman`,
+      `he:好:good`,
+    ]);
   });
 
-  await test(`prioritises due skills with highest value (not most overdue)`, async () => {
+  await test(`prioritises due skills with highest value (rather than most overdue)`, async () => {
     const graph = await skillLearningGraph({
       targetSkills: [`he:分:divide`],
-      isSkillLearned: () => false,
+      shouldSkipSubTree: () => false,
     });
 
-    const isDue = new Date(Date.now() - 5 * 60 * 1000);
     assert.deepEqual(
       skillReviewQueue({
         graph,
-        getSkillDueDate: (skill) =>
-          [`he:八:eight`, `he:刀:knife`].includes(skill) ? isDue : undefined,
+        skillSrsStates: new Map([
+          [`he:八:eight`, mockSrsState(`-1d`, `-5m`)],
+          [`he:刀:knife`, mockSrsState(`-1d`, `-5m`)],
+        ]),
       }),
       [
         `he:八:eight`,
@@ -340,13 +342,13 @@ await test(`${skillReviewQueue.name} suite`, async () => {
   await test(`schedules new skills in dependency order`, async () => {
     const graph = await skillLearningGraph({
       targetSkills: [`he:分:divide`],
-      isSkillLearned: () => false,
+      shouldSkipSubTree: () => false,
     });
 
     assert.deepEqual(
       skillReviewQueue({
         graph,
-        getSkillDueDate: () => undefined,
+        skillSrsStates: new Map(),
       }),
       [
         `he:丿:slash`,
@@ -361,20 +363,18 @@ await test(`${skillReviewQueue.name} suite`, async () => {
   await test(`schedules skill reviews in order of due`, async () => {
     const graph = await skillLearningGraph({
       targetSkills: [`he:分:divide`, `he:一:one`],
-      isSkillLearned: () => false,
+      shouldSkipSubTree: () => false,
     });
 
-    const now = new Date();
     assert.deepEqual(
       skillReviewQueue({
         graph,
-        getSkillDueDate: (skill) =>
-          ({
-            [`he:一:one`]: add(now, { hours: -2 }), // due two hours ago
-            [`he:𠃌:radical`]: add(now, { hours: -1 }), // due one hour ago
-            [`he:八:eight`]: add(now, { hours: 1 }), // due in one hour,
-            [`he:刀:knife`]: add(now, { hours: 2 }), // due in two hours,
-          })[skill as string],
+        skillSrsStates: new Map([
+          [`he:一:one`, mockSrsState(`-10m`, `-2h`)], // due two hours ago
+          [`he:𠃌:radical`, mockSrsState(`0s`, `-1h`)], // due one hour ago
+          [`he:八:eight`, mockSrsState(`-10m`, `1h`)], // due in one hour,
+          [`he:刀:knife`, mockSrsState(`-10m`, `2h`)], // due in two hours,
+        ]),
       }),
       [
         `he:一:one`,
