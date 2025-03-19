@@ -15,6 +15,11 @@ declare global {
       EXPO_PUBLIC_USE_STATIC?: string | boolean; // boolean during static render, string on web
       EXPO_TUNNEL_SUBDOMAIN?: string;
       HHH_PREFLIGHT_CHECK_ENV_VARS?: string;
+      HHH_SENTRY_DEBUG?: string;
+      HHH_SENTRY_ENABLED?: string;
+      HHH_SENTRY_ENVIRONMENT?: string;
+      HHH_SENTRY_PROFILES_SAMPLE_RATE?: string;
+      HHH_SENTRY_TRACES_SAMPLE_RATE?: string;
       NODE_ENV?: string;
       POSTMARK_SERVER_TOKEN?: string;
       SENTRY_DSN?: string;
