@@ -1,3 +1,5 @@
+import { SrsStateMock, SrsType } from "#data/model.ts";
+import { invariant } from "@haohaohow/lib/invariant";
 import { TestContext } from "node:test";
 import { ReadTransaction, WriteTransaction } from "replicache";
 
@@ -33,3 +35,32 @@ export function makeMockTx(t: TestContext) {
     },
   };
 }
+
+/**
+ * Convert a string like "+1d" or "-5s" to a date.
+ */
+export const parseRelativeTimeShorthand = (
+  shorthand: string,
+  now = new Date(),
+): Date => {
+  const parseResult = /^(-|\+?)(\d+)([smhd])$/.exec(shorthand);
+  invariant(parseResult != null, `invalid shorthand ${shorthand}`);
+  const [, sign, multiple, unit] = parseResult;
+  const duration =
+    (sign === `-` ? -1 : 1) *
+    Number(multiple) *
+    { s: 1, m: 60 * 1, h: 60 * 60, d: 60 * 60 * 24 }[unit!]!;
+  return new Date(now.getTime() + duration * 1000);
+};
+
+export const mockSrsState = (
+  prevReviewAtShorthand: string,
+  nextReviewAtShorthand: string,
+  now = new Date(),
+): SrsStateMock => {
+  return {
+    type: SrsType.Mock,
+    prevReviewAt: parseRelativeTimeShorthand(prevReviewAtShorthand, now),
+    nextReviewAt: parseRelativeTimeShorthand(nextReviewAtShorthand, now),
+  };
+};

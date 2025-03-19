@@ -6,6 +6,7 @@ import {
   ratingName,
 } from "#util/fsrs.ts";
 import { RepeatedSequence2 } from "#util/types.ts";
+import { parseRelativeTimeShorthand } from "../data/helpers";
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type { Duration } from "date-fns";
 import { add } from "date-fns/add";
@@ -31,6 +32,83 @@ const expectedReviewSchema = z.object({
 });
 
 const ratingSchema = z.nativeEnum(Rating);
+
+await test(`${nextReview.name} suite`, async () => {
+  await test(`stability increases after time elapsed with correct rating`, () => {
+    const before = nextReview(null, Rating.Again);
+    const afterEasy = nextReview(
+      before,
+      Rating.Easy,
+      parseRelativeTimeShorthand(`+1s`),
+    );
+    const afterGood = nextReview(
+      before,
+      Rating.Good,
+      parseRelativeTimeShorthand(`+1s`),
+    );
+    const afterHard = nextReview(
+      before,
+      Rating.Hard,
+      parseRelativeTimeShorthand(`+1s`),
+    );
+
+    assert.ok(
+      before.stability < afterEasy.stability,
+      `.Easy should increase stability`,
+    );
+    assert.ok(
+      before.stability < afterGood.stability,
+      `.Good should increase stability`,
+    );
+    assert.ok(
+      before.stability < afterHard.stability,
+      `.Hard should increase stability`,
+    );
+  });
+
+  await test(`stability does not decrease from .Again`, () => {
+    const before = nextReview(null, Rating.Good);
+    const after = nextReview(
+      before,
+      Rating.Again,
+      parseRelativeTimeShorthand(`+10m`),
+    );
+
+    assert.ok(after.stability === before.stability);
+  });
+
+  await test(`difficulty lowers with Easy and increases with Hard`, () => {
+    const before = nextReview(null, Rating.Good);
+    const afterEasy = nextReview(
+      before,
+      Rating.Easy,
+      parseRelativeTimeShorthand(`+1s`),
+    );
+    const afterGood = nextReview(
+      before,
+      Rating.Good,
+      parseRelativeTimeShorthand(`+1s`),
+    );
+    const afterHard = nextReview(
+      before,
+      Rating.Hard,
+      parseRelativeTimeShorthand(`+1s`),
+    );
+
+    assert.ok(
+      before.difficulty > afterEasy.difficulty,
+      `.Easy should decrease difficulty`,
+    );
+    assert.ok(
+      before.difficulty === afterGood.difficulty,
+      `.Good should keep the same difficulty`,
+    );
+    assert.ok(
+      before.difficulty < afterHard.difficulty,
+      `.Hard should increase difficulty`,
+    );
+  });
+});
 
 await testFsrsSequence(`Again → Again → Again`, [
   Rating.Again,

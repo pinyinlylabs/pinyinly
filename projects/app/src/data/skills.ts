@@ -11,8 +11,16 @@ import {
   splitPinyin,
 } from "@/dictionary/dictionary";
 import { sortComparatorNumber } from "@/util/collections";
+import { fsrsIsIntroduced } from "@/util/fsrs";
+import { pseudoRandomNumberGenerator } from "@/util/random";
 import { invariant } from "@haohaohow/lib/invariant";
-import { HanziWord, HanziWordSkillType, SkillType } from "./model";
+import {
+  HanziWord,
+  HanziWordSkillType,
+  SkillType,
+  SrsState,
+  SrsType,
+} from "./model";
 import {
   HanziWordSkill,
   PinyinFinalAssociationSkill,
@@ -36,7 +44,7 @@ export interface LearningOptions {
 
 export async function skillLearningGraph(options: {
   targetSkills: Skill[];
-  isSkillLearned: (skill: Skill) => boolean;
+  shouldSkipSubTree: (skill: Skill) => boolean;
   learningOptions?: LearningOptions;
 }): Promise<SkillLearningGraph> {
   const learningOptions = options.learningOptions ?? {};
@@ -45,7 +53,7 @@ export async function skillLearningGraph(options: {
   async function addSkill(skill: Skill): Promise<void> {
     // Skip over any skills (and its dependency tree) that have already been
     // learned.
-    if (options.isSkillLearned(skill)) {
+    if (options.shouldSkipSubTree(skill)) {
       return;
     }
 
@@ -55,7 +63,7 @@ export async function skillLearningGraph(options: {
     }
 
     const dependencies = await skillDependencies(skill, learningOptions).then(
-      (x) => x.filter((s) => !options.isSkillLearned(s)),
+      (x) => x.filter((s) => !options.shouldSkipSubTree(s)),
     );
 
     const node: Node = {
@@ -326,11 +334,11 @@ export function pinyinInitialAssociation(
 
 export function skillReviewQueue({
   graph,
-  getSkillDueDate,
+  skillSrsStates,
   now = new Date(),
 }: {
   graph: SkillLearningGraph;
-  getSkillDueDate: (skill: Skill) => Date | undefined;
+  skillSrsStates: Map<Skill, SrsState>;
   now?: Date;
 }): Skill[] {
   // Kahn topological sort
@@ -338,7 +346,7 @@ export function skillReviewQueue({
   const queue: Skill[] = [];
   const learningOrderDue: [Skill, number][] = [];
   const learningOrderNew: Skill[] = [];
-  const learningOrderNotDue: [Skill, number][] = [];
+  const learningOrderNotDue: [Skill, SrsState | undefined][] = [];
 
   // Compute in-degree
   for (const [skill, node] of graph.entries()) {
@@ -362,14 +370,15 @@ export function skillReviewQueue({
   while (queue.length > 0) {
     const skill = queue.shift();
     invariant(skill != null);
-    const dueDate = getSkillDueDate(skill);
 
-    if (dueDate == undefined) {
+    const srsState = skillSrsStates.get(skill);
+
+    if (srsState == null || !isSkillIntroduced(srsState)) {
       learningOrderNew.push(skill);
-    } else if (dueDate > now) {
-      learningOrderNotDue.push([skill, dueDate.getTime()]);
+    } else if (srsState.nextReviewAt > now) {
+      learningOrderNotDue.push([skill, srsState]);
     } else {
-      learningOrderDue.push([skill, dueDate.getTime()]);
+      learningOrderDue.push([skill, srsState.nextReviewAt.getTime()]);
     }
 
     const node = graph.get(skill);
@@ -392,12 +401,69 @@ export function skillReviewQueue({
       .map(([skill]) => skill),
     // Then do new skills in the order of the learning graph.
     ...learningOrderNew.reverse(),
-    // Finally do not due skills, in the order that they're due (closest first).
-    ...learningOrderNotDue
-      .sort(sortComparatorNumber(([, due]) => due))
-      .map(([skill]) => skill),
+    // Finally sort the not-due skills.
+    ...randomSortSkills(learningOrderNotDue),
   ];
 }
+
+/**
+ * Randomly sort skills for review based on their SRS state to form a
+ * probability distribution weighted by each skill's difficulty. It's designed
+ * to be efficient and deterministic so it can be tested and predictable. In
+ * practice it probably doesn't make sense to compute all of the upcoming skills
+ * (rather than just "the next one") because each time a skill is reviewed the
+ * sequence will change. But it can be used to allow batches of skills to be
+ * selected and reviewed as a quiz rather than just taking one-by-one.
+ *
+ * @param skillStates
+ * @returns
+ */
+const randomSortSkills = (skillStates: [Skill, SrsState | undefined][]) => {
+  let totalWeight = 0;
+
+  const weighted = skillStates.map(([skill, srsState]): [Skill, number] => {
+    // Compute weights: lower stability = higher selection weight
+    const learningScore =
+      srsState?.type === SrsType.FsrsFourPointFive
+        ? // either difficulty or stability should always change after each
+          // review, so combining them ensures each review changes the random
+          // order and avoids getting stuck in a loop repeating a review for the
+          // same skill over and over again.
+          (1 / srsState.difficulty) * Math.sqrt(1 + srsState.stability)
+        : 0;
+    const weight = 1 / learningScore + 1;
+    totalWeight += weight;
+    return [skill, weight];
+  });
+
+  // Create a pseudo-random number generator seeded from the total weight of
+  // the skills. This way the order is deterministic but should change each
+  // time a skill is reviewed (since the total weight will change).
+  const random = pseudoRandomNumberGenerator(totalWeight);
+
+  // Normalize the weights and convert into a "priority" value for sorting.
+  for (const x of weighted) {
+    const normalizedWeight = x[1] / totalWeight;
+    // Randomize the order (weight turns into "priority")
+    x[1] = random() / normalizedWeight;
+  }
+
+  // Order the skills
+  weighted.sort(sortComparatorNumber(([, weight]) => weight));
+
+  return weighted.map(([skill]) => skill);
+};
+
+const isSkillIntroduced = (srsState: SrsState) => {
+  switch (srsState.type) {
+    case SrsType.FsrsFourPointFive: {
+      return fsrsIsIntroduced(srsState);
+    }
+    case SrsType.Mock: {
+      return true;
+    }
+  }
+};
 
 const skillTypeShorthandMapping: Record<SkillType, string> = {
   [SkillType.Deprecated_EnglishToRadical]: `[deprecated]`,

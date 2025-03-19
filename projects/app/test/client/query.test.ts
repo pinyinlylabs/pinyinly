@@ -16,6 +16,7 @@ import { r } from "#util/rizzle.ts";
 import { invariant } from "@haohaohow/lib/invariant";
 import assert from "node:assert/strict";
 import test from "node:test";
+import { parseRelativeTimeShorthand } from "../data/helpers";
 import { testReplicacheOptions } from "../util/rizzleHelpers";
 
 await test(`${hsk1SkillReview.name} suite`, async () => {
@@ -81,34 +82,31 @@ await test(`${computeSkillReviewQueue.name} suite`, async () => {
   });
 
   await test(`doesn't get stuck reviewing the same skill after all due skills are done`, async () => {
-    const reviewQueue = await simulateSkillReviews({
-      targetSkills: [`he:分:divide`],
-      history: [
-        `❌ he:𠃌:radical`, // Get it wrong initially (so after all the reviews it will have lower "stability" than the others).
-        `💤 5s`,
-        `✅ he:𠃌:radical`, // Then answer it correctly.
-        `💤 5s`,
-        `✅ he:刀:knife`,
-        `💤 5s`,
-        `✅ he:八:eight`,
-        `💤 5s`,
-        `✅ he:分:divide`,
-        `💤 5s`,
-        `✅ he:丿:slash`,
-        // Finished all the reviews, now we can start reviewing things that
-        // aren't due yet. he:𠃌:radical was incorrect so it should be reviewed
-        // again, but then reviewing it as "easy" should mean it shouldn't be
-        // next to review after this.
-        `💤 4h`,
-        `✅(easy) he:𠃌:radical`,
-        `💤 4h`,
-        `✅(easy) he:𠃌:radical`,
-        `💤 4h`,
-        `✅(easy) he:𠃌:radical`,
-      ],
-    });
+    const targetSkills: Skill[] = [`he:分:divide`];
+    const history: SkillReviewOp[] = [
+      `❌ he:𠃌:radical`, // Get it wrong initially (so after all the reviews it will have lower "stability" than the others).
+      `💤 5s`,
+      `✅ he:𠃌:radical`, // Then answer it correctly.
+      `💤 5s`,
+      `✅ he:刀:knife`,
+      `💤 5s`,
+      `✅ he:八:eight`,
+      `💤 5s`,
+      `✅ he:分:divide`,
+      `💤 5s`,
+      `✅ he:丿:slash`,
+    ];
 
-    assert.notEqual(reviewQueue[0], `he:𠃌:radical`);
+    const [review1] = await simulateSkillReviews({ targetSkills, history });
+    history.push(`💤 10s`, `✅ ${review1!}`);
+    const [review2] = await simulateSkillReviews({ targetSkills, history });
+    history.push(`💤 10s`, `✅ ${review2!}`);
+    const [review3] = await simulateSkillReviews({ targetSkills, history });
+
+    assert.notDeepEqual(
+      [review1, review2, review3],
+      [review1, review1, review1],
+    );
   });
 });
 
@@ -132,6 +130,10 @@ await test(`${flagsForSrsState.name} suite`, async () => {
   });
 });
 
+type SkillReviewOp =
+  | `${`✅` | `✅(easy)` | `✅(hard)` | `❌`} ${Skill}`
+  | `💤 ${string}`;
+
 /**
  * Testing helper to calculate a skill review queue based on a history of
  * simulated reviews.
@@ -141,10 +143,7 @@ async function simulateSkillReviews({
   history,
 }: {
   targetSkills: Skill[];
-  history: (
-    | `${`✅` | `✅(easy)` | `✅(hard)` | `❌`} ${Skill}`
-    | `💤 ${string}`
-  )[];
+  history: SkillReviewOp[];
 }): Promise<Skill[]> {
   await using rizzle = r.replicache(testReplicacheOptions(), v7, v7Mutators);
   let now = new Date();
@@ -156,18 +155,8 @@ async function simulateSkillReviews({
     switch (op) {
       // jump forward in time
       case `💤`: {
-        const durationString = args[0];
-        invariant(durationString != null);
-        const durationParseResult = /^(\d+)([smhd])$/.exec(durationString);
-        invariant(
-          durationParseResult != null,
-          `invalid duration ${durationString}`,
-        );
-        const [, multiple, unit] = durationParseResult;
-        const duration =
-          Number(multiple) *
-          { s: 1, m: 60 * 1, h: 60 * 60, d: 60 * 60 * 24 }[unit!]!;
-        now = new Date(now.getTime() + duration * 1000);
+        invariant(args[0] != null);
+        now = parseRelativeTimeShorthand(args[0], now);
         break;
       }
       // skill rating

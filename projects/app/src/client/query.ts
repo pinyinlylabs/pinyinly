@@ -5,7 +5,6 @@ import {
   Question,
   QuestionFlag,
   QuestionFlagType,
-  SkillType,
   SrsState,
   SrsType,
 } from "@/data/model";
@@ -14,76 +13,11 @@ import {
   hanziWordToEnglish,
   skillLearningGraph,
   skillReviewQueue,
-  skillType,
 } from "@/data/skills";
 import { allHsk1HanziWords, lookupHanziWord } from "@/dictionary/dictionary";
 import { fsrsIsIntroduced, fsrsIsLearned } from "@/util/fsrs";
 import { useQuery } from "@tanstack/react-query";
 import { interval } from "date-fns/interval";
-import shuffle from "lodash/shuffle";
-import take from "lodash/take";
-
-export async function questionsForReview(
-  r: Rizzle,
-  options?: {
-    skillTypes?: readonly SkillType[];
-    sampleSize?: number;
-    dueBeforeNow?: boolean;
-    filter?: (skill: Skill, srsState: SrsState) => boolean;
-    limit?: number;
-  },
-): Promise<[Skill, SrsState, Question][]> {
-  const result: [Skill, SrsState, Question][] = [];
-  const now = new Date();
-  const skillTypesFilter =
-    options?.skillTypes == null ? null : new Set(options.skillTypes);
-
-  for await (const [, skillState] of r.queryPaged.skillState.byNextReviewAt()) {
-    // Only consider skills that are due for review.
-    if (options?.dueBeforeNow === true && skillState.srs.nextReviewAt > now) {
-      continue;
-    }
-
-    // Only consider radical skills
-    if (
-      skillTypesFilter != null &&
-      !skillTypesFilter.has(skillType(skillState.skill))
-    ) {
-      continue;
-    }
-
-    // eslint-disable-next-line unicorn/no-array-callback-reference, unicorn/no-array-method-this-argument
-    if (options?.filter && !options.filter(skillState.skill, skillState.srs)) {
-      continue;
-    }
-
-    try {
-      const question = await generateQuestionForSkillOrThrow(skillState.skill);
-      question.flag ??= flagsForSrsState(skillState.srs);
-      result.push([skillState.skill, skillState.srs, question]);
-    } catch (error) {
-      console.error(
-        `Error while generating a question for a skill ${JSON.stringify(skillState.skill)}`,
-        error,
-      );
-      continue;
-    }
-
-    if (options?.sampleSize != null) {
-      if (result.length === options.sampleSize) {
-        break;
-      }
-    } else if (options?.limit != null && result.length === options.limit) {
-      break;
-    }
-  }
-
-  if (options?.sampleSize != null) {
-    return take(shuffle(result), options.limit ?? Infinity);
-  }
-
-  return result;
-}
 
 export async function questionsForReview2(
   r: Rizzle,
@@ -160,25 +94,20 @@ export async function computeSkillReviewQueue(
   now = new Date(),
 ): Promise<Skill[]> {
   const learnedSkills = new Set<Skill>();
-  const dueSkillDates = new Map<Skill, Date>();
+  const skillSrsStates = new Map<Skill, SrsState>();
   for await (const [, v] of r.queryPaged.skillState.scan()) {
+    skillSrsStates.set(v.skill, v.srs);
     if (fsrsIsLearned(v.srs)) {
       learnedSkills.add(v.skill);
-    } else if (fsrsIsIntroduced(v.srs)) {
-      dueSkillDates.set(v.skill, v.srs.nextReviewAt);
     }
   }
 
   const graph = await skillLearningGraph({
     targetSkills,
-    isSkillLearned: (skill) => learnedSkills.has(skill),
+    shouldSkipSubTree: (skill) => learnedSkills.has(skill),
   });
 
-  return skillReviewQueue({
-    graph,
-    getSkillDueDate: (skill) => dueSkillDates.get(skill),
-    now,
-  });
+  return skillReviewQueue({ graph, skillSrsStates, now });
 }
 
 export const useHanziWordMeaning = (hanziWord: HanziWord) => {
