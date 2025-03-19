@@ -1,12 +1,14 @@
 {
   "module": "commonjs",
   "dependencies": {
-    "@expo/server": "0.5.2",
-    "@sentry/core": "~8.40.0",
-    "@sentry/node": "~8.40.0"
+    "@expo/server": "0.5.1",
+    "@sentry/core": "~9.6.0",
+    "@sentry/node": "~9.6.0",
+    "@sentry/profiling-node": "~9.6.0",
+    "@vercel/functions": "^2.0.0"
   },
   "engines": {
-    "node": "22.x"
+    "node": "22.14.0"
   },
   "packageManager": "pnpm@9.15.9"
 }

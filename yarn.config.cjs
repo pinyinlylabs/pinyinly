@@ -409,6 +409,10 @@ module.exports = defineConfig({
     });
     await enforceMoonToolchainVersion(ctx);
     await enforceConsistentAppPnpmAndYarnDependencies(ctx);
-    await enforceSingleDependencyVersion(ctx, [/^@sentry\//, /^react-native$/]);
+    await enforceSingleDependencyVersion(ctx, [
+      /^@sentry\//,
+      /^react-native$/,
+      /^@vercel\//,
+    ]);
   },
 });

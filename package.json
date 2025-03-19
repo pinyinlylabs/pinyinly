@@ -14,12 +14,16 @@
     "yaml": "^2.7.0"
   },
   "engines": {
-    "node": "~23.9.0"
+    "node": "22.14.0"
   },
   "resolutions": {
     "@testing-library/user-event@npm:14.3.0": "npm:@testing-library/user-event@^14.5.0",
     "@types/pg@npm:8.11.6": "patch:@types/pg@npm%3A8.11.11#~/.yarn/patches/@types-pg-npm-8.11.11-c5a8a91498.patch",
     "@sentry/types@npm:^8.48.0": "8.48.0",
+    "@sentry/types@npm:8.54.0": "~9.6.0",
+    "@sentry/browser@npm:8.54.0": "~9.6.0",
+    "@sentry/core@npm:8.54.0": "~9.6.0",
+    "@sentry/react@npm:8.54.0": "~9.6.0",
     "debug@npm:^4.1.0": "4.3.4",
     "debug@npm:^4.1.1": "4.3.4",
     "debug@npm:4.1.1": "4.3.4",
