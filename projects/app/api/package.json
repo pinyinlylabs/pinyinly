@@ -2,9 +2,9 @@
   "module": "commonjs",
   "dependencies": {
     "@expo/server": "0.5.1",
-    "@sentry/core": "~9.6.0",
-    "@sentry/node": "~9.6.0",
-    "@sentry/profiling-node": "~9.6.0",
+    "@sentry/core": "~8.54.0",
+    "@sentry/node": "~8.54.0",
+    "@sentry/profiling-node": "~8.54.0",
     "@vercel/functions": "^2.0.0"
   },
   "engines": {
