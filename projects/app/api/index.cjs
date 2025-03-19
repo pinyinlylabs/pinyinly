@@ -1,6 +1,6 @@
 const Sentry = require(`@sentry/node`);
 const { captureConsoleIntegration } = require(`@sentry/core`);
-const { nodeProfilingIntegration } = require(`@sentry/profiling-node`);
+// const { nodeProfilingIntegration } = require(`@sentry/profiling-node`);
 
 Sentry.init({
   enabled: process.env.HHH_SENTRY_ENABLED !== `false`,
@@ -11,7 +11,7 @@ Sentry.init({
     // If there's an unhandled rejection then crash the process rather than
     // hanging indefinitely as this is more suitable for serverless environments.
     Sentry.onUnhandledRejectionIntegration({ mode: `strict` }),
-    nodeProfilingIntegration(),
+    // nodeProfilingIntegration(),
   ],
   environment: process.env.HHH_SENTRY_ENVIRONMENT,
   tracesSampleRate: Number.parseFloat(
