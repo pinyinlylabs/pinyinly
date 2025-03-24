@@ -6,7 +6,12 @@
       "description": "Disable renovate for Expo managed packages (e.g. react-native) otherwise expo-doctor will complain",
       "matchDatasources": ["npm"],
       "matchDepTypes": ["dependencies"],
-      "matchDepNames": ["*react-native*", "expo-updates", "@sentry/*"],
+      "matchDepNames": [
+        "@expo/*",
+        "@sentry/*",
+        "*react-native*",
+        "expo-updates"
+      ],
       "enabled": false
     },
     {
