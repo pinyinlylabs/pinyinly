@@ -11227,8 +11227,8 @@ __metadata:
   linkType: hard
 
 "inngest@npm:^3.29.2":
-  version: 3.32.7
-  resolution: "inngest@npm:3.32.7"
+  version: 3.33.0
+  resolution: "inngest@npm:3.33.0"
   dependencies:
     "@bufbuild/protobuf": "npm:^2.2.3"
     "@inngest/ai": "npm:^0.1.3"
@@ -11243,6 +11243,7 @@ __metadata:
     ms: "npm:^2.1.3"
     serialize-error-cjs: "npm:^0.1.3"
     strip-ansi: "npm:^5.2.0"
+    temporal-polyfill: "npm:^0.2.5"
     ulidx: "npm:^2.4.1"
     zod: "npm:~3.22.3"
   peerDependencies:
@@ -11277,7 +11278,7 @@ __metadata:
       optional: true
     typescript:
       optional: true
-  checksum: 10c0/ee2b4b1f3b81c80fad943e656faa7bafa9a035da02a47d1c4e8c101db3322fc5ccab6f0f62db6eaf9e25594099efe023e68fd279aeec4194e2b38b57ec514c32
+  checksum: 10c0/71ab818e87a4ea15045345d83285ab5fe30454025fc6895b2295d7ba7de9130975db2ef9c070a4fce6ec141942337e64a2b5c367279d128516e383c4a8f2f38b
   languageName: node
   linkType: hard
 
@@ -16838,6 +16839,22 @@ __metadata:
   dependencies:
     rimraf: "npm:~2.6.2"
   checksum: 10c0/7f071c963031bfece37e13c5da11e9bb451e4ddfc4653e23e327a2f91594102dc826ef6a693648e09a6e0eb856f507967ec759ae55635e0878091eccf411db37
+  languageName: node
+  linkType: hard
+
+"temporal-polyfill@npm:^0.2.5":
+  version: 0.2.5
+  resolution: "temporal-polyfill@npm:0.2.5"
+  dependencies:
+    temporal-spec: "npm:^0.2.4"
+  checksum: 10c0/f2e828b15809bac9fcbab28f238c03277dd134ccc05f80cf2daa26cf8f8a865e9a2f610bcd6148845908665f8b59a5793c25d607cc0eec95f869d9d746839230
+  languageName: node
+  linkType: hard
+
+"temporal-spec@npm:^0.2.4":
+  version: 0.2.4
+  resolution: "temporal-spec@npm:0.2.4"
+  checksum: 10c0/89dec88dcded2cdffa36c3c2274881e833dd69e5959c9b50f52a93b29f02b8f265288be113b2d3b70e89dc85ece7eb8f9121c6d0e0563ea21bbf81693da8f97d
   languageName: node
   linkType: hard
 
