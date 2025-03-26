@@ -82,7 +82,7 @@ export async function withRetriableTransaction<R>(
    * will be retried up to that many times in the event of a serialization
    * error.
    *
-   * This is the second parameter to mkae code more readable top-to-bottom so
+   * This is the second parameter to make code more readable top-to-bottom so
    * the isolation level is known as up-front context when reading the function
    * body.
    */

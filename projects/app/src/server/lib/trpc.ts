@@ -31,7 +31,7 @@ export const authedProcedure = procedure.use(async function isAuthed(opts) {
   if (session == null) {
     throw new TRPCError({ code: `UNAUTHORIZED` });
   }
-  return opts.next({
+  return await opts.next({
     ctx: {
       session,
     },
