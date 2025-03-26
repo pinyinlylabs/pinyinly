@@ -181,12 +181,13 @@ const syncRemotePush = inngest.createFunction(
             `syncRemoteClient-${clientId}-${lastSyncedMutationId}`,
             async () => {
               // Fetch mutations that need to be sent.
-              const mutationBatchToPush = await withDrizzle(async (db) =>
-                getReplicacheClientMutationsSince(db, {
-                  clientId,
-                  sinceMutationId: lastSyncedMutationId,
-                  limit: mutationBatchSize,
-                }),
+              const mutationBatchToPush = await withDrizzle(
+                async (db) =>
+                  await getReplicacheClientMutationsSince(db, {
+                    clientId,
+                    sinceMutationId: lastSyncedMutationId,
+                    limit: mutationBatchSize,
+                  }),
               );
 
               // push to server

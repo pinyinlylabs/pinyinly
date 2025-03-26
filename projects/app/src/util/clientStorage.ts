@@ -56,7 +56,7 @@ export async function clientStorageGet(key: string): Promise<string | null> {
     }
     case `ios`:
     case `android`: {
-      return SecureStore.getItemAsync(storageKey);
+      return await SecureStore.getItemAsync(storageKey);
     }
     case `macos`:
     case `windows`: {

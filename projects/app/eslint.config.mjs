@@ -211,6 +211,9 @@ export default tseslint.config(
       // means it's often turned off even when it perhaps shouldn't be, so it's
       // better to just disable it completely.
       "@typescript-eslint/no-unsafe-return": `off`,
+      // It's easier to use the debugger for async code when all promises are
+      // awaited so that the function call stack is preserved.
+      "@typescript-eslint/return-await": [`error`, `always`],
 
       //
       // @stylistic
@@ -255,10 +258,12 @@ export default tseslint.config(
   // test files
   {
     files: [`test/**`],
+    ignores: [`**/lint.test.ts`],
     rules: {
       "@typescript-eslint/no-non-null-assertion": `off`,
       "@typescript-eslint/restrict-template-expressions": `off`,
       "@typescript-eslint/require-await": `off`, // this is annoying when you want a little function to return a promise
+      "@typescript-eslint/return-await": `off`, // this is annoying when you want a little function to return a promise
       "unicorn/consistent-function-scoping": `off`, // it's useful to write functions in the scope of a test
       "unicorn/no-useless-undefined": `off`, // writing undefined can be useful when writing mocks
     },
