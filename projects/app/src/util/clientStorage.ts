@@ -23,7 +23,7 @@ function getStorageKey(key: string): string {
 
 /**
  * react-query wrapper around localStorage (web) and SecureStore (ios +
- * android). See @see {useClientStorageMutation}.
+ * android). See {@link useClientStorageMutation}.
  */
 export const useClientStorageQuery = (key: string) => {
   const queryClient = useQueryClient();

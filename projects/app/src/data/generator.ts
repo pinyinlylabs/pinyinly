@@ -2,6 +2,7 @@ import {
   allHsk1HanziWords,
   allHsk2HanziWords,
   allHsk3HanziWords,
+  hanziFromHanziWord,
   HanziWordMeaning,
   lookupHanziWord,
 } from "@/dictionary/dictionary";
@@ -115,17 +116,91 @@ function evenHalve<T>(items: T[]): [T[], T[]] {
 
 type OtherHanziResult = [HanziWord, DeepReadonly<HanziWordMeaning>][];
 
+interface WrongAnswersQuizContext {
+  /**
+   * Keep track of which hanzi have been used so that we don't have multiple
+   * choices with the same hanzi or meaning.
+   */
+  usedHanzi: Set<string>;
+  /**
+   * Keep track of which glosses have been used so that we don't have multiple
+   * choices in the quiz that have the same meaning. Otherwise there could be a
+   * pair of "wrong choices" that have overlapping meanings and if picked would
+   * be marked incorrect.
+   */
+  usedGlosses: Set<string>;
+  /**
+   * The final set of wrong answers.
+   */
+  result: OtherHanziResult;
+}
+
+export async function shouldOmitHanziWord(
+  hanziWord: HanziWord,
+  ctx: WrongAnswersQuizContext,
+): Promise<boolean> {
+  const meaning = await lookupHanziWord(hanziWord);
+  if (meaning == null) {
+    return true;
+  }
+
+  const hanzi = hanziFromHanziWord(hanziWord);
+  if (ctx.usedHanzi.has(hanzi)) {
+    return true;
+  }
+
+  // Don't use any words that have meanings that are too similar and could be
+  // confusing.
+  for (const gloss of meaning.gloss) {
+    if (ctx.usedGlosses.has(gloss)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+export async function makeQuizContext(
+  correctAnswer?: HanziWord,
+): Promise<WrongAnswersQuizContext> {
+  const ctx: WrongAnswersQuizContext = {
+    usedHanzi: new Set(),
+    usedGlosses: new Set(),
+    result: [],
+  };
+
+  if (correctAnswer != null) {
+    await addToQuizContext(correctAnswer, ctx);
+    ctx.result.splice(0, ctx.result.length);
+  }
+
+  return ctx;
+}
+
+export async function addToQuizContext(
+  hanziWord: HanziWord,
+  ctx: WrongAnswersQuizContext,
+): Promise<void> {
+  const hanziWordMeaning = await lookupHanziWord(hanziWord);
+  if (!hanziWordMeaning) {
+    return;
+  }
+
+  for (const gloss of hanziWordMeaning.gloss) {
+    ctx.usedGlosses.add(gloss);
+  }
+
+  ctx.usedHanzi.add(hanziFromHanziWord(hanziWord));
+
+  ctx.result.push([hanziWord, hanziWordMeaning]);
+}
+
 async function getWrongHanziWordAnswers(
   hanziWord: HanziWord,
   count: number,
 ): Promise<OtherHanziResult> {
-  const hanziWordMeaning = await lookupHanziWord(hanziWord);
-  invariant(
-    hanziWordMeaning != null,
-    `missing meaning for hanzi word ${hanziWord}`,
-  );
-
-  const result: OtherHanziResult = [];
+  // Don't have anything conflict with the correct answer.
+  const ctx = await makeQuizContext(hanziWord);
 
   const [hsk1HanziWords, hsk2HanziWords, hsk3HanziWords] = await Promise.all([
     allHsk1HanziWords(),
@@ -140,38 +215,20 @@ async function getWrongHanziWordAnswers(
     (words) => words.includes(hanziWord),
   ) ?? [...hsk1HanziWords, ...hsk2HanziWords, ...hsk3HanziWords];
 
-  // Keep track of which glosses have been used so that we don't have multiple
-  // choices in the quiz that have the same meaning. Otherwise there could be a
-  // pair of "wrong choices" that have overlapping meanings and if picked would
-  // be marked incorrect.
-  const usedGlosses = new Set(hanziWordMeaning.gloss);
-
   for (const x of shuffle(allHanziWords)) {
-    const meaning = await lookupHanziWord(x);
-    if (meaning == null) {
-      continue;
-    }
+    if (!(await shouldOmitHanziWord(x, ctx))) {
+      await addToQuizContext(x, ctx);
 
-    // Don't use any words that have meanings that are too similar and could be
-    // confusing.
-    if (meaning.gloss.some((x) => usedGlosses.has(x))) {
-      continue;
-    }
-
-    result.push([x, meaning]);
-    for (const gloss of meaning.gloss) {
-      usedGlosses.add(gloss);
-    }
-
-    if (result.length === count) {
-      break;
+      if (ctx.result.length === count) {
+        break;
+      }
     }
   }
 
   invariant(
-    result.length == count,
-    `couldn't get enough other choices ${result.length} != ${count}`,
+    ctx.result.length == count,
+    `couldn't get enough other choices ${ctx.result.length} != ${count}`,
   );
 
-  return result;
+  return ctx.result;
 }
