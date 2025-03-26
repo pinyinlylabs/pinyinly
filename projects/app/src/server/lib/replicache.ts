@@ -33,8 +33,7 @@ import {
   assertMinimumIsolationLevel,
   json_build_object,
   json_object_agg,
-  withDrizzle,
-  withSerializationRetries,
+  withRepeatableReadTransaction,
   xmin,
 } from "./db";
 import { updateSkillState } from "./queries";
@@ -108,7 +107,7 @@ function getSchemaImpl(schemaVersion: string) {
 }
 
 export async function push(
-  tx: Drizzle,
+  db: Drizzle,
   userId: string,
   pushRequest: PushRequest,
 ): Promise<PushResponse> {
@@ -129,7 +128,7 @@ export async function push(
     }
 
     // Required as per https://doc.replicache.dev/concepts/db-isolation-level
-    await assertMinimumIsolationLevel(tx, `repeatable read`);
+    await assertMinimumIsolationLevel(db, `repeatable read`);
 
     const mutationRecords: (typeof s.replicacheMutation.$inferInsert)[] = [];
 
@@ -138,7 +137,7 @@ export async function push(
       let notSkipped;
       try {
         notSkipped = await processMutation(
-          tx,
+          db,
           userId,
           pushRequest.clientGroupId,
           pushRequest.schemaVersion,
@@ -149,7 +148,7 @@ export async function push(
         success = true;
       } catch {
         notSkipped = await processMutation(
-          tx,
+          db,
           userId,
           pushRequest.clientGroupId,
           pushRequest.schemaVersion,
@@ -177,7 +176,7 @@ export async function push(
     }
 
     if (mutationRecords.length > 0) {
-      await tx.insert(s.replicacheMutation).values(mutationRecords);
+      await db.insert(s.replicacheMutation).values(mutationRecords);
     }
   });
 }
@@ -266,7 +265,7 @@ function isCvrLastMutationIdsDiffEmpty(diff: Record<string, number>) {
 }
 
 export async function pull(
-  tx: Drizzle,
+  db: Drizzle,
   userId: string,
   pullRequest: PullRequest,
 ): Promise<
@@ -282,7 +281,7 @@ export async function pull(
     }
 
     // Required as per https://doc.replicache.dev/concepts/db-isolation-level
-    await assertMinimumIsolationLevel(tx, `repeatable read`);
+    await assertMinimumIsolationLevel(db, `repeatable read`);
 
     const { clientGroupId, cookie } = pullRequest;
 
@@ -290,7 +289,7 @@ export async function pull(
     const prevCvr =
       cookie == null
         ? null
-        : await tx.query.replicacheCvr.findFirst({
+        : await db.query.replicacheCvr.findFirst({
             where: (p, { eq }) => eq(p.id, cookie.cvrId),
           });
 
@@ -298,132 +297,130 @@ export async function pull(
     // n/a
 
     // 3: begin transaction
-    const txResult = await withSerializationRetries(
-      tx.transaction(async (tx) => {
-        // 4-5: getClientGroup(body.clientGroupID), verify user
-        const prevClientGroup = await getClientGroup(tx, {
-          userId,
-          clientGroupId,
-          schemaVersion: pullRequest.schemaVersion,
-        });
-        debug(`%o`, { prevClientGroup });
+    const txResult = await withRepeatableReadTransaction(db, async (db) => {
+      // 4-5: getClientGroup(body.clientGroupID), verify user
+      const prevClientGroup = await getClientGroup(db, {
+        userId,
+        clientGroupId,
+        schemaVersion: pullRequest.schemaVersion,
+      });
+      debug(`%o`, { prevClientGroup });
 
-        // 6: Read all domain data, just ids and versions
-        // n/a
+      // 6: Read all domain data, just ids and versions
+      // n/a
 
-        // 7: Read all clients in CG
-        const clients = await tx.query.replicacheClient.findMany({
-          where: (t) => eq(t.clientGroupId, clientGroupId),
-        });
+      // 7: Read all clients in CG
+      const clients = await db.query.replicacheClient.findMany({
+        where: (t) => eq(t.clientGroupId, clientGroupId),
+      });
 
-        // 8: Build nextCVR
-        const allCvrEntities = await computeCvrEntities(tx, userId, schema);
+      // 8: Build nextCVR
+      const allCvrEntities = await computeCvrEntities(db, userId, schema);
 
-        const {
-          nextEntitiesDiff: entitiesDiff,
-          nextCvrEntities,
-          partial,
-        } = computeCvrEntitiesDiff(prevCvr?.entities ?? {}, allCvrEntities);
+      const {
+        nextEntitiesDiff: entitiesDiff,
+        nextCvrEntities,
+        partial,
+      } = computeCvrEntitiesDiff(prevCvr?.entities ?? {}, allCvrEntities);
 
-        const nextCvrLastMutationIds = Object.fromEntries(
-          clients.map((c) => [c.id, c.lastMutationId]),
-        );
-        debug(`%o`, { nextCvrEntities, nextCvrLastMutationIds });
+      const nextCvrLastMutationIds = Object.fromEntries(
+        clients.map((c) => [c.id, c.lastMutationId]),
+      );
+      debug(`%o`, { nextCvrEntities, nextCvrLastMutationIds });
 
-        // 9: calculate diffs
-        const lastMutationIdsDiff = diffLastMutationIds(
-          prevCvr?.lastMutationIds ?? {},
-          nextCvrLastMutationIds,
-        );
-        debug(`%o`, { entitiesDiff, lastMutationIdsDiff });
+      // 9: calculate diffs
+      const lastMutationIdsDiff = diffLastMutationIds(
+        prevCvr?.lastMutationIds ?? {},
+        nextCvrLastMutationIds,
+      );
+      debug(`%o`, { entitiesDiff, lastMutationIdsDiff });
 
-        // 10: If diff is empty, return no-op PR
-        if (
-          prevCvr &&
-          isCvrDiffEmpty(entitiesDiff) &&
-          isCvrLastMutationIdsDiffEmpty(lastMutationIdsDiff)
-        ) {
-          return null;
-        }
+      // 10: If diff is empty, return no-op PR
+      if (
+        prevCvr &&
+        isCvrDiffEmpty(entitiesDiff) &&
+        isCvrLastMutationIdsDiffEmpty(lastMutationIdsDiff)
+      ) {
+        return null;
+      }
 
-        // 11: get entities
-        const [
-          pinyinFinalAssociations,
-          pinyinInitialAssociations,
-          pinyinInitialGroupThemes,
-          skillStates,
-          skillRatings,
-        ] = await Promise.all([
-          tx.query.pinyinFinalAssociation.findMany({
-            where: (t) =>
-              inArray(t.id, entitiesDiff.pinyinFinalAssociation?.puts ?? []),
-          }),
-          tx.query.pinyinInitialAssociation.findMany({
-            where: (t) =>
-              inArray(t.id, entitiesDiff.pinyinInitialAssociation?.puts ?? []),
-          }),
-          tx.query.pinyinInitialGroupTheme.findMany({
-            where: (t) =>
-              inArray(t.id, entitiesDiff.pinyinInitialGroupTheme?.puts ?? []),
-          }),
-          tx.query.skillState.findMany({
-            where: (t) => inArray(t.id, entitiesDiff.skillState?.puts ?? []),
-          }),
-          tx.query.skillRating.findMany({
-            where: (t) => inArray(t.id, entitiesDiff.skillRating?.puts ?? []),
-          }),
-        ]);
-        debug(`%o`, { skillStates, skillRatings });
+      // 11: get entities
+      const [
+        pinyinFinalAssociations,
+        pinyinInitialAssociations,
+        pinyinInitialGroupThemes,
+        skillStates,
+        skillRatings,
+      ] = await Promise.all([
+        db.query.pinyinFinalAssociation.findMany({
+          where: (t) =>
+            inArray(t.id, entitiesDiff.pinyinFinalAssociation?.puts ?? []),
+        }),
+        db.query.pinyinInitialAssociation.findMany({
+          where: (t) =>
+            inArray(t.id, entitiesDiff.pinyinInitialAssociation?.puts ?? []),
+        }),
+        db.query.pinyinInitialGroupTheme.findMany({
+          where: (t) =>
+            inArray(t.id, entitiesDiff.pinyinInitialGroupTheme?.puts ?? []),
+        }),
+        db.query.skillState.findMany({
+          where: (t) => inArray(t.id, entitiesDiff.skillState?.puts ?? []),
+        }),
+        db.query.skillRating.findMany({
+          where: (t) => inArray(t.id, entitiesDiff.skillRating?.puts ?? []),
+        }),
+      ]);
+      debug(`%o`, { skillStates, skillRatings });
 
-        // 12: changed clients
-        // n/a (done above)
+      // 12: changed clients
+      // n/a (done above)
 
-        // 13: newCVRVersion
-        const prevCvrVersion = pullRequest.cookie?.order ?? 0;
-        const nextCvrVersion =
-          Math.max(prevCvrVersion, prevClientGroup.cvrVersion) + 1;
+      // 13: newCVRVersion
+      const prevCvrVersion = pullRequest.cookie?.order ?? 0;
+      const nextCvrVersion =
+        Math.max(prevCvrVersion, prevClientGroup.cvrVersion) + 1;
 
-        // 14: Write ClientGroupRecord
-        const nextClientGroup = {
-          ...prevClientGroup,
-          cvrVersion: nextCvrVersion,
-        };
-        debug(`%o`, { nextClientGroup });
-        await putClientGroup(tx, nextClientGroup);
+      // 14: Write ClientGroupRecord
+      const nextClientGroup = {
+        ...prevClientGroup,
+        cvrVersion: nextCvrVersion,
+      };
+      debug(`%o`, { nextClientGroup });
+      await putClientGroup(db, nextClientGroup);
 
-        return {
-          entityPatches: {
-            pinyinInitialAssociation: {
-              dels: entitiesDiff.pinyinInitialAssociation?.dels ?? [],
-              puts: pinyinInitialAssociations,
-            },
-            pinyinFinalAssociation: {
-              dels: entitiesDiff.pinyinFinalAssociation?.dels ?? [],
-              puts: pinyinFinalAssociations,
-            },
-            pinyinInitialGroupTheme: {
-              dels: entitiesDiff.pinyinInitialGroupTheme?.dels ?? [],
-              puts: pinyinInitialGroupThemes,
-            },
-            skillState: {
-              dels: entitiesDiff.skillState?.dels ?? [],
-              puts: skillStates,
-            },
-            skillRating: {
-              dels: entitiesDiff.skillRating?.dels ?? [],
-              puts: skillRatings,
-            },
+      return {
+        entityPatches: {
+          pinyinInitialAssociation: {
+            dels: entitiesDiff.pinyinInitialAssociation?.dels ?? [],
+            puts: pinyinInitialAssociations,
           },
-          nextCvr: {
-            lastMutationIds: nextCvrLastMutationIds,
-            entities: nextCvrEntities,
+          pinyinFinalAssociation: {
+            dels: entitiesDiff.pinyinFinalAssociation?.dels ?? [],
+            puts: pinyinFinalAssociations,
           },
-          lastMutationIdChanges: lastMutationIdsDiff,
-          nextCvrVersion,
-          partial,
-        };
-      }),
-    );
+          pinyinInitialGroupTheme: {
+            dels: entitiesDiff.pinyinInitialGroupTheme?.dels ?? [],
+            puts: pinyinInitialGroupThemes,
+          },
+          skillState: {
+            dels: entitiesDiff.skillState?.dels ?? [],
+            puts: skillStates,
+          },
+          skillRating: {
+            dels: entitiesDiff.skillRating?.dels ?? [],
+            puts: skillRatings,
+          },
+        },
+        nextCvr: {
+          lastMutationIds: nextCvrLastMutationIds,
+          entities: nextCvrEntities,
+        },
+        lastMutationIdChanges: lastMutationIdsDiff,
+        nextCvrVersion,
+        partial,
+      };
+    });
 
     // 10: If diff is empty, return no-op PR
     if (txResult === null) {
@@ -444,7 +441,7 @@ export async function pull(
     } = txResult;
 
     // 16-17: store cvr
-    const [cvr] = await tx
+    const [cvr] = await db
       .insert(s.replicacheCvr)
       .values([
         {
@@ -541,7 +538,7 @@ export async function pull(
 // Implements the push algorithm from
 // https://doc.replicache.dev/strategies/row-version#push
 export async function processMutation(
-  tx: Drizzle,
+  db: Drizzle,
   userId: string,
   clientGroupId: string,
   clientGroupSchemaVersion: string,
@@ -553,19 +550,19 @@ export async function processMutation(
 ): Promise<boolean> {
   return await startSpan({ name: processMutation.name }, async () => {
     // 2: beginTransaction
-    return await tx.transaction(async (tx) => {
+    return await db.transaction(async (db) => {
       debug(`Processing mutation errorMode=%o %o`, errorMode, mutation);
 
       // 3: `getClientGroup(body.clientGroupID)`
       // 4: Verify requesting user owns cg (in function)
-      const clientGroup = await getClientGroup(tx, {
+      const clientGroup = await getClientGroup(db, {
         userId,
         clientGroupId,
         schemaVersion: clientGroupSchemaVersion,
       });
       // 5: `getClient(mutation.clientID)`
       // 6: Verify requesting client group owns requested client
-      const prevClient = await getClient(tx, mutation.clientId, clientGroupId);
+      const prevClient = await getClient(db, mutation.clientId, clientGroupId);
 
       // 7: init nextMutationID
       const nextMutationId = prevClient.lastMutationId + 1;
@@ -589,7 +586,7 @@ export async function processMutation(
         try {
           // 10(i): Run business logic
           // 10(i)(a): xmin column is automatically updated by Postgres for any affected rows.
-          await mutate(tx, userId, mutation);
+          await mutate(db, userId, mutation);
         } catch (error) {
           // 10(ii)(a-c): log error, abort, and retry
           debug(`Error executing mutation: %o %o`, mutation, error);
@@ -604,8 +601,8 @@ export async function processMutation(
         lastMutationId: nextMutationId,
       };
 
-      await putClientGroup(tx, clientGroup);
-      await putClient(tx, nextClient);
+      await putClientGroup(db, clientGroup);
+      await putClient(db, nextClient);
 
       debug(`Processed mutation in %s`, Date.now() - t1);
 
@@ -857,7 +854,7 @@ export const fetchedMutationSchema = pushRequestSchema.omit({
 export type FetchedMutation = z.infer<typeof fetchedMutationSchema>;
 
 export async function fetchMutations(
-  tx: Drizzle,
+  db: Drizzle,
   userId: string,
   opts: {
     schemaVersions: string[];
@@ -868,7 +865,7 @@ export async function fetchMutations(
   return await startSpan({ name: fetchMutations.name }, async () => {
     let remainingLimit = opts.limit ?? 100;
 
-    const clientState = await getReplicacheClientStateForUser(tx, userId);
+    const clientState = await getReplicacheClientStateForUser(db, userId);
 
     // Compare the state provided by the caller with state from the database to
     // determine which clients have new mutations.
@@ -901,7 +898,7 @@ export async function fetchMutations(
     const result: FetchedMutation[] = [];
 
     for (const client of clientsWithNewData) {
-      const mutations = await getReplicacheClientMutationsSince(tx, {
+      const mutations = await getReplicacheClientMutationsSince(db, {
         clientId: client.clientId,
         sinceMutationId: client.sinceMutationId,
         limit: remainingLimit,
@@ -993,34 +990,29 @@ export async function updateRemoteSyncClientLastMutationId(
   db: Drizzle,
   opts: { remoteSyncId: string; clientId: string; lastMutationId: number },
 ) {
-  await db.transaction(
-    async (tx) => {
-      // Get a fresh copy since we're overwriting it but we only
-      // want to update one key. This could probably be done more
-      // efficiently in raw SQL.
-      const res = await tx.query.remoteSync.findFirst({
-        where: eq(s.remoteSync.id, opts.remoteSyncId),
-      });
-      invariant(
-        res != null,
-        `could not find remoteSync id=${opts.remoteSyncId}`,
-      );
+  await withRepeatableReadTransaction(db, async (db) => {
+    // Get a fresh copy since we're overwriting it but we only
+    // want to update one key. This could probably be done more
+    // efficiently in raw SQL.
+    const res = await db.query.remoteSync.findFirst({
+      where: eq(s.remoteSync.id, opts.remoteSyncId),
+    });
+    invariant(res != null, `could not find remoteSync id=${opts.remoteSyncId}`);
 
-      await tx
-        .update(s.remoteSync)
-        .set({
-          lastSyncedMutationIds: {
-            ...res.lastSyncedMutationIds,
-            [opts.clientId]: opts.lastMutationId,
-          },
-        })
-        .where(eq(s.remoteSync.id, opts.remoteSyncId));
-    },
-    { isolationLevel: `repeatable read` },
-  );
+    await db
+      .update(s.remoteSync)
+      .set({
+        lastSyncedMutationIds: {
+          ...res.lastSyncedMutationIds,
+          [opts.clientId]: opts.lastMutationId,
+        },
+      })
+      .where(eq(s.remoteSync.id, opts.remoteSyncId));
+  });
 }
 
-export async function withDrizzlePushChunked(
+export async function pushChunked(
+  db: Drizzle,
   userId: string,
   input: PushRequest,
 ) {
@@ -1033,11 +1025,9 @@ export async function withDrizzlePushChunked(
       mutations: batch,
     };
 
-    const result = await withDrizzle(
-      async (db) =>
-        await db.transaction((tx) => push(tx, userId, inputBatch), {
-          isolationLevel: `repeatable read`,
-        }),
+    const result = await withRepeatableReadTransaction(
+      db,
+      async (db) => await push(db, userId, inputBatch),
     );
 
     // Return any errors immediately
@@ -1047,36 +1037,34 @@ export async function withDrizzlePushChunked(
   }
 }
 
-export async function withDrizzleIgnoreRemoteClientForRemoteSync(
+/**
+ * Find the new remote client IDs that we haven't seen before and add them to
+ * the remoteSync record.
+ */
+export async function ignoreRemoteClientForRemoteSync(
+  db: Drizzle,
   remoteSyncId: string,
   clientIds: string[],
 ) {
-  // Find the new remote client IDs that we haven't seen before and
-  // add them to the remoteSync record.
-  await withDrizzle(async (db) => {
-    await db.transaction(
-      async (tx) => {
-        const freshRemoteSync = await tx.query.remoteSync.findFirst({
-          where: eq(s.remoteSync.id, remoteSyncId),
-        });
-        invariant(freshRemoteSync != null, `remoteSync not found`);
+  await withRepeatableReadTransaction(db, async (db) => {
+    const freshRemoteSync = await db.query.remoteSync.findFirst({
+      where: eq(s.remoteSync.id, remoteSyncId),
+    });
+    invariant(freshRemoteSync != null, `remoteSync not found`);
 
-        const knownRemoteClientIds = new Set(freshRemoteSync.pulledClientIds);
+    const knownRemoteClientIds = new Set(freshRemoteSync.pulledClientIds);
 
-        const newRemoteClientIds = clientIds.filter(
-          (x) => !knownRemoteClientIds.has(x),
-        );
-
-        if (newRemoteClientIds.length > 0) {
-          await tx
-            .update(s.remoteSync)
-            .set({
-              pulledClientIds: [...knownRemoteClientIds, ...newRemoteClientIds],
-            })
-            .where(eq(s.remoteSync.id, remoteSyncId));
-        }
-      },
-      { isolationLevel: `repeatable read` },
+    const newRemoteClientIds = clientIds.filter(
+      (x) => !knownRemoteClientIds.has(x),
     );
+
+    if (newRemoteClientIds.length > 0) {
+      await db
+        .update(s.remoteSync)
+        .set({
+          pulledClientIds: [...knownRemoteClientIds, ...newRemoteClientIds],
+        })
+        .where(eq(s.remoteSync.id, remoteSyncId));
+    }
   });
 }
