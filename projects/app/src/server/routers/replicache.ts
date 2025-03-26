@@ -1,4 +1,4 @@
-import { withDrizzle } from "@/server/lib/db";
+import { withDrizzle, withRepeatableReadTransaction } from "@/server/lib/db";
 import {
   pullRequestSchema,
   pullResponseSchema,
@@ -10,7 +10,7 @@ import {
   fetchedMutationSchema,
   fetchMutations,
   pull,
-  withDrizzlePushChunked,
+  pushChunked,
 } from "../lib/replicache";
 import { authedProcedure, router } from "../lib/trpc";
 
@@ -21,7 +21,9 @@ export const replicacheRouter = router({
     .mutation(async (opts) => {
       const { userId } = opts.ctx.session;
 
-      return await withDrizzlePushChunked(userId, opts.input);
+      return await withDrizzle(
+        async (db) => await pushChunked(db, userId, opts.input),
+      );
     }),
 
   pull: authedProcedure
@@ -32,9 +34,10 @@ export const replicacheRouter = router({
 
       return await withDrizzle(
         async (db) =>
-          await db.transaction((tx) => pull(tx, userId, opts.input), {
-            isolationLevel: `repeatable read`,
-          }),
+          await withRepeatableReadTransaction(
+            db,
+            async (tx) => await pull(tx, userId, opts.input),
+          ),
       );
     }),
 

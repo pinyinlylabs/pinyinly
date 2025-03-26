@@ -15,9 +15,9 @@ import { substring, withDrizzle } from "./db";
 import {
   getReplicacheClientMutationsSince,
   getReplicacheClientStateForUser,
+  ignoreRemoteClientForRemoteSync,
+  pushChunked,
   updateRemoteSyncClientLastMutationId,
-  withDrizzleIgnoreRemoteClientForRemoteSync,
-  withDrizzlePushChunked,
 } from "./replicache";
 
 const { POSTMARK_SERVER_TOKEN } = process.env;
@@ -297,20 +297,26 @@ const syncRemotePull = inngest.createFunction(
                 const remoteClientIds = [
                   ...new Set(mutations.map((m) => m.clientId)),
                 ];
-                await withDrizzleIgnoreRemoteClientForRemoteSync(
-                  remoteSync.id,
-                  remoteClientIds,
-                );
+                await withDrizzle(async (db) => {
+                  await ignoreRemoteClientForRemoteSync(
+                    db,
+                    remoteSync.id,
+                    remoteClientIds,
+                  );
+                });
               }
 
               // Finally apply the mutations.
-              const result = await withDrizzlePushChunked(remoteSync.userId, {
-                schemaVersion,
-                profileId: remoteSync.remoteProfileId,
-                clientGroupId,
-                pushVersion: 1,
-                mutations,
-              });
+              const result = await withDrizzle(
+                async (db) =>
+                  await pushChunked(db, remoteSync.userId, {
+                    schemaVersion,
+                    profileId: remoteSync.remoteProfileId,
+                    clientGroupId,
+                    pushVersion: 1,
+                    mutations,
+                  }),
+              );
 
               if (result != null) {
                 console.error(`Error applying remote mutations for:`, result);

@@ -8,7 +8,6 @@ import {
   PgTransactionConfig,
 } from "drizzle-orm/pg-core";
 import type { Pool as PgPool } from "pg";
-import { DatabaseError } from "pg-protocol";
 import z from "zod";
 import * as schema from "../schema";
 
@@ -68,46 +67,90 @@ export async function withDrizzle<R>(f: (db: Drizzle) => Promise<R>) {
   }
 }
 
-export async function transactWithExecutor<R>(
+interface WithTransactionOptions {
+  isolationLevel?: PgTransactionIsolationLevel;
+  /**
+   * Maximum number of attempts at executing the transaction.
+   */
+  maxAttempts?: number;
+}
+
+export async function withRetriableTransaction<R>(
   tx: Transaction | Drizzle,
+  /**
+   * Options for the transaction. If `retries` is not provided, the transaction
+   * will be retried up to that many times in the event of a serialization
+   * error.
+   *
+   * This is the second parameter to mkae code more readable top-to-bottom so
+   * the isolation level is known as up-front context when reading the function
+   * body.
+   */
+  options: WithTransactionOptions,
   body: TransactionBodyFn<R>,
-) {
-  let retries = 3;
+): ReturnType<typeof body> {
+  const maxAttempts = options.maxAttempts ?? 3;
+  const isolationLevel = options.isolationLevel ?? pgIsolationLevelDefault;
+
+  let attempt = 1;
   do {
     try {
-      return await tx.transaction(body);
+      return await tx.transaction(body, { isolationLevel });
     } catch (error) {
-      if (retries > 0 && shouldRetryTransaction(error)) {
+      if (attempt < maxAttempts && isRetryablePgError(error)) {
         console.warn(
-          `Retrying transaction due to SERIALIZABLE isolation error (attempt ${retries})`,
+          `Retrying transaction due to some conflict violating the \`${isolationLevel}\` isolation level (attempt ${attempt})`,
           error,
         );
         continue;
       }
       throw error;
     }
-  } while (retries-- > 0);
+  } while (attempt++);
+
+  invariant(
+    false,
+    `unexpected code path reached, transaction failed maximum number of times but did not throw error`,
+  );
 }
 
-// Because we are using SERIALIZABLE isolation level, we need to be prepared to retry transactions.
-// stackoverflow.com/questions/60339223/node-js-transaction-coflicts-in-postgresql-optimistic-concurrency-control-and
-function shouldRetryTransaction(err: unknown) {
+/**
+ * Convience function with isolation level set to `repeatable read`. Preferred
+ * over using @see withRetriableTransaction because it's easier to read code
+ * top-to-bottom and see the isolation level in context.
+ *
+ * @param tx
+ * @param body @returns
+ */
+export async function withRepeatableReadTransaction<R>(
+  tx: Transaction | Drizzle,
+  body: TransactionBodyFn<R>,
+): ReturnType<typeof body> {
+  return await withRetriableTransaction(
+    tx,
+    {
+      isolationLevel: `repeatable read`,
+    },
+    body,
+  );
+}
+
+/**
+ * Determine if retrying a transaction could fix it (useful for strict
+ * transaction isolation levels where locks can cause conflicts).
+ *
+ * This is common (and expected) when using SERIALIZABLE isolation level, and
+ * the transaction should be retried.
+ *
+ * See
+ * https://stackoverflow.com/questions/60339223/node-js-transaction-coflicts-in-postgresql-optimistic-concurrency-control-and
+ */
+function isRetryablePgError(err: unknown) {
   // TODO: use zod to decode
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
   const code = typeof err === `object` ? String((err as any).code) : null;
   return code === `40001` || code === `40P01`;
-}
-
-/**
- * Invokes a supplied function within a transaction.
- * @param body Function to invoke. If this throws, the transaction will be rolled
- * back. The thrown error will be re-thrown.
- */
-export async function transact<R>(body: TransactionBodyFn<R>) {
-  return await withDrizzle(async (executor) => {
-    return await transactWithExecutor(executor, body);
-  });
 }
 
 export function json_agg<TTable extends PgTable>(col: TTable) {
@@ -167,6 +210,9 @@ export type PgTransactionIsolationLevel = NonNullable<
   PgTransactionConfig[`isolationLevel`]
 >;
 
+export const pgIsolationLevelDefault =
+  `read committed` satisfies PgTransactionIsolationLevel;
+
 const pgIsolationLevelPower = {
   [`read uncommitted`]: 0,
   [`read committed`]: 1,
@@ -193,35 +239,4 @@ export async function assertMinimumIsolationLevel(
 
 export function xmin<TFrom extends PgTable>(source: TFrom) {
   return sql<string>`${source}.xmin`;
-}
-
-export async function withSerializationRetries<T>(
-  result: Promise<T>,
-  retryCount = 3,
-): Promise<T> {
-  for (
-    let remainingRetries = retryCount;
-    remainingRetries > 0;
-    remainingRetries--
-  ) {
-    try {
-      return await result;
-    } catch (error) {
-      if (
-        error instanceof DatabaseError &&
-        error.code === `40001` && // Serialization failure, retry
-        remainingRetries > 0
-      ) {
-        console.warn(
-          `database serialization error, retrying (${remainingRetries} remaining)`,
-          error,
-        );
-        continue;
-      } else {
-        throw error;
-      }
-    }
-  }
-
-  return await result;
 }
