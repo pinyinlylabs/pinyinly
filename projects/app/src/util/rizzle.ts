@@ -20,6 +20,7 @@ import {
 } from "replicache";
 import { AnyFunction } from "ts-essentials";
 import { z } from "zod";
+import { PartialIfUndefined } from "./types";
 
 export interface RizzleTypeDef {
   description?: string;
@@ -64,6 +65,10 @@ export abstract class RizzleType<
 
   nullable(): RizzleNullable<this> {
     return RizzleNullable.create(this);
+  }
+
+  optional(): RizzleOptional<this> {
+    return RizzleOptional.create(this);
   }
 
   indexed<
@@ -122,6 +127,55 @@ export class RizzleNullable<T extends RizzleType> extends RizzleType<
 
   static create = <T extends RizzleType>(type: T): RizzleNullable<T> => {
     return new RizzleNullable({ innerType: type, typeName: `nullable` });
+  };
+}
+
+interface RizzleOptionalDef<T extends RizzleType> extends RizzleTypeDef {
+  innerType: T;
+  typeName: `optional`;
+}
+
+export class RizzleOptional<T extends RizzleType> extends RizzleType<
+  RizzleOptionalDef<T>,
+  T[`_input`] | undefined,
+  T[`_marshaled`] | undefined,
+  T[`_output`] | undefined
+> {
+  constructor(def: RizzleOptionalDef<T>) {
+    super(def);
+
+    this.getMarshal = memoize0(this.getMarshal.bind(this));
+    this.getUnmarshal = memoize0(this.getUnmarshal.bind(this));
+    this.marshal = weakMemoize1(this.marshal.bind(this));
+    this.unmarshal = weakMemoize1(this.unmarshal.bind(this));
+  }
+
+  getMarshal() {
+    return this._def.innerType.getMarshal().optional();
+  }
+
+  getUnmarshal() {
+    return this._def.innerType.getUnmarshal().optional();
+  }
+
+  marshal(input: this[`_input`]): this[`_marshaled`] {
+    return this.getMarshal().parse(input);
+  }
+
+  unmarshal(marshaled: T[`_marshaled`]): T[`_output`] {
+    return this.getUnmarshal().parse(marshaled);
+  }
+
+  _getIndexes() {
+    return this._def.innerType._getIndexes();
+  }
+
+  _getAlias(): string | undefined {
+    return this._def.innerType._getAlias();
+  }
+
+  static create = <T extends RizzleType>(type: T): RizzleOptional<T> => {
+    return new RizzleOptional({ innerType: type, typeName: `optional` });
   };
 }
 
@@ -506,7 +560,9 @@ export class RizzleEntity<
       invariant(result != null);
       for (const [i, varName] of keyPathVars.entries()) {
         if (varName in keyInput) {
-          result += shape[varName].marshal(keyInput[varName]);
+          result += shape[varName].marshal(
+            keyInput[varName as keyof typeof keyInput],
+          );
           const nextFiller = filler[i + 1];
           invariant(nextFiller != null);
           result += nextFiller;
@@ -563,18 +619,19 @@ export type RizzleRawObject = Record<string, RizzleType>;
 
 export type RizzleRawSchema = Record<string, RizzleRoot | string>;
 
-export type RizzleObjectInput<T extends RizzleRawObject> = {
+export type RizzleObjectInput<T extends RizzleRawObject> = PartialIfUndefined<{
   [K in keyof T]: T[K][`_input`];
-};
+}>;
 
-export type RizzleObjectMarshaled<T extends RizzleRawObject> = {
-  // TODO: this is missing key aliases
-  [K in keyof T]: T[K][`_marshaled`];
-};
+export type RizzleObjectMarshaled<T extends RizzleRawObject> =
+  PartialIfUndefined<{
+    // TODO: this is missing key aliases
+    [K in keyof T]: T[K][`_marshaled`];
+  }>;
 
-export type RizzleObjectOutput<T extends RizzleRawObject> = {
+export type RizzleObjectOutput<T extends RizzleRawObject> = PartialIfUndefined<{
   [K in keyof T]: T[K][`_output`];
-};
+}>;
 
 export type RizzleIndexNames<T extends RizzleType> =
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -584,11 +641,13 @@ export type RizzleIndexNames<T extends RizzleType> =
       ? RizzleIndexNames<Wrapped>
       : T extends RizzleNullable<infer Wrapped>
         ? RizzleIndexNames<Wrapped>
-        : T extends RizzleObject<infer Shape>
-          ? {
-              [K in keyof Shape]: RizzleIndexNames<Shape[K]>;
-            }[keyof Shape]
-          : never;
+        : T extends RizzleOptional<infer Wrapped>
+          ? RizzleIndexNames<Wrapped>
+          : T extends RizzleObject<infer Shape>
+            ? {
+                [K in keyof Shape]: RizzleIndexNames<Shape[K]>;
+              }[keyof Shape]
+            : never;
 
 export type RizzleIndexTypes<T extends RizzleType> = {
   [K in RizzleIndexTypesInner<T> as K[0]]: K[1];
@@ -602,11 +661,13 @@ export type RizzleIndexTypesInner<T extends RizzleType> =
       ? RizzleIndexTypesInner<Wrapped>
       : T extends RizzleNullable<infer Wrapped>
         ? RizzleIndexTypesInner<Wrapped>
-        : T extends RizzleObject<infer Shape>
-          ? {
-              [K in keyof Shape]: RizzleIndexTypesInner<Shape[K]>;
-            }[keyof Shape]
-          : never;
+        : T extends RizzleOptional<infer Wrapped>
+          ? RizzleIndexTypesInner<Wrapped>
+          : T extends RizzleObject<infer Shape>
+            ? {
+                [K in keyof Shape]: RizzleIndexTypesInner<Shape[K]>;
+              }[keyof Shape]
+            : never;
 
 type WithoutFirstArgument<T> = T extends (
   arg1: never,
