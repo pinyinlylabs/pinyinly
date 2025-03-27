@@ -1,4 +1,4 @@
-import { MultipleChoiceQuestion, SkillRating } from "@/data/model";
+import { Mistake, MultipleChoiceQuestion, SkillRating } from "@/data/model";
 import { setAudioModeAsync, useAudioPlayer } from "expo-audio";
 import chunk from "lodash/chunk";
 import {
@@ -26,6 +26,7 @@ export const QuizDeckMultipleChoiceQuestion = memo(
     onRating: (
       question: MultipleChoiceQuestion,
       ratings: SkillRating[],
+      mistakes: Mistake[],
     ) => void;
   }) {
     const { prompt, choices } = question;

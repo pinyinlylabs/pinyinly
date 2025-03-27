@@ -40,6 +40,14 @@ export default function HistoryPage() {
     },
   );
 
+  const hanziGlossMistakesQuery = useRizzleQueryPaged(
+    [HistoryPage.name, `hanziGlossMistakesQuery`],
+    async (r) => {
+      const res = await r.queryPaged.hanziGlossMistake.byCreatedAt().toArray();
+      return res.reverse();
+    },
+  );
+
   return (
     <ScrollView contentContainerClassName="py-safe-offset-4 px-safe-or-4 items-center">
       <View className="max-w-[600px] gap-4">
@@ -57,6 +65,16 @@ export default function HistoryPage() {
             ))}
           </View>
 
+          <View>
+            <Text className="self-center text-xl text-text">mistakes</Text>
+            {hanziGlossMistakesQuery.data?.map(([_key, value], i) => (
+              <View key={i}>
+                <Text className="text-text">
+                  {value.hanzi} ❌ {value.gloss}
+                </Text>
+              </View>
+            ))}
+          </View>
           <View>
             <Text className="self-center text-xl text-text">history</Text>
 

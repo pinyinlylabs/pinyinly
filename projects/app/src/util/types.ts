@@ -47,6 +47,18 @@ export type IsEqual<T, U> =
     ? true
     : false | { [debug]: Prettify<T> };
 
+export type Flatten<T> = {
+  [k in keyof T]: T[k];
+};
+
+export type PartialIfUndefined<T> = Flatten<
+  {
+    [K in keyof T as undefined extends T[K] ? K : never]?: T[K];
+  } & {
+    [K in keyof T as undefined extends T[K] ? never : K]: T[K];
+  }
+>;
+
 function typeChecks<_T>(..._args: unknown[]) {
   // This function is only used for type checking, so it should never be called.
 }

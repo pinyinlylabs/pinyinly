@@ -141,6 +141,13 @@
       "when": 1742079589700,
       "tag": "0019_flimsy_cassandra_nova",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1743055825685,
+      "tag": "0020_wealthy_wild_child",
+      "breakpoints": true
     }
   ]
 }

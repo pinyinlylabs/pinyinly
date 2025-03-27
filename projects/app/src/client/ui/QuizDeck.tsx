@@ -1,4 +1,6 @@
 import {
+  Mistake,
+  MistakeType,
   Question,
   QuestionFlag,
   QuestionFlagType,
@@ -111,7 +113,7 @@ export const QuizDeck = ({
   });
 
   const handleRating = useEventCallback(
-    (question: Question, ratings: SkillRating[]) => {
+    (question: Question, ratings: SkillRating[], mistakes: Mistake[]) => {
       invariant(
         questions.includes(question),
         `handleRating called with wrong question`,
@@ -137,6 +139,23 @@ export const QuizDeck = ({
           .catch((error: unknown) => {
             console.error(`Could not add skill rating`, error);
           });
+      }
+
+      for (const mistake of mistakes) {
+        switch (mistake.type) {
+          case MistakeType.HanziGloss: {
+            void r.mutate.saveHanziGlossMistake({
+              id: nanoid(),
+              now,
+              hanzi: mistake.hanzi,
+              gloss: mistake.gloss,
+            });
+            break;
+          }
+          case MistakeType.HanziPinyinInitial: {
+            throw new Error(`todo: not implemented`);
+          }
+        }
       }
 
       setStreakCount((prev) => (success ? prev + 1 : 0));

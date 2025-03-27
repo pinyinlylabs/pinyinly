@@ -50,6 +50,11 @@ const mutators: RizzleDrizzleMutators<SupportedSchema, Drizzle> = {
 
     await updateSkillState(db, skill, userId);
   },
+  async saveHanziGlossMistake(db, userId, { id, gloss, hanzi, now }) {
+    await db
+      .insert(s.hanziGlossMistake)
+      .values([{ id, userId, gloss, hanzi, createdAt: now }]);
+  },
   async setPinyinInitialAssociation(db, userId, { initial, name, now }) {
     const updatedAt = now;
     const createdAt = now;
@@ -351,6 +356,7 @@ export async function pull(
         pinyinInitialGroupThemes,
         skillStates,
         skillRatings,
+        hanziGlossMistakes,
       ] = await Promise.all([
         db.query.pinyinFinalAssociation.findMany({
           where: (t) =>
@@ -369,6 +375,10 @@ export async function pull(
         }),
         db.query.skillRating.findMany({
           where: (t) => inArray(t.id, entitiesDiff.skillRating?.puts ?? []),
+        }),
+        db.query.hanziGlossMistake.findMany({
+          where: (t) =>
+            inArray(t.id, entitiesDiff.hanziGlossMistake?.puts ?? []),
         }),
       ]);
       debug(`%o`, { skillStates, skillRatings });
@@ -410,6 +420,10 @@ export async function pull(
           skillRating: {
             dels: entitiesDiff.skillRating?.dels ?? [],
             puts: skillRatings,
+          },
+          hanziGlossMistake: {
+            dels: entitiesDiff.hanziGlossMistake?.dels ?? [],
+            puts: hanziGlossMistakes,
           },
         },
         nextCvr: {
@@ -479,6 +493,16 @@ export async function pull(
     if (`skillRating` in schema) {
       const e = schema.skillRating;
       for (const s of entityPatches.skillRating.puts) {
+        patch.push({
+          op: `put`,
+          key: e.marshalKey(s),
+          value: e.marshalValue(s),
+        });
+      }
+    }
+    if (`hanziGlossMistake` in schema) {
+      const e = schema.hanziGlossMistake;
+      for (const s of entityPatches.hanziGlossMistake.puts) {
         patch.push({
           op: `put`,
           key: e.marshalKey(s),
@@ -794,6 +818,20 @@ export async function computeCvrEntities(
       .where(eq(s.skillRating.userId, userId))
       .as(`skillRatingVersions`);
 
+    const hanziGlossMistakeVersions = db
+      .select({
+        map: json_object_agg(
+          s.hanziGlossMistake.id,
+          json_build_object({
+            id: s.hanziGlossMistake.id,
+            xmin: xmin(s.hanziGlossMistake),
+          }),
+        ).as(`hanziGlossMistakeVersions`),
+      })
+      .from(s.hanziGlossMistake)
+      .where(eq(s.hanziGlossMistake.userId, userId))
+      .as(`hanziGlossMistakeVersions`);
+
     const [result] = await db
       .select({
         pinyinFinalAssociation: pinyinFinalAssociationVersions.map,
@@ -801,13 +839,14 @@ export async function computeCvrEntities(
         pinyinInitialGroupTheme: pinyinInitialGroupThemeVersions.map,
         skillRating: skillRatingVersions.map,
         skillState: skillStateVersions.map,
+        hanziGlossMistake: hanziGlossMistakeVersions.map,
       })
       .from(pinyinFinalAssociationVersions)
       .leftJoin(pinyinInitialAssociationVersions, sql`true`)
       .leftJoin(pinyinInitialGroupThemeVersions, sql`true`)
       .leftJoin(skillRatingVersions, sql`true`)
-      .leftJoin(skillStateVersions, sql`true`);
-
+      .leftJoin(skillStateVersions, sql`true`)
+      .leftJoin(hanziGlossMistakeVersions, sql`true`);
     invariant(result != null);
 
     return {
@@ -838,6 +877,10 @@ export async function computeCvrEntities(
       skillRating: mapValues(
         result.skillRating,
         (v) => v.xmin + `:` + schema.skillRating.marshalKey(v),
+      ),
+      hanziGlossMistake: mapValues(
+        result.hanziGlossMistake,
+        (v) => v.xmin + `:` + schema.hanziGlossMistake.marshalKey(v),
       ),
     };
   });

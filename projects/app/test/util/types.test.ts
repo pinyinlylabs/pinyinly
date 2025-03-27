@@ -1,4 +1,4 @@
-import { IsEqual } from "#util/types.ts";
+import { Flatten, IsEqual, PartialIfUndefined } from "#util/types.ts";
 import assert from "node:assert/strict";
 import test from "node:test";
 
@@ -27,6 +27,44 @@ typeChecks(`IsEqual`, () => {
   // @ts-expect-error object isn't equal to never
   true satisfies IsEqual<{ key: `value` }, never>;
   false satisfies IsEqual<{ key: `value` }, never>;
+
+  true satisfies IsEqual<
+    { key?: string | undefined },
+    { key?: string | undefined }
+  >;
+  true satisfies IsEqual<{ key?: string | undefined }, { key?: string }>;
+  true satisfies IsEqual<{ key?: string }, { key?: string | undefined }>;
+  // @ts-expect-error optional key is not the same as undefined
+  true satisfies IsEqual<{ key?: string }, { key: string | undefined }>;
+});
+
+typeChecks(`PartialIfUndefined`, () => {
+  true satisfies IsEqual<
+    PartialIfUndefined<{
+      key1: string;
+      key2: string | undefined;
+      key3?: string;
+    }>,
+    {
+      key1: string;
+      key2?: string | undefined;
+      key3?: string;
+    }
+  >;
+});
+
+typeChecks(`Flatten`, () => {
+  // @ts-expect-error record intersection isn't the same as flat union
+  true satisfies IsEqual<
+    { key1: string } & { key2: string },
+    { key1: string; key2: string }
+  >;
+
+  // Flatten<…> fixes it
+  true satisfies IsEqual<
+    Flatten<{ key1: string } & { key2: string }>,
+    { key1: string; key2: string }
+  >;
 });
 
 await test(`lib.dom.d.ts patches`, async () => {

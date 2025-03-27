@@ -136,6 +136,13 @@ export const rSrsState = memoize0(function rSrsParams() {
   );
 });
 
+export const rSkillRatingMistakes = memoize0(function rSkillRatingMistakes() {
+  return r.object({
+    hanzi: r.string().optional().alias(`h`),
+    gloss: r.string().optional().alias(`g`),
+  });
+});
+
 /**
  * # v7 change log
  *
@@ -177,6 +184,16 @@ export const v7 = {
   skillState: r.entity(`s/[skill]`, {
     skill: rSkill().alias(`s`),
     srs: rSrsState().alias(`r`),
+  }),
+
+  //
+  // Mistakes
+  //
+  hanziGlossMistake: r.entity(`m/hg/[id]`, {
+    id: r.string().alias(`i`),
+    hanzi: r.string().alias(`h`),
+    gloss: r.string().alias(`g`),
+    createdAt: r.datetime().alias(`c`).indexed(`byCreatedAt`),
   }),
 
   //
@@ -227,6 +244,14 @@ export const v7 = {
       now: r.timestamp().alias(`n`),
     })
     .alias(`reviewSkill`),
+  saveHanziGlossMistake: r
+    .mutator({
+      id: r.string().alias(`i`),
+      hanzi: r.string().alias(`h`),
+      gloss: r.string().alias(`g`),
+      now: r.timestamp().alias(`n`),
+    })
+    .alias(`shgm`),
 };
 
 export function srsStateFromFsrsState(fsrsState: FsrsState) {
@@ -243,7 +268,7 @@ export function srsStateFromFsrsState(fsrsState: FsrsState) {
 // multiple schema versions at the same time.
 export const v7_1 = {
   ...v7,
-  version: `6.1`,
+  version: `7.1`,
 };
 
 export const supportedSchemas = [v7] as const;
@@ -281,6 +306,12 @@ export const v7Mutators: RizzleReplicacheMutators<typeof v7> = {
   },
   async setPinyinInitialGroupTheme(tx, { groupId, themeId }) {
     await tx.pinyinInitialGroupTheme.set({ groupId }, { groupId, themeId });
+  },
+  async saveHanziGlossMistake(tx, { id, gloss, hanzi, now }) {
+    await tx.hanziGlossMistake.set(
+      { id },
+      { id, gloss, hanzi, createdAt: now },
+    );
   },
 };
 

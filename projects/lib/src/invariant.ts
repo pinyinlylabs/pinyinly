@@ -13,3 +13,12 @@ export function invariant(
     throw new Invariant(message);
   }
 }
+
+export function uniqueInvariant<T extends string>(choices: readonly T[]) {
+  const seen = new Set<T>();
+
+  for (const choice of choices) {
+    invariant(!seen.has(choice), `duplicate choice ${choice}`);
+    seen.add(choice);
+  }
+}

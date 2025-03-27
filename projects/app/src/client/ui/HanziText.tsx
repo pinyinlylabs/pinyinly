@@ -14,32 +14,17 @@ export const HanziText = ({
   small?: boolean;
   underline?: boolean;
 }) => {
-  const pinyinWithoutSpaces = pinyin?.split(` `).join(``);
   return (
     <View
       className={`flex-0 flex-col items-center ${small ? `gap-0.5` : `gap-1`}`}
     >
-      {pinyinWithoutSpaces == null ? null : (
-        <Text className={pinyinText({ accented, small })}>
-          {pinyinWithoutSpaces}
-        </Text>
+      {pinyin == null ? null : (
+        <PinyinText pinyin={pinyin} accented={accented} small={small} />
       )}
       <Text className={hanziText({ accented, small, underline })}>{hanzi}</Text>
     </View>
   );
 };
-
-const pinyinText = tv({
-  base: `text-base/none text-primary-9 w-full text-center`,
-  variants: {
-    accented: {
-      true: `text-accent-10 opacity-80`,
-    },
-    small: {
-      true: `text-xs/none`,
-    },
-  },
-});
 
 const hanziText = tv({
   base: `text-2xl/none text-text`,
@@ -53,6 +38,35 @@ const hanziText = tv({
     },
     underline: {
       true: ``,
+    },
+  },
+});
+
+export const PinyinText = ({
+  pinyin,
+  accented,
+  small = false,
+}: {
+  pinyin: string;
+  accented?: boolean;
+  small?: boolean;
+}) => {
+  const pinyinWithoutSpaces = pinyin.split(` `).join(``);
+  return (
+    <Text className={pinyinText({ accented, small })}>
+      {pinyinWithoutSpaces}
+    </Text>
+  );
+};
+
+const pinyinText = tv({
+  base: `text-base/none text-primary-9 w-full text-center`,
+  variants: {
+    accented: {
+      true: `text-accent-10 opacity-80`,
+    },
+    small: {
+      true: `text-xs/none`,
     },
   },
 });

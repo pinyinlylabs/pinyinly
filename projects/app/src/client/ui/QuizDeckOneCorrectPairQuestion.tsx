@@ -1,7 +1,9 @@
 import { useHanziWordMeaning } from "@/client/query";
 import {
+  HanziGlossMistake,
+  Mistake,
+  MistakeType,
   OneCorrectPairQuestion,
-  OneCorrectPairQuestionAnswer,
   OneCorrectPairQuestionChoice,
   QuestionFlag,
   QuestionFlagType,
@@ -10,11 +12,9 @@ import {
 } from "@/data/model";
 import { HanziWordSkill, Skill } from "@/data/rizzleSchema";
 import { hanziWordFromSkill, skillType } from "@/data/skills";
-import { hanziFromHanziWord, lookupHanziWord } from "@/dictionary/dictionary";
-import { arrayFilterUniqueWithKey } from "@/util/collections";
+import { hanziFromHanziWord } from "@/dictionary/dictionary";
 import { Rating } from "@/util/fsrs";
 import { invariant } from "@haohaohow/lib/invariant";
-import { useQuery } from "@tanstack/react-query";
 import { formatDuration } from "date-fns/formatDuration";
 import { intervalToDuration } from "date-fns/intervalToDuration";
 import { Image } from "expo-image";
@@ -41,7 +41,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { tv } from "tailwind-variants";
 import { GlossHint } from "./GlossHint";
-import { HanziText } from "./HanziText";
+import { HanziText, PinyinText } from "./HanziText";
 import { HanziWordModal } from "./HanziWordModal";
 import { Hhhmark } from "./Hhhmark";
 import { NewSkillModal } from "./NewSkillModal";
@@ -65,21 +65,21 @@ export const QuizDeckOneCorrectPairQuestion = memo(
     onRating: (
       question: OneCorrectPairQuestion,
       ratings: SkillRating[],
+      mistakes: Mistake[],
     ) => void;
   }) {
     const { prompt, answer, hint, groupA, groupB } = question;
-    const answerSkill = answer.a.skill;
 
-    const [selectedAAnswer, setSelectedAAnswer] =
-      useState<OneCorrectPairQuestionAnswer>();
-    const [selectedBAnswer, setSelectedBAnswer] =
-      useState<OneCorrectPairQuestionAnswer>();
-    const [rating, setRating] = useState<Rating>();
+    const [selectedAChoice, setSelectedAChoice] =
+      useState<OneCorrectPairQuestionChoice>();
+    const [selectedBChoice, setSelectedBChoice] =
+      useState<OneCorrectPairQuestionChoice>();
+    const [isCorrect, setIsCorrect] = useState<boolean>();
 
     const choiceRowCount = Math.max(groupA.length, groupB.length);
     const choiceRows: {
-      a: OneCorrectPairQuestionAnswer;
-      b: OneCorrectPairQuestionAnswer;
+      a: OneCorrectPairQuestionChoice;
+      b: OneCorrectPairQuestionChoice;
     }[] = [];
 
     for (let i = 0; i < choiceRowCount; i++) {
@@ -89,91 +89,65 @@ export const QuizDeckOneCorrectPairQuestion = memo(
       choiceRows.push({ a, b });
     }
 
-    invariant(groupA.includes(answer));
+    invariant(groupA.includes(answer.a));
+    invariant(groupB.includes(answer.b));
 
     const handleSubmit = () => {
-      if (rating === undefined) {
-        const rating =
-          selectedAAnswer === answer && selectedBAnswer === answer
-            ? Rating.Good
-            : Rating.Again;
+      if (
+        isCorrect === undefined &&
+        selectedAChoice != null &&
+        selectedBChoice != null
+      ) {
+        function hanziGlossMistake(
+          choice1: OneCorrectPairQuestionChoice,
+          choice2: OneCorrectPairQuestionChoice,
+        ): HanziGlossMistake | undefined {
+          if (choice1.type === `hanzi` && choice2.type === `gloss`) {
+            return {
+              type: MistakeType.HanziGloss,
+              hanzi: choice1.value,
+              gloss: choice2.value,
+            };
+          }
+        }
+
+        const mistakeChecks = [hanziGlossMistake];
+        const mistakes: Mistake[] = [];
+
+        const choicePairs = [
+          [selectedAChoice, selectedBChoice],
+          [selectedBChoice, selectedAChoice],
+        ] as const;
+        for (const mistakeCheck of mistakeChecks) {
+          for (const [choice1, choice2] of choicePairs) {
+            const mistake = mistakeCheck(choice1, choice2);
+            if (mistake) {
+              mistakes.push(mistake);
+            }
+          }
+        }
+
+        const isCorrect =
+          selectedAChoice === answer.a && selectedBChoice === answer.b;
 
         const skillRatings: SkillRating[] = [
-          selectedAAnswer?.a.skill,
-          selectedAAnswer?.b.skill,
-          selectedBAnswer?.a.skill,
-          selectedBAnswer?.b.skill,
-        ]
-          .filter((x) => x != null)
-          .map((skill) => ({ skill, rating }))
-          .filter(arrayFilterUniqueWithKey((x) => JSON.stringify(x.skill)));
+          {
+            skill: answer.skill,
+            rating: isCorrect ? Rating.Good : Rating.Again,
+          },
+        ];
 
-        setRating(rating);
-        onRating(question, skillRatings);
+        setIsCorrect(isCorrect);
+        onRating(question, skillRatings, mistakes);
       } else {
         onNext();
       }
     };
 
-    const showResult = rating !== undefined;
-    const isCorrect = rating !== Rating.Again;
-
-    // const pinyinChartQuery = useQuery({
-    //   queryKey: [QuizDeckOneCorrectPairQuestion.name, `pinyinChart`],
-    //   queryFn: async () => {
-    //     return await loadStandardPinyinChart();
-    //   },
-    // });
-
-    // const answerPinyin = answer.b.type === `pinyin` ? answer.b.pinyin : null;
-    // const splitAnswerPinyin =
-    //   answerPinyin != null && pinyinChartQuery.data
-    //     ? splitPinyin(answerPinyin, pinyinChartQuery.data)
-    //     : null;
-
-    // const pinyinNewHintQuery = useRizzleQuery(
-    //   [QuizDeckOneCorrectPairQuestion.name, `association`, splitAnswerPinyin],
-    //   async (r, tx) => {
-    //     if (splitAnswerPinyin != null) {
-    //       const { initial, final, tone } = splitAnswerPinyin;
-    //       const initialRes = await r.query.pinyinInitialAssociation.get(tx, {
-    //         initial: `${initial}-`,
-    //       });
-    //       const finalRes = await r.query.pinyinFinalAssociation.get(tx, {
-    //         final: `-${final}`,
-    //       });
-    //       return {
-    //         initial,
-    //         initialMnemonic: initialRes?.name,
-    //         final,
-    //         finalMnemonic: finalRes?.name,
-    //         tone,
-    //         toneMnemonic: null as unknown as string | undefined, // TODO: implement
-    //       };
-    //     }
-    //     return null;
-    //   },
-    // );
-
-    // const pinyinHint =
-    //   pinyinNewHintQuery.data != null
-    //     ? `${pinyinNewHintQuery.data.initial}${pinyinNewHintQuery.data.initialMnemonic != null ? ` (${pinyinNewHintQuery.data.initialMnemonic})` : ``} + ${pinyinNewHintQuery.data.final}${pinyinNewHintQuery.data.finalMnemonic != null ? ` (${pinyinNewHintQuery.data.finalMnemonic})` : ``} + ${pinyinNewHintQuery.data.tone}${pinyinNewHintQuery.data.toneMnemonic != null ? ` (${pinyinNewHintQuery.data.toneMnemonic})` : ``}.`
-    //     : null;
-
-    // Show a lesson for new skills.
-    // const isNewSkill = flag?.type === QuestionFlagType.NewSkill;
-    // const skill = question.answer.a.skill ?? question.answer.b.skill;
-    // useEffect(() => {
-    //   if (isNewSkill && skill != null) {
-    //     // push modal screen
-    //     // router.push(`/learn/skill/${skill}`);
-    //   }
-    // }, [isNewSkill, skill]);
-
     return (
       <Skeleton
         toast={
-          showResult ? (
+          isCorrect == null ? null : (
             <View
               className={`flex-1 gap-[12px] ${isCorrect ? `success-theme` : `danger-theme`} bg-primary-5 px-quiz-px pt-3 pb-safe-offset-[84px] lg:mb-2 lg:rounded-xl`}
             >
@@ -206,8 +180,8 @@ export const QuizDeckOneCorrectPairQuestion = memo(
                     Correct answer:
                   </Text>
 
-                  <ShowSkillAnswer
-                    skill={answerSkill}
+                  <SkillAnswer
+                    skill={answer.skill}
                     includeHint
                     includeAlternatives
                   />
@@ -219,48 +193,42 @@ export const QuizDeckOneCorrectPairQuestion = memo(
                     </Text>
                   )}
 
-                  {selectedAAnswer != null && selectedBAnswer != null ? (
+                  {selectedAChoice != null && selectedBChoice != null ? (
                     <View className="flex-row flex-wrap items-center gap-2">
                       <Text className="flex-shrink-0 font-bold leading-snug text-accent-10">
                         Your answer:
                       </Text>
                       <View className="flex-1 flex-row flex-wrap items-center">
-                        <ShowSkillAnswer
-                          skill={selectedAAnswer.a.skill}
-                          small
-                        />
+                        <SkillChoice choice={selectedAChoice} />
                         <Text className="flex-shrink-0 flex-grow-0 px-1 leading-snug text-accent-10 opacity-50">
                           +
                         </Text>
-                        <ShowSkillAnswer
-                          skill={selectedBAnswer.b.skill}
-                          small
-                        />
+                        <SkillChoice choice={selectedBChoice} />
                       </View>
                     </View>
                   ) : null}
                 </>
               )}
             </View>
-          ) : null
+          )
         }
         submitButton={
           <SubmitButton
             state={
-              selectedAAnswer === undefined || selectedBAnswer === undefined
+              selectedAChoice === undefined || selectedBChoice === undefined
                 ? SubmitButtonState.Disabled
-                : showResult
-                  ? isCorrect
+                : isCorrect == null
+                  ? SubmitButtonState.Check
+                  : isCorrect
                     ? SubmitButtonState.Correct
                     : SubmitButtonState.Incorrect
-                  : SubmitButtonState.Check
             }
             onPress={handleSubmit}
           />
         }
       >
         {flag?.type === QuestionFlagType.NewSkill ? (
-          <NewSkillModal passivePresentation skill={question.answer.a.skill} />
+          <NewSkillModal passivePresentation skill={question.answer.skill} />
         ) : null}
 
         {flag == null ? null : <FlagText flag={flag} />}
@@ -281,44 +249,44 @@ export const QuizDeckOneCorrectPairQuestion = memo(
             {choiceRows.map(({ a, b }, i) => (
               <View className="flex-1 flex-row gap-[28px]" key={i}>
                 <ChoiceButton
-                  choice={a.a}
+                  choice={a}
                   state={
-                    selectedAAnswer === undefined
+                    selectedAChoice === undefined
                       ? `default`
-                      : a === selectedAAnswer
-                        ? showResult
-                          ? isCorrect
+                      : a === selectedAChoice
+                        ? isCorrect == null
+                          ? `selected`
+                          : isCorrect
                             ? `success`
                             : `error`
-                          : `selected`
-                        : selectedBAnswer === undefined
+                        : selectedBChoice === undefined
                           ? `default`
                           : `dimmed`
                   }
                   onPress={() => {
-                    if (!showResult) {
-                      setSelectedAAnswer((x) => (x === a ? undefined : a));
+                    if (isCorrect == null) {
+                      setSelectedAChoice((x) => (x === a ? undefined : a));
                     }
                   }}
                 />
                 <ChoiceButton
-                  choice={b.b}
+                  choice={b}
                   state={
-                    selectedBAnswer === undefined
+                    selectedBChoice === undefined
                       ? `default`
-                      : b === selectedBAnswer
-                        ? showResult
-                          ? isCorrect
+                      : b === selectedBChoice
+                        ? isCorrect == null
+                          ? `selected`
+                          : isCorrect
                             ? `success`
                             : `error`
-                          : `selected`
-                        : selectedAAnswer === undefined
+                        : selectedAChoice === undefined
                           ? `default`
                           : `dimmed`
                   }
                   onPress={() => {
-                    if (!showResult) {
-                      setSelectedBAnswer((x) => (x === b ? undefined : b));
+                    if (isCorrect == null) {
+                      setSelectedBChoice((x) => (x === b ? undefined : b));
                     }
                   }}
                 />
@@ -424,7 +392,25 @@ const choiceEnglishText = tv({
   },
 });
 
-const ShowSkillAnswer = ({
+const SkillChoice = ({ choice }: { choice: OneCorrectPairQuestionChoice }) => {
+  switch (choice.type) {
+    case `gloss`: {
+      return (
+        <Text className={choiceEnglishText({ small: true })}>
+          <Hhhmark source={choice.value} />
+        </Text>
+      );
+    }
+    case `hanzi`: {
+      return <HanziText hanzi={choice.value} small accented />;
+    }
+    case `pinyin`: {
+      return <PinyinText pinyin={choice.value} small accented />;
+    }
+  }
+};
+
+const SkillAnswer = ({
   skill,
   includeAlternatives = false,
   includeHint = false,
@@ -533,7 +519,7 @@ const HanziWordToEnglishSkillAnswer = ({
           : null}
         {includeGloss && gloss != null ? (
           <Text className={choiceEnglishText({ small, underline: true })}>
-            <Hhhmark source={gloss} />
+            {gloss}
           </Text>
         ) : null}
       </Pressable>
@@ -758,52 +744,13 @@ const ChoiceButton = ({
     onPress(choice);
   }, [onPress, choice]);
 
-  const textQuery = useQuery({
-    queryKey: [QuizDeckOneCorrectPairQuestion.name, `choiceText`, choice],
-    queryFn: async (): Promise<string> => {
-      const meaning = await lookupHanziWord(choice.hanziWord);
-      invariant(
-        meaning != null,
-        `missing meaning for hanzi word ${choice.hanziWord}`,
-      );
-
-      switch (choice.type) {
-        case `hanzi`: {
-          return hanziFromHanziWord(choice.hanziWord);
-        }
-        case `pinyin`: {
-          invariant(
-            meaning.pinyin != null,
-            `missing pinyin array for hanzi word ${choice.hanziWord}`,
-          );
-          const [pinyin] = meaning.pinyin;
-          invariant(
-            pinyin != null,
-            `missing pinyin for hanzi word ${choice.hanziWord}`,
-          );
-          return pinyin;
-        }
-        case `gloss`: {
-          const [gloss] = meaning.gloss;
-          invariant(
-            gloss != null,
-            `missing gloss for hanzi word ${choice.hanziWord}`,
-          );
-          return gloss;
-        }
-      }
-    },
-  });
-
-  const text = textQuery.data ?? ``;
-
   return (
     <TextAnswerButton
       onPress={handlePress}
       state={state}
       className="flex-1"
       textClassName={choice.type === `hanzi` ? `font-normal` : undefined}
-      text={text}
+      text={choice.value}
     />
   );
 };

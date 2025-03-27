@@ -10,6 +10,7 @@ import {
   RizzleObjectInput,
   RizzleObjectMarshaled,
   RizzleObjectOutput,
+  RizzleOptional,
   RizzleReplicache,
   RizzleReplicacheMutators,
   RizzleReplicacheQuery,
@@ -133,6 +134,37 @@ await test(`string() .nullable()`, async (t) => {
     // .set()
     void posts.set(tx, { id: `1` }, { id: `1`, name: `foo` });
     void posts.set(tx, { id: `1` }, { id: `1`, name: null });
+  });
+});
+
+await test(`string() .optional()`, async (t) => {
+  const posts = r.entity(`foo/[id]`, {
+    id: r.string(),
+    name: r.string().optional().alias(`n`),
+  });
+
+  using tx = makeMockTx(t);
+
+  tx.get.mock.mockImplementationOnce(async () => ({ id: `1`, n: `foo` }));
+  assert.deepEqual(await posts.get(tx, { id: `1` }), { id: `1`, name: `foo` });
+
+  tx.get.mock.mockImplementationOnce(async () => ({ id: `1` }));
+  assert.deepEqual(await posts.get(tx, { id: `1` }), { id: `1` });
+
+  typeChecks(async () => {
+    // .get()
+    {
+      const x = await posts.get(tx, { id: `1` });
+      true satisfies IsEqual<
+        typeof x,
+        { id: string; name?: string | undefined } | undefined
+      >;
+    }
+
+    // .set()
+    void posts.set(tx, { id: `1` }, { id: `1`, name: `foo` });
+    void posts.set(tx, { id: `1` }, { id: `1`, name: undefined });
+    void posts.set(tx, { id: `1` }, { id: `1` });
   });
 });
 
@@ -770,6 +802,38 @@ await test(`.getIndexes()`, () => {
     const posts = r.entity(`foo/[id]`, {
       id: r.string(),
       name: r.string().alias(`n`).indexed(`byAuthorName`).nullable(),
+    });
+
+    assert.partialDeepStrictEqual(posts.getIndexes(), {
+      byAuthorName: {
+        allowEmpty: false,
+        prefix: `foo/`,
+        jsonPointer: `/n`,
+      },
+    });
+  }
+
+  // .string().indexed().optional()
+  {
+    const posts = r.entity(`foo/[id]`, {
+      id: r.string(),
+      name: r.string().indexed(`byAuthorName`).optional(),
+    });
+
+    assert.partialDeepStrictEqual(posts.getIndexes(), {
+      byAuthorName: {
+        allowEmpty: false,
+        prefix: `foo/`,
+        jsonPointer: `/name`,
+      },
+    });
+  }
+
+  // .string().alias().indexed().optional()
+  {
+    const posts = r.entity(`foo/[id]`, {
+      id: r.string(),
+      name: r.string().alias(`n`).indexed(`byAuthorName`).optional(),
     });
 
     assert.partialDeepStrictEqual(posts.getIndexes(), {
@@ -1674,16 +1738,17 @@ typeChecks<RizzleObjectInput<never>>(() => {
   type RawShape = {
     id: RizzleCustom<string, string>;
     date: RizzleCustom<Date, string>;
+    optional: RizzleOptional<RizzleCustom<string, string>>;
   };
 
   true satisfies IsEqual<
     RizzleObjectInput<RawShape>,
-    { id: string; date: Date }
+    { id: string; date: Date; optional?: string | undefined }
   >;
 
   true satisfies IsEqual<
     RizzleObject<RawShape>[`_input`],
-    { id: string; date: Date }
+    { id: string; date: Date; optional?: string | undefined }
   >;
 });
 
@@ -1691,16 +1756,17 @@ typeChecks<RizzleObjectMarshaled<never>>(() => {
   type RawShape = {
     id: RizzleCustom<string, number, string>;
     date: RizzleCustom<Date, number, string>;
+    optional: RizzleOptional<RizzleCustom<string, string>>;
   };
 
   true satisfies IsEqual<
     RizzleObjectMarshaled<RawShape>,
-    { id: number; date: number }
+    { id: number; date: number; optional?: string | undefined }
   >;
 
   true satisfies IsEqual<
     RizzleObject<RawShape>[`_marshaled`],
-    { id: number; date: number }
+    { id: number; date: number; optional?: string | undefined }
   >;
 });
 
@@ -1708,16 +1774,17 @@ typeChecks<RizzleObjectOutput<never>>(() => {
   type RawShape = {
     id: RizzleCustom<string, number, string>;
     date: RizzleCustom<Date, number, string>;
+    optional: RizzleOptional<RizzleCustom<string, string>>;
   };
 
   true satisfies IsEqual<
     RizzleObjectOutput<RawShape>,
-    { id: string; date: string }
+    { id: string; date: string; optional?: string | undefined }
   >;
 
   true satisfies IsEqual<
     RizzleObject<RawShape>[`_output`],
-    { id: string; date: string }
+    { id: string; date: string; optional?: string | undefined }
   >;
 });
 
