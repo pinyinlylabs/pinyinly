@@ -28,6 +28,7 @@ export const cvrEntitiesSchema = z.record(
     z.literal(`pinyinInitialGroupTheme`),
     z.literal(`skillState`),
     z.literal(`skillRating`),
+    z.literal(`hanziGlossMistake`),
   ]),
   cvrEntity,
 );
@@ -105,6 +106,21 @@ export const skillState = schema.table(
     createdAt: pg.timestamp(`createdAt`).defaultNow().notNull(),
   },
   (t) => [pg.unique().on(t.userId, t.skill)],
+);
+
+export const hanziGlossMistake = schema.table(
+  `hanziGlossMistake`,
+  {
+    id: pg.text(`id`).primaryKey().$defaultFn(nanoid),
+    userId: pg
+      .text(`userId`)
+      .references(() => user.id)
+      .notNull(),
+    hanzi: pg.text(`hanzi`).notNull(),
+    gloss: pg.text(`gloss`).notNull(),
+    createdAt: pg.timestamp(`timestamp`).defaultNow().notNull(),
+  },
+  (t) => [pg.index().on(t.userId)],
 );
 
 export const pinyinInitialAssociation = schema.table(

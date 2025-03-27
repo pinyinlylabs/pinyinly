@@ -6,7 +6,7 @@ import {
   HanziWordMeaning,
   lookupHanziWord,
 } from "@/dictionary/dictionary";
-import { invariant } from "@haohaohow/lib/invariant";
+import { invariant, uniqueInvariant } from "@haohaohow/lib/invariant";
 import shuffle from "lodash/shuffle";
 import { DeepReadonly } from "ts-essentials";
 import {
@@ -18,31 +18,16 @@ import {
   SkillType,
 } from "./model";
 import { HanziWordSkill, Skill } from "./rizzleSchema";
-import { hanziWordFromSkill, hanziWordToEnglish, skillType } from "./skills";
-
-function keyForChoice(choice: OneCorrectPairQuestionChoice) {
-  const { skill, type, ...rest } = choice;
-  return JSON.stringify(rest);
-}
-
-function uniqueChoicesInvariant(choices: OneCorrectPairQuestionChoice[]) {
-  const seen = new Set<string>();
-
-  for (const choice of choices) {
-    const key = keyForChoice(choice);
-    invariant(!seen.has(key), `duplicate choice ${key}`);
-    seen.add(key);
-  }
-}
+import { hanziWordFromSkill, skillType } from "./skills";
 
 function validQuestionInvariant(question: Question) {
   switch (question.type) {
     case QuestionType.OneCorrectPair: {
       // Ensure there aren't two identical choices in the same group.
-      uniqueChoicesInvariant(question.groupA.map((x) => x.a));
-      uniqueChoicesInvariant(question.groupB.map((x) => x.b));
-      invariant(question.groupA.includes(question.answer));
-      invariant(question.groupB.includes(question.answer));
+      uniqueInvariant(question.groupA.map((x) => x.value));
+      uniqueInvariant(question.groupB.map((x) => x.value));
+      invariant(question.groupA.includes(question.answer.a));
+      invariant(question.groupB.includes(question.answer.b));
       break;
     }
     case QuestionType.MultipleChoice: {
@@ -53,6 +38,15 @@ function validQuestionInvariant(question: Question) {
   return question;
 }
 
+function glossOrThrow(
+  hanziWord: HanziWord,
+  meaning: DeepReadonly<HanziWordMeaning> | null,
+): string {
+  const gloss = meaning?.gloss[0];
+  invariant(gloss != null, `missing gloss for hanzi word ${hanziWord}`);
+  return gloss;
+}
+
 // generate a question to test a skill
 export async function generateQuestionForSkillOrThrow(
   skill: Skill,
@@ -61,31 +55,36 @@ export async function generateQuestionForSkillOrThrow(
     case SkillType.HanziWordToEnglish: {
       skill = skill as HanziWordSkill;
       const hanziWord = hanziWordFromSkill(skill);
+      const meaning = await lookupHanziWord(hanziWord);
       const rowCount = 5;
       const answer: OneCorrectPairQuestionAnswer = {
-        a: { type: `hanzi`, hanziWord, skill },
-        b: { type: `gloss`, hanziWord, skill },
+        a: { type: `hanzi`, value: hanziFromHanziWord(hanziWord) },
+        b: { type: `gloss`, value: glossOrThrow(hanziWord, meaning) },
+        skill,
       };
 
-      const otherAnswers: OneCorrectPairQuestionAnswer[] = [];
-      for (const [hanziWord2, meaning] of await getWrongHanziWordAnswers(
-        hanziWord,
-        (rowCount - 1) * 2,
-      )) {
-        const skill2 = hanziWordToEnglish(hanziWord2);
-        const gloss = meaning.gloss[0];
-        invariant(gloss != null, `missing gloss for hanzi word ${hanziWord2}`);
-        otherAnswers.push({
-          a: { type: `hanzi`, hanziWord: hanziWord2, skill: skill2 },
-          b: { type: `gloss`, hanziWord: hanziWord2, skill: skill2 },
-        });
-      }
-      const [wrongA, wrongB] = evenHalve(otherAnswers);
+      const [groupAHanziWords, groupBHanziWords] = evenHalve(
+        await getWrongHanziWordAnswers(hanziWord, (rowCount - 1) * 2),
+      );
+
+      const groupA: OneCorrectPairQuestionChoice[] = groupAHanziWords.map(
+        ([hanziWord, _meaning]) => ({
+          type: `hanzi`,
+          value: hanziFromHanziWord(hanziWord),
+        }),
+      );
+      const groupB: OneCorrectPairQuestionChoice[] = groupBHanziWords.map(
+        ([hanziWord, meaning]) => ({
+          type: `gloss`,
+          value: glossOrThrow(hanziWord, meaning),
+        }),
+      );
+
       return validQuestionInvariant({
         type: QuestionType.OneCorrectPair,
         prompt: `Match a word with its name`,
-        groupA: shuffle([...wrongA, answer]),
-        groupB: shuffle([...wrongB, answer]),
+        groupA: shuffle([...groupA, answer.a]),
+        groupB: shuffle([...groupB, answer.b]),
         answer,
       });
     }

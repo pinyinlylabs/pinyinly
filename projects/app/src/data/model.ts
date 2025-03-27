@@ -2,7 +2,7 @@ import { Rating } from "@/util/fsrs";
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type { Interval } from "date-fns";
 import { z } from "zod";
-import { HanziWordSkill, Skill } from "./rizzleSchema";
+import { Skill } from "./rizzleSchema";
 
 export enum PinyinInitialGroupId {
   Basic,
@@ -100,15 +100,6 @@ export enum PartOfSpeech {
   Particle,
 }
 
-/**
- * A hanzi character or word with a specific meaning.
- * @deprecated Use {@link HanziWord} instead.
- */
-export interface HanziWordObj {
-  hanzi: string;
-  meaningKey: string;
-}
-
 export type HanziWord = (string & z.BRAND<`HanziWord`>) | `${string}:${string}`; // useful when writing literal strings in tests
 
 export type HanziWordSkillType =
@@ -163,6 +154,27 @@ export interface MultipleChoiceQuestion {
   choices: readonly string[];
 }
 
+// The values of this enum should only be used for debugging, they should never
+// be persisted.
+export enum MistakeType {
+  HanziGloss = `HanziGloss`,
+  HanziPinyinInitial = `HanziPinyinInitial`,
+}
+
+export interface HanziGlossMistake {
+  type: MistakeType.HanziGloss;
+  hanzi: string;
+  gloss: string;
+}
+
+export interface HanziPinyinInitialMistake {
+  type: MistakeType.HanziPinyinInitial;
+  hanzi: string;
+  pinyinInitial: string;
+}
+
+export type Mistake = HanziGlossMistake | HanziPinyinInitialMistake;
+
 export interface SkillRating {
   skill: Skill;
   rating: Rating;
@@ -170,26 +182,21 @@ export interface SkillRating {
 
 export type OneCorrectPairQuestionChoice = {
   type: `hanzi` | `gloss` | `pinyin`;
-  hanziWord: HanziWord;
-  /**
-   * Having the skill here allows making the skill "wrong" if the user submits
-   * it. It means they've regressed on this skill as well as getting the primary
-   * question skill wrong.
-   */
-  skill: HanziWordSkill;
+  value: string;
 };
 
 export interface OneCorrectPairQuestionAnswer {
   a: OneCorrectPairQuestionChoice;
   b: OneCorrectPairQuestionChoice;
+  skill: Skill;
 }
 
 export interface OneCorrectPairQuestion {
   type: QuestionType.OneCorrectPair;
   prompt: string;
   answer: OneCorrectPairQuestionAnswer;
-  groupA: readonly OneCorrectPairQuestionAnswer[];
-  groupB: readonly OneCorrectPairQuestionAnswer[];
+  groupA: readonly OneCorrectPairQuestionChoice[];
+  groupB: readonly OneCorrectPairQuestionChoice[];
   hint?: string;
   flag?: QuestionFlag;
 }
