@@ -4,7 +4,7 @@ import {
   v7,
 } from "#data/rizzleSchema.ts";
 import { englishToHanziWord } from "#data/skills.ts";
-import { Drizzle } from "#server/lib/db.ts";
+import { Drizzle, xmin } from "#server/lib/db.ts";
 import {
   computeCvrEntities,
   fetchMutations,
@@ -15,7 +15,7 @@ import * as s from "#server/schema.ts";
 import { nextReview, Rating } from "#util/fsrs.ts";
 import { nanoid } from "#util/nanoid.ts";
 import { invariant } from "@haohaohow/lib/invariant";
-import { eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { withDbTest, withTxTest } from "./dbHelpers";
@@ -721,7 +721,7 @@ await test(`${computeCvrEntities.name} suite`, async (t) => {
           .returning({
             id: s.skillState.id,
             skill: s.skillState.skill,
-            version: sql<string>`${s.skillState}.xmin`,
+            version: xmin(s.skillState),
           });
         invariant(user1SkillState != null);
 
@@ -761,7 +761,7 @@ await test(`${computeCvrEntities.name} suite`, async (t) => {
             id: s.skillRating.id,
             skill: s.skillRating.skill,
             createdAt: s.skillRating.createdAt,
-            version: sql<string>`${s.skillRating}.xmin`,
+            version: xmin(s.skillRating),
           });
         invariant(user1SkillRating != null);
 
@@ -802,7 +802,7 @@ await test(`${computeCvrEntities.name} suite`, async (t) => {
             .returning({
               id: s.pinyinFinalAssociation.id,
               final: s.pinyinFinalAssociation.final,
-              version: sql<string>`${s.pinyinFinalAssociation}.xmin`,
+              version: xmin(s.pinyinFinalAssociation),
             });
           invariant(user1PinyinFinalAssociation != null);
 
@@ -846,7 +846,7 @@ await test(`${computeCvrEntities.name} suite`, async (t) => {
             .returning({
               id: s.pinyinInitialAssociation.id,
               initial: s.pinyinInitialAssociation.initial,
-              version: sql<string>`${s.pinyinInitialAssociation}.xmin`,
+              version: xmin(s.pinyinInitialAssociation),
             });
           invariant(user1PinyinInitialAssociation != null);
 
