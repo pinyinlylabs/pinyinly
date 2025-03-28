@@ -1,9 +1,14 @@
+import { MistakeType } from "@/data/model";
 import {
   rPinyinInitialGroupId,
   SupportedSchema,
   v7,
   v7_1,
 } from "@/data/rizzleSchema";
+import {
+  nextReviewForOtherSkillMistake,
+  skillsToReReviewForHanziGlossMistake,
+} from "@/data/skills";
 import {
   ClientStateNotFoundResponse,
   Cookie,
@@ -33,6 +38,7 @@ import {
   assertMinimumIsolationLevel,
   json_build_object,
   json_object_agg,
+  pgBatchUpdate,
   withRepeatableReadTransaction,
   xmin,
 } from "./db";
@@ -54,6 +60,25 @@ const mutators: RizzleDrizzleMutators<SupportedSchema, Drizzle> = {
     await db
       .insert(s.hanziGlossMistake)
       .values([{ id, userId, gloss, hanzi, createdAt: now }]);
+
+    // Apply mistake effect to in-scope skills.
+    const mistake = { type: MistakeType.HanziGloss, gloss, hanzi } as const;
+    const skillsToReview = await skillsToReReviewForHanziGlossMistake(mistake);
+
+    // Find any existing skills for the user that should be reviewed again.
+    const skillStates = await db.query.skillState.findMany({
+      where: (t) =>
+        and(eq(t.userId, userId), inArray(t.skill, [...skillsToReview])),
+    });
+
+    await pgBatchUpdate(db, {
+      whereColumn: s.skillState.id,
+      setColumn: s.skillState.srs,
+      updates: skillStates.map((skillState) => [
+        skillState.id,
+        nextReviewForOtherSkillMistake(skillState.srs, now),
+      ]),
+    });
   },
   async setPinyinInitialAssociation(db, userId, { initial, name, now }) {
     const updatedAt = now;

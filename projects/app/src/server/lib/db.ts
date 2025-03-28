@@ -1,12 +1,8 @@
 import { invariant } from "@haohaohow/lib/invariant";
-import { sql, SQL, SQLWrapper } from "drizzle-orm";
+import { GetColumnData, sql, SQL, SQLWrapper } from "drizzle-orm";
 import { drizzle, NodePgDatabase } from "drizzle-orm/node-postgres";
-import {
-  AnyPgTable,
-  PgColumn,
-  PgTable,
-  PgTransactionConfig,
-} from "drizzle-orm/pg-core";
+import type { PgColumn, PgTable } from "drizzle-orm/pg-core";
+import { AnyPgTable, PgTransactionConfig } from "drizzle-orm/pg-core";
 import type { Pool as PgPool } from "pg";
 import z from "zod";
 import * as schema from "../schema";
@@ -239,4 +235,57 @@ export async function assertMinimumIsolationLevel(
 
 export function xmin<TFrom extends PgTable>(source: TFrom) {
   return sql<string>`${source}.xmin`;
+}
+
+/**
+ * Efficiently update a single column across multiple rows using a single SQL
+ * CTE and Drizzle's column serialization.
+ */
+export async function pgBatchUpdate<
+  WhereColumn extends PgColumn,
+  SetColumn extends PgColumn,
+>(
+  db: Drizzle,
+  options: {
+    whereColumn: WhereColumn;
+    setColumn: SetColumn;
+    updates: [
+      where: GetColumnData<WhereColumn>,
+      set: GetColumnData<SetColumn>,
+    ][];
+  },
+): Promise<void> {
+  const { whereColumn, setColumn, updates } = options;
+
+  invariant(
+    whereColumn.table === setColumn.table,
+    `columns must be from the same table`,
+  );
+
+  if (updates.length === 0) {
+    return;
+  }
+
+  const table = whereColumn.table;
+
+  const values = sql.join(
+    updates.map(([whereInput, setInput]) => {
+      const whereValue = sql.param(whereColumn.mapToDriverValue(whereInput));
+      const whereType = sql.raw(whereColumn.getSQLType());
+      const setValue = sql.param(setColumn.mapToDriverValue(setInput));
+      const setType = sql.raw(setColumn.getSQLType());
+      return sql`select ${whereValue}::${whereType}, ${setValue}::${setType}`;
+    }),
+    sql` union all `,
+  );
+
+  const query = sql`
+    with vals(where_value, set_value) as (${values})
+    update ${table} as t
+    set ${sql.identifier(setColumn.name)} = vals.set_value
+    from vals
+    where t.${sql.identifier(whereColumn.name)} = vals.where_value
+  `;
+
+  await db.execute(query);
 }

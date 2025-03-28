@@ -5,16 +5,19 @@ import {
   hanziToLearnForHanzi,
   loadDictionary,
   loadStandardPinyinChart,
+  lookupGloss,
+  lookupHanzi,
   lookupHanziWord,
   meaningKeyFromHanziWord,
   splitCharacters,
   splitPinyin,
 } from "@/dictionary/dictionary";
 import { sortComparatorNumber } from "@/util/collections";
-import { fsrsIsIntroduced } from "@/util/fsrs";
+import { fsrsIsIntroduced, nextReview, Rating } from "@/util/fsrs";
 import { pseudoRandomNumberGenerator } from "@/util/random";
 import { invariant } from "@haohaohow/lib/invariant";
 import {
+  HanziGlossMistake,
   HanziWord,
   HanziWordSkillType,
   SkillType,
@@ -25,8 +28,9 @@ import {
   HanziWordSkill,
   PinyinFinalAssociationSkill,
   PinyinInitialAssociationSkill,
-  Skill,
   rSkillType,
+  Skill,
+  srsStateFromFsrsState,
 } from "./rizzleSchema";
 
 export interface Node {
@@ -484,4 +488,41 @@ const skillTypeShorthandMapping: Record<SkillType, string> = {
 
 export function skillTypeToShorthand(skillType: SkillType): string {
   return skillTypeShorthandMapping[skillType];
+}
+
+export async function skillsToReReviewForHanziGlossMistake(
+  mistake: HanziGlossMistake,
+): Promise<ReadonlySet<Skill>> {
+  const skills = new Set<Skill>();
+
+  // Queue all skills relevant to the gloss.
+  for (const [hanziWord] of await lookupGloss(mistake.gloss)) {
+    skills.add(hanziWordToEnglish(hanziWord));
+  }
+
+  // Queue all skills relevant to the hanzi.
+  for (const [hanziWord] of await lookupHanzi(mistake.hanzi)) {
+    skills.add(hanziWordToEnglish(hanziWord));
+  }
+
+  return skills;
+}
+
+/**
+ * Update the SRS state a skill that's related to a mistake that was made that
+ * wasn't tied to a specific skill. It should make the skill reviewed again
+ * soon.
+ */
+export function nextReviewForOtherSkillMistake<T extends SrsState>(
+  srs: T,
+  now: Date,
+): T {
+  switch (srs.type) {
+    case SrsType.Mock: {
+      return srs;
+    }
+    case SrsType.FsrsFourPointFive: {
+      return srsStateFromFsrsState(nextReview(srs, Rating.Again, now)) as T;
+    }
+  }
 }

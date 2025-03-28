@@ -1,5 +1,6 @@
 import { trpc } from "@/client/trpc";
-import { v7, v7Mutators } from "@/data/rizzleSchema";
+import { v7Mutators } from "@/data/rizzleMutators";
+import { v7 } from "@/data/rizzleSchema";
 import { AppRouter } from "@/server/routers/_app";
 import { cookieSchema, r, RizzleReplicache } from "@/util/rizzle";
 import { ReactQueryValue } from "@/util/types";

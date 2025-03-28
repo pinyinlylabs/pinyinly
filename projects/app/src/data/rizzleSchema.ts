@@ -1,12 +1,6 @@
-import { memoize0, sortComparatorDate } from "@/util/collections";
-import { FsrsState, nextReview, Rating } from "@/util/fsrs";
-import {
-  r,
-  RizzleCustom,
-  RizzleReplicache,
-  RizzleReplicacheMutators,
-} from "@/util/rizzle";
-import { invariant } from "@haohaohow/lib/invariant";
+import { memoize0 } from "@/util/collections";
+import { FsrsState, Rating } from "@/util/fsrs";
+import { r, RizzleCustom, RizzleReplicache } from "@/util/rizzle";
 import { z } from "zod";
 import {
   MnemonicThemeId,
@@ -271,50 +265,8 @@ export const v7_1 = {
   version: `7.1`,
 };
 
-export const supportedSchemas = [v7] as const;
+export const supportedSchemas = [v7, v7_1] as const;
 
 export type SupportedSchema = (typeof supportedSchemas)[number];
 
 export type Rizzle = RizzleReplicache<typeof v7>;
-
-export const v7Mutators: RizzleReplicacheMutators<typeof v7> = {
-  async rateSkill(tx, { id, skill, rating, now }) {
-    // Save a record of the rating.
-    await tx.skillRating.set({ id }, { id, rating, skill, createdAt: now });
-
-    const skillRatingsByDate = await tx.skillRating
-      .bySkill(skill)
-      .toArray()
-      .then((x) => x.sort(sortComparatorDate((x) => x[1].createdAt)));
-    let fsrsState: FsrsState | null = null;
-    for (const [, { rating, createdAt }] of skillRatingsByDate) {
-      fsrsState = nextReview(fsrsState, rating, createdAt);
-    }
-
-    invariant(fsrsState !== null);
-
-    await tx.skillState.set(
-      { skill },
-      { skill, srs: srsStateFromFsrsState(fsrsState) },
-    );
-  },
-  async setPinyinInitialAssociation(tx, { initial, name }) {
-    await tx.pinyinInitialAssociation.set({ initial }, { initial, name });
-  },
-  async setPinyinFinalAssociation(tx, { final, name }) {
-    await tx.pinyinFinalAssociation.set({ final }, { final, name });
-  },
-  async setPinyinInitialGroupTheme(tx, { groupId, themeId }) {
-    await tx.pinyinInitialGroupTheme.set({ groupId }, { groupId, themeId });
-  },
-  async saveHanziGlossMistake(tx, { id, gloss, hanzi, now }) {
-    await tx.hanziGlossMistake.set(
-      { id },
-      { id, gloss, hanzi, createdAt: now },
-    );
-  },
-};
-
-export type SkillRating = NonNullable<
-  Awaited<ReturnType<typeof v7.skillRating.get>>
->;

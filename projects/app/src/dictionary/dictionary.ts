@@ -410,6 +410,13 @@ export const lookupHanzi = async (
       meaning.visualVariants?.includes(hanzi) === true,
   );
 
+export const lookupGloss = async (
+  gloss: string,
+): Promise<DeepReadonly<[HanziWord, HanziWordMeaning][]>> =>
+  [...(await loadDictionary())].filter(([_hanziWord, meaning]) =>
+    meaning.gloss.includes(gloss),
+  );
+
 export const lookupHanziWord = async (
   hanziWord: HanziWord,
 ): Promise<DeepReadonly<HanziWordMeaning> | null> =>

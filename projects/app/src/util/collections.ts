@@ -212,7 +212,9 @@ export function weakMemoize1<T, R>(fn: (input: T) => R): typeof fn {
   return memoFn;
 }
 
-export function memoize0<R>(fn: () => R): () => R {
+export function memoize0<R>(
+  fn: () => R,
+): (() => R) & { isCached: () => boolean } {
   let cache: R | undefined;
   let cacheSet = false;
   const memoFn = function <This>(this: This) {
@@ -225,7 +227,7 @@ export function memoize0<R>(fn: () => R): () => R {
     return cache;
   };
   Object.defineProperty(memoFn, `name`, { value: fn.name });
-  return memoFn;
+  return Object.assign(memoFn, { isCached: () => cacheSet });
 }
 
 /**

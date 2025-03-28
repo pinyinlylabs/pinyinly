@@ -4,12 +4,8 @@ import {
   hsk1SkillReview,
 } from "#client/query.ts";
 import { QuestionFlagType, SrsType } from "#data/model.ts";
-import {
-  Skill,
-  srsStateFromFsrsState,
-  v7,
-  v7Mutators,
-} from "#data/rizzleSchema.ts";
+import { v7Mutators } from "#data/rizzleMutators.ts";
+import { Skill, srsStateFromFsrsState, v7 } from "#data/rizzleSchema.ts";
 import { nextReview, Rating } from "#util/fsrs.ts";
 import { nanoid } from "#util/nanoid.ts";
 import { r } from "#util/rizzle.ts";
