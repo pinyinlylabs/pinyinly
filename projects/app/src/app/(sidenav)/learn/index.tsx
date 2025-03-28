@@ -12,8 +12,28 @@ import Animated, { FadeIn } from "react-native-reanimated";
 import { tv } from "tailwind-variants";
 
 export default function IndexPage() {
+  const reviewCountQuery = useRizzleQueryPaged(
+    [IndexPage.name, `recentCharacters`],
+    async (r) => {
+      const now = new Date();
+      let reviewCount = 0;
+      for await (const [
+        ,
+        skillState,
+      ] of r.queryPaged.skillState.byNextReviewAt()) {
+        if (skillState.srs.nextReviewAt <= now) {
+          reviewCount++;
+        } else {
+          break;
+        }
+      }
+
+      return reviewCount;
+    },
+  );
+
   const recentHanzi = useRizzleQueryPaged(
-    [`IndexPage`, `recentCharacters`],
+    [IndexPage.name, `recentCharacters`],
     async (r) => {
       const recentHanziWords: HanziWord[] = [];
       const ratingHistory = await r.queryPaged.skillRating
@@ -57,7 +77,7 @@ export default function IndexPage() {
   );
 
   const streakQuery = useRizzleQueryPaged(
-    [`IndexPage`, `streakQuery`],
+    [IndexPage.name, `streakQuery`],
     async (r) => {
       const ratingHistory = await r.queryPaged.skillRating
         .byCreatedAt()
@@ -135,6 +155,21 @@ export default function IndexPage() {
                       {streakQuery.data.isActive ? `🔥` : `❄️`}
                       {` `}
                       {streakQuery.data.streakDayCount} day streak
+                    </Text>
+                  </Animated.View>
+                )}
+
+                {reviewCountQuery.data == null ? null : (
+                  <Animated.View entering={FadeIn}>
+                    <Text
+                      className={
+                        `font-bold text-text` +
+                        (reviewCountQuery.data > 0 ? `` : ` opacity-50`)
+                      }
+                    >
+                      {reviewCountQuery.data}
+                      {` `}
+                      📨
                     </Text>
                   </Animated.View>
                 )}
