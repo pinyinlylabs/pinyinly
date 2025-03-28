@@ -4,7 +4,7 @@ import {
   v7,
 } from "#data/rizzleSchema.ts";
 import { englishToHanziWord } from "#data/skills.ts";
-import { Drizzle, xmin } from "#server/lib/db.ts";
+import { xmin } from "#server/lib/db.ts";
 import {
   computeCvrEntities,
   fetchMutations,
@@ -18,13 +18,7 @@ import { invariant } from "@haohaohow/lib/invariant";
 import { eq } from "drizzle-orm";
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { withDbTest, withTxTest } from "./dbHelpers";
-
-async function createUser(tx: Drizzle, id: string = nanoid()) {
-  const [user] = await tx.insert(s.user).values([{ id }]).returning();
-  assert.ok(user != null);
-  return user;
-}
+import { createUser, withDbTest, withTxTest } from "./dbHelpers";
 
 await test(`${push.name} suite`, async (t) => {
   for (const schema of supportedSchemas) {

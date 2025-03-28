@@ -1,4 +1,4 @@
-import * as r from "@/data/rizzleSchema";
+import * as s from "@/data/rizzleSchema";
 import { nanoid } from "@/util/nanoid";
 import { sql } from "drizzle-orm";
 import * as pg from "drizzle-orm/pg-core";
@@ -102,7 +102,7 @@ export const skillState = schema.table(
       .references(() => user.id)
       .notNull(),
     skill: sSkill(`skill`).notNull(),
-    srs: rizzleCustomType(r.rSrsState(), `json`)(`srs`).notNull(),
+    srs: rizzleCustomType(s.rSrsState(), `json`)(`srs`).notNull(),
     createdAt: pg.timestamp(`createdAt`).defaultNow().notNull(),
   },
   (t) => [pg.unique().on(t.userId, t.skill)],
