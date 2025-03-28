@@ -1,5 +1,4 @@
 import { invariant } from "@haohaohow/lib/invariant";
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type { Duration } from "date-fns";
 import { add } from "date-fns/add";
 import round from "lodash/round";

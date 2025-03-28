@@ -270,3 +270,7 @@ export const supportedSchemas = [v7, v7_1] as const;
 export type SupportedSchema = (typeof supportedSchemas)[number];
 
 export type Rizzle = RizzleReplicache<typeof v7>;
+
+export type SkillState = NonNullable<
+  Awaited<ReturnType<typeof v7.skillState.get>>
+>;

@@ -16,6 +16,7 @@ import { sortComparatorNumber } from "@/util/collections";
 import { fsrsIsIntroduced, nextReview, Rating } from "@/util/fsrs";
 import { pseudoRandomNumberGenerator } from "@/util/random";
 import { invariant } from "@haohaohow/lib/invariant";
+import type { Duration } from "date-fns";
 import {
   HanziGlossMistake,
   HanziWord,
@@ -567,3 +568,8 @@ export function hanziGlossMistake(
     };
   }
 }
+
+/**
+ * You get 1 day to review a skill before it becomes overdue.
+ */
+export const skillDueWindow: Duration = { hours: 24 };

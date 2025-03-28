@@ -6,14 +6,13 @@ import {
   ratingName,
 } from "#util/fsrs.ts";
 import { RepeatedSequence2 } from "#util/types.ts";
-import { parseRelativeTimeShorthand } from "../data/helpers";
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type { Duration } from "date-fns";
 import { add } from "date-fns/add";
 import { intervalToDuration } from "date-fns/intervalToDuration";
 import assert from "node:assert/strict";
 import test, { TestContext } from "node:test";
 import z from "zod";
+import { parseRelativeTimeShorthand } from "../data/helpers";
 
 const expectedReviewSchema = z.object({
   stability: z.number(),

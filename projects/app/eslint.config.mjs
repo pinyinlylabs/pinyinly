@@ -121,6 +121,7 @@ export default tseslint.config(
             {
               name: `date-fns`,
               message: `Please use date-fns/* instead for smaller bundle size.`,
+              allowTypeImports: true,
             },
             {
               name: `lodash`,

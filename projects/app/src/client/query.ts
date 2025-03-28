@@ -11,12 +11,14 @@ import {
 import { Skill } from "@/data/rizzleSchema";
 import {
   hanziWordToEnglish,
+  skillDueWindow,
   skillLearningGraph,
   skillReviewQueue,
 } from "@/data/skills";
 import { allHsk1HanziWords, lookupHanziWord } from "@/dictionary/dictionary";
 import { fsrsIsIntroduced, fsrsIsLearned } from "@/util/fsrs";
 import { useQuery } from "@tanstack/react-query";
+import { add } from "date-fns/add";
 import { interval } from "date-fns/interval";
 
 export async function questionsForReview2(
@@ -64,10 +66,7 @@ export function flagsForSrsState(
     };
   }
   const now = new Date();
-  // Something is overdue if its due date was more than 1 day ago.
-  const overdueDate = new Date(
-    srsState.nextReviewAt.getTime() + 24 * 60 * 60 * 1000,
-  );
+  const overdueDate = add(srsState.nextReviewAt, skillDueWindow);
 
   if (now >= overdueDate) {
     return {
@@ -77,11 +76,14 @@ export function flagsForSrsState(
   }
 }
 
-export async function hsk1SkillReview(r: Rizzle): Promise<Skill[]> {
-  const targetSkills = await allHsk1HanziWords().then((words) =>
+export async function getAllTargetSkills() {
+  return await allHsk1HanziWords().then((words) =>
     words.map((w) => hanziWordToEnglish(w)),
   );
+}
 
+export async function hsk1SkillReview(r: Rizzle): Promise<Skill[]> {
+  const targetSkills = await getAllTargetSkills();
   return await computeSkillReviewQueue(r, targetSkills);
 }
 

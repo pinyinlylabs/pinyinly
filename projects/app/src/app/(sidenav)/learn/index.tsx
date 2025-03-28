@@ -1,34 +1,65 @@
+import { getAllTargetSkills } from "@/client/query";
+import { Countdown } from "@/client/ui/Countdown";
 import { RectButton2 } from "@/client/ui/RectButton2";
 import { useRizzleQueryPaged } from "@/client/ui/ReplicacheContext";
 import { HanziWord, SkillType } from "@/data/model";
-import { HanziWordSkill } from "@/data/rizzleSchema";
-import { hanziWordFromSkill, skillType } from "@/data/skills";
+import { HanziWordSkill, Skill, SkillState } from "@/data/rizzleSchema";
+import { hanziWordFromSkill, skillDueWindow, skillType } from "@/data/skills";
 import { hanziFromHanziWord } from "@/dictionary/dictionary";
 import { invariant } from "@haohaohow/lib/invariant";
+import { add } from "date-fns/add";
 import { differenceInCalendarDays } from "date-fns/differenceInCalendarDays";
+import { sub } from "date-fns/sub";
 import { Link } from "expo-router";
 import { ScrollView, Text, View } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { tv } from "tailwind-variants";
 
 export default function IndexPage() {
-  const reviewCountQuery = useRizzleQueryPaged(
+  const reviewQuery = useRizzleQueryPaged(
     [IndexPage.name, `recentCharacters`],
     async (r) => {
       const now = new Date();
-      let reviewCount = 0;
+      const latestNotOverDueDate = sub(now, skillDueWindow);
+
+      const targetSkills = new Set<Skill>(await getAllTargetSkills());
+
+      let dueCount = 0;
+      let overdueCount = 0;
+      let mostDueSkill: SkillState | undefined;
+
       for await (const [
         ,
         skillState,
       ] of r.queryPaged.skillState.byNextReviewAt()) {
-        if (skillState.srs.nextReviewAt <= now) {
-          reviewCount++;
+        if (!targetSkills.has(skillState.skill)) {
+          continue;
+        }
+
+        if (
+          mostDueSkill == null ||
+          mostDueSkill.srs.nextReviewAt > skillState.srs.nextReviewAt
+        ) {
+          mostDueSkill = skillState;
+        }
+        if (skillState.srs.nextReviewAt < latestNotOverDueDate) {
+          overdueCount++;
+        } else if (skillState.srs.nextReviewAt <= now) {
+          dueCount++;
         } else {
           break;
         }
       }
 
-      return reviewCount;
+      return {
+        dueCount,
+        overdueCount,
+        dueOrOverdueCount: dueCount + overdueCount,
+        firstOverdueAt:
+          mostDueSkill == null
+            ? null
+            : add(mostDueSkill.srs.nextReviewAt, skillDueWindow),
+      };
     },
   );
 
@@ -144,8 +175,8 @@ export default function IndexPage() {
                     : `Start learning`}
                 </Text>
 
-                {streakQuery.data == null ? null : (
-                  <Animated.View entering={FadeIn}>
+                {streakQuery.data == null || reviewQuery.data == null ? null : (
+                  <Animated.View entering={FadeIn} className="gap-1">
                     <Text
                       className={
                         `font-bold text-text` +
@@ -156,21 +187,29 @@ export default function IndexPage() {
                       {` `}
                       {streakQuery.data.streakDayCount} day streak
                     </Text>
-                  </Animated.View>
-                )}
-
-                {reviewCountQuery.data == null ? null : (
-                  <Animated.View entering={FadeIn}>
-                    <Text
-                      className={
-                        `font-bold text-text` +
-                        (reviewCountQuery.data > 0 ? `` : ` opacity-50`)
-                      }
+                    <View
+                      className={`flex-row gap-1 ${
+                        reviewQuery.data.dueOrOverdueCount > 0
+                          ? ``
+                          : `opacity-50`
+                      }`}
                     >
-                      {reviewCountQuery.data}
-                      {` `}
-                      📨
-                    </Text>
+                      <Text className="font-bold text-text">
+                        📨
+                        {` `}
+                        {reviewQuery.data.dueOrOverdueCount}
+                        {reviewQuery.data.overdueCount > 0 ? (
+                          <>
+                            (😡
+                            {` `}
+                            {reviewQuery.data.overdueCount})
+                          </>
+                        ) : null}
+                      </Text>
+                      {reviewQuery.data.firstOverdueAt == null ? null : (
+                        <Countdown date={reviewQuery.data.firstOverdueAt} />
+                      )}
+                    </View>
                   </Animated.View>
                 )}
               </View>
