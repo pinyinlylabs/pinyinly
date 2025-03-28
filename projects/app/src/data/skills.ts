@@ -20,6 +20,9 @@ import {
   HanziGlossMistake,
   HanziWord,
   HanziWordSkillType,
+  Mistake,
+  MistakeType,
+  OneCorrectPairQuestionChoice,
   SkillType,
   SrsState,
   SrsType,
@@ -524,5 +527,43 @@ export function nextReviewForOtherSkillMistake<T extends SrsState>(
     case SrsType.FsrsFourPointFive: {
       return srsStateFromFsrsState(nextReview(srs, Rating.Again, now)) as T;
     }
+  }
+}
+
+export function oneCorrectPairQuestionChoiceMistakes(
+  choice1: OneCorrectPairQuestionChoice,
+  choice2: OneCorrectPairQuestionChoice,
+): Mistake[] {
+  const mistakes: Mistake[] = [];
+
+  const mistakeChecks = [hanziGlossMistake];
+  // Check all combinations of the choices, this makes each check simpler as it
+  // doesn't need to consider each direction.
+  const choicePairs = [
+    [choice1, choice2],
+    [choice2, choice1],
+  ] as const;
+
+  for (const mistakeCheck of mistakeChecks) {
+    for (const [choice1, choice2] of choicePairs) {
+      const mistake = mistakeCheck(choice1, choice2);
+      if (mistake) {
+        mistakes.push(mistake);
+      }
+    }
+  }
+  return mistakes;
+}
+
+export function hanziGlossMistake(
+  choice1: OneCorrectPairQuestionChoice,
+  choice2: OneCorrectPairQuestionChoice,
+): HanziGlossMistake | undefined {
+  if (choice1.type === `hanzi` && choice2.type === `gloss`) {
+    return {
+      type: MistakeType.HanziGloss,
+      hanzi: choice1.value,
+      gloss: choice2.value,
+    };
   }
 }

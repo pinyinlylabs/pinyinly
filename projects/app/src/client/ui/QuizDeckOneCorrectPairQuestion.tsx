@@ -1,8 +1,6 @@
 import { useHanziWordMeaning } from "@/client/query";
 import {
-  HanziGlossMistake,
   Mistake,
-  MistakeType,
   OneCorrectPairQuestion,
   OneCorrectPairQuestionChoice,
   QuestionFlag,
@@ -11,7 +9,11 @@ import {
   SkillType,
 } from "@/data/model";
 import { HanziWordSkill, Skill } from "@/data/rizzleSchema";
-import { hanziWordFromSkill, skillType } from "@/data/skills";
+import {
+  hanziWordFromSkill,
+  oneCorrectPairQuestionChoiceMistakes,
+  skillType,
+} from "@/data/skills";
 import { hanziFromHanziWord } from "@/dictionary/dictionary";
 import { Rating } from "@/util/fsrs";
 import { invariant } from "@haohaohow/lib/invariant";
@@ -98,37 +100,15 @@ export const QuizDeckOneCorrectPairQuestion = memo(
         selectedAChoice != null &&
         selectedBChoice != null
       ) {
-        function hanziGlossMistake(
-          choice1: OneCorrectPairQuestionChoice,
-          choice2: OneCorrectPairQuestionChoice,
-        ): HanziGlossMistake | undefined {
-          if (choice1.type === `hanzi` && choice2.type === `gloss`) {
-            return {
-              type: MistakeType.HanziGloss,
-              hanzi: choice1.value,
-              gloss: choice2.value,
-            };
-          }
-        }
-
-        const mistakeChecks = [hanziGlossMistake];
-        const mistakes: Mistake[] = [];
-
-        const choicePairs = [
-          [selectedAChoice, selectedBChoice],
-          [selectedBChoice, selectedAChoice],
-        ] as const;
-        for (const mistakeCheck of mistakeChecks) {
-          for (const [choice1, choice2] of choicePairs) {
-            const mistake = mistakeCheck(choice1, choice2);
-            if (mistake) {
-              mistakes.push(mistake);
-            }
-          }
-        }
-
         const isCorrect =
           selectedAChoice === answer.a && selectedBChoice === answer.b;
+
+        const mistakes = isCorrect
+          ? []
+          : oneCorrectPairQuestionChoiceMistakes(
+              selectedAChoice,
+              selectedBChoice,
+            );
 
         const skillRatings: SkillRating[] = [
           {
