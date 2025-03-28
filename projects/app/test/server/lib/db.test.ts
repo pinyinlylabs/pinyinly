@@ -1,9 +1,14 @@
-import { substring } from "#server/lib/db.ts";
+import { Skill, srsStateFromFsrsState } from "#data/rizzleSchema.ts";
+import { englishToHanziWord } from "#data/skills.ts";
+import { Drizzle, pgBatchUpdate, substring } from "#server/lib/db.ts";
 import * as s from "#server/schema.ts";
+import { nextReview, Rating } from "#util/fsrs.ts";
+import { invariant } from "@haohaohow/lib/invariant";
+import { eq } from "drizzle-orm";
 import * as pg from "drizzle-orm/pg-core";
 import assert from "node:assert/strict";
 import test, { TestContext } from "node:test";
-import { withDbTest, withTxTest } from "./dbHelpers";
+import { createUser, withDbTest, withTxTest } from "./dbHelpers";
 
 function typeChecks(..._args: unknown[]) {
   // This function is only used for type checking, so it should never be called.
@@ -45,5 +50,118 @@ await test(`${substring.name} suite`, async (t) => {
         .from(s.user),
       [{ text: `bar` }],
     );
+  });
+});
+
+await test(`${pgBatchUpdate.name} suite`, async (t) => {
+  const txTest = withTxTest(t);
+
+  await txTest(`no updates should be no-op`, async (tx) => {
+    await pgBatchUpdate(tx, {
+      whereColumn: s.skillState.id,
+      setColumn: s.skillState.srs,
+      updates: [],
+    });
+  });
+
+  await txTest(`throws when given different columns`, async (tx) => {
+    await assert.rejects(
+      pgBatchUpdate(tx, {
+        whereColumn: s.skillState.id,
+        setColumn: s.skillRating.id,
+        updates: [],
+      }),
+    );
+  });
+
+  await txTest(`handles one update`, async (tx) => {
+    const user = await createUser(tx);
+
+    const [skillState] = await tx
+      .insert(s.skillState)
+      .values([
+        {
+          userId: user.id,
+          srs: srsStateFromFsrsState(nextReview(null, Rating.Good)),
+          skill: englishToHanziWord(`我:i`),
+        },
+      ])
+      .returning();
+    invariant(skillState != null);
+
+    const newSrs = srsStateFromFsrsState(
+      nextReview(skillState.srs, Rating.Good),
+    );
+    await pgBatchUpdate(tx, {
+      whereColumn: s.skillState.id,
+      setColumn: s.skillState.srs,
+      updates: [[skillState.id, newSrs]],
+    });
+
+    const updatedSkillState = await tx.query.skillState.findFirst({
+      where: (t) => eq(t.id, skillState.id),
+    });
+    assert.deepEqual(updatedSkillState?.srs, newSrs);
+  });
+
+  await txTest(`handles many updates`, async (tx) => {
+    const user = await createUser(tx);
+
+    const [skillState1, skillState2] = await tx
+      .insert(s.skillState)
+      .values([
+        {
+          userId: user.id,
+          srs: srsStateFromFsrsState(nextReview(null, Rating.Good)),
+          skill: englishToHanziWord(`我:i`),
+        },
+        {
+          userId: user.id,
+          srs: srsStateFromFsrsState(nextReview(null, Rating.Hard)),
+          skill: englishToHanziWord(`两:pair`),
+        },
+      ])
+      .returning();
+    invariant(skillState1 != null && skillState2 != null);
+
+    const newSkillState1Srs = srsStateFromFsrsState(
+      nextReview(skillState1.srs, Rating.Good),
+    );
+    const newSkillState2Srs = srsStateFromFsrsState(
+      nextReview(skillState2.srs, Rating.Good),
+    );
+    await pgBatchUpdate(tx, {
+      whereColumn: s.skillState.id,
+      setColumn: s.skillState.srs,
+      updates: [
+        [skillState1.id, newSkillState1Srs],
+        [skillState2.id, newSkillState2Srs],
+      ],
+    });
+
+    const updatedSkillState1 = await tx.query.skillState.findFirst({
+      where: (t) => eq(t.id, skillState1.id),
+    });
+    assert.deepEqual(updatedSkillState1?.srs, newSkillState1Srs);
+
+    const updatedSkillState2 = await tx.query.skillState.findFirst({
+      where: (t) => eq(t.id, skillState2.id),
+    });
+    assert.deepEqual(updatedSkillState2?.srs, newSkillState2Srs);
+  });
+
+  typeChecks(`requires correct column types`, async () => {
+    const tx = null as unknown as Drizzle;
+    await pgBatchUpdate(tx, {
+      whereColumn: s.skillState.skill,
+      setColumn: s.skillRating.rating,
+      updates: [
+        // @ts-expect-error wrong where column type
+        [`1`, Rating.Good],
+        // @ts-expect-error wrong set column type
+        [`` as Skill, `1`],
+        [`` as Skill, Rating.Good],
+      ],
+    });
   });
 });

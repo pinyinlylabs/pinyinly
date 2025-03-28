@@ -1,9 +1,11 @@
-import { Transaction } from "#server/lib/db.ts";
-import * as schema from "#server/schema.ts";
+import { Drizzle, Transaction } from "#server/lib/db.ts";
+import * as s from "#server/schema.ts";
+import { nanoid } from "#util/nanoid.ts";
 import { PGlite } from "@electric-sql/pglite";
 import { PgTransactionConfig } from "drizzle-orm/pg-core";
 import { drizzle } from "drizzle-orm/pglite";
 import { migrate } from "drizzle-orm/pglite/migrator";
+import assert from "node:assert/strict";
 import { TestContext } from "node:test";
 
 const migrationsFolder = import.meta.dirname + `/../../../drizzle`;
@@ -14,7 +16,7 @@ async function createTestDb(t: TestContext) {
   const client = await PGlite.create({ loadDataDir: dataDir });
   t.diagnostic(`created pglite (${Date.now() - start.getTime()}ms)`);
 
-  const db = drizzle(client, { schema });
+  const db = drizzle(client, { schema: s });
 
   // Run migrations and cache a snapshot of the DB.
   if (dataDir == null) {
@@ -81,3 +83,9 @@ export const withDbTest = (t: TestContext) => {
     todo: (msg: string, _fn?: TestFn) => t.test(msg, { todo: true }),
   });
 };
+
+export async function createUser(tx: Drizzle, id: string = nanoid()) {
+  const [user] = await tx.insert(s.user).values([{ id }]).returning();
+  assert.ok(user != null);
+  return user;
+}
