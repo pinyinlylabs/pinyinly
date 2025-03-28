@@ -20,7 +20,7 @@ function countdownUpdatePeriod(date: Date): number {
   } else if (diffMs > 0) {
     return oneSecondMs;
   }
-  return Infinity;
+  return Number.MAX_SAFE_INTEGER;
 }
 
 export const Countdown = ({ date }: { date: Date }) => {
