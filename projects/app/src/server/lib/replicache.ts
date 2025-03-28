@@ -65,7 +65,7 @@ const mutators: RizzleDrizzleMutators<SupportedSchema, Drizzle> = {
     const mistake = { type: MistakeType.HanziGloss, gloss, hanzi } as const;
     const skillsToReview = await skillsToReReviewForHanziGlossMistake(mistake);
 
-    // Find any existing skills for the user that shuold be reviewed again.
+    // Find any existing skills for the user that should be reviewed again.
     const skillStates = await db.query.skillState.findMany({
       where: (t) =>
         and(eq(t.userId, userId), inArray(t.skill, [...skillsToReview])),
