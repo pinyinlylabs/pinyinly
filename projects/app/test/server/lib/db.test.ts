@@ -74,9 +74,10 @@ await test(`${pgBatchUpdate.name} suite`, async (t) => {
     );
   });
 
-  await txTest(`handles one update`, async (tx) => {
-    const user = await createUser(tx);
+  await txTest(`handles one update`, async (tx, { mock }) => {
+    mock.timers.enable({ apis: [`Date`] });
 
+    const user = await createUser(tx);
     const [skillState] = await tx
       .insert(s.skillState)
       .values([
@@ -88,6 +89,8 @@ await test(`${pgBatchUpdate.name} suite`, async (t) => {
       ])
       .returning();
     invariant(skillState != null);
+
+    mock.timers.tick(5000);
 
     const newSrs = srsStateFromFsrsState(
       nextReview(skillState.srs, Rating.Good),
@@ -104,7 +107,8 @@ await test(`${pgBatchUpdate.name} suite`, async (t) => {
     assert.deepEqual(updatedSkillState?.srs, newSrs);
   });
 
-  await txTest(`handles many updates`, async (tx) => {
+  await txTest(`handles many updates`, async (tx, { mock }) => {
+    mock.timers.enable({ apis: [`Date`] });
     const user = await createUser(tx);
 
     const [skillState1, skillState2] = await tx
@@ -124,6 +128,7 @@ await test(`${pgBatchUpdate.name} suite`, async (t) => {
       .returning();
     invariant(skillState1 != null && skillState2 != null);
 
+    mock.timers.tick(5000);
     const newSkillState1Srs = srsStateFromFsrsState(
       nextReview(skillState1.srs, Rating.Good),
     );

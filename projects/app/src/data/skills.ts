@@ -14,7 +14,7 @@ import {
 } from "@/dictionary/dictionary";
 import { sortComparatorNumber } from "@/util/collections";
 import { fsrsIsIntroduced, nextReview, Rating } from "@/util/fsrs";
-import { pseudoRandomNumberGenerator } from "@/util/random";
+import { makePRNG } from "@/util/random";
 import { invariant } from "@haohaohow/lib/invariant";
 import type { Duration } from "date-fns";
 import {
@@ -439,7 +439,7 @@ const randomSortSkills = (skillStates: [Skill, SrsState | undefined][]) => {
           // same skill over and over again.
           (1 / srsState.difficulty) * Math.sqrt(1 + srsState.stability)
         : 0;
-    const weight = 1 / learningScore + 1;
+    const weight = 1 / (learningScore + 1);
     totalWeight += weight;
     return [skill, weight];
   });
@@ -447,7 +447,7 @@ const randomSortSkills = (skillStates: [Skill, SrsState | undefined][]) => {
   // Create a pseudo-random number generator seeded from the total weight of
   // the skills. This way the order is deterministic but should change each
   // time a skill is reviewed (since the total weight will change).
-  const random = pseudoRandomNumberGenerator(totalWeight);
+  const random = makePRNG(totalWeight);
 
   // Normalize the weights and convert into a "priority" value for sorting.
   for (const x of weighted) {

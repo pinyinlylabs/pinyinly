@@ -158,25 +158,30 @@ export default function IndexPage() {
 
   return (
     <ScrollView contentContainerClassName="pt-safe-offset-4 px-safe-or-4 items-center gap-[10px] padding-[10px]">
-      <View className={boxClass()}>
-        {recentHanzi.isLoading ? null : recentHanzi.isError ? (
-          <View>
-            <Text className="danger-theme text-text">
-              Oops something went wrong.
-            </Text>
-          </View>
-        ) : recentHanzi.data == null ? null : (
-          <Animated.View entering={FadeIn} style={{ alignSelf: `stretch` }}>
-            <View className="items-stretch self-stretch">
-              <View className="flex-row items-center justify-between">
-                <Text className="hhh-text-title mb-1">
-                  {recentHanzi.data.length > 0
-                    ? `Continue learning`
-                    : `Start learning`}
-                </Text>
+      {recentHanzi.data == null ||
+      streakQuery.data == null ||
+      reviewQuery.data == null ? null : recentHanzi.isError ? (
+        <View>
+          <Text className="danger-theme text-text">
+            Oops something went wrong.
+          </Text>
+        </View>
+      ) : (
+        <>
+          <Animated.View
+            entering={FadeIn}
+            style={{ alignSelf: `stretch`, alignItems: `center` }}
+          >
+            <View className={boxClass()}>
+              <View className="items-stretch self-stretch">
+                <View className="flex-row items-center justify-between">
+                  <Text className="hhh-text-title mb-1">
+                    {recentHanzi.data.length > 0
+                      ? `Continue learning`
+                      : `Start learning`}
+                  </Text>
 
-                {streakQuery.data == null || reviewQuery.data == null ? null : (
-                  <Animated.View entering={FadeIn} className="gap-1">
+                  <View className="gap-1">
                     <Text
                       className={
                         `font-bold text-text` +
@@ -210,67 +215,72 @@ export default function IndexPage() {
                         <Countdown date={reviewQuery.data.firstOverdueAt} />
                       )}
                     </View>
-                  </Animated.View>
-                )}
-              </View>
-
-              {recentHanzi.data.length > 0 ? (
-                <>
-                  <Text className="hhh-text-caption">
-                    A few things from last time
-                  </Text>
-                  <View className="mt-2 flex-row gap-2">
-                    {recentHanzi.data.map((char, i) => (
-                      <View
-                        key={i}
-                        className="rounded border border-primary-7 bg-primary-3 p-2"
-                      >
-                        <Text className="text-text">{char}</Text>
-                      </View>
-                    ))}
                   </View>
-                </>
-              ) : (
-                <>
-                  <Text className="hhh-text-caption">
-                    There’s no time like the present
-                  </Text>
-                </>
-              )}
+                </View>
 
-              <Link href="/learn/reviews" asChild>
+                {recentHanzi.data.length > 0 ? (
+                  <>
+                    <Text className="hhh-text-caption">
+                      A few things from last time
+                    </Text>
+                    <View className="mt-2 flex-row gap-2">
+                      {recentHanzi.data.map((char, i) => (
+                        <View
+                          key={i}
+                          className="rounded border border-primary-7 bg-primary-3 p-2"
+                        >
+                          <Text className="text-text">{char}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  </>
+                ) : (
+                  <>
+                    <Text className="hhh-text-caption">
+                      There’s no time like the present
+                    </Text>
+                  </>
+                )}
+
+                <Link href="/learn/reviews" asChild>
+                  <RectButton2
+                    variant="filled"
+                    className="success-theme mt-2 self-stretch"
+                    accent
+                    textClassName="py-1"
+                  >
+                    Start
+                  </RectButton2>
+                </Link>
+              </View>
+            </View>
+          </Animated.View>
+
+          <Animated.View
+            entering={FadeIn}
+            style={{ alignSelf: `stretch`, alignItems: `center` }}
+          >
+            <View className={boxClass()}>
+              <Text className="hhh-text-title mb-1">History</Text>
+              <Text className="hhh-text-caption mb-4">
+                See your past studies, review characters and words, and
+                reinforce your knowledge with spaced repetition.
+              </Text>
+
+              <Link href="/learn/history" asChild>
                 <RectButton2
                   variant="filled"
-                  className="success-theme mt-2 self-stretch"
+                  className="self-start"
                   accent
-                  textClassName="py-1"
+                  textClassName="py-1 px-2"
                 >
-                  Start
+                  Explore history
                 </RectButton2>
               </Link>
             </View>
           </Animated.View>
-        )}
-      </View>
-
-      <View className={boxClass()}>
-        <Text className="hhh-text-title mb-1">History</Text>
-        <Text className="hhh-text-caption mb-4">
-          See your past studies, review characters and words, and reinforce your
-          knowledge with spaced repetition.
-        </Text>
-
-        <Link href="/learn/history" asChild>
-          <RectButton2
-            variant="filled"
-            className="self-start"
-            accent
-            textClassName="py-1 px-2"
-          >
-            Explore history
-          </RectButton2>
-        </Link>
-      </View>
+        </>
+      )}
     </ScrollView>
   );
 }
