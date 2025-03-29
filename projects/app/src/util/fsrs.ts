@@ -59,6 +59,15 @@ export function nextReview(
   now = new Date(),
 ): FsrsState {
   const created = now;
+
+  if (currentState != null && currentState.prevReviewAt >= now) {
+    // It's important that the stability/difficulty as it's part of the seed to
+    // determine the quiz order.
+    console.warn(
+      `previous FSRS is not in the past, stability/difficulty may not change`,
+    );
+  }
+
   const stability =
     currentState === null
       ? initStability(rating)
@@ -68,6 +77,14 @@ export function nextReview(
       ? initDifficulty(rating)
       : nextDifficulty(currentState.difficulty, rating);
   const dueDuration = nextDueDuration(stability, rating);
+
+  if (currentState != null && rating !== Rating.Again) {
+    invariant(
+      difficulty !== currentState.difficulty ||
+        stability !== currentState.stability,
+      `neither stability nor difficulty changed after review`,
+    );
+  }
 
   return {
     prevReviewAt: created,
