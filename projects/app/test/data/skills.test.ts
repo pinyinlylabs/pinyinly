@@ -360,7 +360,7 @@ await test(`${skillReviewQueue.name} suite`, async () => {
     );
   });
 
-  await test(`schedules skill reviews in order of due`, async () => {
+  await test(`schedules skill reviews in order of due, and then deterministic random`, async () => {
     const graph = await skillLearningGraph({
       targetSkills: [`he:分:divide`, `he:一:one`],
       shouldSkipSubTree: () => false,
@@ -381,8 +381,8 @@ await test(`${skillReviewQueue.name} suite`, async () => {
         `he:𠃌:radical`,
         `he:丿:slash`,
         `he:分:divide`,
-        `he:八:eight`,
         `he:刀:knife`,
+        `he:八:eight`,
       ],
     );
   });

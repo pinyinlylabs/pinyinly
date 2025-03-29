@@ -439,7 +439,7 @@ const randomSortSkills = (skillStates: [Skill, SrsState | undefined][]) => {
           // same skill over and over again.
           (1 / srsState.difficulty) * Math.sqrt(1 + srsState.stability)
         : 0;
-    const weight = 1 / learningScore + 1;
+    const weight = 1 / (learningScore + 1);
     totalWeight += weight;
     return [skill, weight];
   });
