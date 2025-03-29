@@ -11,7 +11,7 @@ function splitmix64(seed: number): () => bigint {
 }
 
 /**
- * Seedable psuedo-random number generator using the Xoshiro128** algorithm.
+ * Seedable pseudo-random number generator using the Xoshiro128** algorithm.
  * Returns numbers between 0 and 1. Supports seeding with 64-bit floats.
  */
 export function makePRNG(seed: number): () => number {
