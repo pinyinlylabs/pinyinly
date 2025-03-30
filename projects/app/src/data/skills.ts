@@ -24,6 +24,7 @@ import {
   Mistake,
   MistakeType,
   OneCorrectPairQuestionChoice,
+  SkillRating,
   SkillType,
   SrsState,
   SrsType,
@@ -573,3 +574,52 @@ export function hanziGlossMistake(
  * You get 1 day to review a skill before it becomes overdue.
  */
 export const skillDueWindow: Duration = { hours: 24 };
+
+export function computeSkillRating(opts: {
+  skill: Skill;
+  correct: boolean;
+  hadPreviousMistake: boolean;
+  durationMs: number;
+}): SkillRating {
+  const { skill, correct, durationMs, hadPreviousMistake } = opts;
+
+  let easyDuration;
+  let goodDuration;
+
+  switch (skillType(opts.skill)) {
+    case SkillType.HanziWordToEnglish: {
+      easyDuration = 5000;
+      goodDuration = 10_000;
+      break;
+    }
+    case SkillType.HanziWordToPinyinInitial:
+    case SkillType.HanziWordToPinyinFinal:
+    case SkillType.HanziWordToPinyinTone:
+    case SkillType.EnglishToHanziWord:
+    case SkillType.PinyinToHanziWord:
+    case SkillType.ImageToHanziWord:
+    case SkillType.PinyinInitialAssociation:
+    case SkillType.PinyinFinalAssociation:
+    case SkillType.Deprecated:
+    case SkillType.Deprecated_RadicalToEnglish:
+    case SkillType.Deprecated_EnglishToRadical:
+    case SkillType.Deprecated_RadicalToPinyin:
+    case SkillType.Deprecated_PinyinToRadical: {
+      throw new Error(
+        `duration rating thresholds not implemented for ${skillType(opts.skill)}`,
+      );
+    }
+  }
+
+  const rating = correct
+    ? hadPreviousMistake
+      ? Rating.Hard
+      : durationMs < easyDuration
+        ? Rating.Easy
+        : durationMs < goodDuration
+          ? Rating.Good
+          : Rating.Hard
+    : Rating.Again;
+
+  return { skill, rating, durationMs };
+}

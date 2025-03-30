@@ -130,13 +130,6 @@ export const rSrsState = memoize0(function rSrsParams() {
   );
 });
 
-export const rSkillRatingMistakes = memoize0(function rSkillRatingMistakes() {
-  return r.object({
-    hanzi: r.string().optional().alias(`h`),
-    gloss: r.string().optional().alias(`g`),
-  });
-});
-
 /**
  * # v7 change log
  *
@@ -174,6 +167,7 @@ export const v7 = {
     skill: rSkill().alias(`s`).indexed(`bySkill`),
     createdAt: r.datetime().alias(`c`).indexed(`byCreatedAt`),
     rating: rFsrsRating().alias(`r`),
+    durationMs: r.number().nullable().optional().alias(`d`),
   }),
   skillState: r.entity(`s/[skill]`, {
     skill: rSkill().alias(`s`),
@@ -235,6 +229,7 @@ export const v7 = {
       id: r.string().alias(`i`),
       skill: rSkill().alias(`s`),
       rating: rFsrsRating().alias(`r`),
+      durationMs: r.number().nullable().alias(`d`),
       now: r.timestamp().alias(`n`),
     })
     .alias(`reviewSkill`),

@@ -11,8 +11,8 @@ import Animated, {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
+import { useEventCallback } from "../hooks";
 import { AnimatedPressable } from "./AnimatedPressable";
-import { useEventCallback } from "./util";
 
 interface PageSheetModalProps {
   backdropColor?: string;

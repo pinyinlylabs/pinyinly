@@ -88,6 +88,7 @@ export const skillRating = schema.table(
       .notNull(),
     skill: sSkill(`skillId`).notNull(),
     rating: sFsrsRating(`rating`).notNull(),
+    durationMs: pg.doublePrecision(`durationMs`),
     createdAt: pg.timestamp(`timestamp`).defaultNow().notNull(),
   },
   (t) => [pg.index().on(t.userId, t.skill)],

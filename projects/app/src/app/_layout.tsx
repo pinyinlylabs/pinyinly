@@ -12,8 +12,8 @@ import { routingIntegration } from "@/client/sentry";
 // needs to be very early on in the setup.
 // ------------------------------
 
+import { getSessionId } from "@/client/auth";
 import { TrpcProvider } from "@/client/trpc";
-import { getSessionId } from "@/client/ui/auth";
 import { ReplicacheProvider } from "@/client/ui/ReplicacheContext";
 import { SplashScreen } from "@/client/ui/SplashScreen";
 import type { Theme as ReactNavigationTheme } from "@react-navigation/native";

@@ -6,7 +6,7 @@ import {
   LayoutRectangle,
   View,
 } from "react-native";
-import { useEventCallback } from "./util";
+import { useEventCallback } from "../hooks";
 
 export const QuizProgressBar = ({
   progress,

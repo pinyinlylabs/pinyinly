@@ -12,10 +12,10 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { tv } from "tailwind-variants";
+import { hapticImpactIfMobile } from "../hooks";
 import { AnimatedPressable } from "./AnimatedPressable";
 import { Hhhmark } from "./Hhhmark";
 import { PropsOf } from "./types";
-import { hapticImpactIfMobile } from "./util";
 
 export type TextAnswerButtonState =
   | `default`

@@ -1,3 +1,4 @@
+import { StackNavigationFor } from "@/client/ui/types";
 import {
   Mistake,
   MistakeType,
@@ -10,7 +11,6 @@ import {
 import { readonlyMapSet } from "@/util/collections";
 import { Rating } from "@/util/fsrs";
 import { nanoid } from "@/util/nanoid";
-import { StackNavigationFor } from "@/util/types";
 import { invariant } from "@haohaohow/lib/invariant";
 import {
   NavigationContainer,
@@ -30,6 +30,7 @@ import { Href, Link, usePathname } from "expo-router";
 import sortBy from "lodash/sortBy";
 import React, { useMemo, useRef, useState } from "react";
 import { Animated, Platform, View } from "react-native";
+import { useEventCallback } from "../hooks";
 import { CloseButton } from "./CloseButton";
 import { QuizDeckMultipleChoiceQuestion } from "./QuizDeckMultipleChoiceQuestion";
 import { QuizDeckOneCorrectPairQuestion } from "./QuizDeckOneCorrectPairQuestion";
@@ -37,7 +38,6 @@ import { QuizProgressBar } from "./QuizProgressBar";
 import { RectButton2 } from "./RectButton2";
 import { useReplicache } from "./ReplicacheContext";
 import { useSoundEffect } from "./useSoundEffect";
-import { useEventCallback } from "./util";
 
 interface QuestionState {
   type: QuestionStateType;
@@ -128,12 +128,13 @@ export const QuizDeck = ({
 
       const now = Date.now();
 
-      for (const { skill, rating } of ratings) {
+      for (const { skill, rating, durationMs } of ratings) {
         void r.mutate
           .rateSkill({
             id: nanoid(),
             now,
             skill,
+            durationMs,
             rating,
           })
           .catch((error: unknown) => {

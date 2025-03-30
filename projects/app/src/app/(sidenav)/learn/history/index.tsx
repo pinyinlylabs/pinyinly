@@ -85,9 +85,14 @@ export default function HistoryPage() {
                   <Text className="text-text">
                     {value.rating === Rating.Again
                       ? `❌`
-                      : value.rating === Rating.Good
-                        ? `✅`
-                        : value.rating}
+                      : value.rating === Rating.Hard
+                        ? `🟠`
+                        : value.rating === Rating.Good
+                          ? `🟡`
+                          : // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+                            value.rating === Rating.Easy
+                            ? `🟢`
+                            : value.rating}
                     {` `}
                     {skillParam(skill)}: {createdAt.toISOString()}
                   </Text>

@@ -1,4 +1,3 @@
-import { Rizzle } from "@/client/ui/ReplicacheContext";
 import { generateQuestionForSkillOrThrow } from "@/data/generator";
 import {
   HanziWord,
@@ -8,7 +7,7 @@ import {
   SrsState,
   SrsType,
 } from "@/data/model";
-import { Skill } from "@/data/rizzleSchema";
+import { Rizzle, Skill } from "@/data/rizzleSchema";
 import {
   hanziWordToEnglish,
   skillDueWindow,

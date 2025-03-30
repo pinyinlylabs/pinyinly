@@ -161,6 +161,7 @@ await test(`${push.name} suite`, async (t) => {
             id: nanoid(),
             skill: englishToHanziWord(`我:i`),
             rating: Rating.Good,
+            durationMs: null,
             now: new Date(),
           }),
           timestamp: 1,
@@ -664,6 +665,7 @@ await test(`${pull.name} suite`, async (t) => {
               skill: englishToHanziWord(`我:i`),
               rating: Rating.Again,
               createdAt: now,
+              durationMs: 1234,
             },
           ])
           .returning();
@@ -690,6 +692,7 @@ await test(`${pull.name} suite`, async (t) => {
                 skill: englishToHanziWord(`我:i`),
                 rating: Rating.Again,
                 createdAt: now,
+                durationMs: 1234,
               }),
             },
           ],

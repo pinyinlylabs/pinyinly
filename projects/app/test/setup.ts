@@ -8,8 +8,16 @@ mock.module(`react-native`, {
   namedExports: await import(`react-native-web`),
 });
 
-// Set up global expect
+mock.module(`expo-haptics`);
+
 {
+  // Set up __DEV__
+  // @ts-expect-error __DEV__ is not defined in Node
+  globalThis.__DEV__ = true;
+}
+
+{
+  // Set up global expect
   const { expect } = await import(`expect`);
   globalThis.expect = expect;
 }

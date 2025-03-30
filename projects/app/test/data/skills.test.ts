@@ -1,4 +1,6 @@
+import { SkillType } from "#data/model.ts";
 import {
+  computeSkillRating,
   hanziWordToEnglish,
   SkillLearningGraph,
   skillLearningGraph,
@@ -9,6 +11,7 @@ import {
   allHsk2HanziWords,
   allHsk3HanziWords,
 } from "#dictionary/dictionary.ts";
+import { Rating } from "#util/fsrs.ts";
 import { invariant } from "@haohaohow/lib/invariant";
 import assert from "node:assert/strict";
 import test from "node:test";
@@ -385,5 +388,66 @@ await test(`${skillReviewQueue.name} suite`, async () => {
         `he:八:eight`,
       ],
     );
+  });
+});
+
+await test(`${computeSkillRating.name} suite`, async () => {
+  await test(`includes duration and skill`, async () => {
+    const skill = `he:我:i`;
+    const durationMs = 1234;
+
+    const rating = computeSkillRating({
+      skill,
+      durationMs,
+      correct: true,
+      hadPreviousMistake: true,
+    });
+    assert.partialDeepStrictEqual(rating, { skill, durationMs });
+  });
+
+  await test(`${SkillType.HanziWordToEnglish} suites`, async () => {
+    const skill = `he:我:i`;
+
+    await test(`gives Hard rating for correct answer after previous mistake regardless of duration`, async () => {
+      const rating = computeSkillRating({
+        skill,
+        durationMs: 1000,
+        correct: true,
+        hadPreviousMistake: true,
+      });
+      assert.equal(rating.rating, Rating.Hard);
+    });
+
+    await test(`gives rating based on duration`, async () => {
+      {
+        const { rating } = computeSkillRating({
+          skill,
+          durationMs: 1000,
+          correct: true,
+          hadPreviousMistake: false,
+        });
+        assert.equal(rating, Rating.Easy);
+      }
+
+      {
+        const { rating } = computeSkillRating({
+          skill,
+          durationMs: 6000,
+          correct: true,
+          hadPreviousMistake: false,
+        });
+        assert.equal(rating, Rating.Good);
+      }
+
+      {
+        const { rating } = computeSkillRating({
+          skill,
+          durationMs: 11_000,
+          correct: true,
+          hadPreviousMistake: false,
+        });
+        assert.equal(rating, Rating.Hard);
+      }
+    });
   });
 });

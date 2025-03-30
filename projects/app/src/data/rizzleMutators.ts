@@ -11,9 +11,12 @@ import {
 } from "./skills";
 
 export const v7Mutators: RizzleReplicacheMutators<typeof v7> = {
-  async rateSkill(tx, { id, skill, rating, now }) {
+  async rateSkill(tx, { id, skill, rating, durationMs, now }) {
     // Save a record of the rating.
-    await tx.skillRating.set({ id }, { id, rating, skill, createdAt: now });
+    await tx.skillRating.set(
+      { id },
+      { id, rating, skill, durationMs, createdAt: now },
+    );
 
     const skillRatingsByDate = await tx.skillRating
       .bySkill(skill)
