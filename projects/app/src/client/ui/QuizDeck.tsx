@@ -128,12 +128,13 @@ export const QuizDeck = ({
 
       const now = Date.now();
 
-      for (const { skill, rating } of ratings) {
+      for (const { skill, rating, durationMs } of ratings) {
         void r.mutate
           .rateSkill({
             id: nanoid(),
             now,
             skill,
+            durationMs,
             rating,
           })
           .catch((error: unknown) => {

@@ -1,3 +1,4 @@
+import { useMultiChoiceQuizTimer } from "@/client/hooks";
 import { useHanziWordMeaning } from "@/client/query";
 import {
   Mistake,
@@ -10,12 +11,12 @@ import {
 } from "@/data/model";
 import { HanziWordSkill, Skill } from "@/data/rizzleSchema";
 import {
+  computeSkillRating,
   hanziWordFromSkill,
   oneCorrectPairQuestionChoiceMistakes,
   skillType,
 } from "@/data/skills";
 import { hanziFromHanziWord } from "@/dictionary/dictionary";
-import { Rating } from "@/util/fsrs";
 import { invariant } from "@haohaohow/lib/invariant";
 import { formatDuration } from "date-fns/formatDuration";
 import { intervalToDuration } from "date-fns/intervalToDuration";
@@ -78,6 +79,17 @@ export const QuizDeckOneCorrectPairQuestion = memo(
       useState<OneCorrectPairQuestionChoice>();
     const [isCorrect, setIsCorrect] = useState<boolean>();
 
+    // Setup the timer to measure how fast they answer the question.
+    const timer = useMultiChoiceQuizTimer();
+    const isSelectedAChoiceCorrect = selectedAChoice === answer.a;
+    const isSelectedBChoiceCorrect = selectedBChoice === answer.a;
+    useEffect(() => {
+      timer.recordChoice(isSelectedAChoiceCorrect);
+    }, [isSelectedAChoiceCorrect, timer]);
+    useEffect(() => {
+      timer.recordChoice(isSelectedBChoiceCorrect);
+    }, [isSelectedBChoiceCorrect, timer]);
+
     const choiceRowCount = Math.max(groupA.length, groupB.length);
     const choiceRows: {
       a: OneCorrectPairQuestionChoice;
@@ -110,11 +122,14 @@ export const QuizDeckOneCorrectPairQuestion = memo(
               selectedBChoice,
             );
 
+        const durationMs = (timer.endTime ?? Date.now()) - timer.startTime;
         const skillRatings: SkillRating[] = [
-          {
+          computeSkillRating({
             skill: answer.skill,
-            rating: isCorrect ? Rating.Good : Rating.Again,
-          },
+            correct: isCorrect,
+            hadPreviousMistake: flag?.type === QuestionFlagType.PreviousMistake,
+            durationMs,
+          }),
         ];
 
         setIsCorrect(isCorrect);

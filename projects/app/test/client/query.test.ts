@@ -171,7 +171,13 @@ async function simulateSkillReviews({
         const skills = args as Skill[]; // TODO: shuffle the skills to see if it's sensitive to ordering?
 
         for (const skill of skills) {
-          await rizzle.mutate.rateSkill({ id: nanoid(), skill, rating, now });
+          await rizzle.mutate.rateSkill({
+            id: nanoid(),
+            skill,
+            rating,
+            now,
+            durationMs: null,
+          });
         }
         break;
       }

@@ -49,10 +49,10 @@ invariant(loggerName != null);
 const debug = makeDebug(loggerName);
 
 const mutators: RizzleDrizzleMutators<SupportedSchema, Drizzle> = {
-  async rateSkill(db, userId, { id, skill, rating, now }) {
+  async rateSkill(db, userId, { id, skill, rating, durationMs, now }) {
     await db
       .insert(s.skillRating)
-      .values([{ id, userId, skill, rating, createdAt: now }]);
+      .values([{ id, userId, skill, rating, durationMs, createdAt: now }]);
 
     await updateSkillState(db, skill, userId);
   },

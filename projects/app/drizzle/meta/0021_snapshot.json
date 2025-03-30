@@ -1,0 +1,959 @@
+{
+  "id": "dee6faf7-ce09-4ea1-a68d-1ca688cd8c4c",
+  "prevId": "280e9a86-6935-45cb-aa80-4280c81cb7f8",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "haohaohow.authOAuth2": {
+      "name": "authOAuth2",
+      "schema": "haohaohow",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "userId": {
+          "name": "userId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "provider": {
+          "name": "provider",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "providerUserId": {
+          "name": "providerUserId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "timestamp": {
+          "name": "timestamp",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "authOAuth2_userId_user_id_fk": {
+          "name": "authOAuth2_userId_user_id_fk",
+          "tableFrom": "authOAuth2",
+          "tableTo": "user",
+          "schemaTo": "haohaohow",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "authOAuth2_provider_providerUserId_unique": {
+          "name": "authOAuth2_provider_providerUserId_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "provider",
+            "providerUserId"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "haohaohow.authSession": {
+      "name": "authSession",
+      "schema": "haohaohow",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "userId": {
+          "name": "userId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expiresAt": {
+          "name": "expiresAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "authSession_userId_user_id_fk": {
+          "name": "authSession_userId_user_id_fk",
+          "tableFrom": "authSession",
+          "tableTo": "user",
+          "schemaTo": "haohaohow",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "haohaohow.hanziGlossMistake": {
+      "name": "hanziGlossMistake",
+      "schema": "haohaohow",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "userId": {
+          "name": "userId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "hanzi": {
+          "name": "hanzi",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "gloss": {
+          "name": "gloss",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "timestamp": {
+          "name": "timestamp",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "hanziGlossMistake_userId_index": {
+          "name": "hanziGlossMistake_userId_index",
+          "columns": [
+            {
+              "expression": "userId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "hanziGlossMistake_userId_user_id_fk": {
+          "name": "hanziGlossMistake_userId_user_id_fk",
+          "tableFrom": "hanziGlossMistake",
+          "tableTo": "user",
+          "schemaTo": "haohaohow",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "haohaohow.pinyinFinalAssociation": {
+      "name": "pinyinFinalAssociation",
+      "schema": "haohaohow",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "userId": {
+          "name": "userId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "final": {
+          "name": "final",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "pinyinFinalAssociation_userId_user_id_fk": {
+          "name": "pinyinFinalAssociation_userId_user_id_fk",
+          "tableFrom": "pinyinFinalAssociation",
+          "tableTo": "user",
+          "schemaTo": "haohaohow",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "pinyinFinalAssociation_userId_final_unique": {
+          "name": "pinyinFinalAssociation_userId_final_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "userId",
+            "final"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "haohaohow.pinyinInitialAssociation": {
+      "name": "pinyinInitialAssociation",
+      "schema": "haohaohow",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "userId": {
+          "name": "userId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "initial": {
+          "name": "initial",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "pinyinInitialAssociation_userId_user_id_fk": {
+          "name": "pinyinInitialAssociation_userId_user_id_fk",
+          "tableFrom": "pinyinInitialAssociation",
+          "tableTo": "user",
+          "schemaTo": "haohaohow",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "pinyinInitialAssociation_userId_initial_unique": {
+          "name": "pinyinInitialAssociation_userId_initial_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "userId",
+            "initial"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "haohaohow.pinyinInitialGroupTheme": {
+      "name": "pinyinInitialGroupTheme",
+      "schema": "haohaohow",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "userId": {
+          "name": "userId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "groupId": {
+          "name": "groupId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "themeId": {
+          "name": "themeId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "pinyinInitialGroupTheme_userId_user_id_fk": {
+          "name": "pinyinInitialGroupTheme_userId_user_id_fk",
+          "tableFrom": "pinyinInitialGroupTheme",
+          "tableTo": "user",
+          "schemaTo": "haohaohow",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "pinyinInitialGroupTheme_userId_groupId_unique": {
+          "name": "pinyinInitialGroupTheme_userId_groupId_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "userId",
+            "groupId"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "haohaohow.remoteSync": {
+      "name": "remoteSync",
+      "schema": "haohaohow",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "userId": {
+          "name": "userId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "remoteUrl": {
+          "name": "remoteUrl",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "remoteClientGroupId": {
+          "name": "remoteClientGroupId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "remoteProfileId": {
+          "name": "remoteProfileId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "remoteSessionId": {
+          "name": "remoteSessionId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lastSyncedMutationIds": {
+          "name": "lastSyncedMutationIds",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "pulledClientIds": {
+          "name": "pulledClientIds",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::json"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "remoteSync_userId_user_id_fk": {
+          "name": "remoteSync_userId_user_id_fk",
+          "tableFrom": "remoteSync",
+          "tableTo": "user",
+          "schemaTo": "haohaohow",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "remoteSync_remoteUrl_userId_unique": {
+          "name": "remoteSync_remoteUrl_userId_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "remoteUrl",
+            "userId"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "haohaohow.replicacheClient": {
+      "name": "replicacheClient",
+      "schema": "haohaohow",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "clientGroupId": {
+          "name": "clientGroupId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lastMutationId": {
+          "name": "lastMutationId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "timestamp": {
+          "name": "timestamp",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "replicacheClient_clientGroupId_index": {
+          "name": "replicacheClient_clientGroupId_index",
+          "columns": [
+            {
+              "expression": "clientGroupId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "replicacheClient_clientGroupId_replicacheClientGroup_id_fk": {
+          "name": "replicacheClient_clientGroupId_replicacheClientGroup_id_fk",
+          "tableFrom": "replicacheClient",
+          "tableTo": "replicacheClientGroup",
+          "schemaTo": "haohaohow",
+          "columnsFrom": [
+            "clientGroupId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "haohaohow.replicacheClientGroup": {
+      "name": "replicacheClientGroup",
+      "schema": "haohaohow",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "userId": {
+          "name": "userId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "schemaVersion": {
+          "name": "schemaVersion",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cvrVersion": {
+          "name": "cvrVersion",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "timestamp": {
+          "name": "timestamp",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "replicacheClientGroup_userId_index": {
+          "name": "replicacheClientGroup_userId_index",
+          "columns": [
+            {
+              "expression": "userId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "replicacheClientGroup_userId_user_id_fk": {
+          "name": "replicacheClientGroup_userId_user_id_fk",
+          "tableFrom": "replicacheClientGroup",
+          "tableTo": "user",
+          "schemaTo": "haohaohow",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "haohaohow.replicacheCvr": {
+      "name": "replicacheCvr",
+      "schema": "haohaohow",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "lastMutationIds": {
+          "name": "lastMutationIds",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "entities": {
+          "name": "entities",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "haohaohow.replicacheMutation": {
+      "name": "replicacheMutation",
+      "schema": "haohaohow",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "clientId": {
+          "name": "clientId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "mutationId": {
+          "name": "mutationId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "mutation": {
+          "name": "mutation",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "success": {
+          "name": "success",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "processedAt": {
+          "name": "processedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "replicacheMutation_clientId_replicacheClient_id_fk": {
+          "name": "replicacheMutation_clientId_replicacheClient_id_fk",
+          "tableFrom": "replicacheMutation",
+          "tableTo": "replicacheClient",
+          "schemaTo": "haohaohow",
+          "columnsFrom": [
+            "clientId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "replicacheMutation_clientId_mutationId_unique": {
+          "name": "replicacheMutation_clientId_mutationId_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "clientId",
+            "mutationId"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "haohaohow.skillRating": {
+      "name": "skillRating",
+      "schema": "haohaohow",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "userId": {
+          "name": "userId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "skillId": {
+          "name": "skillId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "rating": {
+          "name": "rating",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "durationMs": {
+          "name": "durationMs",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "timestamp": {
+          "name": "timestamp",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "skillRating_userId_skillId_index": {
+          "name": "skillRating_userId_skillId_index",
+          "columns": [
+            {
+              "expression": "userId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "skillId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "skillRating_userId_user_id_fk": {
+          "name": "skillRating_userId_user_id_fk",
+          "tableFrom": "skillRating",
+          "tableTo": "user",
+          "schemaTo": "haohaohow",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "haohaohow.skillState": {
+      "name": "skillState",
+      "schema": "haohaohow",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "userId": {
+          "name": "userId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "skill": {
+          "name": "skill",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "srs": {
+          "name": "srs",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "skillState_userId_user_id_fk": {
+          "name": "skillState_userId_user_id_fk",
+          "tableFrom": "skillState",
+          "tableTo": "user",
+          "schemaTo": "haohaohow",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "skillState_userId_skill_unique": {
+          "name": "skillState_userId_skill_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "userId",
+            "skill"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "haohaohow.user": {
+      "name": "user",
+      "schema": "haohaohow",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {
+    "haohaohow": "haohaohow"
+  },
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

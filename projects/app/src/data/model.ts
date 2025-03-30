@@ -177,6 +177,7 @@ export type Mistake = HanziGlossMistake | HanziPinyinInitialMistake;
 export interface SkillRating {
   skill: Skill;
   rating: Rating;
+  durationMs: number;
 }
 
 export type OneCorrectPairQuestionChoice = {
