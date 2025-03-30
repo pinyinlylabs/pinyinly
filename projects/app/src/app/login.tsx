@@ -1,4 +1,4 @@
-import { useAuth } from "@/client/ui/auth";
+import { useAuth } from "@/client/auth";
 import { RectButton2 } from "@/client/ui/RectButton2";
 import { SignInWithAppleButton } from "@/client/ui/SignInWithAppleButton";
 import { invariant } from "@haohaohow/lib/invariant";

@@ -1,5 +1,5 @@
+import { useAuth } from "@/client/auth";
 import { DevLozenge } from "@/client/ui/DevLozenge";
-import { useAuth } from "@/client/ui/auth";
 import { Image } from "expo-image";
 import { Link } from "expo-router";
 import {

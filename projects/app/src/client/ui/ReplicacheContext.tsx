@@ -1,8 +1,8 @@
 import { trpc } from "@/client/trpc";
 import { v7Mutators } from "@/data/rizzleMutators";
-import { v7 } from "@/data/rizzleSchema";
+import { Rizzle, v7 } from "@/data/rizzleSchema";
 import { AppRouter } from "@/server/routers/_app";
-import { cookieSchema, r, RizzleReplicache } from "@/util/rizzle";
+import { cookieSchema, r } from "@/util/rizzle";
 import { ReactQueryValue } from "@/util/types";
 import { invariant } from "@haohaohow/lib/invariant";
 import * as Sentry from "@sentry/core";
@@ -15,11 +15,9 @@ import {
   ReadTransaction,
   TEST_LICENSE_KEY,
 } from "replicache";
-import { useAuth, UseAuth2Data } from "./auth";
+import { useAuth, UseAuth2Data } from "../auth";
+import { useRenderGuard } from "../hooks";
 import { kvStore } from "./replicacheOptions";
-import { useRenderGuard } from "./util";
-
-export type Rizzle = RizzleReplicache<typeof v7>;
 
 const ReplicacheContext = createContext<Rizzle | null>(null);
 

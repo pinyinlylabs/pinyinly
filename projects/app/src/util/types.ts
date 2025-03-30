@@ -1,6 +1,4 @@
-import type { PropsOf } from "@/client/ui/types";
-import type { TypedNavigator } from "@react-navigation/native";
-import type { AnyFunction, Prettify } from "ts-essentials";
+import type { Prettify } from "ts-essentials";
 
 /**
  * react-query strictly forbids returning `undefined`, but this isn't enforced
@@ -24,16 +22,6 @@ export type RepeatedSequence2<
       : RepeatedSequence2<Tuple, Result | [...Result, ...Tuple], [...Count, 1]>;
 
 export type ValuesOf<X> = X[keyof X];
-
-export type StackNavigationFor<
-  Stack,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ScreenListenersFn = Stack extends TypedNavigator<any, any>
-    ? PropsOf<Stack[`Navigator`]>[`screenListeners`]
-    : never,
-> = ScreenListenersFn extends AnyFunction
-  ? Parameters<ScreenListenersFn>[0][`navigation`]
-  : never;
 
 // This is used to make more helpful type errors, by showing a preview of the
 // mismatch type in the error. But it's critical that it doesn't accidentally

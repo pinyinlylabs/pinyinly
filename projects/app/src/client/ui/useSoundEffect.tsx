@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { AudioSource, useAudioPlayer } from "expo-audio";
-import { useEventCallback } from "./util";
+import { useEventCallback } from "../hooks";
 
 const audioContext =
   typeof AudioContext === `undefined` ? null : new AudioContext();
