@@ -1,16 +1,14 @@
-import { useChoicePairQuizTimer } from "#client/hooks.ts";
+import { useMultiChoiceQuizTimer } from "#client/hooks.ts";
 import { act, renderHook } from "@testing-library/react-native";
 import test from "node:test";
 
-await test(`${useChoicePairQuizTimer.name} suite`, async (t) => {
+await test(`${useMultiChoiceQuizTimer.name} suite`, async (t) => {
   await t.test(
     `records time correctly for correct and incorrect choices`,
     async () => {
       t.mock.timers.enable({ apis: [`Date`] });
 
-      const { result } = renderHook(() =>
-        useChoicePairQuizTimer<string>(`correct1`, `correct2`),
-      );
+      const { result } = renderHook(() => useMultiChoiceQuizTimer());
 
       // Simulate 100ms elapsed
       t.mock.timers.tick(100);
@@ -20,7 +18,7 @@ await test(`${useChoicePairQuizTimer.name} suite`, async (t) => {
 
       // Record the first correct choice
       act(() => {
-        result.current.recordChoice(`correct1`);
+        result.current.recordChoice(true);
       });
 
       // endTime should now be set to 100ms (the time at which the correct
@@ -33,7 +31,7 @@ await test(`${useChoicePairQuizTimer.name} suite`, async (t) => {
 
       // Record the second correct choice
       act(() => {
-        result.current.recordChoice(`correct2`);
+        result.current.recordChoice(true);
       });
 
       // Simulate additional time passing (100ms) and ensure endTime remains unchanged
@@ -42,7 +40,7 @@ await test(`${useChoicePairQuizTimer.name} suite`, async (t) => {
 
       // Record an incorrect choice
       act(() => {
-        result.current.recordChoice(`wrong`);
+        result.current.recordChoice(false);
       });
 
       // endTime should reset to undefined
@@ -50,7 +48,7 @@ await test(`${useChoicePairQuizTimer.name} suite`, async (t) => {
 
       // Record a correct choice again
       act(() => {
-        result.current.recordChoice(`correct1`);
+        result.current.recordChoice(true);
       });
 
       // Simulate 100ms elapsed after the reset

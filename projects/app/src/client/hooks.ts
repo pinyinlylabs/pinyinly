@@ -61,23 +61,26 @@ export function documentEventListenerEffect<K extends keyof DocumentEventMap>(
   }
 }
 
-export function useChoicePairQuizTimer<T extends string | number>(
-  correctChoice1: T,
-  correctChoice2: T,
-) {
+/**
+ * A hook that measures how long it takes to answer a multi-choice question.
+ *
+ * The time is measured to the first correct choice because it's assumed that if
+ * a user picks one choice they know the other choice too, so by measuring the
+ * first correct choice it's measuring their mental speed not their physical
+ * agility with interacting with the UI. However if a wrong choice is the
+ * "optimistic" time is released and the full duration is measured.
+ */
+export function useMultiChoiceQuizTimer() {
   const startTime = useMemo(() => Date.now(), []);
   const [endTime, setEndTime] = useState<number>();
 
-  const recordChoice = useCallback(
-    (choice: T) => {
-      if (choice === correctChoice1 || choice === correctChoice2) {
-        setEndTime((end) => end ?? Date.now());
-      } else {
-        setEndTime(undefined);
-      }
-    },
-    [correctChoice1, correctChoice2],
-  );
+  const recordChoice = useCallback((correct: boolean) => {
+    if (correct) {
+      setEndTime((end) => end ?? Date.now());
+    } else {
+      setEndTime(undefined);
+    }
+  }, []);
 
   return {
     recordChoice,
