@@ -124,7 +124,7 @@
     "eslint-plugin-react": "^7.37.2",
     "eslint-plugin-react-compiler": "19.0.0-beta-e552027-20250112",
     "eslint-plugin-react-hooks": "^5.0.0",
-    "eslint-plugin-unicorn": "^57.0.0",
+    "eslint-plugin-unicorn": "^58.0.0",
     "expect": "^29.7.0",
     "expo-atlas": "^0.4.0",
     "fontkit": "^2.0.4",
