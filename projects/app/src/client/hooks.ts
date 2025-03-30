@@ -73,13 +73,18 @@ export function documentEventListenerEffect<K extends keyof DocumentEventMap>(
 export function useMultiChoiceQuizTimer() {
   const startTime = useMemo(() => Date.now(), []);
   const [endTime, setEndTime] = useState<number>();
+  const maxTimeBetweenChoices = 4000;
 
   const recordChoice = useCallback((correct: boolean) => {
-    if (correct) {
-      setEndTime((end) => end ?? Date.now());
-    } else {
-      setEndTime(undefined);
-    }
+    setEndTime((end) =>
+      correct
+        ? end == null
+          ? Date.now()
+          : Date.now() - end <= maxTimeBetweenChoices
+            ? end
+            : undefined
+        : undefined,
+    );
   }, []);
 
   return {

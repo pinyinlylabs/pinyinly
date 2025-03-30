@@ -5,7 +5,7 @@ import test from "node:test";
 await test(`${useMultiChoiceQuizTimer.name} suite`, async (t) => {
   await t.test(
     `records time correctly for correct and incorrect choices`,
-    async () => {
+    async (t) => {
       t.mock.timers.enable({ apis: [`Date`] });
 
       const { result } = renderHook(() => useMultiChoiceQuizTimer());
@@ -58,4 +58,31 @@ await test(`${useMultiChoiceQuizTimer.name} suite`, async (t) => {
       expect(result.current.endTime).toBe(300);
     },
   );
+
+  await t.test(`resets if more than 4s between choices`, async (t) => {
+    t.mock.timers.enable({ apis: [`Date`] });
+
+    const { result } = renderHook(() => useMultiChoiceQuizTimer());
+
+    // Simulate 100ms elapsed
+    t.mock.timers.tick(100);
+
+    // Record the first correct choice
+    act(() => {
+      result.current.recordChoice(true);
+    });
+
+    // Simulate 4.1s elapsed
+    t.mock.timers.tick(10_000);
+
+    // Should not reset because no additional choices were made
+    expect(result.current.endTime).toBe(100);
+
+    // Choosing another option should reset the timer because more than 4s have passed.
+    act(() => {
+      result.current.recordChoice(true);
+    });
+
+    expect(result.current.endTime).toBeUndefined();
+  });
 });
