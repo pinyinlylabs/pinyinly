@@ -3,7 +3,7 @@ import { Countdown } from "@/client/ui/Countdown";
 import { RectButton2 } from "@/client/ui/RectButton2";
 import { useRizzleQueryPaged } from "@/client/ui/ReplicacheContext";
 import { HanziWord, SkillType } from "@/data/model";
-import { HanziWordSkill, Skill, SkillState } from "@/data/rizzleSchema";
+import { HanziWordSkill, Skill } from "@/data/rizzleSchema";
 import { hanziWordFromSkill, skillDueWindow, skillType } from "@/data/skills";
 import { hanziFromHanziWord } from "@/dictionary/dictionary";
 import { invariant } from "@haohaohow/lib/invariant";
@@ -20,33 +20,36 @@ export default function IndexPage() {
     [IndexPage.name, `recentCharacters`],
     async (r) => {
       const now = new Date();
-      const latestNotOverDueDate = sub(now, skillDueWindow);
 
       const targetSkills = new Set<Skill>(await getAllTargetSkills());
 
+      // When will you get a new due item?
+      let newDueAt;
+      // When will you get a new overdue item?
+      let newOverDueAt;
+
       let dueCount = 0;
       let overdueCount = 0;
-      let mostDueSkill: SkillState | undefined;
+
+      const dueTransitionDate = now;
+      const overDueTransitionDate = sub(now, skillDueWindow);
 
       for await (const [
         ,
         skillState,
       ] of r.queryPaged.skillState.byNextReviewAt()) {
+        // Skip any skills that aren't being targeted to learn.
         if (!targetSkills.has(skillState.skill)) {
           continue;
         }
 
-        if (
-          mostDueSkill == null ||
-          mostDueSkill.srs.nextReviewAt > skillState.srs.nextReviewAt
-        ) {
-          mostDueSkill = skillState;
-        }
-        if (skillState.srs.nextReviewAt < latestNotOverDueDate) {
+        if (skillState.srs.nextReviewAt < overDueTransitionDate) {
           overdueCount++;
-        } else if (skillState.srs.nextReviewAt <= now) {
+        } else if (skillState.srs.nextReviewAt <= dueTransitionDate) {
+          newOverDueAt ??= add(skillState.srs.nextReviewAt, skillDueWindow);
           dueCount++;
         } else {
+          newDueAt ??= skillState.srs.nextReviewAt;
           break;
         }
       }
@@ -55,10 +58,8 @@ export default function IndexPage() {
         dueCount,
         overdueCount,
         dueOrOverdueCount: dueCount + overdueCount,
-        firstOverdueAt:
-          mostDueSkill == null
-            ? null
-            : add(mostDueSkill.srs.nextReviewAt, skillDueWindow),
+        newDueAt,
+        newOverDueAt,
       };
     },
   );
@@ -203,17 +204,40 @@ export default function IndexPage() {
                         📨
                         {` `}
                         {reviewQuery.data.dueOrOverdueCount}
+                        {` `}
                         {reviewQuery.data.overdueCount > 0 ? (
+                          // If there are already overdue items, you should just
+                          // do them immediately so there's no need to show the
+                          // time, just show the count.
                           <>
                             (😡
                             {` `}
                             {reviewQuery.data.overdueCount})
                           </>
-                        ) : null}
+                        ) : reviewQuery.data.newOverDueAt == null ? null : (
+                          // No overdue items YET, but maybe it will become
+                          // overdue in a couple of minutes so show the countdown
+                          // so the person doesn't wrongly procrastinate and then
+                          // get overdue items.
+                          <>
+                            (😡
+                            {` `}
+                            <Countdown date={reviewQuery.data.newOverDueAt} />)
+                          </>
+                        )}
+                        {reviewQuery.data.dueOrOverdueCount > 0 ||
+                        reviewQuery.data.newDueAt == null ? (
+                          // There are due items (just do them now, no need to
+                          // show when the next one will come), or there's no
+                          // data for when the next review is scheduled.
+                          <></>
+                        ) : (
+                          // There's no review queue, so show when the next one
+                          // is due so the user knows how long they can relax
+                          // for.
+                          <Countdown date={reviewQuery.data.newDueAt} />
+                        )}
                       </Text>
-                      {reviewQuery.data.firstOverdueAt == null ? null : (
-                        <Countdown date={reviewQuery.data.firstOverdueAt} />
-                      )}
                     </View>
                   </View>
                 </View>
