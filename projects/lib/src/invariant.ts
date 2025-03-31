@@ -14,11 +14,23 @@ export function invariant(
   }
 }
 
-export function uniqueInvariant<T extends string>(choices: readonly T[]) {
+export function uniqueInvariant<T extends string | number>(
+  items: readonly T[],
+) {
   const seen = new Set<T>();
 
-  for (const choice of choices) {
-    invariant(!seen.has(choice), `duplicate choice ${choice}`);
-    seen.add(choice);
+  for (const item of items) {
+    invariant(!seen.has(item), `non-unique item ${item}`);
+    seen.add(item);
+  }
+}
+
+export function identicalInvariant<T extends string | number>(
+  items: readonly T[],
+) {
+  const identity = items[0];
+
+  for (const item of items) {
+    invariant(item === identity, `unexpected unique value ${item}`);
   }
 }

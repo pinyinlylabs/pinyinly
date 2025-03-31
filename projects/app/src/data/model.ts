@@ -57,6 +57,7 @@ export enum SkillType {
    * When shown a hanzi word, write the english translation.
    */
   HanziWordToEnglish = `HanziWordToEnglish`,
+  HanziWordToPinyin = `HanziWordToPinyin`,
   HanziWordToPinyinInitial = `HanziWordToPinyinInitial`,
   HanziWordToPinyinFinal = `HanziWordToPinyinFinal`,
   HanziWordToPinyinTone = `HanziWordToPinyinTone`,
@@ -101,8 +102,22 @@ export enum PartOfSpeech {
 
 export type HanziWord = (string & z.BRAND<`HanziWord`>) | `${string}:${string}`; // useful when writing literal strings in tests
 
+/**
+ * Space-separated string of pinyin.
+ *
+ * This makes it easier to split into individual pinyin words for rendering or
+ * other processing.
+ */
+export type PinyinText = string & z.BRAND<`PinyinText`>;
+
+/**
+ * Non-space separated hanzi text.
+ */
+export type HanziText = string & z.BRAND<`HanziText`>;
+
 export type HanziWordSkillType =
   | SkillType.HanziWordToEnglish
+  | SkillType.HanziWordToPinyin
   | SkillType.HanziWordToPinyinInitial
   | SkillType.HanziWordToPinyinFinal
   | SkillType.HanziWordToPinyinTone
@@ -162,7 +177,7 @@ export enum MistakeType {
 
 export interface HanziGlossMistake {
   type: MistakeType.HanziGloss;
-  hanzi: string;
+  hanzi: HanziText;
   gloss: string;
 }
 
@@ -180,10 +195,25 @@ export interface SkillRating {
   durationMs: number;
 }
 
-export type OneCorrectPairQuestionChoice = {
-  type: `hanzi` | `gloss` | `pinyin`;
+export type OneCorrectPairQuestionHanziChoice = {
+  type: `hanzi`;
+  value: HanziText;
+};
+
+export type OneCorrectPairQuestionGlossChoice = {
+  type: `gloss`;
   value: string;
 };
+
+export type OneCorrectPairQuestionPinyinChoice = {
+  type: `pinyin`;
+  value: PinyinText;
+};
+
+export type OneCorrectPairQuestionChoice =
+  | OneCorrectPairQuestionHanziChoice
+  | OneCorrectPairQuestionGlossChoice
+  | OneCorrectPairQuestionPinyinChoice;
 
 export interface OneCorrectPairQuestionAnswer {
   a: OneCorrectPairQuestionChoice;

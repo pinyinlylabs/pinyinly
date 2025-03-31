@@ -238,3 +238,13 @@ export function mapSetAdd<K, V>(map: Map<K, Set<V>>, key: K, value: V) {
   versions.add(value);
   map.set(key, versions);
 }
+
+/**
+ * Split an array in half.
+ */
+export function evenHalve<T>(items: T[]): [T[], T[]] {
+  const splitIndex = Math.floor(items.length / 2);
+  const a = items.slice(0, splitIndex);
+  const b = items.slice(splitIndex, splitIndex + a.length);
+  return [a, b];
+}

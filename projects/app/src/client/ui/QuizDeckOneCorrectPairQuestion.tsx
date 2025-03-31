@@ -459,6 +459,16 @@ const SkillAnswer = ({
         />
       );
     }
+    case SkillType.HanziWordToPinyin: {
+      skill = skill as HanziWordSkill;
+      return (
+        <HanziWordToPinyinSkillAnswer
+          skill={skill}
+          includeAlternatives={includeAlternatives}
+          small={small}
+        />
+      );
+    }
   }
 };
 
@@ -537,6 +547,52 @@ const HanziWordToEnglishSkillAnswer = ({
         />
       ) : null}
     </>
+  );
+};
+
+const HanziWordToPinyinSkillAnswer = ({
+  skill,
+  includeAlternatives = false,
+  small = false,
+}: {
+  skill: HanziWordSkill;
+  includeAlternatives?: boolean;
+  small?: boolean;
+}) => {
+  const hanziWord = hanziWordFromSkill(skill);
+  const meaningQuery = useHanziWordMeaning(hanziWord);
+
+  const meaning = meaningQuery.data;
+
+  if (meaning == null) {
+    return null;
+  }
+
+  const primaryHanzi = hanziFromHanziWord(hanziWord);
+  const pinyin = meaning.pinyin?.[0];
+  const gloss = meaning.gloss[0];
+  const hanzis = [primaryHanzi];
+  if (includeAlternatives && meaning.visualVariants != null) {
+    hanzis.push(...meaning.visualVariants);
+  }
+
+  return (
+    <View className={`flex-row items-center ${small ? `gap-1` : `gap-2`}`}>
+      {hanzis.map((hanzi, i) => (
+        <View
+          key={i}
+          className={hanzi === primaryHanzi ? undefined : `opacity-50`}
+        >
+          <HanziText
+            pinyin={hanzi === primaryHanzi ? pinyin : undefined}
+            hanzi={hanzi}
+            small={small}
+            accented
+          />
+        </View>
+      ))}
+      <Text className={choiceEnglishText({ small })}>{gloss}</Text>
+    </View>
   );
 };
 

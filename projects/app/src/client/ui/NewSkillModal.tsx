@@ -2,7 +2,7 @@ import { useHanziWordMeaning } from "@/client/query";
 import { SkillType } from "@/data/model";
 import { HanziWordSkill, Skill } from "@/data/rizzleSchema";
 import { hanziWordFromSkill, skillType } from "@/data/skills";
-import { hanziFromHanziWord, splitCharacters } from "@/dictionary/dictionary";
+import { hanziFromHanziWord, splitHanziText } from "@/dictionary/dictionary";
 import { Image } from "expo-image";
 import { useMemo, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
@@ -33,6 +33,12 @@ export const NewSkillModal = ({
             skill = skill as HanziWordSkill;
             return (
               <NewHanziToEnglishSkillContent skill={skill} dismiss={dismiss} />
+            );
+          }
+          case SkillType.HanziWordToPinyin: {
+            skill = skill as HanziWordSkill;
+            return (
+              <NewHanziToPinyinSkillContent skill={skill} dismiss={dismiss} />
             );
           }
           case SkillType.Deprecated_EnglishToRadical:
@@ -71,7 +77,7 @@ const NewHanziToEnglishSkillContent = ({
   const hanziWordSkillData = useHanziWordMeaning(hanziWord);
 
   const characters = useMemo(
-    (): string[] => splitCharacters(hanziFromHanziWord(hanziWord)),
+    (): string[] => splitHanziText(hanziFromHanziWord(hanziWord)),
     [hanziWord],
   );
 
@@ -116,6 +122,61 @@ const NewHanziToEnglishSkillContent = ({
                 explanationClassName="flex-column text-center font-karla text-lg leading-normal text-primary-10"
               />
             )}
+          </View>
+        </>
+      )}
+    </ContainerWithContinueButton>
+  );
+};
+
+const NewHanziToPinyinSkillContent = ({
+  skill,
+  dismiss,
+}: {
+  skill: HanziWordSkill;
+  dismiss: () => void;
+}) => {
+  const hanziWord = hanziWordFromSkill(skill);
+  const hanziWordSkillData = useHanziWordMeaning(hanziWord);
+
+  const characters = useMemo(
+    (): string[] => splitHanziText(hanziFromHanziWord(hanziWord)),
+    [hanziWord],
+  );
+
+  return (
+    <ContainerWithContinueButton onContinue={dismiss}>
+      {hanziWordSkillData.data == null ? (
+        <Text className="text-text">Not implemented</Text>
+      ) : (
+        <>
+          <View className="mb-8 gap-8">
+            <View className="success-theme flex-row items-center gap-2 self-center">
+              <Image
+                source={require(`@/assets/icons/plant-filled.svg`)}
+                className="my-[-0px] h-[24px] w-[24px] flex-shrink text-accent-10"
+                tintColor="currentColor"
+              />
+              <Text className="text-md font-bold uppercase text-accent-10">
+                New Pinyin
+              </Text>
+            </View>
+
+            <View className="items-center gap-2">
+              <View className="flex-row gap-1">
+                {characters.map((character) => (
+                  <View key={character} className="items-center">
+                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-text">
+                      {character}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+
+              <Text className="text-4xl font-bold text-primary-12">
+                {hanziWordSkillData.data.pinyin?.[0]}
+              </Text>
+            </View>
           </View>
         </>
       )}

@@ -9,8 +9,8 @@ import {
   lookupHanzi,
   lookupHanziWord,
   meaningKeyFromHanziWord,
-  splitCharacters,
-  splitPinyin,
+  parsePinyin,
+  splitHanziText,
 } from "@/dictionary/dictionary";
 import { sortComparatorNumber } from "@/util/collections";
 import { fsrsIsIntroduced, nextReview, Rating } from "@/util/fsrs";
@@ -161,11 +161,18 @@ export async function skillDependencies(
       deps.push(hanziWordToEnglish(hanziWordFromSkill(skill)));
       break;
     }
+    case SkillType.HanziWordToPinyin: {
+      skill = skill as HanziWordSkill;
+      // Learn the Hanzi -> English first. Knowing the meaning of the character
+      // is useful to create a mnemonic to remember the pronunciation.
+      deps.push(hanziWordToEnglish(hanziWordFromSkill(skill)));
+      break;
+    }
     case SkillType.HanziWordToEnglish: {
       skill = skill as HanziWordSkill;
       // Learn the components of a hanzi word first.
       const hanziToLearn = await hanziToLearnForHanzi(
-        splitCharacters(hanziFromHanziWord(hanziWordFromSkill(skill))),
+        splitHanziText(hanziFromHanziWord(hanziWordFromSkill(skill))),
       );
       for (const hanzi of hanziToLearn) {
         if (await characterHasGlyph(hanzi)) {
@@ -185,7 +192,7 @@ export async function skillDependencies(
 
       // Only do this for single characters
       const hanzi = hanziFromHanziWord(hanziWordFromSkill(skill));
-      if (splitCharacters(hanzi).length > 1) {
+      if (splitHanziText(hanzi).length > 1) {
         break;
       }
 
@@ -207,7 +214,7 @@ export async function skillDependencies(
         break;
       }
 
-      const final = splitPinyin(pinyin, chart)?.final;
+      const final = parsePinyin(pinyin, chart)?.final;
       if (final == null) {
         console.error(
           new Error(`could not extract pinyin final for ${pinyin} `),
@@ -225,7 +232,7 @@ export async function skillDependencies(
 
       // Only do this for single characters
       const hanzi = hanziFromHanziWord(hanziWord);
-      if (splitCharacters(hanzi).length > 1) {
+      if (splitHanziText(hanzi).length > 1) {
         break;
       }
 
@@ -242,7 +249,7 @@ export async function skillDependencies(
         break;
       }
 
-      const initial = splitPinyin(pinyin, chart)?.initial;
+      const initial = parsePinyin(pinyin, chart)?.initial;
       if (initial == null) {
         console.error(
           new Error(`could not extract pinyin initial for ${pinyin} `),
@@ -272,7 +279,7 @@ export async function skillDependencies(
 
       // Only do this for single characters
       const hanzi = hanziFromHanziWord(hanziWord);
-      if (splitCharacters(hanzi).length > 1) {
+      if (splitHanziText(hanzi).length > 1) {
         break;
       }
 
@@ -316,6 +323,9 @@ export function hanziWordSkill(
 
 export const hanziWordToEnglish = (hanziWord: HanziWord) =>
   hanziWordSkill(SkillType.HanziWordToEnglish, hanziWord);
+
+export const hanziWordToPinyin = (hanziWord: HanziWord) =>
+  hanziWordSkill(SkillType.HanziWordToPinyin, hanziWord);
 
 export const hanziWordToPinyinInitial = (hanziWord: HanziWord) =>
   hanziWordSkill(SkillType.HanziWordToPinyinInitial, hanziWord);
@@ -482,6 +492,7 @@ const skillTypeShorthandMapping: Record<SkillType, string> = {
   [SkillType.Deprecated]: `[deprecated]`,
   [SkillType.EnglishToHanziWord]: `EN → 中文`,
   [SkillType.HanziWordToEnglish]: `中文 → EN`,
+  [SkillType.HanziWordToPinyin]: `中文 → PY`,
   [SkillType.HanziWordToPinyinFinal]: `中文 → PY⁻ᶠ`,
   [SkillType.HanziWordToPinyinInitial]: `中文 → PYⁱ⁻`,
   [SkillType.HanziWordToPinyinTone]: `中文 → PYⁿ`,
@@ -587,6 +598,7 @@ export function computeSkillRating(opts: {
   let goodDuration;
 
   switch (skillType(opts.skill)) {
+    case SkillType.HanziWordToPinyin:
     case SkillType.HanziWordToEnglish: {
       easyDuration = 5000;
       goodDuration = 10_000;

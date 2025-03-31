@@ -76,7 +76,7 @@ export default function IndexPage() {
         switch (skillType(skill)) {
           case SkillType.EnglishToHanziWord:
           case SkillType.HanziWordToEnglish:
-          case SkillType.HanziWordToEnglish:
+          case SkillType.HanziWordToPinyin:
           case SkillType.HanziWordToPinyinFinal:
           case SkillType.HanziWordToPinyinInitial:
           case SkillType.HanziWordToPinyinTone:

@@ -1,6 +1,6 @@
 import { useHanziWordMeaning } from "@/client/query";
 import { HanziWord } from "@/data/model";
-import { hanziFromHanziWord, splitCharacters } from "@/dictionary/dictionary";
+import { hanziFromHanziWord, splitHanziText } from "@/dictionary/dictionary";
 import { useMemo } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { GlossHint } from "./GlossHint";
@@ -18,7 +18,7 @@ export const HanziWordModal = ({
   const hanziWordSkillData = useHanziWordMeaning(hanziWord);
 
   const characters = useMemo(
-    (): string[] => splitCharacters(hanziFromHanziWord(hanziWord)),
+    (): string[] => splitHanziText(hanziFromHanziWord(hanziWord)),
     [hanziWord],
   );
 

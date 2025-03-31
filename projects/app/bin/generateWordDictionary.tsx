@@ -1,7 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import hanzi from "hanzi";
 
-import { HanziWord } from "#data/model.ts";
+import { HanziText, HanziWord, PinyinText } from "#data/model.ts";
 import {
   allHanziCharacters,
   allHsk1HanziWords,
@@ -762,7 +762,7 @@ const HanziWordEditor = ({
               const newArray = newValue
                 .split(`;`)
                 .map((x) => x.trim())
-                .filter((x) => x !== ``);
+                .filter((x) => x !== ``) as HanziText[];
               const newVisualVariants =
                 newArray.length > 0 ? newArray : undefined;
 
@@ -781,7 +781,7 @@ const HanziWordEditor = ({
               const newPinyin = newValue
                 .split(`;`)
                 .map((x) => x.trim())
-                .filter((x) => x !== ``);
+                .filter((x) => x !== ``) as PinyinText[];
 
               mutations.push(() =>
                 upsertHanziWordMeaning(hanziWord, {

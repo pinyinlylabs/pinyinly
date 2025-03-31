@@ -1,4 +1,10 @@
-import { HanziWord, PartOfSpeech, PinyinInitialGroupId } from "@/data/model";
+import {
+  HanziText,
+  HanziWord,
+  PartOfSpeech,
+  PinyinInitialGroupId,
+  PinyinText,
+} from "@/data/model";
 import { rMnemonicThemeId, rPinyinInitialGroupId } from "@/data/rizzleSchema";
 import {
   deepReadonly,
@@ -8,6 +14,12 @@ import {
 import { invariant } from "@haohaohow/lib/invariant";
 import { DeepReadonly, StrictExtract } from "ts-essentials";
 import { z } from "zod";
+
+export const hanziWordSchema = z.string().transform((x) => x as HanziWord);
+export const hanziTextSchema = z.string().transform((x) => x as HanziText);
+export const pinyinTextSchema = z
+  .string({ description: `space separated pinyin for each word` })
+  .transform((x) => x as PinyinText);
 
 /**
  * `[label, match1, match2, ...]`
@@ -91,7 +103,7 @@ export function parsePinyinTone(
   return [pinyin, 5];
 }
 
-export function splitPinyin(
+export function parsePinyin(
   pinyin: string,
   chart: PinyinChart,
 ): { initial: string; final: string; tone: number } | null {
@@ -253,8 +265,6 @@ export const loadHanziWordGlossMnemonics = memoize0(async () =>
     .parse((await import(`./hanziWordGlossMnemonics.asset.json`)).default),
 );
 
-export const hanziWordSchema = z.string().transform((x) => x as HanziWord);
-
 export const wordListSchema = z.array(hanziWordSchema);
 
 export const allRadicalHanziWords = memoize0(async () =>
@@ -304,7 +314,7 @@ export const hanziWordMeaningSchema = z.object({
   gloss: z.array(z.string()),
   glossHint: z.string().optional(),
   pinyin: z
-    .array(z.string({ description: `space separated pinyin for each word` }), {
+    .array(pinyinTextSchema, {
       description: `all valid pinyin variations for this meaning (might be omitted for radicals without pronunciation)`,
     })
     .optional(),
@@ -315,41 +325,17 @@ export const hanziWordMeaningSchema = z.object({
     .optional(),
   partOfSpeech: partOfSpeechSchema,
   visualVariants: z
-    .array(
-      z.string({
-        description: `Hanzi with the same meaning but visually different.`,
-      }),
-      {
-        description: `Only included in rare cases (e.g. radicals with multiple visual forms). `,
-      },
-    )
+    .array(hanziTextSchema, {
+      description: `Hanzi with the same meaning but visually different. Only included in rare cases (e.g. radicals with multiple visual forms). `,
+    })
     .optional(),
   definition: z.string(),
 });
 
 export type HanziWordMeaning = z.infer<typeof hanziWordMeaningSchema>;
 
-export const hanziWordsSchema = z
-  .array(
-    z.tuple([
-      z.string(), // hanzi
-      z.array(
-        z.tuple([
-          z.string(), // meaning key
-          hanziWordMeaningSchema,
-        ]),
-      ),
-    ]),
-  )
-  .transform((x) => new Map(x.map(([k, v]) => [k, new Map(v)])));
-
 export const dictionarySchema = z
-  .array(
-    z.tuple([
-      z.string().transform((x) => x as HanziWord),
-      hanziWordMeaningSchema,
-    ]),
-  )
+  .array(z.tuple([hanziWordSchema, hanziWordMeaningSchema]))
   .transform((x) => new Map(x));
 
 export const loadDictionary = memoize0(async () =>
@@ -407,7 +393,7 @@ export const lookupHanzi = async (
   [...(await loadDictionary())].filter(
     ([hanziWord, meaning]) =>
       hanziFromHanziWord(hanziWord) === hanzi ||
-      meaning.visualVariants?.includes(hanzi) === true,
+      meaning.visualVariants?.includes(hanzi as HanziText) === true,
   );
 
 export const lookupGloss = async (
@@ -439,7 +425,7 @@ export const allHanziCharacters = async () =>
   new Set(
     [...(await allHanziWordsHanzi())]
       // Split words into characters because decomposition is per-character.
-      .flatMap((x) => splitCharacters(x)),
+      .flatMap((x) => splitHanziText(x)),
   );
 
 export const radicalStrokes = [
@@ -602,7 +588,7 @@ export type IdsNode =
     }
   | {
       type: `LeafCharacter`;
-      character: string;
+      character: HanziText;
     }
   | {
       type: `LeafUnknownCharacter`;
@@ -752,7 +738,7 @@ export function parseIds(ids: string, cursor?: { index: number }): IdsNode {
     return { type: `LeafUnknownCharacter`, strokeCount };
   }
 
-  return { type: `LeafCharacter`, character: char };
+  return { type: `LeafCharacter`, character: char as HanziText };
 }
 
 export function strokeCountPlaceholderOrNull(
@@ -1043,14 +1029,14 @@ export function shorthandPartOfSpeech(partOfSpeech: PartOfSpeech) {
   }
 }
 
-export function hanziFromHanziWord(hanziWord: HanziWord): string {
+export function hanziFromHanziWord(hanziWord: HanziWord): HanziText {
   const result = /^(.+?):/.exec(hanziWord);
   invariant(result != null, `couldn't parse HanziWord ${hanziWord}`);
 
   const [, hanzi] = result;
   invariant(hanzi != null, `couldn't parse hanzi (before :)`);
 
-  return hanzi;
+  return hanzi as HanziText;
 }
 
 export function meaningKeyFromHanziWord(hanziWord: HanziWord): string {
@@ -1062,12 +1048,14 @@ export function buildHanziWord(hanzi: string, meaningKey: string): HanziWord {
   return `${hanzi}:${meaningKey}`;
 }
 
-export async function hanziToLearnForHanzi(hanzi: string[]): Promise<string[]> {
+export async function hanziToLearnForHanzi(
+  hanzi: HanziText[],
+): Promise<HanziText[]> {
   const decompositions = await loadHanziDecomposition();
 
   // For multi-character hanzi, learn each character, but for for
   // single-character hanzi, decompose it into radicals and learn those.
-  const hanziToLearn = [];
+  const hanziToLearn: HanziText[] = [];
   if (hanzi.length > 1) {
     for (const char of hanzi) {
       hanziToLearn.push(char);
@@ -1094,11 +1082,26 @@ export async function hanziToLearnForHanzi(hanzi: string[]): Promise<string[]> {
 
 export async function hanziToLearnForHanziWord(hanziWord: HanziWord) {
   return await hanziToLearnForHanzi(
-    splitCharacters(hanziFromHanziWord(hanziWord)),
+    splitHanziText(hanziFromHanziWord(hanziWord)),
   );
 }
 
-export function splitCharacters(text: string): string[] {
+/**
+ * Calculate the number of glyphs in a string.
+ */
+export function glyphCount(text: string): number {
   // eslint-disable-next-line @typescript-eslint/no-misused-spread
-  return [...text];
+  return [...text].length;
+}
+
+export function splitHanziText(hanziText: HanziText): HanziText[] {
+  // eslint-disable-next-line @typescript-eslint/no-misused-spread
+  return [...hanziText] as HanziText[];
+}
+
+/**
+ * Break a PinyinString into individual pinyin words.
+ */
+export function splitPinyinText(pinyinText: PinyinText): string[] {
+  return pinyinText.split(` `);
 }

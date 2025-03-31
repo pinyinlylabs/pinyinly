@@ -10,6 +10,7 @@ import {
 import { Rizzle, Skill } from "@/data/rizzleSchema";
 import {
   hanziWordToEnglish,
+  hanziWordToPinyin,
   skillDueWindow,
   skillLearningGraph,
   skillReviewQueue,
@@ -77,7 +78,7 @@ export function flagsForSrsState(
 
 export async function getAllTargetSkills() {
   return await allHsk1HanziWords().then((words) =>
-    words.map((w) => hanziWordToEnglish(w)),
+    words.flatMap((w) => [hanziWordToEnglish(w), hanziWordToPinyin(w)]),
   );
 }
 

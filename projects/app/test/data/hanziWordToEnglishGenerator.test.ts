@@ -2,7 +2,7 @@ import {
   addToQuizContext,
   makeQuizContext,
   shouldOmitHanziWord,
-} from "#data/generator.ts";
+} from "#data/hanziWordToEnglishGenerator.ts";
 import { lookupHanziWord } from "#dictionary/dictionary.ts";
 import assert from "node:assert/strict";
 import test from "node:test";
