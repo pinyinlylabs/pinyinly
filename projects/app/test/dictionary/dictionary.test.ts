@@ -1,4 +1,4 @@
-import { HanziWord } from "#data/model.ts";
+import { HanziText } from "#data/model.ts";
 import {
   allHanziCharacters,
   allHanziWordsHanzi,
@@ -32,7 +32,7 @@ import {
   parseIds,
   parsePinyinTone,
   PinyinChart,
-  splitCharacters,
+  splitHanziText,
   splitTonelessPinyin,
   unicodeShortIdentifier,
   walkIdsNode,
@@ -444,7 +444,7 @@ await test(`hanzi uses consistent unicode characters`, async () => {
   const dict = await loadDictionary();
   const violations = [...dict.keys()]
     .map((x) => hanziFromHanziWord(x))
-    .flatMap((x) => splitCharacters(x))
+    .flatMap((x) => splitHanziText(x))
     .filter((x) => isNotCjkUnifiedIdeograph(x));
   assert.deepEqual(
     violations,
@@ -996,16 +996,16 @@ await test(`${idsNodeToString.name} roundtrips`, () => {
 
 await test(`dictionary contains entries for decomposition`, async () => {
   const unknownCharacters = new Map<
-    /* hanzi */ string,
-    /* sources */ Set<HanziWord>
+    /* hanzi */ HanziText,
+    /* sources */ Set<HanziText>
   >();
   const unknownComponents = new Map<
-    /* hanzi */ string,
-    /* sources */ Set<HanziWord>
+    /* hanzi */ HanziText,
+    /* sources */ Set<HanziText>
   >();
 
   for (const hanzi of await allHanziWordsHanzi()) {
-    for (const character of splitCharacters(hanzi)) {
+    for (const character of splitHanziText(hanzi)) {
       const lookup = await lookupHanzi(character);
       if (lookup.length === 0) {
         mapSetAdd(unknownCharacters, character, hanzi);

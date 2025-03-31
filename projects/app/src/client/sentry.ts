@@ -22,8 +22,8 @@ Sentry.init({
     }),
     routingIntegration,
   ],
-  tracesSampleRate: 1, // Keep in sync with the other Sentry.init()
-  profilesSampleRate: 1,
+  tracesSampleRate: __DEV__ ? 1 : 0.1, // Keep in sync with the other Sentry.init()
+  profilesSampleRate: __DEV__ ? 1 : 0.1,
 });
 
 import { invariant } from "@haohaohow/lib/invariant";

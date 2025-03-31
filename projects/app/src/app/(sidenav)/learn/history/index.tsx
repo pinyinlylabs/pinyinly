@@ -125,6 +125,7 @@ const skillParam = (skill: Skill): string => {
       return skillTypeToShorthand(skillType(skill));
     }
     case SkillType.HanziWordToEnglish:
+    case SkillType.HanziWordToPinyin:
     case SkillType.HanziWordToPinyinInitial:
     case SkillType.HanziWordToPinyinFinal:
     case SkillType.HanziWordToPinyinTone:

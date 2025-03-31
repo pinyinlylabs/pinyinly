@@ -3,6 +3,7 @@ import { FsrsState, Rating } from "@/util/fsrs";
 import { r, RizzleCustom, RizzleReplicache } from "@/util/rizzle";
 import { z } from "zod";
 import {
+  HanziText,
   MnemonicThemeId,
   PartOfSpeech,
   PinyinInitialGroupId,
@@ -19,6 +20,7 @@ export const rSkillType = memoize0(function rSkillType() {
     [SkillType.Deprecated_PinyinToRadical]: `pr`,
     [SkillType.Deprecated]: `xx`,
     [SkillType.HanziWordToEnglish]: `he`,
+    [SkillType.HanziWordToPinyin]: `hp`,
     [SkillType.HanziWordToPinyinInitial]: `hpi`,
     [SkillType.HanziWordToPinyinFinal]: `hpf`,
     [SkillType.HanziWordToPinyinTone]: `hpt`,
@@ -103,6 +105,13 @@ export const rSkill = memoize0(function rSkill() {
   return RizzleCustom.create<Skill, Skill, Skill>(
     z.custom<Skill>((x) => typeof x === `string`),
     z.custom<Skill>((x) => typeof x === `string`),
+  );
+});
+
+export const rHanziText = memoize0(function rHanziText() {
+  return RizzleCustom.create<HanziText, string, HanziText>(
+    z.custom<HanziText>((x) => typeof x === `string`),
+    z.custom<HanziText>((x) => typeof x === `string`),
   );
 });
 
@@ -236,7 +245,7 @@ export const v7 = {
   saveHanziGlossMistake: r
     .mutator({
       id: r.string().alias(`i`),
-      hanzi: r.string().alias(`h`),
+      hanzi: rHanziText().alias(`h`),
       gloss: r.string().alias(`g`),
       now: r.timestamp().alias(`n`),
     })
