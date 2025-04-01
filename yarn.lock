@@ -5517,11 +5517,11 @@ __metadata:
   linkType: hard
 
 "@types/fontkit@npm:2.0.x":
-  version: 2.0.7
-  resolution: "@types/fontkit@npm:2.0.7"
+  version: 2.0.8
+  resolution: "@types/fontkit@npm:2.0.8"
   dependencies:
     "@types/node": "npm:*"
-  checksum: 10c0/026ac8673aa1d9662ce86b0fcb3ed5c220ba5285904ef014e2607caa19e92ec503a9308ac27cc3bd4698fed42fc17fb4bd10702541d86b0e8b7a5abc36e58419
+  checksum: 10c0/e5a124d468f17d3b74a07d38257fc38b8d3d1e3e1e68b1c4a3314beb274223499009f4a6c1d2f15a9928ad6643fb8bfca4881d13447cfbf5de1733ad6fd5d4b1
   languageName: node
   linkType: hard
 
