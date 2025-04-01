@@ -177,6 +177,7 @@ export interface MultipleChoiceQuestion {
 // be persisted.
 export enum MistakeType {
   HanziGloss = `HanziGloss`,
+  HanziPinyin = `HanziPinyin`,
   HanziPinyinInitial = `HanziPinyinInitial`,
 }
 
@@ -186,13 +187,22 @@ export interface HanziGlossMistake {
   gloss: string;
 }
 
+export interface HanziPinyinMistake {
+  type: MistakeType.HanziPinyin;
+  hanzi: HanziText;
+  pinyin: PinyinText;
+}
+
 export interface HanziPinyinInitialMistake {
   type: MistakeType.HanziPinyinInitial;
   hanzi: string;
   pinyinInitial: string;
 }
 
-export type Mistake = HanziGlossMistake | HanziPinyinInitialMistake;
+export type Mistake =
+  | HanziGlossMistake
+  | HanziPinyinMistake
+  | HanziPinyinInitialMistake;
 
 export interface SkillRating {
   skill: Skill;

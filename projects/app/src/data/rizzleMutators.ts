@@ -8,6 +8,7 @@ import { srsStateFromFsrsState, v7 } from "./rizzleSchema";
 import {
   nextReviewForOtherSkillMistake,
   skillsToReReviewForHanziGlossMistake,
+  skillsToReReviewForHanziPinyinMistake,
 } from "./skills";
 
 export const v7Mutators: RizzleReplicacheMutators<typeof v7> = {
@@ -54,6 +55,8 @@ export const v7Mutators: RizzleReplicacheMutators<typeof v7> = {
     // not already cached. This guard acts as a no-op if it's too slow.
     //
     // TODO: make more ergonomic
+    //
+    // SAME AS saveHanziPinyinMistake
     if (loadDictionary.isCached()) {
       const mistake = { type: MistakeType.HanziGloss, gloss, hanzi } as const;
 
@@ -68,6 +71,38 @@ export const v7Mutators: RizzleReplicacheMutators<typeof v7> = {
     } else {
       console.warn(
         `saveHanziGlossMistake: dictionary is not already loaded, bailing out`,
+      );
+    }
+  },
+  async saveHanziPinyinMistake(tx, { id, pinyin, hanzi, now }) {
+    await tx.hanziPinyinMistake.set(
+      { id },
+      { id, pinyin, hanzi, createdAt: now },
+    );
+
+    // Mutator must be run in one task. Only microtask async is allowed, but
+    // since the dictionary loads data over the network it's possible that it's
+    // not already cached. This guard acts as a no-op if it's too slow.
+    //
+    // TODO: make more ergonomic
+    //
+    // SAME AS saveHanziGlossMistake
+    if (loadDictionary.isCached()) {
+      const mistake = { type: MistakeType.HanziPinyin, pinyin, hanzi } as const;
+
+      // Queue all skills relevant to the gloss.
+      for (const skill of await skillsToReReviewForHanziPinyinMistake(
+        mistake,
+      )) {
+        const existing = await tx.skillState.get({ skill });
+        if (existing) {
+          const srs = nextReviewForOtherSkillMistake(existing.srs, now);
+          await tx.skillState.set({ skill }, { skill, srs });
+        }
+      }
+    } else {
+      console.warn(
+        `saveHanziPinyinMistake: dictionary is not already loaded, bailing out`,
       );
     }
   },

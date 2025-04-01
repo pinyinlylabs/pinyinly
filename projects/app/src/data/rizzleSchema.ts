@@ -7,6 +7,7 @@ import {
   MnemonicThemeId,
   PartOfSpeech,
   PinyinInitialGroupId,
+  PinyinText,
   SkillType,
   SrsState,
   SrsType,
@@ -115,6 +116,13 @@ export const rHanziText = memoize0(function rHanziText() {
   );
 });
 
+export const rPinyinText = memoize0(function rPinyinText() {
+  return RizzleCustom.create<PinyinText, string, PinyinText>(
+    z.custom<PinyinText>((x) => typeof x === `string`),
+    z.custom<PinyinText>((x) => typeof x === `string`),
+  );
+});
+
 export const rSrsType = memoize0(function rSrsType() {
   return r.enum(SrsType, {
     [SrsType.Mock]: `0`,
@@ -192,6 +200,12 @@ export const v7 = {
     gloss: r.string().alias(`g`),
     createdAt: r.datetime().alias(`c`).indexed(`byCreatedAt`),
   }),
+  hanziPinyinMistake: r.entity(`m/hp/[id]`, {
+    id: r.string().alias(`i`),
+    hanzi: r.string().alias(`h`),
+    pinyin: r.string().alias(`p`),
+    createdAt: r.datetime().alias(`c`).indexed(`byCreatedAt`),
+  }),
 
   //
   // Pinyin mnemonics
@@ -250,6 +264,14 @@ export const v7 = {
       now: r.timestamp().alias(`n`),
     })
     .alias(`shgm`),
+  saveHanziPinyinMistake: r
+    .mutator({
+      id: r.string().alias(`i`),
+      hanzi: rHanziText().alias(`h`),
+      pinyin: rPinyinText().alias(`p`),
+      now: r.timestamp().alias(`n`),
+    })
+    .alias(`shpm`),
 };
 
 export function srsStateFromFsrsState(fsrsState: FsrsState) {
