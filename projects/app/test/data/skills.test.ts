@@ -463,9 +463,12 @@ await test(`${skillReviewQueue.name} suite`, async () => {
           skillSrsStates: new Map(),
         }),
         [
+          `he:人:person`,
+          `he:八:eight`,
           `he:口:mouth`,
           `he:乚:hook`,
           `he:丿:slash`,
+          `he:火:fire`,
           `he:灬:fire`,
           `he:占:occupy`,
           `he:儿:son`,

@@ -11,6 +11,7 @@ import {
   decomposeHanzi,
   flattenIds,
   hanziFromHanziWord,
+  HanziWordMeaning,
   hanziWordMeaningSchema,
   idsNodeToString,
   IdsOperator,
@@ -47,6 +48,7 @@ import { invariant } from "@haohaohow/lib/invariant";
 import assert from "node:assert/strict";
 import test from "node:test";
 import { zodResponseFormat } from "openai/helpers/zod";
+import { DeepReadonly } from "ts-essentials";
 import { z } from "zod";
 
 await test(`radical groups have the right number of elements`, async () => {
@@ -150,7 +152,7 @@ await test(`hanzi word meaning gloss lint`, async () => {
   const isViolating = (x: string) =>
     // no comma
     /,/.exec(x) != null ||
-    // no "measure word" or "radical" or "particle" or "("
+    // no banned characters/phrases
     /measure ?word|radical|particle|\(/i.exec(x) != null ||
     // doesn't start with "to "
     x.startsWith(`to `) ||
@@ -174,18 +176,23 @@ await test(`hanzi word meaning glossHint lint`, async () => {
   const maxWords = 100;
   const maxSpaces = maxWords - 1;
 
-  const isViolating = (x: string) =>
+  const isViolating = (
+    glossHint: string,
+    meaning: DeepReadonly<HanziWordMeaning>,
+  ) =>
     // no double space
-    /  /.exec(x) != null ||
-    // no new lines
-    // /\n/.exec(x) != null ||
+    /  /.exec(glossHint) != null ||
+    // referencing "component form of" must match the .componentFormOf
+    (/component form of ([^., ]+)/i.exec(glossHint)?.[1] ??
+      meaning.componentFormOf) != meaning.componentFormOf ||
     // doesn't exceed word limit
-    (x.match(/\s+/g)?.length ?? 0) > maxSpaces;
+    (glossHint.match(/\s+/g)?.length ?? 0) > maxSpaces;
 
   const violations = new Set(
     [...dict]
       .filter(
-        ([, { glossHint }]) => glossHint != null && isViolating(glossHint),
+        ([, meaning]) =>
+          meaning.glossHint != null && isViolating(meaning.glossHint, meaning),
       )
       .map(([hanziWord, { glossHint }]) => ({
         hanziWord,
