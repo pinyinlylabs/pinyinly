@@ -51,12 +51,7 @@ export const PinyinText = ({
   accented?: boolean;
   small?: boolean;
 }) => {
-  const pinyinWithoutSpaces = pinyin.split(` `).join(``);
-  return (
-    <Text className={pinyinText({ accented, small })}>
-      {pinyinWithoutSpaces}
-    </Text>
-  );
+  return <Text className={pinyinText({ accented, small })}>{pinyin}</Text>;
 };
 
 const pinyinText = tv({

@@ -11,6 +11,7 @@ import {
   decomposeHanzi,
   flattenIds,
   hanziFromHanziWord,
+  HanziWordMeaning,
   hanziWordMeaningSchema,
   idsNodeToString,
   IdsOperator,
@@ -47,6 +48,7 @@ import { invariant } from "@haohaohow/lib/invariant";
 import assert from "node:assert/strict";
 import test from "node:test";
 import { zodResponseFormat } from "openai/helpers/zod";
+import { DeepReadonly } from "ts-essentials";
 import { z } from "zod";
 
 await test(`radical groups have the right number of elements`, async () => {
@@ -150,7 +152,7 @@ await test(`hanzi word meaning gloss lint`, async () => {
   const isViolating = (x: string) =>
     // no comma
     /,/.exec(x) != null ||
-    // no "measure word" or "radical" or "particle" or "("
+    // no banned characters/phrases
     /measure ?word|radical|particle|\(/i.exec(x) != null ||
     // doesn't start with "to "
     x.startsWith(`to `) ||
@@ -174,18 +176,23 @@ await test(`hanzi word meaning glossHint lint`, async () => {
   const maxWords = 100;
   const maxSpaces = maxWords - 1;
 
-  const isViolating = (x: string) =>
+  const isViolating = (
+    glossHint: string,
+    meaning: DeepReadonly<HanziWordMeaning>,
+  ) =>
     // no double space
-    /  /.exec(x) != null ||
-    // no new lines
-    // /\n/.exec(x) != null ||
+    /  /.exec(glossHint) != null ||
+    // referencing "component form of" must match the .componentFormOf
+    (/component form of ([^., ]+)/i.exec(glossHint)?.[1] ??
+      meaning.componentFormOf) != meaning.componentFormOf ||
     // doesn't exceed word limit
-    (x.match(/\s+/g)?.length ?? 0) > maxSpaces;
+    (glossHint.match(/\s+/g)?.length ?? 0) > maxSpaces;
 
   const violations = new Set(
     [...dict]
       .filter(
-        ([, { glossHint }]) => glossHint != null && isViolating(glossHint),
+        ([, meaning]) =>
+          meaning.glossHint != null && isViolating(meaning.glossHint, meaning),
       )
       .map(([hanziWord, { glossHint }]) => ({
         hanziWord,
@@ -194,6 +201,39 @@ await test(`hanzi word meaning glossHint lint`, async () => {
   );
 
   assert.deepEqual(violations, new Set());
+});
+
+await test(`hanzi meaning componentFormOf lint`, async () => {
+  const dict = await loadDictionary();
+
+  for (const [hanziWord, { gloss, componentFormOf }] of dict) {
+    if (componentFormOf == null) {
+      continue;
+    }
+
+    const meaningKey = meaningKeyFromHanziWord(hanziWord);
+    const baseHanziMatches = await lookupHanzi(componentFormOf);
+
+    if (baseHanziMatches.length !== 1) {
+      assert.fail(
+        `hanzi word ${hanziWord} has componentFormOf ${componentFormOf} with ${baseHanziMatches.length} matches (rather than exactly 1)`,
+      );
+    }
+
+    for (const [baseHanziWord, baseMeaning] of baseHanziMatches) {
+      if (meaningKeyFromHanziWord(baseHanziWord) !== meaningKey) {
+        assert.fail(
+          `hanzi word ${hanziWord} has different meaning key to ${baseHanziWord}`,
+        );
+      }
+
+      if (baseMeaning.gloss[0] !== gloss[0]) {
+        assert.fail(
+          `hanzi word ${hanziWord} has different primary gloss to ${baseHanziWord}`,
+        );
+      }
+    }
+  }
 });
 
 await test(`hanzi word meaning example is not in english`, async () => {
@@ -261,23 +301,22 @@ await test(`hanzi word visual variants shouldn't include the hanzi`, async () =>
 await test(`hanzi words are unique on (meaning key, pinyin)`, async () => {
   const exceptions = new Set(
     [
-      [`人:person`, `亻:person`],
       [`他们:they`, `它们:they`, `她们:they`],
-      [`刂:knife`, `𠂉:knife`],
-      [`扌:hand`, `爫:hand`, `𠂇:hand`],
-      [`氵:water`, `氺:water`],
       [`艹:grass`, `草:grass`],
-      [`言:speech`, `讠:speech`],
     ].map((x) => new Set(x)),
   );
 
   const dict = await loadDictionary();
 
   const byMeaningKeyAndPinyin = new Map<string, Set<string>>();
-  for (const [hanziWord, { pinyin }] of dict) {
+  for (const [hanziWord, { pinyin, componentFormOf }] of dict) {
     const meaningKey = meaningKeyFromHanziWord(hanziWord);
     // special case allow "radical" to have overlaps
     if (meaningKey === `radical`) {
+      continue;
+    }
+    // allow component-form of hanzi to have overlaps
+    if (componentFormOf != null) {
       continue;
     }
     const key = `${meaningKey}:${pinyin}`;

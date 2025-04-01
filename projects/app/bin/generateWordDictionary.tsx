@@ -1,7 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import hanzi from "hanzi";
 
-import { HanziText, HanziWord, PinyinText } from "#data/model.ts";
+import { HanziChar, HanziText, HanziWord, PinyinText } from "#data/model.ts";
 import {
   allHanziCharacters,
   allHsk1HanziWords,
@@ -10,6 +10,7 @@ import {
   hanziFromHanziWord,
   HanziWordMeaning,
   hanziWordMeaningSchema,
+  HanziWordWithMeaning,
   loadHanziDecomposition,
   lookupHanzi,
   lookupHanziWord,
@@ -662,6 +663,11 @@ const HanziWordEditor = ({
                   value: meaning.visualVariants?.join(`;`) ?? ``,
                 },
                 {
+                  id: `componentFormOf`,
+                  label: `Component form of`,
+                  value: meaning.componentFormOf ?? ``,
+                },
+                {
                   id: `definition`,
                   label: `Definition`,
                   value: meaning.definition,
@@ -753,6 +759,20 @@ const HanziWordEditor = ({
                 }),
               );
               edits.delete(`glossHint`);
+            }
+
+            if (edits.has(`componentFormOf`)) {
+              const newComponentFormOf = edits.get(`componentFormOf`) as
+                | HanziChar
+                | undefined;
+              invariant(newComponentFormOf != null);
+
+              mutations.push(() =>
+                upsertHanziWordMeaning(hanziWord, {
+                  componentFormOf: newComponentFormOf,
+                }),
+              );
+              edits.delete(`componentFormOf`);
             }
 
             if (edits.has(`visualVariants`)) {
@@ -1428,7 +1448,7 @@ type HanziWordCreateResult =
 interface GenerateHanziWordQuery {
   hanzi: string;
   description?: string | null;
-  existingItems?: DeepReadonly<[HanziWord, HanziWordMeaning][]>;
+  existingItems?: DeepReadonly<HanziWordWithMeaning[]>;
 }
 
 async function queryOpenAi(query: unknown) {
@@ -1957,7 +1977,7 @@ render(<App />);
 
 function hanziWordQueryFilter(
   query: string,
-  [hanziWord, meaning]: DeepReadonly<[HanziWord, HanziWordMeaning]>,
+  [hanziWord, meaning]: DeepReadonly<HanziWordWithMeaning>,
 ) {
   return (
     hanziWord.includes(query) ||
@@ -2090,6 +2110,15 @@ const DictionaryHanziWordEntry = ({
               <SemiColonList items={meaning.visualVariants} />
             </Text>
           )}
+          {meaning.componentFormOf == null ? null : (
+            <Text>
+              <Text bold dimColor>
+                component form of:
+              </Text>
+              {` `}
+              {meaning.componentFormOf}
+            </Text>
+          )}
         </Box>
       )}
     </Box>
@@ -2187,6 +2216,10 @@ async function upsertHanziWordMeaning(
 
   if (patch.visualVariants?.length === 0) {
     patch.visualVariants = undefined;
+  }
+
+  if (patch.componentFormOf?.trim().length === 0) {
+    patch.componentFormOf = undefined;
   }
 
   const meaning = dict.get(hanziWord);

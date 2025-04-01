@@ -3,6 +3,7 @@ import {
   decomposeHanzi,
   glyphCount,
   hanziFromHanziWord,
+  HanziWordWithMeaning,
   loadStandardPinyinChart,
   lookupGloss,
   lookupHanzi,
@@ -15,6 +16,7 @@ import { fsrsIsIntroduced, nextReview, Rating } from "@/util/fsrs";
 import { makePRNG } from "@/util/random";
 import { invariant } from "@haohaohow/lib/invariant";
 import type { Duration } from "date-fns";
+import { DeepReadonly } from "ts-essentials";
 import {
   HanziGlossMistake,
   HanziWord,
@@ -172,8 +174,10 @@ export async function skillDependencies(
       if (characters.length > 1) {
         for (const character of characters) {
           if (await characterHasGlyph(character)) {
-            const hanziWord = await hackyGuessHanziWordToLearn(character);
-            if (hanziWord != null) {
+            const hanziWordWithMeaning =
+              await hackyGuessHanziWordToLearn(character);
+            if (hanziWordWithMeaning != null) {
+              const [hanziWord] = hanziWordWithMeaning;
               deps.push(hanziWordToPinyin(hanziWord));
             }
           }
@@ -190,9 +194,23 @@ export async function skillDependencies(
       )) {
         if (await characterHasGlyph(character)) {
           // TODO: need to a better way to choose the meaning key.
-          const hanziWord = await hackyGuessHanziWordToLearn(character);
-          if (hanziWord != null) {
+          const hanziWordWithMeaning =
+            await hackyGuessHanziWordToLearn(character);
+          if (hanziWordWithMeaning != null) {
+            const [hanziWord, meaning] = hanziWordWithMeaning;
             deps.push(hanziWordToEnglish(hanziWord));
+
+            // If it's the component form of another base hanzi, learn that
+            // first because it can help understand the meaning from the shape.
+            if (meaning.componentFormOf != null) {
+              const hanziWordWithMeaning = await hackyGuessHanziWordToLearn(
+                meaning.componentFormOf,
+              );
+              if (hanziWordWithMeaning != null) {
+                const [hanziWord] = hanziWordWithMeaning;
+                deps.push(hanziWordToEnglish(hanziWord));
+              }
+            }
           }
         }
       }
@@ -318,10 +336,10 @@ export async function skillDependencies(
 
 async function hackyGuessHanziWordToLearn(
   hanzi: string,
-): Promise<HanziWord | undefined> {
+): Promise<DeepReadonly<HanziWordWithMeaning> | undefined> {
   const hanziWords = await lookupHanzi(hanzi);
-  for (const [hanziWord] of hanziWords) {
-    return hanziWord;
+  for (const item of hanziWords) {
+    return item;
   }
 }
 
