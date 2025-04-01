@@ -19,6 +19,7 @@ import type { Duration } from "date-fns";
 import { DeepReadonly } from "ts-essentials";
 import {
   HanziGlossMistake,
+  HanziPinyinMistake,
   HanziWord,
   HanziWordSkillType,
   Mistake,
@@ -553,6 +554,19 @@ export async function skillsToReReviewForHanziGlossMistake(
   return skills;
 }
 
+export async function skillsToReReviewForHanziPinyinMistake(
+  mistake: HanziPinyinMistake,
+): Promise<ReadonlySet<Skill>> {
+  const skills = new Set<Skill>();
+
+  // Queue all skills relevant to the hanzi.
+  for (const [hanziWord] of await lookupHanzi(mistake.hanzi)) {
+    skills.add(hanziWordToPinyin(hanziWord));
+  }
+
+  return skills;
+}
+
 /**
  * Update the SRS state a skill that's related to a mistake that was made that
  * wasn't tied to a specific skill. It should make the skill reviewed again
@@ -578,7 +592,7 @@ export function oneCorrectPairQuestionChoiceMistakes(
 ): Mistake[] {
   const mistakes: Mistake[] = [];
 
-  const mistakeChecks = [hanziGlossMistake];
+  const mistakeChecks = [hanziGlossMistake, hanziPinyinMistake];
   // Check all combinations of the choices, this makes each check simpler as it
   // doesn't need to consider each direction.
   const choicePairs = [
@@ -606,6 +620,19 @@ export function hanziGlossMistake(
       type: MistakeType.HanziGloss,
       hanzi: choice1.value,
       gloss: choice2.value,
+    };
+  }
+}
+
+export function hanziPinyinMistake(
+  choice1: OneCorrectPairQuestionChoice,
+  choice2: OneCorrectPairQuestionChoice,
+): HanziPinyinMistake | undefined {
+  if (choice1.type === `hanzi` && choice2.type === `pinyin`) {
+    return {
+      type: MistakeType.HanziPinyin,
+      hanzi: choice1.value,
+      pinyin: choice2.value,
     };
   }
 }

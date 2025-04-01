@@ -153,6 +153,15 @@ export const QuizDeck = ({
             });
             break;
           }
+          case MistakeType.HanziPinyin: {
+            void r.mutate.saveHanziPinyinMistake({
+              id: nanoid(),
+              now,
+              hanzi: mistake.hanzi,
+              pinyin: mistake.pinyin,
+            });
+            break;
+          }
           case MistakeType.HanziPinyinInitial: {
             throw new Error(`todo: not implemented`);
           }

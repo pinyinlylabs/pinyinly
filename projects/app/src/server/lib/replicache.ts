@@ -8,6 +8,7 @@ import {
 import {
   nextReviewForOtherSkillMistake,
   skillsToReReviewForHanziGlossMistake,
+  skillsToReReviewForHanziPinyinMistake,
 } from "@/data/skills";
 import {
   ClientStateNotFoundResponse,
@@ -64,6 +65,30 @@ const mutators: RizzleDrizzleMutators<SupportedSchema, Drizzle> = {
     // Apply mistake effect to in-scope skills.
     const mistake = { type: MistakeType.HanziGloss, gloss, hanzi } as const;
     const skillsToReview = await skillsToReReviewForHanziGlossMistake(mistake);
+
+    // Find any existing skills for the user that should be reviewed again.
+    const skillStates = await db.query.skillState.findMany({
+      where: (t) =>
+        and(eq(t.userId, userId), inArray(t.skill, [...skillsToReview])),
+    });
+
+    await pgBatchUpdate(db, {
+      whereColumn: s.skillState.id,
+      setColumn: s.skillState.srs,
+      updates: skillStates.map((skillState) => [
+        skillState.id,
+        nextReviewForOtherSkillMistake(skillState.srs, now),
+      ]),
+    });
+  },
+  async saveHanziPinyinMistake(db, userId, { id, pinyin, hanzi, now }) {
+    await db
+      .insert(s.hanziPinyinMistake)
+      .values([{ id, userId, pinyin, hanzi, createdAt: now }]);
+
+    // Apply mistake effect to in-scope skills.
+    const mistake = { type: MistakeType.HanziPinyin, pinyin, hanzi } as const;
+    const skillsToReview = await skillsToReReviewForHanziPinyinMistake(mistake);
 
     // Find any existing skills for the user that should be reviewed again.
     const skillStates = await db.query.skillState.findMany({
@@ -404,6 +429,10 @@ export async function pull(
         db.query.hanziGlossMistake.findMany({
           where: (t) =>
             inArray(t.id, entitiesDiff.hanziGlossMistake?.puts ?? []),
+        }),
+        db.query.hanziPinyinMistake.findMany({
+          where: (t) =>
+            inArray(t.id, entitiesDiff.hanziPinyinMistake?.puts ?? []),
         }),
       ]);
       debug(`%o`, { skillStates, skillRatings });
@@ -857,6 +886,20 @@ export async function computeCvrEntities(
       .where(eq(s.hanziGlossMistake.userId, userId))
       .as(`hanziGlossMistakeVersions`);
 
+    const hanziPinyinMistakeVersions = db
+      .select({
+        map: json_object_agg(
+          s.hanziPinyinMistake.id,
+          json_build_object({
+            id: s.hanziPinyinMistake.id,
+            xmin: xmin(s.hanziPinyinMistake),
+          }),
+        ).as(`hanziPinyinMistakeVersions`),
+      })
+      .from(s.hanziPinyinMistake)
+      .where(eq(s.hanziPinyinMistake.userId, userId))
+      .as(`hanziPinyinMistakeVersions`);
+
     const [result] = await db
       .select({
         pinyinFinalAssociation: pinyinFinalAssociationVersions.map,
@@ -865,13 +908,15 @@ export async function computeCvrEntities(
         skillRating: skillRatingVersions.map,
         skillState: skillStateVersions.map,
         hanziGlossMistake: hanziGlossMistakeVersions.map,
+        hanziPinyinMistake: hanziPinyinMistakeVersions.map,
       })
       .from(pinyinFinalAssociationVersions)
       .leftJoin(pinyinInitialAssociationVersions, sql`true`)
       .leftJoin(pinyinInitialGroupThemeVersions, sql`true`)
       .leftJoin(skillRatingVersions, sql`true`)
       .leftJoin(skillStateVersions, sql`true`)
-      .leftJoin(hanziGlossMistakeVersions, sql`true`);
+      .leftJoin(hanziGlossMistakeVersions, sql`true`)
+      .leftJoin(hanziPinyinMistakeVersions, sql`true`);
     invariant(result != null);
 
     return {
@@ -906,6 +951,10 @@ export async function computeCvrEntities(
       hanziGlossMistake: mapValues(
         result.hanziGlossMistake,
         (v) => v.xmin + `:` + schema.hanziGlossMistake.marshalKey(v),
+      ),
+      hanziPinyinMistake: mapValues(
+        result.hanziPinyinMistake,
+        (v) => v.xmin + `:` + schema.hanziPinyinMistake.marshalKey(v),
       ),
     };
   });

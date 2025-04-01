@@ -29,6 +29,7 @@ export const cvrEntitiesSchema = z.record(
     z.literal(`skillState`),
     z.literal(`skillRating`),
     z.literal(`hanziGlossMistake`),
+    z.literal(`hanziPinyinMistake`),
   ]),
   cvrEntity,
 );
@@ -119,6 +120,21 @@ export const hanziGlossMistake = schema.table(
       .notNull(),
     hanzi: pg.text(`hanzi`).notNull(),
     gloss: pg.text(`gloss`).notNull(),
+    createdAt: pg.timestamp(`timestamp`).defaultNow().notNull(),
+  },
+  (t) => [pg.index().on(t.userId)],
+);
+
+export const hanziPinyinMistake = schema.table(
+  `hanziPinyinMistake`,
+  {
+    id: pg.text(`id`).primaryKey().$defaultFn(nanoid),
+    userId: pg
+      .text(`userId`)
+      .references(() => user.id)
+      .notNull(),
+    hanzi: pg.text(`hanzi`).notNull(),
+    pinyin: pg.text(`pinyin`).notNull(),
     createdAt: pg.timestamp(`timestamp`).defaultNow().notNull(),
   },
   (t) => [pg.index().on(t.userId)],

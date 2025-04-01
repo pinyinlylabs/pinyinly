@@ -724,6 +724,7 @@ await test(`${computeCvrEntities.name} suite`, async (t) => {
         async (tx) => {
           assert.deepEqual(await computeCvrEntities(tx, `1`, schema), {
             hanziGlossMistake: {},
+            hanziPinyinMistake: {},
             pinyinFinalAssociation: {},
             pinyinInitialAssociation: {},
             pinyinInitialGroupTheme: {},
@@ -738,6 +739,7 @@ await test(`${computeCvrEntities.name} suite`, async (t) => {
 
         assert.deepEqual(await computeCvrEntities(tx, user.id, schema), {
           hanziGlossMistake: {},
+          hanziPinyinMistake: {},
           pinyinFinalAssociation: {},
           pinyinInitialAssociation: {},
           pinyinInitialGroupTheme: {},
@@ -773,6 +775,7 @@ await test(`${computeCvrEntities.name} suite`, async (t) => {
 
         assert.deepEqual(await computeCvrEntities(tx, user1.id, schema), {
           hanziGlossMistake: {},
+          hanziPinyinMistake: {},
           pinyinFinalAssociation: {},
           pinyinInitialAssociation: {},
           pinyinInitialGroupTheme: {},
@@ -814,6 +817,7 @@ await test(`${computeCvrEntities.name} suite`, async (t) => {
 
         assert.deepEqual(await computeCvrEntities(tx, user1.id, schema), {
           hanziGlossMistake: {},
+          hanziPinyinMistake: {},
           pinyinFinalAssociation: {},
           pinyinInitialAssociation: {},
           pinyinInitialGroupTheme: {},
@@ -856,6 +860,7 @@ await test(`${computeCvrEntities.name} suite`, async (t) => {
 
           assert.deepEqual(await computeCvrEntities(tx, user1.id, schema), {
             hanziGlossMistake: {},
+            hanziPinyinMistake: {},
             pinyinFinalAssociation: {
               [user1PinyinFinalAssociation.id]:
                 user1PinyinFinalAssociation.version +
@@ -901,6 +906,7 @@ await test(`${computeCvrEntities.name} suite`, async (t) => {
 
           assert.deepEqual(await computeCvrEntities(tx, user1.id, schema), {
             hanziGlossMistake: {},
+            hanziPinyinMistake: {},
             pinyinFinalAssociation: {},
             pinyinInitialAssociation: {
               [user1PinyinInitialAssociation.id]:
