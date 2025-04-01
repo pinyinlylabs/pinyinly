@@ -45,7 +45,7 @@ export type DeprecatedSkill =
 
 export type HanziWordSkill =
   | (string & z.BRAND<`HanziWordSkill`>)
-  | `${`he` | `hpi` | `hpf` | `hpt` | `eh` | `ph` | `ih`}:${string}:${string}`;
+  | `${`he` | `hp` | `hpi` | `hpf` | `hpt` | `eh` | `ph` | `ih`}:${string}:${string}`;
 
 export type PinyinInitialAssociationSkill =
   | (string & z.BRAND<`PinyinInitialAssociationSkill`>)

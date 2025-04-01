@@ -8,9 +8,9 @@ import {
   allRadicalHanziWords,
   allRadicalsByStrokes,
   convertPinyinWithToneNumberToToneMark,
+  decomposeHanzi,
   flattenIds,
   hanziFromHanziWord,
-  hanziToLearnForHanzi,
   hanziWordMeaningSchema,
   idsNodeToString,
   IdsOperator,
@@ -261,8 +261,13 @@ await test(`hanzi word visual variants shouldn't include the hanzi`, async () =>
 await test(`hanzi words are unique on (meaning key, pinyin)`, async () => {
   const exceptions = new Set(
     [
-      [`艹:grass`, `草:grass`],
+      [`人:person`, `亻:person`],
       [`他们:they`, `它们:they`, `她们:they`],
+      [`刂:knife`, `𠂉:knife`],
+      [`扌:hand`, `爫:hand`, `𠂇:hand`],
+      [`氵:water`, `氺:water`],
+      [`艹:grass`, `草:grass`],
+      [`言:speech`, `讠:speech`],
     ].map((x) => new Set(x)),
   );
 
@@ -1011,7 +1016,7 @@ await test(`dictionary contains entries for decomposition`, async () => {
         mapSetAdd(unknownCharacters, character, hanzi);
       }
 
-      for (const component of await hanziToLearnForHanzi([character])) {
+      for (const component of await decomposeHanzi(character)) {
         const lookup = await lookupHanzi(component);
         if (lookup.length === 0) {
           mapSetAdd(unknownComponents, component, character);
@@ -1020,15 +1025,35 @@ await test(`dictionary contains entries for decomposition`, async () => {
     }
   }
 
+  // Explicit exceptions that are not in the dictionary. The "sources" are
+  // stored so that if new items are added to the dictionary that relate to this
+  // list, the list can be manually reviewed and updated.
+  const allowedMissing = new Map([
+    // Coulnd't find any standard meaning for this. In most cases this is used
+    // at the top and looks like "上", so maybe the decomposition should just
+    // pick that instead of going further to "⺊"?
+    [`⺊`, new Set([`上`, `占`, `卤`, `攴`, `桌`, `虍`])],
+    // Only 3 cases and isn't visually distinctive in the characters.
+    [`乀`, new Set([`展`, `水`, `辰`])],
+    // Only 3 cases and there doens't seem to be an obvious common meaning.
+    [`乛`, new Set([`买`, `了`, `敢`])],
+  ]);
+
   // There's not much value in learning components that are only used once, so
   // we only test that there are dictionary entries for components that are used
   // multiple times.
   const unknownWithMultipleSources = [
     // always learn characters of a word
     ...unknownCharacters,
-    // only learn components that are used at least 3 times
-    ...[...unknownComponents].filter(([, sources]) => sources.size >= 3),
-  ];
+    ...[...unknownComponents]
+      // only learn components that are used at least 3 times
+      .filter(([, sources]) => sources.size >= 3),
+  ]
+    // explicitly ignored cases
+    .filter(
+      ([x, sources]) =>
+        allowedMissing.get(x)?.symmetricDifference(sources).size !== 0,
+    );
 
   assert.deepEqual(unknownWithMultipleSources, []);
 });
@@ -1055,6 +1080,8 @@ function isCjkUnifiedIdeograph(char: string): boolean {
     codePoint != null &&
     // CJK Unified Ideographs U+4E00 to U+9FFF
     ((codePoint >= 0x4e00 && codePoint <= 0x9fff) ||
+      // CJK Unified Ideographs Extension A U+3400 to U+4DBF
+      (codePoint >= 0x3400 && codePoint <= 0x4dbf) ||
       // CJK Unified Ideographs Extension B U+20000 to U+2A6DF
       (codePoint >= 0x20000 && codePoint <= 0x2a6df) ||
       // CJK Unified Ideographs Extension F U+2CEB0 to U+2EBEF

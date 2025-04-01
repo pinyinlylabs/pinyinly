@@ -230,13 +230,45 @@ export function memoize0<R>(
   return Object.assign(memoFn, { isCached: () => cacheSet });
 }
 
+export function memoize1<T extends string, R>(
+  fn: (input: T) => R,
+): ((input: T) => R) & { isCached: (input: T) => boolean } {
+  const cache = new Map<T, R>();
+  const memoFn = function <This>(this: This, input: T) {
+    if (cache.has(input)) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      return cache.get(input)!;
+    }
+    const ret = fn.call(this, input);
+    cache.set(input, ret);
+    return ret;
+  };
+  Object.defineProperty(memoFn, `name`, { value: fn.name });
+  return Object.assign(memoFn, {
+    isCached: (input: T) => cache.has(input),
+  });
+}
+
 /**
  * Add a value to a set in a map without having to check if the set exists.
  */
 export function mapSetAdd<K, V>(map: Map<K, Set<V>>, key: K, value: V) {
-  const versions = map.get(key) ?? new Set();
-  versions.add(value);
-  map.set(key, versions);
+  const items = map.get(key) ?? new Set();
+  items.add(value);
+  if (items.size === 1) {
+    map.set(key, items);
+  }
+}
+
+/**
+ * Add a value to a set in a map without having to check if the set exists.
+ */
+export function mapArrayAdd<K, V>(map: Map<K, V[]>, key: K, value: V) {
+  const items = map.get(key) ?? [];
+  items.push(value);
+  if (items.length === 1) {
+    map.set(key, items);
+  }
 }
 
 /**
@@ -248,3 +280,5 @@ export function evenHalve<T>(items: T[]): [T[], T[]] {
   const b = items.slice(splitIndex, splitIndex + a.length);
   return [a, b];
 }
+
+export const emptySet: ReadonlySet<unknown> = new Set();

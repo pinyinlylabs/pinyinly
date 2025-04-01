@@ -6,7 +6,6 @@ import {
   hanziFromHanziWord,
   HanziWordMeaning,
   lookupHanziWord,
-  splitHanziText,
   splitPinyinText,
 } from "@/dictionary/dictionary";
 import { evenHalve } from "@/util/collections";
@@ -227,7 +226,7 @@ function validQuestionInvariant(question: Question) {
 function hanziOrPinyinWordCount(choice: OneCorrectPairQuestionChoice): number {
   switch (choice.type) {
     case `hanzi`: {
-      return splitHanziText(choice.value).length;
+      return glyphCount(choice.value);
     }
     case `pinyin`: {
       return splitPinyinText(choice.value).length;

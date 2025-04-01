@@ -8,6 +8,7 @@ import {
 import { rMnemonicThemeId, rPinyinInitialGroupId } from "@/data/rizzleSchema";
 import {
   deepReadonly,
+  mapArrayAdd,
   memoize0,
   sortComparatorNumber,
 } from "@/util/collections";
@@ -387,21 +388,48 @@ export const lookupHanziWordGlossMnemonics = async (hanziWord: HanziWord) =>
 export const lookupHanziWordPinyinMnemonics = async (hanziWord: HanziWord) =>
   await loadHanziWordPinyinMnemonics().then((x) => x.get(hanziWord) ?? null);
 
+/**
+ * Build an inverted index of hanzi words to hanzi word meanings and glosses to
+ * hanzi word meanings. Useful when building learning graphs.
+ */
+const hanziToHanziWordMap = memoize0(
+  async (): Promise<
+    DeepReadonly<{
+      hanziMap: Map<string, [HanziWord, HanziWordMeaning][]>;
+      glossMap: Map<string, [HanziWord, HanziWordMeaning][]>;
+    }>
+  > => {
+    const hanziMap = new Map<string, [HanziWord, HanziWordMeaning][]>();
+    const glossMap = new Map<string, [HanziWord, HanziWordMeaning][]>();
+
+    for (const item of await loadDictionary()) {
+      const [hanziWord, meaning] = item;
+
+      mapArrayAdd(hanziMap, hanziFromHanziWord(hanziWord), item);
+      for (const gloss of meaning.gloss) {
+        mapArrayAdd(glossMap, gloss, item);
+      }
+    }
+
+    return { hanziMap, glossMap };
+  },
+);
+
+const empty = [] as const;
+
 export const lookupHanzi = async (
   hanzi: string,
-): Promise<DeepReadonly<[HanziWord, HanziWordMeaning][]>> =>
-  [...(await loadDictionary())].filter(
-    ([hanziWord, meaning]) =>
-      hanziFromHanziWord(hanziWord) === hanzi ||
-      meaning.visualVariants?.includes(hanzi as HanziText) === true,
-  );
+): Promise<DeepReadonly<[HanziWord, HanziWordMeaning][]>> => {
+  const { hanziMap } = await hanziToHanziWordMap();
+  return hanziMap.get(hanzi) ?? empty;
+};
 
 export const lookupGloss = async (
   gloss: string,
-): Promise<DeepReadonly<[HanziWord, HanziWordMeaning][]>> =>
-  [...(await loadDictionary())].filter(([_hanziWord, meaning]) =>
-    meaning.gloss.includes(gloss),
-  );
+): Promise<DeepReadonly<[HanziWord, HanziWordMeaning][]>> => {
+  const { glossMap } = await hanziToHanziWordMap();
+  return glossMap.get(gloss) ?? empty;
+};
 
 export const lookupHanziWord = async (
   hanziWord: HanziWord,
@@ -411,22 +439,26 @@ export const lookupHanziWord = async (
 export const lookupRadicalsByStrokes = async (strokes: number) =>
   await loadRadicalStrokes().then((x) => x.get(strokes) ?? null);
 
-export const allHanziWordsHanzi = async () =>
-  new Set(
-    [
-      ...(await allRadicalHanziWords()),
-      ...(await allHsk1HanziWords()),
-      ...(await allHsk2HanziWords()),
-      ...(await allHsk3HanziWords()),
-    ].map((x) => hanziFromHanziWord(x)),
-  );
+export const allHanziWordsHanzi = memoize0(
+  async () =>
+    new Set(
+      [
+        ...(await allRadicalHanziWords()),
+        ...(await allHsk1HanziWords()),
+        ...(await allHsk2HanziWords()),
+        ...(await allHsk3HanziWords()),
+      ].map((x) => hanziFromHanziWord(x)),
+    ),
+);
 
-export const allHanziCharacters = async () =>
-  new Set(
-    [...(await allHanziWordsHanzi())]
-      // Split words into characters because decomposition is per-character.
-      .flatMap((x) => splitHanziText(x)),
-  );
+export const allHanziCharacters = memoize0(
+  async () =>
+    new Set(
+      [...(await allHanziWordsHanzi())]
+        // Split words into characters because decomposition is per-character.
+        .flatMap((x) => splitHanziText(x)),
+    ),
+);
 
 export const radicalStrokes = [
   1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
@@ -1048,20 +1080,26 @@ export function buildHanziWord(hanzi: string, meaningKey: string): HanziWord {
   return `${hanzi}:${meaningKey}`;
 }
 
-export async function hanziToLearnForHanzi(
-  hanzi: HanziText[],
-): Promise<HanziText[]> {
+/**
+ * Break apart a hanzi text into its constituent characters that should be
+ * learned in a "bottom up" learning strategy.
+ *
+ * This first splits up into each character, and then splits each character down
+ * further into its constituent parts (radicals).
+ */
+export async function decomposeHanzi(hanzi: HanziText): Promise<HanziText[]> {
   const decompositions = await loadHanziDecomposition();
+  const hanziChars = splitHanziText(hanzi);
 
   // For multi-character hanzi, learn each character, but for for
   // single-character hanzi, decompose it into radicals and learn those.
-  const hanziToLearn: HanziText[] = [];
-  if (hanzi.length > 1) {
-    for (const char of hanzi) {
-      hanziToLearn.push(char);
+  const result: HanziText[] = [];
+  if (hanziChars.length > 1) {
+    for (const char of hanziChars) {
+      result.push(char);
     }
   } else {
-    for (const char of hanzi) {
+    for (const char of hanziChars) {
       const ids = decompositions.get(char);
       if (ids != null) {
         const idsNode = parseIds(ids);
@@ -1070,20 +1108,14 @@ export async function hanziToLearnForHanzi(
             leaf.type === `LeafCharacter` &&
             leaf.character !== char // todo turn into invariant?
           ) {
-            hanziToLearn.push(leaf.character);
+            result.push(leaf.character);
           }
         }
       }
     }
   }
 
-  return hanziToLearn;
-}
-
-export async function hanziToLearnForHanziWord(hanziWord: HanziWord) {
-  return await hanziToLearnForHanzi(
-    splitHanziText(hanziFromHanziWord(hanziWord)),
-  );
+  return result;
 }
 
 /**
