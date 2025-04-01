@@ -207,9 +207,9 @@ await test(`hanzi meaning componentFormOf lint`, async () => {
     const meaningKey = meaningKeyFromHanziWord(hanziWord);
     const baseHanziMatches = await lookupHanzi(componentFormOf);
 
-    if (baseHanziMatches.length > 1) {
+    if (baseHanziMatches.length !== 1) {
       assert.fail(
-        `hanzi word ${hanziWord} has componentFormOf ${componentFormOf} with ${baseHanziMatches.length} matches`,
+        `hanzi word ${hanziWord} has componentFormOf ${componentFormOf} with ${baseHanziMatches.length} matches (rather than exactly 1)`,
       );
     }
 
@@ -294,23 +294,22 @@ await test(`hanzi word visual variants shouldn't include the hanzi`, async () =>
 await test(`hanzi words are unique on (meaning key, pinyin)`, async () => {
   const exceptions = new Set(
     [
-      [`人:person`, `亻:person`],
       [`他们:they`, `它们:they`, `她们:they`],
-      [`刂:knife`, `𠂉:knife`],
-      [`扌:hand`, `𠂇:hand`],
-      [`氵:water`, `氺:water`],
       [`艹:grass`, `草:grass`],
-      [`言:speech`, `讠:speech`],
     ].map((x) => new Set(x)),
   );
 
   const dict = await loadDictionary();
 
   const byMeaningKeyAndPinyin = new Map<string, Set<string>>();
-  for (const [hanziWord, { pinyin }] of dict) {
+  for (const [hanziWord, { pinyin, componentFormOf }] of dict) {
     const meaningKey = meaningKeyFromHanziWord(hanziWord);
     // special case allow "radical" to have overlaps
     if (meaningKey === `radical`) {
+      continue;
+    }
+    // allow component-form of hanzi to have overlaps
+    if (componentFormOf != null) {
       continue;
     }
     const key = `${meaningKey}:${pinyin}`;
