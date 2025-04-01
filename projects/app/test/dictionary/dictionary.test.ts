@@ -196,6 +196,39 @@ await test(`hanzi word meaning glossHint lint`, async () => {
   assert.deepEqual(violations, new Set());
 });
 
+await test(`hanzi meaning componentFormOf lint`, async () => {
+  const dict = await loadDictionary();
+
+  for (const [hanziWord, { gloss, componentFormOf }] of dict) {
+    if (componentFormOf == null) {
+      continue;
+    }
+
+    const meaningKey = meaningKeyFromHanziWord(hanziWord);
+    const baseHanziMatches = await lookupHanzi(componentFormOf);
+
+    if (baseHanziMatches.length > 1) {
+      assert.fail(
+        `hanzi word ${hanziWord} has componentFormOf ${componentFormOf} with ${baseHanziMatches.length} matches`,
+      );
+    }
+
+    for (const [baseHanziWord, baseMeaning] of baseHanziMatches) {
+      if (meaningKeyFromHanziWord(baseHanziWord) !== meaningKey) {
+        assert.fail(
+          `hanzi word ${hanziWord} has different meaning key to ${baseHanziWord}`,
+        );
+      }
+
+      if (baseMeaning.gloss[0] !== gloss[0]) {
+        assert.fail(
+          `hanzi word ${hanziWord} has different primary gloss to ${baseHanziWord}`,
+        );
+      }
+    }
+  }
+});
+
 await test(`hanzi word meaning example is not in english`, async () => {
   const dict = await loadDictionary();
 
@@ -264,7 +297,7 @@ await test(`hanzi words are unique on (meaning key, pinyin)`, async () => {
       [`人:person`, `亻:person`],
       [`他们:they`, `它们:they`, `她们:they`],
       [`刂:knife`, `𠂉:knife`],
-      [`扌:hand`, `爫:hand`, `𠂇:hand`],
+      [`扌:hand`, `𠂇:hand`],
       [`氵:water`, `氺:water`],
       [`艹:grass`, `草:grass`],
       [`言:speech`, `讠:speech`],
