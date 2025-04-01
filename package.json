@@ -59,6 +59,8 @@
     "typescript@npm:^5.7.3": "patch:typescript@npm%3A5.8.2#~/.yarn/patches/typescript-npm-5.8.2-b95d637f6a.patch",
     "@expo/cli@npm:0.22.20": "patch:@expo/cli@npm%3A0.22.20#~/.yarn/patches/@expo-cli-npm-0.22.20-0232ba978d.patch",
     "@types/pg@npm:8.6.1": "patch:@types/pg@npm%3A8.11.11#~/.yarn/patches/@types-pg-npm-8.11.11-c5a8a91498.patch",
-    "@types/pg@npm:*": "patch:@types/pg@npm%3A8.11.11#~/.yarn/patches/@types-pg-npm-8.11.11-c5a8a91498.patch"
+    "@types/pg@npm:*": "patch:@types/pg@npm%3A8.11.11#~/.yarn/patches/@types-pg-npm-8.11.11-c5a8a91498.patch",
+    "@expo/cli@npm:0.22.23": "patch:@expo/cli@npm%3A0.22.23#~/.yarn/patches/@expo-cli-npm-0.22.23-e1b846adca.patch",
+    "babel-preset-expo@npm:~12.0.10": "patch:babel-preset-expo@npm%3A12.0.10#~/.yarn/patches/babel-preset-expo-npm-12.0.10-a31546c93f.patch"
   }
 }
