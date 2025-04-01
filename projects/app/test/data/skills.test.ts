@@ -321,6 +321,22 @@ await test(`${skillReviewQueue.name} suite`, async () => {
       ]);
     });
 
+    await test(`learns the word form of component-form first`, async () => {
+      const graph = await skillLearningGraph({
+        targetSkills: [`he:汉:chinese`],
+        shouldSkipSubTree: () => false,
+      });
+
+      assert.deepEqual(skillReviewQueue({ graph, skillSrsStates: new Map() }), [
+        `he:丿:slash`,
+        `he:亅:hook`,
+        `he:又:again`,
+        `he:水:water`, // learns this because of 氵
+        `he:氵:water`,
+        `he:汉:chinese`,
+      ]);
+    });
+
     await test(`prioritises due skills with highest value (rather than most overdue)`, async () => {
       const graph = await skillLearningGraph({
         targetSkills: [`he:分:divide`],

@@ -1713,7 +1713,7 @@
 ["水:water",{"gloss":["water"],"pinyin":["shuǐ"],"example":"水是生命之源。","partOfSpeech":"radical","visualVariants":["氵","氺"],"definition":"A radical meaning 'water', used in characters related to liquids and flowing."}],
 ["水平:level",{"gloss":["level","standard","proficiency"],"pinyin":["shuǐ píng"],"example":"他的中文水平很高。","partOfSpeech":"noun","definition":"An indication of ability or quality in a certain domain."}],
 ["水果:fruit",{"gloss":["fruit"],"pinyin":["shuǐ guǒ"],"example":"她喜欢吃水果。","partOfSpeech":"noun","definition":"The sweet and fleshy product of a tree or other plant that contains seed and can be eaten as food."}],
-["氵:water",{"gloss":["water"],"glossHint":"氵 is a component form of 水.","partOfSpeech":"radical","definition":"A radical representing water, often used as a component in compound characters."}],
+["氵:water",{"gloss":["water"],"glossHint":"氵 is a component form of 水.","partOfSpeech":"radical","definition":"A radical representing water, often used as a component in compound characters.","componentFormOf":"水"}],
 ["氺:water",{"gloss":["water"],"glossHint":"water radical","partOfSpeech":"radical","definition":"A radical representing water, not used independently."}],
 ["永:long",{"gloss":["long"],"pinyin":["yǒng"],"partOfSpeech":"adjective","definition":"Describes something that is long in duration or extent."}],
 ["永远:forever",{"gloss":["forever","always"],"pinyin":["yǒng yuǎn"],"example":"我会永远支持你。","partOfSpeech":"adverb","definition":"For all future time; for always."}],

@@ -115,6 +115,11 @@ export type PinyinText = string & z.BRAND<`PinyinText`>;
  */
 export type HanziText = string & z.BRAND<`HanziText`>;
 
+/**
+ * Single Hanzi character
+ */
+export type HanziChar = string & z.BRAND<`HanziChar`>;
+
 export type HanziWordSkillType =
   | SkillType.HanziWordToEnglish
   | SkillType.HanziWordToPinyin

@@ -1,4 +1,5 @@
 import {
+  HanziChar,
   HanziText,
   HanziWord,
   PartOfSpeech,
@@ -18,6 +19,7 @@ import { z } from "zod";
 
 export const hanziWordSchema = z.string().transform((x) => x as HanziWord);
 export const hanziTextSchema = z.string().transform((x) => x as HanziText);
+export const hanziCharSchema = z.string().transform((x) => x as HanziChar);
 export const pinyinTextSchema = z
   .string({ description: `space separated pinyin for each word` })
   .transform((x) => x as PinyinText);
@@ -325,6 +327,11 @@ export const hanziWordMeaningSchema = z.object({
     })
     .optional(),
   partOfSpeech: partOfSpeechSchema,
+  componentFormOf: hanziCharSchema
+    .describe(
+      `the primary form of this hanzi (only relevant for component-form hanzi)`,
+    )
+    .optional(),
   visualVariants: z
     .array(hanziTextSchema, {
       description: `Hanzi with the same meaning but visually different. Only included in rare cases (e.g. radicals with multiple visual forms). `,
@@ -334,6 +341,7 @@ export const hanziWordMeaningSchema = z.object({
 });
 
 export type HanziWordMeaning = z.infer<typeof hanziWordMeaningSchema>;
+export type HanziWordWithMeaning = [HanziWord, HanziWordMeaning];
 
 export const dictionarySchema = z
   .array(z.tuple([hanziWordSchema, hanziWordMeaningSchema]))
@@ -395,12 +403,12 @@ export const lookupHanziWordPinyinMnemonics = async (hanziWord: HanziWord) =>
 const hanziToHanziWordMap = memoize0(
   async (): Promise<
     DeepReadonly<{
-      hanziMap: Map<string, [HanziWord, HanziWordMeaning][]>;
-      glossMap: Map<string, [HanziWord, HanziWordMeaning][]>;
+      hanziMap: Map<string, HanziWordWithMeaning[]>;
+      glossMap: Map<string, HanziWordWithMeaning[]>;
     }>
   > => {
-    const hanziMap = new Map<string, [HanziWord, HanziWordMeaning][]>();
-    const glossMap = new Map<string, [HanziWord, HanziWordMeaning][]>();
+    const hanziMap = new Map<string, HanziWordWithMeaning[]>();
+    const glossMap = new Map<string, HanziWordWithMeaning[]>();
 
     for (const item of await loadDictionary()) {
       const [hanziWord, meaning] = item;
@@ -419,14 +427,14 @@ const empty = [] as const;
 
 export const lookupHanzi = async (
   hanzi: string,
-): Promise<DeepReadonly<[HanziWord, HanziWordMeaning][]>> => {
+): Promise<DeepReadonly<HanziWordWithMeaning[]>> => {
   const { hanziMap } = await hanziToHanziWordMap();
   return hanziMap.get(hanzi) ?? empty;
 };
 
 export const lookupGloss = async (
   gloss: string,
-): Promise<DeepReadonly<[HanziWord, HanziWordMeaning][]>> => {
+): Promise<DeepReadonly<HanziWordWithMeaning[]>> => {
   const { glossMap } = await hanziToHanziWordMap();
   return glossMap.get(gloss) ?? empty;
 };
