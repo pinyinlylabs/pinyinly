@@ -1,14 +1,12 @@
 import {
-  buildHanziWord,
   characterHasGlyph,
+  decomposeHanzi,
+  glyphCount,
   hanziFromHanziWord,
-  hanziToLearnForHanzi,
-  loadDictionary,
   loadStandardPinyinChart,
   lookupGloss,
   lookupHanzi,
   lookupHanziWord,
-  meaningKeyFromHanziWord,
   parsePinyin,
   splitHanziText,
 } from "@/dictionary/dictionary";
@@ -166,20 +164,35 @@ export async function skillDependencies(
       // Learn the Hanzi -> English first. Knowing the meaning of the character
       // is useful to create a mnemonic to remember the pronunciation.
       deps.push(hanziWordToEnglish(hanziWordFromSkill(skill)));
+      const hanzi = hanziFromHanziWord(hanziWordFromSkill(skill));
+
+      // If the hanzi word is multiple characters (e.g. 为什么:why) learn the
+      // meaning of each one separately.
+      const characters = splitHanziText(hanzi);
+      if (characters.length > 1) {
+        for (const character of characters) {
+          if (await characterHasGlyph(character)) {
+            const hanziWord = await hackyGuessHanziWordToLearn(character);
+            if (hanziWord != null) {
+              deps.push(hanziWordToPinyin(hanziWord));
+            }
+          }
+        }
+      }
       break;
     }
     case SkillType.HanziWordToEnglish: {
       skill = skill as HanziWordSkill;
+
       // Learn the components of a hanzi word first.
-      const hanziToLearn = await hanziToLearnForHanzi(
-        splitHanziText(hanziFromHanziWord(hanziWordFromSkill(skill))),
-      );
-      for (const hanzi of hanziToLearn) {
-        if (await characterHasGlyph(hanzi)) {
+      for (const character of await decomposeHanzi(
+        hanziFromHanziWord(hanziWordFromSkill(skill)),
+      )) {
+        if (await characterHasGlyph(character)) {
           // TODO: need to a better way to choose the meaning key.
-          const meaningKey = await guessHanziMeaningKey(hanzi);
-          if (meaningKey != null) {
-            deps.push(hanziWordToEnglish(buildHanziWord(hanzi, meaningKey)));
+          const hanziWord = await hackyGuessHanziWordToLearn(character);
+          if (hanziWord != null) {
+            deps.push(hanziWordToEnglish(hanziWord));
           }
         }
       }
@@ -192,7 +205,7 @@ export async function skillDependencies(
 
       // Only do this for single characters
       const hanzi = hanziFromHanziWord(hanziWordFromSkill(skill));
-      if (splitHanziText(hanzi).length > 1) {
+      if (glyphCount(hanzi) > 1) {
         break;
       }
 
@@ -232,7 +245,7 @@ export async function skillDependencies(
 
       // Only do this for single characters
       const hanzi = hanziFromHanziWord(hanziWord);
-      if (splitHanziText(hanzi).length > 1) {
+      if (glyphCount(hanzi) > 1) {
         break;
       }
 
@@ -279,7 +292,7 @@ export async function skillDependencies(
 
       // Only do this for single characters
       const hanzi = hanziFromHanziWord(hanziWord);
-      if (splitHanziText(hanzi).length > 1) {
+      if (glyphCount(hanzi) > 1) {
         break;
       }
 
@@ -303,14 +316,12 @@ export async function skillDependencies(
   return deps;
 }
 
-async function guessHanziMeaningKey(
+async function hackyGuessHanziWordToLearn(
   hanzi: string,
-): Promise<string | undefined> {
-  const dict = await loadDictionary();
-  for (const key of dict.keys()) {
-    if (hanziFromHanziWord(key) === hanzi) {
-      return meaningKeyFromHanziWord(key);
-    }
+): Promise<HanziWord | undefined> {
+  const hanziWords = await lookupHanzi(hanzi);
+  for (const [hanziWord] of hanziWords) {
+    return hanziWord;
   }
 }
 

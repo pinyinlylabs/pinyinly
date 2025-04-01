@@ -6,6 +6,7 @@ import {
   HanziWordMeaning,
   lookupHanziWord,
 } from "@/dictionary/dictionary";
+import { evenHalve } from "@/util/collections";
 import { invariant, uniqueInvariant } from "@haohaohow/lib/invariant";
 import shuffle from "lodash/shuffle";
 import { DeepReadonly } from "ts-essentials";
@@ -114,13 +115,6 @@ export async function generateHanziWordToEnglishQuestionOrThrow(
       throw new Error(`todo: not implemented`);
     }
   }
-}
-
-function evenHalve<T>(items: T[]): [T[], T[]] {
-  const splitIndex = Math.floor(items.length / 2);
-  const a = items.slice(0, splitIndex);
-  const b = items.slice(splitIndex, splitIndex + a.length);
-  return [a, b];
 }
 
 type OtherHanziResult = [HanziWord, DeepReadonly<HanziWordMeaning>][];
