@@ -55,7 +55,7 @@ export const PinyinText = ({
 };
 
 const pinyinText = tv({
-  base: `text-base/none text-primary-9 w-full text-center`,
+  base: `text-base/none text-primary-9`,
   variants: {
     accented: {
       true: `text-accent-10 opacity-80`,
