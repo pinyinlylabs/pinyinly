@@ -148,12 +148,12 @@ const skillParam = (skill: Skill): string => {
       skill = skill as DeprecatedSkill;
       return skillTypeToShorthand(skillType(skill));
     }
-    case SkillType.HanziWordToEnglish:
+    case SkillType.HanziWordToGloss:
     case SkillType.HanziWordToPinyin:
     case SkillType.HanziWordToPinyinInitial:
     case SkillType.HanziWordToPinyinFinal:
     case SkillType.HanziWordToPinyinTone:
-    case SkillType.EnglishToHanziWord:
+    case SkillType.GlossToHanziWord:
     case SkillType.PinyinToHanziWord:
     case SkillType.ImageToHanziWord: {
       skill = skill as HanziWordSkill;

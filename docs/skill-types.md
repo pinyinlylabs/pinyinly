@@ -8,7 +8,7 @@ This document describes the different types of skills available in haohaohow.
 - **EnglishToRadical (`er`)**: Translate English to a radical.
 - **RadicalToPinyin (`rp`)**: Translate a radical to Pinyin.
 - **PinyinToRadical (`pr`)**: Translate Pinyin to a radical.
-- **HanziWordToEnglish (`he`)**: Translate a Hanzi word to English.
+- **HanziWordToGloss (`he`)**: Translate a Hanzi word to a gloss.
 - **HanziWordToPinyinInitial (`hpi`)**: Translate a Hanzi word to its Pinyin initial.
 - **HanziWordToPinyinFinal (`hpf`)**: Translate a Hanzi word to its Pinyin final.
 - **HanziWordToPinyinTone (`hpt`)**: Translate a Hanzi word to its Pinyin tone.

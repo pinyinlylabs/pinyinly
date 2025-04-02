@@ -23,11 +23,11 @@ import { HanziWordSkill, Skill } from "./rizzleSchema";
 import { hanziWordFromSkill, skillType } from "./skills";
 
 // generate a question to test a skill
-export async function generateHanziWordToEnglishQuestionOrThrow(
+export async function generateHanziWordToGlossQuestionOrThrow(
   skill: Skill,
 ): Promise<Question> {
   switch (skillType(skill)) {
-    case SkillType.HanziWordToEnglish: {
+    case SkillType.HanziWordToGloss: {
       skill = skill as HanziWordSkill;
       const hanziWord = hanziWordFromSkill(skill);
       const meaning = await lookupHanziWord(hanziWord);
@@ -104,7 +104,7 @@ export async function generateHanziWordToEnglishQuestionOrThrow(
     case SkillType.Deprecated_RadicalToEnglish:
     case SkillType.Deprecated_RadicalToPinyin:
     case SkillType.Deprecated:
-    case SkillType.EnglishToHanziWord:
+    case SkillType.GlossToHanziWord:
     case SkillType.HanziWordToPinyinFinal:
     case SkillType.HanziWordToPinyinInitial:
     case SkillType.HanziWordToPinyinTone:

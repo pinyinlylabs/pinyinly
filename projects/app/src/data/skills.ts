@@ -141,7 +141,7 @@ export const finalFromPinyinFinalAssociationSkill = (
   return final;
 };
 
-export const hanziWordToEnglishHanziWord = (
+export const hanziWordToGlossHanziWord = (
   skill: Skill,
 ): HanziWord | undefined => {
   if (skill.startsWith(`he:`)) {
@@ -156,17 +156,17 @@ export async function skillDependencies(
   const deps: Skill[] = [];
 
   switch (skillType(skill)) {
-    case SkillType.EnglishToHanziWord: {
+    case SkillType.GlossToHanziWord: {
       skill = skill as HanziWordSkill;
-      // Learn the Hanzi -> English first. It's easier to read than write (for chinese characters).
-      deps.push(hanziWordToEnglish(hanziWordFromSkill(skill)));
+      // Learn the Hanzi -> Gloss first. It's easier to read than write (for chinese characters).
+      deps.push(hanziWordToGloss(hanziWordFromSkill(skill)));
       break;
     }
     case SkillType.HanziWordToPinyin: {
       skill = skill as HanziWordSkill;
-      // Learn the Hanzi -> English first. Knowing the meaning of the character
+      // Learn the Hanzi -> Gloss first. Knowing the meaning of the character
       // is useful to create a mnemonic to remember the pronunciation.
-      deps.push(hanziWordToEnglish(hanziWordFromSkill(skill)));
+      deps.push(hanziWordToGloss(hanziWordFromSkill(skill)));
       const hanzi = hanziFromHanziWord(hanziWordFromSkill(skill));
 
       // If the hanzi word is multiple characters (e.g. 为什么:why) learn the
@@ -186,7 +186,7 @@ export async function skillDependencies(
       }
       break;
     }
-    case SkillType.HanziWordToEnglish: {
+    case SkillType.HanziWordToGloss: {
       skill = skill as HanziWordSkill;
 
       // Learn the components of a hanzi word first.
@@ -199,7 +199,7 @@ export async function skillDependencies(
             await hackyGuessHanziWordToLearn(character);
           if (hanziWordWithMeaning != null) {
             const [hanziWord, meaning] = hanziWordWithMeaning;
-            deps.push(hanziWordToEnglish(hanziWord));
+            deps.push(hanziWordToGloss(hanziWord));
 
             // If it's the component form of another base hanzi, learn that
             // first because it can help understand the meaning from the shape.
@@ -209,7 +209,7 @@ export async function skillDependencies(
               );
               if (hanziWordWithMeaning != null) {
                 const [hanziWord] = hanziWordWithMeaning;
-                deps.push(hanziWordToEnglish(hanziWord));
+                deps.push(hanziWordToGloss(hanziWord));
               }
             }
           }
@@ -351,8 +351,8 @@ export function hanziWordSkill(
   return `${rSkillType().marshal(type)}:${hanziWord}` as HanziWordSkill;
 }
 
-export const hanziWordToEnglish = (hanziWord: HanziWord) =>
-  hanziWordSkill(SkillType.HanziWordToEnglish, hanziWord);
+export const hanziWordToGloss = (hanziWord: HanziWord) =>
+  hanziWordSkill(SkillType.HanziWordToGloss, hanziWord);
 
 export const hanziWordToPinyin = (hanziWord: HanziWord) =>
   hanziWordSkill(SkillType.HanziWordToPinyin, hanziWord);
@@ -366,8 +366,8 @@ export const hanziWordToPinyinFinal = (hanziWord: HanziWord) =>
 export const hanziWordToPinyinTone = (hanziWord: HanziWord) =>
   hanziWordSkill(SkillType.HanziWordToPinyinTone, hanziWord);
 
-export const englishToHanziWord = (hanziWord: HanziWord) =>
-  hanziWordSkill(SkillType.EnglishToHanziWord, hanziWord);
+export const glossToHanziWord = (hanziWord: HanziWord) =>
+  hanziWordSkill(SkillType.GlossToHanziWord, hanziWord);
 
 export function pinyinFinalAssociation(
   final: string,
@@ -509,8 +509,8 @@ const skillTypeShorthandMapping: Record<SkillType, string> = {
   [SkillType.Deprecated_RadicalToEnglish]: `[deprecated]`,
   [SkillType.Deprecated_RadicalToPinyin]: `[deprecated]`,
   [SkillType.Deprecated]: `[deprecated]`,
-  [SkillType.EnglishToHanziWord]: `EN → 中文`,
-  [SkillType.HanziWordToEnglish]: `中文 → EN`,
+  [SkillType.GlossToHanziWord]: `EN → 中文`,
+  [SkillType.HanziWordToGloss]: `中文 → EN`,
   [SkillType.HanziWordToPinyin]: `中文 → PY`,
   [SkillType.HanziWordToPinyinFinal]: `中文 → PY⁻ᶠ`,
   [SkillType.HanziWordToPinyinInitial]: `中文 → PYⁱ⁻`,
@@ -532,12 +532,12 @@ export async function skillsToReReviewForHanziGlossMistake(
 
   // Queue all skills relevant to the gloss.
   for (const [hanziWord] of await lookupGloss(mistake.gloss)) {
-    skills.add(hanziWordToEnglish(hanziWord));
+    skills.add(hanziWordToGloss(hanziWord));
   }
 
   // Queue all skills relevant to the hanzi.
   for (const [hanziWord] of await lookupHanzi(mistake.hanzi)) {
-    skills.add(hanziWordToEnglish(hanziWord));
+    skills.add(hanziWordToGloss(hanziWord));
   }
 
   return skills;
@@ -649,7 +649,7 @@ export function computeSkillRating(opts: {
 
   switch (skillType(opts.skill)) {
     case SkillType.HanziWordToPinyin:
-    case SkillType.HanziWordToEnglish: {
+    case SkillType.HanziWordToGloss: {
       easyDuration = 5000;
       goodDuration = 10_000;
       break;
@@ -657,7 +657,7 @@ export function computeSkillRating(opts: {
     case SkillType.HanziWordToPinyinInitial:
     case SkillType.HanziWordToPinyinFinal:
     case SkillType.HanziWordToPinyinTone:
-    case SkillType.EnglishToHanziWord:
+    case SkillType.GlossToHanziWord:
     case SkillType.PinyinToHanziWord:
     case SkillType.ImageToHanziWord:
     case SkillType.PinyinInitialAssociation:

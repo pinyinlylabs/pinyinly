@@ -56,15 +56,15 @@ export enum SkillType {
   /**
    * When shown a hanzi word, write the english translation.
    */
-  HanziWordToEnglish = `HanziWordToEnglish`,
+  HanziWordToGloss = `HanziWordToGloss`,
   HanziWordToPinyin = `HanziWordToPinyin`,
   HanziWordToPinyinInitial = `HanziWordToPinyinInitial`,
   HanziWordToPinyinFinal = `HanziWordToPinyinFinal`,
   HanziWordToPinyinTone = `HanziWordToPinyinTone`,
   /**
-   * When shown an english word, write the hanzi characters.
+   * When shown a gloss, write the hanzi characters.
    */
-  EnglishToHanziWord = `EnglishToHanzi`,
+  GlossToHanziWord = `GlossToHanziWord`,
   /**
    * Given a pinyin word, write the hanzi character.
    */
@@ -121,12 +121,12 @@ export type HanziText = string & z.BRAND<`HanziText`>;
 export type HanziChar = string & z.BRAND<`HanziChar`>;
 
 export type HanziWordSkillType =
-  | SkillType.HanziWordToEnglish
+  | SkillType.HanziWordToGloss
   | SkillType.HanziWordToPinyin
   | SkillType.HanziWordToPinyinInitial
   | SkillType.HanziWordToPinyinFinal
   | SkillType.HanziWordToPinyinTone
-  | SkillType.EnglishToHanziWord
+  | SkillType.GlossToHanziWord
   | SkillType.PinyinToHanziWord
   | SkillType.ImageToHanziWord;
 

@@ -3,7 +3,7 @@ import {
   supportedSchemas,
   v7,
 } from "#data/rizzleSchema.ts";
-import { englishToHanziWord } from "#data/skills.ts";
+import { glossToHanziWord } from "#data/skills.ts";
 import { xmin } from "#server/lib/db.ts";
 import {
   computeCvrEntities,
@@ -159,7 +159,7 @@ await test(`${push.name} suite`, async (t) => {
           name: schema.rateSkill._def.alias!,
           args: schema.rateSkill.marshalArgs({
             id: nanoid(),
-            skill: englishToHanziWord(`我:i`),
+            skill: glossToHanziWord(`我:i`),
             rating: Rating.Good,
             durationMs: null,
             now: new Date(),
@@ -369,7 +369,7 @@ await test(`${pull.name} suite`, async (t) => {
               {
                 userId: user.id,
                 srs: srsStateFromFsrsState(nextReview(null, Rating.Good)),
-                skill: englishToHanziWord(`我:i`),
+                skill: glossToHanziWord(`我:i`),
               },
             ])
             .returning();
@@ -513,7 +513,7 @@ await test(`${pull.name} suite`, async (t) => {
             {
               userId: user.id,
               srs: srsStateFromFsrsState(nextReview(null, Rating.Good)),
-              skill: englishToHanziWord(`我:i`),
+              skill: glossToHanziWord(`我:i`),
             },
           ])
           .returning();
@@ -556,7 +556,7 @@ await test(`${pull.name} suite`, async (t) => {
             {
               userId: user.id,
               srs: srsStateFromFsrsState(nextReview(null, Rating.Good)),
-              skill: englishToHanziWord(`我:i`),
+              skill: glossToHanziWord(`我:i`),
             },
           ])
           .returning();
@@ -607,7 +607,7 @@ await test(`${pull.name} suite`, async (t) => {
           .values([
             {
               userId: user.id,
-              skill: englishToHanziWord(`我:i`),
+              skill: glossToHanziWord(`我:i`),
               rating: Rating.Good,
               createdAt: now,
             },
@@ -662,7 +662,7 @@ await test(`${pull.name} suite`, async (t) => {
           .values([
             {
               userId: user.id,
-              skill: englishToHanziWord(`我:i`),
+              skill: glossToHanziWord(`我:i`),
               rating: Rating.Again,
               createdAt: now,
               durationMs: 1234,
@@ -689,7 +689,7 @@ await test(`${pull.name} suite`, async (t) => {
               key: schema.skillRating.marshalKey({ id: skillRating.id }),
               value: schema.skillRating.marshalValue({
                 id: skillRating.id,
-                skill: englishToHanziWord(`我:i`),
+                skill: glossToHanziWord(`我:i`),
                 rating: Rating.Again,
                 createdAt: now,
                 durationMs: 1234,
@@ -757,12 +757,12 @@ await test(`${computeCvrEntities.name} suite`, async (t) => {
           .values([
             {
               userId: user1.id,
-              skill: englishToHanziWord(`我:i`),
+              skill: glossToHanziWord(`我:i`),
               srs: srsStateFromFsrsState(nextReview(null, Rating.Good)),
             },
             {
               userId: user2.id,
-              skill: englishToHanziWord(`我:i`),
+              skill: glossToHanziWord(`我:i`),
               srs: srsStateFromFsrsState(nextReview(null, Rating.Good)),
             },
           ])
@@ -798,12 +798,12 @@ await test(`${computeCvrEntities.name} suite`, async (t) => {
           .values([
             {
               userId: user1.id,
-              skill: englishToHanziWord(`我:i`),
+              skill: glossToHanziWord(`我:i`),
               rating: Rating.Again,
             },
             {
               userId: user2.id,
-              skill: englishToHanziWord(`我:i`),
+              skill: glossToHanziWord(`我:i`),
               rating: Rating.Good,
             },
           ])

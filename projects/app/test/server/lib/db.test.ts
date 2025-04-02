@@ -1,5 +1,5 @@
 import { Skill, srsStateFromFsrsState } from "#data/rizzleSchema.ts";
-import { englishToHanziWord } from "#data/skills.ts";
+import { glossToHanziWord } from "#data/skills.ts";
 import { Drizzle, pgBatchUpdate, substring } from "#server/lib/db.ts";
 import * as s from "#server/schema.ts";
 import { nextReview, Rating } from "#util/fsrs.ts";
@@ -86,7 +86,7 @@ await test(`${pgBatchUpdate.name} suite`, async (t) => {
         {
           userId: user.id,
           srs: srsStateFromFsrsState(nextReview(null, Rating.Good)),
-          skill: englishToHanziWord(`我:i`),
+          skill: glossToHanziWord(`我:i`),
         },
       ])
       .returning();
@@ -120,12 +120,12 @@ await test(`${pgBatchUpdate.name} suite`, async (t) => {
         {
           userId: user.id,
           srs: srsStateFromFsrsState(nextReview(null, Rating.Good)),
-          skill: englishToHanziWord(`我:i`),
+          skill: glossToHanziWord(`我:i`),
         },
         {
           userId: user.id,
           srs: srsStateFromFsrsState(nextReview(null, Rating.Hard)),
-          skill: englishToHanziWord(`两:pair`),
+          skill: glossToHanziWord(`两:pair`),
         },
       ])
       .returning();

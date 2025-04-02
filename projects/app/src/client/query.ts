@@ -9,7 +9,7 @@ import {
 } from "@/data/model";
 import { Rizzle, Skill } from "@/data/rizzleSchema";
 import {
-  hanziWordToEnglish,
+  hanziWordToGloss,
   hanziWordToPinyin,
   skillDueWindow,
   skillLearningGraph,
@@ -75,7 +75,7 @@ export function flagsForSrsState(
 
 export async function getAllTargetSkills() {
   return await allHsk1HanziWords().then((words) =>
-    words.flatMap((w) => [hanziWordToEnglish(w), hanziWordToPinyin(w)]),
+    words.flatMap((w) => [hanziWordToGloss(w), hanziWordToPinyin(w)]),
   );
 }
 
