@@ -281,4 +281,5 @@ export function evenHalve<T>(items: T[]): [T[], T[]] {
   return [a, b];
 }
 
-export const emptySet: ReadonlySet<unknown> = new Set();
+export const emptySet: ReadonlySet<never> = new Set();
+export const emptyArray: readonly never[] = [];

@@ -407,6 +407,7 @@ export async function pull(
         skillStates,
         skillRatings,
         hanziGlossMistakes,
+        hanziPinyinMistakes,
       ] = await Promise.all([
         db.query.pinyinFinalAssociation.findMany({
           where: (t) =>
@@ -478,6 +479,10 @@ export async function pull(
           hanziGlossMistake: {
             dels: entitiesDiff.hanziGlossMistake?.dels ?? [],
             puts: hanziGlossMistakes,
+          },
+          hanziPinyinMistake: {
+            dels: entitiesDiff.hanziPinyinMistake?.dels ?? [],
+            puts: hanziPinyinMistakes,
           },
         },
         nextCvr: {
@@ -557,6 +562,16 @@ export async function pull(
     if (`hanziGlossMistake` in schema) {
       const e = schema.hanziGlossMistake;
       for (const s of entityPatches.hanziGlossMistake.puts) {
+        patch.push({
+          op: `put`,
+          key: e.marshalKey(s),
+          value: e.marshalValue(s),
+        });
+      }
+    }
+    if (`hanziPinyinMistake` in schema) {
+      const e = schema.hanziPinyinMistake;
+      for (const s of entityPatches.hanziPinyinMistake.puts) {
         patch.push({
           op: `put`,
           key: e.marshalKey(s),
