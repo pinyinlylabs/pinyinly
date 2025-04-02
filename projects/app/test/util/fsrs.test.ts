@@ -1,10 +1,4 @@
-import {
-  FsrsState,
-  Rating,
-  fsrsIsIntroduced,
-  nextReview,
-  ratingName,
-} from "#util/fsrs.ts";
+import { FsrsState, Rating, nextReview, ratingName } from "#util/fsrs.ts";
 import { RepeatedSequence2 } from "#util/types.ts";
 import type { Duration } from "date-fns";
 import { add } from "date-fns/add";
@@ -65,7 +59,7 @@ await test(`${nextReview.name} suite`, async () => {
     );
   });
 
-  await test(`stability does not decrease from .Again`, () => {
+  await test(`stability decreases from .Again`, () => {
     const before = nextReview(null, Rating.Good);
     const after = nextReview(
       before,
@@ -73,7 +67,7 @@ await test(`${nextReview.name} suite`, async () => {
       parseRelativeTimeShorthand(`+10m`),
     );
 
-    assert.ok(after.stability === before.stability);
+    assert.ok(after.stability < before.stability);
   });
 
   await test(`difficulty lowers with Easy and increases with Hard`, () => {
@@ -120,14 +114,14 @@ await testFsrsSequence(`Again → Again → Again`, [
   Rating.Again,
   {
     difficulty: 7.5455,
-    stability: 0.5701,
+    stability: 0.277_987_11,
     delay: { minutes: 1 },
   },
   { minutes: 1 },
   Rating.Again,
   {
     difficulty: 7.5455,
-    stability: 0.5701,
+    stability: 0.146_182_23,
     delay: { minutes: 1 },
   },
   { minutes: 1 },
@@ -261,33 +255,32 @@ await testFsrsSequence(`Good → Again → Again → Easy → Easy`, [
   Rating.Again,
   {
     difficulty: 5.1443,
-    stability: 4.1386,
+    stability: 1.473_632_35,
     delay: { minutes: 1 },
   },
   { minutes: 1 },
   Rating.Again,
   {
     difficulty: 5.1443,
-    stability: 4.1386,
+    stability: 0.621_389_34,
     delay: { minutes: 1 },
   },
   { minutes: 1 },
   Rating.Easy,
   {
     difficulty: 4.312_829_74,
-    stability: 4.144_369_18,
-    delay: { days: 4, hours: 3, minutes: 28 },
+    stability: 0.628_829_35,
+    delay: { hours: 15, minutes: 6 },
   },
-  { days: 4, hours: 3, minutes: 28 },
+  { hours: 15, minutes: 6 },
   Rating.Easy,
   {
     difficulty: 3.511_458_7,
-    stability: 39.425_421_47,
+    stability: 7.526_747_8,
     delay: {
-      months: 1,
-      days: 8,
-      hours: 10,
-      minutes: 13,
+      days: 7,
+      hours: 12,
+      minutes: 39,
     },
   },
   {
@@ -335,6 +328,39 @@ await testFsrsSequence(`Again → Good → Good → Good → Good`, [
   },
   { days: 13, hours: 3, minutes: 1 },
 ]);
+
+await test(`Again should drop stability`, async () => {
+  await testFsrsSequence(`Good → Good → Good → Again`, [
+    Rating.Good,
+    {
+      difficulty: 5.1443,
+      stability: 4.1386,
+      delay: { days: 4, hours: 3, minutes: 20 },
+    },
+    { minutes: 5 },
+    Rating.Good,
+    {
+      difficulty: 5.1443,
+      stability: 4.148_813_98,
+      delay: { days: 4, hours: 3, minutes: 34 },
+    },
+    { minutes: 5 },
+    Rating.Good,
+    {
+      difficulty: 5.1443,
+      stability: 4.159_024_81,
+      delay: { days: 4, hours: 3, minutes: 49 },
+    },
+    { minutes: 5 },
+    Rating.Again,
+    {
+      difficulty: 5.1443,
+      stability: 1.276_621_05,
+      delay: { minutes: 1 },
+    },
+    { minutes: 5 },
+  ]);
+});
 
 await test(`reviewing before due`, async () => {
   await testFsrsSequence(`Good → Good → Good → Good → Good → Good`, [
@@ -408,34 +434,6 @@ await test(`reviewing before due`, async () => {
     },
     { minutes: 5 },
   ]);
-});
-
-await test(`${fsrsIsIntroduced.name} suite`, async () => {
-  await test(`treats Again → Good as introduced`, ({ mock }) => {
-    mock.timers.enable({ apis: [`Date`] });
-    let state = nextReview(null, Rating.Again);
-    mock.timers.tick(5000);
-    state = nextReview(state, Rating.Good);
-
-    assert.equal(fsrsIsIntroduced(state), true);
-  });
-
-  await test(`treats Again → Again → Good as introduced`, ({ mock }) => {
-    mock.timers.enable({ apis: [`Date`] });
-    let state = nextReview(null, Rating.Again);
-    mock.timers.tick(5000);
-    state = nextReview(state, Rating.Again);
-    mock.timers.tick(5000);
-    state = nextReview(state, Rating.Good);
-
-    assert.equal(fsrsIsIntroduced(state), true);
-  });
-
-  await test(`treats Again as not introduced`, () => {
-    const state = nextReview(null, Rating.Again);
-
-    assert.equal(fsrsIsIntroduced(state), false);
-  });
 });
 
 type ExpectedReview = z.TypeOf<typeof expectedReviewSchema>;

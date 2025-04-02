@@ -12,7 +12,7 @@ import {
   splitHanziText,
 } from "@/dictionary/dictionary";
 import { sortComparatorNumber } from "@/util/collections";
-import { fsrsIsIntroduced, nextReview, Rating } from "@/util/fsrs";
+import { Rating } from "@/util/fsrs";
 import { makePRNG } from "@/util/random";
 import { invariant } from "@haohaohow/lib/invariant";
 import type { Duration } from "date-fns";
@@ -422,7 +422,7 @@ export function skillReviewQueue({
 
     const srsState = skillSrsStates.get(skill);
 
-    if (srsState == null || !isSkillIntroduced(srsState)) {
+    if (srsState == null) {
       learningOrderNew.push(skill);
     } else if (srsState.nextReviewAt > now) {
       learningOrderNotDue.push([skill, srsState]);
@@ -503,17 +503,6 @@ const randomSortSkills = (skillStates: [Skill, SrsState | undefined][]) => {
   return weighted.map(([skill]) => skill);
 };
 
-const isSkillIntroduced = (srsState: SrsState) => {
-  switch (srsState.type) {
-    case SrsType.FsrsFourPointFive: {
-      return fsrsIsIntroduced(srsState);
-    }
-    case SrsType.Mock: {
-      return true;
-    }
-  }
-};
-
 const skillTypeShorthandMapping: Record<SkillType, string> = {
   [SkillType.Deprecated_EnglishToRadical]: `[deprecated]`,
   [SkillType.Deprecated_PinyinToRadical]: `[deprecated]`,
@@ -581,7 +570,13 @@ export function nextReviewForOtherSkillMistake<T extends SrsState>(
       return srs;
     }
     case SrsType.FsrsFourPointFive: {
-      return srsStateFromFsrsState(nextReview(srs, Rating.Again, now)) as T;
+      // Schedule the skill for immediate review, but don't actually mark it as
+      // an error (`Rating.Again`) otherwise the difficulty and stability will
+      // change, but they haven't actually made a mistake yet on that skill.
+      return srsStateFromFsrsState({
+        ...srs,
+        nextReviewAt: now,
+      }) as T;
     }
   }
 }
@@ -645,10 +640,9 @@ export const skillDueWindow: Duration = { hours: 24 };
 export function computeSkillRating(opts: {
   skill: Skill;
   correct: boolean;
-  hadPreviousMistake: boolean;
   durationMs: number;
 }): SkillRating {
-  const { skill, correct, durationMs, hadPreviousMistake } = opts;
+  const { skill, correct, durationMs } = opts;
 
   let easyDuration;
   let goodDuration;
@@ -680,13 +674,11 @@ export function computeSkillRating(opts: {
   }
 
   const rating = correct
-    ? hadPreviousMistake
-      ? Rating.Hard
-      : durationMs < easyDuration
-        ? Rating.Easy
-        : durationMs < goodDuration
-          ? Rating.Good
-          : Rating.Hard
+    ? durationMs < easyDuration
+      ? Rating.Easy
+      : durationMs < goodDuration
+        ? Rating.Good
+        : Rating.Hard
     : Rating.Again;
 
   return { skill, rating, durationMs };

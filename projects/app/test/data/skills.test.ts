@@ -494,7 +494,6 @@ await test(`${computeSkillRating.name} suite`, async () => {
       skill,
       durationMs,
       correct: true,
-      hadPreviousMistake: true,
     });
     assert.partialDeepStrictEqual(rating, { skill, durationMs });
   });
@@ -502,23 +501,12 @@ await test(`${computeSkillRating.name} suite`, async () => {
   await test(`${SkillType.HanziWordToEnglish} suites`, async () => {
     const skill = `he:我:i`;
 
-    await test(`gives Hard rating for correct answer after previous mistake regardless of duration`, async () => {
-      const rating = computeSkillRating({
-        skill,
-        durationMs: 1000,
-        correct: true,
-        hadPreviousMistake: true,
-      });
-      assert.equal(rating.rating, Rating.Hard);
-    });
-
     await test(`gives rating based on duration`, async () => {
       {
         const { rating } = computeSkillRating({
           skill,
           durationMs: 1000,
           correct: true,
-          hadPreviousMistake: false,
         });
         assert.equal(rating, Rating.Easy);
       }
@@ -528,7 +516,6 @@ await test(`${computeSkillRating.name} suite`, async () => {
           skill,
           durationMs: 6000,
           correct: true,
-          hadPreviousMistake: false,
         });
         assert.equal(rating, Rating.Good);
       }
@@ -538,7 +525,6 @@ await test(`${computeSkillRating.name} suite`, async () => {
           skill,
           durationMs: 11_000,
           correct: true,
-          hadPreviousMistake: false,
         });
         assert.equal(rating, Rating.Hard);
       }
