@@ -57,11 +57,13 @@ await test(`${pgBatchUpdate.name} suite`, async (t) => {
   const txTest = withTxTest(t);
 
   await txTest(`no updates should be no-op`, async (tx) => {
-    await pgBatchUpdate(tx, {
+    const result = await pgBatchUpdate(tx, {
       whereColumn: s.skillState.id,
       setColumn: s.skillState.srs,
       updates: [],
     });
+
+    assert.deepEqual(result, { affectedRows: 0 });
   });
 
   await txTest(`throws when given different columns`, async (tx) => {
@@ -95,11 +97,12 @@ await test(`${pgBatchUpdate.name} suite`, async (t) => {
     const newSrs = srsStateFromFsrsState(
       nextReview(skillState.srs, Rating.Good),
     );
-    await pgBatchUpdate(tx, {
+    const result = await pgBatchUpdate(tx, {
       whereColumn: s.skillState.id,
       setColumn: s.skillState.srs,
       updates: [[skillState.id, newSrs]],
     });
+    assert.deepEqual(result, { affectedRows: 1 });
 
     const updatedSkillState = await tx.query.skillState.findFirst({
       where: (t) => eq(t.id, skillState.id),
@@ -135,7 +138,7 @@ await test(`${pgBatchUpdate.name} suite`, async (t) => {
     const newSkillState2Srs = srsStateFromFsrsState(
       nextReview(skillState2.srs, Rating.Good),
     );
-    await pgBatchUpdate(tx, {
+    const result = await pgBatchUpdate(tx, {
       whereColumn: s.skillState.id,
       setColumn: s.skillState.srs,
       updates: [
@@ -143,6 +146,7 @@ await test(`${pgBatchUpdate.name} suite`, async (t) => {
         [skillState2.id, newSkillState2Srs],
       ],
     });
+    assert.deepEqual(result, { affectedRows: 2 });
 
     const updatedSkillState1 = await tx.query.skillState.findFirst({
       where: (t) => eq(t.id, skillState1.id),
