@@ -18,8 +18,14 @@ import {
   skillType,
   skillTypeToShorthand,
 } from "@/data/skills";
+import {
+  emptyArray,
+  inverseSortComparator,
+  sortComparatorDate,
+} from "@/util/collections";
 import { Rating } from "@/util/fsrs";
 import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 import { ScrollView, Text, View } from "react-native";
 
 export default function HistoryPage() {
@@ -43,10 +49,27 @@ export default function HistoryPage() {
   const hanziGlossMistakesQuery = useRizzleQueryPaged(
     [HistoryPage.name, `hanziGlossMistakesQuery`],
     async (r) => {
-      const res = await r.queryPaged.hanziGlossMistake.byCreatedAt().toArray();
-      return res.reverse();
+      return await r.queryPaged.hanziGlossMistake.byCreatedAt().toArray();
     },
   );
+
+  const hanziPinyinMistakesQuery = useRizzleQueryPaged(
+    [HistoryPage.name, `hanziPinyinMistakesQuery`],
+    async (r) => {
+      return await r.queryPaged.hanziPinyinMistake.byCreatedAt().toArray();
+    },
+  );
+
+  const allMistakes = useMemo(() => {
+    return [
+      ...(hanziGlossMistakesQuery.data ?? emptyArray),
+      ...(hanziPinyinMistakesQuery.data ?? emptyArray),
+    ].sort(
+      inverseSortComparator(
+        sortComparatorDate(([, mistake]) => mistake.createdAt),
+      ),
+    );
+  }, [hanziGlossMistakesQuery.data, hanziPinyinMistakesQuery.data]);
 
   return (
     <ScrollView contentContainerClassName="py-safe-offset-4 px-safe-or-4 items-center">
@@ -67,10 +90,11 @@ export default function HistoryPage() {
 
           <View>
             <Text className="self-center text-xl text-text">mistakes</Text>
-            {hanziGlossMistakesQuery.data?.map(([_key, value], i) => (
+            {allMistakes.map(([_key, value], i) => (
               <View key={i}>
                 <Text className="text-text">
-                  {value.hanzi} ❌ {value.gloss}
+                  {value.hanzi} ❌{` `}
+                  {`gloss` in value ? value.gloss : value.pinyin}
                 </Text>
               </View>
             ))}

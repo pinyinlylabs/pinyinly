@@ -254,7 +254,7 @@ export async function pgBatchUpdate<
       set: GetColumnData<SetColumn>,
     ][];
   },
-): Promise<void> {
+): Promise<{ affectedRows: number }> {
   const { whereColumn, setColumn, updates } = options;
 
   invariant(
@@ -263,7 +263,9 @@ export async function pgBatchUpdate<
   );
 
   if (updates.length === 0) {
-    return;
+    return {
+      affectedRows: 0,
+    };
   }
 
   const table = whereColumn.table;
@@ -280,12 +282,17 @@ export async function pgBatchUpdate<
   );
 
   const query = sql`
-    with vals(where_value, set_value) as (${values})
-    update ${table} as t
-    set ${sql.identifier(setColumn.name)} = vals.set_value
-    from vals
-    where t.${sql.identifier(whereColumn.name)} = vals.where_value
+    with updated as (
+      with vals(where_value, set_value) as (${values})
+      update ${table} as t
+      set ${sql.identifier(setColumn.name)} = vals.set_value
+      from vals
+      where t.${sql.identifier(whereColumn.name)} = vals.where_value
+      returning 1
+    )
+    select count(*)::double precision from updated
   `;
 
-  await db.execute(query);
+  const { rows } = await db.execute<{ count: number }>(query);
+  return { affectedRows: rows[0]?.count ?? 0 };
 }
