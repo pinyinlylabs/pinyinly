@@ -440,17 +440,17 @@ export function skillReviewQueue({
     const skill = queue.shift();
     invariant(skill != null);
 
-    if (hasStableDependencies(skill)) {
-      const srsState = skillSrsStates.get(skill);
-      if (srsState == null) {
+    const srsState = skillSrsStates.get(skill);
+    if (srsState == null) {
+      if (hasStableDependencies(skill)) {
         learningOrderNew.push(skill);
-      } else if (srsState.nextReviewAt > now) {
-        learningOrderNotDue.push([skill, srsState]);
       } else {
-        learningOrderDue.push([skill, srsState.nextReviewAt.getTime()]);
+        learningOrderBlocked.push(skill);
       }
+    } else if (srsState.nextReviewAt > now) {
+      learningOrderNotDue.push([skill, srsState]);
     } else {
-      learningOrderBlocked.push(skill);
+      learningOrderDue.push([skill, srsState.nextReviewAt.getTime()]);
     }
 
     const node = graph.get(skill);
