@@ -11,8 +11,23 @@ export enum Rating {
 }
 
 const w = [
-  0.5701, 1.4436, 4.1386, 10.9355, 5.1443, 1.2006, 0.8627, 0.0362, 1.629,
-  0.1342, 1.0166, 2.1174, 0.0839, 0.3204, 1.4676, 0.219, 2.8237,
+  0.5701, // initial stability (Again)
+  1.4436, // initial stability (Hard)
+  4.1386, // initial stability (Good)
+  10.9355, // initial stability (Easy)
+  5.1443, // initial difficulty (Good)
+  1.2006, // initial difficulty (multiplier)
+  0.8627, // difficulty (multiplier)
+  0.0362, // difficulty (multiplier)
+  1.629, // stability (exponent)
+  0.1342, // stability (negative power)
+  1.0166, // stability (exponent)
+  2.1174, // fail stability (multiplier)
+  0.0839, // fail stability (negative power)
+  0.3204, // fail stability (power)
+  1.4676, // fail stability (exponent)
+  0.219, // stability (multiplier for Hard)
+  2.8237, // stability (multiplier for Easy)
 ] as const;
 
 export interface FsrsState {
@@ -151,17 +166,24 @@ function nextStability(
   nextCreated: Date,
   rating: Rating,
 ): number {
-  if (rating === Rating.Again) {
-    return lastReview.stability;
-  }
-
   const elapsedDays = daysDiff(lastReview.prevReviewAt, nextCreated);
   const retrievability = forgettingCurve(elapsedDays, lastReview.stability);
+
+  if (rating === Rating.Again) {
+    // implementation from next_forget_stability()
+    return constrainStability(
+      w[11] *
+        Math.pow(lastReview.difficulty, -w[12]) *
+        (Math.pow(lastReview.stability + 1, w[13]) - 1) *
+        Math.exp((1 - retrievability) * w[14]),
+    );
+  }
 
   const hardPenalty = rating === Rating.Hard ? w[15] : 1;
   const easyBound = rating === Rating.Easy ? w[16] : 1;
 
-  return round(
+  // implementation from next_recall_stability()
+  return constrainStability(
     lastReview.stability *
       (1 +
         Math.exp(w[8]) *
@@ -170,7 +192,6 @@ function nextStability(
           (Math.exp((1 - retrievability) * w[10]) - 1) *
           hardPenalty *
           easyBound),
-    8,
   );
 }
 
@@ -180,7 +201,11 @@ function nextStability(
  * @param {number} difficulty $$D \in [1,10]$$
  */
 function constrainDifficulty(difficulty: number): number {
-  return Math.min(Math.max(round(difficulty, 8), 1), 10);
+  return round(Math.min(Math.max(round(difficulty, 8), 1), 10), 8);
+}
+
+function constrainStability(stability: number): number {
+  return round(Math.min(Math.max(round(stability, 8), 0.1), 36_500), 8);
 }
 
 /**
@@ -245,22 +270,6 @@ function intervalModifier(requestRetentionPercentile: number): number {
  */
 export function fsrsIsLearned(options: Pick<FsrsState, `stability`>): boolean {
   return options.stability >= 100;
-}
-
-const { stability: isIntroducedStability } = nextReview(null, Rating.Again);
-
-/**
- * Return true if the skill has been introduced and is ready for review. This is
- * used to determine whether a skill should be included in the review queue. A
- * skill can be "marked incorrect" even if it's never been introduced, because
- * it can be presented as one of the wrong answers in a quiz. If it's submitted
- * as a wrong answer it will be marked as incorrect, however it's important not
- * to prematurely introduce it into the review queue.
- */
-export function fsrsIsIntroduced(
-  options: Pick<FsrsState, `stability`>,
-): boolean {
-  return options.stability > isIntroducedStability;
 }
 
 export function ratingName(rating: Rating) {

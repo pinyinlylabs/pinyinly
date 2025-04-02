@@ -3,10 +3,15 @@ import {
   flagsForSrsState,
   hsk1SkillReview,
 } from "#client/query.ts";
-import { QuestionFlagType, SrsType } from "#data/model.ts";
+import {
+  HanziText,
+  PinyinText,
+  QuestionFlagType,
+  SrsType,
+} from "#data/model.ts";
 import { v7Mutators } from "#data/rizzleMutators.ts";
-import { Skill, srsStateFromFsrsState, v7 } from "#data/rizzleSchema.ts";
-import { nextReview, Rating } from "#util/fsrs.ts";
+import { Skill, v7 } from "#data/rizzleSchema.ts";
+import { Rating } from "#util/fsrs.ts";
 import { nanoid } from "#util/nanoid.ts";
 import { r } from "#util/rizzle.ts";
 import { invariant } from "@haohaohow/lib/invariant";
@@ -47,7 +52,7 @@ await test(`${computeSkillReviewQueue.name} suite`, async () => {
       history: [
         // first question is 丿:slash but they get it wrong. 八 is one of the
         // wrong choices they submit so it's also marked wrong.
-        `❌ he:丿:slash he:八:eight`,
+        `❌hanziGloss 丿 eight`,
         `💤 1h`, // wait past he:八:eight due date
       ],
     });
@@ -65,7 +70,7 @@ await test(`${computeSkillReviewQueue.name} suite`, async () => {
   await test(`learns new skills first (stable sorted to maintain graph order) rather than reviewing not-due skills`, async () => {
     const reviewQueue = await simulateSkillReviews({
       targetSkills: [`he:分:divide`],
-      history: [`✅ he:丿:slash`, `💤 1m`],
+      history: [`🟡 he:丿:slash`, `💤 1m`],
     });
 
     assert.deepEqual(reviewQueue, [
@@ -82,21 +87,21 @@ await test(`${computeSkillReviewQueue.name} suite`, async () => {
     const history: SkillReviewOp[] = [
       `❌ he:𠃌:radical`, // Get it wrong initially (so after all the reviews it will have lower "stability" than the others).
       `💤 5s`,
-      `✅ he:𠃌:radical`, // Then answer it correctly.
+      `🟡 he:𠃌:radical`, // Then answer it correctly.
       `💤 5s`,
-      `✅ he:刀:knife`,
+      `🟡 he:刀:knife`,
       `💤 5s`,
-      `✅ he:八:eight`,
+      `🟡 he:八:eight`,
       `💤 5s`,
-      `✅ he:分:divide`,
+      `🟡 he:分:divide`,
       `💤 5s`,
-      `✅ he:丿:slash`,
+      `🟡 he:丿:slash`,
     ];
 
     const [review1] = await simulateSkillReviews({ targetSkills, history });
-    history.push(`💤 10s`, `✅ ${review1!}`);
+    history.push(`💤 10s`, `🟡 ${review1!}`);
     const [review2] = await simulateSkillReviews({ targetSkills, history });
-    history.push(`💤 10s`, `✅ ${review2!}`);
+    history.push(`💤 10s`, `🟡 ${review2!}`);
     const [review3] = await simulateSkillReviews({ targetSkills, history });
 
     assert.notDeepEqual(
@@ -119,15 +124,16 @@ await test(`${flagsForSrsState.name} suite`, async () => {
   });
 
   await test(`marks a question as new if it has fsrs state but is not stable enough to be introduced`, async () => {
-    assert.deepEqual(
-      flagsForSrsState(srsStateFromFsrsState(nextReview(null, Rating.Again))),
-      { type: QuestionFlagType.NewSkill },
-    );
+    assert.deepEqual(flagsForSrsState(undefined), {
+      type: QuestionFlagType.NewSkill,
+    });
   });
 });
 
 type SkillReviewOp =
-  | `${`✅` | `✅(easy)` | `✅(hard)` | `❌`} ${Skill}`
+  | `${`🟢` | `🟡` | `🟠` | `❌`} ${Skill}`
+  | `❌hanziGloss ${string} ${string}`
+  | `❌hanziPinyin ${string} ${string}`
   | `💤 ${string}`;
 
 /**
@@ -155,17 +161,38 @@ async function simulateSkillReviews({
         now = parseRelativeTimeShorthand(args[0], now);
         break;
       }
+      // mistakes
+      case `❌hanziGloss`: {
+        const [hanzi, gloss] = args as [HanziText, string];
+        await rizzle.mutate.saveHanziGlossMistake({
+          id: nanoid(),
+          hanzi,
+          gloss,
+          now,
+        });
+        break;
+      }
+      case `❌hanziPinyin`: {
+        const [hanzi, pinyin] = args as [HanziText, PinyinText];
+        await rizzle.mutate.saveHanziPinyinMistake({
+          id: nanoid(),
+          hanzi,
+          pinyin,
+          now,
+        });
+        break;
+      }
       // skill rating
       case `❌`:
-      case `✅`:
-      case `✅(easy)`:
-      case `✅(hard)`: {
+      case `🟢`:
+      case `🟡`:
+      case `🟠`: {
         const rating =
-          op === `✅`
-            ? Rating.Good
-            : op === `✅(easy)`
-              ? Rating.Easy
-              : op === `✅(hard)`
+          op === `🟢`
+            ? Rating.Easy
+            : op === `🟡`
+              ? Rating.Good
+              : op === `🟠`
                 ? Rating.Hard
                 : Rating.Again;
         const skills = args as Skill[]; // TODO: shuffle the skills to see if it's sensitive to ordering?

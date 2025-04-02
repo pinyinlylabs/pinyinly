@@ -127,7 +127,6 @@ export const QuizDeckOneCorrectPairQuestion = memo(
           computeSkillRating({
             skill: answer.skill,
             correct: isCorrect,
-            hadPreviousMistake: flag?.type === QuestionFlagType.PreviousMistake,
             durationMs,
           }),
         ];

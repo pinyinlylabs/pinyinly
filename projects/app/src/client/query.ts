@@ -16,7 +16,7 @@ import {
   skillReviewQueue,
 } from "@/data/skills";
 import { allHsk1HanziWords, lookupHanziWord } from "@/dictionary/dictionary";
-import { fsrsIsIntroduced, fsrsIsLearned } from "@/util/fsrs";
+import { fsrsIsLearned } from "@/util/fsrs";
 import { useQuery } from "@tanstack/react-query";
 import { add } from "date-fns/add";
 import { interval } from "date-fns/interval";
@@ -57,10 +57,7 @@ export async function questionsForReview2(
 export function flagsForSrsState(
   srsState: SrsState | undefined,
 ): QuestionFlag | undefined {
-  if (
-    srsState?.type !== SrsType.FsrsFourPointFive ||
-    !fsrsIsIntroduced(srsState)
-  ) {
+  if (srsState?.type !== SrsType.FsrsFourPointFive) {
     return {
       type: QuestionFlagType.NewSkill,
     };
