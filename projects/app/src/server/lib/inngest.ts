@@ -1,4 +1,4 @@
-import { v7 } from "@/data/rizzleSchema";
+import { Skill, v7 } from "@/data/rizzleSchema";
 import { loadDictionary } from "@/dictionary/dictionary";
 import { AppRouter } from "@/server/routers/_app";
 import { preflightCheckEnvVars } from "@/util/env";
@@ -11,7 +11,7 @@ import { Inngest } from "inngest";
 import * as postmark from "postmark";
 import { z } from "zod";
 import * as s from "../schema";
-import { substring, withDrizzle } from "./db";
+import { pgBatchUpdate, substring, withDrizzle } from "./db";
 import {
   getReplicacheClientMutationsSince,
   getReplicacheClientStateForUser,
@@ -384,6 +384,43 @@ const dataIntegrityDictionary = inngest.createFunction(
   },
 );
 
+const hanziWordRenames = {
+  "上:goUp": `上:above`,
+  "凵:containerOpenBottom": `凵:box`,
+  "哥哥:olderBrother": `哥哥:brother`,
+  "妹妹:youngerSister": `妹妹:sister`,
+  "姐姐:olderSister": `姐姐:sister`,
+  "𭕄:earth": `𭕄:radical`,
+  "弟弟:youngerBrother": `弟弟:brother`,
+  "的:possession": `的:of`,
+  "艮:stubborn": `艮:stopping`,
+  "请客:treatGuests": `请客:treat`,
+  "非:wrong": `非:not`,
+};
+
+const migrateHanziWords = inngest.createFunction(
+  { id: `migrateHanziWords` },
+  { cron: `30 * * * *` },
+  async ({ step }) => {
+    await step.run(
+      `migrate skillRating.skill`,
+      async () =>
+        await withDrizzle(
+          async (db) =>
+            await pgBatchUpdate(db, {
+              whereColumn: s.skillRating.skill,
+              setColumn: s.skillRating.skill,
+              updates: Object.entries(hanziWordRenames).map(
+                ([oldSkill, newSkill]) => {
+                  return [oldSkill as Skill, newSkill as Skill] as const;
+                },
+              ),
+            }),
+        ),
+    );
+  },
+);
+
 // Create an empty array where we'll export future Inngest functions
 export const functions = [
   dataIntegrityDictionary,
@@ -392,4 +429,5 @@ export const functions = [
   helloWorldEmail,
   syncRemotePull,
   syncRemotePush,
+  migrateHanziWords,
 ];
