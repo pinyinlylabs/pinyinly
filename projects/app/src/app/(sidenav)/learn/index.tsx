@@ -74,8 +74,8 @@ export default function IndexPage() {
         .then((x) => x.reverse());
       pushLoop: for (let [, { skill }] of ratingHistory) {
         switch (skillType(skill)) {
-          case SkillType.EnglishToHanziWord:
-          case SkillType.HanziWordToEnglish:
+          case SkillType.GlossToHanziWord:
+          case SkillType.HanziWordToGloss:
           case SkillType.HanziWordToPinyin:
           case SkillType.HanziWordToPinyinFinal:
           case SkillType.HanziWordToPinyinInitial:

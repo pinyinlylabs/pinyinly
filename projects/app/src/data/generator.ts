@@ -4,7 +4,7 @@ import {
   lookupHanziWord,
 } from "@/dictionary/dictionary";
 import { DeepReadonly } from "ts-essentials";
-import { generateHanziWordToEnglishQuestionOrThrow } from "./hanziWordToEnglishGenerator";
+import { generateHanziWordToGlossQuestionOrThrow } from "./hanziWordToGlossGenerator";
 import { generateHanziWordToPinyinQuestionOrThrow } from "./hanziWordToPinyinGenerator";
 import { HanziWord, Question, SkillType } from "./model";
 import { HanziWordSkill, Skill } from "./rizzleSchema";
@@ -14,9 +14,9 @@ export async function generateQuestionForSkillOrThrow(
   skill: Skill,
 ): Promise<Question> {
   switch (skillType(skill)) {
-    case SkillType.HanziWordToEnglish: {
+    case SkillType.HanziWordToGloss: {
       skill = skill as HanziWordSkill;
-      return await generateHanziWordToEnglishQuestionOrThrow(skill);
+      return await generateHanziWordToGlossQuestionOrThrow(skill);
     }
     case SkillType.HanziWordToPinyin: {
       skill = skill as HanziWordSkill;
@@ -27,7 +27,7 @@ export async function generateQuestionForSkillOrThrow(
     case SkillType.Deprecated_RadicalToEnglish:
     case SkillType.Deprecated_RadicalToPinyin:
     case SkillType.Deprecated:
-    case SkillType.EnglishToHanziWord:
+    case SkillType.GlossToHanziWord:
     case SkillType.HanziWordToPinyinFinal:
     case SkillType.HanziWordToPinyinInitial:
     case SkillType.HanziWordToPinyinTone:

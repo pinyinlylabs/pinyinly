@@ -29,10 +29,10 @@ export const NewSkillModal = ({
     >
       {({ dismiss }) => {
         switch (skillType(skill)) {
-          case SkillType.HanziWordToEnglish: {
+          case SkillType.HanziWordToGloss: {
             skill = skill as HanziWordSkill;
             return (
-              <NewHanziToEnglishSkillContent skill={skill} dismiss={dismiss} />
+              <NewHanziToGlossSkillContent skill={skill} dismiss={dismiss} />
             );
           }
           case SkillType.HanziWordToPinyin: {
@@ -46,7 +46,7 @@ export const NewSkillModal = ({
           case SkillType.Deprecated_RadicalToEnglish:
           case SkillType.Deprecated_RadicalToPinyin:
           case SkillType.Deprecated:
-          case SkillType.EnglishToHanziWord:
+          case SkillType.GlossToHanziWord:
           case SkillType.HanziWordToPinyinFinal:
           case SkillType.HanziWordToPinyinInitial:
           case SkillType.HanziWordToPinyinTone:
@@ -66,7 +66,7 @@ export const NewSkillModal = ({
   ) : null;
 };
 
-const NewHanziToEnglishSkillContent = ({
+const NewHanziToGlossSkillContent = ({
   skill,
   dismiss,
 }: {

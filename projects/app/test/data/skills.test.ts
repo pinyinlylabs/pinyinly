@@ -1,7 +1,7 @@
 import { SkillType } from "#data/model.ts";
 import {
   computeSkillRating,
-  hanziWordToEnglish,
+  hanziWordToGloss,
   SkillLearningGraph,
   skillLearningGraph,
   skillReviewQueue,
@@ -42,37 +42,34 @@ await test(`${skillLearningGraph.name} suite`, async () => {
   });
 
   await test(`includes decomposition dependencies when learning 好`, async () => {
-    const goodHanziWordToEnglish = `he:好:good`;
-    const womanRadicalToEnglish = `he:女:woman`;
-    const childRadicalToEnglish = `he:子:child`;
+    const skillGood = `he:好:good`;
+    const skillWoman = `he:女:woman`;
+    const skillChild = `he:子:child`;
 
     assert.deepEqual(
       await skillLearningGraph({
-        targetSkills: [goodHanziWordToEnglish],
+        targetSkills: [skillGood],
         shouldSkipSubTree: () => false,
       }),
       new Map([
         [
-          goodHanziWordToEnglish,
+          skillGood,
           {
-            skill: goodHanziWordToEnglish,
-            dependencies: new Set([
-              womanRadicalToEnglish,
-              childRadicalToEnglish,
-            ]),
+            skill: skillGood,
+            dependencies: new Set([skillWoman, skillChild]),
           },
         ],
         [
-          womanRadicalToEnglish,
+          skillWoman,
           {
-            skill: womanRadicalToEnglish,
+            skill: skillWoman,
             dependencies: new Set(),
           },
         ],
         [
-          childRadicalToEnglish,
+          skillChild,
           {
-            skill: childRadicalToEnglish,
+            skill: skillChild,
             dependencies: new Set(),
           },
         ],
@@ -276,7 +273,7 @@ await test(`${skillLearningGraph.name} suite`, async () => {
         ...(await allHsk1HanziWords()),
         ...(await allHsk2HanziWords()),
         ...(await allHsk3HanziWords()),
-      ].map((w) => hanziWordToEnglish(w)),
+      ].map((w) => hanziWordToGloss(w)),
       shouldSkipSubTree: () => false,
     });
   });
@@ -296,7 +293,7 @@ await test(`${skillReviewQueue.name} suite`, async () => {
     );
   });
 
-  await test(`${SkillType.HanziWordToEnglish} skills`, async () => {
+  await test(`${SkillType.HanziWordToGloss} skills`, async () => {
     await test(`works for 好`, async () => {
       const graph = await skillLearningGraph({
         targetSkills: [`he:好:good`],
@@ -498,7 +495,7 @@ await test(`${computeSkillRating.name} suite`, async () => {
     assert.partialDeepStrictEqual(rating, { skill, durationMs });
   });
 
-  await test(`${SkillType.HanziWordToEnglish} suites`, async () => {
+  await test(`${SkillType.HanziWordToGloss} suites`, async () => {
     const skill = `he:我:i`;
 
     await test(`gives rating based on duration`, async () => {

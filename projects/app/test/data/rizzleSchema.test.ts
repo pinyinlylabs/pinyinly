@@ -1,6 +1,6 @@
 import { SkillType } from "#data/model.ts";
 import { rSkill, rSkillType } from "#data/rizzleSchema.ts";
-import { hanziWordToEnglish } from "#data/skills.ts";
+import { hanziWordToGloss } from "#data/skills.ts";
 import { r } from "#util/rizzle.ts";
 import assert from "node:assert/strict";
 import test, { TestContext } from "node:test";
@@ -73,8 +73,9 @@ await test(`${rSkillType.name}()`, async (t) => {
     SkillType.Deprecated_RadicalToEnglish,
     SkillType.Deprecated_RadicalToPinyin,
     SkillType.Deprecated,
-    SkillType.EnglishToHanziWord,
-    SkillType.HanziWordToEnglish,
+    SkillType.GlossToHanziWord,
+    SkillType.HanziWordToGloss,
+    SkillType.HanziWordToPinyin,
     SkillType.HanziWordToPinyinFinal,
     SkillType.HanziWordToPinyinInitial,
     SkillType.HanziWordToPinyinTone,
@@ -100,7 +101,7 @@ await test(`${rSkill.name}()`, async (t) => {
   });
 
   // Marshal and unmarshal round tripping
-  for (const skill of [hanziWordToEnglish(`好:good`)] as const) {
+  for (const skill of [hanziWordToGloss(`好:good`)] as const) {
     using tx = makeMockTx(t);
     const id = `1`;
     await posts.set(tx, { id }, { id, skill });

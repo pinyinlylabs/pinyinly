@@ -374,7 +374,7 @@ const flagTextClass = tv({
   base: `font-bold uppercase text-accent-10`,
 });
 
-const choiceEnglishText = tv({
+const choiceGlossText = tv({
   base: `text-xl/none text-accent-10`,
   variants: {
     small: {
@@ -390,7 +390,7 @@ const SkillChoice = ({ choice }: { choice: OneCorrectPairQuestionChoice }) => {
   switch (choice.type) {
     case `gloss`: {
       return (
-        <Text className={choiceEnglishText({ small: true })}>
+        <Text className={choiceGlossText({ small: true })}>
           <Hhhmark source={choice.value} />
         </Text>
       );
@@ -436,7 +436,7 @@ const SkillAnswer = ({
     case SkillType.Deprecated_RadicalToEnglish:
     case SkillType.Deprecated_RadicalToPinyin:
     case SkillType.Deprecated:
-    case SkillType.EnglishToHanziWord:
+    case SkillType.GlossToHanziWord:
     case SkillType.HanziWordToPinyinFinal:
     case SkillType.HanziWordToPinyinTone:
     case SkillType.ImageToHanziWord:
@@ -447,10 +447,10 @@ const SkillAnswer = ({
         `ShowSkillAnswer not implemented for ${skillType(skill)}`,
       );
     }
-    case SkillType.HanziWordToEnglish: {
+    case SkillType.HanziWordToGloss: {
       skill = skill as HanziWordSkill;
       return (
-        <HanziWordToEnglishSkillAnswer
+        <HanziWordToGlossSkillAnswer
           skill={skill}
           includeAlternatives={includeAlternatives}
           includeHint={includeHint}
@@ -471,7 +471,7 @@ const SkillAnswer = ({
   }
 };
 
-const HanziWordToEnglishSkillAnswer = ({
+const HanziWordToGlossSkillAnswer = ({
   skill,
   includeAlternatives = false,
   includeHint = false,
@@ -522,7 +522,7 @@ const HanziWordToEnglishSkillAnswer = ({
             ))
           : null}
         {includeGloss && gloss != null ? (
-          <Text className={choiceEnglishText({ small, underline: true })}>
+          <Text className={choiceGlossText({ small, underline: true })}>
             {gloss}
           </Text>
         ) : null}
@@ -590,7 +590,7 @@ const HanziWordToPinyinSkillAnswer = ({
           />
         </View>
       ))}
-      <Text className={choiceEnglishText({ small })}>{gloss}</Text>
+      <Text className={choiceGlossText({ small })}>{gloss}</Text>
     </View>
   );
 };
@@ -639,7 +639,7 @@ const HanziWordToPinyinInitialSkillAnswer = ({
             />
           </View>
         ))}
-        <Text className={choiceEnglishText({ small })}>{gloss}</Text>
+        <Text className={choiceGlossText({ small })}>{gloss}</Text>
       </View>
       {includeHint && meaning.glossHint != null ? (
         <Text className="leading-snug text-accent-10">
