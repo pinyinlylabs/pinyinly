@@ -11,8 +11,8 @@ import {
   parsePinyin,
   splitHanziText,
 } from "@/dictionary/dictionary";
-import { sortComparatorNumber } from "@/util/collections";
-import { Rating } from "@/util/fsrs";
+import { emptySet, memoize1, sortComparatorNumber } from "@/util/collections";
+import { fsrsIsStable, Rating } from "@/util/fsrs";
 import { makePRNG } from "@/util/random";
 import { invariant } from "@haohaohow/lib/invariant";
 import type { Duration } from "date-fns";
@@ -54,32 +54,20 @@ export interface LearningOptions {
 
 export async function skillLearningGraph(options: {
   targetSkills: Skill[];
-  shouldSkipSubTree: (skill: Skill) => boolean;
   learningOptions?: LearningOptions;
 }): Promise<SkillLearningGraph> {
   const learningOptions = options.learningOptions ?? {};
   const graph: SkillLearningGraph = new Map();
 
   async function addSkill(skill: Skill): Promise<void> {
-    // Skip over any skills (and its dependency tree) that have already been
-    // learned.
-    if (options.shouldSkipSubTree(skill)) {
-      return;
-    }
-
     // Skip doing any work if the skill is already in the graph.
     if (graph.has(skill)) {
       return;
     }
 
-    const dependencies = await skillDependencies(skill, learningOptions).then(
-      (x) => x.filter((s) => !options.shouldSkipSubTree(s)),
-    );
+    const dependencies = await skillDependencies(skill, learningOptions);
 
-    const node: Node = {
-      skill,
-      dependencies: new Set(dependencies),
-    };
+    const node: Node = { skill, dependencies: new Set(dependencies) };
     graph.set(skill, node);
 
     for (const dependency of dependencies) {
@@ -203,7 +191,13 @@ export async function skillDependencies(
 
             // If it's the component form of another base hanzi, learn that
             // first because it can help understand the meaning from the shape.
-            if (meaning.componentFormOf != null) {
+            if (
+              meaning.componentFormOf != null &&
+              // Avoid circular loops e.g. he:老:old→he:耂:old→he:老:old
+              (await decomposeHanzi(meaning.componentFormOf).then(
+                (x) => !x.includes(character),
+              ))
+            ) {
               const hanziWordWithMeaning = await hackyGuessHanziWordToLearn(
                 meaning.componentFormOf,
               );
@@ -395,6 +389,7 @@ export function skillReviewQueue({
   const queue: Skill[] = [];
   const learningOrderDue: [Skill, number][] = [];
   const learningOrderNew: Skill[] = [];
+  const learningOrderBlocked: Skill[] = [];
   const learningOrderNotDue: [Skill, SrsState | undefined][] = [];
 
   // Compute in-degree
@@ -408,6 +403,31 @@ export function skillReviewQueue({
     }
   }
 
+  const hasStableDependencies = memoize1((skill: Skill): boolean => {
+    for (const dep of graph.get(skill)?.dependencies ?? emptySet) {
+      const srsState = skillSrsStates.get(dep);
+
+      switch (srsState?.type) {
+        case undefined:
+        case SrsType.Mock: {
+          break;
+        }
+        case SrsType.FsrsFourPointFive: {
+          if (!fsrsIsStable(srsState)) {
+            return false;
+          }
+          break;
+        }
+      }
+
+      if (!hasStableDependencies(dep)) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+
   // Find skills that have no prerequisites
   for (const [skill, deg] of inDegree.entries()) {
     if (deg === 0) {
@@ -420,14 +440,17 @@ export function skillReviewQueue({
     const skill = queue.shift();
     invariant(skill != null);
 
-    const srsState = skillSrsStates.get(skill);
-
-    if (srsState == null) {
-      learningOrderNew.push(skill);
-    } else if (srsState.nextReviewAt > now) {
-      learningOrderNotDue.push([skill, srsState]);
+    if (hasStableDependencies(skill)) {
+      const srsState = skillSrsStates.get(skill);
+      if (srsState == null) {
+        learningOrderNew.push(skill);
+      } else if (srsState.nextReviewAt > now) {
+        learningOrderNotDue.push([skill, srsState]);
+      } else {
+        learningOrderDue.push([skill, srsState.nextReviewAt.getTime()]);
+      }
     } else {
-      learningOrderDue.push([skill, srsState.nextReviewAt.getTime()]);
+      learningOrderBlocked.push(skill);
     }
 
     const node = graph.get(skill);
@@ -452,6 +475,7 @@ export function skillReviewQueue({
     ...learningOrderNew.reverse(),
     // Finally sort the not-due skills.
     ...randomSortSkills(learningOrderNotDue),
+    ...learningOrderBlocked.reverse(),
   ];
 }
 

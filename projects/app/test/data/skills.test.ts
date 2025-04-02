@@ -20,23 +20,14 @@ import { mockSrsState } from "./helpers";
 
 await test(`${skillLearningGraph.name} suite`, async () => {
   await test(`no targets gives an empty graph`, async () => {
-    assert.deepEqual(
-      await skillLearningGraph({
-        targetSkills: [],
-        shouldSkipSubTree: () => false,
-      }),
-      new Map(),
-    );
+    assert.deepEqual(await skillLearningGraph({ targetSkills: [] }), new Map());
   });
 
   await test(`includes the target skill in the graph`, async () => {
     const skill = `he:我:i`;
 
     assert.deepEqual(
-      await skillLearningGraph({
-        targetSkills: [skill],
-        shouldSkipSubTree: () => false,
-      }),
+      await skillLearningGraph({ targetSkills: [skill] }),
       new Map([[skill, { skill, dependencies: new Set() }]]),
     );
   });
@@ -47,10 +38,7 @@ await test(`${skillLearningGraph.name} suite`, async () => {
     const skillChild = `he:子:child`;
 
     assert.deepEqual(
-      await skillLearningGraph({
-        targetSkills: [skillGood],
-        shouldSkipSubTree: () => false,
-      }),
+      await skillLearningGraph({ targetSkills: [skillGood] }),
       new Map([
         [
           skillGood,
@@ -81,7 +69,6 @@ await test(`${skillLearningGraph.name} suite`, async () => {
     assert.deepEqual(
       await skillLearningGraph({
         targetSkills: [`he:外:outside`],
-        shouldSkipSubTree: () => false,
       }),
       new Map([
         [
@@ -251,7 +238,6 @@ await test(`${skillLearningGraph.name} suite`, async () => {
     assertLearningGraphEqual(
       await skillLearningGraph({
         targetSkills: [`he:一下儿:aBit`],
-        shouldSkipSubTree: () => false,
       }),
       `
       he:一下儿:aBit
@@ -274,7 +260,6 @@ await test(`${skillLearningGraph.name} suite`, async () => {
         ...(await allHsk2HanziWords()),
         ...(await allHsk3HanziWords()),
       ].map((w) => hanziWordToGloss(w)),
-      shouldSkipSubTree: () => false,
     });
   });
 
@@ -285,7 +270,6 @@ await test(`${skillReviewQueue.name} suite`, async () => {
   await test(`no skills gives an empty queue`, async () => {
     const graph = await skillLearningGraph({
       targetSkills: [],
-      shouldSkipSubTree: () => false,
     });
     assert.deepEqual(
       skillReviewQueue({ graph, skillSrsStates: new Map() }),
@@ -297,7 +281,6 @@ await test(`${skillReviewQueue.name} suite`, async () => {
     await test(`works for 好`, async () => {
       const graph = await skillLearningGraph({
         targetSkills: [`he:好:good`],
-        shouldSkipSubTree: () => false,
       });
       assert.deepEqual(skillReviewQueue({ graph, skillSrsStates: new Map() }), [
         `he:子:child`,
@@ -306,22 +289,9 @@ await test(`${skillReviewQueue.name} suite`, async () => {
       ]);
     });
 
-    await test(`skips learned skills and their dependencies`, async () => {
-      const graph = await skillLearningGraph({
-        targetSkills: [`he:好:good`],
-        shouldSkipSubTree: (skill) => [`he:子:child`].includes(skill),
-      });
-
-      assert.deepEqual(skillReviewQueue({ graph, skillSrsStates: new Map() }), [
-        `he:女:woman`,
-        `he:好:good`,
-      ]);
-    });
-
     await test(`learns the word form of component-form first`, async () => {
       const graph = await skillLearningGraph({
         targetSkills: [`he:汉:chinese`],
-        shouldSkipSubTree: () => false,
       });
 
       assert.deepEqual(skillReviewQueue({ graph, skillSrsStates: new Map() }), [
@@ -337,7 +307,6 @@ await test(`${skillReviewQueue.name} suite`, async () => {
     await test(`prioritises due skills with highest value (rather than most overdue)`, async () => {
       const graph = await skillLearningGraph({
         targetSkills: [`he:分:divide`],
-        shouldSkipSubTree: () => false,
       });
 
       assert.deepEqual(
@@ -361,7 +330,6 @@ await test(`${skillReviewQueue.name} suite`, async () => {
     await test(`schedules new skills in dependency order`, async () => {
       const graph = await skillLearningGraph({
         targetSkills: [`he:分:divide`],
-        shouldSkipSubTree: () => false,
       });
 
       assert.deepEqual(
@@ -382,7 +350,6 @@ await test(`${skillReviewQueue.name} suite`, async () => {
     await test(`schedules skill reviews in order of due, and then deterministic random`, async () => {
       const graph = await skillLearningGraph({
         targetSkills: [`he:分:divide`, `he:一:one`],
-        shouldSkipSubTree: () => false,
       });
 
       assert.deepEqual(
@@ -409,10 +376,7 @@ await test(`${skillReviewQueue.name} suite`, async () => {
 
   await test(`${SkillType.HanziWordToPinyin} skills`, async () => {
     await test(`doesn't learn pinyin for all constituents of a single character`, async () => {
-      const graph = await skillLearningGraph({
-        targetSkills: [`hp:好:good`],
-        shouldSkipSubTree: () => false,
-      });
+      const graph = await skillLearningGraph({ targetSkills: [`hp:好:good`] });
       assert.deepEqual(skillReviewQueue({ graph, skillSrsStates: new Map() }), [
         `he:子:child`,
         `he:女:woman`,
@@ -424,25 +388,15 @@ await test(`${skillReviewQueue.name} suite`, async () => {
     await test(`learns the pinyin for each character in multi-character words`, async () => {
       const graph = await skillLearningGraph({
         targetSkills: [`hp:一样:same`],
-        shouldSkipSubTree: (skill) =>
-          skillType(skill) !== SkillType.HanziWordToPinyin,
       });
-      assert.deepEqual(skillReviewQueue({ graph, skillSrsStates: new Map() }), [
+
+      const onlyHpQueue = skillReviewQueue({
+        graph,
+        skillSrsStates: new Map(),
+      }).filter((x) => skillType(x) === SkillType.HanziWordToPinyin);
+
+      assert.deepEqual(onlyHpQueue, [
         `hp:样:shape`,
-        `hp:一:one`,
-        `hp:一样:same`,
-      ]);
-    });
-
-    await test(`skips learned skills and their dependencies`, async () => {
-      const graph = await skillLearningGraph({
-        targetSkills: [`hp:一样:same`],
-        shouldSkipSubTree: (skill) =>
-          [`hp:样:shape`].includes(skill) ||
-          skillType(skill) !== SkillType.HanziWordToPinyin,
-      });
-
-      assert.deepEqual(skillReviewQueue({ graph, skillSrsStates: new Map() }), [
         `hp:一:one`,
         `hp:一样:same`,
       ]);
@@ -451,7 +405,6 @@ await test(`${skillReviewQueue.name} suite`, async () => {
     await test(`schedules new skills in dependency order`, async () => {
       const graph = await skillLearningGraph({
         targetSkills: [`hp:一点儿:aLittle`],
-        shouldSkipSubTree: () => false,
       });
 
       assert.deepEqual(
