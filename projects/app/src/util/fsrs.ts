@@ -265,11 +265,11 @@ function intervalModifier(requestRetentionPercentile: number): number {
 }
 
 /**
- * Return true if the skill is "learned" and doesn't need to be reviewed
- * anymore.
+ * Return true if the skill is learned enough to build upon. (i.e. if other
+ * skills depend on this, they can be introduced at this point).
  */
-export function fsrsIsLearned(options: Pick<FsrsState, `stability`>): boolean {
-  return options.stability >= 100;
+export function fsrsIsStable(options: Pick<FsrsState, `stability`>): boolean {
+  return options.stability >= 30;
 }
 
 export function ratingName(rating: Rating) {

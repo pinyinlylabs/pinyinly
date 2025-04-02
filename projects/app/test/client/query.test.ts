@@ -75,11 +75,35 @@ await test(`${computeSkillReviewQueue.name} suite`, async () => {
 
     assert.deepEqual(reviewQueue, [
       `he:𠃌:radical`,
-      `he:刀:knife`,
       `he:八:eight`,
-      `he:分:divide`,
       `he:丿:slash`,
+      `he:刀:knife`,
+      `he:分:divide`,
     ]);
+  });
+
+  await test(`dependencies unlock skills when they become stable enough`, async () => {
+    const targetSkills: Skill[] = [`he:刀:knife`];
+    const history: SkillReviewOp[] = [];
+
+    const [review1] = await simulateSkillReviews({ targetSkills, history });
+    assert.equal(review1, `he:丿:slash`);
+
+    history.push(`💤 1d`, `🟢 he:丿:slash he:𠃌:radical`);
+    const [review2] = await simulateSkillReviews({ targetSkills, history });
+    assert.deepEqual([review2], [`he:𠃌:radical`]);
+
+    history.push(`💤 1d`, `🟢 he:丿:slash he:𠃌:radical`);
+    const [review3] = await simulateSkillReviews({ targetSkills, history });
+    assert.deepEqual([review3], [`he:丿:slash`]);
+
+    history.push(`💤 1d`, `🟢 he:丿:slash he:𠃌:radical`);
+    const [review4] = await simulateSkillReviews({ targetSkills, history });
+    assert.deepEqual([review4], [`he:𠃌:radical`]);
+
+    history.push(`💤 1d`, `🟢 he:丿:slash he:𠃌:radical`);
+    const [review5] = await simulateSkillReviews({ targetSkills, history });
+    assert.deepEqual([review5], [`he:刀:knife`]);
   });
 
   await test(`doesn't get stuck reviewing the same skill after all due skills are done`, async () => {

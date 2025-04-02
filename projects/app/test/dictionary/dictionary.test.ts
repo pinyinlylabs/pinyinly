@@ -1,4 +1,4 @@
-import { HanziText } from "#data/model.ts";
+import { HanziChar } from "#data/model.ts";
 import {
   allHanziCharacters,
   allHanziWordsHanzi,
@@ -1040,12 +1040,12 @@ await test(`${idsNodeToString.name} roundtrips`, () => {
 
 await test(`dictionary contains entries for decomposition`, async () => {
   const unknownCharacters = new Map<
-    /* hanzi */ HanziText,
-    /* sources */ Set<HanziText>
+    /* hanzi */ HanziChar,
+    /* sources */ Set<string>
   >();
   const unknownComponents = new Map<
-    /* hanzi */ HanziText,
-    /* sources */ Set<HanziText>
+    /* hanzi */ HanziChar,
+    /* sources */ Set<string>
   >();
 
   for (const hanzi of await allHanziWordsHanzi()) {

@@ -628,7 +628,7 @@ export type IdsNode =
     }
   | {
       type: `LeafCharacter`;
-      character: HanziText;
+      character: HanziChar;
     }
   | {
       type: `LeafUnknownCharacter`;
@@ -778,7 +778,7 @@ export function parseIds(ids: string, cursor?: { index: number }): IdsNode {
     return { type: `LeafUnknownCharacter`, strokeCount };
   }
 
-  return { type: `LeafCharacter`, character: char as HanziText };
+  return { type: `LeafCharacter`, character: char as HanziChar };
 }
 
 export function strokeCountPlaceholderOrNull(
@@ -1095,13 +1095,15 @@ export function buildHanziWord(hanzi: string, meaningKey: string): HanziWord {
  * This first splits up into each character, and then splits each character down
  * further into its constituent parts (radicals).
  */
-export async function decomposeHanzi(hanzi: HanziText): Promise<HanziText[]> {
+export async function decomposeHanzi(
+  hanzi: HanziText | HanziChar,
+): Promise<HanziChar[]> {
   const decompositions = await loadHanziDecomposition();
   const hanziChars = splitHanziText(hanzi);
 
   // For multi-character hanzi, learn each character, but for for
   // single-character hanzi, decompose it into radicals and learn those.
-  const result: HanziText[] = [];
+  const result: HanziChar[] = [];
   if (hanziChars.length > 1) {
     for (const char of hanziChars) {
       result.push(char);
@@ -1134,9 +1136,9 @@ export function glyphCount(text: string): number {
   return [...text].length;
 }
 
-export function splitHanziText(hanziText: HanziText): HanziText[] {
+export function splitHanziText(hanziText: HanziText | HanziChar): HanziChar[] {
   // eslint-disable-next-line @typescript-eslint/no-misused-spread
-  return [...hanziText] as HanziText[];
+  return [...hanziText] as HanziChar[];
 }
 
 /**
