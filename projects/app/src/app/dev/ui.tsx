@@ -209,6 +209,26 @@ const HanziTextExamples = () => (
         <HanziText pinyin="yǐ" hanzi="乚" accented />
       </View>
     </ExampleStack>
+
+    <ExampleStack title="underline" className="gap-5">
+      <View className="items-start border-2 border-dashed border-primary-8">
+        <HanziText pinyin="nǐhǎo" hanzi="你好" underline />
+      </View>
+
+      <View className="items-start border-2 border-dashed border-primary-8">
+        <HanziText pinyin="yǐ" hanzi="乚" underline />
+      </View>
+    </ExampleStack>
+
+    <ExampleStack title="accented + underline" className="gap-5">
+      <View className="items-start border-2 border-dashed border-primary-8">
+        <HanziText pinyin="nǐhǎo" hanzi="你好" accented underline />
+      </View>
+
+      <View className="items-start border-2 border-dashed border-primary-8">
+        <HanziText pinyin="yǐ" hanzi="乚" accented underline />
+      </View>
+    </ExampleStack>
   </>
 );
 
@@ -292,7 +312,7 @@ const Section = ({
               });
             }}
           >
-            <Text className="text-2xl">{title}</Text>
+            <Text className="text-2xl text-text">{title}</Text>
           </Pressable>
         </View>
         <View className="dark-theme flex-1 bg-primary-4 p-2" />
