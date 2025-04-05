@@ -89,7 +89,7 @@ export function splitTonelessPinyin(
   return null;
 }
 
-export function parsePinyinTone(
+export const parsePinyinTone = memoize1(function parsePinyinTone(
   pinyin: string,
 ): [tonelessPinyin: string, tone: number] | null {
   for (const [key, value] of Object.entries(toneMap)) {
@@ -106,7 +106,7 @@ export function parsePinyinTone(
   }
 
   return [pinyin, 5];
-}
+});
 
 export function parsePinyinWithChart(
   pinyin: string,
