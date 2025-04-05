@@ -67,7 +67,7 @@ A meaning-key is a short english string that serves to disambiguate multiple mea
 
 A meaning-key must be unique within the scope of a hanzi, you can think of it as a composite primary key `{hanzi}:{meaningKey}`. Here's how they're used to disambiguate `好`.
 
-- `好:positive` — good; nice; friendly
+- `好:good` — good; nice; friendly
 - `好:like` — to like; to enjoy
 
 ## HanziWord String Format

@@ -4,23 +4,33 @@ import {
   lookupHanziWord,
 } from "@/dictionary/dictionary";
 import { DeepReadonly } from "ts-essentials";
-import { generateHanziWordToGlossQuestionOrThrow } from "./hanziWordToGlossGenerator";
-import { generateHanziWordToPinyinQuestionOrThrow } from "./hanziWordToPinyinGenerator";
+import { hanziWordToGlossQuestionOrThrow } from "./generators/hanziWordToGloss";
+import { hanziWordToPinyinFinalQuestionOrThrow } from "./generators/hanziWordToPinyinFinal";
+import { hanziWordToPinyinInitialQuestionOrThrow } from "./generators/hanziWordToPinyinInitial";
+import { hanziWordToPinyinToneQuestionOrThrow } from "./generators/hanziWordToPinyinTone";
 import { HanziWord, Question, SkillType } from "./model";
 import { HanziWordSkill, Skill } from "./rizzleSchema";
-import { skillType } from "./skills";
+import { skillTypeFromSkill } from "./skills";
 
 export async function generateQuestionForSkillOrThrow(
   skill: Skill,
 ): Promise<Question> {
-  switch (skillType(skill)) {
+  switch (skillTypeFromSkill(skill)) {
     case SkillType.HanziWordToGloss: {
       skill = skill as HanziWordSkill;
-      return await generateHanziWordToGlossQuestionOrThrow(skill);
+      return await hanziWordToGlossQuestionOrThrow(skill);
     }
-    case SkillType.HanziWordToPinyin: {
+    case SkillType.HanziWordToPinyinInitial: {
       skill = skill as HanziWordSkill;
-      return await generateHanziWordToPinyinQuestionOrThrow(skill);
+      return await hanziWordToPinyinInitialQuestionOrThrow(skill);
+    }
+    case SkillType.HanziWordToPinyinFinal: {
+      skill = skill as HanziWordSkill;
+      return await hanziWordToPinyinFinalQuestionOrThrow(skill);
+    }
+    case SkillType.HanziWordToPinyinTone: {
+      skill = skill as HanziWordSkill;
+      return await hanziWordToPinyinToneQuestionOrThrow(skill);
     }
     case SkillType.Deprecated_EnglishToRadical:
     case SkillType.Deprecated_PinyinToRadical:
@@ -28,9 +38,7 @@ export async function generateQuestionForSkillOrThrow(
     case SkillType.Deprecated_RadicalToPinyin:
     case SkillType.Deprecated:
     case SkillType.GlossToHanziWord:
-    case SkillType.HanziWordToPinyinFinal:
-    case SkillType.HanziWordToPinyinInitial:
-    case SkillType.HanziWordToPinyinTone:
+    case SkillType.HanziWordToPinyin:
     case SkillType.ImageToHanziWord:
     case SkillType.PinyinFinalAssociation:
     case SkillType.PinyinInitialAssociation:

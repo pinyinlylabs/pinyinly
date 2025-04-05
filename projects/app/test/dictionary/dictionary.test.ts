@@ -566,6 +566,11 @@ await test(`${convertPinyinWithToneNumberToToneMark.name} fixtures`, () => {
     [`hao3`, `hǎo`],
     [`zhu5`, `zhu`],
     [`zi5`, `zi`],
+    [`jiang1`, `jiāng`],
+    [`jiang2`, `jiáng`],
+    [`jiang3`, `jiǎng`],
+    [`jiang4`, `jiàng`],
+    [`jiang5`, `jiang`],
   ] as const) {
     assert.equal(convertPinyinWithToneNumberToToneMark(input), expected);
   }

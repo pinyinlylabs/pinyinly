@@ -396,6 +396,7 @@ const hanziWordRenames = {
   "艮:stubborn": `艮:stopping`,
   "请客:treatGuests": `请客:treat`,
   "非:wrong": `非:not`,
+  "好:positive": `好:good`,
 };
 
 const migrateHanziWords = inngest.createFunction(

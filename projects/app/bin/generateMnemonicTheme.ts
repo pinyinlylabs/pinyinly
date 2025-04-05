@@ -7,7 +7,7 @@ import { zodResponseFormat } from "openai/helpers/zod";
 import yargs from "yargs";
 import { z } from "zod";
 import {
-  loadMmPinyinChart,
+  loadHhhPinyinChart,
   loadMnemonicThemeChoices,
   loadMnemonicThemes,
 } from "../src/dictionary/dictionary.js";
@@ -23,7 +23,7 @@ import { openAiWithCache } from "./util/openai.js";
 const debug = makeDebug(`hhh`);
 
 const themes = await loadMnemonicThemes();
-const pinyinChart = await loadMmPinyinChart();
+const pinyinChart = loadHhhPinyinChart();
 const groupIds = pinyinChart.initials.map((x) => x.id);
 
 const argv = await yargs(process.argv.slice(2))

@@ -1,7 +1,7 @@
 import { useHanziWordMeaning } from "@/client/query";
 import { SkillType } from "@/data/model";
 import { HanziWordSkill, Skill } from "@/data/rizzleSchema";
-import { hanziWordFromSkill, skillType } from "@/data/skills";
+import { hanziWordFromSkill, skillTypeFromSkill } from "@/data/skills";
 import { hanziFromHanziWord, splitHanziText } from "@/dictionary/dictionary";
 import { Image } from "expo-image";
 import { useMemo, useState } from "react";
@@ -28,17 +28,50 @@ export const NewSkillModal = ({
       passivePresentation={passivePresentation}
     >
       {({ dismiss }) => {
-        switch (skillType(skill)) {
+        switch (skillTypeFromSkill(skill)) {
           case SkillType.HanziWordToGloss: {
             skill = skill as HanziWordSkill;
             return (
-              <NewHanziToGlossSkillContent skill={skill} dismiss={dismiss} />
+              <NewHanziWordToGlossSkillContent
+                skill={skill}
+                dismiss={dismiss}
+              />
             );
           }
           case SkillType.HanziWordToPinyin: {
             skill = skill as HanziWordSkill;
             return (
-              <NewHanziToPinyinSkillContent skill={skill} dismiss={dismiss} />
+              <NewHanziWordToPinyinSkillContent
+                skill={skill}
+                dismiss={dismiss}
+              />
+            );
+          }
+          case SkillType.HanziWordToPinyinFinal: {
+            skill = skill as HanziWordSkill;
+            return (
+              <NewHanziWordToPinyinFinalSkillContent
+                skill={skill}
+                dismiss={dismiss}
+              />
+            );
+          }
+          case SkillType.HanziWordToPinyinInitial: {
+            skill = skill as HanziWordSkill;
+            return (
+              <NewHanziWordToPinyinInitialSkillContent
+                skill={skill}
+                dismiss={dismiss}
+              />
+            );
+          }
+          case SkillType.HanziWordToPinyinTone: {
+            skill = skill as HanziWordSkill;
+            return (
+              <NewHanziWordToPinyinToneSkillContent
+                skill={skill}
+                dismiss={dismiss}
+              />
             );
           }
           case SkillType.Deprecated_EnglishToRadical:
@@ -47,9 +80,6 @@ export const NewSkillModal = ({
           case SkillType.Deprecated_RadicalToPinyin:
           case SkillType.Deprecated:
           case SkillType.GlossToHanziWord:
-          case SkillType.HanziWordToPinyinFinal:
-          case SkillType.HanziWordToPinyinInitial:
-          case SkillType.HanziWordToPinyinTone:
           case SkillType.ImageToHanziWord:
           case SkillType.PinyinFinalAssociation:
           case SkillType.PinyinInitialAssociation:
@@ -66,7 +96,7 @@ export const NewSkillModal = ({
   ) : null;
 };
 
-const NewHanziToGlossSkillContent = ({
+const NewHanziWordToGlossSkillContent = ({
   skill,
   dismiss,
 }: {
@@ -129,7 +159,7 @@ const NewHanziToGlossSkillContent = ({
   );
 };
 
-const NewHanziToPinyinSkillContent = ({
+const NewHanziWordToPinyinSkillContent = ({
   skill,
   dismiss,
 }: {
@@ -159,6 +189,171 @@ const NewHanziToPinyinSkillContent = ({
               />
               <Text className="text-md font-bold uppercase text-accent-10">
                 New Pinyin
+              </Text>
+            </View>
+
+            <View className="items-center gap-2">
+              <View className="flex-row gap-1">
+                {characters.map((character) => (
+                  <View key={character} className="items-center">
+                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-text">
+                      {character}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+
+              <Text className="text-4xl font-bold text-primary-12">
+                {hanziWordSkillData.data.pinyin?.[0]}
+              </Text>
+            </View>
+          </View>
+        </>
+      )}
+    </ContainerWithContinueButton>
+  );
+};
+
+const NewHanziWordToPinyinInitialSkillContent = ({
+  skill,
+  dismiss,
+}: {
+  skill: HanziWordSkill;
+  dismiss: () => void;
+}) => {
+  const hanziWord = hanziWordFromSkill(skill);
+  const hanziWordSkillData = useHanziWordMeaning(hanziWord);
+
+  const characters = useMemo(
+    (): string[] => splitHanziText(hanziFromHanziWord(hanziWord)),
+    [hanziWord],
+  );
+
+  return (
+    <ContainerWithContinueButton onContinue={dismiss}>
+      {hanziWordSkillData.data == null ? (
+        <Text className="text-text">Not implemented</Text>
+      ) : (
+        <>
+          <View className="mb-8 gap-8">
+            <View className="success-theme flex-row items-center gap-2 self-center">
+              <Image
+                source={require(`@/assets/icons/plant-filled.svg`)}
+                className="my-[-0px] h-[24px] w-[24px] flex-shrink text-accent-10"
+                tintColor="currentColor"
+              />
+              <Text className="text-md font-bold uppercase text-accent-10">
+                New Pinyin Initial
+              </Text>
+            </View>
+
+            <View className="items-center gap-2">
+              <View className="flex-row gap-1">
+                {characters.map((character) => (
+                  <View key={character} className="items-center">
+                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-text">
+                      {character}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+
+              <Text className="text-4xl font-bold text-primary-12">
+                {hanziWordSkillData.data.pinyin?.[0]}
+              </Text>
+            </View>
+          </View>
+        </>
+      )}
+    </ContainerWithContinueButton>
+  );
+};
+
+const NewHanziWordToPinyinFinalSkillContent = ({
+  skill,
+  dismiss,
+}: {
+  skill: HanziWordSkill;
+  dismiss: () => void;
+}) => {
+  const hanziWord = hanziWordFromSkill(skill);
+  const hanziWordSkillData = useHanziWordMeaning(hanziWord);
+
+  const characters = useMemo(
+    (): string[] => splitHanziText(hanziFromHanziWord(hanziWord)),
+    [hanziWord],
+  );
+
+  return (
+    <ContainerWithContinueButton onContinue={dismiss}>
+      {hanziWordSkillData.data == null ? (
+        <Text className="text-text">Not implemented</Text>
+      ) : (
+        <>
+          <View className="mb-8 gap-8">
+            <View className="success-theme flex-row items-center gap-2 self-center">
+              <Image
+                source={require(`@/assets/icons/plant-filled.svg`)}
+                className="my-[-0px] h-[24px] w-[24px] flex-shrink text-accent-10"
+                tintColor="currentColor"
+              />
+              <Text className="text-md font-bold uppercase text-accent-10">
+                New Pinyin Final
+              </Text>
+            </View>
+
+            <View className="items-center gap-2">
+              <View className="flex-row gap-1">
+                {characters.map((character) => (
+                  <View key={character} className="items-center">
+                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-text">
+                      {character}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+
+              <Text className="text-4xl font-bold text-primary-12">
+                {hanziWordSkillData.data.pinyin?.[0]}
+              </Text>
+            </View>
+          </View>
+        </>
+      )}
+    </ContainerWithContinueButton>
+  );
+};
+
+const NewHanziWordToPinyinToneSkillContent = ({
+  skill,
+  dismiss,
+}: {
+  skill: HanziWordSkill;
+  dismiss: () => void;
+}) => {
+  const hanziWord = hanziWordFromSkill(skill);
+  const hanziWordSkillData = useHanziWordMeaning(hanziWord);
+
+  const characters = useMemo(
+    (): string[] => splitHanziText(hanziFromHanziWord(hanziWord)),
+    [hanziWord],
+  );
+
+  return (
+    <ContainerWithContinueButton onContinue={dismiss}>
+      {hanziWordSkillData.data == null ? (
+        <Text className="text-text">Not implemented</Text>
+      ) : (
+        <>
+          <View className="mb-8 gap-8">
+            <View className="success-theme flex-row items-center gap-2 self-center">
+              <Image
+                source={require(`@/assets/icons/plant-filled.svg`)}
+                className="my-[-0px] h-[24px] w-[24px] flex-shrink text-accent-10"
+                tintColor="currentColor"
+              />
+              <Text className="text-md font-bold uppercase text-accent-10">
+                New Pinyin Tone
               </Text>
             </View>
 
