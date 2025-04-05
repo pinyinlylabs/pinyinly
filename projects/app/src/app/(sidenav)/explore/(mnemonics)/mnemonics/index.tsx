@@ -2,7 +2,7 @@ import {
   useRizzleQuery,
   useRizzleQueryPaged,
 } from "@/client/ui/ReplicacheContext";
-import { loadMmPinyinChart } from "@/dictionary/dictionary";
+import { loadHhhPinyinChart } from "@/dictionary/dictionary";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "expo-router";
 import { Fragment } from "react";
@@ -37,7 +37,7 @@ const widths = [
 export default function MnemonicsPage() {
   const query = useQuery({
     queryKey: [MnemonicsPage.name, `chart`],
-    queryFn: async () => await loadMmPinyinChart(),
+    queryFn: () => Promise.resolve(loadHhhPinyinChart()),
   });
 
   const initialAssociationsQuery = useRizzleQuery(

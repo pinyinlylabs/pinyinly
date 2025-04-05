@@ -5,7 +5,7 @@ import {
   SkillLearningGraph,
   skillLearningGraph,
   skillReviewQueue,
-  skillType,
+  skillTypeFromSkill,
 } from "#data/skills.ts";
 import {
   allHsk1HanziWords,
@@ -253,6 +253,22 @@ await test(`${skillLearningGraph.name} suite`, async () => {
     );
   });
 
+  await test(`supports HanziWordToPinyin dependency chain`, async () => {
+    assertLearningGraphEqual(
+      await skillLearningGraph({ targetSkills: [`hp:儿:son`] }),
+      `
+      hp:儿:son
+        he:儿:son
+        hpt:儿:son
+          hpf:儿:son
+            hpi:儿:son
+              he:儿:son
+                he:丿:slash
+                he:乚:hook
+      `,
+    );
+  });
+
   await test(`works for hsk words`, async () => {
     await skillLearningGraph({
       targetSkills: [
@@ -381,6 +397,9 @@ await test(`${skillReviewQueue.name} suite`, async () => {
         `he:子:child`,
         `he:女:woman`,
         `he:好:good`,
+        `hpi:好:good`,
+        `hpf:好:good`,
+        `hpt:好:good`,
         `hp:好:good`,
       ]);
     });
@@ -393,7 +412,7 @@ await test(`${skillReviewQueue.name} suite`, async () => {
       const onlyHpQueue = skillReviewQueue({
         graph,
         skillSrsStates: new Map(),
-      }).filter((x) => skillType(x) === SkillType.HanziWordToPinyin);
+      }).filter((x) => skillTypeFromSkill(x) === SkillType.HanziWordToPinyin);
 
       assert.deepEqual(onlyHpQueue, [
         `hp:样:shape`,
@@ -424,6 +443,15 @@ await test(`${skillReviewQueue.name} suite`, async () => {
           `he:儿:son`,
           `he:点:oClock`,
           `he:一:one`,
+          `hpi:儿:son`,
+          `hpi:点:oClock`,
+          `hpi:一:one`,
+          `hpf:儿:son`,
+          `hpf:点:oClock`,
+          `hpf:一:one`,
+          `hpt:儿:son`,
+          `hpt:点:oClock`,
+          `hpt:一:one`,
           `hp:儿:son`,
           `hp:点:oClock`,
           `hp:一:one`,

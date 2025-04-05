@@ -9,8 +9,10 @@ import {
 import { rMnemonicThemeId, rPinyinInitialGroupId } from "@/data/rizzleSchema";
 import {
   deepReadonly,
+  emptyArray,
   mapArrayAdd,
   memoize0,
+  memoize1,
   sortComparatorNumber,
 } from "@/util/collections";
 import { invariant } from "@haohaohow/lib/invariant";
@@ -106,7 +108,7 @@ export function parsePinyinTone(
   return [pinyin, 5];
 }
 
-export function parsePinyin(
+export function parsePinyinWithChart(
   pinyin: string,
   chart: PinyinChart,
 ): { initial: string; final: string; tone: number } | null {
@@ -124,6 +126,15 @@ export function parsePinyin(
 
   return { initial, final, tone };
 }
+
+export const parsePinyinOrThrow = memoize1(function parsePinyinOrThrow(
+  pinyin: string,
+) {
+  const chart = loadHhhPinyinChart();
+  const parsed = parsePinyinWithChart(pinyin, chart);
+  invariant(parsed != null, `Could not parse pinyin ${pinyin}`);
+  return deepReadonly(parsed);
+});
 
 export const loadPinyinWords = memoize0(async () =>
   z
@@ -252,6 +263,104 @@ export const loadHmmPinyinChart = memoize0(async () =>
     .transform(deepReadonly)
     // eslint-disable-next-line unicorn/no-await-expression-member
     .parse((await import(`./hmmPinyinChart.asset.json`)).default),
+);
+
+export const loadHhhPinyinChart = memoize0(() =>
+  pinyinChartSchema.transform(deepReadonly).parse({
+    initials: [
+      {
+        id: `basic`,
+        desc: `basic distinct sounds`,
+        initials: [
+          `b`,
+          `p`,
+          `m`,
+          `f`,
+          `d`,
+          `t`,
+          `n`,
+          `l`,
+          `g`,
+          `k`,
+          `h`,
+          `zh`,
+          [`ch`, `ch`, `chi`],
+          `sh`,
+          `r`,
+          `z`,
+          [`c`, `c`, `ci`],
+          `s`,
+        ],
+      },
+      {
+        id: `-i`,
+        desc: `ends with an 'i' (ee) sound`,
+        initials: [
+          [`y`, `y`, `yi`],
+          `bi`,
+          `pi`,
+          `mi`,
+          `di`,
+          `ti`,
+          `ni`,
+          `li`,
+          `ji`,
+          `qi`,
+          `xi`,
+        ],
+      },
+      {
+        id: `-u`,
+        desc: `ends with an 'u' (oo) sound`,
+        initials: [
+          `w`,
+          `bu`,
+          `pu`,
+          `mu`,
+          `fu`,
+          `du`,
+          `tu`,
+          `nu`,
+          `lu`,
+          `gu`,
+          `ku`,
+          `hu`,
+          [`zhu`, `zhu`, `zho`],
+          [`chu`, `chu`, `cho`],
+          `shu`,
+          `ru`,
+          `zu`,
+          [`cu`, `cu`, `co`],
+          `su`,
+        ],
+      },
+      {
+        id: `-ü`,
+        desc: `ends with an 'ü' (ü) sound`,
+        initials: [`yu`, `nü`, `lü`, `ju`, `qu`, `xu`],
+      },
+      {
+        id: `∅`,
+        desc: `null special case`,
+        initials: [[`∅`, ``]],
+      },
+    ],
+    finals: [
+      [`∅`, ``, `er`],
+      `a`,
+      `o`,
+      [`e`, `e`, `ê`],
+      `ai`,
+      [`ei`, `ei`, `i`],
+      `ao`,
+      [`ou`, `ou`, `u`],
+      `an`,
+      [`(e)n`, `n`, `en`],
+      `ang`,
+      [`(e)ng`, `ng`, `eng`, `ong`],
+    ],
+    overrides: {},
+  }),
 );
 
 export const loadHanziWordGlossMnemonics = memoize0(async () =>
@@ -414,6 +523,7 @@ const hanziToHanziWordMap = memoize0(
       const [hanziWord, meaning] = item;
 
       mapArrayAdd(hanziMap, hanziFromHanziWord(hanziWord), item);
+
       for (const gloss of meaning.gloss) {
         mapArrayAdd(glossMap, gloss, item);
       }
@@ -459,6 +569,20 @@ export const allHanziWordsHanzi = memoize0(
     ),
 );
 
+export const allOneCharacterHanzi = memoize0(
+  async () =>
+    new Set<string>(
+      [
+        ...(await allRadicalHanziWords()),
+        ...(await allHsk1HanziWords()),
+        ...(await allHsk2HanziWords()),
+        ...(await allHsk3HanziWords()),
+      ]
+        .map((x) => hanziFromHanziWord(x))
+        .filter((x) => characterCount(x) === 1),
+    ),
+);
+
 export const allHanziCharacters = memoize0(
   async () =>
     new Set(
@@ -490,7 +614,7 @@ export function convertPinyinWithToneNumberToToneMark(pinyin: string): string {
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   let tone = `012345`.indexOf(pinyin.at(-1)!);
 
-  const pinyinLengthWithoutTone = tone > 0 ? pinyin.length - 1 : pinyin.length;
+  const pinyinLengthWithoutTone = tone >= 0 ? pinyin.length - 1 : pinyin.length;
 
   let result = ``;
   for (let i = 0; i < pinyinLengthWithoutTone; i++) {
@@ -539,11 +663,14 @@ const toneMap = {
   // The order of `ü` and `v` is significant.
   ü: `_ǖǘǚǜü`,
   v: `_ǖǘǚǜü`,
+  // fake pinyin, but used for distractors
+  ï: `_ïḯîìi`,
 } as const;
 
 const isPinyinVowel = (
   char: string | null | undefined,
-): char is `a` | `e` | `i` | `o` | `u` | `ü` => char != null && char in toneMap;
+): char is `a` | `e` | `i` | `ï` | `o` | `u` | `ü` =>
+  char != null && char in toneMap;
 
 export type IdsNode =
   | {
@@ -1129,9 +1256,9 @@ export async function decomposeHanzi(
 }
 
 /**
- * Calculate the number of glyphs in a string.
+ * Calculate the number of characters in a string.
  */
-export function glyphCount(text: string): number {
+export function characterCount(text: string): number {
   // eslint-disable-next-line @typescript-eslint/no-misused-spread
   return [...text].length;
 }
@@ -1147,3 +1274,92 @@ export function splitHanziText(hanziText: HanziText | HanziChar): HanziChar[] {
 export function splitPinyinText(pinyinText: PinyinText): string[] {
   return pinyinText.split(` `);
 }
+
+export function pinyinOrThrow(
+  hanziWord: HanziWord,
+  meaning: DeepReadonly<HanziWordMeaning> | null,
+): PinyinText {
+  const pinyin = meaning?.pinyin?.[0];
+  invariant(pinyin != null, `missing pinyin for hanzi word ${hanziWord}`);
+  return pinyin;
+}
+
+export function glossOrThrow(
+  hanziWord: HanziWord,
+  meaning: DeepReadonly<HanziWordMeaning> | null,
+): string {
+  const gloss = meaning?.gloss[0];
+  invariant(gloss != null, `missing gloss for hanzi word ${hanziWord}`);
+  return gloss;
+}
+
+export const allPinyinForHanzi = memoize1(async function allPinyinForHanzi(
+  hanzi: string,
+) {
+  const hanziWordMeanings = await lookupHanzi(hanzi);
+  const pinyins = new Set<string>();
+
+  for (const [, meaning] of hanziWordMeanings) {
+    for (const pinyin of meaning.pinyin ?? emptyArray) {
+      pinyins.add(pinyin);
+    }
+  }
+
+  return pinyins;
+});
+
+/**
+ * Non-existant pinyin used as distractors in quizes.
+ */
+export const fakePinyin = [
+  // yu fake finals
+  `yuen`,
+  `yuo`,
+  // qu fake finals
+  `quan`,
+  `quei`,
+  `que`,
+  // mu fake finals
+  `muan`,
+  `muei`,
+  `mue`,
+  `muo`,
+  // ju fake finals
+  `juan`,
+  `juei`,
+  `jue`,
+  // bu fake finals
+  `buan`,
+  `buei`,
+  `bue`,
+  `buo`,
+  // pu fake finals
+  `puan`,
+  `puei`,
+  `pue`,
+  `puo`,
+  // xu fake finals
+  `xuan`,
+  `xuei`,
+  // lü fake finals
+  `lüan`,
+  `lüei`,
+  `lüo`,
+  // nü fake finals
+  `nüan`,
+  `nüei`,
+  `nüo`,
+  // nu fake finals
+  `nuan`,
+  `nuei`,
+  `nuo`,
+  `nui`,
+  // lu fake finals
+  `luan`,
+  `luei`,
+  // fu fake finals
+  `fuan`,
+  `fuei`,
+  `fui`,
+  `fuo`,
+];

@@ -1,4 +1,4 @@
-import { glyphCount } from "@/dictionary/dictionary";
+import { characterCount } from "@/dictionary/dictionary";
 import { ElementRef, forwardRef, useEffect, useMemo, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import Animated, {
@@ -130,7 +130,7 @@ export const TextAnswerButton = forwardRef<
   );
 
   const textLength = useMemo(() => {
-    const charCount = glyphCount(text);
+    const charCount = characterCount(text);
     return charCount <= 5
       ? (`tiny` as const)
       : charCount <= 20

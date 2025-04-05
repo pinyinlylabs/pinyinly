@@ -14,7 +14,7 @@ import {
   computeSkillRating,
   hanziWordFromSkill,
   oneCorrectPairQuestionChoiceMistakes,
-  skillType,
+  skillTypeFromSkill,
 } from "@/data/skills";
 import { hanziFromHanziWord } from "@/dictionary/dictionary";
 import { invariant } from "@haohaohow/lib/invariant";
@@ -419,7 +419,7 @@ const SkillAnswer = ({
   hideB?: boolean;
   small?: boolean;
 }) => {
-  switch (skillType(skill)) {
+  switch (skillTypeFromSkill(skill)) {
     case SkillType.HanziWordToPinyinInitial: {
       skill = skill as HanziWordSkill;
       return (
@@ -444,7 +444,7 @@ const SkillAnswer = ({
     case SkillType.PinyinInitialAssociation:
     case SkillType.PinyinToHanziWord: {
       throw new Error(
-        `ShowSkillAnswer not implemented for ${skillType(skill)}`,
+        `ShowSkillAnswer not implemented for ${skillTypeFromSkill(skill)}`,
       );
     }
     case SkillType.HanziWordToGloss: {

@@ -25,9 +25,9 @@ export function uniqueInvariant<T extends string | number>(
   }
 }
 
-export function identicalInvariant<T extends string | number>(
-  items: readonly T[],
-) {
+export function identicalInvariant<
+  T extends string | number | null | undefined,
+>(items: readonly T[]) {
   const identity = items[0];
 
   for (const item of items) {

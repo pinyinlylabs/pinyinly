@@ -2,9 +2,11 @@ import {
   allHsk1HanziWords,
   allHsk2HanziWords,
   allHsk3HanziWords,
+  glossOrThrow,
   hanziFromHanziWord,
   HanziWordMeaning,
   lookupHanziWord,
+  pinyinOrThrow,
 } from "@/dictionary/dictionary";
 import { evenHalve } from "@/util/collections";
 import { invariant, uniqueInvariant } from "@haohaohow/lib/invariant";
@@ -14,19 +16,18 @@ import {
   HanziWord,
   OneCorrectPairQuestionAnswer,
   OneCorrectPairQuestionChoice,
-  PinyinText,
   Question,
   QuestionType,
   SkillType,
-} from "./model";
-import { HanziWordSkill, Skill } from "./rizzleSchema";
-import { hanziWordFromSkill, skillType } from "./skills";
+} from "../model";
+import { HanziWordSkill, Skill } from "../rizzleSchema";
+import { hanziWordFromSkill, skillTypeFromSkill } from "../skills";
 
 // generate a question to test a skill
-export async function generateHanziWordToGlossQuestionOrThrow(
+export async function hanziWordToGlossQuestionOrThrow(
   skill: Skill,
 ): Promise<Question> {
-  switch (skillType(skill)) {
+  switch (skillTypeFromSkill(skill)) {
     case SkillType.HanziWordToGloss: {
       skill = skill as HanziWordSkill;
       const hanziWord = hanziWordFromSkill(skill);
@@ -252,22 +253,4 @@ function validQuestionInvariant(question: Question) {
   }
 
   return question;
-}
-
-function glossOrThrow(
-  hanziWord: HanziWord,
-  meaning: DeepReadonly<HanziWordMeaning> | null,
-): string {
-  const gloss = meaning?.gloss[0];
-  invariant(gloss != null, `missing gloss for hanzi word ${hanziWord}`);
-  return gloss;
-}
-
-function pinyinOrThrow(
-  hanziWord: HanziWord,
-  meaning: DeepReadonly<HanziWordMeaning> | null,
-): PinyinText {
-  const pinyin = meaning?.pinyin?.[0];
-  invariant(pinyin != null, `missing pinyin for hanzi word ${hanziWord}`);
-  return pinyin;
 }

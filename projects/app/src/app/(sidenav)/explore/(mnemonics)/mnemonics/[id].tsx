@@ -2,7 +2,7 @@ import { RectButton2 } from "@/client/ui/RectButton2";
 import { useReplicache, useRizzleQuery } from "@/client/ui/ReplicacheContext";
 import { rMnemonicThemeId } from "@/data/rizzleSchema";
 import {
-  loadMmPinyinChart,
+  loadHhhPinyinChart,
   loadMnemonicThemeChoices,
 } from "@/dictionary/dictionary";
 import { useQuery } from "@tanstack/react-query";
@@ -15,9 +15,7 @@ export default function MnemonicIdPage() {
 
   const query = useQuery({
     queryKey: [MnemonicIdPage.name, `chart`],
-    queryFn: async () => {
-      return await loadMmPinyinChart();
-    },
+    queryFn: () => Promise.resolve(loadHhhPinyinChart()),
   });
 
   const choicesQuery = useQuery({

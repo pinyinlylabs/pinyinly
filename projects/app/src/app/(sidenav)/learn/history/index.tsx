@@ -15,7 +15,7 @@ import {
   finalFromPinyinFinalAssociationSkill,
   hanziWordFromSkill,
   initialFromPinyinInitialAssociationSkill,
-  skillType,
+  skillTypeFromSkill,
   skillTypeToShorthand,
 } from "@/data/skills";
 import {
@@ -82,7 +82,7 @@ export default function HistoryPage() {
               <View key={i} className="flex-col items-center">
                 <Text className="hhh-text-body">{skillParam(skill)}</Text>
                 <Text className="hhh-text-caption">
-                  {skillTypeToShorthand(skillType(skill))}
+                  {skillTypeToShorthand(skillTypeFromSkill(skill))}
                 </Text>
               </View>
             ))}
@@ -131,7 +131,7 @@ export default function HistoryPage() {
 }
 
 const skillParam = (skill: Skill): string => {
-  switch (skillType(skill)) {
+  switch (skillTypeFromSkill(skill)) {
     case SkillType.PinyinFinalAssociation: {
       skill = skill as PinyinFinalAssociationSkill;
       return `-${finalFromPinyinFinalAssociationSkill(skill)}`;
@@ -146,7 +146,7 @@ const skillParam = (skill: Skill): string => {
     case SkillType.Deprecated_PinyinToRadical:
     case SkillType.Deprecated: {
       skill = skill as DeprecatedSkill;
-      return skillTypeToShorthand(skillType(skill));
+      return skillTypeToShorthand(skillTypeFromSkill(skill));
     }
     case SkillType.HanziWordToGloss:
     case SkillType.HanziWordToPinyin:

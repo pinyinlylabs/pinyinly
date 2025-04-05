@@ -57,9 +57,13 @@ export enum SkillType {
    * When shown a hanzi word, write the english translation.
    */
   HanziWordToGloss = `HanziWordToGloss`,
+  /**
+   * When shown a Hanzi be able to write the pinyin using the keyboard without
+   * any other hints.
+   */
   HanziWordToPinyin = `HanziWordToPinyin`,
-  HanziWordToPinyinInitial = `HanziWordToPinyinInitial`,
   HanziWordToPinyinFinal = `HanziWordToPinyinFinal`,
+  HanziWordToPinyinInitial = `HanziWordToPinyinInitial`,
   HanziWordToPinyinTone = `HanziWordToPinyinTone`,
   /**
    * When shown a gloss, write the hanzi characters.

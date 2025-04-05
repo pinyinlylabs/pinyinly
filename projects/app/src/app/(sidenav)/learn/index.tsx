@@ -4,7 +4,11 @@ import { RectButton2 } from "@/client/ui/RectButton2";
 import { useRizzleQueryPaged } from "@/client/ui/ReplicacheContext";
 import { HanziWord, SkillType } from "@/data/model";
 import { HanziWordSkill, Skill } from "@/data/rizzleSchema";
-import { hanziWordFromSkill, skillDueWindow, skillType } from "@/data/skills";
+import {
+  hanziWordFromSkill,
+  skillDueWindow,
+  skillTypeFromSkill,
+} from "@/data/skills";
 import { hanziFromHanziWord } from "@/dictionary/dictionary";
 import { invariant } from "@haohaohow/lib/invariant";
 import { add } from "date-fns/add";
@@ -73,7 +77,7 @@ export default function IndexPage() {
         .toArray()
         .then((x) => x.reverse());
       pushLoop: for (let [, { skill }] of ratingHistory) {
-        switch (skillType(skill)) {
+        switch (skillTypeFromSkill(skill)) {
           case SkillType.GlossToHanziWord:
           case SkillType.HanziWordToGloss:
           case SkillType.HanziWordToPinyin:
