@@ -381,7 +381,7 @@ const choiceGlossText = tv({
       true: `text-md`,
     },
     underline: {
-      true: ``,
+      true: `underline decoration-dashed decoration-[2px] underline-offset-[6px]`,
     },
   },
 });
