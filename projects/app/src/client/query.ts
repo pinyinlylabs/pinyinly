@@ -16,7 +16,6 @@ import {
   skillReviewQueue,
 } from "@/data/skills";
 import { allHsk1HanziWords, lookupHanziWord } from "@/dictionary/dictionary";
-import { fsrsIsStable } from "@/util/fsrs";
 import { useQuery } from "@tanstack/react-query";
 import { add } from "date-fns/add";
 import { interval } from "date-fns/interval";
@@ -92,13 +91,9 @@ export async function computeSkillReviewQueue(
    */
   now = new Date(),
 ): Promise<Skill[]> {
-  const learnedSkills = new Set<Skill>();
   const skillSrsStates = new Map<Skill, SrsState>();
   for await (const [, v] of r.queryPaged.skillState.scan()) {
     skillSrsStates.set(v.skill, v.srs);
-    if (fsrsIsStable(v.srs)) {
-      learnedSkills.add(v.skill);
-    }
   }
 
   const graph = await skillLearningGraph({ targetSkills });
