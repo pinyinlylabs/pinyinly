@@ -39,9 +39,9 @@ await test(`${simulateSkillReviews.name} returns a review queue`, async () => {
   assert.deepEqual(reviewQueue, [
     `he:丿:slash`,
     `he:𠃌:radical`,
-    `he:刀:knife`,
     `he:八:eight`,
-    `he:分:divide`,
+    // (blocked) he:刀:knife
+    // (blocked) he:分:divide
   ]);
 });
 
@@ -77,8 +77,8 @@ await test(`${computeSkillReviewQueue.name} suite`, async () => {
       `he:𠃌:radical`,
       `he:八:eight`,
       `he:丿:slash`,
-      `he:刀:knife`,
-      `he:分:divide`,
+      // (block) he:刀:knife
+      // (block) he:分:divide
     ]);
   });
 

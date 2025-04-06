@@ -4,6 +4,7 @@ import {
   decomposeHanzi,
   hanziFromHanziWord,
   HanziWordWithMeaning,
+  isHanziChar,
   lookupGloss,
   lookupHanzi,
   lookupHanziWord,
@@ -142,6 +143,30 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
 
     case SkillType.HanziWordToGloss: {
       skill = skill as HanziWordSkill;
+      const hanziWord = hanziWordFromSkill(skill);
+      const hanzi = hanziFromHanziWord(hanziWord);
+
+      // If it's the component form of another base hanzi, learn that
+      // first because it can help understand the meaning from the shape.
+      if (isHanziChar(hanzi)) {
+        const meaning = await lookupHanziWord(hanziWord);
+
+        if (
+          meaning?.componentFormOf != null &&
+          // Avoid circular loops e.g. he:老:old→he:耂:old→he:老:old
+          (await decomposeHanzi(meaning.componentFormOf).then(
+            (x) => !x.includes(hanzi),
+          ))
+        ) {
+          const hanziWordWithMeaning = await hackyGuessHanziWordToLearn(
+            meaning.componentFormOf,
+          );
+          if (hanziWordWithMeaning != null) {
+            const [hanziWord] = hanziWordWithMeaning;
+            deps.push(hanziWordToGloss(hanziWord));
+          }
+        }
+      }
 
       // Learn the components of a hanzi word first.
       for (const character of await decomposeHanzi(
@@ -152,26 +177,8 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
           const hanziWordWithMeaning =
             await hackyGuessHanziWordToLearn(character);
           if (hanziWordWithMeaning != null) {
-            const [hanziWord, meaning] = hanziWordWithMeaning;
+            const [hanziWord] = hanziWordWithMeaning;
             deps.push(hanziWordToGloss(hanziWord));
-
-            // If it's the component form of another base hanzi, learn that
-            // first because it can help understand the meaning from the shape.
-            if (
-              meaning.componentFormOf != null &&
-              // Avoid circular loops e.g. he:老:old→he:耂:old→he:老:old
-              (await decomposeHanzi(meaning.componentFormOf).then(
-                (x) => !x.includes(character),
-              ))
-            ) {
-              const hanziWordWithMeaning = await hackyGuessHanziWordToLearn(
-                meaning.componentFormOf,
-              );
-              if (hanziWordWithMeaning != null) {
-                const [hanziWord] = hanziWordWithMeaning;
-                deps.push(hanziWordToGloss(hanziWord));
-              }
-            }
           }
         }
       }
@@ -333,10 +340,12 @@ export function skillReviewQueue({
   graph,
   skillSrsStates,
   now = new Date(),
+  includeBlocked = false,
 }: {
   graph: SkillLearningGraph;
   skillSrsStates: Map<Skill, SrsState>;
   now?: Date;
+  includeBlocked?: boolean;
 }): Skill[] {
   // Kahn topological sort
   const inDegree = new Map<Skill, number>();
@@ -362,7 +371,6 @@ export function skillReviewQueue({
       const srsState = skillSrsStates.get(dep);
 
       switch (srsState?.type) {
-        case undefined:
         case SrsType.Mock: {
           break;
         }
@@ -371,6 +379,10 @@ export function skillReviewQueue({
             return false;
           }
           break;
+        }
+        case undefined: {
+          // The dep hasn't been introduced yet, so it can't be stable.
+          return false;
         }
       }
 
@@ -429,7 +441,7 @@ export function skillReviewQueue({
     ...learningOrderNew.reverse(),
     // Finally sort the not-due skills.
     ...randomSortSkills(learningOrderNotDue),
-    ...learningOrderBlocked.reverse(),
+    ...(includeBlocked ? learningOrderBlocked.reverse() : []),
   ];
 }
 

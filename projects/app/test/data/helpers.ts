@@ -1,4 +1,9 @@
-import { SrsStateMock, SrsType } from "#data/model.ts";
+import {
+  SrsStateFsrsFourPointFive,
+  SrsStateMock,
+  SrsType,
+} from "#data/model.ts";
+import { nextReview, Rating } from "#util/fsrs.ts";
 import { invariant } from "@haohaohow/lib/invariant";
 import { TestContext } from "node:test";
 import { ReadTransaction, WriteTransaction } from "replicache";
@@ -62,5 +67,25 @@ export const mockSrsState = (
     type: SrsType.Mock,
     prevReviewAt: parseRelativeTimeShorthand(prevReviewAtShorthand, now),
     nextReviewAt: parseRelativeTimeShorthand(nextReviewAtShorthand, now),
+  };
+};
+
+export const fsrsSrsState = (
+  prevReviewAtShorthand: string,
+  nextReviewAtShorthand: string,
+  rating: Rating,
+): SrsStateFsrsFourPointFive => {
+  let state = null;
+  for (const now of [`-20d`, `-15d`, `-10d`, `-5d`, `-2d`]) {
+    state = nextReview(state, rating, parseRelativeTimeShorthand(now));
+  }
+  invariant(state != null);
+
+  return {
+    type: SrsType.FsrsFourPointFive,
+    prevReviewAt: parseRelativeTimeShorthand(prevReviewAtShorthand),
+    nextReviewAt: parseRelativeTimeShorthand(nextReviewAtShorthand),
+    stability: state.stability,
+    difficulty: state.difficulty,
   };
 };

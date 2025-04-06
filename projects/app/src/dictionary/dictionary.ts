@@ -229,9 +229,8 @@ const pinyinChartSchema = z
   .transform(({ initials: initialGroups, finals, overrides }) => ({
     initials: initialGroups.map((group) => ({
       ...group,
-      initials: group.initials.map(
-        (initial): PinyinProduction =>
-          typeof initial === `string` ? ([initial, initial] as const) : initial,
+      initials: group.initials.map((initial) =>
+        typeof initial === `string` ? ([initial, initial] as const) : initial,
       ),
     })),
     finals: finals.map((x) => (typeof x === `string` ? ([x, x] as const) : x)),
@@ -1375,3 +1374,7 @@ export const fakePinyin = [
   `fui`,
   `fuo`,
 ];
+
+export function isHanziChar(hanzi: string): hanzi is HanziChar {
+  return characterCount(hanzi) === 1;
+}
