@@ -134,6 +134,14 @@ export type HanziWordSkillType =
   | SkillType.PinyinToHanziWord
   | SkillType.ImageToHanziWord;
 
+export const hanziWordSkillTypes: HanziWordSkillType[] = [
+  SkillType.HanziWordToGloss,
+  SkillType.HanziWordToPinyin,
+  SkillType.HanziWordToPinyinInitial,
+  SkillType.HanziWordToPinyinFinal,
+  SkillType.HanziWordToPinyinTone,
+];
+
 export enum QuestionFlagType {
   NewSkill,
   Overdue,

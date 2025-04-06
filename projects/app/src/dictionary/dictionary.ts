@@ -33,7 +33,7 @@ export type PinyinProduction = readonly string[];
 
 export interface PinyinChart {
   initials: DeepReadonly<
-    { id: PinyinInitialGroupId; desc: string; initials: string[][] }[]
+    { id: PinyinInitialGroupId; desc: string; initials: PinyinProduction[] }[]
   >;
   finals: readonly PinyinProduction[];
   overrides?: DeepReadonly<Record<string, [initial: string, final: string]>>;
@@ -461,6 +461,17 @@ export const loadDictionary = memoize0(async () =>
     .transform(deepReadonly)
     // eslint-disable-next-line unicorn/no-await-expression-member
     .parse((await import(`./dictionary.asset.json`)).default),
+);
+
+export const hanziWordMigrationsSchema = z
+  .array(z.tuple([hanziWordSchema, hanziWordSchema]))
+  .transform((x) => new Map(x));
+
+export const loadHanziWordMigrations = memoize0(async () =>
+  hanziWordMigrationsSchema
+    .transform(deepReadonly)
+    // eslint-disable-next-line unicorn/no-await-expression-member
+    .parse((await import(`./hanziWordMigrations.asset.json`)).default),
 );
 
 const loadRadicalStrokes = memoize0(async () =>
@@ -1363,3 +1374,7 @@ export const fakePinyin = [
   `fui`,
   `fuo`,
 ];
+
+export function isHanziChar(hanzi: string): hanzi is HanziChar {
+  return characterCount(hanzi) === 1;
+}

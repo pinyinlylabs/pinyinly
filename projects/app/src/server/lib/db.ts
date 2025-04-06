@@ -249,10 +249,10 @@ export async function pgBatchUpdate<
   options: {
     whereColumn: WhereColumn;
     setColumn: SetColumn;
-    updates: [
+    updates: readonly (readonly [
       where: GetColumnData<WhereColumn>,
       set: GetColumnData<SetColumn>,
-    ][];
+    ])[];
   },
 ): Promise<{ affectedRows: number }> {
   const { whereColumn, setColumn, updates } = options;

@@ -381,7 +381,7 @@ const choiceGlossText = tv({
       true: `text-md`,
     },
     underline: {
-      true: ``,
+      true: `underline decoration-dashed decoration-[2px] underline-offset-[6px]`,
     },
   },
 });
@@ -420,25 +420,12 @@ const SkillAnswer = ({
   small?: boolean;
 }) => {
   switch (skillTypeFromSkill(skill)) {
-    case SkillType.HanziWordToPinyinInitial: {
-      skill = skill as HanziWordSkill;
-      return (
-        <HanziWordToPinyinInitialSkillAnswer
-          skill={skill}
-          includeAlternatives={includeAlternatives}
-          includeHint={includeHint}
-          small={small}
-        />
-      );
-    }
     case SkillType.Deprecated_EnglishToRadical:
     case SkillType.Deprecated_PinyinToRadical:
     case SkillType.Deprecated_RadicalToEnglish:
     case SkillType.Deprecated_RadicalToPinyin:
     case SkillType.Deprecated:
     case SkillType.GlossToHanziWord:
-    case SkillType.HanziWordToPinyinFinal:
-    case SkillType.HanziWordToPinyinTone:
     case SkillType.ImageToHanziWord:
     case SkillType.PinyinFinalAssociation:
     case SkillType.PinyinInitialAssociation:
@@ -458,7 +445,10 @@ const SkillAnswer = ({
         />
       );
     }
-    case SkillType.HanziWordToPinyin: {
+    case SkillType.HanziWordToPinyin:
+    case SkillType.HanziWordToPinyinFinal:
+    case SkillType.HanziWordToPinyinInitial:
+    case SkillType.HanziWordToPinyinTone: {
       skill = skill as HanziWordSkill;
       return (
         <HanziWordToPinyinSkillAnswer
@@ -592,62 +582,6 @@ const HanziWordToPinyinSkillAnswer = ({
       ))}
       <Text className={choiceGlossText({ small })}>{gloss}</Text>
     </View>
-  );
-};
-
-const HanziWordToPinyinInitialSkillAnswer = ({
-  skill,
-  includeAlternatives = false,
-  includeHint = false,
-  small = false,
-}: {
-  skill: HanziWordSkill;
-  includeHint?: boolean;
-  includeAlternatives?: boolean;
-  small?: boolean;
-}) => {
-  const hanziWord = hanziWordFromSkill(skill);
-  const meaningQuery = useHanziWordMeaning(hanziWord);
-
-  const meaning = meaningQuery.data;
-
-  if (meaning == null) {
-    return null;
-  }
-
-  const primaryHanzi = hanziFromHanziWord(hanziWord);
-  const pinyin = meaning.pinyin?.[0];
-  const gloss = meaning.gloss[0];
-  const hanzis = [primaryHanzi];
-  if (includeAlternatives && meaning.visualVariants != null) {
-    hanzis.push(...meaning.visualVariants);
-  }
-
-  return (
-    <>
-      <View className={`flex-row items-center ${small ? `gap-1` : `gap-2`}`}>
-        {hanzis.map((hanzi, i) => (
-          <View
-            key={i}
-            className={hanzi === primaryHanzi ? undefined : `opacity-50`}
-          >
-            <HanziText
-              pinyin={hanzi === primaryHanzi ? pinyin : undefined}
-              hanzi={hanzi}
-              small={small}
-              accented
-            />
-          </View>
-        ))}
-        <Text className={choiceGlossText({ small })}>{gloss}</Text>
-      </View>
-      {includeHint && meaning.glossHint != null ? (
-        <Text className="leading-snug text-accent-10">
-          <Text className="font-bold">Hint:</Text>
-          {meaning.glossHint}
-        </Text>
-      ) : null}
-    </>
   );
 };
 

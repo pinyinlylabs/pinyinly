@@ -1060,7 +1060,7 @@
 ["将近:nearly",{"gloss":["nearly","almost"],"pinyin":["jiāng jìn"],"example":"现在将近三点了。","partOfSpeech":"adverb","definition":"Almost or very nearly."}],
 ["小:small",{"gloss":["small","little"],"pinyin":["xiǎo"],"example":"这个地方很小。","partOfSpeech":"adjective","visualVariants":["⺌","⺍"],"definition":"Describes something of small size."}],
 ["小声:quietVoice",{"gloss":["quiet voice"],"pinyin":["xiǎo shēng"],"example":"她用小声说话。","partOfSpeech":"noun","definition":"Refers to speaking in a low voice."}],
-["小姐:miss",{"gloss":["miss","young lady"],"pinyin":["xiǎo jiě"],"example":"这位小姐是我的朋友。","partOfSpeech":"noun","definition":"A title for a young woman."}],
+["小姐:miss",{"gloss":["Miss","young lady"],"pinyin":["xiǎo jiě"],"example":"这位小姐是我的朋友。","partOfSpeech":"noun","definition":"A title for a young woman."}],
 ["小学:primarySchool",{"gloss":["primary school"],"pinyin":["xiǎo xué"],"example":"她在小学教书。","partOfSpeech":"noun","definition":"An institution for the instruction of children, typically following kindergarten and preceding middle school."}],
 ["小学生:primarySchoolStudent",{"gloss":["primary school student"],"pinyin":["xiǎo xué shēng"],"example":"他是一名小学生。","partOfSpeech":"noun","definition":"A student who attends primary school."}],
 ["小孩儿:child",{"gloss":["child"],"pinyin":["xiǎo hái ér"],"example":"那个小孩儿很可爱。","partOfSpeech":"noun","definition":"A young human being below the age of puberty or below the legal age of majority."}],

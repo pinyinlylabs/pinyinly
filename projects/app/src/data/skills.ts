@@ -4,6 +4,7 @@ import {
   decomposeHanzi,
   hanziFromHanziWord,
   HanziWordWithMeaning,
+  isHanziChar,
   lookupGloss,
   lookupHanzi,
   lookupHanziWord,
@@ -140,6 +141,50 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
       break;
     }
 
+    case SkillType.HanziWordToGloss: {
+      skill = skill as HanziWordSkill;
+      const hanziWord = hanziWordFromSkill(skill);
+      const hanzi = hanziFromHanziWord(hanziWord);
+
+      // If it's the component form of another base hanzi, learn that
+      // first because it can help understand the meaning from the shape.
+      if (isHanziChar(hanzi)) {
+        const meaning = await lookupHanziWord(hanziWord);
+
+        if (
+          meaning?.componentFormOf != null &&
+          // Avoid circular loops e.g. he:老:old→he:耂:old→he:老:old
+          (await decomposeHanzi(meaning.componentFormOf).then(
+            (x) => !x.includes(hanzi),
+          ))
+        ) {
+          const hanziWordWithMeaning = await hackyGuessHanziWordToLearn(
+            meaning.componentFormOf,
+          );
+          if (hanziWordWithMeaning != null) {
+            const [hanziWord] = hanziWordWithMeaning;
+            deps.push(hanziWordToGloss(hanziWord));
+          }
+        }
+      }
+
+      // Learn the components of a hanzi word first.
+      for (const character of await decomposeHanzi(
+        hanziFromHanziWord(hanziWordFromSkill(skill)),
+      )) {
+        if (await characterHasGlyph(character)) {
+          // TODO: need to a better way to choose the meaning key.
+          const hanziWordWithMeaning =
+            await hackyGuessHanziWordToLearn(character);
+          if (hanziWordWithMeaning != null) {
+            const [hanziWord] = hanziWordWithMeaning;
+            deps.push(hanziWordToGloss(hanziWord));
+          }
+        }
+      }
+      break;
+    }
+
     case SkillType.HanziWordToPinyin: {
       skill = skill as HanziWordSkill;
       const hanziWord = hanziWordFromSkill(skill);
@@ -174,41 +219,17 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
       break;
     }
 
-    case SkillType.HanziWordToGloss: {
+    case SkillType.HanziWordToPinyinTone: {
       skill = skill as HanziWordSkill;
+      const hanziWord = hanziWordFromSkill(skill);
+      const hanzi = hanziFromHanziWord(hanziWord);
 
-      // Learn the components of a hanzi word first.
-      for (const character of await decomposeHanzi(
-        hanziFromHanziWord(hanziWordFromSkill(skill)),
-      )) {
-        if (await characterHasGlyph(character)) {
-          // TODO: need to a better way to choose the meaning key.
-          const hanziWordWithMeaning =
-            await hackyGuessHanziWordToLearn(character);
-          if (hanziWordWithMeaning != null) {
-            const [hanziWord, meaning] = hanziWordWithMeaning;
-            deps.push(hanziWordToGloss(hanziWord));
+      invariant(
+        characterCount(hanzi) === 1,
+        `${skillType} only applies to single character hanzi`,
+      );
 
-            // If it's the component form of another base hanzi, learn that
-            // first because it can help understand the meaning from the shape.
-            if (
-              meaning.componentFormOf != null &&
-              // Avoid circular loops e.g. he:老:old→he:耂:old→he:老:old
-              (await decomposeHanzi(meaning.componentFormOf).then(
-                (x) => !x.includes(character),
-              ))
-            ) {
-              const hanziWordWithMeaning = await hackyGuessHanziWordToLearn(
-                meaning.componentFormOf,
-              );
-              if (hanziWordWithMeaning != null) {
-                const [hanziWord] = hanziWordWithMeaning;
-                deps.push(hanziWordToGloss(hanziWord));
-              }
-            }
-          }
-        }
-      }
+      deps.push(hanziWordToPinyinFinal(hanziWord));
       break;
     }
 
@@ -223,31 +244,6 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
       );
 
       deps.push(hanziWordToPinyinInitial(hanziWord));
-
-      // const res = await lookupHanziWord(hanziWord);
-      // if (!res) {
-      //   break;
-      // }
-
-      // Learn the mnemonic associations for the final first.
-      // const chart = await loadStandardPinyinChart();
-      // // TODO: when there are multiple pinyin, what should happen?
-      // const pinyin = res.pinyin?.[0];
-
-      // if (pinyin == null) {
-      //   console.error(new Error(`no pinyin for ${hanziWord}`));
-      //   break;
-      // }
-
-      // const final = parsePinyin(pinyin, chart)?.final;
-      // if (final == null) {
-      //   console.error(
-      //     new Error(`could not extract pinyin final for ${pinyin} `),
-      //   );
-      //   break;
-      // }
-
-      // deps.push(pinyinFinalAssociation(final));
       break;
     }
 
@@ -264,37 +260,6 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
       // Learn the Hanzi -> Gloss first. Knowing the meaning of the character
       // is useful to create a mnemonic to remember the pronunciation.
       deps.push(hanziWordToGloss(hanziWord));
-
-      // // Learn the mnemonic associations for the final first.
-
-      // // Only do this for single characters
-      // if (characterCount(hanzi) > 1) {
-      //   break;
-      // }
-
-      // const res = await lookupHanziWord(hanziWord);
-      // if (!res) {
-      //   break;
-      // }
-
-      // const chart = await loadStandardPinyinChart();
-
-      // const pinyin = res.pinyin?.[0];
-      // if (pinyin == null) {
-      //   console.error(new Error(`no pinyin for ${hanziWord}`));
-      //   break;
-      // }
-
-      // const initial = parsePinyin(pinyin, chart)?.initial;
-      // if (initial == null) {
-      //   console.error(
-      //     new Error(`could not extract pinyin initial for ${pinyin} `),
-      //   );
-      //   break;
-      // }
-
-      // deps.push(pinyinInitialAssociation(initial));
-
       break;
     }
 
@@ -307,20 +272,6 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
         hanziWordToPinyinFinal(hanziWord),
         hanziWordToPinyinTone(hanziWord),
       );
-      break;
-    }
-
-    case SkillType.HanziWordToPinyinTone: {
-      skill = skill as HanziWordSkill;
-      const hanziWord = hanziWordFromSkill(skill);
-      const hanzi = hanziFromHanziWord(hanziWord);
-
-      invariant(
-        characterCount(hanzi) === 1,
-        `${skillType} only applies to single character hanzi`,
-      );
-
-      deps.push(hanziWordToPinyinFinal(hanziWord));
       break;
     }
 
@@ -389,10 +340,12 @@ export function skillReviewQueue({
   graph,
   skillSrsStates,
   now = new Date(),
+  includeBlocked = false,
 }: {
   graph: SkillLearningGraph;
   skillSrsStates: Map<Skill, SrsState>;
   now?: Date;
+  includeBlocked?: boolean;
 }): Skill[] {
   // Kahn topological sort
   const inDegree = new Map<Skill, number>();
@@ -418,7 +371,6 @@ export function skillReviewQueue({
       const srsState = skillSrsStates.get(dep);
 
       switch (srsState?.type) {
-        case undefined:
         case SrsType.Mock: {
           break;
         }
@@ -427,6 +379,10 @@ export function skillReviewQueue({
             return false;
           }
           break;
+        }
+        case undefined: {
+          // The dep hasn't been introduced yet, so it can't be stable.
+          return false;
         }
       }
 
@@ -485,7 +441,7 @@ export function skillReviewQueue({
     ...learningOrderNew.reverse(),
     // Finally sort the not-due skills.
     ...randomSortSkills(learningOrderNotDue),
-    ...learningOrderBlocked.reverse(),
+    ...(includeBlocked ? learningOrderBlocked.reverse() : []),
   ];
 }
 
