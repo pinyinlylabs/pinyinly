@@ -33,7 +33,7 @@ export type PinyinProduction = readonly string[];
 
 export interface PinyinChart {
   initials: DeepReadonly<
-    { id: PinyinInitialGroupId; desc: string; initials: string[][] }[]
+    { id: PinyinInitialGroupId; desc: string; initials: PinyinProduction[] }[]
   >;
   finals: readonly PinyinProduction[];
   overrides?: DeepReadonly<Record<string, [initial: string, final: string]>>;
@@ -229,8 +229,9 @@ const pinyinChartSchema = z
   .transform(({ initials: initialGroups, finals, overrides }) => ({
     initials: initialGroups.map((group) => ({
       ...group,
-      initials: group.initials.map((initial) =>
-        typeof initial === `string` ? ([initial, initial] as const) : initial,
+      initials: group.initials.map(
+        (initial): PinyinProduction =>
+          typeof initial === `string` ? ([initial, initial] as const) : initial,
       ),
     })),
     finals: finals.map((x) => (typeof x === `string` ? ([x, x] as const) : x)),
@@ -461,6 +462,17 @@ export const loadDictionary = memoize0(async () =>
     .transform(deepReadonly)
     // eslint-disable-next-line unicorn/no-await-expression-member
     .parse((await import(`./dictionary.asset.json`)).default),
+);
+
+export const hanziWordMigrationsSchema = z
+  .array(z.tuple([hanziWordSchema, hanziWordSchema]))
+  .transform((x) => new Map(x));
+
+export const loadHanziWordMigrations = memoize0(async () =>
+  hanziWordMigrationsSchema
+    .transform(deepReadonly)
+    // eslint-disable-next-line unicorn/no-await-expression-member
+    .parse((await import(`./hanziWordMigrations.asset.json`)).default),
 );
 
 const loadRadicalStrokes = memoize0(async () =>

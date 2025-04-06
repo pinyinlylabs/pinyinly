@@ -1,17 +1,27 @@
-import { Skill, v7 } from "@/data/rizzleSchema";
-import { loadDictionary } from "@/dictionary/dictionary";
+import { hanziWordSkillTypes } from "@/data/model";
+import { v7 } from "@/data/rizzleSchema";
+import { hanziWordSkill } from "@/data/skills";
+import {
+  loadDictionary,
+  loadHanziWordMigrations,
+} from "@/dictionary/dictionary";
 import { AppRouter } from "@/server/routers/_app";
 import { preflightCheckEnvVars } from "@/util/env";
 import { httpSessionHeader } from "@/util/http";
 import { invariant } from "@haohaohow/lib/invariant";
 import { sentryMiddleware } from "@inngest/middleware-sentry";
 import { createTRPCClient, httpLink } from "@trpc/client";
-import { notInArray } from "drizzle-orm";
+import { inArray, notInArray } from "drizzle-orm";
 import { Inngest } from "inngest";
 import * as postmark from "postmark";
 import { z } from "zod";
 import * as s from "../schema";
-import { pgBatchUpdate, substring, withDrizzle } from "./db";
+import {
+  pgBatchUpdate,
+  substring,
+  withDrizzle,
+  withRepeatableReadTransaction,
+} from "./db";
 import {
   getReplicacheClientMutationsSince,
   getReplicacheClientStateForUser,
@@ -384,27 +394,22 @@ const dataIntegrityDictionary = inngest.createFunction(
   },
 );
 
-const hanziWordRenames = {
-  "上:goUp": `上:above`,
-  "凵:containerOpenBottom": `凵:box`,
-  "哥哥:olderBrother": `哥哥:brother`,
-  "妹妹:youngerSister": `妹妹:sister`,
-  "姐姐:olderSister": `姐姐:sister`,
-  "𭕄:earth": `𭕄:radical`,
-  "弟弟:youngerBrother": `弟弟:brother`,
-  "的:possession": `的:of`,
-  "艮:stubborn": `艮:stopping`,
-  "请客:treatGuests": `请客:treat`,
-  "非:wrong": `非:not`,
-  "好:positive": `好:good`,
-  "前:front": `前:before`,
-  "爫:hand": `爫:claw`,
-};
-
 const migrateHanziWords = inngest.createFunction(
   { id: `migrateHanziWords` },
   { cron: `30 * * * *` },
   async ({ step }) => {
+    const hanziWordMigrations = await loadHanziWordMigrations();
+    const skillMigrations = [...hanziWordMigrations].flatMap(
+      ([oldHanziWord, newHanziWord]) =>
+        hanziWordSkillTypes.map(
+          (skillType) =>
+            [
+              hanziWordSkill(skillType, oldHanziWord),
+              hanziWordSkill(skillType, newHanziWord),
+            ] as const,
+        ),
+    );
+
     await step.run(
       `migrate skillRating.skill`,
       async () =>
@@ -413,14 +418,60 @@ const migrateHanziWords = inngest.createFunction(
             await pgBatchUpdate(db, {
               whereColumn: s.skillRating.skill,
               setColumn: s.skillRating.skill,
-              updates: Object.entries(hanziWordRenames).map(
-                ([oldSkill, newSkill]) => {
-                  return [oldSkill as Skill, newSkill as Skill] as const;
-                },
-              ),
+              updates: skillMigrations,
             }),
         ),
     );
+
+    await step.run(`migrate skillState.skill`, async () => {
+      return await withDrizzle(async (db) => {
+        return await withRepeatableReadTransaction(db, async (db) => {
+          const newSkills = skillMigrations.map(([, newSkill]) => newSkill);
+
+          const skillStatesWithNewSkill = await db.query.skillState.findMany({
+            where: (t) => inArray(t.skill, newSkills),
+          });
+          const existingNewSkills = new Set(
+            skillStatesWithNewSkill.map((r) => r.skill),
+          );
+
+          const toMigrate = skillMigrations.filter(
+            ([, newSkill]) =>
+              // We only want to do renames for skillState rows that don't
+              // already exist in the new format (a new record would exist if a
+              // review was done on the new skill).
+              !existingNewSkills.has(newSkill),
+          );
+
+          const toDelete = skillMigrations
+            .filter(([, newSkill]) =>
+              // These are stale skill states that
+              existingNewSkills.has(newSkill),
+            )
+            .map(([oldSkill]) => oldSkill);
+
+          // Sanity check that we're not doubling up.
+          invariant(
+            toMigrate.length + toDelete.length === skillMigrations.length,
+          );
+
+          // Migrate old -> new.
+          const { affectedRows: migratedCount } = await pgBatchUpdate(db, {
+            whereColumn: s.skillRating.skill,
+            setColumn: s.skillRating.skill,
+            updates: toMigrate,
+          });
+
+          // Delete old that already have a new.
+          const deletedRows = await db
+            .delete(s.skillState)
+            .where(inArray(s.skillState.skill, toDelete))
+            .returning();
+
+          return { migratedCount, deletedRows };
+        });
+      });
+    });
   },
 );
 

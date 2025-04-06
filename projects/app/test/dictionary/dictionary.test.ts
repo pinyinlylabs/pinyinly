@@ -18,6 +18,7 @@ import {
   loadDictionary,
   loadHanziDecomposition,
   loadHanziWordGlossMnemonics,
+  loadHanziWordMigrations,
   loadHanziWordPinyinMnemonics,
   loadHhPinyinChart,
   loadHmmPinyinChart,
@@ -44,7 +45,7 @@ import {
   sortComparatorNumber,
   sortComparatorString,
 } from "#util/collections.ts";
-import { invariant } from "@haohaohow/lib/invariant";
+import { invariant, uniqueInvariant } from "@haohaohow/lib/invariant";
 import assert from "node:assert/strict";
 import test from "node:test";
 import { zodResponseFormat } from "openai/helpers/zod";
@@ -1043,6 +1044,30 @@ await test(`${idsNodeToString.name} roundtrips`, () => {
   }
 });
 
+await test(`${loadHanziWordMigrations.name} suite`, async () => {
+  await test(`no "from" keys are in the dictionary`, async () => {
+    const hanziWordRenames = await loadHanziWordMigrations();
+    const dictionary = await loadDictionary();
+    assert.deepEqual(
+      [...hanziWordRenames].filter(([oldHanziWord]) =>
+        dictionary.has(oldHanziWord),
+      ),
+      [],
+    );
+  });
+
+  await test(`all "to" keys are in the dictionary`, async () => {
+    const hanziWordRenames = await loadHanziWordMigrations();
+    const dictionary = await loadDictionary();
+    assert.deepEqual(
+      [...hanziWordRenames].filter(
+        ([, newHanziWord]) => !dictionary.has(newHanziWord),
+      ),
+      [],
+    );
+  });
+});
+
 await test(`dictionary contains entries for decomposition`, async () => {
   const unknownCharacters = new Map<
     /* hanzi */ HanziChar,
@@ -1185,21 +1210,8 @@ async function testPinyinChart(
   }
 
   // Ensure that there are no duplicates initials or finals.
-  assertUniqueArray(
-    chart.initials.map((x) => x.initials).flatMap(([, ...x]) => x),
+  uniqueInvariant(
+    chart.initials.flatMap((x) => x.initials).flatMap(([, ...x]) => x),
   );
-  assertUniqueArray(chart.finals.flatMap(([, ...x]) => x));
-}
-
-function assertUniqueArray<T>(items: readonly T[]): void {
-  const seen = new Set();
-  const duplicates = [];
-  for (const x of items) {
-    if (seen.has(x)) {
-      duplicates.push(x);
-    } else {
-      seen.add(x);
-    }
-  }
-  assert.deepEqual(duplicates, [], `expected no duplicates`);
+  uniqueInvariant(chart.finals.flatMap(([, ...x]) => x));
 }
