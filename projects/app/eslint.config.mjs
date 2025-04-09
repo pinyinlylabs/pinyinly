@@ -111,6 +111,11 @@ export default tseslint.config(
               message: `Please use \`useSafeAreaInsets\` from \`react-native-safe-area-context\` instead.`,
             },
             {
+              name: `react-native`,
+              importNames: [`Animated`],
+              message: `Please use the default \`Animated\` import from \`react-native-reanimated\` instead.`,
+            },
+            {
               name: `hanzi`,
               message: `Please use @/dictionary/hanzi instead.`,
             },

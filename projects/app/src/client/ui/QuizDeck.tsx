@@ -29,6 +29,7 @@ import { Image } from "expo-image";
 import { Href, Link, usePathname } from "expo-router";
 import sortBy from "lodash/sortBy";
 import React, { useMemo, useRef, useState } from "react";
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { Animated, Platform, View } from "react-native";
 import { useEventCallback } from "../hooks";
 import { CloseButton } from "./CloseButton";
