@@ -112,6 +112,7 @@ export const TextAnswerButton = forwardRef<
     [bgScale],
   );
 
+  // eslint-disable-next-line unicorn/expiring-todo-comments
   // TODO [react-native-reanimated@>=3.17] try using `useAnimatedStyle`
   //
   // It wasn't working in 3.16 on iOS, the styles just weren't applied.

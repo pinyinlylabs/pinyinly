@@ -718,7 +718,7 @@ function QuizProgressBar2Example() {
   return (
     <>
       <View className="w-full flex-col gap-2">
-        <View className="h-[16px]">
+        <View className="min-h-[32px]">
           <QuizProgressBar2 progress={progress} />
         </View>
         <View className="flex-row items-start gap-4">

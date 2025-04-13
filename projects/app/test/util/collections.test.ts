@@ -1,5 +1,6 @@
 import {
   deepTransform,
+  makeRange,
   mapInvert,
   merge,
   mergeSortComparators,
@@ -122,4 +123,17 @@ await test(`${mapInvert.name} fixtures`, () => {
       [`b`, `a`],
     ]),
   );
+});
+
+await test(`${makeRange.name} suite`, async () => {
+  await test(`ascending range`, () => {
+    assert.deepEqual(makeRange(0, 0), [0]);
+    assert.deepEqual(makeRange(0, 1), [0, 1]);
+    assert.deepEqual(makeRange(1, 2), [1, 2]);
+    assert.deepEqual(makeRange(1, 3), [1, 2, 3]);
+  });
+
+  await test(`descending range`, () => {
+    assert.deepEqual(makeRange(3, 1), [3, 2, 1]);
+  });
 });
