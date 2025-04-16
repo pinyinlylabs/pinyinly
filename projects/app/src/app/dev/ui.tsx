@@ -1,3 +1,4 @@
+import { useQuizProgress } from "@/client/hooks";
 import { HanziText } from "@/client/ui/HanziText";
 import { QuizProgressBar2 } from "@/client/ui/QuizProgressBar2";
 import { RectButton2 } from "@/client/ui/RectButton2";
@@ -698,28 +699,21 @@ function SyncedAnswerButtonExample(
 }
 
 function QuizProgressBar2Example() {
-  const [correct, setCorrect] = useState(0);
-  const [attempts, setAttempts] = useState(0);
+  const quizProgress = useQuizProgress();
 
   const logCorrect = useCallback(() => {
-    setCorrect((prev) => prev + 1);
-    setAttempts(0);
-  }, []);
+    quizProgress.recordAnswer(true);
+  }, [quizProgress]);
 
   const logIncorrect = useCallback(() => {
-    setAttempts((prev) => prev + 1);
-  }, []);
-
-  const progress =
-    correct +
-    // Give a diminishing progress for each attempt.
-    (attempts === 0 ? 0 : (Math.log(attempts - 0.5) + 1.9) / 8.7);
+    quizProgress.recordAnswer(false);
+  }, [quizProgress]);
 
   return (
     <>
       <View className="w-full flex-col gap-2">
         <View className="min-h-[32px]">
-          <QuizProgressBar2 progress={progress} />
+          <QuizProgressBar2 progress={quizProgress.progress} />
         </View>
         <View className="flex-row items-start gap-4">
           <View className="flex-row items-center gap-2">

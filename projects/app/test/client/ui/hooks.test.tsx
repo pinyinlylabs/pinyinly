@@ -1,4 +1,4 @@
-import { useMultiChoiceQuizTimer } from "#client/hooks.ts";
+import { useMultiChoiceQuizTimer, useQuizProgress } from "#client/hooks.ts";
 import { act, renderHook } from "@testing-library/react-native";
 import test from "node:test";
 
@@ -84,5 +84,64 @@ await test(`${useMultiChoiceQuizTimer.name} suite`, async (t) => {
     });
 
     expect(result.current.endTime).toBeUndefined();
+  });
+});
+
+await test(`${useQuizProgress.name} suite`, async (t) => {
+  await t.test(`increments progress for each correct answer`, () => {
+    const { result } = renderHook(() => useQuizProgress());
+
+    expect(result.current.progress).toBe(0);
+
+    act(() => {
+      result.current.recordAnswer(true);
+    });
+
+    expect(result.current.progress).toBe(1);
+
+    act(() => {
+      result.current.recordAnswer(true);
+    });
+
+    expect(result.current.progress).toBe(2);
+  });
+
+  await t.test(`fractionally increments progress for each incorrect`, () => {
+    const { result } = renderHook(() => useQuizProgress());
+
+    expect(result.current.progress).toBe(0);
+    let lastProgress;
+    for (let i = 0; i < 100; i++) {
+      lastProgress = result.current.progress;
+
+      act(() => {
+        result.current.recordAnswer(false);
+      });
+
+      expect(result.current.progress).toBeGreaterThan(lastProgress);
+      expect(result.current.progress).toBeLessThan(1);
+    }
+  });
+
+  await t.test(`resets fractional progress after correct answer`, () => {
+    const { result } = renderHook(() => useQuizProgress());
+
+    act(() => {
+      result.current.recordAnswer(false);
+    });
+
+    // Correct answers should reset to whole number progress values.
+
+    act(() => {
+      result.current.recordAnswer(true);
+    });
+
+    expect(result.current.progress).toBe(1);
+
+    act(() => {
+      result.current.recordAnswer(true);
+    });
+
+    expect(result.current.progress).toBe(2);
   });
 });
