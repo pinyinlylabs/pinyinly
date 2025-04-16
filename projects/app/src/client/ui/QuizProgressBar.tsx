@@ -1,6 +1,7 @@
 import { LinearGradient, LinearGradientProps } from "expo-linear-gradient";
 import { useEffect, useState } from "react";
 import {
+  // eslint-disable-next-line @typescript-eslint/no-restricted-imports
   Animated,
   LayoutChangeEvent,
   LayoutRectangle,

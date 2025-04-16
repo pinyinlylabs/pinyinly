@@ -1,4 +1,5 @@
 import { HanziText } from "@/client/ui/HanziText";
+import { QuizProgressBar2 } from "@/client/ui/QuizProgressBar2";
 import { RectButton2 } from "@/client/ui/RectButton2";
 import {
   TextAnswerButton,
@@ -7,7 +8,7 @@ import {
 import { PropsOf } from "@/client/ui/types";
 import { Link } from "expo-router";
 import shuffle from "lodash/shuffle";
-import { ReactNode, useRef, useState } from "react";
+import { ReactNode, useCallback, useRef, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { tv } from "tailwind-variants";
@@ -28,6 +29,10 @@ export default function DesignSystemPage() {
         </Link>
       </View>
       <ScrollView style={{ flex: 1 }} ref={scrollViewRef}>
+        <Section title="QuizProgressBar2Example" scrollTo={scrollTo}>
+          <QuizProgressBar2Example />
+        </Section>
+
         <Section title="HanziText" scrollTo={scrollTo}>
           <HanziTextExamples />
         </Section>
@@ -688,6 +693,46 @@ function SyncedAnswerButtonExample(
         text="Primary"
       />
       <TextAnswerButton state={state} {...props} text="Mirror" />
+    </>
+  );
+}
+
+function QuizProgressBar2Example() {
+  const [correct, setCorrect] = useState(0);
+  const [attempts, setAttempts] = useState(0);
+
+  const logCorrect = useCallback(() => {
+    setCorrect((prev) => prev + 1);
+    setAttempts(0);
+  }, []);
+
+  const logIncorrect = useCallback(() => {
+    setAttempts((prev) => prev + 1);
+  }, []);
+
+  const progress =
+    correct +
+    // Give a diminishing progress for each attempt.
+    (attempts === 0 ? 0 : (Math.log(attempts - 0.5) + 1.9) / 8.7);
+
+  return (
+    <>
+      <View className="w-full flex-col gap-2">
+        <View className="min-h-[32px]">
+          <QuizProgressBar2 progress={progress} />
+        </View>
+        <View className="flex-row items-start gap-4">
+          <View className="flex-row items-center gap-2">
+            <Text className="font-bold text-primary-10">Answer:</Text>
+            <RectButton2 variant="outline" onPress={logCorrect}>
+              Correct
+            </RectButton2>
+            <RectButton2 variant="outline" onPress={logIncorrect}>
+              Incorrect
+            </RectButton2>
+          </View>
+        </View>
+      </View>
     </>
   );
 }

@@ -283,3 +283,17 @@ export function evenHalve<T>(items: T[]): [T[], T[]] {
 
 export const emptySet: ReadonlySet<never> = new Set();
 export const emptyArray: readonly never[] = [];
+
+export const makeRange = (start: number, end: number) => {
+  const range = [];
+  if (start <= end) {
+    for (let i = start; i <= end; i++) {
+      range.push(i);
+    }
+  } else {
+    for (let i = start; i >= end; i--) {
+      range.push(i);
+    }
+  }
+  return range;
+};
