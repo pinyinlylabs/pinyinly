@@ -149,6 +149,10 @@ tasks:
       # Pass $NODE_OPTIONS to support VS Code "JavaScript Debug Terminal".
       NODE_OPTIONS: --import tsx $NODE_OPTIONS
 
+  devInngest:
+    command: npx -y inngest-cli@1.5.7 dev
+    preset: watcher
+
   formatAssetJson:
     command: tsx --tsconfig tsconfig.node.json ./bin/formatAssetJson.ts
     preset: watcher

@@ -1,14 +1,13 @@
+import { questionsForReview2 } from "@/client/query";
 import { StackNavigationFor } from "@/client/ui/types";
 import {
   Mistake,
   MistakeType,
   Question,
   QuestionFlag,
-  QuestionFlagType,
   QuestionType,
   SkillRating,
 } from "@/data/model";
-import { readonlyMapSet } from "@/util/collections";
 import { Rating } from "@/util/fsrs";
 import { nanoid } from "@/util/nanoid";
 import { invariant } from "@haohaohow/lib/invariant";
@@ -23,37 +22,29 @@ import {
   StackCardInterpolationProps,
   TransitionPresets,
 } from "@react-navigation/stack";
-import { useQueries } from "@tanstack/react-query";
+import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Asset } from "expo-asset";
 import { Image } from "expo-image";
-import { Href, Link, usePathname } from "expo-router";
-import sortBy from "lodash/sortBy";
-import React, { useMemo, useRef, useState } from "react";
+import { Link } from "expo-router";
+import React, { useEffect, useId, useRef } from "react";
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import { Animated, Platform, View } from "react-native";
-import { useEventCallback } from "../hooks";
+import { Animated, Platform, Text, View } from "react-native";
+import Reanimated, { FadeIn } from "react-native-reanimated";
+import { useEventCallback, useQuizProgress } from "../hooks";
 import { CloseButton } from "./CloseButton";
 import { QuizDeckMultipleChoiceQuestion } from "./QuizDeckMultipleChoiceQuestion";
 import { QuizDeckOneCorrectPairQuestion } from "./QuizDeckOneCorrectPairQuestion";
-import { QuizProgressBar } from "./QuizProgressBar";
+import { QuizProgressBar2 } from "./QuizProgressBar2";
 import { RectButton2 } from "./RectButton2";
 import { useReplicache } from "./ReplicacheContext";
 import { useSoundEffect } from "./useSoundEffect";
 
-interface QuestionState {
-  type: QuestionStateType;
-  attempts: number;
-}
-
-enum QuestionStateType {
-  Correct,
-  Incorrect,
-}
-
 const Stack = createStackNavigator<{
-  results: undefined;
+  loading: undefined;
+  chill: undefined;
   question: {
-    question: Question | null;
+    question: Question;
+    // todo remove
     flag?: QuestionFlag;
   };
 }>();
@@ -61,64 +52,101 @@ const Stack = createStackNavigator<{
 type Navigation = StackNavigationFor<typeof Stack>;
 
 export const QuizDeck = ({
-  questions,
+  // questions,
   className,
 }: {
-  questions: readonly Question[];
+  // questions: readonly Question[];
   className?: string;
 }) => {
+  const id = useId();
   const theme = useTheme();
   const navigationRef = useRef<Navigation>();
-  const [questionStateMap, setQuestionStateMap] = useState<
-    ReadonlyMap<Question, QuestionState>
-  >(() => new Map());
+  // const [questionStateMap, setQuestionStateMap] = useState<
+  //   ReadonlyMap<Question, QuestionState>
+  // >(() => new Map());
   const r = useReplicache();
+  const queryClient = useQueryClient();
+
+  const questionsQueryKey = [QuizDeck.name, `quiz`, id];
+
+  const questionsQuery = useQuery({
+    queryKey: questionsQueryKey,
+    queryFn: async () => {
+      const [question] = await questionsForReview2(r, { limit: 5 });
+      return question ?? null;
+    },
+    staleTime: Infinity, // Don't regenerate the quiz after re-focusing the page.
+    structuralSharing: false,
+  });
+
+  const question = questionsQuery.data;
+
+  useEffect(() => {
+    // console.log(`question changed:`, question);
+    if (question != null) {
+      const flag: QuestionFlag | undefined =
+        // attempts > 0
+        //   ? { type: QuestionFlagType.PreviousMistake }
+        //   :
+        question.flag;
+      // console.log(
+      //   `navigationRef.current?.replace('question', { question, flag })`,
+      //   question,
+      // );
+      navigationRef.current?.replace(`question`, { question, flag });
+    }
+  }, [question]);
 
   const playSuccessSound = useSoundEffect(
     require(`@/assets/audio/sparkle.mp3`),
   );
 
   // The number of questions in a row correctly answered.
-  const [streakCount, setStreakCount] = useState(0);
+  const quizProgress = useQuizProgress();
 
-  const progress = useMemo(() => {
-    let p = 0;
-    for (const s of questionStateMap.values()) {
-      if (s.type === QuestionStateType.Correct) {
-        p += 1;
-      } else if (s.attempts > 0) {
-        // Give a diminishing progress for each attempt.
-        p += (Math.log(s.attempts - 0.5) + 1.9) / 8.7;
-      }
-    }
-    return p / questions.length;
-  }, [questionStateMap, questions.length]);
+  // const progress = useMemo(() => {
+  //   let p = 0;
+  //   for (const s of questionStateMap.values()) {
+  //     if (s.type === QuestionStateType.Correct) {
+  //       p += 1;
+  //     } else if (s.attempts > 0) {
+  //       // Give a diminishing progress for each attempt.
+  //       p += (Math.log(s.attempts - 0.5) + 1.9) / 8.7;
+  //     }
+  //   }
+  //   return p / questions.length;
+  // }, [questionStateMap, questions.length]);
 
   const handleNext = useEventCallback(() => {
-    const remainingQuestions = questions
-      .map((q) => [q, questionStateMap.get(q)] as const)
-      .filter(([, state]) => state?.type !== QuestionStateType.Correct);
-    const [next] = sortBy(remainingQuestions, ([, s]) => s?.attempts ?? 0);
+    // console.log(`queryClient.invalidateQueries()`);
 
-    if (next == null) {
-      navigationRef.current?.replace(`results`);
-    } else {
-      const [question, state] = next;
-      const attempts = state?.attempts ?? 0;
-      const flag: QuestionFlag | undefined =
-        attempts > 0
-          ? { type: QuestionFlagType.PreviousMistake }
-          : question.flag;
-      navigationRef.current?.replace(`question`, { question, flag });
-    }
+    // Force the next question to be fetched.
+    void queryClient.invalidateQueries({ queryKey: questionsQueryKey });
+
+    // const remainingQuestions = questions
+    //   .map((q) => [q, questionStateMap.get(q)] as const)
+    //   .filter(([, state]) => state?.type !== QuestionStateType.Correct);
+    // const [next] = sortBy(remainingQuestions, ([, s]) => s?.attempts ?? 0);
+
+    // if (next == null) {
+    //   navigationRef.current?.replace(`results`);
+    // } else {
+    //   const [question, state] = next;
+    //   const attempts = state?.attempts ?? 0;
+    //   const flag: QuestionFlag | undefined =
+    //     attempts > 0
+    //       ? { type: QuestionFlagType.PreviousMistake }
+    //       : question.flag;
+    //   navigationRef.current?.replace(`question`, { question, flag });
+    // }
   });
 
   const handleRating = useEventCallback(
-    (question: Question, ratings: SkillRating[], mistakes: Mistake[]) => {
-      invariant(
-        questions.includes(question),
-        `handleRating called with wrong question`,
-      );
+    (_question: Question, ratings: SkillRating[], mistakes: Mistake[]) => {
+      // invariant(
+      //   questions.includes(question),
+      //   `handleRating called with wrong question`,
+      // );
       invariant(ratings.length > 0, `ratings must not be empty`);
 
       const success = ratings.every(({ rating }) => rating !== Rating.Again);
@@ -169,15 +197,16 @@ export const QuizDeck = ({
         }
       }
 
-      setStreakCount((prev) => (success ? prev + 1 : 0));
-      setQuestionStateMap((prev) =>
-        readonlyMapSet(prev, question, {
-          type: success
-            ? QuestionStateType.Correct
-            : QuestionStateType.Incorrect,
-          attempts: (prev.get(question)?.attempts ?? 0) + 1,
-        }),
-      );
+      quizProgress.recordAnswer(success);
+
+      // setQuestionStateMap((prev) =>
+      //   readonlyMapSet(prev, question, {
+      //     type: success
+      //       ? QuestionStateType.Correct
+      //       : QuestionStateType.Incorrect,
+      //     attempts: (prev.get(question)?.attempts ?? 0) + 1,
+      //   }),
+      // );
     },
   );
 
@@ -187,19 +216,17 @@ export const QuizDeck = ({
     require(`@/assets/icons/close-circled-filled.svg`),
   );
 
-  const pathname = usePathname();
-
   return (
     <View className={className}>
       <View className="mb-[20px] w-full max-w-[600px] flex-row items-center gap-[24px] self-center px-[16px]">
         <CloseButton tintColor="#3C464D" />
-        <QuizProgressBar
-          progress={progress}
-          colors={
-            streakCount >= 2
-              ? [`#E861F8`, `#414DF6`, `#75F076`] // streak
-              : [`#3F4CF5`, `#3F4CF5`] // solid blue
-          }
+        <QuizProgressBar2
+          progress={quizProgress.progress}
+          // colors={
+          //   streakCount >= 2
+          //     ? [`#E861F8`, `#414DF6`, `#75F076`] // streak
+          //     : [`#3F4CF5`, `#3F4CF5`] // solid blue
+          // }
         />
       </View>
 
@@ -222,25 +249,77 @@ export const QuizDeck = ({
             })}
           >
             <Stack.Screen
-              name="question"
-              initialParams={{
-                // initial params is cached across multiple mounts, it seems like
-                // the screen names are global? and initialParams can only be set
-                // once?
-                question: null,
+              name="loading"
+              children={() => {
+                return (
+                  <Reanimated.View entering={FadeIn} className="my-auto">
+                    <Text className="font-karla text-lg text-primary-10">
+                      Loading
+                    </Text>
+                  </Reanimated.View>
+                );
               }}
+            />
+            <Stack.Screen
+              name="chill"
+              children={() => {
+                return (
+                  <View className="gap-2">
+                    <View
+                      style={{
+                        flex: 1,
+                        gap: 16,
+                        alignItems: `center`,
+                        justifyContent: `center`,
+                        paddingLeft: 20,
+                        paddingRight: 20,
+                      }}
+                    >
+                      <Text className="hhh-text-title">
+                        👏 You’re all caught up on your reviews!
+                      </Text>
+                      {/* {nextNotYetDueSkillState.isLoading ||
+                      nextNotYetDueSkillState.data == null ? null : (
+                        <Text className="hhh-text-caption">
+                          Next review in{` `}
+                          {formatDuration(
+                            intervalToDuration(
+                              interval(
+                                new Date(),
+                                nextNotYetDueSkillState.data.srs.nextReviewAt,
+                              ),
+                            ),
+                          )}
+                        </Text>
+                      )} */}
+                      <Link dismissTo href="/learn" asChild>
+                        <RectButton2>Back</RectButton2>
+                      </Link>
+                    </View>
+                  </View>
+                );
+              }}
+            />
+            <Stack.Screen
+              name="question"
+              // initialParams={{
+              //   // initial params is cached across multiple mounts, it seems like
+              //   // the screen names are global? and initialParams can only be set
+              //   // once?
+              //   question: null,
+              // }}
               children={({
                 route: {
-                  params: { question: q, flag: f },
+                  params: { question, flag: f },
                 },
               }) => {
-                const question = q ?? questions[0];
-                const flag = f ?? question?.flag;
+                // console.log(`<Stack.Screen name="question">`, question);
+                const flag = f ?? question.flag;
 
-                invariant(
-                  question != null && questions.includes(question),
-                  `Stack.Screen called with wrong question`,
-                );
+                // invariant(
+                //   question != null && questions.includes(question),
+                //   `Stack.Screen called with wrong question`,
+                // );
 
                 let screen: React.ReactNode;
 
@@ -270,25 +349,6 @@ export const QuizDeck = ({
                 return (
                   <View className="h-full w-full max-w-[600px] flex-1 self-center">
                     {screen}
-                  </View>
-                );
-              }}
-            />
-            <Stack.Screen
-              name="results"
-              children={() => {
-                return (
-                  <View className="gap-2">
-                    <Link href={pathname as Href} asChild replace>
-                      <RectButton2 variant="filled" accent>
-                        Keep learning
-                      </RectButton2>
-                    </Link>
-                    <Link href="/learn" asChild>
-                      <RectButton2 variant="bare">
-                        That’s enough for now
-                      </RectButton2>
-                    </Link>
                   </View>
                 );
               }}
