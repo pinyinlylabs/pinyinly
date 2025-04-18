@@ -117,7 +117,7 @@
     "@typescript-eslint/utils": "^8.26.0",
     "babel-plugin-transform-import-meta": "patch:babel-plugin-transform-import-meta@npm%3A2.2.1#~/.yarn/patches/babel-plugin-transform-import-meta-npm-2.2.1-0927fef047.patch",
     "debug": "^4.3.7",
-    "drizzle-kit": "^0.30.1",
+    "drizzle-kit": "^0.31.0",
     "eslint": "^9.13.0",
     "eslint-plugin-drizzle": "^0.2.3",
     "eslint-plugin-import": "^2.31.0",
