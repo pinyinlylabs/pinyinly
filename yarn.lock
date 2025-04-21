@@ -10835,16 +10835,15 @@ __metadata:
   linkType: hard
 
 "ink-select-input@npm:^6.0.0":
-  version: 6.0.0
-  resolution: "ink-select-input@npm:6.0.0"
+  version: 6.1.0
+  resolution: "ink-select-input@npm:6.1.0"
   dependencies:
     figures: "npm:^6.1.0"
-    lodash.isequal: "npm:^4.5.0"
     to-rotated: "npm:^1.0.0"
   peerDependencies:
     ink: ">=5.0.0"
     react: ">=18.0.0"
-  checksum: 10c0/6e2422dda13d2c5e29cb2f46b401949884c7e6c179eb8908cb8e558cf859c3e0af6aee603dc700e609a759c976bff2198442348d4c6695db3a34d454d7e63c3f
+  checksum: 10c0/25c7665f56453260c4057c8e66a2511c007c4a50c0cb7cc745e59dac358d08aa5d2239fabb761244850235a2d0d7fb9895ad214e1cb146a58dc5d0bca4bcf9e0
   languageName: node
   linkType: hard
 
