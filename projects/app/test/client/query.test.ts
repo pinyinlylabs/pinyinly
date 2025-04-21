@@ -1,7 +1,7 @@
 import {
   computeSkillReviewQueue,
   flagsForSrsState,
-  hsk1SkillReview,
+  targetSkillsReviewQueue,
 } from "#client/query.ts";
 import {
   HanziText,
@@ -20,12 +20,12 @@ import test from "node:test";
 import { parseRelativeTimeShorthand } from "../data/helpers";
 import { testReplicacheOptions } from "../util/rizzleHelpers";
 
-await test(`${hsk1SkillReview.name} suite`, async () => {
+await test(`${targetSkillsReviewQueue.name} suite`, async () => {
   await test(`returns everything when no skills have state`, async () => {
     await using rizzle = r.replicache(testReplicacheOptions(), v7, v7Mutators);
 
     // Sanity check that there should be a bunch in the queue
-    const skills = await hsk1SkillReview(rizzle);
+    const skills = await targetSkillsReviewQueue(rizzle);
     assert.ok(skills.length > 100);
   });
 });
