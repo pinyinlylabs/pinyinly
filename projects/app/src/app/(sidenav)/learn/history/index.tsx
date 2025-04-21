@@ -1,8 +1,5 @@
 import { hsk1SkillReview } from "@/client/query";
-import {
-  useReplicache,
-  useRizzleQueryPaged,
-} from "@/client/ui/ReplicacheContext";
+import { useRizzleQueryPaged } from "@/client/ui/ReplicacheContext";
 import { SkillType } from "@/data/model";
 import {
   DeprecatedSkill,
@@ -24,19 +21,14 @@ import {
   sortComparatorDate,
 } from "@/util/collections";
 import { Rating } from "@/util/fsrs";
-import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { ScrollView, Text, View } from "react-native";
 
 export default function HistoryPage() {
-  const r = useReplicache();
-
-  const data2Query = useQuery({
-    queryKey: [HistoryPage.name, `hsk1SkillReview`],
-    queryFn: async () => {
-      return await hsk1SkillReview(r);
-    },
-  });
+  const data2Query = useRizzleQueryPaged(
+    [HistoryPage.name, `hsk1SkillReview`],
+    (r) => hsk1SkillReview(r),
+  );
 
   const skillRatingsQuery = useRizzleQueryPaged(
     [HistoryPage.name, `skillRatings`],

@@ -1,15 +1,13 @@
+import { useLocalQuery } from "@/client/hooks";
 import { RectButton2 } from "@/client/ui/RectButton2";
 import { allRadicalsByStrokes, radicalStrokes } from "@/dictionary/dictionary";
-import { useQuery } from "@tanstack/react-query";
 import { Link } from "expo-router";
 import { ScrollView, Text, View } from "react-native";
 
 export default function RadicalsPage() {
-  const query = useQuery({
+  const query = useLocalQuery({
     queryKey: [RadicalsPage.name, `radicals`],
-    queryFn: async () => {
-      return await allRadicalsByStrokes();
-    },
+    queryFn: () => allRadicalsByStrokes(),
   });
 
   return (

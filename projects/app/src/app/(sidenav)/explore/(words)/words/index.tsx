@@ -1,3 +1,4 @@
+import { useLocalQuery } from "@/client/hooks";
 import { RectButton2 } from "@/client/ui/RectButton2";
 import {
   allHsk1HanziWords,
@@ -5,12 +6,11 @@ import {
   allHsk3HanziWords,
   hanziFromHanziWord,
 } from "@/dictionary/dictionary";
-import { useQuery } from "@tanstack/react-query";
 import { Link } from "expo-router";
 import { ScrollView, Text, View } from "react-native";
 
 export default function WordsPage() {
-  const query = useQuery({
+  const query = useLocalQuery({
     queryKey: [WordsPage.name, `words`],
     queryFn: async () => {
       const [hsk1Words, hsk2Words, hsk3Words] = await Promise.all([

@@ -1,3 +1,4 @@
+import { useLocalQuery } from "@/client/hooks";
 import { RectButton2 } from "@/client/ui/RectButton2";
 import { useReplicache, useRizzleQuery } from "@/client/ui/ReplicacheContext";
 import { rMnemonicThemeId } from "@/data/rizzleSchema";
@@ -5,7 +6,7 @@ import {
   loadHhhPinyinChart,
   loadMnemonicThemeChoices,
 } from "@/dictionary/dictionary";
-import { useQuery } from "@tanstack/react-query";
+
 import { Link, useLocalSearchParams } from "expo-router";
 import { ScrollView, Text, View } from "react-native";
 
@@ -13,16 +14,14 @@ export default function MnemonicIdPage() {
   const { id } = useLocalSearchParams<`/explore/mnemonics/[id]`>();
   const r = useReplicache();
 
-  const query = useQuery({
+  const query = useLocalQuery({
     queryKey: [MnemonicIdPage.name, `chart`],
-    queryFn: () => Promise.resolve(loadHhhPinyinChart()),
+    queryFn: () => loadHhhPinyinChart(),
   });
 
-  const choicesQuery = useQuery({
+  const choicesQuery = useLocalQuery({
     queryKey: [MnemonicIdPage.name, `mnemonicThemeChoices`],
-    queryFn: async () => {
-      return await loadMnemonicThemeChoices();
-    },
+    queryFn: () => loadMnemonicThemeChoices(),
   });
 
   const associationQuery = useRizzleQuery(

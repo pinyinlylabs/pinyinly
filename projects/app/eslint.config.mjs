@@ -116,6 +116,11 @@ export default tseslint.config(
               message: `Please use the default \`Animated\` import from \`react-native-reanimated\` instead.`,
             },
             {
+              name: `@tanstack/react-query`,
+              importNames: [`useQuery`],
+              message: `Please use a wrapped version (e.g. useLocalQuery).`,
+            },
+            {
               name: `hanzi`,
               message: `Please use @/dictionary/hanzi instead.`,
             },

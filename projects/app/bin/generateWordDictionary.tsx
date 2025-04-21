@@ -1,6 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import hanzi from "hanzi";
 
+import { useInternetQuery, useLocalQuery } from "#client/hooks.ts";
 import { HanziChar, HanziText, HanziWord, PinyinText } from "#data/model.ts";
 import {
   allHanziCharacters,
@@ -30,12 +31,9 @@ import {
 import { jsonStringifyIndentOneLevel } from "#util/json.ts";
 import { invariant } from "@haohaohow/lib/invariant";
 import { Alert, MultiSelect, Select } from "@inkjs/ui";
-import {
-  QueryClient,
-  QueryClientProvider,
-  useQuery,
-} from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import makeDebug from "debug";
+
 import { Box, render, Text, useFocus, useInput } from "ink";
 import Link from "ink-link";
 import Spinner from "ink-spinner";
@@ -1231,7 +1229,7 @@ const DictionaryEditor = ({ onCancel }: { onCancel: () => void }) => {
 };
 
 const DongChineseHanziEntry = ({ hanzi }: { hanzi: string }) => {
-  const dongChinese = useQuery({
+  const dongChinese = useInternetQuery({
     queryKey: [`dongChineseData`],
     queryFn: dongChineseData,
   });
@@ -1988,7 +1986,7 @@ function hanziWordQueryFilter(
 }
 
 function useDictionary() {
-  return useQuery({
+  return useLocalQuery({
     queryKey: [`loadDictionary`],
     queryFn: async () => {
       return await readDictionary();
@@ -2268,7 +2266,7 @@ async function upsertHanziWordWordList(
 }
 
 function useHanziWordList(wordListFileName: string) {
-  return useQuery({
+  return useLocalQuery({
     queryKey: [`loadHanziWordList`, wordListFileName],
     queryFn: async () => {
       return await readHanziWordList(wordListFileName);

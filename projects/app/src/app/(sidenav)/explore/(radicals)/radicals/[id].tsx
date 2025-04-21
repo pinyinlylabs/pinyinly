@@ -1,3 +1,4 @@
+import { useLocalQuery } from "@/client/hooks";
 import { ReferencePage } from "@/client/ui/ReferencePage";
 import { ReferencePageBodySection } from "@/client/ui/ReferencePageBodySection";
 import { ReferencePageHeader } from "@/client/ui/ReferencePageHeader";
@@ -8,14 +9,13 @@ import {
   lookupHanziWordGlossMnemonics,
   lookupHanziWordPinyinMnemonics,
 } from "@/dictionary/dictionary";
-import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams } from "expo-router";
 import { ScrollView, Text, View } from "react-native";
 
 export default function RadicalPage() {
   const { id } = useLocalSearchParams<`/explore/radicals/[id]`>();
 
-  const query = useQuery({
+  const query = useLocalQuery({
     queryKey: [`character.radical`, id],
     queryFn: async () => {
       const [radical, nameMnemonics, pinyinMnemonics] = await Promise.all([
