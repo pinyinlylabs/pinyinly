@@ -1,3 +1,4 @@
+import { useLocalQuery } from "@/client/hooks";
 import { CloseButton } from "@/client/ui/CloseButton";
 import { QuizProgressBar } from "@/client/ui/QuizProgressBar";
 import { RectButton2 } from "@/client/ui/RectButton2";
@@ -10,7 +11,6 @@ import {
   lookupHanziWord,
   lookupHanziWordGlossMnemonics,
 } from "@/dictionary/dictionary";
-import { useQuery } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams } from "expo-router";
@@ -76,7 +76,7 @@ const svgData = {
 export default function RadicalPage() {
   const { id } = useLocalSearchParams<`/explore/radicals/[id]`>();
 
-  const query = useQuery({
+  const query = useLocalQuery({
     queryKey: [`character.radical`, id],
     queryFn: async () => {
       const [radical, nameMnemonics] = await Promise.all([

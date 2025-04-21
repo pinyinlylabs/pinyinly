@@ -1,14 +1,14 @@
+import { useLocalQuery } from "@/client/hooks";
 import { ReferencePage } from "@/client/ui/ReferencePage";
 import { ReferencePageBodySection } from "@/client/ui/ReferencePageBodySection";
 import { ReferencePageHeader } from "@/client/ui/ReferencePageHeader";
 import { GradientRed } from "@/client/ui/styles";
-import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams } from "expo-router";
 
 export default function CharacterPage() {
   const { id } = useLocalSearchParams<`/character/[id]`>();
 
-  const query = useQuery({
+  const query = useLocalQuery({
     queryKey: [`character`, id],
     // eslint-disable-next-line @typescript-eslint/require-await
     queryFn: async () => {

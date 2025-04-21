@@ -22,7 +22,7 @@ import {
   StackCardInterpolationProps,
   TransitionPresets,
 } from "@react-navigation/stack";
-import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueries, useQueryClient } from "@tanstack/react-query";
 import { Asset } from "expo-asset";
 import { Image } from "expo-image";
 import { Link } from "expo-router";
@@ -36,7 +36,7 @@ import { QuizDeckMultipleChoiceQuestion } from "./QuizDeckMultipleChoiceQuestion
 import { QuizDeckOneCorrectPairQuestion } from "./QuizDeckOneCorrectPairQuestion";
 import { QuizProgressBar2 } from "./QuizProgressBar2";
 import { RectButton2 } from "./RectButton2";
-import { useReplicache } from "./ReplicacheContext";
+import { useReplicache, useRizzleQueryPaged } from "./ReplicacheContext";
 import { useSoundEffect } from "./useSoundEffect";
 
 const Stack = createStackNavigator<{
@@ -69,14 +69,9 @@ export const QuizDeck = ({
 
   const questionsQueryKey = [QuizDeck.name, `quiz`, id];
 
-  const questionsQuery = useQuery({
-    queryKey: questionsQueryKey,
-    queryFn: async () => {
-      const [question] = await questionsForReview2(r, { limit: 5 });
-      return question ?? null;
-    },
-    staleTime: Infinity, // Don't regenerate the quiz after re-focusing the page.
-    structuralSharing: false,
+  const questionsQuery = useRizzleQueryPaged(questionsQueryKey, async (r) => {
+    const [question] = await questionsForReview2(r, { limit: 5 });
+    return question ?? null;
   });
 
   const question = questionsQuery.data;

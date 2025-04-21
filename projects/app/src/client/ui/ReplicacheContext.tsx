@@ -6,7 +6,7 @@ import { cookieSchema, r } from "@/util/rizzle";
 import { ReactQueryValue } from "@/util/types";
 import { invariant } from "@haohaohow/lib/invariant";
 import * as Sentry from "@sentry/core";
-import { QueryKey, useQuery, useQueryClient } from "@tanstack/react-query";
+import { QueryKey, useQueryClient } from "@tanstack/react-query";
 import { TRPCClientError } from "@trpc/client";
 import { createContext, useContext, useEffect, useMemo } from "react";
 import {
@@ -16,7 +16,7 @@ import {
   TEST_LICENSE_KEY,
 } from "replicache";
 import { useAuth, UseAuth2Data } from "../auth";
-import { useRenderGuard } from "../hooks";
+import { useLocalQuery, useRenderGuard } from "../hooks";
 import { kvStore } from "./replicacheOptions";
 
 const ReplicacheContext = createContext<Rizzle | null>(null);
@@ -196,7 +196,7 @@ export function useRizzleQuery<T extends ReactQueryValue>(
     };
   }, [stableKey, stableQuery, queryClient, r]);
 
-  const result = useQuery({
+  const result = useLocalQuery({
     queryKey: key,
     queryFn: () => r.replicache.query((tx) => query(r, tx)),
   });
@@ -213,9 +213,15 @@ export function useRizzleQueryPaged<T extends ReactQueryValue>(
   // Improve debugging.
   useRenderGuard(useRizzleQueryPaged.name);
 
-  const result = useQuery({
+  const result = useLocalQuery({
     queryKey: key,
     queryFn: () => query(r),
+    // TODO: enable these after adding subscribing to replicache mutations and
+    // invalidating the cache.
+    //
+    // refetchOnReconnect: false,
+    // refetchOnWindowFocus: false,
+    // refetchOnMount: false,
   });
 
   return result;

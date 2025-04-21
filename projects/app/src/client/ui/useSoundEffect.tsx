@@ -1,6 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
 import { AudioSource, useAudioPlayer } from "expo-audio";
-import { useEventCallback } from "../hooks";
+import { useEventCallback, useLocalQuery } from "../hooks";
 
 const audioContext =
   typeof AudioContext === `undefined` ? null : new AudioContext();
@@ -24,7 +23,7 @@ const useSoundEffectWebApi: UseSoundEffect = (source) => {
   const sourceUri = typeof source === `string` ? source : null;
 
   // Download and cache the audio buffer.
-  const { data: audioBuffer } = useQuery({
+  const { data: audioBuffer } = useLocalQuery({
     queryKey: [`useSoundEffect`, sourceUri],
     queryFn: async () => {
       if (sourceUri == null) {

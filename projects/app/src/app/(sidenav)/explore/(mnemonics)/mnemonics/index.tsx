@@ -1,9 +1,9 @@
+import { useLocalQuery } from "@/client/hooks";
 import {
   useRizzleQuery,
   useRizzleQueryPaged,
 } from "@/client/ui/ReplicacheContext";
 import { loadHhhPinyinChart } from "@/dictionary/dictionary";
-import { useQuery } from "@tanstack/react-query";
 import { Link } from "expo-router";
 import { Fragment } from "react";
 import { ScrollView, Text, View } from "react-native";
@@ -35,9 +35,9 @@ const widths = [
 ];
 
 export default function MnemonicsPage() {
-  const query = useQuery({
+  const query = useLocalQuery({
     queryKey: [MnemonicsPage.name, `chart`],
-    queryFn: () => Promise.resolve(loadHhhPinyinChart()),
+    queryFn: () => loadHhhPinyinChart(),
   });
 
   const initialAssociationsQuery = useRizzleQuery(

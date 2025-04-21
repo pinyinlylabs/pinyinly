@@ -1,3 +1,9 @@
+import {
+  // eslint-disable-next-line @typescript-eslint/no-restricted-imports
+  useQuery,
+  UseQueryOptions,
+  UseQueryResult,
+} from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import {
   useCallback,
@@ -197,3 +203,38 @@ const noOp = () => {};
  * Only runs in dev mode.
  */
 export const useRenderGuard = __DEV__ ? useRenderGuardImpl : () => noOp;
+
+export function useLocalQuery<
+  TQueryFnData = unknown,
+  TError = unknown,
+  TData = TQueryFnData,
+  TQueryKey extends readonly unknown[] = [],
+>(
+  options: Omit<
+    UseQueryOptions<TQueryFnData, TError, TData, TQueryKey>,
+    `networkMode`
+  >,
+): UseQueryResult<TData, TError> {
+  return useQuery({
+    ...options,
+    networkMode: `offlineFirst`,
+    structuralSharing: false,
+  });
+}
+
+export function useInternetQuery<
+  TQueryFnData = unknown,
+  TError = unknown,
+  TData = TQueryFnData,
+  TQueryKey extends readonly unknown[] = [],
+>(
+  options: Omit<
+    UseQueryOptions<TQueryFnData, TError, TData, TQueryKey>,
+    `networkMode`
+  >,
+): UseQueryResult<TData, TError> {
+  return useQuery({
+    ...options,
+    networkMode: `online`,
+  });
+}

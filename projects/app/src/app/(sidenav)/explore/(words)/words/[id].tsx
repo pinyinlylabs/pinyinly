@@ -1,16 +1,16 @@
+import { useLocalQuery } from "@/client/hooks";
 import { ReferencePage } from "@/client/ui/ReferencePage";
 import { ReferencePageBodySection } from "@/client/ui/ReferencePageBodySection";
 import { ReferencePageHeader } from "@/client/ui/ReferencePageHeader";
 import { GradientPurple } from "@/client/ui/styles";
 import { lookupHanzi } from "@/dictionary/dictionary";
-import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams } from "expo-router";
 import { ScrollView } from "react-native";
 
 export default function WordPage() {
   const { id } = useLocalSearchParams<`/explore/words/[id]`>();
 
-  const query = useQuery({
+  const query = useLocalQuery({
     queryKey: [`word`, id],
     queryFn: async () => {
       const [result] = await lookupHanzi(id);

@@ -16,9 +16,9 @@ import {
   skillReviewQueue,
 } from "@/data/skills";
 import { allHsk1HanziWords, lookupHanziWord } from "@/dictionary/dictionary";
-import { useQuery } from "@tanstack/react-query";
 import { add } from "date-fns/add";
 import { interval } from "date-fns/interval";
+import { useLocalQuery } from "./hooks";
 
 export async function questionsForReview2(
   r: Rizzle,
@@ -102,11 +102,9 @@ export async function computeSkillReviewQueue(
 }
 
 export const useHanziWordMeaning = (hanziWord: HanziWord) => {
-  return useQuery({
+  return useLocalQuery({
     queryKey: [useHanziWordMeaning.name, hanziWord],
-    queryFn: async () => {
-      return await lookupHanziWord(hanziWord);
-    },
+    queryFn: () => lookupHanziWord(hanziWord),
     staleTime: Infinity,
   });
 };
