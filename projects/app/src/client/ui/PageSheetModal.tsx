@@ -1,6 +1,6 @@
 import { ReactNode, useEffect, useMemo, useState } from "react";
 import { Modal, Platform, PressableProps, View } from "react-native";
-import Animated, {
+import Reanimated, {
   Easing,
   Extrapolation,
   interpolate,
@@ -171,12 +171,12 @@ const WebImpl = ({
         style={[animatedBackgroundStyle]}
         onPress={onBackgroundPress}
       >
-        <Animated.View
+        <Reanimated.View
           className={`max-h-full w-full max-w-[500px] rounded-xl lg:max-h-[80vh] lg:w-[500px] bg-${backdropColor}`}
           style={[animatedContentStyle]}
         >
           {children(api)}
-        </Animated.View>
+        </Reanimated.View>
       </AnimatedPressable>
     </Modal>
   );

@@ -2,7 +2,7 @@ import { makeRange } from "@/util/collections";
 import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useMemo, useState } from "react";
 import { LayoutChangeEvent, LayoutRectangle, View } from "react-native";
-import Animated, {
+import Reanimated, {
   Easing,
   SharedValue,
   useAnimatedStyle,
@@ -159,7 +159,7 @@ export const QuizProgressBar2 = ({ progress }: { progress: number }) => {
             })}
 
             {/* Fill bar */}
-            <Animated.View
+            <Reanimated.View
               className="flex-1 overflow-hidden"
               style={[
                 fillAnimStyles,
@@ -182,7 +182,7 @@ export const QuizProgressBar2 = ({ progress }: { progress: number }) => {
                   width: layout?.width,
                 }}
               />
-            </Animated.View>
+            </Reanimated.View>
           </View>
 
           {/* Ticks over the fill bar */}
@@ -218,7 +218,7 @@ const MinorTick = ({
   const animStyles = useTickAnimStyles({ axis, n, size: 5, fillSv });
 
   return (
-    <Animated.View
+    <Reanimated.View
       className="absolute top-1/2 rounded-full bg-[white]"
       style={animStyles}
     />
@@ -229,7 +229,7 @@ const MinorTickBg = ({ n, axis }: { axis: Axis; n: number }) => {
   const animStyles = useTickAnimStyles({ axis, n, size: 3 });
 
   return (
-    <Animated.View
+    <Reanimated.View
       className="absolute top-1/2 rounded-full bg-[white] opacity-50"
       style={animStyles}
     />
@@ -262,11 +262,11 @@ const MajorTick = ({
 
   return (
     <>
-      <Animated.View
+      <Reanimated.View
         className="absolute top-1/2 rounded-full bg-[#3F4CF5]"
         style={bgAnimStyles}
       />
-      <Animated.View
+      <Reanimated.View
         className="absolute left-1/2 top-1/2 rounded-full bg-[white]"
         style={dotAnimStyles}
       />
@@ -280,11 +280,11 @@ const MajorTickBg = ({ n, axis }: { axis: Axis; n: number }) => {
 
   return (
     <>
-      <Animated.View
+      <Reanimated.View
         className="absolute top-1/2 rounded-full bg-primary-7"
         style={bgAnimStyles}
       />
-      <Animated.View
+      <Reanimated.View
         className="absolute left-1/2 top-1/2 rounded-full bg-[white] opacity-50"
         style={dotAnimStyles}
       />

@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@expo/metro-runtime": "~4.0.1",
+    "@haohaohow/eslint-rules": "workspace:*",
     "@haohaohow/lib": "workspace:*",
     "@inngest/middleware-sentry": "^0.1.1",
     "@lottiefiles/dotlottie-react": "^0.6.5",

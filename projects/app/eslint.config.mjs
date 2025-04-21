@@ -1,4 +1,5 @@
 import { FlatCompat } from "@eslint/eslintrc";
+import haohaohowPlugin from "@haohaohow/eslint-rules";
 import inngestPlugin from "@inngest/eslint-plugin";
 import stylisticPlugin from "@stylistic/eslint-plugin";
 import drizzlePlugin from "eslint-plugin-drizzle";
@@ -24,6 +25,7 @@ export default tseslint.config(
     // note - intentionally uses computed syntax to make it easy to sort the keys
     plugins: {
       [`@expoCodeImports`]: tseslint.plugin, // an extra scope for no-restricted-imports so they don't clobber other configs
+      [`@haohaohow`]: haohaohowPlugin,
       [`@inngest`]: inngestPlugin,
       [`@stylistic`]: stylisticPlugin,
       [`@typescript-eslint`]: tseslint.plugin,
@@ -255,6 +257,11 @@ export default tseslint.config(
       "unicorn/prevent-abbreviations": `off`, // abbreviations are fine
       "unicorn/no-nested-ternary": `off`, // nested ternaries are not so bad
       "unicorn/filename-case": `off`, // using camelCase for filenames
+
+      //
+      // @haohaohow/eslint-rules
+      //
+      "@haohaohow/reanimated-default-name": `error`,
     },
   },
 

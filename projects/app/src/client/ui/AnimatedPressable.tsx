@@ -1,6 +1,6 @@
 import { cssInterop } from "nativewind";
 import { Pressable } from "react-native";
-import Animated from "react-native-reanimated";
+import Reanimated from "react-native-reanimated";
 
-export const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+export const AnimatedPressable = Reanimated.createAnimatedComponent(Pressable);
 cssInterop(AnimatedPressable, { className: `style` });
