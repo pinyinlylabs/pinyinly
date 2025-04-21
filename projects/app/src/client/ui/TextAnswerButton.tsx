@@ -5,6 +5,7 @@ import Animated, {
   Easing,
   runOnJS,
   useAnimatedReaction,
+  useAnimatedStyle,
   useSharedValue,
   withClamp,
   withSequence,
@@ -53,10 +54,10 @@ export const TextAnswerButton = forwardRef<
   const [pressed, setPressed] = useState(false);
   const [hovered, setHovered] = useState(false);
 
-  const scale = useSharedValue(1);
-  const rotation = useSharedValue(`0deg`);
-  const bgScale = useSharedValue(0.5);
-  const bgOpacity = useSharedValue(0);
+  const scaleSv = useSharedValue(1);
+  const rotationSv = useSharedValue(`0deg`);
+  const bgScaleSv = useSharedValue(0.5);
+  const bgOpacitySv = useSharedValue(0);
 
   useEffect(() => {
     setPrevState(state);
@@ -70,35 +71,35 @@ export const TextAnswerButton = forwardRef<
         case `dimmed`:
         case `default`: {
           setBgFilled(false);
-          bgScale.set(0.5);
-          bgOpacity.set(0);
+          bgScaleSv.set(0.5);
+          bgOpacitySv.set(0);
           break;
         }
         case `selected`: {
-          scale.set(withClamp({ min: 1 }, withScaleAnimation()));
-          bgScale.set(withClamp({ max: 1 }, withScaleAnimation()));
-          bgOpacity.set(withTiming(1, { duration }));
+          scaleSv.set(withClamp({ min: 1 }, withScaleAnimation()));
+          bgScaleSv.set(withClamp({ max: 1 }, withScaleAnimation()));
+          bgOpacitySv.set(withTiming(1, { duration }));
           break;
         }
         case `error`: {
-          rotation.set(withIncorrectWobbleAnimation());
-          bgOpacity.set(withTiming(1, { duration }));
+          rotationSv.set(withIncorrectWobbleAnimation());
+          bgOpacitySv.set(withTiming(1, { duration }));
           break;
         }
         case `success`: {
-          bgOpacity.set(
-            withClamp({ min: bgOpacity.get() }, withTiming(1, { duration })),
+          bgOpacitySv.set(
+            withClamp({ min: bgOpacitySv.get() }, withTiming(1, { duration })),
           );
           break;
         }
       }
     }
-  }, [bgOpacity, bgScale, scale, stateChanged, state, rotation]);
+  }, [bgOpacitySv, bgScaleSv, scaleSv, stateChanged, state, rotationSv]);
 
   // When the background scale reaches 100% update `bgFilled` to make the border
   // bright.
   useAnimatedReaction(
-    () => bgScale.get(),
+    () => bgScaleSv.get(),
     (currentValue, previousValue) => {
       if (currentValue < 1 && (previousValue === null || previousValue >= 1)) {
         runOnJS(setBgFilled)(false);
@@ -109,26 +110,17 @@ export const TextAnswerButton = forwardRef<
         runOnJS(setBgFilled)(true);
       }
     },
-    [bgScale],
+    [bgScaleSv],
   );
 
-  // eslint-disable-next-line unicorn/expiring-todo-comments
-  // TODO [react-native-reanimated@>=3.17] try using `useAnimatedStyle`
-  //
-  // It wasn't working in 3.16 on iOS, the styles just weren't applied.
-  // perhaps the babel plugin isn't working properly or something else?
-  const bgAnimatedStyle = useMemo(
-    () => ({
-      opacity: bgOpacity,
-      transform: [{ scale: bgScale }],
-    }),
-    [bgOpacity, bgScale],
-  );
+  const bgAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: bgOpacitySv.get(),
+    transform: [{ scale: bgScaleSv.get() }],
+  }));
 
-  const pressableAnimatedStyle = useMemo(
-    () => ({ transform: [{ scale }, { rotateZ: rotation }] }),
-    [rotation, scale],
-  );
+  const pressableAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scaleSv.get() }, { rotateZ: rotationSv.get() }],
+  }));
 
   const textLength = useMemo(() => {
     const charCount = characterCount(text);
