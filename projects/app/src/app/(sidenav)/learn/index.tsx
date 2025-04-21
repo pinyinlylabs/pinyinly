@@ -16,7 +16,7 @@ import { differenceInCalendarDays } from "date-fns/differenceInCalendarDays";
 import { sub } from "date-fns/sub";
 import { Link } from "expo-router";
 import { ScrollView, Text, View } from "react-native";
-import Animated, { FadeIn } from "react-native-reanimated";
+import Reanimated, { FadeIn } from "react-native-reanimated";
 import { tv } from "tailwind-variants";
 
 export default function IndexPage() {
@@ -173,7 +173,7 @@ export default function IndexPage() {
         </View>
       ) : (
         <>
-          <Animated.View
+          <Reanimated.View
             entering={FadeIn}
             style={{ alignSelf: `stretch`, alignItems: `center` }}
           >
@@ -282,9 +282,9 @@ export default function IndexPage() {
                 </Link>
               </View>
             </View>
-          </Animated.View>
+          </Reanimated.View>
 
-          <Animated.View
+          <Reanimated.View
             entering={FadeIn}
             style={{ alignSelf: `stretch`, alignItems: `center` }}
           >
@@ -306,7 +306,7 @@ export default function IndexPage() {
                 </RectButton2>
               </Link>
             </View>
-          </Animated.View>
+          </Reanimated.View>
         </>
       )}
     </ScrollView>

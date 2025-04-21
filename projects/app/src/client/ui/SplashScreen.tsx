@@ -4,7 +4,7 @@ import * as ExpoSplashScreen from "expo-splash-screen";
 import LottieView from "lottie-react-native";
 import { useEffect, useRef, useState } from "react";
 import { Platform, View } from "react-native";
-import Animated, { FadeOut } from "react-native-reanimated";
+import Reanimated, { FadeOut } from "react-native-reanimated";
 
 const isExpoGo =
   Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
@@ -71,7 +71,7 @@ export const SplashScreen = ({}: { children?: never }) => {
   }
 
   return (
-    <Animated.View
+    <Reanimated.View
       exiting={FadeOut}
       className="absolute bottom-0 left-0 right-0 top-0"
     >
@@ -91,6 +91,6 @@ export const SplashScreen = ({}: { children?: never }) => {
           source={require(`@/assets/lottie/splash.lottie.json`)}
         />
       </View>
-    </Animated.View>
+    </Reanimated.View>
   );
 };

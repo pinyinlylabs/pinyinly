@@ -1,0 +1,8 @@
+tasks:
+  test:
+    command: node --test --test-reporter=spec --import tsx "'**/*.test.{js,cjs}'"
+    inputs:
+      - "!dist/"
+      - "**/*"
+    env:
+      NODE_OPTIONS: --experimental-vm-modules $NODE_OPTIONS

@@ -1,0 +1,15 @@
+{
+  "name": "@haohaohow/eslint-rules",
+  "main": "index.cjs",
+  "type": "module",
+  "exports": {
+    ".": "./index.cjs"
+  },
+  "scripts": {
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "eslint": "^9.13.0"
+  },
+  "private": true
+}

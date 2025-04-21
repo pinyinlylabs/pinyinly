@@ -26,16 +26,19 @@
   "exclude": [],
   "references": [
     {
+      "path": "./api"
+    },
+    {
+      "path": "./bin"
+    },
+    {
       "path": "./src"
     },
     {
       "path": "./test"
     },
     {
-      "path": "./api"
-    },
-    {
-      "path": "./bin"
+      "path": "../eslint-rules"
     },
     {
       "path": "../lib"

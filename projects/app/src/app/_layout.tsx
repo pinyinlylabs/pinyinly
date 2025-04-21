@@ -25,7 +25,7 @@ import { Stack, useNavigationContainerRef } from "expo-router";
 import { cssInterop } from "nativewind";
 import { useEffect, useState } from "react";
 import { Platform, useColorScheme, View } from "react-native";
-import Animated from "react-native-reanimated";
+import Reanimated from "react-native-reanimated";
 import "../global.css";
 
 // NativeWind adapters for third party components
@@ -34,7 +34,7 @@ import "../global.css";
 cssInterop(Image, {
   className: { target: `style`, nativeStyleToProp: { color: `tintColor` } },
 });
-cssInterop(Animated.View, { className: `style` });
+cssInterop(Reanimated.View, { className: `style` });
 
 import * as AppleAuthentication from "expo-apple-authentication";
 import Head from "expo-router/head";

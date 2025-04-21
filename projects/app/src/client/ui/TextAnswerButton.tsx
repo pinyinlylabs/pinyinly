@@ -1,7 +1,7 @@
 import { characterCount } from "@/dictionary/dictionary";
 import { ElementRef, forwardRef, useEffect, useMemo, useState } from "react";
 import { Pressable, Text, View } from "react-native";
-import Animated, {
+import Reanimated, {
   Easing,
   runOnJS,
   useAnimatedReaction,
@@ -163,7 +163,7 @@ export const TextAnswerButton = forwardRef<
       style={pressableAnimatedStyle}
       className={pressableClass({ flat, state, inFlexRowParent, className })}
     >
-      <Animated.View
+      <Reanimated.View
         style={bgAnimatedStyle}
         className={bgAnimatedClass({ state })}
       />

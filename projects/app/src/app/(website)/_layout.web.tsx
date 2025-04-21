@@ -4,7 +4,7 @@ import { invariant } from "@haohaohow/lib/invariant";
 import { Image } from "expo-image";
 import { Link, Slot } from "expo-router";
 import { ScrollView, View } from "react-native";
-import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
+import Reanimated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { tv } from "tailwind-variants";
 import { useIntersectionObserver } from "usehooks-ts";
 
@@ -39,7 +39,7 @@ export default function WebsiteLayout() {
 
             {isBodyGetStartedVisible ? null : (
               <View className="flex-1 flex-row items-center justify-end gap-2">
-                <Animated.View
+                <Reanimated.View
                   entering={FadeIn.duration(100)}
                   exiting={FadeOut.duration(100)}
                 >
@@ -52,7 +52,7 @@ export default function WebsiteLayout() {
                       Get Started
                     </RectButton2>
                   </Link>
-                </Animated.View>
+                </Reanimated.View>
               </View>
             )}
           </View>
