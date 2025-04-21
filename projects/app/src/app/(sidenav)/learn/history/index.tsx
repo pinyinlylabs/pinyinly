@@ -1,4 +1,4 @@
-import { hsk1SkillReview } from "@/client/query";
+import { targetSkillsReviewQueue } from "@/client/query";
 import { useRizzleQueryPaged } from "@/client/ui/ReplicacheContext";
 import { SkillType } from "@/data/model";
 import {
@@ -27,7 +27,7 @@ import { ScrollView, Text, View } from "react-native";
 export default function HistoryPage() {
   const data2Query = useRizzleQueryPaged(
     [HistoryPage.name, `hsk1SkillReview`],
-    (r) => hsk1SkillReview(r),
+    (r) => targetSkillsReviewQueue(r),
   );
 
   const skillRatingsQuery = useRizzleQueryPaged(
