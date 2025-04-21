@@ -15,7 +15,11 @@ import {
   skillLearningGraph,
   skillReviewQueue,
 } from "@/data/skills";
-import { allHsk1HanziWords, lookupHanziWord } from "@/dictionary/dictionary";
+import {
+  allHsk1HanziWords,
+  allHsk2HanziWords,
+  lookupHanziWord,
+} from "@/dictionary/dictionary";
 import { add } from "date-fns/add";
 import { interval } from "date-fns/interval";
 import { useLocalQuery } from "./hooks";
@@ -28,7 +32,7 @@ export async function questionsForReview2(
 ): Promise<Question[]> {
   const result: Question[] = [];
 
-  for (const skill of await hsk1SkillReview(r)) {
+  for (const skill of await targetSkillsReviewQueue(r)) {
     const skillState = await r.replicache.query((tx) =>
       r.query.skillState.get(tx, { skill }),
     );
@@ -72,13 +76,19 @@ export function flagsForSrsState(
   }
 }
 
-export async function getAllTargetSkills() {
-  return await allHsk1HanziWords().then((words) =>
-    words.flatMap((w) => [hanziWordToGloss(w), hanziWordToPinyin(w)]),
-  );
+export async function getAllTargetSkills(): Promise<Skill[]> {
+  const [hsk1HanziWords, hsk2HanziWords] = await Promise.all([
+    allHsk1HanziWords(),
+    allHsk2HanziWords(),
+  ]);
+
+  return [...hsk1HanziWords, ...hsk2HanziWords].flatMap((w) => [
+    hanziWordToGloss(w),
+    hanziWordToPinyin(w),
+  ]);
 }
 
-export async function hsk1SkillReview(r: Rizzle): Promise<Skill[]> {
+export async function targetSkillsReviewQueue(r: Rizzle): Promise<Skill[]> {
   const targetSkills = await getAllTargetSkills();
   return await computeSkillReviewQueue(r, targetSkills);
 }
