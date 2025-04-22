@@ -2500,7 +2500,7 @@ __metadata:
     date-fns: "npm:^4.0.0"
     debug: "npm:^4.3.7"
     drizzle-kit: "npm:^0.31.0"
-    drizzle-orm: "npm:~0.41.0"
+    drizzle-orm: "npm:~0.42.0"
     eslint: "npm:^9.13.0"
     eslint-plugin-drizzle: "npm:^0.2.3"
     eslint-plugin-import: "npm:^2.31.0"
@@ -8002,9 +8002,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"drizzle-orm@npm:~0.41.0":
-  version: 0.41.0
-  resolution: "drizzle-orm@npm:0.41.0"
+"drizzle-orm@npm:~0.42.0":
+  version: 0.42.0
+  resolution: "drizzle-orm@npm:0.42.0"
   peerDependencies:
     "@aws-sdk/client-rds-data": ">=3"
     "@cloudflare/workers-types": ">=4"
@@ -8014,7 +8014,7 @@ __metadata:
     "@neondatabase/serverless": ">=0.10.0"
     "@op-engineering/op-sqlite": ">=2"
     "@opentelemetry/api": ^1.4.1
-    "@planetscale/database": ">=1"
+    "@planetscale/database": ">=1.13"
     "@prisma/client": "*"
     "@tidbcloud/serverless": "*"
     "@types/better-sqlite3": "*"
@@ -8090,7 +8090,7 @@ __metadata:
       optional: true
     sqlite3:
       optional: true
-  checksum: 10c0/4abc7ab2958a7862a9bdd149f3ec892ec05892e7cd2042f996b6e58c5504e51d50b408833ff5bdd6d44a4a71af4b4c280d281b01a0ce59acfc26a0117b6b6875
+  checksum: 10c0/9992b8dfa830e41cded7c47e55de4dec282154fc6c5dbe74146ee1679145fd7365dce99ea1fafb3a72284fe6061c360718e91c44301a2ff3076eebae10b24bf8
   languageName: node
   linkType: hard
 
