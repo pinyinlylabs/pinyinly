@@ -16,6 +16,7 @@ import { fsrsIsStable, Rating } from "@/util/fsrs";
 import { makePRNG } from "@/util/random";
 import { invariant } from "@haohaohow/lib/invariant";
 import type { Duration } from "date-fns";
+import { subDays } from "date-fns/subDays";
 import { DeepReadonly } from "ts-essentials";
 import {
   HanziGlossMistake,
@@ -336,24 +337,50 @@ export function pinyinInitialAssociation(
   return `${rSkillType().marshal(SkillType.PinyinInitialAssociation)}:${initial}` as PinyinInitialAssociationSkill;
 }
 
+export interface SkillReviewQueue {
+  available: readonly Skill[];
+  blocked: readonly Skill[];
+}
+
 export function skillReviewQueue({
   graph,
   skillSrsStates,
   now = new Date(),
-  includeBlocked = false,
 }: {
   graph: SkillLearningGraph;
   skillSrsStates: Map<Skill, SrsState>;
   now?: Date;
-  includeBlocked?: boolean;
-}): Skill[] {
+}): SkillReviewQueue {
   // Kahn topological sort
   const inDegree = new Map<Skill, number>();
   const queue: Skill[] = [];
+  // Which skills have been included in the learning order.
+  // This is used to avoid adding the same skill multiple times.
+  const learningOrderIncluded = new Set<Skill>();
   const learningOrderDue: [Skill, number][] = [];
   const learningOrderNew: Skill[] = [];
-  const learningOrderBlocked: Skill[] = [];
   const learningOrderNotDue: [Skill, SrsState | undefined][] = [];
+  const learningOrderBlocked: Skill[] = [];
+
+  const staleSkillDateCutoff = subDays(now, 14);
+
+  // Skills that are "too overdue" are 't been reviewed for a long time are considered "stale"
+  // and are re-introduced
+  const needsToBeIntroduced = (srsState: SrsState) =>
+    srsState.nextReviewAt < staleSkillDateCutoff;
+
+  // Add already introduced skills to the learning order, unless they're too
+  // stale and probably forgotten.
+  for (const [skill, srsState] of skillSrsStates) {
+    if (!needsToBeIntroduced(srsState)) {
+      learningOrderIncluded.add(skill);
+      if (srsState.nextReviewAt > now) {
+        learningOrderNotDue.push([skill, srsState]);
+      } else {
+        learningOrderDue.push([skill, srsState.nextReviewAt.getTime()]);
+      }
+    }
+  }
 
   // Compute in-degree
   for (const [skill, node] of graph.entries()) {
@@ -406,17 +433,22 @@ export function skillReviewQueue({
     const skill = queue.shift();
     invariant(skill != null);
 
-    const srsState = skillSrsStates.get(skill);
-    if (srsState == null) {
-      if (hasStableDependencies(skill)) {
-        learningOrderNew.push(skill);
+    if (!learningOrderIncluded.has(skill)) {
+      learningOrderIncluded.add(skill);
+
+      const srsState = skillSrsStates.get(skill);
+
+      if (srsState == null || needsToBeIntroduced(srsState)) {
+        if (hasStableDependencies(skill)) {
+          learningOrderNew.push(skill);
+        } else {
+          learningOrderBlocked.push(skill);
+        }
+      } else if (srsState.nextReviewAt > now) {
+        learningOrderNotDue.push([skill, srsState]);
       } else {
-        learningOrderBlocked.push(skill);
+        learningOrderDue.push([skill, srsState.nextReviewAt.getTime()]);
       }
-    } else if (srsState.nextReviewAt > now) {
-      learningOrderNotDue.push([skill, srsState]);
-    } else {
-      learningOrderDue.push([skill, srsState.nextReviewAt.getTime()]);
     }
 
     const node = graph.get(skill);
@@ -432,7 +464,7 @@ export function skillReviewQueue({
     }
   }
 
-  return [
+  const available = [
     // First do due skills, by the most due (oldest date) first.
     ...learningOrderDue
       .sort(sortComparatorNumber(([, due]) => due))
@@ -441,8 +473,10 @@ export function skillReviewQueue({
     ...learningOrderNew.reverse(),
     // Finally sort the not-due skills.
     ...randomSortSkills(learningOrderNotDue),
-    ...(includeBlocked ? learningOrderBlocked.reverse() : []),
   ];
+  const blocked = learningOrderBlocked.reverse();
+
+  return { available, blocked };
 }
 
 /**

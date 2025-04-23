@@ -68,9 +68,9 @@ export default function HistoryPage() {
       <View className="max-w-[600px] gap-4">
         <View className="flex-row gap-2">
           <View className="flex-1 items-center gap-[10px]">
-            <Text className="text-xl text-text">upcoming2</Text>
+            <Text className="text-xl text-text">available queue</Text>
 
-            {data2Query.data?.map((skill, i) => (
+            {data2Query.data?.available.map((skill, i) => (
               <View key={i} className="flex-col items-center">
                 <Text className="hhh-text-body">{skillParam(skill)}</Text>
                 <Text className="hhh-text-caption">
