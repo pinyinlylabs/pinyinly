@@ -16,6 +16,7 @@ import {
   skillReviewQueue,
 } from "@/data/skills";
 import { allHsk1HanziWords, allHsk2HanziWords } from "@/dictionary/dictionary";
+import { fsrsIsForgotten } from "@/util/fsrs";
 import { add } from "date-fns/add";
 import { interval } from "date-fns/interval";
 
@@ -57,7 +58,10 @@ export async function questionsForReview2(
 export function flagsForSrsState(
   srsState: SrsState | undefined,
 ): QuestionFlag | undefined {
-  if (srsState?.type !== SrsType.FsrsFourPointFive) {
+  if (
+    srsState?.type !== SrsType.FsrsFourPointFive ||
+    fsrsIsForgotten(srsState)
+  ) {
     return {
       type: QuestionFlagType.NewSkill,
     };

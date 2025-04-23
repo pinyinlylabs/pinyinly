@@ -1,4 +1,11 @@
-import { FsrsState, Rating, nextReview, ratingName } from "#util/fsrs.ts";
+import {
+  FsrsState,
+  Rating,
+  fsrsIsForgotten,
+  fsrsPredictedRecallProbability,
+  nextReview,
+  ratingName,
+} from "#util/fsrs.ts";
 import { RepeatedSequence2 } from "#util/types.ts";
 import type { Duration } from "date-fns";
 import { add } from "date-fns/add";
@@ -434,6 +441,45 @@ await test(`reviewing before due`, async () => {
     },
     { minutes: 5 },
   ]);
+});
+
+await test(`${fsrsPredictedRecallProbability.name} suite`, async () => {
+  await test(`decreases as days elapsed increases (memories fade with time)`, () => {
+    const srsState = nextReview(null, Rating.Good);
+
+    for (let i = 1; i < 100; i++) {
+      expect(
+        fsrsPredictedRecallProbability(srsState.stability, i),
+      ).toBeLessThan(fsrsPredictedRecallProbability(srsState.stability, i - 1));
+    }
+  });
+});
+
+await test(`${fsrsIsForgotten.name} suite`, async (t) => {
+  await t.test(
+    `is forgotten if waiting more than a week after one good review`,
+    ({ mock }) => {
+      mock.timers.enable({ apis: [`Date`] });
+
+      const srsState = nextReview(null, Rating.Good);
+
+      expect(fsrsIsForgotten(srsState)).toBe(false);
+      mock.timers.tick(1000 * 60 * 60 * 24 * 1);
+      expect(fsrsIsForgotten(srsState)).toBe(false); // 1 day
+      mock.timers.tick(1000 * 60 * 60 * 24 * 1);
+      expect(fsrsIsForgotten(srsState)).toBe(false); // 2 days
+      mock.timers.tick(1000 * 60 * 60 * 24 * 1);
+      expect(fsrsIsForgotten(srsState)).toBe(false); // 3 days
+      mock.timers.tick(1000 * 60 * 60 * 24 * 1);
+      expect(fsrsIsForgotten(srsState)).toBe(false); // 4 days
+      mock.timers.tick(1000 * 60 * 60 * 24 * 1);
+      expect(fsrsIsForgotten(srsState)).toBe(false); // 5 days
+      mock.timers.tick(1000 * 60 * 60 * 24 * 1);
+      expect(fsrsIsForgotten(srsState)).toBe(false); // 6 days
+      mock.timers.tick(1000 * 60 * 60 * 24 * 1);
+      expect(fsrsIsForgotten(srsState)).toBe(true); // 7 days
+    },
+  );
 });
 
 type ExpectedReview = z.TypeOf<typeof expectedReviewSchema>;
