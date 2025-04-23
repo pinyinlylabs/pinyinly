@@ -1,6 +1,5 @@
 import { generateQuestionForSkillOrThrow } from "@/data/generator";
 import {
-  HanziWord,
   Question,
   QuestionFlag,
   QuestionFlagType,
@@ -15,14 +14,9 @@ import {
   skillLearningGraph,
   skillReviewQueue,
 } from "@/data/skills";
-import {
-  allHsk1HanziWords,
-  allHsk2HanziWords,
-  lookupHanziWord,
-} from "@/dictionary/dictionary";
+import { allHsk1HanziWords, allHsk2HanziWords } from "@/dictionary/dictionary";
 import { add } from "date-fns/add";
 import { interval } from "date-fns/interval";
-import { useLocalQuery } from "./hooks";
 
 export async function questionsForReview2(
   r: Rizzle,
@@ -110,11 +104,3 @@ export async function computeSkillReviewQueue(
 
   return skillReviewQueue({ graph, skillSrsStates, now });
 }
-
-export const useHanziWordMeaning = (hanziWord: HanziWord) => {
-  return useLocalQuery({
-    queryKey: [useHanziWordMeaning.name, hanziWord],
-    queryFn: () => lookupHanziWord(hanziWord),
-    staleTime: Infinity,
-  });
-};

@@ -1,3 +1,5 @@
+import { HanziWord } from "@/data/model";
+import { lookupHanziWord } from "@/dictionary/dictionary";
 import {
   // eslint-disable-next-line @typescript-eslint/no-restricted-imports
   useQuery,
@@ -238,3 +240,11 @@ export function useInternetQuery<
     networkMode: `online`,
   });
 }
+
+export const useHanziWordMeaning = (hanziWord: HanziWord) => {
+  return useLocalQuery({
+    queryKey: [useHanziWordMeaning.name, hanziWord],
+    queryFn: () => lookupHanziWord(hanziWord),
+    staleTime: Infinity,
+  });
+};
