@@ -12,7 +12,7 @@ import {
   splitPinyinText,
 } from "@/dictionary/dictionary";
 import { emptySet, memoize1, sortComparatorNumber } from "@/util/collections";
-import { fsrsIsStable, Rating } from "@/util/fsrs";
+import { fsrsIsForgotten, fsrsIsStable, Rating } from "@/util/fsrs";
 import { makePRNG } from "@/util/random";
 import { invariant } from "@haohaohow/lib/invariant";
 import type { Duration } from "date-fns";
@@ -362,17 +362,10 @@ export function skillReviewQueue({
   const learningOrderNotDue: [Skill, SrsState | undefined][] = [];
   const learningOrderBlocked: Skill[] = [];
 
-  const staleSkillDateCutoff = subDays(now, 14);
-
-  // Skills that are "too overdue" are 't been reviewed for a long time are considered "stale"
-  // and are re-introduced
-  const needsToBeIntroduced = (srsState: SrsState) =>
-    srsState.nextReviewAt < staleSkillDateCutoff;
-
   // Add already introduced skills to the learning order, unless they're too
   // stale and probably forgotten.
   for (const [skill, srsState] of skillSrsStates) {
-    if (!needsToBeIntroduced(srsState)) {
+    if (!needsToBeIntroduced(srsState, now)) {
       learningOrderIncluded.add(skill);
       if (srsState.nextReviewAt > now) {
         learningOrderNotDue.push([skill, srsState]);
@@ -438,7 +431,7 @@ export function skillReviewQueue({
 
       const srsState = skillSrsStates.get(skill);
 
-      if (srsState == null || needsToBeIntroduced(srsState)) {
+      if (srsState == null || needsToBeIntroduced(srsState, now)) {
         if (hasStableDependencies(skill)) {
           learningOrderNew.push(skill);
         } else {
@@ -720,6 +713,27 @@ export function hanziOrPinyinWordCount(
     }
     case `gloss`: {
       throw new Error(`unexpected gloss choice in HanziWordToPinyin`);
+    }
+  }
+}
+
+// Skills that have either never been introduced, or were last reviewed too
+// long ago and have been likely forgotten should be introduced.
+export function needsToBeIntroduced(
+  srsState: SrsState | undefined | null,
+  now: Date,
+): boolean {
+  if (srsState == null) {
+    return true;
+  }
+
+  switch (srsState.type) {
+    case SrsType.FsrsFourPointFive: {
+      return fsrsIsForgotten(srsState, now);
+    }
+    case SrsType.Mock: {
+      // If it's more than 14 days overdue then assume it's forgotten.
+      return srsState.nextReviewAt < subDays(now, 14);
     }
   }
 }
