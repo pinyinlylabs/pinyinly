@@ -1,5 +1,4 @@
-import { useMultiChoiceQuizTimer } from "@/client/hooks";
-import { useHanziWordMeaning } from "@/client/query";
+import { useHanziWordMeaning, useMultiChoiceQuizTimer } from "@/client/hooks";
 import {
   Mistake,
   OneCorrectPairQuestion,

@@ -1,6 +1,5 @@
 import { generateQuestionForSkillOrThrow } from "@/data/generator";
 import {
-  HanziWord,
   Question,
   QuestionFlag,
   QuestionFlagType,
@@ -13,16 +12,12 @@ import {
   hanziWordToPinyin,
   skillDueWindow,
   skillLearningGraph,
+  SkillReviewQueue,
   skillReviewQueue,
 } from "@/data/skills";
-import {
-  allHsk1HanziWords,
-  allHsk2HanziWords,
-  lookupHanziWord,
-} from "@/dictionary/dictionary";
+import { allHsk1HanziWords, allHsk2HanziWords } from "@/dictionary/dictionary";
 import { add } from "date-fns/add";
 import { interval } from "date-fns/interval";
-import { useLocalQuery } from "./hooks";
 
 export async function questionsForReview2(
   r: Rizzle,
@@ -32,7 +27,9 @@ export async function questionsForReview2(
 ): Promise<Question[]> {
   const result: Question[] = [];
 
-  for (const skill of await targetSkillsReviewQueue(r)) {
+  for (const skill of await targetSkillsReviewQueue(r).then(
+    (q) => q.available,
+  )) {
     const skillState = await r.replicache.query((tx) =>
       r.query.skillState.get(tx, { skill }),
     );
@@ -88,7 +85,9 @@ export async function getAllTargetSkills(): Promise<Skill[]> {
   ]);
 }
 
-export async function targetSkillsReviewQueue(r: Rizzle): Promise<Skill[]> {
+export async function targetSkillsReviewQueue(
+  r: Rizzle,
+): Promise<SkillReviewQueue> {
   const targetSkills = await getAllTargetSkills();
   return await computeSkillReviewQueue(r, targetSkills);
 }
@@ -100,21 +99,13 @@ export async function computeSkillReviewQueue(
    * exposed for testing/simulating different times
    */
   now = new Date(),
-): Promise<Skill[]> {
+): Promise<SkillReviewQueue> {
+  const graph = await skillLearningGraph({ targetSkills });
+
   const skillSrsStates = new Map<Skill, SrsState>();
   for await (const [, v] of r.queryPaged.skillState.scan()) {
     skillSrsStates.set(v.skill, v.srs);
   }
 
-  const graph = await skillLearningGraph({ targetSkills });
-
   return skillReviewQueue({ graph, skillSrsStates, now });
 }
-
-export const useHanziWordMeaning = (hanziWord: HanziWord) => {
-  return useLocalQuery({
-    queryKey: [useHanziWordMeaning.name, hanziWord],
-    queryFn: () => lookupHanziWord(hanziWord),
-    staleTime: Infinity,
-  });
-};

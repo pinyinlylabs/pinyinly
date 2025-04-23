@@ -11,6 +11,7 @@ import {
 } from "#data/model.ts";
 import { v7Mutators } from "#data/rizzleMutators.ts";
 import { Skill, v7 } from "#data/rizzleSchema.ts";
+import { SkillReviewQueue } from "#data/skills.ts";
 import { Rating } from "#util/fsrs.ts";
 import { nanoid } from "#util/nanoid.ts";
 import { r } from "#util/rizzle.ts";
@@ -25,8 +26,8 @@ await test(`${targetSkillsReviewQueue.name} suite`, async () => {
     await using rizzle = r.replicache(testReplicacheOptions(), v7, v7Mutators);
 
     // Sanity check that there should be a bunch in the queue
-    const skills = await targetSkillsReviewQueue(rizzle);
-    assert.ok(skills.length > 100);
+    const { available } = await targetSkillsReviewQueue(rizzle);
+    assert.ok(available.length > 100);
   });
 });
 
@@ -36,18 +37,15 @@ await test(`${simulateSkillReviews.name} returns a review queue`, async () => {
     history: [],
   });
 
-  assert.deepEqual(reviewQueue, [
-    `he:丿:slash`,
-    `he:𠃌:radical`,
-    `he:八:eight`,
-    // (blocked) he:刀:knife
-    // (blocked) he:分:divide
-  ]);
+  assert.deepEqual(reviewQueue, {
+    available: [`he:丿:slash`, `he:𠃌:radical`, `he:八:eight`],
+    blocked: [`he:刀:knife`, `he:分:divide`],
+  });
 });
 
 await test(`${computeSkillReviewQueue.name} suite`, async () => {
   await test(`incorrect answers in a quiz don't get scheduled prematurely`, async () => {
-    const reviewQueue = await simulateSkillReviews({
+    const { available } = await simulateSkillReviews({
       targetSkills: [`he:分:divide`],
       history: [
         // first question is 丿:slash but they get it wrong. 八 is one of the
@@ -59,51 +57,66 @@ await test(`${computeSkillReviewQueue.name} suite`, async () => {
 
     // Make sure 八 didn't jump the queue before 𠃌 because it hasn't been
     // introduced yet, instead they should have to answer 𠃌 again.
-    const 𠃌Index = reviewQueue.indexOf(`he:𠃌:radical`);
-    const 八Index = reviewQueue.indexOf(`he:八:eight`);
+    const 𠃌Index = available.indexOf(`he:𠃌:radical`);
+    const 八Index = available.indexOf(`he:八:eight`);
     assert.ok(
       𠃌Index < 八Index,
       `he:𠃌:radical should be scheduled before he:八:eight`,
     );
   });
 
-  await test(`learns new skills first (stable sorted to maintain graph order) rather than reviewing not-due skills`, async () => {
+  await test(`learns new skills before not-due skills (stable sorted to maintain graph order)`, async () => {
     const reviewQueue = await simulateSkillReviews({
       targetSkills: [`he:分:divide`],
       history: [`🟡 he:丿:slash`, `💤 1m`],
     });
 
-    assert.deepEqual(reviewQueue, [
-      `he:𠃌:radical`,
-      `he:八:eight`,
-      `he:丿:slash`,
-      // (block) he:刀:knife
-      // (block) he:分:divide
-    ]);
+    assert.deepEqual(reviewQueue, {
+      available: [`he:𠃌:radical`, `he:八:eight`, `he:丿:slash`],
+      blocked: [`he:刀:knife`, `he:分:divide`],
+    });
   });
 
-  await test(`dependencies unlock skills when they become stable enough`, async () => {
+  await test(`skills unblock dependant skills when they become stable enough`, async () => {
     const targetSkills: Skill[] = [`he:刀:knife`];
     const history: SkillReviewOp[] = [];
 
-    const [review1] = await simulateSkillReviews({ targetSkills, history });
-    assert.equal(review1, `he:丿:slash`);
+    {
+      const { blocked } = await simulateSkillReviews({ targetSkills, history });
+      assert.deepEqual(blocked, [`he:刀:knife`]);
+    }
 
     history.push(`💤 1d`, `🟢 he:丿:slash he:𠃌:radical`);
-    const [review2] = await simulateSkillReviews({ targetSkills, history });
-    assert.deepEqual([review2], [`he:𠃌:radical`]);
+
+    {
+      const { blocked } = await simulateSkillReviews({ targetSkills, history });
+      assert.deepEqual(blocked, [`he:刀:knife`]);
+    }
 
     history.push(`💤 1d`, `🟢 he:丿:slash he:𠃌:radical`);
-    const [review3] = await simulateSkillReviews({ targetSkills, history });
-    assert.deepEqual([review3], [`he:丿:slash`]);
+
+    {
+      const { blocked } = await simulateSkillReviews({ targetSkills, history });
+      assert.deepEqual(blocked, [`he:刀:knife`]);
+    }
 
     history.push(`💤 1d`, `🟢 he:丿:slash he:𠃌:radical`);
-    const [review4] = await simulateSkillReviews({ targetSkills, history });
-    assert.deepEqual([review4], [`he:𠃌:radical`]);
+
+    {
+      const { blocked } = await simulateSkillReviews({ targetSkills, history });
+      assert.deepEqual(blocked, [`he:刀:knife`]);
+    }
 
     history.push(`💤 1d`, `🟢 he:丿:slash he:𠃌:radical`);
-    const [review5] = await simulateSkillReviews({ targetSkills, history });
-    assert.deepEqual([review5], [`he:刀:knife`]);
+
+    {
+      const { available, blocked } = await simulateSkillReviews({
+        targetSkills,
+        history,
+      });
+      expect(available).toContain(`he:刀:knife`);
+      assert.deepEqual(blocked, []);
+    }
   });
 
   await test(`doesn't get stuck reviewing the same skill after all due skills are done`, async () => {
@@ -122,16 +135,52 @@ await test(`${computeSkillReviewQueue.name} suite`, async () => {
       `🟡 he:丿:slash`,
     ];
 
-    const [review1] = await simulateSkillReviews({ targetSkills, history });
-    history.push(`💤 10s`, `🟡 ${review1!}`);
-    const [review2] = await simulateSkillReviews({ targetSkills, history });
-    history.push(`💤 10s`, `🟡 ${review2!}`);
-    const [review3] = await simulateSkillReviews({ targetSkills, history });
+    const {
+      available: [review1],
+    } = await simulateSkillReviews({ targetSkills, history });
 
-    assert.notDeepEqual(
-      [review1, review2, review3],
-      [review1, review1, review1],
-    );
+    // Doesn't get stuck reviewing he:𠃌:radical just because it had a lower stability.
+    assert.notDeepEqual([review1], [`he:𠃌:radical`]);
+  });
+
+  await test(`skills that are stale (heavily overdue and not stable) are treated as new skills`, async () => {
+    const targetSkills: Skill[] = [`he:刀:knife`];
+    const history: SkillReviewOp[] = [
+      `❌ he:刀:knife`, // Get it wrong initially so it's considered introduced but not very stable.
+      `💤 1h`, // Wait a short time so we can test that it's actually scheduled first again (base case).
+    ];
+
+    {
+      const queue = await simulateSkillReviews({
+        targetSkills,
+        history,
+      });
+      assert.deepEqual(queue, {
+        available: [
+          `he:刀:knife`,
+          // These come later because he:刀:knife is due.
+          `he:丿:slash`,
+          `he:𠃌:radical`,
+        ],
+        blocked: [],
+      });
+    }
+
+    history.push(`💤 100d`); // Wait a long time without reviewing it, so it's essentially stale.
+
+    {
+      const queue = await simulateSkillReviews({
+        targetSkills,
+        history,
+      });
+      assert.deepEqual(queue, {
+        available: [`he:丿:slash`, `he:𠃌:radical`],
+        blocked: [
+          // Now this comes last because it's "stale" and reset to new.
+          `he:刀:knife`,
+        ],
+      });
+    }
   });
 });
 
@@ -170,7 +219,7 @@ async function simulateSkillReviews({
 }: {
   targetSkills: Skill[];
   history: SkillReviewOp[];
-}): Promise<Skill[]> {
+}): Promise<SkillReviewQueue> {
   await using rizzle = r.replicache(testReplicacheOptions(), v7, v7Mutators);
   let now = new Date();
 
@@ -238,6 +287,5 @@ async function simulateSkillReviews({
     }
   }
 
-  const reviewQueue = await computeSkillReviewQueue(rizzle, targetSkills, now);
-  return reviewQueue;
+  return await computeSkillReviewQueue(rizzle, targetSkills, now);
 }

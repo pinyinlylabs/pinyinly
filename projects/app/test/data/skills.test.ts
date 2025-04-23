@@ -1,4 +1,5 @@
 import { SkillType } from "#data/model.ts";
+import { Skill } from "#data/rizzleSchema.ts";
 import {
   computeSkillRating,
   hanziWordToGloss,
@@ -297,13 +298,52 @@ await test(`${skillLearningGraph.name} suite`, async () => {
 });
 
 await test(`${skillReviewQueue.name} suite`, async () => {
-  await test(`no skills gives an empty queue`, async () => {
+  await test(`no target skills or skill states gives an empty queue`, async () => {
+    const graph = await skillLearningGraph({
+      targetSkills: [],
+    });
+    assert.deepEqual(skillReviewQueue({ graph, skillSrsStates: new Map() }), {
+      available: [],
+      blocked: [],
+    });
+  });
+
+  await test(`no target skills but some skill states (i.e. introduced skills) includes introduced skills (but not any dependencies of it)`, async () => {
     const graph = await skillLearningGraph({
       targetSkills: [],
     });
     assert.deepEqual(
-      skillReviewQueue({ graph, skillSrsStates: new Map() }),
-      [],
+      skillReviewQueue({
+        graph,
+        skillSrsStates: new Map([[`he:刀:knife`, mockSrsState(`-1d`, `-5m`)]]),
+      }),
+      { available: [`he:刀:knife`], blocked: [] },
+    );
+  });
+
+  await test(`introduced skills that would otherwise be blocked are not blocked (because they've been introduced already)`, async () => {
+    const graph = await skillLearningGraph({
+      targetSkills: [`he:刀:knife`],
+    });
+    assert.deepEqual(
+      skillReviewQueue({
+        graph,
+        skillSrsStates: new Map([[`he:刀:knife`, mockSrsState(`-1d`, `-5m`)]]),
+      }),
+      {
+        available: [
+          // This would normally be blocked but because it's already introduced
+          // (because there's an srs state for it) it's available.
+          `he:刀:knife`,
+
+          // These would normally come first in the queue because they're
+          // dependencies of he:刀:knife, but he:刀:knife is first because it's
+          // "due" while these are not yet.
+          `he:丿:slash`,
+          `he:𠃌:radical`,
+        ],
+        blocked: [],
+      },
     );
   });
 
@@ -316,9 +356,11 @@ await test(`${skillReviewQueue.name} suite`, async () => {
         skillReviewQueue({
           graph,
           skillSrsStates: new Map(),
-          includeBlocked: true,
         }),
-        [`he:子:child`, `he:女:woman`, `he:好:good`],
+        {
+          available: [`he:子:child`, `he:女:woman`],
+          blocked: [`he:好:good`],
+        },
       );
     });
 
@@ -331,16 +373,15 @@ await test(`${skillReviewQueue.name} suite`, async () => {
         skillReviewQueue({
           graph,
           skillSrsStates: new Map(),
-          includeBlocked: true,
         }),
-        [
-          `he:丿:slash`,
-          `he:亅:hook`,
-          `he:又:again`,
-          `he:水:water`, // learns this because of 氵
-          `he:氵:water`,
-          `he:汉:chinese`,
-        ],
+        {
+          available: [`he:丿:slash`, `he:亅:hook`, `he:又:again`],
+          blocked: [
+            `he:水:water`, // learns this because of 氵
+            `he:氵:water`,
+            `he:汉:chinese`,
+          ],
+        },
       );
     });
 
@@ -356,15 +397,16 @@ await test(`${skillReviewQueue.name} suite`, async () => {
             [`he:八:eight`, mockSrsState(`-1d`, `-5m`)],
             [`he:刀:knife`, mockSrsState(`-1d`, `-5m`)],
           ]),
-          includeBlocked: true,
         }),
-        [
-          `he:八:eight`,
-          `he:刀:knife`,
-          `he:丿:slash`,
-          `he:𠃌:radical`,
-          `he:分:divide`,
-        ],
+        {
+          available: [
+            `he:八:eight`,
+            `he:刀:knife`,
+            `he:丿:slash`,
+            `he:𠃌:radical`,
+          ],
+          blocked: [`he:分:divide`],
+        },
       );
     });
 
@@ -377,15 +419,11 @@ await test(`${skillReviewQueue.name} suite`, async () => {
         skillReviewQueue({
           graph,
           skillSrsStates: new Map(),
-          includeBlocked: true,
         }),
-        [
-          `he:丿:slash`,
-          `he:𠃌:radical`,
-          `he:八:eight`,
-          `he:刀:knife`,
-          `he:分:divide`,
-        ],
+        {
+          available: [`he:丿:slash`, `he:𠃌:radical`, `he:八:eight`],
+          blocked: [`he:刀:knife`, `he:分:divide`],
+        },
       );
     });
 
@@ -403,16 +441,17 @@ await test(`${skillReviewQueue.name} suite`, async () => {
             [`he:八:eight`, mockSrsState(`-10m`, `1h`)], // due in one hour,
             [`he:刀:knife`, mockSrsState(`-10m`, `2h`)], // due in two hours,
           ]),
-          includeBlocked: true,
         }),
-        [
-          `he:一:one`,
-          `he:𠃌:radical`,
-          `he:丿:slash`,
-          `he:刀:knife`,
-          `he:八:eight`,
-          `he:分:divide`,
-        ],
+        {
+          available: [
+            `he:一:one`,
+            `he:𠃌:radical`,
+            `he:丿:slash`,
+            `he:刀:knife`,
+            `he:八:eight`,
+          ],
+          blocked: [`he:分:divide`],
+        },
       );
     });
   });
@@ -424,17 +463,17 @@ await test(`${skillReviewQueue.name} suite`, async () => {
         skillReviewQueue({
           graph,
           skillSrsStates: new Map(),
-          includeBlocked: true,
         }),
-        [
-          `he:子:child`,
-          `he:女:woman`,
-          `he:好:good`,
-          `hpi:好:good`,
-          `hpf:好:good`,
-          `hpt:好:good`,
-          `hp:好:good`,
-        ],
+        {
+          available: [`he:子:child`, `he:女:woman`],
+          blocked: [
+            `he:好:good`,
+            `hpi:好:good`,
+            `hpf:好:good`,
+            `hpt:好:good`,
+            `hp:好:good`,
+          ],
+        },
       );
     });
 
@@ -443,17 +482,23 @@ await test(`${skillReviewQueue.name} suite`, async () => {
         targetSkills: [`hp:一样:same`],
       });
 
-      const onlyHpQueue = skillReviewQueue({
+      const queue = skillReviewQueue({
         graph,
         skillSrsStates: new Map(),
-        includeBlocked: true,
-      }).filter((x) => skillTypeFromSkill(x) === SkillType.HanziWordToPinyin);
+      });
 
-      assert.deepEqual(onlyHpQueue, [
-        `hp:样:shape`,
-        `hp:一:one`,
-        `hp:一样:same`,
-      ]);
+      const isHpSkill = (s: Skill) =>
+        skillTypeFromSkill(s) === SkillType.HanziWordToPinyin;
+
+      const onlyHpQueue = {
+        available: queue.available.filter((s) => isHpSkill(s)),
+        blocked: queue.blocked.filter((s) => isHpSkill(s)),
+      };
+
+      assert.deepEqual(onlyHpQueue, {
+        available: [],
+        blocked: [`hp:样:shape`, `hp:一:one`, `hp:一样:same`],
+      });
     });
 
     await test(`schedules new skills in dependency order`, async () => {
@@ -465,35 +510,38 @@ await test(`${skillReviewQueue.name} suite`, async () => {
         skillReviewQueue({
           graph,
           skillSrsStates: new Map(),
-          includeBlocked: true,
         }),
-        [
-          `he:人:person`,
-          `he:八:eight`,
-          `he:口:mouth`,
-          `he:乚:hook`,
-          `he:丿:slash`,
-          `he:一:one`,
-          `he:火:fire`,
-          `he:灬:fire`,
-          `he:占:occupy`,
-          `he:儿:son`,
-          `he:点:oClock`,
-          `hpi:儿:son`,
-          `hpi:点:oClock`,
-          `hpi:一:one`,
-          `hpf:儿:son`,
-          `hpf:点:oClock`,
-          `hpf:一:one`,
-          `hpt:儿:son`,
-          `hpt:点:oClock`,
-          `hpt:一:one`,
-          `hp:儿:son`,
-          `hp:点:oClock`,
-          `hp:一:one`,
-          `he:一点儿:aLittle`,
-          `hp:一点儿:aLittle`,
-        ],
+        {
+          available: [
+            `he:人:person`,
+            `he:八:eight`,
+            `he:口:mouth`,
+            `he:乚:hook`,
+            `he:丿:slash`,
+            `he:一:one`,
+          ],
+          blocked: [
+            `he:火:fire`,
+            `he:灬:fire`,
+            `he:占:occupy`,
+            `he:儿:son`,
+            `he:点:oClock`,
+            `hpi:儿:son`,
+            `hpi:点:oClock`,
+            `hpi:一:one`,
+            `hpf:儿:son`,
+            `hpf:点:oClock`,
+            `hpf:一:one`,
+            `hpt:儿:son`,
+            `hpt:点:oClock`,
+            `hpt:一:one`,
+            `hp:儿:son`,
+            `hp:点:oClock`,
+            `hp:一:one`,
+            `he:一点儿:aLittle`,
+            `hp:一点儿:aLittle`,
+          ],
+        },
       );
     });
 
@@ -502,9 +550,10 @@ await test(`${skillReviewQueue.name} suite`, async () => {
         targetSkills: [`hp:一:one`],
       });
 
-      assert.deepEqual(skillReviewQueue({ graph, skillSrsStates: new Map() }), [
-        `he:一:one`,
-      ]);
+      assert.deepEqual(skillReviewQueue({ graph, skillSrsStates: new Map() }), {
+        available: [`he:一:one`],
+        blocked: [`hpi:一:one`, `hpf:一:one`, `hpt:一:one`, `hp:一:one`],
+      });
 
       assert.deepEqual(
         skillReviewQueue({
@@ -513,7 +562,10 @@ await test(`${skillReviewQueue.name} suite`, async () => {
             [`he:一:one`, fsrsSrsState(`-1d`, `-5m`, Rating.Good)],
           ]),
         }),
-        [`he:一:one`, `hpi:一:one`],
+        {
+          available: [`he:一:one`, `hpi:一:one`],
+          blocked: [`hpf:一:one`, `hpt:一:one`, `hp:一:one`],
+        },
       );
 
       assert.deepEqual(
@@ -524,7 +576,10 @@ await test(`${skillReviewQueue.name} suite`, async () => {
             [`hpi:一:one`, fsrsSrsState(`-1d`, `-4m`, Rating.Good)],
           ]),
         }),
-        [`he:一:one`, `hpi:一:one`, `hpf:一:one`],
+        {
+          available: [`he:一:one`, `hpi:一:one`, `hpf:一:one`],
+          blocked: [`hpt:一:one`, `hp:一:one`],
+        },
       );
     });
   });

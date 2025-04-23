@@ -1,4 +1,4 @@
-import { useHanziWordMeaning } from "@/client/query";
+import { useHanziWordMeaning } from "@/client/hooks";
 import { HanziWord } from "@/data/model";
 import { hanziFromHanziWord, splitHanziText } from "@/dictionary/dictionary";
 import { useMemo } from "react";
