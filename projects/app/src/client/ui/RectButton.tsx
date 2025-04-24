@@ -1,8 +1,10 @@
 import Color from "color";
-import { ElementRef, forwardRef, useMemo } from "react";
-import { ColorValue, Pressable, View, ViewProps } from "react-native";
+import type { ElementRef } from "react";
+import { forwardRef, useMemo } from "react";
+import type { ColorValue, ViewProps } from "react-native";
+import { Pressable, View } from "react-native";
 import { hapticImpactIfMobile } from "../hooks";
-import { PropsOf } from "./types";
+import type { PropsOf } from "./types";
 
 export type RectButtonProps = {
   borderRadius?: number;

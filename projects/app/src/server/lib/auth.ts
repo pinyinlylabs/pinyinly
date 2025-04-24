@@ -3,7 +3,7 @@ import { DrizzlePostgreSQLAdapter } from "@lucia-auth/adapter-drizzle";
 import { and, eq } from "drizzle-orm";
 import { Lucia, TimeSpan } from "lucia";
 import * as schema from "../schema";
-import { Drizzle } from "./db";
+import type { Drizzle } from "./db";
 
 export function getLucia(db: Drizzle) {
   const adapter = new DrizzlePostgreSQLAdapter(

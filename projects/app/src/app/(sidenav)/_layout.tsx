@@ -2,15 +2,11 @@ import { useAuth } from "@/client/auth";
 import { DevLozenge } from "@/client/ui/DevLozenge";
 import { Image } from "expo-image";
 import { Link } from "expo-router";
-import {
-  TabList,
-  Tabs,
-  TabSlot,
-  TabTrigger,
-  TabTriggerSlotProps,
-} from "expo-router/ui";
+import type { TabTriggerSlotProps } from "expo-router/ui";
+import { TabList, Tabs, TabSlot, TabTrigger } from "expo-router/ui";
 import { StatusBar } from "expo-status-bar";
-import { ElementRef, forwardRef, ReactNode } from "react";
+import type { ElementRef, ReactNode } from "react";
+import { forwardRef } from "react";
 import { Pressable, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 

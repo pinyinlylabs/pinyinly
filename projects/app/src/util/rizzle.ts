@@ -9,18 +9,18 @@ import fromAsync from "array-from-async";
 import mapKeys from "lodash/mapKeys";
 import mapValues from "lodash/mapValues";
 import memoize from "lodash/memoize";
-import {
+import type {
   IndexDefinition,
   MutatorDefs,
   ReadonlyJSONValue,
   ReadTransaction,
-  Replicache,
   ReplicacheOptions,
   WriteTransaction,
 } from "replicache";
-import { AnyFunction } from "ts-essentials";
+import { Replicache } from "replicache";
+import type { AnyFunction } from "ts-essentials";
 import { z } from "zod";
-import { PartialIfUndefined } from "./types";
+import type { PartialIfUndefined } from "./types";
 
 export interface RizzleTypeDef {
   description?: string;

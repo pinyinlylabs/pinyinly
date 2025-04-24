@@ -1,17 +1,18 @@
+import type { FsrsState } from "#util/fsrs.ts";
 import {
-  FsrsState,
   Rating,
   fsrsIsForgotten,
   fsrsPredictedRecallProbability,
   nextReview,
   ratingName,
 } from "#util/fsrs.ts";
-import { RepeatedSequence2 } from "#util/types.ts";
+import type { RepeatedSequence2 } from "#util/types.ts";
 import type { Duration } from "date-fns";
 import { add } from "date-fns/add";
 import { intervalToDuration } from "date-fns/intervalToDuration";
 import assert from "node:assert/strict";
-import test, { TestContext } from "node:test";
+import type { TestContext } from "node:test";
+import test from "node:test";
 import z from "zod";
 import { parseRelativeTimeShorthand } from "../data/helpers";
 

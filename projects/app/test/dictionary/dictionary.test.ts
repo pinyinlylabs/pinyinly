@@ -1,4 +1,5 @@
-import { HanziChar } from "#data/model.ts";
+import type { HanziChar } from "#data/model.ts";
+import type { HanziWordMeaning, PinyinChart } from "#dictionary/dictionary.ts";
 import {
   allHanziCharacters,
   allHanziWordsHanzi,
@@ -11,7 +12,6 @@ import {
   decomposeHanzi,
   flattenIds,
   hanziFromHanziWord,
-  HanziWordMeaning,
   hanziWordMeaningSchema,
   idsNodeToString,
   IdsOperator,
@@ -33,7 +33,6 @@ import {
   meaningKeyFromHanziWord,
   parseIds,
   parsePinyinTone,
-  PinyinChart,
   splitHanziText,
   splitTonelessPinyin,
   unicodeShortIdentifier,
@@ -49,8 +48,8 @@ import { invariant, uniqueInvariant } from "@haohaohow/lib/invariant";
 import assert from "node:assert/strict";
 import test from "node:test";
 import { zodResponseFormat } from "openai/helpers/zod";
-import { DeepReadonly } from "ts-essentials";
-import { z } from "zod";
+import type { DeepReadonly } from "ts-essentials";
+import type { z } from "zod";
 
 await test(`radical groups have the right number of elements`, async () => {
   // Data integrity test to ensure that the number of characters in each group

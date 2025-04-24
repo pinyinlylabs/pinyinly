@@ -16,16 +16,16 @@ import {
   uniqueInvariant,
 } from "@haohaohow/lib/invariant";
 import shuffle from "lodash/shuffle";
-import {
+import type {
   HanziText,
   HanziWord,
   OneCorrectPairQuestionAnswer,
   OneCorrectPairQuestionChoice,
   PinyinText,
   Question,
-  QuestionType,
 } from "../model";
-import { HanziWordSkill } from "../rizzleSchema";
+import { QuestionType } from "../model";
+import type { HanziWordSkill } from "../rizzleSchema";
 import { hanziOrPinyinWordCount, hanziWordFromSkill } from "../skills";
 
 export async function hanziWordToPinyinFinalQuestionOrThrow(

@@ -1,4 +1,4 @@
-import { Flatten, IsEqual, PartialIfUndefined } from "#util/types.ts";
+import type { Flatten, IsEqual, PartialIfUndefined } from "#util/types.ts";
 import assert from "node:assert/strict";
 import test from "node:test";
 

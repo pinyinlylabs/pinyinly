@@ -2,8 +2,9 @@ import { getAllTargetSkills } from "@/client/query";
 import { Countdown } from "@/client/ui/Countdown";
 import { RectButton2 } from "@/client/ui/RectButton2";
 import { useRizzleQueryPaged } from "@/client/ui/ReplicacheContext";
-import { HanziWord, SkillType } from "@/data/model";
-import { HanziWordSkill, Skill } from "@/data/rizzleSchema";
+import type { HanziWord } from "@/data/model";
+import { SkillType } from "@/data/model";
+import type { HanziWordSkill, Skill } from "@/data/rizzleSchema";
 import {
   hanziWordFromSkill,
   skillDueWindow,

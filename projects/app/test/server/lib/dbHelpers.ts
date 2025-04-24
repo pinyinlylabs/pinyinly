@@ -1,12 +1,12 @@
-import { Drizzle, Transaction } from "#server/lib/db.ts";
+import type { Drizzle, Transaction } from "#server/lib/db.ts";
 import * as s from "#server/schema.ts";
 import { nanoid } from "#util/nanoid.ts";
 import { PGlite } from "@electric-sql/pglite";
-import { PgTransactionConfig } from "drizzle-orm/pg-core";
+import type { PgTransactionConfig } from "drizzle-orm/pg-core";
 import { drizzle } from "drizzle-orm/pglite";
 import { migrate } from "drizzle-orm/pglite/migrator";
 import assert from "node:assert/strict";
-import { TestContext } from "node:test";
+import type { TestContext } from "node:test";
 
 const migrationsFolder = import.meta.dirname + `/../../../drizzle`;
 

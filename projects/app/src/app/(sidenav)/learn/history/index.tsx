@@ -1,7 +1,7 @@
 import { targetSkillsReviewQueue } from "@/client/query";
 import { useRizzleQueryPaged } from "@/client/ui/ReplicacheContext";
 import { SkillType } from "@/data/model";
-import {
+import type {
   DeprecatedSkill,
   HanziWordSkill,
   PinyinFinalAssociationSkill,

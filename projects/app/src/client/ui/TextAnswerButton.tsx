@@ -1,6 +1,8 @@
 import { characterCount } from "@/dictionary/dictionary";
-import { ElementRef, forwardRef, useEffect, useMemo, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import type { ElementRef } from "react";
+import { forwardRef, useEffect, useMemo, useState } from "react";
+import type { Pressable } from "react-native";
+import { Text, View } from "react-native";
 import Reanimated, {
   Easing,
   runOnJS,
@@ -16,7 +18,7 @@ import { tv } from "tailwind-variants";
 import { hapticImpactIfMobile } from "../hooks";
 import { AnimatedPressable } from "./AnimatedPressable";
 import { Hhhmark } from "./Hhhmark";
-import { PropsOf } from "./types";
+import type { PropsOf } from "./types";
 
 export type TextAnswerButtonState =
   | `default`

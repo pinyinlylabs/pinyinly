@@ -1,11 +1,12 @@
 import * as r from "@/data/rizzleSchema";
 import { isRunningTests } from "@/util/env";
-import { RizzleType, RizzleTypeDef } from "@/util/rizzle";
+import type { RizzleType, RizzleTypeDef } from "@/util/rizzle";
 import { invariant } from "@haohaohow/lib/invariant";
-import { ColumnBaseConfig, Table } from "drizzle-orm";
-import * as s from "drizzle-orm/pg-core";
+import type { ColumnBaseConfig } from "drizzle-orm";
+import { Table } from "drizzle-orm";
+import type * as s from "drizzle-orm/pg-core";
 import { customType } from "drizzle-orm/pg-core";
-import { z, ZodError } from "zod";
+import type { z, ZodError } from "zod";
 
 type PgCustomColumn = s.PgCustomColumn<
   ColumnBaseConfig<`custom`, `PgCustomColumn`>

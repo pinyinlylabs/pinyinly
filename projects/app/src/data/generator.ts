@@ -1,15 +1,13 @@
-import {
-  hanziFromHanziWord,
-  HanziWordMeaning,
-  lookupHanziWord,
-} from "@/dictionary/dictionary";
-import { DeepReadonly } from "ts-essentials";
+import type { HanziWordMeaning } from "@/dictionary/dictionary";
+import { hanziFromHanziWord, lookupHanziWord } from "@/dictionary/dictionary";
+import type { DeepReadonly } from "ts-essentials";
 import { hanziWordToGlossQuestionOrThrow } from "./generators/hanziWordToGloss";
 import { hanziWordToPinyinFinalQuestionOrThrow } from "./generators/hanziWordToPinyinFinal";
 import { hanziWordToPinyinInitialQuestionOrThrow } from "./generators/hanziWordToPinyinInitial";
 import { hanziWordToPinyinToneQuestionOrThrow } from "./generators/hanziWordToPinyinTone";
-import { HanziWord, Question, SkillType } from "./model";
-import { HanziWordSkill, Skill } from "./rizzleSchema";
+import type { HanziWord, Question } from "./model";
+import { SkillType } from "./model";
+import type { HanziWordSkill, Skill } from "./rizzleSchema";
 import { skillTypeFromSkill } from "./skills";
 
 export async function generateQuestionForSkillOrThrow(

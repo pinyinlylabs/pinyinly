@@ -1,14 +1,13 @@
 import { useHanziWordMeaning, useMultiChoiceQuizTimer } from "@/client/hooks";
-import {
+import type {
   Mistake,
   OneCorrectPairQuestion,
   OneCorrectPairQuestionChoice,
   QuestionFlag,
-  QuestionFlagType,
   SkillRating,
-  SkillType,
 } from "@/data/model";
-import { HanziWordSkill, Skill } from "@/data/rizzleSchema";
+import { QuestionFlagType, SkillType } from "@/data/model";
+import type { HanziWordSkill, Skill } from "@/data/rizzleSchema";
 import {
   computeSkillRating,
   hanziWordFromSkill,
@@ -20,9 +19,8 @@ import { invariant } from "@haohaohow/lib/invariant";
 import { formatDuration } from "date-fns/formatDuration";
 import { intervalToDuration } from "date-fns/intervalToDuration";
 import { Image } from "expo-image";
+import type { ElementRef, ReactNode } from "react";
 import {
-  ElementRef,
-  ReactNode,
   forwardRef,
   memo,
   useCallback,
@@ -30,16 +28,15 @@ import {
   useMemo,
   useState,
 } from "react";
+import type { StyleProp, ViewStyle } from "react-native";
 import {
   // eslint-disable-next-line @typescript-eslint/no-restricted-imports
   Animated,
   Easing,
   Platform,
   Pressable,
-  StyleProp,
   Text,
   View,
-  ViewStyle,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { tv } from "tailwind-variants";
@@ -49,8 +46,9 @@ import { HanziWordModal } from "./HanziWordModal";
 import { Hhhmark } from "./Hhhmark";
 import { NewSkillModal } from "./NewSkillModal";
 import { RectButton2 } from "./RectButton2";
-import { TextAnswerButton, TextAnswerButtonState } from "./TextAnswerButton";
-import { PropsOf } from "./types";
+import type { TextAnswerButtonState } from "./TextAnswerButton";
+import { TextAnswerButton } from "./TextAnswerButton";
+import type { PropsOf } from "./types";
 
 const buttonThickness = 4;
 const gap = 12;

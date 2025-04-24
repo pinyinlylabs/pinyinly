@@ -1,4 +1,5 @@
-import { AudioSource, useAudioPlayer } from "expo-audio";
+import type { AudioSource } from "expo-audio";
+import { useAudioPlayer } from "expo-audio";
 import { useEventCallback, useLocalQuery } from "../hooks";
 
 const audioContext =

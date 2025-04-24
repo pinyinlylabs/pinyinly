@@ -1,8 +1,6 @@
 import { nanoid } from "#util/nanoid.ts";
-import {
+import type {
   ExtractVariableNames,
-  keyPathVariableNames,
-  r,
   RizzleCustom,
   RizzleIndexed,
   RizzleIndexTypes,
@@ -15,12 +13,15 @@ import {
   RizzleReplicacheMutators,
   RizzleReplicacheQuery,
 } from "#util/rizzle.ts";
-import { IsEqual } from "#util/types.ts";
+import { keyPathVariableNames, r } from "#util/rizzle.ts";
+import type { IsEqual } from "#util/types.ts";
 import mapValues from "lodash/mapValues";
 import shuffle from "lodash/shuffle";
 import assert from "node:assert/strict";
-import test, { TestContext } from "node:test";
-import { ReadTransaction, Replicache, WriteTransaction } from "replicache";
+import type { TestContext } from "node:test";
+import test from "node:test";
+import type { ReadTransaction, WriteTransaction } from "replicache";
+import { Replicache } from "replicache";
 import { z } from "zod";
 import { testReplicacheOptions } from "./rizzleHelpers";
 

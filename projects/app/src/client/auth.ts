@@ -2,7 +2,7 @@ import { trpc } from "@/client/trpc";
 import { invariant } from "@haohaohow/lib/invariant";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { DeepReadonly } from "ts-essentials";
+import type { DeepReadonly } from "ts-essentials";
 import { z } from "zod";
 import {
   clientStorageGet,

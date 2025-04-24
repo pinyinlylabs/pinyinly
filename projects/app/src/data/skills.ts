@@ -1,9 +1,9 @@
+import type { HanziWordWithMeaning } from "@/dictionary/dictionary";
 import {
   characterCount,
   characterHasGlyph,
   decomposeHanzi,
   hanziFromHanziWord,
-  HanziWordWithMeaning,
   isHanziChar,
   lookupGloss,
   lookupHanzi,
@@ -17,28 +17,25 @@ import { makePRNG } from "@/util/random";
 import { invariant } from "@haohaohow/lib/invariant";
 import type { Duration } from "date-fns";
 import { subDays } from "date-fns/subDays";
-import { DeepReadonly } from "ts-essentials";
-import {
+import type { DeepReadonly } from "ts-essentials";
+import type {
   HanziGlossMistake,
   HanziPinyinMistake,
   HanziWord,
   HanziWordSkillType,
   Mistake,
-  MistakeType,
   OneCorrectPairQuestionChoice,
   SkillRating,
-  SkillType,
   SrsState,
-  SrsType,
 } from "./model";
-import {
+import { MistakeType, SkillType, SrsType } from "./model";
+import type {
   HanziWordSkill,
   PinyinFinalAssociationSkill,
   PinyinInitialAssociationSkill,
-  rSkillType,
   Skill,
-  srsStateFromFsrsState,
 } from "./rizzleSchema";
+import { rSkillType, srsStateFromFsrsState } from "./rizzleSchema";
 
 export interface Node {
   skill: Skill;

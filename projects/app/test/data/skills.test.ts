@@ -1,9 +1,9 @@
 import { SkillType } from "#data/model.ts";
-import { Skill } from "#data/rizzleSchema.ts";
+import type { Skill } from "#data/rizzleSchema.ts";
+import type { SkillLearningGraph } from "#data/skills.ts";
 import {
   computeSkillRating,
   hanziWordToGloss,
-  SkillLearningGraph,
   skillLearningGraph,
   skillReviewQueue,
   skillTypeFromSkill,

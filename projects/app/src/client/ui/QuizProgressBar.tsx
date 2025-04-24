@@ -1,10 +1,10 @@
-import { LinearGradient, LinearGradientProps } from "expo-linear-gradient";
+import type { LinearGradientProps } from "expo-linear-gradient";
+import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useState } from "react";
+import type { LayoutChangeEvent, LayoutRectangle } from "react-native";
 import {
   // eslint-disable-next-line @typescript-eslint/no-restricted-imports
   Animated,
-  LayoutChangeEvent,
-  LayoutRectangle,
   View,
 } from "react-native";
 import { useEventCallback } from "../hooks";

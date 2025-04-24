@@ -1,4 +1,4 @@
-import { PinyinText } from "#data/model.ts";
+import type { PinyinText } from "#data/model.ts";
 import {
   inverseSortComparator,
   memoize0,

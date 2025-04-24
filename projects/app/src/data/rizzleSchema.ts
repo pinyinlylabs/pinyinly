@@ -1,15 +1,15 @@
 import { memoize0 } from "@/util/collections";
-import { FsrsState, Rating } from "@/util/fsrs";
-import { r, RizzleCustom, RizzleReplicache } from "@/util/rizzle";
+import type { FsrsState } from "@/util/fsrs";
+import { Rating } from "@/util/fsrs";
+import type { RizzleReplicache } from "@/util/rizzle";
+import { r, RizzleCustom } from "@/util/rizzle";
 import { z } from "zod";
+import type { HanziText, PinyinText, SrsState } from "./model";
 import {
-  HanziText,
   MnemonicThemeId,
   PartOfSpeech,
   PinyinInitialGroupId,
-  PinyinText,
   SkillType,
-  SrsState,
   SrsType,
 } from "./model";
 

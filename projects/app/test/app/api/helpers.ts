@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { spawn as _spawn } from "node:child_process";
-import { TestContext } from "node:test";
+import type { TestContext } from "node:test";
 import { setTimeout } from "node:timers/promises";
 
 export type TestExpoServer = Awaited<ReturnType<typeof testExpoServer>>;

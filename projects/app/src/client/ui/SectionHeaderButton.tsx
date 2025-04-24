@@ -1,6 +1,6 @@
 import { Text } from "react-native";
 import { RectButton } from "./RectButton";
-import { PropsOf } from "./types";
+import type { PropsOf } from "./types";
 
 export type SectionHeaderButtonProps = {
   title: string;

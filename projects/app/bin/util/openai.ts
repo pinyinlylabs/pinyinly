@@ -1,12 +1,12 @@
 import { invariant } from "@haohaohow/lib/invariant";
-import { Debugger } from "debug";
+import type { Debugger } from "debug";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import OpenAI from "openai";
 import { zodResponseFormat } from "openai/helpers/zod";
-import { ChatCompletionCreateParamsNonStreaming } from "openai/resources/index.mjs";
-import { z } from "zod";
-import { DbCache } from "./cache.js";
+import type { ChatCompletionCreateParamsNonStreaming } from "openai/resources/index.mjs";
+import type { z } from "zod";
+import type { DbCache } from "./cache.js";
 
 export const openAiWithCache = async (
   body: ChatCompletionCreateParamsNonStreaming,

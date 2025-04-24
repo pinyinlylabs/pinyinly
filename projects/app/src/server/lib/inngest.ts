@@ -5,7 +5,7 @@ import {
   loadDictionary,
   loadHanziWordMigrations,
 } from "@/dictionary/dictionary";
-import { AppRouter } from "@/server/routers/_app";
+import type { AppRouter } from "@/server/routers/_app";
 import { preflightCheckEnvVars } from "@/util/env";
 import { httpSessionHeader } from "@/util/http";
 import { invariant } from "@haohaohow/lib/invariant";
