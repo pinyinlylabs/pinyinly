@@ -35,7 +35,7 @@ import { useEventCallback, useQuizProgress } from "../hooks";
 import { CloseButton } from "./CloseButton";
 import { QuizDeckMultipleChoiceQuestion } from "./QuizDeckMultipleChoiceQuestion";
 import { QuizDeckOneCorrectPairQuestion } from "./QuizDeckOneCorrectPairQuestion";
-import { QuizProgressBar2 } from "./QuizProgressBar2";
+import { QuizProgressBar } from "./QuizProgressBar";
 import { RectButton2 } from "./RectButton2";
 import { useReplicache, useRizzleQueryPaged } from "./ReplicacheContext";
 import { useSoundEffect } from "./useSoundEffect";
@@ -52,19 +52,10 @@ const Stack = createStackNavigator<{
 
 type Navigation = StackNavigationFor<typeof Stack>;
 
-export const QuizDeck = ({
-  // questions,
-  className,
-}: {
-  // questions: readonly Question[];
-  className?: string;
-}) => {
+export const QuizDeck = ({ className }: { className?: string }) => {
   const id = useId();
   const theme = useTheme();
   const navigationRef = useRef<Navigation>();
-  // const [questionStateMap, setQuestionStateMap] = useState<
-  //   ReadonlyMap<Question, QuestionState>
-  // >(() => new Map());
   const r = useReplicache();
   const queryClient = useQueryClient();
 
@@ -78,17 +69,12 @@ export const QuizDeck = ({
   const question = questionsQuery.data;
 
   useEffect(() => {
-    // console.log(`question changed:`, question);
     if (question != null) {
       const flag: QuestionFlag | undefined =
         // attempts > 0
         //   ? { type: QuestionFlagType.PreviousMistake }
         //   :
         question.flag;
-      // console.log(
-      //   `navigationRef.current?.replace('question', { question, flag })`,
-      //   question,
-      // );
       navigationRef.current?.replace(`question`, { question, flag });
     }
   }, [question]);
@@ -100,49 +86,13 @@ export const QuizDeck = ({
   // The number of questions in a row correctly answered.
   const quizProgress = useQuizProgress();
 
-  // const progress = useMemo(() => {
-  //   let p = 0;
-  //   for (const s of questionStateMap.values()) {
-  //     if (s.type === QuestionStateType.Correct) {
-  //       p += 1;
-  //     } else if (s.attempts > 0) {
-  //       // Give a diminishing progress for each attempt.
-  //       p += (Math.log(s.attempts - 0.5) + 1.9) / 8.7;
-  //     }
-  //   }
-  //   return p / questions.length;
-  // }, [questionStateMap, questions.length]);
-
   const handleNext = useEventCallback(() => {
-    // console.log(`queryClient.invalidateQueries()`);
-
     // Force the next question to be fetched.
     void queryClient.invalidateQueries({ queryKey: questionsQueryKey });
-
-    // const remainingQuestions = questions
-    //   .map((q) => [q, questionStateMap.get(q)] as const)
-    //   .filter(([, state]) => state?.type !== QuestionStateType.Correct);
-    // const [next] = sortBy(remainingQuestions, ([, s]) => s?.attempts ?? 0);
-
-    // if (next == null) {
-    //   navigationRef.current?.replace(`results`);
-    // } else {
-    //   const [question, state] = next;
-    //   const attempts = state?.attempts ?? 0;
-    //   const flag: QuestionFlag | undefined =
-    //     attempts > 0
-    //       ? { type: QuestionFlagType.PreviousMistake }
-    //       : question.flag;
-    //   navigationRef.current?.replace(`question`, { question, flag });
-    // }
   });
 
   const handleRating = useEventCallback(
-    (_question: Question, ratings: SkillRating[], mistakes: Mistake[]) => {
-      // invariant(
-      //   questions.includes(question),
-      //   `handleRating called with wrong question`,
-      // );
+    (ratings: SkillRating[], mistakes: Mistake[]) => {
       invariant(ratings.length > 0, `ratings must not be empty`);
 
       const success = ratings.every(({ rating }) => rating !== Rating.Again);
@@ -194,15 +144,6 @@ export const QuizDeck = ({
       }
 
       quizProgress.recordAnswer(success);
-
-      // setQuestionStateMap((prev) =>
-      //   readonlyMapSet(prev, question, {
-      //     type: success
-      //       ? QuestionStateType.Correct
-      //       : QuestionStateType.Incorrect,
-      //     attempts: (prev.get(question)?.attempts ?? 0) + 1,
-      //   }),
-      // );
     },
   );
 
@@ -216,7 +157,7 @@ export const QuizDeck = ({
     <View className={className}>
       <View className="mb-[20px] w-full max-w-[600px] flex-row items-center gap-[24px] self-center px-[16px]">
         <CloseButton tintColor="#3C464D" />
-        <QuizProgressBar2
+        <QuizProgressBar
           progress={quizProgress.progress}
           // colors={
           //   streakCount >= 2
@@ -240,7 +181,6 @@ export const QuizDeck = ({
               // Hack to get the navigation object.
               state: () => {
                 navigationRef.current = navigation;
-                // as Navigation;
               },
             })}
           >
@@ -301,24 +241,12 @@ export const QuizDeck = ({
             />
             <Stack.Screen
               name="question"
-              // initialParams={{
-              //   // initial params is cached across multiple mounts, it seems like
-              //   // the screen names are global? and initialParams can only be set
-              //   // once?
-              //   question: null,
-              // }}
               children={({
                 route: {
                   params: { question, flag: f },
                 },
               }) => {
-                // console.log(`<Stack.Screen name="question">`, question);
                 const flag = f ?? question.flag;
-
-                // invariant(
-                //   question != null && questions.includes(question),
-                //   `Stack.Screen called with wrong question`,
-                // );
 
                 let screen: React.ReactNode;
 

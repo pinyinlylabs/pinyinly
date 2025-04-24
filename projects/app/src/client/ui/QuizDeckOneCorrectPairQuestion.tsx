@@ -63,11 +63,7 @@ export const QuizDeckOneCorrectPairQuestion = memo(
     question: OneCorrectPairQuestion;
     flag?: QuestionFlag;
     onNext: () => void;
-    onRating: (
-      question: OneCorrectPairQuestion,
-      ratings: SkillRating[],
-      mistakes: Mistake[],
-    ) => void;
+    onRating: (ratings: SkillRating[], mistakes: Mistake[]) => void;
   }) {
     const { prompt, answer, hint, groupA, groupB } = question;
 
@@ -130,7 +126,7 @@ export const QuizDeckOneCorrectPairQuestion = memo(
         ];
 
         setIsCorrect(isCorrect);
-        onRating(question, skillRatings, mistakes);
+        onRating(skillRatings, mistakes);
       } else {
         onNext();
       }

@@ -21,11 +21,7 @@ export const QuizDeckMultipleChoiceQuestion = memo(
   }: {
     question: MultipleChoiceQuestion;
     onNext: () => void;
-    onRating: (
-      question: MultipleChoiceQuestion,
-      ratings: SkillRating[],
-      mistakes: Mistake[],
-    ) => void;
+    onRating: (ratings: SkillRating[], mistakes: Mistake[]) => void;
   }) {
     const { prompt, choices } = question;
     const [selectedChoice, setSelectedChoice] = useState<string>();

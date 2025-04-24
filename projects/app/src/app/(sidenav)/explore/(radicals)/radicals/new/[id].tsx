@@ -1,6 +1,5 @@
 import { useLocalQuery } from "@/client/hooks";
 import { CloseButton } from "@/client/ui/CloseButton";
-import { QuizProgressBar } from "@/client/ui/QuizProgressBar";
 import { RectButton2 } from "@/client/ui/RectButton2";
 import { ReferencePage } from "@/client/ui/ReferencePage";
 import { ReferencePageBodySection } from "@/client/ui/ReferencePageBodySection";
@@ -93,12 +92,6 @@ export default function RadicalPage() {
     <View className="flex-1 items-center bg-background">
       <View className="w-[100%] max-w-[600px] flex-row items-center gap-3 pt-safe-offset-4 px-safe-or-4">
         <CloseButton tintColor="#3C464D" />
-        <QuizProgressBar
-          progress={0.5}
-          colors={
-            [`#3F4CF5`, `#3F4CF5`] // solid blue
-          }
-        />
       </View>
       <ScrollView contentContainerClassName="px-safe-or-4 flex-1 pb-2">
         <View className="flex-row items-center gap-2 self-center py-4">

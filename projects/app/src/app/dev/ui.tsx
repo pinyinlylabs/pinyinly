@@ -1,6 +1,6 @@
 import { useQuizProgress } from "@/client/hooks";
 import { HanziText } from "@/client/ui/HanziText";
-import { QuizProgressBar2 } from "@/client/ui/QuizProgressBar2";
+import { QuizProgressBar } from "@/client/ui/QuizProgressBar";
 import { RectButton2 } from "@/client/ui/RectButton2";
 import type { TextAnswerButtonState } from "@/client/ui/TextAnswerButton";
 import { TextAnswerButton } from "@/client/ui/TextAnswerButton";
@@ -29,8 +29,8 @@ export default function DesignSystemPage() {
         </Link>
       </View>
       <ScrollView style={{ flex: 1 }} ref={scrollViewRef}>
-        <Section title="QuizProgressBar2Example" scrollTo={scrollTo}>
-          <QuizProgressBar2Example />
+        <Section title="QuizProgressBarExample" scrollTo={scrollTo}>
+          <QuizProgressBarExample />
         </Section>
 
         <Section title="HanziText" scrollTo={scrollTo}>
@@ -697,7 +697,7 @@ function SyncedAnswerButtonExample(
   );
 }
 
-function QuizProgressBar2Example() {
+function QuizProgressBarExample() {
   const quizProgress = useQuizProgress();
 
   const logCorrect = useCallback(() => {
@@ -712,7 +712,7 @@ function QuizProgressBar2Example() {
     <>
       <View className="w-full flex-col gap-2">
         <View className="min-h-[32px]">
-          <QuizProgressBar2 progress={quizProgress.progress} />
+          <QuizProgressBar progress={quizProgress.progress} />
         </View>
         <View className="flex-row items-start gap-4">
           <View className="flex-row items-center gap-2">
