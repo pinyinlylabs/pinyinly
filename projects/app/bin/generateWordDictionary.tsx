@@ -2100,6 +2100,15 @@ const DictionaryHanziWordEntry = ({
             {` `}
             <Text italic>{meaning.partOfSpeech}</Text>
           </Text>
+          {meaning.glossHint == null ? null : (
+            <Text>
+              <Text bold dimColor>
+                gloss hint:
+              </Text>
+              {` `}
+              <Text italic>{meaning.glossHint}</Text>
+            </Text>
+          )}
           <Text>
             <Text bold dimColor>
               example:
