@@ -4,6 +4,7 @@ import {
   characterHasGlyph,
   decomposeHanzi,
   hanziFromHanziWord,
+  hanziTextFromHanziChar,
   isHanziChar,
   lookupGloss,
   lookupHanzi,
@@ -24,6 +25,7 @@ import type { Duration } from "date-fns";
 import { sub } from "date-fns/sub";
 import { subDays } from "date-fns/subDays";
 import type { DeepReadonly } from "ts-essentials";
+import { parseHhhmark } from "./hhhmark";
 import type {
   HanziGlossMistake,
   HanziPinyinMistake,
@@ -170,6 +172,14 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
             deps.push(hanziWordToGloss(hanziWord));
           }
         }
+
+        if (meaning?.glossHint != null) {
+          for (const node of parseHhhmark(meaning.glossHint)) {
+            if (node.type === `hanziWord`) {
+              deps.push(hanziWordToGloss(node.hanziWord));
+            }
+          }
+        }
       }
 
       // Learn the components of a hanzi word first.
@@ -177,12 +187,28 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
         hanziFromHanziWord(hanziWordFromSkill(skill)),
       )) {
         if (await characterHasGlyph(character)) {
-          // TODO: need to a better way to choose the meaning key.
-          const hanziWordWithMeaning =
-            await hackyGuessHanziWordToLearn(character);
-          if (hanziWordWithMeaning != null) {
-            const [hanziWord] = hanziWordWithMeaning;
-            deps.push(hanziWordToGloss(hanziWord));
+          // Check if the character was already added as a dependency by being
+          // referenced inthe gloss hint.
+          const depAlreadyAdded = deps.some((x) => {
+            if (skillTypeFromSkill(x) === SkillType.HanziWordToGloss) {
+              skill = skill as HanziWordSkill;
+              return (
+                hanziFromHanziWord(hanziWordFromSkill(skill)) ===
+                hanziTextFromHanziChar(character)
+              );
+            }
+            return false;
+          });
+
+          // If the character wasn't already added, add it as a dependency by
+          // guessing what disambugation to use for the hanzi.
+          if (!depAlreadyAdded) {
+            const hanziWordWithMeaning =
+              await hackyGuessHanziWordToLearn(character);
+            if (hanziWordWithMeaning != null) {
+              const [hanziWord] = hanziWordWithMeaning;
+              deps.push(hanziWordToGloss(hanziWord));
+            }
           }
         }
       }

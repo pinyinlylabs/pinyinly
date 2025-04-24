@@ -8,6 +8,6 @@ await test(`${Hhhmark.name} suite`, async (t) => {
     const { root } = render(
       <Hhhmark source={`This is a 'test' with "dumb quotes"`} />,
     );
-    expect(root).toHaveTextContent(`This is a ’test’ with “dumb quotes”`);
+    expect(root).toHaveTextContent(`This is a ‘test’ with “dumb quotes”`);
   });
 });

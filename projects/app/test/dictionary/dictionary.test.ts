@@ -1,3 +1,4 @@
+import { parseHhhmark } from "#data/hhhmark.ts";
 import type { HanziChar } from "#data/model.ts";
 import type { HanziWordMeaning, PinyinChart } from "#dictionary/dictionary.ts";
 import {
@@ -203,8 +204,33 @@ await test(`hanzi word meaning glossHint lint`, async () => {
   assert.deepEqual(violations, new Set());
 });
 
+await test(`hanzi meaning glossHint lint`, async () => {
+  // all HanziWord references should exist in the dictionary
+  const dict = await loadDictionary();
+
+  for (const [hanziWord, { glossHint }] of dict) {
+    if (glossHint == null) {
+      continue;
+    }
+
+    const hanziWordRefs = parseHhhmark(glossHint).filter(
+      (x) => x.type === `hanziWord`,
+    );
+
+    for (const hanziWordRef of hanziWordRefs) {
+      if (!dict.has(hanziWordRef.hanziWord)) {
+        assert.fail(
+          `hanzi word ${hanziWord} has references HanziWord ${hanziWordRef.hanziWord} but it is not in the dictionary`,
+        );
+      }
+    }
+  }
+});
+
 await test(`hanzi meaning componentFormOf lint`, async () => {
   const dict = await loadDictionary();
+
+  const meaningExceptions = new Set([[`示:show`, `礻:ritual`]]);
 
   for (const [hanziWord, { gloss, componentFormOf }] of dict) {
     if (componentFormOf == null) {
@@ -220,7 +246,14 @@ await test(`hanzi meaning componentFormOf lint`, async () => {
       );
     }
 
-    for (const [baseHanziWord, baseMeaning] of baseHanziMatches) {
+    meaningLint: for (const [baseHanziWord, baseMeaning] of baseHanziMatches) {
+      // exceptions
+      for (const exception of meaningExceptions) {
+        if (baseHanziWord === exception[0] && hanziWord === exception[1]) {
+          continue meaningLint;
+        }
+      }
+
       if (meaningKeyFromHanziWord(baseHanziWord) !== meaningKey) {
         assert.fail(
           `hanzi word ${hanziWord} has different meaning key to ${baseHanziWord}`,
@@ -363,6 +396,7 @@ await test(`hanzi words are unique on (hanzi, part-of-speech, pinyin)`, async ()
       [`表:surface`, `表:watch`],
       [`要:must`, `要:want`],
       [`面:face`, `面:surface`],
+      [`乚:hidden`, `乚:second`],
     ].map((x) => new Set(x)),
   );
 

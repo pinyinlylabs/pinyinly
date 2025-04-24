@@ -249,7 +249,7 @@ await test(`${skillLearningGraph.name} suite`, async () => {
         he:儿:son
       he:儿:son
         he:丿:slash
-        he:乚:hook
+        he:乚:hidden
       `,
     );
   });
@@ -265,7 +265,7 @@ await test(`${skillLearningGraph.name} suite`, async () => {
             hpi:儿:son
               he:儿:son
                 he:丿:slash
-                he:乚:hook
+                he:乚:hidden
       `,
     );
   });
@@ -529,7 +529,7 @@ await test(`${skillReviewQueue.name} suite`, async () => {
             `he:人:person`,
             `he:八:eight`,
             `he:口:mouth`,
-            `he:乚:hook`,
+            `he:乚:hidden`,
             `he:丿:slash`,
             `he:一:one`,
           ],
