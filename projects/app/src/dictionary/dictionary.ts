@@ -1207,6 +1207,10 @@ export function shorthandPartOfSpeech(partOfSpeech: PartOfSpeech) {
   }
 }
 
+export function hanziTextFromHanziChar(hanziChar: HanziChar): HanziText {
+  return hanziChar as unknown as HanziText;
+}
+
 export function hanziFromHanziWord(hanziWord: HanziWord): HanziText {
   const result = /^(.+?):/.exec(hanziWord);
   invariant(result != null, `couldn't parse HanziWord ${hanziWord}`);
