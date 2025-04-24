@@ -62,12 +62,12 @@ export function flagsForSrsState(
     };
   }
   const now = new Date();
-  const overdueDate = add(srsState.nextReviewAt, skillDueWindow);
+  const overDueDate = add(srsState.nextReviewAt, skillDueWindow);
 
-  if (now >= overdueDate) {
+  if (now >= overDueDate) {
     return {
       type: QuestionFlagType.Overdue,
-      interval: interval(overdueDate.getTime(), now),
+      interval: interval(overDueDate.getTime(), now),
     };
   }
 }

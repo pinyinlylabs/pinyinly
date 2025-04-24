@@ -34,7 +34,7 @@ await test(`${simulateSkillReviews.name} returns a review queue`, async () => {
     history: [],
   });
 
-  assert.deepEqual(reviewQueue, {
+  assert.partialDeepStrictEqual(reviewQueue, {
     available: [`he:丿:slash`, `he:𠃌:radical`, `he:八:eight`],
     blocked: [`he:刀:knife`, `he:分:divide`],
   });
@@ -68,7 +68,7 @@ await test(`${computeSkillReviewQueue.name} suite`, async () => {
       history: [`🟡 he:丿:slash`, `💤 1m`],
     });
 
-    assert.deepEqual(reviewQueue, {
+    assert.partialDeepStrictEqual(reviewQueue, {
       available: [`he:𠃌:radical`, `he:八:eight`, `he:丿:slash`],
       blocked: [`he:刀:knife`, `he:分:divide`],
     });
@@ -140,7 +140,7 @@ await test(`${computeSkillReviewQueue.name} suite`, async () => {
     assert.notDeepEqual([review1], [`he:𠃌:radical`]);
   });
 
-  await test(`skills that are stale (heavily overdue and not stable) are treated as new skills`, async () => {
+  await test(`skills that are stale (heavily over-due and not stable) are treated as new skills`, async () => {
     const targetSkills: Skill[] = [`he:刀:knife`];
     const history: SkillReviewOp[] = [
       `❌ he:刀:knife`, // Get it wrong initially so it's considered introduced but not very stable.
@@ -152,7 +152,7 @@ await test(`${computeSkillReviewQueue.name} suite`, async () => {
         targetSkills,
         history,
       });
-      assert.deepEqual(queue, {
+      assert.partialDeepStrictEqual(queue, {
         available: [
           `he:刀:knife`,
           // These come later because he:刀:knife is due.
@@ -160,6 +160,8 @@ await test(`${computeSkillReviewQueue.name} suite`, async () => {
           `he:𠃌:radical`,
         ],
         blocked: [],
+        dueCount: 1,
+        overDueCount: 0,
       });
     }
 
@@ -170,12 +172,14 @@ await test(`${computeSkillReviewQueue.name} suite`, async () => {
         targetSkills,
         history,
       });
-      assert.deepEqual(queue, {
+      assert.partialDeepStrictEqual(queue, {
         available: [`he:丿:slash`, `he:𠃌:radical`],
         blocked: [
           // Now this comes last because it's "stale" and reset to new.
           `he:刀:knife`,
         ],
+        dueCount: 0,
+        overDueCount: 0,
       });
     }
   });

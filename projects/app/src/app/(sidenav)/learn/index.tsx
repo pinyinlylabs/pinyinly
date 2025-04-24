@@ -1,20 +1,14 @@
-import { getAllTargetSkills } from "@/client/query";
+import { targetSkillsReviewQueue } from "@/client/query";
 import { Countdown } from "@/client/ui/Countdown";
 import { RectButton2 } from "@/client/ui/RectButton2";
 import { useRizzleQueryPaged } from "@/client/ui/ReplicacheContext";
 import type { HanziWord } from "@/data/model";
 import { SkillType } from "@/data/model";
-import type { HanziWordSkill, Skill } from "@/data/rizzleSchema";
-import {
-  hanziWordFromSkill,
-  skillDueWindow,
-  skillTypeFromSkill,
-} from "@/data/skills";
+import type { HanziWordSkill } from "@/data/rizzleSchema";
+import { hanziWordFromSkill, skillTypeFromSkill } from "@/data/skills";
 import { hanziFromHanziWord } from "@/dictionary/dictionary";
 import { invariant } from "@haohaohow/lib/invariant";
-import { add } from "date-fns/add";
 import { differenceInCalendarDays } from "date-fns/differenceInCalendarDays";
-import { sub } from "date-fns/sub";
 import { Link } from "expo-router";
 import { ScrollView, Text, View } from "react-native";
 import Reanimated, { FadeIn } from "react-native-reanimated";
@@ -24,47 +18,14 @@ export default function IndexPage() {
   const reviewQuery = useRizzleQueryPaged(
     [IndexPage.name, `recentCharacters`],
     async (r) => {
-      const now = new Date();
-
-      const targetSkills = new Set<Skill>(await getAllTargetSkills());
-
-      // When will you get a new due item?
-      let newDueAt;
-      // When will you get a new overdue item?
-      let newOverDueAt;
-
-      let dueCount = 0;
-      let overdueCount = 0;
-
-      const dueTransitionDate = now;
-      const overDueTransitionDate = sub(now, skillDueWindow);
-
-      for await (const [
-        ,
-        skillState,
-      ] of r.queryPaged.skillState.byNextReviewAt()) {
-        // Skip any skills that aren't being targeted to learn.
-        if (!targetSkills.has(skillState.skill)) {
-          continue;
-        }
-
-        if (skillState.srs.nextReviewAt < overDueTransitionDate) {
-          overdueCount++;
-        } else if (skillState.srs.nextReviewAt <= dueTransitionDate) {
-          newOverDueAt ??= add(skillState.srs.nextReviewAt, skillDueWindow);
-          dueCount++;
-        } else {
-          newDueAt ??= skillState.srs.nextReviewAt;
-          break;
-        }
-      }
+      const queue = await targetSkillsReviewQueue(r);
 
       return {
-        dueCount,
-        overdueCount,
-        dueOrOverdueCount: dueCount + overdueCount,
-        newDueAt,
-        newOverDueAt,
+        dueCount: queue.dueCount,
+        overDueCount: queue.overDueCount,
+        dueOrOverdueCount: queue.dueCount + queue.overDueCount,
+        newDueAt: queue.newDueAt,
+        newOverDueAt: queue.newOverDueAt,
       };
     },
   );
@@ -210,20 +171,20 @@ export default function IndexPage() {
                         {` `}
                         {reviewQuery.data.dueOrOverdueCount}
                         {` `}
-                        {reviewQuery.data.overdueCount > 0 ? (
-                          // If there are already overdue items, you should just
+                        {reviewQuery.data.overDueCount > 0 ? (
+                          // If there are already over-due items, you should just
                           // do them immediately so there's no need to show the
                           // time, just show the count.
                           <>
                             (😡
                             {` `}
-                            {reviewQuery.data.overdueCount})
+                            {reviewQuery.data.overDueCount})
                           </>
                         ) : reviewQuery.data.newOverDueAt == null ? null : (
-                          // No overdue items YET, but maybe it will become
-                          // overdue in a couple of minutes so show the countdown
+                          // No over-due items YET, but maybe it will become
+                          // over-due in a couple of minutes so show the countdown
                           // so the person doesn't wrongly procrastinate and then
-                          // get overdue items.
+                          // get over-due items.
                           <>
                             (😡
                             {` `}
