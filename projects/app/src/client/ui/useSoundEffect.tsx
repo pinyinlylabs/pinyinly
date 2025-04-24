@@ -1,6 +1,7 @@
 import type { AudioSource } from "expo-audio";
 import { useAudioPlayer } from "expo-audio";
-import { useEventCallback, useLocalQuery } from "../hooks";
+import { useEventCallback } from "../hooks/useEventCallback";
+import { useLocalQuery } from "../hooks/useLocalQuery";
 
 const audioContext =
   typeof AudioContext === `undefined` ? null : new AudioContext();

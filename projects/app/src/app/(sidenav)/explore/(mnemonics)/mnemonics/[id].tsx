@@ -1,4 +1,4 @@
-import { useLocalQuery } from "@/client/hooks";
+import { useLocalQuery } from "@/client/hooks/useLocalQuery";
 import { RectButton2 } from "@/client/ui/RectButton2";
 import { useReplicache, useRizzleQuery } from "@/client/ui/ReplicacheContext";
 import { rMnemonicThemeId } from "@/data/rizzleSchema";

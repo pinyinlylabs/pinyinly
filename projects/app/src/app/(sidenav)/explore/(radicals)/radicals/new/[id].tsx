@@ -1,4 +1,4 @@
-import { useLocalQuery } from "@/client/hooks";
+import { useLocalQuery } from "@/client/hooks/useLocalQuery";
 import { CloseButton } from "@/client/ui/CloseButton";
 import { RectButton2 } from "@/client/ui/RectButton2";
 import { ReferencePage } from "@/client/ui/ReferencePage";

@@ -31,7 +31,8 @@ import React, { useEffect, useId, useRef } from "react";
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { Animated, Platform, Text, View } from "react-native";
 import Reanimated, { FadeIn } from "react-native-reanimated";
-import { useEventCallback, useQuizProgress } from "../hooks";
+import { useEventCallback } from "../hooks/useEventCallback";
+import { useQuizProgress } from "../hooks/useQuizProgress";
 import { CloseButton } from "./CloseButton";
 import { QuizDeckMultipleChoiceQuestion } from "./QuizDeckMultipleChoiceQuestion";
 import { QuizDeckOneCorrectPairQuestion } from "./QuizDeckOneCorrectPairQuestion";

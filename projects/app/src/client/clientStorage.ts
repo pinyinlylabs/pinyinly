@@ -2,7 +2,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as SecureStore from "expo-secure-store";
 import { useEffect } from "react";
 import { Platform } from "react-native";
-import { useLocalQuery, windowEventListenerEffect } from "./hooks";
+import { useLocalQuery } from "./hooks/useLocalQuery";
+import { windowEventListenerEffect } from "./hooks/windowEventListenerEffect";
 
 // SecureStore keys must contain only alphanumeric characters, ".", "-", and
 // "_", so the separator is `.`

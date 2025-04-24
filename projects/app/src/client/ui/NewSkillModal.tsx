@@ -1,4 +1,4 @@
-import { useHanziWordMeaning } from "@/client/hooks";
+import { useHanziWordMeaning } from "@/client/hooks/useHanziWordMeaning";
 import { SkillType } from "@/data/model";
 import type { HanziWordSkill, Skill } from "@/data/rizzleSchema";
 import { hanziWordFromSkill, skillTypeFromSkill } from "@/data/skills";

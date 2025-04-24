@@ -1,4 +1,4 @@
-import { useLocalQuery } from "@/client/hooks";
+import { useLocalQuery } from "@/client/hooks/useLocalQuery";
 import {
   useRizzleQuery,
   useRizzleQueryPaged,
