@@ -1,11 +1,11 @@
-import {
+import type {
   HanziChar,
   HanziText,
   HanziWord,
-  PartOfSpeech,
   PinyinInitialGroupId,
   PinyinText,
 } from "@/data/model";
+import { PartOfSpeech } from "@/data/model";
 import { rMnemonicThemeId, rPinyinInitialGroupId } from "@/data/rizzleSchema";
 import {
   deepReadonly,
@@ -16,7 +16,7 @@ import {
   sortComparatorNumber,
 } from "@/util/collections";
 import { invariant } from "@haohaohow/lib/invariant";
-import { DeepReadonly, StrictExtract } from "ts-essentials";
+import type { DeepReadonly, StrictExtract } from "ts-essentials";
 import { z } from "zod";
 
 export const hanziWordSchema = z.string().transform((x) => x as HanziWord);

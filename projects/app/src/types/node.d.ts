@@ -1,9 +1,11 @@
+import type { AudioSource } from "expo-audio";
+
 declare global {
   interface NodeRequire {
     // Support for asset files. Anything that starts with a dot and ends with a
     // known extension.
     (id: `${string}.${`ttf` | `otf` | `svg` | `png` | `json`}`): string;
-    (id: `${string}.mp3`): import("expo-audio").AudioSource;
+    (id: `${string}.mp3`): AudioSource;
   }
 
   namespace NodeJS {

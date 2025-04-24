@@ -3,9 +3,9 @@ import makeDebug from "debug";
 import assert from "node:assert/strict";
 import path from "node:path";
 import yargs from "yargs";
+import type { IdsNode } from "../src/dictionary/dictionary.js";
 import {
   allHanziCharacters,
-  IdsNode,
   loadHanziDecomposition,
   parseIds,
   unicodeShortIdentifier,

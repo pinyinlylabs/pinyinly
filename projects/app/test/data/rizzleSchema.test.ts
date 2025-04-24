@@ -3,8 +3,9 @@ import { rSkill, rSkillType } from "#data/rizzleSchema.ts";
 import { hanziWordToGloss } from "#data/skills.ts";
 import { r } from "#util/rizzle.ts";
 import assert from "node:assert/strict";
-import test, { TestContext } from "node:test";
-import { ReadTransaction, WriteTransaction } from "replicache";
+import type { TestContext } from "node:test";
+import test from "node:test";
+import type { ReadTransaction, WriteTransaction } from "replicache";
 
 function makeMockTx(t: TestContext) {
   const readTx = {

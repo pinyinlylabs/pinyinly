@@ -1,13 +1,12 @@
 import { questionsForReview2 } from "@/client/query";
-import { StackNavigationFor } from "@/client/ui/types";
-import {
+import type { StackNavigationFor } from "@/client/ui/types";
+import type {
   Mistake,
-  MistakeType,
   Question,
   QuestionFlag,
-  QuestionType,
   SkillRating,
 } from "@/data/model";
+import { MistakeType, QuestionType } from "@/data/model";
 import { Rating } from "@/util/fsrs";
 import { nanoid } from "@/util/nanoid";
 import { invariant } from "@haohaohow/lib/invariant";
@@ -16,10 +15,12 @@ import {
   NavigationIndependentTree,
   useTheme,
 } from "@react-navigation/native";
-import {
-  createStackNavigator,
+import type {
   StackCardInterpolatedStyle,
   StackCardInterpolationProps,
+} from "@react-navigation/stack";
+import {
+  createStackNavigator,
   TransitionPresets,
 } from "@react-navigation/stack";
 import { useQueries, useQueryClient } from "@tanstack/react-query";

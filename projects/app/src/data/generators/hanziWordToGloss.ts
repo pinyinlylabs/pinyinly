@@ -1,26 +1,25 @@
+import type { HanziWordMeaning } from "@/dictionary/dictionary";
 import {
   allHsk1HanziWords,
   allHsk2HanziWords,
   allHsk3HanziWords,
   glossOrThrow,
   hanziFromHanziWord,
-  HanziWordMeaning,
   lookupHanziWord,
   pinyinOrThrow,
 } from "@/dictionary/dictionary";
 import { evenHalve } from "@/util/collections";
 import { invariant, uniqueInvariant } from "@haohaohow/lib/invariant";
 import shuffle from "lodash/shuffle";
-import { DeepReadonly } from "ts-essentials";
-import {
+import type { DeepReadonly } from "ts-essentials";
+import type {
   HanziWord,
   OneCorrectPairQuestionAnswer,
   OneCorrectPairQuestionChoice,
   Question,
-  QuestionType,
-  SkillType,
 } from "../model";
-import { HanziWordSkill, Skill } from "../rizzleSchema";
+import { QuestionType, SkillType } from "../model";
+import type { HanziWordSkill, Skill } from "../rizzleSchema";
 import { hanziWordFromSkill, skillTypeFromSkill } from "../skills";
 
 // generate a question to test a skill

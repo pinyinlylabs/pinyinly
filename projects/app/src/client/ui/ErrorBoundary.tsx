@@ -1,6 +1,7 @@
 import * as Sentry from "@sentry/react-native";
 import { Link } from "expo-router";
-import { Text, View, ViewProps } from "react-native";
+import type { ViewProps } from "react-native";
+import { Text, View } from "react-native";
 import { RectButton2 } from "./RectButton2";
 
 export const ErrorBoundary = ({ children }: Pick<ViewProps, `children`>) => {

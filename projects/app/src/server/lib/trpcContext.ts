@@ -1,6 +1,6 @@
 import { httpSessionHeader } from "@/util/http";
 import { TRPCError } from "@trpc/server";
-import { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
+import type { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
 import { withDrizzle } from "./db";
 
 export async function createContext({ req }: FetchCreateContextFnOptions) {

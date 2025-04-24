@@ -1,10 +1,9 @@
-import { HanziWord } from "@/data/model";
+import type { HanziWord } from "@/data/model";
 import { lookupHanziWord } from "@/dictionary/dictionary";
+import type { UseQueryOptions, UseQueryResult } from "@tanstack/react-query";
 import {
   // eslint-disable-next-line @typescript-eslint/no-restricted-imports
   useQuery,
-  UseQueryOptions,
-  UseQueryResult,
 } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import {

@@ -1,4 +1,5 @@
-import { ReplicacheOptions, TEST_LICENSE_KEY } from "replicache";
+import type { ReplicacheOptions } from "replicache";
+import { TEST_LICENSE_KEY } from "replicache";
 
 let _testReplicacheNameId = 0;
 /**

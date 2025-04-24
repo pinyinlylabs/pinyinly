@@ -3,15 +3,12 @@ import {
   flagsForSrsState,
   targetSkillsReviewQueue,
 } from "#client/query.ts";
-import {
-  HanziText,
-  PinyinText,
-  QuestionFlagType,
-  SrsType,
-} from "#data/model.ts";
+import type { HanziText, PinyinText } from "#data/model.ts";
+import { QuestionFlagType, SrsType } from "#data/model.ts";
 import { v7Mutators } from "#data/rizzleMutators.ts";
-import { Skill, v7 } from "#data/rizzleSchema.ts";
-import { SkillReviewQueue } from "#data/skills.ts";
+import type { Skill } from "#data/rizzleSchema.ts";
+import { v7 } from "#data/rizzleSchema.ts";
+import type { SkillReviewQueue } from "#data/skills.ts";
 import { Rating } from "#util/fsrs.ts";
 import { nanoid } from "#util/nanoid.ts";
 import { r } from "#util/rizzle.ts";

@@ -4,7 +4,7 @@ import { documentEventListenerEffect } from "@/client/hooks";
 import { invariant } from "@haohaohow/lib/invariant";
 import { useEffect, useMemo, useState } from "react";
 import { useEventCallback } from "../hooks";
-import { SignInWithAppleButtonProps } from "./SignInWithAppleButton";
+import type { SignInWithAppleButtonProps } from "./SignInWithAppleButton";
 
 type AppleIdSignInOnSuccessEvent = CustomEvent<AppleSignInAPI.SignInResponseI>;
 type AppleIdSignInOnFailureEvent = CustomEvent<AppleSignInAPI.SignInErrorI>;

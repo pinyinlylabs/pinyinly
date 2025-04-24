@@ -1,13 +1,16 @@
-import { Skill, srsStateFromFsrsState } from "#data/rizzleSchema.ts";
+import type { Skill } from "#data/rizzleSchema.ts";
+import { srsStateFromFsrsState } from "#data/rizzleSchema.ts";
 import { glossToHanziWord } from "#data/skills.ts";
-import { Drizzle, pgBatchUpdate, substring } from "#server/lib/db.ts";
+import type { Drizzle } from "#server/lib/db.ts";
+import { pgBatchUpdate, substring } from "#server/lib/db.ts";
 import * as s from "#server/schema.ts";
 import { nextReview, Rating } from "#util/fsrs.ts";
 import { invariant } from "@haohaohow/lib/invariant";
 import { eq } from "drizzle-orm";
 import * as pg from "drizzle-orm/pg-core";
 import assert from "node:assert/strict";
-import test, { TestContext } from "node:test";
+import type { TestContext } from "node:test";
+import test from "node:test";
 import { createUser, withDbTest, withTxTest } from "./dbHelpers";
 
 function typeChecks(..._args: unknown[]) {

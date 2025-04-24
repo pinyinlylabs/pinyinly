@@ -1,4 +1,5 @@
-import { LinearGradient, LinearGradientProps } from "expo-linear-gradient";
+import type { LinearGradientProps } from "expo-linear-gradient";
+import { LinearGradient } from "expo-linear-gradient";
 import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { CloseButton } from "./CloseButton";

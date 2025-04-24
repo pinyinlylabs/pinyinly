@@ -1,10 +1,12 @@
-import { SrsState, SrsType } from "@/data/model";
-import { Skill } from "@/data/rizzleSchema";
-import { FsrsState, nextReview } from "@/util/fsrs";
+import type { SrsState } from "@/data/model";
+import { SrsType } from "@/data/model";
+import type { Skill } from "@/data/rizzleSchema";
+import type { FsrsState } from "@/util/fsrs";
+import { nextReview } from "@/util/fsrs";
 import { invariant } from "@haohaohow/lib/invariant";
 import { and, asc, eq } from "drizzle-orm";
 import * as schema from "../schema";
-import { Drizzle } from "./db";
+import type { Drizzle } from "./db";
 
 export async function updateSkillState(
   tx: Drizzle,

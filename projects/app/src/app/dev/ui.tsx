@@ -2,14 +2,13 @@ import { useQuizProgress } from "@/client/hooks";
 import { HanziText } from "@/client/ui/HanziText";
 import { QuizProgressBar2 } from "@/client/ui/QuizProgressBar2";
 import { RectButton2 } from "@/client/ui/RectButton2";
-import {
-  TextAnswerButton,
-  TextAnswerButtonState,
-} from "@/client/ui/TextAnswerButton";
-import { PropsOf } from "@/client/ui/types";
+import type { TextAnswerButtonState } from "@/client/ui/TextAnswerButton";
+import { TextAnswerButton } from "@/client/ui/TextAnswerButton";
+import type { PropsOf } from "@/client/ui/types";
 import { Link } from "expo-router";
 import shuffle from "lodash/shuffle";
-import { ReactNode, useCallback, useRef, useState } from "react";
+import type { ReactNode } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { tv } from "tailwind-variants";

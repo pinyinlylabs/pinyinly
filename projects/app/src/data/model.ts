@@ -1,7 +1,7 @@
-import { Rating } from "@/util/fsrs";
+import type { Rating } from "@/util/fsrs";
 import type { Interval } from "date-fns";
-import { z } from "zod";
-import { Skill } from "./rizzleSchema";
+import type { z } from "zod";
+import type { Skill } from "./rizzleSchema";
 
 export enum PinyinInitialGroupId {
   Basic,

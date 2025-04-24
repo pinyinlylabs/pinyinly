@@ -1,10 +1,12 @@
 import { loadDictionary } from "@/dictionary/dictionary";
 import { sortComparatorDate } from "@/util/collections";
-import { FsrsState, nextReview } from "@/util/fsrs";
-import { RizzleReplicacheMutators } from "@/util/rizzle";
+import type { FsrsState } from "@/util/fsrs";
+import { nextReview } from "@/util/fsrs";
+import type { RizzleReplicacheMutators } from "@/util/rizzle";
 import { invariant } from "@haohaohow/lib/invariant";
 import { MistakeType } from "./model";
-import { srsStateFromFsrsState, v7 } from "./rizzleSchema";
+import type { v7 } from "./rizzleSchema";
+import { srsStateFromFsrsState } from "./rizzleSchema";
 import {
   nextReviewForOtherSkillMistake,
   skillsToReReviewForHanziGlossMistake,

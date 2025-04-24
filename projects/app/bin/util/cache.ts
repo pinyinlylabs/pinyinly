@@ -1,4 +1,4 @@
-import { Debugger } from "debug";
+import type { Debugger } from "debug";
 import { DatabaseSync } from "node:sqlite";
 
 export function makeDbCache<K, V>(

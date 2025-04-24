@@ -1,6 +1,6 @@
 import { invariant } from "@haohaohow/lib/invariant";
-import { Debugger } from "debug";
-import { DbCache } from "./cache.js";
+import type { Debugger } from "debug";
+import type { DbCache } from "./cache.js";
 
 export const fetchWithCache = async (
   body: Parameters<typeof fetch>[0],

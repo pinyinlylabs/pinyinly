@@ -1,4 +1,4 @@
-import { ReplicacheOptions } from "replicache";
+import type { ReplicacheOptions } from "replicache";
 
 export const kvStore: ReplicacheOptions<never>[`kvStore`] =
   // For Expo `static` rendering use in-memory KV store (as indexedDB is not

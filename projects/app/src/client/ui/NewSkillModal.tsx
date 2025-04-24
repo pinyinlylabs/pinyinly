@@ -1,6 +1,6 @@
 import { useHanziWordMeaning } from "@/client/hooks";
 import { SkillType } from "@/data/model";
-import { HanziWordSkill, Skill } from "@/data/rizzleSchema";
+import type { HanziWordSkill, Skill } from "@/data/rizzleSchema";
 import { hanziWordFromSkill, skillTypeFromSkill } from "@/data/skills";
 import { hanziFromHanziWord, splitHanziText } from "@/dictionary/dictionary";
 import { Image } from "expo-image";

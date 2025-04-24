@@ -1,29 +1,27 @@
 import { MistakeType } from "@/data/model";
-import {
-  rPinyinInitialGroupId,
-  SupportedSchema,
-  v7,
-  v7_1,
-} from "@/data/rizzleSchema";
+import type { SupportedSchema } from "@/data/rizzleSchema";
+import { rPinyinInitialGroupId, v7, v7_1 } from "@/data/rizzleSchema";
 import {
   nextReviewForOtherSkillMistake,
   skillsToReReviewForHanziGlossMistake,
   skillsToReReviewForHanziPinyinMistake,
 } from "@/data/skills";
-import {
+import type {
   ClientStateNotFoundResponse,
   Cookie,
-  makeDrizzleMutationHandler,
   MutateHandler,
   PullOkResponse,
   PullRequest,
   PushRequest,
-  pushRequestSchema,
   PushResponse,
   ReplicacheMutation,
-  replicacheMutationSchema,
   RizzleDrizzleMutators,
   VersionNotSupportedResponse,
+} from "@/util/rizzle";
+import {
+  makeDrizzleMutationHandler,
+  pushRequestSchema,
+  replicacheMutationSchema,
 } from "@/util/rizzle";
 import { invariant } from "@haohaohow/lib/invariant";
 import { startSpan } from "@sentry/core";
@@ -32,7 +30,7 @@ import { and, eq, gt, inArray, sql } from "drizzle-orm";
 import chunk from "lodash/chunk";
 import mapValues from "lodash/mapValues";
 import pickBy from "lodash/pickBy";
-import { z } from "zod";
+import type { z } from "zod";
 import * as s from "../schema";
 import type { Drizzle } from "./db";
 import {

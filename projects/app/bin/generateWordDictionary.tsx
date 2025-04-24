@@ -2,16 +2,23 @@
 import hanzi from "hanzi";
 
 import { useInternetQuery, useLocalQuery } from "#client/hooks.ts";
-import { HanziChar, HanziText, HanziWord, PinyinText } from "#data/model.ts";
+import type {
+  HanziChar,
+  HanziText,
+  HanziWord,
+  PinyinText,
+} from "#data/model.ts";
+import type {
+  HanziWordMeaning,
+  HanziWordWithMeaning,
+} from "#dictionary/dictionary.ts";
 import {
   allHanziCharacters,
   allHsk1HanziWords,
   buildHanziWord,
   dictionarySchema,
   hanziFromHanziWord,
-  HanziWordMeaning,
   hanziWordMeaningSchema,
-  HanziWordWithMeaning,
   loadHanziDecomposition,
   lookupHanzi,
   lookupHanziWord,
@@ -41,16 +48,16 @@ import TextInput from "ink-text-input";
 import chunk from "lodash/chunk.js";
 import isEqual from "lodash/isEqual.js";
 import path from "node:path";
+import type { ReactNode } from "react";
 import {
   Children,
   Fragment,
-  ReactNode,
   useCallback,
   useEffect,
   useMemo,
   useState,
 } from "react";
-import { DeepReadonly } from "ts-essentials";
+import type { DeepReadonly } from "ts-essentials";
 import yargs from "yargs";
 import { z } from "zod";
 import { makeDbCache } from "./util/cache.js";

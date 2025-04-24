@@ -1,8 +1,10 @@
-import { ElementRef, forwardRef, useState } from "react";
-import { Pressable, Text, View, ViewProps } from "react-native";
+import type { ElementRef } from "react";
+import { forwardRef, useState } from "react";
+import type { ViewProps } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 import { hapticImpactIfMobile } from "../hooks";
-import { PropsOf } from "./types";
+import type { PropsOf } from "./types";
 
 export type ButtonVariant = `filled` | `outline` | `bare`;
 

@@ -1,18 +1,13 @@
 import { generateQuestionForSkillOrThrow } from "@/data/generator";
-import {
-  Question,
-  QuestionFlag,
-  QuestionFlagType,
-  SrsState,
-  SrsType,
-} from "@/data/model";
-import { Rizzle, Skill } from "@/data/rizzleSchema";
+import type { Question, QuestionFlag, SrsState } from "@/data/model";
+import { QuestionFlagType, SrsType } from "@/data/model";
+import type { Rizzle, Skill } from "@/data/rizzleSchema";
+import type { SkillReviewQueue } from "@/data/skills";
 import {
   hanziWordToGloss,
   hanziWordToPinyin,
   skillDueWindow,
   skillLearningGraph,
-  SkillReviewQueue,
   skillReviewQueue,
 } from "@/data/skills";
 import { allHsk1HanziWords, allHsk2HanziWords } from "@/dictionary/dictionary";

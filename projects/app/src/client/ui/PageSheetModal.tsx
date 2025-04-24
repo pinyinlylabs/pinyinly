@@ -1,5 +1,7 @@
-import { ReactNode, useEffect, useMemo, useState } from "react";
-import { Modal, Platform, PressableProps, View } from "react-native";
+import type { ReactNode } from "react";
+import { useEffect, useMemo, useState } from "react";
+import type { PressableProps } from "react-native";
+import { Modal, Platform, View } from "react-native";
 import Reanimated, {
   Easing,
   Extrapolation,

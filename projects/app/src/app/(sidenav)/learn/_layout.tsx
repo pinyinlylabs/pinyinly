@@ -1,4 +1,4 @@
-import { PropsOf } from "@/client/ui/types";
+import type { PropsOf } from "@/client/ui/types";
 import { Stack } from "expo-router";
 
 export const unstable_settings = {

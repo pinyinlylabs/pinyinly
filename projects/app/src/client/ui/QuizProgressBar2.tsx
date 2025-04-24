@@ -1,10 +1,11 @@
 import { makeRange } from "@/util/collections";
 import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useMemo, useState } from "react";
-import { LayoutChangeEvent, LayoutRectangle, View } from "react-native";
+import type { LayoutChangeEvent, LayoutRectangle } from "react-native";
+import { View } from "react-native";
+import type { SharedValue } from "react-native-reanimated";
 import Reanimated, {
   Easing,
-  SharedValue,
   useAnimatedStyle,
   useDerivedValue,
   useSharedValue,
@@ -12,7 +13,8 @@ import Reanimated, {
   withTiming,
 } from "react-native-reanimated";
 import { useEventCallback } from "../hooks";
-import { createAffineTransform, Transform1D } from "./animate";
+import type { Transform1D } from "./animate";
+import { createAffineTransform } from "./animate";
 
 const majorTickBgSize = 20;
 const barSize = 16;

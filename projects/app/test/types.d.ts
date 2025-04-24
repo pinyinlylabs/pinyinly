@@ -1,8 +1,10 @@
-import { JestNativeMatchers } from "@testing-library/react-native/build/matchers/types";
+import type { JestNativeMatchers } from "@testing-library/react-native/build/matchers/types";
 
 declare global {
+  import type { Expect } from "expect";
+
   // This is needed so that in `setup.ts` we can do `globalThis.expect = …`.
-  var expect: typeof import("expect").expect;
+  var expect: Expect;
 }
 
 declare module "expect" {

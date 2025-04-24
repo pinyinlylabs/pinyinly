@@ -1,21 +1,24 @@
 import { trpc } from "@/client/trpc";
 import { v7Mutators } from "@/data/rizzleMutators";
-import { Rizzle, v7 } from "@/data/rizzleSchema";
-import { AppRouter } from "@/server/routers/_app";
+import type { Rizzle } from "@/data/rizzleSchema";
+import { v7 } from "@/data/rizzleSchema";
+import type { AppRouter } from "@/server/routers/_app";
 import { cookieSchema, r } from "@/util/rizzle";
-import { ReactQueryValue } from "@/util/types";
+import type { ReactQueryValue } from "@/util/types";
 import { invariant } from "@haohaohow/lib/invariant";
 import * as Sentry from "@sentry/core";
-import { QueryKey, useQueryClient } from "@tanstack/react-query";
+import type { QueryKey } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { TRPCClientError } from "@trpc/client";
 import { createContext, useContext, useEffect, useMemo } from "react";
-import {
+import type {
   HTTPRequestInfo,
   PullResponseV1,
   ReadTransaction,
-  TEST_LICENSE_KEY,
 } from "replicache";
-import { useAuth, UseAuth2Data } from "../auth";
+import { TEST_LICENSE_KEY } from "replicache";
+import type { UseAuth2Data } from "../auth";
+import { useAuth } from "../auth";
 import { useLocalQuery, useRenderGuard } from "../hooks";
 import { kvStore } from "./replicacheOptions";
 

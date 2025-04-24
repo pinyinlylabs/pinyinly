@@ -3,7 +3,7 @@ import { ReferencePage } from "@/client/ui/ReferencePage";
 import { ReferencePageBodySection } from "@/client/ui/ReferencePageBodySection";
 import { ReferencePageHeader } from "@/client/ui/ReferencePageHeader";
 import { GradientAqua } from "@/client/ui/styles";
-import { HanziWord } from "@/data/model";
+import type { HanziWord } from "@/data/model";
 import {
   lookupHanziWord,
   lookupHanziWordGlossMnemonics,

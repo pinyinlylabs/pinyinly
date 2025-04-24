@@ -1,6 +1,7 @@
 import LottieView from "lottie-react-native";
 import { useState } from "react";
-import { View, ViewProps } from "react-native";
+import type { ViewProps } from "react-native";
+import { View } from "react-native";
 
 export const ShootingStar = ({ className }: Pick<ViewProps, `className`>) => {
   const [hide, setHide] = useState(false);

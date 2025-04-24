@@ -1,17 +1,15 @@
-import { Mistake, MultipleChoiceQuestion, SkillRating } from "@/data/model";
+import type {
+  Mistake,
+  MultipleChoiceQuestion,
+  SkillRating,
+} from "@/data/model";
 import { setAudioModeAsync, useAudioPlayer } from "expo-audio";
 import chunk from "lodash/chunk";
-import {
-  ElementRef,
-  forwardRef,
-  memo,
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
+import type { ElementRef } from "react";
+import { forwardRef, memo, useCallback, useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import { RectButton } from "./RectButton";
-import { PropsOf } from "./types";
+import type { PropsOf } from "./types";
 
 const buttonThickness = 4;
 const gap = 16;

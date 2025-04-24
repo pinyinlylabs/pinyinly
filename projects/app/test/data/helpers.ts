@@ -1,12 +1,10 @@
-import {
-  SrsStateFsrsFourPointFive,
-  SrsStateMock,
-  SrsType,
-} from "#data/model.ts";
-import { nextReview, Rating } from "#util/fsrs.ts";
+import type { SrsStateFsrsFourPointFive, SrsStateMock } from "#data/model.ts";
+import { SrsType } from "#data/model.ts";
+import type { Rating } from "#util/fsrs.ts";
+import { nextReview } from "#util/fsrs.ts";
 import { invariant } from "@haohaohow/lib/invariant";
-import { TestContext } from "node:test";
-import { ReadTransaction, WriteTransaction } from "replicache";
+import type { TestContext } from "node:test";
+import type { ReadTransaction, WriteTransaction } from "replicache";
 
 export function makeMockTx(t: TestContext) {
   const readTx = {
