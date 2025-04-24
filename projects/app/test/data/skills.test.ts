@@ -302,22 +302,29 @@ await test(`${skillReviewQueue.name} suite`, async () => {
     const graph = await skillLearningGraph({
       targetSkills: [],
     });
-    assert.deepEqual(skillReviewQueue({ graph, skillSrsStates: new Map() }), {
-      available: [],
-      blocked: [],
-    });
+    assert.partialDeepStrictEqual(
+      skillReviewQueue({ graph, skillSrsStates: new Map() }),
+      {
+        available: [],
+        blocked: [],
+        dueCount: 0,
+        overDueCount: 0,
+        newDueAt: null,
+        newOverDueAt: null,
+      },
+    );
   });
 
   await test(`no target skills but some skill states (i.e. introduced skills) includes introduced skills (but not any dependencies of it)`, async () => {
     const graph = await skillLearningGraph({
       targetSkills: [],
     });
-    assert.deepEqual(
+    assert.partialDeepStrictEqual(
       skillReviewQueue({
         graph,
         skillSrsStates: new Map([[`he:刀:knife`, mockSrsState(`-1d`, `-5m`)]]),
       }),
-      { available: [`he:刀:knife`], blocked: [] },
+      { available: [`he:刀:knife`], blocked: [], dueCount: 1, overDueCount: 0 },
     );
   });
 
@@ -325,7 +332,7 @@ await test(`${skillReviewQueue.name} suite`, async () => {
     const graph = await skillLearningGraph({
       targetSkills: [`he:刀:knife`],
     });
-    assert.deepEqual(
+    assert.partialDeepStrictEqual(
       skillReviewQueue({
         graph,
         skillSrsStates: new Map([[`he:刀:knife`, mockSrsState(`-1d`, `-5m`)]]),
@@ -343,6 +350,8 @@ await test(`${skillReviewQueue.name} suite`, async () => {
           `he:𠃌:radical`,
         ],
         blocked: [],
+        dueCount: 1,
+        overDueCount: 0,
       },
     );
   });
@@ -352,7 +361,7 @@ await test(`${skillReviewQueue.name} suite`, async () => {
       const graph = await skillLearningGraph({
         targetSkills: [`he:好:good`],
       });
-      assert.deepEqual(
+      assert.partialDeepStrictEqual(
         skillReviewQueue({
           graph,
           skillSrsStates: new Map(),
@@ -369,7 +378,7 @@ await test(`${skillReviewQueue.name} suite`, async () => {
         targetSkills: [`he:汉:chinese`],
       });
 
-      assert.deepEqual(
+      assert.partialDeepStrictEqual(
         skillReviewQueue({
           graph,
           skillSrsStates: new Map(),
@@ -385,12 +394,12 @@ await test(`${skillReviewQueue.name} suite`, async () => {
       );
     });
 
-    await test(`prioritises due skills with highest value (rather than most overdue)`, async () => {
+    await test(`prioritises due skills with highest value (rather than most over-due)`, async () => {
       const graph = await skillLearningGraph({
         targetSkills: [`he:分:divide`],
       });
 
-      assert.deepEqual(
+      assert.partialDeepStrictEqual(
         skillReviewQueue({
           graph,
           skillSrsStates: new Map([
@@ -406,6 +415,8 @@ await test(`${skillReviewQueue.name} suite`, async () => {
             `he:𠃌:radical`,
           ],
           blocked: [`he:分:divide`],
+          dueCount: 2,
+          overDueCount: 0,
         },
       );
     });
@@ -415,7 +426,7 @@ await test(`${skillReviewQueue.name} suite`, async () => {
         targetSkills: [`he:分:divide`],
       });
 
-      assert.deepEqual(
+      assert.partialDeepStrictEqual(
         skillReviewQueue({
           graph,
           skillSrsStates: new Map(),
@@ -432,7 +443,7 @@ await test(`${skillReviewQueue.name} suite`, async () => {
         targetSkills: [`he:分:divide`, `he:一:one`],
       });
 
-      assert.deepEqual(
+      assert.partialDeepStrictEqual(
         skillReviewQueue({
           graph,
           skillSrsStates: new Map([
@@ -451,6 +462,8 @@ await test(`${skillReviewQueue.name} suite`, async () => {
             `he:八:eight`,
           ],
           blocked: [`he:分:divide`],
+          dueCount: 2,
+          overDueCount: 0,
         },
       );
     });
@@ -459,7 +472,7 @@ await test(`${skillReviewQueue.name} suite`, async () => {
   await test(`${SkillType.HanziWordToPinyin} skills`, async () => {
     await test(`doesn't learn pinyin for all constituents of a single character`, async () => {
       const graph = await skillLearningGraph({ targetSkills: [`hp:好:good`] });
-      assert.deepEqual(
+      assert.partialDeepStrictEqual(
         skillReviewQueue({
           graph,
           skillSrsStates: new Map(),
@@ -506,7 +519,7 @@ await test(`${skillReviewQueue.name} suite`, async () => {
         targetSkills: [`hp:一点儿:aLittle`],
       });
 
-      assert.deepEqual(
+      assert.partialDeepStrictEqual(
         skillReviewQueue({
           graph,
           skillSrsStates: new Map(),
@@ -550,12 +563,15 @@ await test(`${skillReviewQueue.name} suite`, async () => {
         targetSkills: [`hp:一:one`],
       });
 
-      assert.deepEqual(skillReviewQueue({ graph, skillSrsStates: new Map() }), {
-        available: [`he:一:one`],
-        blocked: [`hpi:一:one`, `hpf:一:one`, `hpt:一:one`, `hp:一:one`],
-      });
+      assert.partialDeepStrictEqual(
+        skillReviewQueue({ graph, skillSrsStates: new Map() }),
+        {
+          available: [`he:一:one`],
+          blocked: [`hpi:一:one`, `hpf:一:one`, `hpt:一:one`, `hp:一:one`],
+        },
+      );
 
-      assert.deepEqual(
+      assert.partialDeepStrictEqual(
         skillReviewQueue({
           graph,
           skillSrsStates: new Map([
@@ -565,10 +581,12 @@ await test(`${skillReviewQueue.name} suite`, async () => {
         {
           available: [`he:一:one`, `hpi:一:one`],
           blocked: [`hpf:一:one`, `hpt:一:one`, `hp:一:one`],
+          dueCount: 1,
+          overDueCount: 0,
         },
       );
 
-      assert.deepEqual(
+      assert.partialDeepStrictEqual(
         skillReviewQueue({
           graph,
           skillSrsStates: new Map([
@@ -579,6 +597,8 @@ await test(`${skillReviewQueue.name} suite`, async () => {
         {
           available: [`he:一:one`, `hpi:一:one`, `hpf:一:one`],
           blocked: [`hpt:一:one`, `hp:一:one`],
+          dueCount: 2,
+          overDueCount: 0,
         },
       );
     });
