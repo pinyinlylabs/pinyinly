@@ -19,7 +19,8 @@ import type {
 import { TEST_LICENSE_KEY } from "replicache";
 import type { UseAuth2Data } from "../auth";
 import { useAuth } from "../auth";
-import { useLocalQuery, useRenderGuard } from "../hooks";
+import { useLocalQuery } from "../hooks/useLocalQuery";
+import { useRenderGuard } from "../hooks/useRenderGuard";
 import { kvStore } from "./replicacheOptions";
 
 const ReplicacheContext = createContext<Rizzle | null>(null);

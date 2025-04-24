@@ -1,4 +1,4 @@
-import { useHanziWordMeaning } from "@/client/hooks";
+import { useHanziWordMeaning } from "@/client/hooks/useHanziWordMeaning";
 import type { HanziWord } from "@/data/model";
 import { hanziFromHanziWord, splitHanziText } from "@/dictionary/dictionary";
 import { useMemo } from "react";

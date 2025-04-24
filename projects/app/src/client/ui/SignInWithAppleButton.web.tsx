@@ -1,9 +1,9 @@
 /// <reference types="apple-signin-api" />
 
-import { documentEventListenerEffect } from "@/client/hooks";
 import { invariant } from "@haohaohow/lib/invariant";
 import { useEffect, useMemo, useState } from "react";
-import { useEventCallback } from "../hooks";
+import { documentEventListenerEffect } from "../hooks/documentEventListenerEffect";
+import { useEventCallback } from "../hooks/useEventCallback";
 import type { SignInWithAppleButtonProps } from "./SignInWithAppleButton";
 
 type AppleIdSignInOnSuccessEvent = CustomEvent<AppleSignInAPI.SignInResponseI>;

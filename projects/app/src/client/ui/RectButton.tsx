@@ -3,7 +3,7 @@ import type { ElementRef } from "react";
 import { forwardRef, useMemo } from "react";
 import type { ColorValue, ViewProps } from "react-native";
 import { Pressable, View } from "react-native";
-import { hapticImpactIfMobile } from "../hooks";
+import { hapticImpactIfMobile } from "../hooks/hapticImpactIfMobile";
 import type { PropsOf } from "./types";
 
 export type RectButtonProps = {

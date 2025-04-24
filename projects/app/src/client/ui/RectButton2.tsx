@@ -3,7 +3,7 @@ import { forwardRef, useState } from "react";
 import type { ViewProps } from "react-native";
 import { Pressable, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
-import { hapticImpactIfMobile } from "../hooks";
+import { hapticImpactIfMobile } from "../hooks/hapticImpactIfMobile";
 import type { PropsOf } from "./types";
 
 export type ButtonVariant = `filled` | `outline` | `bare`;

@@ -1,4 +1,4 @@
-import { useLocalQuery } from "@/client/hooks";
+import { useLocalQuery } from "@/client/hooks/useLocalQuery";
 import { ReferencePage } from "@/client/ui/ReferencePage";
 import { ReferencePageBodySection } from "@/client/ui/ReferencePageBodySection";
 import { ReferencePageHeader } from "@/client/ui/ReferencePageHeader";

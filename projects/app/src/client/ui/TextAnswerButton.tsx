@@ -15,7 +15,7 @@ import Reanimated, {
   withTiming,
 } from "react-native-reanimated";
 import { tv } from "tailwind-variants";
-import { hapticImpactIfMobile } from "../hooks";
+import { hapticImpactIfMobile } from "../hooks/hapticImpactIfMobile";
 import { AnimatedPressable } from "./AnimatedPressable";
 import { Hhhmark } from "./Hhhmark";
 import type { PropsOf } from "./types";

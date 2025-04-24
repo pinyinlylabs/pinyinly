@@ -1,7 +1,8 @@
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import hanzi from "hanzi";
 
-import { useInternetQuery, useLocalQuery } from "#client/hooks.ts";
+import { useInternetQuery } from "#client/hooks/useInternetQuery.ts";
+import { useLocalQuery } from "#client/hooks/useLocalQuery.ts";
 import type {
   HanziChar,
   HanziText,

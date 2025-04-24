@@ -1,4 +1,4 @@
-import { useQuizProgress } from "@/client/hooks";
+import { useQuizProgress } from "@/client/hooks/useQuizProgress";
 import { HanziText } from "@/client/ui/HanziText";
 import { QuizProgressBar } from "@/client/ui/QuizProgressBar";
 import { RectButton2 } from "@/client/ui/RectButton2";
