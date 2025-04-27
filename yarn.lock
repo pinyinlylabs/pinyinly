@@ -1306,10 +1306,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@electric-sql/pglite@npm:^0.2.15":
-  version: 0.2.17
-  resolution: "@electric-sql/pglite@npm:0.2.17"
-  checksum: 10c0/4358eccb2a3de5148b8995c7dbf3cad2d80a2a193885838ec19e0381ca204c0e37f721d006ad23fcad0b694ec6089a6786b82f2ad87f18344c82e059ff37017f
+"@electric-sql/pglite@npm:^0.3.0":
+  version: 0.3.0
+  resolution: "@electric-sql/pglite@npm:0.3.0"
+  checksum: 10c0/690cd6a402a0b72074e95e6129f423cd1d3ebb663b13efefb58da6e27f74eaa66d9a5873891add36884eeb1dae803f64fc6a4e339391ba7f9a9ceef980132954
   languageName: node
   linkType: hard
 
@@ -2454,7 +2454,7 @@ __metadata:
   resolution: "@haohaohow/app@workspace:projects/app"
   dependencies:
     "@babel/core": "npm:^7.20.0"
-    "@electric-sql/pglite": "npm:^0.2.15"
+    "@electric-sql/pglite": "npm:^0.3.0"
     "@eslint/eslintrc": "npm:^3.3.0"
     "@expo/metro-runtime": "npm:~4.0.1"
     "@haohaohow/eslint-rules": "workspace:*"
