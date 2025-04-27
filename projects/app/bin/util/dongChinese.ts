@@ -1,5 +1,6 @@
 import type { PinyinText } from "#data/model.ts";
 import {
+  emptyArray,
   inverseSortComparator,
   memoize0,
   sortComparatorNumber,
@@ -196,8 +197,6 @@ export const dongChineseSchema = z
 
 export type DongChineseRecord = z.infer<typeof dongChineseSchema>;
 
-const empty = [] as const;
-
 export function getDongChinesePinyin(record: DongChineseRecord) {
   let result: PinyinText[] | undefined;
 
@@ -218,12 +217,12 @@ export function getDongChinesePinyin(record: DongChineseRecord) {
             (x) => x.frequency ?? record.pinyinFrequencies?.indexOf(x) ?? 0,
           )
         : sortComparatorNumber(() => 0),
-  ) ?? empty) {
+  ) ?? emptyArray) {
     (result ??= []).push(x.pinyin as PinyinText);
   }
 
   if (result == null) {
-    for (const x of record.oldPronunciations ?? empty) {
+    for (const x of record.oldPronunciations ?? emptyArray) {
       const pinyin = x.pinyin as PinyinText | undefined;
       // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
       if (pinyin != null && (result == null || !result.includes(pinyin))) {

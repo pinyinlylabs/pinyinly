@@ -18,20 +18,27 @@ import {
   allHsk1HanziWords,
   buildHanziWord,
   dictionarySchema,
+  flattenIds,
+  glossOrThrow,
   hanziFromHanziWord,
   hanziWordMeaningSchema,
+  idsNodeToString,
+  isHanziChar,
   loadHanziDecomposition,
   lookupHanzi,
   lookupHanziWord,
   meaningKeyFromHanziWord,
   parseIds,
   partOfSpeechSchema,
+  strokeCountToCharacter,
   walkIdsNode,
   wordListSchema,
 } from "#dictionary/dictionary.ts";
 import "#types/hanzi.d.ts";
 import {
   arrayFilterUniqueWithKey,
+  emptyArray,
+  mapSetAdd,
   mergeSortComparators,
   sortComparatorNumber,
   sortComparatorString,
@@ -39,7 +46,11 @@ import {
 import { jsonStringifyIndentOneLevel } from "#util/json.ts";
 import { invariant } from "@haohaohow/lib/invariant";
 import { Alert, MultiSelect, Select } from "@inkjs/ui";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQuery,
+} from "@tanstack/react-query";
 import makeDebug from "debug";
 
 import { Box, render, Text, useFocus, useInput } from "ink";
@@ -622,6 +633,224 @@ Can you give me a few options to pick from.`,
   );
 };
 
+async function openAiHanziWordGlossHintQuery(hanziWord: HanziWord) {
+  const dict = await readDictionary();
+  const meaning = dict.get(hanziWord);
+  invariant(meaning != null);
+  const hanzi = hanziFromHanziWord(hanziWord);
+  const gloss = glossOrThrow(hanziWord, meaning);
+
+  if (isHanziChar(hanzi)) {
+    const componentGlosses = new Map<string, Set<string>>();
+    let hanziIds: string = hanzi;
+
+    const visited = new Set<string>();
+    async function decomp(char: string) {
+      if (visited.has(char)) {
+        return;
+      }
+      visited.add(char);
+
+      // single character
+      const ids = decompositions.get(char);
+      invariant(ids != null, `missing decomposition for ${char}`);
+      hanziIds = hanziIds.replaceAll(char, ids);
+
+      for (const leaf of walkIdsNode(parseIds(ids))) {
+        switch (leaf.type) {
+          case `LeafUnknownCharacter`: {
+            mapSetAdd(
+              componentGlosses,
+              strokeCountToCharacter(leaf.strokeCount),
+              `an unknown ${leaf.strokeCount}-stroke character`,
+            );
+            break;
+          }
+          case `LeafCharacter`: {
+            if (leaf.character === char) {
+              mapSetAdd(
+                componentGlosses,
+                leaf.character,
+                `anything as it has no specific meaning since it's purely structural`,
+              );
+            } else {
+              const lookups = await lookupHanzi(leaf.character);
+              if (lookups.length > 0) {
+                for (const [leafHanziWord, leafMeaning] of lookups) {
+                  // TODO: handle case for (2)(3) etc
+                  mapSetAdd(
+                    componentGlosses,
+                    leaf.character,
+                    JSON.stringify(glossOrThrow(leafHanziWord, leafMeaning)),
+                  );
+                }
+              } else {
+                // No definition for the character, try decomposing it further.
+                await decomp(leaf.character);
+              }
+            }
+            break;
+          }
+        }
+      }
+    }
+
+    await decomp(hanzi);
+
+    // "dot" is not a useful concept to focus on, it's better to let the LLM
+    // imagine what it might represent
+    if (componentGlosses.has(`丶`)) {
+      componentGlosses.set(
+        `丶`,
+        new Set([
+          `almost anything small phyiscal thing — a rain drop, a stick, a leaf, a hand, etc`,
+        ]),
+      );
+    }
+
+    hanziIds = idsNodeToString(flattenIds(parseIds(hanziIds)));
+
+    const query = `
+Can you make a 'glossHint' to remember that "${hanzi}" means "${gloss}" ${meaning.partOfSpeech == `unknown` ? `` : `(${meaning.partOfSpeech})`}.
+${hanziIds.length > 1 ? `\n${hanzi} decomposes into the IDS ${hanziIds}` : ``}
+${[...componentGlosses.entries()]
+  .flatMap(
+    ([hanzi, glosses]) =>
+      `"${hanzi}" can mean ${[...glosses]
+        // .map((gloss) => JSON.stringify(gloss))
+        .join(` or `)}${
+        glosses.size > 1
+          ? ` (${glosses.size} distinct meanings to choose from)`
+          : ``
+      }`,
+  )
+  .map((x) => `• ${x}`)
+  .join(`\n`)}
+
+There's a couple of ways to make a hint:
+
+1. Base it on how the character looks (i.e. visual analogy), e.g.
+
+  宀 (roof) {
+    "strategy": "visual",
+    "glossHint": "Looks like the outline of a rooftop with a chimney in the middle"
+  }
+  灬 (fire) {
+    "strategy": "visual",
+    "glossHint": "Looks like the glowing embers of a fire"
+  }
+  乙 (second) {
+    "strategy": "visual",
+    "glossHint": "Looks like an upside-down number 2"
+  }
+  亻 (person) {
+    "strategy": "visual",
+    "glossHint": "Looks like a slimmer simplified version of 人"
+  }
+
+2. Base it on the connections between the conceptual meaning of the components, e.g.
+
+  学 (learn) {
+    "strategy": "conceptual",
+    "glossHint": "Imagine a child (子) under a blanket (冖) trying to learn how to count using their fingers (𭕄)"
+  }
+  业 (profession) {
+    "strategy": "conceptual",
+    "glossHint": "Looks like a folder of paper documents open on a table, something comomn in a desk jobs."
+  }
+  以 (use) {
+    "strategy": "conceptual",
+    "glossHint": "A person (人) takes what’s in front of them and puts it to use."
+    "explanation": {
+      "stepByStepLogic": "The shape on the left can be imagined as a tool or resource. The person on the right is using it. Think: **“a person making use of something”** — that’s 以."
+    }
+  }
+  印 (print) {
+    "strategy": "conceptual",
+    "glossHint": "印 (print) is like a seal (卩) pressed down to leave a mark.",
+    "explanation": {
+      "summary": "Imagine a hand with three fingers holding a seal (卩) — together they stamp a print onto paper or clay.",
+      "stepByStepLogic": "The left side is your hand. The right side (卩:seal) is an official seal. Together: print = hand + seal."
+    }
+  }
+  礼 (ceremony) {
+    "strategy": "conceptual",
+    "glossHint": "A ceremony (礼) is a spiritual ritual (礻) that contains hidden meaning (乚)."
+  }
+
+Also remember to stick to simple casual language so it's easy to understand and remember.
+
+Can you come up with a few suggestions for me?
+  `;
+    console.log(query);
+    const { suggestions: results } = await openai(
+      [`curriculum.md`, `word-representation.md`, `skill-types.md`],
+      query,
+      z.object({
+        suggestions: z.array(
+          z.object({
+            strategy: z.string(),
+            glossHint: z.string(),
+            stepByStepLogic: z.string(),
+          }),
+        ),
+      }),
+    );
+
+    // Imagine a child under a
+
+    return results;
+  }
+  // multiple characters
+  throw new Error(
+    `multiple character gloss hint generation not implemented yet`,
+  );
+}
+
+const HanziWordGlossHintEditor = ({
+  hanziWord,
+  onCancel,
+}: {
+  hanziWord: HanziWord;
+  onCancel: () => void;
+  onSave: () => void;
+}) => {
+  const result = useQuery({
+    queryKey: [`HanziWordGlossHintEditor`, hanziWord],
+    queryFn: () => openAiHanziWordGlossHintQuery(hanziWord),
+    staleTime: Infinity,
+    throwOnError: true,
+  });
+
+  return (
+    <>
+      <Text bold>Editing {hanziWord} gloss hint</Text>
+
+      <Text>Status: {result.status}</Text>
+
+      {result.data == null ? null : (
+        <Box flexDirection="column" gap={1}>
+          <Text>Result:</Text>
+          {result.data.map((x, i) => (
+            <Box key={i}>
+              <Text>{JSON.stringify(x, null, 2)}</Text>
+            </Box>
+          ))}
+        </Box>
+      )}
+
+      <Shortcuts>
+        <Button
+          label="Back"
+          action={() => {
+            onCancel();
+          }}
+        />
+      </Shortcuts>
+    </>
+  );
+};
+
 const HanziWordEditor = ({
   hanziWord,
   onCancel,
@@ -1055,6 +1284,7 @@ const DictionaryEditor = ({ onCancel }: { onCancel: () => void }) => {
     | { type: `list` }
     | { type: `view`; hanziWord: HanziWord }
     | { type: `edit`; hanziWord: HanziWord }
+    | { type: `editGlossHint`; hanziWord: HanziWord }
     | { type: `merge`; hanziWord: HanziWord; otherHanziWord?: HanziWord }
     | null
   >({ type: `list` });
@@ -1102,6 +1332,15 @@ const DictionaryEditor = ({ onCancel }: { onCancel: () => void }) => {
               }}
             />
             <Button
+              label="Edit gloss hint…"
+              action={() => {
+                setLocation({
+                  type: `editGlossHint`,
+                  hanziWord: location.hanziWord,
+                });
+              }}
+            />
+            <Button
               label="Merge…"
               action={() => {
                 setLocation({ type: `merge`, hanziWord: location.hanziWord });
@@ -1121,6 +1360,21 @@ const DictionaryEditor = ({ onCancel }: { onCancel: () => void }) => {
       return (
         <Box flexDirection="column" gap={1}>
           <HanziWordEditor
+            hanziWord={location.hanziWord}
+            onSave={() => {
+              setLocation({ type: `view`, hanziWord: location.hanziWord });
+            }}
+            onCancel={() => {
+              setLocation({ type: `list` });
+            }}
+          />
+        </Box>
+      );
+    }
+    case `editGlossHint`: {
+      return (
+        <Box flexDirection="column" gap={1}>
+          <HanziWordGlossHintEditor
             hanziWord={location.hanziWord}
             onSave={() => {
               setLocation({ type: `view`, hanziWord: location.hanziWord });
@@ -1297,7 +1551,7 @@ const DongChineseHanziEntry = ({ hanzi }: { hanzi: string }) => {
           <Text>
             <Text dimColor>pinyin:</Text>
             {` `}
-            <SemiColonList items={getDongChinesePinyin(lookup) ?? empty} />
+            <SemiColonList items={getDongChinesePinyin(lookup) ?? emptyArray} />
           </Text>
         )}
         {lookup.hint == null ? null : (
@@ -1457,7 +1711,7 @@ interface GenerateHanziWordQuery {
   existingItems?: DeepReadonly<HanziWordWithMeaning[]>;
 }
 
-async function queryOpenAi(query: unknown) {
+async function queryOpenAiForHanziWordResults(query: unknown) {
   const { suggestions } = await openai(
     [`curriculum.md`, `word-representation.md`, `skill-types.md`],
     `
@@ -1492,7 +1746,7 @@ async function generateHanziWordResults(
     }
   }
 
-  for (const x of await queryOpenAi(query)) {
+  for (const x of await queryOpenAiForHanziWordResults(query)) {
     res.push({
       type: `new`,
       sources: [`openai`],
@@ -1528,7 +1782,7 @@ async function generateHanziWordResults(
         });
 
         // Add a mixed version with OpenAI
-        for (const openAiResult of await queryOpenAi({
+        for (const openAiResult of await queryOpenAiForHanziWordResults({
           hanzi: query.hanzi,
           gloss: lookup.gloss,
           hint: lookup.hint,
@@ -2502,5 +2756,3 @@ const FormFieldEditor = ({
     </Box>
   );
 };
-
-const empty = [] as const;

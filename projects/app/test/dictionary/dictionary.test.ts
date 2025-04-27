@@ -1131,7 +1131,7 @@ await test(`dictionary contains entries for decomposition`, async () => {
   // stored so that if new items are added to the dictionary that relate to this
   // list, the list can be manually reviewed and updated.
   const allowedMissing = new Map([
-    // Coulnd't find any standard meaning for this. In most cases this is used
+    // Couldn't find any standard meaning for this. In most cases this is used
     // at the top and looks like "上", so maybe the decomposition should just
     // pick that instead of going further to "⺊"?
     [`⺊`, new Set([`上`, `占`, `卤`, `攴`, `桌`, `虍`])],
@@ -1148,7 +1148,7 @@ await test(`dictionary contains entries for decomposition`, async () => {
     // always learn characters of a word
     ...unknownCharacters,
     ...[...unknownComponents]
-      // only learn components that are used at least 3 times
+      // only learn components that are used at least a few times
       .filter(([, sources]) => sources.size >= 3),
   ]
     // explicitly ignored cases

@@ -94,10 +94,17 @@ await test(`${skillLearningGraph.name} suite`, async () => {
           },
         ],
         [
+          `he:丨:line`,
+          {
+            skill: `he:丨:line`,
+            dependencies: new Set(),
+          },
+        ],
+        [
           `he:卜:divine`,
           {
             skill: `he:卜:divine`,
-            dependencies: new Set([]),
+            dependencies: new Set([`he:丨:line`, `he:丶:dot`]),
           },
         ],
         [
@@ -246,6 +253,8 @@ await test(`${skillLearningGraph.name} suite`, async () => {
         he:下:below
           he:一:one
           he:卜:divine
+            he:丨:line
+            he:丶:dot
         he:儿:son
       he:儿:son
         he:丿:slash
