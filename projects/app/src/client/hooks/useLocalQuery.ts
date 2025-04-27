@@ -1,6 +1,6 @@
 import type { UseQueryOptions, UseQueryResult } from "@tanstack/react-query";
 import {
-  // eslint-disable-next-line @typescript-eslint/no-restricted-imports
+  // eslint-disable-next-line @expoCodeImports/no-restricted-imports
   useQuery,
 } from "@tanstack/react-query";
 

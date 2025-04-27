@@ -544,20 +544,18 @@ const hanziToHanziWordMap = memoize0(
   },
 );
 
-const empty = [] as const;
-
 export const lookupHanzi = async (
   hanzi: string,
 ): Promise<DeepReadonly<HanziWordWithMeaning[]>> => {
   const { hanziMap } = await hanziToHanziWordMap();
-  return hanziMap.get(hanzi) ?? empty;
+  return hanziMap.get(hanzi) ?? emptyArray;
 };
 
 export const lookupGloss = async (
   gloss: string,
 ): Promise<DeepReadonly<HanziWordWithMeaning[]>> => {
   const { glossMap } = await hanziToHanziWordMap();
-  return glossMap.get(gloss) ?? empty;
+  return glossMap.get(gloss) ?? emptyArray;
 };
 
 export const lookupHanziWord = async (

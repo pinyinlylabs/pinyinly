@@ -118,11 +118,6 @@ export default tseslint.config(
               message: `Please use the default \`Animated\` import from \`react-native-reanimated\` instead.`,
             },
             {
-              name: `@tanstack/react-query`,
-              importNames: [`useQuery`],
-              message: `Please use a wrapped version (e.g. useLocalQuery).`,
-            },
-            {
               name: `hanzi`,
               message: `Please use @/dictionary/hanzi instead.`,
             },
@@ -334,12 +329,19 @@ export default tseslint.config(
       "@expoCodeImports/no-restricted-imports": [
         `error`,
         {
-          paths: builtinModules
-            .flatMap((x) => (x.startsWith(`node:`) ? [x] : [x, `node:` + x]))
-            .map((name) => ({
-              name,
-              message: `Expo code is universal and doesn't support Node.js packages`,
-            })),
+          paths: [
+            ...builtinModules
+              .flatMap((x) => (x.startsWith(`node:`) ? [x] : [x, `node:` + x]))
+              .map((name) => ({
+                name,
+                message: `Expo code is universal and doesn't support Node.js packages`,
+              })),
+            {
+              name: `@tanstack/react-query`,
+              importNames: [`useQuery`],
+              message: `Please use a wrapped version (e.g. useLocalQuery).`,
+            },
+          ],
           patterns: [
             {
               regex: `^#`,
