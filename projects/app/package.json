@@ -97,7 +97,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
-    "@electric-sql/pglite": "^0.2.15",
+    "@electric-sql/pglite": "^0.3.0",
     "@eslint/eslintrc": "^3.3.0",
     "@inkjs/ui": "^2.0.0",
     "@inngest/eslint-plugin": "^0.0.7",
