@@ -19,7 +19,6 @@ import {
   buildHanziWord,
   dictionarySchema,
   flattenIds,
-  glossOrThrow,
   hanziFromHanziWord,
   hanziWordMeaningSchema,
   idsNodeToString,
@@ -638,7 +637,6 @@ async function openAiHanziWordGlossHintQuery(hanziWord: HanziWord) {
   const meaning = dict.get(hanziWord);
   invariant(meaning != null);
   const hanzi = hanziFromHanziWord(hanziWord);
-  const gloss = glossOrThrow(hanziWord, meaning);
 
   if (isHanziChar(hanzi)) {
     const componentGlosses = new Map<string, Set<string>>();
@@ -676,12 +674,11 @@ async function openAiHanziWordGlossHintQuery(hanziWord: HanziWord) {
             } else {
               const lookups = await lookupHanzi(leaf.character);
               if (lookups.length > 0) {
-                for (const [leafHanziWord, leafMeaning] of lookups) {
-                  // TODO: handle case for (2)(3) etc
+                for (const [, leafMeaning] of lookups) {
                   mapSetAdd(
                     componentGlosses,
                     leaf.character,
-                    JSON.stringify(glossOrThrow(leafHanziWord, leafMeaning)),
+                    `"${leafMeaning.gloss.join(`/`)}"`,
                   );
                 }
               } else {
@@ -711,17 +708,13 @@ async function openAiHanziWordGlossHintQuery(hanziWord: HanziWord) {
     hanziIds = idsNodeToString(flattenIds(parseIds(hanziIds)));
 
     const query = `
-Can you make a 'glossHint' to remember that "${hanzi}" means "${gloss}" ${meaning.partOfSpeech == `unknown` ? `` : `(${meaning.partOfSpeech})`}.
+Can you make a 'glossHint' to remember that "${hanzi}" means "${meaning.gloss.join(`/`)}" ${meaning.partOfSpeech == `unknown` ? `` : `(${meaning.partOfSpeech})`}.
 ${hanziIds.length > 1 ? `\n${hanzi} decomposes into the IDS ${hanziIds}` : ``}
 ${[...componentGlosses.entries()]
   .flatMap(
     ([hanzi, glosses]) =>
-      `"${hanzi}" can mean ${[...glosses]
-        // .map((gloss) => JSON.stringify(gloss))
-        .join(` or `)}${
-        glosses.size > 1
-          ? ` (${glosses.size} distinct meanings to choose from)`
-          : ``
+      `"${hanzi}" can mean ${[...glosses].join(` or `)}${
+        glosses.size > 1 ? ` (${glosses.size} distinct meanings)` : ``
       }`,
   )
   .map((x) => `• ${x}`)
@@ -761,24 +754,20 @@ There's a couple of ways to make a hint:
   以 (use) {
     "strategy": "conceptual",
     "glossHint": "A person (人) takes what’s in front of them and puts it to use."
-    "explanation": {
-      "stepByStepLogic": "The shape on the left can be imagined as a tool or resource. The person on the right is using it. Think: **“a person making use of something”** — that’s 以."
-    }
+    "stepByStepLogic": "The shape on the left can be imagined as a tool or resource. The person on the right is using it. Think: **“a person making use of something”** — that’s 以."
   }
   印 (print) {
     "strategy": "conceptual",
     "glossHint": "印 (print) is like a seal (卩) pressed down to leave a mark.",
-    "explanation": {
-      "summary": "Imagine a hand with three fingers holding a seal (卩) — together they stamp a print onto paper or clay.",
-      "stepByStepLogic": "The left side is your hand. The right side (卩:seal) is an official seal. Together: print = hand + seal."
+    "stepByStepLogic": "The left side is your hand. The right side (卩:seal) is an official seal. Together: print = hand + seal."
     }
   }
   礼 (ceremony) {
     "strategy": "conceptual",
-    "glossHint": "A ceremony (礼) is a spiritual ritual (礻) that contains hidden meaning (乚)."
+    "glossHint": "A **ceremony** (礼) is a **spiritual ritual** (礻) that contains **hidden meaning** (乚)."
   }
 
-Also remember to stick to simple casual language so it's easy to understand and remember.
+I think it's best to stick to simple casual language so it's easy to understand and remember. And for characters with multiple meanings, pick the one that will make the best result.
 
 Can you come up with a few suggestions for me?
   `;
