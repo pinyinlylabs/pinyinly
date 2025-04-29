@@ -10956,8 +10956,8 @@ __metadata:
   linkType: hard
 
 "inngest@npm:^3.29.2":
-  version: 3.35.0
-  resolution: "inngest@npm:3.35.0"
+  version: 3.35.1
+  resolution: "inngest@npm:3.35.1"
   dependencies:
     "@bufbuild/protobuf": "npm:^2.2.3"
     "@inngest/ai": "npm:^0.1.3"
@@ -10973,7 +10973,6 @@ __metadata:
     serialize-error-cjs: "npm:^0.1.3"
     strip-ansi: "npm:^5.2.0"
     temporal-polyfill: "npm:^0.2.5"
-    ulidx: "npm:^2.4.1"
     zod: "npm:~3.22.3"
   peerDependencies:
     "@sveltejs/kit": ">=1.27.3"
@@ -11007,7 +11006,7 @@ __metadata:
       optional: true
     typescript:
       optional: true
-  checksum: 10c0/578a083d7a55451a182cc9bcd5cd7ff5d95cee1f76cac07154314f47de06b4f1098d6edbd8880c1eafdf881f0c8921d8eef785e278b7655a2b093446b8178ace
+  checksum: 10c0/e91dccc17d444d04cb28a0cdcbeb4c1044f58d109312cc3b29b65aafaf53b0c260e766a2d2cd33f21b1791f50aacf34f815912a984354bc56e5b88c368490b30
   languageName: node
   linkType: hard
 
@@ -11924,13 +11923,6 @@ __metadata:
   version: 3.0.3
   resolution: "kleur@npm:3.0.3"
   checksum: 10c0/cd3a0b8878e7d6d3799e54340efe3591ca787d9f95f109f28129bdd2915e37807bf8918bb295ab86afb8c82196beec5a1adcaf29042ce3f2bd932b038fe3aa4b
-  languageName: node
-  linkType: hard
-
-"layerr@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "layerr@npm:3.0.0"
-  checksum: 10c0/320c9b9cf1392c73c9ff8f8d1bb7a782093ac7341fe5d7fea6ebfeea6d785af8e0fc573541431b6ffcb268577f8aea66168757e73a15035568a00ab9e4370705
   languageName: node
   linkType: hard
 
@@ -17042,15 +17034,6 @@ __metadata:
   bin:
     uglifyjs: bin/uglifyjs
   checksum: 10c0/83b0a90eca35f778e07cad9622b80c448b6aad457c9ff8e568afed978212b42930a95f9e1be943a1ffa4258a3340fbb899f41461131c05bb1d0a9c303aed8479
-  languageName: node
-  linkType: hard
-
-"ulidx@npm:^2.4.1":
-  version: 2.4.1
-  resolution: "ulidx@npm:2.4.1"
-  dependencies:
-    layerr: "npm:^3.0.0"
-  checksum: 10c0/3cbe05123b4b49d262e26cd0edd3ac38a4f9e97f043d47ae7daa88502748881d1615d832e3bcb29698ca2429947c24494929ba35b40d6bf38df891cb15642d2e
   languageName: node
   linkType: hard
 
