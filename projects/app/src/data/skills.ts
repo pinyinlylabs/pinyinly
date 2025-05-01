@@ -188,7 +188,7 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
       )) {
         if (await characterHasGlyph(character)) {
           // Check if the character was already added as a dependency by being
-          // referenced inthe gloss hint.
+          // referenced in the gloss hint.
           const depAlreadyAdded = deps.some((x) => {
             if (skillTypeFromSkill(x) === SkillType.HanziWordToGloss) {
               skill = skill as HanziWordSkill;
@@ -234,11 +234,15 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
       if (characters.length > 1) {
         for (const character of characters) {
           if (await characterHasGlyph(character)) {
-            const hanziWordWithMeaning =
-              await hackyGuessHanziWordToLearn(character);
-            if (hanziWordWithMeaning != null) {
-              const [hanziWord] = hanziWordWithMeaning;
-              deps.push(hanziWordToPinyin(hanziWord));
+            // We only have a character, but need a hanzi word to learn. So make
+            // the best guess for the hanzi word to learn.
+            for (const [charHanziWord, charMeaning] of await lookupHanzi(
+              character,
+            )) {
+              if (charMeaning.pinyin != null) {
+                deps.push(hanziWordToPinyin(charHanziWord));
+                break;
+              }
             }
           }
         }

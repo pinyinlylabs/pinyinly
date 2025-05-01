@@ -678,7 +678,7 @@ async function openAiHanziWordGlossHintQuery(hanziWord: HanziWord) {
                   mapSetAdd(
                     componentGlosses,
                     leaf.character,
-                    `"${leafMeaning.gloss.join(`/`)}"`,
+                    `**${leafMeaning.gloss.join(`/`)}**`,
                   );
                 }
               } else {
@@ -708,79 +708,32 @@ async function openAiHanziWordGlossHintQuery(hanziWord: HanziWord) {
     hanziIds = idsNodeToString(flattenIds(parseIds(hanziIds)));
 
     const query = `
-Can you make a 'glossHint' to remember that "${hanzi}" means "${meaning.gloss.join(`/`)}" ${meaning.partOfSpeech == `unknown` ? `` : `(${meaning.partOfSpeech})`}.
-${hanziIds.length > 1 ? `\n${hanzi} decomposes into the IDS ${hanziIds}` : ``}
+I'm having trouble remembering that ${hanzi} means **${meaning.gloss.join(`/`)}** ${meaning.partOfSpeech == `unknown` ? `` : `(${meaning.partOfSpeech})`}.
+
+${hanziIds.length > 1 ? `\nI've worked out that ${hanzi} = ${hanziIds}` : ``}
 ${[...componentGlosses.entries()]
   .flatMap(
     ([hanzi, glosses]) =>
-      `"${hanzi}" can mean ${[...glosses].join(` or `)}${
+      `${hanzi} → ${[...glosses].join(` or `)}${
         glosses.size > 1 ? ` (${glosses.size} distinct meanings)` : ``
       }`,
   )
   .map((x) => `• ${x}`)
   .join(`\n`)}
 
-There's a couple of ways to make a hint:
-
-1. Base it on how the character looks (i.e. visual analogy), e.g.
-
-  宀 (roof) {
-    "strategy": "visual",
-    "glossHint": "Looks like the outline of a rooftop with a chimney in the middle"
-  }
-  灬 (fire) {
-    "strategy": "visual",
-    "glossHint": "Looks like the glowing embers of a fire"
-  }
-  乙 (second) {
-    "strategy": "visual",
-    "glossHint": "Looks like an upside-down number 2"
-  }
-  亻 (person) {
-    "strategy": "visual",
-    "glossHint": "Looks like a slimmer simplified version of 人"
-  }
-
-2. Base it on the connections between the conceptual meaning of the components, e.g.
-
-  学 (learn) {
-    "strategy": "conceptual",
-    "glossHint": "Imagine a child (子) under a blanket (冖) trying to learn how to count using their fingers (𭕄)"
-  }
-  业 (profession) {
-    "strategy": "conceptual",
-    "glossHint": "Looks like a folder of paper documents open on a table, something comomn in a desk jobs."
-  }
-  以 (use) {
-    "strategy": "conceptual",
-    "glossHint": "A person (人) takes what’s in front of them and puts it to use."
-    "stepByStepLogic": "The shape on the left can be imagined as a tool or resource. The person on the right is using it. Think: **“a person making use of something”** — that’s 以."
-  }
-  印 (print) {
-    "strategy": "conceptual",
-    "glossHint": "印 (print) is like a seal (卩) pressed down to leave a mark.",
-    "stepByStepLogic": "The left side is your hand. The right side (卩:seal) is an official seal. Together: print = hand + seal."
-    }
-  }
-  礼 (ceremony) {
-    "strategy": "conceptual",
-    "glossHint": "A **ceremony** (礼) is a **spiritual ritual** (礻) that contains **hidden meaning** (乚)."
-  }
-
-I think it's best to stick to simple casual language so it's easy to understand and remember. And for characters with multiple meanings, pick the one that will make the best result.
-
 Can you come up with a few suggestions for me?
   `;
+
     console.log(query);
     const { suggestions: results } = await openai(
-      [`curriculum.md`, `word-representation.md`, `skill-types.md`],
+      [`curriculum.md`],
       query,
       z.object({
         suggestions: z.array(
           z.object({
-            strategy: z.string(),
+            // strategy: z.string(),
             glossHint: z.string(),
-            stepByStepLogic: z.string(),
+            // stepByStepLogic: z.string(),
           }),
         ),
       }),
