@@ -10826,15 +10826,15 @@ __metadata:
   linkType: hard
 
 "ink-select-input@npm:^6.0.0":
-  version: 6.1.0
-  resolution: "ink-select-input@npm:6.1.0"
+  version: 6.2.0
+  resolution: "ink-select-input@npm:6.2.0"
   dependencies:
     figures: "npm:^6.1.0"
     to-rotated: "npm:^1.0.0"
   peerDependencies:
     ink: ">=5.0.0"
     react: ">=18.0.0"
-  checksum: 10c0/25c7665f56453260c4057c8e66a2511c007c4a50c0cb7cc745e59dac358d08aa5d2239fabb761244850235a2d0d7fb9895ad214e1cb146a58dc5d0bca4bcf9e0
+  checksum: 10c0/e13ccdc5268e5c6300c9e62761662e69a70570124fa0b458c7d203eeff7cea5cde8eac78cd8709001c9339471df6ddfcbddc37aacd10c8829b94687d9fa98839
   languageName: node
   linkType: hard
 
