@@ -137,6 +137,40 @@ When your heart is overflowing (太), it shows in your mood or behavior.
 • 动态 (dòngtài) – movement, dynamic status
 • 心态 (xīntài) – mental state, mindset
 
+### Example of learning the meaning of 科
+
+科 (kē) broadly means “subject,” “branch,” “discipline,” or “department.” It’s used in contexts like academic subjects, administrative divisions, and scientific classifications.
+
+⸻
+
+🧩 Decomposition
+
+科 = ⿰禾斗
+• 禾 → grain, cereal crop (like rice or wheat)
+• 斗 → to fight / ladle / unit of volume (often phonetic here)
+
+⸻
+
+🧠 Mnemonic Idea
+
+Imagine measuring grain (禾) with a scoop (斗) to organize it into types — this links to the idea of classifying or categorizing, just like school subjects or branches of science.
+
+⸻
+
+✅ Gloss suggestions:
+• subject (in school or study)
+• branch (of science, gov, etc.)
+• department
+• discipline
+
+⸻
+
+📚 Common words:
+• 科学 (kēxué) – science
+• 学科 (xuékē) – academic subject
+• 外科 (wàikē) – surgery (surgical department)
+• 科目 (kēmù) – course, subject
+
 ### Imagining objects that looks like the object.
 
 Some characters a composed of lots of smaller components that form groups, and by associating a concept with these groups it's possible to create a more concise and efficient mnemonic hint.
