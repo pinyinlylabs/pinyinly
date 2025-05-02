@@ -66,7 +66,7 @@ export const QuizDeckOneCorrectPairQuestion = memo(
     onNext: () => void;
     onRating: (ratings: SkillRating[], mistakes: Mistake[]) => void;
   }) {
-    const { prompt, answer, hint, groupA, groupB } = question;
+    const { prompt, answer, groupA, groupB } = question;
 
     const [selectedAChoice, setSelectedAChoice] =
       useState<OneCorrectPairQuestionChoice>();
@@ -174,13 +174,6 @@ export const QuizDeckOneCorrectPairQuestion = memo(
                     includeHint
                     includeAlternatives
                   />
-
-                  {hint == null ? null : (
-                    <Text className="leading-snug text-accent-10">
-                      <Text className="font-bold">Hint:</Text>
-                      {hint}
-                    </Text>
-                  )}
 
                   {selectedAChoice != null && selectedBChoice != null ? (
                     <View className="flex-row flex-wrap items-center gap-2">
