@@ -456,6 +456,8 @@ export const dictionarySchema = z
   .array(z.tuple([hanziWordSchema, hanziWordMeaningSchema]))
   .transform((x) => new Map(x));
 
+export type Dictionary = z.infer<typeof dictionarySchema>;
+
 export const loadDictionary = memoize0(async () =>
   dictionarySchema
     .transform(deepReadonly)

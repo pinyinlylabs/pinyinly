@@ -10,6 +10,7 @@ import type {
   PinyinText,
 } from "#data/model.ts";
 import type {
+  Dictionary,
   HanziWordMeaning,
   HanziWordWithMeaning,
 } from "#dictionary/dictionary.ts";
@@ -632,8 +633,10 @@ Can you give me a few options to pick from.`,
   );
 };
 
-async function openAiHanziWordGlossHintQuery(hanziWord: HanziWord) {
-  const dict = await readDictionary();
+async function openAiHanziWordGlossHintQuery(
+  hanziWord: HanziWord,
+  dict: Dictionary,
+) {
   const meaning = dict.get(hanziWord);
   invariant(meaning != null);
   const hanzi = hanziFromHanziWord(hanziWord);
@@ -700,7 +703,7 @@ async function openAiHanziWordGlossHintQuery(hanziWord: HanziWord) {
       componentGlosses.set(
         `丶`,
         new Set([
-          `almost anything small phyiscal thing — a rain drop, a stick, a leaf, a hand, etc`,
+          `almost anything small physical thing — a rain drop, a stick, a leaf, a hand, etc`,
         ]),
       );
     }
@@ -757,9 +760,11 @@ const HanziWordGlossHintEditor = ({
   onCancel: () => void;
   onSave: () => void;
 }) => {
+  const dict = useDictionary().data;
   const result = useQuery({
-    queryKey: [`HanziWordGlossHintEditor`, hanziWord],
-    queryFn: () => openAiHanziWordGlossHintQuery(hanziWord),
+    queryKey: [`HanziWordGlossHintEditor`, hanziWord, dict],
+    queryFn: () =>
+      dict == null ? null : openAiHanziWordGlossHintQuery(hanziWord, dict),
     staleTime: Infinity,
     throwOnError: true,
   });
@@ -2351,7 +2356,7 @@ const dictionaryPath = path.join(import.meta.dirname, `../src/dictionary/`);
 
 const dictionaryFilePath = path.join(dictionaryPath, `dictionary.asset.json`);
 
-const readDictionary = () =>
+const readDictionary = (): Promise<Dictionary> =>
   readFileWithSchema(dictionaryFilePath, dictionarySchema, new Map());
 
 async function renameHanziWord(
