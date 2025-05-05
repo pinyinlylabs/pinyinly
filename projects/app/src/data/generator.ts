@@ -103,7 +103,7 @@ export async function makeQuizContext(
 
   if (correctAnswer != null) {
     await addToQuizContext(correctAnswer, ctx);
-    ctx.result.splice(0, ctx.result.length);
+    ctx.result.splice(0);
   }
 
   return ctx;
