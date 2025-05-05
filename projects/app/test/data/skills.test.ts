@@ -163,7 +163,7 @@ await test(`${skillLearningGraph.name} suite`, async () => {
       // Drop any existing subtree starting at the same indent.
       const siblingIndex = parentStack.findIndex((p) => p.indent === indent);
       if (siblingIndex !== -1) {
-        parentStack.splice(siblingIndex, parentStack.length);
+        parentStack.splice(siblingIndex);
       }
 
       // If there's a parent, add this as a child.
