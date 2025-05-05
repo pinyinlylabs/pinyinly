@@ -29,7 +29,7 @@
     "@tanstack/react-query": "^5.66.0",
     "@trpc/client": "11.1.0",
     "@trpc/react-query": "11.1.0",
-    "@trpc/server": "11.1.0",
+    "@trpc/server": "11.1.1",
     "@types/apple-signin-api": "^1.5.3",
     "@vercel/functions": "^2.0.0",
     "array-from-async": "^3.0.0",
