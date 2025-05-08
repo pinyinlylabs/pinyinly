@@ -1,11 +1,10 @@
+import { parseIds, walkIdsNode } from "#data/hanzi.ts";
 import {
   allHanziCharacters,
   loadHanziDecomposition,
-  parseIds,
-  unicodeShortIdentifier,
-  walkIdsNode,
 } from "#dictionary/dictionary.ts";
 import { jsonStringifyIndentOneLevel } from "#util/json.ts";
+import { unicodeShortIdentifier } from "#util/unicode.ts";
 import { invariant } from "@haohaohow/lib/invariant";
 import * as fontkit from "fontkit";
 import { glob, writeFile } from "node:fs/promises";

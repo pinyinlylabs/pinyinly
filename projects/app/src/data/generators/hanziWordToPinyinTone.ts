@@ -1,12 +1,14 @@
 import {
+  convertPinyinWithToneNumberToToneMark,
+  parsePinyinTone,
+} from "@/data/pinyin";
+import {
   allOneCharacterHanzi,
   allPinyinForHanzi,
   characterCount,
-  convertPinyinWithToneNumberToToneMark,
   hanziFromHanziWord,
   lookupHanziWord,
   parsePinyinOrThrow,
-  parsePinyinTone,
   pinyinOrThrow,
 } from "@/dictionary/dictionary";
 import {

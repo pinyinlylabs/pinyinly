@@ -1,8 +1,9 @@
 import { useHanziWordMeaning } from "@/client/hooks/useHanziWordMeaning";
+import { splitHanziText } from "@/data/hanzi";
 import { SkillType } from "@/data/model";
 import type { HanziWordSkill, Skill } from "@/data/rizzleSchema";
 import { hanziWordFromSkill, skillTypeFromSkill } from "@/data/skills";
-import { hanziFromHanziWord, splitHanziText } from "@/dictionary/dictionary";
+import { hanziFromHanziWord } from "@/dictionary/dictionary";
 import { Image } from "expo-image";
 import { useMemo, useState } from "react";
 import { ScrollView, Text, View } from "react-native";

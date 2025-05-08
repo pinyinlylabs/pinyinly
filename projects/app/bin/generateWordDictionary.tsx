@@ -3,6 +3,13 @@ import hanzi from "hanzi";
 
 import { useInternetQuery } from "#client/hooks/useInternetQuery.ts";
 import { useLocalQuery } from "#client/hooks/useLocalQuery.ts";
+import {
+  flattenIds,
+  idsNodeToString,
+  parseIds,
+  strokeCountToCharacter,
+  walkIdsNode,
+} from "#data/hanzi.ts";
 import type {
   HanziChar,
   HanziText,
@@ -19,19 +26,14 @@ import {
   allHsk1HanziWords,
   buildHanziWord,
   dictionarySchema,
-  flattenIds,
   hanziFromHanziWord,
   hanziWordMeaningSchema,
-  idsNodeToString,
   isHanziChar,
   loadHanziDecomposition,
   lookupHanzi,
   lookupHanziWord,
   meaningKeyFromHanziWord,
-  parseIds,
   partOfSpeechSchema,
-  strokeCountToCharacter,
-  walkIdsNode,
   wordListSchema,
 } from "#dictionary/dictionary.ts";
 import "#types/hanzi.d.ts";
