@@ -1,6 +1,7 @@
 import { useLocalQuery } from "@/client/hooks/useLocalQuery";
 import { RectButton2 } from "@/client/ui/RectButton2";
-import { allRadicalsByStrokes, radicalStrokes } from "@/dictionary/dictionary";
+import { radicalStrokes } from "@/data/hanzi";
+import { allRadicalsByStrokes } from "@/dictionary/dictionary";
 import { Link } from "expo-router";
 import { ScrollView, Text, View } from "react-native";
 

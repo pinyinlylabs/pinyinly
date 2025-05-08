@@ -1,6 +1,7 @@
 import { useHanziWordMeaning } from "@/client/hooks/useHanziWordMeaning";
+import { splitHanziText } from "@/data/hanzi";
 import type { HanziWord } from "@/data/model";
-import { hanziFromHanziWord, splitHanziText } from "@/dictionary/dictionary";
+import { hanziFromHanziWord } from "@/dictionary/dictionary";
 import { useMemo } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { GlossHint } from "./GlossHint";

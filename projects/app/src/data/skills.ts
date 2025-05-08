@@ -9,8 +9,6 @@ import {
   lookupGloss,
   lookupHanzi,
   lookupHanziWord,
-  splitHanziText,
-  splitPinyinText,
 } from "@/dictionary/dictionary";
 import {
   emptySet,
@@ -25,6 +23,7 @@ import type { Duration } from "date-fns";
 import { sub } from "date-fns/sub";
 import { subDays } from "date-fns/subDays";
 import type { DeepReadonly } from "ts-essentials";
+import { splitHanziText } from "./hanzi";
 import { parseHhhmark } from "./hhhmark";
 import type {
   HanziGlossMistake,
@@ -37,6 +36,7 @@ import type {
   SrsState,
 } from "./model";
 import { MistakeType, SkillType, SrsType } from "./model";
+import { splitPinyinText } from "./pinyin";
 import type {
   HanziWordSkill,
   PinyinFinalAssociationSkill,

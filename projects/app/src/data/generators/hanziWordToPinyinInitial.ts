@@ -1,8 +1,8 @@
+import { convertPinyinWithToneNumberToToneMark } from "@/data/pinyin";
 import {
   allOneCharacterHanzi,
   allPinyinForHanzi,
   characterCount,
-  convertPinyinWithToneNumberToToneMark,
   hanziFromHanziWord,
   loadPinyinWords,
   lookupHanziWord,

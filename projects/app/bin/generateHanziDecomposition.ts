@@ -3,13 +3,11 @@ import makeDebug from "debug";
 import assert from "node:assert/strict";
 import path from "node:path";
 import yargs from "yargs";
-import type { IdsNode } from "../src/dictionary/dictionary.js";
+import type { IdsNode } from "../src/data/hanzi.js";
+import { parseIds, walkIdsNode } from "../src/data/hanzi.js";
 import {
   allHanziCharacters,
   loadHanziDecomposition,
-  parseIds,
-  unicodeShortIdentifier,
-  walkIdsNode,
 } from "../src/dictionary/dictionary.js";
 import {
   deepReadonly,
@@ -17,6 +15,7 @@ import {
   sortComparatorString,
 } from "../src/util/collections.js";
 import { jsonStringifyIndentOneLevel } from "../src/util/json.js";
+import { unicodeShortIdentifier } from "../src/util/unicode.js";
 import { makeDbCache } from "./util/cache.js";
 import { fetchWithCache } from "./util/fetch.js";
 import { writeUtf8FileIfChanged } from "./util/fs.js";
