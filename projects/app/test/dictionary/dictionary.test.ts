@@ -28,6 +28,7 @@ import {
   loadMnemonicThemes,
   loadPinyinWords,
   loadStandardPinyinChart,
+  loadWiki,
   lookupHanzi,
   lookupHanziWord,
   meaningKeyFromHanziWord,
@@ -70,6 +71,7 @@ await test(`json data can be loaded and passes the schema validation`, async () 
   await loadHanziWordPinyinMnemonics();
   await loadStandardPinyinChart();
   await loadDictionary();
+  await loadWiki();
 });
 
 const wordLists = [

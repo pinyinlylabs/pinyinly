@@ -14,6 +14,7 @@ import { invariant } from "@haohaohow/lib/invariant";
 import type { DeepReadonly } from "ts-essentials";
 import { z } from "zod";
 
+export const hhhMarkSchema = z.string();
 export const hanziWordSchema = z.string().transform((x) => x as HanziWord);
 export const hanziTextSchema = z.string().transform((x) => x as HanziText);
 export const hanziCharSchema = z.string().transform((x) => x as HanziChar);
@@ -318,28 +319,32 @@ export const partOfSpeechSchema = z.enum([
 
 export const hanziWordMeaningSchema = z.object({
   gloss: z.array(z.string()),
-  glossHint: z.string().optional(),
+  glossHint: z.string().optional().nullable(),
   pinyin: z
     .array(pinyinTextSchema, {
       description: `all valid pinyin variations for this meaning (might be omitted for radicals without pronunciation)`,
     })
-    .optional(),
+    .optional()
+    .nullable(),
   example: z
     .string({
       description: `a Chinese sentence that includes this hanzi`,
     })
-    .optional(),
+    .optional()
+    .nullable(),
   partOfSpeech: partOfSpeechSchema,
   componentFormOf: hanziCharSchema
     .describe(
       `the primary form of this hanzi (only relevant for component-form hanzi)`,
     )
-    .optional(),
+    .optional()
+    .nullable(),
   visualVariants: z
     .array(hanziTextSchema, {
       description: `Hanzi with the same meaning but visually different. Only included in rare cases (e.g. radicals with multiple visual forms). `,
     })
-    .optional(),
+    .optional()
+    .nullable(),
   definition: z.string(),
 });
 
@@ -357,6 +362,54 @@ export const loadDictionary = memoize0(async () =>
     .transform(deepReadonly)
     // eslint-disable-next-line unicorn/no-await-expression-member
     .parse((await import(`./dictionary.asset.json`)).default),
+);
+
+export const wikiEntrySchema = z.object({
+  componentsIdc: z
+    .string()
+    .describe(`Ideographic Description Character for the components, e.g. ⿰`),
+  components: z.array(
+    z.object({
+      hanziWord: hanziWordSchema
+        .describe(`Optional link to a specific hanzi word`)
+        .optional(),
+      title: z.string().optional(),
+      description: z.string().optional(),
+    }),
+  ),
+  mnemonics: z
+    .array(
+      z.object({
+        hanziWord: hanziWordSchema,
+        mnemonic: hhhMarkSchema,
+      }),
+    )
+    .optional(),
+  relatedMeaning: z
+    .array(
+      z.object({
+        gloss: z.string(),
+        hanziWords: z.array(hanziWordSchema),
+      }),
+    )
+    .optional()
+    .nullable(),
+  visuallySimilar: z.array(hanziWordSchema).optional().nullable(),
+});
+
+export type WikiEntry = z.infer<typeof wikiEntrySchema>;
+
+export const wikiSchema = z
+  .array(z.tuple([hanziTextSchema, wikiEntrySchema]))
+  .transform((x) => new Map(x));
+
+export type Wiki = z.infer<typeof wikiSchema>;
+
+export const loadWiki = memoize0(async () =>
+  wikiSchema
+    .transform(deepReadonly)
+    // eslint-disable-next-line unicorn/no-await-expression-member
+    .parse((await import(`./wiki.asset.json`)).default),
 );
 
 export const hanziWordMigrationsSchema = z
@@ -458,6 +511,11 @@ export const lookupHanziWord = async (
   hanziWord: HanziWord,
 ): Promise<DeepReadonly<HanziWordMeaning> | null> =>
   await loadDictionary().then((x) => x.get(hanziWord) ?? null);
+
+export const lookupHanziWikiEntry = async (
+  hanzi: HanziText,
+): Promise<DeepReadonly<WikiEntry> | null> =>
+  await loadWiki().then((x) => x.get(hanzi) ?? null);
 
 export const lookupRadicalsByStrokes = async (strokes: number) =>
   await loadRadicalStrokes().then((x) => x.get(strokes) ?? null);

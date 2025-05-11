@@ -1,0 +1,22 @@
+[
+  [
+    "学",
+    {
+      "componentsIdc": "⿳",
+      "components": [
+        {
+          "hanziWord": "𭕄:radical",
+          "description": "The fingers of a hand sticking up in the air."
+        },
+        {
+          "hanziWord": "冖:cover",
+          "description": "Imagine a blanket draped over something and the edges hanging down."
+        },
+        {
+          "hanziWord": "子:child",
+          "description": "Can mean each / every (and serves as the phonetic component)"
+        }
+      ]
+    }
+  ]
+]
