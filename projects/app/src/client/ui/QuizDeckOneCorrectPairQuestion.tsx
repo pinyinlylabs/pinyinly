@@ -43,13 +43,13 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { tv } from "tailwind-variants";
 import { GlossHint } from "./GlossHint";
 import { HanziText, PinyinText } from "./HanziText";
-import { HanziWordModal } from "./HanziWordModal";
 import { Hhhmark } from "./Hhhmark";
 import { NewSkillModal } from "./NewSkillModal";
 import { RectButton2 } from "./RectButton2";
 import type { TextAnswerButtonState } from "./TextAnswerButton";
 import { TextAnswerButton } from "./TextAnswerButton";
 import type { PropsOf } from "./types";
+import { WikiHanziWordModal } from "./WikiHanziWordModal";
 
 const buttonThickness = 4;
 const gap = 12;
@@ -516,7 +516,7 @@ const HanziWordToGlossSkillAnswer = ({
       ) : null}
 
       {showModal ? (
-        <HanziWordModal
+        <WikiHanziWordModal
           hanziWord={hanziWord}
           onDismiss={() => {
             setShowModal(false);

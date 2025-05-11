@@ -1,5 +1,6 @@
 import { targetSkillsReviewQueue } from "@/client/query";
 import { useRizzleQueryPaged } from "@/client/ui/ReplicacheContext";
+import { HanziWordRefText } from "@/client/ui/WikiHanziWordModal";
 import { SkillType } from "@/data/model";
 import type {
   DeprecatedSkill,
@@ -34,7 +35,7 @@ export default function HistoryPage() {
     [HistoryPage.name, `skillRatings`],
     async (r) => {
       const res = await r.queryPaged.skillRating.byCreatedAt().toArray();
-      return res.reverse();
+      return res.reverse().slice(0, 100);
     },
   );
 
@@ -56,11 +57,13 @@ export default function HistoryPage() {
     return [
       ...(hanziGlossMistakesQuery.data ?? emptyArray),
       ...(hanziPinyinMistakesQuery.data ?? emptyArray),
-    ].sort(
-      inverseSortComparator(
-        sortComparatorDate(([, mistake]) => mistake.createdAt),
-      ),
-    );
+    ]
+      .sort(
+        inverseSortComparator(
+          sortComparatorDate(([, mistake]) => mistake.createdAt),
+        ),
+      )
+      .slice(0, 100);
   }, [hanziGlossMistakesQuery.data, hanziPinyinMistakesQuery.data]);
 
   return (
@@ -70,9 +73,11 @@ export default function HistoryPage() {
           <View className="flex-1 items-center gap-[10px]">
             <Text className="text-xl text-text">available queue</Text>
 
-            {data2Query.data?.available.map((skill, i) => (
+            {data2Query.data?.available.slice(0, 100).map((skill, i) => (
               <View key={i} className="flex-col items-center">
-                <Text className="hhh-text-body">{skillParam(skill)}</Text>
+                <Text className="hhh-text-body">
+                  <InlineSkillRef skill={skill} />
+                </Text>
                 <Text className="hhh-text-caption">
                   {skillTypeToShorthand(skillTypeFromSkill(skill))}
                 </Text>
@@ -94,27 +99,30 @@ export default function HistoryPage() {
           <View>
             <Text className="self-center text-xl text-text">history</Text>
 
-            {skillRatingsQuery.data?.map(([_key, value], i) => {
-              const { skill, createdAt } = value;
-              return (
-                <View key={i}>
-                  <Text className="text-text">
-                    {value.rating === Rating.Again
-                      ? `❌`
-                      : value.rating === Rating.Hard
-                        ? `🟠`
-                        : value.rating === Rating.Good
-                          ? `🟡`
-                          : // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-                            value.rating === Rating.Easy
-                            ? `🟢`
-                            : value.rating}
-                    {` `}
-                    {skillParam(skill)}: {createdAt.toISOString()}
-                  </Text>
-                </View>
-              );
-            })}
+            <View className="flex-column gap-2">
+              {skillRatingsQuery.data?.map(([_key, value], i) => {
+                const { skill, createdAt } = value;
+                return (
+                  <View key={i}>
+                    <Text className="text-text">
+                      {value.rating === Rating.Again
+                        ? `❌`
+                        : value.rating === Rating.Hard
+                          ? `🟠`
+                          : value.rating === Rating.Good
+                            ? `🟡`
+                            : // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+                              value.rating === Rating.Easy
+                              ? `🟢`
+                              : value.rating}
+                      {` `}
+                      <InlineSkillRef skill={skill} />:{` `}
+                      {createdAt.toISOString()}
+                    </Text>
+                  </View>
+                );
+              })}
+            </View>
           </View>
         </View>
       </View>
@@ -122,15 +130,15 @@ export default function HistoryPage() {
   );
 }
 
-const skillParam = (skill: Skill): string => {
+const InlineSkillRef = ({ skill }: { skill: Skill }) => {
   switch (skillTypeFromSkill(skill)) {
     case SkillType.PinyinFinalAssociation: {
       skill = skill as PinyinFinalAssociationSkill;
-      return `-${finalFromPinyinFinalAssociationSkill(skill)}`;
+      return <Text>-{finalFromPinyinFinalAssociationSkill(skill)}</Text>;
     }
     case SkillType.PinyinInitialAssociation: {
       skill = skill as PinyinInitialAssociationSkill;
-      return `${initialFromPinyinInitialAssociationSkill(skill)}-`;
+      return <Text>{initialFromPinyinInitialAssociationSkill(skill)}-</Text>;
     }
     case SkillType.Deprecated_RadicalToEnglish:
     case SkillType.Deprecated_EnglishToRadical:
@@ -138,7 +146,7 @@ const skillParam = (skill: Skill): string => {
     case SkillType.Deprecated_PinyinToRadical:
     case SkillType.Deprecated: {
       skill = skill as DeprecatedSkill;
-      return skillTypeToShorthand(skillTypeFromSkill(skill));
+      return <Text>{skillTypeToShorthand(skillTypeFromSkill(skill))}</Text>;
     }
     case SkillType.HanziWordToGloss:
     case SkillType.HanziWordToPinyin:
@@ -149,7 +157,8 @@ const skillParam = (skill: Skill): string => {
     case SkillType.PinyinToHanziWord:
     case SkillType.ImageToHanziWord: {
       skill = skill as HanziWordSkill;
-      return hanziWordFromSkill(skill);
+      const hanziWord = hanziWordFromSkill(skill);
+      return <HanziWordRefText hanziWord={hanziWord} />;
     }
   }
 };
