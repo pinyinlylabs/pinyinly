@@ -441,6 +441,23 @@ await test(`all word lists only reference valid hanzi words`, async () => {
   }
 });
 
+await test(`all wiki component hanzi words reference valid hanzi words`, async () => {
+  const wiki = await loadWiki();
+  for (const [hanzi, wikiEntry] of wiki) {
+    if (wikiEntry.components != null) {
+      for (const { hanziWord } of wikiEntry.components) {
+        if (hanziWord != null) {
+          assert.notEqual(
+            await lookupHanziWord(hanziWord),
+            null,
+            `missing hanzi word lookup for ${hanziWord} in wiki entry ${hanzi}`,
+          );
+        }
+      }
+    }
+  }
+});
+
 await test(`expect missing glyphs to be included decomposition data`, async () => {
   const allChars = await allHanziCharacters();
   const allComponents = new Set<string>();
