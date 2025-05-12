@@ -39,6 +39,13 @@ export function makeMockTx(t: TestContext) {
   };
 }
 
+export const date = (strings: TemplateStringsArray): Date => {
+  const shorthand = strings.reduce((acc, str) => acc + str, ``);
+  return parseRelativeTimeShorthand(shorthand);
+};
+
+export const 时 = date;
+
 /**
  * Convert a string like "+1d" or "-5s" to a date.
  */
@@ -57,14 +64,13 @@ export const parseRelativeTimeShorthand = (
 };
 
 export const mockSrsState = (
-  prevReviewAtShorthand: string,
-  nextReviewAtShorthand: string,
-  now = new Date(),
+  prevReviewAt: Date,
+  nextReviewAt: Date,
 ): SrsStateMock => {
   return {
     type: SrsType.Mock,
-    prevReviewAt: parseRelativeTimeShorthand(prevReviewAtShorthand, now),
-    nextReviewAt: parseRelativeTimeShorthand(nextReviewAtShorthand, now),
+    prevReviewAt,
+    nextReviewAt,
   };
 };
 

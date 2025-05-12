@@ -31,8 +31,8 @@ import type {
   HanziWord,
   HanziWordSkillType,
   Mistake,
+  NewSkillRating,
   OneCorrectPairQuestionChoice,
-  SkillRating,
   SrsState,
 } from "./model";
 import { MistakeType, SkillType, SrsType } from "./model";
@@ -42,6 +42,7 @@ import type {
   PinyinFinalAssociationSkill,
   PinyinInitialAssociationSkill,
   Skill,
+  SkillRating,
 } from "./rizzleSchema";
 import { rSkillType, srsStateFromFsrsState } from "./rizzleSchema";
 
@@ -373,6 +374,7 @@ export function pinyinInitialAssociation(
 export interface SkillReviewQueue {
   available: readonly Skill[];
   blocked: readonly Skill[];
+  retryCount: number;
   dueCount: number;
   overDueCount: number;
   /**
@@ -388,10 +390,12 @@ export interface SkillReviewQueue {
 export function skillReviewQueue({
   graph,
   skillSrsStates,
+  latestSkillRatings,
   now = new Date(),
 }: {
   graph: SkillLearningGraph;
   skillSrsStates: Map<Skill, SrsState>;
+  latestSkillRatings: Map<Skill, Pick<SkillRating, `rating` | `createdAt`>>;
   now?: Date;
 }): SkillReviewQueue {
   // Kahn topological sort
@@ -400,6 +404,7 @@ export function skillReviewQueue({
   // Which skills have been included in the learning order.
   // This is used to avoid adding the same skill multiple times.
   const learningOrderIncluded = new Set<Skill>();
+  const learningOrderRetry: [Skill, Date][] = [];
   const learningOrderOverDue: [Skill, Date][] = [];
   const learningOrderDue: [Skill, Date][] = [];
   const learningOrderNew: Skill[] = [];
@@ -424,7 +429,10 @@ export function skillReviewQueue({
         learningOrderBlocked.push(skill);
       }
     } else {
-      if (srsState.nextReviewAt > now) {
+      const skillRating = latestSkillRatings.get(skill);
+      if (skillRating?.rating === Rating.Again) {
+        learningOrderRetry.push([skill, skillRating.createdAt]);
+      } else if (srsState.nextReviewAt > now) {
         // Check if it should be the new newDueAt.
         if (newDueAt == null || newDueAt > srsState.nextReviewAt) {
           newDueAt = srsState.nextReviewAt;
@@ -520,7 +528,12 @@ export function skillReviewQueue({
   }
 
   const available = [
-    // First do over-due skills, by the most due (oldest date) first.
+    // First do incorrect answers that need to be retried.
+    ...learningOrderRetry
+      .sort(sortComparatorDate(([, when]) => when))
+      .map(([skill]) => skill)
+      .reverse(),
+    // Then do over-due skills, by the most due (oldest date) first.
     ...learningOrderOverDue
       .sort(sortComparatorDate(([, due]) => due))
       .map(([skill]) => skill),
@@ -538,6 +551,7 @@ export function skillReviewQueue({
   return {
     available,
     blocked,
+    retryCount: learningOrderRetry.length,
     dueCount: learningOrderDue.length,
     overDueCount: learningOrderOverDue.length,
     newDueAt,
@@ -735,7 +749,7 @@ export function computeSkillRating(opts: {
   skill: Skill;
   correct: boolean;
   durationMs: number;
-}): SkillRating {
+}): NewSkillRating {
   const { skill, correct, durationMs } = opts;
 
   let easyDuration;

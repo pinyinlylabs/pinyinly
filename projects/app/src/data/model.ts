@@ -216,7 +216,7 @@ export type Mistake =
   | HanziPinyinMistake
   | HanziPinyinInitialMistake;
 
-export interface SkillRating {
+export interface NewSkillRating {
   skill: Skill;
   rating: Rating;
   durationMs: number;
