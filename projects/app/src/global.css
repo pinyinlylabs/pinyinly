@@ -42,7 +42,7 @@
   }
 
   .hhh-text-body {
-    @apply font-sans font-thin leading-normal text-primary-12/90;
+    @apply font-sans font-thin leading-normal text-text/90;
   }
 
   .hhh-text-body-ref {
@@ -263,6 +263,8 @@
     --color-accent-10: var(--color-cyan-10);
     --color-accent-11: var(--color-cyan-11);
     --color-accent-12: var(--color-cyan-12);
+
+    --color-text: var(--color-primary-12);
   }
 
   .danger-theme {
@@ -278,6 +280,23 @@
     --color-accent-10: var(--color-red-10);
     --color-accent-11: var(--color-red-11);
     --color-accent-12: var(--color-red-12);
+  }
+
+  .danger-theme2 {
+    --color-primary-1: var(--color-red-1);
+    --color-primary-2: var(--color-red-2);
+    --color-primary-3: var(--color-red-3);
+    --color-primary-4: var(--color-red-4);
+    --color-primary-5: var(--color-red-5);
+    --color-primary-6: var(--color-red-6);
+    --color-primary-7: var(--color-red-7);
+    --color-primary-8: var(--color-red-8);
+    --color-primary-9: var(--color-red-9);
+    --color-primary-10: var(--color-red-10);
+    --color-primary-11: var(--color-red-11);
+    --color-primary-12: var(--color-red-12);
+
+    --color-text: var(--color-red-10);
   }
 
   .success-theme {

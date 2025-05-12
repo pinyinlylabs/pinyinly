@@ -28,7 +28,7 @@ module.exports = {
     },
     colors: {
       background: `rgb(var(--color-primary-2) / <alpha-value>)`,
-      text: `rgb(var(--color-primary-12) / <alpha-value>)`,
+      text: `rgb(var(--color-text) / <alpha-value>)`,
 
       primary: {
         1: `rgb(var(--color-primary-1) / <alpha-value>)`,

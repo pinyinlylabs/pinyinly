@@ -22,16 +22,21 @@ export async function questionsForReview2(
   },
 ): Promise<Question[]> {
   const result: Question[] = [];
+  const reviewQueue = await targetSkillsReviewQueue(r);
 
-  for (const skill of await targetSkillsReviewQueue(r).then(
-    (q) => q.available,
-  )) {
+  for (const [i, skill] of reviewQueue.available.entries()) {
     const skillState = await r.replicache.query((tx) =>
       r.query.skillState.get(tx, { skill }),
     );
 
     try {
       const question = await generateQuestionForSkillOrThrow(skill);
+      const isRetry = reviewQueue.retryCount > 0 && i < reviewQueue.retryCount;
+      if (isRetry) {
+        question.flag ??= {
+          type: QuestionFlagType.Retry,
+        };
+      }
       question.flag ??= flagsForSrsState(skillState?.srs);
       result.push(question);
     } catch (error) {
