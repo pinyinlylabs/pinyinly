@@ -314,6 +314,8 @@
     --color-accent-10: var(--color-lime-10);
     --color-accent-11: var(--color-lime-11);
     --color-accent-12: var(--color-lime-12);
+
+    --color-background: var(--color-slate-5);
   }
 
   .warning-theme {
