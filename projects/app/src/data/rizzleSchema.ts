@@ -300,3 +300,7 @@ export type Rizzle = RizzleReplicache<typeof v7>;
 export type SkillState = NonNullable<
   Awaited<ReturnType<typeof v7.skillState.get>>
 >;
+
+export type SkillRating = NonNullable<
+  Awaited<ReturnType<typeof v7.skillRating.get>>
+>;

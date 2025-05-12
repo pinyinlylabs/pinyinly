@@ -34,7 +34,7 @@ await test(`${simulateSkillReviews.name} returns a review queue`, async () => {
     history: [],
   });
 
-  assert.partialDeepStrictEqual(reviewQueue, {
+  expect(reviewQueue).toMatchObject({
     available: [`he:丿:slash`, `he:𠃌:radical`, `he:八:eight`],
     blocked: [`he:刀:knife`, `he:分:divide`],
   });
@@ -68,7 +68,7 @@ await test(`${computeSkillReviewQueue.name} suite`, async () => {
       history: [`🟡 he:丿:slash`, `💤 1m`],
     });
 
-    assert.partialDeepStrictEqual(reviewQueue, {
+    expect(reviewQueue).toMatchObject({
       available: [`he:𠃌:radical`, `he:八:eight`, `he:丿:slash`],
       blocked: [`he:刀:knife`, `he:分:divide`],
     });
@@ -152,7 +152,7 @@ await test(`${computeSkillReviewQueue.name} suite`, async () => {
         targetSkills,
         history,
       });
-      assert.partialDeepStrictEqual(queue, {
+      expect(queue).toMatchObject({
         available: [
           `he:刀:knife`,
           // These come later because he:刀:knife is due.
@@ -160,7 +160,8 @@ await test(`${computeSkillReviewQueue.name} suite`, async () => {
           `he:𠃌:radical`,
         ],
         blocked: [],
-        dueCount: 1,
+        retryCount: 1,
+        dueCount: 0,
         overDueCount: 0,
       });
     }
@@ -172,12 +173,13 @@ await test(`${computeSkillReviewQueue.name} suite`, async () => {
         targetSkills,
         history,
       });
-      assert.partialDeepStrictEqual(queue, {
+      expect(queue).toMatchObject({
         available: [`he:丿:slash`, `he:𠃌:radical`],
         blocked: [
           // Now this comes last because it's "stale" and reset to new.
           `he:刀:knife`,
         ],
+        retryCount: 0,
         dueCount: 0,
         overDueCount: 0,
       });

@@ -2,10 +2,10 @@ import { useHanziWordMeaning } from "@/client/hooks/useHanziWordMeaning";
 import { useMultiChoiceQuizTimer } from "@/client/hooks/useMultiChoiceQuizTimer";
 import type {
   Mistake,
+  NewSkillRating,
   OneCorrectPairQuestion,
   OneCorrectPairQuestionChoice,
   QuestionFlag,
-  SkillRating,
 } from "@/data/model";
 import { QuestionFlagType, SkillType } from "@/data/model";
 import type { HanziWordSkill, Skill } from "@/data/rizzleSchema";
@@ -64,7 +64,7 @@ export const QuizDeckOneCorrectPairQuestion = memo(
     question: OneCorrectPairQuestion;
     flag?: QuestionFlag;
     onNext: () => void;
-    onRating: (ratings: SkillRating[], mistakes: Mistake[]) => void;
+    onRating: (ratings: NewSkillRating[], mistakes: Mistake[]) => void;
   }) {
     const { prompt, answer, groupA, groupB } = question;
 
@@ -118,7 +118,7 @@ export const QuizDeckOneCorrectPairQuestion = memo(
             );
 
         const durationMs = (timer.endTime ?? Date.now()) - timer.startTime;
-        const skillRatings: SkillRating[] = [
+        const skillRatings: NewSkillRating[] = [
           computeSkillRating({
             skill: answer.skill,
             correct: isCorrect,

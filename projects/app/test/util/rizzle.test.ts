@@ -749,7 +749,7 @@ await test(`.getIndexes()`, () => {
         name: r.string().indexed(`byAuthorName`),
       }),
     });
-    assert.partialDeepStrictEqual(posts.getIndexes(), {
+    expect(posts.getIndexes()).toMatchObject({
       byAuthorName: {
         allowEmpty: false,
         prefix: `foo`,
@@ -767,13 +767,13 @@ await test(`.getIndexes()`, () => {
       }),
     });
 
-    assert.partialDeepStrictEqual(posts._def.valueType._getIndexes(), {
+    expect(posts._def.valueType._getIndexes()).toMatchObject({
       byAuthorName: {
         allowEmpty: false,
         jsonPointer: `/author/name`,
       },
     });
-    assert.partialDeepStrictEqual(posts.getIndexes(), {
+    expect(posts.getIndexes()).toMatchObject({
       byAuthorName: {
         allowEmpty: false,
         prefix: `foo/`,
@@ -789,7 +789,7 @@ await test(`.getIndexes()`, () => {
       name: r.string().indexed(`byAuthorName`).nullable(),
     });
 
-    assert.partialDeepStrictEqual(posts.getIndexes(), {
+    expect(posts.getIndexes()).toMatchObject({
       byAuthorName: {
         allowEmpty: false,
         prefix: `foo/`,
@@ -805,7 +805,7 @@ await test(`.getIndexes()`, () => {
       name: r.string().alias(`n`).indexed(`byAuthorName`).nullable(),
     });
 
-    assert.partialDeepStrictEqual(posts.getIndexes(), {
+    expect(posts.getIndexes()).toMatchObject({
       byAuthorName: {
         allowEmpty: false,
         prefix: `foo/`,
@@ -821,7 +821,7 @@ await test(`.getIndexes()`, () => {
       name: r.string().indexed(`byAuthorName`).optional(),
     });
 
-    assert.partialDeepStrictEqual(posts.getIndexes(), {
+    expect(posts.getIndexes()).toMatchObject({
       byAuthorName: {
         allowEmpty: false,
         prefix: `foo/`,
@@ -837,7 +837,7 @@ await test(`.getIndexes()`, () => {
       name: r.string().alias(`n`).indexed(`byAuthorName`).optional(),
     });
 
-    assert.partialDeepStrictEqual(posts.getIndexes(), {
+    expect(posts.getIndexes()).toMatchObject({
       byAuthorName: {
         allowEmpty: false,
         prefix: `foo/`,
@@ -853,7 +853,7 @@ await test(`.getIndexes()`, () => {
       name: r.string().indexed(`byAuthorName`).alias(`n`),
     });
 
-    assert.partialDeepStrictEqual(posts.getIndexes(), {
+    expect(posts.getIndexes()).toMatchObject({
       byAuthorName: {
         allowEmpty: false,
         prefix: `foo/`,
@@ -986,7 +986,7 @@ await test(`replicache()`, async (t) => {
         mapValues(options.mutators, (v) => typeof v),
         { cp: `function` },
       );
-      assert.partialDeepStrictEqual(options.indexes, {
+      expect(options.indexes).toMatchObject({
         "posts.byTitle": {
           allowEmpty: false,
           jsonPointer: `/r`,

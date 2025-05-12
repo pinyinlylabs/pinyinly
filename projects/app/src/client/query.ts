@@ -1,7 +1,7 @@
 import { generateQuestionForSkillOrThrow } from "@/data/generator";
 import type { Question, QuestionFlag, SrsState } from "@/data/model";
 import { QuestionFlagType, SrsType } from "@/data/model";
-import type { Rizzle, Skill } from "@/data/rizzleSchema";
+import type { Rizzle, Skill, SkillRating } from "@/data/rizzleSchema";
 import type { SkillReviewQueue } from "@/data/skills";
 import {
   hanziWordToGloss,
@@ -106,5 +106,16 @@ export async function computeSkillReviewQueue(
     skillSrsStates.set(v.skill, v.srs);
   }
 
-  return skillReviewQueue({ graph, skillSrsStates, now });
+  const latestSkillRatings = new Map<Skill, SkillRating>();
+  // const res = await r.queryPaged.skillRating.byCreatedAt().toArray();
+  for await (const [, v] of r.queryPaged.skillRating.byCreatedAt()) {
+    latestSkillRatings.set(v.skill, v);
+  }
+
+  return skillReviewQueue({
+    graph,
+    skillSrsStates,
+    latestSkillRatings,
+    now,
+  });
 }

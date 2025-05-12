@@ -1,7 +1,7 @@
 import { fsrsIsStable, Rating } from "#util/fsrs.ts";
 import assert from "node:assert/strict";
 import test from "node:test";
-import { fsrsSrsState, parseRelativeTimeShorthand } from "./helpers";
+import { date, fsrsSrsState, parseRelativeTimeShorthand } from "./helpers";
 
 await test(`${parseRelativeTimeShorthand.name} suite`, async (t) => {
   await t.test(`assumes positive without a sign`, () => {
@@ -25,6 +25,16 @@ await test(`${parseRelativeTimeShorthand.name} suite`, async (t) => {
       parseRelativeTimeShorthand(`+5m`, now),
       new Date(now.getTime() + 5 * 60 * 1000),
     );
+  });
+});
+
+await test(`${date.name} suite`, async (t) => {
+  await t.test(`parses values`, (t) => {
+    t.mock.timers.enable({ apis: [`Date`] });
+    t.mock.timers.setTime(new Date(`2025-01-01T00:00:00Z`).getTime());
+
+    expect(date`+1d`).toEqual(parseRelativeTimeShorthand(`+1d`));
+    expect(date`+1m`).toEqual(parseRelativeTimeShorthand(`+1m`));
   });
 });
 

@@ -256,12 +256,11 @@ await test(`${push.name} suite`, async (t) => {
             mutations: [mut],
           });
 
-          assert.partialDeepStrictEqual(
+          expect(
             await tx.query.replicacheClient.findFirst({
               where: (t, { eq }) => eq(t.id, client.id),
             }),
-            { lastMutationId: mut.id },
-          );
+          ).toMatchObject({ lastMutationId: mut.id });
         },
       );
 
@@ -341,7 +340,7 @@ await test(`${pull.name} suite`, async (t) => {
           where: (t, { eq }) => eq(t.userId, user.id),
         });
 
-        assert.partialDeepStrictEqual(clientGroup, { cvrVersion: 1 });
+        expect(clientGroup).toMatchObject({ cvrVersion: 1 });
       });
 
       await txTest(
@@ -397,7 +396,7 @@ await test(`${pull.name} suite`, async (t) => {
           );
 
           // The CVR should have the lastMutationIds for the clients in the group
-          assert.partialDeepStrictEqual(cvr, {
+          expect(cvr).toMatchObject({
             lastMutationIds: { [client.id]: 66 },
             entities: expectedEntities,
           });
@@ -527,7 +526,7 @@ await test(`${pull.name} suite`, async (t) => {
           cookie: null,
         });
 
-        assert.partialDeepStrictEqual(result, {
+        expect(result).toMatchObject({
           cookie: {
             order: 1,
           },
@@ -582,7 +581,7 @@ await test(`${pull.name} suite`, async (t) => {
           cookie: pull1.cookie,
         });
 
-        assert.partialDeepStrictEqual(pull2, {
+        expect(pull2).toMatchObject({
           cookie: {
             order: 2,
           },
@@ -637,7 +636,7 @@ await test(`${pull.name} suite`, async (t) => {
           cookie: pull1.cookie,
         });
 
-        assert.partialDeepStrictEqual(pull2, {
+        expect(pull2).toMatchObject({
           cookie: {
             order: 2,
           },
@@ -679,7 +678,7 @@ await test(`${pull.name} suite`, async (t) => {
           cookie: null,
         });
 
-        assert.partialDeepStrictEqual(pull1, {
+        expect(pull1).toMatchObject({
           patch: [
             {
               op: `clear`,

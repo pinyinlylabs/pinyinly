@@ -2,9 +2,9 @@ import { questionsForReview2 } from "@/client/query";
 import type { StackNavigationFor } from "@/client/ui/types";
 import type {
   Mistake,
+  NewSkillRating,
   Question,
   QuestionFlag,
-  SkillRating,
 } from "@/data/model";
 import { MistakeType, QuestionType } from "@/data/model";
 import { Rating } from "@/util/fsrs";
@@ -93,7 +93,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
   });
 
   const handleRating = useEventCallback(
-    (ratings: SkillRating[], mistakes: Mistake[]) => {
+    (ratings: NewSkillRating[], mistakes: Mistake[]) => {
       invariant(ratings.length > 0, `ratings must not be empty`);
 
       const success = ratings.every(({ rating }) => rating !== Rating.Again);
