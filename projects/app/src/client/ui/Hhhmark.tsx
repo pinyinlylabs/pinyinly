@@ -1,32 +1,51 @@
 import { parseHhhmark } from "@/data/hhhmark";
 import { useMemo } from "react";
 import { Text } from "react-native";
+import { HanziWordRefText } from "./HanziWordRefText";
 
-export const Hhhmark = ({ source }: { source: string }) => {
+export const Hhhmark = ({
+  source,
+  context,
+}: {
+  source: string;
+  context: `body` | `caption`;
+}) => {
   const rendered = useMemo(() => {
     const parsed = parseHhhmark(source);
     return (
-      <Text>
+      <Text className="hhh-hhhmark">
         {parsed.map((node, index) => {
           switch (node.type) {
             case `text`: {
-              return <Text key={`text-${index}`}>{node.text}</Text>;
+              return (
+                <Text
+                  key={`text-${index}`}
+                  className={
+                    context === `body` ? `hhh-text-body` : `hhh-text-caption`
+                  }
+                >
+                  {node.text}
+                </Text>
+              );
             }
             case `hanziWord`: {
               return (
-                <Text
+                <HanziWordRefText
                   key={`hanziWord-${index}`}
-                  className="rounded bg-accent-10 px-1 font-medium tracking-tighter text-primary-4"
-                >
-                  {node.hanziWord}
-                </Text>
+                  context={context}
+                  hanziWord={node.hanziWord}
+                />
               );
             }
             case `bold`: {
               return (
                 <Text
                   key={`bold-${index}`}
-                  className="rounded bg-accent-10 px-1 font-medium tracking-tighter text-primary-4"
+                  className={
+                    context === `body`
+                      ? `hhh-text-body-bold`
+                      : `hhh-text-caption-bold`
+                  }
                 >
                   {node.text}
                 </Text>
@@ -36,7 +55,11 @@ export const Hhhmark = ({ source }: { source: string }) => {
               return (
                 <Text
                   key={`italic-${index}`}
-                  className="font-medium text-accent-10"
+                  className={
+                    context === `body`
+                      ? `hhh-text-body-italic`
+                      : `hhh-text-caption-italic`
+                  }
                 >
                   {node.text}
                 </Text>
@@ -46,7 +69,7 @@ export const Hhhmark = ({ source }: { source: string }) => {
         })}
       </Text>
     );
-  }, [source]);
+  }, [context, source]);
 
   return rendered;
 };

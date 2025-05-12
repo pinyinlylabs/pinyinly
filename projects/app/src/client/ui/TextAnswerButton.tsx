@@ -188,7 +188,7 @@ export const TextAnswerButton = forwardRef<
           numberOfLines={2}
           ellipsizeMode="tail"
         >
-          <Hhhmark source={text} />
+          <Hhhmark source={text} context="body" />
         </Text>
       </View>
     </AnimatedPressable>

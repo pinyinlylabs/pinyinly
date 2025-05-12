@@ -2,14 +2,13 @@ import { useHanziWikiEntry } from "@/client/hooks/useHanziWikiEntry";
 import { useHanziWordMeaning } from "@/client/hooks/useHanziWordMeaning";
 import { splitHanziText } from "@/data/hanzi";
 import type { HanziWord } from "@/data/model";
-import { glossOrThrow, hanziFromHanziWord } from "@/dictionary/dictionary";
-import { useMemo, useState } from "react";
+import { hanziFromHanziWord } from "@/dictionary/dictionary";
+import { useMemo } from "react";
 import { ScrollView, Text, View } from "react-native";
-import { GlossHint } from "./GlossHint";
+import { HanziWordRefText } from "./HanziWordRefText";
 import { Hhhmark } from "./Hhhmark";
 import { PageSheetModal } from "./PageSheetModal";
 import { RectButton2 } from "./RectButton2";
-import type { PropsOf } from "./types";
 
 export const WikiHanziWordModal = ({
   hanziWord,
@@ -59,9 +58,10 @@ export const WikiHanziWordModal = ({
                   <Text className="font-karla text-xl text-text">
                     {hanziWordSkillData.data.gloss.join(`, `)}
                   </Text>
-                  <Text className="font-karla text-sm text-text/50">
-                    <Hhhmark source={hanziWordSkillData.data.definition} />
-                  </Text>
+                  <Hhhmark
+                    source={hanziWordSkillData.data.definition}
+                    context="caption"
+                  />
                 </View>
 
                 {wikiEntry.data?.components == null ? null : (
@@ -73,16 +73,17 @@ export const WikiHanziWordModal = ({
                       {wikiEntry.data.components.map((component, i) => {
                         return (
                           <View key={i} className="flex-column gap-1">
-                            <Text className="font-karla text-text">
+                            <Text className="hhh-text-body">
                               {component.title ??
                                 (component.hanziWord == null ? null : (
                                   <HanziWordRefText
                                     hanziWord={component.hanziWord}
+                                    context="body"
                                   />
                                 )) ??
                                 `???`}
                             </Text>
-                            <Text className="font-karla text-sm text-text/50">
+                            <Text className="hhh-text-caption">
                               {component.description}
                             </Text>
                           </View>
@@ -92,13 +93,40 @@ export const WikiHanziWordModal = ({
                       {hanziWordSkillData.data.glossHint == null ? null : (
                         <>
                           <View className="h-[1px] w-full bg-primary-8" />
-                          <GlossHint
-                            glossHint={hanziWordSkillData.data.glossHint}
-                            headlineClassName="font-karla text-text"
-                            explanationClassName="font-karla text-text opacity-80"
-                          />
+                          <Text className="hhh-text-body">
+                            <Hhhmark
+                              source={hanziWordSkillData.data.glossHint}
+                              context="body"
+                            />
+                          </Text>
                         </>
                       )}
+
+                      {wikiEntry.data.interpretation == null ? null : (
+                        <>
+                          <View className="h-[1px] w-full bg-primary-8" />
+                          <Text className="hhh-text-body">
+                            <Hhhmark
+                              source={wikiEntry.data.interpretation}
+                              context="body"
+                            />
+                          </Text>
+                        </>
+                      )}
+                    </View>
+                  </View>
+                )}
+
+                {wikiEntry.data?.visuallySimilar == null ? null : (
+                  <View className="gap-1 font-karla">
+                    <Text className="text-xs uppercase text-primary-10">
+                      Visually Similar
+                    </Text>
+
+                    <View className="flex-row flex-wrap gap-2 text-text">
+                      {wikiEntry.data.visuallySimilar.map((hanzi, i) => (
+                        <Text key={i}>{hanzi}</Text>
+                      ))}
                     </View>
                   </View>
                 )}
@@ -122,38 +150,5 @@ export const WikiHanziWordModal = ({
   );
 };
 
-const RefText = (props: Omit<PropsOf<typeof Text>, `className`>) => (
-  <Text
-    className="underline decoration-text/50 decoration-dashed decoration-[1.5px] underline-offset-[6px]"
-    {...props}
-  />
-);
-
-export const HanziWordRefText = ({ hanziWord }: { hanziWord: HanziWord }) => {
-  const meaning = useHanziWordMeaning(hanziWord);
-  const [showWiki, setShowWiki] = useState(false);
-  const gloss =
-    meaning.data == null || meaning.data.gloss.length === 0
-      ? null
-      : glossOrThrow(hanziWord, meaning.data);
-
-  return (
-    <>
-      <RefText
-        onPress={() => {
-          setShowWiki(true);
-        }}
-      >
-        {`${hanziFromHanziWord(hanziWord)}${gloss == null ? `` : ` ${gloss}`}`}
-      </RefText>
-      {showWiki ? (
-        <WikiHanziWordModal
-          hanziWord={hanziWord}
-          onDismiss={() => {
-            setShowWiki(false);
-          }}
-        />
-      ) : null}
-    </>
-  );
-};
+// eslint-disable-next-line import/no-default-export
+export default WikiHanziWordModal;

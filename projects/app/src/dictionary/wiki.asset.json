@@ -16,6 +16,38 @@
           "hanziWord": "子:child",
           "description": "Can mean each / every (and serves as the phonetic component)"
         }
+      ],
+      "visuallySimilar": [
+        "觉"
+      ]
+    }
+  ],
+  [
+    "觉",
+    {
+      "visuallySimilar": [
+        "学"
+      ]
+    }
+  ],
+  [
+    "会",
+    {
+      "componentsIdc": "⿱",
+      "components": [
+        {
+          "hanziWord": "人:person",
+          "description": "A person standing up."
+        },
+        {
+          "hanziWord": "云:cloud",
+          "description": "A cloud (originally also “say” or “speech” in ancient scripts)."
+        }
+      ],
+      "interpretation": "Although it might feel intuitive to interpret 云 as being “above” the person (since clouds are above people), **the actual character has 人 on top** and 云 underneath.\n\nWhat might this symbolize?\n• A {人:person} standing over or leading a **group / thought / idea** (云).\n• Or a **person coming together over shared speech** (云) — pointing to meanings like:\n\t• to meet\n\t• to understand\n\t• to be able to do something (as in potential)\n• a meeting or event",
+      "visuallySimilar": [
+        "金",
+        "舍"
       ]
     }
   ]

@@ -986,7 +986,7 @@
 ["字典:dictionary",{"gloss":["dictionary"],"pinyin":["zì diǎn"],"example":"我需要一本字典。","partOfSpeech":"noun","definition":"A reference book containing words and their meanings."}],
 ["存:store",{"gloss":["save","store"],"pinyin":["cún"],"example":"把文件存到硬盘。","partOfSpeech":"verb","definition":"To keep or store something for future use."}],
 ["存在:exist",{"gloss":["exist","be present"],"pinyin":["cún zài"],"example":"这种问题一直存在。","partOfSpeech":"verb","definition":"To have an existence or to be present."}],
-["学:learn",{"gloss":["learn"],"glossHint":"Imagine a child (子) under a blanket (冖) trying to learn how to count using their fingers (𭕄)","pinyin":["xué"],"example":"他在学汉语。","partOfSpeech":"verb","definition":"To acquire knowledge or skill in a subject or activity by study, experience, or being taught."}],
+["学:learn",{"gloss":["learn"],"glossHint":"Imagine a {子:child} under a blanket (冖) trying to learn how to count using their fingers (𭕄)","pinyin":["xué"],"example":"他在学汉语。","partOfSpeech":"verb","definition":"To acquire knowledge or skill in a subject or activity by study, experience, or being taught."}],
 ["学习:study",{"gloss":["study","learn"],"pinyin":["xué xí"],"example":"她每天学习两个小时。","partOfSpeech":"verb","definition":"The act of acquiring knowledge or skill by studying, practicing, being taught, or experiencing something."}],
 ["学期:semester",{"gloss":["semester"],"pinyin":["xué qī"],"example":"新学期开始了。","partOfSpeech":"noun","definition":"A half-year term in a school or university, typically lasting 15 to 18 weeks."}],
 ["学校:school",{"gloss":["school"],"pinyin":["xué xiào"],"example":"她去学校上课。","partOfSpeech":"noun","definition":"An institution for educating children or providing specialized instruction."}],
