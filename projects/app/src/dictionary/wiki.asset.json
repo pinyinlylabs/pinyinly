@@ -50,5 +50,26 @@
         "舍"
       ]
     }
+  ],
+  [
+    "司",
+    {
+      "componentsIdc": "⿳",
+      "components": [
+        {
+          "hanziWord": "𠃌:radical",
+          "description": "A stylized sweeping enclosure (not a box!) that suggests oversight or constraint."
+        },
+        {
+          "hanziWord": "一:one",
+          "description": "“one” or “a single”. Symbolic of singular authority or order."
+        },
+        {
+          "hanziWord": "口:mouth",
+          "description": "“mouth” → speech, command. Often implies speaking, orders, or delegation."
+        }
+      ],
+      "interpretation": "① **One** voice (口) speaks under a single command (一), all under the control of a higher authority (𠃌 wrapping stroke) — someone is in **charge**.\n\nOr more vivid:\n\n② Imagine a **manager’s voice** (口) under a **single rule** (一) — all wrapped tightly by an **enclosure** (𠃌) like a rolled scroll or decree. The person speaking isn’t just talking — they speak with **authority**. This is someone who **oversees, commands**, or **manages**."
+    }
   ]
 ]

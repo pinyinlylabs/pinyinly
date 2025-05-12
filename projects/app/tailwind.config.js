@@ -27,7 +27,7 @@ module.exports = {
       // => @media (min-width: 1536px) { ... }
     },
     colors: {
-      background: `rgb(var(--color-primary-2) / <alpha-value>)`,
+      background: `rgb(var(--color-background) / <alpha-value>)`,
       text: `rgb(var(--color-text) / <alpha-value>)`,
 
       primary: {

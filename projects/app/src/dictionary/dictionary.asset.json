@@ -691,7 +691,7 @@
 ["右:right",{"gloss":["right","right side"],"pinyin":["yòu"],"example":"请向右转。","partOfSpeech":"noun","definition":"The direction or position that is opposite of left."}],
 ["右边:rightSide",{"gloss":["right side"],"pinyin":["yòu biān"],"example":"左边是商店，右边是银行。","partOfSpeech":"noun","definition":"The position or direction that is on the right-hand side."}],
 ["号:number",{"gloss":["number","day of the month"],"pinyin":["hào"],"example":"今天是几号？","partOfSpeech":"noun","definition":"An abstract object used to describe positions in a sequence."}],
-["司:oversee",{"gloss":["take charge of"],"pinyin":["sī"],"example":"他负责司仪，确保活动顺利进行。","partOfSpeech":"verb","definition":"To take charge of or command something, often depicting authority."}],
+["司:oversee",{"gloss":["take charge of","manage"],"pinyin":["sī"],"example":"他负责司仪，确保活动顺利进行。","partOfSpeech":"verb","definition":"To take charge of or command something, often depicting authority."}],
 ["司机:driver",{"gloss":["driver","chauffeur"],"pinyin":["sī jī"],"example":"他是一名出租车司机。","partOfSpeech":"noun","definition":"A person who drives a vehicle."}],
 ["吃:eat",{"gloss":["eat"],"pinyin":["chī"],"example":"我想吃苹果。","partOfSpeech":"verb","definition":"To put food or drink into your mouth, chew it, and swallow it."}],
 ["吃饭:eat",{"gloss":["have a meal","eat"],"pinyin":["chī fàn"],"example":"我们去吃饭吧。","partOfSpeech":"verb","definition":"The act of consuming food."}],
