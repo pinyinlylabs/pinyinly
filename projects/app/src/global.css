@@ -264,6 +264,7 @@
     --color-accent-11: var(--color-cyan-11);
     --color-accent-12: var(--color-cyan-12);
 
+    --color-background: var(--color-primary-2);
     --color-text: var(--color-primary-12);
   }
 
@@ -296,6 +297,7 @@
     --color-primary-11: var(--color-red-11);
     --color-primary-12: var(--color-red-12);
 
+    --color-background: var(--color-slate-5);
     --color-text: var(--color-red-10);
   }
 
@@ -312,6 +314,8 @@
     --color-accent-10: var(--color-lime-10);
     --color-accent-11: var(--color-lime-11);
     --color-accent-12: var(--color-lime-12);
+
+    --color-background: var(--color-slate-5);
   }
 
   .warning-theme {

@@ -7,9 +7,9 @@ import { hanziFromHanziWord } from "@/dictionary/dictionary";
 import { Image } from "expo-image";
 import { useMemo, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
-import { GlossHint } from "./GlossHint";
 import { PageSheetModal } from "./PageSheetModal";
 import { RectButton2 } from "./RectButton2";
+import { WikiHanziInterpretationPanel } from "./WikiHanziInterpretationPanel";
 
 export const NewSkillModal = ({
   skill,
@@ -106,6 +106,7 @@ const NewHanziWordToGlossSkillContent = ({
 }) => {
   const hanziWord = hanziWordFromSkill(skill);
   const hanziWordSkillData = useHanziWordMeaning(hanziWord);
+  const hanzi = hanziFromHanziWord(hanziWord);
 
   const characters = useMemo(
     (): string[] => splitHanziText(hanziFromHanziWord(hanziWord)),
@@ -146,13 +147,7 @@ const NewHanziWordToGlossSkillContent = ({
               </Text>
             </View>
 
-            {hanziWordSkillData.data.glossHint == null ? null : (
-              <GlossHint
-                glossHint={hanziWordSkillData.data.glossHint}
-                headlineClassName="flex-column text-center font-karla text-2xl text-primary-11"
-                explanationClassName="flex-column text-center font-karla text-lg leading-normal text-primary-10"
-              />
-            )}
+            <WikiHanziInterpretationPanel hanzi={hanzi} />
           </View>
         </>
       )}
