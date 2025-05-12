@@ -145,12 +145,12 @@ export const hanziWordSkillTypes: HanziWordSkillType[] = [
 export enum QuestionFlagType {
   NewSkill,
   Overdue,
-  PreviousMistake,
+  Retry,
   WeakWord,
 }
 
-export interface QuestionFlagPreviousMistake {
-  type: QuestionFlagType.PreviousMistake;
+export interface QuestionFlagRetry {
+  type: QuestionFlagType.Retry;
 }
 
 export interface QuestionFlagOverdue {
@@ -170,7 +170,7 @@ export type QuestionFlag =
   | QuestionFlagWeakWord
   | QuestionFlagNewSkill
   | QuestionFlagOverdue
-  | QuestionFlagPreviousMistake;
+  | QuestionFlagRetry;
 
 export enum QuestionType {
   MultipleChoice,

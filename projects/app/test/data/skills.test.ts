@@ -706,7 +706,7 @@ await test(`${skillReviewQueue.name} suite`, async () => {
         skillReviewQueue({
           graph,
           skillSrsStates: new Map([
-            [`he:一:one`, fsrsSrsState(`-1d`, `-5m`, Rating.Good)],
+            [`he:一:one`, fsrsSrsState(时`-1d`, 时`-5m`, Rating.Good)],
           ]),
           latestSkillRatings: new Map(),
         }),
@@ -722,8 +722,8 @@ await test(`${skillReviewQueue.name} suite`, async () => {
         skillReviewQueue({
           graph,
           skillSrsStates: new Map([
-            [`he:一:one`, fsrsSrsState(`-1d`, `-6m`, Rating.Good)],
-            [`hpi:一:one`, fsrsSrsState(`-1d`, `-4m`, Rating.Good)],
+            [`he:一:one`, fsrsSrsState(时`-1d`, 时`-6m`, Rating.Good)],
+            [`hpi:一:one`, fsrsSrsState(时`-1d`, 时`-4m`, Rating.Good)],
           ]),
           latestSkillRatings: new Map(),
         }),

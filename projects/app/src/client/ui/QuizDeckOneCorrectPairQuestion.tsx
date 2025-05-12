@@ -43,7 +43,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { tv } from "tailwind-variants";
 import { GlossHint } from "./GlossHint";
 import { HanziText, PinyinText } from "./HanziText";
-import { Hhhmark } from "./Hhhmark";
 import { NewSkillModal } from "./NewSkillModal";
 import { RectButton2 } from "./RectButton2";
 import type { TextAnswerButtonState } from "./TextAnswerButton";
@@ -138,7 +137,7 @@ export const QuizDeckOneCorrectPairQuestion = memo(
         toast={
           isCorrect == null ? null : (
             <View
-              className={`flex-1 gap-[12px] ${isCorrect ? `success-theme` : `danger-theme`} bg-primary-5 px-quiz-px pt-3 pb-safe-offset-[84px] lg:mb-2 lg:rounded-xl`}
+              className={`flex-1 gap-[12px] ${isCorrect ? `success-theme` : `danger-theme2`} bg-primary-5 px-quiz-px pt-3 pb-safe-offset-[84px] lg:mb-2 lg:rounded-xl`}
             >
               {isCorrect ? (
                 <View className="flex-row items-center gap-[8px]">
@@ -155,17 +154,17 @@ export const QuizDeckOneCorrectPairQuestion = memo(
                 <>
                   <View className="flex-row items-center gap-[8px]">
                     <Image
-                      className="h-[32px] w-[32px] flex-shrink text-accent-10"
+                      className="h-[32px] w-[32px] flex-shrink text-primary-10"
                       source={require(
                         `@/assets/icons/close-circled-filled.svg`,
                       )}
                       tintColor="currentColor"
                     />
-                    <Text className="text-2xl font-bold text-accent-10">
+                    <Text className="text-2xl font-bold text-primary-10">
                       Incorrect
                     </Text>
                   </View>
-                  <Text className="text-xl/none font-bold text-accent-10">
+                  <Text className="text-xl/none font-bold text-primary-10">
                     Correct answer:
                   </Text>
 
@@ -177,12 +176,12 @@ export const QuizDeckOneCorrectPairQuestion = memo(
 
                   {selectedAChoice != null && selectedBChoice != null ? (
                     <View className="flex-row flex-wrap items-center gap-2">
-                      <Text className="flex-shrink-0 font-bold leading-snug text-accent-10">
+                      <Text className="flex-shrink-0 font-bold leading-snug text-primary-10">
                         Your answer:
                       </Text>
                       <View className="flex-1 flex-row flex-wrap items-center">
                         <SkillChoice choice={selectedAChoice} />
-                        <Text className="flex-shrink-0 flex-grow-0 px-1 leading-snug text-accent-10 opacity-50">
+                        <Text className="flex-shrink-0 flex-grow-0 px-1 leading-snug text-primary-10/50">
                           +
                         </Text>
                         <SkillChoice choice={selectedBChoice} />
@@ -323,7 +322,7 @@ const FlagText = ({ flag }: { flag: QuestionFlag }) => {
         </View>
       );
     }
-    case QuestionFlagType.PreviousMistake: {
+    case QuestionFlagType.Retry: {
       return (
         <View className={flagViewClass({ class: `warning-theme` })}>
           <Image
@@ -363,7 +362,7 @@ const flagTextClass = tv({
 });
 
 const choiceGlossText = tv({
-  base: `text-xl/none text-accent-10`,
+  base: `text-xl/none text-primary-10`,
   variants: {
     small: {
       true: `text-md`,
@@ -378,16 +377,14 @@ const SkillChoice = ({ choice }: { choice: OneCorrectPairQuestionChoice }) => {
   switch (choice.type) {
     case `gloss`: {
       return (
-        <Text className={choiceGlossText({ small: true })}>
-          <Hhhmark source={choice.value} context="body" />
-        </Text>
+        <Text className={choiceGlossText({ small: true })}>{choice.value}</Text>
       );
     }
     case `hanzi`: {
-      return <HanziText hanzi={choice.value} small accented />;
+      return <HanziText hanzi={choice.value} small />;
     }
     case `pinyin`: {
-      return <PinyinText pinyin={choice.value} small accented />;
+      return <PinyinText pinyin={choice.value} small />;
     }
   }
 };
@@ -495,7 +492,7 @@ const HanziWordToGlossSkillAnswer = ({
                 key={i}
                 className={hanzi === primaryHanzi ? undefined : `opacity-50`}
               >
-                <HanziText hanzi={hanzi} small={small} underline accented />
+                <HanziText hanzi={hanzi} small={small} underline />
               </View>
             ))
           : null}
@@ -510,8 +507,8 @@ const HanziWordToGlossSkillAnswer = ({
         <GlossHint
           glossHint={meaning.glossHint}
           hideExplanation
-          headlineClassName="leading-snug text-accent-10"
-          explanationClassName="leading-snug text-accent-9"
+          headlineClassName="leading-snug text-primary-10"
+          explanationClassName="leading-snug text-primary-9"
         />
       ) : null}
 
@@ -564,7 +561,6 @@ const HanziWordToPinyinSkillAnswer = ({
             pinyin={hanzi === primaryHanzi ? pinyin : undefined}
             hanzi={hanzi}
             small={small}
-            accented
           />
         </View>
       ))}
@@ -721,7 +717,6 @@ const ChoiceButton = ({
       onPress={handlePress}
       state={state}
       className="flex-1"
-      textClassName={choice.type === `hanzi` ? `font-normal` : undefined}
       text={choice.value}
     />
   );
