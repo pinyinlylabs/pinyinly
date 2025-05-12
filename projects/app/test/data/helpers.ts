@@ -75,20 +75,20 @@ export const mockSrsState = (
 };
 
 export const fsrsSrsState = (
-  prevReviewAtShorthand: string,
-  nextReviewAtShorthand: string,
+  prevReviewAt: Date,
+  nextReviewAt: Date,
   rating: Rating,
 ): SrsStateFsrsFourPointFive => {
   let state = null;
-  for (const now of [`-20d`, `-15d`, `-10d`, `-5d`, `-2d`]) {
-    state = nextReview(state, rating, parseRelativeTimeShorthand(now));
+  for (const now of [时`-20d`, 时`-15d`, 时`-10d`, 时`-5d`, 时`-2d`]) {
+    state = nextReview(state, rating, now);
   }
   invariant(state != null);
 
   return {
     type: SrsType.FsrsFourPointFive,
-    prevReviewAt: parseRelativeTimeShorthand(prevReviewAtShorthand),
-    nextReviewAt: parseRelativeTimeShorthand(nextReviewAtShorthand),
+    prevReviewAt,
+    nextReviewAt,
     stability: state.stability,
     difficulty: state.difficulty,
   };

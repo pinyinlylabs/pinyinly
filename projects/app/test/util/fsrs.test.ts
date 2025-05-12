@@ -14,7 +14,7 @@ import assert from "node:assert/strict";
 import type { TestContext } from "node:test";
 import test from "node:test";
 import z from "zod";
-import { parseRelativeTimeShorthand } from "../data/helpers";
+import { parseRelativeTimeShorthand, 时 } from "../data/helpers";
 
 const expectedReviewSchema = z.object({
   stability: z.number(),
@@ -37,21 +37,9 @@ const ratingSchema = z.nativeEnum(Rating);
 await test(`${nextReview.name} suite`, async () => {
   await test(`stability increases after time elapsed with correct rating`, () => {
     const before = nextReview(null, Rating.Again);
-    const afterEasy = nextReview(
-      before,
-      Rating.Easy,
-      parseRelativeTimeShorthand(`+1s`),
-    );
-    const afterGood = nextReview(
-      before,
-      Rating.Good,
-      parseRelativeTimeShorthand(`+1s`),
-    );
-    const afterHard = nextReview(
-      before,
-      Rating.Hard,
-      parseRelativeTimeShorthand(`+1s`),
-    );
+    const afterEasy = nextReview(before, Rating.Easy, 时`+1s`);
+    const afterGood = nextReview(before, Rating.Good, 时`+1s`);
+    const afterHard = nextReview(before, Rating.Hard, 时`+1s`);
 
     assert.ok(
       before.stability < afterEasy.stability,
@@ -80,21 +68,9 @@ await test(`${nextReview.name} suite`, async () => {
 
   await test(`difficulty lowers with Easy and increases with Hard`, () => {
     const before = nextReview(null, Rating.Good);
-    const afterEasy = nextReview(
-      before,
-      Rating.Easy,
-      parseRelativeTimeShorthand(`+1s`),
-    );
-    const afterGood = nextReview(
-      before,
-      Rating.Good,
-      parseRelativeTimeShorthand(`+1s`),
-    );
-    const afterHard = nextReview(
-      before,
-      Rating.Hard,
-      parseRelativeTimeShorthand(`+1s`),
-    );
+    const afterEasy = nextReview(before, Rating.Easy, 时`+1s`);
+    const afterGood = nextReview(before, Rating.Good, 时`+1s`);
+    const afterHard = nextReview(before, Rating.Hard, 时`+1s`);
 
     assert.ok(
       before.difficulty > afterEasy.difficulty,
