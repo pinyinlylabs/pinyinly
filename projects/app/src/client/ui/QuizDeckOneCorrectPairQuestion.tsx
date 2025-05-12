@@ -379,7 +379,7 @@ const SkillChoice = ({ choice }: { choice: OneCorrectPairQuestionChoice }) => {
     case `gloss`: {
       return (
         <Text className={choiceGlossText({ small: true })}>
-          <Hhhmark source={choice.value} />
+          <Hhhmark source={choice.value} context="body" />
         </Text>
       );
     }

@@ -367,16 +367,23 @@ export const loadDictionary = memoize0(async () =>
 export const wikiEntrySchema = z.object({
   componentsIdc: z
     .string()
-    .describe(`Ideographic Description Character for the components, e.g. ⿰`),
-  components: z.array(
-    z.object({
-      hanziWord: hanziWordSchema
-        .describe(`Optional link to a specific hanzi word`)
-        .optional(),
-      title: z.string().optional(),
-      description: z.string().optional(),
-    }),
-  ),
+    .describe(`Ideographic Description Character for the components, e.g. ⿰`)
+    .optional(),
+  components: z
+    .array(
+      z.object({
+        hanziWord: hanziWordSchema
+          .describe(`Optional link to a specific hanzi word`)
+          .optional(),
+        title: z.string().optional(),
+        description: z.string().optional(),
+      }),
+    )
+    .optional(),
+  interpretation: z
+    .string()
+    .describe(`Interpretation of the character`)
+    .optional(),
   mnemonics: z
     .array(
       z.object({
@@ -394,7 +401,7 @@ export const wikiEntrySchema = z.object({
     )
     .optional()
     .nullable(),
-  visuallySimilar: z.array(hanziWordSchema).optional().nullable(),
+  visuallySimilar: z.array(hanziTextSchema).optional().nullable(),
 });
 
 export type WikiEntry = z.infer<typeof wikiEntrySchema>;

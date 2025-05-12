@@ -22,12 +22,12 @@ export const GlossHint = ({
     <View className="gap-1">
       {parts.headline == null ? null : (
         <Text className={headlineClassName}>
-          <Hhhmark source={parts.headline} />
+          <Hhhmark source={parts.headline} context="body" />
         </Text>
       )}
       {parts.explanation == null || hideExplanation ? null : (
         <Text className={explanationClassName}>
-          <Hhhmark source={parts.explanation} />
+          <Hhhmark source={parts.explanation} context="body" />
         </Text>
       )}
     </View>

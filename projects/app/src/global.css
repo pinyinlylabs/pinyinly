@@ -36,12 +36,41 @@
   }
   /* end .hhh-text-title */
 
+  .hhh-hhhmark {
+    white-space: pre-wrap;
+    tab-size: 2;
+  }
+
   .hhh-text-body {
-    @apply font-sans text-primary-12;
+    @apply font-sans font-thin leading-normal text-primary-12/90;
+  }
+
+  .hhh-text-body-ref {
+    @apply font-sans font-normal leading-normal text-primary-12 underline decoration-primary-12/50 decoration-dashed decoration-[1.5px] underline-offset-[5px];
+  }
+
+  .hhh-text-body-bold {
+    @apply font-sans font-medium leading-normal text-primary-12;
+  }
+
+  .hhh-text-body-italic {
+    @apply font-sans font-medium italic leading-normal text-primary-12;
   }
 
   .hhh-text-caption {
-    @apply font-karla text-sm leading-normal text-primary-11;
+    @apply font-sans text-sm font-light leading-normal text-primary-12/50;
+  }
+
+  .hhh-text-caption-ref {
+    @apply font-sans text-sm font-normal leading-normal text-primary-12/80 underline decoration-primary-12/50 decoration-dashed decoration-[1.5px] underline-offset-[5px];
+  }
+
+  .hhh-text-caption-bold {
+    @apply font-sans text-sm font-medium leading-normal text-primary-12/50;
+  }
+
+  .hhh-text-caption-italic {
+    @apply font-sans text-sm font-light italic leading-normal text-primary-12/50;
   }
 
   /* www */

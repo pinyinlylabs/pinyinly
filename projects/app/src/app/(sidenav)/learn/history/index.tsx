@@ -1,21 +1,7 @@
 import { targetSkillsReviewQueue } from "@/client/query";
 import { useRizzleQueryPaged } from "@/client/ui/ReplicacheContext";
-import { HanziWordRefText } from "@/client/ui/WikiHanziWordModal";
-import { SkillType } from "@/data/model";
-import type {
-  DeprecatedSkill,
-  HanziWordSkill,
-  PinyinFinalAssociationSkill,
-  PinyinInitialAssociationSkill,
-  Skill,
-} from "@/data/rizzleSchema";
-import {
-  finalFromPinyinFinalAssociationSkill,
-  hanziWordFromSkill,
-  initialFromPinyinInitialAssociationSkill,
-  skillTypeFromSkill,
-  skillTypeToShorthand,
-} from "@/data/skills";
+import { SkillRefText } from "@/client/ui/SkillRefText";
+import { skillTypeFromSkill, skillTypeToShorthand } from "@/data/skills";
 import {
   emptyArray,
   inverseSortComparator,
@@ -75,9 +61,7 @@ export default function HistoryPage() {
 
             {data2Query.data?.available.slice(0, 100).map((skill, i) => (
               <View key={i} className="flex-col items-center">
-                <Text className="hhh-text-body">
-                  <InlineSkillRef skill={skill} />
-                </Text>
+                <SkillRefText skill={skill} context="body" />
                 <Text className="hhh-text-caption">
                   {skillTypeToShorthand(skillTypeFromSkill(skill))}
                 </Text>
@@ -104,7 +88,7 @@ export default function HistoryPage() {
                 const { skill, createdAt } = value;
                 return (
                   <View key={i}>
-                    <Text className="text-text">
+                    <Text className="hhh-text-body">
                       {value.rating === Rating.Again
                         ? `❌`
                         : value.rating === Rating.Hard
@@ -116,7 +100,7 @@ export default function HistoryPage() {
                               ? `🟢`
                               : value.rating}
                       {` `}
-                      <InlineSkillRef skill={skill} />:{` `}
+                      <SkillRefText skill={skill} context="body" />:{` `}
                       {createdAt.toISOString()}
                     </Text>
                   </View>
@@ -129,36 +113,3 @@ export default function HistoryPage() {
     </ScrollView>
   );
 }
-
-const InlineSkillRef = ({ skill }: { skill: Skill }) => {
-  switch (skillTypeFromSkill(skill)) {
-    case SkillType.PinyinFinalAssociation: {
-      skill = skill as PinyinFinalAssociationSkill;
-      return <Text>-{finalFromPinyinFinalAssociationSkill(skill)}</Text>;
-    }
-    case SkillType.PinyinInitialAssociation: {
-      skill = skill as PinyinInitialAssociationSkill;
-      return <Text>{initialFromPinyinInitialAssociationSkill(skill)}-</Text>;
-    }
-    case SkillType.Deprecated_RadicalToEnglish:
-    case SkillType.Deprecated_EnglishToRadical:
-    case SkillType.Deprecated_RadicalToPinyin:
-    case SkillType.Deprecated_PinyinToRadical:
-    case SkillType.Deprecated: {
-      skill = skill as DeprecatedSkill;
-      return <Text>{skillTypeToShorthand(skillTypeFromSkill(skill))}</Text>;
-    }
-    case SkillType.HanziWordToGloss:
-    case SkillType.HanziWordToPinyin:
-    case SkillType.HanziWordToPinyinInitial:
-    case SkillType.HanziWordToPinyinFinal:
-    case SkillType.HanziWordToPinyinTone:
-    case SkillType.GlossToHanziWord:
-    case SkillType.PinyinToHanziWord:
-    case SkillType.ImageToHanziWord: {
-      skill = skill as HanziWordSkill;
-      const hanziWord = hanziWordFromSkill(skill);
-      return <HanziWordRefText hanziWord={hanziWord} />;
-    }
-  }
-};

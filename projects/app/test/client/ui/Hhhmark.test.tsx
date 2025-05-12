@@ -6,7 +6,7 @@ await test(`${Hhhmark.name} suite`, async (t) => {
   await t.test(`renders correctly with dumb quotes`, async () => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- bug in no-unsafe-assignment
     const { root } = render(
-      <Hhhmark source={`This is a 'test' with "dumb quotes"`} />,
+      <Hhhmark source={`This is a 'test' with "dumb quotes"`} context="body" />,
     );
     expect(root).toHaveTextContent(`This is a ‘test’ with “dumb quotes”`);
   });
