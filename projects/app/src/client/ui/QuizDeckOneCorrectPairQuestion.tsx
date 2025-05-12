@@ -721,7 +721,6 @@ const ChoiceButton = ({
       onPress={handlePress}
       state={state}
       className="flex-1"
-      textClassName={choice.type === `hanzi` ? `font-normal` : undefined}
       text={choice.value}
     />
   );

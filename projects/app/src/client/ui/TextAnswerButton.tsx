@@ -17,7 +17,6 @@ import Reanimated, {
 import { tv } from "tailwind-variants";
 import { hapticImpactIfMobile } from "../hooks/hapticImpactIfMobile";
 import { AnimatedPressable } from "./AnimatedPressable";
-import { Hhhmark } from "./Hhhmark";
 import type { PropsOf } from "./types";
 
 export type TextAnswerButtonState =
@@ -188,7 +187,7 @@ export const TextAnswerButton = forwardRef<
           numberOfLines={2}
           ellipsizeMode="tail"
         >
-          <Hhhmark source={text} context="body" />
+          {text}
         </Text>
       </View>
     </AnimatedPressable>
@@ -263,7 +262,7 @@ const textClass = tv({
   // px-1: Horizontal padding is necessary to give first and last letters on a
   // line with accents enough space to not be clipped. Without this words like
   // "lǐ" will have half the accent clipped.
-  base: `px-1 text-center font-bold text-text web:transition-color`,
+  base: `px-1 text-center font-normal text-text web:transition-color`,
   variants: {
     state: {
       default: `text-text`,
