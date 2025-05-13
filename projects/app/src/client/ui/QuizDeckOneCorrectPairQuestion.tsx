@@ -132,7 +132,7 @@ export const QuizDeckOneCorrectPairQuestion = memo(
         toast={
           isCorrect == null ? null : (
             <View
-              className={`flex-1 ${isCorrect ? `success-theme2` : `danger-theme2`} bg-body-bg10 gap-[12px] overflow-hidden px-quiz-px pt-3 pb-safe-offset-[84px] lg:mb-2 lg:rounded-xl`}
+              className={`flex-1 ${isCorrect ? `success-theme2` : `danger-theme2`} gap-[12px] overflow-hidden bg-body-bg10 px-quiz-px pt-3 pb-safe-offset-[84px] lg:mb-2 lg:rounded-xl`}
             >
               {isCorrect ? (
                 <View className="flex-row items-center gap-[8px]">

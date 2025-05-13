@@ -151,7 +151,7 @@ export default function IndexPage() {
                   <View className="gap-1">
                     <Text
                       className={
-                        `text-body font-bold` +
+                        `font-bold text-body` +
                         (streakQuery.data.isActive ? `` : ` opacity-50`)
                       }
                     >
@@ -166,7 +166,7 @@ export default function IndexPage() {
                           : `opacity-50`
                       }`}
                     >
-                      <Text className="text-body font-bold">
+                      <Text className="font-bold text-body">
                         📨
                         {` `}
                         {reviewQuery.data.dueOrOverdueCount}

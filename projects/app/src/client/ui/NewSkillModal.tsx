@@ -135,7 +135,7 @@ const NewHanziWordToGlossSkillContent = ({
               <View className="flex-row gap-1">
                 {characters.map((character) => (
                   <View key={character} className="items-center">
-                    <Text className="text-body rounded-xl bg-primary-6 px-2 py-1 text-[60px]">
+                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-body">
                       {character}
                     </Text>
                   </View>
@@ -192,7 +192,7 @@ const NewHanziWordToPinyinSkillContent = ({
               <View className="flex-row gap-1">
                 {characters.map((character) => (
                   <View key={character} className="items-center">
-                    <Text className="text-body rounded-xl bg-primary-6 px-2 py-1 text-[60px]">
+                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-body">
                       {character}
                     </Text>
                   </View>
@@ -247,7 +247,7 @@ const NewHanziWordToPinyinInitialSkillContent = ({
               <View className="flex-row gap-1">
                 {characters.map((character) => (
                   <View key={character} className="items-center">
-                    <Text className="text-body rounded-xl bg-primary-6 px-2 py-1 text-[60px]">
+                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-body">
                       {character}
                     </Text>
                   </View>
@@ -302,7 +302,7 @@ const NewHanziWordToPinyinFinalSkillContent = ({
               <View className="flex-row gap-1">
                 {characters.map((character) => (
                   <View key={character} className="items-center">
-                    <Text className="text-body rounded-xl bg-primary-6 px-2 py-1 text-[60px]">
+                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-body">
                       {character}
                     </Text>
                   </View>
@@ -357,7 +357,7 @@ const NewHanziWordToPinyinToneSkillContent = ({
               <View className="flex-row gap-1">
                 {characters.map((character) => (
                   <View key={character} className="items-center">
-                    <Text className="text-body rounded-xl bg-primary-6 px-2 py-1 text-[60px]">
+                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-body">
                       {character}
                     </Text>
                   </View>

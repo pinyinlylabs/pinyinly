@@ -40,7 +40,7 @@ export const WikiHanziWordModal = ({
                   <View className="flex-row gap-1">
                     {characters.map((character) => (
                       <View key={character} className="items-start">
-                        <Text className="text-body font-karla text-[60px]">
+                        <Text className="font-karla text-[60px] text-body">
                           {character}
                         </Text>
                       </View>
@@ -48,14 +48,14 @@ export const WikiHanziWordModal = ({
                   </View>
 
                   {hanziWordSkillData.data.pinyin == null ? null : (
-                    <Text className="text-body/50 font-karla text-2xl">
+                    <Text className="font-karla text-2xl text-body/50">
                       {hanziWordSkillData.data.pinyin.join(`, `)}
                     </Text>
                   )}
                 </View>
 
                 <View className="gap-1">
-                  <Text className="text-body font-karla text-xl">
+                  <Text className="font-karla text-xl text-body">
                     {hanziWordSkillData.data.gloss.join(`, `)}
                   </Text>
                   <Hhhmark
@@ -115,11 +115,11 @@ export const WikiHanziWordModal = ({
 
                 {wikiEntry.data?.visuallySimilar == null ? null : (
                   <View className="gap-1 font-karla">
-                    <Text className="text-body/90 text-xs uppercase">
+                    <Text className="text-xs uppercase text-body/90">
                       Visually Similar
                     </Text>
 
-                    <View className="text-body flex-row flex-wrap gap-2">
+                    <View className="flex-row flex-wrap gap-2 text-body">
                       {wikiEntry.data.visuallySimilar.map((hanzi, i) => (
                         <Text key={i}>{hanzi}</Text>
                       ))}

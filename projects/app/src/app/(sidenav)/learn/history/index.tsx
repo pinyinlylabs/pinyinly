@@ -57,7 +57,7 @@ export default function HistoryPage() {
       <View className="max-w-[600px] gap-4">
         <View className="flex-row gap-2">
           <View className="flex-1 items-center gap-[10px]">
-            <Text className="text-body text-xl">available queue</Text>
+            <Text className="text-xl text-body">available queue</Text>
 
             {data2Query.data?.available.slice(0, 100).map((skill, i) => (
               <View key={i} className="flex-col items-center">
@@ -70,7 +70,7 @@ export default function HistoryPage() {
           </View>
 
           <View>
-            <Text className="text-body self-center text-xl">mistakes</Text>
+            <Text className="self-center text-xl text-body">mistakes</Text>
             {allMistakes.map(([_key, value], i) => (
               <View key={i}>
                 <Text className="text-body">
@@ -81,7 +81,7 @@ export default function HistoryPage() {
             ))}
           </View>
           <View>
-            <Text className="text-body self-center text-xl">history</Text>
+            <Text className="self-center text-xl text-body">history</Text>
 
             <View className="flex-column gap-2">
               {skillRatingsQuery.data?.map(([_key, value], i) => {

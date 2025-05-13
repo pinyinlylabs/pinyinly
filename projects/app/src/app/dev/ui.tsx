@@ -261,7 +261,7 @@ const LittlePrimaryHeader = ({ title }: { title: string }) => {
   return (
     <View className="mb-2 mt-4 flex-row items-center gap-2">
       <View className="h-[1px] flex-grow bg-primary-7" />
-      <Text className="text-body/80 text-center text-xs font-bold uppercase">
+      <Text className="text-center text-xs font-bold uppercase text-body/80">
         {title}
       </Text>
       <View className="h-[1px] flex-grow bg-primary-7" />
@@ -277,7 +277,7 @@ const ColorSwatch = ({
   className?: string;
 }) => (
   <View className="flex-wrap gap-1">
-    <Text className="text-body/50 text-center text-xs">{index}</Text>
+    <Text className="text-center text-xs text-body/50">{index}</Text>
     <View className={`h-[40px] w-[40px] ${className ?? ``}`} />
   </View>
 );
@@ -308,7 +308,7 @@ const Section = ({
               });
             }}
           >
-            <Text className="text-body text-2xl">{title}</Text>
+            <Text className="text-2xl text-body">{title}</Text>
           </Pressable>
         </View>
         <View className="dark-theme flex-1 bg-primary-4 p-2" />

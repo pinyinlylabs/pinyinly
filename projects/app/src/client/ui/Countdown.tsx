@@ -41,5 +41,5 @@ export const Countdown = ({ date }: { date: Date }) => {
     };
   }, [date, updateValue]);
 
-  return <Text className={`text-body font-bold`}>⏱️ {value}</Text>;
+  return <Text className={`font-bold text-body`}>⏱️ {value}</Text>;
 };

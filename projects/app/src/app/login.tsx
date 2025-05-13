@@ -12,7 +12,7 @@ export default function LoginPage() {
 
   return (
     <View className="flex-1 items-center justify-center gap-[10px] bg-background">
-      <Text className="text-body font-bold">Login</Text>
+      <Text className="font-bold text-body">Login</Text>
       <View className="gap-2">
         {auth.data?.allClientSessions.map((x, i) => (
           <View key={i} className="flex-row gap-2 border-y">

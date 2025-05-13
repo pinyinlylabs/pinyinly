@@ -57,11 +57,11 @@ export default function MnemonicIdPage() {
       contentContainerClassName="max-w-[800px] self-center px-safe-or-4 pb-2 pt-safe-offset-4 px-safe-or-4"
     >
       <View>
-        <Text className="text-body text-3xl">{id}-</Text>
+        <Text className="text-3xl text-body">{id}-</Text>
       </View>
 
       <View className="gap-2">
-        <Text className="text-body text-lg">
+        <Text className="text-lg text-body">
           others in this group ({group?.id}) — {group?.desc}
         </Text>
         <View className="flex-row flex-wrap gap-1">
@@ -73,7 +73,7 @@ export default function MnemonicIdPage() {
         </View>
 
         <View className="flex-row flex-wrap gap-1">
-          <Text className="text-body text-xl">Association choices</Text>
+          <Text className="text-xl text-body">Association choices</Text>
         </View>
 
         <View className="gap-2">
@@ -89,7 +89,7 @@ export default function MnemonicIdPage() {
                 })
                 .map(([themeId, themeName, initials], i) => (
                   <View key={i}>
-                    <Text className="text-body text-lg">
+                    <Text className="text-lg text-body">
                       {themeName}
                       {themeId === groupTheme.data?.themeId ? (
                         ` ✅`
@@ -112,7 +112,7 @@ export default function MnemonicIdPage() {
                     {[...initials.entries()].map(([name, desc], i) => (
                       <View key={i}>
                         <Text
-                          className="text-body font-bold"
+                          className="font-bold text-body"
                           onPress={() => {
                             void r.mutate.setPinyinInitialAssociation({
                               initial: id,

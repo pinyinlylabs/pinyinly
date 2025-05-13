@@ -89,7 +89,7 @@ export default function MnemonicsPage() {
     >
       <View className="max-w-[800px] gap-4 px-safe-or-4">
         <View className="gap-2 lg:px-0">
-          <Text className="text-body text-3xl font-bold">Mnemonics</Text>
+          <Text className="text-3xl font-bold text-body">Mnemonics</Text>
         </View>
 
         {query.data == null ? (
@@ -103,7 +103,7 @@ export default function MnemonicsPage() {
         ) : (
           <>
             <View className="">
-              <Text className="text-body text-lg font-bold">Tones</Text>
+              <Text className="text-lg font-bold text-body">Tones</Text>
             </View>
             <View className="flex-row flex-wrap gap-3.5 lg:gap-4">
               {tones.map(({ tone, desc }, i) => (
@@ -111,7 +111,7 @@ export default function MnemonicsPage() {
                   key={tone}
                   className="size-24 justify-center gap-2 rounded-xl bg-primary-3 px-2 hover:bg-primary-5 lg:size-24"
                 >
-                  <Text className="text-body text-center text-2xl">{tone}</Text>
+                  <Text className="text-center text-2xl text-body">{tone}</Text>
                   <Text
                     className="text-center text-primary-10"
                     numberOfLines={1}
@@ -130,7 +130,7 @@ export default function MnemonicsPage() {
             <View className="border-t-2 border-primary-5"></View>
 
             <View className="">
-              <Text className="text-body text-lg font-bold">Initials</Text>
+              <Text className="text-lg font-bold text-body">Initials</Text>
             </View>
 
             <View className="gap-3.5 lg:gap-4">
@@ -157,7 +157,7 @@ export default function MnemonicsPage() {
                                 false,
                             })}
                           >
-                            <Text className="text-body text-center font-cursive text-2xl">
+                            <Text className="text-center font-cursive text-2xl text-body">
                               {initial}-
                             </Text>
                             <Text className={altText()} numberOfLines={1}>
@@ -183,7 +183,7 @@ export default function MnemonicsPage() {
             <View className="border-t-2 border-primary-5"></View>
 
             <View className="">
-              <Text className="text-body text-lg font-bold">Finals</Text>
+              <Text className="text-lg font-bold text-body">Finals</Text>
             </View>
             <View className="flex-row flex-wrap gap-3.5 lg:gap-4">
               {query.data.finals.map(([final, ...alts], i) => (
@@ -194,7 +194,7 @@ export default function MnemonicsPage() {
                       finalAssociationsQuery.data?.has(final) ?? false,
                   })}
                 >
-                  <Text className="text-body text-center font-cursive text-2xl">
+                  <Text className="text-center font-cursive text-2xl text-body">
                     -{final}
                   </Text>
                   <Text className={altText()} numberOfLines={1}>

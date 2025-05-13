@@ -77,7 +77,7 @@ export default function SideNavLayout() {
 
         <Link
           href="/login"
-          className="text-body items-center rounded-md px-2 py-1 text-xl font-bold tracking-wide hover:bg-primary-4 md:self-stretch"
+          className="items-center rounded-md px-2 py-1 text-xl font-bold tracking-wide text-body hover:bg-primary-4 md:self-stretch"
         >
           {isAuthenticated ? (
             <View className="size-10 rounded-full bg-[green]"></View>
