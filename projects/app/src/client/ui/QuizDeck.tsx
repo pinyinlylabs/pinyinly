@@ -22,7 +22,7 @@ import { useQueries, useQueryClient } from "@tanstack/react-query";
 import { Asset } from "expo-asset";
 import { Image } from "expo-image";
 import { Link } from "expo-router";
-import React, { useEffect, useId, useRef } from "react";
+import React, { useEffect, useId, useRef, useState } from "react";
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { Animated, Platform, Text, View } from "react-native";
 import Reanimated, { FadeIn } from "react-native-reanimated";
@@ -55,12 +55,26 @@ export const QuizDeck = ({ className }: { className?: string }) => {
 
   const questionsQueryKey = [QuizDeck.name, `quiz`, id];
 
-  const questionsQuery = useRizzleQueryPaged(questionsQueryKey, async (r) => {
-    const [question] = await questionsForReview2(r, { limit: 5 }); // TODO: make this 1? does that work?
-    return question ?? null;
-  });
+  // The following is a bit convoluted but allows prefetching the next question
+  // when the result for the previous is shown.
+  const nextQuestionQuery = useRizzleQueryPaged(
+    questionsQueryKey,
+    async (r) => {
+      const [question] = await questionsForReview2(r, { limit: 5 }); // TODO: make this 1? does that work?
+      return question ?? null;
+    },
+  );
+  const nextQuestion = nextQuestionQuery.isFetching
+    ? null
+    : nextQuestionQuery.data;
 
-  const question = questionsQuery.data;
+  const [question, setQuestion] = useState<Question>();
+
+  useEffect(() => {
+    if (question == null && nextQuestion != null) {
+      setQuestion(nextQuestion);
+    }
+  }, [question, nextQuestion]);
 
   useEffect(() => {
     if (question != null) {
@@ -76,8 +90,8 @@ export const QuizDeck = ({ className }: { className?: string }) => {
   const quizProgress = useQuizProgress();
 
   const handleNext = useEventCallback(() => {
-    // Force the next question to be fetched.
-    void queryClient.invalidateQueries({ queryKey: questionsQueryKey });
+    // Clear the current question so that we swap to the next question.
+    setQuestion(undefined);
   });
 
   const handleRating = useEventCallback(
@@ -92,45 +106,51 @@ export const QuizDeck = ({ className }: { className?: string }) => {
 
       const now = Date.now();
 
-      for (const { skill, rating, durationMs } of ratings) {
-        void r.mutate
-          .rateSkill({
-            id: nanoid(),
-            now,
-            skill,
-            durationMs,
-            rating,
-          })
-          .catch((error: unknown) => {
-            console.error(`Could not add skill rating`, error);
-          });
-      }
+      void (async () => {
+        for (const { skill, rating, durationMs } of ratings) {
+          await r.mutate
+            .rateSkill({
+              id: nanoid(),
+              now,
+              skill,
+              durationMs,
+              rating,
+            })
+            .catch((error: unknown) => {
+              console.error(`Could not add skill rating`, error);
+            });
+        }
 
-      for (const mistake of mistakes) {
-        switch (mistake.type) {
-          case MistakeType.HanziGloss: {
-            void r.mutate.saveHanziGlossMistake({
-              id: nanoid(),
-              now,
-              hanzi: mistake.hanzi,
-              gloss: mistake.gloss,
-            });
-            break;
-          }
-          case MistakeType.HanziPinyin: {
-            void r.mutate.saveHanziPinyinMistake({
-              id: nanoid(),
-              now,
-              hanzi: mistake.hanzi,
-              pinyin: mistake.pinyin,
-            });
-            break;
-          }
-          case MistakeType.HanziPinyinInitial: {
-            throw new Error(`todo: not implemented`);
+        for (const mistake of mistakes) {
+          switch (mistake.type) {
+            case MistakeType.HanziGloss: {
+              await r.mutate.saveHanziGlossMistake({
+                id: nanoid(),
+                now,
+                hanzi: mistake.hanzi,
+                gloss: mistake.gloss,
+              });
+              break;
+            }
+            case MistakeType.HanziPinyin: {
+              await r.mutate.saveHanziPinyinMistake({
+                id: nanoid(),
+                now,
+                hanzi: mistake.hanzi,
+                pinyin: mistake.pinyin,
+              });
+              break;
+            }
+            case MistakeType.HanziPinyinInitial: {
+              throw new Error(`todo: not implemented`);
+            }
           }
         }
-      }
+
+        await queryClient.invalidateQueries({ queryKey: questionsQueryKey });
+      })().catch((error: unknown) => {
+        console.error(`error in async handling in handleRating`, error);
+      });
 
       quizProgress.recordAnswer(success);
     },

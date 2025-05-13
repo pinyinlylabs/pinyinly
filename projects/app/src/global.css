@@ -9,7 +9,7 @@
   
   */
   .hhh-text-button {
-    @apply font-sans font-bold uppercase text-body;
+    @apply font-sans text-sm font-bold uppercase text-body;
   }
 
   .hhh-text-title {
