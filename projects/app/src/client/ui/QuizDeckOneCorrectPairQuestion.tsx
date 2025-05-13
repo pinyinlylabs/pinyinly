@@ -15,7 +15,6 @@ import {
   oneCorrectPairQuestionChoiceMistakes,
   skillTypeFromSkill,
 } from "@/data/skills";
-import { hanziFromHanziWord } from "@/dictionary/dictionary";
 import { invariant } from "@haohaohow/lib/invariant";
 import { formatDuration } from "date-fns/formatDuration";
 import { intervalToDuration } from "date-fns/intervalToDuration";
@@ -35,20 +34,18 @@ import {
   Animated,
   Easing,
   Platform,
-  Pressable,
   Text,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { tv } from "tailwind-variants";
-import { HanziText, PinyinText } from "./HanziText";
+import { HanziWordRefText } from "./HanziWordRefText";
 import { Hhhmark } from "./Hhhmark";
 import { NewSkillModal } from "./NewSkillModal";
 import { RectButton2 } from "./RectButton2";
 import type { TextAnswerButtonState } from "./TextAnswerButton";
 import { TextAnswerButton } from "./TextAnswerButton";
 import type { PropsOf } from "./types";
-import { WikiHanziWordModal } from "./WikiHanziWordModal";
 
 const buttonThickness = 4;
 const gap = 12;
@@ -137,56 +134,60 @@ export const QuizDeckOneCorrectPairQuestion = memo(
         toast={
           isCorrect == null ? null : (
             <View
-              className={`flex-1 gap-[12px] ${isCorrect ? `success-theme2` : `danger-theme2`} bg-background px-quiz-px pt-3 pb-safe-offset-[84px] lg:mb-2 lg:rounded-xl`}
+              className={`flex-1 ${isCorrect ? `success-theme2` : `danger-theme2`} overflow-hidden bg-background lg:mb-2 lg:rounded-xl`}
             >
-              {isCorrect ? (
-                <View className="flex-row items-center gap-[8px]">
-                  <Image
-                    className="text-body h-[32px] w-[32px] flex-shrink"
-                    source={require(`@/assets/icons/check-circled-filled.svg`)}
-                    tintColor="currentColor"
-                  />
-                  <Text className="text-body text-2xl font-bold">Nice!</Text>
-                </View>
-              ) : (
-                <>
+              <View className="bg-body/10 gap-[12px] px-quiz-px pt-3 pb-safe-offset-[84px]">
+                {isCorrect ? (
                   <View className="flex-row items-center gap-[8px]">
                     <Image
                       className="text-body h-[32px] w-[32px] flex-shrink"
                       source={require(
-                        `@/assets/icons/close-circled-filled.svg`,
+                        `@/assets/icons/check-circled-filled.svg`,
                       )}
                       tintColor="currentColor"
                     />
-                    <Text className="text-body text-2xl font-bold">
-                      Incorrect
-                    </Text>
+                    <Text className="text-body text-2xl font-bold">Nice!</Text>
                   </View>
-                  <Text className="text-body text-xl/none font-medium">
-                    Correct answer:
-                  </Text>
-
-                  <SkillAnswer
-                    skill={answer.skill}
-                    includeHint
-                    includeAlternatives
-                  />
-
-                  {selectedAChoice != null && selectedBChoice != null ? (
-                    <View className="flex-row flex-wrap items-center gap-2">
-                      <Text className="text-body flex-shrink-0 font-bold leading-snug">
-                        Your answer:
+                ) : (
+                  <>
+                    <View className="flex-row items-center gap-[8px]">
+                      <Image
+                        className="text-body h-[32px] w-[32px] flex-shrink"
+                        source={require(
+                          `@/assets/icons/close-circled-filled.svg`,
+                        )}
+                        tintColor="currentColor"
+                      />
+                      <Text className="text-body text-2xl font-bold">
+                        Incorrect
                       </Text>
-                      <View className="flex-1 flex-row flex-wrap items-center">
-                        <Hhhmark
-                          source={`${choiceToHhhmark(selectedAChoice)} + ${choiceToHhhmark(selectedBChoice)}`}
-                          context="caption"
-                        />
-                      </View>
                     </View>
-                  ) : null}
-                </>
-              )}
+                    <Text className="text-body text-xl/none font-medium">
+                      Correct answer:
+                    </Text>
+
+                    <SkillAnswer
+                      skill={answer.skill}
+                      includeHint
+                      includeAlternatives
+                    />
+
+                    {selectedAChoice != null && selectedBChoice != null ? (
+                      <View className="flex-row flex-wrap items-center gap-2">
+                        <Text className="text-body flex-shrink-0 font-bold leading-snug">
+                          Your answer:
+                        </Text>
+                        <View className="flex-1 flex-row flex-wrap items-center">
+                          <Hhhmark
+                            source={`${choiceToHhhmark(selectedAChoice)} + ${choiceToHhhmark(selectedBChoice)}`}
+                            context="caption"
+                          />
+                        </View>
+                      </View>
+                    ) : null}
+                  </>
+                )}
+              </View>
             </View>
           )
         }
@@ -211,7 +212,7 @@ export const QuizDeckOneCorrectPairQuestion = memo(
 
         {flag == null ? null : <FlagText flag={flag} />}
         <View>
-          <Text className="text-xl font-bold text-text">{prompt}</Text>
+          <Text className="text-body text-xl font-bold">{prompt}</Text>
         </View>
         <View className="flex-1 justify-center py-quiz-px">
           <View
@@ -358,18 +359,6 @@ const flagTextClass = tv({
   base: `font-bold uppercase text-accent-10`,
 });
 
-const choiceGlossText = tv({
-  base: `text-xl/none text-text`,
-  variants: {
-    small: {
-      true: `text-md`,
-    },
-    underline: {
-      true: `underline decoration-dashed decoration-[2px] underline-offset-[6px]`,
-    },
-  },
-});
-
 function choiceToHhhmark(choice: OneCorrectPairQuestionChoice): string {
   switch (choice.type) {
     case `gloss`: {
@@ -384,31 +373,9 @@ function choiceToHhhmark(choice: OneCorrectPairQuestionChoice): string {
   }
 }
 
-const SkillChoiceText = ({
-  choice,
-}: {
-  choice: OneCorrectPairQuestionChoice;
-}) => {
-  switch (choice.type) {
-    case `gloss`: {
-      return (
-        <Text className={choiceGlossText({ small: true })}>{choice.value}</Text>
-      );
-    }
-    case `hanzi`: {
-      return <HanziText hanzi={choice.value} small />;
-    }
-    case `pinyin`: {
-      return <PinyinText pinyin={choice.value} small />;
-    }
-  }
-};
-
 const SkillAnswer = ({
   skill,
-  includeAlternatives = false,
   includeHint = false,
-  small = false,
   // hideA = false,
   // hideB = false,
 }: {
@@ -437,12 +404,7 @@ const SkillAnswer = ({
     case SkillType.HanziWordToGloss: {
       skill = skill as HanziWordSkill;
       return (
-        <HanziWordToGlossSkillAnswer
-          skill={skill}
-          includeAlternatives={includeAlternatives}
-          includeHint={includeHint}
-          small={small}
-        />
+        <HanziWordToGlossSkillAnswer skill={skill} includeHint={includeHint} />
       );
     }
     case SkillType.HanziWordToPinyin:
@@ -450,133 +412,37 @@ const SkillAnswer = ({
     case SkillType.HanziWordToPinyinInitial:
     case SkillType.HanziWordToPinyinTone: {
       skill = skill as HanziWordSkill;
-      return (
-        <HanziWordToPinyinSkillAnswer
-          skill={skill}
-          includeAlternatives={includeAlternatives}
-          small={small}
-        />
-      );
+      return <HanziWordToPinyinSkillAnswer skill={skill} />;
     }
   }
 };
 
 const HanziWordToGlossSkillAnswer = ({
   skill,
-  includeAlternatives = false,
   includeHint = false,
-  includeGloss = true,
-  includeHanzi = true,
-  small = false,
 }: {
   skill: HanziWordSkill;
   includeHint?: boolean;
-  includeAlternatives?: boolean;
-  includeGloss?: boolean;
-  includeHanzi?: boolean;
-  small?: boolean;
 }) => {
   const hanziWord = hanziWordFromSkill(skill);
   const meaningQuery = useHanziWordMeaning(hanziWord);
-  const [showModal, setShowModal] = useState(false);
-
-  const meaning = meaningQuery.data;
-
-  if (meaning == null) {
-    return null;
-  }
-
-  const primaryHanzi = hanziFromHanziWord(hanziWord);
-  const gloss = meaning.gloss[0];
-  const hanzis = [primaryHanzi];
-  if (includeAlternatives && meaning.visualVariants != null) {
-    hanzis.push(...meaning.visualVariants);
-  }
 
   return (
     <>
-      <Hhhmark source={`{${hanziWord}}`} context="body" />
-      <Pressable
-        onPress={() => {
-          setShowModal(true);
-        }}
-        className={`flex-row items-center ${small ? `gap-1` : `gap-2`}`}
-      >
-        {includeHanzi
-          ? hanzis.map((hanzi, i) => (
-              <View
-                key={i}
-                className={hanzi === primaryHanzi ? undefined : `opacity-50`}
-              >
-                <HanziText hanzi={hanzi} small={small} underline />
-              </View>
-            ))
-          : null}
-        {includeGloss && gloss != null ? (
-          <Text className={choiceGlossText({ small, underline: true })}>
-            {gloss}
-          </Text>
-        ) : null}
-      </Pressable>
+      <Hhhmark source={`{${hanziWord}}`} context="body-2xl" />
 
-      {includeHint && meaning.glossHint != null ? (
-        <Hhhmark source={meaning.glossHint} context="caption" />
-      ) : null}
-
-      {showModal ? (
-        <WikiHanziWordModal
-          hanziWord={hanziWord}
-          onDismiss={() => {
-            setShowModal(false);
-          }}
-        />
+      {includeHint && meaningQuery.data?.glossHint != null ? (
+        <Hhhmark source={meaningQuery.data.glossHint} context="caption" />
       ) : null}
     </>
   );
 };
 
-const HanziWordToPinyinSkillAnswer = ({
-  skill,
-  includeAlternatives = false,
-  small = false,
-}: {
-  skill: HanziWordSkill;
-  includeAlternatives?: boolean;
-  small?: boolean;
-}) => {
+const HanziWordToPinyinSkillAnswer = ({ skill }: { skill: HanziWordSkill }) => {
   const hanziWord = hanziWordFromSkill(skill);
-  const meaningQuery = useHanziWordMeaning(hanziWord);
-
-  const meaning = meaningQuery.data;
-
-  if (meaning == null) {
-    return null;
-  }
-
-  const primaryHanzi = hanziFromHanziWord(hanziWord);
-  const pinyin = meaning.pinyin?.[0];
-  const gloss = meaning.gloss[0];
-  const hanzis = [primaryHanzi];
-  if (includeAlternatives && meaning.visualVariants != null) {
-    hanzis.push(...meaning.visualVariants);
-  }
 
   return (
-    <View className={`flex-row items-center ${small ? `gap-1` : `gap-2`}`}>
-      {hanzis.map((hanzi, i) => (
-        <View
-          key={i}
-          className={hanzi === primaryHanzi ? undefined : `opacity-50`}
-        >
-          <HanziText
-            pinyin={hanzi === primaryHanzi ? pinyin : undefined}
-            hanzi={hanzi}
-            small={small}
-          />
-        </View>
-      ))}
-      <Text className={choiceGlossText({ small })}>{gloss}</Text>
-    </View>
+    <HanziWordRefText hanziWord={hanziWord} showPinyin context="body-2xl" />
   );
 };
 
@@ -701,8 +567,7 @@ const SubmitButton = forwardRef<
       variant="filled"
       ref={ref}
       disabled={state === SubmitButtonState.Disabled}
-      className={`flex-1 ${state === SubmitButtonState.Incorrect ? `danger-theme` : `success-theme`}`}
-      accent
+      className={`flex-1 ${state === SubmitButtonState.Disabled ? `` : state === SubmitButtonState.Incorrect ? `danger-theme2` : `success-theme2`}`}
       onPress={state === SubmitButtonState.Disabled ? undefined : onPress}
     >
       {text}

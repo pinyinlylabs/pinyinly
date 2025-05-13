@@ -57,23 +57,23 @@ export default function MnemonicIdPage() {
       contentContainerClassName="max-w-[800px] self-center px-safe-or-4 pb-2 pt-safe-offset-4 px-safe-or-4"
     >
       <View>
-        <Text className="text-3xl text-text">{id}-</Text>
+        <Text className="text-body text-3xl">{id}-</Text>
       </View>
 
       <View className="gap-2">
-        <Text className="text-lg text-text">
+        <Text className="text-body text-lg">
           others in this group ({group?.id}) — {group?.desc}
         </Text>
         <View className="flex-row flex-wrap gap-1">
           {group?.initials.map(([i]) => (
             <Link key={i} href={`/explore/mnemonics/${i}`}>
-              <Text className="text-text">{i}-</Text>
+              <Text className="text-body">{i}-</Text>
             </Link>
           ))}
         </View>
 
         <View className="flex-row flex-wrap gap-1">
-          <Text className="text-xl text-text">Association choices</Text>
+          <Text className="text-body text-xl">Association choices</Text>
         </View>
 
         <View className="gap-2">
@@ -89,7 +89,7 @@ export default function MnemonicIdPage() {
                 })
                 .map(([themeId, themeName, initials], i) => (
                   <View key={i}>
-                    <Text className="text-lg text-text">
+                    <Text className="text-body text-lg">
                       {themeName}
                       {themeId === groupTheme.data?.themeId ? (
                         ` ✅`
@@ -112,7 +112,7 @@ export default function MnemonicIdPage() {
                     {[...initials.entries()].map(([name, desc], i) => (
                       <View key={i}>
                         <Text
-                          className="font-bold text-text"
+                          className="text-body font-bold"
                           onPress={() => {
                             void r.mutate.setPinyinInitialAssociation({
                               initial: id,

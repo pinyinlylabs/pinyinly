@@ -46,7 +46,7 @@ export default function WebsiteLayout() {
                   <Link href="/learn" asChild>
                     <RectButton2
                       variant="filled"
-                      accent
+                      className="accent-theme2"
                       textClassName="www-text-button"
                     >
                       Get Started

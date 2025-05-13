@@ -40,7 +40,7 @@ export const WikiHanziWordModal = ({
                   <View className="flex-row gap-1">
                     {characters.map((character) => (
                       <View key={character} className="items-start">
-                        <Text className="font-karla text-[60px] text-text">
+                        <Text className="text-body font-karla text-[60px]">
                           {character}
                         </Text>
                       </View>
@@ -48,14 +48,14 @@ export const WikiHanziWordModal = ({
                   </View>
 
                   {hanziWordSkillData.data.pinyin == null ? null : (
-                    <Text className="font-karla text-2xl text-text/50">
+                    <Text className="text-body/50 font-karla text-2xl">
                       {hanziWordSkillData.data.pinyin.join(`, `)}
                     </Text>
                   )}
                 </View>
 
                 <View className="gap-1">
-                  <Text className="font-karla text-xl text-text">
+                  <Text className="text-body font-karla text-xl">
                     {hanziWordSkillData.data.gloss.join(`, `)}
                   </Text>
                   <Hhhmark
@@ -115,11 +115,11 @@ export const WikiHanziWordModal = ({
 
                 {wikiEntry.data?.visuallySimilar == null ? null : (
                   <View className="gap-1 font-karla">
-                    <Text className="text-xs uppercase text-primary-10">
+                    <Text className="text-body/90 text-xs uppercase">
                       Visually Similar
                     </Text>
 
-                    <View className="flex-row flex-wrap gap-2 text-text">
+                    <View className="text-body flex-row flex-wrap gap-2">
                       {wikiEntry.data.visuallySimilar.map((hanzi, i) => (
                         <Text key={i}>{hanzi}</Text>
                       ))}
@@ -129,11 +129,10 @@ export const WikiHanziWordModal = ({
               </View>
             </ScrollView>
 
-            <View className="border-t-2 border-primary-5 px-4 py-4 mb-safe">
+            <View className="accent-theme2 border-t-2 border-primary-5 px-4 py-4 mb-safe">
               <RectButton2
                 textClassName="px-2 py-1"
                 variant="filled"
-                accent
                 onPress={dismiss}
               >
                 Close

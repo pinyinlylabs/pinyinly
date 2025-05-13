@@ -31,10 +31,12 @@ export default function WebsitePage() {
           <Link href="/learn" asChild>
             <RectButton2
               variant="filled"
-              accent
+              className="accent-theme2"
               textClassName="www-text-button"
-              // @ts-expect-error RectButton2 is a <View> rather than a DOM element.
-              ref={ref}
+              ref={(el) => {
+                //  RectButton2 is a <View> rather than a DOM element.
+                ref(el as Element | null);
+              }}
             >
               Get Started
             </RectButton2>

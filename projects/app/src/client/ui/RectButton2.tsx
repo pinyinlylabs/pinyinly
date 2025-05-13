@@ -10,7 +10,6 @@ export type ButtonVariant = `filled` | `outline` | `bare`;
 
 export type RectButton2Props = {
   variant?: ButtonVariant;
-  accent?: boolean;
   children?: ViewProps[`children`];
   className?: string;
   inFlexRowParent?: boolean;
@@ -27,7 +26,6 @@ export const RectButton2 = forwardRef<
   {
     children,
     variant = `outline`,
-    accent = false,
     className,
     inFlexRowParent = false,
     textClassName,
@@ -37,9 +35,9 @@ export const RectButton2 = forwardRef<
 ) {
   const disabled = pressableProps.disabled === true;
 
-  if (disabled) {
-    accent = false;
-  }
+  // if (disabled) {
+  //   accent = false;
+  // }
 
   const [pressed, setPressed] = useState(false);
   const [hovered, setHovered] = useState(false);
@@ -72,7 +70,6 @@ export const RectButton2 = forwardRef<
       <View
         className={roundedRect({
           flat,
-          accent,
           variant,
           disabled,
           pressed,
@@ -81,7 +78,7 @@ export const RectButton2 = forwardRef<
         })}
       >
         {typeof children === `string` ? (
-          <Text className={text({ variant, accent, class: textClassName })}>
+          <Text className={text({ variant, class: textClassName })}>
             {children}
           </Text>
         ) : (
@@ -142,32 +139,18 @@ const roundedRect = tv({
       true: ``,
     },
     disabled: {
-      true: `opacity-50 select-none cursor-default`,
+      true: `opacity-30 select-none cursor-default`,
     },
   },
   compoundVariants: [
     {
       variant: `filled`,
-      accent: true,
-      class: `bg-accent-10 border-accent-9`,
+      class: `bg-body/95 border-background/20`,
     },
     {
       variant: `filled`,
       hovered: true,
-      accent: true,
-      class: `bg-accent-11`,
-    },
-    {
-      variant: `filled`,
-      accent: false,
-      class: `bg-primary-10 border-primary-9`,
-    },
-    {
-      variant: `filled`,
-      accent: false,
-      disabled: false,
-      hovered: true,
-      class: `bg-primary-11 border-primary-10`,
+      class: `bg-body`,
     },
     {
       variant: `filled`,
@@ -176,27 +159,19 @@ const roundedRect = tv({
     },
     {
       variant: `outline`,
-      accent: true,
-      class: `border-accent-9`,
+      class: `border-body/90`,
     },
     {
       variant: `outline`,
-      accent: false,
-      class: `border-primary-7`,
-    },
-    {
-      variant: `outline`,
-      accent: false,
       disabled: false,
       hovered: true,
-      class: `border-primary-8`,
+      class: `border-body`,
     },
     {
       variant: `outline`,
-      accent: false,
       disabled: false,
       pressed: true,
-      class: `border-primary-8`,
+      class: `border-body`,
     },
     {
       variant: `outline`,
@@ -215,24 +190,15 @@ const text = tv({
   base: `hhh-text-button select-none`,
   variants: {
     variant: {
-      filled: `text-primary-2`,
+      filled: `text-background`,
       outline: ``,
       bare: ``,
-    },
-    accent: {
-      true: ``,
     },
   },
   compoundVariants: [
     {
       variant: [`outline`, `bare`],
-      accent: true,
-      class: `text-accent-9`,
-    },
-    {
-      variant: [`outline`, `bare`],
-      accent: false,
-      class: `text-primary-12`,
+      class: `text-body`,
     },
   ],
 });

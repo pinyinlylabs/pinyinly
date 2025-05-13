@@ -162,18 +162,19 @@ export const TextAnswerButton = forwardRef<
       }}
       ref={ref}
       style={pressableAnimatedStyle}
-      className={pressableClass({ flat, state, inFlexRowParent, className })}
+      className={containerClass({ flat, state, inFlexRowParent, className })}
     >
       <Reanimated.View
         style={bgAnimatedStyle}
         className={bgAnimatedClass({ state })}
       />
       <View
-        className={roundedRectClass({
+        className={rectClass({
           flat,
           pressed,
           disabled,
           filled: state !== `default` && bgFilled,
+          state,
           hovered,
           className,
         })}
@@ -217,19 +218,19 @@ const withIncorrectWobbleAnimation = () => {
 };
 
 const bgAnimatedClass = tv({
-  base: `pointer-events-none absolute bottom-[2px] left-[1px] right-[1px] top-[2px] rounded-lg bg-accent-4`,
+  base: `pointer-events-none absolute bottom-[2px] left-[1px] right-[1px] top-[2px] rounded-lg bg-cyan-10/10`,
   variants: {
     state: {
       default: ``,
       dimmed: ``,
       selected: ``,
-      success: `bg-accent-10`,
+      success: `bg-body`,
       error: `bg-transparent`,
     },
   },
 });
 
-const pressableClass = tv({
+const containerClass = tv({
   base: ``,
   variants: {
     flat: {
@@ -242,8 +243,8 @@ const pressableClass = tv({
       default: ``,
       dimmed: ``,
       selected: ``,
-      success: `success-theme`,
-      error: `danger-theme`,
+      success: `success-theme2`,
+      error: `danger-theme2`,
     },
   },
   compoundVariants: [
@@ -262,14 +263,14 @@ const textClass = tv({
   // px-1: Horizontal padding is necessary to give first and last letters on a
   // line with accents enough space to not be clipped. Without this words like
   // "lǐ" will have half the accent clipped.
-  base: `px-1 text-center font-normal text-text web:transition-color`,
+  base: `px-1 text-center font-normal text-body web:transition-color`,
   variants: {
     state: {
-      default: `text-text`,
+      default: `text-body`,
       dimmed: `text-primary-9`,
       selected: `text-accent-9`,
-      success: `text-accent-8`,
-      error: `text-accent-9`,
+      success: `text-background`,
+      error: `text-red-10`,
     },
     length: {
       tiny: `text-xl/tight lg:text-2xl/tight`,
@@ -280,7 +281,7 @@ const textClass = tv({
   },
 });
 
-const roundedRectClass = tv({
+const rectClass = tv({
   base: `items-center select-none justify-center border-2 px-3 py-1 rounded-lg`,
   variants: {
     disabled: {
@@ -290,8 +291,7 @@ const roundedRectClass = tv({
       false: `border-b-4`,
     },
     filled: {
-      true: `border-accent-9`,
-      false: `border-primary-7`,
+      true: ``,
     },
     pressed: {
       true: ``,
@@ -299,18 +299,46 @@ const roundedRectClass = tv({
     hovered: {
       true: ``,
     },
+    state: {
+      default: ``,
+      dimmed: ``,
+      selected: ``,
+      success: ``,
+      error: ``,
+    },
   },
   compoundVariants: [
     {
       disabled: false,
       filled: false,
       hovered: true,
-      class: `border-primary-8`,
+      class: `border-body/30`,
     },
     {
       filled: false,
       pressed: true,
-      class: `border-primary-8`,
+      class: `border-cyan-5`,
+    },
+    // unfilled border
+    {
+      filled: false,
+      class: `border-body/20`,
+    },
+    // filled border
+    {
+      state: `success`,
+      filled: true,
+      class: `border-body`,
+    },
+    {
+      state: `selected`,
+      filled: true,
+      class: `border-cyan-10`,
+    },
+    {
+      state: `error`,
+      filled: true,
+      class: `border-red-10`,
     },
   ],
 });
