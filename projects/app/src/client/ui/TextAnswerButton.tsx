@@ -268,7 +268,7 @@ const textClass = tv({
     state: {
       default: `text-body`,
       dimmed: `text-primary-9`,
-      selected: `text-accent-9`,
+      selected: `text-cyan-10`,
       success: `text-background`,
       error: `text-red-10`,
     },
@@ -328,12 +328,12 @@ const rectClass = tv({
     {
       state: `success`,
       filled: true,
-      class: `border-body`,
+      class: `border-body-bg75`,
     },
     {
       state: `selected`,
       filled: true,
-      class: `border-cyan-10`,
+      class: `border-cyan-10/90`,
     },
     {
       state: `error`,

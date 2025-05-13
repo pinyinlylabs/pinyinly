@@ -134,60 +134,56 @@ export const QuizDeckOneCorrectPairQuestion = memo(
         toast={
           isCorrect == null ? null : (
             <View
-              className={`flex-1 ${isCorrect ? `success-theme2` : `danger-theme2`} overflow-hidden bg-background lg:mb-2 lg:rounded-xl`}
+              className={`flex-1 ${isCorrect ? `success-theme2` : `danger-theme2`} bg-body-bg10 gap-[12px] overflow-hidden px-quiz-px pt-3 pb-safe-offset-[84px] lg:mb-2 lg:rounded-xl`}
             >
-              <View className="bg-body/10 gap-[12px] px-quiz-px pt-3 pb-safe-offset-[84px]">
-                {isCorrect ? (
+              {isCorrect ? (
+                <View className="flex-row items-center gap-[8px]">
+                  <Image
+                    className="h-[32px] w-[32px] flex-shrink text-body"
+                    source={require(`@/assets/icons/check-circled-filled.svg`)}
+                    tintColor="currentColor"
+                  />
+                  <Text className="text-2xl font-bold text-body">Nice!</Text>
+                </View>
+              ) : (
+                <>
                   <View className="flex-row items-center gap-[8px]">
                     <Image
-                      className="text-body h-[32px] w-[32px] flex-shrink"
+                      className="h-[32px] w-[32px] flex-shrink text-body"
                       source={require(
-                        `@/assets/icons/check-circled-filled.svg`,
+                        `@/assets/icons/close-circled-filled.svg`,
                       )}
                       tintColor="currentColor"
                     />
-                    <Text className="text-body text-2xl font-bold">Nice!</Text>
-                  </View>
-                ) : (
-                  <>
-                    <View className="flex-row items-center gap-[8px]">
-                      <Image
-                        className="text-body h-[32px] w-[32px] flex-shrink"
-                        source={require(
-                          `@/assets/icons/close-circled-filled.svg`,
-                        )}
-                        tintColor="currentColor"
-                      />
-                      <Text className="text-body text-2xl font-bold">
-                        Incorrect
-                      </Text>
-                    </View>
-                    <Text className="text-body text-xl/none font-medium">
-                      Correct answer:
+                    <Text className="text-2xl font-bold text-body">
+                      Incorrect
                     </Text>
+                  </View>
+                  <Text className="text-xl/none font-medium text-body">
+                    Correct answer:
+                  </Text>
 
-                    <SkillAnswer
-                      skill={answer.skill}
-                      includeHint
-                      includeAlternatives
-                    />
+                  <SkillAnswer
+                    skill={answer.skill}
+                    includeHint
+                    includeAlternatives
+                  />
 
-                    {selectedAChoice != null && selectedBChoice != null ? (
-                      <View className="flex-row flex-wrap items-center gap-2">
-                        <Text className="text-body flex-shrink-0 font-bold leading-snug">
-                          Your answer:
-                        </Text>
-                        <View className="flex-1 flex-row flex-wrap items-center">
-                          <Hhhmark
-                            source={`${choiceToHhhmark(selectedAChoice)} + ${choiceToHhhmark(selectedBChoice)}`}
-                            context="caption"
-                          />
-                        </View>
+                  {selectedAChoice != null && selectedBChoice != null ? (
+                    <View className="flex-row flex-wrap items-center gap-2">
+                      <Text className="flex-shrink-0 font-bold leading-snug text-body">
+                        Your answer:
+                      </Text>
+                      <View className="flex-1 flex-row flex-wrap items-center">
+                        <Hhhmark
+                          source={`${choiceToHhhmark(selectedAChoice)} + ${choiceToHhhmark(selectedBChoice)}`}
+                          context="caption"
+                        />
                       </View>
-                    ) : null}
-                  </>
-                )}
-              </View>
+                    </View>
+                  ) : null}
+                </>
+              )}
             </View>
           )
         }
@@ -212,7 +208,7 @@ export const QuizDeckOneCorrectPairQuestion = memo(
 
         {flag == null ? null : <FlagText flag={flag} />}
         <View>
-          <Text className="text-body text-xl font-bold">{prompt}</Text>
+          <Text className="text-xl font-bold text-body">{prompt}</Text>
         </View>
         <View className="flex-1 justify-center py-quiz-px">
           <View

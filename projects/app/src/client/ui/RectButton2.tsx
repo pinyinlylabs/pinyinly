@@ -72,8 +72,7 @@ export const RectButton2 = forwardRef<
           flat,
           variant,
           disabled,
-          pressed,
-          hovered,
+          hoveredOrPressed: pressed || hovered,
           className,
         })}
       >
@@ -126,16 +125,10 @@ const roundedRect = tv({
       outline: `border-[2px]`,
       bare: ``,
     },
-    hovered: {
+    hoveredOrPressed: {
       true: ``,
     },
     flat: {
-      true: ``,
-    },
-    accent: {
-      true: ``,
-    },
-    pressed: {
       true: ``,
     },
     disabled: {
@@ -149,7 +142,7 @@ const roundedRect = tv({
     },
     {
       variant: `filled`,
-      hovered: true,
+      hoveredOrPressed: true,
       class: `bg-body`,
     },
     {
@@ -159,19 +152,13 @@ const roundedRect = tv({
     },
     {
       variant: `outline`,
-      class: `border-body/90`,
+      class: `border-body/20`,
     },
     {
       variant: `outline`,
       disabled: false,
-      hovered: true,
-      class: `border-body`,
-    },
-    {
-      variant: `outline`,
-      disabled: false,
-      pressed: true,
-      class: `border-body`,
+      hoveredOrPressed: true,
+      class: `border-body/30`,
     },
     {
       variant: `outline`,

@@ -30,6 +30,14 @@ module.exports = {
       body: {
         DEFAULT: `rgb(from var(--color-body) r g b / calc(alpha * <alpha-value>))`,
         ref: `rgb(from var(--color-body-ref) r g b / calc(alpha * <alpha-value>))`,
+        bg10: `rgb(from color-mix(in oklab, var(--color-body) 10%, var(--color-background)) r g b / calc(alpha * <alpha-value>))`,
+        bg25: `rgb(from color-mix(in oklab, var(--color-body) 25%, var(--color-background)) r g b / calc(alpha * <alpha-value>))`,
+        bg35: `rgb(from color-mix(in oklab, var(--color-body) 35%, var(--color-background)) r g b / calc(alpha * <alpha-value>))`,
+        bg50: `rgb(from color-mix(in oklab, var(--color-body) 50%, var(--color-background)) r g b / calc(alpha * <alpha-value>))`,
+        bg75: `rgb(from color-mix(in oklab, var(--color-body) 75%, var(--color-background)) r g b / calc(alpha * <alpha-value>))`,
+        bg90: `rgb(from color-mix(in oklab, var(--color-body) 90%, var(--color-background)) r g b / calc(alpha * <alpha-value>))`,
+        bg95: `rgb(from color-mix(in oklab, var(--color-body) 95%, var(--color-background)) r g b / calc(alpha * <alpha-value>))`,
+        bg100: `rgb(from color-mix(in oklab, var(--color-body) 100%, var(--color-background)) r g b / calc(alpha * <alpha-value>))`,
       },
       caption: {
         DEFAULT: `rgb(from var(--color-caption) r g b / calc(alpha * <alpha-value>))`,
@@ -64,6 +72,10 @@ module.exports = {
         10: `rgb(from var(--color-accent-10) r g b / calc(alpha * <alpha-value>))`,
         11: `rgb(from var(--color-accent-11) r g b / calc(alpha * <alpha-value>))`,
         12: `rgb(from var(--color-accent-12) r g b / calc(alpha * <alpha-value>))`,
+      },
+
+      sky: {
+        DEFAULT: `rgb(from var(--color-sky) r g b / calc(alpha * <alpha-value>))`,
       },
 
       cyan: {
