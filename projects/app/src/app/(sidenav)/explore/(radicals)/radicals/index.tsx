@@ -15,10 +15,10 @@ export default function RadicalsPage() {
     <ScrollView contentContainerClassName="py-safe-offset-4 px-safe-or-4 items-center">
       <View className="max-w-[600px] gap-4">
         <View className="gap-2 px-safe-or-4 lg:px-0">
-          <Text className="text-center text-2xl font-bold text-text">
+          <Text className="text-center text-2xl font-bold text-body">
             Kangxi Radicals
           </Text>
-          <Text className="text-center leading-relaxed text-text">
+          <Text className="text-center leading-relaxed text-body">
             The building blocks of Chinese characters, representing core
             meanings and structures. Familiarizing yourself with these radicals
             will help you recognize patterns, understand character meanings, and
@@ -28,11 +28,11 @@ export default function RadicalsPage() {
 
         {query.data == null ? (
           query.isLoading ? (
-            <Text className="text-text">Loading</Text>
+            <Text className="text-body">Loading</Text>
           ) : query.isError ? (
-            <Text className="text-text">Error</Text>
+            <Text className="text-body">Error</Text>
           ) : (
-            <Text className="text-text">unexpected state</Text>
+            <Text className="text-body">unexpected state</Text>
           )
         ) : (
           radicalStrokes.map((strokes) => (

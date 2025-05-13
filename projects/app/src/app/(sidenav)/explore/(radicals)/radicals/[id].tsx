@@ -39,9 +39,9 @@ export default function RadicalPage() {
         }
         body={
           query.isLoading ? (
-            <Text className="text-text">Loading</Text>
+            <Text className="text-body">Loading</Text>
           ) : query.isError ? (
-            <Text className="text-text">Error</Text>
+            <Text className="text-body">Error</Text>
           ) : (
             <>
               {query.data?.nameMnemonics == null ? null : (
@@ -50,7 +50,7 @@ export default function RadicalPage() {
                     {query.data.nameMnemonics.map(
                       ({ mnemonic, rationale }, i) => (
                         <View key={i} className="gap-1">
-                          <Text className="text-text">{mnemonic}</Text>
+                          <Text className="text-body">{mnemonic}</Text>
                           <Text className="text-xs italic text-primary-10">
                             {rationale}
                           </Text>
@@ -66,7 +66,7 @@ export default function RadicalPage() {
                     {query.data.pinyinMnemonics.map(
                       ({ mnemonic, strategy: rationale }, i) => (
                         <View key={i} className="gap-1">
-                          <Text className="text-text">{mnemonic}</Text>
+                          <Text className="text-body">{mnemonic}</Text>
                           <Text className="text-xs italic text-primary-10">
                             {rationale}
                           </Text>

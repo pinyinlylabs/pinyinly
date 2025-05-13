@@ -1,11 +1,6 @@
 import { questionsForReview2 } from "@/client/query";
 import type { StackNavigationFor } from "@/client/ui/types";
-import type {
-  Mistake,
-  NewSkillRating,
-  Question,
-  QuestionFlag,
-} from "@/data/model";
+import type { Mistake, NewSkillRating, Question } from "@/data/model";
 import { MistakeType, QuestionType } from "@/data/model";
 import { Rating } from "@/util/fsrs";
 import { nanoid } from "@/util/nanoid";
@@ -46,8 +41,6 @@ const Stack = createStackNavigator<{
   chill: undefined;
   question: {
     question: Question;
-    // todo remove
-    flag?: QuestionFlag;
   };
 }>();
 
@@ -63,7 +56,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
   const questionsQueryKey = [QuizDeck.name, `quiz`, id];
 
   const questionsQuery = useRizzleQueryPaged(questionsQueryKey, async (r) => {
-    const [question] = await questionsForReview2(r, { limit: 5 });
+    const [question] = await questionsForReview2(r, { limit: 5 }); // TODO: make this 1? does that work?
     return question ?? null;
   });
 
@@ -71,12 +64,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
 
   useEffect(() => {
     if (question != null) {
-      const flag: QuestionFlag | undefined =
-        // attempts > 0
-        //   ? { type: QuestionFlagType.PreviousMistake }
-        //   :
-        question.flag;
-      navigationRef.current?.replace(`question`, { question, flag });
+      navigationRef.current?.replace(`question`, { question });
     }
   }, [question]);
 
@@ -157,15 +145,8 @@ export const QuizDeck = ({ className }: { className?: string }) => {
   return (
     <View className={className}>
       <View className="mb-[20px] w-full max-w-[600px] flex-row items-center gap-[24px] self-center px-[16px]">
-        <CloseButton tintColor="#3C464D" />
-        <QuizProgressBar
-          progress={quizProgress.progress}
-          // colors={
-          //   streakCount >= 2
-          //     ? [`#E861F8`, `#414DF6`, `#75F076`] // streak
-          //     : [`#3F4CF5`, `#3F4CF5`] // solid blue
-          // }
-        />
+        <CloseButton />
+        <QuizProgressBar progress={quizProgress.progress} />
       </View>
 
       <NavigationIndependentTree>
@@ -244,11 +225,9 @@ export const QuizDeck = ({ className }: { className?: string }) => {
               name="question"
               children={({
                 route: {
-                  params: { question, flag: f },
+                  params: { question },
                 },
               }) => {
-                const flag = f ?? question.flag;
-
                 let screen: React.ReactNode;
 
                 switch (question.type) {
@@ -266,7 +245,6 @@ export const QuizDeck = ({ className }: { className?: string }) => {
                     screen = (
                       <QuizDeckOneCorrectPairQuestion
                         question={question}
-                        flag={flag}
                         onNext={handleNext}
                         onRating={handleRating}
                       />

@@ -25,7 +25,7 @@ export default function DesignSystemPage() {
     <View style={{ flex: 1, paddingTop: insets.top }}>
       <View className="flex-row p-2">
         <Link href="/learn" asChild>
-          <Text className="text-text hover:underline">Home</Text>
+          <Text className="text-body hover:underline">Home</Text>
         </Link>
       </View>
       <ScrollView style={{ flex: 1 }} ref={scrollViewRef}>
@@ -161,7 +161,7 @@ export default function DesignSystemPage() {
 }
 
 const typography = tv({
-  base: `text-primary-12`,
+  base: `text-body`,
 
   variants: {
     size: {
@@ -261,22 +261,13 @@ const LittlePrimaryHeader = ({ title }: { title: string }) => {
   return (
     <View className="mb-2 mt-4 flex-row items-center gap-2">
       <View className="h-[1px] flex-grow bg-primary-7" />
-      <Text className="text-center text-xs font-bold uppercase text-primary-10">
+      <Text className="text-center text-xs font-bold uppercase text-body/80">
         {title}
       </Text>
       <View className="h-[1px] flex-grow bg-primary-7" />
     </View>
   );
 };
-
-const captionLabel = tv({
-  base: `text-primary-9 text-xs text-center`,
-  variants: {
-    highlighted: {
-      true: `text-primary-11 font-bold`,
-    },
-  },
-});
 
 const ColorSwatch = ({
   index,
@@ -286,7 +277,7 @@ const ColorSwatch = ({
   className?: string;
 }) => (
   <View className="flex-wrap gap-1">
-    <Text className={captionLabel({ highlighted: index === 10 })}>{index}</Text>
+    <Text className="text-center text-xs text-body/50">{index}</Text>
     <View className={`h-[40px] w-[40px] ${className ?? ``}`} />
   </View>
 );
@@ -309,7 +300,7 @@ const Section = ({
   return (
     <>
       <View className="flex-row" ref={ref}>
-        <View className="light-theme flex-1 bg-primary-4 p-2 hover:bg-primary-5">
+        <View className="light-theme flex-1 bg-background/90 p-2 hover:bg-background">
           <Pressable
             onPress={() => {
               ref.current?.measure((_x, y) => {
@@ -317,7 +308,7 @@ const Section = ({
               });
             }}
           >
-            <Text className="text-2xl text-text">{title}</Text>
+            <Text className="text-2xl text-body">{title}</Text>
           </Pressable>
         </View>
         <View className="dark-theme flex-1 bg-primary-4 p-2" />
@@ -377,27 +368,33 @@ const RectButton2Examples = (props: Partial<PropsOf<typeof RectButton2>>) => (
       </ExampleStack>
     </View>
 
-    <LittlePrimaryHeader title="accent" />
+    <LittlePrimaryHeader title="themes" />
 
     <View className="flex-row flex-wrap">
       <ExampleStack title="normal">
-        <RectButton2Variants accent {...props} />
+        <RectButton2Variants {...props} />
       </ExampleStack>
 
-      <View className="success-theme">
-        <ExampleStack title="success">
-          <RectButton2Variants accent {...props} />
+      <View className="accent-theme2">
+        <ExampleStack title="accent">
+          <RectButton2Variants {...props} />
         </ExampleStack>
       </View>
 
-      <View className="danger-theme">
+      <View className="success-theme2">
+        <ExampleStack title="success">
+          <RectButton2Variants {...props} />
+        </ExampleStack>
+      </View>
+
+      <View className="danger-theme2">
         <ExampleStack title="danger">
-          <RectButton2Variants accent {...props} />
+          <RectButton2Variants {...props} />
         </ExampleStack>
       </View>
 
       <ExampleStack title="(disabled)">
-        <RectButton2Variants accent disabled {...props} />
+        <RectButton2Variants disabled {...props} />
       </ExampleStack>
     </View>
 

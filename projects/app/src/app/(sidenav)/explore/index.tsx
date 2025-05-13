@@ -18,8 +18,7 @@ export default function ExplorePage() {
         <Link href="/explore/mnemonics/" asChild>
           <RectButton2
             variant="filled"
-            className="self-start"
-            accent
+            className="accent-theme2 self-start"
             textClassName="py-1 px-2"
           >
             Explore mnemonics
@@ -37,8 +36,7 @@ export default function ExplorePage() {
         <Link href="/explore/radicals" asChild>
           <RectButton2
             variant="filled"
-            className="self-start"
-            accent
+            className="accent-theme2 self-start"
             textClassName="py-1 px-2"
           >
             Explore radicals
@@ -56,8 +54,7 @@ export default function ExplorePage() {
         <Link href="/explore/words" asChild>
           <RectButton2
             variant="filled"
-            className="self-start"
-            accent
+            className="accent-theme2 self-start"
             textClassName="py-1 px-2"
           >
             Explore words

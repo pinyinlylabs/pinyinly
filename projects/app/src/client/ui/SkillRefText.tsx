@@ -15,13 +15,14 @@ import {
 } from "@/data/skills";
 import { Text } from "react-native";
 import { HanziWordRefText } from "./HanziWordRefText";
+import type { HhhmarkContext } from "./Hhhmark";
 
 export const SkillRefText = ({
   skill,
   context,
 }: {
   skill: Skill;
-  context: `body` | `caption`;
+  context: HhhmarkContext;
 }) => {
   switch (skillTypeFromSkill(skill)) {
     case SkillType.PinyinFinalAssociation: {

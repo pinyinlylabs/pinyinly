@@ -27,7 +27,7 @@ export const HanziText = ({
 };
 
 const hanziText = tv({
-  base: `text-2xl/none text-text`,
+  base: `text-2xl/none text-body`,
 
   variants: {
     accented: {

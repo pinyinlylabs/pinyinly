@@ -226,3 +226,11 @@ Customise this to suit your scenario.
   Expo's Metro plugin is patched to error if `HHH_STRICT_EXPO_ENV_VARS` is set
   when a `PUBLIC_EXPO_` variable is missing. This helps catch errors during
   build before they reach users.
+
+## Debugging nativewind
+
+First test that tailwind works:
+
+```
+yarn tailwindcss --input src/global.css
+```

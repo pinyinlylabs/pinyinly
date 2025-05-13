@@ -1,44 +1,70 @@
 import { useHanziWordMeaning } from "@/client/hooks/useHanziWordMeaning";
 import type { HanziWord } from "@/data/model";
-import { glossOrThrow, hanziFromHanziWord } from "@/dictionary/dictionary";
-import { lazy, useState } from "react";
+import {
+  glossOrThrow,
+  hanziFromHanziWord,
+  pinyinOrThrow,
+} from "@/dictionary/dictionary";
+import { lazy, Suspense, useState } from "react";
 import { Text } from "react-native";
+import { tv } from "tailwind-variants";
+import type { HhhmarkContext } from "./Hhhmark";
+
+export const hhhTextRef = tv({
+  variants: {
+    context: {
+      [`body-2xl`]: `hhh-text-body-2xl-ref`,
+      body: `hhh-text-body-ref`,
+      caption: `hhh-text-caption-ref`,
+    },
+  },
+});
 
 const WikiHanziWordModal = lazy(() => import(`./WikiHanziWordModal`));
 
 export const HanziWordRefText = ({
   hanziWord,
+  showGloss = true,
+  showPinyin = false,
   context,
 }: {
   hanziWord: HanziWord;
-  context: `body` | `caption`;
+  showGloss?: boolean;
+  showPinyin?: boolean;
+  context: HhhmarkContext;
 }) => {
   const meaning = useHanziWordMeaning(hanziWord);
   const [showWiki, setShowWiki] = useState(false);
-  const gloss =
-    meaning.data == null || meaning.data.gloss.length === 0
-      ? null
-      : glossOrThrow(hanziWord, meaning.data);
+
+  let infoText = ``;
+
+  if (showGloss && meaning.data != null && meaning.data.gloss.length > 0) {
+    infoText += ` ${glossOrThrow(hanziWord, meaning.data)}`;
+  }
+
+  if (showPinyin && meaning.data?.pinyin != null) {
+    infoText += ` (${pinyinOrThrow(hanziWord, meaning.data)})`;
+  }
 
   return (
     <>
       <Text
-        className={
-          context === `body` ? `hhh-text-body-ref` : `hhh-text-caption-ref`
-        }
+        className={hhhTextRef({ context })}
         onPress={() => {
           setShowWiki(true);
         }}
       >
-        {`${hanziFromHanziWord(hanziWord)}${gloss == null ? `` : ` ${gloss}`}`}
+        {`${hanziFromHanziWord(hanziWord)}${infoText}`}
       </Text>
       {showWiki ? (
-        <WikiHanziWordModal
-          hanziWord={hanziWord}
-          onDismiss={() => {
-            setShowWiki(false);
-          }}
-        />
+        <Suspense fallback={null}>
+          <WikiHanziWordModal
+            hanziWord={hanziWord}
+            onDismiss={() => {
+              setShowWiki(false);
+            }}
+          />
+        </Suspense>
       ) : null}
     </>
   );

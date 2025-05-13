@@ -116,7 +116,7 @@ const NewHanziWordToGlossSkillContent = ({
   return (
     <ContainerWithContinueButton onContinue={dismiss}>
       {hanziWordSkillData.data == null ? (
-        <Text className="text-text">Not implemented</Text>
+        <Text className="text-body">Not implemented</Text>
       ) : (
         <>
           <View className="mb-8 gap-8">
@@ -135,7 +135,7 @@ const NewHanziWordToGlossSkillContent = ({
               <View className="flex-row gap-1">
                 {characters.map((character) => (
                   <View key={character} className="items-center">
-                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-text">
+                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-body">
                       {character}
                     </Text>
                   </View>
@@ -173,7 +173,7 @@ const NewHanziWordToPinyinSkillContent = ({
   return (
     <ContainerWithContinueButton onContinue={dismiss}>
       {hanziWordSkillData.data == null ? (
-        <Text className="text-text">Not implemented</Text>
+        <Text className="text-body">Not implemented</Text>
       ) : (
         <>
           <View className="mb-8 gap-8">
@@ -192,7 +192,7 @@ const NewHanziWordToPinyinSkillContent = ({
               <View className="flex-row gap-1">
                 {characters.map((character) => (
                   <View key={character} className="items-center">
-                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-text">
+                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-body">
                       {character}
                     </Text>
                   </View>
@@ -228,7 +228,7 @@ const NewHanziWordToPinyinInitialSkillContent = ({
   return (
     <ContainerWithContinueButton onContinue={dismiss}>
       {hanziWordSkillData.data == null ? (
-        <Text className="text-text">Not implemented</Text>
+        <Text className="text-body">Not implemented</Text>
       ) : (
         <>
           <View className="mb-8 gap-8">
@@ -247,7 +247,7 @@ const NewHanziWordToPinyinInitialSkillContent = ({
               <View className="flex-row gap-1">
                 {characters.map((character) => (
                   <View key={character} className="items-center">
-                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-text">
+                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-body">
                       {character}
                     </Text>
                   </View>
@@ -283,7 +283,7 @@ const NewHanziWordToPinyinFinalSkillContent = ({
   return (
     <ContainerWithContinueButton onContinue={dismiss}>
       {hanziWordSkillData.data == null ? (
-        <Text className="text-text">Not implemented</Text>
+        <Text className="text-body">Not implemented</Text>
       ) : (
         <>
           <View className="mb-8 gap-8">
@@ -302,7 +302,7 @@ const NewHanziWordToPinyinFinalSkillContent = ({
               <View className="flex-row gap-1">
                 {characters.map((character) => (
                   <View key={character} className="items-center">
-                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-text">
+                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-body">
                       {character}
                     </Text>
                   </View>
@@ -338,7 +338,7 @@ const NewHanziWordToPinyinToneSkillContent = ({
   return (
     <ContainerWithContinueButton onContinue={dismiss}>
       {hanziWordSkillData.data == null ? (
-        <Text className="text-text">Not implemented</Text>
+        <Text className="text-body">Not implemented</Text>
       ) : (
         <>
           <View className="mb-8 gap-8">
@@ -357,7 +357,7 @@ const NewHanziWordToPinyinToneSkillContent = ({
               <View className="flex-row gap-1">
                 {characters.map((character) => (
                   <View key={character} className="items-center">
-                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-text">
+                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-body">
                       {character}
                     </Text>
                   </View>
@@ -388,10 +388,9 @@ const ContainerWithContinueButton = ({
         {children}
       </ScrollView>
 
-      <View className="border-t-2 border-primary-5 px-4 py-4 mb-safe">
+      <View className="theme-accent2 border-t-2 border-primary-5 px-4 py-4 mb-safe">
         <RectButton2
           variant="filled"
-          accent
           textClassName="py-1 px-2"
           onPress={onContinue}
         >

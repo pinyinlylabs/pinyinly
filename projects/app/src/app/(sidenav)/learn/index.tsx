@@ -129,7 +129,7 @@ export default function IndexPage() {
       streakQuery.data == null ||
       reviewQuery.data == null ? null : recentHanzi.isError ? (
         <View>
-          <Text className="danger-theme text-text">
+          <Text className="danger-theme text-body">
             Oops something went wrong.
           </Text>
         </View>
@@ -151,7 +151,7 @@ export default function IndexPage() {
                   <View className="gap-1">
                     <Text
                       className={
-                        `font-bold text-text` +
+                        `font-bold text-body` +
                         (streakQuery.data.isActive ? `` : ` opacity-50`)
                       }
                     >
@@ -166,7 +166,7 @@ export default function IndexPage() {
                           : `opacity-50`
                       }`}
                     >
-                      <Text className="font-bold text-text">
+                      <Text className="font-bold text-body">
                         📨
                         {` `}
                         {reviewQuery.data.dueOrOverdueCount}
@@ -219,7 +219,7 @@ export default function IndexPage() {
                           key={i}
                           className="rounded border border-primary-7 bg-primary-3 p-2"
                         >
-                          <Text className="text-text">{char}</Text>
+                          <Text className="text-body">{char}</Text>
                         </View>
                       ))}
                     </View>
@@ -235,8 +235,7 @@ export default function IndexPage() {
                 <Link href="/learn/reviews" asChild>
                   <RectButton2
                     variant="filled"
-                    className="success-theme mt-2 self-stretch"
-                    accent
+                    className="success-theme2 mt-2 self-stretch"
                     textClassName="py-1"
                   >
                     Start
@@ -261,7 +260,6 @@ export default function IndexPage() {
                 <RectButton2
                   variant="filled"
                   className="self-start"
-                  accent
                   textClassName="py-1 px-2"
                 >
                   Explore history

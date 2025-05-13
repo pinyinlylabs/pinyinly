@@ -1,5 +1,4 @@
 import { makeRange } from "@/util/collections";
-import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useMemo, useState } from "react";
 import type { LayoutChangeEvent, LayoutRectangle } from "react-native";
 import { View } from "react-native";
@@ -20,7 +19,6 @@ const majorTickBgSize = 20;
 const barSize = 16;
 const halfBarSize = barSize / 2;
 const minTickSpacing = 40;
-const fillColor = `#3F4CF5`;
 const leftPadding = majorTickBgSize / 2;
 const rightPadding = halfBarSize;
 
@@ -147,7 +145,7 @@ export const QuizProgressBar = ({ progress }: { progress: number }) => {
       {metrics == null ? null : (
         <>
           <View
-            className="top-1/2 h-[16px] w-full rounded-[8px] bg-primary-7"
+            className="top-1/2 h-[16px] w-full rounded-[8px] bg-body-bg25"
             style={{ transform: [{ translateY: -8 }] }}
           >
             {/* Ticks behind the fill bar */}
@@ -162,7 +160,7 @@ export const QuizProgressBar = ({ progress }: { progress: number }) => {
 
             {/* Fill bar */}
             <Reanimated.View
-              className="flex-1 overflow-hidden"
+              className="flex-1 overflow-hidden bg-sky"
               style={[
                 fillAnimStyles,
                 {
@@ -171,20 +169,7 @@ export const QuizProgressBar = ({ progress }: { progress: number }) => {
                   borderRadius: halfBarSize,
                 },
               ]}
-            >
-              {/* Background */}
-              <LinearGradient
-                colors={[fillColor, fillColor]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={{
-                  flex: 1,
-                  height: 16,
-                  display: layout === undefined ? `none` : `flex`, // Intended to jank, but not sure if necessary.
-                  width: layout?.width,
-                }}
-              />
-            </Reanimated.View>
+            />
           </View>
 
           {/* Ticks over the fill bar */}
@@ -232,7 +217,7 @@ const MinorTickBg = ({ n, axis }: { axis: Axis; n: number }) => {
 
   return (
     <Reanimated.View
-      className="absolute top-1/2 rounded-full bg-[white] opacity-50"
+      className="absolute top-1/2 rounded-full bg-[white]/80"
       style={animStyles}
     />
   );
@@ -265,7 +250,7 @@ const MajorTick = ({
   return (
     <>
       <Reanimated.View
-        className="absolute top-1/2 rounded-full bg-[#3F4CF5]"
+        className="absolute top-1/2 rounded-full bg-sky"
         style={bgAnimStyles}
       />
       <Reanimated.View
@@ -283,11 +268,11 @@ const MajorTickBg = ({ n, axis }: { axis: Axis; n: number }) => {
   return (
     <>
       <Reanimated.View
-        className="absolute top-1/2 rounded-full bg-primary-7"
+        className="absolute top-1/2 rounded-full bg-body-bg25"
         style={bgAnimStyles}
       />
       <Reanimated.View
-        className="absolute left-1/2 top-1/2 rounded-full bg-[white] opacity-50"
+        className="absolute left-1/2 top-1/2 rounded-full bg-[white]/80"
         style={dotAnimStyles}
       />
     </>
