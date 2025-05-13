@@ -64,7 +64,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
       return question ?? null;
     },
   );
-  const nextQuestion = nextQuestionQuery.isLoading
+  const nextQuestion = nextQuestionQuery.isFetching
     ? null
     : nextQuestionQuery.data;
 
