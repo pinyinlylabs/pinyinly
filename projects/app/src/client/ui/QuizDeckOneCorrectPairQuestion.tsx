@@ -53,16 +53,14 @@ const gap = 12;
 export const QuizDeckOneCorrectPairQuestion = memo(
   function QuizDeckOneCorrectPairQuestion({
     question,
-    flag,
     onNext,
     onRating,
   }: {
     question: OneCorrectPairQuestion;
-    flag?: QuestionFlag;
     onNext: () => void;
     onRating: (ratings: NewSkillRating[], mistakes: Mistake[]) => void;
   }) {
-    const { prompt, answer, groupA, groupB } = question;
+    const { prompt, answer, groupA, groupB, flag } = question;
 
     const [selectedAChoice, setSelectedAChoice] =
       useState<OneCorrectPairQuestionChoice>();
