@@ -27,8 +27,18 @@ module.exports = {
       // => @media (min-width: 1536px) { ... }
     },
     colors: {
-      background: `rgb(var(--color-background) / <alpha-value>)`,
-      text: `rgb(var(--color-text) / <alpha-value>)`,
+      text: `rgb(var(--color-text) / <alpha-value>)`, // deprecated
+
+      /* EXPERIMENTAL: named semantic colors */
+      background: `rgb(from var(--color-background) r g b / calc(alpha * <alpha-value>))`,
+      body: {
+        DEFAULT: `rgb(from var(--color-body) r g b / calc(alpha * <alpha-value>))`,
+        ref: `rgb(from var(--color-body-ref) r g b / calc(alpha * <alpha-value>))`,
+      },
+      caption: {
+        DEFAULT: `rgb(from var(--color-caption) r g b / calc(alpha * <alpha-value>))`,
+        ref: `rgb(from var(--color-caption-ref) r g b / calc(alpha * <alpha-value>))`,
+      },
 
       primary: {
         1: `rgb(var(--color-primary-1) / <alpha-value>)`,

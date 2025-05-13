@@ -42,35 +42,35 @@
   }
 
   .hhh-text-body {
-    @apply font-sans font-thin leading-normal text-text/90;
+    @apply text-body font-sans font-thin leading-normal;
   }
 
   .hhh-text-body-ref {
-    @apply font-sans font-normal leading-normal text-primary-12 underline decoration-primary-12/50 decoration-dashed decoration-[1.5px] underline-offset-[5px];
+    @apply decoration-body-ref/50 text-body-ref font-sans font-normal leading-normal underline decoration-dashed decoration-[1.5px] underline-offset-[5px];
   }
 
   .hhh-text-body-bold {
-    @apply font-sans font-medium leading-normal text-primary-12;
+    @apply text-body font-sans font-medium leading-normal;
   }
 
   .hhh-text-body-italic {
-    @apply font-sans font-medium italic leading-normal text-primary-12;
+    @apply text-body font-sans font-medium italic leading-normal;
   }
 
   .hhh-text-caption {
-    @apply font-sans text-sm font-light leading-normal text-primary-12/50;
+    @apply text-caption font-sans text-sm font-light leading-normal;
   }
 
   .hhh-text-caption-ref {
-    @apply font-sans text-sm font-normal leading-normal text-primary-12/80 underline decoration-primary-12/50 decoration-dashed decoration-[1.5px] underline-offset-[5px];
+    @apply text-caption-ref decoration-caption-ref/50 font-sans text-sm font-normal leading-normal underline decoration-dashed decoration-[1.5px] underline-offset-[5px];
   }
 
   .hhh-text-caption-bold {
-    @apply font-sans text-sm font-medium leading-normal text-primary-12/50;
+    @apply text-caption font-sans text-sm font-medium leading-normal;
   }
 
   .hhh-text-caption-italic {
-    @apply font-sans text-sm font-light italic leading-normal text-primary-12/50;
+    @apply text-caption font-sans text-sm font-light italic leading-normal;
   }
 
   /* www */
@@ -264,8 +264,13 @@
     --color-accent-11: var(--color-cyan-11);
     --color-accent-12: var(--color-cyan-12);
 
-    --color-background: var(--color-primary-2);
     --color-text: var(--color-primary-12);
+
+    --color-background: rgb(var(--color-primary-2));
+    --color-body: rgb(var(--color-primary-12) / 0.9);
+    --color-body-ref: rgb(var(--color-primary-12));
+    --color-caption: rgb(var(--color-primary-10));
+    --color-caption-ref: rgb(var(--color-primary-11));
   }
 
   .danger-theme {
@@ -284,6 +289,7 @@
   }
 
   .danger-theme2 {
+    /* todo: delete */
     --color-primary-1: var(--color-red-1);
     --color-primary-2: var(--color-red-2);
     --color-primary-3: var(--color-red-3);
@@ -297,8 +303,13 @@
     --color-primary-11: var(--color-red-11);
     --color-primary-12: var(--color-red-12);
 
-    --color-background: var(--color-slate-5);
-    --color-text: var(--color-red-10);
+    --color-text: var(--color-red-10); /* TODO: deprecated */
+
+    --color-background: rgb(var(--color-slate-5));
+    --color-body: rgb(var(--color-red-10));
+    --color-body-ref: rgb(var(--color-red-10));
+    --color-caption: rgb(var(--color-red-10));
+    --color-caption-ref: rgb(var(--color-red-10));
   }
 
   .success-theme {
@@ -314,8 +325,16 @@
     --color-accent-10: var(--color-lime-10);
     --color-accent-11: var(--color-lime-11);
     --color-accent-12: var(--color-lime-12);
+  }
 
-    --color-background: var(--color-slate-5);
+  .success-theme2 {
+    --color-text: rgb(var(--color-lime-10));
+
+    --color-background: rgb(var(--color-slate-5));
+    --color-body: rgb(var(--color-lime-10));
+    --color-body-ref: rgb(var(--color-lime-10));
+    --color-caption: rgb(var(--color-lime-10));
+    --color-caption-ref: rgb(var(--color-lime-10));
   }
 
   .warning-theme {

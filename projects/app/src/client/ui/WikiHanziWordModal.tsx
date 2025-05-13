@@ -93,24 +93,20 @@ export const WikiHanziWordModal = ({
                       {hanziWordSkillData.data.glossHint == null ? null : (
                         <>
                           <View className="h-[1px] w-full bg-primary-8" />
-                          <Text className="hhh-text-body">
-                            <Hhhmark
-                              source={hanziWordSkillData.data.glossHint}
-                              context="body"
-                            />
-                          </Text>
+                          <Hhhmark
+                            source={hanziWordSkillData.data.glossHint}
+                            context="body"
+                          />
                         </>
                       )}
 
                       {wikiEntry.data.interpretation == null ? null : (
                         <>
                           <View className="h-[1px] w-full bg-primary-8" />
-                          <Text className="hhh-text-body">
-                            <Hhhmark
-                              source={wikiEntry.data.interpretation}
-                              context="body"
-                            />
-                          </Text>
+                          <Hhhmark
+                            source={wikiEntry.data.interpretation}
+                            context="body"
+                          />
                         </>
                       )}
                     </View>
