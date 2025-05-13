@@ -91,7 +91,7 @@ export default function RadicalPage() {
   return (
     <View className="flex-1 items-center bg-background">
       <View className="w-[100%] max-w-[600px] flex-row items-center gap-3 pt-safe-offset-4 px-safe-or-4">
-        <CloseButton tintColor="#3C464D" />
+        <CloseButton />
       </View>
       <ScrollView contentContainerClassName="px-safe-or-4 flex-1 pb-2">
         <View className="flex-row items-center gap-2 self-center py-4">
@@ -106,7 +106,7 @@ export default function RadicalPage() {
         </View>
 
         <View className="items-center justify-center gap-5">
-          <Text className="text-body font-cursive text-5xl">not</Text>
+          <Text className="font-cursive text-5xl text-body">not</Text>
           <View className="items-center gap-2">
             <LinearGradient
               colors={GradientPink}
@@ -122,7 +122,7 @@ export default function RadicalPage() {
                 </G>
               </Svg>
             </LinearGradient>
-            <Text className="text-body text-3xl opacity-50">
+            <Text className="text-3xl text-body opacity-50">
               ⿱ <Text className="font-chinese">一 尢</Text>
             </Text>
           </View>
@@ -131,7 +131,7 @@ export default function RadicalPage() {
         <View className="flex-1"></View>
 
         <View className="max-w-[400px] justify-center">
-          <Text className="text-body text-center text-2xl">
+          <Text className="text-center text-2xl text-body">
             Imagine a straight line on top of a bent person trying to stand up
             but failing, so they are{` `}
             <Text className="font-bold text-[#04ABF6]">not</Text>
@@ -162,19 +162,19 @@ export default function RadicalPage() {
             <View className="my-2 h-2 w-12 self-center rounded bg-primary-8" />
 
             <View>
-              <Text className="text-body self-center font-semibold">
+              <Text className="self-center font-semibold text-body">
                 Explanation
               </Text>
             </View>
 
             <View className="mt-6 flex-row items-center gap-2 self-center">
-              <Text className="text-body font-chinese text-5xl">无</Text>
-              <Text className="text-body text-5xl opacity-50">•</Text>
-              <Text className="text-body font-cursive text-5xl">not</Text>
+              <Text className="font-chinese text-5xl text-body">无</Text>
+              <Text className="text-5xl text-body opacity-50">•</Text>
+              <Text className="font-cursive text-5xl text-body">not</Text>
             </View>
 
             <View className="my-4 flex-row items-center gap-2 self-center">
-              <Text className="text-body text-2xl">
+              <Text className="text-2xl text-body">
                 <Text className="opacity-50">⿱</Text>
                 {` `}
                 <Text className="font-chinese">一 尢</Text>

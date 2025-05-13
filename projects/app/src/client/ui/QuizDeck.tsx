@@ -157,15 +157,8 @@ export const QuizDeck = ({ className }: { className?: string }) => {
   return (
     <View className={className}>
       <View className="mb-[20px] w-full max-w-[600px] flex-row items-center gap-[24px] self-center px-[16px]">
-        <CloseButton tintColor="#3C464D" />
-        <QuizProgressBar
-          progress={quizProgress.progress}
-          // colors={
-          //   streakCount >= 2
-          //     ? [`#E861F8`, `#414DF6`, `#75F076`] // streak
-          //     : [`#3F4CF5`, `#3F4CF5`] // solid blue
-          // }
-        />
+        <CloseButton />
+        <QuizProgressBar progress={quizProgress.progress} />
       </View>
 
       <NavigationIndependentTree>
