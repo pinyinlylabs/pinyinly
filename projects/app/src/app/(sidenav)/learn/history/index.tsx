@@ -1,14 +1,18 @@
 import { targetSkillsReviewQueue } from "@/client/query";
 import { useRizzleQueryPaged } from "@/client/ui/ReplicacheContext";
 import { SkillRefText } from "@/client/ui/SkillRefText";
-import { skillTypeFromSkill, skillTypeToShorthand } from "@/data/skills";
+import {
+  needsToBeIntroduced,
+  skillTypeFromSkill,
+  skillTypeToShorthand,
+} from "@/data/skills";
 import {
   emptyArray,
   inverseSortComparator,
   sortComparatorDate,
 } from "@/util/collections";
-import { Rating } from "@/util/fsrs";
-import { useMemo } from "react";
+import { fsrsIsStable, Rating } from "@/util/fsrs";
+import { useEffect, useMemo, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 
 export default function HistoryPage() {
@@ -22,6 +26,14 @@ export default function HistoryPage() {
     async (r) => {
       const res = await r.queryPaged.skillRating.byCreatedAt().toArray();
       return res.reverse().slice(0, 100);
+    },
+  );
+
+  const skillStatesQuery = useRizzleQueryPaged(
+    [HistoryPage.name, `skillStates`],
+    async (r) => {
+      const res = await r.queryPaged.skillState.scan().toArray();
+      return new Map(res.map(([, value]) => [value.skill, value]));
     },
   );
 
@@ -52,9 +64,46 @@ export default function HistoryPage() {
       .slice(0, 100);
   }, [hanziGlossMistakesQuery.data, hanziPinyinMistakesQuery.data]);
 
+  const [_stats, setStats] = useState<{
+    stableCount: number;
+    totalCount: number;
+    needsToBeIntroducedCount: number;
+    unstableCount: number;
+  }>();
+  useEffect(() => {
+    let stableCount = 0;
+    let totalCount = 0;
+    let needsToBeIntroducedCount = 0;
+    let unstableCount = 0;
+    for (const skillState of skillStatesQuery.data?.values() ?? []) {
+      if (fsrsIsStable(skillState.srs)) {
+        stableCount++;
+      } else {
+        if (!needsToBeIntroduced(skillState.srs, new Date())) {
+          unstableCount++;
+        }
+      }
+      totalCount++;
+      if (needsToBeIntroduced(skillState.srs, new Date())) {
+        needsToBeIntroducedCount++;
+      }
+    }
+    setStats({
+      stableCount,
+      totalCount,
+      needsToBeIntroducedCount,
+      unstableCount,
+    });
+  }, [skillStatesQuery.data]);
+
   return (
     <ScrollView contentContainerClassName="py-safe-offset-4 px-safe-or-4 items-center">
       <View className="max-w-[600px] gap-4">
+        {/* <View>
+          <Text className="hhh-text-body">
+            {JSON.stringify(stats, null, 2)}
+          </Text>
+        </View> */}
         <View className="flex-row gap-2">
           <View className="flex-1 items-center gap-[10px]">
             <Text className="text-xl text-body">available queue</Text>
@@ -101,6 +150,10 @@ export default function HistoryPage() {
                               : value.rating}
                       {` `}
                       <SkillRefText skill={skill} context="body" />:{` `}
+                      {skillStatesQuery.data
+                        ?.get(skill)
+                        ?.srs.stability.toFixed(1)}
+                      {` `}
                       {createdAt.toISOString()}
                     </Text>
                   </View>
