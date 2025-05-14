@@ -413,6 +413,30 @@ export function skillReviewQueue({
   let newOverDueAt: Date | null = null;
   let newDueAt: Date | null = null;
 
+  // Calculate how many unstable skills there are for each skill type.
+  const unstableSkillCounts = new Map<SkillType, number>();
+  for (const [skill, srsState] of skillSrsStates) {
+    const alreadyIntroduced = !needsToBeIntroduced(srsState, now);
+    if (alreadyIntroduced && !isStable(srsState)) {
+      const skillType = skillTypeFromSkill(skill);
+      const count = unstableSkillCounts.get(skillType) ?? 0;
+      unstableSkillCounts.set(skillType, count + 1);
+    }
+  }
+
+  // Check if introducing a skill would be too overwhelming. There is a limit on
+  // how many unstable skills can be introduced at once. This is to avoid
+  // overwhelming the user with too many new skills at once.
+  function hasLearningCapacity(skill: Skill): boolean {
+    // 💭 maybe this should be dynamic, based on the number of skills that have
+    // been learned. So if you know 1000 words you can probably learn more at
+    // once than if you only know 10 words.
+    const throttleLimit = 15;
+    return (
+      (unstableSkillCounts.get(skillTypeFromSkill(skill)) ?? 0) < throttleLimit
+    );
+  }
+
   function enqueueReviewOnce(
     skill: Skill,
     srsState: SrsState | null | undefined,
@@ -423,7 +447,7 @@ export function skillReviewQueue({
     learningOrderIncluded.add(skill);
 
     if (srsState == null || needsToBeIntroduced(srsState, now)) {
-      if (hasStableDependencies(skill)) {
+      if (hasStableDependencies(skill) && hasLearningCapacity(skill)) {
         learningOrderNew.push(skill);
       } else {
         learningOrderBlocked.push(skill);
@@ -828,3 +852,24 @@ export function needsToBeIntroduced(
     }
   }
 }
+
+export function isStable(srsState: SrsState | undefined | null): boolean {
+  if (srsState == null) {
+    return false;
+  }
+
+  switch (srsState.type) {
+    case SrsType.FsrsFourPointFive: {
+      return fsrsIsStable(srsState);
+    }
+    case SrsType.Mock: {
+      // If the schedule interval is more than a week, then it's stable.
+      return (
+        srsState.nextReviewAt.getTime() - srsState.prevReviewAt.getTime() >
+        weekInMillis
+      );
+    }
+  }
+}
+
+const weekInMillis = 1000 * 60 * 60 * 24 * 7;
