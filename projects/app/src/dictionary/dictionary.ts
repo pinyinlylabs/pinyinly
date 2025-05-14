@@ -420,7 +420,14 @@ export const loadWiki = memoize0(async () =>
 );
 
 export const hanziWordMigrationsSchema = z
-  .array(z.tuple([hanziWordSchema, hanziWordSchema]))
+  .array(
+    z.tuple([
+      hanziWordSchema,
+      hanziWordSchema
+        .nullable()
+        .describe(`the new hanzi word, or null when it should be deleted`),
+    ]),
+  )
   .transform((x) => new Map(x));
 
 export const loadHanziWordMigrations = memoize0(async () =>

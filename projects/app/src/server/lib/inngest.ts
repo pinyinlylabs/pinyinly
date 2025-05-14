@@ -399,34 +399,68 @@ const migrateHanziWords = inngest.createFunction(
   { cron: `30 * * * *` },
   async ({ step }) => {
     const hanziWordMigrations = await loadHanziWordMigrations();
-    const skillMigrations = [...hanziWordMigrations].flatMap(
+    // HanziWord -> HanziWord
+    const skillRenames = [...hanziWordMigrations].flatMap(
       ([oldHanziWord, newHanziWord]) =>
-        hanziWordSkillTypes.map(
-          (skillType) =>
-            [
+        newHanziWord == null // `null` indicates a deletion rather than a rename, so skip these.
+          ? []
+          : hanziWordSkillTypes.map(
+              (skillType) =>
+                [
+                  hanziWordSkill(skillType, oldHanziWord),
+                  hanziWordSkill(skillType, newHanziWord),
+                ] as const,
+            ),
+    );
+    // HanziWord -> null
+    const skillDeletes = [...hanziWordMigrations].flatMap(
+      ([oldHanziWord, newHanziWord]) =>
+        // When newHanziWord is null it's a deletion rather than a rename.
+        newHanziWord == null
+          ? hanziWordSkillTypes.map((skillType) =>
               hanziWordSkill(skillType, oldHanziWord),
-              hanziWordSkill(skillType, newHanziWord),
-            ] as const,
-        ),
+            )
+          : [],
     );
 
+    //
+    // skillRating
+    //
+
     await step.run(
-      `migrate skillRating.skill`,
+      `skillRating.skill renames`,
       async () =>
         await withDrizzle(
           async (db) =>
             await pgBatchUpdate(db, {
               whereColumn: s.skillRating.skill,
               setColumn: s.skillRating.skill,
-              updates: skillMigrations,
+              updates: skillRenames,
             }),
         ),
     );
 
-    await step.run(`migrate skillState.skill`, async () => {
+    await step.run(
+      `skillRating.skill deletes`,
+      async () =>
+        await withDrizzle(async (db) => {
+          const deletedRows = await db
+            .delete(s.skillRating)
+            .where(inArray(s.skillRating.skill, skillDeletes))
+            .returning();
+
+          return { deletedRows };
+        }),
+    );
+
+    //
+    // skillState
+    //
+
+    await step.run(`skillState.skill renames`, async () => {
       return await withDrizzle(async (db) => {
         return await withRepeatableReadTransaction(db, async (db) => {
-          const newSkills = skillMigrations.map(([, newSkill]) => newSkill);
+          const newSkills = skillRenames.map(([, newSkill]) => newSkill);
 
           const skillStatesWithNewSkill = await db.query.skillState.findMany({
             where: (t) => inArray(t.skill, newSkills),
@@ -435,7 +469,7 @@ const migrateHanziWords = inngest.createFunction(
             skillStatesWithNewSkill.map((r) => r.skill),
           );
 
-          const toMigrate = skillMigrations.filter(
+          const toMigrate = skillRenames.filter(
             ([, newSkill]) =>
               // We only want to do renames for skillState rows that don't
               // already exist in the new format (a new record would exist if a
@@ -443,7 +477,7 @@ const migrateHanziWords = inngest.createFunction(
               !existingNewSkills.has(newSkill),
           );
 
-          const toDelete = skillMigrations
+          const toDelete = skillRenames
             .filter(([, newSkill]) =>
               // These are stale skill states that
               existingNewSkills.has(newSkill),
@@ -451,9 +485,7 @@ const migrateHanziWords = inngest.createFunction(
             .map(([oldSkill]) => oldSkill);
 
           // Sanity check that we're not doubling up.
-          invariant(
-            toMigrate.length + toDelete.length === skillMigrations.length,
-          );
+          invariant(toMigrate.length + toDelete.length === skillRenames.length);
 
           // Migrate old -> new.
           const { affectedRows: migratedCount } = await pgBatchUpdate(db, {
@@ -472,6 +504,19 @@ const migrateHanziWords = inngest.createFunction(
         });
       });
     });
+
+    await step.run(
+      `skillState.skill deletes`,
+      async () =>
+        await withDrizzle(async (db) => {
+          const deletedRows = await db
+            .delete(s.skillState)
+            .where(inArray(s.skillState.skill, skillDeletes))
+            .returning();
+
+          return { deletedRows };
+        }),
+    );
   },
 );
 
