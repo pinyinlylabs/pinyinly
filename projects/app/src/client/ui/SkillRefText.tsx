@@ -41,14 +41,67 @@ export const SkillRefText = ({
       skill = skill as DeprecatedSkill;
       return <Text>{skillTypeToShorthand(skillTypeFromSkill(skill))}</Text>;
     }
-    case SkillType.HanziWordToGloss:
-    case SkillType.HanziWordToPinyin:
-    case SkillType.HanziWordToPinyinInitial:
-    case SkillType.HanziWordToPinyinFinal:
-    case SkillType.HanziWordToPinyinTone:
+    case SkillType.HanziWordToPinyin: {
+      skill = skill as HanziWordSkill;
+      const hanziWord = hanziWordFromSkill(skill);
+      return (
+        <HanziWordRefText
+          hanziWord={hanziWord}
+          showGloss={false}
+          showPinyin
+          context={context}
+        />
+      );
+    }
+    case SkillType.HanziWordToPinyinInitial: {
+      skill = skill as HanziWordSkill;
+      const hanziWord = hanziWordFromSkill(skill);
+      return (
+        <>
+          <HanziWordRefText
+            hanziWord={hanziWord}
+            showGloss={false}
+            showPinyin
+            context={context}
+          />
+          <Text className="hhh-text-caption"> (initial)</Text>
+        </>
+      );
+    }
+    case SkillType.HanziWordToPinyinFinal: {
+      skill = skill as HanziWordSkill;
+      const hanziWord = hanziWordFromSkill(skill);
+      return (
+        <>
+          <HanziWordRefText
+            hanziWord={hanziWord}
+            showGloss={false}
+            showPinyin
+            context={context}
+          />
+          <Text className="hhh-text-caption"> (final)</Text>
+        </>
+      );
+    }
+    case SkillType.HanziWordToPinyinTone: {
+      skill = skill as HanziWordSkill;
+      const hanziWord = hanziWordFromSkill(skill);
+      return (
+        <>
+          <HanziWordRefText
+            hanziWord={hanziWord}
+            showGloss={false}
+            showPinyin
+            context={context}
+          />
+          <Text className="hhh-text-caption"> (tone)</Text>
+        </>
+      );
+    }
     case SkillType.GlossToHanziWord:
     case SkillType.PinyinToHanziWord:
-    case SkillType.ImageToHanziWord: {
+    case SkillType.ImageToHanziWord:
+    case SkillType.HanziWordToGloss: {
       skill = skill as HanziWordSkill;
       const hanziWord = hanziWordFromSkill(skill);
       return <HanziWordRefText hanziWord={hanziWord} context={context} />;
