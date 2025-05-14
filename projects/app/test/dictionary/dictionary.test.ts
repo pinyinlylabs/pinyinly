@@ -704,7 +704,19 @@ await test(`${loadHanziWordMigrations.name} suite`, async () => {
     const dictionary = await loadDictionary();
     assert.deepEqual(
       [...hanziWordRenames].filter(
-        ([, newHanziWord]) => !dictionary.has(newHanziWord),
+        ([, newHanziWord]) =>
+          newHanziWord != null && !dictionary.has(newHanziWord),
+      ),
+      [],
+    );
+  });
+
+  await test(`no "to" keys are also "from" keys (could cause loops)`, async () => {
+    const hanziWordRenames = await loadHanziWordMigrations();
+    assert.deepEqual(
+      [...hanziWordRenames].filter(
+        ([, newHanziWord]) =>
+          newHanziWord != null && hanziWordRenames.has(newHanziWord),
       ),
       [],
     );
