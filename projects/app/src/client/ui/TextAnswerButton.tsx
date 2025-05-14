@@ -309,12 +309,6 @@ const rectClass = tv({
   },
   compoundVariants: [
     {
-      disabled: false,
-      filled: false,
-      hovered: true,
-      class: `border-body/30`,
-    },
-    {
       filled: false,
       pressed: true,
       class: `border-cyan-5`,
@@ -323,6 +317,11 @@ const rectClass = tv({
     {
       filled: false,
       class: `border-body/20`,
+    },
+    {
+      filled: false,
+      hovered: true,
+      class: `border-body/30`,
     },
     // filled border
     {
