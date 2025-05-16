@@ -104,7 +104,7 @@ tasks:
       runInCI: false
 
   deployEasUpdateEas:
-    command: npx -y eas-cli@16.4.1 update --skip-bundler --input-dir @group(buildEasUpdateOutdir) --auto --non-interactive
+    command: npx -y eas-cli@16.5.0 update --skip-bundler --input-dir @group(buildEasUpdateOutdir) --auto --non-interactive
     deps:
       - buildEasUpdate
     options:
