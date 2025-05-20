@@ -1,4 +1,8 @@
-import { buildHanziWord } from "@/dictionary/dictionary";
+import {
+  buildHanziWord,
+  hanziFromHanziWord,
+  meaningKeyFromHanziWord,
+} from "@/dictionary/dictionary";
 import type { HanziWord } from "./model";
 
 export interface HhhmarkHanziWordNode {
@@ -155,4 +159,25 @@ export function parseHhhmark(value: string): HhhmarkNode[] {
   }
 
   return nodes;
+}
+
+export function stringifyHhhmark(nodes: HhhmarkNode[]): string {
+  return nodes
+    .map((node) => {
+      switch (node.type) {
+        case `text`: {
+          return node.text;
+        }
+        case `hanziWord`: {
+          return `{${hanziFromHanziWord(node.hanziWord)}:${node.showGloss ? `` : `-`}${meaningKeyFromHanziWord(node.hanziWord)}}`;
+        }
+        case `bold`: {
+          return `**${node.text}**`;
+        }
+        case `italic`: {
+          return `*${node.text}*`;
+        }
+      }
+    })
+    .join(``);
 }
