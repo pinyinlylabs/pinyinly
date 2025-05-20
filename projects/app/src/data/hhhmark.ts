@@ -4,6 +4,7 @@ import type { HanziWord } from "./model";
 export interface HhhmarkHanziWordNode {
   type: `hanziWord`;
   hanziWord: HanziWord;
+  showGloss: boolean;
 }
 
 export interface HhhmarkTextNode {
@@ -45,19 +46,22 @@ export function parseHhhmark(value: string): HhhmarkNode[] {
 
   // Regex patterns for HanziWord, Bold, Italic, and smart quotes
   const regex =
-    /{([^:]+):([^}]+)}|\*\*(.+?)\*\*|\*(.+?)\*|'([^']+)'|"([^"]+)"|(\b\w+)'(\w+)/g;
+    /{([^:]+):(-)?([^}]+)}|\*\*(.+?)\*\*|\*(.+?)\*|'([^']+)'|"([^"]+)"|(\b\w+)'(\w+)/g;
   let match;
   let lastIndex = 0;
 
   while ((match = regex.exec(value)) !== null) {
     const [
       _fullMatch,
-      hanziWord,
-      meaning,
+      hanziWordHanzi,
+      hanziWordHideGloss,
+      hanziWordMeaningKey,
       boldText,
       italicText,
       singleQuoteText,
       doubleQuoteText,
+      apostropheBeforeText,
+      apostropheAfterText,
     ] = match;
     const startIndex = match.index;
     const endIndex = regex.lastIndex;
@@ -76,11 +80,12 @@ export function parseHhhmark(value: string): HhhmarkNode[] {
       }
     }
 
-    if (hanziWord != null && meaning != null) {
+    if (hanziWordHanzi != null && hanziWordMeaningKey != null) {
       // Add HanziWord node for the match
       nodes.push({
         type: `hanziWord`,
-        hanziWord: buildHanziWord(hanziWord, meaning),
+        hanziWord: buildHanziWord(hanziWordHanzi, hanziWordMeaningKey),
+        showGloss: hanziWordHideGloss != `-`,
       });
     } else if (boldText != null) {
       // Add Bold node for the match
@@ -118,9 +123,9 @@ export function parseHhhmark(value: string): HhhmarkNode[] {
           text,
         });
       }
-    } else if (match[7] != null && match[8] != null) {
+    } else if (apostropheBeforeText != null && apostropheAfterText != null) {
       // Add or merge Text node with smart single quotes within words
-      const singleQuoteTextNode = `${match[7]}’${match[8]}`;
+      const singleQuoteTextNode = `${apostropheBeforeText}’${apostropheAfterText}`;
       const lastNode = nodes.at(-1);
       if (lastNode?.type === `text`) {
         lastNode.text += singleQuoteTextNode; // Merge with the last text node

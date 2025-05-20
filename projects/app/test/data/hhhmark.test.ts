@@ -24,6 +24,26 @@ await test(`${parseHhhmark.name} suite`, async () => {
       {
         hanziWord: `好:good`,
         type: `hanziWord`,
+        showGloss: true,
+      },
+      {
+        text: `.`,
+        type: `text`,
+      },
+    ]);
+  });
+
+  await test(`parses HanziWord references with omitted gloss`, async () => {
+    const nodes = parseHhhmark(`See also {好:-good}.`);
+    assert.deepEqual(nodes, [
+      {
+        text: `See also `,
+        type: `text`,
+      },
+      {
+        hanziWord: `好:good`,
+        type: `hanziWord`,
+        showGloss: false,
       },
       {
         text: `.`,
