@@ -71,5 +71,22 @@
       ],
       "interpretation": "① **One** voice (口) speaks under a single command (一), all under the control of a higher authority (𠃌 wrapping stroke) — someone is in **charge**.\n\nOr more vivid:\n\n② Imagine a **manager’s voice** (口) under a **single rule** (一) — all wrapped tightly by an **enclosure** (𠃌) like a rolled scroll or decree. The person speaking isn’t just talking — they speak with **authority**. This is someone who **oversees, commands**, or **manages**."
     }
+  ],
+  [
+    "钟",
+    {
+      "componentsIdc": "⿰",
+      "components": [
+        {
+          "hanziWord": "钅:metal",
+          "description": "Indicates the object is made of metal — commonly used for tools, coins, and instruments."
+        },
+        {
+          "hanziWord": "中:middle",
+          "description": "Gives the sound zhōng and suggests something resonating from the center"
+        }
+      ],
+      "interpretation": "A metal ({钅:-metal}) object that resonates from its center ({中:-middle}) — a bell, and by extension, clocks."
+    }
   ]
 ]

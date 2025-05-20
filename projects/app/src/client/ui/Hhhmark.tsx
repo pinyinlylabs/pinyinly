@@ -16,16 +16,6 @@ export const hhhText = tv({
   },
 });
 
-export const hhhTextRef = tv({
-  variants: {
-    context: {
-      [`body-2xl`]: `hhh-text-body-2xl-ref`,
-      body: `hhh-text-body-ref`,
-      caption: `hhh-text-caption-ref`,
-    },
-  },
-});
-
 export const hhhTextBold = tv({
   variants: {
     context: {
@@ -72,6 +62,7 @@ export const Hhhmark = ({
                   key={`hanziWord-${index}`}
                   context={context}
                   hanziWord={node.hanziWord}
+                  showGloss={node.showGloss}
                 />
               );
             }
