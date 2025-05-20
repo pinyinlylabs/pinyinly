@@ -105,5 +105,39 @@
       ],
       "interpretation": "A roof ({宀:-roof}) over the place you arrive ({至:-arrive}) — that’s a room."
     }
+  ],
+  [
+    "笑",
+    {
+      "componentsIdc": "⿱",
+      "components": [
+        {
+          "hanziWord": "𥫗:bamboo",
+          "description": "Semantic — bamboo radical, often associated with lightness, playfulness, or bamboo-based items"
+        },
+        {
+          "hanziWord": "夭:young",
+          "description": "Phonetic + symbolic — contributes to the sound and evokes a joyful, lively figure"
+        }
+      ],
+      "interpretation": "A lively person ({夭:-young}) paired with bamboo ({𥫗:-bamboo}) — together evoking the lightness and joy of laughter or **smiling**."
+    }
+  ],
+  [
+    "夭",
+    {
+      "componentsIdc": "⿱",
+      "components": [
+        {
+          "hanziWord": "丿:slash",
+          "description": "Symbolic — may represent an imbalance, fall, or drooping movement"
+        },
+        {
+          "hanziWord": "大:big",
+          "description": "Semantic — person with arms outstretched, represents a person or vitality, common in human-related characters"
+        }
+      ],
+      "interpretation": "A person ({大:-big}) under a slanting stroke ({丿:-slash}) — symbolizing either wilting, youthful delicacy, or a life cut short."
+    }
   ]
 ]

@@ -319,32 +319,32 @@ export const partOfSpeechSchema = z.enum([
 
 export const hanziWordMeaningSchema = z.object({
   gloss: z.array(z.string()),
-  glossHint: z.string().optional().nullable(),
+  glossHint: z.string().nullable().optional(),
   pinyin: z
     .array(pinyinTextSchema, {
       description: `all valid pinyin variations for this meaning (might be omitted for radicals without pronunciation)`,
     })
-    .optional()
-    .nullable(),
+    .nullable()
+    .optional(),
   example: z
     .string({
       description: `a Chinese sentence that includes this hanzi`,
     })
-    .optional()
-    .nullable(),
+    .nullable()
+    .optional(),
   partOfSpeech: partOfSpeechSchema,
   componentFormOf: hanziCharSchema
     .describe(
       `the primary form of this hanzi (only relevant for component-form hanzi)`,
     )
-    .optional()
-    .nullable(),
+    .nullable()
+    .optional(),
   visualVariants: z
     .array(hanziTextSchema, {
       description: `Hanzi with the same meaning but visually different. Only included in rare cases (e.g. radicals with multiple visual forms). `,
     })
-    .optional()
-    .nullable(),
+    .nullable()
+    .optional(),
   definition: z.string(),
 });
 
