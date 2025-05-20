@@ -136,7 +136,7 @@
     "ink-select-input": "^6.0.0",
     "ink-spinner": "^5.0.0",
     "ink-text-input": "^6.0.0",
-    "openai": "^4.68.4",
+    "openai": "^4.100.0",
     "prettier": "^3.4.2",
     "prettier-plugin-tailwindcss": "^0.6.9",
     "react-test-renderer": "18.x",

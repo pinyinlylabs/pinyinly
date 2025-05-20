@@ -1,4 +1,4 @@
-import { parseHhhmark } from "#data/hhhmark.ts";
+import { parseHhhmark, stringifyHhhmark } from "#data/hhhmark.ts";
 
 import assert from "node:assert/strict";
 import test from "node:test";
@@ -106,5 +106,29 @@ await test(`${parseHhhmark.name} suite`, async () => {
         type: `text`,
       },
     ]);
+  });
+});
+
+await test(`${stringifyHhhmark.name} suite`, async () => {
+  const roundTrip = (str: string) => stringifyHhhmark(parseHhhmark(str));
+
+  await test(`roundtrips bold text`, async () => {
+    const str = `This is **bold** text.`;
+    expect(roundTrip(str)).toBe(str);
+  });
+
+  await test(`roundtrips italic text`, async () => {
+    const str = `This is *italic* text.`;
+    expect(roundTrip(str)).toBe(str);
+  });
+
+  await test(`roundtrips HanziWord references`, async () => {
+    const str = `This is {好:good}.`;
+    expect(roundTrip(str)).toBe(str);
+  });
+
+  await test(`roundtrips HanziWord references with omitted gloss`, async () => {
+    const str = `This is {好:-good}.`;
+    expect(roundTrip(str)).toBe(str);
   });
 });
