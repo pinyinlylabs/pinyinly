@@ -64,9 +64,10 @@ export const QuizDeck = ({ className }: { className?: string }) => {
       return question ?? null;
     },
   );
-  const nextQuestion = nextQuestionQuery.isFetching
-    ? null
-    : nextQuestionQuery.data;
+  const nextQuestion =
+    nextQuestionQuery.isSuccess && !nextQuestionQuery.isFetching
+      ? nextQuestionQuery.data
+      : null;
 
   const [question, setQuestion] = useState<Question>();
 

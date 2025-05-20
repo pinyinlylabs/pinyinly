@@ -2,13 +2,22 @@ import { useHanziWikiEntry } from "@/client/hooks/useHanziWikiEntry";
 import { useHanziWordMeaning } from "@/client/hooks/useHanziWordMeaning";
 import { splitHanziText } from "@/data/hanzi";
 import type { HanziWord } from "@/data/model";
+import { hanziWordSkillTypes } from "@/data/model";
+import type { Skill, SkillState } from "@/data/rizzleSchema";
+import {
+  hanziWordSkill,
+  skillTypeFromSkill,
+  skillTypeToShorthand,
+} from "@/data/skills";
 import { hanziFromHanziWord } from "@/dictionary/dictionary";
 import { useMemo } from "react";
 import { ScrollView, Text, View } from "react-native";
+import { DevLozenge } from "./DevLozenge";
 import { HanziWordRefText } from "./HanziWordRefText";
 import { Hhhmark } from "./Hhhmark";
 import { PageSheetModal } from "./PageSheetModal";
 import { RectButton2 } from "./RectButton2";
+import { useRizzleQueryPaged } from "./ReplicacheContext";
 
 export const WikiHanziWordModal = ({
   hanziWord,
@@ -26,6 +35,28 @@ export const WikiHanziWordModal = ({
     [hanziWord],
   );
 
+  const skills = useMemo(() => {
+    return hanziWordSkillTypes.map((skillType) =>
+      hanziWordSkill(skillType, hanziWord),
+    );
+  }, [hanziWord]);
+
+  const skillStatesQuery = useRizzleQueryPaged(
+    [WikiHanziWordModal, `skillStates`, hanziWord],
+    async (r) => {
+      const skillStates = await r.replicache.query(async (tx) => {
+        const skillStates: [Skill, SkillState | null | undefined][] = [];
+        for (const skill of skills) {
+          const skillState = await r.query.skillState.get(tx, { skill });
+          skillStates.push([skill, skillState]);
+        }
+        return skillStates;
+      });
+
+      return skillStates;
+    },
+  );
+
   return (
     <PageSheetModal onDismiss={onDismiss}>
       {({ dismiss }) =>
@@ -33,100 +64,122 @@ export const WikiHanziWordModal = ({
           <>
             <ScrollView
               className="flex-1"
-              contentContainerClassName="px-4 py-4"
+              contentContainerClassName="px-4 py-4 gap-4"
             >
-              <View className="gap-4">
-                <View className="flex-row items-center gap-2">
-                  <View className="flex-row gap-1">
-                    {characters.map((character) => (
-                      <View key={character} className="items-start">
-                        <Text className="font-karla text-[60px] text-body">
-                          {character}
+              <View className="flex-row items-center gap-2">
+                <View className="flex-row gap-1">
+                  {characters.map((character) => (
+                    <View key={character} className="items-start">
+                      <Text className="font-karla text-[60px] text-body">
+                        {character}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+
+                {hanziWordSkillData.data.pinyin == null ? null : (
+                  <Text className="font-karla text-2xl text-body/50">
+                    {hanziWordSkillData.data.pinyin.join(`, `)}
+                  </Text>
+                )}
+              </View>
+
+              <View className="gap-1">
+                <Text className="font-karla text-xl text-body">
+                  {hanziWordSkillData.data.gloss.join(`, `)}
+                </Text>
+                <Hhhmark
+                  source={hanziWordSkillData.data.definition}
+                  context="caption"
+                />
+              </View>
+
+              {wikiEntry.data?.components == null ? null : (
+                <View className="gap-1">
+                  <Text className="font-karla text-xs uppercase text-primary-10">
+                    Interpretation
+                  </Text>
+                  <View className="gap-4 rounded-xl bg-primary-5 p-4">
+                    {wikiEntry.data.components.map((component, i) => {
+                      return (
+                        <View key={i} className="flex-column gap-1">
+                          <Text className="hhh-text-body">
+                            {component.title ??
+                              (component.hanziWord == null ? null : (
+                                <HanziWordRefText
+                                  hanziWord={component.hanziWord}
+                                  context="body"
+                                />
+                              )) ??
+                              `???`}
+                          </Text>
+                          <Text className="hhh-text-caption">
+                            {component.description}
+                          </Text>
+                        </View>
+                      );
+                    })}
+
+                    {hanziWordSkillData.data.glossHint == null ? null : (
+                      <>
+                        <View className="h-[1px] w-full bg-primary-8" />
+                        <Hhhmark
+                          source={hanziWordSkillData.data.glossHint}
+                          context="body"
+                        />
+                      </>
+                    )}
+
+                    {wikiEntry.data.interpretation == null ? null : (
+                      <>
+                        <View className="h-[1px] w-full bg-primary-8" />
+                        <Hhhmark
+                          source={wikiEntry.data.interpretation}
+                          context="body"
+                        />
+                      </>
+                    )}
+                  </View>
+                </View>
+              )}
+
+              {wikiEntry.data?.visuallySimilar == null ? null : (
+                <View className="gap-1 font-karla">
+                  <Text className="text-xs uppercase text-body/90">
+                    Visually Similar
+                  </Text>
+
+                  <View className="flex-row flex-wrap gap-2 text-body">
+                    {wikiEntry.data.visuallySimilar.map((hanzi, i) => (
+                      <Text key={i}>{hanzi}</Text>
+                    ))}
+                  </View>
+                </View>
+              )}
+
+              {!__DEV__ || skillStatesQuery.data == null ? null : (
+                <View className="gap-1 font-karla">
+                  <Text className="text-xs uppercase text-body/90">
+                    Skills <DevLozenge />
+                  </Text>
+                  <View className="flex-col gap-2 text-body">
+                    {skillStatesQuery.data.map(([skill, skillState], i) => (
+                      <View key={i} className="flex-row items-center gap-2">
+                        <Text>
+                          {skillTypeToShorthand(skillTypeFromSkill(skill))}
+                        </Text>
+                        <Text>
+                          {Math.min(
+                            skillState?.srs.stability ?? 0,
+                            100,
+                          ).toFixed(0)}
+                          /100
                         </Text>
                       </View>
                     ))}
                   </View>
-
-                  {hanziWordSkillData.data.pinyin == null ? null : (
-                    <Text className="font-karla text-2xl text-body/50">
-                      {hanziWordSkillData.data.pinyin.join(`, `)}
-                    </Text>
-                  )}
                 </View>
-
-                <View className="gap-1">
-                  <Text className="font-karla text-xl text-body">
-                    {hanziWordSkillData.data.gloss.join(`, `)}
-                  </Text>
-                  <Hhhmark
-                    source={hanziWordSkillData.data.definition}
-                    context="caption"
-                  />
-                </View>
-
-                {wikiEntry.data?.components == null ? null : (
-                  <View className="gap-1">
-                    <Text className="font-karla text-xs uppercase text-primary-10">
-                      Interpretation
-                    </Text>
-                    <View className="gap-4 rounded-xl bg-primary-5 p-4">
-                      {wikiEntry.data.components.map((component, i) => {
-                        return (
-                          <View key={i} className="flex-column gap-1">
-                            <Text className="hhh-text-body">
-                              {component.title ??
-                                (component.hanziWord == null ? null : (
-                                  <HanziWordRefText
-                                    hanziWord={component.hanziWord}
-                                    context="body"
-                                  />
-                                )) ??
-                                `???`}
-                            </Text>
-                            <Text className="hhh-text-caption">
-                              {component.description}
-                            </Text>
-                          </View>
-                        );
-                      })}
-
-                      {hanziWordSkillData.data.glossHint == null ? null : (
-                        <>
-                          <View className="h-[1px] w-full bg-primary-8" />
-                          <Hhhmark
-                            source={hanziWordSkillData.data.glossHint}
-                            context="body"
-                          />
-                        </>
-                      )}
-
-                      {wikiEntry.data.interpretation == null ? null : (
-                        <>
-                          <View className="h-[1px] w-full bg-primary-8" />
-                          <Hhhmark
-                            source={wikiEntry.data.interpretation}
-                            context="body"
-                          />
-                        </>
-                      )}
-                    </View>
-                  </View>
-                )}
-
-                {wikiEntry.data?.visuallySimilar == null ? null : (
-                  <View className="gap-1 font-karla">
-                    <Text className="text-xs uppercase text-body/90">
-                      Visually Similar
-                    </Text>
-
-                    <View className="flex-row flex-wrap gap-2 text-body">
-                      {wikiEntry.data.visuallySimilar.map((hanzi, i) => (
-                        <Text key={i}>{hanzi}</Text>
-                      ))}
-                    </View>
-                  </View>
-                )}
-              </View>
+              )}
             </ScrollView>
 
             <View className="accent-theme2 border-t-2 border-primary-5 px-4 py-4 mb-safe">

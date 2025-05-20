@@ -489,8 +489,8 @@ const migrateHanziWords = inngest.createFunction(
 
           // Migrate old -> new.
           const { affectedRows: migratedCount } = await pgBatchUpdate(db, {
-            whereColumn: s.skillRating.skill,
-            setColumn: s.skillRating.skill,
+            whereColumn: s.skillState.skill,
+            setColumn: s.skillState.skill,
             updates: toMigrate,
           });
 
