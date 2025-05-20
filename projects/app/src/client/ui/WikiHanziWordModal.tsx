@@ -1,16 +1,17 @@
 import { useHanziWikiEntry } from "@/client/hooks/useHanziWikiEntry";
 import { useHanziWordMeaning } from "@/client/hooks/useHanziWordMeaning";
+import { useLocalQuery } from "@/client/hooks/useLocalQuery";
 import { splitHanziText } from "@/data/hanzi";
 import type { HanziWord } from "@/data/model";
 import { hanziWordSkillTypes } from "@/data/model";
-import type { Skill, SkillState } from "@/data/rizzleSchema";
+import type { Skill, SkillRating, SkillState } from "@/data/rizzleSchema";
 import {
   hanziWordSkill,
   skillTypeFromSkill,
   skillTypeToShorthand,
 } from "@/data/skills";
-import { hanziFromHanziWord } from "@/dictionary/dictionary";
-import { useMemo } from "react";
+import { hanziFromHanziWord, lookupHanzi } from "@/dictionary/dictionary";
+import { Fragment, useMemo } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { DevLozenge } from "./DevLozenge";
 import { HanziWordRefText } from "./HanziWordRefText";
@@ -41,8 +42,16 @@ export const WikiHanziWordModal = ({
     );
   }, [hanziWord]);
 
+  const otherMeaningsQuery = useLocalQuery({
+    queryKey: [WikiHanziWordModal.name, `otherMeanings`, hanziWord],
+    queryFn: async () => {
+      const res = await lookupHanzi(hanzi);
+      return res.filter(([otherHanziWord]) => otherHanziWord !== hanziWord);
+    },
+  });
+
   const skillStatesQuery = useRizzleQueryPaged(
-    [WikiHanziWordModal, `skillStates`, hanziWord],
+    [WikiHanziWordModal.name, `skillStates`, hanziWord],
     async (r) => {
       const skillStates = await r.replicache.query(async (tx) => {
         const skillStates: [Skill, SkillState | null | undefined][] = [];
@@ -54,6 +63,21 @@ export const WikiHanziWordModal = ({
       });
 
       return skillStates;
+    },
+  );
+
+  const skillRatingsQuery = useRizzleQueryPaged(
+    [WikiHanziWordModal.name, `skillRatings`, hanziWord],
+    async (r) => {
+      const skillRatings: [
+        Skill,
+        [string, SkillRating][] | null | undefined,
+      ][] = [];
+      for (const skill of skills) {
+        const ratings = await r.queryPaged.skillRating.bySkill(skill).toArray();
+        skillRatings.push([skill, ratings]);
+      }
+      return new Map(skillRatings.map(([skill, ratings]) => [skill, ratings]));
     },
   );
 
@@ -85,8 +109,24 @@ export const WikiHanziWordModal = ({
               </View>
 
               <View className="gap-1">
-                <Text className="font-karla text-xl text-body">
+                <Text className="font-karla text-2xl text-body">
                   {hanziWordSkillData.data.gloss.join(`, `)}
+                  {otherMeaningsQuery.data == null ||
+                  otherMeaningsQuery.data.length === 0 ? null : (
+                    <Text className="hhh-text-caption">
+                      ; also
+                      {otherMeaningsQuery.data.map(([otherHanziWord], i) => (
+                        <Fragment key={otherHanziWord}>
+                          {i > 0 ? `; ` : ` `}
+                          <HanziWordRefText
+                            context="caption"
+                            showHanzi={false}
+                            hanziWord={otherHanziWord}
+                          />
+                        </Fragment>
+                      ))}
+                    </Text>
+                  )}
                 </Text>
                 <Hhhmark
                   source={hanziWordSkillData.data.definition}
@@ -113,9 +153,12 @@ export const WikiHanziWordModal = ({
                               )) ??
                               `???`}
                           </Text>
-                          <Text className="hhh-text-caption">
-                            {component.description}
-                          </Text>
+                          {component.description == null ? null : (
+                            <Hhhmark
+                              source={component.description}
+                              context="caption"
+                            />
+                          )}
                         </View>
                       );
                     })}
@@ -175,6 +218,14 @@ export const WikiHanziWordModal = ({
                           ).toFixed(0)}
                           /100
                         </Text>
+                        {(() => {
+                          const ratings = skillRatingsQuery.data?.get(skill);
+
+                          return ratings == null ||
+                            ratings.length === 0 ? null : (
+                            <Text>({ratings.length} reviews)</Text>
+                          );
+                        })()}
                       </View>
                     ))}
                   </View>

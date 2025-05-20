@@ -51,7 +51,7 @@
   }
 
   .hhh-text-body-2xl-bold {
-    @apply font-sans text-2xl font-medium leading-normal text-body;
+    @apply font-sans text-2xl font-medium leading-normal text-body-bold;
   }
 
   .hhh-text-body-2xl-italic {
@@ -68,7 +68,7 @@
   }
 
   .hhh-text-body-bold {
-    @apply font-sans text-base font-medium leading-normal text-body;
+    @apply font-sans text-base font-medium leading-normal text-body-bold;
   }
 
   .hhh-text-body-italic {
@@ -85,7 +85,7 @@
   }
 
   .hhh-text-caption-bold {
-    @apply font-sans text-sm font-medium leading-normal text-caption;
+    @apply font-sans text-sm font-medium leading-normal text-caption-bold;
   }
 
   .hhh-text-caption-italic {
@@ -197,9 +197,11 @@
     --color-background: var(--color-slate-2);
 
     --color-body: rgb(from var(--color-slate-12) r g b / 0.9);
+    --color-body-bold: var(--color-slate-12);
     --color-body-ref: var(--color-slate-12);
-    --color-caption: var(--color-slate-10);
-    --color-caption-ref: var(--color-slate-11);
+    --color-caption: rgb(from var(--color-slate-12) r g b / 0.5);
+    --color-caption-bold: rgb(from var(--color-slate-12) r g b / 0.75);
+    --color-caption-ref: rgb(from var(--color-slate-12) r g b / 0.75);
   }
 
   .light-theme {
@@ -268,8 +270,10 @@
     --color-background: var(--color-slate-2);
 
     --color-body: rgb(from var(--color-slate-12) r g b / 0.9);
+    --color-body-bold: var(--color-slate-12);
     --color-body-ref: var(--color-slate-12);
     --color-caption: var(--color-slate-10);
+    --color-caption-bold: var(--color-slate-11);
     --color-caption-ref: var(--color-slate-11);
   }
 
@@ -301,8 +305,10 @@
     --color-accent-12: var(--color-cyan-12);
 
     --color-body: rgb(from var(--color-primary-12) r g b / 0.9);
+    --color-body-bold: var(--color-primary-12);
     --color-body-ref: var(--color-primary-12);
     --color-caption: var(--color-primary-10);
+    --color-caption-bold: var(--color-primary-11);
     --color-caption-ref: var(--color-primary-11);
   }
 
@@ -337,8 +343,10 @@
     --color-primary-12: var(--color-red-12);
 
     --color-body: var(--color-red-10);
+    --color-body-bold: var(--color-red-10);
     --color-body-ref: var(--color-red-10);
     --color-caption: var(--color-red-10);
+    --color-caption-bold: var(--color-red-10);
     --color-caption-ref: var(--color-red-10);
   }
 
@@ -359,15 +367,19 @@
 
   .success-theme2 {
     --color-body: var(--color-lime-10);
+    --color-body-bold: var(--color-lime-10);
     --color-body-ref: var(--color-lime-10);
     --color-caption: var(--color-lime-10);
+    --color-caption-bold: var(--color-lime-10);
     --color-caption-ref: var(--color-lime-10);
   }
 
   .accent-theme2 {
     --color-body: var(--color-cyan-10);
+    --color-body-bold: var(--color-cyan-10);
     --color-body-ref: var(--color-cyan-10);
     --color-caption: var(--color-cyan-10);
+    --color-caption-bold: var(--color-cyan-10);
     --color-caption-ref: var(--color-cyan-10);
   }
 

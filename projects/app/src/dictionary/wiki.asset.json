@@ -139,5 +139,56 @@
       ],
       "interpretation": "A person ({大:-big}) under a slanting stroke ({丿:-slash}) — symbolizing either wilting, youthful delicacy, or a life cut short."
     }
+  ],
+  [
+    "校",
+    {
+      "componentsIdc": "⿰",
+      "components": [
+        {
+          "hanziWord": "木:tree",
+          "description": "Semantic — indicates something made of wood or structurally built; often appears in words related to physical tools or institutions"
+        },
+        {
+          "hanziWord": "交:toHandOver",
+          "description": "Phonetic — provides pronunciation; also conveys a sense of exchange or interaction (to hand something over is to exchange something)"
+        }
+      ],
+      "interpretation": "Originally referred to wooden ({木:-wood}) structures used for inspection, later extended to checking or proofreading, and eventually came to mean 'school' — a place where knowledge is exchanged and tested."
+    }
+  ],
+  [
+    "交",
+    {
+      "componentsIdc": "⿱",
+      "components": [
+        {
+          "hanziWord": "亠:lid",
+          "description": "**Symbolic** — often represents the **head**, **control**, or the **top** of something"
+        },
+        {
+          "hanziWord": "父:father",
+          "description": "**Semantic + phonetic** — originally a **hand holding a stick or tool**, representing **action** or **authority**"
+        }
+      ],
+      "interpretation": "A **person** ({父:-father}) under a **head or lid** ({亠:-lid}), reaching out — symbolizing the act of **handing over**, **meeting**, or **exchanging**."
+    }
+  ],
+  [
+    "喂",
+    {
+      "componentsIdc": "⿰",
+      "components": [
+        {
+          "hanziWord": "口:mouth",
+          "description": "indicating **speech**, **calling**, or **feeding**"
+        },
+        {
+          "hanziWord": "畏:fear",
+          "description": "**Phonetic** — provides the pronunciation **wèi**; also contributes a sense of **urgency**, **attention**, or **care**"
+        }
+      ],
+      "interpretation": "A **mouth** ({口:-mouth}) expressing **urgency or care** ({畏:-fear}) — originally used to **call out to someone**, now commonly means **'hello?'** when answering the phone, or **'to feed'** someone with care and attention."
+    }
   ]
 ]

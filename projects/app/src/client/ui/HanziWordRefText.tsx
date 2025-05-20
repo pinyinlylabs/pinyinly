@@ -24,11 +24,13 @@ const WikiHanziWordModal = lazy(() => import(`./WikiHanziWordModal`));
 
 export const HanziWordRefText = ({
   hanziWord,
+  showHanzi = true,
   showGloss = true,
   showPinyin = false,
   context,
 }: {
   hanziWord: HanziWord;
+  showHanzi?: boolean;
   showGloss?: boolean;
   showPinyin?: boolean;
   context: HhhmarkContext;
@@ -36,14 +38,29 @@ export const HanziWordRefText = ({
   const meaning = useHanziWordMeaning(hanziWord);
   const [showWiki, setShowWiki] = useState(false);
 
-  let infoText = ``;
+  let text = ``;
+
+  if (showHanzi) {
+    text += hanziFromHanziWord(hanziWord);
+  }
 
   if (showGloss && meaning.data != null && meaning.data.gloss.length > 0) {
-    infoText += ` ${glossOrThrow(hanziWord, meaning.data)}`;
+    const appending = text.length > 0;
+    if (appending) {
+      text += ` `;
+    }
+    text += glossOrThrow(hanziWord, meaning.data);
   }
 
   if (showPinyin && meaning.data?.pinyin != null) {
-    infoText += ` (${pinyinOrThrow(hanziWord, meaning.data)})`;
+    const appending = text.length > 0;
+    if (appending) {
+      text += ` (`;
+    }
+    text += pinyinOrThrow(hanziWord, meaning.data);
+    if (appending) {
+      text += `)`;
+    }
   }
 
   return (
@@ -54,7 +71,7 @@ export const HanziWordRefText = ({
           setShowWiki(true);
         }}
       >
-        {`${hanziFromHanziWord(hanziWord)}${infoText}`}
+        {text}
       </Text>
       {showWiki ? (
         <Suspense fallback={null}>
