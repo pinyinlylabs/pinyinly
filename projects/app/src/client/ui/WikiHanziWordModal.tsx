@@ -3,7 +3,7 @@ import { useHanziWordMeaning } from "@/client/hooks/useHanziWordMeaning";
 import { splitHanziText } from "@/data/hanzi";
 import type { HanziWord } from "@/data/model";
 import { hanziWordSkillTypes } from "@/data/model";
-import type { Skill, SkillState } from "@/data/rizzleSchema";
+import type { Skill, SkillRating, SkillState } from "@/data/rizzleSchema";
 import {
   hanziWordSkill,
   skillTypeFromSkill,
@@ -54,6 +54,21 @@ export const WikiHanziWordModal = ({
       });
 
       return skillStates;
+    },
+  );
+
+  const skillRatingsQuery = useRizzleQueryPaged(
+    [WikiHanziWordModal, `skillRatings`, hanziWord],
+    async (r) => {
+      const skillRatings: [
+        Skill,
+        [string, SkillRating][] | null | undefined,
+      ][] = [];
+      for (const skill of skills) {
+        const ratings = await r.queryPaged.skillRating.bySkill(skill).toArray();
+        skillRatings.push([skill, ratings]);
+      }
+      return new Map(skillRatings.map(([skill, ratings]) => [skill, ratings]));
     },
   );
 
@@ -175,6 +190,14 @@ export const WikiHanziWordModal = ({
                           ).toFixed(0)}
                           /100
                         </Text>
+                        {(() => {
+                          const ratings = skillRatingsQuery.data?.get(skill);
+
+                          return ratings == null ||
+                            ratings.length === 0 ? null : (
+                            <Text>({ratings.length} reviews)</Text>
+                          );
+                        })()}
                       </View>
                     ))}
                   </View>
