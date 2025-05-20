@@ -29,6 +29,7 @@ module.exports = {
       background: `rgb(from var(--color-background) r g b / calc(alpha * <alpha-value>))`,
       body: {
         DEFAULT: `rgb(from var(--color-body) r g b / calc(alpha * <alpha-value>))`,
+        bold: `rgb(from var(--color-body-bold) r g b / calc(alpha * <alpha-value>))`,
         ref: `rgb(from var(--color-body-ref) r g b / calc(alpha * <alpha-value>))`,
         bg5: `rgb(from color-mix(in oklab, var(--color-body) 5%, var(--color-background)) r g b / calc(alpha * <alpha-value>))`,
         bg10: `rgb(from color-mix(in oklab, var(--color-body) 10%, var(--color-background)) r g b / calc(alpha * <alpha-value>))`,
@@ -53,6 +54,7 @@ module.exports = {
       },
       caption: {
         DEFAULT: `rgb(from var(--color-caption) r g b / calc(alpha * <alpha-value>))`,
+        bold: `rgb(from var(--color-caption-bold) r g b / calc(alpha * <alpha-value>))`,
         ref: `rgb(from var(--color-caption-ref) r g b / calc(alpha * <alpha-value>))`,
       },
 
