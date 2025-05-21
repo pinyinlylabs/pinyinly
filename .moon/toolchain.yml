@@ -1,5 +1,5 @@
 node:
-  version: "22.14.0" # renovate: datasource=node-version depName=node versioning=node
+  version: "22.16.0" # renovate: datasource=node-version depName=node versioning=node
   packageManager: "yarn"
   yarn:
     version: "4.9.1" # renovate: datasource=npm depName=@yarnpkg/cli
