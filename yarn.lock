@@ -6893,14 +6893,14 @@ __metadata:
   linkType: hard
 
 "@vercel/functions@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "@vercel/functions@npm:2.0.0"
+  version: 2.1.0
+  resolution: "@vercel/functions@npm:2.1.0"
   peerDependencies:
     "@aws-sdk/credential-provider-web-identity": "*"
   peerDependenciesMeta:
     "@aws-sdk/credential-provider-web-identity":
       optional: true
-  checksum: 10c0/d5577ca64143cdde44340659757bd427ef88f8e349c4e952a01f30ed28aabafd9a3c357dbeabe907e54064b25404f95aaa84ebe04541618590285ded54681abb
+  checksum: 10c0/6ff5a08439bc940d9409455f94e4caeca19c3528d429b25c4b479f3568c4bd8db6ed75c92d0a516ee71fd2ca6772dee7748032d553cf71a5b9b3cee7d9e0df72
   languageName: node
   linkType: hard
 
