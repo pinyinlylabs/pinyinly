@@ -63,7 +63,7 @@ function CountLozenge({
 }
 
 const countLozengePillClass = tv({
-  base: `flex h-[20px] px-[4px] min-w-[20px] items-center justify-center rounded-full border-2 border-solid border-background absolute left-[52%] top-[60%]`,
+  base: `absolute left-[52%] top-[60%] flex h-[20px] min-w-[20px] items-center justify-center rounded-full border-2 border-solid border-background px-[4px]`,
   variants: {
     mode: {
       overdue: `bg-red-9`,

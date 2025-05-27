@@ -226,7 +226,7 @@ const pinyinPartBox = tv({
   base: `size-24 justify-center gap-2 rounded-xl bg-primary-3 px-2 hover:bg-primary-5 lg:size-24`,
   variants: {
     hasAssociation: {
-      true: `border-accent-10 border-2`,
+      true: `border-2 border-accent-10`,
     },
   },
 });

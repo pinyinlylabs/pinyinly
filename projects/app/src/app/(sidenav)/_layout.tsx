@@ -136,11 +136,11 @@ const iconClass = tv({
 });
 
 const buttonClass = tv({
-  base: `rounded-md px-2 py-1 flex-row gap-2 items-center`,
+  base: `flex-row items-center gap-2 rounded-md px-2 py-1`,
 });
 
 const buttonTextClass = tv({
-  base: `text-sm uppercase font-sans font-bold text-body hidden md:flex transition-colors`,
+  base: `hidden font-sans text-sm font-bold uppercase text-body transition-colors md:flex`,
   variants: {
     isFocused: {
       true: `text-primary-12`,

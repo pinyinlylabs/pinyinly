@@ -158,6 +158,8 @@ const WebImpl = ({
     };
   });
 
+  const backdropColorClass = `bg-${backdropColor}`;
+
   return (
     <Modal
       presentationStyle="fullScreen"
@@ -174,7 +176,7 @@ const WebImpl = ({
         onPress={onBackgroundPress}
       >
         <Reanimated.View
-          className={`max-h-full w-full max-w-[500px] rounded-xl lg:max-h-[80vh] lg:w-[500px] bg-${backdropColor}`}
+          className={`max-h-full w-full max-w-[500px] rounded-xl lg:max-h-[80vh] lg:w-[500px] ${backdropColorClass}`}
           style={[animatedContentStyle]}
         >
           {children(api)}
@@ -191,6 +193,8 @@ const IosImpl = ({ onDismiss, backdropColor, children }: ImplProps) => {
     }),
     [onDismiss],
   );
+
+  const backdropColorClass = `bg-${backdropColor}`;
 
   return (
     <Modal
@@ -210,7 +214,7 @@ const IosImpl = ({ onDismiss, backdropColor, children }: ImplProps) => {
           `flex-1 pb-[72px] ${__DEV__ ? `bg-[purple]` : ``}`
         }
       >
-        <View className={`flex-1 bg-${backdropColor}`}>{children(api)}</View>
+        <View className={`flex-1 ${backdropColorClass}`}>{children(api)}</View>
       </View>
     </Modal>
   );
@@ -224,13 +228,15 @@ const DefaultImpl = ({ backdropColor, children, onDismiss }: ImplProps) => {
     [onDismiss],
   );
 
+  const backdropColorClass = `bg-${backdropColor}`;
+
   return (
     <Modal
       animationType="slide"
       presentationStyle="pageSheet"
       onRequestClose={api.dismiss}
     >
-      <View className={`flex-1 bg-${backdropColor}`}>{children(api)}</View>
+      <View className={`flex-1 ${backdropColorClass}`}>{children(api)}</View>
     </Modal>
   );
 };

@@ -144,5 +144,5 @@ const footerLinkTitle = tv({
 });
 
 const footerLinkClass = tv({
-  base: `text-primary-10 no-underline www-text-footer-link focus-visible:focus-ring hover:text-accent-10 my-0.5 inline-block py-0.5`,
+  base: `www-text-footer-link focus-visible:focus-ring my-0.5 inline-block py-0.5 text-primary-10 no-underline hover:text-accent-10`,
 });

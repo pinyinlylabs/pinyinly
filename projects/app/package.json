@@ -140,7 +140,6 @@
     "ink-text-input": "^6.0.0",
     "openai": "^4.100.0",
     "prettier": "^3.4.2",
-    "prettier-plugin-tailwindcss": "^0.6.11",
     "react-test-renderer": "18.x",
     "ts-essentials": "^10.0.3",
     "tsx": "^4.15.7",

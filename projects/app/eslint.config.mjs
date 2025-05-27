@@ -264,7 +264,7 @@ export default tseslint.config(
       //
       // tailwindcss
       //
-      // "tailwind/classnames-order": `error`,
+      "tailwind/classnames-order": `error`,
       // "tailwind/enforces-negative-arbitrary-values": `error`,
       "tailwind/enforces-shorthand": `error`,
       "tailwind/migration-from-tailwind-2": `error`,

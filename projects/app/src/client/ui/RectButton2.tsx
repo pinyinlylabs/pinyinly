@@ -114,7 +114,7 @@ const pressable = tv({
 });
 
 const roundedRect = tv({
-  base: `rounded-lg px-3 py-[4px] items-center justify-center web:transition-all`,
+  base: `items-center justify-center rounded-lg px-3 py-[4px] web:transition-all`,
   variants: {
     variant: {
       filled: `py-[5px]`,
@@ -128,13 +128,13 @@ const roundedRect = tv({
       true: ``,
     },
     disabled: {
-      true: `opacity-30 select-none cursor-default`,
+      true: `cursor-default select-none opacity-30`,
     },
   },
   compoundVariants: [
     {
       variant: `filled`,
-      class: `bg-body/95 border-background/20`,
+      class: `border-background/20 bg-body/95`,
     },
     {
       variant: `filled`,
