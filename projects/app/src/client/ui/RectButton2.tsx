@@ -35,10 +35,6 @@ export const RectButton2 = forwardRef<
 ) {
   const disabled = pressableProps.disabled === true;
 
-  // if (disabled) {
-  //   accent = false;
-  // }
-
   const [pressed, setPressed] = useState(false);
   const [hovered, setHovered] = useState(false);
 
