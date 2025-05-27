@@ -60,14 +60,18 @@ export const QuizDeck = ({ className }: { className?: string }) => {
   const nextQuestionQuery = useRizzleQueryPaged(
     questionsQueryKey,
     async (r) => {
-      const [question] = await questionsForReview2(r, { limit: 5 }); // TODO: make this 1? does that work?
-      return question ?? null;
+      const [questions, reviewQueue] = await questionsForReview2(r, {
+        limit: 5, // TODO: make this 1? does that work?
+      });
+      const question = questions[0] ?? null;
+      return { question, reviewQueue };
     },
   );
   const nextQuestion =
     nextQuestionQuery.isSuccess && !nextQuestionQuery.isFetching
-      ? nextQuestionQuery.data
+      ? nextQuestionQuery.data.question
       : null;
+  const reviewQueue = nextQuestionQuery.data?.reviewQueue ?? null;
 
   const [question, setQuestion] = useState<Question>();
 
@@ -168,7 +172,11 @@ export const QuizDeck = ({ className }: { className?: string }) => {
       <View className="mb-[20px] w-full max-w-[600px] flex-row items-center gap-[24px] self-center px-quiz-px">
         <CloseButton />
         <QuizProgressBar progress={quizProgress.progress} />
-        <QuizQueueButton />
+        <QuizQueueButton
+          overdueCount={reviewQueue?.overDueCount}
+          dueCount={reviewQueue?.dueCount}
+          newCount={0}
+        />
       </View>
 
       <NavigationIndependentTree>

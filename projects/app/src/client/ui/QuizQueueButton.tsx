@@ -3,9 +3,9 @@ import { Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 
 export function QuizQueueButton({
-  overdueCount = 0,
-  dueCount = 0,
-  newCount = 0,
+  overdueCount,
+  dueCount,
+  newCount,
 }: {
   overdueCount?: number;
   dueCount?: number;
@@ -19,7 +19,9 @@ export function QuizQueueButton({
         tintColor="currentColor"
         contentFit="fill"
       />
-      {overdueCount > 0 ? (
+      {overdueCount == null ||
+      dueCount == null ||
+      newCount == null ? null : overdueCount > 0 ? (
         <CountLozenge count={overdueCount} mode="overdue" />
       ) : dueCount > 0 ? (
         <CountLozenge count={dueCount} mode="due" />
