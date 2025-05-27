@@ -1,6 +1,7 @@
 import { useQuizProgress } from "@/client/hooks/useQuizProgress";
 import { HanziText } from "@/client/ui/HanziText";
 import { QuizProgressBar } from "@/client/ui/QuizProgressBar";
+import { QuizQueueButton } from "@/client/ui/QuizQueueButton";
 import { RectButton2 } from "@/client/ui/RectButton2";
 import type { TextAnswerButtonState } from "@/client/ui/TextAnswerButton";
 import { TextAnswerButton } from "@/client/ui/TextAnswerButton";
@@ -29,6 +30,10 @@ export default function DesignSystemPage() {
         </Link>
       </View>
       <ScrollView style={{ flex: 1 }} ref={scrollViewRef}>
+        <Section title={QuizQueueButton.name} scrollTo={scrollTo}>
+          <QuizQueueButtonExample />
+        </Section>
+
         <Section title="QuizProgressBarExample" scrollTo={scrollTo}>
           <QuizProgressBarExample />
         </Section>
@@ -706,23 +711,49 @@ function QuizProgressBarExample() {
   }, [quizProgress]);
 
   return (
-    <>
-      <View className="w-full flex-col gap-2">
-        <View className="min-h-[32px]">
-          <QuizProgressBar progress={quizProgress.progress} />
-        </View>
-        <View className="flex-row items-start gap-4">
-          <View className="flex-row items-center gap-2">
-            <Text className="font-bold text-primary-10">Answer:</Text>
-            <RectButton2 variant="outline" onPress={logCorrect}>
-              Correct
-            </RectButton2>
-            <RectButton2 variant="outline" onPress={logIncorrect}>
-              Incorrect
-            </RectButton2>
-          </View>
+    <View className="w-full flex-col gap-2">
+      <View className="min-h-[32px]">
+        <QuizProgressBar progress={quizProgress.progress} />
+      </View>
+      <View className="flex-row items-start gap-4">
+        <View className="flex-row items-center gap-2">
+          <Text className="font-bold text-primary-10">Answer:</Text>
+          <RectButton2 variant="outline" onPress={logCorrect}>
+            Correct
+          </RectButton2>
+          <RectButton2 variant="outline" onPress={logIncorrect}>
+            Incorrect
+          </RectButton2>
         </View>
       </View>
-    </>
+    </View>
+  );
+}
+
+function QuizQueueButtonExample() {
+  return (
+    <View className="w-full flex-row gap-2">
+      <ExampleStack title="default">
+        <QuizQueueButton />
+      </ExampleStack>
+
+      <ExampleStack title="overdue">
+        <QuizQueueButton overdueCount={1} />
+        <QuizQueueButton overdueCount={10} />
+        <QuizQueueButton overdueCount={100} />
+      </ExampleStack>
+
+      <ExampleStack title="due">
+        <QuizQueueButton dueCount={1} />
+        <QuizQueueButton dueCount={10} />
+        <QuizQueueButton dueCount={100} />
+      </ExampleStack>
+
+      <ExampleStack title="new">
+        <QuizQueueButton newCount={1} />
+        <QuizQueueButton newCount={10} />
+        <QuizQueueButton newCount={100} />
+      </ExampleStack>
+    </View>
   );
 }
