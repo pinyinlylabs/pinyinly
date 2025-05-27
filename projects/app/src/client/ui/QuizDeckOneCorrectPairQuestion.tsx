@@ -137,7 +137,7 @@ export const QuizDeckOneCorrectPairQuestion = memo(
               {isCorrect ? (
                 <View className="flex-row items-center gap-[8px]">
                   <Image
-                    className="h-[32px] w-[32px] flex-shrink text-body"
+                    className="h-[32px] w-[32px] shrink text-body"
                     source={require(`@/assets/icons/check-circled-filled.svg`)}
                     tintColor="currentColor"
                   />
@@ -147,7 +147,7 @@ export const QuizDeckOneCorrectPairQuestion = memo(
                 <>
                   <View className="flex-row items-center gap-[8px]">
                     <Image
-                      className="h-[32px] w-[32px] flex-shrink text-body"
+                      className="h-[32px] w-[32px] shrink text-body"
                       source={require(
                         `@/assets/icons/close-circled-filled.svg`,
                       )}
@@ -169,7 +169,7 @@ export const QuizDeckOneCorrectPairQuestion = memo(
 
                   {selectedAChoice != null && selectedBChoice != null ? (
                     <View className="flex-row flex-wrap items-center gap-2">
-                      <Text className="flex-shrink-0 font-bold leading-snug text-body">
+                      <Text className="shrink-0 font-bold leading-snug text-body">
                         Your answer:
                       </Text>
                       <View className="flex-1 flex-row flex-wrap items-center">

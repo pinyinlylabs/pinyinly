@@ -32,7 +32,7 @@ export default function WebsiteLayout() {
           <View className="h-full w-full flex-row justify-center md:justify-start">
             <Image
               source={require(`@/assets/logo/logo-row.svg`)}
-              className="h-[40px] w-[200px] flex-shrink self-center text-primary-12"
+              className="h-[40px] w-[200px] shrink self-center text-primary-12"
               tintColor="currentColor"
               contentFit="fill"
             />
@@ -67,7 +67,7 @@ export default function WebsiteLayout() {
         <footer className="mt-20 flex justify-center border-x-0 border-y-0 border-t border-solid border-primary-5 py-6 pt-20">
           <div className="www-px-comfortable flex w-full max-w-www-col">
             <div className="w-full flex-col gap-0 md:flex-row md:gap-8">
-              <div className="grid flex-grow grid-cols-1 gap-8 pb-10 md:grid-cols-3">
+              <div className="grid grow grid-cols-1 gap-8 pb-10 md:grid-cols-3">
                 <div>
                   <div className={footerLinkTitle()}>Product</div>
                   <div>

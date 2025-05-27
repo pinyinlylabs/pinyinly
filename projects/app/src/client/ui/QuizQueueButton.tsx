@@ -15,7 +15,7 @@ export function QuizQueueButton({
     <View className="relative h-[32px] w-[32px] flex-row justify-center md:justify-start">
       <Image
         source={require(`@/assets/icons/inbox-filled.svg`)}
-        className="h-[32px] w-[32px] flex-shrink self-center text-body"
+        className="h-[32px] w-[32px] shrink self-center text-body"
         tintColor="currentColor"
         contentFit="fill"
       />

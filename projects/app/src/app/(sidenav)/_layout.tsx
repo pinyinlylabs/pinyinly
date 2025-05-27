@@ -15,14 +15,14 @@ export default function SideNavLayout() {
 
   return (
     <Tabs className="flex-1 flex-col-reverse items-stretch self-stretch md:flex-row">
-      <TabList className="flex-grow-0 items-center gap-4 justify-self-stretch border-t-2 border-primary-4 pt-2 pb-safe-or-2 px-safe-or-4 md:flex-col md:items-start md:border-t-0 md:px-4 md:pt-6">
+      <TabList className="grow-0 items-center gap-4 justify-self-stretch border-t-2 border-primary-4 pt-2 pb-safe-or-2 px-safe-or-4 md:flex-col md:items-start md:border-t-0 md:px-4 md:pt-6">
         <Link
           href="/learn"
           className="hidden px-2 py-1 text-2xl font-bold tracking-wide text-primary-10 md:flex"
         >
           <Image
             source={require(`@/assets/logo/logotype.svg`)}
-            className="h-[40px] w-[140px] flex-shrink text-primary-12"
+            className="h-[40px] w-[140px] shrink text-primary-12"
             tintColor="currentColor"
             contentFit="fill"
           />
