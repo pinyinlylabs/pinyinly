@@ -132,7 +132,7 @@ export default function HistoryPage() {
           <View>
             <Text className="self-center text-xl text-body">history</Text>
 
-            <View className="flex-column gap-2">
+            <View className="flex-col gap-2">
               {skillRatingsQuery.data?.map(([_key, value], i) => {
                 const { skill, createdAt } = value;
                 return (

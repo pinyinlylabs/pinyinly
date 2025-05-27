@@ -269,7 +269,7 @@ export default tseslint.config(
       "tailwind/enforces-shorthand": `error`,
       "tailwind/migration-from-tailwind-2": `error`,
       "tailwind/no-contradicting-classname": `error`,
-      // "tailwind/no-custom-classname": `error`,
+      "tailwind/no-custom-classname": `error`,
       "tailwind/no-unnecessary-arbitrary-value": `error`,
     },
   },

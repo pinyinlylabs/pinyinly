@@ -225,7 +225,7 @@ const bgAnimatedClass = tv({
       dimmed: ``,
       selected: ``,
       success: `bg-body`,
-      error: `bg-transparent`,
+      error: ``,
     },
   },
 });
@@ -263,7 +263,7 @@ const textClass = tv({
   // px-1: Horizontal padding is necessary to give first and last letters on a
   // line with accents enough space to not be clipped. Without this words like
   // "lǐ" will have half the accent clipped.
-  base: `web:transition-color px-1 text-center font-normal text-body`,
+  base: `px-1 text-center font-normal text-body web:transition-colors`,
   variants: {
     state: {
       default: `text-body`,
@@ -276,7 +276,7 @@ const textClass = tv({
       tiny: `text-xl/tight lg:text-2xl/tight`,
       short: `text-lg/tight lg:text-xl/tight`,
       medium: `text-sm lg:text-lg/tight`,
-      long: `lg:text-md/tight text-xs`,
+      long: `text-xs lg:text-base/tight`,
     },
   },
 });

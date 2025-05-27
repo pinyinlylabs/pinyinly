@@ -108,7 +108,7 @@
     "@types/color": "4.x || 5.x",
     "@types/debug": "^4 <=4.3.x",
     "@types/eslint": "^9 <=9.13.x",
-    "@types/eslint-plugin-tailwindcss": "^3",
+    "@types/eslint-plugin-tailwindcss": "^3 <=3.18.x",
     "@types/fontkit": "2.0.x",
     "@types/lodash": "4.17.x",
     "@types/node": "patch:@types/node@patch%3A@types/node@npm%253A22.10.2%23~/.yarn/patches/@types-node-npm-22.10.2-572466b048.patch%3A%3Aversion=22.10.2&hash=819d81#~/.yarn/patches/@types-node-patch-8935673d40.patch",

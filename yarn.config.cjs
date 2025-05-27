@@ -402,6 +402,7 @@ module.exports = defineConfig({
       "color@^5.0.0": "4.x || 5.x",
       "debug@^4.3.7": "^4 <=4.3.x",
       "eslint@^9.13.0": "^9 <=9.13.x",
+      "eslint-plugin-tailwindcss@^3.18.0": "^3 <=3.18.x",
       "pg@^8.14.0":
         "patch:@types/pg@npm%3A8.11.11#~/.yarn/patches/@types-pg-npm-8.11.11-c5a8a91498.patch",
       "ws@^8.17.1": "^8 <=8.17.x",

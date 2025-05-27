@@ -137,13 +137,13 @@ export default function MnemonicsPage() {
               {Object.entries(query.data.initials).map(
                 ([, { initials, desc, id }], i) => (
                   <Fragment key={desc}>
-                    <View className="flex-0 flex-row gap-2">
+                    <View className="flex-row gap-2">
                       <Text className="text-body">{desc}</Text>
                       <Text className="text-primary-8">
                         {initialGroupThemes.data?.get(id) ?? `no theme`}
                       </Text>
                     </View>
-                    <View className="flex-0 flex-row flex-wrap gap-3.5">
+                    <View className="flex-row flex-wrap gap-3.5">
                       {initials.map(([initial, ...alts]) => (
                         <Link
                           key={initial}

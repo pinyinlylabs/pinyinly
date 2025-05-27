@@ -52,7 +52,7 @@ export default function DesignSystemPage() {
 
         <Section title="Typography" scrollTo={scrollTo}>
           <View className="flex-1 gap-2">
-            {([`body`, `title`, `chinese`] as const).map((family) => (
+            {([`chinese`] as const).map((family) => (
               <View key={family}>
                 <LittlePrimaryHeader title={family} />
                 <TypographyExample family={family} size="xs" />
@@ -178,8 +178,6 @@ const typography = tv({
       "2xl": `text-2xl`,
     },
     family: {
-      body: `font-body`,
-      title: `font-title`,
       chinese: `font-chinese`,
     },
   },
@@ -247,13 +245,11 @@ const TypographyExample = ({
   family,
 }: {
   size: `xs` | `sm` | `base` | `lg` | `xl` | `2xl`;
-  family: `body` | `title` | `chinese`;
+  family: `chinese`;
 }) => {
   return (
     <View>
-      <Text className="font-xs text-primary-9">
-        <Text className="text-xs text-primary-11">{size}</Text>
-      </Text>
+      <Text className="text-xs text-primary-11">{size}</Text>
 
       <Text className={typography({ size, family })} numberOfLines={1}>
         The quick brown fox jumps over the lazy dog.

@@ -142,7 +142,7 @@ export const WikiHanziWordModal = ({
                   <View className="gap-4 rounded-xl bg-primary-5 p-4">
                     {wikiEntry.data.components.map((component, i) => {
                       return (
-                        <View key={i} className="flex-column gap-1">
+                        <View key={i} className="flex-col gap-1">
                           <Text className="hhh-text-body">
                             {component.title ??
                               (component.hanziWord == null ? null : (

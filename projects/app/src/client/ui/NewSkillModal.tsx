@@ -126,7 +126,7 @@ const NewHanziWordToGlossSkillContent = ({
                 className="-my-0 size-[24px] shrink text-accent-10"
                 tintColor="currentColor"
               />
-              <Text className="text-md font-bold uppercase text-accent-10">
+              <Text className="font-bold uppercase text-accent-10">
                 New Word
               </Text>
             </View>
@@ -183,7 +183,7 @@ const NewHanziWordToPinyinSkillContent = ({
                 className="-my-0 size-[24px] shrink text-accent-10"
                 tintColor="currentColor"
               />
-              <Text className="text-md font-bold uppercase text-accent-10">
+              <Text className="font-bold uppercase text-accent-10">
                 New Pinyin
               </Text>
             </View>
@@ -238,7 +238,7 @@ const NewHanziWordToPinyinInitialSkillContent = ({
                 className="-my-0 size-[24px] shrink text-accent-10"
                 tintColor="currentColor"
               />
-              <Text className="text-md font-bold uppercase text-accent-10">
+              <Text className="font-bold uppercase text-accent-10">
                 New Pinyin Initial
               </Text>
             </View>
@@ -293,7 +293,7 @@ const NewHanziWordToPinyinFinalSkillContent = ({
                 className="-my-0 size-[24px] shrink text-accent-10"
                 tintColor="currentColor"
               />
-              <Text className="text-md font-bold uppercase text-accent-10">
+              <Text className="font-bold uppercase text-accent-10">
                 New Pinyin Final
               </Text>
             </View>
@@ -348,7 +348,7 @@ const NewHanziWordToPinyinToneSkillContent = ({
                 className="-my-0 size-[24px] shrink text-accent-10"
                 tintColor="currentColor"
               />
-              <Text className="text-md font-bold uppercase text-accent-10">
+              <Text className="font-bold uppercase text-accent-10">
                 New Pinyin Tone
               </Text>
             </View>
@@ -388,7 +388,7 @@ const ContainerWithContinueButton = ({
         {children}
       </ScrollView>
 
-      <View className="theme-accent2 border-t-2 border-primary-5 p-4 mb-safe">
+      <View className="accent-theme2 border-t-2 border-primary-5 p-4 mb-safe">
         <RectButton2
           variant="filled"
           textClassName="py-1 px-2"

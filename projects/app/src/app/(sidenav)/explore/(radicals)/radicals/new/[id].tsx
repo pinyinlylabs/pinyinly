@@ -100,7 +100,7 @@ export default function RadicalPage() {
             source={require(`@/assets/icons/loader.svg`)}
             tintColor="currentColor"
           />
-          <Text className="font-body text-lg font-bold uppercase text-[#04ABF6]">
+          <Text className="text-lg font-bold uppercase text-[#04ABF6]">
             New Word
           </Text>
         </View>
