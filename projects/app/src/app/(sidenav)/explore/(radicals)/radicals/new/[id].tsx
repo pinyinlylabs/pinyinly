@@ -96,7 +96,7 @@ export default function RadicalPage() {
       <ScrollView contentContainerClassName="px-safe-or-4 flex-1 pb-2">
         <View className="flex-row items-center gap-2 self-center py-4">
           <Image
-            className="h-[32px] w-[32px] shrink text-[#04ABF6]"
+            className="size-[32px] shrink text-[#04ABF6]"
             source={require(`@/assets/icons/loader.svg`)}
             tintColor="currentColor"
           />
@@ -158,7 +158,7 @@ export default function RadicalPage() {
         </View>
 
         {showExplanation ? (
-          <View className="absolute bottom-0 left-0 right-0 rounded-t-2xl bg-primary-6">
+          <View className="absolute inset-x-0 bottom-0 rounded-t-2xl bg-primary-6">
             <View className="my-2 h-2 w-12 self-center rounded bg-primary-8" />
 
             <View>

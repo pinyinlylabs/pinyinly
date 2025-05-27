@@ -275,7 +275,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
                 }
 
                 return (
-                  <View className="h-full w-full max-w-[600px] flex-1 self-center">
+                  <View className="size-full max-w-[600px] flex-1 self-center">
                     {screen}
                   </View>
                 );

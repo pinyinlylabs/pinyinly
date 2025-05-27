@@ -123,7 +123,7 @@ const NewHanziWordToGlossSkillContent = ({
             <View className="success-theme flex-row items-center gap-2 self-center">
               <Image
                 source={require(`@/assets/icons/plant-filled.svg`)}
-                className="-my-0 h-[24px] w-[24px] shrink text-accent-10"
+                className="-my-0 size-[24px] shrink text-accent-10"
                 tintColor="currentColor"
               />
               <Text className="text-md font-bold uppercase text-accent-10">
@@ -180,7 +180,7 @@ const NewHanziWordToPinyinSkillContent = ({
             <View className="success-theme flex-row items-center gap-2 self-center">
               <Image
                 source={require(`@/assets/icons/plant-filled.svg`)}
-                className="-my-0 h-[24px] w-[24px] shrink text-accent-10"
+                className="-my-0 size-[24px] shrink text-accent-10"
                 tintColor="currentColor"
               />
               <Text className="text-md font-bold uppercase text-accent-10">
@@ -235,7 +235,7 @@ const NewHanziWordToPinyinInitialSkillContent = ({
             <View className="success-theme flex-row items-center gap-2 self-center">
               <Image
                 source={require(`@/assets/icons/plant-filled.svg`)}
-                className="-my-0 h-[24px] w-[24px] shrink text-accent-10"
+                className="-my-0 size-[24px] shrink text-accent-10"
                 tintColor="currentColor"
               />
               <Text className="text-md font-bold uppercase text-accent-10">
@@ -290,7 +290,7 @@ const NewHanziWordToPinyinFinalSkillContent = ({
             <View className="success-theme flex-row items-center gap-2 self-center">
               <Image
                 source={require(`@/assets/icons/plant-filled.svg`)}
-                className="-my-0 h-[24px] w-[24px] shrink text-accent-10"
+                className="-my-0 size-[24px] shrink text-accent-10"
                 tintColor="currentColor"
               />
               <Text className="text-md font-bold uppercase text-accent-10">
@@ -345,7 +345,7 @@ const NewHanziWordToPinyinToneSkillContent = ({
             <View className="success-theme flex-row items-center gap-2 self-center">
               <Image
                 source={require(`@/assets/icons/plant-filled.svg`)}
-                className="-my-0 h-[24px] w-[24px] shrink text-accent-10"
+                className="-my-0 size-[24px] shrink text-accent-10"
                 tintColor="currentColor"
               />
               <Text className="text-md font-bold uppercase text-accent-10">
@@ -388,7 +388,7 @@ const ContainerWithContinueButton = ({
         {children}
       </ScrollView>
 
-      <View className="theme-accent2 border-t-2 border-primary-5 px-4 py-4 mb-safe">
+      <View className="theme-accent2 border-t-2 border-primary-5 p-4 mb-safe">
         <RectButton2
           variant="filled"
           textClassName="py-1 px-2"

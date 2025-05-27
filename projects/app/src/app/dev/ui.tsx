@@ -283,7 +283,7 @@ const ColorSwatch = ({
 }) => (
   <View className="flex-wrap gap-1">
     <Text className="text-center text-xs text-body/50">{index}</Text>
-    <View className={`h-[40px] w-[40px] ${className ?? ``}`} />
+    <View className={`size-[40px] ${className ?? ``}`} />
   </View>
 );
 
@@ -538,7 +538,7 @@ const TextAnswerButtonExamples = (
       </ExampleStack>
 
       <ExampleStack title="text overflow">
-        <View className="h-[120px] w-[120px] gap-2 border-2 border-dashed border-primary-8">
+        <View className="size-[120px] gap-2 border-2 border-dashed border-primary-8">
           <TextAnswerButton
             className="flex-1"
             text="one two three four five six seven eight nine ten"
@@ -558,25 +558,25 @@ const TextAnswerButtonExamples = (
 
     <View className="flex-row flex-wrap">
       <ExampleStack title="items-start">
-        <View className="h-[120px] w-[120px] flex-col items-start gap-2 border-2 border-dashed border-primary-8">
+        <View className="size-[120px] flex-col items-start gap-2 border-2 border-dashed border-primary-8">
           <SyncedAnswerButtonExample />
         </View>
       </ExampleStack>
 
       <ExampleStack title="items-center">
-        <View className="h-[120px] w-[120px] flex-col items-center gap-2 border-2 border-dashed border-primary-8">
+        <View className="size-[120px] flex-col items-center gap-2 border-2 border-dashed border-primary-8">
           <SyncedAnswerButtonExample />
         </View>
       </ExampleStack>
 
       <ExampleStack title="items-stretch">
-        <View className="h-[120px] w-[120px] flex-col gap-2 border-2 border-dashed border-primary-8">
+        <View className="size-[120px] flex-col gap-2 border-2 border-dashed border-primary-8">
           <SyncedAnswerButtonExample />
         </View>
       </ExampleStack>
 
       <ExampleStack title="items-end">
-        <View className="h-[120px] w-[120px] flex-col items-end gap-2 border-2 border-dashed border-primary-8">
+        <View className="size-[120px] flex-col items-end gap-2 border-2 border-dashed border-primary-8">
           <SyncedAnswerButtonExample />
         </View>
       </ExampleStack>
@@ -586,25 +586,25 @@ const TextAnswerButtonExamples = (
 
     <View className="flex-row flex-wrap">
       <ExampleStack title="items-start">
-        <View className="h-[120px] w-[120px] flex-col items-start gap-2 border-2 border-dashed border-primary-8">
+        <View className="size-[120px] flex-col items-start gap-2 border-2 border-dashed border-primary-8">
           <SyncedAnswerButtonExample className="flex-1" />
         </View>
       </ExampleStack>
 
       <ExampleStack title="items-center">
-        <View className="h-[120px] w-[120px] flex-col items-center gap-2 border-2 border-dashed border-primary-8">
+        <View className="size-[120px] flex-col items-center gap-2 border-2 border-dashed border-primary-8">
           <SyncedAnswerButtonExample className="flex-1" />
         </View>
       </ExampleStack>
 
       <ExampleStack title="items-stretch">
-        <View className="h-[120px] w-[120px] flex-col gap-2 border-2 border-dashed border-primary-8">
+        <View className="size-[120px] flex-col gap-2 border-2 border-dashed border-primary-8">
           <SyncedAnswerButtonExample className="flex-1" />
         </View>
       </ExampleStack>
 
       <ExampleStack title="items-end">
-        <View className="h-[120px] w-[120px] flex-col items-end gap-2 border-2 border-dashed border-primary-8">
+        <View className="size-[120px] flex-col items-end gap-2 border-2 border-dashed border-primary-8">
           <SyncedAnswerButtonExample className="flex-1" />
         </View>
       </ExampleStack>

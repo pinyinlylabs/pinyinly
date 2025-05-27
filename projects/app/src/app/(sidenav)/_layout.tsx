@@ -126,7 +126,7 @@ const TabButton = forwardRef<ElementRef<typeof Pressable>, TabButtonProps>(
 TabButton.displayName = `TabButton`;
 
 const iconClass = tv({
-  base: `h-[24px] w-[24px] flex-shrink`,
+  base: `size-[24px] flex-shrink`,
   variants: {
     isFocused: {
       true: `text-primary-12`,

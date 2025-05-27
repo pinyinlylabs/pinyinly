@@ -12,10 +12,10 @@ export function QuizQueueButton({
   newCount?: number;
 }) {
   return (
-    <View className="relative h-[32px] w-[32px] flex-row justify-center md:justify-start">
+    <View className="relative size-[32px] flex-row justify-center md:justify-start">
       <Image
         source={require(`@/assets/icons/inbox-filled.svg`)}
-        className="h-[32px] w-[32px] shrink self-center text-body"
+        className="size-[32px] shrink self-center text-body"
         tintColor="currentColor"
         contentFit="fill"
       />
@@ -34,10 +34,10 @@ export function QuizQueueButton({
 
 function CheckBadge() {
   return (
-    <View className="absolute left-[55%] top-[62%] h-quiz-px w-quiz-px rounded-full bg-background px-[2px] py-[2px]">
+    <View className="absolute left-[55%] top-[62%] size-quiz-px rounded-full bg-background p-[2px]">
       <Image
         source={require(`@/assets/icons/check.svg`)}
-        className="h-[12px] w-[12px] self-center rounded-full bg-body/30 text-body"
+        className="size-[12px] self-center rounded-full bg-body/30 text-body"
         tintColor="currentColor"
         contentFit="fill"
       />

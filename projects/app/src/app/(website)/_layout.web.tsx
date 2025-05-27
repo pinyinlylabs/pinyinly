@@ -26,10 +26,10 @@ export default function WebsiteLayout() {
   return (
     <>
       <header
-        className={`www-px-comfortable fixed left-0 right-0 top-0 z-50 flex h-[72px] justify-center border-0 bg-background transition-all ${isIntersecting ? `` : `border-b-2 border-solid border-primary-5`}`}
+        className={`www-px-comfortable fixed inset-x-0 top-0 z-50 flex h-[72px] justify-center border-0 bg-background transition-all ${isIntersecting ? `` : `border-b-2 border-solid border-primary-5`}`}
       >
         <View className="flex w-full max-w-www-col justify-between">
-          <View className="h-full w-full flex-row justify-center md:justify-start">
+          <View className="size-full flex-row justify-center md:justify-start">
             <Image
               source={require(`@/assets/logo/logo-row.svg`)}
               className="h-[40px] w-[200px] shrink self-center text-primary-12"
@@ -64,7 +64,7 @@ export default function WebsiteLayout() {
       >
         <div className="h-px w-full" ref={ref} /* Scroll detector */ />
         <Slot />
-        <footer className="mt-20 flex justify-center border-x-0 border-y-0 border-t border-solid border-primary-5 py-6 pt-20">
+        <footer className="mt-20 flex justify-center border-0 border-t border-solid border-primary-5 py-6 pt-20">
           <div className="www-px-comfortable flex w-full max-w-www-col">
             <div className="w-full flex-col gap-0 md:flex-row md:gap-8">
               <div className="grid grow grid-cols-1 gap-8 pb-10 md:grid-cols-3">

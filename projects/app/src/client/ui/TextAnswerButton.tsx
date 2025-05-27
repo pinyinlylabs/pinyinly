@@ -218,7 +218,7 @@ const withIncorrectWobbleAnimation = () => {
 };
 
 const bgAnimatedClass = tv({
-  base: `pointer-events-none absolute bottom-[2px] left-px right-px top-[2px] rounded-lg bg-cyan-10/10`,
+  base: `pointer-events-none absolute inset-y-[2px] inset-x-px rounded-lg bg-cyan-10/10`,
   variants: {
     state: {
       default: ``,

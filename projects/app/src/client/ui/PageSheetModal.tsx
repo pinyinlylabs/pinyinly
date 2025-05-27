@@ -169,7 +169,7 @@ const WebImpl = ({
       onRequestClose={api.dismiss}
     >
       <AnimatedPressable
-        className={`absolute h-full w-full cursor-auto items-center justify-center p-4`}
+        className={`absolute size-full cursor-auto items-center justify-center p-4`}
         style={[animatedBackgroundStyle]}
         onPress={onBackgroundPress}
       >

@@ -137,7 +137,7 @@ export const QuizDeckOneCorrectPairQuestion = memo(
               {isCorrect ? (
                 <View className="flex-row items-center gap-[8px]">
                   <Image
-                    className="h-[32px] w-[32px] shrink text-body"
+                    className="size-[32px] shrink text-body"
                     source={require(`@/assets/icons/check-circled-filled.svg`)}
                     tintColor="currentColor"
                   />
@@ -147,7 +147,7 @@ export const QuizDeckOneCorrectPairQuestion = memo(
                 <>
                   <View className="flex-row items-center gap-[8px]">
                     <Image
-                      className="h-[32px] w-[32px] shrink text-body"
+                      className="size-[32px] shrink text-body"
                       source={require(
                         `@/assets/icons/close-circled-filled.svg`,
                       )}
@@ -346,7 +346,7 @@ const flagViewClass = tv({
 });
 
 const flagIconClass = tv({
-  base: `h-[24px] w-[24px] flex-shrink text-accent-10`,
+  base: `size-[24px] flex-shrink text-accent-10`,
 });
 
 const flagTextClass = tv({

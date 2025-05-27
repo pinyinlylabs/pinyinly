@@ -7,7 +7,7 @@ export const ShootingStar = ({ className }: Pick<ViewProps, `className`>) => {
   const [hide, setHide] = useState(false);
 
   return (
-    <View className={`h-[40px] w-[40px] ${className ?? ``}`}>
+    <View className={`size-[40px] ${className ?? ``}`}>
       {hide ? null : (
         <LottieView
           autoPlay
