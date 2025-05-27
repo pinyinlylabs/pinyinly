@@ -165,7 +165,7 @@ export const WikiHanziWordModal = ({
 
                     {hanziWordSkillData.data.glossHint == null ? null : (
                       <>
-                        <View className="h-[1px] w-full bg-primary-8" />
+                        <View className="h-px w-full bg-primary-8" />
                         <Hhhmark
                           source={hanziWordSkillData.data.glossHint}
                           context="body"
@@ -175,7 +175,7 @@ export const WikiHanziWordModal = ({
 
                     {wikiEntry.data.interpretation == null ? null : (
                       <>
-                        <View className="h-[1px] w-full bg-primary-8" />
+                        <View className="h-px w-full bg-primary-8" />
                         <Hhhmark
                           source={wikiEntry.data.interpretation}
                           context="body"

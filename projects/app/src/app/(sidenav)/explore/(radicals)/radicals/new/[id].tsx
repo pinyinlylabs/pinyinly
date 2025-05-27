@@ -90,7 +90,7 @@ export default function RadicalPage() {
 
   return (
     <View className="flex-1 items-center bg-background">
-      <View className="w-[100%] max-w-[600px] flex-row items-center gap-3 pt-safe-offset-4 px-safe-or-4">
+      <View className="w-full max-w-[600px] flex-row items-center gap-3 pt-safe-offset-4 px-safe-or-4">
         <CloseButton />
       </View>
       <ScrollView contentContainerClassName="px-safe-or-4 flex-1 pb-2">
@@ -143,7 +143,7 @@ export default function RadicalPage() {
         <View className="h-1 w-2 flex-1"></View>
         <View className="h-1 w-2 flex-1"></View>
 
-        <View className="w-[100%] max-w-[600px] flex-col items-stretch gap-3 mb-safe-offset-2">
+        <View className="w-full max-w-[600px] flex-col items-stretch gap-3 mb-safe-offset-2">
           <RectButton2
             variant="outline"
             onPress={() => {

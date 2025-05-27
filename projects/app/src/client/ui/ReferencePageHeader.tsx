@@ -26,7 +26,7 @@ export const ReferencePageHeader = ({
         <View className="h-[250px] items-center justify-center">
           <Text className="text-[60px] text-[white]">{title ?? `⁉️`}</Text>
         </View>
-        <View className="absolute left-[16px] top-safe-or-[16px]">
+        <View className="absolute left-quiz-px top-safe-or-[16px]">
           <CloseButton />
         </View>
       </LinearGradient>

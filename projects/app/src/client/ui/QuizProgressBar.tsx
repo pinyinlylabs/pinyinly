@@ -145,7 +145,7 @@ export const QuizProgressBar = ({ progress }: { progress: number }) => {
       {metrics == null ? null : (
         <>
           <View
-            className="top-1/2 h-[16px] w-full rounded-[8px] bg-body-bg25"
+            className="top-1/2 h-quiz-px w-full rounded-[8px] bg-body-bg25"
             style={{ transform: [{ translateY: -8 }] }}
           >
             {/* Ticks behind the fill bar */}

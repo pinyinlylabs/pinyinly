@@ -69,7 +69,7 @@ export const QuizDeckMultipleChoiceQuestion = memo(
           </Text>
         </View>
         {choicesRows.map((choicesRow, i) => (
-          <View className="flex-1 flex-row items-stretch gap-[16px]" key={i}>
+          <View className="flex-1 flex-row items-stretch gap-quiz-px" key={i}>
             {choicesRow.map((choice, i) => (
               <AnswerButton
                 text={choice}

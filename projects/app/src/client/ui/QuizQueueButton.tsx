@@ -34,7 +34,7 @@ export function QuizQueueButton({
 
 function CheckBadge() {
   return (
-    <View className="absolute left-[55%] top-[62%] h-[16px] w-[16px] rounded-full bg-background px-[2px] py-[2px]">
+    <View className="absolute left-[55%] top-[62%] h-quiz-px w-quiz-px rounded-full bg-background px-[2px] py-[2px]">
       <Image
         source={require(`@/assets/icons/check.svg`)}
         className="h-[12px] w-[12px] self-center rounded-full bg-body/30 text-body"
@@ -63,7 +63,7 @@ function CountLozenge({
 }
 
 const countLozengePillClass = tv({
-  base: `flex h-[20px] px-[4px] min-w-[20px] items-center justify-center rounded-full border-[2px] border-solid border-background absolute left-[52%] top-[60%]`,
+  base: `flex h-[20px] px-[4px] min-w-[20px] items-center justify-center rounded-full border-2 border-solid border-background absolute left-[52%] top-[60%]`,
   variants: {
     mode: {
       overdue: `bg-red-9`,

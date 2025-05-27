@@ -118,7 +118,7 @@ const roundedRect = tv({
   variants: {
     variant: {
       filled: `py-[5px]`,
-      outline: `border-[2px]`,
+      outline: `border-2`,
       bare: ``,
     },
     hoveredOrPressed: {
@@ -144,7 +144,7 @@ const roundedRect = tv({
     {
       variant: `filled`,
       flat: false,
-      class: `border-b-[4px]`,
+      class: `border-b-4`,
     },
     {
       variant: `outline`,
@@ -159,12 +159,12 @@ const roundedRect = tv({
     {
       variant: `outline`,
       flat: true,
-      class: `border-b-[2px]`,
+      class: `border-b-2`,
     },
     {
       variant: `outline`,
       flat: false,
-      class: `border-b-[4px]`,
+      class: `border-b-4`,
     },
   ],
 });

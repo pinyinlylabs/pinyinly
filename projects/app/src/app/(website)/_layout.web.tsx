@@ -62,7 +62,7 @@ export default function WebsiteLayout() {
         contentContainerClassName=" bg-[center_top_50svh] bg-no-repeat bg-contain"
         contentContainerStyle={{ backgroundImage: `url(${calligraphy.uri})` }}
       >
-        <div className="h-[1px] w-full" ref={ref} /* Scroll detector */ />
+        <div className="h-px w-full" ref={ref} /* Scroll detector */ />
         <Slot />
         <footer className="mt-20 flex justify-center border-x-0 border-y-0 border-t border-solid border-primary-5 py-6 pt-20">
           <div className="www-px-comfortable flex w-full max-w-www-col">

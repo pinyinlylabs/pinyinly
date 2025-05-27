@@ -265,11 +265,11 @@ const TypographyExample = ({
 const LittlePrimaryHeader = ({ title }: { title: string }) => {
   return (
     <View className="mb-2 mt-4 flex-row items-center gap-2">
-      <View className="h-[1px] flex-grow bg-primary-7" />
+      <View className="h-px flex-grow bg-primary-7" />
       <Text className="text-center text-xs font-bold uppercase text-body/80">
         {title}
       </Text>
-      <View className="h-[1px] flex-grow bg-primary-7" />
+      <View className="h-px flex-grow bg-primary-7" />
     </View>
   );
 };

@@ -31,6 +31,7 @@ import { CloseButton } from "./CloseButton";
 import { QuizDeckMultipleChoiceQuestion } from "./QuizDeckMultipleChoiceQuestion";
 import { QuizDeckOneCorrectPairQuestion } from "./QuizDeckOneCorrectPairQuestion";
 import { QuizProgressBar } from "./QuizProgressBar";
+import { QuizQueueButton } from "./QuizQueueButton";
 import { RectButton2 } from "./RectButton2";
 import { useReplicache, useRizzleQueryPaged } from "./ReplicacheContext";
 import { useSoundEffect } from "./useSoundEffect";
@@ -164,9 +165,10 @@ export const QuizDeck = ({ className }: { className?: string }) => {
 
   return (
     <View className={className}>
-      <View className="mb-[20px] w-full max-w-[600px] flex-row items-center gap-[24px] self-center px-[16px]">
+      <View className="mb-[20px] w-full max-w-[600px] flex-row items-center gap-[24px] self-center px-quiz-px">
         <CloseButton />
         <QuizProgressBar progress={quizProgress.progress} />
+        <QuizQueueButton />
       </View>
 
       <NavigationIndependentTree>

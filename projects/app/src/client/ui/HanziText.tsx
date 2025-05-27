@@ -37,7 +37,7 @@ const hanziText = tv({
       true: `text-xl/none`,
     },
     underline: {
-      true: `underline decoration-dashed decoration-[2px] underline-offset-[6px]`,
+      true: `underline decoration-dashed decoration-2 underline-offset-[6px]`,
     },
   },
 });
