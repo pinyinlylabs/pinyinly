@@ -1,3 +1,4 @@
+import { usePrefetchImages } from "@/client/hooks/usePrefetchImages";
 import { questionsForReview2 } from "@/client/query";
 import type { StackNavigationFor } from "@/client/ui/types";
 import type { Mistake, NewSkillRating, Question } from "@/data/model";
@@ -18,13 +19,11 @@ import {
   createStackNavigator,
   TransitionPresets,
 } from "@react-navigation/stack";
-import { useQueries, useQueryClient } from "@tanstack/react-query";
-import { Asset } from "expo-asset";
-import { Image } from "expo-image";
+import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "expo-router";
 import React, { useEffect, useId, useRef, useState } from "react";
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import { Animated, Platform, Text, View } from "react-native";
+import { Animated, Text, View } from "react-native";
 import Reanimated, { FadeIn } from "react-native-reanimated";
 import { useEventCallback } from "../hooks/useEventCallback";
 import { useQuizProgress } from "../hooks/useQuizProgress";
@@ -326,21 +325,4 @@ function horizontalCardStyleInterpolator({
       opacity,
     },
   };
-}
-
-function usePrefetchImages(...images: (string | number)[]) {
-  return useQueries({
-    queries: images.map((image) => ({
-      queryKey: [usePrefetchImages.name, image],
-      queryFn: () => cacheImage(image),
-    })),
-  });
-}
-
-function cacheImage(image: string | number) {
-  if (Platform.OS === `web`) {
-    const uri = typeof image === `string` ? image : Asset.fromModule(image).uri;
-    return Image.prefetch(uri);
-  }
-  return Asset.fromModule(image).downloadAsync();
 }
