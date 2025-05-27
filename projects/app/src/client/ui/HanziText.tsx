@@ -15,9 +15,7 @@ export const HanziText = ({
   underline?: boolean;
 }) => {
   return (
-    <View
-      className={`flex-0 flex-col items-center ${small ? `gap-0.5` : `gap-1`}`}
-    >
+    <View className={`flex-col items-center ${small ? `gap-0.5` : `gap-1`}`}>
       {pinyin == null ? null : (
         <PinyinText pinyin={pinyin} accented={accented} small={small} />
       )}
@@ -37,7 +35,7 @@ const hanziText = tv({
       true: `text-xl/none`,
     },
     underline: {
-      true: `underline decoration-dashed decoration-[2px] underline-offset-[6px]`,
+      true: `underline decoration-dashed decoration-2 underline-offset-[6px]`,
     },
   },
 });

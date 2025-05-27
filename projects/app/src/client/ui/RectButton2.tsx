@@ -35,10 +35,6 @@ export const RectButton2 = forwardRef<
 ) {
   const disabled = pressableProps.disabled === true;
 
-  // if (disabled) {
-  //   accent = false;
-  // }
-
   const [pressed, setPressed] = useState(false);
   const [hovered, setHovered] = useState(false);
 
@@ -118,11 +114,11 @@ const pressable = tv({
 });
 
 const roundedRect = tv({
-  base: `rounded-lg px-3 py-[4px] items-center justify-center web:transition-all`,
+  base: `items-center justify-center rounded-lg px-3 py-[4px] web:transition-all`,
   variants: {
     variant: {
       filled: `py-[5px]`,
-      outline: `border-[2px]`,
+      outline: `border-2`,
       bare: ``,
     },
     hoveredOrPressed: {
@@ -132,13 +128,13 @@ const roundedRect = tv({
       true: ``,
     },
     disabled: {
-      true: `opacity-30 select-none cursor-default`,
+      true: `cursor-default select-none opacity-30`,
     },
   },
   compoundVariants: [
     {
       variant: `filled`,
-      class: `bg-body/95 border-background/20`,
+      class: `border-background/20 bg-body/95`,
     },
     {
       variant: `filled`,
@@ -148,7 +144,7 @@ const roundedRect = tv({
     {
       variant: `filled`,
       flat: false,
-      class: `border-b-[4px]`,
+      class: `border-b-4`,
     },
     {
       variant: `outline`,
@@ -163,12 +159,12 @@ const roundedRect = tv({
     {
       variant: `outline`,
       flat: true,
-      class: `border-b-[2px]`,
+      class: `border-b-2`,
     },
     {
       variant: `outline`,
       flat: false,
-      class: `border-b-[4px]`,
+      class: `border-b-4`,
     },
   ],
 });

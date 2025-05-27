@@ -142,7 +142,7 @@ export const WikiHanziWordModal = ({
                   <View className="gap-4 rounded-xl bg-primary-5 p-4">
                     {wikiEntry.data.components.map((component, i) => {
                       return (
-                        <View key={i} className="flex-column gap-1">
+                        <View key={i} className="flex-col gap-1">
                           <Text className="hhh-text-body">
                             {component.title ??
                               (component.hanziWord == null ? null : (
@@ -165,7 +165,7 @@ export const WikiHanziWordModal = ({
 
                     {hanziWordSkillData.data.glossHint == null ? null : (
                       <>
-                        <View className="h-[1px] w-full bg-primary-8" />
+                        <View className="h-px w-full bg-primary-8" />
                         <Hhhmark
                           source={hanziWordSkillData.data.glossHint}
                           context="body"
@@ -175,7 +175,7 @@ export const WikiHanziWordModal = ({
 
                     {wikiEntry.data.interpretation == null ? null : (
                       <>
-                        <View className="h-[1px] w-full bg-primary-8" />
+                        <View className="h-px w-full bg-primary-8" />
                         <Hhhmark
                           source={wikiEntry.data.interpretation}
                           context="body"
@@ -233,7 +233,7 @@ export const WikiHanziWordModal = ({
               )}
             </ScrollView>
 
-            <View className="accent-theme2 border-t-2 border-primary-5 px-4 py-4 mb-safe">
+            <View className="accent-theme2 border-t-2 border-primary-5 p-4 mb-safe">
               <RectButton2
                 textClassName="px-2 py-1"
                 variant="filled"

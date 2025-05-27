@@ -7,6 +7,7 @@ import importPlugin from "eslint-plugin-import";
 import reactPlugin from "eslint-plugin-react";
 import reactCompilerPlugin from "eslint-plugin-react-compiler";
 import reactHooksPlugin from "eslint-plugin-react-hooks";
+import tailwindPlugin from "eslint-plugin-tailwindcss";
 import unicornPlugin from "eslint-plugin-unicorn";
 import { builtinModules } from "node:module";
 import tseslint from "typescript-eslint";
@@ -34,6 +35,7 @@ export default tseslint.config(
       [`react-compiler`]: reactCompilerPlugin,
       [`react-hooks`]: reactHooksPlugin,
       [`react`]: reactPlugin,
+      [`tailwind`]: tailwindPlugin,
     },
   },
 
@@ -258,6 +260,17 @@ export default tseslint.config(
       // @haohaohow/eslint-rules
       //
       "@haohaohow/reanimated-default-name": `error`,
+
+      //
+      // tailwindcss
+      //
+      "tailwind/classnames-order": `error`,
+      "tailwind/enforces-negative-arbitrary-values": `error`,
+      "tailwind/enforces-shorthand": `error`,
+      "tailwind/migration-from-tailwind-2": `error`,
+      "tailwind/no-contradicting-classname": `error`,
+      "tailwind/no-custom-classname": `error`,
+      "tailwind/no-unnecessary-arbitrary-value": `error`,
     },
   },
 

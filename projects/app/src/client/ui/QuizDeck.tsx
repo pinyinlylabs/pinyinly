@@ -1,3 +1,4 @@
+import { usePrefetchImages } from "@/client/hooks/usePrefetchImages";
 import { questionsForReview2 } from "@/client/query";
 import type { StackNavigationFor } from "@/client/ui/types";
 import type { Mistake, NewSkillRating, Question } from "@/data/model";
@@ -18,13 +19,11 @@ import {
   createStackNavigator,
   TransitionPresets,
 } from "@react-navigation/stack";
-import { useQueries, useQueryClient } from "@tanstack/react-query";
-import { Asset } from "expo-asset";
-import { Image } from "expo-image";
+import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "expo-router";
 import React, { useEffect, useId, useRef, useState } from "react";
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import { Animated, Platform, Text, View } from "react-native";
+import { Animated, Text, View } from "react-native";
 import Reanimated, { FadeIn } from "react-native-reanimated";
 import { useEventCallback } from "../hooks/useEventCallback";
 import { useQuizProgress } from "../hooks/useQuizProgress";
@@ -32,6 +31,7 @@ import { CloseButton } from "./CloseButton";
 import { QuizDeckMultipleChoiceQuestion } from "./QuizDeckMultipleChoiceQuestion";
 import { QuizDeckOneCorrectPairQuestion } from "./QuizDeckOneCorrectPairQuestion";
 import { QuizProgressBar } from "./QuizProgressBar";
+import { QuizQueueButton } from "./QuizQueueButton";
 import { RectButton2 } from "./RectButton2";
 import { useReplicache, useRizzleQueryPaged } from "./ReplicacheContext";
 import { useSoundEffect } from "./useSoundEffect";
@@ -165,9 +165,10 @@ export const QuizDeck = ({ className }: { className?: string }) => {
 
   return (
     <View className={className}>
-      <View className="mb-[20px] w-full max-w-[600px] flex-row items-center gap-[24px] self-center px-[16px]">
+      <View className="mb-[20px] w-full max-w-[600px] flex-row items-center gap-[24px] self-center px-quiz-px">
         <CloseButton />
         <QuizProgressBar progress={quizProgress.progress} />
+        <QuizQueueButton />
       </View>
 
       <NavigationIndependentTree>
@@ -274,7 +275,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
                 }
 
                 return (
-                  <View className="h-full w-full max-w-[600px] flex-1 self-center">
+                  <View className="size-full max-w-[600px] flex-1 self-center">
                     {screen}
                   </View>
                 );
@@ -326,21 +327,4 @@ function horizontalCardStyleInterpolator({
       opacity,
     },
   };
-}
-
-function usePrefetchImages(...images: (string | number)[]) {
-  return useQueries({
-    queries: images.map((image) => ({
-      queryKey: [usePrefetchImages.name, image],
-      queryFn: () => cacheImage(image),
-    })),
-  });
-}
-
-function cacheImage(image: string | number) {
-  if (Platform.OS === `web`) {
-    const uri = typeof image === `string` ? image : Asset.fromModule(image).uri;
-    return Image.prefetch(uri);
-  }
-  return Asset.fromModule(image).downloadAsync();
 }

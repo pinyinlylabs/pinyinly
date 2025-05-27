@@ -90,17 +90,17 @@ export default function RadicalPage() {
 
   return (
     <View className="flex-1 items-center bg-background">
-      <View className="w-[100%] max-w-[600px] flex-row items-center gap-3 pt-safe-offset-4 px-safe-or-4">
+      <View className="w-full max-w-[600px] flex-row items-center gap-3 pt-safe-offset-4 px-safe-or-4">
         <CloseButton />
       </View>
       <ScrollView contentContainerClassName="px-safe-or-4 flex-1 pb-2">
         <View className="flex-row items-center gap-2 self-center py-4">
           <Image
-            className="h-[32px] w-[32px] flex-shrink text-[#04ABF6]"
+            className="size-[32px] shrink text-[#04ABF6]"
             source={require(`@/assets/icons/loader.svg`)}
             tintColor="currentColor"
           />
-          <Text className="font-body text-lg font-bold uppercase text-[#04ABF6]">
+          <Text className="text-lg font-bold uppercase text-[#04ABF6]">
             New Word
           </Text>
         </View>
@@ -143,7 +143,7 @@ export default function RadicalPage() {
         <View className="h-1 w-2 flex-1"></View>
         <View className="h-1 w-2 flex-1"></View>
 
-        <View className="w-[100%] max-w-[600px] flex-col items-stretch gap-3 mb-safe-offset-2">
+        <View className="w-full max-w-[600px] flex-col items-stretch gap-3 mb-safe-offset-2">
           <RectButton2
             variant="outline"
             onPress={() => {
@@ -158,7 +158,7 @@ export default function RadicalPage() {
         </View>
 
         {showExplanation ? (
-          <View className="absolute bottom-0 left-0 right-0 rounded-t-2xl bg-primary-6">
+          <View className="absolute inset-x-0 bottom-0 rounded-t-2xl bg-primary-6">
             <View className="my-2 h-2 w-12 self-center rounded bg-primary-8" />
 
             <View>

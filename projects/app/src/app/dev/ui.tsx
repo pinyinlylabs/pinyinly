@@ -1,6 +1,7 @@
 import { useQuizProgress } from "@/client/hooks/useQuizProgress";
 import { HanziText } from "@/client/ui/HanziText";
 import { QuizProgressBar } from "@/client/ui/QuizProgressBar";
+import { QuizQueueButton } from "@/client/ui/QuizQueueButton";
 import { RectButton2 } from "@/client/ui/RectButton2";
 import type { TextAnswerButtonState } from "@/client/ui/TextAnswerButton";
 import { TextAnswerButton } from "@/client/ui/TextAnswerButton";
@@ -29,6 +30,10 @@ export default function DesignSystemPage() {
         </Link>
       </View>
       <ScrollView style={{ flex: 1 }} ref={scrollViewRef}>
+        <Section title={QuizQueueButton.name} scrollTo={scrollTo}>
+          <QuizQueueButtonExample />
+        </Section>
+
         <Section title="QuizProgressBarExample" scrollTo={scrollTo}>
           <QuizProgressBarExample />
         </Section>
@@ -47,7 +52,7 @@ export default function DesignSystemPage() {
 
         <Section title="Typography" scrollTo={scrollTo}>
           <View className="flex-1 gap-2">
-            {([`body`, `title`, `chinese`] as const).map((family) => (
+            {([`chinese`] as const).map((family) => (
               <View key={family}>
                 <LittlePrimaryHeader title={family} />
                 <TypographyExample family={family} size="xs" />
@@ -173,8 +178,6 @@ const typography = tv({
       "2xl": `text-2xl`,
     },
     family: {
-      body: `font-body`,
-      title: `font-title`,
       chinese: `font-chinese`,
     },
   },
@@ -242,13 +245,11 @@ const TypographyExample = ({
   family,
 }: {
   size: `xs` | `sm` | `base` | `lg` | `xl` | `2xl`;
-  family: `body` | `title` | `chinese`;
+  family: `chinese`;
 }) => {
   return (
     <View>
-      <Text className="font-xs text-primary-9">
-        <Text className="text-xs text-primary-11">{size}</Text>
-      </Text>
+      <Text className="text-xs text-primary-11">{size}</Text>
 
       <Text className={typography({ size, family })} numberOfLines={1}>
         The quick brown fox jumps over the lazy dog.
@@ -260,11 +261,11 @@ const TypographyExample = ({
 const LittlePrimaryHeader = ({ title }: { title: string }) => {
   return (
     <View className="mb-2 mt-4 flex-row items-center gap-2">
-      <View className="h-[1px] flex-grow bg-primary-7" />
+      <View className="h-px grow bg-primary-7" />
       <Text className="text-center text-xs font-bold uppercase text-body/80">
         {title}
       </Text>
-      <View className="h-[1px] flex-grow bg-primary-7" />
+      <View className="h-px grow bg-primary-7" />
     </View>
   );
 };
@@ -278,7 +279,7 @@ const ColorSwatch = ({
 }) => (
   <View className="flex-wrap gap-1">
     <Text className="text-center text-xs text-body/50">{index}</Text>
-    <View className={`h-[40px] w-[40px] ${className ?? ``}`} />
+    <View className={`size-[40px] ${className ?? ``}`} />
   </View>
 );
 
@@ -533,7 +534,7 @@ const TextAnswerButtonExamples = (
       </ExampleStack>
 
       <ExampleStack title="text overflow">
-        <View className="h-[120px] w-[120px] gap-2 border-2 border-dashed border-primary-8">
+        <View className="size-[120px] gap-2 border-2 border-dashed border-primary-8">
           <TextAnswerButton
             className="flex-1"
             text="one two three four five six seven eight nine ten"
@@ -553,25 +554,25 @@ const TextAnswerButtonExamples = (
 
     <View className="flex-row flex-wrap">
       <ExampleStack title="items-start">
-        <View className="h-[120px] w-[120px] flex-col items-start gap-2 border-2 border-dashed border-primary-8">
+        <View className="size-[120px] flex-col items-start gap-2 border-2 border-dashed border-primary-8">
           <SyncedAnswerButtonExample />
         </View>
       </ExampleStack>
 
       <ExampleStack title="items-center">
-        <View className="h-[120px] w-[120px] flex-col items-center gap-2 border-2 border-dashed border-primary-8">
+        <View className="size-[120px] flex-col items-center gap-2 border-2 border-dashed border-primary-8">
           <SyncedAnswerButtonExample />
         </View>
       </ExampleStack>
 
       <ExampleStack title="items-stretch">
-        <View className="h-[120px] w-[120px] flex-col gap-2 border-2 border-dashed border-primary-8">
+        <View className="size-[120px] flex-col gap-2 border-2 border-dashed border-primary-8">
           <SyncedAnswerButtonExample />
         </View>
       </ExampleStack>
 
       <ExampleStack title="items-end">
-        <View className="h-[120px] w-[120px] flex-col items-end gap-2 border-2 border-dashed border-primary-8">
+        <View className="size-[120px] flex-col items-end gap-2 border-2 border-dashed border-primary-8">
           <SyncedAnswerButtonExample />
         </View>
       </ExampleStack>
@@ -581,25 +582,25 @@ const TextAnswerButtonExamples = (
 
     <View className="flex-row flex-wrap">
       <ExampleStack title="items-start">
-        <View className="h-[120px] w-[120px] flex-col items-start gap-2 border-2 border-dashed border-primary-8">
+        <View className="size-[120px] flex-col items-start gap-2 border-2 border-dashed border-primary-8">
           <SyncedAnswerButtonExample className="flex-1" />
         </View>
       </ExampleStack>
 
       <ExampleStack title="items-center">
-        <View className="h-[120px] w-[120px] flex-col items-center gap-2 border-2 border-dashed border-primary-8">
+        <View className="size-[120px] flex-col items-center gap-2 border-2 border-dashed border-primary-8">
           <SyncedAnswerButtonExample className="flex-1" />
         </View>
       </ExampleStack>
 
       <ExampleStack title="items-stretch">
-        <View className="h-[120px] w-[120px] flex-col gap-2 border-2 border-dashed border-primary-8">
+        <View className="size-[120px] flex-col gap-2 border-2 border-dashed border-primary-8">
           <SyncedAnswerButtonExample className="flex-1" />
         </View>
       </ExampleStack>
 
       <ExampleStack title="items-end">
-        <View className="h-[120px] w-[120px] flex-col items-end gap-2 border-2 border-dashed border-primary-8">
+        <View className="size-[120px] flex-col items-end gap-2 border-2 border-dashed border-primary-8">
           <SyncedAnswerButtonExample className="flex-1" />
         </View>
       </ExampleStack>
@@ -706,23 +707,49 @@ function QuizProgressBarExample() {
   }, [quizProgress]);
 
   return (
-    <>
-      <View className="w-full flex-col gap-2">
-        <View className="min-h-[32px]">
-          <QuizProgressBar progress={quizProgress.progress} />
-        </View>
-        <View className="flex-row items-start gap-4">
-          <View className="flex-row items-center gap-2">
-            <Text className="font-bold text-primary-10">Answer:</Text>
-            <RectButton2 variant="outline" onPress={logCorrect}>
-              Correct
-            </RectButton2>
-            <RectButton2 variant="outline" onPress={logIncorrect}>
-              Incorrect
-            </RectButton2>
-          </View>
+    <View className="w-full flex-col gap-2">
+      <View className="min-h-[32px]">
+        <QuizProgressBar progress={quizProgress.progress} />
+      </View>
+      <View className="flex-row items-start gap-4">
+        <View className="flex-row items-center gap-2">
+          <Text className="font-bold text-primary-10">Answer:</Text>
+          <RectButton2 variant="outline" onPress={logCorrect}>
+            Correct
+          </RectButton2>
+          <RectButton2 variant="outline" onPress={logIncorrect}>
+            Incorrect
+          </RectButton2>
         </View>
       </View>
-    </>
+    </View>
+  );
+}
+
+function QuizQueueButtonExample() {
+  return (
+    <View className="w-full flex-row gap-2">
+      <ExampleStack title="default">
+        <QuizQueueButton />
+      </ExampleStack>
+
+      <ExampleStack title="overdue">
+        <QuizQueueButton overdueCount={1} />
+        <QuizQueueButton overdueCount={10} />
+        <QuizQueueButton overdueCount={100} />
+      </ExampleStack>
+
+      <ExampleStack title="due">
+        <QuizQueueButton dueCount={1} />
+        <QuizQueueButton dueCount={10} />
+        <QuizQueueButton dueCount={100} />
+      </ExampleStack>
+
+      <ExampleStack title="new">
+        <QuizQueueButton newCount={1} />
+        <QuizQueueButton newCount={10} />
+        <QuizQueueButton newCount={100} />
+      </ExampleStack>
+    </View>
   );
 }

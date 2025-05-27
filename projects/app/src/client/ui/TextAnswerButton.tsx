@@ -218,14 +218,14 @@ const withIncorrectWobbleAnimation = () => {
 };
 
 const bgAnimatedClass = tv({
-  base: `pointer-events-none absolute bottom-[2px] left-[1px] right-[1px] top-[2px] rounded-lg bg-cyan-10/10`,
+  base: `pointer-events-none absolute inset-x-px inset-y-[2px] rounded-lg bg-cyan-10/10`,
   variants: {
     state: {
       default: ``,
       dimmed: ``,
       selected: ``,
       success: `bg-body`,
-      error: `bg-transparent`,
+      error: ``,
     },
   },
 });
@@ -263,7 +263,7 @@ const textClass = tv({
   // px-1: Horizontal padding is necessary to give first and last letters on a
   // line with accents enough space to not be clipped. Without this words like
   // "lǐ" will have half the accent clipped.
-  base: `px-1 text-center font-normal text-body web:transition-color`,
+  base: `px-1 text-center font-normal text-body web:transition-colors`,
   variants: {
     state: {
       default: `text-body`,
@@ -276,16 +276,16 @@ const textClass = tv({
       tiny: `text-xl/tight lg:text-2xl/tight`,
       short: `text-lg/tight lg:text-xl/tight`,
       medium: `text-sm lg:text-lg/tight`,
-      long: `text-xs lg:text-md/tight`,
+      long: `text-xs lg:text-base/tight`,
     },
   },
 });
 
 const rectClass = tv({
-  base: `items-center select-none justify-center border-2 px-3 py-1 rounded-lg`,
+  base: `select-none items-center justify-center rounded-lg border-2 px-3 py-1`,
   variants: {
     disabled: {
-      true: `opacity-50 select-none cursor-default`,
+      true: `cursor-default select-none opacity-50`,
     },
     flat: {
       false: `border-b-4`,

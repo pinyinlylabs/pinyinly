@@ -71,11 +71,8 @@ export const SplashScreen = ({}: { children?: never }) => {
   }
 
   return (
-    <Reanimated.View
-      exiting={FadeOut}
-      className="absolute bottom-0 left-0 right-0 top-0"
-    >
-      <View className="h-full w-full items-center justify-center bg-[#DE6447]">
+    <Reanimated.View exiting={FadeOut} className="absolute inset-0">
+      <View className="size-full items-center justify-center bg-[#DE6447]">
         <LottieView
           loop={false}
           onAnimationFinish={() => {

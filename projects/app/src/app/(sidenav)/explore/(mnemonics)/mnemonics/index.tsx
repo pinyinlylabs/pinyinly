@@ -137,13 +137,13 @@ export default function MnemonicsPage() {
               {Object.entries(query.data.initials).map(
                 ([, { initials, desc, id }], i) => (
                   <Fragment key={desc}>
-                    <View className="flex-0 flex-row gap-2">
+                    <View className="flex-row gap-2">
                       <Text className="text-body">{desc}</Text>
                       <Text className="text-primary-8">
                         {initialGroupThemes.data?.get(id) ?? `no theme`}
                       </Text>
                     </View>
-                    <View className="flex-0 flex-row flex-wrap gap-3.5">
+                    <View className="flex-row flex-wrap gap-3.5">
                       {initials.map(([initial, ...alts]) => (
                         <Link
                           key={initial}
@@ -226,7 +226,7 @@ const pinyinPartBox = tv({
   base: `size-24 justify-center gap-2 rounded-xl bg-primary-3 px-2 hover:bg-primary-5 lg:size-24`,
   variants: {
     hasAssociation: {
-      true: `border-accent-10 border-2`,
+      true: `border-2 border-accent-10`,
     },
   },
 });

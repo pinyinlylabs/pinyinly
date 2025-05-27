@@ -6,7 +6,7 @@ export default function ReviewsPage() {
   return (
     <View className="flex-1 items-center bg-background pt-safe-offset-[20px]">
       <ErrorBoundary>
-        <QuizDeck className="h-full w-full" />
+        <QuizDeck className="size-full" />
       </ErrorBoundary>
     </View>
   );
