@@ -20,8 +20,8 @@ export async function questionsForReview2(
   options?: {
     limit?: number;
   },
-): Promise<Question[]> {
-  const result: Question[] = [];
+): Promise<[Question[], SkillReviewQueue]> {
+  const questions: Question[] = [];
   const reviewQueue = await targetSkillsReviewQueue(r);
 
   for (const [i, skill] of reviewQueue.available.entries()) {
@@ -38,7 +38,7 @@ export async function questionsForReview2(
         };
       }
       question.flag ??= flagsForSrsState(skillState?.srs);
-      result.push(question);
+      questions.push(question);
     } catch (error) {
       console.error(
         `Error while generating a question for a skill ${JSON.stringify(skill)}`,
@@ -47,12 +47,12 @@ export async function questionsForReview2(
       continue;
     }
 
-    if (options?.limit != null && result.length === options.limit) {
+    if (options?.limit != null && questions.length === options.limit) {
       break;
     }
   }
 
-  return result;
+  return [questions, reviewQueue];
 }
 
 export function flagsForSrsState(
