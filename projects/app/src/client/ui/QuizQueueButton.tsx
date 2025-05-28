@@ -1,15 +1,15 @@
+import type { SkillReviewQueue } from "@/data/skills";
 import { Image } from "expo-image";
 import { Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 
 export function QuizQueueButton({
-  overdueCount,
-  dueCount,
-  newCount,
+  queueStats,
 }: {
-  overdueCount?: number;
-  dueCount?: number;
-  newCount?: number;
+  queueStats: Pick<
+    SkillReviewQueue,
+    `overDueCount` | `dueCount` | `newCount`
+  > | null;
 }) {
   return (
     <View className="relative size-[32px] flex-row justify-center md:justify-start">
@@ -19,14 +19,12 @@ export function QuizQueueButton({
         tintColor="currentColor"
         contentFit="fill"
       />
-      {overdueCount == null ||
-      dueCount == null ||
-      newCount == null ? null : overdueCount > 0 ? (
-        <CountLozenge count={overdueCount} mode="overdue" />
-      ) : dueCount > 0 ? (
-        <CountLozenge count={dueCount} mode="due" />
-      ) : newCount > 0 ? (
-        <CountLozenge count={newCount} mode="new" />
+      {queueStats == null ? null : queueStats.overDueCount > 0 ? (
+        <CountLozenge count={queueStats.overDueCount} mode="overdue" />
+      ) : queueStats.dueCount > 0 ? (
+        <CountLozenge count={queueStats.dueCount} mode="due" />
+      ) : queueStats.newCount > 0 ? (
+        <CountLozenge count={queueStats.newCount} mode="new" />
       ) : (
         <CheckBadge />
       )}

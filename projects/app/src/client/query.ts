@@ -24,7 +24,7 @@ export async function questionsForReview2(
   const questions: Question[] = [];
   const reviewQueue = await targetSkillsReviewQueue(r);
 
-  for (const [i, skill] of reviewQueue.available.entries()) {
+  for (const [i, skill] of reviewQueue.items.entries()) {
     const skillState = await r.replicache.query((tx) =>
       r.query.skillState.get(tx, { skill }),
     );

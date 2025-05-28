@@ -318,13 +318,14 @@ await test(`${skillReviewQueue.name} suite`, async () => {
         latestSkillRatings: new Map(),
       }),
     ).toMatchObject({
-      available: [],
-      blocked: [],
-      retryCount: 0,
+      blockedItems: [],
       dueCount: 0,
-      overDueCount: 0,
+      items: [],
+      newCount: 0,
       newDueAt: null,
       newOverDueAt: null,
+      overDueCount: 0,
+      retryCount: 0,
     });
   });
 
@@ -341,11 +342,12 @@ await test(`${skillReviewQueue.name} suite`, async () => {
         latestSkillRatings: new Map(),
       }),
     ).toMatchObject({
-      available: [`he:刀:knife`],
-      blocked: [],
-      retryCount: 0,
+      blockedItems: [],
       dueCount: 1,
+      items: [`he:刀:knife`],
+      newCount: 0,
       overDueCount: 0,
+      retryCount: 0,
     });
   });
 
@@ -362,7 +364,9 @@ await test(`${skillReviewQueue.name} suite`, async () => {
         latestSkillRatings: new Map(),
       }),
     ).toMatchObject({
-      available: [
+      blockedItems: [],
+      dueCount: 1,
+      items: [
         // This would normally be blocked but because it's already introduced
         // (because there's an srs state for it) it's available.
         `he:刀:knife`,
@@ -373,10 +377,9 @@ await test(`${skillReviewQueue.name} suite`, async () => {
         `he:丿:slash`,
         `he:𠃌:radical`,
       ],
-      blocked: [],
-      retryCount: 0,
-      dueCount: 1,
+      newCount: 2,
       overDueCount: 0,
+      retryCount: 0,
     });
   });
 
@@ -392,8 +395,8 @@ await test(`${skillReviewQueue.name} suite`, async () => {
           latestSkillRatings: new Map(),
         }),
       ).toMatchObject({
-        available: [`he:子:child`, `he:女:woman`],
-        blocked: [`he:好:good`],
+        items: [`he:子:child`, `he:女:woman`],
+        blockedItems: [`he:好:good`],
       });
     });
 
@@ -409,8 +412,8 @@ await test(`${skillReviewQueue.name} suite`, async () => {
           latestSkillRatings: new Map(),
         }),
       ).toMatchObject({
-        available: [`he:丿:slash`, `he:亅:hook`, `he:又:again`],
-        blocked: [
+        items: [`he:丿:slash`, `he:亅:hook`, `he:又:again`],
+        blockedItems: [
           `he:水:water`, // learns this because of 氵
           `he:氵:water`,
           `he:汉:chinese`,
@@ -436,14 +439,15 @@ await test(`${skillReviewQueue.name} suite`, async () => {
             ]),
           }),
         ).toMatchObject({
-          available: [
+          blockedItems: [],
+          dueCount: 1,
+          items: [
             `he:丿:slash`, // hoisted to the top for retry
             `he:八:eight`,
           ],
-          blocked: [],
-          retryCount: 1,
-          dueCount: 1,
+          newCount: 0,
           overDueCount: 0,
+          retryCount: 1,
         });
       });
 
@@ -463,11 +467,12 @@ await test(`${skillReviewQueue.name} suite`, async () => {
             ]),
           }),
         ).toMatchObject({
-          available: [`he:八:eight`, `he:丿:slash`],
-          blocked: [],
-          retryCount: 0,
+          blockedItems: [],
           dueCount: 1,
+          items: [`he:八:eight`, `he:丿:slash`],
+          newCount: 1,
           overDueCount: 0,
+          retryCount: 0,
         });
       });
 
@@ -489,11 +494,12 @@ await test(`${skillReviewQueue.name} suite`, async () => {
             ]),
           }),
         ).toMatchObject({
-          available: [`he:八:eight`, `he:丿:slash`],
-          blocked: [],
-          retryCount: 2,
+          blockedItems: [],
           dueCount: 0,
+          items: [`he:八:eight`, `he:丿:slash`],
+          newCount: 0,
           overDueCount: 0,
+          retryCount: 2,
         });
 
         // try in reverse order
@@ -510,11 +516,12 @@ await test(`${skillReviewQueue.name} suite`, async () => {
             ]),
           }),
         ).toMatchObject({
-          available: [`he:丿:slash`, `he:八:eight`],
-          blocked: [],
-          retryCount: 2,
+          blockedItems: [],
           dueCount: 0,
+          items: [`he:丿:slash`, `he:八:eight`],
+          newCount: 0,
           overDueCount: 0,
+          retryCount: 2,
         });
       });
     });
@@ -534,16 +541,12 @@ await test(`${skillReviewQueue.name} suite`, async () => {
           latestSkillRatings: new Map(),
         }),
       ).toMatchObject({
-        available: [
-          `he:八:eight`,
-          `he:刀:knife`,
-          `he:丿:slash`,
-          `he:𠃌:radical`,
-        ],
-        blocked: [`he:分:divide`],
-        retryCount: 0,
+        blockedItems: [`he:分:divide`],
         dueCount: 2,
+        items: [`he:八:eight`, `he:刀:knife`, `he:丿:slash`, `he:𠃌:radical`],
+        newCount: 2,
         overDueCount: 0,
+        retryCount: 0,
       });
     });
 
@@ -559,8 +562,8 @@ await test(`${skillReviewQueue.name} suite`, async () => {
           latestSkillRatings: new Map(),
         }),
       ).toMatchObject({
-        available: [`he:丿:slash`, `he:𠃌:radical`, `he:八:eight`],
-        blocked: [`he:刀:knife`, `he:分:divide`],
+        items: [`he:丿:slash`, `he:𠃌:radical`, `he:八:eight`],
+        blockedItems: [`he:刀:knife`, `he:分:divide`],
       });
     });
 
@@ -581,17 +584,18 @@ await test(`${skillReviewQueue.name} suite`, async () => {
           latestSkillRatings: new Map(),
         }),
       ).toMatchObject({
-        available: [
+        blockedItems: [`he:分:divide`],
+        dueCount: 2,
+        items: [
           `he:一:one`,
           `he:𠃌:radical`,
           `he:丿:slash`,
           `he:刀:knife`,
           `he:八:eight`,
         ],
-        blocked: [`he:分:divide`],
-        retryCount: 0,
-        dueCount: 2,
+        newCount: 1,
         overDueCount: 0,
+        retryCount: 0,
       });
     });
   });
@@ -606,8 +610,8 @@ await test(`${skillReviewQueue.name} suite`, async () => {
           latestSkillRatings: new Map(),
         }),
       ).toMatchObject({
-        available: [`he:子:child`, `he:女:woman`],
-        blocked: [
+        items: [`he:子:child`, `he:女:woman`],
+        blockedItems: [
           `he:好:good`,
           `hpi:好:good`,
           `hpf:好:good`,
@@ -632,13 +636,13 @@ await test(`${skillReviewQueue.name} suite`, async () => {
         skillTypeFromSkill(s) === SkillType.HanziWordToPinyin;
 
       const onlyHpQueue = {
-        available: queue.available.filter((s) => isHpSkill(s)),
-        blocked: queue.blocked.filter((s) => isHpSkill(s)),
+        items: queue.items.filter((s) => isHpSkill(s)),
+        blockedItems: queue.blockedItems.filter((s) => isHpSkill(s)),
       };
 
       assert.deepEqual(onlyHpQueue, {
-        available: [],
-        blocked: [`hp:样:shape`, `hp:一:one`, `hp:一样:same`],
+        items: [],
+        blockedItems: [`hp:样:shape`, `hp:一:one`, `hp:一样:same`],
       });
     });
 
@@ -654,7 +658,7 @@ await test(`${skillReviewQueue.name} suite`, async () => {
           latestSkillRatings: new Map(),
         }),
       ).toMatchObject({
-        available: [
+        items: [
           `he:人:person`,
           `he:八:eight`,
           `he:口:mouth`,
@@ -662,7 +666,7 @@ await test(`${skillReviewQueue.name} suite`, async () => {
           `he:丿:slash`,
           `he:一:one`,
         ],
-        blocked: [
+        blockedItems: [
           `he:火:fire`,
           `he:灬:fire`,
           `he:占:occupy`,
@@ -698,8 +702,8 @@ await test(`${skillReviewQueue.name} suite`, async () => {
           latestSkillRatings: new Map(),
         }),
       ).toMatchObject({
-        available: [`he:一:one`],
-        blocked: [`hpi:一:one`, `hpf:一:one`, `hpt:一:one`, `hp:一:one`],
+        items: [`he:一:one`],
+        blockedItems: [`hpi:一:one`, `hpf:一:one`, `hpt:一:one`, `hp:一:one`],
       });
 
       expect(
@@ -711,11 +715,12 @@ await test(`${skillReviewQueue.name} suite`, async () => {
           latestSkillRatings: new Map(),
         }),
       ).toMatchObject({
-        available: [`he:一:one`, `hpi:一:one`],
-        blocked: [`hpf:一:one`, `hpt:一:one`, `hp:一:one`],
-        retryCount: 0,
+        blockedItems: [`hpf:一:one`, `hpt:一:one`, `hp:一:one`],
         dueCount: 1,
+        items: [`he:一:one`, `hpi:一:one`],
+        newCount: 1,
         overDueCount: 0,
+        retryCount: 0,
       });
 
       expect(
@@ -728,11 +733,12 @@ await test(`${skillReviewQueue.name} suite`, async () => {
           latestSkillRatings: new Map(),
         }),
       ).toMatchObject({
-        available: [`he:一:one`, `hpi:一:one`, `hpf:一:one`],
-        blocked: [`hpt:一:one`, `hp:一:one`],
-        retryCount: 0,
+        blockedItems: [`hpt:一:one`, `hp:一:one`],
         dueCount: 2,
+        items: [`he:一:one`, `hpi:一:one`, `hpf:一:one`],
+        newCount: 1,
         overDueCount: 0,
+        retryCount: 0,
       });
     });
   });

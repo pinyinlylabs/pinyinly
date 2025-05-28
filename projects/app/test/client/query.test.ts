@@ -23,8 +23,8 @@ await test(`${targetSkillsReviewQueue.name} suite`, async () => {
     await using rizzle = r.replicache(testReplicacheOptions(), v7, v7Mutators);
 
     // Sanity check that there should be a bunch in the queue
-    const { available } = await targetSkillsReviewQueue(rizzle);
-    assert.ok(available.length > 100);
+    const { items } = await targetSkillsReviewQueue(rizzle);
+    assert.ok(items.length > 100);
   });
 });
 
@@ -35,14 +35,14 @@ await test(`${simulateSkillReviews.name} returns a review queue`, async () => {
   });
 
   expect(reviewQueue).toMatchObject({
-    available: [`he:丿:slash`, `he:𠃌:radical`, `he:八:eight`],
-    blocked: [`he:刀:knife`, `he:分:divide`],
+    items: [`he:丿:slash`, `he:𠃌:radical`, `he:八:eight`],
+    blockedItems: [`he:刀:knife`, `he:分:divide`],
   });
 });
 
 await test(`${computeSkillReviewQueue.name} suite`, async () => {
   await test(`incorrect answers in a quiz don't get scheduled prematurely`, async () => {
-    const { available } = await simulateSkillReviews({
+    const { items } = await simulateSkillReviews({
       targetSkills: [`he:分:divide`],
       history: [
         // first question is 丿:slash but they get it wrong. 八 is one of the
@@ -54,8 +54,8 @@ await test(`${computeSkillReviewQueue.name} suite`, async () => {
 
     // Make sure 八 didn't jump the queue before 𠃌 because it hasn't been
     // introduced yet, instead they should have to answer 𠃌 again.
-    const 𠃌Index = available.indexOf(`he:𠃌:radical`);
-    const 八Index = available.indexOf(`he:八:eight`);
+    const 𠃌Index = items.indexOf(`he:𠃌:radical`);
+    const 八Index = items.indexOf(`he:八:eight`);
     assert.ok(
       𠃌Index < 八Index,
       `he:𠃌:radical should be scheduled before he:八:eight`,
@@ -69,8 +69,8 @@ await test(`${computeSkillReviewQueue.name} suite`, async () => {
     });
 
     expect(reviewQueue).toMatchObject({
-      available: [`he:𠃌:radical`, `he:八:eight`, `he:丿:slash`],
-      blocked: [`he:刀:knife`, `he:分:divide`],
+      items: [`he:𠃌:radical`, `he:八:eight`, `he:丿:slash`],
+      blockedItems: [`he:刀:knife`, `he:分:divide`],
     });
   });
 
@@ -79,40 +79,52 @@ await test(`${computeSkillReviewQueue.name} suite`, async () => {
     const history: SkillReviewOp[] = [];
 
     {
-      const { blocked } = await simulateSkillReviews({ targetSkills, history });
-      assert.deepEqual(blocked, [`he:刀:knife`]);
-    }
-
-    history.push(`💤 1d`, `🟢 he:丿:slash he:𠃌:radical`);
-
-    {
-      const { blocked } = await simulateSkillReviews({ targetSkills, history });
-      assert.deepEqual(blocked, [`he:刀:knife`]);
-    }
-
-    history.push(`💤 1d`, `🟢 he:丿:slash he:𠃌:radical`);
-
-    {
-      const { blocked } = await simulateSkillReviews({ targetSkills, history });
-      assert.deepEqual(blocked, [`he:刀:knife`]);
-    }
-
-    history.push(`💤 1d`, `🟢 he:丿:slash he:𠃌:radical`);
-
-    {
-      const { blocked } = await simulateSkillReviews({ targetSkills, history });
-      assert.deepEqual(blocked, [`he:刀:knife`]);
-    }
-
-    history.push(`💤 1d`, `🟢 he:丿:slash he:𠃌:radical`);
-
-    {
-      const { available, blocked } = await simulateSkillReviews({
+      const { blockedItems } = await simulateSkillReviews({
         targetSkills,
         history,
       });
-      expect(available).toContain(`he:刀:knife`);
-      assert.deepEqual(blocked, []);
+      assert.deepEqual(blockedItems, [`he:刀:knife`]);
+    }
+
+    history.push(`💤 1d`, `🟢 he:丿:slash he:𠃌:radical`);
+
+    {
+      const { blockedItems } = await simulateSkillReviews({
+        targetSkills,
+        history,
+      });
+      assert.deepEqual(blockedItems, [`he:刀:knife`]);
+    }
+
+    history.push(`💤 1d`, `🟢 he:丿:slash he:𠃌:radical`);
+
+    {
+      const { blockedItems } = await simulateSkillReviews({
+        targetSkills,
+        history,
+      });
+      assert.deepEqual(blockedItems, [`he:刀:knife`]);
+    }
+
+    history.push(`💤 1d`, `🟢 he:丿:slash he:𠃌:radical`);
+
+    {
+      const { blockedItems } = await simulateSkillReviews({
+        targetSkills,
+        history,
+      });
+      assert.deepEqual(blockedItems, [`he:刀:knife`]);
+    }
+
+    history.push(`💤 1d`, `🟢 he:丿:slash he:𠃌:radical`);
+
+    {
+      const { items, blockedItems } = await simulateSkillReviews({
+        targetSkills,
+        history,
+      });
+      expect(items).toContain(`he:刀:knife`);
+      assert.deepEqual(blockedItems, []);
     }
   });
 
@@ -133,7 +145,7 @@ await test(`${computeSkillReviewQueue.name} suite`, async () => {
     ];
 
     const {
-      available: [review1],
+      items: [review1],
     } = await simulateSkillReviews({ targetSkills, history });
 
     // Doesn't get stuck reviewing he:𠃌:radical just because it had a lower stability.
@@ -153,16 +165,17 @@ await test(`${computeSkillReviewQueue.name} suite`, async () => {
         history,
       });
       expect(queue).toMatchObject({
-        available: [
+        items: [
           `he:刀:knife`,
           // These come later because he:刀:knife is due.
           `he:丿:slash`,
           `he:𠃌:radical`,
         ],
-        blocked: [],
+        blockedItems: [],
         retryCount: 1,
         dueCount: 0,
         overDueCount: 0,
+        newCount: 2,
       });
     }
 
@@ -174,14 +187,15 @@ await test(`${computeSkillReviewQueue.name} suite`, async () => {
         history,
       });
       expect(queue).toMatchObject({
-        available: [`he:丿:slash`, `he:𠃌:radical`],
-        blocked: [
+        items: [`he:丿:slash`, `he:𠃌:radical`],
+        blockedItems: [
           // Now this comes last because it's "stale" and reset to new.
           `he:刀:knife`,
         ],
         retryCount: 0,
         dueCount: 0,
         overDueCount: 0,
+        newCount: 2,
       });
     }
   });
