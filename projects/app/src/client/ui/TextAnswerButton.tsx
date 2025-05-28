@@ -225,7 +225,7 @@ const bgAnimatedClass = tv({
       dimmed: ``,
       selected: ``,
       success: `bg-body`,
-      error: ``,
+      error: `bg-transparent`,
     },
   },
 });

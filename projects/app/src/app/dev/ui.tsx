@@ -34,15 +34,15 @@ export default function DesignSystemPage() {
           <QuizQueueButtonExample />
         </Section>
 
-        <Section title="QuizProgressBarExample" scrollTo={scrollTo}>
+        <Section title={QuizProgressBar.name} scrollTo={scrollTo}>
           <QuizProgressBarExample />
         </Section>
 
-        <Section title="HanziText" scrollTo={scrollTo}>
+        <Section title={HanziText.name} scrollTo={scrollTo}>
           <HanziTextExamples />
         </Section>
 
-        <Section title="AnswerButton" scrollTo={scrollTo}>
+        <Section title="TextAnswerButton" scrollTo={scrollTo}>
           <TextAnswerButtonExamples />
         </Section>
 
