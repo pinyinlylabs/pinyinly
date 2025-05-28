@@ -372,11 +372,28 @@ export function pinyinInitialAssociation(
 }
 
 export interface SkillReviewQueue {
-  available: readonly Skill[];
-  blocked: readonly Skill[];
+  /**
+   * The skills in the review queue.
+   */
+  items: readonly Skill[];
+  /**
+   * Skills that are blocked from being reviewed (or introduced) because their
+   * dependencies aren't met yet.
+   */
+  blockedItems: readonly Skill[];
+  /**
+   * The number of items in the queue that need to be retried because they were
+   * answered incorrectly.
+   */
   retryCount: number;
+  /**
+   * The number of items in the queue due for review.
+   */
   dueCount: number;
-  overDueCount: number;
+  /**
+   * The number of new (never seen before) items in the queue.
+   */
+  newCount: number;
   /**
    * When the number of "due" items will increase.
    */
@@ -385,6 +402,10 @@ export interface SkillReviewQueue {
    * When the number of "over due" items will increase.
    */
   newOverDueAt: Date | null;
+  /**
+   * The number of items in the queue overdue for review.
+   */
+  overDueCount: number;
 }
 
 export function skillReviewQueue({
@@ -551,7 +572,7 @@ export function skillReviewQueue({
     }
   }
 
-  const available = [
+  const items = [
     // First do incorrect answers that need to be retried.
     ...learningOrderRetry
       .sort(sortComparatorDate(([, when]) => when))
@@ -570,14 +591,15 @@ export function skillReviewQueue({
     // Finally sort the not-due skills.
     ...randomSortSkills(learningOrderNotDue),
   ];
-  const blocked = learningOrderBlocked.reverse();
+  const blockedItems = learningOrderBlocked.reverse();
 
   return {
-    available,
-    blocked,
+    items,
+    blockedItems,
     retryCount: learningOrderRetry.length,
     dueCount: learningOrderDue.length,
     overDueCount: learningOrderOverDue.length,
+    newCount: learningOrderNew.length,
     newDueAt,
     newOverDueAt,
   };

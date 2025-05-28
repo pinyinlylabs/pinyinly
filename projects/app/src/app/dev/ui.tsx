@@ -729,26 +729,44 @@ function QuizProgressBarExample() {
 function QuizQueueButtonExample() {
   return (
     <View className="w-full flex-row gap-2">
-      <ExampleStack title="default">
-        <QuizQueueButton />
+      <ExampleStack title="loading">
+        <QuizQueueButton queueStats={null} />
       </ExampleStack>
 
       <ExampleStack title="overdue">
-        <QuizQueueButton overdueCount={1} />
-        <QuizQueueButton overdueCount={10} />
-        <QuizQueueButton overdueCount={100} />
+        <QuizQueueButton
+          queueStats={{ overDueCount: 1, dueCount: 0, newCount: 0 }}
+        />
+        <QuizQueueButton
+          queueStats={{ overDueCount: 10, dueCount: 0, newCount: 0 }}
+        />
+        <QuizQueueButton
+          queueStats={{ overDueCount: 100, dueCount: 0, newCount: 0 }}
+        />
       </ExampleStack>
 
       <ExampleStack title="due">
-        <QuizQueueButton dueCount={1} />
-        <QuizQueueButton dueCount={10} />
-        <QuizQueueButton dueCount={100} />
+        <QuizQueueButton
+          queueStats={{ overDueCount: 0, dueCount: 1, newCount: 0 }}
+        />
+        <QuizQueueButton
+          queueStats={{ overDueCount: 0, dueCount: 10, newCount: 0 }}
+        />
+        <QuizQueueButton
+          queueStats={{ overDueCount: 0, dueCount: 100, newCount: 0 }}
+        />
       </ExampleStack>
 
       <ExampleStack title="new">
-        <QuizQueueButton newCount={1} />
-        <QuizQueueButton newCount={10} />
-        <QuizQueueButton newCount={100} />
+        <QuizQueueButton
+          queueStats={{ overDueCount: 0, dueCount: 0, newCount: 1 }}
+        />
+        <QuizQueueButton
+          queueStats={{ overDueCount: 0, dueCount: 0, newCount: 10 }}
+        />
+        <QuizQueueButton
+          queueStats={{ overDueCount: 0, dueCount: 0, newCount: 100 }}
+        />
       </ExampleStack>
     </View>
   );
