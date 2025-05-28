@@ -24,6 +24,15 @@
           "value": "public, max-age=31556952, immutable"
         }
       ]
+    },
+    {
+      "source": "/_expo/static/js/web/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31556952, immutable"
+        }
+      ]
     }
   ]
 }
