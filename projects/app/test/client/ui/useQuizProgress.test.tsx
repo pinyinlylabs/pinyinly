@@ -1,6 +1,7 @@
 import { useQuizProgress } from "#client/hooks/useQuizProgress.ts";
-import { act, renderHook } from "@testing-library/react-native";
+import { renderHook } from "@testing-library/react-native";
 import test from "node:test";
+import { act } from "react";
 
 await test(`increments progress for each correct answer`, () => {
   const { result } = renderHook(() => useQuizProgress());
