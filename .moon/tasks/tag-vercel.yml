@@ -9,6 +9,9 @@ tasks:
       fi
     env:
       HHH_VALUE: "123"
+    options:
+      # moon doesn't use its version in the cache key, so just turn off caching
+      cache: false
   deploy:
     command: |
       npx -y vercel@39.4.2 pull --yes ${HHH_VERCEL_PREVIEW+--environment=preview} ${HHH_VERCEL_PROD+--environment=production} ${VERCEL_TOKEN:+--token=$VERCEL_TOKEN} &&
