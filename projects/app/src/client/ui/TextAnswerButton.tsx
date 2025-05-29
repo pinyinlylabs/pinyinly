@@ -1,5 +1,5 @@
 import { characterCount } from "@/dictionary/dictionary";
-import type { ElementRef } from "react";
+import type { ComponentRef } from "react";
 import { forwardRef, useEffect, useMemo, useState } from "react";
 import type { Pressable } from "react-native";
 import { Text, View } from "react-native";
@@ -36,7 +36,7 @@ export type TextAnswerButtonProps = {
 } & Omit<PropsOf<typeof Pressable>, `children` | `disabled`>;
 
 export const TextAnswerButton = forwardRef<
-  ElementRef<typeof Pressable>,
+  ComponentRef<typeof Pressable>,
   TextAnswerButtonProps
 >(function TextAnswerButton(
   {
@@ -225,7 +225,7 @@ const bgAnimatedClass = tv({
       dimmed: ``,
       selected: ``,
       success: `bg-body`,
-      error: ``,
+      error: `bg-transparent`,
     },
   },
 });

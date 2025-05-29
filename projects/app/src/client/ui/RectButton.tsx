@@ -1,5 +1,5 @@
 import Color from "color";
-import type { ElementRef } from "react";
+import type { ComponentRef } from "react";
 import { forwardRef, useMemo } from "react";
 import type { ColorValue, ViewProps } from "react-native";
 import { Pressable, View } from "react-native";
@@ -16,7 +16,7 @@ export type RectButtonProps = {
 } & Omit<PropsOf<typeof Pressable>, `children`>;
 
 export const RectButton = forwardRef<
-  ElementRef<typeof Pressable>,
+  ComponentRef<typeof Pressable>,
   RectButtonProps
 >(function RectButton(
   {

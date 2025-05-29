@@ -5,7 +5,7 @@ import { Link } from "expo-router";
 import type { TabTriggerSlotProps } from "expo-router/ui";
 import { TabList, Tabs, TabSlot, TabTrigger } from "expo-router/ui";
 import { StatusBar } from "expo-status-bar";
-import type { ElementRef, ReactNode } from "react";
+import type { ComponentRef, ReactNode } from "react";
 import { forwardRef } from "react";
 import { Pressable, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
@@ -98,7 +98,7 @@ type TabButtonProps = Omit<TabTriggerSlotProps, `children`> & {
   children: ReactNode | ((options: { isFocused: boolean }) => ReactNode);
 };
 
-const TabButton = forwardRef<ElementRef<typeof Pressable>, TabButtonProps>(
+const TabButton = forwardRef<ComponentRef<typeof Pressable>, TabButtonProps>(
   (
     {
       children,

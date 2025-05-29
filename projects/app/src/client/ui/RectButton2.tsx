@@ -1,4 +1,4 @@
-import type { ElementRef } from "react";
+import type { ComponentRef } from "react";
 import { forwardRef, useState } from "react";
 import type { ViewProps } from "react-native";
 import { Pressable, Text, View } from "react-native";
@@ -20,7 +20,7 @@ export type RectButton2Props = {
 >;
 
 export const RectButton2 = forwardRef<
-  ElementRef<typeof Pressable>,
+  ComponentRef<typeof Pressable>,
   RectButton2Props
 >(function RectButton2(
   {

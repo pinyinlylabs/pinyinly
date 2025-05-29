@@ -19,7 +19,7 @@ import { invariant } from "@haohaohow/lib/invariant";
 import { formatDuration } from "date-fns/formatDuration";
 import { intervalToDuration } from "date-fns/intervalToDuration";
 import { Image } from "expo-image";
-import type { ElementRef, ReactNode } from "react";
+import type { ComponentRef, ReactNode } from "react";
 import {
   forwardRef,
   memo,
@@ -535,7 +535,7 @@ enum SubmitButtonState {
 }
 
 const SubmitButton = forwardRef<
-  ElementRef<typeof RectButton2>,
+  ComponentRef<typeof RectButton2>,
   { state: SubmitButtonState } & Pick<PropsOf<typeof RectButton2>, `onPress`>
 >(function SubmitButton({ state, onPress }, ref) {
   let text;

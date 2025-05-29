@@ -269,7 +269,15 @@ export default tseslint.config(
       "tailwind/enforces-shorthand": `error`,
       "tailwind/migration-from-tailwind-2": `error`,
       "tailwind/no-contradicting-classname": `error`,
-      "tailwind/no-custom-classname": `error`,
+      "tailwind/no-custom-classname": [
+        `error`,
+        {
+          whitelist: [
+            // TODO delete when https://github.com/francoismassart/eslint-plugin-tailwindcss/issues/404 is resolved.
+            `bg-transparent`,
+          ],
+        },
+      ],
       "tailwind/no-unnecessary-arbitrary-value": `error`,
     },
   },

@@ -1,6 +1,6 @@
 import Color from "color";
 import { Image } from "expo-image";
-import type { ElementRef } from "react";
+import type { ComponentRef } from "react";
 import { forwardRef, useMemo } from "react";
 import type { ColorValue } from "react-native";
 import { Pressable, View } from "react-native";
@@ -15,7 +15,7 @@ export type CircleButtonProps = {
 } & PropsOf<typeof Pressable>;
 
 export const CircleButton = forwardRef<
-  ElementRef<typeof Pressable>,
+  ComponentRef<typeof Pressable>,
   CircleButtonProps
 >(function CircleButton(
   {

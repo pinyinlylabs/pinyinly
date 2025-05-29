@@ -163,11 +163,7 @@ const WebImpl = ({
   return (
     <Modal
       presentationStyle="fullScreen"
-      transparent={
-        // only works on web, on Native `true` throws an error
-        // TODO [react-native@>=0.78] migrate to using `backdropColor` instead.
-        true
-      }
+      backdropColor={false}
       onRequestClose={api.dismiss}
     >
       <AnimatedPressable
