@@ -1,5 +1,4 @@
-import type { ComponentRef } from "react";
-import { forwardRef, useState } from "react";
+import { useState } from "react";
 import type { ViewProps } from "react-native";
 import { Pressable, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
@@ -16,23 +15,17 @@ export type RectButton2Props = {
   textClassName?: string;
 } & Pick<
   PropsOf<typeof Pressable>,
-  keyof PropsOf<typeof Pressable> & (`on${string}` | `disabled`)
+  keyof PropsOf<typeof Pressable> & (`on${string}` | `disabled` | `ref`)
 >;
 
-export const RectButton2 = forwardRef<
-  ComponentRef<typeof Pressable>,
-  RectButton2Props
->(function RectButton2(
-  {
-    children,
-    variant = `outline`,
-    className,
-    inFlexRowParent = false,
-    textClassName,
-    ...pressableProps
-  },
-  ref,
-) {
+export function RectButton2({
+  children,
+  variant = `outline`,
+  className,
+  inFlexRowParent = false,
+  textClassName,
+  ...pressableProps
+}: RectButton2Props) {
   const disabled = pressableProps.disabled === true;
 
   const [pressed, setPressed] = useState(false);
@@ -60,7 +53,6 @@ export const RectButton2 = forwardRef<
         setPressed(false);
         pressableProps.onPressOut?.(e);
       }}
-      ref={ref}
       className={pressable({ flat, variant, inFlexRowParent, className })}
     >
       <View
@@ -82,7 +74,7 @@ export const RectButton2 = forwardRef<
       </View>
     </Pressable>
   );
-});
+}
 
 const pressable = tv({
   base: `web:transition-all`,

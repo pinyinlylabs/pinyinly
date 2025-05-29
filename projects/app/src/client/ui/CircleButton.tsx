@@ -1,7 +1,6 @@
 import Color from "color";
 import { Image } from "expo-image";
-import type { ComponentRef } from "react";
-import { forwardRef, useMemo } from "react";
+import { useMemo } from "react";
 import type { ColorValue } from "react-native";
 import { Pressable, View } from "react-native";
 import { hapticImpactIfMobile } from "../hooks/hapticImpactIfMobile";
@@ -14,19 +13,13 @@ export type CircleButtonProps = {
   color?: ColorValue;
 } & PropsOf<typeof Pressable>;
 
-export const CircleButton = forwardRef<
-  ComponentRef<typeof Pressable>,
-  CircleButtonProps
->(function CircleButton(
-  {
-    thickness = 10,
-    scaleY = 0.8,
-    diameter = 80,
-    color = `#1CB0F5`,
-    ...pressableProps
-  },
-  ref,
-) {
+export function CircleButton({
+  thickness = 10,
+  scaleY = 0.8,
+  diameter = 80,
+  color = `#1CB0F5`,
+  ...pressableProps
+}: CircleButtonProps) {
   const baseColor = useMemo(() => Color(color).darken(0.2).hex(), [color]);
 
   return (
@@ -36,7 +29,6 @@ export const CircleButton = forwardRef<
         hapticImpactIfMobile();
         pressableProps.onPressIn?.(e);
       }}
-      ref={ref}
     >
       {({ pressed }) => (
         <View
@@ -106,4 +98,4 @@ export const CircleButton = forwardRef<
       )}
     </Pressable>
   );
-});
+}

@@ -1,6 +1,5 @@
 import { characterCount } from "@/dictionary/dictionary";
-import type { ComponentRef } from "react";
-import { forwardRef, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Pressable } from "react-native";
 import { Text, View } from "react-native";
 import Reanimated, {
@@ -35,21 +34,15 @@ export type TextAnswerButtonProps = {
   disabled?: boolean;
 } & Omit<PropsOf<typeof Pressable>, `children` | `disabled`>;
 
-export const TextAnswerButton = forwardRef<
-  ComponentRef<typeof Pressable>,
-  TextAnswerButtonProps
->(function TextAnswerButton(
-  {
-    disabled = false,
-    text,
-    state = `default`,
-    inFlexRowParent = false,
-    className,
-    textClassName,
-    ...pressableProps
-  },
-  ref,
-) {
+export function TextAnswerButton({
+  disabled = false,
+  text,
+  state = `default`,
+  inFlexRowParent = false,
+  className,
+  textClassName,
+  ...pressableProps
+}: TextAnswerButtonProps) {
   const [prevState, setPrevState] = useState(state);
   const [bgFilled, setBgFilled] = useState(false);
   const [pressed, setPressed] = useState(false);
@@ -160,7 +153,6 @@ export const TextAnswerButton = forwardRef<
       onPress={(e) => {
         pressableProps.onPress?.(e);
       }}
-      ref={ref}
       style={pressableAnimatedStyle}
       className={containerClass({ flat, state, inFlexRowParent, className })}
     >
@@ -193,7 +185,7 @@ export const TextAnswerButton = forwardRef<
       </View>
     </AnimatedPressable>
   );
-});
+}
 
 const duration = 100;
 

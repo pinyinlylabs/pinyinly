@@ -120,6 +120,11 @@ export default tseslint.config(
               message: `Please use the default \`Animated\` import from \`react-native-reanimated\` instead.`,
             },
             {
+              name: `react`,
+              importNames: [`forwardRef`],
+              message: `Migrate to React 19 patterns.`,
+            },
+            {
               name: `hanzi`,
               message: `Please use @/dictionary/hanzi instead.`,
             },
