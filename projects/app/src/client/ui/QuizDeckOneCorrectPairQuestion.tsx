@@ -19,15 +19,8 @@ import { invariant } from "@haohaohow/lib/invariant";
 import { formatDuration } from "date-fns/formatDuration";
 import { intervalToDuration } from "date-fns/intervalToDuration";
 import { Image } from "expo-image";
-import type { ComponentRef, ReactNode } from "react";
-import {
-  forwardRef,
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import type { ReactNode } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import type { StyleProp, ViewStyle } from "react-native";
 import {
   // eslint-disable-next-line @typescript-eslint/no-restricted-imports
@@ -534,10 +527,13 @@ enum SubmitButtonState {
   Incorrect,
 }
 
-const SubmitButton = forwardRef<
-  ComponentRef<typeof RectButton2>,
-  { state: SubmitButtonState } & Pick<PropsOf<typeof RectButton2>, `onPress`>
->(function SubmitButton({ state, onPress }, ref) {
+function SubmitButton({
+  state,
+  onPress,
+  ref,
+}: {
+  state: SubmitButtonState;
+} & Pick<PropsOf<typeof RectButton2>, `onPress` | `ref`>) {
   let text;
 
   switch (state) {
@@ -567,7 +563,7 @@ const SubmitButton = forwardRef<
       {text}
     </RectButton2>
   );
-});
+}
 
 const ChoiceButton = ({
   state,

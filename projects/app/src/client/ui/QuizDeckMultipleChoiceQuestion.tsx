@@ -5,8 +5,7 @@ import type {
 } from "@/data/model";
 import { setAudioModeAsync, useAudioPlayer } from "expo-audio";
 import chunk from "lodash/chunk";
-import type { ComponentRef } from "react";
-import { forwardRef, memo, useCallback, useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import { RectButton } from "./RectButton";
 import type { PropsOf } from "./types";
@@ -89,10 +88,14 @@ export const QuizDeckMultipleChoiceQuestion = memo(
   },
 );
 
-const SubmitButton = forwardRef<
-  ComponentRef<typeof RectButton>,
-  { disabled: boolean } & Pick<PropsOf<typeof RectButton>, `onPress`>
->(function SubmitButton({ disabled, ...rectButtonProps }, ref) {
+function SubmitButton({
+  disabled,
+  ref,
+  ...rectButtonProps
+}: { disabled: boolean } & Pick<
+  PropsOf<typeof RectButton>,
+  `onPress` | `ref`
+>) {
   const color = disabled ? `#3A464E` : `#A1D151`;
   const textColor = disabled ? `#56646C` : `#161F23`;
 
@@ -118,7 +121,7 @@ const SubmitButton = forwardRef<
       </Text>
     </RectButton>
   );
-});
+}
 
 const AnswerButton = ({
   selected,

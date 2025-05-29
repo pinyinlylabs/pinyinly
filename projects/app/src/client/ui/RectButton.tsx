@@ -1,6 +1,5 @@
 import Color from "color";
-import type { ComponentRef } from "react";
-import { forwardRef, useMemo } from "react";
+import { useMemo } from "react";
 import type { ColorValue, ViewProps } from "react-native";
 import { Pressable, View } from "react-native";
 import { hapticImpactIfMobile } from "../hooks/hapticImpactIfMobile";
@@ -15,21 +14,15 @@ export type RectButtonProps = {
   children?: ViewProps[`children`];
 } & Omit<PropsOf<typeof Pressable>, `children`>;
 
-export const RectButton = forwardRef<
-  ComponentRef<typeof Pressable>,
-  RectButtonProps
->(function RectButton(
-  {
-    thickness = 4,
-    borderRadius = 16,
-    borderWidth = 0,
-    color = `#1CB0F5`,
-    accentColor,
-    children,
-    ...pressableProps
-  },
-  ref,
-) {
+export function RectButton({
+  thickness = 4,
+  borderRadius = 16,
+  borderWidth = 0,
+  color = `#1CB0F5`,
+  accentColor,
+  children,
+  ...pressableProps
+}: RectButtonProps) {
   accentColor = useMemo(
     () => accentColor ?? Color(color).darken(0.2).hex(),
     [accentColor, color],
@@ -46,7 +39,6 @@ export const RectButton = forwardRef<
         hapticImpactIfMobile();
         pressableProps.onPressIn?.(e);
       }}
-      ref={ref}
     >
       {({ pressed }) => (
         <View
@@ -94,4 +86,4 @@ export const RectButton = forwardRef<
       )}
     </Pressable>
   );
-});
+}
