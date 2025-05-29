@@ -49,7 +49,7 @@ type Navigation = StackNavigationFor<typeof Stack>;
 export const QuizDeck = ({ className }: { className?: string }) => {
   const id = useId();
   const theme = useTheme();
-  const navigationRef = useRef<Navigation>();
+  const navigationRef = useRef<Navigation>(undefined);
   const r = useReplicache();
   const queryClient = useQueryClient();
 

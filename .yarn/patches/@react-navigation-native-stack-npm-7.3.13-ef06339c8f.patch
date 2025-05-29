@@ -1,5 +1,5 @@
 diff --git a/lib/module/views/NativeStackView.js b/lib/module/views/NativeStackView.js
-index 9171235745e27a5b630601ffc1fc8bf09fe75ffe..d0590b1807346baa1a716a45838e064b9b96ca28 100644
+index 9171235745e27a5b630601ffc1fc8bf09fe75ffe..6e95702c0cf094a5bfa0737ce20939d2437cbf48 100644
 --- a/lib/module/views/NativeStackView.js
 +++ b/lib/module/views/NativeStackView.js
 @@ -3,10 +3,11 @@

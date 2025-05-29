@@ -153,15 +153,30 @@ async function enforceSingleDependencyVersion({ Yarn }, packagePatterns) {
       if (key === "__metadata") continue;
       invariant(!("cacheKey" in value));
 
-      const match = /^(@?.+?)@(?:npm:)?(.+)$/.exec(value.resolution);
+      const match = /^(@?.+?)@(.+?):(.+)$/.exec(value.resolution);
       invariant(
         match != null,
         `Could not extract package ident from ${value.resolution} (key: ${key})`,
       );
-      const [, packageIdent, version] = match;
+      const [, packageIdent, protocol, version] = match;
       invariant(packageIdent != null && version != null);
 
       if (packagePatterns.some((pattern) => pattern.test(packageIdent))) {
+        // Avoid double counting patched packages. Instead just keep the patch
+        // version and delete the unpatched version. This would catch the case
+        // where pnpm is using an unpatched version, but Yarn is using a
+        // patched version.
+        if (protocol === "patch") {
+          const npmVersionMatch = /@npm%3A(.+?)#/.exec(version);
+          invariant(
+            npmVersionMatch != null,
+            `Could not extract npm version from ${version} (key: ${key})`,
+          );
+          const [, npmVersion] = npmVersionMatch;
+          invariant(npmVersion != null, `npmVersion is null for ${version}`);
+          dependencyVersions.get(packageIdent)?.delete(npmVersion);
+        }
+
         mapSetAdd(dependencyVersions, packageIdent, version);
         mapSetAdd(dependencySources, packageIdent, `yarn:${version}`);
       }
@@ -412,8 +427,9 @@ module.exports = defineConfig({
     await enforceConsistentAppPnpmAndYarnDependencies(ctx);
     await enforceSingleDependencyVersion(ctx, [
       /^@sentry\//,
-      /^react-native$/,
       /^@vercel\//,
+      /^expo-/,
+      /^react-native$/,
     ]);
   },
 });
