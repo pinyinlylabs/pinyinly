@@ -1,6 +1,7 @@
 import { useMultiChoiceQuizTimer } from "#client/hooks/useMultiChoiceQuizTimer.ts";
-import { act, renderHook } from "@testing-library/react-native";
+import { renderHook } from "@testing-library/react-native";
 import test from "node:test";
+import { act } from "react";
 
 await test(`records time correctly for correct and incorrect choices`, async (t) => {
   t.mock.timers.enable({ apis: [`Date`] });

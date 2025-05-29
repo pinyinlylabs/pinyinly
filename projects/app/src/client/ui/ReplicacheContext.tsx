@@ -10,7 +10,7 @@ import * as Sentry from "@sentry/core";
 import type { QueryKey } from "@tanstack/react-query";
 import { useQueryClient } from "@tanstack/react-query";
 import { TRPCClientError } from "@trpc/client";
-import { createContext, useContext, useEffect, useMemo } from "react";
+import { createContext, use, useEffect, useMemo } from "react";
 import type {
   HTTPRequestInfo,
   PullResponseV1,
@@ -156,7 +156,7 @@ export function ReplicacheProvider({ children }: React.PropsWithChildren) {
 }
 
 export function useReplicache() {
-  const r = useContext(ReplicacheContext);
+  const r = use(ReplicacheContext);
   invariant(r !== null);
   return r;
 }
