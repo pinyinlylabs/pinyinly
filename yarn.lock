@@ -1148,7 +1148,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/types@npm:^7.0.0, @babel/types@npm:^7.20.0, @babel/types@npm:^7.20.7, @babel/types@npm:^7.23.0, @babel/types@npm:^7.25.2, @babel/types@npm:^7.25.9, @babel/types@npm:^7.27.1, @babel/types@npm:^7.27.3, @babel/types@npm:^7.3.3":
+"@babel/types@npm:^7.0.0, @babel/types@npm:^7.20.0, @babel/types@npm:^7.20.7, @babel/types@npm:^7.23.0, @babel/types@npm:^7.25.2, @babel/types@npm:^7.25.9, @babel/types@npm:^7.26.0, @babel/types@npm:^7.27.1, @babel/types@npm:^7.27.3, @babel/types@npm:^7.3.3":
   version: 7.27.3
   resolution: "@babel/types@npm:7.27.3"
   dependencies:
@@ -2213,6 +2213,7 @@ __metadata:
     "@typescript-eslint/utils": "npm:^8.26.0"
     "@vercel/functions": "npm:^2.0.0"
     array-from-async: "npm:^3.0.0"
+    babel-plugin-react-compiler: "npm:19.0.0-beta-af1b7da-20250417"
     babel-plugin-transform-import-meta: "patch:babel-plugin-transform-import-meta@npm%3A2.2.1#~/.yarn/patches/babel-plugin-transform-import-meta-npm-2.2.1-0927fef047.patch"
     color: "npm:^5.0.0"
     date-fns: "npm:^4.0.0"
@@ -7156,6 +7157,15 @@ __metadata:
   peerDependencies:
     "@babel/core": ^7.4.0 || ^8.0.0-0 <8.0.0
   checksum: 10c0/40164432e058e4b5c6d56feecacdad22692ae0534bd80c92d5399ed9e1a6a2b6797c8fda837995daddd4ca391f9aa2d58c74ad465164922e0f73631eaf9c4f76
+  languageName: node
+  linkType: hard
+
+"babel-plugin-react-compiler@npm:19.0.0-beta-af1b7da-20250417":
+  version: 19.0.0-beta-af1b7da-20250417
+  resolution: "babel-plugin-react-compiler@npm:19.0.0-beta-af1b7da-20250417"
+  dependencies:
+    "@babel/types": "npm:^7.26.0"
+  checksum: 10c0/dee0a398be02afc6fa35199ef4d8c30025adcaa7056f56130601254c45d8ee8f06730d4e17e26a3f7f0711eef1323a1e6c01a76ac7516f0c34766bfa27fc92e1
   languageName: node
   linkType: hard
 
