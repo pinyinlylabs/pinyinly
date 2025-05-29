@@ -33,7 +33,6 @@ export default tseslint.config(
       [`drizzle`]: drizzlePlugin,
       [`import`]: importPlugin,
       [`react-compiler`]: reactCompilerPlugin,
-      [`react-hooks`]: reactHooksPlugin,
       [`react`]: reactPlugin,
       [`tailwind`]: tailwindPlugin,
     },
@@ -59,7 +58,8 @@ export default tseslint.config(
   ...tseslint.configs.stylisticTypeChecked,
   ...compat.config(drizzlePlugin.configs.recommended),
   ...compat.config(inngestPlugin.configs.recommended),
-  ...compat.config(reactHooksPlugin.configs.recommended),
+  /** @type {Linter.Config} */
+  reactHooksPlugin.configs[`recommended-latest`],
   ...compat.config(reactPlugin.configs.recommended),
   unicornPlugin.configs.recommended,
 

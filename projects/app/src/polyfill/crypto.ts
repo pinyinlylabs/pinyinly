@@ -1,14 +1,14 @@
 import * as Crypto from "expo-crypto";
 
 declare const global: {
-  crypto: {
+  crypto?: {
     getRandomValues(array: Uint8Array): Uint8Array;
     randomUUID(): string;
   };
 };
 
 export function installCryptoPolyfill() {
-  global.crypto = {
+  global.crypto ??= {
     getRandomValues(array: Uint8Array) {
       return Crypto.getRandomValues(array);
     },

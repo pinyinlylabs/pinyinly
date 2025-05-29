@@ -163,7 +163,7 @@ const WebImpl = ({
   return (
     <Modal
       presentationStyle="fullScreen"
-      backdropColor={false}
+      transparent={true}
       onRequestClose={api.dismiss}
     >
       <AnimatedPressable

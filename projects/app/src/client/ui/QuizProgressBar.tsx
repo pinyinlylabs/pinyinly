@@ -11,7 +11,6 @@ import Reanimated, {
   withDelay,
   withTiming,
 } from "react-native-reanimated";
-import { useEventCallback } from "../hooks/useEventCallback";
 import type { Transform1D } from "./animate";
 import { createAffineTransform } from "./animate";
 
@@ -82,9 +81,9 @@ export const QuizProgressBar = ({ progress }: { progress: number }) => {
     };
   }, [layout, leftOffsetSv]);
 
-  const handleLayout = useEventCallback((x: LayoutChangeEvent) => {
+  const handleLayout = (x: LayoutChangeEvent) => {
     setLayout(x.nativeEvent.layout);
-  });
+  };
 
   useEffect(() => {
     if (metrics != null && progress - nStart > metrics.maxFilledTicks) {
