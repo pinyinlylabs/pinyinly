@@ -150,6 +150,7 @@ export const expo = {
     `expo-sqlite`,
   ],
   experiments: {
+    reactCompiler: true,
     typedRoutes: true,
   },
 };

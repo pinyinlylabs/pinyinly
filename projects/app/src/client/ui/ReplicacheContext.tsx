@@ -165,6 +165,7 @@ export function useRizzleQuery<T extends ReactQueryValue>(
   key: QueryKey,
   query: (r: Rizzle, tx: ReadTransaction) => Promise<T>,
 ) {
+  "use no memo";
   const queryClient = useQueryClient();
   const r = useReplicache();
 

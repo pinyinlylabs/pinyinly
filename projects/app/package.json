@@ -124,8 +124,8 @@
     "eslint-plugin-drizzle": "^0.2.3",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-react": "^7.37.2",
-    "eslint-plugin-react-compiler": "19.0.0-beta-ebf51a3-20250411",
-    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-react-compiler": "rc",
+    "eslint-plugin-react-hooks": "^6.0.0-rc.1",
     "eslint-plugin-tailwindcss": "^3.18.0",
     "eslint-plugin-unicorn": "^59.0.0",
     "expect": "^29.7.0",
@@ -163,9 +163,6 @@
       "reactNativeDirectoryCheck": {
         "listUnknownPackages": false
       }
-    },
-    "experiments": {
-      "reactCompiler": true
     }
   }
 }
