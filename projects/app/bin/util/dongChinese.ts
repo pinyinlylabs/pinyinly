@@ -5,7 +5,7 @@ import {
   memoize0,
   sortComparatorNumber,
 } from "#util/collections.ts";
-import { z } from "zod";
+import { z } from "zod/v4";
 import { makeDbCache } from "./cache.js";
 import { fetchWithCache } from "./fetch.js";
 
@@ -137,7 +137,7 @@ export const dongChineseSchema = z
               .object({
                 word: z.string(),
                 share: z.number(),
-                trad: z.string({ description: `Traditional Chinese` }),
+                trad: z.string().describe(`Traditional Chinese`),
                 gloss: z.string(),
               })
               .strict(),

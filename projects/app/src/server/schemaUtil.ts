@@ -6,7 +6,8 @@ import type { ColumnBaseConfig } from "drizzle-orm";
 import { Table } from "drizzle-orm";
 import type * as s from "drizzle-orm/pg-core";
 import { customType } from "drizzle-orm/pg-core";
-import type { z, ZodError } from "zod";
+import type { z } from "zod/v4";
+import type { $ZodCatchCtx } from "zod/v4/core";
 
 type PgCustomColumn = s.PgCustomColumn<
   ColumnBaseConfig<`custom`, `PgCustomColumn`>
@@ -45,10 +46,10 @@ function drizzleColumnTypeEnhancedErrors(column: PgCustomColumn) {
     unstable__columnName(column);
   }
 
-  return (ctx: { error: ZodError }) => {
+  return (ctx: $ZodCatchCtx) => {
     throw new Error(
       `could not parse DB value at "${unstable__columnName(column)}"`,
-      { cause: ctx.error },
+      { cause: ctx.issues },
     );
   };
 }
@@ -73,7 +74,7 @@ function jsonStringifyEnhancedErrors(
   }
 }
 
-export const zodJson = <T extends z.ZodTypeAny>(name: string, schema: T) => {
+export const zodJson = <T extends z.ZodType>(name: string, schema: T) => {
   // Avoid creating a new Zod schema each time a value is decoded.
   let fromDriverSchemaMemo: z.ZodCatch<T> | undefined;
 

@@ -3,7 +3,7 @@ import { invariant } from "@haohaohow/lib/invariant";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { DeepReadonly } from "ts-essentials";
-import { z } from "zod";
+import { z } from "zod/v4";
 import {
   clientStorageGet,
   useClientStorageMutation,

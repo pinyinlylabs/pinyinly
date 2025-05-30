@@ -2,7 +2,7 @@ import * as s from "@/data/rizzleSchema";
 import { nanoid } from "@/util/nanoid";
 import { sql } from "drizzle-orm";
 import * as pg from "drizzle-orm/pg-core";
-import { z } from "zod";
+import { z } from "zod/v4";
 import {
   rizzleCustomType,
   sFsrsRating,
@@ -13,11 +13,12 @@ import {
 } from "./schemaUtil";
 
 export const cvrEntity = z.record(
-  z.string({ description: `DB \`id\` primary keys` }),
+  z.string().describe(`DB \`id\` primary keys`),
   z
-    .string({
-      description: `in the format <xmin>:<replicacheEntityKey>. storing \`replicacheEntityKey>\` makes it possible to construct \`dels\` after the row is deleted`,
-    })
+    .string()
+    .describe(
+      `in the format <xmin>:<replicacheEntityKey>. storing \`replicacheEntityKey>\` makes it possible to construct \`dels\` after the row is deleted`,
+    )
     .optional(),
 );
 

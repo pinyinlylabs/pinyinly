@@ -73,7 +73,7 @@ import {
 } from "react";
 import type { DeepReadonly } from "ts-essentials";
 import yargs from "yargs";
-import { z } from "zod";
+import { z } from "zod/v4";
 import { makeDbCache } from "./util/cache.js";
 import {
   dongChineseData,
@@ -219,9 +219,8 @@ ${JSON.stringify(
             id: z.string(),
             isCorrect: z.boolean(),
             reason: z
-              .string({
-                description: `When the meaning isn't correct, explanation for why.`,
-              })
+              .string()
+              .describe(`When the meaning isn't correct, explanation for why.`)
               .optional(),
           }),
         ),

@@ -44,7 +44,7 @@ import type { PropsOf } from "./types";
 const buttonThickness = 4;
 const gap = 12;
 
-export function QuizDeckOneCorrectPairQuestion({
+export function QuizDeckHanziToPinyinQuestion({
   question,
   onNext,
   onRating,

@@ -1,87 +1,88 @@
 import type { HanziChar, HanziText } from "@/data/model";
+import { UnexpectedValueError } from "@/util/types";
 import { invariant } from "@haohaohow/lib/invariant";
 import type { StrictExtract } from "ts-essentials";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 export type IdsNode =
   | {
-      type: IdsOperator.LeftToRight;
+      type: typeof IdsOperator.LeftToRight;
       left: IdsNode;
       right: IdsNode;
     }
   | {
-      type: IdsOperator.AboveToBelow;
+      type: typeof IdsOperator.AboveToBelow;
       above: IdsNode;
       below: IdsNode;
     }
   | {
-      type: IdsOperator.LeftToMiddleToRight;
+      type: typeof IdsOperator.LeftToMiddleToRight;
       left: IdsNode;
       middle: IdsNode;
       right: IdsNode;
     }
   | {
-      type: IdsOperator.AboveToMiddleAndBelow;
+      type: typeof IdsOperator.AboveToMiddleAndBelow;
       above: IdsNode;
       middle: IdsNode;
       below: IdsNode;
     }
   | {
-      type: IdsOperator.FullSurround;
+      type: typeof IdsOperator.FullSurround;
       surrounding: IdsNode;
       surrounded: IdsNode;
     }
   | {
-      type: IdsOperator.SurroundFromAbove;
+      type: typeof IdsOperator.SurroundFromAbove;
       above: IdsNode;
       surrounded: IdsNode;
     }
   | {
-      type: IdsOperator.SurroundFromBelow;
+      type: typeof IdsOperator.SurroundFromBelow;
       below: IdsNode;
       surrounded: IdsNode;
     }
   | {
-      type: IdsOperator.SurroundFromLeft;
+      type: typeof IdsOperator.SurroundFromLeft;
       left: IdsNode;
       surrounded: IdsNode;
     }
   | {
-      type: IdsOperator.SurroundFromRight;
+      type: typeof IdsOperator.SurroundFromRight;
       right: IdsNode;
       surrounded: IdsNode;
     }
   | {
-      type: IdsOperator.SurroundFromUpperLeft;
+      type: typeof IdsOperator.SurroundFromUpperLeft;
       upperLeft: IdsNode;
       surrounded: IdsNode;
     }
   | {
-      type: IdsOperator.SurroundFromUpperRight;
+      type: typeof IdsOperator.SurroundFromUpperRight;
       upperRight: IdsNode;
       surrounded: IdsNode;
     }
   | {
-      type: IdsOperator.SurroundFromLowerLeft;
+      type: typeof IdsOperator.SurroundFromLowerLeft;
       lowerLeft: IdsNode;
       surrounded: IdsNode;
     }
   | {
-      type: IdsOperator.SurroundFromLowerRight;
+      type: typeof IdsOperator.SurroundFromLowerRight;
       lowerRight: IdsNode;
       surrounded: IdsNode;
     }
   | {
-      type: IdsOperator.Overlaid;
+      type: typeof IdsOperator.Overlaid;
       overlay: IdsNode;
       underlay: IdsNode;
     }
   | {
-      type: IdsOperator.HorizontalReflection;
+      type: typeof IdsOperator.HorizontalReflection;
       reflected: IdsNode;
     }
   | {
-      type: IdsOperator.Rotation;
+      type: typeof IdsOperator.Rotation;
       rotated: IdsNode;
     }
   | {
@@ -93,26 +94,29 @@ export type IdsNode =
       strokeCount: number;
     };
 
-export enum IdsOperator {
-  LeftToRight = `⿰`,
-  AboveToBelow = `⿱`,
-  LeftToMiddleToRight = `⿲`,
-  AboveToMiddleAndBelow = `⿳`,
-  FullSurround = `⿴`,
-  SurroundFromAbove = `⿵`,
-  SurroundFromBelow = `⿶`,
-  SurroundFromLeft = `⿷`,
-  SurroundFromRight = `⿼`,
-  SurroundFromUpperLeft = `⿸`,
-  SurroundFromUpperRight = `⿹`,
-  SurroundFromLowerLeft = `⿺`,
-  SurroundFromLowerRight = `⿽`,
-  Overlaid = `⿻`,
-  HorizontalReflection = `⿾`,
-  Rotation = `⿿`,
-}
+const idsOperatorSchema = z.enum({
+  LeftToRight: `⿰`,
+  AboveToBelow: `⿱`,
+  LeftToMiddleToRight: `⿲`,
+  AboveToMiddleAndBelow: `⿳`,
+  FullSurround: `⿴`,
+  SurroundFromAbove: `⿵`,
+  SurroundFromBelow: `⿶`,
+  SurroundFromLeft: `⿷`,
+  SurroundFromRight: `⿼`,
+  SurroundFromUpperLeft: `⿸`,
+  SurroundFromUpperRight: `⿹`,
+  SurroundFromLowerLeft: `⿺`,
+  SurroundFromLowerRight: `⿽`,
+  Overlaid: `⿻`,
+  HorizontalReflection: `⿾`,
+  Rotation: `⿿`,
+});
 
-const idsOperatorSchema = z.nativeEnum(IdsOperator);
+const IdsOperator = idsOperatorSchema.enum;
+type IdsOperator = z.infer<typeof idsOperatorSchema>;
+
+export { IdsOperator };
 
 export function parseIds(ids: string, cursor?: { index: number }): IdsNode {
   cursor ??= { index: 0 };
@@ -462,7 +466,7 @@ export function* walkIdsNode(
       return;
     }
     default: {
-      throw new Error(`unexpected ids node type: ${(ids as IdsNode).type}`);
+      throw new UnexpectedValueError(ids);
     }
   }
 }

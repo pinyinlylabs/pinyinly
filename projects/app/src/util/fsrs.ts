@@ -2,13 +2,19 @@ import { invariant } from "@haohaohow/lib/invariant";
 import type { Duration } from "date-fns";
 import { add } from "date-fns/add";
 import round from "lodash/round";
+import z from "zod/v4";
 
-export enum Rating {
-  Again = 1,
-  Hard = 2,
-  Good = 3,
-  Easy = 4,
-}
+const ratingSchema = z.enum({
+  Again: 1,
+  Hard: 2,
+  Good: 3,
+  Easy: 4,
+});
+
+const Rating = ratingSchema.enum;
+type Rating = z.infer<typeof ratingSchema>;
+
+export { Rating };
 
 const w = [
   0.5701, // initial stability (Again)

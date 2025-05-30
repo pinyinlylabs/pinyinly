@@ -4,13 +4,13 @@ import { sql } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { drizzle } from "drizzle-orm/node-postgres";
 import type {
+  AnyPgTable,
   PgColumn,
   PgTable,
-  AnyPgTable,
   PgTransactionConfig,
 } from "drizzle-orm/pg-core";
 import type { Pool as PgPool } from "pg";
-import z from "zod";
+import z from "zod/v4";
 import * as schema from "../schema";
 
 export type Drizzle = NodePgDatabase<typeof schema>;

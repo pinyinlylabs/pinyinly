@@ -3,6 +3,7 @@ import makeDebug from "debug";
 import assert from "node:assert/strict";
 import path from "node:path";
 import yargs from "yargs";
+import z from "zod/v4";
 import type { IdsNode } from "../src/data/hanzi.js";
 import { parseIds, walkIdsNode } from "../src/data/hanzi.js";
 import {
@@ -45,31 +46,34 @@ if (argv.debug) {
   makeDebug.enable(`${debug.namespace},${debug.namespace}:*`);
 }
 
-const enum SourceTag {
-  AdobeJapan16 = `A`,
-  China = `G`,
-  HongKong = `H`,
-  Japan = `J`,
-  Korea = `K`,
-  Macau = `M`,
-  Obsolete = `O`,
-  Singapore = `S`,
-  Taiwan = `T`,
-  Vietnam = `V`,
-  Unicode = `U`,
-  VirtualShape = `X`,
-}
+const sourceTagSchema = z.enum({
+  AdobeJapan16: `A`,
+  China: `G`,
+  HongKong: `H`,
+  Japan: `J`,
+  Korea: `K`,
+  Macau: `M`,
+  Obsolete: `O`,
+  Singapore: `S`,
+  Taiwan: `T`,
+  Vietnam: `V`,
+  Unicode: `U`,
+  VirtualShape: `X`,
+});
+
+const SourceTag = sourceTagSchema.enum;
+type SourceTag = z.infer<typeof sourceTagSchema>;
 
 interface Decomposition {
   readonly idsNode: IdsNode;
   readonly ids: string;
-  readonly tags: ReadonlySet<string>;
+  readonly tags: ReadonlySet<SourceTag>;
 }
 
 function parseIdsTxt(txt: string): ReadonlyMap<string, Decomposition[]> {
   const result = new Map<string, Decomposition[]>();
 
-  const emptySet = deepReadonly(new Set<string>());
+  const emptySet = deepReadonly(new Set<never>());
 
   for (const line of txt.split(`\n`)) {
     debug(`parsing line: %O`, line);
@@ -113,11 +117,14 @@ function parseIdsTxt(txt: string): ReadonlyMap<string, Decomposition[]> {
       parsedDecompositions.push({
         ids,
         idsNode: parsed,
-        tags: tags == null ? emptySet : new Set(tags.split(``)),
+        tags:
+          tags == null
+            ? emptySet
+            : new Set(tags.split(``).map((t) => sourceTagSchema.parse(t))),
       });
     }
 
-    const seenTags = new Set<string>();
+    const seenTags = new Set<SourceTag>();
     for (const { tags } of parsedDecompositions) {
       for (const tag of tags) {
         if (seenTags.has(tag)) {

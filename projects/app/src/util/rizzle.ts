@@ -19,7 +19,7 @@ import type {
 } from "replicache";
 import { Replicache } from "replicache";
 import type { AnyFunction } from "ts-essentials";
-import { z } from "zod";
+import { z } from "zod/v4";
 import type { PartialIfUndefined } from "./types";
 
 export interface RizzleTypeDef {
@@ -40,8 +40,8 @@ export abstract class RizzleType<
   readonly _marshaled!: Marshaled;
   readonly _def!: Def;
 
-  abstract getMarshal(): z.ZodType<Marshaled, z.ZodTypeDef, Input>;
-  abstract getUnmarshal(): z.ZodType<Output, z.ZodTypeDef, Marshaled>;
+  abstract getMarshal(): z.ZodType<Marshaled, Input>;
+  abstract getUnmarshal(): z.ZodType<Output, Marshaled>;
   abstract marshal(input: Input): Marshaled;
   abstract unmarshal(marshaled: Marshaled): Output;
 
@@ -325,11 +325,7 @@ export class RizzleObject<T extends RizzleRawObject> extends RizzleType<
       .object(mapValues(this._def.shape, (v) => v.getMarshal()))
       .transform((x) =>
         mapKeys(x, (_v, k) => this.#keyToAlias[k]),
-      ) as unknown as z.ZodType<
-      RizzleObjectMarshaled<T>,
-      z.ZodAnyDef,
-      RizzleObjectInput<T>
-    >;
+      ) as unknown as z.ZodType<RizzleObjectMarshaled<T>, RizzleObjectInput<T>>;
   }
 
   getUnmarshal() {
@@ -344,7 +340,6 @@ export class RizzleObject<T extends RizzleRawObject> extends RizzleType<
         mapKeys(x, (_v, k) => this.#aliasToKey[k]),
       ) as unknown as z.ZodType<
       RizzleObjectOutput<T>,
-      z.ZodAnyDef,
       RizzleObjectMarshaled<T>
     >;
   }
@@ -377,8 +372,8 @@ export class RizzleObject<T extends RizzleRawObject> extends RizzleType<
 }
 
 interface RizzleCustomDef<I, M, O> extends RizzleTypeDef {
-  marshal: z.ZodType<M, z.ZodTypeDef, I>;
-  unmarshal: z.ZodType<O, z.ZodTypeDef, M>;
+  marshal: z.ZodType<M, I>;
+  unmarshal: z.ZodType<O, M>;
   typeName: `custom`;
 }
 
@@ -425,8 +420,8 @@ export class RizzleCustom<I, M, O = I> extends RizzleType<
   }
 
   static create = <I, M, O>(
-    marshal: z.ZodType<M, z.ZodTypeDef, I>,
-    unmarshal: z.ZodType<O, z.ZodTypeDef, M>,
+    marshal: z.ZodType<M, I>,
+    unmarshal: z.ZodType<O, M>,
   ): RizzleCustom<I, M, O> => {
     return new RizzleCustom({ marshal, unmarshal, typeName: `custom` });
   };
@@ -1111,7 +1106,7 @@ export const replicacheMutationSchema = z
   .object({
     id: z.number(),
     name: z.string(),
-    args: z.unknown(),
+    args: z.unknown().optional(),
     timestamp: z.number(),
     clientId: z.string(),
   })
@@ -1182,11 +1177,13 @@ export const pullRequestSchema = z
 export type PullRequest = z.infer<typeof pullRequestSchema>;
 
 export const pullOkResponseSchema = z.object({
-  partial: z.boolean({
-    description: `if true only partial results were returned and another pull request should be made`,
-  }),
+  partial: z
+    .boolean()
+    .describe(
+      `if true only partial results were returned and another pull request should be made`,
+    ),
   cookie: cookieSchema,
-  lastMutationIdChanges: z.record(z.number()),
+  lastMutationIdChanges: z.record(z.string(), z.number()),
   patch: z.array(
     z.discriminatedUnion(`op`, [
       z.object({
@@ -1198,7 +1195,7 @@ export const pullOkResponseSchema = z.object({
           z.boolean(),
           z.number(),
           z.array(z.unknown()),
-          z.record(z.unknown()),
+          z.record(z.string(), z.unknown()),
         ]),
       }),
       z.object({
@@ -1284,7 +1281,7 @@ export const r = {
 
 export function invalid(ctx: z.RefinementCtx, message: string): typeof z.NEVER {
   ctx.addIssue({
-    code: z.ZodIssueCode.custom,
+    code: `custom`,
     message,
   });
   return z.NEVER;

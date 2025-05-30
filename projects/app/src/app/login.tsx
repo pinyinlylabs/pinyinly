@@ -5,7 +5,7 @@ import { invariant } from "@haohaohow/lib/invariant";
 import * as AppleAuthentication from "expo-apple-authentication";
 import { Link } from "expo-router";
 import { Platform, Text, View } from "react-native";
-import z from "zod";
+import z from "zod/v4";
 
 export default function LoginPage() {
   const auth = useAuth();
