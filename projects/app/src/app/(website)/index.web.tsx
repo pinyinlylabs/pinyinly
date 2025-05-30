@@ -32,7 +32,6 @@ export default function WebsitePage() {
             <RectButton2
               variant="filled"
               className="accent-theme2"
-              textClassName="www-text-button"
               ref={(el) => {
                 //  RectButton2 is a <View> rather than a DOM element.
                 ref(el as Element | null);
@@ -43,7 +42,7 @@ export default function WebsitePage() {
           </Link>
 
           <Link href="/learn" asChild>
-            <RectButton2 variant="outline" textClassName="www-text-button">
+            <RectButton2 variant="outline">
               I already have an account
             </RectButton2>
           </Link>

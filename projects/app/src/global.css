@@ -3,17 +3,26 @@
 @tailwind utilities;
 
 @layer components {
-  /* 
+  /*
   
   TEXT STYLES
   
   */
-  .hhh-text-button {
-    @apply font-sans text-sm font-bold uppercase text-body;
+  .hhh-text-button-filled {
+    @apply font-sans text-base/snug font-bold uppercase text-background;
+  }
+  .hhh-text-button-outline {
+    @apply font-sans text-base/snug font-bold uppercase text-body;
+  }
+  .hhh-text-button-option {
+    @apply font-sans text-base/none text-body;
+  }
+  .hhh-text-button-bare {
+    @apply font-sans text-sm/normal font-bold uppercase text-body;
   }
 
   .hhh-text-title {
-    @apply font-karla text-2xl leading-normal tracking-tight text-body;
+    @apply font-karla text-2xl/normal tracking-tight text-body;
   }
   /*
   Karla on iOS font-bold looks like font-medium, so we have to bump it up to
@@ -43,62 +52,67 @@
 
   /* hhh/body-2xl */
   .hhh-text-body-2xl {
-    @apply font-sans text-2xl font-thin leading-normal text-body;
+    @apply font-sans text-2xl/normal font-thin text-body;
   }
 
   .hhh-text-body-2xl-ref {
-    @apply font-sans text-2xl font-normal leading-tight text-body-ref underline decoration-body-ref/70 decoration-dashed decoration-[2px] underline-offset-[5px];
+    @apply font-sans text-2xl/tight font-normal text-body-ref underline decoration-body-ref/70 decoration-dashed decoration-[2px] underline-offset-[5px];
   }
 
   .hhh-text-body-2xl-bold {
-    @apply font-sans text-2xl font-medium leading-normal text-body-bold;
+    @apply font-sans text-2xl/normal font-medium text-body-bold;
   }
 
   .hhh-text-body-2xl-italic {
-    @apply font-sans text-2xl font-medium italic leading-normal text-body;
+    @apply font-sans text-2xl/normal font-medium italic text-body;
   }
 
   /* hhh/body */
   .hhh-text-body {
-    @apply font-sans text-base font-thin leading-normal text-body;
+    @apply font-sans text-base/normal font-thin text-body;
   }
 
   .hhh-text-body-ref {
-    @apply font-sans text-base font-normal leading-normal text-body-ref underline decoration-body-ref/50 decoration-dashed decoration-[1.5px] underline-offset-[5px];
+    @apply font-sans text-base/normal font-normal text-body-ref underline decoration-body-ref/50 decoration-dashed decoration-[1.5px] underline-offset-[5px];
   }
 
   .hhh-text-body-bold {
-    @apply font-sans text-base font-medium leading-normal text-body-bold;
+    @apply font-sans text-base/normal font-medium text-body-bold;
   }
 
   .hhh-text-body-italic {
-    @apply font-sans text-base font-medium italic leading-normal text-body;
+    @apply font-sans text-base/normal font-medium italic text-body;
   }
 
   /* hhh/caption */
   .hhh-text-caption {
-    @apply font-sans text-sm font-light leading-normal text-caption;
+    @apply font-sans text-sm/normal font-light text-caption;
   }
 
   .hhh-text-caption-ref {
-    @apply font-sans text-sm font-normal leading-normal text-caption-ref underline decoration-caption-ref/50 decoration-dashed decoration-[1.5px] underline-offset-[5px];
+    @apply font-sans text-sm/normal font-normal text-caption-ref underline decoration-caption-ref/50 decoration-dashed decoration-[1.5px] underline-offset-[5px];
   }
 
   .hhh-text-caption-bold {
-    @apply font-sans text-sm font-medium leading-normal text-caption-bold;
+    @apply font-sans text-sm/normal font-medium text-caption-bold;
   }
 
   .hhh-text-caption-italic {
-    @apply font-sans text-sm font-light italic leading-normal text-caption;
+    @apply font-sans text-sm/normal font-light italic text-caption;
+  }
+
+  /* hhh/body-input */
+  .hhh-text-body-input {
+    @apply font-sans text-lg/normal font-normal text-body;
   }
 
   /* www */
   .www-text-hero {
-    @apply font-karla text-5xl font-bold leading-tight tracking-tighter text-primary-12 transition-all md:text-6xl md:leading-tight;
+    @apply font-karla text-5xl/tight font-bold tracking-tighter text-primary-12 transition-all md:text-6xl/tight;
   }
 
   .www-text-title {
-    @apply font-karla text-3xl font-bold leading-normal tracking-tighter text-primary-12 transition-all md:text-4xl md:leading-normal;
+    @apply font-karla text-3xl/normal font-bold tracking-tighter text-primary-12 transition-all md:text-4xl/normal;
   }
 
   .www-text-subtitle {
@@ -110,20 +124,16 @@
     @apply text-[17px]/[24px];
   }
 
-  .www-text-button {
-    @apply px-2 py-1 text-center font-sans text-base font-bold uppercase leading-normal text-primary-12;
-  }
-
   .www-px-comfortable {
     @apply px-safe-or-4 md:px-safe-or-8;
   }
 
   .www-text-footer-title {
-    @apply font-karla text-[19px] font-medium leading-normal text-primary-12;
+    @apply font-karla text-[19px]/normal font-medium text-primary-12;
   }
 
   .www-text-footer-link {
-    @apply font-karla text-[15px] font-medium leading-normal text-primary-12 antialiased;
+    @apply font-karla text-[15px]/normal font-medium text-primary-12 antialiased;
   }
 
   /* 

@@ -1,5 +1,6 @@
 import { useQuizProgress } from "@/client/hooks/useQuizProgress";
 import { HanziText } from "@/client/ui/HanziText";
+import { PinyinOptionButton } from "@/client/ui/PinyinOptionButton";
 import { QuizProgressBar } from "@/client/ui/QuizProgressBar";
 import { QuizQueueButton } from "@/client/ui/QuizQueueButton";
 import { RectButton2 } from "@/client/ui/RectButton2";
@@ -31,6 +32,10 @@ export default function DesignSystemPage() {
         </Link>
       </View>
       <ScrollView style={{ flex: 1 }} ref={scrollViewRef}>
+        <Section title={PinyinOptionButtonExample.name} scrollTo={scrollTo}>
+          <PinyinOptionButtonExample />
+        </Section>
+
         <Section title={TextInputSingleExample.name} scrollTo={scrollTo}>
           <TextInputSingleExample />
         </Section>
@@ -365,6 +370,7 @@ const ExampleStack = ({
 );
 
 const exampleStackChildrenClass = tv({
+  base: `items-start`,
   variants: {
     showFrame: {
       true: `border-2 border-dashed border-primary-8`,
@@ -374,14 +380,17 @@ const exampleStackChildrenClass = tv({
 
 const RectButton2Variants = (props: Partial<PropsOf<typeof RectButton2>>) => (
   <>
-    <RectButton2 variant="bare" {...props}>
-      Bare
+    <RectButton2 variant="filled" {...props}>
+      Filled
     </RectButton2>
     <RectButton2 variant="outline" {...props}>
       Outline
     </RectButton2>
-    <RectButton2 variant="filled" {...props}>
-      Filled
+    <RectButton2 variant="option" {...props}>
+      Option
+    </RectButton2>
+    <RectButton2 variant="bare" {...props}>
+      Bare
     </RectButton2>
   </>
 );
@@ -389,11 +398,11 @@ const RectButton2Variants = (props: Partial<PropsOf<typeof RectButton2>>) => (
 const RectButton2Examples = (props: Partial<PropsOf<typeof RectButton2>>) => (
   <View className="flex-1">
     <View className="flex-row flex-wrap">
-      <ExampleStack title="normal">
+      <ExampleStack title="normal" childrenClassName="gap-2">
         <RectButton2Variants {...props} />
       </ExampleStack>
 
-      <ExampleStack title="normal (disabled)">
+      <ExampleStack title="normal (disabled)" childrenClassName="gap-2">
         <RectButton2Variants disabled {...props} />
       </ExampleStack>
     </View>
@@ -401,29 +410,29 @@ const RectButton2Examples = (props: Partial<PropsOf<typeof RectButton2>>) => (
     <LittlePrimaryHeader title="themes" />
 
     <View className="flex-row flex-wrap">
-      <ExampleStack title="normal">
+      <ExampleStack title="normal" childrenClassName="gap-2">
         <RectButton2Variants {...props} />
       </ExampleStack>
 
       <View className="accent-theme2">
-        <ExampleStack title="accent">
+        <ExampleStack title="accent" childrenClassName="gap-2">
           <RectButton2Variants {...props} />
         </ExampleStack>
       </View>
 
       <View className="success-theme2">
-        <ExampleStack title="success">
+        <ExampleStack title="success" childrenClassName="gap-2">
           <RectButton2Variants {...props} />
         </ExampleStack>
       </View>
 
       <View className="danger-theme2">
-        <ExampleStack title="danger">
+        <ExampleStack title="danger" childrenClassName="gap-2">
           <RectButton2Variants {...props} />
         </ExampleStack>
       </View>
 
-      <ExampleStack title="(disabled)">
+      <ExampleStack title="(disabled)" childrenClassName="gap-2">
         <RectButton2Variants disabled {...props} />
       </ExampleStack>
     </View>
@@ -870,6 +879,34 @@ function TextInputSingleExample() {
 
       <ExampleStack title="disabled" showFrame>
         <TextInputSingle placeholder="Placeholder" disabled />
+      </ExampleStack>
+    </View>
+  );
+}
+
+function PinyinOptionButtonExample() {
+  return (
+    <View className="w-full flex-row gap-2">
+      <ExampleStack
+        title="default"
+        childrenClassName="flex-row flex-wrap gap-1"
+      >
+        <PinyinOptionButton text="nī" shortcutKey="1" />
+        <PinyinOptionButton text="ní" shortcutKey="2" />
+        <PinyinOptionButton text="nǐ" shortcutKey="3" />
+        <PinyinOptionButton text="nì" shortcutKey="4" />
+        <PinyinOptionButton text="ni" shortcutKey="5" />
+      </ExampleStack>
+
+      <ExampleStack
+        title="disabled"
+        childrenClassName="flex-row flex-wrap gap-1"
+      >
+        <PinyinOptionButton text="nī" shortcutKey="1" disabled />
+        <PinyinOptionButton text="ní" shortcutKey="2" disabled />
+        <PinyinOptionButton text="nǐ" shortcutKey="3" disabled />
+        <PinyinOptionButton text="nì" shortcutKey="4" disabled />
+        <PinyinOptionButton text="ni" shortcutKey="5" disabled />
       </ExampleStack>
     </View>
   );

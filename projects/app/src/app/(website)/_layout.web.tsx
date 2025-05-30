@@ -44,11 +44,7 @@ export default function WebsiteLayout() {
                   exiting={FadeOut.duration(100)}
                 >
                   <Link href="/learn" asChild>
-                    <RectButton2
-                      variant="filled"
-                      className="accent-theme2"
-                      textClassName="www-text-button"
-                    >
+                    <RectButton2 variant="filled" className="accent-theme2">
                       Get Started
                     </RectButton2>
                   </Link>
@@ -59,7 +55,7 @@ export default function WebsiteLayout() {
         </View>
       </header>
       <ScrollView
-        contentContainerClassName=" bg-[center_top_50svh] bg-no-repeat bg-contain"
+        contentContainerClassName="bg-[center_top_50svh] bg-no-repeat bg-contain"
         contentContainerStyle={{ backgroundImage: `url(${calligraphy.uri})` }}
       >
         <div className="h-px w-full" ref={ref} /* Scroll detector */ />

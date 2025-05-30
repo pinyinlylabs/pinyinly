@@ -5,7 +5,7 @@ import { tv } from "tailwind-variants";
 import { hapticImpactIfMobile } from "../hooks/hapticImpactIfMobile";
 import type { PropsOf } from "./types";
 
-export type ButtonVariant = `filled` | `outline` | `bare`;
+export type ButtonVariant = `filled` | `outline` | `option` | `bare`;
 
 export type RectButton2Props = {
   variant?: ButtonVariant;
@@ -86,6 +86,7 @@ const pressable = tv({
       filled: ``,
       outline: ``,
       bare: ``,
+      option: ``,
     },
     inFlexRowParent: {
       true: `flex-row`,
@@ -93,25 +94,31 @@ const pressable = tv({
   },
   compoundVariants: [
     {
-      flat: true,
       variant: `filled`,
+      flat: true,
       class: `pt-[4px]`,
     },
     {
-      flat: true,
       variant: `outline`,
+      flat: true,
+      class: `pt-[2px]`,
+    },
+    {
+      variant: `option`,
+      flat: true,
       class: `pt-[2px]`,
     },
   ],
 });
 
 const roundedRect = tv({
-  base: `items-center justify-center rounded-lg px-3 py-[4px] web:transition-all`,
+  base: `box-border select-none items-center justify-center web:transition-all`,
   variants: {
     variant: {
-      filled: `py-[5px]`,
-      outline: `border-2`,
-      bare: ``,
+      filled: `rounded-xl border-background/20 bg-body/95 px-4 py-2`,
+      outline: `rounded-xl border-2 border-body/20 px-4 py-2`,
+      option: `rounded-xl border border-body/20 px-3 py-2`,
+      bare: `px-2 py-1`,
     },
     hoveredOrPressed: {
       true: ``,
@@ -126,10 +133,6 @@ const roundedRect = tv({
   compoundVariants: [
     {
       variant: `filled`,
-      class: `border-background/20 bg-body/95`,
-    },
-    {
-      variant: `filled`,
       hoveredOrPressed: true,
       class: `bg-body`,
     },
@@ -138,10 +141,7 @@ const roundedRect = tv({
       flat: false,
       class: `border-b-4`,
     },
-    {
-      variant: `outline`,
-      class: `border-body/20`,
-    },
+    // Outline
     {
       variant: `outline`,
       disabled: false,
@@ -158,22 +158,33 @@ const roundedRect = tv({
       flat: false,
       class: `border-b-4`,
     },
+    // Option
+    {
+      variant: `option`,
+      disabled: false,
+      hoveredOrPressed: true,
+      class: `border-body/30`,
+    },
+    {
+      variant: `option`,
+      flat: true,
+      class: `border-b`,
+    },
+    {
+      variant: `option`,
+      flat: false,
+      class: `border-b-[3px]`,
+    },
   ],
 });
 
 const text = tv({
-  base: `hhh-text-button select-none`,
   variants: {
     variant: {
-      filled: `text-background`,
-      outline: ``,
-      bare: ``,
+      filled: `hhh-text-button-filled`,
+      outline: `hhh-text-button-outline`,
+      option: `hhh-text-button-option`,
+      bare: `hhh-text-button-bare`,
     },
   },
-  compoundVariants: [
-    {
-      variant: [`outline`, `bare`],
-      class: `text-body`,
-    },
-  ],
 });
