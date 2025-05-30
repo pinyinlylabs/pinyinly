@@ -266,7 +266,6 @@ export interface OneCorrectPairQuestion {
   answer: OneCorrectPairQuestionAnswer;
   groupA: readonly OneCorrectPairQuestionChoice[];
   groupB: readonly OneCorrectPairQuestionChoice[];
-  hint?: string;
   flag?: QuestionFlag;
 }
 
