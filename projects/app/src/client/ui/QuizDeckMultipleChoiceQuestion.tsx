@@ -5,7 +5,7 @@ import type {
 } from "@/data/model";
 import { setAudioModeAsync, useAudioPlayer } from "expo-audio";
 import chunk from "lodash/chunk";
-import { memo, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import { RectButton } from "./RectButton";
 import type { PropsOf } from "./types";
@@ -13,80 +13,78 @@ import type { PropsOf } from "./types";
 const buttonThickness = 4;
 const gap = 16;
 
-export const QuizDeckMultipleChoiceQuestion = memo(
-  function QuizDeckMultipleChoiceQuestion({
-    question,
-    onNext,
-  }: {
-    question: MultipleChoiceQuestion;
-    onNext: () => void;
-    onRating: (ratings: NewSkillRating[], mistakes: Mistake[]) => void;
-  }) {
-    const { prompt, choices } = question;
-    const [selectedChoice, setSelectedChoice] = useState<string>();
+export function QuizDeckMultipleChoiceQuestion({
+  question,
+  onNext,
+}: {
+  question: MultipleChoiceQuestion;
+  onNext: () => void;
+  onRating: (ratings: NewSkillRating[], mistakes: Mistake[]) => void;
+}) {
+  const { prompt, choices } = question;
+  const [selectedChoice, setSelectedChoice] = useState<string>();
 
-    useEffect(() => {
-      setAudioModeAsync({ playsInSilentMode: true }).catch((error: unknown) => {
-        console.error(`Error setting audio mode`, error);
-      });
-    }, []);
+  useEffect(() => {
+    setAudioModeAsync({ playsInSilentMode: true }).catch((error: unknown) => {
+      console.error(`Error setting audio mode`, error);
+    });
+  }, []);
 
-    const player = useAudioPlayer(
-      `https://static-ruddy.vercel.app/speech/1/2-1d2454055c29d34e69979f8873769672.aac`,
-    );
+  const player = useAudioPlayer(
+    `https://static-ruddy.vercel.app/speech/1/2-1d2454055c29d34e69979f8873769672.aac`,
+  );
 
-    useEffect(() => {
-      player.play();
-    }, [player]);
+  useEffect(() => {
+    player.play();
+  }, [player]);
 
-    const choicesRows = chunk(choices, 2);
-    const handleSubmit = () => {
-      throw new Error(`not implemented`);
-      // TODO: show error or success modal
-      // onRating(
-      //   question,
-      //   selectedChoice === answer ? Rating.Good : Rating.Again,
-      // );
-      onNext();
-    };
-    return (
-      <View
-        style={{
-          flex: 1,
-          gap: gap + buttonThickness,
-        }}
-      >
-        <View>
-          <Text
-            style={{
-              color: `white`,
-              fontSize: 24,
-              fontWeight: `bold`,
-            }}
-          >
-            {prompt}
-          </Text>
-        </View>
-        {choicesRows.map((choicesRow, i) => (
-          <View className="flex-1 flex-row items-stretch gap-quiz-px" key={i}>
-            {choicesRow.map((choice, i) => (
-              <AnswerButton
-                text={choice}
-                selected={choice === selectedChoice}
-                onPress={setSelectedChoice}
-                key={i}
-              />
-            ))}
-          </View>
-        ))}
-        <SubmitButton
-          disabled={selectedChoice === undefined}
-          onPress={handleSubmit}
-        />
+  const choicesRows = chunk(choices, 2);
+  const handleSubmit = () => {
+    throw new Error(`not implemented`);
+    // TODO: show error or success modal
+    // onRating(
+    //   question,
+    //   selectedChoice === answer ? Rating.Good : Rating.Again,
+    // );
+    onNext();
+  };
+  return (
+    <View
+      style={{
+        flex: 1,
+        gap: gap + buttonThickness,
+      }}
+    >
+      <View>
+        <Text
+          style={{
+            color: `white`,
+            fontSize: 24,
+            fontWeight: `bold`,
+          }}
+        >
+          {prompt}
+        </Text>
       </View>
-    );
-  },
-);
+      {choicesRows.map((choicesRow, i) => (
+        <View className="flex-1 flex-row items-stretch gap-quiz-px" key={i}>
+          {choicesRow.map((choice, i) => (
+            <AnswerButton
+              text={choice}
+              selected={choice === selectedChoice}
+              onPress={setSelectedChoice}
+              key={i}
+            />
+          ))}
+        </View>
+      ))}
+      <SubmitButton
+        disabled={selectedChoice === undefined}
+        onPress={handleSubmit}
+      />
+    </View>
+  );
+}
 
 function SubmitButton({
   disabled,

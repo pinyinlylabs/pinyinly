@@ -20,7 +20,7 @@ import { formatDuration } from "date-fns/formatDuration";
 import { intervalToDuration } from "date-fns/intervalToDuration";
 import { Image } from "expo-image";
 import type { ReactNode } from "react";
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { StyleProp, ViewStyle } from "react-native";
 import {
   // eslint-disable-next-line @typescript-eslint/no-restricted-imports
@@ -43,227 +43,223 @@ import type { PropsOf } from "./types";
 const buttonThickness = 4;
 const gap = 12;
 
-export const QuizDeckOneCorrectPairQuestion = memo(
-  function QuizDeckOneCorrectPairQuestion({
-    question,
-    onNext,
-    onRating,
-  }: {
-    question: OneCorrectPairQuestion;
-    onNext: () => void;
-    onRating: (ratings: NewSkillRating[], mistakes: Mistake[]) => void;
-  }) {
-    const { prompt, answer, groupA, groupB, flag } = question;
+export function QuizDeckOneCorrectPairQuestion({
+  question,
+  onNext,
+  onRating,
+}: {
+  question: OneCorrectPairQuestion;
+  onNext: () => void;
+  onRating: (ratings: NewSkillRating[], mistakes: Mistake[]) => void;
+}) {
+  const { prompt, answer, groupA, groupB, flag } = question;
 
-    const [selectedAChoice, setSelectedAChoice] =
-      useState<OneCorrectPairQuestionChoice>();
-    const [selectedBChoice, setSelectedBChoice] =
-      useState<OneCorrectPairQuestionChoice>();
-    const [isCorrect, setIsCorrect] = useState<boolean>();
+  const [selectedAChoice, setSelectedAChoice] =
+    useState<OneCorrectPairQuestionChoice>();
+  const [selectedBChoice, setSelectedBChoice] =
+    useState<OneCorrectPairQuestionChoice>();
+  const [isCorrect, setIsCorrect] = useState<boolean>();
 
-    // Setup the timer to measure how fast they answer the question.
-    const timer = useMultiChoiceQuizTimer();
-    const isSelectedAChoiceCorrect = selectedAChoice === answer.a;
-    const isSelectedBChoiceCorrect = selectedBChoice === answer.a;
-    useEffect(() => {
-      timer.recordChoice(isSelectedAChoiceCorrect);
-    }, [isSelectedAChoiceCorrect, timer]);
-    useEffect(() => {
-      timer.recordChoice(isSelectedBChoiceCorrect);
-    }, [isSelectedBChoiceCorrect, timer]);
+  // Setup the timer to measure how fast they answer the question.
+  const timer = useMultiChoiceQuizTimer();
+  const isSelectedAChoiceCorrect = selectedAChoice === answer.a;
+  const isSelectedBChoiceCorrect = selectedBChoice === answer.a;
+  useEffect(() => {
+    timer.recordChoice(isSelectedAChoiceCorrect);
+  }, [isSelectedAChoiceCorrect, timer]);
+  useEffect(() => {
+    timer.recordChoice(isSelectedBChoiceCorrect);
+  }, [isSelectedBChoiceCorrect, timer]);
 
-    const choiceRowCount = Math.max(groupA.length, groupB.length);
-    const choiceRows: {
-      a: OneCorrectPairQuestionChoice;
-      b: OneCorrectPairQuestionChoice;
-    }[] = [];
+  const choiceRowCount = Math.max(groupA.length, groupB.length);
+  const choiceRows: {
+    a: OneCorrectPairQuestionChoice;
+    b: OneCorrectPairQuestionChoice;
+  }[] = [];
 
-    for (let i = 0; i < choiceRowCount; i++) {
-      const a = groupA[i];
-      const b = groupB[i];
-      invariant(a !== undefined && b !== undefined, `missing choice`);
-      choiceRows.push({ a, b });
+  for (let i = 0; i < choiceRowCount; i++) {
+    const a = groupA[i];
+    const b = groupB[i];
+    invariant(a !== undefined && b !== undefined, `missing choice`);
+    choiceRows.push({ a, b });
+  }
+
+  invariant(groupA.includes(answer.a));
+  invariant(groupB.includes(answer.b));
+
+  const handleSubmit = () => {
+    if (
+      isCorrect === undefined &&
+      selectedAChoice != null &&
+      selectedBChoice != null
+    ) {
+      const isCorrect =
+        selectedAChoice === answer.a && selectedBChoice === answer.b;
+
+      const mistakes = isCorrect
+        ? []
+        : oneCorrectPairQuestionChoiceMistakes(
+            selectedAChoice,
+            selectedBChoice,
+          );
+
+      const durationMs = (timer.endTime ?? Date.now()) - timer.startTime;
+      const skillRatings: NewSkillRating[] = [
+        computeSkillRating({
+          skill: answer.skill,
+          correct: isCorrect,
+          durationMs,
+        }),
+      ];
+
+      setIsCorrect(isCorrect);
+      onRating(skillRatings, mistakes);
+    } else {
+      onNext();
     }
+  };
 
-    invariant(groupA.includes(answer.a));
-    invariant(groupB.includes(answer.b));
-
-    const handleSubmit = () => {
-      if (
-        isCorrect === undefined &&
-        selectedAChoice != null &&
-        selectedBChoice != null
-      ) {
-        const isCorrect =
-          selectedAChoice === answer.a && selectedBChoice === answer.b;
-
-        const mistakes = isCorrect
-          ? []
-          : oneCorrectPairQuestionChoiceMistakes(
-              selectedAChoice,
-              selectedBChoice,
-            );
-
-        const durationMs = (timer.endTime ?? Date.now()) - timer.startTime;
-        const skillRatings: NewSkillRating[] = [
-          computeSkillRating({
-            skill: answer.skill,
-            correct: isCorrect,
-            durationMs,
-          }),
-        ];
-
-        setIsCorrect(isCorrect);
-        onRating(skillRatings, mistakes);
-      } else {
-        onNext();
-      }
-    };
-
-    return (
-      <Skeleton
-        toast={
-          isCorrect == null ? null : (
-            <View
-              className={`flex-1 ${isCorrect ? `success-theme2` : `danger-theme2`} gap-[12px] overflow-hidden bg-body-bg10 px-quiz-px pt-3 pb-safe-offset-[84px] lg:mb-2 lg:rounded-xl`}
-            >
-              {isCorrect ? (
+  return (
+    <Skeleton
+      toast={
+        isCorrect == null ? null : (
+          <View
+            className={`flex-1 ${isCorrect ? `success-theme2` : `danger-theme2`} gap-[12px] overflow-hidden bg-body-bg10 px-quiz-px pt-3 pb-safe-offset-[84px] lg:mb-2 lg:rounded-xl`}
+          >
+            {isCorrect ? (
+              <View className="flex-row items-center gap-[8px]">
+                <Image
+                  className="size-[32px] shrink text-body"
+                  source={require(`@/assets/icons/check-circled-filled.svg`)}
+                  tintColor="currentColor"
+                />
+                <Text className="text-2xl font-bold text-body">Nice!</Text>
+              </View>
+            ) : (
+              <>
                 <View className="flex-row items-center gap-[8px]">
                   <Image
                     className="size-[32px] shrink text-body"
-                    source={require(`@/assets/icons/check-circled-filled.svg`)}
+                    source={require(`@/assets/icons/close-circled-filled.svg`)}
                     tintColor="currentColor"
                   />
-                  <Text className="text-2xl font-bold text-body">Nice!</Text>
-                </View>
-              ) : (
-                <>
-                  <View className="flex-row items-center gap-[8px]">
-                    <Image
-                      className="size-[32px] shrink text-body"
-                      source={require(
-                        `@/assets/icons/close-circled-filled.svg`,
-                      )}
-                      tintColor="currentColor"
-                    />
-                    <Text className="text-2xl font-bold text-body">
-                      Incorrect
-                    </Text>
-                  </View>
-                  <Text className="text-xl/none font-medium text-body">
-                    Correct answer:
+                  <Text className="text-2xl font-bold text-body">
+                    Incorrect
                   </Text>
+                </View>
+                <Text className="text-xl/none font-medium text-body">
+                  Correct answer:
+                </Text>
 
-                  <SkillAnswer
-                    skill={answer.skill}
-                    includeHint
-                    includeAlternatives
-                  />
+                <SkillAnswer
+                  skill={answer.skill}
+                  includeHint
+                  includeAlternatives
+                />
 
-                  {selectedAChoice != null && selectedBChoice != null ? (
-                    <View className="flex-row flex-wrap items-center gap-2">
-                      <Text className="shrink-0 font-bold leading-snug text-body">
-                        Your answer:
-                      </Text>
-                      <View className="flex-1 flex-row flex-wrap items-center">
-                        <Hhhmark
-                          source={`${choiceToHhhmark(selectedAChoice)} + ${choiceToHhhmark(selectedBChoice)}`}
-                          context="caption"
-                        />
-                      </View>
+                {selectedAChoice != null && selectedBChoice != null ? (
+                  <View className="flex-row flex-wrap items-center gap-2">
+                    <Text className="shrink-0 font-bold leading-snug text-body">
+                      Your answer:
+                    </Text>
+                    <View className="flex-1 flex-row flex-wrap items-center">
+                      <Hhhmark
+                        source={`${choiceToHhhmark(selectedAChoice)} + ${choiceToHhhmark(selectedBChoice)}`}
+                        context="caption"
+                      />
                     </View>
-                  ) : null}
-                </>
-              )}
-            </View>
-          )
-        }
-        submitButton={
-          <SubmitButton
-            state={
-              selectedAChoice === undefined || selectedBChoice === undefined
-                ? SubmitButtonState.Disabled
-                : isCorrect == null
-                  ? SubmitButtonState.Check
-                  : isCorrect
-                    ? SubmitButtonState.Correct
-                    : SubmitButtonState.Incorrect
-            }
-            onPress={handleSubmit}
-          />
-        }
-      >
-        {flag?.type === QuestionFlagType.NewSkill ? (
-          <NewSkillModal passivePresentation skill={question.answer.skill} />
-        ) : null}
-
-        {flag == null ? null : <FlagText flag={flag} />}
-        <View>
-          <Text className="text-xl font-bold text-body">{prompt}</Text>
-        </View>
-        <View className="flex-1 justify-center py-quiz-px">
-          <View
-            className="flex-1"
-            style={{
-              gap: gap + buttonThickness,
-              maxHeight:
-                choiceRowCount * 80 +
-                (choiceRowCount - 1) * gap +
-                buttonThickness,
-            }}
-          >
-            {choiceRows.map(({ a, b }, i) => (
-              <View className="flex-1 flex-row gap-[28px]" key={i}>
-                <ChoiceButton
-                  choice={a}
-                  state={
-                    selectedAChoice === undefined
-                      ? `default`
-                      : a === selectedAChoice
-                        ? isCorrect == null
-                          ? `selected`
-                          : isCorrect
-                            ? `success`
-                            : `error`
-                        : selectedBChoice === undefined
-                          ? `default`
-                          : `dimmed`
-                  }
-                  onPress={() => {
-                    if (isCorrect == null) {
-                      setSelectedAChoice((x) => (x === a ? undefined : a));
-                    }
-                  }}
-                />
-                <ChoiceButton
-                  choice={b}
-                  state={
-                    selectedBChoice === undefined
-                      ? `default`
-                      : b === selectedBChoice
-                        ? isCorrect == null
-                          ? `selected`
-                          : isCorrect
-                            ? `success`
-                            : `error`
-                        : selectedAChoice === undefined
-                          ? `default`
-                          : `dimmed`
-                  }
-                  onPress={() => {
-                    if (isCorrect == null) {
-                      setSelectedBChoice((x) => (x === b ? undefined : b));
-                    }
-                  }}
-                />
-              </View>
-            ))}
+                  </View>
+                ) : null}
+              </>
+            )}
           </View>
+        )
+      }
+      submitButton={
+        <SubmitButton
+          state={
+            selectedAChoice === undefined || selectedBChoice === undefined
+              ? SubmitButtonState.Disabled
+              : isCorrect == null
+                ? SubmitButtonState.Check
+                : isCorrect
+                  ? SubmitButtonState.Correct
+                  : SubmitButtonState.Incorrect
+          }
+          onPress={handleSubmit}
+        />
+      }
+    >
+      {flag?.type === QuestionFlagType.NewSkill ? (
+        <NewSkillModal passivePresentation skill={question.answer.skill} />
+      ) : null}
+
+      {flag == null ? null : <FlagText flag={flag} />}
+      <View>
+        <Text className="text-xl font-bold text-body">{prompt}</Text>
+      </View>
+      <View className="flex-1 justify-center py-quiz-px">
+        <View
+          className="flex-1"
+          style={{
+            gap: gap + buttonThickness,
+            maxHeight:
+              choiceRowCount * 80 +
+              (choiceRowCount - 1) * gap +
+              buttonThickness,
+          }}
+        >
+          {choiceRows.map(({ a, b }, i) => (
+            <View className="flex-1 flex-row gap-[28px]" key={i}>
+              <ChoiceButton
+                choice={a}
+                state={
+                  selectedAChoice === undefined
+                    ? `default`
+                    : a === selectedAChoice
+                      ? isCorrect == null
+                        ? `selected`
+                        : isCorrect
+                          ? `success`
+                          : `error`
+                      : selectedBChoice === undefined
+                        ? `default`
+                        : `dimmed`
+                }
+                onPress={() => {
+                  if (isCorrect == null) {
+                    setSelectedAChoice((x) => (x === a ? undefined : a));
+                  }
+                }}
+              />
+              <ChoiceButton
+                choice={b}
+                state={
+                  selectedBChoice === undefined
+                    ? `default`
+                    : b === selectedBChoice
+                      ? isCorrect == null
+                        ? `selected`
+                        : isCorrect
+                          ? `success`
+                          : `error`
+                      : selectedAChoice === undefined
+                        ? `default`
+                        : `dimmed`
+                }
+                onPress={() => {
+                  if (isCorrect == null) {
+                    setSelectedBChoice((x) => (x === b ? undefined : b));
+                  }
+                }}
+              />
+            </View>
+          ))}
         </View>
-      </Skeleton>
-    );
-  },
-);
+      </View>
+    </Skeleton>
+  );
+}
 
 const FlagText = ({ flag }: { flag: QuestionFlag }) => {
   switch (flag.type) {
