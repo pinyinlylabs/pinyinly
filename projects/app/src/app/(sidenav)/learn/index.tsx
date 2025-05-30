@@ -236,7 +236,6 @@ export default function IndexPage() {
                   <RectButton2
                     variant="filled"
                     className="success-theme2 mt-2 self-stretch"
-                    textClassName="py-1"
                   >
                     Start
                   </RectButton2>
@@ -257,11 +256,7 @@ export default function IndexPage() {
               </Text>
 
               <Link href="/learn/history" asChild>
-                <RectButton2
-                  variant="filled"
-                  className="self-start"
-                  textClassName="py-1 px-2"
-                >
+                <RectButton2 variant="filled" className="self-start">
                   Explore history
                 </RectButton2>
               </Link>

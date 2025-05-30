@@ -234,11 +234,7 @@ export const WikiHanziWordModal = ({
             </ScrollView>
 
             <View className="accent-theme2 border-t-2 border-primary-5 p-4 mb-safe">
-              <RectButton2
-                textClassName="px-2 py-1"
-                variant="filled"
-                onPress={dismiss}
-              >
+              <RectButton2 variant="filled" onPress={dismiss}>
                 Close
               </RectButton2>
             </View>
