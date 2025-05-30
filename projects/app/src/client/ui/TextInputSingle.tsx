@@ -21,7 +21,7 @@ export function TextInputSingle(props: TextInputSingleProps) {
         // Disable the 1Password button in inputs.
         "1p-ignore": `true`,
       }}
-      className="rounded-xl bg-background-1 px-4 py-3 text-lg leading-none text-body outline outline-2 outline-offset-0 outline-transparent transition-[outline-color] placeholder:text-body/30 focus:outline-offset-0 focus:outline-sky"
+      className="hhh-text-body-input rounded-xl bg-background-1 px-4 py-3 font-light outline-none placeholder:text-body/30"
     />
   );
 }
