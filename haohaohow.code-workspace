@@ -30,6 +30,9 @@
     "files.exclude": {
       ".yarn/releases/*.*": true,
     },
+    "files.associations": {
+      "*.css": "tailwindcss",
+    },
     "tailwindCSS.files.exclude": [
       "**/.git/**",
       "**/node_modules/**",
@@ -38,5 +41,6 @@
       "**/.moon/cache/**",
       "**/.react-email/**",
     ],
+    "tailwindCSS.validate": false,
   },
 }
