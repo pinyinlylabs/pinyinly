@@ -5,6 +5,7 @@ import { QuizQueueButton } from "@/client/ui/QuizQueueButton";
 import { RectButton2 } from "@/client/ui/RectButton2";
 import type { TextAnswerButtonState } from "@/client/ui/TextAnswerButton";
 import { TextAnswerButton } from "@/client/ui/TextAnswerButton";
+import { TextInputSingle } from "@/client/ui/TextInputSingle";
 import type { PropsOf } from "@/client/ui/types";
 import { Link } from "expo-router";
 import shuffle from "lodash/shuffle";
@@ -30,6 +31,10 @@ export default function DesignSystemPage() {
         </Link>
       </View>
       <ScrollView style={{ flex: 1 }} ref={scrollViewRef}>
+        <Section title={TextInputSingleExample.name} scrollTo={scrollTo}>
+          <TextInputSingleExample />
+        </Section>
+
         <Section title={QuizQueueButton.name} scrollTo={scrollTo}>
           <QuizQueueButtonExample />
         </Section>
@@ -185,57 +190,64 @@ const typography = tv({
 
 const HanziTextExamples = () => (
   <>
-    <ExampleStack title="bare" className="gap-5">
-      <View className="items-start border-2 border-dashed border-primary-8">
+    <ExampleStack title="hanzi">
+      <ExampleStack title="1" showFrame>
         <HanziText hanzi="你好" />
-      </View>
-      <View className="items-start border-2 border-dashed border-primary-8">
+      </ExampleStack>
+      <ExampleStack title="2" showFrame>
+        <HanziText hanzi="别的" />
+      </ExampleStack>
+      <ExampleStack title="3" showFrame>
         <HanziText hanzi="乚" />
-      </View>
+      </ExampleStack>
     </ExampleStack>
 
-    <ExampleStack title="pinyin" className="gap-5">
-      <View className="items-start border-2 border-dashed border-primary-8">
+    <ExampleStack title="hanzi + pinyin">
+      <ExampleStack title="1" showFrame>
         <HanziText pinyin="nǐhǎo" hanzi="你好" />
-      </View>
-
-      <View className="items-start border-2 border-dashed border-primary-8">
+      </ExampleStack>
+      <ExampleStack title="2" showFrame>
         <HanziText pinyin="bie2 de5" hanzi="别的" />
-      </View>
-
-      <View className="items-start border-2 border-dashed border-primary-8">
+      </ExampleStack>
+      <ExampleStack title="3" showFrame>
         <HanziText pinyin="yǐ" hanzi="乚" />
-      </View>
+      </ExampleStack>
     </ExampleStack>
 
-    <ExampleStack title="accented" className="gap-5">
-      <View className="items-start border-2 border-dashed border-primary-8">
+    <ExampleStack title="hanzi + pinyin (accented)">
+      <ExampleStack title="1" showFrame>
         <HanziText pinyin="nǐhǎo" hanzi="你好" accented />
-      </View>
-
-      <View className="items-start border-2 border-dashed border-primary-8">
+      </ExampleStack>
+      <ExampleStack title="2" showFrame>
+        <HanziText pinyin="bie2 de5" hanzi="别的" accented />
+      </ExampleStack>
+      <ExampleStack title="3" showFrame>
         <HanziText pinyin="yǐ" hanzi="乚" accented />
-      </View>
+      </ExampleStack>
     </ExampleStack>
 
-    <ExampleStack title="underline" className="gap-5">
-      <View className="items-start border-2 border-dashed border-primary-8">
+    <ExampleStack title="hanzi + pinyin (underline)">
+      <ExampleStack title="1" showFrame>
         <HanziText pinyin="nǐhǎo" hanzi="你好" underline />
-      </View>
-
-      <View className="items-start border-2 border-dashed border-primary-8">
+      </ExampleStack>
+      <ExampleStack title="2" showFrame>
+        <HanziText pinyin="bie2 de5" hanzi="别的" underline />
+      </ExampleStack>
+      <ExampleStack title="3" showFrame>
         <HanziText pinyin="yǐ" hanzi="乚" underline />
-      </View>
+      </ExampleStack>
     </ExampleStack>
 
-    <ExampleStack title="accented + underline" className="gap-5">
-      <View className="items-start border-2 border-dashed border-primary-8">
+    <ExampleStack title="hanzi + pinyin (accented + underline)">
+      <ExampleStack title="1" showFrame>
         <HanziText pinyin="nǐhǎo" hanzi="你好" accented underline />
-      </View>
-
-      <View className="items-start border-2 border-dashed border-primary-8">
+      </ExampleStack>
+      <ExampleStack title="2" showFrame>
+        <HanziText pinyin="bie2 de5" hanzi="别的" accented underline />
+      </ExampleStack>
+      <ExampleStack title="3" showFrame>
         <HanziText pinyin="yǐ" hanzi="乚" accented underline />
-      </View>
+      </ExampleStack>
     </ExampleStack>
   </>
 );
@@ -331,17 +343,34 @@ const examplesStackClassName = `bg-background flex-1 shrink basis-1 flex-row fle
 const ExampleStack = ({
   children,
   title,
-  className,
+  childrenClassName,
+  showFrame,
 }: {
   children: ReactNode;
   title: string;
-  className?: string;
+  childrenClassName?: string;
+  showFrame?: boolean;
 }) => (
-  <View className={`items-center gap-2 p-2 ${className ?? ``}`}>
+  <View className="items-center gap-2 p-2">
     <Text className="text-center text-xs text-primary-10">{title}</Text>
-    {children}
+    <View
+      className={exampleStackChildrenClass({
+        showFrame,
+        className: childrenClassName,
+      })}
+    >
+      {children}
+    </View>
   </View>
 );
+
+const exampleStackChildrenClass = tv({
+  variants: {
+    showFrame: {
+      true: `border-2 border-dashed border-primary-8`,
+    },
+  },
+});
 
 const RectButton2Variants = (props: Partial<PropsOf<typeof RectButton2>>) => (
   <>
@@ -402,26 +431,26 @@ const RectButton2Examples = (props: Partial<PropsOf<typeof RectButton2>>) => (
     <LittlePrimaryHeader title="flex-col" />
 
     <View className="flex-row flex-wrap">
-      <ExampleStack title="items-start">
-        <View className="w-[120px] flex-col items-start gap-2 border-2 border-dashed border-primary-8">
+      <ExampleStack title="items-start" showFrame>
+        <View className="w-[120px] flex-col items-start gap-2">
           <RectButton2Variants {...props} />
         </View>
       </ExampleStack>
 
-      <ExampleStack title="items-center">
-        <View className="w-[120px] flex-col items-center gap-2 border-2 border-dashed border-primary-8">
+      <ExampleStack title="items-center" showFrame>
+        <View className="w-[120px] flex-col items-center gap-2">
           <RectButton2Variants {...props} />
         </View>
       </ExampleStack>
 
-      <ExampleStack title="items-stretch">
-        <View className="w-[120px] flex-col items-stretch gap-2 border-2 border-dashed border-primary-8">
+      <ExampleStack title="items-stretch" showFrame>
+        <View className="w-[120px] flex-col items-stretch gap-2">
           <RectButton2Variants className="flex-col" {...props} />
         </View>
       </ExampleStack>
 
-      <ExampleStack title="items-end">
-        <View className="w-[120px] flex-col items-end gap-2 border-2 border-dashed border-primary-8">
+      <ExampleStack title="items-end" showFrame>
+        <View className="w-[120px] flex-col items-end gap-2">
           <RectButton2Variants {...props} />
         </View>
       </ExampleStack>
@@ -430,84 +459,108 @@ const RectButton2Examples = (props: Partial<PropsOf<typeof RectButton2>>) => (
     <LittlePrimaryHeader title="flex-col + flex-1" />
 
     <View className="flex-row flex-wrap">
-      <ExampleStack title="items-start">
-        <View className="w-[120px] flex-col items-start gap-2 border-2 border-dashed border-primary-8">
-          <RectButton2Variants className="flex-1" {...props} />
-        </View>
+      <ExampleStack
+        title="items-start"
+        showFrame
+        childrenClassName="w-[120px] flex-col items-start gap-2"
+      >
+        <RectButton2Variants className="flex-1" {...props} />
       </ExampleStack>
 
-      <ExampleStack title="items-center">
-        <View className="w-[120px] flex-col items-center gap-2 border-2 border-dashed border-primary-8">
-          <RectButton2Variants className="flex-1" {...props} />
-        </View>
+      <ExampleStack
+        title="items-center"
+        showFrame
+        childrenClassName="w-[120px] flex-col items-center gap-2"
+      >
+        <RectButton2Variants className="flex-1" {...props} />
       </ExampleStack>
 
-      <ExampleStack title="items-stretch">
-        <View className="w-[120px] flex-col items-stretch gap-2 border-2 border-dashed border-primary-8">
-          <RectButton2Variants className="flex-1" {...props} />
-        </View>
+      <ExampleStack
+        title="items-stretch"
+        showFrame
+        childrenClassName="w-[120px] flex-col items-stretch gap-2"
+      >
+        <RectButton2Variants className="flex-1" {...props} />
       </ExampleStack>
 
-      <ExampleStack title="items-end">
-        <View className="w-[120px] flex-col items-end gap-2 border-2 border-dashed border-primary-8">
-          <RectButton2Variants className="flex-1" {...props} />
-        </View>
+      <ExampleStack
+        title="items-end"
+        showFrame
+        childrenClassName="w-[120px] flex-col items-end gap-2"
+      >
+        <RectButton2Variants className="flex-1" {...props} />
       </ExampleStack>
     </View>
 
     <LittlePrimaryHeader title="flex-row" />
 
     <View className="flex-row flex-wrap">
-      <ExampleStack title="items-start">
-        <View className="h-[100px] flex-row items-start gap-2 border-2 border-dashed border-primary-8">
-          <RectButton2Variants inFlexRowParent {...props} />
-        </View>
+      <ExampleStack
+        title="items-start"
+        showFrame
+        childrenClassName="h-[100px] flex-row items-start gap-2"
+      >
+        <RectButton2Variants inFlexRowParent {...props} />
       </ExampleStack>
 
-      <ExampleStack title="items-center">
-        <View className="h-[100px] flex-row items-center gap-2 border-2 border-dashed border-primary-8">
-          <RectButton2Variants inFlexRowParent {...props} />
-        </View>
+      <ExampleStack
+        title="items-center"
+        showFrame
+        childrenClassName="h-[100px] flex-row items-center gap-2"
+      >
+        <RectButton2Variants inFlexRowParent {...props} />
       </ExampleStack>
 
-      <ExampleStack title="items-stretch**">
-        <View className="h-[100px] flex-row items-stretch gap-2 border-2 border-dashed border-primary-8">
-          <RectButton2Variants inFlexRowParent {...props} />
-        </View>
+      <ExampleStack
+        title="items-stretch**"
+        showFrame
+        childrenClassName="h-[100px] flex-row items-stretch gap-2"
+      >
+        <RectButton2Variants inFlexRowParent {...props} />
       </ExampleStack>
 
-      <ExampleStack title="items-end">
-        <View className="h-[100px] flex-row items-end gap-2 border-2 border-dashed border-primary-8">
-          <RectButton2Variants inFlexRowParent {...props} />
-        </View>
+      <ExampleStack
+        title="items-end"
+        showFrame
+        childrenClassName="h-[100px] flex-row items-end gap-2"
+      >
+        <RectButton2Variants inFlexRowParent {...props} />
       </ExampleStack>
     </View>
 
     <LittlePrimaryHeader title="flex-row + flex-1" />
 
     <View className="flex-row flex-wrap">
-      <ExampleStack title="items-start">
-        <View className="h-[100px] flex-row items-start gap-2 border-2 border-dashed border-primary-8">
-          <RectButton2Variants inFlexRowParent className="flex-1" {...props} />
-        </View>
+      <ExampleStack
+        title="items-start"
+        showFrame
+        childrenClassName="h-[100px] flex-row items-start gap-2"
+      >
+        <RectButton2Variants inFlexRowParent className="flex-1" {...props} />
       </ExampleStack>
 
-      <ExampleStack title="items-center">
-        <View className="h-[100px] flex-row items-center gap-2 border-2 border-dashed border-primary-8">
-          <RectButton2Variants inFlexRowParent className="flex-1" {...props} />
-        </View>
+      <ExampleStack
+        title="items-center"
+        showFrame
+        childrenClassName="h-[100px] flex-row items-center gap-2"
+      >
+        <RectButton2Variants inFlexRowParent className="flex-1" {...props} />
       </ExampleStack>
 
-      <ExampleStack title="items-stretch**">
-        <View className="h-[100px] flex-row items-stretch gap-2 border-2 border-dashed border-primary-8">
-          <RectButton2Variants inFlexRowParent className="flex-1" {...props} />
-        </View>
+      <ExampleStack
+        title="items-stretch**"
+        showFrame
+        childrenClassName="h-[100px] flex-row items-stretch gap-2"
+      >
+        <RectButton2Variants inFlexRowParent className="flex-1" {...props} />
       </ExampleStack>
 
-      <ExampleStack title="items-end">
-        <View className="h-[100px] flex-row items-end gap-2 border-2 border-dashed border-primary-8">
-          <RectButton2Variants inFlexRowParent className="flex-1" {...props} />
-        </View>
+      <ExampleStack
+        title="items-end"
+        showFrame
+        childrenClassName="h-[100px] flex-row items-end gap-2"
+      >
+        <RectButton2Variants inFlexRowParent className="flex-1" {...props} />
       </ExampleStack>
     </View>
   </View>
@@ -533,8 +586,8 @@ const TextAnswerButtonExamples = (
         <SyncedAnswerButtonExample />
       </ExampleStack>
 
-      <ExampleStack title="text overflow">
-        <View className="size-[120px] gap-2 border-2 border-dashed border-primary-8">
+      <ExampleStack title="text overflow" showFrame>
+        <View className="size-[120px]">
           <TextAnswerButton
             className="flex-1"
             text="one two three four five six seven eight nine ten"
@@ -553,112 +606,144 @@ const TextAnswerButtonExamples = (
     <LittlePrimaryHeader title="flex-col" />
 
     <View className="flex-row flex-wrap">
-      <ExampleStack title="items-start">
-        <View className="size-[120px] flex-col items-start gap-2 border-2 border-dashed border-primary-8">
-          <SyncedAnswerButtonExample />
-        </View>
+      <ExampleStack
+        title="items-start"
+        showFrame
+        childrenClassName="size-[120px] flex-col items-start gap-2"
+      >
+        <SyncedAnswerButtonExample />
       </ExampleStack>
 
-      <ExampleStack title="items-center">
-        <View className="size-[120px] flex-col items-center gap-2 border-2 border-dashed border-primary-8">
-          <SyncedAnswerButtonExample />
-        </View>
+      <ExampleStack
+        title="items-center"
+        showFrame
+        childrenClassName="size-[120px] flex-col items-center gap-2"
+      >
+        <SyncedAnswerButtonExample />
       </ExampleStack>
 
-      <ExampleStack title="items-stretch">
-        <View className="size-[120px] flex-col gap-2 border-2 border-dashed border-primary-8">
-          <SyncedAnswerButtonExample />
-        </View>
+      <ExampleStack
+        title="items-stretch"
+        showFrame
+        childrenClassName="size-[120px] flex-col gap-2"
+      >
+        <SyncedAnswerButtonExample />
       </ExampleStack>
 
-      <ExampleStack title="items-end">
-        <View className="size-[120px] flex-col items-end gap-2 border-2 border-dashed border-primary-8">
-          <SyncedAnswerButtonExample />
-        </View>
+      <ExampleStack
+        title="items-end"
+        showFrame
+        childrenClassName="size-[120px] flex-col items-end gap-2"
+      >
+        <SyncedAnswerButtonExample />
       </ExampleStack>
     </View>
 
     <LittlePrimaryHeader title="flex-col + flex-1" />
 
     <View className="flex-row flex-wrap">
-      <ExampleStack title="items-start">
-        <View className="size-[120px] flex-col items-start gap-2 border-2 border-dashed border-primary-8">
-          <SyncedAnswerButtonExample className="flex-1" />
-        </View>
+      <ExampleStack
+        title="items-start"
+        showFrame
+        childrenClassName="size-[120px] flex-col items-start gap-2"
+      >
+        <SyncedAnswerButtonExample className="flex-1" />
       </ExampleStack>
 
-      <ExampleStack title="items-center">
-        <View className="size-[120px] flex-col items-center gap-2 border-2 border-dashed border-primary-8">
-          <SyncedAnswerButtonExample className="flex-1" />
-        </View>
+      <ExampleStack
+        title="items-center"
+        showFrame
+        childrenClassName="size-[120px] flex-col items-center gap-2"
+      >
+        <SyncedAnswerButtonExample className="flex-1" />
       </ExampleStack>
 
-      <ExampleStack title="items-stretch">
-        <View className="size-[120px] flex-col gap-2 border-2 border-dashed border-primary-8">
-          <SyncedAnswerButtonExample className="flex-1" />
-        </View>
+      <ExampleStack
+        title="items-stretch"
+        showFrame
+        childrenClassName="size-[120px] flex-col gap-2"
+      >
+        <SyncedAnswerButtonExample className="flex-1" />
       </ExampleStack>
 
-      <ExampleStack title="items-end">
-        <View className="size-[120px] flex-col items-end gap-2 border-2 border-dashed border-primary-8">
-          <SyncedAnswerButtonExample className="flex-1" />
-        </View>
+      <ExampleStack
+        title="items-end"
+        showFrame
+        childrenClassName="size-[120px] flex-col items-end gap-2"
+      >
+        <SyncedAnswerButtonExample className="flex-1" />
       </ExampleStack>
     </View>
 
     <LittlePrimaryHeader title="flex-row" />
 
     <View className="flex-row flex-wrap">
-      <ExampleStack title="items-start">
-        <View className="h-[100px] w-[200px] flex-row items-start gap-2 border-2 border-dashed border-primary-8">
-          <SyncedAnswerButtonExample inFlexRowParent />
-        </View>
+      <ExampleStack
+        title="items-start"
+        showFrame
+        childrenClassName="h-[100px] w-[200px] flex-row items-start gap-2"
+      >
+        <SyncedAnswerButtonExample inFlexRowParent />
       </ExampleStack>
 
-      <ExampleStack title="items-center">
-        <View className="h-[100px] w-[200px] flex-row items-center gap-2 border-2 border-dashed border-primary-8">
-          <SyncedAnswerButtonExample inFlexRowParent />
-        </View>
+      <ExampleStack
+        title="items-center"
+        showFrame
+        childrenClassName="h-[100px] w-[200px] flex-row items-center gap-2"
+      >
+        <SyncedAnswerButtonExample inFlexRowParent />
       </ExampleStack>
 
-      <ExampleStack title="items-stretch">
-        <View className="h-[100px] w-[200px] flex-row gap-2 border-2 border-dashed border-primary-8">
-          <SyncedAnswerButtonExample inFlexRowParent />
-        </View>
+      <ExampleStack
+        title="items-stretch"
+        showFrame
+        childrenClassName="h-[100px] w-[200px] flex-row gap-2"
+      >
+        <SyncedAnswerButtonExample inFlexRowParent />
       </ExampleStack>
 
-      <ExampleStack title="items-end">
-        <View className="h-[100px] w-[200px] flex-row items-end gap-2 border-2 border-dashed border-primary-8">
-          <SyncedAnswerButtonExample inFlexRowParent />
-        </View>
+      <ExampleStack
+        title="items-end"
+        showFrame
+        childrenClassName="h-[100px] w-[200px] flex-row items-end gap-2"
+      >
+        <SyncedAnswerButtonExample inFlexRowParent />
       </ExampleStack>
     </View>
 
     <LittlePrimaryHeader title="flex-row + flex-1" />
 
     <View className="flex-row flex-wrap">
-      <ExampleStack title="items-start">
-        <View className="h-[100px] w-[200px] flex-row items-start gap-2 border-2 border-dashed border-primary-8">
-          <SyncedAnswerButtonExample inFlexRowParent className="flex-1" />
-        </View>
+      <ExampleStack
+        title="items-start"
+        showFrame
+        childrenClassName="h-[100px] w-[200px] flex-row items-start gap-2"
+      >
+        <SyncedAnswerButtonExample inFlexRowParent className="flex-1" />
       </ExampleStack>
 
-      <ExampleStack title="items-center">
-        <View className="h-[100px] w-[200px] flex-row items-center gap-2 border-2 border-dashed border-primary-8">
-          <SyncedAnswerButtonExample inFlexRowParent className="flex-1" />
-        </View>
+      <ExampleStack
+        title="items-center"
+        showFrame
+        childrenClassName="h-[100px] w-[200px] flex-row items-center gap-2"
+      >
+        <SyncedAnswerButtonExample inFlexRowParent className="flex-1" />
       </ExampleStack>
 
-      <ExampleStack title="items-stretch">
-        <View className="h-[100px] w-[200px] flex-row gap-2 border-2 border-dashed border-primary-8">
-          <SyncedAnswerButtonExample inFlexRowParent className="flex-1" />
-        </View>
+      <ExampleStack
+        title="items-stretch"
+        showFrame
+        childrenClassName="h-[100px] w-[200px] flex-row gap-2"
+      >
+        <SyncedAnswerButtonExample inFlexRowParent className="flex-1" />
       </ExampleStack>
 
-      <ExampleStack title="items-end">
-        <View className="h-[100px] w-[200px] flex-row items-end gap-2 border-2 border-dashed border-primary-8">
-          <SyncedAnswerButtonExample inFlexRowParent className="flex-1" />
-        </View>
+      <ExampleStack
+        title="items-end"
+        showFrame
+        childrenClassName="h-[100px] w-[200px] flex-row items-end gap-2"
+      >
+        <SyncedAnswerButtonExample inFlexRowParent className="flex-1" />
       </ExampleStack>
     </View>
   </View>
@@ -767,6 +852,24 @@ function QuizQueueButtonExample() {
         <QuizQueueButton
           queueStats={{ overDueCount: 0, dueCount: 0, newCount: 100 }}
         />
+      </ExampleStack>
+    </View>
+  );
+}
+
+function TextInputSingleExample() {
+  return (
+    <View className="w-full flex-row gap-2">
+      <ExampleStack title="default">
+        <TextInputSingle placeholder="Placeholder text" />
+      </ExampleStack>
+
+      <ExampleStack title="default (framed)" showFrame>
+        <TextInputSingle placeholder="Placeholder text" />
+      </ExampleStack>
+
+      <ExampleStack title="disabled" showFrame>
+        <TextInputSingle placeholder="Placeholder" disabled />
       </ExampleStack>
     </View>
   );

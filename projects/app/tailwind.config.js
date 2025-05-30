@@ -26,7 +26,10 @@ module.exports = {
     },
     colors: {
       /* EXPERIMENTAL: named semantic colors */
-      background: `rgb(from var(--color-background) r g b / calc(alpha * <alpha-value>))`,
+      background: {
+        DEFAULT: `rgb(from var(--color-background) r g b / calc(alpha * <alpha-value>))`,
+        1: `rgb(from var(--color-slate-3) r g b / calc(alpha * <alpha-value>))`,
+      },
       body: {
         DEFAULT: `rgb(from var(--color-body) r g b / calc(alpha * <alpha-value>))`,
         bold: `rgb(from var(--color-body-bold) r g b / calc(alpha * <alpha-value>))`,
@@ -166,6 +169,8 @@ module.exports = {
         11: `rgb(from var(--color-lime-11) r g b / calc(alpha * <alpha-value>))`,
         12: `rgb(from var(--color-lime-12) r g b / calc(alpha * <alpha-value>))`,
       },
+
+      transparent: `transparent`,
     },
     extend: {
       fontFamily: {
