@@ -9,10 +9,10 @@
   
   */
   .hhh-text-button-filled {
-    @apply font-sans text-base/normal font-bold uppercase text-background;
+    @apply font-sans text-base/snug font-bold uppercase text-background;
   }
   .hhh-text-button-outline {
-    @apply font-sans text-base/normal font-bold uppercase text-body;
+    @apply font-sans text-base/snug font-bold uppercase text-body;
   }
   .hhh-text-button-option {
     @apply font-sans text-base/none text-body;
