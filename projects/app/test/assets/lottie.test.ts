@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import * as fs from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 await test(`no luminance layers in lottie animations (incompatible with lottie-ios)`, async () => {
   const projectRoot = path.join(import.meta.dirname, `../..`);
@@ -23,7 +23,7 @@ await test(`no luminance layers in lottie animations (incompatible with lottie-i
       `utf8`,
     );
     const anim = lottieJs.fromJSON(
-      z.record(z.unknown()).parse(JSON.parse(lottieContents)),
+      z.record(z.string(), z.unknown()).parse(JSON.parse(lottieContents)),
     );
 
     // Check each layer to make sure it's not a luminance mask.

@@ -22,7 +22,7 @@ import type { TestContext } from "node:test";
 import test from "node:test";
 import type { ReadTransaction, WriteTransaction } from "replicache";
 import { Replicache } from "replicache";
-import { z } from "zod";
+import { z } from "zod/v4";
 import { testReplicacheOptions } from "./rizzleHelpers";
 
 function typeChecks<_T>(..._args: unknown[]) {
@@ -655,10 +655,8 @@ await test(`number()`, async (t) => {
   assert.deepEqual(await posts.get(tx, { id: `1` }), { id: `1`, count: 5 });
 });
 await test(`enum()`, async (t) => {
-  enum Colors {
-    RED,
-    BLUE,
-  }
+  const colorsSchema = z.enum([`RED`, `BLUE`]);
+  const Colors = colorsSchema.enum;
 
   const posts = r.entity(`foo/[id]`, {
     id: r.string(),
@@ -1724,10 +1722,8 @@ typeChecks(`.indexed() not allowed a non-string marshaling properties`, () => {
   r.literal(`5`, r.string()).indexed(`c`);
   // can index enum with string values
   {
-    enum Colors {
-      RED,
-      BLUE,
-    }
+    const colorsSchema = z.enum([`RED`, `BLUE`]);
+    const Colors = colorsSchema.enum;
     r.enum(Colors, {
       [Colors.RED]: `r`,
       [Colors.BLUE]: `b`,

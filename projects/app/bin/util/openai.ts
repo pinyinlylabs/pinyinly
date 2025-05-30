@@ -3,9 +3,11 @@ import type { Debugger } from "debug";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import OpenAI from "openai";
-import { zodResponseFormat } from "openai/helpers/zod";
-import type { ChatCompletionCreateParamsNonStreaming } from "openai/resources/index.mjs";
-import type { z } from "zod";
+import type {
+  ChatCompletionCreateParamsNonStreaming,
+  ResponseFormatJSONSchema,
+} from "openai/resources/index.mjs";
+import { z } from "zod/v4";
 import type { DbCache } from "./cache.js";
 
 export const openAiWithCache = async (
@@ -106,5 +108,18 @@ async function systemRoleMessageWithProjectContext(
   return {
     role: `system`,
     content: messageLines.join(`\n`),
+  };
+}
+
+export function zodResponseFormat(
+  zodObject: z.ZodType,
+  name: string,
+): ResponseFormatJSONSchema {
+  return {
+    type: `json_schema`,
+    json_schema: {
+      schema: z.toJSONSchema(zodObject, { unrepresentable: `any` }),
+      name,
+    },
   };
 }

@@ -6,8 +6,7 @@
   },
   "dependencies": {
     "lodash": "^4.17.21",
-    "nanoid": "patch:nanoid@npm%3A5.1.2#~/.yarn/patches/nanoid-npm-5.1.2-40381f6f88.patch",
-    "zod": "^3.23.8"
+    "nanoid": "patch:nanoid@npm%3A5.1.2#~/.yarn/patches/nanoid-npm-5.1.2-40381f6f88.patch"
   },
   "devDependencies": {
     "@types/lodash": "4.17.x",

@@ -145,6 +145,10 @@ export default tseslint.config(
               name: `node:assert`,
               message: `Please use node:assert/strict`,
             },
+            {
+              name: `zod`,
+              message: `Please use zod/v4 instead`,
+            },
           ],
         },
       ],

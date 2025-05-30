@@ -1,5 +1,5 @@
 import { readFile, stat, writeFile } from "node:fs/promises";
-import type { z } from "zod";
+import type { z } from "zod/v4";
 
 export async function writeUtf8FileIfChanged(
   path: string,

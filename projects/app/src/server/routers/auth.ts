@@ -2,7 +2,7 @@ import { getLucia, getOrCreateUser } from "@/server/lib/auth";
 import { withDrizzle } from "@/server/lib/db";
 import { invariant } from "@haohaohow/lib/invariant";
 import { parseJWT } from "oslo/jwt";
-import { z } from "zod";
+import { z } from "zod/v4";
 import { procedure, router } from "../lib/trpc";
 
 export const authRouter = router({

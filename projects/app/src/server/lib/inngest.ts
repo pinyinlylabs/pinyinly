@@ -14,7 +14,7 @@ import { createTRPCClient, httpLink } from "@trpc/client";
 import { inArray, notInArray } from "drizzle-orm";
 import { Inngest } from "inngest";
 import * as postmark from "postmark";
-import { z } from "zod";
+import { z } from "zod/v4";
 import * as s from "../schema";
 import {
   pgBatchUpdate,

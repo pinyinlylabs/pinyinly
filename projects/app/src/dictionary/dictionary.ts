@@ -12,14 +12,15 @@ import {
 } from "@/util/collections";
 import { invariant } from "@haohaohow/lib/invariant";
 import type { DeepReadonly } from "ts-essentials";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 export const hhhMarkSchema = z.string();
 export const hanziWordSchema = z.string().transform((x) => x as HanziWord);
 export const hanziTextSchema = z.string().transform((x) => x as HanziText);
 export const hanziCharSchema = z.string().transform((x) => x as HanziChar);
 export const pinyinTextSchema = z
-  .string({ description: `space separated pinyin for each word` })
+  .string()
+  .describe(`space separated pinyin for each word`)
   .transform((x) => x as PinyinText);
 
 export const parsePinyinOrThrow = memoize1(function parsePinyinOrThrow(
@@ -41,7 +42,7 @@ export const loadPinyinWords = memoize0(async () =>
 
 export const loadMissingFontGlyphs = memoize0(async () =>
   z
-    .record(z.array(z.string()))
+    .record(z.string(), z.array(z.string()))
     .transform(
       (x) => new Map(Object.entries(x).map(([k, v]) => [k, new Set(v)])),
     )
@@ -119,7 +120,7 @@ const pinyinChartSchema = z
       }),
     ),
     finals: z.array(z.union([z.string(), z.array(z.string())])),
-    overrides: z.record(z.tuple([z.string(), z.string()])),
+    overrides: z.record(z.string(), z.tuple([z.string(), z.string()])),
   })
   .transform(({ initials: initialGroups, finals, overrides }) => ({
     initials: initialGroups.map((group) => ({
@@ -321,15 +322,15 @@ export const hanziWordMeaningSchema = z.object({
   gloss: z.array(z.string()),
   glossHint: z.string().nullable().optional(),
   pinyin: z
-    .array(pinyinTextSchema, {
-      description: `all valid pinyin variations for this meaning (might be omitted for radicals without pronunciation)`,
-    })
+    .array(pinyinTextSchema)
+    .describe(
+      `all valid pinyin variations for this meaning (might be omitted for radicals without pronunciation)`,
+    )
     .nullable()
     .optional(),
   example: z
-    .string({
-      description: `a Chinese sentence that includes this hanzi`,
-    })
+    .string()
+    .describe(`a Chinese sentence that includes this hanzi`)
     .nullable()
     .optional(),
   partOfSpeech: partOfSpeechSchema,
@@ -340,9 +341,10 @@ export const hanziWordMeaningSchema = z.object({
     .nullable()
     .optional(),
   visualVariants: z
-    .array(hanziTextSchema, {
-      description: `Hanzi with the same meaning but visually different. Only included in rare cases (e.g. radicals with multiple visual forms). `,
-    })
+    .array(hanziTextSchema)
+    .describe(
+      `Hanzi with the same meaning but visually different. Only included in rare cases (e.g. radicals with multiple visual forms).`,
+    )
     .nullable()
     .optional(),
   definition: z.string(),

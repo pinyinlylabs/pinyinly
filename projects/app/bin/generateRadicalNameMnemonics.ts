@@ -1,9 +1,8 @@
 import makeDebug from "debug";
 import path from "node:path";
 import OpenAI from "openai";
-import { zodResponseFormat } from "openai/helpers/zod";
 import yargs from "yargs";
-import { z } from "zod";
+import { z } from "zod/v4";
 import {
   loadHanziWordGlossMnemonics,
   lookupHanzi,
@@ -12,7 +11,7 @@ import { mergeMaps, sortComparatorString } from "../src/util/collections.js";
 import { jsonStringifyIndentOneLevel } from "../src/util/json.js";
 import { makeDbCache } from "./util/cache.js";
 import { writeUtf8FileIfChanged } from "./util/fs.js";
-import { openAiWithCache } from "./util/openai.js";
+import { openAiWithCache, zodResponseFormat } from "./util/openai.js";
 
 const debug = makeDebug(`hhh`);
 

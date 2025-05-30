@@ -13,7 +13,7 @@ import { intervalToDuration } from "date-fns/intervalToDuration";
 import assert from "node:assert/strict";
 import type { TestContext } from "node:test";
 import test from "node:test";
-import z from "zod";
+import z from "zod/v4";
 import { parseRelativeTimeShorthand, 时 } from "../data/helpers";
 
 const expectedReviewSchema = z.object({
@@ -32,7 +32,7 @@ const expectedReviewSchema = z.object({
     .partial(),
 });
 
-const ratingSchema = z.nativeEnum(Rating);
+const ratingSchema = z.enum(Rating);
 
 await test(`${nextReview.name} suite`, async () => {
   await test(`stability increases after time elapsed with correct rating`, () => {
@@ -459,7 +459,7 @@ await test(`${fsrsIsForgotten.name} suite`, async (t) => {
   );
 });
 
-type ExpectedReview = z.TypeOf<typeof expectedReviewSchema>;
+type ExpectedReview = z.output<typeof expectedReviewSchema>;
 
 type FsrsSequence = RepeatedSequence2<[Rating, ExpectedReview, Duration]>;
 

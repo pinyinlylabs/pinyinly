@@ -8,8 +8,11 @@ export class ExpoSQLiteKVStore implements KVStore {
   private _busyDbs: SQLite.SQLiteDatabase[] = [];
   private _idleDbs: SQLite.SQLiteDatabase[] = [];
   private _closed = false;
+  private readonly name: string;
 
-  constructor(private readonly name: string) {}
+  constructor(name: string) {
+    this.name = name;
+  }
 
   async truncate() {
     const db = await this.open();
@@ -99,11 +102,10 @@ const txIds: Record<string, number> = {};
 export class ExpoSQLiteKVStoreReadImpl implements KVRead {
   protected _db: SQLite.SQLiteDatabase | null;
   protected _txId: number;
+  public readonly onRelease: () => void;
 
-  constructor(
-    db: SQLite.SQLiteDatabase,
-    public readonly onRelease: () => void,
-  ) {
+  constructor(db: SQLite.SQLiteDatabase, onRelease: () => void) {
+    this.onRelease = onRelease;
     this._txId = txIds[db.databasePath] = (txIds[db.databasePath] ?? 0) + 1;
     log?.(`KV[${this._txId.toString()}]#constructor()`);
     this._db = db;

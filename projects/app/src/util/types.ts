@@ -58,3 +58,18 @@ typeChecks(() => {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   Array.fromAsync();
 });
+
+export class UnexpectedValueError extends Error {
+  constructor(
+    // Type enables type checking
+    value: never,
+    // Avoid exception if `value` is:
+    // - object without prototype
+    // - symbol
+    message = `Unexpected value: ${Object.prototype.toString.call(value)}`,
+  ) {
+    super(message);
+  }
+}
+
+export type PropertyValues<Obj> = Obj[Exclude<keyof Obj, `__proto__`>];

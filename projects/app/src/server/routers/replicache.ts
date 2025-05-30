@@ -5,7 +5,7 @@ import {
   pushRequestSchema,
   pushResponseSchema,
 } from "@/util/rizzle";
-import { z } from "zod";
+import { z } from "zod/v4";
 import {
   fetchedMutationSchema,
   fetchMutations,

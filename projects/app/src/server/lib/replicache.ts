@@ -30,7 +30,7 @@ import { and, eq, gt, inArray, sql } from "drizzle-orm";
 import chunk from "lodash/chunk";
 import mapValues from "lodash/mapValues";
 import pickBy from "lodash/pickBy";
-import type { z } from "zod";
+import type { z } from "zod/v4";
 import * as s from "../schema";
 import type { Drizzle } from "./db";
 import {
