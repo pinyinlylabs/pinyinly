@@ -103,7 +103,7 @@
 
   /* hhh/body-input */
   .hhh-text-body-input {
-    @apply font-sans text-lg/normal font-normal text-body;
+    @apply font-sans text-lg/snug font-normal text-body;
   }
 
   /* www */

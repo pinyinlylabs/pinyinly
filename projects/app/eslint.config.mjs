@@ -121,7 +121,7 @@ export default tseslint.config(
             },
             {
               name: `react`,
-              importNames: [`forwardRef`, `useContext`],
+              importNames: [`forwardRef`, `memo`, `useContext`],
               message: `Migrate to React 19 patterns.`,
             },
             {
