@@ -143,7 +143,7 @@ export default function RadicalPage() {
         <View className="h-1 w-2 flex-1"></View>
         <View className="h-1 w-2 flex-1"></View>
 
-        <View className="w-full max-w-[600px] flex-col items-stretch gap-3 mb-safe-offset-2">
+        <View className="w-full max-w-[600px] items-stretch gap-3 mb-safe-offset-2">
           <RectButton2
             variant="outline"
             onPress={() => {
@@ -304,7 +304,7 @@ export default function RadicalPage() {
                 <>
                   {query.data?.nameMnemonics == null ? null : (
                     <ReferencePageBodySection title="Mnemonics">
-                      <View className="flex-col gap-2">
+                      <View className="gap-2">
                         {query.data.nameMnemonics.map(
                           ({ mnemonic, rationale }, i) => (
                             <View key={i} className="gap-1">

@@ -28,7 +28,9 @@ import z from "zod/v4";
 import { HanziWordRefText } from "./HanziWordRefText";
 import { Hhhmark } from "./Hhhmark";
 import { NewSkillModal } from "./NewSkillModal";
+import { PinyinOptionButton } from "./PinyinOptionButton";
 import { RectButton2 } from "./RectButton2";
+import { TextInputSingle } from "./TextInputSingle";
 import type { PropsOf } from "./types";
 
 export function QuizDeckHanziToPinyinQuestion({
@@ -39,9 +41,9 @@ export function QuizDeckHanziToPinyinQuestion({
   onNext: () => void;
   onRating: (ratings: NewSkillRating[], mistakes: MistakeType[]) => void;
 }) {
-  const { prompt, skill, flag } = question;
+  const { prompt, skill, flag, answer } = question;
 
-  const isCorrect = false as boolean | null;
+  const isCorrect = null as boolean | null;
 
   const handleSubmit = () => {
     onNext();
@@ -110,7 +112,27 @@ export function QuizDeckHanziToPinyinQuestion({
       <View>
         <Text className="text-xl font-bold text-body">{prompt}</Text>
       </View>
-      <View className="flex-1 justify-center py-quiz-px"></View>
+      <View className="flex-1 justify-center py-quiz-px">
+        <View className="flex-row justify-center gap-2">
+          {answer.map(([hanzi], i) => (
+            <View key={i} className="items-center gap-2">
+              <Text className="text-[80px] font-medium text-body">{hanzi}</Text>
+              <View className="h-[40px] w-[60px] rounded-xl border-2 border-dashed border-body/50"></View>
+            </View>
+          ))}
+        </View>
+        <View className="min-h-2 flex-1" />
+        <View>
+          <View className="flex-row flex-wrap justify-center gap-2 bg-[red]">
+            <PinyinOptionButton pinyin="nī" shortcutKey="1" />
+            <PinyinOptionButton pinyin="ní" shortcutKey="2" />
+            <PinyinOptionButton pinyin="nǐ" shortcutKey="3" />
+            <PinyinOptionButton pinyin="nì" shortcutKey="4" />
+            <PinyinOptionButton pinyin="ni" shortcutKey="5" />
+          </View>
+          <TextInputSingle placeholder="Search pinyin" />
+        </View>
+      </View>
     </Skeleton>
   );
 }

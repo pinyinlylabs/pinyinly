@@ -1,3 +1,4 @@
+/* eslint-disable @haohaohow/no-restricted-css-classes */
 import { RectButton2 } from "@/client/ui/RectButton2";
 import { useWebsiteStore } from "@/client/website";
 import { invariant } from "@haohaohow/lib/invariant";

@@ -450,41 +450,47 @@ const RectButton2Examples = (props: Partial<PropsOf<typeof RectButton2>>) => (
       </ExampleStack>
     </View>
 
-    <LittlePrimaryHeader title="flex-col" />
+    <LittlePrimaryHeader
+      // eslint-disable-next-line @haohaohow/no-restricted-css-classes
+      title="flex-col"
+    />
 
     <View className="flex-row flex-wrap">
       <ExampleStack title="items-start" showFrame>
-        <View className="w-[120px] flex-col items-start gap-2">
+        <View className="w-[120px] items-start gap-2">
           <RectButton2Variants {...props} />
         </View>
       </ExampleStack>
 
       <ExampleStack title="items-center" showFrame>
-        <View className="w-[120px] flex-col items-center gap-2">
+        <View className="w-[120px] items-center gap-2">
           <RectButton2Variants {...props} />
         </View>
       </ExampleStack>
 
       <ExampleStack title="items-stretch" showFrame>
-        <View className="w-[120px] flex-col items-stretch gap-2">
-          <RectButton2Variants className="flex-col" {...props} />
+        <View className="w-[120px] items-stretch gap-2">
+          <RectButton2Variants {...props} />
         </View>
       </ExampleStack>
 
       <ExampleStack title="items-end" showFrame>
-        <View className="w-[120px] flex-col items-end gap-2">
+        <View className="w-[120px] items-end gap-2">
           <RectButton2Variants {...props} />
         </View>
       </ExampleStack>
     </View>
 
-    <LittlePrimaryHeader title="flex-col + flex-1" />
+    <LittlePrimaryHeader
+      // eslint-disable-next-line @haohaohow/no-restricted-css-classes
+      title="flex-col + flex-1"
+    />
 
     <View className="flex-row flex-wrap">
       <ExampleStack
         title="items-start"
         showFrame
-        childrenClassName="w-[120px] flex-col items-start gap-2"
+        childrenClassName="w-[120px] items-start gap-2"
       >
         <RectButton2Variants className="flex-1" {...props} />
       </ExampleStack>
@@ -492,7 +498,7 @@ const RectButton2Examples = (props: Partial<PropsOf<typeof RectButton2>>) => (
       <ExampleStack
         title="items-center"
         showFrame
-        childrenClassName="w-[120px] flex-col items-center gap-2"
+        childrenClassName="w-[120px] items-center gap-2"
       >
         <RectButton2Variants className="flex-1" {...props} />
       </ExampleStack>
@@ -500,7 +506,7 @@ const RectButton2Examples = (props: Partial<PropsOf<typeof RectButton2>>) => (
       <ExampleStack
         title="items-stretch"
         showFrame
-        childrenClassName="w-[120px] flex-col items-stretch gap-2"
+        childrenClassName="w-[120px] items-stretch gap-2"
       >
         <RectButton2Variants className="flex-1" {...props} />
       </ExampleStack>
@@ -508,7 +514,7 @@ const RectButton2Examples = (props: Partial<PropsOf<typeof RectButton2>>) => (
       <ExampleStack
         title="items-end"
         showFrame
-        childrenClassName="w-[120px] flex-col items-end gap-2"
+        childrenClassName="w-[120px] items-end gap-2"
       >
         <RectButton2Variants className="flex-1" {...props} />
       </ExampleStack>
@@ -625,13 +631,16 @@ const TextAnswerButtonExamples = (
       </ExampleStack>
     </View>
 
-    <LittlePrimaryHeader title="flex-col" />
+    <LittlePrimaryHeader
+      // eslint-disable-next-line @haohaohow/no-restricted-css-classes
+      title="flex-col"
+    />
 
     <View className="flex-row flex-wrap">
       <ExampleStack
         title="items-start"
         showFrame
-        childrenClassName="size-[120px] flex-col items-start gap-2"
+        childrenClassName="size-[120px] items-start gap-2"
       >
         <SyncedAnswerButtonExample />
       </ExampleStack>
@@ -639,7 +648,7 @@ const TextAnswerButtonExamples = (
       <ExampleStack
         title="items-center"
         showFrame
-        childrenClassName="size-[120px] flex-col items-center gap-2"
+        childrenClassName="size-[120px] items-center gap-2"
       >
         <SyncedAnswerButtonExample />
       </ExampleStack>
@@ -647,7 +656,7 @@ const TextAnswerButtonExamples = (
       <ExampleStack
         title="items-stretch"
         showFrame
-        childrenClassName="size-[120px] flex-col gap-2"
+        childrenClassName="size-[120px] gap-2"
       >
         <SyncedAnswerButtonExample />
       </ExampleStack>
@@ -655,19 +664,22 @@ const TextAnswerButtonExamples = (
       <ExampleStack
         title="items-end"
         showFrame
-        childrenClassName="size-[120px] flex-col items-end gap-2"
+        childrenClassName="size-[120px] items-end gap-2"
       >
         <SyncedAnswerButtonExample />
       </ExampleStack>
     </View>
 
-    <LittlePrimaryHeader title="flex-col + flex-1" />
+    <LittlePrimaryHeader
+      // eslint-disable-next-line @haohaohow/no-restricted-css-classes
+      title="flex-col + flex-1"
+    />
 
     <View className="flex-row flex-wrap">
       <ExampleStack
         title="items-start"
         showFrame
-        childrenClassName="size-[120px] flex-col items-start gap-2"
+        childrenClassName="size-[120px] items-start gap-2"
       >
         <SyncedAnswerButtonExample className="flex-1" />
       </ExampleStack>
@@ -675,7 +687,7 @@ const TextAnswerButtonExamples = (
       <ExampleStack
         title="items-center"
         showFrame
-        childrenClassName="size-[120px] flex-col items-center gap-2"
+        childrenClassName="size-[120px] items-center gap-2"
       >
         <SyncedAnswerButtonExample className="flex-1" />
       </ExampleStack>
@@ -683,7 +695,7 @@ const TextAnswerButtonExamples = (
       <ExampleStack
         title="items-stretch"
         showFrame
-        childrenClassName="size-[120px] flex-col gap-2"
+        childrenClassName="size-[120px] gap-2"
       >
         <SyncedAnswerButtonExample className="flex-1" />
       </ExampleStack>
@@ -691,7 +703,7 @@ const TextAnswerButtonExamples = (
       <ExampleStack
         title="items-end"
         showFrame
-        childrenClassName="size-[120px] flex-col items-end gap-2"
+        childrenClassName="size-[120px] items-end gap-2"
       >
         <SyncedAnswerButtonExample className="flex-1" />
       </ExampleStack>
@@ -814,7 +826,7 @@ function QuizProgressBarExample() {
   }, [quizProgress]);
 
   return (
-    <View className="w-full flex-col gap-2">
+    <View className="w-full gap-2">
       <View className="min-h-[32px]">
         <QuizProgressBar progress={quizProgress.progress} />
       </View>
@@ -904,22 +916,22 @@ function PinyinOptionButtonExample() {
         title="default"
         childrenClassName="flex-row flex-wrap gap-1"
       >
-        <PinyinOptionButton text="nī" shortcutKey="1" />
-        <PinyinOptionButton text="ní" shortcutKey="2" />
-        <PinyinOptionButton text="nǐ" shortcutKey="3" />
-        <PinyinOptionButton text="nì" shortcutKey="4" />
-        <PinyinOptionButton text="ni" shortcutKey="5" />
+        <PinyinOptionButton pinyin="nī" shortcutKey="1" />
+        <PinyinOptionButton pinyin="ní" shortcutKey="2" />
+        <PinyinOptionButton pinyin="nǐ" shortcutKey="3" />
+        <PinyinOptionButton pinyin="nì" shortcutKey="4" />
+        <PinyinOptionButton pinyin="ni" shortcutKey="5" />
       </ExampleStack>
 
       <ExampleStack
         title="disabled"
         childrenClassName="flex-row flex-wrap gap-1"
       >
-        <PinyinOptionButton text="nī" shortcutKey="1" disabled />
-        <PinyinOptionButton text="ní" shortcutKey="2" disabled />
-        <PinyinOptionButton text="nǐ" shortcutKey="3" disabled />
-        <PinyinOptionButton text="nì" shortcutKey="4" disabled />
-        <PinyinOptionButton text="ni" shortcutKey="5" disabled />
+        <PinyinOptionButton pinyin="nī" shortcutKey="1" disabled />
+        <PinyinOptionButton pinyin="ní" shortcutKey="2" disabled />
+        <PinyinOptionButton pinyin="nǐ" shortcutKey="3" disabled />
+        <PinyinOptionButton pinyin="nì" shortcutKey="4" disabled />
+        <PinyinOptionButton pinyin="ni" shortcutKey="5" disabled />
       </ExampleStack>
     </View>
   );
@@ -929,7 +941,7 @@ function QuizDeckHanziToPinyinQuestionExample() {
     <QuizDeckHanziToPinyinQuestion
       question={{
         kind: QuestionKind.HanziToPinyin,
-        prompt: `Prompt text`,
+        prompt: `What sound does this make?`,
         answer: [
           [`你` as HanziChar, `nǐ`],
           [`好` as HanziChar, `hǎo`],

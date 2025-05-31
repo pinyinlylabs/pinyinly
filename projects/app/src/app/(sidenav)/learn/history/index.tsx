@@ -109,7 +109,7 @@ export default function HistoryPage() {
             <Text className="text-xl text-body">queue items</Text>
 
             {data2Query.data?.items.slice(0, 100).map((skill, i) => (
-              <View key={i} className="flex-col items-center">
+              <View key={i} className="items-center">
                 <SkillRefText skill={skill} context="body" />
                 <Text className="hhh-text-caption">
                   {skillKindToShorthand(skillKindFromSkill(skill))}
@@ -132,7 +132,7 @@ export default function HistoryPage() {
           <View>
             <Text className="self-center text-xl text-body">history</Text>
 
-            <View className="flex-col gap-2">
+            <View className="gap-2">
               {skillRatingsQuery.data?.map(([_key, value], i) => {
                 const { skill, createdAt } = value;
                 return (
