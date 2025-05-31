@@ -175,7 +175,7 @@ export function QuizDeckHanziToPinyinQuestion({
           ))}
         </View>
         <View className="min-h-2 flex-1" />
-        <View className={focusedCharIndex == null ? `invisible` : ``}>
+        <View className={focusedCharIndex == null ? `opacity-0` : ``}>
           <PinyinSearchInput
             key={focusedCharIndex}
             autoFocus={focusedCharIndex != null}
