@@ -46,7 +46,7 @@ export default function RadicalPage() {
             <>
               {query.data?.nameMnemonics == null ? null : (
                 <ReferencePageBodySection title="Name mnemonics">
-                  <View className="flex-col gap-2">
+                  <View className="gap-2">
                     {query.data.nameMnemonics.map(
                       ({ mnemonic, rationale }, i) => (
                         <View key={i} className="gap-1">
@@ -62,7 +62,7 @@ export default function RadicalPage() {
               )}
               {query.data?.pinyinMnemonics == null ? null : (
                 <ReferencePageBodySection title="Pinyin mnemonics">
-                  <View className="flex-col gap-2">
+                  <View className="gap-2">
                     {query.data.pinyinMnemonics.map(
                       ({ mnemonic, strategy: rationale }, i) => (
                         <View key={i} className="gap-1">

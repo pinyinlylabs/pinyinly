@@ -269,6 +269,15 @@ export default tseslint.config(
       // @haohaohow/eslint-rules
       //
       "@haohaohow/reanimated-default-name": `error`,
+      "@haohaohow/no-restricted-css-classes": [
+        `error`,
+        {
+          classes: [
+            // eslint-disable-next-line @haohaohow/no-restricted-css-classes
+            { name: `flex-col`, message: `flex-col is already the default` },
+          ],
+        },
+      ],
 
       //
       // tailwindcss

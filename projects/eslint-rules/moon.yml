@@ -6,3 +6,12 @@ tasks:
       - "**/*"
     env:
       NODE_OPTIONS: --experimental-vm-modules $NODE_OPTIONS
+
+  testWatch:
+    command: node --test --watch --test-reporter=spec --import tsx "'**/*.test.{js,cjs}'"
+    preset: watcher
+    inputs:
+      - "!dist/"
+      - "**/*"
+    env:
+      NODE_OPTIONS: --experimental-vm-modules $NODE_OPTIONS

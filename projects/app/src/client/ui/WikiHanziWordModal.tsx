@@ -142,7 +142,7 @@ export const WikiHanziWordModal = ({
                   <View className="gap-4 rounded-xl bg-primary-5 p-4">
                     {wikiEntry.data.components.map((component, i) => {
                       return (
-                        <View key={i} className="flex-col gap-1">
+                        <View key={i} className="gap-1">
                           <Text className="hhh-text-body">
                             {component.title ??
                               (component.hanziWord == null ? null : (
@@ -205,7 +205,7 @@ export const WikiHanziWordModal = ({
                   <Text className="text-xs uppercase text-body/90">
                     Skills <DevLozenge />
                   </Text>
-                  <View className="flex-col gap-2 text-body">
+                  <View className="gap-2 text-body">
                     {skillStatesQuery.data.map(([skill, skillState], i) => (
                       <View key={i} className="flex-row items-center gap-2">
                         <Text>

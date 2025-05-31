@@ -10,7 +10,7 @@ export const ReferencePage = ({
 }) => {
   return (
     <View className="flex-1 bg-background">
-      <View className="w-full max-w-[600px] flex-col self-center overflow-hidden lg:my-4 lg:rounded-t-lg">
+      <View className="w-full max-w-[600px] self-center overflow-hidden lg:my-4 lg:rounded-t-lg">
         {header}
 
         <View className="gap-[12px] p-[12px] pt-quiz-px">{body}</View>

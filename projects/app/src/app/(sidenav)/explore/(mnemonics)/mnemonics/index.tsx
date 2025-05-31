@@ -102,7 +102,7 @@ export default function MnemonicsPage() {
           )
         ) : (
           <>
-            <View className="">
+            <View>
               <Text className="text-lg font-bold text-body">Tones</Text>
             </View>
             <View className="flex-row flex-wrap gap-3.5 lg:gap-4">
@@ -129,7 +129,7 @@ export default function MnemonicsPage() {
 
             <View className="border-t-2 border-primary-5"></View>
 
-            <View className="">
+            <View>
               <Text className="text-lg font-bold text-body">Initials</Text>
             </View>
 
@@ -182,7 +182,7 @@ export default function MnemonicsPage() {
 
             <View className="border-t-2 border-primary-5"></View>
 
-            <View className="">
+            <View>
               <Text className="text-lg font-bold text-body">Finals</Text>
             </View>
             <View className="flex-row flex-wrap gap-3.5 lg:gap-4">
