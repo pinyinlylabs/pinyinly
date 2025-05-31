@@ -6,8 +6,10 @@ import type {
   QuestionFlagType,
 } from "@/data/model";
 import { QuestionFlagKind, SkillKind } from "@/data/model";
+import { parsePinyinTone } from "@/data/pinyin";
 import type { HanziWordSkill, Skill } from "@/data/rizzleSchema";
 import { hanziWordFromSkill, skillKindFromSkill } from "@/data/skills";
+import { readonlyMapSet } from "@/util/collections";
 import { formatDuration } from "date-fns/formatDuration";
 import { intervalToDuration } from "date-fns/intervalToDuration";
 import { Image } from "expo-image";
@@ -19,9 +21,11 @@ import {
   Animated,
   Easing,
   Platform,
+  Pressable,
   Text,
   View,
 } from "react-native";
+import Reanimated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { tv } from "tailwind-variants";
 import z from "zod/v4";
@@ -45,11 +49,56 @@ export function QuizDeckHanziToPinyinQuestion({
 
   const isCorrect = null as boolean | null;
 
+  const [focusedCharIndex, setFocusedCharIndex] = useState<number | null>(null);
+  const [pinyinByIndex, setPinyinByIndex] = useState<
+    ReadonlyMap<number, string>
+  >(new Map());
+
   const handleSubmit = () => {
     onNext();
   };
 
-  const submitEnabled = false as boolean;
+  const handlePinyinSearchFocus = () => {
+    setFocusedCharIndex((prev) => prev ?? 0);
+  };
+
+  const handlePinyinSearchSelect = (pinyin: string) => {
+    if (focusedCharIndex == null) {
+      return;
+    }
+
+    setPinyinByIndex((prev) => readonlyMapSet(prev, focusedCharIndex, pinyin));
+
+    setFocusedCharIndex((prev) => {
+      if (prev == null) {
+        return null;
+      }
+
+      // Move focus to the next character without pinyin
+      for (let offset = 1; offset < answer.length; offset++) {
+        const index = (prev + offset) % answer.length;
+        if (!pinyinByIndex.has(index)) {
+          // Found the next character without pinyin
+          return index;
+        }
+      }
+
+      return null;
+    });
+  };
+
+  const handleFocusRequest = (index: number) => {
+    setFocusedCharIndex(index);
+  };
+
+  let initialPinyinSearchQuery = ``;
+  if (focusedCharIndex != null) {
+    const pinyin = pinyinByIndex.get(focusedCharIndex);
+    const searchQuery = pinyin == null ? null : parsePinyinTone(pinyin)?.[0];
+    initialPinyinSearchQuery = searchQuery ?? ``;
+  }
+
+  const isMissingAnswers = pinyinByIndex.size < answer.length;
 
   return (
     <Skeleton
@@ -92,7 +141,7 @@ export function QuizDeckHanziToPinyinQuestion({
       submitButton={
         <SubmitButton
           state={
-            submitEnabled
+            isMissingAnswers
               ? SubmitButtonState.Disabled
               : isCorrect == null
                 ? SubmitButtonState.Check
@@ -115,27 +164,164 @@ export function QuizDeckHanziToPinyinQuestion({
       <View className="flex-1 justify-center py-quiz-px">
         <View className="flex-row justify-center gap-2">
           {answer.map(([hanzi], i) => (
-            <View key={i} className="items-center gap-2">
-              <Text className="text-[80px] font-medium text-body">{hanzi}</Text>
-              <View className="h-[40px] w-[60px] rounded-xl border-2 border-dashed border-body/50"></View>
-            </View>
+            <HanziPinyinAnswerBox
+              key={i}
+              focused={i === focusedCharIndex}
+              hanzi={hanzi}
+              index={i}
+              onFocusRequest={handleFocusRequest}
+              selectedPinyin={pinyinByIndex.get(i)}
+            />
           ))}
         </View>
         <View className="min-h-2 flex-1" />
-        <View>
-          <View className="flex-row flex-wrap justify-center gap-2 bg-[red]">
-            <PinyinOptionButton pinyin="nī" shortcutKey="1" />
-            <PinyinOptionButton pinyin="ní" shortcutKey="2" />
-            <PinyinOptionButton pinyin="nǐ" shortcutKey="3" />
-            <PinyinOptionButton pinyin="nì" shortcutKey="4" />
-            <PinyinOptionButton pinyin="ni" shortcutKey="5" />
-          </View>
-          <TextInputSingle placeholder="Search pinyin" />
+        <View className={focusedCharIndex == null ? `invisible` : ``}>
+          <PinyinSearchInput
+            key={focusedCharIndex}
+            autoFocus={focusedCharIndex != null}
+            initialQuery={initialPinyinSearchQuery}
+            onFocus={handlePinyinSearchFocus}
+            onSelect={handlePinyinSearchSelect}
+          />
         </View>
       </View>
     </Skeleton>
   );
 }
+
+function HanziPinyinAnswerBox({
+  focused,
+  hanzi,
+  index,
+  onFocusRequest,
+  selectedPinyin,
+}: {
+  focused: boolean;
+  hanzi: string;
+  index: number;
+  onFocusRequest: (index: number) => void;
+  selectedPinyin: string | undefined;
+}) {
+  const handlePress = () => {
+    onFocusRequest(index);
+  };
+
+  return (
+    <View className="items-center gap-2">
+      <Text className="text-[80px] font-medium text-body">{hanzi}</Text>
+      <View className={`h-[40px] ${focused ? `accent-theme2` : ``}`}>
+        {selectedPinyin == null ? (
+          <Pressable
+            className={pinyinPlaceholderClass({
+              // focused,
+            })}
+            onPress={handlePress}
+          />
+        ) : (
+          <RectButton2 variant="option" onPress={handlePress}>
+            {selectedPinyin}
+          </RectButton2>
+        )}
+      </View>
+    </View>
+  );
+}
+
+interface PinyinSearchInputOption {
+  pinyin: string;
+  shortcutKey: string;
+}
+
+const PinyinSearchInput = ({
+  autoFocus,
+  initialQuery,
+  onSelect,
+  onFocus,
+}: {
+  autoFocus: boolean;
+  initialQuery: string;
+  onSelect: (pinyin: string) => void;
+  onFocus: () => void;
+}) => {
+  const [query, setQuery] = useState(initialQuery);
+
+  const options: PinyinSearchInputOption[] | null = query.startsWith(`ni`)
+    ? [
+        { pinyin: `nī`, shortcutKey: `1` },
+        { pinyin: `ní`, shortcutKey: `2` },
+        { pinyin: `nǐ`, shortcutKey: `3` },
+        { pinyin: `nì`, shortcutKey: `4` },
+        { pinyin: `ni`, shortcutKey: `5` },
+      ]
+    : null;
+
+  const handleQueryChange = (text: string) => {
+    setQuery(text);
+
+    if (options != null) {
+      for (const option of options) {
+        if (option.shortcutKey === text.slice(-1)) {
+          onSelect(option.pinyin);
+        }
+      }
+    }
+  };
+
+  const handleOptionPress = (pinyin: string) => {
+    onSelect(pinyin);
+  };
+
+  return (
+    <View className="gap-2">
+      <View className="flex-row flex-wrap justify-center gap-2">
+        {hiddenPlaceholderOptions}
+        <View className="absolute inset-0 flex-row flex-wrap content-end justify-center gap-2">
+          {options?.map((option, i) => (
+            <Reanimated.View
+              key={i}
+              // entering={SlideInDown.springify()
+              //   .delay(i * 100)
+              //   .withInitialValues({ transform: [{ translateY: 20 }] })
+              //   .damping(30)
+              //   .mass(5)
+              //   .stiffness(10)
+              //   // .overshootClamping(false)
+              //   .restDisplacementThreshold(0.1)
+              //   .restSpeedThreshold(5)}
+              // entering={BounceIn.delay(i * 100)}
+              entering={FadeIn.duration(100)}
+              exiting={FadeOut.duration(100)}
+            >
+              <PinyinOptionButton
+                pinyin={option.pinyin}
+                shortcutKey={option.shortcutKey}
+                onPress={handleOptionPress}
+              />
+            </Reanimated.View>
+          ))}
+        </View>
+      </View>
+      <TextInputSingle
+        autoFocus={autoFocus}
+        onChangeText={handleQueryChange}
+        onFocus={onFocus}
+        placeholder="Search pinyin"
+        value={query}
+      />
+    </View>
+  );
+};
+
+// Reserve the space
+const hiddenPlaceholderOptions = (
+  <>
+    <PinyinOptionButton pinyin="xxxxxx" shortcutKey="x" className="opacity-0" />
+    <PinyinOptionButton pinyin="xxxxxx" shortcutKey="x" className="opacity-0" />
+    <PinyinOptionButton pinyin="xxxxxx" shortcutKey="x" className="opacity-0" />
+    <PinyinOptionButton pinyin="xxxxxx" shortcutKey="x" className="opacity-0" />
+    <PinyinOptionButton pinyin="xxxxxx" shortcutKey="x" className="opacity-0" />
+  </>
+);
 
 const FlagText = ({ flag }: { flag: QuestionFlagType }) => {
   switch (flag.kind) {
@@ -205,6 +391,15 @@ const FlagText = ({ flag }: { flag: QuestionFlagType }) => {
     }
   }
 };
+
+const pinyinPlaceholderClass = tv({
+  base: `h-[40px] w-[60px] rounded-xl border-2 border-dashed border-body/50`,
+  variants: {
+    focused: {
+      true: `accent-theme2`,
+    },
+  },
+});
 
 const flagViewClass = tv({
   base: `flex-row items-center gap-1`,

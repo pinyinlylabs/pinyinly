@@ -24,7 +24,7 @@
       "editor.defaultFormatter": "redhat.vscode-xml",
     },
     "tailwindCSS.experimental.classRegex": [
-      ["([\"'`][^\"'`]*.*?[\"'`])", "[\"'`]([^\"'`]*).*?[\"'`]"],
+      ["(`.*?`)", "(\".*?\")", "('.*?')"],
     ],
     "files.exclude": {
       ".yarn/releases/*.*": true,

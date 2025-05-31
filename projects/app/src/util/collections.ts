@@ -36,8 +36,23 @@ export function readonlyMapSet<K, V>(
   key: K,
   value: V,
 ): ReadonlyMap<K, V> {
+  if (map.get(key) === value) {
+    return map;
+  }
   const copy = new Map(map);
   copy.set(key, value);
+  return copy;
+}
+
+export function readonlyMapDelete<K, V>(
+  map: ReadonlyMap<K, V>,
+  key: K,
+): ReadonlyMap<K, V> {
+  if (!map.has(key)) {
+    return map;
+  }
+  const copy = new Map(map);
+  copy.delete(key);
   return copy;
 }
 
