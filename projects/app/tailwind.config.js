@@ -206,7 +206,6 @@ module.exports = {
     strokeWidth: false,
     textOpacity: false,
     translate: false,
-    pointerEvents: false,
     visibility: false,
   },
 };

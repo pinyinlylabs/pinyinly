@@ -31,7 +31,7 @@ export function PinyinOptionButton({
       {...props}
     >
       <Text className="hhh-text-button-option">{pinyin}</Text>
-      <Text className="hhh-text-caption">{shortcutKey}</Text>
+      <Text className="hhh-text-button-option-caption">{shortcutKey}</Text>
     </RectButton2>
   );
 }

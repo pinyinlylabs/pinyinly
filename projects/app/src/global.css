@@ -3,6 +3,10 @@
 @tailwind utilities;
 
 @layer components {
+  /* WARNING: this doesn't disable keyboard focus on inputs, so you can still tab to them */
+  .hhh-hidden {
+    @apply opacity-0 pointer-events-none;
+  }
   /*
   
   TEXT STYLES
@@ -15,7 +19,10 @@
     @apply font-sans text-base/snug font-bold uppercase text-body;
   }
   .hhh-text-button-option {
-    @apply font-sans text-base/none text-body;
+    @apply font-sans text-base/snug text-body;
+  }
+  .hhh-text-button-option-caption {
+    @apply font-sans text-sm/snug font-light text-caption;
   }
   .hhh-text-button-bare {
     @apply font-sans text-sm/normal font-bold uppercase text-body;

@@ -177,8 +177,8 @@ export function QuizDeckHanziToPinyinQuestion({
             />
           ))}
         </View>
-        <View className="min-h-2 flex-1" />
-        <View className={focusedCharIndex == null ? `opacity-0` : ``}>
+        <View className="min-h-12 flex-1" />
+        <View className={focusedCharIndex == null ? `hhh-hidden` : ``}>
           <PinyinSearchInput
             key={focusedCharIndex}
             autoFocus={focusedCharIndex != null}
@@ -213,12 +213,10 @@ function HanziPinyinAnswerBox({
   return (
     <View className="items-center gap-2">
       <Text className="text-[80px] font-medium text-body">{hanzi}</Text>
-      <View className={`h-[40px] ${focused ? `accent-theme2` : ``}`}>
-        {selectedPinyin == null ? (
+      <View className={`h-[40px] ${focused ? `` : ``}`}>
+        {selectedPinyin == null || focused ? (
           <Pressable
-            className={pinyinPlaceholderClass({
-              // focused,
-            })}
+            className={pinyinPlaceholderClass({ focused })}
             onPress={handlePress}
           />
         ) : (
@@ -322,11 +320,31 @@ const PinyinSearchInput = ({
 // Reserve the space
 const hiddenPlaceholderOptions = (
   <>
-    <PinyinOptionButton pinyin="xxxxxx" shortcutKey="x" className="opacity-0" />
-    <PinyinOptionButton pinyin="xxxxxx" shortcutKey="x" className="opacity-0" />
-    <PinyinOptionButton pinyin="xxxxxx" shortcutKey="x" className="opacity-0" />
-    <PinyinOptionButton pinyin="xxxxxx" shortcutKey="x" className="opacity-0" />
-    <PinyinOptionButton pinyin="xxxxxx" shortcutKey="x" className="opacity-0" />
+    <PinyinOptionButton
+      pinyin="xxxxxx"
+      shortcutKey="x"
+      className="hhh-hidden"
+    />
+    <PinyinOptionButton
+      pinyin="xxxxxx"
+      shortcutKey="x"
+      className="hhh-hidden"
+    />
+    <PinyinOptionButton
+      pinyin="xxxxxx"
+      shortcutKey="x"
+      className="hhh-hidden"
+    />
+    <PinyinOptionButton
+      pinyin="xxxxxx"
+      shortcutKey="x"
+      className="hhh-hidden"
+    />
+    <PinyinOptionButton
+      pinyin="xxxxxx"
+      shortcutKey="x"
+      className="hhh-hidden"
+    />
   </>
 );
 
