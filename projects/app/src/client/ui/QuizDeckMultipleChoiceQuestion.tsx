@@ -1,5 +1,5 @@
 import type {
-  Mistake,
+  MistakeType,
   MultipleChoiceQuestion,
   NewSkillRating,
 } from "@/data/model";
@@ -19,7 +19,7 @@ export function QuizDeckMultipleChoiceQuestion({
 }: {
   question: MultipleChoiceQuestion;
   onNext: () => void;
-  onRating: (ratings: NewSkillRating[], mistakes: Mistake[]) => void;
+  onRating: (ratings: NewSkillRating[], mistakes: MistakeType[]) => void;
 }) {
   const { prompt, choices } = question;
   const [selectedChoice, setSelectedChoice] = useState<string>();

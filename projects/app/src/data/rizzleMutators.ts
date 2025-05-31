@@ -4,7 +4,7 @@ import type { FsrsState } from "@/util/fsrs";
 import { nextReview } from "@/util/fsrs";
 import type { RizzleReplicacheMutators } from "@/util/rizzle";
 import { invariant } from "@haohaohow/lib/invariant";
-import { MistakeType } from "./model";
+import { MistakeKind } from "./model";
 import type { v7 } from "./rizzleSchema";
 import { srsStateFromFsrsState } from "./rizzleSchema";
 import {
@@ -60,7 +60,7 @@ export const v7Mutators: RizzleReplicacheMutators<typeof v7> = {
     //
     // SAME AS saveHanziPinyinMistake
     if (loadDictionary.isCached()) {
-      const mistake = { type: MistakeType.HanziGloss, gloss, hanzi } as const;
+      const mistake = { kind: MistakeKind.HanziGloss, gloss, hanzi } as const;
 
       // Queue all skills relevant to the gloss.
       for (const skill of await skillsToReReviewForHanziGlossMistake(mistake)) {
@@ -90,7 +90,7 @@ export const v7Mutators: RizzleReplicacheMutators<typeof v7> = {
     //
     // SAME AS saveHanziGlossMistake
     if (loadDictionary.isCached()) {
-      const mistake = { type: MistakeType.HanziPinyin, pinyin, hanzi } as const;
+      const mistake = { kind: MistakeKind.HanziPinyin, pinyin, hanzi } as const;
 
       // Queue all skills relevant to the gloss.
       for (const skill of await skillsToReReviewForHanziPinyinMistake(

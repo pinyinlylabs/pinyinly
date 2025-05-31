@@ -18,23 +18,23 @@ import type {
   OneCorrectPairQuestionChoice,
   Question,
 } from "../model";
-import { QuestionType, SkillType } from "../model";
+import { QuestionKind, SkillKind } from "../model";
 import type { HanziWordSkill, Skill } from "../rizzleSchema";
-import { hanziWordFromSkill, skillTypeFromSkill } from "../skills";
+import { hanziWordFromSkill, skillKindFromSkill } from "../skills";
 
 // generate a question to test a skill
 export async function hanziWordToGlossQuestionOrThrow(
   skill: Skill,
 ): Promise<Question> {
-  switch (skillTypeFromSkill(skill)) {
-    case SkillType.HanziWordToGloss: {
+  switch (skillKindFromSkill(skill)) {
+    case SkillKind.HanziWordToGloss: {
       skill = skill as HanziWordSkill;
       const hanziWord = hanziWordFromSkill(skill);
       const meaning = await lookupHanziWord(hanziWord);
       const rowCount = 5;
       const answer: OneCorrectPairQuestionAnswer = {
-        a: { type: `hanzi`, value: hanziFromHanziWord(hanziWord) },
-        b: { type: `gloss`, value: glossOrThrow(hanziWord, meaning) },
+        a: { kind: `hanzi`, value: hanziFromHanziWord(hanziWord) },
+        b: { kind: `gloss`, value: glossOrThrow(hanziWord, meaning) },
         skill,
       };
 
@@ -44,33 +44,33 @@ export async function hanziWordToGlossQuestionOrThrow(
 
       const groupA: OneCorrectPairQuestionChoice[] = groupAHanziWords.map(
         ([hanziWord, _meaning]) => ({
-          type: `hanzi`,
+          kind: `hanzi`,
           value: hanziFromHanziWord(hanziWord),
         }),
       );
       const groupB: OneCorrectPairQuestionChoice[] = groupBHanziWords.map(
         ([hanziWord, meaning]) => ({
-          type: `gloss`,
+          kind: `gloss`,
           value: glossOrThrow(hanziWord, meaning),
         }),
       );
 
       return validQuestionInvariant({
-        type: QuestionType.OneCorrectPair,
+        kind: QuestionKind.OneCorrectPair,
         prompt: `Match a word with its name`,
         groupA: shuffle([...groupA, answer.a]),
         groupB: shuffle([...groupB, answer.b]),
         answer,
       });
     }
-    case SkillType.HanziWordToPinyin: {
+    case SkillKind.HanziWordToPinyin: {
       skill = skill as HanziWordSkill;
       const hanziWord = hanziWordFromSkill(skill);
       const meaning = await lookupHanziWord(hanziWord);
       const rowCount = 5;
       const answer: OneCorrectPairQuestionAnswer = {
-        a: { type: `hanzi`, value: hanziFromHanziWord(hanziWord) },
-        b: { type: `pinyin`, value: pinyinOrThrow(hanziWord, meaning) },
+        a: { kind: `hanzi`, value: hanziFromHanziWord(hanziWord) },
+        b: { kind: `pinyin`, value: pinyinOrThrow(hanziWord, meaning) },
         skill,
       };
 
@@ -80,38 +80,38 @@ export async function hanziWordToGlossQuestionOrThrow(
 
       const groupA: OneCorrectPairQuestionChoice[] = groupAHanziWords.map(
         ([hanziWord, _meaning]) => ({
-          type: `hanzi`,
+          kind: `hanzi`,
           value: hanziFromHanziWord(hanziWord),
         }),
       );
       const groupB: OneCorrectPairQuestionChoice[] = groupBHanziWords.map(
         ([hanziWord, meaning]) => ({
-          type: `gloss`,
+          kind: `gloss`,
           value: glossOrThrow(hanziWord, meaning),
         }),
       );
 
       return validQuestionInvariant({
-        type: QuestionType.OneCorrectPair,
+        kind: QuestionKind.OneCorrectPair,
         prompt: `Match a word with its name`,
         groupA: shuffle([...groupA, answer.a]),
         groupB: shuffle([...groupB, answer.b]),
         answer,
       });
     }
-    case SkillType.Deprecated_EnglishToRadical:
-    case SkillType.Deprecated_PinyinToRadical:
-    case SkillType.Deprecated_RadicalToEnglish:
-    case SkillType.Deprecated_RadicalToPinyin:
-    case SkillType.Deprecated:
-    case SkillType.GlossToHanziWord:
-    case SkillType.HanziWordToPinyinFinal:
-    case SkillType.HanziWordToPinyinInitial:
-    case SkillType.HanziWordToPinyinTone:
-    case SkillType.ImageToHanziWord:
-    case SkillType.PinyinFinalAssociation:
-    case SkillType.PinyinInitialAssociation:
-    case SkillType.PinyinToHanziWord: {
+    case SkillKind.Deprecated_EnglishToRadical:
+    case SkillKind.Deprecated_PinyinToRadical:
+    case SkillKind.Deprecated_RadicalToEnglish:
+    case SkillKind.Deprecated_RadicalToPinyin:
+    case SkillKind.Deprecated:
+    case SkillKind.GlossToHanziWord:
+    case SkillKind.HanziWordToPinyinFinal:
+    case SkillKind.HanziWordToPinyinInitial:
+    case SkillKind.HanziWordToPinyinTone:
+    case SkillKind.ImageToHanziWord:
+    case SkillKind.PinyinFinalAssociation:
+    case SkillKind.PinyinInitialAssociation:
+    case SkillKind.PinyinToHanziWord: {
       throw new Error(`todo: not implemented`);
     }
   }
@@ -237,8 +237,8 @@ async function getWrongHanziWordAnswers(
 }
 
 function validQuestionInvariant(question: Question) {
-  switch (question.type) {
-    case QuestionType.OneCorrectPair: {
+  switch (question.kind) {
+    case QuestionKind.OneCorrectPair: {
       // Ensure there aren't two identical choices in the same group.
       uniqueInvariant(question.groupA.map((x) => x.value));
       uniqueInvariant(question.groupB.map((x) => x.value));
@@ -246,7 +246,8 @@ function validQuestionInvariant(question: Question) {
       invariant(question.groupB.includes(question.answer.b));
       break;
     }
-    case QuestionType.MultipleChoice: {
+    case QuestionKind.HanziToPinyin:
+    case QuestionKind.MultipleChoice: {
       break;
     }
   }

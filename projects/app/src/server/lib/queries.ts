@@ -1,5 +1,5 @@
-import type { SrsState } from "@/data/model";
-import { SrsType } from "@/data/model";
+import type { SrsStateType } from "@/data/model";
+import { SrsKind } from "@/data/model";
 import type { Skill } from "@/data/rizzleSchema";
 import type { FsrsState } from "@/util/fsrs";
 import { nextReview } from "@/util/fsrs";
@@ -37,9 +37,9 @@ export async function updateSkillState(
   // Save the new state.
   {
     const srs = {
-      type: SrsType.FsrsFourPointFive,
+      kind: SrsKind.FsrsFourPointFive,
       ...fsrsState,
-    } satisfies SrsState;
+    } satisfies SrsStateType;
 
     await tx
       .insert(schema.skillState)

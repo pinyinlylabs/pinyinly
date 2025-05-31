@@ -669,7 +669,7 @@ export async function decomposeHanzi(
         const idsNode = parseIds(ids);
         for (const leaf of walkIdsNode(idsNode)) {
           if (
-            leaf.type === `LeafCharacter` &&
+            leaf.operator === `LeafCharacter` &&
             leaf.character !== char // todo turn into invariant?
           ) {
             result.push(leaf.character);

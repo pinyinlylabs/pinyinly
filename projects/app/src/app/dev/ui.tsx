@@ -1,6 +1,8 @@
+/* eslint-disable no-console */
 import { useQuizProgress } from "@/client/hooks/useQuizProgress";
 import { HanziText } from "@/client/ui/HanziText";
 import { PinyinOptionButton } from "@/client/ui/PinyinOptionButton";
+import { QuizDeckHanziToPinyinQuestion } from "@/client/ui/QuizDeckHanziToPinyinQuestion";
 import { QuizProgressBar } from "@/client/ui/QuizProgressBar";
 import { QuizQueueButton } from "@/client/ui/QuizQueueButton";
 import { RectButton2 } from "@/client/ui/RectButton2";
@@ -8,6 +10,10 @@ import type { TextAnswerButtonState } from "@/client/ui/TextAnswerButton";
 import { TextAnswerButton } from "@/client/ui/TextAnswerButton";
 import { TextInputSingle } from "@/client/ui/TextInputSingle";
 import type { PropsOf } from "@/client/ui/types";
+import type { HanziChar } from "@/data/model";
+import { QuestionKind } from "@/data/model";
+import { hanziWordToPinyin } from "@/data/skills";
+import { buildHanziWord } from "@/dictionary/dictionary";
 import { Link } from "expo-router";
 import shuffle from "lodash/shuffle";
 import type { ReactNode } from "react";
@@ -32,6 +38,13 @@ export default function DesignSystemPage() {
         </Link>
       </View>
       <ScrollView style={{ flex: 1 }} ref={scrollViewRef}>
+        <Section
+          title={QuizDeckHanziToPinyinQuestionExample.name}
+          scrollTo={scrollTo}
+        >
+          <QuizDeckHanziToPinyinQuestionExample />
+        </Section>
+
         <Section title={PinyinOptionButtonExample.name} scrollTo={scrollTo}>
           <PinyinOptionButtonExample />
         </Section>
@@ -909,5 +922,26 @@ function PinyinOptionButtonExample() {
         <PinyinOptionButton text="ni" shortcutKey="5" disabled />
       </ExampleStack>
     </View>
+  );
+}
+function QuizDeckHanziToPinyinQuestionExample() {
+  return (
+    <QuizDeckHanziToPinyinQuestion
+      question={{
+        kind: QuestionKind.HanziToPinyin,
+        prompt: `Prompt text`,
+        answer: [
+          [`你` as HanziChar, `nǐ`],
+          [`好` as HanziChar, `hǎo`],
+        ],
+        skill: hanziWordToPinyin(buildHanziWord(`你好`, `hello`)),
+      }}
+      onNext={() => {
+        console.log(`onNext()`);
+      }}
+      onRating={() => {
+        console.log(`onRating()`);
+      }}
+    />
   );
 }

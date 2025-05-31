@@ -4,32 +4,32 @@ import { Rating } from "@/util/fsrs";
 import type { RizzleReplicache } from "@/util/rizzle";
 import { r, RizzleCustom } from "@/util/rizzle";
 import { z } from "zod/v4";
-import type { HanziText, PinyinText, SrsState } from "./model";
+import type { HanziText, PinyinText, SrsStateType } from "./model";
 import {
   MnemonicThemeId,
   PartOfSpeech,
   PinyinInitialGroupId,
-  SkillType,
-  SrsType,
+  SkillKind,
+  SrsKind,
 } from "./model";
 
-export const rSkillType = memoize0(function rSkillType() {
-  return r.enum(SkillType, {
-    [SkillType.Deprecated_RadicalToEnglish]: `re`,
-    [SkillType.Deprecated_EnglishToRadical]: `er`,
-    [SkillType.Deprecated_RadicalToPinyin]: `rp`,
-    [SkillType.Deprecated_PinyinToRadical]: `pr`,
-    [SkillType.Deprecated]: `xx`,
-    [SkillType.HanziWordToGloss]: `he`,
-    [SkillType.HanziWordToPinyin]: `hp`,
-    [SkillType.HanziWordToPinyinInitial]: `hpi`,
-    [SkillType.HanziWordToPinyinFinal]: `hpf`,
-    [SkillType.HanziWordToPinyinTone]: `hpt`,
-    [SkillType.GlossToHanziWord]: `eh`,
-    [SkillType.PinyinToHanziWord]: `ph`,
-    [SkillType.ImageToHanziWord]: `ih`,
-    [SkillType.PinyinInitialAssociation]: `pia`,
-    [SkillType.PinyinFinalAssociation]: `pfa`,
+export const rSkillKind = memoize0(function rSkillKind() {
+  return r.enum(SkillKind, {
+    [SkillKind.Deprecated_RadicalToEnglish]: `re`,
+    [SkillKind.Deprecated_EnglishToRadical]: `er`,
+    [SkillKind.Deprecated_RadicalToPinyin]: `rp`,
+    [SkillKind.Deprecated_PinyinToRadical]: `pr`,
+    [SkillKind.Deprecated]: `xx`,
+    [SkillKind.HanziWordToGloss]: `he`,
+    [SkillKind.HanziWordToPinyin]: `hp`,
+    [SkillKind.HanziWordToPinyinInitial]: `hpi`,
+    [SkillKind.HanziWordToPinyinFinal]: `hpf`,
+    [SkillKind.HanziWordToPinyinTone]: `hpt`,
+    [SkillKind.GlossToHanziWord]: `eh`,
+    [SkillKind.PinyinToHanziWord]: `ph`,
+    [SkillKind.ImageToHanziWord]: `ih`,
+    [SkillKind.PinyinInitialAssociation]: `pia`,
+    [SkillKind.PinyinFinalAssociation]: `pfa`,
   });
 });
 
@@ -123,10 +123,10 @@ export const rPinyinText = memoize0(function rPinyinText() {
   );
 });
 
-export const rSrsType = memoize0(function rSrsType() {
-  return r.enum(SrsType, {
-    [SrsType.Mock]: `0`,
-    [SrsType.FsrsFourPointFive]: `1`,
+export const rSrsKind = memoize0(function rSrsKind() {
+  return r.enum(SrsKind, {
+    [SrsKind.Mock]: `0`,
+    [SrsKind.FsrsFourPointFive]: `1`,
   });
 });
 
@@ -137,7 +137,7 @@ export const rSrsState = memoize0(function rSrsParams() {
     //     type: r.literal(SrsType.Null),
     //   }),
     r.object({
-      type: r.literal(SrsType.FsrsFourPointFive, rSrsType()).alias(`t`),
+      kind: r.literal(SrsKind.FsrsFourPointFive, rSrsKind()).alias(`t`),
       stability: r.number().alias(`s` /* (F)SRS (S)tability */),
       difficulty: r.number().alias(`d` /* (F)SRS (D)ifficulty */),
       prevReviewAt: r.datetime().alias(`p`),
@@ -276,12 +276,12 @@ export const v7 = {
 
 export function srsStateFromFsrsState(fsrsState: FsrsState) {
   return {
-    type: SrsType.FsrsFourPointFive,
+    kind: SrsKind.FsrsFourPointFive,
     stability: fsrsState.stability,
     difficulty: fsrsState.difficulty,
     nextReviewAt: fsrsState.nextReviewAt,
     prevReviewAt: fsrsState.prevReviewAt,
-  } satisfies SrsState;
+  } satisfies SrsStateType;
 }
 
 // This is a placeholder to keep code around that demonstrates how to support

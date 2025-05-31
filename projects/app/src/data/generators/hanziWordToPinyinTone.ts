@@ -25,7 +25,7 @@ import type {
   PinyinText,
   Question,
 } from "../model";
-import { QuestionType } from "../model";
+import { QuestionKind } from "../model";
 import type { HanziWordSkill } from "../rizzleSchema";
 import { hanziOrPinyinWordCount, hanziWordFromSkill } from "../skills";
 
@@ -36,8 +36,8 @@ export async function hanziWordToPinyinToneQuestionOrThrow(
   const meaning = await lookupHanziWord(hanziWord);
   const rowCount = 5;
   const answer: OneCorrectPairQuestionAnswer = {
-    a: { type: `hanzi`, value: hanziFromHanziWord(hanziWord) },
-    b: { type: `pinyin`, value: pinyinOrThrow(hanziWord, meaning) },
+    a: { kind: `hanzi`, value: hanziFromHanziWord(hanziWord) },
+    b: { kind: `pinyin`, value: pinyinOrThrow(hanziWord, meaning) },
     skill,
   };
 
@@ -45,14 +45,14 @@ export async function hanziWordToPinyinToneQuestionOrThrow(
   await addDistractors(ctx, rowCount - 1);
 
   const groupA: OneCorrectPairQuestionChoice[] = ctx.hanziDistractors.map(
-    (hanzi) => ({ type: `hanzi`, value: hanzi }),
+    (hanzi) => ({ kind: `hanzi`, value: hanzi }),
   );
   const groupB: OneCorrectPairQuestionChoice[] = ctx.pinyinDistractors.map(
-    (pinyin) => ({ type: `pinyin`, value: pinyin }),
+    (pinyin) => ({ kind: `pinyin`, value: pinyin }),
   );
 
   return validQuestionInvariant({
-    type: QuestionType.OneCorrectPair,
+    kind: QuestionKind.OneCorrectPair,
     prompt: `Match a word with its pinyin`,
     groupA: shuffle([...groupA, answer.a]),
     groupB: shuffle([...groupB, answer.b]),
@@ -220,8 +220,8 @@ async function addDistractors(
 }
 
 function validQuestionInvariant(question: Question) {
-  switch (question.type) {
-    case QuestionType.OneCorrectPair: {
+  switch (question.kind) {
+    case QuestionKind.OneCorrectPair: {
       // Ensure there aren't two identical choices in the same group.
       uniqueInvariant(question.groupA.map((x) => x.value));
       uniqueInvariant(question.groupB.map((x) => x.value));
@@ -235,7 +235,8 @@ function validQuestionInvariant(question: Question) {
       ]);
       break;
     }
-    case QuestionType.MultipleChoice: {
+    case QuestionKind.HanziToPinyin:
+    case QuestionKind.MultipleChoice: {
       break;
     }
   }

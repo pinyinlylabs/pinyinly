@@ -471,7 +471,7 @@ await test(`expect missing glyphs to be included decomposition data`, async () =
     );
     const idsNode = parseIds(ids);
     for (const leaf of walkIdsNode(idsNode)) {
-      if (leaf.type === `LeafCharacter`) {
+      if (leaf.operator === `LeafCharacter`) {
         allComponents.add(leaf.character);
       }
     }

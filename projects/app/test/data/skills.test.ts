@@ -1,12 +1,12 @@
-import { SkillType } from "#data/model.ts";
+import { SkillKind } from "#data/model.ts";
 import type { Skill } from "#data/rizzleSchema.ts";
 import type { SkillLearningGraph } from "#data/skills.ts";
 import {
   computeSkillRating,
   hanziWordToGloss,
+  skillKindFromSkill,
   skillLearningGraph,
   skillReviewQueue,
-  skillTypeFromSkill,
 } from "#data/skills.ts";
 import {
   allHsk1HanziWords,
@@ -383,7 +383,7 @@ await test(`${skillReviewQueue.name} suite`, async () => {
     });
   });
 
-  await test(`${SkillType.HanziWordToGloss} skills`, async () => {
+  await test(`${SkillKind.HanziWordToGloss} skills`, async () => {
     await test(`works for 好`, async () => {
       const graph = await skillLearningGraph({
         targetSkills: [`he:好:good`],
@@ -600,7 +600,7 @@ await test(`${skillReviewQueue.name} suite`, async () => {
     });
   });
 
-  await test(`${SkillType.HanziWordToPinyin} skills`, async () => {
+  await test(`${SkillKind.HanziWordToPinyin} skills`, async () => {
     await test(`doesn't learn pinyin for all constituents of a single character`, async () => {
       const graph = await skillLearningGraph({ targetSkills: [`hp:好:good`] });
       expect(
@@ -633,7 +633,7 @@ await test(`${skillReviewQueue.name} suite`, async () => {
       });
 
       const isHpSkill = (s: Skill) =>
-        skillTypeFromSkill(s) === SkillType.HanziWordToPinyin;
+        skillKindFromSkill(s) === SkillKind.HanziWordToPinyin;
 
       const onlyHpQueue = {
         items: queue.items.filter((s) => isHpSkill(s)),
@@ -757,7 +757,7 @@ await test(`${computeSkillRating.name} suite`, async () => {
     expect(rating).toMatchObject({ skill, durationMs });
   });
 
-  await test(`${SkillType.HanziWordToGloss} suites`, async () => {
+  await test(`${SkillKind.HanziWordToGloss} suites`, async () => {
     const skill = `he:我:i`;
 
     await test(`gives rating based on duration`, async () => {

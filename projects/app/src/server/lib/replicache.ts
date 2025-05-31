@@ -1,4 +1,4 @@
-import { MistakeType } from "@/data/model";
+import { MistakeKind } from "@/data/model";
 import type { SupportedSchema } from "@/data/rizzleSchema";
 import { rPinyinInitialGroupId, v7, v7_1 } from "@/data/rizzleSchema";
 import {
@@ -61,7 +61,7 @@ const mutators: RizzleDrizzleMutators<SupportedSchema, Drizzle> = {
       .values([{ id, userId, gloss, hanzi, createdAt: now }]);
 
     // Apply mistake effect to in-scope skills.
-    const mistake = { type: MistakeType.HanziGloss, gloss, hanzi } as const;
+    const mistake = { kind: MistakeKind.HanziGloss, gloss, hanzi } as const;
     const skillsToReview = await skillsToReReviewForHanziGlossMistake(mistake);
 
     // Find any existing skills for the user that should be reviewed again.
@@ -85,7 +85,7 @@ const mutators: RizzleDrizzleMutators<SupportedSchema, Drizzle> = {
       .values([{ id, userId, pinyin, hanzi, createdAt: now }]);
 
     // Apply mistake effect to in-scope skills.
-    const mistake = { type: MistakeType.HanziPinyin, pinyin, hanzi } as const;
+    const mistake = { kind: MistakeKind.HanziPinyin, pinyin, hanzi } as const;
     const skillsToReview = await skillsToReReviewForHanziPinyinMistake(mistake);
 
     // Find any existing skills for the user that should be reviewed again.

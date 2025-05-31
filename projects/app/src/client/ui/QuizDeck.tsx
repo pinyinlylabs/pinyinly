@@ -1,8 +1,8 @@
 import { usePrefetchImages } from "@/client/hooks/usePrefetchImages";
 import { questionsForReview2 } from "@/client/query";
 import type { StackNavigationFor } from "@/client/ui/types";
-import type { Mistake, NewSkillRating, Question } from "@/data/model";
-import { MistakeType, QuestionType } from "@/data/model";
+import type { MistakeType, NewSkillRating, Question } from "@/data/model";
+import { MistakeKind, QuestionKind } from "@/data/model";
 import { Rating } from "@/util/fsrs";
 import { nanoid } from "@/util/nanoid";
 import { invariant } from "@haohaohow/lib/invariant";
@@ -28,6 +28,7 @@ import Reanimated, { FadeIn } from "react-native-reanimated";
 import { useEventCallback } from "../hooks/useEventCallback";
 import { useQuizProgress } from "../hooks/useQuizProgress";
 import { CloseButton } from "./CloseButton";
+import { QuizDeckHanziToPinyinQuestion } from "./QuizDeckHanziToPinyinQuestion";
 import { QuizDeckMultipleChoiceQuestion } from "./QuizDeckMultipleChoiceQuestion";
 import { QuizDeckOneCorrectPairQuestion } from "./QuizDeckOneCorrectPairQuestion";
 import { QuizProgressBar } from "./QuizProgressBar";
@@ -100,7 +101,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
   });
 
   const handleRating = useEventCallback(
-    (ratings: NewSkillRating[], mistakes: Mistake[]) => {
+    (ratings: NewSkillRating[], mistakes: MistakeType[]) => {
       invariant(ratings.length > 0, `ratings must not be empty`);
 
       const success = ratings.every(({ rating }) => rating !== Rating.Again);
@@ -127,8 +128,8 @@ export const QuizDeck = ({ className }: { className?: string }) => {
         }
 
         for (const mistake of mistakes) {
-          switch (mistake.type) {
-            case MistakeType.HanziGloss: {
+          switch (mistake.kind) {
+            case MistakeKind.HanziGloss: {
               await r.mutate.saveHanziGlossMistake({
                 id: nanoid(),
                 now,
@@ -137,7 +138,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
               });
               break;
             }
-            case MistakeType.HanziPinyin: {
+            case MistakeKind.HanziPinyin: {
               await r.mutate.saveHanziPinyinMistake({
                 id: nanoid(),
                 now,
@@ -146,7 +147,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
               });
               break;
             }
-            case MistakeType.HanziPinyinInitial: {
+            case MistakeKind.HanziPinyinInitial: {
               throw new Error(`todo: not implemented`);
             }
           }
@@ -256,8 +257,18 @@ export const QuizDeck = ({ className }: { className?: string }) => {
               }) => {
                 let screen: React.ReactNode;
 
-                switch (question.type) {
-                  case QuestionType.MultipleChoice: {
+                switch (question.kind) {
+                  case QuestionKind.HanziToPinyin: {
+                    screen = (
+                      <QuizDeckHanziToPinyinQuestion
+                        question={question}
+                        onNext={handleNext}
+                        onRating={handleRating}
+                      />
+                    );
+                    break;
+                  }
+                  case QuestionKind.MultipleChoice: {
                     screen = (
                       <QuizDeckMultipleChoiceQuestion
                         question={question}
@@ -267,7 +278,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
                     );
                     break;
                   }
-                  case QuestionType.OneCorrectPair: {
+                  case QuestionKind.OneCorrectPair: {
                     screen = (
                       <QuizDeckOneCorrectPairQuestion
                         question={question}
@@ -275,6 +286,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
                         onRating={handleRating}
                       />
                     );
+                    break;
                   }
                 }
 

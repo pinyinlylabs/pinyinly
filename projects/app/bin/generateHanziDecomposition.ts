@@ -181,7 +181,7 @@ for (const character of decompositionQueue) {
   for (const decomposition of decompositions) {
     let score = decomposition.tags.has(SourceTag.China) ? 100 : 0;
     for (const leaf of walkIdsNode(decomposition.idsNode)) {
-      switch (leaf.type) {
+      switch (leaf.operator) {
         case `LeafCharacter`: {
           score -= allDecompositions.has(leaf.character) ? 1 : 3;
           break;
@@ -241,7 +241,7 @@ for (const character of decompositionQueue) {
 
   for (const decomposition of bestDecompositions) {
     for (const leaf of walkIdsNode(decomposition.idsNode)) {
-      if (leaf.type === `LeafCharacter`) {
+      if (leaf.operator === `LeafCharacter`) {
         decompositionQueue.add(leaf.character);
       }
     }
