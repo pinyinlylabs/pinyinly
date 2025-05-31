@@ -13,9 +13,9 @@ import { readonlyMapSet } from "@/util/collections";
 import { formatDuration } from "date-fns/formatDuration";
 import { intervalToDuration } from "date-fns/intervalToDuration";
 import { Image } from "expo-image";
-import type { ReactNode } from "react";
-import { useEffect, useMemo, useState } from "react";
-import type { StyleProp, ViewStyle } from "react-native";
+import type { ReactNode, Ref } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { StyleProp, TextInput, ViewStyle } from "react-native";
 import {
   // eslint-disable-next-line @typescript-eslint/no-restricted-imports
   Animated,
@@ -89,6 +89,7 @@ export function QuizDeckHanziToPinyinQuestion({
 
   const handleFocusRequest = (index: number) => {
     setFocusedCharIndex(index);
+    inputRef.current?.focus();
   };
 
   let initialPinyinSearchQuery = ``;
@@ -99,6 +100,8 @@ export function QuizDeckHanziToPinyinQuestion({
   }
 
   const isMissingAnswers = pinyinByIndex.size < answer.length;
+
+  const inputRef = useRef<TextInput>(null);
 
   return (
     <Skeleton
@@ -182,6 +185,7 @@ export function QuizDeckHanziToPinyinQuestion({
             initialQuery={initialPinyinSearchQuery}
             onFocus={handlePinyinSearchFocus}
             onSelect={handlePinyinSearchSelect}
+            inputRef={inputRef}
           />
         </View>
       </View>
@@ -235,13 +239,15 @@ interface PinyinSearchInputOption {
 const PinyinSearchInput = ({
   autoFocus,
   initialQuery,
-  onSelect,
+  inputRef,
   onFocus,
+  onSelect,
 }: {
   autoFocus: boolean;
   initialQuery: string;
-  onSelect: (pinyin: string) => void;
+  inputRef?: Ref<TextInput>;
   onFocus: () => void;
+  onSelect: (pinyin: string) => void;
 }) => {
   const [query, setQuery] = useState(initialQuery);
 
@@ -306,6 +312,7 @@ const PinyinSearchInput = ({
         onChangeText={handleQueryChange}
         onFocus={onFocus}
         placeholder="Search pinyin"
+        ref={inputRef}
         value={query}
       />
     </View>

@@ -1,3 +1,4 @@
+import type { Ref } from "react";
 import { TextInput } from "react-native";
 import type { PropsOf } from "./types";
 
@@ -7,8 +8,9 @@ interface TextInputSingleProps
     // make `placeholder` mandatory (encourage a11y)
     `placeholder`
   > {
-  placeholder: string | undefined;
   disabled?: boolean;
+  placeholder: string | undefined;
+  ref?: Ref<TextInput>;
 }
 
 export function TextInputSingle(props: TextInputSingleProps) {
