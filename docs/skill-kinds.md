@@ -1,8 +1,8 @@
-# Skill Types in haohaohow
+# Skill kinds in haohaohow
 
 This document describes the different types of skills available in haohaohow.
 
-## Skill Types
+## Skill kinds
 
 - **RadicalToEnglish (`re`)**: Translate a radical to English.
 - **EnglishToRadical (`er`)**: Translate English to a radical.

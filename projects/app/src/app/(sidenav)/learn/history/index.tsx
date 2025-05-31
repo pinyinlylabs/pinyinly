@@ -3,8 +3,8 @@ import { useRizzleQueryPaged } from "@/client/ui/ReplicacheContext";
 import { SkillRefText } from "@/client/ui/SkillRefText";
 import {
   needsToBeIntroduced,
-  skillTypeFromSkill,
-  skillTypeToShorthand,
+  skillKindFromSkill,
+  skillKindToShorthand,
 } from "@/data/skills";
 import {
   emptyArray,
@@ -112,7 +112,7 @@ export default function HistoryPage() {
               <View key={i} className="flex-col items-center">
                 <SkillRefText skill={skill} context="body" />
                 <Text className="hhh-text-caption">
-                  {skillTypeToShorthand(skillTypeFromSkill(skill))}
+                  {skillKindToShorthand(skillKindFromSkill(skill))}
                 </Text>
               </View>
             ))}

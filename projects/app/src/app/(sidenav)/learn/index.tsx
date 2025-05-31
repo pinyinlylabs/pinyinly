@@ -3,9 +3,9 @@ import { Countdown } from "@/client/ui/Countdown";
 import { RectButton2 } from "@/client/ui/RectButton2";
 import { useRizzleQueryPaged } from "@/client/ui/ReplicacheContext";
 import type { HanziWord } from "@/data/model";
-import { SkillType } from "@/data/model";
+import { SkillKind } from "@/data/model";
 import type { HanziWordSkill } from "@/data/rizzleSchema";
-import { hanziWordFromSkill, skillTypeFromSkill } from "@/data/skills";
+import { hanziWordFromSkill, skillKindFromSkill } from "@/data/skills";
 import { hanziFromHanziWord } from "@/dictionary/dictionary";
 import { invariant } from "@haohaohow/lib/invariant";
 import { differenceInCalendarDays } from "date-fns/differenceInCalendarDays";
@@ -39,15 +39,15 @@ export default function IndexPage() {
         .toArray()
         .then((x) => x.reverse());
       pushLoop: for (let [, { skill }] of ratingHistory) {
-        switch (skillTypeFromSkill(skill)) {
-          case SkillType.GlossToHanziWord:
-          case SkillType.HanziWordToGloss:
-          case SkillType.HanziWordToPinyin:
-          case SkillType.HanziWordToPinyinFinal:
-          case SkillType.HanziWordToPinyinInitial:
-          case SkillType.HanziWordToPinyinTone:
-          case SkillType.ImageToHanziWord:
-          case SkillType.PinyinToHanziWord: {
+        switch (skillKindFromSkill(skill)) {
+          case SkillKind.GlossToHanziWord:
+          case SkillKind.HanziWordToGloss:
+          case SkillKind.HanziWordToPinyin:
+          case SkillKind.HanziWordToPinyinFinal:
+          case SkillKind.HanziWordToPinyinInitial:
+          case SkillKind.HanziWordToPinyinTone:
+          case SkillKind.ImageToHanziWord:
+          case SkillKind.PinyinToHanziWord: {
             skill = skill as HanziWordSkill;
             const hanziWord = hanziWordFromSkill(skill);
             if (!recentHanziWords.includes(hanziWord)) {
@@ -59,13 +59,13 @@ export default function IndexPage() {
             break;
           }
 
-          case SkillType.Deprecated_EnglishToRadical:
-          case SkillType.Deprecated_PinyinToRadical:
-          case SkillType.Deprecated_RadicalToEnglish:
-          case SkillType.Deprecated_RadicalToPinyin:
-          case SkillType.Deprecated:
-          case SkillType.PinyinFinalAssociation:
-          case SkillType.PinyinInitialAssociation: {
+          case SkillKind.Deprecated_EnglishToRadical:
+          case SkillKind.Deprecated_PinyinToRadical:
+          case SkillKind.Deprecated_RadicalToEnglish:
+          case SkillKind.Deprecated_RadicalToPinyin:
+          case SkillKind.Deprecated:
+          case SkillKind.PinyinFinalAssociation:
+          case SkillKind.PinyinInitialAssociation: {
             break;
           }
         }

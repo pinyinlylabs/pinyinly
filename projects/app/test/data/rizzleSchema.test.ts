@@ -1,5 +1,5 @@
-import { SkillType } from "#data/model.ts";
-import { rSkill, rSkillType } from "#data/rizzleSchema.ts";
+import { SkillKind } from "#data/model.ts";
+import { rSkill, rSkillKind } from "#data/rizzleSchema.ts";
 import { hanziWordToGloss } from "#data/skills.ts";
 import { r } from "#util/rizzle.ts";
 import assert from "node:assert/strict";
@@ -61,36 +61,36 @@ await test(`skill as key`, async (t) => {
   }
 });
 
-await test(`${rSkillType.name}()`, async (t) => {
+await test(`${rSkillKind.name}()`, async (t) => {
   const posts = r.entity(`foo/[id]`, {
     id: r.string(),
-    skill: rSkillType(),
+    skill: rSkillKind(),
   });
 
   // Marshal and unmarshal round tripping
-  for (const skillType of [
-    SkillType.Deprecated_EnglishToRadical,
-    SkillType.Deprecated_PinyinToRadical,
-    SkillType.Deprecated_RadicalToEnglish,
-    SkillType.Deprecated_RadicalToPinyin,
-    SkillType.Deprecated,
-    SkillType.GlossToHanziWord,
-    SkillType.HanziWordToGloss,
-    SkillType.HanziWordToPinyin,
-    SkillType.HanziWordToPinyinFinal,
-    SkillType.HanziWordToPinyinInitial,
-    SkillType.HanziWordToPinyinTone,
-    SkillType.ImageToHanziWord,
-    SkillType.PinyinToHanziWord,
+  for (const skillKind of [
+    SkillKind.Deprecated_EnglishToRadical,
+    SkillKind.Deprecated_PinyinToRadical,
+    SkillKind.Deprecated_RadicalToEnglish,
+    SkillKind.Deprecated_RadicalToPinyin,
+    SkillKind.Deprecated,
+    SkillKind.GlossToHanziWord,
+    SkillKind.HanziWordToGloss,
+    SkillKind.HanziWordToPinyin,
+    SkillKind.HanziWordToPinyinFinal,
+    SkillKind.HanziWordToPinyinInitial,
+    SkillKind.HanziWordToPinyinTone,
+    SkillKind.ImageToHanziWord,
+    SkillKind.PinyinToHanziWord,
   ] as const) {
     using tx = makeMockTx(t);
 
-    await posts.set(tx, { id: `1` }, { id: `1`, skill: skillType });
+    await posts.set(tx, { id: `1` }, { id: `1`, skill: skillKind });
     const [, marshaledData] = tx.set.mock.calls[0]!.arguments;
     tx.get.mock.mockImplementationOnce(async () => marshaledData);
     assert.deepEqual(await posts.get(tx, { id: `1` }), {
       id: `1`,
-      skill: skillType,
+      skill: skillKind,
     });
   }
 });

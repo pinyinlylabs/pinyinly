@@ -1,4 +1,4 @@
-import { hanziWordSkillTypes } from "@/data/model";
+import { hanziWordSkillKinds } from "@/data/model";
 import { v7 } from "@/data/rizzleSchema";
 import { hanziWordSkill } from "@/data/skills";
 import {
@@ -404,7 +404,7 @@ const migrateHanziWords = inngest.createFunction(
       ([oldHanziWord, newHanziWord]) =>
         newHanziWord == null // `null` indicates a deletion rather than a rename, so skip these.
           ? []
-          : hanziWordSkillTypes.map(
+          : hanziWordSkillKinds.map(
               (skillType) =>
                 [
                   hanziWordSkill(skillType, oldHanziWord),
@@ -417,7 +417,7 @@ const migrateHanziWords = inngest.createFunction(
       ([oldHanziWord, newHanziWord]) =>
         // When newHanziWord is null it's a deletion rather than a rename.
         newHanziWord == null
-          ? hanziWordSkillTypes.map((skillType) =>
+          ? hanziWordSkillKinds.map((skillType) =>
               hanziWordSkill(skillType, oldHanziWord),
             )
           : [],

@@ -1,6 +1,6 @@
 import { generateQuestionForSkillOrThrow } from "@/data/generator";
-import type { Question, QuestionFlag, SrsState } from "@/data/model";
-import { QuestionFlagType, SrsType } from "@/data/model";
+import type { Question, QuestionFlagType, SrsStateType } from "@/data/model";
+import { QuestionFlagKind, SrsKind } from "@/data/model";
 import type { Rizzle, Skill, SkillRating } from "@/data/rizzleSchema";
 import type { SkillReviewQueue } from "@/data/skills";
 import {
@@ -34,7 +34,7 @@ export async function questionsForReview2(
       const isRetry = reviewQueue.retryCount > 0 && i < reviewQueue.retryCount;
       if (isRetry) {
         question.flag ??= {
-          type: QuestionFlagType.Retry,
+          kind: QuestionFlagKind.Retry,
         };
       }
       question.flag ??= flagsForSrsState(skillState?.srs);
@@ -56,14 +56,14 @@ export async function questionsForReview2(
 }
 
 export function flagsForSrsState(
-  srsState: SrsState | undefined,
-): QuestionFlag | undefined {
+  srsState: SrsStateType | undefined,
+): QuestionFlagType | undefined {
   if (
-    srsState?.type !== SrsType.FsrsFourPointFive ||
+    srsState?.kind !== SrsKind.FsrsFourPointFive ||
     fsrsIsForgotten(srsState)
   ) {
     return {
-      type: QuestionFlagType.NewSkill,
+      kind: QuestionFlagKind.NewSkill,
     };
   }
   const now = new Date();
@@ -71,7 +71,7 @@ export function flagsForSrsState(
 
   if (now >= overDueDate) {
     return {
-      type: QuestionFlagType.Overdue,
+      kind: QuestionFlagKind.Overdue,
       interval: interval(overDueDate.getTime(), now),
     };
   }
@@ -106,7 +106,7 @@ export async function computeSkillReviewQueue(
 ): Promise<SkillReviewQueue> {
   const graph = await skillLearningGraph({ targetSkills });
 
-  const skillSrsStates = new Map<Skill, SrsState>();
+  const skillSrsStates = new Map<Skill, SrsStateType>();
   for await (const [, v] of r.queryPaged.skillState.scan()) {
     skillSrsStates.set(v.skill, v.srs);
   }

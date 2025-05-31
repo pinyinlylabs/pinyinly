@@ -1,8 +1,8 @@
 import { useHanziWordMeaning } from "@/client/hooks/useHanziWordMeaning";
 import { splitHanziText } from "@/data/hanzi";
-import { SkillType } from "@/data/model";
+import { SkillKind } from "@/data/model";
 import type { HanziWordSkill, Skill } from "@/data/rizzleSchema";
-import { hanziWordFromSkill, skillTypeFromSkill } from "@/data/skills";
+import { hanziWordFromSkill, skillKindFromSkill } from "@/data/skills";
 import { hanziFromHanziWord } from "@/dictionary/dictionary";
 import { Image } from "expo-image";
 import { useMemo, useState } from "react";
@@ -29,8 +29,8 @@ export const NewSkillModal = ({
       passivePresentation={passivePresentation}
     >
       {({ dismiss }) => {
-        switch (skillTypeFromSkill(skill)) {
-          case SkillType.HanziWordToGloss: {
+        switch (skillKindFromSkill(skill)) {
+          case SkillKind.HanziWordToGloss: {
             skill = skill as HanziWordSkill;
             return (
               <NewHanziWordToGlossSkillContent
@@ -39,7 +39,7 @@ export const NewSkillModal = ({
               />
             );
           }
-          case SkillType.HanziWordToPinyin: {
+          case SkillKind.HanziWordToPinyin: {
             skill = skill as HanziWordSkill;
             return (
               <NewHanziWordToPinyinSkillContent
@@ -48,7 +48,7 @@ export const NewSkillModal = ({
               />
             );
           }
-          case SkillType.HanziWordToPinyinFinal: {
+          case SkillKind.HanziWordToPinyinFinal: {
             skill = skill as HanziWordSkill;
             return (
               <NewHanziWordToPinyinFinalSkillContent
@@ -57,7 +57,7 @@ export const NewSkillModal = ({
               />
             );
           }
-          case SkillType.HanziWordToPinyinInitial: {
+          case SkillKind.HanziWordToPinyinInitial: {
             skill = skill as HanziWordSkill;
             return (
               <NewHanziWordToPinyinInitialSkillContent
@@ -66,7 +66,7 @@ export const NewSkillModal = ({
               />
             );
           }
-          case SkillType.HanziWordToPinyinTone: {
+          case SkillKind.HanziWordToPinyinTone: {
             skill = skill as HanziWordSkill;
             return (
               <NewHanziWordToPinyinToneSkillContent
@@ -75,16 +75,16 @@ export const NewSkillModal = ({
               />
             );
           }
-          case SkillType.Deprecated_EnglishToRadical:
-          case SkillType.Deprecated_PinyinToRadical:
-          case SkillType.Deprecated_RadicalToEnglish:
-          case SkillType.Deprecated_RadicalToPinyin:
-          case SkillType.Deprecated:
-          case SkillType.GlossToHanziWord:
-          case SkillType.ImageToHanziWord:
-          case SkillType.PinyinFinalAssociation:
-          case SkillType.PinyinInitialAssociation:
-          case SkillType.PinyinToHanziWord: {
+          case SkillKind.Deprecated_EnglishToRadical:
+          case SkillKind.Deprecated_PinyinToRadical:
+          case SkillKind.Deprecated_RadicalToEnglish:
+          case SkillKind.Deprecated_RadicalToPinyin:
+          case SkillKind.Deprecated:
+          case SkillKind.GlossToHanziWord:
+          case SkillKind.ImageToHanziWord:
+          case SkillKind.PinyinFinalAssociation:
+          case SkillKind.PinyinInitialAssociation:
+          case SkillKind.PinyinToHanziWord: {
             return (
               <ContainerWithContinueButton onContinue={dismiss}>
                 <Text>Not implemented</Text>

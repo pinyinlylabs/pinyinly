@@ -1,4 +1,4 @@
-import { SkillType } from "@/data/model";
+import { SkillKind } from "@/data/model";
 import type {
   DeprecatedSkill,
   HanziWordSkill,
@@ -10,8 +10,8 @@ import {
   finalFromPinyinFinalAssociationSkill,
   hanziWordFromSkill,
   initialFromPinyinInitialAssociationSkill,
-  skillTypeFromSkill,
-  skillTypeToShorthand,
+  skillKindFromSkill,
+  skillKindToShorthand,
 } from "@/data/skills";
 import { Text } from "react-native";
 import { HanziWordRefText } from "./HanziWordRefText";
@@ -24,24 +24,24 @@ export const SkillRefText = ({
   skill: Skill;
   context: HhhmarkContext;
 }) => {
-  switch (skillTypeFromSkill(skill)) {
-    case SkillType.PinyinFinalAssociation: {
+  switch (skillKindFromSkill(skill)) {
+    case SkillKind.PinyinFinalAssociation: {
       skill = skill as PinyinFinalAssociationSkill;
       return <Text>-{finalFromPinyinFinalAssociationSkill(skill)}</Text>;
     }
-    case SkillType.PinyinInitialAssociation: {
+    case SkillKind.PinyinInitialAssociation: {
       skill = skill as PinyinInitialAssociationSkill;
       return <Text>{initialFromPinyinInitialAssociationSkill(skill)}-</Text>;
     }
-    case SkillType.Deprecated_RadicalToEnglish:
-    case SkillType.Deprecated_EnglishToRadical:
-    case SkillType.Deprecated_RadicalToPinyin:
-    case SkillType.Deprecated_PinyinToRadical:
-    case SkillType.Deprecated: {
+    case SkillKind.Deprecated_RadicalToEnglish:
+    case SkillKind.Deprecated_EnglishToRadical:
+    case SkillKind.Deprecated_RadicalToPinyin:
+    case SkillKind.Deprecated_PinyinToRadical:
+    case SkillKind.Deprecated: {
       skill = skill as DeprecatedSkill;
-      return <Text>{skillTypeToShorthand(skillTypeFromSkill(skill))}</Text>;
+      return <Text>{skillKindToShorthand(skillKindFromSkill(skill))}</Text>;
     }
-    case SkillType.HanziWordToPinyin: {
+    case SkillKind.HanziWordToPinyin: {
       skill = skill as HanziWordSkill;
       const hanziWord = hanziWordFromSkill(skill);
       return (
@@ -53,7 +53,7 @@ export const SkillRefText = ({
         />
       );
     }
-    case SkillType.HanziWordToPinyinInitial: {
+    case SkillKind.HanziWordToPinyinInitial: {
       skill = skill as HanziWordSkill;
       const hanziWord = hanziWordFromSkill(skill);
       return (
@@ -68,7 +68,7 @@ export const SkillRefText = ({
         </>
       );
     }
-    case SkillType.HanziWordToPinyinFinal: {
+    case SkillKind.HanziWordToPinyinFinal: {
       skill = skill as HanziWordSkill;
       const hanziWord = hanziWordFromSkill(skill);
       return (
@@ -83,7 +83,7 @@ export const SkillRefText = ({
         </>
       );
     }
-    case SkillType.HanziWordToPinyinTone: {
+    case SkillKind.HanziWordToPinyinTone: {
       skill = skill as HanziWordSkill;
       const hanziWord = hanziWordFromSkill(skill);
       return (
@@ -98,10 +98,10 @@ export const SkillRefText = ({
         </>
       );
     }
-    case SkillType.GlossToHanziWord:
-    case SkillType.PinyinToHanziWord:
-    case SkillType.ImageToHanziWord:
-    case SkillType.HanziWordToGloss: {
+    case SkillKind.GlossToHanziWord:
+    case SkillKind.PinyinToHanziWord:
+    case SkillKind.ImageToHanziWord:
+    case SkillKind.HanziWordToGloss: {
       skill = skill as HanziWordSkill;
       const hanziWord = hanziWordFromSkill(skill);
       return <HanziWordRefText hanziWord={hanziWord} context={context} />;

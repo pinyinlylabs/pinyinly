@@ -1,19 +1,19 @@
 import { useHanziWordMeaning } from "@/client/hooks/useHanziWordMeaning";
 import { useMultiChoiceQuizTimer } from "@/client/hooks/useMultiChoiceQuizTimer";
 import type {
-  Mistake,
+  MistakeType,
   NewSkillRating,
   OneCorrectPairQuestion,
   OneCorrectPairQuestionChoice,
-  QuestionFlag,
+  QuestionFlagType,
 } from "@/data/model";
-import { QuestionFlagType, SkillType } from "@/data/model";
+import { QuestionFlagKind, SkillKind } from "@/data/model";
 import type { HanziWordSkill, Skill } from "@/data/rizzleSchema";
 import {
   computeSkillRating,
   hanziWordFromSkill,
   oneCorrectPairQuestionChoiceMistakes,
-  skillTypeFromSkill,
+  skillKindFromSkill,
 } from "@/data/skills";
 import { invariant } from "@haohaohow/lib/invariant";
 import { formatDuration } from "date-fns/formatDuration";
@@ -51,7 +51,7 @@ export function QuizDeckOneCorrectPairQuestion({
 }: {
   question: OneCorrectPairQuestion;
   onNext: () => void;
-  onRating: (ratings: NewSkillRating[], mistakes: Mistake[]) => void;
+  onRating: (ratings: NewSkillRating[], mistakes: MistakeType[]) => void;
 }) {
   const { prompt, answer, groupA, groupB, flag } = question;
 
@@ -191,7 +191,7 @@ export function QuizDeckOneCorrectPairQuestion({
         />
       }
     >
-      {flag?.type === QuestionFlagType.NewSkill ? (
+      {flag?.kind === QuestionFlagKind.NewSkill ? (
         <NewSkillModal passivePresentation skill={question.answer.skill} />
       ) : null}
 
@@ -262,9 +262,9 @@ export function QuizDeckOneCorrectPairQuestion({
   );
 }
 
-const FlagText = ({ flag }: { flag: QuestionFlag }) => {
-  switch (flag.type) {
-    case QuestionFlagType.NewSkill: {
+const FlagText = ({ flag }: { flag: QuestionFlagType }) => {
+  switch (flag.kind) {
+    case QuestionFlagKind.NewSkill: {
       return (
         <View className={flagViewClass({ class: `success-theme` })}>
           <Image
@@ -276,7 +276,7 @@ const FlagText = ({ flag }: { flag: QuestionFlag }) => {
         </View>
       );
     }
-    case QuestionFlagType.Overdue: {
+    case QuestionFlagKind.Overdue: {
       return (
         <View className={flagViewClass({ class: `danger-theme` })}>
           <Image
@@ -304,7 +304,7 @@ const FlagText = ({ flag }: { flag: QuestionFlag }) => {
         </View>
       );
     }
-    case QuestionFlagType.Retry: {
+    case QuestionFlagKind.Retry: {
       return (
         <View className={flagViewClass({ class: `warning-theme` })}>
           <Image
@@ -316,7 +316,7 @@ const FlagText = ({ flag }: { flag: QuestionFlag }) => {
         </View>
       );
     }
-    case QuestionFlagType.WeakWord: {
+    case QuestionFlagKind.WeakWord: {
       return (
         <View className={flagViewClass({ class: `danger-theme` })}>
           <Image
@@ -344,7 +344,7 @@ const flagTextClass = tv({
 });
 
 function choiceToHhhmark(choice: OneCorrectPairQuestionChoice): string {
-  switch (choice.type) {
+  switch (choice.kind) {
     case `gloss`: {
       return `**${choice.value}**`;
     }
@@ -370,31 +370,31 @@ const SkillAnswer = ({
   hideB?: boolean;
   small?: boolean;
 }) => {
-  switch (skillTypeFromSkill(skill)) {
-    case SkillType.Deprecated_EnglishToRadical:
-    case SkillType.Deprecated_PinyinToRadical:
-    case SkillType.Deprecated_RadicalToEnglish:
-    case SkillType.Deprecated_RadicalToPinyin:
-    case SkillType.Deprecated:
-    case SkillType.GlossToHanziWord:
-    case SkillType.ImageToHanziWord:
-    case SkillType.PinyinFinalAssociation:
-    case SkillType.PinyinInitialAssociation:
-    case SkillType.PinyinToHanziWord: {
+  switch (skillKindFromSkill(skill)) {
+    case SkillKind.Deprecated_EnglishToRadical:
+    case SkillKind.Deprecated_PinyinToRadical:
+    case SkillKind.Deprecated_RadicalToEnglish:
+    case SkillKind.Deprecated_RadicalToPinyin:
+    case SkillKind.Deprecated:
+    case SkillKind.GlossToHanziWord:
+    case SkillKind.ImageToHanziWord:
+    case SkillKind.PinyinFinalAssociation:
+    case SkillKind.PinyinInitialAssociation:
+    case SkillKind.PinyinToHanziWord: {
       throw new Error(
-        `ShowSkillAnswer not implemented for ${skillTypeFromSkill(skill)}`,
+        `ShowSkillAnswer not implemented for ${skillKindFromSkill(skill)}`,
       );
     }
-    case SkillType.HanziWordToGloss: {
+    case SkillKind.HanziWordToGloss: {
       skill = skill as HanziWordSkill;
       return (
         <HanziWordToGlossSkillAnswer skill={skill} includeHint={includeHint} />
       );
     }
-    case SkillType.HanziWordToPinyin:
-    case SkillType.HanziWordToPinyinFinal:
-    case SkillType.HanziWordToPinyinInitial:
-    case SkillType.HanziWordToPinyinTone: {
+    case SkillKind.HanziWordToPinyin:
+    case SkillKind.HanziWordToPinyinFinal:
+    case SkillKind.HanziWordToPinyinInitial:
+    case SkillKind.HanziWordToPinyinTone: {
       skill = skill as HanziWordSkill;
       return <HanziWordToPinyinSkillAnswer skill={skill} />;
     }

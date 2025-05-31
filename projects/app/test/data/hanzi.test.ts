@@ -21,219 +21,219 @@ await test(`${flattenIds.name} handles ⿱⿱ to ⿳ and ⿰⿰ to ⿲`, () => {
 
 await test(`${parseIds.name} handles 1 depth`, () => {
   assert.deepEqual(parseIds(`木`), {
-    type: `LeafCharacter`,
+    operator: `LeafCharacter`,
     character: `木`,
   });
 
   // 相
   assert.deepEqual(parseIds(`⿰木目`), {
-    type: IdsOperator.LeftToRight,
-    left: { type: `LeafCharacter`, character: `木` },
-    right: { type: `LeafCharacter`, character: `目` },
+    operator: IdsOperator.LeftToRight,
+    left: { operator: `LeafCharacter`, character: `木` },
+    right: { operator: `LeafCharacter`, character: `目` },
   });
 
   // 杏
   assert.deepEqual(parseIds(`⿱木口`), {
-    type: IdsOperator.AboveToBelow,
-    above: { type: `LeafCharacter`, character: `木` },
-    below: { type: `LeafCharacter`, character: `口` },
+    operator: IdsOperator.AboveToBelow,
+    above: { operator: `LeafCharacter`, character: `木` },
+    below: { operator: `LeafCharacter`, character: `口` },
   });
 
   // 衍
   assert.deepEqual(parseIds(`⿲彳氵亍`), {
-    type: IdsOperator.LeftToMiddleToRight,
-    left: { type: `LeafCharacter`, character: `彳` },
-    middle: { type: `LeafCharacter`, character: `氵` },
-    right: { type: `LeafCharacter`, character: `亍` },
+    operator: IdsOperator.LeftToMiddleToRight,
+    left: { operator: `LeafCharacter`, character: `彳` },
+    middle: { operator: `LeafCharacter`, character: `氵` },
+    right: { operator: `LeafCharacter`, character: `亍` },
   });
 
   // 京
   assert.deepEqual(parseIds(`⿳亠口小`), {
-    type: IdsOperator.AboveToMiddleAndBelow,
-    above: { type: `LeafCharacter`, character: `亠` },
-    middle: { type: `LeafCharacter`, character: `口` },
-    below: { type: `LeafCharacter`, character: `小` },
+    operator: IdsOperator.AboveToMiddleAndBelow,
+    above: { operator: `LeafCharacter`, character: `亠` },
+    middle: { operator: `LeafCharacter`, character: `口` },
+    below: { operator: `LeafCharacter`, character: `小` },
   });
 
   // 回
   assert.deepEqual(parseIds(`⿴囗口`), {
-    type: IdsOperator.FullSurround,
-    surrounding: { type: `LeafCharacter`, character: `囗` },
-    surrounded: { type: `LeafCharacter`, character: `口` },
+    operator: IdsOperator.FullSurround,
+    surrounding: { operator: `LeafCharacter`, character: `囗` },
+    surrounded: { operator: `LeafCharacter`, character: `口` },
   });
 
   // 凰
   assert.deepEqual(parseIds(`⿵几皇`), {
-    type: IdsOperator.SurroundFromAbove,
-    above: { type: `LeafCharacter`, character: `几` },
-    surrounded: { type: `LeafCharacter`, character: `皇` },
+    operator: IdsOperator.SurroundFromAbove,
+    above: { operator: `LeafCharacter`, character: `几` },
+    surrounded: { operator: `LeafCharacter`, character: `皇` },
   });
 
   // 凶
   assert.deepEqual(parseIds(`⿶凵㐅`), {
-    type: IdsOperator.SurroundFromBelow,
-    below: { type: `LeafCharacter`, character: `凵` },
-    surrounded: { type: `LeafCharacter`, character: `㐅` },
+    operator: IdsOperator.SurroundFromBelow,
+    below: { operator: `LeafCharacter`, character: `凵` },
+    surrounded: { operator: `LeafCharacter`, character: `㐅` },
   });
 
   // 匠
   assert.deepEqual(parseIds(`⿷匚斤`), {
-    type: IdsOperator.SurroundFromLeft,
-    left: { type: `LeafCharacter`, character: `匚` },
-    surrounded: { type: `LeafCharacter`, character: `斤` },
+    operator: IdsOperator.SurroundFromLeft,
+    left: { operator: `LeafCharacter`, character: `匚` },
+    surrounded: { operator: `LeafCharacter`, character: `斤` },
   });
 
   // 㕚
   assert.deepEqual(parseIds(`⿼叉丶`), {
-    type: IdsOperator.SurroundFromRight,
-    right: { type: `LeafCharacter`, character: `叉` },
-    surrounded: { type: `LeafCharacter`, character: `丶` },
+    operator: IdsOperator.SurroundFromRight,
+    right: { operator: `LeafCharacter`, character: `叉` },
+    surrounded: { operator: `LeafCharacter`, character: `丶` },
   });
 
   // 病
   assert.deepEqual(parseIds(`⿸疒丙`), {
-    type: IdsOperator.SurroundFromUpperLeft,
-    upperLeft: { type: `LeafCharacter`, character: `疒` },
-    surrounded: { type: `LeafCharacter`, character: `丙` },
+    operator: IdsOperator.SurroundFromUpperLeft,
+    upperLeft: { operator: `LeafCharacter`, character: `疒` },
+    surrounded: { operator: `LeafCharacter`, character: `丙` },
   });
 
   // 戒
   assert.deepEqual(parseIds(`⿹戈廾`), {
-    type: IdsOperator.SurroundFromUpperRight,
-    upperRight: { type: `LeafCharacter`, character: `戈` },
-    surrounded: { type: `LeafCharacter`, character: `廾` },
+    operator: IdsOperator.SurroundFromUpperRight,
+    upperRight: { operator: `LeafCharacter`, character: `戈` },
+    surrounded: { operator: `LeafCharacter`, character: `廾` },
   });
 
   // 超
   assert.deepEqual(parseIds(`⿺走召`), {
-    type: IdsOperator.SurroundFromLowerLeft,
-    lowerLeft: { type: `LeafCharacter`, character: `走` },
-    surrounded: { type: `LeafCharacter`, character: `召` },
+    operator: IdsOperator.SurroundFromLowerLeft,
+    lowerLeft: { operator: `LeafCharacter`, character: `走` },
+    surrounded: { operator: `LeafCharacter`, character: `召` },
   });
 
   // 氷
   assert.deepEqual(parseIds(`⿽水丶`), {
-    type: IdsOperator.SurroundFromLowerRight,
-    lowerRight: { type: `LeafCharacter`, character: `水` },
-    surrounded: { type: `LeafCharacter`, character: `丶` },
+    operator: IdsOperator.SurroundFromLowerRight,
+    lowerRight: { operator: `LeafCharacter`, character: `水` },
+    surrounded: { operator: `LeafCharacter`, character: `丶` },
   });
 
   // 巫
   assert.deepEqual(parseIds(`⿻工从`), {
-    type: IdsOperator.Overlaid,
-    overlay: { type: `LeafCharacter`, character: `工` },
-    underlay: { type: `LeafCharacter`, character: `从` },
+    operator: IdsOperator.Overlaid,
+    overlay: { operator: `LeafCharacter`, character: `工` },
+    underlay: { operator: `LeafCharacter`, character: `从` },
   });
 
   // 卐
   assert.deepEqual(parseIds(`⿾卍`), {
-    type: IdsOperator.HorizontalReflection,
-    reflected: { type: `LeafCharacter`, character: `卍` },
+    operator: IdsOperator.HorizontalReflection,
+    reflected: { operator: `LeafCharacter`, character: `卍` },
   });
 
   // 𠕄
   assert.deepEqual(parseIds(`⿿凹`), {
-    type: IdsOperator.Rotation,
-    rotated: { type: `LeafCharacter`, character: `凹` },
+    operator: IdsOperator.Rotation,
+    rotated: { operator: `LeafCharacter`, character: `凹` },
   });
 
   assert.deepEqual(parseIds(`①`), {
-    type: `LeafUnknownCharacter`,
+    operator: `LeafUnknownCharacter`,
     strokeCount: 1,
   });
 
   assert.deepEqual(parseIds(`②`), {
-    type: `LeafUnknownCharacter`,
+    operator: `LeafUnknownCharacter`,
     strokeCount: 2,
   });
 
   assert.deepEqual(parseIds(`③`), {
-    type: `LeafUnknownCharacter`,
+    operator: `LeafUnknownCharacter`,
     strokeCount: 3,
   });
 
   assert.deepEqual(parseIds(`④`), {
-    type: `LeafUnknownCharacter`,
+    operator: `LeafUnknownCharacter`,
     strokeCount: 4,
   });
 
   assert.deepEqual(parseIds(`⑤`), {
-    type: `LeafUnknownCharacter`,
+    operator: `LeafUnknownCharacter`,
     strokeCount: 5,
   });
 
   assert.deepEqual(parseIds(`⑥`), {
-    type: `LeafUnknownCharacter`,
+    operator: `LeafUnknownCharacter`,
     strokeCount: 6,
   });
 
   assert.deepEqual(parseIds(`⑦`), {
-    type: `LeafUnknownCharacter`,
+    operator: `LeafUnknownCharacter`,
     strokeCount: 7,
   });
 
   assert.deepEqual(parseIds(`⑧`), {
-    type: `LeafUnknownCharacter`,
+    operator: `LeafUnknownCharacter`,
     strokeCount: 8,
   });
 
   assert.deepEqual(parseIds(`⑨`), {
-    type: `LeafUnknownCharacter`,
+    operator: `LeafUnknownCharacter`,
     strokeCount: 9,
   });
 
   assert.deepEqual(parseIds(`⑩`), {
-    type: `LeafUnknownCharacter`,
+    operator: `LeafUnknownCharacter`,
     strokeCount: 10,
   });
 
   assert.deepEqual(parseIds(`⑪`), {
-    type: `LeafUnknownCharacter`,
+    operator: `LeafUnknownCharacter`,
     strokeCount: 11,
   });
 
   assert.deepEqual(parseIds(`⑫`), {
-    type: `LeafUnknownCharacter`,
+    operator: `LeafUnknownCharacter`,
     strokeCount: 12,
   });
 
   assert.deepEqual(parseIds(`⑬`), {
-    type: `LeafUnknownCharacter`,
+    operator: `LeafUnknownCharacter`,
     strokeCount: 13,
   });
 
   assert.deepEqual(parseIds(`⑭`), {
-    type: `LeafUnknownCharacter`,
+    operator: `LeafUnknownCharacter`,
     strokeCount: 14,
   });
 
   assert.deepEqual(parseIds(`⑮`), {
-    type: `LeafUnknownCharacter`,
+    operator: `LeafUnknownCharacter`,
     strokeCount: 15,
   });
 
   assert.deepEqual(parseIds(`⑯`), {
-    type: `LeafUnknownCharacter`,
+    operator: `LeafUnknownCharacter`,
     strokeCount: 16,
   });
 
   assert.deepEqual(parseIds(`⑰`), {
-    type: `LeafUnknownCharacter`,
+    operator: `LeafUnknownCharacter`,
     strokeCount: 17,
   });
 
   assert.deepEqual(parseIds(`⑱`), {
-    type: `LeafUnknownCharacter`,
+    operator: `LeafUnknownCharacter`,
     strokeCount: 18,
   });
 
   assert.deepEqual(parseIds(`⑲`), {
-    type: `LeafUnknownCharacter`,
+    operator: `LeafUnknownCharacter`,
     strokeCount: 19,
   });
 
   assert.deepEqual(parseIds(`⑳`), {
-    type: `LeafUnknownCharacter`,
+    operator: `LeafUnknownCharacter`,
     strokeCount: 20,
   });
 });
@@ -242,12 +242,12 @@ await test(`${parseIds.name} handles 2 depth`, () => {
   {
     const cursor = { index: 0 };
     assert.deepEqual(parseIds(`⿰a⿱bc`, cursor), {
-      type: IdsOperator.LeftToRight,
-      left: { type: `LeafCharacter`, character: `a` },
+      operator: IdsOperator.LeftToRight,
+      left: { operator: `LeafCharacter`, character: `a` },
       right: {
-        type: IdsOperator.AboveToBelow,
-        above: { type: `LeafCharacter`, character: `b` },
-        below: { type: `LeafCharacter`, character: `c` },
+        operator: IdsOperator.AboveToBelow,
+        above: { operator: `LeafCharacter`, character: `b` },
+        below: { operator: `LeafCharacter`, character: `c` },
       },
     });
     assert.deepEqual(cursor, { index: 5 });
@@ -256,16 +256,16 @@ await test(`${parseIds.name} handles 2 depth`, () => {
   {
     const cursor = { index: 0 };
     assert.deepEqual(parseIds(`⿱a⿳bc⿴de`, cursor), {
-      type: IdsOperator.AboveToBelow,
-      above: { type: `LeafCharacter`, character: `a` },
+      operator: IdsOperator.AboveToBelow,
+      above: { operator: `LeafCharacter`, character: `a` },
       below: {
-        type: IdsOperator.AboveToMiddleAndBelow,
-        above: { type: `LeafCharacter`, character: `b` },
-        middle: { type: `LeafCharacter`, character: `c` },
+        operator: IdsOperator.AboveToMiddleAndBelow,
+        above: { operator: `LeafCharacter`, character: `b` },
+        middle: { operator: `LeafCharacter`, character: `c` },
         below: {
-          type: IdsOperator.FullSurround,
-          surrounding: { type: `LeafCharacter`, character: `d` },
-          surrounded: { type: `LeafCharacter`, character: `e` },
+          operator: IdsOperator.FullSurround,
+          surrounding: { operator: `LeafCharacter`, character: `d` },
+          surrounded: { operator: `LeafCharacter`, character: `e` },
         },
       },
     });
@@ -275,9 +275,9 @@ await test(`${parseIds.name} handles 2 depth`, () => {
 
 await test(`${parseIds.name} regression tests`, () => {
   assert.deepEqual(parseIds(`⿱丿𭕄`), {
-    type: IdsOperator.AboveToBelow,
-    above: { type: `LeafCharacter`, character: `丿` },
-    below: { type: `LeafCharacter`, character: `𭕄` },
+    operator: IdsOperator.AboveToBelow,
+    above: { operator: `LeafCharacter`, character: `丿` },
+    below: { operator: `LeafCharacter`, character: `𭕄` },
   });
 });
 
@@ -285,7 +285,7 @@ await test(`${walkIdsNode.name} fixture`, () => {
   const ids = parseIds(`⿰a⿱bc`);
 
   const leafs = [...walkIdsNode(ids)].map((x) => {
-    switch (x.type) {
+    switch (x.operator) {
       case `LeafCharacter`: {
         return x.character;
       }

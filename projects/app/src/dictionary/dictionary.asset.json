@@ -322,6 +322,7 @@
 ["作者:author",{"gloss":["author"],"pinyin":["zuò zhě"],"example":"他是这本书的作者。","partOfSpeech":"noun","definition":"A person who writes books, articles, or other literary works."}],
 ["你:you",{"gloss":["you"],"pinyin":["nǐ"],"example":"你好！","partOfSpeech":"pronoun","definition":"Used to address one or more people directly."}],
 ["你们:yall",{"gloss":["ya'll","you"],"pinyin":["nǐ men"],"example":"你们好。","partOfSpeech":"pronoun","definition":"Used to address two or more people directly."}],
+["你好:hello",{"gloss":["hello","hi"],"glossHint":null,"pinyin":["nǐ hǎo"],"example":"你好，很高兴见到你。","partOfSpeech":"interjection","componentFormOf":null,"visualVariants":null,"definition":"A common greeting used to say hello or hi."}],
 ["佥:together",{"gloss":["together"],"example":"我们佥同意这个决定。","partOfSpeech":"adverb","definition":"Refers to the concept of being together or unanimous, often used in contexts where agreement or collective action is involved."}],
 ["使:cause",{"gloss":["cause","make"],"pinyin":["shǐ"],"example":"这部电影使我感动。","partOfSpeech":"verb","definition":"To make something happen, often with an effect or outcome."}],
 ["使用:use",{"gloss":["use","employ"],"pinyin":["shǐ yòng"],"example":"请使用这个工具。","partOfSpeech":"verb","definition":"To make practical use of something."}],

@@ -3,12 +3,12 @@ import { useHanziWordMeaning } from "@/client/hooks/useHanziWordMeaning";
 import { useLocalQuery } from "@/client/hooks/useLocalQuery";
 import { splitHanziText } from "@/data/hanzi";
 import type { HanziWord } from "@/data/model";
-import { hanziWordSkillTypes } from "@/data/model";
+import { hanziWordSkillKinds } from "@/data/model";
 import type { Skill, SkillRating, SkillState } from "@/data/rizzleSchema";
 import {
   hanziWordSkill,
-  skillTypeFromSkill,
-  skillTypeToShorthand,
+  skillKindFromSkill,
+  skillKindToShorthand,
 } from "@/data/skills";
 import { hanziFromHanziWord, lookupHanzi } from "@/dictionary/dictionary";
 import { Fragment, useMemo } from "react";
@@ -37,7 +37,7 @@ export const WikiHanziWordModal = ({
   );
 
   const skills = useMemo(() => {
-    return hanziWordSkillTypes.map((skillType) =>
+    return hanziWordSkillKinds.map((skillType) =>
       hanziWordSkill(skillType, hanziWord),
     );
   }, [hanziWord]);
@@ -209,7 +209,7 @@ export const WikiHanziWordModal = ({
                     {skillStatesQuery.data.map(([skill, skillState], i) => (
                       <View key={i} className="flex-row items-center gap-2">
                         <Text>
-                          {skillTypeToShorthand(skillTypeFromSkill(skill))}
+                          {skillKindToShorthand(skillKindFromSkill(skill))}
                         </Text>
                         <Text>
                           {Math.min(

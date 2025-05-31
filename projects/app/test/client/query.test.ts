@@ -4,7 +4,7 @@ import {
   targetSkillsReviewQueue,
 } from "#client/query.ts";
 import type { HanziText, PinyinText } from "#data/model.ts";
-import { QuestionFlagType, SrsType } from "#data/model.ts";
+import { QuestionFlagKind, SrsKind } from "#data/model.ts";
 import { v7Mutators } from "#data/rizzleMutators.ts";
 import type { Skill } from "#data/rizzleSchema.ts";
 import { v7 } from "#data/rizzleSchema.ts";
@@ -205,17 +205,17 @@ await test(`${flagsForSrsState.name} suite`, async () => {
   await test(`marks a question as new if it has no srs`, async () => {
     assert.deepEqual(
       flagsForSrsState({
-        type: SrsType.Mock,
+        kind: SrsKind.Mock,
         prevReviewAt: new Date(),
         nextReviewAt: new Date(),
       }),
-      { type: QuestionFlagType.NewSkill },
+      { kind: QuestionFlagKind.NewSkill },
     );
   });
 
   await test(`marks a question as new if it has fsrs state but is not stable enough to be introduced`, async () => {
     assert.deepEqual(flagsForSrsState(undefined), {
-      type: QuestionFlagType.NewSkill,
+      kind: QuestionFlagKind.NewSkill,
     });
   });
 });

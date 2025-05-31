@@ -6,41 +6,41 @@ import { hanziWordToPinyinFinalQuestionOrThrow } from "./generators/hanziWordToP
 import { hanziWordToPinyinInitialQuestionOrThrow } from "./generators/hanziWordToPinyinInitial";
 import { hanziWordToPinyinToneQuestionOrThrow } from "./generators/hanziWordToPinyinTone";
 import type { HanziWord, Question } from "./model";
-import { SkillType } from "./model";
+import { SkillKind } from "./model";
 import type { HanziWordSkill, Skill } from "./rizzleSchema";
-import { skillTypeFromSkill } from "./skills";
+import { skillKindFromSkill } from "./skills";
 
 export async function generateQuestionForSkillOrThrow(
   skill: Skill,
 ): Promise<Question> {
-  switch (skillTypeFromSkill(skill)) {
-    case SkillType.HanziWordToGloss: {
+  switch (skillKindFromSkill(skill)) {
+    case SkillKind.HanziWordToGloss: {
       skill = skill as HanziWordSkill;
       return await hanziWordToGlossQuestionOrThrow(skill);
     }
-    case SkillType.HanziWordToPinyinInitial: {
+    case SkillKind.HanziWordToPinyinInitial: {
       skill = skill as HanziWordSkill;
       return await hanziWordToPinyinInitialQuestionOrThrow(skill);
     }
-    case SkillType.HanziWordToPinyinFinal: {
+    case SkillKind.HanziWordToPinyinFinal: {
       skill = skill as HanziWordSkill;
       return await hanziWordToPinyinFinalQuestionOrThrow(skill);
     }
-    case SkillType.HanziWordToPinyinTone: {
+    case SkillKind.HanziWordToPinyinTone: {
       skill = skill as HanziWordSkill;
       return await hanziWordToPinyinToneQuestionOrThrow(skill);
     }
-    case SkillType.Deprecated_EnglishToRadical:
-    case SkillType.Deprecated_PinyinToRadical:
-    case SkillType.Deprecated_RadicalToEnglish:
-    case SkillType.Deprecated_RadicalToPinyin:
-    case SkillType.Deprecated:
-    case SkillType.GlossToHanziWord:
-    case SkillType.HanziWordToPinyin:
-    case SkillType.ImageToHanziWord:
-    case SkillType.PinyinFinalAssociation:
-    case SkillType.PinyinInitialAssociation:
-    case SkillType.PinyinToHanziWord: {
+    case SkillKind.Deprecated_EnglishToRadical:
+    case SkillKind.Deprecated_PinyinToRadical:
+    case SkillKind.Deprecated_RadicalToEnglish:
+    case SkillKind.Deprecated_RadicalToPinyin:
+    case SkillKind.Deprecated:
+    case SkillKind.GlossToHanziWord:
+    case SkillKind.HanziWordToPinyin:
+    case SkillKind.ImageToHanziWord:
+    case SkillKind.PinyinFinalAssociation:
+    case SkillKind.PinyinInitialAssociation:
+    case SkillKind.PinyinToHanziWord: {
       throw new Error(`todo: not implemented`);
     }
   }

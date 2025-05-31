@@ -46,7 +46,7 @@ for (const char of allChars) {
   );
   const idsNode = parseIds(ids);
   for (const leaf of walkIdsNode(idsNode)) {
-    if (leaf.type === `LeafCharacter`) {
+    if (leaf.operator === `LeafCharacter`) {
       allComponents.add(leaf.character);
     }
   }

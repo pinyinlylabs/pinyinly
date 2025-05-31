@@ -1,5 +1,8 @@
-import type { SrsStateFsrsFourPointFive, SrsStateMock } from "#data/model.ts";
-import { SrsType } from "#data/model.ts";
+import type {
+  SrsStateFsrsFourPointFiveType,
+  SrsStateMockType,
+} from "#data/model.ts";
+import { SrsKind } from "#data/model.ts";
 import type { Rating } from "#util/fsrs.ts";
 import { nextReview } from "#util/fsrs.ts";
 import { invariant } from "@haohaohow/lib/invariant";
@@ -66,9 +69,9 @@ export const parseRelativeTimeShorthand = (
 export const mockSrsState = (
   prevReviewAt: Date,
   nextReviewAt: Date,
-): SrsStateMock => {
+): SrsStateMockType => {
   return {
-    type: SrsType.Mock,
+    kind: SrsKind.Mock,
     prevReviewAt,
     nextReviewAt,
   };
@@ -78,7 +81,7 @@ export const fsrsSrsState = (
   prevReviewAt: Date,
   nextReviewAt: Date,
   rating: Rating,
-): SrsStateFsrsFourPointFive => {
+): SrsStateFsrsFourPointFiveType => {
   let state = null;
   for (const now of [时`-20d`, 时`-15d`, 时`-10d`, 时`-5d`, 时`-2d`]) {
     state = nextReview(state, rating, now);
@@ -86,7 +89,7 @@ export const fsrsSrsState = (
   invariant(state != null);
 
   return {
-    type: SrsType.FsrsFourPointFive,
+    kind: SrsKind.FsrsFourPointFive,
     prevReviewAt,
     nextReviewAt,
     stability: state.stability,

@@ -1,26 +1,18 @@
 import { useHanziWordMeaning } from "@/client/hooks/useHanziWordMeaning";
-import { useMultiChoiceQuizTimer } from "@/client/hooks/useMultiChoiceQuizTimer";
 import type {
-  Mistake,
+  HanziToPinyinQuestion,
+  MistakeType,
   NewSkillRating,
-  OneCorrectPairQuestion,
-  OneCorrectPairQuestionChoice,
-  QuestionFlag,
+  QuestionFlagType,
 } from "@/data/model";
-import { QuestionFlagType, SkillType } from "@/data/model";
+import { QuestionFlagKind, SkillKind } from "@/data/model";
 import type { HanziWordSkill, Skill } from "@/data/rizzleSchema";
-import {
-  computeSkillRating,
-  hanziWordFromSkill,
-  oneCorrectPairQuestionChoiceMistakes,
-  skillTypeFromSkill,
-} from "@/data/skills";
-import { invariant } from "@haohaohow/lib/invariant";
+import { hanziWordFromSkill, skillKindFromSkill } from "@/data/skills";
 import { formatDuration } from "date-fns/formatDuration";
 import { intervalToDuration } from "date-fns/intervalToDuration";
 import { Image } from "expo-image";
 import type { ReactNode } from "react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { StyleProp, ViewStyle } from "react-native";
 import {
   // eslint-disable-next-line @typescript-eslint/no-restricted-imports
@@ -37,88 +29,25 @@ import { HanziWordRefText } from "./HanziWordRefText";
 import { Hhhmark } from "./Hhhmark";
 import { NewSkillModal } from "./NewSkillModal";
 import { RectButton2 } from "./RectButton2";
-import type { TextAnswerButtonState } from "./TextAnswerButton";
-import { TextAnswerButton } from "./TextAnswerButton";
 import type { PropsOf } from "./types";
-
-const buttonThickness = 4;
-const gap = 12;
 
 export function QuizDeckHanziToPinyinQuestion({
   question,
   onNext,
-  onRating,
 }: {
-  question: OneCorrectPairQuestion;
+  question: HanziToPinyinQuestion;
   onNext: () => void;
-  onRating: (ratings: NewSkillRating[], mistakes: Mistake[]) => void;
+  onRating: (ratings: NewSkillRating[], mistakes: MistakeType[]) => void;
 }) {
-  const { prompt, answer, groupA, groupB, flag } = question;
+  const { prompt, skill, flag } = question;
 
-  const [selectedAChoice, setSelectedAChoice] =
-    useState<OneCorrectPairQuestionChoice>();
-  const [selectedBChoice, setSelectedBChoice] =
-    useState<OneCorrectPairQuestionChoice>();
-  const [isCorrect, setIsCorrect] = useState<boolean>();
-
-  // Setup the timer to measure how fast they answer the question.
-  const timer = useMultiChoiceQuizTimer();
-  const isSelectedAChoiceCorrect = selectedAChoice === answer.a;
-  const isSelectedBChoiceCorrect = selectedBChoice === answer.a;
-  useEffect(() => {
-    timer.recordChoice(isSelectedAChoiceCorrect);
-  }, [isSelectedAChoiceCorrect, timer]);
-  useEffect(() => {
-    timer.recordChoice(isSelectedBChoiceCorrect);
-  }, [isSelectedBChoiceCorrect, timer]);
-
-  const choiceRowCount = Math.max(groupA.length, groupB.length);
-  const choiceRows: {
-    a: OneCorrectPairQuestionChoice;
-    b: OneCorrectPairQuestionChoice;
-  }[] = [];
-
-  for (let i = 0; i < choiceRowCount; i++) {
-    const a = groupA[i];
-    const b = groupB[i];
-    invariant(a !== undefined && b !== undefined, `missing choice`);
-    choiceRows.push({ a, b });
-  }
-
-  invariant(groupA.includes(answer.a));
-  invariant(groupB.includes(answer.b));
+  const isCorrect = false as boolean | null;
 
   const handleSubmit = () => {
-    if (
-      isCorrect === undefined &&
-      selectedAChoice != null &&
-      selectedBChoice != null
-    ) {
-      const isCorrect =
-        selectedAChoice === answer.a && selectedBChoice === answer.b;
-
-      const mistakes = isCorrect
-        ? []
-        : oneCorrectPairQuestionChoiceMistakes(
-            selectedAChoice,
-            selectedBChoice,
-          );
-
-      const durationMs = (timer.endTime ?? Date.now()) - timer.startTime;
-      const skillRatings: NewSkillRating[] = [
-        computeSkillRating({
-          skill: answer.skill,
-          correct: isCorrect,
-          durationMs,
-        }),
-      ];
-
-      setIsCorrect(isCorrect);
-      onRating(skillRatings, mistakes);
-    } else {
-      onNext();
-    }
+    onNext();
   };
+
+  const submitEnabled = false as boolean;
 
   return (
     <Skeleton
@@ -152,25 +81,7 @@ export function QuizDeckHanziToPinyinQuestion({
                   Correct answer:
                 </Text>
 
-                <SkillAnswer
-                  skill={answer.skill}
-                  includeHint
-                  includeAlternatives
-                />
-
-                {selectedAChoice != null && selectedBChoice != null ? (
-                  <View className="flex-row flex-wrap items-center gap-2">
-                    <Text className="shrink-0 font-bold leading-snug text-body">
-                      Your answer:
-                    </Text>
-                    <View className="flex-1 flex-row flex-wrap items-center">
-                      <Hhhmark
-                        source={`${choiceToHhhmark(selectedAChoice)} + ${choiceToHhhmark(selectedBChoice)}`}
-                        context="caption"
-                      />
-                    </View>
-                  </View>
-                ) : null}
+                <SkillAnswer skill={skill} includeHint includeAlternatives />
               </>
             )}
           </View>
@@ -179,7 +90,7 @@ export function QuizDeckHanziToPinyinQuestion({
       submitButton={
         <SubmitButton
           state={
-            selectedAChoice === undefined || selectedBChoice === undefined
+            submitEnabled
               ? SubmitButtonState.Disabled
               : isCorrect == null
                 ? SubmitButtonState.Check
@@ -191,80 +102,22 @@ export function QuizDeckHanziToPinyinQuestion({
         />
       }
     >
-      {flag?.type === QuestionFlagType.NewSkill ? (
-        <NewSkillModal passivePresentation skill={question.answer.skill} />
+      {flag?.kind === QuestionFlagKind.NewSkill ? (
+        <NewSkillModal passivePresentation skill={skill} />
       ) : null}
 
       {flag == null ? null : <FlagText flag={flag} />}
       <View>
         <Text className="text-xl font-bold text-body">{prompt}</Text>
       </View>
-      <View className="flex-1 justify-center py-quiz-px">
-        <View
-          className="flex-1"
-          style={{
-            gap: gap + buttonThickness,
-            maxHeight:
-              choiceRowCount * 80 +
-              (choiceRowCount - 1) * gap +
-              buttonThickness,
-          }}
-        >
-          {choiceRows.map(({ a, b }, i) => (
-            <View className="flex-1 flex-row gap-[28px]" key={i}>
-              <ChoiceButton
-                choice={a}
-                state={
-                  selectedAChoice === undefined
-                    ? `default`
-                    : a === selectedAChoice
-                      ? isCorrect == null
-                        ? `selected`
-                        : isCorrect
-                          ? `success`
-                          : `error`
-                      : selectedBChoice === undefined
-                        ? `default`
-                        : `dimmed`
-                }
-                onPress={() => {
-                  if (isCorrect == null) {
-                    setSelectedAChoice((x) => (x === a ? undefined : a));
-                  }
-                }}
-              />
-              <ChoiceButton
-                choice={b}
-                state={
-                  selectedBChoice === undefined
-                    ? `default`
-                    : b === selectedBChoice
-                      ? isCorrect == null
-                        ? `selected`
-                        : isCorrect
-                          ? `success`
-                          : `error`
-                      : selectedAChoice === undefined
-                        ? `default`
-                        : `dimmed`
-                }
-                onPress={() => {
-                  if (isCorrect == null) {
-                    setSelectedBChoice((x) => (x === b ? undefined : b));
-                  }
-                }}
-              />
-            </View>
-          ))}
-        </View>
-      </View>
+      <View className="flex-1 justify-center py-quiz-px"></View>
     </Skeleton>
   );
 }
 
-const FlagText = ({ flag }: { flag: QuestionFlag }) => {
-  switch (flag.type) {
-    case QuestionFlagType.NewSkill: {
+const FlagText = ({ flag }: { flag: QuestionFlagType }) => {
+  switch (flag.kind) {
+    case QuestionFlagKind.NewSkill: {
       return (
         <View className={flagViewClass({ class: `success-theme` })}>
           <Image
@@ -276,7 +129,7 @@ const FlagText = ({ flag }: { flag: QuestionFlag }) => {
         </View>
       );
     }
-    case QuestionFlagType.Overdue: {
+    case QuestionFlagKind.Overdue: {
       return (
         <View className={flagViewClass({ class: `danger-theme` })}>
           <Image
@@ -304,7 +157,7 @@ const FlagText = ({ flag }: { flag: QuestionFlag }) => {
         </View>
       );
     }
-    case QuestionFlagType.Retry: {
+    case QuestionFlagKind.Retry: {
       return (
         <View className={flagViewClass({ class: `warning-theme` })}>
           <Image
@@ -316,7 +169,7 @@ const FlagText = ({ flag }: { flag: QuestionFlag }) => {
         </View>
       );
     }
-    case QuestionFlagType.WeakWord: {
+    case QuestionFlagKind.WeakWord: {
       return (
         <View className={flagViewClass({ class: `danger-theme` })}>
           <Image
@@ -343,25 +196,9 @@ const flagTextClass = tv({
   base: `font-bold uppercase text-accent-10`,
 });
 
-function choiceToHhhmark(choice: OneCorrectPairQuestionChoice): string {
-  switch (choice.type) {
-    case `gloss`: {
-      return `**${choice.value}**`;
-    }
-    case `hanzi`: {
-      return `**${choice.value}**`;
-    }
-    case `pinyin`: {
-      return `**${choice.value}**`;
-    }
-  }
-}
-
 const SkillAnswer = ({
   skill,
   includeHint = false,
-  // hideA = false,
-  // hideB = false,
 }: {
   skill: Skill;
   includeAlternatives?: boolean;
@@ -370,31 +207,31 @@ const SkillAnswer = ({
   hideB?: boolean;
   small?: boolean;
 }) => {
-  switch (skillTypeFromSkill(skill)) {
-    case SkillType.Deprecated_EnglishToRadical:
-    case SkillType.Deprecated_PinyinToRadical:
-    case SkillType.Deprecated_RadicalToEnglish:
-    case SkillType.Deprecated_RadicalToPinyin:
-    case SkillType.Deprecated:
-    case SkillType.GlossToHanziWord:
-    case SkillType.ImageToHanziWord:
-    case SkillType.PinyinFinalAssociation:
-    case SkillType.PinyinInitialAssociation:
-    case SkillType.PinyinToHanziWord: {
+  switch (skillKindFromSkill(skill)) {
+    case SkillKind.Deprecated_EnglishToRadical:
+    case SkillKind.Deprecated_PinyinToRadical:
+    case SkillKind.Deprecated_RadicalToEnglish:
+    case SkillKind.Deprecated_RadicalToPinyin:
+    case SkillKind.Deprecated:
+    case SkillKind.GlossToHanziWord:
+    case SkillKind.ImageToHanziWord:
+    case SkillKind.PinyinFinalAssociation:
+    case SkillKind.PinyinInitialAssociation:
+    case SkillKind.PinyinToHanziWord: {
       throw new Error(
-        `ShowSkillAnswer not implemented for ${skillTypeFromSkill(skill)}`,
+        `ShowSkillAnswer not implemented for ${skillKindFromSkill(skill)}`,
       );
     }
-    case SkillType.HanziWordToGloss: {
+    case SkillKind.HanziWordToGloss: {
       skill = skill as HanziWordSkill;
       return (
         <HanziWordToGlossSkillAnswer skill={skill} includeHint={includeHint} />
       );
     }
-    case SkillType.HanziWordToPinyin:
-    case SkillType.HanziWordToPinyinFinal:
-    case SkillType.HanziWordToPinyinInitial:
-    case SkillType.HanziWordToPinyinTone: {
+    case SkillKind.HanziWordToPinyin:
+    case SkillKind.HanziWordToPinyinFinal:
+    case SkillKind.HanziWordToPinyinInitial:
+    case SkillKind.HanziWordToPinyinTone: {
       skill = skill as HanziWordSkill;
       return <HanziWordToPinyinSkillAnswer skill={skill} />;
     }
@@ -564,26 +401,3 @@ function SubmitButton({
     </RectButton2>
   );
 }
-
-const ChoiceButton = ({
-  state,
-  choice,
-  onPress,
-}: {
-  state: TextAnswerButtonState;
-  choice: OneCorrectPairQuestionChoice;
-  onPress: (choice: OneCorrectPairQuestionChoice) => void;
-}) => {
-  const handlePress = useCallback(() => {
-    onPress(choice);
-  }, [onPress, choice]);
-
-  return (
-    <TextAnswerButton
-      onPress={handlePress}
-      state={state}
-      className="flex-1"
-      text={choice.value}
-    />
-  );
-};

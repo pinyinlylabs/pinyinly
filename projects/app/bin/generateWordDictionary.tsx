@@ -133,7 +133,7 @@ function decomp(char: string) {
   if (ids != null) {
     const idsNode = parseIds(ids);
     for (const leaf of walkIdsNode(idsNode)) {
-      if (leaf.type === `LeafCharacter` && leaf.character !== char) {
+      if (leaf.operator === `LeafCharacter` && leaf.character !== char) {
         decomp(leaf.character);
       }
     }
@@ -195,7 +195,7 @@ async function checkHsk1HanziWords(
     }
 
     const json = await openai(
-      [`curriculum.md`, `word-representation.md`, `skill-types.md`],
+      [`curriculum.md`, `word-representation.md`, `skill-kinds.md`],
       `
 Can you check my word list for HSK1 and make sure it's correct. I need to know if the gloss I have for each word is correct.
 
@@ -579,7 +579,7 @@ const HanziEditor = ({
                     [
                       `curriculum.md`,
                       `word-representation.md`,
-                      `skill-types.md`,
+                      `skill-kinds.md`,
                     ],
                     `
 I want to create a new HanziWord entry for ${hanzi} based on the gloss: ${query}
@@ -659,7 +659,7 @@ async function openAiHanziWordGlossHintQuery(
       hanziIds = hanziIds.replaceAll(char, ids);
 
       for (const leaf of walkIdsNode(parseIds(ids))) {
-        switch (leaf.type) {
+        switch (leaf.operator) {
           case `LeafUnknownCharacter`: {
             mapSetAdd(
               componentGlosses,
@@ -1661,7 +1661,7 @@ interface GenerateHanziWordQuery {
 
 async function queryOpenAiForHanziWordResults(query: unknown) {
   const { suggestions } = await openai(
-    [`curriculum.md`, `word-representation.md`, `skill-types.md`],
+    [`curriculum.md`, `word-representation.md`, `skill-kinds.md`],
     `
 I have a hanzi I want to add to a word list, can fill in the rest of the data for me?
 

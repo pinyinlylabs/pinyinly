@@ -26,16 +26,16 @@ import type { DeepReadonly } from "ts-essentials";
 import { splitHanziText } from "./hanzi";
 import { parseHhhmark } from "./hhhmark";
 import type {
-  HanziGlossMistake,
-  HanziPinyinMistake,
+  HanziGlossMistakeType,
+  HanziPinyinMistakeType,
   HanziWord,
-  HanziWordSkillType,
-  Mistake,
+  HanziWordSkillKind,
+  MistakeType,
   NewSkillRating,
   OneCorrectPairQuestionChoice,
-  SrsState,
+  SrsStateType,
 } from "./model";
-import { MistakeType, SkillType, SrsType } from "./model";
+import { MistakeKind, SkillKind, SrsKind } from "./model";
 import { splitPinyinText } from "./pinyin";
 import type {
   HanziWordSkill,
@@ -44,7 +44,7 @@ import type {
   Skill,
   SkillRating,
 } from "./rizzleSchema";
-import { rSkillType, srsStateFromFsrsState } from "./rizzleSchema";
+import { rSkillKind, srsStateFromFsrsState } from "./rizzleSchema";
 
 export interface Node {
   skill: Skill;
@@ -81,22 +81,22 @@ export async function skillLearningGraph(options: {
   return graph;
 }
 
-export const skillTypeFromSkill = (skill: Skill): SkillType => {
+export const skillKindFromSkill = (skill: Skill): SkillKind => {
   const result = /^(.+?):/.exec(skill);
   invariant(result != null, `doesn't match *:* pattern`);
 
-  const [, marshaledSkillType] = result;
-  invariant(marshaledSkillType != null, `couldn't parse skill type (before :)`);
+  const [, marshaledSkillKind] = result;
+  invariant(marshaledSkillKind != null, `couldn't parse skill kind (before :)`);
 
-  return rSkillType().unmarshal(marshaledSkillType);
+  return rSkillKind().unmarshal(marshaledSkillKind);
 };
 
 export const hanziWordFromSkill = (skill: HanziWordSkill): HanziWord => {
   const result = /^(.+?):(.+)$/.exec(skill);
   invariant(result != null, `doesn't match *:* pattern`);
 
-  const [, marshaledSkillType, hanziWord] = result;
-  invariant(marshaledSkillType != null, `couldn't parse skill type (before :)`);
+  const [, marshaledSkillKind, hanziWord] = result;
+  invariant(marshaledSkillKind != null, `couldn't parse skill kind (before :)`);
   invariant(hanziWord != null, `couldn't parse hanzi word (after :)`);
 
   return hanziWord as HanziWord;
@@ -108,8 +108,8 @@ export const initialFromPinyinInitialAssociationSkill = (
   const result = /^(.+?):(.+)$/.exec(skill);
   invariant(result != null, `doesn't match *:* pattern`);
 
-  const [, marshaledSkillType, initial] = result;
-  invariant(marshaledSkillType != null, `couldn't parse skill type (before :)`);
+  const [, marshaledSkillKind, initial] = result;
+  invariant(marshaledSkillKind != null, `couldn't parse skill kind (before :)`);
   invariant(initial != null, `couldn't parse pinyin initial (after :)`);
 
   return initial;
@@ -121,8 +121,8 @@ export const finalFromPinyinFinalAssociationSkill = (
   const result = /^(.+?):(.+)$/.exec(skill);
   invariant(result != null, `doesn't match *:* pattern`);
 
-  const [, marshaledSkillType, final] = result;
-  invariant(marshaledSkillType != null, `couldn't parse skill type (before :)`);
+  const [, marshaledSkillKind, final] = result;
+  invariant(marshaledSkillKind != null, `couldn't parse skill kind (before :)`);
   invariant(final != null, `couldn't parse pinyin final (after :)`);
 
   return final;
@@ -138,17 +138,17 @@ export const hanziWordToGlossHanziWord = (
 
 export async function skillDependencies(skill: Skill): Promise<Skill[]> {
   const deps: Skill[] = [];
-  const skillType = skillTypeFromSkill(skill);
+  const skillKind = skillKindFromSkill(skill);
 
-  switch (skillType) {
-    case SkillType.GlossToHanziWord: {
+  switch (skillKind) {
+    case SkillKind.GlossToHanziWord: {
       skill = skill as HanziWordSkill;
       // Learn the Hanzi -> Gloss first. It's easier to read than write (for chinese characters).
       deps.push(hanziWordToGloss(hanziWordFromSkill(skill)));
       break;
     }
 
-    case SkillType.HanziWordToGloss: {
+    case SkillKind.HanziWordToGloss: {
       skill = skill as HanziWordSkill;
       const hanziWord = hanziWordFromSkill(skill);
       const hanzi = hanziFromHanziWord(hanziWord);
@@ -191,7 +191,7 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
           // Check if the character was already added as a dependency by being
           // referenced in the gloss hint.
           const depAlreadyAdded = deps.some((x) => {
-            if (skillTypeFromSkill(x) === SkillType.HanziWordToGloss) {
+            if (skillKindFromSkill(x) === SkillKind.HanziWordToGloss) {
               skill = skill as HanziWordSkill;
               return (
                 hanziFromHanziWord(hanziWordFromSkill(skill)) ===
@@ -216,7 +216,7 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
       break;
     }
 
-    case SkillType.HanziWordToPinyin: {
+    case SkillKind.HanziWordToPinyin: {
       skill = skill as HanziWordSkill;
       const hanziWord = hanziWordFromSkill(skill);
       const hanzi = hanziFromHanziWord(hanziWord);
@@ -254,42 +254,42 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
       break;
     }
 
-    case SkillType.HanziWordToPinyinTone: {
+    case SkillKind.HanziWordToPinyinTone: {
       skill = skill as HanziWordSkill;
       const hanziWord = hanziWordFromSkill(skill);
       const hanzi = hanziFromHanziWord(hanziWord);
 
       invariant(
         characterCount(hanzi) === 1,
-        `${skillType} only applies to single character hanzi`,
+        `${skillKind} only applies to single character hanzi`,
       );
 
       deps.push(hanziWordToPinyinFinal(hanziWord));
       break;
     }
 
-    case SkillType.HanziWordToPinyinFinal: {
+    case SkillKind.HanziWordToPinyinFinal: {
       skill = skill as HanziWordSkill;
       const hanziWord = hanziWordFromSkill(skill);
       const hanzi = hanziFromHanziWord(hanziWord);
 
       invariant(
         characterCount(hanzi) === 1,
-        `${skillType} only applies to single character hanzi`,
+        `${skillKind} only applies to single character hanzi`,
       );
 
       deps.push(hanziWordToPinyinInitial(hanziWord));
       break;
     }
 
-    case SkillType.HanziWordToPinyinInitial: {
+    case SkillKind.HanziWordToPinyinInitial: {
       skill = skill as HanziWordSkill;
       const hanziWord = hanziWordFromSkill(skill);
       const hanzi = hanziFromHanziWord(hanziWord);
 
       invariant(
         characterCount(hanzi) === 1,
-        `${skillType} only applies to single character hanzi`,
+        `${skillKind} only applies to single character hanzi`,
       );
 
       // Learn the Hanzi -> Gloss first. Knowing the meaning of the character
@@ -298,7 +298,7 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
       break;
     }
 
-    case SkillType.PinyinToHanziWord: {
+    case SkillKind.PinyinToHanziWord: {
       skill = skill as HanziWordSkill;
       const hanziWord = hanziWordFromSkill(skill);
       // Learn going from Hanzi -> Pinyin first.
@@ -310,14 +310,14 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
       break;
     }
 
-    case SkillType.Deprecated:
-    case SkillType.Deprecated_RadicalToEnglish:
-    case SkillType.Deprecated_EnglishToRadical:
-    case SkillType.Deprecated_RadicalToPinyin:
-    case SkillType.Deprecated_PinyinToRadical:
-    case SkillType.ImageToHanziWord:
-    case SkillType.PinyinInitialAssociation:
-    case SkillType.PinyinFinalAssociation: {
+    case SkillKind.Deprecated:
+    case SkillKind.Deprecated_RadicalToEnglish:
+    case SkillKind.Deprecated_EnglishToRadical:
+    case SkillKind.Deprecated_RadicalToPinyin:
+    case SkillKind.Deprecated_PinyinToRadical:
+    case SkillKind.ImageToHanziWord:
+    case SkillKind.PinyinInitialAssociation:
+    case SkillKind.PinyinFinalAssociation: {
       // Leaf skills (no dependencies).
       break;
     }
@@ -335,40 +335,40 @@ async function hackyGuessHanziWordToLearn(
 }
 
 export function hanziWordSkill(
-  type: HanziWordSkillType,
+  type: HanziWordSkillKind,
   hanziWord: HanziWord,
 ): HanziWordSkill {
-  return `${rSkillType().marshal(type)}:${hanziWord}` as HanziWordSkill;
+  return `${rSkillKind().marshal(type)}:${hanziWord}` as HanziWordSkill;
 }
 
 export const hanziWordToGloss = (hanziWord: HanziWord) =>
-  hanziWordSkill(SkillType.HanziWordToGloss, hanziWord);
+  hanziWordSkill(SkillKind.HanziWordToGloss, hanziWord);
 
 export const hanziWordToPinyin = (hanziWord: HanziWord) =>
-  hanziWordSkill(SkillType.HanziWordToPinyin, hanziWord);
+  hanziWordSkill(SkillKind.HanziWordToPinyin, hanziWord);
 
 export const hanziWordToPinyinInitial = (hanziWord: HanziWord) =>
-  hanziWordSkill(SkillType.HanziWordToPinyinInitial, hanziWord);
+  hanziWordSkill(SkillKind.HanziWordToPinyinInitial, hanziWord);
 
 export const hanziWordToPinyinFinal = (hanziWord: HanziWord) =>
-  hanziWordSkill(SkillType.HanziWordToPinyinFinal, hanziWord);
+  hanziWordSkill(SkillKind.HanziWordToPinyinFinal, hanziWord);
 
 export const hanziWordToPinyinTone = (hanziWord: HanziWord) =>
-  hanziWordSkill(SkillType.HanziWordToPinyinTone, hanziWord);
+  hanziWordSkill(SkillKind.HanziWordToPinyinTone, hanziWord);
 
 export const glossToHanziWord = (hanziWord: HanziWord) =>
-  hanziWordSkill(SkillType.GlossToHanziWord, hanziWord);
+  hanziWordSkill(SkillKind.GlossToHanziWord, hanziWord);
 
 export function pinyinFinalAssociation(
   final: string,
 ): PinyinInitialAssociationSkill {
-  return `${rSkillType().marshal(SkillType.PinyinFinalAssociation)}:${final}` as PinyinInitialAssociationSkill;
+  return `${rSkillKind().marshal(SkillKind.PinyinFinalAssociation)}:${final}` as PinyinInitialAssociationSkill;
 }
 
 export function pinyinInitialAssociation(
   initial: string,
 ): PinyinInitialAssociationSkill {
-  return `${rSkillType().marshal(SkillType.PinyinInitialAssociation)}:${initial}` as PinyinInitialAssociationSkill;
+  return `${rSkillKind().marshal(SkillKind.PinyinInitialAssociation)}:${initial}` as PinyinInitialAssociationSkill;
 }
 
 export interface SkillReviewQueue {
@@ -415,7 +415,7 @@ export function skillReviewQueue({
   now = new Date(),
 }: {
   graph: SkillLearningGraph;
-  skillSrsStates: Map<Skill, SrsState>;
+  skillSrsStates: Map<Skill, SrsStateType>;
   latestSkillRatings: Map<Skill, Pick<SkillRating, `rating` | `createdAt`>>;
   now?: Date;
 }): SkillReviewQueue {
@@ -429,19 +429,19 @@ export function skillReviewQueue({
   const learningOrderOverDue: [Skill, Date][] = [];
   const learningOrderDue: [Skill, Date][] = [];
   const learningOrderNew: Skill[] = [];
-  const learningOrderNotDue: [Skill, SrsState | undefined][] = [];
+  const learningOrderNotDue: [Skill, SrsStateType | undefined][] = [];
   const learningOrderBlocked: Skill[] = [];
   let newOverDueAt: Date | null = null;
   let newDueAt: Date | null = null;
 
-  // Calculate how many unstable skills there are for each skill type.
-  const unstableSkillCounts = new Map<SkillType, number>();
+  // Calculate how many unstable skills there are for each skill kind.
+  const unstableSkillCounts = new Map<SkillKind, number>();
   for (const [skill, srsState] of skillSrsStates) {
     const alreadyIntroduced = !needsToBeIntroduced(srsState, now);
     if (alreadyIntroduced && !isStable(srsState)) {
-      const skillType = skillTypeFromSkill(skill);
-      const count = unstableSkillCounts.get(skillType) ?? 0;
-      unstableSkillCounts.set(skillType, count + 1);
+      const skillKind = skillKindFromSkill(skill);
+      const count = unstableSkillCounts.get(skillKind) ?? 0;
+      unstableSkillCounts.set(skillKind, count + 1);
     }
   }
 
@@ -454,13 +454,13 @@ export function skillReviewQueue({
     // once than if you only know 10 words.
     const throttleLimit = 15;
     return (
-      (unstableSkillCounts.get(skillTypeFromSkill(skill)) ?? 0) < throttleLimit
+      (unstableSkillCounts.get(skillKindFromSkill(skill)) ?? 0) < throttleLimit
     );
   }
 
   function enqueueReviewOnce(
     skill: Skill,
-    srsState: SrsState | null | undefined,
+    srsState: SrsStateType | null | undefined,
   ) {
     if (learningOrderIncluded.has(skill)) {
       return;
@@ -520,11 +520,11 @@ export function skillReviewQueue({
     for (const dep of graph.get(skill)?.dependencies ?? emptySet) {
       const srsState = skillSrsStates.get(dep);
 
-      switch (srsState?.type) {
-        case SrsType.Mock: {
+      switch (srsState?.kind) {
+        case SrsKind.Mock: {
           break;
         }
-        case SrsType.FsrsFourPointFive: {
+        case SrsKind.FsrsFourPointFive: {
           if (!fsrsIsStable(srsState)) {
             return false;
           }
@@ -617,13 +617,13 @@ export function skillReviewQueue({
  * @param skillStates
  * @returns
  */
-const randomSortSkills = (skillStates: [Skill, SrsState | undefined][]) => {
+const randomSortSkills = (skillStates: [Skill, SrsStateType | undefined][]) => {
   let totalWeight = 0;
 
   const weighted = skillStates.map(([skill, srsState]): [Skill, number] => {
     // Compute weights: lower stability = higher selection weight
     const learningScore =
-      srsState?.type === SrsType.FsrsFourPointFive
+      srsState?.kind === SrsKind.FsrsFourPointFive
         ? // either difficulty or stability should always change after each
           // review, so combining them ensures each review changes the random
           // order and avoids getting stuck in a loop repeating a review for the
@@ -653,30 +653,30 @@ const randomSortSkills = (skillStates: [Skill, SrsState | undefined][]) => {
   return weighted.map(([skill]) => skill);
 };
 
-const skillTypeShorthandMapping: Record<SkillType, string> = {
-  [SkillType.Deprecated_EnglishToRadical]: `[deprecated]`,
-  [SkillType.Deprecated_PinyinToRadical]: `[deprecated]`,
-  [SkillType.Deprecated_RadicalToEnglish]: `[deprecated]`,
-  [SkillType.Deprecated_RadicalToPinyin]: `[deprecated]`,
-  [SkillType.Deprecated]: `[deprecated]`,
-  [SkillType.GlossToHanziWord]: `EN → 中文`,
-  [SkillType.HanziWordToGloss]: `中文 → EN`,
-  [SkillType.HanziWordToPinyin]: `中文 → PY`,
-  [SkillType.HanziWordToPinyinFinal]: `中文 → PY⁻ᶠ`,
-  [SkillType.HanziWordToPinyinInitial]: `中文 → PYⁱ⁻`,
-  [SkillType.HanziWordToPinyinTone]: `中文 → PYⁿ`,
-  [SkillType.ImageToHanziWord]: `🏞️ → 中文`,
-  [SkillType.PinyinFinalAssociation]: `PY⁻ᶠ → ✦`,
-  [SkillType.PinyinInitialAssociation]: `PYⁱ⁻ → ✦`,
-  [SkillType.PinyinToHanziWord]: `PY → 中文`,
+const skillKindShorthandMapping: Record<SkillKind, string> = {
+  [SkillKind.Deprecated_EnglishToRadical]: `[deprecated]`,
+  [SkillKind.Deprecated_PinyinToRadical]: `[deprecated]`,
+  [SkillKind.Deprecated_RadicalToEnglish]: `[deprecated]`,
+  [SkillKind.Deprecated_RadicalToPinyin]: `[deprecated]`,
+  [SkillKind.Deprecated]: `[deprecated]`,
+  [SkillKind.GlossToHanziWord]: `EN → 中文`,
+  [SkillKind.HanziWordToGloss]: `中文 → EN`,
+  [SkillKind.HanziWordToPinyin]: `中文 → PY`,
+  [SkillKind.HanziWordToPinyinFinal]: `中文 → PY⁻ᶠ`,
+  [SkillKind.HanziWordToPinyinInitial]: `中文 → PYⁱ⁻`,
+  [SkillKind.HanziWordToPinyinTone]: `中文 → PYⁿ`,
+  [SkillKind.ImageToHanziWord]: `🏞️ → 中文`,
+  [SkillKind.PinyinFinalAssociation]: `PY⁻ᶠ → ✦`,
+  [SkillKind.PinyinInitialAssociation]: `PYⁱ⁻ → ✦`,
+  [SkillKind.PinyinToHanziWord]: `PY → 中文`,
 };
 
-export function skillTypeToShorthand(skillType: SkillType): string {
-  return skillTypeShorthandMapping[skillType];
+export function skillKindToShorthand(skillKind: SkillKind): string {
+  return skillKindShorthandMapping[skillKind];
 }
 
 export async function skillsToReReviewForHanziGlossMistake(
-  mistake: HanziGlossMistake,
+  mistake: HanziGlossMistakeType,
 ): Promise<ReadonlySet<Skill>> {
   const skills = new Set<Skill>();
 
@@ -694,7 +694,7 @@ export async function skillsToReReviewForHanziGlossMistake(
 }
 
 export async function skillsToReReviewForHanziPinyinMistake(
-  mistake: HanziPinyinMistake,
+  mistake: HanziPinyinMistakeType,
 ): Promise<ReadonlySet<Skill>> {
   const skills = new Set<Skill>();
 
@@ -711,15 +711,15 @@ export async function skillsToReReviewForHanziPinyinMistake(
  * wasn't tied to a specific skill. It should make the skill reviewed again
  * soon.
  */
-export function nextReviewForOtherSkillMistake<T extends SrsState>(
+export function nextReviewForOtherSkillMistake<T extends SrsStateType>(
   srs: T,
   now: Date,
 ): T {
-  switch (srs.type) {
-    case SrsType.Mock: {
+  switch (srs.kind) {
+    case SrsKind.Mock: {
       return srs;
     }
-    case SrsType.FsrsFourPointFive: {
+    case SrsKind.FsrsFourPointFive: {
       // Schedule the skill for immediate review, but don't actually mark it as
       // an error (`Rating.Again`) otherwise the difficulty and stability will
       // change, but they haven't actually made a mistake yet on that skill.
@@ -734,8 +734,8 @@ export function nextReviewForOtherSkillMistake<T extends SrsState>(
 export function oneCorrectPairQuestionChoiceMistakes(
   choice1: OneCorrectPairQuestionChoice,
   choice2: OneCorrectPairQuestionChoice,
-): Mistake[] {
-  const mistakes: Mistake[] = [];
+): MistakeType[] {
+  const mistakes: MistakeType[] = [];
 
   const mistakeChecks = [hanziGlossMistake, hanziPinyinMistake];
   // Check all combinations of the choices, this makes each check simpler as it
@@ -759,10 +759,10 @@ export function oneCorrectPairQuestionChoiceMistakes(
 export function hanziGlossMistake(
   choice1: OneCorrectPairQuestionChoice,
   choice2: OneCorrectPairQuestionChoice,
-): HanziGlossMistake | undefined {
-  if (choice1.type === `hanzi` && choice2.type === `gloss`) {
+): HanziGlossMistakeType | undefined {
+  if (choice1.kind === `hanzi` && choice2.kind === `gloss`) {
     return {
-      type: MistakeType.HanziGloss,
+      kind: MistakeKind.HanziGloss,
       hanzi: choice1.value,
       gloss: choice2.value,
     };
@@ -772,10 +772,10 @@ export function hanziGlossMistake(
 export function hanziPinyinMistake(
   choice1: OneCorrectPairQuestionChoice,
   choice2: OneCorrectPairQuestionChoice,
-): HanziPinyinMistake | undefined {
-  if (choice1.type === `hanzi` && choice2.type === `pinyin`) {
+): HanziPinyinMistakeType | undefined {
+  if (choice1.kind === `hanzi` && choice2.kind === `pinyin`) {
     return {
-      type: MistakeType.HanziPinyin,
+      kind: MistakeKind.HanziPinyin,
       hanzi: choice1.value,
       pinyin: choice2.value,
     };
@@ -787,7 +787,7 @@ export function hanziPinyinMistake(
  */
 export const skillDueWindow: Duration = { hours: 24 };
 
-export function isOverdue(srsState: SrsState, now: Date): boolean {
+export function isOverdue(srsState: SrsStateType, now: Date): boolean {
   return srsState.nextReviewAt < sub(now, skillDueWindow);
 }
 
@@ -801,28 +801,28 @@ export function computeSkillRating(opts: {
   let easyDuration;
   let goodDuration;
 
-  switch (skillTypeFromSkill(opts.skill)) {
-    case SkillType.HanziWordToPinyin:
-    case SkillType.HanziWordToPinyinInitial:
-    case SkillType.HanziWordToPinyinFinal:
-    case SkillType.HanziWordToPinyinTone:
-    case SkillType.PinyinInitialAssociation:
-    case SkillType.PinyinFinalAssociation:
-    case SkillType.GlossToHanziWord:
-    case SkillType.PinyinToHanziWord:
-    case SkillType.ImageToHanziWord:
-    case SkillType.HanziWordToGloss: {
+  switch (skillKindFromSkill(opts.skill)) {
+    case SkillKind.HanziWordToPinyin:
+    case SkillKind.HanziWordToPinyinInitial:
+    case SkillKind.HanziWordToPinyinFinal:
+    case SkillKind.HanziWordToPinyinTone:
+    case SkillKind.PinyinInitialAssociation:
+    case SkillKind.PinyinFinalAssociation:
+    case SkillKind.GlossToHanziWord:
+    case SkillKind.PinyinToHanziWord:
+    case SkillKind.ImageToHanziWord:
+    case SkillKind.HanziWordToGloss: {
       easyDuration = 5000;
       goodDuration = 10_000;
       break;
     }
-    case SkillType.Deprecated:
-    case SkillType.Deprecated_RadicalToEnglish:
-    case SkillType.Deprecated_EnglishToRadical:
-    case SkillType.Deprecated_RadicalToPinyin:
-    case SkillType.Deprecated_PinyinToRadical: {
+    case SkillKind.Deprecated:
+    case SkillKind.Deprecated_RadicalToEnglish:
+    case SkillKind.Deprecated_EnglishToRadical:
+    case SkillKind.Deprecated_RadicalToPinyin:
+    case SkillKind.Deprecated_PinyinToRadical: {
       throw new Error(
-        `duration rating thresholds not implemented for ${skillTypeFromSkill(opts.skill)}`,
+        `duration rating thresholds not implemented for ${skillKindFromSkill(opts.skill)}`,
       );
     }
   }
@@ -841,7 +841,7 @@ export function computeSkillRating(opts: {
 export function hanziOrPinyinWordCount(
   choice: OneCorrectPairQuestionChoice,
 ): number {
-  switch (choice.type) {
+  switch (choice.kind) {
     case `hanzi`: {
       return characterCount(choice.value);
     }
@@ -857,34 +857,34 @@ export function hanziOrPinyinWordCount(
 // Skills that have either never been introduced, or were last reviewed too
 // long ago and have been likely forgotten should be introduced.
 export function needsToBeIntroduced(
-  srsState: SrsState | undefined | null,
+  srsState: SrsStateType | undefined | null,
   now: Date,
 ): boolean {
   if (srsState == null) {
     return true;
   }
 
-  switch (srsState.type) {
-    case SrsType.FsrsFourPointFive: {
+  switch (srsState.kind) {
+    case SrsKind.FsrsFourPointFive: {
       return fsrsIsForgotten(srsState, now);
     }
-    case SrsType.Mock: {
+    case SrsKind.Mock: {
       // If it's more than 14 days over-due then assume it's forgotten.
       return srsState.nextReviewAt < subDays(now, 14);
     }
   }
 }
 
-export function isStable(srsState: SrsState | undefined | null): boolean {
+export function isStable(srsState: SrsStateType | undefined | null): boolean {
   if (srsState == null) {
     return false;
   }
 
-  switch (srsState.type) {
-    case SrsType.FsrsFourPointFive: {
+  switch (srsState.kind) {
+    case SrsKind.FsrsFourPointFive: {
       return fsrsIsStable(srsState);
     }
-    case SrsType.Mock: {
+    case SrsKind.Mock: {
       // If the schedule interval is more than a week, then it's stable.
       return (
         srsState.nextReviewAt.getTime() - srsState.prevReviewAt.getTime() >
