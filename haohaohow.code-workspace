@@ -24,7 +24,8 @@
       "editor.defaultFormatter": "redhat.vscode-xml",
     },
     "tailwindCSS.experimental.classRegex": [
-      ["(`.*?`)", "(\".*?\")", "('.*?')"],
+      // https://github.com/paolotiu/tailwind-intellisense-regex-list?tab=readme-ov-file#tailwind-variants
+      ["tv\\(([^)]*)\\)", "{?\\s?[\\w].*:\\s*?[\"'`]([^\"'`]*).*?,?\\s?}?"],
     ],
     "files.exclude": {
       ".yarn/releases/*.*": true,
