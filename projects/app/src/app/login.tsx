@@ -12,13 +12,17 @@ export default function LoginPage() {
 
   return (
     <View className="flex-1 items-center justify-center gap-[10px] bg-background">
-      <Text className="font-bold text-body">Login</Text>
+      <Text className="font-bold text-foreground">Login</Text>
       <View className="gap-2">
         {auth.data?.allClientSessions.map((x, i) => (
           <View key={i} className="flex-row gap-2 border-y">
             <View className="flex-1">
-              <Text className="text-body">Session ID: {x.serverSessionId}</Text>
-              <Text className="text-body">DB name: {x.replicacheDbName}</Text>
+              <Text className="text-foreground">
+                Session ID: {x.serverSessionId}
+              </Text>
+              <Text className="text-foreground">
+                DB name: {x.replicacheDbName}
+              </Text>
             </View>
             <RectButton2
               onPressIn={() => {
@@ -32,10 +36,10 @@ export default function LoginPage() {
           </View>
         ))}
       </View>
-      <Text className="text-body">
+      <Text className="text-foreground">
         Session ID: {auth.data?.clientSession.serverSessionId}
       </Text>
-      <Text className="text-body">
+      <Text className="text-foreground">
         DB name: {auth.data?.clientSession.replicacheDbName}
       </Text>
 
@@ -114,7 +118,7 @@ export default function LoginPage() {
 const GoHomeButton = () => (
   <View style={{ height: 44 }}>
     <Link dismissTo href="/learn" asChild>
-      <RectButton2 textClassName="font-bold text-body text-xl">
+      <RectButton2 textClassName="font-bold text-foreground text-xl">
         Back
       </RectButton2>
     </Link>

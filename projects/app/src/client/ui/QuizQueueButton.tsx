@@ -15,7 +15,7 @@ export function QuizQueueButton({
     <View className="relative size-[32px] flex-row justify-center md:justify-start">
       <Image
         source={require(`@/assets/icons/inbox-filled.svg`)}
-        className="size-[32px] shrink self-center text-body"
+        className="size-[32px] shrink self-center text-foreground"
         tintColor="currentColor"
         contentFit="fill"
       />
@@ -37,7 +37,7 @@ function CheckBadge() {
     <View className="absolute left-[55%] top-[62%] size-quiz-px rounded-full bg-background p-[2px]">
       <Image
         source={require(`@/assets/icons/check.svg`)}
-        className="size-[12px] self-center rounded-full bg-body/30 text-body"
+        className="size-[12px] self-center rounded-full bg-foreground/30 text-foreground"
         tintColor="currentColor"
         contentFit="fill"
       />

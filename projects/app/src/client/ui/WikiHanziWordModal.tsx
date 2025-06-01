@@ -94,7 +94,7 @@ export const WikiHanziWordModal = ({
                 <View className="flex-row gap-1">
                   {characters.map((character) => (
                     <View key={character} className="items-start">
-                      <Text className="font-karla text-[60px] text-body">
+                      <Text className="font-karla text-[60px] text-foreground">
                         {character}
                       </Text>
                     </View>
@@ -102,14 +102,14 @@ export const WikiHanziWordModal = ({
                 </View>
 
                 {hanziWordSkillData.data.pinyin == null ? null : (
-                  <Text className="font-karla text-2xl text-body/50">
+                  <Text className="font-karla text-2xl text-foreground/50">
                     {hanziWordSkillData.data.pinyin.join(`, `)}
                   </Text>
                 )}
               </View>
 
               <View className="gap-1">
-                <Text className="font-karla text-2xl text-body">
+                <Text className="font-karla text-2xl text-foreground">
                   {hanziWordSkillData.data.gloss.join(`, `)}
                   {otherMeaningsQuery.data == null ||
                   otherMeaningsQuery.data.length === 0 ? null : (
@@ -188,11 +188,11 @@ export const WikiHanziWordModal = ({
 
               {wikiEntry.data?.visuallySimilar == null ? null : (
                 <View className="gap-1 font-karla">
-                  <Text className="text-xs uppercase text-body/90">
+                  <Text className="text-xs uppercase text-foreground/90">
                     Visually Similar
                   </Text>
 
-                  <View className="flex-row flex-wrap gap-2 text-body">
+                  <View className="flex-row flex-wrap gap-2 text-foreground">
                     {wikiEntry.data.visuallySimilar.map((hanzi, i) => (
                       <Text key={i}>{hanzi}</Text>
                     ))}
@@ -202,10 +202,10 @@ export const WikiHanziWordModal = ({
 
               {!__DEV__ || skillStatesQuery.data == null ? null : (
                 <View className="gap-1 font-karla">
-                  <Text className="text-xs uppercase text-body/90">
+                  <Text className="text-xs uppercase text-foreground/90">
                     Skills <DevLozenge />
                   </Text>
-                  <View className="gap-2 text-body">
+                  <View className="gap-2 text-foreground">
                     {skillStatesQuery.data.map(([skill, skillState], i) => (
                       <View key={i} className="flex-row items-center gap-2">
                         <Text>

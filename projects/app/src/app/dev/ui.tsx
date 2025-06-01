@@ -34,7 +34,7 @@ export default function DesignSystemPage() {
     <View style={{ flex: 1, paddingTop: insets.top }}>
       <View className="flex-row p-2">
         <Link href="/learn" asChild>
-          <Text className="text-body hover:underline">Home</Text>
+          <Text className="text-foreground hover:underline">Home</Text>
         </Link>
       </View>
       <ScrollView style={{ flex: 1 }} ref={scrollViewRef}>
@@ -189,7 +189,7 @@ export default function DesignSystemPage() {
 }
 
 const typography = tv({
-  base: `text-body`,
+  base: `text-foreground`,
 
   variants: {
     size: {
@@ -292,7 +292,7 @@ const LittlePrimaryHeader = ({ title }: { title: string }) => {
   return (
     <View className="mb-2 mt-4 flex-row items-center gap-2">
       <View className="h-px grow bg-primary-7" />
-      <Text className="text-center text-xs font-bold uppercase text-body/80">
+      <Text className="text-center text-xs font-bold uppercase text-foreground/80">
         {title}
       </Text>
       <View className="h-px grow bg-primary-7" />
@@ -308,7 +308,7 @@ const ColorSwatch = ({
   className?: string;
 }) => (
   <View className="flex-wrap gap-1">
-    <Text className="text-center text-xs text-body/50">{index}</Text>
+    <Text className="text-center text-xs text-foreground/50">{index}</Text>
     <View className={`size-[40px] ${className ?? ``}`} />
   </View>
 );
@@ -339,7 +339,7 @@ const Section = ({
               });
             }}
           >
-            <Text className="text-2xl text-body">{title}</Text>
+            <Text className="text-2xl text-foreground">{title}</Text>
           </Pressable>
         </View>
         <View className="dark-theme flex-1 bg-primary-4 p-2" />

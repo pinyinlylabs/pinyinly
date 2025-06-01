@@ -16,20 +16,20 @@
     @apply font-sans text-base/snug font-bold uppercase text-background;
   }
   .hhh-text-button-outline {
-    @apply font-sans text-base/snug font-bold uppercase text-body;
+    @apply font-sans text-base/snug font-bold uppercase text-foreground;
   }
   .hhh-text-button-option {
-    @apply font-sans text-base/snug text-body;
+    @apply font-sans text-base/snug text-foreground;
   }
   .hhh-text-button-option-caption {
     @apply font-sans text-sm/snug font-light text-caption;
   }
   .hhh-text-button-bare {
-    @apply font-sans text-sm/normal font-bold uppercase text-body;
+    @apply font-sans text-sm/normal font-bold uppercase text-foreground;
   }
 
   .hhh-text-title {
-    @apply font-karla text-2xl/normal tracking-tight text-body;
+    @apply font-karla text-2xl/normal tracking-tight text-foreground;
   }
   /*
   Karla on iOS font-bold looks like font-medium, so we have to bump it up to
@@ -59,36 +59,36 @@
 
   /* hhh/body-2xl */
   .hhh-text-body-2xl {
-    @apply font-sans text-2xl/normal font-thin text-body;
+    @apply font-sans text-2xl/normal font-thin text-foreground;
   }
 
   .hhh-text-body-2xl-ref {
-    @apply font-sans text-2xl/tight font-normal text-body-ref underline decoration-body-ref/70 decoration-dashed decoration-[2px] underline-offset-[5px];
+    @apply font-sans text-2xl/tight font-normal text-foreground-ref underline decoration-foreground-ref/70 decoration-dashed decoration-[2px] underline-offset-[5px];
   }
 
   .hhh-text-body-2xl-bold {
-    @apply font-sans text-2xl/normal font-medium text-body-bold;
+    @apply font-sans text-2xl/normal font-medium text-foreground-bold;
   }
 
   .hhh-text-body-2xl-italic {
-    @apply font-sans text-2xl/normal font-medium italic text-body;
+    @apply font-sans text-2xl/normal font-medium italic text-foreground;
   }
 
   /* hhh/body */
   .hhh-text-body {
-    @apply font-sans text-base/normal font-thin text-body;
+    @apply font-sans text-base/normal font-thin text-foreground;
   }
 
   .hhh-text-body-ref {
-    @apply font-sans text-base/normal font-normal text-body-ref underline decoration-body-ref/50 decoration-dashed decoration-[1.5px] underline-offset-[5px];
+    @apply font-sans text-base/normal font-normal text-foreground-ref underline decoration-foreground-ref/50 decoration-dashed decoration-[1.5px] underline-offset-[5px];
   }
 
   .hhh-text-body-bold {
-    @apply font-sans text-base/normal font-medium text-body-bold;
+    @apply font-sans text-base/normal font-medium text-foreground-bold;
   }
 
   .hhh-text-body-italic {
-    @apply font-sans text-base/normal font-medium italic text-body;
+    @apply font-sans text-base/normal font-medium italic text-foreground;
   }
 
   /* hhh/caption */
@@ -110,7 +110,7 @@
 
   /* hhh/body-input */
   .hhh-text-body-input {
-    @apply font-sans text-lg/snug font-normal text-body;
+    @apply font-sans text-lg/snug font-normal text-foreground;
   }
 
   /* www */
@@ -213,9 +213,9 @@
 
     --color-background: var(--color-slate-2);
 
-    --color-body: rgb(from var(--color-slate-12) r g b / 0.9);
-    --color-body-bold: var(--color-slate-12);
-    --color-body-ref: var(--color-slate-12);
+    --color-foreground: rgb(from var(--color-slate-12) r g b / 0.9);
+    --color-foreground-bold: var(--color-slate-12);
+    --color-foreground-ref: var(--color-slate-12);
     --color-caption: rgb(from var(--color-slate-12) r g b / 0.5);
     --color-caption-bold: rgb(from var(--color-slate-12) r g b / 0.75);
     --color-caption-ref: rgb(from var(--color-slate-12) r g b / 0.75);
@@ -286,9 +286,9 @@
 
     --color-background: var(--color-slate-2);
 
-    --color-body: rgb(from var(--color-slate-12) r g b / 0.9);
-    --color-body-bold: var(--color-slate-12);
-    --color-body-ref: var(--color-slate-12);
+    --color-foreground: rgb(from var(--color-slate-12) r g b / 0.9);
+    --color-foreground-bold: var(--color-slate-12);
+    --color-foreground-ref: var(--color-slate-12);
     --color-caption: var(--color-slate-10);
     --color-caption-bold: var(--color-slate-11);
     --color-caption-ref: var(--color-slate-11);
@@ -321,9 +321,9 @@
     --color-accent-11: var(--color-cyan-11);
     --color-accent-12: var(--color-cyan-12);
 
-    --color-body: rgb(from var(--color-primary-12) r g b / 0.9);
-    --color-body-bold: var(--color-primary-12);
-    --color-body-ref: var(--color-primary-12);
+    --color-foreground: rgb(from var(--color-primary-12) r g b / 0.9);
+    --color-foreground-bold: var(--color-primary-12);
+    --color-foreground-ref: var(--color-primary-12);
     --color-caption: var(--color-primary-10);
     --color-caption-bold: var(--color-primary-11);
     --color-caption-ref: var(--color-primary-11);
@@ -359,9 +359,9 @@
     --color-primary-11: var(--color-red-11);
     --color-primary-12: var(--color-red-12);
 
-    --color-body: var(--color-red-10);
-    --color-body-bold: var(--color-red-10);
-    --color-body-ref: var(--color-red-10);
+    --color-foreground: var(--color-red-10);
+    --color-foreground-bold: var(--color-red-10);
+    --color-foreground-ref: var(--color-red-10);
     --color-caption: var(--color-red-10);
     --color-caption-bold: var(--color-red-10);
     --color-caption-ref: var(--color-red-10);
@@ -383,18 +383,18 @@
   }
 
   .success-theme2 {
-    --color-body: var(--color-lime-10);
-    --color-body-bold: var(--color-lime-10);
-    --color-body-ref: var(--color-lime-10);
+    --color-foreground: var(--color-lime-10);
+    --color-foreground-bold: var(--color-lime-10);
+    --color-foreground-ref: var(--color-lime-10);
     --color-caption: var(--color-lime-10);
     --color-caption-bold: var(--color-lime-10);
     --color-caption-ref: var(--color-lime-10);
   }
 
   .accent-theme2 {
-    --color-body: var(--color-cyan-10);
-    --color-body-bold: var(--color-cyan-10);
-    --color-body-ref: var(--color-cyan-10);
+    --color-foreground: var(--color-cyan-10);
+    --color-foreground-bold: var(--color-cyan-10);
+    --color-foreground-ref: var(--color-cyan-10);
     --color-caption: var(--color-cyan-10);
     --color-caption-bold: var(--color-cyan-10);
     --color-caption-ref: var(--color-cyan-10);

@@ -115,9 +115,9 @@ const roundedRect = tv({
   base: `box-border select-none items-center justify-center web:transition-all`,
   variants: {
     variant: {
-      filled: `rounded-xl border-background/20 bg-body/95 px-4 py-2`,
-      outline: `rounded-xl border-2 border-body/20 px-4 py-2`,
-      option: `rounded-xl border border-body/20 px-3 py-2`,
+      filled: `rounded-xl border-background/20 bg-foreground/95 px-4 py-2`,
+      outline: `rounded-xl border-2 border-foreground/20 px-4 py-2`,
+      option: `rounded-xl border border-foreground/20 px-3 py-2`,
       bare: `px-2 py-1`,
     },
     hoveredOrPressed: {
@@ -134,7 +134,7 @@ const roundedRect = tv({
     {
       variant: `filled`,
       hoveredOrPressed: true,
-      class: `bg-body`,
+      class: `bg-foreground`,
     },
     {
       variant: `filled`,
@@ -146,7 +146,7 @@ const roundedRect = tv({
       variant: `outline`,
       disabled: false,
       hoveredOrPressed: true,
-      class: `border-body/30`,
+      class: `border-foreground/30`,
     },
     {
       variant: `outline`,
@@ -163,7 +163,7 @@ const roundedRect = tv({
       variant: `option`,
       disabled: false,
       hoveredOrPressed: true,
-      class: `border-body/30`,
+      class: `border-foreground/30`,
     },
     {
       variant: `option`,

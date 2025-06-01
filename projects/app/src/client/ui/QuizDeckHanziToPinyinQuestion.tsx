@@ -74,30 +74,32 @@ export function QuizDeckHanziToPinyinQuestion({
       toast={
         isCorrect == null ? null : (
           <View
-            className={`flex-1 ${isCorrect ? `success-theme2` : `danger-theme2`} gap-[12px] overflow-hidden bg-body-bg10 px-quiz-px pt-3 pb-safe-offset-[84px] lg:mb-2 lg:rounded-xl`}
+            className={`flex-1 ${isCorrect ? `success-theme2` : `danger-theme2`} gap-[12px] overflow-hidden bg-foreground-bg10 px-quiz-px pt-3 pb-safe-offset-[84px] lg:mb-2 lg:rounded-xl`}
           >
             {isCorrect ? (
               <View className="flex-row items-center gap-[8px]">
                 <Image
-                  className="size-[32px] shrink text-body"
+                  className="size-[32px] shrink text-foreground"
                   source={require(`@/assets/icons/check-circled-filled.svg`)}
                   tintColor="currentColor"
                 />
-                <Text className="text-2xl font-bold text-body">Nice!</Text>
+                <Text className="text-2xl font-bold text-foreground">
+                  Nice!
+                </Text>
               </View>
             ) : (
               <>
                 <View className="flex-row items-center gap-[8px]">
                   <Image
-                    className="size-[32px] shrink text-body"
+                    className="size-[32px] shrink text-foreground"
                     source={require(`@/assets/icons/close-circled-filled.svg`)}
                     tintColor="currentColor"
                   />
-                  <Text className="text-2xl font-bold text-body">
+                  <Text className="text-2xl font-bold text-foreground">
                     Incorrect
                   </Text>
                 </View>
-                <Text className="text-xl/none font-medium text-body">
+                <Text className="text-xl/none font-medium text-foreground">
                   Correct answer:
                 </Text>
 
@@ -128,7 +130,7 @@ export function QuizDeckHanziToPinyinQuestion({
 
       {flag == null ? null : <FlagText flag={flag} />}
       <View>
-        <Text className="text-xl font-bold text-body">{prompt}</Text>
+        <Text className="text-xl font-bold text-foreground">{prompt}</Text>
       </View>
       <View className="flex-1 justify-center py-quiz-px">
         <View className="flex-row justify-center gap-2">
@@ -209,7 +211,7 @@ function HanziPinyinAnswerBox({
 
   return (
     <View className="items-center gap-2">
-      <Text className="text-[80px] font-medium text-body">{hanzi}</Text>
+      <Text className="text-[80px] font-medium text-foreground">{hanzi}</Text>
       <View className={`h-[40px] ${focused ? `` : ``}`}>
         {userAnswer === `` || focused ? (
           <Pressable
@@ -437,7 +439,7 @@ const FlagText = ({ flag }: { flag: QuestionFlagType }) => {
 };
 
 const pinyinPlaceholderClass = tv({
-  base: `h-[40px] min-w-[60px] items-center justify-center rounded-xl border border-transparent px-3 outline-dashed outline-2 outline-body/50 transition-[outline-color]`,
+  base: `h-[40px] min-w-[60px] items-center justify-center rounded-xl border border-transparent px-3 outline-dashed outline-2 outline-foreground/50 transition-[outline-color]`,
   variants: {
     focused: {
       true: `accent-theme2`,

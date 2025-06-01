@@ -57,23 +57,23 @@ export default function MnemonicIdPage() {
       contentContainerClassName="max-w-[800px] self-center px-safe-or-4 pb-2 pt-safe-offset-4 px-safe-or-4"
     >
       <View>
-        <Text className="text-3xl text-body">{id}-</Text>
+        <Text className="text-3xl text-foreground">{id}-</Text>
       </View>
 
       <View className="gap-2">
-        <Text className="text-lg text-body">
+        <Text className="text-lg text-foreground">
           others in this group ({group?.id}) — {group?.desc}
         </Text>
         <View className="flex-row flex-wrap gap-1">
           {group?.initials.map(([i]) => (
             <Link key={i} href={`/explore/mnemonics/${i}`}>
-              <Text className="text-body">{i}-</Text>
+              <Text className="text-foreground">{i}-</Text>
             </Link>
           ))}
         </View>
 
         <View className="flex-row flex-wrap gap-1">
-          <Text className="text-xl text-body">Association choices</Text>
+          <Text className="text-xl text-foreground">Association choices</Text>
         </View>
 
         <View className="gap-2">
@@ -89,7 +89,7 @@ export default function MnemonicIdPage() {
                 })
                 .map(([themeId, themeName, initials], i) => (
                   <View key={i}>
-                    <Text className="text-lg text-body">
+                    <Text className="text-lg text-foreground">
                       {themeName}
                       {themeId === groupTheme.data?.themeId ? (
                         ` ✅`
@@ -112,7 +112,7 @@ export default function MnemonicIdPage() {
                     {[...initials.entries()].map(([name, desc], i) => (
                       <View key={i}>
                         <Text
-                          className="font-bold text-body"
+                          className="font-bold text-foreground"
                           onPress={() => {
                             void r.mutate.setPinyinInitialAssociation({
                               initial: id,

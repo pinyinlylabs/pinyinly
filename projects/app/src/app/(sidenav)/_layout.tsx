@@ -76,7 +76,7 @@ export default function SideNavLayout() {
 
         <Link
           href="/login"
-          className="items-center rounded-md px-2 py-1 text-xl font-bold tracking-wide text-body hover:bg-primary-4 md:self-stretch"
+          className="items-center rounded-md px-2 py-1 text-xl font-bold tracking-wide text-foreground hover:bg-primary-4 md:self-stretch"
         >
           {isAuthenticated ? (
             <View className="size-10 rounded-full bg-[green]"></View>
@@ -133,7 +133,7 @@ const buttonClass = tv({
 });
 
 const buttonTextClass = tv({
-  base: `hidden font-sans text-sm font-bold uppercase text-body transition-colors md:flex`,
+  base: `hidden font-sans text-sm font-bold uppercase text-foreground transition-colors md:flex`,
   variants: {
     isFocused: {
       true: `text-primary-12`,
