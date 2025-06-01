@@ -50,7 +50,7 @@ export function QuizDeckHanziToPinyinQuestion({
   const isCorrect = null as boolean | null;
 
   const [focusedCharIndex, setFocusedCharIndex] = useState<number | null>(null);
-  const [pinyinByIndex, setPinyinByIndex] = useState<
+  const [userAnswers, setUserAnswersByIndex] = useState<
     ReadonlyMap<number, string>
   >(new Map());
 
@@ -58,48 +58,14 @@ export function QuizDeckHanziToPinyinQuestion({
     onNext();
   };
 
-  const handlePinyinSearchFocus = () => {
-    setFocusedCharIndex((prev) => prev ?? 0);
-  };
-
-  const handlePinyinSearchSelect = (pinyin: string) => {
-    if (focusedCharIndex == null) {
-      return;
-    }
-
-    setPinyinByIndex((prev) => readonlyMapSet(prev, focusedCharIndex, pinyin));
-
-    setFocusedCharIndex((prev) => {
-      if (prev == null) {
-        return null;
-      }
-
-      // Move focus to the next character without pinyin
-      for (let offset = 1; offset < answer.length; offset++) {
-        const index = (prev + offset) % answer.length;
-        if (!pinyinByIndex.has(index)) {
-          // Found the next character without pinyin
-          return index;
-        }
-      }
-
-      return null;
-    });
-  };
-
-  const handleFocusRequest = (index: number) => {
-    setFocusedCharIndex(index);
-    inputRef.current?.focus();
-  };
-
   let initialPinyinSearchQuery = ``;
   if (focusedCharIndex != null) {
-    const pinyin = pinyinByIndex.get(focusedCharIndex);
+    const pinyin = userAnswers.get(focusedCharIndex);
     const searchQuery = pinyin == null ? null : parsePinyinTone(pinyin)?.[0];
     initialPinyinSearchQuery = searchQuery ?? ``;
   }
 
-  const isMissingAnswers = pinyinByIndex.size < answer.length;
+  const isMissingAnswers = userAnswers.size < answer.length;
 
   const inputRef = useRef<TextInput>(null);
 
@@ -172,8 +138,11 @@ export function QuizDeckHanziToPinyinQuestion({
               focused={i === focusedCharIndex}
               hanzi={hanzi}
               index={i}
-              onFocusRequest={handleFocusRequest}
-              selectedPinyin={pinyinByIndex.get(i)}
+              onFocusRequest={(index) => {
+                setFocusedCharIndex(index);
+                inputRef.current?.focus();
+              }}
+              userAnswer={userAnswers.get(i) ?? ``}
             />
           ))}
         </View>
@@ -183,8 +152,36 @@ export function QuizDeckHanziToPinyinQuestion({
             key={focusedCharIndex}
             autoFocus={focusedCharIndex != null}
             initialQuery={initialPinyinSearchQuery}
-            onFocus={handlePinyinSearchFocus}
-            onSelect={handlePinyinSearchSelect}
+            onChangeText={(text) => {
+              if (focusedCharIndex == null) {
+                return;
+              }
+
+              setUserAnswersByIndex((prev) =>
+                readonlyMapSet(prev, focusedCharIndex, text),
+              );
+            }}
+            onFocus={() => {
+              setFocusedCharIndex((prev) => prev ?? 0);
+            }}
+            onSubmit={() => {
+              setFocusedCharIndex((prev) => {
+                if (prev == null) {
+                  return null;
+                }
+
+                // Move focus to the next character without pinyin
+                for (let offset = 1; offset < answer.length; offset++) {
+                  const index = (prev + offset) % answer.length;
+                  if ((userAnswers.get(index) ?? ``) === ``) {
+                    // Found the next character without pinyin
+                    return index;
+                  }
+                }
+
+                return null;
+              });
+            }}
             inputRef={inputRef}
           />
         </View>
@@ -198,13 +195,13 @@ function HanziPinyinAnswerBox({
   hanzi,
   index,
   onFocusRequest,
-  selectedPinyin,
+  userAnswer,
 }: {
   focused: boolean;
   hanzi: string;
   index: number;
   onFocusRequest: (index: number) => void;
-  selectedPinyin: string | undefined;
+  userAnswer: string;
 }) {
   const handlePress = () => {
     onFocusRequest(index);
@@ -214,14 +211,16 @@ function HanziPinyinAnswerBox({
     <View className="items-center gap-2">
       <Text className="text-[80px] font-medium text-body">{hanzi}</Text>
       <View className={`h-[40px] ${focused ? `` : ``}`}>
-        {selectedPinyin == null || focused ? (
+        {userAnswer === `` || focused ? (
           <Pressable
             className={pinyinPlaceholderClass({ focused })}
             onPress={handlePress}
-          />
+          >
+            <Text className="hhh-text-button-option">{userAnswer}</Text>
+          </Pressable>
         ) : (
           <RectButton2 variant="option" onPress={handlePress}>
-            {selectedPinyin}
+            {userAnswer}
           </RectButton2>
         )}
       </View>
@@ -239,13 +238,15 @@ const PinyinSearchInput = ({
   initialQuery,
   inputRef,
   onFocus,
-  onSelect,
+  onChangeText,
+  onSubmit,
 }: {
   autoFocus: boolean;
   initialQuery: string;
   inputRef?: Ref<TextInput>;
   onFocus: () => void;
-  onSelect: (pinyin: string) => void;
+  onChangeText: (text: string) => void;
+  onSubmit: (focusImmediateNextInput: boolean) => void;
 }) => {
   const [query, setQuery] = useState(initialQuery);
 
@@ -265,14 +266,19 @@ const PinyinSearchInput = ({
     if (options != null) {
       for (const option of options) {
         if (option.shortcutKey === text.slice(-1)) {
-          onSelect(option.pinyin);
+          onChangeText(option.pinyin);
+          return;
         }
       }
     }
-  };
 
-  const handleOptionPress = (pinyin: string) => {
-    onSelect(pinyin);
+    if (/\s$/.test(text)) {
+      // Pressing "space" indicates moving to the next word.
+      onSubmit(true);
+      return;
+    }
+
+    onChangeText(text.trim());
   };
 
   return (
@@ -293,13 +299,16 @@ const PinyinSearchInput = ({
               //   .restDisplacementThreshold(0.1)
               //   .restSpeedThreshold(5)}
               // entering={BounceIn.delay(i * 100)}
-              entering={FadeIn.duration(100)}
+              entering={FadeIn.duration(200)}
               exiting={FadeOut.duration(100)}
             >
               <PinyinOptionButton
                 pinyin={option.pinyin}
                 shortcutKey={option.shortcutKey}
-                onPress={handleOptionPress}
+                onPress={(pinyin) => {
+                  onChangeText(pinyin);
+                  onSubmit(false);
+                }}
               />
             </Reanimated.View>
           ))}
@@ -308,6 +317,16 @@ const PinyinSearchInput = ({
       <TextInputSingle
         autoFocus={autoFocus}
         onChangeText={handleQueryChange}
+        onKeyPress={(e) => {
+          if (e.nativeEvent.key === `Enter`) {
+            e.preventDefault();
+            onSubmit(false);
+          }
+          if (e.nativeEvent.key === `Tab`) {
+            e.preventDefault();
+            onSubmit(true);
+          }
+        }}
         onFocus={onFocus}
         placeholder="Search pinyin"
         ref={inputRef}
@@ -418,7 +437,7 @@ const FlagText = ({ flag }: { flag: QuestionFlagType }) => {
 };
 
 const pinyinPlaceholderClass = tv({
-  base: `h-[40px] w-[60px] rounded-xl border-2 border-dashed border-body/50`,
+  base: `h-[40px] min-w-[60px] items-center justify-center rounded-xl border border-transparent px-3 outline-dashed outline-2 outline-body/50 transition-[outline-color]`,
   variants: {
     focused: {
       true: `accent-theme2`,
