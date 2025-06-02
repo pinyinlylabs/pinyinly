@@ -155,7 +155,7 @@ export const sPinyinPronunciation = rizzleCustomType(
   `text`,
 );
 export const sSpaceSeparatoredString = rizzleCustomType(
-  r.rSpaceSeparatoredString(),
+  r.rSpaceSeparatedString(),
   `text`,
 );
 export const sHanziOrHanziWord = rizzleCustomType(

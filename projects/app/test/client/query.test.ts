@@ -10,7 +10,7 @@ import type {
 import { QuestionFlagKind, SrsKind } from "#data/model.ts";
 import { v7Mutators } from "#data/rizzleMutators.ts";
 import type { Skill } from "#data/rizzleSchema.ts";
-import { rSpaceSeparatoredString, v7 } from "#data/rizzleSchema.ts";
+import { rSpaceSeparatedString, v7 } from "#data/rizzleSchema.ts";
 import type { SkillReviewQueue } from "#data/skills.ts";
 import { Rating } from "#util/fsrs.ts";
 import { nanoid } from "#util/nanoid.ts";
@@ -273,7 +273,7 @@ async function simulateSkillReviews({
         await rizzle.mutate.saveHanziPinyinMistake({
           id: nanoid(),
           hanziOrHanziWord: hanzi,
-          pinyin: rSpaceSeparatoredString().unmarshal(pinyin),
+          pinyin: rSpaceSeparatedString().unmarshal(pinyin),
           now,
         });
         break;

@@ -1,11 +1,9 @@
 import { useLocalQuery } from "@/client/hooks/useLocalQuery";
 import { RectButton2 } from "@/client/ui/RectButton2";
 import { useReplicache, useRizzleQuery } from "@/client/ui/ReplicacheContext";
+import { loadHhhPinyinChart } from "@/data/pinyin";
 import { rMnemonicThemeId } from "@/data/rizzleSchema";
-import {
-  loadHhhPinyinChart,
-  loadMnemonicThemeChoices,
-} from "@/dictionary/dictionary";
+import { loadMnemonicThemeChoices } from "@/dictionary/dictionary";
 
 import { Link, useLocalSearchParams } from "expo-router";
 import { ScrollView, Text, View } from "react-native";

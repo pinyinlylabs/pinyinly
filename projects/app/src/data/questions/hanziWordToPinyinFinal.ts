@@ -1,4 +1,7 @@
-import { convertPinyinWithToneNumberToToneMark } from "@/data/pinyin";
+import {
+  convertPinyinWithToneNumberToToneMark,
+  parsePinyinSyllableOrThrow,
+} from "@/data/pinyin";
 import {
   allOneSyllableHanzi,
   allOneSyllablePronunciationsForHanzi,
@@ -7,7 +10,6 @@ import {
   hanziFromHanziWord,
   loadPinyinWords,
   lookupHanziWord,
-  parsePinyinSyllableOrThrow,
   pinyinOrThrow,
 } from "@/dictionary/dictionary";
 import {
@@ -102,7 +104,7 @@ export async function makeQuestionContext(
   const parsedPinyin = parsePinyinSyllableOrThrow(pinyin);
 
   const ctx: QuestionContext = {
-    answerPinyinInitial: parsedPinyin.initial,
+    answerPinyinInitial: parsedPinyin.initialChartLabel,
     answerPinyinTone: parsedPinyin.tone,
     usedHanzi: new Set([hanzi]),
     usedPinyin: new Set(await allOneSyllablePronunciationsForHanzi(hanzi)),
@@ -145,7 +147,7 @@ export function tryPinyinDistractor(
 ): boolean {
   const parsedPinyin = parsePinyinSyllableOrThrow(pinyin);
 
-  if (ctx.answerPinyinInitial !== parsedPinyin.initial) {
+  if (ctx.answerPinyinInitial !== parsedPinyin.initialChartLabel) {
     return false;
   }
 
@@ -229,7 +231,8 @@ function validQuestionInvariant(question: OneCorrectPairQuestion) {
       invariant(hanziOrPinyinSyllableCount(x) === 1);
 
       const syllable = nonNullable(x.value[0]);
-      const { initial, tone } = parsePinyinSyllableOrThrow(syllable);
+      const { initialChartLabel: initial, tone } =
+        parsePinyinSyllableOrThrow(syllable);
       return `${initial}-${tone}`;
     }),
   );

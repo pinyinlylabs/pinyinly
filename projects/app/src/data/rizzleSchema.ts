@@ -138,14 +138,12 @@ export const pinyinSyllableSchema = z.custom<PinyinSyllable>(
   (x) => typeof x === `string`,
 );
 
-export const rSpaceSeparatoredString = memoize0(
-  function rSpaceSeparatoredString() {
-    return RizzleCustom.create<readonly string[], string, readonly string[]>(
-      z.array(z.string()).transform((x) => x.join(` `)),
-      z.string().transform((x) => x.split(/ +/) as readonly string[]),
-    );
-  },
-);
+export const rSpaceSeparatedString = memoize0(function rSpaceSeparatedString() {
+  return RizzleCustom.create<readonly string[], string, readonly string[]>(
+    z.array(z.string()).transform((x) => x.join(` `)),
+    z.string().transform((x) => x.split(/ +/) as readonly string[]),
+  );
+});
 
 export const rPinyinPronunciation = memoize0(function rPinyinPronunciation() {
   return RizzleCustom.create<
@@ -242,7 +240,7 @@ export const v7 = {
   hanziPinyinMistake: r.entity(`m/hp/[id]`, {
     id: r.string().alias(`i`),
     hanziOrHanziWord: rHanziOrHanziWord().alias(`h`),
-    pinyin: rSpaceSeparatoredString().alias(`p`),
+    pinyin: rSpaceSeparatedString().alias(`p`),
     createdAt: r.datetime().alias(`c`).indexed(`byCreatedAt`),
   }),
 
@@ -311,7 +309,7 @@ export const v7 = {
        * Intentionally left as strings because this is user input and might not
        * be valid pinyin.
        */
-      pinyin: rSpaceSeparatoredString().alias(`p`),
+      pinyin: rSpaceSeparatedString().alias(`p`),
       now: r.timestamp().alias(`n`),
     })
     .alias(`shpm`),
