@@ -1,3 +1,4 @@
+import { hanziCharCount } from "@/data/hanzi";
 import type {
   HanziWord,
   OneCorrectPairQuestionChoice,
@@ -5,7 +6,7 @@ import type {
   PinyinSyllable,
 } from "@/data/model";
 import type { HanziWordMeaning } from "@/dictionary/dictionary";
-import { hanziCharCount, pinyinOrThrow } from "@/dictionary/dictionary";
+import { pinyinOrThrow } from "@/dictionary/dictionary";
 import { invariant } from "@haohaohow/lib/invariant";
 import type { DeepReadonly } from "ts-essentials";
 

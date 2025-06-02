@@ -1,10 +1,12 @@
 import {
   flattenIds,
+  hanziCharCount,
   idsNodeToString,
   IdsOperator,
   parseIds,
   walkIdsNode,
 } from "#data/hanzi.ts";
+import type { HanziText } from "#data/model.ts";
 import assert from "node:assert/strict";
 import test from "node:test";
 
@@ -313,5 +315,15 @@ await test(`${idsNodeToString.name} roundtrips`, () => {
     [`⑪`, `⑫`, `⑬`, `⑭`, `⑮`, `⑯`, `⑰`, `⑱`, `⑲`, `⑳`],
   ].flat()) {
     assert.equal(idsNodeToString(parseIds(input)), input);
+  }
+});
+
+await test(`${hanziCharCount.name} fixtures`, () => {
+  for (const value of [`木`, `你`] as HanziText[]) {
+    expect(hanziCharCount(value)).toBe(1);
+  }
+
+  for (const value of [`你好`, `再见`] as HanziText[]) {
+    expect(hanziCharCount(value)).toBe(2);
   }
 });

@@ -6,6 +6,7 @@ import { useLocalQuery } from "#client/hooks/useLocalQuery.ts";
 import {
   flattenIds,
   idsNodeToString,
+  isHanziChar,
   parseIds,
   strokeCountToCharacter,
   walkIdsNode,
@@ -29,7 +30,6 @@ import {
   dictionarySchema,
   hanziFromHanziWord,
   hanziWordMeaningSchema,
-  isHanziChar,
   loadHanziDecomposition,
   lookupHanzi,
   lookupHanziWord,

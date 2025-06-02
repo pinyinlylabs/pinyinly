@@ -2,10 +2,8 @@ import type { HanziWordWithMeaning } from "@/dictionary/dictionary";
 import {
   characterHasGlyph,
   decomposeHanzi,
-  hanziCharCount,
   hanziFromHanziWord,
   hanziTextFromHanziChar,
-  isHanziChar,
   isHanziWord,
   lookupGloss,
   lookupHanzi,
@@ -24,7 +22,7 @@ import type { Duration } from "date-fns";
 import { sub } from "date-fns/sub";
 import { subDays } from "date-fns/subDays";
 import type { DeepReadonly } from "ts-essentials";
-import { splitHanziText } from "./hanzi";
+import { isHanziChar, splitHanziText } from "./hanzi";
 import { parseHhhmark } from "./hhhmark";
 import type {
   HanziGlossMistakeType,
@@ -259,7 +257,7 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
       const hanzi = hanziFromHanziWord(hanziWord);
 
       invariant(
-        hanziCharCount(hanzi) === 1,
+        isHanziChar(hanzi),
         `${skillKind} only applies to single character hanzi`,
       );
 
@@ -273,7 +271,7 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
       const hanzi = hanziFromHanziWord(hanziWord);
 
       invariant(
-        hanziCharCount(hanzi) === 1,
+        isHanziChar(hanzi),
         `${skillKind} only applies to single character hanzi`,
       );
 
@@ -287,7 +285,7 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
       const hanzi = hanziFromHanziWord(hanziWord);
 
       invariant(
-        hanziCharCount(hanzi) === 1,
+        isHanziChar(hanzi),
         `${skillKind} only applies to single character hanzi`,
       );
 

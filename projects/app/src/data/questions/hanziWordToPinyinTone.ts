@@ -1,3 +1,4 @@
+import { isHanziChar } from "@/data/hanzi";
 import {
   convertPinyinWithToneNumberToToneMark,
   parsePinyinSyllableTone,
@@ -95,20 +96,17 @@ export async function makeQuestionContext(
   correctAnswer: HanziWord,
 ): Promise<QuestionContext> {
   const hanzi = hanziFromHanziWord(correctAnswer);
+  invariant(isHanziChar(hanzi), `expected single-character hanzi`);
   const meaning = await lookupHanziWord(correctAnswer);
   const pinyin = oneSyllablePinyinOrThrow(correctAnswer, meaning);
-  const parsedPinyin = parsePinyinSyllableTone(pinyin);
+  const parsedPinyin = nonNullable(parsePinyinSyllableTone(pinyin));
   const { initial } = parsePinyinSyllableOrThrow(pinyin);
-  invariant(
-    parsedPinyin != null,
-    `couldn't parse pinyin ${pinyin} for ${correctAnswer}`,
-  );
   const [answerPinyinToneless] = parsedPinyin;
 
   const ctx: QuestionContext = {
     answerPinyinToneless,
     answerPinyinInitial: initial,
-    usedHanzi: new Set([hanzi as unknown as HanziChar]),
+    usedHanzi: new Set([hanzi]),
     usedPinyin: new Set(await allOneSyllablePronunciationsForHanzi(hanzi)),
     pinyinDistractors: [],
     hanziDistractors: [],

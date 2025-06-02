@@ -1,4 +1,9 @@
-import { parseIds, splitHanziText, walkIdsNode } from "@/data/hanzi";
+import {
+  isHanziChar,
+  parseIds,
+  splitHanziText,
+  walkIdsNode,
+} from "@/data/hanzi";
 import type {
   HanziChar,
   HanziText,
@@ -567,7 +572,7 @@ export const allOneSyllableHanzi = memoize0(
         ...(await allHsk3HanziWords()),
       ]
         .map((x) => hanziFromHanziWord(x))
-        .filter((x) => hanziCharCount(x) === 1) as unknown as HanziChar[],
+        .filter((x) => isHanziChar(x)) as unknown as HanziChar[],
     ),
 );
 
@@ -819,12 +824,3 @@ export const fakePinyin = [
   `fui`,
   `fuo`,
 ];
-
-export function isHanziChar(hanzi: string): hanzi is HanziChar {
-  return characterCount(hanzi) === 1;
-}
-
-export function hanziCharCount(hanziText: HanziText): number {
-  // eslint-disable-next-line @typescript-eslint/no-misused-spread
-  return [...hanziText].length;
-}
