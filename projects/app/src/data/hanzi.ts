@@ -1,4 +1,4 @@
-import type { HanziSyllable, HanziText } from "@/data/model";
+import type { HanziChar, HanziText } from "@/data/model";
 import { UnexpectedValueError } from "@/util/types";
 import { invariant } from "@haohaohow/lib/invariant";
 import type { StrictExtract } from "ts-essentials";
@@ -87,7 +87,7 @@ export type IdsNode =
     }
   | {
       operator: `LeafCharacter`;
-      character: HanziSyllable;
+      character: HanziChar;
     }
   | {
       operator: `LeafUnknownCharacter`;
@@ -261,7 +261,7 @@ export function parseIds(ids: string, cursor?: { index: number }): IdsNode {
     return { operator: `LeafUnknownCharacter`, strokeCount };
   }
 
-  return { operator: `LeafCharacter`, character: char as HanziSyllable };
+  return { operator: `LeafCharacter`, character: char as HanziChar };
 }
 
 export function strokeCountPlaceholderOrNull(
@@ -492,11 +492,9 @@ export function* walkIdsNode(
   }
 }
 
-export function splitHanziText(
-  hanziText: HanziText | HanziSyllable,
-): HanziSyllable[] {
+export function splitHanziText(hanziText: HanziText): HanziChar[] {
   // eslint-disable-next-line @typescript-eslint/no-misused-spread
-  return [...hanziText] as HanziSyllable[];
+  return [...hanziText] as HanziChar[];
 }
 
 export function strokeCountToCharacter(strokeCount: number): string {

@@ -1,5 +1,5 @@
 import type {
-  HanziSyllable,
+  HanziChar,
   PinyinSyllable,
   SrsStateFsrsFourPointFiveType,
   SrsStateMockType,
@@ -100,11 +100,11 @@ export const fsrsSrsState = (
 };
 
 /**
- * Helper template string tag to make {@link HanziSyllable}.
+ * Helper template string tag to make {@link HanziChar}.
  */
 export const 汉字 = (strings: TemplateStringsArray) => {
   invariant(strings.length === 1, `汉字 must be a single string`);
-  return strings[0] as HanziSyllable;
+  return strings[0] as HanziChar;
 };
 
 /**

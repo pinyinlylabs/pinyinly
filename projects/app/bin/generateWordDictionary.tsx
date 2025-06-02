@@ -11,7 +11,7 @@ import {
   walkIdsNode,
 } from "#data/hanzi.ts";
 import type {
-  HanziSyllable,
+  HanziChar,
   HanziText,
   HanziWord,
   PinyinPronunciationSpaceSeparated,
@@ -29,7 +29,7 @@ import {
   dictionarySchema,
   hanziFromHanziWord,
   hanziWordMeaningSchema,
-  isHanziSyllable,
+  isHanziChar,
   loadHanziDecomposition,
   lookupHanzi,
   lookupHanziWord,
@@ -644,7 +644,7 @@ async function openAiHanziWordGlossHintQuery(
   invariant(meaning != null);
   const hanzi = hanziFromHanziWord(hanziWord);
 
-  if (isHanziSyllable(hanzi)) {
+  if (isHanziChar(hanzi)) {
     const componentGlosses = new Map<string, Set<string>>();
     let hanziIds: string = hanzi;
 
@@ -948,7 +948,7 @@ const HanziWordEditor = ({
 
             if (edits.has(`componentFormOf`)) {
               const newComponentFormOf = edits.get(`componentFormOf`) as
-                | HanziSyllable
+                | HanziChar
                 | undefined;
               invariant(newComponentFormOf != null);
 

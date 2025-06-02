@@ -5,7 +5,7 @@ import {
   decomposeHanzi,
   hanziFromHanziWord,
   hanziTextFromHanziChar,
-  isHanziSyllable,
+  isHanziChar,
   isHanziWord,
   lookupGloss,
   lookupHanzi,
@@ -154,7 +154,7 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
 
       // If it's the component form of another base hanzi, learn that
       // first because it can help understand the meaning from the shape.
-      if (isHanziSyllable(hanzi)) {
+      if (isHanziChar(hanzi)) {
         const meaning = await lookupHanziWord(hanziWord);
 
         if (
@@ -183,10 +183,10 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
       }
 
       // Learn the components of a hanzi word first.
-      for (const hanziSyllable of await decomposeHanzi(
+      for (const hanziChar of await decomposeHanzi(
         hanziFromHanziWord(hanziWordFromSkill(skill)),
       )) {
-        if (await characterHasGlyph(hanziSyllable)) {
+        if (await characterHasGlyph(hanziChar)) {
           // Check if the character was already added as a dependency by being
           // referenced in the gloss hint.
           const depAlreadyAdded = deps.some((x) => {
@@ -194,7 +194,7 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
               skill = skill as HanziWordSkill;
               return (
                 hanziFromHanziWord(hanziWordFromSkill(skill)) ===
-                hanziTextFromHanziChar(hanziSyllable)
+                hanziTextFromHanziChar(hanziChar)
               );
             }
             return false;
@@ -204,7 +204,7 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
           // guessing what disambugation to use for the hanzi.
           if (!depAlreadyAdded) {
             const hanziWordWithMeaning =
-              await hackyGuessHanziWordToLearn(hanziSyllable);
+              await hackyGuessHanziWordToLearn(hanziChar);
             if (hanziWordWithMeaning != null) {
               const [hanziWord] = hanziWordWithMeaning;
               deps.push(hanziWordToGloss(hanziWord));

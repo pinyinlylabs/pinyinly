@@ -18,7 +18,7 @@ import {
 } from "@haohaohow/lib/invariant";
 import shuffle from "lodash/shuffle";
 import type {
-  HanziSyllable,
+  HanziChar,
   HanziWord,
   OneCorrectPairQuestionAnswer,
   OneCorrectPairQuestionChoice,
@@ -76,7 +76,7 @@ interface QuestionContext {
    * Keep track of which hanzi have been used so that we don't have multiple
    * choices with the same hanzi or meaning.
    */
-  usedHanzi: Set<HanziSyllable>;
+  usedHanzi: Set<HanziChar>;
   /**
    * Keep track of which pinyin have been used so that we don't have multiple
    * choices in the quiz that have the same correct answer. Otherwise there
@@ -86,7 +86,7 @@ interface QuestionContext {
   usedPinyin: Set<PinyinSyllable>;
 
   pinyinDistractors: PinyinSyllable[];
-  hanziDistractors: HanziSyllable[];
+  hanziDistractors: HanziChar[];
 }
 
 export async function makeQuestionContext(
@@ -106,7 +106,7 @@ export async function makeQuestionContext(
   const ctx: QuestionContext = {
     answerPinyinToneless,
     answerPinyinInitial: initial,
-    usedHanzi: new Set([hanzi as unknown as HanziSyllable]),
+    usedHanzi: new Set([hanzi as unknown as HanziChar]),
     usedPinyin: new Set(await allOneSyllablePronunciationsForHanzi(hanzi)),
     pinyinDistractors: [],
     hanziDistractors: [],
@@ -117,7 +117,7 @@ export async function makeQuestionContext(
 
 export async function tryHanziDistractor(
   ctx: QuestionContext,
-  hanzi: HanziSyllable,
+  hanzi: HanziChar,
 ): Promise<boolean> {
   // Don't include if there's overlapping hanzi
   if (ctx.usedHanzi.has(hanzi)) {

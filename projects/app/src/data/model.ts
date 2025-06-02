@@ -147,17 +147,16 @@ export type PinyinPronunciationSpaceSeparated = string &
   z.BRAND<`PinyinPronunciationSpaceSeparated`>;
 
 /**
- * Single Hanzi character (syllable).
+ * Single Hanzi character.
  *
- * The name `HanziSyllable` uses a consistent naming convention with
- * `PinyinSyllable`, which is a single pinyin syllable.
+ * This is the hanzi companion to {@link PinyinSyllable}.
  */
-export type HanziSyllable = string & z.BRAND<`HanziSyllable`>;
+export type HanziChar = string & z.BRAND<`HanziChar`>;
 
 /**
  * Non-space separated hanzi text.
  */
-export type HanziText = (string & z.BRAND<`HanziText`>) | HanziSyllable;
+export type HanziText = (string & z.BRAND<`HanziText`>) | HanziChar;
 
 export type HanziWordSkillKind =
   | typeof SkillKind.HanziWordToGloss
@@ -293,7 +292,7 @@ export interface NewSkillRating {
 
 export type OneCorrectPairQuestionHanziChoice = {
   kind: `hanzi`;
-  value: HanziText | HanziSyllable;
+  value: HanziText;
 };
 
 export type OneCorrectPairQuestionGlossChoice = {

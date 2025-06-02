@@ -1,6 +1,6 @@
 import { parseIds, splitHanziText, walkIdsNode } from "@/data/hanzi";
 import type {
-  HanziSyllable,
+  HanziChar,
   HanziText,
   HanziWord,
   PinyinPronunciation,
@@ -27,9 +27,7 @@ import { z } from "zod/v4";
 export const hhhMarkSchema = z.string();
 export const hanziWordSchema = z.string().transform((x) => x as HanziWord);
 export const hanziTextSchema = z.string().transform((x) => x as HanziText);
-export const hanziSyllableSchema = z
-  .string()
-  .transform((x) => x as HanziSyllable);
+export const hanziCharSchema = z.string().transform((x) => x as HanziChar);
 export const pinyinPronunciationSchema = rPinyinPronunciation()
   .getUnmarshal()
   .describe(`space separated pinyin for each word`);
@@ -345,7 +343,7 @@ export const hanziWordMeaningSchema = z.object({
     .nullable()
     .optional(),
   partOfSpeech: partOfSpeechSchema,
-  componentFormOf: hanziSyllableSchema
+  componentFormOf: hanziCharSchema
     .describe(
       `the primary form of this hanzi (only relevant for component-form hanzi)`,
     )
@@ -561,7 +559,7 @@ export const allHanziWordsHanzi = memoize0(
 
 export const allOneSyllableHanzi = memoize0(
   async () =>
-    new Set<HanziSyllable>(
+    new Set<HanziChar>(
       [
         ...(await allRadicalHanziWords()),
         ...(await allHsk1HanziWords()),
@@ -569,7 +567,7 @@ export const allOneSyllableHanzi = memoize0(
         ...(await allHsk3HanziWords()),
       ]
         .map((x) => hanziFromHanziWord(x))
-        .filter((x) => characterCount(x) === 1) as unknown as HanziSyllable[],
+        .filter((x) => characterCount(x) === 1) as unknown as HanziChar[],
     ),
 );
 
@@ -630,7 +628,7 @@ export function shorthandPartOfSpeech(partOfSpeech: PartOfSpeech) {
   }
 }
 
-export function hanziTextFromHanziChar(hanziChar: HanziSyllable): HanziText {
+export function hanziTextFromHanziChar(hanziChar: HanziChar): HanziText {
   return hanziChar as unknown as HanziText;
 }
 
@@ -650,9 +648,7 @@ export function hanziFromHanziWord(hanziWord: HanziWord): HanziText {
   return hanzi as HanziText;
 }
 
-export function hanziSyllablesFromHanziWord(
-  hanziWord: HanziWord,
-): HanziSyllable[] {
+export function hanziCharsFromHanziWord(hanziWord: HanziWord): HanziChar[] {
   const hanzi = hanziFromHanziWord(hanziWord);
   return splitHanziText(hanzi);
 }
@@ -673,15 +669,13 @@ export function buildHanziWord(hanzi: string, meaningKey: string): HanziWord {
  * This first splits up into each character, and then splits each character down
  * further into its constituent parts (radicals).
  */
-export async function decomposeHanzi(
-  hanzi: HanziText | HanziSyllable,
-): Promise<HanziSyllable[]> {
+export async function decomposeHanzi(hanzi: HanziText): Promise<HanziChar[]> {
   const decompositions = await loadHanziDecomposition();
   const hanziChars = splitHanziText(hanzi);
 
   // For multi-character hanzi, learn each character, but for for
   // single-character hanzi, decompose it into radicals and learn those.
-  const result: HanziSyllable[] = [];
+  const result: HanziChar[] = [];
   if (hanziChars.length > 1) {
     for (const char of hanziChars) {
       result.push(char);
@@ -758,9 +752,7 @@ export const allOneSyllablePronunciationsForHanzi = memoize1(
 
     for (const [, meaning] of hanziWordMeanings) {
       for (const pronunciation of meaning.pinyin ?? emptyArray) {
-        if (typeof pronunciation === `string`) {
-          pronunciations.add(pronunciation);
-        } else if (pronunciation.length === 1) {
+        if (pronunciation.length === 1) {
           const syllable = pronunciation[0];
           invariant(syllable != null);
           pronunciations.add(syllable);
@@ -828,6 +820,6 @@ export const fakePinyin = [
   `fuo`,
 ];
 
-export function isHanziSyllable(hanzi: string): hanzi is HanziSyllable {
+export function isHanziChar(hanzi: string): hanzi is HanziChar {
   return characterCount(hanzi) === 1;
 }

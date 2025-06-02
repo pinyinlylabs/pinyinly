@@ -16,7 +16,7 @@ import {
 } from "@haohaohow/lib/invariant";
 import shuffle from "lodash/shuffle";
 import type {
-  HanziSyllable,
+  HanziChar,
   HanziText,
   HanziWord,
   OneCorrectPairQuestionAnswer,
@@ -112,7 +112,7 @@ export async function makeQuestionContext(
 
 export async function tryHanziDistractor(
   ctx: QuestionContext,
-  hanzi: HanziSyllable,
+  hanzi: HanziChar,
 ): Promise<boolean> {
   // Don't include if there's overlapping hanzi
   if (ctx.usedHanzi.has(hanzi)) {

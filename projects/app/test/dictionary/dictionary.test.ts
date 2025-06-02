@@ -1,6 +1,6 @@
 import { parseIds, splitHanziText, walkIdsNode } from "#data/hanzi.ts";
 import { parseHhhmark } from "#data/hhhmark.ts";
-import type { HanziSyllable } from "#data/model.ts";
+import type { HanziChar } from "#data/model.ts";
 import type { PinyinChart } from "#data/pinyin.ts";
 import { splitTonelessPinyin } from "#data/pinyin.ts";
 import { pinyinPronunciationDisplayText } from "#data/questions/util.ts";
@@ -743,14 +743,8 @@ await test(`${loadHanziWordMigrations.name} suite`, async () => {
 });
 
 await test(`dictionary contains entries for decomposition`, async () => {
-  const unknownCharacters = new Map<
-    /* hanzi */ HanziSyllable,
-    /* sources */ Set<string>
-  >();
-  const unknownComponents = new Map<
-    /* hanzi */ HanziSyllable,
-    /* sources */ Set<string>
-  >();
+  const unknownCharacters = new Map<HanziChar, /* sources */ Set<string>>();
+  const unknownComponents = new Map<HanziChar, /* sources */ Set<string>>();
 
   for (const hanzi of await allHanziWordsHanzi()) {
     for (const character of splitHanziText(hanzi)) {

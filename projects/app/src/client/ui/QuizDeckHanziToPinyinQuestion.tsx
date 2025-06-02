@@ -62,7 +62,7 @@ export function QuizDeckHanziToPinyinQuestion({
     ReadonlyMap<number, string>
   >(new Map());
   const startTime = useMemo(() => Date.now(), []);
-  const hanziSyllables = splitHanziText(
+  const hanziChars = splitHanziText(
     hanziFromHanziWord(hanziWordFromSkill(skill)),
   );
 
@@ -70,16 +70,14 @@ export function QuizDeckHanziToPinyinQuestion({
     // First time you press the button it will grade your answer, the next time
     // it moves you to the next question.
     if (isCorrect == null) {
-      const userAnswer = hanziSyllables.map((_, i) => userAnswers.get(i) ?? ``);
+      const userAnswer = hanziChars.map((_, i) => userAnswers.get(i) ?? ``);
       invariant(
         userAnswer.every((p) => p.length > 0),
         `all pinyin answers must be filled in`,
       );
 
       const isCorrect = answers.some((answer) =>
-        typeof answer === `string`
-          ? answer === userAnswers.get(0)
-          : answer.every((pinyin, i) => userAnswers.get(i) === pinyin),
+        answer.every((pinyin, i) => userAnswers.get(i) === pinyin),
       );
 
       const mistakes = isCorrect
@@ -110,7 +108,7 @@ export function QuizDeckHanziToPinyinQuestion({
     initialPinyinSearchQuery = searchQuery ?? ``;
   }
 
-  const isMissingAnswers = userAnswers.size < hanziSyllables.length;
+  const isMissingAnswers = userAnswers.size < hanziChars.length;
 
   const inputRef = useRef<TextInput>(null);
 
@@ -181,7 +179,7 @@ export function QuizDeckHanziToPinyinQuestion({
       </View>
       <View className="flex-1 justify-center py-quiz-px">
         <View className="flex-row justify-center gap-2">
-          {hanziSyllables.map((hanzi, i) => (
+          {hanziChars.map((hanzi, i) => (
             <HanziPinyinAnswerBox
               key={i}
               focused={i === focusedCharIndex}
@@ -224,8 +222,8 @@ export function QuizDeckHanziToPinyinQuestion({
                 }
 
                 // Move focus to the next character without pinyin
-                for (let offset = 1; offset < hanziSyllables.length; offset++) {
-                  const index = (prev + offset) % hanziSyllables.length;
+                for (let offset = 1; offset < hanziChars.length; offset++) {
+                  const index = (prev + offset) % hanziChars.length;
                   if (
                     // Pressing "Tab" should focus the next input regardless of
                     // whether it's empty.
