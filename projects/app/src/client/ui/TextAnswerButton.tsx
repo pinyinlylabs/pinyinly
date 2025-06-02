@@ -216,7 +216,7 @@ const bgAnimatedClass = tv({
       default: ``,
       dimmed: ``,
       selected: ``,
-      success: `bg-body`,
+      success: `bg-foreground`,
       error: `bg-transparent`,
     },
   },
@@ -255,10 +255,10 @@ const textClass = tv({
   // px-1: Horizontal padding is necessary to give first and last letters on a
   // line with accents enough space to not be clipped. Without this words like
   // "lǐ" will have half the accent clipped.
-  base: `px-1 text-center font-normal text-body web:transition-colors`,
+  base: `px-1 text-center font-normal text-foreground web:transition-colors`,
   variants: {
     state: {
-      default: `text-body`,
+      default: `text-foreground`,
       dimmed: `text-primary-9`,
       selected: `text-cyan-10`,
       success: `text-background`,
@@ -308,18 +308,18 @@ const rectClass = tv({
     // unfilled border
     {
       filled: false,
-      class: `border-body/20`,
+      class: `border-foreground/20`,
     },
     {
       filled: false,
       hovered: true,
-      class: `border-body/30`,
+      class: `border-foreground/30`,
     },
     // filled border
     {
       state: `success`,
       filled: true,
-      class: `border-body-bg75`,
+      class: `border-foreground-bg75`,
     },
     {
       state: `selected`,

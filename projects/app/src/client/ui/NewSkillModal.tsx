@@ -1,9 +1,11 @@
 import { useHanziWordMeaning } from "@/client/hooks/useHanziWordMeaning";
-import { splitHanziText } from "@/data/hanzi";
 import { SkillKind } from "@/data/model";
 import type { HanziWordSkill, Skill } from "@/data/rizzleSchema";
 import { hanziWordFromSkill, skillKindFromSkill } from "@/data/skills";
-import { hanziFromHanziWord } from "@/dictionary/dictionary";
+import {
+  hanziCharsFromHanziWord,
+  hanziFromHanziWord,
+} from "@/dictionary/dictionary";
 import { Image } from "expo-image";
 import { useMemo, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
@@ -107,16 +109,12 @@ const NewHanziWordToGlossSkillContent = ({
   const hanziWord = hanziWordFromSkill(skill);
   const hanziWordSkillData = useHanziWordMeaning(hanziWord);
   const hanzi = hanziFromHanziWord(hanziWord);
-
-  const characters = useMemo(
-    (): string[] => splitHanziText(hanziFromHanziWord(hanziWord)),
-    [hanziWord],
-  );
+  const hanziChars = hanziCharsFromHanziWord(hanziWord);
 
   return (
     <ContainerWithContinueButton onContinue={dismiss}>
       {hanziWordSkillData.data == null ? (
-        <Text className="text-body">Not implemented</Text>
+        <Text className="text-foreground">Not implemented</Text>
       ) : (
         <>
           <View className="mb-8 gap-8">
@@ -133,9 +131,9 @@ const NewHanziWordToGlossSkillContent = ({
 
             <View className="items-center gap-2">
               <View className="flex-row gap-1">
-                {characters.map((character) => (
+                {hanziChars.map((character) => (
                   <View key={character} className="items-center">
-                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-body">
+                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-foreground">
                       {character}
                     </Text>
                   </View>
@@ -164,16 +162,12 @@ const NewHanziWordToPinyinSkillContent = ({
 }) => {
   const hanziWord = hanziWordFromSkill(skill);
   const hanziWordSkillData = useHanziWordMeaning(hanziWord);
-
-  const characters = useMemo(
-    (): string[] => splitHanziText(hanziFromHanziWord(hanziWord)),
-    [hanziWord],
-  );
+  const hanziChars = hanziCharsFromHanziWord(hanziWord);
 
   return (
     <ContainerWithContinueButton onContinue={dismiss}>
       {hanziWordSkillData.data == null ? (
-        <Text className="text-body">Not implemented</Text>
+        <Text className="text-foreground">Not implemented</Text>
       ) : (
         <>
           <View className="mb-8 gap-8">
@@ -190,9 +184,9 @@ const NewHanziWordToPinyinSkillContent = ({
 
             <View className="items-center gap-2">
               <View className="flex-row gap-1">
-                {characters.map((character) => (
+                {hanziChars.map((character) => (
                   <View key={character} className="items-center">
-                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-body">
+                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-foreground">
                       {character}
                     </Text>
                   </View>
@@ -219,16 +213,12 @@ const NewHanziWordToPinyinInitialSkillContent = ({
 }) => {
   const hanziWord = hanziWordFromSkill(skill);
   const hanziWordSkillData = useHanziWordMeaning(hanziWord);
-
-  const characters = useMemo(
-    (): string[] => splitHanziText(hanziFromHanziWord(hanziWord)),
-    [hanziWord],
-  );
+  const hanziChars = hanziCharsFromHanziWord(hanziWord);
 
   return (
     <ContainerWithContinueButton onContinue={dismiss}>
       {hanziWordSkillData.data == null ? (
-        <Text className="text-body">Not implemented</Text>
+        <Text className="text-foreground">Not implemented</Text>
       ) : (
         <>
           <View className="mb-8 gap-8">
@@ -245,9 +235,9 @@ const NewHanziWordToPinyinInitialSkillContent = ({
 
             <View className="items-center gap-2">
               <View className="flex-row gap-1">
-                {characters.map((character) => (
+                {hanziChars.map((character) => (
                   <View key={character} className="items-center">
-                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-body">
+                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-foreground">
                       {character}
                     </Text>
                   </View>
@@ -276,14 +266,14 @@ const NewHanziWordToPinyinFinalSkillContent = ({
   const hanziWordSkillData = useHanziWordMeaning(hanziWord);
 
   const characters = useMemo(
-    (): string[] => splitHanziText(hanziFromHanziWord(hanziWord)),
+    (): string[] => hanziCharsFromHanziWord(hanziWord),
     [hanziWord],
   );
 
   return (
     <ContainerWithContinueButton onContinue={dismiss}>
       {hanziWordSkillData.data == null ? (
-        <Text className="text-body">Not implemented</Text>
+        <Text className="text-foreground">Not implemented</Text>
       ) : (
         <>
           <View className="mb-8 gap-8">
@@ -302,7 +292,7 @@ const NewHanziWordToPinyinFinalSkillContent = ({
               <View className="flex-row gap-1">
                 {characters.map((character) => (
                   <View key={character} className="items-center">
-                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-body">
+                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-foreground">
                       {character}
                     </Text>
                   </View>
@@ -331,14 +321,14 @@ const NewHanziWordToPinyinToneSkillContent = ({
   const hanziWordSkillData = useHanziWordMeaning(hanziWord);
 
   const characters = useMemo(
-    (): string[] => splitHanziText(hanziFromHanziWord(hanziWord)),
+    (): string[] => hanziCharsFromHanziWord(hanziWord),
     [hanziWord],
   );
 
   return (
     <ContainerWithContinueButton onContinue={dismiss}>
       {hanziWordSkillData.data == null ? (
-        <Text className="text-body">Not implemented</Text>
+        <Text className="text-foreground">Not implemented</Text>
       ) : (
         <>
           <View className="mb-8 gap-8">
@@ -357,7 +347,7 @@ const NewHanziWordToPinyinToneSkillContent = ({
               <View className="flex-row gap-1">
                 {characters.map((character) => (
                   <View key={character} className="items-center">
-                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-body">
+                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-foreground">
                       {character}
                     </Text>
                   </View>

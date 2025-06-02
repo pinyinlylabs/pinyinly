@@ -1,11 +1,10 @@
 import type { HanziWordWithMeaning } from "@/dictionary/dictionary";
 import {
-  characterCount,
   characterHasGlyph,
   decomposeHanzi,
   hanziFromHanziWord,
   hanziTextFromHanziChar,
-  isHanziChar,
+  isHanziWord,
   lookupGloss,
   lookupHanzi,
   lookupHanziWord,
@@ -23,20 +22,18 @@ import type { Duration } from "date-fns";
 import { sub } from "date-fns/sub";
 import { subDays } from "date-fns/subDays";
 import type { DeepReadonly } from "ts-essentials";
-import { splitHanziText } from "./hanzi";
+import { isHanziChar, splitHanziText } from "./hanzi";
 import { parseHhhmark } from "./hhhmark";
 import type {
   HanziGlossMistakeType,
   HanziPinyinMistakeType,
+  HanziText,
   HanziWord,
   HanziWordSkillKind,
-  MistakeType,
   NewSkillRating,
-  OneCorrectPairQuestionChoice,
   SrsStateType,
 } from "./model";
-import { MistakeKind, SkillKind, SrsKind } from "./model";
-import { splitPinyinText } from "./pinyin";
+import { SkillKind, SrsKind } from "./model";
 import type {
   HanziWordSkill,
   PinyinFinalAssociationSkill,
@@ -184,10 +181,10 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
       }
 
       // Learn the components of a hanzi word first.
-      for (const character of await decomposeHanzi(
+      for (const hanziChar of await decomposeHanzi(
         hanziFromHanziWord(hanziWordFromSkill(skill)),
       )) {
-        if (await characterHasGlyph(character)) {
+        if (await characterHasGlyph(hanziChar)) {
           // Check if the character was already added as a dependency by being
           // referenced in the gloss hint.
           const depAlreadyAdded = deps.some((x) => {
@@ -195,7 +192,7 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
               skill = skill as HanziWordSkill;
               return (
                 hanziFromHanziWord(hanziWordFromSkill(skill)) ===
-                hanziTextFromHanziChar(character)
+                hanziTextFromHanziChar(hanziChar)
               );
             }
             return false;
@@ -205,7 +202,7 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
           // guessing what disambugation to use for the hanzi.
           if (!depAlreadyAdded) {
             const hanziWordWithMeaning =
-              await hackyGuessHanziWordToLearn(character);
+              await hackyGuessHanziWordToLearn(hanziChar);
             if (hanziWordWithMeaning != null) {
               const [hanziWord] = hanziWordWithMeaning;
               deps.push(hanziWordToGloss(hanziWord));
@@ -260,7 +257,7 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
       const hanzi = hanziFromHanziWord(hanziWord);
 
       invariant(
-        characterCount(hanzi) === 1,
+        isHanziChar(hanzi),
         `${skillKind} only applies to single character hanzi`,
       );
 
@@ -274,7 +271,7 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
       const hanzi = hanziFromHanziWord(hanziWord);
 
       invariant(
-        characterCount(hanzi) === 1,
+        isHanziChar(hanzi),
         `${skillKind} only applies to single character hanzi`,
       );
 
@@ -288,7 +285,7 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
       const hanzi = hanziFromHanziWord(hanziWord);
 
       invariant(
-        characterCount(hanzi) === 1,
+        isHanziChar(hanzi),
         `${skillKind} only applies to single character hanzi`,
       );
 
@@ -326,7 +323,7 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
 }
 
 async function hackyGuessHanziWordToLearn(
-  hanzi: string,
+  hanzi: HanziText,
 ): Promise<DeepReadonly<HanziWordWithMeaning> | undefined> {
   const hanziWords = await lookupHanzi(hanzi);
   for (const item of hanziWords) {
@@ -680,13 +677,18 @@ export async function skillsToReReviewForHanziGlossMistake(
 ): Promise<ReadonlySet<Skill>> {
   const skills = new Set<Skill>();
 
+  if (isHanziWord(mistake.hanziOrHanziWord)) {
+    // TODO: work out the appropriate skills to review in this case.
+    return skills;
+  }
+
   // Queue all skills relevant to the gloss.
   for (const [hanziWord] of await lookupGloss(mistake.gloss)) {
     skills.add(hanziWordToGloss(hanziWord));
   }
 
   // Queue all skills relevant to the hanzi.
-  for (const [hanziWord] of await lookupHanzi(mistake.hanzi)) {
+  for (const [hanziWord] of await lookupHanzi(mistake.hanziOrHanziWord)) {
     skills.add(hanziWordToGloss(hanziWord));
   }
 
@@ -698,8 +700,13 @@ export async function skillsToReReviewForHanziPinyinMistake(
 ): Promise<ReadonlySet<Skill>> {
   const skills = new Set<Skill>();
 
+  if (isHanziWord(mistake.hanziOrHanziWord)) {
+    // TODO: work out the appropriate skills to review in this case.
+    return skills;
+  }
+
   // Queue all skills relevant to the hanzi.
-  for (const [hanziWord] of await lookupHanzi(mistake.hanzi)) {
+  for (const [hanziWord] of await lookupHanzi(mistake.hanziOrHanziWord)) {
     skills.add(hanziWordToPinyin(hanziWord));
   }
 
@@ -728,57 +735,6 @@ export function nextReviewForOtherSkillMistake<T extends SrsStateType>(
         nextReviewAt: now,
       }) as T;
     }
-  }
-}
-
-export function oneCorrectPairQuestionChoiceMistakes(
-  choice1: OneCorrectPairQuestionChoice,
-  choice2: OneCorrectPairQuestionChoice,
-): MistakeType[] {
-  const mistakes: MistakeType[] = [];
-
-  const mistakeChecks = [hanziGlossMistake, hanziPinyinMistake];
-  // Check all combinations of the choices, this makes each check simpler as it
-  // doesn't need to consider each direction.
-  const choicePairs = [
-    [choice1, choice2],
-    [choice2, choice1],
-  ] as const;
-
-  for (const mistakeCheck of mistakeChecks) {
-    for (const [choice1, choice2] of choicePairs) {
-      const mistake = mistakeCheck(choice1, choice2);
-      if (mistake) {
-        mistakes.push(mistake);
-      }
-    }
-  }
-  return mistakes;
-}
-
-export function hanziGlossMistake(
-  choice1: OneCorrectPairQuestionChoice,
-  choice2: OneCorrectPairQuestionChoice,
-): HanziGlossMistakeType | undefined {
-  if (choice1.kind === `hanzi` && choice2.kind === `gloss`) {
-    return {
-      kind: MistakeKind.HanziGloss,
-      hanzi: choice1.value,
-      gloss: choice2.value,
-    };
-  }
-}
-
-export function hanziPinyinMistake(
-  choice1: OneCorrectPairQuestionChoice,
-  choice2: OneCorrectPairQuestionChoice,
-): HanziPinyinMistakeType | undefined {
-  if (choice1.kind === `hanzi` && choice2.kind === `pinyin`) {
-    return {
-      kind: MistakeKind.HanziPinyin,
-      hanzi: choice1.value,
-      pinyin: choice2.value,
-    };
   }
 }
 
@@ -836,22 +792,6 @@ export function computeSkillRating(opts: {
     : Rating.Again;
 
   return { skill, rating, durationMs };
-}
-
-export function hanziOrPinyinWordCount(
-  choice: OneCorrectPairQuestionChoice,
-): number {
-  switch (choice.kind) {
-    case `hanzi`: {
-      return characterCount(choice.value);
-    }
-    case `pinyin`: {
-      return splitPinyinText(choice.value).length;
-    }
-    case `gloss`: {
-      throw new Error(`unexpected gloss choice in HanziWordToPinyin`);
-    }
-  }
 }
 
 // Skills that have either never been introduced, or were last reviewed too

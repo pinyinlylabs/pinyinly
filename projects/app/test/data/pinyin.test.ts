@@ -1,6 +1,6 @@
 import {
   convertPinyinWithToneNumberToToneMark,
-  parsePinyinTone,
+  parsePinyinSyllableTone,
 } from "#data/pinyin.ts";
 import assert from "node:assert/strict";
 import test from "node:test";
@@ -84,7 +84,7 @@ await test(`${convertPinyinWithToneNumberToToneMark.name} fixtures`, () => {
   }
 });
 
-await test(`${parsePinyinTone.name} fixtures`, async () => {
+await test(`${parsePinyinSyllableTone.name} fixtures`, async () => {
   await test(`static test cases`, () => {
     for (const [input, expected] of [
       [`niú`, [`niu`, 2]],
@@ -95,7 +95,7 @@ await test(`${parsePinyinTone.name} fixtures`, async () => {
       [`ǜ`, [`ü`, 4]],
       [`ü`, [`ü`, 5]],
     ] as const) {
-      assert.deepEqual(parsePinyinTone(input), expected);
+      assert.deepEqual(parsePinyinSyllableTone(input), expected);
     }
   });
 });

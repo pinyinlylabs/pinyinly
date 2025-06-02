@@ -144,7 +144,7 @@ export const QuizProgressBar = ({ progress }: { progress: number }) => {
       {metrics == null ? null : (
         <>
           <View
-            className="top-1/2 h-quiz-px w-full rounded-[8px] bg-body-bg25"
+            className="top-1/2 h-quiz-px w-full rounded-[8px] bg-foreground-bg25"
             style={{ transform: [{ translateY: -8 }] }}
           >
             {/* Ticks behind the fill bar */}
@@ -267,7 +267,7 @@ const MajorTickBg = ({ n, axis }: { axis: Axis; n: number }) => {
   return (
     <>
       <Reanimated.View
-        className="absolute top-1/2 rounded-full bg-body-bg25"
+        className="absolute top-1/2 rounded-full bg-foreground-bg25"
         style={bgAnimStyles}
       />
       <Reanimated.View

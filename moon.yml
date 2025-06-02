@@ -11,11 +11,15 @@ fileGroups:
 
 tasks:
   prettierCheck:
+    inputs:
+      - "!./projects/**/*"
     args:
-      - "'!./projects/**/*'"
+      - "'!projects/**'"
   prettier:
+    inputs:
+      - "!./projects/**/*"
     args:
-      - "'!./projects/**/*'"
+      - "'!projects/**/*'"
   yarnConstraints:
     command: yarn constraints
     inputs:

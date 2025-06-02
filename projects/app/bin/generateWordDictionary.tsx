@@ -6,6 +6,7 @@ import { useLocalQuery } from "#client/hooks/useLocalQuery.ts";
 import {
   flattenIds,
   idsNodeToString,
+  isHanziChar,
   parseIds,
   strokeCountToCharacter,
   walkIdsNode,
@@ -14,8 +15,9 @@ import type {
   HanziChar,
   HanziText,
   HanziWord,
-  PinyinText,
+  PinyinPronunciationSpaceSeparated,
 } from "#data/model.ts";
+import { pinyinPronunciationDisplayText } from "#data/questions/util.ts";
 import type {
   Dictionary,
   HanziWordMeaning,
@@ -28,7 +30,6 @@ import {
   dictionarySchema,
   hanziFromHanziWord,
   hanziWordMeaningSchema,
-  isHanziChar,
   loadHanziDecomposition,
   lookupHanzi,
   lookupHanziWord,
@@ -55,6 +56,7 @@ import {
 } from "@tanstack/react-query";
 import makeDebug from "debug";
 
+import { rPinyinPronunciation } from "#data/rizzleSchema.ts";
 import { Box, render, Text, useFocus, useInput } from "ink";
 import Link from "ink-link";
 import Spinner from "ink-spinner";
@@ -983,8 +985,19 @@ const HanziWordEditor = ({
 
               const newPinyin = newValue
                 .split(`;`)
-                .map((x) => x.trim())
-                .filter((x) => x !== ``) as PinyinText[];
+                .map((x) =>
+                  x
+                    // Make sure any double spaces are replaced with a single, this is assumed by rPinyinPronunciation
+                    .replaceAll(/ +/g, ` `)
+                    // Remove leading and trailing spaces
+                    .trim(),
+                )
+                .filter((x) => x !== ``)
+                .map((x) =>
+                  rPinyinPronunciation().unmarshal(
+                    x as PinyinPronunciationSpaceSeparated,
+                  ),
+                );
 
               mutations.push(() =>
                 upsertHanziWordMeaning(hanziWord, {
@@ -1499,7 +1512,11 @@ const DongChineseHanziEntry = ({ hanzi }: { hanzi: string }) => {
           <Text>
             <Text dimColor>pinyin:</Text>
             {` `}
-            <SemiColonList items={getDongChinesePinyin(lookup) ?? emptyArray} />
+            <SemiColonList
+              items={(getDongChinesePinyin(lookup) ?? emptyArray).map((x) =>
+                pinyinPronunciationDisplayText(x),
+              )}
+            />
           </Text>
         )}
         {lookup.hint == null ? null : (
@@ -1854,7 +1871,7 @@ const DictionaryPicker = ({
               const description =
                 rest == null || rest.trim() === `` ? null : rest.trim();
 
-              const existingItems = await lookupHanzi(hanzi);
+              const existingItems = await lookupHanzi(hanzi as HanziText);
               queries.push({ hanzi, description, existingItems });
             }
 
@@ -2191,7 +2208,10 @@ function hanziWordQueryFilter(
     hanziWord.includes(query) ||
     meaning.gloss.some((x) => x.includes(query)) ||
     (meaning.visualVariants?.some((x) => x.includes(query)) ?? false) ||
-    (meaning.pinyin?.some((x) => x.includes(query)) ?? false)
+    (meaning.pinyin?.some((pronunciation) =>
+      pronunciation.some((syllable) => syllable.includes(query)),
+    ) ??
+      false)
   );
 }
 
@@ -2285,7 +2305,11 @@ const DictionaryHanziWordEntry = ({
                 pinyin:
               </Text>
               {` `}
-              <SemiColonList items={meaning.pinyin} />
+              <SemiColonList
+                items={meaning.pinyin.map((x) =>
+                  pinyinPronunciationDisplayText(x),
+                )}
+              />
             </Text>
           )}
           <Text>
@@ -2463,7 +2487,25 @@ async function writeDictionary(data: Map<HanziWord, HanziWordMeaning>) {
   await writeUtf8FileIfChanged(
     dictionaryFilePath,
     jsonStringifyIndentOneLevel(
-      [...data.entries()].sort(sortComparatorString((x) => x[0])),
+      [...data.entries()]
+        .map(
+          ([key, meaning]) =>
+            [
+              key,
+              {
+                ...meaning,
+
+                // TODO: convert to rizzle
+                pinyin:
+                  meaning.pinyin == null
+                    ? undefined
+                    : meaning.pinyin.map((x) =>
+                        rPinyinPronunciation().marshal(x),
+                      ),
+              },
+            ] as const,
+        )
+        .sort(sortComparatorString((x) => x[0])),
     ),
   );
   await queryClient.invalidateQueries({ queryKey: [`loadDictionary`] });

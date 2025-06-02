@@ -2,7 +2,8 @@ import { parseIds, splitHanziText, walkIdsNode } from "#data/hanzi.ts";
 import { parseHhhmark } from "#data/hhhmark.ts";
 import type { HanziChar } from "#data/model.ts";
 import type { PinyinChart } from "#data/pinyin.ts";
-import { splitTonelessPinyin } from "#data/pinyin.ts";
+import { splitTonelessPinyinSyllable } from "#data/pinyin.ts";
+import { pinyinPronunciationDisplayText } from "#data/questions/util.ts";
 import type { HanziWordMeaning } from "#dictionary/dictionary.ts";
 import {
   allHanziCharacters,
@@ -280,14 +281,30 @@ await test(`hanzi word meaning example is not in english`, async () => {
   assert.deepEqual(violations, new Set());
 });
 
-await test(`hanzi word without pinyin omit the property rather than use an empty array`, async () => {
+await test(`hanzi word meaning pinyin lint`, async () => {
   const dict = await loadDictionary();
 
-  const hanziWordWithEmptyArray = [...dict]
-    .filter(([, { pinyin }]) => pinyin?.length === 0)
-    .map(([hanziWord]) => hanziWord);
+  // `pinyin` key should be omitted rather than an empty
+  {
+    const violations = [...dict]
+      .filter(([, { pinyin }]) => pinyin?.length === 0)
+      .map(([hanziWord]) => hanziWord);
+    assert.deepEqual(violations, []);
+  }
 
-  assert.deepEqual(hanziWordWithEmptyArray, []);
+  // Multiple pinyin entries should have the same number of words
+  {
+    const violations = [...dict]
+      .filter(([, { pinyin }]) => {
+        if (pinyin == null) {
+          return false;
+        }
+        const syllableCounts = pinyin.map((p) => p.length);
+        return new Set(syllableCounts).size > 1;
+      })
+      .map(([hanziWord]) => hanziWord);
+    assert.deepEqual(violations, []);
+  }
 });
 
 await test(`hanzi word without visual variants omit the property rather than use an empty array`, async () => {
@@ -326,7 +343,7 @@ await test(`hanzi word visual variants shouldn't include the hanzi`, async () =>
   assert.deepEqual(hanziWordWithBadVisualVariants, []);
 });
 
-await test(`hanzi words are unique on (meaning key, pinyin)`, async () => {
+await test(`hanzi words are unique on (meaning key, primary pinyin)`, async () => {
   const exceptions = new Set(
     [
       [`他们:they`, `它们:they`, `她们:they`],
@@ -347,7 +364,8 @@ await test(`hanzi words are unique on (meaning key, pinyin)`, async () => {
     if (componentFormOf != null) {
       continue;
     }
-    const key = `${meaningKey}:${pinyin}`;
+    const primaryPinyin = pinyin?.[0];
+    const key = `${meaningKey}:${primaryPinyin == null ? `<nullish>` : pinyinPronunciationDisplayText(primaryPinyin)}`;
     const set = byMeaningKeyAndPinyin.get(key) ?? new Set();
     set.add(hanziWord);
     byMeaningKeyAndPinyin.set(key, set);
@@ -723,14 +741,8 @@ await test(`${loadHanziWordMigrations.name} suite`, async () => {
 });
 
 await test(`dictionary contains entries for decomposition`, async () => {
-  const unknownCharacters = new Map<
-    /* hanzi */ HanziChar,
-    /* sources */ Set<string>
-  >();
-  const unknownComponents = new Map<
-    /* hanzi */ HanziChar,
-    /* sources */ Set<string>
-  >();
+  const unknownCharacters = new Map<HanziChar, /* sources */ Set<string>>();
+  const unknownComponents = new Map<HanziChar, /* sources */ Set<string>>();
 
   for (const hanzi of await allHanziWordsHanzi()) {
     for (const character of splitHanziText(hanzi)) {
@@ -853,14 +865,18 @@ async function testPinyinChart(
   // Start with test cases first as these are easier to debug.
   for (const [input, initial, final] of testCases) {
     assert.deepEqual(
-      splitTonelessPinyin(input, chart),
+      splitTonelessPinyinSyllable(input, chart),
       [initial, final],
       `${input} didn't split as expected`,
     );
   }
 
   for (const x of pinyinWords) {
-    assert.notEqual(splitTonelessPinyin(x, chart), null, `couldn't split ${x}`);
+    assert.notEqual(
+      splitTonelessPinyinSyllable(x, chart),
+      null,
+      `couldn't split ${x}`,
+    );
   }
 
   // Ensure that there are no duplicates initials or finals.

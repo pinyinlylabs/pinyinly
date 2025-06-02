@@ -3,6 +3,7 @@ import { ReferencePage } from "@/client/ui/ReferencePage";
 import { ReferencePageBodySection } from "@/client/ui/ReferencePageBodySection";
 import { ReferencePageHeader } from "@/client/ui/ReferencePageHeader";
 import { GradientPurple } from "@/client/ui/styles";
+import type { HanziText } from "@/data/model";
 import { lookupHanzi } from "@/dictionary/dictionary";
 import { useLocalSearchParams } from "expo-router";
 import { ScrollView } from "react-native";
@@ -13,7 +14,7 @@ export default function WordPage() {
   const query = useLocalQuery({
     queryKey: [`word`, id],
     queryFn: async () => {
-      const [result] = await lookupHanzi(id);
+      const [result] = await lookupHanzi(id as HanziText);
       if (result != null) {
         const [hanziWord, meaning] = result;
         return {

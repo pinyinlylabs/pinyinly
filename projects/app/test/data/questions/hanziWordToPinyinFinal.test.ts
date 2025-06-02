@@ -1,10 +1,10 @@
 import {
-  hanziWordToPinyinToneQuestionOrThrow,
+  hanziWordToPinyinFinalQuestionOrThrow,
   makeQuestionContext,
   tryHanziDistractor,
   tryPinyinDistractor,
-} from "#data/generators/hanziWordToPinyinTone.ts";
-import { hanziWordToPinyinInitial } from "#data/skills.ts";
+} from "#data/questions/hanziWordToPinyinFinal.ts";
+import { hanziWordToPinyinFinal } from "#data/skills.ts";
 import {
   characterCount,
   hanziFromHanziWord,
@@ -13,55 +13,56 @@ import {
 import shuffle from "lodash/shuffle";
 import assert from "node:assert/strict";
 import test from "node:test";
+import { 拼音, 汉字 } from "../helpers";
 
 await test(`${tryHanziDistractor.name} suite`, async () => {
   await test(`should omit if there is a conflicting pinyin`, async () => {
     {
       const ctx = await makeQuestionContext(`我:i`);
       // wǒ doesn't conflict with yī
-      assert.equal(await tryHanziDistractor(ctx, `医`), true);
+      assert.equal(await tryHanziDistractor(ctx, 汉字`医`), true);
     }
 
     {
       const ctx = await makeQuestionContext(`一:one`);
       // Both are yī
-      assert.equal(await tryHanziDistractor(ctx, `医`), false);
+      assert.equal(await tryHanziDistractor(ctx, 汉字`医`), false);
     }
   });
 
   await test(`should omit if an alternative pinyin conflicts`, async () => {
     const ctx = await makeQuestionContext(`后:behind`); // hòu
     // 候:wait has "hou","hòu". it should be excluded because hòu conflicts
-    assert.equal(await tryHanziDistractor(ctx, `候`), false);
+    assert.equal(await tryHanziDistractor(ctx, 汉字`候`), false);
   });
 
   await test(`should not omit if initial is the same`, async () => {
     const ctx = await makeQuestionContext(`我:i`);
     // 武 (wǔ) should not be omitted because it has no exact pinyin conflict
-    assert.equal(await tryHanziDistractor(ctx, `武`), true);
+    assert.equal(await tryHanziDistractor(ctx, 汉字`武`), true);
   });
 
   await test(`should omit if not the same length as the correct answer`, async () => {
     const ctx = await makeQuestionContext(`一:one`);
 
     // 1 word vs 2 words
-    assert.equal(await tryHanziDistractor(ctx, `北方`), false);
+    assert.equal(await tryHanziDistractor(ctx, 汉字`北方`), false);
   });
 
   await test(`should omit if there is a conflicting hanzi`, async () => {
     const ctx = await makeQuestionContext(`上:above`);
 
-    assert.equal(await tryHanziDistractor(ctx, `上`), false);
+    assert.equal(await tryHanziDistractor(ctx, 汉字`上`), false);
   });
 
   await test(`should not omit if there is no conflict`, async () => {
     {
       const ctx = await makeQuestionContext(`一:one`);
-      assert.equal(await tryHanziDistractor(ctx, `我`), true);
+      assert.equal(await tryHanziDistractor(ctx, 汉字`我`), true);
     }
     {
       const ctx = await makeQuestionContext(`争:compete`);
-      assert.equal(await tryHanziDistractor(ctx, `我`), true);
+      assert.equal(await tryHanziDistractor(ctx, 汉字`我`), true);
     }
   });
 });
@@ -70,27 +71,35 @@ await test(`${tryPinyinDistractor.name} suite`, async () => {
   await test(`should omit if it is the same`, async () => {
     const ctx = await makeQuestionContext(`我:i`);
     // wǒ conflicts with wǒ
-    assert.equal(tryPinyinDistractor(ctx, `wǒ`), false);
+    assert.equal(tryPinyinDistractor(ctx, 拼音`wǒ`), false);
+  });
+
+  await test(`should omit if the initial differs`, async () => {
+    const ctx = await makeQuestionContext(`堂:hall`); // táng
+
+    // u doesn't match o
+    assert.equal(tryPinyinDistractor(ctx, 拼音`fá`), false);
+  });
+
+  await test(`should omit if the tone differs`, async () => {
+    const ctx = await makeQuestionContext(`我:i`);
+
+    // ō doesn't match ǒ
+    assert.equal(tryPinyinDistractor(ctx, 拼音`tō`), false);
   });
 
   await test(`should add viable candidates`, async () => {
     const ctx = await makeQuestionContext(`我:i`);
     expect(ctx.usedPinyin).toEqual(new Set([`wǒ`]));
 
-    assert.equal(tryPinyinDistractor(ctx, `wǔ`), true);
+    assert.equal(tryPinyinDistractor(ctx, 拼音`wǔ`), true);
     expect(ctx.pinyinDistractors).toEqual([`wǔ`]);
     expect(ctx.usedPinyin).toEqual(new Set([`wǔ`, `wǒ`]));
   });
 });
 
-await test(`${hanziWordToPinyinToneQuestionOrThrow.name} suite`, async () => {
-  await test(`fixtues`, async () => {
-    await hanziWordToPinyinToneQuestionOrThrow(
-      hanziWordToPinyinInitial(`应:should`),
-    );
-  });
-
-  await test.skip(`randomly generate 100 questions`, async () => {
+await test(`${hanziWordToPinyinFinalQuestionOrThrow.name} suite`, async () => {
+  await test(`randomly generate 100 questions`, async () => {
     const dictionary = await loadDictionary();
     const sample = shuffle([...dictionary])
       .filter(
@@ -101,8 +110,8 @@ await test(`${hanziWordToPinyinToneQuestionOrThrow.name} suite`, async () => {
       .slice(0, 100);
 
     for (const [hanziWord] of sample) {
-      const skill = hanziWordToPinyinInitial(hanziWord);
-      await hanziWordToPinyinToneQuestionOrThrow(skill);
+      const skill = hanziWordToPinyinFinal(hanziWord);
+      await hanziWordToPinyinFinalQuestionOrThrow(skill);
     }
   });
 });

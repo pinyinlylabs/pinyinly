@@ -21,6 +21,7 @@ import type {
 import { QuestionKind, SkillKind } from "../model";
 import type { HanziWordSkill, Skill } from "../rizzleSchema";
 import { hanziWordFromSkill, skillKindFromSkill } from "../skills";
+import { oneCorrectPairChoiceText } from "./util";
 
 // generate a question to test a skill
 export async function hanziWordToGlossQuestionOrThrow(
@@ -240,8 +241,8 @@ function validQuestionInvariant(question: Question) {
   switch (question.kind) {
     case QuestionKind.OneCorrectPair: {
       // Ensure there aren't two identical choices in the same group.
-      uniqueInvariant(question.groupA.map((x) => x.value));
-      uniqueInvariant(question.groupB.map((x) => x.value));
+      uniqueInvariant(question.groupA.map((x) => oneCorrectPairChoiceText(x)));
+      uniqueInvariant(question.groupB.map((x) => oneCorrectPairChoiceText(x)));
       invariant(question.groupA.includes(question.answer.a));
       invariant(question.groupB.includes(question.answer.b));
       break;

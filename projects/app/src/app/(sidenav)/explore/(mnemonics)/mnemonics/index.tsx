@@ -89,21 +89,21 @@ export default function MnemonicsPage() {
     >
       <View className="max-w-[800px] gap-4 px-safe-or-4">
         <View className="gap-2 lg:px-0">
-          <Text className="text-3xl font-bold text-body">Mnemonics</Text>
+          <Text className="text-3xl font-bold text-foreground">Mnemonics</Text>
         </View>
 
         {query.data == null ? (
           query.isLoading ? (
-            <Text className="text-body">Loading</Text>
+            <Text className="text-foreground">Loading</Text>
           ) : query.isError ? (
-            <Text className="text-body">Error</Text>
+            <Text className="text-foreground">Error</Text>
           ) : (
-            <Text className="text-body">unexpected state</Text>
+            <Text className="text-foreground">unexpected state</Text>
           )
         ) : (
           <>
             <View>
-              <Text className="text-lg font-bold text-body">Tones</Text>
+              <Text className="text-lg font-bold text-foreground">Tones</Text>
             </View>
             <View className="flex-row flex-wrap gap-3.5 lg:gap-4">
               {tones.map(({ tone, desc }, i) => (
@@ -111,7 +111,9 @@ export default function MnemonicsPage() {
                   key={tone}
                   className="size-24 justify-center gap-2 rounded-xl bg-primary-3 px-2 hover:bg-primary-5 lg:size-24"
                 >
-                  <Text className="text-center text-2xl text-body">{tone}</Text>
+                  <Text className="text-center text-2xl text-foreground">
+                    {tone}
+                  </Text>
                   <Text
                     className="text-center text-primary-10"
                     numberOfLines={1}
@@ -130,7 +132,9 @@ export default function MnemonicsPage() {
             <View className="border-t-2 border-primary-5"></View>
 
             <View>
-              <Text className="text-lg font-bold text-body">Initials</Text>
+              <Text className="text-lg font-bold text-foreground">
+                Initials
+              </Text>
             </View>
 
             <View className="gap-3.5 lg:gap-4">
@@ -138,7 +142,7 @@ export default function MnemonicsPage() {
                 ([, { initials, desc, id }], i) => (
                   <Fragment key={desc}>
                     <View className="flex-row gap-2">
-                      <Text className="text-body">{desc}</Text>
+                      <Text className="text-foreground">{desc}</Text>
                       <Text className="text-primary-8">
                         {initialGroupThemes.data?.get(id) ?? `no theme`}
                       </Text>
@@ -157,7 +161,7 @@ export default function MnemonicsPage() {
                                 false,
                             })}
                           >
-                            <Text className="text-center font-cursive text-2xl text-body">
+                            <Text className="text-center font-cursive text-2xl text-foreground">
                               {initial}-
                             </Text>
                             <Text className={altText()} numberOfLines={1}>
@@ -183,7 +187,7 @@ export default function MnemonicsPage() {
             <View className="border-t-2 border-primary-5"></View>
 
             <View>
-              <Text className="text-lg font-bold text-body">Finals</Text>
+              <Text className="text-lg font-bold text-foreground">Finals</Text>
             </View>
             <View className="flex-row flex-wrap gap-3.5 lg:gap-4">
               {query.data.finals.map(([final, ...alts], i) => (
@@ -194,7 +198,7 @@ export default function MnemonicsPage() {
                       finalAssociationsQuery.data?.has(final) ?? false,
                   })}
                 >
-                  <Text className="text-center font-cursive text-2xl text-body">
+                  <Text className="text-center font-cursive text-2xl text-foreground">
                     -{final}
                   </Text>
                   <Text className={altText()} numberOfLines={1}>

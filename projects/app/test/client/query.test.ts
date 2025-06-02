@@ -3,11 +3,14 @@ import {
   flagsForSrsState,
   targetSkillsReviewQueue,
 } from "#client/query.ts";
-import type { HanziText, PinyinText } from "#data/model.ts";
+import type {
+  HanziText,
+  PinyinPronunciationSpaceSeparated,
+} from "#data/model.ts";
 import { QuestionFlagKind, SrsKind } from "#data/model.ts";
 import { v7Mutators } from "#data/rizzleMutators.ts";
 import type { Skill } from "#data/rizzleSchema.ts";
-import { v7 } from "#data/rizzleSchema.ts";
+import { rSpaceSeparatoredString, v7 } from "#data/rizzleSchema.ts";
 import type { SkillReviewQueue } from "#data/skills.ts";
 import { Rating } from "#util/fsrs.ts";
 import { nanoid } from "#util/nanoid.ts";
@@ -256,18 +259,21 @@ async function simulateSkillReviews({
         const [hanzi, gloss] = args as [HanziText, string];
         await rizzle.mutate.saveHanziGlossMistake({
           id: nanoid(),
-          hanzi,
+          hanziOrHanziWord: hanzi,
           gloss,
           now,
         });
         break;
       }
       case `❌hanziPinyin`: {
-        const [hanzi, pinyin] = args as [HanziText, PinyinText];
+        const [hanzi, pinyin] = args as [
+          HanziText,
+          PinyinPronunciationSpaceSeparated,
+        ];
         await rizzle.mutate.saveHanziPinyinMistake({
           id: nanoid(),
-          hanzi,
-          pinyin,
+          hanziOrHanziWord: hanzi,
+          pinyin: rSpaceSeparatoredString().unmarshal(pinyin),
           now,
         });
         break;

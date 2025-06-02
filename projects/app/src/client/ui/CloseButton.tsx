@@ -13,7 +13,7 @@ export const CloseButton = () => {
     >
       <Image
         source={require(`@/assets/icons/close.svg`)}
-        className="-my-0 size-[24px] shrink text-body-bg70"
+        className="-my-0 size-[24px] shrink text-foreground-bg70"
         tintColor="currentColor"
       />
     </Pressable>

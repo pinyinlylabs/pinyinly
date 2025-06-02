@@ -1,33 +1,41 @@
+import { isHanziChar } from "@/data/hanzi";
 import {
   convertPinyinWithToneNumberToToneMark,
-  parsePinyinTone,
+  parsePinyinSyllableTone,
 } from "@/data/pinyin";
 import {
-  allOneCharacterHanzi,
-  allPinyinForHanzi,
+  allOneSyllableHanzi,
+  allOneSyllablePronunciationsForHanzi,
   characterCount,
   hanziFromHanziWord,
   lookupHanziWord,
-  parsePinyinOrThrow,
+  parsePinyinSyllableOrThrow,
   pinyinOrThrow,
 } from "@/dictionary/dictionary";
 import {
   identicalInvariant,
   invariant,
+  nonNullable,
   uniqueInvariant,
 } from "@haohaohow/lib/invariant";
 import shuffle from "lodash/shuffle";
 import type {
-  HanziText,
+  HanziChar,
   HanziWord,
+  OneCorrectPairQuestion,
   OneCorrectPairQuestionAnswer,
   OneCorrectPairQuestionChoice,
-  PinyinText,
+  PinyinSyllable,
   Question,
 } from "../model";
 import { QuestionKind } from "../model";
 import type { HanziWordSkill } from "../rizzleSchema";
-import { hanziOrPinyinWordCount, hanziWordFromSkill } from "../skills";
+import { hanziWordFromSkill } from "../skills";
+import {
+  hanziOrPinyinSyllableCount,
+  oneCorrectPairChoiceText,
+  oneSyllablePinyinOrThrow,
+} from "./util";
 
 export async function hanziWordToPinyinToneQuestionOrThrow(
   skill: HanziWordSkill,
@@ -48,7 +56,7 @@ export async function hanziWordToPinyinToneQuestionOrThrow(
     (hanzi) => ({ kind: `hanzi`, value: hanzi }),
   );
   const groupB: OneCorrectPairQuestionChoice[] = ctx.pinyinDistractors.map(
-    (pinyin) => ({ kind: `pinyin`, value: pinyin }),
+    (pinyin) => ({ kind: `pinyin`, value: [pinyin] }),
   );
 
   return validQuestionInvariant({
@@ -71,38 +79,35 @@ interface QuestionContext {
    * Keep track of which hanzi have been used so that we don't have multiple
    * choices with the same hanzi or meaning.
    */
-  usedHanzi: Set<string>;
+  usedHanzi: Set<HanziChar>;
   /**
    * Keep track of which pinyin have been used so that we don't have multiple
    * choices in the quiz that have the same correct answer. Otherwise there
    * could be a pair of "wrong choices" that have overlapping pinyin and if
    * picked would be marked incorrect.
    */
-  usedPinyin: Set<string>;
+  usedPinyin: Set<PinyinSyllable>;
 
-  pinyinDistractors: PinyinText[];
-  hanziDistractors: HanziText[];
+  pinyinDistractors: PinyinSyllable[];
+  hanziDistractors: HanziChar[];
 }
 
 export async function makeQuestionContext(
   correctAnswer: HanziWord,
 ): Promise<QuestionContext> {
   const hanzi = hanziFromHanziWord(correctAnswer);
+  invariant(isHanziChar(hanzi), `expected single-character hanzi`);
   const meaning = await lookupHanziWord(correctAnswer);
-  const pinyin = pinyinOrThrow(correctAnswer, meaning);
-  const parsedPinyin = parsePinyinTone(pinyin);
-  const { initial } = parsePinyinOrThrow(pinyin);
-  invariant(
-    parsedPinyin != null,
-    `couldn't parse pinyin ${pinyin} for ${correctAnswer}`,
-  );
+  const pinyin = oneSyllablePinyinOrThrow(correctAnswer, meaning);
+  const parsedPinyin = nonNullable(parsePinyinSyllableTone(pinyin));
+  const { initial } = parsePinyinSyllableOrThrow(pinyin);
   const [answerPinyinToneless] = parsedPinyin;
 
   const ctx: QuestionContext = {
     answerPinyinToneless,
     answerPinyinInitial: initial,
     usedHanzi: new Set([hanzi]),
-    usedPinyin: new Set(await allPinyinForHanzi(hanzi)),
+    usedPinyin: new Set(await allOneSyllablePronunciationsForHanzi(hanzi)),
     pinyinDistractors: [],
     hanziDistractors: [],
   };
@@ -112,7 +117,7 @@ export async function makeQuestionContext(
 
 export async function tryHanziDistractor(
   ctx: QuestionContext,
-  hanzi: string,
+  hanzi: HanziChar,
 ): Promise<boolean> {
   // Don't include if there's overlapping hanzi
   if (ctx.usedHanzi.has(hanzi)) {
@@ -124,21 +129,21 @@ export async function tryHanziDistractor(
   }
 
   // Don't use any words that have overlapping pinyin.
-  for (const pinyin of await allPinyinForHanzi(hanzi)) {
+  for (const pinyin of await allOneSyllablePronunciationsForHanzi(hanzi)) {
     if (ctx.usedPinyin.has(pinyin)) {
       return false;
     }
   }
 
   // No conflicts, add it.
-  ctx.hanziDistractors.push(hanzi as HanziText);
+  ctx.hanziDistractors.push(hanzi);
 
   return true;
 }
 
 export function tryPinyinDistractor(
   ctx: QuestionContext,
-  pinyin: string,
+  pinyin: PinyinSyllable,
 ): boolean {
   if (ctx.usedPinyin.has(pinyin)) {
     return false;
@@ -146,7 +151,7 @@ export function tryPinyinDistractor(
 
   // No conflicts, add it.
   ctx.usedPinyin.add(pinyin);
-  ctx.pinyinDistractors.push(pinyin as PinyinText);
+  ctx.pinyinDistractors.push(pinyin);
 
   return true;
 }
@@ -204,7 +209,7 @@ async function addDistractors(
   //
   // Add hanzi distractors.
   //
-  const allHanziCandiates = shuffle([...(await allOneCharacterHanzi())]);
+  const allHanziCandiates = shuffle([...(await allOneSyllableHanzi())]);
   for (const hanzi of allHanziCandiates) {
     await tryHanziDistractor(ctx, hanzi);
 
@@ -219,27 +224,52 @@ async function addDistractors(
   );
 }
 
-function validQuestionInvariant(question: Question) {
-  switch (question.kind) {
-    case QuestionKind.OneCorrectPair: {
-      // Ensure there aren't two identical choices in the same group.
-      uniqueInvariant(question.groupA.map((x) => x.value));
-      uniqueInvariant(question.groupB.map((x) => x.value));
-      // Ensure the answer is included.
-      invariant(question.groupA.includes(question.answer.a));
-      invariant(question.groupB.includes(question.answer.b));
-      // Ensure all choices are the same length.
-      identicalInvariant([
-        ...question.groupA.map((x) => hanziOrPinyinWordCount(x)),
-        ...question.groupB.map((x) => hanziOrPinyinWordCount(x)),
-      ]);
-      break;
-    }
-    case QuestionKind.HanziToPinyin:
-    case QuestionKind.MultipleChoice: {
-      break;
-    }
-  }
+function validQuestionInvariant(question: OneCorrectPairQuestion) {
+  // Ensure there aren't two identical choices in the same group.
+  uniqueInvariant(question.groupA.map((x) => oneCorrectPairChoiceText(x)));
+  uniqueInvariant(question.groupB.map((x) => oneCorrectPairChoiceText(x)));
+  // Ensure the answer is included.
+  invariant(question.groupA.includes(question.answer.a));
+  invariant(question.groupB.includes(question.answer.b));
+  // Ensure all choices are single syllable.
+  identicalInvariant([
+    ...question.groupA.map((x) => hanziOrPinyinSyllableCount(x)),
+    ...question.groupB.map((x) => hanziOrPinyinSyllableCount(x)),
+  ]);
+  // Ensure all pinyin have the same initial and final
+  identicalInvariant(
+    question.groupB.map((x) => {
+      invariant(x.kind === `pinyin`);
+      invariant(hanziOrPinyinSyllableCount(x) === 1);
+
+      const syllable = nonNullable(x.value[0]);
+      const { initial, final } =
+        parsePinyinSyllableWithVowelVariationsOrThrow(syllable);
+      return `${initial}-${final}`;
+    }),
+  );
 
   return question;
+}
+
+function parsePinyinSyllableWithVowelVariationsOrThrow(
+  syllable: PinyinSyllable,
+): ReturnType<typeof parsePinyinSyllableOrThrow> {
+  try {
+    // Standard pinyin should work.
+    return parsePinyinSyllableOrThrow(syllable);
+  } catch {
+    // Maybe it failed because of extra vowel variations, reverse that and try again.
+    const toneResult = parsePinyinSyllableTone(syllable);
+    let [base] = nonNullable(toneResult);
+
+    for (const [vowel, replacement] of extraVowelVariations) {
+      if (base.includes(replacement)) {
+        base = base.replace(replacement, vowel);
+        break;
+      }
+    }
+
+    return parsePinyinSyllableOrThrow(base);
+  }
 }

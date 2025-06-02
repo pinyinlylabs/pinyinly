@@ -94,17 +94,64 @@ export default tseslint.config(
 
       curly: [`error`, `all`],
       "logical-assignment-operators": `error`,
+      "no-console": [`error`, { allow: [`warn`, `error`] }],
       "no-debugger": `error`,
       "no-else-return": `error`,
       "no-empty-function": `off`, // handled by @typescript-eslint/no-empty-function
-      "no-console": [`error`, { allow: [`warn`, `error`] }],
-      "no-process-exit": `error`,
       "no-fallthrough": [
         `error`,
         { commentPattern: `.*intentional fallthrough.*` },
       ],
+      "no-process-exit": `error`,
+      "no-useless-rename": `error`,
+      "object-shorthand": `error`,
       "one-var": [`error`, `never`],
 
+      //
+      // eslint-plugin-import
+      //
+
+      // enforces consistent type specifier style for named imports
+      "import/consistent-type-specifier-style": `error`,
+      // disallow non-import statements appearing before import statements
+      "import/first": `error`,
+      // Require a newline after the last import/require in a group
+      "import/newline-after-import": `error`,
+      // Forbid import of modules using absolute paths
+      "import/no-absolute-path": `error`,
+      // disallow AMD require/define
+      "import/no-amd": `error`,
+      // forbid default exports - we want to standardize on named exports so that imported names are consistent
+      "import/no-default-export": `error`,
+      // disallow imports from duplicate paths
+      "import/no-duplicates": `error`,
+      // Forbid the use of extraneous packages
+      "import/no-extraneous-dependencies": [
+        `error`,
+        {
+          devDependencies: true,
+          peerDependencies: true,
+          optionalDependencies: false,
+        },
+      ],
+      // Forbid mutable exports
+      "import/no-mutable-exports": `error`,
+      // Prevent importing the default as if it were named
+      "import/no-named-default": `error`,
+      // Prohibit named exports
+      "import/no-named-export": `off`, // we want everything to be a named export
+      // Forbid a module from importing itself
+      "import/no-self-import": `error`,
+      // Require modules with a single export to use a default export
+      "import/prefer-default-export": `off`, // we want everything to be named
+
+      //
+      // @typescript-eslint
+      //
+      // Messes up things where the difference between a type and interface is significant.
+      "@typescript-eslint/consistent-type-definitions": `off`,
+      "@typescript-eslint/consistent-type-imports": `error`,
+      "@typescript-eslint/no-var-requires": `off`,
       "@typescript-eslint/no-restricted-imports": [
         `error`,
         {
@@ -152,52 +199,23 @@ export default tseslint.config(
           ],
         },
       ],
-      "no-useless-rename": `error`,
-      "object-shorthand": `error`,
+      "@typescript-eslint/no-import-type-side-effects": `error`,
+      "@typescript-eslint/no-unnecessary-condition": `error`,
+      // Expo/metro stuff still uses require().
+      "@typescript-eslint/no-require-imports": `off`,
+      // A bit buggy when vars are only used as types, sticking with
+      // noUnusedLocals and noUnusedParameters.
+      "@typescript-eslint/no-unused-vars": `off`,
 
-      //
-      // eslint-plugin-import
-      //
-
-      // enforces consistent type specifier style for named imports
-      "import/consistent-type-specifier-style": `error`,
-      // disallow non-import statements appearing before import statements
-      "import/first": `error`,
-      // Require a newline after the last import/require in a group
-      "import/newline-after-import": `error`,
-      // Forbid import of modules using absolute paths
-      "import/no-absolute-path": `error`,
-      // disallow AMD require/define
-      "import/no-amd": `error`,
-      // forbid default exports - we want to standardize on named exports so that imported names are consistent
-      "import/no-default-export": `error`,
-      // disallow imports from duplicate paths
-      "import/no-duplicates": `error`,
-      // Forbid the use of extraneous packages
-      "import/no-extraneous-dependencies": [
-        `error`,
-        {
-          devDependencies: true,
-          peerDependencies: true,
-          optionalDependencies: false,
-        },
-      ],
-      // Forbid mutable exports
-      "import/no-mutable-exports": `error`,
-      // Prevent importing the default as if it were named
-      "import/no-named-default": `error`,
-      // Prohibit named exports
-      "import/no-named-export": `off`, // we want everything to be a named export
-      // Forbid a module from importing itself
-      "import/no-self-import": `error`,
-      // Require modules with a single export to use a default export
-      "import/prefer-default-export": `off`, // we want everything to be named
-
-      //
-      // @typescript-eslint
-      //
-      "@typescript-eslint/consistent-type-imports": `error`,
-      "@typescript-eslint/no-var-requires": `off`,
+      "@typescript-eslint/no-unnecessary-type-assertion": `error`,
+      "@typescript-eslint/no-unnecessary-type-constraint": `error`,
+      // Often only having one usage of a type parameter is fine because it's
+      // the only way to use "_ extends _".
+      "@typescript-eslint/no-unnecessary-type-parameters": `off`,
+      // It's broken when using generic inferred return types. Too much noise
+      // means it's often turned off even when it perhaps shouldn't be, so it's
+      // better to just disable it completely.
+      "@typescript-eslint/no-unsafe-return": `off`,
       "@typescript-eslint/restrict-template-expressions": [
         `error`,
         {
@@ -215,22 +233,6 @@ export default tseslint.config(
         { requireDefaultForNonUnion: true },
       ],
       "@typescript-eslint/strict-boolean-expressions": `error`,
-      "@typescript-eslint/no-import-type-side-effects": `error`,
-      "@typescript-eslint/no-unnecessary-condition": `error`,
-      // Expo/metro stuff still uses require().
-      "@typescript-eslint/no-require-imports": `off`,
-      // A bit buggy when vars are only used as types, sticking with
-      // noUnusedLocals and noUnusedParameters.
-      "@typescript-eslint/no-unused-vars": `off`,
-      // Messes up things where the difference between a type and interface is significant.
-      "@typescript-eslint/consistent-type-definitions": `off`,
-      // Often only having one usage of a type parameter is fine because it's
-      // the only way to use "_ extends _".
-      "@typescript-eslint/no-unnecessary-type-parameters": `off`,
-      // It's broken when using generic inferred return types. Too much noise
-      // means it's often turned off even when it perhaps shouldn't be, so it's
-      // better to just disable it completely.
-      "@typescript-eslint/no-unsafe-return": `off`,
       // It's easier to use the debugger for async code when all promises are
       // awaited so that the function call stack is preserved.
       "@typescript-eslint/return-await": [`error`, `always`],

@@ -4,6 +4,7 @@ import type { FsrsState } from "@/util/fsrs";
 import { nextReview } from "@/util/fsrs";
 import type { RizzleReplicacheMutators } from "@/util/rizzle";
 import { invariant } from "@haohaohow/lib/invariant";
+import type { HanziGlossMistakeType, HanziPinyinMistakeType } from "./model";
 import { MistakeKind } from "./model";
 import type { v7 } from "./rizzleSchema";
 import { srsStateFromFsrsState } from "./rizzleSchema";
@@ -46,10 +47,10 @@ export const v7Mutators: RizzleReplicacheMutators<typeof v7> = {
   async setPinyinInitialGroupTheme(tx, { groupId, themeId }) {
     await tx.pinyinInitialGroupTheme.set({ groupId }, { groupId, themeId });
   },
-  async saveHanziGlossMistake(tx, { id, gloss, hanzi, now }) {
+  async saveHanziGlossMistake(tx, { id, gloss, hanziOrHanziWord, now }) {
     await tx.hanziGlossMistake.set(
       { id },
-      { id, gloss, hanzi, createdAt: now },
+      { id, gloss, hanziOrHanziWord, createdAt: now },
     );
 
     // Mutator must be run in one task. Only microtask async is allowed, but
@@ -60,7 +61,11 @@ export const v7Mutators: RizzleReplicacheMutators<typeof v7> = {
     //
     // SAME AS saveHanziPinyinMistake
     if (loadDictionary.isCached()) {
-      const mistake = { kind: MistakeKind.HanziGloss, gloss, hanzi } as const;
+      const mistake: HanziGlossMistakeType = {
+        kind: MistakeKind.HanziGloss,
+        gloss,
+        hanziOrHanziWord,
+      };
 
       // Queue all skills relevant to the gloss.
       for (const skill of await skillsToReReviewForHanziGlossMistake(mistake)) {
@@ -76,10 +81,10 @@ export const v7Mutators: RizzleReplicacheMutators<typeof v7> = {
       );
     }
   },
-  async saveHanziPinyinMistake(tx, { id, pinyin, hanzi, now }) {
+  async saveHanziPinyinMistake(tx, { id, pinyin, hanziOrHanziWord, now }) {
     await tx.hanziPinyinMistake.set(
       { id },
-      { id, pinyin, hanzi, createdAt: now },
+      { id, pinyin, hanziOrHanziWord, createdAt: now },
     );
 
     // Mutator must be run in one task. Only microtask async is allowed, but
@@ -90,7 +95,11 @@ export const v7Mutators: RizzleReplicacheMutators<typeof v7> = {
     //
     // SAME AS saveHanziGlossMistake
     if (loadDictionary.isCached()) {
-      const mistake = { kind: MistakeKind.HanziPinyin, pinyin, hanzi } as const;
+      const mistake: HanziPinyinMistakeType = {
+        kind: MistakeKind.HanziPinyin,
+        pinyin,
+        hanziOrHanziWord,
+      };
 
       // Queue all skills relevant to the gloss.
       for (const skill of await skillsToReReviewForHanziPinyinMistake(

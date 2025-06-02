@@ -1,3 +1,4 @@
+import type { Ref } from "react";
 import { TextInput } from "react-native";
 import type { PropsOf } from "./types";
 
@@ -7,8 +8,9 @@ interface TextInputSingleProps
     // make `placeholder` mandatory (encourage a11y)
     `placeholder`
   > {
-  placeholder: string | undefined;
   disabled?: boolean;
+  placeholder: string | undefined;
+  ref?: Ref<TextInput>;
 }
 
 export function TextInputSingle(props: TextInputSingleProps) {
@@ -21,7 +23,7 @@ export function TextInputSingle(props: TextInputSingleProps) {
         // Disable the 1Password button in inputs.
         "1p-ignore": `true`,
       }}
-      className="hhh-text-body-input rounded-xl bg-background-1 px-4 py-3 outline-none placeholder:text-body/30"
+      className="hhh-text-body-input rounded-xl bg-background-1 px-4 py-3 outline-none placeholder:text-foreground/30"
     />
   );
 }

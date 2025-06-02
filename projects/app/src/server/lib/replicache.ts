@@ -1,3 +1,7 @@
+import type {
+  HanziGlossMistakeType,
+  HanziPinyinMistakeType,
+} from "@/data/model";
 import { MistakeKind } from "@/data/model";
 import type { SupportedSchema } from "@/data/rizzleSchema";
 import { rPinyinInitialGroupId, v7, v7_1 } from "@/data/rizzleSchema";
@@ -55,13 +59,21 @@ const mutators: RizzleDrizzleMutators<SupportedSchema, Drizzle> = {
 
     await updateSkillState(db, skill, userId);
   },
-  async saveHanziGlossMistake(db, userId, { id, gloss, hanzi, now }) {
+  async saveHanziGlossMistake(
+    db,
+    userId,
+    { id, gloss, hanziOrHanziWord, now },
+  ) {
     await db
       .insert(s.hanziGlossMistake)
-      .values([{ id, userId, gloss, hanzi, createdAt: now }]);
+      .values([{ id, userId, gloss, hanziOrHanziWord, createdAt: now }]);
 
     // Apply mistake effect to in-scope skills.
-    const mistake = { kind: MistakeKind.HanziGloss, gloss, hanzi } as const;
+    const mistake: HanziGlossMistakeType = {
+      kind: MistakeKind.HanziGloss,
+      gloss,
+      hanziOrHanziWord,
+    };
     const skillsToReview = await skillsToReReviewForHanziGlossMistake(mistake);
 
     // Find any existing skills for the user that should be reviewed again.
@@ -79,13 +91,21 @@ const mutators: RizzleDrizzleMutators<SupportedSchema, Drizzle> = {
       ]),
     });
   },
-  async saveHanziPinyinMistake(db, userId, { id, pinyin, hanzi, now }) {
+  async saveHanziPinyinMistake(
+    db,
+    userId,
+    { id, pinyin, hanziOrHanziWord, now },
+  ) {
     await db
       .insert(s.hanziPinyinMistake)
-      .values([{ id, userId, pinyin, hanzi, createdAt: now }]);
+      .values([{ id, userId, pinyin, hanziOrHanziWord, createdAt: now }]);
 
     // Apply mistake effect to in-scope skills.
-    const mistake = { kind: MistakeKind.HanziPinyin, pinyin, hanzi } as const;
+    const mistake: HanziPinyinMistakeType = {
+      kind: MistakeKind.HanziPinyin,
+      pinyin,
+      hanziOrHanziWord,
+    };
     const skillsToReview = await skillsToReReviewForHanziPinyinMistake(mistake);
 
     // Find any existing skills for the user that should be reviewed again.

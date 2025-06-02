@@ -1,4 +1,4 @@
-import type { PinyinInitialGroupId, PinyinText } from "@/data/model";
+import type { PinyinInitialGroupId, PinyinSyllable } from "@/data/model";
 import { memoize1, sortComparatorNumber } from "@/util/collections";
 import { invariant } from "@haohaohow/lib/invariant";
 import type { DeepReadonly } from "ts-essentials";
@@ -6,31 +6,28 @@ import type { DeepReadonly } from "ts-essentials";
 /**
  * `[label, match1, match2, ...]`
  */
-export type PinyinProduction = readonly string[];
+export type PinyinChartProduction = readonly string[];
 
 export interface PinyinChart {
   initials: DeepReadonly<
-    { id: PinyinInitialGroupId; desc: string; initials: PinyinProduction[] }[]
+    {
+      id: PinyinInitialGroupId;
+      desc: string;
+      initials: PinyinChartProduction[];
+    }[]
   >;
-  finals: readonly PinyinProduction[];
+  finals: readonly PinyinChartProduction[];
   overrides?: DeepReadonly<Record<string, [initial: string, final: string]>>;
-}
-
-/**
- * Break a PinyinString into individual pinyin words.
- */
-export function splitPinyinText(pinyinText: PinyinText): string[] {
-  return pinyinText.split(` `);
 }
 
 /**
  * Converts a single pinyin word written with a tone number suffix to use a tone
  * mark instead (also converts v to ü).
  */
-export function convertPinyinWithToneNumberToToneMark(pinyin: string): string {
-  if (pinyin.length === 0) {
-    return pinyin;
-  }
+export function convertPinyinWithToneNumberToToneMark(
+  pinyin: string,
+): PinyinSyllable {
+  invariant(pinyin.length > 0, `pinyin must not be empty`);
 
   // An algorithm to find the correct vowel letter (when there is more than one) is as follows:
   //
@@ -78,7 +75,7 @@ export function convertPinyinWithToneNumberToToneMark(pinyin: string): string {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     result += isPinyinVowel(char) ? toneMap[char][5]! : char;
   }
-  return result;
+  return result as PinyinSyllable;
 }
 
 const toneMap = {
@@ -99,7 +96,7 @@ const isPinyinVowel = (
 ): char is `a` | `e` | `i` | `ï` | `o` | `u` | `ü` =>
   char != null && char in toneMap;
 
-export const parsePinyinTone = memoize1(function parsePinyinTone(
+export const parsePinyinSyllableTone = memoize1(function parsePinyinTone(
   pinyin: string,
 ): [tonelessPinyin: string, tone: number] | null {
   for (const [key, value] of Object.entries(toneMap)) {
@@ -119,7 +116,7 @@ export const parsePinyinTone = memoize1(function parsePinyinTone(
 });
 
 function expandCombinations(
-  rules: readonly PinyinProduction[],
+  rules: readonly PinyinChartProduction[],
 ): [string, string][] {
   return rules.flatMap(([label, ...xs]): [string, string][] =>
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -131,7 +128,7 @@ function expandCombinations(
  * Given a toneless pinyin (i.e. `hao` not `hǎo`) split into an initial and
  * final using a given chart.
  */
-export function splitTonelessPinyin(
+export function splitTonelessPinyinSyllable(
   pinyin: string,
   chart: PinyinChart,
 ): readonly [initial: string, final: string] | null {
@@ -169,14 +166,17 @@ export function splitTonelessPinyin(
 }
 
 export function parsePinyinWithChart(
-  pinyin: string,
+  pinyinSyllable: string,
   chart: PinyinChart,
 ): { initial: string; final: string; tone: number } | null {
-  const toneResult = parsePinyinTone(pinyin);
-  invariant(toneResult != null, `Could not parse tone for pinyin ${pinyin}`);
+  const toneResult = parsePinyinSyllableTone(pinyinSyllable);
+  invariant(
+    toneResult != null,
+    `Could not parse tone for pinyin ${pinyinSyllable}`,
+  );
   const [tonelessPinyin, tone] = toneResult;
 
-  const initialFinalResult = splitTonelessPinyin(tonelessPinyin, chart);
+  const initialFinalResult = splitTonelessPinyinSyllable(tonelessPinyin, chart);
   invariant(
     initialFinalResult != null,
     `Could not split pinyin ${tonelessPinyin}`,
@@ -185,4 +185,27 @@ export function parsePinyinWithChart(
   const [initial, final] = initialFinalResult;
 
   return { initial, final, tone };
+}
+
+/**
+ * Search for pinyin syllables using ASCII.
+ * @param query
+ * @returns
+ */
+export function pinyinSyllableSearch(query: string): PinyinSyllable[] {
+  const result: PinyinSyllable[] = [];
+  const queryLower = query.toLowerCase();
+
+  for (const [initial, finals] of Object.entries(toneMap)) {
+    for (let tone = 1; tone <= 4; tone++) {
+      const char = finals[tone];
+      invariant(char != null);
+
+      if (char.toLowerCase().includes(queryLower)) {
+        result.push(`${initial}${char}` as PinyinSyllable);
+      }
+    }
+  }
+
+  return result;
 }
