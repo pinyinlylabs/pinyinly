@@ -1,4 +1,6 @@
 import type {
+  HanziSyllable,
+  PinyinSyllable,
   SrsStateFsrsFourPointFiveType,
   SrsStateMockType,
 } from "#data/model.ts";
@@ -96,3 +98,20 @@ export const fsrsSrsState = (
     difficulty: state.difficulty,
   };
 };
+
+/**
+ * Helper template string tag to make {@link HanziSyllable}.
+ */
+export const 汉字 = (strings: TemplateStringsArray) => {
+  invariant(strings.length === 1, `汉字 must be a single string`);
+  return strings[0] as HanziSyllable;
+};
+
+/**
+ * Helper template string tag to make {@link PinyinSyllable}.
+ *
+ * 拼音 means syllable in Chinese, and since it's written using Chinese it's
+ * inferred it's for Pinyin syllables.
+ */
+export const 拼音 = (strings: TemplateStringsArray) =>
+  strings[0] as PinyinSyllable;

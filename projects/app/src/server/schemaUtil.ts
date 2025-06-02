@@ -150,4 +150,16 @@ export const sPinyinInitialGroupId = rizzleCustomType(
   r.rPinyinInitialGroupId(),
   `text`,
 );
+export const sPinyinPronunciation = rizzleCustomType(
+  r.rPinyinPronunciation(),
+  `text`,
+);
+export const sSpaceSeparatoredString = rizzleCustomType(
+  r.rSpaceSeparatoredString(),
+  `text`,
+);
+export const sHanziOrHanziWord = rizzleCustomType(
+  r.rHanziOrHanziWord(),
+  `text`,
+);
 export const sFsrsRating = rizzleCustomType(r.rFsrsRating(), `text`);

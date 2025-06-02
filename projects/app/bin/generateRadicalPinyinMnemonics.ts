@@ -1,3 +1,5 @@
+import type { HanziText } from "#data/model.ts";
+import { pinyinPronunciationDisplayText } from "#data/questions/util.ts";
 import { invariant } from "@haohaohow/lib/invariant";
 import makeDebug from "debug";
 import path from "node:path";
@@ -81,10 +83,10 @@ const updates = new Map<string, { mnemonic: string; strategy: string }[]>();
 const decompositions = await loadHanziDecomposition();
 
 for (const hanzi of radicalsToCheck) {
-  const lookup = await lookupHanzi(hanzi).then((x) => x[0]?.[1]);
+  const lookup = await lookupHanzi(hanzi as HanziText).then((x) => x[0]?.[1]);
 
   const name = lookup?.gloss[0];
-  const pinyin = lookup?.pinyin?.[0];
+  const pinyin = lookup?.pinyin?.map(pinyinPronunciationDisplayText)[0];
   const decomposition = decompositions.get(hanzi);
   invariant(name != null, `Missing name data for ${hanzi}`);
   invariant(pinyin != null, `Missing pinyin data for ${hanzi}`);

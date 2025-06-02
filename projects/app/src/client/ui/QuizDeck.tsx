@@ -133,7 +133,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
               await r.mutate.saveHanziGlossMistake({
                 id: nanoid(),
                 now,
-                hanzi: mistake.hanzi,
+                hanziOrHanziWord: mistake.hanziOrHanziWord,
                 gloss: mistake.gloss,
               });
               break;
@@ -142,7 +142,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
               await r.mutate.saveHanziPinyinMistake({
                 id: nanoid(),
                 now,
-                hanzi: mistake.hanzi,
+                hanziOrHanziWord: mistake.hanziOrHanziWord,
                 pinyin: mistake.pinyin,
               });
               break;

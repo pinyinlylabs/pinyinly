@@ -1,5 +1,6 @@
 import { useHanziWordMeaning } from "@/client/hooks/useHanziWordMeaning";
 import type { HanziWord } from "@/data/model";
+import { pinyinPronunciationDisplayText } from "@/data/questions/util";
 import {
   glossOrThrow,
   hanziFromHanziWord,
@@ -57,7 +58,9 @@ export const HanziWordRefText = ({
     if (appending) {
       text += ` (`;
     }
-    text += pinyinOrThrow(hanziWord, meaning.data);
+    text += pinyinPronunciationDisplayText(
+      pinyinOrThrow(hanziWord, meaning.data),
+    );
     if (appending) {
       text += `)`;
     }

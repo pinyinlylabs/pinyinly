@@ -1,5 +1,6 @@
 import { useHanziWordMeaning } from "@/client/hooks/useHanziWordMeaning";
 import { useMultiChoiceQuizTimer } from "@/client/hooks/useMultiChoiceQuizTimer";
+import { oneCorrectPairQuestionChoiceMistakes } from "@/data/mistakes";
 import type {
   MistakeType,
   NewSkillRating,
@@ -8,11 +9,11 @@ import type {
   QuestionFlagType,
 } from "@/data/model";
 import { QuestionFlagKind, SkillKind } from "@/data/model";
+import { oneCorrectPairChoiceText } from "@/data/questions/util";
 import type { HanziWordSkill, Skill } from "@/data/rizzleSchema";
 import {
   computeSkillRating,
   hanziWordFromSkill,
-  oneCorrectPairQuestionChoiceMistakes,
   skillKindFromSkill,
 } from "@/data/skills";
 import { invariant } from "@haohaohow/lib/invariant";
@@ -346,17 +347,7 @@ const flagTextClass = tv({
 });
 
 function choiceToHhhmark(choice: OneCorrectPairQuestionChoice): string {
-  switch (choice.kind) {
-    case `gloss`: {
-      return `**${choice.value}**`;
-    }
-    case `hanzi`: {
-      return `**${choice.value}**`;
-    }
-    case `pinyin`: {
-      return `**${choice.value}**`;
-    }
-  }
+  return `**${oneCorrectPairChoiceText(choice)}**`;
 }
 
 const SkillAnswer = ({
@@ -585,7 +576,7 @@ const ChoiceButton = ({
       onPress={handlePress}
       state={state}
       className="flex-1"
-      text={choice.value}
+      text={oneCorrectPairChoiceText(choice)}
     />
   );
 };

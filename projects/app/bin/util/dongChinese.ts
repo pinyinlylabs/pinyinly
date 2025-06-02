@@ -1,4 +1,8 @@
-import type { PinyinText } from "#data/model.ts";
+import type {
+  PinyinPronunciation,
+  PinyinPronunciationSpaceSeparated,
+} from "#data/model.ts";
+import { rPinyinPronunciation } from "#data/rizzleSchema.ts";
 import {
   emptyArray,
   inverseSortComparator,
@@ -197,8 +201,10 @@ export const dongChineseSchema = z
 
 export type DongChineseRecord = z.infer<typeof dongChineseSchema>;
 
-export function getDongChinesePinyin(record: DongChineseRecord) {
-  let result: PinyinText[] | undefined;
+export function getDongChinesePinyin(
+  record: DongChineseRecord,
+): PinyinPronunciation[] | null | undefined {
+  let result: PinyinPronunciationSpaceSeparated[] | undefined;
 
   const useCountComparator =
     record.pinyinFrequencies?.some((x) => `count` in x) ?? false;
@@ -218,12 +224,12 @@ export function getDongChinesePinyin(record: DongChineseRecord) {
           )
         : sortComparatorNumber(() => 0),
   ) ?? emptyArray) {
-    (result ??= []).push(x.pinyin as PinyinText);
+    (result ??= []).push(x.pinyin as PinyinPronunciationSpaceSeparated);
   }
 
   if (result == null) {
     for (const x of record.oldPronunciations ?? emptyArray) {
-      const pinyin = x.pinyin as PinyinText | undefined;
+      const pinyin = x.pinyin as PinyinPronunciationSpaceSeparated | undefined;
       // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
       if (pinyin != null && (result == null || !result.includes(pinyin))) {
         (result ??= []).push(pinyin);
@@ -231,7 +237,7 @@ export function getDongChinesePinyin(record: DongChineseRecord) {
     }
   }
 
-  return result;
+  return result?.map((x) => rPinyinPronunciation().unmarshal(x));
 }
 
 function cleanGloss(gloss: string): string {

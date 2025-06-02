@@ -125,7 +125,7 @@ export default function HistoryPage() {
             {allMistakes.map(([_key, value], i) => (
               <View key={i}>
                 <Text className="text-foreground">
-                  {value.hanzi} ❌{` `}
+                  {value.hanziOrHanziWord} ❌{` `}
                   {`gloss` in value ? value.gloss : value.pinyin}
                 </Text>
               </View>

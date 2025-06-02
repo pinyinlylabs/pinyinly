@@ -1,3 +1,5 @@
+// hhh-standalone-test
+
 function typeChecks(..._args: unknown[]) {
   // This function is only used for type checking, so it should never be called.
 }

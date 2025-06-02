@@ -1,6 +1,6 @@
-import { generateQuestionForSkillOrThrow } from "@/data/generator";
 import type { Question, QuestionFlagType, SrsStateType } from "@/data/model";
 import { QuestionFlagKind, SrsKind } from "@/data/model";
+import { generateQuestionForSkillOrThrow } from "@/data/questions";
 import type { Rizzle, Skill, SkillRating } from "@/data/rizzleSchema";
 import type { SkillReviewQueue } from "@/data/skills";
 import {

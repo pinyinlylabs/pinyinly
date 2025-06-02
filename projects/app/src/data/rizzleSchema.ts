@@ -4,7 +4,14 @@ import { Rating } from "@/util/fsrs";
 import type { RizzleReplicache } from "@/util/rizzle";
 import { r, RizzleCustom } from "@/util/rizzle";
 import { z } from "zod/v4";
-import type { HanziText, PinyinText, SrsStateType } from "./model";
+import type {
+  HanziText,
+  HanziWord,
+  PinyinPronunciation,
+  PinyinPronunciationSpaceSeparated,
+  PinyinSyllable,
+  SrsStateType,
+} from "./model";
 import {
   MnemonicThemeId,
   PartOfSpeech,
@@ -102,6 +109,13 @@ export const rMnemonicThemeId = memoize0(function rMnemonicThemeId() {
   });
 });
 
+export const rHanziWord = memoize0(function rHanziWord() {
+  return RizzleCustom.create<HanziWord, HanziWord, HanziWord>(
+    z.custom<HanziWord>((x) => typeof x === `string`),
+    z.custom<HanziWord>((x) => typeof x === `string`),
+  );
+});
+
 export const rSkill = memoize0(function rSkill() {
   return RizzleCustom.create<Skill, Skill, Skill>(
     z.custom<Skill>((x) => typeof x === `string`),
@@ -109,17 +123,42 @@ export const rSkill = memoize0(function rSkill() {
   );
 });
 
-export const rHanziText = memoize0(function rHanziText() {
-  return RizzleCustom.create<HanziText, string, HanziText>(
-    z.custom<HanziText>((x) => typeof x === `string`),
-    z.custom<HanziText>((x) => typeof x === `string`),
+export const rHanziOrHanziWord = memoize0(function rHanziText() {
+  return RizzleCustom.create<
+    HanziText | HanziWord,
+    string,
+    HanziText | HanziWord
+  >(
+    z.custom<HanziText | HanziWord>((x) => typeof x === `string`),
+    z.custom<HanziText | HanziWord>((x) => typeof x === `string`),
   );
 });
 
-export const rPinyinText = memoize0(function rPinyinText() {
-  return RizzleCustom.create<PinyinText, string, PinyinText>(
-    z.custom<PinyinText>((x) => typeof x === `string`),
-    z.custom<PinyinText>((x) => typeof x === `string`),
+export const pinyinSyllableSchema = z.custom<PinyinSyllable>(
+  (x) => typeof x === `string`,
+);
+
+export const rSpaceSeparatoredString = memoize0(
+  function rSpaceSeparatedString() {
+    return RizzleCustom.create<readonly string[], string, readonly string[]>(
+      z.array(z.string()).transform((x) => x.join(` `)),
+      z.string().transform((x) => x.split(/ +/) as readonly string[]),
+    );
+  },
+);
+
+export const rPinyinPronunciation = memoize0(function rPinyinPronunciation() {
+  return RizzleCustom.create<
+    Readonly<PinyinPronunciation>,
+    PinyinPronunciationSpaceSeparated,
+    PinyinPronunciation
+  >(
+    z
+      .array(pinyinSyllableSchema)
+      .transform((x) => x.join(` `) as PinyinPronunciationSpaceSeparated),
+    z
+      .custom<PinyinPronunciationSpaceSeparated>((x) => typeof x === `string`)
+      .transform((x) => x.split(` `) as PinyinSyllable[]),
   );
 });
 
@@ -196,14 +235,14 @@ export const v7 = {
   //
   hanziGlossMistake: r.entity(`m/hg/[id]`, {
     id: r.string().alias(`i`),
-    hanzi: r.string().alias(`h`),
+    hanziOrHanziWord: rHanziOrHanziWord().alias(`h`),
     gloss: r.string().alias(`g`),
     createdAt: r.datetime().alias(`c`).indexed(`byCreatedAt`),
   }),
   hanziPinyinMistake: r.entity(`m/hp/[id]`, {
     id: r.string().alias(`i`),
-    hanzi: r.string().alias(`h`),
-    pinyin: r.string().alias(`p`),
+    hanziOrHanziWord: rHanziOrHanziWord().alias(`h`),
+    pinyin: rSpaceSeparatoredString().alias(`p`),
     createdAt: r.datetime().alias(`c`).indexed(`byCreatedAt`),
   }),
 
@@ -259,7 +298,7 @@ export const v7 = {
   saveHanziGlossMistake: r
     .mutator({
       id: r.string().alias(`i`),
-      hanzi: rHanziText().alias(`h`),
+      hanziOrHanziWord: rHanziOrHanziWord().alias(`h`),
       gloss: r.string().alias(`g`),
       now: r.timestamp().alias(`n`),
     })
@@ -267,8 +306,12 @@ export const v7 = {
   saveHanziPinyinMistake: r
     .mutator({
       id: r.string().alias(`i`),
-      hanzi: rHanziText().alias(`h`),
-      pinyin: rPinyinText().alias(`p`),
+      hanziOrHanziWord: rHanziOrHanziWord().alias(`h`),
+      /**
+       * Intentionally left as strings because this is user input and might not
+       * be valid pinyin.
+       */
+      pinyin: rSpaceSeparatoredString().alias(`p`),
       now: r.timestamp().alias(`n`),
     })
     .alias(`shpm`),

@@ -1,7 +1,7 @@
 import type { Rating } from "@/util/fsrs";
 import type { Interval } from "date-fns";
 import { z } from "zod/v4";
-import type { Skill } from "./rizzleSchema";
+import type { HanziWordSkill, Skill } from "./rizzleSchema";
 
 const pinyinInitialGroupIdSchema = z.enum({
   Basic: `debug--Basic`,
@@ -121,22 +121,43 @@ export type PartOfSpeech = z.infer<typeof partOfSpeechSchema>;
 export type HanziWord = (string & z.BRAND<`HanziWord`>) | `${string}:${string}`; // useful when writing literal strings in tests
 
 /**
- * Space-separated string of pinyin.
+ * A single pinyin syllable (e.g. `hǎo`).
  *
- * This makes it easier to split into individual pinyin words for rendering or
- * other processing.
+ * An syllable is a single sound (e.g. nǐ), so `nǐ hǎo` would be two syllables: `nǐ` and `hǎo`.
  */
-export type PinyinText = string & z.BRAND<`PinyinText`>;
+export type PinyinSyllable = string & z.BRAND<`PinyinSyllable`>;
+
+/**
+ * A sequence of pinyin syllables that make up a pronunciation.
+ *
+ * Differs from being generic "pinyin" in that punctuation is not included so
+ * it's not intended to describe a full sentence, but rather a single
+ * pronunciation of a word or phrase.
+ */
+export type PinyinPronunciation = PinyinSyllable[];
+
+/**
+ * Space-separated pinyin syllables, used for efficient storage.
+ *
+ * Being space-separated (rather than no-separation) makes it simpler to split
+ * back into individual pinyin syllables rather than parsing valid pinyin
+ * syllable boundaries.
+ */
+export type PinyinPronunciationSpaceSeparated = string &
+  z.BRAND<`PinyinPronunciationSpaceSeparated`>;
+
+/**
+ * Single Hanzi character (syllable).
+ *
+ * The name `HanziSyllable` uses a consistent naming convention with
+ * `PinyinSyllable`, which is a single pinyin syllable.
+ */
+export type HanziSyllable = string & z.BRAND<`HanziSyllable`>;
 
 /**
  * Non-space separated hanzi text.
  */
-export type HanziText = string & z.BRAND<`HanziText`>;
-
-/**
- * Single Hanzi character
- */
-export type HanziChar = string & z.BRAND<`HanziChar`>;
+export type HanziText = (string & z.BRAND<`HanziText`>) | HanziSyllable;
 
 export type HanziWordSkillKind =
   | typeof SkillKind.HanziWordToGloss
@@ -205,8 +226,20 @@ export interface MultipleChoiceQuestion {
 }
 
 const mistakeKindSchema = z.enum({
+  /**
+   * Mistakenly matching a hanzi with the wrong gloss.
+   */
   HanziGloss: `debug--HanziGloss`,
+  /**
+   * Mistakenly matching a hanzi with the wrong pinyin. This can be used for
+   * both HanziWord and plain Hanzi mistakes.
+   */
   HanziPinyin: `debug--HanziPinyin`,
+  /**
+   * Mistakenly matching a hanzi with the wrong pinyin initial.
+   *
+   * This **is not specific** to a particular HanziWord.
+   */
   HanziPinyinInitial: `debug--HanziPinyinInitial`,
 });
 export const MistakeKind = mistakeKindSchema.enum;
@@ -214,14 +247,31 @@ export type MistakeKind = z.infer<typeof mistakeKindSchema>;
 
 export interface HanziGlossMistakeType {
   kind: typeof MistakeKind.HanziGloss;
-  hanzi: HanziText;
+  /**
+   * This can be either a HanziWord or a plain Hanzi character.
+   *
+   * It should be a HanziWord when the user was shown a specific HanziWord and
+   * they answered with the wrong pinyin. The Pinyin might have been correct for
+   * another meaning of the same hanzi, but it was incorrect for the meaning
+   * they were shown.
+   */
+  hanziOrHanziWord: HanziWord | HanziText;
   gloss: string;
 }
 
 export interface HanziPinyinMistakeType {
   kind: typeof MistakeKind.HanziPinyin;
-  hanzi: HanziText;
-  pinyin: PinyinText;
+  /**
+   * This can be either a HanziWord or a plain Hanzi character,
+   * {@link HanziGlossMistakeType} for a rationale.
+   */
+  hanziOrHanziWord: HanziWord | HanziText;
+  /**
+   * This is intentionally **not** a {@link PinyinPronunciation} and instead a
+   * string because the user might have answered with junk and there's no
+   * guarantee what it is.
+   */
+  pinyin: readonly string[];
 }
 
 export interface HanziPinyinInitialMistakeType {
@@ -243,7 +293,7 @@ export interface NewSkillRating {
 
 export type OneCorrectPairQuestionHanziChoice = {
   kind: `hanzi`;
-  value: HanziText;
+  value: HanziText | HanziSyllable;
 };
 
 export type OneCorrectPairQuestionGlossChoice = {
@@ -253,7 +303,7 @@ export type OneCorrectPairQuestionGlossChoice = {
 
 export type OneCorrectPairQuestionPinyinChoice = {
   kind: `pinyin`;
-  value: PinyinText;
+  value: Readonly<PinyinPronunciation>;
 };
 
 export type OneCorrectPairQuestionChoice =
@@ -278,9 +328,12 @@ export interface OneCorrectPairQuestion {
 
 export interface HanziToPinyinQuestion {
   kind: typeof QuestionKind.HanziToPinyin;
-  prompt: string;
-  answer: readonly (readonly [HanziChar, /* pinyin */ string])[];
-  skill: Skill;
+  /**
+   * There can be multiple correct answers, e.g. for a word like `好` which
+   * can be pronounced as `hǎo` or `hào`.
+   */
+  answers: readonly Readonly<PinyinPronunciation>[];
+  skill: HanziWordSkill;
   flag?: QuestionFlagType;
 }
 

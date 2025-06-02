@@ -10,8 +10,8 @@ import type { TextAnswerButtonState } from "@/client/ui/TextAnswerButton";
 import { TextAnswerButton } from "@/client/ui/TextAnswerButton";
 import { TextInputSingle } from "@/client/ui/TextInputSingle";
 import type { PropsOf } from "@/client/ui/types";
-import type { HanziChar } from "@/data/model";
-import { QuestionKind } from "@/data/model";
+import { Use } from "@/client/ui/Use";
+import { hanziWordToPinyinQuestionOrThrow } from "@/data/questions/hanziWordToPinyin";
 import { hanziWordToPinyin } from "@/data/skills";
 import { buildHanziWord } from "@/dictionary/dictionary";
 import { Link } from "expo-router";
@@ -936,24 +936,25 @@ function PinyinOptionButtonExample() {
     </View>
   );
 }
+
 function QuizDeckHanziToPinyinQuestionExample() {
+  const skill = hanziWordToPinyin(buildHanziWord(`你好`, `hello`));
+  const questionPromise = hanziWordToPinyinQuestionOrThrow(skill);
+
   return (
-    <QuizDeckHanziToPinyinQuestion
-      question={{
-        kind: QuestionKind.HanziToPinyin,
-        prompt: `What sound does this make?`,
-        answer: [
-          [`你` as HanziChar, `nǐ`],
-          [`好` as HanziChar, `hǎo`],
-        ],
-        skill: hanziWordToPinyin(buildHanziWord(`你好`, `hello`)),
-      }}
-      onNext={() => {
-        console.log(`onNext()`);
-      }}
-      onRating={() => {
-        console.log(`onRating()`);
-      }}
+    <Use
+      promise={questionPromise}
+      render={(question) => (
+        <QuizDeckHanziToPinyinQuestion
+          question={question}
+          onNext={() => {
+            console.log(`onNext()`);
+          }}
+          onRating={() => {
+            console.log(`onRating()`);
+          }}
+        />
+      )}
     />
   );
 }

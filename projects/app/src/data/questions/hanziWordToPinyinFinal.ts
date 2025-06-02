@@ -1,7 +1,7 @@
 import { convertPinyinWithToneNumberToToneMark } from "@/data/pinyin";
 import {
-  allOneCharacterHanzi,
-  allPinyinForHanzi,
+  allOneSyllableHanzi,
+  allOneSyllablePronunciationsForHanzi,
   characterCount,
   fakePinyin,
   hanziFromHanziWord,
@@ -17,16 +17,22 @@ import {
 } from "@haohaohow/lib/invariant";
 import shuffle from "lodash/shuffle";
 import type {
+  HanziSyllable,
   HanziText,
   HanziWord,
   OneCorrectPairQuestionAnswer,
   OneCorrectPairQuestionChoice,
-  PinyinText,
+  PinyinSyllable,
   Question,
 } from "../model";
 import { QuestionKind } from "../model";
 import type { HanziWordSkill } from "../rizzleSchema";
-import { hanziOrPinyinWordCount, hanziWordFromSkill } from "../skills";
+import { hanziWordFromSkill } from "../skills";
+import {
+  hanziOrPinyinWordCount,
+  oneCorrectPairChoiceText,
+  oneSyllablePinyinOrThrow,
+} from "./util";
 
 export async function hanziWordToPinyinFinalQuestionOrThrow(
   skill: HanziWordSkill,
@@ -47,7 +53,7 @@ export async function hanziWordToPinyinFinalQuestionOrThrow(
     (hanzi) => ({ kind: `hanzi`, value: hanzi }),
   );
   const groupB: OneCorrectPairQuestionChoice[] = ctx.pinyinDistractors.map(
-    (pinyin) => ({ kind: `pinyin`, value: pinyin }),
+    (pinyin) => ({ kind: `pinyin`, value: [pinyin] }),
   );
 
   return validQuestionInvariant({
@@ -81,7 +87,7 @@ interface QuestionContext {
    */
   usedPinyin: Set<string>;
 
-  pinyinDistractors: PinyinText[];
+  pinyinDistractors: PinyinSyllable[];
   hanziDistractors: HanziText[];
 }
 
@@ -90,14 +96,14 @@ export async function makeQuestionContext(
 ): Promise<QuestionContext> {
   const hanzi = hanziFromHanziWord(correctAnswer);
   const meaning = await lookupHanziWord(correctAnswer);
-  const pinyin = pinyinOrThrow(correctAnswer, meaning);
+  const pinyin = oneSyllablePinyinOrThrow(correctAnswer, meaning);
   const parsedPinyin = parsePinyinOrThrow(pinyin);
 
   const ctx: QuestionContext = {
     answerPinyinInitial: parsedPinyin.initial,
     answerPinyinTone: parsedPinyin.tone,
     usedHanzi: new Set([hanzi]),
-    usedPinyin: new Set(await allPinyinForHanzi(hanzi)),
+    usedPinyin: new Set(await allOneSyllablePronunciationsForHanzi(hanzi)),
     pinyinDistractors: [],
     hanziDistractors: [],
   };
@@ -107,7 +113,7 @@ export async function makeQuestionContext(
 
 export async function tryHanziDistractor(
   ctx: QuestionContext,
-  hanzi: string,
+  hanzi: HanziSyllable,
 ): Promise<boolean> {
   // Don't include if there's overlapping hanzi
   if (ctx.usedHanzi.has(hanzi)) {
@@ -119,7 +125,7 @@ export async function tryHanziDistractor(
   }
 
   // Don't use any words that have overlapping pinyin.
-  for (const pinyin of await allPinyinForHanzi(hanzi)) {
+  for (const pinyin of await allOneSyllablePronunciationsForHanzi(hanzi)) {
     if (ctx.usedPinyin.has(pinyin)) {
       return false;
     }
@@ -133,7 +139,7 @@ export async function tryHanziDistractor(
 
 export function tryPinyinDistractor(
   ctx: QuestionContext,
-  pinyin: string,
+  pinyin: PinyinSyllable,
 ): boolean {
   const parsedPinyin = parsePinyinOrThrow(pinyin);
 
@@ -151,7 +157,7 @@ export function tryPinyinDistractor(
 
   // No conflicts, add it.
   ctx.usedPinyin.add(pinyin);
-  ctx.pinyinDistractors.push(pinyin as PinyinText);
+  ctx.pinyinDistractors.push(pinyin);
 
   return true;
 }
@@ -187,7 +193,7 @@ async function addDistractors(
   //
   // Add hanzi distractors.
   //
-  const allHanziCandiates = shuffle([...(await allOneCharacterHanzi())]);
+  const allHanziCandiates = shuffle([...(await allOneSyllableHanzi())]);
   for (const hanzi of allHanziCandiates) {
     await tryHanziDistractor(ctx, hanzi);
 
@@ -206,8 +212,8 @@ function validQuestionInvariant(question: Question) {
   switch (question.kind) {
     case QuestionKind.OneCorrectPair: {
       // Ensure there aren't two identical choices in the same group.
-      uniqueInvariant(question.groupA.map((x) => x.value));
-      uniqueInvariant(question.groupB.map((x) => x.value));
+      uniqueInvariant(question.groupA.map((x) => oneCorrectPairChoiceText(x)));
+      uniqueInvariant(question.groupB.map((x) => oneCorrectPairChoiceText(x)));
       // Ensure the answer is included.
       invariant(question.groupA.includes(question.answer.a));
       invariant(question.groupB.includes(question.answer.b));
@@ -218,11 +224,17 @@ function validQuestionInvariant(question: Question) {
       ]);
       // Ensure all pinyin have the same initial.
       identicalInvariant(
-        question.groupB.map((x) => parsePinyinOrThrow(x.value).initial),
+        question.groupB.map((x) =>
+          typeof x.value === `string`
+            ? parsePinyinOrThrow(x.value).initial
+            : null,
+        ),
       );
       // Ensure all pinyin have the same tone.
       identicalInvariant(
-        question.groupB.map((x) => parsePinyinOrThrow(x.value).tone),
+        question.groupB.map((x) =>
+          typeof x.value === `string` ? parsePinyinOrThrow(x.value).tone : null,
+        ),
       );
       break;
     }

@@ -6,9 +6,11 @@ import { z } from "zod/v4";
 import {
   rizzleCustomType,
   sFsrsRating,
+  sHanziOrHanziWord,
   sMnemonicThemeId,
   sPinyinInitialGroupId,
   sSkill,
+  sSpaceSeparatoredString,
   zodJson,
 } from "./schemaUtil";
 
@@ -119,7 +121,7 @@ export const hanziGlossMistake = schema.table(
       .text(`userId`)
       .references(() => user.id)
       .notNull(),
-    hanzi: pg.text(`hanzi`).notNull(),
+    hanziOrHanziWord: sHanziOrHanziWord(`hanzi`).notNull(),
     gloss: pg.text(`gloss`).notNull(),
     createdAt: pg.timestamp(`timestamp`).defaultNow().notNull(),
   },
@@ -134,8 +136,9 @@ export const hanziPinyinMistake = schema.table(
       .text(`userId`)
       .references(() => user.id)
       .notNull(),
-    hanzi: pg.text(`hanzi`).notNull(),
-    pinyin: pg.text(`pinyin`).notNull(),
+    hanziOrHanziWord: sHanziOrHanziWord(`hanzi`).notNull(),
+    // Intentionally left as strings because it's user input.
+    pinyin: sSpaceSeparatoredString(`pinyin`).notNull(),
     createdAt: pg.timestamp(`timestamp`).defaultNow().notNull(),
   },
   (t) => [pg.index().on(t.userId)],
