@@ -542,14 +542,6 @@ export async function decomposeHanzi(hanzi: HanziText): Promise<HanziChar[]> {
   return result;
 }
 
-/**
- * Calculate the number of characters in a string.
- */
-export function characterCount(text: string): number {
-  // eslint-disable-next-line @typescript-eslint/no-misused-spread
-  return [...text].length;
-}
-
 export function pinyinOrThrow(
   hanziWord: HanziWord,
   meaning: DeepReadonly<HanziWordMeaning> | null,

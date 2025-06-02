@@ -5,7 +5,6 @@ import {
 import {
   allOneSyllableHanzi,
   allOneSyllablePronunciationsForHanzi,
-  characterCount,
   fakePinyin,
   hanziFromHanziWord,
   loadPinyinWords,
@@ -121,10 +120,6 @@ export async function tryHanziDistractor(
 ): Promise<boolean> {
   // Don't include if there's overlapping hanzi
   if (ctx.usedHanzi.has(hanzi)) {
-    return false;
-  }
-
-  if (characterCount(hanzi) !== 1) {
     return false;
   }
 
