@@ -5,8 +5,8 @@ import path from "node:path";
 import OpenAI from "openai";
 import yargs from "yargs";
 import { z } from "zod/v4";
+import { loadHhhPinyinChart } from "../src/data/pinyin.js";
 import {
-  loadHhhPinyinChart,
   loadMnemonicThemeChoices,
   loadMnemonicThemes,
 } from "../src/dictionary/dictionary.js";

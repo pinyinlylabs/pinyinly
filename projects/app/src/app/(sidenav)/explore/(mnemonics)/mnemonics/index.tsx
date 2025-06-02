@@ -3,7 +3,7 @@ import {
   useRizzleQuery,
   useRizzleQueryPaged,
 } from "@/client/ui/ReplicacheContext";
-import { loadHhhPinyinChart } from "@/dictionary/dictionary";
+import { loadHhhPinyinChart } from "@/data/pinyin";
 import { Link } from "expo-router";
 import { Fragment } from "react";
 import { ScrollView, Text, View } from "react-native";

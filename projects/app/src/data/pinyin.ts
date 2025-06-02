@@ -1,7 +1,16 @@
 import type { PinyinInitialGroupId, PinyinSyllable } from "@/data/model";
-import { memoize1, sortComparatorNumber } from "@/util/collections";
+import {
+  deepReadonly,
+  emptyArray,
+  memoize0,
+  memoize1,
+  sortComparatorNumber,
+  weakMemoize1,
+} from "@/util/collections";
 import { invariant } from "@haohaohow/lib/invariant";
 import type { DeepReadonly } from "ts-essentials";
+import z from "zod/v4";
+import { rPinyinInitialGroupId } from "./rizzleSchema";
 
 /**
  * `[label, match1, match2, ...]`
@@ -17,66 +26,77 @@ export interface PinyinChart {
     }[]
   >;
   finals: readonly PinyinChartProduction[];
-  overrides?: DeepReadonly<Record<string, [initial: string, final: string]>>;
+  overrides?: DeepReadonly<
+    Record<
+      string,
+      [
+        [initialChartLabel: string, initial: string],
+        [finalChartLabel: string, final: string],
+      ]
+    >
+  >;
 }
 
 /**
  * Converts a single pinyin word written with a tone number suffix to use a tone
  * mark instead (also converts v to ü).
  */
-export function convertPinyinWithToneNumberToToneMark(
-  pinyin: string,
-): PinyinSyllable {
-  invariant(pinyin.length > 0, `pinyin must not be empty`);
+export const convertPinyinWithToneNumberToToneMark = memoize1(
+  function convertPinyinWithToneNumberToToneMark(
+    pinyin: string,
+  ): PinyinSyllable {
+    invariant(pinyin.length > 0, `pinyin must not be empty`);
 
-  // An algorithm to find the correct vowel letter (when there is more than one) is as follows:
-  //
-  // 1. If there is an a or an e, it will take the tone mark
-  // 2. If there is an ou, then the o takes the tone mark
-  // 3. Otherwise, the second vowel takes the tone mark
+    // An algorithm to find the correct vowel letter (when there is more than one) is as follows:
+    //
+    // 1. If there is an a or an e, it will take the tone mark
+    // 2. If there is an ou, then the o takes the tone mark
+    // 3. Otherwise, the second vowel takes the tone mark
 
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  let tone = `012345`.indexOf(pinyin.at(-1)!);
-
-  const pinyinLengthWithoutTone = tone >= 0 ? pinyin.length - 1 : pinyin.length;
-
-  let result = ``;
-  for (let i = 0; i < pinyinLengthWithoutTone; i++) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const char = pinyin[i]!;
+    let tone = `012345`.indexOf(pinyin.at(-1)!);
 
-    if (tone > 0) {
-      const nextChar = pinyin[i + 1];
+    const pinyinLengthWithoutTone =
+      tone >= 0 ? pinyin.length - 1 : pinyin.length;
 
-      if (char === `a` || char === `e`) {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        result += toneMap[char][tone]!;
-        tone = -1;
-        continue;
-      } else if (char === `o` && nextChar === `u`) {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        result += toneMap[char][tone]!;
-        tone = -1;
-        continue;
-      } else if (isPinyinVowel(char)) {
-        if (isPinyinVowel(nextChar)) {
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          result += toneMap[char][5]! + toneMap[nextChar][tone]!;
-          i++;
-        } else {
+    let result = ``;
+    for (let i = 0; i < pinyinLengthWithoutTone; i++) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const char = pinyin[i]!;
+
+      if (tone > 0) {
+        const nextChar = pinyin[i + 1];
+
+        if (char === `a` || char === `e`) {
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           result += toneMap[char][tone]!;
+          tone = -1;
+          continue;
+        } else if (char === `o` && nextChar === `u`) {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          result += toneMap[char][tone]!;
+          tone = -1;
+          continue;
+        } else if (isPinyinVowel(char)) {
+          if (isPinyinVowel(nextChar)) {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            result += toneMap[char][5]! + toneMap[nextChar][tone]!;
+            i++;
+          } else {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            result += toneMap[char][tone]!;
+          }
+          tone = -1;
+          continue;
         }
-        tone = -1;
-        continue;
       }
-    }
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    result += isPinyinVowel(char) ? toneMap[char][5]! : char;
-  }
-  return result as PinyinSyllable;
-}
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      result += isPinyinVowel(char) ? toneMap[char][5]! : char;
+    }
+    return result as PinyinSyllable;
+  },
+);
 
 const toneMap = {
   a: `_āáǎàa`,
@@ -98,7 +118,7 @@ const isPinyinVowel = (
 
 export const parsePinyinSyllableTone = memoize1(function parsePinyinTone(
   pinyin: string,
-): [tonelessPinyin: string, tone: number] | null {
+): { tonelessPinyin: string; tone: number } | null {
   for (const [key, value] of Object.entries(toneMap)) {
     for (let tone = 1; tone <= 4; tone++) {
       const char = value[tone];
@@ -106,13 +126,13 @@ export const parsePinyinSyllableTone = memoize1(function parsePinyinTone(
 
       const index = pinyin.indexOf(char);
       if (index !== -1) {
-        const withoutTone = pinyin.replace(char, key);
-        return [withoutTone, tone];
+        const tonelessPinyin = pinyin.replace(char, key);
+        return { tonelessPinyin, tone };
       }
     }
   }
 
-  return [pinyin, 5];
+  return { tonelessPinyin: pinyin, tone: 5 };
 });
 
 function expandCombinations(
@@ -124,14 +144,12 @@ function expandCombinations(
   );
 }
 
-/**
- * Given a toneless pinyin (i.e. `hao` not `hǎo`) split into an initial and
- * final using a given chart.
- */
-export function splitTonelessPinyinSyllable(
-  pinyin: string,
+const expandChart = weakMemoize1(function expandChart(
   chart: PinyinChart,
-): readonly [initial: string, final: string] | null {
+): DeepReadonly<{
+  initialsList: [initialChartLabel: string, initial: string][];
+  finalsList: [finalChartLabel: string, final: string][];
+}> {
   const initialsList = expandCombinations(
     chart.initials.flatMap((x) => x.initials),
   )
@@ -146,17 +164,36 @@ export function splitTonelessPinyinSyllable(
     .sort(sortComparatorNumber((x) => x.length))
     .reverse();
 
+  return { initialsList, finalsList };
+});
+
+/**
+ * Given a toneless pinyin (i.e. `hao` rather than `hǎo`) split into an initial
+ * and final using a given chart.
+ */
+export function splitTonelessPinyinSyllable(
+  pinyin: string,
+  chart: PinyinChart,
+): {
+  initial: string;
+  final: string;
+  initialChartLabel: string;
+  finalChartLabel: string;
+} | null {
+  const { initialsList, finalsList } = expandChart(chart);
+
   const override = chart.overrides?.[pinyin];
   if (override) {
-    return override;
+    const [[initialChartLabel, initial], [finalChartLabel, final]] = override;
+    return { initialChartLabel, initial, finalChartLabel, final };
   }
 
-  for (const [initialLabel, initial] of initialsList) {
+  for (const [initialChartLabel, initial] of initialsList) {
     if (pinyin.startsWith(initial)) {
       const final = pinyin.slice(initial.length);
-      for (const [finalLabel, finalCandiate] of finalsList) {
-        if (final === finalCandiate) {
-          return [initialLabel, finalLabel];
+      for (const [finalChartLabel, finalCandidate] of finalsList) {
+        if (final === finalCandidate) {
+          return { initial, initialChartLabel, final, finalChartLabel };
         }
       }
     }
@@ -165,26 +202,48 @@ export function splitTonelessPinyinSyllable(
   return null;
 }
 
-export function parsePinyinWithChart(
+export function parsePinyinSyllableWithChart(
   pinyinSyllable: string,
   chart: PinyinChart,
-): { initial: string; final: string; tone: number } | null {
+): {
+  initialChartLabel: string;
+  initial: string;
+  finalChartLabel: string;
+  final: string;
+  tone: number;
+  tonelessSyllable: PinyinSyllable;
+} | null {
+  if (pinyinSyllable === ``) {
+    return null;
+  }
+
   const toneResult = parsePinyinSyllableTone(pinyinSyllable);
-  invariant(
-    toneResult != null,
-    `Could not parse tone for pinyin ${pinyinSyllable}`,
-  );
-  const [tonelessPinyin, tone] = toneResult;
+  if (toneResult == null) {
+    return null;
+  }
+  const { tonelessPinyin, tone } = toneResult;
 
   const initialFinalResult = splitTonelessPinyinSyllable(tonelessPinyin, chart);
-  invariant(
-    initialFinalResult != null,
-    `Could not split pinyin ${tonelessPinyin}`,
-  );
+  if (initialFinalResult == null) {
+    return null;
+  }
 
-  const [initial, final] = initialFinalResult;
+  const { initialChartLabel, initial, finalChartLabel, final } =
+    initialFinalResult;
 
-  return { initial, final, tone };
+  return {
+    initialChartLabel,
+    initial,
+    final,
+    finalChartLabel,
+    tone,
+    tonelessSyllable: `${initial}${final}` as PinyinSyllable,
+  };
+}
+
+interface PinyinSyllableSearchResult {
+  pinyinSyllable: PinyinSyllable;
+  tone: number;
 }
 
 /**
@@ -192,20 +251,205 @@ export function parsePinyinWithChart(
  * @param query
  * @returns
  */
-export function pinyinSyllableSearch(query: string): PinyinSyllable[] {
-  const result: PinyinSyllable[] = [];
-  const queryLower = query.toLowerCase();
-
-  for (const [initial, finals] of Object.entries(toneMap)) {
-    for (let tone = 1; tone <= 4; tone++) {
-      const char = finals[tone];
-      invariant(char != null);
-
-      if (char.toLowerCase().includes(queryLower)) {
-        result.push(`${initial}${char}` as PinyinSyllable);
-      }
-    }
+export function pinyinSyllableSearch(
+  query: string,
+): DeepReadonly<PinyinSyllableSearchResult[]> {
+  const parsed = parsePinyinSyllable(query);
+  if (parsed == null) {
+    return emptyArray;
   }
 
-  return result;
+  return toneVariationsForTonelessSyllable(parsed.tonelessSyllable);
 }
+
+const toneVariationsForTonelessSyllable = memoize1(
+  (
+    tonelessSyllable: PinyinSyllable,
+  ): DeepReadonly<PinyinSyllableSearchResult[]> => {
+    const result: PinyinSyllableSearchResult[] = [];
+    for (let i = 1; i <= 5; i++) {
+      result.push({
+        pinyinSyllable: convertPinyinWithToneNumberToToneMark(
+          `${tonelessSyllable}${i}`,
+        ),
+        tone: i,
+      });
+    }
+    return result;
+  },
+);
+
+export const parsePinyinSyllable = memoize1(function parsePinyinSyllable(
+  pinyinSyllable: string,
+) {
+  const chart = loadHhhPinyinChart();
+
+  return deepReadonly(parsePinyinSyllableWithChart(pinyinSyllable, chart));
+});
+
+export function parsePinyinSyllableOrThrow(pinyinSyllable: string) {
+  const parsed = parsePinyinSyllable(pinyinSyllable);
+  invariant(parsed != null, `Could not parse pinyin ${pinyinSyllable}`);
+  return parsed;
+}
+
+export const loadHhhPinyinChart = memoize0(() =>
+  pinyinChartSchema.transform(deepReadonly).parse({
+    initials: [
+      {
+        id: `basic`,
+        desc: `basic distinct sounds`,
+        initials: [
+          `b`,
+          `p`,
+          `m`,
+          `f`,
+          `d`,
+          `t`,
+          `n`,
+          `l`,
+          `g`,
+          `k`,
+          `h`,
+          `zh`,
+          [`ch`, `ch`, `chi`],
+          `sh`,
+          `r`,
+          `z`,
+          [`c`, `c`, `ci`],
+          `s`,
+        ],
+      },
+      {
+        id: `-i`,
+        desc: `ends with an 'i' (ee) sound`,
+        initials: [
+          [`y`, `y`, `yi`],
+          `bi`,
+          `pi`,
+          `mi`,
+          `di`,
+          `ti`,
+          `ni`,
+          `li`,
+          `ji`,
+          `qi`,
+          `xi`,
+        ],
+      },
+      {
+        id: `-u`,
+        desc: `ends with an 'u' (oo) sound`,
+        initials: [
+          `w`,
+          `bu`,
+          `pu`,
+          `mu`,
+          `fu`,
+          `du`,
+          `tu`,
+          `nu`,
+          `lu`,
+          `gu`,
+          `ku`,
+          `hu`,
+          [`zhu`, `zhu`, `zho`],
+          [`chu`, `chu`, `cho`],
+          `shu`,
+          `ru`,
+          `zu`,
+          [`cu`, `cu`, `co`],
+          `su`,
+        ],
+      },
+      {
+        id: `-ü`,
+        desc: `ends with an 'ü' (ü) sound`,
+        initials: [`yu`, `nü`, `lü`, `ju`, `qu`, `xu`],
+      },
+      {
+        id: `∅`,
+        desc: `null special case`,
+        initials: [[`∅`, ``]],
+      },
+    ],
+    finals: [
+      [`∅`, ``, `er`],
+      `a`,
+      `o`,
+      [`e`, `e`, `ê`],
+      `ai`,
+      [`ei`, `ei`, `i`],
+      `ao`,
+      [`ou`, `ou`, `u`],
+      `an`,
+      [`(e)n`, `n`, `en`],
+      `ang`,
+      [`(e)ng`, `ng`, `eng`, `ong`],
+    ],
+    overrides: {},
+  }),
+);
+
+const pinyinChartSchema = z
+  .object({
+    initials: z.array(
+      z.object({
+        id: rPinyinInitialGroupId().getUnmarshal(),
+        desc: z.string(),
+        initials: z.array(z.union([z.string(), z.array(z.string())])),
+      }),
+    ),
+    finals: z.array(z.union([z.string(), z.array(z.string())])),
+    overrides: z.record(
+      z.string(),
+      z.tuple([
+        z.tuple([
+          z.string().describe(`initial chart label`),
+          z.string().describe(`initial`),
+        ]),
+        z.tuple([
+          z.string().describe(`final chart label`),
+          z.string().describe(`final`),
+        ]),
+      ]),
+    ),
+  })
+  .transform(({ initials: initialGroups, finals, overrides }) => ({
+    initials: initialGroups.map((group) => ({
+      ...group,
+      initials: group.initials.map((initial) =>
+        typeof initial === `string` ? ([initial, initial] as const) : initial,
+      ),
+    })),
+    finals: finals.map((x) => (typeof x === `string` ? ([x, x] as const) : x)),
+    overrides,
+  }));
+
+export const loadStandardPinyinChart = memoize0(async () =>
+  pinyinChartSchema
+    .transform(deepReadonly)
+    // eslint-disable-next-line unicorn/no-await-expression-member
+    .parse((await import(`./standardPinyinChart.asset.json`)).default),
+);
+
+export const loadMmPinyinChart = memoize0(async () =>
+  pinyinChartSchema
+    .transform(deepReadonly)
+    // eslint-disable-next-line unicorn/no-await-expression-member
+    .parse((await import(`./mmPinyinChart.asset.json`)).default),
+);
+
+export const loadHhPinyinChart = memoize0(async () =>
+  pinyinChartSchema
+    .transform(deepReadonly)
+    // eslint-disable-next-line unicorn/no-await-expression-member
+    .parse((await import(`./hhPinyinChart.asset.json`)).default),
+);
+
+export const loadHmmPinyinChart = memoize0(async () =>
+  pinyinChartSchema
+    .transform(deepReadonly)
+    // eslint-disable-next-line unicorn/no-await-expression-member
+    .parse((await import(`./hmmPinyinChart.asset.json`)).default),
+);

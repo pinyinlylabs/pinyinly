@@ -2,7 +2,13 @@ import { parseIds, splitHanziText, walkIdsNode } from "#data/hanzi.ts";
 import { parseHhhmark } from "#data/hhhmark.ts";
 import type { HanziChar } from "#data/model.ts";
 import type { PinyinChart } from "#data/pinyin.ts";
-import { splitTonelessPinyinSyllable } from "#data/pinyin.ts";
+import {
+  loadHhPinyinChart,
+  loadHmmPinyinChart,
+  loadMmPinyinChart,
+  loadStandardPinyinChart,
+  splitTonelessPinyinSyllable,
+} from "#data/pinyin.ts";
 import { pinyinPronunciationDisplayText } from "#data/questions/util.ts";
 import type { HanziWordMeaning } from "#dictionary/dictionary.ts";
 import {
@@ -21,14 +27,10 @@ import {
   loadHanziWordGlossMnemonics,
   loadHanziWordMigrations,
   loadHanziWordPinyinMnemonics,
-  loadHhPinyinChart,
-  loadHmmPinyinChart,
   loadMissingFontGlyphs,
-  loadMmPinyinChart,
   loadMnemonicThemeChoices,
   loadMnemonicThemes,
   loadPinyinWords,
-  loadStandardPinyinChart,
   loadWiki,
   lookupHanzi,
   lookupHanziWord,
@@ -856,17 +858,28 @@ async function testPinyinChart(
   chart: PinyinChart,
   testCases: readonly [
     input: string,
-    expectedInitial: string,
-    expectedFinal: string,
+    expectedInitialChartLabel: string,
+    expectedFinalChartLabel: string,
   ][] = [],
 ): Promise<void> {
   const pinyinWords = await loadPinyinWords();
 
   // Start with test cases first as these are easier to debug.
-  for (const [input, initial, final] of testCases) {
+  for (const [
+    input,
+    expectedInitialChartLabel,
+    expectedFinalChartLabel,
+  ] of testCases) {
+    const actual = splitTonelessPinyinSyllable(input, chart);
     assert.deepEqual(
-      splitTonelessPinyinSyllable(input, chart),
-      [initial, final],
+      {
+        initialChartLabel: actual?.initialChartLabel,
+        finalChartLabel: actual?.finalChartLabel,
+      },
+      {
+        initialChartLabel: expectedInitialChartLabel,
+        finalChartLabel: expectedFinalChartLabel,
+      },
       `${input} didn't split as expected`,
     );
   }

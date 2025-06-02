@@ -1,6 +1,8 @@
 import {
   convertPinyinWithToneNumberToToneMark,
+  parsePinyinSyllable,
   parsePinyinSyllableTone,
+  pinyinSyllableSearch,
 } from "#data/pinyin.ts";
 import assert from "node:assert/strict";
 import test from "node:test";
@@ -95,7 +97,44 @@ await test(`${parsePinyinSyllableTone.name} fixtures`, async () => {
       [`ǜ`, [`ü`, 4]],
       [`ü`, [`ü`, 5]],
     ] as const) {
-      assert.deepEqual(parsePinyinSyllableTone(input), expected);
+      const [tonelessPinyin, tone] = expected;
+      assert.deepEqual(parsePinyinSyllableTone(input), {
+        tonelessPinyin,
+        tone,
+      });
     }
+  });
+});
+
+await test(`${parsePinyinSyllable.name} suite`, async () => {
+  await test(`fixtures`, () => {
+    expect(parsePinyinSyllable(``)).toBeNull();
+  });
+});
+
+await test(`${pinyinSyllableSearch.name} suite`, async () => {
+  await test(`fixtures`, () => {
+    const fixtures: [string, string[]][] = [
+      [``, []],
+      [` `, []],
+      [`ni`, [`nī-1`, `ní-2`, `nǐ-3`, `nì-4`, `ni-5`]],
+      [`hao`, [`hāo-1`, `háo-2`, `hǎo-3`, `hào-4`, `hao-5`]],
+    ];
+
+    for (const [query, results] of fixtures) {
+      expect({
+        query,
+        results: pinyinSyllableSearch(query).map(
+          (x) => `${x.pinyinSyllable}-${x.tone}`,
+        ),
+      }).toEqual({
+        query,
+        results,
+      });
+    }
+  });
+
+  await test(`should not throw on invalid input`, () => {
+    expect(pinyinSyllableSearch(`hao3`)).toEqual([]);
   });
 });

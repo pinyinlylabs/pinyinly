@@ -8,7 +8,7 @@ import type {
   QuestionFlagType,
 } from "@/data/model";
 import { QuestionFlagKind, SkillKind } from "@/data/model";
-import { parsePinyinSyllableTone } from "@/data/pinyin";
+import { parsePinyinSyllableTone, pinyinSyllableSearch } from "@/data/pinyin";
 import type { HanziWordSkill, Skill } from "@/data/rizzleSchema";
 import {
   computeSkillRating,
@@ -105,7 +105,7 @@ export function QuizDeckHanziToPinyinQuestion({
   if (focusedCharIndex != null) {
     const pinyin = userAnswers.get(focusedCharIndex);
     const searchQuery =
-      pinyin == null ? null : parsePinyinSyllableTone(pinyin)?.[0];
+      pinyin == null ? null : parsePinyinSyllableTone(pinyin)?.tonelessPinyin;
     initialPinyinSearchQuery = searchQuery ?? ``;
   }
 
@@ -290,11 +290,6 @@ function HanziPinyinAnswerBox({
   );
 }
 
-interface PinyinSearchInputOption {
-  pinyin: string;
-  shortcutKey: string;
-}
-
 const PinyinSearchInput = ({
   autoFocus,
   initialQuery,
@@ -312,25 +307,15 @@ const PinyinSearchInput = ({
 }) => {
   const [query, setQuery] = useState(initialQuery);
 
-  const options: PinyinSearchInputOption[] | null = query.startsWith(`ni`)
-    ? [
-        { pinyin: `nī`, shortcutKey: `1` },
-        { pinyin: `ní`, shortcutKey: `2` },
-        { pinyin: `nǐ`, shortcutKey: `3` },
-        { pinyin: `nì`, shortcutKey: `4` },
-        { pinyin: `ni`, shortcutKey: `5` },
-      ]
-    : null;
+  const options = pinyinSyllableSearch(query);
 
   const handleQueryChange = (text: string) => {
     setQuery(text);
 
-    if (options != null) {
-      for (const option of options) {
-        if (option.shortcutKey === text.slice(-1)) {
-          onChangeText(option.pinyin);
-          return;
-        }
+    for (const option of options) {
+      if (option.tone.toString() === text.slice(-1)) {
+        onChangeText(option.pinyinSyllable);
+        return;
       }
     }
 
@@ -348,7 +333,7 @@ const PinyinSearchInput = ({
       <View className="flex-row flex-wrap justify-center gap-2">
         {hiddenPlaceholderOptions}
         <View className="absolute inset-0 flex-row flex-wrap content-end justify-center gap-2">
-          {options?.map((option, i) => (
+          {options.map((option, i) => (
             <Reanimated.View
               key={i}
               // entering={SlideInDown.springify()
@@ -365,8 +350,8 @@ const PinyinSearchInput = ({
               exiting={FadeOut.duration(100)}
             >
               <PinyinOptionButton
-                pinyin={option.pinyin}
-                shortcutKey={option.shortcutKey}
+                pinyin={option.pinyinSyllable}
+                shortcutKey={option.tone.toString()}
                 onPress={(pinyin) => {
                   onChangeText(pinyin);
                   onSubmit(false);

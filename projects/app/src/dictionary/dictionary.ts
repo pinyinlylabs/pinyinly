@@ -12,12 +12,7 @@ import type {
   PinyinSyllable,
 } from "@/data/model";
 import { PartOfSpeech } from "@/data/model";
-import { parsePinyinWithChart as parsePinyinSyllableWithChart } from "@/data/pinyin";
-import {
-  rMnemonicThemeId,
-  rPinyinInitialGroupId,
-  rPinyinPronunciation,
-} from "@/data/rizzleSchema";
+import { rMnemonicThemeId, rPinyinPronunciation } from "@/data/rizzleSchema";
 import {
   deepReadonly,
   emptyArray,
@@ -36,15 +31,6 @@ export const hanziCharSchema = z.string().transform((x) => x as HanziChar);
 export const pinyinPronunciationSchema = rPinyinPronunciation()
   .getUnmarshal()
   .describe(`space separated pinyin for each word`);
-
-export const parsePinyinSyllableOrThrow = memoize1(
-  function parsePinyinSyllableOrThrow(pinyinSyllable: string) {
-    const chart = loadHhhPinyinChart();
-    const parsed = parsePinyinSyllableWithChart(pinyinSyllable, chart);
-    invariant(parsed != null, `Could not parse pinyin ${pinyinSyllable}`);
-    return deepReadonly(parsed);
-  },
-);
 
 export const loadPinyinWords = memoize0(async () =>
   z
@@ -122,155 +108,6 @@ export const loadHanziDecomposition = memoize0(async () =>
     .transform(deepReadonly)
     // eslint-disable-next-line unicorn/no-await-expression-member
     .parse((await import(`./hanziDecomposition.asset.json`)).default),
-);
-
-const pinyinChartSchema = z
-  .object({
-    initials: z.array(
-      z.object({
-        id: rPinyinInitialGroupId().getUnmarshal(),
-        desc: z.string(),
-        initials: z.array(z.union([z.string(), z.array(z.string())])),
-      }),
-    ),
-    finals: z.array(z.union([z.string(), z.array(z.string())])),
-    overrides: z.record(z.string(), z.tuple([z.string(), z.string()])),
-  })
-  .transform(({ initials: initialGroups, finals, overrides }) => ({
-    initials: initialGroups.map((group) => ({
-      ...group,
-      initials: group.initials.map((initial) =>
-        typeof initial === `string` ? ([initial, initial] as const) : initial,
-      ),
-    })),
-    finals: finals.map((x) => (typeof x === `string` ? ([x, x] as const) : x)),
-    overrides,
-  }));
-
-export const loadStandardPinyinChart = memoize0(async () =>
-  pinyinChartSchema
-    .transform(deepReadonly)
-    // eslint-disable-next-line unicorn/no-await-expression-member
-    .parse((await import(`./standardPinyinChart.asset.json`)).default),
-);
-
-export const loadMmPinyinChart = memoize0(async () =>
-  pinyinChartSchema
-    .transform(deepReadonly)
-    // eslint-disable-next-line unicorn/no-await-expression-member
-    .parse((await import(`./mmPinyinChart.asset.json`)).default),
-);
-
-export const loadHhPinyinChart = memoize0(async () =>
-  pinyinChartSchema
-    .transform(deepReadonly)
-    // eslint-disable-next-line unicorn/no-await-expression-member
-    .parse((await import(`./hhPinyinChart.asset.json`)).default),
-);
-
-export const loadHmmPinyinChart = memoize0(async () =>
-  pinyinChartSchema
-    .transform(deepReadonly)
-    // eslint-disable-next-line unicorn/no-await-expression-member
-    .parse((await import(`./hmmPinyinChart.asset.json`)).default),
-);
-
-export const loadHhhPinyinChart = memoize0(() =>
-  pinyinChartSchema.transform(deepReadonly).parse({
-    initials: [
-      {
-        id: `basic`,
-        desc: `basic distinct sounds`,
-        initials: [
-          `b`,
-          `p`,
-          `m`,
-          `f`,
-          `d`,
-          `t`,
-          `n`,
-          `l`,
-          `g`,
-          `k`,
-          `h`,
-          `zh`,
-          [`ch`, `ch`, `chi`],
-          `sh`,
-          `r`,
-          `z`,
-          [`c`, `c`, `ci`],
-          `s`,
-        ],
-      },
-      {
-        id: `-i`,
-        desc: `ends with an 'i' (ee) sound`,
-        initials: [
-          [`y`, `y`, `yi`],
-          `bi`,
-          `pi`,
-          `mi`,
-          `di`,
-          `ti`,
-          `ni`,
-          `li`,
-          `ji`,
-          `qi`,
-          `xi`,
-        ],
-      },
-      {
-        id: `-u`,
-        desc: `ends with an 'u' (oo) sound`,
-        initials: [
-          `w`,
-          `bu`,
-          `pu`,
-          `mu`,
-          `fu`,
-          `du`,
-          `tu`,
-          `nu`,
-          `lu`,
-          `gu`,
-          `ku`,
-          `hu`,
-          [`zhu`, `zhu`, `zho`],
-          [`chu`, `chu`, `cho`],
-          `shu`,
-          `ru`,
-          `zu`,
-          [`cu`, `cu`, `co`],
-          `su`,
-        ],
-      },
-      {
-        id: `-ü`,
-        desc: `ends with an 'ü' (ü) sound`,
-        initials: [`yu`, `nü`, `lü`, `ju`, `qu`, `xu`],
-      },
-      {
-        id: `∅`,
-        desc: `null special case`,
-        initials: [[`∅`, ``]],
-      },
-    ],
-    finals: [
-      [`∅`, ``, `er`],
-      `a`,
-      `o`,
-      [`e`, `e`, `ê`],
-      `ai`,
-      [`ei`, `ei`, `i`],
-      `ao`,
-      [`ou`, `ou`, `u`],
-      `an`,
-      [`(e)n`, `n`, `en`],
-      `ang`,
-      [`(e)ng`, `ng`, `eng`, `ong`],
-    ],
-    overrides: {},
-  }),
 );
 
 export const loadHanziWordGlossMnemonics = memoize0(async () =>

@@ -1,6 +1,7 @@
 import { isHanziChar } from "@/data/hanzi";
 import {
   convertPinyinWithToneNumberToToneMark,
+  parsePinyinSyllableOrThrow,
   parsePinyinSyllableTone,
 } from "@/data/pinyin";
 import {
@@ -9,7 +10,6 @@ import {
   characterCount,
   hanziFromHanziWord,
   lookupHanziWord,
-  parsePinyinSyllableOrThrow,
   pinyinOrThrow,
 } from "@/dictionary/dictionary";
 import {
@@ -101,7 +101,7 @@ export async function makeQuestionContext(
   const pinyin = oneSyllablePinyinOrThrow(correctAnswer, meaning);
   const parsedPinyin = nonNullable(parsePinyinSyllableTone(pinyin));
   const { initial } = parsePinyinSyllableOrThrow(pinyin);
-  const [answerPinyinToneless] = parsedPinyin;
+  const { tonelessPinyin: answerPinyinToneless } = parsedPinyin;
 
   const ctx: QuestionContext = {
     answerPinyinToneless,
@@ -243,7 +243,7 @@ function validQuestionInvariant(question: OneCorrectPairQuestion) {
       invariant(hanziOrPinyinSyllableCount(x) === 1);
 
       const syllable = nonNullable(x.value[0]);
-      const { initial, final } =
+      const { initialChartLabel: initial, finalChartLabel: final } =
         parsePinyinSyllableWithVowelVariationsOrThrow(syllable);
       return `${initial}-${final}`;
     }),
@@ -261,7 +261,7 @@ function parsePinyinSyllableWithVowelVariationsOrThrow(
   } catch {
     // Maybe it failed because of extra vowel variations, reverse that and try again.
     const toneResult = parsePinyinSyllableTone(syllable);
-    let [base] = nonNullable(toneResult);
+    let { tonelessPinyin: base } = nonNullable(toneResult);
 
     for (const [vowel, replacement] of extraVowelVariations) {
       if (base.includes(replacement)) {

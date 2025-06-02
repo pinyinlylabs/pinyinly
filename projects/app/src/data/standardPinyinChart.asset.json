@@ -5,5 +5,5 @@
   "initials": [["∅",""],"b","p","m","f","d","t","n","l","g","k","h","j","q","x","zh","ch","sh","r","z","c","s"]
 }],
 "finals":[["∅",""],"a","o","e","ê","ai","ei","ao","ou","an","en","ang","eng","er",["i","i","yi"],["ia","ia","ya"],["io","io","yo"],["ie","ie","ye"],["iai","yai"],["iao","iao","yao"],["iu","iu","you"],["ian","ian","yan"],["in","in","yin"],["iang","iang","yang"],["ing","ing","ying"],["u","u","wu"],["ua","ua","wa"],["uo","uo","wo"],["uai","uai","wai"],["ui","ui","wei"],["uan","uan","wan"],["un","un","wen"],["uang","uang","wang"],["ong","ong","weng"],"ü",["üe","üe","ue","yue"],"üan","ün",["iong","iong","yong"]],
-"overrides":{"yu":["∅","ü"],"yuan":["∅","üan"],"yun":["∅","ün"],"ju":["j","ü"],"juan":["j","üan"],"jun":["j","ün"],"qu":["q","ü"],"quan":["q","üan"],"qun":["q","ün"],"xu":["x","ü"],"xuan":["x","üan"],"xun":["x","ün"]}
+"overrides":{"yu":[["∅", ""],["ü","u"]],"yuan":[["∅", "y"],["üan","uan"]],"yun":[["∅","y"],["ün","un"]],"ju":[["j","j"],["ü","u"]],"juan":[["j","j"],["üan","uan"]],"jun":[["j","j"],["ün","un"]],"qu":[["q","q"],["ü","u"]],"quan":[["q","q"],["üan","uan"]],"qun":[["q","q"],["ün","un"]],"xu":[["x","x"],["ü","u"]],"xuan":[["x","x"],["üan","uan"]],"xun":[["x","x"],["ün","un"]]}
 }
