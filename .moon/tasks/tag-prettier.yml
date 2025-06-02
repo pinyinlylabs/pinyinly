@@ -2,17 +2,19 @@ fileGroups:
   config:
     - "/.gitignore"
     - "/.prettierignore"
+  sources:
+    - "**/*"
 
 tasks:
   prettier:
-    command: yarn prettier --write --check --ignore-path .gitignore --ignore-path ../../.gitignore --ignore-path ../../.prettierignore .
+    command: yarn prettier --write --check --ignore-path .gitignore --ignore-path $workspaceRoot/.gitignore --ignore-path $workspaceRoot/.prettierignore .
     inputs:
-      - "**/*"
+      - "@globs(sources)"
       - "@group(config)"
     options:
       runInCI: false
   prettierCheck:
-    command: yarn prettier --check --ignore-path .gitignore --ignore-path ../../.gitignore --ignore-path ../../.prettierignore .
+    command: yarn prettier --check --ignore-path .gitignore --ignore-path $workspaceRoot/.gitignore --ignore-path $workspaceRoot/.prettierignore .
     inputs:
-      - "**/*"
+      - "@globs(sources)"
       - "@group(config)"

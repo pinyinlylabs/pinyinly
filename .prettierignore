@@ -2,6 +2,8 @@
 package.json
 pnpm-lock.yaml
 
+/.yarn/releases
+
 /projects/app/drizzle/meta
 /projects/app/.vercel
 /projects/app/src/assets/**/*.svg

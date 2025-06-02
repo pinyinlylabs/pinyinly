@@ -20,6 +20,9 @@
       { "directory": "./" },
       { "pattern": "./projects/*" },
     ],
+    "[markdown]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode",
+    },
     "[xml]": {
       "editor.defaultFormatter": "redhat.vscode-xml",
     },
