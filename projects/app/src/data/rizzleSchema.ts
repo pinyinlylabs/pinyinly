@@ -139,7 +139,7 @@ export const pinyinSyllableSchema = z.custom<PinyinSyllable>(
 );
 
 export const rSpaceSeparatoredString = memoize0(
-  function rSpaceSeparatedString() {
+  function rSpaceSeparatoredString() {
     return RizzleCustom.create<readonly string[], string, readonly string[]>(
       z.array(z.string()).transform((x) => x.join(` `)),
       z.string().transform((x) => x.split(/ +/) as readonly string[]),
