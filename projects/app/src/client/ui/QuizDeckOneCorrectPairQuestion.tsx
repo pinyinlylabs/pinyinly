@@ -6,7 +6,6 @@ import type {
   NewSkillRating,
   OneCorrectPairQuestion,
   OneCorrectPairQuestionChoice,
-  QuestionFlagType,
 } from "@/data/model";
 import { QuestionFlagKind, SkillKind } from "@/data/model";
 import { oneCorrectPairChoiceText } from "@/data/questions/util";
@@ -17,11 +16,9 @@ import {
   skillKindFromSkill,
 } from "@/data/skills";
 import { invariant } from "@haohaohow/lib/invariant";
-import { formatDuration } from "date-fns/formatDuration";
-import { intervalToDuration } from "date-fns/intervalToDuration";
 import { Image } from "expo-image";
 import type { ReactNode } from "react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { StyleProp, ViewStyle } from "react-native";
 import {
   // eslint-disable-next-line @typescript-eslint/no-restricted-imports
@@ -32,19 +29,17 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { tv } from "tailwind-variants";
-import z from "zod/v4";
 import { HanziWordRefText } from "./HanziWordRefText";
 import { Hhhmark } from "./Hhhmark";
 import { NewSkillModal } from "./NewSkillModal";
-import { RectButton2 } from "./RectButton2";
+import { QuizFlagText } from "./QuizFlagText";
+import { QuizSubmitButton, QuizSubmitButtonState } from "./QuizSubmitButton";
 import type { TextAnswerButtonState } from "./TextAnswerButton";
 import { TextAnswerButton } from "./TextAnswerButton";
-import type { PropsOf } from "./types";
 
 const buttonThickness = 4;
 const gap = 12;
-const autoSubmit = false as boolean;
+const autoSubmit = true as boolean;
 
 export function QuizDeckOneCorrectPairQuestion({
   question,
@@ -166,15 +161,15 @@ export function QuizDeckOneCorrectPairQuestion({
         )
       }
       submitButton={
-        <SubmitButton
+        <QuizSubmitButton
           state={
             selectedAChoice === undefined || selectedBChoice === undefined
-              ? SubmitButtonState.Disabled
+              ? QuizSubmitButtonState.Disabled
               : isCorrect == null
-                ? SubmitButtonState.Check
+                ? QuizSubmitButtonState.Check
                 : isCorrect
-                  ? SubmitButtonState.Correct
-                  : SubmitButtonState.Incorrect
+                  ? QuizSubmitButtonState.Correct
+                  : QuizSubmitButtonState.Incorrect
           }
           onPress={() => {
             if (selectedAChoice == null || selectedBChoice == null) {
@@ -192,7 +187,7 @@ export function QuizDeckOneCorrectPairQuestion({
         <NewSkillModal passivePresentation skill={question.answer.skill} />
       ) : null}
 
-      {flag == null ? null : <FlagText flag={flag} />}
+      {flag == null ? null : <QuizFlagText flag={flag} />}
       <View>
         <Text className="text-xl font-bold text-foreground">{prompt}</Text>
       </View>
@@ -290,87 +285,6 @@ export function QuizDeckOneCorrectPairQuestion({
     </Skeleton>
   );
 }
-
-const FlagText = ({ flag }: { flag: QuestionFlagType }) => {
-  switch (flag.kind) {
-    case QuestionFlagKind.NewSkill: {
-      return (
-        <View className={flagViewClass({ class: `success-theme` })}>
-          <Image
-            source={require(`@/assets/icons/plant-filled.svg`)}
-            className={flagIconClass()}
-            tintColor="currentColor"
-          />
-          <Text className={flagTextClass()}>New skill</Text>
-        </View>
-      );
-    }
-    case QuestionFlagKind.Overdue: {
-      return (
-        <View className={flagViewClass({ class: `danger-theme` })}>
-          <Image
-            source={require(`@/assets/icons/alarm.svg`)}
-            className={flagIconClass()}
-            tintColor="currentColor"
-          />
-          <Text className={flagTextClass()}>
-            Overdue by{` `}
-            {
-              formatDuration(intervalToDuration(flag.interval), {
-                format: [
-                  `years`,
-                  `months`,
-                  `weeks`,
-                  `days`,
-                  `hours`,
-                  `minutes`,
-                ],
-                zero: false,
-                delimiter: `, `,
-              }).split(`, `)[0]
-            }
-          </Text>
-        </View>
-      );
-    }
-    case QuestionFlagKind.Retry: {
-      return (
-        <View className={flagViewClass({ class: `warning-theme` })}>
-          <Image
-            source={require(`@/assets/icons/repeat.svg`)}
-            className={flagIconClass()}
-            tintColor="currentColor"
-          />
-          <Text className={flagTextClass()}>Previous mistake</Text>
-        </View>
-      );
-    }
-    case QuestionFlagKind.WeakWord: {
-      return (
-        <View className={flagViewClass({ class: `danger-theme` })}>
-          <Image
-            source={require(`@/assets/icons/flag.svg`)}
-            className={flagIconClass()}
-            tintColor="currentColor"
-          />
-          <Text className={flagTextClass()}>Weak word</Text>
-        </View>
-      );
-    }
-  }
-};
-
-const flagViewClass = tv({
-  base: `flex-row items-center gap-1`,
-});
-
-const flagIconClass = tv({
-  base: `size-[24px] flex-shrink text-accent-10`,
-});
-
-const flagTextClass = tv({
-  base: `font-bold uppercase text-accent-10`,
-});
 
 function choiceToHhhmark(choice: OneCorrectPairQuestionChoice): string {
   return `**${oneCorrectPairChoiceText(choice)}**`;
@@ -536,54 +450,6 @@ const Skeleton = ({
   );
 };
 
-const submitButtonStateSchema = z.enum({
-  Disabled: `Disabled`,
-  Check: `Check`,
-  Correct: `Correct`,
-  Incorrect: `Incorrect`,
-});
-
-const SubmitButtonState = submitButtonStateSchema.enum;
-type SubmitButtonState = z.infer<typeof submitButtonStateSchema>;
-
-function SubmitButton({
-  state,
-  onPress,
-  ref,
-}: {
-  state: SubmitButtonState;
-} & Pick<PropsOf<typeof RectButton2>, `onPress` | `ref`>) {
-  let text;
-
-  switch (state) {
-    case SubmitButtonState.Disabled:
-    case SubmitButtonState.Check: {
-      text = `Check`;
-      break;
-    }
-    case SubmitButtonState.Correct: {
-      text = `Continue`;
-      break;
-    }
-    case SubmitButtonState.Incorrect: {
-      text = `Got it`;
-      break;
-    }
-  }
-
-  return (
-    <RectButton2
-      variant="filled"
-      ref={ref}
-      disabled={state === SubmitButtonState.Disabled}
-      className={`flex-1 ${state === SubmitButtonState.Disabled ? `` : state === SubmitButtonState.Incorrect ? `danger-theme2` : `success-theme2`}`}
-      onPress={state === SubmitButtonState.Disabled ? undefined : onPress}
-    >
-      {text}
-    </RectButton2>
-  );
-}
-
 const ChoiceButton = ({
   state,
   choice,
@@ -592,17 +458,13 @@ const ChoiceButton = ({
   state: TextAnswerButtonState;
   choice: OneCorrectPairQuestionChoice;
   onPress: (choice: OneCorrectPairQuestionChoice) => void;
-}) => {
-  const handlePress = useCallback(() => {
-    onPress(choice);
-  }, [onPress, choice]);
-
-  return (
-    <TextAnswerButton
-      onPress={handlePress}
-      state={state}
-      className="flex-1"
-      text={oneCorrectPairChoiceText(choice)}
-    />
-  );
-};
+}) => (
+  <TextAnswerButton
+    onPress={() => {
+      onPress(choice);
+    }}
+    state={state}
+    className="flex-1"
+    text={oneCorrectPairChoiceText(choice)}
+  />
+);

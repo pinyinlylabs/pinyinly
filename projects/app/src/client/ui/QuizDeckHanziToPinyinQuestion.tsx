@@ -5,9 +5,8 @@ import type {
   HanziToPinyinQuestion,
   MistakeType,
   NewSkillRating,
-  QuestionFlagType,
 } from "@/data/model";
-import { QuestionFlagKind, SkillKind } from "@/data/model";
+import { SkillKind } from "@/data/model";
 import { parsePinyinSyllableTone, pinyinSyllableSearch } from "@/data/pinyin";
 import type { HanziWordSkill, Skill } from "@/data/rizzleSchema";
 import {
@@ -18,8 +17,6 @@ import {
 import { hanziFromHanziWord } from "@/dictionary/dictionary";
 import { readonlyMapSet } from "@/util/collections";
 import { invariant } from "@haohaohow/lib/invariant";
-import { formatDuration } from "date-fns/formatDuration";
-import { intervalToDuration } from "date-fns/intervalToDuration";
 import { Image } from "expo-image";
 import type { ReactNode, Ref } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -36,14 +33,13 @@ import {
 import Reanimated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { tv } from "tailwind-variants";
-import z from "zod/v4";
 import { HanziWordRefText } from "./HanziWordRefText";
 import { Hhhmark } from "./Hhhmark";
-import { NewSkillModal } from "./NewSkillModal";
 import { PinyinOptionButton } from "./PinyinOptionButton";
+import { QuizFlagText } from "./QuizFlagText";
+import { QuizSubmitButton, QuizSubmitButtonState } from "./QuizSubmitButton";
 import { RectButton2 } from "./RectButton2";
 import { TextInputSingle } from "./TextInputSingle";
-import type { PropsOf } from "./types";
 
 export function QuizDeckHanziToPinyinQuestion({
   question,
@@ -57,7 +53,7 @@ export function QuizDeckHanziToPinyinQuestion({
   const { skill, flag, answers } = question;
 
   const [isCorrect, setIsCorrect] = useState<boolean>();
-  const [focusedCharIndex, setFocusedCharIndex] = useState<number | null>(null);
+  const [focusedCharIndex, setFocusedCharIndex] = useState<number | null>(0);
   const [userAnswers, setUserAnswersByIndex] = useState<
     ReadonlyMap<number, string>
   >(new Map());
@@ -154,31 +150,28 @@ export function QuizDeckHanziToPinyinQuestion({
         )
       }
       submitButton={
-        <SubmitButton
+        <QuizSubmitButton
           state={
             isMissingAnswers
-              ? SubmitButtonState.Disabled
+              ? QuizSubmitButtonState.Disabled
               : isCorrect == null
-                ? SubmitButtonState.Check
+                ? QuizSubmitButtonState.Check
                 : isCorrect
-                  ? SubmitButtonState.Correct
-                  : SubmitButtonState.Incorrect
+                  ? QuizSubmitButtonState.Correct
+                  : QuizSubmitButtonState.Incorrect
           }
           onPress={handleSubmit}
         />
       }
     >
-      {flag?.kind === QuestionFlagKind.NewSkill ? (
-        <NewSkillModal passivePresentation skill={skill} />
-      ) : null}
-
-      {flag == null ? null : <FlagText flag={flag} />}
+      {flag == null ? null : <QuizFlagText flag={flag} />}
       <View>
         <Text className="text-xl font-bold text-foreground">
           What sound does this make?
         </Text>
       </View>
       <View className="flex-1 justify-center py-quiz-px">
+        <View className="flex-1" />
         <View className="flex-row justify-center gap-2">
           {hanziChars.map((hanzi, i) => (
             <HanziPinyinAnswerBox
@@ -336,16 +329,6 @@ const PinyinSearchInput = ({
           {options.map((option) => (
             <Reanimated.View
               key={`${option.pinyinSyllable}-${option.tone}`}
-              // entering={SlideInDown.springify()
-              //   .delay(i * 100)
-              //   .withInitialValues({ transform: [{ translateY: 20 }] })
-              //   .damping(30)
-              //   .mass(5)
-              //   .stiffness(10)
-              //   // .overshootClamping(false)
-              //   .restDisplacementThreshold(0.1)
-              //   .restSpeedThreshold(5)}
-              // entering={BounceIn.delay(i * 100)}
               entering={FadeIn.duration(200)}
               exiting={FadeOut.duration(100)}
             >
@@ -410,75 +393,6 @@ const hiddenPlaceholderOptions = (
   </>
 );
 
-const FlagText = ({ flag }: { flag: QuestionFlagType }) => {
-  switch (flag.kind) {
-    case QuestionFlagKind.NewSkill: {
-      return (
-        <View className={flagViewClass({ class: `success-theme` })}>
-          <Image
-            source={require(`@/assets/icons/plant-filled.svg`)}
-            className={flagIconClass()}
-            tintColor="currentColor"
-          />
-          <Text className={flagTextClass()}>New skill</Text>
-        </View>
-      );
-    }
-    case QuestionFlagKind.Overdue: {
-      return (
-        <View className={flagViewClass({ class: `danger-theme` })}>
-          <Image
-            source={require(`@/assets/icons/alarm.svg`)}
-            className={flagIconClass()}
-            tintColor="currentColor"
-          />
-          <Text className={flagTextClass()}>
-            Overdue by{` `}
-            {
-              formatDuration(intervalToDuration(flag.interval), {
-                format: [
-                  `years`,
-                  `months`,
-                  `weeks`,
-                  `days`,
-                  `hours`,
-                  `minutes`,
-                ],
-                zero: false,
-                delimiter: `, `,
-              }).split(`, `)[0]
-            }
-          </Text>
-        </View>
-      );
-    }
-    case QuestionFlagKind.Retry: {
-      return (
-        <View className={flagViewClass({ class: `warning-theme` })}>
-          <Image
-            source={require(`@/assets/icons/repeat.svg`)}
-            className={flagIconClass()}
-            tintColor="currentColor"
-          />
-          <Text className={flagTextClass()}>Previous mistake</Text>
-        </View>
-      );
-    }
-    case QuestionFlagKind.WeakWord: {
-      return (
-        <View className={flagViewClass({ class: `danger-theme` })}>
-          <Image
-            source={require(`@/assets/icons/flag.svg`)}
-            className={flagIconClass()}
-            tintColor="currentColor"
-          />
-          <Text className={flagTextClass()}>Weak word</Text>
-        </View>
-      );
-    }
-  }
-};
-
 const pinyinPlaceholderClass = tv({
   base: `h-[40px] min-w-[60px] items-center justify-center rounded-xl border border-transparent px-3 outline-dashed outline-2 outline-foreground/50 transition-[outline-color]`,
   variants: {
@@ -486,18 +400,6 @@ const pinyinPlaceholderClass = tv({
       true: `accent-theme2`,
     },
   },
-});
-
-const flagViewClass = tv({
-  base: `flex-row items-center gap-1`,
-});
-
-const flagIconClass = tv({
-  base: `size-[24px] flex-shrink text-accent-10`,
-});
-
-const flagTextClass = tv({
-  base: `font-bold uppercase text-accent-10`,
 });
 
 const SkillAnswer = ({
@@ -657,51 +559,3 @@ const Skeleton = ({
     </>
   );
 };
-
-const submitButtonStateSchema = z.enum({
-  Disabled: `Disabled`,
-  Check: `Check`,
-  Correct: `Correct`,
-  Incorrect: `Incorrect`,
-});
-
-const SubmitButtonState = submitButtonStateSchema.enum;
-type SubmitButtonState = z.infer<typeof submitButtonStateSchema>;
-
-function SubmitButton({
-  state,
-  onPress,
-  ref,
-}: {
-  state: SubmitButtonState;
-} & Pick<PropsOf<typeof RectButton2>, `onPress` | `ref`>) {
-  let text;
-
-  switch (state) {
-    case SubmitButtonState.Disabled:
-    case SubmitButtonState.Check: {
-      text = `Check`;
-      break;
-    }
-    case SubmitButtonState.Correct: {
-      text = `Continue`;
-      break;
-    }
-    case SubmitButtonState.Incorrect: {
-      text = `Got it`;
-      break;
-    }
-  }
-
-  return (
-    <RectButton2
-      variant="filled"
-      ref={ref}
-      disabled={state === SubmitButtonState.Disabled}
-      className={`flex-1 ${state === SubmitButtonState.Disabled ? `` : state === SubmitButtonState.Incorrect ? `danger-theme2` : `success-theme2`}`}
-      onPress={state === SubmitButtonState.Disabled ? undefined : onPress}
-    >
-      {text}
-    </RectButton2>
-  );
-}
