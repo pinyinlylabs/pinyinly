@@ -1,3 +1,4 @@
+import { isHanziChar } from "#data/hanzi.ts";
 import {
   hanziWordToPinyinFinalQuestionOrThrow,
   makeQuestionContext,
@@ -5,11 +6,7 @@ import {
   tryPinyinDistractor,
 } from "#data/questions/hanziWordToPinyinFinal.ts";
 import { hanziWordToPinyinFinal } from "#data/skills.ts";
-import {
-  characterCount,
-  hanziFromHanziWord,
-  loadDictionary,
-} from "#dictionary/dictionary.ts";
+import { hanziFromHanziWord, loadDictionary } from "#dictionary/dictionary.ts";
 import shuffle from "lodash/shuffle";
 import assert from "node:assert/strict";
 import test from "node:test";
@@ -40,13 +37,6 @@ await test(`${tryHanziDistractor.name} suite`, async () => {
     const ctx = await makeQuestionContext(`我:i`);
     // 武 (wǔ) should not be omitted because it has no exact pinyin conflict
     assert.equal(await tryHanziDistractor(ctx, 汉字`武`), true);
-  });
-
-  await test(`should omit if not the same length as the correct answer`, async () => {
-    const ctx = await makeQuestionContext(`一:one`);
-
-    // 1 word vs 2 words
-    assert.equal(await tryHanziDistractor(ctx, 汉字`北方`), false);
   });
 
   await test(`should omit if there is a conflicting hanzi`, async () => {
@@ -104,8 +94,7 @@ await test(`${hanziWordToPinyinFinalQuestionOrThrow.name} suite`, async () => {
     const sample = shuffle([...dictionary])
       .filter(
         ([hanziWord, meaning]) =>
-          characterCount(hanziFromHanziWord(hanziWord)) === 1 &&
-          meaning.pinyin != null,
+          isHanziChar(hanziFromHanziWord(hanziWord)) && meaning.pinyin != null,
       )
       .slice(0, 100);
 

@@ -1,10 +1,11 @@
-import { characterCount } from "@/dictionary/dictionary";
-import { useEffect, useMemo, useState } from "react";
+import { glyphCount } from "@/util/unicode";
+import { useState } from "react";
 import type { Pressable } from "react-native";
 import { Text, View } from "react-native";
 import Reanimated, {
   Easing,
   runOnJS,
+  runOnUI,
   useAnimatedReaction,
   useAnimatedStyle,
   useSharedValue,
@@ -53,14 +54,8 @@ export function TextAnswerButton({
   const bgScaleSv = useSharedValue(0.5);
   const bgOpacitySv = useSharedValue(0);
 
-  useEffect(() => {
-    setPrevState(state);
-  }, [state]);
-
-  const stateChanged = state !== prevState;
-
-  useEffect(() => {
-    if (stateChanged) {
+  if (state !== prevState) {
+    runOnUI(() => {
       switch (state) {
         case `dimmed`:
         case `default`: {
@@ -76,19 +71,23 @@ export function TextAnswerButton({
           break;
         }
         case `error`: {
+          bgScaleSv.set(1);
           rotationSv.set(withIncorrectWobbleAnimation());
           bgOpacitySv.set(withTiming(1, { duration }));
           break;
         }
         case `success`: {
+          bgScaleSv.set(1);
           bgOpacitySv.set(
             withClamp({ min: bgOpacitySv.get() }, withTiming(1, { duration })),
           );
           break;
         }
       }
-    }
-  }, [bgOpacitySv, bgScaleSv, scaleSv, stateChanged, state, rotationSv]);
+    })();
+
+    setPrevState(state);
+  }
 
   // When the background scale reaches 100% update `bgFilled` to make the border
   // bright.
@@ -116,16 +115,15 @@ export function TextAnswerButton({
     transform: [{ scale: scaleSv.get() }, { rotateZ: rotationSv.get() }],
   }));
 
-  const textLength = useMemo(() => {
-    const charCount = characterCount(text);
-    return charCount <= 5
+  const charCount = glyphCount(text);
+  const textLength =
+    charCount <= 5
       ? (`tiny` as const)
       : charCount <= 20
         ? (`short` as const)
         : charCount <= 40
           ? (`medium` as const)
           : (`long` as const);
-  }, [text]);
 
   const flat = pressed || disabled;
 

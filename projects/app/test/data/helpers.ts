@@ -1,5 +1,7 @@
+import { isHanziChar } from "#data/hanzi.ts";
 import type {
   HanziChar,
+  HanziText,
   PinyinSyllable,
   SrsStateFsrsFourPointFiveType,
   SrsStateMockType,
@@ -7,7 +9,7 @@ import type {
 import { SrsKind } from "#data/model.ts";
 import type { Rating } from "#util/fsrs.ts";
 import { nextReview } from "#util/fsrs.ts";
-import { invariant } from "@haohaohow/lib/invariant";
+import { invariant, nonNullable } from "@haohaohow/lib/invariant";
 import type { TestContext } from "node:test";
 import type { ReadTransaction, WriteTransaction } from "replicache";
 
@@ -102,9 +104,11 @@ export const fsrsSrsState = (
 /**
  * Helper template string tag to make {@link HanziChar}.
  */
-export const 汉字 = (strings: TemplateStringsArray) => {
+export const 汉字 = (strings: TemplateStringsArray): HanziChar => {
   invariant(strings.length === 1, `汉字 must be a single string`);
-  return strings[0] as HanziChar;
+  const string = nonNullable(strings[0]) as HanziText;
+  invariant(isHanziChar(string), `汉字 must be given a single Hanzi character`);
+  return string;
 };
 
 /**

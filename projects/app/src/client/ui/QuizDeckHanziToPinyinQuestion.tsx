@@ -333,9 +333,9 @@ const PinyinSearchInput = ({
       <View className="flex-row flex-wrap justify-center gap-2">
         {hiddenPlaceholderOptions}
         <View className="absolute inset-0 flex-row flex-wrap content-end justify-center gap-2">
-          {options.map((option, i) => (
+          {options.map((option) => (
             <Reanimated.View
-              key={i}
+              key={`${option.pinyinSyllable}-${option.tone}`}
               // entering={SlideInDown.springify()
               //   .delay(i * 100)
               //   .withInitialValues({ transform: [{ translateY: 20 }] })

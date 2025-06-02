@@ -28,3 +28,11 @@ export function isCjkUnifiedIdeograph(char: string): boolean {
 export function isNotCjkUnifiedIdeograph(char: string): boolean {
   return !isCjkUnifiedIdeograph(char);
 }
+
+/**
+ * Calculate the number of glyphs (characters) in a string.
+ */
+export function glyphCount(text: string): number {
+  // eslint-disable-next-line @typescript-eslint/no-misused-spread
+  return [...text].length;
+}

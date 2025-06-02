@@ -1,11 +1,8 @@
+import { isHanziChar } from "#data/hanzi.ts";
 import { QuestionKind } from "#data/model.ts";
 import { hanziWordToPinyinQuestionOrThrow } from "#data/questions/hanziWordToPinyin.ts";
 import { hanziWordToPinyin, hanziWordToPinyinInitial } from "#data/skills.ts";
-import {
-  characterCount,
-  hanziFromHanziWord,
-  loadDictionary,
-} from "#dictionary/dictionary.ts";
+import { hanziFromHanziWord, loadDictionary } from "#dictionary/dictionary.ts";
 import shuffle from "lodash/shuffle";
 import test from "node:test";
 
@@ -15,8 +12,7 @@ await test(`${hanziWordToPinyinQuestionOrThrow.name} suite`, async () => {
     const sample = shuffle([...dictionary])
       .filter(
         ([hanziWord, meaning]) =>
-          characterCount(hanziFromHanziWord(hanziWord)) === 1 &&
-          meaning.pinyin != null,
+          isHanziChar(hanziFromHanziWord(hanziWord)) && meaning.pinyin != null,
       )
       .slice(0, 100);
 

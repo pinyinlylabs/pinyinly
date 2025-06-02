@@ -44,6 +44,7 @@ import type { PropsOf } from "./types";
 
 const buttonThickness = 4;
 const gap = 12;
+const autoSubmit = false as boolean;
 
 export function QuizDeckOneCorrectPairQuestion({
   question,
@@ -64,14 +65,6 @@ export function QuizDeckOneCorrectPairQuestion({
 
   // Setup the timer to measure how fast they answer the question.
   const timer = useMultiChoiceQuizTimer();
-  const isSelectedAChoiceCorrect = selectedAChoice === answer.a;
-  const isSelectedBChoiceCorrect = selectedBChoice === answer.a;
-  useEffect(() => {
-    timer.recordChoice(isSelectedAChoiceCorrect);
-  }, [isSelectedAChoiceCorrect, timer]);
-  useEffect(() => {
-    timer.recordChoice(isSelectedBChoiceCorrect);
-  }, [isSelectedBChoiceCorrect, timer]);
 
   const choiceRowCount = Math.max(groupA.length, groupB.length);
   const choiceRows: {
@@ -86,39 +79,32 @@ export function QuizDeckOneCorrectPairQuestion({
     choiceRows.push({ a, b });
   }
 
-  invariant(groupA.includes(answer.a));
-  invariant(groupB.includes(answer.b));
+  if (__DEV__) {
+    invariant(groupA.includes(answer.a));
+    invariant(groupB.includes(answer.b));
+  }
 
-  const handleSubmit = () => {
-    if (
-      isCorrect === undefined &&
-      selectedAChoice != null &&
-      selectedBChoice != null
-    ) {
-      const isCorrect =
-        selectedAChoice === answer.a && selectedBChoice === answer.b;
+  const submitChoices = (
+    aChoice: OneCorrectPairQuestionChoice,
+    bChoice: OneCorrectPairQuestionChoice,
+  ) => {
+    const isCorrect = aChoice === answer.a && bChoice === answer.b;
 
-      const mistakes = isCorrect
-        ? []
-        : oneCorrectPairQuestionChoiceMistakes(
-            selectedAChoice,
-            selectedBChoice,
-          );
+    const mistakes = isCorrect
+      ? []
+      : oneCorrectPairQuestionChoiceMistakes(aChoice, bChoice);
 
-      const durationMs = (timer.endTime ?? Date.now()) - timer.startTime;
-      const skillRatings: NewSkillRating[] = [
-        computeSkillRating({
-          skill: answer.skill,
-          correct: isCorrect,
-          durationMs,
-        }),
-      ];
+    const durationMs = (timer.endTime ?? Date.now()) - timer.startTime;
+    const skillRatings: NewSkillRating[] = [
+      computeSkillRating({
+        skill: answer.skill,
+        correct: isCorrect,
+        durationMs,
+      }),
+    ];
 
-      setIsCorrect(isCorrect);
-      onRating(skillRatings, mistakes);
-    } else {
-      onNext();
-    }
+    setIsCorrect(isCorrect);
+    onRating(skillRatings, mistakes);
   };
 
   return (
@@ -190,7 +176,15 @@ export function QuizDeckOneCorrectPairQuestion({
                   ? SubmitButtonState.Correct
                   : SubmitButtonState.Incorrect
           }
-          onPress={handleSubmit}
+          onPress={() => {
+            if (selectedAChoice == null || selectedBChoice == null) {
+              return;
+            } else if (isCorrect == null) {
+              submitChoices(selectedAChoice, selectedBChoice);
+            } else {
+              onNext();
+            }
+          }}
         />
       }
     >
@@ -232,7 +226,23 @@ export function QuizDeckOneCorrectPairQuestion({
                 }
                 onPress={() => {
                   if (isCorrect == null) {
-                    setSelectedAChoice((x) => (x === a ? undefined : a));
+                    const newSelectedAChoice =
+                      selectedAChoice === a ? undefined : a;
+                    setSelectedAChoice(newSelectedAChoice);
+                    timer.recordChoice(newSelectedAChoice === answer.a);
+
+                    // Support auto-submit
+                    if (
+                      autoSubmit &&
+                      newSelectedAChoice != null &&
+                      selectedBChoice != null
+                    ) {
+                      submitChoices(newSelectedAChoice, selectedBChoice);
+                    }
+                  } else if (isCorrect) {
+                    // If the answer is correct, this is a shortcut to the next
+                    // question to avoid moving the mouse.
+                    onNext();
                   }
                 }}
               />
@@ -253,7 +263,23 @@ export function QuizDeckOneCorrectPairQuestion({
                 }
                 onPress={() => {
                   if (isCorrect == null) {
-                    setSelectedBChoice((x) => (x === b ? undefined : b));
+                    const newSelectedBChoice =
+                      selectedBChoice === b ? undefined : b;
+                    setSelectedBChoice(newSelectedBChoice);
+                    timer.recordChoice(newSelectedBChoice === answer.b);
+
+                    // Support auto-submit
+                    if (
+                      autoSubmit &&
+                      selectedAChoice != null &&
+                      newSelectedBChoice != null
+                    ) {
+                      submitChoices(selectedAChoice, newSelectedBChoice);
+                    }
+                  } else if (isCorrect) {
+                    // If the answer is correct, this is a shortcut to the next
+                    // question to avoid moving the mouse.
+                    onNext();
                   }
                 }}
               />
