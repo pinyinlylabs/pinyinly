@@ -8,7 +8,7 @@ import type {
   QuestionFlagType,
 } from "@/data/model";
 import { QuestionFlagKind, SkillKind } from "@/data/model";
-import { parsePinyinTone } from "@/data/pinyin";
+import { parsePinyinSyllableTone } from "@/data/pinyin";
 import type { HanziWordSkill, Skill } from "@/data/rizzleSchema";
 import {
   computeSkillRating,
@@ -104,7 +104,8 @@ export function QuizDeckHanziToPinyinQuestion({
   let initialPinyinSearchQuery = ``;
   if (focusedCharIndex != null) {
     const pinyin = userAnswers.get(focusedCharIndex);
-    const searchQuery = pinyin == null ? null : parsePinyinTone(pinyin)?.[0];
+    const searchQuery =
+      pinyin == null ? null : parsePinyinSyllableTone(pinyin)?.[0];
     initialPinyinSearchQuery = searchQuery ?? ``;
   }
 

@@ -6,12 +6,13 @@ import {
   hanziFromHanziWord,
   loadPinyinWords,
   lookupHanziWord,
-  parsePinyinOrThrow,
+  parsePinyinSyllableOrThrow,
   pinyinOrThrow,
 } from "@/dictionary/dictionary";
 import {
   identicalInvariant,
   invariant,
+  nonNullable,
   uniqueInvariant,
 } from "@haohaohow/lib/invariant";
 import shuffle from "lodash/shuffle";
@@ -19,23 +20,23 @@ import type {
   HanziChar,
   HanziText,
   HanziWord,
+  OneCorrectPairQuestion,
   OneCorrectPairQuestionAnswer,
   OneCorrectPairQuestionChoice,
   PinyinSyllable,
-  Question,
 } from "../model";
 import { QuestionKind } from "../model";
 import type { HanziWordSkill } from "../rizzleSchema";
 import { hanziWordFromSkill } from "../skills";
 import {
-  hanziOrPinyinWordCount,
+  hanziOrPinyinSyllableCount,
   oneCorrectPairChoiceText,
   oneSyllablePinyinOrThrow,
 } from "./util";
 
 export async function hanziWordToPinyinInitialQuestionOrThrow(
   skill: HanziWordSkill,
-): Promise<Question> {
+): Promise<OneCorrectPairQuestion> {
   const hanziWord = hanziWordFromSkill(skill);
   const meaning = await lookupHanziWord(hanziWord);
   const rowCount = 5;
@@ -96,7 +97,7 @@ export async function makeQuestionContext(
   const hanzi = hanziFromHanziWord(correctAnswer);
   const meaning = await lookupHanziWord(correctAnswer);
   const pinyin = oneSyllablePinyinOrThrow(correctAnswer, meaning);
-  const parsedPinyin = parsePinyinOrThrow(pinyin);
+  const parsedPinyin = parsePinyinSyllableOrThrow(pinyin);
 
   const ctx: QuestionContext = {
     answerPinyinFinal: parsedPinyin.final,
@@ -140,7 +141,7 @@ export function tryPinyinDistractor(
   ctx: QuestionContext,
   pinyin: PinyinSyllable,
 ): boolean {
-  const parsedPinyin = parsePinyinOrThrow(pinyin);
+  const parsedPinyin = parsePinyinSyllableOrThrow(pinyin);
 
   if (ctx.answerPinyinFinal !== parsedPinyin.final) {
     return false;
@@ -203,41 +204,29 @@ async function addDistractors(
   );
 }
 
-function validQuestionInvariant(question: Question) {
-  switch (question.kind) {
-    case QuestionKind.OneCorrectPair: {
-      // Ensure there aren't two identical choices in the same group.
-      uniqueInvariant(question.groupA.map((x) => oneCorrectPairChoiceText(x)));
-      uniqueInvariant(question.groupB.map((x) => oneCorrectPairChoiceText(x)));
-      // Ensure the answer is included.
-      invariant(question.groupA.includes(question.answer.a));
-      invariant(question.groupB.includes(question.answer.b));
-      // Ensure all choices are the same length.
-      identicalInvariant([
-        ...question.groupA.map((x) => hanziOrPinyinWordCount(x)),
-        ...question.groupB.map((x) => hanziOrPinyinWordCount(x)),
-      ]);
-      // Ensure all pinyin have the same final.
-      identicalInvariant(
-        question.groupB.map((x) =>
-          typeof x.value === `string`
-            ? parsePinyinOrThrow(x.value).final
-            : null,
-        ),
-      );
-      // Ensure all pinyin have the same tone.
-      identicalInvariant(
-        question.groupB.map((x) =>
-          typeof x.value === `string` ? parsePinyinOrThrow(x.value).tone : null,
-        ),
-      );
-      break;
-    }
-    case QuestionKind.HanziToPinyin:
-    case QuestionKind.MultipleChoice: {
-      break;
-    }
-  }
+function validQuestionInvariant(question: OneCorrectPairQuestion) {
+  // Ensure there aren't two identical choices in the same group.
+  uniqueInvariant(question.groupA.map((x) => oneCorrectPairChoiceText(x)));
+  uniqueInvariant(question.groupB.map((x) => oneCorrectPairChoiceText(x)));
+  // Ensure the answer is included.
+  invariant(question.groupA.includes(question.answer.a));
+  invariant(question.groupB.includes(question.answer.b));
+  // Ensure all choices are the same length.
+  identicalInvariant([
+    ...question.groupA.map((x) => hanziOrPinyinSyllableCount(x)),
+    ...question.groupB.map((x) => hanziOrPinyinSyllableCount(x)),
+  ]);
+  // Ensure all pinyin have the same final and tone.
+  identicalInvariant(
+    question.groupB.map((x) => {
+      invariant(x.kind === `pinyin`);
+      invariant(hanziOrPinyinSyllableCount(x) === 1);
+
+      const syllable = nonNullable(x.value[0]);
+      const { final, tone } = parsePinyinSyllableOrThrow(syllable);
+      return `${final}-${tone}`;
+    }),
+  );
 
   return question;
 }

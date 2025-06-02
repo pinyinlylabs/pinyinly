@@ -158,7 +158,7 @@ export const rPinyinPronunciation = memoize0(function rPinyinPronunciation() {
       .transform((x) => x.join(` `) as PinyinPronunciationSpaceSeparated),
     z
       .custom<PinyinPronunciationSpaceSeparated>((x) => typeof x === `string`)
-      .transform((x) => x.split(` `) as PinyinSyllable[]),
+      .transform((x) => x.split(/\s+/) as PinyinSyllable[]),
   );
 });
 

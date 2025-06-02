@@ -1,6 +1,6 @@
 import {
   convertPinyinWithToneNumberToToneMark,
-  parsePinyinTone,
+  parsePinyinSyllableTone,
 } from "@/data/pinyin";
 import {
   allOneSyllableHanzi,
@@ -8,18 +8,20 @@ import {
   characterCount,
   hanziFromHanziWord,
   lookupHanziWord,
-  parsePinyinOrThrow,
+  parsePinyinSyllableOrThrow,
   pinyinOrThrow,
 } from "@/dictionary/dictionary";
 import {
   identicalInvariant,
   invariant,
+  nonNullable,
   uniqueInvariant,
 } from "@haohaohow/lib/invariant";
 import shuffle from "lodash/shuffle";
 import type {
   HanziChar,
   HanziWord,
+  OneCorrectPairQuestion,
   OneCorrectPairQuestionAnswer,
   OneCorrectPairQuestionChoice,
   PinyinSyllable,
@@ -29,7 +31,7 @@ import { QuestionKind } from "../model";
 import type { HanziWordSkill } from "../rizzleSchema";
 import { hanziWordFromSkill } from "../skills";
 import {
-  hanziOrPinyinWordCount,
+  hanziOrPinyinSyllableCount,
   oneCorrectPairChoiceText,
   oneSyllablePinyinOrThrow,
 } from "./util";
@@ -95,8 +97,8 @@ export async function makeQuestionContext(
   const hanzi = hanziFromHanziWord(correctAnswer);
   const meaning = await lookupHanziWord(correctAnswer);
   const pinyin = oneSyllablePinyinOrThrow(correctAnswer, meaning);
-  const parsedPinyin = parsePinyinTone(pinyin);
-  const { initial } = parsePinyinOrThrow(pinyin);
+  const parsedPinyin = parsePinyinSyllableTone(pinyin);
+  const { initial } = parsePinyinSyllableOrThrow(pinyin);
   invariant(
     parsedPinyin != null,
     `couldn't parse pinyin ${pinyin} for ${correctAnswer}`,
@@ -224,27 +226,52 @@ async function addDistractors(
   );
 }
 
-function validQuestionInvariant(question: Question) {
-  switch (question.kind) {
-    case QuestionKind.OneCorrectPair: {
-      // Ensure there aren't two identical choices in the same group.
-      uniqueInvariant(question.groupA.map((x) => oneCorrectPairChoiceText(x)));
-      uniqueInvariant(question.groupB.map((x) => oneCorrectPairChoiceText(x)));
-      // Ensure the answer is included.
-      invariant(question.groupA.includes(question.answer.a));
-      invariant(question.groupB.includes(question.answer.b));
-      // Ensure all choices are the same length.
-      identicalInvariant([
-        ...question.groupA.map((x) => hanziOrPinyinWordCount(x)),
-        ...question.groupB.map((x) => hanziOrPinyinWordCount(x)),
-      ]);
-      break;
-    }
-    case QuestionKind.HanziToPinyin:
-    case QuestionKind.MultipleChoice: {
-      break;
-    }
-  }
+function validQuestionInvariant(question: OneCorrectPairQuestion) {
+  // Ensure there aren't two identical choices in the same group.
+  uniqueInvariant(question.groupA.map((x) => oneCorrectPairChoiceText(x)));
+  uniqueInvariant(question.groupB.map((x) => oneCorrectPairChoiceText(x)));
+  // Ensure the answer is included.
+  invariant(question.groupA.includes(question.answer.a));
+  invariant(question.groupB.includes(question.answer.b));
+  // Ensure all choices are single syllable.
+  identicalInvariant([
+    ...question.groupA.map((x) => hanziOrPinyinSyllableCount(x)),
+    ...question.groupB.map((x) => hanziOrPinyinSyllableCount(x)),
+  ]);
+  // Ensure all pinyin have the same initial and final
+  identicalInvariant(
+    question.groupB.map((x) => {
+      invariant(x.kind === `pinyin`);
+      invariant(hanziOrPinyinSyllableCount(x) === 1);
+
+      const syllable = nonNullable(x.value[0]);
+      const { initial, final } =
+        parsePinyinSyllableWithVowelVariationsOrThrow(syllable);
+      return `${initial}-${final}`;
+    }),
+  );
 
   return question;
+}
+
+function parsePinyinSyllableWithVowelVariationsOrThrow(
+  syllable: PinyinSyllable,
+): ReturnType<typeof parsePinyinSyllableOrThrow> {
+  try {
+    // Standard pinyin should work.
+    return parsePinyinSyllableOrThrow(syllable);
+  } catch {
+    // Maybe it failed because of extra vowel variations, reverse that and try again.
+    const toneResult = parsePinyinSyllableTone(syllable);
+    let [base] = nonNullable(toneResult);
+
+    for (const [vowel, replacement] of extraVowelVariations) {
+      if (base.includes(replacement)) {
+        base = base.replace(replacement, vowel);
+        break;
+      }
+    }
+
+    return parsePinyinSyllableOrThrow(base);
+  }
 }

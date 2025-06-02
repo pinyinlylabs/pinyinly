@@ -5,19 +5,19 @@ import type {
   PinyinSyllable,
 } from "@/data/model";
 import type { HanziWordMeaning } from "@/dictionary/dictionary";
-import { characterCount, pinyinOrThrow } from "@/dictionary/dictionary";
+import { hanziCharCount, pinyinOrThrow } from "@/dictionary/dictionary";
 import { invariant } from "@haohaohow/lib/invariant";
 import type { DeepReadonly } from "ts-essentials";
 
-export function hanziOrPinyinWordCount(
+export function hanziOrPinyinSyllableCount(
   choice: OneCorrectPairQuestionChoice,
 ): number {
   switch (choice.kind) {
     case `hanzi`: {
-      return characterCount(choice.value);
+      return hanziCharCount(choice.value);
     }
     case `pinyin`: {
-      return typeof choice.value === `string` ? 1 : choice.value.length;
+      return choice.value.length;
     }
     case `gloss`: {
       throw new Error(`unexpected gloss choice in HanziWordToPinyin`);
@@ -44,7 +44,7 @@ export function oneCorrectPairChoiceText(
 export function pinyinPronunciationDisplayText(
   value: Readonly<PinyinPronunciation>,
 ): string {
-  return typeof value === `string` ? value : value.join(``);
+  return value.join(``);
 }
 
 export function oneSyllablePinyinOrThrow(

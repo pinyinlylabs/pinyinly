@@ -7,7 +7,7 @@ import type {
   PinyinSyllable,
 } from "@/data/model";
 import { PartOfSpeech } from "@/data/model";
-import { parsePinyinWithChart } from "@/data/pinyin";
+import { parsePinyinWithChart as parsePinyinSyllableWithChart } from "@/data/pinyin";
 import {
   rMnemonicThemeId,
   rPinyinInitialGroupId,
@@ -32,14 +32,14 @@ export const pinyinPronunciationSchema = rPinyinPronunciation()
   .getUnmarshal()
   .describe(`space separated pinyin for each word`);
 
-export const parsePinyinOrThrow = memoize1(function parsePinyinOrThrow(
-  pinyin: string,
-) {
-  const chart = loadHhhPinyinChart();
-  const parsed = parsePinyinWithChart(pinyin, chart);
-  invariant(parsed != null, `Could not parse pinyin ${pinyin}`);
-  return deepReadonly(parsed);
-});
+export const parsePinyinSyllableOrThrow = memoize1(
+  function parsePinyinSyllableOrThrow(pinyinSyllable: string) {
+    const chart = loadHhhPinyinChart();
+    const parsed = parsePinyinSyllableWithChart(pinyinSyllable, chart);
+    invariant(parsed != null, `Could not parse pinyin ${pinyinSyllable}`);
+    return deepReadonly(parsed);
+  },
+);
 
 export const loadPinyinWords = memoize0(async () =>
   z
@@ -567,7 +567,7 @@ export const allOneSyllableHanzi = memoize0(
         ...(await allHsk3HanziWords()),
       ]
         .map((x) => hanziFromHanziWord(x))
-        .filter((x) => characterCount(x) === 1) as unknown as HanziChar[],
+        .filter((x) => hanziCharCount(x) === 1) as unknown as HanziChar[],
     ),
 );
 
@@ -822,4 +822,9 @@ export const fakePinyin = [
 
 export function isHanziChar(hanzi: string): hanzi is HanziChar {
   return characterCount(hanzi) === 1;
+}
+
+export function hanziCharCount(hanziText: HanziText): number {
+  // eslint-disable-next-line @typescript-eslint/no-misused-spread
+  return [...hanziText].length;
 }

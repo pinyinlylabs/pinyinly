@@ -2,9 +2,8 @@ import type {
   HanziToPinyinQuestion,
   MistakeType,
   OneCorrectPairQuestionChoice,
-  PinyinSyllable,
 } from "@/data/model";
-import { invariant } from "@haohaohow/lib/invariant";
+import { nonNullable } from "@haohaohow/lib/invariant";
 import type { HanziGlossMistakeType, HanziPinyinMistakeType } from "./model";
 import { MistakeKind } from "./model";
 import { hanziWordFromSkill } from "./skills";
@@ -30,8 +29,7 @@ export function hanziPinyinMistake(
     return {
       kind: MistakeKind.HanziPinyin,
       hanziOrHanziWord: choice1.value,
-      pinyin:
-        typeof choice2.value === `string` ? [choice2.value] : choice2.value,
+      pinyin: choice2.value,
     };
   }
 }
@@ -67,10 +65,7 @@ export function hanziToPinyinQuestionMistakes(
 ): MistakeType[] {
   const mistakes: MistakeType[] = [];
 
-  const firstAnswer = question.answers[0];
-  invariant(firstAnswer != null, `expected answer to be defined`);
-  const answer: readonly PinyinSyllable[] | undefined =
-    typeof firstAnswer === `string` ? [firstAnswer] : firstAnswer;
+  const answer = nonNullable(question.answers[0]);
 
   if (!answer.every((syllable, i) => syllable === userAnswer[i])) {
     // Push a single mistake for the whole word, not per syllable. This might be

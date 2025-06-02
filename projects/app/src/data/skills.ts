@@ -1,8 +1,8 @@
 import type { HanziWordWithMeaning } from "@/dictionary/dictionary";
 import {
-  characterCount,
   characterHasGlyph,
   decomposeHanzi,
+  hanziCharCount,
   hanziFromHanziWord,
   hanziTextFromHanziChar,
   isHanziChar,
@@ -259,7 +259,7 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
       const hanzi = hanziFromHanziWord(hanziWord);
 
       invariant(
-        characterCount(hanzi) === 1,
+        hanziCharCount(hanzi) === 1,
         `${skillKind} only applies to single character hanzi`,
       );
 
@@ -273,7 +273,7 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
       const hanzi = hanziFromHanziWord(hanziWord);
 
       invariant(
-        characterCount(hanzi) === 1,
+        hanziCharCount(hanzi) === 1,
         `${skillKind} only applies to single character hanzi`,
       );
 
@@ -287,7 +287,7 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
       const hanzi = hanziFromHanziWord(hanziWord);
 
       invariant(
-        characterCount(hanzi) === 1,
+        hanziCharCount(hanzi) === 1,
         `${skillKind} only applies to single character hanzi`,
       );
 

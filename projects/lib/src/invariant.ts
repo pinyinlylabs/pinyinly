@@ -34,3 +34,11 @@ export function identicalInvariant<
     invariant(item === identity, `unexpected unique value ${item}`);
   }
 }
+
+export function nonNullable<T>(
+  value: T | null | undefined,
+  message?: string,
+): NonNullable<T> {
+  invariant(value != null, message ?? `unexpected ${value} value`);
+  return value;
+}

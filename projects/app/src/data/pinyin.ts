@@ -96,7 +96,7 @@ const isPinyinVowel = (
 ): char is `a` | `e` | `i` | `ï` | `o` | `u` | `ü` =>
   char != null && char in toneMap;
 
-export const parsePinyinTone = memoize1(function parsePinyinTone(
+export const parsePinyinSyllableTone = memoize1(function parsePinyinTone(
   pinyin: string,
 ): [tonelessPinyin: string, tone: number] | null {
   for (const [key, value] of Object.entries(toneMap)) {
@@ -128,7 +128,7 @@ function expandCombinations(
  * Given a toneless pinyin (i.e. `hao` not `hǎo`) split into an initial and
  * final using a given chart.
  */
-export function splitTonelessPinyin(
+export function splitTonelessPinyinSyllable(
   pinyin: string,
   chart: PinyinChart,
 ): readonly [initial: string, final: string] | null {
@@ -166,14 +166,17 @@ export function splitTonelessPinyin(
 }
 
 export function parsePinyinWithChart(
-  pinyin: string,
+  pinyinSyllable: string,
   chart: PinyinChart,
 ): { initial: string; final: string; tone: number } | null {
-  const toneResult = parsePinyinTone(pinyin);
-  invariant(toneResult != null, `Could not parse tone for pinyin ${pinyin}`);
+  const toneResult = parsePinyinSyllableTone(pinyinSyllable);
+  invariant(
+    toneResult != null,
+    `Could not parse tone for pinyin ${pinyinSyllable}`,
+  );
   const [tonelessPinyin, tone] = toneResult;
 
-  const initialFinalResult = splitTonelessPinyin(tonelessPinyin, chart);
+  const initialFinalResult = splitTonelessPinyinSyllable(tonelessPinyin, chart);
   invariant(
     initialFinalResult != null,
     `Could not split pinyin ${tonelessPinyin}`,

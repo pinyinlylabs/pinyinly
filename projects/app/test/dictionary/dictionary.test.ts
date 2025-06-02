@@ -2,7 +2,7 @@ import { parseIds, splitHanziText, walkIdsNode } from "#data/hanzi.ts";
 import { parseHhhmark } from "#data/hhhmark.ts";
 import type { HanziChar } from "#data/model.ts";
 import type { PinyinChart } from "#data/pinyin.ts";
-import { splitTonelessPinyin } from "#data/pinyin.ts";
+import { splitTonelessPinyinSyllable } from "#data/pinyin.ts";
 import { pinyinPronunciationDisplayText } from "#data/questions/util.ts";
 import type { HanziWordMeaning } from "#dictionary/dictionary.ts";
 import {
@@ -299,10 +299,8 @@ await test(`hanzi word meaning pinyin lint`, async () => {
         if (pinyin == null) {
           return false;
         }
-        const fingerprints = pinyin.map((p) =>
-          typeof p === `string` ? 1 : p.length,
-        );
-        return new Set(fingerprints).size > 1;
+        const syllableCounts = pinyin.map((p) => p.length);
+        return new Set(syllableCounts).size > 1;
       })
       .map(([hanziWord]) => hanziWord);
     assert.deepEqual(violations, []);
@@ -867,14 +865,18 @@ async function testPinyinChart(
   // Start with test cases first as these are easier to debug.
   for (const [input, initial, final] of testCases) {
     assert.deepEqual(
-      splitTonelessPinyin(input, chart),
+      splitTonelessPinyinSyllable(input, chart),
       [initial, final],
       `${input} didn't split as expected`,
     );
   }
 
   for (const x of pinyinWords) {
-    assert.notEqual(splitTonelessPinyin(x, chart), null, `couldn't split ${x}`);
+    assert.notEqual(
+      splitTonelessPinyinSyllable(x, chart),
+      null,
+      `couldn't split ${x}`,
+    );
   }
 
   // Ensure that there are no duplicates initials or finals.
