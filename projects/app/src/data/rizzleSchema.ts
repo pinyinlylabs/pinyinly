@@ -123,7 +123,7 @@ export const rSkill = memoize0(function rSkill() {
   );
 });
 
-export const rHanziOrHanziWord = memoize0(function rHanziText() {
+export const rHanziOrHanziWord = memoize0(function rHanziOrHanziWord() {
   return RizzleCustom.create<
     HanziText | HanziWord,
     string,
