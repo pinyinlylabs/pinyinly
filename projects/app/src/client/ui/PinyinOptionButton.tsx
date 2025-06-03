@@ -20,14 +20,13 @@ export function PinyinOptionButton({
   onPress,
   ...props
 }: PinyinOptionButtonProps) {
-  const handlePress = () => {
-    onPress?.(pinyin);
-  };
   return (
     <RectButton2
       variant="option"
       className={buttonClass({ className })}
-      onPress={handlePress}
+      onPress={() => {
+        onPress?.(pinyin);
+      }}
       {...props}
     >
       <Text className="hhh-text-button-option">{pinyin}</Text>

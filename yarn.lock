@@ -2339,7 +2339,7 @@ __metadata:
     react-native: "npm:0.79.2"
     react-native-gesture-handler: "npm:~2.24.0"
     react-native-purchases: "npm:^8.5.2"
-    react-native-reanimated: "npm:3.17.4"
+    react-native-reanimated: "patch:react-native-reanimated@npm%3A3.17.4#~/.yarn/patches/react-native-reanimated-npm-3.17.4-d7caed9b50.patch"
     react-native-safe-area-context: "npm:5.4.0"
     react-native-screens: "npm:~4.10.0"
     react-native-svg: "npm:15.11.2"
@@ -14851,6 +14851,30 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: 10c0/a86e0886acec76367b14cb3026de09a5c83b2845349b4c643b2a95eb56b9e477a3c6b5956707457c794dde3dc06e47d451c55d94188533abec04451c2c378160
+  languageName: node
+  linkType: hard
+
+"react-native-reanimated@patch:react-native-reanimated@npm%3A3.17.4#~/.yarn/patches/react-native-reanimated-npm-3.17.4-d7caed9b50.patch":
+  version: 3.17.4
+  resolution: "react-native-reanimated@patch:react-native-reanimated@npm%3A3.17.4#~/.yarn/patches/react-native-reanimated-npm-3.17.4-d7caed9b50.patch::version=3.17.4&hash=31cb24"
+  dependencies:
+    "@babel/plugin-transform-arrow-functions": "npm:^7.0.0-0"
+    "@babel/plugin-transform-class-properties": "npm:^7.0.0-0"
+    "@babel/plugin-transform-classes": "npm:^7.0.0-0"
+    "@babel/plugin-transform-nullish-coalescing-operator": "npm:^7.0.0-0"
+    "@babel/plugin-transform-optional-chaining": "npm:^7.0.0-0"
+    "@babel/plugin-transform-shorthand-properties": "npm:^7.0.0-0"
+    "@babel/plugin-transform-template-literals": "npm:^7.0.0-0"
+    "@babel/plugin-transform-unicode-regex": "npm:^7.0.0-0"
+    "@babel/preset-typescript": "npm:^7.16.7"
+    convert-source-map: "npm:^2.0.0"
+    invariant: "npm:^2.2.4"
+    react-native-is-edge-to-edge: "npm:1.1.7"
+  peerDependencies:
+    "@babel/core": ^7.0.0-0
+    react: "*"
+    react-native: "*"
+  checksum: 10c0/2e721d3fb2e44869cba1cb487b5bca01a526129f5e32dd50ba837edadb1eaa11493ad8dcd6e9aca9b4d2c412f35727dbacc8e86c1862ea51c190ab2da9101c2f
   languageName: node
   linkType: hard
 
