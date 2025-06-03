@@ -112,6 +112,14 @@ export const 汉字 = (strings: TemplateStringsArray): HanziChar => {
 };
 
 /**
+ * Helper template string tag to make {@link HanziText}.
+ */
+export const 汉 = (strings: TemplateStringsArray): HanziText => {
+  invariant(strings.length === 1, `汉 must be a single string`);
+  return nonNullable(strings[0]) as HanziText;
+};
+
+/**
  * Helper template string tag to make {@link PinyinSyllable}.
  *
  * 拼音 means syllable in Chinese, and since it's written using Chinese it's

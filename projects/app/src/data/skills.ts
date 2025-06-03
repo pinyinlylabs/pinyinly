@@ -4,8 +4,6 @@ import {
   decomposeHanzi,
   hanziFromHanziWord,
   hanziTextFromHanziChar,
-  isHanziWord,
-  lookupGloss,
   lookupHanzi,
   lookupHanziWord,
 } from "@/dictionary/dictionary";
@@ -25,8 +23,6 @@ import type { DeepReadonly } from "ts-essentials";
 import { isHanziChar, splitHanziText } from "./hanzi";
 import { parseHhhmark } from "./hhhmark";
 import type {
-  HanziGlossMistakeType,
-  HanziPinyinMistakeType,
   HanziText,
   HanziWord,
   HanziWordSkillKind,
@@ -41,7 +37,7 @@ import type {
   Skill,
   SkillRating,
 } from "./rizzleSchema";
-import { rSkillKind, srsStateFromFsrsState } from "./rizzleSchema";
+import { rSkillKind } from "./rizzleSchema";
 
 export interface Node {
   skill: Skill;
@@ -670,72 +666,6 @@ const skillKindShorthandMapping: Record<SkillKind, string> = {
 
 export function skillKindToShorthand(skillKind: SkillKind): string {
   return skillKindShorthandMapping[skillKind];
-}
-
-export async function skillsToReReviewForHanziGlossMistake(
-  mistake: HanziGlossMistakeType,
-): Promise<ReadonlySet<Skill>> {
-  const skills = new Set<Skill>();
-
-  if (isHanziWord(mistake.hanziOrHanziWord)) {
-    // TODO: work out the appropriate skills to review in this case.
-    return skills;
-  }
-
-  // Queue all skills relevant to the gloss.
-  for (const [hanziWord] of await lookupGloss(mistake.gloss)) {
-    skills.add(hanziWordToGloss(hanziWord));
-  }
-
-  // Queue all skills relevant to the hanzi.
-  for (const [hanziWord] of await lookupHanzi(mistake.hanziOrHanziWord)) {
-    skills.add(hanziWordToGloss(hanziWord));
-  }
-
-  return skills;
-}
-
-export async function skillsToReReviewForHanziPinyinMistake(
-  mistake: HanziPinyinMistakeType,
-): Promise<ReadonlySet<Skill>> {
-  const skills = new Set<Skill>();
-
-  if (isHanziWord(mistake.hanziOrHanziWord)) {
-    // TODO: work out the appropriate skills to review in this case.
-    return skills;
-  }
-
-  // Queue all skills relevant to the hanzi.
-  for (const [hanziWord] of await lookupHanzi(mistake.hanziOrHanziWord)) {
-    skills.add(hanziWordToPinyin(hanziWord));
-  }
-
-  return skills;
-}
-
-/**
- * Update the SRS state a skill that's related to a mistake that was made that
- * wasn't tied to a specific skill. It should make the skill reviewed again
- * soon.
- */
-export function nextReviewForOtherSkillMistake<T extends SrsStateType>(
-  srs: T,
-  now: Date,
-): T {
-  switch (srs.kind) {
-    case SrsKind.Mock: {
-      return srs;
-    }
-    case SrsKind.FsrsFourPointFive: {
-      // Schedule the skill for immediate review, but don't actually mark it as
-      // an error (`Rating.Again`) otherwise the difficulty and stability will
-      // change, but they haven't actually made a mistake yet on that skill.
-      return srsStateFromFsrsState({
-        ...srs,
-        nextReviewAt: now,
-      }) as T;
-    }
-  }
 }
 
 /**
