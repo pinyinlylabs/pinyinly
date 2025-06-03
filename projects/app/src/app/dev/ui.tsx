@@ -809,6 +809,7 @@ function SyncedAnswerButtonExample(
                     `success`,
                     `error`,
                     `default`,
+                    `dimmed`,
                   ] as TextAnswerButtonState[]
                 ).filter((x) => x !== prev),
               )[0] ?? `default`,
@@ -954,13 +955,14 @@ function QuizDeckHanziToPinyinQuestionExample() {
       promise={questionPromise}
       render={(question) => (
         <QuizDeckHanziToPinyinQuestion
-          question={question}
+          noAutoFocus
           onNext={() => {
             console.log(`onNext()`);
           }}
           onRating={() => {
             console.log(`onRating()`);
           }}
+          question={question}
         />
       )}
     />

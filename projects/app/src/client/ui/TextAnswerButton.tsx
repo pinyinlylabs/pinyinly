@@ -10,6 +10,7 @@ import Reanimated, {
   useAnimatedStyle,
   useSharedValue,
   withClamp,
+  withRepeat,
   withSequence,
   withSpring,
   withTiming,
@@ -18,6 +19,35 @@ import { tv } from "tailwind-variants";
 import { hapticImpactIfMobile } from "../hooks/hapticImpactIfMobile";
 import { AnimatedPressable } from "./AnimatedPressable";
 import type { PropsOf } from "./types";
+
+const targetBgScale: Record<TextAnswerButtonState, number> = {
+  dimmed: 0.5,
+  default: 0.5,
+  selected: 1,
+  error: 1,
+  success: 1,
+};
+const targetBgOpacity: Record<TextAnswerButtonState, number> = {
+  dimmed: 0,
+  default: 0,
+  selected: 1,
+  error: 1,
+  success: 1,
+};
+const targetScale: Record<TextAnswerButtonState, number> = {
+  dimmed: 1,
+  default: 1,
+  selected: 1,
+  error: 1,
+  success: 1,
+};
+const targetRotation: Record<TextAnswerButtonState, string> = {
+  dimmed: `0deg`,
+  default: `0deg`,
+  selected: `0deg`,
+  error: `0deg`,
+  success: `0deg`,
+};
 
 export type TextAnswerButtonState =
   | `default`
@@ -49,41 +79,56 @@ export function TextAnswerButton({
   const [pressed, setPressed] = useState(false);
   const [hovered, setHovered] = useState(false);
 
-  const scaleSv = useSharedValue(1);
-  const rotationSv = useSharedValue(`0deg`);
-  const bgScaleSv = useSharedValue(0.5);
-  const bgOpacitySv = useSharedValue(0);
+  const scaleSv = useSharedValue(targetScale[state]);
+  const rotationSv = useSharedValue(targetRotation[state]);
+  const bgScaleSv = useSharedValue(targetBgScale[state]);
+  const bgOpacitySv = useSharedValue(targetBgOpacity[state]);
 
   if (state !== prevState) {
+    let newScale = targetScale[state];
+    let newBgScale = targetBgScale[state];
+    let newRotation = targetRotation[state];
+    let newBgOpacity = targetBgOpacity[state];
+
     runOnUI(() => {
       switch (state) {
         case `dimmed`:
         case `default`: {
-          setBgFilled(false);
-          bgScaleSv.set(0.5);
-          bgOpacitySv.set(0);
           break;
         }
         case `selected`: {
-          scaleSv.set(withClamp({ min: 1 }, withScaleAnimation()));
-          bgScaleSv.set(withClamp({ max: 1 }, withScaleAnimation()));
-          bgOpacitySv.set(withTiming(1, { duration }));
+          newBgScale = withClamp(
+            { max: 1 },
+            withPulseSpringAnimation(newBgScale),
+          );
+          newBgOpacity = withClamp(
+            { min: bgOpacitySv.get() },
+            withTiming(newBgOpacity, { duration }),
+          );
+          newScale = withClamp({ min: 1 }, withPulseSpringAnimation(newScale));
           break;
         }
         case `error`: {
-          bgScaleSv.set(1);
-          rotationSv.set(withIncorrectWobbleAnimation());
-          bgOpacitySv.set(withTiming(1, { duration }));
+          newBgOpacity = withClamp(
+            { min: bgOpacitySv.get() },
+            withTiming(newBgOpacity, { duration }),
+          );
+          newRotation = withIncorrectWobbleAnimation();
           break;
         }
         case `success`: {
-          bgScaleSv.set(1);
-          bgOpacitySv.set(
-            withClamp({ min: bgOpacitySv.get() }, withTiming(1, { duration })),
+          newBgOpacity = withClamp(
+            { min: bgOpacitySv.get() },
+            withTiming(newBgOpacity, { duration }),
           );
           break;
         }
       }
+
+      scaleSv.set(newScale);
+      bgScaleSv.set(newBgScale);
+      bgOpacitySv.set(newBgOpacity);
+      rotationSv.set(newRotation);
     })();
 
     setPrevState(state);
@@ -149,6 +194,11 @@ export function TextAnswerButton({
         pressableProps.onPressOut?.(e);
       }}
       onPress={(e) => {
+        if (state === `error`) {
+          // Shake the button violently if the user presses it again after they
+          // already made an error.
+          rotationSv.set(withIncorrectShakeAnimation(rotationSv.get()));
+        }
         pressableProps.onPress?.(e);
       }}
       style={pressableAnimatedStyle}
@@ -187,14 +237,14 @@ export function TextAnswerButton({
 
 const duration = 100;
 
-const withScaleAnimation = () =>
+const withPulseSpringAnimation = (target: number) =>
   withSequence(
-    withTiming(0.5, { duration: 0 }),
-    withTiming(1.03, {
+    withTiming(target * 0.5, { duration: 0 }),
+    withTiming(target * 1.03, {
       duration: 2 * duration,
       easing: Easing.inOut(Easing.quad),
     }),
-    withTiming(1, {
+    withTiming(target, {
       duration,
       easing: Easing.out(Easing.quad),
     }),
@@ -205,6 +255,11 @@ const withIncorrectWobbleAnimation = () => {
   offset += offset < 0 ? -0.5 : 0.5;
 
   return withSpring(`${offset}deg`, { duration: 2 * duration });
+};
+
+const withIncorrectShakeAnimation = (current: string) => {
+  const deg = Number.parseFloat(current.replace(/deg$/, ``));
+  return withRepeat(withSpring(`${deg + 2}deg`, { duration: 80 }), 4, true);
 };
 
 const bgAnimatedClass = tv({
