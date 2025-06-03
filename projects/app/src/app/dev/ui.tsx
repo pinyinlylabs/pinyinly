@@ -17,12 +17,12 @@ import { buildHanziWord } from "@/dictionary/dictionary";
 import { Link } from "expo-router";
 import shuffle from "lodash/shuffle";
 import type { ReactNode } from "react";
-import { useCallback, useRef, useState } from "react";
+import { StrictMode, useCallback, useRef, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { tv } from "tailwind-variants";
 
-export default function DesignSystemPage() {
+function DesignSystemPage() {
   const insets = useSafeAreaInsets();
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -185,6 +185,14 @@ export default function DesignSystemPage() {
         </View>
       </ScrollView>
     </View>
+  );
+}
+
+export default function DesignSystemStrict() {
+  return (
+    <StrictMode>
+      <DesignSystemPage />
+    </StrictMode>
   );
 }
 
