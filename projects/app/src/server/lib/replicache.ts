@@ -1,3 +1,8 @@
+import {
+  nextReviewForOtherSkillMistake,
+  skillsToReReviewForHanziGlossMistake,
+  skillsToReReviewForHanziPinyinMistake,
+} from "@/data/mistakes";
 import type {
   HanziGlossMistakeType,
   HanziPinyinMistakeType,
@@ -5,11 +10,6 @@ import type {
 import { MistakeKind } from "@/data/model";
 import type { SupportedSchema } from "@/data/rizzleSchema";
 import { rPinyinInitialGroupId, v7, v7_1 } from "@/data/rizzleSchema";
-import {
-  nextReviewForOtherSkillMistake,
-  skillsToReReviewForHanziGlossMistake,
-  skillsToReReviewForHanziPinyinMistake,
-} from "@/data/skills";
 import type {
   ClientStateNotFoundResponse,
   Cookie,
