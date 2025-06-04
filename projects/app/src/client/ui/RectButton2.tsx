@@ -112,7 +112,11 @@ const pressable = tv({
 });
 
 const roundedRect = tv({
-  base: `box-border select-none items-center justify-center web:transition-all`,
+  base: `
+    box-border select-none items-center justify-center
+
+    web:transition-all
+  `,
   variants: {
     variant: {
       filled: `rounded-xl border-background/20 bg-foreground/95 px-4 py-2`,

@@ -170,7 +170,11 @@ export const QuizDeck = ({ className }: { className?: string }) => {
 
   return (
     <View className={className}>
-      <View className="mb-[20px] w-full max-w-[600px] flex-row items-center gap-3 self-center px-quiz-px">
+      <View
+        className={`
+          mb-[20px] w-full max-w-[600px] flex-row items-center gap-3 self-center px-quiz-px
+        `}
+      >
         <CloseButton />
         <QuizProgressBar progress={quizProgress.progress} />
         <QuizQueueButton queueStats={reviewQueue} />

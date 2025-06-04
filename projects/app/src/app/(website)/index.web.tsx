@@ -20,9 +20,17 @@ export default function WebsitePage() {
 
   return (
     <>
-      <View className="www-px-comfortable mb-[100px] h-screen items-center justify-center pt-[100px]">
+      <View
+        className={`www-px-comfortable mb-[100px] h-screen items-center justify-center pt-[100px]`}
+      >
         <View className="mb-[100px] items-center">
-          <Text className="www-text-hero text-center lg:text-left">
+          <Text
+            className={`
+              www-text-hero text-center
+
+              lg:text-left
+            `}
+          >
             Teach yourself Chinese.
           </Text>
         </View>

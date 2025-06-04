@@ -28,7 +28,13 @@ export default function WordsPage() {
       contentContainerClassName="py-safe-offset-4 px-safe-or-4 items-center"
     >
       <View className="max-w-[600px] gap-4">
-        <View className="gap-2 px-safe-or-4 lg:px-0">
+        <View
+          className={`
+            gap-2 px-safe-or-4
+
+            lg:px-0
+          `}
+        >
           <Text className="text-center text-2xl font-bold text-foreground">
             HSK 1
           </Text>
@@ -51,7 +57,13 @@ export default function WordsPage() {
           <>
             <WordList words={query.data.hsk1Words} />
 
-            <View className="gap-2 px-safe-or-4 lg:px-0">
+            <View
+              className={`
+                gap-2 px-safe-or-4
+
+                lg:px-0
+              `}
+            >
               <Text className="text-center text-2xl font-bold text-foreground">
                 HSK 2
               </Text>
@@ -64,7 +76,13 @@ export default function WordsPage() {
             </View>
             <WordList words={query.data.hsk2Words} />
 
-            <View className="gap-2 px-safe-or-4 lg:px-0">
+            <View
+              className={`
+                gap-2 px-safe-or-4
+
+                lg:px-0
+              `}
+            >
               <Text className="text-center text-2xl font-bold text-foreground">
                 HSK 3
               </Text>

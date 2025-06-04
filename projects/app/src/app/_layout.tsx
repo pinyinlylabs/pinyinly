@@ -26,6 +26,7 @@ import { cssInterop } from "nativewind";
 import { useEffect, useState } from "react";
 import { Platform, useColorScheme, View } from "react-native";
 import Reanimated from "react-native-reanimated";
+import { tv } from "tailwind-variants";
 import "../global.css";
 
 // NativeWind adapters for third party components
@@ -46,7 +47,7 @@ cssInterop(AppleAuthentication.AppleAuthenticationButton, {
 function RootLayout() {
   // Capture the NavigationContainer ref and register it with the instrumentation.
   const ref = useNavigationContainerRef();
-  const dark = useColorScheme() === `dark`;
+  const isDarkMode = useColorScheme() === `dark`;
 
   useEffect(() => {
     routingIntegration.registerNavigationContainer(ref);
@@ -92,13 +93,10 @@ function RootLayout() {
             </Head>
 
             <View
-              className={`${
-                // This is the native equivalent of adding a class to the body
-                // element, without this the root color scheme is not set.
-                Platform.OS === `web`
-                  ? ``
-                  : `${dark ? `dark-theme` : `light-theme`} default-theme`
-              } flex-1 bg-background`}
+              className={containerClass({
+                isWeb: Platform.OS === `web`,
+                isDarkMode,
+              })}
             >
               <Stack screenOptions={{ headerShown: false, animation: `fade` }}>
                 <Stack.Screen
@@ -117,6 +115,32 @@ function RootLayout() {
     </TrpcProvider>
   );
 }
+
+const containerClass = tv({
+  base: `flex-1 bg-background`,
+  variants: {
+    isWeb: {
+      false: `default-theme`,
+    },
+    isDarkMode: {
+      true: ``,
+    },
+  },
+  compoundVariants: [
+    // These are the native equivalent of adding a class to the body
+    // element, without this the root color scheme is not set.
+    {
+      isWeb: false,
+      isDarkMode: true,
+      class: `dark-theme`,
+    },
+    {
+      isWeb: false,
+      isDarkMode: false,
+      class: `light-theme`,
+    },
+  ],
+});
 
 const BUG_DETECTOR_COLOR = `#ff0000`;
 

@@ -15,7 +15,13 @@ export const HanziText = ({
   underline?: boolean;
 }) => {
   return (
-    <View className={`flex-col items-center ${small ? `gap-0.5` : `gap-1`}`}>
+    <View
+      className={`
+        flex-col items-center
+
+        ${small ? `gap-0.5` : `gap-1`}
+      `}
+    >
       {pinyin == null ? null : (
         <PinyinText pinyin={pinyin} accented={accented} small={small} />
       )}

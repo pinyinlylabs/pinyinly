@@ -308,7 +308,11 @@ const textClass = tv({
   // px-1: Horizontal padding is necessary to give first and last letters on a
   // line with accents enough space to not be clipped. Without this words like
   // "lǐ" will have half the accent clipped.
-  base: `px-1 text-center font-normal text-foreground web:transition-colors`,
+  base: `
+    px-1 text-center font-normal text-foreground
+
+    web:transition-colors
+  `,
   variants: {
     state: {
       default: `text-foreground`,
@@ -318,10 +322,26 @@ const textClass = tv({
       error: `text-red-10`,
     },
     length: {
-      tiny: `text-xl/tight lg:text-2xl/tight`,
-      short: `text-lg/tight lg:text-xl/tight`,
-      medium: `text-sm lg:text-lg/tight`,
-      long: `text-xs lg:text-base/tight`,
+      tiny: `
+        text-xl/tight
+
+        lg:text-2xl/tight
+      `,
+      short: `
+        text-lg/tight
+
+        lg:text-xl/tight
+      `,
+      medium: `
+        text-sm
+
+        lg:text-lg/tight
+      `,
+      long: `
+        text-xs
+
+        lg:text-base/tight
+      `,
     },
   },
 });

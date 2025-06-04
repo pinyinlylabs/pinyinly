@@ -152,7 +152,7 @@ export default function IndexPage() {
                     <Text
                       className={
                         `font-bold text-foreground` +
-                        (streakQuery.data.isActive ? `` : ` opacity-50`)
+                        (streakQuery.data.isActive ? `` : `opacity-50`)
                       }
                     >
                       {streakQuery.data.isActive ? `🔥` : `❄️`}
@@ -160,11 +160,15 @@ export default function IndexPage() {
                       {streakQuery.data.streakDayCount} day streak
                     </Text>
                     <View
-                      className={`flex-row gap-1 ${
-                        reviewQuery.data.dueOrOverdueCount > 0
-                          ? ``
-                          : `opacity-50`
-                      }`}
+                      className={`
+                        flex-row gap-1
+
+                        ${
+                          reviewQuery.data.dueOrOverdueCount > 0
+                            ? ``
+                            : `opacity-50`
+                        }
+                      `}
                     >
                       <Text className="font-bold text-foreground">
                         📨
@@ -269,5 +273,9 @@ export default function IndexPage() {
 }
 
 const boxClass = tv({
-  base: `w-full overflow-hidden rounded-xl bg-primary-3 p-4 md:max-w-[400px]`,
+  base: `
+    w-full overflow-hidden rounded-xl bg-primary-3 p-4
+
+    md:max-w-[400px]
+  `,
 });

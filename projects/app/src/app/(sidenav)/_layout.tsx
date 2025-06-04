@@ -13,11 +13,28 @@ export default function SideNavLayout() {
   const isAuthenticated = useAuth().data?.clientSession.serverSessionId != null;
 
   return (
-    <Tabs className="flex-1 flex-col-reverse items-stretch self-stretch md:flex-row">
-      <TabList className="grow-0 items-center gap-4 justify-self-stretch border-t-2 border-primary-4 pt-2 pb-safe-or-2 px-safe-or-4 md:flex-col md:items-start md:border-t-0 md:px-4 md:pt-6">
+    <Tabs
+      className={`
+        flex-1 flex-col-reverse items-stretch self-stretch
+
+        md:flex-row
+      `}
+    >
+      <TabList
+        className={`
+          grow-0 items-center gap-4 justify-self-stretch border-t-2 border-primary-4 pt-2
+          pb-safe-or-2 px-safe-or-4
+
+          md:flex-col md:items-start md:border-t-0 md:px-4 md:pt-6
+        `}
+      >
         <Link
           href="/learn"
-          className="hidden px-2 py-1 text-2xl font-bold tracking-wide text-primary-10 md:flex"
+          className={`
+            hidden px-2 py-1 text-2xl font-bold tracking-wide text-primary-10
+
+            md:flex
+          `}
         >
           <Image
             source={require(`@/assets/logo/logotype.svg`)}
@@ -72,11 +89,23 @@ export default function SideNavLayout() {
           </TabTrigger>
         ) : null}
 
-        <View className="hidden md:flex md:flex-1" />
+        <View
+          className={`
+            hidden
+
+            md:flex md:flex-1
+          `}
+        />
 
         <Link
           href="/login"
-          className="items-center rounded-md px-2 py-1 text-xl font-bold tracking-wide text-foreground hover:bg-primary-4 md:self-stretch"
+          className={`
+            items-center rounded-md px-2 py-1 text-xl font-bold tracking-wide text-foreground
+
+            hover:bg-primary-4
+
+            md:self-stretch
+          `}
         >
           {isAuthenticated ? (
             <View className="size-10 rounded-full bg-[green]"></View>
@@ -133,7 +162,11 @@ const buttonClass = tv({
 });
 
 const buttonTextClass = tv({
-  base: `hidden font-sans text-sm font-bold uppercase text-foreground transition-colors md:flex`,
+  base: `
+    hidden font-sans text-sm font-bold uppercase text-foreground transition-colors
+
+    md:flex
+  `,
   variants: {
     isFocused: {
       true: `text-primary-12`,

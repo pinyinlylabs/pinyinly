@@ -130,7 +130,14 @@ export function QuizDeckHanziToPinyinQuestion({
       toast={
         grade == null ? null : (
           <View
-            className={`flex-1 ${grade.correct ? `success-theme2` : `danger-theme2`} gap-[12px] overflow-hidden bg-foreground-bg10 px-quiz-px pt-3 pb-safe-offset-[84px] lg:mb-2 lg:rounded-xl`}
+            className={`
+              flex-1 gap-[12px] overflow-hidden bg-foreground-bg10 px-quiz-px pt-3
+              pb-safe-offset-[84px]
+
+              lg:mb-2 lg:rounded-xl
+
+              ${grade.correct ? `success-theme2` : `danger-theme2`}
+            `}
           >
             {grade.correct ? (
               <View className="flex-row items-center gap-[8px]">
@@ -283,7 +290,7 @@ function HanziPinyinAnswerBox({
   return (
     <View className="items-center gap-2">
       <Text className="text-[80px] font-medium text-foreground">{hanzi}</Text>
-      <View className={`h-[40px] ${focused ? `` : ``}`}>
+      <View className={`h-[40px]`}>
         {userAnswer === `` || focused ? (
           <Pressable
             className={pinyinPlaceholderClass({ focused })}
@@ -416,7 +423,10 @@ const hiddenPlaceholderOptions = (
 );
 
 const pinyinPlaceholderClass = tv({
-  base: `h-[40px] min-w-[60px] items-center justify-center rounded-xl border border-transparent px-3 outline-dashed outline-2 outline-foreground/50 transition-[outline-color]`,
+  base: `
+    h-[40px] min-w-[60px] items-center justify-center rounded-xl border border-transparent px-3
+    outline-dashed outline-2 outline-foreground/50 transition-[outline-color]
+  `,
   variants: {
     focused: {
       true: `accent-theme2`,

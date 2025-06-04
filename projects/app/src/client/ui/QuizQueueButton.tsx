@@ -12,7 +12,13 @@ export function QuizQueueButton({
   > | null;
 }) {
   return (
-    <View className="relative size-[32px] flex-row justify-center md:justify-start">
+    <View
+      className={`
+        relative size-[32px] flex-row justify-center
+
+        md:justify-start
+      `}
+    >
       <Image
         source={require(`@/assets/icons/inbox-filled.svg`)}
         className="size-[32px] shrink self-center text-foreground"
@@ -63,7 +69,10 @@ function CountLozenge({
 }
 
 const countLozengePillClass = tv({
-  base: `absolute left-[52%] top-[60%] flex h-[20px] min-w-[20px] items-center justify-center rounded-full border-2 border-solid border-background px-[4px]`,
+  base: `
+    absolute left-[52%] top-[60%] flex h-[20px] min-w-[20px] items-center justify-center
+    rounded-full border-2 border-solid border-background px-[4px]
+  `,
   variants: {
     mode: {
       overdue: `bg-red-9`,

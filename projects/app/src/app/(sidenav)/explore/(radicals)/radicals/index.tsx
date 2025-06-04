@@ -14,7 +14,13 @@ export default function RadicalsPage() {
   return (
     <ScrollView contentContainerClassName="py-safe-offset-4 px-safe-or-4 items-center">
       <View className="max-w-[600px] gap-4">
-        <View className="gap-2 px-safe-or-4 lg:px-0">
+        <View
+          className={`
+            gap-2 px-safe-or-4
+
+            lg:px-0
+          `}
+        >
           <Text className="text-center text-2xl font-bold text-foreground">
             Kangxi Radicals
           </Text>
@@ -38,7 +44,11 @@ export default function RadicalsPage() {
           radicalStrokes.map((strokes) => (
             <View
               key={strokes}
-              className="gap-2 border-t-2 border-primary-7 pt-2 px-safe-or-4 lg:px-0"
+              className={`
+                gap-2 border-t-2 border-primary-7 pt-2 px-safe-or-4
+
+                lg:px-0
+              `}
             >
               <Text className="text-sm text-primary-10">
                 Radicals with {strokes} strokes
