@@ -1,3 +1,4 @@
+import { tv } from "tailwind-variants";
 import z from "zod/v4";
 import { RectButton2 } from "./RectButton2";
 import type { PropsOf } from "./types";
@@ -45,10 +46,22 @@ export const QuizSubmitButton = ({
       variant="filled"
       ref={ref}
       disabled={state === QuizSubmitButtonState.Disabled}
-      className={`flex-1 ${state === QuizSubmitButtonState.Disabled ? `` : state === QuizSubmitButtonState.Incorrect ? `danger-theme2` : `success-theme2`}`}
+      className={buttonClass({ state })}
       onPress={state === QuizSubmitButtonState.Disabled ? undefined : onPress}
     >
       {text}
     </RectButton2>
   );
 };
+
+const buttonClass = tv({
+  base: `flex-1`,
+  variants: {
+    state: {
+      [QuizSubmitButtonState.Check]: `success-theme2`,
+      [QuizSubmitButtonState.Correct]: `success-theme2`,
+      [QuizSubmitButtonState.Disabled]: ``,
+      [QuizSubmitButtonState.Incorrect]: `danger-theme2`,
+    },
+  },
+});
