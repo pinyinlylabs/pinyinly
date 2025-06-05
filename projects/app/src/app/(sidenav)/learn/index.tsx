@@ -150,10 +150,11 @@ export default function IndexPage() {
 
                   <View className="gap-1">
                     <Text
-                      className={
-                        `font-bold text-foreground` +
-                        (streakQuery.data.isActive ? `` : `opacity-50`)
-                      }
+                      className={`
+                        font-bold text-foreground
+
+                        ${streakQuery.data.isActive ? `` : `opacity-50`}
+                      `}
                     >
                       {streakQuery.data.isActive ? `🔥` : `❄️`}
                       {` `}
