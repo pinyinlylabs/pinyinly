@@ -162,7 +162,7 @@ export function TextAnswerButton({
 
   const charCount = glyphCount(text);
   const textLength =
-    charCount <= 5
+    charCount <= 10
       ? (`tiny` as const)
       : charCount <= 20
         ? (`short` as const)
