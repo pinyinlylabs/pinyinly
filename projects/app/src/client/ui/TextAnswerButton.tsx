@@ -276,7 +276,12 @@ const bgAnimatedClass = tv({
 });
 
 const containerClass = tv({
-  base: ``,
+  base: `
+    focus-visible:rounded-lg focus-visible:outline focus-visible:outline-4
+    focus-visible:outline-offset-2 focus-visible:outline-foreground/75
+
+    web:transition-[outline-width]
+  `,
   variants: {
     flat: {
       true: ``,

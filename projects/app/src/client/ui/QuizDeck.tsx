@@ -27,6 +27,7 @@ import { Animated, Text, View } from "react-native";
 import Reanimated, { FadeIn } from "react-native-reanimated";
 import { useEventCallback } from "../hooks/useEventCallback";
 import { useQuizProgress } from "../hooks/useQuizProgress";
+import { useSoundEffect } from "../hooks/useSoundEffect";
 import { CloseButton } from "./CloseButton";
 import { QuizDeckHanziToPinyinQuestion } from "./QuizDeckHanziToPinyinQuestion";
 import { QuizDeckMultipleChoiceQuestion } from "./QuizDeckMultipleChoiceQuestion";
@@ -35,7 +36,6 @@ import { QuizProgressBar } from "./QuizProgressBar";
 import { QuizQueueButton } from "./QuizQueueButton";
 import { RectButton2 } from "./RectButton2";
 import { useReplicache, useRizzleQueryPaged } from "./ReplicacheContext";
-import { useSoundEffect } from "./useSoundEffect";
 
 const Stack = createStackNavigator<{
   loading: undefined;

@@ -174,6 +174,7 @@ export function QuizDeckHanziToPinyinQuestion({
       }
       submitButton={
         <QuizSubmitButton
+          autoFocus={grade != null}
           state={
             isMissingAnswers
               ? QuizSubmitButtonState.Disabled

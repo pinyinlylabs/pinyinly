@@ -162,6 +162,9 @@
     },
     "doctor": {
       "reactNativeDirectoryCheck": {
+        "exclude": [
+          "drizzle-orm"
+        ],
         "listUnknownPackages": false
       }
     }

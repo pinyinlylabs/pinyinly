@@ -83,7 +83,10 @@ const pressable = tv({
       true: ``,
     },
     variant: {
-      filled: ``,
+      filled: `
+        focus-visible:rounded-xl focus-visible:outline focus-visible:outline-4
+        focus-visible:outline-offset-2 focus-visible:outline-foreground/75
+      `,
       outline: ``,
       bare: ``,
       option: ``,
