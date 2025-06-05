@@ -144,7 +144,7 @@ export const QuizProgressBar = ({ progress }: { progress: number }) => {
       {metrics == null ? null : (
         <>
           <View
-            className="top-1/2 h-quiz-px w-full rounded-[8px] bg-foreground-bg25"
+            className="top-1/2 h-quiz-px w-full rounded-[8px]"
             style={{ transform: [{ translateY: -8 }] }}
           >
             {/* Ticks behind the fill bar */}
@@ -261,20 +261,13 @@ const MajorTick = ({
 };
 
 const MajorTickBg = ({ n, axis }: { axis: Axis; n: number }) => {
-  const bgAnimStyles = useTickAnimStyles({ axis, n, size: majorTickBgSize });
   const dotAnimStyles = useTickAnimStyles({ axis, n, size: 6 });
 
   return (
-    <>
-      <Reanimated.View
-        className="absolute top-1/2 rounded-full bg-foreground-bg25"
-        style={bgAnimStyles}
-      />
-      <Reanimated.View
-        className="absolute left-1/2 top-1/2 rounded-full bg-[white]/80"
-        style={dotAnimStyles}
-      />
-    </>
+    <Reanimated.View
+      className="absolute left-1/2 top-1/2 rounded-full bg-[white]/80"
+      style={dotAnimStyles}
+    />
   );
 };
 
