@@ -35,7 +35,7 @@
     "array-from-async": "^3.0.0",
     "color": "^5.0.0",
     "date-fns": "^4.0.0",
-    "drizzle-orm": "~0.43.0",
+    "drizzle-orm": "~0.44.0",
     "expo": "~53.0.9",
     "expo-apple-authentication": "~7.2.4",
     "expo-asset": "~11.1.5",
