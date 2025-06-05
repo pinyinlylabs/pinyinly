@@ -1,6 +1,6 @@
 import { useHanziWordMeaning } from "@/client/hooks/useHanziWordMeaning";
 import type { HanziWord } from "@/data/model";
-import { pinyinPronunciationDisplayText } from "@/data/questions/util";
+import { pinyinPronunciationDisplayText } from "@/data/pinyin";
 import {
   glossOrThrow,
   hanziFromHanziWord,

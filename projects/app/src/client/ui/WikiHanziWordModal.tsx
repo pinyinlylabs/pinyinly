@@ -4,6 +4,7 @@ import { useLocalQuery } from "@/client/hooks/useLocalQuery";
 import { splitHanziText } from "@/data/hanzi";
 import type { HanziWord } from "@/data/model";
 import { hanziWordSkillKinds } from "@/data/model";
+import { pinyinPronunciationDisplayText } from "@/data/pinyin";
 import type { Skill, SkillRating, SkillState } from "@/data/rizzleSchema";
 import {
   hanziWordSkill,
@@ -103,7 +104,9 @@ export const WikiHanziWordModal = ({
 
                 {hanziWordSkillData.data.pinyin == null ? null : (
                   <Text className="font-karla text-2xl text-foreground/50">
-                    {hanziWordSkillData.data.pinyin.join(`, `)}
+                    {hanziWordSkillData.data.pinyin
+                      .map((x) => pinyinPronunciationDisplayText(x))
+                      .join(`, `)}
                   </Text>
                 )}
               </View>

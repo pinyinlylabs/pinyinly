@@ -2,6 +2,7 @@ import { FlatCompat } from "@eslint/eslintrc";
 import haohaohowPlugin from "@haohaohow/eslint-rules";
 import inngestPlugin from "@inngest/eslint-plugin";
 import stylisticPlugin from "@stylistic/eslint-plugin";
+import betterTailwindcssPlugin from "eslint-plugin-better-tailwindcss";
 import drizzlePlugin from "eslint-plugin-drizzle";
 import importPlugin from "eslint-plugin-import";
 import reactPlugin from "eslint-plugin-react";
@@ -30,11 +31,19 @@ export default tseslint.config(
       [`@inngest`]: inngestPlugin,
       [`@stylistic`]: stylisticPlugin,
       [`@typescript-eslint`]: tseslint.plugin,
+      [`better-tailwindcss`]: betterTailwindcssPlugin,
       [`drizzle`]: drizzlePlugin,
       [`import`]: importPlugin,
       [`react-compiler`]: reactCompilerPlugin,
       [`react`]: reactPlugin,
       [`tailwind`]: tailwindPlugin,
+    },
+
+    settings: {
+      "better-tailwindcss": {
+        // Tailwind 3 config
+        tailwindConfig: `tailwind.config.js`,
+      },
     },
   },
 
@@ -148,6 +157,7 @@ export default tseslint.config(
       //
       // @typescript-eslint
       //
+
       // Messes up things where the difference between a type and interface is significant.
       "@typescript-eslint/consistent-type-definitions": `off`,
       "@typescript-eslint/consistent-type-imports": `error`,
@@ -240,11 +250,13 @@ export default tseslint.config(
       //
       // @stylistic
       //
+
       "@stylistic/quotes": [`error`, `backtick`],
 
       //
       // drizzle
       //
+
       "drizzle/enforce-delete-with-where": [
         `error`,
         { drizzleObjectName: [`db`, `tx`] },
@@ -253,6 +265,7 @@ export default tseslint.config(
       //
       // unicorn
       //
+
       "unicorn/no-null": `off`, // null used extensively
       "unicorn/number-literal-case": `off`, // overwritten by prettier
       "unicorn/numeric-separators-style": [
@@ -270,6 +283,7 @@ export default tseslint.config(
       //
       // @haohaohow/eslint-rules
       //
+
       "@haohaohow/reanimated-default-name": `error`,
       "@haohaohow/no-restricted-css-classes": [
         `error`,
@@ -284,6 +298,7 @@ export default tseslint.config(
       //
       // tailwindcss
       //
+
       "tailwind/classnames-order": `error`,
       "tailwind/enforces-negative-arbitrary-values": `error`,
       "tailwind/enforces-shorthand": `error`,
@@ -291,6 +306,19 @@ export default tseslint.config(
       "tailwind/no-contradicting-classname": `error`,
       "tailwind/no-custom-classname": `error`,
       "tailwind/no-unnecessary-arbitrary-value": `error`,
+
+      //
+      // better-tailwindcss
+      //
+
+      "better-tailwindcss/multiline": [
+        `error`,
+        {
+          printWidth: 100,
+          group: `emptyLine`,
+        },
+      ],
+      "better-tailwindcss/no-unnecessary-whitespace": `error`,
     },
   },
 

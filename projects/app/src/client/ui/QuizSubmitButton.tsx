@@ -1,3 +1,7 @@
+import { focusVisible, mergeRefs } from "@/client/react";
+import { useLayoutEffect, useRef } from "react";
+import type { View } from "react-native";
+import { tv } from "tailwind-variants";
 import z from "zod/v4";
 import { RectButton2 } from "./RectButton2";
 import type { PropsOf } from "./types";
@@ -14,10 +18,12 @@ export type QuizSubmitButtonState = z.infer<typeof quizSubmitButtonStateSchema>;
 
 interface QuizSubmitButtonProps
   extends Pick<PropsOf<typeof RectButton2>, `onPress` | `ref`> {
+  autoFocus?: boolean;
   state: QuizSubmitButtonState;
 }
 
 export const QuizSubmitButton = ({
+  autoFocus = false,
   state,
   onPress,
   ref,
@@ -40,15 +46,35 @@ export const QuizSubmitButton = ({
     }
   }
 
+  const buttonRef = useRef<View>(null);
+
+  useLayoutEffect(() => {
+    if (autoFocus && buttonRef.current != null) {
+      focusVisible(buttonRef.current);
+    }
+  }, [autoFocus, buttonRef, state]);
+
   return (
     <RectButton2
       variant="filled"
-      ref={ref}
+      ref={mergeRefs(buttonRef, ref)}
       disabled={state === QuizSubmitButtonState.Disabled}
-      className={`flex-1 ${state === QuizSubmitButtonState.Disabled ? `` : state === QuizSubmitButtonState.Incorrect ? `danger-theme2` : `success-theme2`}`}
+      className={buttonClass({ state })}
       onPress={state === QuizSubmitButtonState.Disabled ? undefined : onPress}
     >
       {text}
     </RectButton2>
   );
 };
+
+const buttonClass = tv({
+  base: `flex-1`,
+  variants: {
+    state: {
+      [QuizSubmitButtonState.Check]: `success-theme2`,
+      [QuizSubmitButtonState.Correct]: `success-theme2`,
+      [QuizSubmitButtonState.Disabled]: ``,
+      [QuizSubmitButtonState.Incorrect]: `danger-theme2`,
+    },
+  },
+});

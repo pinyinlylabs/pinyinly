@@ -17,7 +17,7 @@ import type {
   HanziWord,
   PinyinPronunciationSpaceSeparated,
 } from "#data/model.ts";
-import { pinyinPronunciationDisplayText } from "#data/questions/util.ts";
+import { pinyinPronunciationDisplayText } from "#data/pinyin.ts";
 import type {
   Dictionary,
   HanziWordMeaning,

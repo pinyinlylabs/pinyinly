@@ -107,7 +107,14 @@ export function QuizDeckOneCorrectPairQuestion({
       toast={
         isCorrect == null ? null : (
           <View
-            className={`flex-1 ${isCorrect ? `success-theme2` : `danger-theme2`} gap-[12px] overflow-hidden bg-foreground-bg10 px-quiz-px pt-3 pb-safe-offset-[84px] lg:mb-2 lg:rounded-xl`}
+            className={`
+              ${isCorrect ? `success-theme2` : `danger-theme2`}
+
+              flex-1 gap-[12px] overflow-hidden bg-foreground-bg10 px-quiz-px pt-3
+              pb-safe-offset-[84px]
+
+              lg:mb-2 lg:rounded-xl
+            `}
           >
             {isCorrect ? (
               <View className="flex-row items-center gap-[8px]">

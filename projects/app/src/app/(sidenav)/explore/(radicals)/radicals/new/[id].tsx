@@ -90,7 +90,9 @@ export default function RadicalPage() {
 
   return (
     <View className="flex-1 items-center bg-background">
-      <View className="w-full max-w-[600px] flex-row items-center gap-3 pt-safe-offset-4 px-safe-or-4">
+      <View
+        className={`w-full max-w-[600px] flex-row items-center gap-3 pt-safe-offset-4 px-safe-or-4`}
+      >
         <CloseButton />
       </View>
       <ScrollView contentContainerClassName="px-safe-or-4 flex-1 pb-2">

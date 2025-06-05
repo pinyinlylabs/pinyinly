@@ -83,7 +83,10 @@ const pressable = tv({
       true: ``,
     },
     variant: {
-      filled: ``,
+      filled: `
+        focus-visible:rounded-xl focus-visible:outline focus-visible:outline-4
+        focus-visible:outline-offset-2 focus-visible:outline-foreground/75
+      `,
       outline: ``,
       bare: ``,
       option: ``,
@@ -112,7 +115,11 @@ const pressable = tv({
 });
 
 const roundedRect = tv({
-  base: `box-border select-none items-center justify-center web:transition-all`,
+  base: `
+    box-border select-none items-center justify-center
+
+    web:transition-all
+  `,
   variants: {
     variant: {
       filled: `rounded-xl border-background/20 bg-foreground/95 px-4 py-2`,

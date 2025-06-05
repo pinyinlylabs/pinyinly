@@ -88,7 +88,13 @@ export default function MnemonicsPage() {
       contentContainerClassName="py-safe-offset-4 items-center"
     >
       <View className="max-w-[800px] gap-4 px-safe-or-4">
-        <View className="gap-2 lg:px-0">
+        <View
+          className={`
+            gap-2
+
+            lg:px-0
+          `}
+        >
           <Text className="text-3xl font-bold text-foreground">Mnemonics</Text>
         </View>
 
@@ -105,11 +111,23 @@ export default function MnemonicsPage() {
             <View>
               <Text className="text-lg font-bold text-foreground">Tones</Text>
             </View>
-            <View className="flex-row flex-wrap gap-3.5 lg:gap-4">
+            <View
+              className={`
+                flex-row flex-wrap gap-3.5
+
+                lg:gap-4
+              `}
+            >
               {tones.map(({ tone, desc }, i) => (
                 <View
                   key={tone}
-                  className="size-24 justify-center gap-2 rounded-xl bg-primary-3 px-2 hover:bg-primary-5 lg:size-24"
+                  className={`
+                    size-24 justify-center gap-2 rounded-xl bg-primary-3 px-2
+
+                    hover:bg-primary-5
+
+                    lg:size-24
+                  `}
                 >
                   <Text className="text-center text-2xl text-foreground">
                     {tone}
@@ -122,7 +140,13 @@ export default function MnemonicsPage() {
                   </Text>
                   <View className="h-2 rounded bg-primary-5">
                     <View
-                      className={`h-2 ${widths[3 + (i % widths.length)] ?? ``} rounded bg-[yellow]`}
+                      className={`
+                        h-2
+
+                        ${widths[3 + (i % widths.length)] ?? ``}
+
+                        rounded bg-[yellow]
+                      `}
                     ></View>
                   </View>
                 </View>
@@ -137,7 +161,13 @@ export default function MnemonicsPage() {
               </Text>
             </View>
 
-            <View className="gap-3.5 lg:gap-4">
+            <View
+              className={`
+                gap-3.5
+
+                lg:gap-4
+              `}
+            >
               {Object.entries(query.data.initials).map(
                 ([, { initials, desc, id }], i) => (
                   <Fragment key={desc}>
@@ -172,7 +202,13 @@ export default function MnemonicsPage() {
                             </Text>
                             <View className="h-2 rounded bg-primary-5">
                               <View
-                                className={`h-2 ${widths[1 + (i % widths.length)] ?? ``} rounded bg-[yellow]`}
+                                className={`
+                                  h-2
+
+                                  ${widths[1 + (i % widths.length)] ?? ``}
+
+                                  rounded bg-[yellow]
+                                `}
                               ></View>
                             </View>
                           </View>
@@ -189,7 +225,13 @@ export default function MnemonicsPage() {
             <View>
               <Text className="text-lg font-bold text-foreground">Finals</Text>
             </View>
-            <View className="flex-row flex-wrap gap-3.5 lg:gap-4">
+            <View
+              className={`
+                flex-row flex-wrap gap-3.5
+
+                lg:gap-4
+              `}
+            >
               {query.data.finals.map(([final, ...alts], i) => (
                 <View
                   key={i}
@@ -209,7 +251,13 @@ export default function MnemonicsPage() {
                   </Text>
                   <View className="mt-2 h-2 rounded bg-primary-5">
                     <View
-                      className={`h-2 ${widths[5 + (i % widths.length)] ?? ``} rounded bg-[yellow]`}
+                      className={`
+                        h-2
+
+                        ${widths[5 + (i % widths.length)] ?? ``}
+
+                        rounded bg-[yellow]
+                      `}
                     ></View>
                   </View>
                 </View>
@@ -227,7 +275,13 @@ const altText = tv({
 });
 
 const pinyinPartBox = tv({
-  base: `size-24 justify-center gap-2 rounded-xl bg-primary-3 px-2 hover:bg-primary-5 lg:size-24`,
+  base: `
+    size-24 justify-center gap-2 rounded-xl bg-primary-3 px-2
+
+    hover:bg-primary-5
+
+    lg:size-24
+  `,
   variants: {
     hasAssociation: {
       true: `border-2 border-accent-10`,

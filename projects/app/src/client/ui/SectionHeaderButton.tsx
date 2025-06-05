@@ -21,7 +21,11 @@ export function SectionHeaderButton({
       borderRadius={rectButtonProps.borderRadius ?? 10}
       color={rectButtonProps.color ?? `#333`}
     >
-      <Text className="mb-[5px] select-none self-start text-xs font-bold uppercase text-[white] opacity-80">
+      <Text
+        className={`
+          mb-[5px] select-none self-start text-xs font-bold uppercase text-[white] opacity-80
+        `}
+      >
         {title}
       </Text>
       <Text className="select-none self-start font-bold text-[white]">

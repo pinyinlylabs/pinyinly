@@ -1,4 +1,8 @@
-import type { PinyinInitialGroupId, PinyinSyllable } from "@/data/model";
+import type {
+  PinyinInitialGroupId,
+  PinyinPronunciation,
+  PinyinSyllable,
+} from "@/data/model";
 import {
   deepReadonly,
   emptyArray,
@@ -453,3 +457,12 @@ export const loadHmmPinyinChart = memoize0(async () =>
     // eslint-disable-next-line unicorn/no-await-expression-member
     .parse((await import(`./hmmPinyinChart.asset.json`)).default),
 );
+
+export function pinyinPronunciationDisplayText(
+  value: Readonly<PinyinPronunciation>,
+): string {
+  // When learning pinyin (i.e. single words) the syllables are space separated.
+  // But when learning a sentence then the words become space separated and the
+  // syllables are joined without spaces.
+  return value.join(` `);
+}

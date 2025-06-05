@@ -2,9 +2,9 @@ import { hanziCharCount } from "@/data/hanzi";
 import type {
   HanziWord,
   OneCorrectPairQuestionChoice,
-  PinyinPronunciation,
   PinyinSyllable,
 } from "@/data/model";
+import { pinyinPronunciationDisplayText } from "@/data/pinyin";
 import type { HanziWordMeaning } from "@/dictionary/dictionary";
 import { pinyinOrThrow } from "@/dictionary/dictionary";
 import { invariant } from "@haohaohow/lib/invariant";
@@ -40,12 +40,6 @@ export function oneCorrectPairChoiceText(
       return pinyinPronunciationDisplayText(choice.value);
     }
   }
-}
-
-export function pinyinPronunciationDisplayText(
-  value: Readonly<PinyinPronunciation>,
-): string {
-  return value.join(``);
 }
 
 export function oneSyllablePinyinOrThrow(

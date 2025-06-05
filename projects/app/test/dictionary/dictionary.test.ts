@@ -7,9 +7,9 @@ import {
   loadHmmPinyinChart,
   loadMmPinyinChart,
   loadStandardPinyinChart,
+  pinyinPronunciationDisplayText,
   splitTonelessPinyinSyllable,
 } from "#data/pinyin.ts";
-import { pinyinPronunciationDisplayText } from "#data/questions/util.ts";
 import type { HanziWordMeaning } from "#dictionary/dictionary.ts";
 import {
   allHanziCharacters,

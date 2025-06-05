@@ -172,7 +172,13 @@ const WebImpl = ({
         onPress={onBackgroundPress}
       >
         <Reanimated.View
-          className={`max-h-full w-full max-w-[500px] rounded-xl lg:max-h-[80vh] lg:w-[500px] ${backdropColorClass}`}
+          className={`
+            max-h-full w-full max-w-[500px] rounded-xl
+
+            lg:max-h-[80vh] lg:w-[500px]
+
+            ${backdropColorClass}
+          `}
           style={[animatedContentStyle]}
         >
           {children(api)}
@@ -207,10 +213,22 @@ const IosImpl = ({ onDismiss, backdropColor, children }: ImplProps) => {
           // For debugging the background is set to purple, but this should
           // never be seen. If you see a purple line on iOS then this is the
           // cause and needs to be set more carefully.
-          `flex-1 pb-[72px] ${__DEV__ ? `bg-[purple]` : ``}`
+          `
+            flex-1 pb-[72px]
+
+            ${__DEV__ ? `bg-[purple]` : ``}
+          `
         }
       >
-        <View className={`flex-1 ${backdropColorClass}`}>{children(api)}</View>
+        <View
+          className={`
+            flex-1
+
+            ${backdropColorClass}
+          `}
+        >
+          {children(api)}
+        </View>
       </View>
     </Modal>
   );
@@ -232,7 +250,15 @@ const DefaultImpl = ({ backdropColor, children, onDismiss }: ImplProps) => {
       presentationStyle="pageSheet"
       onRequestClose={api.dismiss}
     >
-      <View className={`flex-1 ${backdropColorClass}`}>{children(api)}</View>
+      <View
+        className={`
+          flex-1
+
+          ${backdropColorClass}
+        `}
+      >
+        {children(api)}
+      </View>
     </Modal>
   );
 };
