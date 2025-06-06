@@ -53,7 +53,14 @@ type AuthApi = {
   // `null` while loading
   data: UseAuth2Data | null;
   signInWithApple: (identityToken: string) => Promise<void>;
-  signInExisting: (predicate: (session: ClientSession) => boolean) => void;
+  /**
+   * This is useful for local development on a phone when you can't use OAuth2
+   * sign-in providers because the URL doesn't match.
+   */
+  signInWithServerSessionId: (serverSessionId: string) => void;
+  signInWithExistingClientSession: (
+    predicate: (clientSession: ClientSession) => boolean,
+  ) => void;
   signOut: () => void;
 };
 
@@ -143,12 +150,13 @@ export function useAuth(): AuthApi {
       const existingSession = data.allClientSessions.find(
         (s) => s.serverSessionId === session.id,
       );
-      const newSession: ClientSession = existingSession ?? {
-        replicacheDbName: `hao-${new Date().toISOString()}`,
-        serverSessionId: session.id,
-        // userId: session.userId, // TODO: implement
-        // userName: session.userName, // TODO: implement
-      };
+      const newSession: ClientSession =
+        existingSession ??
+        makeClientSession({
+          serverSessionId: session.id,
+          // userId: session.userId, // TODO: implement
+          // userName: session.userName, // TODO: implement
+        });
       const newState: AuthState2 = {
         clientSessions: [
           newSession,
@@ -162,7 +170,9 @@ export function useAuth(): AuthApi {
     [authStateMutation, data, signInWithAppleMutate],
   );
 
-  const signInExisting = useCallback<AuthApi[`signInExisting`]>(
+  const signInWithExistingClientSession = useCallback<
+    AuthApi[`signInWithExistingClientSession`]
+  >(
     (predicate) => {
       invariant(data != null, `expected auth state to be initialized`);
 
@@ -183,6 +193,21 @@ export function useAuth(): AuthApi {
     [authStateMutation, data],
   );
 
+  const signInWithServerSessionId = useCallback<
+    AuthApi[`signInWithServerSessionId`]
+  >(
+    (serverSessionId: string) => {
+      invariant(data != null, `expected auth state to be initialized`);
+
+      const newSession = makeClientSession({ serverSessionId });
+      const newState: AuthState2 = {
+        clientSessions: [newSession, ...data.allClientSessions],
+      };
+      authStateMutation.mutate(JSON.stringify(newState));
+    },
+    [authStateMutation, data],
+  );
+
   const signOut = useCallback(() => {
     invariant(data != null, `expected auth state to be initialized`);
 
@@ -190,9 +215,7 @@ export function useAuth(): AuthApi {
     const existingSession = data.allClientSessions.find(
       (s) => s.serverSessionId == null,
     );
-    const newSession: ClientSession = existingSession ?? {
-      replicacheDbName: `hhh-${new Date().toISOString()}`,
-    };
+    const newSession: ClientSession = existingSession ?? makeClientSession();
     const newState: AuthState2 = {
       clientSessions: [
         newSession,
@@ -222,8 +245,18 @@ export function useAuth(): AuthApi {
   return {
     data,
     signInWithApple,
-    signInExisting,
+    signInWithExistingClientSession,
+    signInWithServerSessionId,
     signOut,
+  };
+}
+
+function makeClientSession(
+  opts?: Pick<ClientSession, `serverSessionId`>,
+): ClientSession {
+  return {
+    ...opts,
+    replicacheDbName: `hao-${new Date().toISOString()}`,
   };
 }
 
