@@ -14,19 +14,16 @@ import { routingIntegration } from "@/client/sentry";
 
 import { getSessionId } from "@/client/auth";
 import { TrpcProvider } from "@/client/trpc";
+import { HhhThemeProvider } from "@/client/ui/HhhThemeProvider";
 import { ReplicacheProvider } from "@/client/ui/ReplicacheContext";
 import { SplashScreen } from "@/client/ui/SplashScreen";
-import type { Theme as ReactNavigationTheme } from "@react-navigation/native";
-import { DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import * as Sentry from "@sentry/react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { Stack, useNavigationContainerRef } from "expo-router";
 import { cssInterop } from "nativewind";
 import { useEffect, useState } from "react";
-import { Platform, useColorScheme, View } from "react-native";
 import Reanimated from "react-native-reanimated";
-import { tv } from "tailwind-variants";
 import "../global.css";
 
 // NativeWind adapters for third party components
@@ -47,7 +44,6 @@ cssInterop(AppleAuthentication.AppleAuthenticationButton, {
 function RootLayout() {
   // Capture the NavigationContainer ref and register it with the instrumentation.
   const ref = useNavigationContainerRef();
-  const isDarkMode = useColorScheme() === `dark`;
 
   useEffect(() => {
     routingIntegration.registerNavigationContainer(ref);
@@ -68,81 +64,27 @@ function RootLayout() {
     <TrpcProvider queryClient={queryClient} getSessionId={getSessionId}>
       <QueryClientProvider client={queryClient}>
         <ReplicacheProvider>
-          <ThemeProvider
-            // Even though this looks like an no-op layout—it's not, and it ensures the
-            // top and bottom of the app have the correct color.
-            value={
-              {
-                dark: false,
-                colors: {
-                  background: `transparent`,
-                  // We should never see these colors, instead tamagui should
-                  // have priority.
-                  border: BUG_DETECTOR_COLOR,
-                  card: BUG_DETECTOR_COLOR,
-                  notification: BUG_DETECTOR_COLOR,
-                  primary: BUG_DETECTOR_COLOR,
-                  text: BUG_DETECTOR_COLOR,
-                },
-                fonts: DefaultTheme.fonts,
-              } satisfies ReactNavigationTheme
-            }
-          >
+          <HhhThemeProvider>
             <Head>
               <title>haohaohow - Teach yourself Chinese</title>
             </Head>
 
-            <View
-              className={containerClass({
-                isWeb: Platform.OS === `web`,
-                isDarkMode,
-              })}
-            >
-              <Stack screenOptions={{ headerShown: false, animation: `fade` }}>
-                <Stack.Screen
-                  name="login"
-                  options={{
-                    presentation: `modal`,
-                    animation: `slide_from_bottom`,
-                  }}
-                />
-              </Stack>
-              <SplashScreen />
-            </View>
-          </ThemeProvider>
+            <Stack screenOptions={{ headerShown: false, animation: `fade` }}>
+              <Stack.Screen
+                name="login"
+                options={{
+                  presentation: `modal`,
+                  animation: `slide_from_bottom`,
+                }}
+              />
+            </Stack>
+            <SplashScreen />
+          </HhhThemeProvider>
         </ReplicacheProvider>
       </QueryClientProvider>
     </TrpcProvider>
   );
 }
-
-const containerClass = tv({
-  base: `flex-1 bg-background`,
-  variants: {
-    isWeb: {
-      false: `default-theme`,
-    },
-    isDarkMode: {
-      true: ``,
-    },
-  },
-  compoundVariants: [
-    // These are the native equivalent of adding a class to the body
-    // element, without this the root color scheme is not set.
-    {
-      isWeb: false,
-      isDarkMode: true,
-      class: `dark-theme`,
-    },
-    {
-      isWeb: false,
-      isDarkMode: false,
-      class: `light-theme`,
-    },
-  ],
-});
-
-const BUG_DETECTOR_COLOR = `#ff0000`;
 
 // Wrap the Root Layout route component with `Sentry.wrap` to capture gesture info and profiling data.
 export default Sentry.wrap(RootLayout);
