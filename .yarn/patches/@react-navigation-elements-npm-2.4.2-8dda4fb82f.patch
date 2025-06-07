@@ -1,0 +1,20 @@
+diff --git a/lib/module/Screen.js b/lib/module/Screen.js
+index f04c88645f4d0fca5f9bec201f4a1fb54415c788..8a30beaed0a077194a850f2d60f37ab6246a3113 100644
+--- a/lib/module/Screen.js
++++ b/lib/module/Screen.js
+@@ -15,6 +15,7 @@ export function Screen(props) {
+   const isParentHeaderShown = React.useContext(HeaderShownContext);
+   const parentHeaderHeight = React.useContext(HeaderHeightContext);
+   const {
++    dataSet,
+     focused,
+     modal = false,
+     header,
+@@ -29,6 +30,7 @@ export function Screen(props) {
+   const [headerHeight, setHeaderHeight] = React.useState(() => getDefaultHeaderHeight(dimensions, modal, headerStatusBarHeight));
+   return /*#__PURE__*/_jsxs(Background, {
+     "aria-hidden": !focused,
++    dataSet,
+     style: [styles.container, style]
+     // On Fabric we need to disable collapsing for the background to ensure
+     // that we won't render unnecessary views due to the view flattening.

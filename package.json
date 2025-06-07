@@ -66,6 +66,7 @@
     "react-reconciler@npm:^0.29.0": "^0.32.0",
     "babel-preset-expo@npm:~13.1.11": "patch:babel-preset-expo@npm%3A13.1.11#~/.yarn/patches/babel-preset-expo-npm-13.1.11-662de9d30d.patch",
     "@expo/cli@npm:0.24.13": "patch:@expo/cli@npm%3A0.24.13#~/.yarn/patches/@expo-cli-npm-0.24.13-fb70ee0167.patch",
-    "@react-navigation/native-stack@npm:^7.3.10": "patch:@react-navigation/native-stack@npm%3A7.3.13#~/.yarn/patches/@react-navigation-native-stack-npm-7.3.13-ef06339c8f.patch"
+    "@react-navigation/native-stack@npm:^7.3.10": "patch:@react-navigation/native-stack@npm%3A7.3.13#~/.yarn/patches/@react-navigation-native-stack-npm-7.3.13-ef06339c8f.patch",
+    "@react-navigation/elements@npm:^2.4.2": "patch:@react-navigation/elements@npm%3A2.4.2#~/.yarn/patches/@react-navigation-elements-npm-2.4.2-8dda4fb82f.patch"
   }
 }
