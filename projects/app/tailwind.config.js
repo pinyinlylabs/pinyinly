@@ -208,6 +208,6 @@ module.exports = {
     strokeWidth: false,
     textOpacity: false,
     translate: false,
-    visibility: false,
+    visibility: true,
   },
 };
