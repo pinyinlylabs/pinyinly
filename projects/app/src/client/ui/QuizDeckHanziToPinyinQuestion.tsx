@@ -8,7 +8,11 @@ import type {
   PinyinPronunciation,
 } from "@/data/model";
 import { SkillKind } from "@/data/model";
-import { pinyinSyllableSearch } from "@/data/pinyin";
+import type {
+  PinyinSyllableSuggestion,
+  PinyinSyllableSuggestions,
+} from "@/data/pinyin";
+import { pinyinSyllableSuggestions } from "@/data/pinyin";
 import type { HanziWordSkill, Skill } from "@/data/rizzleSchema";
 import {
   computeSkillRating,
@@ -31,6 +35,7 @@ import {
 } from "react-native";
 import Reanimated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import type { DeepReadonly } from "ts-essentials";
 import { HanziWordRefText } from "./HanziWordRefText";
 import { Hhhmark } from "./Hhhmark";
 import { PinyinOptionButton } from "./PinyinOptionButton";
@@ -232,10 +237,7 @@ const PinyinTextInputSingle = ({
 }) => {
   const [text, setText] = useState(``);
 
-  const words = text.replaceAll(/\s+/g, ` `).split(/\s+/);
-  const options = disabled
-    ? []
-    : pinyinSyllableSearch(nonNullable(words.at(-1)).replaceAll(/\d/g, ``));
+  const suggestions = disabled ? null : pinyinSyllableSuggestions(text);
 
   const updateText = (text: string) => {
     setText(text);
@@ -243,21 +245,28 @@ const PinyinTextInputSingle = ({
   };
 
   const handleChangeText = (text: string) => {
-    // TODO: parse the pinyin properly and transform it here.
-    for (const option of options) {
-      if (text.endsWith(option.tone.toString())) {
-        acceptSuggestion(option.pinyinSyllable);
-        return;
+    if (suggestions !== null) {
+      for (const option of suggestions.syllables) {
+        if (text.endsWith(option.tone.toString())) {
+          acceptSuggestion(suggestions, option);
+          return;
+        }
       }
     }
 
     updateText(text);
   };
 
-  const acceptSuggestion = (suggestion: string) => {
-    const newWords = words.slice(0, -1);
-    newWords.push(suggestion);
-    updateText(newWords.join(` `));
+  const acceptSuggestion = (
+    suggestions: DeepReadonly<PinyinSyllableSuggestions>,
+    syllable: PinyinSyllableSuggestion,
+  ) => {
+    const newText =
+      text.slice(0, suggestions.from) +
+      syllable.pinyinSyllable +
+      text.slice(suggestions.to) +
+      text.slice(suggestions.to);
+    updateText(newText);
   };
 
   return (
@@ -282,17 +291,17 @@ const PinyinTextInputSingle = ({
       <View className="flex-row flex-wrap justify-center gap-2">
         {hiddenPlaceholderOptions}
         <View className="absolute inset-0 flex-row flex-wrap content-start justify-center gap-2">
-          {options.map((option) => (
+          {suggestions?.syllables.map((syllable) => (
             <Reanimated.View
-              key={`${option.pinyinSyllable}-${option.tone}`}
+              key={`${syllable.pinyinSyllable}-${syllable.tone}`}
               entering={FadeIn.duration(200)}
               exiting={FadeOut.duration(100)}
             >
               <PinyinOptionButton
-                pinyin={option.pinyinSyllable}
-                shortcutKey={option.tone.toString()}
+                pinyin={syllable.pinyinSyllable}
+                shortcutKey={syllable.tone.toString()}
                 onPress={() => {
-                  acceptSuggestion(option.pinyinSyllable);
+                  acceptSuggestion(suggestions, syllable);
                 }}
               />
             </Reanimated.View>
