@@ -27,6 +27,16 @@ export function PinyinOptionButton({
       onPress={() => {
         onPress?.(pinyin);
       }}
+      onTouchEnd={(e) => {
+        // Using `onTouchEnd` instead of `onPress` to avoid the keyboard closing
+        // when the button is pressed. This is a workaround for the issue where
+        // the keyboard closes when pressing a button after typing in a
+        // TextInput.
+        //
+        // `onPress` is still needed for non-touch devices (like desktop).
+        e.preventDefault();
+        onPress?.(pinyin);
+      }}
       {...props}
     >
       <Text className="hhh-text-button-option">{pinyin}</Text>

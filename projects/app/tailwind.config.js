@@ -181,8 +181,10 @@ module.exports = {
       },
 
       spacing: {
-        "quiz-px": `16px`,
-        "www-col": `988px`,
+        [`quiz-px`]: `16px`,
+        [`vvh`]: `var(--vvh)`, // VisualViewport height
+        [`vvw`]: `var(--vvw)`, // VisualViewport width
+        [`www-col`]: `988px`,
       },
     },
   },
@@ -206,6 +208,6 @@ module.exports = {
     strokeWidth: false,
     textOpacity: false,
     translate: false,
-    visibility: false,
+    visibility: true,
   },
 };

@@ -377,6 +377,8 @@ export default tseslint.config(
       // Conflicts when augmenting an interface by adding ` extends …` but
       // leaving the body empty.
       "@typescript-eslint/no-empty-object-type": `off`,
+      // Interface merging works with interface declarations, not `Record<…>`.
+      "@typescript-eslint/consistent-indexed-object-style": `off`,
     },
   },
 

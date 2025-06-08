@@ -3,10 +3,6 @@
 @tailwind utilities;
 
 @layer components {
-  /* WARNING: this doesn't disable keyboard focus on inputs, so you can still tab to them */
-  .hhh-hidden {
-    @apply opacity-0 pointer-events-none;
-  }
   /*
   
   TEXT STYLES
@@ -554,4 +550,11 @@ body {
   :root {
     @apply dark-theme;
   }
+}
+
+[data-hhh-react-navigation-screen] {
+  @apply absolute inset-0;
+}
+[data-hhh-react-navigation-screen][data-hhh-react-navigation-modal] {
+  @apply fixed;
 }

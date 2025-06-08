@@ -1,5 +1,5 @@
 diff --git a/lib/module/views/NativeStackView.js b/lib/module/views/NativeStackView.js
-index 9171235745e27a5b630601ffc1fc8bf09fe75ffe..6e95702c0cf094a5bfa0737ce20939d2437cbf48 100644
+index 9171235745e27a5b630601ffc1fc8bf09fe75ffe..2197b5ec5e0ff2a21b23a4585832ac2cd0f0dcb7 100644
 --- a/lib/module/views/NativeStackView.js
 +++ b/lib/module/views/NativeStackView.js
 @@ -3,10 +3,11 @@
@@ -15,16 +15,18 @@ index 9171235745e27a5b630601ffc1fc8bf09fe75ffe..6e95702c0cf094a5bfa0737ce20939d2
  export function NativeStackView({
    state,
    descriptors,
-@@ -89,7 +90,11 @@ export function NativeStackView({
+@@ -89,7 +90,13 @@ export function NativeStackView({
            }) : headerLeft,
            headerTransparent: headerTransparent
          }),
 -        style: [StyleSheet.absoluteFill, {
-+        style: [StyleSheet.absoluteFill,
-+        // Always fill the whole screen, even in the case of nested navigators.
-+        Platform.OS === 'web' && presentation != null && MODAL_PRESENTATIONS.includes(presentation) ? {
-+          position: 'fixed'
-+        } : null, {
++        dataSet: {
++          "hhh-react-navigation-screen": "",
++          "hhh-react-navigation-modal": presentation != null && MODAL_PRESENTATIONS.includes(presentation) ? "" : null
++        },
++        style: [
++          Platform.OS === 'web' ? {} : StyleSheet.absoluteFill,
++        {
            display: (isFocused || nextPresentation != null && TRANSPARENT_PRESENTATIONS.includes(nextPresentation)) && !isPreloaded ? 'flex' : 'none'
          }, presentation != null && TRANSPARENT_PRESENTATIONS.includes(presentation) ? {
            backgroundColor: 'transparent'

@@ -1,5 +1,6 @@
 import type { Ref } from "react";
 import { TextInput } from "react-native";
+import { tv } from "tailwind-variants";
 import type { PropsOf } from "./types";
 
 interface TextInputSingleProps
@@ -23,11 +24,24 @@ export function TextInputSingle(props: TextInputSingleProps) {
         // Disable the 1Password button in inputs.
         "1p-ignore": `true`,
       }}
-      className={`
-        hhh-text-body-input rounded-xl bg-background-1 px-4 py-3 outline-none
-
-        placeholder:text-foreground/30
-      `}
+      className={inputClass({
+        textAlign: props.textAlign,
+      })}
     />
   );
 }
+
+const inputClass = tv({
+  base: `
+    hhh-text-body-input rounded-xl bg-background-1 px-4 py-3 outline-none
+
+    placeholder:text-foreground/30
+  `,
+  variants: {
+    textAlign: {
+      left: `text-left`,
+      center: `text-center`,
+      right: `text-right`,
+    },
+  },
+});

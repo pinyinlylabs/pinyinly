@@ -1,4 +1,4 @@
-import { focusVisible, mergeRefs } from "@/client/react";
+import { mergeRefs } from "@/client/react";
 import { useLayoutEffect, useRef } from "react";
 import type { View } from "react-native";
 import { tv } from "tailwind-variants";
@@ -50,7 +50,7 @@ export const QuizSubmitButton = ({
 
   useLayoutEffect(() => {
     if (autoFocus && buttonRef.current != null) {
-      focusVisible(buttonRef.current);
+      buttonRef.current.focus();
     }
   }, [autoFocus, buttonRef, state]);
 

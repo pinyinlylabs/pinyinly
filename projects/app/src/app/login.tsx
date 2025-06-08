@@ -1,9 +1,11 @@
 import { useAuth } from "@/client/auth";
 import { RectButton2 } from "@/client/ui/RectButton2";
 import { SignInWithAppleButton } from "@/client/ui/SignInWithAppleButton";
+import { TextInputSingle } from "@/client/ui/TextInputSingle";
 import { invariant } from "@haohaohow/lib/invariant";
 import * as AppleAuthentication from "expo-apple-authentication";
 import { Link } from "expo-router";
+import { useState } from "react";
 import { Platform, Text, View } from "react-native";
 import z from "zod/v4";
 
@@ -26,7 +28,7 @@ export default function LoginPage() {
             </View>
             <RectButton2
               onPressIn={() => {
-                auth.signInExisting(
+                auth.signInWithExistingClientSession(
                   (s) => s.replicacheDbName === x.replicacheDbName,
                 );
               }}
@@ -50,6 +52,7 @@ export default function LoginPage() {
       >
         Logout
       </RectButton2>
+      {__DEV__ ? <ServerSessionIdLoginForm /> : null}
 
       {Platform.OS === `web` ? (
         <SignInWithAppleButton
@@ -112,6 +115,27 @@ export default function LoginPage() {
 
       <GoHomeButton />
     </View>
+  );
+}
+
+function ServerSessionIdLoginForm() {
+  const auth = useAuth();
+  const [input, setInput] = useState(``);
+
+  return (
+    <TextInputSingle
+      placeholder={`session ID`}
+      onKeyPress={(e) => {
+        if (e.nativeEvent.key === `Enter`) {
+          auth.signInWithServerSessionId(input);
+          e.preventDefault();
+        }
+      }}
+      value={input}
+      onChangeText={(text) => {
+        setInput(text);
+      }}
+    />
   );
 }
 
