@@ -32,127 +32,157 @@ export const pinyinPronunciationSchema = rPinyinPronunciation()
   .getUnmarshal()
   .describe(`space separated pinyin for each word`);
 
-export const loadPinyinWords = memoize0(async () =>
-  z
-    .array(z.string())
-    .transform(deepReadonly)
-    // eslint-disable-next-line unicorn/no-await-expression-member
-    .parse((await import(`./pinyinWords.asset.json`)).default),
+export const loadPinyinWords = memoize0(async function loadPinyinWords() {
+  return (
+    z
+      .array(z.string())
+      .transform(deepReadonly)
+      // eslint-disable-next-line unicorn/no-await-expression-member
+      .parse((await import(`./pinyinWords.asset.json`)).default)
+  );
+});
+
+export const loadMissingFontGlyphs = memoize0(
+  async function loadMissingFontGlyphs() {
+    return (
+      z
+        .record(z.string(), z.array(z.string()))
+        .transform(
+          (x) => new Map(Object.entries(x).map(([k, v]) => [k, new Set(v)])),
+        )
+        .transform(deepReadonly)
+        // eslint-disable-next-line unicorn/no-await-expression-member
+        .parse((await import(`./missingFontGlyphs.asset.json`)).default)
+    );
+  },
 );
 
-export const loadMissingFontGlyphs = memoize0(async () =>
-  z
-    .record(z.string(), z.array(z.string()))
-    .transform(
-      (x) => new Map(Object.entries(x).map(([k, v]) => [k, new Set(v)])),
-    )
-    .transform(deepReadonly)
-    // eslint-disable-next-line unicorn/no-await-expression-member
-    .parse((await import(`./missingFontGlyphs.asset.json`)).default),
-);
-
-export const loadMnemonicThemes = memoize0(async () =>
-  z
-    .record(
-      z.string(), // themeId
-      z.object({
-        noun: z.string(),
-        description: z.string(),
-      }),
-    )
-    .transform(
-      (x) =>
-        new Map(
-          Object.entries(x).map(
-            ([k, v]) => [rMnemonicThemeId().unmarshal(k), v] as const,
+export const loadMnemonicThemes = memoize0(async function loadMnemonicThemes() {
+  return (
+    z
+      .record(
+        z.string(), // themeId
+        z.object({
+          noun: z.string(),
+          description: z.string(),
+        }),
+      )
+      .transform(
+        (x) =>
+          new Map(
+            Object.entries(x).map(
+              ([k, v]) => [rMnemonicThemeId().unmarshal(k), v] as const,
+            ),
           ),
-        ),
-    )
-    .transform(deepReadonly)
-    // eslint-disable-next-line unicorn/no-await-expression-member
-    .parse((await import(`./mnemonicThemes.asset.json`)).default),
-);
+      )
+      .transform(deepReadonly)
+      // eslint-disable-next-line unicorn/no-await-expression-member
+      .parse((await import(`./mnemonicThemes.asset.json`)).default)
+  );
+});
 
-export const loadMnemonicThemeChoices = memoize0(async () =>
-  z
-    .record(
-      z.string(), // themeId
-      z.record(
-        z.string(), // initial
-        z.record(z.string(), z.string()),
-      ),
-    )
-    .transform(
-      (x) =>
-        new Map(
-          Object.entries(x).map(([k, v]) => [
-            rMnemonicThemeId().unmarshal(k),
+export const loadMnemonicThemeChoices = memoize0(
+  async function loadMnemonicThemeChoices() {
+    return (
+      z
+        .record(
+          z.string(), // themeId
+          z.record(
+            z.string(), // initial
+            z.record(z.string(), z.string()),
+          ),
+        )
+        .transform(
+          (x) =>
             new Map(
-              Object.entries(v).map(([k2, v2]) => [
-                k2,
-                new Map(Object.entries(v2)),
+              Object.entries(x).map(([k, v]) => [
+                rMnemonicThemeId().unmarshal(k),
+                new Map(
+                  Object.entries(v).map(([k2, v2]) => [
+                    k2,
+                    new Map(Object.entries(v2)),
+                  ]),
+                ),
               ]),
             ),
+        )
+        .transform(deepReadonly)
+        // eslint-disable-next-line unicorn/no-await-expression-member
+        .parse((await import(`./mnemonicThemeChoices.asset.json`)).default)
+    );
+  },
+);
+
+export const loadHanziDecomposition = memoize0(
+  async function loadHanziDecomposition() {
+    return (
+      z
+        .array(z.tuple([z.string(), z.string()]))
+        .transform((x) => new Map(x))
+        .transform(deepReadonly)
+        // eslint-disable-next-line unicorn/no-await-expression-member
+        .parse((await import(`./hanziDecomposition.asset.json`)).default)
+    );
+  },
+);
+
+export const loadHanziWordGlossMnemonics = memoize0(
+  async function loadHanziWordGlossMnemonics() {
+    return (
+      z
+        .array(
+          z.tuple([
+            hanziWordSchema,
+            z.array(z.object({ mnemonic: z.string(), rationale: z.string() })),
           ]),
-        ),
-    )
-    .transform(deepReadonly)
-    // eslint-disable-next-line unicorn/no-await-expression-member
-    .parse((await import(`./mnemonicThemeChoices.asset.json`)).default),
-);
-
-export const loadHanziDecomposition = memoize0(async () =>
-  z
-    .array(z.tuple([z.string(), z.string()]))
-    .transform((x) => new Map(x))
-    .transform(deepReadonly)
-    // eslint-disable-next-line unicorn/no-await-expression-member
-    .parse((await import(`./hanziDecomposition.asset.json`)).default),
-);
-
-export const loadHanziWordGlossMnemonics = memoize0(async () =>
-  z
-    .array(
-      z.tuple([
-        hanziWordSchema,
-        z.array(z.object({ mnemonic: z.string(), rationale: z.string() })),
-      ]),
-    )
-    .transform((x) => new Map(x))
-    .transform(deepReadonly)
-    // eslint-disable-next-line unicorn/no-await-expression-member
-    .parse((await import(`./hanziWordGlossMnemonics.asset.json`)).default),
+        )
+        .transform((x) => new Map(x))
+        .transform(deepReadonly)
+        // eslint-disable-next-line unicorn/no-await-expression-member
+        .parse((await import(`./hanziWordGlossMnemonics.asset.json`)).default)
+    );
+  },
 );
 
 export const wordListSchema = z.array(hanziWordSchema);
 
-export const allRadicalHanziWords = memoize0(async () =>
-  wordListSchema
-    .transform(deepReadonly)
-    // eslint-disable-next-line unicorn/no-await-expression-member
-    .parse((await import(`./radicalsHanziWords.asset.json`)).default),
+export const allRadicalHanziWords = memoize0(
+  async function allRadicalHanziWords() {
+    return (
+      wordListSchema
+        .transform(deepReadonly)
+        // eslint-disable-next-line unicorn/no-await-expression-member
+        .parse((await import(`./radicalsHanziWords.asset.json`)).default)
+    );
+  },
 );
 
-export const allHsk1HanziWords = memoize0(async () =>
-  wordListSchema
-    .transform(deepReadonly)
-    // eslint-disable-next-line unicorn/no-await-expression-member
-    .parse((await import(`./hsk1HanziWords.asset.json`)).default),
-);
+export const allHsk1HanziWords = memoize0(async function allHsk1HanziWords() {
+  return (
+    wordListSchema
+      .transform(deepReadonly)
+      // eslint-disable-next-line unicorn/no-await-expression-member
+      .parse((await import(`./hsk1HanziWords.asset.json`)).default)
+  );
+});
 
-export const allHsk2HanziWords = memoize0(async () =>
-  wordListSchema
-    .transform(deepReadonly)
-    // eslint-disable-next-line unicorn/no-await-expression-member
-    .parse((await import(`./hsk2HanziWords.asset.json`)).default),
-);
+export const allHsk2HanziWords = memoize0(async function allHsk2HanziWords() {
+  return (
+    wordListSchema
+      .transform(deepReadonly)
+      // eslint-disable-next-line unicorn/no-await-expression-member
+      .parse((await import(`./hsk2HanziWords.asset.json`)).default)
+  );
+});
 
-export const allHsk3HanziWords = memoize0(async () =>
-  wordListSchema
-    .transform(deepReadonly)
-    // eslint-disable-next-line unicorn/no-await-expression-member
-    .parse((await import(`./hsk3HanziWords.asset.json`)).default),
-);
+export const allHsk3HanziWords = memoize0(async function allHsk3HanziWords() {
+  return (
+    wordListSchema
+      .transform(deepReadonly)
+      // eslint-disable-next-line unicorn/no-await-expression-member
+      .parse((await import(`./hsk3HanziWords.asset.json`)).default)
+  );
+});
 
 export const partOfSpeechSchema = z.enum([
   `noun`,
@@ -265,12 +295,14 @@ export const wikiSchema = z
 
 export type Wiki = z.infer<typeof wikiSchema>;
 
-export const loadWiki = memoize0(async () =>
-  wikiSchema
-    .transform(deepReadonly)
-    // eslint-disable-next-line unicorn/no-await-expression-member
-    .parse((await import(`./wiki.asset.json`)).default),
-);
+export const loadWiki = memoize0(async function loadWiki() {
+  return (
+    wikiSchema
+      .transform(deepReadonly)
+      // eslint-disable-next-line unicorn/no-await-expression-member
+      .parse((await import(`./wiki.asset.json`)).default)
+  );
+});
 
 export const hanziWordMigrationsSchema = z
   .array(
@@ -283,11 +315,15 @@ export const hanziWordMigrationsSchema = z
   )
   .transform((x) => new Map(x));
 
-export const loadHanziWordMigrations = memoize0(async () =>
-  hanziWordMigrationsSchema
-    .transform(deepReadonly)
-    // eslint-disable-next-line unicorn/no-await-expression-member
-    .parse((await import(`./hanziWordMigrations.asset.json`)).default),
+export const loadHanziWordMigrations = memoize0(
+  async function loadHanziWordMigrations() {
+    return (
+      hanziWordMigrationsSchema
+        .transform(deepReadonly)
+        // eslint-disable-next-line unicorn/no-await-expression-member
+        .parse((await import(`./hanziWordMigrations.asset.json`)).default)
+    );
+  },
 );
 
 const loadRadicalStrokes = memoize0(async () =>
@@ -305,23 +341,27 @@ const loadRadicalStrokes = memoize0(async () =>
     .parse((await import(`./radicalStrokes.asset.json`)).default),
 );
 
-export const loadHanziWordPinyinMnemonics = memoize0(async () =>
-  z
-    .array(
-      z.tuple([
-        z.string(),
-        z.array(
-          z.object({
-            mnemonic: z.string(),
-            strategy: z.string(),
-          }),
-        ),
-      ]),
-    )
-    .transform((x) => new Map(x))
-    .transform(deepReadonly)
-    // eslint-disable-next-line unicorn/no-await-expression-member
-    .parse((await import(`./radicalPinyinMnemonics.asset.json`)).default),
+export const loadHanziWordPinyinMnemonics = memoize0(
+  async function loadHanziWordPinyinMnemonics() {
+    return (
+      z
+        .array(
+          z.tuple([
+            z.string(),
+            z.array(
+              z.object({
+                mnemonic: z.string(),
+                strategy: z.string(),
+              }),
+            ),
+          ]),
+        )
+        .transform((x) => new Map(x))
+        .transform(deepReadonly)
+        // eslint-disable-next-line unicorn/no-await-expression-member
+        .parse((await import(`./radicalPinyinMnemonics.asset.json`)).default)
+    );
+  },
 );
 
 export const allRadicalsByStrokes = async () => await loadRadicalStrokes();
@@ -387,21 +427,20 @@ export const lookupHanziWikiEntry = async (
 export const lookupRadicalsByStrokes = async (strokes: number) =>
   await loadRadicalStrokes().then((x) => x.get(strokes) ?? null);
 
-export const allHanziWordsHanzi = memoize0(
-  async () =>
-    new Set(
-      [
-        ...(await allRadicalHanziWords()),
-        ...(await allHsk1HanziWords()),
-        ...(await allHsk2HanziWords()),
-        ...(await allHsk3HanziWords()),
-      ].map((x) => hanziFromHanziWord(x)),
-    ),
-);
+export const allHanziWordsHanzi = memoize0(async function allHanziWordsHanzi() {
+  return new Set(
+    [
+      ...(await allRadicalHanziWords()),
+      ...(await allHsk1HanziWords()),
+      ...(await allHsk2HanziWords()),
+      ...(await allHsk3HanziWords()),
+    ].map((x) => hanziFromHanziWord(x)),
+  );
+});
 
 export const allOneSyllableHanzi = memoize0(
-  async () =>
-    new Set<HanziChar>(
+  async function allOneSyllableHanzi() {
+    return new Set<HanziChar>(
       [
         ...(await allRadicalHanziWords()),
         ...(await allHsk1HanziWords()),
@@ -410,17 +449,17 @@ export const allOneSyllableHanzi = memoize0(
       ]
         .map((x) => hanziFromHanziWord(x))
         .filter((x) => isHanziChar(x)) as unknown as HanziChar[],
-    ),
+    );
+  },
 );
 
-export const allHanziCharacters = memoize0(
-  async () =>
-    new Set(
-      [...(await allHanziWordsHanzi())]
-        // Split words into characters because decomposition is per-character.
-        .flatMap((x) => splitHanziText(x)),
-    ),
-);
+export const allHanziCharacters = memoize0(async function allHanziCharacters() {
+  return new Set(
+    [...(await allHanziWordsHanzi())]
+      // Split words into characters because decomposition is per-character.
+      .flatMap((x) => splitHanziText(x)),
+  );
+});
 
 /**
  * Return true if the character can be rendered (i.e. it has a font glyph).

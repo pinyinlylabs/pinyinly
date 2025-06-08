@@ -5,7 +5,6 @@ import type {
 } from "@/data/model";
 import {
   deepReadonly,
-  emptyArray,
   memoize0,
   memoize1,
   sortComparatorNumber,
@@ -245,9 +244,15 @@ export function parsePinyinSyllableWithChart(
   };
 }
 
-interface PinyinSyllableSearchResult {
+export interface PinyinSyllableSuggestion {
   pinyinSyllable: PinyinSyllable;
   tone: number;
+}
+
+export interface PinyinSyllableSuggestions {
+  from: number;
+  to: number;
+  syllables: PinyinSyllableSuggestion[];
 }
 
 /**
@@ -255,22 +260,44 @@ interface PinyinSyllableSearchResult {
  * @param query
  * @returns
  */
-export function pinyinSyllableSearch(
+export function pinyinSyllableSuggestions(
   query: string,
-): DeepReadonly<PinyinSyllableSearchResult[]> {
-  const parsed = parsePinyinSyllable(query);
+): DeepReadonly<PinyinSyllableSuggestions> | null {
+  const lastSyllable = matchAllPinyinSyllables(query).slice(-2);
+  if (lastSyllable.length !== 2) {
+    return null;
+  }
+  const [lastSyllableIndex, lastSyllableText] = lastSyllable as [
+    number,
+    string,
+  ];
+  const from = lastSyllableIndex;
+  const to = lastSyllableIndex + lastSyllableText.length;
+  if (to !== query.length) {
+    // The last syllable is not at the end of the string, so we can't search for it.
+    return null;
+  }
+  const syllableWithoutNumber = lastSyllableText.at(-1)?.match(/\d/)
+    ? lastSyllableText.slice(0, -1)
+    : lastSyllableText;
+  const parsed = parsePinyinSyllable(
+    syllableWithoutNumber.replaceAll(`v`, `ü`),
+  );
   if (parsed == null) {
-    return emptyArray;
+    return null;
   }
 
-  return toneVariationsForTonelessSyllable(parsed.tonelessSyllable);
+  const suggestions = toneVariationsForTonelessSyllable(
+    parsed.tonelessSyllable,
+  );
+  return { from, to, syllables: suggestions };
 }
 
 const toneVariationsForTonelessSyllable = memoize1(
   (
     tonelessSyllable: PinyinSyllable,
-  ): DeepReadonly<PinyinSyllableSearchResult[]> => {
-    const result: PinyinSyllableSearchResult[] = [];
+  ): DeepReadonly<PinyinSyllableSuggestion[]> => {
+    const result: PinyinSyllableSuggestion[] = [];
     for (let i = 1; i <= 5; i++) {
       result.push({
         pinyinSyllable: convertPinyinWithToneNumberToToneMark(
@@ -465,4 +492,69 @@ export function pinyinPronunciationDisplayText(
   // But when learning a sentence then the words become space separated and the
   // syllables are joined without spaces.
   return value.join(` `);
+}
+
+export const pinyinSyllablePattern = (() => {
+  const a = `(?:a|ā|à|á|ǎ)`;
+  const e = `(?:e|ē|é|ě|è)`;
+  const i = `(?:i|ī|í|ǐ|ì)`;
+  const o = `(?:o|ō|ó|ǒ|ò)`;
+  const u = `(?:u|ū|ú|ǔ|ù)`;
+  const v = `(?:ü|ǖ|ǘ|ǚ|ǜ|v|u:)`;
+
+  const consonantEnd = `(?!${a}${e}${i}${o}${u}${v})`;
+
+  return (
+    `(?:` +
+    `(?:(?:[zcs]h|[gkh])u${a}ng${consonantEnd})|` +
+    `(?:[jqx]i${o}ng${consonantEnd})|` +
+    `(?:[nljqx]i${a}ng${consonantEnd})|` +
+    `(?:(?:[zcs]h?|[dtnlgkhrjqxy])u${a}n${consonantEnd})|` +
+    `(?:(?:[zcs]h|[gkh])u${a}i)|` +
+    `(?:(?:[zc]h?|[rdtnlgkhsy])${o}ng${consonantEnd})|` +
+    `(?:(?:[zcs]h?|[rbpmfdtnlgkhw])?${e}ng${consonantEnd})|` +
+    `(?:(?:[zcs]h?|[rbpmfdtnlgkhwy])?${a}ng${consonantEnd})|` +
+    `(?:[bpmdtnljqxy]${i}ng${consonantEnd})|` +
+    `(?:[bpmdtnljqx]i${a}n${consonantEnd})|` +
+    `(?:[bpmdtnljqx]i${a}o)|` +
+    `(?:[nl](?:v|u:|ü)${e})|` +
+    `(?:[nl](?:${v}))|` +
+    `(?:[jqxy]u${e})|` +
+    `(?:[bpmnljqxy]${i}n${consonantEnd})|` +
+    `(?:[mdnljqx]i${u})|` +
+    `(?:[bpmdtnljqx]i${e})|` +
+    `(?:[dljqx]i${a})|` +
+    `(?:(?:[zcs]h?|[rdtnlgkhxqjy])${u}n${consonantEnd})|` +
+    `(?:(?:[zcs]h?|[rdtgkh])u${i})|` +
+    `(?:(?:[zcs]h?|[rdtnlgkh])u${o})|` +
+    `(?:(?:[zcs]h|[rgkh])u${a})|` +
+    `(?:(?:[zcs]h?|[rbpmfdngkhw])?${e}n${consonantEnd})|` +
+    `(?:(?:[zcs]h?|[rbpmfdtnlgkhwy])?${a}n${consonantEnd})|` +
+    `(?:(?:[zcs]h?|[rpmfdtnlgkhy])?${o}u)|` +
+    `(?:(?:[zcs]h?|[rbpmdtnlgkhy])?${a}o)|` +
+    `(?:(?:[zs]h|[bpmfdtnlgkhwz])?${e}i)|` +
+    `(?:(?:[zcs]h?|[bpmdtnlgkhw])?${a}i)|` +
+    `(?:(?:[zcs]h?|[rjqxybpmdtnl])${i})|` +
+    `(?:(?:[zcs]h?|[rwbpmfdtnlgkhjqxwy])${u})|` +
+    `(?:${e}(?:r${consonantEnd})?)|` +
+    `(?:(?:[zcs]h?|[rmdtnlgkhy])${e})|` +
+    `(?:[bpmfwyl]?${o})|` +
+    `(?:(?:[zcs]h|[bpmfdtnlgkhzcswy])?${a})|` +
+    `(?:r${consonantEnd})` +
+    `)` +
+    `[0-5]?`
+  );
+})();
+
+const matchAllPinyinRegExp = new RegExp(pinyinSyllablePattern, `g`);
+
+/**
+ * Find all pinyin syllables in a string.
+ */
+export function matchAllPinyinSyllables(input: string) {
+  const tokens = [];
+  for (const match of input.matchAll(matchAllPinyinRegExp)) {
+    tokens.push(match.index, match[0]);
+  }
+  return tokens;
 }
