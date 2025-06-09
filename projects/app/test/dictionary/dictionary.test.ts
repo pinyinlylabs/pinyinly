@@ -10,7 +10,7 @@ import {
   pinyinPronunciationDisplayText,
   splitTonelessPinyinSyllable,
 } from "#data/pinyin.ts";
-import type { HanziWordMeaning } from "#dictionary/dictionary.ts";
+import type { Dictionary, HanziWordMeaning } from "#dictionary/dictionary.ts";
 import {
   allHanziCharacters,
   allHanziWordsHanzi,
@@ -36,6 +36,7 @@ import {
   lookupHanzi,
   lookupHanziWord,
   meaningKeyFromHanziWord,
+  upsertHanziWordMeaning,
 } from "#dictionary/dictionary.ts";
 import {
   mapSetAdd,
@@ -49,7 +50,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import type { DeepReadonly } from "ts-essentials";
 import { z } from "zod/v4";
-import { 汉 } from "../data/helpers";
+import { 拼音, 汉 } from "../data/helpers";
 
 await test(`radical groups have the right number of elements`, async () => {
   // Data integrity test to ensure that the number of characters in each group
@@ -908,5 +909,33 @@ await test(`${hanziFromHanziOrHanziWord.name} suite`, async () => {
 
   await test(`supports hanzi`, () => {
     expect(hanziFromHanziOrHanziWord(汉`你好`)).toEqual(`你好`);
+  });
+});
+
+await test(`${upsertHanziWordMeaning.name} suite`, async () => {
+  function helloDict(): Dictionary {
+    const dict: Dictionary = new Map();
+    dict.set(`你好:hello`, {
+      gloss: [`hello`],
+      pinyin: [[拼音`ni`, 拼音`hao`]],
+      partOfSpeech: `interjection`,
+      definition: `a greeting`,
+    });
+    return dict;
+  }
+
+  await test(`can update pinyin`, async () => {
+    const dict = helloDict();
+
+    upsertHanziWordMeaning(dict, `你好:hello`, {
+      pinyin: [[拼音`nǐ`, 拼音`hǎo`]],
+    });
+
+    expect(dict.get(`你好:hello`)).toEqual({
+      gloss: [`hello`],
+      pinyin: [[拼音`nǐ`, 拼音`hǎo`]],
+      partOfSpeech: `interjection`,
+      definition: `a greeting`,
+    });
   });
 });

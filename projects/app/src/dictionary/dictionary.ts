@@ -19,6 +19,7 @@ import {
   mapArrayAdd,
   memoize0,
   memoize1,
+  sortComparatorString,
 } from "@/util/collections";
 import { invariant } from "@haohaohow/lib/invariant";
 import type { DeepReadonly } from "ts-essentials";
@@ -659,58 +660,64 @@ export const allOneSyllablePronunciationsForHanzi = memoize1(
   },
 );
 
-/**
- * Non-existant pinyin used as distractors in quizes.
- */
-export const fakePinyin = [
-  // yu fake finals
-  `yuen`,
-  `yuo`,
-  // qu fake finals
-  `quan`,
-  `quei`,
-  `que`,
-  // mu fake finals
-  `muan`,
-  `muei`,
-  `mue`,
-  `muo`,
-  // ju fake finals
-  `juan`,
-  `juei`,
-  `jue`,
-  // bu fake finals
-  `buan`,
-  `buei`,
-  `bue`,
-  `buo`,
-  // pu fake finals
-  `puan`,
-  `puei`,
-  `pue`,
-  `puo`,
-  // xu fake finals
-  `xuan`,
-  `xuei`,
-  // lü fake finals
-  `lüan`,
-  `lüei`,
-  `lüo`,
-  // nü fake finals
-  `nüan`,
-  `nüei`,
-  `nüo`,
-  // nu fake finals
-  `nuan`,
-  `nuei`,
-  `nuo`,
-  `nui`,
-  // lu fake finals
-  `luan`,
-  `luei`,
-  // fu fake finals
-  `fuan`,
-  `fuei`,
-  `fui`,
-  `fuo`,
-];
+export function upsertHanziWordMeaning(
+  dict: Dictionary,
+  hanziWord: HanziWord,
+  patch: Partial<HanziWordMeaning>,
+): void {
+  if (patch.pinyin?.length === 0) {
+    patch.pinyin = undefined;
+  }
+
+  if (patch.definition?.trim().length === 0) {
+    patch.definition = undefined;
+  }
+
+  if (patch.example?.trim().length === 0) {
+    patch.example = undefined;
+  }
+
+  if (patch.glossHint?.trim().length === 0) {
+    patch.glossHint = undefined;
+  }
+
+  if (patch.visualVariants?.length === 0) {
+    patch.visualVariants = undefined;
+  }
+
+  if (patch.componentFormOf?.trim().length === 0) {
+    patch.componentFormOf = undefined;
+  }
+
+  const meaning = dict.get(hanziWord);
+  if (meaning == null) {
+    dict.set(hanziWord, patch as HanziWordMeaning);
+  } else {
+    dict.set(hanziWord, { ...meaning, ...patch });
+  }
+
+  // Test the validity of the dictionary.
+  dictionarySchema.parse(unparseDictionary(dict));
+}
+
+export function unparseDictionary(
+  dict: Dictionary,
+): z.input<typeof dictionarySchema> {
+  return [...dict.entries()]
+    .map(([hanziWord, meaning]): z.input<typeof dictionarySchema>[number] => [
+      hanziWord,
+      {
+        gloss: meaning.gloss,
+        glossHint: meaning.glossHint ?? undefined,
+        pinyin:
+          meaning.pinyin?.map((p) => rPinyinPronunciation().marshal(p)) ??
+          undefined,
+        example: meaning.example ?? undefined,
+        partOfSpeech: meaning.partOfSpeech,
+        componentFormOf: meaning.componentFormOf ?? undefined,
+        visualVariants: meaning.visualVariants ?? undefined,
+        definition: meaning.definition,
+      } satisfies z.input<typeof hanziWordMeaningSchema>,
+    ])
+    .sort(sortComparatorString((x) => x[0]));
+}

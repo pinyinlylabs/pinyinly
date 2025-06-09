@@ -5,7 +5,6 @@ import {
 import {
   allOneSyllableHanzi,
   allOneSyllablePronunciationsForHanzi,
-  fakePinyin,
   hanziFromHanziWord,
   loadPinyinWords,
   lookupHanziWord,
@@ -234,3 +233,59 @@ function validQuestionInvariant(question: OneCorrectPairQuestion) {
 
   return question;
 }
+
+/**
+ * Non-existant pinyin used as distractors in quizes.
+ */
+export const fakePinyin = [
+  // yu fake finals
+  `yuen`,
+  `yuo`,
+  // qu fake finals
+  `quan`,
+  `quei`,
+  `que`,
+  // mu fake finals
+  `muan`,
+  `muei`,
+  `mue`,
+  `muo`,
+  // ju fake finals
+  `juan`,
+  `juei`,
+  `jue`,
+  // bu fake finals
+  `buan`,
+  `buei`,
+  `bue`,
+  `buo`,
+  // pu fake finals
+  `puan`,
+  `puei`,
+  `pue`,
+  `puo`,
+  // xu fake finals
+  `xuan`,
+  `xuei`,
+  // lü fake finals
+  `lüan`,
+  `lüei`,
+  `lüo`,
+  // nü fake finals
+  `nüan`,
+  `nüei`,
+  `nüo`,
+  // nu fake finals
+  `nuan`,
+  `nuei`,
+  `nuo`,
+  `nui`,
+  // lu fake finals
+  `luan`,
+  `luei`,
+  // fu fake finals
+  `fuan`,
+  `fuei`,
+  `fui`,
+  `fuo`,
+];
