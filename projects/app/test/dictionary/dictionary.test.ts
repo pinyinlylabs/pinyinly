@@ -20,6 +20,7 @@ import {
   allRadicalHanziWords,
   allRadicalsByStrokes,
   decomposeHanzi,
+  hanziFromHanziOrHanziWord,
   hanziFromHanziWord,
   hanziWordMeaningSchema,
   loadDictionary,
@@ -48,6 +49,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import type { DeepReadonly } from "ts-essentials";
 import { z } from "zod/v4";
+import { 汉 } from "../data/helpers";
 
 await test(`radical groups have the right number of elements`, async () => {
   // Data integrity test to ensure that the number of characters in each group
@@ -898,3 +900,13 @@ async function testPinyinChart(
   );
   uniqueInvariant(chart.finals.flatMap(([, ...x]) => x));
 }
+
+await test(`${hanziFromHanziOrHanziWord.name} suite`, async () => {
+  await test(`supports hanzi word`, () => {
+    expect(hanziFromHanziOrHanziWord(`你好:hello`)).toEqual(`你好`);
+  });
+
+  await test(`supports hanzi`, () => {
+    expect(hanziFromHanziOrHanziWord(汉`你好`)).toEqual(`你好`);
+  });
+});

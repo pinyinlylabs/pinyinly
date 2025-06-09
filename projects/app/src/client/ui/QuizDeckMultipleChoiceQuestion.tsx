@@ -1,7 +1,7 @@
 import type {
   MistakeType,
   MultipleChoiceQuestion,
-  NewSkillRating,
+  UnsavedSkillRating,
 } from "@/data/model";
 import { setAudioModeAsync, useAudioPlayer } from "expo-audio";
 import chunk from "lodash/chunk";
@@ -19,7 +19,7 @@ export function QuizDeckMultipleChoiceQuestion({
 }: {
   question: MultipleChoiceQuestion;
   onNext: () => void;
-  onRating: (ratings: NewSkillRating[], mistakes: MistakeType[]) => void;
+  onRating: (ratings: UnsavedSkillRating[], mistakes: MistakeType[]) => void;
 }) {
   const { prompt, choices } = question;
   const [selectedChoice, setSelectedChoice] = useState<string>();

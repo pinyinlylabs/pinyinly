@@ -599,6 +599,28 @@ export function glossOrThrow(
   return gloss;
 }
 
+export function hanziFromHanziOrHanziWord(
+  hanziOrHanziWord: HanziText | HanziWord,
+): HanziText {
+  if (isHanziWord(hanziOrHanziWord)) {
+    return hanziFromHanziWord(hanziOrHanziWord);
+  }
+  return hanziOrHanziWord;
+}
+
+export function oneSyllablePinyinOrThrow(
+  hanziWord: HanziWord,
+  meaning: DeepReadonly<HanziWordMeaning> | null,
+): PinyinSyllable {
+  const pronunciation = pinyinOrThrow(hanziWord, meaning);
+  const syllable = pronunciation[0];
+  invariant(
+    syllable != null && pronunciation.length === 1,
+    `expected only one syllable`,
+  );
+  return syllable;
+}
+
 export const allPronunciationsForHanzi = memoize1(
   async function allPronunciationsForHanzi(
     hanzi: HanziText,

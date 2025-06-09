@@ -9,7 +9,7 @@ export type ReactQueryValue = object | string | null | unknown[] | number;
 type MaximumAllowedBoundary = 50;
 
 // See https://stackoverflow.com/a/69787886
-export type RepeatedSequence2<
+export type RepeatedSequence<
   Tuple extends unknown[],
   Result extends unknown[] = [],
   Count extends readonly number[] = [],
@@ -18,8 +18,8 @@ export type RepeatedSequence2<
   : Tuple extends []
     ? []
     : Result extends []
-      ? RepeatedSequence2<Tuple, Tuple, [...Count, 1]>
-      : RepeatedSequence2<Tuple, Result | [...Result, ...Tuple], [...Count, 1]>;
+      ? RepeatedSequence<Tuple, Tuple, [...Count, 1]>
+      : RepeatedSequence<Tuple, Result | [...Result, ...Tuple], [...Count, 1]>;
 
 export type ValuesOf<X> = X[keyof X];
 

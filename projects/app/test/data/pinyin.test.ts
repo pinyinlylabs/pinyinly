@@ -1,6 +1,7 @@
 import {
   convertPinyinWithToneNumberToToneMark,
   matchAllPinyinSyllables,
+  matchAllPinyinSyllablesWithIndexes,
   parsePinyinSyllable,
   parsePinyinSyllableTone,
   pinyinSyllablePattern,
@@ -172,6 +173,33 @@ await test(`${pinyinSyllableSuggestions.name} suite`, async () => {
   });
 });
 
+const pinyinWithIndexesFixtures: [string, (number | string)[]][] = [
+  // Syllables
+  [`nv`, [0, `nv`]],
+  [`nv1`, [0, `nv1`]],
+  [`hao`, [0, `hao`]],
+  [`hǎo`, [0, `hǎo`]],
+  [`hao3`, [0, `hao3`]],
+  [`ni`, [0, `ni`]],
+  [`ní`, [0, `ní`]],
+  [`nì`, [0, `nì`]],
+  [`nǐ`, [0, `nǐ`]],
+  [`nī`, [0, `nī`]],
+  [`ni0`, [0, `ni0`]],
+  [`ni1`, [0, `ni1`]],
+  [`ni2`, [0, `ni2`]],
+  [`ni3`, [0, `ni3`]],
+  [`ni4`, [0, `ni4`]],
+  [`ni5`, [0, `ni5`]],
+  [`r`, [0, `r`]],
+  // Words
+  [`nǐhǎo`, [0, `nǐ`, 2, `hǎo`]],
+  [`nǐ·hǎo`, [0, `nǐ`, 3, `hǎo`]], // \u00B7 MIDDLE DOT
+  [`nǐ‧hǎo`, [0, `nǐ`, 3, `hǎo`]], // \u2027 HYPHENATION POINT
+  // Sentences
+  [`nǐ hǎo`, [0, `nǐ`, 3, `hǎo`]],
+];
+
 await test(`${matchAllPinyinSyllables.name} suite`, async () => {
   await test(`pinyinSyllablePattern`, async () => {
     const valid = [
@@ -195,35 +223,22 @@ await test(`${matchAllPinyinSyllables.name} suite`, async () => {
   });
 
   await test(`fixtures`, () => {
-    const valid: [string, (number | string)[]][] = [
-      // Syllables
-      [`nv`, [0, `nv`]],
-      [`nv1`, [0, `nv1`]],
-      [`hao`, [0, `hao`]],
-      [`hǎo`, [0, `hǎo`]],
-      [`hao3`, [0, `hao3`]],
-      [`ni`, [0, `ni`]],
-      [`ní`, [0, `ní`]],
-      [`nì`, [0, `nì`]],
-      [`nǐ`, [0, `nǐ`]],
-      [`nī`, [0, `nī`]],
-      [`ni0`, [0, `ni0`]],
-      [`ni1`, [0, `ni1`]],
-      [`ni2`, [0, `ni2`]],
-      [`ni3`, [0, `ni3`]],
-      [`ni4`, [0, `ni4`]],
-      [`ni5`, [0, `ni5`]],
-      [`r`, [0, `r`]],
-      // Words
-      [`nǐhǎo`, [0, `nǐ`, 2, `hǎo`]],
-      [`nǐ·hǎo`, [0, `nǐ`, 3, `hǎo`]], // \u00B7 MIDDLE DOT
-      [`nǐ‧hǎo`, [0, `nǐ`, 3, `hǎo`]], // \u2027 HYPHENATION POINT
-      // Sentences
-      [`nǐ hǎo`, [0, `nǐ`, 3, `hǎo`]],
-    ];
-
-    for (const [input, expected] of valid) {
+    for (const [input, expected] of pinyinWithIndexesFixtures) {
       const actual = matchAllPinyinSyllables(input);
+      expect([input, actual]).toEqual([
+        input,
+        expected
+          // strip out the indexes to re-use the same fixture data
+          .filter((_, i) => i % 2 === 1),
+      ]);
+    }
+  });
+});
+
+await test(`${matchAllPinyinSyllablesWithIndexes.name} suite`, async () => {
+  await test(`fixtures`, () => {
+    for (const [input, expected] of pinyinWithIndexesFixtures) {
+      const actual = matchAllPinyinSyllablesWithIndexes(input);
       expect([input, actual]).toEqual([input, expected]);
     }
   });

@@ -1,11 +1,10 @@
 import { useHanziWordMeaning } from "@/client/hooks/useHanziWordMeaning";
 import { splitHanziText } from "@/data/hanzi";
-import { hanziToPinyinQuestionMistakes } from "@/data/mistakes";
 import type {
-  HanziToPinyinQuestion,
+  HanziWordToPinyinQuestion,
   MistakeType,
-  NewSkillRating,
   PinyinPronunciation,
+  UnsavedSkillRating,
 } from "@/data/model";
 import { SkillKind } from "@/data/model";
 import type {
@@ -16,6 +15,7 @@ import {
   matchAllPinyinSyllables,
   pinyinSyllableSuggestions,
 } from "@/data/pinyin";
+import { hanziToPinyinQuestionMistakes } from "@/data/questions/hanziWordToPinyin";
 import type { HanziWordSkill, Skill } from "@/data/rizzleSchema";
 import {
   computeSkillRating,
@@ -55,9 +55,9 @@ export function QuizDeckHanziToPinyinQuestion({
   onRating,
 }: {
   noAutoFocus?: boolean;
-  question: HanziToPinyinQuestion;
+  question: HanziWordToPinyinQuestion;
   onNext: () => void;
-  onRating: (ratings: NewSkillRating[], mistakes: MistakeType[]) => void;
+  onRating: (ratings: UnsavedSkillRating[], mistakes: MistakeType[]) => void;
 }) {
   const { skill, flag, answers } = question;
 
@@ -77,30 +77,15 @@ export function QuizDeckHanziToPinyinQuestion({
     // First time you press the button it will grade your answer, the next time
     // it moves you to the next question.
     if (grade == null) {
-      // Normalise whitespace in the user's answer, replace multiple spaces with
-      // one, and trim.
-      const userAnswer = userAnswerRef.current.replaceAll(/\s+/g, ` `).trim();
+      const mistakes = hanziToPinyinQuestionMistakes(
+        question,
+        userAnswerRef.current,
+      );
 
-      if (userAnswer.length === 0) {
-        // must have some input to submit
-        return;
-      }
-
-      const possibleAnswers = answers.map((answer) => answer.join(` `));
-
-      const expectedAnswer =
-        possibleAnswers.find((answer) => answer === userAnswer) ??
-        nonNullable(possibleAnswers[0]);
-
-      const correct = expectedAnswer === userAnswer;
-
-      const mistakes = correct
-        ? []
-        : hanziToPinyinQuestionMistakes(question, userAnswer.split(/\s+/));
+      const correct = mistakes.length === 0;
 
       const durationMs = Date.now() - startTime;
-
-      const skillRatings: NewSkillRating[] = [
+      const skillRatings: UnsavedSkillRating[] = [
         computeSkillRating({
           skill,
           correct,
@@ -110,7 +95,7 @@ export function QuizDeckHanziToPinyinQuestion({
 
       setGrade({
         correct,
-        expectedAnswer: expectedAnswer.split(` `) as PinyinPronunciation,
+        expectedAnswer: nonNullable(answers[0]),
       });
       onRating(skillRatings, mistakes);
     } else {
@@ -225,10 +210,16 @@ export function QuizDeckHanziToPinyinQuestion({
         onChangeText={(text) => {
           userAnswerRef.current = text;
           setUserAnswerEmpty(text.trim().length === 0);
-          if (autoSubmit && text.endsWith(` `)) {
+
+          if (
+            autoSubmit &&
+            // It's important to only trigger when there's a space at the end,
+            // otherwise as soon as you type "ni" it will submit, before you've
+            // had a chance to change the tone.
+            text.endsWith(` `)
+          ) {
             const expectedSyllableCount = nonNullable(answers[0]).length;
-            const actualSyllableCount =
-              matchAllPinyinSyllables(text).length / 2;
+            const actualSyllableCount = matchAllPinyinSyllables(text).length;
             if (expectedSyllableCount === actualSyllableCount) {
               submit();
             }

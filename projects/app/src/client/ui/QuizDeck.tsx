@@ -4,7 +4,7 @@ import { useQuizProgress } from "@/client/hooks/useQuizProgress";
 import { useSoundEffect } from "@/client/hooks/useSoundEffect";
 import { questionsForReview2 } from "@/client/query";
 import type { StackNavigationFor } from "@/client/ui/types";
-import type { MistakeType, NewSkillRating, Question } from "@/data/model";
+import type { MistakeType, Question, UnsavedSkillRating } from "@/data/model";
 import { MistakeKind, QuestionKind } from "@/data/model";
 import { Rating } from "@/util/fsrs";
 import { nanoid } from "@/util/nanoid";
@@ -102,7 +102,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
   });
 
   const handleRating = useEventCallback(
-    (ratings: NewSkillRating[], mistakes: MistakeType[]) => {
+    (ratings: UnsavedSkillRating[], mistakes: MistakeType[]) => {
       invariant(ratings.length > 0, `ratings must not be empty`);
 
       const success = ratings.every(({ rating }) => rating !== Rating.Again);
@@ -263,7 +263,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
                 let screen: React.ReactNode;
 
                 switch (question.kind) {
-                  case QuestionKind.HanziToPinyin: {
+                  case QuestionKind.HanziWordToPinyin: {
                     screen = (
                       <QuizDeckHanziToPinyinQuestion
                         question={question}

@@ -1,14 +1,16 @@
 import { useHanziWordMeaning } from "@/client/hooks/useHanziWordMeaning";
 import { useMultiChoiceQuizTimer } from "@/client/hooks/useMultiChoiceQuizTimer";
-import { oneCorrectPairQuestionChoiceMistakes } from "@/data/mistakes";
 import type {
   MistakeType,
-  NewSkillRating,
   OneCorrectPairQuestion,
   OneCorrectPairQuestionChoice,
+  UnsavedSkillRating,
 } from "@/data/model";
 import { QuestionFlagKind, SkillKind } from "@/data/model";
-import { oneCorrectPairChoiceText } from "@/data/questions/util";
+import {
+  oneCorrectPairChoiceText,
+  oneCorrectPairQuestionChoiceMistakes,
+} from "@/data/questions/oneCorrectPair";
 import type { HanziWordSkill, Skill } from "@/data/rizzleSchema";
 import {
   computeSkillRating,
@@ -48,7 +50,7 @@ export function QuizDeckOneCorrectPairQuestion({
 }: {
   question: OneCorrectPairQuestion;
   onNext: () => void;
-  onRating: (ratings: NewSkillRating[], mistakes: MistakeType[]) => void;
+  onRating: (ratings: UnsavedSkillRating[], mistakes: MistakeType[]) => void;
 }) {
   const { prompt, answer, groupA, groupB, flag } = question;
 
@@ -90,7 +92,7 @@ export function QuizDeckOneCorrectPairQuestion({
       : oneCorrectPairQuestionChoiceMistakes(aChoice, bChoice);
 
     const durationMs = (timer.endTime ?? Date.now()) - timer.startTime;
-    const skillRatings: NewSkillRating[] = [
+    const skillRatings: UnsavedSkillRating[] = [
       computeSkillRating({
         skill: answer.skill,
         correct: isCorrect,
