@@ -84,12 +84,19 @@ const pressable = tv({
     },
     variant: {
       filled: `
-        focus-visible:rounded-xl focus-visible:outline focus-visible:outline-4
-        focus-visible:outline-offset-2 focus-visible:outline-foreground/75
+        rounded-xl
+
+        focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1
+        focus-visible:outline-foreground/75
       `,
-      outline: ``,
+      outline: `rounded-xl`,
+      option: `
+        rounded-xl
+
+        focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1
+        focus-visible:outline-sky/75
+      `,
       bare: ``,
-      option: ``,
     },
     inFlexRowParent: {
       true: `flex-row`,

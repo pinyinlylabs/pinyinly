@@ -550,11 +550,13 @@ const matchAllPinyinRegExp = new RegExp(pinyinSyllablePattern, `g`);
 
 /**
  * Find all pinyin syllables in a string.
+ *
+ * @returns An array of alternating index and matched syllable pairs.
  */
 export function matchAllPinyinSyllables(input: string) {
   const tokens = [];
-  for (const match of input.matchAll(matchAllPinyinRegExp)) {
-    tokens.push(match.index, match[0]);
+  for (const { index, 0: text } of input.matchAll(matchAllPinyinRegExp)) {
+    tokens.push(index, text);
   }
   return tokens;
 }
