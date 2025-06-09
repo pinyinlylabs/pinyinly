@@ -58,9 +58,9 @@ export function hanziToPinyinQuestionMistakes(
 
   for (const [i, expectedSyllables] of question.answers.entries()) {
     const isLastChance = i === question.answers.length - 1;
-    const isCorrect = expectedSyllables.every(
-      (syllable, i) => syllable === actualSyllables[i],
-    );
+    const isCorrect =
+      expectedSyllables.length === actualSyllables.length &&
+      expectedSyllables.every((syllable, i) => syllable === actualSyllables[i]);
 
     if (isCorrect) {
       return [];
