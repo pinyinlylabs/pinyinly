@@ -7,7 +7,6 @@ import {
 } from "#data/questions/hanziWordToPinyinInitial.ts";
 import { hanziWordToPinyinInitial } from "#data/skills.ts";
 import { hanziFromHanziWord, loadDictionary } from "#dictionary/dictionary.ts";
-import shuffle from "lodash/shuffle";
 import assert from "node:assert/strict";
 import test from "node:test";
 import { 拼音, 汉字 } from "../helpers";
@@ -89,14 +88,12 @@ await test(`${tryPinyinDistractor.name} suite`, async () => {
 });
 
 await test(`${hanziWordToPinyinInitialQuestionOrThrow.name} suite`, async () => {
-  await test(`randomly generate 100 questions`, async () => {
+  await test(`works for all valid single character hanzi`, async () => {
     const dictionary = await loadDictionary();
-    const sample = shuffle([...dictionary])
-      .filter(
-        ([hanziWord, meaning]) =>
-          isHanziChar(hanziFromHanziWord(hanziWord)) && meaning.pinyin != null,
-      )
-      .slice(0, 100);
+    const sample = [...dictionary].filter(
+      ([hanziWord, meaning]) =>
+        isHanziChar(hanziFromHanziWord(hanziWord)) && meaning.pinyin != null,
+    );
 
     for (const [hanziWord] of sample) {
       const skill = hanziWordToPinyinInitial(hanziWord);

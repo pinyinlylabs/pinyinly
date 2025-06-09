@@ -7,7 +7,6 @@ import {
 } from "#data/questions/hanziWordToPinyinTone.ts";
 import { hanziWordToPinyinTone } from "#data/skills.ts";
 import { hanziFromHanziWord, loadDictionary } from "#dictionary/dictionary.ts";
-import shuffle from "lodash/shuffle";
 import assert from "node:assert/strict";
 import test from "node:test";
 import { 拼音, 汉字 } from "../helpers";
@@ -72,27 +71,40 @@ await test(`${tryPinyinDistractor.name} suite`, async () => {
     expect(ctx.pinyinDistractors).toEqual([`wǔ`]);
     expect(ctx.usedPinyin).toEqual(new Set([`wǔ`, `wǒ`]));
   });
+
+  await test(`should reject conflicts with pinyin of another meaning of the same hanzi`, async () => {
+    // 为:become is wéi but 为:for is wèi. So the question for 为:become should
+    // omit wèi entirely, because even though it's a correct answer it's not the
+    // focus of what's being tested (this is a HanziWord test not a Hanzi test).
+    const ctx = await makeQuestionContext(`为:become`); // wéi
+    expect(ctx.usedPinyin).toEqual(
+      new Set([
+        `wéi`, // via 为:become
+        `wèi`, // via 为:for
+      ]),
+    );
+    expect(ctx.pinyinAnswers).toEqual([`wéi`]);
+
+    assert.equal(tryPinyinDistractor(ctx, 拼音`wèi`), false);
+    expect(ctx.pinyinDistractors).toEqual([]);
+  });
 });
 
 await test(`${hanziWordToPinyinToneQuestionOrThrow.name} suite`, async () => {
-  await test(`fixtures`, async () => {
-    await hanziWordToPinyinToneQuestionOrThrow(
-      hanziWordToPinyinTone(`应:should`),
-    );
-  });
-
-  await test.skip(`randomly generate 100 questions`, async () => {
+  await test(`works for all valid single character hanzi`, async () => {
     const dictionary = await loadDictionary();
-    const sample = shuffle([...dictionary])
-      .filter(
-        ([hanziWord, meaning]) =>
-          isHanziChar(hanziFromHanziWord(hanziWord)) && meaning.pinyin != null,
-      )
-      .slice(0, 100);
+    const sample = [...dictionary].filter(
+      ([hanziWord, meaning]) =>
+        isHanziChar(hanziFromHanziWord(hanziWord)) && meaning.pinyin != null,
+    );
 
     for (const [hanziWord] of sample) {
       const skill = hanziWordToPinyinTone(hanziWord);
-      await hanziWordToPinyinToneQuestionOrThrow(skill);
+      await expect(
+        hanziWordToPinyinToneQuestionOrThrow(skill),
+      ).resolves.toBeDefined();
     }
+
+    expect.assertions(sample.length);
   });
 });

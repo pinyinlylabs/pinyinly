@@ -311,8 +311,8 @@ export type OneCorrectPairQuestionChoice =
   | OneCorrectPairQuestionPinyinChoice;
 
 export interface OneCorrectPairQuestionAnswer {
-  a: OneCorrectPairQuestionChoice;
-  b: OneCorrectPairQuestionChoice;
+  as: readonly OneCorrectPairQuestionChoice[];
+  bs: readonly OneCorrectPairQuestionChoice[];
   skill: Skill;
 }
 

@@ -9,14 +9,12 @@ import {
   allOneSyllablePronunciationsForHanzi,
   hanziFromHanziWord,
   lookupHanziWord,
-  oneSyllablePinyinOrThrow,
-  pinyinOrThrow,
 } from "@/dictionary/dictionary";
+import { arrayFilterUniqueWithKey, emptyArray } from "@/util/collections";
 import {
   identicalInvariant,
   invariant,
   nonNullable,
-  uniqueInvariant,
 } from "@haohaohow/lib/invariant";
 import shuffle from "lodash/shuffle";
 import type {
@@ -33,47 +31,49 @@ import type { HanziWordSkill } from "../rizzleSchema";
 import { hanziWordFromSkill } from "../skills";
 import {
   hanziOrPinyinSyllableCount,
-  oneCorrectPairChoiceText,
+  oneCorrectPairQuestionInvariant,
 } from "./oneCorrectPair";
 
 export async function hanziWordToPinyinToneQuestionOrThrow(
   skill: HanziWordSkill,
 ): Promise<Question> {
   const hanziWord = hanziWordFromSkill(skill);
-  const meaning = await lookupHanziWord(hanziWord);
   const rowCount = 5;
-  const answer: OneCorrectPairQuestionAnswer = {
-    a: { kind: `hanzi`, value: hanziFromHanziWord(hanziWord) },
-    b: { kind: `pinyin`, value: pinyinOrThrow(hanziWord, meaning) },
-    skill,
-  };
 
   const ctx = await makeQuestionContext(hanziWord);
-  await addDistractors(ctx, rowCount - 1);
+  await addDistractors(ctx, rowCount);
 
-  const groupA: OneCorrectPairQuestionChoice[] = ctx.hanziDistractors.map(
-    (hanzi) => ({ kind: `hanzi`, value: hanzi }),
-  );
-  const groupB: OneCorrectPairQuestionChoice[] = ctx.pinyinDistractors.map(
-    (pinyin) => ({ kind: `pinyin`, value: [pinyin] }),
-  );
+  const answer: OneCorrectPairQuestionAnswer = {
+    as: ctx.hanziAnswers.map((hanzi) => ({ kind: `hanzi`, value: hanzi })),
+    bs: ctx.pinyinAnswers.map((pinyin) => ({
+      kind: `pinyin`,
+      value: [pinyin],
+    })),
+    skill,
+  };
+  const groupA: OneCorrectPairQuestionChoice[] = [
+    ...ctx.hanziDistractors.map(
+      (hanzi) => ({ kind: `hanzi`, value: hanzi }) as const,
+    ),
+    ...answer.as,
+  ];
+  const groupB: OneCorrectPairQuestionChoice[] = [
+    ...ctx.pinyinDistractors.map(
+      (pinyin) => ({ kind: `pinyin`, value: [pinyin] }) as const,
+    ),
+    ...answer.bs,
+  ];
 
   return validQuestionInvariant({
     kind: QuestionKind.OneCorrectPair,
     prompt: `Match a word with its pinyin`,
-    groupA: shuffle([...groupA, answer.a]),
-    groupB: shuffle([...groupB, answer.b]),
+    groupA: shuffle(groupA),
+    groupB: shuffle(groupB),
     answer,
   });
 }
 
 interface QuestionContext {
-  /**
-   * The toneless version of the correct pinyin, so that distractors can have
-   * the same base and differ by tone
-   */
-  answerPinyinToneless: string;
-  answerPinyinInitial: string;
   /**
    * Keep track of which hanzi have been used so that we don't have multiple
    * choices with the same hanzi or meaning.
@@ -88,7 +88,14 @@ interface QuestionContext {
   usedPinyin: Set<PinyinSyllable>;
 
   pinyinDistractors: PinyinSyllable[];
+  pinyinAnswers: readonly PinyinSyllable[];
+  /**
+   * The toneless version of the correct pinyins, so that distractors can have
+   * the same bases and differ by tone
+   */
+  pinyinAnswersToneless: readonly PinyinSyllable[];
   hanziDistractors: HanziChar[];
+  hanziAnswers: readonly HanziChar[];
 }
 
 export async function makeQuestionContext(
@@ -97,17 +104,33 @@ export async function makeQuestionContext(
   const hanzi = hanziFromHanziWord(correctAnswer);
   invariant(isHanziChar(hanzi), `expected single-character hanzi`);
   const meaning = await lookupHanziWord(correctAnswer);
-  const pinyin = oneSyllablePinyinOrThrow(correctAnswer, meaning);
-  const parsedPinyin = nonNullable(parsePinyinSyllableTone(pinyin));
-  const { initial } = parsePinyinSyllableOrThrow(pinyin);
-  const { tonelessPinyin: answerPinyinToneless } = parsedPinyin;
+
+  const hanziAnswers = [hanzi];
+  const pinyinAnswers =
+    meaning?.pinyin?.map((p) => {
+      invariant(p.length === 1, `expected single-syllable pinyin`);
+      return nonNullable(p[0]);
+    }) ?? emptyArray;
+  invariant(
+    pinyinAnswers.length > 0,
+    `hanzi word ${correctAnswer} has no pinyin`,
+  );
+
+  const pinyinAnswersToneless = pinyinAnswers
+    .map((p) => {
+      const syllable = nonNullable(p);
+      const { tonelessPinyin } = nonNullable(parsePinyinSyllableTone(syllable));
+      return tonelessPinyin;
+    })
+    .filter(arrayFilterUniqueWithKey((x) => x));
 
   const ctx: QuestionContext = {
-    answerPinyinToneless,
-    answerPinyinInitial: initial,
     usedHanzi: new Set([hanzi]),
     usedPinyin: new Set(await allOneSyllablePronunciationsForHanzi(hanzi)),
+    pinyinAnswers,
+    pinyinAnswersToneless,
     pinyinDistractors: [],
+    hanziAnswers,
     hanziDistractors: [],
   };
 
@@ -152,37 +175,19 @@ export function tryPinyinDistractor(
 }
 
 const toneSuffixes = [``, 1, 2, 3, 4, 5];
-const extraVowelVariations: [string, string][] = [
-  [`u`, `ü`],
-  [`ü`, `u`],
-  [`e`, `ë`],
-  [`ë`, `e`],
-  [`a`, `ä`],
-  [`i`, `ï`],
-  [`ï`, `i`],
-];
 
 async function addDistractors(
   ctx: QuestionContext,
-  count: number,
+  targetTotalRows: number,
 ): Promise<void> {
   // IMPORTANT: pinyin distractors must be added first, then hanzi are added if
   // they don't conflict.
 
-  const tonelessPinyins = [ctx.answerPinyinToneless];
+  // const tonelessPinyins = [ctx.answerPinyinToneless];
+  const { pinyinAnswers, hanziAnswers } = ctx;
+  const debugInfo = JSON.stringify({ pinyinAnswers, hanziAnswers });
 
-  // In some cases the answer has multiple correct pinyin (e.g. "wǔ" and "wū")
-  // and there are not enough pinyin distractors that can be generated, so we
-  // add some extra variations.
-  for (const [vowel, replacement] of extraVowelVariations) {
-    if (ctx.answerPinyinToneless.includes(vowel)) {
-      tonelessPinyins.push(
-        ctx.answerPinyinToneless.replace(vowel, replacement),
-      );
-    }
-  }
-
-  loop: for (const tonelessPinyin of tonelessPinyins) {
+  loop: for (const tonelessPinyin of ctx.pinyinAnswersToneless) {
     for (const tone of shuffle(toneSuffixes)) {
       const pinyin = convertPinyinWithToneNumberToToneMark(
         `${tonelessPinyin}${tone}`,
@@ -190,15 +195,18 @@ async function addDistractors(
 
       tryPinyinDistractor(ctx, pinyin);
 
-      if (ctx.pinyinDistractors.length === count) {
+      if (
+        ctx.pinyinAnswers.length + ctx.pinyinDistractors.length ===
+        targetTotalRows
+      ) {
         break loop;
       }
     }
   }
 
   invariant(
-    ctx.pinyinDistractors.length == count,
-    `couldn't get enough pinyin distractors ${ctx.pinyinDistractors.length} != ${count} (answerPinyinToneless=${ctx.answerPinyinToneless})`,
+    ctx.pinyinDistractors.length > 0,
+    `couldn't find at least one pinyin distractors (${debugInfo})`,
   );
 
   //
@@ -208,63 +216,45 @@ async function addDistractors(
   for (const hanzi of allHanziCandiates) {
     await tryHanziDistractor(ctx, hanzi);
 
-    if (ctx.hanziDistractors.length === count) {
+    if (
+      ctx.hanziAnswers.length + ctx.hanziDistractors.length ===
+      targetTotalRows
+    ) {
       break;
     }
   }
 
   invariant(
-    ctx.hanziDistractors.length == count,
-    `couldn't get enough hanzi distractors ${ctx.hanziDistractors.length} != ${count} (answerPinyinToneless=${ctx.answerPinyinToneless})`,
+    ctx.hanziDistractors.length > 0,
+    `couldn't find at least one hanzi distractor (${debugInfo})`,
   );
 }
 
 function validQuestionInvariant(question: OneCorrectPairQuestion) {
-  // Ensure there aren't two identical choices in the same group.
-  uniqueInvariant(question.groupA.map((x) => oneCorrectPairChoiceText(x)));
-  uniqueInvariant(question.groupB.map((x) => oneCorrectPairChoiceText(x)));
-  // Ensure the answer is included.
-  invariant(question.groupA.includes(question.answer.a));
-  invariant(question.groupB.includes(question.answer.b));
+  oneCorrectPairQuestionInvariant(question);
+
   // Ensure all choices are single syllable.
   identicalInvariant([
-    ...question.groupA.map((x) => hanziOrPinyinSyllableCount(x)),
-    ...question.groupB.map((x) => hanziOrPinyinSyllableCount(x)),
+    1, // require 1 syllable
+    ...question.groupA.map((a) => hanziOrPinyinSyllableCount(a)),
+    ...question.groupB.map((b) => hanziOrPinyinSyllableCount(b)),
   ]);
-  // Ensure all pinyin have the same initial and final
-  identicalInvariant(
-    question.groupB.map((x) => {
-      invariant(x.kind === `pinyin`);
-      invariant(hanziOrPinyinSyllableCount(x) === 1);
 
-      const syllable = nonNullable(x.value[0]);
-      const { initialChartLabel: initial, finalChartLabel: final } =
-        parsePinyinSyllableWithVowelVariationsOrThrow(syllable);
-      return `${initial}-${final}`;
-    }),
-  );
-
-  return question;
-}
-
-function parsePinyinSyllableWithVowelVariationsOrThrow(
-  syllable: PinyinSyllable,
-): ReturnType<typeof parsePinyinSyllableOrThrow> {
-  try {
-    // Standard pinyin should work.
+  // Ensure all pinyin have the same initial and final as one of the answers.
+  // They might all be identical because some hanzi have different pinyin finals
+  // (e.g. 似:resemble is shì/sì).
+  const answerPinyinParts = question.answer.bs.map((x) => {
+    invariant(x.kind === `pinyin`);
+    const syllable = nonNullable(x.value[0]);
     return parsePinyinSyllableOrThrow(syllable);
-  } catch {
-    // Maybe it failed because of extra vowel variations, reverse that and try again.
-    const toneResult = parsePinyinSyllableTone(syllable);
-    let { tonelessPinyin: base } = nonNullable(toneResult);
-
-    for (const [vowel, replacement] of extraVowelVariations) {
-      if (base.includes(replacement)) {
-        base = base.replace(replacement, vowel);
-        break;
-      }
-    }
-
-    return parsePinyinSyllableOrThrow(base);
+  });
+  for (const b of question.groupB) {
+    invariant(b.kind === `pinyin`);
+    const syllable = nonNullable(b.value[0]);
+    const { initial, final } = parsePinyinSyllableOrThrow(syllable);
+    invariant(
+      answerPinyinParts.some((x) => x.initial === initial && x.final === final),
+    );
   }
+  return question;
 }

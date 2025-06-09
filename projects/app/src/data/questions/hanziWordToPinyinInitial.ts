@@ -15,7 +15,6 @@ import {
   identicalInvariant,
   invariant,
   nonNullable,
-  uniqueInvariant,
 } from "@haohaohow/lib/invariant";
 import shuffle from "lodash/shuffle";
 import type {
@@ -32,7 +31,7 @@ import type { HanziWordSkill } from "../rizzleSchema";
 import { hanziWordFromSkill } from "../skills";
 import {
   hanziOrPinyinSyllableCount,
-  oneCorrectPairChoiceText,
+  oneCorrectPairQuestionInvariant,
 } from "./oneCorrectPair";
 
 export async function hanziWordToPinyinInitialQuestionOrThrow(
@@ -42,8 +41,8 @@ export async function hanziWordToPinyinInitialQuestionOrThrow(
   const meaning = await lookupHanziWord(hanziWord);
   const rowCount = 5;
   const answer: OneCorrectPairQuestionAnswer = {
-    a: { kind: `hanzi`, value: hanziFromHanziWord(hanziWord) },
-    b: { kind: `pinyin`, value: pinyinOrThrow(hanziWord, meaning) },
+    as: [{ kind: `hanzi`, value: hanziFromHanziWord(hanziWord) }],
+    bs: [{ kind: `pinyin`, value: pinyinOrThrow(hanziWord, meaning) }],
     skill,
   };
 
@@ -60,8 +59,8 @@ export async function hanziWordToPinyinInitialQuestionOrThrow(
   return validQuestionInvariant({
     kind: QuestionKind.OneCorrectPair,
     prompt: `Match a word with its pinyin`,
-    groupA: shuffle([...groupA, answer.a]),
-    groupB: shuffle([...groupB, answer.b]),
+    groupA: shuffle([...groupA, ...answer.as]),
+    groupB: shuffle([...groupB, ...answer.bs]),
     answer,
   });
 }
@@ -202,12 +201,8 @@ async function addDistractors(
 }
 
 function validQuestionInvariant(question: OneCorrectPairQuestion) {
-  // Ensure there aren't two identical choices in the same group.
-  uniqueInvariant(question.groupA.map((x) => oneCorrectPairChoiceText(x)));
-  uniqueInvariant(question.groupB.map((x) => oneCorrectPairChoiceText(x)));
-  // Ensure the answer is included.
-  invariant(question.groupA.includes(question.answer.a));
-  invariant(question.groupB.includes(question.answer.b));
+  oneCorrectPairQuestionInvariant(question);
+
   // Ensure all choices are the same length.
   identicalInvariant([
     ...question.groupA.map((x) => hanziOrPinyinSyllableCount(x)),

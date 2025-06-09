@@ -3,12 +3,14 @@ import {
   hanziCharCount,
   idsNodeToString,
   IdsOperator,
+  isHanziChar,
   parseIds,
   walkIdsNode,
 } from "#data/hanzi.ts";
 import type { HanziText } from "#data/model.ts";
 import assert from "node:assert/strict";
 import test from "node:test";
+import { 汉 } from "./helpers";
 
 await test(`${flattenIds.name} handles ⿱⿱ to ⿳ and ⿰⿰ to ⿲`, () => {
   for (const [input, expected] of [
@@ -326,4 +328,18 @@ await test(`${hanziCharCount.name} fixtures`, () => {
   for (const value of [`你好`, `再见`] as HanziText[]) {
     expect(hanziCharCount(value)).toBe(2);
   }
+});
+
+await test(`${isHanziChar.name} suite`, async () => {
+  await test(`fixtures`, async () => {
+    const valid = [汉`应`, 汉`兄`, 汉`同`];
+    for (const x of valid) {
+      expect(isHanziChar(x)).toBe(true);
+    }
+
+    const invalid = [汉`应应`, 汉`兄兄`, 汉`同同`];
+    for (const x of invalid) {
+      expect(isHanziChar(x)).toBe(false);
+    }
+  });
 });
