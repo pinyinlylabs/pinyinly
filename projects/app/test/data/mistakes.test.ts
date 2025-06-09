@@ -1,21 +1,8 @@
-import {
-  hanziFromHanziOrHanziWord,
-  skillsToReReviewForHanziGlossMistake,
-} from "#data/mistakes.ts";
+import { skillsToReReviewForHanziGlossMistake } from "#data/mistakes.ts";
 import type { HanziGlossMistakeType } from "#data/model.ts";
 import { MistakeKind } from "#data/model.ts";
 import test from "node:test";
 import { 汉 } from "./helpers";
-
-await test(`${hanziFromHanziOrHanziWord.name} suite`, async () => {
-  await test(`supports hanzi word`, () => {
-    expect(hanziFromHanziOrHanziWord(`你好:hello`)).toEqual(`你好`);
-  });
-
-  await test(`supports hanzi`, () => {
-    expect(hanziFromHanziOrHanziWord(汉`你好`)).toEqual(`你好`);
-  });
-});
 
 await test(`${skillsToReReviewForHanziGlossMistake.name} suite`, async () => {
   await test(`reviews all meanings with the same hanzi`, async () => {

@@ -26,8 +26,8 @@ import type {
   HanziText,
   HanziWord,
   HanziWordSkillKind,
-  NewSkillRating,
   SrsStateType,
+  UnsavedSkillRating,
 } from "./model";
 import { SkillKind, SrsKind } from "./model";
 import type {
@@ -681,7 +681,7 @@ export function computeSkillRating(opts: {
   skill: Skill;
   correct: boolean;
   durationMs: number;
-}): NewSkillRating {
+}): UnsavedSkillRating {
   const { skill, correct, durationMs } = opts;
 
   let easyDuration;

@@ -263,7 +263,7 @@ export interface PinyinSyllableSuggestions {
 export function pinyinSyllableSuggestions(
   query: string,
 ): DeepReadonly<PinyinSyllableSuggestions> | null {
-  const lastSyllable = matchAllPinyinSyllables(query).slice(-2);
+  const lastSyllable = matchAllPinyinSyllablesWithIndexes(query).slice(-2);
   if (lastSyllable.length !== 2) {
     return null;
   }
@@ -553,7 +553,22 @@ const matchAllPinyinRegExp = new RegExp(pinyinSyllablePattern, `g`);
  *
  * @returns An array of alternating index and matched syllable pairs.
  */
-export function matchAllPinyinSyllables(input: string) {
+export function matchAllPinyinSyllables(input: string): string[] {
+  const tokens = [];
+  for (const { 0: text } of input.matchAll(matchAllPinyinRegExp)) {
+    tokens.push(text);
+  }
+  return tokens;
+}
+
+/**
+ * Find all pinyin syllables in a string.
+ *
+ * @returns An array of alternating index and matched syllable pairs.
+ */
+export function matchAllPinyinSyllablesWithIndexes(
+  input: string,
+): (string | number)[] {
   const tokens = [];
   for (const { index, 0: text } of input.matchAll(matchAllPinyinRegExp)) {
     tokens.push(index, text);

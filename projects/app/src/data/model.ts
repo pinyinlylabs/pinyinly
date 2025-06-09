@@ -211,7 +211,7 @@ export type QuestionFlagType =
 const questionKindSchema = z.enum({
   MultipleChoice: `debug--MultipleChoice`,
   OneCorrectPair: `debug--OneCorrectPair`,
-  HanziToPinyin: `debug--HanziToPinyin`,
+  HanziWordToPinyin: `debug--HanziWordToPinyin`,
 });
 export const QuestionKind = questionKindSchema.enum;
 export type QuestionKind = z.infer<typeof questionKindSchema>;
@@ -284,7 +284,7 @@ export type MistakeType =
   | HanziPinyinMistakeType
   | HanziPinyinInitialMistakeType;
 
-export interface NewSkillRating {
+export interface UnsavedSkillRating {
   skill: Skill;
   rating: Rating;
   durationMs: number;
@@ -325,8 +325,8 @@ export interface OneCorrectPairQuestion {
   flag?: QuestionFlagType;
 }
 
-export interface HanziToPinyinQuestion {
-  kind: typeof QuestionKind.HanziToPinyin;
+export interface HanziWordToPinyinQuestion {
+  kind: typeof QuestionKind.HanziWordToPinyin;
   /**
    * There can be multiple correct answers, e.g. for a word like `好` which
    * can be pronounced as `hǎo` or `hào`.
@@ -339,7 +339,7 @@ export interface HanziToPinyinQuestion {
 export type Question =
   | MultipleChoiceQuestion
   | OneCorrectPairQuestion
-  | HanziToPinyinQuestion;
+  | HanziWordToPinyinQuestion;
 
 export interface PinyinInitialAssociation {
   initial: string;

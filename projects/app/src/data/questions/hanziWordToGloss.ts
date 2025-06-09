@@ -21,7 +21,7 @@ import type {
 import { QuestionKind, SkillKind } from "../model";
 import type { HanziWordSkill, Skill } from "../rizzleSchema";
 import { hanziWordFromSkill, skillKindFromSkill } from "../skills";
-import { oneCorrectPairChoiceText } from "./util";
+import { oneCorrectPairChoiceText } from "./oneCorrectPair";
 
 // generate a question to test a skill
 export async function hanziWordToGlossQuestionOrThrow(
@@ -247,7 +247,7 @@ function validQuestionInvariant(question: Question) {
       invariant(question.groupB.includes(question.answer.b));
       break;
     }
-    case QuestionKind.HanziToPinyin:
+    case QuestionKind.HanziWordToPinyin:
     case QuestionKind.MultipleChoice: {
       break;
     }

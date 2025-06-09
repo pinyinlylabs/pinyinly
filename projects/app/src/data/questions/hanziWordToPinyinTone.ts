@@ -9,6 +9,7 @@ import {
   allOneSyllablePronunciationsForHanzi,
   hanziFromHanziWord,
   lookupHanziWord,
+  oneSyllablePinyinOrThrow,
   pinyinOrThrow,
 } from "@/dictionary/dictionary";
 import {
@@ -33,8 +34,7 @@ import { hanziWordFromSkill } from "../skills";
 import {
   hanziOrPinyinSyllableCount,
   oneCorrectPairChoiceText,
-  oneSyllablePinyinOrThrow,
-} from "./util";
+} from "./oneCorrectPair";
 
 export async function hanziWordToPinyinToneQuestionOrThrow(
   skill: HanziWordSkill,

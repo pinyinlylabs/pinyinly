@@ -6,7 +6,7 @@ import {
   nextReview,
   ratingName,
 } from "#util/fsrs.ts";
-import type { RepeatedSequence2 } from "#util/types.ts";
+import type { RepeatedSequence } from "#util/types.ts";
 import type { Duration } from "date-fns";
 import { add } from "date-fns/add";
 import { intervalToDuration } from "date-fns/intervalToDuration";
@@ -461,7 +461,7 @@ await test(`${fsrsIsForgotten.name} suite`, async (t) => {
 
 type ExpectedReview = z.output<typeof expectedReviewSchema>;
 
-type FsrsSequence = RepeatedSequence2<[Rating, ExpectedReview, Duration]>;
+type FsrsSequence = RepeatedSequence<[Rating, ExpectedReview, Duration]>;
 
 /**
  * Create a test case for an FSRS sequence based on ratings.
