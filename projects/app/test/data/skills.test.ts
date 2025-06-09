@@ -598,6 +598,69 @@ await test(`${skillReviewQueue.name} suite`, async () => {
         retryCount: 0,
       });
     });
+
+    await test(`throttles the number of new skills in the queue`, async () => {
+      const graph = await skillLearningGraph({
+        targetSkills: [
+          `he:分:divide`,
+          `he:一:one`,
+          `he:一下儿:aBit`,
+          `he:一些:some`,
+          `he:一会儿:aWhile`,
+          `he:一共:inTotal`,
+          `he:一切:everything`,
+          `he:一半:half`,
+          `he:一块儿:together`,
+          `he:一定:certainly`,
+          `he:一方面:onOneHand`,
+          `he:一样:same`,
+          `he:一点儿:aLittle`,
+          `he:一点点:aLittleBit`,
+          `he:一生:lifetime`,
+          `he:一直:continuously`,
+          `he:一般:general`,
+          `he:一起:together`,
+          `he:一路平安:haveGoodTrip`,
+          `he:一路顺风:journeysmooth`,
+          `he:一边:side`,
+          `he:一部分:part`,
+        ],
+      });
+
+      // When there's no existing SRS state, you can learn 15 new skills.
+      expect(
+        skillReviewQueue({
+          graph,
+          skillSrsStates: new Map(),
+          latestSkillRatings: new Map(),
+        }),
+      ).toMatchObject({
+        dueCount: 0,
+        newCount: 15,
+        overDueCount: 0,
+        retryCount: 0,
+      });
+
+      // When you have partially stablised some skills, that reduces the number
+      // of new skills you can learn.
+      expect(
+        skillReviewQueue({
+          graph,
+          skillSrsStates: new Map([
+            [`he:一:one`, mockSrsState(时`-10m`, 时`-2h`)], // due two hours ago
+            [`he:𠃌:radical`, mockSrsState(时`0s`, 时`-1h`)], // due one hour ago
+            [`he:八:eight`, mockSrsState(时`-10m`, 时`1h`)], // due in one hour,
+            [`he:刀:knife`, mockSrsState(时`-10m`, 时`2h`)], // due in two hours,
+          ]),
+          latestSkillRatings: new Map(),
+        }),
+      ).toMatchObject({
+        dueCount: 2,
+        newCount: 11, // 4 unstablised skills, only 11 slots available for new skills
+        overDueCount: 0,
+        retryCount: 0,
+      });
+    });
   });
 
   await test(`${SkillKind.HanziWordToPinyin} skills`, async () => {
