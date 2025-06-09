@@ -83,6 +83,8 @@ await test(`${hanziToPinyinQuestionMistakes.name} suite`, async () => {
     };
 
     const fixtures: [string, string[]][] = [
+      [`nǐ`, [`nǐ`]], // less syllables than the answer
+      [`nǐhǎomá`, [`nǐ`, `hǎo`, `má`]], // more syllables than the answer
       [`nihǎo`, [`ni`, `hǎo`]],
       [`ni  hǎo`, [`ni`, `hǎo`]],
       [`nǐhao`, [`nǐ`, `hao`]],
