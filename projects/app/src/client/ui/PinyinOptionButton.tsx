@@ -22,6 +22,7 @@ export function PinyinOptionButton({
 }: PinyinOptionButtonProps) {
   return (
     <RectButton2
+      {...props}
       variant="option"
       className={buttonClass({ className })}
       onPress={() => {
@@ -36,8 +37,17 @@ export function PinyinOptionButton({
         // `onPress` is still needed for non-touch devices (like desktop).
         e.preventDefault();
         onPress?.(pinyin);
+
+        // Pass-through
+        props.onTouchEnd?.(e);
       }}
-      {...props}
+      onPointerDown={(e) => {
+        // Prevent focus loss on mouse/trackpad devices like desktop. The `onPress`
+        e.preventDefault();
+
+        // Pass-through
+        props.onPointerDown?.(e);
+      }}
     >
       <Text className="hhh-text-button-option">{pinyin}</Text>
       <Text className="hhh-text-button-option-caption">{shortcutKey}</Text>

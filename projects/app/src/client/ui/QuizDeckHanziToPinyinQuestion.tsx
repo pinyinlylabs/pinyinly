@@ -12,7 +12,10 @@ import type {
   PinyinSyllableSuggestion,
   PinyinSyllableSuggestions,
 } from "@/data/pinyin";
-import { pinyinSyllableSuggestions } from "@/data/pinyin";
+import {
+  matchAllPinyinSyllables,
+  pinyinSyllableSuggestions,
+} from "@/data/pinyin";
 import type { HanziWordSkill, Skill } from "@/data/rizzleSchema";
 import {
   computeSkillRating,
@@ -42,6 +45,8 @@ import { PinyinOptionButton } from "./PinyinOptionButton";
 import { QuizFlagText } from "./QuizFlagText";
 import { QuizSubmitButton, QuizSubmitButtonState } from "./QuizSubmitButton";
 import { TextInputSingle } from "./TextInputSingle";
+
+const autoSubmit = true as boolean;
 
 export function QuizDeckHanziToPinyinQuestion({
   noAutoFocus = true,
@@ -207,7 +212,12 @@ export function QuizDeckHanziToPinyinQuestion({
             );
           })}
         </View>
-        <View className="h-0" />
+        <View
+          // Invisible element at the bottom so that the `justify-between`
+          // applys space at the bottom too, whilst still keeping this whole
+          // thing at 200px.
+          className="h-0"
+        />
       </View>
       <PinyinTextInputSingle
         autoFocus={!noAutoFocus}
@@ -215,6 +225,14 @@ export function QuizDeckHanziToPinyinQuestion({
         onChangeText={(text) => {
           userAnswerRef.current = text;
           setUserAnswerEmpty(text.trim().length === 0);
+          if (autoSubmit && text.endsWith(` `)) {
+            const expectedSyllableCount = nonNullable(answers[0]).length;
+            const actualSyllableCount =
+              matchAllPinyinSyllables(text).length / 2;
+            if (expectedSyllableCount === actualSyllableCount) {
+              submit();
+            }
+          }
         }}
         onSubmit={submit}
       />
@@ -265,7 +283,8 @@ const PinyinTextInputSingle = ({
       text.slice(0, suggestions.from) +
       syllable.pinyinSyllable +
       text.slice(suggestions.to) +
-      text.slice(suggestions.to);
+      // Trailing space ensures "autoSubmit" works.
+      ` `;
     updateText(newText);
   };
 
