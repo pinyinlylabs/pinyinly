@@ -35,6 +35,8 @@ import {
   lookupHanziWord,
   meaningKeyFromHanziWord,
   partOfSpeechSchema,
+  unparseDictionary,
+  upsertHanziWordMeaning,
   wordListSchema,
 } from "#dictionary/dictionary.ts";
 import "#types/hanzi.d.ts";
@@ -552,7 +554,7 @@ const HanziEditor = ({
             onChange={(value) => {
               void (async () => {
                 const hanziWord = buildHanziWord(hanzi, value.meaningKey);
-                await upsertHanziWordMeaning(hanziWord, value.meaning);
+                await saveUpsertHanziWordMeaning(hanziWord, value.meaning);
                 setLocation({ type: `saved` });
               })();
             }}
@@ -881,7 +883,7 @@ const HanziWordEditor = ({
               invariant(newExample != null);
 
               mutations.push(() =>
-                upsertHanziWordMeaning(hanziWord, {
+                saveUpsertHanziWordMeaning(hanziWord, {
                   example: newExample,
                 }),
               );
@@ -897,7 +899,7 @@ const HanziWordEditor = ({
                   ? undefined
                   : partOfSpeechSchema.parse(newValue);
               mutations.push(() =>
-                upsertHanziWordMeaning(hanziWord, {
+                saveUpsertHanziWordMeaning(hanziWord, {
                   partOfSpeech: newPartOfSpeech,
                 }),
               );
@@ -909,7 +911,7 @@ const HanziWordEditor = ({
               invariant(newDefinition != null);
 
               mutations.push(() =>
-                upsertHanziWordMeaning(hanziWord, {
+                saveUpsertHanziWordMeaning(hanziWord, {
                   definition: newDefinition,
                 }),
               );
@@ -927,7 +929,7 @@ const HanziWordEditor = ({
               const newGloss = newArray.length > 0 ? newArray : undefined;
 
               mutations.push(() =>
-                upsertHanziWordMeaning(hanziWord, {
+                saveUpsertHanziWordMeaning(hanziWord, {
                   gloss: newGloss,
                 }),
               );
@@ -939,7 +941,7 @@ const HanziWordEditor = ({
               invariant(newGlossHint != null);
 
               mutations.push(() =>
-                upsertHanziWordMeaning(hanziWord, {
+                saveUpsertHanziWordMeaning(hanziWord, {
                   glossHint: newGlossHint,
                 }),
               );
@@ -953,7 +955,7 @@ const HanziWordEditor = ({
               invariant(newComponentFormOf != null);
 
               mutations.push(() =>
-                upsertHanziWordMeaning(hanziWord, {
+                saveUpsertHanziWordMeaning(hanziWord, {
                   componentFormOf: newComponentFormOf,
                 }),
               );
@@ -972,7 +974,7 @@ const HanziWordEditor = ({
                 newArray.length > 0 ? newArray : undefined;
 
               mutations.push(() =>
-                upsertHanziWordMeaning(hanziWord, {
+                saveUpsertHanziWordMeaning(hanziWord, {
                   visualVariants: newVisualVariants,
                 }),
               );
@@ -1000,7 +1002,7 @@ const HanziWordEditor = ({
                 );
 
               mutations.push(() =>
-                upsertHanziWordMeaning(hanziWord, {
+                saveUpsertHanziWordMeaning(hanziWord, {
                   pinyin: newPinyin,
                 }),
               );
@@ -1926,7 +1928,7 @@ const DictionaryPicker = ({
               void (async () => {
                 const newResults = [...location.result];
                 if (result.type === `new`) {
-                  await upsertHanziWordMeaning(
+                  await saveUpsertHanziWordMeaning(
                     result.hanziWord,
                     result.meaning,
                   );
@@ -2433,80 +2435,21 @@ async function mergeHanziWord(
   }
 }
 
-async function upsertHanziWordMeaning(
+async function saveUpsertHanziWordMeaning(
   hanziWord: HanziWord,
   patch: Partial<HanziWordMeaning>,
 ) {
   const dict = await readDictionary();
 
-  if (patch.pinyin?.length === 0) {
-    patch.pinyin = undefined;
-  }
-
-  if (patch.definition?.trim().length === 0) {
-    patch.definition = undefined;
-  }
-
-  if (patch.example?.trim().length === 0) {
-    patch.example = undefined;
-  }
-
-  if (patch.glossHint?.trim().length === 0) {
-    patch.glossHint = undefined;
-  }
-
-  if (patch.visualVariants?.length === 0) {
-    patch.visualVariants = undefined;
-  }
-
-  if (patch.componentFormOf?.trim().length === 0) {
-    patch.componentFormOf = undefined;
-  }
-
-  const meaning = dict.get(hanziWord);
-  if (meaning == null) {
-    const res = hanziWordMeaningSchema.safeParse(patch);
-    if (res.success) {
-      dict.set(hanziWord, res.data);
-    } else {
-      throw new Error(
-        `Could not create a new meaning for ${hanziWord} (patch is incomplete)`,
-      );
-    }
-  } else {
-    const newMeaning = { ...meaning, ...patch };
-    // Validate the data before saving.
-    hanziWordMeaningSchema.parse(newMeaning);
-    dict.set(hanziWord, newMeaning);
-  }
+  upsertHanziWordMeaning(dict, hanziWord, patch);
 
   await writeDictionary(dict);
 }
 
-async function writeDictionary(data: Map<HanziWord, HanziWordMeaning>) {
+async function writeDictionary(dict: Dictionary) {
   await writeUtf8FileIfChanged(
     dictionaryFilePath,
-    jsonStringifyIndentOneLevel(
-      [...data.entries()]
-        .map(
-          ([key, meaning]) =>
-            [
-              key,
-              {
-                ...meaning,
-
-                // TODO: convert to rizzle
-                pinyin:
-                  meaning.pinyin == null
-                    ? undefined
-                    : meaning.pinyin.map((x) =>
-                        rPinyinPronunciation().marshal(x),
-                      ),
-              },
-            ] as const,
-        )
-        .sort(sortComparatorString((x) => x[0])),
-    ),
+    jsonStringifyIndentOneLevel(unparseDictionary(dict)),
   );
   await queryClient.invalidateQueries({ queryKey: [`loadDictionary`] });
 }
