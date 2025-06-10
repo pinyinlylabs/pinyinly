@@ -155,8 +155,8 @@ function isRetryablePgError(err: unknown) {
   return code === `40001` || code === `40P01`;
 }
 
-export function json_agg<TTable extends PgTable>(col: TTable) {
-  return sql<TTable[`$inferSelect`][]>`coalesce(json_agg(${col}),'[]')`;
+export function json_agg<TCol extends SQLWrapper>(col: TCol) {
+  return sql<InferSelect<TCol>[]>`coalesce(json_agg(${col}),'[]')`;
 }
 
 export function substring<TCol extends PgColumn>(col: TCol, regex: RegExp) {
@@ -165,25 +165,24 @@ export function substring<TCol extends PgColumn>(col: TCol, regex: RegExp) {
 
 export function array_agg<TCol extends PgColumn>(col: TCol) {
   return sql<
-    TCol[`_`][`data`][]
+    InferSelect<TCol>[]
   >`coalesce(array_agg(${col}),ARRAY[]::${sql.raw(col.getSQLType())}[])`;
 }
+
+type InferSelect<T extends SQLWrapper> = T extends PgColumn
+  ? T[`_`][`data`]
+  : T extends AnyPgTable
+    ? T[`$inferSelect`]
+    : T extends SQL<infer T>
+      ? T
+      : never;
 
 export function json_object_agg<
   TCol1 extends SQLWrapper,
   TCol2 extends SQLWrapper,
 >(col1: TCol1, col2: TCol2) {
   return sql<
-    Record<
-      string,
-      TCol2 extends PgColumn
-        ? TCol2[`_`][`data`]
-        : TCol2 extends AnyPgTable
-          ? TCol2[`$inferSelect`]
-          : TCol2 extends SQL<infer T>
-            ? T
-            : never
-    >
+    Record<string, InferSelect<TCol2>>
   >`coalesce(json_object_agg(${col1},${col2}),'{}')`;
 }
 
@@ -239,8 +238,10 @@ export async function assertMinimumIsolationLevel(
   );
 }
 
-export function xmin<TFrom extends PgTable>(source: TFrom) {
-  return sql<string>`${source}.xmin`;
+export type Xmin = string;
+
+export function pgXmin<TFrom extends PgTable>(source: TFrom) {
+  return sql<Xmin>`${source}.xmin`;
 }
 
 /**

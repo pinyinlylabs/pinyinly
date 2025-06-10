@@ -332,9 +332,14 @@ export const v7_1 = {
   version: `7.1`,
 };
 
-const currentSchema = v7;
+export const v8 = {
+  ...v7,
+  version: `8`,
+};
 
-export const supportedSchemas = [v7, v7_1] as const;
+export const currentSchema = v8; // TODO: switch to v8 when ready
+
+export const supportedSchemas = [v7, v7_1, v8] as const;
 
 export type SupportedSchema = (typeof supportedSchemas)[number];
 

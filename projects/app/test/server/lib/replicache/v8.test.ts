@@ -1,7 +1,13 @@
-import { v7 as schema, srsStateFromFsrsState } from "#data/rizzleSchema.ts";
+import { v8 as schema, srsStateFromFsrsState } from "#data/rizzleSchema.ts";
 import { glossToHanziWord } from "#data/skills.ts";
 import { pgXmin } from "#server/lib/db.ts";
-import { computeCvrEntities, pull, push } from "#server/lib/replicache/v7.ts";
+import {
+  computeEntitiesState,
+  computePatch,
+  pull,
+  push,
+} from "#server/lib/replicache/v8.ts";
+import type { CvrEntities } from "#server/schema.ts";
 import * as s from "#server/schema.ts";
 import { nextReview, Rating } from "#util/fsrs.ts";
 import { nanoid } from "#util/nanoid.ts";
@@ -353,12 +359,13 @@ await test(`${pull.name} suite`, async (t) => {
         where: (t, { eq }) => eq(t.id, cookie.cvrId),
       });
 
-      const expectedEntities = await computeCvrEntities(tx, user.id);
+      const entitiesState = await computeEntitiesState(tx, user.id);
+      const patch = computePatch({}, entitiesState);
 
       // The CVR should have the lastMutationIds for the clients in the group
       expect(cvr).toMatchObject({
         lastMutationIds: { [client.id]: 66 },
-        entities: expectedEntities,
+        entities: patch.nextCvrEntities,
       });
     },
   );
@@ -657,33 +664,33 @@ await test(`${pull.name} suite`, async (t) => {
   });
 });
 
-await test(`${computeCvrEntities.name} suite`, async (t) => {
+await test(`${computeEntitiesState.name} suite`, async (t) => {
   await t.test(`schema ${schema.version}`, async (t) => {
     const txTest = withTxTest(t);
 
     await txTest(`works for non-existant user and client group`, async (tx) => {
-      assert.deepEqual(await computeCvrEntities(tx, `1`), {
-        hanziGlossMistake: {},
-        hanziPinyinMistake: {},
-        pinyinFinalAssociation: {},
-        pinyinInitialAssociation: {},
-        pinyinInitialGroupTheme: {},
-        skillState: {},
-        skillRating: {},
+      assert.deepEqual(await computeEntitiesState(tx, `1`), {
+        hanziGlossMistake: [],
+        hanziPinyinMistake: [],
+        pinyinFinalAssociation: [],
+        pinyinInitialAssociation: [],
+        pinyinInitialGroupTheme: [],
+        skillState: [],
+        skillRating: [],
       });
     });
 
     await txTest(`works for user`, async (tx) => {
       const user = await createUser(tx);
 
-      assert.deepEqual(await computeCvrEntities(tx, user.id), {
-        hanziGlossMistake: {},
-        hanziPinyinMistake: {},
-        pinyinFinalAssociation: {},
-        pinyinInitialAssociation: {},
-        pinyinInitialGroupTheme: {},
-        skillState: {},
-        skillRating: {},
+      assert.deepEqual(await computeEntitiesState(tx, user.id), {
+        hanziGlossMistake: [],
+        hanziPinyinMistake: [],
+        pinyinFinalAssociation: [],
+        pinyinInitialAssociation: [],
+        pinyinInitialGroupTheme: [],
+        skillState: [],
+        skillRating: [],
       });
     });
 
@@ -707,24 +714,19 @@ await test(`${computeCvrEntities.name} suite`, async (t) => {
         ])
         .returning({
           id: s.skillState.id,
-          skill: s.skillState.skill,
-          version: pgXmin(s.skillState),
+          key: s.skillState.skill,
+          xmin: pgXmin(s.skillState),
         });
       invariant(user1SkillState != null);
 
-      assert.deepEqual(await computeCvrEntities(tx, user1.id), {
-        hanziGlossMistake: {},
-        hanziPinyinMistake: {},
-        pinyinFinalAssociation: {},
-        pinyinInitialAssociation: {},
-        pinyinInitialGroupTheme: {},
-        skillRating: {},
-        skillState: {
-          [user1SkillState.id]:
-            user1SkillState.version +
-            `:` +
-            schema.skillState.marshalKey(user1SkillState),
-        },
+      assert.deepEqual(await computeEntitiesState(tx, user1.id), {
+        hanziGlossMistake: [],
+        hanziPinyinMistake: [],
+        pinyinFinalAssociation: [],
+        pinyinInitialAssociation: [],
+        pinyinInitialGroupTheme: [],
+        skillRating: [],
+        skillState: [user1SkillState],
       });
     });
 
@@ -748,25 +750,18 @@ await test(`${computeCvrEntities.name} suite`, async (t) => {
         ])
         .returning({
           id: s.skillRating.id,
-          skill: s.skillRating.skill,
-          createdAt: s.skillRating.createdAt,
-          version: pgXmin(s.skillRating),
+          xmin: pgXmin(s.skillRating),
         });
       invariant(user1SkillRating != null);
 
-      assert.deepEqual(await computeCvrEntities(tx, user1.id), {
-        hanziGlossMistake: {},
-        hanziPinyinMistake: {},
-        pinyinFinalAssociation: {},
-        pinyinInitialAssociation: {},
-        pinyinInitialGroupTheme: {},
-        skillRating: {
-          [user1SkillRating.id]:
-            user1SkillRating.version +
-            `:` +
-            schema.skillRating.marshalKey({ id: user1SkillRating.id }),
-        },
-        skillState: {},
+      assert.deepEqual(await computeEntitiesState(tx, user1.id), {
+        hanziGlossMistake: [],
+        hanziPinyinMistake: [],
+        pinyinFinalAssociation: [],
+        pinyinInitialAssociation: [],
+        pinyinInitialGroupTheme: [],
+        skillRating: [user1SkillRating],
+        skillState: [],
       });
     });
 
@@ -792,26 +787,19 @@ await test(`${computeCvrEntities.name} suite`, async (t) => {
           ])
           .returning({
             id: s.pinyinFinalAssociation.id,
-            final: s.pinyinFinalAssociation.final,
-            version: pgXmin(s.pinyinFinalAssociation),
+            key: s.pinyinFinalAssociation.final,
+            xmin: pgXmin(s.pinyinFinalAssociation),
           });
         invariant(user1PinyinFinalAssociation != null);
 
-        assert.deepEqual(await computeCvrEntities(tx, user1.id), {
-          hanziGlossMistake: {},
-          hanziPinyinMistake: {},
-          pinyinFinalAssociation: {
-            [user1PinyinFinalAssociation.id]:
-              user1PinyinFinalAssociation.version +
-              `:` +
-              schema.pinyinFinalAssociation.marshalKey(
-                user1PinyinFinalAssociation,
-              ),
-          },
-          pinyinInitialAssociation: {},
-          pinyinInitialGroupTheme: {},
-          skillRating: {},
-          skillState: {},
+        assert.deepEqual(await computeEntitiesState(tx, user1.id), {
+          hanziGlossMistake: [],
+          hanziPinyinMistake: [],
+          pinyinFinalAssociation: [user1PinyinFinalAssociation],
+          pinyinInitialAssociation: [],
+          pinyinInitialGroupTheme: [],
+          skillRating: [],
+          skillState: [],
         });
       },
     );
@@ -838,28 +826,59 @@ await test(`${computeCvrEntities.name} suite`, async (t) => {
           ])
           .returning({
             id: s.pinyinInitialAssociation.id,
-            initial: s.pinyinInitialAssociation.initial,
-            version: pgXmin(s.pinyinInitialAssociation),
+            key: s.pinyinInitialAssociation.initial,
+            xmin: pgXmin(s.pinyinInitialAssociation),
           });
         invariant(user1PinyinInitialAssociation != null);
 
-        assert.deepEqual(await computeCvrEntities(tx, user1.id), {
-          hanziGlossMistake: {},
-          hanziPinyinMistake: {},
-          pinyinFinalAssociation: {},
-          pinyinInitialAssociation: {
-            [user1PinyinInitialAssociation.id]:
-              user1PinyinInitialAssociation.version +
-              `:` +
-              schema.pinyinInitialAssociation.marshalKey(
-                user1PinyinInitialAssociation,
-              ),
-          },
-          pinyinInitialGroupTheme: {},
-          skillRating: {},
-          skillState: {},
+        assert.deepEqual(await computeEntitiesState(tx, user1.id), {
+          hanziGlossMistake: [],
+          hanziPinyinMistake: [],
+          pinyinFinalAssociation: [],
+          pinyinInitialAssociation: [user1PinyinInitialAssociation],
+          pinyinInitialGroupTheme: [],
+          skillRating: [],
+          skillState: [],
         });
       },
     );
+  });
+});
+
+await test(`${computePatch.name} suite`, async (t) => {
+  type EntitiesState = Parameters<typeof computePatch>[1];
+
+  await t.test(`unchanged entities are preserved`, async (t) => {
+    const prevCvr: CvrEntities = {
+      hanziGlossMistake: { x1: `1` },
+      hanziPinyinMistake: { x2: `2` },
+      pinyinFinalAssociation: { x3: `3` },
+      pinyinInitialAssociation: { x4: `4` },
+      pinyinInitialGroupTheme: { x5: `5` },
+      skillState: { x6: `6` },
+      skillRating: { x7: `7` },
+    };
+    const entitiesState: EntitiesState = {
+      hanziGlossMistake: [{ id: `x1`, xmin: `1` }],
+      hanziPinyinMistake: [{ id: `x2`, xmin: `2` }],
+      pinyinFinalAssociation: [{ id: `x3`, xmin: `3` }],
+      pinyinInitialAssociation: [{ id: `x4`, xmin: `4` }],
+      pinyinInitialGroupTheme: [{ id: `x5`, xmin: `5` }],
+      skillState: [{ id: `x6`, xmin: `6` }],
+      skillRating: [{ id: `x7`, xmin: `7` }],
+    };
+    expect(computePatch(prevCvr, entitiesState)).toEqual({
+      nextCvrEntities: prevCvr,
+      partial: false,
+      patchOpsUnhydrated: {
+        hanziGlossMistake: { delKeys: [], putIds: [] },
+        hanziPinyinMistake: { delKeys: [], putIds: [] },
+        pinyinFinalAssociation: { delKeys: [], putIds: [] },
+        pinyinInitialAssociation: { delKeys: [], putIds: [] },
+        pinyinInitialGroupTheme: { delKeys: [], putIds: [] },
+        skillState: { delKeys: [], putIds: [] },
+        skillRating: { delKeys: [], putIds: [] },
+      },
+    });
   });
 });

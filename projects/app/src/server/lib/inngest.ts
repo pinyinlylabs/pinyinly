@@ -1,5 +1,5 @@
 import { hanziWordSkillKinds } from "@/data/model";
-import { v7 } from "@/data/rizzleSchema";
+import { supportedSchemas } from "@/data/rizzleSchema";
 import { hanziWordSkill } from "@/data/skills";
 import {
   loadDictionary,
@@ -170,7 +170,10 @@ const syncRemotePush = inngest.createFunction(
         lastMutationId,
         schemaVersion,
       } of remoteSyncClients) {
-        if (schemaVersion !== v7.version) {
+        if (
+          schemaVersion == null ||
+          supportedSchemas.some((s) => s.version === schemaVersion)
+        ) {
           continue;
         }
 
@@ -260,8 +263,6 @@ const syncRemotePull = inngest.createFunction(
 
     // Iterate over each remote sync rule and process it one by one.
     for (const remoteSync of remoteSyncs) {
-      const schemaVersions = [v7.version];
-
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       while (true) {
         const fetchedMutations = await step.run(
@@ -283,7 +284,7 @@ const syncRemotePull = inngest.createFunction(
             );
 
             return await trpcClient.replicache.fetchMutations.mutate({
-              schemaVersions,
+              schemaVersions: supportedSchemas.map((s) => s.version),
               lastMutationIds,
             });
           },

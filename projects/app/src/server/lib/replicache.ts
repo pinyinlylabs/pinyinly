@@ -1,5 +1,4 @@
-import type { SupportedSchema } from "@/data/rizzleSchema";
-import { rPinyinInitialGroupId, v7, v7_1 } from "@/data/rizzleSchema";
+import { v7, v7_1, v8 } from "@/data/rizzleSchema";
 import type {
   ClientStateNotFoundResponse,
   PullOkResponse,
@@ -11,24 +10,19 @@ import type {
 import { pushRequestSchema, replicacheMutationSchema } from "@/util/rizzle";
 import { invariant } from "@haohaohow/lib/invariant";
 import { startSpan } from "@sentry/core";
-import { and, eq, gt, sql } from "drizzle-orm";
+import { and, eq, gt } from "drizzle-orm";
 import chunk from "lodash/chunk";
-import mapValues from "lodash/mapValues";
 import type { z } from "zod/v4";
 import * as s from "../schema";
 import type { Drizzle } from "./db";
-import {
-  json_build_object,
-  json_object_agg,
-  withRepeatableReadTransaction,
-  xmin,
-} from "./db";
+import { withRepeatableReadTransaction } from "./db";
 import {
   pull as pullV7,
   pull as pullV7_1,
   push as pushV7,
   push as pushV7_1,
 } from "./replicache/v7";
+import { pull as pullV8, push as pushV8 } from "./replicache/v8";
 
 interface Impl {
   pull: typeof pull;
@@ -60,13 +54,25 @@ export async function pull(
 }
 
 function getImpl(schemaVersion: string): Impl {
-  if (schemaVersion === v7_1.version) {
-    return { pull: pullV7_1, push: pushV7_1 };
-  } else if (schemaVersion === v7.version) {
-    return { pull: pullV7, push: pushV7 };
+  switch (schemaVersion) {
+    case v8.version: {
+      return { pull: pullV8, push: pushV8 };
+    }
+    case v7_1.version: {
+      return { pull: pullV7_1, push: pushV7_1 };
+    }
+    case v7.version: {
+      return { pull: pullV7, push: pushV7 };
+    }
+    default: {
+      // If the schema version is not recognized, return a not supported
+      // implementation that returns a VersionNotSupportedResponse.
+      return {
+        pull: notSupported,
+        push: notSupported,
+      };
+    }
   }
-
-  return { pull: notSupported, push: notSupported };
 }
 
 const notSupported = () =>
@@ -74,183 +80,6 @@ const notSupported = () =>
     error: `VersionNotSupported`,
     versionType: `schema`,
   } satisfies VersionNotSupportedResponse);
-
-export interface ClientRecord {
-  id: string;
-  clientGroupId: string;
-  lastMutationId: number;
-}
-
-export interface ClientGroupRecord {
-  id: string;
-  userId: string;
-  schemaVersion: string;
-  cvrVersion: number;
-}
-
-export async function computeCvrEntities(
-  db: Drizzle,
-  userId: string,
-  schema: SupportedSchema,
-) {
-  return await startSpan({ name: computeCvrEntities.name }, async () => {
-    const pinyinFinalAssociationVersions = db
-      .select({
-        map: json_object_agg(
-          s.pinyinFinalAssociation.id,
-          json_build_object({
-            final: s.pinyinFinalAssociation.final,
-            xmin: xmin(s.pinyinFinalAssociation),
-          }),
-        ).as(`pinyinFinalAssociationVersions`),
-      })
-      .from(s.pinyinFinalAssociation)
-      .where(eq(s.pinyinFinalAssociation.userId, userId))
-      .as(`pinyinFinalAssociationVersions`);
-
-    const pinyinInitialAssociationVersions = db
-      .select({
-        map: json_object_agg(
-          s.pinyinInitialAssociation.id,
-          json_build_object({
-            initial: s.pinyinInitialAssociation.initial,
-            xmin: xmin(s.pinyinInitialAssociation),
-          }),
-        ).as(`pinyinInitialAssociationVersions`),
-      })
-      .from(s.pinyinInitialAssociation)
-      .where(eq(s.pinyinInitialAssociation.userId, userId))
-      .as(`pinyinInitialAssociationVersions`);
-
-    const pinyinInitialGroupThemeVersions = db
-      .select({
-        map: json_object_agg(
-          s.pinyinInitialGroupTheme.id,
-          json_build_object({
-            groupId: sql<string>`${s.pinyinInitialGroupTheme.groupId}`,
-            xmin: xmin(s.pinyinInitialGroupTheme),
-          }),
-        ).as(`pinyinInitialGroupThemeVersions`),
-      })
-      .from(s.pinyinInitialGroupTheme)
-      .where(eq(s.pinyinInitialGroupTheme.userId, userId))
-      .as(`pinyinInitialGroupThemeVersions`);
-
-    const skillStateVersions = db
-      .select({
-        map: json_object_agg(
-          s.skillState.id,
-          json_build_object({
-            skill: s.skillState.skill,
-            xmin: xmin(s.skillState),
-          }),
-        ).as(`skillStateVersions`),
-      })
-      .from(s.skillState)
-      .where(eq(s.skillState.userId, userId))
-      .as(`skillStateVersions`);
-
-    const skillRatingVersions = db
-      .select({
-        map: json_object_agg(
-          s.skillRating.id,
-          json_build_object({
-            id: s.skillRating.id,
-            xmin: xmin(s.skillRating),
-          }),
-        ).as(`skillRatingVersions`),
-      })
-      .from(s.skillRating)
-      .where(eq(s.skillRating.userId, userId))
-      .as(`skillRatingVersions`);
-
-    const hanziGlossMistakeVersions = db
-      .select({
-        map: json_object_agg(
-          s.hanziGlossMistake.id,
-          json_build_object({
-            id: s.hanziGlossMistake.id,
-            xmin: xmin(s.hanziGlossMistake),
-          }),
-        ).as(`hanziGlossMistakeVersions`),
-      })
-      .from(s.hanziGlossMistake)
-      .where(eq(s.hanziGlossMistake.userId, userId))
-      .as(`hanziGlossMistakeVersions`);
-
-    const hanziPinyinMistakeVersions = db
-      .select({
-        map: json_object_agg(
-          s.hanziPinyinMistake.id,
-          json_build_object({
-            id: s.hanziPinyinMistake.id,
-            xmin: xmin(s.hanziPinyinMistake),
-          }),
-        ).as(`hanziPinyinMistakeVersions`),
-      })
-      .from(s.hanziPinyinMistake)
-      .where(eq(s.hanziPinyinMistake.userId, userId))
-      .as(`hanziPinyinMistakeVersions`);
-
-    const [result] = await db
-      .select({
-        pinyinFinalAssociation: pinyinFinalAssociationVersions.map,
-        pinyinInitialAssociation: pinyinInitialAssociationVersions.map,
-        pinyinInitialGroupTheme: pinyinInitialGroupThemeVersions.map,
-        skillRating: skillRatingVersions.map,
-        skillState: skillStateVersions.map,
-        hanziGlossMistake: hanziGlossMistakeVersions.map,
-        hanziPinyinMistake: hanziPinyinMistakeVersions.map,
-      })
-      .from(pinyinFinalAssociationVersions)
-      .leftJoin(pinyinInitialAssociationVersions, sql`true`)
-      .leftJoin(pinyinInitialGroupThemeVersions, sql`true`)
-      .leftJoin(skillRatingVersions, sql`true`)
-      .leftJoin(skillStateVersions, sql`true`)
-      .leftJoin(hanziGlossMistakeVersions, sql`true`)
-      .leftJoin(hanziPinyinMistakeVersions, sql`true`);
-    invariant(result != null);
-
-    return {
-      pinyinInitialAssociation: mapValues(
-        result.pinyinInitialAssociation,
-        (v) => v.xmin + `:` + schema.pinyinInitialAssociation.marshalKey(v),
-      ),
-      pinyinFinalAssociation: mapValues(
-        result.pinyinFinalAssociation,
-        (v) => v.xmin + `:` + schema.pinyinFinalAssociation.marshalKey(v),
-      ),
-      pinyinInitialGroupTheme:
-        `pinyinInitialGroupTheme` in schema
-          ? mapValues(
-              result.pinyinInitialGroupTheme,
-              (v) =>
-                v.xmin +
-                `:` +
-                schema.pinyinInitialGroupTheme.marshalKey({
-                  groupId: rPinyinInitialGroupId().unmarshal(v.groupId),
-                }),
-            )
-          : {},
-      skillState: mapValues(
-        result.skillState,
-        (v) => v.xmin + `:` + schema.skillState.marshalKey(v),
-      ),
-      skillRating: mapValues(
-        result.skillRating,
-        (v) => v.xmin + `:` + schema.skillRating.marshalKey(v),
-      ),
-      hanziGlossMistake: mapValues(
-        result.hanziGlossMistake,
-        (v) => v.xmin + `:` + schema.hanziGlossMistake.marshalKey(v),
-      ),
-      hanziPinyinMistake: mapValues(
-        result.hanziPinyinMistake,
-        (v) => v.xmin + `:` + schema.hanziPinyinMistake.marshalKey(v),
-      ),
-    };
-  });
-}
 
 export const fetchedMutationSchema = pushRequestSchema.omit({
   // `profileId` isn't stored in the DB so we can't return it.

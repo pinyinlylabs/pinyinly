@@ -1,7 +1,7 @@
 import { trpc } from "@/client/trpc";
-import { v7Mutators } from "@/data/rizzleMutators";
+import { mutators } from "@/data/rizzleMutators";
 import type { Rizzle } from "@/data/rizzleSchema";
-import { v7 } from "@/data/rizzleSchema";
+import { currentSchema } from "@/data/rizzleSchema";
 import type { AppRouter } from "@/server/routers/_app";
 import { cookieSchema, r } from "@/util/rizzle";
 import type { ReactQueryValue } from "@/util/types";
@@ -124,8 +124,8 @@ function ReplicacheProviderWithDeps({
             }
           : undefined,
       },
-      v7,
-      v7Mutators,
+      currentSchema,
+      mutators,
     );
     return rizzle;
   }, [replicacheDbName, isAuthenticated, pushMutate, pullMutate]);

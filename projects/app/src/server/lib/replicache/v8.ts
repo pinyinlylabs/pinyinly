@@ -6,10 +6,11 @@ import {
 import type {
   HanziGlossMistakeType,
   HanziPinyinMistakeType,
+  PinyinInitialGroupId,
 } from "@/data/model";
 import { MistakeKind } from "@/data/model";
-import type { SupportedSchema } from "@/data/rizzleSchema";
-import { rPinyinInitialGroupId, v7 as schema } from "@/data/rizzleSchema";
+import type { Skill, SupportedSchema } from "@/data/rizzleSchema";
+import { v7 as schema } from "@/data/rizzleSchema";
 import type {
   ClientStateNotFoundResponse,
   Cookie,
@@ -20,27 +21,68 @@ import type {
   PushResponse,
   ReplicacheMutation,
   RizzleDrizzleMutators,
+  RizzleEntity,
+  RizzleRawObject,
   VersionNotSupportedResponse,
 } from "@/util/rizzle";
 import { makeDrizzleMutationHandler } from "@/util/rizzle";
-import { invariant } from "@haohaohow/lib/invariant";
+import { invariant, nonNullable } from "@haohaohow/lib/invariant";
 import { startSpan } from "@sentry/core";
 import makeDebug from "debug";
+import type { SQL } from "drizzle-orm";
 import { and, eq, inArray, sql } from "drizzle-orm";
-import mapValues from "lodash/mapValues";
+import type { SubqueryWithSelection } from "drizzle-orm/pg-core";
 import pickBy from "lodash/pickBy";
-import type { z } from "zod/v4";
+import type { CvrEntities } from "../../schema";
 import * as s from "../../schema";
-import type { Drizzle } from "../db";
+import type { Drizzle, Xmin } from "../db";
 import {
   assertMinimumIsolationLevel,
+  json_agg,
   json_build_object,
-  json_object_agg,
   pgBatchUpdate,
   pgXmin,
   withRepeatableReadTransaction,
 } from "../db";
 import { updateSkillState } from "../queries";
+
+// Changes from v7
+//
+// In v7 the CVR was stored in this format:
+//
+// ```
+// {
+//   "skillState": {
+//     "iIn9Msb81zRN": "57524:s/he:钱包:wallet",
+//     "Y3wox8G3zvLS": "59166:s/he:站:stand",
+//     …
+//   },
+//   …
+// }
+// ```
+//
+// There's a few problems with this:
+//
+// - If the replicache key changes (e.g. `s/he:钱包:wallet`) because values in
+//   the row changed, then the diff won't be detected and syncing will be
+//   broken.
+// - The CVR are bloated to store, so the DB fills up quite quickly. There's a
+//   lot of unnecessary data in this format that can be removed.
+//
+// In v8 the new CVR format is:
+//
+// ```
+// {
+//   "skillState": {
+//     "钱包:wallet": 57524,
+//     "站:stand": 59166,
+//     …
+//   },
+//   …
+// }
+// ```
+//
+// So the PostgreSQL row ID is no longer stored in the CVR.
 
 const loggerName = import.meta.filename.split(`/`).at(-1);
 invariant(loggerName != null);
@@ -229,71 +271,321 @@ export async function push(
   }
 }
 
-type CvrEntity = z.infer<typeof s.cvrEntitySchema>;
-type CvrEntities = z.infer<typeof s.cvrEntitiesSchema>;
-type CvrEntityDiff = {
-  puts: string[];
-  dels: string[];
-};
-type CvrEntitiesDiff = { [K in keyof CvrEntities]?: CvrEntityDiff };
+type CvrNamespace = keyof CvrEntities;
 
-function computeCvrEntitiesDiff(
-  prev: CvrEntities,
-  all: CvrEntities,
-  opLimit = 1000,
+interface SyncEntity<
+  KeyPath extends string,
+  S extends RizzleRawObject,
+  R extends RizzleEntity<KeyPath, S>,
+  DbEntityState extends SubqueryWithSelection<
+    { map: SQL.Aliased<EntityState> },
+    string
+  >,
+> {
+  cvrNamespace: CvrNamespace;
+  rizzleEntity: R;
+  cvrKeyToEntityKey: (cvrKey: string) => string;
+  fetchEntityPutOps: (
+    db: Drizzle,
+    ids: string[],
+  ) => Promise<{ op: `put`; key: string; value: Record<string, string> }[]>;
+  entityStateSubquery: (db: Drizzle, userId: string) => DbEntityState;
+}
+
+function makeSyncEntity<
+  CvrKeyType extends string,
+  KeyPath extends string,
+  S extends RizzleRawObject,
+  R extends RizzleEntity<KeyPath, S>,
+  DbRow extends Parameters<R[`marshalKey`]>[0] &
+    Parameters<R[`marshalValue`]>[0],
+  DbEntityState extends SubqueryWithSelection<
+    { map: SQL.Aliased<EntityState> },
+    string
+  >,
+>(
+  cvrNamespace: CvrNamespace,
+  rizzleEntity: R,
+  cvrKeyToEntityKey: (cvrKey: CvrKeyType, rizzleEntity: R) => string,
+  fetchEntities: (db: Drizzle, ids: string[]) => Promise<DbRow[]>,
+  entityStateSubquery: (db: Drizzle, userId: string) => DbEntityState,
+): SyncEntity<KeyPath, S, R, DbEntityState> {
+  return {
+    cvrNamespace,
+    rizzleEntity,
+    cvrKeyToEntityKey: (cvrKey: string) =>
+      cvrKeyToEntityKey(cvrKey as CvrKeyType, rizzleEntity),
+    fetchEntityPutOps: (db, ids) =>
+      fetchEntities(db, ids).then((rows) =>
+        rows.map((row) => ({
+          op: `put`,
+          key: rizzleEntity.marshalKey(row),
+          value: rizzleEntity.marshalValue(row),
+        })),
+      ),
+    entityStateSubquery,
+  };
+}
+
+const pinyinFinalAssociationSyncEntity = makeSyncEntity(
+  `pinyinFinalAssociation`,
+  schema.pinyinFinalAssociation,
+  (final, e) => e.marshalKey({ final }),
+  (db, ids) =>
+    db.query.pinyinFinalAssociation.findMany({
+      where: (t) => inArray(t.id, ids),
+    }),
+  (db, userId) =>
+    db
+      .select({
+        map: json_agg(
+          json_build_object({
+            id: s.pinyinFinalAssociation.id,
+            key: s.pinyinFinalAssociation.final,
+            xmin: pgXmin(s.pinyinFinalAssociation),
+          }),
+        ).as(`pinyinFinalAssociationVersions`),
+      })
+      .from(s.pinyinFinalAssociation)
+      .where(eq(s.pinyinFinalAssociation.userId, userId))
+      .as(`pinyinFinalAssociationVersions`),
+);
+
+const pinyinInitialAssociationSyncEntity = makeSyncEntity(
+  `pinyinInitialAssociation`,
+  schema.pinyinInitialAssociation,
+  (initial, e) => e.marshalKey({ initial }),
+  (db, ids) =>
+    db.query.pinyinInitialAssociation.findMany({
+      where: (t) => inArray(t.id, ids),
+    }),
+  (db, userId) =>
+    db
+      .select({
+        map: json_agg(
+          json_build_object({
+            id: s.pinyinInitialAssociation.id,
+            key: s.pinyinInitialAssociation.initial,
+            xmin: pgXmin(s.pinyinInitialAssociation),
+          }),
+        ).as(`pinyinInitialAssociationVersions`),
+      })
+      .from(s.pinyinInitialAssociation)
+      .where(eq(s.pinyinInitialAssociation.userId, userId))
+      .as(`pinyinInitialAssociationVersions`),
+);
+
+const pinyinInitialGroupThemeSyncEntity = makeSyncEntity(
+  `pinyinInitialGroupTheme`,
+  schema.pinyinInitialGroupTheme,
+  (groupId: PinyinInitialGroupId, e) => e.marshalKey({ groupId }),
+  (db, ids) =>
+    db.query.pinyinInitialGroupTheme.findMany({
+      where: (t) => inArray(t.id, ids),
+    }),
+  (db, userId) =>
+    db
+      .select({
+        map: json_agg(
+          json_build_object({
+            id: s.pinyinInitialGroupTheme.id,
+            key: s.pinyinInitialGroupTheme.groupId,
+            xmin: pgXmin(s.pinyinInitialGroupTheme),
+          }),
+        ).as(`pinyinInitialGroupThemeVersions`),
+      })
+      .from(s.pinyinInitialGroupTheme)
+      .where(eq(s.pinyinInitialGroupTheme.userId, userId))
+      .as(`pinyinInitialGroupThemeVersions`),
+);
+
+const skillStateSyncEntity = makeSyncEntity(
+  `skillState`,
+  schema.skillState,
+  (skill: Skill, e) => e.marshalKey({ skill }),
+  (db, ids) =>
+    db.query.skillState.findMany({ where: (t) => inArray(t.id, ids) }),
+  (db, userId) =>
+    db
+      .select({
+        map: json_agg(
+          json_build_object({
+            key: s.skillState.skill,
+            xmin: pgXmin(s.skillState),
+            id: s.skillState.id,
+          }),
+        ).as(`skillStateVersions`),
+      })
+      .from(s.skillState)
+      .where(eq(s.skillState.userId, userId))
+      .as(`skillStateVersions`),
+);
+
+const skillRatingSyncEntity = makeSyncEntity(
+  `skillRating`,
+  schema.skillRating,
+  (id, e) => e.marshalKey({ id }),
+  (db, ids) =>
+    db.query.skillRating.findMany({ where: (t) => inArray(t.id, ids) }),
+  (db, userId) =>
+    db
+      .select({
+        map: json_agg(
+          json_build_object({
+            id: s.skillRating.id,
+            xmin: pgXmin(s.skillRating),
+          }),
+        ).as(`skillRatingVersions`),
+      })
+      .from(s.skillRating)
+      .where(eq(s.skillRating.userId, userId))
+      .as(`skillRatingVersions`),
+);
+
+const hanziGlossMistakeSyncEntity = makeSyncEntity(
+  `hanziGlossMistake`,
+  schema.hanziGlossMistake,
+  (id, e) => e.marshalKey({ id }),
+  (db, ids) =>
+    db.query.hanziGlossMistake.findMany({ where: (t) => inArray(t.id, ids) }),
+  (db, userId) =>
+    db
+      .select({
+        map: json_agg(
+          json_build_object({
+            id: s.hanziGlossMistake.id,
+            xmin: pgXmin(s.hanziGlossMistake),
+          }),
+        ).as(`hanziGlossMistakeVersions`),
+      })
+      .from(s.hanziGlossMistake)
+      .where(eq(s.hanziGlossMistake.userId, userId))
+      .as(`hanziGlossMistakeVersions`),
+);
+
+const hanziPinyinMistakeSyncEntity = makeSyncEntity(
+  `hanziPinyinMistake`,
+  schema.hanziPinyinMistake,
+  (id, e) => e.marshalKey({ id }),
+  (db, ids) =>
+    db.query.hanziPinyinMistake.findMany({ where: (t) => inArray(t.id, ids) }),
+  (db, userId) =>
+    db
+      .select({
+        map: json_agg(
+          json_build_object({
+            id: s.hanziPinyinMistake.id,
+            xmin: pgXmin(s.hanziPinyinMistake),
+          }),
+        ).as(`hanziPinyinMistakeVersions`),
+      })
+      .from(s.hanziPinyinMistake)
+      .where(eq(s.hanziPinyinMistake.userId, userId))
+      .as(`hanziPinyinMistakeVersions`),
+);
+
+type PatchOpsUnhydrated = Partial<
+  Record<CvrNamespace, { putIds: string[]; delKeys: string[] }>
+>;
+
+const syncEntities = [
+  pinyinFinalAssociationSyncEntity,
+  pinyinInitialAssociationSyncEntity,
+  pinyinInitialGroupThemeSyncEntity,
+  skillStateSyncEntity,
+  skillRatingSyncEntity,
+  hanziGlossMistakeSyncEntity,
+  hanziPinyinMistakeSyncEntity,
+];
+
+export function computePatch(
+  prevCvrEntities: CvrEntities,
+  entitiesState: EntitiesState,
+  opLimit = 10_000, // If this is too low, then loading the app will cause a huge number of CVR rows to be created just to load the app, and bloat the DB.
 ): {
-  nextEntitiesDiff: CvrEntitiesDiff;
+  patchOpsUnhydrated: PatchOpsUnhydrated;
   nextCvrEntities: CvrEntities;
   partial: boolean;
 } {
-  const next: CvrEntities = {};
-  const nextEntitiesDiff: CvrEntitiesDiff = {};
-  const entityNames = [
-    ...new Set([...Object.keys(prev), ...Object.keys(all)]),
-  ] as (keyof CvrEntities)[];
+  const nextCvrEntities: CvrEntities = {};
 
-  let opCount = 0;
   // Enforce a finite number of operations to avoid unbounded server work and
   // subsequent request timeouts.
-  for (const entityName of entityNames) {
-    const prevEntries: CvrEntity = prev[entityName] ?? {};
-    const nextEntries = (next[entityName] = { ...prevEntries } as CvrEntity);
-    const allEntries = all[entityName] ?? {};
-    const puts = [];
-    const dels = [];
+  let opCount = 0;
 
-    for (const [id, value] of Object.entries(allEntries)) {
-      if (prevEntries[id] !== allEntries[id]) {
+  const patchOps: PatchOpsUnhydrated = {};
+
+  for (const syncEntity of syncEntities) {
+    const prevState = new Map(
+      Object.entries(prevCvrEntities[syncEntity.cvrNamespace] ?? {}),
+    );
+    const patchPutsIds = [];
+    const patchDelKeys = []; // replicache entity keys
+    const nextCvrEntity: Record<string, Xmin> = {};
+    for (const e of entitiesState[syncEntity.cvrNamespace]) {
+      const cvrKey = e.key ?? e.id;
+      const prevXmin = prevState.get(cvrKey);
+      if (prevXmin === e.xmin) {
+        nextCvrEntity[cvrKey] = prevXmin;
+      } else {
         opCount++;
         if (opCount <= opLimit) {
-          nextEntries[id] = value;
-          puts.push(id);
+          patchPutsIds.push(e.id);
+          nextCvrEntity[cvrKey] = e.xmin;
         }
+      }
+      // Remove the key, so at the end we can calculate how many keys have been
+      // deleted from the DB and need to have `del` patches sent to the client.
+      prevState.delete(cvrKey);
+    }
+
+    // At this point all the entities that still exist in the DB have been
+    // removed from prevState, so now prevState only has items that have been
+    // deleted from the DB.
+
+    for (const [orphanCvrKey, xmin] of prevState) {
+      opCount++;
+      if (opCount <= opLimit) {
+        // If there's still budget, update the patch.
+        patchDelKeys.push(syncEntity.cvrKeyToEntityKey(orphanCvrKey));
+      } else {
+        // If there's no budget to patch, copy across the old state.
+        nextCvrEntity[orphanCvrKey] = xmin;
       }
     }
 
-    for (const id of Object.keys(prevEntries)) {
-      if (allEntries[id] === undefined) {
-        opCount++;
-        if (opCount <= opLimit) {
-          const parts = prevEntries[id]?.match(/^(.+?):(.+)$/);
-          invariant(parts != null);
-          const [, _xmin, key] = parts;
-          invariant(key != null);
-          dels.push(key);
-          // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-          delete nextEntries[id];
-        }
-      }
-    }
-
-    nextEntitiesDiff[entityName] = { puts, dels };
+    nextCvrEntities[syncEntity.cvrNamespace] = nextCvrEntity;
+    patchOps[syncEntity.cvrNamespace] = {
+      putIds: patchPutsIds,
+      delKeys: patchDelKeys,
+    };
   }
+
   return {
-    nextEntitiesDiff,
-    nextCvrEntities: next,
+    nextCvrEntities,
+    patchOpsUnhydrated: patchOps,
     partial: opCount > opLimit,
   };
+}
+
+async function hydratePatches(
+  db: Drizzle,
+  entityPatchesUnhydrated: PatchOpsUnhydrated,
+): Promise<PullOkResponse[`patch`]> {
+  const pendingOps = [];
+
+  for (const syncEntity of syncEntities) {
+    const delKeys =
+      entityPatchesUnhydrated[syncEntity.cvrNamespace]?.delKeys ?? [];
+    pendingOps.push(delKeys.map((key) => ({ op: `del` as const, key })));
+
+    const putIds =
+      entityPatchesUnhydrated[syncEntity.cvrNamespace]?.putIds ?? [];
+    pendingOps.push(syncEntity.fetchEntityPutOps(db, putIds));
+  }
+
+  const ops = await Promise.all(pendingOps);
+  return ops.flat();
 }
 
 function diffLastMutationIds(
@@ -303,9 +595,9 @@ function diffLastMutationIds(
   return pickBy(next, (v, k) => prev[k] !== v);
 }
 
-function isCvrDiffEmpty(diff: CvrEntitiesDiff) {
-  return Object.values(diff).every(
-    (e) => e.puts.length === 0 && e.dels.length === 0,
+function isEmptyPatch(patchOps: PatchOpsUnhydrated) {
+  return Object.values(patchOps).every(
+    (p) => p.putIds.length === 0 && p.delKeys.length === 0,
   );
 }
 
@@ -355,72 +647,39 @@ export async function pull(
     });
 
     // 8: Build nextCVR
-    const allCvrEntities = await computeCvrEntities(db, userId);
+    const entitiesState = await computeEntitiesState(db, userId);
 
-    const {
-      nextEntitiesDiff: entitiesDiff,
-      nextCvrEntities,
-      partial,
-    } = computeCvrEntitiesDiff(prevCvr?.entities ?? {}, allCvrEntities);
+    const { patchOpsUnhydrated, nextCvrEntities, partial } = computePatch(
+      prevCvr?.entities ?? {},
+      entitiesState,
+    );
 
     const nextCvrLastMutationIds = Object.fromEntries(
       clients.map((c) => [c.id, c.lastMutationId]),
     );
-    debug(`%o`, { nextCvrEntities, nextCvrLastMutationIds });
+    debug(`%o`, { nextCvr: nextCvrEntities, nextCvrLastMutationIds });
 
     // 9: calculate diffs
-    const lastMutationIdsDiff = diffLastMutationIds(
+    const lastMutationIdChanges = diffLastMutationIds(
       prevCvr?.lastMutationIds ?? {},
       nextCvrLastMutationIds,
     );
-    debug(`%o`, { entitiesDiff, lastMutationIdsDiff });
+    debug(`%o`, {
+      patchOpsUnhydrated,
+      lastMutationIdsDiff: lastMutationIdChanges,
+    });
 
     // 10: If diff is empty, return no-op PR
     if (
       prevCvr &&
-      isCvrDiffEmpty(entitiesDiff) &&
-      isCvrLastMutationIdsDiffEmpty(lastMutationIdsDiff)
+      isEmptyPatch(patchOpsUnhydrated) &&
+      isCvrLastMutationIdsDiffEmpty(lastMutationIdChanges)
     ) {
       return null;
     }
 
     // 11: get entities
-    const [
-      pinyinFinalAssociations,
-      pinyinInitialAssociations,
-      pinyinInitialGroupThemes,
-      skillStates,
-      skillRatings,
-      hanziGlossMistakes,
-      hanziPinyinMistakes,
-    ] = await Promise.all([
-      db.query.pinyinFinalAssociation.findMany({
-        where: (t) =>
-          inArray(t.id, entitiesDiff.pinyinFinalAssociation?.puts ?? []),
-      }),
-      db.query.pinyinInitialAssociation.findMany({
-        where: (t) =>
-          inArray(t.id, entitiesDiff.pinyinInitialAssociation?.puts ?? []),
-      }),
-      db.query.pinyinInitialGroupTheme.findMany({
-        where: (t) =>
-          inArray(t.id, entitiesDiff.pinyinInitialGroupTheme?.puts ?? []),
-      }),
-      db.query.skillState.findMany({
-        where: (t) => inArray(t.id, entitiesDiff.skillState?.puts ?? []),
-      }),
-      db.query.skillRating.findMany({
-        where: (t) => inArray(t.id, entitiesDiff.skillRating?.puts ?? []),
-      }),
-      db.query.hanziGlossMistake.findMany({
-        where: (t) => inArray(t.id, entitiesDiff.hanziGlossMistake?.puts ?? []),
-      }),
-      db.query.hanziPinyinMistake.findMany({
-        where: (t) =>
-          inArray(t.id, entitiesDiff.hanziPinyinMistake?.puts ?? []),
-      }),
-    ]);
-    debug(`%o`, { skillStates, skillRatings });
+    const patchOps = await hydratePatches(db, patchOpsUnhydrated);
 
     // 12: changed clients
     // n/a (done above)
@@ -438,42 +697,15 @@ export async function pull(
     debug(`%o`, { nextClientGroup });
     await putClientGroup(db, nextClientGroup);
 
+    const nextCvr: (typeof s.replicacheCvr)[`$inferInsert`] = {
+      lastMutationIds: nextCvrLastMutationIds,
+      entities: nextCvrEntities,
+    };
+
     return {
-      entityPatches: {
-        pinyinInitialAssociation: {
-          dels: entitiesDiff.pinyinInitialAssociation?.dels ?? [],
-          puts: pinyinInitialAssociations,
-        },
-        pinyinFinalAssociation: {
-          dels: entitiesDiff.pinyinFinalAssociation?.dels ?? [],
-          puts: pinyinFinalAssociations,
-        },
-        pinyinInitialGroupTheme: {
-          dels: entitiesDiff.pinyinInitialGroupTheme?.dels ?? [],
-          puts: pinyinInitialGroupThemes,
-        },
-        skillState: {
-          dels: entitiesDiff.skillState?.dels ?? [],
-          puts: skillStates,
-        },
-        skillRating: {
-          dels: entitiesDiff.skillRating?.dels ?? [],
-          puts: skillRatings,
-        },
-        hanziGlossMistake: {
-          dels: entitiesDiff.hanziGlossMistake?.dels ?? [],
-          puts: hanziGlossMistakes,
-        },
-        hanziPinyinMistake: {
-          dels: entitiesDiff.hanziPinyinMistake?.dels ?? [],
-          puts: hanziPinyinMistakes,
-        },
-      },
-      nextCvr: {
-        lastMutationIds: nextCvrLastMutationIds,
-        entities: nextCvrEntities,
-      },
-      lastMutationIdChanges: lastMutationIdsDiff,
+      patchOps,
+      nextCvr,
+      lastMutationIdChanges,
       nextCvrVersion,
       partial,
     };
@@ -489,23 +721,13 @@ export async function pull(
     };
   }
 
-  const {
-    entityPatches,
-    nextCvr,
-    nextCvrVersion,
-    lastMutationIdChanges,
-    partial,
-  } = txResult;
+  const { patchOps, nextCvr, nextCvrVersion, lastMutationIdChanges, partial } =
+    txResult;
 
   // 16-17: store cvr
   const [cvr] = await db
     .insert(s.replicacheCvr)
-    .values([
-      {
-        lastMutationIds: nextCvr.lastMutationIds,
-        entities: nextCvr.entities,
-      },
-    ])
+    .values([nextCvr])
     .returning({ id: s.replicacheCvr.id });
   invariant(cvr != null);
 
@@ -516,83 +738,8 @@ export async function pull(
   }
 
   // 18(i): dels
-  for (const entity of Object.values(entityPatches)) {
-    for (const key of entity.dels) {
-      patch.push({ op: `del`, key });
-    }
-  }
-
   // 18(ii): puts
-  if (`skillState` in schema) {
-    const e = schema.skillState;
-    for (const s of entityPatches.skillState.puts) {
-      patch.push({
-        op: `put`,
-        key: e.marshalKey(s),
-        value: e.marshalValue(s),
-      });
-    }
-  }
-  if (`skillRating` in schema) {
-    const e = schema.skillRating;
-    for (const s of entityPatches.skillRating.puts) {
-      patch.push({
-        op: `put`,
-        key: e.marshalKey(s),
-        value: e.marshalValue(s),
-      });
-    }
-  }
-  if (`hanziGlossMistake` in schema) {
-    const e = schema.hanziGlossMistake;
-    for (const s of entityPatches.hanziGlossMistake.puts) {
-      patch.push({
-        op: `put`,
-        key: e.marshalKey(s),
-        value: e.marshalValue(s),
-      });
-    }
-  }
-  if (`hanziPinyinMistake` in schema) {
-    const e = schema.hanziPinyinMistake;
-    for (const s of entityPatches.hanziPinyinMistake.puts) {
-      patch.push({
-        op: `put`,
-        key: e.marshalKey(s),
-        value: e.marshalValue(s),
-      });
-    }
-  }
-  if (`pinyinFinalAssociation` in schema) {
-    const e = schema.pinyinFinalAssociation;
-    for (const s of entityPatches.pinyinFinalAssociation.puts) {
-      patch.push({
-        op: `put`,
-        key: e.marshalKey(s),
-        value: e.marshalValue(s),
-      });
-    }
-  }
-  if (`pinyinInitialAssociation` in schema) {
-    const e = schema.pinyinInitialAssociation;
-    for (const s of entityPatches.pinyinInitialAssociation.puts) {
-      patch.push({
-        op: `put`,
-        key: e.marshalKey(s),
-        value: e.marshalValue(s),
-      });
-    }
-  }
-  if (`pinyinInitialGroupTheme` in schema) {
-    const e = schema.pinyinInitialGroupTheme;
-    for (const s of entityPatches.pinyinInitialGroupTheme.puts) {
-      patch.push({
-        op: `put`,
-        key: e.marshalKey(s),
-        value: e.marshalValue(s),
-      });
-    }
-  }
+  patch.push(...patchOps);
 
   // 18(ii): construct cookie
   const nextCookie: Cookie = {
@@ -671,14 +818,12 @@ export async function processMutation(
       }
 
       // 11-12: put client and client group
-      const nextClient = {
+      await putClientGroup(db, clientGroup);
+      await putClient(db, {
         id: mutation.clientId,
         clientGroupId,
         lastMutationId: nextMutationId,
-      };
-
-      await putClientGroup(db, clientGroup);
-      await putClient(db, nextClient);
+      });
 
       debug(`Processed mutation in %s`, Date.now() - t1);
 
@@ -687,13 +832,13 @@ export async function processMutation(
   });
 }
 
-export interface ClientRecord {
+interface Client {
   id: string;
   clientGroupId: string;
   lastMutationId: number;
 }
 
-export async function putClient(db: Drizzle, client: ClientRecord) {
+export async function putClient(db: Drizzle, client: Client) {
   const { id, clientGroupId, lastMutationId } = client;
 
   await db
@@ -709,17 +854,14 @@ export async function putClient(db: Drizzle, client: ClientRecord) {
     });
 }
 
-export interface ClientGroupRecord {
+export interface ClientGroup {
   id: string;
   userId: string;
   schemaVersion: string;
   cvrVersion: number;
 }
 
-export async function putClientGroup(
-  db: Drizzle,
-  clientGroup: ClientGroupRecord,
-) {
+export async function putClientGroup(db: Drizzle, clientGroup: ClientGroup) {
   const { id, userId, cvrVersion, schemaVersion } = clientGroup;
 
   await db
@@ -738,7 +880,7 @@ export async function getClientGroup(
     clientGroupId: string;
     schemaVersion: string;
   },
-): Promise<ClientGroupRecord> {
+): Promise<ClientGroup> {
   const r = await db.query.replicacheClientGroup.findFirst({
     where: (p, { eq }) => eq(p.id, opts.clientGroupId),
   });
@@ -768,7 +910,7 @@ export async function getClient(
   db: Drizzle,
   clientId: string,
   clientGroupId: string,
-): Promise<ClientRecord> {
+): Promise<Client> {
   const r = await db.query.replicacheClient.findFirst({
     where: (p, { eq }) => eq(p.id, clientId),
   });
@@ -794,162 +936,43 @@ export async function getClient(
   };
 }
 
-export async function computeCvrEntities(db: Drizzle, userId: string) {
-  return await startSpan({ name: computeCvrEntities.name }, async () => {
-    const pinyinFinalAssociationVersions = db
-      .select({
-        map: json_object_agg(
-          s.pinyinFinalAssociation.id,
-          json_build_object({
-            final: s.pinyinFinalAssociation.final,
-            xmin: pgXmin(s.pinyinFinalAssociation),
-          }),
-        ).as(`pinyinFinalAssociationVersions`),
-      })
-      .from(s.pinyinFinalAssociation)
-      .where(eq(s.pinyinFinalAssociation.userId, userId))
-      .as(`pinyinFinalAssociationVersions`);
+type EntityState = {
+  id: string;
+  key?: string;
+  xmin: Xmin;
+}[];
 
-    const pinyinInitialAssociationVersions = db
-      .select({
-        map: json_object_agg(
-          s.pinyinInitialAssociation.id,
-          json_build_object({
-            initial: s.pinyinInitialAssociation.initial,
-            xmin: pgXmin(s.pinyinInitialAssociation),
-          }),
-        ).as(`pinyinInitialAssociationVersions`),
-      })
-      .from(s.pinyinInitialAssociation)
-      .where(eq(s.pinyinInitialAssociation.userId, userId))
-      .as(`pinyinInitialAssociationVersions`);
+type EntitiesState = Record<CvrNamespace, EntityState>;
 
-    const pinyinInitialGroupThemeVersions = db
-      .select({
-        map: json_object_agg(
-          s.pinyinInitialGroupTheme.id,
-          json_build_object({
-            groupId: sql<string>`${s.pinyinInitialGroupTheme.groupId}`,
-            xmin: pgXmin(s.pinyinInitialGroupTheme),
-          }),
-        ).as(`pinyinInitialGroupThemeVersions`),
-      })
-      .from(s.pinyinInitialGroupTheme)
-      .where(eq(s.pinyinInitialGroupTheme.userId, userId))
-      .as(`pinyinInitialGroupThemeVersions`);
+export async function computeEntitiesState(
+  db: Drizzle,
+  userId: string,
+): Promise<EntitiesState> {
+  return await startSpan({ name: computeEntitiesState.name }, async () => {
+    const subQueries = syncEntities.map(
+      (syncEntity) =>
+        [
+          syncEntity.cvrNamespace,
+          syncEntity.entityStateSubquery(db, userId),
+        ] as const,
+    );
 
-    const skillStateVersions = db
-      .select({
-        map: json_object_agg(
-          s.skillState.id,
-          json_build_object({
-            skill: s.skillState.skill,
-            xmin: pgXmin(s.skillState),
-          }),
-        ).as(`skillStateVersions`),
-      })
-      .from(s.skillState)
-      .where(eq(s.skillState.userId, userId))
-      .as(`skillStateVersions`);
+    let query = db
+      .select(
+        Object.fromEntries(
+          subQueries.map(
+            ([cvrNamespace, subQuery]) => [cvrNamespace, subQuery.map] as const,
+          ),
+        ) as Record<CvrNamespace, SQL.Aliased<EntityState>>,
+      )
+      .from(nonNullable(subQueries[0])[1])
+      .leftJoin(nonNullable(subQueries[1])[1], sql`true`);
+    for (const [, subQuery] of subQueries.slice(2)) {
+      query = query.leftJoin(subQuery, sql`true`);
+    }
 
-    const skillRatingVersions = db
-      .select({
-        map: json_object_agg(
-          s.skillRating.id,
-          json_build_object({
-            id: s.skillRating.id,
-            xmin: pgXmin(s.skillRating),
-          }),
-        ).as(`skillRatingVersions`),
-      })
-      .from(s.skillRating)
-      .where(eq(s.skillRating.userId, userId))
-      .as(`skillRatingVersions`);
+    const [result] = await query;
 
-    const hanziGlossMistakeVersions = db
-      .select({
-        map: json_object_agg(
-          s.hanziGlossMistake.id,
-          json_build_object({
-            id: s.hanziGlossMistake.id,
-            xmin: pgXmin(s.hanziGlossMistake),
-          }),
-        ).as(`hanziGlossMistakeVersions`),
-      })
-      .from(s.hanziGlossMistake)
-      .where(eq(s.hanziGlossMistake.userId, userId))
-      .as(`hanziGlossMistakeVersions`);
-
-    const hanziPinyinMistakeVersions = db
-      .select({
-        map: json_object_agg(
-          s.hanziPinyinMistake.id,
-          json_build_object({
-            id: s.hanziPinyinMistake.id,
-            xmin: pgXmin(s.hanziPinyinMistake),
-          }),
-        ).as(`hanziPinyinMistakeVersions`),
-      })
-      .from(s.hanziPinyinMistake)
-      .where(eq(s.hanziPinyinMistake.userId, userId))
-      .as(`hanziPinyinMistakeVersions`);
-
-    const [result] = await db
-      .select({
-        pinyinFinalAssociation: pinyinFinalAssociationVersions.map,
-        pinyinInitialAssociation: pinyinInitialAssociationVersions.map,
-        pinyinInitialGroupTheme: pinyinInitialGroupThemeVersions.map,
-        skillRating: skillRatingVersions.map,
-        skillState: skillStateVersions.map,
-        hanziGlossMistake: hanziGlossMistakeVersions.map,
-        hanziPinyinMistake: hanziPinyinMistakeVersions.map,
-      })
-      .from(pinyinFinalAssociationVersions)
-      .leftJoin(pinyinInitialAssociationVersions, sql`true`)
-      .leftJoin(pinyinInitialGroupThemeVersions, sql`true`)
-      .leftJoin(skillRatingVersions, sql`true`)
-      .leftJoin(skillStateVersions, sql`true`)
-      .leftJoin(hanziGlossMistakeVersions, sql`true`)
-      .leftJoin(hanziPinyinMistakeVersions, sql`true`);
-    invariant(result != null);
-
-    return {
-      pinyinInitialAssociation: mapValues(
-        result.pinyinInitialAssociation,
-        (v) => v.xmin + `:` + schema.pinyinInitialAssociation.marshalKey(v),
-      ),
-      pinyinFinalAssociation: mapValues(
-        result.pinyinFinalAssociation,
-        (v) => v.xmin + `:` + schema.pinyinFinalAssociation.marshalKey(v),
-      ),
-      pinyinInitialGroupTheme:
-        `pinyinInitialGroupTheme` in schema
-          ? mapValues(
-              result.pinyinInitialGroupTheme,
-              (v) =>
-                v.xmin +
-                `:` +
-                schema.pinyinInitialGroupTheme.marshalKey({
-                  groupId: rPinyinInitialGroupId().unmarshal(v.groupId),
-                }),
-            )
-          : {},
-      skillState: mapValues(
-        result.skillState,
-        (v) => v.xmin + `:` + schema.skillState.marshalKey(v),
-      ),
-      skillRating: mapValues(
-        result.skillRating,
-        (v) => v.xmin + `:` + schema.skillRating.marshalKey(v),
-      ),
-      hanziGlossMistake: mapValues(
-        result.hanziGlossMistake,
-        (v) => v.xmin + `:` + schema.hanziGlossMistake.marshalKey(v),
-      ),
-      hanziPinyinMistake: mapValues(
-        result.hanziPinyinMistake,
-        (v) => v.xmin + `:` + schema.hanziPinyinMistake.marshalKey(v),
-      ),
-    };
+    return nonNullable(result);
   });
 }
