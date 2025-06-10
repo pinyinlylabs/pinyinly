@@ -11,10 +11,10 @@ import {
 } from "./mistakes";
 import type { HanziGlossMistakeType, HanziPinyinMistakeType } from "./model";
 import { MistakeKind } from "./model";
-import type { v7 } from "./rizzleSchema";
+import type { currentSchema } from "./rizzleSchema";
 import { srsStateFromFsrsState } from "./rizzleSchema";
 
-export const v7Mutators: RizzleReplicacheMutators<typeof v7> = {
+export const mutators: RizzleReplicacheMutators<typeof currentSchema> = {
   async rateSkill(tx, { id, skill, rating, durationMs, now }) {
     // Save a record of the rating.
     await tx.skillRating.set(

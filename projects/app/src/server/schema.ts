@@ -14,14 +14,11 @@ import {
   zodJson,
 } from "./schemaUtil";
 
-export const cvrEntity = z.record(
-  z.string().describe(`DB \`id\` primary keys`),
+export const cvrEntitySchema = z.record(
   z
     .string()
-    .describe(
-      `in the format <xmin>:<replicacheEntityKey>. storing \`replicacheEntityKey>\` makes it possible to construct \`dels\` after the row is deleted`,
-    )
-    .optional(),
+    .describe(`the unique part of the replicache entity key, varies by entity`),
+  z.string().describe(`xmin value for the row`),
 );
 
 export const cvrEntitiesSchema = z.record(
@@ -34,8 +31,10 @@ export const cvrEntitiesSchema = z.record(
     z.literal(`hanziGlossMistake`),
     z.literal(`hanziPinyinMistake`),
   ]),
-  cvrEntity,
+  cvrEntitySchema,
 );
+
+export type CvrEntities = z.infer<typeof cvrEntitiesSchema>;
 
 export const schema = pg.pgSchema(`haohaohow`);
 

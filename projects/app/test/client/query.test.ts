@@ -8,9 +8,9 @@ import type {
   PinyinPronunciationSpaceSeparated,
 } from "#data/model.ts";
 import { QuestionFlagKind, SrsKind } from "#data/model.ts";
-import { v7Mutators } from "#data/rizzleMutators.ts";
+import { mutators } from "#data/rizzleMutators.ts";
 import type { Skill } from "#data/rizzleSchema.ts";
-import { rSpaceSeparatedString, v7 } from "#data/rizzleSchema.ts";
+import { currentSchema, rSpaceSeparatedString } from "#data/rizzleSchema.ts";
 import type { SkillReviewQueue } from "#data/skills.ts";
 import { Rating } from "#util/fsrs.ts";
 import { nanoid } from "#util/nanoid.ts";
@@ -23,7 +23,11 @@ import { testReplicacheOptions } from "../util/rizzleHelpers";
 
 await test(`${targetSkillsReviewQueue.name} suite`, async () => {
   await test(`returns everything when no skills have state`, async () => {
-    await using rizzle = r.replicache(testReplicacheOptions(), v7, v7Mutators);
+    await using rizzle = r.replicache(
+      testReplicacheOptions(),
+      currentSchema,
+      mutators,
+    );
 
     // Sanity check that there should be a bunch in the queue
     const queue = await targetSkillsReviewQueue(rizzle);
@@ -243,7 +247,11 @@ async function simulateSkillReviews({
   targetSkills: Skill[];
   history: SkillReviewOp[];
 }): Promise<SkillReviewQueue> {
-  await using rizzle = r.replicache(testReplicacheOptions(), v7, v7Mutators);
+  await using rizzle = r.replicache(
+    testReplicacheOptions(),
+    currentSchema,
+    mutators,
+  );
   let now = new Date();
 
   for (const event of history) {

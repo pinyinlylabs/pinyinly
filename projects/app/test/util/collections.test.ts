@@ -5,6 +5,8 @@ import {
   merge,
   mergeSortComparators,
   objectInvert,
+  objectMap,
+  objectMapToArray,
   sortComparatorNumber,
   sortComparatorString,
 } from "#util/collections.ts";
@@ -136,4 +138,34 @@ await test(`${makeRange.name} suite`, async () => {
   await test(`descending range`, () => {
     assert.deepEqual(makeRange(3, 1), [3, 2, 1]);
   });
+});
+
+await test(`${objectMap.name} suite`, () => {
+  assert.deepEqual(
+    objectMap({ a: 1, b: 2 }, (key, value) => [`${key}${value}`, value * 2]),
+    { a1: 2, b2: 4 },
+  );
+
+  assert.deepEqual(
+    objectMap({ a: `x`, b: `y` }, (key, value) => [`${key}${value}`, value]),
+    { ax: `x`, by: `y` },
+  );
+});
+
+await test(`${objectMapToArray.name} suite`, () => {
+  assert.deepEqual(
+    objectMapToArray({ a: 1, b: 2 }, (key, value) => [
+      `${key}${value}`,
+      value * 2,
+    ]),
+    [
+      [`a1`, 2],
+      [`b2`, 4],
+    ],
+  );
+
+  assert.deepEqual(
+    objectMapToArray({ a: `x`, b: `y` }, (key, value) => `${key}${value}`),
+    [`ax`, `by`],
+  );
 });
