@@ -848,7 +848,7 @@ await test(`${computeEntitiesState.name} suite`, async (t) => {
 await test(`${computePatch.name} suite`, async (t) => {
   type EntitiesState = Parameters<typeof computePatch>[1];
 
-  await t.test(`unchanged entities are preserved`, async (t) => {
+  await t.test(`unchanged entities are preserved`, async () => {
     const prevCvr: CvrEntities = {
       hanziGlossMistake: { x1: `1` },
       hanziPinyinMistake: { x2: `2` },

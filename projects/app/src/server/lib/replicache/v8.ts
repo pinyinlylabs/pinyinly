@@ -271,340 +271,6 @@ export async function push(
   }
 }
 
-type CvrNamespace = keyof CvrEntities;
-
-interface SyncEntity<
-  KeyPath extends string,
-  S extends RizzleRawObject,
-  R extends RizzleEntity<KeyPath, S>,
-  DbEntityState extends SubqueryWithSelection<
-    { map: SQL.Aliased<EntityState> },
-    string
-  >,
-> {
-  cvrNamespace: CvrNamespace;
-  rizzleEntity: R;
-  cvrKeyToEntityKey: (cvrKey: string) => string;
-  fetchEntityPutOps: (
-    db: Drizzle,
-    ids: string[],
-  ) => Promise<{ op: `put`; key: string; value: Record<string, string> }[]>;
-  entityStateSubquery: (db: Drizzle, userId: string) => DbEntityState;
-}
-
-function makeSyncEntity<
-  CvrKeyType extends string,
-  KeyPath extends string,
-  S extends RizzleRawObject,
-  R extends RizzleEntity<KeyPath, S>,
-  DbRow extends Parameters<R[`marshalKey`]>[0] &
-    Parameters<R[`marshalValue`]>[0],
-  DbEntityState extends SubqueryWithSelection<
-    { map: SQL.Aliased<EntityState> },
-    string
-  >,
->(
-  cvrNamespace: CvrNamespace,
-  rizzleEntity: R,
-  cvrKeyToEntityKey: (cvrKey: CvrKeyType, rizzleEntity: R) => string,
-  fetchEntities: (db: Drizzle, ids: string[]) => Promise<DbRow[]>,
-  entityStateSubquery: (db: Drizzle, userId: string) => DbEntityState,
-): SyncEntity<KeyPath, S, R, DbEntityState> {
-  return {
-    cvrNamespace,
-    rizzleEntity,
-    cvrKeyToEntityKey: (cvrKey: string) =>
-      cvrKeyToEntityKey(cvrKey as CvrKeyType, rizzleEntity),
-    fetchEntityPutOps: (db, ids) =>
-      fetchEntities(db, ids).then((rows) =>
-        rows.map((row) => ({
-          op: `put`,
-          key: rizzleEntity.marshalKey(row),
-          value: rizzleEntity.marshalValue(row),
-        })),
-      ),
-    entityStateSubquery,
-  };
-}
-
-const pinyinFinalAssociationSyncEntity = makeSyncEntity(
-  `pinyinFinalAssociation`,
-  schema.pinyinFinalAssociation,
-  (final, e) => e.marshalKey({ final }),
-  (db, ids) =>
-    db.query.pinyinFinalAssociation.findMany({
-      where: (t) => inArray(t.id, ids),
-    }),
-  (db, userId) =>
-    db
-      .select({
-        map: json_agg(
-          json_build_object({
-            id: s.pinyinFinalAssociation.id,
-            key: s.pinyinFinalAssociation.final,
-            xmin: pgXmin(s.pinyinFinalAssociation),
-          }),
-        ).as(`pinyinFinalAssociationVersions`),
-      })
-      .from(s.pinyinFinalAssociation)
-      .where(eq(s.pinyinFinalAssociation.userId, userId))
-      .as(`pinyinFinalAssociationVersions`),
-);
-
-const pinyinInitialAssociationSyncEntity = makeSyncEntity(
-  `pinyinInitialAssociation`,
-  schema.pinyinInitialAssociation,
-  (initial, e) => e.marshalKey({ initial }),
-  (db, ids) =>
-    db.query.pinyinInitialAssociation.findMany({
-      where: (t) => inArray(t.id, ids),
-    }),
-  (db, userId) =>
-    db
-      .select({
-        map: json_agg(
-          json_build_object({
-            id: s.pinyinInitialAssociation.id,
-            key: s.pinyinInitialAssociation.initial,
-            xmin: pgXmin(s.pinyinInitialAssociation),
-          }),
-        ).as(`pinyinInitialAssociationVersions`),
-      })
-      .from(s.pinyinInitialAssociation)
-      .where(eq(s.pinyinInitialAssociation.userId, userId))
-      .as(`pinyinInitialAssociationVersions`),
-);
-
-const pinyinInitialGroupThemeSyncEntity = makeSyncEntity(
-  `pinyinInitialGroupTheme`,
-  schema.pinyinInitialGroupTheme,
-  (groupId: PinyinInitialGroupId, e) => e.marshalKey({ groupId }),
-  (db, ids) =>
-    db.query.pinyinInitialGroupTheme.findMany({
-      where: (t) => inArray(t.id, ids),
-    }),
-  (db, userId) =>
-    db
-      .select({
-        map: json_agg(
-          json_build_object({
-            id: s.pinyinInitialGroupTheme.id,
-            key: s.pinyinInitialGroupTheme.groupId,
-            xmin: pgXmin(s.pinyinInitialGroupTheme),
-          }),
-        ).as(`pinyinInitialGroupThemeVersions`),
-      })
-      .from(s.pinyinInitialGroupTheme)
-      .where(eq(s.pinyinInitialGroupTheme.userId, userId))
-      .as(`pinyinInitialGroupThemeVersions`),
-);
-
-const skillStateSyncEntity = makeSyncEntity(
-  `skillState`,
-  schema.skillState,
-  (skill: Skill, e) => e.marshalKey({ skill }),
-  (db, ids) =>
-    db.query.skillState.findMany({ where: (t) => inArray(t.id, ids) }),
-  (db, userId) =>
-    db
-      .select({
-        map: json_agg(
-          json_build_object({
-            key: s.skillState.skill,
-            xmin: pgXmin(s.skillState),
-            id: s.skillState.id,
-          }),
-        ).as(`skillStateVersions`),
-      })
-      .from(s.skillState)
-      .where(eq(s.skillState.userId, userId))
-      .as(`skillStateVersions`),
-);
-
-const skillRatingSyncEntity = makeSyncEntity(
-  `skillRating`,
-  schema.skillRating,
-  (id, e) => e.marshalKey({ id }),
-  (db, ids) =>
-    db.query.skillRating.findMany({ where: (t) => inArray(t.id, ids) }),
-  (db, userId) =>
-    db
-      .select({
-        map: json_agg(
-          json_build_object({
-            id: s.skillRating.id,
-            xmin: pgXmin(s.skillRating),
-          }),
-        ).as(`skillRatingVersions`),
-      })
-      .from(s.skillRating)
-      .where(eq(s.skillRating.userId, userId))
-      .as(`skillRatingVersions`),
-);
-
-const hanziGlossMistakeSyncEntity = makeSyncEntity(
-  `hanziGlossMistake`,
-  schema.hanziGlossMistake,
-  (id, e) => e.marshalKey({ id }),
-  (db, ids) =>
-    db.query.hanziGlossMistake.findMany({ where: (t) => inArray(t.id, ids) }),
-  (db, userId) =>
-    db
-      .select({
-        map: json_agg(
-          json_build_object({
-            id: s.hanziGlossMistake.id,
-            xmin: pgXmin(s.hanziGlossMistake),
-          }),
-        ).as(`hanziGlossMistakeVersions`),
-      })
-      .from(s.hanziGlossMistake)
-      .where(eq(s.hanziGlossMistake.userId, userId))
-      .as(`hanziGlossMistakeVersions`),
-);
-
-const hanziPinyinMistakeSyncEntity = makeSyncEntity(
-  `hanziPinyinMistake`,
-  schema.hanziPinyinMistake,
-  (id, e) => e.marshalKey({ id }),
-  (db, ids) =>
-    db.query.hanziPinyinMistake.findMany({ where: (t) => inArray(t.id, ids) }),
-  (db, userId) =>
-    db
-      .select({
-        map: json_agg(
-          json_build_object({
-            id: s.hanziPinyinMistake.id,
-            xmin: pgXmin(s.hanziPinyinMistake),
-          }),
-        ).as(`hanziPinyinMistakeVersions`),
-      })
-      .from(s.hanziPinyinMistake)
-      .where(eq(s.hanziPinyinMistake.userId, userId))
-      .as(`hanziPinyinMistakeVersions`),
-);
-
-type PatchOpsUnhydrated = Partial<
-  Record<CvrNamespace, { putIds: string[]; delKeys: string[] }>
->;
-
-const syncEntities = [
-  pinyinFinalAssociationSyncEntity,
-  pinyinInitialAssociationSyncEntity,
-  pinyinInitialGroupThemeSyncEntity,
-  skillStateSyncEntity,
-  skillRatingSyncEntity,
-  hanziGlossMistakeSyncEntity,
-  hanziPinyinMistakeSyncEntity,
-];
-
-export function computePatch(
-  prevCvrEntities: CvrEntities,
-  entitiesState: EntitiesState,
-  opLimit = 10_000, // If this is too low, then loading the app will cause a huge number of CVR rows to be created just to load the app, and bloat the DB.
-): {
-  patchOpsUnhydrated: PatchOpsUnhydrated;
-  nextCvrEntities: CvrEntities;
-  partial: boolean;
-} {
-  const nextCvrEntities: CvrEntities = {};
-
-  // Enforce a finite number of operations to avoid unbounded server work and
-  // subsequent request timeouts.
-  let opCount = 0;
-
-  const patchOps: PatchOpsUnhydrated = {};
-
-  for (const syncEntity of syncEntities) {
-    const prevState = new Map(
-      Object.entries(prevCvrEntities[syncEntity.cvrNamespace] ?? {}),
-    );
-    const patchPutsIds = [];
-    const patchDelKeys = []; // replicache entity keys
-    const nextCvrEntity: Record<string, Xmin> = {};
-    for (const e of entitiesState[syncEntity.cvrNamespace]) {
-      const cvrKey = e.key ?? e.id;
-      const prevXmin = prevState.get(cvrKey);
-      if (prevXmin === e.xmin) {
-        nextCvrEntity[cvrKey] = prevXmin;
-      } else {
-        opCount++;
-        if (opCount <= opLimit) {
-          patchPutsIds.push(e.id);
-          nextCvrEntity[cvrKey] = e.xmin;
-        }
-      }
-      // Remove the key, so at the end we can calculate how many keys have been
-      // deleted from the DB and need to have `del` patches sent to the client.
-      prevState.delete(cvrKey);
-    }
-
-    // At this point all the entities that still exist in the DB have been
-    // removed from prevState, so now prevState only has items that have been
-    // deleted from the DB.
-
-    for (const [orphanCvrKey, xmin] of prevState) {
-      opCount++;
-      if (opCount <= opLimit) {
-        // If there's still budget, update the patch.
-        patchDelKeys.push(syncEntity.cvrKeyToEntityKey(orphanCvrKey));
-      } else {
-        // If there's no budget to patch, copy across the old state.
-        nextCvrEntity[orphanCvrKey] = xmin;
-      }
-    }
-
-    nextCvrEntities[syncEntity.cvrNamespace] = nextCvrEntity;
-    patchOps[syncEntity.cvrNamespace] = {
-      putIds: patchPutsIds,
-      delKeys: patchDelKeys,
-    };
-  }
-
-  return {
-    nextCvrEntities,
-    patchOpsUnhydrated: patchOps,
-    partial: opCount > opLimit,
-  };
-}
-
-async function hydratePatches(
-  db: Drizzle,
-  entityPatchesUnhydrated: PatchOpsUnhydrated,
-): Promise<PullOkResponse[`patch`]> {
-  const pendingOps = [];
-
-  for (const syncEntity of syncEntities) {
-    const delKeys =
-      entityPatchesUnhydrated[syncEntity.cvrNamespace]?.delKeys ?? [];
-    pendingOps.push(delKeys.map((key) => ({ op: `del` as const, key })));
-
-    const putIds =
-      entityPatchesUnhydrated[syncEntity.cvrNamespace]?.putIds ?? [];
-    pendingOps.push(syncEntity.fetchEntityPutOps(db, putIds));
-  }
-
-  const ops = await Promise.all(pendingOps);
-  return ops.flat();
-}
-
-function diffLastMutationIds(
-  prev: Record<string, number>,
-  next: Record<string, number>,
-) {
-  return pickBy(next, (v, k) => prev[k] !== v);
-}
-
-function isEmptyPatch(patchOps: PatchOpsUnhydrated) {
-  return Object.values(patchOps).every(
-    (p) => p.putIds.length === 0 && p.delKeys.length === 0,
-  );
-}
-
-function isCvrLastMutationIdsDiffEmpty(diff: Record<string, number>) {
-  return Object.keys(diff).length === 0;
-}
-
 export async function pull(
   db: Drizzle,
   userId: string,
@@ -756,6 +422,328 @@ export async function pull(
     patch,
     partial,
   };
+}
+
+type CvrNamespace = keyof CvrEntities;
+
+interface SyncEntity<
+  KeyPath extends string,
+  S extends RizzleRawObject,
+  R extends RizzleEntity<KeyPath, S>,
+  DbEntityState extends SubqueryWithSelection<
+    { map: SQL.Aliased<EntityState> },
+    string
+  >,
+> {
+  cvrNamespace: CvrNamespace;
+  rizzleEntity: R;
+  cvrKeyToEntityKey: (cvrKey: string) => string;
+  fetchEntityPutOps: (
+    db: Drizzle,
+    ids: string[],
+  ) => Promise<{ op: `put`; key: string; value: Record<string, string> }[]>;
+  entityStateSubquery: (db: Drizzle, userId: string) => DbEntityState;
+}
+
+function makeSyncEntity<
+  CvrKeyType extends string,
+  KeyPath extends string,
+  S extends RizzleRawObject,
+  R extends RizzleEntity<KeyPath, S>,
+  DbRow extends Parameters<R[`marshalKey`]>[0] &
+    Parameters<R[`marshalValue`]>[0],
+  DbEntityState extends SubqueryWithSelection<
+    { map: SQL.Aliased<EntityState> },
+    string
+  >,
+>(
+  cvrNamespace: CvrNamespace,
+  rizzleEntity: R,
+  cvrKeyToEntityKey: (cvrKey: CvrKeyType, rizzleEntity: R) => string,
+  fetchEntities: (db: Drizzle, ids: string[]) => Promise<DbRow[]>,
+  entityStateSubquery: (db: Drizzle, userId: string) => DbEntityState,
+): SyncEntity<KeyPath, S, R, DbEntityState> {
+  return {
+    cvrNamespace,
+    rizzleEntity,
+    cvrKeyToEntityKey: (cvrKey: string) =>
+      cvrKeyToEntityKey(cvrKey as CvrKeyType, rizzleEntity),
+    fetchEntityPutOps: (db, ids) =>
+      fetchEntities(db, ids).then((rows) =>
+        rows.map((row) => ({
+          op: `put`,
+          key: rizzleEntity.marshalKey(row),
+          value: rizzleEntity.marshalValue(row),
+        })),
+      ),
+    entityStateSubquery,
+  };
+}
+
+type PatchOpsUnhydrated = Partial<
+  Record<CvrNamespace, { putIds: string[]; delKeys: string[] }>
+>;
+
+const syncEntities = [
+  makeSyncEntity(
+    `pinyinFinalAssociation`,
+    schema.pinyinFinalAssociation,
+    (final, e) => e.marshalKey({ final }),
+    (db, ids) =>
+      db.query.pinyinFinalAssociation.findMany({
+        where: (t) => inArray(t.id, ids),
+      }),
+    (db, userId) =>
+      db
+        .select({
+          map: json_agg(
+            json_build_object({
+              id: s.pinyinFinalAssociation.id,
+              key: s.pinyinFinalAssociation.final,
+              xmin: pgXmin(s.pinyinFinalAssociation),
+            }),
+          ).as(`pinyinFinalAssociationVersions`),
+        })
+        .from(s.pinyinFinalAssociation)
+        .where(eq(s.pinyinFinalAssociation.userId, userId))
+        .as(`pinyinFinalAssociationVersions`),
+  ),
+  makeSyncEntity(
+    `pinyinInitialAssociation`,
+    schema.pinyinInitialAssociation,
+    (initial, e) => e.marshalKey({ initial }),
+    (db, ids) =>
+      db.query.pinyinInitialAssociation.findMany({
+        where: (t) => inArray(t.id, ids),
+      }),
+    (db, userId) =>
+      db
+        .select({
+          map: json_agg(
+            json_build_object({
+              id: s.pinyinInitialAssociation.id,
+              key: s.pinyinInitialAssociation.initial,
+              xmin: pgXmin(s.pinyinInitialAssociation),
+            }),
+          ).as(`pinyinInitialAssociationVersions`),
+        })
+        .from(s.pinyinInitialAssociation)
+        .where(eq(s.pinyinInitialAssociation.userId, userId))
+        .as(`pinyinInitialAssociationVersions`),
+  ),
+  makeSyncEntity(
+    `pinyinInitialGroupTheme`,
+    schema.pinyinInitialGroupTheme,
+    (groupId: PinyinInitialGroupId, e) => e.marshalKey({ groupId }),
+    (db, ids) =>
+      db.query.pinyinInitialGroupTheme.findMany({
+        where: (t) => inArray(t.id, ids),
+      }),
+    (db, userId) =>
+      db
+        .select({
+          map: json_agg(
+            json_build_object({
+              id: s.pinyinInitialGroupTheme.id,
+              key: s.pinyinInitialGroupTheme.groupId,
+              xmin: pgXmin(s.pinyinInitialGroupTheme),
+            }),
+          ).as(`pinyinInitialGroupThemeVersions`),
+        })
+        .from(s.pinyinInitialGroupTheme)
+        .where(eq(s.pinyinInitialGroupTheme.userId, userId))
+        .as(`pinyinInitialGroupThemeVersions`),
+  ),
+  makeSyncEntity(
+    `skillState`,
+    schema.skillState,
+    (skill: Skill, e) => e.marshalKey({ skill }),
+    (db, ids) =>
+      db.query.skillState.findMany({ where: (t) => inArray(t.id, ids) }),
+    (db, userId) =>
+      db
+        .select({
+          map: json_agg(
+            json_build_object({
+              key: s.skillState.skill,
+              xmin: pgXmin(s.skillState),
+              id: s.skillState.id,
+            }),
+          ).as(`skillStateVersions`),
+        })
+        .from(s.skillState)
+        .where(eq(s.skillState.userId, userId))
+        .as(`skillStateVersions`),
+  ),
+  makeSyncEntity(
+    `skillRating`,
+    schema.skillRating,
+    (id, e) => e.marshalKey({ id }),
+    (db, ids) =>
+      db.query.skillRating.findMany({ where: (t) => inArray(t.id, ids) }),
+    (db, userId) =>
+      db
+        .select({
+          map: json_agg(
+            json_build_object({
+              id: s.skillRating.id,
+              xmin: pgXmin(s.skillRating),
+            }),
+          ).as(`skillRatingVersions`),
+        })
+        .from(s.skillRating)
+        .where(eq(s.skillRating.userId, userId))
+        .as(`skillRatingVersions`),
+  ),
+  makeSyncEntity(
+    `hanziGlossMistake`,
+    schema.hanziGlossMistake,
+    (id, e) => e.marshalKey({ id }),
+    (db, ids) =>
+      db.query.hanziGlossMistake.findMany({ where: (t) => inArray(t.id, ids) }),
+    (db, userId) =>
+      db
+        .select({
+          map: json_agg(
+            json_build_object({
+              id: s.hanziGlossMistake.id,
+              xmin: pgXmin(s.hanziGlossMistake),
+            }),
+          ).as(`hanziGlossMistakeVersions`),
+        })
+        .from(s.hanziGlossMistake)
+        .where(eq(s.hanziGlossMistake.userId, userId))
+        .as(`hanziGlossMistakeVersions`),
+  ),
+  makeSyncEntity(
+    `hanziPinyinMistake`,
+    schema.hanziPinyinMistake,
+    (id, e) => e.marshalKey({ id }),
+    (db, ids) =>
+      db.query.hanziPinyinMistake.findMany({
+        where: (t) => inArray(t.id, ids),
+      }),
+    (db, userId) =>
+      db
+        .select({
+          map: json_agg(
+            json_build_object({
+              id: s.hanziPinyinMistake.id,
+              xmin: pgXmin(s.hanziPinyinMistake),
+            }),
+          ).as(`hanziPinyinMistakeVersions`),
+        })
+        .from(s.hanziPinyinMistake)
+        .where(eq(s.hanziPinyinMistake.userId, userId))
+        .as(`hanziPinyinMistakeVersions`),
+  ),
+];
+
+export function computePatch(
+  prevCvrEntities: CvrEntities,
+  entitiesState: EntitiesState,
+  opLimit = 10_000, // If this is too low, then loading the app will cause a huge number of CVR rows to be created just to load the app, and bloat the DB.
+): {
+  patchOpsUnhydrated: PatchOpsUnhydrated;
+  nextCvrEntities: CvrEntities;
+  partial: boolean;
+} {
+  const nextCvrEntities: CvrEntities = {};
+
+  // Enforce a finite number of operations to avoid unbounded server work and
+  // subsequent request timeouts.
+  let opCount = 0;
+
+  const patchOps: PatchOpsUnhydrated = {};
+
+  for (const syncEntity of syncEntities) {
+    const prevState = new Map(
+      Object.entries(prevCvrEntities[syncEntity.cvrNamespace] ?? {}),
+    );
+    const patchPutsIds = [];
+    const patchDelKeys = []; // replicache entity keys
+    const nextCvrEntity: Record<string, Xmin> = {};
+    for (const e of entitiesState[syncEntity.cvrNamespace]) {
+      const cvrKey = e.key ?? e.id;
+      const prevXmin = prevState.get(cvrKey);
+      if (prevXmin === e.xmin) {
+        nextCvrEntity[cvrKey] = prevXmin;
+      } else {
+        opCount++;
+        if (opCount <= opLimit) {
+          patchPutsIds.push(e.id);
+          nextCvrEntity[cvrKey] = e.xmin;
+        }
+      }
+      // Remove the key, so at the end we can calculate how many keys have been
+      // deleted from the DB and need to have `del` patches sent to the client.
+      prevState.delete(cvrKey);
+    }
+
+    // At this point all the entities that still exist in the DB have been
+    // removed from prevState, so now prevState only has items that have been
+    // deleted from the DB.
+
+    for (const [orphanCvrKey, xmin] of prevState) {
+      opCount++;
+      if (opCount <= opLimit) {
+        // If there's still budget, update the patch.
+        patchDelKeys.push(syncEntity.cvrKeyToEntityKey(orphanCvrKey));
+      } else {
+        // If there's no budget to patch, copy across the old state.
+        nextCvrEntity[orphanCvrKey] = xmin;
+      }
+    }
+
+    nextCvrEntities[syncEntity.cvrNamespace] = nextCvrEntity;
+    patchOps[syncEntity.cvrNamespace] = {
+      putIds: patchPutsIds,
+      delKeys: patchDelKeys,
+    };
+  }
+
+  return {
+    nextCvrEntities,
+    patchOpsUnhydrated: patchOps,
+    partial: opCount > opLimit,
+  };
+}
+
+async function hydratePatches(
+  db: Drizzle,
+  entityPatchesUnhydrated: PatchOpsUnhydrated,
+): Promise<PullOkResponse[`patch`]> {
+  const pendingOps = [];
+
+  for (const syncEntity of syncEntities) {
+    const delKeys =
+      entityPatchesUnhydrated[syncEntity.cvrNamespace]?.delKeys ?? [];
+    pendingOps.push(delKeys.map((key) => ({ op: `del` as const, key })));
+
+    const putIds =
+      entityPatchesUnhydrated[syncEntity.cvrNamespace]?.putIds ?? [];
+    pendingOps.push(syncEntity.fetchEntityPutOps(db, putIds));
+  }
+
+  const ops = await Promise.all(pendingOps);
+  return ops.flat();
+}
+
+function diffLastMutationIds(
+  prev: Record<string, number>,
+  next: Record<string, number>,
+) {
+  return pickBy(next, (v, k) => prev[k] !== v);
+}
+
+function isEmptyPatch(patchOps: PatchOpsUnhydrated) {
+  return Object.values(patchOps).every(
+    (p) => p.putIds.length === 0 && p.delKeys.length === 0,
+  );
+}
+
+function isCvrLastMutationIdsDiffEmpty(diff: Record<string, number>) {
+  return Object.keys(diff).length === 0;
 }
 
 // Implements the push algorithm from

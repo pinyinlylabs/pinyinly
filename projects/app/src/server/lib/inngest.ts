@@ -11,10 +11,10 @@ import { httpSessionHeader } from "@/util/http";
 import { invariant } from "@haohaohow/lib/invariant";
 import { sentryMiddleware } from "@inngest/middleware-sentry";
 import { createTRPCClient, httpLink } from "@trpc/client";
-import { inArray, notInArray } from "drizzle-orm";
+import { subDays } from "date-fns/subDays";
+import { inArray, lt, notInArray } from "drizzle-orm";
 import { Inngest } from "inngest";
 import * as postmark from "postmark";
-import { z } from "zod/v4";
 import * as s from "../schema";
 import {
   pgBatchUpdate,
@@ -41,61 +41,6 @@ export const inngest = new Inngest({
   id: `my-app`,
   middleware: [sentryMiddleware()],
 });
-
-// Your new function:
-const helloWorld = inngest.createFunction(
-  { id: `hello-world` },
-  { event: `test/hello.world` },
-  async ({ event, step }) => {
-    await step.sleep(`wait-a-moment`, `1s`);
-
-    const data2 = await step.run(`validateData`, () =>
-      z
-        .object({
-          email: z.string(),
-        })
-        .partial({ email: true })
-        .parse(event.data),
-    );
-
-    const data = z
-      .object({
-        email: z.string(),
-      })
-      .partial({ email: true })
-      .parse(event.data);
-
-    return {
-      message: `Hello ${data.email ?? `world`}!`,
-      message2: `Hello ${data2.email ?? `world`}!`,
-    };
-  },
-);
-
-// Your new function:
-const helloWorld2 = inngest.createFunction(
-  { id: `hello-world2` },
-  { event: `test/hello.world2` },
-  async ({ step }) => {
-    await step.sleep(`wait-a-moment`, `1s`);
-    await step.sleep(`wait-a-moment2`, `1s`);
-
-    const data2 = await step.run(`getData2`, () => `data2`);
-
-    const data3 = await step.run(`getData3`, () =>
-      z
-        .object({
-          email: z.string(),
-        })
-        .parse({ email: `hardcoded email` }),
-    );
-
-    return {
-      data2,
-      data3,
-    };
-  },
-);
 
 const helloWorldEmail = inngest.createFunction(
   { id: `hello-world-email` },
@@ -135,6 +80,44 @@ function createTrpcClient(url: string, sessionId: string) {
     ],
   });
 }
+
+const replicacheGarbageCollection = inngest.createFunction(
+  {
+    description: `Delete old replicache data no longer used to reduce DB bloat.`,
+    id: `replicacheGarbageCollection`,
+    concurrency: 1,
+  },
+  {
+    // Sync every hour minutes
+    cron: `0 * * * *`,
+  },
+  async ({ step }) => {
+    let deletedRowCount = 0;
+    do {
+      const { deletedRows } = await step.run(
+        `replicacheCvr table deletes`,
+        async () =>
+          await withDrizzle(async (db) => {
+            const rowsToDelete = await db
+              .select({ id: s.replicacheCvr.id })
+              .from(s.replicacheCvr)
+              .where(lt(s.replicacheCvr.createdAt, subDays(new Date(), 7)))
+              .limit(1000);
+
+            const idsToDelete = rowsToDelete.map((r) => r.id);
+
+            const deletedRows = await db
+              .delete(s.replicacheCvr)
+              .where(inArray(s.replicacheCvr.id, idsToDelete))
+              .returning({ id: s.replicacheCvr.id });
+
+            return { deletedRows };
+          }),
+      );
+      deletedRowCount = deletedRows.length;
+    } while (deletedRowCount > 0);
+  },
+);
 
 const syncRemotePush = inngest.createFunction(
   { id: `syncRemotePush`, concurrency: 1 },
@@ -524,10 +507,9 @@ const migrateHanziWords = inngest.createFunction(
 // Create an empty array where we'll export future Inngest functions
 export const functions = [
   dataIntegrityDictionary,
-  helloWorld,
-  helloWorld2,
   helloWorldEmail,
+  migrateHanziWords,
+  replicacheGarbageCollection,
   syncRemotePull,
   syncRemotePush,
-  migrateHanziWords,
 ];
