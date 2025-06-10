@@ -1,31 +1,16 @@
-import { isHanziChar } from "#data/hanzi.ts";
 import type { HanziWordToPinyinQuestion } from "#data/model.ts";
 import { MistakeKind, QuestionKind } from "#data/model.ts";
 import {
   hanziToPinyinQuestionMistakes,
   hanziWordToPinyinQuestionOrThrow,
 } from "#data/questions/hanziWordToPinyin.ts";
-import { hanziWordToPinyin, hanziWordToPinyinInitial } from "#data/skills.ts";
-import { hanziFromHanziWord, loadDictionary } from "#dictionary/dictionary.ts";
-import shuffle from "lodash/shuffle";
+import { hanziWordToPinyin } from "#data/skills.ts";
+import { loadDictionary } from "#dictionary/dictionary.ts";
 import test from "node:test";
 import { 拼音 } from "../helpers";
 
 await test(`${hanziWordToPinyinQuestionOrThrow.name} suite`, async () => {
-  await test(`fixtures`, async () => {
-    const dictionary = await loadDictionary();
-    const sample = shuffle([...dictionary])
-      .filter(
-        ([hanziWord, meaning]) =>
-          isHanziChar(hanziFromHanziWord(hanziWord)) && meaning.pinyin != null,
-      )
-      .slice(0, 100);
-
-    for (const [hanziWord] of sample) {
-      const skill = hanziWordToPinyinInitial(hanziWord);
-      await hanziWordToPinyinQuestionOrThrow(skill);
-    }
-
+  await test(`simple case`, async () => {
     const skill = hanziWordToPinyin(`你好:hello`);
     expect(await hanziWordToPinyinQuestionOrThrow(skill)).toEqual({
       kind: QuestionKind.HanziWordToPinyin,
@@ -46,11 +31,11 @@ await test(`${hanziWordToPinyinQuestionOrThrow.name} suite`, async () => {
     ).resolves.not.toBeNull();
   });
 
-  await test(`randomly generate 100 questions`, async () => {
+  await test(`works for all valid dictionary items`, async () => {
     const dictionary = await loadDictionary();
-    const sample = shuffle([...dictionary])
-      .filter(([, meaning]) => meaning.pinyin != null)
-      .slice(0, 100);
+    const sample = [...dictionary].filter(
+      ([, meaning]) => meaning.pinyin != null,
+    );
 
     for (const [hanziWord] of sample) {
       const skill = hanziWordToPinyin(hanziWord);

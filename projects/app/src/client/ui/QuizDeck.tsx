@@ -102,7 +102,10 @@ export const QuizDeck = ({ className }: { className?: string }) => {
   });
 
   const handleRating = useEventCallback(
-    (ratings: UnsavedSkillRating[], mistakes: MistakeType[]) => {
+    (
+      ratings: readonly UnsavedSkillRating[],
+      mistakes: readonly MistakeType[],
+    ) => {
       invariant(ratings.length > 0, `ratings must not be empty`);
 
       const success = ratings.every(({ rating }) => rating !== Rating.Again);

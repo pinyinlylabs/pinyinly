@@ -121,7 +121,7 @@ const isPinyinVowel = (
 
 export const parsePinyinSyllableTone = memoize1(function parsePinyinTone(
   pinyin: string,
-): { tonelessPinyin: string; tone: number } | null {
+): { tonelessPinyin: PinyinSyllable; tone: number } | null {
   for (const [key, value] of Object.entries(toneMap)) {
     for (let tone = 1; tone <= 4; tone++) {
       const char = value[tone];
@@ -129,13 +129,13 @@ export const parsePinyinSyllableTone = memoize1(function parsePinyinTone(
 
       const index = pinyin.indexOf(char);
       if (index !== -1) {
-        const tonelessPinyin = pinyin.replace(char, key);
+        const tonelessPinyin = pinyin.replace(char, key) as PinyinSyllable;
         return { tonelessPinyin, tone };
       }
     }
   }
 
-  return { tonelessPinyin: pinyin, tone: 5 };
+  return { tonelessPinyin: pinyin as PinyinSyllable, tone: 5 };
 });
 
 function expandCombinations(

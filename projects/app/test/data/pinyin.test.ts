@@ -76,6 +76,7 @@ await test(`${convertPinyinWithToneNumberToToneMark.name} fixtures`, () => {
     [`dou5`, `dou`],
 
     // A few examples
+    [`fa1`, `fā`],
     [`hao3`, `hǎo`],
     [`zhu5`, `zhu`],
     [`zi5`, `zi`],

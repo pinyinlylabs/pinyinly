@@ -441,13 +441,15 @@ export function skillReviewQueue({
   // Check if introducing a skill would be too overwhelming. There is a limit on
   // how many unstable skills can be introduced at once. This is to avoid
   // overwhelming the user with too many new skills at once.
-  function hasLearningCapacity(skill: Skill): boolean {
+  function hasLearningCapacityForNewSkill(skill: Skill): boolean {
     // 💭 maybe this should be dynamic, based on the number of skills that have
     // been learned. So if you know 1000 words you can probably learn more at
     // once than if you only know 10 words.
     const throttleLimit = 15;
     return (
-      (unstableSkillCounts.get(skillKindFromSkill(skill)) ?? 0) < throttleLimit
+      (unstableSkillCounts.get(skillKindFromSkill(skill)) ?? 0) +
+        learningOrderNew.length <
+      throttleLimit
     );
   }
 
@@ -461,7 +463,10 @@ export function skillReviewQueue({
     learningOrderIncluded.add(skill);
 
     if (srsState == null || needsToBeIntroduced(srsState, now)) {
-      if (hasStableDependencies(skill) && hasLearningCapacity(skill)) {
+      if (
+        hasStableDependencies(skill) &&
+        hasLearningCapacityForNewSkill(skill)
+      ) {
         learningOrderNew.push(skill);
       } else {
         learningOrderBlocked.push(skill);

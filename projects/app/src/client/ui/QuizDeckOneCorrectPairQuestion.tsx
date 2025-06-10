@@ -9,7 +9,7 @@ import type {
 import { QuestionFlagKind, SkillKind } from "@/data/model";
 import {
   oneCorrectPairChoiceText,
-  oneCorrectPairQuestionChoiceMistakes,
+  oneCorrectPairQuestionMistakes,
 } from "@/data/questions/oneCorrectPair";
 import type { HanziWordSkill, Skill } from "@/data/rizzleSchema";
 import {
@@ -50,7 +50,10 @@ export function QuizDeckOneCorrectPairQuestion({
 }: {
   question: OneCorrectPairQuestion;
   onNext: () => void;
-  onRating: (ratings: UnsavedSkillRating[], mistakes: MistakeType[]) => void;
+  onRating: (
+    ratings: readonly UnsavedSkillRating[],
+    mistakes: readonly MistakeType[],
+  ) => void;
 }) {
   const { prompt, answer, groupA, groupB, flag } = question;
 
@@ -64,32 +67,18 @@ export function QuizDeckOneCorrectPairQuestion({
   const timer = useMultiChoiceQuizTimer();
 
   const choiceRowCount = Math.max(groupA.length, groupB.length);
-  const choiceRows: {
-    a: OneCorrectPairQuestionChoice;
-    b: OneCorrectPairQuestionChoice;
-  }[] = [];
-
-  for (let i = 0; i < choiceRowCount; i++) {
-    const a = groupA[i];
-    const b = groupB[i];
-    invariant(a !== undefined && b !== undefined, `missing choice`);
-    choiceRows.push({ a, b });
-  }
 
   if (__DEV__) {
-    invariant(groupA.includes(answer.a));
-    invariant(groupB.includes(answer.b));
+    invariant(answer.as.every((a) => groupA.includes(a)));
+    invariant(answer.bs.every((b) => groupB.includes(b)));
   }
 
   const submitChoices = (
     aChoice: OneCorrectPairQuestionChoice,
     bChoice: OneCorrectPairQuestionChoice,
   ) => {
-    const isCorrect = aChoice === answer.a && bChoice === answer.b;
-
-    const mistakes = isCorrect
-      ? []
-      : oneCorrectPairQuestionChoiceMistakes(aChoice, bChoice);
+    const mistakes = oneCorrectPairQuestionMistakes(answer, aChoice, bChoice);
+    const isCorrect = mistakes.length === 0;
 
     const durationMs = (timer.endTime ?? Date.now()) - timer.startTime;
     const skillRatings: UnsavedSkillRating[] = [
@@ -202,18 +191,19 @@ export function QuizDeckOneCorrectPairQuestion({
       </View>
       <View className="flex-1 justify-center py-quiz-px">
         <View
-          className="flex-1"
+          className="flex-1 flex-row gap-[28px]"
           style={{
-            gap: gap + buttonThickness,
             maxHeight:
               choiceRowCount * 80 +
               (choiceRowCount - 1) * gap +
               buttonThickness,
           }}
         >
-          {choiceRows.map(({ a, b }, i) => (
-            <View className="flex-1 flex-row gap-[28px]" key={i}>
+          {/* Group A */}
+          <View className="flex-1" style={{ gap: gap + buttonThickness }}>
+            {groupA.map((a, i) => (
               <ChoiceButton
+                key={i}
                 choice={a}
                 state={
                   selectedAChoice === undefined
@@ -233,7 +223,10 @@ export function QuizDeckOneCorrectPairQuestion({
                     const newSelectedAChoice =
                       selectedAChoice === a ? undefined : a;
                     setSelectedAChoice(newSelectedAChoice);
-                    timer.recordChoice(newSelectedAChoice === answer.a);
+                    timer.recordChoice(
+                      newSelectedAChoice != null &&
+                        answer.as.includes(newSelectedAChoice),
+                    );
 
                     // Support auto-submit
                     if (
@@ -250,7 +243,13 @@ export function QuizDeckOneCorrectPairQuestion({
                   }
                 }}
               />
+            ))}
+          </View>
+          {/* Group B */}
+          <View className="flex-1" style={{ gap: gap + buttonThickness }}>
+            {groupB.map((b, i) => (
               <ChoiceButton
+                key={i}
                 choice={b}
                 state={
                   selectedBChoice === undefined
@@ -270,7 +269,10 @@ export function QuizDeckOneCorrectPairQuestion({
                     const newSelectedBChoice =
                       selectedBChoice === b ? undefined : b;
                     setSelectedBChoice(newSelectedBChoice);
-                    timer.recordChoice(newSelectedBChoice === answer.b);
+                    timer.recordChoice(
+                      newSelectedBChoice != null &&
+                        answer.bs.includes(newSelectedBChoice),
+                    );
 
                     // Support auto-submit
                     if (
@@ -287,8 +289,8 @@ export function QuizDeckOneCorrectPairQuestion({
                   }
                 }}
               />
-            </View>
-          ))}
+            ))}
+          </View>
         </View>
       </View>
     </Skeleton>

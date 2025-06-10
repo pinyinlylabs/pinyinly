@@ -6,116 +6,60 @@ import {
   glossOrThrow,
   hanziFromHanziWord,
   lookupHanziWord,
-  pinyinOrThrow,
 } from "@/dictionary/dictionary";
 import { evenHalve } from "@/util/collections";
-import { invariant, uniqueInvariant } from "@haohaohow/lib/invariant";
+import { invariant } from "@haohaohow/lib/invariant";
 import shuffle from "lodash/shuffle";
 import type { DeepReadonly } from "ts-essentials";
 import type {
   HanziWord,
+  OneCorrectPairQuestion,
   OneCorrectPairQuestionAnswer,
   OneCorrectPairQuestionChoice,
   Question,
 } from "../model";
-import { QuestionKind, SkillKind } from "../model";
-import type { HanziWordSkill, Skill } from "../rizzleSchema";
-import { hanziWordFromSkill, skillKindFromSkill } from "../skills";
-import { oneCorrectPairChoiceText } from "./oneCorrectPair";
+import { QuestionKind } from "../model";
+import type { HanziWordSkill } from "../rizzleSchema";
+import { hanziWordFromSkill } from "../skills";
+import { oneCorrectPairQuestionInvariant } from "./oneCorrectPair";
 
 // generate a question to test a skill
 export async function hanziWordToGlossQuestionOrThrow(
-  skill: Skill,
+  skill: HanziWordSkill,
 ): Promise<Question> {
-  switch (skillKindFromSkill(skill)) {
-    case SkillKind.HanziWordToGloss: {
-      skill = skill as HanziWordSkill;
-      const hanziWord = hanziWordFromSkill(skill);
-      const meaning = await lookupHanziWord(hanziWord);
-      const rowCount = 5;
-      const answer: OneCorrectPairQuestionAnswer = {
-        a: { kind: `hanzi`, value: hanziFromHanziWord(hanziWord) },
-        b: { kind: `gloss`, value: glossOrThrow(hanziWord, meaning) },
-        skill,
-      };
+  const hanziWord = hanziWordFromSkill(skill);
+  const meaning = await lookupHanziWord(hanziWord);
+  const rowCount = 5;
+  const answer: OneCorrectPairQuestionAnswer = {
+    as: [{ kind: `hanzi`, value: hanziFromHanziWord(hanziWord) }],
+    bs: [{ kind: `gloss`, value: glossOrThrow(hanziWord, meaning) }],
+    skill,
+  };
 
-      const [groupAHanziWords, groupBHanziWords] = evenHalve(
-        await getWrongHanziWordAnswers(hanziWord, (rowCount - 1) * 2),
-      );
+  const [groupAHanziWords, groupBHanziWords] = evenHalve(
+    await getWrongHanziWordAnswers(hanziWord, (rowCount - 1) * 2),
+  );
 
-      const groupA: OneCorrectPairQuestionChoice[] = groupAHanziWords.map(
-        ([hanziWord, _meaning]) => ({
-          kind: `hanzi`,
-          value: hanziFromHanziWord(hanziWord),
-        }),
-      );
-      const groupB: OneCorrectPairQuestionChoice[] = groupBHanziWords.map(
-        ([hanziWord, meaning]) => ({
-          kind: `gloss`,
-          value: glossOrThrow(hanziWord, meaning),
-        }),
-      );
+  const groupA: OneCorrectPairQuestionChoice[] = groupAHanziWords.map(
+    ([hanziWord, _meaning]) => ({
+      kind: `hanzi`,
+      value: hanziFromHanziWord(hanziWord),
+    }),
+  );
+  const groupB: OneCorrectPairQuestionChoice[] = groupBHanziWords.map(
+    ([hanziWord, meaning]) => ({
+      kind: `gloss`,
+      value: glossOrThrow(hanziWord, meaning),
+    }),
+  );
 
-      return validQuestionInvariant({
-        kind: QuestionKind.OneCorrectPair,
-        prompt: `Match a word with its name`,
-        groupA: shuffle([...groupA, answer.a]),
-        groupB: shuffle([...groupB, answer.b]),
-        answer,
-      });
-    }
-    case SkillKind.HanziWordToPinyin: {
-      skill = skill as HanziWordSkill;
-      const hanziWord = hanziWordFromSkill(skill);
-      const meaning = await lookupHanziWord(hanziWord);
-      const rowCount = 5;
-      const answer: OneCorrectPairQuestionAnswer = {
-        a: { kind: `hanzi`, value: hanziFromHanziWord(hanziWord) },
-        b: { kind: `pinyin`, value: pinyinOrThrow(hanziWord, meaning) },
-        skill,
-      };
-
-      const [groupAHanziWords, groupBHanziWords] = evenHalve(
-        await getWrongHanziWordAnswers(hanziWord, (rowCount - 1) * 2),
-      );
-
-      const groupA: OneCorrectPairQuestionChoice[] = groupAHanziWords.map(
-        ([hanziWord, _meaning]) => ({
-          kind: `hanzi`,
-          value: hanziFromHanziWord(hanziWord),
-        }),
-      );
-      const groupB: OneCorrectPairQuestionChoice[] = groupBHanziWords.map(
-        ([hanziWord, meaning]) => ({
-          kind: `gloss`,
-          value: glossOrThrow(hanziWord, meaning),
-        }),
-      );
-
-      return validQuestionInvariant({
-        kind: QuestionKind.OneCorrectPair,
-        prompt: `Match a word with its name`,
-        groupA: shuffle([...groupA, answer.a]),
-        groupB: shuffle([...groupB, answer.b]),
-        answer,
-      });
-    }
-    case SkillKind.Deprecated_EnglishToRadical:
-    case SkillKind.Deprecated_PinyinToRadical:
-    case SkillKind.Deprecated_RadicalToEnglish:
-    case SkillKind.Deprecated_RadicalToPinyin:
-    case SkillKind.Deprecated:
-    case SkillKind.GlossToHanziWord:
-    case SkillKind.HanziWordToPinyinFinal:
-    case SkillKind.HanziWordToPinyinInitial:
-    case SkillKind.HanziWordToPinyinTone:
-    case SkillKind.ImageToHanziWord:
-    case SkillKind.PinyinFinalAssociation:
-    case SkillKind.PinyinInitialAssociation:
-    case SkillKind.PinyinToHanziWord: {
-      throw new Error(`todo: not implemented`);
-    }
-  }
+  return validQuestionInvariant({
+    kind: QuestionKind.OneCorrectPair,
+    prompt: `Match a word with its name`,
+    groupA: shuffle([...groupA, ...answer.as]),
+    groupB: shuffle([...groupB, ...answer.bs]),
+    answer,
+  });
 }
 
 type OtherHanziResult = [HanziWord, DeepReadonly<HanziWordMeaning>][];
@@ -237,21 +181,7 @@ async function getWrongHanziWordAnswers(
   return ctx.result;
 }
 
-function validQuestionInvariant(question: Question) {
-  switch (question.kind) {
-    case QuestionKind.OneCorrectPair: {
-      // Ensure there aren't two identical choices in the same group.
-      uniqueInvariant(question.groupA.map((x) => oneCorrectPairChoiceText(x)));
-      uniqueInvariant(question.groupB.map((x) => oneCorrectPairChoiceText(x)));
-      invariant(question.groupA.includes(question.answer.a));
-      invariant(question.groupB.includes(question.answer.b));
-      break;
-    }
-    case QuestionKind.HanziWordToPinyin:
-    case QuestionKind.MultipleChoice: {
-      break;
-    }
-  }
-
+function validQuestionInvariant(question: OneCorrectPairQuestion) {
+  oneCorrectPairQuestionInvariant(question);
   return question;
 }

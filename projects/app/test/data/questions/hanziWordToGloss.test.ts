@@ -1,9 +1,11 @@
 import {
   addToQuizContext,
+  hanziWordToGlossQuestionOrThrow,
   makeQuizContext,
   shouldOmitHanziWord,
 } from "#data/questions/hanziWordToGloss.ts";
-import { lookupHanziWord } from "#dictionary/dictionary.ts";
+import { hanziWordToGloss } from "#data/skills.ts";
+import { loadDictionary, lookupHanziWord } from "#dictionary/dictionary.ts";
 import assert from "node:assert/strict";
 import test from "node:test";
 
@@ -65,5 +67,16 @@ await test(`${addToQuizContext.name} suite`, async () => {
     await addToQuizContext(hanziWord, ctx);
 
     assert.deepEqual(ctx.result, [[hanziWord, hanziWordMeaning]]);
+  });
+});
+
+await test(`${hanziWordToGlossQuestionOrThrow.name} suite`, async () => {
+  await test(`works for the entire dictionary`, async () => {
+    const dictionary = await loadDictionary();
+
+    for (const [hanziWord] of dictionary) {
+      const skill = hanziWordToGloss(hanziWord);
+      await hanziWordToGlossQuestionOrThrow(skill);
+    }
   });
 });

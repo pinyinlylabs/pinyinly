@@ -26,8 +26,11 @@ await test(`${targetSkillsReviewQueue.name} suite`, async () => {
     await using rizzle = r.replicache(testReplicacheOptions(), v7, v7Mutators);
 
     // Sanity check that there should be a bunch in the queue
-    const { items } = await targetSkillsReviewQueue(rizzle);
-    assert.ok(items.length > 100);
+    const queue = await targetSkillsReviewQueue(rizzle);
+    // The queue is throttled by unstable skills, so it starts at 15. This
+    // assert only requires 10 though to avoid brittleness if the throttle value
+    // changes.
+    expect(queue.items.length).toBeGreaterThan(10);
   });
 });
 

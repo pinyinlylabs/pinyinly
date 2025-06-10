@@ -3,10 +3,14 @@ import type {
   HanziGlossMistakeType,
   HanziPinyinMistakeType,
   MistakeType,
+  OneCorrectPairQuestion,
+  OneCorrectPairQuestionAnswer,
   OneCorrectPairQuestionChoice,
 } from "@/data/model";
 import { MistakeKind } from "@/data/model";
 import { pinyinPronunciationDisplayText } from "@/data/pinyin";
+import { emptyArray } from "@/util/collections";
+import { invariant, uniqueInvariant } from "@haohaohow/lib/invariant";
 
 export function oneCorrectPairChoiceText(
   choice: OneCorrectPairQuestionChoice,
@@ -66,10 +70,19 @@ export function oneCorrectPairQuestionHanziPinyinMistake(
   }
 }
 
-export function oneCorrectPairQuestionChoiceMistakes(
-  choice1: OneCorrectPairQuestionChoice,
-  choice2: OneCorrectPairQuestionChoice,
-): MistakeType[] {
+/**
+ * Determine if the user's answer is correct, and if not returning 1 or more
+ * mistakes.
+ */
+export function oneCorrectPairQuestionMistakes(
+  answer: OneCorrectPairQuestionAnswer,
+  aChoice: OneCorrectPairQuestionChoice,
+  bChoice: OneCorrectPairQuestionChoice,
+): readonly MistakeType[] {
+  if (answer.as.includes(aChoice) && answer.bs.includes(bChoice)) {
+    return emptyArray;
+  }
+
   const mistakes: MistakeType[] = [];
 
   const mistakeChecks = [
@@ -79,8 +92,8 @@ export function oneCorrectPairQuestionChoiceMistakes(
   // Check all combinations of the choices, this makes each check simpler as it
   // doesn't need to consider each direction.
   const choicePairs = [
-    [choice1, choice2],
-    [choice2, choice1],
+    [aChoice, bChoice],
+    [bChoice, aChoice],
   ] as const;
 
   for (const mistakeCheck of mistakeChecks) {
@@ -93,4 +106,18 @@ export function oneCorrectPairQuestionChoiceMistakes(
   }
 
   return mistakes;
+}
+
+export function oneCorrectPairQuestionInvariant(
+  question: OneCorrectPairQuestion,
+) {
+  // Ensure there aren't two identical choices in the same group.
+  uniqueInvariant(question.groupA.map((x) => oneCorrectPairChoiceText(x)));
+  uniqueInvariant(question.groupB.map((x) => oneCorrectPairChoiceText(x)));
+  // Ensure the answer is included.
+  invariant(question.answer.as.every((a) => question.groupA.includes(a)));
+  invariant(question.answer.bs.every((b) => question.groupB.includes(b)));
+  // Ensure there's at least one wrong choice in each group.
+  invariant(question.answer.as.length < question.groupA.length);
+  invariant(question.answer.bs.length < question.groupB.length);
 }
