@@ -332,16 +332,18 @@ export const v7_1 = {
   version: `7.1`,
 };
 
+const currentSchema = v7;
+
 export const supportedSchemas = [v7, v7_1] as const;
 
 export type SupportedSchema = (typeof supportedSchemas)[number];
 
-export type Rizzle = RizzleReplicache<typeof v7>;
+export type Rizzle = RizzleReplicache<typeof currentSchema>;
 
 export type SkillState = NonNullable<
-  Awaited<ReturnType<typeof v7.skillState.get>>
+  Awaited<ReturnType<typeof currentSchema.skillState.get>>
 >;
 
 export type SkillRating = NonNullable<
-  Awaited<ReturnType<typeof v7.skillRating.get>>
+  Awaited<ReturnType<typeof currentSchema.skillRating.get>>
 >;
