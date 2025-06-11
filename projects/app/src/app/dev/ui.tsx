@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 import { useQuizProgress } from "@/client/hooks/useQuizProgress";
 import { HanziText } from "@/client/ui/HanziText";
+import { IconImage } from "@/client/ui/IconImage";
 import { PinyinOptionButton } from "@/client/ui/PinyinOptionButton";
 import { QuizDeckHanziToPinyinQuestion } from "@/client/ui/QuizDeckHanziToPinyinQuestion";
 import { QuizProgressBar } from "@/client/ui/QuizProgressBar";
@@ -46,6 +47,10 @@ function DesignSystemPage() {
         </Link>
       </View>
       <ScrollView style={{ flex: 1 }} ref={scrollViewRef}>
+        <Section title={IconImageExample.name} scrollTo={scrollTo}>
+          <IconImageExample />
+        </Section>
+
         <Section
           title={QuizDeckHanziToPinyinQuestionExample.name}
           scrollTo={scrollTo}
@@ -964,6 +969,52 @@ function TextInputSingleExample() {
         <TextInputSingle placeholder="Centered" disabled textAlign="center" />
         <TextInputSingle placeholder="Right" disabled textAlign="right" />
       </ExampleStack>
+    </View>
+  );
+}
+
+function IconImageExample() {
+  const sources = [
+    require(`@/assets/icons/book.svg`),
+    require(`@/assets/icons/cart.svg`),
+    require(`@/assets/icons/flag.svg`),
+    require(`@/assets/icons/home.svg`),
+  ];
+  return (
+    <View className="w-full flex-row gap-2">
+      <ExampleStack title="size=12">
+        {sources.map((s) => (
+          <IconImage key={s} size={12} source={s} />
+        ))}
+      </ExampleStack>
+
+      <ExampleStack title="default">
+        {sources.map((s) => (
+          <IconImage key={s} source={s} />
+        ))}
+      </ExampleStack>
+
+      <ExampleStack title="size=32">
+        {sources.map((s) => (
+          <IconImage key={s} size={32} source={s} />
+        ))}
+      </ExampleStack>
+
+      <View className="success-theme2">
+        <ExampleStack title="success">
+          {sources.map((s) => (
+            <IconImage key={s} source={s} />
+          ))}
+        </ExampleStack>
+      </View>
+
+      <View className="accent-theme2">
+        <ExampleStack title="accent">
+          {sources.map((s) => (
+            <IconImage key={s} source={s} />
+          ))}
+        </ExampleStack>
+      </View>
     </View>
   );
 }

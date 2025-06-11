@@ -6,9 +6,9 @@ import {
   hanziCharsFromHanziWord,
   hanziFromHanziWord,
 } from "@/dictionary/dictionary";
-import { Image } from "expo-image";
 import { useMemo, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
+import { IconImage } from "./IconImage";
 import { PageSheetModal } from "./PageSheetModal";
 import { RectButton2 } from "./RectButton2";
 import { WikiHanziInterpretationPanel } from "./WikiHanziInterpretationPanel";
@@ -119,10 +119,9 @@ const NewHanziWordToGlossSkillContent = ({
         <>
           <View className="mb-8 gap-8">
             <View className="success-theme flex-row items-center gap-2 self-center">
-              <Image
+              <IconImage
+                className="text-accent-10"
                 source={require(`@/assets/icons/plant-filled.svg`)}
-                className="-my-0 size-[24px] shrink text-accent-10"
-                tintColor="currentColor"
               />
               <Text className="font-bold uppercase text-accent-10">
                 New Word
@@ -172,10 +171,9 @@ const NewHanziWordToPinyinSkillContent = ({
         <>
           <View className="mb-8 gap-8">
             <View className="success-theme flex-row items-center gap-2 self-center">
-              <Image
+              <IconImage
+                className="text-accent-10"
                 source={require(`@/assets/icons/plant-filled.svg`)}
-                className="-my-0 size-[24px] shrink text-accent-10"
-                tintColor="currentColor"
               />
               <Text className="font-bold uppercase text-accent-10">
                 New Pinyin
@@ -223,10 +221,9 @@ const NewHanziWordToPinyinInitialSkillContent = ({
         <>
           <View className="mb-8 gap-8">
             <View className="success-theme flex-row items-center gap-2 self-center">
-              <Image
+              <IconImage
+                className="text-accent-10"
                 source={require(`@/assets/icons/plant-filled.svg`)}
-                className="-my-0 size-[24px] shrink text-accent-10"
-                tintColor="currentColor"
               />
               <Text className="font-bold uppercase text-accent-10">
                 New Pinyin Initial
@@ -278,10 +275,9 @@ const NewHanziWordToPinyinFinalSkillContent = ({
         <>
           <View className="mb-8 gap-8">
             <View className="success-theme flex-row items-center gap-2 self-center">
-              <Image
+              <IconImage
+                className="text-accent-10"
                 source={require(`@/assets/icons/plant-filled.svg`)}
-                className="-my-0 size-[24px] shrink text-accent-10"
-                tintColor="currentColor"
               />
               <Text className="font-bold uppercase text-accent-10">
                 New Pinyin Final
@@ -333,10 +329,9 @@ const NewHanziWordToPinyinToneSkillContent = ({
         <>
           <View className="mb-8 gap-8">
             <View className="success-theme flex-row items-center gap-2 self-center">
-              <Image
+              <IconImage
+                className="text-accent-10"
                 source={require(`@/assets/icons/plant-filled.svg`)}
-                className="-my-0 size-[24px] shrink text-accent-10"
-                tintColor="currentColor"
               />
               <Text className="font-bold uppercase text-accent-10">
                 New Pinyin Tone

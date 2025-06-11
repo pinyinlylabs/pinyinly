@@ -18,7 +18,6 @@ import {
   skillKindFromSkill,
 } from "@/data/skills";
 import { invariant } from "@haohaohow/lib/invariant";
-import { Image } from "expo-image";
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 import type { StyleProp, ViewStyle } from "react-native";
@@ -33,6 +32,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { HanziWordRefText } from "./HanziWordRefText";
 import { Hhhmark } from "./Hhhmark";
+import { IconImage } from "./IconImage";
 import { NewSkillModal } from "./NewSkillModal";
 import { QuizFlagText } from "./QuizFlagText";
 import { QuizSubmitButton, QuizSubmitButtonState } from "./QuizSubmitButton";
@@ -109,10 +109,9 @@ export function QuizDeckOneCorrectPairQuestion({
           >
             {isCorrect ? (
               <View className="flex-row items-center gap-[8px]">
-                <Image
-                  className="size-[32px] shrink text-foreground"
+                <IconImage
+                  size={32}
                   source={require(`@/assets/icons/check-circled-filled.svg`)}
-                  tintColor="currentColor"
                 />
                 <Text className="text-2xl font-bold text-foreground">
                   Nice!
@@ -121,10 +120,9 @@ export function QuizDeckOneCorrectPairQuestion({
             ) : (
               <>
                 <View className="flex-row items-center gap-[8px]">
-                  <Image
-                    className="size-[32px] shrink text-foreground"
+                  <IconImage
+                    size={32}
                     source={require(`@/assets/icons/close-circled-filled.svg`)}
-                    tintColor="currentColor"
                   />
                   <Text className="text-2xl font-bold text-foreground">
                     Incorrect

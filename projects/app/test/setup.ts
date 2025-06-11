@@ -10,6 +10,14 @@ mock.module(`react-native`, {
 
 mock.module(`expo-haptics`);
 
+mock.module(`expo-image`, {
+  namedExports: {
+    // SyntaxError: The requested module 'expo-image' does not provide an export
+    // named 'Image'
+    Image: () => null,
+  },
+});
+
 {
   // Set up __DEV__
   // @ts-expect-error __DEV__ is not defined in Node

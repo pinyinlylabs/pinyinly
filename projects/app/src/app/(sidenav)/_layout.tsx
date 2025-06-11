@@ -1,5 +1,6 @@
 import { useAuth } from "@/client/auth";
 import { DevLozenge } from "@/client/ui/DevLozenge";
+import { IconImage } from "@/client/ui/IconImage";
 import { Image } from "expo-image";
 import { Link } from "expo-router";
 import type { TabTriggerSlotProps } from "expo-router/ui";
@@ -48,15 +49,13 @@ export default function SideNavLayout() {
           <TabButton className={buttonClass()}>
             {({ isFocused }) => (
               <>
-                <Image
+                <IconImage
                   source={
                     isFocused
                       ? require(`@/assets/icons/home-filled.svg`)
                       : require(`@/assets/icons/home.svg`)
                   }
                   className={iconClass({ isFocused })}
-                  tintColor="currentColor"
-                  contentFit="fill"
                 />
                 <Text className={buttonTextClass({ isFocused })}>Learn</Text>
               </>
@@ -69,15 +68,13 @@ export default function SideNavLayout() {
             <TabButton className={buttonClass()}>
               {({ isFocused }) => (
                 <>
-                  <Image
+                  <IconImage
                     source={
                       isFocused
                         ? require(`@/assets/icons/bookmark-filled.svg`)
                         : require(`@/assets/icons/bookmark.svg`)
                     }
                     className={iconClass({ isFocused })}
-                    tintColor="currentColor"
-                    contentFit="fill"
                   />
                   <Text className={buttonTextClass({ isFocused })}>
                     Explore
@@ -148,11 +145,10 @@ const TabButton = ({
 );
 
 const iconClass = tv({
-  base: `size-[24px] flex-shrink`,
   variants: {
     isFocused: {
-      true: `text-primary-12`,
-      false: `text-primary-10`,
+      true: `text-foreground`,
+      false: `text-foreground-bg50`, // avoid using opacity because it doesn't work properly with the expo-image tintColor filter
     },
   },
 });
@@ -169,8 +165,8 @@ const buttonTextClass = tv({
   `,
   variants: {
     isFocused: {
-      true: `text-primary-12`,
-      false: `text-primary-10`,
+      true: `text-foreground`,
+      false: `text-foreground/50`,
     },
   },
 });

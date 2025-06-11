@@ -1,7 +1,7 @@
 import type { SkillReviewQueue } from "@/data/skills";
-import { Image } from "expo-image";
 import { Text, View } from "react-native";
 import { tv } from "tailwind-variants";
+import { IconImage } from "./IconImage";
 
 export function QuizQueueButton({
   queueStats,
@@ -19,11 +19,10 @@ export function QuizQueueButton({
         md:justify-start
       `}
     >
-      <Image
+      <IconImage
+        size={32}
+        className="self-center text-foreground"
         source={require(`@/assets/icons/inbox-filled.svg`)}
-        className="size-[32px] shrink self-center text-foreground"
-        tintColor="currentColor"
-        contentFit="fill"
       />
       {queueStats == null ? null : queueStats.overDueCount > 0 ? (
         <CountLozenge count={queueStats.overDueCount} mode="overdue" />
@@ -41,11 +40,10 @@ export function QuizQueueButton({
 function CheckBadge() {
   return (
     <View className="absolute left-[55%] top-[62%] size-quiz-px rounded-full bg-background p-[2px]">
-      <Image
+      <IconImage
+        size={12}
+        className="self-center rounded-full bg-foreground/30 text-foreground"
         source={require(`@/assets/icons/check.svg`)}
-        className="size-[12px] self-center rounded-full bg-foreground/30 text-foreground"
-        tintColor="currentColor"
-        contentFit="fill"
       />
     </View>
   );
