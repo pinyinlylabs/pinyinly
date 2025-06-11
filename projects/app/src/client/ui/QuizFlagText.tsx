@@ -2,19 +2,18 @@ import type { QuestionFlagType } from "@/data/model";
 import { QuestionFlagKind } from "@/data/model";
 import { formatDuration } from "date-fns/formatDuration";
 import { intervalToDuration } from "date-fns/intervalToDuration";
-import { Image } from "expo-image";
 import { Text, View } from "react-native";
 import { tv } from "tailwind-variants";
+import { IconImage } from "./IconImage";
 
 export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
   switch (flag.kind) {
     case QuestionFlagKind.NewSkill: {
       return (
         <View className={flagViewClass({ class: `success-theme` })}>
-          <Image
-            source={require(`@/assets/icons/plant-filled.svg`)}
+          <IconImage
             className={flagIconClass()}
-            tintColor="currentColor"
+            source={require(`@/assets/icons/plant-filled.svg`)}
           />
           <Text className={flagTextClass()}>New skill</Text>
         </View>
@@ -23,10 +22,9 @@ export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
     case QuestionFlagKind.Overdue: {
       return (
         <View className={flagViewClass({ class: `danger-theme` })}>
-          <Image
-            source={require(`@/assets/icons/alarm.svg`)}
+          <IconImage
             className={flagIconClass()}
-            tintColor="currentColor"
+            source={require(`@/assets/icons/alarm.svg`)}
           />
           <Text className={flagTextClass()}>
             Overdue by{` `}
@@ -51,10 +49,9 @@ export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
     case QuestionFlagKind.Retry: {
       return (
         <View className={flagViewClass({ class: `warning-theme` })}>
-          <Image
-            source={require(`@/assets/icons/repeat.svg`)}
+          <IconImage
             className={flagIconClass()}
-            tintColor="currentColor"
+            source={require(`@/assets/icons/repeat.svg`)}
           />
           <Text className={flagTextClass()}>Previous mistake</Text>
         </View>
@@ -63,10 +60,9 @@ export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
     case QuestionFlagKind.WeakWord: {
       return (
         <View className={flagViewClass({ class: `danger-theme` })}>
-          <Image
-            source={require(`@/assets/icons/flag.svg`)}
+          <IconImage
             className={flagIconClass()}
-            tintColor="currentColor"
+            source={require(`@/assets/icons/flag.svg`)}
           />
           <Text className={flagTextClass()}>Weak word</Text>
         </View>
@@ -80,7 +76,7 @@ const flagViewClass = tv({
 });
 
 const flagIconClass = tv({
-  base: `size-[24px] flex-shrink text-accent-10`,
+  base: `text-accent-10`,
 });
 
 const flagTextClass = tv({

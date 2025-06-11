@@ -1,6 +1,6 @@
-import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { Pressable } from "react-native";
+import { IconImage } from "./IconImage";
 
 export const CloseButton = () => {
   const router = useRouter();
@@ -11,10 +11,9 @@ export const CloseButton = () => {
         router.dismiss();
       }}
     >
-      <Image
+      <IconImage
         source={require(`@/assets/icons/close.svg`)}
-        className="-my-0 size-[24px] shrink text-foreground-bg70"
-        tintColor="currentColor"
+        className="text-foreground-bg70"
       />
     </Pressable>
   ) : null;

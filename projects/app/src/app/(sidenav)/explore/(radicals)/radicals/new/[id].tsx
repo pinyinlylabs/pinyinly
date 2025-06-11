@@ -1,5 +1,6 @@
 import { useLocalQuery } from "@/client/hooks/useLocalQuery";
 import { CloseButton } from "@/client/ui/CloseButton";
+import { IconImage } from "@/client/ui/IconImage";
 import { RectButton2 } from "@/client/ui/RectButton2";
 import { ReferencePage } from "@/client/ui/ReferencePage";
 import { ReferencePageBodySection } from "@/client/ui/ReferencePageBodySection";
@@ -10,7 +11,6 @@ import {
   lookupHanziWord,
   lookupHanziWordGlossMnemonics,
 } from "@/dictionary/dictionary";
-import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams } from "expo-router";
 import { useState } from "react";
@@ -97,10 +97,10 @@ export default function RadicalPage() {
       </View>
       <ScrollView contentContainerClassName="px-safe-or-4 flex-1 pb-2">
         <View className="flex-row items-center gap-2 self-center py-4">
-          <Image
-            className="size-[32px] shrink text-[#04ABF6]"
+          <IconImage
+            size={32}
+            className="text-[#04ABF6]"
             source={require(`@/assets/icons/loader.svg`)}
-            tintColor="currentColor"
           />
           <Text className="text-lg font-bold uppercase text-[#04ABF6]">
             New Word
