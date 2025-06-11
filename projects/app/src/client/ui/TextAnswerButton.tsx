@@ -202,7 +202,7 @@ export function TextAnswerButton({
         pressableProps.onPress?.(e);
       }}
       style={pressableAnimatedStyle}
-      className={containerClass({ flat, state, inFlexRowParent, className })}
+      className={pressableClass({ state, inFlexRowParent, className })}
     >
       <Reanimated.View
         style={bgAnimatedStyle}
@@ -275,7 +275,7 @@ const bgAnimatedClass = tv({
   },
 });
 
-const containerClass = tv({
+const pressableClass = tv({
   base: `
     focus-visible:rounded-lg focus-visible:outline focus-visible:outline-4
     focus-visible:outline-offset-2 focus-visible:outline-foreground/75
@@ -283,9 +283,6 @@ const containerClass = tv({
     web:transition-[outline-width]
   `,
   variants: {
-    flat: {
-      true: ``,
-    },
     inFlexRowParent: {
       true: `flex-row`,
     },
@@ -297,58 +294,6 @@ const containerClass = tv({
       error: `danger-theme2`,
     },
   },
-  compoundVariants: [
-    {
-      flat: true,
-      class: `pt-[4px]`,
-    },
-    {
-      flat: true,
-      class: `pt-[2px]`,
-    },
-  ],
-});
-
-const textClass = tv({
-  // px-1: Horizontal padding is necessary to give first and last letters on a
-  // line with accents enough space to not be clipped. Without this words like
-  // "lǐ" will have half the accent clipped.
-  base: `
-    px-1 text-center font-normal text-foreground
-
-    web:transition-colors
-  `,
-  variants: {
-    state: {
-      default: `text-foreground`,
-      dimmed: `text-primary-9`,
-      selected: `text-cyan-10`,
-      success: `text-background`,
-      error: `text-red-10`,
-    },
-    length: {
-      tiny: `
-        text-xl/tight
-
-        lg:text-2xl/tight
-      `,
-      short: `
-        text-lg/tight
-
-        lg:text-xl/tight
-      `,
-      medium: `
-        text-sm
-
-        lg:text-lg/tight
-      `,
-      long: `
-        text-xs
-
-        lg:text-base/tight
-      `,
-    },
-  },
 });
 
 const rectClass = tv({
@@ -358,6 +303,7 @@ const rectClass = tv({
       true: `cursor-default select-none opacity-50`,
     },
     flat: {
+      true: `mt-[2px]`,
       false: `border-b-4`,
     },
     filled: {
@@ -410,4 +356,46 @@ const rectClass = tv({
       class: `border-red-10`,
     },
   ],
+});
+
+const textClass = tv({
+  // px-1: Horizontal padding is necessary to give first and last letters on a
+  // line with accents enough space to not be clipped. Without this words like
+  // "lǐ" will have half the accent clipped.
+  base: `
+    px-1 text-center font-normal text-foreground
+
+    web:transition-colors
+  `,
+  variants: {
+    state: {
+      default: `text-foreground`,
+      dimmed: `text-primary-9`,
+      selected: `text-cyan-10`,
+      success: `text-background`,
+      error: `text-red-10`,
+    },
+    length: {
+      tiny: `
+        text-xl/tight
+
+        lg:text-2xl/tight
+      `,
+      short: `
+        text-lg/tight
+
+        lg:text-xl/tight
+      `,
+      medium: `
+        text-sm
+
+        lg:text-lg/tight
+      `,
+      long: `
+        text-xs
+
+        lg:text-base/tight
+      `,
+    },
+  },
 });
