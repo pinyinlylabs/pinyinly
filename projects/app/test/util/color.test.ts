@@ -1,0 +1,86 @@
+import { parseCssColorOrThrow, parseScalar } from "#util/color.ts";
+import assert from "node:assert/strict";
+import test from "node:test";
+
+await test(`${parseCssColorOrThrow.name} suite`, async () => {
+  await test(`fixtures`, () => {
+    const fixtures = [
+      [`rgb(1 2 3)`, [1, 2, 3, 1]],
+      [`rgb(0 0 0 / 0)`, [0, 0, 0, 0]],
+      [`rgb(0 0 0 / 1)`, [0, 0, 0, 1]],
+      [`rgb(1 2 3 / 0)`, [1, 2, 3, 0]],
+      [`rgb(1 2 3 / 1)`, [1, 2, 3, 1]],
+      [`rgb(1 2 3 / .9)`, [1, 2, 3, 0.9]],
+      [`rgb(0% 0% 0%)`, [0, 0, 0, 1]],
+      [`rgb(0% 0% 0% / 50%)`, [0, 0, 0, 0.5]],
+      [`rgb(100% 100% 100% / 50%)`, [255, 255, 255, 0.5]],
+      [`rgb(none none none)`, [0, 0, 0, 1]],
+      [`rgb(none none none / none)`, [0, 0, 0, 1]],
+      [`rgb(none 10 10% / 10%)`, [0, 10, 25.5, 0.1]],
+      [`rgb(none 10 10% / 20%)`, [0, 10, 25.5, 0.2]],
+      [`rgb(from #aabbcc r g b)`, [170, 187, 204, 1]],
+      [`rgb(from #aabbcc r g b / none)`, [170, 187, 204, 1]],
+      [`rgb(from #aabbcc r g b / 0.5)`, [170, 187, 204, 0.5]],
+      [`RgB(fRoM #aabbcc r G b / NoNe)`, [170, 187, 204, 1]],
+      [`#aabbcc`, [170, 187, 204, 1]],
+      [`#AABbCc`, [170, 187, 204, 1]],
+    ] as const;
+
+    for (const [input, [red, green, blue, alpha]] of fixtures) {
+      const expected = { red, green, blue, alpha };
+      assert.deepEqual([input, parseCssColorOrThrow(input)], [input, expected]);
+    }
+  });
+});
+
+await test(`${parseScalar.name} suite`, async () => {
+  await test(`valid fixtures`, () => {
+    const fixtures: [string, number | null][] = [
+      [`0`, 0],
+      [`1`, 1],
+      [`1.123`, 1.123],
+      [`.123`, 0.123],
+      [`255`, 255],
+      [`02`, 2],
+      [`100%`, 255],
+      [`.5%`, 0.005 * 255],
+      [`50%`, 127.5],
+      [`none`, null],
+    ];
+
+    for (const [input, expected] of fixtures) {
+      expect(parseScalar(input)).toEqual(expected);
+    }
+  });
+
+  await test(`invalid fixtures`, () => {
+    const fixtures: string[] = [`-1`, `256`, `100.5%`];
+
+    for (const input of fixtures) {
+      expect(() => parseScalar(input, 255)).toThrow();
+    }
+  });
+
+  await test(`valid fixtures for alpha`, () => {
+    const fixtures: [string, number | null][] = [
+      [`0`, 0],
+      [`1`, 1],
+      [`0.5`, 0.5],
+      [`100%`, 1],
+      [`50%`, 0.5],
+      [`none`, null],
+    ];
+
+    for (const [input, expected] of fixtures) {
+      expect(parseScalar(input, 1)).toEqual(expected);
+    }
+  });
+
+  await test(`invalid fixtures for alpha`, () => {
+    const fixtures: string[] = [`-1`, `256`, `100.5%`];
+
+    for (const input of fixtures) {
+      expect(() => parseScalar(input, 1)).toThrow();
+    }
+  });
+});

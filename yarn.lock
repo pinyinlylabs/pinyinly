@@ -2186,6 +2186,7 @@ __metadata:
     "@react-native-replicache/deep-freeze": "npm:^1.1.0"
     "@react-navigation/native": "npm:^7.0.0"
     "@react-navigation/stack": "npm:^7.0.0"
+    "@rive-app/react-canvas": "npm:^4.21.3"
     "@sentry/core": "npm:~8.54.0"
     "@sentry/node": "npm:~8.54.0"
     "@sentry/profiling-node": "npm:~8.54.0"
@@ -2289,6 +2290,7 @@ __metadata:
     react-responsive: "npm:^10.0.0"
     react-test-renderer: "npm:19.x"
     replicache: "patch:replicache@patch%3Areplicache@npm%253A15.0.1%23~/.yarn/patches/replicache-npm-15.0.1-daaa5044ba.patch%3A%3Aversion=15.0.1&hash=c643a4#~/.yarn/patches/replicache-patch-1cf70e7f66.patch"
+    rive-react-native: "npm:^9.3.4"
     tailwind-variants: "npm:^1.0.0"
     tailwindcss: "npm:^3.4.17"
     ts-essentials: "npm:^10.0.3"
@@ -5494,6 +5496,24 @@ __metadata:
   version: 13.21.0
   resolution: "@revenuecat/purchases-typescript-internal@npm:13.21.0"
   checksum: 10c0/af3e4e44f557f9570738c97de9aa1db07e16fd8e28198b7f1a474970fce589813bbc6d2b207045b77dd17a002059336043041a0fa6f11cd938f00eec13d7eb11
+  languageName: node
+  linkType: hard
+
+"@rive-app/canvas@npm:2.29.3":
+  version: 2.29.3
+  resolution: "@rive-app/canvas@npm:2.29.3"
+  checksum: 10c0/c6fd9b2ea0d3c0c6584064725def2241708e0fb900d144f1d23b08a2bee72890298b2c4196de7844cc2b72cd173276b409b9b47af42ae1f8c554ee7c03886fd7
+  languageName: node
+  linkType: hard
+
+"@rive-app/react-canvas@npm:^4.21.3":
+  version: 4.21.3
+  resolution: "@rive-app/react-canvas@npm:4.21.3"
+  dependencies:
+    "@rive-app/canvas": "npm:2.29.3"
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0
+  checksum: 10c0/ff062972353d07f940464c754f7d22b4476ee27dd584c255eda4a51cf253cce3be993d7adc4093f1c61c5fef841aef03f52180c132791716d832a99bfa026191
   languageName: node
   linkType: hard
 
@@ -15483,6 +15503,16 @@ __metadata:
   bin:
     rimraf: bin.js
   checksum: 10c0/9cb7757acb489bd83757ba1a274ab545eafd75598a9d817e0c3f8b164238dd90eba50d6b848bd4dcc5f3040912e882dc7ba71653e35af660d77b25c381d402e8
+  languageName: node
+  linkType: hard
+
+"rive-react-native@npm:^9.3.4":
+  version: 9.3.4
+  resolution: "rive-react-native@npm:9.3.4"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 10c0/9f630ae8abdba0ece13f598ddb25e38e361ec8d986964fd33c90242b3e26a45b3b363bae695fbc1c9aeb88dde3aefb4293dea8b6c7b9f2eca370d7a7321c3693
   languageName: node
   linkType: hard
 

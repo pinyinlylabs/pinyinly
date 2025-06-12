@@ -1,4 +1,9 @@
-import type { Flatten, IsEqual, PartialIfUndefined } from "#util/types.ts";
+import type {
+  Flatten,
+  IsEqual,
+  IsExhaustedRest,
+  PartialIfUndefined,
+} from "#util/types.ts";
 import assert from "node:assert/strict";
 import test from "node:test";
 
@@ -65,6 +70,20 @@ typeChecks(`Flatten`, () => {
     Flatten<{ key1: string } & { key2: string }>,
     { key1: string; key2: string }
   >;
+});
+
+typeChecks(`IsExhaustedRest`, () => {
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+  true satisfies IsExhaustedRest<{}>;
+
+  // @ts-expect-error not an empty object
+  true satisfies IsExhaustedRest<object>;
+
+  // @ts-expect-error still have key1
+  true satisfies IsExhaustedRest<{ key1: string }>;
+
+  // @ts-expect-error never is not an empty object
+  true satisfies IsExhaustedRest<never>;
 });
 
 await test(`lib.dom.d.ts patches`, async () => {
