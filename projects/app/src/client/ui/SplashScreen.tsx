@@ -1,3 +1,4 @@
+import { invariant } from "@haohaohow/lib/invariant";
 import Constants, { ExecutionEnvironment } from "expo-constants";
 import { useFonts } from "expo-font";
 import * as ExpoSplashScreen from "expo-splash-screen";
@@ -70,6 +71,9 @@ export const SplashScreen = ({}: { children?: never }) => {
     return null;
   }
 
+  const splashSource = require(`@/assets/lottie/splash.lottie.json`);
+  invariant(typeof splashSource !== `number`);
+
   return (
     <Reanimated.View exiting={FadeOut} className="absolute inset-0">
       <View className="size-full items-center justify-center bg-[#DE6447]">
@@ -85,7 +89,7 @@ export const SplashScreen = ({}: { children?: never }) => {
             alignSelf: `center`,
             justifyContent: `center`,
           }}
-          source={require(`@/assets/lottie/splash.lottie.json`)}
+          source={splashSource}
         />
       </View>
     </Reanimated.View>

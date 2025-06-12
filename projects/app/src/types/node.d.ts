@@ -1,10 +1,18 @@
 import type { AudioSource } from "expo-audio";
 
 declare global {
+  type RnRequireSource =
+    // Web
+    | string
+    // Native
+    | number;
+
   interface NodeRequire {
     // Support for asset files. Anything that starts with a dot and ends with a
     // known extension.
-    (id: `${string}.${`ttf` | `otf` | `svg` | `png` | `json`}`): string;
+    (
+      id: `${string}.${`ttf` | `otf` | `svg` | `png` | `riv` | `lottie.json`}`,
+    ): RnRequireSource;
     (id: `${string}.mp3`): AudioSource;
   }
 

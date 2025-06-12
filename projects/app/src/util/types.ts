@@ -35,6 +35,15 @@ export type IsEqual<T, U> =
     ? true
     : false | { [debug]: Prettify<T> };
 
+/**
+ * Utility to help in asserting that all properties are destructurd from a type.
+ *
+ * @example
+ * const { foo, bar, ...rest } = someObject;
+ * true satisfies IsExhaustedRest<typeof rest>;
+ */
+export type IsExhaustedRest<T> = IsEqual<T, Record<never, never>>;
+
 export type Flatten<T> = {
   [k in keyof T]: T[k];
 };

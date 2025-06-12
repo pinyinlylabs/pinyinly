@@ -7,6 +7,7 @@ import { QuizDeckHanziToPinyinQuestion } from "@/client/ui/QuizDeckHanziToPinyin
 import { QuizProgressBar } from "@/client/ui/QuizProgressBar";
 import { QuizQueueButton } from "@/client/ui/QuizQueueButton";
 import { RectButton2 } from "@/client/ui/RectButton2";
+import { ShootingStars } from "@/client/ui/ShootingStars";
 import type { TextAnswerButtonState } from "@/client/ui/TextAnswerButton";
 import { TextAnswerButton } from "@/client/ui/TextAnswerButton";
 import { TextInputSingle } from "@/client/ui/TextInputSingle";
@@ -47,6 +48,10 @@ function DesignSystemPage() {
         </Link>
       </View>
       <ScrollView style={{ flex: 1 }} ref={scrollViewRef}>
+        <Section title={ShootingStarsExample.name} scrollTo={scrollTo}>
+          <ShootingStarsExample />
+        </Section>
+
         <Section title={IconImageExample.name} scrollTo={scrollTo}>
           <IconImageExample />
         </Section>
@@ -983,35 +988,35 @@ function IconImageExample() {
   return (
     <View className="w-full flex-row gap-2">
       <ExampleStack title="size=12">
-        {sources.map((s) => (
-          <IconImage key={s} size={12} source={s} />
+        {sources.map((s, i) => (
+          <IconImage key={i} size={12} source={s} />
         ))}
       </ExampleStack>
 
       <ExampleStack title="default">
-        {sources.map((s) => (
-          <IconImage key={s} source={s} />
+        {sources.map((s, i) => (
+          <IconImage key={i} source={s} />
         ))}
       </ExampleStack>
 
       <ExampleStack title="size=32">
-        {sources.map((s) => (
-          <IconImage key={s} size={32} source={s} />
+        {sources.map((s, i) => (
+          <IconImage key={i} size={32} source={s} />
         ))}
       </ExampleStack>
 
       <View className="success-theme2">
         <ExampleStack title="success">
-          {sources.map((s) => (
-            <IconImage key={s} source={s} />
+          {sources.map((s, i) => (
+            <IconImage key={i} source={s} />
           ))}
         </ExampleStack>
       </View>
 
       <View className="accent-theme2">
         <ExampleStack title="accent">
-          {sources.map((s) => (
-            <IconImage key={s} source={s} />
+          {sources.map((s, i) => (
+            <IconImage key={i} source={s} />
           ))}
         </ExampleStack>
       </View>
@@ -1067,5 +1072,74 @@ function QuizDeckHanziToPinyinQuestionExample() {
         />
       )}
     />
+  );
+}
+
+function ShootingStarsExample() {
+  const [i, setI] = useState(0);
+  const [growth, setGrowth] = useState(0);
+  const [play, setPlay] = useState(false);
+
+  return (
+    <View key={i} className="flex-row">
+      <ExampleStack title="autoplay (125×75)" showFrame>
+        <ShootingStars className="h-[75px] w-[125px]" play={true} />
+      </ExampleStack>
+
+      <View>
+        <ExampleStack title="resizable (100×50)" showFrame>
+          <ShootingStars
+            style={{ width: 100 + growth, height: 50 + growth }}
+            play={play}
+          />
+        </ExampleStack>
+        <View className="shrink flex-row">
+          <RectButton2
+            variant="bare"
+            onPress={() => {
+              setGrowth((prev) => prev - 5);
+            }}
+          >
+            Shrink
+          </RectButton2>
+          <RectButton2
+            variant="bare"
+            onPress={() => {
+              setGrowth((prev) => prev + 5);
+            }}
+          >
+            Grow
+          </RectButton2>
+        </View>
+      </View>
+
+      <ExampleStack title="manual (100×50)" showFrame>
+        <ShootingStars className="h-[50px] w-[100px]" play={play} />
+      </ExampleStack>
+
+      <ExampleStack title="manual (100×50) success" showFrame>
+        <ShootingStars
+          className="success-theme2 h-[50px] w-[100px]"
+          play={play}
+        />
+      </ExampleStack>
+
+      <ExampleStack title="Controls" childrenClassName="items-center gap-2">
+        <RectButton2
+          onPress={() => {
+            setPlay((prev) => !prev);
+          }}
+        >
+          {play ? `Stop` : `Play`}
+        </RectButton2>
+        <RectButton2
+          onPress={() => {
+            setI((prev) => prev + 1);
+          }}
+        >
+          Re-render
+        </RectButton2>
+      </ExampleStack>
+    </View>
   );
 }

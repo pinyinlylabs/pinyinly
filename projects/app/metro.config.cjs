@@ -17,6 +17,11 @@ config = {
   // Fixes "Metro has encountered an error: While trying to resolve module `replicache-react`"
   resolver: {
     ...config.resolver,
+    assetExts: [
+      ...(config.resolver?.assetExts ?? []),
+      // Add Rive support.
+      `riv`,
+    ],
     unstable_enablePackageExports: true,
   },
 };
