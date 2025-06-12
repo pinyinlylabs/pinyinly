@@ -11,6 +11,7 @@ await test(`${parseCssColorOrThrow.name} suite`, async () => {
       [`rgb(1 2 3 / 0)`, [1, 2, 3, 0]],
       [`rgb(1 2 3 / 1)`, [1, 2, 3, 1]],
       [`rgb(1 2 3 / .9)`, [1, 2, 3, 0.9]],
+      [`rgb(1 2 3/.9)`, [1, 2, 3, 0.9]],
       [`rgb(0% 0% 0%)`, [0, 0, 0, 1]],
       [`rgb(0% 0% 0% / 50%)`, [0, 0, 0, 0.5]],
       [`rgb(100% 100% 100% / 50%)`, [255, 255, 255, 0.5]],
@@ -22,6 +23,17 @@ await test(`${parseCssColorOrThrow.name} suite`, async () => {
       [`rgb(from #aabbcc r g b / none)`, [170, 187, 204, 1]],
       [`rgb(from #aabbcc r g b / 0.5)`, [170, 187, 204, 0.5]],
       [`RgB(fRoM #aabbcc r G b / NoNe)`, [170, 187, 204, 1]],
+      [
+        // Comments in the middle of the color
+        `rgb(/**/from/**/#11181d/**/r/**/g/**/b/**///**/.9/**/)`,
+        [17, 24, 29, 0.9],
+      ],
+      [
+        // Newline and comments in the middle of the color
+        `rgb(/*
+        */from/**/#11181d/**/r/**/g/**/b/**///**/.9/**/)`,
+        [17, 24, 29, 0.9],
+      ],
       [`#aabbcc`, [170, 187, 204, 1]],
       [`#AABbCc`, [170, 187, 204, 1]],
     ] as const;

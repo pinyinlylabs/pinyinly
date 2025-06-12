@@ -11,6 +11,10 @@ export interface ColorRGBA {
   alpha: number;
 }
 
+// One or more of of:
+// - <whitespace>
+// - <comment>
+const spacePattern = String.raw`(?:\s|/\*[\s\S]*?\*/)`;
 // One of:
 // - <number>
 // - <number>.<fraction>
@@ -27,13 +31,13 @@ const hexPattern = String.raw`#[a-f0-9]{6}`;
 // - rgb(<scalar> <scalar> <scalar>)
 // - rgb(<scalar> <scalar> <scalar> / <scalar>)
 const rgbRegex = new RegExp(
-  `rgb\\(\\s*(${scalarPattern})\\s+(${scalarPattern})\\s+(${scalarPattern})(?:\\s+\\/\\s*(${scalarPattern}))?\\)`,
+  `rgb\\(${spacePattern}*(${scalarPattern})${spacePattern}+(${scalarPattern})${spacePattern}+(${scalarPattern})(?:${spacePattern}*\\/${spacePattern}*(${scalarPattern}))?${spacePattern}*\\)`,
 );
 // One of:
 // - rgb(from <hex> r g b)
 // - rgb(from <hex> r g b / <scalar>)
 const rgbRelativeRegex = new RegExp(
-  `rgb\\(from\\s+(${hexPattern})\\s+r\\s+g\\s+b\\s*(?:\\s+\\/\\s*(${scalarPattern}))?\\)`,
+  `rgb\\(${spacePattern}*from${spacePattern}+(${hexPattern})${spacePattern}+r${spacePattern}+g${spacePattern}+b(?:${spacePattern}*\\/${spacePattern}*(${scalarPattern}))?${spacePattern}*\\)`,
 );
 const rgbHexRegex = new RegExp(`^${hexPattern}$`);
 

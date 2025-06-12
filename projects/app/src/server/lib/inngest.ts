@@ -12,7 +12,7 @@ import { invariant } from "@haohaohow/lib/invariant";
 import { sentryMiddleware } from "@inngest/middleware-sentry";
 import { createTRPCClient, httpLink } from "@trpc/client";
 import { subDays } from "date-fns/subDays";
-import { inArray, lt, notInArray } from "drizzle-orm";
+import { inArray, lt, notInArray, sql } from "drizzle-orm";
 import { Inngest } from "inngest";
 import * as postmark from "postmark";
 import * as s from "../schema";
@@ -88,7 +88,7 @@ const replicacheGarbageCollection = inngest.createFunction(
     concurrency: 1,
   },
   {
-    // Sync every hour minutes
+    // Run once every hour
     cron: `0 * * * *`,
   },
   async ({ step }) => {
@@ -116,6 +116,112 @@ const replicacheGarbageCollection = inngest.createFunction(
       );
       deletedRowCount = deletedRows.length;
     } while (deletedRowCount > 0);
+  },
+);
+
+const pgFullVacuumGarbageCollection = inngest.createFunction(
+  {
+    description: `Checks PostgreSQL tables for dead tuples and if VACUUM FULL is needed to reclaim space.`,
+    id: `pgFullVacuumGarbageCollection`,
+    concurrency: 1,
+  },
+  {
+    // Run once every day
+    cron: `0 0 * * *`,
+  },
+  async ({ step }) => {
+    type BloatRow = {
+      schema_name: string;
+      table_name: string;
+      table_size: string;
+      n_live_tup: number;
+      n_dead_tup: number;
+      table_dead_pct: number;
+      toast_table_size: string | null;
+      toast_live_tup: number | null;
+      toast_dead_tup: number | null;
+      toast_dead_pct: number | null;
+      recommendation: `OK` | `Consider VACUUM FULL`;
+    };
+
+    const bloatRows = await step.run(
+      `query bloat stats`,
+      async () =>
+        await withDrizzle(async (db) => {
+          const { rows } = await db.execute<BloatRow>(`
+  WITH toast_stats AS (
+    SELECT 
+      t.oid AS toast_oid,
+      t.relname AS toast_relname,
+      t.reltoastrelid AS toast_relid,
+      p.oid AS parent_oid,
+      p.relname AS parent_relname,
+      ns.nspname AS schema_name,
+      pg_total_relation_size(t.oid) AS toast_total_size,
+      s.n_dead_tup AS toast_dead_tup,
+      s.n_live_tup AS toast_live_tup
+    FROM pg_class t
+    JOIN pg_class p ON t.reltoastrelid = p.oid
+    JOIN pg_namespace ns ON p.relnamespace = ns.oid
+    LEFT JOIN pg_stat_all_tables s ON s.relid = t.oid
+    WHERE t.relname LIKE 'pg_toast_%'
+  ),
+  parent_table_stats AS (
+    SELECT
+      s.relid,
+      n.nspname AS schema_name,
+      c.relname AS table_name,
+      s.n_live_tup,
+      s.n_dead_tup,
+      pg_total_relation_size(s.relid) AS table_size
+    FROM pg_stat_user_tables s
+    JOIN pg_class c ON c.oid = s.relid
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+  )
+  SELECT 
+    p.schema_name,
+    p.table_name,
+    pg_size_pretty(p.table_size) AS table_size,
+    p.n_live_tup,
+    p.n_dead_tup,
+    ROUND(((p.n_dead_tup::float / NULLIF(p.n_live_tup + p.n_dead_tup, 0)) * 100)::numeric, 2) AS table_dead_pct,
+    pg_size_pretty(t.toast_total_size) AS toast_table_size,
+    t.toast_live_tup,
+    t.toast_dead_tup,
+    ROUND(((t.toast_dead_tup::float / NULLIF(t.toast_live_tup + t.toast_dead_tup, 0)) * 100)::numeric, 2) AS toast_dead_pct,
+    CASE 
+      WHEN (p.n_dead_tup > 100000 AND (p.n_dead_tup::float / NULLIF(p.n_live_tup + p.n_dead_tup, 0)) > 0.2)
+        OR (t.toast_dead_tup > 10000 AND (t.toast_dead_tup::float / NULLIF(t.toast_live_tup + t.toast_dead_tup, 0)) > 0.2)
+      THEN 'Consider VACUUM FULL'
+      ELSE 'OK'
+    END AS recommendation
+  FROM parent_table_stats p
+  LEFT JOIN toast_stats t ON p.relid = t.parent_oid
+  ORDER BY recommendation DESC, table_dead_pct DESC NULLS LAST;
+`);
+          return rows;
+        }),
+    );
+
+    const tablesToVacuum = bloatRows.filter(
+      (row) => row.recommendation === `Consider VACUUM FULL`,
+    );
+
+    for (const table of tablesToVacuum) {
+      await step.run(
+        `vacuum table ${table.schema_name}.${table.table_name}`,
+        async () => {
+          // Run VACUUM FULL on the table
+          await withDrizzle(async (db) => {
+            await db.execute(
+              sql`VACUUM FULL ${sql.identifier(table.schema_name)}.${sql.identifier(table.table_name)};`,
+            );
+          });
+        },
+      );
+    }
+
+    return bloatRows;
   },
 );
 
@@ -509,6 +615,7 @@ export const functions = [
   dataIntegrityDictionary,
   helloWorldEmail,
   migrateHanziWords,
+  pgFullVacuumGarbageCollection,
   replicacheGarbageCollection,
   syncRemotePull,
   syncRemotePush,
