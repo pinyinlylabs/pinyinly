@@ -2954,12 +2954,12 @@ __metadata:
   linkType: hard
 
 "@neondatabase/serverless@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "@neondatabase/serverless@npm:1.0.0"
+  version: 1.0.1
+  resolution: "@neondatabase/serverless@npm:1.0.1"
   dependencies:
-    "@types/node": "npm:^22.10.2"
+    "@types/node": "npm:^22.15.30"
     "@types/pg": "npm:^8.8.0"
-  checksum: 10c0/62bb99bfef7c20dc2c948209bc8eb05ca88123ecc44b3cbf49536c0002d9a9b22e6b0d9de17e5baaae0ef7b409f65cb9d1a9197d97826a480a81e10f6c31c643
+  checksum: 10c0/9c7377e5ce3792b8af81c8823ec5e42b8eff3a718df69333ec768b30b6b05ca3ae080deba36d919f2530c2bdaaf8b85de8cc6e738e5670acbea7b18f92ab2ce8
   languageName: node
   linkType: hard
 
@@ -6287,12 +6287,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:>=13.7.0, @types/node@npm:^22.10.2, @types/node@npm:^22.10.5":
+"@types/node@npm:>=13.7.0, @types/node@npm:^22.10.5":
   version: 22.15.21
   resolution: "@types/node@npm:22.15.21"
   dependencies:
     undici-types: "npm:~6.21.0"
   checksum: 10c0/f092bbccda2131c2b2c8f720338080aa0ef1d928f5f1062c03954a4f7dafa7ee3ed29bc3e51bd4e2584473b3d943c637a2b39ad7174898970818270187cf10c1
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:^22.15.30":
+  version: 22.15.31
+  resolution: "@types/node@npm:22.15.31"
+  dependencies:
+    undici-types: "npm:~6.21.0"
+  checksum: 10c0/ef7d5dc890da41cfd554d35ab8998bc18be9e3a0caa642e720599ac4410a94a4879766e52b3c9cafa06c66b7b8aebdc51f322cf67df23a6489927890196a316d
   languageName: node
   linkType: hard
 
