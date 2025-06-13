@@ -118,14 +118,9 @@ const NewHanziWordToGlossSkillContent = ({
       ) : (
         <>
           <View className="mb-8 gap-8">
-            <View className="success-theme flex-row items-center gap-2 self-center">
-              <IconImage
-                className="text-accent-10"
-                source={require(`@/assets/icons/plant-filled.svg`)}
-              />
-              <Text className="font-bold uppercase text-accent-10">
-                New Word
-              </Text>
+            <View className="theme-success flex-row items-center gap-2 self-center">
+              <IconImage source={require(`@/assets/icons/plant-filled.svg`)} />
+              <Text className="font-bold uppercase">New Word</Text>
             </View>
 
             <View className="items-center gap-2">
@@ -170,14 +165,9 @@ const NewHanziWordToPinyinSkillContent = ({
       ) : (
         <>
           <View className="mb-8 gap-8">
-            <View className="success-theme flex-row items-center gap-2 self-center">
-              <IconImage
-                className="text-accent-10"
-                source={require(`@/assets/icons/plant-filled.svg`)}
-              />
-              <Text className="font-bold uppercase text-accent-10">
-                New Pinyin
-              </Text>
+            <View className="theme-success flex-row items-center gap-2 self-center">
+              <IconImage source={require(`@/assets/icons/plant-filled.svg`)} />
+              <Text className="font-bold uppercase">New Pinyin</Text>
             </View>
 
             <View className="items-center gap-2">
@@ -220,14 +210,9 @@ const NewHanziWordToPinyinInitialSkillContent = ({
       ) : (
         <>
           <View className="mb-8 gap-8">
-            <View className="success-theme flex-row items-center gap-2 self-center">
-              <IconImage
-                className="text-accent-10"
-                source={require(`@/assets/icons/plant-filled.svg`)}
-              />
-              <Text className="font-bold uppercase text-accent-10">
-                New Pinyin Initial
-              </Text>
+            <View className="theme-success flex-row items-center gap-2 self-center">
+              <IconImage source={require(`@/assets/icons/plant-filled.svg`)} />
+              <Text className="font-bold uppercase">New Pinyin Initial</Text>
             </View>
 
             <View className="items-center gap-2">
@@ -274,14 +259,9 @@ const NewHanziWordToPinyinFinalSkillContent = ({
       ) : (
         <>
           <View className="mb-8 gap-8">
-            <View className="success-theme flex-row items-center gap-2 self-center">
-              <IconImage
-                className="text-accent-10"
-                source={require(`@/assets/icons/plant-filled.svg`)}
-              />
-              <Text className="font-bold uppercase text-accent-10">
-                New Pinyin Final
-              </Text>
+            <View className="theme-success flex-row items-center gap-2 self-center">
+              <IconImage source={require(`@/assets/icons/plant-filled.svg`)} />
+              <Text className="font-bold uppercase">New Pinyin Final</Text>
             </View>
 
             <View className="items-center gap-2">
@@ -328,14 +308,9 @@ const NewHanziWordToPinyinToneSkillContent = ({
       ) : (
         <>
           <View className="mb-8 gap-8">
-            <View className="success-theme flex-row items-center gap-2 self-center">
-              <IconImage
-                className="text-accent-10"
-                source={require(`@/assets/icons/plant-filled.svg`)}
-              />
-              <Text className="font-bold uppercase text-accent-10">
-                New Pinyin Tone
-              </Text>
+            <View className="theme-success flex-row items-center gap-2 self-center">
+              <IconImage source={require(`@/assets/icons/plant-filled.svg`)} />
+              <Text className="font-bold uppercase">New Pinyin Tone</Text>
             </View>
 
             <View className="items-center gap-2">
@@ -373,7 +348,7 @@ const ContainerWithContinueButton = ({
         {children}
       </ScrollView>
 
-      <View className="accent-theme2 border-t-2 border-primary-5 p-4 mb-safe">
+      <View className="theme-accent border-t-2 border-primary-5 p-4 mb-safe">
         <RectButton2
           variant="filled"
           textClassName="py-1 px-2"

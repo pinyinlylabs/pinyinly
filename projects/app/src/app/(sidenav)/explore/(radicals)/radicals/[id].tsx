@@ -51,7 +51,7 @@ export default function RadicalPage() {
                       ({ mnemonic, rationale }, i) => (
                         <View key={i} className="gap-1">
                           <Text className="text-foreground">{mnemonic}</Text>
-                          <Text className="text-xs italic text-primary-10">
+                          <Text className="text-xs italic text-caption">
                             {rationale}
                           </Text>
                         </View>
@@ -67,7 +67,7 @@ export default function RadicalPage() {
                       ({ mnemonic, strategy: rationale }, i) => (
                         <View key={i} className="gap-1">
                           <Text className="text-foreground">{mnemonic}</Text>
-                          <Text className="text-xs italic text-primary-10">
+                          <Text className="text-xs italic text-caption">
                             {rationale}
                           </Text>
                         </View>

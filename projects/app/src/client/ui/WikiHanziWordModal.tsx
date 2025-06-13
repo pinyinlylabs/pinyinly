@@ -139,7 +139,7 @@ export const WikiHanziWordModal = ({
 
               {wikiEntry.data?.components == null ? null : (
                 <View className="gap-1">
-                  <Text className="font-karla text-xs uppercase text-primary-10">
+                  <Text className="font-karla text-xs uppercase text-caption">
                     Interpretation
                   </Text>
                   <View className="gap-4 rounded-xl bg-primary-5 p-4">
@@ -236,7 +236,7 @@ export const WikiHanziWordModal = ({
               )}
             </ScrollView>
 
-            <View className="accent-theme2 border-t-2 border-primary-5 p-4 mb-safe">
+            <View className="theme-accent border-t-2 border-primary-5 p-4 mb-safe">
               <RectButton2 variant="filled" onPress={dismiss}>
                 Close
               </RectButton2>

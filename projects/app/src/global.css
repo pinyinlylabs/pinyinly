@@ -119,7 +119,7 @@
   }
 
   .www-text-subtitle {
-    @apply font-karla text-base uppercase text-accent-10;
+    @apply font-karla text-base uppercase text-cyan-10;
   }
 
   .www-text-body {
@@ -141,10 +141,10 @@
 
   /* 
   
-  COLOR THEMES
+  COLOR SCHEMES
 
   */
-  .dark-theme {
+  .hhh-color-scheme-dark {
     --color-slate-1: var(--color-slate-dark-1);
     --color-slate-2: var(--color-slate-dark-2);
     --color-slate-3: var(--color-slate-dark-3);
@@ -217,7 +217,7 @@
     --color-caption-ref: rgb(from var(--color-slate-12) r g b / 0.75);
   }
 
-  .light-theme {
+  .hhh-color-schema-light {
     --color-slate-1: var(--color-slate-light-1);
     --color-slate-2: var(--color-slate-light-2);
     --color-slate-3: var(--color-slate-light-3);
@@ -290,7 +290,12 @@
     --color-caption-ref: var(--color-slate-11);
   }
 
-  .default-theme {
+  /* 
+  
+  THEMES
+
+  */
+  .theme-default {
     /* todo delete ? */
     --color-primary-1: var(--color-slate-1);
     --color-primary-2: var(--color-slate-2);
@@ -304,18 +309,6 @@
     --color-primary-10: var(--color-slate-10);
     --color-primary-11: var(--color-slate-11);
     --color-primary-12: var(--color-slate-12);
-    --color-accent-1: var(--color-cyan-1);
-    --color-accent-2: var(--color-cyan-2);
-    --color-accent-3: var(--color-cyan-3);
-    --color-accent-4: var(--color-cyan-4);
-    --color-accent-5: var(--color-cyan-5);
-    --color-accent-6: var(--color-cyan-6);
-    --color-accent-7: var(--color-cyan-7);
-    --color-accent-8: var(--color-cyan-8);
-    --color-accent-9: var(--color-cyan-9);
-    --color-accent-10: var(--color-cyan-10);
-    --color-accent-11: var(--color-cyan-11);
-    --color-accent-12: var(--color-cyan-12);
 
     --color-foreground: rgb(from var(--color-primary-12) r g b / 0.9);
     --color-foreground-bold: var(--color-primary-12);
@@ -325,22 +318,7 @@
     --color-caption-ref: var(--color-primary-11);
   }
 
-  .danger-theme {
-    --color-accent-1: var(--color-red-1);
-    --color-accent-2: var(--color-red-2);
-    --color-accent-3: var(--color-red-3);
-    --color-accent-4: var(--color-red-4);
-    --color-accent-5: var(--color-red-5);
-    --color-accent-6: var(--color-red-6);
-    --color-accent-7: var(--color-red-7);
-    --color-accent-8: var(--color-red-8);
-    --color-accent-9: var(--color-red-9);
-    --color-accent-10: var(--color-red-10);
-    --color-accent-11: var(--color-red-11);
-    --color-accent-12: var(--color-red-12);
-  }
-
-  .danger-theme2 {
+  .theme-danger {
     /* todo: delete */
     --color-primary-1: var(--color-red-1);
     --color-primary-2: var(--color-red-2);
@@ -363,22 +341,7 @@
     --color-caption-ref: var(--color-red-10);
   }
 
-  .success-theme {
-    --color-accent-1: var(--color-lime-1);
-    --color-accent-2: var(--color-lime-2);
-    --color-accent-3: var(--color-lime-3);
-    --color-accent-4: var(--color-lime-4);
-    --color-accent-5: var(--color-lime-5);
-    --color-accent-6: var(--color-lime-6);
-    --color-accent-7: var(--color-lime-7);
-    --color-accent-8: var(--color-lime-8);
-    --color-accent-9: var(--color-lime-9);
-    --color-accent-10: var(--color-lime-10);
-    --color-accent-11: var(--color-lime-11);
-    --color-accent-12: var(--color-lime-12);
-  }
-
-  .success-theme2 {
+  .theme-success {
     --color-foreground: var(--color-lime-10);
     --color-foreground-bold: var(--color-lime-10);
     --color-foreground-ref: var(--color-lime-10);
@@ -387,7 +350,7 @@
     --color-caption-ref: var(--color-lime-10);
   }
 
-  .accent-theme2 {
+  .theme-accent {
     --color-foreground: var(--color-cyan-10);
     --color-foreground-bold: var(--color-cyan-10);
     --color-foreground-ref: var(--color-cyan-10);
@@ -396,19 +359,13 @@
     --color-caption-ref: var(--color-cyan-10);
   }
 
-  .warning-theme {
-    --color-accent-1: var(--color-amber-1);
-    --color-accent-2: var(--color-amber-2);
-    --color-accent-3: var(--color-amber-3);
-    --color-accent-4: var(--color-amber-4);
-    --color-accent-5: var(--color-amber-5);
-    --color-accent-6: var(--color-amber-6);
-    --color-accent-7: var(--color-amber-7);
-    --color-accent-8: var(--color-amber-8);
-    --color-accent-9: var(--color-amber-9);
-    --color-accent-10: var(--color-amber-10);
-    --color-accent-11: var(--color-amber-11);
-    --color-accent-12: var(--color-amber-12);
+  .theme-warning {
+    --color-foreground: var(--color-amber-10);
+    --color-foreground-bold: var(--color-amber-10);
+    --color-foreground-ref: var(--color-amber-10);
+    --color-caption: var(--color-amber-10);
+    --color-caption-bold: var(--color-amber-10);
+    --color-caption-ref: var(--color-amber-10);
   }
 }
 
@@ -542,13 +499,13 @@ body {
   --color-cyan-dark-11: rgb(0 194 215);
   --color-cyan-dark-12: rgb(225 248 250);
 
-  @apply light-theme;
-  @apply default-theme;
+  @apply hhh-color-schema-light;
+  @apply theme-default;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    @apply dark-theme;
+    @apply hhh-color-scheme-dark;
   }
 }
 

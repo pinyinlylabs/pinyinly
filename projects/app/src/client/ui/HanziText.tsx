@@ -4,13 +4,11 @@ import { tv } from "tailwind-variants";
 export const HanziText = ({
   pinyin,
   hanzi,
-  accented,
   small = false,
   underline = false,
 }: {
   pinyin?: string;
   hanzi: string;
-  accented?: boolean;
   small?: boolean;
   underline?: boolean;
 }) => {
@@ -22,10 +20,8 @@ export const HanziText = ({
         ${small ? `gap-0.5` : `gap-1`}
       `}
     >
-      {pinyin == null ? null : (
-        <PinyinText pinyin={pinyin} accented={accented} small={small} />
-      )}
-      <Text className={hanziText({ accented, small, underline })}>{hanzi}</Text>
+      {pinyin == null ? null : <PinyinText pinyin={pinyin} small={small} />}
+      <Text className={hanziText({ small, underline })}>{hanzi}</Text>
     </View>
   );
 };
@@ -34,9 +30,6 @@ const hanziText = tv({
   base: `text-2xl/none text-foreground`,
 
   variants: {
-    accented: {
-      true: `text-accent-10`,
-    },
     small: {
       true: `text-xl/none`,
     },
@@ -48,22 +41,17 @@ const hanziText = tv({
 
 export const PinyinText = ({
   pinyin,
-  accented,
   small = false,
 }: {
   pinyin: string;
-  accented?: boolean;
   small?: boolean;
 }) => {
-  return <Text className={pinyinText({ accented, small })}>{pinyin}</Text>;
+  return <Text className={pinyinText({ small })}>{pinyin}</Text>;
 };
 
 const pinyinText = tv({
   base: `text-base/none text-primary-9`,
   variants: {
-    accented: {
-      true: `text-accent-10 opacity-80`,
-    },
     small: {
       true: `text-xs/none`,
     },

@@ -29,8 +29,7 @@ export async function hanziWordToPinyinQuestionOrThrow(
 function validQuestionInvariant<T extends Question>(question: T): T {
   switch (question.kind) {
     case QuestionKind.OneCorrectPair:
-    case QuestionKind.HanziWordToPinyin:
-    case QuestionKind.MultipleChoice: {
+    case QuestionKind.HanziWordToPinyin: {
       break;
     }
   }

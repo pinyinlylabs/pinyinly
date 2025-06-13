@@ -28,7 +28,6 @@ import React, { useEffect, useId, useRef, useState } from "react";
 import Reanimated, { FadeIn } from "react-native-reanimated";
 import { CloseButton } from "./CloseButton";
 import { QuizDeckHanziToPinyinQuestion } from "./QuizDeckHanziToPinyinQuestion";
-import { QuizDeckMultipleChoiceQuestion } from "./QuizDeckMultipleChoiceQuestion";
 import { QuizDeckOneCorrectPairQuestion } from "./QuizDeckOneCorrectPairQuestion";
 import { QuizProgressBar } from "./QuizProgressBar";
 import { QuizQueueButton } from "./QuizQueueButton";
@@ -209,7 +208,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
                     entering={FadeIn}
                     className="my-auto items-center"
                   >
-                    <Text className="font-karla text-lg text-primary-10">
+                    <Text className="font-karla text-lg text-caption">
                       Loading
                     </Text>
                   </Reanimated.View>
@@ -269,16 +268,6 @@ export const QuizDeck = ({ className }: { className?: string }) => {
                   case QuestionKind.HanziWordToPinyin: {
                     screen = (
                       <QuizDeckHanziToPinyinQuestion
-                        question={question}
-                        onNext={handleNext}
-                        onRating={handleRating}
-                      />
-                    );
-                    break;
-                  }
-                  case QuestionKind.MultipleChoice: {
-                    screen = (
-                      <QuizDeckMultipleChoiceQuestion
                         question={question}
                         onNext={handleNext}
                         onRating={handleRating}

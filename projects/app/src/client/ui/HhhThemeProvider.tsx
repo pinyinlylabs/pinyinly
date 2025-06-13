@@ -43,7 +43,7 @@ const containerClass = tv({
   base: `flex-1 bg-background`,
   variants: {
     isWeb: {
-      false: `default-theme`,
+      false: `theme-default`,
     },
     isDarkMode: {
       true: ``,
@@ -55,12 +55,12 @@ const containerClass = tv({
     {
       isWeb: false,
       isDarkMode: true,
-      class: `dark-theme`,
+      class: `hhh-color-scheme-dark`,
     },
     {
       isWeb: false,
       isDarkMode: false,
-      class: `light-theme`,
+      class: `hhh-color-schema-light`,
     },
   ],
 });

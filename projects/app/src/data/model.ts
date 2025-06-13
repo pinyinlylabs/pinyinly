@@ -209,20 +209,11 @@ export type QuestionFlagType =
   | QuestionFlagRetryType;
 
 const questionKindSchema = z.enum({
-  MultipleChoice: `debug--MultipleChoice`,
   OneCorrectPair: `debug--OneCorrectPair`,
   HanziWordToPinyin: `debug--HanziWordToPinyin`,
 });
 export const QuestionKind = questionKindSchema.enum;
 export type QuestionKind = z.infer<typeof questionKindSchema>;
-
-export interface MultipleChoiceQuestion {
-  kind: typeof QuestionKind.MultipleChoice;
-  prompt: string;
-  answer: string;
-  flag?: QuestionFlagType;
-  choices: readonly string[];
-}
 
 const mistakeKindSchema = z.enum({
   /**
@@ -336,10 +327,7 @@ export interface HanziWordToPinyinQuestion {
   flag?: QuestionFlagType;
 }
 
-export type Question =
-  | MultipleChoiceQuestion
-  | OneCorrectPairQuestion
-  | HanziWordToPinyinQuestion;
+export type Question = OneCorrectPairQuestion | HanziWordToPinyinQuestion;
 
 export interface PinyinInitialAssociation {
   initial: string;
