@@ -11,7 +11,7 @@ import type { CvrEntities } from "#server/schema.ts";
 import * as s from "#server/schema.ts";
 import { nextReview, Rating } from "#util/fsrs.ts";
 import { nanoid } from "#util/nanoid.ts";
-import { invariant } from "@haohaohow/lib/invariant";
+import { invariant, nonNullable } from "@haohaohow/lib/invariant";
 import { eq } from "drizzle-orm";
 import assert from "node:assert/strict";
 import { test } from "node:test";
@@ -511,6 +511,78 @@ await test(`${pull.name} suite`, async (t) => {
     });
   });
 
+  await txTest(`handles skill renames for skillState`, async (tx) => {
+    // This test ensures that changes to the skill (which is used as the key in
+    // replicache) is correctly turned into delete+add. The skill might change
+    // if the HanziWord meaning key is renamed (e.g. 我:i to 我:me).
+
+    const clientGroupId = nanoid();
+
+    const user = await createUser(tx);
+
+    const [skillState] = await tx
+      .insert(s.skillState)
+      .values([
+        {
+          userId: user.id,
+          srs: srsStateFromFsrsState(nextReview(null, Rating.Good)),
+          skill: glossToHanziWord(`我:i`),
+        },
+      ])
+      .returning();
+    invariant(skillState != null);
+
+    const pull1 = await pull(tx, user.id, {
+      profileId: ``,
+      clientGroupId,
+      pullVersion: 1,
+      schemaVersion: schema.version,
+      cookie: null,
+    });
+
+    // Rename 我:i to 我:me. Need to start a new checkpoint so that xmin is
+    // updated, otherwise it won't be seen as a diff by computeEntitiesState.
+    const [updatedSkillState] = await tx.transaction((tx) =>
+      tx
+        .update(s.skillState)
+        .set({ skill: glossToHanziWord(`我:me`) })
+        .where(eq(s.skillState.id, skillState.id))
+        .returning(),
+    );
+    invariant(updatedSkillState != null);
+
+    assert.ok(`cookie` in pull1);
+
+    const pull2 = await pull(tx, user.id, {
+      profileId: ``,
+      clientGroupId,
+      pullVersion: 1,
+      schemaVersion: schema.version,
+      cookie: pull1.cookie,
+    });
+
+    expect(pull2).toMatchObject({
+      cookie: {
+        order: nonNullable(pull1.cookie).order + 1,
+      },
+      patch: [
+        {
+          op: `del`,
+          key: schema.skillState.marshalKey({
+            skill: glossToHanziWord(`我:i`),
+          }),
+        },
+        {
+          op: `put`,
+          key: schema.skillState.marshalKey({
+            skill: glossToHanziWord(`我:me`),
+          }),
+          value: schema.skillState.marshalValue(updatedSkillState),
+        },
+      ],
+    });
+  });
+
   await txTest(`handles deletes for skillState`, async (tx) => {
     const clientGroupId = nanoid();
 
@@ -608,6 +680,66 @@ await test(`${pull.name} suite`, async (t) => {
       patch: [
         {
           op: `del`,
+          key: schema.skillRating.marshalKey({ id: skillRating.id }),
+        },
+      ],
+    });
+  });
+
+  await txTest(`handles skill renames for skillRating`, async (tx) => {
+    const clientGroupId = nanoid();
+
+    const user = await createUser(tx);
+
+    const now = new Date();
+
+    const [skillRating] = await tx
+      .insert(s.skillRating)
+      .values([
+        {
+          userId: user.id,
+          skill: glossToHanziWord(`我:i`),
+          rating: Rating.Good,
+          createdAt: now,
+        },
+      ])
+      .returning();
+    invariant(skillRating != null);
+
+    const pull1 = await pull(tx, user.id, {
+      profileId: ``,
+      clientGroupId,
+      pullVersion: 1,
+      schemaVersion: schema.version,
+      cookie: null,
+    });
+
+    // Rename 我:i to 我:me. Need to start a new checkpoint so that xmin is
+    // updated, otherwise it won't be seen as a diff by computeEntitiesState.
+    await tx.transaction((tx) =>
+      tx
+        .update(s.skillRating)
+        .set({ skill: glossToHanziWord(`我:me`) })
+        .where(eq(s.skillRating.id, skillRating.id)),
+    );
+
+    assert.ok(`cookie` in pull1);
+
+    const pull2 = await pull(tx, user.id, {
+      profileId: ``,
+      clientGroupId,
+      pullVersion: 1,
+      schemaVersion: schema.version,
+      cookie: pull1.cookie,
+    });
+
+    expect(pull2).toMatchObject({
+      cookie: {
+        order: nonNullable(pull1.cookie).order + 1,
+      },
+      patch: [
+        {
+          op: `put`,
           key: schema.skillRating.marshalKey({ id: skillRating.id }),
         },
       ],
