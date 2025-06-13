@@ -25,8 +25,9 @@ const spacePattern = String.raw`(?:\s|/\*[\s\S]*?\*/)`;
 // - none
 const scalarPattern = String.raw`\d+(?:\.\d*)?%?|\.\d+%?|none`;
 // One of:
-// - #<hexbyte><hexbyte><hexbyte>
-const hexPattern = String.raw`#[a-f0-9]{6}`;
+// - #<octal><octal><octal><octal><octal><octal>
+// - #<octal><octal><octal>
+const hexPattern = String.raw`#(?:[a-f0-9]{6}|[a-f0-9]{3})`;
 // One of:
 // - rgb(<scalar> <scalar> <scalar>)
 // - rgb(<scalar> <scalar> <scalar> / <scalar>)
@@ -90,10 +91,17 @@ export function parseCssColorOrThrow(color: string): ColorRGBA {
   };
 }
 
-function parseHexColor(color: string): ColorRGBA {
+export function parseHexColor(color: string): ColorRGBA {
   invariant(rgbHexRegex.test(color), `invalid hex color: ${color}`);
-  // Convert hex color to RGB
-  const bigint = Number.parseInt(color.slice(1), 16);
+  // Handle shortform hex (#abc)
+  let hex = color.slice(1);
+  if (hex.length === 3) {
+    hex = hex
+      .split(``)
+      .map((c) => c + c)
+      .join(``);
+  }
+  const bigint = Number.parseInt(hex, 16);
   const red = (bigint >> 16) & 255;
   const green = (bigint >> 8) & 255;
   const blue = bigint & 255;

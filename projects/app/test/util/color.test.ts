@@ -1,4 +1,9 @@
-import { parseCssColorOrThrow, parseScalar } from "#util/color.ts";
+import type { ColorRGBA } from "#util/color.ts";
+import {
+  parseCssColorOrThrow,
+  parseHexColor,
+  parseScalar,
+} from "#util/color.ts";
 import assert from "node:assert/strict";
 import test from "node:test";
 
@@ -19,6 +24,7 @@ await test(`${parseCssColorOrThrow.name} suite`, async () => {
       [`rgb(none none none / none)`, [0, 0, 0, 1]],
       [`rgb(none 10 10% / 10%)`, [0, 10, 25.5, 0.1]],
       [`rgb(none 10 10% / 20%)`, [0, 10, 25.5, 0.2]],
+      [`rgb(from #abc r g b)`, [170, 187, 204, 1]],
       [`rgb(from #aabbcc r g b)`, [170, 187, 204, 1]],
       [`rgb(from #aabbcc r g b / none)`, [170, 187, 204, 1]],
       [`rgb(from #aabbcc r g b / 0.5)`, [170, 187, 204, 0.5]],
@@ -93,6 +99,23 @@ await test(`${parseScalar.name} suite`, async () => {
 
     for (const input of fixtures) {
       expect(() => parseScalar(input, 1)).toThrow();
+    }
+  });
+});
+
+await test(`${parseHexColor.name} suite`, async () => {
+  await test(`valid fixtures`, () => {
+    const fixtures: [string, ColorRGBA][] = [
+      [`#000`, { red: 0, green: 0, blue: 0, alpha: 1 }],
+      [`#000000`, { red: 0, green: 0, blue: 0, alpha: 1 }],
+      [`#fff`, { red: 255, green: 255, blue: 255, alpha: 1 }],
+      [`#ffffff`, { red: 255, green: 255, blue: 255, alpha: 1 }],
+      [`#123`, { red: 17, green: 34, blue: 51, alpha: 1 }],
+      [`#112233`, { red: 17, green: 34, blue: 51, alpha: 1 }],
+    ];
+
+    for (const [input, expected] of fixtures) {
+      expect(parseHexColor(input)).toEqual(expected);
     }
   });
 });
