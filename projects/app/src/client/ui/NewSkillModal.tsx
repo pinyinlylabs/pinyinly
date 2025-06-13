@@ -120,7 +120,9 @@ const NewHanziWordToGlossSkillContent = ({
           <View className="mb-8 gap-8">
             <View className="theme-success flex-row items-center gap-2 self-center">
               <IconImage source={require(`@/assets/icons/plant-filled.svg`)} />
-              <Text className="font-bold uppercase">New Word</Text>
+              <Text className="font-bold uppercase text-foreground">
+                New Word
+              </Text>
             </View>
 
             <View className="items-center gap-2">
@@ -167,7 +169,9 @@ const NewHanziWordToPinyinSkillContent = ({
           <View className="mb-8 gap-8">
             <View className="theme-success flex-row items-center gap-2 self-center">
               <IconImage source={require(`@/assets/icons/plant-filled.svg`)} />
-              <Text className="font-bold uppercase">New Pinyin</Text>
+              <Text className="font-bold uppercase text-foreground">
+                New Pinyin
+              </Text>
             </View>
 
             <View className="items-center gap-2">
@@ -212,7 +216,9 @@ const NewHanziWordToPinyinInitialSkillContent = ({
           <View className="mb-8 gap-8">
             <View className="theme-success flex-row items-center gap-2 self-center">
               <IconImage source={require(`@/assets/icons/plant-filled.svg`)} />
-              <Text className="font-bold uppercase">New Pinyin Initial</Text>
+              <Text className="font-bold uppercase text-foreground">
+                New Pinyin Initial
+              </Text>
             </View>
 
             <View className="items-center gap-2">
@@ -261,7 +267,9 @@ const NewHanziWordToPinyinFinalSkillContent = ({
           <View className="mb-8 gap-8">
             <View className="theme-success flex-row items-center gap-2 self-center">
               <IconImage source={require(`@/assets/icons/plant-filled.svg`)} />
-              <Text className="font-bold uppercase">New Pinyin Final</Text>
+              <Text className="font-bold uppercase text-foreground">
+                New Pinyin Final
+              </Text>
             </View>
 
             <View className="items-center gap-2">
@@ -310,7 +318,9 @@ const NewHanziWordToPinyinToneSkillContent = ({
           <View className="mb-8 gap-8">
             <View className="theme-success flex-row items-center gap-2 self-center">
               <IconImage source={require(`@/assets/icons/plant-filled.svg`)} />
-              <Text className="font-bold uppercase">New Pinyin Tone</Text>
+              <Text className="font-bold uppercase text-foreground">
+                New Pinyin Tone
+              </Text>
             </View>
 
             <View className="items-center gap-2">
