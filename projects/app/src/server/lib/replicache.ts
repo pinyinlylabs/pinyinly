@@ -34,10 +34,14 @@ export async function push(
   userId: string,
   pushRequest: PushRequest,
 ): Promise<PushResponse> {
-  return await startSpan({ name: push.name }, async () => {
-    const impl = getImpl(pushRequest.schemaVersion);
-    return await impl.push(db, userId, pushRequest);
-  });
+  const { schemaVersion } = pushRequest;
+  return await startSpan(
+    { name: `${push.name} (${schemaVersion})` },
+    async () => {
+      const impl = getImpl(schemaVersion);
+      return await impl.push(db, userId, pushRequest);
+    },
+  );
 }
 
 export async function pull(
@@ -47,10 +51,14 @@ export async function pull(
 ): Promise<
   PullOkResponse | VersionNotSupportedResponse | ClientStateNotFoundResponse
 > {
-  return await startSpan({ name: pull.name }, async () => {
-    const impl = getImpl(pullRequest.schemaVersion);
-    return await impl.pull(db, userId, pullRequest);
-  });
+  const { schemaVersion } = pullRequest;
+  return await startSpan(
+    { name: `${pull.name} (${schemaVersion})` },
+    async () => {
+      const impl = getImpl(schemaVersion);
+      return await impl.pull(db, userId, pullRequest);
+    },
+  );
 }
 
 function getImpl(schemaVersion: string): Impl {
