@@ -42,6 +42,42 @@ export const inngest = new Inngest({
   middleware: [sentryMiddleware()],
 });
 
+const devTestThrowRootError = inngest.createFunction(
+  { id: `test-throw-root-error` },
+  { event: `test/test-throw-root-error` },
+  () => {
+    throw new Error(`test error`);
+  },
+);
+
+const devTestThrowStepError = inngest.createFunction(
+  { id: `test-throw-step-error` },
+  { event: `test/test-throw-step-error` },
+  async ({ step }) => {
+    await step.run(`throw error`, () => {
+      throw new Error(`test error`);
+    });
+  },
+);
+
+const devTestLogRootError = inngest.createFunction(
+  { id: `test-log-root-error` },
+  { event: `test/test-log-root-error` },
+  () => {
+    console.error(new Error(`test error`));
+  },
+);
+
+const devTestLogStepError = inngest.createFunction(
+  { id: `test-log-step-error` },
+  { event: `test/test-log-step-error` },
+  async ({ step }) => {
+    await step.run(`log error`, () => {
+      console.error(new Error(`test error`));
+    });
+  },
+);
+
 const helloWorldEmail = inngest.createFunction(
   { id: `hello-world-email` },
   { event: `test/hello.world.email` },
@@ -619,4 +655,8 @@ export const functions = [
   replicacheGarbageCollection,
   syncRemotePull,
   syncRemotePush,
+  devTestThrowRootError,
+  devTestThrowStepError,
+  devTestLogRootError,
+  devTestLogStepError,
 ];
