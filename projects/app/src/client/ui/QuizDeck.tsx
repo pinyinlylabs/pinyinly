@@ -24,6 +24,7 @@ import {
 } from "@react-navigation/stack";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "expo-router";
+import { usePostHog } from "posthog-react-native";
 import React, { useEffect, useId, useRef, useState } from "react";
 import Reanimated, { FadeIn } from "react-native-reanimated";
 import { CloseButton } from "./CloseButton";
@@ -53,6 +54,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
   const navigationRef = useRef<Navigation>(undefined);
   const r = useReplicache();
   const queryClient = useQueryClient();
+  const postHog = usePostHog();
 
   const questionsQueryKey = [QuizDeck.name, `quiz`, id];
 
@@ -108,6 +110,8 @@ export const QuizDeck = ({ className }: { className?: string }) => {
       invariant(ratings.length > 0, `ratings must not be empty`);
 
       const success = ratings.every(({ rating }) => rating !== Rating.Again);
+
+      postHog.capture(`question answered`, { success });
 
       if (success) {
         playSuccessSound();

@@ -20,6 +20,7 @@ declare global {
     // Necessary to avoid noPropertyAccessFromIndexSignature errors. Keep in
     // sync with `env.ts`.
     interface ProcessEnv {
+      EXPO_PUBLIC_POSTHOG_API_KEY?: string;
       EXPO_PUBLIC_REPLICACHE_LICENSE_KEY?: string;
       EXPO_PUBLIC_SENTRY_DSN?: string;
       EXPO_PUBLIC_USE_STATIC?: string | boolean; // boolean during static render, string on web

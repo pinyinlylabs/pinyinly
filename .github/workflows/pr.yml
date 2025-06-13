@@ -55,9 +55,10 @@ jobs:
         run: moon run app:deployVercel --color --affected --remote
         if: steps.moon-deployVercel-query.target-affected
         env:
+          EXPO_PUBLIC_POSTHOG_API_KEY: ${{ secrets.EXPO_PUBLIC_POSTHOG_API_KEY }}
           EXPO_PUBLIC_REPLICACHE_LICENSE_KEY: ${{ secrets.EXPO_PUBLIC_REPLICACHE_LICENSE_KEY }}
           EXPO_PUBLIC_SENTRY_DSN: ${{ secrets.EXPO_PUBLIC_SENTRY_DSN }}
-          HHH_VERCEL_PREVIEW:
+          HHH_VERCEL_PREVIEW: ""
           HHH_STRICT_EXPO_ENV_VARS: "true"
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -90,7 +91,7 @@ jobs:
         run: moon run static:deploy --color --affected --remote
         if: steps.moon-deploy-query.target-affected
         env:
-          HHH_VERCEL_PREVIEW:
+          HHH_VERCEL_PREVIEW: ""
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_STATIC }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}

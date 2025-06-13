@@ -146,6 +146,7 @@ export const expo = {
     `expo-apple-authentication`,
     `expo-asset`,
     `expo-font`,
+    `expo-localization`,
     `expo-secure-store`,
     `expo-sqlite`,
   ],

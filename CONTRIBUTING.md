@@ -224,7 +224,7 @@ Customise this to suit your scenario.
   This means they need to be declared in Github's Action Secrets too.
 
   Expo's Metro plugin is patched to error if `HHH_STRICT_EXPO_ENV_VARS` is set
-  when a `PUBLIC_EXPO_` variable is missing. This helps catch errors during
+  when a `EXPO_PUBLIC_` variable is missing. This helps catch errors during
   build before they reach users.
 
 ## Debugging nativewind
