@@ -1,5 +1,5 @@
 import { useLocalQuery } from "@/client/hooks/useLocalQuery";
-import { RectButton2 } from "@/client/ui/RectButton2";
+import { RectButton } from "@/client/ui/RectButton";
 import { radicalStrokes } from "@/data/hanzi";
 import { allRadicalsByStrokes } from "@/dictionary/dictionary";
 import { Link } from "expo-router";
@@ -64,9 +64,9 @@ export default function RadicalsPage() {
                     asChild
                     key={i}
                   >
-                    <RectButton2 textClassName="text-xl font-normal">
+                    <RectButton textClassName="text-xl font-normal">
                       {char}
-                    </RectButton2>
+                    </RectButton>
                   </Link>
                 ))}
               </View>

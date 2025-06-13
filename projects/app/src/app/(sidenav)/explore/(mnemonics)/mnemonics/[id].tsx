@@ -1,5 +1,5 @@
 import { useLocalQuery } from "@/client/hooks/useLocalQuery";
-import { RectButton2 } from "@/client/ui/RectButton2";
+import { RectButton } from "@/client/ui/RectButton";
 import { useReplicache, useRizzleQuery } from "@/client/ui/ReplicacheContext";
 import { loadHhhPinyinChart } from "@/data/pinyin";
 import { rMnemonicThemeId } from "@/data/rizzleSchema";
@@ -92,7 +92,7 @@ export default function MnemonicIdPage() {
                       {themeId === groupTheme.data?.themeId ? (
                         ` ✅`
                       ) : (
-                        <RectButton2
+                        <RectButton
                           onPress={() => {
                             if (group?.id != null) {
                               void r.mutate.setPinyinInitialGroupTheme({
@@ -104,7 +104,7 @@ export default function MnemonicIdPage() {
                           }}
                         >
                           Use
-                        </RectButton2>
+                        </RectButton>
                       )}
                     </Text>
                     {[...initials.entries()].map(([name, desc], i) => (

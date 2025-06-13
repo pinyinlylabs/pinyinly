@@ -2,7 +2,7 @@ import * as Sentry from "@sentry/react-native";
 import { Link } from "expo-router";
 import type { ViewProps } from "react-native";
 import { Text, View } from "react-native";
-import { RectButton2 } from "./RectButton2";
+import { RectButton } from "./RectButton";
 
 export const ErrorBoundary = ({ children }: Pick<ViewProps, `children`>) => {
   return (
@@ -11,7 +11,7 @@ export const ErrorBoundary = ({ children }: Pick<ViewProps, `children`>) => {
         <View>
           <Text className="hhh-text-title">An error has occurred</Text>
           <Link dismissTo href="/learn" asChild>
-            <RectButton2>Home</RectButton2>
+            <RectButton>Home</RectButton>
           </Link>
         </View>
       }

@@ -1,7 +1,7 @@
 import { useLocalQuery } from "@/client/hooks/useLocalQuery";
 import { CloseButton } from "@/client/ui/CloseButton";
 import { IconImage } from "@/client/ui/IconImage";
-import { RectButton2 } from "@/client/ui/RectButton2";
+import { RectButton } from "@/client/ui/RectButton";
 import { ReferencePage } from "@/client/ui/ReferencePage";
 import { ReferencePageBodySection } from "@/client/ui/ReferencePageBodySection";
 import { ReferencePageHeader } from "@/client/ui/ReferencePageHeader";
@@ -146,17 +146,17 @@ export default function RadicalPage() {
         <View className="h-1 w-2 flex-1"></View>
 
         <View className="w-full max-w-[600px] items-stretch gap-3 mb-safe-offset-2">
-          <RectButton2
+          <RectButton
             variant="outline"
             onPress={() => {
               setShowExplanation((x) => !x);
             }}
           >
             I Don&apos;t Get It
-          </RectButton2>
-          <RectButton2 variant="filled" className="theme-accent">
+          </RectButton>
+          <RectButton variant="filled" className="theme-accent">
             Next
-          </RectButton2>
+          </RectButton>
         </View>
 
         {showExplanation ? (
@@ -273,17 +273,17 @@ export default function RadicalPage() {
             <View className="min-h-8 flex-1"></View>
 
             <View className="mx-4 items-stretch gap-3 mb-safe-offset-4">
-              <RectButton2
+              <RectButton
                 variant="outline"
                 onPress={() => {
                   setShowExplanation((x) => !x);
                 }}
               >
                 I Don&apos;t Get It
-              </RectButton2>
-              <RectButton2 variant="filled" className="theme-accent">
+              </RectButton>
+              <RectButton variant="filled" className="theme-accent">
                 Next
-              </RectButton2>
+              </RectButton>
             </View>
           </View>
         ) : null}

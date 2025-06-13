@@ -3,7 +3,7 @@ import {
   QuizSubmitButton,
   QuizSubmitButtonState,
 } from "@/client/ui/QuizSubmitButton";
-import { RectButton2 } from "@/client/ui/RectButton2";
+import { RectButton } from "@/client/ui/RectButton";
 import { TextInputSingle } from "@/client/ui/TextInputSingle";
 import { StrictMode, useRef, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
@@ -25,13 +25,13 @@ function TestPage() {
         className={`h-vvh max-h-vvh w-dvw flex-1 gap-5 bg-[blue] transition-[height,max-height]`}
       >
         <View className={``}>
-          <RectButton2
+          <RectButton
             onPress={() => {
               alert(1);
             }}
           >
             header
-          </RectButton2>
+          </RectButton>
         </View>
         <Text className="text-[100px] text-foreground">你好</Text>
 
@@ -47,7 +47,7 @@ function TestPage() {
           value={text}
         />
         {text.endsWith(`a`) ? (
-          <RectButton2
+          <RectButton
             onTouchEnd={(e) => {
               // Using `onTouchEnd` instead of `onPress` to avoid the keyboard
               // closing when the button is pressed.
@@ -58,7 +58,7 @@ function TestPage() {
             }}
           >
             chuāng
-          </RectButton2>
+          </RectButton>
         ) : null}
         <Text
           className={`

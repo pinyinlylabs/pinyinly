@@ -1,5 +1,5 @@
 /* eslint-disable @haohaohow/no-restricted-css-classes */
-import { RectButton2 } from "@/client/ui/RectButton2";
+import { RectButton } from "@/client/ui/RectButton";
 import { useWebsiteStore } from "@/client/website";
 import { invariant } from "@haohaohow/lib/invariant";
 import { Image } from "expo-image";
@@ -56,9 +56,9 @@ export default function WebsiteLayout() {
                   exiting={FadeOut.duration(100)}
                 >
                   <Link href="/learn" asChild>
-                    <RectButton2 variant="filled" className="theme-accent">
+                    <RectButton variant="filled" className="theme-accent">
                       Get Started
-                    </RectButton2>
+                    </RectButton>
                   </Link>
                 </Reanimated.View>
               </View>
