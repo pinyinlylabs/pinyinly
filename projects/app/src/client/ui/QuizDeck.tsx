@@ -31,7 +31,7 @@ import { QuizDeckHanziToPinyinQuestion } from "./QuizDeckHanziToPinyinQuestion";
 import { QuizDeckOneCorrectPairQuestion } from "./QuizDeckOneCorrectPairQuestion";
 import { QuizProgressBar } from "./QuizProgressBar";
 import { QuizQueueButton } from "./QuizQueueButton";
-import { RectButton2 } from "./RectButton2";
+import { RectButton } from "./RectButton";
 import { useReplicache, useRizzleQueryPaged } from "./ReplicacheContext";
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
@@ -248,7 +248,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
                         </Text>
                       )} */}
                       <Link dismissTo href="/learn" asChild>
-                        <RectButton2>Back</RectButton2>
+                        <RectButton>Back</RectButton>
                       </Link>
                     </View>
                   </View>

@@ -1,4 +1,4 @@
-import { RectButton2 } from "@/client/ui/RectButton2";
+import { RectButton } from "@/client/ui/RectButton";
 import { useWebsiteStore } from "@/client/website";
 import { Link } from "expo-router";
 import { useEffect } from "react";
@@ -37,22 +37,20 @@ export default function WebsitePage() {
 
         <View className="w-[350px] items-stretch gap-2">
           <Link href="/learn" asChild>
-            <RectButton2
+            <RectButton
               variant="filled"
               className="theme-accent"
               ref={(el) => {
-                //  RectButton2 is a <View> rather than a DOM element.
+                //  RectButton is a <View> rather than a DOM element.
                 ref(el as Element | null);
               }}
             >
               Get Started
-            </RectButton2>
+            </RectButton>
           </Link>
 
           <Link href="/learn" asChild>
-            <RectButton2 variant="outline">
-              I already have an account
-            </RectButton2>
+            <RectButton variant="outline">I already have an account</RectButton>
           </Link>
         </View>
       </View>

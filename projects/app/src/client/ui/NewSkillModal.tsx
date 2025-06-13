@@ -10,7 +10,7 @@ import { useMemo, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { IconImage } from "./IconImage";
 import { PageSheetModal } from "./PageSheetModal";
-import { RectButton2 } from "./RectButton2";
+import { RectButton } from "./RectButton";
 import { WikiHanziInterpretationPanel } from "./WikiHanziInterpretationPanel";
 
 export const NewSkillModal = ({
@@ -349,13 +349,13 @@ const ContainerWithContinueButton = ({
       </ScrollView>
 
       <View className="theme-accent border-t-2 border-primary-5 p-4 mb-safe">
-        <RectButton2
+        <RectButton
           variant="filled"
           textClassName="py-1 px-2"
           onPress={onContinue}
         >
           Continue
-        </RectButton2>
+        </RectButton>
       </View>
     </>
   );

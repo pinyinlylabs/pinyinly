@@ -1,5 +1,5 @@
 import { trpc } from "@/client/trpc";
-import { RectButton2 } from "@/client/ui/RectButton2";
+import { RectButton } from "@/client/ui/RectButton";
 import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -17,34 +17,34 @@ export default function DevApiPage() {
   return (
     <View style={{ flex: 1, paddingTop: insets.top }}>
       <View className="max-w-[600px]"></View>
-      <RectButton2
+      <RectButton
         onPress={() => {
           void anonymousThrowError();
         }}
       >
         anonymousThrowError
-      </RectButton2>
-      <RectButton2
+      </RectButton>
+      <RectButton
         onPress={() => {
           void authedThrowError();
         }}
       >
         authedThrowError
-      </RectButton2>
-      <RectButton2
+      </RectButton>
+      <RectButton
         onPress={() => {
           void anonymousLogError();
         }}
       >
         anonymousLogError
-      </RectButton2>
-      <RectButton2
+      </RectButton>
+      <RectButton
         onPress={() => {
           void authedLogError();
         }}
       >
         authedLogError
-      </RectButton2>
+      </RectButton>
     </View>
   );
 }

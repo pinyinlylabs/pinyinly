@@ -1,5 +1,5 @@
 import { useLocalQuery } from "@/client/hooks/useLocalQuery";
-import { RectButton2 } from "@/client/ui/RectButton2";
+import { RectButton } from "@/client/ui/RectButton";
 import {
   allHsk1HanziWords,
   allHsk2HanziWords,
@@ -107,7 +107,7 @@ const WordList = ({ words }: { words: readonly string[] }) => {
     <View className="flex-row flex-wrap gap-2">
       {words.map((word, i) => (
         <Link href={`/explore/words/${word}`} asChild key={i}>
-          <RectButton2 textClassName="text-xl font-normal">{word}</RectButton2>
+          <RectButton textClassName="text-xl font-normal">{word}</RectButton>
         </Link>
       ))}
     </View>

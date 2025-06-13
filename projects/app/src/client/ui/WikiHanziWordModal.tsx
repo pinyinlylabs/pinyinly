@@ -18,7 +18,7 @@ import { DevLozenge } from "./DevLozenge";
 import { HanziWordRefText } from "./HanziWordRefText";
 import { Hhhmark } from "./Hhhmark";
 import { PageSheetModal } from "./PageSheetModal";
-import { RectButton2 } from "./RectButton2";
+import { RectButton } from "./RectButton";
 import { useRizzleQueryPaged } from "./ReplicacheContext";
 
 export const WikiHanziWordModal = ({
@@ -237,9 +237,9 @@ export const WikiHanziWordModal = ({
             </ScrollView>
 
             <View className="theme-accent border-t-2 border-primary-5 p-4 mb-safe">
-              <RectButton2 variant="filled" onPress={dismiss}>
+              <RectButton variant="filled" onPress={dismiss}>
                 Close
-              </RectButton2>
+              </RectButton>
             </View>
           </>
         )

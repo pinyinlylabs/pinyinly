@@ -1,5 +1,5 @@
 import { useAuth } from "@/client/auth";
-import { RectButton2 } from "@/client/ui/RectButton2";
+import { RectButton } from "@/client/ui/RectButton";
 import { SignInWithAppleButton } from "@/client/ui/SignInWithAppleButton";
 import { TextInputSingle } from "@/client/ui/TextInputSingle";
 import { invariant } from "@haohaohow/lib/invariant";
@@ -26,7 +26,7 @@ export default function LoginPage() {
                 DB name: {x.replicacheDbName}
               </Text>
             </View>
-            <RectButton2
+            <RectButton
               onPressIn={() => {
                 auth.signInWithExistingClientSession(
                   (s) => s.replicacheDbName === x.replicacheDbName,
@@ -34,7 +34,7 @@ export default function LoginPage() {
               }}
             >
               Log in
-            </RectButton2>
+            </RectButton>
           </View>
         ))}
       </View>
@@ -45,13 +45,13 @@ export default function LoginPage() {
         DB name: {auth.data?.clientSession.replicacheDbName}
       </Text>
 
-      <RectButton2
+      <RectButton
         onPressIn={() => {
           auth.signOut();
         }}
       >
         Logout
-      </RectButton2>
+      </RectButton>
       {__DEV__ ? <ServerSessionIdLoginForm /> : null}
 
       {Platform.OS === `web` ? (
@@ -110,7 +110,7 @@ export default function LoginPage() {
         />
       ) : null}
       <Link href="/dev/ui" asChild>
-        <RectButton2 variant="filled">UI</RectButton2>
+        <RectButton variant="filled">UI</RectButton>
       </Link>
 
       <GoHomeButton />
@@ -142,9 +142,9 @@ function ServerSessionIdLoginForm() {
 const GoHomeButton = () => (
   <View style={{ height: 44 }}>
     <Link dismissTo href="/learn" asChild>
-      <RectButton2 textClassName="font-bold text-foreground text-xl">
+      <RectButton textClassName="font-bold text-foreground text-xl">
         Back
-      </RectButton2>
+      </RectButton>
     </Link>
   </View>
 );

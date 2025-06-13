@@ -7,7 +7,7 @@ import { QuizDeckHanziToPinyinQuestion } from "@/client/ui/QuizDeckHanziToPinyin
 import { QuizFlagText } from "@/client/ui/QuizFlagText";
 import { QuizProgressBar } from "@/client/ui/QuizProgressBar";
 import { QuizQueueButton } from "@/client/ui/QuizQueueButton";
-import { RectButton2 } from "@/client/ui/RectButton2";
+import { RectButton } from "@/client/ui/RectButton";
 import { ShootingStars } from "@/client/ui/ShootingStars";
 import type { TextAnswerButtonState } from "@/client/ui/TextAnswerButton";
 import { TextAnswerButton } from "@/client/ui/TextAnswerButton";
@@ -94,8 +94,8 @@ function DesignSystemPage() {
           <TextAnswerButtonExamples />
         </Section>
 
-        <Section title="RectButton2" scrollTo={scrollTo}>
-          <RectButton2Examples />
+        <Section title="RectButton" scrollTo={scrollTo}>
+          <RectButtonExamples />
         </Section>
 
         <Section title="Typography" scrollTo={scrollTo}>
@@ -436,32 +436,32 @@ const exampleStackChildrenClass = tv({
   },
 });
 
-const RectButton2Variants = (props: Partial<PropsOf<typeof RectButton2>>) => (
+const RectButtonVariants = (props: Partial<PropsOf<typeof RectButton>>) => (
   <>
-    <RectButton2 variant="filled" {...props}>
+    <RectButton variant="filled" {...props}>
       Filled
-    </RectButton2>
-    <RectButton2 variant="outline" {...props}>
+    </RectButton>
+    <RectButton variant="outline" {...props}>
       Outline
-    </RectButton2>
-    <RectButton2 variant="option" {...props}>
+    </RectButton>
+    <RectButton variant="option" {...props}>
       Option
-    </RectButton2>
-    <RectButton2 variant="bare" {...props}>
+    </RectButton>
+    <RectButton variant="bare" {...props}>
       Bare
-    </RectButton2>
+    </RectButton>
   </>
 );
 
-const RectButton2Examples = (props: Partial<PropsOf<typeof RectButton2>>) => (
+const RectButtonExamples = (props: Partial<PropsOf<typeof RectButton>>) => (
   <View className="flex-1">
     <View className="flex-row flex-wrap">
       <ExampleStack title="normal" childrenClassName="gap-2">
-        <RectButton2Variants {...props} />
+        <RectButtonVariants {...props} />
       </ExampleStack>
 
       <ExampleStack title="normal (disabled)" childrenClassName="gap-2">
-        <RectButton2Variants disabled {...props} />
+        <RectButtonVariants disabled {...props} />
       </ExampleStack>
     </View>
 
@@ -469,29 +469,29 @@ const RectButton2Examples = (props: Partial<PropsOf<typeof RectButton2>>) => (
 
     <View className="flex-row flex-wrap">
       <ExampleStack title="normal" childrenClassName="gap-2">
-        <RectButton2Variants {...props} />
+        <RectButtonVariants {...props} />
       </ExampleStack>
 
       <View className="theme-accent">
         <ExampleStack title="accent" childrenClassName="gap-2">
-          <RectButton2Variants {...props} />
+          <RectButtonVariants {...props} />
         </ExampleStack>
       </View>
 
       <View className="theme-success">
         <ExampleStack title="success" childrenClassName="gap-2">
-          <RectButton2Variants {...props} />
+          <RectButtonVariants {...props} />
         </ExampleStack>
       </View>
 
       <View className="theme-danger">
         <ExampleStack title="danger" childrenClassName="gap-2">
-          <RectButton2Variants {...props} />
+          <RectButtonVariants {...props} />
         </ExampleStack>
       </View>
 
       <ExampleStack title="(disabled)" childrenClassName="gap-2">
-        <RectButton2Variants disabled {...props} />
+        <RectButtonVariants disabled {...props} />
       </ExampleStack>
     </View>
 
@@ -503,25 +503,25 @@ const RectButton2Examples = (props: Partial<PropsOf<typeof RectButton2>>) => (
     <View className="flex-row flex-wrap">
       <ExampleStack title="items-start" showFrame>
         <View className="w-[120px] items-start gap-2">
-          <RectButton2Variants {...props} />
+          <RectButtonVariants {...props} />
         </View>
       </ExampleStack>
 
       <ExampleStack title="items-center" showFrame>
         <View className="w-[120px] items-center gap-2">
-          <RectButton2Variants {...props} />
+          <RectButtonVariants {...props} />
         </View>
       </ExampleStack>
 
       <ExampleStack title="items-stretch" showFrame>
         <View className="w-[120px] items-stretch gap-2">
-          <RectButton2Variants {...props} />
+          <RectButtonVariants {...props} />
         </View>
       </ExampleStack>
 
       <ExampleStack title="items-end" showFrame>
         <View className="w-[120px] items-end gap-2">
-          <RectButton2Variants {...props} />
+          <RectButtonVariants {...props} />
         </View>
       </ExampleStack>
     </View>
@@ -537,7 +537,7 @@ const RectButton2Examples = (props: Partial<PropsOf<typeof RectButton2>>) => (
         showFrame
         childrenClassName="w-[120px] items-start gap-2"
       >
-        <RectButton2Variants className="flex-1" {...props} />
+        <RectButtonVariants className="flex-1" {...props} />
       </ExampleStack>
 
       <ExampleStack
@@ -545,7 +545,7 @@ const RectButton2Examples = (props: Partial<PropsOf<typeof RectButton2>>) => (
         showFrame
         childrenClassName="w-[120px] items-center gap-2"
       >
-        <RectButton2Variants className="flex-1" {...props} />
+        <RectButtonVariants className="flex-1" {...props} />
       </ExampleStack>
 
       <ExampleStack
@@ -553,7 +553,7 @@ const RectButton2Examples = (props: Partial<PropsOf<typeof RectButton2>>) => (
         showFrame
         childrenClassName="w-[120px] items-stretch gap-2"
       >
-        <RectButton2Variants className="flex-1" {...props} />
+        <RectButtonVariants className="flex-1" {...props} />
       </ExampleStack>
 
       <ExampleStack
@@ -561,7 +561,7 @@ const RectButton2Examples = (props: Partial<PropsOf<typeof RectButton2>>) => (
         showFrame
         childrenClassName="w-[120px] items-end gap-2"
       >
-        <RectButton2Variants className="flex-1" {...props} />
+        <RectButtonVariants className="flex-1" {...props} />
       </ExampleStack>
     </View>
 
@@ -573,7 +573,7 @@ const RectButton2Examples = (props: Partial<PropsOf<typeof RectButton2>>) => (
         showFrame
         childrenClassName="h-[100px] flex-row items-start gap-2"
       >
-        <RectButton2Variants inFlexRowParent {...props} />
+        <RectButtonVariants inFlexRowParent {...props} />
       </ExampleStack>
 
       <ExampleStack
@@ -581,7 +581,7 @@ const RectButton2Examples = (props: Partial<PropsOf<typeof RectButton2>>) => (
         showFrame
         childrenClassName="h-[100px] flex-row items-center gap-2"
       >
-        <RectButton2Variants inFlexRowParent {...props} />
+        <RectButtonVariants inFlexRowParent {...props} />
       </ExampleStack>
 
       <ExampleStack
@@ -589,7 +589,7 @@ const RectButton2Examples = (props: Partial<PropsOf<typeof RectButton2>>) => (
         showFrame
         childrenClassName="h-[100px] flex-row items-stretch gap-2"
       >
-        <RectButton2Variants inFlexRowParent {...props} />
+        <RectButtonVariants inFlexRowParent {...props} />
       </ExampleStack>
 
       <ExampleStack
@@ -597,7 +597,7 @@ const RectButton2Examples = (props: Partial<PropsOf<typeof RectButton2>>) => (
         showFrame
         childrenClassName="h-[100px] flex-row items-end gap-2"
       >
-        <RectButton2Variants inFlexRowParent {...props} />
+        <RectButtonVariants inFlexRowParent {...props} />
       </ExampleStack>
     </View>
 
@@ -609,7 +609,7 @@ const RectButton2Examples = (props: Partial<PropsOf<typeof RectButton2>>) => (
         showFrame
         childrenClassName="h-[100px] flex-row items-start gap-2"
       >
-        <RectButton2Variants inFlexRowParent className="flex-1" {...props} />
+        <RectButtonVariants inFlexRowParent className="flex-1" {...props} />
       </ExampleStack>
 
       <ExampleStack
@@ -617,7 +617,7 @@ const RectButton2Examples = (props: Partial<PropsOf<typeof RectButton2>>) => (
         showFrame
         childrenClassName="h-[100px] flex-row items-center gap-2"
       >
-        <RectButton2Variants inFlexRowParent className="flex-1" {...props} />
+        <RectButtonVariants inFlexRowParent className="flex-1" {...props} />
       </ExampleStack>
 
       <ExampleStack
@@ -625,7 +625,7 @@ const RectButton2Examples = (props: Partial<PropsOf<typeof RectButton2>>) => (
         showFrame
         childrenClassName="h-[100px] flex-row items-stretch gap-2"
       >
-        <RectButton2Variants inFlexRowParent className="flex-1" {...props} />
+        <RectButtonVariants inFlexRowParent className="flex-1" {...props} />
       </ExampleStack>
 
       <ExampleStack
@@ -633,7 +633,7 @@ const RectButton2Examples = (props: Partial<PropsOf<typeof RectButton2>>) => (
         showFrame
         childrenClassName="h-[100px] flex-row items-end gap-2"
       >
-        <RectButton2Variants inFlexRowParent className="flex-1" {...props} />
+        <RectButtonVariants inFlexRowParent className="flex-1" {...props} />
       </ExampleStack>
     </View>
   </View>
@@ -879,12 +879,12 @@ function QuizProgressBarExample() {
       <View className="flex-row items-start gap-4">
         <View className="flex-row items-center gap-2">
           <Text className="font-bold text-caption">Answer:</Text>
-          <RectButton2 variant="outline" onPress={logCorrect}>
+          <RectButton variant="outline" onPress={logCorrect}>
             Correct
-          </RectButton2>
-          <RectButton2 variant="outline" onPress={logIncorrect}>
+          </RectButton>
+          <RectButton variant="outline" onPress={logIncorrect}>
             Incorrect
-          </RectButton2>
+          </RectButton>
         </View>
       </View>
     </View>
@@ -1093,22 +1093,22 @@ function ShootingStarsExample() {
           />
         </ExampleStack>
         <View className="shrink flex-row">
-          <RectButton2
+          <RectButton
             variant="bare"
             onPress={() => {
               setGrowth((prev) => prev - 5);
             }}
           >
             Shrink
-          </RectButton2>
-          <RectButton2
+          </RectButton>
+          <RectButton
             variant="bare"
             onPress={() => {
               setGrowth((prev) => prev + 5);
             }}
           >
             Grow
-          </RectButton2>
+          </RectButton>
         </View>
       </View>
 
@@ -1124,20 +1124,20 @@ function ShootingStarsExample() {
       </ExampleStack>
 
       <ExampleStack title="Controls" childrenClassName="items-center gap-2">
-        <RectButton2
+        <RectButton
           onPress={() => {
             setPlay((prev) => !prev);
           }}
         >
           {play ? `Stop` : `Play`}
-        </RectButton2>
-        <RectButton2
+        </RectButton>
+        <RectButton
           onPress={() => {
             setI((prev) => prev + 1);
           }}
         >
           Re-render
-        </RectButton2>
+        </RectButton>
       </ExampleStack>
     </View>
   );

@@ -1,13 +1,10 @@
 import { Text } from "react-native";
 import { tv } from "tailwind-variants";
-import { RectButton2 } from "./RectButton2";
+import { RectButton } from "./RectButton";
 import type { PropsOf } from "./types";
 
 interface PinyinOptionButtonProps
-  extends Omit<
-    PropsOf<typeof RectButton2>,
-    `variant` | `children` | `onPress`
-  > {
+  extends Omit<PropsOf<typeof RectButton>, `variant` | `children` | `onPress`> {
   pinyin: string;
   shortcutKey: string;
   onPress?: (pinyin: string) => void;
@@ -21,7 +18,7 @@ export function PinyinOptionButton({
   ...props
 }: PinyinOptionButtonProps) {
   return (
-    <RectButton2
+    <RectButton
       {...props}
       variant="option"
       className={buttonClass({ className })}
@@ -51,7 +48,7 @@ export function PinyinOptionButton({
     >
       <Text className="hhh-text-button-option">{pinyin}</Text>
       <Text className="hhh-text-button-option-caption">{shortcutKey}</Text>
-    </RectButton2>
+    </RectButton>
   );
 }
 

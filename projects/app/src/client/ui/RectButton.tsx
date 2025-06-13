@@ -1,89 +1,204 @@
-import Color from "color";
-import { useMemo } from "react";
-import type { ColorValue, ViewProps } from "react-native";
-import { Pressable, View } from "react-native";
+import { useState } from "react";
+import type { ViewProps } from "react-native";
+import { Pressable, Text, View } from "react-native";
+import { tv } from "tailwind-variants";
 import { hapticImpactIfMobile } from "../hooks/hapticImpactIfMobile";
 import type { PropsOf } from "./types";
 
+export type ButtonVariant = `filled` | `outline` | `option` | `bare`;
+
 export type RectButtonProps = {
-  borderRadius?: number;
-  borderWidth?: number;
-  thickness?: number;
-  color?: ColorValue;
-  accentColor?: ColorValue;
+  variant?: ButtonVariant;
   children?: ViewProps[`children`];
-} & Omit<PropsOf<typeof Pressable>, `children`>;
+  className?: string;
+  inFlexRowParent?: boolean;
+  textClassName?: string;
+} & Pick<
+  PropsOf<typeof Pressable>,
+  keyof PropsOf<typeof Pressable> & (`on${string}` | `disabled` | `ref`)
+>;
 
 export function RectButton({
-  thickness = 4,
-  borderRadius = 16,
-  borderWidth = 0,
-  color = `#1CB0F5`,
-  accentColor,
   children,
+  variant = `outline`,
+  className,
+  inFlexRowParent = false,
+  textClassName,
   ...pressableProps
 }: RectButtonProps) {
-  accentColor = useMemo(
-    () => accentColor ?? Color(color).darken(0.2).hex(),
-    [accentColor, color],
-  );
+  const disabled = pressableProps.disabled === true;
 
-  // The border contributes to the same *thickness* appearance, so to avoid
-  // doubling up, we subtract it.
-  thickness = thickness - borderWidth;
+  const [pressed, setPressed] = useState(false);
+  const [hovered, setHovered] = useState(false);
+
+  const flat = pressed || disabled;
 
   return (
     <Pressable
       {...pressableProps}
+      onHoverIn={(e) => {
+        setHovered(true);
+        pressableProps.onHoverIn?.(e);
+      }}
+      onHoverOut={(e) => {
+        setHovered(false);
+        pressableProps.onHoverOut?.(e);
+      }}
       onPressIn={(e) => {
+        setPressed(true);
         hapticImpactIfMobile();
         pressableProps.onPressIn?.(e);
       }}
+      onPressOut={(e) => {
+        setPressed(false);
+        pressableProps.onPressOut?.(e);
+      }}
+      className={pressable({ flat, variant, inFlexRowParent, className })}
     >
-      {({ pressed }) => (
-        <View
-          style={{
-            flexGrow: 1,
-            flexShrink: 1,
-            backgroundColor: accentColor,
-            borderRadius,
-          }}
-        >
-          {/* <View
-              // thickness
-              style={[
-                {
-                  backgroundColor: accentColor,
-                  opacity: pressed ? 0 : 1,
-                  height: thickness,
-                  position: "absolute",
-                  transform: [{ translateY: -thickness }],
-                },
-              ]}
-            /> */}
-
-          <View
-            // top surface
-            style={[
-              {
-                borderWidth,
-                borderColor: accentColor,
-                backgroundColor: color,
-                flexGrow: 1,
-                flexShrink: 1,
-                alignItems: `center`,
-                justifyContent: `center`,
-                borderRadius,
-                padding: 10,
-                transform: [{ translateY: pressed ? 0 : -thickness }],
-                transformOrigin: `top`,
-              },
-            ]}
-          >
+      <View
+        className={roundedRect({
+          flat,
+          variant,
+          disabled,
+          hoveredOrPressed: pressed || hovered,
+          className,
+        })}
+      >
+        {typeof children === `string` ? (
+          <Text className={text({ variant, class: textClassName })}>
             {children}
-          </View>
-        </View>
-      )}
+          </Text>
+        ) : (
+          children
+        )}
+      </View>
     </Pressable>
   );
 }
+
+const pressable = tv({
+  base: `web:transition-all`,
+  variants: {
+    flat: {
+      true: ``,
+    },
+    variant: {
+      filled: `
+        rounded-xl
+
+        focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1
+        focus-visible:outline-foreground/75
+      `,
+      outline: `rounded-xl`,
+      option: `
+        rounded-xl
+
+        focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1
+        focus-visible:outline-sky/75
+      `,
+      bare: ``,
+    },
+    inFlexRowParent: {
+      true: `flex-row`,
+    },
+  },
+  compoundVariants: [
+    {
+      variant: `filled`,
+      flat: true,
+      class: `pt-[4px]`,
+    },
+    {
+      variant: `outline`,
+      flat: true,
+      class: `pt-[2px]`,
+    },
+    {
+      variant: `option`,
+      flat: true,
+      class: `pt-[2px]`,
+    },
+  ],
+});
+
+const roundedRect = tv({
+  base: `
+    box-border select-none items-center justify-center
+
+    web:transition-all
+  `,
+  variants: {
+    variant: {
+      filled: `rounded-xl border-background/20 bg-foreground/95 px-4 py-2`,
+      outline: `rounded-xl border-2 border-foreground/20 px-4 py-2`,
+      option: `rounded-xl border border-foreground/20 px-3 py-2`,
+      bare: `px-2 py-1`,
+    },
+    hoveredOrPressed: {
+      true: ``,
+    },
+    flat: {
+      true: ``,
+    },
+    disabled: {
+      true: `cursor-default select-none opacity-30`,
+    },
+  },
+  compoundVariants: [
+    {
+      variant: `filled`,
+      hoveredOrPressed: true,
+      class: `bg-foreground`,
+    },
+    {
+      variant: `filled`,
+      flat: false,
+      class: `border-b-4`,
+    },
+    // Outline
+    {
+      variant: `outline`,
+      disabled: false,
+      hoveredOrPressed: true,
+      class: `border-foreground/30`,
+    },
+    {
+      variant: `outline`,
+      flat: true,
+      class: `border-b-2`,
+    },
+    {
+      variant: `outline`,
+      flat: false,
+      class: `border-b-4`,
+    },
+    // Option
+    {
+      variant: `option`,
+      disabled: false,
+      hoveredOrPressed: true,
+      class: `border-foreground/30`,
+    },
+    {
+      variant: `option`,
+      flat: true,
+      class: `border-b`,
+    },
+    {
+      variant: `option`,
+      flat: false,
+      class: `border-b-[3px]`,
+    },
+  ],
+});
+
+const text = tv({
+  variants: {
+    variant: {
+      filled: `hhh-text-button-filled`,
+      outline: `hhh-text-button-outline`,
+      option: `hhh-text-button-option`,
+      bare: `hhh-text-button-bare`,
+    },
+  },
+});

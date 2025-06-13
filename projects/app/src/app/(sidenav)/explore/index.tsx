@@ -1,6 +1,6 @@
 import { ScrollView, Text, View } from "react-native";
 
-import { RectButton2 } from "@/client/ui/RectButton2";
+import { RectButton } from "@/client/ui/RectButton";
 import { Link } from "expo-router";
 import { tv } from "tailwind-variants";
 
@@ -16,9 +16,9 @@ export default function ExplorePage() {
         </Text>
 
         <Link href="/explore/mnemonics/" asChild>
-          <RectButton2 variant="filled" className="theme-accent self-start">
+          <RectButton variant="filled" className="theme-accent self-start">
             Explore mnemonics
-          </RectButton2>
+          </RectButton>
         </Link>
       </View>
 
@@ -30,9 +30,9 @@ export default function ExplorePage() {
         </Text>
 
         <Link href="/explore/radicals" asChild>
-          <RectButton2 variant="filled" className="theme-accent self-start">
+          <RectButton variant="filled" className="theme-accent self-start">
             Explore radicals
-          </RectButton2>
+          </RectButton>
         </Link>
       </View>
 
@@ -44,9 +44,9 @@ export default function ExplorePage() {
         </Text>
 
         <Link href="/explore/words" asChild>
-          <RectButton2 variant="filled" className="theme-accent self-start">
+          <RectButton variant="filled" className="theme-accent self-start">
             Explore words
-          </RectButton2>
+          </RectButton>
         </Link>
       </View>
     </ScrollView>

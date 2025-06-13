@@ -3,7 +3,7 @@ import { useLayoutEffect, useRef } from "react";
 import type { View } from "react-native";
 import { tv } from "tailwind-variants";
 import z from "zod/v4";
-import { RectButton2 } from "./RectButton2";
+import { RectButton } from "./RectButton";
 import type { PropsOf } from "./types";
 
 const quizSubmitButtonStateSchema = z.enum({
@@ -17,7 +17,7 @@ export const QuizSubmitButtonState = quizSubmitButtonStateSchema.enum;
 export type QuizSubmitButtonState = z.infer<typeof quizSubmitButtonStateSchema>;
 
 interface QuizSubmitButtonProps
-  extends Pick<PropsOf<typeof RectButton2>, `onPress` | `ref`> {
+  extends Pick<PropsOf<typeof RectButton>, `onPress` | `ref`> {
   autoFocus?: boolean;
   state: QuizSubmitButtonState;
 }
@@ -55,7 +55,7 @@ export const QuizSubmitButton = ({
   }, [autoFocus, buttonRef, state]);
 
   return (
-    <RectButton2
+    <RectButton
       variant="filled"
       ref={mergeRefs(buttonRef, ref)}
       disabled={state === QuizSubmitButtonState.Disabled}
@@ -63,7 +63,7 @@ export const QuizSubmitButton = ({
       onPress={state === QuizSubmitButtonState.Disabled ? undefined : onPress}
     >
       {text}
-    </RectButton2>
+    </RectButton>
   );
 };
 

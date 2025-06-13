@@ -1,6 +1,6 @@
 import { targetSkillsReviewQueue } from "@/client/query";
 import { Countdown } from "@/client/ui/Countdown";
-import { RectButton2 } from "@/client/ui/RectButton2";
+import { RectButton } from "@/client/ui/RectButton";
 import { useRizzleQueryPaged } from "@/client/ui/ReplicacheContext";
 import type { HanziWord } from "@/data/model";
 import { SkillKind } from "@/data/model";
@@ -236,12 +236,12 @@ export default function IndexPage() {
                 )}
 
                 <Link href="/learn/reviews" asChild>
-                  <RectButton2
+                  <RectButton
                     variant="filled"
                     className="theme-success mt-2 self-stretch"
                   >
                     Start
-                  </RectButton2>
+                  </RectButton>
                 </Link>
               </View>
             </View>
@@ -259,9 +259,9 @@ export default function IndexPage() {
               </Text>
 
               <Link href="/learn/history" asChild>
-                <RectButton2 variant="filled" className="self-start">
+                <RectButton variant="filled" className="self-start">
                   Explore history
-                </RectButton2>
+                </RectButton>
               </Link>
             </View>
           </Reanimated.View>
