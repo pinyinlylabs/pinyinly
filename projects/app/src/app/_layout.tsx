@@ -22,6 +22,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { Stack, useNavigationContainerRef } from "expo-router";
 import { cssInterop } from "nativewind";
+import { PostHogProvider } from "posthog-react-native";
 import { useEffect, useState } from "react";
 import Reanimated from "react-native-reanimated";
 import "../global.css";
@@ -64,22 +65,27 @@ function RootLayout() {
     <TrpcProvider queryClient={queryClient} getSessionId={getSessionId}>
       <QueryClientProvider client={queryClient}>
         <ReplicacheProvider>
-          <HhhThemeProvider>
-            <Head>
-              <title>haohaohow - Teach yourself Chinese</title>
-            </Head>
+          <PostHogProvider
+            apiKey={process.env.EXPO_PUBLIC_POSTHOG_API_KEY}
+            options={{ host: `https://eu.i.posthog.com` }}
+          >
+            <HhhThemeProvider>
+              <Head>
+                <title>haohaohow - Teach yourself Chinese</title>
+              </Head>
 
-            <Stack screenOptions={{ headerShown: false, animation: `fade` }}>
-              <Stack.Screen
-                name="login"
-                options={{
-                  presentation: `modal`,
-                  animation: `slide_from_bottom`,
-                }}
-              />
-            </Stack>
-            <SplashScreen />
-          </HhhThemeProvider>
+              <Stack screenOptions={{ headerShown: false, animation: `fade` }}>
+                <Stack.Screen
+                  name="login"
+                  options={{
+                    presentation: `modal`,
+                    animation: `slide_from_bottom`,
+                  }}
+                />
+              </Stack>
+              <SplashScreen />
+            </HhhThemeProvider>
+          </PostHogProvider>
         </ReplicacheProvider>
       </QueryClientProvider>
     </TrpcProvider>
