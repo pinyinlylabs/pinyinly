@@ -235,7 +235,7 @@ export function TextAnswerButton({
       <ShootingStars
         // The theme needs to be set on this explicitly because the Rive CSS
         // variable proxy doesn't handle class changes.
-        className="success-theme2 pointer-events-none absolute -inset-3"
+        className="theme-success pointer-events-none absolute -inset-3"
         play={state === `success`}
       />
     </AnimatedPressable>
@@ -297,8 +297,8 @@ const pressableClass = tv({
       default: ``,
       dimmed: ``,
       selected: ``,
-      success: `success-theme2`,
-      error: `danger-theme2`,
+      success: `theme-success`,
+      error: `theme-danger`,
     },
   },
 });

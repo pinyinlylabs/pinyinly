@@ -129,9 +129,7 @@ export default function IndexPage() {
       streakQuery.data == null ||
       reviewQuery.data == null ? null : recentHanzi.isError ? (
         <View>
-          <Text className="danger-theme text-foreground">
-            Oops something went wrong.
-          </Text>
+          <Text className="text-foreground">Oops something went wrong.</Text>
         </View>
       ) : (
         <>
@@ -240,7 +238,7 @@ export default function IndexPage() {
                 <Link href="/learn/reviews" asChild>
                   <RectButton2
                     variant="filled"
-                    className="success-theme2 mt-2 self-stretch"
+                    className="theme-success mt-2 self-stretch"
                   >
                     Start
                   </RectButton2>

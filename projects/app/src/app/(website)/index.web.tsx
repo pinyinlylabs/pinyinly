@@ -39,7 +39,7 @@ export default function WebsitePage() {
           <Link href="/learn" asChild>
             <RectButton2
               variant="filled"
-              className="accent-theme2"
+              className="theme-accent"
               ref={(el) => {
                 //  RectButton2 is a <View> rather than a DOM element.
                 ref(el as Element | null);

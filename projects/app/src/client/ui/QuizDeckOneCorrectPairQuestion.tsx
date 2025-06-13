@@ -99,7 +99,7 @@ export function QuizDeckOneCorrectPairQuestion({
         isCorrect == null ? null : (
           <View
             className={`
-              ${isCorrect ? `success-theme2` : `danger-theme2`}
+              ${isCorrect ? `theme-success` : `theme-danger`}
 
               flex-1 gap-[12px] overflow-hidden bg-foreground-bg10 px-quiz-px pt-3
               pb-safe-offset-[84px]

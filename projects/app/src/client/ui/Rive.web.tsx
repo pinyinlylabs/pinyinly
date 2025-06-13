@@ -2,6 +2,7 @@ import type { ColorRGBA } from "@/util/color";
 import { parseCssColorOrThrow } from "@/util/color";
 import type { IsExhaustedRest } from "@/util/types";
 import { invariant } from "@haohaohow/lib/invariant";
+import type { ViewModel } from "@rive-app/canvas";
 import type { ViewModelInstance } from "@rive-app/react-canvas";
 import { Fit, Layout, useRive } from "@rive-app/react-canvas";
 import { useLayoutEffect } from "react";
@@ -75,15 +76,40 @@ const fitMap: Record<RiveFit, Fit> = {
   scaleDown: Fit.ScaleDown,
 };
 
-const varNames = [`foreground`, `background`];
-
-function applyThemeFromDom(dom: HTMLElement, viewModel: ViewModelInstance) {
+function applyThemeFromDom(
+  dom: HTMLElement,
+  themeViewModel: ViewModelInstance,
+) {
   const style = getComputedStyle(dom);
 
-  for (const varName of varNames) {
-    const color = parseCssColorOrThrow(
-      style.getPropertyValue(`--color-${varName}`),
-    );
-    applyColorToViewModel(viewModel, varName, color);
+  // Look at all the color properties in the theme view model and pass through
+  // the value from the DOM.
+  for (const property of themeViewModel.properties) {
+    if (property.type === PropertyType.Color) {
+      const cssPropertyName = `--color-${property.name}`;
+      const cssPropertyValue = style.getPropertyValue(cssPropertyName);
+      try {
+        const color = parseCssColorOrThrow(cssPropertyValue);
+        applyColorToViewModel(themeViewModel, property.name, color);
+      } catch (error) {
+        console.error(
+          `Failed to parse CSS color "${cssPropertyValue}" from "${cssPropertyName}" for Rive theme property "${property.name}"`,
+          error,
+        );
+      }
+    }
   }
 }
+
+// Hacky type-safe translation for ViewModel property types.
+type DataType = (typeof ViewModel.prototype.properties)[0][`type`];
+const PropertyType = {
+  Number: `number` as unknown as DataType,
+  String: `string` as unknown as DataType,
+  Boolean: `boolean` as unknown as DataType,
+  Color: `color` as unknown as DataType,
+  Trigger: `trigger` as unknown as DataType,
+  Enum: `enum` as unknown as DataType,
+  List: `list` as unknown as DataType,
+  Image: `image` as unknown as DataType,
+};

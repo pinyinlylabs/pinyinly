@@ -114,7 +114,7 @@ export function QuizDeckHanziToPinyinQuestion({
 
               lg:mb-2 lg:rounded-xl
 
-              ${grade.correct ? `success-theme2` : `danger-theme2`}
+              ${grade.correct ? `theme-success` : `theme-danger`}
             `}
           >
             {grade.correct ? (

@@ -50,7 +50,7 @@ export default function RadicalsPage() {
                 lg:px-0
               `}
             >
-              <Text className="text-sm text-primary-10">
+              <Text className="text-sm text-caption">
                 Radicals with {strokes} strokes
               </Text>
               <View className="flex-row flex-wrap gap-2">

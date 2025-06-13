@@ -132,10 +132,7 @@ export default function MnemonicsPage() {
                   <Text className="text-center text-2xl text-foreground">
                     {tone}
                   </Text>
-                  <Text
-                    className="text-center text-primary-10"
-                    numberOfLines={1}
-                  >
+                  <Text className="text-center text-caption" numberOfLines={1}>
                     {desc}
                   </Text>
                   <View className="h-2 rounded bg-primary-5">
@@ -271,7 +268,7 @@ export default function MnemonicsPage() {
 }
 
 const altText = tv({
-  base: `text-center text-primary-10`,
+  base: `text-center text-caption`,
 });
 
 const pinyinPartBox = tv({
@@ -284,7 +281,7 @@ const pinyinPartBox = tv({
   `,
   variants: {
     hasAssociation: {
-      true: `border-2 border-accent-10`,
+      true: `border-2 border-cyan-10`,
     },
   },
 });

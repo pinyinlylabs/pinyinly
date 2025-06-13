@@ -76,21 +76,6 @@ module.exports = {
         12: `rgb(from var(--color-primary-12) r g b / calc(alpha * <alpha-value>))`,
       },
 
-      accent: {
-        1: `rgb(from var(--color-accent-1) r g b / calc(alpha * <alpha-value>))`,
-        2: `rgb(from var(--color-accent-2) r g b / calc(alpha * <alpha-value>))`,
-        3: `rgb(from var(--color-accent-3) r g b / calc(alpha * <alpha-value>))`,
-        4: `rgb(from var(--color-accent-4) r g b / calc(alpha * <alpha-value>))`,
-        5: `rgb(from var(--color-accent-5) r g b / calc(alpha * <alpha-value>))`,
-        6: `rgb(from var(--color-accent-6) r g b / calc(alpha * <alpha-value>))`,
-        7: `rgb(from var(--color-accent-7) r g b / calc(alpha * <alpha-value>))`,
-        8: `rgb(from var(--color-accent-8) r g b / calc(alpha * <alpha-value>))`,
-        9: `rgb(from var(--color-accent-9) r g b / calc(alpha * <alpha-value>))`,
-        10: `rgb(from var(--color-accent-10) r g b / calc(alpha * <alpha-value>))`,
-        11: `rgb(from var(--color-accent-11) r g b / calc(alpha * <alpha-value>))`,
-        12: `rgb(from var(--color-accent-12) r g b / calc(alpha * <alpha-value>))`,
-      },
-
       sky: {
         DEFAULT: `rgb(from var(--color-sky) r g b / calc(alpha * <alpha-value>))`,
       },

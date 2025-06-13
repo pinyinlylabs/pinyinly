@@ -154,7 +154,7 @@ export default function RadicalPage() {
           >
             I Don&apos;t Get It
           </RectButton2>
-          <RectButton2 variant="filled" className="accent-theme2">
+          <RectButton2 variant="filled" className="theme-accent">
             Next
           </RectButton2>
         </View>
@@ -281,7 +281,7 @@ export default function RadicalPage() {
               >
                 I Don&apos;t Get It
               </RectButton2>
-              <RectButton2 variant="filled" className="accent-theme2">
+              <RectButton2 variant="filled" className="theme-accent">
                 Next
               </RectButton2>
             </View>
@@ -313,7 +313,7 @@ export default function RadicalPage() {
                               <Text className="text-foreground">
                                 {mnemonic}
                               </Text>
-                              <Text className="text-xs italic text-primary-10">
+                              <Text className="text-xs italic text-caption">
                                 {rationale}
                               </Text>
                             </View>

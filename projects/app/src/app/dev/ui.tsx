@@ -4,6 +4,7 @@ import { HanziText } from "@/client/ui/HanziText";
 import { IconImage } from "@/client/ui/IconImage";
 import { PinyinOptionButton } from "@/client/ui/PinyinOptionButton";
 import { QuizDeckHanziToPinyinQuestion } from "@/client/ui/QuizDeckHanziToPinyinQuestion";
+import { QuizFlagText } from "@/client/ui/QuizFlagText";
 import { QuizProgressBar } from "@/client/ui/QuizProgressBar";
 import { QuizQueueButton } from "@/client/ui/QuizQueueButton";
 import { RectButton2 } from "@/client/ui/RectButton2";
@@ -13,9 +14,11 @@ import { TextAnswerButton } from "@/client/ui/TextAnswerButton";
 import { TextInputSingle } from "@/client/ui/TextInputSingle";
 import type { PropsOf } from "@/client/ui/types";
 import { Use } from "@/client/ui/Use";
+import { QuestionFlagKind } from "@/data/model";
 import { hanziWordToPinyinQuestionOrThrow } from "@/data/questions/hanziWordToPinyin";
 import { hanziWordToPinyin } from "@/data/skills";
 import { buildHanziWord } from "@/dictionary/dictionary";
+import { subMinutes } from "date-fns/subMinutes";
 import { Link } from "expo-router";
 import shuffle from "lodash/shuffle";
 import type { ReactNode } from "react";
@@ -48,6 +51,10 @@ function DesignSystemPage() {
         </Link>
       </View>
       <ScrollView style={{ flex: 1 }} ref={scrollViewRef}>
+        <Section title={QuizFlagTextExample.name} scrollTo={scrollTo}>
+          <QuizFlagTextExample />
+        </Section>
+
         <Section title={ShootingStarsExample.name} scrollTo={scrollTo}>
           <ShootingStarsExample />
         </Section>
@@ -200,14 +207,14 @@ function DesignSystemPage() {
         <View className="flex-1 flex-row">
           <View
             className={`
-              light-theme
+              hhh-color-schema-light
 
               ${examplesStackClassName}
             `}
           />
           <View
             className={`
-              dark-theme
+              hhh-color-scheme-dark
 
               ${examplesStackClassName}
             `}
@@ -270,18 +277,6 @@ const HanziTextExamples = () => (
       </ExampleStack>
     </ExampleStack>
 
-    <ExampleStack title="hanzi + pinyin (accented)">
-      <ExampleStack title="1" showFrame>
-        <HanziText pinyin="nǐhǎo" hanzi="你好" accented />
-      </ExampleStack>
-      <ExampleStack title="2" showFrame>
-        <HanziText pinyin="bie2 de5" hanzi="别的" accented />
-      </ExampleStack>
-      <ExampleStack title="3" showFrame>
-        <HanziText pinyin="yǐ" hanzi="乚" accented />
-      </ExampleStack>
-    </ExampleStack>
-
     <ExampleStack title="hanzi + pinyin (underline)">
       <ExampleStack title="1" showFrame>
         <HanziText pinyin="nǐhǎo" hanzi="你好" underline />
@@ -291,18 +286,6 @@ const HanziTextExamples = () => (
       </ExampleStack>
       <ExampleStack title="3" showFrame>
         <HanziText pinyin="yǐ" hanzi="乚" underline />
-      </ExampleStack>
-    </ExampleStack>
-
-    <ExampleStack title="hanzi + pinyin (accented + underline)">
-      <ExampleStack title="1" showFrame>
-        <HanziText pinyin="nǐhǎo" hanzi="你好" accented underline />
-      </ExampleStack>
-      <ExampleStack title="2" showFrame>
-        <HanziText pinyin="bie2 de5" hanzi="别的" accented underline />
-      </ExampleStack>
-      <ExampleStack title="3" showFrame>
-        <HanziText pinyin="yǐ" hanzi="乚" accented underline />
       </ExampleStack>
     </ExampleStack>
   </>
@@ -377,7 +360,7 @@ const Section = ({
       <View className="flex-row" ref={ref}>
         <View
           className={`
-            light-theme flex-1 bg-background/90 p-2
+            hhh-color-schema-light flex-1 bg-background/90 p-2
 
             hover:bg-background
           `}
@@ -392,12 +375,12 @@ const Section = ({
             <Text className="text-2xl text-foreground">{title}</Text>
           </Pressable>
         </View>
-        <View className="dark-theme flex-1 bg-primary-4 p-2" />
+        <View className="hhh-color-scheme-dark flex-1 bg-primary-4 p-2" />
       </View>
       <View className="flex-row">
         <View
           className={`
-            light-theme
+            hhh-color-schema-light
 
             ${examplesStackClassName}
           `}
@@ -406,7 +389,7 @@ const Section = ({
         </View>
         <View
           className={`
-            dark-theme
+            hhh-color-scheme-dark
 
             ${examplesStackClassName}
           `}
@@ -432,7 +415,7 @@ const ExampleStack = ({
   showFrame?: boolean;
 }) => (
   <View className="items-center gap-2 p-2">
-    <Text className="text-center text-xs text-primary-10">{title}</Text>
+    <Text className="text-center text-xs text-caption">{title}</Text>
     <View
       className={exampleStackChildrenClass({
         showFrame,
@@ -489,19 +472,19 @@ const RectButton2Examples = (props: Partial<PropsOf<typeof RectButton2>>) => (
         <RectButton2Variants {...props} />
       </ExampleStack>
 
-      <View className="accent-theme2">
+      <View className="theme-accent">
         <ExampleStack title="accent" childrenClassName="gap-2">
           <RectButton2Variants {...props} />
         </ExampleStack>
       </View>
 
-      <View className="success-theme2">
+      <View className="theme-success">
         <ExampleStack title="success" childrenClassName="gap-2">
           <RectButton2Variants {...props} />
         </ExampleStack>
       </View>
 
-      <View className="danger-theme2">
+      <View className="theme-danger">
         <ExampleStack title="danger" childrenClassName="gap-2">
           <RectButton2Variants {...props} />
         </ExampleStack>
@@ -895,7 +878,7 @@ function QuizProgressBarExample() {
       </View>
       <View className="flex-row items-start gap-4">
         <View className="flex-row items-center gap-2">
-          <Text className="font-bold text-primary-10">Answer:</Text>
+          <Text className="font-bold text-caption">Answer:</Text>
           <RectButton2 variant="outline" onPress={logCorrect}>
             Correct
           </RectButton2>
@@ -1005,7 +988,7 @@ function IconImageExample() {
         ))}
       </ExampleStack>
 
-      <View className="success-theme2">
+      <View className="theme-success">
         <ExampleStack title="success">
           {sources.map((s, i) => (
             <IconImage key={i} source={s} />
@@ -1013,7 +996,7 @@ function IconImageExample() {
         </ExampleStack>
       </View>
 
-      <View className="accent-theme2">
+      <View className="theme-accent">
         <ExampleStack title="accent">
           {sources.map((s, i) => (
             <IconImage key={i} source={s} />
@@ -1075,6 +1058,22 @@ function QuizDeckHanziToPinyinQuestionExample() {
   );
 }
 
+function QuizFlagTextExample() {
+  return (
+    <ExampleStack title="flags">
+      <QuizFlagText flag={{ kind: QuestionFlagKind.WeakWord }} />
+      <QuizFlagText flag={{ kind: QuestionFlagKind.NewSkill }} />
+      <QuizFlagText
+        flag={{
+          kind: QuestionFlagKind.Overdue,
+          interval: { start: subMinutes(new Date(), 59), end: new Date() },
+        }}
+      />
+      <QuizFlagText flag={{ kind: QuestionFlagKind.Retry }} />
+    </ExampleStack>
+  );
+}
+
 function ShootingStarsExample() {
   const [i, setI] = useState(0);
   const [growth, setGrowth] = useState(0);
@@ -1119,7 +1118,7 @@ function ShootingStarsExample() {
 
       <ExampleStack title="manual (100×50) success" showFrame>
         <ShootingStars
-          className="success-theme2 h-[50px] w-[100px]"
+          className="theme-success h-[50px] w-[100px]"
           play={play}
         />
       </ExampleStack>

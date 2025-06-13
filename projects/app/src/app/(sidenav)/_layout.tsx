@@ -32,7 +32,7 @@ export default function SideNavLayout() {
         <Link
           href="/learn"
           className={`
-            hidden px-2 py-1 text-2xl font-bold tracking-wide text-primary-10
+            hidden px-2 py-1 text-2xl font-bold tracking-wide
 
             md:flex
           `}

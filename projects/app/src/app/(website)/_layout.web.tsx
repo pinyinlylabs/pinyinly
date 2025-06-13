@@ -56,7 +56,7 @@ export default function WebsiteLayout() {
                   exiting={FadeOut.duration(100)}
                 >
                   <Link href="/learn" asChild>
-                    <RectButton2 variant="filled" className="accent-theme2">
+                    <RectButton2 variant="filled" className="theme-accent">
                       Get Started
                     </RectButton2>
                   </Link>
@@ -169,9 +169,9 @@ const footerLinkTitle = tv({
 
 const footerLinkClass = tv({
   base: `
-    www-text-footer-link my-0.5 inline-block py-0.5 text-primary-10 no-underline
+    www-text-footer-link my-0.5 inline-block py-0.5 text-caption no-underline
 
-    hover:text-accent-10
+    hover:text-cyan-10
 
     focus-visible:ring
   `,

@@ -16,7 +16,7 @@ export default function ExplorePage() {
         </Text>
 
         <Link href="/explore/mnemonics/" asChild>
-          <RectButton2 variant="filled" className="accent-theme2 self-start">
+          <RectButton2 variant="filled" className="theme-accent self-start">
             Explore mnemonics
           </RectButton2>
         </Link>
@@ -30,7 +30,7 @@ export default function ExplorePage() {
         </Text>
 
         <Link href="/explore/radicals" asChild>
-          <RectButton2 variant="filled" className="accent-theme2 self-start">
+          <RectButton2 variant="filled" className="theme-accent self-start">
             Explore radicals
           </RectButton2>
         </Link>
@@ -44,7 +44,7 @@ export default function ExplorePage() {
         </Text>
 
         <Link href="/explore/words" asChild>
-          <RectButton2 variant="filled" className="accent-theme2 self-start">
+          <RectButton2 variant="filled" className="theme-accent self-start">
             Explore words
           </RectButton2>
         </Link>

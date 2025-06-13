@@ -130,7 +130,7 @@ export default function MnemonicIdPage() {
                           </Text>
 
                           {` `}
-                          <Text className="text-sm font-normal text-primary-10">
+                          <Text className="text-sm font-normal text-caption">
                             {desc}
                           </Text>
                         </Text>
