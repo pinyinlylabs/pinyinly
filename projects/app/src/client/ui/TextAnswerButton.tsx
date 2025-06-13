@@ -18,6 +18,7 @@ import Reanimated, {
 import { tv } from "tailwind-variants";
 import { hapticImpactIfMobile } from "../hooks/hapticImpactIfMobile";
 import { AnimatedPressable } from "./AnimatedPressable";
+import { ShootingStars } from "./ShootingStars";
 import type { PropsOf } from "./types";
 
 const targetBgScale: Record<TextAnswerButtonState, number> = {
@@ -231,6 +232,12 @@ export function TextAnswerButton({
           {text}
         </Text>
       </View>
+      <ShootingStars
+        // The theme needs to be set on this explicitly because the Rive CSS
+        // variable proxy doesn't handle class changes.
+        className="success-theme2 pointer-events-none absolute -inset-3"
+        play={state === `success`}
+      />
     </AnimatedPressable>
   );
 }
@@ -263,13 +270,13 @@ const withIncorrectShakeAnimation = (current: string) => {
 };
 
 const bgAnimatedClass = tv({
-  base: `pointer-events-none absolute inset-x-px inset-y-[2px] rounded-lg bg-cyan-10/10`,
+  base: `pointer-events-none absolute inset-x-px inset-y-[2px] rounded-lg`,
   variants: {
     state: {
       default: ``,
       dimmed: ``,
-      selected: ``,
-      success: `bg-foreground`,
+      selected: `bg-cyan-10/10`,
+      success: `bg-foreground/10`,
       error: `bg-transparent`,
     },
   },
@@ -343,7 +350,7 @@ const rectClass = tv({
     {
       state: `success`,
       filled: true,
-      class: `border-foreground-bg75`,
+      class: `border-foreground`,
     },
     {
       state: `selected`,
@@ -372,7 +379,7 @@ const textClass = tv({
       default: `text-foreground`,
       dimmed: `text-primary-9`,
       selected: `text-cyan-10`,
-      success: `text-background`,
+      success: `text-foreground`,
       error: `text-red-10`,
     },
     length: {
