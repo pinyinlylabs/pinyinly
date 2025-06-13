@@ -2183,7 +2183,7 @@ __metadata:
     "@lottiefiles/lottie-js": "npm:^0.4.2"
     "@lucia-auth/adapter-drizzle": "npm:^1.1.0"
     "@neondatabase/serverless": "npm:^1.0.0"
-    "@react-native-async-storage/async-storage": "npm:^2.2.0"
+    "@react-native-async-storage/async-storage": "npm:2.1.2"
     "@react-native-replicache/deep-freeze": "npm:^1.1.0"
     "@react-navigation/native": "npm:^7.0.0"
     "@react-navigation/stack": "npm:^7.0.0"
@@ -5148,14 +5148,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native-async-storage/async-storage@npm:^2.2.0":
-  version: 2.2.0
-  resolution: "@react-native-async-storage/async-storage@npm:2.2.0"
+"@react-native-async-storage/async-storage@npm:2.1.2":
+  version: 2.1.2
+  resolution: "@react-native-async-storage/async-storage@npm:2.1.2"
   dependencies:
     merge-options: "npm:^3.0.4"
   peerDependencies:
     react-native: ^0.0.0-0 || >=0.65 <1.0
-  checksum: 10c0/84900eba46a40225c4ac9bf5eb58885200dc1e789d873ecda46a2a213870cc7110536ed1fd7a74b873071f3603c093958fbd84c635d6f6d4f94bfbb616ffa0ef
+  checksum: 10c0/8f3d6ff1b32ef8705c5c8be8248988cfbfd571c0e8142b8aef15429f13ddc9a018792b4be837215f6592c76b9cd99a931d4f0ab4182eebd8bddede458d484053
   languageName: node
   linkType: hard
 
