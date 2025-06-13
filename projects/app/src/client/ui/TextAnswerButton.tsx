@@ -233,7 +233,7 @@ export function TextAnswerButton({
         </Text>
       </View>
       <ShootingStars
-        // The theme needs to be set on this explicltly because the Rive CSS
+        // The theme needs to be set on this explicitly because the Rive CSS
         // variable proxy doesn't handle class changes.
         className="success-theme2 pointer-events-none absolute -inset-3"
         play={state === `success`}
