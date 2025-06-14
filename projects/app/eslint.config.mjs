@@ -285,6 +285,7 @@ export default tseslint.config(
       //
 
       "@haohaohow/reanimated-default-name": `error`,
+      "@haohaohow/require-glob": `error`,
       "@haohaohow/no-restricted-css-classes": [
         `error`,
         {
