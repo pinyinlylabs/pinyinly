@@ -12,11 +12,11 @@
   },
   "rewrites": [
     {
-      "source": "^/api/0opho0/static/(.+)$",
+      "source": "/api/0opho0/static/(.*)",
       "destination": "https://eu-assets.i.posthog.com/static/$1"
     },
     {
-      "source": "^/api/0opho0/(.+)$",
+      "source": "/api/0opho0/(.*)",
       "destination": "https://eu.i.posthog.com/$1"
     },
     {
