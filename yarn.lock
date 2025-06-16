@@ -2278,6 +2278,7 @@ __metadata:
     oslo: "npm:^1.2.1"
     pg: "npm:^8.14.0"
     pg-protocol: "npm:^1.8.0"
+    posthog-js: "npm:^1.252.1"
     posthog-react-native: "npm:^4.1.0"
     postmark: "npm:^4.0.5"
     prettier: "npm:^3.4.2"
@@ -8244,6 +8245,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"core-js@npm:^3.38.1":
+  version: 3.43.0
+  resolution: "core-js@npm:3.43.0"
+  checksum: 10c0/9d4ad66296e60380777de51d019b5c3e6cce023b7999750a5094f9a4b0ea53bf3600beb4ef11c56548f2c8791d43d4056e270d1cf55ba87273011aa7d4597871
+  languageName: node
+  linkType: hard
+
 "core-util-is@npm:^1.0.3":
   version: 1.0.3
   resolution: "core-util-is@npm:1.0.3"
@@ -10341,6 +10349,13 @@ __metadata:
     setimmediate: "npm:^1.0.5"
     ua-parser-js: "npm:^1.0.35"
   checksum: 10c0/66d0a2fc9a774f9066e35ac2ac4bf1245931d27f3ac287c7d47e6aa1fc152b243c2109743eb8f65341e025621fb51a12038fadb9fd8fda2e3ddae04ebab06f91
+  languageName: node
+  linkType: hard
+
+"fflate@npm:^0.4.8":
+  version: 0.4.8
+  resolution: "fflate@npm:0.4.8"
+  checksum: 10c0/29d1eddaaa5deab61b1c6b0d21282adacadbc4d2c01e94d8b1ee784398151673b9c563e53f97a801bc410a1ae55e8de5378114a743430e643e7a0644ba8e5a42
   languageName: node
   linkType: hard
 
@@ -14557,6 +14572,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"posthog-js@npm:^1.252.1":
+  version: 1.252.1
+  resolution: "posthog-js@npm:1.252.1"
+  dependencies:
+    core-js: "npm:^3.38.1"
+    fflate: "npm:^0.4.8"
+    preact: "npm:^10.19.3"
+    web-vitals: "npm:^4.2.4"
+  peerDependencies:
+    "@rrweb/types": 2.0.0-alpha.17
+    rrweb-snapshot: 2.0.0-alpha.17
+  peerDependenciesMeta:
+    "@rrweb/types":
+      optional: true
+    rrweb-snapshot:
+      optional: true
+  checksum: 10c0/7dedde5868e6b812b72ad544b029fb80759f1e19caa565fddbe72ac46fbb65ff0713d5ae55f7d501eddd5ff0f62477044ff012297e8adc8e518b92e21ff67837
+  languageName: node
+  linkType: hard
+
 "posthog-react-native@npm:^4.1.0":
   version: 4.1.0
   resolution: "posthog-react-native@npm:4.1.0"
@@ -14606,6 +14641,13 @@ __metadata:
   dependencies:
     axios: "npm:^1.7.4"
   checksum: 10c0/d8d7108e49919812d485306ede69c30b9532328d7a21f881e891c7c26f25395850b3291d688a9ad09d352daeb395eee2e45353d9174e15fb71d7d9bfaa2a5cd2
+  languageName: node
+  linkType: hard
+
+"preact@npm:^10.19.3":
+  version: 10.26.9
+  resolution: "preact@npm:10.26.9"
+  checksum: 10c0/15f187e3278ae749b70e887f88bb01be63ebcc2eea46ffa86be69180716db40b8b4304e9768767fd68a5910ef5fd1f9ea6389e17cd25e950be76574d568e8fc3
   languageName: node
   linkType: hard
 
@@ -17415,6 +17457,13 @@ __metadata:
   dependencies:
     defaults: "npm:^1.0.3"
   checksum: 10c0/5b61ca583a95e2dd85d7078400190efd452e05751a64accb8c06ce4db65d7e0b0cde9917d705e826a2e05cc2548f61efde115ffa374c3e436d04be45c889e5b4
+  languageName: node
+  linkType: hard
+
+"web-vitals@npm:^4.2.4":
+  version: 4.2.4
+  resolution: "web-vitals@npm:4.2.4"
+  checksum: 10c0/383c9281d5b556bcd190fde3c823aeb005bb8cf82e62c75b47beb411014a4ed13fa5c5e0489ed0f1b8d501cd66b0bebcb8624c1a75750bd5df13e2a3b1b2d194
   languageName: node
   linkType: hard
 
