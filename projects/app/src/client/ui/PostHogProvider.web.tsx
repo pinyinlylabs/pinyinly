@@ -12,6 +12,7 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
         // directly in local development because the vercel dev server is not
         // used locally, so the proxy won't exist.
         api_host: __DEV__ ? apiHost : `/api/0opho0`,
+        ui_host: `https://eu.posthog.com`,
         debug,
       }}
     >

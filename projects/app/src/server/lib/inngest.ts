@@ -121,7 +121,7 @@ const replicacheGarbageCollection = inngest.createFunction(
   {
     description: `Delete old replicache data no longer used to reduce DB bloat.`,
     id: `replicacheGarbageCollection`,
-    concurrency: 1,
+    singleton: { mode: `skip` },
   },
   {
     // Run once every hour
@@ -159,7 +159,7 @@ const pgFullVacuumGarbageCollection = inngest.createFunction(
   {
     description: `Checks PostgreSQL tables for dead tuples and if VACUUM FULL is needed to reclaim space.`,
     id: `pgFullVacuumGarbageCollection`,
-    concurrency: 1,
+    singleton: { mode: `skip` },
   },
   {
     // Run once every day
@@ -262,7 +262,10 @@ const pgFullVacuumGarbageCollection = inngest.createFunction(
 );
 
 const syncRemotePush = inngest.createFunction(
-  { id: `syncRemotePush`, concurrency: 1 },
+  {
+    id: `syncRemotePush`,
+    singleton: { mode: `skip` },
+  },
   {
     // Sync every 5 minutes
     cron: `*/5 * * * *`,
@@ -373,7 +376,10 @@ const syncRemotePush = inngest.createFunction(
 );
 
 const syncRemotePull = inngest.createFunction(
-  { id: `syncRemotePull`, concurrency: 1 },
+  {
+    id: `syncRemotePull`,
+    singleton: { mode: `skip` },
+  },
   {
     // Sync every 5 minutes
     cron: `*/5 * * * *`,

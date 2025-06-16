@@ -64,7 +64,7 @@
     "expo-system-ui": "~5.0.7",
     "expo-updates": "~0.28.13",
     "hanzi": "patch:hanzi@npm%3A2.1.5#~/.yarn/patches/hanzi-npm-2.1.5-506390bb41.patch",
-    "inngest": "^3.29.2",
+    "inngest": "^3.39.1",
     "lodash": "^4.17.21",
     "lottie-react-native": "7.2.2",
     "lucia": "^3.2.0",
