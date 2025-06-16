@@ -15,6 +15,7 @@ import { routingIntegration } from "@/client/sentry";
 import { getSessionId } from "@/client/auth";
 import { TrpcProvider } from "@/client/trpc";
 import { HhhThemeProvider } from "@/client/ui/HhhThemeProvider";
+import { PostHogProvider } from "@/client/ui/PostHogProvider";
 import { ReplicacheProvider } from "@/client/ui/ReplicacheContext";
 import { SplashScreen } from "@/client/ui/SplashScreen";
 import * as Sentry from "@sentry/react-native";
@@ -22,7 +23,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { Stack, useNavigationContainerRef } from "expo-router";
 import { cssInterop } from "nativewind";
-import { PostHogProvider } from "posthog-react-native";
 import { useEffect, useState } from "react";
 import Reanimated from "react-native-reanimated";
 import "../global.css";
@@ -65,10 +65,7 @@ function RootLayout() {
     <TrpcProvider queryClient={queryClient} getSessionId={getSessionId}>
       <QueryClientProvider client={queryClient}>
         <ReplicacheProvider>
-          <PostHogProvider
-            apiKey={process.env.EXPO_PUBLIC_POSTHOG_API_KEY}
-            options={{ host: `https://eu.i.posthog.com` }}
-          >
+          <PostHogProvider>
             <HhhThemeProvider>
               <Head>
                 <title>haohaohow - Teach yourself Chinese</title>
