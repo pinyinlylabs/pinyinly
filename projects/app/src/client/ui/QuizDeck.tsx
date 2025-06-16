@@ -24,7 +24,6 @@ import {
 } from "@react-navigation/stack";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "expo-router";
-import { usePostHog } from "posthog-react-native";
 import React, { useEffect, useId, useRef, useState } from "react";
 import Reanimated, { FadeIn } from "react-native-reanimated";
 import { CloseButton } from "./CloseButton";
@@ -37,6 +36,7 @@ import { useReplicache, useRizzleQueryPaged } from "./ReplicacheContext";
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { Animated, Text, View } from "react-native";
+import { usePostHog } from "./PostHogProvider";
 
 const Stack = createStackNavigator<{
   loading: undefined;
