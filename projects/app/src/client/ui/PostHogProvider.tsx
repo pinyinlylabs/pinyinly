@@ -1,5 +1,10 @@
 import { useNavigationContainerRef } from "expo-router";
-import { PostHogProvider as RnPostHogProvider } from "posthog-react-native";
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import {
+  PostHogProvider as RnPostHogProvider,
+  usePostHog as rnUsePostHog,
+} from "posthog-react-native";
+import type { UsePostHog } from "./postHogOptions";
 import { apiHost, apiKey, debug } from "./postHogOptions";
 
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
@@ -21,4 +26,9 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
       {children}
     </RnPostHogProvider>
   );
+}
+
+export function usePostHog(): UsePostHog {
+  const posthog = rnUsePostHog();
+  return posthog;
 }

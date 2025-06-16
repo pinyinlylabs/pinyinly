@@ -11,6 +11,10 @@ export function QuizQueueButton({
     `overDueCount` | `dueCount` | `newCount`
   > | null;
 }) {
+  const queueCount =
+    queueStats == null
+      ? null
+      : queueStats.overDueCount + queueStats.dueCount + queueStats.newCount;
   return (
     <View
       className={`
@@ -24,12 +28,17 @@ export function QuizQueueButton({
         className="self-center text-foreground"
         source={require(`@/assets/icons/inbox-filled.svg`)}
       />
-      {queueStats == null ? null : queueStats.overDueCount > 0 ? (
-        <CountLozenge count={queueStats.overDueCount} mode="overdue" />
-      ) : queueStats.dueCount > 0 ? (
-        <CountLozenge count={queueStats.dueCount} mode="due" />
-      ) : queueStats.newCount > 0 ? (
-        <CountLozenge count={queueStats.newCount} mode="new" />
+      {queueStats == null || queueCount == null ? null : queueCount > 0 ? (
+        <CountLozenge
+          count={queueCount}
+          mode={
+            queueStats.overDueCount > 0
+              ? `overdue`
+              : queueStats.dueCount > 0
+                ? `due`
+                : `new`
+          }
+        />
       ) : (
         <CheckBadge />
       )}

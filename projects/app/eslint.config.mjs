@@ -203,6 +203,14 @@ export default tseslint.config(
               message: `Please use node:assert/strict`,
             },
             {
+              name: `posthog-js/react`,
+              message: `Please use @/client/ui/PostHogProvider.`,
+            },
+            {
+              name: `posthog-react-native`,
+              message: `Please use @/client/ui/PostHogProvider.`,
+            },
+            {
               name: `zod`,
               message: `Please use zod/v4 instead`,
             },

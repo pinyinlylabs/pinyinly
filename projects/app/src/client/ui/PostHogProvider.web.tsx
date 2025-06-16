@@ -1,12 +1,16 @@
-import { PostHogProvider as WebPostHogProvider } from "posthog-js/react";
+import { nonNullable } from "@haohaohow/lib/invariant";
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import {
+  PostHogProvider as WebPostHogProvider,
+  usePostHog as webUsePostHog,
+} from "posthog-js/react";
+import type { UsePostHog } from "./postHogOptions";
 import { apiHost, apiKey, debug } from "./postHogOptions";
 
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
-  return apiKey == null ? (
-    children
-  ) : (
+  return (
     <WebPostHogProvider
-      apiKey={apiKey}
+      apiKey={nonNullable(apiKey)}
       options={{
         // Use the Vercel reverse proxy to Posthog in production, but use it
         // directly in local development because the vercel dev server is not
@@ -19,4 +23,9 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
       {children}
     </WebPostHogProvider>
   );
+}
+
+export function usePostHog(): UsePostHog {
+  const posthog = webUsePostHog();
+  return posthog;
 }
