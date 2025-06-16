@@ -16861,14 +16861,14 @@ __metadata:
   linkType: hard
 
 "ts-essentials@npm:^10.0.3":
-  version: 10.1.0
-  resolution: "ts-essentials@npm:10.1.0"
+  version: 10.1.1
+  resolution: "ts-essentials@npm:10.1.1"
   peerDependencies:
     typescript: ">=4.5.0"
   peerDependenciesMeta:
     typescript:
       optional: true
-  checksum: 10c0/359838bf6b157431e9b011e955445a35b60eebab8b711ebe3492b2153c85e7253a39819360830b38488b11c1e163c689bcf7df133af26aac1868e7f1f4f3ac9c
+  checksum: 10c0/8c59148a03eae086e7b1454fa6895e94e2f71385089ccda7e1f720a586749ede7e49ff7338e5f27e44a79f4bed740cc5dc3ad59313769bec028a85fa985685ff
   languageName: node
   linkType: hard
 
