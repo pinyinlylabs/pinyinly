@@ -17,6 +17,14 @@
   ],
   "headers": [
     {
+      "source": "/api/0opho0/static/:path*",
+      "destination": "https://eu-assets.i.posthog.com/static/:path*"
+    },
+    {
+      "source": "/api/0opho0/:path*",
+      "destination": "https://eu.i.posthog.com/:path*"
+    },
+    {
       "source": "/assets/(.*)",
       "headers": [
         {
