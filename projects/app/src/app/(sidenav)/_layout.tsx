@@ -119,14 +119,13 @@ export default function SideNavLayout() {
   );
 }
 
-type TabButtonProps = Omit<TabTriggerSlotProps, `children`> & {
+type TabButtonProps = Omit<TabTriggerSlotProps, `children` | `style`> & {
   children: ReactNode | ((options: { isFocused: boolean }) => ReactNode);
 };
 
 const TabButton = ({
   children,
   isFocused = false,
-  style, // pull out of `...props` and don't pass to <Pressable>
   ...props
 }: TabButtonProps) => (
   <Pressable {...props}>
