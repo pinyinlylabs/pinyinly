@@ -24,8 +24,8 @@
     @apply font-sans text-sm/normal font-bold uppercase text-foreground;
   }
 
-  .hhh-text-title {
-    @apply font-karla text-2xl/normal tracking-tight text-foreground;
+  .hhh-body-title {
+    @apply font-sans text-2xl/normal tracking-tight text-foreground;
   }
   /*
   Karla on iOS font-bold looks like font-medium, so we have to bump it up to
@@ -35,18 +35,18 @@
   */
   /* web */
   @media (display-mode: browser) {
-    .hhh-text-title {
+    .hhh-body-title {
       @apply font-bold;
     }
   }
 
   @media not (display-mode: browser) {
     /* native */
-    .hhh-text-title {
+    .hhh-body-title {
       @apply font-[800];
     }
   }
-  /* end .hhh-text-title */
+  /* end .hhh-body-title */
 
   .hhh-hhhmark {
     white-space: pre-wrap;
@@ -54,58 +54,62 @@
   }
 
   /* hhh/body-2xl */
-  .hhh-text-body-2xl {
+  .hhh-body-2xl {
     @apply font-sans text-2xl/normal font-thin text-foreground;
   }
 
-  .hhh-text-body-2xl-ref {
+  .hhh-body-2xl-ref {
     @apply font-sans text-2xl/tight font-normal text-foreground-ref underline decoration-foreground-ref/70 decoration-dashed decoration-[2px] underline-offset-[5px];
   }
 
-  .hhh-text-body-2xl-bold {
+  .hhh-body-2xl-bold {
     @apply font-sans text-2xl/normal font-medium text-foreground-bold;
   }
 
-  .hhh-text-body-2xl-italic {
+  .hhh-body-2xl-italic {
     @apply font-sans text-2xl/normal font-medium italic text-foreground;
   }
 
+  .hhh-body-dt {
+    @apply font-sans text-xs/normal font-normal text-caption uppercase;
+  }
+
   /* hhh/body */
-  .hhh-text-body {
+  .hhh-body {
     @apply font-sans text-base/normal font-thin text-foreground;
   }
 
-  .hhh-text-body-ref {
+  .hhh-body-ref {
     @apply font-sans text-base/normal font-normal text-foreground-ref underline decoration-foreground-ref/50 decoration-dashed decoration-[1.5px] underline-offset-[5px];
   }
 
-  .hhh-text-body-bold {
+  .hhh-body-bold {
     @apply font-sans text-base/normal font-medium text-foreground-bold;
   }
 
-  .hhh-text-body-italic {
+  .hhh-body-italic {
     @apply font-sans text-base/normal font-medium italic text-foreground;
   }
 
-  /* hhh/caption */
-  .hhh-text-caption {
+  /* hhh/body-caption */
+  .hhh-body-caption {
     @apply font-sans text-sm/normal font-light text-caption;
   }
 
-  .hhh-text-caption-ref {
+  .hhh-body-caption-ref {
     @apply font-sans text-sm/normal font-normal text-caption-ref underline decoration-caption-ref/50 decoration-dashed decoration-[1.5px] underline-offset-[5px];
   }
 
-  .hhh-text-caption-bold {
+  .hhh-body-caption-bold {
     @apply font-sans text-sm/normal font-medium text-caption-bold;
   }
 
-  .hhh-text-caption-italic {
+  .hhh-body-caption-italic {
     @apply font-sans text-sm/normal font-light italic text-caption;
   }
 
   /* hhh/body-input */
-  .hhh-text-body-input {
+  .hhh-body-input {
     @apply font-sans text-lg/snug font-normal text-foreground;
   }
 

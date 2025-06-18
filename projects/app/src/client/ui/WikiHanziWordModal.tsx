@@ -116,7 +116,7 @@ export const WikiHanziWordModal = ({
                   {hanziWordSkillData.data.gloss.join(`, `)}
                   {otherMeaningsQuery.data == null ||
                   otherMeaningsQuery.data.length === 0 ? null : (
-                    <Text className="hhh-text-caption">
+                    <Text className="hhh-body-caption">
                       ; also
                       {otherMeaningsQuery.data.map(([otherHanziWord], i) => (
                         <Fragment key={otherHanziWord}>
@@ -146,7 +146,7 @@ export const WikiHanziWordModal = ({
                     {wikiEntry.data.components.map((component, i) => {
                       return (
                         <View key={i} className="gap-1">
-                          <Text className="hhh-text-body">
+                          <Text className="hhh-body">
                             {component.title ??
                               (component.hanziWord == null ? null : (
                                 <HanziWordRefText

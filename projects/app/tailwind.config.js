@@ -15,6 +15,10 @@ module.exports = {
       md: `768px`,
       // => @media (min-width: 768px) { ... }
 
+      /** "portal" is the name for the non-game pages like settings/profile/etc */
+      [`portal-lg`]: `872px`,
+      // => @media (min-width: 1024px) { ... }
+
       lg: `1024px`,
       // => @media (min-width: 1024px) { ... }
 

@@ -23,7 +23,7 @@ export const WikiHanziInterpretationPanel = ({
         {wikiEntry.data.components.map((component, i) => {
           return (
             <View key={i} className="gap-1">
-              <Text className="hhh-text-body">
+              <Text className="hhh-body">
                 {component.title ??
                   (component.hanziWord == null ? null : (
                     <HanziWordRefText
@@ -33,7 +33,7 @@ export const WikiHanziInterpretationPanel = ({
                   )) ??
                   `???`}
               </Text>
-              <Text className="hhh-text-caption">{component.description}</Text>
+              <Text className="hhh-body-caption">{component.description}</Text>
             </View>
           );
         })}
@@ -44,7 +44,7 @@ export const WikiHanziInterpretationPanel = ({
               meaning.glossHint == null ? null : (
                 <Fragment key={i}>
                   <View className="h-px w-full bg-primary-8" />
-                  <Text className="hhh-text-body">
+                  <Text className="hhh-body">
                     <Hhhmark source={meaning.glossHint} context="body" />
                   </Text>
                 </Fragment>
@@ -54,7 +54,7 @@ export const WikiHanziInterpretationPanel = ({
         {wikiEntry.data.interpretation == null ? null : (
           <>
             <View className="h-px w-full bg-primary-8" />
-            <Text className="hhh-text-body">
+            <Text className="hhh-body">
               <Hhhmark source={wikiEntry.data.interpretation} context="body" />
             </Text>
           </>
