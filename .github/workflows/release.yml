@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 concurrency:
   # Ensure only one build at a time, so that DB migrations, EAS releases, Vercel
   # deployments, all happen in sequence and results are more deterministic.
