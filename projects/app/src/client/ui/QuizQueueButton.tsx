@@ -1,4 +1,5 @@
 import type { SkillReviewQueue } from "@/data/skills";
+import { Link } from "expo-router";
 import { Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 import { IconImage } from "./IconImage";
@@ -16,7 +17,8 @@ export function QuizQueueButton({
       ? null
       : queueStats.overDueCount + queueStats.dueCount + queueStats.newCount;
   return (
-    <View
+    <Link
+      href="/history"
       className={`
         relative size-[32px] flex-row justify-center
 
@@ -42,7 +44,7 @@ export function QuizQueueButton({
       ) : (
         <CheckBadge />
       )}
-    </View>
+    </Link>
   );
 }
 
@@ -70,7 +72,9 @@ function CountLozenge({
   const countText = count >= 100 ? `99+` : `${count}`;
   return (
     <View className={countLozengePillClass({ mode, className })}>
-      <Text className="text-[10px] font-bold text-background">{countText}</Text>
+      <Text className="text-[10px] font-bold tabular-nums text-background">
+        {countText}
+      </Text>
     </View>
   );
 }

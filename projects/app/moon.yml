@@ -69,6 +69,16 @@ tasks:
     outputs:
       - "@group(buildVercelExpoSentryOutdir)"
 
+  buildBillOfMaterials:
+    command: |
+      yarn expo export &&
+      tsx --tsconfig tsconfig.node.json ./bin/buildBillOfMaterials.ts
+    preset: watcher
+    options:
+      envFile: .env.local
+    env:
+      NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
+
   dbCheck:
     command: drizzle-kit check
     description: |

@@ -18,6 +18,7 @@ import type {
   PinyinPronunciationSpaceSeparated,
 } from "#data/model.ts";
 import { pinyinPronunciationDisplayText } from "#data/pinyin.ts";
+import { rPinyinPronunciation } from "#data/rizzleSchema.ts";
 import type {
   Dictionary,
   HanziWordMeaning,
@@ -57,8 +58,6 @@ import {
   useQuery,
 } from "@tanstack/react-query";
 import makeDebug from "debug";
-
-import { rPinyinPronunciation } from "#data/rizzleSchema.ts";
 import { Box, render, Text, useFocus, useInput } from "ink";
 import Link from "ink-link";
 import Spinner from "ink-spinner";
