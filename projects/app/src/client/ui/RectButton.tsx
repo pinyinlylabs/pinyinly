@@ -195,10 +195,10 @@ const roundedRect = tv({
 const text = tv({
   variants: {
     variant: {
-      filled: `hhh-text-button-filled`,
-      outline: `hhh-text-button-outline`,
-      option: `hhh-text-button-option`,
-      bare: `hhh-text-button-bare`,
+      filled: `hhh-button-filled`,
+      outline: `hhh-button-outline`,
+      option: `hhh-button-option`,
+      bare: `hhh-button-bare`,
     },
   },
 });

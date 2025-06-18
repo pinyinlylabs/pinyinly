@@ -8,22 +8,23 @@
   TEXT STYLES
   
   */
-  .hhh-text-button-filled {
+  .hhh-button-filled {
     @apply font-sans text-base/snug font-bold uppercase text-background;
   }
-  .hhh-text-button-outline {
+  .hhh-button-outline {
     @apply font-sans text-base/snug font-bold uppercase text-foreground;
   }
-  .hhh-text-button-option {
+  .hhh-button-option {
     @apply font-sans text-base/snug text-foreground;
   }
-  .hhh-text-button-option-caption {
+  .hhh-button-option-caption {
     @apply font-sans text-sm/snug font-light text-caption;
   }
-  .hhh-text-button-bare {
+  .hhh-button-bare {
     @apply font-sans text-sm/normal font-bold uppercase text-foreground;
   }
 
+  /* <hhh-body-title> */
   .hhh-body-title {
     @apply font-sans text-2xl/normal tracking-tight text-foreground;
   }
@@ -46,7 +47,11 @@
       @apply font-[800];
     }
   }
-  /* end .hhh-body-title */
+  /* </hhh-body-title> */
+
+  .hhh-body-heading {
+    @apply font-sans text-lg/normal tracking-tight text-foreground font-bold;
+  }
 
   .hhh-hhhmark {
     white-space: pre-wrap;
