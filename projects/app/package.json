@@ -150,6 +150,7 @@
     "openai": "^5.0.1",
     "prettier": "^3.4.2",
     "react-test-renderer": "19.x",
+    "resolve-package-path": "^4.0.3",
     "ts-essentials": "^10.0.3",
     "tsx": "^4.15.7",
     "typescript": "patch:typescript@npm%3A5.8.2#~/.yarn/patches/typescript-npm-5.8.2-b95d637f6a.patch",
