@@ -1650,6 +1650,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@eslint/css-tree@npm:^3.6.1":
+  version: 3.6.1
+  resolution: "@eslint/css-tree@npm:3.6.1"
+  dependencies:
+    mdn-data: "npm:2.21.0"
+    source-map-js: "npm:^1.0.1"
+  checksum: 10c0/bf482dd90061c8f1cd425f0f3da1322254525d96ab1fb5b542934703e349b29e72701bf394e3bb286d6eb2faa8b7172b29a86d8e1809be1038ce0c7367c4bac1
+  languageName: node
+  linkType: hard
+
 "@eslint/eslintrc@npm:^3.3.0, @eslint/eslintrc@npm:^3.3.1":
   version: 3.3.1
   resolution: "@eslint/eslintrc@npm:3.3.1"
@@ -4812,10 +4822,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pkgr/core@npm:^0.1.0":
-  version: 0.1.2
-  resolution: "@pkgr/core@npm:0.1.2"
-  checksum: 10c0/fd4acc154c8f1b5c544b6dd152b7ce68f6cbb8b92e9abf2e5d756d6e95052d08d0d693a668dea67af1386d62635b50adfe463cce03c5620402b468498cc7592f
+"@pkgr/core@npm:^0.2.4":
+  version: 0.2.7
+  resolution: "@pkgr/core@npm:0.2.7"
+  checksum: 10c0/951f5ebf2feb6e9dbc202d937f1a364d60f2bf0e3e53594251bcc1d9d2ed0df0a919c49ba162a9499fce73cf46ebe4d7959a8dfbac03511dbe79b69f5fedb804
   languageName: node
   linkType: hard
 
@@ -9347,18 +9357,20 @@ __metadata:
   linkType: hard
 
 "eslint-plugin-better-tailwindcss@npm:^3.1.0":
-  version: 3.1.0
-  resolution: "eslint-plugin-better-tailwindcss@npm:3.1.0"
+  version: 3.3.1
+  resolution: "eslint-plugin-better-tailwindcss@npm:3.3.1"
   dependencies:
+    "@eslint/css-tree": "npm:^3.6.1"
     enhanced-resolve: "npm:^5.18.1"
     jiti: "npm:^2.4.2"
-    postcss: "npm:^8.5.4"
-    postcss-import: "npm:^16.1.0"
-    synckit: "npm:0.9.2"
+    postcss: "npm:^8.5.6"
+    postcss-import: "npm:^16.1.1"
+    synckit: "npm:^0.11.8"
+    tailwind-csstree: "npm:^0.1.1"
   peerDependencies:
     eslint: ^7.0.0 || ^8.0.0 || ^9.0.0
     tailwindcss: ^3.3.0 || ^4.0.0
-  checksum: 10c0/53a580229ee746039a24c09e9d53f6f633c5d53bab49d7a2fc5299f2a77ad0531fe0969515cc8f1a77b7a33bd9ff253eddfa88568b3593bcc6592b68f4969787
+  checksum: 10c0/24addd82b979869f20da69cf9a5a84ab2e28aaf0013446f37b60f57e108b0d2dd1904a451722389c0ca0f246534c51ebe2f60b3314e1010dafc0536cba5d19fa
   languageName: node
   linkType: hard
 
@@ -12855,6 +12867,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"mdn-data@npm:2.21.0":
+  version: 2.21.0
+  resolution: "mdn-data@npm:2.21.0"
+  checksum: 10c0/cd26902551af2cc29f06f130893cb04bca9ee278939fce3ffbcb759497cc80d53a6f4abdef2ae2f3ed3c95ac8d651f53fc141defd580ebf4ae2f93aea325957b
+  languageName: node
+  linkType: hard
+
 "media-typer@npm:0.3.0":
   version: 0.3.0
   resolution: "media-typer@npm:0.3.0"
@@ -14410,16 +14429,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"postcss-import@npm:^16.1.0":
-  version: 16.1.0
-  resolution: "postcss-import@npm:16.1.0"
+"postcss-import@npm:^16.1.1":
+  version: 16.1.1
+  resolution: "postcss-import@npm:16.1.1"
   dependencies:
     postcss-value-parser: "npm:^4.0.0"
     read-cache: "npm:^1.0.0"
     resolve: "npm:^1.1.7"
   peerDependencies:
     postcss: ^8.0.0
-  checksum: 10c0/60e6499354079a3f46242b861412a40c54be7ab99f4ad55096a07ffe5e57fcc01c2c626b5d1fbc7a18cd23adc82b320c205059d0c7ab09e91baba8dc45c88e29
+  checksum: 10c0/b91245971564891110cb407c7459bd470893ccbdd3328fdd384ef2be4d0e5f304e5834acbb8b537ad562c001db34bee1c29b55994bead5ab5a53b1edc2a687b9
   languageName: node
   linkType: hard
 
@@ -14491,7 +14510,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"postcss@npm:^8.4.4, postcss@npm:^8.4.47, postcss@npm:^8.5.4":
+"postcss@npm:^8.4.4, postcss@npm:^8.4.47":
   version: 8.5.4
   resolution: "postcss@npm:8.5.4"
   dependencies:
@@ -14499,6 +14518,17 @@ __metadata:
     picocolors: "npm:^1.1.1"
     source-map-js: "npm:^1.2.1"
   checksum: 10c0/0feff648614a834f7cd5396ea6b05b658ca0507e10a4eaad03b56c348f6aec93f42a885fc1b30522630c6a7e49ae53b38a061e3cba526f2d9857afbe095a22bb
+  languageName: node
+  linkType: hard
+
+"postcss@npm:^8.5.6":
+  version: 8.5.6
+  resolution: "postcss@npm:8.5.6"
+  dependencies:
+    nanoid: "npm:^3.3.11"
+    picocolors: "npm:^1.1.1"
+    source-map-js: "npm:^1.2.1"
+  checksum: 10c0/5127cc7c91ed7a133a1b7318012d8bfa112da9ef092dddf369ae699a1f10ebbd89b1b9f25f3228795b84585c72aabd5ced5fc11f2ba467eedf7b081a66fad024
   languageName: node
   linkType: hard
 
@@ -16231,7 +16261,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"source-map-js@npm:^1.0.2, source-map-js@npm:^1.2.1":
+"source-map-js@npm:^1.0.1, source-map-js@npm:^1.0.2, source-map-js@npm:^1.2.1":
   version: 1.2.1
   resolution: "source-map-js@npm:1.2.1"
   checksum: 10c0/7bda1fc4c197e3c6ff17de1b8b2c20e60af81b63a52cb32ec5a5d67a20a7d42651e2cb34ebe93833c5a2a084377e17455854fee3e21e7925c64a51b6a52b0faf
@@ -16659,13 +16689,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"synckit@npm:0.9.2":
-  version: 0.9.2
-  resolution: "synckit@npm:0.9.2"
+"synckit@npm:^0.11.8":
+  version: 0.11.8
+  resolution: "synckit@npm:0.11.8"
   dependencies:
-    "@pkgr/core": "npm:^0.1.0"
-    tslib: "npm:^2.6.2"
-  checksum: 10c0/e0c262817444e5b872708adb6f5ad37951ba33f6b2d1d4477d45db1f57573a784618ceed5e6614e0225db330632b1f6b95bb74d21e4d013e45ad4bde03d0cb59
+    "@pkgr/core": "npm:^0.2.4"
+  checksum: 10c0/a1de5131ee527512afcaafceb2399b2f3e63678e56b831e1cb2dc7019c972a8b654703a3b94ef4166868f87eb984ea252b467c9d9e486b018ec2e6a55c24dfd8
+  languageName: node
+  linkType: hard
+
+"tailwind-csstree@npm:^0.1.1":
+  version: 0.1.1
+  resolution: "tailwind-csstree@npm:0.1.1"
+  checksum: 10c0/137215440f59942df640d90efbbac66ba61680d13f73ede4f4c5b3d880a54cc7298b2a70b7cae9d634bc51778445901362217650848e2aebfb481aa75ece2e0e
   languageName: node
   linkType: hard
 
@@ -16988,7 +17024,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:^2.1.0, tslib@npm:^2.3.1, tslib@npm:^2.4.0, tslib@npm:^2.6.2, tslib@npm:^2.8.0":
+"tslib@npm:^2.1.0, tslib@npm:^2.3.1, tslib@npm:^2.4.0, tslib@npm:^2.8.0":
   version: 2.8.1
   resolution: "tslib@npm:2.8.1"
   checksum: 10c0/9c4759110a19c53f992d9aae23aac5ced636e99887b51b9e61def52611732872ff7668757d4e4c61f19691e36f4da981cd9485e869b4a7408d689f6bf1f14e62
