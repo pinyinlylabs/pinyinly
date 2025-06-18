@@ -234,12 +234,12 @@ export const QuizDeck = ({ className }: { className?: string }) => {
                         paddingRight: 20,
                       }}
                     >
-                      <Text className="hhh-text-title">
+                      <Text className="hhh-body-title">
                         👏 You’re all caught up on your reviews!
                       </Text>
                       {/* {nextNotYetDueSkillState.isLoading ||
                       nextNotYetDueSkillState.data == null ? null : (
-                        <Text className="hhh-text-caption">
+                        <Text className="hhh-body-caption">
                           Next review in{` `}
                           {formatDuration(
                             intervalToDuration(

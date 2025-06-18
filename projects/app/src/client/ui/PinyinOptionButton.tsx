@@ -46,8 +46,8 @@ export function PinyinOptionButton({
         props.onPointerDown?.(e);
       }}
     >
-      <Text className="hhh-text-button-option">{pinyin}</Text>
-      <Text className="hhh-text-button-option-caption">{shortcutKey}</Text>
+      <Text className="hhh-button-option">{pinyin}</Text>
+      <Text className="hhh-button-option-caption">{shortcutKey}</Text>
     </RectButton>
   );
 }

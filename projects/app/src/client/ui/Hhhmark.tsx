@@ -9,9 +9,9 @@ export type HhhmarkContext = `body-2xl` | `body` | `caption`;
 export const hhhText = tv({
   variants: {
     context: {
-      [`body-2xl`]: `hhh-text-body-2xl`,
-      body: `hhh-text-body`,
-      caption: `hhh-text-caption`,
+      [`body-2xl`]: `hhh-body-2xl`,
+      [`body`]: `hhh-body`,
+      [`caption`]: `hhh-body-caption`,
     },
   },
 });
@@ -19,9 +19,9 @@ export const hhhText = tv({
 export const hhhTextBold = tv({
   variants: {
     context: {
-      [`body-2xl`]: `hhh-text-body-2xl-bold`,
-      body: `hhh-text-body-bold`,
-      caption: `hhh-text-caption-bold`,
+      [`body-2xl`]: `hhh-body-2xl-bold`,
+      [`body`]: `hhh-body-bold`,
+      [`caption`]: `hhh-body-caption-bold`,
     },
   },
 });
@@ -29,9 +29,9 @@ export const hhhTextBold = tv({
 export const hhhTextItalic = tv({
   variants: {
     context: {
-      [`body-2xl`]: `hhh-text-body-2xl-italic`,
-      body: `hhh-text-body-italic`,
-      caption: `hhh-text-caption-italic`,
+      [`body-2xl`]: `hhh-body-2xl-italic`,
+      [`body`]: `hhh-body-italic`,
+      [`caption`]: `hhh-body-caption-italic`,
     },
   },
 });

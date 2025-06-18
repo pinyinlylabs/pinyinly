@@ -64,7 +64,7 @@ export const SkillRefText = ({
             showPinyin
             context={context}
           />
-          <Text className="hhh-text-caption"> (initial)</Text>
+          <Text className="hhh-body-caption"> (initial)</Text>
         </>
       );
     }
@@ -79,7 +79,7 @@ export const SkillRefText = ({
             showPinyin
             context={context}
           />
-          <Text className="hhh-text-caption"> (final)</Text>
+          <Text className="hhh-body-caption"> (final)</Text>
         </>
       );
     }
@@ -94,7 +94,7 @@ export const SkillRefText = ({
             showPinyin
             context={context}
           />
-          <Text className="hhh-text-caption"> (tone)</Text>
+          <Text className="hhh-body-caption"> (tone)</Text>
         </>
       );
     }

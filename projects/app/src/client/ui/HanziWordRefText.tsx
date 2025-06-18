@@ -14,9 +14,9 @@ import type { HhhmarkContext } from "./Hhhmark";
 export const hhhTextRef = tv({
   variants: {
     context: {
-      [`body-2xl`]: `hhh-text-body-2xl-ref`,
-      body: `hhh-text-body-ref`,
-      caption: `hhh-text-caption-ref`,
+      [`body-2xl`]: `hhh-body-2xl-ref`,
+      [`body`]: `hhh-body-ref`,
+      [`caption`]: `hhh-body-caption-ref`,
     },
   },
 });

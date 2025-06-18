@@ -9,7 +9,7 @@ export const ErrorBoundary = ({ children }: Pick<ViewProps, `children`>) => {
     <Sentry.ErrorBoundary
       fallback={
         <View>
-          <Text className="hhh-text-title">An error has occurred</Text>
+          <Text className="hhh-body-title">An error has occurred</Text>
           <Link dismissTo href="/learn" asChild>
             <RectButton>Home</RectButton>
           </Link>

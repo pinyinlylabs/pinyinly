@@ -100,7 +100,7 @@ export default function HistoryPage() {
     <ScrollView contentContainerClassName="py-safe-offset-4 px-safe-or-4 items-center">
       <View className="max-w-[600px] gap-4">
         {/* <View>
-          <Text className="hhh-text-body">
+          <Text className="hhh-body">
             {JSON.stringify(stats, null, 2)}
           </Text>
         </View> */}
@@ -111,7 +111,7 @@ export default function HistoryPage() {
             {data2Query.data?.items.slice(0, 100).map((skill, i) => (
               <View key={i} className="items-center">
                 <SkillRefText skill={skill} context="body" />
-                <Text className="hhh-text-caption">
+                <Text className="hhh-body-caption">
                   {skillKindToShorthand(skillKindFromSkill(skill))}
                 </Text>
               </View>
@@ -139,7 +139,7 @@ export default function HistoryPage() {
                 const { skill, createdAt } = value;
                 return (
                   <View key={i}>
-                    <Text className="hhh-text-body">
+                    <Text className="hhh-body">
                       {value.rating === Rating.Again
                         ? `❌`
                         : value.rating === Rating.Hard
