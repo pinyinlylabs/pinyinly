@@ -20,6 +20,9 @@ on:
           - preview
           - production
 
+permissions:
+  contents: read
+
 jobs:
   app-eas-build:
     name: EAS Build
