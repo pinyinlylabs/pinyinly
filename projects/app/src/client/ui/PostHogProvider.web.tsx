@@ -18,6 +18,7 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
         api_host: __DEV__ ? apiHost : `/api/0opho0`,
         ui_host: `https://eu.posthog.com`,
         debug,
+        disable_session_recording: true,
       }}
     >
       {children}
