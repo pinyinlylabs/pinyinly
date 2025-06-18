@@ -235,7 +235,7 @@ export default function IndexPage() {
                   </>
                 )}
 
-                <Link href="/learn/reviews" asChild>
+                <Link href="/learn" asChild>
                   <RectButton
                     variant="filled"
                     className="theme-success mt-2 self-stretch"

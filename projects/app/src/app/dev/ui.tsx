@@ -1177,6 +1177,7 @@ const allIcons = [
   require(`../../assets/icons/alarm-filled.svg`),
   require(`../../assets/icons/alarm.svg`),
   require(`../../assets/icons/arrow-down.svg`),
+  require(`../../assets/icons/arrow-return-left.svg`),
   require(`../../assets/icons/arrow-right.svg`),
   require(`../../assets/icons/arrow-up.svg`),
   require(`../../assets/icons/badge-filled.svg`),

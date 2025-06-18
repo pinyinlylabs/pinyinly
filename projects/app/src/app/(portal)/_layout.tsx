@@ -2,12 +2,13 @@ import { useVisualViewportSize } from "@/client/hooks/useVisualViewportSize";
 import { IconImage } from "@/client/ui/IconImage";
 import { RectButton } from "@/client/ui/RectButton";
 import { invariant } from "@haohaohow/lib/invariant";
+import type { Href } from "expo-router";
 import { Link, usePathname } from "expo-router";
 import type { TabTriggerSlotProps } from "expo-router/ui";
 import { TabList, Tabs, TabSlot, TabTrigger } from "expo-router/ui";
 import { StatusBar } from "expo-status-bar";
 import type { ReactNode } from "react";
-import { useLayoutEffect, useState } from "react";
+import { Fragment, useLayoutEffect, useState } from "react";
 import { Modal, Pressable, ScrollView, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 
@@ -22,15 +23,15 @@ export default function SideNavLayout() {
     >
       {/* ROUTE DECLARATIONS */}
       <TabList className="hidden">
-        <TabTrigger name="Overview" href="/overview" />
-        <TabTrigger name="Skills" href="/skills" />
-        <TabTrigger name="History" href="/history" />
-
-        <TabTrigger name="Profile" href="/settings/profile" />
-        <TabTrigger name="Appearance" href="/settings/appearance" />
-        <TabTrigger name="Notifications" href="/settings/notifications" />
-        <TabTrigger name="Billing" href="/settings/billing" />
-        <TabTrigger name="Support" href="/settings/support" />
+        {navItems.map((section, sectionIndex) =>
+          section.items.map((item, itemIndex) => (
+            <TabTrigger
+              key={`${sectionIndex}-${itemIndex}`}
+              name={item.name}
+              href={item.href}
+            />
+          )),
+        )}
       </TabList>
 
       {/* Mobile header navigation */}
@@ -56,40 +57,62 @@ export default function SideNavLayout() {
           `}
         >
           <View className="sticky items-end top-safe-offset-5">
-            <View className="mb-5 h-[32px] justify-center">
+            <View className="mb-5 h-[32px] justify-center pr-4">
               <Link href="/learn" asChild>
-                <RectButton variant="bare">Back to app</RectButton>
+                <RectButton
+                  variant="bare"
+                  className={`
+                    flex-row gap-2 opacity-75
+
+                    hover:opacity-100
+                  `}
+                >
+                  <IconImage
+                    source={require(`@/assets/icons/arrow-return-left.svg`)}
+                    size={24}
+                  />
+                  <Text className="hhh-button-bare">Back to app</Text>
+                </RectButton>
               </Link>
             </View>
 
             <View className="w-[200px] items-stretch rounded-xl bg-background-1 py-3">
-              <TabButtonSectionTitle name="Learning" />
-              <TabButton2 name="Overview" />
-              <TabButton2 name="Skills" />
-              <TabButton2 name="History" />
-              <TabButton2 name="Tutoring" />
-              <TabButton2 name="Wiki" />
-
-              {/* GAP */}
-              <View className="invisible h-[40px]" />
-
-              <TabButtonSectionTitle name="Settings" />
-              <TabButton2 name="Profile" />
-              <TabButton2 name="Courses" />
-              <TabButton2 name="Appearance" />
-              <TabButton2 name="Notifications" />
-              <TabButton2 name="Billing" />
-              <TabButton2 name="Support" />
+              {navItems
+                .filter((section) => section.primary === true)
+                .map((section, sectionIndex) => (
+                  <Fragment key={sectionIndex}>
+                    {/* GAP */}
+                    {sectionIndex === 0 ? null : (
+                      <View className={`invisible h-[40px]`} />
+                    )}
+                    {section.title == null ? null : (
+                      <TabButtonSectionTitle name={section.title} />
+                    )}
+                    {section.items.map((item, itemIndex) => (
+                      <TabButton2 key={itemIndex} name={item.name} />
+                    ))}
+                  </Fragment>
+                ))}
             </View>
 
             {/* GAP */}
             <View className="invisible min-h-10 flex-1" />
 
             <View className="items-end px-5">
-              <FooterLink text="Logout" />
-              <FooterLink text="Terms" />
-              <FooterLink text="Privacy Policy" />
-              <FooterLink text="Acknowledgements" />
+              {navItems
+                .filter((section) => section.primary !== true)
+                .map((section, sectionIndex) => (
+                  <Fragment key={sectionIndex}>
+                    {/* GAP */}
+                    {sectionIndex === 0 ? null : (
+                      <View className={`invisible h-[40px]`} />
+                    )}
+
+                    {section.items.map((item, itemIndex) => (
+                      <FooterLink2 key={itemIndex} name={item.name} />
+                    ))}
+                  </Fragment>
+                ))}
             </View>
           </View>
         </View>
@@ -123,16 +146,6 @@ export default function SideNavLayout() {
   );
 }
 
-function FooterLink({ text }: { text: string }) {
-  return (
-    <View className="h-[32px] justify-center">
-      <Text className="font-sans text-sm/normal font-light uppercase text-caption">
-        {text}
-      </Text>
-    </View>
-  );
-}
-
 function TabButtonSectionTitle({ name }: { name: string }) {
   return (
     <View className="h-[24px] items-end justify-center px-[24px]">
@@ -141,10 +154,29 @@ function TabButtonSectionTitle({ name }: { name: string }) {
   );
 }
 
-type TabTriggerSlotRouterProps = Pick<
-  TabTriggerSlotProps,
-  `isFocused` | `href`
->;
+interface TabTriggerChildProps
+  extends Pick<TabTriggerSlotProps, `isFocused` | `href`> {
+  name: string;
+}
+
+function FooterLink2({ name }: { name: string }) {
+  return (
+    <TabTrigger name={name} asChild>
+      {/* <TabTrigger> will .cloneElement() and pass through props like `href` */}
+      <FooterLink2Impl name={name} />
+    </TabTrigger>
+  );
+}
+
+function FooterLink2Impl({ name, isFocused, ...rest }: TabTriggerChildProps) {
+  return (
+    <Pressable {...rest} className="h-[32px] justify-center">
+      <Text className="font-sans text-sm/normal font-light uppercase text-caption">
+        {name}
+      </Text>
+    </Pressable>
+  );
+}
 
 const TabButton2 = ({ name }: { name: string }) => (
   <TabTrigger name={name} asChild>
@@ -157,10 +189,7 @@ const TabButton2Impl = ({
   isFocused = false,
   name = ``,
   ...rest
-}: {
-  isFocused?: boolean;
-  name?: string;
-} & TabTriggerSlotRouterProps) => {
+}: TabTriggerChildProps) => {
   if (__DEV__) {
     invariant(`href` in rest, `TabButton2Inner requires 'href' prop`);
   }
@@ -281,7 +310,7 @@ function MobileNavigationGroupItemImpl({
   name,
   isFocused = false,
   ...rest
-}: { name: string } & TabTriggerSlotRouterProps) {
+}: { name: string } & TabTriggerChildProps) {
   return (
     <Pressable
       {...rest}
@@ -346,3 +375,48 @@ const buttonContainerClass = tv({
     },
   },
 });
+
+const navItems: NavGroup[] = [
+  {
+    title: `Learning`,
+    primary: true,
+    items: [
+      { name: `Overview`, href: `/overview` },
+      { name: `Skills`, href: `/skills` },
+      { name: `History`, href: `/history` },
+      // { name: `Tutoring`, href: `/tutoring` },
+      // { name: `Wiki`, href: `/wiki` },
+    ] satisfies NavItem[],
+  },
+  {
+    title: `Settings`,
+    primary: true,
+    items: [
+      { name: `Profile`, href: `/settings/profile` },
+      // { name: `Courses`, href: `/settings/courses` },
+      { name: `Appearance`, href: `/settings/appearance` },
+      { name: `Notifications`, href: `/settings/notifications` },
+      { name: `Billing`, href: `/settings/billing` },
+      { name: `Support`, href: `/settings/support` },
+    ] satisfies NavItem[],
+  },
+  {
+    // { name: "Logout", href: `/logout` },
+    // { name: "Terms", href: `/terms` },
+    // { name: "Privacy Policy", href: `/privacy` },
+    items: [
+      { name: `Acknowledgements`, href: `/acknowledgements` },
+    ] satisfies NavItem[],
+  },
+];
+
+interface NavItem {
+  name: string;
+  href: Href;
+}
+
+interface NavGroup {
+  title?: string;
+  items: NavItem[];
+  primary?: boolean;
+}
