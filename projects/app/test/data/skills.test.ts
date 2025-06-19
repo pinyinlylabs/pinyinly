@@ -875,14 +875,14 @@ await test(`${getHanziWordRank.name} suite`, async () => {
     );
   }
 
-  await test(`it defaults to rank 1`, async () => {
+  await test(`it defaults to no rank`, async () => {
     expect(
       getHanziWordRank({
         hanziWord: `一:one`,
-        skillSrsStates: new Map(),
+        skillSrsStates: makeSkillSrsStates({}),
         rankRules,
       }),
-    ).toEqual({ currentRank: 1, completion: 0 });
+    ).toEqual({ hanziWord: `一:one`, rank: 0, completion: 0 });
   });
 
   await test(`single skill per rank`, async () => {
@@ -901,7 +901,7 @@ await test(`${getHanziWordRank.name} suite`, async () => {
       },
     ];
 
-    await test(`no goals met, current rank is 1`, async () => {
+    await test(`no goals started, rank is 0`, async () => {
       const skillSrsStates = makeSkillSrsStates({});
 
       const result = getHanziWordRank({
@@ -910,7 +910,7 @@ await test(`${getHanziWordRank.name} suite`, async () => {
         rankRules,
       });
 
-      expect(result).toEqual({ currentRank: 1, completion: 0 });
+      expect(result).toEqual({ hanziWord: `一:one`, rank: 0, completion: 0 });
     });
 
     await test(`rank 1 goals met, current rank is 2`, async () => {
@@ -924,7 +924,7 @@ await test(`${getHanziWordRank.name} suite`, async () => {
         rankRules,
       });
 
-      expect(result).toEqual({ currentRank: 2, completion: 0 });
+      expect(result).toEqual({ hanziWord: `一:one`, rank: 2, completion: 0 });
     });
 
     await test(`rank 1 and 2 goals met, current rank is 3`, async () => {
@@ -939,7 +939,7 @@ await test(`${getHanziWordRank.name} suite`, async () => {
         rankRules,
       });
 
-      expect(result).toEqual({ currentRank: 3, completion: 0 });
+      expect(result).toEqual({ hanziWord: `一:one`, rank: 3, completion: 0 });
     });
 
     await test(`rank 1 goals missed, but rank 2 goals met, current rank is 3`, async () => {
@@ -954,7 +954,7 @@ await test(`${getHanziWordRank.name} suite`, async () => {
         rankRules,
       });
 
-      expect(result).toEqual({ currentRank: 3, completion: 0 });
+      expect(result).toEqual({ hanziWord: `一:one`, rank: 3, completion: 0 });
     });
 
     await test(`rank 1 goals not met, progress is fraction of stability`, async () => {
@@ -968,7 +968,7 @@ await test(`${getHanziWordRank.name} suite`, async () => {
         rankRules,
       });
 
-      expect(result).toEqual({ currentRank: 1, completion: 0.5 });
+      expect(result).toEqual({ hanziWord: `一:one`, rank: 1, completion: 0.5 });
     });
 
     await test(`rank 2 goals not met, progress is fraction of stability`, async () => {
@@ -983,7 +983,7 @@ await test(`${getHanziWordRank.name} suite`, async () => {
         rankRules,
       });
 
-      expect(result).toEqual({ currentRank: 2, completion: 0.2 });
+      expect(result).toEqual({ hanziWord: `一:one`, rank: 2, completion: 0.2 });
     });
 
     await test(`rank 3 goals not met, progress is fraction of stability`, async () => {
@@ -999,7 +999,7 @@ await test(`${getHanziWordRank.name} suite`, async () => {
         rankRules,
       });
 
-      expect(result).toEqual({ currentRank: 3, completion: 0.8 });
+      expect(result).toEqual({ hanziWord: `一:one`, rank: 3, completion: 0.8 });
     });
   });
 
@@ -1022,7 +1022,7 @@ await test(`${getHanziWordRank.name} suite`, async () => {
       },
     ];
 
-    await test(`no goals met, current rank is 1`, async () => {
+    await test(`no skills attempted, current rank is null`, async () => {
       const skillSrsStates = makeSkillSrsStates({});
 
       const result = getHanziWordRank({
@@ -1031,7 +1031,25 @@ await test(`${getHanziWordRank.name} suite`, async () => {
         rankRules,
       });
 
-      expect(result).toEqual({ currentRank: 1, completion: 0 });
+      expect(result).toEqual({ hanziWord: `一:one`, rank: 0, completion: 0 });
+    });
+
+    await test(`rank 1 when the skill has been started`, async () => {
+      const skillSrsStates = makeSkillSrsStates({
+        "he:一:one": 1,
+      });
+
+      const result = getHanziWordRank({
+        hanziWord: `一:one`,
+        skillSrsStates,
+        rankRules,
+      });
+
+      expect(result).toEqual({
+        hanziWord: `一:one`,
+        rank: 1,
+        completion: 1 / 50,
+      });
     });
 
     await test(`rank 1 goals met, current rank is 2`, async () => {
@@ -1045,7 +1063,7 @@ await test(`${getHanziWordRank.name} suite`, async () => {
         rankRules,
       });
 
-      expect(result).toEqual({ currentRank: 2, completion: 0 });
+      expect(result).toEqual({ hanziWord: `一:one`, rank: 2, completion: 0 });
     });
 
     await test(`rank 1 and 2 goals met, current rank is 3`, async () => {
@@ -1061,7 +1079,7 @@ await test(`${getHanziWordRank.name} suite`, async () => {
         rankRules,
       });
 
-      expect(result).toEqual({ currentRank: 3, completion: 0 });
+      expect(result).toEqual({ hanziWord: `一:one`, rank: 3, completion: 0 });
     });
 
     await test(`rank 1 goals missed, but rank 2 goals met, current rank is 3`, async () => {
@@ -1077,7 +1095,7 @@ await test(`${getHanziWordRank.name} suite`, async () => {
         rankRules,
       });
 
-      expect(result).toEqual({ currentRank: 3, completion: 0 });
+      expect(result).toEqual({ hanziWord: `一:one`, rank: 3, completion: 0 });
     });
 
     await test(`rank 2 goals not met, progress is fraction of stability`, async () => {
@@ -1092,7 +1110,22 @@ await test(`${getHanziWordRank.name} suite`, async () => {
         rankRules,
       });
 
-      expect(result).toEqual({ currentRank: 2, completion: 0.1 });
+      expect(result).toEqual({ hanziWord: `一:one`, rank: 2, completion: 0.1 });
+    });
+
+    await test(`rank 2 goals not fully met, but one skill is more advanced than required`, async () => {
+      const skillSrsStates = makeSkillSrsStates({
+        "he:一:one": 50,
+        "hpi:一:one": 100,
+      });
+
+      const result = getHanziWordRank({
+        hanziWord: `一:one`,
+        skillSrsStates,
+        rankRules,
+      });
+
+      expect(result).toEqual({ hanziWord: `一:one`, rank: 2, completion: 0.5 });
     });
 
     await test(`rank 3 goals not met, progress is fraction of stability`, async () => {
@@ -1109,7 +1142,7 @@ await test(`${getHanziWordRank.name} suite`, async () => {
         rankRules,
       });
 
-      expect(result).toEqual({ currentRank: 3, completion: 0.4 });
+      expect(result).toEqual({ hanziWord: `一:one`, rank: 3, completion: 0.4 });
     });
   });
 
@@ -1136,7 +1169,7 @@ await test(`${getHanziWordRank.name} suite`, async () => {
         rankRules,
       });
 
-      expect(result).toEqual({ currentRank: 2, completion: 0.5 });
+      expect(result).toEqual({ hanziWord: `一:one`, rank: 2, completion: 0.5 });
     });
   });
 
@@ -1168,7 +1201,11 @@ await test(`${getHanziWordRank.name} suite`, async () => {
         rankRules,
       });
 
-      expect(result).toEqual({ currentRank: 3, completion: 0.5 });
+      expect(result).toEqual({
+        hanziWord: `一:one`,
+        rank: 3,
+        completion: 0.5,
+      });
     });
   });
 });

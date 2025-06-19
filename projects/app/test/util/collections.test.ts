@@ -2,6 +2,7 @@ import {
   deepTransform,
   makeRange,
   mapInvert,
+  memoize1,
   merge,
   mergeSortComparators,
   objectInvert,
@@ -10,8 +11,10 @@ import {
   sortComparatorNumber,
   sortComparatorString,
 } from "#util/collections.ts";
+import type { IsEqual } from "#util/types.ts";
 import assert from "node:assert/strict";
 import test from "node:test";
+import type z from "zod/v4";
 
 function typeChecks<_T>(..._args: unknown[]) {
   // This function is only used for type checking, so it should never be called.
@@ -168,4 +171,35 @@ await test(`${objectMapToArray.name} suite`, () => {
     objectMapToArray({ a: `x`, b: `y` }, (key, value) => `${key}${value}`),
     [`ax`, `by`],
   );
+});
+
+await test(`${memoize1.name} suite`, async () => {
+  await test(`fixtures`, () => {
+    const fn = (x: string) => x.toUpperCase();
+    const memoized = memoize1(fn);
+
+    assert.strictEqual(memoized(`test`), `TEST`);
+    assert.strictEqual(memoized(`test`), `TEST`); // Should hit cache
+    assert.strictEqual(memoized.isCached(`test`), true);
+    assert.strictEqual(memoized.isCached(`other`), false);
+    assert.strictEqual(memoized(`other`), `OTHER`);
+    assert.strictEqual(memoized.isCached(`other`), true);
+  });
+
+  await test(`preserves type assertions`, () => {
+    const isFooLiteral = memoize1((x: string): x is `foo` => x === `foo`);
+
+    const x = `foo` as string;
+
+    false satisfies IsEqual<typeof x, `foo`>;
+    if (isFooLiteral(x)) {
+      true satisfies IsEqual<typeof x, `foo`>;
+    }
+  });
+
+  await test(`allows branded string argument`, () => {
+    type Branded = string & z.BRAND<`Foo`>;
+
+    memoize1((x: Branded) => x);
+  });
 });

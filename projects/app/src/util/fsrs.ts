@@ -270,12 +270,14 @@ function intervalModifier(requestRetentionPercentile: number): number {
   );
 }
 
+export const fsrsStabilityThreshold = 30;
+
 /**
  * Return true if the skill is learned enough to build upon. (i.e. if other
  * skills depend on this, they can be introduced at this point).
  */
 export function fsrsIsStable(options: Pick<FsrsState, `stability`>): boolean {
-  return options.stability >= 30;
+  return options.stability >= fsrsStabilityThreshold;
 }
 
 export function ratingName(rating: Rating) {
