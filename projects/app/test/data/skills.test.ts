@@ -1,9 +1,12 @@
-import { SkillKind } from "#data/model.ts";
+import type { SrsStateType } from "#data/model.ts";
+import { SkillKind, SrsKind } from "#data/model.ts";
 import type { Skill } from "#data/rizzleSchema.ts";
-import type { SkillLearningGraph } from "#data/skills.ts";
+import type { RankRules, SkillLearningGraph } from "#data/skills.ts";
 import {
   computeSkillRating,
+  getHanziWordRank,
   hanziWordToGloss,
+  rankRules,
   skillKindFromSkill,
   skillLearningGraph,
   skillReviewQueue,
@@ -850,6 +853,322 @@ await test(`${computeSkillRating.name} suite`, async () => {
         });
         assert.equal(rating, Rating.Hard);
       }
+    });
+  });
+});
+
+await test(`${getHanziWordRank.name} suite`, async () => {
+  function makeSkillSrsStates(
+    skillStabilities: Record<Skill, /* stability */ number>,
+  ): Map<Skill, SrsStateType> {
+    return new Map<Skill, SrsStateType>(
+      Object.entries(skillStabilities).map(([skill, stability]) => [
+        skill as Skill,
+        {
+          kind: SrsKind.FsrsFourPointFive,
+          prevReviewAt: 时`-1d`,
+          nextReviewAt: 时`+1d`,
+          stability,
+          difficulty: 0,
+        },
+      ]),
+    );
+  }
+
+  await test(`it defaults to rank 1`, async () => {
+    expect(
+      getHanziWordRank({
+        hanziWord: `一:one`,
+        skillSrsStates: new Map(),
+        rankRules,
+      }),
+    ).toEqual({ currentRank: 1, completion: 0 });
+  });
+
+  await test(`single skill per rank`, async () => {
+    const rankRules: RankRules = [
+      {
+        rank: 1,
+        goals: [{ skill: SkillKind.HanziWordToGloss, stability: 50 }],
+      },
+      {
+        rank: 2,
+        goals: [{ skill: SkillKind.HanziWordToPinyinInitial, stability: 50 }],
+      },
+      {
+        rank: 3,
+        goals: [{ skill: SkillKind.HanziWordToPinyinFinal, stability: 50 }],
+      },
+    ];
+
+    await test(`no goals met, current rank is 1`, async () => {
+      const skillSrsStates = makeSkillSrsStates({});
+
+      const result = getHanziWordRank({
+        hanziWord: `一:one`,
+        skillSrsStates,
+        rankRules,
+      });
+
+      expect(result).toEqual({ currentRank: 1, completion: 0 });
+    });
+
+    await test(`rank 1 goals met, current rank is 2`, async () => {
+      const skillSrsStates = makeSkillSrsStates({
+        "he:一:one": 50,
+      });
+
+      const result = getHanziWordRank({
+        hanziWord: `一:one`,
+        skillSrsStates,
+        rankRules,
+      });
+
+      expect(result).toEqual({ currentRank: 2, completion: 0 });
+    });
+
+    await test(`rank 1 and 2 goals met, current rank is 3`, async () => {
+      const skillSrsStates = makeSkillSrsStates({
+        "he:一:one": 50,
+        "hpi:一:one": 50,
+      });
+
+      const result = getHanziWordRank({
+        hanziWord: `一:one`,
+        skillSrsStates,
+        rankRules,
+      });
+
+      expect(result).toEqual({ currentRank: 3, completion: 0 });
+    });
+
+    await test(`rank 1 goals missed, but rank 2 goals met, current rank is 3`, async () => {
+      const skillSrsStates = makeSkillSrsStates({
+        "he:一:one": 25,
+        "hpi:一:one": 50,
+      });
+
+      const result = getHanziWordRank({
+        hanziWord: `一:one`,
+        skillSrsStates,
+        rankRules,
+      });
+
+      expect(result).toEqual({ currentRank: 3, completion: 0 });
+    });
+
+    await test(`rank 1 goals not met, progress is fraction of stability`, async () => {
+      const skillSrsStates = makeSkillSrsStates({
+        "he:一:one": 25,
+      });
+
+      const result = getHanziWordRank({
+        hanziWord: `一:one`,
+        skillSrsStates,
+        rankRules,
+      });
+
+      expect(result).toEqual({ currentRank: 1, completion: 0.5 });
+    });
+
+    await test(`rank 2 goals not met, progress is fraction of stability`, async () => {
+      const skillSrsStates = makeSkillSrsStates({
+        "he:一:one": 50,
+        "hpi:一:one": 10,
+      });
+
+      const result = getHanziWordRank({
+        hanziWord: `一:one`,
+        skillSrsStates,
+        rankRules,
+      });
+
+      expect(result).toEqual({ currentRank: 2, completion: 0.2 });
+    });
+
+    await test(`rank 3 goals not met, progress is fraction of stability`, async () => {
+      const skillSrsStates = makeSkillSrsStates({
+        "he:一:one": 50,
+        "hpi:一:one": 50,
+        "hpf:一:one": 40,
+      });
+
+      const result = getHanziWordRank({
+        hanziWord: `一:one`,
+        skillSrsStates,
+        rankRules,
+      });
+
+      expect(result).toEqual({ currentRank: 3, completion: 0.8 });
+    });
+  });
+
+  await test(`multiple skills per rank`, async () => {
+    const rankRules: RankRules = [
+      {
+        rank: 1,
+        goals: [{ skill: SkillKind.HanziWordToGloss, stability: 50 }],
+      },
+      {
+        rank: 2,
+        goals: [
+          { skill: SkillKind.HanziWordToPinyinInitial, stability: 50 },
+          { skill: SkillKind.HanziWordToPinyinFinal, stability: 50 },
+        ],
+      },
+      {
+        rank: 3,
+        goals: [{ skill: SkillKind.HanziWordToPinyinTone, stability: 50 }],
+      },
+    ];
+
+    await test(`no goals met, current rank is 1`, async () => {
+      const skillSrsStates = makeSkillSrsStates({});
+
+      const result = getHanziWordRank({
+        hanziWord: `一:one`,
+        skillSrsStates,
+        rankRules,
+      });
+
+      expect(result).toEqual({ currentRank: 1, completion: 0 });
+    });
+
+    await test(`rank 1 goals met, current rank is 2`, async () => {
+      const skillSrsStates = makeSkillSrsStates({
+        "he:一:one": 50,
+      });
+
+      const result = getHanziWordRank({
+        hanziWord: `一:one`,
+        skillSrsStates,
+        rankRules,
+      });
+
+      expect(result).toEqual({ currentRank: 2, completion: 0 });
+    });
+
+    await test(`rank 1 and 2 goals met, current rank is 3`, async () => {
+      const skillSrsStates = makeSkillSrsStates({
+        "he:一:one": 50,
+        "hpi:一:one": 50,
+        "hpf:一:one": 50,
+      });
+
+      const result = getHanziWordRank({
+        hanziWord: `一:one`,
+        skillSrsStates,
+        rankRules,
+      });
+
+      expect(result).toEqual({ currentRank: 3, completion: 0 });
+    });
+
+    await test(`rank 1 goals missed, but rank 2 goals met, current rank is 3`, async () => {
+      const skillSrsStates = makeSkillSrsStates({
+        "he:一:one": 25,
+        "hpi:一:one": 50,
+        "hpf:一:one": 50,
+      });
+
+      const result = getHanziWordRank({
+        hanziWord: `一:one`,
+        skillSrsStates,
+        rankRules,
+      });
+
+      expect(result).toEqual({ currentRank: 3, completion: 0 });
+    });
+
+    await test(`rank 2 goals not met, progress is fraction of stability`, async () => {
+      const skillSrsStates = makeSkillSrsStates({
+        "he:一:one": 50,
+        "hpi:一:one": 10,
+      });
+
+      const result = getHanziWordRank({
+        hanziWord: `一:one`,
+        skillSrsStates,
+        rankRules,
+      });
+
+      expect(result).toEqual({ currentRank: 2, completion: 0.1 });
+    });
+
+    await test(`rank 3 goals not met, progress is fraction of stability`, async () => {
+      const skillSrsStates = makeSkillSrsStates({
+        "he:一:one": 50,
+        "hpi:一:one": 50,
+        "hpf:一:one": 50,
+        "hpt:一:one": 20,
+      });
+
+      const result = getHanziWordRank({
+        hanziWord: `一:one`,
+        skillSrsStates,
+        rankRules,
+      });
+
+      expect(result).toEqual({ currentRank: 3, completion: 0.4 });
+    });
+  });
+
+  await test(`same skill with increased stability requirement in the next rank`, async () => {
+    const rankRules: RankRules = [
+      {
+        rank: 1,
+        goals: [{ skill: SkillKind.HanziWordToGloss, stability: 50 }],
+      },
+      {
+        rank: 2,
+        goals: [{ skill: SkillKind.HanziWordToGloss, stability: 80 }],
+      },
+    ];
+
+    await test(`rank 1 goals met, partial rank 2 progress`, async () => {
+      const skillSrsStates = makeSkillSrsStates({
+        "he:一:one": 65,
+      });
+
+      const result = getHanziWordRank({
+        hanziWord: `一:one`,
+        skillSrsStates,
+        rankRules,
+      });
+
+      expect(result).toEqual({ currentRank: 2, completion: 0.5 });
+    });
+  });
+
+  await test(`same skill with increased stability requirement in the a skipped rank`, async () => {
+    const rankRules: RankRules = [
+      {
+        rank: 1,
+        goals: [{ skill: SkillKind.HanziWordToGloss, stability: 50 }],
+      },
+      {
+        rank: 2,
+        goals: [{ skill: SkillKind.HanziWordToPinyinInitial, stability: 50 }],
+      },
+      {
+        rank: 3,
+        goals: [{ skill: SkillKind.HanziWordToGloss, stability: 80 }],
+      },
+    ];
+
+    await test(`rank 1 goals met, partial rank 2 progress`, async () => {
+      const skillSrsStates = makeSkillSrsStates({
+        "he:一:one": 65,
+        "hpi:一:one": 50,
+      });
+
+      const result = getHanziWordRank({
+        hanziWord: `一:one`,
+        skillSrsStates,
+        rankRules,
+      });
+
+      expect(result).toEqual({ currentRank: 3, completion: 0.5 });
     });
   });
 });

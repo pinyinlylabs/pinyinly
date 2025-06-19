@@ -1,4 +1,9 @@
-import type { Question, QuestionFlagType, SrsStateType } from "@/data/model";
+import type {
+  HanziWord,
+  Question,
+  QuestionFlagType,
+  SrsStateType,
+} from "@/data/model";
 import { QuestionFlagKind, SrsKind } from "@/data/model";
 import { generateQuestionForSkillOrThrow } from "@/data/questions";
 import type { Rizzle, Skill, SkillRating } from "@/data/rizzleSchema";
@@ -11,6 +16,7 @@ import {
   skillReviewQueue,
 } from "@/data/skills";
 import { allHsk1HanziWords, allHsk2HanziWords } from "@/dictionary/dictionary";
+import { arrayFilterUniqueWithKey } from "@/util/collections";
 import { fsrsIsForgotten } from "@/util/fsrs";
 import { add } from "date-fns/add";
 import { interval } from "date-fns/interval";
@@ -77,16 +83,20 @@ export function flagsForSrsState(
   }
 }
 
-export async function getAllTargetSkills(): Promise<Skill[]> {
+export async function getAllTargetHanziWords(): Promise<HanziWord[]> {
   const [hsk1HanziWords, hsk2HanziWords] = await Promise.all([
     allHsk1HanziWords(),
     allHsk2HanziWords(),
   ]);
 
-  return [...hsk1HanziWords, ...hsk2HanziWords].flatMap((w) => [
-    hanziWordToGloss(w),
-    hanziWordToPinyin(w),
-  ]);
+  return [...hsk1HanziWords, ...hsk2HanziWords].filter(
+    arrayFilterUniqueWithKey((x) => x),
+  );
+}
+
+export async function getAllTargetSkills(): Promise<Skill[]> {
+  const hanziWords = await getAllTargetHanziWords();
+  return hanziWords.flatMap((w) => [hanziWordToGloss(w), hanziWordToPinyin(w)]);
 }
 
 export async function targetSkillsReviewQueue(
