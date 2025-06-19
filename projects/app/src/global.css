@@ -47,6 +47,15 @@
       @apply font-[800];
     }
   }
+  .hhh-body-title-ref {
+    @apply font-sans text-2xl/tight font-normal text-foreground-ref underline decoration-foreground-ref/70 decoration-dashed decoration-[2px] underline-offset-[5px];
+  }
+  .hhh-body-title-bold {
+    @apply font-sans text-2xl/normal font-medium text-foreground-bold;
+  }
+  .hhh-body-title-italic {
+    @apply font-sans text-2xl/normal font-medium italic text-foreground;
+  }
   /* </hhh-body-title> */
 
   .hhh-body-heading {

@@ -1,13 +1,11 @@
 import { getAllTargetHanziWords } from "@/client/query";
+import { HanziWordRefText } from "@/client/ui/HanziWordRefText";
 import { useRizzleQueryPaged } from "@/client/ui/ReplicacheContext";
-import type { SrsStateType } from "@/data/model";
+import type { HanziWord, SrsStateType } from "@/data/model";
 import type { Skill } from "@/data/rizzleSchema";
 import type { RankedHanziWord } from "@/data/skills";
 import { getHanziWordRank, rankRules } from "@/data/skills";
-import {
-  hanziFromHanziWord,
-  meaningKeyFromHanziWord,
-} from "@/dictionary/dictionary";
+import { meaningKeyFromHanziWord } from "@/dictionary/dictionary";
 import { sortComparatorNumber } from "@/util/collections";
 import { Text, View } from "react-native";
 import { tv } from "tailwind-variants";
@@ -66,7 +64,7 @@ export default function SkillsPage() {
                   key={hanziWord}
                   rank={coerceRank(rank)}
                   completion={completion}
-                  hanzi={hanziFromHanziWord(hanziWord)}
+                  hanziWord={hanziWord}
                   gloss={meaningKeyFromHanziWord(hanziWord)}
                 />
               ))}
@@ -84,7 +82,13 @@ export default function SkillsPage() {
 }
 
 const skillTileFiller = (
-  <SkillTile rank={0} completion={0} hanzi="" gloss="" className="invisible" />
+  <SkillTile
+    rank={0}
+    completion={0}
+    hanziWord={null}
+    gloss=""
+    className="invisible"
+  />
 );
 
 const rankTextClass = tv({
@@ -115,13 +119,13 @@ function coerceRank(rank: number): RankNumber {
 }
 
 function SkillTile({
-  hanzi,
+  hanziWord,
   gloss,
   className,
   rank,
   completion,
 }: {
-  hanzi: string;
+  hanziWord: HanziWord | null;
   gloss: string;
   className?: string;
   rank: RankNumber;
@@ -129,7 +133,15 @@ function SkillTile({
 }) {
   return (
     <View className={skillTileClass({ rank, className })}>
-      <Text className={skillTileTitleClass({ rank })}>{hanzi}</Text>
+      <Text className={skillTileTitleClass({ rank })}>
+        {hanziWord == null ? null : (
+          <HanziWordRefText
+            hanziWord={hanziWord}
+            context="body-2xl"
+            showGloss={false}
+          />
+        )}
+      </Text>
       <Text className={skillTileGlossClass({ rank })}>{gloss}</Text>
       <View className="mt-3 h-1 w-full items-start rounded bg-background">
         {completion === 0 ? null : (
@@ -147,7 +159,7 @@ const skillTileClass = tv({
   base: `min-w-[120px] flex-1 rounded-lg border-b-2 px-4 py-3`,
   variants: {
     rank: {
-      0: `border-b-[#2b2b2b] bg-[#1A1A1A]`,
+      0: `border-b-[#2b2b2b] bg-background-1`,
       1: `border-b-[#5C184E] bg-[#3C1F36]`,
       2: `border-b-[#4E145D] bg-[#361A3D]`,
       3: `border-b-[#002B56] bg-[#002244]`,

@@ -215,11 +215,18 @@ export const WikiHanziWordModal = ({
                           {skillKindToShorthand(skillKindFromSkill(skill))}
                         </Text>
                         <Text>
-                          {Math.min(
-                            skillState?.srs.stability ?? 0,
-                            100,
-                          ).toFixed(0)}
-                          /100
+                          <Text className="hhh-body-caption">Stability:</Text>
+                          {` `}
+                          {skillState?.srs.stability == null
+                            ? `null`
+                            : skillState.srs.stability.toFixed(2)}
+                        </Text>
+                        <Text>
+                          <Text className="hhh-body-caption">Difficulty:</Text>
+                          {` `}
+                          {skillState?.srs.difficulty == null
+                            ? `null`
+                            : skillState.srs.difficulty.toFixed(2)}
                         </Text>
                         {(() => {
                           const ratings = skillRatingsQuery.data?.get(skill);

@@ -170,10 +170,10 @@ export type HanziWordSkillKind =
 
 export const hanziWordSkillKinds: HanziWordSkillKind[] = [
   SkillKind.HanziWordToGloss,
-  SkillKind.HanziWordToPinyin,
   SkillKind.HanziWordToPinyinInitial,
   SkillKind.HanziWordToPinyinFinal,
   SkillKind.HanziWordToPinyinTone,
+  SkillKind.HanziWordToPinyin,
 ];
 
 const questionFlagKindSchema = z.enum({
