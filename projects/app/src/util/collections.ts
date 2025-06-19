@@ -263,9 +263,17 @@ export function memoize0<R>(
   return Object.assign(memoFn, { isCached: () => cacheSet });
 }
 
-export function memoize1<T extends string, R>(
-  fn: (input: T) => R,
-): ((input: T) => R) & { isCached: (input: T) => boolean } {
+/**
+ * Memoize a function that takes a single argument.
+ *
+ * The cache is a Map that is never cleared, so only use this for functions with
+ * bounded input.
+ */
+export function memoize1<
+  R,
+  Fn extends (input: never) => R,
+  T extends Parameters<Fn>[0],
+>(fn: Fn): Fn & { isCached: (input: T) => boolean } {
   const cache = new Map<T, R>();
   const memoFn = function <This>(this: This, input: T) {
     if (cache.has(input)) {
@@ -275,7 +283,7 @@ export function memoize1<T extends string, R>(
     const ret = fn.call(this, input);
     cache.set(input, ret);
     return ret;
-  };
+  } as Fn;
   Object.defineProperty(memoFn, `name`, { value: fn.name });
   return Object.assign(memoFn, {
     isCached: (input: T) => cache.has(input),

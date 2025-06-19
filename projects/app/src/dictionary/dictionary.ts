@@ -514,13 +514,15 @@ export function hanziTextFromHanziChar(hanziChar: HanziChar): HanziText {
   return hanziChar as unknown as HanziText;
 }
 
-export function isHanziWord(
+export const isHanziWord = memoize1(function isHanziWord(
   hanziOrHanziWord: HanziText | HanziWord,
 ): hanziOrHanziWord is HanziWord {
   return hanziOrHanziWord.includes(`:`);
-}
+});
 
-export function hanziFromHanziWord(hanziWord: HanziWord): HanziText {
+export const hanziFromHanziWord = memoize1(function hanziFromHanziWord(
+  hanziWord: HanziWord,
+): HanziText {
   const result = /^(.+?):/.exec(hanziWord);
   invariant(result != null, `couldn't parse HanziWord ${hanziWord}`);
 
@@ -528,17 +530,21 @@ export function hanziFromHanziWord(hanziWord: HanziWord): HanziText {
   invariant(hanzi != null, `couldn't parse hanzi (before :)`);
 
   return hanzi as HanziText;
-}
+});
 
-export function hanziCharsFromHanziWord(hanziWord: HanziWord): HanziChar[] {
-  const hanzi = hanziFromHanziWord(hanziWord);
-  return splitHanziText(hanzi);
-}
+export const hanziCharsFromHanziWord = memoize1(
+  function hanziCharsFromHanziWord(hanziWord: HanziWord): HanziChar[] {
+    const hanzi = hanziFromHanziWord(hanziWord);
+    return splitHanziText(hanzi);
+  },
+);
 
-export function meaningKeyFromHanziWord(hanziWord: HanziWord): string {
-  const hanzi = hanziFromHanziWord(hanziWord);
-  return hanziWord.slice(hanzi.length + 1 /* skip the : */);
-}
+export const meaningKeyFromHanziWord = memoize1(
+  function meaningKeyFromHanziWord(hanziWord: HanziWord): string {
+    const hanzi = hanziFromHanziWord(hanziWord);
+    return hanziWord.slice(hanzi.length + 1 /* skip the : */);
+  },
+);
 
 export function buildHanziWord(hanzi: string, meaningKey: string): HanziWord {
   return `${hanzi}:${meaningKey}`;

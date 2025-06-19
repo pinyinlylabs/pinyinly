@@ -13,7 +13,12 @@ import {
   sortComparatorDate,
   sortComparatorNumber,
 } from "@/util/collections";
-import { fsrsIsForgotten, fsrsIsStable, Rating } from "@/util/fsrs";
+import {
+  fsrsIsForgotten,
+  fsrsIsStable,
+  fsrsStabilityThreshold,
+  Rating,
+} from "@/util/fsrs";
 import { makePRNG } from "@/util/random";
 import { invariant } from "@haohaohow/lib/invariant";
 import type { Duration } from "date-fns";
@@ -413,37 +418,56 @@ export interface RankRule {
 
 export type RankRules = RankRule[];
 
+const stability = fsrsStabilityThreshold;
 export const rankRules: RankRules = [
   {
     rank: 1,
     goals: [
-      { skill: SkillKind.HanziWordToGloss, stability: 50 },
-      { skill: SkillKind.HanziWordToPinyinInitial, stability: 50 },
+      { skill: SkillKind.HanziWordToGloss, stability },
+      { skill: SkillKind.HanziWordToPinyinInitial, stability },
     ],
   },
   {
     rank: 2,
-    goals: [{ skill: SkillKind.HanziWordToPinyinFinal, stability: 50 }],
+    goals: [
+      { skill: SkillKind.HanziWordToGloss, stability },
+      { skill: SkillKind.HanziWordToPinyinInitial, stability },
+      { skill: SkillKind.HanziWordToPinyinFinal, stability },
+    ],
   },
   {
     rank: 3,
     goals: [
-      { skill: SkillKind.HanziWordToGloss, stability: 70 },
-      { skill: SkillKind.HanziWordToPinyinInitial, stability: 70 },
-      { skill: SkillKind.HanziWordToPinyinFinal, stability: 70 },
-      { skill: SkillKind.HanziWordToPinyinTone, stability: 70 },
+      { skill: SkillKind.HanziWordToGloss, stability },
+      { skill: SkillKind.HanziWordToPinyinInitial, stability },
+      { skill: SkillKind.HanziWordToPinyinFinal, stability },
+      { skill: SkillKind.HanziWordToPinyinTone, stability },
     ],
   },
   {
     rank: 4,
     goals: [
-      { skill: SkillKind.HanziWordToGloss, stability: 85 },
-      { skill: SkillKind.HanziWordToPinyinInitial, stability: 85 },
-      { skill: SkillKind.HanziWordToPinyinFinal, stability: 85 },
-      { skill: SkillKind.HanziWordToPinyinTone, stability: 85 },
+      { skill: SkillKind.HanziWordToGloss, stability },
+      { skill: SkillKind.HanziWordToPinyinInitial, stability },
+      { skill: SkillKind.HanziWordToPinyinFinal, stability },
+      { skill: SkillKind.HanziWordToPinyinTone, stability },
+      { skill: SkillKind.HanziWordToPinyin, stability },
     ],
   },
 ];
+
+export type RankedHanziWord = {
+  // Including the hanzi word itself for convenience for calling code to avoid
+  // the need for it to allocate an whole new set of objects with this included.
+  hanziWord: HanziWord;
+  /**
+   * - `0` for hanzi words that have never been quizzed.
+   * - `1` for the first rank.
+   * - `2` for the second rank, etc.
+   */
+  rank: number;
+  completion: number;
+};
 
 export function getHanziWordRank({
   hanziWord,
@@ -453,15 +477,15 @@ export function getHanziWordRank({
   hanziWord: HanziWord;
   skillSrsStates: Map<Skill, SrsStateType>;
   rankRules: RankRules;
-}): { currentRank: number; completion: number } {
-  let currentRank = 1;
-  let currentCompletion = 0;
+}): RankedHanziWord {
+  let highestRank = 0;
+  let highestRankCompletion = 0;
 
   const skillStabilitiesOffsets = new Map<Skill, number>();
 
   for (const rule of rankRules) {
-    let ruleCompletionNumerator = 0;
-    let ruleCompletionDenominator = 0;
+    let rankCompletionNumerator = null;
+    let rankCompletionDenominator = 0;
 
     for (const goal of rule.goals) {
       const skill = hanziWordSkill(goal.skill as HanziWordSkillKind, hanziWord);
@@ -469,15 +493,18 @@ export function getHanziWordRank({
       const stabilityOffset = skillStabilitiesOffsets.get(skill) ?? 0;
       skillStabilitiesOffsets.set(skill, goal.stability);
 
-      ruleCompletionDenominator += goal.stability - stabilityOffset;
+      const rankCompletionNumeratorRange = goal.stability - stabilityOffset;
+      rankCompletionDenominator += rankCompletionNumeratorRange;
 
       const srsState = skillSrsStates.get(skill);
       switch (srsState?.kind) {
         case SrsKind.FsrsFourPointFive: {
-          ruleCompletionNumerator += Math.max(
-            srsState.stability - stabilityOffset,
-            0,
-          );
+          rankCompletionNumerator =
+            (rankCompletionNumerator ?? 0) +
+            Math.min(
+              Math.max(srsState.stability - stabilityOffset, 0),
+              rankCompletionNumeratorRange,
+            );
           break;
         }
         case undefined:
@@ -489,21 +516,35 @@ export function getHanziWordRank({
       }
     }
 
-    const ruleCompletion =
-      ruleCompletionDenominator === 0
-        ? 1
-        : Math.min(ruleCompletionNumerator / ruleCompletionDenominator, 1);
-
-    if (ruleCompletion === 1) {
-      currentRank = rule.rank + 1;
+    // If there's no progress towards this rank, skip it.
+    if (rankCompletionNumerator == null) {
+      // If there are no goals for this rule, skip it.
+      continue;
     }
 
-    if (rule.rank === currentRank) {
-      currentCompletion = ruleCompletion;
+    // If there's no rank yet, but some progress has been made on this rank,
+    // then make this the current rank.
+    if (highestRank == 0) {
+      highestRank = rule.rank;
+    }
+
+    const rankCompletion =
+      rankCompletionDenominator === 0
+        ? 1
+        : Math.min(rankCompletionNumerator / rankCompletionDenominator, 1);
+
+    // If the goals for this rank are completed, progress to the next rank.
+    if (rankCompletion === 1) {
+      highestRank = rule.rank + 1;
+      highestRankCompletion = 0;
+    }
+
+    if (rule.rank === highestRank) {
+      highestRankCompletion = rankCompletion;
     }
   }
 
-  return { currentRank, completion: currentCompletion };
+  return { hanziWord, rank: highestRank, completion: highestRankCompletion };
 }
 
 export function skillReviewQueue({
