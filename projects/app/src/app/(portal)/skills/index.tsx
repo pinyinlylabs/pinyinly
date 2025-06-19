@@ -157,7 +157,7 @@ const skillTileClass = tv({
 });
 
 const skillTileTitleClass = tv({
-  base: `hhh-body-title`,
+  base: `hhh-body-title truncate`,
   variants: {
     rank: {
       0: `text-[#999999]`,
@@ -170,7 +170,7 @@ const skillTileTitleClass = tv({
 });
 
 const skillTileGlossClass = tv({
-  base: `hhh-body-caption`,
+  base: `hhh-body-caption truncate`,
   variants: {
     rank: {
       0: `text-[#999999]`,
