@@ -1,7 +1,36 @@
+import { getAllTargetHanziWords } from "@/client/query";
+import { useRizzleQueryPaged } from "@/client/ui/ReplicacheContext";
+import type { SrsStateType } from "@/data/model";
+import type { Skill } from "@/data/rizzleSchema";
+import { getHanziWordRank, rankRules } from "@/data/skills";
+import {
+  hanziFromHanziWord,
+  meaningKeyFromHanziWord,
+} from "@/dictionary/dictionary";
+import { sortComparatorNumber } from "@/util/collections";
 import { Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 
 export default function SkillsPage() {
+  const x = useRizzleQueryPaged([SkillsPage.name, `skillStates`], async (r) => {
+    const skillSrsStates = new Map<Skill, SrsStateType>();
+    for await (const [, v] of r.queryPaged.skillState.scan()) {
+      skillSrsStates.set(v.skill, v.srs);
+    }
+
+    const hanziWords = await getAllTargetHanziWords();
+    const rankedHanziWords = hanziWords.map((hanziWord) => ({
+      hanziWord,
+      ...getHanziWordRank({
+        hanziWord,
+        skillSrsStates,
+        rankRules,
+      }),
+    }));
+
+    return rankedHanziWords;
+  });
+
   return (
     <View className="gap-5">
       {/* Header */}
@@ -16,55 +45,41 @@ export default function SkillsPage() {
         </View>
 
         <View className="flex-row flex-wrap gap-2">
-          <SkillTile rank={1} hanzi="汉字" gloss="Hànzì" />
-          <SkillTile rank={1} hanzi="拼音" gloss="Pīnyīn" />
-          <SkillTile rank={1} hanzi="语法" gloss="Yǔfǎ" />
-          <SkillTile rank={1} hanzi="语法" gloss="Yǔfǎ" />
-          <SkillTile rank={1} hanzi="语法" gloss="Yǔfǎ" />
-          <SkillTile rank={1} hanzi="汉字" gloss="Hànzì" />
-          <SkillTile rank={1} hanzi="拼音" gloss="Pīnyīn" />
-          <SkillTile rank={1} hanzi="语法" gloss="Yǔfǎ" />
-          <SkillTile rank={1} hanzi="语法" gloss="Yǔfǎ" />
-          <SkillTile rank={1} hanzi="语法" gloss="Yǔfǎ" />
-          <SkillTile rank={1} hanzi="汉字" gloss="Hànzì" />
-          <SkillTile rank={1} hanzi="拼音" gloss="Pīnyīn" />
-          <SkillTile rank={1} hanzi="语法" gloss="Yǔfǎ" />
-          <SkillTile rank={1} hanzi="语法" gloss="Yǔfǎ" />
-          <SkillTile rank={1} hanzi="语法" gloss="Yǔfǎ" />
-          <SkillTile rank={1} hanzi="汉字" gloss="Hànzì" />
-          <SkillTile rank={1} hanzi="拼音" gloss="Pīnyīn" />
-          <SkillTile rank={1} hanzi="语法" gloss="Yǔfǎ" />
-          <SkillTile rank={1} hanzi="语法" gloss="Yǔfǎ" />
-          <SkillTile rank={1} hanzi="语法" gloss="Yǔfǎ" />
-          <SkillTile rank={1} hanzi="汉字" gloss="Hànzì" />
-          <SkillTile rank={1} hanzi="拼音" gloss="Pīnyīn" />
-          <SkillTile rank={1} hanzi="语法" gloss="Yǔfǎ" />
-          <SkillTile rank={1} hanzi="语法" gloss="Yǔfǎ" />
-          <SkillTile rank={1} hanzi="语法" gloss="Yǔfǎ" />
-          <SkillTile rank={1} hanzi="汉字" gloss="Hànzì" />
-          <SkillTile rank={1} hanzi="拼音" gloss="Pīnyīn" />
-          <SkillTile rank={1} hanzi="语法" gloss="Yǔfǎ" />
-          <SkillTile rank={1} hanzi="语法" gloss="Yǔfǎ" />
-          <SkillTile rank={1} hanzi="语法" gloss="Yǔfǎ" />
-          <SkillTile rank={1} hanzi="汉字" gloss="Hànzì" />
-          <SkillTile rank={1} hanzi="拼音" gloss="Pīnyīn" />
-          <SkillTile rank={1} hanzi="语法" gloss="Yǔfǎ" />
-          <SkillTile rank={1} hanzi="语法" gloss="Yǔfǎ" />
-          <SkillTile rank={1} hanzi="语法" gloss="Yǔfǎ" />
-          <SkillTile rank={1} hanzi="汉字" gloss="Hànzì" />
-          <SkillTile rank={1} hanzi="拼音" gloss="Pīnyīn" />
-          <SkillTile rank={1} hanzi="语法" gloss="Yǔfǎ" />
-          <SkillTile rank={1} hanzi="语法" gloss="Yǔfǎ" />
-          <SkillTile rank={1} hanzi="语法" gloss="Yǔfǎ" />
-          <SkillTile rank={1} hanzi="汉字" gloss="Hànzì" />
-          <SkillTile rank={1} hanzi="拼音" gloss="Pīnyīn" />
-          <SkillTile rank={1} hanzi="语法" gloss="Yǔfǎ" />
-          <SkillTile rank={1} hanzi="语法" gloss="Yǔfǎ" />
-          <SkillTile rank={1} hanzi="语法" gloss="Yǔfǎ" />
+          {x.data
+            ?.filter((x) => x.currentRank === 1)
+            .sort(sortComparatorNumber((x) => x.completion))
+            .map((x) => (
+              <SkillTile
+                key={x.hanziWord}
+                rank={coerceRank(x.currentRank)}
+                completion={x.completion}
+                hanzi={hanziFromHanziWord(x.hanziWord)}
+                gloss={meaningKeyFromHanziWord(x.hanziWord)}
+              />
+            ))}
+
           {/* Placeholder fill */}
-          <SkillTile rank={2} hanzi="" gloss="" className="invisible" />
-          <SkillTile rank={2} hanzi="" gloss="" className="invisible" />
-          <SkillTile rank={2} hanzi="" gloss="" className="invisible" />
+          <SkillTile
+            rank={2}
+            completion={0}
+            hanzi=""
+            gloss=""
+            className="invisible"
+          />
+          <SkillTile
+            rank={2}
+            completion={0}
+            hanzi=""
+            gloss=""
+            className="invisible"
+          />
+          <SkillTile
+            rank={2}
+            completion={0}
+            hanzi=""
+            gloss=""
+            className="invisible"
+          />
         </View>
       </View>
 
@@ -75,26 +90,18 @@ export default function SkillsPage() {
         </View>
 
         <View className="flex-row flex-wrap gap-2">
-          <SkillTile rank={2} hanzi="汉字" gloss="Hànzì" />
-          <SkillTile rank={2} hanzi="拼音" gloss="Pīnyīn" />
-          <SkillTile rank={2} hanzi="语法" gloss="Yǔfǎ" />
-          <SkillTile rank={2} hanzi="语法" gloss="Yǔfǎ" />
-          <SkillTile rank={2} hanzi="语法" gloss="Yǔfǎ" />
-          <SkillTile rank={2} hanzi="汉字" gloss="Hànzì" />
-          <SkillTile rank={2} hanzi="拼音" gloss="Pīnyīn" />
-          <SkillTile rank={2} hanzi="语法" gloss="Yǔfǎ" />
-          <SkillTile rank={2} hanzi="语法" gloss="Yǔfǎ" />
-          <SkillTile rank={2} hanzi="语法" gloss="Yǔfǎ" />
-          <SkillTile rank={2} hanzi="汉字" gloss="Hànzì" />
-          <SkillTile rank={2} hanzi="拼音" gloss="Pīnyīn" />
-          <SkillTile rank={2} hanzi="语法" gloss="Yǔfǎ" />
-          <SkillTile rank={2} hanzi="语法" gloss="Yǔfǎ" />
-          <SkillTile rank={2} hanzi="语法" gloss="Yǔfǎ" />
-          <SkillTile rank={2} hanzi="汉字" gloss="Hànzì" />
-          <SkillTile rank={2} hanzi="拼音" gloss="Pīnyīn" />
-          <SkillTile rank={2} hanzi="语法" gloss="Yǔfǎ" />
-          <SkillTile rank={2} hanzi="语法" gloss="Yǔfǎ" />
-          <SkillTile rank={2} hanzi="语法" gloss="Yǔfǎ" />
+          {x.data
+            ?.filter((x) => x.currentRank === 2)
+            .sort(sortComparatorNumber((x) => x.completion))
+            .map((x) => (
+              <SkillTile
+                key={x.hanziWord}
+                rank={coerceRank(x.currentRank)}
+                completion={x.completion}
+                hanzi={hanziFromHanziWord(x.hanziWord)}
+                gloss={meaningKeyFromHanziWord(x.hanziWord)}
+              />
+            ))}
         </View>
       </View>
 
@@ -105,15 +112,18 @@ export default function SkillsPage() {
         </View>
 
         <View className="flex-row flex-wrap gap-2">
-          <SkillTile rank={3} hanzi="汉字" gloss="Hànzì" />
-          <SkillTile rank={3} hanzi="拼音" gloss="Pīnyīn" />
-          <SkillTile rank={3} hanzi="语法" gloss="Yǔfǎ" />
-          <SkillTile rank={3} hanzi="语法" gloss="Yǔfǎ" />
-          <SkillTile rank={3} hanzi="语法" gloss="Yǔfǎ" />
-          {/* Placeholder fill */}
-          <SkillTile rank={3} hanzi="" gloss="" className="invisible" />
-          <SkillTile rank={3} hanzi="" gloss="" className="invisible" />
-          <SkillTile rank={3} hanzi="" gloss="" className="invisible" />
+          {x.data
+            ?.filter((x) => x.currentRank === 3)
+            .sort(sortComparatorNumber((x) => x.completion))
+            .map((x) => (
+              <SkillTile
+                key={x.hanziWord}
+                rank={coerceRank(x.currentRank)}
+                completion={x.completion}
+                hanzi={hanziFromHanziWord(x.hanziWord)}
+                gloss={meaningKeyFromHanziWord(x.hanziWord)}
+              />
+            ))}
         </View>
       </View>
 
@@ -124,15 +134,18 @@ export default function SkillsPage() {
         </View>
 
         <View className="flex-row flex-wrap gap-2">
-          <SkillTile rank={4} hanzi="汉字" gloss="Hànzì" />
-          <SkillTile rank={4} hanzi="拼音" gloss="Pīnyīn" />
-          <SkillTile rank={4} hanzi="语法" gloss="Yǔfǎ" />
-          <SkillTile rank={4} hanzi="语法" gloss="Yǔfǎ" />
-          <SkillTile rank={4} hanzi="语法" gloss="Yǔfǎ" />
-          {/* Placeholder fill */}
-          <SkillTile rank={4} hanzi="" gloss="" className="invisible" />
-          <SkillTile rank={4} hanzi="" gloss="" className="invisible" />
-          <SkillTile rank={4} hanzi="" gloss="" className="invisible" />
+          {x.data
+            ?.filter((x) => x.currentRank === 4)
+            .sort(sortComparatorNumber((x) => x.completion))
+            .map((x) => (
+              <SkillTile
+                key={x.hanziWord}
+                rank={coerceRank(x.currentRank)}
+                completion={x.completion}
+                hanzi={hanziFromHanziWord(x.hanziWord)}
+                gloss={meaningKeyFromHanziWord(x.hanziWord)}
+              />
+            ))}
         </View>
       </View>
     </View>
@@ -153,16 +166,30 @@ const rankTextClass = tv({
   },
 });
 
+type RankNumber = 1 | 2 | 3 | 4;
+
+function coerceRank(rank: number): RankNumber {
+  if (rank < 1) {
+    return 1;
+  }
+  if (rank > 4) {
+    return 4;
+  }
+  return rank as RankNumber;
+}
+
 function SkillTile({
   hanzi,
   gloss,
   className,
   rank,
+  completion,
 }: {
   hanzi: string;
   gloss: string;
   className?: string;
-  rank: 1 | 2 | 3 | 4;
+  rank: RankNumber;
+  completion: number;
 }) {
   return (
     <View className={skillTileClass({ rank, className })}>
@@ -171,7 +198,7 @@ function SkillTile({
       <View className="mt-3 h-1 w-full items-start rounded bg-background">
         <View
           className={skillTileProgressBarClass({ rank })}
-          style={{ width: `${Math.random() * 100}%` }}
+          style={{ width: `${completion * 100}%` }}
         ></View>
       </View>
     </View>

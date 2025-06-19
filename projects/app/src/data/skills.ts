@@ -401,6 +401,111 @@ export interface SkillReviewQueue {
   overDueCount: number;
 }
 
+export interface RankGoal {
+  skill: SkillKind;
+  stability: number;
+}
+
+export interface RankRule {
+  rank: number;
+  goals: RankGoal[];
+}
+
+export type RankRules = RankRule[];
+
+export const rankRules: RankRules = [
+  {
+    rank: 1,
+    goals: [
+      { skill: SkillKind.HanziWordToGloss, stability: 50 },
+      { skill: SkillKind.HanziWordToPinyinInitial, stability: 50 },
+    ],
+  },
+  {
+    rank: 2,
+    goals: [{ skill: SkillKind.HanziWordToPinyinFinal, stability: 50 }],
+  },
+  {
+    rank: 3,
+    goals: [
+      { skill: SkillKind.HanziWordToGloss, stability: 70 },
+      { skill: SkillKind.HanziWordToPinyinInitial, stability: 70 },
+      { skill: SkillKind.HanziWordToPinyinFinal, stability: 70 },
+      { skill: SkillKind.HanziWordToPinyinTone, stability: 70 },
+    ],
+  },
+  {
+    rank: 4,
+    goals: [
+      { skill: SkillKind.HanziWordToGloss, stability: 85 },
+      { skill: SkillKind.HanziWordToPinyinInitial, stability: 85 },
+      { skill: SkillKind.HanziWordToPinyinFinal, stability: 85 },
+      { skill: SkillKind.HanziWordToPinyinTone, stability: 85 },
+    ],
+  },
+];
+
+export function getHanziWordRank({
+  hanziWord,
+  skillSrsStates,
+  rankRules,
+}: {
+  hanziWord: HanziWord;
+  skillSrsStates: Map<Skill, SrsStateType>;
+  rankRules: RankRules;
+}): { currentRank: number; completion: number } {
+  let currentRank = 1;
+  let currentCompletion = 0;
+
+  const skillStabilitiesOffsets = new Map<Skill, number>();
+
+  for (const rule of rankRules) {
+    let ruleCompletionNumerator = 0;
+    let ruleCompletionDenominator = 0;
+
+    for (const goal of rule.goals) {
+      const skill = hanziWordSkill(goal.skill as HanziWordSkillKind, hanziWord);
+
+      const stabilityOffset = skillStabilitiesOffsets.get(skill) ?? 0;
+      skillStabilitiesOffsets.set(skill, goal.stability);
+
+      ruleCompletionDenominator += goal.stability - stabilityOffset;
+
+      const srsState = skillSrsStates.get(skill);
+      switch (srsState?.kind) {
+        case SrsKind.FsrsFourPointFive: {
+          ruleCompletionNumerator += Math.max(
+            srsState.stability - stabilityOffset,
+            0,
+          );
+          break;
+        }
+        case undefined:
+        case SrsKind.Mock: {
+          // Mock SRS state is used for skills that have never been introduced.
+          // So we can skip it.
+          break;
+        }
+      }
+    }
+
+    const ruleCompletion =
+      ruleCompletionDenominator === 0
+        ? 1
+        : Math.min(ruleCompletionNumerator / ruleCompletionDenominator, 1);
+
+    if (ruleCompletion === 1) {
+      currentRank = rule.rank + 1;
+    }
+
+    if (rule.rank === currentRank) {
+      currentCompletion = ruleCompletion;
+    }
+  }
+
+  return { currentRank, completion: currentCompletion };
+}
+
 export function skillReviewQueue({
   graph,
   skillSrsStates,
