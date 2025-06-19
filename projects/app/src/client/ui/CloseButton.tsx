@@ -13,7 +13,7 @@ export const CloseButton = () => {
     >
       <IconImage
         source={require(`@/assets/icons/close.svg`)}
-        className="text-foreground-bg70"
+        className="text-fg-bg70"
       />
     </Pressable>
   ) : null;

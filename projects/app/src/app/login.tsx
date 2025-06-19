@@ -13,18 +13,14 @@ export default function LoginPage() {
   const auth = useAuth();
 
   return (
-    <View className="flex-1 items-center justify-center gap-[10px] bg-background">
-      <Text className="font-bold text-foreground">Login</Text>
+    <View className="flex-1 items-center justify-center gap-[10px] bg-bg">
+      <Text className="font-bold text-fg">Login</Text>
       <View className="gap-2">
         {auth.data?.allClientSessions.map((x, i) => (
           <View key={i} className="flex-row gap-2 border-y">
             <View className="flex-1">
-              <Text className="text-foreground">
-                Session ID: {x.serverSessionId}
-              </Text>
-              <Text className="text-foreground">
-                DB name: {x.replicacheDbName}
-              </Text>
+              <Text className="text-fg">Session ID: {x.serverSessionId}</Text>
+              <Text className="text-fg">DB name: {x.replicacheDbName}</Text>
             </View>
             <RectButton
               onPressIn={() => {
@@ -38,10 +34,10 @@ export default function LoginPage() {
           </View>
         ))}
       </View>
-      <Text className="text-foreground">
+      <Text className="text-fg">
         Session ID: {auth.data?.clientSession.serverSessionId}
       </Text>
-      <Text className="text-foreground">
+      <Text className="text-fg">
         DB name: {auth.data?.clientSession.replicacheDbName}
       </Text>
 
@@ -142,9 +138,7 @@ function ServerSessionIdLoginForm() {
 const GoHomeButton = () => (
   <View style={{ height: 44 }}>
     <Link dismissTo href="/learn" asChild>
-      <RectButton textClassName="font-bold text-foreground text-xl">
-        Back
-      </RectButton>
+      <RectButton textClassName="font-bold text-fg text-xl">Back</RectButton>
     </Link>
   </View>
 );

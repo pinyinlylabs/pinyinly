@@ -27,7 +27,7 @@ export const HanziText = ({
 };
 
 const hanziText = tv({
-  base: `text-2xl/none text-foreground`,
+  base: `text-2xl/none text-fg`,
 
   variants: {
     small: {

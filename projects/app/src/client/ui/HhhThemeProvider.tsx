@@ -40,7 +40,7 @@ export function HhhThemeProvider({ children }: { children: ReactNode }) {
 }
 
 const containerClass = tv({
-  base: `flex-1 bg-background`,
+  base: `flex-1 bg-bg`,
   variants: {
     isWeb: {
       false: `theme-default`,

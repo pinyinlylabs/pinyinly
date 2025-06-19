@@ -21,10 +21,10 @@ export default function RadicalsPage() {
             lg:px-0
           `}
         >
-          <Text className="text-center text-2xl font-bold text-foreground">
+          <Text className="text-center text-2xl font-bold text-fg">
             Kangxi Radicals
           </Text>
-          <Text className="text-center text-foreground">
+          <Text className="text-center text-fg">
             The building blocks of Chinese characters, representing core
             meanings and structures. Familiarizing yourself with these radicals
             will help you recognize patterns, understand character meanings, and
@@ -34,11 +34,11 @@ export default function RadicalsPage() {
 
         {query.data == null ? (
           query.isLoading ? (
-            <Text className="text-foreground">Loading</Text>
+            <Text className="text-fg">Loading</Text>
           ) : query.isError ? (
-            <Text className="text-foreground">Error</Text>
+            <Text className="text-fg">Error</Text>
           ) : (
-            <Text className="text-foreground">unexpected state</Text>
+            <Text className="text-fg">unexpected state</Text>
           )
         ) : (
           radicalStrokes.map((strokes) => (

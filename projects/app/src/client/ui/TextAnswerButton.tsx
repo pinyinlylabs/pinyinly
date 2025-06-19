@@ -276,7 +276,7 @@ const bgAnimatedClass = tv({
       default: ``,
       dimmed: ``,
       selected: `bg-cyan-10/10`,
-      success: `bg-foreground/10`,
+      success: `bg-fg/10`,
       error: `bg-transparent`,
     },
   },
@@ -285,7 +285,7 @@ const bgAnimatedClass = tv({
 const pressableClass = tv({
   base: `
     focus-visible:rounded-lg focus-visible:outline focus-visible:outline-4
-    focus-visible:outline-offset-2 focus-visible:outline-foreground/75
+    focus-visible:outline-offset-2 focus-visible:outline-fg/75
 
     web:transition-[outline-width]
   `,
@@ -339,18 +339,18 @@ const rectClass = tv({
     // unfilled border
     {
       filled: false,
-      class: `border-foreground/20`,
+      class: `border-fg/20`,
     },
     {
       filled: false,
       hovered: true,
-      class: `border-foreground/30`,
+      class: `border-fg/30`,
     },
     // filled border
     {
       state: `success`,
       filled: true,
-      class: `border-foreground`,
+      class: `border-fg`,
     },
     {
       state: `selected`,
@@ -370,16 +370,16 @@ const textClass = tv({
   // line with accents enough space to not be clipped. Without this words like
   // "lǐ" will have half the accent clipped.
   base: `
-    px-1 text-center font-normal text-foreground
+    px-1 text-center font-normal text-fg
 
     web:transition-colors
   `,
   variants: {
     state: {
-      default: `text-foreground`,
+      default: `text-fg`,
       dimmed: `text-primary-9`,
       selected: `text-cyan-10`,
-      success: `text-foreground`,
+      success: `text-fg`,
       error: `text-red-10`,
     },
     length: {

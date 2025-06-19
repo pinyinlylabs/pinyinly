@@ -89,7 +89,7 @@ export default function RadicalPage() {
   const [showExplanation, setShowExplanation] = useState(false);
 
   return (
-    <View className="flex-1 items-center bg-background">
+    <View className="flex-1 items-center bg-bg">
       <View
         className={`w-full max-w-[600px] flex-row items-center gap-3 pt-safe-offset-4 px-safe-or-4`}
       >
@@ -108,7 +108,7 @@ export default function RadicalPage() {
         </View>
 
         <View className="items-center justify-center gap-5">
-          <Text className="font-cursive text-5xl text-foreground">not</Text>
+          <Text className="font-cursive text-5xl text-fg">not</Text>
           <View className="items-center gap-2">
             <LinearGradient
               colors={GradientPink}
@@ -124,7 +124,7 @@ export default function RadicalPage() {
                 </G>
               </Svg>
             </LinearGradient>
-            <Text className="text-3xl text-foreground opacity-50">
+            <Text className="text-3xl text-fg opacity-50">
               ⿱ <Text className="font-chinese">一 尢</Text>
             </Text>
           </View>
@@ -133,7 +133,7 @@ export default function RadicalPage() {
         <View className="flex-1"></View>
 
         <View className="max-w-[400px] justify-center">
-          <Text className="text-center text-2xl text-foreground">
+          <Text className="text-center text-2xl text-fg">
             Imagine a straight line on top of a bent person trying to stand up
             but failing, so they are{` `}
             <Text className="font-bold text-[#04ABF6]">not</Text>
@@ -164,19 +164,19 @@ export default function RadicalPage() {
             <View className="my-2 h-2 w-12 self-center rounded bg-primary-8" />
 
             <View>
-              <Text className="self-center font-semibold text-foreground">
+              <Text className="self-center font-semibold text-fg">
                 Explanation
               </Text>
             </View>
 
             <View className="mt-6 flex-row items-center gap-2 self-center">
-              <Text className="font-chinese text-5xl text-foreground">无</Text>
-              <Text className="text-5xl text-foreground opacity-50">•</Text>
-              <Text className="font-cursive text-5xl text-foreground">not</Text>
+              <Text className="font-chinese text-5xl text-fg">无</Text>
+              <Text className="text-5xl text-fg opacity-50">•</Text>
+              <Text className="font-cursive text-5xl text-fg">not</Text>
             </View>
 
             <View className="my-4 flex-row items-center gap-2 self-center">
-              <Text className="text-2xl text-foreground">
+              <Text className="text-2xl text-fg">
                 <Text className="opacity-50">⿱</Text>
                 {` `}
                 <Text className="font-chinese">一 尢</Text>
@@ -208,7 +208,7 @@ export default function RadicalPage() {
                 </G>
               </Svg>
               <View className="flex-1">
-                <Text className="text-foreground">
+                <Text className="text-fg">
                   <Text className="opacity-50">The</Text> 一 at the top{` `}
                   <Text className="opacity-50">is like a</Text> straight line or
                   a boundary.
@@ -241,7 +241,7 @@ export default function RadicalPage() {
                 </G>
               </Svg>
               <View className="flex-1">
-                <Text className="text-foreground">
+                <Text className="text-fg">
                   <Text className="opacity-50">The</Text> 尢 underneath{` `}
                   <Text className="opacity-50">looks like a</Text> person trying
                   to stand{` `}
@@ -263,7 +263,7 @@ export default function RadicalPage() {
                 </G>
               </Svg>
               <View className="flex-1">
-                <Text className="text-foreground">
+                <Text className="text-fg">
                   Imagine someone lying under a line, unable to stand up,
                   illustrating the concept of &apos;not&apos; able to overcome.
                 </Text>
@@ -299,9 +299,9 @@ export default function RadicalPage() {
             }
             body={
               query.isLoading ? (
-                <Text className="text-foreground">Loading</Text>
+                <Text className="text-fg">Loading</Text>
               ) : query.isError ? (
-                <Text className="text-foreground">Error</Text>
+                <Text className="text-fg">Error</Text>
               ) : (
                 <>
                   {query.data?.nameMnemonics == null ? null : (
@@ -310,9 +310,7 @@ export default function RadicalPage() {
                         {query.data.nameMnemonics.map(
                           ({ mnemonic, rationale }, i) => (
                             <View key={i} className="gap-1">
-                              <Text className="text-foreground">
-                                {mnemonic}
-                              </Text>
+                              <Text className="text-fg">{mnemonic}</Text>
                               <Text className="text-xs italic text-caption">
                                 {rationale}
                               </Text>

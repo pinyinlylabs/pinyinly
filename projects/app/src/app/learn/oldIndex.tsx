@@ -129,7 +129,7 @@ export default function IndexPage() {
       streakQuery.data == null ||
       reviewQuery.data == null ? null : recentHanzi.isError ? (
         <View>
-          <Text className="text-foreground">Oops something went wrong.</Text>
+          <Text className="text-fg">Oops something went wrong.</Text>
         </View>
       ) : (
         <>
@@ -149,7 +149,7 @@ export default function IndexPage() {
                   <View className="gap-1">
                     <Text
                       className={`
-                        font-bold text-foreground
+                        font-bold text-fg
 
                         ${streakQuery.data.isActive ? `` : `opacity-50`}
                       `}
@@ -169,7 +169,7 @@ export default function IndexPage() {
                         }
                       `}
                     >
-                      <Text className="font-bold text-foreground">
+                      <Text className="font-bold text-fg">
                         📨
                         {` `}
                         {reviewQuery.data.dueOrOverdueCount}
@@ -222,7 +222,7 @@ export default function IndexPage() {
                           key={i}
                           className="rounded border border-primary-7 bg-primary-3 p-2"
                         >
-                          <Text className="text-foreground">{char}</Text>
+                          <Text className="text-fg">{char}</Text>
                         </View>
                       ))}
                     </View>

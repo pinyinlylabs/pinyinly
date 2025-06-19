@@ -101,8 +101,7 @@ export function QuizDeckOneCorrectPairQuestion({
             className={`
               ${isCorrect ? `theme-success` : `theme-danger`}
 
-              flex-1 gap-[12px] overflow-hidden bg-foreground-bg10 px-quiz-px pt-3
-              pb-safe-offset-[84px]
+              flex-1 gap-[12px] overflow-hidden bg-fg-bg10 px-quiz-px pt-3 pb-safe-offset-[84px]
 
               lg:mb-2 lg:rounded-xl
             `}
@@ -113,9 +112,7 @@ export function QuizDeckOneCorrectPairQuestion({
                   size={32}
                   source={require(`@/assets/icons/check-circled-filled.svg`)}
                 />
-                <Text className="text-2xl font-bold text-foreground">
-                  Nice!
-                </Text>
+                <Text className="text-2xl font-bold text-fg">Nice!</Text>
               </View>
             ) : (
               <>
@@ -124,11 +121,9 @@ export function QuizDeckOneCorrectPairQuestion({
                     size={32}
                     source={require(`@/assets/icons/close-circled-filled.svg`)}
                   />
-                  <Text className="text-2xl font-bold text-foreground">
-                    Incorrect
-                  </Text>
+                  <Text className="text-2xl font-bold text-fg">Incorrect</Text>
                 </View>
-                <Text className="text-xl/none font-medium text-foreground">
+                <Text className="text-xl/none font-medium text-fg">
                   Correct answer:
                 </Text>
 
@@ -140,7 +135,7 @@ export function QuizDeckOneCorrectPairQuestion({
 
                 {selectedAChoice != null && selectedBChoice != null ? (
                   <View className="flex-row flex-wrap items-center gap-2">
-                    <Text className="shrink-0 font-bold leading-snug text-foreground">
+                    <Text className="shrink-0 font-bold leading-snug text-fg">
                       Your answer:
                     </Text>
                     <View className="flex-1 flex-row flex-wrap items-center">
@@ -185,7 +180,7 @@ export function QuizDeckOneCorrectPairQuestion({
 
       {flag == null ? null : <QuizFlagText flag={flag} />}
       <View>
-        <Text className="text-xl font-bold text-foreground">{prompt}</Text>
+        <Text className="text-xl font-bold text-fg">{prompt}</Text>
       </View>
       <View className="flex-1 justify-center py-quiz-px">
         <View

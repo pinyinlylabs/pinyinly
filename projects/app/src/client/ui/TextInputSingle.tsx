@@ -33,9 +33,9 @@ export function TextInputSingle(props: TextInputSingleProps) {
 
 const inputClass = tv({
   base: `
-    hhh-body-input rounded-xl bg-background-1 px-4 py-3 outline-none
+    hhh-body-input rounded-xl bg-bg-1 px-4 py-3 outline-none
 
-    placeholder:text-foreground/30
+    placeholder:text-fg/30
   `,
   variants: {
     textAlign: {

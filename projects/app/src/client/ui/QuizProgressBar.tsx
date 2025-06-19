@@ -175,9 +175,9 @@ export const QuizProgressBar = ({ progress }: { progress: number }) => {
           {ticks.map((n) => {
             const isMilestone = n % milestoneInterval === 0;
             return isMilestone ? (
-              <MajorTick key={n} n={n} fillSv={fillSv} axis={metrics.axis} />
+              <MajorTickFg key={n} n={n} fillSv={fillSv} axis={metrics.axis} />
             ) : (
-              <MinorTick key={n} fillSv={fillSv} n={n} axis={metrics.axis} />
+              <MinorTickFg key={n} fillSv={fillSv} n={n} axis={metrics.axis} />
             );
           })}
         </>
@@ -192,7 +192,7 @@ const ticksToRender = (fill: number | null, tickCount: number) => {
   return makeRange(min, max);
 };
 
-const MinorTick = ({
+const MinorTickFg = ({
   n,
   fillSv,
   axis,
@@ -216,13 +216,13 @@ const MinorTickBg = ({ n, axis }: { axis: Axis; n: number }) => {
 
   return (
     <Reanimated.View
-      className="absolute top-1/2 rounded-full bg-[white]/80"
+      className="absolute top-1/2 rounded-full bg-fg"
       style={animStyles}
     />
   );
 };
 
-const MajorTick = ({
+const MajorTickFg = ({
   n,
   fillSv,
   axis,
@@ -265,7 +265,7 @@ const MajorTickBg = ({ n, axis }: { axis: Axis; n: number }) => {
 
   return (
     <Reanimated.View
-      className="absolute left-1/2 top-1/2 rounded-full bg-[white]/80"
+      className="absolute left-1/2 top-1/2 rounded-full bg-fg"
       style={dotAnimStyles}
     />
   );

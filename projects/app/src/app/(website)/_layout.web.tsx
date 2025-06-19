@@ -28,8 +28,8 @@ export default function WebsiteLayout() {
     <>
       <header
         className={`
-          www-px-comfortable fixed inset-x-0 top-0 z-50 flex h-[72px] justify-center border-0
-          bg-background transition-all
+          www-px-comfortable fixed inset-x-0 top-0 z-50 flex h-[72px] justify-center border-0 bg-bg
+          transition-all
 
           ${isIntersecting ? `` : `border-b-2 border-solid border-primary-5`}
         `}

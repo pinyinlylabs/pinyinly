@@ -9,24 +9,24 @@
   
   */
   .hhh-button-filled {
-    @apply font-sans text-base/snug font-bold uppercase text-background;
+    @apply font-sans text-base/snug font-bold uppercase text-bg;
   }
   .hhh-button-outline {
-    @apply font-sans text-base/snug font-bold uppercase text-foreground;
+    @apply font-sans text-base/snug font-bold uppercase text-fg;
   }
   .hhh-button-option {
-    @apply font-sans text-base/snug text-foreground;
+    @apply font-sans text-base/snug text-fg;
   }
   .hhh-button-option-caption {
     @apply font-sans text-sm/snug font-light text-caption;
   }
   .hhh-button-bare {
-    @apply font-sans text-sm/normal font-bold uppercase text-foreground;
+    @apply font-sans text-sm/normal font-bold uppercase text-fg;
   }
 
   /* <hhh-body-title> */
   .hhh-body-title {
-    @apply font-sans text-2xl/normal tracking-tight text-foreground;
+    @apply font-sans text-2xl/normal tracking-tight text-fg;
   }
   /*
   Karla on iOS font-bold looks like font-medium, so we have to bump it up to
@@ -48,18 +48,18 @@
     }
   }
   .hhh-body-title-ref {
-    @apply font-sans text-2xl/tight font-normal text-foreground-ref underline decoration-foreground-ref/70 decoration-dashed decoration-[2px] underline-offset-[5px];
+    @apply font-sans text-2xl/tight font-normal text-fg-ref underline decoration-fg-ref/70 decoration-dashed decoration-[2px] underline-offset-[5px];
   }
   .hhh-body-title-bold {
-    @apply font-sans text-2xl/normal font-medium text-foreground-bold;
+    @apply font-sans text-2xl/normal font-medium text-fg-bold;
   }
   .hhh-body-title-italic {
-    @apply font-sans text-2xl/normal font-medium italic text-foreground;
+    @apply font-sans text-2xl/normal font-medium italic text-fg;
   }
   /* </hhh-body-title> */
 
   .hhh-body-heading {
-    @apply font-sans text-lg/normal tracking-tight text-foreground font-bold;
+    @apply font-sans text-lg/normal tracking-tight text-fg font-bold;
   }
 
   .hhh-hhhmark {
@@ -69,19 +69,19 @@
 
   /* hhh/body-2xl */
   .hhh-body-2xl {
-    @apply font-sans text-2xl/normal font-thin text-foreground;
+    @apply font-sans text-2xl/normal font-thin text-fg;
   }
 
   .hhh-body-2xl-ref {
-    @apply font-sans text-2xl/tight font-normal text-foreground-ref underline decoration-foreground-ref/70 decoration-dashed decoration-[2px] underline-offset-[5px];
+    @apply font-sans text-2xl/tight font-normal text-fg-ref underline decoration-fg-ref/70 decoration-dashed decoration-[2px] underline-offset-[5px];
   }
 
   .hhh-body-2xl-bold {
-    @apply font-sans text-2xl/normal font-medium text-foreground-bold;
+    @apply font-sans text-2xl/normal font-medium text-fg-bold;
   }
 
   .hhh-body-2xl-italic {
-    @apply font-sans text-2xl/normal font-medium italic text-foreground;
+    @apply font-sans text-2xl/normal font-medium italic text-fg;
   }
 
   .hhh-body-dt {
@@ -90,19 +90,19 @@
 
   /* hhh/body */
   .hhh-body {
-    @apply font-sans text-base/normal font-thin text-foreground;
+    @apply font-sans text-base/normal font-thin text-fg;
   }
 
   .hhh-body-ref {
-    @apply font-sans text-base/normal font-normal text-foreground-ref underline decoration-foreground-ref/50 decoration-dashed decoration-[1.5px] underline-offset-[5px];
+    @apply font-sans text-base/normal font-normal text-fg-ref underline decoration-fg-ref/50 decoration-dashed decoration-[1.5px] underline-offset-[5px];
   }
 
   .hhh-body-bold {
-    @apply font-sans text-base/normal font-medium text-foreground-bold;
+    @apply font-sans text-base/normal font-medium text-fg-bold;
   }
 
   .hhh-body-italic {
-    @apply font-sans text-base/normal font-medium italic text-foreground;
+    @apply font-sans text-base/normal font-medium italic text-fg;
   }
 
   /* hhh/body-caption */
@@ -124,7 +124,7 @@
 
   /* hhh/body-input */
   .hhh-body-input {
-    @apply font-sans text-lg/snug font-normal text-foreground;
+    @apply font-sans text-lg/snug font-normal text-fg;
   }
 
   /* www */
@@ -225,11 +225,11 @@
     --color-amber-12: var(--color-amber-dark-12);
     --color-sky: rgb(63 76 245);
 
-    --color-background: var(--color-slate-2);
+    --color-bg: var(--color-slate-2);
 
-    --color-foreground: rgb(from var(--color-slate-12) r g b / 0.9);
-    --color-foreground-bold: var(--color-slate-12);
-    --color-foreground-ref: var(--color-slate-12);
+    --color-fg: rgb(from var(--color-slate-12) r g b / 0.9);
+    --color-fg-bold: var(--color-slate-12);
+    --color-fg-ref: var(--color-slate-12);
     --color-caption: rgb(from var(--color-slate-12) r g b / 0.5);
     --color-caption-bold: rgb(from var(--color-slate-12) r g b / 0.75);
     --color-caption-ref: rgb(from var(--color-slate-12) r g b / 0.75);
@@ -298,11 +298,11 @@
     --color-amber-12: var(--color-amber-light-12);
     --color-sky: rgb(34 121 255);
 
-    --color-background: var(--color-slate-2);
+    --color-bg: var(--color-slate-2);
 
-    --color-foreground: rgb(from var(--color-slate-12) r g b / 0.9);
-    --color-foreground-bold: var(--color-slate-12);
-    --color-foreground-ref: var(--color-slate-12);
+    --color-fg: rgb(from var(--color-slate-12) r g b / 0.9);
+    --color-fg-bold: var(--color-slate-12);
+    --color-fg-ref: var(--color-slate-12);
     --color-caption: var(--color-slate-10);
     --color-caption-bold: var(--color-slate-11);
     --color-caption-ref: var(--color-slate-11);
@@ -328,9 +328,9 @@
     --color-primary-11: var(--color-slate-11);
     --color-primary-12: var(--color-slate-12);
 
-    --color-foreground: rgb(from var(--color-primary-12) r g b / 0.9);
-    --color-foreground-bold: var(--color-primary-12);
-    --color-foreground-ref: var(--color-primary-12);
+    --color-fg: rgb(from var(--color-primary-12) r g b / 0.9);
+    --color-fg-bold: var(--color-primary-12);
+    --color-fg-ref: var(--color-primary-12);
     --color-caption: var(--color-primary-10);
     --color-caption-bold: var(--color-primary-11);
     --color-caption-ref: var(--color-primary-11);
@@ -351,36 +351,36 @@
     --color-primary-11: var(--color-red-11);
     --color-primary-12: var(--color-red-12);
 
-    --color-foreground: var(--color-red-10);
-    --color-foreground-bold: var(--color-red-10);
-    --color-foreground-ref: var(--color-red-10);
+    --color-fg: var(--color-red-10);
+    --color-fg-bold: var(--color-red-10);
+    --color-fg-ref: var(--color-red-10);
     --color-caption: var(--color-red-10);
     --color-caption-bold: var(--color-red-10);
     --color-caption-ref: var(--color-red-10);
   }
 
   .theme-success {
-    --color-foreground: var(--color-lime-10);
-    --color-foreground-bold: var(--color-lime-10);
-    --color-foreground-ref: var(--color-lime-10);
+    --color-fg: var(--color-lime-10);
+    --color-fg-bold: var(--color-lime-10);
+    --color-fg-ref: var(--color-lime-10);
     --color-caption: var(--color-lime-10);
     --color-caption-bold: var(--color-lime-10);
     --color-caption-ref: var(--color-lime-10);
   }
 
   .theme-accent {
-    --color-foreground: var(--color-cyan-10);
-    --color-foreground-bold: var(--color-cyan-10);
-    --color-foreground-ref: var(--color-cyan-10);
+    --color-fg: var(--color-cyan-10);
+    --color-fg-bold: var(--color-cyan-10);
+    --color-fg-ref: var(--color-cyan-10);
     --color-caption: var(--color-cyan-10);
     --color-caption-bold: var(--color-cyan-10);
     --color-caption-ref: var(--color-cyan-10);
   }
 
   .theme-warning {
-    --color-foreground: var(--color-amber-10);
-    --color-foreground-bold: var(--color-amber-10);
-    --color-foreground-ref: var(--color-amber-10);
+    --color-fg: var(--color-amber-10);
+    --color-fg-bold: var(--color-amber-10);
+    --color-fg-ref: var(--color-amber-10);
     --color-caption: var(--color-amber-10);
     --color-caption-bold: var(--color-amber-10);
     --color-caption-ref: var(--color-amber-10);
@@ -388,7 +388,7 @@
 }
 
 body {
-  @apply bg-background;
+  @apply bg-bg;
 }
 
 :root {

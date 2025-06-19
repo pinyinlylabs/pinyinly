@@ -76,9 +76,9 @@ const flagViewClass = tv({
 });
 
 const flagIconClass = tv({
-  base: `text-foreground`,
+  base: `text-fg`,
 });
 
 const flagTextClass = tv({
-  base: `font-bold uppercase text-foreground`,
+  base: `font-bold uppercase text-fg`,
 });

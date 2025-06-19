@@ -33,7 +33,7 @@ function TestPage() {
             header
           </RectButton>
         </View>
-        <Text className="text-[100px] text-foreground">你好</Text>
+        <Text className="text-[100px] text-fg">你好</Text>
 
         <TextInputSingle
           placeholder={`type text`}
@@ -61,9 +61,7 @@ function TestPage() {
           </RectButton>
         ) : null}
         <Text
-          className={`
-            h-[100px] overflow-hidden whitespace-pre bg-[red] text-foreground transition-[height]
-          `}
+          className={`h-[100px] overflow-hidden whitespace-pre bg-[red] text-fg transition-[height]`}
         >
           {JSON.stringify({ visualViewport }, null, 2)}
         </Text>

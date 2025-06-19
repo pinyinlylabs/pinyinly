@@ -95,7 +95,7 @@ export const WikiHanziWordModal = ({
                 <View className="flex-row gap-1">
                   {characters.map((character) => (
                     <View key={character} className="items-start">
-                      <Text className="font-karla text-[60px] text-foreground">
+                      <Text className="font-karla text-[60px] text-fg">
                         {character}
                       </Text>
                     </View>
@@ -103,7 +103,7 @@ export const WikiHanziWordModal = ({
                 </View>
 
                 {hanziWordSkillData.data.pinyin == null ? null : (
-                  <Text className="font-karla text-2xl text-foreground/50">
+                  <Text className="font-karla text-2xl text-fg/50">
                     {hanziWordSkillData.data.pinyin
                       .map((x) => pinyinPronunciationDisplayText(x))
                       .join(`, `)}
@@ -112,7 +112,7 @@ export const WikiHanziWordModal = ({
               </View>
 
               <View className="gap-1">
-                <Text className="font-karla text-2xl text-foreground">
+                <Text className="font-karla text-2xl text-fg">
                   {hanziWordSkillData.data.gloss.join(`, `)}
                   {otherMeaningsQuery.data == null ||
                   otherMeaningsQuery.data.length === 0 ? null : (
@@ -191,11 +191,11 @@ export const WikiHanziWordModal = ({
 
               {wikiEntry.data?.visuallySimilar == null ? null : (
                 <View className="gap-1 font-karla">
-                  <Text className="text-xs uppercase text-foreground/90">
+                  <Text className="text-xs uppercase text-fg/90">
                     Visually Similar
                   </Text>
 
-                  <View className="flex-row flex-wrap gap-2 text-foreground">
+                  <View className="flex-row flex-wrap gap-2 text-fg">
                     {wikiEntry.data.visuallySimilar.map((hanzi, i) => (
                       <Text key={i}>{hanzi}</Text>
                     ))}
@@ -205,10 +205,10 @@ export const WikiHanziWordModal = ({
 
               {!__DEV__ || skillStatesQuery.data == null ? null : (
                 <View className="gap-1 font-karla">
-                  <Text className="text-xs uppercase text-foreground/90">
+                  <Text className="text-xs uppercase text-fg/90">
                     Skills <DevLozenge />
                   </Text>
-                  <View className="gap-2 text-foreground">
+                  <View className="gap-2 text-fg">
                     {skillStatesQuery.data.map(([skill, skillState], i) => (
                       <View key={i} className="flex-row items-center gap-2">
                         <Text>

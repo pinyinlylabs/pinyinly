@@ -41,7 +41,7 @@ function DesignSystemPage() {
         <Link href="/learn" asChild>
           <Text
             className={`
-              text-foreground
+              text-fg
 
               hover:underline
             `}
@@ -238,7 +238,7 @@ export default function DesignSystemStrict() {
 }
 
 const typography = tv({
-  base: `text-foreground`,
+  base: `text-fg`,
 
   variants: {
     size: {
@@ -317,7 +317,7 @@ const LittlePrimaryHeader = ({ title }: { title: string }) => {
   return (
     <View className="mb-2 mt-4 flex-row items-center gap-2">
       <View className="h-px grow bg-primary-7" />
-      <Text className="text-center text-xs font-bold uppercase text-foreground/80">
+      <Text className="text-center text-xs font-bold uppercase text-fg/80">
         {title}
       </Text>
       <View className="h-px grow bg-primary-7" />
@@ -333,7 +333,7 @@ const ColorSwatch = ({
   className?: string;
 }) => (
   <View className="flex-wrap gap-1">
-    <Text className="text-center text-xs text-foreground/50">{index}</Text>
+    <Text className="text-center text-xs text-fg/50">{index}</Text>
     <View
       className={`
         size-[40px]
@@ -364,9 +364,9 @@ const Section = ({
       <View className="flex-row" ref={ref}>
         <View
           className={`
-            hhh-color-schema-light flex-1 bg-background/90 p-2
+            hhh-color-schema-light flex-1 bg-bg/90 p-2
 
-            hover:bg-background
+            hover:bg-bg
           `}
         >
           <Pressable
@@ -376,7 +376,7 @@ const Section = ({
               });
             }}
           >
-            <Text className="text-2xl text-foreground">{title}</Text>
+            <Text className="text-2xl text-fg">{title}</Text>
           </Pressable>
         </View>
         <View className="hhh-color-scheme-dark flex-1 bg-primary-4 p-2" />
@@ -405,7 +405,7 @@ const Section = ({
   );
 };
 
-const examplesStackClassName = `bg-background flex-1 shrink basis-1 flex-row flex-wrap justify-center gap-2 p-2 sm:justify-start`;
+const examplesStackClassName = `bg-bg flex-1 shrink basis-1 flex-row flex-wrap justify-center gap-2 p-2 sm:justify-start`;
 
 const ExampleStack = ({
   children,
