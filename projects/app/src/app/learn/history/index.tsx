@@ -106,7 +106,7 @@ export default function HistoryPage() {
         </View> */}
         <View className="flex-row gap-2">
           <View className="flex-1 items-center gap-[10px]">
-            <Text className="text-xl text-foreground">queue items</Text>
+            <Text className="text-xl text-fg">queue items</Text>
 
             {data2Query.data?.items.slice(0, 100).map((skill, i) => (
               <View key={i} className="items-center">
@@ -119,12 +119,10 @@ export default function HistoryPage() {
           </View>
 
           <View>
-            <Text className="self-center text-xl text-foreground">
-              mistakes
-            </Text>
+            <Text className="self-center text-xl text-fg">mistakes</Text>
             {allMistakes.map(([_key, value], i) => (
               <View key={i}>
-                <Text className="text-foreground">
+                <Text className="text-fg">
                   {value.hanziOrHanziWord} ❌{` `}
                   {`gloss` in value ? value.gloss : value.pinyin}
                 </Text>
@@ -132,7 +130,7 @@ export default function HistoryPage() {
             ))}
           </View>
           <View>
-            <Text className="self-center text-xl text-foreground">history</Text>
+            <Text className="self-center text-xl text-fg">history</Text>
 
             <View className="gap-2">
               {skillRatingsQuery.data?.map(([_key, value], i) => {

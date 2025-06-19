@@ -216,7 +216,7 @@ const MinorTickBg = ({ n, axis }: { axis: Axis; n: number }) => {
 
   return (
     <Reanimated.View
-      className="absolute top-1/2 rounded-full bg-foreground"
+      className="absolute top-1/2 rounded-full bg-fg"
       style={animStyles}
     />
   );
@@ -265,7 +265,7 @@ const MajorTickBg = ({ n, axis }: { axis: Axis; n: number }) => {
 
   return (
     <Reanimated.View
-      className="absolute left-1/2 top-1/2 rounded-full bg-foreground"
+      className="absolute left-1/2 top-1/2 rounded-full bg-fg"
       style={dotAnimStyles}
     />
   );

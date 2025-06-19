@@ -14,7 +14,7 @@ export const ReferencePageBodySection = ({
       </View>
       <View>
         {typeof children === `string` ? (
-          <Text className="text-xl text-foreground">{children}</Text>
+          <Text className="text-xl text-fg">{children}</Text>
         ) : (
           children
         )}

@@ -32,7 +32,7 @@ export const ReferencePageHeader = ({
       </LinearGradient>
 
       <View className="h-[52px] items-center justify-center bg-primary-5">
-        <Text className="text-[23px] text-foreground">{subtitle ?? ``}</Text>
+        <Text className="text-[23px] text-fg">{subtitle ?? ``}</Text>
       </View>
     </>
   );

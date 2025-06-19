@@ -84,7 +84,7 @@ export default function MnemonicsPage() {
 
   return (
     <ScrollView
-      className="flex-1 bg-background"
+      className="flex-1 bg-bg"
       contentContainerClassName="py-safe-offset-4 items-center"
     >
       <View className="max-w-[800px] gap-4 px-safe-or-4">
@@ -95,21 +95,21 @@ export default function MnemonicsPage() {
             lg:px-0
           `}
         >
-          <Text className="text-3xl font-bold text-foreground">Mnemonics</Text>
+          <Text className="text-3xl font-bold text-fg">Mnemonics</Text>
         </View>
 
         {query.data == null ? (
           query.isLoading ? (
-            <Text className="text-foreground">Loading</Text>
+            <Text className="text-fg">Loading</Text>
           ) : query.isError ? (
-            <Text className="text-foreground">Error</Text>
+            <Text className="text-fg">Error</Text>
           ) : (
-            <Text className="text-foreground">unexpected state</Text>
+            <Text className="text-fg">unexpected state</Text>
           )
         ) : (
           <>
             <View>
-              <Text className="text-lg font-bold text-foreground">Tones</Text>
+              <Text className="text-lg font-bold text-fg">Tones</Text>
             </View>
             <View
               className={`
@@ -129,9 +129,7 @@ export default function MnemonicsPage() {
                     lg:size-24
                   `}
                 >
-                  <Text className="text-center text-2xl text-foreground">
-                    {tone}
-                  </Text>
+                  <Text className="text-center text-2xl text-fg">{tone}</Text>
                   <Text className="text-center text-caption" numberOfLines={1}>
                     {desc}
                   </Text>
@@ -153,9 +151,7 @@ export default function MnemonicsPage() {
             <View className="border-t-2 border-primary-5"></View>
 
             <View>
-              <Text className="text-lg font-bold text-foreground">
-                Initials
-              </Text>
+              <Text className="text-lg font-bold text-fg">Initials</Text>
             </View>
 
             <View
@@ -169,7 +165,7 @@ export default function MnemonicsPage() {
                 ([, { initials, desc, id }], i) => (
                   <Fragment key={desc}>
                     <View className="flex-row gap-2">
-                      <Text className="text-foreground">{desc}</Text>
+                      <Text className="text-fg">{desc}</Text>
                       <Text className="text-primary-8">
                         {initialGroupThemes.data?.get(id) ?? `no theme`}
                       </Text>
@@ -188,7 +184,7 @@ export default function MnemonicsPage() {
                                 false,
                             })}
                           >
-                            <Text className="text-center font-cursive text-2xl text-foreground">
+                            <Text className="text-center font-cursive text-2xl text-fg">
                               {initial}-
                             </Text>
                             <Text className={altText()} numberOfLines={1}>
@@ -220,7 +216,7 @@ export default function MnemonicsPage() {
             <View className="border-t-2 border-primary-5"></View>
 
             <View>
-              <Text className="text-lg font-bold text-foreground">Finals</Text>
+              <Text className="text-lg font-bold text-fg">Finals</Text>
             </View>
             <View
               className={`
@@ -237,7 +233,7 @@ export default function MnemonicsPage() {
                       finalAssociationsQuery.data?.has(final) ?? false,
                   })}
                 >
-                  <Text className="text-center font-cursive text-2xl text-foreground">
+                  <Text className="text-center font-cursive text-2xl text-fg">
                     -{final}
                   </Text>
                   <Text className={altText()} numberOfLines={1}>

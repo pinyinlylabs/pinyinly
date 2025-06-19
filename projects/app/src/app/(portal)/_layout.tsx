@@ -76,7 +76,7 @@ export default function SideNavLayout() {
               </Link>
             </View>
 
-            <View className="w-[200px] items-stretch rounded-xl bg-background-1 py-3">
+            <View className="w-[200px] items-stretch rounded-xl bg-bg-1 py-3">
               {navItems
                 .filter((section) => section.primary === true)
                 .map((section, sectionIndex) => (
@@ -196,7 +196,7 @@ const TabButton2Impl = ({
   return (
     <Pressable {...rest}>
       <View className={buttonContainerClass({ isFocused })}>
-        <Text className="font-sans text-sm/normal font-normal uppercase text-foreground">
+        <Text className="font-sans text-sm/normal font-normal uppercase text-fg">
           {name}
         </Text>
       </View>
@@ -238,7 +238,7 @@ function MobileNavigationTrigger() {
             setIsOpen(false);
           }}
         >
-          <View className="size-full bg-background">
+          <View className="size-full bg-bg">
             <MobileTopMenu
               title="Menu"
               rightButton={
@@ -315,9 +315,9 @@ function MobileNavigationGroupItemImpl({
     <Pressable
       {...rest}
       className={`
-        flex-row bg-background-1 py-2.5 pl-4 pr-3
+        flex-row bg-bg-1 py-2.5 pl-4 pr-3
 
-        hover:bg-foreground/10
+        hover:bg-fg/10
       `}
     >
       <Text className="hhh-button-outline">{name}</Text>
@@ -367,11 +367,11 @@ const buttonContainerClass = tv({
   base: `
     h-[32px] flex-1 items-end justify-center px-[24px]
 
-    hover:bg-foreground/5
+    hover:bg-fg/5
   `,
   variants: {
     isFocused: {
-      true: `bg-foreground/10`,
+      true: `bg-fg/10`,
     },
   },
 });

@@ -51,27 +51,27 @@ export default function MnemonicIdPage() {
 
   return (
     <ScrollView
-      className="bg-background"
+      className="bg-bg"
       contentContainerClassName="max-w-[800px] self-center px-safe-or-4 pb-2 pt-safe-offset-4 px-safe-or-4"
     >
       <View>
-        <Text className="text-3xl text-foreground">{id}-</Text>
+        <Text className="text-3xl text-fg">{id}-</Text>
       </View>
 
       <View className="gap-2">
-        <Text className="text-lg text-foreground">
+        <Text className="text-lg text-fg">
           others in this group ({group?.id}) — {group?.desc}
         </Text>
         <View className="flex-row flex-wrap gap-1">
           {group?.initials.map(([i]) => (
             <Link key={i} href={`/explore/mnemonics/${i}`}>
-              <Text className="text-foreground">{i}-</Text>
+              <Text className="text-fg">{i}-</Text>
             </Link>
           ))}
         </View>
 
         <View className="flex-row flex-wrap gap-1">
-          <Text className="text-xl text-foreground">Association choices</Text>
+          <Text className="text-xl text-fg">Association choices</Text>
         </View>
 
         <View className="gap-2">
@@ -87,7 +87,7 @@ export default function MnemonicIdPage() {
                 })
                 .map(([themeId, themeName, initials], i) => (
                   <View key={i}>
-                    <Text className="text-lg text-foreground">
+                    <Text className="text-lg text-fg">
                       {themeName}
                       {themeId === groupTheme.data?.themeId ? (
                         ` ✅`
@@ -110,7 +110,7 @@ export default function MnemonicIdPage() {
                     {[...initials.entries()].map(([name, desc], i) => (
                       <View key={i}>
                         <Text
-                          className="font-bold text-foreground"
+                          className="font-bold text-fg"
                           onPress={() => {
                             void r.mutate.setPinyinInitialAssociation({
                               initial: id,

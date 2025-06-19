@@ -97,7 +97,7 @@ export default function SideNavLayout() {
         <Link
           href="/login"
           className={`
-            items-center rounded-md px-2 py-1 text-xl font-bold tracking-wide text-foreground
+            items-center rounded-md px-2 py-1 text-xl font-bold tracking-wide text-fg
 
             hover:bg-primary-4
 
@@ -146,8 +146,8 @@ const TabButton = ({
 const iconClass = tv({
   variants: {
     isFocused: {
-      true: `text-foreground`,
-      false: `text-foreground-bg50`, // avoid using opacity because it doesn't work properly with the expo-image tintColor filter
+      true: `text-fg`,
+      false: `text-fg-bg50`, // avoid using opacity because it doesn't work properly with the expo-image tintColor filter
     },
   },
 });
@@ -158,14 +158,14 @@ const buttonClass = tv({
 
 const buttonTextClass = tv({
   base: `
-    hidden font-sans text-sm font-bold uppercase text-foreground transition-colors
+    hidden font-sans text-sm font-bold uppercase text-fg transition-colors
 
     md:flex
   `,
   variants: {
     isFocused: {
-      true: `text-foreground`,
-      false: `text-foreground/50`,
+      true: `text-fg`,
+      false: `text-fg/50`,
     },
   },
 });

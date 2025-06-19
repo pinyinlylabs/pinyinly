@@ -114,22 +114,20 @@ const NewHanziWordToGlossSkillContent = ({
   return (
     <ContainerWithContinueButton onContinue={dismiss}>
       {hanziWordSkillData.data == null ? (
-        <Text className="text-foreground">Not implemented</Text>
+        <Text className="text-fg">Not implemented</Text>
       ) : (
         <>
           <View className="mb-8 gap-8">
             <View className="theme-success flex-row items-center gap-2 self-center">
               <IconImage source={require(`@/assets/icons/plant-filled.svg`)} />
-              <Text className="font-bold uppercase text-foreground">
-                New Word
-              </Text>
+              <Text className="font-bold uppercase text-fg">New Word</Text>
             </View>
 
             <View className="items-center gap-2">
               <View className="flex-row gap-1">
                 {hanziChars.map((character) => (
                   <View key={character} className="items-center">
-                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-foreground">
+                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-fg">
                       {character}
                     </Text>
                   </View>
@@ -163,22 +161,20 @@ const NewHanziWordToPinyinSkillContent = ({
   return (
     <ContainerWithContinueButton onContinue={dismiss}>
       {hanziWordSkillData.data == null ? (
-        <Text className="text-foreground">Not implemented</Text>
+        <Text className="text-fg">Not implemented</Text>
       ) : (
         <>
           <View className="mb-8 gap-8">
             <View className="theme-success flex-row items-center gap-2 self-center">
               <IconImage source={require(`@/assets/icons/plant-filled.svg`)} />
-              <Text className="font-bold uppercase text-foreground">
-                New Pinyin
-              </Text>
+              <Text className="font-bold uppercase text-fg">New Pinyin</Text>
             </View>
 
             <View className="items-center gap-2">
               <View className="flex-row gap-1">
                 {hanziChars.map((character) => (
                   <View key={character} className="items-center">
-                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-foreground">
+                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-fg">
                       {character}
                     </Text>
                   </View>
@@ -210,13 +206,13 @@ const NewHanziWordToPinyinInitialSkillContent = ({
   return (
     <ContainerWithContinueButton onContinue={dismiss}>
       {hanziWordSkillData.data == null ? (
-        <Text className="text-foreground">Not implemented</Text>
+        <Text className="text-fg">Not implemented</Text>
       ) : (
         <>
           <View className="mb-8 gap-8">
             <View className="theme-success flex-row items-center gap-2 self-center">
               <IconImage source={require(`@/assets/icons/plant-filled.svg`)} />
-              <Text className="font-bold uppercase text-foreground">
+              <Text className="font-bold uppercase text-fg">
                 New Pinyin Initial
               </Text>
             </View>
@@ -225,7 +221,7 @@ const NewHanziWordToPinyinInitialSkillContent = ({
               <View className="flex-row gap-1">
                 {hanziChars.map((character) => (
                   <View key={character} className="items-center">
-                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-foreground">
+                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-fg">
                       {character}
                     </Text>
                   </View>
@@ -261,13 +257,13 @@ const NewHanziWordToPinyinFinalSkillContent = ({
   return (
     <ContainerWithContinueButton onContinue={dismiss}>
       {hanziWordSkillData.data == null ? (
-        <Text className="text-foreground">Not implemented</Text>
+        <Text className="text-fg">Not implemented</Text>
       ) : (
         <>
           <View className="mb-8 gap-8">
             <View className="theme-success flex-row items-center gap-2 self-center">
               <IconImage source={require(`@/assets/icons/plant-filled.svg`)} />
-              <Text className="font-bold uppercase text-foreground">
+              <Text className="font-bold uppercase text-fg">
                 New Pinyin Final
               </Text>
             </View>
@@ -276,7 +272,7 @@ const NewHanziWordToPinyinFinalSkillContent = ({
               <View className="flex-row gap-1">
                 {characters.map((character) => (
                   <View key={character} className="items-center">
-                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-foreground">
+                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-fg">
                       {character}
                     </Text>
                   </View>
@@ -312,13 +308,13 @@ const NewHanziWordToPinyinToneSkillContent = ({
   return (
     <ContainerWithContinueButton onContinue={dismiss}>
       {hanziWordSkillData.data == null ? (
-        <Text className="text-foreground">Not implemented</Text>
+        <Text className="text-fg">Not implemented</Text>
       ) : (
         <>
           <View className="mb-8 gap-8">
             <View className="theme-success flex-row items-center gap-2 self-center">
               <IconImage source={require(`@/assets/icons/plant-filled.svg`)} />
-              <Text className="font-bold uppercase text-foreground">
+              <Text className="font-bold uppercase text-fg">
                 New Pinyin Tone
               </Text>
             </View>
@@ -327,7 +323,7 @@ const NewHanziWordToPinyinToneSkillContent = ({
               <View className="flex-row gap-1">
                 {characters.map((character) => (
                   <View key={character} className="items-center">
-                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-foreground">
+                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-fg">
                       {character}
                     </Text>
                   </View>

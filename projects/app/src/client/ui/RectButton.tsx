@@ -87,7 +87,7 @@ const pressable = tv({
         rounded-xl
 
         focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1
-        focus-visible:outline-foreground/75
+        focus-visible:outline-fg/75
       `,
       outline: `rounded-xl`,
       option: `
@@ -129,9 +129,9 @@ const roundedRect = tv({
   `,
   variants: {
     variant: {
-      filled: `rounded-xl border-background/20 bg-foreground/95 px-4 py-2`,
-      outline: `rounded-xl border-2 border-foreground/20 px-4 py-2`,
-      option: `rounded-xl border border-foreground/20 px-3 py-2`,
+      filled: `rounded-xl border-bg/20 bg-fg/95 px-4 py-2`,
+      outline: `rounded-xl border-2 border-fg/20 px-4 py-2`,
+      option: `rounded-xl border border-fg/20 px-3 py-2`,
       bare: `px-2 py-1`,
     },
     hoveredOrPressed: {
@@ -148,7 +148,7 @@ const roundedRect = tv({
     {
       variant: `filled`,
       hoveredOrPressed: true,
-      class: `bg-foreground`,
+      class: `bg-fg`,
     },
     {
       variant: `filled`,
@@ -160,7 +160,7 @@ const roundedRect = tv({
       variant: `outline`,
       disabled: false,
       hoveredOrPressed: true,
-      class: `border-foreground/30`,
+      class: `border-fg/30`,
     },
     {
       variant: `outline`,
@@ -177,7 +177,7 @@ const roundedRect = tv({
       variant: `option`,
       disabled: false,
       hoveredOrPressed: true,
-      class: `border-foreground/30`,
+      class: `border-fg/30`,
     },
     {
       variant: `option`,

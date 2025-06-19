@@ -13,16 +13,16 @@ await test(`${classNameLintInvariant.name} suite`, async (t) => {
 
   await t.test(`does not allow transparent text colors`, async () => {
     expect(() => {
-      classNameLintInvariant(`text-foreground/50`);
+      classNameLintInvariant(`text-fg/50`);
     }).toThrow();
     expect(() => {
-      classNameLintInvariant(`other-class text-foreground/50`);
+      classNameLintInvariant(`other-class text-fg/50`);
     }).toThrow();
   });
 
   await t.test(`allows opaque text colors`, async () => {
     expect(() => {
-      classNameLintInvariant(`text-foreground-bg50`);
+      classNameLintInvariant(`text-fg-bg50`);
     }).not.toThrow();
   });
 

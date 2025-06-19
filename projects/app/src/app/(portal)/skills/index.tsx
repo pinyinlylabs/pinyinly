@@ -143,7 +143,7 @@ function SkillTile({
         )}
       </Text>
       <Text className={skillTileGlossClass({ rank })}>{gloss}</Text>
-      <View className="mt-3 h-1 w-full items-start rounded bg-background">
+      <View className="mt-3 h-1 w-full items-start rounded bg-bg">
         {completion === 0 ? null : (
           <View
             className={skillTileProgressBarClass({ rank })}
@@ -159,7 +159,7 @@ const skillTileClass = tv({
   base: `min-w-[120px] flex-1 rounded-lg border-b-2 px-4 py-3`,
   variants: {
     rank: {
-      0: `border-b-[#2b2b2b] bg-background-1`,
+      0: `border-b-[#2b2b2b] bg-bg-1`,
       1: `border-b-[#5C184E] bg-[#3C1F36]`,
       2: `border-b-[#4E145D] bg-[#361A3D]`,
       3: `border-b-[#002B56] bg-[#002244]`,

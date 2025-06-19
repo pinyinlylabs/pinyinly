@@ -28,7 +28,7 @@ export default function RadicalPage() {
   });
 
   return (
-    <ScrollView className="bg-background">
+    <ScrollView className="bg-bg">
       <ReferencePage
         header={
           <ReferencePageHeader
@@ -39,9 +39,9 @@ export default function RadicalPage() {
         }
         body={
           query.isLoading ? (
-            <Text className="text-foreground">Loading</Text>
+            <Text className="text-fg">Loading</Text>
           ) : query.isError ? (
-            <Text className="text-foreground">Error</Text>
+            <Text className="text-fg">Error</Text>
           ) : (
             <>
               {query.data?.nameMnemonics == null ? null : (
@@ -50,7 +50,7 @@ export default function RadicalPage() {
                     {query.data.nameMnemonics.map(
                       ({ mnemonic, rationale }, i) => (
                         <View key={i} className="gap-1">
-                          <Text className="text-foreground">{mnemonic}</Text>
+                          <Text className="text-fg">{mnemonic}</Text>
                           <Text className="text-xs italic text-caption">
                             {rationale}
                           </Text>
@@ -66,7 +66,7 @@ export default function RadicalPage() {
                     {query.data.pinyinMnemonics.map(
                       ({ mnemonic, strategy: rationale }, i) => (
                         <View key={i} className="gap-1">
-                          <Text className="text-foreground">{mnemonic}</Text>
+                          <Text className="text-fg">{mnemonic}</Text>
                           <Text className="text-xs italic text-caption">
                             {rationale}
                           </Text>

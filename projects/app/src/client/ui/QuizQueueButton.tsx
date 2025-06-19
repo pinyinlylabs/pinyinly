@@ -27,7 +27,7 @@ export function QuizQueueButton({
     >
       <IconImage
         size={32}
-        className="self-center text-foreground"
+        className="self-center text-fg"
         source={require(`@/assets/icons/inbox-filled.svg`)}
       />
       {queueStats == null || queueCount == null ? null : queueCount > 0 ? (
@@ -50,10 +50,10 @@ export function QuizQueueButton({
 
 function CheckBadge() {
   return (
-    <View className="absolute left-[55%] top-[62%] size-quiz-px rounded-full bg-background p-[2px]">
+    <View className="absolute left-[55%] top-[62%] size-quiz-px rounded-full bg-bg p-[2px]">
       <IconImage
         size={12}
-        className="self-center rounded-full bg-foreground/30 text-foreground"
+        className="self-center rounded-full bg-fg/30 text-fg"
         source={require(`@/assets/icons/check.svg`)}
       />
     </View>
@@ -72,7 +72,7 @@ function CountLozenge({
   const countText = count >= 100 ? `99+` : `${count}`;
   return (
     <View className={countLozengePillClass({ mode, className })}>
-      <Text className="text-[10px] font-bold tabular-nums text-background">
+      <Text className="text-[10px] font-bold tabular-nums text-bg">
         {countText}
       </Text>
     </View>
@@ -82,7 +82,7 @@ function CountLozenge({
 const countLozengePillClass = tv({
   base: `
     absolute left-[52%] top-[60%] flex h-[20px] min-w-[20px] items-center justify-center
-    rounded-full border-2 border-solid border-background px-[4px]
+    rounded-full border-2 border-solid border-bg px-[4px]
   `,
   variants: {
     mode: {

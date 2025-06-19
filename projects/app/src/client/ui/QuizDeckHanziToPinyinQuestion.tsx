@@ -109,8 +109,7 @@ export function QuizDeckHanziToPinyinQuestion({
         grade == null ? null : (
           <View
             className={`
-              flex-1 gap-[12px] overflow-hidden bg-foreground-bg10 px-quiz-px pt-3
-              pb-safe-offset-[84px]
+              flex-1 gap-[12px] overflow-hidden bg-fg-bg10 px-quiz-px pt-3 pb-safe-offset-[84px]
 
               lg:mb-2 lg:rounded-xl
 
@@ -123,9 +122,7 @@ export function QuizDeckHanziToPinyinQuestion({
                   size={32}
                   source={require(`@/assets/icons/check-circled-filled.svg`)}
                 />
-                <Text className="text-2xl font-bold text-foreground">
-                  Nice!
-                </Text>
+                <Text className="text-2xl font-bold text-fg">Nice!</Text>
               </View>
             ) : (
               <>
@@ -134,11 +131,9 @@ export function QuizDeckHanziToPinyinQuestion({
                     size={32}
                     source={require(`@/assets/icons/close-circled-filled.svg`)}
                   />
-                  <Text className="text-2xl font-bold text-foreground">
-                    Incorrect
-                  </Text>
+                  <Text className="text-2xl font-bold text-fg">Incorrect</Text>
                 </View>
-                <Text className="text-xl/none font-medium text-foreground">
+                <Text className="text-xl/none font-medium text-fg">
                   Correct answer:
                 </Text>
 
@@ -179,7 +174,7 @@ export function QuizDeckHanziToPinyinQuestion({
         <View>
           {flag == null ? null : <QuizFlagText flag={flag} />}
           <View>
-            <Text className="text-xl font-bold text-foreground">
+            <Text className="text-xl font-bold text-fg">
               What sound does this make?
             </Text>
           </View>
@@ -188,9 +183,7 @@ export function QuizDeckHanziToPinyinQuestion({
           {hanziChars.map((hanzi, i) => {
             return (
               <View className="items-center gap-2" key={i}>
-                <Text className="text-[80px] font-medium text-foreground">
-                  {hanzi}
-                </Text>
+                <Text className="text-[80px] font-medium text-fg">{hanzi}</Text>
               </View>
             );
           })}
