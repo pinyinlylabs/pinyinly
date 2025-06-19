@@ -15,6 +15,7 @@ export const hhhTextRef = tv({
   variants: {
     context: {
       [`body-2xl`]: `hhh-body-2xl-ref`,
+      [`body-title`]: `hhh-body-title-ref`,
       [`body`]: `hhh-body-ref`,
       [`caption`]: `hhh-body-caption-ref`,
     },

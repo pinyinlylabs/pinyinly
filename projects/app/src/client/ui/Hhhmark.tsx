@@ -4,11 +4,12 @@ import { Text } from "react-native";
 import { tv } from "tailwind-variants";
 import { HanziWordRefText } from "./HanziWordRefText";
 
-export type HhhmarkContext = `body-2xl` | `body` | `caption`;
+export type HhhmarkContext = `body-2xl` | `body-title` | `body` | `caption`;
 
 export const hhhText = tv({
   variants: {
     context: {
+      [`body-title`]: `hhh-body-title`,
       [`body-2xl`]: `hhh-body-2xl`,
       [`body`]: `hhh-body`,
       [`caption`]: `hhh-body-caption`,
@@ -20,6 +21,7 @@ export const hhhTextBold = tv({
   variants: {
     context: {
       [`body-2xl`]: `hhh-body-2xl-bold`,
+      [`body-title`]: `hhh-body-title-bold`,
       [`body`]: `hhh-body-bold`,
       [`caption`]: `hhh-body-caption-bold`,
     },
@@ -30,6 +32,7 @@ export const hhhTextItalic = tv({
   variants: {
     context: {
       [`body-2xl`]: `hhh-body-2xl-italic`,
+      [`body-title`]: `hhh-body-title-italic`,
       [`body`]: `hhh-body-italic`,
       [`caption`]: `hhh-body-caption-italic`,
     },
