@@ -1,10 +1,10 @@
 import { mock } from "node:test";
+import type { Component } from "react";
+import { View } from "react-native-web";
 
 // Mock react-native to use react-native-web otherwise Node will try to import
 // Flow type files and fail.
 mock.module(`react-native`, {
-  // @ts-expect-error we don't care about the types of this, it's just for mocking.
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   namedExports: await import(`react-native-web`),
 });
 
@@ -15,6 +15,41 @@ mock.module(`expo-image`, {
     // SyntaxError: The requested module 'expo-image' does not provide an export
     // named 'Image'
     Image: () => null,
+  },
+});
+
+mock.module(`expo-secure-store`, {
+  namedExports: {
+    getItemAsync: () => null,
+    deleteItemAsync: () => null,
+    setItemAsync: () => null,
+  },
+});
+
+mock.module(`react-native-reanimated`, {
+  namedExports: {
+    useSharedValue: () => null,
+    useAnimatedStyle: () => ({}),
+    withDelay: null,
+    withSpring: null,
+    withTiming: null,
+    Easing: null,
+    Extrapolation: null,
+    interpolate: null,
+    interpolateColor: null,
+  },
+  defaultExport: {
+    createAnimatedComponent: (x: Component) => x,
+  },
+});
+
+mock.module(`nativewind`, {
+  namedExports: {
+    cssInterop: () => null,
+  },
+  defaultExport: {
+    createAnimatedComponent: (x: Component) => x,
+    View,
   },
 });
 

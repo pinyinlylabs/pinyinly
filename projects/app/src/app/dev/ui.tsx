@@ -13,9 +13,10 @@ import { ShootingStars } from "@/client/ui/ShootingStars";
 import type { TextAnswerButtonState } from "@/client/ui/TextAnswerButton";
 import { TextAnswerButton } from "@/client/ui/TextAnswerButton";
 import { TextInputSingle } from "@/client/ui/TextInputSingle";
+import { ToggleButton } from "@/client/ui/ToggleButton";
 import type { PropsOf } from "@/client/ui/types";
 import { Use } from "@/client/ui/Use";
-import WikiHanziWordModal from "@/client/ui/WikiHanziWordModal";
+import { WikiHanziWordModal } from "@/client/ui/WikiHanziWordModal";
 import { QuestionFlagKind } from "@/data/model";
 import { hanziWordToPinyinQuestionOrThrow } from "@/data/questions/hanziWordToPinyin";
 import {
@@ -61,6 +62,10 @@ function DesignSystemPage() {
         </Link>
       </View>
       <ScrollView style={{ flex: 1 }} ref={scrollViewRef}>
+        <Section title={ToggleButtonExamples.name} scrollTo={scrollTo}>
+          <ToggleButtonExamples />
+        </Section>
+
         <Section title={WikiHanziWordModalExamples.name} scrollTo={scrollTo}>
           <WikiHanziWordModalExamples />
         </Section>
@@ -121,19 +126,7 @@ function DesignSystemPage() {
         </Section>
 
         <Section title="Typography" scrollTo={scrollTo}>
-          <View className="flex-1 gap-2">
-            {([`chinese`] as const).map((family) => (
-              <View key={family}>
-                <LittlePrimaryHeader title={family} />
-                <TypographyExample family={family} size="xs" />
-                <TypographyExample family={family} size="sm" />
-                <TypographyExample family={family} size="base" />
-                <TypographyExample family={family} size="lg" />
-                <TypographyExample family={family} size="xl" />
-                <TypographyExample family={family} size="2xl" />
-              </View>
-            ))}
-          </View>
+          <TypographyExamples />
         </Section>
 
         <Section title="Colors" scrollTo={scrollTo}>
@@ -173,24 +166,6 @@ export default function DesignSystemStrict() {
     </StrictMode>
   );
 }
-
-const typography = tv({
-  base: `text-fg`,
-
-  variants: {
-    size: {
-      xs: `text-xs`,
-      sm: `text-sm`,
-      base: `text-base`,
-      lg: `text-lg`,
-      xl: `text-xl`,
-      "2xl": `text-2xl`,
-    },
-    family: {
-      chinese: `font-chinese`,
-    },
-  },
-});
 
 const HanziTextExamples = () => (
   <>
@@ -232,20 +207,44 @@ const HanziTextExamples = () => (
   </>
 );
 
-const TypographyExample = ({
-  size,
-  family,
-}: {
-  size: `xs` | `sm` | `base` | `lg` | `xl` | `2xl`;
-  family: `chinese`;
-}) => {
+const TypographyExamples = () => {
   return (
-    <View>
-      <Text className="text-xs text-caption">{size}</Text>
+    <View className="flex-1 gap-3">
+      {[
+        `hhh-body-2xl`,
+        `hhh-body-2xl-ref`,
+        `hhh-body-2xl-bold`,
+        `hhh-body-2xl-italic`,
+        `hhh-body-title`,
+        `hhh-body-heading`,
+        `hhh-body`,
+        `hhh-body-ref`,
+        `hhh-body-bold`,
+        `hhh-body-italic`,
+        `hhh-body-caption`,
+        `hhh-body-caption-ref`,
+        `hhh-body-caption-bold`,
+        `hhh-body-caption-italic`,
+        `hhh-body-dt`,
+        `hhh-body-input`,
+      ].map((family) => (
+        <View key={family} className="flex-row items-center gap-2">
+          <Text className="hhh-body-dt w-[200px] shrink-0 text-right">
+            {family}
+          </Text>
+          <Text className="text-fg">
+            <Text
+              className={`
+                ${family}
 
-      <Text className={typography({ size, family })} numberOfLines={1}>
-        The quick brown fox jumps over the lazy dog.
-      </Text>
+                truncate
+              `}
+            >
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit
+            </Text>
+          </Text>
+        </View>
+      ))}
     </View>
   );
 };
@@ -1333,6 +1332,31 @@ function WikiHanziWordModalExamples() {
           onDismiss={() => null}
         />
       </View>
+    </>
+  );
+}
+
+function ToggleButtonExamples() {
+  const [isActive1, setIsActive1] = useState(false);
+  const [isActive2, setIsActive2] = useState(true);
+  return (
+    <>
+      <ExampleStack title="on">
+        <ToggleButton
+          isActive={isActive1}
+          onPress={() => {
+            setIsActive1((prev) => !prev);
+          }}
+        />
+      </ExampleStack>
+      <ExampleStack title="off">
+        <ToggleButton
+          isActive={isActive2}
+          onPress={() => {
+            setIsActive2((prev) => !prev);
+          }}
+        />
+      </ExampleStack>
     </>
   );
 }

@@ -1,3 +1,4 @@
+import { devtoolsQueryFn } from "@/util/devtools";
 import type { UseQueryOptions, UseQueryResult } from "@tanstack/react-query";
 import {
   // eslint-disable-next-line @expoCodeImports/no-restricted-imports
@@ -17,6 +18,7 @@ export function useLocalQuery<
 ): UseQueryResult<TData, TError> {
   return useQuery({
     ...options,
+    queryFn: devtoolsQueryFn(options.queryFn),
     networkMode: `offlineFirst`,
     structuralSharing: false,
   });

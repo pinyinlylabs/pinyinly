@@ -6,10 +6,11 @@ import {
   hanziFromHanziWord,
   pinyinOrThrow,
 } from "@/dictionary/dictionary";
-import { lazy, Suspense, useState } from "react";
+import { useState } from "react";
 import { Text } from "react-native";
 import { tv } from "tailwind-variants";
 import type { HhhmarkContext } from "./Hhhmark";
+import { WikiHanziWordModal } from "./WikiHanziWordModal";
 
 export const hhhTextRef = tv({
   variants: {
@@ -21,8 +22,6 @@ export const hhhTextRef = tv({
     },
   },
 });
-
-const WikiHanziWordModal = lazy(() => import(`./WikiHanziWordModal`));
 
 export const HanziWordRefText = ({
   hanziWord,
@@ -78,14 +77,12 @@ export const HanziWordRefText = ({
         {text}
       </Text>
       {showWiki ? (
-        <Suspense fallback={null}>
-          <WikiHanziWordModal
-            hanziWord={hanziWord}
-            onDismiss={() => {
-              setShowWiki(false);
-            }}
-          />
-        </Suspense>
+        <WikiHanziWordModal
+          hanziWord={hanziWord}
+          onDismiss={() => {
+            setShowWiki(false);
+          }}
+        />
       ) : null}
     </>
   );

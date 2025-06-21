@@ -1,6 +1,6 @@
 import { Text, View } from "react-native";
 
-export default function SupportPage() {
+export default function SupportSettingsPage() {
   return (
     <View className="gap-5">
       {/* Header */}
