@@ -387,12 +387,13 @@ const navItems: NavGroup[] = [
     title: `Settings`,
     primary: true,
     items: [
-      { name: `Profile`, href: `/settings/profile` },
+      { name: `Developer`, href: `/settings/developer` },
+      // { name: `Profile`, href: `/settings/profile` },
       // { name: `Courses`, href: `/settings/courses` },
-      { name: `Appearance`, href: `/settings/appearance` },
-      { name: `Notifications`, href: `/settings/notifications` },
-      { name: `Billing`, href: `/settings/billing` },
-      { name: `Support`, href: `/settings/support` },
+      // { name: `Appearance`, href: `/settings/appearance` },
+      // { name: `Notifications`, href: `/settings/notifications` },
+      // { name: `Billing`, href: `/settings/billing` },
+      // { name: `Support`, href: `/settings/support` },
     ] satisfies NavItem[],
   },
   {

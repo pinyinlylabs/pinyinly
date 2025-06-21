@@ -1,6 +1,6 @@
 import { Text, View } from "react-native";
 
-export default function BillingPage() {
+export default function BillingSettingsPage() {
   return (
     <View className="gap-5">
       {/* Header */}

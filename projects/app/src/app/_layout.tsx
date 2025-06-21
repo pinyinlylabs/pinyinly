@@ -20,6 +20,7 @@ import { ReplicacheProvider } from "@/client/ui/ReplicacheContext";
 import { SplashScreen } from "@/client/ui/SplashScreen";
 import * as Sentry from "@sentry/react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Image } from "expo-image";
 import { Stack, useNavigationContainerRef } from "expo-router";
 import { cssInterop } from "nativewind";
@@ -64,6 +65,7 @@ function RootLayout() {
   return (
     <TrpcProvider queryClient={queryClient} getSessionId={getSessionId}>
       <QueryClientProvider client={queryClient}>
+        <ReactQueryDevtools initialIsOpen />
         <ReplicacheProvider>
           <PostHogProvider>
             <HhhThemeProvider>
