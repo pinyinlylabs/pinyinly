@@ -195,7 +195,7 @@ const DesktopNavGroupItemImpl = ({
   ...rest
 }: TabTriggerChildProps) => {
   if (__DEV__) {
-    invariant(`href` in rest, `DesktopNavGroupItemInner requires 'href' prop`);
+    invariant(`href` in rest, `DesktopNavGroupItemImpl requires 'href' prop`);
   }
   return (
     <Pressable {...rest}>
