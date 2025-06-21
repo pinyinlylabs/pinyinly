@@ -275,7 +275,7 @@ const bgAnimatedClass = tv({
     state: {
       default: ``,
       dimmed: ``,
-      selected: `bg-cyan-10/10`,
+      selected: `bg-cyanold/10`,
       success: `bg-fg/10`,
       error: `bg-transparent`,
     },
@@ -334,7 +334,7 @@ const rectClass = tv({
     {
       filled: false,
       pressed: true,
-      class: `border-cyan-5`,
+      class: `border-cyanold/50`,
     },
     // unfilled border
     {
@@ -355,12 +355,12 @@ const rectClass = tv({
     {
       state: `selected`,
       filled: true,
-      class: `border-cyan-10/90`,
+      class: `border-cyanold/90`,
     },
     {
       state: `error`,
       filled: true,
-      class: `border-red-10`,
+      class: `border-brick`,
     },
   ],
 });
@@ -377,10 +377,10 @@ const textClass = tv({
   variants: {
     state: {
       default: `text-fg`,
-      dimmed: `text-primary-9`,
-      selected: `text-cyan-10`,
+      dimmed: `text-fg/90`,
+      selected: `text-cyanold`,
       success: `text-fg`,
-      error: `text-red-10`,
+      error: `text-brick`,
     },
     length: {
       tiny: `

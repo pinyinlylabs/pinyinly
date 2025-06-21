@@ -16,9 +16,11 @@ import { WikiHanziInterpretationPanel } from "./WikiHanziInterpretationPanel";
 export const NewSkillModal = ({
   skill,
   passivePresentation,
+  devUiSnapshotMode,
 }: {
   skill: Skill;
   passivePresentation?: boolean;
+  devUiSnapshotMode?: boolean;
 }) => {
   const [isModalVisible, setIsModalVisible] = useState(true);
 
@@ -29,6 +31,7 @@ export const NewSkillModal = ({
         setIsModalVisible(false);
       }}
       passivePresentation={passivePresentation}
+      devUiSnapshotMode={devUiSnapshotMode}
     >
       {({ dismiss }) => {
         switch (skillKindFromSkill(skill)) {
@@ -127,14 +130,14 @@ const NewHanziWordToGlossSkillContent = ({
               <View className="flex-row gap-1">
                 {hanziChars.map((character) => (
                   <View key={character} className="items-center">
-                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-fg">
+                    <Text className="rounded-xl bg-bg-1 px-2 py-1 text-[60px] text-fg">
                       {character}
                     </Text>
                   </View>
                 ))}
               </View>
 
-              <Text className="text-4xl font-bold text-primary-12">
+              <Text className="text-4xl font-bold text-fg">
                 {hanziWordSkillData.data.gloss[0]}
               </Text>
             </View>
@@ -174,14 +177,14 @@ const NewHanziWordToPinyinSkillContent = ({
               <View className="flex-row gap-1">
                 {hanziChars.map((character) => (
                   <View key={character} className="items-center">
-                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-fg">
+                    <Text className="rounded-xl bg-bg-1 px-2 py-1 text-[60px] text-fg">
                       {character}
                     </Text>
                   </View>
                 ))}
               </View>
 
-              <Text className="text-4xl font-bold text-primary-12">
+              <Text className="text-4xl font-bold text-fg">
                 {hanziWordSkillData.data.pinyin?.[0]}
               </Text>
             </View>
@@ -221,14 +224,14 @@ const NewHanziWordToPinyinInitialSkillContent = ({
               <View className="flex-row gap-1">
                 {hanziChars.map((character) => (
                   <View key={character} className="items-center">
-                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-fg">
+                    <Text className="rounded-xl bg-bg-1 px-2 py-1 text-[60px] text-fg">
                       {character}
                     </Text>
                   </View>
                 ))}
               </View>
 
-              <Text className="text-4xl font-bold text-primary-12">
+              <Text className="text-4xl font-bold text-fg">
                 {hanziWordSkillData.data.pinyin?.[0]}
               </Text>
             </View>
@@ -272,14 +275,14 @@ const NewHanziWordToPinyinFinalSkillContent = ({
               <View className="flex-row gap-1">
                 {characters.map((character) => (
                   <View key={character} className="items-center">
-                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-fg">
+                    <Text className="rounded-xl bg-bg-1 px-2 py-1 text-[60px] text-fg">
                       {character}
                     </Text>
                   </View>
                 ))}
               </View>
 
-              <Text className="text-4xl font-bold text-primary-12">
+              <Text className="text-4xl font-bold text-fg">
                 {hanziWordSkillData.data.pinyin?.[0]}
               </Text>
             </View>
@@ -323,14 +326,14 @@ const NewHanziWordToPinyinToneSkillContent = ({
               <View className="flex-row gap-1">
                 {characters.map((character) => (
                   <View key={character} className="items-center">
-                    <Text className="rounded-xl bg-primary-6 px-2 py-1 text-[60px] text-fg">
+                    <Text className="rounded-xl bg-bg-1 px-2 py-1 text-[60px] text-fg">
                       {character}
                     </Text>
                   </View>
                 ))}
               </View>
 
-              <Text className="text-4xl font-bold text-primary-12">
+              <Text className="text-4xl font-bold text-fg">
                 {hanziWordSkillData.data.pinyin?.[0]}
               </Text>
             </View>
@@ -354,7 +357,7 @@ const ContainerWithContinueButton = ({
         {children}
       </ScrollView>
 
-      <View className="theme-accent border-t-2 border-primary-5 p-4 mb-safe">
+      <View className="theme-accent border-t-2 border-bg-1 p-4 mb-safe">
         <RectButton
           variant="filled"
           textClassName="py-1 px-2"

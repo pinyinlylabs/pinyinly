@@ -50,7 +50,7 @@ export const PinyinText = ({
 };
 
 const pinyinText = tv({
-  base: `text-base/none text-primary-9`,
+  base: `text-base/none text-caption`,
   variants: {
     small: {
       true: `text-xs/none`,

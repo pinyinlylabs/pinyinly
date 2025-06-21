@@ -54,9 +54,7 @@ export default function SkillsPage() {
         const items = x.data?.rankToHanziWords.get(rank);
         return items == null ? null : (
           <View className="gap-2" key={rank}>
-            <View className="items-start">
-              <Text className={rankTextClass({ rank })}>Rank {rank}</Text>
-            </View>
+            <RankLozenge rank={rank} />
 
             <View className="flex-row flex-wrap gap-2">
               {items.map(({ hanziWord, rank, completion }) => (
@@ -91,22 +89,28 @@ const skillTileFiller = (
   />
 );
 
-const rankTextClass = tv({
-  base: `
-    h-5 items-center justify-center rounded-full px-2 text-[10px] uppercase leading-[20px] ring-1
-  `,
+const rankLozengeTextClass = tv({
+  base: `items-center justify-center rounded-full px-3 py-2 text-xs font-medium uppercase text-bg`,
   variants: {
     rank: {
-      0: `bg-[#1A1A1A] text-[#999999] ring-[#666666]`,
-      1: `bg-[#3C1F36] text-[#FF38BD] ring-[#DD0093]`,
-      2: `bg-[#361A3D] text-[#D945FF] ring-[#B323D8]`,
-      3: `bg-[#002244] text-[#6B7CFF] ring-[#293EDB]`,
-      4: `bg-[#002644] text-[#3F89FF] ring-[#0055DE]`,
+      0: `bg-fg/10 text-fg/50`,
+      1: `bg-cyan`,
+      2: `bg-blue`,
+      3: `bg-violet`,
+      4: `bg-fuchsia`,
     },
   },
 });
 
-type RankNumber = 0 | 1 | 2 | 3 | 4;
+export type RankNumber = 0 | 1 | 2 | 3 | 4;
+
+export function RankLozenge({ rank }: { rank: RankNumber }) {
+  return (
+    <View className="items-start">
+      <Text className={rankLozengeTextClass({ rank })}>Rank {rank}</Text>
+    </View>
+  );
+}
 
 function coerceRank(rank: number): RankNumber {
   if (rank < 0) {
@@ -118,7 +122,7 @@ function coerceRank(rank: number): RankNumber {
   return rank as RankNumber;
 }
 
-function SkillTile({
+export function SkillTile({
   hanziWord,
   gloss,
   className,
@@ -156,14 +160,14 @@ function SkillTile({
 }
 
 const skillTileClass = tv({
-  base: `min-w-[120px] flex-1 rounded-lg border-b-2 px-4 py-3`,
+  base: `min-w-[120px] flex-1 rounded-lg px-4 py-3`,
   variants: {
     rank: {
-      0: `border-b-[#2b2b2b] bg-bg-1`,
-      1: `border-b-[#5C184E] bg-[#3C1F36]`,
-      2: `border-b-[#4E145D] bg-[#361A3D]`,
-      3: `border-b-[#002B56] bg-[#002244]`,
-      4: `border-b-[#002F53] bg-[#002644]`,
+      0: `bg-bg-1`,
+      1: `bg-cyan/5`,
+      2: `bg-blue/5`,
+      3: `bg-violet/5`,
+      4: `bg-fuchsia/5`,
     },
   },
 });
@@ -172,11 +176,11 @@ const skillTileTitleClass = tv({
   base: `hhh-body-title truncate`,
   variants: {
     rank: {
-      0: `text-[#999999]`,
-      1: `text-[#FFE3F9]`,
-      2: `text-[#FAE8FF]`,
-      3: `text-[#E8F4FF]`,
-      4: `text-[#E8F4FF]`,
+      0: `text-fg/50`,
+      1: `text-cyan`,
+      2: `text-blue`,
+      3: `text-violet`,
+      4: `text-fuchsia`,
     },
   },
 });
@@ -185,11 +189,11 @@ const skillTileGlossClass = tv({
   base: `hhh-body-caption truncate`,
   variants: {
     rank: {
-      0: `text-[#999999]`,
-      1: `text-[#FFCEF5]`,
-      2: `text-[#F5CCFF]`,
-      3: `text-[#A4D1FF]`,
-      4: `text-[#A4D1FF]`,
+      0: `text-fg/50`,
+      1: `text-cyan`,
+      2: `text-blue`,
+      3: `text-violet`,
+      4: `text-fuchsia`,
     },
   },
 });
@@ -198,11 +202,11 @@ const skillTileProgressBarClass = tv({
   base: `h-1 rounded`,
   variants: {
     rank: {
-      0: `bg-[#666666]`,
-      1: `bg-[#FF38BD]`,
-      2: `bg-[#D945FF]`,
-      3: `bg-[#6B7CFF]`,
-      4: `bg-[#3F89FF]`,
+      0: `text-fg/50`,
+      1: `bg-cyan`,
+      2: `bg-blue`,
+      3: `bg-violet`,
+      4: `bg-fuchsia`,
     },
   },
 });

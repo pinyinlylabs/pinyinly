@@ -12,7 +12,7 @@ import { Fragment, useLayoutEffect, useState } from "react";
 import { Modal, Pressable, ScrollView, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 
-export default function SideNavLayout() {
+export default function MenuLayout() {
   return (
     <Tabs
       className={`
@@ -34,7 +34,7 @@ export default function SideNavLayout() {
         )}
       </TabList>
 
-      {/* Mobile header navigation */}
+      {/* Mobile header nav */}
       <MobileTopMenu
         className="sm:hidden"
         leftButton={
@@ -42,7 +42,7 @@ export default function SideNavLayout() {
             <IconImage source={require(`@/assets/icons/close.svg`)} size={32} />
           </Link>
         }
-        rightButton={<MobileNavigationTrigger />}
+        rightButton={<MobileNavTrigger />}
       />
 
       <ScrollView contentContainerClassName="py-safe-offset-5 px-safe-or-4 flex-row">
@@ -53,7 +53,7 @@ export default function SideNavLayout() {
 
             sm:flex sm:min-w-[240px] sm:items-end sm:pr-[32px]
 
-            portal-lg:flex-1
+            menu-lg:flex-1
           `}
         >
           <View className="sticky items-end top-safe-offset-5">
@@ -86,10 +86,10 @@ export default function SideNavLayout() {
                       <View className={`invisible h-[40px]`} />
                     )}
                     {section.title == null ? null : (
-                      <TabButtonSectionTitle name={section.title} />
+                      <DesktopNavGroupTitle name={section.title} />
                     )}
                     {section.items.map((item, itemIndex) => (
-                      <TabButton2 key={itemIndex} name={item.name} />
+                      <DesktopNavGroupItem key={itemIndex} name={item.name} />
                     ))}
                   </Fragment>
                 ))}
@@ -109,7 +109,7 @@ export default function SideNavLayout() {
                     )}
 
                     {section.items.map((item, itemIndex) => (
-                      <FooterLink2 key={itemIndex} name={item.name} />
+                      <DesktopNavSubtleItem key={itemIndex} name={item.name} />
                     ))}
                   </Fragment>
                 ))}
@@ -122,7 +122,7 @@ export default function SideNavLayout() {
           className={`
             flex-1
 
-            portal-lg:w-[600px] portal-lg:max-w-[600px] portal-lg:flex-none
+            menu-lg:w-[600px] menu-lg:max-w-[600px] menu-lg:flex-none
           `}
         >
           <TabSlot />
@@ -135,7 +135,7 @@ export default function SideNavLayout() {
 
             sm:flex
 
-            portal-lg:flex-1
+            menu-lg:flex-1
           `}
         ></View>
       </ScrollView>
@@ -146,7 +146,7 @@ export default function SideNavLayout() {
   );
 }
 
-function TabButtonSectionTitle({ name }: { name: string }) {
+function DesktopNavGroupTitle({ name }: { name: string }) {
   return (
     <View className="h-[24px] items-end justify-center px-[24px]">
       <Text className="hhh-body-dt">{name}</Text>
@@ -159,16 +159,20 @@ interface TabTriggerChildProps
   name: string;
 }
 
-function FooterLink2({ name }: { name: string }) {
+function DesktopNavSubtleItem({ name }: { name: string }) {
   return (
     <TabTrigger name={name} asChild>
       {/* <TabTrigger> will .cloneElement() and pass through props like `href` */}
-      <FooterLink2Impl name={name} />
+      <DesktopNavSubtleItemImpl name={name} />
     </TabTrigger>
   );
 }
 
-function FooterLink2Impl({ name, isFocused, ...rest }: TabTriggerChildProps) {
+function DesktopNavSubtleItemImpl({
+  name,
+  isFocused,
+  ...rest
+}: TabTriggerChildProps) {
   return (
     <Pressable {...rest} className="h-[32px] justify-center">
       <Text className="font-sans text-sm/normal font-light uppercase text-caption">
@@ -178,20 +182,20 @@ function FooterLink2Impl({ name, isFocused, ...rest }: TabTriggerChildProps) {
   );
 }
 
-const TabButton2 = ({ name }: { name: string }) => (
+const DesktopNavGroupItem = ({ name }: { name: string }) => (
   <TabTrigger name={name} asChild>
     {/* <TabTrigger> will .cloneElement() and pass through props like `href` */}
-    <TabButton2Impl name={name} />
+    <DesktopNavGroupItemImpl name={name} />
   </TabTrigger>
 );
 
-const TabButton2Impl = ({
+const DesktopNavGroupItemImpl = ({
   isFocused = false,
   name = ``,
   ...rest
 }: TabTriggerChildProps) => {
   if (__DEV__) {
-    invariant(`href` in rest, `TabButton2Inner requires 'href' prop`);
+    invariant(`href` in rest, `DesktopNavGroupItemImpl requires 'href' prop`);
   }
   return (
     <Pressable {...rest}>
@@ -204,7 +208,7 @@ const TabButton2Impl = ({
   );
 };
 
-function MobileNavigationTrigger() {
+function MobileNavTrigger() {
   const [isOpen, setIsOpen] = useState(false);
   const pathName = usePathname();
 
@@ -255,22 +259,13 @@ function MobileNavigationTrigger() {
               }
             />
             <View className="size-full gap-8 px-4 pb-6">
-              <MobileNavigationGroup>
-                <MobileNavigationGroupItem name="Overview" />
-                <MobileNavigationGroupItem name="Skills" />
-                <MobileNavigationGroupItem name="History" />
-                <MobileNavigationGroupItem name="Tutoring" />
-                <MobileNavigationGroupItem name="Wiki" />
-              </MobileNavigationGroup>
-
-              <MobileNavigationGroup title="Settings">
-                <MobileNavigationGroupItem name="Profile" />
-                <MobileNavigationGroupItem name="Courses" />
-                <MobileNavigationGroupItem name="Appearance" />
-                <MobileNavigationGroupItem name="Notifications" />
-                <MobileNavigationGroupItem name="Billing" />
-                <MobileNavigationGroupItem name="Support" />
-              </MobileNavigationGroup>
+              {navItems.map((section, sectionIndex) => (
+                <MobileNavGroup key={sectionIndex} title={section.title}>
+                  {section.items.map((item, itemIndex) => (
+                    <MobileNavGroupItem key={itemIndex} name={item.name} />
+                  ))}
+                </MobileNavGroup>
+              ))}
             </View>
           </View>
         </Modal>
@@ -279,7 +274,7 @@ function MobileNavigationTrigger() {
   );
 }
 
-function MobileNavigationGroup({
+function MobileNavGroup({
   children,
   title,
 }: {
@@ -298,15 +293,15 @@ function MobileNavigationGroup({
   );
 }
 
-function MobileNavigationGroupItem({ name }: { name: string }) {
+function MobileNavGroupItem({ name }: { name: string }) {
   return (
     <TabTrigger name={name} style={{ flex: 1 }} asChild>
-      <MobileNavigationGroupItemImpl name={name} />
+      <MobileNavGroupItemImpl name={name} />
     </TabTrigger>
   );
 }
 
-function MobileNavigationGroupItemImpl({
+function MobileNavGroupItemImpl({
   name,
   isFocused = false,
   ...rest

@@ -159,7 +159,7 @@ export const QuizProgressBar = ({ progress }: { progress: number }) => {
 
             {/* Fill bar */}
             <Reanimated.View
-              className="flex-1 overflow-hidden bg-sky"
+              className="flex-1 overflow-hidden bg-blue"
               style={[
                 fillAnimStyles,
                 {
@@ -249,7 +249,7 @@ const MajorTickFg = ({
   return (
     <>
       <Reanimated.View
-        className="absolute top-1/2 rounded-full bg-sky"
+        className="absolute top-1/2 rounded-full bg-blue"
         style={bgAnimStyles}
       />
       <Reanimated.View
