@@ -300,7 +300,7 @@ const syncRemotePush = inngest.createFunction(
       } of remoteSyncClients) {
         if (
           schemaVersion == null ||
-          supportedSchemas.some((s) => s.version === schemaVersion)
+          !supportedSchemas.some((s) => s.version === schemaVersion)
         ) {
           continue;
         }

@@ -10,7 +10,7 @@ import type {
 } from "@/data/model";
 import { MistakeKind } from "@/data/model";
 import type { Skill, SupportedSchema } from "@/data/rizzleSchema";
-import { v7 as schema } from "@/data/rizzleSchema";
+import { v8 as schema } from "@/data/rizzleSchema";
 import type {
   ClientStateNotFoundResponse,
   Cookie,
