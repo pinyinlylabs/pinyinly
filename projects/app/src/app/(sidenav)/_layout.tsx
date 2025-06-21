@@ -23,8 +23,8 @@ export default function SideNavLayout() {
     >
       <TabList
         className={`
-          grow-0 items-center gap-4 justify-self-stretch border-t-2 border-primary-4 pt-2
-          pb-safe-or-2 px-safe-or-4
+          grow-0 items-center gap-4 justify-self-stretch border-t-2 border-bg pt-2 pb-safe-or-2
+          px-safe-or-4
 
           md:flex-col md:items-start md:border-t-0 md:px-4 md:pt-6
         `}
@@ -39,7 +39,7 @@ export default function SideNavLayout() {
         >
           <Image
             source={require(`@/assets/logo/logotype.svg`)}
-            className="h-[40px] w-[140px] shrink text-primary-12"
+            className="h-[40px] w-[140px] shrink text-fg"
             tintColor="currentColor"
             contentFit="fill"
           />
@@ -99,7 +99,7 @@ export default function SideNavLayout() {
           className={`
             items-center rounded-md px-2 py-1 text-xl font-bold tracking-wide text-fg
 
-            hover:bg-primary-4
+            hover:bg-bg
 
             md:self-stretch
           `}

@@ -15,8 +15,8 @@ module.exports = {
       md: `768px`,
       // => @media (min-width: 768px) { ... }
 
-      /** "portal" is the name for the non-game pages like settings/profile/etc */
-      [`portal-lg`]: `872px`,
+      /** "menu" is the name for the non-game pages like settings/profile/etc */
+      [`menu-lg`]: `872px`,
       // => @media (min-width: 1024px) { ... }
 
       lg: `1024px`,
@@ -32,12 +32,12 @@ module.exports = {
       /* EXPERIMENTAL: named semantic colors */
       bg: {
         DEFAULT: `rgb(from var(--color-bg) r g b / calc(alpha * <alpha-value>))`,
-        1: `rgb(from var(--color-slate-3) r g b / calc(alpha * <alpha-value>))`,
+        1: `rgb(from var(--color-bg-1) r g b / calc(alpha * <alpha-value>))`,
       },
       fg: {
         DEFAULT: `rgb(from var(--color-fg) r g b / calc(alpha * <alpha-value>))`,
-        bold: `rgb(from var(--color-fg-bold) r g b / calc(alpha * <alpha-value>))`,
-        ref: `rgb(from var(--color-fg-ref) r g b / calc(alpha * <alpha-value>))`,
+        bold: `rgb(from var(--color-fg-1) r g b / calc(alpha * <alpha-value>))`,
+        ref: `rgb(from var(--color-fg-1) r g b / calc(alpha * <alpha-value>))`,
         bg5: `rgb(from color-mix(in oklab, var(--color-fg) 5%, var(--color-bg)) r g b / calc(alpha * <alpha-value>))`,
         bg10: `rgb(from color-mix(in oklab, var(--color-fg) 10%, var(--color-bg)) r g b / calc(alpha * <alpha-value>))`,
         bg15: `rgb(from color-mix(in oklab, var(--color-fg) 15%, var(--color-bg)) r g b / calc(alpha * <alpha-value>))`,
@@ -61,105 +61,40 @@ module.exports = {
       },
       caption: {
         DEFAULT: `rgb(from var(--color-caption) r g b / calc(alpha * <alpha-value>))`,
-        bold: `rgb(from var(--color-caption-bold) r g b / calc(alpha * <alpha-value>))`,
-        ref: `rgb(from var(--color-caption-ref) r g b / calc(alpha * <alpha-value>))`,
+        bold: `rgb(from var(--color-caption-1) r g b / calc(alpha * <alpha-value>))`,
+        ref: `rgb(from var(--color-caption-1) r g b / calc(alpha * <alpha-value>))`,
       },
 
-      primary: {
-        1: `rgb(from var(--color-primary-1) r g b / calc(alpha * <alpha-value>))`,
-        2: `rgb(from var(--color-primary-2) r g b / calc(alpha * <alpha-value>))`,
-        3: `rgb(from var(--color-primary-3) r g b / calc(alpha * <alpha-value>))`,
-        4: `rgb(from var(--color-primary-4) r g b / calc(alpha * <alpha-value>))`,
-        5: `rgb(from var(--color-primary-5) r g b / calc(alpha * <alpha-value>))`,
-        6: `rgb(from var(--color-primary-6) r g b / calc(alpha * <alpha-value>))`,
-        7: `rgb(from var(--color-primary-7) r g b / calc(alpha * <alpha-value>))`,
-        8: `rgb(from var(--color-primary-8) r g b / calc(alpha * <alpha-value>))`,
-        9: `rgb(from var(--color-primary-9) r g b / calc(alpha * <alpha-value>))`,
-        10: `rgb(from var(--color-primary-10) r g b / calc(alpha * <alpha-value>))`,
-        11: `rgb(from var(--color-primary-11) r g b / calc(alpha * <alpha-value>))`,
-        12: `rgb(from var(--color-primary-12) r g b / calc(alpha * <alpha-value>))`,
-      },
-
-      sky: {
-        DEFAULT: `rgb(from var(--color-sky) r g b / calc(alpha * <alpha-value>))`,
-      },
-
-      cyan: {
-        1: `rgb(from var(--color-cyan-1) r g b / calc(alpha * <alpha-value>))`,
-        2: `rgb(from var(--color-cyan-2) r g b / calc(alpha * <alpha-value>))`,
-        3: `rgb(from var(--color-cyan-3) r g b / calc(alpha * <alpha-value>))`,
-        4: `rgb(from var(--color-cyan-4) r g b / calc(alpha * <alpha-value>))`,
-        5: `rgb(from var(--color-cyan-5) r g b / calc(alpha * <alpha-value>))`,
-        6: `rgb(from var(--color-cyan-6) r g b / calc(alpha * <alpha-value>))`,
-        7: `rgb(from var(--color-cyan-7) r g b / calc(alpha * <alpha-value>))`,
-        8: `rgb(from var(--color-cyan-8) r g b / calc(alpha * <alpha-value>))`,
-        9: `rgb(from var(--color-cyan-9) r g b / calc(alpha * <alpha-value>))`,
-        10: `rgb(from var(--color-cyan-10) r g b / calc(alpha * <alpha-value>))`,
-        11: `rgb(from var(--color-cyan-11) r g b / calc(alpha * <alpha-value>))`,
-        12: `rgb(from var(--color-cyan-12) r g b / calc(alpha * <alpha-value>))`,
-      },
-
-      slate: {
-        1: `rgb(from var(--color-slate-1) r g b / calc(alpha * <alpha-value>))`,
-        2: `rgb(from var(--color-slate-2) r g b / calc(alpha * <alpha-value>))`,
-        3: `rgb(from var(--color-slate-3) r g b / calc(alpha * <alpha-value>))`,
-        4: `rgb(from var(--color-slate-4) r g b / calc(alpha * <alpha-value>))`,
-        5: `rgb(from var(--color-slate-5) r g b / calc(alpha * <alpha-value>))`,
-        6: `rgb(from var(--color-slate-6) r g b / calc(alpha * <alpha-value>))`,
-        7: `rgb(from var(--color-slate-7) r g b / calc(alpha * <alpha-value>))`,
-        8: `rgb(from var(--color-slate-8) r g b / calc(alpha * <alpha-value>))`,
-        9: `rgb(from var(--color-slate-9) r g b / calc(alpha * <alpha-value>))`,
-        10: `rgb(from var(--color-slate-10) r g b / calc(alpha * <alpha-value>))`,
-        11: `rgb(from var(--color-slate-11) r g b / calc(alpha * <alpha-value>))`,
-        12: `rgb(from var(--color-slate-12) r g b / calc(alpha * <alpha-value>))`,
-      },
-
-      red: {
-        1: `rgb(from var(--color-red-1) r g b / calc(alpha * <alpha-value>))`,
-        2: `rgb(from var(--color-red-2) r g b / calc(alpha * <alpha-value>))`,
-        3: `rgb(from var(--color-red-3) r g b / calc(alpha * <alpha-value>))`,
-        4: `rgb(from var(--color-red-4) r g b / calc(alpha * <alpha-value>))`,
-        5: `rgb(from var(--color-red-5) r g b / calc(alpha * <alpha-value>))`,
-        6: `rgb(from var(--color-red-6) r g b / calc(alpha * <alpha-value>))`,
-        7: `rgb(from var(--color-red-7) r g b / calc(alpha * <alpha-value>))`,
-        8: `rgb(from var(--color-red-8) r g b / calc(alpha * <alpha-value>))`,
-        9: `rgb(from var(--color-red-9) r g b / calc(alpha * <alpha-value>))`,
-        10: `rgb(from var(--color-red-10) r g b / calc(alpha * <alpha-value>))`,
-        11: `rgb(from var(--color-red-11) r g b / calc(alpha * <alpha-value>))`,
-        12: `rgb(from var(--color-red-12) r g b / calc(alpha * <alpha-value>))`,
-      },
-
-      amber: {
-        1: `rgb(from var(--color-amber-1) r g b / calc(alpha * <alpha-value>))`,
-        2: `rgb(from var(--color-amber-2) r g b / calc(alpha * <alpha-value>))`,
-        3: `rgb(from var(--color-amber-3) r g b / calc(alpha * <alpha-value>))`,
-        4: `rgb(from var(--color-amber-4) r g b / calc(alpha * <alpha-value>))`,
-        5: `rgb(from var(--color-amber-5) r g b / calc(alpha * <alpha-value>))`,
-        6: `rgb(from var(--color-amber-6) r g b / calc(alpha * <alpha-value>))`,
-        7: `rgb(from var(--color-amber-7) r g b / calc(alpha * <alpha-value>))`,
-        8: `rgb(from var(--color-amber-8) r g b / calc(alpha * <alpha-value>))`,
-        9: `rgb(from var(--color-amber-9) r g b / calc(alpha * <alpha-value>))`,
-        10: `rgb(from var(--color-amber-10) r g b / calc(alpha * <alpha-value>))`,
-        11: `rgb(from var(--color-amber-11) r g b / calc(alpha * <alpha-value>))`,
-        12: `rgb(from var(--color-amber-12) r g b / calc(alpha * <alpha-value>))`,
-      },
-
-      lime: {
-        1: `rgb(from var(--color-lime-1) r g b / calc(alpha * <alpha-value>))`,
-        2: `rgb(from var(--color-lime-2) r g b / calc(alpha * <alpha-value>))`,
-        3: `rgb(from var(--color-lime-3) r g b / calc(alpha * <alpha-value>))`,
-        4: `rgb(from var(--color-lime-4) r g b / calc(alpha * <alpha-value>))`,
-        5: `rgb(from var(--color-lime-5) r g b / calc(alpha * <alpha-value>))`,
-        6: `rgb(from var(--color-lime-6) r g b / calc(alpha * <alpha-value>))`,
-        7: `rgb(from var(--color-lime-7) r g b / calc(alpha * <alpha-value>))`,
-        8: `rgb(from var(--color-lime-8) r g b / calc(alpha * <alpha-value>))`,
-        9: `rgb(from var(--color-lime-9) r g b / calc(alpha * <alpha-value>))`,
-        10: `rgb(from var(--color-lime-10) r g b / calc(alpha * <alpha-value>))`,
-        11: `rgb(from var(--color-lime-11) r g b / calc(alpha * <alpha-value>))`,
-        12: `rgb(from var(--color-lime-12) r g b / calc(alpha * <alpha-value>))`,
-      },
+      red: `rgb(from var(--color-red) r g b / calc(alpha * <alpha-value>))`,
+      orange: `rgb(from var(--color-orange) r g b / calc(alpha * <alpha-value>))`,
+      amber: `rgb(from var(--color-amber) r g b / calc(alpha * <alpha-value>))`,
+      yellow: `rgb(from var(--color-yellow) r g b / calc(alpha * <alpha-value>))`,
+      lime: `rgb(from var(--color-lime) r g b / calc(alpha * <alpha-value>))`,
+      wasabi: `rgb(from var(--color-wasabi) r g b / calc(alpha * <alpha-value>))`,
+      green: `rgb(from var(--color-green) r g b / calc(alpha * <alpha-value>))`,
+      emerald: `rgb(from var(--color-emerald) r g b / calc(alpha * <alpha-value>))`,
+      teal: `rgb(from var(--color-teal) r g b / calc(alpha * <alpha-value>))`,
+      cyan: `rgb(from var(--color-cyan) r g b / calc(alpha * <alpha-value>))`,
+      cyanold: `rgb(from var(--color-cyanold) r g b / calc(alpha * <alpha-value>))`,
+      sky: `rgb(from var(--color-sky) r g b / calc(alpha * <alpha-value>))`,
+      blue: `rgb(from var(--color-blue) r g b / calc(alpha * <alpha-value>))`,
+      indigo: `rgb(from var(--color-indigo) r g b / calc(alpha * <alpha-value>))`,
+      violet: `rgb(from var(--color-violet) r g b / calc(alpha * <alpha-value>))`,
+      purple: `rgb(from var(--color-purple) r g b / calc(alpha * <alpha-value>))`,
+      fuchsia: `rgb(from var(--color-fuchsia) r g b / calc(alpha * <alpha-value>))`,
+      pink: `rgb(from var(--color-pink) r g b / calc(alpha * <alpha-value>))`,
+      rose: `rgb(from var(--color-rose) r g b / calc(alpha * <alpha-value>))`,
+      brick: `rgb(from var(--color-brick) r g b / calc(alpha * <alpha-value>))`,
+      slate: `rgb(from var(--color-slate) r g b / calc(alpha * <alpha-value>))`,
+      gray: `rgb(from var(--color-gray) r g b / calc(alpha * <alpha-value>))`,
+      zinc: `rgb(from var(--color-zinc) r g b / calc(alpha * <alpha-value>))`,
+      neutral: `rgb(from var(--color-neutral) r g b / calc(alpha * <alpha-value>))`,
+      stone: `rgb(from var(--color-stone) r g b / calc(alpha * <alpha-value>))`,
 
       transparent: `transparent`,
+      // Can be used like `current` but supports alpha values, e.g.:
+      // `deecoration-currentColor/50` will be `color-mix(in srgb, currentColor 50%, transparent)`
+      currentColor: `color-mix(in srgb, currentColor calc(<alpha-value> * 100%), transparent)`,
     },
     extend: {
       fontFamily: {

@@ -31,7 +31,7 @@ export const ReferencePageHeader = ({
         </View>
       </LinearGradient>
 
-      <View className="h-[52px] items-center justify-center bg-primary-5">
+      <View className="h-[52px] items-center justify-center bg-bg-1">
         <Text className="text-[23px] text-fg">{subtitle ?? ``}</Text>
       </View>
     </>

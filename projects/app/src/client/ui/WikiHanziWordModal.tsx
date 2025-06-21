@@ -24,9 +24,11 @@ import { useRizzleQueryPaged } from "./ReplicacheContext";
 export const WikiHanziWordModal = ({
   hanziWord,
   onDismiss,
+  devUiSnapshotMode,
 }: {
   hanziWord: HanziWord;
   onDismiss: () => void;
+  devUiSnapshotMode?: boolean;
 }) => {
   const hanziWordSkillData = useHanziWordMeaning(hanziWord);
   const hanzi = hanziFromHanziWord(hanziWord);
@@ -83,7 +85,7 @@ export const WikiHanziWordModal = ({
   );
 
   return (
-    <PageSheetModal onDismiss={onDismiss}>
+    <PageSheetModal onDismiss={onDismiss} devUiSnapshotMode={devUiSnapshotMode}>
       {({ dismiss }) =>
         hanziWordSkillData.data == null ? null : (
           <>
@@ -142,7 +144,7 @@ export const WikiHanziWordModal = ({
                   <Text className="font-karla text-xs uppercase text-caption">
                     Interpretation
                   </Text>
-                  <View className="gap-4 rounded-xl bg-primary-5 p-4">
+                  <View className="gap-4 rounded-xl bg-bg-1 p-4">
                     {wikiEntry.data.components.map((component, i) => {
                       return (
                         <View key={i} className="gap-1">
@@ -168,7 +170,7 @@ export const WikiHanziWordModal = ({
 
                     {hanziWordSkillData.data.glossHint == null ? null : (
                       <>
-                        <View className="h-px w-full bg-primary-8" />
+                        <View className="h-px w-full bg-bg-1" />
                         <Hhhmark
                           source={hanziWordSkillData.data.glossHint}
                           context="body"
@@ -178,7 +180,7 @@ export const WikiHanziWordModal = ({
 
                     {wikiEntry.data.interpretation == null ? null : (
                       <>
-                        <View className="h-px w-full bg-primary-8" />
+                        <View className="h-px w-full bg-bg-1" />
                         <Hhhmark
                           source={wikiEntry.data.interpretation}
                           context="body"
@@ -211,17 +213,17 @@ export const WikiHanziWordModal = ({
                   <View className="gap-2 text-fg">
                     {skillStatesQuery.data.map(([skill, skillState], i) => (
                       <View key={i} className="flex-row items-center gap-2">
-                        <Text>
+                        <Text className="hhh-body">
                           {skillKindToShorthand(skillKindFromSkill(skill))}
                         </Text>
-                        <Text>
+                        <Text className="hhh-body">
                           <Text className="hhh-body-caption">Stability:</Text>
                           {` `}
                           {skillState?.srs.stability == null
                             ? `null`
                             : skillState.srs.stability.toFixed(2)}
                         </Text>
-                        <Text>
+                        <Text className="hhh-body">
                           <Text className="hhh-body-caption">Difficulty:</Text>
                           {` `}
                           {skillState?.srs.difficulty == null
@@ -243,7 +245,7 @@ export const WikiHanziWordModal = ({
               )}
             </ScrollView>
 
-            <View className="theme-accent border-t-2 border-primary-5 p-4 mb-safe">
+            <View className="theme-accent border-t-2 border-bg-1 p-4 mb-safe">
               <RectButton variant="filled" onPress={dismiss}>
                 Close
               </RectButton>

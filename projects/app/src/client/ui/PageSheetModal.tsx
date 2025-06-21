@@ -17,7 +17,6 @@ import { useEventCallback } from "../hooks/useEventCallback";
 import { AnimatedPressable } from "./AnimatedPressable";
 
 interface PageSheetModalProps {
-  backdropColor?: string;
   children: (options: { dismiss: () => void }) => ReactNode;
   disableBackgroundDismiss?: boolean;
   /**
@@ -26,21 +25,27 @@ interface PageSheetModalProps {
    */
   passivePresentation?: boolean;
   onDismiss: () => void;
+  /**
+   * For development purposes only, this will disable the animations and
+   * allow the modal to be rendered immediately.
+   * This is useful for snapshot testing.
+   */
+  devUiSnapshotMode?: boolean;
 }
 
 export const PageSheetModal = ({
   children,
-  backdropColor = `primary-3`,
   disableBackgroundDismiss = false,
   onDismiss,
   passivePresentation = false,
+  devUiSnapshotMode = false,
 }: PageSheetModalProps) => {
   return (
     <PageSheetModalImpl
       onDismiss={onDismiss}
-      backdropColor={backdropColor}
       passivePresentation={passivePresentation}
       disableBackgroundDismiss={disableBackgroundDismiss}
+      devUiSnapshotMode={devUiSnapshotMode}
     >
       {children}
     </PageSheetModalImpl>
@@ -51,10 +56,10 @@ type ImplProps = Required<PageSheetModalProps>;
 
 const WebImpl = ({
   children,
-  backdropColor,
   disableBackgroundDismiss,
   passivePresentation,
   onDismiss,
+  devUiSnapshotMode,
 }: ImplProps) => {
   // snapshot the value so that changes to it don't cause show/dismiss
   // animations to repeat.
@@ -158,9 +163,26 @@ const WebImpl = ({
     };
   });
 
-  const backdropColorClass = `bg-${backdropColor}`;
+  const content = (
+    <Reanimated.View
+      className={`
+        max-h-full w-full max-w-[500px] rounded-xl bg-bg
 
-  return (
+        lg:max-h-[80vh] lg:w-[500px]
+      `}
+      style={[animatedContentStyle]}
+    >
+      {children(api)}
+    </Reanimated.View>
+  );
+
+  return devUiSnapshotMode ? (
+    <View
+      className={`size-full cursor-auto items-center justify-center bg-[black]/50 p-4`}
+    >
+      {content}
+    </View>
+  ) : (
     <Modal
       presentationStyle="fullScreen"
       transparent={true}
@@ -171,32 +193,19 @@ const WebImpl = ({
         style={[animatedBackgroundStyle]}
         onPress={onBackgroundPress}
       >
-        <Reanimated.View
-          className={`
-            max-h-full w-full max-w-[500px] rounded-xl
-
-            lg:max-h-[80vh] lg:w-[500px]
-
-            ${backdropColorClass}
-          `}
-          style={[animatedContentStyle]}
-        >
-          {children(api)}
-        </Reanimated.View>
+        {content}
       </AnimatedPressable>
     </Modal>
   );
 };
 
-const IosImpl = ({ onDismiss, backdropColor, children }: ImplProps) => {
+const IosImpl = ({ onDismiss, children }: ImplProps) => {
   const api = useMemo(
     () => ({
       dismiss: onDismiss,
     }),
     [onDismiss],
   );
-
-  const backdropColorClass = `bg-${backdropColor}`;
 
   return (
     <Modal
@@ -220,21 +229,13 @@ const IosImpl = ({ onDismiss, backdropColor, children }: ImplProps) => {
           `
         }
       >
-        <View
-          className={`
-            flex-1
-
-            ${backdropColorClass}
-          `}
-        >
-          {children(api)}
-        </View>
+        <View className={`flex-1 bg-bg`}>{children(api)}</View>
       </View>
     </Modal>
   );
 };
 
-const DefaultImpl = ({ backdropColor, children, onDismiss }: ImplProps) => {
+const DefaultImpl = ({ children, onDismiss }: ImplProps) => {
   const api = useMemo(
     () => ({
       dismiss: onDismiss,
@@ -242,23 +243,13 @@ const DefaultImpl = ({ backdropColor, children, onDismiss }: ImplProps) => {
     [onDismiss],
   );
 
-  const backdropColorClass = `bg-${backdropColor}`;
-
   return (
     <Modal
       animationType="slide"
       presentationStyle="pageSheet"
       onRequestClose={api.dismiss}
     >
-      <View
-        className={`
-          flex-1
-
-          ${backdropColorClass}
-        `}
-      >
-        {children(api)}
-      </View>
+      <View className={`flex-1 bg-bg`}>{children(api)}</View>
     </Modal>
   );
 };

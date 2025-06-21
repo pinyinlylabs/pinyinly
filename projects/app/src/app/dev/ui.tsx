@@ -2,6 +2,7 @@
 import { useQuizProgress } from "@/client/hooks/useQuizProgress";
 import { HanziText } from "@/client/ui/HanziText";
 import { IconImage } from "@/client/ui/IconImage";
+import { NewSkillModal } from "@/client/ui/NewSkillModal";
 import { PinyinOptionButton } from "@/client/ui/PinyinOptionButton";
 import { QuizDeckHanziToPinyinQuestion } from "@/client/ui/QuizDeckHanziToPinyinQuestion";
 import { QuizFlagText } from "@/client/ui/QuizFlagText";
@@ -14,9 +15,16 @@ import { TextAnswerButton } from "@/client/ui/TextAnswerButton";
 import { TextInputSingle } from "@/client/ui/TextInputSingle";
 import type { PropsOf } from "@/client/ui/types";
 import { Use } from "@/client/ui/Use";
+import WikiHanziWordModal from "@/client/ui/WikiHanziWordModal";
 import { QuestionFlagKind } from "@/data/model";
 import { hanziWordToPinyinQuestionOrThrow } from "@/data/questions/hanziWordToPinyin";
-import { hanziWordToPinyin } from "@/data/skills";
+import {
+  hanziWordToGloss,
+  hanziWordToPinyin,
+  hanziWordToPinyinFinal,
+  hanziWordToPinyinInitial,
+  hanziWordToPinyinTone,
+} from "@/data/skills";
 import { buildHanziWord } from "@/dictionary/dictionary";
 import { subMinutes } from "date-fns/subMinutes";
 import { Link } from "expo-router";
@@ -26,6 +34,8 @@ import { StrictMode, useCallback, useRef, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { tv } from "tailwind-variants";
+import type { RankNumber } from "../(menu)/skills";
+import { RankLozenge, SkillTile } from "../(menu)/skills";
 
 function DesignSystemPage() {
   const insets = useSafeAreaInsets();
@@ -51,6 +61,14 @@ function DesignSystemPage() {
         </Link>
       </View>
       <ScrollView style={{ flex: 1 }} ref={scrollViewRef}>
+        <Section title={WikiHanziWordModalExamples.name} scrollTo={scrollTo}>
+          <WikiHanziWordModalExamples />
+        </Section>
+
+        <Section title={SkillTileExamples.name} scrollTo={scrollTo}>
+          <SkillTileExamples />
+        </Section>
+
         <Section title={IconsExample.name} scrollTo={scrollTo}>
           <IconsExample />
         </Section>
@@ -119,92 +137,11 @@ function DesignSystemPage() {
         </Section>
 
         <Section title="Colors" scrollTo={scrollTo}>
-          <View>
-            <LittlePrimaryHeader title="slate" />
-            <View className="flex-row flex-wrap gap-1">
-              <ColorSwatch className="bg-slate-1" index={1} />
-              <ColorSwatch className="bg-slate-2" index={2} />
-              <ColorSwatch className="bg-slate-3" index={3} />
-              <ColorSwatch className="bg-slate-4" index={4} />
-              <ColorSwatch className="bg-slate-5" index={5} />
-              <ColorSwatch className="bg-slate-6" index={6} />
-              <ColorSwatch className="bg-slate-7" index={7} />
-              <ColorSwatch className="bg-slate-8" index={8} />
-              <ColorSwatch className="bg-slate-9" index={9} />
-              <ColorSwatch className="bg-slate-10" index={10} />
-              <ColorSwatch className="bg-slate-11" index={11} />
-              <ColorSwatch className="bg-slate-12" index={12} />
-            </View>
-          </View>
+          <ColorPalette />
+        </Section>
 
-          <View>
-            <LittlePrimaryHeader title="cyan" />
-            <View className="flex-row flex-wrap gap-1">
-              <ColorSwatch className="bg-cyan-1" index={1} />
-              <ColorSwatch className="bg-cyan-2" index={2} />
-              <ColorSwatch className="bg-cyan-3" index={3} />
-              <ColorSwatch className="bg-cyan-4" index={4} />
-              <ColorSwatch className="bg-cyan-5" index={5} />
-              <ColorSwatch className="bg-cyan-6" index={6} />
-              <ColorSwatch className="bg-cyan-7" index={7} />
-              <ColorSwatch className="bg-cyan-8" index={8} />
-              <ColorSwatch className="bg-cyan-9" index={9} />
-              <ColorSwatch className="bg-cyan-10" index={10} />
-              <ColorSwatch className="bg-cyan-11" index={11} />
-              <ColorSwatch className="bg-cyan-12" index={12} />
-            </View>
-          </View>
-          <View>
-            <LittlePrimaryHeader title="red" />
-            <View className="flex-row flex-wrap gap-1">
-              <ColorSwatch className="bg-red-1" index={1} />
-              <ColorSwatch className="bg-red-2" index={2} />
-              <ColorSwatch className="bg-red-3" index={3} />
-              <ColorSwatch className="bg-red-4" index={4} />
-              <ColorSwatch className="bg-red-5" index={5} />
-              <ColorSwatch className="bg-red-6" index={6} />
-              <ColorSwatch className="bg-red-7" index={7} />
-              <ColorSwatch className="bg-red-8" index={8} />
-              <ColorSwatch className="bg-red-9" index={9} />
-              <ColorSwatch className="bg-red-10" index={10} />
-              <ColorSwatch className="bg-red-11" index={11} />
-              <ColorSwatch className="bg-red-12" index={12} />
-            </View>
-          </View>
-          <View>
-            <LittlePrimaryHeader title="lime" />
-            <View className="flex-row flex-wrap gap-1">
-              <ColorSwatch className="bg-lime-1" index={1} />
-              <ColorSwatch className="bg-lime-2" index={2} />
-              <ColorSwatch className="bg-lime-3" index={3} />
-              <ColorSwatch className="bg-lime-4" index={4} />
-              <ColorSwatch className="bg-lime-5" index={5} />
-              <ColorSwatch className="bg-lime-6" index={6} />
-              <ColorSwatch className="bg-lime-7" index={7} />
-              <ColorSwatch className="bg-lime-8" index={8} />
-              <ColorSwatch className="bg-lime-9" index={9} />
-              <ColorSwatch className="bg-lime-10" index={10} />
-              <ColorSwatch className="bg-lime-11" index={11} />
-              <ColorSwatch className="bg-lime-12" index={12} />
-            </View>
-          </View>
-          <View>
-            <LittlePrimaryHeader title="amber" />
-            <View className="flex-row flex-wrap gap-1">
-              <ColorSwatch className="bg-amber-1" index={1} />
-              <ColorSwatch className="bg-amber-2" index={2} />
-              <ColorSwatch className="bg-amber-3" index={3} />
-              <ColorSwatch className="bg-amber-4" index={4} />
-              <ColorSwatch className="bg-amber-5" index={5} />
-              <ColorSwatch className="bg-amber-6" index={6} />
-              <ColorSwatch className="bg-amber-7" index={7} />
-              <ColorSwatch className="bg-amber-8" index={8} />
-              <ColorSwatch className="bg-amber-9" index={9} />
-              <ColorSwatch className="bg-amber-10" index={10} />
-              <ColorSwatch className="bg-amber-11" index={11} />
-              <ColorSwatch className="bg-amber-12" index={12} />
-            </View>
-          </View>
+        <Section title={NewSkillModalExamples.name} scrollTo={scrollTo}>
+          <NewSkillModalExamples />
         </Section>
 
         {/* Fill the rest of the page if it's too tall for the content */}
@@ -304,7 +241,7 @@ const TypographyExample = ({
 }) => {
   return (
     <View>
-      <Text className="text-xs text-primary-11">{size}</Text>
+      <Text className="text-xs text-caption">{size}</Text>
 
       <Text className={typography({ size, family })} numberOfLines={1}>
         The quick brown fox jumps over the lazy dog.
@@ -316,33 +253,14 @@ const TypographyExample = ({
 const LittlePrimaryHeader = ({ title }: { title: string }) => {
   return (
     <View className="mb-2 mt-4 flex-row items-center gap-2">
-      <View className="h-px grow bg-primary-7" />
+      <View className="h-px grow bg-bg-1" />
       <Text className="text-center text-xs font-bold uppercase text-fg/80">
         {title}
       </Text>
-      <View className="h-px grow bg-primary-7" />
+      <View className="h-px grow bg-bg-1" />
     </View>
   );
 };
-
-const ColorSwatch = ({
-  index,
-  className = ``,
-}: {
-  index: number;
-  className?: string;
-}) => (
-  <View className="flex-wrap gap-1">
-    <Text className="text-center text-xs text-fg/50">{index}</Text>
-    <View
-      className={`
-        size-[40px]
-
-        ${className}
-      `}
-    />
-  </View>
-);
 
 const Section = ({
   title,
@@ -379,7 +297,7 @@ const Section = ({
             <Text className="text-2xl text-fg">{title}</Text>
           </Pressable>
         </View>
-        <View className="hhh-color-scheme-dark flex-1 bg-primary-4 p-2" />
+        <View className="hhh-color-scheme-dark flex-1 bg-bg-1 p-2" />
       </View>
       <View className="flex-row">
         <View
@@ -435,7 +353,7 @@ const exampleStackChildrenClass = tv({
   base: `items-start`,
   variants: {
     showFrame: {
-      true: `border-2 border-dashed border-primary-8`,
+      true: `border-2 border-dashed border-fg/50`,
     },
   },
 });
@@ -878,6 +796,12 @@ function QuizProgressBarExample() {
   return (
     <View className="w-full gap-2">
       <View className="min-h-[32px]">
+        <QuizProgressBar progress={3} />
+      </View>
+      <View className="min-h-[32px]">
+        <QuizProgressBar progress={11} />
+      </View>
+      <View className="min-h-[32px]">
         <QuizProgressBar progress={quizProgress.progress} />
       </View>
       <View className="flex-row items-start gap-4">
@@ -1229,3 +1153,186 @@ const allIcons = [
   require(`../../assets/icons/zap-filled.svg`),
   // </hhh-require-glob>
 ];
+
+function ColorPalette() {
+  const bgColors = [
+    `bg-red`,
+    `bg-orange`,
+    `bg-amber`,
+    `bg-yellow`,
+    `bg-lime`,
+    `bg-wasabi`,
+    `bg-green`,
+    `bg-emerald`,
+    `bg-teal`,
+    `bg-cyan`,
+    `bg-cyanold`,
+    `bg-sky`,
+    `bg-blue`,
+    `bg-indigo`,
+    `bg-violet`,
+    `bg-purple`,
+    `bg-fuchsia`,
+    `bg-pink`,
+    `bg-rose`,
+    `bg-brick`,
+    `bg-slate`,
+    `bg-gray`,
+    `bg-zinc`,
+    `bg-neutral`,
+    `bg-stone`,
+    `bg-fg`,
+    `bg-bg-1`,
+  ];
+  const opacities = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1];
+  const columnLabels = (
+    <View
+      className={`
+        flex-row gap-2
+
+        [.hhh-color-scheme-dark_&]:flex-row-reverse
+      `}
+    >
+      {opacities.map((o, i) => (
+        <View key={i} className="w-9 items-center justify-center">
+          <Text className="text-xs text-fg">
+            <Text className="text-fg/20">/ </Text>
+            {o * 100}
+          </Text>
+        </View>
+      ))}
+    </View>
+  );
+  return (
+    <View
+      className={`
+        flex-1 items-end
+
+        [.hhh-color-scheme-dark_&]:items-start
+      `}
+    >
+      <View
+        className={`
+          flex-row gap-4
+
+          [.hhh-color-scheme-dark_&]:flex-row-reverse
+        `}
+      >
+        <View
+          className={`
+            items-end gap-2
+
+            [.hhh-color-scheme-dark_&]:items-start
+          `}
+        >
+          <View>
+            <Text className="invisible text-xs">Colors</Text>
+          </View>
+          {bgColors.map((bgColor) => (
+            <View key={bgColor} className={`h-9 justify-center`}>
+              <Text className="text-fg">{bgColor.replace(`bg-`, ``)}</Text>
+            </View>
+          ))}
+        </View>
+        <View className="gap-2">
+          {columnLabels}
+          {bgColors.map((bgColor) => (
+            <View
+              key={bgColor}
+              className={`
+                flex-row gap-2
+
+                [.hhh-color-scheme-dark_&]:flex-row-reverse
+              `}
+            >
+              {opacities.map((opacity, index) => (
+                <View
+                  className={`
+                    size-9 rounded-lg
+
+                    ${bgColor}
+                  `}
+                  key={index}
+                  style={{ opacity }}
+                />
+              ))}
+            </View>
+          ))}
+          {columnLabels}
+        </View>
+      </View>
+    </View>
+  );
+}
+
+function NewSkillModalExamples() {
+  return (
+    <>
+      <View>
+        <NewSkillModal
+          skill={hanziWordToPinyin(`你好:hello`)}
+          devUiSnapshotMode
+        />
+      </View>
+      <View>
+        <NewSkillModal
+          skill={hanziWordToPinyinInitial(`你好:hello`)}
+          devUiSnapshotMode
+        />
+      </View>
+      <View>
+        <NewSkillModal
+          skill={hanziWordToPinyinFinal(`你好:hello`)}
+          devUiSnapshotMode
+        />
+      </View>
+      <View>
+        <NewSkillModal
+          skill={hanziWordToPinyinTone(`你好:hello`)}
+          devUiSnapshotMode
+        />
+      </View>
+      <View>
+        <NewSkillModal
+          skill={hanziWordToGloss(`你好:hello`)}
+          devUiSnapshotMode
+        />
+      </View>
+    </>
+  );
+}
+
+function SkillTileExamples() {
+  return (
+    <>
+      {([0, 1, 2, 3, 4] as RankNumber[]).map((rank) => (
+        <View key={rank} className="gap-2">
+          <RankLozenge rank={rank} />
+          {[0, 0.1, 0.5, 0.9].map((completion) => (
+            <SkillTile
+              key={`${rank}-${completion}`}
+              hanziWord={`你好:hello`}
+              gloss={`hello`}
+              rank={rank}
+              completion={completion}
+            />
+          ))}
+        </View>
+      ))}
+    </>
+  );
+}
+
+function WikiHanziWordModalExamples() {
+  return (
+    <>
+      <View>
+        <WikiHanziWordModal
+          devUiSnapshotMode
+          hanziWord={`你好:hello`}
+          onDismiss={() => null}
+        />
+      </View>
+    </>
+  );
+}

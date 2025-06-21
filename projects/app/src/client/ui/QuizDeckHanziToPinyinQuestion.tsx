@@ -137,7 +137,13 @@ export function QuizDeckHanziToPinyinQuestion({
                   Correct answer:
                 </Text>
 
-                <SkillAnswer skill={skill} includeHint includeAlternatives />
+                <Text className="text-fg">
+                  <SkillAnswerText
+                    skill={skill}
+                    includeHint
+                    includeAlternatives
+                  />
+                </Text>
               </>
             )}
           </View>
@@ -324,7 +330,7 @@ const hiddenPlaceholderOptions = (
   </>
 );
 
-const SkillAnswer = ({
+const SkillAnswerText = ({
   skill,
   includeHint = false,
 }: {
@@ -353,7 +359,10 @@ const SkillAnswer = ({
     case SkillKind.HanziWordToGloss: {
       skill = skill as HanziWordSkill;
       return (
-        <HanziWordToGlossSkillAnswer skill={skill} includeHint={includeHint} />
+        <HanziWordToGlossSkillAnswerText
+          skill={skill}
+          includeHint={includeHint}
+        />
       );
     }
     case SkillKind.HanziWordToPinyin:
@@ -361,12 +370,12 @@ const SkillAnswer = ({
     case SkillKind.HanziWordToPinyinInitial:
     case SkillKind.HanziWordToPinyinTone: {
       skill = skill as HanziWordSkill;
-      return <HanziWordToPinyinSkillAnswer skill={skill} />;
+      return <HanziWordToPinyinSkillAnswerText skill={skill} />;
     }
   }
 };
 
-const HanziWordToGlossSkillAnswer = ({
+const HanziWordToGlossSkillAnswerText = ({
   skill,
   includeHint = false,
 }: {
@@ -387,7 +396,11 @@ const HanziWordToGlossSkillAnswer = ({
   );
 };
 
-const HanziWordToPinyinSkillAnswer = ({ skill }: { skill: HanziWordSkill }) => {
+const HanziWordToPinyinSkillAnswerText = ({
+  skill,
+}: {
+  skill: HanziWordSkill;
+}) => {
   const hanziWord = hanziWordFromSkill(skill);
 
   return (

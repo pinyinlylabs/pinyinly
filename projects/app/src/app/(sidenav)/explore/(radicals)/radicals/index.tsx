@@ -45,7 +45,7 @@ export default function RadicalsPage() {
             <View
               key={strokes}
               className={`
-                gap-2 border-t-2 border-primary-7 pt-2 px-safe-or-4
+                gap-2 border-t-2 border-bg-1 pt-2 px-safe-or-4
 
                 lg:px-0
               `}

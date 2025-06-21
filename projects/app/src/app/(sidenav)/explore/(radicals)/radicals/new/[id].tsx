@@ -160,8 +160,8 @@ export default function RadicalPage() {
         </View>
 
         {showExplanation ? (
-          <View className="absolute inset-x-0 bottom-0 rounded-t-2xl bg-primary-6">
-            <View className="my-2 h-2 w-12 self-center rounded bg-primary-8" />
+          <View className="absolute inset-x-0 bottom-0 rounded-t-2xl bg-bg">
+            <View className="my-2 h-2 w-12 self-center rounded bg-bg-1" />
 
             <View>
               <Text className="self-center font-semibold text-fg">

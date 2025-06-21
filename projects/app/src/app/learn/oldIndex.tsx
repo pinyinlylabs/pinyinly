@@ -220,7 +220,7 @@ export default function IndexPage() {
                       {recentHanzi.data.map((char, i) => (
                         <View
                           key={i}
-                          className="rounded border border-primary-7 bg-primary-3 p-2"
+                          className="rounded border border-bg-1 bg-bg p-2"
                         >
                           <Text className="text-fg">{char}</Text>
                         </View>
@@ -273,7 +273,7 @@ export default function IndexPage() {
 
 const boxClass = tv({
   base: `
-    w-full overflow-hidden rounded-xl bg-primary-3 p-4
+    w-full overflow-hidden rounded-xl bg-bg p-4
 
     md:max-w-[400px]
   `,

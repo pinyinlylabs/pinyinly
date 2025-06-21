@@ -55,7 +55,7 @@ export default function ExplorePage() {
 
 const boxClass = tv({
   base: `
-    w-full overflow-hidden rounded-xl bg-primary-3 p-4
+    w-full overflow-hidden rounded-xl bg-bg p-4
 
     md:max-w-[400px]
   `,

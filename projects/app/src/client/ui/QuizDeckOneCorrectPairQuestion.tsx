@@ -127,11 +127,13 @@ export function QuizDeckOneCorrectPairQuestion({
                   Correct answer:
                 </Text>
 
-                <SkillAnswer
-                  skill={answer.skill}
-                  includeHint
-                  includeAlternatives
-                />
+                <Text className="text-fg">
+                  <SkillAnswerText
+                    skill={answer.skill}
+                    includeHint
+                    includeAlternatives
+                  />
+                </Text>
 
                 {selectedAChoice != null && selectedBChoice != null ? (
                   <View className="flex-row flex-wrap items-center gap-2">
@@ -294,7 +296,7 @@ function choiceToHhhmark(choice: OneCorrectPairQuestionChoice): string {
   return `**${oneCorrectPairChoiceText(choice)}**`;
 }
 
-const SkillAnswer = ({
+const SkillAnswerText = ({
   skill,
   includeHint = false,
   // hideA = false,
@@ -325,7 +327,10 @@ const SkillAnswer = ({
     case SkillKind.HanziWordToGloss: {
       skill = skill as HanziWordSkill;
       return (
-        <HanziWordToGlossSkillAnswer skill={skill} includeHint={includeHint} />
+        <HanziWordToGlossSkillAnswerText
+          skill={skill}
+          includeHint={includeHint}
+        />
       );
     }
     case SkillKind.HanziWordToPinyin:
@@ -333,12 +338,12 @@ const SkillAnswer = ({
     case SkillKind.HanziWordToPinyinInitial:
     case SkillKind.HanziWordToPinyinTone: {
       skill = skill as HanziWordSkill;
-      return <HanziWordToPinyinSkillAnswer skill={skill} />;
+      return <HanziWordToPinyinSkillAnswerText skill={skill} />;
     }
   }
 };
 
-const HanziWordToGlossSkillAnswer = ({
+const HanziWordToGlossSkillAnswerText = ({
   skill,
   includeHint = false,
 }: {
@@ -359,7 +364,11 @@ const HanziWordToGlossSkillAnswer = ({
   );
 };
 
-const HanziWordToPinyinSkillAnswer = ({ skill }: { skill: HanziWordSkill }) => {
+const HanziWordToPinyinSkillAnswerText = ({
+  skill,
+}: {
+  skill: HanziWordSkill;
+}) => {
   const hanziWord = hanziWordFromSkill(skill);
 
   return (

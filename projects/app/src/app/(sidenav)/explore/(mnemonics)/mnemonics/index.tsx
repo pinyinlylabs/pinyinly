@@ -122,9 +122,9 @@ export default function MnemonicsPage() {
                 <View
                   key={tone}
                   className={`
-                    size-24 justify-center gap-2 rounded-xl bg-primary-3 px-2
+                    size-24 justify-center gap-2 rounded-xl bg-bg px-2
 
-                    hover:bg-primary-5
+                    hover:bg-bg-1
 
                     lg:size-24
                   `}
@@ -133,7 +133,7 @@ export default function MnemonicsPage() {
                   <Text className="text-center text-caption" numberOfLines={1}>
                     {desc}
                   </Text>
-                  <View className="h-2 rounded bg-primary-5">
+                  <View className="h-2 rounded bg-bg-1">
                     <View
                       className={`
                         h-2
@@ -148,7 +148,7 @@ export default function MnemonicsPage() {
               ))}
             </View>
 
-            <View className="border-t-2 border-primary-5"></View>
+            <View className="border-t-2 border-bg-1"></View>
 
             <View>
               <Text className="text-lg font-bold text-fg">Initials</Text>
@@ -166,7 +166,7 @@ export default function MnemonicsPage() {
                   <Fragment key={desc}>
                     <View className="flex-row gap-2">
                       <Text className="text-fg">{desc}</Text>
-                      <Text className="text-primary-8">
+                      <Text className="text-caption">
                         {initialGroupThemes.data?.get(id) ?? `no theme`}
                       </Text>
                     </View>
@@ -193,7 +193,7 @@ export default function MnemonicsPage() {
                                 .map((x) => `` + x)
                                 .join(` `)}
                             </Text>
-                            <View className="h-2 rounded bg-primary-5">
+                            <View className="h-2 rounded bg-bg-1">
                               <View
                                 className={`
                                   h-2
@@ -213,7 +213,7 @@ export default function MnemonicsPage() {
               )}
             </View>
 
-            <View className="border-t-2 border-primary-5"></View>
+            <View className="border-t-2 border-bg-1"></View>
 
             <View>
               <Text className="text-lg font-bold text-fg">Finals</Text>
@@ -242,7 +242,7 @@ export default function MnemonicsPage() {
                       .map((x) => `` + x)
                       .join(` `)}
                   </Text>
-                  <View className="mt-2 h-2 rounded bg-primary-5">
+                  <View className="mt-2 h-2 rounded bg-bg-1">
                     <View
                       className={`
                         h-2
@@ -269,15 +269,15 @@ const altText = tv({
 
 const pinyinPartBox = tv({
   base: `
-    size-24 justify-center gap-2 rounded-xl bg-primary-3 px-2
+    size-24 justify-center gap-2 rounded-xl bg-fg/20 px-2
 
-    hover:bg-primary-5
+    hover:bg-fg/50
 
     lg:size-24
   `,
   variants: {
     hasAssociation: {
-      true: `border-2 border-cyan-10`,
+      true: `border-2 border-cyanold`,
     },
   },
 });
