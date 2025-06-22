@@ -12,7 +12,7 @@ import { routingIntegration } from "@/client/sentry";
 // needs to be very early on in the setup.
 // ------------------------------
 
-import { getSessionId } from "@/client/auth";
+import { getServerSessionId } from "@/client/auth";
 import { TrpcProvider } from "@/client/trpc";
 import { HhhThemeProvider } from "@/client/ui/HhhThemeProvider";
 import { PostHogProvider } from "@/client/ui/PostHogProvider";
@@ -63,7 +63,10 @@ function RootLayout() {
   );
 
   return (
-    <TrpcProvider queryClient={queryClient} getSessionId={getSessionId}>
+    <TrpcProvider
+      queryClient={queryClient}
+      getServerSessionId={getServerSessionId}
+    >
       <QueryClientProvider client={queryClient}>
         <ReactQueryDevtools initialIsOpen />
         <ReplicacheProvider>

@@ -610,6 +610,13 @@ export type RizzleAnyMutator = RizzleMutator<any>;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type RizzleAnyEntity = RizzleEntity<string, any>;
 
+export type RizzleEntityInput<T extends RizzleAnyEntity> =
+  T[`_def`][`valueType`][`_input`];
+export type RizzleEntityMarshaled<T extends RizzleAnyEntity> =
+  T[`_def`][`valueType`][`_marshaled`];
+export type RizzleEntityOutput<T extends RizzleAnyEntity> =
+  T[`_def`][`valueType`][`_output`];
+
 export type RizzleRawObject = Record<string, RizzleType>;
 
 export type RizzleRawSchema = Record<string, RizzleRoot | string>;
@@ -722,8 +729,8 @@ export type RizzleReplicacheMutate<S extends RizzleRawSchema> = {
 };
 
 export type RizzleScanResult<T extends RizzleAnyEntity> = AsyncGenerator<
-  [string, T[`_def`][`valueType`][`_output`]]
-> & { toArray: () => Promise<[string, T[`_def`][`valueType`][`_output`]][]> };
+  [string, RizzleEntityOutput<T>]
+> & { toArray: () => Promise<[string, RizzleEntityOutput<T>][]> };
 
 export type RizzleReplicacheEntityMutate<T extends RizzleAnyEntity> =
   T extends RizzleAnyEntity ? Pick<T, `set`> : never;
@@ -784,6 +791,16 @@ export type RizzleReplicachePagedQuery<S extends RizzleRawSchema> = {
 
 const string = (alias?: string) => {
   const result = RizzleCustom.create(z.string(), z.string());
+  return alias == null ? result : result.alias(alias);
+};
+
+export type RizzleBoolean = RizzleCustom<boolean, boolean, boolean>;
+
+/**
+ * Stores a boolean value.
+ */
+const boolean = (alias?: string) => {
+  const result = RizzleCustom.create(z.boolean(), z.boolean());
   return alias == null ? result : result.alias(alias);
 };
 
@@ -952,7 +969,7 @@ const replicache = <
                         e._def.interpolateKey(partialKey, true),
                         (x) =>
                           e.unmarshalValue(
-                            x as (typeof e)[`_def`][`valueType`][`_marshaled`],
+                            x as RizzleEntityMarshaled<typeof e>,
                           ),
                       ),
                     ),
@@ -971,7 +988,7 @@ const replicache = <
                           `${k}.${indexName}`,
                           (x) =>
                             e.unmarshalValue(
-                              x as (typeof e)[`_def`][`valueType`][`_marshaled`],
+                              x as RizzleEntityMarshaled<typeof e>,
                             ),
                           value == null ? undefined : _v.marshal(value),
                           exact,
@@ -1056,7 +1073,7 @@ const replicache = <
                         e._def.interpolateKey(partialKey, true),
                         (x) =>
                           e.unmarshalValue(
-                            x as (typeof e)[`_def`][`valueType`][`_marshaled`],
+                            x as RizzleEntityMarshaled<typeof e>,
                           ),
                       ),
                     ),
@@ -1075,7 +1092,7 @@ const replicache = <
                           `${k}.${indexName}`,
                           (x) =>
                             e.unmarshalValue(
-                              x as (typeof e)[`_def`][`valueType`][`_marshaled`],
+                              x as RizzleEntityMarshaled<typeof e>,
                             ),
                           indexValue == null
                             ? undefined
@@ -1266,6 +1283,7 @@ export const makeDrizzleMutationHandler = <S extends RizzleRawSchema, Tx>(
 };
 
 export const r = {
+  boolean,
   string,
   number,
   timestamp,

@@ -16,7 +16,7 @@ export default function LoginPage() {
     <View className="flex-1 items-center justify-center gap-[10px] bg-bg">
       <Text className="font-bold text-fg">Login</Text>
       <View className="gap-2">
-        {auth.data?.allClientSessions.map((x, i) => (
+        {auth.data?.allDeviceSessions.map((x, i) => (
           <View key={i} className="flex-row gap-2 border-y">
             <View className="flex-1">
               <Text className="text-fg">Session ID: {x.serverSessionId}</Text>
@@ -24,7 +24,7 @@ export default function LoginPage() {
             </View>
             <RectButton
               onPressIn={() => {
-                auth.signInWithExistingClientSession(
+                auth.signInToExistingDeviceSession(
                   (s) => s.replicacheDbName === x.replicacheDbName,
                 );
               }}
@@ -35,10 +35,10 @@ export default function LoginPage() {
         ))}
       </View>
       <Text className="text-fg">
-        Session ID: {auth.data?.clientSession.serverSessionId}
+        Session ID: {auth.data?.activeDeviceSession.serverSessionId}
       </Text>
       <Text className="text-fg">
-        DB name: {auth.data?.clientSession.replicacheDbName}
+        DB name: {auth.data?.activeDeviceSession.replicacheDbName}
       </Text>
 
       <RectButton

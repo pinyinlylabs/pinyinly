@@ -11,7 +11,8 @@ import { Pressable, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 
 export default function SideNavLayout() {
-  const isAuthenticated = useAuth().data?.clientSession.serverSessionId != null;
+  const isAuthenticated =
+    useAuth().data?.activeDeviceSession.serverSessionId != null;
 
   return (
     <Tabs

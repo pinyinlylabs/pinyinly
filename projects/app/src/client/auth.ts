@@ -1,25 +1,20 @@
 import { trpc } from "@/client/trpc";
+import type { RizzleEntityOutput } from "@/util/rizzle";
+import { r } from "@/util/rizzle";
 import { invariant } from "@haohaohow/lib/invariant";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { DeepReadonly } from "ts-essentials";
 import { z } from "zod/v4";
-import { clientStorageGet } from "./clientStorage";
-import {
-  useClientStorageMutation,
-  useClientStorageQuery,
-} from "./hooks/useClientStorage";
-
-const LEGACY_SESSION_ID_KEY = `sessionId`;
-
-const AUTH_STATE_KEY = `authState`;
+import { deviceStorageGet } from "./deviceStorage";
+import { useDeviceStorage } from "./hooks/useDeviceStorage";
 
 /**
  * Represents a session on the client, either anonymous or authenticated.
  *
  * An anonymous session can be "adopted" when signing in
  */
-const clientSessionSchema = z.object({
+const deviceSessionSchema = z.object({
   /**
    * This should be unique across all sessions.
    */
@@ -33,20 +28,26 @@ const clientSessionSchema = z.object({
   userName: z.string().optional(),
 });
 
-type ClientSession = z.infer<typeof clientSessionSchema>;
+type DeviceSession = z.infer<typeof deviceSessionSchema>;
 
-const authState2Schema = z.object({
-  /**
-   * The array is ordered, the first session is always the "active" session.
-   */
-  clientSessions: z.array(clientSessionSchema).min(1),
+// const authState2Schema = z.object({
+//   /**
+//    * The array is ordered, the first session is always the "active" session.
+//    */
+//   clientSessions: z.array(deviceSessionSchema).min(1),
+// });
+
+const authStateSetting = r.entity(`authState`, {
+  deviceSessions: r
+    .custom(z.array(deviceSessionSchema).min(1), z.array(deviceSessionSchema))
+    .alias(`clientSessions`),
 });
 
-export type AuthState2 = z.infer<typeof authState2Schema>;
+export type AuthState2 = RizzleEntityOutput<typeof authStateSetting>;
 
 export type UseAuth2Data = DeepReadonly<{
-  clientSession: ClientSession;
-  allClientSessions: ClientSession[];
+  activeDeviceSession: DeviceSession;
+  allDeviceSessions: DeviceSession[];
 }>;
 
 type AuthApi = {
@@ -58,83 +59,61 @@ type AuthApi = {
    * sign-in providers because the URL doesn't match.
    */
   signInWithServerSessionId: (serverSessionId: string) => void;
-  signInWithExistingClientSession: (
-    predicate: (clientSession: ClientSession) => boolean,
-  ) => void;
+  signInToExistingDeviceSession: (
+    predicate: (deviceSession: DeviceSession) => boolean,
+  ) => boolean;
   signOut: () => void;
 };
 
-// TODO: how to handle being anonymous then logging in but there's an existing
-// user. It's more like "switch user" than it is anything else. Maybe even in
-// the anonymous case you should have to give your name? Only after you actually
-// save some useful state.
-
 export function useAuth(): AuthApi {
   // Step 1. Try to read the current version of the auth state from local storage.
-  const authStateQuery = useClientStorageQuery(AUTH_STATE_KEY);
-  const authStateMutation = useClientStorageMutation(AUTH_STATE_KEY);
-  const legacySessionIdQuery = useClientStorageQuery(LEGACY_SESSION_ID_KEY);
-  const legacySessionIdMutation = useClientStorageMutation(
-    LEGACY_SESSION_ID_KEY,
-  );
-
-  // If there's no existing auth state create a new one (migrating the old way
-  // sessions were stored on the client).
+  const authStateQuery = useDeviceStorage(authStateSetting);
 
   // Helps ensure data is only migrated once to avoid race conditions.
   const [initComplete, setInitComplete] = useState(false);
 
   const doInitFirstSession =
-    !authStateQuery.isPending &&
-    !legacySessionIdQuery.isPending &&
-    authStateQuery.data == null &&
-    !initComplete;
-  const legacySessionId = legacySessionIdQuery.data ?? undefined;
+    !authStateQuery.isLoading && authStateQuery.value == null && !initComplete;
   useEffect(() => {
     if (doInitFirstSession) {
-      const clientSession: ClientSession =
-        legacySessionId == null
-          ? // Migrate a legacy session ID to the new format.
-            {
-              // Putting the date in the DB name makes it easier to debug.
-              replicacheDbName: `hao-${new Date().toISOString()}`,
-            }
-          : // Create a fresh blank session.
-            {
-              replicacheDbName: `hao`, // This was the previously hard-coded name of the database.
-              serverSessionId: legacySessionId,
-            };
-
-      authStateMutation.mutate(
-        JSON.stringify({
-          clientSessions: [clientSession],
-        } satisfies AuthState2),
-      );
+      // Create a new anonymous session.
+      authStateQuery.setValue({
+        deviceSessions: [
+          {
+            // Putting the date in the DB name makes it easier to debug.
+            replicacheDbName: `hao-${new Date().toISOString()}`,
+          },
+        ],
+      });
 
       setInitComplete(true);
     }
-  }, [doInitFirstSession, authStateMutation, legacySessionId]);
-
-  // Delete the old session ID storage if needed.
-  const hasNewData = authStateQuery.data != null;
-  useEffect(() => {
-    if (legacySessionId != null && hasNewData) {
-      legacySessionIdMutation.mutate(null);
-    }
-  }, [legacySessionIdMutation, legacySessionId, hasNewData]);
+  }, [doInitFirstSession, authStateQuery]);
 
   const data = useMemo((): UseAuth2Data | null => {
-    if (authStateQuery.data == null) {
+    if (authStateQuery.isLoading) {
       return null;
     }
-    const { clientSessions } = authState2Schema.parse(
-      JSON.parse(authStateQuery.data),
+
+    if (authStateQuery.value === null) {
+      // This should only happen in the app initialization phase when there's no
+      // data in the device storage.
+      //
+      // The useEffect above should create a new session immediately.
+      return null;
+    }
+
+    const activeDeviceSession = authStateQuery.value.deviceSessions[0];
+    invariant(
+      activeDeviceSession != null,
+      `expected at least one device session`,
     );
-    const clientSession = clientSessions[0];
-    invariant(clientSession != null, `expected at least one client session`);
-    const allClientSessions = clientSessions;
-    return { clientSession, allClientSessions };
-  }, [authStateQuery.data]);
+    const allDeviceSessions = authStateQuery.value.deviceSessions;
+    return {
+      activeDeviceSession,
+      allDeviceSessions,
+    };
+  }, [authStateQuery.isLoading, authStateQuery.value]);
 
   const signInWithAppleMutate = trpc.auth.signInWithApple.useMutation();
 
@@ -147,50 +126,53 @@ export function useAuth(): AuthApi {
       });
       // Activate an existing session if one exists with a matching session ID.
       // TODO: also look for matching user ID first.
-      const existingSession = data.allClientSessions.find(
+      const existingSession = data.allDeviceSessions.find(
         (s) => s.serverSessionId === session.id,
       );
-      const newSession: ClientSession =
+      const newSession: DeviceSession =
         existingSession ??
-        makeClientSession({
+        makeDeviceSession({
           serverSessionId: session.id,
           // userId: session.userId, // TODO: implement
           // userName: session.userName, // TODO: implement
         });
       const newState: AuthState2 = {
-        clientSessions: [
+        deviceSessions: [
           newSession,
-          ...data.allClientSessions.filter(
+          ...data.allDeviceSessions.filter(
             (s) => s.replicacheDbName !== newSession.replicacheDbName,
           ),
         ],
       };
-      authStateMutation.mutate(JSON.stringify(newState));
+      authStateQuery.setValue(newState);
     },
-    [authStateMutation, data, signInWithAppleMutate],
+    [authStateQuery, data, signInWithAppleMutate],
   );
 
-  const signInWithExistingClientSession = useCallback<
-    AuthApi[`signInWithExistingClientSession`]
+  const signInToExistingDeviceSession = useCallback<
+    AuthApi[`signInToExistingDeviceSession`]
   >(
     (predicate) => {
       invariant(data != null, `expected auth state to be initialized`);
 
-      // Activate an existing session if one exists with a matching session ID.
-      const existingSession = data.allClientSessions.find((x) => predicate(x));
-      invariant(existingSession != null, `no session matched the predicate`);
+      // Activate an existing session if one exists matching the predicate.
+      const existingSession = data.allDeviceSessions.find((x) => predicate(x));
+      if (existingSession == null) {
+        return false;
+      }
 
-      const newState: AuthState2 = {
-        clientSessions: [
+      authStateQuery.setValue({
+        deviceSessions: [
           existingSession,
-          ...data.allClientSessions.filter(
+          ...data.allDeviceSessions.filter(
             (s) => s.replicacheDbName !== existingSession.replicacheDbName,
           ),
         ],
-      };
-      authStateMutation.mutate(JSON.stringify(newState));
+      });
+
+      return true;
     },
-    [authStateMutation, data],
+    [authStateQuery, data],
   );
 
   const signInWithServerSessionId = useCallback<
@@ -199,72 +181,78 @@ export function useAuth(): AuthApi {
     (serverSessionId: string) => {
       invariant(data != null, `expected auth state to be initialized`);
 
-      const newSession = makeClientSession({ serverSessionId });
-      const newState: AuthState2 = {
-        clientSessions: [newSession, ...data.allClientSessions],
-      };
-      authStateMutation.mutate(JSON.stringify(newState));
+      // Try activating an existing session first.
+      const usedExisting = signInToExistingDeviceSession(
+        (s) => s.serverSessionId === serverSessionId,
+      );
+      if (usedExisting) {
+        return;
+      }
+
+      const newSession = makeDeviceSession({ serverSessionId });
+      authStateQuery.setValue({
+        deviceSessions: [newSession, ...data.allDeviceSessions],
+      });
     },
-    [authStateMutation, data],
+    [authStateQuery, data, signInToExistingDeviceSession],
   );
 
   const signOut = useCallback(() => {
     invariant(data != null, `expected auth state to be initialized`);
 
-    // Find and use an existing "logged out" session if one exists.
-    const existingSession = data.allClientSessions.find(
+    // Find and use an existing "logged out" session if one exists (even if it's
+    // the same one).
+    const existingSession = data.allDeviceSessions.find(
       (s) => s.serverSessionId == null,
     );
-    const newSession: ClientSession = existingSession ?? makeClientSession();
-    const newState: AuthState2 = {
-      clientSessions: [
+    const newSession: DeviceSession = existingSession ?? makeDeviceSession();
+
+    authStateQuery.setValue({
+      deviceSessions: [
         newSession,
-        ...data.allClientSessions.filter(
+        ...data.allDeviceSessions.filter(
           (s) => s.replicacheDbName !== newSession.replicacheDbName,
         ),
       ],
-    };
+    });
+  }, [authStateQuery, data]);
 
-    authStateMutation.mutate(JSON.stringify(newState));
-  }, [authStateMutation, data]);
-
-  //  Clear all stale data when switching session.
+  // Reset local state when switching device sessions.
   {
     const queryClient = useQueryClient();
-    const currentSessionId = data?.clientSession.serverSessionId;
+    const activeServerSessionId = data?.activeDeviceSession.serverSessionId;
     useEffect(() => {
       return () => {
         // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-        currentSessionId; // It's critical that this is a dependency of the effect.
+        activeServerSessionId; // It's critical that this is a dependency of the effect.
 
         void queryClient.invalidateQueries();
       };
-    }, [currentSessionId, queryClient]);
+    }, [activeServerSessionId, queryClient]);
   }
 
   return {
     data,
     signInWithApple,
-    signInWithExistingClientSession,
+    signInToExistingDeviceSession,
     signInWithServerSessionId,
     signOut,
   };
 }
 
-function makeClientSession(
-  opts?: Pick<ClientSession, `serverSessionId`>,
-): ClientSession {
+function makeDeviceSession(
+  opts?: Pick<DeviceSession, `serverSessionId`>,
+): DeviceSession {
   return {
     ...opts,
     replicacheDbName: `hao-${new Date().toISOString()}`,
   };
 }
 
-export async function getSessionId(): Promise<string | null> {
-  const data = await clientStorageGet(AUTH_STATE_KEY);
+export async function getServerSessionId(): Promise<string | null> {
+  const data = await deviceStorageGet(authStateSetting);
   if (data == null) {
     return null;
   }
-  const { clientSessions } = authState2Schema.parse(JSON.parse(data));
-  return clientSessions[0]?.serverSessionId ?? null;
+  return data.deviceSessions[0]?.serverSessionId ?? null;
 }
