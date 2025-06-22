@@ -21,7 +21,7 @@ export default function DeveloperSettingsPage() {
           <View className="flex-1">
             <Text className="hhh-body-heading">Slow queries</Text>
             <Text className="hhh-body-caption">
-              Artifically increase local and network query latency by 1000 ms.
+              Artificially increase local and network query latency by 1000 ms.
             </Text>
           </View>
           <View>
