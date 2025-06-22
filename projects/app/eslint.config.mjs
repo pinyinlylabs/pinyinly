@@ -398,13 +398,22 @@ export default tseslint.config(
     },
   },
 
-  // Files not run in Node.js environment shouldn't do any Node.js imports. Expo
-  // pulls in the `node` types so it doesn't fail type checking on "missing
-  // imports", so this lint rule catches them.
+  // Metro bundled files
   {
     files: [`**/*.{cjs,js,mjs,ts,tsx}`],
     ignores: [`*.*`, `bin/**/*`, `test/**/*`],
     rules: {
+      // Expo code doesn't support subpath imports, so rewrite them to use the
+      // @/ path alias.
+      "@haohaohow/import-path-rewrite": [
+        `error`,
+        {
+          patterns: [{ from: String.raw`^#(.+)\.tsx?$`, to: `@/$1` }],
+        },
+      ],
+      // Files not run in Node.js environment shouldn't do any Node.js imports. Expo
+      // pulls in the `node` types so it doesn't fail type checking on "missing
+      // imports", so this lint rule catches them.
       "@expoCodeImports/no-restricted-imports": [
         `error`,
         {
@@ -419,12 +428,6 @@ export default tseslint.config(
               name: `@tanstack/react-query`,
               importNames: [`useQuery`],
               message: `Please use a wrapped version (e.g. useLocalQuery).`,
-            },
-          ],
-          patterns: [
-            {
-              regex: `^#`,
-              message: `Expo code doesn't support subpath imports`,
             },
           ],
         },
