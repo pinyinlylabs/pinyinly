@@ -34,7 +34,7 @@ function ReplicacheProviderWithDeps({
   const { mutateAsync: pushMutate } = trpc.replicache.push.useMutation();
   const { mutateAsync: pullMutate } = trpc.replicache.pull.useMutation();
 
-  const { replicacheDbName, serverSessionId } = auth.clientSession;
+  const { replicacheDbName, serverSessionId } = auth.activeDeviceSession;
   const isAuthenticated = serverSessionId != null;
   const rizzle = useMemo(() => {
     const rizzle = r.replicache(

@@ -25,9 +25,9 @@ const lozengeClass = tv({
   variants: {
     isActive: {
       true: `
-        bg-blue/50
+        bg-blue/100
 
-        hover:bg-blue/55
+        hover:bg-blue/95
       `,
       false: `
         bg-fg/20
@@ -39,15 +39,10 @@ const lozengeClass = tv({
 });
 
 const dotClass = tv({
-  base: `left-0 size-5 rounded-full transition-all`,
+  base: `left-0 size-5 rounded-full bg-fg transition-all`,
   variants: {
     isActive: {
-      true: `left-1/2 bg-blue`,
-      false: `
-        bg-fg/50
-
-        group-hover:bg-fg/80
-      `,
+      true: `left-1/2`,
     },
   },
 });

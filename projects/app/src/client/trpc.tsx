@@ -12,11 +12,11 @@ export const trpc = createTRPCReact<AppRouter>();
 export const TrpcProvider = ({
   children,
   queryClient,
-  getSessionId,
+  getServerSessionId,
 }: {
   children: ReactNode;
   queryClient: QueryClient;
-  getSessionId: () => Promise<string | null>; // Avoid circular dependency
+  getServerSessionId: () => Promise<string | null>; // Avoid circular dependency
 }) => {
   const [trpcClient] = useState(() =>
     trpc.createClient({
@@ -42,7 +42,7 @@ export const TrpcProvider = ({
           async headers() {
             const result: HTTPHeaders = {};
 
-            const sessionId = await getSessionId();
+            const sessionId = await getServerSessionId();
             if (sessionId != null) {
               result[httpSessionHeader] = sessionId;
             }

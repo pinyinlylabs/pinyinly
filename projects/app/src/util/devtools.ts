@@ -1,6 +1,8 @@
-import { clientStorageGet } from "@/client/clientStorage";
+import type { DeviceStorageToggleableEntity } from "@/client/deviceStorage";
+import { deviceStorageGet } from "@/client/deviceStorage";
 import type { SkipToken } from "@tanstack/react-query";
 import type { AnyFunction } from "ts-essentials";
+import { r } from "./rizzle";
 
 const cacheSymbol = Symbol(`slowQueryFn`);
 
@@ -42,7 +44,12 @@ export async function sleep(ms: number): Promise<void> {
 }
 
 export async function devToolsSlowQuerySleepIfEnabled(): Promise<void> {
-  if ((await clientStorageGet(`settings.developer.slowQueries`)) === `true`) {
+  const setting = await deviceStorageGet(slowQueriesSetting);
+  if (setting?.enabled ?? false) {
     await sleep(1000);
   }
 }
+
+export const slowQueriesSetting = r.entity(`settings.developer.slowQueries`, {
+  enabled: r.boolean(`e`),
+}) satisfies DeviceStorageToggleableEntity;
