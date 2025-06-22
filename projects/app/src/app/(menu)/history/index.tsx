@@ -1,6 +1,6 @@
 import { useRizzleQueryPaged } from "@/client/ui/ReplicacheContext";
 import { SkillRefText } from "@/client/ui/SkillRefText";
-import { formatTimeSince } from "@/util/date";
+import { formatRelativeTime } from "@/util/date";
 import { Rating } from "@/util/fsrs";
 import { Text, View } from "react-native";
 
@@ -38,7 +38,7 @@ export default function HistoryPage() {
                 {` `}
                 <SkillRefText skill={skill} context="body" />:{` `}
                 {` `}
-                {formatTimeSince(createdAt)}
+                {formatRelativeTime(createdAt)}
               </Text>
             </View>
           );

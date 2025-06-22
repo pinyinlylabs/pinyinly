@@ -185,6 +185,11 @@ export const rSrsState = memoize0(function rSrsParams() {
 });
 
 /**
+ * # v8 change log
+ *
+ * - **Breaking**: the CVR format changed, so the version needed to be
+ *   incremented.
+ *
  * # v7 change log
  *
  * - **Breaking**: `skillState` `createdAt` and `due` values are now part of
