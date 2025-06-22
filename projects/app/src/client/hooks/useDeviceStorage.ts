@@ -8,7 +8,7 @@ import {
   deviceStorageGet,
   deviceStorageSet,
 } from "@/client/deviceStorage";
-import type { RizzleEntityInput } from "@/util/rizzle";
+import type { RizzleEntityInput, RizzleEntityMarshaled } from "@/util/rizzle";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useLocalQuery } from "./useLocalQuery";
@@ -35,7 +35,26 @@ export const useDeviceStorageQuery = (key: DeviceStorageEntity) => {
     () =>
       windowEventListenerEffect(`storage`, (event) => {
         if (event.storageArea === localStorage && event.key === storageKey) {
-          queryClient.setQueryData(queryKey, event.newValue);
+          try {
+            const marshaledValue =
+              event.newValue == null
+                ? null
+                : (JSON.parse(
+                    event.newValue,
+                  ) as RizzleEntityMarshaled<DeviceStorageEntity>);
+
+            const newValue =
+              marshaledValue == null
+                ? null
+                : key.unmarshalValue(marshaledValue);
+
+            queryClient.setQueryData(queryKey, newValue);
+          } catch (error) {
+            console.error(
+              `Failed to parse device storage change event value at "${storageKey}":`,
+              error,
+            );
+          }
         }
       }),
     [key, queryClient, storageKey, queryKey],
