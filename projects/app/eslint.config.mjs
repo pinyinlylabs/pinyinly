@@ -172,11 +172,6 @@ export default tseslint.config(
               message: `Please use \`useSafeAreaInsets\` from \`react-native-safe-area-context\` instead.`,
             },
             {
-              name: `react-native`,
-              importNames: [`Animated`],
-              message: `Please use the default \`Animated\` import from \`react-native-reanimated\` instead.`,
-            },
-            {
               name: `react`,
               importNames: [`forwardRef`, `memo`, `useContext`],
               message: `Migrate to React 19 patterns.`,
@@ -201,14 +196,6 @@ export default tseslint.config(
             {
               name: `node:assert`,
               message: `Please use node:assert/strict`,
-            },
-            {
-              name: `posthog-js/react`,
-              message: `Please use @/client/ui/PostHogProvider.`,
-            },
-            {
-              name: `posthog-react-native`,
-              message: `Please use @/client/ui/PostHogProvider.`,
             },
             {
               name: `zod`,
@@ -292,7 +279,27 @@ export default tseslint.config(
       // @haohaohow/eslint-rules
       //
 
-      "@haohaohow/reanimated-default-name": `error`,
+      "@haohaohow/import-names": [
+        `error`,
+        {
+          defaultImports: {
+            "react-native-reanimated": `Reanimated`,
+          },
+          namedImports: {
+            "posthog-react-native": {
+              PostHogProvider: `RnPostHogProvider`,
+              usePostHog: `rnUsePostHog`,
+            },
+            "posthog-js/react": {
+              PostHogProvider: `WebPostHogProvider`,
+              usePostHog: `webUsePostHog`,
+            },
+            "react-native": {
+              Animated: `RnAnimated`,
+            },
+          },
+        },
+      ],
       "@haohaohow/require-glob": `error`,
       "@haohaohow/no-restricted-css-classes": [
         `error`,
