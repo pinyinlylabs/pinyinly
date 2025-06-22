@@ -9,7 +9,12 @@ export function ToggleButton({
   onPress: () => void;
 }) {
   return (
-    <Pressable className={lozengeClass({ isActive })} onPress={onPress}>
+    <Pressable
+      className={lozengeClass({ isActive })}
+      accessibilityRole="switch"
+      accessibilityState={{ checked: isActive }}
+      onPress={onPress}
+    >
       <View className={dotClass({ isActive })} />
     </Pressable>
   );
