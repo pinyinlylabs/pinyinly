@@ -55,7 +55,7 @@ function CountLozenge({
   mode: `overdue` | `due` | `new`;
   className?: string;
 }) {
-  const countText = count >= 100 ? `99+` : `${count}`;
+  const countText = count >= 999 ? `999+` : `${count}`;
   return (
     <View className={countLozengePillClass({ mode, className })}>
       <Text className="text-[10px] font-bold tabular-nums text-bg">
