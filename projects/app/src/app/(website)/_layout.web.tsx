@@ -120,6 +120,14 @@ export default function WebsiteLayout() {
                   <div>
                     <Link
                       className={footerLinkClass()}
+                      href="https://discord.gg/ER6mMnJxXM"
+                    >
+                      Discord
+                    </Link>
+                  </div>
+                  <div>
+                    <Link
+                      className={footerLinkClass()}
                       href="https://github.com/haohao-how/haohaohow/"
                     >
                       Github

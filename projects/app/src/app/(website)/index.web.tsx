@@ -31,7 +31,7 @@ export default function WebsitePage() {
               lg:text-left
             `}
           >
-            Teach yourself Chinese.
+            Learn Chinese characters
           </Text>
         </View>
 
