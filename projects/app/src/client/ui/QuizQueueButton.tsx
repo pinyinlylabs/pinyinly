@@ -41,22 +41,8 @@ export function QuizQueueButton({
                 : `new`
           }
         />
-      ) : (
-        <CheckBadge />
-      )}
+      ) : null}
     </Link>
-  );
-}
-
-function CheckBadge() {
-  return (
-    <View className="absolute left-[55%] top-[62%] size-quiz-px rounded-full bg-bg p-[2px]">
-      <IconImage
-        size={12}
-        className="self-center rounded-full bg-fg/30 text-fg"
-        source={require(`@/assets/icons/check.svg`)}
-      />
-    </View>
   );
 }
 
