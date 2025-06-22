@@ -1,5 +1,4 @@
 import { useNavigationContainerRef } from "expo-router";
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import {
   PostHogProvider as RnPostHogProvider,
   usePostHog as rnUsePostHog,

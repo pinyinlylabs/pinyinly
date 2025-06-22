@@ -1,8 +1,5 @@
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import type { usePostHog as rnUsePostHog } from "posthog-react-native";
-
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type { usePostHog as webUsePostHog } from "posthog-js/react";
+import type { usePostHog as rnUsePostHog } from "posthog-react-native";
 
 // Set this to true to turn on debug console logs for PostHog. They output via
 // `console.log()` so you can see them in the browser console.

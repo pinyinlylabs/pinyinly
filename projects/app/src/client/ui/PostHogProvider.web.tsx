@@ -1,5 +1,4 @@
 import { nonNullable } from "@haohaohow/lib/invariant";
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import {
   PostHogProvider as WebPostHogProvider,
   usePostHog as webUsePostHog,

@@ -1,11 +1,7 @@
-const noRestrictedClasses = require("./no-restricted-css-classes.cjs");
-const reanimatedDefaultName = require("./reanimated-default-name.cjs");
-const requireGlob = require("./require-glob.cjs");
-
 module.exports = {
   rules: {
-    "no-restricted-css-classes": noRestrictedClasses,
-    "reanimated-default-name": reanimatedDefaultName,
-    "require-glob": requireGlob,
+    "no-restricted-css-classes": require("./no-restricted-css-classes.cjs"),
+    "import-names": require("./import-names.cjs"),
+    "require-glob": require("./require-glob.cjs"),
   },
 };

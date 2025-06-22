@@ -25,18 +25,16 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "expo-router";
 import React, { useEffect, useId, useRef, useState } from "react";
+import { Animated as RnAnimated, Text, View } from "react-native";
 import Reanimated, { FadeIn } from "react-native-reanimated";
 import { CloseButton } from "./CloseButton";
+import { usePostHog } from "./PostHogProvider";
 import { QuizDeckHanziToPinyinQuestion } from "./QuizDeckHanziToPinyinQuestion";
 import { QuizDeckOneCorrectPairQuestion } from "./QuizDeckOneCorrectPairQuestion";
 import { QuizProgressBar } from "./QuizProgressBar";
 import { QuizQueueButton } from "./QuizQueueButton";
 import { RectButton } from "./RectButton";
 import { useReplicache, useRizzleQueryPaged } from "./ReplicacheContext";
-
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import { Animated, Text, View } from "react-native";
-import { usePostHog } from "./PostHogProvider";
 
 const Stack = createStackNavigator<{
   loading: undefined;
@@ -316,7 +314,7 @@ function horizontalCardStyleInterpolator({
       ? 40 // on big screens sliding the whole screen across is too distracting, so instead we just do a small slide
       : screen.width;
 
-  const translateEntering = Animated.multiply(
+  const translateEntering = RnAnimated.multiply(
     current.progress.interpolate({
       inputRange: [0, 1],
       outputRange: [distance, 0],
@@ -325,7 +323,7 @@ function horizontalCardStyleInterpolator({
   );
 
   const translateExiting = next
-    ? Animated.multiply(
+    ? RnAnimated.multiply(
         next.progress.interpolate({
           inputRange: [0, 1],
           outputRange: [0, -distance],
@@ -335,8 +333,8 @@ function horizontalCardStyleInterpolator({
     : translateEntering;
 
   const opacity = next
-    ? Animated.subtract(1, next.progress)
-    : Animated.add(0, current.progress);
+    ? RnAnimated.subtract(1, next.progress)
+    : RnAnimated.add(0, current.progress);
 
   return {
     cardStyle: {

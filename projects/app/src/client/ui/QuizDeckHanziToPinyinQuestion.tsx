@@ -28,10 +28,9 @@ import type { ReactNode, Ref } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { StyleProp, TextInput, ViewStyle } from "react-native";
 import {
-  // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-  Animated,
   Easing,
   Platform,
+  Animated as RnAnimated,
   Text,
   View,
 } from "react-native";
@@ -421,19 +420,19 @@ const Skeleton = ({
   const submitButtonHeight = 44;
   const submitButtonInsetBottom = insets.bottom + 20;
 
-  const [slideInAnim] = useState(() => new Animated.Value(0));
+  const [slideInAnim] = useState(() => new RnAnimated.Value(0));
   const hasToast = toast !== null;
 
   useEffect(() => {
     if (hasToast) {
-      Animated.timing(slideInAnim, {
+      RnAnimated.timing(slideInAnim, {
         toValue: 1,
         duration: 200,
         easing: Easing.out(Easing.exp),
         useNativeDriver: false, // layout properties aren't compatible with the native driver on mobile (it works on Web though)
       }).start();
     } else {
-      Animated.timing(slideInAnim, {
+      RnAnimated.timing(slideInAnim, {
         toValue: 0,
         duration: 0,
         useNativeDriver: false,
@@ -484,7 +483,7 @@ const Skeleton = ({
       </View>
       {toast === null ? null : (
         <View className="absolute inset-x-0 bottom-0">
-          <Animated.View style={slideInStyle}>{toast}</Animated.View>
+          <RnAnimated.View style={slideInStyle}>{toast}</RnAnimated.View>
         </View>
       )}
       <View
