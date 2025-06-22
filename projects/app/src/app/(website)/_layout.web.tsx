@@ -121,6 +121,8 @@ export default function WebsiteLayout() {
                     <Link
                       className={footerLinkClass()}
                       href="https://discord.gg/ER6mMnJxXM"
+                      target="_blank"
+                      rel="noopener noreferrer"
                     >
                       Discord
                     </Link>
