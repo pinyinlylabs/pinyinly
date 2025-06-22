@@ -73,7 +73,7 @@ function RootLayout() {
           <PostHogProvider>
             <HhhThemeProvider>
               <Head>
-                <title>haohaohow - Teach yourself Chinese</title>
+                <title>haohaohow - learn Chinese characters</title>
               </Head>
 
               <Stack screenOptions={{ headerShown: false, animation: `fade` }}>
