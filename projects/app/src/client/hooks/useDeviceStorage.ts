@@ -103,12 +103,6 @@ export const useDeviceStorageMutation = <T extends DeviceStorageEntity>(
   });
 };
 
-export const UseDeviceStorageLoadingSymbol = Symbol(`DeviceStorageLoading`);
-
-export type UseDeviceStorageValue<T extends DeviceStorageEntity> =
-  | DeviceStorageEntityOutput<T>
-  | typeof UseDeviceStorageLoadingSymbol;
-
 export interface UseDeviceStorageResult<T extends DeviceStorageEntity> {
   isLoading: boolean;
   value: DeviceStorageEntityOutput<T>;

@@ -1,5 +1,9 @@
 import { useHanziWordMeaning } from "@/client/hooks/useHanziWordMeaning";
 import { useMultiChoiceQuizTimer } from "@/client/hooks/useMultiChoiceQuizTimer";
+import {
+  autoCheckUserSetting,
+  useUserSetting,
+} from "@/client/hooks/useUserSetting";
 import type {
   MistakeType,
   OneCorrectPairQuestion,
@@ -40,7 +44,6 @@ import { TextAnswerButton } from "./TextAnswerButton";
 
 const buttonThickness = 4;
 const gap = 12;
-const autoSubmit = true as boolean;
 
 export function QuizDeckOneCorrectPairQuestion({
   question,
@@ -55,6 +58,9 @@ export function QuizDeckOneCorrectPairQuestion({
   ) => void;
 }) {
   const { prompt, answer, groupA, groupB, flag } = question;
+
+  const autoCheck =
+    useUserSetting(autoCheckUserSetting).value?.enabled ?? false;
 
   const [selectedAChoice, setSelectedAChoice] =
     useState<OneCorrectPairQuestionChoice>();
@@ -224,7 +230,7 @@ export function QuizDeckOneCorrectPairQuestion({
 
                     // Support auto-submit
                     if (
-                      autoSubmit &&
+                      autoCheck &&
                       newSelectedAChoice != null &&
                       selectedBChoice != null
                     ) {
@@ -270,7 +276,7 @@ export function QuizDeckOneCorrectPairQuestion({
 
                     // Support auto-submit
                     if (
-                      autoSubmit &&
+                      autoCheck &&
                       selectedAChoice != null &&
                       newSelectedBChoice != null
                     ) {

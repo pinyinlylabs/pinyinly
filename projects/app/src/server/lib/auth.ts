@@ -2,7 +2,7 @@ import { invariant } from "@haohaohow/lib/invariant";
 import { DrizzlePostgreSQLAdapter } from "@lucia-auth/adapter-drizzle";
 import { and, eq } from "drizzle-orm";
 import { Lucia, TimeSpan } from "lucia";
-import * as schema from "../schema";
+import * as schema from "../pgSchema";
 import type { Drizzle } from "./db";
 
 export function getLucia(db: Drizzle) {

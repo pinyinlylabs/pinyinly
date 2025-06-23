@@ -7,8 +7,8 @@ import {
   pull,
   push,
 } from "#server/lib/replicache/v8.ts";
-import type { CvrEntities } from "#server/schema.ts";
-import * as s from "#server/schema.ts";
+import type { CvrEntities } from "#server/pgSchema.ts";
+import * as s from "#server/pgSchema.ts";
 import { nextReview, Rating } from "#util/fsrs.ts";
 import { nanoid } from "#util/nanoid.ts";
 import { invariant, nonNullable } from "@haohaohow/lib/invariant";
@@ -809,6 +809,7 @@ await test(`${computeEntitiesState.name} suite`, async (t) => {
         pinyinInitialGroupTheme: [],
         skillState: [],
         skillRating: [],
+        setting: [],
       });
     });
 
@@ -823,6 +824,7 @@ await test(`${computeEntitiesState.name} suite`, async (t) => {
         pinyinInitialGroupTheme: [],
         skillState: [],
         skillRating: [],
+        setting: [],
       });
     });
 
@@ -859,6 +861,7 @@ await test(`${computeEntitiesState.name} suite`, async (t) => {
         pinyinInitialGroupTheme: [],
         skillRating: [],
         skillState: [user1SkillState],
+        setting: [],
       });
     });
 
@@ -894,6 +897,7 @@ await test(`${computeEntitiesState.name} suite`, async (t) => {
         pinyinInitialGroupTheme: [],
         skillRating: [user1SkillRating],
         skillState: [],
+        setting: [],
       });
     });
 
@@ -932,6 +936,7 @@ await test(`${computeEntitiesState.name} suite`, async (t) => {
           pinyinInitialGroupTheme: [],
           skillRating: [],
           skillState: [],
+          setting: [],
         });
       },
     );
@@ -971,6 +976,7 @@ await test(`${computeEntitiesState.name} suite`, async (t) => {
           pinyinInitialGroupTheme: [],
           skillRating: [],
           skillState: [],
+          setting: [],
         });
       },
     );
@@ -989,6 +995,7 @@ await test(`${computePatch.name} suite`, async (t) => {
       pinyinInitialGroupTheme: { x5: `5` },
       skillState: { x6: `6` },
       skillRating: { x7: `7` },
+      setting: { x8: `8` },
     };
     const entitiesState: EntitiesState = {
       hanziGlossMistake: [{ id: `x1`, xmin: `1` }],
@@ -998,6 +1005,7 @@ await test(`${computePatch.name} suite`, async (t) => {
       pinyinInitialGroupTheme: [{ id: `x5`, xmin: `5` }],
       skillState: [{ id: `x6`, xmin: `6` }],
       skillRating: [{ id: `x7`, xmin: `7` }],
+      setting: [{ id: `x8`, xmin: `8` }],
     };
     expect(computePatch(prevCvr, entitiesState)).toEqual({
       nextCvrEntities: prevCvr,
@@ -1010,6 +1018,7 @@ await test(`${computePatch.name} suite`, async (t) => {
         pinyinInitialGroupTheme: { delKeys: [], putIds: [] },
         skillState: { delKeys: [], putIds: [] },
         skillRating: { delKeys: [], putIds: [] },
+        setting: { delKeys: [], putIds: [] },
       },
     });
   });

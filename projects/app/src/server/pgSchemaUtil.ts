@@ -1,6 +1,15 @@
-import * as r from "@/data/rizzleSchema";
+import {
+  rFsrsRating,
+  rHanziOrHanziWord,
+  rMnemonicThemeId,
+  rPinyinInitialGroupId,
+  rPinyinPronunciation,
+  rSkill,
+  rSpaceSeparatedString,
+} from "@/data/rizzleSchema";
 import { isRunningTests } from "@/util/env";
 import type { RizzleType, RizzleTypeDef } from "@/util/rizzle";
+import { r } from "@/util/rizzle";
 import { invariant } from "@haohaohow/lib/invariant";
 import type { ColumnBaseConfig } from "drizzle-orm";
 import { Table } from "drizzle-orm";
@@ -144,22 +153,21 @@ export const rizzleCustomType = <
 
 // The "s" prefix follows the convention of "s" being drizzle things. This helps
 // differentiate them from rizzle schema things.
-export const sSkill = rizzleCustomType(r.rSkill(), `text`);
-export const sMnemonicThemeId = rizzleCustomType(r.rMnemonicThemeId(), `text`);
+export const sSkill = rizzleCustomType(rSkill(), `text`);
+export const sMnemonicThemeId = rizzleCustomType(rMnemonicThemeId(), `text`);
 export const sPinyinInitialGroupId = rizzleCustomType(
-  r.rPinyinInitialGroupId(),
+  rPinyinInitialGroupId(),
   `text`,
 );
 export const sPinyinPronunciation = rizzleCustomType(
-  r.rPinyinPronunciation(),
+  rPinyinPronunciation(),
   `text`,
 );
 export const sSpaceSeparatoredString = rizzleCustomType(
-  r.rSpaceSeparatedString(),
+  rSpaceSeparatedString(),
   `text`,
 );
-export const sHanziOrHanziWord = rizzleCustomType(
-  r.rHanziOrHanziWord(),
-  `text`,
-);
-export const sFsrsRating = rizzleCustomType(r.rFsrsRating(), `text`);
+export const sHanziOrHanziWord = rizzleCustomType(rHanziOrHanziWord(), `text`);
+export const sJson = rizzleCustomType(r.json(), `json`);
+export const sJsonObject = rizzleCustomType(r.jsonObject(), `json`);
+export const sFsrsRating = rizzleCustomType(rFsrsRating(), `text`);

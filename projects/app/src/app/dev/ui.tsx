@@ -1341,6 +1341,9 @@ function ToggleButtonExamples() {
   const [isActive2, setIsActive2] = useState(true);
   return (
     <>
+      <ExampleStack title="loading">
+        <ToggleButton isActive={null} onPress={() => null} />
+      </ExampleStack>
       <ExampleStack title="on">
         <ToggleButton
           isActive={isActive1}

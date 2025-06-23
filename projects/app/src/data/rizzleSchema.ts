@@ -185,6 +185,11 @@ export const rSrsState = memoize0(function rSrsParams() {
 });
 
 /**
+ * # v8 change log
+ *
+ * - **Breaking**: the CVR format changed, so the version needed to be
+ *   incremented.
+ *
  * # v7 change log
  *
  * - **Breaking**: `skillState` `createdAt` and `due` values are now part of
@@ -260,7 +265,9 @@ export const v7 = {
     themeId: rMnemonicThemeId().alias(`t`),
   }),
 
+  //
   // Mutators
+  //
   setPinyinInitialAssociation: r.mutator({
     /**
      * The initial component as defined by the pinyin chart. No trailing dash.
@@ -335,13 +342,33 @@ export const v7_1 = {
 export const v8 = {
   ...v7,
   version: `8`,
+
+  //
+  // Settings
+  //
+  setting: r.entity(`setting/[key]`, {
+    // The setting identifier e.g. `autoCheck`
+    key: r.string().alias(`k`),
+    // Arbitrary JSON value (or null if unset), parsed by setting-specific
+    // logic.
+    value: r.jsonObject().nullable().alias(`v`),
+  }),
+
+  //
+  // Mutators
+  //
+  setSetting: r
+    .mutator({
+      key: r.string().alias(`k`),
+      value: r.jsonObject().nullable().alias(`v`),
+      now: r.timestamp().alias(`n`),
+    })
+    .alias(`ss`),
 };
 
-export const currentSchema = v8; // TODO: switch to v8 when ready
+export const currentSchema = v8;
 
 export const supportedSchemas = [v7, v7_1, v8] as const;
-
-export type SupportedSchema = (typeof supportedSchemas)[number];
 
 export type Rizzle = RizzleReplicache<typeof currentSchema>;
 

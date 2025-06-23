@@ -1,5 +1,5 @@
+import { useRizzleQueryPaged } from "@/client/hooks/useRizzleQueryPaged";
 import { targetSkillsReviewQueue } from "@/client/query";
-import { useRizzleQueryPaged } from "@/client/ui/ReplicacheContext";
 import { SkillRefText } from "@/client/ui/SkillRefText";
 import {
   needsToBeIntroduced,

@@ -5,7 +5,7 @@ import type { FsrsState } from "@/util/fsrs";
 import { nextReview } from "@/util/fsrs";
 import { invariant } from "@haohaohow/lib/invariant";
 import { and, asc, eq } from "drizzle-orm";
-import * as schema from "../schema";
+import * as schema from "../pgSchema";
 import type { Drizzle } from "./db";
 
 export async function updateSkillState(

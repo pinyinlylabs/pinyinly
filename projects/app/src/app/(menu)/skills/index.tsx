@@ -1,6 +1,6 @@
+import { useRizzleQueryPaged } from "@/client/hooks/useRizzleQueryPaged";
 import { getAllTargetHanziWords } from "@/client/query";
 import { HanziWordRefText } from "@/client/ui/HanziWordRefText";
-import { useRizzleQueryPaged } from "@/client/ui/ReplicacheContext";
 import type { HanziWord, SrsStateType } from "@/data/model";
 import type { Skill } from "@/data/rizzleSchema";
 import type { RankedHanziWord } from "@/data/skills";

@@ -425,6 +425,16 @@ export class RizzleCustom<I, M, O = I> extends RizzleType<
   ): RizzleCustom<I, M, O> => {
     return new RizzleCustom({ marshal, unmarshal, typeName: `custom` });
   };
+
+  static createSymmetric = <IO>(
+    marshalUnmarshal: z.ZodType<IO, IO>,
+  ): RizzleCustom<IO, IO, IO> => {
+    return new RizzleCustom({
+      marshal: marshalUnmarshal,
+      unmarshal: marshalUnmarshal,
+      typeName: `custom`,
+    });
+  };
 }
 
 abstract class RizzleRoot<Def extends RizzleTypeDef = RizzleTypeDef> {
@@ -789,10 +799,13 @@ export type RizzleReplicachePagedQuery<S extends RizzleRawSchema> = {
     : never;
 };
 
+/**
+ * Stores any string.
+ */
 const string = (alias?: string) => {
-  const result = RizzleCustom.create(z.string(), z.string());
-  return alias == null ? result : result.alias(alias);
+  return alias == null ? _string : _string.alias(alias);
 };
+const _string = RizzleCustom.create(z.string(), z.string());
 
 export type RizzleBoolean = RizzleCustom<boolean, boolean, boolean>;
 
@@ -800,14 +813,33 @@ export type RizzleBoolean = RizzleCustom<boolean, boolean, boolean>;
  * Stores a boolean value.
  */
 const boolean = (alias?: string) => {
-  const result = RizzleCustom.create(z.boolean(), z.boolean());
-  return alias == null ? result : result.alias(alias);
+  return alias == null ? _boolean : _boolean.alias(alias);
 };
+const _boolean = RizzleCustom.createSymmetric(z.boolean());
 
-const number = (alias?: string) => {
-  const result = RizzleCustom.create(z.number(), z.number());
-  return alias == null ? result : result.alias(alias);
+/**
+ * Stores an arbitrary JSON value.
+ */
+const json = (alias?: string) => {
+  return alias == null ? _json : _json.alias(alias);
 };
+const _json = RizzleCustom.createSymmetric(z.json());
+
+/**
+ * Stores any JSON object.
+ */
+const jsonObject = (alias?: string) => {
+  return alias == null ? _jsonObject : _jsonObject.alias(alias);
+};
+const _jsonObject = RizzleCustom.createSymmetric(z.looseObject({}));
+
+/**
+ * Stores any number.
+ */
+const number = (alias?: string) => {
+  return alias == null ? _number : _number.alias(alias);
+};
+const _number = RizzleCustom.createSymmetric(z.number());
 
 /**
  * A UNIX timestamp number.
@@ -1284,17 +1316,19 @@ export const makeDrizzleMutationHandler = <S extends RizzleRawSchema, Tx>(
 
 export const r = {
   boolean,
-  string,
-  number,
-  timestamp,
-  datetime,
-  enum: enum_,
-  object,
-  entity,
-  mutator,
   custom: RizzleCustom.create,
-  replicache,
+  datetime,
+  entity,
+  enum: enum_,
+  json,
+  jsonObject,
   literal,
+  mutator,
+  number,
+  object,
+  replicache,
+  string,
+  timestamp,
 };
 
 export function invalid(ctx: z.RefinementCtx, message: string): typeof z.NEVER {

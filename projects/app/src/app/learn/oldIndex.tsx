@@ -1,7 +1,7 @@
+import { useRizzleQueryPaged } from "@/client/hooks/useRizzleQueryPaged";
 import { targetSkillsReviewQueue } from "@/client/query";
 import { Countdown } from "@/client/ui/Countdown";
 import { RectButton } from "@/client/ui/RectButton";
-import { useRizzleQueryPaged } from "@/client/ui/ReplicacheContext";
 import type { HanziWord } from "@/data/model";
 import { SkillKind } from "@/data/model";
 import type { HanziWordSkill } from "@/data/rizzleSchema";

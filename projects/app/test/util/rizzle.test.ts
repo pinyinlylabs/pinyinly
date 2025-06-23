@@ -675,6 +675,26 @@ await test(`boolean()`, async (t) => {
   });
 });
 
+await test(`json()`, async (t) => {
+  const posts = r.entity(`foo/[id]`, {
+    id: r.string(),
+    data: r.json(`a`),
+  });
+
+  using tx = makeMockTx(t);
+
+  // Marshal and unmarshal round tripping
+  await posts.set(tx, { id: `1` }, { id: `1`, data: { foo: `bar` } });
+  const [, marshaledData] = tx.set.mock.calls[0]!.arguments;
+  assert.deepEqual(marshaledData, { id: `1`, a: { foo: `bar` } });
+
+  tx.get.mock.mockImplementationOnce(async () => marshaledData);
+  assert.deepEqual(await posts.get(tx, { id: `1` }), {
+    id: `1`,
+    data: { foo: `bar` },
+  });
+});
+
 await test(`enum()`, async (t) => {
   const colorsSchema = z.enum([`RED`, `BLUE`]);
   const Colors = colorsSchema.enum;

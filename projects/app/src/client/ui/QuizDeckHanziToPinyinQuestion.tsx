@@ -1,4 +1,8 @@
 import { useHanziWordMeaning } from "@/client/hooks/useHanziWordMeaning";
+import {
+  autoCheckUserSetting,
+  useUserSetting,
+} from "@/client/hooks/useUserSetting";
 import { splitHanziText } from "@/data/hanzi";
 import type {
   HanziWordToPinyinQuestion,
@@ -45,8 +49,6 @@ import { QuizFlagText } from "./QuizFlagText";
 import { QuizSubmitButton, QuizSubmitButtonState } from "./QuizSubmitButton";
 import { TextInputSingle } from "./TextInputSingle";
 
-const autoSubmit = true as boolean;
-
 export function QuizDeckHanziToPinyinQuestion({
   noAutoFocus = true,
   question,
@@ -59,6 +61,9 @@ export function QuizDeckHanziToPinyinQuestion({
   onRating: (ratings: UnsavedSkillRating[], mistakes: MistakeType[]) => void;
 }) {
   const { skill, flag, answers } = question;
+
+  const autoCheck =
+    useUserSetting(autoCheckUserSetting).value?.enabled ?? false;
 
   const userAnswerRef = useRef(``);
   const [userAnswerEmpty, setUserAnswerEmpty] = useState(true);
@@ -208,7 +213,7 @@ export function QuizDeckHanziToPinyinQuestion({
           setUserAnswerEmpty(text.trim().length === 0);
 
           if (
-            autoSubmit &&
+            autoCheck &&
             // It's important to only trigger when there's a space at the end,
             // otherwise as soon as you type "ni" it will submit, before you've
             // had a chance to change the tone.

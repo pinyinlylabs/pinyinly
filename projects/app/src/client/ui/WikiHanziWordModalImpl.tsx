@@ -1,6 +1,7 @@
 import { useHanziWikiEntry } from "@/client/hooks/useHanziWikiEntry";
 import { useHanziWordMeaning } from "@/client/hooks/useHanziWordMeaning";
 import { useLocalQuery } from "@/client/hooks/useLocalQuery";
+import { useRizzleQueryPaged } from "@/client/hooks/useRizzleQueryPaged";
 import { splitHanziText } from "@/data/hanzi";
 import type { HanziWord } from "@/data/model";
 import { hanziWordSkillKinds } from "@/data/model";
@@ -18,7 +19,6 @@ import { DevLozenge } from "./DevLozenge";
 import { HanziWordRefText } from "./HanziWordRefText";
 import { Hhhmark } from "./Hhhmark";
 import { RectButton } from "./RectButton";
-import { useRizzleQueryPaged } from "./ReplicacheContext";
 
 export function WikiHanziWordModalImpl({
   hanziWord,

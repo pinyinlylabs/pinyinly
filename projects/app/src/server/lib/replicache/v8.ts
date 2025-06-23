@@ -9,7 +9,7 @@ import type {
   PinyinInitialGroupId,
 } from "@/data/model";
 import { MistakeKind } from "@/data/model";
-import type { Skill, SupportedSchema } from "@/data/rizzleSchema";
+import type { Skill } from "@/data/rizzleSchema";
 import { v8 as schema } from "@/data/rizzleSchema";
 import type {
   ClientStateNotFoundResponse,
@@ -33,8 +33,8 @@ import type { SQL } from "drizzle-orm";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import type { SubqueryWithSelection } from "drizzle-orm/pg-core";
 import pickBy from "lodash/pickBy";
-import type { CvrEntities } from "../../schema";
-import * as s from "../../schema";
+import type { CvrEntities } from "../../pgSchema";
+import * as s from "../../pgSchema";
 import type { Drizzle, Xmin } from "../db";
 import {
   assertMinimumIsolationLevel,
@@ -88,7 +88,7 @@ const loggerName = import.meta.filename.split(`/`).at(-1);
 invariant(loggerName != null);
 const debug = makeDebug(loggerName);
 
-const mutators: RizzleDrizzleMutators<SupportedSchema, Drizzle> = {
+const mutators: RizzleDrizzleMutators<typeof schema, Drizzle> = {
   async rateSkill(db, userId, { id, skill, rating, durationMs, now }) {
     await db
       .insert(s.skillRating)
@@ -200,6 +200,17 @@ const mutators: RizzleDrizzleMutators<SupportedSchema, Drizzle> = {
           s.pinyinInitialGroupTheme.groupId,
         ],
         set: { themeId, updatedAt },
+      });
+  },
+  async setSetting(db, userId, { key, value, now }) {
+    const updatedAt = now;
+    const createdAt = now;
+    await db
+      .insert(s.userSetting)
+      .values([{ userId, key, value, updatedAt, createdAt }])
+      .onConflictDoUpdate({
+        target: [s.userSetting.userId, s.userSetting.key],
+        set: { value, updatedAt },
       });
   },
 };
@@ -636,6 +647,27 @@ const syncEntities = [
         .from(s.hanziPinyinMistake)
         .where(eq(s.hanziPinyinMistake.userId, userId))
         .as(`hanziPinyinMistakeVersions`),
+  ),
+  makeSyncEntity(
+    `setting`,
+    schema.setting,
+    (key, e) => e.marshalKey({ key }),
+    (db, ids) =>
+      db.query.userSetting.findMany({ where: (t) => inArray(t.id, ids) }),
+    (db, userId) =>
+      db
+        .select({
+          map: json_agg(
+            json_build_object({
+              key: s.userSetting.key,
+              xmin: pgXmin(s.userSetting),
+              id: s.userSetting.id,
+            }),
+          ).as(`setting`),
+        })
+        .from(s.userSetting)
+        .where(eq(s.userSetting.userId, userId))
+        .as(`setting`),
   ),
 ];
 

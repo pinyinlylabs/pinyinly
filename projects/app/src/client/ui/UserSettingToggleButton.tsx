@@ -1,13 +1,13 @@
-import type { DeviceStorageToggleableEntity } from "@/client/deviceStorage";
-import { useDeviceStorage } from "@/client/hooks/useDeviceStorage";
+import type { UserSettingToggleableEntity } from "@/client/hooks/useUserSetting";
+import { useUserSetting } from "@/client/hooks/useUserSetting";
 import { ToggleButton } from "@/client/ui/ToggleButton";
 
-export function DeviceStorageToggleButton({
+export function UserSettingToggleButton({
   entity,
 }: {
-  entity: DeviceStorageToggleableEntity;
+  entity: UserSettingToggleableEntity;
 }) {
-  const { isLoading, value, setValue } = useDeviceStorage(entity);
+  const { isLoading, value, setValue } = useUserSetting(entity);
 
   return (
     <ToggleButton

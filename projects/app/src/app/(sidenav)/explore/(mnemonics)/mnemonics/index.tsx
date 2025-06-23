@@ -1,8 +1,6 @@
 import { useLocalQuery } from "@/client/hooks/useLocalQuery";
-import {
-  useRizzleQuery,
-  useRizzleQueryPaged,
-} from "@/client/ui/ReplicacheContext";
+import { useRizzleQuery } from "@/client/hooks/useRizzleQuery";
+import { useRizzleQueryPaged } from "@/client/hooks/useRizzleQueryPaged";
 import { loadHhhPinyinChart } from "@/data/pinyin";
 import { Link } from "expo-router";
 import { Fragment } from "react";
