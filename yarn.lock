@@ -14622,8 +14622,8 @@ __metadata:
   linkType: hard
 
 "posthog-js@npm:^1.252.1":
-  version: 1.252.1
-  resolution: "posthog-js@npm:1.252.1"
+  version: 1.255.1
+  resolution: "posthog-js@npm:1.255.1"
   dependencies:
     core-js: "npm:^3.38.1"
     fflate: "npm:^0.4.8"
@@ -14637,7 +14637,7 @@ __metadata:
       optional: true
     rrweb-snapshot:
       optional: true
-  checksum: 10c0/7dedde5868e6b812b72ad544b029fb80759f1e19caa565fddbe72ac46fbb65ff0713d5ae55f7d501eddd5ff0f62477044ff012297e8adc8e518b92e21ff67837
+  checksum: 10c0/313c9df0cabbc2025db4a7aa9bffdd1006e29c2f04331a9176c7237035a5d64ae8f40541fd8e322abbf09bf84470f067dbfd6329684e0644f03fcd099cd1ef13
   languageName: node
   linkType: hard
 
