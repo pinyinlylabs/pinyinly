@@ -1,5 +1,5 @@
 import type { Drizzle, Transaction } from "#server/lib/db.ts";
-import * as s from "#server/schema.ts";
+import * as s from "#server/pgSchema.ts";
 import { nanoid } from "#util/nanoid.ts";
 import { PGlite } from "@electric-sql/pglite";
 import type { PgTransactionConfig } from "drizzle-orm/pg-core";

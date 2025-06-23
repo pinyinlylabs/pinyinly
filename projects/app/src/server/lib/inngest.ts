@@ -15,7 +15,7 @@ import { subDays } from "date-fns/subDays";
 import { inArray, lt, notInArray, sql } from "drizzle-orm";
 import { Inngest } from "inngest";
 import * as postmark from "postmark";
-import * as s from "../schema";
+import * as s from "../pgSchema";
 import {
   pgBatchUpdate,
   substring,

@@ -1,4 +1,4 @@
-import { useRizzleQueryPaged } from "@/client/ui/ReplicacheContext";
+import { useRizzleQueryPaged } from "@/client/hooks/useRizzleQueryPaged";
 import { SkillRefText } from "@/client/ui/SkillRefText";
 import { formatRelativeTime } from "@/util/date";
 import { Rating } from "@/util/fsrs";

@@ -7,12 +7,13 @@ import {
   rizzleCustomType,
   sFsrsRating,
   sHanziOrHanziWord,
+  sJsonObject,
   sMnemonicThemeId,
   sPinyinInitialGroupId,
   sSkill,
   sSpaceSeparatoredString,
   zodJson,
-} from "./schemaUtil";
+} from "./pgSchemaUtil";
 
 export const cvrEntitySchema = z.record(
   z
@@ -21,7 +22,7 @@ export const cvrEntitySchema = z.record(
   z.string().describe(`xmin value for the row`),
 );
 
-export const cvrEntitiesSchema = z.record(
+export const cvrEntitiesSchema = z.partialRecord(
   z.union([
     z.literal(`pinyinInitialAssociation`),
     z.literal(`pinyinFinalAssociation`),
@@ -30,6 +31,7 @@ export const cvrEntitiesSchema = z.record(
     z.literal(`skillRating`),
     z.literal(`hanziGlossMistake`),
     z.literal(`hanziPinyinMistake`),
+    z.literal(`setting`),
   ]),
   cvrEntitySchema,
 );
@@ -48,6 +50,22 @@ export const user = schema.table(`user`, {
     .defaultNow()
     .notNull(),
 });
+
+export const userSetting = schema.table(
+  `userSetting`,
+  {
+    id: pg.text(`id`).primaryKey().$defaultFn(nanoid),
+    userId: pg
+      .text(`userId`)
+      .notNull()
+      .references(() => user.id),
+    key: pg.text(`key`).notNull(),
+    value: sJsonObject(`value`),
+    updatedAt: pg.timestamp(`updatedAt`).defaultNow().notNull(),
+    createdAt: pg.timestamp(`createdAt`).defaultNow().notNull(),
+  },
+  (t) => [pg.unique().on(t.userId, t.key)],
+);
 
 export const authSession = schema.table(`authSession`, {
   id: pg.text(`id`).primaryKey(),

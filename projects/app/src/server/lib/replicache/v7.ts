@@ -8,7 +8,6 @@ import type {
   HanziPinyinMistakeType,
 } from "@/data/model";
 import { MistakeKind } from "@/data/model";
-import type { SupportedSchema } from "@/data/rizzleSchema";
 import { rPinyinInitialGroupId, v7 as schema } from "@/data/rizzleSchema";
 import type {
   ClientStateNotFoundResponse,
@@ -30,7 +29,7 @@ import { and, eq, inArray, sql } from "drizzle-orm";
 import mapValues from "lodash/mapValues";
 import pickBy from "lodash/pickBy";
 import type { z } from "zod/v4";
-import * as s from "../../schema";
+import * as s from "../../pgSchema";
 import type { Drizzle } from "../db";
 import {
   assertMinimumIsolationLevel,
@@ -46,7 +45,7 @@ const loggerName = import.meta.filename.split(`/`).at(-1);
 invariant(loggerName != null);
 const debug = makeDebug(loggerName);
 
-const mutators: RizzleDrizzleMutators<SupportedSchema, Drizzle> = {
+const mutators: RizzleDrizzleMutators<typeof schema, Drizzle> = {
   async rateSkill(db, userId, { id, skill, rating, durationMs, now }) {
     await db
       .insert(s.skillRating)

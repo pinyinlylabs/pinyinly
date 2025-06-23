@@ -2,7 +2,7 @@ import { v7 as schema, srsStateFromFsrsState } from "#data/rizzleSchema.ts";
 import { glossToHanziWord } from "#data/skills.ts";
 import { pgXmin } from "#server/lib/db.ts";
 import { computeCvrEntities, pull, push } from "#server/lib/replicache/v7.ts";
-import * as s from "#server/schema.ts";
+import * as s from "#server/pgSchema.ts";
 import { nextReview, Rating } from "#util/fsrs.ts";
 import { nanoid } from "#util/nanoid.ts";
 import { invariant } from "@haohaohow/lib/invariant";

@@ -1,6 +1,7 @@
 import { useLocalQuery } from "@/client/hooks/useLocalQuery";
+import { useReplicache } from "@/client/hooks/useReplicache";
+import { useRizzleQuery } from "@/client/hooks/useRizzleQuery";
 import { RectButton } from "@/client/ui/RectButton";
-import { useReplicache, useRizzleQuery } from "@/client/ui/ReplicacheContext";
 import { loadHhhPinyinChart } from "@/data/pinyin";
 import { rMnemonicThemeId } from "@/data/rizzleSchema";
 import { loadMnemonicThemeChoices } from "@/dictionary/dictionary";

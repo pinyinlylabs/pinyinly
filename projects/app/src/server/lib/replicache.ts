@@ -13,7 +13,7 @@ import { startSpan } from "@sentry/core";
 import { and, eq, gt } from "drizzle-orm";
 import chunk from "lodash/chunk";
 import type { z } from "zod/v4";
-import * as s from "../schema";
+import * as s from "../pgSchema";
 import type { Drizzle } from "./db";
 import { withRepeatableReadTransaction } from "./db";
 import {

@@ -1,5 +1,5 @@
 // hhh-standalone-test
-import * as s from "#server/schema.ts";
+import * as s from "#server/pgSchema.ts";
 import assert from "node:assert/strict";
 import test from "node:test";
 import { withDbTest } from "./dbHelpers";

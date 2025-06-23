@@ -1,6 +1,8 @@
 import { useEventCallback } from "@/client/hooks/useEventCallback";
 import { usePrefetchImages } from "@/client/hooks/usePrefetchImages";
 import { useQuizProgress } from "@/client/hooks/useQuizProgress";
+import { useReplicache } from "@/client/hooks/useReplicache";
+import { useRizzleQueryPaged } from "@/client/hooks/useRizzleQueryPaged";
 import { useSoundEffect } from "@/client/hooks/useSoundEffect";
 import { questionsForReview2 } from "@/client/query";
 import type { StackNavigationFor } from "@/client/ui/types";
@@ -34,7 +36,6 @@ import { QuizDeckOneCorrectPairQuestion } from "./QuizDeckOneCorrectPairQuestion
 import { QuizProgressBar } from "./QuizProgressBar";
 import { QuizQueueButton } from "./QuizQueueButton";
 import { RectButton } from "./RectButton";
-import { useReplicache, useRizzleQueryPaged } from "./ReplicacheContext";
 
 const Stack = createStackNavigator<{
   loading: undefined;

@@ -117,4 +117,7 @@ export const mutators: RizzleReplicacheMutators<typeof currentSchema> = {
       );
     }
   },
+  async setSetting(tx, { key, value }) {
+    await tx.setting.set({ key }, { key, value });
+  },
 };
