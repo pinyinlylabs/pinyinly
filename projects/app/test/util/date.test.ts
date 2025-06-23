@@ -55,10 +55,10 @@ await test(`${formatRelativeTime.name} suite`, async () => {
   });
 
   await test(`formats months correctly for future dates`, () => {
-    const start = new Date(`2025-07-01T00:00:00Z`);
-    const end = new Date(`2025-04-01T00:00:00Z`);
+    const start = new Date(`2025-09-01T00:00:00Z`);
+    const end = new Date(`2025-06-01T00:00:00Z`);
     const result = formatRelativeTime(start, end);
-    assert.equal(result, `in 2 months`);
+    assert.equal(result, `in 3 months`);
   });
 
   await test(`formats weeks correctly for future dates`, () => {
