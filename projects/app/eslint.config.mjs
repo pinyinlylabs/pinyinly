@@ -1,6 +1,6 @@
 import { FlatCompat } from "@eslint/eslintrc";
-import haohaohowPlugin from "@haohaohow/eslint-rules";
 import inngestPlugin from "@inngest/eslint-plugin";
+import pinyinlyPlugin from "@pinyinly/eslint-rules";
 import stylisticPlugin from "@stylistic/eslint-plugin";
 import betterTailwindcssPlugin from "eslint-plugin-better-tailwindcss";
 import drizzlePlugin from "eslint-plugin-drizzle";
@@ -27,7 +27,7 @@ export default tseslint.config(
     // note - intentionally uses computed syntax to make it easy to sort the keys
     plugins: {
       [`@expoCodeImports`]: tseslint.plugin, // an extra scope for no-restricted-imports so they don't clobber other configs
-      [`@haohaohow`]: haohaohowPlugin,
+      [`@pinyinly`]: pinyinlyPlugin,
       [`@inngest`]: inngestPlugin,
       [`@stylistic`]: stylisticPlugin,
       [`@typescript-eslint`]: tseslint.plugin,
@@ -276,10 +276,10 @@ export default tseslint.config(
       "unicorn/filename-case": `off`, // using camelCase for filenames
 
       //
-      // @haohaohow/eslint-rules
+      // @pinyinly/eslint-rules
       //
 
-      "@haohaohow/import-names": [
+      "@pinyinly/import-names": [
         `error`,
         {
           defaultImports: {
@@ -300,12 +300,12 @@ export default tseslint.config(
           },
         },
       ],
-      "@haohaohow/require-glob": `error`,
-      "@haohaohow/no-restricted-css-classes": [
+      "@pinyinly/require-glob": `error`,
+      "@pinyinly/no-restricted-css-classes": [
         `error`,
         {
           classes: [
-            // eslint-disable-next-line @haohaohow/no-restricted-css-classes
+            // eslint-disable-next-line @pinyinly/no-restricted-css-classes
             { name: `flex-col`, message: `flex-col is already the default` },
           ],
         },
@@ -405,7 +405,7 @@ export default tseslint.config(
     rules: {
       // Expo code doesn't support subpath imports, so rewrite them to use the
       // @/ path alias.
-      "@haohaohow/import-path-rewrite": [
+      "@pinyinly/import-path-rewrite": [
         `error`,
         {
           patterns: [{ from: String.raw`^#(.+)\.tsx?$`, to: `@/$1` }],

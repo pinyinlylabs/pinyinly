@@ -5,7 +5,7 @@ import { computeCvrEntities, pull, push } from "#server/lib/replicache/v7.ts";
 import * as s from "#server/pgSchema.ts";
 import { nextReview, Rating } from "#util/fsrs.ts";
 import { nanoid } from "#util/nanoid.ts";
-import { invariant } from "@haohaohow/lib/invariant";
+import { invariant } from "@pinyinly/lib/invariant";
 import { eq } from "drizzle-orm";
 import { describe, expect } from "vitest";
 import { createUser, txTest } from "../dbHelpers";

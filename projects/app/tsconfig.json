@@ -12,7 +12,7 @@
     // one in `src/`.
     "paths": {
       "@/*": ["src/*"],
-      "@haohaohow/lib/*": ["../lib/src/*"]
+      "@pinyinly/lib/*": ["../lib/src/*"]
     },
     "target": "ESNext"
   },

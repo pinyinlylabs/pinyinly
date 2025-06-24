@@ -142,7 +142,7 @@ tasks:
       - buildVercel
 
   deployVercelSentry:
-    command: npx -y @sentry/cli@2.46.0 sourcemaps upload -o haohaohow -p app @group(buildVercelOutdir)
+    command: npx -y @sentry/cli@2.46.0 sourcemaps upload -o pinyinly -p app @group(buildVercelOutdir)
     deps:
       - buildVercel
     options:

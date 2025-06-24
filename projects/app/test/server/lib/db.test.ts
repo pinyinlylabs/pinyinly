@@ -5,7 +5,7 @@ import type { Drizzle } from "#server/lib/db.ts";
 import { pgBatchUpdate, substring } from "#server/lib/db.ts";
 import * as s from "#server/pgSchema.ts";
 import { nextReview, Rating } from "#util/fsrs.ts";
-import { invariant } from "@haohaohow/lib/invariant";
+import { invariant } from "@pinyinly/lib/invariant";
 import { eq } from "drizzle-orm";
 import * as pg from "drizzle-orm/pg-core";
 import { describe, expect, vi } from "vitest";

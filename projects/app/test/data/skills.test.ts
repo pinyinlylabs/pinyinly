@@ -17,7 +17,7 @@ import {
   allHsk3HanziWords,
 } from "#dictionary/dictionary.ts";
 import { Rating } from "#util/fsrs.ts";
-import { invariant } from "@haohaohow/lib/invariant";
+import { invariant } from "@pinyinly/lib/invariant";
 import assert from "node:assert/strict";
 import { describe, expect, test } from "vitest";
 import { fsrsSrsState, mockSrsState, 时 } from "./helpers";

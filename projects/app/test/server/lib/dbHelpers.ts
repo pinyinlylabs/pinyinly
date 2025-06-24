@@ -2,7 +2,7 @@ import type { Drizzle, Transaction } from "#server/lib/db.ts";
 import * as s from "#server/pgSchema.ts";
 import { nanoid } from "#util/nanoid.ts";
 import { PGlite } from "@electric-sql/pglite";
-import { nonNullable } from "@haohaohow/lib/invariant";
+import { nonNullable } from "@pinyinly/lib/invariant";
 import type { PgTransactionConfig } from "drizzle-orm/pg-core";
 import { drizzle } from "drizzle-orm/pglite";
 import { migrate } from "drizzle-orm/pglite/migrator";

@@ -1,6 +1,6 @@
-# Curriculum Design for haohaohow
+# Curriculum Design for Pinyinly
 
-haohaohow is structured to teach Mandarin Chinese in a way that balances vocabulary, character recognition, and skill dependencies.
+Pinyinly is structured to teach Mandarin Chinese in a way that balances vocabulary, character recognition, and skill dependencies.
 
 ## Handling Words with Multiple Meanings
 
@@ -13,17 +13,17 @@ This approach ensures structured learning progression and prevents premature mer
 
 ## Learning the meaning for a hanzi
 
-haohaohow takes the approach of teaching how to remember the meaning of a hanzi when you see it (i.e. read it) by using a few pieces of information:
+Pinyinly takes the approach of teaching how to remember the meaning of a hanzi when you see it (i.e. read it) by using a few pieces of information:
 
 - The breakdown of components in the character.
 - The relative position or composition of those components.
 - The meaning of those components.
 
-As such haohaohow teaches you hanzi in "bottom up" manner where by you learn basic hanzi and radicals first, followed by more complex hanzi that are composed of those components.
+As such Pinyinly teaches you hanzi in "bottom up" manner where by you learn basic hanzi and radicals first, followed by more complex hanzi that are composed of those components.
 
 ---
 
-haohaohow teaches you a short story or mnemonic that ties together the components of a hanzi to remember the meaning. This can work in a few ways:
+Pinyinly teaches you a short story or mnemonic that ties together the components of a hanzi to remember the meaning. This can work in a few ways:
 
 - imagining something that **looks** like the character (for example 人 **looks** like a **person** walking, or 宀 **looks** like the side profile of a roof with a chimney)
 - combining the meaning of the components (e.g. **ceremony** (礼) is a **spiritual ritual** (礻) that contains **hidden meaning** (乚))

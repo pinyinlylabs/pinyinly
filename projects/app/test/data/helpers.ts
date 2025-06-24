@@ -9,7 +9,7 @@ import type {
 import { SrsKind } from "#data/model.ts";
 import type { Rating } from "#util/fsrs.ts";
 import { nextReview } from "#util/fsrs.ts";
-import { invariant, nonNullable } from "@haohaohow/lib/invariant";
+import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 
 export const date = (strings: TemplateStringsArray): Date => {
   const shorthand = strings.reduce((acc, str) => acc + str, ``);

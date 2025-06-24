@@ -15,7 +15,7 @@ import type { SkillReviewQueue } from "#data/skills.ts";
 import { Rating } from "#util/fsrs.ts";
 import { nanoid } from "#util/nanoid.ts";
 import { r } from "#util/rizzle.ts";
-import { invariant } from "@haohaohow/lib/invariant";
+import { invariant } from "@pinyinly/lib/invariant";
 import assert from "node:assert/strict";
 import { describe, expect, test } from "vitest";
 import { parseRelativeTimeShorthand } from "../data/helpers";

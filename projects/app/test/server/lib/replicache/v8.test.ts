@@ -11,7 +11,7 @@ import type { CvrEntities } from "#server/pgSchema.ts";
 import * as s from "#server/pgSchema.ts";
 import { nextReview, Rating } from "#util/fsrs.ts";
 import { nanoid } from "#util/nanoid.ts";
-import { invariant, nonNullable } from "@haohaohow/lib/invariant";
+import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import { eq } from "drizzle-orm";
 import { describe, expect, test } from "vitest";
 import { createUser, txTest } from "../dbHelpers";

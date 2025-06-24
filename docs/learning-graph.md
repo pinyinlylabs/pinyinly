@@ -1,6 +1,6 @@
-# haohaohow Skill Dependency Graph
+# Pinyinly Skill Dependency Graph
 
-Skills in haohaohow are organized in a **directed weighted graph**, ensuring users learn components before full words.
+Skills in Pinyinly are organized in a **directed weighted graph**, ensuring users learn components before full words.
 
 ## Example Structure
 

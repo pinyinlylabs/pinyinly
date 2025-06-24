@@ -45,7 +45,7 @@ import {
   sortComparatorString,
 } from "#util/collections.ts";
 import { unicodeShortIdentifier } from "#util/unicode.ts";
-import { invariant, uniqueInvariant } from "@haohaohow/lib/invariant";
+import { invariant, uniqueInvariant } from "@pinyinly/lib/invariant";
 import assert from "node:assert/strict";
 import type { DeepReadonly } from "ts-essentials";
 import { describe, expect, test } from "vitest";

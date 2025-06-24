@@ -1,4 +1,4 @@
-# Word Representation in haohaohow
+# Word Representation in Pinyinly
 
 ## Handling Multiple Meanings in Hanzi
 
@@ -10,7 +10,7 @@ In Mandarin Chinese, a single Hanzi character or word can have multiple distinct
 - **Grammatical Role Changes**: A word functioning as a verb in one case and a noun in another.
 - **Compound Influence**: A character meaning something on its own vs. within a compound word.
 
-To accurately represent this in haohaohow, each Hanzi word is associated with a **set of distinct meanings** rather than a single definition.
+To accurately represent this in Pinyinly, each Hanzi word is associated with a **set of distinct meanings** rather than a single definition.
 
 ---
 

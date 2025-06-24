@@ -1,5 +1,5 @@
 {
-  "name": "haohaohow",
+  "name": "pinyinly",
   "packageManager": "yarn@4.9.2",
   "workspaces": [
     "projects/*"

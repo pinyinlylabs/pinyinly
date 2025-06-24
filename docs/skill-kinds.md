@@ -1,6 +1,6 @@
-# Skill kinds in haohaohow
+# Skill kinds in Pinyinly
 
-This document describes the different types of skills available in haohaohow.
+This document describes the different types of skills available in Pinyinly.
 
 ## Skill kinds
 

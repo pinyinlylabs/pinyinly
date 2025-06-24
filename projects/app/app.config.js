@@ -132,7 +132,7 @@ export const expo = {
     [
       `@sentry/react-native/expo`,
       {
-        organization: `haohaohow`,
+        organization: `pinyinly`,
         project: `app`,
         url: `https://sentry.io/`,
       },
