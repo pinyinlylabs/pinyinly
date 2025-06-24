@@ -17,12 +17,12 @@ import { nanoid } from "#util/nanoid.ts";
 import { r } from "#util/rizzle.ts";
 import { invariant } from "@haohaohow/lib/invariant";
 import assert from "node:assert/strict";
-import test from "node:test";
+import { describe, expect, test } from "vitest";
 import { parseRelativeTimeShorthand } from "../data/helpers";
 import { testReplicacheOptions } from "../util/rizzleHelpers";
 
-await test(`${targetSkillsReviewQueue.name} suite`, async () => {
-  await test(`returns everything when no skills have state`, async () => {
+describe(`${targetSkillsReviewQueue.name} suite`, () => {
+  test(`returns everything when no skills have state`, async () => {
     await using rizzle = r.replicache(
       testReplicacheOptions(),
       currentSchema,
@@ -38,7 +38,7 @@ await test(`${targetSkillsReviewQueue.name} suite`, async () => {
   });
 });
 
-await test(`${simulateSkillReviews.name} returns a review queue`, async () => {
+test(`${simulateSkillReviews.name} returns a review queue`, async () => {
   const reviewQueue = await simulateSkillReviews({
     targetSkills: [`he:分:divide`],
     history: [],
@@ -50,8 +50,8 @@ await test(`${simulateSkillReviews.name} returns a review queue`, async () => {
   });
 });
 
-await test(`${computeSkillReviewQueue.name} suite`, async () => {
-  await test(`incorrect answers in a quiz don't get scheduled prematurely`, async () => {
+describe(`${computeSkillReviewQueue.name} suite`, () => {
+  test(`incorrect answers in a quiz don't get scheduled prematurely`, async () => {
     const { items } = await simulateSkillReviews({
       targetSkills: [`he:分:divide`],
       history: [
@@ -72,7 +72,7 @@ await test(`${computeSkillReviewQueue.name} suite`, async () => {
     );
   });
 
-  await test(`learns new skills before not-due skills (stable sorted to maintain graph order)`, async () => {
+  test(`learns new skills before not-due skills (stable sorted to maintain graph order)`, async () => {
     const reviewQueue = await simulateSkillReviews({
       targetSkills: [`he:分:divide`],
       history: [`🟡 he:丿:slash`, `💤 1m`],
@@ -84,7 +84,7 @@ await test(`${computeSkillReviewQueue.name} suite`, async () => {
     });
   });
 
-  await test(`skills unblock dependant skills when they become stable enough`, async () => {
+  test(`skills unblock dependant skills when they become stable enough`, async () => {
     const targetSkills: Skill[] = [`he:刀:knife`];
     const history: SkillReviewOp[] = [];
 
@@ -138,7 +138,7 @@ await test(`${computeSkillReviewQueue.name} suite`, async () => {
     }
   });
 
-  await test(`doesn't get stuck reviewing the same skill after all due skills are done`, async () => {
+  test(`doesn't get stuck reviewing the same skill after all due skills are done`, async () => {
     const targetSkills: Skill[] = [`he:分:divide`];
     const history: SkillReviewOp[] = [
       `❌ he:𠃌:radical`, // Get it wrong initially (so after all the reviews it will have lower "stability" than the others).
@@ -162,7 +162,7 @@ await test(`${computeSkillReviewQueue.name} suite`, async () => {
     assert.notDeepEqual([review1], [`he:𠃌:radical`]);
   });
 
-  await test(`skills that are stale (heavily over-due and not stable) are treated as new skills`, async () => {
+  test(`skills that are stale (heavily over-due and not stable) are treated as new skills`, async () => {
     const targetSkills: Skill[] = [`he:刀:knife`];
     const history: SkillReviewOp[] = [
       `❌ he:刀:knife`, // Get it wrong initially so it's considered introduced but not very stable.
@@ -211,8 +211,8 @@ await test(`${computeSkillReviewQueue.name} suite`, async () => {
   });
 });
 
-await test(`${flagsForSrsState.name} suite`, async () => {
-  await test(`marks a question as new if it has no srs`, async () => {
+describe(`${flagsForSrsState.name} suite`, () => {
+  test(`marks a question as new if it has no srs`, async () => {
     assert.deepEqual(
       flagsForSrsState({
         kind: SrsKind.Mock,
@@ -223,7 +223,7 @@ await test(`${flagsForSrsState.name} suite`, async () => {
     );
   });
 
-  await test(`marks a question as new if it has fsrs state but is not stable enough to be introduced`, async () => {
+  test(`marks a question as new if it has fsrs state but is not stable enough to be introduced`, async () => {
     assert.deepEqual(flagsForSrsState(undefined), {
       kind: QuestionFlagKind.NewSkill,
     });

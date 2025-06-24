@@ -9,42 +9,42 @@ import {
 } from "#data/hanzi.ts";
 import type { HanziText } from "#data/model.ts";
 import assert from "node:assert/strict";
-import test from "node:test";
+import { describe, expect, test } from "vitest";
 import { 汉 } from "./helpers";
 
-await test(`${flattenIds.name} handles ⿱⿱ to ⿳ and ⿰⿰ to ⿲`, () => {
+test(`${flattenIds.name} handles ⿱⿱ to ⿳ and ⿰⿰ to ⿲`, () => {
   for (const [input, expected] of [
     [`⿱⿱abc`, `⿳abc`],
     [`⿱a⿱bc`, `⿳abc`],
     [`⿰⿰abc`, `⿲abc`],
     [`⿰a⿰bc`, `⿲abc`],
   ] as const) {
-    assert.equal(idsNodeToString(flattenIds(parseIds(input))), expected);
+    expect(idsNodeToString(flattenIds(parseIds(input)))).toBe(expected);
   }
 });
 
-await test(`${parseIds.name} handles 1 depth`, () => {
-  assert.deepEqual(parseIds(`木`), {
+test(`${parseIds.name} handles 1 depth`, () => {
+  expect(parseIds(`木`)).toEqual({
     operator: `LeafCharacter`,
     character: `木`,
   });
 
   // 相
-  assert.deepEqual(parseIds(`⿰木目`), {
+  expect(parseIds(`⿰木目`)).toEqual({
     operator: IdsOperator.LeftToRight,
     left: { operator: `LeafCharacter`, character: `木` },
     right: { operator: `LeafCharacter`, character: `目` },
   });
 
   // 杏
-  assert.deepEqual(parseIds(`⿱木口`), {
+  expect(parseIds(`⿱木口`)).toEqual({
     operator: IdsOperator.AboveToBelow,
     above: { operator: `LeafCharacter`, character: `木` },
     below: { operator: `LeafCharacter`, character: `口` },
   });
 
   // 衍
-  assert.deepEqual(parseIds(`⿲彳氵亍`), {
+  expect(parseIds(`⿲彳氵亍`)).toEqual({
     operator: IdsOperator.LeftToMiddleToRight,
     left: { operator: `LeafCharacter`, character: `彳` },
     middle: { operator: `LeafCharacter`, character: `氵` },
@@ -52,7 +52,7 @@ await test(`${parseIds.name} handles 1 depth`, () => {
   });
 
   // 京
-  assert.deepEqual(parseIds(`⿳亠口小`), {
+  expect(parseIds(`⿳亠口小`)).toEqual({
     operator: IdsOperator.AboveToMiddleAndBelow,
     above: { operator: `LeafCharacter`, character: `亠` },
     middle: { operator: `LeafCharacter`, character: `口` },
@@ -60,192 +60,192 @@ await test(`${parseIds.name} handles 1 depth`, () => {
   });
 
   // 回
-  assert.deepEqual(parseIds(`⿴囗口`), {
+  expect(parseIds(`⿴囗口`)).toEqual({
     operator: IdsOperator.FullSurround,
     surrounding: { operator: `LeafCharacter`, character: `囗` },
     surrounded: { operator: `LeafCharacter`, character: `口` },
   });
 
   // 凰
-  assert.deepEqual(parseIds(`⿵几皇`), {
+  expect(parseIds(`⿵几皇`)).toEqual({
     operator: IdsOperator.SurroundFromAbove,
     above: { operator: `LeafCharacter`, character: `几` },
     surrounded: { operator: `LeafCharacter`, character: `皇` },
   });
 
   // 凶
-  assert.deepEqual(parseIds(`⿶凵㐅`), {
+  expect(parseIds(`⿶凵㐅`)).toEqual({
     operator: IdsOperator.SurroundFromBelow,
     below: { operator: `LeafCharacter`, character: `凵` },
     surrounded: { operator: `LeafCharacter`, character: `㐅` },
   });
 
   // 匠
-  assert.deepEqual(parseIds(`⿷匚斤`), {
+  expect(parseIds(`⿷匚斤`)).toEqual({
     operator: IdsOperator.SurroundFromLeft,
     left: { operator: `LeafCharacter`, character: `匚` },
     surrounded: { operator: `LeafCharacter`, character: `斤` },
   });
 
   // 㕚
-  assert.deepEqual(parseIds(`⿼叉丶`), {
+  expect(parseIds(`⿼叉丶`)).toEqual({
     operator: IdsOperator.SurroundFromRight,
     right: { operator: `LeafCharacter`, character: `叉` },
     surrounded: { operator: `LeafCharacter`, character: `丶` },
   });
 
   // 病
-  assert.deepEqual(parseIds(`⿸疒丙`), {
+  expect(parseIds(`⿸疒丙`)).toEqual({
     operator: IdsOperator.SurroundFromUpperLeft,
     upperLeft: { operator: `LeafCharacter`, character: `疒` },
     surrounded: { operator: `LeafCharacter`, character: `丙` },
   });
 
   // 戒
-  assert.deepEqual(parseIds(`⿹戈廾`), {
+  expect(parseIds(`⿹戈廾`)).toEqual({
     operator: IdsOperator.SurroundFromUpperRight,
     upperRight: { operator: `LeafCharacter`, character: `戈` },
     surrounded: { operator: `LeafCharacter`, character: `廾` },
   });
 
   // 超
-  assert.deepEqual(parseIds(`⿺走召`), {
+  expect(parseIds(`⿺走召`)).toEqual({
     operator: IdsOperator.SurroundFromLowerLeft,
     lowerLeft: { operator: `LeafCharacter`, character: `走` },
     surrounded: { operator: `LeafCharacter`, character: `召` },
   });
 
   // 氷
-  assert.deepEqual(parseIds(`⿽水丶`), {
+  expect(parseIds(`⿽水丶`)).toEqual({
     operator: IdsOperator.SurroundFromLowerRight,
     lowerRight: { operator: `LeafCharacter`, character: `水` },
     surrounded: { operator: `LeafCharacter`, character: `丶` },
   });
 
   // 巫
-  assert.deepEqual(parseIds(`⿻工从`), {
+  expect(parseIds(`⿻工从`)).toEqual({
     operator: IdsOperator.Overlaid,
     overlay: { operator: `LeafCharacter`, character: `工` },
     underlay: { operator: `LeafCharacter`, character: `从` },
   });
 
   // 卐
-  assert.deepEqual(parseIds(`⿾卍`), {
+  expect(parseIds(`⿾卍`)).toEqual({
     operator: IdsOperator.HorizontalReflection,
     reflected: { operator: `LeafCharacter`, character: `卍` },
   });
 
   // 𠕄
-  assert.deepEqual(parseIds(`⿿凹`), {
+  expect(parseIds(`⿿凹`)).toEqual({
     operator: IdsOperator.Rotation,
     rotated: { operator: `LeafCharacter`, character: `凹` },
   });
 
-  assert.deepEqual(parseIds(`①`), {
+  expect(parseIds(`①`)).toEqual({
     operator: `LeafUnknownCharacter`,
     strokeCount: 1,
   });
 
-  assert.deepEqual(parseIds(`②`), {
+  expect(parseIds(`②`)).toEqual({
     operator: `LeafUnknownCharacter`,
     strokeCount: 2,
   });
 
-  assert.deepEqual(parseIds(`③`), {
+  expect(parseIds(`③`)).toEqual({
     operator: `LeafUnknownCharacter`,
     strokeCount: 3,
   });
 
-  assert.deepEqual(parseIds(`④`), {
+  expect(parseIds(`④`)).toEqual({
     operator: `LeafUnknownCharacter`,
     strokeCount: 4,
   });
 
-  assert.deepEqual(parseIds(`⑤`), {
+  expect(parseIds(`⑤`)).toEqual({
     operator: `LeafUnknownCharacter`,
     strokeCount: 5,
   });
 
-  assert.deepEqual(parseIds(`⑥`), {
+  expect(parseIds(`⑥`)).toEqual({
     operator: `LeafUnknownCharacter`,
     strokeCount: 6,
   });
 
-  assert.deepEqual(parseIds(`⑦`), {
+  expect(parseIds(`⑦`)).toEqual({
     operator: `LeafUnknownCharacter`,
     strokeCount: 7,
   });
 
-  assert.deepEqual(parseIds(`⑧`), {
+  expect(parseIds(`⑧`)).toEqual({
     operator: `LeafUnknownCharacter`,
     strokeCount: 8,
   });
 
-  assert.deepEqual(parseIds(`⑨`), {
+  expect(parseIds(`⑨`)).toEqual({
     operator: `LeafUnknownCharacter`,
     strokeCount: 9,
   });
 
-  assert.deepEqual(parseIds(`⑩`), {
+  expect(parseIds(`⑩`)).toEqual({
     operator: `LeafUnknownCharacter`,
     strokeCount: 10,
   });
 
-  assert.deepEqual(parseIds(`⑪`), {
+  expect(parseIds(`⑪`)).toEqual({
     operator: `LeafUnknownCharacter`,
     strokeCount: 11,
   });
 
-  assert.deepEqual(parseIds(`⑫`), {
+  expect(parseIds(`⑫`)).toEqual({
     operator: `LeafUnknownCharacter`,
     strokeCount: 12,
   });
 
-  assert.deepEqual(parseIds(`⑬`), {
+  expect(parseIds(`⑬`)).toEqual({
     operator: `LeafUnknownCharacter`,
     strokeCount: 13,
   });
 
-  assert.deepEqual(parseIds(`⑭`), {
+  expect(parseIds(`⑭`)).toEqual({
     operator: `LeafUnknownCharacter`,
     strokeCount: 14,
   });
 
-  assert.deepEqual(parseIds(`⑮`), {
+  expect(parseIds(`⑮`)).toEqual({
     operator: `LeafUnknownCharacter`,
     strokeCount: 15,
   });
 
-  assert.deepEqual(parseIds(`⑯`), {
+  expect(parseIds(`⑯`)).toEqual({
     operator: `LeafUnknownCharacter`,
     strokeCount: 16,
   });
 
-  assert.deepEqual(parseIds(`⑰`), {
+  expect(parseIds(`⑰`)).toEqual({
     operator: `LeafUnknownCharacter`,
     strokeCount: 17,
   });
 
-  assert.deepEqual(parseIds(`⑱`), {
+  expect(parseIds(`⑱`)).toEqual({
     operator: `LeafUnknownCharacter`,
     strokeCount: 18,
   });
 
-  assert.deepEqual(parseIds(`⑲`), {
+  expect(parseIds(`⑲`)).toEqual({
     operator: `LeafUnknownCharacter`,
     strokeCount: 19,
   });
 
-  assert.deepEqual(parseIds(`⑳`), {
+  expect(parseIds(`⑳`)).toEqual({
     operator: `LeafUnknownCharacter`,
     strokeCount: 20,
   });
 });
 
-await test(`${parseIds.name} handles 2 depth`, () => {
+test(`${parseIds.name} handles 2 depth`, () => {
   {
     const cursor = { index: 0 };
-    assert.deepEqual(parseIds(`⿰a⿱bc`, cursor), {
+    expect(parseIds(`⿰a⿱bc`, cursor)).toEqual({
       operator: IdsOperator.LeftToRight,
       left: { operator: `LeafCharacter`, character: `a` },
       right: {
@@ -259,7 +259,7 @@ await test(`${parseIds.name} handles 2 depth`, () => {
 
   {
     const cursor = { index: 0 };
-    assert.deepEqual(parseIds(`⿱a⿳bc⿴de`, cursor), {
+    expect(parseIds(`⿱a⿳bc⿴de`, cursor)).toEqual({
       operator: IdsOperator.AboveToBelow,
       above: { operator: `LeafCharacter`, character: `a` },
       below: {
@@ -277,15 +277,15 @@ await test(`${parseIds.name} handles 2 depth`, () => {
   }
 });
 
-await test(`${parseIds.name} regression tests`, () => {
-  assert.deepEqual(parseIds(`⿱丿𭕄`), {
+test(`${parseIds.name} regression tests`, () => {
+  expect(parseIds(`⿱丿𭕄`)).toEqual({
     operator: IdsOperator.AboveToBelow,
     above: { operator: `LeafCharacter`, character: `丿` },
     below: { operator: `LeafCharacter`, character: `𭕄` },
   });
 });
 
-await test(`${walkIdsNode.name} fixture`, () => {
+test(`${walkIdsNode.name} fixture`, () => {
   const ids = parseIds(`⿰a⿱bc`);
 
   const leafs = [...walkIdsNode(ids)].map((x) => {
@@ -302,7 +302,7 @@ await test(`${walkIdsNode.name} fixture`, () => {
   assert.deepEqual(leafs, [`a`, `b`, `c`]);
 });
 
-await test(`${idsNodeToString.name} roundtrips`, () => {
+test(`${idsNodeToString.name} roundtrips`, () => {
   for (const input of [
     [`木`],
     [`⿰木目`, `⿱木口`, `⿲彳氵亍`, `⿳亠口小`],
@@ -320,7 +320,7 @@ await test(`${idsNodeToString.name} roundtrips`, () => {
   }
 });
 
-await test(`${hanziCharCount.name} fixtures`, () => {
+test(`${hanziCharCount.name} fixtures`, () => {
   for (const value of [`木`, `你`] as HanziText[]) {
     expect(hanziCharCount(value)).toBe(1);
   }
@@ -330,8 +330,8 @@ await test(`${hanziCharCount.name} fixtures`, () => {
   }
 });
 
-await test(`${isHanziChar.name} suite`, async () => {
-  await test(`fixtures`, async () => {
+describe(`${isHanziChar.name} suite`, () => {
+  test(`fixtures`, () => {
     const valid = [汉`应`, 汉`兄`, 汉`同`];
     for (const x of valid) {
       expect(isHanziChar(x)).toBe(true);

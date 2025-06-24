@@ -13,7 +13,7 @@ import {
 } from "#util/collections.ts";
 import type { IsEqual } from "#util/types.ts";
 import assert from "node:assert/strict";
-import test from "node:test";
+import { describe, test } from "vitest";
 import type z from "zod/v4";
 
 function typeChecks<_T>(..._args: unknown[]) {
@@ -28,7 +28,7 @@ typeChecks(`type checks only`, () => {
   [1, 2].sort(sortComparatorString());
 });
 
-await test(`${sortComparatorString.name} fixtures`, () => {
+test(`${sortComparatorString.name} fixtures`, () => {
   {
     const arr = [`c`, `a`, `b`];
     arr.sort(sortComparatorString());
@@ -42,7 +42,7 @@ await test(`${sortComparatorString.name} fixtures`, () => {
   }
 });
 
-await test(`${sortComparatorNumber.name} suite`, () => {
+test(`${sortComparatorNumber.name} suite`, () => {
   {
     const arr = [3, 1, 2];
     arr.sort(sortComparatorNumber());
@@ -56,7 +56,7 @@ await test(`${sortComparatorNumber.name} suite`, () => {
   }
 });
 
-await test(`${mergeSortComparators.name} suite`, () => {
+test(`${mergeSortComparators.name} suite`, () => {
   const arr = [`金`, `现金`, `金`, `金牌`];
   arr.sort(
     mergeSortComparators(
@@ -67,7 +67,7 @@ await test(`${mergeSortComparators.name} suite`, () => {
   assert.deepEqual(arr, [`金`, `金`, `现金`, `金牌`]);
 });
 
-await test(`${merge.name} suite`, () => {
+test(`${merge.name} suite`, () => {
   assert.deepEqual(merge(null, null), null);
   assert.deepEqual(merge(null, 1), 1);
   assert.deepEqual(merge(1, null), 1);
@@ -96,7 +96,7 @@ await test(`${merge.name} suite`, () => {
   );
 });
 
-await test(`${deepTransform.name} suite`, () => {
+test(`${deepTransform.name} suite`, () => {
   assert.deepEqual(
     deepTransform(null, (x) => x),
     null,
@@ -109,12 +109,12 @@ await test(`${deepTransform.name} suite`, () => {
   );
 });
 
-await test(`${objectInvert.name} fixtures`, () => {
+test(`${objectInvert.name} fixtures`, () => {
   assert.deepEqual(objectInvert({}), {});
   assert.deepEqual(objectInvert({ a: 1, b: 2 }), { 1: `a`, 2: `b` });
 });
 
-await test(`${mapInvert.name} fixtures`, () => {
+test(`${mapInvert.name} fixtures`, () => {
   assert.deepEqual(mapInvert(new Map()), new Map());
   assert.deepEqual(
     mapInvert(
@@ -130,20 +130,20 @@ await test(`${mapInvert.name} fixtures`, () => {
   );
 });
 
-await test(`${makeRange.name} suite`, async () => {
-  await test(`ascending range`, () => {
+describe(`${makeRange.name} suite`, async () => {
+  test(`ascending range`, () => {
     assert.deepEqual(makeRange(0, 0), [0]);
     assert.deepEqual(makeRange(0, 1), [0, 1]);
     assert.deepEqual(makeRange(1, 2), [1, 2]);
     assert.deepEqual(makeRange(1, 3), [1, 2, 3]);
   });
 
-  await test(`descending range`, () => {
+  test(`descending range`, () => {
     assert.deepEqual(makeRange(3, 1), [3, 2, 1]);
   });
 });
 
-await test(`${objectMap.name} suite`, () => {
+test(`${objectMap.name} suite`, () => {
   assert.deepEqual(
     objectMap({ a: 1, b: 2 }, (key, value) => [`${key}${value}`, value * 2]),
     { a1: 2, b2: 4 },
@@ -155,7 +155,7 @@ await test(`${objectMap.name} suite`, () => {
   );
 });
 
-await test(`${objectMapToArray.name} suite`, () => {
+test(`${objectMapToArray.name} suite`, () => {
   assert.deepEqual(
     objectMapToArray({ a: 1, b: 2 }, (key, value) => [
       `${key}${value}`,
@@ -173,8 +173,8 @@ await test(`${objectMapToArray.name} suite`, () => {
   );
 });
 
-await test(`${memoize1.name} suite`, async () => {
-  await test(`fixtures`, () => {
+describe(`${memoize1.name} suite`, async () => {
+  test(`fixtures`, () => {
     const fn = (x: string) => x.toUpperCase();
     const memoized = memoize1(fn);
 
@@ -186,7 +186,7 @@ await test(`${memoize1.name} suite`, async () => {
     assert.strictEqual(memoized.isCached(`other`), true);
   });
 
-  await test(`preserves type assertions`, () => {
+  test(`preserves type assertions`, () => {
     const isFooLiteral = memoize1((x: string): x is `foo` => x === `foo`);
 
     const x = `foo` as string;
@@ -197,7 +197,7 @@ await test(`${memoize1.name} suite`, async () => {
     }
   });
 
-  await test(`allows branded string argument`, () => {
+  test(`allows branded string argument`, () => {
     type Branded = string & z.BRAND<`Foo`>;
 
     memoize1((x: Branded) => x);

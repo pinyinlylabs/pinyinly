@@ -5,10 +5,10 @@ import {
   parseScalar,
 } from "#util/color.ts";
 import assert from "node:assert/strict";
-import test from "node:test";
+import { describe, expect, test } from "vitest";
 
-await test(`${parseCssColorOrThrow.name} suite`, async () => {
-  await test(`fixtures`, () => {
+describe(`${parseCssColorOrThrow.name} suite`, async () => {
+  test(`fixtures`, () => {
     const fixtures = [
       [`rgb(1 2 3)`, [1, 2, 3, 1]],
       [`rgb(0 0 0 / 0)`, [0, 0, 0, 0]],
@@ -51,8 +51,8 @@ await test(`${parseCssColorOrThrow.name} suite`, async () => {
   });
 });
 
-await test(`${parseScalar.name} suite`, async () => {
-  await test(`valid fixtures`, () => {
+describe(`${parseScalar.name} suite`, async () => {
+  test(`valid fixtures`, () => {
     const fixtures: [string, number | null][] = [
       [`0`, 0],
       [`1`, 1],
@@ -71,7 +71,7 @@ await test(`${parseScalar.name} suite`, async () => {
     }
   });
 
-  await test(`invalid fixtures`, () => {
+  test(`invalid fixtures`, () => {
     const fixtures: string[] = [`-1`, `256`, `100.5%`];
 
     for (const input of fixtures) {
@@ -79,7 +79,7 @@ await test(`${parseScalar.name} suite`, async () => {
     }
   });
 
-  await test(`valid fixtures for alpha`, () => {
+  test(`valid fixtures for alpha`, () => {
     const fixtures: [string, number | null][] = [
       [`0`, 0],
       [`1`, 1],
@@ -94,7 +94,7 @@ await test(`${parseScalar.name} suite`, async () => {
     }
   });
 
-  await test(`invalid fixtures for alpha`, () => {
+  test(`invalid fixtures for alpha`, () => {
     const fixtures: string[] = [`-1`, `256`, `100.5%`];
 
     for (const input of fixtures) {
@@ -103,8 +103,8 @@ await test(`${parseScalar.name} suite`, async () => {
   });
 });
 
-await test(`${parseHexColor.name} suite`, async () => {
-  await test(`valid fixtures`, () => {
+describe(`${parseHexColor.name} suite`, async () => {
+  test(`valid fixtures`, () => {
     const fixtures: [string, ColorRGBA][] = [
       [`#000`, { red: 0, green: 0, blue: 0, alpha: 1 }],
       [`#000000`, { red: 0, green: 0, blue: 0, alpha: 1 }],

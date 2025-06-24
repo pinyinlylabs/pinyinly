@@ -1,9 +1,9 @@
 // hhh-standalone-test
 
-import test from "node:test";
 import { tv } from "tailwind-variants";
+import { expect, test } from "vitest";
 
-await test(`regression https://github.com/heroui-inc/tailwind-variants/issues/248`, async () => {
+test(`regression https://github.com/heroui-inc/tailwind-variants/issues/248`, async () => {
   const notMergedFixtures = [
     // TODO [tailwindcss@>=4] remove this case as `outline` is part of other outline helpers.
     `outline outline-2`,

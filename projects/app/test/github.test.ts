@@ -1,8 +1,7 @@
 // hhh-standalone-test
 
-import assert from "node:assert/strict";
 import * as fs from "node:fs/promises";
-import test from "node:test";
+import { expect, test } from "vitest";
 import YAML from "yaml";
 import { z } from "zod/v4";
 
@@ -22,7 +21,7 @@ const workflowSchema = z.object({
   ),
 });
 
-await test(`no missing EXPO_PUBLIC_ environment variables`, async () => {
+test(`no missing EXPO_PUBLIC_ environment variables`, async () => {
   const projectRoot = import.meta.dirname + `/..`;
   const workspaceRoot = projectRoot + `/../..`;
   const githubWorkflowsPath = `.github/workflows`;
@@ -62,11 +61,10 @@ await test(`no missing EXPO_PUBLIC_ environment variables`, async () => {
             ),
           );
           if (stepExpoPublicEnvVars.size > 0) {
-            assert.deepEqual(
-              stepExpoPublicEnvVars,
-              expectedEnvVars,
-              `Mismatched EXPO_PUBLIC_ environment variables in ${workflowPath}`,
-            );
+            expect({
+              file: workflowPath,
+              envVars: stepExpoPublicEnvVars,
+            }).toEqual({ file: workflowPath, envVars: expectedEnvVars });
           }
         }
       }

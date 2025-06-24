@@ -19,15 +19,15 @@ import {
 import { Rating } from "#util/fsrs.ts";
 import { invariant } from "@haohaohow/lib/invariant";
 import assert from "node:assert/strict";
-import test from "node:test";
+import { describe, expect, test } from "vitest";
 import { fsrsSrsState, mockSrsState, 时 } from "./helpers";
 
-await test(`${skillLearningGraph.name} suite`, async () => {
-  await test(`no targets gives an empty graph`, async () => {
+describe(`${skillLearningGraph.name} suite`, () => {
+  test(`no targets gives an empty graph`, async () => {
     assert.deepEqual(await skillLearningGraph({ targetSkills: [] }), new Map());
   });
 
-  await test(`includes the target skill in the graph`, async () => {
+  test(`includes the target skill in the graph`, async () => {
     const skill = `he:我:i`;
 
     assert.deepEqual(
@@ -36,7 +36,7 @@ await test(`${skillLearningGraph.name} suite`, async () => {
     );
   });
 
-  await test(`includes decomposition dependencies when learning 好`, async () => {
+  test(`includes decomposition dependencies when learning 好`, async () => {
     const skillGood = `he:好:good`;
     const skillWoman = `he:女:woman`;
     const skillChild = `he:子:child`;
@@ -69,7 +69,7 @@ await test(`${skillLearningGraph.name} suite`, async () => {
     );
   });
 
-  await test(`includes multiple levels of decomposition for a character`, async () => {
+  test(`includes multiple levels of decomposition for a character`, async () => {
     assert.deepEqual(
       await skillLearningGraph({
         targetSkills: [`he:外:outside`],
@@ -199,7 +199,7 @@ await test(`${skillLearningGraph.name} suite`, async () => {
     return textGraph;
   }
 
-  await test(`${parseTextGraph.name} basics`, () => {
+  test(`${parseTextGraph.name} basics`, () => {
     assert.deepEqual(
       parseTextGraph(`
       he:一下儿:aBit
@@ -245,7 +245,7 @@ await test(`${skillLearningGraph.name} suite`, async () => {
     );
   }
 
-  await test(`supports multi-character words`, async () => {
+  test(`supports multi-character words`, async () => {
     assertLearningGraphEqual(
       await skillLearningGraph({
         targetSkills: [`he:一下儿:aBit`],
@@ -266,7 +266,7 @@ await test(`${skillLearningGraph.name} suite`, async () => {
     );
   });
 
-  await test(`supports HanziWordToPinyin dependency chain`, async () => {
+  test(`supports HanziWordToPinyin dependency chain`, async () => {
     assertLearningGraphEqual(
       await skillLearningGraph({ targetSkills: [`hp:儿:son`] }),
       `
@@ -282,7 +282,7 @@ await test(`${skillLearningGraph.name} suite`, async () => {
     );
   });
 
-  await test(`works for hsk words`, async () => {
+  test(`works for hsk words`, async () => {
     await skillLearningGraph({
       targetSkills: [
         ...(await allHsk1HanziWords()),
@@ -292,7 +292,7 @@ await test(`${skillLearningGraph.name} suite`, async () => {
     });
   });
 
-  await test(`learns the word form of component-form first`, async () => {
+  test(`learns the word form of component-form first`, async () => {
     assertLearningGraphEqual(
       await skillLearningGraph({ targetSkills: [`he:汉:chinese`] }),
       `
@@ -306,11 +306,11 @@ await test(`${skillLearningGraph.name} suite`, async () => {
     );
   });
 
-  await test.todo(`splits words into characters`);
+  test.todo(`splits words into characters`);
 });
 
-await test(`${skillReviewQueue.name} suite`, async () => {
-  await test(`no target skills or skill states gives an empty queue`, async () => {
+describe(`${skillReviewQueue.name} suite`, () => {
+  test(`no target skills or skill states gives an empty queue`, async () => {
     const graph = await skillLearningGraph({
       targetSkills: [],
     });
@@ -332,7 +332,7 @@ await test(`${skillReviewQueue.name} suite`, async () => {
     });
   });
 
-  await test(`no target skills but some skill states (i.e. introduced skills) includes introduced skills (but not any dependencies of it)`, async () => {
+  test(`no target skills but some skill states (i.e. introduced skills) includes introduced skills (but not any dependencies of it)`, async () => {
     const graph = await skillLearningGraph({
       targetSkills: [],
     });
@@ -354,7 +354,7 @@ await test(`${skillReviewQueue.name} suite`, async () => {
     });
   });
 
-  await test(`introduced skills that would otherwise be blocked are not blocked (because they've been introduced already)`, async () => {
+  test(`introduced skills that would otherwise be blocked are not blocked (because they've been introduced already)`, async () => {
     const graph = await skillLearningGraph({
       targetSkills: [`he:刀:knife`],
     });
@@ -386,8 +386,8 @@ await test(`${skillReviewQueue.name} suite`, async () => {
     });
   });
 
-  await test(`${SkillKind.HanziWordToGloss} skills`, async () => {
-    await test(`works for 好`, async () => {
+  describe(`${SkillKind.HanziWordToGloss} skills`, () => {
+    test(`works for 好`, async () => {
       const graph = await skillLearningGraph({
         targetSkills: [`he:好:good`],
       });
@@ -403,7 +403,7 @@ await test(`${skillReviewQueue.name} suite`, async () => {
       });
     });
 
-    await test(`learns the word form of component-form first`, async () => {
+    test(`learns the word form of component-form first`, async () => {
       const graph = await skillLearningGraph({
         targetSkills: [`he:汉:chinese`],
       });
@@ -424,8 +424,8 @@ await test(`${skillReviewQueue.name} suite`, async () => {
       });
     });
 
-    await test(`retry logic`, async () => {
-      await test(`skills that were just failed should stay first in queue (so you retry it immediately)`, async () => {
+    describe(`retry logic`, () => {
+      test(`skills that were just failed should stay first in queue (so you retry it immediately)`, async () => {
         const graph = await skillLearningGraph({
           targetSkills: [`he:八:eight`, `he:丿:slash`],
         });
@@ -454,7 +454,7 @@ await test(`${skillReviewQueue.name} suite`, async () => {
         });
       });
 
-      await test(`failed skills that are not introduced are not promoted`, async () => {
+      test(`failed skills that are not introduced are not promoted`, async () => {
         const graph = await skillLearningGraph({
           targetSkills: [`he:八:eight`, `he:丿:slash`],
         });
@@ -479,7 +479,7 @@ await test(`${skillReviewQueue.name} suite`, async () => {
         });
       });
 
-      await test(`multiple failed skills are prioritised in most-recent first`, async () => {
+      test(`multiple failed skills are prioritised in most-recent first`, async () => {
         const graph = await skillLearningGraph({
           targetSkills: [`he:八:eight`, `he:丿:slash`],
         });
@@ -529,7 +529,7 @@ await test(`${skillReviewQueue.name} suite`, async () => {
       });
     });
 
-    await test(`prioritises due skills with highest value (rather than most over-due)`, async () => {
+    test(`prioritises due skills with highest value (rather than most over-due)`, async () => {
       const graph = await skillLearningGraph({
         targetSkills: [`he:分:divide`],
       });
@@ -553,7 +553,7 @@ await test(`${skillReviewQueue.name} suite`, async () => {
       });
     });
 
-    await test(`schedules new skills in dependency order`, async () => {
+    test(`schedules new skills in dependency order`, async () => {
       const graph = await skillLearningGraph({
         targetSkills: [`he:分:divide`],
       });
@@ -570,7 +570,7 @@ await test(`${skillReviewQueue.name} suite`, async () => {
       });
     });
 
-    await test(`schedules skill reviews in order of due, and then deterministic random`, async () => {
+    test(`schedules skill reviews in order of due, and then deterministic random`, async () => {
       const graph = await skillLearningGraph({
         targetSkills: [`he:分:divide`, `he:一:one`],
       });
@@ -602,7 +602,7 @@ await test(`${skillReviewQueue.name} suite`, async () => {
       });
     });
 
-    await test(`throttles the number of new skills in the queue`, async () => {
+    test(`throttles the number of new skills in the queue`, async () => {
       const graph = await skillLearningGraph({
         targetSkills: [
           `he:分:divide`,
@@ -666,8 +666,8 @@ await test(`${skillReviewQueue.name} suite`, async () => {
     });
   });
 
-  await test(`${SkillKind.HanziWordToPinyin} skills`, async () => {
-    await test(`doesn't learn pinyin for all constituents of a single character`, async () => {
+  describe(`${SkillKind.HanziWordToPinyin} skills`, () => {
+    test(`doesn't learn pinyin for all constituents of a single character`, async () => {
       const graph = await skillLearningGraph({ targetSkills: [`hp:好:good`] });
       expect(
         skillReviewQueue({
@@ -687,7 +687,7 @@ await test(`${skillReviewQueue.name} suite`, async () => {
       });
     });
 
-    await test(`learns the pinyin for each character in multi-character words`, async () => {
+    test(`learns the pinyin for each character in multi-character words`, async () => {
       const graph = await skillLearningGraph({
         targetSkills: [`hp:一样:same`],
       });
@@ -712,7 +712,7 @@ await test(`${skillReviewQueue.name} suite`, async () => {
       });
     });
 
-    await test(`schedules new skills in dependency order`, async () => {
+    test(`schedules new skills in dependency order`, async () => {
       const graph = await skillLearningGraph({
         targetSkills: [`hp:一点儿:aLittle`],
       });
@@ -756,7 +756,7 @@ await test(`${skillReviewQueue.name} suite`, async () => {
       });
     });
 
-    await test(`treats non-introduced skills as "not stable" and won't dependant skills`, async () => {
+    test(`treats non-introduced skills as "not stable" and won't dependant skills`, async () => {
       const graph = await skillLearningGraph({
         targetSkills: [`hp:一:one`],
       });
@@ -810,8 +810,8 @@ await test(`${skillReviewQueue.name} suite`, async () => {
   });
 });
 
-await test(`${computeSkillRating.name} suite`, async () => {
-  await test(`includes duration and skill`, async () => {
+describe(`${computeSkillRating.name} suite`, () => {
+  test(`includes duration and skill`, async () => {
     const skill = `he:我:i`;
     const durationMs = 1234;
 
@@ -823,10 +823,10 @@ await test(`${computeSkillRating.name} suite`, async () => {
     expect(rating).toMatchObject({ skill, durationMs });
   });
 
-  await test(`${SkillKind.HanziWordToGloss} suites`, async () => {
+  describe(`${SkillKind.HanziWordToGloss} suites`, () => {
     const skill = `he:我:i`;
 
-    await test(`gives rating based on duration`, async () => {
+    test(`gives rating based on duration`, async () => {
       {
         const { rating } = computeSkillRating({
           skill,
@@ -857,7 +857,7 @@ await test(`${computeSkillRating.name} suite`, async () => {
   });
 });
 
-await test(`${getHanziWordRank.name} suite`, async () => {
+describe(`${getHanziWordRank.name} suite`, () => {
   function makeSkillSrsStates(
     skillStabilities: Record<Skill, /* stability */ number>,
   ): Map<Skill, SrsStateType> {
@@ -875,7 +875,7 @@ await test(`${getHanziWordRank.name} suite`, async () => {
     );
   }
 
-  await test(`it defaults to no rank`, async () => {
+  test(`it defaults to no rank`, async () => {
     expect(
       getHanziWordRank({
         hanziWord: `一:one`,
@@ -885,7 +885,7 @@ await test(`${getHanziWordRank.name} suite`, async () => {
     ).toEqual({ hanziWord: `一:one`, rank: 0, completion: 0 });
   });
 
-  await test(`single skill per rank`, async () => {
+  describe(`single skill per rank`, () => {
     const rankRules: RankRules = [
       {
         rank: 1,
@@ -901,7 +901,7 @@ await test(`${getHanziWordRank.name} suite`, async () => {
       },
     ];
 
-    await test(`no goals started, rank is 0`, async () => {
+    test(`no goals started, rank is 0`, async () => {
       const skillSrsStates = makeSkillSrsStates({});
 
       const result = getHanziWordRank({
@@ -913,7 +913,7 @@ await test(`${getHanziWordRank.name} suite`, async () => {
       expect(result).toEqual({ hanziWord: `一:one`, rank: 0, completion: 0 });
     });
 
-    await test(`rank 1 goals met, current rank is 2`, async () => {
+    test(`rank 1 goals met, current rank is 2`, async () => {
       const skillSrsStates = makeSkillSrsStates({
         "he:一:one": 50,
       });
@@ -927,7 +927,7 @@ await test(`${getHanziWordRank.name} suite`, async () => {
       expect(result).toEqual({ hanziWord: `一:one`, rank: 2, completion: 0 });
     });
 
-    await test(`rank 1 and 2 goals met, current rank is 3`, async () => {
+    test(`rank 1 and 2 goals met, current rank is 3`, async () => {
       const skillSrsStates = makeSkillSrsStates({
         "he:一:one": 50,
         "hpi:一:one": 50,
@@ -942,7 +942,7 @@ await test(`${getHanziWordRank.name} suite`, async () => {
       expect(result).toEqual({ hanziWord: `一:one`, rank: 3, completion: 0 });
     });
 
-    await test(`rank 1 goals missed, but rank 2 goals met, current rank is 3`, async () => {
+    test(`rank 1 goals missed, but rank 2 goals met, current rank is 3`, async () => {
       const skillSrsStates = makeSkillSrsStates({
         "he:一:one": 25,
         "hpi:一:one": 50,
@@ -957,7 +957,7 @@ await test(`${getHanziWordRank.name} suite`, async () => {
       expect(result).toEqual({ hanziWord: `一:one`, rank: 3, completion: 0 });
     });
 
-    await test(`rank 1 goals not met, progress is fraction of stability`, async () => {
+    test(`rank 1 goals not met, progress is fraction of stability`, async () => {
       const skillSrsStates = makeSkillSrsStates({
         "he:一:one": 25,
       });
@@ -971,7 +971,7 @@ await test(`${getHanziWordRank.name} suite`, async () => {
       expect(result).toEqual({ hanziWord: `一:one`, rank: 1, completion: 0.5 });
     });
 
-    await test(`rank 2 goals not met, progress is fraction of stability`, async () => {
+    test(`rank 2 goals not met, progress is fraction of stability`, async () => {
       const skillSrsStates = makeSkillSrsStates({
         "he:一:one": 50,
         "hpi:一:one": 10,
@@ -986,7 +986,7 @@ await test(`${getHanziWordRank.name} suite`, async () => {
       expect(result).toEqual({ hanziWord: `一:one`, rank: 2, completion: 0.2 });
     });
 
-    await test(`rank 3 goals not met, progress is fraction of stability`, async () => {
+    test(`rank 3 goals not met, progress is fraction of stability`, async () => {
       const skillSrsStates = makeSkillSrsStates({
         "he:一:one": 50,
         "hpi:一:one": 50,
@@ -1003,7 +1003,7 @@ await test(`${getHanziWordRank.name} suite`, async () => {
     });
   });
 
-  await test(`multiple skills per rank`, async () => {
+  describe(`multiple skills per rank`, () => {
     const rankRules: RankRules = [
       {
         rank: 1,
@@ -1022,7 +1022,7 @@ await test(`${getHanziWordRank.name} suite`, async () => {
       },
     ];
 
-    await test(`no skills attempted, current rank is null`, async () => {
+    test(`no skills attempted, current rank is null`, async () => {
       const skillSrsStates = makeSkillSrsStates({});
 
       const result = getHanziWordRank({
@@ -1034,7 +1034,7 @@ await test(`${getHanziWordRank.name} suite`, async () => {
       expect(result).toEqual({ hanziWord: `一:one`, rank: 0, completion: 0 });
     });
 
-    await test(`rank 1 when the skill has been started`, async () => {
+    test(`rank 1 when the skill has been started`, async () => {
       const skillSrsStates = makeSkillSrsStates({
         "he:一:one": 1,
       });
@@ -1052,7 +1052,7 @@ await test(`${getHanziWordRank.name} suite`, async () => {
       });
     });
 
-    await test(`rank 1 goals met, current rank is 2`, async () => {
+    test(`rank 1 goals met, current rank is 2`, async () => {
       const skillSrsStates = makeSkillSrsStates({
         "he:一:one": 50,
       });
@@ -1066,7 +1066,7 @@ await test(`${getHanziWordRank.name} suite`, async () => {
       expect(result).toEqual({ hanziWord: `一:one`, rank: 2, completion: 0 });
     });
 
-    await test(`rank 1 and 2 goals met, current rank is 3`, async () => {
+    test(`rank 1 and 2 goals met, current rank is 3`, async () => {
       const skillSrsStates = makeSkillSrsStates({
         "he:一:one": 50,
         "hpi:一:one": 50,
@@ -1082,7 +1082,7 @@ await test(`${getHanziWordRank.name} suite`, async () => {
       expect(result).toEqual({ hanziWord: `一:one`, rank: 3, completion: 0 });
     });
 
-    await test(`rank 1 goals missed, but rank 2 goals met, current rank is 3`, async () => {
+    test(`rank 1 goals missed, but rank 2 goals met, current rank is 3`, async () => {
       const skillSrsStates = makeSkillSrsStates({
         "he:一:one": 25,
         "hpi:一:one": 50,
@@ -1098,7 +1098,7 @@ await test(`${getHanziWordRank.name} suite`, async () => {
       expect(result).toEqual({ hanziWord: `一:one`, rank: 3, completion: 0 });
     });
 
-    await test(`rank 2 goals not met, progress is fraction of stability`, async () => {
+    test(`rank 2 goals not met, progress is fraction of stability`, async () => {
       const skillSrsStates = makeSkillSrsStates({
         "he:一:one": 50,
         "hpi:一:one": 10,
@@ -1113,7 +1113,7 @@ await test(`${getHanziWordRank.name} suite`, async () => {
       expect(result).toEqual({ hanziWord: `一:one`, rank: 2, completion: 0.1 });
     });
 
-    await test(`rank 2 goals not fully met, but one skill is more advanced than required`, async () => {
+    test(`rank 2 goals not fully met, but one skill is more advanced than required`, async () => {
       const skillSrsStates = makeSkillSrsStates({
         "he:一:one": 50,
         "hpi:一:one": 100,
@@ -1128,7 +1128,7 @@ await test(`${getHanziWordRank.name} suite`, async () => {
       expect(result).toEqual({ hanziWord: `一:one`, rank: 2, completion: 0.5 });
     });
 
-    await test(`rank 3 goals not met, progress is fraction of stability`, async () => {
+    test(`rank 3 goals not met, progress is fraction of stability`, async () => {
       const skillSrsStates = makeSkillSrsStates({
         "he:一:one": 50,
         "hpi:一:one": 50,
@@ -1146,7 +1146,7 @@ await test(`${getHanziWordRank.name} suite`, async () => {
     });
   });
 
-  await test(`same skill with increased stability requirement in the next rank`, async () => {
+  describe(`same skill with increased stability requirement in the next rank`, () => {
     const rankRules: RankRules = [
       {
         rank: 1,
@@ -1158,7 +1158,7 @@ await test(`${getHanziWordRank.name} suite`, async () => {
       },
     ];
 
-    await test(`rank 1 goals met, partial rank 2 progress`, async () => {
+    test(`rank 1 goals met, partial rank 2 progress`, async () => {
       const skillSrsStates = makeSkillSrsStates({
         "he:一:one": 65,
       });
@@ -1173,7 +1173,7 @@ await test(`${getHanziWordRank.name} suite`, async () => {
     });
   });
 
-  await test(`same skill with increased stability requirement in the a skipped rank`, async () => {
+  describe(`same skill with increased stability requirement in the a skipped rank`, () => {
     const rankRules: RankRules = [
       {
         rank: 1,
@@ -1189,7 +1189,7 @@ await test(`${getHanziWordRank.name} suite`, async () => {
       },
     ];
 
-    await test(`rank 1 goals met, partial rank 2 progress`, async () => {
+    test(`rank 1 goals met, partial rank 2 progress`, async () => {
       const skillSrsStates = makeSkillSrsStates({
         "he:一:one": 65,
         "hpi:一:one": 50,

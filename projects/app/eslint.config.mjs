@@ -349,7 +349,7 @@ export default tseslint.config(
   // test files
   {
     files: [`test/**`],
-    ignores: [`**/lint.test.ts`],
+    ignores: [`**/lint.test-d.ts`],
     rules: {
       "@typescript-eslint/no-non-null-assertion": `off`,
       "@typescript-eslint/restrict-template-expressions": `off`,

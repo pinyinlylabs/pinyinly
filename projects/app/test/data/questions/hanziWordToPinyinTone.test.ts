@@ -8,11 +8,11 @@ import {
 import { hanziWordToPinyinTone } from "#data/skills.ts";
 import { hanziFromHanziWord, loadDictionary } from "#dictionary/dictionary.ts";
 import assert from "node:assert/strict";
-import test from "node:test";
+import { describe, expect, test } from "vitest";
 import { 拼音, 汉字 } from "../helpers";
 
-await test(`${tryHanziDistractor.name} suite`, async () => {
-  await test(`should omit if there is a conflicting pinyin`, async () => {
+describe(`${tryHanziDistractor.name} suite`, async () => {
+  test(`should omit if there is a conflicting pinyin`, async () => {
     {
       const ctx = await makeQuestionContext(`我:i`);
       // wǒ doesn't conflict with yī
@@ -26,25 +26,26 @@ await test(`${tryHanziDistractor.name} suite`, async () => {
     }
   });
 
-  await test(`should omit if an alternative pinyin conflicts`, async () => {
+  test(`should omit if an alternative pinyin conflicts`, async () => {
     const ctx = await makeQuestionContext(`后:behind`); // hòu
+
     // 候:wait has "hou","hòu". it should be excluded because hòu conflicts
     assert.equal(await tryHanziDistractor(ctx, 汉字`候`), false);
   });
 
-  await test(`should not omit if initial is the same`, async () => {
+  test(`should not omit if initial is the same`, async () => {
     const ctx = await makeQuestionContext(`我:i`);
     // 武 (wǔ) should not be omitted because it has no exact pinyin conflict
     assert.equal(await tryHanziDistractor(ctx, 汉字`武`), true);
   });
 
-  await test(`should omit if there is a conflicting hanzi`, async () => {
+  test(`should omit if there is a conflicting hanzi`, async () => {
     const ctx = await makeQuestionContext(`上:above`);
 
     assert.equal(await tryHanziDistractor(ctx, 汉字`上`), false);
   });
 
-  await test(`should not omit if there is no conflict`, async () => {
+  test(`should not omit if there is no conflict`, async () => {
     {
       const ctx = await makeQuestionContext(`一:one`);
       assert.equal(await tryHanziDistractor(ctx, 汉字`我`), true);
@@ -56,14 +57,14 @@ await test(`${tryHanziDistractor.name} suite`, async () => {
   });
 });
 
-await test(`${tryPinyinDistractor.name} suite`, async () => {
-  await test(`should omit if it is the same`, async () => {
+describe(`${tryPinyinDistractor.name} suite`, async () => {
+  test(`should omit if it is the same`, async () => {
     const ctx = await makeQuestionContext(`我:i`);
     // wǒ conflicts with wǒ
     assert.equal(tryPinyinDistractor(ctx, 拼音`wǒ`), false);
   });
 
-  await test(`should add viable candidates`, async () => {
+  test(`should add viable candidates`, async () => {
     const ctx = await makeQuestionContext(`我:i`);
     expect(ctx.usedPinyin).toEqual(new Set([`wǒ`]));
 
@@ -72,7 +73,7 @@ await test(`${tryPinyinDistractor.name} suite`, async () => {
     expect(ctx.usedPinyin).toEqual(new Set([`wǔ`, `wǒ`]));
   });
 
-  await test(`should reject conflicts with pinyin of another meaning of the same hanzi`, async () => {
+  test(`should reject conflicts with pinyin of another meaning of the same hanzi`, async () => {
     // 为:become is wéi but 为:for is wèi. So the question for 为:become should
     // omit wèi entirely, because even though it's a correct answer it's not the
     // focus of what's being tested (this is a HanziWord test not a Hanzi test).
@@ -90,8 +91,8 @@ await test(`${tryPinyinDistractor.name} suite`, async () => {
   });
 });
 
-await test(`${hanziWordToPinyinToneQuestionOrThrow.name} suite`, async () => {
-  await test(`works for all valid single character hanzi`, async () => {
+describe(`${hanziWordToPinyinToneQuestionOrThrow.name} suite`, async () => {
+  test(`works for all valid single character hanzi`, async () => {
     const dictionary = await loadDictionary();
     const sample = [...dictionary].filter(
       ([hanziWord, meaning]) =>

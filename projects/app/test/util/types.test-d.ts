@@ -4,14 +4,9 @@ import type {
   IsExhaustedRest,
   PartialIfUndefined,
 } from "#util/types.ts";
-import assert from "node:assert/strict";
-import test from "node:test";
+import { expect, test } from "vitest";
 
-function typeChecks(..._args: unknown[]) {
-  // This function is only used for type checking, so it should never be called.
-}
-
-typeChecks(`IsEqual`, () => {
+test(`IsEqual`, () => {
   true satisfies IsEqual<`a`, `a`>;
   false satisfies IsEqual<`a`, `b`>;
 
@@ -43,7 +38,7 @@ typeChecks(`IsEqual`, () => {
   true satisfies IsEqual<{ key?: string }, { key: string | undefined }>;
 });
 
-typeChecks(`PartialIfUndefined`, () => {
+test(`PartialIfUndefined`, () => {
   true satisfies IsEqual<
     PartialIfUndefined<{
       key1: string;
@@ -58,7 +53,7 @@ typeChecks(`PartialIfUndefined`, () => {
   >;
 });
 
-typeChecks(`Flatten`, () => {
+test(`Flatten`, () => {
   // @ts-expect-error record intersection isn't the same as flat union
   true satisfies IsEqual<
     { key1: string } & { key2: string },
@@ -72,7 +67,7 @@ typeChecks(`Flatten`, () => {
   >;
 });
 
-typeChecks(`IsExhaustedRest`, () => {
+test(`IsExhaustedRest`, () => {
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   true satisfies IsExhaustedRest<{}>;
 
@@ -86,14 +81,14 @@ typeChecks(`IsExhaustedRest`, () => {
   true satisfies IsExhaustedRest<never>;
 });
 
-await test(`lib.dom.d.ts patches`, async () => {
+test(`lib.dom.d.ts patches`, async () => {
   // Passing `undefined` throws, but in lib.dom.d.ts `Response.json()` takes an
   // `any`, so it's not caught by the type checker. So we've patched
   // lib.dom.d.ts to remove the `any` so this test ensures that the patch is
   // working.
-  assert.throws(() => Response.json(undefined as unknown as string));
+  expect(() => Response.json(undefined as unknown as string)).toThrow();
 
-  typeChecks(() => {
+  test(() => {
     // @ts-expect-error passing `undefined` throws, but in lib.dom.d.ts
     // `Response.json()` takes an `any`, so it's not caught by the type checker.
     // So we've patched lib.dom.d.ts to remove the `any` so this test ensures
@@ -102,7 +97,7 @@ await test(`lib.dom.d.ts patches`, async () => {
   });
 });
 
-typeChecks(`banned CommonJS globals, use import.meta.* instead`, () => {
+test(`banned CommonJS globals, use import.meta.* instead`, () => {
   // eslint-disable-next-line no-restricted-globals
   void __dirname;
   // eslint-disable-next-line no-restricted-globals

@@ -1,9 +1,9 @@
 import { makePRNG } from "#util/random.ts";
 import assert from "node:assert/strict";
-import test from "node:test";
+import { describe, test } from "vitest";
 
-await test(`${makePRNG.name} suite`, async () => {
-  await test(`returns different numbers for seeds that differ by fractional amount`, () => {
+describe(`${makePRNG.name} suite`, async () => {
+  test(`returns different numbers for seeds that differ by fractional amount`, () => {
     const bases = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9];
     const diffs = [
       0.1, 0.01, 0.001, 0.0001, 0.000_01, 0.000_001, 0.000_000_1, 0.000_000_01,

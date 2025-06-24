@@ -249,19 +249,11 @@ tasks:
     # necessary explicitly specify it as `tsconfig.node.json`. It also doesn't
     # seem to respect project references so there just needs to be one tsconfig
     # that is used for all files.
-    command: tsx --tsconfig tsconfig.node.json --test --test-reporter=spec --import ./test/setup.ts --experimental-test-module-mocks "'test/**/*.test.{ts,tsx}'"
+    command: vitest
     inputs:
       - "!dist/"
       - "**/*"
       - "/.github/workflows" # There is a test that checks workflow environment variables.
-    options:
-      envFile: .env.local
-    env:
-      NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
-
-  testWatch:
-    command: tsx --tsconfig tsconfig.node.json --test --watch --import ./test/setup.ts --experimental-test-module-mocks "'test/**/*.test.{ts,tsx}'"
-    preset: watcher
     options:
       envFile: .env.local
     env:

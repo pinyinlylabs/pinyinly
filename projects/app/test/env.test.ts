@@ -1,33 +1,29 @@
-import assert from "node:assert/strict";
 import * as fs from "node:fs/promises";
 import path from "node:path";
-import test from "node:test";
+import { expect, test } from "vitest";
 
-await test(`.env file does not exist in projects/app`, async () => {
+test(`.env file does not exist in projects/app`, async () => {
   const projectRoot = import.meta.dirname + `/..`;
 
   // Check that `projectRoot` is pointing to the correct directory.
-  await assert.doesNotReject(
-    fs.access(projectRoot + `/package.json`),
-    `projectRoot considered incorrectly`,
-  );
+  await expect(fs.access(projectRoot + `/package.json`)).resolves.not.toThrow();
 
   // Intentionally left absent. Do not use this file as it's not used for Expo API
   // routes (see https://docs.expo.dev/router/reference/api-routes/#deployment)
   //
   // > @expo/server does not inflate environment variables from .env files. They
   // > are expected to load either by the hosting provider or the user.
-  await assert.rejects(fs.access(projectRoot + `/.env`), `.env file exists`);
+  await expect(fs.access(projectRoot + `/.env`)).rejects.toThrow();
 });
 
-await test(`tests/ tree mirrors src/ tree`, async () => {
+test(`tests/ tree mirrors src/ tree`, async () => {
   const projectRoot = import.meta.dirname + `/..`;
   const testRoot = `${projectRoot}/test`;
   const srcRoot = `${projectRoot}/src`;
 
   const srcRelPaths = await getTreePaths(srcRoot, `**/*`);
   const srcRelPathsSet = new Set(srcRelPaths);
-  const testRelPaths = await getTreePaths(testRoot, `**/*.test.*`);
+  const testRelPaths = await getTreePaths(testRoot, `**/*.{test,test-d}.*`);
 
   // Test that every test files corresponds to a src/ file (or it has a
   // `// hhh-standalone-test`), and that every standalone test does not have a
@@ -38,8 +34,8 @@ await test(`tests/ tree mirrors src/ tree`, async () => {
   for (const testRelPath of testRelPaths) {
     const hasSrcFile = [
       // Look for both .ts or .tsx source files.
-      testRelPath.replace(/\.test\.tsx?/, `.ts`),
-      testRelPath.replace(/\.test\.tsx?/, `.tsx`),
+      testRelPath.replace(/\.test(-d)?\.tsx?/, `.ts`),
+      testRelPath.replace(/\.test(-d)?\.tsx?/, `.tsx`),
     ].some((x) => srcRelPathsSet.has(x));
     const isStandalone = await isStandaloneTestFile(
       path.resolve(testRoot, testRelPath),

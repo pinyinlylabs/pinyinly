@@ -1,10 +1,8 @@
 // hhh-standalone-test
 
-function typeChecks(..._args: unknown[]) {
-  // This function is only used for type checking, so it should never be called.
-}
+import { test } from "vitest";
 
-typeChecks(`@typescript-eslint/return-await`, () => {
+test(`@typescript-eslint/return-await`, () => {
   // eslint-disable-next-line unicorn/consistent-function-scoping
   const promiseValue = () => Promise.resolve(null);
 

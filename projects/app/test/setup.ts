@@ -1,33 +1,40 @@
-import { mock } from "node:test";
+import * as matchers from "@testing-library/jest-dom/matchers";
 import type { Component } from "react";
 import { View } from "react-native-web";
+import { expect, vi } from "vitest";
+
+expect.extend(matchers);
 
 // Mock react-native to use react-native-web otherwise Node will try to import
 // Flow type files and fail.
-mock.module(`react-native`, {
-  namedExports: await import(`react-native-web`),
+vi.mock(`react-native`, async () => {
+  return {
+    ...(await vi.importActual(`react-native-web`)),
+  };
 });
 
-mock.module(`expo-haptics`);
+vi.mock(`expo-haptics`, () => {
+  return {};
+});
 
-mock.module(`expo-image`, {
-  namedExports: {
+vi.mock(`expo-image`, () => {
+  return {
     // SyntaxError: The requested module 'expo-image' does not provide an export
     // named 'Image'
     Image: () => null,
-  },
+  };
 });
 
-mock.module(`expo-secure-store`, {
-  namedExports: {
+vi.mock(`expo-secure-store`, () => {
+  return {
     getItemAsync: () => null,
     deleteItemAsync: () => null,
     setItemAsync: () => null,
-  },
+  };
 });
 
-mock.module(`react-native-reanimated`, {
-  namedExports: {
+vi.mock(`react-native-reanimated`, () => {
+  return {
     useSharedValue: () => null,
     useAnimatedStyle: () => ({}),
     withDelay: null,
@@ -37,30 +44,22 @@ mock.module(`react-native-reanimated`, {
     Extrapolation: null,
     interpolate: null,
     interpolateColor: null,
-  },
-  defaultExport: {
-    createAnimatedComponent: (x: Component) => x,
-  },
+    default: {
+      createAnimatedComponent: (x: Component) => x,
+    },
+  };
 });
 
-mock.module(`nativewind`, {
-  namedExports: {
+vi.mock(`nativewind`, () => {
+  return {
     cssInterop: () => null,
-  },
-  defaultExport: {
-    createAnimatedComponent: (x: Component) => x,
-    View,
-  },
+    default: {
+      createAnimatedComponent: (x: Component) => x,
+      View,
+    },
+  };
 });
 
-{
-  // Set up __DEV__
-  // @ts-expect-error __DEV__ is not defined in Node
-  globalThis.__DEV__ = true;
-}
-
-{
-  // Set up global expect
-  const { expect } = await import(`expect`);
-  globalThis.expect = expect;
-}
+// Set up __DEV__ global variable
+// @ts-expect-error __DEV__ is not defined in Node
+globalThis.__DEV__ = true;

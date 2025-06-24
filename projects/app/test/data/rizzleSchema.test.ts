@@ -3,44 +3,11 @@ import { rSkill, rSkillKind } from "#data/rizzleSchema.ts";
 import { hanziWordToGloss } from "#data/skills.ts";
 import { r } from "#util/rizzle.ts";
 import assert from "node:assert/strict";
-import type { TestContext } from "node:test";
-import test from "node:test";
-import type { ReadTransaction, WriteTransaction } from "replicache";
+import type { DeepReadonly, ReadonlyJSONValue } from "replicache";
+import { test, vi } from "vitest";
+import { makeMockTx } from "../util/rizzleHelpers";
 
-function makeMockTx(t: TestContext) {
-  const readTx = {
-    get: t.mock.fn<ReadTransaction[`get`]>(async () => undefined),
-    scan: t.mock.fn<ReadTransaction[`scan`]>(() => {
-      return null as never;
-    }),
-    clientID: null as never,
-    environment: null as never,
-    location: null as never,
-    has: null as never,
-    isEmpty: null as never,
-  } satisfies ReadTransaction;
-
-  const writeTx = {
-    ...readTx,
-    set: t.mock.fn<WriteTransaction[`set`]>(async () => undefined),
-    mutationID: null as never,
-    reason: null as never,
-    put: null as never,
-    del: null as never,
-  } satisfies WriteTransaction;
-
-  return {
-    ...writeTx,
-    readonly: readTx,
-    [Symbol.dispose]: () => {
-      writeTx.get.mock.resetCalls();
-      writeTx.set.mock.resetCalls();
-      writeTx.scan.mock.resetCalls();
-    },
-  };
-}
-
-await test(`skill as key`, async (t) => {
+test(`skill as key`, async () => {
   const posts = r.entity(`foo/[skill]`, {
     skill: rSkill(),
     text: r.string(),
@@ -48,20 +15,25 @@ await test(`skill as key`, async (t) => {
 
   // Marshal and unmarshal round tripping
   for (const skill of [`eh:好:good`, `he:好:good`] as const) {
-    using tx = makeMockTx(t);
+    using tx = makeMockTx();
+    const setSpy = vi.spyOn(tx, `set`);
+    const getSpy = vi.spyOn(tx, `get`);
+
     await posts.set(tx, { skill }, { skill, text: `hello` });
-    const [, marshaledData] = tx.set.mock.calls[0]!.arguments;
-    tx.get.mock.mockImplementationOnce(async () => marshaledData);
+    const [, marshaledData] = setSpy.mock.calls[0]!;
+    getSpy.mockImplementationOnce(
+      async () => marshaledData as DeepReadonly<ReadonlyJSONValue>,
+    );
     assert.deepEqual(await posts.get(tx, { skill }), {
       skill,
       text: `hello`,
     });
-    assert.equal(tx.get.mock.callCount(), 1);
-    assert.deepEqual(tx.get.mock.calls[0]?.arguments, [`foo/${skill}`]);
+    assert.equal(getSpy.mock.calls.length, 1);
+    assert.deepEqual(getSpy.mock.calls[0], [`foo/${skill}`]);
   }
 });
 
-await test(`${rSkillKind.name}()`, async (t) => {
+test(`${rSkillKind.name}()`, async () => {
   const posts = r.entity(`foo/[id]`, {
     id: r.string(),
     skill: rSkillKind(),
@@ -83,11 +55,15 @@ await test(`${rSkillKind.name}()`, async (t) => {
     SkillKind.ImageToHanziWord,
     SkillKind.PinyinToHanziWord,
   ] as const) {
-    using tx = makeMockTx(t);
+    using tx = makeMockTx();
+    const setSpy = vi.spyOn(tx, `set`);
+    const getSpy = vi.spyOn(tx, `get`);
 
     await posts.set(tx, { id: `1` }, { id: `1`, skill: skillKind });
-    const [, marshaledData] = tx.set.mock.calls[0]!.arguments;
-    tx.get.mock.mockImplementationOnce(async () => marshaledData);
+    const [, marshaledData] = setSpy.mock.calls[0]!;
+    getSpy.mockImplementationOnce(
+      async () => marshaledData as DeepReadonly<ReadonlyJSONValue>,
+    );
     assert.deepEqual(await posts.get(tx, { id: `1` }), {
       id: `1`,
       skill: skillKind,
@@ -95,7 +71,7 @@ await test(`${rSkillKind.name}()`, async (t) => {
   }
 });
 
-await test(`${rSkill.name}()`, async (t) => {
+test(`${rSkill.name}()`, async () => {
   const posts = r.entity(`foo/[id]`, {
     id: r.string(),
     skill: rSkill(),
@@ -103,11 +79,16 @@ await test(`${rSkill.name}()`, async (t) => {
 
   // Marshal and unmarshal round tripping
   for (const skill of [hanziWordToGloss(`好:good`)] as const) {
-    using tx = makeMockTx(t);
+    using tx = makeMockTx();
+    const setSpy = vi.spyOn(tx, `set`);
+    const getSpy = vi.spyOn(tx, `get`);
+
     const id = `1`;
     await posts.set(tx, { id }, { id, skill });
-    const [, marshaledData] = tx.set.mock.calls[0]!.arguments;
-    tx.get.mock.mockImplementationOnce(async () => marshaledData);
+    const [, marshaledData] = setSpy.mock.calls[0]!;
+    getSpy.mockImplementationOnce(
+      async () => marshaledData as DeepReadonly<ReadonlyJSONValue>,
+    );
     assert.deepEqual(await posts.get(tx, { id }), { id, skill });
   }
 });

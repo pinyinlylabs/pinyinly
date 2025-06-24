@@ -18,75 +18,45 @@ import type { IsEqual } from "#util/types.ts";
 import mapValues from "lodash/mapValues";
 import shuffle from "lodash/shuffle";
 import assert from "node:assert/strict";
-import type { TestContext } from "node:test";
-import test from "node:test";
-import type { ReadTransaction, WriteTransaction } from "replicache";
+import type {
+  DeepReadonly,
+  ReadonlyJSONValue,
+  WriteTransaction,
+} from "replicache";
 import { Replicache } from "replicache";
+import { describe, expect, test, vi } from "vitest";
 import { z } from "zod/v4";
-import { testReplicacheOptions } from "./rizzleHelpers";
+import { makeMockTx, testReplicacheOptions } from "./rizzleHelpers";
 
 function typeChecks<_T>(..._args: unknown[]) {
   // This function is only used for type checking, so it should never be called.
 }
 
-function makeMockTx(t: TestContext) {
-  const readTx = {
-    get: t.mock.fn<ReadTransaction[`get`]>(async () => undefined),
-    scan: t.mock.fn<ReadTransaction[`scan`]>(() => {
-      return null as never;
-    }),
-    clientID: null as never,
-    environment: null as never,
-    location: null as never,
-    has: t.mock.fn<ReadTransaction[`has`]>(async () => false),
-    isEmpty: null as never,
-  } satisfies ReadTransaction;
-
-  const writeTx = {
-    ...readTx,
-    set: t.mock.fn<WriteTransaction[`set`]>(async () => undefined),
-    mutationID: null as never,
-    reason: null as never,
-    put: null as never,
-    del: null as never,
-  } satisfies WriteTransaction;
-
-  return {
-    ...writeTx,
-    readonly: readTx,
-    [Symbol.dispose]: () => {
-      writeTx.get.mock.resetCalls();
-      writeTx.set.mock.resetCalls();
-      writeTx.scan.mock.resetCalls();
-    },
-  };
-}
-
-await test(`string() key and value`, async (t) => {
+test(`string() key and value`, async () => {
   const posts = r.entity(`foo/[id]`, {
     id: r.string(),
     name: r.string(),
   });
 
-  using tx = makeMockTx(t);
+  using tx = makeMockTx();
+
+  const getSpy = vi.spyOn(tx, `get`);
+  const setSpy = vi.spyOn(tx, `set`);
 
   await posts.get(tx, { id: `1` });
-  assert.equal(tx.get.mock.callCount(), 1);
-  assert.deepEqual(tx.get.mock.calls[0]?.arguments, [`foo/1`]);
+  expect(getSpy).toHaveBeenCalledTimes(1);
+  expect(getSpy).toHaveBeenCalledWith(`foo/1`);
 
   // Check that a ReadonlyJSONValue is parsed correctly.
-  tx.get.mock.mockImplementationOnce(() =>
+  getSpy.mockImplementationOnce(() =>
     Promise.resolve({ id: `1`, name: `foo` }),
   );
-  assert.deepEqual(await posts.get(tx, { id: `1` }), { id: `1`, name: `foo` });
+  expect(await posts.get(tx, { id: `1` })).toEqual({ id: `1`, name: `foo` });
 
   // Check that a value is encoded correctly.
   await posts.set(tx, { id: `1` }, { id: `1`, name: `foo` });
-  assert.equal(tx.set.mock.callCount(), 1);
-  assert.deepEqual(tx.set.mock.calls[0]?.arguments, [
-    `foo/1`,
-    { id: `1`, name: `foo` },
-  ]);
+  expect(setSpy).toHaveBeenCalledTimes(1);
+  expect(setSpy).toHaveBeenCalledWith(`foo/1`, { id: `1`, name: `foo` });
 
   typeChecks(async () => {
     // .get()
@@ -108,19 +78,25 @@ await test(`string() key and value`, async (t) => {
   });
 });
 
-await test(`string() .nullable()`, async (t) => {
+test(`string() .nullable()`, async () => {
   const posts = r.entity(`foo/[id]`, {
     id: r.string(),
     name: r.string().nullable().alias(`n`),
   });
 
-  using tx = makeMockTx(t);
+  using tx = makeMockTx();
 
-  tx.get.mock.mockImplementationOnce(async () => ({ id: `1`, n: `foo` }));
-  assert.deepEqual(await posts.get(tx, { id: `1` }), { id: `1`, name: `foo` });
+  vi.spyOn(tx, `get`).mockImplementationOnce(async () => ({
+    id: `1`,
+    n: `foo`,
+  }));
+  expect(await posts.get(tx, { id: `1` })).toEqual({ id: `1`, name: `foo` });
 
-  tx.get.mock.mockImplementationOnce(async () => ({ id: `1`, n: null }));
-  assert.deepEqual(await posts.get(tx, { id: `1` }), { id: `1`, name: null });
+  vi.spyOn(tx, `get`).mockImplementationOnce(async () => ({
+    id: `1`,
+    n: null,
+  }));
+  expect(await posts.get(tx, { id: `1` })).toEqual({ id: `1`, name: null });
 
   typeChecks(async () => {
     // .get()
@@ -138,18 +114,21 @@ await test(`string() .nullable()`, async (t) => {
   });
 });
 
-await test(`string() .optional()`, async (t) => {
+test(`string() .optional()`, async () => {
   const posts = r.entity(`foo/[id]`, {
     id: r.string(),
     name: r.string().optional().alias(`n`),
   });
 
-  using tx = makeMockTx(t);
+  using tx = makeMockTx();
 
-  tx.get.mock.mockImplementationOnce(async () => ({ id: `1`, n: `foo` }));
+  vi.spyOn(tx, `get`).mockImplementationOnce(async () => ({
+    id: `1`,
+    n: `foo`,
+  }));
   assert.deepEqual(await posts.get(tx, { id: `1` }), { id: `1`, name: `foo` });
 
-  tx.get.mock.mockImplementationOnce(async () => ({ id: `1` }));
+  vi.spyOn(tx, `get`).mockImplementationOnce(async () => ({ id: `1` }));
   assert.deepEqual(await posts.get(tx, { id: `1` }), { id: `1` });
 
   typeChecks(async () => {
@@ -169,7 +148,7 @@ await test(`string() .optional()`, async (t) => {
   });
 });
 
-await test(`object() .nullable()`, async (t) => {
+test(`object() .nullable()`, async () => {
   const posts = r.entity(`foo/[id]`, {
     id: r.string(),
     name: r
@@ -181,9 +160,9 @@ await test(`object() .nullable()`, async (t) => {
       .alias(`n`),
   });
 
-  using tx = makeMockTx(t);
+  using tx = makeMockTx();
 
-  tx.get.mock.mockImplementationOnce(async () => ({
+  vi.spyOn(tx, `get`).mockImplementationOnce(async () => ({
     id: `1`,
     n: { first: `a`, last: `b` },
   }));
@@ -192,7 +171,10 @@ await test(`object() .nullable()`, async (t) => {
     name: { first: `a`, last: `b` },
   });
 
-  tx.get.mock.mockImplementationOnce(async () => ({ id: `1`, n: null }));
+  vi.spyOn(tx, `get`).mockImplementationOnce(async () => ({
+    id: `1`,
+    n: null,
+  }));
   assert.deepEqual(await posts.get(tx, { id: `1` }), { id: `1`, name: null });
 
   typeChecks(async () => {
@@ -215,8 +197,8 @@ await test(`object() .nullable()`, async (t) => {
   });
 });
 
-await test(`object()`, async (t) => {
-  using tx = makeMockTx(t);
+test(`object()`, async () => {
+  using tx = makeMockTx();
 
   {
     // key alias
@@ -225,14 +207,15 @@ await test(`object()`, async (t) => {
       name: r.string(`n`),
     });
 
+    const getSpy = vi.spyOn(tx, `get`);
+    const setSpy = vi.spyOn(tx, `set`);
+
     await posts.get(tx, { id: `1` });
-    assert.equal(tx.get.mock.callCount(), 1);
-    assert.deepEqual(tx.get.mock.calls[0]?.arguments, [`foo/1`]);
+    assert.equal(getSpy.mock.calls.length, 1);
+    assert.deepEqual(getSpy.mock.calls[0], [`foo/1`]);
 
     // Check that a ReadonlyJSONValue is parsed correctly.
-    tx.get.mock.mockImplementationOnce(() =>
-      Promise.resolve({ id: `1`, n: `foo` }),
-    );
+    getSpy.mockImplementationOnce(() => Promise.resolve({ id: `1`, n: `foo` }));
     assert.deepEqual(await posts.get(tx, { id: `1` }), {
       id: `1`,
       name: `foo`,
@@ -240,11 +223,8 @@ await test(`object()`, async (t) => {
 
     // Check that a value is encoded correctly.
     await posts.set(tx, { id: `1` }, { id: `1`, name: `foo` });
-    assert.equal(tx.set.mock.callCount(), 1);
-    assert.deepEqual(tx.set.mock.calls[0]?.arguments, [
-      `foo/1`,
-      { id: `1`, n: `foo` },
-    ]);
+    assert.equal(setSpy.mock.calls.length, 1);
+    assert.deepEqual(setSpy.mock.calls[0], [`foo/1`, { id: `1`, n: `foo` }]);
   }
 
   typeChecks(`simple, no aliases`, async () => {
@@ -313,17 +293,20 @@ await test(`object()`, async (t) => {
   });
 });
 
-await test(`timestamp()`, async (t) => {
+test(`timestamp()`, async () => {
   const posts = r.entity(`foo/[id]`, {
     id: r.string(),
     due: r.timestamp(),
   });
 
-  using tx = makeMockTx(t);
+  using tx = makeMockTx();
+
+  const getSpy = vi.spyOn(tx, `get`);
+  const setSpy = vi.spyOn(tx, `set`);
 
   await posts.get(tx, { id: `1` });
-  assert.equal(tx.get.mock.callCount(), 1);
-  assert.deepEqual(tx.get.mock.calls[0]?.arguments, [`foo/1`]);
+  assert.equal(getSpy.mock.calls.length, 1);
+  assert.deepEqual(getSpy.mock.calls[0], [`foo/1`]);
 
   // Unmarshalling
   {
@@ -332,9 +315,12 @@ await test(`timestamp()`, async (t) => {
       [date.toISOString(), date], // ISO8601 string
       [date.getTime(), date], // timestamp as number
       [date.getTime().toString(), date], // timestamp as string
-    ]) {
-      tx.get.mock.mockImplementationOnce(() =>
-        Promise.resolve({ id: `1`, due: marshaled }),
+    ] as const) {
+      vi.spyOn(tx, `get`).mockImplementationOnce(() =>
+        Promise.resolve({
+          id: `1`,
+          due: marshaled,
+        }),
       );
 
       assert.deepEqual(
@@ -356,36 +342,41 @@ await test(`timestamp()`, async (t) => {
       [date.getTime(), date.getTime()], // timestamp as number
     ] as const) {
       await posts.set(tx, { id: `1` }, { id: `1`, due: unmarshaled });
-      assert.equal(tx.set.mock.callCount(), 1);
-      assert.deepEqual(tx.set.mock.calls[0]?.arguments, [
+      assert.equal(setSpy.mock.calls.length, 1);
+      assert.deepEqual(setSpy.mock.calls[0], [
         `foo/1`,
         { id: `1`, due: marshaled },
       ]);
-      tx.set.mock.resetCalls();
+      setSpy.mockClear();
     }
   }
 });
 
-await test(`entity() one variable`, async (t) => {
+test(`entity() one variable`, async () => {
   const posts = r.entity(`foo/[id1]`, {
     id1: r.string(),
     text: r.string(),
   });
 
-  using tx = makeMockTx(t);
+  using tx = makeMockTx();
+
+  const setSpy = vi.spyOn(tx, `set`);
 
   await posts.set(tx, { id1: `1` }, { id1: `1`, text: `hello` });
-  const [, marshaledData] = tx.set.mock.calls[0]!.arguments;
-  tx.get.mock.mockImplementationOnce(async () => marshaledData);
+  const [, marshaledData] = setSpy.mock.calls[0]!;
+  const getSpy = vi.spyOn(tx, `get`);
+  getSpy.mockImplementationOnce(
+    async () => marshaledData as DeepReadonly<ReadonlyJSONValue>,
+  );
   assert.deepEqual(await posts.get(tx, { id1: `1` }), {
     id1: `1`,
     text: `hello`,
   });
-  assert.equal(tx.get.mock.callCount(), 1);
-  assert.deepEqual(tx.get.mock.calls[0]?.arguments, [`foo/1`]);
+  assert.equal(getSpy.mock.calls.length, 1);
+  assert.deepEqual(getSpy.mock.calls[0], [`foo/1`]);
 });
 
-await test(`entity() variables requires string marshaler`, async () => {
+test(`entity() variables requires string marshaler`, async () => {
   typeChecks(() => {
     r.entity(`foo/[id]`, { id: r.string() });
     r.entity(`foo/[id]`, { id: r.literal(`foo`, r.string()) });
@@ -394,32 +385,37 @@ await test(`entity() variables requires string marshaler`, async () => {
   });
 });
 
-await test(`entity() two variables`, async (t) => {
+test(`entity() two variables`, async () => {
   const posts = r.entity(`foo/[id1]/[id2]`, {
     id1: r.string(),
     id2: r.string(),
     text: r.string(),
   });
 
-  using tx = makeMockTx(t);
+  using tx = makeMockTx();
+
+  const setSpy = vi.spyOn(tx, `set`);
 
   await posts.set(
     tx,
     { id1: `1`, id2: `2` },
     { id1: `1`, id2: `2`, text: `hello` },
   );
-  const [, marshaledData] = tx.set.mock.calls[0]!.arguments;
-  tx.get.mock.mockImplementationOnce(async () => marshaledData);
+  const [, marshaledData] = setSpy.mock.calls[0]!;
+  const getSpy = vi.spyOn(tx, `get`);
+  getSpy.mockImplementationOnce(
+    async () => marshaledData as DeepReadonly<ReadonlyJSONValue>,
+  );
   assert.deepEqual(await posts.get(tx, { id1: `1`, id2: `2` }), {
     id1: `1`,
     id2: `2`,
     text: `hello`,
   });
-  assert.equal(tx.get.mock.callCount(), 1);
-  assert.deepEqual(tx.get.mock.calls[0]?.arguments, [`foo/1/2`]);
+  assert.equal(getSpy.mock.calls.length, 1);
+  assert.deepEqual(getSpy.mock.calls[0], [`foo/1/2`]);
 });
 
-await test(`entity() non-string key codec`, async (t) => {
+test(`entity() non-string key codec`, async () => {
   const rComplex = r.custom(
     z
       .tuple([z.string(), z.number()])
@@ -441,24 +437,28 @@ await test(`entity() non-string key codec`, async (t) => {
     [[`a`, 1], `a:1`],
     [[`c`, 3], `c:3`],
   ] as const) {
-    using tx = makeMockTx(t);
+    using tx = makeMockTx();
+    const setSpy = vi.spyOn(tx, `set`);
     await posts.set(
       tx,
       { complex: unmarshaled },
       { complex: unmarshaled, text: `hello` },
     );
-    const [, marshaledData] = tx.set.mock.calls[0]!.arguments;
-    tx.get.mock.mockImplementationOnce(async () => marshaledData);
+    const [, marshaledData] = setSpy.mock.calls[0]!;
+    const getSpy = vi.spyOn(tx, `get`);
+    getSpy.mockImplementationOnce(
+      async () => marshaledData as DeepReadonly<ReadonlyJSONValue>,
+    );
     assert.deepEqual(await posts.get(tx, { complex: unmarshaled }), {
       complex: unmarshaled,
       text: `hello`,
     });
-    assert.equal(tx.get.mock.callCount(), 1);
-    assert.deepEqual(tx.get.mock.calls[0]?.arguments, [`foo/${marshaled}`]);
+    assert.equal(getSpy.mock.calls.length, 1);
+    assert.deepEqual(getSpy.mock.calls[0], [`foo/${marshaled}`]);
   }
 });
 
-await test(`entity() key marshaling`, async () => {
+test(`entity() key marshaling`, async () => {
   const posts = r.entity(`posts/[id]`, {
     id: r.string(),
   });
@@ -475,7 +475,7 @@ await test(`entity() key marshaling`, async () => {
   assert.throws(() => aliased.marshalKey({}), /missing/);
 });
 
-await test(`entity() alias duplicates`, async () => {
+test(`entity() alias duplicates`, async () => {
   assert.throws(
     () =>
       r.entity(`posts/[id]`, {
@@ -495,23 +495,24 @@ await test(`entity() alias duplicates`, async () => {
   );
 });
 
-await test(`entity() .has()`, async (t) => {
+test(`entity() .has()`, async () => {
   const posts = r.entity(`foo/[id]`, { id: r.string() });
 
-  using tx = makeMockTx(t);
+  using tx = makeMockTx();
 
+  const hasSpy = vi.spyOn(tx, `has`);
   // Marshal and unmarshal round tripping
   await posts.has(tx, { id: `1` });
-  assert.deepEqual(tx.has.mock.calls[0]!.arguments, [`foo/1`]);
+  assert.deepEqual(hasSpy.mock.calls[0], [`foo/1`]);
 
-  tx.has.mock.mockImplementation(async (key) =>
+  vi.spyOn(tx, `has`).mockImplementation(async (key) =>
     key === `foo/1` ? true : false,
   );
   assert.deepEqual(await posts.has(tx, { id: `1` }), true);
   assert.deepEqual(await posts.has(tx, { id: `2` }), false);
 });
 
-await test(`entity() distinguishing between input/output types`, async (t) => {
+test(`entity() distinguishing between input/output types`, async () => {
   const rCoerciveString = () =>
     r.custom(
       // takes in a number or string
@@ -527,7 +528,7 @@ await test(`entity() distinguishing between input/output types`, async (t) => {
     text: rCoerciveString().indexed(`byText`),
   });
 
-  using tx = makeMockTx(t);
+  using tx = makeMockTx();
 
   // .get()
   {
@@ -556,7 +557,7 @@ await test(`entity() distinguishing between input/output types`, async (t) => {
   });
 });
 
-await test(`entity() multiple indexes types work`, async (t) => {
+test(`entity() multiple indexes types work`, async () => {
   const posts = r.entity(`posts/[id]`, {
     id: r.string().alias(`i`).indexed(`byId`),
     date: r.datetime().alias(`d`).indexed(`byDate`),
@@ -566,7 +567,7 @@ await test(`entity() multiple indexes types work`, async (t) => {
     id: r.string().alias(`i`).indexed(`byId`),
   });
 
-  using tx = makeMockTx(t);
+  using tx = makeMockTx();
 
   // index scan
   typeChecks(async () => {
@@ -628,7 +629,7 @@ await test(`entity() multiple indexes types work`, async (t) => {
   });
 });
 
-await test(`entity() requires variables to be declared`, () => {
+test(`entity() requires variables to be declared`, () => {
   typeChecks(() => {
     r.entity(
       `foo/[id]`,
@@ -638,64 +639,68 @@ await test(`entity() requires variables to be declared`, () => {
   });
 });
 
-await test(`number()`, async (t) => {
+test(`number()`, async () => {
   const posts = r.entity(`foo/[id]`, {
     id: r.string(),
     count: r.number(`c`),
   });
 
-  using tx = makeMockTx(t);
+  using tx = makeMockTx();
+
+  const setSpy = vi.spyOn(tx, `set`);
 
   // Marshal and unmarshal round tripping
   await posts.set(tx, { id: `1` }, { id: `1`, count: 5 });
-  const [, marshaledData] = tx.set.mock.calls[0]!.arguments;
+  const [, marshaledData] = setSpy.mock.calls[0]!;
   assert.deepEqual(marshaledData, { id: `1`, c: 5 });
 
-  tx.get.mock.mockImplementationOnce(async () => marshaledData);
+  vi.spyOn(tx, `get`).mockImplementationOnce(async () => marshaledData);
   assert.deepEqual(await posts.get(tx, { id: `1` }), { id: `1`, count: 5 });
 });
 
-await test(`boolean()`, async (t) => {
+test(`boolean()`, async () => {
   const posts = r.entity(`foo/[id]`, {
     id: r.string(),
     isActive: r.boolean(`a`),
   });
 
-  using tx = makeMockTx(t);
+  using tx = makeMockTx();
+  const setSpy = vi.spyOn(tx, `set`);
 
   // Marshal and unmarshal round tripping
   await posts.set(tx, { id: `1` }, { id: `1`, isActive: true });
-  const [, marshaledData] = tx.set.mock.calls[0]!.arguments;
+  const [, marshaledData] = setSpy.mock.calls[0]!;
   assert.deepEqual(marshaledData, { id: `1`, a: true });
 
-  tx.get.mock.mockImplementationOnce(async () => marshaledData);
+  vi.spyOn(tx, `get`).mockImplementationOnce(async () => marshaledData);
   assert.deepEqual(await posts.get(tx, { id: `1` }), {
     id: `1`,
     isActive: true,
   });
 });
 
-await test(`json()`, async (t) => {
+test(`json()`, async () => {
   const posts = r.entity(`foo/[id]`, {
     id: r.string(),
     data: r.json(`a`),
   });
 
-  using tx = makeMockTx(t);
+  using tx = makeMockTx();
+  const setSpy = vi.spyOn(tx, `set`);
 
   // Marshal and unmarshal round tripping
   await posts.set(tx, { id: `1` }, { id: `1`, data: { foo: `bar` } });
-  const [, marshaledData] = tx.set.mock.calls[0]!.arguments;
+  const [, marshaledData] = setSpy.mock.calls[0]!;
   assert.deepEqual(marshaledData, { id: `1`, a: { foo: `bar` } });
 
-  tx.get.mock.mockImplementationOnce(async () => marshaledData);
+  vi.spyOn(tx, `get`).mockImplementationOnce(async () => marshaledData);
   assert.deepEqual(await posts.get(tx, { id: `1` }), {
     id: `1`,
     data: { foo: `bar` },
   });
 });
 
-await test(`enum()`, async (t) => {
+test(`enum()`, async () => {
   const colorsSchema = z.enum([`RED`, `BLUE`]);
   const Colors = colorsSchema.enum;
 
@@ -709,11 +714,15 @@ await test(`enum()`, async (t) => {
 
   // Marshal and unmarshal round tripping
   for (const color of [Colors.BLUE, Colors.RED]) {
-    using tx = makeMockTx(t);
+    using tx = makeMockTx();
+    const setSpy = vi.spyOn(tx, `set`);
 
     await posts.set(tx, { id: `1` }, { id: `1`, color });
-    const [, marshaledData] = tx.set.mock.calls[0]!.arguments;
-    tx.get.mock.mockImplementationOnce(async () => marshaledData);
+    const [, marshaledData] = setSpy.mock.calls[0]!;
+
+    vi.spyOn(tx, `get`).mockImplementationOnce(
+      async () => marshaledData as DeepReadonly<ReadonlyJSONValue>,
+    );
     // Make sure the enum isn't just being marshaled to its runtime value,
     // these are too easily to change accidentally so instead there should be
     // a separate explicit marshaled value.
@@ -725,7 +734,7 @@ await test(`enum()`, async (t) => {
   }
 });
 
-await test(`object() with alias`, async (t) => {
+test(`object() with alias`, async () => {
   const posts = r.entity(`foo/[id]`, {
     id: r.string(),
     author: r.object({
@@ -735,7 +744,8 @@ await test(`object() with alias`, async (t) => {
     }),
   });
 
-  using tx = makeMockTx(t);
+  using tx = makeMockTx();
+  const setSpy = vi.spyOn(tx, `set`);
 
   // Marshal and unmarshal round tripping
   await posts.set(
@@ -743,20 +753,20 @@ await test(`object() with alias`, async (t) => {
     { id: `1` },
     { id: `1`, author: { name: `foo`, email: `f@o`, id: `1` } },
   );
-  const [, marshaledData] = tx.set.mock.calls[0]!.arguments;
+  const [, marshaledData] = setSpy.mock.calls[0]!;
   assert.deepEqual(marshaledData, {
     id: `1`,
     author: { name: `foo`, e: `f@o`, i: `1` },
   });
 
-  tx.get.mock.mockImplementationOnce(async () => marshaledData);
+  vi.spyOn(tx, `get`).mockImplementationOnce(async () => marshaledData);
   assert.deepEqual(await posts.get(tx, { id: `1` }), {
     id: `1`,
     author: { name: `foo`, email: `f@o`, id: `1` },
   });
 });
 
-await test(`object()`, async (t) => {
+test(`object()`, async () => {
   const posts = r.entity(`foo/[id]`, {
     id: r.string(),
     author: r.object({
@@ -764,22 +774,23 @@ await test(`object()`, async (t) => {
     }),
   });
 
-  using tx = makeMockTx(t);
+  using tx = makeMockTx();
+  const setSpy = vi.spyOn(tx, `set`);
 
   // Marshal and unmarshal round tripping
   const id = `1`;
   await posts.set(tx, { id }, { id, author: { name: `foo` } });
-  const [, marshaledData] = tx.set.mock.calls[0]!.arguments;
+  const [, marshaledData] = setSpy.mock.calls[0]!;
   assert.deepEqual(marshaledData, { id, author: { name: `foo` } });
 
-  tx.get.mock.mockImplementationOnce(async () => marshaledData);
+  vi.spyOn(tx, `get`).mockImplementationOnce(async () => marshaledData);
   assert.deepEqual(await posts.get(tx, { id }), {
     id,
     author: { name: `foo` },
   });
 });
 
-await test(`.getIndexes()`, () => {
+test(`.getIndexes()`, () => {
   // no key path variables
   {
     const posts = r.entity(`foo`, {
@@ -902,7 +913,7 @@ await test(`.getIndexes()`, () => {
   }
 });
 
-await test(`mutator()`, async () => {
+test(`mutator()`, async () => {
   const fn = r
     .mutator({
       id: r.string(),
@@ -990,7 +1001,7 @@ class CheckpointLog {
   }
 }
 
-await test(`replicache()`, async (t) => {
+test(`replicache()`, async () => {
   const schema = {
     version: `1`,
     posts: r.entity(`p/[id]`, {
@@ -1051,10 +1062,10 @@ await test(`replicache()`, async (t) => {
     //
     // Index scans
     //
-    using tx = makeMockTx(t);
+    using tx = makeMockTx();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    tx.scan.mock.mockImplementationOnce((options: any): any => {
+    vi.spyOn(tx, `scan`).mockImplementationOnce((options: any): any => {
       checkPoints.log(`tx.scan`);
       assert.deepEqual(options, {
         indexName: `posts.byTitle`,
@@ -1083,41 +1094,44 @@ await test(`replicache()`, async (t) => {
     //
     // Paged index scans
     //
-    using tx = makeMockTx(t);
+    using tx = makeMockTx();
 
-    const query = t.mock.method(db.replicache, `query`);
-    query.mock.mockImplementation(async (fn) => fn(tx));
+    vi.spyOn(db.replicache, `query`).mockImplementation(async (fn) => fn(tx));
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    tx.scan.mock.mockImplementationOnce((options: any): any => {
-      checkPoints.log(`tx.scan 0`);
-      assert.deepEqual(options, {
-        indexName: `posts.byTitle`,
-        start: undefined,
+    vi.spyOn(tx, `scan`)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .mockImplementationOnce((options: any): any => {
+        checkPoints.log(`tx.scan 0`);
+        assert.deepEqual(options, {
+          indexName: `posts.byTitle`,
+          start: undefined,
+        });
+        return {
+          async *entries() {
+            const value = [
+              [`hello world`, `p/1`],
+              { id: `1`, r: `hello world` },
+            ];
+            yield await Promise.resolve(value);
+          },
+        };
+      })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .mockImplementationOnce((options: any): any => {
+        checkPoints.log(`tx.scan 1`);
+        assert.deepEqual(options, {
+          indexName: `posts.byTitle`,
+          start: {
+            exclusive: true,
+            key: [`hello world`, `p/1`],
+          },
+        });
+        return {
+          async *entries() {
+            return;
+          },
+        };
       });
-      return {
-        async *entries() {
-          const value = [[`hello world`, `p/1`], { id: `1`, r: `hello world` }];
-          yield await Promise.resolve(value);
-        },
-      };
-    }, 0);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    tx.scan.mock.mockImplementationOnce((options: any): any => {
-      checkPoints.log(`tx.scan 1`);
-      assert.deepEqual(options, {
-        indexName: `posts.byTitle`,
-        start: {
-          exclusive: true,
-          key: [`hello world`, `p/1`],
-        },
-      });
-      return {
-        async *entries() {
-          return;
-        },
-      };
-    }, 1);
 
     const results = [];
     for await (const post of db.queryPaged.posts.byTitle()) {
@@ -1134,9 +1148,9 @@ await test(`replicache()`, async (t) => {
     //
     // entity() .has()
     //
-    using tx = makeMockTx(t);
+    using tx = makeMockTx();
 
-    tx.has.mock.mockImplementation(async (x: unknown) => x === `p/1`);
+    vi.spyOn(tx, `has`).mockImplementation(async (x: unknown) => x === `p/1`);
 
     assert.equal(await db.query.posts.has(tx, { id: `1` }), true);
     assert.equal(await db.query.posts.has(tx, { id: `2` }), false);
@@ -1146,9 +1160,9 @@ await test(`replicache()`, async (t) => {
     //
     // entity() .get()
     //
-    using tx = makeMockTx(t);
+    using tx = makeMockTx();
 
-    tx.get.mock.mockImplementationOnce(async (x: unknown) =>
+    vi.spyOn(tx, `get`).mockImplementationOnce(async (x: unknown) =>
       x === `p/1` ? { id: `1`, r: `hello world` } : undefined,
     );
 
@@ -1160,9 +1174,9 @@ await test(`replicache()`, async (t) => {
     //
     // entity() .set()
     //
-    using tx = makeMockTx(t);
+    using tx = makeMockTx();
 
-    tx.get.mock.mockImplementationOnce(async (x: unknown) =>
+    vi.spyOn(tx, `get`).mockImplementationOnce(async (x: unknown) =>
       x === `p/1` ? { id: `1`, r: `hello world` } : undefined,
     );
 
@@ -1173,9 +1187,9 @@ await test(`replicache()`, async (t) => {
   checkPoints.assert();
 });
 
-void test.todo(`replicache() errors if two mutators have the same alias`);
+test.todo(`replicache() errors if two mutators have the same alias`);
 
-await test(`replicache() disallows unknown mutator implementations`, async () => {
+test(`replicache() disallows unknown mutator implementations`, async () => {
   const schema = {
     version: `1`,
     posts: r.entity(`p/[id]`, { id: r.string() }),
@@ -1203,7 +1217,7 @@ await test(`replicache() disallows unknown mutator implementations`, async () =>
   });
 });
 
-await test(`replicache() mutator tx`, async () => {
+test(`replicache() mutator tx`, async () => {
   const schema = {
     version: `1`,
     counter: r.entity(`counter/[id]`, {
@@ -1241,7 +1255,7 @@ await test(`replicache() mutator tx`, async () => {
   );
 });
 
-await test(`replicache() entity()`, async (t) => {
+describe(`replicache() entity()`, async () => {
   const schema = {
     version: `1`,
     text: r.entity(`text/[id]:[id2].`, {
@@ -1257,7 +1271,7 @@ await test(`replicache() entity()`, async (t) => {
       .alias(`at`),
   };
 
-  await t.test(`.set() only exposed to mutators`, async () => {
+  test(`.set() only exposed to mutators`, async () => {
     await using db = r.replicache(testReplicacheOptions(), schema, {
       async appendText(db) {
         // eslint-disable-next-line @typescript-eslint/no-unused-expressions
@@ -1270,19 +1284,19 @@ await test(`replicache() entity()`, async (t) => {
     db.query.text.set;
   });
 
-  await t.test(`.scan() supports empty partial key`, async () => {
+  test(`.scan() supports empty partial key`, async () => {
     await using db = r.replicache(testReplicacheOptions(), schema, {
       async appendText() {
         // noop
       },
     });
 
-    using tx = makeMockTx(t);
+    using tx = makeMockTx();
 
     let checkPointsReached = ``;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    tx.scan.mock.mockImplementationOnce((options: any): any => {
+    vi.spyOn(tx, `scan`).mockImplementationOnce((options: any): any => {
       checkPointsReached += `1`;
       assert.deepEqual(options, {
         prefix: `text/`,
@@ -1307,19 +1321,19 @@ await test(`replicache() entity()`, async (t) => {
     assert.equal(checkPointsReached, `12`);
   });
 
-  await t.test(`.scan() supports non-empty partial key`, async () => {
+  test(`.scan() supports non-empty partial key`, async () => {
     await using db = r.replicache(testReplicacheOptions(), schema, {
       async appendText() {
         // noop
       },
     });
 
-    using tx = makeMockTx(t);
+    using tx = makeMockTx();
 
     let checkPointsReached = 0;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    tx.scan.mock.mockImplementationOnce((options: any): any => {
+    vi.spyOn(tx, `scan`).mockImplementationOnce((options: any): any => {
       checkPointsReached++;
       assert.deepEqual(options, {
         prefix: `text/abc:`,
@@ -1347,7 +1361,7 @@ await test(`replicache() entity()`, async (t) => {
     assert.equal(checkPointsReached, 2);
   });
 
-  await t.test(`.scan() works inside mutator`, async () => {
+  test(`.scan() works inside mutator`, async () => {
     let checkPointsReached = 0;
 
     await using db = r.replicache(testReplicacheOptions(), schema, {
@@ -1364,49 +1378,52 @@ await test(`replicache() entity()`, async (t) => {
     assert.equal(checkPointsReached, 1);
   });
 
-  await t.test(`paged .scan() supports empty partial key`, async () => {
+  test(`paged .scan() supports empty partial key`, async () => {
     await using db = r.replicache(testReplicacheOptions(), schema, {
       async appendText() {
         // noop
       },
     });
 
-    using tx = makeMockTx(t);
-    const query = t.mock.method(db.replicache, `query`);
-    query.mock.mockImplementation(async (fn) => fn(tx));
+    using tx = makeMockTx();
+    vi.spyOn(db.replicache, `query`).mockImplementation(async (fn) => fn(tx));
 
     const checkPoints = new CheckpointLog();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    tx.scan.mock.mockImplementationOnce((options: any): any => {
-      checkPoints.log(`tx.scan 0`);
-      assert.deepEqual(options, {
-        prefix: `text/`,
-        start: undefined,
+    vi.spyOn(tx, `scan`)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .mockImplementationOnce((options: any): any => {
+        checkPoints.log(`tx.scan 0`);
+        assert.deepEqual(options, {
+          prefix: `text/`,
+          start: undefined,
+        });
+        return {
+          async *entries() {
+            const value = [
+              `text/1:2.`,
+              { id: `1`, id2: `2`, b: `hello world` },
+            ];
+            yield await Promise.resolve(value);
+          },
+        };
+      })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .mockImplementationOnce((options: any): any => {
+        checkPoints.log(`tx.scan 1`);
+        assert.deepEqual(options, {
+          prefix: `text/`,
+          start: {
+            exclusive: true,
+            key: `text/1:2.`,
+          },
+        });
+        return {
+          async *entries() {
+            return;
+          },
+        };
       });
-      return {
-        async *entries() {
-          const value = [`text/1:2.`, { id: `1`, id2: `2`, b: `hello world` }];
-          yield await Promise.resolve(value);
-        },
-      };
-    }, 0);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    tx.scan.mock.mockImplementationOnce((options: any): any => {
-      checkPoints.log(`tx.scan 1`);
-      assert.deepEqual(options, {
-        prefix: `text/`,
-        start: {
-          exclusive: true,
-          key: `text/1:2.`,
-        },
-      });
-      return {
-        async *entries() {
-          return;
-        },
-      };
-    }, 1);
 
     for await (const result of db.queryPaged.text.scan()) {
       checkPoints.log(`loop`);
@@ -1419,52 +1436,54 @@ await test(`replicache() entity()`, async (t) => {
     checkPoints.assert(`tx.scan 0`, `loop`, `tx.scan 1`);
   });
 
-  await t.test(`paged .scan() supports non-empty partial key`, async () => {
+  test(`paged .scan() supports non-empty partial key`, async () => {
     await using db = r.replicache(testReplicacheOptions(), schema, {
       async appendText() {
         // noop
       },
     });
 
-    using tx = makeMockTx(t);
-    const query = t.mock.method(db.replicache, `query`);
-    query.mock.mockImplementation(async (fn) => fn(tx));
+    using tx = makeMockTx();
+    vi.spyOn(db.replicache, `query`).mockImplementation(async (fn) => fn(tx));
+    // const query = t.mock.method(db.replicache, `query`);
+    // query.mock.mockImplementation(async (fn) => fn(tx));
 
     const checkPoint = new CheckpointLog();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    tx.scan.mock.mockImplementationOnce((options: any): any => {
-      checkPoint.log(`tx.scan 0`);
-      assert.deepEqual(options, {
-        prefix: `text/abc:`,
-        start: undefined,
+    vi.spyOn(tx, `scan`)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .mockImplementationOnce((options: any): any => {
+        checkPoint.log(`tx.scan 0`);
+        assert.deepEqual(options, {
+          prefix: `text/abc:`,
+          start: undefined,
+        });
+        return {
+          async *entries() {
+            const value = [
+              `text/abc:1.`,
+              { id: `abc`, id2: `1`, b: `hello world` },
+            ];
+            yield await Promise.resolve(value);
+          },
+        };
+      })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .mockImplementationOnce((options: any): any => {
+        checkPoint.log(`tx.scan 1`);
+        assert.deepEqual(options, {
+          prefix: `text/abc:`,
+          start: {
+            exclusive: true,
+            key: `text/abc:1.`,
+          },
+        });
+        return {
+          async *entries() {
+            return;
+          },
+        };
       });
-      return {
-        async *entries() {
-          const value = [
-            `text/abc:1.`,
-            { id: `abc`, id2: `1`, b: `hello world` },
-          ];
-          yield await Promise.resolve(value);
-        },
-      };
-    }, 0);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    tx.scan.mock.mockImplementationOnce((options: any): any => {
-      checkPoint.log(`tx.scan 1`);
-      assert.deepEqual(options, {
-        prefix: `text/abc:`,
-        start: {
-          exclusive: true,
-          key: `text/abc:1.`,
-        },
-      });
-      return {
-        async *entries() {
-          return;
-        },
-      };
-    }, 1);
 
     for await (const result of db.queryPaged.text.scan({ id: `abc` })) {
       checkPoint.log(`loop`);
@@ -1478,7 +1497,7 @@ await test(`replicache() entity()`, async (t) => {
   });
 });
 
-await test(`replicache() index scan`, async () => {
+test(`replicache() index scan`, async () => {
   const schema = {
     version: `1`,
     text: r.entity(`text/[id]`, {
@@ -1520,7 +1539,7 @@ await test(`replicache() index scan`, async () => {
   });
 });
 
-await test(`replicache() index scan functional test`, async () => {
+test(`replicache() index scan functional test`, async () => {
   const schema = {
     version: `1`,
     text: r.entity(`text/[id]`, {
@@ -1595,7 +1614,7 @@ await test(`replicache() index scan functional test`, async () => {
   }
 });
 
-await test(`replicache() index scan supports starting from non-existent values`, async () => {
+test(`replicache() index scan supports starting from non-existent values`, async () => {
   const schema = {
     version: `1`,
     text: r.entity(`text/[id]`, {
@@ -1659,32 +1678,33 @@ await test(`replicache() index scan supports starting from non-existent values`,
   );
 });
 
-await test(`number()`, async (t) => {
+test(`number()`, async () => {
   const posts = r.entity(`foo/[id]`, {
     id: r.string(),
     count: r.number(`c`),
   });
 
-  using tx = makeMockTx(t);
+  using tx = makeMockTx();
+  const setSpy = vi.spyOn(tx, `set`);
 
   // Marshal and unmarshal round tripping
   const id = `1`;
   await posts.set(tx, { id }, { id, count: 5 });
-  const [, marshaledData] = tx.set.mock.calls[0]!.arguments;
+  const [, marshaledData] = setSpy.mock.calls[0]!;
   assert.deepEqual(marshaledData, { c: 5, id });
 
-  tx.get.mock.mockImplementationOnce(async () => marshaledData);
+  vi.spyOn(tx, `get`).mockImplementationOnce(async () => marshaledData);
   assert.deepEqual(await posts.get(tx, { id }), { id, count: 5 });
 });
 
-await test(`literal()`, async (t) => {
+test(`literal()`, async () => {
   typeChecks(async () => {
     r.literal(1, r.number());
     r.literal(``, r.string());
     // @ts-expect-error string isn't compatible with number
     r.literal(`abc`, r.number());
 
-    using tx = makeMockTx(t);
+    using tx = makeMockTx();
 
     {
       const e = r.entity(`foo`, { number: r.literal(1, r.number()) });
@@ -1718,15 +1738,16 @@ await test(`literal()`, async (t) => {
     count: r.literal(5, r.number()).alias(`c`),
   });
 
-  using tx = makeMockTx(t);
+  using tx = makeMockTx();
+  const setSpy = vi.spyOn(tx, `set`);
 
   // Marshal and unmarshal round tripping
   const id = `1`;
   await posts.set(tx, { id }, { id, count: 5 });
-  const [, marshaledData] = tx.set.mock.calls[0]!.arguments;
+  const [, marshaledData] = setSpy.mock.calls[0]!;
   assert.deepEqual(marshaledData, { c: 5, id });
 
-  tx.get.mock.mockImplementationOnce(async () => marshaledData);
+  vi.spyOn(tx, `get`).mockImplementationOnce(async () => marshaledData);
   assert.deepEqual(await posts.get(tx, { id }), { id, count: 5 });
 });
 
@@ -1826,7 +1847,7 @@ typeChecks<RizzleObjectOutput<never>>(() => {
   >;
 });
 
-await test(`${keyPathVariableNames.name}()`, () => {
+test(`${keyPathVariableNames.name}()`, () => {
   assert.deepEqual(keyPathVariableNames(`foo/[id]`), [`id`]);
   assert.deepEqual(keyPathVariableNames(`foo/[id]/[bar]`), [`id`, `bar`]);
 });

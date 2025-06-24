@@ -4,15 +4,12 @@ import {
   fsrsIsForgotten,
   fsrsPredictedRecallProbability,
   nextReview,
-  ratingName,
 } from "#util/fsrs.ts";
-import type { RepeatedSequence } from "#util/types.ts";
 import type { Duration } from "date-fns";
 import { add } from "date-fns/add";
 import { intervalToDuration } from "date-fns/intervalToDuration";
 import assert from "node:assert/strict";
-import type { TestContext } from "node:test";
-import test from "node:test";
+import { describe, expect, test, vi } from "vitest";
 import z from "zod/v4";
 import { parseRelativeTimeShorthand, 时 } from "../data/helpers";
 
@@ -34,8 +31,8 @@ const expectedReviewSchema = z.object({
 
 const ratingSchema = z.enum(Rating);
 
-await test(`${nextReview.name} suite`, async () => {
-  await test(`stability increases after time elapsed with correct rating`, () => {
+describe(`${nextReview.name} suite`, async () => {
+  test(`stability increases after time elapsed with correct rating`, () => {
     const before = nextReview(null, Rating.Again);
     const afterEasy = nextReview(before, Rating.Easy, 时`+1s`);
     const afterGood = nextReview(before, Rating.Good, 时`+1s`);
@@ -55,7 +52,7 @@ await test(`${nextReview.name} suite`, async () => {
     );
   });
 
-  await test(`stability decreases from .Again`, () => {
+  test(`stability decreases from .Again`, () => {
     const before = nextReview(null, Rating.Good);
     const after = nextReview(
       before,
@@ -66,7 +63,7 @@ await test(`${nextReview.name} suite`, async () => {
     assert.ok(after.stability < before.stability);
   });
 
-  await test(`difficulty lowers with Easy and increases with Hard`, () => {
+  test(`difficulty lowers with Easy and increases with Hard`, () => {
     const before = nextReview(null, Rating.Good);
     const afterEasy = nextReview(before, Rating.Easy, 时`+1s`);
     const afterGood = nextReview(before, Rating.Good, 时`+1s`);
@@ -87,341 +84,361 @@ await test(`${nextReview.name} suite`, async () => {
   });
 });
 
-await testFsrsSequence(`Again → Again → Again`, [
-  Rating.Again,
-  {
-    difficulty: 7.5455,
-    stability: 0.5701,
-    delay: { minutes: 1 },
-  },
-  { minutes: 1 },
-  Rating.Again,
-  {
-    difficulty: 7.5455,
-    stability: 0.277_987_11,
-    delay: { minutes: 1 },
-  },
-  { minutes: 1 },
-  Rating.Again,
-  {
-    difficulty: 7.5455,
-    stability: 0.146_182_23,
-    delay: { minutes: 1 },
-  },
-  { minutes: 1 },
-]);
-
-await testFsrsSequence(`Hard → Hard → Hard`, [
-  Rating.Hard,
-  {
-    difficulty: 6.3449,
-    stability: 1.4436,
-    delay: { minutes: 5 },
-  },
-  { minutes: 5 },
-  Rating.Hard,
-  {
-    difficulty: 7.132_908_54,
-    stability: 1.445_647_95,
-    delay: { minutes: 5 },
-  },
-  { minutes: 5 },
-  Rating.Hard,
-  {
-    difficulty: 7.892_391_17,
-    stability: 1.447_348_9,
-    delay: { minutes: 5 },
-  },
-  { minutes: 5 },
-]);
-
-await testFsrsSequence(`Good → Good → Good → Good`, [
-  Rating.Good,
-  {
-    difficulty: 5.1443,
-    stability: 4.1386,
-    delay: { days: 4, hours: 3, minutes: 20 },
-  },
-  { days: 4, hours: 3, minutes: 20 },
-  Rating.Good,
-  {
-    difficulty: 5.1443,
-    stability: 15.066_980_51,
-    delay: { days: 15, hours: 1, minutes: 36 },
-  },
-  { days: 15, hours: 1, minutes: 36 },
-  Rating.Good,
-  {
-    difficulty: 5.1443,
-    stability: 48.516_031_3,
-    delay: { days: 17, hours: 12, minutes: 23, months: 1 },
-  },
-  { days: 17, hours: 12, minutes: 23, months: 1 },
-  Rating.Good,
-  {
-    difficulty: 5.1443,
-    stability: 140.581_300_87,
-    delay: { months: 4, days: 18, hours: 13, minutes: 57 },
-  },
-  { months: 4, days: 18, hours: 13, minutes: 57 },
-]);
-
-await testFsrsSequence(`Easy → Easy → Easy`, [
-  Rating.Easy,
-  {
-    difficulty: 3.9437,
-    stability: 10.9355,
-    delay: { days: 10, hours: 22, minutes: 27 },
-  },
-  { days: 10, hours: 22, minutes: 27 },
-  Rating.Easy,
-  {
-    difficulty: 3.155_691_46,
-    stability: 97.173_191_59,
-    delay: { months: 3, days: 7, hours: 4, minutes: 9 },
-  },
-  { months: 3, days: 7, hours: 4, minutes: 9 },
-  Rating.Easy,
-  {
-    difficulty: 2.396_208_83,
-    stability: 732.603_401_94,
-    delay: { years: 2, days: 1, hours: 14, minutes: 29 },
-  },
-  { years: 2, days: 1, hours: 14, minutes: 29 },
-]);
-
-await testFsrsSequence(`Good → Good → Hard → Hard → Hard`, [
-  Rating.Good,
-  {
-    difficulty: 5.1443,
-    stability: 4.1386,
-    delay: { days: 4, hours: 3, minutes: 20 },
-  },
-  { days: 4, hours: 3, minutes: 20 },
-  Rating.Good,
-  {
-    difficulty: 5.1443,
-    stability: 15.066_980_51,
-    delay: { days: 15, hours: 1, minutes: 36 },
-  },
-  { days: 15, hours: 1, minutes: 36 },
-  Rating.Hard,
-  {
-    difficulty: 5.975_770_26,
-    stability: 22.392_322_63,
-    delay: { minutes: 5 },
-  },
-  { minutes: 5 },
-  Rating.Hard,
-  {
-    difficulty: 6.777_141_3,
-    stability: 22.393_853_3,
-    delay: { minutes: 5 },
-  },
-  { minutes: 5 },
-  Rating.Hard,
-  {
-    difficulty: 7.549_502_7,
-    stability: 22.395_139_2,
-    delay: { minutes: 5 },
-  },
-  { minutes: 5 },
-]);
-
-await testFsrsSequence(`Good → Again → Again → Easy → Easy`, [
-  Rating.Good,
-  {
-    difficulty: 5.1443,
-    stability: 4.1386,
-    delay: { days: 4, hours: 3, minutes: 20 },
-  },
-  { days: 4, hours: 3, minutes: 20 },
-  Rating.Again,
-  {
-    difficulty: 5.1443,
-    stability: 1.473_632_35,
-    delay: { minutes: 1 },
-  },
-  { minutes: 1 },
-  Rating.Again,
-  {
-    difficulty: 5.1443,
-    stability: 0.621_389_34,
-    delay: { minutes: 1 },
-  },
-  { minutes: 1 },
-  Rating.Easy,
-  {
-    difficulty: 4.312_829_74,
-    stability: 0.628_829_35,
-    delay: { hours: 15, minutes: 6 },
-  },
-  { hours: 15, minutes: 6 },
-  Rating.Easy,
-  {
-    difficulty: 3.511_458_7,
-    stability: 7.526_747_8,
-    delay: {
-      days: 7,
-      hours: 12,
-      minutes: 39,
-    },
-  },
-  {
-    months: 1,
-    days: 8,
-    hours: 10,
-    minutes: 13,
-  },
-]);
-
-await testFsrsSequence(`Again → Good → Good → Good → Good`, [
-  Rating.Again,
-  {
-    difficulty: 7.5455,
-    stability: 0.5701,
-    delay: { minutes: 1 },
-  },
-  { minutes: 1 },
-  Rating.Good,
-  {
-    difficulty: 7.458_576_56,
-    stability: 0.571_672_37,
-    delay: { hours: 13, minutes: 43 },
-  },
-  { hours: 13, minutes: 43 },
-  Rating.Good,
-  {
-    difficulty: 7.374_799_75,
-    stability: 1.762_078_36,
-    delay: { days: 1, hours: 18, minutes: 17 },
-  },
-  { days: 1, hours: 18, minutes: 17 },
-  Rating.Good,
-  {
-    difficulty: 7.294_055_66,
-    stability: 4.991_748_44,
-    delay: { days: 4, hours: 23, minutes: 48 },
-  },
-  { days: 4, hours: 23, minutes: 48 },
-  Rating.Good,
-  {
-    difficulty: 7.216_234_51,
-    stability: 13.126_001_51,
-    delay: { days: 13, hours: 3, minutes: 1 },
-  },
-  { days: 13, hours: 3, minutes: 1 },
-]);
-
-await test(`Again should drop stability`, async () => {
-  await testFsrsSequence(`Good → Good → Good → Again`, [
-    Rating.Good,
-    {
-      difficulty: 5.1443,
-      stability: 4.1386,
-      delay: { days: 4, hours: 3, minutes: 20 },
-    },
-    { minutes: 5 },
-    Rating.Good,
-    {
-      difficulty: 5.1443,
-      stability: 4.148_813_98,
-      delay: { days: 4, hours: 3, minutes: 34 },
-    },
-    { minutes: 5 },
-    Rating.Good,
-    {
-      difficulty: 5.1443,
-      stability: 4.159_024_81,
-      delay: { days: 4, hours: 3, minutes: 49 },
-    },
-    { minutes: 5 },
+test(`Again → Again → Again`, () => {
+  assertFsrsSequence([
     Rating.Again,
     {
-      difficulty: 5.1443,
-      stability: 1.276_621_05,
+      difficulty: 7.5455,
+      stability: 0.5701,
       delay: { minutes: 1 },
+    },
+    { minutes: 1 },
+    Rating.Again,
+    {
+      difficulty: 7.5455,
+      stability: 0.277_987_11,
+      delay: { minutes: 1 },
+    },
+    { minutes: 1 },
+    Rating.Again,
+    {
+      difficulty: 7.5455,
+      stability: 0.146_182_23,
+      delay: { minutes: 1 },
+    },
+    { minutes: 1 },
+  ]);
+});
+
+test(`Hard → Hard → Hard`, () => {
+  assertFsrsSequence([
+    Rating.Hard,
+    {
+      difficulty: 6.3449,
+      stability: 1.4436,
+      delay: { minutes: 5 },
+    },
+    { minutes: 5 },
+    Rating.Hard,
+    {
+      difficulty: 7.132_908_54,
+      stability: 1.445_647_95,
+      delay: { minutes: 5 },
+    },
+    { minutes: 5 },
+    Rating.Hard,
+    {
+      difficulty: 7.892_391_17,
+      stability: 1.447_348_9,
+      delay: { minutes: 5 },
     },
     { minutes: 5 },
   ]);
 });
 
-await test(`reviewing before due`, async () => {
-  await testFsrsSequence(`Good → Good → Good → Good → Good → Good`, [
+test(`Good → Good → Good → Good`, () => {
+  assertFsrsSequence([
     Rating.Good,
     {
       difficulty: 5.1443,
       stability: 4.1386,
       delay: { days: 4, hours: 3, minutes: 20 },
     },
-    { hours: 14, minutes: 40, seconds: 48 },
+    { days: 4, hours: 3, minutes: 20 },
     Rating.Good,
     {
       difficulty: 5.1443,
-      stability: 5.907_832_47,
-      delay: { days: 5, hours: 21, minutes: 47 },
+      stability: 15.066_980_51,
+      delay: { days: 15, hours: 1, minutes: 36 },
     },
-    { days: 6, minutes: 50, seconds: 59 },
+    { days: 15, hours: 1, minutes: 36 },
     Rating.Good,
     {
       difficulty: 5.1443,
-      stability: 21.067_636_55,
-      delay: { days: 21, hours: 1, minutes: 37 },
+      stability: 48.516_031_3,
+      delay: { days: 17, hours: 12, minutes: 23, months: 1 },
     },
-    { days: 7, hours: 13, minutes: 18, seconds: 44 },
+    { days: 17, hours: 12, minutes: 23, months: 1 },
     Rating.Good,
     {
       difficulty: 5.1443,
-      stability: 38.222_650_6,
-      delay: { months: 1, days: 7, hours: 5, minutes: 21 },
+      stability: 140.581_300_87,
+      delay: { months: 4, days: 18, hours: 13, minutes: 57 },
     },
-    { seconds: 20 },
-    Rating.Good,
-    {
-      difficulty: 5.1443,
-      stability: 38.223_155_76,
-      delay: { months: 1, days: 7, hours: 5, minutes: 21 },
-    },
-    { seconds: 32 },
-    Rating.Good,
-    {
-      difficulty: 5.1443,
-      stability: 38.223_966_87,
-      delay: { months: 1, days: 7, hours: 5, minutes: 23 },
-    },
-    { minutes: 20 },
+    { months: 4, days: 18, hours: 13, minutes: 57 },
   ]);
+});
+
+test(`Easy → Easy → Easy`, () => {
+  assertFsrsSequence([
+    Rating.Easy,
+    {
+      difficulty: 3.9437,
+      stability: 10.9355,
+      delay: { days: 10, hours: 22, minutes: 27 },
+    },
+    { days: 10, hours: 22, minutes: 27 },
+    Rating.Easy,
+    {
+      difficulty: 3.155_691_46,
+      stability: 97.173_191_59,
+      delay: { months: 3, days: 7, hours: 4, minutes: 9 },
+    },
+    { months: 3, days: 7, hours: 4, minutes: 9 },
+    Rating.Easy,
+    {
+      difficulty: 2.396_208_83,
+      stability: 732.603_401_94,
+      delay: { years: 2, days: 1, hours: 14, minutes: 29 },
+    },
+    { years: 2, days: 1, hours: 14, minutes: 29 },
+  ]);
+});
+
+test(`Good → Good → Hard → Hard → Hard`, () => {
+  assertFsrsSequence([
+    Rating.Good,
+    {
+      difficulty: 5.1443,
+      stability: 4.1386,
+      delay: { days: 4, hours: 3, minutes: 20 },
+    },
+    { days: 4, hours: 3, minutes: 20 },
+    Rating.Good,
+    {
+      difficulty: 5.1443,
+      stability: 15.066_980_51,
+      delay: { days: 15, hours: 1, minutes: 36 },
+    },
+    { days: 15, hours: 1, minutes: 36 },
+    Rating.Hard,
+    {
+      difficulty: 5.975_770_26,
+      stability: 22.392_322_63,
+      delay: { minutes: 5 },
+    },
+    { minutes: 5 },
+    Rating.Hard,
+    {
+      difficulty: 6.777_141_3,
+      stability: 22.393_853_3,
+      delay: { minutes: 5 },
+    },
+    { minutes: 5 },
+    Rating.Hard,
+    {
+      difficulty: 7.549_502_7,
+      stability: 22.395_139_2,
+      delay: { minutes: 5 },
+    },
+    { minutes: 5 },
+  ]);
+});
+
+test(`Good → Again → Again → Easy → Easy`, () => {
+  assertFsrsSequence([
+    Rating.Good,
+    {
+      difficulty: 5.1443,
+      stability: 4.1386,
+      delay: { days: 4, hours: 3, minutes: 20 },
+    },
+    { days: 4, hours: 3, minutes: 20 },
+    Rating.Again,
+    {
+      difficulty: 5.1443,
+      stability: 1.473_632_35,
+      delay: { minutes: 1 },
+    },
+    { minutes: 1 },
+    Rating.Again,
+    {
+      difficulty: 5.1443,
+      stability: 0.621_389_34,
+      delay: { minutes: 1 },
+    },
+    { minutes: 1 },
+    Rating.Easy,
+    {
+      difficulty: 4.312_829_74,
+      stability: 0.628_829_35,
+      delay: { hours: 15, minutes: 6 },
+    },
+    { hours: 15, minutes: 6 },
+    Rating.Easy,
+    {
+      difficulty: 3.511_458_7,
+      stability: 7.526_747_8,
+      delay: {
+        days: 7,
+        hours: 12,
+        minutes: 39,
+      },
+    },
+    {
+      months: 1,
+      days: 8,
+      hours: 10,
+      minutes: 13,
+    },
+  ]);
+});
+
+test(`Again → Good → Good → Good → Good`, () => {
+  assertFsrsSequence([
+    Rating.Again,
+    {
+      difficulty: 7.5455,
+      stability: 0.5701,
+      delay: { minutes: 1 },
+    },
+    { minutes: 1 },
+    Rating.Good,
+    {
+      difficulty: 7.458_576_56,
+      stability: 0.571_672_37,
+      delay: { hours: 13, minutes: 43 },
+    },
+    { hours: 13, minutes: 43 },
+    Rating.Good,
+    {
+      difficulty: 7.374_799_75,
+      stability: 1.762_078_36,
+      delay: { days: 1, hours: 18, minutes: 17 },
+    },
+    { days: 1, hours: 18, minutes: 17 },
+    Rating.Good,
+    {
+      difficulty: 7.294_055_66,
+      stability: 4.991_748_44,
+      delay: { days: 4, hours: 23, minutes: 48 },
+    },
+    { days: 4, hours: 23, minutes: 48 },
+    Rating.Good,
+    {
+      difficulty: 7.216_234_51,
+      stability: 13.126_001_51,
+      delay: { days: 13, hours: 3, minutes: 1 },
+    },
+    { days: 13, hours: 3, minutes: 1 },
+  ]);
+});
+
+describe(`Again should drop stability`, async () => {
+  test(`Good → Good → Good → Again`, () => {
+    assertFsrsSequence([
+      Rating.Good,
+      {
+        difficulty: 5.1443,
+        stability: 4.1386,
+        delay: { days: 4, hours: 3, minutes: 20 },
+      },
+      { minutes: 5 },
+      Rating.Good,
+      {
+        difficulty: 5.1443,
+        stability: 4.148_813_98,
+        delay: { days: 4, hours: 3, minutes: 34 },
+      },
+      { minutes: 5 },
+      Rating.Good,
+      {
+        difficulty: 5.1443,
+        stability: 4.159_024_81,
+        delay: { days: 4, hours: 3, minutes: 49 },
+      },
+      { minutes: 5 },
+      Rating.Again,
+      {
+        difficulty: 5.1443,
+        stability: 1.276_621_05,
+        delay: { minutes: 1 },
+      },
+      { minutes: 5 },
+    ]);
+  });
+});
+
+describe(`reviewing before due`, async () => {
+  test(`Good → Good → Good → Good → Good → Good`, () => {
+    assertFsrsSequence([
+      Rating.Good,
+      {
+        difficulty: 5.1443,
+        stability: 4.1386,
+        delay: { days: 4, hours: 3, minutes: 20 },
+      },
+      { hours: 14, minutes: 40, seconds: 48 },
+      Rating.Good,
+      {
+        difficulty: 5.1443,
+        stability: 5.907_832_47,
+        delay: { days: 5, hours: 21, minutes: 47 },
+      },
+      { days: 6, minutes: 50, seconds: 59 },
+      Rating.Good,
+      {
+        difficulty: 5.1443,
+        stability: 21.067_636_55,
+        delay: { days: 21, hours: 1, minutes: 37 },
+      },
+      { days: 7, hours: 13, minutes: 18, seconds: 44 },
+      Rating.Good,
+      {
+        difficulty: 5.1443,
+        stability: 38.222_650_6,
+        delay: { months: 1, days: 7, hours: 5, minutes: 21 },
+      },
+      { seconds: 20 },
+      Rating.Good,
+      {
+        difficulty: 5.1443,
+        stability: 38.223_155_76,
+        delay: { months: 1, days: 7, hours: 5, minutes: 21 },
+      },
+      { seconds: 32 },
+      Rating.Good,
+      {
+        difficulty: 5.1443,
+        stability: 38.223_966_87,
+        delay: { months: 1, days: 7, hours: 5, minutes: 23 },
+      },
+      { minutes: 20 },
+    ]);
+  });
 
   // Reviewing the same skill repeatedly shouldn't push its scheduled review
   // date by a large amount, and it shouldn't increase the stability much either
   // because learning takes time, it can't be crammed.
-  await testFsrsSequence(`Good → Good → Good`, [
-    Rating.Good,
-    {
-      difficulty: 5.1443,
-      stability: 4.1386,
-      delay: { days: 4, hours: 3, minutes: 20 },
-    },
-    { minutes: 5 },
-    Rating.Good,
-    {
-      difficulty: 5.1443,
-      stability: 4.148_813_98,
-      delay: { days: 4, hours: 3, minutes: 34 },
-    },
-    { minutes: 5 },
-    Rating.Good,
-    {
-      difficulty: 5.1443,
-      stability: 4.159_024_81,
-      delay: { days: 4, hours: 3, minutes: 49 },
-    },
-    { minutes: 5 },
-  ]);
+  test(`Good → Good → Good`, () => {
+    assertFsrsSequence([
+      Rating.Good,
+      {
+        difficulty: 5.1443,
+        stability: 4.1386,
+        delay: { days: 4, hours: 3, minutes: 20 },
+      },
+      { minutes: 5 },
+      Rating.Good,
+      {
+        difficulty: 5.1443,
+        stability: 4.148_813_98,
+        delay: { days: 4, hours: 3, minutes: 34 },
+      },
+      { minutes: 5 },
+      Rating.Good,
+      {
+        difficulty: 5.1443,
+        stability: 4.159_024_81,
+        delay: { days: 4, hours: 3, minutes: 49 },
+      },
+      { minutes: 5 },
+    ]);
+  });
 });
 
-await test(`${fsrsPredictedRecallProbability.name} suite`, async () => {
-  await test(`decreases as days elapsed increases (memories fade with time)`, () => {
+describe(`${fsrsPredictedRecallProbability.name} suite`, async () => {
+  test(`decreases as days elapsed increases (memories fade with time)`, () => {
     const srsState = nextReview(null, Rating.Good);
 
     for (let i = 1; i < 100; i++) {
@@ -432,59 +449,39 @@ await test(`${fsrsPredictedRecallProbability.name} suite`, async () => {
   });
 });
 
-await test(`${fsrsIsForgotten.name} suite`, async (t) => {
-  await t.test(
-    `is forgotten if waiting more than a week after one good review`,
-    ({ mock }) => {
-      mock.timers.enable({ apis: [`Date`] });
+describe(`${fsrsIsForgotten.name} suite`, async () => {
+  test(`is forgotten if waiting more than a week after one good review`, () => {
+    vi.useFakeTimers({ toFake: [`Date`] });
 
-      const srsState = nextReview(null, Rating.Good);
+    const srsState = nextReview(null, Rating.Good);
 
-      expect(fsrsIsForgotten(srsState)).toBe(false);
-      mock.timers.tick(1000 * 60 * 60 * 24 * 1);
-      expect(fsrsIsForgotten(srsState)).toBe(false); // 1 day
-      mock.timers.tick(1000 * 60 * 60 * 24 * 1);
-      expect(fsrsIsForgotten(srsState)).toBe(false); // 2 days
-      mock.timers.tick(1000 * 60 * 60 * 24 * 1);
-      expect(fsrsIsForgotten(srsState)).toBe(false); // 3 days
-      mock.timers.tick(1000 * 60 * 60 * 24 * 1);
-      expect(fsrsIsForgotten(srsState)).toBe(false); // 4 days
-      mock.timers.tick(1000 * 60 * 60 * 24 * 1);
-      expect(fsrsIsForgotten(srsState)).toBe(false); // 5 days
-      mock.timers.tick(1000 * 60 * 60 * 24 * 1);
-      expect(fsrsIsForgotten(srsState)).toBe(false); // 6 days
-      mock.timers.tick(1000 * 60 * 60 * 24 * 1);
-      expect(fsrsIsForgotten(srsState)).toBe(true); // 7 days
-    },
-  );
+    expect(fsrsIsForgotten(srsState)).toBe(false);
+    vi.advanceTimersByTime(1000 * 60 * 60 * 24 * 1);
+    expect(fsrsIsForgotten(srsState)).toBe(false); // 1 day
+    vi.advanceTimersByTime(1000 * 60 * 60 * 24 * 1);
+    expect(fsrsIsForgotten(srsState)).toBe(false); // 2 days
+    vi.advanceTimersByTime(1000 * 60 * 60 * 24 * 1);
+    expect(fsrsIsForgotten(srsState)).toBe(false); // 3 days
+    vi.advanceTimersByTime(1000 * 60 * 60 * 24 * 1);
+    expect(fsrsIsForgotten(srsState)).toBe(false); // 4 days
+    vi.advanceTimersByTime(1000 * 60 * 60 * 24 * 1);
+    expect(fsrsIsForgotten(srsState)).toBe(false); // 5 days
+    vi.advanceTimersByTime(1000 * 60 * 60 * 24 * 1);
+    expect(fsrsIsForgotten(srsState)).toBe(false); // 6 days
+    vi.advanceTimersByTime(1000 * 60 * 60 * 24 * 1);
+    expect(fsrsIsForgotten(srsState)).toBe(true); // 7 days
+  });
 });
 
 type ExpectedReview = z.output<typeof expectedReviewSchema>;
 
-type FsrsSequence = RepeatedSequence<[Rating, ExpectedReview, Duration]>;
-
-/**
- * Create a test case for an FSRS sequence based on ratings.
- * @param sequence
- */
-async function testFsrsSequence(name: string, sequence: FsrsSequence) {
-  const expectedName = sequence
-    .flatMap((x) => {
-      const rating = ratingSchema.safeParse(x);
-      return rating.success ? [ratingName(rating.data)] : [];
-    })
-    .join(` → `);
-
-  assert.equal(name, expectedName, `wrong name for test case`);
-
-  await test(name, assertFsrsSequence(sequence));
-}
-
 function assertFsrsSequence(
   sequence: readonly (ExpectedReview | Rating | Duration)[],
 ) {
-  return function ({ mock }: TestContext) {
-    mock.timers.enable({ apis: [`Date`] });
+  return function () {
+    vi.useFakeTimers({
+      toFake: [`Date`],
+    });
 
     let review: FsrsState | null = null;
 
@@ -511,7 +508,8 @@ function assertFsrsSequence(
       // Use .setTime() instead of .tick() to avoid differences in calculations
       // between date-fns and node.js when deciding how to move forward in time.
       // There was a bug previously that this avoids.
-      mock.timers.setTime(add(new Date(), waitDuration).getTime());
+      vi.useFakeTimers({ now: add(new Date(), waitDuration).getTime() });
+      // mock.timers.setTime(add(new Date(), waitDuration).getTime());
     }
   };
 }

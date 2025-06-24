@@ -8,9 +8,9 @@ import {
   pinyinSyllableSuggestions,
 } from "#data/pinyin.ts";
 import assert from "node:assert/strict";
-import test from "node:test";
+import { describe, expect, test } from "vitest";
 
-await test(`${convertPinyinWithToneNumberToToneMark.name} fixtures`, () => {
+test(`${convertPinyinWithToneNumberToToneMark.name} fixtures`, () => {
   // Rules: (from https://en.wikipedia.org/wiki/Pinyin)
   // 1. If there is an a or an e, it will take the tone mark
   // 2. If there is an ou, then the o takes the tone mark
@@ -90,8 +90,8 @@ await test(`${convertPinyinWithToneNumberToToneMark.name} fixtures`, () => {
   }
 });
 
-await test(`${parsePinyinSyllableTone.name} fixtures`, async () => {
-  await test(`static test cases`, () => {
+describe(`${parsePinyinSyllableTone.name} fixtures`, () => {
+  test(`static test cases`, () => {
     for (const [input, expected] of [
       [`niú`, [`niu`, 2]],
       [`hǎo`, [`hao`, 3]],
@@ -110,14 +110,14 @@ await test(`${parsePinyinSyllableTone.name} fixtures`, async () => {
   });
 });
 
-await test(`${parsePinyinSyllable.name} suite`, async () => {
-  await test(`fixtures`, () => {
+describe(`${parsePinyinSyllable.name} suite`, () => {
+  test(`fixtures`, () => {
     expect(parsePinyinSyllable(``)).toBeNull();
   });
 });
 
-await test(`${pinyinSyllableSuggestions.name} suite`, async () => {
-  await test(`fixtures`, () => {
+describe(`${pinyinSyllableSuggestions.name} suite`, () => {
+  test(`fixtures`, () => {
     const fixtures: [string, string[] | null][] = [
       [``, null],
       [` `, null],
@@ -169,7 +169,7 @@ await test(`${pinyinSyllableSuggestions.name} suite`, async () => {
     }
   });
 
-  await test(`should not throw on invalid input`, () => {
+  test(`should not throw on invalid input`, () => {
     expect(pinyinSyllableSuggestions(`xxxx`)).toEqual(null);
   });
 });
@@ -201,8 +201,8 @@ const pinyinWithIndexesFixtures: [string, (number | string)[]][] = [
   [`nǐ hǎo`, [0, `nǐ`, 3, `hǎo`]],
 ];
 
-await test(`${matchAllPinyinSyllables.name} suite`, async () => {
-  await test(`pinyinSyllablePattern`, async () => {
+describe(`${matchAllPinyinSyllables.name} suite`, () => {
+  test(`pinyinSyllablePattern`, () => {
     const valid = [
       `ni`,
       `ní`,
@@ -223,7 +223,7 @@ await test(`${matchAllPinyinSyllables.name} suite`, async () => {
     }
   });
 
-  await test(`fixtures`, () => {
+  test(`fixtures`, () => {
     for (const [input, expected] of pinyinWithIndexesFixtures) {
       const actual = matchAllPinyinSyllables(input);
       expect([input, actual]).toEqual([
@@ -236,8 +236,8 @@ await test(`${matchAllPinyinSyllables.name} suite`, async () => {
   });
 });
 
-await test(`${matchAllPinyinSyllablesWithIndexes.name} suite`, async () => {
-  await test(`fixtures`, () => {
+describe(`${matchAllPinyinSyllablesWithIndexes.name} suite`, () => {
+  test(`fixtures`, () => {
     for (const [input, expected] of pinyinWithIndexesFixtures) {
       const actual = matchAllPinyinSyllablesWithIndexes(input);
       expect([input, actual]).toEqual([input, expected]);

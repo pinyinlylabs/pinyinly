@@ -7,10 +7,10 @@ import {
 import { hanziWordToGloss } from "#data/skills.ts";
 import { loadDictionary, lookupHanziWord } from "#dictionary/dictionary.ts";
 import assert from "node:assert/strict";
-import test from "node:test";
+import { describe, test } from "vitest";
 
-await test(`${shouldOmitHanziWord.name} suite`, async () => {
-  await test(`should omit if there is no dictionary item`, async () => {
+describe(`${shouldOmitHanziWord.name} suite`, async () => {
+  test(`should omit if there is no dictionary item`, async () => {
     const ctx = await makeQuizContext();
 
     // not in dictionary
@@ -19,21 +19,21 @@ await test(`${shouldOmitHanziWord.name} suite`, async () => {
     assert.equal(await shouldOmitHanziWord(`我:i`, ctx), false);
   });
 
-  await test(`should omit if there is a conflicting gloss`, async () => {
+  test(`should omit if there is a conflicting gloss`, async () => {
     const ctx = await makeQuizContext();
     ctx.usedGlosses.add(`me`);
 
     assert.equal(await shouldOmitHanziWord(`我:i`, ctx), true);
   });
 
-  await test(`should omit if there is a conflicting hanzi`, async () => {
+  test(`should omit if there is a conflicting hanzi`, async () => {
     const ctx = await makeQuizContext();
     ctx.usedHanzi.add(`我`);
 
     assert.equal(await shouldOmitHanziWord(`我:i`, ctx), true);
   });
 
-  await test(`should not omit if there is no conflict`, async () => {
+  test(`should not omit if there is no conflict`, async () => {
     const ctx = await makeQuizContext();
 
     await addToQuizContext(`丨:line`, ctx);
@@ -41,8 +41,8 @@ await test(`${shouldOmitHanziWord.name} suite`, async () => {
   });
 });
 
-await test(`${addToQuizContext.name} suite`, async () => {
-  await test(`adds to used glosses`, async () => {
+describe(`${addToQuizContext.name} suite`, async () => {
+  test(`adds to used glosses`, async () => {
     const ctx = await makeQuizContext();
 
     await addToQuizContext(`我:i`, ctx);
@@ -51,7 +51,7 @@ await test(`${addToQuizContext.name} suite`, async () => {
     assert.deepEqual(ctx.usedGlosses, new Set(meaning?.gloss));
   });
 
-  await test(`adds to used hanzi`, async () => {
+  test(`adds to used hanzi`, async () => {
     const ctx = await makeQuizContext();
 
     await addToQuizContext(`我:i`, ctx);
@@ -59,7 +59,7 @@ await test(`${addToQuizContext.name} suite`, async () => {
     assert.deepEqual(ctx.usedHanzi, new Set([`我`]));
   });
 
-  await test(`adds to final result`, async () => {
+  test(`adds to final result`, async () => {
     const ctx = await makeQuizContext();
     const hanziWord = `我:i`;
     const hanziWordMeaning = await lookupHanziWord(`我:i`);
@@ -70,8 +70,8 @@ await test(`${addToQuizContext.name} suite`, async () => {
   });
 });
 
-await test(`${hanziWordToGlossQuestionOrThrow.name} suite`, async () => {
-  await test(`works for the entire dictionary`, async () => {
+describe(`${hanziWordToGlossQuestionOrThrow.name} suite`, async () => {
+  test(`works for the entire dictionary`, async () => {
     const dictionary = await loadDictionary();
 
     for (const [hanziWord] of dictionary) {
