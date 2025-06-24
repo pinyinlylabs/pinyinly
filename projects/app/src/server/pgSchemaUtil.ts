@@ -10,7 +10,7 @@ import {
 import { isRunningTests } from "@/util/env";
 import type { RizzleType, RizzleTypeDef } from "@/util/rizzle";
 import { r } from "@/util/rizzle";
-import { invariant } from "@haohaohow/lib/invariant";
+import { invariant } from "@pinyinly/lib/invariant";
 import type { ColumnBaseConfig } from "drizzle-orm";
 import { Table } from "drizzle-orm";
 import type * as s from "drizzle-orm/pg-core";

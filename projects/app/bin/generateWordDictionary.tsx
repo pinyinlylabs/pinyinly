@@ -50,8 +50,8 @@ import {
   sortComparatorString,
 } from "#util/collections.ts";
 import { jsonStringifyIndentOneLevel } from "#util/json.ts";
-import { invariant } from "@haohaohow/lib/invariant";
 import { Alert, MultiSelect, Select } from "@inkjs/ui";
+import { invariant } from "@pinyinly/lib/invariant";
 import {
   QueryClient,
   QueryClientProvider,

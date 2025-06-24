@@ -1,4 +1,4 @@
-import { invariant } from "@haohaohow/lib/invariant";
+import { invariant } from "@pinyinly/lib/invariant";
 import type { Debugger } from "debug";
 import type { DbCache } from "./cache.js";
 

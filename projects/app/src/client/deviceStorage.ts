@@ -10,7 +10,7 @@ import type {
   RizzleEntityOutput,
   RizzleTypeAlias,
 } from "@/util/rizzle";
-import { invariant } from "@haohaohow/lib/invariant";
+import { invariant } from "@pinyinly/lib/invariant";
 
 export type DeviceStorageToggleableEntity = RizzleEntity<
   string,

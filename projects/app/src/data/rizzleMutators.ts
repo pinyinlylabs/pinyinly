@@ -3,7 +3,7 @@ import { sortComparatorDate } from "@/util/collections";
 import type { FsrsState } from "@/util/fsrs";
 import { nextReview } from "@/util/fsrs";
 import type { RizzleReplicacheMutators } from "@/util/rizzle";
-import { invariant } from "@haohaohow/lib/invariant";
+import { invariant } from "@pinyinly/lib/invariant";
 import {
   nextReviewForOtherSkillMistake,
   skillsToReReviewForHanziGlossMistake,

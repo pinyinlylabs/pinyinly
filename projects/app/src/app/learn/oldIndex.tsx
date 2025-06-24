@@ -7,7 +7,7 @@ import { SkillKind } from "@/data/model";
 import type { HanziWordSkill } from "@/data/rizzleSchema";
 import { hanziWordFromSkill, skillKindFromSkill } from "@/data/skills";
 import { hanziFromHanziWord } from "@/dictionary/dictionary";
-import { invariant } from "@haohaohow/lib/invariant";
+import { invariant } from "@pinyinly/lib/invariant";
 import { differenceInCalendarDays } from "date-fns/differenceInCalendarDays";
 import { Link } from "expo-router";
 import { ScrollView, Text, View } from "react-native";

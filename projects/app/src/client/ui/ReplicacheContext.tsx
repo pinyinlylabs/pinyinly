@@ -4,7 +4,7 @@ import type { Rizzle } from "@/data/rizzleSchema";
 import { currentSchema } from "@/data/rizzleSchema";
 import type { AppRouter } from "@/server/routers/_app";
 import { cookieSchema, r } from "@/util/rizzle";
-import { invariant } from "@haohaohow/lib/invariant";
+import { invariant } from "@pinyinly/lib/invariant";
 import * as Sentry from "@sentry/core";
 import { TRPCClientError } from "@trpc/client";
 import { createContext, useEffect, useMemo } from "react";

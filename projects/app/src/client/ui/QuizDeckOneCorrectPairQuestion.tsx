@@ -21,7 +21,7 @@ import {
   hanziWordFromSkill,
   skillKindFromSkill,
 } from "@/data/skills";
-import { invariant } from "@haohaohow/lib/invariant";
+import { invariant } from "@pinyinly/lib/invariant";
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 import type { StyleProp, ViewStyle } from "react-native";

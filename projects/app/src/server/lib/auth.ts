@@ -1,5 +1,5 @@
-import { invariant } from "@haohaohow/lib/invariant";
 import { DrizzlePostgreSQLAdapter } from "@lucia-auth/adapter-drizzle";
+import { invariant } from "@pinyinly/lib/invariant";
 import { and, eq } from "drizzle-orm";
 import { Lucia, TimeSpan } from "lucia";
 import * as schema from "../pgSchema";

@@ -1,5 +1,5 @@
 import { ReplicacheContext } from "@/client/ui/ReplicacheContext";
-import { invariant } from "@haohaohow/lib/invariant";
+import { invariant } from "@pinyinly/lib/invariant";
 import { use } from "react";
 
 export function useReplicache() {

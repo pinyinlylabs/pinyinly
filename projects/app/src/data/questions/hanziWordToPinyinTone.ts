@@ -15,7 +15,7 @@ import {
   identicalInvariant,
   invariant,
   nonNullable,
-} from "@haohaohow/lib/invariant";
+} from "@pinyinly/lib/invariant";
 import shuffle from "lodash/shuffle";
 import type {
   HanziChar,

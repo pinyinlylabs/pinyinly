@@ -4,7 +4,7 @@ import {
   objectInvert,
   weakMemoize1,
 } from "@/util/collections";
-import { invariant } from "@haohaohow/lib/invariant";
+import { invariant } from "@pinyinly/lib/invariant";
 import fromAsync from "array-from-async";
 import mapKeys from "lodash/mapKeys";
 import mapValues from "lodash/mapValues";

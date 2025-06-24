@@ -26,7 +26,7 @@ Sentry.init({
   profilesSampleRate: __DEV__ ? 1 : 0.1,
 });
 
-import { invariant } from "@haohaohow/lib/invariant";
+import { invariant } from "@pinyinly/lib/invariant";
 import { Platform } from "react-native";
 
 {

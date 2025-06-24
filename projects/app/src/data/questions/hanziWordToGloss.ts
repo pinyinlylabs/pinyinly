@@ -8,7 +8,7 @@ import {
   lookupHanziWord,
 } from "@/dictionary/dictionary";
 import { evenHalve } from "@/util/collections";
-import { invariant } from "@haohaohow/lib/invariant";
+import { invariant } from "@pinyinly/lib/invariant";
 import shuffle from "lodash/shuffle";
 import type { DeepReadonly } from "ts-essentials";
 import type {

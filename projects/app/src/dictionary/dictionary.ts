@@ -21,7 +21,7 @@ import {
   memoize1,
   sortComparatorString,
 } from "@/util/collections";
-import { invariant } from "@haohaohow/lib/invariant";
+import { invariant } from "@pinyinly/lib/invariant";
 import type { DeepReadonly } from "ts-essentials";
 import { z } from "zod/v4";
 
