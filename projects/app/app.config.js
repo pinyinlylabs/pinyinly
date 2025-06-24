@@ -8,9 +8,9 @@ const devDomain =
 /** @type {import('expo/config.d.ts').ExpoConfig} */
 export const expo = {
   name: `Pinyinly`,
-  slug: `pinyinly`,
+  slug: `hao`,
   version: `1.9.0`,
-  scheme: `hao`,
+  scheme: `pinyinly`,
   runtimeVersion: {
     policy: `fingerprint`,
   },
