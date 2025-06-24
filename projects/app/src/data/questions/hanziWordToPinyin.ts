@@ -1,6 +1,6 @@
 import { matchAllPinyinSyllables } from "@/data/pinyin";
 import { lookupHanziWord } from "@/dictionary/dictionary";
-import { invariant } from "@haohaohow/lib/invariant";
+import { invariant } from "@pinyinly/lib/invariant";
 import type {
   HanziWordToPinyinQuestion,
   MistakeType,

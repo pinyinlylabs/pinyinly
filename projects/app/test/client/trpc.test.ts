@@ -1,17 +1,16 @@
 import { maybeParseVercelError } from "#client/trpc.tsx";
-import assert from "node:assert/strict";
-import test from "node:test";
+import { describe, expect, test } from "vitest";
 
-await test(`${maybeParseVercelError.name} suite`, async () => {
-  await test(`ignores normal responses`, () => {
+describe(`${maybeParseVercelError.name} suite`, () => {
+  test(`ignores normal responses`, () => {
     const result = maybeParseVercelError(
       Response.json({ message: `Hello, world!` }),
     );
 
-    assert.ok(result === undefined);
+    expect(result).toBeUndefined();
   });
 
-  await test(`vercel edge errors are parsed`, () => {
+  test(`vercel edge errors are parsed`, () => {
     const httpResponse = new Response(
       `An error occurred with your deployment
   
@@ -29,8 +28,9 @@ await test(`${maybeParseVercelError.name} suite`, async () => {
 
     const error = maybeParseVercelError(httpResponse);
 
-    assert.ok(error);
-    assert.equal(error.id, `syd1::gqwrj-1738016771255-d9363c982187`);
-    assert.equal(error.code, `FUNCTION_INVOCATION_TIMEOUT`);
+    expect(error).toBeTruthy();
+    // Type assertion since we've already verified error exists with toBeTruthy
+    expect(error?.id).toBe(`syd1::gqwrj-1738016771255-d9363c982187`);
+    expect(error?.code).toBe(`FUNCTION_INVOCATION_TIMEOUT`);
   });
 });

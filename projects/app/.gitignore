@@ -5,6 +5,9 @@
 /ios
 /android
 
+# Inngest
+/.inngest
+
 # Native
 *.orig.*
 *.jks

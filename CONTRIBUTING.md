@@ -112,7 +112,7 @@ Example: to write `hǎo` type <kbd>h</kbd> <kbd>a</kbd> <kbd>o</kbd> <kbd>Tab</k
 ## Local development with Sign in with Apple for Web
 
 1. Set `EXPO_TUNNEL_SUBDOMAIN` in `projects/app/.env.local` to something like
-   `haohaohow-<yourname>`.
+   `pinyinly-<yourname>`.
 1. In [Apple Developer portal](https://developer.apple.com/account/resources/identifiers/list/serviceId) edit the Service ID for the app and click **Configure**.
 1. Click the + button for **Website URLs**, in the **Return URLs** box add
    `https://<EXPO_TUNNEL_SUBDOMAIN>.ngrok.io/api/auth/login/apple/callback`

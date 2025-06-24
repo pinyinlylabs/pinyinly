@@ -1,5 +1,5 @@
 {
-  "name": "haohaohow",
+  "name": "pinyinly",
   "packageManager": "yarn@4.9.2",
   "workspaces": [
     "projects/*"
@@ -42,10 +42,6 @@
     "metro-runtime@npm:^0.80.3": "patch:metro-runtime@npm%3A0.80.12#~/.yarn/patches/metro-runtime-npm-0.80.12-8e7410ce37.patch",
     "metro-runtime@npm:0.80.9": "patch:metro-runtime@npm%3A0.80.12#~/.yarn/patches/metro-runtime-npm-0.80.12-8e7410ce37.patch",
     "@expo/cli@npm:0.21.8": "patch:@expo/cli@npm%3A0.21.8#~/.yarn/patches/@expo-cli-npm-0.21.8-5950619da9.patch",
-    "@types/node@npm:*": "patch:@types/node@patch%3A@types/node@npm%253A22.10.2%23~/.yarn/patches/@types-node-npm-22.10.2-572466b048.patch%3A%3Aversion=22.10.2&hash=819d81#~/.yarn/patches/@types-node-patch-8935673d40.patch",
-    "@types/node@npm:^18.17.15": "patch:@types/node@patch%3A@types/node@npm%253A22.10.2%23~/.yarn/patches/@types-node-npm-22.10.2-572466b048.patch%3A%3Aversion=22.10.2&hash=819d81#~/.yarn/patches/@types-node-patch-8935673d40.patch",
-    "@types/node@npm:>=10.0.0": "patch:@types/node@patch%3A@types/node@npm%253A22.10.2%23~/.yarn/patches/@types-node-npm-22.10.2-572466b048.patch%3A%3Aversion=22.10.2&hash=819d81#~/.yarn/patches/@types-node-patch-8935673d40.patch",
-    "@types/node@npm:^18.11.18": "patch:@types/node@patch%3A@types/node@npm%253A22.10.2%23~/.yarn/patches/@types-node-npm-22.10.2-572466b048.patch%3A%3Aversion=22.10.2&hash=819d81#~/.yarn/patches/@types-node-patch-8935673d40.patch",
     "typescript@npm:^5.5.2": "patch:typescript@npm%3A5.7.2#~/.yarn/patches/typescript-npm-5.7.2-b1f84a8b28.patch",
     "typescript@npm:5.1.6": "patch:typescript@npm%3A5.7.2#~/.yarn/patches/typescript-npm-5.7.2-b1f84a8b28.patch",
     "@expo/cli@npm:0.22.7": "patch:@expo/cli@npm%3A0.22.7#~/.yarn/patches/@expo-cli-npm-0.22.7-9efc9f6be8.patch",

@@ -1,5 +1,5 @@
 {
-  "name": "@haohaohow/lib",
+  "name": "@pinyinly/lib",
   "type": "module",
   "exports": {
     "./*": "./src/*.ts"

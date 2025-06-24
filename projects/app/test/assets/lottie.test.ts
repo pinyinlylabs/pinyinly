@@ -2,46 +2,46 @@
 
 import type { Shape } from "@lottiefiles/lottie-js";
 import { Animation, MatteMode, ShapeLayer } from "@lottiefiles/lottie-js";
-import assert from "node:assert/strict";
 import * as fs from "node:fs/promises";
 import path from "node:path";
-import test from "node:test";
+import { expect, test } from "vitest";
 import { z } from "zod/v4";
 
-await test(`no luminance layers in lottie animations (incompatible with lottie-ios)`, async () => {
+test(`no luminance layers in lottie animations (incompatible with lottie-ios)`, async ({
+  annotate,
+}) => {
   for await (const [lottieFile, anim] of iterLottieAssets()) {
+    await annotate(`file: ${lottieFile}`);
+    // This test checks that no layer in
     // Check each layer to make sure it's not a luminance mask.
     for (const layer of anim.layers) {
-      assert.notEqual(
-        layer.matteMode,
-        MatteMode.LUMA,
-        `luminance layer in ${lottieFile} (id=${layer.id})`,
-      );
+      // The custom message is dropped as .not.toBe doesn't support custom messages like assert.notEqual
+      expect(layer.matteMode).not.toBe(MatteMode.LUMA);
     }
   }
 });
 
-await test(`regression https://github.com/Pixofield/keyshape-lottie-format/pull/15`, async () => {
+test(`regression https://github.com/Pixofield/keyshape-lottie-format/pull/15`, async ({
+  annotate,
+}) => {
   const namedSchema = z.object({ name: z.string().optional() });
 
   for await (const [lottieFile, anim] of iterLottieAssets()) {
-    const assertValid = (
+    await annotate(`file: ${lottieFile}`);
+    const validateItem = (
       value:
         | Pick<Animation, `name` | `toJSON`>
         | Pick<Shape, `name` | `toJSON`>,
     ) => {
-      assert.doesNotThrow(
-        () => namedSchema.parse(value),
-        `Invalid name (.nm) in ${lottieFile} (${JSON.stringify(value.toJSON())})`,
-      );
+      expect(() => namedSchema.parse(value)).not.toThrow();
     };
 
-    assertValid(anim);
+    validateItem(anim);
     for (const layer of anim.layers) {
-      assertValid(layer);
+      validateItem(layer);
       if (layer instanceof ShapeLayer) {
         for (const shape of layer.shapes) {
-          assertValid(shape);
+          validateItem(shape);
         }
       }
     }

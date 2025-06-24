@@ -1,6 +1,6 @@
 /// <reference types="apple-signin-api" />
 
-import { invariant } from "@haohaohow/lib/invariant";
+import { invariant } from "@pinyinly/lib/invariant";
 import { useEffect, useMemo, useState } from "react";
 import { documentEventListenerEffect } from "../hooks/documentEventListenerEffect";
 import { useEventCallback } from "../hooks/useEventCallback";

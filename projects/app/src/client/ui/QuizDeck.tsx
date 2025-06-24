@@ -10,7 +10,7 @@ import type { MistakeType, Question, UnsavedSkillRating } from "@/data/model";
 import { MistakeKind, QuestionKind } from "@/data/model";
 import { Rating } from "@/util/fsrs";
 import { nanoid } from "@/util/nanoid";
-import { invariant } from "@haohaohow/lib/invariant";
+import { invariant } from "@pinyinly/lib/invariant";
 import {
   NavigationContainer,
   NavigationIndependentTree,

@@ -1,5 +1,5 @@
 {
-  "name": "@haohaohow/eslint-rules",
+  "name": "@pinyinly/eslint-rules",
   "main": "index.cjs",
   "type": "module",
   "exports": {

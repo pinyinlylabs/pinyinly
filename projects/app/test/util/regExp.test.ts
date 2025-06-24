@@ -1,8 +1,8 @@
 import { regExpEscape } from "#util/regExp.ts";
-import test from "node:test";
+import { describe, expect, test } from "vitest";
 
-await test(`${regExpEscape.name} suite`, async () => {
-  await test(`fixtures`, async () => {
+describe(`${regExpEscape.name} suite`, async () => {
+  test(`fixtures`, async () => {
     const cases: [string, string][] = [
       [``, String.raw``],
       [`[`, String.raw`\[`],

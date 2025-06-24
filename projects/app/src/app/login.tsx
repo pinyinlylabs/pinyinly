@@ -2,7 +2,7 @@ import { useAuth } from "@/client/auth";
 import { RectButton } from "@/client/ui/RectButton";
 import { SignInWithAppleButton } from "@/client/ui/SignInWithAppleButton";
 import { TextInputSingle } from "@/client/ui/TextInputSingle";
-import { invariant } from "@haohaohow/lib/invariant";
+import { invariant } from "@pinyinly/lib/invariant";
 import * as AppleAuthentication from "expo-apple-authentication";
 import { Link } from "expo-router";
 import { useState } from "react";

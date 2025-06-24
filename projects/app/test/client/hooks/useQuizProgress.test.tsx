@@ -1,9 +1,11 @@
-import { useQuizProgress } from "#client/hooks/useQuizProgress.ts";
-import { renderHook } from "@testing-library/react-native";
-import test from "node:test";
-import { act } from "react";
+// @vitest-environment happy-dom
 
-await test(`increments progress for each correct answer`, () => {
+import { useQuizProgress } from "#client/hooks/useQuizProgress.ts";
+import { renderHook } from "@testing-library/react";
+import { act } from "react";
+import { expect, test } from "vitest";
+
+test(`increments progress for each correct answer`, () => {
   const { result } = renderHook(() => useQuizProgress());
 
   expect(result.current.progress).toBe(0);
@@ -21,7 +23,7 @@ await test(`increments progress for each correct answer`, () => {
   expect(result.current.progress).toBe(2);
 });
 
-await test(`fractionally increments progress for each incorrect`, () => {
+test(`fractionally increments progress for each incorrect`, () => {
   const { result } = renderHook(() => useQuizProgress());
 
   expect(result.current.progress).toBe(0);
@@ -38,7 +40,7 @@ await test(`fractionally increments progress for each incorrect`, () => {
   }
 });
 
-await test(`resets fractional progress after correct answer`, () => {
+test(`resets fractional progress after correct answer`, () => {
   const { result } = renderHook(() => useQuizProgress());
 
   act(() => {

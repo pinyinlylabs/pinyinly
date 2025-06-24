@@ -1,12 +1,11 @@
 import { parseHhhmark, stringifyHhhmark } from "#data/hhhmark.ts";
 
-import assert from "node:assert/strict";
-import test from "node:test";
+import { describe, expect, test } from "vitest";
 
-await test(`${parseHhhmark.name} suite`, async () => {
-  await test(`parses plain text correctly`, async () => {
+describe(`${parseHhhmark.name} suite`, () => {
+  test(`parses plain text correctly`, () => {
     const nodes = parseHhhmark(`This is a plain text.`);
-    assert.deepEqual(nodes, [
+    expect(nodes).toEqual([
       {
         text: `This is a plain text.`,
         type: `text`,
@@ -14,9 +13,9 @@ await test(`${parseHhhmark.name} suite`, async () => {
     ]);
   });
 
-  await test(`parses HanziWord references correctly`, async () => {
+  test(`parses HanziWord references correctly`, () => {
     const nodes = parseHhhmark(`See also {好:good}.`);
-    assert.deepEqual(nodes, [
+    expect(nodes).toEqual([
       {
         text: `See also `,
         type: `text`,
@@ -33,9 +32,9 @@ await test(`${parseHhhmark.name} suite`, async () => {
     ]);
   });
 
-  await test(`parses HanziWord references with omitted gloss`, async () => {
+  test(`parses HanziWord references with omitted gloss`, () => {
     const nodes = parseHhhmark(`See also {好:-good}.`);
-    assert.deepEqual(nodes, [
+    expect(nodes).toEqual([
       {
         text: `See also `,
         type: `text`,
@@ -52,9 +51,9 @@ await test(`${parseHhhmark.name} suite`, async () => {
     ]);
   });
 
-  await test(`parses bold text correctly`, async () => {
+  test(`parses bold text correctly`, () => {
     const nodes = parseHhhmark(`This is **bold** text.`);
-    assert.deepEqual(nodes, [
+    expect(nodes).toEqual([
       {
         text: `This is `,
         type: `text`,
@@ -70,9 +69,9 @@ await test(`${parseHhhmark.name} suite`, async () => {
     ]);
   });
 
-  await test(`parses italic text correctly`, async () => {
+  test(`parses italic text correctly`, () => {
     const nodes = parseHhhmark(`This is *italic* text.`);
-    assert.deepEqual(nodes, [
+    expect(nodes).toEqual([
       {
         text: `This is `,
         type: `text`,
@@ -88,9 +87,9 @@ await test(`${parseHhhmark.name} suite`, async () => {
     ]);
   });
 
-  await test(`parses single smart quotes correctly`, async () => {
+  test(`parses single smart quotes correctly`, () => {
     const nodes = parseHhhmark(`It's a 'quote'.`);
-    assert.deepEqual(nodes, [
+    expect(nodes).toEqual([
       {
         text: `It’s a ‘quote’.`,
         type: `text`,
@@ -98,9 +97,9 @@ await test(`${parseHhhmark.name} suite`, async () => {
     ]);
   });
 
-  await test(`parses double smart quotes correctly`, async () => {
+  test(`parses double smart quotes correctly`, () => {
     const nodes = parseHhhmark(`He said "hello".`);
-    assert.deepEqual(nodes, [
+    expect(nodes).toEqual([
       {
         text: `He said “hello”.`,
         type: `text`,
@@ -109,25 +108,25 @@ await test(`${parseHhhmark.name} suite`, async () => {
   });
 });
 
-await test(`${stringifyHhhmark.name} suite`, async () => {
+describe(`${stringifyHhhmark.name} suite`, () => {
   const roundTrip = (str: string) => stringifyHhhmark(parseHhhmark(str));
 
-  await test(`roundtrips bold text`, async () => {
+  test(`roundtrips bold text`, () => {
     const str = `This is **bold** text.`;
     expect(roundTrip(str)).toBe(str);
   });
 
-  await test(`roundtrips italic text`, async () => {
+  test(`roundtrips italic text`, () => {
     const str = `This is *italic* text.`;
     expect(roundTrip(str)).toBe(str);
   });
 
-  await test(`roundtrips HanziWord references`, async () => {
+  test(`roundtrips HanziWord references`, () => {
     const str = `This is {好:good}.`;
     expect(roundTrip(str)).toBe(str);
   });
 
-  await test(`roundtrips HanziWord references with omitted gloss`, async () => {
+  test(`roundtrips HanziWord references with omitted gloss`, () => {
     const str = `This is {好:-good}.`;
     expect(roundTrip(str)).toBe(str);
   });

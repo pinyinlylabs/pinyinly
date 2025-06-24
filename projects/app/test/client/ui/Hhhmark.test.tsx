@@ -1,13 +1,16 @@
-import { Hhhmark } from "#client/ui/Hhhmark.tsx";
-import { render } from "@testing-library/react-native";
-import test from "node:test";
+// @vitest-environment happy-dom
 
-await test(`${Hhhmark.name} suite`, async (t) => {
-  await t.test(`renders correctly with dumb quotes`, async () => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- bug in no-unsafe-assignment
-    const { root } = render(
+import { Hhhmark } from "#client/ui/Hhhmark.tsx";
+import { render } from "@testing-library/react";
+import { describe, expect, test } from "vitest";
+
+describe(`${Hhhmark.name} suite`, () => {
+  test(`renders correctly with dumb quotes`, async () => {
+    const result = render(
       <Hhhmark source={`This is a 'test' with "dumb quotes"`} context="body" />,
     );
-    expect(root).toHaveTextContent(`This is a ‘test’ with “dumb quotes”`);
+    expect(result.container).toHaveTextContent(
+      `This is a ‘test’ with “dumb quotes”`,
+    );
   });
 });

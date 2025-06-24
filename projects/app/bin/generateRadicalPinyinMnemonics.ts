@@ -1,6 +1,6 @@
 import type { HanziText } from "#data/model.ts";
 import { pinyinPronunciationDisplayText } from "#data/pinyin.ts";
-import { invariant } from "@haohaohow/lib/invariant";
+import { invariant } from "@pinyinly/lib/invariant";
 import makeDebug from "debug";
 import path from "node:path";
 import OpenAI from "openai";

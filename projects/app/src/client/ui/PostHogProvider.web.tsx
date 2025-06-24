@@ -1,4 +1,4 @@
-import { nonNullable } from "@haohaohow/lib/invariant";
+import { nonNullable } from "@pinyinly/lib/invariant";
 import {
   PostHogProvider as WebPostHogProvider,
   usePostHog as webUsePostHog,

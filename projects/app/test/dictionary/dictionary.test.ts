@@ -45,14 +45,14 @@ import {
   sortComparatorString,
 } from "#util/collections.ts";
 import { unicodeShortIdentifier } from "#util/unicode.ts";
-import { invariant, uniqueInvariant } from "@haohaohow/lib/invariant";
+import { invariant, uniqueInvariant } from "@pinyinly/lib/invariant";
 import assert from "node:assert/strict";
-import test from "node:test";
 import type { DeepReadonly } from "ts-essentials";
+import { describe, expect, test } from "vitest";
 import { z } from "zod/v4";
 import { 拼音, 汉 } from "../data/helpers";
 
-await test(`radical groups have the right number of elements`, async () => {
+test(`radical groups have the right number of elements`, async () => {
   // Data integrity test to ensure that the number of characters in each group
   // matches the expected range.
   const radicalsByStrokes = await allRadicalsByStrokes();
@@ -61,7 +61,7 @@ await test(`radical groups have the right number of elements`, async () => {
   }
 });
 
-await test(`json data can be loaded and passes the schema validation`, async () => {
+test(`json data can be loaded and passes the schema validation`, async () => {
   await allHsk1HanziWords();
   await allHsk2HanziWords();
   await allHsk3HanziWords();
@@ -86,7 +86,7 @@ const wordLists = [
   allRadicalHanziWords,
 ];
 
-await test(`hanzi word meaning-keys are not too similar`, async () => {
+test(`hanzi word meaning-keys are not too similar`, async () => {
   const dict = await loadDictionary();
 
   const hanziToMeaningKey = new Map<string, string[]>();
@@ -125,7 +125,7 @@ await test(`hanzi word meaning-keys are not too similar`, async () => {
   }
 });
 
-await test(`hanzi word meaning-key lint`, async () => {
+test(`hanzi word meaning-key lint`, async () => {
   const dict = await loadDictionary();
 
   const isViolating = (x: string) =>
@@ -145,7 +145,7 @@ await test(`hanzi word meaning-key lint`, async () => {
   assert.deepEqual(violations, new Set());
 });
 
-await test(`hanzi word meaning gloss lint`, async () => {
+test(`hanzi word meaning gloss lint`, async () => {
   const dict = await loadDictionary();
 
   const maxWords = 4;
@@ -172,7 +172,7 @@ await test(`hanzi word meaning gloss lint`, async () => {
   assert.deepEqual(violations, new Set());
 });
 
-await test(`hanzi word meaning glossHint lint`, async () => {
+test(`hanzi word meaning glossHint lint`, async () => {
   const dict = await loadDictionary();
 
   const maxWords = 100;
@@ -205,7 +205,7 @@ await test(`hanzi word meaning glossHint lint`, async () => {
   assert.deepEqual(violations, new Set());
 });
 
-await test(`hanzi meaning glossHint lint`, async () => {
+test(`hanzi meaning glossHint lint`, async () => {
   // all HanziWord references should exist in the dictionary
   const dict = await loadDictionary();
 
@@ -228,7 +228,7 @@ await test(`hanzi meaning glossHint lint`, async () => {
   }
 });
 
-await test(`hanzi meaning componentFormOf lint`, async () => {
+test(`hanzi meaning componentFormOf lint`, async () => {
   const dict = await loadDictionary();
 
   const meaningExceptions = new Set([[`示:show`, `礻:ritual`]]);
@@ -270,7 +270,7 @@ await test(`hanzi meaning componentFormOf lint`, async () => {
   }
 });
 
-await test(`hanzi word meaning example is not in english`, async () => {
+test(`hanzi word meaning example is not in english`, async () => {
   const dict = await loadDictionary();
 
   const violations = new Set(
@@ -286,7 +286,7 @@ await test(`hanzi word meaning example is not in english`, async () => {
   assert.deepEqual(violations, new Set());
 });
 
-await test(`hanzi word meaning pinyin lint`, async () => {
+test(`hanzi word meaning pinyin lint`, async () => {
   const dict = await loadDictionary();
 
   // `pinyin` key should be omitted rather than an empty
@@ -312,7 +312,7 @@ await test(`hanzi word meaning pinyin lint`, async () => {
   }
 });
 
-await test(`hanzi word without visual variants omit the property rather than use an empty array`, async () => {
+test(`hanzi word without visual variants omit the property rather than use an empty array`, async () => {
   const dict = await loadDictionary();
 
   const hanziWordWithEmptyArray = [...dict]
@@ -322,7 +322,7 @@ await test(`hanzi word without visual variants omit the property rather than use
   assert.deepEqual(hanziWordWithEmptyArray, []);
 });
 
-await test(`hanzi word meanings actually include the hanzi in the example`, async () => {
+test(`hanzi word meanings actually include the hanzi in the example`, async () => {
   const dict = await loadDictionary();
 
   const hanziWordWithBadExamples = [...dict]
@@ -335,7 +335,7 @@ await test(`hanzi word meanings actually include the hanzi in the example`, asyn
   assert.deepEqual(hanziWordWithBadExamples, []);
 });
 
-await test(`hanzi word visual variants shouldn't include the hanzi`, async () => {
+test(`hanzi word visual variants shouldn't include the hanzi`, async () => {
   const dict = await loadDictionary();
 
   const hanziWordWithBadVisualVariants = [...dict]
@@ -348,7 +348,7 @@ await test(`hanzi word visual variants shouldn't include the hanzi`, async () =>
   assert.deepEqual(hanziWordWithBadVisualVariants, []);
 });
 
-await test(`hanzi words are unique on (meaning key, primary pinyin)`, async () => {
+test(`hanzi words are unique on (meaning key, primary pinyin)`, async () => {
   const exceptions = new Set(
     [
       [`他们:they`, `它们:they`, `她们:they`],
@@ -400,7 +400,7 @@ await test(`hanzi words are unique on (meaning key, primary pinyin)`, async () =
   }
 });
 
-await test(`hanzi words are unique on (hanzi, part-of-speech, pinyin)`, async () => {
+test(`hanzi words are unique on (hanzi, part-of-speech, pinyin)`, async () => {
   const exceptions = new Set(
     [
       [`从来:always`, `从来:never`],
@@ -451,7 +451,7 @@ await test(`hanzi words are unique on (hanzi, part-of-speech, pinyin)`, async ()
   );
 });
 
-await test(`all word lists only reference valid hanzi words`, async () => {
+test(`all word lists only reference valid hanzi words`, async () => {
   for (const wordList of wordLists) {
     for (const hanziWord of await wordList()) {
       assert.notEqual(
@@ -463,7 +463,7 @@ await test(`all word lists only reference valid hanzi words`, async () => {
   }
 });
 
-await test(`all wiki component hanzi words reference valid hanzi words`, async () => {
+test(`all wiki component hanzi words reference valid hanzi words`, async () => {
   const wiki = await loadWiki();
   for (const [hanzi, wikiEntry] of wiki) {
     if (wikiEntry.components != null) {
@@ -480,7 +480,7 @@ await test(`all wiki component hanzi words reference valid hanzi words`, async (
   }
 });
 
-await test(`expect missing glyphs to be included decomposition data`, async () => {
+test(`expect missing glyphs to be included decomposition data`, async () => {
   const allChars = await allHanziCharacters();
   const allComponents = new Set<string>();
   const decompositions = await loadHanziDecomposition();
@@ -512,27 +512,21 @@ await test(`expect missing glyphs to be included decomposition data`, async () =
   assert.deepEqual(knownMissingGlyphs, new Set());
 });
 
-void test.todo(
-  `hanzi name mnemonics don't include visual variants`,
-  async () => {
-    // const radicalNameMnemonics = await loadHanziWordGlossMnemonics();
-    // const primarySet = new Set(await allRadicalPrimaryForms());
-    // const radicalsWithNameMnemonics = new Set(radicalNameMnemonics.keys());
-    // assert.deepEqual(radicalsWithNameMnemonics.difference(primarySet), new Set());
-  },
-);
+test.todo(`hanzi name mnemonics don't include visual variants`, async () => {
+  // const radicalNameMnemonics = await loadHanziWordGlossMnemonics();
+  // const primarySet = new Set(await allRadicalPrimaryForms());
+  // const radicalsWithNameMnemonics = new Set(radicalNameMnemonics.keys());
+  // assert.deepEqual(radicalsWithNameMnemonics.difference(primarySet), new Set());
+});
 
-void test.todo(
-  `hanzi pinyin mnemonics don't include visual variants`,
-  async () => {
-    // const pinyinMnemonics = await loadRadicalPinyinMnemonics();
-    // const primarySet = new Set(await allRadicalPrimaryForms());
-    // const radicalsWithNameMnemonics = new Set(pinyinMnemonics.keys());
-    // assert.deepEqual(radicalsWithNameMnemonics.difference(primarySet), new Set());
-  },
-);
+test.todo(`hanzi pinyin mnemonics don't include visual variants`, async () => {
+  // const pinyinMnemonics = await loadRadicalPinyinMnemonics();
+  // const primarySet = new Set(await allRadicalPrimaryForms());
+  // const radicalsWithNameMnemonics = new Set(pinyinMnemonics.keys());
+  // assert.deepEqual(radicalsWithNameMnemonics.difference(primarySet), new Set());
+});
 
-await test(`zod schemas are compatible with OpenAI API`, async () => {
+test(`zod schemas are compatible with OpenAI API`, async () => {
   function assertCompatible(schema: z.ZodType): void {
     const jsonSchema = JSON.stringify(
       z.toJSONSchema(schema, { unrepresentable: `any` }),
@@ -553,7 +547,7 @@ await test(`zod schemas are compatible with OpenAI API`, async () => {
   assertCompatible(hanziWordMeaningSchema);
 });
 
-await test(`hanzi uses consistent unicode characters`, async () => {
+test(`hanzi uses consistent unicode characters`, async () => {
   const dict = await loadDictionary();
   const violations = [...dict.keys()]
     .map((x) => hanziFromHanziWord(x))
@@ -566,7 +560,7 @@ await test(`hanzi uses consistent unicode characters`, async () => {
   );
 });
 
-await test(`standard pinyin covers kangxi pinyin`, async () => {
+test(`standard pinyin covers kangxi pinyin`, async () => {
   const chart = await loadStandardPinyinChart();
 
   await testPinyinChart(chart, [
@@ -635,7 +629,7 @@ await test(`standard pinyin covers kangxi pinyin`, async () => {
   ]);
 });
 
-await test(`mm pinyin covers kangxi pinyin`, async () => {
+test(`mm pinyin covers kangxi pinyin`, async () => {
   const chart = await loadMmPinyinChart();
 
   await testPinyinChart(chart, [
@@ -666,7 +660,7 @@ await test(`mm pinyin covers kangxi pinyin`, async () => {
   ]);
 });
 
-await test(`hh pinyin covers kangxi pinyin`, async () => {
+test(`hh pinyin covers kangxi pinyin`, async () => {
   const chart = await loadHhPinyinChart();
 
   await testPinyinChart(chart, [
@@ -679,7 +673,7 @@ await test(`hh pinyin covers kangxi pinyin`, async () => {
   ]);
 });
 
-await test(`hmm pinyin covers kangxi pinyin`, async () => {
+test(`hmm pinyin covers kangxi pinyin`, async () => {
   const chart = await loadHmmPinyinChart();
 
   assert.equal(chart.initials.flatMap((i) => i.initials).length, 55);
@@ -709,8 +703,8 @@ await test(`hmm pinyin covers kangxi pinyin`, async () => {
   ]);
 });
 
-await test(`${loadHanziWordMigrations.name} suite`, async () => {
-  await test(`no "from" keys are in the dictionary`, async () => {
+describe(`${loadHanziWordMigrations.name} suite`, async () => {
+  test(`no "from" keys are in the dictionary`, async () => {
     const hanziWordRenames = await loadHanziWordMigrations();
     const dictionary = await loadDictionary();
     assert.deepEqual(
@@ -721,7 +715,7 @@ await test(`${loadHanziWordMigrations.name} suite`, async () => {
     );
   });
 
-  await test(`all "to" keys are in the dictionary`, async () => {
+  test(`all "to" keys are in the dictionary`, async () => {
     const hanziWordRenames = await loadHanziWordMigrations();
     const dictionary = await loadDictionary();
     assert.deepEqual(
@@ -733,7 +727,7 @@ await test(`${loadHanziWordMigrations.name} suite`, async () => {
     );
   });
 
-  await test(`no "to" keys are also "from" keys (could cause loops)`, async () => {
+  test(`no "to" keys are also "from" keys (could cause loops)`, async () => {
     const hanziWordRenames = await loadHanziWordMigrations();
     assert.deepEqual(
       [...hanziWordRenames].filter(
@@ -745,7 +739,7 @@ await test(`${loadHanziWordMigrations.name} suite`, async () => {
   });
 });
 
-await test(`dictionary contains entries for decomposition`, async () => {
+test(`dictionary contains entries for decomposition`, async () => {
   const unknownCharacters = new Map<HanziChar, /* sources */ Set<string>>();
   const unknownComponents = new Map<HanziChar, /* sources */ Set<string>>();
 
@@ -902,17 +896,17 @@ async function testPinyinChart(
   uniqueInvariant(chart.finals.flatMap(([, ...x]) => x));
 }
 
-await test(`${hanziFromHanziOrHanziWord.name} suite`, async () => {
-  await test(`supports hanzi word`, () => {
+describe(`${hanziFromHanziOrHanziWord.name} suite`, async () => {
+  test(`supports hanzi word`, () => {
     expect(hanziFromHanziOrHanziWord(`你好:hello`)).toEqual(`你好`);
   });
 
-  await test(`supports hanzi`, () => {
+  test(`supports hanzi`, () => {
     expect(hanziFromHanziOrHanziWord(汉`你好`)).toEqual(`你好`);
   });
 });
 
-await test(`${upsertHanziWordMeaning.name} suite`, async () => {
+describe(`${upsertHanziWordMeaning.name} suite`, async () => {
   function helloDict(): Dictionary {
     const dict: Dictionary = new Map();
     dict.set(`你好:hello`, {
@@ -924,7 +918,7 @@ await test(`${upsertHanziWordMeaning.name} suite`, async () => {
     return dict;
   }
 
-  await test(`can update pinyin`, async () => {
+  test(`can update pinyin`, async () => {
     const dict = helloDict();
 
     upsertHanziWordMeaning(dict, `你好:hello`, {

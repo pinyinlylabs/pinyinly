@@ -1,4 +1,4 @@
-import { invariant } from "@haohaohow/lib/invariant";
+import { invariant } from "@pinyinly/lib/invariant";
 import Constants, { ExecutionEnvironment } from "expo-constants";
 import { useFonts } from "expo-font";
 import * as ExpoSplashScreen from "expo-splash-screen";

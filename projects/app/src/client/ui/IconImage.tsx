@@ -1,4 +1,4 @@
-import { invariant } from "@haohaohow/lib/invariant";
+import { invariant } from "@pinyinly/lib/invariant";
 import type { ImageProps } from "expo-image";
 import { Image } from "expo-image";
 import { tv } from "tailwind-variants";

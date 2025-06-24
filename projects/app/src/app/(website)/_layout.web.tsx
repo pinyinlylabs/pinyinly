@@ -1,7 +1,7 @@
-/* eslint-disable @haohaohow/no-restricted-css-classes */
+/* eslint-disable @pinyinly/no-restricted-css-classes */
 import { RectButton } from "@/client/ui/RectButton";
 import { useWebsiteStore } from "@/client/website";
-import { invariant } from "@haohaohow/lib/invariant";
+import { invariant } from "@pinyinly/lib/invariant";
 import { Image } from "expo-image";
 import { Link, Slot } from "expo-router";
 import { ScrollView, View } from "react-native";
@@ -130,7 +130,7 @@ export default function WebsiteLayout() {
                   <div>
                     <Link
                       className={footerLinkClass()}
-                      href="https://github.com/haohao-how/haohaohow/"
+                      href="https://github.com/pinyinlylabs/pinyinly/"
                     >
                       Github
                     </Link>

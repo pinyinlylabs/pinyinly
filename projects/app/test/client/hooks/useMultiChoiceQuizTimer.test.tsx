@@ -1,15 +1,17 @@
-import { useMultiChoiceQuizTimer } from "#client/hooks/useMultiChoiceQuizTimer.ts";
-import { renderHook } from "@testing-library/react-native";
-import test from "node:test";
-import { act } from "react";
+// @vitest-environment happy-dom
 
-await test(`records time correctly for correct and incorrect choices`, async (t) => {
-  t.mock.timers.enable({ apis: [`Date`] });
+import { useMultiChoiceQuizTimer } from "#client/hooks/useMultiChoiceQuizTimer.ts";
+import { renderHook } from "@testing-library/react";
+import { act } from "react";
+import { expect, test, vi } from "vitest";
+
+test(`records time correctly for correct and incorrect choices`, () => {
+  vi.useFakeTimers({ toFake: [`Date`] });
 
   const { result } = renderHook(() => useMultiChoiceQuizTimer());
 
   // Simulate 100ms elapsed
-  t.mock.timers.tick(100);
+  vi.advanceTimersByTime(100);
 
   // Initially, endTime should be undefined
   expect(result.current.endTime).toBeUndefined();
@@ -24,7 +26,7 @@ await test(`records time correctly for correct and incorrect choices`, async (t)
   expect(result.current.endTime).toBe(100);
 
   // Simulate more time passing (100ms) and ensure endTime remains constant
-  t.mock.timers.tick(100);
+  vi.advanceTimersByTime(100);
   expect(result.current.endTime).toBe(100);
 
   // Record the second correct choice
@@ -33,7 +35,7 @@ await test(`records time correctly for correct and incorrect choices`, async (t)
   });
 
   // Simulate additional time passing (100ms) and ensure endTime remains unchanged
-  t.mock.timers.tick(100);
+  vi.advanceTimersByTime(100);
   expect(result.current.endTime).toBe(100);
 
   // Record an incorrect choice
@@ -50,19 +52,21 @@ await test(`records time correctly for correct and incorrect choices`, async (t)
   });
 
   // Simulate 100ms elapsed after the reset
-  t.mock.timers.tick(100);
+  vi.advanceTimersByTime(100);
 
   // endTime should now reflect the new correct choice time (300ms total elapsed)
   expect(result.current.endTime).toBe(300);
+
+  vi.useRealTimers();
 });
 
-await test(`resets if more than 4s between choices`, async (t) => {
-  t.mock.timers.enable({ apis: [`Date`] });
+test(`resets if more than 4s between choices`, () => {
+  vi.useFakeTimers({ toFake: [`Date`] });
 
   const { result } = renderHook(() => useMultiChoiceQuizTimer());
 
   // Simulate 100ms elapsed
-  t.mock.timers.tick(100);
+  vi.advanceTimersByTime(100);
 
   // Record the first correct choice
   act(() => {
@@ -70,7 +74,7 @@ await test(`resets if more than 4s between choices`, async (t) => {
   });
 
   // Simulate 4.1s elapsed
-  t.mock.timers.tick(10_000);
+  vi.advanceTimersByTime(10_000);
 
   // Should not reset because no additional choices were made
   expect(result.current.endTime).toBe(100);
@@ -81,4 +85,6 @@ await test(`resets if more than 4s between choices`, async (t) => {
   });
 
   expect(result.current.endTime).toBeUndefined();
+
+  vi.useRealTimers();
 });

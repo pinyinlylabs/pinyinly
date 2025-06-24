@@ -6,32 +6,32 @@ import {
 } from "#data/questions/hanziWordToPinyin.ts";
 import { hanziWordToPinyin } from "#data/skills.ts";
 import { loadDictionary } from "#dictionary/dictionary.ts";
-import test from "node:test";
+import { describe, expect, test } from "vitest";
 import { 拼音 } from "../helpers";
 
-await test(`${hanziWordToPinyinQuestionOrThrow.name} suite`, async () => {
-  await test(`simple case`, async () => {
+describe(`${hanziWordToPinyinQuestionOrThrow.name} suite`, async () => {
+  test(`simple case`, async () => {
     const skill = hanziWordToPinyin(`你好:hello`);
-    expect(await hanziWordToPinyinQuestionOrThrow(skill)).toEqual({
+    await expect(hanziWordToPinyinQuestionOrThrow(skill)).resolves.toEqual({
       kind: QuestionKind.HanziWordToPinyin,
       answers: [[`nǐ`, `hǎo`]],
       skill,
     });
   });
 
-  await test(`throws if the hanzi word has no pinyin`, async () => {
+  test(`throws if the hanzi word has no pinyin`, async () => {
     const skill = hanziWordToPinyin(`亼:assemble`); // 亼:assemble has no pinyin
     await expect(hanziWordToPinyinQuestionOrThrow(skill)).rejects.toThrow();
   });
 
-  await test(`supports hanzi word with multiple pinyin`, async () => {
+  test(`supports hanzi word with multiple pinyin`, async () => {
     const skill = hanziWordToPinyin(`什:what`); // 什:what has shén and shen
     await expect(
       hanziWordToPinyinQuestionOrThrow(skill),
     ).resolves.not.toBeNull();
   });
 
-  await test(`works for all valid dictionary items`, async () => {
+  test(`works for all valid dictionary items`, async () => {
     const dictionary = await loadDictionary();
     const sample = [...dictionary].filter(
       ([, meaning]) => meaning.pinyin != null,
@@ -44,8 +44,8 @@ await test(`${hanziWordToPinyinQuestionOrThrow.name} suite`, async () => {
   });
 });
 
-await test(`${hanziToPinyinQuestionMistakes.name} suite`, async () => {
-  await test(`correctness ignores whitespace`, async () => {
+describe(`${hanziToPinyinQuestionMistakes.name} suite`, async () => {
+  test(`correctness ignores whitespace`, async () => {
     const question: HanziWordToPinyinQuestion = {
       kind: QuestionKind.HanziWordToPinyin,
       answers: [[拼音`nǐ`, 拼音`hǎo`]],
@@ -60,7 +60,7 @@ await test(`${hanziToPinyinQuestionMistakes.name} suite`, async () => {
     }
   });
 
-  await test(`incorrect returns a mistake`, async () => {
+  test(`incorrect returns a mistake`, async () => {
     const question: HanziWordToPinyinQuestion = {
       kind: QuestionKind.HanziWordToPinyin,
       answers: [[拼音`nǐ`, 拼音`hǎo`]],
@@ -92,7 +92,7 @@ await test(`${hanziToPinyinQuestionMistakes.name} suite`, async () => {
     }
   });
 
-  await test(`secondary pinyin definitions are still correct`, async () => {
+  test(`secondary pinyin definitions are still correct`, async () => {
     const question: HanziWordToPinyinQuestion = {
       kind: QuestionKind.HanziWordToPinyin,
       answers: [

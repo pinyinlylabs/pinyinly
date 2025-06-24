@@ -1,6 +1,6 @@
 import RnRive from "rive-react-native";
 
-import { invariant } from "@haohaohow/lib/invariant";
+import { invariant } from "@pinyinly/lib/invariant";
 import { useEffect } from "react";
 import type { RiveProps } from "./riveTypes";
 

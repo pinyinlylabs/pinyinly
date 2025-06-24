@@ -1,10 +1,7 @@
 import { inngest } from "#server/lib/inngest.ts";
+import { test } from "vitest";
 
-function typeChecks(..._args: unknown[]) {
-  // This function is only used for type checking, so it should never be called.
-}
-
-typeChecks(`@inngest/eslint-plugin is configured correctly`, async () => {
+test(`@inngest/eslint-plugin is configured correctly`, () => {
   inngest.createFunction(
     { id: `test-fn` },
     { event: `test/test-fn` },

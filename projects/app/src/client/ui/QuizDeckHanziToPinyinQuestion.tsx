@@ -27,7 +27,7 @@ import {
   skillKindFromSkill,
 } from "@/data/skills";
 import { hanziFromHanziWord } from "@/dictionary/dictionary";
-import { nonNullable } from "@haohaohow/lib/invariant";
+import { nonNullable } from "@pinyinly/lib/invariant";
 import type { ReactNode, Ref } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { StyleProp, TextInput, ViewStyle } from "react-native";

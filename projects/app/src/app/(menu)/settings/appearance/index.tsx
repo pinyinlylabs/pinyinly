@@ -10,13 +10,13 @@ export default function AppearanceSettingsPage() {
         <Text className="hhh-body-title">Appearance</Text>
       </View>
       <View className="gap-2">
-        <Text className="hhh-body-dt">Network</Text>
+        <Text className="hhh-body-dt">Learning</Text>
 
         <View className="flex-row">
           <View className="flex-1">
             <Text className="hhh-body-heading">Auto check answers</Text>
             <Text className="hhh-body-caption">
-              Automatically check the answer instead of needing to press
+              Automatically check the answer rather than needing to press
               &quot;Check&quot;.
             </Text>
           </View>

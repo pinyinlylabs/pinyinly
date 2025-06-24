@@ -1,7 +1,7 @@
 import { useVisualViewportSize } from "@/client/hooks/useVisualViewportSize";
 import { IconImage } from "@/client/ui/IconImage";
 import { RectButton } from "@/client/ui/RectButton";
-import { invariant } from "@haohaohow/lib/invariant";
+import { invariant } from "@pinyinly/lib/invariant";
 import type { Href } from "expo-router";
 import { Link, usePathname } from "expo-router";
 import type { TabTriggerSlotProps } from "expo-router/ui";

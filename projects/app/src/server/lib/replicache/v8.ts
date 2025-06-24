@@ -26,7 +26,7 @@ import type {
   VersionNotSupportedResponse,
 } from "@/util/rizzle";
 import { makeDrizzleMutationHandler } from "@/util/rizzle";
-import { invariant, nonNullable } from "@haohaohow/lib/invariant";
+import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import { startSpan } from "@sentry/core";
 import makeDebug from "debug";
 import type { SQL } from "drizzle-orm";

@@ -1,8 +1,8 @@
 import { unicodeShortIdentifier } from "#util/unicode.ts";
-import test from "node:test";
+import { describe, expect, test } from "vitest";
 
-await test(`${unicodeShortIdentifier.name} suite`, async () => {
-  await test(`works for hanzi`, () => {
+describe(`${unicodeShortIdentifier.name} suite`, () => {
+  test(`works for hanzi`, () => {
     expect(unicodeShortIdentifier(`汉`)).toEqual(`U+6C49`);
   });
 });

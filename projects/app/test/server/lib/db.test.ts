@@ -5,82 +5,69 @@ import type { Drizzle } from "#server/lib/db.ts";
 import { pgBatchUpdate, substring } from "#server/lib/db.ts";
 import * as s from "#server/pgSchema.ts";
 import { nextReview, Rating } from "#util/fsrs.ts";
-import { invariant } from "@haohaohow/lib/invariant";
+import { invariant } from "@pinyinly/lib/invariant";
 import { eq } from "drizzle-orm";
 import * as pg from "drizzle-orm/pg-core";
-import assert from "node:assert/strict";
-import type { TestContext } from "node:test";
-import test from "node:test";
-import { createUser, withDbTest, withTxTest } from "./dbHelpers";
+import { describe, expect, vi } from "vitest";
+import { createUser, txTest } from "./dbHelpers";
 
 function typeChecks(..._args: unknown[]) {
   // This function is only used for type checking, so it should never be called.
 }
 
-typeChecks(`eslint-plugin-drizzle tests`, (t: TestContext) => {
-  const dbTest = withDbTest(t);
+describe(`${substring.name} suite`, () => {
+  txTest.scoped({ pgConfig: { isolationLevel: `repeatable read` } });
 
-  void dbTest(`eslint`, async (tx) => {
-    // eslint-disable-next-line drizzle/enforce-delete-with-where
-    tx.delete(s.authSession);
-  });
-});
-
-await test(`${substring.name} suite`, async (t) => {
-  const txTest = withTxTest(t);
-
-  await txTest(`static query`, async (tx) => {
+  txTest(`static query`, async ({ tx }) => {
     const table = pg.pgTable(`tbl`, { col: pg.text() });
 
-    assert.deepEqual(
+    expect(
       tx
         .select({ text: substring(table.col, /^\w+:(.+)$/) })
         .from(table)
         .toSQL(),
-      {
-        params: [`^\\w+:(.+)$`],
-        sql: `select substring("col" from $1) from "tbl"`,
-      },
-    );
+    ).toEqual({
+      params: [`^\\w+:(.+)$`],
+      sql: `select substring("col" from $1) from "tbl"`,
+    });
   });
 
-  await txTest(`functional test`, async (tx) => {
+  txTest(`functional test`, async ({ tx }) => {
     await tx.insert(s.user).values([{ id: `foo:bar` }]);
 
-    assert.deepEqual(
+    expect(
       await tx
         .select({ text: substring(s.user.id, /^\w+:(.+)$/) })
         .from(s.user),
-      [{ text: `bar` }],
-    );
+    ).toEqual([{ text: `bar` }]);
   });
 });
 
-await test(`${pgBatchUpdate.name} suite`, async (t) => {
-  const txTest = withTxTest(t);
+describe(`${pgBatchUpdate.name} suite`, () => {
+  txTest.scoped({ pgConfig: { isolationLevel: `repeatable read` } });
 
-  await txTest(`no updates should be no-op`, async (tx) => {
+  txTest(`no updates should be no-op`, async ({ tx }) => {
     const result = await pgBatchUpdate(tx, {
       whereColumn: s.skillState.id,
       setColumn: s.skillState.srs,
       updates: [],
     });
 
-    assert.deepEqual(result, { affectedRows: 0 });
+    expect(result).toEqual({ affectedRows: 0 });
   });
 
-  await txTest(`throws when given different columns`, async (tx) => {
-    await assert.rejects(
+  txTest(`throws when given different columns`, async ({ tx }) => {
+    await expect(
       pgBatchUpdate(tx, {
         whereColumn: s.skillState.id,
         setColumn: s.skillRating.id,
         updates: [],
       }),
-    );
+    ).rejects.toThrow();
   });
 
-  await txTest(`handles one update`, async (tx, { mock }) => {
-    mock.timers.enable({ apis: [`Date`] });
+  txTest(`handles one update`, async ({ tx }) => {
+    vi.useFakeTimers();
 
     const user = await createUser(tx);
     const [skillState] = await tx
@@ -95,7 +82,7 @@ await test(`${pgBatchUpdate.name} suite`, async (t) => {
       .returning();
     invariant(skillState != null);
 
-    mock.timers.tick(5000);
+    vi.advanceTimersByTime(5000);
 
     const newSrs = srsStateFromFsrsState(
       nextReview(skillState.srs, Rating.Good),
@@ -105,16 +92,16 @@ await test(`${pgBatchUpdate.name} suite`, async (t) => {
       setColumn: s.skillState.srs,
       updates: [[skillState.id, newSrs]],
     });
-    assert.deepEqual(result, { affectedRows: 1 });
+    expect(result).toEqual({ affectedRows: 1 });
 
     const updatedSkillState = await tx.query.skillState.findFirst({
       where: (t) => eq(t.id, skillState.id),
     });
-    assert.deepEqual(updatedSkillState?.srs, newSrs);
+    expect(updatedSkillState?.srs).toEqual(newSrs);
   });
 
-  await txTest(`handles many updates`, async (tx, { mock }) => {
-    mock.timers.enable({ apis: [`Date`] });
+  txTest(`handles many updates`, async ({ tx }) => {
+    vi.useFakeTimers();
     const user = await createUser(tx);
 
     const [skillState1, skillState2] = await tx
@@ -134,7 +121,7 @@ await test(`${pgBatchUpdate.name} suite`, async (t) => {
       .returning();
     invariant(skillState1 != null && skillState2 != null);
 
-    mock.timers.tick(5000);
+    vi.advanceTimersByTime(5000);
     const newSkillState1Srs = srsStateFromFsrsState(
       nextReview(skillState1.srs, Rating.Good),
     );
@@ -149,17 +136,17 @@ await test(`${pgBatchUpdate.name} suite`, async (t) => {
         [skillState2.id, newSkillState2Srs],
       ],
     });
-    assert.deepEqual(result, { affectedRows: 2 });
+    expect(result).toEqual({ affectedRows: 2 });
 
     const updatedSkillState1 = await tx.query.skillState.findFirst({
       where: (t) => eq(t.id, skillState1.id),
     });
-    assert.deepEqual(updatedSkillState1?.srs, newSkillState1Srs);
+    expect(updatedSkillState1?.srs).toEqual(newSkillState1Srs);
 
     const updatedSkillState2 = await tx.query.skillState.findFirst({
       where: (t) => eq(t.id, skillState2.id),
     });
-    assert.deepEqual(updatedSkillState2?.srs, newSkillState2Srs);
+    expect(updatedSkillState2?.srs).toEqual(newSkillState2Srs);
   });
 
   typeChecks(`requires correct column types`, async () => {

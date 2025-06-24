@@ -11,19 +11,18 @@ import type { CvrEntities } from "#server/pgSchema.ts";
 import * as s from "#server/pgSchema.ts";
 import { nextReview, Rating } from "#util/fsrs.ts";
 import { nanoid } from "#util/nanoid.ts";
-import { invariant, nonNullable } from "@haohaohow/lib/invariant";
+import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import { eq } from "drizzle-orm";
-import assert from "node:assert/strict";
-import { test } from "node:test";
-import { createUser, withTxTest } from "../dbHelpers";
+import { describe, expect, test } from "vitest";
+import { createUser, txTest } from "../dbHelpers";
 
-await test(`${push.name} suite`, async (t) => {
-  const txTest = withTxTest(t, { isolationLevel: `repeatable read` });
+describe(`${push.name} suite`, () => {
+  txTest.scoped({ pgConfig: { isolationLevel: `repeatable read` } });
 
-  await test(`database transaction isolation level`, async (t) => {
-    const txTest = withTxTest(t, { isolationLevel: `read committed` });
+  describe(`database transaction isolation level`, () => {
+    txTest.scoped({ pgConfig: { isolationLevel: `read committed` } });
 
-    await txTest(`fails when using the default`, async (tx) => {
+    txTest(`fails when using the default`, async ({ tx }) => {
       const result = push(tx, `1`, {
         profileId: ``,
         clientGroupId: ``,
@@ -32,11 +31,11 @@ await test(`${push.name} suite`, async (t) => {
         mutations: [],
       });
 
-      await assert.rejects(result, /transaction_isolation/);
+      await expect(result).rejects.toThrow(/transaction_isolation/);
     });
   });
 
-  await txTest(`handles no mutations`, async (tx) => {
+  txTest(`handles no mutations`, async ({ tx }) => {
     await push(tx, `1`, {
       profileId: ``,
       clientGroupId: ``,
@@ -46,9 +45,9 @@ await test(`${push.name} suite`, async (t) => {
     });
   });
 
-  await txTest(
+  txTest(
     `only allows a client group if it matches the user`,
-    async (tx) => {
+    async ({ tx }) => {
       const user1 = await createUser(tx);
       const user2 = await createUser(tx);
 
@@ -75,7 +74,7 @@ await test(`${push.name} suite`, async (t) => {
       };
 
       // User 2 doesn't own the clientGroup
-      await assert.rejects(
+      await expect(
         push(tx, user2.id, {
           profileId: ``,
           clientGroupId: clientGroup.id,
@@ -83,7 +82,7 @@ await test(`${push.name} suite`, async (t) => {
           schemaVersion: schema.version,
           mutations: [mut],
         }),
-      );
+      ).rejects.toThrow();
 
       // User 1 does own the clientGroup
       await push(tx, user1.id, {
@@ -96,9 +95,9 @@ await test(`${push.name} suite`, async (t) => {
     },
   );
 
-  await txTest(
+  txTest(
     `creates a client group and client if one doesn't exist`,
-    async (tx) => {
+    async ({ tx }) => {
       const clientId = `clientid`;
       const clientGroupId = `clientgroupid`;
 
@@ -123,16 +122,16 @@ await test(`${push.name} suite`, async (t) => {
       const client = await tx.query.replicacheClient.findFirst({
         where: (t, { eq }) => eq(t.id, clientId),
       });
-      assert.equal(client?.id, clientId);
+      expect(client?.id).toBe(clientId);
 
       const clientGroup = await tx.query.replicacheClientGroup.findFirst({
         where: (t, { eq }) => eq(t.id, clientGroupId),
       });
-      assert.equal(clientGroup?.id, clientGroupId);
+      expect(clientGroup?.id).toBe(clientGroupId);
     },
   );
 
-  await txTest(`skips already processed mutations`, async (tx) => {
+  txTest(`skips already processed mutations`, async ({ tx }) => {
     const user = await createUser(tx);
 
     // Create a client group
@@ -171,16 +170,17 @@ await test(`${push.name} suite`, async (t) => {
       mutations: [mut],
     });
 
-    assert.deepEqual(
+    expect(
       await tx.query.skillState.findMany({
         where: (t, { eq }) => eq(t.userId, user.id),
       }),
+    ).toEqual(
       // The mutation SHOULDN'T have done anything, it should be skipped.
       [],
     );
   });
 
-  await txTest(`does not process mutations from the future`, async (tx) => {
+  txTest(`does not process mutations from the future`, async ({ tx }) => {
     const user = await createUser(tx);
 
     // Create a client group
@@ -205,7 +205,7 @@ await test(`${push.name} suite`, async (t) => {
       clientId: client.id,
     };
 
-    await assert.rejects(
+    await expect(
       push(tx, user.id, {
         profileId: ``,
         clientGroupId: clientGroup.id,
@@ -213,12 +213,12 @@ await test(`${push.name} suite`, async (t) => {
         schemaVersion: schema.version,
         mutations: [mut],
       }),
-    );
+    ).rejects.toThrow();
   });
 
-  await txTest(
+  txTest(
     `invalid mutations must still update client.lastMutationID`,
-    async (tx) => {
+    async ({ tx }) => {
       const user = await createUser(tx);
 
       // Create a client group
@@ -259,7 +259,7 @@ await test(`${push.name} suite`, async (t) => {
     },
   );
 
-  await txTest(`returns correct error for invalid push version`, async (tx) => {
+  txTest(`returns correct error for invalid push version`, async ({ tx }) => {
     const result = await push(tx, `1`, {
       profileId: ``,
       clientGroupId: ``,
@@ -268,20 +268,20 @@ await test(`${push.name} suite`, async (t) => {
       mutations: [],
     });
 
-    assert.deepEqual(result, {
+    expect(result).toEqual({
       error: `VersionNotSupported`,
       versionType: `push`,
     });
   });
 });
 
-await test(`${pull.name} suite`, async (t) => {
-  const txTest = withTxTest(t, { isolationLevel: `repeatable read` });
+describe(`${pull.name} suite`, () => {
+  txTest.scoped({ pgConfig: { isolationLevel: `repeatable read` } });
 
-  await test(`database transaction isolation level`, async (t) => {
-    const txTest = withTxTest(t, { isolationLevel: `read committed` });
+  describe(`database transaction isolation level`, () => {
+    txTest.scoped({ pgConfig: { isolationLevel: `read committed` } });
 
-    await txTest(`fails when using the default`, async (tx) => {
+    txTest(`fails when using the default`, async ({ tx }) => {
       const result = pull(tx, `xxx`, {
         profileId: ``,
         clientGroupId: ``,
@@ -290,11 +290,11 @@ await test(`${pull.name} suite`, async (t) => {
         cookie: null,
       });
 
-      await assert.rejects(result, /transaction_isolation/);
+      await expect(result).rejects.toThrow(/transaction_isolation/);
     });
   });
 
-  await txTest(`creates a CVR with lastMutationIds`, async (tx) => {
+  txTest(`creates a CVR with lastMutationIds`, async ({ tx }) => {
     const clientGroupId = nanoid();
     const user = await createUser(tx);
 
@@ -313,9 +313,9 @@ await test(`${pull.name} suite`, async (t) => {
     expect(clientGroup).toMatchObject({ cvrVersion: 1 });
   });
 
-  await txTest(
+  txTest(
     `non-existant client group creates one and stores cvrVersion`,
-    async (tx) => {
+    async ({ tx }) => {
       const user = await createUser(tx);
 
       // Create a client group
@@ -353,7 +353,7 @@ await test(`${pull.name} suite`, async (t) => {
       });
 
       const cookie = `cookie` in result ? result.cookie : null;
-      assert.ok(cookie != null);
+      invariant(cookie != null);
 
       const cvr = await tx.query.replicacheCvr.findFirst({
         where: (t, { eq }) => eq(t.id, cookie.cvrId),
@@ -370,9 +370,9 @@ await test(`${pull.name} suite`, async (t) => {
     },
   );
 
-  await txTest(
+  txTest(
     `returns lastMutationIdChanges only for changed clients`,
-    async (tx) => {
+    async ({ tx }) => {
       const clientGroupId = nanoid();
       const clientId1 = nanoid();
       const clientId2 = nanoid();
@@ -405,8 +405,10 @@ await test(`${pull.name} suite`, async (t) => {
         schemaVersion: schema.version,
         cookie: null,
       });
-      assert.ok(`cookie` in pull1);
-      assert.deepEqual(pull1.lastMutationIdChanges, {
+      invariant(`cookie` in pull1);
+      expect(pull1).toHaveProperty(`cookie`);
+      expect(`lastMutationIdChanges` in pull1).toBe(true);
+      expect(pull1.lastMutationIdChanges).toEqual({
         [clientId1]: 1,
       });
 
@@ -436,8 +438,10 @@ await test(`${pull.name} suite`, async (t) => {
         schemaVersion: schema.version,
         cookie: null,
       });
-      assert.ok(`cookie` in pull2);
-      assert.deepEqual(pull2.lastMutationIdChanges, {
+      invariant(`cookie` in pull2);
+      expect(pull2).toHaveProperty(`cookie`);
+      expect(`lastMutationIdChanges` in pull2).toBe(true);
+      expect(pull2.lastMutationIdChanges).toEqual({
         [clientId1]: 1,
         [clientId2]: 1,
       });
@@ -448,10 +452,12 @@ await test(`${pull.name} suite`, async (t) => {
         clientGroupId,
         pullVersion: 1,
         schemaVersion: schema.version,
-        cookie: pull1.cookie,
+        cookie: `cookie` in pull1 ? pull1.cookie : null,
       });
-      assert.ok(`cookie` in pull3);
-      assert.deepEqual(pull3.lastMutationIdChanges, {
+      invariant(`cookie` in pull3);
+      expect(pull3).toHaveProperty(`cookie`);
+      expect(`lastMutationIdChanges` in pull3).toBe(true);
+      expect(pull3.lastMutationIdChanges).toEqual({
         [clientId2]: 1,
       });
 
@@ -461,14 +467,16 @@ await test(`${pull.name} suite`, async (t) => {
         clientGroupId,
         pullVersion: 1,
         schemaVersion: schema.version,
-        cookie: pull3.cookie,
+        cookie: `cookie` in pull3 ? pull3.cookie : null,
       });
-      assert.ok(`cookie` in pull4);
-      assert.deepEqual(pull4.lastMutationIdChanges, {});
+      invariant(`cookie` in pull4);
+      expect(pull4).toHaveProperty(`cookie`);
+      expect(`lastMutationIdChanges` in pull4).toBe(true);
+      expect(pull4.lastMutationIdChanges).toEqual({});
     },
   );
 
-  await txTest(`null cookie, returns skillState patches`, async (tx) => {
+  txTest(`null cookie, returns skillState patches`, async ({ tx }) => {
     const clientGroupId = nanoid();
 
     const user = await createUser(tx);
@@ -511,7 +519,7 @@ await test(`${pull.name} suite`, async (t) => {
     });
   });
 
-  await txTest(`handles skill renames for skillState`, async (tx) => {
+  txTest(`handles skill renames for skillState`, async ({ tx }) => {
     // This test ensures that changes to the skill (which is used as the key in
     // replicache) is correctly turned into delete+add. The skill might change
     // if the HanziWord meaning key is renamed (e.g. 我:i to 我:me).
@@ -551,7 +559,8 @@ await test(`${pull.name} suite`, async (t) => {
     );
     invariant(updatedSkillState != null);
 
-    assert.ok(`cookie` in pull1);
+    expect(pull1).toHaveProperty(`cookie`);
+    invariant(`cookie` in pull1);
 
     const pull2 = await pull(tx, user.id, {
       profileId: ``,
@@ -583,7 +592,7 @@ await test(`${pull.name} suite`, async (t) => {
     });
   });
 
-  await txTest(`handles deletes for skillState`, async (tx) => {
+  txTest(`handles deletes for skillState`, async ({ tx }) => {
     const clientGroupId = nanoid();
 
     const user = await createUser(tx);
@@ -610,7 +619,8 @@ await test(`${pull.name} suite`, async (t) => {
 
     await tx.delete(s.skillState).where(eq(s.skillState.id, skillState.id));
 
-    assert.ok(`cookie` in pull1);
+    expect(pull1).toHaveProperty(`cookie`);
+    invariant(`cookie` in pull1);
 
     const pull2 = await pull(tx, user.id, {
       profileId: ``,
@@ -633,7 +643,7 @@ await test(`${pull.name} suite`, async (t) => {
     });
   });
 
-  await txTest(`handles deletes for skillRating`, async (tx) => {
+  txTest(`handles deletes for skillRating`, async ({ tx }) => {
     const clientGroupId = nanoid();
 
     const user = await createUser(tx);
@@ -663,7 +673,8 @@ await test(`${pull.name} suite`, async (t) => {
 
     await tx.delete(s.skillRating).where(eq(s.skillRating.id, skillRating.id));
 
-    assert.ok(`cookie` in pull1);
+    expect(pull1).toHaveProperty(`cookie`);
+    invariant(`cookie` in pull1);
 
     const pull2 = await pull(tx, user.id, {
       profileId: ``,
@@ -686,7 +697,7 @@ await test(`${pull.name} suite`, async (t) => {
     });
   });
 
-  await txTest(`handles skill renames for skillRating`, async (tx) => {
+  txTest(`handles skill renames for skillRating`, async ({ tx }) => {
     const clientGroupId = nanoid();
 
     const user = await createUser(tx);
@@ -723,7 +734,8 @@ await test(`${pull.name} suite`, async (t) => {
         .where(eq(s.skillRating.id, skillRating.id)),
     );
 
-    assert.ok(`cookie` in pull1);
+    expect(pull1).toHaveProperty(`cookie`);
+    invariant(`cookie` in pull1);
 
     const pull2 = await pull(tx, user.id, {
       profileId: ``,
@@ -746,7 +758,7 @@ await test(`${pull.name} suite`, async (t) => {
     });
   });
 
-  await txTest(`handles puts for skillRating`, async (tx) => {
+  txTest(`handles puts for skillRating`, async ({ tx }) => {
     const clientGroupId = nanoid();
 
     const user = await createUser(tx);
@@ -796,12 +808,12 @@ await test(`${pull.name} suite`, async (t) => {
   });
 });
 
-await test(`${computeEntitiesState.name} suite`, async (t) => {
-  await t.test(`schema ${schema.version}`, async (t) => {
-    const txTest = withTxTest(t);
+describe(`${computeEntitiesState.name} suite`, () => {
+  describe(`schema ${schema.version}`, () => {
+    txTest.scoped({ pgConfig: { isolationLevel: `repeatable read` } });
 
-    await txTest(`works for non-existant user and client group`, async (tx) => {
-      assert.deepEqual(await computeEntitiesState(tx, `1`), {
+    txTest(`works for non-existant user and client group`, async ({ tx }) => {
+      await expect(computeEntitiesState(tx, `1`)).resolves.toEqual({
         hanziGlossMistake: [],
         hanziPinyinMistake: [],
         pinyinFinalAssociation: [],
@@ -813,10 +825,10 @@ await test(`${computeEntitiesState.name} suite`, async (t) => {
       });
     });
 
-    await txTest(`works for user`, async (tx) => {
+    txTest(`works for user`, async ({ tx }) => {
       const user = await createUser(tx);
 
-      assert.deepEqual(await computeEntitiesState(tx, user.id), {
+      await expect(computeEntitiesState(tx, user.id)).resolves.toEqual({
         hanziGlossMistake: [],
         hanziPinyinMistake: [],
         pinyinFinalAssociation: [],
@@ -828,7 +840,7 @@ await test(`${computeEntitiesState.name} suite`, async (t) => {
       });
     });
 
-    await txTest(`only includes skillState for the user`, async (tx) => {
+    txTest(`only includes skillState for the user`, async ({ tx }) => {
       const user1 = await createUser(tx);
       const user2 = await createUser(tx);
 
@@ -853,7 +865,7 @@ await test(`${computeEntitiesState.name} suite`, async (t) => {
         });
       invariant(user1SkillState != null);
 
-      assert.deepEqual(await computeEntitiesState(tx, user1.id), {
+      await expect(computeEntitiesState(tx, user1.id)).resolves.toEqual({
         hanziGlossMistake: [],
         hanziPinyinMistake: [],
         pinyinFinalAssociation: [],
@@ -865,7 +877,7 @@ await test(`${computeEntitiesState.name} suite`, async (t) => {
       });
     });
 
-    await txTest(`only includes skillRating for the user`, async (tx) => {
+    txTest(`only includes skillRating for the user`, async ({ tx }) => {
       const user1 = await createUser(tx);
       const user2 = await createUser(tx);
 
@@ -889,7 +901,7 @@ await test(`${computeEntitiesState.name} suite`, async (t) => {
         });
       invariant(user1SkillRating != null);
 
-      assert.deepEqual(await computeEntitiesState(tx, user1.id), {
+      await expect(computeEntitiesState(tx, user1.id)).resolves.toEqual({
         hanziGlossMistake: [],
         hanziPinyinMistake: [],
         pinyinFinalAssociation: [],
@@ -901,9 +913,9 @@ await test(`${computeEntitiesState.name} suite`, async (t) => {
       });
     });
 
-    await txTest(
+    txTest(
       `only includes pinyinFinalAssociation for the user`,
-      async (tx) => {
+      async ({ tx }) => {
         const user1 = await createUser(tx);
         const user2 = await createUser(tx);
 
@@ -928,7 +940,7 @@ await test(`${computeEntitiesState.name} suite`, async (t) => {
           });
         invariant(user1PinyinFinalAssociation != null);
 
-        assert.deepEqual(await computeEntitiesState(tx, user1.id), {
+        await expect(computeEntitiesState(tx, user1.id)).resolves.toEqual({
           hanziGlossMistake: [],
           hanziPinyinMistake: [],
           pinyinFinalAssociation: [user1PinyinFinalAssociation],
@@ -941,9 +953,9 @@ await test(`${computeEntitiesState.name} suite`, async (t) => {
       },
     );
 
-    await txTest(
+    txTest(
       `only includes pinyinInitialAssociation for the user`,
-      async (tx) => {
+      async ({ tx }) => {
         const user1 = await createUser(tx);
         const user2 = await createUser(tx);
 
@@ -968,7 +980,7 @@ await test(`${computeEntitiesState.name} suite`, async (t) => {
           });
         invariant(user1PinyinInitialAssociation != null);
 
-        assert.deepEqual(await computeEntitiesState(tx, user1.id), {
+        await expect(computeEntitiesState(tx, user1.id)).resolves.toEqual({
           hanziGlossMistake: [],
           hanziPinyinMistake: [],
           pinyinFinalAssociation: [],
@@ -983,10 +995,10 @@ await test(`${computeEntitiesState.name} suite`, async (t) => {
   });
 });
 
-await test(`${computePatch.name} suite`, async (t) => {
+describe(`${computePatch.name} suite`, () => {
   type EntitiesState = Parameters<typeof computePatch>[1];
 
-  await t.test(`unchanged entities are preserved`, async () => {
+  test(`unchanged entities are preserved`, async () => {
     const prevCvr: CvrEntities = {
       hanziGlossMistake: { x1: `1` },
       hanziPinyinMistake: { x2: `2` },

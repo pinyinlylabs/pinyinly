@@ -8,7 +8,7 @@ import type {
   VersionNotSupportedResponse,
 } from "@/util/rizzle";
 import { pushRequestSchema, replicacheMutationSchema } from "@/util/rizzle";
-import { invariant } from "@haohaohow/lib/invariant";
+import { invariant } from "@pinyinly/lib/invariant";
 import { startSpan } from "@sentry/core";
 import { and, eq, gt } from "drizzle-orm";
 import chunk from "lodash/chunk";

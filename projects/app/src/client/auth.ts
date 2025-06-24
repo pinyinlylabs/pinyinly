@@ -1,7 +1,7 @@
 import { trpc } from "@/client/trpc";
 import type { RizzleEntityOutput } from "@/util/rizzle";
 import { r } from "@/util/rizzle";
-import { invariant } from "@haohaohow/lib/invariant";
+import { invariant } from "@pinyinly/lib/invariant";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { DeepReadonly } from "ts-essentials";

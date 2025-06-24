@@ -18,7 +18,7 @@ export default function AcknowledgementsPage() {
 
       <View>
         <Text className="hhh-body">
-          These open-source libraries are used to create haohaohow:
+          These open-source libraries are used to create Pinyinly:
         </Text>
       </View>
 

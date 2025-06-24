@@ -9,7 +9,11 @@
     "moduleResolution": "Bundler",
     "outDir": "../../../.moon/cache/types/projects/app-test",
     "target": "ESNext",
-    "types": ["node"]
+    "types": [
+      "node",
+      // Enable expect().toHaveTextContent() and similar matchers.
+      "@testing-library/jest-dom"
+    ]
   },
   "include": ["**/*"],
   "references": [

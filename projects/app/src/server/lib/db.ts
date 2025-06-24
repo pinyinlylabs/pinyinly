@@ -1,4 +1,4 @@
-import { invariant } from "@haohaohow/lib/invariant";
+import { invariant } from "@pinyinly/lib/invariant";
 import type { GetColumnData, SQL, SQLWrapper } from "drizzle-orm";
 import { sql } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";

@@ -1,7 +1,7 @@
-import { invariant } from "@haohaohow/lib/invariant";
+import { invariant } from "@pinyinly/lib/invariant";
 import makeDebug from "debug";
-import assert from "node:assert/strict";
 import path from "node:path";
+import { expect } from "vitest";
 import yargs from "yargs";
 import z from "zod/v4";
 import type { IdsNode } from "../src/data/hanzi.js";
@@ -89,7 +89,7 @@ function parseIdsTxt(txt: string): ReadonlyMap<string, Decomposition[]> {
     invariant(character != null);
     invariant(decompositions.length > 0);
 
-    assert.match(unicodeShortIdentifier, /^U\+/);
+    expect(unicodeShortIdentifier).toMatch(/^U\+/);
 
     // Convert the U+ identifier to a Unicode character
     const codePoint = Number.parseInt(
@@ -98,7 +98,7 @@ function parseIdsTxt(txt: string): ReadonlyMap<string, Decomposition[]> {
     );
     const characterFromCodePoint = String.fromCodePoint(codePoint);
 
-    assert.equal(character, characterFromCodePoint);
+    expect(character).toEqual(characterFromCodePoint);
 
     const parsedDecompositions = [];
 
@@ -111,7 +111,7 @@ function parseIdsTxt(txt: string): ReadonlyMap<string, Decomposition[]> {
       const { ids, tags } = result.groups;
       invariant(ids != null);
       if (tags != null) {
-        assert.match(tags, /[AGHJKMOSTUVX]+/);
+        expect(tags).toMatch(/[AGHJKMOSTUVX]+/);
       }
       const parsed = parseIds(ids);
       parsedDecompositions.push({

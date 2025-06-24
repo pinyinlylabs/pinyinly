@@ -8,8 +8,8 @@ import {
 import type { AppRouter } from "@/server/routers/_app";
 import { preflightCheckEnvVars } from "@/util/env";
 import { httpSessionHeader } from "@/util/http";
-import { invariant } from "@haohaohow/lib/invariant";
 import { sentryMiddleware } from "@inngest/middleware-sentry";
+import { invariant } from "@pinyinly/lib/invariant";
 import { createTRPCClient, httpLink } from "@trpc/client";
 import { subDays } from "date-fns/subDays";
 import { inArray, lt, notInArray, sql } from "drizzle-orm";
@@ -87,8 +87,8 @@ const helloWorldEmail = inngest.createFunction(
 
     const response = await step.run(`sendEmail`, () =>
       client.sendEmail({
-        From: `hello@haohao.how`,
-        To: `brad@haohao.how`,
+        From: `hello@pinyinly.com`,
+        To: `brad@pinyinly.com`,
         Subject: `Hello World`,
         TextBody: `Hello World`,
         HtmlBody: `<strong>Hello</strong> World`,

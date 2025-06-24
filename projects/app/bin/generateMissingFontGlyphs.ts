@@ -5,7 +5,7 @@ import {
 } from "#dictionary/dictionary.ts";
 import { jsonStringifyIndentOneLevel } from "#util/json.ts";
 import { unicodeShortIdentifier } from "#util/unicode.ts";
-import { invariant } from "@haohaohow/lib/invariant";
+import { invariant } from "@pinyinly/lib/invariant";
 import * as fontkit from "fontkit";
 import { glob, writeFile } from "node:fs/promises";
 import path from "node:path";

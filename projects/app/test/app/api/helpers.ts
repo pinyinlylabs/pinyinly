@@ -1,32 +1,38 @@
-import assert from "node:assert/strict";
+import makeDebug from "debug";
 import { spawn as _spawn } from "node:child_process";
-import type { TestContext } from "node:test";
+import path from "node:path";
 import { setTimeout } from "node:timers/promises";
+import { expect } from "vitest";
+
+const debug = makeDebug(`hhh:${path.basename(import.meta.filename)}`);
 
 export type TestExpoServer = Awaited<ReturnType<typeof testExpoServer>>;
 
-export function testExpoServer(t: TestContext) {
-  t.diagnostic(`Starting Expo server...`);
+export function testExpoServer() {
+  debug(`Starting Expo server...`);
 
   // Use a different port each time to avoid conflicts. Sometimes the port isn't
   // released properly when running multiple tests in sequence.
   const PORT = 42_000 + Math.round(Math.random() * 10_000);
   const SERVER_URL = `http://localhost:${PORT}`; // Default Expo server URL
 
+  const controller = new AbortController();
+  const signal = controller.signal;
+
   const server = _spawn(
     `npx`,
     [`expo`, `start`, `--offline`, `--port`, `${PORT}`],
     {
       stdio: `pipe`, // Pipe output to console
-      signal: t.signal,
+      signal,
     },
   );
 
   server.stdout.on(`data`, (chunk: Buffer) => {
-    t.diagnostic(`server stdout: ${chunk.toString().trimEnd()}`);
+    debug(`server stdout: ${chunk.toString().trimEnd()}`);
   });
   server.stderr.on(`data`, (chunk: string) => {
-    t.diagnostic(`server stderr: ${chunk.toString().trimEnd()}`);
+    debug(`server stderr: ${chunk.toString().trimEnd()}`);
   });
   server.addListener(`error`, (err) => {
     if (err instanceof Error && err.name === `AbortError`) {
@@ -43,8 +49,8 @@ export function testExpoServer(t: TestContext) {
         {
           signal:
             init?.signal == null
-              ? t.signal
-              : AbortSignal.any([t.signal, init.signal]),
+              ? signal
+              : AbortSignal.any([signal, init.signal]),
         },
       ),
     );
@@ -55,25 +61,25 @@ export function testExpoServer(t: TestContext) {
       let response;
       do {
         try {
-          t.diagnostic(`Checking /api/healthcheck`);
+          console.error(`Checking /api/healthcheck`);
           response = await _fetch(`/api/healthcheck`, {
             signal: AbortSignal.timeout(1000),
           });
 
           if (response.ok) {
             const data = (await response.json()) as unknown;
-            assert.deepEqual(data, { healthcheck: `ok` });
+            expect(data).toEqual({ healthcheck: `ok` });
             break;
           }
         } catch (error) {
-          t.diagnostic(`Error: ${error}`);
+          console.error(`Error: ${error}`);
         }
 
         // Check every 500ms
-        await setTimeout(500, { signal: t.signal });
-      } while (!t.signal.aborted);
+        await setTimeout(500, { signal });
+      } while (!signal.aborted);
 
-      assert.equal(response?.ok, true);
+      expect(response?.ok).toBe(true);
     },
 
     [Symbol.asyncDispose]: async () => {
@@ -83,7 +89,7 @@ export function testExpoServer(t: TestContext) {
       server.stderr.destroy();
 
       if (!server.killed) {
-        t.diagnostic(`Shutting down server...`);
+        console.error(`Shutting down server...`);
         // SIGTERM doesn't seem to shutdown cleanly and the test ends up
         // hanging. But SIGKILL does kill it properly.
         if (!server.kill(`SIGKILL`)) {

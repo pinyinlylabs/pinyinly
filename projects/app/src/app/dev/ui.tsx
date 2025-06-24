@@ -417,7 +417,7 @@ const RectButtonExamples = (props: Partial<PropsOf<typeof RectButton>>) => (
     </View>
 
     <LittlePrimaryHeader
-      // eslint-disable-next-line @haohaohow/no-restricted-css-classes
+      // eslint-disable-next-line @pinyinly/no-restricted-css-classes
       title="flex-col"
     />
 
@@ -448,7 +448,7 @@ const RectButtonExamples = (props: Partial<PropsOf<typeof RectButton>>) => (
     </View>
 
     <LittlePrimaryHeader
-      // eslint-disable-next-line @haohaohow/no-restricted-css-classes
+      // eslint-disable-next-line @pinyinly/no-restricted-css-classes
       title="flex-col + flex-1"
     />
 
@@ -598,7 +598,7 @@ const TextAnswerButtonExamples = (
     </View>
 
     <LittlePrimaryHeader
-      // eslint-disable-next-line @haohaohow/no-restricted-css-classes
+      // eslint-disable-next-line @pinyinly/no-restricted-css-classes
       title="flex-col"
     />
 
@@ -637,7 +637,7 @@ const TextAnswerButtonExamples = (
     </View>
 
     <LittlePrimaryHeader
-      // eslint-disable-next-line @haohaohow/no-restricted-css-classes
+      // eslint-disable-next-line @pinyinly/no-restricted-css-classes
       title="flex-col + flex-1"
     />
 

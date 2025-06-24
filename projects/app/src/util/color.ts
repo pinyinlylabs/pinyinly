@@ -1,4 +1,4 @@
-import { invariant } from "@haohaohow/lib/invariant";
+import { invariant } from "@pinyinly/lib/invariant";
 
 export interface ColorRGBA {
   /** Red channel (0-255) */

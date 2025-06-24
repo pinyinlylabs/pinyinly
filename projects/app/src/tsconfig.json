@@ -11,7 +11,7 @@
     "outDir": "../../../.moon/cache/types/projects/app-src",
     "paths": {
       "@/*": ["*"],
-      "@haohaohow/lib/*": ["../../lib/src/*"]
+      "@pinyinly/lib/*": ["../../lib/src/*"]
     },
     "resolveJsonModule": true,
     "target": "ESNext"

@@ -1,6 +1,6 @@
 import type { HanziChar, HanziText } from "@/data/model";
 import { UnexpectedValueError } from "@/util/types";
-import { invariant } from "@haohaohow/lib/invariant";
+import { invariant } from "@pinyinly/lib/invariant";
 import type { StrictExtract } from "ts-essentials";
 import { z } from "zod/v4";
 

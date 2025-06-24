@@ -1,4 +1,4 @@
-import { invariant } from "@haohaohow/lib/invariant";
+import { invariant } from "@pinyinly/lib/invariant";
 
 export function unicodeShortIdentifier(character: string): string {
   const codePoint = character.codePointAt(0);

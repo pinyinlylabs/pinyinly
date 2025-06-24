@@ -20,7 +20,7 @@ import {
   Rating,
 } from "@/util/fsrs";
 import { makePRNG } from "@/util/random";
-import { invariant } from "@haohaohow/lib/invariant";
+import { invariant } from "@pinyinly/lib/invariant";
 import type { Duration } from "date-fns";
 import { sub } from "date-fns/sub";
 import { subDays } from "date-fns/subDays";

@@ -1,6 +1,6 @@
 import { mapSetAdd, sortComparatorString } from "#util/collections.ts";
 import { jsonStringifyIndentOneLevel } from "#util/json.ts";
-import { invariant, nonNullable } from "@haohaohow/lib/invariant";
+import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import makeDebug from "debug";
 import { readFile, unlink } from "node:fs/promises";
 import path from "node:path";
