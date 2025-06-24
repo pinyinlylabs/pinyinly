@@ -8,7 +8,6 @@ export default defineConfig({
     watch: false,
     environment: `node`,
     setupFiles: [`./test/setup.ts`],
-    include: [`./test/**/*.test.ts`, `./test/**/*.test.tsx`],
     fakeTimers: {
       now: 0,
     },
