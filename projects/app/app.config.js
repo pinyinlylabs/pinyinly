@@ -7,8 +7,8 @@ const devDomain =
 
 /** @type {import('expo/config.d.ts').ExpoConfig} */
 export const expo = {
-  name: `haohǎohow`,
-  slug: `hao`,
+  name: `Pinyinly`,
+  slug: `pinyinly`,
   version: `1.9.0`,
   scheme: `hao`,
   runtimeVersion: {
@@ -117,7 +117,7 @@ export const expo = {
       projectId: `67cd571e-6234-4837-8e61-d9b4d19f0acf`,
     },
   },
-  owner: `haohaohow`,
+  owner: `pinyinly`,
   updates: {
     url: `https://u.expo.dev/67cd571e-6234-4837-8e61-d9b4d19f0acf`,
     assetPatternsToBeBundled: [`./src/**/*.asset.json`],
