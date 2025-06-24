@@ -87,8 +87,8 @@ const helloWorldEmail = inngest.createFunction(
 
     const response = await step.run(`sendEmail`, () =>
       client.sendEmail({
-        From: `hello@haohao.how`,
-        To: `brad@haohao.how`,
+        From: `hello@pinyinly.com`,
+        To: `brad@pinyinly.com`,
         Subject: `Hello World`,
         TextBody: `Hello World`,
         HtmlBody: `<strong>Hello</strong> World`,
