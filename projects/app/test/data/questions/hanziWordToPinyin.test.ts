@@ -12,7 +12,7 @@ import { 拼音 } from "../helpers";
 describe(`${hanziWordToPinyinQuestionOrThrow.name} suite`, async () => {
   test(`simple case`, async () => {
     const skill = hanziWordToPinyin(`你好:hello`);
-    expect(await hanziWordToPinyinQuestionOrThrow(skill)).toEqual({
+    await expect(hanziWordToPinyinQuestionOrThrow(skill)).resolves.toEqual({
       kind: QuestionKind.HanziWordToPinyin,
       answers: [[`nǐ`, `hǎo`]],
       skill,

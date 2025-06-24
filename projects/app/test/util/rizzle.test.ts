@@ -51,7 +51,10 @@ test(`string() key and value`, async () => {
   getSpy.mockImplementationOnce(() =>
     Promise.resolve({ id: `1`, name: `foo` }),
   );
-  expect(await posts.get(tx, { id: `1` })).toEqual({ id: `1`, name: `foo` });
+  await expect(posts.get(tx, { id: `1` })).resolves.toEqual({
+    id: `1`,
+    name: `foo`,
+  });
 
   // Check that a value is encoded correctly.
   await posts.set(tx, { id: `1` }, { id: `1`, name: `foo` });
@@ -90,13 +93,19 @@ test(`string() .nullable()`, async () => {
     id: `1`,
     n: `foo`,
   }));
-  expect(await posts.get(tx, { id: `1` })).toEqual({ id: `1`, name: `foo` });
+  await expect(posts.get(tx, { id: `1` })).resolves.toEqual({
+    id: `1`,
+    name: `foo`,
+  });
 
   vi.spyOn(tx, `get`).mockImplementationOnce(async () => ({
     id: `1`,
     n: null,
   }));
-  expect(await posts.get(tx, { id: `1` })).toEqual({ id: `1`, name: null });
+  await expect(posts.get(tx, { id: `1` })).resolves.toEqual({
+    id: `1`,
+    name: null,
+  });
 
   typeChecks(async () => {
     // .get()

@@ -12,9 +12,9 @@ describe(`${skillsToReReviewForHanziGlossMistake.name} suite`, () => {
       gloss: `xxxxxx`,
     };
 
-    expect(await skillsToReReviewForHanziGlossMistake(mistake)).toEqual(
-      new Set([`he:任:any`, `he:任:appoint`, `he:任:duty`]),
-    );
+    await expect(
+      skillsToReReviewForHanziGlossMistake(mistake),
+    ).resolves.toEqual(new Set([`he:任:any`, `he:任:appoint`, `he:任:duty`]));
   });
 
   test(`reviews all meanings with the same meaning`, async () => {
@@ -24,9 +24,9 @@ describe(`${skillsToReReviewForHanziGlossMistake.name} suite`, () => {
       gloss: `wrong`,
     };
 
-    expect(await skillsToReReviewForHanziGlossMistake(mistake)).toEqual(
-      new Set([`he:不对:incorrect`, `he:错:wrong`]),
-    );
+    await expect(
+      skillsToReReviewForHanziGlossMistake(mistake),
+    ).resolves.toEqual(new Set([`he:不对:incorrect`, `he:错:wrong`]));
   });
 
   test(`reviews combination from hanzi and gloss`, async () => {
@@ -36,7 +36,9 @@ describe(`${skillsToReReviewForHanziGlossMistake.name} suite`, () => {
       gloss: `wrong`,
     };
 
-    expect(await skillsToReReviewForHanziGlossMistake(mistake)).toEqual(
+    await expect(
+      skillsToReReviewForHanziGlossMistake(mistake),
+    ).resolves.toEqual(
       new Set([
         `he:不对:incorrect`,
         `he:任:any`,

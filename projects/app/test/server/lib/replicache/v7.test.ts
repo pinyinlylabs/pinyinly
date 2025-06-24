@@ -663,7 +663,7 @@ describe(`${computeCvrEntities.name} suite`, () => {
     txTest.scoped({ pgConfig: { isolationLevel: `repeatable read` } });
 
     txTest(`works for non-existant user and client group`, async ({ tx }) => {
-      expect(await computeCvrEntities(tx, `1`)).toEqual({
+      await expect(computeCvrEntities(tx, `1`)).resolves.toEqual({
         hanziGlossMistake: {},
         hanziPinyinMistake: {},
         pinyinFinalAssociation: {},
@@ -677,7 +677,7 @@ describe(`${computeCvrEntities.name} suite`, () => {
     txTest(`works for user`, async ({ tx }) => {
       const user = await createUser(tx);
 
-      expect(await computeCvrEntities(tx, user.id)).toEqual({
+      await expect(computeCvrEntities(tx, user.id)).resolves.toEqual({
         hanziGlossMistake: {},
         hanziPinyinMistake: {},
         pinyinFinalAssociation: {},
@@ -713,7 +713,7 @@ describe(`${computeCvrEntities.name} suite`, () => {
         });
       invariant(user1SkillState != null);
 
-      expect(await computeCvrEntities(tx, user1.id)).toEqual({
+      await expect(computeCvrEntities(tx, user1.id)).resolves.toEqual({
         hanziGlossMistake: {},
         hanziPinyinMistake: {},
         pinyinFinalAssociation: {},
@@ -755,7 +755,7 @@ describe(`${computeCvrEntities.name} suite`, () => {
         });
       invariant(user1SkillRating != null);
 
-      expect(await computeCvrEntities(tx, user1.id)).toEqual({
+      await expect(computeCvrEntities(tx, user1.id)).resolves.toEqual({
         hanziGlossMistake: {},
         hanziPinyinMistake: {},
         pinyinFinalAssociation: {},
@@ -798,7 +798,7 @@ describe(`${computeCvrEntities.name} suite`, () => {
           });
         invariant(user1PinyinFinalAssociation != null);
 
-        expect(await computeCvrEntities(tx, user1.id)).toEqual({
+        await expect(computeCvrEntities(tx, user1.id)).resolves.toEqual({
           hanziGlossMistake: {},
           hanziPinyinMistake: {},
           pinyinFinalAssociation: {
@@ -844,7 +844,7 @@ describe(`${computeCvrEntities.name} suite`, () => {
           });
         invariant(user1PinyinInitialAssociation != null);
 
-        expect(await computeCvrEntities(tx, user1.id)).toEqual({
+        await expect(computeCvrEntities(tx, user1.id)).resolves.toEqual({
           hanziGlossMistake: {},
           hanziPinyinMistake: {},
           pinyinFinalAssociation: {},
