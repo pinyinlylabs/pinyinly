@@ -135,10 +135,13 @@ test(`string() .optional()`, async () => {
     id: `1`,
     n: `foo`,
   }));
-  assert.deepEqual(await posts.get(tx, { id: `1` }), { id: `1`, name: `foo` });
+  await expect(posts.get(tx, { id: `1` })).resolves.toEqual({
+    id: `1`,
+    name: `foo`,
+  });
 
   vi.spyOn(tx, `get`).mockImplementationOnce(async () => ({ id: `1` }));
-  assert.deepEqual(await posts.get(tx, { id: `1` }), { id: `1` });
+  await expect(posts.get(tx, { id: `1` })).resolves.toEqual({ id: `1` });
 
   typeChecks(async () => {
     // .get()
@@ -175,7 +178,7 @@ test(`object() .nullable()`, async () => {
     id: `1`,
     n: { first: `a`, last: `b` },
   }));
-  assert.deepEqual(await posts.get(tx, { id: `1` }), {
+  await expect(posts.get(tx, { id: `1` })).resolves.toEqual({
     id: `1`,
     name: { first: `a`, last: `b` },
   });
@@ -184,7 +187,10 @@ test(`object() .nullable()`, async () => {
     id: `1`,
     n: null,
   }));
-  assert.deepEqual(await posts.get(tx, { id: `1` }), { id: `1`, name: null });
+  await expect(posts.get(tx, { id: `1` })).resolves.toEqual({
+    id: `1`,
+    name: null,
+  });
 
   typeChecks(async () => {
     // .get()
@@ -225,7 +231,7 @@ test(`object()`, async () => {
 
     // Check that a ReadonlyJSONValue is parsed correctly.
     getSpy.mockImplementationOnce(() => Promise.resolve({ id: `1`, n: `foo` }));
-    assert.deepEqual(await posts.get(tx, { id: `1` }), {
+    await expect(posts.get(tx, { id: `1` })).resolves.toEqual({
       id: `1`,
       name: `foo`,
     });
@@ -332,14 +338,10 @@ test(`timestamp()`, async () => {
         }),
       );
 
-      assert.deepEqual(
-        await posts.get(tx, { id: `1` }),
-        {
-          id: `1`,
-          due: unmarshaled,
-        },
-        JSON.stringify([marshaled, unmarshaled]),
-      );
+      await expect(posts.get(tx, { id: `1` })).resolves.toEqual({
+        id: `1`,
+        due: unmarshaled,
+      });
     }
   }
 
@@ -377,7 +379,7 @@ test(`entity() one variable`, async () => {
   getSpy.mockImplementationOnce(
     async () => marshaledData as DeepReadonly<ReadonlyJSONValue>,
   );
-  assert.deepEqual(await posts.get(tx, { id1: `1` }), {
+  await expect(posts.get(tx, { id1: `1` })).resolves.toEqual({
     id1: `1`,
     text: `hello`,
   });
@@ -415,7 +417,7 @@ test(`entity() two variables`, async () => {
   getSpy.mockImplementationOnce(
     async () => marshaledData as DeepReadonly<ReadonlyJSONValue>,
   );
-  assert.deepEqual(await posts.get(tx, { id1: `1`, id2: `2` }), {
+  await expect(posts.get(tx, { id1: `1`, id2: `2` })).resolves.toEqual({
     id1: `1`,
     id2: `2`,
     text: `hello`,
@@ -458,7 +460,7 @@ test(`entity() non-string key codec`, async () => {
     getSpy.mockImplementationOnce(
       async () => marshaledData as DeepReadonly<ReadonlyJSONValue>,
     );
-    assert.deepEqual(await posts.get(tx, { complex: unmarshaled }), {
+    await expect(posts.get(tx, { complex: unmarshaled })).resolves.toEqual({
       complex: unmarshaled,
       text: `hello`,
     });
@@ -517,8 +519,8 @@ test(`entity() .has()`, async () => {
   vi.spyOn(tx, `has`).mockImplementation(async (key) =>
     key === `foo/1` ? true : false,
   );
-  assert.deepEqual(await posts.has(tx, { id: `1` }), true);
-  assert.deepEqual(await posts.has(tx, { id: `2` }), false);
+  await expect(posts.has(tx, { id: `1` })).resolves.toEqual(true);
+  await expect(posts.has(tx, { id: `2` })).resolves.toEqual(false);
 });
 
 test(`entity() distinguishing between input/output types`, async () => {
@@ -664,7 +666,10 @@ test(`number()`, async () => {
   assert.deepEqual(marshaledData, { id: `1`, c: 5 });
 
   vi.spyOn(tx, `get`).mockImplementationOnce(async () => marshaledData);
-  assert.deepEqual(await posts.get(tx, { id: `1` }), { id: `1`, count: 5 });
+  await expect(posts.get(tx, { id: `1` })).resolves.toEqual({
+    id: `1`,
+    count: 5,
+  });
 });
 
 test(`boolean()`, async () => {
@@ -682,7 +687,7 @@ test(`boolean()`, async () => {
   assert.deepEqual(marshaledData, { id: `1`, a: true });
 
   vi.spyOn(tx, `get`).mockImplementationOnce(async () => marshaledData);
-  assert.deepEqual(await posts.get(tx, { id: `1` }), {
+  await expect(posts.get(tx, { id: `1` })).resolves.toEqual({
     id: `1`,
     isActive: true,
   });
@@ -703,7 +708,7 @@ test(`json()`, async () => {
   assert.deepEqual(marshaledData, { id: `1`, a: { foo: `bar` } });
 
   vi.spyOn(tx, `get`).mockImplementationOnce(async () => marshaledData);
-  assert.deepEqual(await posts.get(tx, { id: `1` }), {
+  await expect(posts.get(tx, { id: `1` })).resolves.toEqual({
     id: `1`,
     data: { foo: `bar` },
   });
@@ -736,7 +741,7 @@ test(`enum()`, async () => {
     // these are too easily to change accidentally so instead there should be
     // a separate explicit marshaled value.
     assert.notEqual(Object.values(marshaledData as object), [color]);
-    assert.deepEqual(await posts.get(tx, { id: `1` }), {
+    await expect(posts.get(tx, { id: `1` })).resolves.toEqual({
       id: `1`,
       color,
     });
@@ -769,7 +774,7 @@ test(`object() with alias`, async () => {
   });
 
   vi.spyOn(tx, `get`).mockImplementationOnce(async () => marshaledData);
-  assert.deepEqual(await posts.get(tx, { id: `1` }), {
+  await expect(posts.get(tx, { id: `1` })).resolves.toEqual({
     id: `1`,
     author: { name: `foo`, email: `f@o`, id: `1` },
   });
@@ -793,7 +798,7 @@ test(`object()`, async () => {
   assert.deepEqual(marshaledData, { id, author: { name: `foo` } });
 
   vi.spyOn(tx, `get`).mockImplementationOnce(async () => marshaledData);
-  assert.deepEqual(await posts.get(tx, { id }), {
+  await expect(posts.get(tx, { id })).resolves.toEqual({
     id,
     author: { name: `foo` },
   });
@@ -1034,7 +1039,7 @@ test(`replicache()`, async () => {
       async createPost(db, options) {
         true satisfies IsEqual<typeof db.tx, WriteTransaction>;
         true satisfies IsEqual<typeof options, { id: string; title: string }>;
-        assert.deepEqual(await db.posts.get({ id: `2` }), undefined);
+        await expect(db.posts.get({ id: `2` })).resolves.toEqual(undefined);
         assert.deepEqual(options, { id: `1`, title: `hello world` });
         await db.posts.set({ id: options.id }, options);
         checkPoints.log(`createPost.end`);
@@ -1253,15 +1258,13 @@ test(`replicache() mutator tx`, async () => {
   });
 
   await db.mutate.incrementCounter({ id: `1` });
-  assert.deepEqual(
-    await db.replicache.query((tx) => db.query.counter.get(tx, { id: `1` })),
-    { id: `1`, count: 1 },
-  );
+  await expect(
+    db.replicache.query((tx) => db.query.counter.get(tx, { id: `1` })),
+  ).resolves.toEqual({ id: `1`, count: 1 });
   await db.mutate.incrementCounter({ id: `1` });
-  assert.deepEqual(
-    await db.replicache.query((tx) => db.query.counter.get(tx, { id: `1` })),
-    { id: `1`, count: 2 },
-  );
+  await expect(
+    db.replicache.query((tx) => db.query.counter.get(tx, { id: `1` })),
+  ).resolves.toEqual({ id: `1`, count: 2 });
 });
 
 describe(`replicache() entity()`, async () => {
@@ -1703,7 +1706,7 @@ test(`number()`, async () => {
   assert.deepEqual(marshaledData, { c: 5, id });
 
   vi.spyOn(tx, `get`).mockImplementationOnce(async () => marshaledData);
-  assert.deepEqual(await posts.get(tx, { id }), { id, count: 5 });
+  await expect(posts.get(tx, { id })).resolves.toEqual({ id, count: 5 });
 });
 
 test(`literal()`, async () => {
@@ -1757,7 +1760,7 @@ test(`literal()`, async () => {
   assert.deepEqual(marshaledData, { c: 5, id });
 
   vi.spyOn(tx, `get`).mockImplementationOnce(async () => marshaledData);
-  assert.deepEqual(await posts.get(tx, { id }), { id, count: 5 });
+  await expect(posts.get(tx, { id })).resolves.toEqual({ id, count: 5 });
 });
 
 typeChecks<RizzleIndexTypes<never>>(() => {
