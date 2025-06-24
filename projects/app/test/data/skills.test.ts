@@ -24,16 +24,17 @@ import { fsrsSrsState, mockSrsState, 时 } from "./helpers";
 
 describe(`${skillLearningGraph.name} suite`, () => {
   test(`no targets gives an empty graph`, async () => {
-    assert.deepEqual(await skillLearningGraph({ targetSkills: [] }), new Map());
+    await expect(skillLearningGraph({ targetSkills: [] })).resolves.toEqual(
+      new Map(),
+    );
   });
 
   test(`includes the target skill in the graph`, async () => {
     const skill = `he:我:i`;
 
-    assert.deepEqual(
-      await skillLearningGraph({ targetSkills: [skill] }),
-      new Map([[skill, { skill, dependencies: new Set() }]]),
-    );
+    await expect(
+      skillLearningGraph({ targetSkills: [skill] }),
+    ).resolves.toEqual(new Map([[skill, { skill, dependencies: new Set() }]]));
   });
 
   test(`includes decomposition dependencies when learning 好`, async () => {
@@ -41,8 +42,9 @@ describe(`${skillLearningGraph.name} suite`, () => {
     const skillWoman = `he:女:woman`;
     const skillChild = `he:子:child`;
 
-    assert.deepEqual(
-      await skillLearningGraph({ targetSkills: [skillGood] }),
+    await expect(
+      skillLearningGraph({ targetSkills: [skillGood] }),
+    ).resolves.toEqual(
       new Map([
         [
           skillGood,
@@ -70,10 +72,11 @@ describe(`${skillLearningGraph.name} suite`, () => {
   });
 
   test(`includes multiple levels of decomposition for a character`, async () => {
-    assert.deepEqual(
-      await skillLearningGraph({
+    await expect(
+      skillLearningGraph({
         targetSkills: [`he:外:outside`],
       }),
+    ).resolves.toEqual(
       new Map([
         [
           `he:外:outside`,

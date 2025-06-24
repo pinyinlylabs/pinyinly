@@ -4,7 +4,7 @@ import { hanziWordToGloss } from "#data/skills.ts";
 import { r } from "#util/rizzle.ts";
 import assert from "node:assert/strict";
 import type { DeepReadonly, ReadonlyJSONValue } from "replicache";
-import { test, vi } from "vitest";
+import { expect, test, vi } from "vitest";
 import { makeMockTx } from "../util/rizzleHelpers";
 
 test(`skill as key`, async () => {
@@ -24,7 +24,7 @@ test(`skill as key`, async () => {
     getSpy.mockImplementationOnce(
       async () => marshaledData as DeepReadonly<ReadonlyJSONValue>,
     );
-    assert.deepEqual(await posts.get(tx, { skill }), {
+    await expect(posts.get(tx, { skill })).resolves.toEqual({
       skill,
       text: `hello`,
     });
@@ -64,7 +64,7 @@ test(`${rSkillKind.name}()`, async () => {
     getSpy.mockImplementationOnce(
       async () => marshaledData as DeepReadonly<ReadonlyJSONValue>,
     );
-    assert.deepEqual(await posts.get(tx, { id: `1` }), {
+    await expect(posts.get(tx, { id: `1` })).resolves.toEqual({
       id: `1`,
       skill: skillKind,
     });
@@ -89,6 +89,6 @@ test(`${rSkill.name}()`, async () => {
     getSpy.mockImplementationOnce(
       async () => marshaledData as DeepReadonly<ReadonlyJSONValue>,
     );
-    assert.deepEqual(await posts.get(tx, { id }), { id, skill });
+    await expect(posts.get(tx, { id })).resolves.toEqual({ id, skill });
   }
 });
