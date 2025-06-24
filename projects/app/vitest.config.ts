@@ -12,6 +12,7 @@ export default defineConfig({
     fakeTimers: {
       now: 0,
     },
+    testTimeout: 10_000, // pglite can be slow
   },
   plugins: [tsconfigPaths(), react()],
 });
