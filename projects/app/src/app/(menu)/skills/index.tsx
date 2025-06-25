@@ -3,8 +3,13 @@ import { getAllTargetHanziWords } from "@/client/query";
 import { HanziWordRefText } from "@/client/ui/HanziWordRefText";
 import type { HanziWord, SrsStateType } from "@/data/model";
 import type { Skill } from "@/data/rizzleSchema";
-import type { RankedHanziWord } from "@/data/skills";
-import { getHanziWordRank, rankRules } from "@/data/skills";
+import type { RankedHanziWord, RankNumber } from "@/data/skills";
+import {
+  coerceRank,
+  getHanziWordRank,
+  rankName,
+  rankRules,
+} from "@/data/skills";
 import { meaningKeyFromHanziWord } from "@/dictionary/dictionary";
 import { sortComparatorNumber } from "@/util/collections";
 import { Text, View } from "react-native";
@@ -102,24 +107,12 @@ const rankLozengeTextClass = tv({
   },
 });
 
-export type RankNumber = 0 | 1 | 2 | 3 | 4;
-
 export function RankLozenge({ rank }: { rank: RankNumber }) {
   return (
     <View className="items-start">
-      <Text className={rankLozengeTextClass({ rank })}>Rank {rank}</Text>
+      <Text className={rankLozengeTextClass({ rank })}>{rankName(rank)}</Text>
     </View>
   );
-}
-
-function coerceRank(rank: number): RankNumber {
-  if (rank < 0) {
-    return 0;
-  }
-  if (rank > 4) {
-    return 4;
-  }
-  return rank as RankNumber;
 }
 
 export function SkillTile({

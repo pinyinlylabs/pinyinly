@@ -19,6 +19,7 @@ import { Use } from "@/client/ui/Use";
 import { WikiHanziWordModal } from "@/client/ui/WikiHanziWordModal";
 import { QuestionFlagKind } from "@/data/model";
 import { hanziWordToPinyinQuestionOrThrow } from "@/data/questions/hanziWordToPinyin";
+import type { RankNumber } from "@/data/skills";
 import {
   hanziWordToGloss,
   hanziWordToPinyin,
@@ -35,7 +36,6 @@ import { StrictMode, useCallback, useRef, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { tv } from "tailwind-variants";
-import type { RankNumber } from "../(menu)/skills";
 import { RankLozenge, SkillTile } from "../(menu)/skills";
 
 function DesignSystemPage() {
