@@ -916,3 +916,23 @@ export function isStable(srsState: SrsStateType | undefined | null): boolean {
 }
 
 const weekInMillis = 1000 * 60 * 60 * 24 * 7;
+
+export type RankNumber = 0 | 1 | 2 | 3 | 4;
+
+export function rankName(rank: RankNumber): string {
+  if (rank === 0) {
+    return `Locked`;
+  }
+
+  return `Rank ${rank}`;
+}
+
+export function coerceRank(rank: number): RankNumber {
+  if (rank < 0) {
+    return 0;
+  }
+  if (rank > 4) {
+    return 4;
+  }
+  return rank as RankNumber;
+}
