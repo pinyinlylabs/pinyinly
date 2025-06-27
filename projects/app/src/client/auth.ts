@@ -6,12 +6,11 @@ import {
   startAuthentication,
   startRegistration,
 } from "@simplewebauthn/browser";
-import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { DeepReadonly } from "ts-essentials";
 import { z } from "zod/v4";
-import { deviceStorageGet } from "./deviceStorage";
-import { useDeviceStorage } from "./hooks/useDeviceStorage";
+import { deviceStoreGet } from "./deviceStore";
+import { useDeviceStore } from "./hooks/useDeviceStore";
 
 /**
  * Represents a session on the client, either anonymous or authenticated.
@@ -73,7 +72,7 @@ type AuthApi = {
 
 export function useAuth(): AuthApi {
   // Step 1. Try to read the current version of the auth state from local storage.
-  const authState = useDeviceStorage(authStateSetting);
+  const authState = useDeviceStore(authStateSetting);
 
   const { mutateAsync: startPasskeyRegistrationMutate } =
     trpc.auth.startPasskeyRegistration.useMutation();
@@ -114,7 +113,7 @@ export function useAuth(): AuthApi {
 
     if (authState.value === null) {
       // This should only happen in the app initialization phase when there's no
-      // data in the device storage.
+      // data in the device store.
       //
       // The useEffect above should create a new session immediately.
       return null;
@@ -270,20 +269,6 @@ export function useAuth(): AuthApi {
     });
   }, [authState, data]);
 
-  // Reset local state when switching device sessions.
-  {
-    const queryClient = useQueryClient();
-    const activeServerSessionId = data?.activeDeviceSession.serverSessionId;
-    useEffect(() => {
-      return () => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-        activeServerSessionId; // It's critical that this is a dependency of the effect.
-
-        void queryClient.invalidateQueries();
-      };
-    }, [activeServerSessionId, queryClient]);
-  }
-
   return {
     data,
     logInWithApple: signInWithApple,
@@ -305,7 +290,7 @@ function makeDeviceSession(
 }
 
 export async function getServerSessionId(): Promise<string | null> {
-  const data = await deviceStorageGet(authStateSetting);
+  const data = await deviceStoreGet(authStateSetting);
   if (data == null) {
     return null;
   }

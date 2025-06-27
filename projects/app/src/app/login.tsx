@@ -1,5 +1,7 @@
 import { useAuth } from "@/client/auth";
+import { useRizzleQuery } from "@/client/hooks/useRizzleQuery";
 import { RectButton } from "@/client/ui/RectButton";
+import { SessionStoreProvider } from "@/client/ui/SessionStoreProvider";
 import { SignInWithAppleButton } from "@/client/ui/SignInWithAppleButton";
 import { TextInputSingle } from "@/client/ui/TextInputSingle";
 import { invariant } from "@pinyinly/lib/invariant";
@@ -64,21 +66,26 @@ export default function LoginPage() {
       <Text className="font-bold text-fg">Login</Text>
       <View className="gap-2">
         {auth.data?.allDeviceSessions.map((x, i) => (
-          <View key={i} className="flex-row gap-2 border-y">
-            <View className="flex-1">
-              <Text className="text-fg">Session ID: {x.serverSessionId}</Text>
-              <Text className="text-fg">DB name: {x.replicacheDbName}</Text>
+          <SessionStoreProvider key={i} dbName={x.replicacheDbName}>
+            <View key={i} className="flex-row gap-2 border-y">
+              <View className="flex-1">
+                <Text className="text-fg">
+                  Skill count: <SkillCount />
+                </Text>
+                <Text className="text-fg">Session ID: {x.serverSessionId}</Text>
+                <Text className="text-fg">DB name: {x.replicacheDbName}</Text>
+              </View>
+              <RectButton
+                onPressIn={() => {
+                  auth.logInToExistingDeviceSession(
+                    (s) => s.replicacheDbName === x.replicacheDbName,
+                  );
+                }}
+              >
+                Log in
+              </RectButton>
             </View>
-            <RectButton
-              onPressIn={() => {
-                auth.logInToExistingDeviceSession(
-                  (s) => s.replicacheDbName === x.replicacheDbName,
-                );
-              }}
-            >
-              Log in
-            </RectButton>
-          </View>
+          </SessionStoreProvider>
         ))}
       </View>
       <Text className="text-fg">
@@ -189,3 +196,16 @@ const GoHomeButton = () => (
     </Link>
   </View>
 );
+
+function SkillCount() {
+  const result = useRizzleQuery([`wordCount`], async (r, tx) => {
+    const skillStates = await r.query.skillState.scan(tx).toArray();
+    return skillStates.length;
+  });
+
+  return result.isPending ? (
+    <Text>Loading…</Text>
+  ) : (
+    <Text>{result.data} words</Text>
+  );
+}

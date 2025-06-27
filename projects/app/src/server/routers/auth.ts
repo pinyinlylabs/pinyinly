@@ -174,7 +174,6 @@ export const authRouter = router({
       const options = await generateRegistrationOptions({
         rpName: RP_NAME,
         rpID: RP_ID,
-        userDisplayName: `user display name`,
         userName,
         userID: textEncoder.encode(userId),
       });

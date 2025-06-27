@@ -16,7 +16,7 @@ export const TrpcProvider = ({
 }: {
   children: ReactNode;
   queryClient: QueryClient;
-  getServerSessionId: () => Promise<string | null>; // Avoid circular dependency
+  getServerSessionId: () => Promise<string | null>;
 }) => {
   const [trpcClient] = useState(() =>
     trpc.createClient({

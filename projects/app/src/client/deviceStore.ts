@@ -12,19 +12,19 @@ import type {
 } from "@/util/rizzle";
 import { invariant } from "@pinyinly/lib/invariant";
 
-export type DeviceStorageToggleableEntity = RizzleEntity<
+export type DeviceStoreToggleableEntity = RizzleEntity<
   string,
   { enabled: RizzleBoolean | RizzleTypeAlias<RizzleBoolean> }
 >;
 
-export type DeviceStorageEntity = RizzleAnyEntity;
-export type DeviceStorageEntityInput<T extends DeviceStorageEntity> =
+export type DeviceStoreEntity = RizzleAnyEntity;
+export type DeviceStoreEntityInput<T extends DeviceStoreEntity> =
   RizzleEntityInput<T> | null;
-export type DeviceStorageEntityOutput<T extends DeviceStorageEntity> =
+export type DeviceStoreEntityOutput<T extends DeviceStoreEntity> =
   RizzleEntityOutput<T> | null;
 
 const emptySettingKeyParams = {} as const; // stable reference to utilize rizzle's internal memoization
-export function buildDeviceStorageKey(key: DeviceStorageEntity): string {
+export function buildDeviceStoreKey(key: DeviceStoreEntity): string {
   const storageKey = `hhh.${key.marshalKey(emptySettingKeyParams)}`;
 
   // SecureStore keys must contain only alphanumeric characters, ".", "-", and
@@ -34,11 +34,11 @@ export function buildDeviceStorageKey(key: DeviceStorageEntity): string {
   return storageKey;
 }
 
-export async function deviceStorageGet<T extends DeviceStorageEntity>(
+export async function deviceStoreGet<T extends DeviceStoreEntity>(
   entity: T,
-): Promise<DeviceStorageEntityOutput<T>> {
-  const storageKey = buildDeviceStorageKey(entity);
-  const storageValue = await deviceStorageGetByStorageKey(storageKey);
+): Promise<DeviceStoreEntityOutput<T>> {
+  const storageKey = buildDeviceStoreKey(entity);
+  const storageValue = await deviceStoreGetByStorageKey(storageKey);
   if (storageValue === null) {
     return null;
   }
@@ -47,28 +47,28 @@ export async function deviceStorageGet<T extends DeviceStorageEntity>(
     return entity.unmarshalValue(marshaledValue);
   } catch (error) {
     console.error(
-      `Failed to parse device storage value at "${storageKey}":`,
+      `Failed to parse device store value at "${storageKey}":`,
       error,
     );
     return null;
   }
 }
 
-export async function deviceStorageSet<T extends RizzleAnyEntity>(
+export async function deviceStoreSet<T extends RizzleAnyEntity>(
   entity: T,
-  value: DeviceStorageEntityInput<T>,
+  value: DeviceStoreEntityInput<T>,
 ): Promise<void> {
-  const storageKey = buildDeviceStorageKey(entity);
+  const storageKey = buildDeviceStoreKey(entity);
   if (value === null) {
-    await deviceStorageSetByStorageKey(storageKey, null);
+    await deviceStoreSetByStorageKey(storageKey, null);
   } else {
     const marshaledValue = entity.marshalValue(value);
     const storageValue = JSON.stringify(marshaledValue);
-    await deviceStorageSetByStorageKey(storageKey, storageValue);
+    await deviceStoreSetByStorageKey(storageKey, storageValue);
   }
 }
 
-export async function deviceStorageGetByStorageKey(
+export async function deviceStoreGetByStorageKey(
   storageKey: string,
 ): Promise<string | null> {
   switch (Platform.OS) {
@@ -86,7 +86,7 @@ export async function deviceStorageGetByStorageKey(
   }
 }
 
-export async function deviceStorageSetByStorageKey(
+export async function deviceStoreSetByStorageKey(
   storageKey: string,
   value: string | null,
 ): Promise<void> {
