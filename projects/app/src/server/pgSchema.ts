@@ -4,14 +4,16 @@ import { sql } from "drizzle-orm";
 import * as pg from "drizzle-orm/pg-core";
 import { z } from "zod/v4";
 import {
+  pgBase64url,
+  pgFsrsRating,
+  pgHanziOrHanziWord,
+  pgJsonObject,
+  pgMnemonicThemeId,
+  pgPasskeyTransport,
+  pgPinyinInitialGroupId,
+  pgSkill,
+  pgSpaceSeparatoredString,
   rizzleCustomType,
-  sFsrsRating,
-  sHanziOrHanziWord,
-  sJsonObject,
-  sMnemonicThemeId,
-  sPinyinInitialGroupId,
-  sSkill,
-  sSpaceSeparatoredString,
   zodJson,
 } from "./pgSchemaUtil";
 
@@ -42,6 +44,7 @@ export const schema = pg.pgSchema(`haohaohow`);
 
 export const user = schema.table(`user`, {
   id: pg.text(`id`).primaryKey().$defaultFn(nanoid),
+  name: pg.varchar(`name`, { length: 30 }),
   createdAt: pg
     .timestamp(`createdAt`, {
       mode: `date`,
@@ -60,7 +63,7 @@ export const userSetting = schema.table(
       .notNull()
       .references(() => user.id),
     key: pg.text(`key`).notNull(),
-    value: sJsonObject(`value`),
+    value: pgJsonObject(`value`),
     updatedAt: pg.timestamp(`updatedAt`).defaultNow().notNull(),
     createdAt: pg.timestamp(`createdAt`).defaultNow().notNull(),
   },
@@ -99,6 +102,22 @@ export const authOAuth2 = schema.table(
   (t) => [pg.unique().on(t.provider, t.providerUserId)],
 );
 
+export const authPasskey = schema.table(`authPasskey`, {
+  id: pg.varchar(`credentialId`, { length: 100 }).primaryKey(),
+  userId: pg
+    .text(`userId`)
+    .references(() => user.id)
+    .notNull(),
+  publicKey: pgBase64url(`publicKey`).notNull(),
+  webauthnUserId: pgBase64url(`webauthnUserId`).notNull(),
+  transports: pgPasskeyTransport(`transports`).array().default([]), // e.g. ["internal", "usb"]
+  counter: pg.bigint(`counter`, { mode: `number` }).notNull().default(0),
+  createdAt: pg.timestamp(`createdAt`).defaultNow(),
+  lastUsedAt: pg.timestamp(`lastUsedAt`),
+  deviceType: pg.varchar(`deviceType`, { length: 32 }), // e.g. "iPhone", "Android"
+  isBackedUp: pg.boolean(`isBackedUp`).default(false), // synced in iCloud/Google?
+});
+
 export const skillRating = schema.table(
   `skillRating`,
   {
@@ -107,8 +126,8 @@ export const skillRating = schema.table(
       .text(`userId`)
       .references(() => user.id)
       .notNull(),
-    skill: sSkill(`skillId`).notNull(),
-    rating: sFsrsRating(`rating`).notNull(),
+    skill: pgSkill(`skillId`).notNull(),
+    rating: pgFsrsRating(`rating`).notNull(),
     durationMs: pg.doublePrecision(`durationMs`),
     createdAt: pg.timestamp(`timestamp`).defaultNow().notNull(),
   },
@@ -123,7 +142,7 @@ export const skillState = schema.table(
       .text(`userId`)
       .references(() => user.id)
       .notNull(),
-    skill: sSkill(`skill`).notNull(),
+    skill: pgSkill(`skill`).notNull(),
     srs: rizzleCustomType(s.rSrsState(), `json`)(`srs`).notNull(),
     createdAt: pg.timestamp(`createdAt`).defaultNow().notNull(),
   },
@@ -138,7 +157,7 @@ export const hanziGlossMistake = schema.table(
       .text(`userId`)
       .references(() => user.id)
       .notNull(),
-    hanziOrHanziWord: sHanziOrHanziWord(`hanzi`).notNull(),
+    hanziOrHanziWord: pgHanziOrHanziWord(`hanzi`).notNull(),
     gloss: pg.text(`gloss`).notNull(),
     createdAt: pg.timestamp(`timestamp`).defaultNow().notNull(),
   },
@@ -153,9 +172,9 @@ export const hanziPinyinMistake = schema.table(
       .text(`userId`)
       .references(() => user.id)
       .notNull(),
-    hanziOrHanziWord: sHanziOrHanziWord(`hanzi`).notNull(),
+    hanziOrHanziWord: pgHanziOrHanziWord(`hanzi`).notNull(),
     // Intentionally left as strings because it's user input.
-    pinyin: sSpaceSeparatoredString(`pinyin`).notNull(),
+    pinyin: pgSpaceSeparatoredString(`pinyin`).notNull(),
     createdAt: pg.timestamp(`timestamp`).defaultNow().notNull(),
   },
   (t) => [pg.index().on(t.userId)],
@@ -201,8 +220,8 @@ export const pinyinInitialGroupTheme = schema.table(
       .text(`userId`)
       .references(() => user.id)
       .notNull(),
-    groupId: sPinyinInitialGroupId(`groupId`).notNull(),
-    themeId: sMnemonicThemeId(`themeId`).notNull(),
+    groupId: pgPinyinInitialGroupId(`groupId`).notNull(),
+    themeId: pgMnemonicThemeId(`themeId`).notNull(),
     updatedAt: pg.timestamp(`updatedAt`).defaultNow().notNull(),
     createdAt: pg.timestamp(`createdAt`).defaultNow().notNull(),
   },

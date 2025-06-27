@@ -57,21 +57,21 @@ export function readonlyMapDelete<K, V>(
 }
 
 export function objectMap<K extends string, V, K2 extends string, V2>(
-  object: Record<K, V>,
+  object: Partial<Record<K, V>>,
   mapFn: (key: K, value: V) => [K2, V2],
 ): Record<K2, V2> {
   return Object.fromEntries(
     // Use Object.keys() instead of Object.entries() to avoid allocating an
     // array for every item.
-    Object.keys(object).map((k) => mapFn(k as K, object[k as K])),
+    Object.keys(object).map((k) => mapFn(k as K, object[k as K] as V)),
   ) as Record<K2, V2>;
 }
 
 export function objectMapToArray<K extends string, V, V2>(
-  object: Record<K, V>,
+  object: Partial<Record<K, V>>,
   mapFn: (key: K, value: V) => V2,
 ): V2[] {
-  return Object.keys(object).map((k) => mapFn(k as K, object[k as K]));
+  return Object.keys(object).map((k) => mapFn(k as K, object[k as K] as V));
 }
 
 export function objectInvert<K extends PropertyKey, V extends PropertyKey>(

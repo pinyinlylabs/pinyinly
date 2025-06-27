@@ -143,16 +143,26 @@ describe(`${makeRange.name} suite`, async () => {
   });
 });
 
-test(`${objectMap.name} suite`, () => {
-  assert.deepEqual(
-    objectMap({ a: 1, b: 2 }, (key, value) => [`${key}${value}`, value * 2]),
-    { a1: 2, b2: 4 },
-  );
+describe(`${objectMap.name} suite`, () => {
+  test(`fixtures`, () => {
+    assert.deepEqual(
+      objectMap({ a: 1, b: 2 }, (key, value) => [`${key}${value}`, value * 2]),
+      { a1: 2, b2: 4 },
+    );
 
-  assert.deepEqual(
-    objectMap({ a: `x`, b: `y` }, (key, value) => [`${key}${value}`, value]),
-    { ax: `x`, by: `y` },
-  );
+    assert.deepEqual(
+      objectMap({ a: `x`, b: `y` }, (key, value) => [`${key}${value}`, value]),
+      { ax: `x`, by: `y` },
+    );
+  });
+
+  test(`regression: Partial<…>`, () => {
+    const obj: Partial<{ a: string; b: string }> = { a: `x`, b: `y` };
+    assert.deepEqual(
+      objectMap(obj, (key, value) => [`${key}${value}`, value]),
+      { ax: `x`, by: `y` },
+    );
+  });
 });
 
 test(`${objectMapToArray.name} suite`, () => {

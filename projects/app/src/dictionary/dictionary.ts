@@ -26,9 +26,9 @@ import type { DeepReadonly } from "ts-essentials";
 import { z } from "zod/v4";
 
 export const hhhMarkSchema = z.string();
-export const hanziWordSchema = z.string().transform((x) => x as HanziWord);
-export const hanziTextSchema = z.string().transform((x) => x as HanziText);
-export const hanziCharSchema = z.string().transform((x) => x as HanziChar);
+export const hanziWordSchema = z.string().pipe(z.custom<HanziWord>());
+export const hanziTextSchema = z.string().pipe(z.custom<HanziText>());
+export const hanziCharSchema = z.string().pipe(z.custom<HanziChar>());
 export const pinyinPronunciationSchema = rPinyinPronunciation()
   .getUnmarshal()
   .describe(`space separated pinyin for each word`);

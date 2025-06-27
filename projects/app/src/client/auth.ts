@@ -2,6 +2,10 @@ import { trpc } from "@/client/trpc";
 import type { RizzleEntityOutput } from "@/util/rizzle";
 import { r } from "@/util/rizzle";
 import { invariant } from "@pinyinly/lib/invariant";
+import {
+  startAuthentication,
+  startRegistration,
+} from "@simplewebauthn/browser";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { DeepReadonly } from "ts-essentials";
@@ -53,31 +57,44 @@ export type UseAuth2Data = DeepReadonly<{
 type AuthApi = {
   // `null` while loading
   data: UseAuth2Data | null;
-  signInWithApple: (identityToken: string) => Promise<void>;
+  logInWithApple: (identityToken: string) => Promise<void>;
   /**
    * This is useful for local development on a phone when you can't use OAuth2
    * sign-in providers because the URL doesn't match.
    */
-  signInWithServerSessionId: (serverSessionId: string) => void;
-  signInToExistingDeviceSession: (
+  logInWithServerSessionId: (serverSessionId: string) => void;
+  logInToExistingDeviceSession: (
     predicate: (deviceSession: DeviceSession) => boolean,
   ) => boolean;
+  signUpWithPasskey: (opts: { name: string }) => Promise<void>;
+  logInWithPasskey: () => Promise<void>;
   signOut: () => void;
 };
 
 export function useAuth(): AuthApi {
   // Step 1. Try to read the current version of the auth state from local storage.
-  const authStateQuery = useDeviceStorage(authStateSetting);
+  const authState = useDeviceStorage(authStateSetting);
+
+  const { mutateAsync: startPasskeyRegistrationMutate } =
+    trpc.auth.startPasskeyRegistration.useMutation();
+  const { mutateAsync: completePasskeyRegistrationMutate } =
+    trpc.auth.completePasskeyRegistration.useMutation();
+  const { mutateAsync: startPasskeyAuthenticationMutate } =
+    trpc.auth.startPasskeyAuthentication.useMutation();
+  const { mutateAsync: completePasskeyAuthenticationMutate } =
+    trpc.auth.completePasskeyAuthentication.useMutation();
+  const { mutateAsync: signInWithAppleMutate } =
+    trpc.auth.signInWithApple.useMutation();
 
   // Helps ensure data is only migrated once to avoid race conditions.
   const [initComplete, setInitComplete] = useState(false);
 
   const doInitFirstSession =
-    !authStateQuery.isLoading && authStateQuery.value == null && !initComplete;
+    !authState.isLoading && authState.value == null && !initComplete;
   useEffect(() => {
     if (doInitFirstSession) {
       // Create a new anonymous session.
-      authStateQuery.setValue({
+      authState.setValue({
         deviceSessions: [
           {
             // Putting the date in the DB name makes it easier to debug.
@@ -88,14 +105,14 @@ export function useAuth(): AuthApi {
 
       setInitComplete(true);
     }
-  }, [doInitFirstSession, authStateQuery]);
+  }, [doInitFirstSession, authState]);
 
   const data = useMemo((): UseAuth2Data | null => {
-    if (authStateQuery.isLoading) {
+    if (authState.isLoading) {
       return null;
     }
 
-    if (authStateQuery.value === null) {
+    if (authState.value === null) {
       // This should only happen in the app initialization phase when there's no
       // data in the device storage.
       //
@@ -103,25 +120,61 @@ export function useAuth(): AuthApi {
       return null;
     }
 
-    const activeDeviceSession = authStateQuery.value.deviceSessions[0];
+    const activeDeviceSession = authState.value.deviceSessions[0];
     invariant(
       activeDeviceSession != null,
       `expected at least one device session`,
     );
-    const allDeviceSessions = authStateQuery.value.deviceSessions;
+    const allDeviceSessions = authState.value.deviceSessions;
     return {
       activeDeviceSession,
       allDeviceSessions,
     };
-  }, [authStateQuery.isLoading, authStateQuery.value]);
+  }, [authState.isLoading, authState.value]);
 
-  const signInWithAppleMutate = trpc.auth.signInWithApple.useMutation();
+  const logInWithPasskey = async () => {
+    const { options: optionsJSON, cookie } =
+      await startPasskeyAuthenticationMutate();
+
+    const res = await startAuthentication({ optionsJSON });
+
+    const res2 = await completePasskeyAuthenticationMutate({
+      response: res,
+      cookie,
+    });
+
+    if (res2.verified) {
+      const { session } = res2;
+      signInWithServerSessionId(session.id);
+    } else {
+      console.error(`Passkey authentication failed`, res2);
+    }
+  };
+
+  const signUpWithPasskey = async ({ name }: { name: string }) => {
+    const { options: optionsJSON, cookie } =
+      await startPasskeyRegistrationMutate({ userName: name });
+
+    const res = await startRegistration({ optionsJSON });
+
+    const res2 = await completePasskeyRegistrationMutate({
+      response: res,
+      cookie,
+    });
+
+    if (res2.verified) {
+      const { session } = res2;
+      signInWithServerSessionId(session.id);
+    } else {
+      console.error(`Passkey authentication failed`, res2);
+    }
+  };
 
   const signInWithApple = useCallback(
     async (identityToken: string) => {
       invariant(data != null, `expected auth state to be initialized`);
 
-      const { session /*, user */ } = await signInWithAppleMutate.mutateAsync({
+      const { session /*, user */ } = await signInWithAppleMutate({
         identityToken,
       });
       // Activate an existing session if one exists with a matching session ID.
@@ -144,13 +197,13 @@ export function useAuth(): AuthApi {
           ),
         ],
       };
-      authStateQuery.setValue(newState);
+      authState.setValue(newState);
     },
-    [authStateQuery, data, signInWithAppleMutate],
+    [authState, data, signInWithAppleMutate],
   );
 
   const signInToExistingDeviceSession = useCallback<
-    AuthApi[`signInToExistingDeviceSession`]
+    AuthApi[`logInToExistingDeviceSession`]
   >(
     (predicate) => {
       invariant(data != null, `expected auth state to be initialized`);
@@ -161,7 +214,7 @@ export function useAuth(): AuthApi {
         return false;
       }
 
-      authStateQuery.setValue({
+      authState.setValue({
         deviceSessions: [
           existingSession,
           ...data.allDeviceSessions.filter(
@@ -172,11 +225,11 @@ export function useAuth(): AuthApi {
 
       return true;
     },
-    [authStateQuery, data],
+    [authState, data],
   );
 
   const signInWithServerSessionId = useCallback<
-    AuthApi[`signInWithServerSessionId`]
+    AuthApi[`logInWithServerSessionId`]
   >(
     (serverSessionId: string) => {
       invariant(data != null, `expected auth state to be initialized`);
@@ -190,11 +243,11 @@ export function useAuth(): AuthApi {
       }
 
       const newSession = makeDeviceSession({ serverSessionId });
-      authStateQuery.setValue({
+      authState.setValue({
         deviceSessions: [newSession, ...data.allDeviceSessions],
       });
     },
-    [authStateQuery, data, signInToExistingDeviceSession],
+    [authState, data, signInToExistingDeviceSession],
   );
 
   const signOut = useCallback(() => {
@@ -207,7 +260,7 @@ export function useAuth(): AuthApi {
     );
     const newSession: DeviceSession = existingSession ?? makeDeviceSession();
 
-    authStateQuery.setValue({
+    authState.setValue({
       deviceSessions: [
         newSession,
         ...data.allDeviceSessions.filter(
@@ -215,7 +268,7 @@ export function useAuth(): AuthApi {
         ),
       ],
     });
-  }, [authStateQuery, data]);
+  }, [authState, data]);
 
   // Reset local state when switching device sessions.
   {
@@ -233,9 +286,11 @@ export function useAuth(): AuthApi {
 
   return {
     data,
-    signInWithApple,
-    signInToExistingDeviceSession,
-    signInWithServerSessionId,
+    logInWithApple: signInWithApple,
+    logInToExistingDeviceSession: signInToExistingDeviceSession,
+    logInWithServerSessionId: signInWithServerSessionId,
+    signUpWithPasskey,
+    logInWithPasskey,
     signOut,
   };
 }

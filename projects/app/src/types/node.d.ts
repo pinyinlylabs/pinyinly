@@ -25,6 +25,7 @@ declare global {
       EXPO_PUBLIC_SENTRY_DSN?: string;
       EXPO_PUBLIC_USE_STATIC?: string | boolean; // boolean during static render, string on web
       EXPO_TUNNEL_SUBDOMAIN?: string;
+      HHH_JWT_KEY_BASE64?: string;
       HHH_PREFLIGHT_CHECK_ENV_VARS?: string;
       HHH_SENTRY_DEBUG?: string;
       HHH_SENTRY_ENABLED?: string;

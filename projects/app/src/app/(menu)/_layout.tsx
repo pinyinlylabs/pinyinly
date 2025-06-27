@@ -1,13 +1,14 @@
 import { useVisualViewportSize } from "@/client/hooks/useVisualViewportSize";
+import { reactInvariant } from "@/client/react";
 import { IconImage } from "@/client/ui/IconImage";
 import { RectButton } from "@/client/ui/RectButton";
 import { invariant } from "@pinyinly/lib/invariant";
 import type { Href } from "expo-router";
 import { Link, usePathname } from "expo-router";
-import type { TabTriggerSlotProps } from "expo-router/ui";
+import type { TabTriggerProps, TabTriggerSlotProps } from "expo-router/ui";
 import { TabList, Tabs, TabSlot, TabTrigger } from "expo-router/ui";
 import { StatusBar } from "expo-status-bar";
-import type { ReactNode } from "react";
+import type { FunctionComponent, ReactNode } from "react";
 import { Fragment, useLayoutEffect, useState } from "react";
 import { Modal, Pressable, ScrollView, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
@@ -159,44 +160,25 @@ interface TabTriggerChildProps
   name: string;
 }
 
-function DesktopNavSubtleItem({ name }: { name: string }) {
-  return (
-    <TabTrigger name={name} asChild>
-      {/* <TabTrigger> will .cloneElement() and pass through props like `href` */}
-      <DesktopNavSubtleItemImpl name={name} />
-    </TabTrigger>
-  );
-}
+const DesktopNavSubtleItem = customTabTrigger(
+  ({ name, isFocused, ...rest }) => {
+    return (
+      <Pressable {...rest} className="h-[32px] justify-center">
+        <Text
+          className={`
+            font-sans text-sm/normal font-light uppercase text-caption/90
 
-function DesktopNavSubtleItemImpl({
-  name,
-  isFocused,
-  ...rest
-}: TabTriggerChildProps) {
-  return (
-    <Pressable {...rest} className="h-[32px] justify-center">
-      <Text className="font-sans text-sm/normal font-light uppercase text-caption">
-        {name}
-      </Text>
-    </Pressable>
-  );
-}
-
-const DesktopNavGroupItem = ({ name }: { name: string }) => (
-  <TabTrigger name={name} asChild>
-    {/* <TabTrigger> will .cloneElement() and pass through props like `href` */}
-    <DesktopNavGroupItemImpl name={name} />
-  </TabTrigger>
+            hover:text-caption
+          `}
+        >
+          {name}
+        </Text>
+      </Pressable>
+    );
+  },
 );
 
-const DesktopNavGroupItemImpl = ({
-  isFocused = false,
-  name = ``,
-  ...rest
-}: TabTriggerChildProps) => {
-  if (__DEV__) {
-    invariant(`href` in rest, `DesktopNavGroupItemImpl requires 'href' prop`);
-  }
+const DesktopNavGroupItem = customTabTrigger(({ isFocused, name, ...rest }) => {
   return (
     <Pressable {...rest}>
       <View className={buttonContainerClass({ isFocused })}>
@@ -206,7 +188,7 @@ const DesktopNavGroupItemImpl = ({
       </View>
     </Pressable>
   );
-};
+});
 
 function MobileNavTrigger() {
   const [isOpen, setIsOpen] = useState(false);
@@ -259,13 +241,34 @@ function MobileNavTrigger() {
               }
             />
             <View className="size-full gap-8 px-4 pb-6">
-              {navItems.map((section, sectionIndex) => (
-                <MobileNavGroup key={sectionIndex} title={section.title}>
-                  {section.items.map((item, itemIndex) => (
-                    <MobileNavGroupItem key={itemIndex} name={item.name} />
+              {navItems
+                .filter((section) => section.primary === true)
+                .map((section, sectionIndex) => (
+                  <MobileNavGroup key={sectionIndex} title={section.title}>
+                    {section.items.map((item, itemIndex) => (
+                      <MobileNavGroupItem key={itemIndex} name={item.name} />
+                    ))}
+                  </MobileNavGroup>
+                ))}
+
+              {/* GAP */}
+
+              <View className="items-start px-4">
+                {navItems
+                  .filter((section) => section.primary !== true)
+                  .map((section, sectionIndex) => (
+                    <Fragment key={sectionIndex}>
+                      {/* GAP */}
+                      {sectionIndex === 0 ? null : (
+                        <View className={`invisible h-[40px]`} />
+                      )}
+
+                      {section.items.map((item, itemIndex) => (
+                        <MobileNavSubtleItem key={itemIndex} name={item.name} />
+                      ))}
+                    </Fragment>
                   ))}
-                </MobileNavGroup>
-              ))}
+              </View>
             </View>
           </View>
         </Modal>
@@ -293,37 +296,43 @@ function MobileNavGroup({
   );
 }
 
-function MobileNavGroupItem({ name }: { name: string }) {
-  return (
-    <TabTrigger name={name} style={{ flex: 1 }} asChild>
-      <MobileNavGroupItemImpl name={name} />
-    </TabTrigger>
-  );
-}
+const MobileNavGroupItem = customTabTrigger(
+  ({ name, isFocused = false, ...rest }) => {
+    return (
+      <Pressable
+        {...rest}
+        className={`
+          flex-row bg-bg-1 py-2.5 pl-4 pr-3
 
-function MobileNavGroupItemImpl({
-  name,
-  isFocused = false,
-  ...rest
-}: { name: string } & TabTriggerChildProps) {
-  return (
-    <Pressable
-      {...rest}
-      className={`
-        flex-row bg-bg-1 py-2.5 pl-4 pr-3
+          hover:bg-fg/10
+        `}
+      >
+        <Text className="hhh-button-outline">{name}</Text>
+        <View className="flex-1 items-end">
+          {isFocused ? (
+            <IconImage source={require(`@/assets/icons/check.svg`)} size={24} />
+          ) : null}
+        </View>
+      </Pressable>
+    );
+  },
+);
 
-        hover:bg-fg/10
-      `}
-    >
-      <Text className="hhh-button-outline">{name}</Text>
-      <View className="flex-1 items-end">
-        {isFocused ? (
-          <IconImage source={require(`@/assets/icons/check.svg`)} size={24} />
-        ) : null}
-      </View>
+const MobileNavSubtleItem = customTabTrigger(({ name, isFocused, ...rest }) => {
+  return (
+    <Pressable {...rest} className="h-[32px] justify-center">
+      <Text
+        className={`
+          font-sans text-sm/normal font-light uppercase text-caption/90
+
+          hover:text-caption
+        `}
+      >
+        {name}
+      </Text>
     </Pressable>
   );
-}
+});
 
 function MobileTopMenu({
   leftButton,
@@ -388,7 +397,6 @@ const navItems: NavGroup[] = [
     primary: true,
     items: [
       { name: `Appearance`, href: `/settings/appearance` },
-      { name: `Developer`, href: `/settings/developer` },
       // { name: `Profile`, href: `/settings/profile` },
       // { name: `Courses`, href: `/settings/courses` },
       // { name: `Notifications`, href: `/settings/notifications` },
@@ -401,6 +409,7 @@ const navItems: NavGroup[] = [
     // { name: "Terms", href: `/terms` },
     // { name: "Privacy Policy", href: `/privacy` },
     items: [
+      { name: `Developer`, href: `/settings/developer` },
       { name: `Acknowledgements`, href: `/acknowledgements` },
     ] satisfies NavItem[],
   },
@@ -415,4 +424,31 @@ interface NavGroup {
   title?: string;
   items: NavItem[];
   primary?: boolean;
+}
+
+/**
+ * Wrap a component in a `<TabTrigger>` and pass down the props.
+ * @param Component
+ * @returns
+ */
+function customTabTrigger(Component: FunctionComponent<TabTriggerChildProps>) {
+  Component = __DEV__
+    ? // In dev mode add some extra validation checks to make sure that TabTrigger
+      // passes through the correct props to the child Pressable.
+      reactInvariant(Component, (props) => {
+        invariant(
+          `href` in props,
+          `customTabTrigger component missing required 'href' prop`,
+        );
+      })
+    : Component;
+
+  return Object.assign(
+    (props: Pick<TabTriggerProps, `name` | `style`>) => (
+      <TabTrigger {...props} asChild>
+        <Component name={props.name} />
+      </TabTrigger>
+    ),
+    { displayName: Component.displayName },
+  );
 }

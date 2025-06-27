@@ -169,6 +169,13 @@
       "when": 1750640944961,
       "tag": "0023_military_reptil",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1750983142968,
+      "tag": "0024_same_harpoon",
+      "breakpoints": true
     }
   ]
 }
