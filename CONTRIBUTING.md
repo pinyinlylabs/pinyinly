@@ -22,6 +22,12 @@ Now you can start the app:
 1. Edit the Drizzle schema.
 1. Run `moon run app:dbGenerate`
 
+## Creating a HHH_JWT_KEY_BASE64
+
+```sh
+openssl rand -base64 32
+```
+
 ## Debugging Expo server
 
 In VS Code open a `JavaScript Debug Terminal` from the command palette

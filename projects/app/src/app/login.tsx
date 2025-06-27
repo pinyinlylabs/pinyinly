@@ -1,5 +1,7 @@
 import { useAuth } from "@/client/auth";
+import { useRizzleQuery } from "@/client/hooks/useRizzleQuery";
 import { RectButton } from "@/client/ui/RectButton";
+import { SessionStoreProvider } from "@/client/ui/SessionStoreProvider";
 import { SignInWithAppleButton } from "@/client/ui/SignInWithAppleButton";
 import { TextInputSingle } from "@/client/ui/TextInputSingle";
 import { invariant } from "@pinyinly/lib/invariant";
@@ -12,26 +14,78 @@ import z from "zod/v4";
 export default function LoginPage() {
   const auth = useAuth();
 
+  const [name, setName] = useState(``);
+
   return (
     <View className="flex-1 items-center justify-center gap-[10px] bg-bg">
+      <Text className="font-bold text-fg">Passkey</Text>
+      <View className="gap-2">
+        <View className="flex-row gap-2 border-y">
+          <RectButton
+            onPressIn={() => {
+              auth.logInWithPasskey().catch((error: unknown) => {
+                console.error(`failed to log in with passkey`, error);
+              });
+            }}
+          >
+            Log in with Passkey
+          </RectButton>
+        </View>
+        <View className="flex-row gap-2 border-y">
+          <RectButton
+            onPressIn={() => {
+              auth.logInWithPasskey().catch((error: unknown) => {
+                console.error(`failed to log in with passkey`, error);
+              });
+            }}
+          >
+            Log in with Passkey (conditional UI)
+          </RectButton>
+          <input type="button" autoComplete="webauthn" />
+        </View>
+        <View className="flex-row gap-2 border-y">
+          <TextInputSingle
+            placeholder={`Name`}
+            onChangeText={(text) => {
+              setName(text);
+            }}
+            value={name}
+          />
+          <RectButton
+            onPressIn={() => {
+              auth.signUpWithPasskey({ name }).catch((error: unknown) => {
+                console.error(`failed to log in with passkey`, error);
+              });
+            }}
+          >
+            Sign up with Passkey
+          </RectButton>
+        </View>
+      </View>
+
       <Text className="font-bold text-fg">Login</Text>
       <View className="gap-2">
         {auth.data?.allDeviceSessions.map((x, i) => (
-          <View key={i} className="flex-row gap-2 border-y">
-            <View className="flex-1">
-              <Text className="text-fg">Session ID: {x.serverSessionId}</Text>
-              <Text className="text-fg">DB name: {x.replicacheDbName}</Text>
+          <SessionStoreProvider key={i} dbName={x.replicacheDbName}>
+            <View key={i} className="flex-row gap-2 border-y">
+              <View className="flex-1">
+                <Text className="text-fg">
+                  Skill count: <SkillCount />
+                </Text>
+                <Text className="text-fg">Session ID: {x.serverSessionId}</Text>
+                <Text className="text-fg">DB name: {x.replicacheDbName}</Text>
+              </View>
+              <RectButton
+                onPressIn={() => {
+                  auth.logInToExistingDeviceSession(
+                    (s) => s.replicacheDbName === x.replicacheDbName,
+                  );
+                }}
+              >
+                Log in
+              </RectButton>
             </View>
-            <RectButton
-              onPressIn={() => {
-                auth.signInToExistingDeviceSession(
-                  (s) => s.replicacheDbName === x.replicacheDbName,
-                );
-              }}
-            >
-              Log in
-            </RectButton>
-          </View>
+          </SessionStoreProvider>
         ))}
       </View>
       <Text className="text-fg">
@@ -54,7 +108,7 @@ export default function LoginPage() {
         <SignInWithAppleButton
           clientId="how.haohao.app"
           onSuccess={(data) => {
-            void auth.signInWithApple(data.authorization.id_token);
+            void auth.logInWithApple(data.authorization.id_token);
           }}
           redirectUri={`https://${location.hostname}/api/auth/login/apple/callback`}
         />
@@ -101,7 +155,7 @@ export default function LoginPage() {
 
             invariant(credential.identityToken != null);
 
-            void auth.signInWithApple(credential.identityToken);
+            void auth.logInWithApple(credential.identityToken);
           }}
         />
       ) : null}
@@ -123,7 +177,7 @@ function ServerSessionIdLoginForm() {
       placeholder={`session ID`}
       onKeyPress={(e) => {
         if (e.nativeEvent.key === `Enter`) {
-          auth.signInWithServerSessionId(input);
+          auth.logInWithServerSessionId(input);
           e.preventDefault();
         }
       }}
@@ -142,3 +196,16 @@ const GoHomeButton = () => (
     </Link>
   </View>
 );
+
+function SkillCount() {
+  const result = useRizzleQuery([`wordCount`], async (r, tx) => {
+    const skillStates = await r.query.skillState.scan(tx).toArray();
+    return skillStates.length;
+  });
+
+  return result.isPending ? (
+    <Text>Loading…</Text>
+  ) : (
+    <Text>{result.data} words</Text>
+  );
+}

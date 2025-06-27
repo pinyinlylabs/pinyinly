@@ -15,8 +15,9 @@ import type { ColumnBaseConfig } from "drizzle-orm";
 import { Table } from "drizzle-orm";
 import type * as s from "drizzle-orm/pg-core";
 import { customType } from "drizzle-orm/pg-core";
-import type { z } from "zod/v4";
-import type { $ZodCatchCtx } from "zod/v4/core";
+import { base64url } from "jose";
+import { z } from "zod/v4";
+import type * as z4 from "zod/v4/core";
 
 type PgCustomColumn = s.PgCustomColumn<
   ColumnBaseConfig<`custom`, `PgCustomColumn`>
@@ -55,12 +56,29 @@ function drizzleColumnTypeEnhancedErrors(column: PgCustomColumn) {
     unstable__columnName(column);
   }
 
-  return (ctx: $ZodCatchCtx) => {
+  return (ctx: z4.$ZodCatchCtx) => {
     throw new Error(
       `could not parse DB value at "${unstable__columnName(column)}"`,
       { cause: ctx.issues },
     );
   };
+}
+
+/**
+ * Adds the table and column name to Zod parsing errors to help debugging.
+ */
+function debugFriendlyErrorFactory(column: PgCustomColumn) {
+  if (isRunningTests || __DEV__) {
+    // *always* run this code path so that it fails loudly in tests/dev, rather
+    // than only in the case of a zod parsing. This is because it relies on
+    // unstable internal APIs that are fragile to rely upon.
+    unstable__columnName(column);
+  }
+
+  return (issues: readonly z4.$ZodIssue[]) =>
+    new Error(`could not parse DB value at "${unstable__columnName(column)}"`, {
+      cause: issues,
+    });
 }
 
 function jsonStringifyEnhancedErrors(
@@ -108,6 +126,64 @@ export const zodJson = <T extends z.ZodType>(name: string, schema: T) => {
   })(name);
 };
 
+export const pgBase64url = (name: string) =>
+  customType<{ data: Uint8Array; driverData: string }>({
+    dataType() {
+      return `text`;
+    },
+    fromDriver(value) {
+      return base64url.decode(value);
+    },
+    toDriver(value) {
+      return base64url.encode(value);
+    },
+  })(name);
+
+export const pgZod = <
+  DataType extends `text` | `json`,
+  IO extends DataType extends `text` ? string : unknown,
+  T extends z4.$ZodType<IO, IO>,
+>(
+  schema: T,
+  pgDataType: DataType,
+) => {
+  let errorFactory: ((issues: readonly z4.$ZodIssue[]) => Error) | undefined;
+
+  return customType<{ data: z4.output<T>; driverData: string }>({
+    dataType() {
+      return pgDataType;
+    },
+    fromDriver(
+      this: PgCustomColumn, // hack to expose column name
+      value,
+    ) {
+      errorFactory ??= debugFriendlyErrorFactory(this);
+
+      const result = z.safeParse(schema, value);
+      if (result.success) {
+        return result.data;
+      }
+
+      throw errorFactory(result.error.issues);
+    },
+    toDriver(
+      this: PgCustomColumn, // hack to expose column name
+      value: z4.output<T>,
+    ) {
+      errorFactory ??= debugFriendlyErrorFactory(this);
+
+      const result = z.safeParse(schema, value);
+      if (result.success) {
+        return pgDataType === `json`
+          ? jsonStringifyEnhancedErrors(this, result.data)
+          : (result.data as string);
+      }
+
+      throw errorFactory(result.error.issues);
+    },
+  });
+};
+
 export const rizzleCustomType = <
   DataType extends `text` | `json`,
   I,
@@ -116,58 +192,76 @@ export const rizzleCustomType = <
   T extends RizzleType<RizzleTypeDef, I, M, O>,
 >(
   rizzleType: T,
-  dataType: DataType,
+  pgDataType: DataType,
 ) => {
+  let errorFactory: ((issues: readonly z4.$ZodIssue[]) => Error) | undefined;
   const unmarshalSchema = rizzleType.getUnmarshal();
   const marshalSchema = rizzleType.getMarshal();
 
-  // Avoid creating a new Zod schema each time a value is decoded.
-  let fromDriverSchemaMemo: z.ZodCatch<typeof unmarshalSchema> | undefined;
-  let toDriverSchemaMemo: z.ZodCatch<typeof marshalSchema> | undefined;
-
   return customType<{ data: T[`_output`]; driverData: string }>({
     dataType() {
-      return dataType;
+      return pgDataType;
     },
     fromDriver(
-      this: PgCustomColumn, // hack
+      this: PgCustomColumn, // hack to expose column name
       value,
     ) {
-      return (fromDriverSchemaMemo ??= unmarshalSchema.catch(
-        drizzleColumnTypeEnhancedErrors(this),
-      )).parse(value);
+      errorFactory ??= debugFriendlyErrorFactory(this);
+
+      const result = z.safeParse(unmarshalSchema, value);
+      if (result.success) {
+        return result.data;
+      }
+
+      throw errorFactory(result.error.issues);
     },
     toDriver(
-      this: PgCustomColumn, // hack
+      this: PgCustomColumn, // hack to expose column name
       value: T[`_output`],
     ) {
-      const marshaled = (toDriverSchemaMemo ??= marshalSchema.catch(
-        drizzleColumnTypeEnhancedErrors(this),
-      )).parse(value);
-      return dataType === `json`
-        ? jsonStringifyEnhancedErrors(this, marshaled)
-        : (marshaled as string);
+      errorFactory ??= debugFriendlyErrorFactory(this);
+
+      const result = z.safeParse(marshalSchema, value);
+      if (result.success) {
+        return pgDataType === `json`
+          ? jsonStringifyEnhancedErrors(this, result.data)
+          : (result.data as string);
+      }
+
+      throw errorFactory(result.error.issues);
     },
   });
 };
 
 // The "s" prefix follows the convention of "s" being drizzle things. This helps
 // differentiate them from rizzle schema things.
-export const sSkill = rizzleCustomType(rSkill(), `text`);
-export const sMnemonicThemeId = rizzleCustomType(rMnemonicThemeId(), `text`);
-export const sPinyinInitialGroupId = rizzleCustomType(
+export const pgSkill = rizzleCustomType(rSkill(), `text`);
+export const pgMnemonicThemeId = rizzleCustomType(rMnemonicThemeId(), `text`);
+export const pgPinyinInitialGroupId = rizzleCustomType(
   rPinyinInitialGroupId(),
   `text`,
 );
-export const sPinyinPronunciation = rizzleCustomType(
+export const pgPinyinPronunciation = rizzleCustomType(
   rPinyinPronunciation(),
   `text`,
 );
-export const sSpaceSeparatoredString = rizzleCustomType(
+export const pgSpaceSeparatoredString = rizzleCustomType(
   rSpaceSeparatedString(),
   `text`,
 );
-export const sHanziOrHanziWord = rizzleCustomType(rHanziOrHanziWord(), `text`);
-export const sJson = rizzleCustomType(r.json(), `json`);
-export const sJsonObject = rizzleCustomType(r.jsonObject(), `json`);
-export const sFsrsRating = rizzleCustomType(rFsrsRating(), `text`);
+export const pgHanziOrHanziWord = rizzleCustomType(rHanziOrHanziWord(), `text`);
+export const pgJson = rizzleCustomType(r.json(), `json`);
+export const pgJsonObject = rizzleCustomType(r.jsonObject(), `json`);
+export const pgFsrsRating = rizzleCustomType(rFsrsRating(), `text`);
+
+// Auth
+export const passkeyTransportEnumSchema = z.enum([
+  `ble`,
+  `cable`,
+  `hybrid`,
+  `internal`,
+  `nfc`,
+  `smart-card`,
+  `usb`,
+]);
+export const pgPasskeyTransport = pgZod(passkeyTransportEnumSchema, `text`);

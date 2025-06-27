@@ -1,4 +1,4 @@
-import { DeviceStorageToggleButton } from "@/client/ui/DeviceStorageToggleButton";
+import { DeviceStoreToggleButton } from "@/client/ui/DeviceStoreToggleButton";
 import { slowQueriesSetting } from "@/util/devtools";
 import { Text, View } from "react-native";
 
@@ -21,7 +21,7 @@ export default function DeveloperSettingsPage() {
             </Text>
           </View>
           <View>
-            <DeviceStorageToggleButton entity={slowQueriesSetting} />
+            <DeviceStoreToggleButton entity={slowQueriesSetting} />
           </View>
         </View>
       </View>

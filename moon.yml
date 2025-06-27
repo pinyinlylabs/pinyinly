@@ -20,6 +20,7 @@ tasks:
       - "!./projects/**/*"
     args:
       - "'!projects/**/*'"
+
   yarnConstraints:
     command: yarn constraints
     inputs:
@@ -31,6 +32,12 @@ tasks:
     command: npx -y -p renovate@37.424.1 renovate-config-validator --strict
     inputs:
       - renovate.json
+
+  test:
+    deps:
+      - prettierCheck
+      - renovateCheck
+      - yarnConstraints
 
 tags:
   - prettier

@@ -1,4 +1,4 @@
-import type { Ref } from "react";
+import type { FunctionComponent, Ref } from "react";
 
 export function mergeRefs<T>(...refs: (Ref<T> | undefined)[]): Ref<T> {
   return (value) => {
@@ -24,4 +24,17 @@ export function mergeRefs<T>(...refs: (Ref<T> | undefined)[]): Ref<T> {
       }
     };
   };
+}
+
+export function reactInvariant<P>(
+  component: FunctionComponent<P>,
+  invariantFn: (props: P) => void,
+): typeof component {
+  return Object.assign(
+    (props: P) => {
+      invariantFn(props);
+      return component(props);
+    },
+    { displayName: component.displayName },
+  ) as typeof component;
 }

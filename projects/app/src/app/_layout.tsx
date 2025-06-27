@@ -1,5 +1,3 @@
-/* eslint-disable import/first */
-
 // ------------------------------
 // MUST COME FIRST. Sentry instrumentation setup for react-native (but not API
 // routes).
@@ -12,19 +10,21 @@ import { routingIntegration } from "@/client/sentry";
 // needs to be very early on in the setup.
 // ------------------------------
 
-import { getServerSessionId } from "@/client/auth";
-import { TrpcProvider } from "@/client/trpc";
+import { useAuth } from "@/client/auth";
+import { DeviceStoreProvider } from "@/client/ui/DeviceStoreProvider";
 import { HhhThemeProvider } from "@/client/ui/HhhThemeProvider";
 import { PostHogProvider } from "@/client/ui/PostHogProvider";
-import { ReplicacheProvider } from "@/client/ui/ReplicacheContext";
+import { SessionStoreProvider } from "@/client/ui/SessionStoreProvider";
 import { SplashScreen } from "@/client/ui/SplashScreen";
 import * as Sentry from "@sentry/react-native";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import * as AppleAuthentication from "expo-apple-authentication";
 import { Image } from "expo-image";
 import { Stack, useNavigationContainerRef } from "expo-router";
+import Head from "expo-router/head";
 import { cssInterop } from "nativewind";
-import { useEffect, useState } from "react";
+import type { PropsWithChildren } from "react";
+import { useEffect } from "react";
 import Reanimated from "react-native-reanimated";
 import "../global.css";
 
@@ -35,9 +35,6 @@ cssInterop(Image, {
   className: { target: `style`, nativeStyleToProp: { color: `tintColor` } },
 });
 cssInterop(Reanimated.View, { className: `style` });
-
-import * as AppleAuthentication from "expo-apple-authentication";
-import Head from "expo-router/head";
 
 cssInterop(AppleAuthentication.AppleAuthenticationButton, {
   className: `style`,
@@ -51,46 +48,43 @@ function RootLayout() {
     routingIntegration.registerNavigationContainer(ref);
   }, [ref]);
 
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: {
-            throwOnError: true,
-          },
-        },
-      }),
-  );
-
   return (
-    <TrpcProvider
-      queryClient={queryClient}
-      getServerSessionId={getServerSessionId}
-    >
-      <QueryClientProvider client={queryClient}>
-        <ReactQueryDevtools initialIsOpen />
-        <ReplicacheProvider>
+    <HhhThemeProvider>
+      <DeviceStoreProvider>
+        <CurrentSessionStoreProvider>
           <PostHogProvider>
-            <HhhThemeProvider>
-              <Head>
-                <title>Pinyinly - Learn Chinese characters</title>
-              </Head>
+            <Head>
+              <title>Pinyinly - Learn Chinese characters</title>
+            </Head>
 
-              <Stack screenOptions={{ headerShown: false, animation: `fade` }}>
-                <Stack.Screen
-                  name="login"
-                  options={{
-                    presentation: `modal`,
-                    animation: `slide_from_bottom`,
-                  }}
-                />
-              </Stack>
-              <SplashScreen />
-            </HhhThemeProvider>
+            <Stack screenOptions={{ headerShown: false, animation: `fade` }}>
+              <Stack.Screen
+                name="login"
+                options={{
+                  presentation: `modal`,
+                  animation: `slide_from_bottom`,
+                }}
+              />
+            </Stack>
+            <SplashScreen />
           </PostHogProvider>
-        </ReplicacheProvider>
-      </QueryClientProvider>
-    </TrpcProvider>
+        </CurrentSessionStoreProvider>
+      </DeviceStoreProvider>
+    </HhhThemeProvider>
+  );
+}
+
+function CurrentSessionStoreProvider({ children }: PropsWithChildren) {
+  const activeDeviceSession = useAuth().data?.activeDeviceSession;
+
+  return activeDeviceSession == null ? null : (
+    <SessionStoreProvider
+      dbName={activeDeviceSession.replicacheDbName}
+      serverSessionId={activeDeviceSession.serverSessionId}
+    >
+      <ReactQueryDevtools initialIsOpen />
+      {children}
+    </SessionStoreProvider>
   );
 }
 
