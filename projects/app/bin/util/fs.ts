@@ -1,4 +1,5 @@
 import { readFile, stat, writeFile } from "node:fs/promises";
+import path from "node:path";
 import type { z } from "zod/v4";
 
 export async function writeUtf8FileIfChanged(
@@ -33,3 +34,8 @@ export async function readFileWithSchema<Schema extends z.ZodType>(
   const content = await readFile(path, `utf8`);
   return schema.parse(JSON.parse(content));
 }
+
+export const dictionaryPath = path.join(
+  import.meta.dirname,
+  `../../src/dictionary/`,
+);

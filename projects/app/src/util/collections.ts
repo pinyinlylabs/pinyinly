@@ -107,7 +107,7 @@ export function mergeMaps<K, V>(
 }
 
 // a merge function that can recursively merge objects
-export function merge<T>(a: T, b: T): unknown {
+export function merge<T>(a: T, b: T): T {
   if (a == null || b == null) {
     return a ?? b;
   } else if (a instanceof Map) {

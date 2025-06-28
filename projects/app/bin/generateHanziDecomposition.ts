@@ -15,7 +15,7 @@ import {
   mergeMaps,
   sortComparatorString,
 } from "../src/util/collections.js";
-import { jsonStringifyIndentOneLevel } from "../src/util/json.js";
+import { jsonStringifyShallowIndent } from "../src/util/json.js";
 import { unicodeShortIdentifier } from "../src/util/unicode.js";
 import { makeDbCache } from "./util/cache.js";
 import { fetchWithCache } from "./util/fetch.js";
@@ -272,6 +272,6 @@ if (argv[`force-write`] || updates.size > 0) {
       import.meta.dirname,
       `../src/dictionary/hanziDecomposition.asset.json`,
     ),
-    jsonStringifyIndentOneLevel(updatedData),
+    jsonStringifyShallowIndent(updatedData),
   );
 }

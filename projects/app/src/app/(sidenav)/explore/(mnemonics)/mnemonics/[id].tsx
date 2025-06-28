@@ -76,72 +76,73 @@ export default function MnemonicIdPage() {
         </View>
 
         <View className="gap-2">
-          {choicesQuery.data == null
-            ? null
-            : [...choicesQuery.data.entries()]
-                .flatMap(([themeId, initials]) => {
-                  const initial = initials.get(id);
-                  const themeName = rMnemonicThemeId().marshal(themeId);
-                  return initial
-                    ? ([[themeId, themeName, initial]] as const)
-                    : [];
-                })
-                .map(([themeId, themeName, initials], i) => (
-                  <View key={i}>
-                    <Text className="text-lg text-fg">
-                      {themeName}
-                      {themeId === groupTheme.data?.themeId ? (
-                        ` ✅`
-                      ) : (
-                        <RectButton
-                          onPress={() => {
-                            if (group?.id != null) {
-                              void r.mutate.setPinyinInitialGroupTheme({
-                                groupId: group.id,
-                                themeId,
-                                now: new Date(),
-                              });
-                            }
-                          }}
-                        >
-                          Use
-                        </RectButton>
-                      )}
-                    </Text>
-                    {[...initials.entries()].map(([name, desc], i) => (
-                      <View key={i}>
-                        <Text
-                          className="font-bold text-fg"
-                          onPress={() => {
-                            void r.mutate.setPinyinInitialAssociation({
-                              initial: id,
-                              name,
+          {choicesQuery.data == null ? (
+            <Text className="text-fg">null</Text>
+          ) : (
+            [...choicesQuery.data.entries()]
+              .flatMap(([themeId, initials]) => {
+                const initial = initials.get(id);
+                const themeName = rMnemonicThemeId().marshal(themeId);
+                return initial
+                  ? ([[themeId, themeName, initial]] as const)
+                  : [];
+              })
+              .map(([themeId, themeName, initials], i) => (
+                <View key={i}>
+                  <Text className="text-lg text-fg">
+                    {themeName}
+                    {themeId === groupTheme.data?.themeId ? (
+                      ` ✅`
+                    ) : (
+                      <RectButton
+                        onPress={() => {
+                          if (group?.id != null) {
+                            void r.mutate.setPinyinInitialGroupTheme({
+                              groupId: group.id,
+                              themeId,
                               now: new Date(),
                             });
-                          }}
+                          }
+                        }}
+                      >
+                        Use
+                      </RectButton>
+                    )}
+                  </Text>
+                  {[...initials.entries()].map(([name, desc], i) => (
+                    <View key={i}>
+                      <Text
+                        className="font-bold text-fg"
+                        onPress={() => {
+                          void r.mutate.setPinyinInitialAssociation({
+                            initial: id,
+                            name,
+                            now: new Date(),
+                          });
+                        }}
+                      >
+                        <Text
+                          className={
+                            associationQuery.data?.name === name
+                              ? `text-[green]`
+                              : undefined
+                          }
                         >
-                          <Text
-                            className={
-                              associationQuery.data?.name === name
-                                ? `text-[green]`
-                                : undefined
-                            }
-                          >
-                            {name}
-                          </Text>
-
-                          {` `}
-                          <Text className="text-sm font-normal text-caption">
-                            {desc}
-                          </Text>
+                          {name}
                         </Text>
-                      </View>
-                    ))}
-                  </View>
-                ))}
+
+                        {` `}
+                        <Text className="text-sm font-normal text-caption">
+                          {desc}
+                        </Text>
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              ))
+          )}
         </View>
       </View>
-      <View></View>
     </ScrollView>
   );
 }

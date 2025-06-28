@@ -1,5 +1,5 @@
 import { mapSetAdd, sortComparatorString } from "#util/collections.ts";
-import { jsonStringifyIndentOneLevel } from "#util/json.ts";
+import { jsonStringifyShallowIndent } from "#util/json.ts";
 import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import makeDebug from "debug";
 import { readFile, unlink } from "node:fs/promises";
@@ -199,5 +199,5 @@ for (const [platform, pkgNames] of Object.entries(clientPackagesByPlatform)) {
     .sort(sortComparatorString(([license]) => license))
     .map(([license, pkgNamesSet]) => [license, [...pkgNamesSet].sort()]);
 
-  await writeUtf8FileIfChanged(outFile, jsonStringifyIndentOneLevel(licenses3));
+  await writeUtf8FileIfChanged(outFile, jsonStringifyShallowIndent(licenses3));
 }

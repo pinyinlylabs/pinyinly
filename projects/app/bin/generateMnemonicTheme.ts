@@ -1,4 +1,5 @@
 import { rMnemonicThemeId, rPinyinInitialGroupId } from "#data/rizzleSchema.ts";
+import { jsonStringifyShallowIndent } from "#util/json.ts";
 import { invariant } from "@pinyinly/lib/invariant";
 import makeDebug from "debug";
 import path from "node:path";
@@ -6,9 +7,10 @@ import OpenAI from "openai";
 import yargs from "yargs";
 import { z } from "zod/v4";
 import { loadHhhPinyinChart } from "../src/data/pinyin.js";
+import type { loadMnemonicThemeChoices } from "../src/dictionary/dictionary.js";
 import {
-  loadMnemonicThemeChoices,
   loadMnemonicThemes,
+  mnemonicThemeChoicesSchema,
 } from "../src/dictionary/dictionary.js";
 import {
   deepTransform,
@@ -16,7 +18,11 @@ import {
   sortComparatorString,
 } from "../src/util/collections.js";
 import { makeDbCache } from "./util/cache.js";
-import { writeUtf8FileIfChanged } from "./util/fs.js";
+import {
+  dictionaryPath,
+  readFileWithSchema,
+  writeUtf8FileIfChanged,
+} from "./util/fs.js";
 import { openAiWithCache, zodResponseFormat } from "./util/openai.js";
 
 const debug = makeDebug(`hhh`);
@@ -60,6 +66,11 @@ if (argv.debug) {
 }
 
 const dbCache = makeDbCache(import.meta.filename, `openai_chat_cache`, debug);
+
+const dataFilePath = path.join(
+  dictionaryPath,
+  `mnemonicThemeChoices.asset.json`,
+);
 
 const openAiSchema = z.object({
   result: z.array(
@@ -108,7 +119,7 @@ There are some important constraints:
 - I need to imagine each ${theme.noun} visually in my mind, so they should feature in news/movies/tv/videos.
 - It's important that I pick a ${theme.noun} that is meaningful to me, so I want to have a lot of choices to select from.
 
-I want to start with group ${JSON.stringify(groupId)} using ${theme.noun} of the theme ${themeId} (${theme.description}). The items in this group are:
+I want to start with group ${rPinyinInitialGroupId().marshal(groupId)} using ${theme.noun} of the theme ${rMnemonicThemeId().marshal(themeId)} (${theme.description}). The items in this group are:
 
 ${group.initials.map((i) => `- ${JSON.stringify(i)}`).join(`\n`)}
 
@@ -161,21 +172,39 @@ type MnemonicThemeChoices = Awaited<
 >;
 
 async function saveUpdates(updates: MnemonicThemeChoices) {
-  const existingData = await loadMnemonicThemeChoices();
+  const existingData = await readMnemonicThemeChoices();
+  await writeMnemonicThemeChoices(merge(existingData, updates));
+}
 
-  const updatedData = deepTransform(merge(existingData, updates), (x) =>
-    x instanceof Map
-      ? Object.fromEntries(
-          [...x.entries()].sort(sortComparatorString(([k]) => k as string)),
-        )
-      : x,
+async function readMnemonicThemeChoices() {
+  return await readFileWithSchema(
+    dataFilePath,
+    mnemonicThemeChoicesSchema,
+    new Map(),
+  );
+}
+
+async function writeMnemonicThemeChoices(data: MnemonicThemeChoices) {
+  const newData = deepTransform(
+    new Map(
+      [...data.entries()].map(([key, value]) => [
+        rMnemonicThemeId().marshal(key),
+        value,
+      ]),
+    ),
+    (x) =>
+      x instanceof Map
+        ? Object.fromEntries(
+            [...x.entries()].sort(sortComparatorString(([k]) => k as string)),
+          )
+        : x,
   );
 
+  // Make sure the data is valid before writing
+  mnemonicThemeChoicesSchema.parse(newData);
+
   await writeUtf8FileIfChanged(
-    path.join(
-      import.meta.dirname,
-      `../src/dictionary/mnemonicThemeChoices.asset.json`,
-    ),
-    JSON.stringify(updatedData, null, 1),
+    dataFilePath,
+    jsonStringifyShallowIndent(newData, 2),
   );
 }

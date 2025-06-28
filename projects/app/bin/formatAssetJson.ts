@@ -1,7 +1,7 @@
 import makeDebug from "debug";
 import { readFile } from "node:fs/promises";
 import yargs from "yargs";
-import { jsonStringifyIndentOneLevel } from "../src/util/json.js";
+import { jsonStringifyShallowIndent } from "../src/util/json.js";
 import { writeUtf8FileIfChanged } from "./util/fs.js";
 
 const debug = makeDebug(`hhh`);
@@ -32,7 +32,7 @@ for (const path of argv.paths) {
   });
   const updated = await writeUtf8FileIfChanged(
     path,
-    jsonStringifyIndentOneLevel(JSON.parse(existingContent)),
+    jsonStringifyShallowIndent(JSON.parse(existingContent)),
   );
   debug((updated ? `✨ saved` : `skipped`) + `: %s`, path);
 }
