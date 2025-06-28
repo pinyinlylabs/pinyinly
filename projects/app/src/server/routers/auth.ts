@@ -28,11 +28,10 @@ import * as schema from "../pgSchema";
 
 // Define RP (Relying Party) name and ID for the WebAuthn process
 const RP_NAME = `Pinyinly`;
-const RP_ID =
-  process.env.NODE_ENV === `production` ? `pinyinly.com` : `localhost`;
+const RP_ID = process.env.NODE_ENV === `production` ? `pinyin.ly` : `localhost`;
 const ORIGIN =
   process.env.NODE_ENV === `production`
-    ? `https://pinyinly.com/login`
+    ? `https://pinyin.ly`
     : `http://localhost:8081`;
 
 const textEncoder = new TextEncoder();

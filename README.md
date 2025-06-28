@@ -9,9 +9,9 @@
 
 <img src=".github/images/logo-color@2x.png" height="256" />
 
-# Pinyinly — Learn Chinese characters
+# Pinyinly — Learn to read Chinese
 
-Try it out at https://pinyinly.com — no signup needed.
+Try it out at https://pinyin.ly — no signup needed.
 
 # Get involved
 

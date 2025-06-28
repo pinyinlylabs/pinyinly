@@ -4,10 +4,10 @@ import * as React from "react";
 export const MyEmail = () => (
   <Html>
     <Button
-      href="https://pinyinly.com"
+      href="https://pinyin.ly"
       style={{ background: "#000", color: "#fff", padding: "12px 20px" }}
     >
-      Goto pinyinly.com
+      Goto pinyin.ly
     </Button>
   </Html>
 );
