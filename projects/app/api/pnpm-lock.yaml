@@ -22,7 +22,7 @@ importers:
         version: 8.54.0
       '@vercel/functions':
         specifier: ^2.0.0
-        version: 2.1.0
+        version: 2.2.2
 
 packages:
 
@@ -342,8 +342,8 @@ packages:
   '@types/tedious@4.0.14':
     resolution: {integrity: sha512-KHPsfX/FoVbUGbyYvk1q9MMQHLPeRZhRJZdO45Q4YjvFkv4hMNghCWTvy7rdKessBsmtz4euWCWAB6/tVpI1Iw==}
 
-  '@vercel/functions@2.1.0':
-    resolution: {integrity: sha512-1gSbK9zfrbJxk1JTBVERDhLi01mK3fz+gw4GjOjZwHnqs0zsBhQA70HGVtXQX/Z3BTRMfbpAEMVDfhecRw0lDA==}
+  '@vercel/functions@2.2.2':
+    resolution: {integrity: sha512-wgtgFwhYAUzS7UOvw44q14FaoRPONEnyoM0JlrjcDkI+kzSu7M8J5Tk5T3Kvv52//8is+HGxVQtaBSiO3G0wbw==}
     engines: {node: '>= 18'}
     peerDependencies:
       '@aws-sdk/credential-provider-web-identity': '*'
@@ -1089,7 +1089,7 @@ snapshots:
     dependencies:
       '@types/node': 22.13.10
 
-  '@vercel/functions@2.1.0': {}
+  '@vercel/functions@2.2.2': {}
 
   '@web3-storage/multipart-parser@1.0.0': {}
 
