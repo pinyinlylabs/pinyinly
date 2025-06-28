@@ -9458,13 +9458,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"enhanced-resolve@npm:^5.18.1":
-  version: 5.18.1
-  resolution: "enhanced-resolve@npm:5.18.1"
+"enhanced-resolve@npm:^5.18.2":
+  version: 5.18.2
+  resolution: "enhanced-resolve@npm:5.18.2"
   dependencies:
     graceful-fs: "npm:^4.2.4"
     tapable: "npm:^2.2.0"
-  checksum: 10c0/4cffd9b125225184e2abed9fdf0ed3dbd2224c873b165d0838fd066cde32e0918626cba2f1f4bf6860762f13a7e2364fd89a82b99566be2873d813573ac71846
+  checksum: 10c0/2a45105daded694304b0298d1c0351a981842249a9867513d55e41321a4ccf37dfd35b0c1e9ceae290eab73654b09aa7a910d618ea6f9441e97c52bc424a2372
   languageName: node
   linkType: hard
 
@@ -9921,11 +9921,11 @@ __metadata:
   linkType: hard
 
 "eslint-plugin-better-tailwindcss@npm:^3.1.0":
-  version: 3.4.0
-  resolution: "eslint-plugin-better-tailwindcss@npm:3.4.0"
+  version: 3.4.2
+  resolution: "eslint-plugin-better-tailwindcss@npm:3.4.2"
   dependencies:
     "@eslint/css-tree": "npm:^3.6.1"
-    enhanced-resolve: "npm:^5.18.1"
+    enhanced-resolve: "npm:^5.18.2"
     jiti: "npm:^2.4.2"
     postcss: "npm:^8.5.6"
     postcss-import: "npm:^16.1.1"
@@ -9934,7 +9934,7 @@ __metadata:
   peerDependencies:
     eslint: ^7.0.0 || ^8.0.0 || ^9.0.0
     tailwindcss: ^3.3.0 || ^4.0.0
-  checksum: 10c0/9602efa69436ea0c2e15da126808bf0be541bdaf6349a2304c32a7161a5d18c34133dcaa29e858713a2a4ed9059967329aa35c2374046c51a17c5cd436ee2a28
+  checksum: 10c0/26fd3e4b3e1858790d0a335588b14d9c966ef6a1f493248a35eadb8f34142ee5bfdf99a41ed26014090134c4529483cd6c83626da9707b1fbcbd3e47985056da
   languageName: node
   linkType: hard
 
