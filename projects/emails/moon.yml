@@ -11,6 +11,9 @@ tasks:
     command: yarn email build
     inputs:
       - "@group(emails)"
+    options:
+      # disable until https://github.com/fb55/css-select/issues/1590 is resolved.
+      runInCI: false
   start:
     command: yarn email start
     deps:

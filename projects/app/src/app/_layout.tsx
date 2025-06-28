@@ -54,7 +54,7 @@ function RootLayout() {
         <CurrentSessionStoreProvider>
           <PostHogProvider>
             <Head>
-              <title>Pinyinly - Learn Chinese characters</title>
+              <title>Pinyinly - Learn to read Chinese</title>
             </Head>
 
             <Stack screenOptions={{ headerShown: false, animation: `fade` }}>

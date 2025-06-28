@@ -1,4 +1,4 @@
-const prodDomain = `pinyinly.com`;
+const prodDomain = `pinyin.ly`;
 const devDomain =
   process.env.EXPO_TUNNEL_SUBDOMAIN != null &&
   process.env.NODE_ENV === `development`
