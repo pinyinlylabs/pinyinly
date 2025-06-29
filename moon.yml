@@ -32,15 +32,11 @@ tasks:
     command: npx -y -p renovate@37.424.1 renovate-config-validator --strict
     inputs:
       - renovate.json
-    options:
-      # disable until https://github.com/fb55/css-select/issues/1590 is resolved.
-      runInCI: false
 
   test:
     deps:
       - prettierCheck
-      # disable until https://github.com/fb55/css-select/issues/1590 is resolved.
-      # - renovateCheck
+      - renovateCheck
       - yarnConstraints
 
 tags:
