@@ -90,9 +90,9 @@ export const rFsrsRating = memoize0(function rFsrsRating() {
 export const rPinyinInitialGroupId = memoize0(function rPinyinInitialGroupId() {
   return r.enum(PinyinInitialGroupId, {
     [PinyinInitialGroupId.Basic]: `basic`,
-    [PinyinInitialGroupId._i]: `-i`,
-    [PinyinInitialGroupId._u]: `-u`,
-    [PinyinInitialGroupId._v]: `-ü`,
+    [PinyinInitialGroupId[`-i`]]: `-i`,
+    [PinyinInitialGroupId[`-u`]]: `-u`,
+    [PinyinInitialGroupId[`-ü`]]: `-ü`,
     [PinyinInitialGroupId.Null]: `∅`,
     [PinyinInitialGroupId.Everything]: `everything`,
   });
@@ -103,6 +103,8 @@ export const rMnemonicThemeId = memoize0(function rMnemonicThemeId() {
     [MnemonicThemeId.AnimalSpecies]: `AnimalSpecies`,
     [MnemonicThemeId.GreekMythologyCharacter]: `GreekMythologyCharacter`,
     [MnemonicThemeId.MythologyCharacter]: `MythologyCharacter`,
+    [MnemonicThemeId.Profession]: `Profession`,
+    [MnemonicThemeId.AthleteType]: `AthleteType`,
     [MnemonicThemeId.WesternCultureFamousMen]: `WesternCultureFamousMen`,
     [MnemonicThemeId.WesternCultureFamousWomen]: `WesternCultureFamousWomen`,
     [MnemonicThemeId.WesternMythologyCharacter]: `WesternMythologyCharacter`,

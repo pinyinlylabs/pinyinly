@@ -1,4 +1,8 @@
 {
+  "AthleteType": {
+    "noun": "type of athlete",
+    "description": "names of types of athletes (e.g. surfer, weight-lifter, ping pong player, etc)"
+  },
   "WesternCultureFamousWomen": {
     "noun": "person",
     "description": "famous females in western culture (e.g. actresses, influencers, celebrities, politicians, etc)"
@@ -14,6 +18,10 @@
   "MythologyCharacter": {
     "noun": "character",
     "description": "mythology characters (e.g. gods, heroes, monsters, etc)"
+  },
+  "Profession": {
+    "noun": "profession",
+    "description": "names of well-known professions (e.g. baker, lawyer, window cleaner, etc)"
   },
   "AnimalSpecies": {
     "noun": "animal",

@@ -1,8 +1,5 @@
-import type {
-  PinyinInitialGroupId,
-  PinyinPronunciation,
-  PinyinSyllable,
-} from "@/data/model";
+import type { PinyinPronunciation, PinyinSyllable } from "@/data/model";
+import { PinyinInitialGroupId } from "@/data/model";
 import {
   deepReadonly,
   memoize0,
@@ -574,4 +571,27 @@ export function matchAllPinyinSyllablesWithIndexes(
     tokens.push(index, text);
   }
   return tokens;
+}
+
+export function pinyinInitialGroupTitle(groupId: PinyinInitialGroupId): string {
+  switch (groupId) {
+    case PinyinInitialGroupId.Basic: {
+      return `Basic`;
+    }
+    case PinyinInitialGroupId[`-i`]: {
+      return `Ends with -i`;
+    }
+    case PinyinInitialGroupId[`-u`]: {
+      return `Ends with -u`;
+    }
+    case PinyinInitialGroupId[`-ü`]: {
+      return `Ends with -ü`;
+    }
+    case PinyinInitialGroupId.Null: {
+      return `Null`;
+    }
+    case PinyinInitialGroupId.Everything: {
+      return `Everything`;
+    }
+  }
 }
