@@ -4,20 +4,22 @@ import { z } from "zod/v4";
 import type { HanziWordSkill, Skill } from "./rizzleSchema";
 
 const pinyinInitialGroupIdSchema = z.enum({
-  Basic: `debug--Basic`,
-  _i: `debug--_i`,
-  _u: `debug--_u`,
-  _v: `debug--_v`,
-  Null: `debug--Null`,
-  Everything: `debug--Everything`,
+  [`Basic`]: `debug--Basic`,
+  [`-i`]: `debug--_i`,
+  [`-u`]: `debug--_u`,
+  [`-ü`]: `debug--_v`,
+  [`Null`]: `debug--Null`,
+  [`Everything`]: `debug--Everything`,
 });
 export const PinyinInitialGroupId = pinyinInitialGroupIdSchema.enum;
 export type PinyinInitialGroupId = z.infer<typeof pinyinInitialGroupIdSchema>;
 
 export const mnemonicThemeIdSchema = z.enum({
   AnimalSpecies: `debug--AnimalSpecies`,
+  AthleteType: `debug--AthleteType`,
   GreekMythologyCharacter: `debug--GreekMythologyCharacter`,
   MythologyCharacter: `debug--MythologyCharacter`,
+  Profession: `debug--Profession`,
   WesternCultureFamousMen: `debug--WesternCultureFamousMen`,
   WesternCultureFamousWomen: `debug--WesternCultureFamousWomen`,
   WesternMythologyCharacter: `debug--WesternMythologyCharacter`,
