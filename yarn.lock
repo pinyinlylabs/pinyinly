@@ -14918,14 +14918,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pg-protocol@npm:*, pg-protocol@npm:^1.8.0":
-  version: 1.10.0
-  resolution: "pg-protocol@npm:1.10.0"
-  checksum: 10c0/7d0d64fe9df50262d907fd476454e1e36f41f5f66044c3ba6aa773fb8add1d350a9c162306e5c33e99bdfbdcc1140dd4ca74f66eda41d0aaceb5853244dcdb65
-  languageName: node
-  linkType: hard
-
-"pg-protocol@npm:^1.10.3":
+"pg-protocol@npm:*, pg-protocol@npm:^1.10.3, pg-protocol@npm:^1.8.0":
   version: 1.10.3
   resolution: "pg-protocol@npm:1.10.3"
   checksum: 10c0/f7ef54708c93ee6d271e37678296fc5097e4337fca91a88a3d99359b78633dbdbf6e983f0adb34b7cdd261b7ec7266deb20c3233bf3dfdb498b3e1098e8750b9
