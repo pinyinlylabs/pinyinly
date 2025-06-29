@@ -33,12 +33,10 @@ jobs:
       - name: Set file, folder and path variables
         run: |
           GZIP_NAME="$(date +'%B-%d-%Y@%H:%M:%S').sql.gz"
-          UPLOAD_PATH="s3://${{ env.BACKUPS_R2_BUCKET_NAME }}/neon-db/${GZIP_NAME}"
+          UPLOAD_PATH="s3://neon-db/${GZIP_NAME}"
 
           echo "GZIP_NAME=${GZIP_NAME}" >> $GITHUB_ENV
           echo "UPLOAD_PATH=${UPLOAD_PATH}" >> $GITHUB_ENV
-        env:
-          BACKUPS_R2_BUCKET_NAME: ${{ secrets.BACKUPS_R2_BUCKET_NAME }}
 
       - name: Run pg_dump
         run: |
