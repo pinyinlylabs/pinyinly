@@ -14,11 +14,6 @@ jobs:
 
     env:
       RETENTION_DAYS: 365
-      DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
-      AWS_ACCESS_KEY_ID: ${{ secrets.BACKUPS_R2_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.BACKUPS_R2_SECRET_ACCESS_KEY }}
-      BACKUPS_R2_BUCKET_NAME: ${{ secrets.BACKUPS_R2_BUCKET_NAME }}
-      BACKUPS_R2_ENDPOINT: ${{ secrets.BACKUPS_R2_ENDPOINT }}
       PG_VERSION: "17"
 
     steps:
@@ -44,12 +39,21 @@ jobs:
           echo "GZIP_NAME=${GZIP_NAME}" >> $GITHUB_ENV
           echo "FOLDER_NAME=${FOLDER_NAME}" >> $GITHUB_ENV
           echo "UPLOAD_PATH=${UPLOAD_PATH}" >> $GITHUB_ENV
+        env:
+          BACKUPS_R2_BUCKET_NAME: ${{ secrets.BACKUPS_R2_BUCKET_NAME }}
 
       - name: Run pg_dump
         run: |
           $POSTGRES/pg_dump -v ${{ env.DATABASE_URL }} | gzip > "${{ env.GZIP_NAME }}"
+        env:
+          DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
 
       - name: Upload to Cloudflare R2
         run: |
           aws s3 cp "${{ env.GZIP_NAME }}" "${{ env.UPLOAD_PATH }}" \
             --endpoint-url ${{ env.BACKUPS_R2_ENDPOINT }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.BACKUPS_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.BACKUPS_R2_SECRET_ACCESS_KEY }}
+          BACKUPS_R2_ENDPOINT: ${{ secrets.BACKUPS_R2_ENDPOINT }}
+
