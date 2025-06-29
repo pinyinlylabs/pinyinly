@@ -82,31 +82,33 @@ export const loadMnemonicThemes = memoize0(async function loadMnemonicThemes() {
   );
 });
 
+export const mnemonicThemeChoicesSchema = z
+  .record(
+    z.string(), // themeId
+    z.record(
+      z.string(), // initial
+      z.record(z.string(), z.string()),
+    ),
+  )
+  .transform(
+    (x) =>
+      new Map(
+        Object.entries(x).map(([k, v]) => [
+          rMnemonicThemeId().unmarshal(k),
+          new Map(
+            Object.entries(v).map(([k2, v2]) => [
+              k2,
+              new Map(Object.entries(v2)),
+            ]),
+          ),
+        ]),
+      ),
+  );
+
 export const loadMnemonicThemeChoices = memoize0(
   async function loadMnemonicThemeChoices() {
     return (
-      z
-        .record(
-          z.string(), // themeId
-          z.record(
-            z.string(), // initial
-            z.record(z.string(), z.string()),
-          ),
-        )
-        .transform(
-          (x) =>
-            new Map(
-              Object.entries(x).map(([k, v]) => [
-                rMnemonicThemeId().unmarshal(k),
-                new Map(
-                  Object.entries(v).map(([k2, v2]) => [
-                    k2,
-                    new Map(Object.entries(v2)),
-                  ]),
-                ),
-              ]),
-            ),
-        )
+      mnemonicThemeChoicesSchema
         .transform(deepReadonly)
         // eslint-disable-next-line unicorn/no-await-expression-member
         .parse((await import(`./mnemonicThemeChoices.asset.json`)).default)

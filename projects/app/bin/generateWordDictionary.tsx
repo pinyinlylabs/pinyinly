@@ -49,7 +49,7 @@ import {
   sortComparatorNumber,
   sortComparatorString,
 } from "#util/collections.ts";
-import { jsonStringifyIndentOneLevel } from "#util/json.ts";
+import { jsonStringifyShallowIndent } from "#util/json.ts";
 import { Alert, MultiSelect, Select } from "@inkjs/ui";
 import { invariant } from "@pinyinly/lib/invariant";
 import {
@@ -84,7 +84,11 @@ import {
   getDongChineseMeaningKey,
   getDongChinesePinyin,
 } from "./util/dongChinese.js";
-import { readFileWithSchema, writeUtf8FileIfChanged } from "./util/fs.js";
+import {
+  dictionaryPath,
+  readFileWithSchema,
+  writeUtf8FileIfChanged,
+} from "./util/fs.js";
 import { makeSimpleAiClient } from "./util/openai.js";
 
 const debug = makeDebug(`hhh`);
@@ -2378,8 +2382,6 @@ const SemiColonList = ({ items }: { items: readonly string[] }) => (
   </>
 );
 
-const dictionaryPath = path.join(import.meta.dirname, `../src/dictionary/`);
-
 const dictionaryFilePath = path.join(dictionaryPath, `dictionary.asset.json`);
 
 const readDictionary = (): Promise<Dictionary> =>
@@ -2448,7 +2450,7 @@ async function saveUpsertHanziWordMeaning(
 async function writeDictionary(dict: Dictionary) {
   await writeUtf8FileIfChanged(
     dictionaryFilePath,
-    jsonStringifyIndentOneLevel(unparseDictionary(dict)),
+    jsonStringifyShallowIndent(unparseDictionary(dict)),
   );
   await queryClient.invalidateQueries({ queryKey: [`loadDictionary`] });
 }
@@ -2488,7 +2490,7 @@ async function readHanziWordList(name: string) {
 async function writeHanziWordList(wordListFileName: string, data: HanziWord[]) {
   await writeUtf8FileIfChanged(
     path.join(dictionaryPath, `${wordListFileName}.asset.json`),
-    jsonStringifyIndentOneLevel(data.sort()),
+    jsonStringifyShallowIndent(data.sort()),
   );
 }
 

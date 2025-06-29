@@ -3,7 +3,7 @@ import {
   allHanziCharacters,
   loadHanziDecomposition,
 } from "#dictionary/dictionary.ts";
-import { jsonStringifyIndentOneLevel } from "#util/json.ts";
+import { jsonStringifyShallowIndent } from "#util/json.ts";
 import { unicodeShortIdentifier } from "#util/unicode.ts";
 import { invariant } from "@pinyinly/lib/invariant";
 import * as fontkit from "fontkit";
@@ -70,6 +70,6 @@ await writeFile(
     import.meta.dirname,
     `../src/dictionary/missingFontGlyphs.asset.json`,
   ),
-  jsonStringifyIndentOneLevel({ [`macOS`]: [...missingGlyphs].sort() }),
+  jsonStringifyShallowIndent({ [`macOS`]: [...missingGlyphs].sort() }),
   `utf8`,
 );

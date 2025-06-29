@@ -9,7 +9,7 @@ import {
   lookupHanzi,
 } from "../src/dictionary/dictionary.js";
 import { mergeMaps, sortComparatorString } from "../src/util/collections.js";
-import { jsonStringifyIndentOneLevel } from "../src/util/json.js";
+import { jsonStringifyShallowIndent } from "../src/util/json.js";
 import { makeDbCache } from "./util/cache.js";
 import { writeUtf8FileIfChanged } from "./util/fs.js";
 import { openAiWithCache, zodResponseFormat } from "./util/openai.js";
@@ -164,6 +164,6 @@ if (argv[`force-write`] || updates.size > 0) {
       import.meta.dirname,
       `../src/dictionary/radicalNameMnemonics.asset.json`,
     ),
-    jsonStringifyIndentOneLevel(updatedData),
+    jsonStringifyShallowIndent(updatedData),
   );
 }
