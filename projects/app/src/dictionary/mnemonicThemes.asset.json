@@ -1,7 +1,7 @@
 {
   "AthleteType": {
     "noun": "type of athlete",
-    "description": "names of types of atheletes (e.g. surfer, weight-lifter, ping pong player, etc)"
+    "description": "names of types of athletes (e.g. surfer, weight-lifter, ping pong player, etc)"
   },
   "WesternCultureFamousWomen": {
     "noun": "person",
@@ -21,7 +21,7 @@
   },
   "Profession": {
     "noun": "profession",
-    "description": "names of well known professions (e.g. baker, lawyer, window cleaner, etc)"
+    "description": "names of well-known professions (e.g. baker, lawyer, window cleaner, etc)"
   },
   "AnimalSpecies": {
     "noun": "animal",
