@@ -1,6 +1,7 @@
 import type { PinyinChart } from "#data/pinyin.ts";
 import {
   convertPinyinWithToneNumberToToneMark,
+  loadHhhPinyinChart,
   loadHhPinyinChart,
   loadHmmPinyinChart,
   loadMmPinyinChart,
@@ -23,6 +24,7 @@ test(`json data can be loaded and passes the schema validation`, async () => {
   await loadHmmPinyinChart();
   await loadMmPinyinChart();
   await loadStandardPinyinChart();
+  loadHhhPinyinChart();
 });
 
 test(`${convertPinyinWithToneNumberToToneMark.name} fixtures`, () => {
@@ -400,6 +402,41 @@ test(`hmm pinyin covers kangxi pinyin`, async () => {
     [`zhou`, `zh`, `ou`],
     [`zhuo`, `zhu`, `o`],
     [`shua`, `shu`, `a`],
+  ]);
+});
+
+test(`hhh pinyin covers kangxi pinyin`, async () => {
+  const chart = loadHhhPinyinChart();
+
+  await testPinyinChart(chart, [
+    [`zhang`, `zh`, `ang`],
+    [`bao`, `b`, `ao`],
+    [`ao`, `∅`, `ao`],
+    [`ba`, `b`, `a`],
+    [`ci`, `c`, `∅`],
+    [`chi`, `ch`, `∅`],
+    [`cong`, `cu`, `(e)ng`],
+
+    // https://countryoftheblind.blogspot.com/2012/01/mnemonics-for-pronouncing-chinese.html?showComment=1540670199273&m=1#c4879970812355082477
+    [`cheng`, `ch`, `(e)ng`],
+    [`chong`, `chu`, `(e)ng`],
+
+    [`chui`, `chu`, `ei`],
+    [`diu`, `di`, `ou`],
+    [`miu`, `mi`, `ou`],
+    [`niu`, `ni`, `ou`],
+    [`you`, `y`, `ou`],
+    [`yin`, `y`, `(e)n`],
+    [`ê`, `∅`, `e`],
+    [`er`, `∅`, `∅`],
+    [`zhi`, `zh`, `∅`], // ?
+    [`zha`, `zh`, `a`],
+    [`zhong`, `zhu`, `(e)ng`],
+    [`zhe`, `zh`, `e`],
+    [`ta`, `t`, `a`],
+    [`a`, `∅`, `a`],
+    [`xing`, `xi`, `(e)ng`],
+    [`qing`, `qi`, `(e)ng`],
   ]);
 });
 
