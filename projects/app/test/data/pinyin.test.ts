@@ -1,14 +1,29 @@
+import type { PinyinChart } from "#data/pinyin.ts";
 import {
   convertPinyinWithToneNumberToToneMark,
+  loadHhPinyinChart,
+  loadHmmPinyinChart,
+  loadMmPinyinChart,
+  loadStandardPinyinChart,
   matchAllPinyinSyllables,
   matchAllPinyinSyllablesWithIndexes,
   parsePinyinSyllable,
   parsePinyinSyllableTone,
   pinyinSyllablePattern,
   pinyinSyllableSuggestions,
+  splitTonelessPinyinSyllable,
 } from "#data/pinyin.ts";
+import { loadPinyinWords } from "#dictionary/dictionary.ts";
+import { uniqueInvariant } from "@pinyinly/lib/invariant";
 import assert from "node:assert/strict";
 import { describe, expect, test } from "vitest";
+
+test(`json data can be loaded and passes the schema validation`, async () => {
+  await loadHhPinyinChart();
+  await loadHmmPinyinChart();
+  await loadMmPinyinChart();
+  await loadStandardPinyinChart();
+});
 
 test(`${convertPinyinWithToneNumberToToneMark.name} fixtures`, () => {
   // Rules: (from https://en.wikipedia.org/wiki/Pinyin)
@@ -244,3 +259,191 @@ describe(`${matchAllPinyinSyllablesWithIndexes.name} suite`, () => {
     }
   });
 });
+
+test(`standard pinyin covers kangxi pinyin`, async () => {
+  const chart = await loadStandardPinyinChart();
+
+  await testPinyinChart(chart, [
+    [`a`, `∅`, `a`],
+    [`an`, `∅`, `an`],
+    [`ê`, `∅`, `ê`],
+    [`ju`, `j`, `ü`],
+    [`qu`, `q`, `ü`],
+    [`xu`, `x`, `ü`],
+    [`bu`, `b`, `u`],
+    [`pu`, `p`, `u`],
+    [`mu`, `m`, `u`],
+    [`fu`, `f`, `u`],
+    [`du`, `d`, `u`],
+    [`tu`, `t`, `u`],
+    [`nu`, `n`, `u`],
+    [`niu`, `n`, `iu`],
+    [`lu`, `l`, `u`],
+    [`gu`, `g`, `u`],
+    [`ku`, `k`, `u`],
+    [`hu`, `h`, `u`],
+    [`wu`, `∅`, `u`],
+    [`wa`, `∅`, `ua`],
+    [`er`, `∅`, `er`],
+    [`yi`, `∅`, `i`],
+    [`ya`, `∅`, `ia`],
+    [`yo`, `∅`, `io`],
+    [`ye`, `∅`, `ie`],
+    [`yai`, `∅`, `iai`],
+    [`yao`, `∅`, `iao`],
+    [`you`, `∅`, `iu`],
+    [`yan`, `∅`, `ian`],
+    [`yin`, `∅`, `in`],
+    [`yang`, `∅`, `iang`],
+    [`ying`, `∅`, `ing`],
+    [`wu`, `∅`, `u`],
+    [`wa`, `∅`, `ua`],
+    [`wo`, `∅`, `uo`],
+    [`wai`, `∅`, `uai`],
+    [`wei`, `∅`, `ui`],
+    [`wan`, `∅`, `uan`],
+    [`wen`, `∅`, `un`],
+    [`wang`, `∅`, `uang`],
+    [`weng`, `∅`, `ong`],
+    [`ong`, `∅`, `ong`],
+    [`yu`, `∅`, `ü`],
+    [`yue`, `∅`, `üe`],
+    [`yuan`, `∅`, `üan`],
+    [`yun`, `∅`, `ün`],
+    [`yong`, `∅`, `iong`],
+    [`ju`, `j`, `ü`],
+    [`jue`, `j`, `üe`],
+    [`juan`, `j`, `üan`],
+    [`jun`, `j`, `ün`],
+    [`jiong`, `j`, `iong`],
+    [`qu`, `q`, `ü`],
+    [`que`, `q`, `üe`],
+    [`quan`, `q`, `üan`],
+    [`qun`, `q`, `ün`],
+    [`qiong`, `q`, `iong`],
+    [`xu`, `x`, `ü`],
+    [`xue`, `x`, `üe`],
+    [`xuan`, `x`, `üan`],
+    [`xun`, `x`, `ün`],
+    [`xiong`, `x`, `iong`],
+  ]);
+});
+
+test(`mm pinyin covers kangxi pinyin`, async () => {
+  const chart = await loadMmPinyinChart();
+
+  await testPinyinChart(chart, [
+    [`zhang`, `zh`, `ang`],
+    [`bao`, `b`, `ao`],
+    [`ao`, `∅`, `ao`],
+    [`ba`, `b`, `a`],
+    [`ci`, `c`, `∅`],
+    [`chi`, `ch`, `∅`],
+    [`cong`, `cu`, `(e)ng`],
+    [`chong`, `chu`, `(e)ng`],
+    [`chui`, `chu`, `ei`],
+    [`diu`, `di`, `ou`],
+    [`miu`, `mi`, `ou`],
+    [`niu`, `ni`, `ou`],
+    [`you`, `y`, `ou`],
+    [`yin`, `y`, `(e)n`],
+    [`ê`, `∅`, `e`],
+    [`er`, `∅`, `∅`],
+    // [`zh(i)`, `zh`, `∅`], // ?
+    [`zha`, `zh`, `a`],
+    [`zhong`, `zhu`, `(e)ng`],
+    [`zhe`, `zh`, `e`],
+    [`ta`, `t`, `a`],
+    [`a`, `∅`, `a`],
+    [`xing`, `xi`, `(e)ng`],
+    [`qing`, `qi`, `(e)ng`],
+  ]);
+});
+
+test(`hh pinyin covers kangxi pinyin`, async () => {
+  const chart = await loadHhPinyinChart();
+
+  await testPinyinChart(chart, [
+    [`a`, `_`, `a`],
+    [`bi`, `bi`, `_`],
+    [`niu`, `ni`, `(o)u`],
+    [`tie`, `ti`, `e`],
+    [`zhou`, `zh`, `(o)u`],
+    [`zhuo`, `zhu`, `o`],
+  ]);
+});
+
+test(`hmm pinyin covers kangxi pinyin`, async () => {
+  const chart = await loadHmmPinyinChart();
+
+  assert.equal(chart.initials.flatMap((i) => i.initials).length, 55);
+  assert.equal(chart.finals.length, 13);
+
+  await testPinyinChart(chart, [
+    [`a`, `∅`, `a`],
+    [`er`, `∅`, `∅`],
+    [`ci`, `c`, `∅`],
+    [`yi`, `yi`, `∅`],
+    [`ya`, `yi`, `a`],
+    [`wa`, `wu`, `a`],
+    [`wu`, `wu`, `∅`],
+    [`bi`, `bi`, `∅`],
+    [`bin`, `bi`, `(e)n`],
+    [`meng`, `m`, `(e)ng`],
+    [`ming`, `mi`, `(e)ng`],
+    [`li`, `li`, `∅`],
+    [`diu`, `di`, `ou`],
+    [`niu`, `ni`, `ou`],
+    [`lu`, `lu`, `∅`],
+    [`lü`, `lü`, `∅`],
+    [`tie`, `ti`, `e`],
+    [`zhou`, `zh`, `ou`],
+    [`zhuo`, `zhu`, `o`],
+    [`shua`, `shu`, `a`],
+  ]);
+});
+
+async function testPinyinChart(
+  chart: PinyinChart,
+  testCases: readonly [
+    input: string,
+    expectedInitialChartLabel: string,
+    expectedFinalChartLabel: string,
+  ][] = [],
+): Promise<void> {
+  const pinyinWords = await loadPinyinWords();
+
+  // Start with test cases first as these are easier to debug.
+  for (const [
+    input,
+    expectedInitialChartLabel,
+    expectedFinalChartLabel,
+  ] of testCases) {
+    const actual = splitTonelessPinyinSyllable(input, chart);
+    assert.deepEqual(
+      {
+        initialChartLabel: actual?.initialChartLabel,
+        finalChartLabel: actual?.finalChartLabel,
+      },
+      {
+        initialChartLabel: expectedInitialChartLabel,
+        finalChartLabel: expectedFinalChartLabel,
+      },
+      `${input} didn't split as expected`,
+    );
+  }
+
+  for (const x of pinyinWords) {
+    assert.notEqual(
+      splitTonelessPinyinSyllable(x, chart),
+      null,
+      `couldn't split ${x}`,
+    );
+  }
+
+  // Ensure that there are no duplicates initials or finals.
+  uniqueInvariant(
+    chart.initials.flatMap((x) => x.initials).flatMap(([, ...x]) => x),
+  );
+  uniqueInvariant(chart.finals.flatMap(([, ...x]) => x));
+}
