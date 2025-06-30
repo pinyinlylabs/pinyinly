@@ -339,7 +339,7 @@ export const loadHhhPinyinChart = memoize0(() =>
           `g`,
           `k`,
           `h`,
-          `zh`,
+          [`zh`, `zh`, `zhi`],
           [`ch`, `ch`, `chi`],
           `sh`,
           `r`,

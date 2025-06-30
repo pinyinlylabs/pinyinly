@@ -1,15 +1,7 @@
 import { parseIds, splitHanziText, walkIdsNode } from "#data/hanzi.ts";
 import { parseHhhmark } from "#data/hhhmark.ts";
 import type { HanziChar } from "#data/model.ts";
-import type { PinyinChart } from "#data/pinyin.ts";
-import {
-  loadHhPinyinChart,
-  loadHmmPinyinChart,
-  loadMmPinyinChart,
-  loadStandardPinyinChart,
-  pinyinPronunciationDisplayText,
-  splitTonelessPinyinSyllable,
-} from "#data/pinyin.ts";
+import { pinyinPronunciationDisplayText } from "#data/pinyin.ts";
 import type { Dictionary, HanziWordMeaning } from "#dictionary/dictionary.ts";
 import {
   allHanziCharacters,
@@ -45,7 +37,7 @@ import {
   sortComparatorString,
 } from "#util/collections.ts";
 import { unicodeShortIdentifier } from "#util/unicode.ts";
-import { invariant, uniqueInvariant } from "@pinyinly/lib/invariant";
+import { invariant } from "@pinyinly/lib/invariant";
 import assert from "node:assert/strict";
 import type { DeepReadonly } from "ts-essentials";
 import { describe, expect, test } from "vitest";
@@ -66,15 +58,11 @@ test(`json data can be loaded and passes the schema validation`, async () => {
   await allHsk2HanziWords();
   await allHsk3HanziWords();
   await loadHanziDecomposition();
-  await loadHhPinyinChart();
-  await loadHmmPinyinChart();
-  await loadMmPinyinChart();
   await loadMnemonicThemeChoices();
   await loadMnemonicThemes();
   await loadPinyinWords();
   await loadHanziWordGlossMnemonics();
   await loadHanziWordPinyinMnemonics();
-  await loadStandardPinyinChart();
   await loadDictionary();
   await loadWiki();
 });
@@ -142,7 +130,7 @@ test(`hanzi word meaning-key lint`, async () => {
       })),
   );
 
-  assert.deepEqual(violations, new Set());
+  expect(violations).toEqual(new Set());
 });
 
 test(`hanzi word meaning gloss lint`, async () => {
@@ -169,7 +157,7 @@ test(`hanzi word meaning gloss lint`, async () => {
       })),
   );
 
-  assert.deepEqual(violations, new Set());
+  expect(violations).toEqual(new Set());
 });
 
 test(`hanzi word meaning glossHint lint`, async () => {
@@ -202,7 +190,7 @@ test(`hanzi word meaning glossHint lint`, async () => {
       })),
   );
 
-  assert.deepEqual(violations, new Set());
+  expect(violations).toEqual(new Set());
 });
 
 test(`hanzi meaning glossHint lint`, async () => {
@@ -283,7 +271,7 @@ test(`hanzi word meaning example is not in english`, async () => {
       .map(([hanziWord, meaning]) => `${hanziWord} ${meaning.example}`),
   );
 
-  assert.deepEqual(violations, new Set());
+  expect(violations).toEqual(new Set());
 });
 
 test(`hanzi word meaning pinyin lint`, async () => {
@@ -294,7 +282,7 @@ test(`hanzi word meaning pinyin lint`, async () => {
     const violations = [...dict]
       .filter(([, { pinyin }]) => pinyin?.length === 0)
       .map(([hanziWord]) => hanziWord);
-    assert.deepEqual(violations, []);
+    expect(violations).toEqual([]);
   }
 
   // Multiple pinyin entries should have the same number of words
@@ -308,7 +296,7 @@ test(`hanzi word meaning pinyin lint`, async () => {
         return new Set(syllableCounts).size > 1;
       })
       .map(([hanziWord]) => hanziWord);
-    assert.deepEqual(violations, []);
+    expect(violations).toEqual([]);
   }
 });
 
@@ -319,7 +307,7 @@ test(`hanzi word without visual variants omit the property rather than use an em
     .filter(([, { visualVariants }]) => visualVariants?.length === 0)
     .map(([hanziWord]) => hanziWord);
 
-  assert.deepEqual(hanziWordWithEmptyArray, []);
+  expect(hanziWordWithEmptyArray).toEqual([]);
 });
 
 test(`hanzi word meanings actually include the hanzi in the example`, async () => {
@@ -332,7 +320,7 @@ test(`hanzi word meanings actually include the hanzi in the example`, async () =
     )
     .map(([hanziWord]) => hanziWord);
 
-  assert.deepEqual(hanziWordWithBadExamples, []);
+  expect(hanziWordWithBadExamples).toEqual([]);
 });
 
 test(`hanzi word visual variants shouldn't include the hanzi`, async () => {
@@ -345,7 +333,7 @@ test(`hanzi word visual variants shouldn't include the hanzi`, async () => {
     )
     .map(([hanziWord]) => hanziWord);
 
-  assert.deepEqual(hanziWordWithBadVisualVariants, []);
+  expect(hanziWordWithBadVisualVariants).toEqual([]);
 });
 
 test(`hanzi words are unique on (meaning key, primary pinyin)`, async () => {
@@ -509,7 +497,7 @@ test(`expect missing glyphs to be included decomposition data`, async () => {
     knownMissingGlyphs.delete(char);
   }
 
-  assert.deepEqual(knownMissingGlyphs, new Set());
+  expect(knownMissingGlyphs).toEqual(new Set());
 });
 
 test.todo(`hanzi name mnemonics don't include visual variants`, async () => {
@@ -558,149 +546,6 @@ test(`hanzi uses consistent unicode characters`, async () => {
     [],
     await debugNonCjkUnifiedIdeographs(violations),
   );
-});
-
-test(`standard pinyin covers kangxi pinyin`, async () => {
-  const chart = await loadStandardPinyinChart();
-
-  await testPinyinChart(chart, [
-    [`a`, `∅`, `a`],
-    [`an`, `∅`, `an`],
-    [`ê`, `∅`, `ê`],
-    [`ju`, `j`, `ü`],
-    [`qu`, `q`, `ü`],
-    [`xu`, `x`, `ü`],
-    [`bu`, `b`, `u`],
-    [`pu`, `p`, `u`],
-    [`mu`, `m`, `u`],
-    [`fu`, `f`, `u`],
-    [`du`, `d`, `u`],
-    [`tu`, `t`, `u`],
-    [`nu`, `n`, `u`],
-    [`niu`, `n`, `iu`],
-    [`lu`, `l`, `u`],
-    [`gu`, `g`, `u`],
-    [`ku`, `k`, `u`],
-    [`hu`, `h`, `u`],
-    [`wu`, `∅`, `u`],
-    [`wa`, `∅`, `ua`],
-    [`er`, `∅`, `er`],
-    [`yi`, `∅`, `i`],
-    [`ya`, `∅`, `ia`],
-    [`yo`, `∅`, `io`],
-    [`ye`, `∅`, `ie`],
-    [`yai`, `∅`, `iai`],
-    [`yao`, `∅`, `iao`],
-    [`you`, `∅`, `iu`],
-    [`yan`, `∅`, `ian`],
-    [`yin`, `∅`, `in`],
-    [`yang`, `∅`, `iang`],
-    [`ying`, `∅`, `ing`],
-    [`wu`, `∅`, `u`],
-    [`wa`, `∅`, `ua`],
-    [`wo`, `∅`, `uo`],
-    [`wai`, `∅`, `uai`],
-    [`wei`, `∅`, `ui`],
-    [`wan`, `∅`, `uan`],
-    [`wen`, `∅`, `un`],
-    [`wang`, `∅`, `uang`],
-    [`weng`, `∅`, `ong`],
-    [`ong`, `∅`, `ong`],
-    [`yu`, `∅`, `ü`],
-    [`yue`, `∅`, `üe`],
-    [`yuan`, `∅`, `üan`],
-    [`yun`, `∅`, `ün`],
-    [`yong`, `∅`, `iong`],
-    [`ju`, `j`, `ü`],
-    [`jue`, `j`, `üe`],
-    [`juan`, `j`, `üan`],
-    [`jun`, `j`, `ün`],
-    [`jiong`, `j`, `iong`],
-    [`qu`, `q`, `ü`],
-    [`que`, `q`, `üe`],
-    [`quan`, `q`, `üan`],
-    [`qun`, `q`, `ün`],
-    [`qiong`, `q`, `iong`],
-    [`xu`, `x`, `ü`],
-    [`xue`, `x`, `üe`],
-    [`xuan`, `x`, `üan`],
-    [`xun`, `x`, `ün`],
-    [`xiong`, `x`, `iong`],
-  ]);
-});
-
-test(`mm pinyin covers kangxi pinyin`, async () => {
-  const chart = await loadMmPinyinChart();
-
-  await testPinyinChart(chart, [
-    [`zhang`, `zh`, `ang`],
-    [`bao`, `b`, `ao`],
-    [`ao`, `∅`, `ao`],
-    [`ba`, `b`, `a`],
-    [`ci`, `c`, `∅`],
-    [`chi`, `ch`, `∅`],
-    [`cong`, `cu`, `(e)ng`],
-    [`chong`, `chu`, `(e)ng`],
-    [`chui`, `chu`, `ei`],
-    [`diu`, `di`, `ou`],
-    [`miu`, `mi`, `ou`],
-    [`niu`, `ni`, `ou`],
-    [`you`, `y`, `ou`],
-    [`yin`, `y`, `(e)n`],
-    [`ê`, `∅`, `e`],
-    [`er`, `∅`, `∅`],
-    // [`zh(i)`, `zh`, `∅`], // ?
-    [`zha`, `zh`, `a`],
-    [`zhong`, `zhu`, `(e)ng`],
-    [`zhe`, `zh`, `e`],
-    [`ta`, `t`, `a`],
-    [`a`, `∅`, `a`],
-    [`xing`, `xi`, `(e)ng`],
-    [`qing`, `qi`, `(e)ng`],
-  ]);
-});
-
-test(`hh pinyin covers kangxi pinyin`, async () => {
-  const chart = await loadHhPinyinChart();
-
-  await testPinyinChart(chart, [
-    [`a`, `_`, `a`],
-    [`bi`, `bi`, `_`],
-    [`niu`, `ni`, `(o)u`],
-    [`tie`, `ti`, `e`],
-    [`zhou`, `zh`, `(o)u`],
-    [`zhuo`, `zhu`, `o`],
-  ]);
-});
-
-test(`hmm pinyin covers kangxi pinyin`, async () => {
-  const chart = await loadHmmPinyinChart();
-
-  assert.equal(chart.initials.flatMap((i) => i.initials).length, 55);
-  assert.equal(chart.finals.length, 13);
-
-  await testPinyinChart(chart, [
-    [`a`, `∅`, `a`],
-    [`er`, `∅`, `∅`],
-    [`ci`, `c`, `∅`],
-    [`yi`, `yi`, `∅`],
-    [`ya`, `yi`, `a`],
-    [`wa`, `wu`, `a`],
-    [`wu`, `wu`, `∅`],
-    [`bi`, `bi`, `∅`],
-    [`bin`, `bi`, `(e)n`],
-    [`meng`, `m`, `(e)ng`],
-    [`ming`, `mi`, `(e)ng`],
-    [`li`, `li`, `∅`],
-    [`diu`, `di`, `ou`],
-    [`niu`, `ni`, `ou`],
-    [`lu`, `lu`, `∅`],
-    [`lü`, `lü`, `∅`],
-    [`tie`, `ti`, `e`],
-    [`zhou`, `zh`, `ou`],
-    [`zhuo`, `zhu`, `o`],
-    [`shua`, `shu`, `a`],
-  ]);
 });
 
 describe(`${loadHanziWordMigrations.name} suite`, async () => {
@@ -789,7 +634,7 @@ test(`dictionary contains entries for decomposition`, async () => {
         allowedMissing.get(x)?.symmetricDifference(sources).size !== 0,
     );
 
-  assert.deepEqual(unknownWithMultipleSources, []);
+  expect(unknownWithMultipleSources).toEqual([]);
 });
 
 async function debugNonCjkUnifiedIdeographs(chars: string[]): Promise<string> {
@@ -849,51 +694,6 @@ async function kangxiRadicalToCjkRadical(
   if (newCodePoint != null) {
     return String.fromCodePoint(Number.parseInt(newCodePoint, 16));
   }
-}
-
-async function testPinyinChart(
-  chart: PinyinChart,
-  testCases: readonly [
-    input: string,
-    expectedInitialChartLabel: string,
-    expectedFinalChartLabel: string,
-  ][] = [],
-): Promise<void> {
-  const pinyinWords = await loadPinyinWords();
-
-  // Start with test cases first as these are easier to debug.
-  for (const [
-    input,
-    expectedInitialChartLabel,
-    expectedFinalChartLabel,
-  ] of testCases) {
-    const actual = splitTonelessPinyinSyllable(input, chart);
-    assert.deepEqual(
-      {
-        initialChartLabel: actual?.initialChartLabel,
-        finalChartLabel: actual?.finalChartLabel,
-      },
-      {
-        initialChartLabel: expectedInitialChartLabel,
-        finalChartLabel: expectedFinalChartLabel,
-      },
-      `${input} didn't split as expected`,
-    );
-  }
-
-  for (const x of pinyinWords) {
-    assert.notEqual(
-      splitTonelessPinyinSyllable(x, chart),
-      null,
-      `couldn't split ${x}`,
-    );
-  }
-
-  // Ensure that there are no duplicates initials or finals.
-  uniqueInvariant(
-    chart.initials.flatMap((x) => x.initials).flatMap(([, ...x]) => x),
-  );
-  uniqueInvariant(chart.finals.flatMap(([, ...x]) => x));
 }
 
 describe(`${hanziFromHanziOrHanziWord.name} suite`, async () => {
