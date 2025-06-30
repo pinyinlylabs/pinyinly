@@ -359,6 +359,13 @@ test(`mm pinyin covers kangxi pinyin`, async () => {
     [`a`, `∅`, `a`],
     [`xing`, `xi`, `(e)ng`],
     [`qing`, `qi`, `(e)ng`],
+    [`si`, `s`, `∅`],
+    [`zhi`, `zh`, `∅`],
+    [`chi`, `ch`, `∅`],
+    [`shi`, `sh`, `∅`],
+    [`ri`, `r`, `∅`],
+    [`ci`, `c`, `∅`],
+    [`zi`, `z`, `∅`],
   ]);
 });
 
@@ -446,6 +453,10 @@ test(`hhh pinyin covers kangxi pinyin`, async () => {
     [`zi`, `z`, `∅`],
 
     [`zha`, `zh`, `a`],
+    // > You will notice some spelling oddities: for example, zhu- + (e)ng becomes
+    // > zhong instead of *zhung, but these merely reflect the way Pinyin works.
+    //
+    // Source: https://countryoftheblind.blogspot.com/2012/01/mnemonics-for-pronouncing-chinese.html?m=1
     [`zhong`, `zhu`, `(e)ng`],
     [`zhe`, `zh`, `e`],
     [`ta`, `t`, `a`],
