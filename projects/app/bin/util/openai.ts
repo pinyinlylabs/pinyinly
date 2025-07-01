@@ -57,10 +57,11 @@ export function makeSimpleAiClient(dbCache: DbCache) {
     docs: string[],
     userMessage: string,
     schema: Schema,
+    model = `o3`,
   ): Promise<z.infer<Schema>> {
     const rawJson = await openAiWithCache(
       {
-        model: `gpt-4o`,
+        model,
         messages: [
           await systemRoleMessageWithProjectContext(docs),
           { role: `user`, content: userMessage },
