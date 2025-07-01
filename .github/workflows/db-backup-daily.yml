@@ -52,4 +52,3 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.BACKUPS_R2_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.BACKUPS_R2_SECRET_ACCESS_KEY }}
           BACKUPS_R2_ENDPOINT: ${{ secrets.BACKUPS_R2_ENDPOINT }}
-
