@@ -3,7 +3,7 @@
   {
     "id": "basic",
     "desc": "basic distinct sounds",
-    "initials": ["b", "p", "m", "f", "d", "t", "n", "l", "g", "k", "h", "zh", ["ch","ch","chi"], "sh", "r", "z", ["c","c","ci"], "s"]
+    "initials": ["b", "p", "m", "f", "d", "t", "n", "l", "g", "k", "h", ["zh", "zh", "zhi"], ["ch","ch","chi"], ["sh", "sh", "shi"], ["r", "r", "ri"], ["z", "z", "zi"], ["c","c","ci"], ["s","s","si"]]
   },
    {
     "id":"-i",

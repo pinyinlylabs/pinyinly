@@ -14,6 +14,9 @@ const argv = await yargs(process.argv.slice(2))
     demandOption: true,
   })
   .array(`paths`)
+  .option(`indentLevels`, {
+    type: `number`,
+  })
   .option(`debug`, {
     type: `boolean`,
     default: false,
@@ -32,7 +35,7 @@ for (const path of argv.paths) {
   });
   const updated = await writeUtf8FileIfChanged(
     path,
-    jsonStringifyShallowIndent(JSON.parse(existingContent)),
+    jsonStringifyShallowIndent(JSON.parse(existingContent), argv.indentLevels),
   );
   debug((updated ? `✨ saved` : `skipped`) + `: %s`, path);
 }

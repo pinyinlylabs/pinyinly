@@ -359,6 +359,13 @@ test(`mm pinyin covers kangxi pinyin`, async () => {
     [`a`, `∅`, `a`],
     [`xing`, `xi`, `(e)ng`],
     [`qing`, `qi`, `(e)ng`],
+    [`si`, `s`, `∅`],
+    [`zhi`, `zh`, `∅`],
+    [`chi`, `ch`, `∅`],
+    [`shi`, `sh`, `∅`],
+    [`ri`, `r`, `∅`],
+    [`ci`, `c`, `∅`],
+    [`zi`, `z`, `∅`],
   ]);
 });
 
@@ -413,8 +420,7 @@ test(`hhh pinyin covers kangxi pinyin`, async () => {
     [`bao`, `b`, `ao`],
     [`ao`, `∅`, `ao`],
     [`ba`, `b`, `a`],
-    [`ci`, `c`, `∅`],
-    [`chi`, `ch`, `∅`],
+
     [`cong`, `cu`, `(e)ng`],
 
     // https://countryoftheblind.blogspot.com/2012/01/mnemonics-for-pronouncing-chinese.html?showComment=1540670199273&m=1#c4879970812355082477
@@ -429,8 +435,28 @@ test(`hhh pinyin covers kangxi pinyin`, async () => {
     [`yin`, `y`, `(e)n`],
     [`ê`, `∅`, `e`],
     [`er`, `∅`, `∅`],
-    [`zhi`, `zh`, `∅`], // ?
+
+    // When -i- is not an "ee" sound:
+    //
+    // > the "i" in Pinyin "si" is nothing like the "i" in "yi" or "ji". "Si" is
+    // > pronounced more like "sz" than English "sea". Same for "zhi", "chi",
+    // > "shi", "ri", "ci", "zi".
+    //
+    // Source:
+    // https://countryoftheblind.blogspot.com/2012/01/mnemonics-for-pronouncing-chinese.html?m=1
+    [`si`, `s`, `∅`],
+    [`zhi`, `zh`, `∅`],
+    [`chi`, `ch`, `∅`],
+    [`shi`, `sh`, `∅`],
+    [`ri`, `r`, `∅`],
+    [`ci`, `c`, `∅`],
+    [`zi`, `z`, `∅`],
+
     [`zha`, `zh`, `a`],
+    // > You will notice some spelling oddities: for example, zhu- + (e)ng becomes
+    // > zhong instead of *zhung, but these merely reflect the way Pinyin works.
+    //
+    // Source: https://countryoftheblind.blogspot.com/2012/01/mnemonics-for-pronouncing-chinese.html?m=1
     [`zhong`, `zhu`, `(e)ng`],
     [`zhe`, `zh`, `e`],
     [`ta`, `t`, `a`],
