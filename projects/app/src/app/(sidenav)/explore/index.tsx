@@ -15,9 +15,9 @@ export default function ExplorePage() {
           components—making learning intuitive and recall effortless.
         </Text>
 
-        <Link href="/explore/mnemonics/" asChild>
+        <Link href="/explore/sounds/" asChild>
           <RectButton variant="filled" className="theme-accent self-start">
-            Explore mnemonics
+            Explore sounds
           </RectButton>
         </Link>
       </View>

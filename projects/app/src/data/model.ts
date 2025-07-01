@@ -17,12 +17,13 @@ export type PinyinInitialGroupId = z.infer<typeof pinyinInitialGroupIdSchema>;
 export const mnemonicThemeIdSchema = z.enum({
   AnimalSpecies: `debug--AnimalSpecies`,
   AthleteType: `debug--AthleteType`,
+  Name: `debug--Name`,
   GreekMythologyCharacter: `debug--GreekMythologyCharacter`,
   MythologyCharacter: `debug--MythologyCharacter`,
   Profession: `debug--Profession`,
-  WesternCultureFamousMen: `debug--WesternCultureFamousMen`,
-  WesternCultureFamousWomen: `debug--WesternCultureFamousWomen`,
   WesternMythologyCharacter: `debug--WesternMythologyCharacter`,
+  Deprecated_WesternCultureFamousMen: `debug--Deprecated_WesternCultureFamousMen`,
+  Deprecated_WesternCultureFamousWomen: `debug--Deprecated_WesternCultureFamousWomen`,
 });
 export const MnemonicThemeId = mnemonicThemeIdSchema.enum;
 export type MnemonicThemeId = z.infer<typeof mnemonicThemeIdSchema>;

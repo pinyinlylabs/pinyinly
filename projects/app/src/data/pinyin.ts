@@ -1,5 +1,5 @@
 import type { PinyinPronunciation, PinyinSyllable } from "@/data/model";
-import { PinyinInitialGroupId } from "@/data/model";
+import { MnemonicThemeId, PinyinInitialGroupId } from "@/data/model";
 import {
   deepReadonly,
   memoize0,
@@ -595,3 +595,90 @@ export function pinyinInitialGroupTitle(groupId: PinyinInitialGroupId): string {
     }
   }
 }
+
+export function mnemonicThemeTitle(themeId: MnemonicThemeId): string {
+  switch (themeId) {
+    case MnemonicThemeId.AnimalSpecies: {
+      return `Animals`;
+    }
+    case MnemonicThemeId.Profession: {
+      return `Archetypes`;
+    }
+    case MnemonicThemeId.Name: {
+      return `Individuals`;
+    }
+    case MnemonicThemeId.WesternMythologyCharacter: {
+      return `Mythical`;
+    }
+    case MnemonicThemeId.AthleteType:
+    case MnemonicThemeId.GreekMythologyCharacter:
+    case MnemonicThemeId.MythologyCharacter:
+    case MnemonicThemeId.Deprecated_WesternCultureFamousMen:
+    case MnemonicThemeId.Deprecated_WesternCultureFamousWomen: {
+      return `other ${themeId}`;
+    }
+  }
+}
+
+export const pinyinPartPronunciationInstructionsAustralian: Record<
+  string,
+  string
+> = {
+  "b-": `Like the English **“b”** in *bat*, but **unaspirated** — no strong puff of air. Say it gently, without the breathy push you’d normally use in English.`,
+  "p-": `Like the English **“p”** in *pat*, but **more forceful** — aspirated, with a noticeable puff of air. Hold your hand near your mouth to feel the breath.`,
+  "m-": `Exactly like the English **“m”** in *man*. Lips together, nasal sound.`,
+  "f-": `Same as the English **“f”** in *fun*. Top teeth on bottom lip, blow air out.`,
+  "d-": `Like the English **“d”** in *dog*, but **softer and without a puff**. Tongue touches just behind your upper teeth.`,
+  "t-": `Like the English **“t”** in *top*, but **stronger and more aspirated** — with a clear puff of air.`,
+  "n-": `Same as the English **“n”** in *net*. Tip of the tongue touches behind the upper teeth.`,
+  "l-": `Very similar to the English **“l”** in *let*, but the tongue stays further forward and flatter against the roof of the mouth.`,
+  "g-": `Like the hard English **“g”** in *go*, but **unaspirated** — no strong puff of air. It should feel smoother and softer.`,
+  "k-": `Like the English **“k”** in *kite*, but **more forceful**, with a strong puff of air.`,
+  "h-": `Like the **“h”** in *hat*, but produced deeper in the throat — slightly raspier, almost like you're clearing your throat softly.`,
+  "zh-": `A bit like the English **“j”** in *jam*, but with the **tongue curled back**. The tip of your tongue should bend toward the roof of your mouth.`,
+  "ch-": `Like the **“ch”** in *chat*, but with your **tongue curled back** more, and a stronger puff of air.`,
+  "sh-": `Like the **“sh”** in *shoe*, but with the **tongue curled back** further toward the roof of the mouth.`,
+  "r-": `This one’s tricky — it’s **nothing like the Aussie English “r”**. Start with your tongue curled back like for “sh”, but let it **vibrate a little**. It’s somewhere between the English “r” and the “zh” sound.`,
+  "z-": `Like the **“ds”** in *kids*, said quickly at the start of a word. Tongue is flat and close to the teeth.`,
+  "c-": `Like the **“ts”** in *cats*, but said at the beginning of a word, with a noticeable puff of air.`,
+  "s-": `Just like the English **“s”** in *sun*. Tongue is close to the upper teeth.`,
+  // -ee initial (like "sea")
+  "y-": `Similar to the English **“y”** in *yes*, but very short and clean. In Pinyin, \`y-\` is often just there to show that the syllable starts with a vowel like **yi** (一), which sounds like **“ee”** in *see*.`,
+  "bi-": `Starts with a soft **“b”** (like in *bat*, but without a puff of air), followed by **“ee”** as in *see*. Say it smoothly as one sound: **b-ee**.`,
+  "pi-": `Like the **“p”** in *pat*, but with a noticeable puff of air, then **“ee”** as in *see*. Think: **p-ee** with breath.`,
+  "mi-": `Exactly like **“me”** in *meet*. Just say **m-ee**, smooth and nasal.`,
+  "di-": `Begins with a soft **“d”** (like *dog*, but no breathy push), then **“ee”** as in *see*. Try: **d-ee**, without aspiration.`,
+  "ti-": `Like the **“t”** in *tea*, but more aspirated — with a puff of air. Then **“ee”** as in *see*. Say: **t-ee**.`,
+  "ni-": `Same as **“knee”** in Aussie English. Just say **n-ee**, with the tongue behind the teeth.`,
+  "li-": `Like the **“l”** in *leaf*, then **“ee”** as in *see*. Say: **l-ee** with the tongue forward.`,
+  "ji-": `A bit like **“gee”** in *jeep*, but with the tongue closer to the hard palate and no puff of air. The tongue is flatter and more forward than English.`,
+  "qi-": `Like **“chee”** in *cheek*, but the tongue is higher and further forward, with a stronger puff of air. Say: **ch-ee**, but smile slightly.`,
+  "xi-": `A soft **“sh-ee”** sound, like *sheep*, but with the tongue much closer to the front teeth and spread lips — almost like you're smiling. Say: **sh-ee**, but gentler.`,
+  // -u initial (like "woo")
+  "w-": `The \`w-\` sound is just like the English **“w”** in *woo*. It blends directly into the following **“oo”** sound. For example, \`wu\` is just like *woo* without any extra ending.`,
+  "bu-": `Like the English **“boo”**, but with a softer **b** — no strong puff of air. Just say **b-oo**, gently.`,
+  "pu-": `Like **“poo”**, but with a stronger puff of air on the **p**. Hold your hand near your mouth — you should feel it.`,
+  "mu-": `Exactly like the Aussie English **“moo”**. Lips together for **m**, then into **oo** as in *food*.`,
+  "fu-": `Like the **“foo”** in *food*. Top teeth on bottom lip for the **f**, then roll into **oo**.`,
+  "du-": `Similar to **“do”**, but with a soft **d** — no puff of air. Say **d-oo** gently.`,
+  "tu-": `Like **“two”**, but with a more aspirated **t** — stronger puff of air. Say **t-oo** with clear breath.`,
+  "nu-": `Just like **“new”** without the **“y”** sound. Tongue behind upper teeth, then **oo**.`,
+  "lu-": `Like **“loo”** (toilet), said clearly. Tongue touches behind the upper teeth for the **l**.`,
+  "gu-": `Like the **“goo”** in *good*, but with a softer **g** — no strong puff. Say **g-oo**, smoothly.`,
+  "ku-": `Like **“coo”**, but with a stronger **k** and a puff of air. Say **k-oo**, sharply.`,
+  "hu-": `A bit like **“who”**, but with a breathier, raspier **h** that comes from deeper in the throat.`,
+  "zhu-": `Starts like **“joo”**, but with the **tongue curled back**. It’s not quite *zoo*, not quite *Jew*, but in between with a retroflex twist.`,
+  "chu-": `Similar to **“chew”**, but again with the **tongue curled back**, and a stronger puff of air.`,
+  "shu-": `Like **“shoe”**, but the tongue is curled further back in the mouth. It sounds darker and more rounded.`,
+  "ru-": `This one's tricky — it's not like the English **“roo”**. Start by curling your tongue back like for \`sh\`, and try to hum into an **“oo”** sound. It’s somewhere between *rue* and *zhoo*.`,
+  "zu-": `Like **“zoo”**, but with a **flat tongue close to the teeth**. It's not as voiced as in English — more like a quick **ds-oo**.`,
+  "cu-": `Like **“tsu”** in *tsunami*, but with a puff of air. It’s **ts-oo**, pronounced clearly.`,
+  "su-": `Exactly like **“soo”** in *soon*. Tongue close to the upper teeth, no puff of air.`,
+  // -ü initial (like "yoo")
+  "yu-": `\`yu\` is pronounced as **“ü”**, which doesn’t exist in English. Start by saying **“ee”** (as in *see*), then round your lips as if saying **“oo”** (as in *food*) — but **keep your tongue in the 'ee' position**. It’s a tight, forward, rounded sound.`,
+  "nü-": `Like \`nu\`, but with the **ü** sound — say **“nee”** with rounded lips. It should not sound like *new*; there's no 'y' glide. Just pure **n-ü**.`,
+  "lü-": `Say **“lee”** but round your lips like you’re saying **“oo”**. That gives you the **l-ü** sound. Again, not like *loo* or *lew* — it’s sharper and more forward.`,
+  "ju-": `This starts with a sound similar to English **“j”** (as in *jeep*), but then goes into **ü**. Curl your tongue slightly up toward the roof of your mouth, then say **“j-ü”** with rounded lips.`,
+  "qu-": `Pronounced like a **sharp 'ch'** in *cheese*, followed by **ü**. Say **“ch-ü”**, with a big smile and rounded lips. It’s not *choo*, it’s **qu** with the fronted vowel.`,
+  "xu-": `Like a soft **“sh”** sound, but your tongue is much closer to your teeth. Say **“sh-ü”** — smile and round your lips. It’s not *shoe*, it's more hissy and forward.`,
+};

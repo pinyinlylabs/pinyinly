@@ -89,59 +89,77 @@ for (const groupId of argvGroupIds) {
     const initialGroup = pinyinChart.initials.find((x) => x.id === groupId);
     invariant(initialGroup != null, `Missing group for ${groupId}`);
 
-    const r = await openai(
-      [],
-      `
-I'm creating a mnemonic system to help me remember Pinyin initials. For each Pinyin initial I want to pick a ${theme.noun} to associate it with. (then I'll create short stories about the ${theme.noun} to help remember the pinyin). 
+    for (const [initial] of initialGroup.initials) {
+      // if (initial !== `chu`) {
+      //   continue;
+      // }
+
+      const r = await openai(
+        [],
+        `
+I'm creating a mnemonic system to help people remember Pinyin initials. For each Pinyin initial I want to pick a ${theme.noun} to associate it with. (then I'll create short stories about the ${theme.noun} to help remember the pinyin). 
 
 There are some important constraints:
 
-- I need to imagine each ${theme.noun} visually in my mind, so they be common in the social discourse.
+- Each ${theme.noun} should be able to spark a rich image in my mind, so it's important they're well known in modern discourse.
 - It's important that I pick a ${theme.noun} that is meaningful to me, so I want to have a lot of choices to select from.
+- The ${theme.noun}'s name be based on similar pronunciation (not necessarily similar spelling) of the pinyin.
+  - "chu-" ✅ Chancellor ❌ Chef ❌ Choreographer ❌ Chiropractor ❌ Chauffeur ❌ Train Conductor
+  - "cu-"  ✅ Sushi Chef ❌ Cupid
+- The best choices are simple, short, and stand alone. For example "Doctor" for "d-" is good, but "Medical Doctor" for "mu-" is bad.)
+- Make sure the names for one initial and distinct from names for other initials. For example, "Doctor" for "d-" is good, but "Doctor" for "du-" is bad.
 
-I want to start with group ${pinyinInitialGroupTitle(groupId)} using ${theme.noun} of the theme ${themeId} (${theme.description}). The items in this group are:
+I'm working on the group ${pinyinInitialGroupTitle(groupId)} using ${theme.noun} of the theme ${themeId} (${theme.description}). 
 
-${initialGroup.initials.map((i) => `- ${JSON.stringify(i)}`).join(`\n`)}
+The pinyin initials in this group are:
 
-For each item, come up with 20 ${theme.noun} ideas, then narrow it down to the most popular/well-known 12 ${theme.noun}.
+${initialGroup.initials.map((i) => `${i[0]}-`).join(`, `)}
+
+For now let's just focus on "${initial}-".
+
+Can you come up with a short explanation for how you pronounce it?
+
+Which other initials in the group sound similar and might cause confusion?
+
+So based how you pronounce the first syllable can you give me 5 suitable ${theme.noun} suggestions.
 `,
-      z.object({
-        result: z.array(
-          z.object({
-            pinyinInitial: z.string(),
-            shortlistOfBestSuggestions: z.array(
-              z.object({ name: z.string(), description: z.string() }),
-            ),
-            allSuggestions: z.array(
-              z.object({ name: z.string(), description: z.string() }),
-            ),
-          }),
-        ),
-      }),
-    );
-
-    debug(`result for ${groupId} (${themeId}): %o`, r);
-
-    await saveUpdates(
-      new Map([
-        [
-          themeId,
-          new Map(
-            r.result.map(
-              (x) =>
-                [
-                  x.pinyinInitial,
-                  new Map(
-                    x.shortlistOfBestSuggestions.map(
-                      (c) => [c.name, c.description] as const,
-                    ),
-                  ),
-                ] as const,
-            ),
+        z.object({
+          result: z.array(
+            z.object({
+              pinyinInitial: z.string(),
+              englishStudentPronunciationHint: z.string(),
+              similarSoundingConflicts: z.array(z.string()),
+              bestSuggestions: z.array(
+                z.object({ name: z.string(), rationale: z.string() }),
+              ),
+            }),
           ),
-        ],
-      ]),
-    );
+        }),
+      );
+
+      debug(`result for ${groupId} (${themeId}): %o`, r);
+
+      await saveUpdates(
+        new Map([
+          [
+            themeId,
+            new Map(
+              r.result.map(
+                (x) =>
+                  [
+                    x.pinyinInitial.replace(`-`, ``),
+                    new Map(
+                      x.bestSuggestions.map(
+                        (c) => [c.name, c.rationale] as const,
+                      ),
+                    ),
+                  ] as const,
+              ),
+            ),
+          ],
+        ]),
+      );
+    }
   }
 }
 
