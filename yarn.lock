@@ -1203,9 +1203,9 @@ __metadata:
   linkType: hard
 
 "@electric-sql/pglite@npm:^0.3.0":
-  version: 0.3.3
-  resolution: "@electric-sql/pglite@npm:0.3.3"
-  checksum: 10c0/40bb132cdcb55442c69d735e7b3e6c5413358f17dce37661c1f214e5e6d19ebad666dc7cb963158781affad08c46d05d5bded4e63d9c322de5cc9b0c339d2597
+  version: 0.3.4
+  resolution: "@electric-sql/pglite@npm:0.3.4"
+  checksum: 10c0/6a3fe4a809b05dfd28914227c5c806cd9ca76fbd4345d2b39a023c5af18b6cdf2457987a1295f6188e785ebb2ad47b8589455e660d502cb6f6979676aba9a11d
   languageName: node
   linkType: hard
 
