@@ -104,10 +104,11 @@ export const rMnemonicThemeId = memoize0(function rMnemonicThemeId() {
     [MnemonicThemeId.GreekMythologyCharacter]: `GreekMythologyCharacter`,
     [MnemonicThemeId.MythologyCharacter]: `MythologyCharacter`,
     [MnemonicThemeId.Profession]: `Profession`,
+    [MnemonicThemeId.Name]: `Name`,
     [MnemonicThemeId.AthleteType]: `AthleteType`,
-    [MnemonicThemeId.WesternCultureFamousMen]: `WesternCultureFamousMen`,
-    [MnemonicThemeId.WesternCultureFamousWomen]: `WesternCultureFamousWomen`,
     [MnemonicThemeId.WesternMythologyCharacter]: `WesternMythologyCharacter`,
+    [MnemonicThemeId.Deprecated_WesternCultureFamousMen]: `WesternCultureFamousMen`,
+    [MnemonicThemeId.Deprecated_WesternCultureFamousWomen]: `WesternCultureFamousWomen`,
   });
 });
 
