@@ -12955,7 +12955,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"json5@npm:^2.2.3":
+"json5@npm:^2.2.2, json5@npm:^2.2.3":
   version: 2.2.3
   resolution: "json5@npm:2.2.3"
   bin:
@@ -15678,8 +15678,8 @@ __metadata:
   linkType: hard
 
 "react-email@npm:^4.0.15":
-  version: 4.0.16
-  resolution: "react-email@npm:4.0.16"
+  version: 4.0.17
+  resolution: "react-email@npm:4.0.17"
   dependencies:
     "@babel/parser": "npm:^7.27.0"
     "@babel/traverse": "npm:^7.27.0"
@@ -15695,9 +15695,10 @@ __metadata:
     normalize-path: "npm:^3.0.0"
     ora: "npm:^8.0.0"
     socket.io: "npm:^4.8.1"
+    tsconfig-paths: "npm:4.2.0"
   bin:
     email: dist/cli/index.mjs
-  checksum: 10c0/b019c3c3afe14d6f898fd3085a4dfbc42d994ac6ef860d54984bb89283aef972eb54be99e9e44a66b122c4d6a352e02b54a506f011ab8d2d4d31fe70f3ba9bc7
+  checksum: 10c0/1377fec3f00533763a10ce6caa92e8eb95dc6fbe004946cd3695ba8501d90fb07eee5674b7889472351f85654400a5fe0c892f319c542dff7b45afa396d815ea
   languageName: node
   linkType: hard
 
@@ -17946,6 +17947,17 @@ __metadata:
   bin:
     tsconfck: bin/tsconfck.js
   checksum: 10c0/269c3c513540be44844117bb9b9258fe6f8aeab026d32aeebf458d5299125f330711429dbb556dbf125a0bc25f4a81e6c24ac96de2740badd295c3fb400f66c4
+  languageName: node
+  linkType: hard
+
+"tsconfig-paths@npm:4.2.0":
+  version: 4.2.0
+  resolution: "tsconfig-paths@npm:4.2.0"
+  dependencies:
+    json5: "npm:^2.2.2"
+    minimist: "npm:^1.2.6"
+    strip-bom: "npm:^3.0.0"
+  checksum: 10c0/09a5877402d082bb1134930c10249edeebc0211f36150c35e1c542e5b91f1047b1ccf7da1e59babca1ef1f014c525510f4f870de7c9bda470c73bb4e2721b3ea
   languageName: node
   linkType: hard
 
