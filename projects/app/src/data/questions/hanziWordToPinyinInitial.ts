@@ -100,7 +100,7 @@ export async function makeQuestionContext(
   const parsedPinyin = parsePinyinSyllableOrThrow(pinyin);
 
   const ctx: QuestionContext = {
-    answerPinyinFinal: parsedPinyin.finalChartLabel,
+    answerPinyinFinal: parsedPinyin.finalSoundId,
     answerPinyinTone: parsedPinyin.tone,
     usedHanzi: new Set([hanzi]),
     usedPinyin: new Set(await allOneSyllablePronunciationsForHanzi(hanzi)),
@@ -139,7 +139,7 @@ export function tryPinyinDistractor(
 ): boolean {
   const parsedPinyin = parsePinyinSyllableOrThrow(pinyin);
 
-  if (ctx.answerPinyinFinal !== parsedPinyin.finalChartLabel) {
+  if (ctx.answerPinyinFinal !== parsedPinyin.finalSoundId) {
     return false;
   }
 
@@ -215,7 +215,7 @@ function validQuestionInvariant(question: OneCorrectPairQuestion) {
       invariant(hanziOrPinyinSyllableCount(x) === 1);
 
       const syllable = nonNullable(x.value[0]);
-      const { finalChartLabel: final, tone } =
+      const { finalSoundId: final, tone } =
         parsePinyinSyllableOrThrow(syllable);
       return `${final}-${tone}`;
     }),

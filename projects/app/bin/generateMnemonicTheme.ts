@@ -1,5 +1,4 @@
-import { MnemonicThemeId, PinyinInitialGroupId } from "#data/model.ts";
-import { rMnemonicThemeId } from "#data/rizzleSchema.ts";
+import type { PinyinSoundGroupId } from "#data/model.ts";
 import { jsonStringifyShallowIndent } from "#util/json.ts";
 import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import makeDebug from "debug";
@@ -7,13 +6,14 @@ import path from "node:path";
 import yargs from "yargs";
 import { z } from "zod/v4";
 import {
+  defaultPinyinSoundGroupNames,
+  defaultPinyinSoundGroupThemes,
   loadHhhPinyinChart,
-  pinyinInitialGroupTitle,
 } from "../src/data/pinyin.js";
-import type { loadMnemonicThemeChoices } from "../src/dictionary/dictionary.js";
+import type { loadPinyinSoundNameSuggestions } from "../src/dictionary/dictionary.js";
 import {
-  loadMnemonicThemes,
-  mnemonicThemeChoicesSchema,
+  loadPinyinSoundThemeDetails,
+  pinyinSoundNameSuggestionsSchema,
 } from "../src/dictionary/dictionary.js";
 import {
   deepTransform,
@@ -31,27 +31,29 @@ import { makeSimpleAiClient } from "./util/openai.js";
 const debug = makeDebug(`hhh`);
 
 const pinyinChart = loadHhhPinyinChart();
-const chartInitialGroupIds = new Set(pinyinChart.initials.map((x) => x.id));
-
-const initialGroupChoices = Object.entries(PinyinInitialGroupId)
-  .filter(([, v]) => chartInitialGroupIds.has(v))
-  .map(([k]) => k);
-const themeChoices = Object.keys(MnemonicThemeId);
+const allGroupIds = pinyinChart.soundGroups.map((x) => x.id);
+const allThemes = Object.values(defaultPinyinSoundGroupThemes);
 
 const argv = await yargs(process.argv.slice(2))
   .usage(`$0 [args]`)
-  .option(`group`, {
+  .option(`groupIds`, {
     type: `string`,
     describe: `only update a specific pinyin group`,
-    choices: initialGroupChoices,
-    default: initialGroupChoices.join(`,`),
-    coerce: (x: string) => x.split(`,`).filter((x) => x !== ``),
+    choices: allGroupIds,
+    default: allGroupIds.join(`,`),
+    alias: `group`,
+    coerce: (x: string) =>
+      x
+        .split(`,`)
+        .filter((x) => x !== ``)
+        .map((x) => x as PinyinSoundGroupId),
   })
-  .option(`theme`, {
+  .option(`themes`, {
     type: `string`,
     describe: `only update a specific theme`,
-    choices: themeChoices,
-    default: themeChoices.join(`,`),
+    choices: allThemes,
+    default: allThemes.join(`,`),
+    alias: `theme`,
     coerce: (x: string) => x.split(`,`).filter((x) => x !== ``),
   })
   .option(`debug`, {
@@ -66,14 +68,7 @@ if (argv.debug) {
   makeDebug.enable(`${debug.namespace},${debug.namespace}:*`);
 }
 
-const themes = await loadMnemonicThemes();
-
-const argvGroupIds = argv.group.map(
-  (x) => PinyinInitialGroupId[x as keyof typeof PinyinInitialGroupId],
-);
-const argvThemeIds = argv.theme.map(
-  (x) => MnemonicThemeId[x as keyof typeof MnemonicThemeId],
-);
+const pinyinSoundThemeDetails = await loadPinyinSoundThemeDetails();
 
 const dataFilePath = path.join(
   dictionaryPath,
@@ -82,14 +77,18 @@ const dataFilePath = path.join(
 const dbCache = makeDbCache(import.meta.filename, `openai_chat_cache`, debug);
 const openai = makeSimpleAiClient(dbCache);
 
-for (const groupId of argvGroupIds) {
-  for (const themeId of argvThemeIds) {
-    const theme = nonNullable(themes.get(themeId));
+for (const groupId of argv.groupIds) {
+  for (const theme of argv.themes) {
+    const { noun: themeNoun, description: themeDescription } = nonNullable(
+      pinyinSoundThemeDetails.get(theme),
+    );
+    const groupName = nonNullable(defaultPinyinSoundGroupNames[groupId]);
 
-    const initialGroup = pinyinChart.initials.find((x) => x.id === groupId);
-    invariant(initialGroup != null, `Missing group for ${groupId}`);
+    const soundGroup = pinyinChart.soundGroups.find((x) => x.id === groupId);
+    invariant(soundGroup != null, `Missing group for ${groupId}`);
 
-    for (const [initial] of initialGroup.initials) {
+    for (const [initial] of soundGroup.sounds) {
+      invariant(initial != null);
       // if (initial !== `chu`) {
       //   continue;
       // }
@@ -97,31 +96,31 @@ for (const groupId of argvGroupIds) {
       const r = await openai(
         [],
         `
-I'm creating a mnemonic system to help people remember Pinyin initials. For each Pinyin initial I want to pick a ${theme.noun} to associate it with. (then I'll create short stories about the ${theme.noun} to help remember the pinyin). 
+I'm creating a mnemonic system to help people remember Pinyin initials. For each Pinyin initial I want to pick a ${themeNoun} to associate it with. (then I'll create short stories about the ${themeNoun} to help remember the pinyin). 
 
 There are some important constraints:
 
-- Each ${theme.noun} should be able to spark a rich image in my mind, so it's important they're well known in modern discourse.
-- It's important that I pick a ${theme.noun} that is meaningful to me, so I want to have a lot of choices to select from.
-- The ${theme.noun}'s name be based on similar pronunciation (not necessarily similar spelling) of the pinyin.
+- Each ${themeNoun} should be able to spark a rich image in my mind, so it's important they're well known in modern discourse.
+- It's important that I pick a ${themeNoun} that is meaningful to me, so I want to have a lot of choices to select from.
+- The ${themeNoun}'s name be based on similar pronunciation (not necessarily similar spelling) of the pinyin.
   - "chu-" ✅ Chancellor ❌ Chef ❌ Choreographer ❌ Chiropractor ❌ Chauffeur ❌ Train Conductor
   - "cu-"  ✅ Sushi Chef ❌ Cupid
 - The best choices are simple, short, and stand alone. For example "Doctor" for "d-" is good, but "Medical Doctor" for "mu-" is bad.)
 - Make sure the names for one initial and distinct from names for other initials. For example, "Doctor" for "d-" is good, but "Doctor" for "du-" is bad.
 
-I'm working on the group ${pinyinInitialGroupTitle(groupId)} using ${theme.noun} of the theme ${themeId} (${theme.description}). 
+I'm working on the group ${groupName} using ${themeNoun} of the theme ${theme} (${themeDescription}). 
 
 The pinyin initials in this group are:
 
-${initialGroup.initials.map((i) => `${i[0]}-`).join(`, `)}
+${soundGroup.sounds.join(`, `)}
 
-For now let's just focus on "${initial}-".
+For now let's just focus on "${initial}".
 
 Can you come up with a short explanation for how you pronounce it?
 
 Which other initials in the group sound similar and might cause confusion?
 
-So based how you pronounce the first syllable can you give me 5 suitable ${theme.noun} suggestions.
+So based how you pronounce the first syllable can you give me 5 suitable ${themeNoun} suggestions.
 `,
         z.object({
           result: z.array(
@@ -137,12 +136,12 @@ So based how you pronounce the first syllable can you give me 5 suitable ${theme
         }),
       );
 
-      debug(`result for ${groupId} (${themeId}): %o`, r);
+      debug(`result for ${groupId} (${theme}): %o`, r);
 
       await saveUpdates(
         new Map([
           [
-            themeId,
+            theme,
             new Map(
               r.result.map(
                 (x) =>
@@ -164,7 +163,7 @@ So based how you pronounce the first syllable can you give me 5 suitable ${theme
 }
 
 type MnemonicThemeChoices = Awaited<
-  ReturnType<typeof loadMnemonicThemeChoices>
+  ReturnType<typeof loadPinyinSoundNameSuggestions>
 >;
 
 async function saveUpdates(updates: MnemonicThemeChoices) {
@@ -175,29 +174,22 @@ async function saveUpdates(updates: MnemonicThemeChoices) {
 async function readMnemonicThemeChoices() {
   return await readFileWithSchema(
     dataFilePath,
-    mnemonicThemeChoicesSchema,
+    pinyinSoundNameSuggestionsSchema,
     new Map(),
   );
 }
 
 async function writeMnemonicThemeChoices(data: MnemonicThemeChoices) {
-  const newData = deepTransform(
-    new Map(
-      [...data.entries()].map(([key, value]) => [
-        rMnemonicThemeId().marshal(key),
-        value,
-      ]),
-    ),
-    (x) =>
-      x instanceof Map
-        ? Object.fromEntries(
-            [...x.entries()].sort(sortComparatorString(([k]) => k as string)),
-          )
-        : x,
+  const newData = deepTransform(new Map(data.entries()), (x) =>
+    x instanceof Map
+      ? Object.fromEntries(
+          [...x.entries()].sort(sortComparatorString(([k]) => k as string)),
+        )
+      : x,
   );
 
   // Make sure the data is valid before writing
-  mnemonicThemeChoicesSchema.parse(newData);
+  pinyinSoundNameSuggestionsSchema.parse(newData);
 
   await writeUtf8FileIfChanged(
     dataFilePath,

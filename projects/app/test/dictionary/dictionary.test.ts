@@ -21,8 +21,8 @@ import {
   loadHanziWordMigrations,
   loadHanziWordPinyinMnemonics,
   loadMissingFontGlyphs,
-  loadMnemonicThemeChoices,
-  loadMnemonicThemes,
+  loadPinyinSoundNameSuggestions,
+  loadPinyinSoundThemeDetails,
   loadPinyinWords,
   loadWiki,
   lookupHanzi,
@@ -58,8 +58,8 @@ test(`json data can be loaded and passes the schema validation`, async () => {
   await allHsk2HanziWords();
   await allHsk3HanziWords();
   await loadHanziDecomposition();
-  await loadMnemonicThemeChoices();
-  await loadMnemonicThemes();
+  await loadPinyinSoundNameSuggestions();
+  await loadPinyinSoundThemeDetails();
   await loadPinyinWords();
   await loadHanziWordGlossMnemonics();
   await loadHanziWordPinyinMnemonics();

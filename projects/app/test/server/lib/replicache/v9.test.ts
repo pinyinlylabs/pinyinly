@@ -1,13 +1,20 @@
-import { v7 as schema, srsStateFromFsrsState } from "#data/rizzleSchema.ts";
+import type { PinyinSoundGroupId, PinyinSoundId } from "#data/model.ts";
+import { v9 as schema, srsStateFromFsrsState } from "#data/rizzleSchema.ts";
 import { glossToHanziWord } from "#data/skills.ts";
 import { pgXmin } from "#server/lib/db.ts";
-import { computeCvrEntities, pull, push } from "#server/lib/replicache/v7.ts";
+import {
+  computeEntitiesState,
+  computePatch,
+  pull,
+  push,
+} from "#server/lib/replicache/v9.ts";
+import type { CvrEntities } from "#server/pgSchema.ts";
 import * as s from "#server/pgSchema.ts";
 import { nextReview, Rating } from "#util/fsrs.ts";
 import { nanoid } from "#util/nanoid.ts";
-import { invariant } from "@pinyinly/lib/invariant";
+import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import { eq } from "drizzle-orm";
-import { describe, expect } from "vitest";
+import { describe, expect, test } from "vitest";
 import { createUser, txTest } from "../dbHelpers";
 
 describe(`${push.name} suite`, () => {
@@ -353,12 +360,13 @@ describe(`${pull.name} suite`, () => {
         where: (t, { eq }) => eq(t.id, cookie.cvrId),
       });
 
-      const expectedEntities = await computeCvrEntities(tx, user.id);
+      const entitiesState = await computeEntitiesState(tx, user.id);
+      const patch = computePatch({}, entitiesState);
 
       // The CVR should have the lastMutationIds for the clients in the group
       expect(cvr).toMatchObject({
         lastMutationIds: { [client.id]: 66 },
-        entities: expectedEntities,
+        entities: patch.nextCvrEntities,
       });
     },
   );
@@ -399,7 +407,8 @@ describe(`${pull.name} suite`, () => {
         cookie: null,
       });
       invariant(`cookie` in pull1);
-      // Type assertion since we've verified cookie exists
+      expect(pull1).toHaveProperty(`cookie`);
+      expect(`lastMutationIdChanges` in pull1).toBe(true);
       expect(pull1.lastMutationIdChanges).toEqual({
         [clientId1]: 1,
       });
@@ -431,6 +440,8 @@ describe(`${pull.name} suite`, () => {
         cookie: null,
       });
       invariant(`cookie` in pull2);
+      expect(pull2).toHaveProperty(`cookie`);
+      expect(`lastMutationIdChanges` in pull2).toBe(true);
       expect(pull2.lastMutationIdChanges).toEqual({
         [clientId1]: 1,
         [clientId2]: 1,
@@ -442,9 +453,11 @@ describe(`${pull.name} suite`, () => {
         clientGroupId,
         pullVersion: 1,
         schemaVersion: schema.version,
-        cookie: pull1.cookie,
+        cookie: `cookie` in pull1 ? pull1.cookie : null,
       });
       invariant(`cookie` in pull3);
+      expect(pull3).toHaveProperty(`cookie`);
+      expect(`lastMutationIdChanges` in pull3).toBe(true);
       expect(pull3.lastMutationIdChanges).toEqual({
         [clientId2]: 1,
       });
@@ -455,9 +468,11 @@ describe(`${pull.name} suite`, () => {
         clientGroupId,
         pullVersion: 1,
         schemaVersion: schema.version,
-        cookie: pull3.cookie,
+        cookie: `cookie` in pull3 ? pull3.cookie : null,
       });
       invariant(`cookie` in pull4);
+      expect(pull4).toHaveProperty(`cookie`);
+      expect(`lastMutationIdChanges` in pull4).toBe(true);
       expect(pull4.lastMutationIdChanges).toEqual({});
     },
   );
@@ -505,6 +520,79 @@ describe(`${pull.name} suite`, () => {
     });
   });
 
+  txTest(`handles skill renames for skillState`, async ({ tx }) => {
+    // This test ensures that changes to the skill (which is used as the key in
+    // replicache) is correctly turned into delete+add. The skill might change
+    // if the HanziWord meaning key is renamed (e.g. 我:i to 我:me).
+
+    const clientGroupId = nanoid();
+
+    const user = await createUser(tx);
+
+    const [skillState] = await tx
+      .insert(s.skillState)
+      .values([
+        {
+          userId: user.id,
+          srs: srsStateFromFsrsState(nextReview(null, Rating.Good)),
+          skill: glossToHanziWord(`我:i`),
+        },
+      ])
+      .returning();
+    invariant(skillState != null);
+
+    const pull1 = await pull(tx, user.id, {
+      profileId: ``,
+      clientGroupId,
+      pullVersion: 1,
+      schemaVersion: schema.version,
+      cookie: null,
+    });
+
+    // Rename 我:i to 我:me. Need to start a new checkpoint so that xmin is
+    // updated, otherwise it won't be seen as a diff by computeEntitiesState.
+    const [updatedSkillState] = await tx.transaction((tx) =>
+      tx
+        .update(s.skillState)
+        .set({ skill: glossToHanziWord(`我:me`) })
+        .where(eq(s.skillState.id, skillState.id))
+        .returning(),
+    );
+    invariant(updatedSkillState != null);
+
+    expect(pull1).toHaveProperty(`cookie`);
+    invariant(`cookie` in pull1);
+
+    const pull2 = await pull(tx, user.id, {
+      profileId: ``,
+      clientGroupId,
+      pullVersion: 1,
+      schemaVersion: schema.version,
+      cookie: pull1.cookie,
+    });
+
+    expect(pull2).toMatchObject({
+      cookie: {
+        order: nonNullable(pull1.cookie).order + 1,
+      },
+      patch: [
+        {
+          op: `del`,
+          key: schema.skillState.marshalKey({
+            skill: glossToHanziWord(`我:i`),
+          }),
+        },
+        {
+          op: `put`,
+          key: schema.skillState.marshalKey({
+            skill: glossToHanziWord(`我:me`),
+          }),
+          value: schema.skillState.marshalValue(updatedSkillState),
+        },
+      ],
+    });
+  });
+
   txTest(`handles deletes for skillState`, async ({ tx }) => {
     const clientGroupId = nanoid();
 
@@ -532,6 +620,7 @@ describe(`${pull.name} suite`, () => {
 
     await tx.delete(s.skillState).where(eq(s.skillState.id, skillState.id));
 
+    expect(pull1).toHaveProperty(`cookie`);
     invariant(`cookie` in pull1);
 
     const pull2 = await pull(tx, user.id, {
@@ -585,6 +674,7 @@ describe(`${pull.name} suite`, () => {
 
     await tx.delete(s.skillRating).where(eq(s.skillRating.id, skillRating.id));
 
+    expect(pull1).toHaveProperty(`cookie`);
     invariant(`cookie` in pull1);
 
     const pull2 = await pull(tx, user.id, {
@@ -602,6 +692,67 @@ describe(`${pull.name} suite`, () => {
       patch: [
         {
           op: `del`,
+          key: schema.skillRating.marshalKey({ id: skillRating.id }),
+        },
+      ],
+    });
+  });
+
+  txTest(`handles skill renames for skillRating`, async ({ tx }) => {
+    const clientGroupId = nanoid();
+
+    const user = await createUser(tx);
+
+    const now = new Date();
+
+    const [skillRating] = await tx
+      .insert(s.skillRating)
+      .values([
+        {
+          userId: user.id,
+          skill: glossToHanziWord(`我:i`),
+          rating: Rating.Good,
+          createdAt: now,
+        },
+      ])
+      .returning();
+    invariant(skillRating != null);
+
+    const pull1 = await pull(tx, user.id, {
+      profileId: ``,
+      clientGroupId,
+      pullVersion: 1,
+      schemaVersion: schema.version,
+      cookie: null,
+    });
+
+    // Rename 我:i to 我:me. Need to start a new checkpoint so that xmin is
+    // updated, otherwise it won't be seen as a diff by computeEntitiesState.
+    await tx.transaction((tx) =>
+      tx
+        .update(s.skillRating)
+        .set({ skill: glossToHanziWord(`我:me`) })
+        .where(eq(s.skillRating.id, skillRating.id)),
+    );
+
+    expect(pull1).toHaveProperty(`cookie`);
+    invariant(`cookie` in pull1);
+
+    const pull2 = await pull(tx, user.id, {
+      profileId: ``,
+      clientGroupId,
+      pullVersion: 1,
+      schemaVersion: schema.version,
+      cookie: pull1.cookie,
+    });
+
+    expect(pull2).toMatchObject({
+      cookie: {
+        order: nonNullable(pull1.cookie).order + 1,
+      },
+      patch: [
+        {
+          op: `put`,
           key: schema.skillRating.marshalKey({ id: skillRating.id }),
         },
       ],
@@ -658,33 +809,33 @@ describe(`${pull.name} suite`, () => {
   });
 });
 
-describe(`${computeCvrEntities.name} suite`, () => {
+describe(`${computeEntitiesState.name} suite`, () => {
   describe(`schema ${schema.version}`, () => {
     txTest.scoped({ pgConfig: { isolationLevel: `repeatable read` } });
 
     txTest(`works for non-existant user and client group`, async ({ tx }) => {
-      await expect(computeCvrEntities(tx, `1`)).resolves.toEqual({
-        hanziGlossMistake: {},
-        hanziPinyinMistake: {},
-        pinyinFinalAssociation: {},
-        pinyinInitialAssociation: {},
-        pinyinInitialGroupTheme: {},
-        skillState: {},
-        skillRating: {},
+      await expect(computeEntitiesState(tx, `1`)).resolves.toEqual({
+        hanziGlossMistake: [],
+        hanziPinyinMistake: [],
+        pinyinSound: [],
+        pinyinSoundGroup: [],
+        skillState: [],
+        skillRating: [],
+        setting: [],
       });
     });
 
     txTest(`works for user`, async ({ tx }) => {
       const user = await createUser(tx);
 
-      await expect(computeCvrEntities(tx, user.id)).resolves.toEqual({
-        hanziGlossMistake: {},
-        hanziPinyinMistake: {},
-        pinyinFinalAssociation: {},
-        pinyinInitialAssociation: {},
-        pinyinInitialGroupTheme: {},
-        skillState: {},
-        skillRating: {},
+      await expect(computeEntitiesState(tx, user.id)).resolves.toEqual({
+        hanziGlossMistake: [],
+        hanziPinyinMistake: [],
+        pinyinSound: [],
+        pinyinSoundGroup: [],
+        skillState: [],
+        skillRating: [],
+        setting: [],
       });
     });
 
@@ -708,24 +859,19 @@ describe(`${computeCvrEntities.name} suite`, () => {
         ])
         .returning({
           id: s.skillState.id,
-          skill: s.skillState.skill,
-          version: pgXmin(s.skillState),
+          key: s.skillState.skill,
+          xmin: pgXmin(s.skillState),
         });
       invariant(user1SkillState != null);
 
-      await expect(computeCvrEntities(tx, user1.id)).resolves.toEqual({
-        hanziGlossMistake: {},
-        hanziPinyinMistake: {},
-        pinyinFinalAssociation: {},
-        pinyinInitialAssociation: {},
-        pinyinInitialGroupTheme: {},
-        skillRating: {},
-        skillState: {
-          [user1SkillState.id]:
-            user1SkillState.version +
-            `:` +
-            schema.skillState.marshalKey(user1SkillState),
-        },
+      await expect(computeEntitiesState(tx, user1.id)).resolves.toEqual({
+        hanziGlossMistake: [],
+        hanziPinyinMistake: [],
+        pinyinSound: [],
+        pinyinSoundGroup: [],
+        skillRating: [],
+        skillState: [user1SkillState],
+        setting: [],
       });
     });
 
@@ -749,118 +895,129 @@ describe(`${computeCvrEntities.name} suite`, () => {
         ])
         .returning({
           id: s.skillRating.id,
-          skill: s.skillRating.skill,
-          createdAt: s.skillRating.createdAt,
-          version: pgXmin(s.skillRating),
+          xmin: pgXmin(s.skillRating),
         });
       invariant(user1SkillRating != null);
 
-      await expect(computeCvrEntities(tx, user1.id)).resolves.toEqual({
-        hanziGlossMistake: {},
-        hanziPinyinMistake: {},
-        pinyinFinalAssociation: {},
-        pinyinInitialAssociation: {},
-        pinyinInitialGroupTheme: {},
-        skillRating: {
-          [user1SkillRating.id]:
-            user1SkillRating.version +
-            `:` +
-            schema.skillRating.marshalKey({ id: user1SkillRating.id }),
-        },
-        skillState: {},
+      await expect(computeEntitiesState(tx, user1.id)).resolves.toEqual({
+        hanziGlossMistake: [],
+        hanziPinyinMistake: [],
+        pinyinSound: [],
+        pinyinSoundGroup: [],
+        skillRating: [user1SkillRating],
+        skillState: [],
+        setting: [],
       });
     });
 
-    txTest(
-      `only includes pinyinFinalAssociation for the user`,
-      async ({ tx }) => {
-        const user1 = await createUser(tx);
-        const user2 = await createUser(tx);
+    txTest(`only includes pinyinSound for the user`, async ({ tx }) => {
+      const user1 = await createUser(tx);
+      const user2 = await createUser(tx);
 
-        const [user1PinyinFinalAssociation] = await tx
-          .insert(s.pinyinFinalAssociation)
-          .values([
-            {
-              userId: user1.id,
-              final: `p`,
-              name: `p1`,
-            },
-            {
-              userId: user2.id,
-              final: `p`,
-              name: `p2`,
-            },
-          ])
-          .returning({
-            id: s.pinyinFinalAssociation.id,
-            final: s.pinyinFinalAssociation.final,
-            version: pgXmin(s.pinyinFinalAssociation),
-          });
-        invariant(user1PinyinFinalAssociation != null);
-
-        await expect(computeCvrEntities(tx, user1.id)).resolves.toEqual({
-          hanziGlossMistake: {},
-          hanziPinyinMistake: {},
-          pinyinFinalAssociation: {
-            [user1PinyinFinalAssociation.id]:
-              user1PinyinFinalAssociation.version +
-              `:` +
-              schema.pinyinFinalAssociation.marshalKey(
-                user1PinyinFinalAssociation,
-              ),
+      const [user1PinyinSound] = await tx
+        .insert(s.pinyinSound)
+        .values([
+          {
+            userId: user1.id,
+            soundId: `p` as PinyinSoundId,
+            name: `p1`,
           },
-          pinyinInitialAssociation: {},
-          pinyinInitialGroupTheme: {},
-          skillRating: {},
-          skillState: {},
-        });
-      },
-    );
-
-    txTest(
-      `only includes pinyinInitialAssociation for the user`,
-      async ({ tx }) => {
-        const user1 = await createUser(tx);
-        const user2 = await createUser(tx);
-
-        const [user1PinyinInitialAssociation] = await tx
-          .insert(s.pinyinInitialAssociation)
-          .values([
-            {
-              userId: user1.id,
-              initial: `p`,
-              name: `p1`,
-            },
-            {
-              userId: user2.id,
-              initial: `p`,
-              name: `p2`,
-            },
-          ])
-          .returning({
-            id: s.pinyinInitialAssociation.id,
-            initial: s.pinyinInitialAssociation.initial,
-            version: pgXmin(s.pinyinInitialAssociation),
-          });
-        invariant(user1PinyinInitialAssociation != null);
-
-        await expect(computeCvrEntities(tx, user1.id)).resolves.toEqual({
-          hanziGlossMistake: {},
-          hanziPinyinMistake: {},
-          pinyinFinalAssociation: {},
-          pinyinInitialAssociation: {
-            [user1PinyinInitialAssociation.id]:
-              user1PinyinInitialAssociation.version +
-              `:` +
-              schema.pinyinInitialAssociation.marshalKey(
-                user1PinyinInitialAssociation,
-              ),
+          {
+            userId: user2.id,
+            soundId: `p` as PinyinSoundId,
+            name: `p2`,
           },
-          pinyinInitialGroupTheme: {},
-          skillRating: {},
-          skillState: {},
+        ])
+        .returning({
+          id: s.pinyinSound.id,
+          key: s.pinyinSound.soundId,
+          xmin: pgXmin(s.pinyinSound),
         });
+      invariant(user1PinyinSound != null);
+
+      await expect(computeEntitiesState(tx, user1.id)).resolves.toEqual({
+        hanziGlossMistake: [],
+        hanziPinyinMistake: [],
+        pinyinSound: [user1PinyinSound],
+        pinyinSoundGroup: [],
+        skillRating: [],
+        skillState: [],
+        setting: [],
+      });
+    });
+
+    txTest(`only includes pinyinSoundGroup for the user`, async ({ tx }) => {
+      const user1 = await createUser(tx);
+      const user2 = await createUser(tx);
+
+      const [user1PinyinSoundGroup] = await tx
+        .insert(s.pinyinSoundGroup)
+        .values([
+          {
+            userId: user1.id,
+            soundGroupId: `p` as PinyinSoundGroupId,
+            theme: `p1`,
+          },
+          {
+            userId: user2.id,
+            soundGroupId: `p` as PinyinSoundGroupId,
+            theme: `p2`,
+          },
+        ])
+        .returning({
+          id: s.pinyinSoundGroup.id,
+          key: s.pinyinSoundGroup.soundGroupId,
+          xmin: pgXmin(s.pinyinSoundGroup),
+        });
+      invariant(user1PinyinSoundGroup != null);
+
+      await expect(computeEntitiesState(tx, user1.id)).resolves.toEqual({
+        hanziGlossMistake: [],
+        hanziPinyinMistake: [],
+        pinyinSound: [],
+        pinyinSoundGroup: [user1PinyinSoundGroup],
+        skillRating: [],
+        skillState: [],
+        setting: [],
+      });
+    });
+  });
+});
+
+describe(`${computePatch.name} suite`, () => {
+  type EntitiesState = Parameters<typeof computePatch>[1];
+
+  test(`unchanged entities are preserved`, async () => {
+    const prevCvr: CvrEntities = {
+      hanziGlossMistake: { x1: `1` },
+      hanziPinyinMistake: { x2: `2` },
+      pinyinSound: { x3: `3` },
+      pinyinSoundGroup: { x4: `4` },
+      skillState: { x6: `6` },
+      skillRating: { x7: `7` },
+      setting: { x8: `8` },
+    };
+    const entitiesState: EntitiesState = {
+      hanziGlossMistake: [{ id: `x1`, xmin: `1` }],
+      hanziPinyinMistake: [{ id: `x2`, xmin: `2` }],
+      pinyinSound: [{ id: `x3`, xmin: `3` }],
+      pinyinSoundGroup: [{ id: `x4`, xmin: `4` }],
+      skillState: [{ id: `x6`, xmin: `6` }],
+      skillRating: [{ id: `x7`, xmin: `7` }],
+      setting: [{ id: `x8`, xmin: `8` }],
+    };
+    expect(computePatch(prevCvr, entitiesState)).toEqual({
+      nextCvrEntities: prevCvr,
+      partial: false,
+      patchOpsUnhydrated: {
+        hanziGlossMistake: { delKeys: [], putIds: [] },
+        hanziPinyinMistake: { delKeys: [], putIds: [] },
+        pinyinSound: { delKeys: [], putIds: [] },
+        pinyinSoundGroup: { delKeys: [], putIds: [] },
+        skillState: { delKeys: [], putIds: [] },
+        skillRating: { delKeys: [], putIds: [] },
+        setting: { delKeys: [], putIds: [] },
       },
-    );
+    });
   });
 });

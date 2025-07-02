@@ -6,10 +6,12 @@ import {
 import type {
   HanziGlossMistakeType,
   HanziPinyinMistakeType,
+  PinyinSoundGroupId,
+  PinyinSoundId,
 } from "@/data/model";
 import { MistakeKind } from "@/data/model";
 import type { Skill } from "@/data/rizzleSchema";
-import { v8 as schema } from "@/data/rizzleSchema";
+import { v9 as schema } from "@/data/rizzleSchema";
 import type {
   ClientStateNotFoundResponse,
   Cookie,
@@ -44,44 +46,6 @@ import {
   withRepeatableReadTransaction,
 } from "../db";
 import { updateSkillState } from "../queries";
-
-// Changes from v7
-//
-// In v7 the CVR was stored in this format:
-//
-// ```
-// {
-//   "skillState": {
-//     "iIn9Msb81zRN": "57524:s/he:钱包:wallet",
-//     "Y3wox8G3zvLS": "59166:s/he:站:stand",
-//     …
-//   },
-//   …
-// }
-// ```
-//
-// There's a few problems with this:
-//
-// - If the replicache key changes (e.g. `s/he:钱包:wallet`) because values in
-//   the row changed, then the diff won't be detected and syncing will be
-//   broken.
-// - The CVR are bloated to store, so the DB fills up quite quickly. There's a
-//   lot of unnecessary data in this format that can be removed.
-//
-// In v8 the new CVR format is:
-//
-// ```
-// {
-//   "skillState": {
-//     "钱包:wallet": 57524,
-//     "站:stand": 59166,
-//     …
-//   },
-//   …
-// }
-// ```
-//
-// So the PostgreSQL row ID is no longer stored in the CVR.
 
 const loggerName = import.meta.filename.split(`/`).at(-1);
 invariant(loggerName != null);
@@ -159,46 +123,37 @@ const mutators: RizzleDrizzleMutators<typeof schema, Drizzle> = {
       ]),
     });
   },
-  async setPinyinInitialAssociation(db, userId, { initial, name, now }) {
+  async setPinyinSoundName(db, userId, { soundId, name, now }) {
     const updatedAt = now;
     const createdAt = now;
     await db
-      .insert(s.pinyinInitialAssociation)
-      .values([{ userId, initial, name, updatedAt, createdAt }])
+      .insert(s.pinyinSound)
+      .values([{ userId, soundId, name, updatedAt, createdAt }])
       .onConflictDoUpdate({
-        target: [
-          s.pinyinInitialAssociation.userId,
-          s.pinyinInitialAssociation.initial,
-        ],
+        target: [s.pinyinSound.userId, s.pinyinSound.soundId],
         set: { name, updatedAt },
       });
   },
-  async setPinyinFinalAssociation(db, userId, { final, name, now }) {
+  async setPinyinSoundGroupName(db, userId, { soundGroupId, name, now }) {
     const updatedAt = now;
     const createdAt = now;
     await db
-      .insert(s.pinyinFinalAssociation)
-      .values([{ userId, final, name, updatedAt, createdAt }])
+      .insert(s.pinyinSoundGroup)
+      .values([{ userId, soundGroupId, name, updatedAt, createdAt }])
       .onConflictDoUpdate({
-        target: [
-          s.pinyinFinalAssociation.userId,
-          s.pinyinFinalAssociation.final,
-        ],
+        target: [s.pinyinSound.userId, s.pinyinSound.soundId],
         set: { name, updatedAt },
       });
   },
-  async setPinyinInitialGroupTheme(db, userId, { groupId, themeId, now }) {
+  async setPinyinSoundGroupTheme(db, userId, { soundGroupId, theme, now }) {
     const updatedAt = now;
     const createdAt = now;
     await db
-      .insert(s.pinyinInitialGroupTheme)
-      .values([{ userId, groupId, themeId, updatedAt, createdAt }])
+      .insert(s.pinyinSoundGroup)
+      .values([{ userId, soundGroupId, theme, updatedAt, createdAt }])
       .onConflictDoUpdate({
-        target: [
-          s.pinyinInitialGroupTheme.userId,
-          s.pinyinInitialGroupTheme.groupId,
-        ],
-        set: { themeId, updatedAt },
+        target: [s.pinyinSound.userId, s.pinyinSound.soundId],
+        set: { theme, updatedAt },
       });
   },
   async setSetting(db, userId, { key, value, now }) {
@@ -435,9 +390,8 @@ export async function pull(
 }
 
 type CvrNamespace =
-  | `pinyinInitialAssociation`
-  | `pinyinFinalAssociation`
-  | `pinyinInitialGroupTheme`
+  | `pinyinSound`
+  | `pinyinSoundGroup`
   | `skillState`
   | `skillRating`
   | `hanziGlossMistake`
@@ -504,11 +458,11 @@ type PatchOpsUnhydrated = Partial<
 
 const syncEntities = [
   makeSyncEntity(
-    `pinyinFinalAssociation`,
-    schema.pinyinFinalAssociation,
-    (final, e) => e.marshalKey({ final }),
+    `pinyinSound`,
+    schema.pinyinSound,
+    (key: PinyinSoundId, e) => e.marshalKey({ soundId: key }),
     (db, ids) =>
-      db.query.pinyinFinalAssociation.findMany({
+      db.query.pinyinSound.findMany({
         where: (t) => inArray(t.id, ids),
       }),
     (db, userId) =>
@@ -516,22 +470,22 @@ const syncEntities = [
         .select({
           map: json_agg(
             json_build_object({
-              id: s.pinyinFinalAssociation.id,
-              key: s.pinyinFinalAssociation.final,
-              xmin: pgXmin(s.pinyinFinalAssociation),
+              id: s.pinyinSound.id,
+              key: s.pinyinSound.soundId,
+              xmin: pgXmin(s.pinyinSound),
             }),
-          ).as(`pinyinFinalAssociationVersions`),
+          ).as(`pinyinSoundVersions`),
         })
-        .from(s.pinyinFinalAssociation)
-        .where(eq(s.pinyinFinalAssociation.userId, userId))
-        .as(`pinyinFinalAssociationVersions`),
+        .from(s.pinyinSound)
+        .where(eq(s.pinyinSound.userId, userId))
+        .as(`pinyinSoundVersions`),
   ),
   makeSyncEntity(
-    `pinyinInitialAssociation`,
-    schema.pinyinInitialAssociation,
-    (initial, e) => e.marshalKey({ initial }),
+    `pinyinSoundGroup`,
+    schema.pinyinSoundGroup,
+    (key: PinyinSoundGroupId, e) => e.marshalKey({ soundGroupId: key }),
     (db, ids) =>
-      db.query.pinyinInitialAssociation.findMany({
+      db.query.pinyinSoundGroup.findMany({
         where: (t) => inArray(t.id, ids),
       }),
     (db, userId) =>
@@ -539,43 +493,20 @@ const syncEntities = [
         .select({
           map: json_agg(
             json_build_object({
-              id: s.pinyinInitialAssociation.id,
-              key: s.pinyinInitialAssociation.initial,
-              xmin: pgXmin(s.pinyinInitialAssociation),
+              id: s.pinyinSoundGroup.id,
+              key: s.pinyinSoundGroup.soundGroupId,
+              xmin: pgXmin(s.pinyinSoundGroup),
             }),
-          ).as(`pinyinInitialAssociationVersions`),
+          ).as(`pinyinSoundGroupVersions`),
         })
-        .from(s.pinyinInitialAssociation)
-        .where(eq(s.pinyinInitialAssociation.userId, userId))
-        .as(`pinyinInitialAssociationVersions`),
-  ),
-  makeSyncEntity(
-    `pinyinInitialGroupTheme`,
-    schema.pinyinInitialGroupTheme,
-    (groupId, e) => e.marshalKey({ groupId }),
-    (db, ids) =>
-      db.query.pinyinInitialGroupTheme.findMany({
-        where: (t) => inArray(t.id, ids),
-      }),
-    (db, userId) =>
-      db
-        .select({
-          map: json_agg(
-            json_build_object({
-              id: s.pinyinInitialGroupTheme.id,
-              key: s.pinyinInitialGroupTheme.groupId,
-              xmin: pgXmin(s.pinyinInitialGroupTheme),
-            }),
-          ).as(`pinyinInitialGroupThemeVersions`),
-        })
-        .from(s.pinyinInitialGroupTheme)
-        .where(eq(s.pinyinInitialGroupTheme.userId, userId))
-        .as(`pinyinInitialGroupThemeVersions`),
+        .from(s.pinyinSoundGroup)
+        .where(eq(s.pinyinSoundGroup.userId, userId))
+        .as(`pinyinSoundGroupVersions`),
   ),
   makeSyncEntity(
     `skillState`,
     schema.skillState,
-    (skill: Skill, e) => e.marshalKey({ skill }),
+    (key: Skill, e) => e.marshalKey({ skill: key }),
     (db, ids) =>
       db.query.skillState.findMany({ where: (t) => inArray(t.id, ids) }),
     (db, userId) =>

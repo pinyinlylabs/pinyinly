@@ -11,6 +11,8 @@ import {
   pgMnemonicThemeId,
   pgPasskeyTransport,
   pgPinyinInitialGroupId,
+  pgPinyinSoundGroupId,
+  pgPinyinSoundId,
   pgSkill,
   pgSpaceSeparatoredString,
   rizzleCustomType,
@@ -24,19 +26,7 @@ export const cvrEntitySchema = z.record(
   z.string().describe(`xmin value for the row`),
 );
 
-export const cvrEntitiesSchema = z.partialRecord(
-  z.union([
-    z.literal(`pinyinInitialAssociation`),
-    z.literal(`pinyinFinalAssociation`),
-    z.literal(`pinyinInitialGroupTheme`),
-    z.literal(`skillState`),
-    z.literal(`skillRating`),
-    z.literal(`hanziGlossMistake`),
-    z.literal(`hanziPinyinMistake`),
-    z.literal(`setting`),
-  ]),
-  cvrEntitySchema,
-);
+export const cvrEntitiesSchema = z.partialRecord(z.string(), cvrEntitySchema);
 
 export type CvrEntities = z.infer<typeof cvrEntitiesSchema>;
 
@@ -226,6 +216,45 @@ export const pinyinInitialGroupTheme = schema.table(
     createdAt: pg.timestamp(`createdAt`).defaultNow().notNull(),
   },
   (t) => [pg.unique().on(t.userId, t.groupId)],
+);
+
+export const pinyinSound = schema.table(
+  `pinyinSound`,
+  {
+    id: pg.text(`id`).primaryKey().$defaultFn(nanoid),
+    userId: pg
+      .text(`userId`)
+      .references(() => user.id)
+      .notNull(),
+    soundId: pgPinyinSoundId(`soundId`).notNull(),
+    name: pg.text(`name`),
+    updatedAt: pg.timestamp(`updatedAt`).defaultNow().notNull(),
+    createdAt: pg.timestamp(`createdAt`).defaultNow().notNull(),
+  },
+  (t) => [pg.unique().on(t.userId, t.soundId)],
+);
+
+export const pinyinSoundGroup = schema.table(
+  `pinyinSoundGroup`,
+  {
+    id: pg.text(`id`).primaryKey().$defaultFn(nanoid),
+    userId: pg
+      .text(`userId`)
+      .references(() => user.id)
+      .notNull(),
+    soundGroupId: pgPinyinSoundGroupId(`soundGroupId`).notNull(),
+    /**
+     * Override the default name.
+     */
+    name: pg.text(`name`),
+    /**
+     * Override the default theme.
+     */
+    theme: pg.text(`theme`),
+    updatedAt: pg.timestamp(`updatedAt`).defaultNow().notNull(),
+    createdAt: pg.timestamp(`createdAt`).defaultNow().notNull(),
+  },
+  (t) => [pg.unique().on(t.userId, t.soundGroupId)],
 );
 
 /**

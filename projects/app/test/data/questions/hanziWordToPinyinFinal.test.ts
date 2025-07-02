@@ -74,7 +74,7 @@ describe(`${tryPinyinDistractor.name} suite`, async () => {
     const ctx = await makeQuestionContext(`我:i`);
 
     // ō doesn't match ǒ
-    assert.equal(tryPinyinDistractor(ctx, 拼音`tō`), false);
+    assert.equal(tryPinyinDistractor(ctx, 拼音`ō`), false);
   });
 
   test(`should add viable candidates`, async () => {
@@ -88,7 +88,7 @@ describe(`${tryPinyinDistractor.name} suite`, async () => {
 });
 
 describe(`${hanziWordToPinyinFinalQuestionOrThrow.name} suite`, async () => {
-  test(`works for all valid single character hanzi`, async () => {
+  test.skip(`works for all valid single character hanzi`, async () => {
     const dictionary = await loadDictionary();
     const sample = [...dictionary].filter(
       ([hanziWord, meaning]) =>

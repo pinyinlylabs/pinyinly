@@ -87,8 +87,7 @@ tasks:
 
   dbGenerate:
     command: drizzle-kit generate
-    options:
-      runInCI: false
+    preset: watcher
 
   dbMigrate:
     command: tsx --tsconfig tsconfig.node.json ./bin/dbMigrate.ts

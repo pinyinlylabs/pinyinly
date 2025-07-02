@@ -1,9 +1,9 @@
 import {
   rFsrsRating,
   rHanziOrHanziWord,
-  rMnemonicThemeId,
-  rPinyinInitialGroupId,
   rPinyinPronunciation,
+  rPinyinSoundGroupId,
+  rPinyinSoundId,
   rSkill,
   rSpaceSeparatedString,
 } from "@/data/rizzleSchema";
@@ -236,11 +236,13 @@ export const rizzleCustomType = <
 // The "s" prefix follows the convention of "s" being drizzle things. This helps
 // differentiate them from rizzle schema things.
 export const pgSkill = rizzleCustomType(rSkill(), `text`);
-export const pgMnemonicThemeId = rizzleCustomType(rMnemonicThemeId(), `text`);
-export const pgPinyinInitialGroupId = rizzleCustomType(
-  rPinyinInitialGroupId(),
+export const pgMnemonicThemeId = rizzleCustomType(r.string(), `text`);
+export const pgPinyinSoundId = rizzleCustomType(rPinyinSoundId(), `text`);
+export const pgPinyinSoundGroupId = rizzleCustomType(
+  rPinyinSoundGroupId(),
   `text`,
 );
+export const pgPinyinInitialGroupId = rizzleCustomType(r.string(), `text`);
 export const pgPinyinPronunciation = rizzleCustomType(
   rPinyinPronunciation(),
   `text`,

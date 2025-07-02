@@ -1,6 +1,9 @@
 import type { PinyinChart } from "#data/pinyin.ts";
 import {
   convertPinyinWithToneNumberToToneMark,
+  defaultPinyinSoundGroupNames,
+  defaultPinyinSoundGroupRanks,
+  defaultPinyinSoundGroupThemes,
   loadHhhPinyinChart,
   loadHhPinyinChart,
   loadHmmPinyinChart,
@@ -17,6 +20,7 @@ import {
 import { loadPinyinWords } from "#dictionary/dictionary.ts";
 import { uniqueInvariant } from "@pinyinly/lib/invariant";
 import assert from "node:assert/strict";
+import type { DeepReadonly } from "ts-essentials";
 import { describe, expect, test } from "vitest";
 
 test(`json data can be loaded and passes the schema validation`, async () => {
@@ -118,9 +122,9 @@ describe(`${parsePinyinSyllableTone.name} fixtures`, () => {
       [`ǜ`, [`ü`, 4]],
       [`ü`, [`ü`, 5]],
     ] as const) {
-      const [tonelessPinyin, tone] = expected;
-      assert.deepEqual(parsePinyinSyllableTone(input), {
-        tonelessPinyin,
+      const [tonelessSyllable, tone] = expected;
+      expect(parsePinyinSyllableTone(input)).toEqual({
+        tonelessSyllable,
         tone,
       });
     }
@@ -266,68 +270,68 @@ test(`standard pinyin covers kangxi pinyin`, async () => {
   const chart = await loadStandardPinyinChart();
 
   await testPinyinChart(chart, [
-    [`a`, `∅`, `a`],
-    [`an`, `∅`, `an`],
-    [`ê`, `∅`, `ê`],
-    [`ju`, `j`, `ü`],
-    [`qu`, `q`, `ü`],
-    [`xu`, `x`, `ü`],
-    [`bu`, `b`, `u`],
-    [`pu`, `p`, `u`],
-    [`mu`, `m`, `u`],
-    [`fu`, `f`, `u`],
-    [`du`, `d`, `u`],
-    [`tu`, `t`, `u`],
-    [`nu`, `n`, `u`],
-    [`niu`, `n`, `iu`],
-    [`lu`, `l`, `u`],
-    [`gu`, `g`, `u`],
-    [`ku`, `k`, `u`],
-    [`hu`, `h`, `u`],
-    [`wu`, `∅`, `u`],
-    [`wa`, `∅`, `ua`],
-    [`er`, `∅`, `er`],
-    [`yi`, `∅`, `i`],
-    [`ya`, `∅`, `ia`],
-    [`yo`, `∅`, `io`],
-    [`ye`, `∅`, `ie`],
-    [`yai`, `∅`, `iai`],
-    [`yao`, `∅`, `iao`],
-    [`you`, `∅`, `iu`],
-    [`yan`, `∅`, `ian`],
-    [`yin`, `∅`, `in`],
-    [`yang`, `∅`, `iang`],
-    [`ying`, `∅`, `ing`],
-    [`wu`, `∅`, `u`],
-    [`wa`, `∅`, `ua`],
-    [`wo`, `∅`, `uo`],
-    [`wai`, `∅`, `uai`],
-    [`wei`, `∅`, `ui`],
-    [`wan`, `∅`, `uan`],
-    [`wen`, `∅`, `un`],
-    [`wang`, `∅`, `uang`],
-    [`weng`, `∅`, `ong`],
-    [`ong`, `∅`, `ong`],
-    [`yu`, `∅`, `ü`],
-    [`yue`, `∅`, `üe`],
-    [`yuan`, `∅`, `üan`],
-    [`yun`, `∅`, `ün`],
-    [`yong`, `∅`, `iong`],
-    [`ju`, `j`, `ü`],
-    [`jue`, `j`, `üe`],
-    [`juan`, `j`, `üan`],
-    [`jun`, `j`, `ün`],
-    [`jiong`, `j`, `iong`],
-    [`qu`, `q`, `ü`],
-    [`que`, `q`, `üe`],
-    [`quan`, `q`, `üan`],
-    [`qun`, `q`, `ün`],
-    [`qiong`, `q`, `iong`],
-    [`xu`, `x`, `ü`],
-    [`xue`, `x`, `üe`],
-    [`xuan`, `x`, `üan`],
-    [`xun`, `x`, `ün`],
-    [`xiong`, `x`, `iong`],
+    [`a`, `∅-`, `-a`],
+    [`an`, `∅-`, `-an`],
+    [`ê`, `∅-`, `-ê`],
+    [`ju`, `j-`, `-ü`],
+    [`qu`, `q-`, `-ü`],
+    [`xu`, `x-`, `-ü`],
+    [`bu`, `b-`, `-u`],
+    [`pu`, `p-`, `-u`],
+    [`mu`, `m-`, `-u`],
+    [`fu`, `f-`, `-u`],
+    [`du`, `d-`, `-u`],
+    [`tu`, `t-`, `-u`],
+    [`nu`, `n-`, `-u`],
+    [`niu`, `n-`, `-iu`],
+    [`lu`, `l-`, `-u`],
+    [`gu`, `g-`, `-u`],
+    [`ku`, `k-`, `-u`],
+    [`hu`, `h-`, `-u`],
+    [`wu`, `∅-`, `-u`],
+    [`wa`, `∅-`, `-ua`],
+    [`er`, `∅-`, `-er`],
+    [`yi`, `∅-`, `-i`],
+    [`ya`, `∅-`, `-ia`],
+    [`yo`, `∅-`, `-io`],
+    [`ye`, `∅-`, `-ie`],
+    [`yai`, `∅-`, `-iai`],
+    [`yao`, `∅-`, `-iao`],
+    [`you`, `∅-`, `-iu`],
+    [`yan`, `∅-`, `-ian`],
+    [`yin`, `∅-`, `-in`],
+    [`yang`, `∅-`, `-iang`],
+    [`ying`, `∅-`, `-ing`],
+    [`wu`, `∅-`, `-u`],
+    [`wa`, `∅-`, `-ua`],
+    [`wo`, `∅-`, `-uo`],
+    [`wai`, `∅-`, `-uai`],
+    [`wei`, `∅-`, `-ui`],
+    [`wan`, `∅-`, `-uan`],
+    [`wen`, `∅-`, `-un`],
+    [`wang`, `∅-`, `-uang`],
+    [`weng`, `∅-`, `-ong`],
+    [`ong`, `∅-`, `-ong`],
+    [`yu`, `∅-`, `-ü`],
+    [`yue`, `∅-`, `-üe`],
+    [`yuan`, `∅-`, `-üan`],
+    [`yun`, `∅-`, `-ün`],
+    [`yong`, `∅-`, `-iong`],
+    [`ju`, `j-`, `-ü`],
+    [`jue`, `j-`, `-üe`],
+    [`juan`, `j-`, `-üan`],
+    [`jun`, `j-`, `-ün`],
+    [`jiong`, `j-`, `-iong`],
+    [`qu`, `q-`, `-ü`],
+    [`que`, `q-`, `-üe`],
+    [`quan`, `q-`, `-üan`],
+    [`qun`, `q-`, `-ün`],
+    [`qiong`, `q-`, `-iong`],
+    [`xu`, `x-`, `-ü`],
+    [`xue`, `x-`, `-üe`],
+    [`xuan`, `x-`, `-üan`],
+    [`xun`, `x-`, `-ün`],
+    [`xiong`, `x-`, `-iong`],
   ]);
 });
 
@@ -335,106 +339,144 @@ test(`mm pinyin covers kangxi pinyin`, async () => {
   const chart = await loadMmPinyinChart();
 
   await testPinyinChart(chart, [
-    [`zhang`, `zh`, `ang`],
-    [`bao`, `b`, `ao`],
-    [`ao`, `∅`, `ao`],
-    [`ba`, `b`, `a`],
-    [`ci`, `c`, `∅`],
-    [`chi`, `ch`, `∅`],
-    [`cong`, `cu`, `(e)ng`],
-    [`chong`, `chu`, `(e)ng`],
-    [`chui`, `chu`, `ei`],
-    [`diu`, `di`, `ou`],
-    [`miu`, `mi`, `ou`],
-    [`niu`, `ni`, `ou`],
-    [`you`, `y`, `ou`],
-    [`yin`, `y`, `(e)n`],
-    [`ê`, `∅`, `e`],
-    [`er`, `∅`, `∅`],
-    // [`zh(i)`, `zh`, `∅`], // ?
-    [`zha`, `zh`, `a`],
-    [`zhong`, `zhu`, `(e)ng`],
-    [`zhe`, `zh`, `e`],
-    [`ta`, `t`, `a`],
-    [`a`, `∅`, `a`],
-    [`xing`, `xi`, `(e)ng`],
-    [`qing`, `qi`, `(e)ng`],
-    [`si`, `s`, `∅`],
-    [`zhi`, `zh`, `∅`],
-    [`chi`, `ch`, `∅`],
-    [`shi`, `sh`, `∅`],
-    [`ri`, `r`, `∅`],
-    [`ci`, `c`, `∅`],
-    [`zi`, `z`, `∅`],
+    [`zhang`, `zh-`, `-ang`],
+    [`bao`, `b-`, `-ao`],
+    [`ao`, `∅-`, `-ao`],
+    [`ba`, `b-`, `-a`],
+    [`ci`, `c-`, `-∅`],
+    [`chi`, `ch-`, `-∅`],
+    [`cong`, `cu-`, `-(e)ng`],
+    [`chong`, `chu-`, `-(e)ng`],
+    [`chui`, `chu-`, `-ei`],
+    [`diu`, `di-`, `-ou`],
+    [`miu`, `mi-`, `-ou`],
+    [`niu`, `ni-`, `-ou`],
+    [`you`, `y-`, `-ou`],
+    [`yin`, `y-`, `-(e)n`],
+    [`ê`, `∅-`, `-e`],
+    [`er`, `∅-`, `-∅`],
+    [`zha`, `zh-`, `-a`],
+    [`zhong`, `zhu-`, `-(e)ng`],
+    [`zhe`, `zh-`, `-e`],
+    [`ta`, `t-`, `-a`],
+    [`a`, `∅-`, `-a`],
+    [`xing`, `xi-`, `-(e)ng`],
+    [`qing`, `qi-`, `-(e)ng`],
+    [`si`, `s-`, `-∅`],
+    [`zhi`, `zh-`, `-∅`],
+    [`chi`, `ch-`, `-∅`],
+    [`shi`, `sh-`, `-∅`],
+    [`ri`, `r-`, `-∅`],
+    [`ci`, `c-`, `-∅`],
+    [`zi`, `z-`, `-∅`],
   ]);
 });
 
 test(`hh pinyin covers kangxi pinyin`, async () => {
   const chart = await loadHhPinyinChart();
 
-  await testPinyinChart(chart, [
-    [`a`, `_`, `a`],
-    [`bi`, `bi`, `_`],
-    [`niu`, `ni`, `(o)u`],
-    [`tie`, `ti`, `e`],
-    [`zhou`, `zh`, `(o)u`],
-    [`zhuo`, `zhu`, `o`],
-  ]);
+  await testPinyinChart(
+    chart,
+    [
+      [`a`, `_-`, `-a`],
+      [`bi`, `bi-`, `-_`],
+      [`niu`, `ni-`, `-(o)u`],
+      [`tie`, `ti-`, `-e`],
+      [`zhou`, `zh-`, `-(o)u`],
+      [`zhuo`, `zhu-`, `-o`],
+    ],
+    new Set([
+      `ê`,
+      `biang`,
+      `ong`,
+      `pia`,
+      `pun`,
+      `fai`,
+      `fiao`,
+      `din`,
+      `diang`,
+      `duang`,
+      `nia`,
+      `nui`,
+      `nun`,
+      `len`,
+      `lüan`,
+      `lün`,
+      `gin`,
+      `ging`,
+      `kei`,
+      `kiu`,
+      `kiang`,
+      `cei`,
+      `sei`,
+    ]),
+  );
 });
 
 test(`hmm pinyin covers kangxi pinyin`, async () => {
   const chart = await loadHmmPinyinChart();
 
-  assert.equal(chart.initials.flatMap((i) => i.initials).length, 55);
-  assert.equal(chart.finals.length, 13);
+  expect(new Set(Object.values(chart.syllableToInitialSound)).size).toEqual(55);
+  expect(new Set(Object.values(chart.syllableToFinalSound)).size).toEqual(13);
 
   await testPinyinChart(chart, [
-    [`a`, `∅`, `a`],
-    [`er`, `∅`, `∅`],
-    [`ci`, `c`, `∅`],
-    [`yi`, `yi`, `∅`],
-    [`ya`, `yi`, `a`],
-    [`wa`, `wu`, `a`],
-    [`wu`, `wu`, `∅`],
-    [`bi`, `bi`, `∅`],
-    [`bin`, `bi`, `(e)n`],
-    [`meng`, `m`, `(e)ng`],
-    [`ming`, `mi`, `(e)ng`],
-    [`li`, `li`, `∅`],
-    [`diu`, `di`, `ou`],
-    [`niu`, `ni`, `ou`],
-    [`lu`, `lu`, `∅`],
-    [`lü`, `lü`, `∅`],
-    [`tie`, `ti`, `e`],
-    [`zhou`, `zh`, `ou`],
-    [`zhuo`, `zhu`, `o`],
-    [`shua`, `shu`, `a`],
+    [`a`, `∅-`, `-a`],
+    [`er`, `∅-`, `-∅`],
+    [`ci`, `c-`, `-∅`],
+    [`yi`, `yi-`, `-∅`],
+    [`ya`, `yi-`, `-a`],
+    [`wa`, `wu-`, `-a`],
+    [`wu`, `wu-`, `-∅`],
+    [`bi`, `bi-`, `-∅`],
+    [`bin`, `bi-`, `-(e)n`],
+    [`meng`, `m-`, `-(e)ng`],
+    [`ming`, `mi-`, `-(e)ng`],
+    [`li`, `li-`, `-∅`],
+    [`diu`, `di-`, `-ou`],
+    [`niu`, `ni-`, `-ou`],
+    [`lu`, `lu-`, `-∅`],
+    [`lü`, `lü-`, `-∅`],
+    [`tie`, `ti-`, `-e`],
+    [`zhou`, `zh-`, `-ou`],
+    [`zhuo`, `zhu-`, `-o`],
+    [`shua`, `shu-`, `-a`],
   ]);
 });
 
-test(`hhh pinyin covers kangxi pinyin`, async () => {
+test(`hhh pinyin chart`, async () => {
   const chart = loadHhhPinyinChart();
 
-  await testPinyinChart(chart, [
-    [`zhang`, `zh`, `ang`],
-    [`bao`, `b`, `ao`],
-    [`ao`, `∅`, `ao`],
-    [`ba`, `b`, `a`],
+  const chartGroupIds = new Set(chart.soundGroups.map((x) => x.id));
+  expect(chartGroupIds).toEqual(
+    new Set(Object.keys(defaultPinyinSoundGroupRanks)),
+  );
+  expect(chartGroupIds).toEqual(
+    new Set(Object.keys(defaultPinyinSoundGroupNames)),
+  );
+  expect(chartGroupIds).toEqual(
+    new Set(Object.keys(defaultPinyinSoundGroupThemes)),
+  );
 
-    [`cong`, `cu`, `(e)ng`],
+  await testPinyinChart(chart, [
+    [`zhang`, `zh-`, `-ang`],
+    [`bao`, `b-`, `-ao`],
+    [`ao`, `∅-`, `-ao`],
+    [`ba`, `b-`, `-a`],
+
+    [`cong`, `c-`, `-ong`],
 
     // https://countryoftheblind.blogspot.com/2012/01/mnemonics-for-pronouncing-chinese.html?showComment=1540670199273&m=1#c4879970812355082477
-    [`cheng`, `ch`, `(e)ng`],
-    [`chong`, `chu`, `(e)ng`],
+    [`cheng`, `ch-`, `-[e]ng`],
+    [`chong`, `ch-`, `-ong`],
 
-    [`chui`, `chu`, `ei`],
-    [`diu`, `di`, `ou`],
-    [`miu`, `mi`, `ou`],
-    [`niu`, `ni`, `ou`],
-    [`you`, `y`, `ou`],
-    [`yin`, `y`, `(e)n`],
-    [`ê`, `∅`, `e`],
-    [`er`, `∅`, `∅`],
+    [`chui`, `chu-`, `-[e]i`],
+    [`diu`, `di-`, `-[o]u`],
+    [`miu`, `mi-`, `-[o]u`],
+    [`niu`, `ni-`, `-[o]u`],
+    [`you`, `y-`, `-[o]u`],
+    [`yin`, `y-`, `-[e]n`],
+    [`ê`, `∅-`, `-e`],
+    [`er`, `∅-`, `-∅`],
 
     // When -i- is not an "ee" sound:
     //
@@ -444,36 +486,40 @@ test(`hhh pinyin covers kangxi pinyin`, async () => {
     //
     // Source:
     // https://countryoftheblind.blogspot.com/2012/01/mnemonics-for-pronouncing-chinese.html?m=1
-    [`si`, `s`, `∅`],
-    [`zhi`, `zh`, `∅`],
-    [`chi`, `ch`, `∅`],
-    [`shi`, `sh`, `∅`],
-    [`ri`, `r`, `∅`],
-    [`ci`, `c`, `∅`],
-    [`zi`, `z`, `∅`],
+    [`si`, `s-`, `-∅`],
+    [`zhi`, `zh-`, `-∅`],
+    [`chi`, `ch-`, `-∅`],
+    [`shi`, `sh-`, `-∅`],
+    [`ri`, `r-`, `-∅`],
+    [`ci`, `c-`, `-∅`],
+    [`zi`, `z-`, `-∅`],
 
-    [`zha`, `zh`, `a`],
+    [`zha`, `zh-`, `-a`],
     // > You will notice some spelling oddities: for example, zhu- + (e)ng becomes
     // > zhong instead of *zhung, but these merely reflect the way Pinyin works.
     //
     // Source: https://countryoftheblind.blogspot.com/2012/01/mnemonics-for-pronouncing-chinese.html?m=1
-    [`zhong`, `zhu`, `(e)ng`],
-    [`zhe`, `zh`, `e`],
-    [`ta`, `t`, `a`],
-    [`a`, `∅`, `a`],
-    [`xing`, `xi`, `(e)ng`],
-    [`qing`, `qi`, `(e)ng`],
+    [`zhong`, `zh-`, `-ong`],
+    [`zhe`, `zh-`, `-e`],
+    [`ta`, `t-`, `-a`],
+    [`tou`, `t-`, `-[o]u`],
+    [`xiu`, `xi-`, `-[o]u`],
+    [`a`, `∅-`, `-a`],
+    [`xing`, `xi-`, `-[e]ng`],
+    [`qing`, `qi-`, `-[e]ng`],
   ]);
 });
 
 async function testPinyinChart(
-  chart: PinyinChart,
+  chart: DeepReadonly<PinyinChart>,
   testCases: readonly [
     input: string,
     expectedInitialChartLabel: string,
     expectedFinalChartLabel: string,
   ][] = [],
+  expectedDifferenceFromStandard = new Set(),
 ): Promise<void> {
+  const standardChart = await loadStandardPinyinChart();
   const pinyinWords = await loadPinyinWords();
 
   // Start with test cases first as these are easier to debug.
@@ -485,8 +531,8 @@ async function testPinyinChart(
     const actual = splitTonelessPinyinSyllable(input, chart);
     assert.deepEqual(
       {
-        initialChartLabel: actual?.initialChartLabel,
-        finalChartLabel: actual?.finalChartLabel,
+        initialChartLabel: actual?.initialSoundId,
+        finalChartLabel: actual?.finalSoundId,
       },
       {
         initialChartLabel: expectedInitialChartLabel,
@@ -498,15 +544,42 @@ async function testPinyinChart(
 
   for (const x of pinyinWords) {
     assert.notEqual(
-      splitTonelessPinyinSyllable(x, chart),
+      expectedDifferenceFromStandard.has(x) ||
+        splitTonelessPinyinSyllable(x, chart),
       null,
       `couldn't split ${x}`,
     );
   }
 
   // Ensure that there are no duplicates initials or finals.
-  uniqueInvariant(
-    chart.initials.flatMap((x) => x.initials).flatMap(([, ...x]) => x),
+  expect(Object.keys(chart.syllableToInitialSound).sort()).toEqual(
+    Object.keys(chart.syllableToFinalSound).sort(),
   );
-  uniqueInvariant(chart.finals.flatMap(([, ...x]) => x));
+
+  // Ensure all the pinyin syllables in the standard chart are covered by this
+  // chart.
+  expect(
+    new Set(Object.keys(chart.syllableToInitialSound))
+      .symmetricDifference(
+        new Set(Object.keys(standardChart.syllableToInitialSound)),
+      )
+      .symmetricDifference(expectedDifferenceFromStandard),
+  ).toEqual(new Set());
+
+  // Test that there are no duplicated group items.
+  uniqueInvariant(chart.soundGroups.flatMap((x) => x.sounds));
+
+  // Test that all the group items are valid and cover all the listed items.
+  expect(
+    new Set(
+      chart.soundGroups
+        .flatMap((x) => x.sounds)
+        .filter((x) => !`1 2 3 4 5`.includes(x)),
+    ),
+  ).toEqual(
+    new Set([
+      ...Object.values(chart.syllableToInitialSound),
+      ...Object.values(chart.syllableToFinalSound),
+    ]),
+  );
 }

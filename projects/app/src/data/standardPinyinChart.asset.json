@@ -1,9 +1,88 @@
 {
-"initials":[{
-  "id": "everything",
-  "desc": "default",
-  "initials": [["∅",""],"b","p","m","f","d","t","n","l","g","k","h","j","q","x","zh","ch","sh","r","z","c","s"]
-}],
-"finals":[["∅",""],"a","o","e","ê","ai","ei","ao","ou","an","en","ang","eng","er",["i","i","yi"],["ia","ia","ya"],["io","io","yo"],["ie","ie","ye"],["iai","yai"],["iao","iao","yao"],["iu","iu","you"],["ian","ian","yan"],["in","in","yin"],["iang","iang","yang"],["ing","ing","ying"],["u","u","wu"],["ua","ua","wa"],["uo","uo","wo"],["uai","uai","wai"],["ui","ui","wei"],["uan","uan","wan"],["un","un","wen"],["uang","uang","wang"],["ong","ong","weng"],"ü",["üe","üe","ue","yue"],"üan","ün",["iong","iong","yong"]],
-"overrides":{"yu":[["∅", ""],["ü","u"]],"yuan":[["∅", "y"],["üan","uan"]],"yun":[["∅","y"],["ün","un"]],"ju":[["j","j"],["ü","u"]],"juan":[["j","j"],["üan","uan"]],"jun":[["j","j"],["ün","un"]],"qu":[["q","q"],["ü","u"]],"quan":[["q","q"],["üan","uan"]],"qun":[["q","q"],["ün","un"]],"xu":[["x","x"],["ü","u"]],"xuan":[["x","x"],["üan","uan"]],"xun":[["x","x"],["ün","un"]]}
+  "items": {
+    "∅-":  "a o e ê ai ei ao ou an en ang eng er yi ya yo ye yai yao you yan yin yang ying wu wa wo wai wei wan wen wang weng ong yu yue yuan yun yong",
+    "b-":  "ba bai bei bao ban ben bang beng bi bie biao bian bin biang bing bu bo",
+    "p-":  "pa pai pei pao pou pan pen pang peng pi pia pie piao pian pin ping pu po pun",
+    "m-":  "ma me mai mei mao mou man men mang meng mi mie miao miu mian min ming mu mo",
+    "f-":  "fa fai fei fou fan fen fang feng fiao fu fo",
+    "d-":  "da de dai dei dao dou dan den dang deng di dia die diao diu dian din diang ding du duo dui duan dun duang dong",
+    "t-":  "ta te tai tei tao tou tan tang teng ti tie tiao tian ting tu tuo tui tuan tun tong",
+    "n-":  "na ne nai nei nao nou nan nen nang neng ni nia nie niao niu nian nin niang ning nu nuo nui nuan nun nong nü nüe",
+    "l-":  "la lo le lai lei lao lou lan len lang leng li lia lie liao liu lian lin liang ling lu luo luan lun long lü lüe lüan lün",
+    "g-":  "ga ge gai gei gao gou gan gen gang geng gin ging gu gua guo guai gui guan gun guang gong",
+    "k-":  "ka ke kai kei kao kou kan ken kang keng kiu kiang ku kua kuo kuai kui kuan kun kuang kong",
+    "h-":  "ha he hai hei hao hou han hen hang heng hu hua huo huai hui huan hun huang hong",
+    "j-":  "ji jia jie jiao jiu jian jin jiang jing ju jue juan jun jiong",
+    "q-":  "qi qia qie qiao qiu qian qin qiang qing qu que quan qun qiong",
+    "x-":  "xi xia xie xiao xiu xian xin xiang xing xu xue xuan xun xiong",
+    "zh-": "zhi zha zhe zhai zhei zhao zhou zhan zhen zhang zheng zhu zhua zhuo zhuai zhui zhuan zhun zhuang zhong",
+    "ch-": "chi cha che chai chao chou chan chen chang cheng chu chua chuo chuai chui chuan chun chuang chong",
+    "sh-": "shi sha she shai shei shao shou shan shen shang sheng shu shua shuo shuai shui shuan shun shuang",
+
+    "r-":  "ri re rao rou ran ren rang reng ru rua ruo rui ruan run rong",
+    "z-":  "zi za ze zai zei zao zou zan zen zang zeng zu zuo zui zuan zun zong",
+    "c-":  "ci ca ce cai cei cao cou can cen cang ceng cu cuo cui cuan cun cong",
+    "s-":  "si sa se sai sei sao sou san sen sang seng su suo sui suan sun song",
+    "-∅":  "zhi chi shi ri zi ci si",
+    "-a":  "a ba pa ma fa da ta na la ga ka ha zha cha sha za ca sa",
+    "-o":  "o lo",
+    "-e":  "e me de te ne le ge ke he zhe che she re ze ce se",
+    "-ê":  "ê",
+    "-ai":  "ai bai pai mai fai dai tai nai lai gai kai hai zhai chai shai zai cai sai",
+    "-ei":  "ei bei pei mei fei dei tei nei lei gei kei hei zhei shei zei cei sei",
+    "-ao":  "ao bao pao mao dao tao nao lao gao kao hao zhao chao shao rao zao cao sao",
+    "-ou":  "ou pou mou fou dou tou nou lou gou kou hou zhou chou shou rou zou cou sou",
+    "-an":  "an ban pan man fan dan tan nan lan gan kan han zhan chan shan ran zan can san",
+    "-en":  "en ben pen men fen den nen len gen ken hen zhen chen shen ren zen cen sen",
+    "-ang": "ang bang pang mang fang dang tang nang lang gang kang hang zhang chang shang rang zang cang sang",
+    "-eng": "eng beng peng meng feng deng teng neng leng geng keng heng zheng cheng sheng reng zeng ceng seng",
+    "-er":  "er",
+    "-i":   "yi bi pi mi di ti ni li ji qi xi",
+    "-ia":  "ya pia dia nia lia jia qia xia",
+    "-io":  "yo",
+    "-ie":  "ye bie pie mie die tie nie lie jie qie xie",
+    "-iai": "yai",
+    "-iao": "yao biao piao miao fiao diao tiao niao liao jiao qiao xiao",
+    "-iu":  "you miu diu niu liu kiu jiu qiu xiu",
+    "-ian": "yan bian pian mian dian tian nian lian jian qian xian",
+    "-in":  "yin bin pin min din nin lin gin jin qin xin",
+    "-iang":"yang biang diang niang liang kiang jiang qiang xiang",
+    "-ing": "ying bing ping ming ding ting ning ling ging jing qing xing",
+    "-u":   "wu bu pu mu fu du tu nu lu gu ku hu zhu chu shu ru zu cu su",
+    "-ua":  "wa gua kua hua zhua chua shua rua",
+    "-uo":  "wo bo po mo fo duo tuo nuo luo guo kuo huo zhuo chuo shuo ruo zuo cuo suo",
+    "-uai": "wai guai kuai huai zhuai chuai shuai",
+    "-ui":  "wei dui tui nui gui kui hui zhui chui shui rui zui cui sui",
+    "-uan": "wan duan tuan nuan luan guan kuan huan zhuan chuan shuan ruan zuan cuan suan",
+    "-un":  "wen pun dun tun nun lun gun kun hun zhun chun shun run zun cun sun",
+    "-uang":"wang duang guang kuang huang zhuang chuang shuang",
+    "-ong": "ong weng dong tong nong long gong kong hong zhong chong rong zong cong song",
+    "-ü":   "yu nü lü ju qu xu",
+    "-üe":  "yue nüe lüe jue que xue",
+    "-üan": "yuan lüan juan quan xuan",
+    "-ün":  "yun lün jun qun xun",
+    "-iong":"yong jiong qiong xiong"
+  },
+  "groups": [
+    {
+      "name": "Initials",
+      "items": "∅- b- p- m- f- d- t- n- l- g- k- h- j- q- x- zh- ch- sh- r- z- c- s-"
+    },
+    {
+      "name": "Group a finals",
+      "items": "-∅ -a -o -e -ê -ai -ei -ao -ou -an -en -ang -eng -er"
+    },
+    {
+      "name": "Group i finals",
+      "items": "-i -ia -io -ie -iai -iao -iu -ian -in -iang -ing"
+    },
+    {
+      "name": "Group u finals",
+      "items": "-u -ua -uo -uai -ui -uan -un -uang -ong"
+    },
+    {
+      "name": "Group ü finals",
+      "items": "-ü -üe -üan -ün -iong"
+    }
+  ]
 }

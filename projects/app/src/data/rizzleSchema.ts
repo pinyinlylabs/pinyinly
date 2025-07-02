@@ -3,22 +3,19 @@ import type { FsrsState } from "@/util/fsrs";
 import { Rating } from "@/util/fsrs";
 import type { RizzleReplicache } from "@/util/rizzle";
 import { r, RizzleCustom } from "@/util/rizzle";
+import omit from "lodash/omit.js";
 import { z } from "zod/v4";
 import type {
   HanziText,
   HanziWord,
   PinyinPronunciation,
   PinyinPronunciationSpaceSeparated,
+  PinyinSoundGroupId,
+  PinyinSoundId,
   PinyinSyllable,
   SrsStateType,
 } from "./model";
-import {
-  MnemonicThemeId,
-  PartOfSpeech,
-  PinyinInitialGroupId,
-  SkillKind,
-  SrsKind,
-} from "./model";
+import { PartOfSpeech, SkillKind, SrsKind } from "./model";
 
 export const rSkillKind = memoize0(function rSkillKind() {
   return r.enum(SkillKind, {
@@ -87,31 +84,6 @@ export const rFsrsRating = memoize0(function rFsrsRating() {
   });
 });
 
-export const rPinyinInitialGroupId = memoize0(function rPinyinInitialGroupId() {
-  return r.enum(PinyinInitialGroupId, {
-    [PinyinInitialGroupId.Basic]: `basic`,
-    [PinyinInitialGroupId[`-i`]]: `-i`,
-    [PinyinInitialGroupId[`-u`]]: `-u`,
-    [PinyinInitialGroupId[`-ü`]]: `-ü`,
-    [PinyinInitialGroupId.Null]: `∅`,
-    [PinyinInitialGroupId.Everything]: `everything`,
-  });
-});
-
-export const rMnemonicThemeId = memoize0(function rMnemonicThemeId() {
-  return r.enum(MnemonicThemeId, {
-    [MnemonicThemeId.AnimalSpecies]: `AnimalSpecies`,
-    [MnemonicThemeId.GreekMythologyCharacter]: `GreekMythologyCharacter`,
-    [MnemonicThemeId.MythologyCharacter]: `MythologyCharacter`,
-    [MnemonicThemeId.Profession]: `Profession`,
-    [MnemonicThemeId.Name]: `Name`,
-    [MnemonicThemeId.AthleteType]: `AthleteType`,
-    [MnemonicThemeId.WesternMythologyCharacter]: `WesternMythologyCharacter`,
-    [MnemonicThemeId.Deprecated_WesternCultureFamousMen]: `WesternCultureFamousMen`,
-    [MnemonicThemeId.Deprecated_WesternCultureFamousWomen]: `WesternCultureFamousWomen`,
-  });
-});
-
 export const rHanziWord = memoize0(function rHanziWord() {
   return RizzleCustom.create<HanziWord, HanziWord, HanziWord>(
     z.custom<HanziWord>((x) => typeof x === `string`),
@@ -126,16 +98,13 @@ export const rSkill = memoize0(function rSkill() {
   );
 });
 
-export const rHanziOrHanziWord = memoize0(function rHanziOrHanziWord() {
-  return RizzleCustom.create<
-    HanziText | HanziWord,
-    string,
-    HanziText | HanziWord
-  >(
-    z.custom<HanziText | HanziWord>((x) => typeof x === `string`),
-    z.custom<HanziText | HanziWord>((x) => typeof x === `string`),
-  );
-});
+const _brandedStringImpl = r.string();
+const brandedString = <T extends string>() =>
+  _brandedStringImpl as RizzleCustom<T, T, T>;
+
+export const rHanziOrHanziWord = brandedString<HanziText | HanziWord>;
+export const rPinyinSoundId = brandedString<PinyinSoundId>;
+export const rPinyinSoundGroupId = brandedString<PinyinSoundGroupId>;
 
 export const pinyinSyllableSchema = z.custom<PinyinSyllable>(
   (x) => typeof x === `string`,
@@ -188,6 +157,11 @@ export const rSrsState = memoize0(function rSrsParams() {
 });
 
 /**
+ * # v9 change log
+ *
+ * - **Breaking**: removed pinyin initial/final associations and groups,
+ *   replaced with a single unified model.
+ *
  * # v8 change log
  *
  * - **Breaking**: the CVR format changed, so the version needed to be
@@ -218,8 +192,8 @@ export const rSrsState = memoize0(function rSrsParams() {
  * - `skillState` has properties changed from `timestamp()` to `datetime()` so
  *   that they're indexable.
  */
-export const v7 = {
-  version: `v7`,
+export const v8 = {
+  version: `8`,
 
   //
   // Skills
@@ -264,8 +238,8 @@ export const v7 = {
     name: r.string().alias(`n`),
   }),
   pinyinInitialGroupTheme: r.entity(`pigt/[groupId]`, {
-    groupId: rPinyinInitialGroupId().alias(`g`),
-    themeId: rMnemonicThemeId().alias(`t`),
+    groupId: r.string().alias(`g`),
+    themeId: r.string().alias(`t`),
   }),
 
   //
@@ -290,8 +264,8 @@ export const v7 = {
     now: r.timestamp().alias(`t`),
   }),
   setPinyinInitialGroupTheme: r.mutator({
-    groupId: rPinyinInitialGroupId().alias(`g`),
-    themeId: rMnemonicThemeId().alias(`t`),
+    groupId: r.string().alias(`g`),
+    themeId: r.string().alias(`t`),
     now: r.timestamp().alias(`n`),
   }),
   rateSkill: r
@@ -323,28 +297,6 @@ export const v7 = {
       now: r.timestamp().alias(`n`),
     })
     .alias(`shpm`),
-};
-
-export function srsStateFromFsrsState(fsrsState: FsrsState) {
-  return {
-    kind: SrsKind.FsrsFourPointFive,
-    stability: fsrsState.stability,
-    difficulty: fsrsState.difficulty,
-    nextReviewAt: fsrsState.nextReviewAt,
-    prevReviewAt: fsrsState.prevReviewAt,
-  } satisfies SrsStateType;
-}
-
-// This is a placeholder to keep code around that demonstrates how to support
-// multiple schema versions at the same time.
-export const v7_1 = {
-  ...v7,
-  version: `7.1`,
-};
-
-export const v8 = {
-  ...v7,
-  version: `8`,
 
   //
   // Settings
@@ -369,9 +321,55 @@ export const v8 = {
     .alias(`ss`),
 };
 
-export const currentSchema = v8;
+export const v9 = {
+  ...omit(v8, [
+    `setPinyinInitialAssociation`,
+    `setPinyinFinalAssociation`,
+    `setPinyinInitialGroupTheme`,
+    `pinyinFinalAssociation`,
+    `pinyinInitialAssociation`,
+    `pinyinInitialGroupTheme`,
+  ]),
+  version: `9`,
 
-export const supportedSchemas = [v7, v7_1, v8] as const;
+  // Entities
+  pinyinSound: r.entity(`ps/[soundId]`, {
+    soundId: rPinyinSoundId().alias(`i`),
+    name: r.string().nullable().optional().alias(`n`),
+  }),
+  pinyinSoundGroup: r.entity(`psg/[soundGroupId]`, {
+    soundGroupId: rPinyinSoundGroupId().alias(`g`),
+    name: r.string().nullable().optional().alias(`n`),
+    theme: r.string().nullable().optional().alias(`t`),
+  }),
+
+  // Mutators
+  setPinyinSoundName: r
+    .mutator({
+      soundId: rPinyinSoundId().alias(`i`),
+      name: r.string().nullable().alias(`n`),
+      now: r.timestamp().alias(`t`),
+    })
+    .alias(`sps-n`),
+  setPinyinSoundGroupName: r
+    .mutator({
+      soundGroupId: rPinyinSoundGroupId().alias(`i`),
+      name: r.string().nullable().alias(`n`),
+      now: r.timestamp().alias(`t`),
+    })
+    .alias(`spsg-n`),
+  setPinyinSoundGroupTheme: r
+    .mutator({
+      soundGroupId: rPinyinSoundGroupId().alias(`i`),
+      theme: r.string().nullable().alias(`x`),
+      now: r.timestamp().alias(`t`),
+    })
+    .alias(`spsg-t`),
+};
+
+export const currentSchema = v9;
+
+export const supportedSchemas = [v8, v9] as const;
 
 export type Rizzle = RizzleReplicache<typeof currentSchema>;
 
@@ -382,3 +380,13 @@ export type SkillState = NonNullable<
 export type SkillRating = NonNullable<
   Awaited<ReturnType<typeof currentSchema.skillRating.get>>
 >;
+
+export function srsStateFromFsrsState(fsrsState: FsrsState) {
+  return {
+    kind: SrsKind.FsrsFourPointFive,
+    stability: fsrsState.stability,
+    difficulty: fsrsState.difficulty,
+    nextReviewAt: fsrsState.nextReviewAt,
+    prevReviewAt: fsrsState.prevReviewAt,
+  } satisfies SrsStateType;
+}

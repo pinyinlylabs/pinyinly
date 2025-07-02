@@ -101,7 +101,7 @@ export async function makeQuestionContext(
   const parsedPinyin = parsePinyinSyllableOrThrow(pinyin);
 
   const ctx: QuestionContext = {
-    answerPinyinInitial: parsedPinyin.initialChartLabel,
+    answerPinyinInitial: parsedPinyin.initialSoundId,
     answerPinyinTone: parsedPinyin.tone,
     usedHanzi: new Set([hanzi]),
     usedPinyin: new Set(await allOneSyllablePronunciationsForHanzi(hanzi)),
@@ -140,7 +140,7 @@ export function tryPinyinDistractor(
 ): boolean {
   const parsedPinyin = parsePinyinSyllableOrThrow(pinyin);
 
-  if (ctx.answerPinyinInitial !== parsedPinyin.initialChartLabel) {
+  if (ctx.answerPinyinInitial !== parsedPinyin.initialSoundId) {
     return false;
   }
 
@@ -168,7 +168,7 @@ async function addDistractors(
   const pinyinWords = [
     ...shuffle(await loadPinyinWords()),
     // non-existant pinyin used as fillers
-    ...shuffle(fakePinyin),
+    // ...shuffle(fakePinyin),
   ];
   for (const tonelessPinyin of pinyinWords) {
     const pinyin = convertPinyinWithToneNumberToToneMark(
@@ -220,7 +220,7 @@ function validQuestionInvariant(question: OneCorrectPairQuestion) {
       invariant(hanziOrPinyinSyllableCount(x) === 1);
 
       const syllable = nonNullable(x.value[0]);
-      const { initialChartLabel: initial, tone } =
+      const { initialSoundId: initial, tone } =
         parsePinyinSyllableOrThrow(syllable);
       return `${initial}-${tone}`;
     }),
