@@ -3,30 +3,22 @@ import type { Interval } from "date-fns";
 import { z } from "zod/v4";
 import type { HanziWordSkill, Skill } from "./rizzleSchema";
 
-const pinyinInitialGroupIdSchema = z.enum({
-  [`Basic`]: `debug--Basic`,
-  [`-i`]: `debug--_i`,
-  [`-u`]: `debug--_u`,
-  [`-ü`]: `debug--_v`,
-  [`Null`]: `debug--Null`,
-  [`Everything`]: `debug--Everything`,
-});
-export const PinyinInitialGroupId = pinyinInitialGroupIdSchema.enum;
-export type PinyinInitialGroupId = z.infer<typeof pinyinInitialGroupIdSchema>;
-
-export const mnemonicThemeIdSchema = z.enum({
-  AnimalSpecies: `debug--AnimalSpecies`,
-  AthleteType: `debug--AthleteType`,
-  Name: `debug--Name`,
-  GreekMythologyCharacter: `debug--GreekMythologyCharacter`,
-  MythologyCharacter: `debug--MythologyCharacter`,
-  Profession: `debug--Profession`,
-  WesternMythologyCharacter: `debug--WesternMythologyCharacter`,
-  Deprecated_WesternCultureFamousMen: `debug--Deprecated_WesternCultureFamousMen`,
-  Deprecated_WesternCultureFamousWomen: `debug--Deprecated_WesternCultureFamousWomen`,
-});
-export const MnemonicThemeId = mnemonicThemeIdSchema.enum;
-export type MnemonicThemeId = z.infer<typeof mnemonicThemeIdSchema>;
+/**
+ * A static ID for the different components of a pinyin sound, including the
+ * initial, final, and tone.
+ *
+ * - Initials: suffixed with `-`.
+ * - Finals: prefixed with '-`.
+ * - Tones: Single digit between 1 and 5, inclusive.
+ */
+export type PinyinSoundId = string & z.BRAND<`PinyinSoundId`>;
+/**
+ * An ID for a group of pinyin sounds.
+ *
+ * There is a default set of groups, and these groups have static IDs. In the
+ * future user-defined groups may be added and these will have dynamic IDs.
+ */
+export type PinyinSoundGroupId = string & z.BRAND<`PinyinSoundGroupId`>;
 
 export interface BaseSrsState {
   prevReviewAt: Date;

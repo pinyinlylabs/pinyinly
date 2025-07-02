@@ -119,7 +119,9 @@ export async function makeQuestionContext(
   const pinyinAnswersToneless = pinyinAnswers
     .map((p) => {
       const syllable = nonNullable(p);
-      const { tonelessPinyin } = nonNullable(parsePinyinSyllableTone(syllable));
+      const { tonelessSyllable: tonelessPinyin } = nonNullable(
+        parsePinyinSyllableTone(syllable),
+      );
       return tonelessPinyin;
     })
     .filter(arrayFilterUniqueWithKey((x) => x));
@@ -251,9 +253,14 @@ function validQuestionInvariant(question: OneCorrectPairQuestion) {
   for (const b of question.groupB) {
     invariant(b.kind === `pinyin`);
     const syllable = nonNullable(b.value[0]);
-    const { initial, final } = parsePinyinSyllableOrThrow(syllable);
+    const { initialSoundId: initialChartLabel, finalSoundId: finalChartLabel } =
+      parsePinyinSyllableOrThrow(syllable);
     invariant(
-      answerPinyinParts.some((x) => x.initial === initial && x.final === final),
+      answerPinyinParts.some(
+        (x) =>
+          x.initialSoundId === initialChartLabel &&
+          x.finalSoundId === finalChartLabel,
+      ),
     );
   }
   return question;

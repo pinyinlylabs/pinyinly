@@ -1,41 +1,13 @@
-import type { PinyinPronunciation, PinyinSyllable } from "@/data/model";
-import { MnemonicThemeId, PinyinInitialGroupId } from "@/data/model";
-import {
-  deepReadonly,
-  memoize0,
-  memoize1,
-  sortComparatorNumber,
-  weakMemoize1,
-} from "@/util/collections";
+import type {
+  PinyinPronunciation,
+  PinyinSoundGroupId,
+  PinyinSoundId,
+  PinyinSyllable,
+} from "@/data/model";
+import { deepReadonly, memoize0, memoize1 } from "@/util/collections";
 import { invariant } from "@pinyinly/lib/invariant";
 import type { DeepReadonly } from "ts-essentials";
 import z from "zod/v4";
-import { rPinyinInitialGroupId } from "./rizzleSchema";
-
-/**
- * `[label, match1, match2, ...]`
- */
-export type PinyinChartProduction = readonly string[];
-
-export interface PinyinChart {
-  initials: DeepReadonly<
-    {
-      id: PinyinInitialGroupId;
-      desc: string;
-      initials: PinyinChartProduction[];
-    }[]
-  >;
-  finals: readonly PinyinChartProduction[];
-  overrides?: DeepReadonly<
-    Record<
-      string,
-      [
-        [initialChartLabel: string, initial: string],
-        [finalChartLabel: string, final: string],
-      ]
-    >
-  >;
-}
 
 /**
  * Converts a single pinyin word written with a tone number suffix to use a tone
@@ -117,54 +89,22 @@ const isPinyinVowel = (
   char != null && char in toneMap;
 
 export const parsePinyinSyllableTone = memoize1(function parsePinyinTone(
-  pinyin: string,
-): { tonelessPinyin: PinyinSyllable; tone: number } | null {
+  syllable: string,
+): { tonelessSyllable: PinyinSyllable; tone: number } | null {
   for (const [key, value] of Object.entries(toneMap)) {
     for (let tone = 1; tone <= 4; tone++) {
       const char = value[tone];
       invariant(char != null);
 
-      const index = pinyin.indexOf(char);
+      const index = syllable.indexOf(char);
       if (index !== -1) {
-        const tonelessPinyin = pinyin.replace(char, key) as PinyinSyllable;
-        return { tonelessPinyin, tone };
+        const tonelessSyllable = syllable.replace(char, key) as PinyinSyllable;
+        return { tonelessSyllable, tone };
       }
     }
   }
 
-  return { tonelessPinyin: pinyin as PinyinSyllable, tone: 5 };
-});
-
-function expandCombinations(
-  rules: readonly PinyinChartProduction[],
-): [string, string][] {
-  return rules.flatMap(([label, ...xs]): [string, string][] =>
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    xs.map((x) => [label!, x] as const),
-  );
-}
-
-const expandChart = weakMemoize1(function expandChart(
-  chart: PinyinChart,
-): DeepReadonly<{
-  initialsList: [initialChartLabel: string, initial: string][];
-  finalsList: [finalChartLabel: string, final: string][];
-}> {
-  const initialsList = expandCombinations(
-    chart.initials.flatMap((x) => x.initials),
-  )
-    // There's some overlap with initials and finals, the algorithm should use
-    // the longest possible initial.
-    .sort(sortComparatorNumber(([, x]) => x.length))
-    .reverse();
-
-  const finalsList = expandCombinations(chart.finals)
-    // There's some overlap with initials and finals, the algorithm should use
-    // the longest possible initial.
-    .sort(sortComparatorNumber((x) => x.length))
-    .reverse();
-
-  return { initialsList, finalsList };
+  return { tonelessSyllable: syllable as PinyinSyllable, tone: 5 };
 });
 
 /**
@@ -173,43 +113,27 @@ const expandChart = weakMemoize1(function expandChart(
  */
 export function splitTonelessPinyinSyllable(
   pinyin: string,
-  chart: PinyinChart,
+  chart: DeepReadonly<PinyinChart>,
 ): {
-  initial: string;
-  final: string;
-  initialChartLabel: string;
-  finalChartLabel: string;
+  initialSoundId: string;
+  finalSoundId: string;
 } | null {
-  const { initialsList, finalsList } = expandChart(chart);
+  const initialSoundId = chart.syllableToInitialSound[pinyin];
+  const finalSoundId = chart.syllableToFinalSound[pinyin];
 
-  const override = chart.overrides?.[pinyin];
-  if (override) {
-    const [[initialChartLabel, initial], [finalChartLabel, final]] = override;
-    return { initialChartLabel, initial, finalChartLabel, final };
+  if (initialSoundId == null || finalSoundId == null) {
+    return null;
   }
 
-  for (const [initialChartLabel, initial] of initialsList) {
-    if (pinyin.startsWith(initial)) {
-      const final = pinyin.slice(initial.length);
-      for (const [finalChartLabel, finalCandidate] of finalsList) {
-        if (final === finalCandidate) {
-          return { initial, initialChartLabel, final, finalChartLabel };
-        }
-      }
-    }
-  }
-
-  return null;
+  return { initialSoundId, finalSoundId };
 }
 
 export function parsePinyinSyllableWithChart(
   pinyinSyllable: string,
-  chart: PinyinChart,
+  chart: DeepReadonly<PinyinChart>,
 ): {
-  initialChartLabel: string;
-  initial: string;
-  finalChartLabel: string;
-  final: string;
+  initialSoundId: string;
+  finalSoundId: string;
   tone: number;
   tonelessSyllable: PinyinSyllable;
 } | null {
@@ -221,23 +145,23 @@ export function parsePinyinSyllableWithChart(
   if (toneResult == null) {
     return null;
   }
-  const { tonelessPinyin, tone } = toneResult;
+  const { tonelessSyllable, tone } = toneResult;
 
-  const initialFinalResult = splitTonelessPinyinSyllable(tonelessPinyin, chart);
+  const initialFinalResult = splitTonelessPinyinSyllable(
+    tonelessSyllable,
+    chart,
+  );
   if (initialFinalResult == null) {
     return null;
   }
 
-  const { initialChartLabel, initial, finalChartLabel, final } =
-    initialFinalResult;
+  const { initialSoundId, finalSoundId } = initialFinalResult;
 
   return {
-    initialChartLabel,
-    initial,
-    final,
-    finalChartLabel,
+    initialSoundId,
+    finalSoundId,
     tone,
-    tonelessSyllable: `${initial}${final}` as PinyinSyllable,
+    tonelessSyllable,
   };
 }
 
@@ -322,137 +246,219 @@ export function parsePinyinSyllableOrThrow(pinyinSyllable: string) {
 }
 
 export const loadHhhPinyinChart = memoize0(() =>
-  pinyinChartSchema.transform(deepReadonly).parse({
-    initials: [
+  buildPinyinChart({
+    items: {
+      // Initials
+      "∅-": `a ao ê er ai an ang e ei en ong eng ou o`,
+      "zh-": `zhi zha zhe zhai zhei zhao zhou zhan zhen zhang zheng zhong`,
+      "ch-": `chi cha che chai chao chou chan chen chang cheng chong`,
+      "sh-": `shi sha she shai shei shao shou shan shen shang sheng`,
+      "r-": `ri re rao rou ran ren rang reng rong`,
+      "z-": `zi za ze zai zei zao zou zan zen zang zeng zong`,
+      "c-": `ci ca ce cai cei cao cou can cen cang ceng cong`,
+      "s-": `si sa se sai sei sao sou san sen sang seng song`,
+      "b-": `ba bai bei bao ban ben bang beng bo`,
+      "p-": `pa pai pei pao pou pan pen pang peng po pun`,
+      "m-": `ma me mai mei mao mou man men mang meng mo`,
+      "f-": `fa fai fei fou fan fen fang feng fiao fo`,
+      "d-": `da de dai dei dao dou dan den dang deng dong`,
+      "t-": `ta te tai tei tao tou tan tang teng tong`,
+      "n-": `na ne nai nei nao nou nan nen nang neng nong`,
+      "l-": `la lo le lai lei lao lou lan len lang leng long`,
+      "g-": `ga ge gai gei gao gou gan gen gang geng gin ging gong`,
+      "k-": `ka ke kai kei kao kou kan ken kang keng kiu kiang kong`,
+      "h-": `ha he hai hei hao hou han hen hang heng hong`,
+      "yu-": `yu yue yuan yun`,
+      "nü-": `nü nüe`,
+      "lü-": `lü lüe lüan lün`,
+      "ju-": `ju jue juan jun`,
+      "qu-": `qu que quan qun`,
+      "xu-": `xu xue xuan xun`,
+      "w-": `wu wa wo wai wei wan wen wang weng`,
+      "bu-": `bu`,
+      "pu-": `pu`,
+      "mu-": `mu`,
+      "fu-": `fu`,
+      "du-": `du duo dui duan dun duang`,
+      "tu-": `tu tuo tui tuan tun`,
+      "nu-": `nu nuo nui nuan nun`,
+      "lu-": `lu luo luan lun`,
+      "gu-": `gu gua guo guai gui guan gun guang`,
+      "ku-": `ku kua kuo kuai kui kuan kun kuang`,
+      "hu-": `hu hua huo huai hui huan hun huang`,
+      "zhu-": `zhu zhua zhuo zhuai zhui zhuan zhun zhuang`,
+      "chu-": `chu chua chuo chuai chui chuan chun chuang`,
+      "shu-": `shu shua shuo shuai shui shuan shun shuang`,
+      "ru-": `ru rua ruo rui ruan run`,
+      "zu-": `zu zuo zui zuan zun`,
+      "cu-": `cu cuo cui cuan cun`,
+      "su-": `su suo sui suan sun`,
+      "y-": `yi ya yo ye yai yao you yan ying yin yang yong`,
+      "bi-": `bi bie biao bian bin biang bing`,
+      "pi-": `pi pia pie piao pian pin ping`,
+      "mi-": `mi mie miao miu mian min ming`,
+      "di-": `di dia die diao diu dian din diang ding`,
+      "ti-": `ti tie tiao tian ting`,
+      "ni-": `ni nia nie niao niu nian nin niang ning`,
+      "li-": `li lia lie liao liu lian lin liang ling`,
+      "ji-": `ji jia jie jiao jiu jian jin jiang jing jiong`,
+      "qi-": `qi qia qie qiao qiu qian qin qiang qing qiong`,
+      "xi-": `xi xia xie xiao xiu xian xin xiang xing xiong`,
+
+      // Finals
+      //
+      // Instead of using the common -(e)ng convention of parenthesis, we use
+      // square brackets instead as these mean "optional" in many programming
+      // languages.
+      "-[e]ng": `eng beng peng meng feng deng teng neng leng geng keng heng zheng cheng sheng reng zeng ceng seng weng ying bing ping ming ding ting ning ling ging jing qing xing`,
+      "-ang": `ang bang pang mang fang dang tang nang lang gang kang hang zhang chang shang rang zang cang sang yang biang diang niang liang kiang jiang qiang xiang wang duang guang kuang huang zhuang chuang shuang`,
+      "-ong": `ong dong tong nong long gong kong hong zhong chong rong zong cong song yong jiong qiong xiong`,
+      "-ai": `ai bai pai mai fai dai tai nai lai gai kai hai zhai chai shai zai cai sai yai wai guai kuai huai zhuai chuai shuai`,
+      "-[e]i": `ei bei pei mei fei dei tei nei lei gei kei hei zhei shei zei cei sei wei chui cui rui zui sui shui zhui dui tui nui gui kui hui`,
+      "-ao": `ao bao pao mao dao tao nao lao gao kao hao zhao chao shao rao zao cao sao yao biao piao miao fiao diao tiao niao liao jiao qiao xiao`,
+      "-[o]u": `ou pou mou fou dou tou nou lou gou kou hou zhou chou shou rou zou cou sou you diu wu niu liu miu kiu jiu qiu xiu`,
+      "-an": `an ban pan man fan dan tan nan lan gan kan han zhan chan shan ran zan can san yan bian pian mian dian tian nian lian jian qian xian wan duan tuan nuan luan guan kuan huan zhuan chuan shuan ruan zuan cuan suan yuan lüan juan quan xuan`,
+      "-[e]n": `yin en ben pen men fen den nen len gen ken hen zhen chen shen ren zen cen sen wen bin pin min din nin lin gin jin qin xin zhun chun shun cun run zun sun pun dun tun nun lun gun kun hun jun qun xun yun lün`,
+      "-e": `e me de te ne le ge ke he re ze ce ye se ê zhe che she bie pie mie die tie nie lie jie qie xie jue que xue yue nüe lüe`,
+      "-a": `a pa ma fa da ta na la ga ka ha za ca sa ba ya pia dia nia lia jia qia xia wa gua kua hua zhua chua shua rua cha zha sha`,
+      "-o": `o yo wo bo po mo fo duo tuo nuo luo guo kuo huo zhuo chuo shuo ruo zuo cuo suo lo`,
+      "-∅": `er si zhi chi shi ri zi ci yi bi pi mi di ti ni li ji qi xi pu mu fu du tu nu lu gu ku hu bu zhu chu shu cu ru zu su ju qu xu yu nü lü`,
+    },
+    groups: [
+      // These group IDs are URL safe so if they do ever need to go in the URL
+      // they won't need to be percent-encoded and mangled.
       {
-        id: `basic`,
-        desc: `basic distinct sounds`,
-        initials: [
-          `b`,
-          `p`,
-          `m`,
-          `f`,
-          `d`,
-          `t`,
-          `n`,
-          `l`,
-          `g`,
-          `k`,
-          `h`,
-          [`zh`, `zh`, `zhi`],
-          [`ch`, `ch`, `chi`],
-          [`sh`, `sh`, `shi`],
-          [`r`, `r`, `ri`],
-          [`z`, `z`, `zi`],
-          [`c`, `c`, `ci`],
-          [`s`, `s`, `si`],
-        ],
+        id: `__-`,
+        items: `zh- ch- sh- r- z- c- s- b- p- m- f- d- t- n- l- g- k- h-`,
       },
       {
-        id: `-i`,
-        desc: `ends with an 'i' (ee) sound`,
-        initials: [
-          [`y`, `y`, `yi`],
-          `bi`,
-          `pi`,
-          `mi`,
-          `di`,
-          `ti`,
-          `ni`,
-          `li`,
-          `ji`,
-          `qi`,
-          `xi`,
-        ],
+        id: `__u-`,
+        items: `yu- nü- lü- ju- qu- xu-`,
       },
       {
-        id: `-u`,
-        desc: `ends with an 'u' (oo) sound`,
-        initials: [
-          `w`,
-          `bu`,
-          `pu`,
-          `mu`,
-          `fu`,
-          `du`,
-          `tu`,
-          `nu`,
-          `lu`,
-          `gu`,
-          `ku`,
-          `hu`,
-          [`zhu`, `zhu`, `zho`],
-          [`chu`, `chu`, `cho`],
-          `shu`,
-          `ru`,
-          `zu`,
-          [`cu`, `cu`, `co`],
-          `su`,
-        ],
+        id: `__ue-`,
+        items: `w- bu- pu- mu- fu- du- tu- nu- lu- gu- ku- hu- zhu- chu- shu- ru- zu- cu- su-`,
       },
       {
-        id: `-ü`,
-        desc: `ends with an 'ü' (ü) sound`,
-        initials: [`yu`, `nü`, `lü`, `ju`, `qu`, `xu`],
+        id: `__i-`,
+        items: `y- bi- pi- mi- di- ti- ni- li- ji- qi- xi-`,
       },
       {
-        id: `∅`,
-        desc: `null special case`,
-        initials: [[`∅`, ``]],
+        id: `.-`,
+        items: `∅-`,
+      },
+      {
+        id: `-__`,
+        items: `-[e]ng -ang -ong -ai -[e]i -ao -[o]u -an -[e]n -e -a -o -∅`,
+      },
+      {
+        id: `tones`,
+        items: `1 2 3 4 5`,
       },
     ],
-    finals: [
-      [`∅`, ``, `er`],
-      `a`,
-      `o`,
-      [`e`, `e`, `ê`],
-      `ai`,
-      [`ei`, `ei`, `i`],
-      `ao`,
-      [`ou`, `ou`, `u`],
-      `an`,
-      [`(e)n`, `n`, `en`],
-      `ang`,
-      [`(e)ng`, `ng`, `eng`, `ong`],
-    ],
-    overrides: {},
   }),
 );
 
-const pinyinChartSchema = z
-  .object({
-    initials: z.array(
-      z.object({
-        id: rPinyinInitialGroupId().getUnmarshal(),
-        desc: z.string(),
-        initials: z.array(z.union([z.string(), z.array(z.string())])),
-      }),
-    ),
-    finals: z.array(z.union([z.string(), z.array(z.string())])),
-    overrides: z.record(
-      z.string(),
-      z.tuple([
-        z.tuple([
-          z.string().describe(`initial chart label`),
-          z.string().describe(`initial`),
-        ]),
-        z.tuple([
-          z.string().describe(`final chart label`),
-          z.string().describe(`final`),
-        ]),
-      ]),
-    ),
-  })
-  .transform(({ initials: initialGroups, finals, overrides }) => ({
-    initials: initialGroups.map((group) => ({
-      ...group,
-      initials: group.initials.map((initial) =>
-        typeof initial === `string` ? ([initial, initial] as const) : initial,
-      ),
-    })),
-    finals: finals.map((x) => (typeof x === `string` ? ([x, x] as const) : x)),
-    overrides,
+export const defaultPinyinSoundGroupNames = {
+  "__-": `Simple initials`,
+  "__u-": `Initials ending with "ooo"`,
+  "__ue-": `Initials ending with "eeww"`,
+  "__i-": `Initials ending with "eee"`,
+  ".-": `Null initial`,
+  "-__": `Finals`,
+  tones: `Tones`,
+} as Record<PinyinSoundGroupId, string>;
+
+export const defaultPinyinSoundGroupThemes = {
+  "__-": `Animals`,
+  "__u-": `Archetypes`,
+  "__ue-": `Mythical`,
+  "__i-": `Individuals`,
+  ".-": `Special`,
+  "-__": `Places`,
+  tones: `Sub-locations`,
+} as Record<PinyinSoundGroupId, string>;
+
+export const defaultPinyinSoundGroupRanks = Object.fromEntries(
+  [`tones`, `__u-`, `__-`, `__ue-`, `__i-`, `.-`, `-__`].map((id, index) => [
+    id,
+    index,
+  ]),
+) as Record<PinyinSoundGroupId, number>;
+
+type TonelessSyllable = string;
+export interface PinyinChart {
+  syllableToInitialSound: Record<TonelessSyllable, PinyinSoundId>;
+  syllableToFinalSound: Record<TonelessSyllable, PinyinSoundId>;
+  syllables: Set<TonelessSyllable>;
+  sounds: Set<PinyinSoundId>;
+  soundToSyllables: Record<PinyinSoundId, TonelessSyllable[]>;
+  soundGroups: { id: PinyinSoundGroupId; sounds: PinyinSoundId[] }[];
+}
+
+function buildPinyinChart(
+  chart: z.infer<typeof pinyinChartSpecSchema>,
+): DeepReadonly<PinyinChart> {
+  const syllableToInitialSound: Record<string, PinyinSoundId> = {};
+  const syllableToFinalSound: Record<string, PinyinSoundId> = {};
+  const syllables = new Set<string>();
+  const sounds = new Set<PinyinSoundId>();
+  const soundToSyllables: Record<PinyinSoundId, string[]> = {};
+
+  for (const [_soundId, syllablesSpaceSeparated] of Object.entries(
+    chart.items,
+  )) {
+    const soundId = _soundId as PinyinSoundId;
+    sounds.add(soundId);
+
+    const destination = soundId.startsWith(`-`)
+      ? syllableToFinalSound
+      : syllableToInitialSound;
+    const soundSyllables = syllablesSpaceSeparated.split(` `);
+    soundToSyllables[soundId] = soundSyllables;
+
+    for (const syllable of soundSyllables) {
+      invariant(
+        syllable.length > 0,
+        `Match must not be empty: ${soundId} ${syllable}`,
+      );
+      syllables.add(syllable);
+      invariant(
+        !(syllable in destination),
+        `Duplicate pinyin syllable "${syllable}" in ${soundId}`,
+      );
+      destination[syllable] = soundId;
+    }
+  }
+
+  const soundGroups = chart.groups.map((group) => ({
+    id: group.id as PinyinSoundGroupId,
+    sounds: group.items.split(` `) as PinyinSoundId[],
   }));
+
+  return {
+    syllableToInitialSound,
+    syllableToFinalSound,
+    syllables,
+    soundGroups,
+    sounds,
+    soundToSyllables,
+  };
+}
+
+const pinyinChartSpecSchema = z.object({
+  items: z.record(z.string(), z.string()),
+  groups: z.array(
+    z.object({
+      id: z.string().optional(),
+      items: z.string(),
+    }),
+  ),
+});
+
+const pinyinChartSchema = pinyinChartSpecSchema.transform((x) =>
+  buildPinyinChart(x),
+);
 
 export const loadStandardPinyinChart = memoize0(async () =>
   pinyinChartSchema
@@ -573,57 +579,12 @@ export function matchAllPinyinSyllablesWithIndexes(
   return tokens;
 }
 
-export function pinyinInitialGroupTitle(groupId: PinyinInitialGroupId): string {
-  switch (groupId) {
-    case PinyinInitialGroupId.Basic: {
-      return `Basic`;
-    }
-    case PinyinInitialGroupId[`-i`]: {
-      return `Ends with -i`;
-    }
-    case PinyinInitialGroupId[`-u`]: {
-      return `Ends with -u`;
-    }
-    case PinyinInitialGroupId[`-ü`]: {
-      return `Ends with -ü`;
-    }
-    case PinyinInitialGroupId.Null: {
-      return `Null`;
-    }
-    case PinyinInitialGroupId.Everything: {
-      return `Everything`;
-    }
-  }
-}
-
-export function mnemonicThemeTitle(themeId: MnemonicThemeId): string {
-  switch (themeId) {
-    case MnemonicThemeId.AnimalSpecies: {
-      return `Animals`;
-    }
-    case MnemonicThemeId.Profession: {
-      return `Archetypes`;
-    }
-    case MnemonicThemeId.Name: {
-      return `Individuals`;
-    }
-    case MnemonicThemeId.WesternMythologyCharacter: {
-      return `Mythical`;
-    }
-    case MnemonicThemeId.AthleteType:
-    case MnemonicThemeId.GreekMythologyCharacter:
-    case MnemonicThemeId.MythologyCharacter:
-    case MnemonicThemeId.Deprecated_WesternCultureFamousMen:
-    case MnemonicThemeId.Deprecated_WesternCultureFamousWomen: {
-      return `other ${themeId}`;
-    }
-  }
-}
-
-export const pinyinPartPronunciationInstructionsAustralian: Record<
-  string,
-  string
-> = {
+export const defaultPinyinSoundInstructions = {
+  "1": `high and level`,
+  "2": `rising and questioning`,
+  "3": `mid-level and neutral`,
+  "4": `falling and definitive`,
+  "5": `light and short`,
   "b-": `Like the English **“b”** in *bat*, but **unaspirated** — no strong puff of air. Say it gently, without the breathy push you’d normally use in English.`,
   "p-": `Like the English **“p”** in *pat*, but **more forceful** — aspirated, with a noticeable puff of air. Hold your hand near your mouth to feel the breath.`,
   "m-": `Exactly like the English **“m”** in *man*. Lips together, nasal sound.`,
@@ -681,4 +642,4 @@ export const pinyinPartPronunciationInstructionsAustralian: Record<
   "ju-": `This starts with a sound similar to English **“j”** (as in *jeep*), but then goes into **ü**. Curl your tongue slightly up toward the roof of your mouth, then say **“j-ü”** with rounded lips.`,
   "qu-": `Pronounced like a **sharp 'ch'** in *cheese*, followed by **ü**. Say **“ch-ü”**, with a big smile and rounded lips. It’s not *choo*, it’s **qu** with the fronted vowel.`,
   "xu-": `Like a soft **“sh”** sound, but your tongue is much closer to your teeth. Say **“sh-ü”** — smile and round your lips. It’s not *shoe*, it's more hissy and forward.`,
-};
+} as Record<PinyinSoundId, string>;

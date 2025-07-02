@@ -1,61 +1,42 @@
 import { useLocalQuery } from "@/client/hooks/useLocalQuery";
+import { usePinyinSoundGroups } from "@/client/hooks/usePinyinSoundGroups";
+import { usePinyinSounds } from "@/client/hooks/usePinyinSounds";
 import { useReplicache } from "@/client/hooks/useReplicache";
-import { useRizzleQuery } from "@/client/hooks/useRizzleQuery";
 import { Hhhmark } from "@/client/ui/Hhhmark";
 import { RectButton } from "@/client/ui/RectButton";
+import type { PinyinSoundId } from "@/data/model";
 import {
+  defaultPinyinSoundInstructions,
   loadHhhPinyinChart,
-  pinyinPartPronunciationInstructionsAustralian,
 } from "@/data/pinyin";
-import { rMnemonicThemeId } from "@/data/rizzleSchema";
-import { loadMnemonicThemeChoices } from "@/dictionary/dictionary";
+import { loadPinyinSoundNameSuggestions } from "@/dictionary/dictionary";
 import { sortComparatorString } from "@/util/collections";
-import { nonNullable } from "@pinyinly/lib/invariant";
-
+import { nullIfEmpty } from "@/util/unicode";
 import { Link, useLocalSearchParams } from "expo-router";
 import { ScrollView, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 
 export default function MnemonicIdPage() {
-  const { id } = useLocalSearchParams<`/explore/sounds/[id]`>();
+  const id = useLocalSearchParams<`/explore/sounds/[id]`>().id as PinyinSoundId;
   const r = useReplicache();
   const chart = loadHhhPinyinChart();
 
-  const choicesQuery = useLocalQuery({
+  const themeSuggestions = useLocalQuery({
     queryKey: [MnemonicIdPage.name, `mnemonicThemeChoices`],
-    queryFn: () => loadMnemonicThemeChoices(),
+    queryFn: () => loadPinyinSoundNameSuggestions(),
   });
 
-  const associationQuery = useRizzleQuery(
-    [MnemonicIdPage.name, `association`, id],
-    async (r, tx) => {
-      const res = await r.query.pinyinInitialAssociation.get(tx, {
-        initial: id,
-      });
-      return res ?? null;
-    },
+  const pinyinSounds = usePinyinSounds();
+  const pinyinSoundGroups = usePinyinSoundGroups();
+
+  const pinyinSoundGroupId = chart.soundGroups.find((g) =>
+    g.sounds.includes(id),
+  )?.id;
+
+  const pinyinSound = pinyinSounds.data?.get(id);
+  const pinyinSoundGroup = pinyinSoundGroups.data?.find(
+    (g) => g.id === pinyinSoundGroupId,
   );
-
-  const group = chart.initials.find((x) =>
-    x.initials.some((y) => y.includes(id)),
-  );
-
-  const groupItem = group?.initials.find((x) => x.includes(id));
-
-  const groupTheme = useRizzleQuery(
-    [MnemonicIdPage.name, `groupTheme`, group?.id],
-    async (r, tx) => {
-      if (group?.id == null) {
-        return null;
-      }
-      const res = await r.query.pinyinInitialGroupTheme.get(tx, {
-        groupId: group.id,
-      });
-      return res ?? null;
-    },
-  );
-
-  const pinyinPartId = `${nonNullable(groupItem?.[0])}-`;
 
   return (
     <ScrollView
@@ -65,34 +46,22 @@ export default function MnemonicIdPage() {
       <View className="mb-5 flex-row items-center gap-4">
         <View className={pinyinPartBox()}>
           <Text className="text-center font-cursive text-2xl text-fg">
-            {pinyinPartId}
-          </Text>
-          <Text className={altText()} numberOfLines={1}>
-            {groupItem
-              ?.slice(1)
-              .filter((x) => x.length > 0)
-              .map((x) => `` + x)
-              .join(` `)}
+            {id}
           </Text>
         </View>
-        <Text className="text-3xl font-bold text-fg">
-          {associationQuery.data?.name}
-        </Text>
+        <Text className="text-3xl font-bold text-fg">{pinyinSound?.name}</Text>
       </View>
 
       <View className="gap-2">
         <Text className="text-lg text-fg">
-          others in this group ({group?.id}) — {group?.desc}
+          {nullIfEmpty(pinyinSoundGroup?.name) ?? `Untitled group`}:
         </Text>
         <View className="flex-row flex-wrap gap-1">
-          {group?.initials
-            .slice()
-            .sort(sortComparatorString(([x]) => x))
-            .map(([i]) => (
-              <Link key={i} href={`/explore/sounds/${i}`}>
-                <Text className="text-fg">{i}-</Text>
-              </Link>
-            ))}
+          {pinyinSoundGroup?.sounds.map((x) => (
+            <Link key={x} href={`/explore/sounds/${x}`}>
+              <Text className={x === id ? `text-fg` : `text-fg/50`}>{x}</Text>
+            </Link>
+          ))}
         </View>
 
         <View>
@@ -100,62 +69,56 @@ export default function MnemonicIdPage() {
 
           <Text className="hhh-body">
             <Hhhmark
-              source={
-                pinyinPartPronunciationInstructionsAustralian[pinyinPartId] ??
-                ``
-              }
+              source={defaultPinyinSoundInstructions[id] ?? ``}
               context={`body`}
             />
           </Text>
         </View>
 
         <View className="flex-row flex-wrap gap-1">
-          <Text className="hhh-body-title">Association choices</Text>
+          <Text className="hhh-body-title">Names</Text>
         </View>
 
         <View className="gap-2">
-          {choicesQuery.data == null ? (
+          {themeSuggestions.data == null ? (
             <Text className="text-fg">null</Text>
           ) : (
-            [...choicesQuery.data.entries()]
-              .flatMap(([themeId, initials]) => {
-                const initial = initials.get(id);
-                const themeName = rMnemonicThemeId().marshal(themeId);
-                return initial
-                  ? ([[themeId, themeName, initial]] as const)
-                  : [];
+            [...themeSuggestions.data.entries()]
+              .flatMap(([theme, namesBySoundId]) => {
+                const names = namesBySoundId.get(id);
+                return names ? ([[theme, names]] as const) : [];
               })
               .sort(
                 // Put the current theme at the top.
                 sortComparatorString(
-                  ([themeId]) =>
-                    `${themeId === groupTheme.data?.themeId ? 0 : 1}-${themeId}`,
+                  ([theme]) =>
+                    `${theme === pinyinSoundGroup?.theme ? 0 : 1}-${theme}`,
                 ),
               )
-              .map(([themeId, themeName, initials], i) => (
-                <View key={i}>
+              .map(([theme, names]) => (
+                <View key={theme}>
                   <Text className="hhh-body-heading">
-                    {themeName}
-                    {themeId === groupTheme.data?.themeId ? (
+                    {theme}
+                    {theme === pinyinSoundGroup?.theme ? (
                       ` ✅`
                     ) : (
                       <RectButton
                         onPress={() => {
-                          if (group?.id != null) {
-                            void r.mutate.setPinyinInitialGroupTheme({
-                              groupId: group.id,
-                              themeId,
+                          if (pinyinSoundGroup?.id != null) {
+                            void r.mutate.setPinyinSoundGroupName({
+                              soundGroupId: pinyinSoundGroup.id,
+                              name: theme,
                               now: new Date(),
                             });
                           }
                         }}
                         variant="bare"
                       >
-                        Use category
+                        Use theme
                       </RectButton>
                     )}
                   </Text>
-                  {[...initials.entries()].map(([name, desc], i) => (
+                  {[...names.entries()].map(([name, nameDescription], i) => (
                     <View key={i} className="flex-row items-center gap-2">
                       <Text
                         className={`
@@ -164,8 +127,8 @@ export default function MnemonicIdPage() {
                           hover:text-fg
                         `}
                         onPress={() => {
-                          void r.mutate.setPinyinInitialAssociation({
-                            initial: id,
+                          void r.mutate.setPinyinSoundName({
+                            soundId: id,
                             name,
                             now: new Date(),
                           });
@@ -176,7 +139,7 @@ export default function MnemonicIdPage() {
                       <Text className="font-bold text-fg">
                         <Text
                           className={
-                            associationQuery.data?.name === name
+                            pinyinSound?.name === name
                               ? `text-[green]`
                               : undefined
                           }
@@ -186,7 +149,7 @@ export default function MnemonicIdPage() {
 
                         {` `}
                         <Text className="text-sm font-normal text-caption">
-                          {desc}
+                          {nameDescription}
                         </Text>
                       </Text>
                     </View>
@@ -199,10 +162,6 @@ export default function MnemonicIdPage() {
     </ScrollView>
   );
 }
-
-const altText = tv({
-  base: `text-center text-caption`,
-});
 
 const pinyinPartBox = tv({
   base: `size-20 justify-center gap-1 rounded-xl bg-bg-1 p-2`,

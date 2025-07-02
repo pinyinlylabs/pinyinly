@@ -36,3 +36,20 @@ export function glyphCount(text: string): number {
   // eslint-disable-next-line @typescript-eslint/no-misused-spread
   return [...text].length;
 }
+
+/**
+ * Coalesce a nullish or empty string to `null`.
+ *
+ * @example nullIfEmpty(foo?.name) ?? "Default text"
+ *
+ * Otherwise it can be difficult to handle both the null case and empty string
+ * case when you use optional chaining.
+ */
+export function nullIfEmpty<T extends string>(
+  text: T | null | undefined,
+): T | null {
+  if (text == null || text.length === 0) {
+    return null;
+  }
+  return text;
+}

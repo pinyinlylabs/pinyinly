@@ -12,7 +12,7 @@ import type {
   PinyinSyllable,
 } from "@/data/model";
 import { PartOfSpeech } from "@/data/model";
-import { rMnemonicThemeId, rPinyinPronunciation } from "@/data/rizzleSchema";
+import { rPinyinPronunciation } from "@/data/rizzleSchema";
 import {
   deepReadonly,
   emptyArray,
@@ -34,59 +34,51 @@ export const pinyinPronunciationSchema = rPinyinPronunciation()
   .describe(`space separated pinyin for each word`);
 
 export const loadPinyinWords = memoize0(async function loadPinyinWords() {
-  return (
-    z
-      .array(z.string())
-      .transform(deepReadonly)
-      // eslint-disable-next-line unicorn/no-await-expression-member
-      .parse((await import(`./pinyinWords.asset.json`)).default)
-  );
+  return z
+    .array(z.string())
+    .transform(deepReadonly)
+    .parse(await import(`./pinyinWords.asset.json`).then((x) => x.default));
 });
 
 export const loadMissingFontGlyphs = memoize0(
   async function loadMissingFontGlyphs() {
-    return (
-      z
-        .record(z.string(), z.array(z.string()))
-        .transform(
-          (x) => new Map(Object.entries(x).map(([k, v]) => [k, new Set(v)])),
-        )
-        .transform(deepReadonly)
-        // eslint-disable-next-line unicorn/no-await-expression-member
-        .parse((await import(`./missingFontGlyphs.asset.json`)).default)
-    );
+    return z
+      .record(z.string(), z.array(z.string()))
+      .transform(
+        (x) => new Map(Object.entries(x).map(([k, v]) => [k, new Set(v)])),
+      )
+      .transform(deepReadonly)
+      .parse(
+        await import(`./missingFontGlyphs.asset.json`).then((x) => x.default),
+      );
   },
 );
 
-export const loadMnemonicThemes = memoize0(async function loadMnemonicThemes() {
-  return (
-    z
+export const loadPinyinSoundThemeDetails = memoize0(
+  async function loadPinyinSoundThemeDetails() {
+    return z
       .record(
-        z.string(), // themeId
+        z.string(), // theme name
         z.object({
           noun: z.string(),
           description: z.string(),
         }),
       )
-      .transform(
-        (x) =>
-          new Map(
-            Object.entries(x).map(
-              ([k, v]) => [rMnemonicThemeId().unmarshal(k), v] as const,
-            ),
-          ),
-      )
+      .transform((x) => new Map(Object.entries(x)))
       .transform(deepReadonly)
-      // eslint-disable-next-line unicorn/no-await-expression-member
-      .parse((await import(`./mnemonicThemes.asset.json`)).default)
-  );
-});
+      .parse(
+        await import(`./pinyinSoundThemeDetails.asset.json`).then(
+          (x) => x.default,
+        ),
+      );
+  },
+);
 
-export const mnemonicThemeChoicesSchema = z
+export const pinyinSoundNameSuggestionsSchema = z
   .record(
-    z.string(), // themeId
+    z.string(), // theme name
     z.record(
-      z.string(), // initial
+      z.string(), // PinyinSoundId
       z.record(z.string(), z.string()),
     ),
   )
@@ -94,7 +86,7 @@ export const mnemonicThemeChoicesSchema = z
     (x) =>
       new Map(
         Object.entries(x).map(([k, v]) => [
-          rMnemonicThemeId().unmarshal(k),
+          k,
           new Map(
             Object.entries(v).map(([k2, v2]) => [
               k2,
@@ -105,45 +97,46 @@ export const mnemonicThemeChoicesSchema = z
       ),
   );
 
-export const loadMnemonicThemeChoices = memoize0(
-  async function loadMnemonicThemeChoices() {
-    return (
-      mnemonicThemeChoicesSchema
-        .transform(deepReadonly)
-        // eslint-disable-next-line unicorn/no-await-expression-member
-        .parse((await import(`./mnemonicThemeChoices.asset.json`)).default)
-    );
+export const loadPinyinSoundNameSuggestions = memoize0(
+  async function loadPinyinSoundNameSuggestions() {
+    return pinyinSoundNameSuggestionsSchema
+      .transform(deepReadonly)
+      .parse(
+        await import(`./pinyinSoundNameSuggestions.asset.json`).then(
+          (x) => x.default,
+        ),
+      );
   },
 );
 
 export const loadHanziDecomposition = memoize0(
   async function loadHanziDecomposition() {
-    return (
-      z
-        .array(z.tuple([z.string(), z.string()]))
-        .transform((x) => new Map(x))
-        .transform(deepReadonly)
-        // eslint-disable-next-line unicorn/no-await-expression-member
-        .parse((await import(`./hanziDecomposition.asset.json`)).default)
-    );
+    return z
+      .array(z.tuple([z.string(), z.string()]))
+      .transform((x) => new Map(x))
+      .transform(deepReadonly)
+      .parse(
+        await import(`./hanziDecomposition.asset.json`).then((x) => x.default),
+      );
   },
 );
 
 export const loadHanziWordGlossMnemonics = memoize0(
   async function loadHanziWordGlossMnemonics() {
-    return (
-      z
-        .array(
-          z.tuple([
-            hanziWordSchema,
-            z.array(z.object({ mnemonic: z.string(), rationale: z.string() })),
-          ]),
-        )
-        .transform((x) => new Map(x))
-        .transform(deepReadonly)
-        // eslint-disable-next-line unicorn/no-await-expression-member
-        .parse((await import(`./hanziWordGlossMnemonics.asset.json`)).default)
-    );
+    return z
+      .array(
+        z.tuple([
+          hanziWordSchema,
+          z.array(z.object({ mnemonic: z.string(), rationale: z.string() })),
+        ]),
+      )
+      .transform((x) => new Map(x))
+      .transform(deepReadonly)
+      .parse(
+        await import(`./hanziWordGlossMnemonics.asset.json`).then(
+          (x) => x.default,
+        ),
+      );
   },
 );
 
@@ -151,40 +144,30 @@ export const wordListSchema = z.array(hanziWordSchema);
 
 export const allRadicalHanziWords = memoize0(
   async function allRadicalHanziWords() {
-    return (
-      wordListSchema
-        .transform(deepReadonly)
-        // eslint-disable-next-line unicorn/no-await-expression-member
-        .parse((await import(`./radicalsHanziWords.asset.json`)).default)
-    );
+    return wordListSchema
+      .transform(deepReadonly)
+      .parse(
+        await import(`./radicalsHanziWords.asset.json`).then((x) => x.default),
+      );
   },
 );
 
 export const allHsk1HanziWords = memoize0(async function allHsk1HanziWords() {
-  return (
-    wordListSchema
-      .transform(deepReadonly)
-      // eslint-disable-next-line unicorn/no-await-expression-member
-      .parse((await import(`./hsk1HanziWords.asset.json`)).default)
-  );
+  return wordListSchema
+    .transform(deepReadonly)
+    .parse(await import(`./hsk1HanziWords.asset.json`).then((x) => x.default));
 });
 
 export const allHsk2HanziWords = memoize0(async function allHsk2HanziWords() {
-  return (
-    wordListSchema
-      .transform(deepReadonly)
-      // eslint-disable-next-line unicorn/no-await-expression-member
-      .parse((await import(`./hsk2HanziWords.asset.json`)).default)
-  );
+  return wordListSchema
+    .transform(deepReadonly)
+    .parse(await import(`./hsk2HanziWords.asset.json`).then((x) => x.default));
 });
 
 export const allHsk3HanziWords = memoize0(async function allHsk3HanziWords() {
-  return (
-    wordListSchema
-      .transform(deepReadonly)
-      // eslint-disable-next-line unicorn/no-await-expression-member
-      .parse((await import(`./hsk3HanziWords.asset.json`)).default)
-  );
+  return wordListSchema
+    .transform(deepReadonly)
+    .parse(await import(`./hsk3HanziWords.asset.json`).then((x) => x.default));
 });
 
 export const partOfSpeechSchema = z.enum([

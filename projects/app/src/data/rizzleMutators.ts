@@ -38,14 +38,23 @@ export const mutators: RizzleReplicacheMutators<typeof currentSchema> = {
       { skill, srs: srsStateFromFsrsState(fsrsState) },
     );
   },
-  async setPinyinInitialAssociation(tx, { initial, name }) {
-    await tx.pinyinInitialAssociation.set({ initial }, { initial, name });
+  async setPinyinSoundName(tx, { soundId, name }) {
+    const existing = await tx.pinyinSound.get({ soundId });
+    await tx.pinyinSound.set({ soundId }, { ...existing, soundId, name });
   },
-  async setPinyinFinalAssociation(tx, { final, name }) {
-    await tx.pinyinFinalAssociation.set({ final }, { final, name });
+  async setPinyinSoundGroupName(tx, { soundGroupId, name }) {
+    const existing = await tx.pinyinSoundGroup.get({ soundGroupId });
+    await tx.pinyinSoundGroup.set(
+      { soundGroupId },
+      { ...existing, soundGroupId, name },
+    );
   },
-  async setPinyinInitialGroupTheme(tx, { groupId, themeId }) {
-    await tx.pinyinInitialGroupTheme.set({ groupId }, { groupId, themeId });
+  async setPinyinSoundGroupTheme(tx, { soundGroupId, theme }) {
+    const existing = await tx.pinyinSoundGroup.get({ soundGroupId });
+    await tx.pinyinSoundGroup.set(
+      { soundGroupId },
+      { ...existing, soundGroupId, theme },
+    );
   },
   async saveHanziGlossMistake(tx, { id, gloss, hanziOrHanziWord, now }) {
     await tx.hanziGlossMistake.set(

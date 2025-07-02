@@ -1,11 +1,94 @@
 {
-"initials":[
-  {
-    "id": "everything",
-    "desc": "all initials",
-    "initials": [["∅","","er"],"b","p","m","f","d","t","n","l","z","c","s","zh","ch","sh","r","g","k","h",["yi","yi","y"],"bi","pi","mi","di","ti","ni","li","ji","qi","xi",["wu","wu","w"],"bu","pu","mu","fu","du","tu","nu","lu","zu","cu","su","zhu","chu","shu","ru","gu","ku","hu","yu","nü","lü","ju","qu","xu"] 
-  }
-],
-"finals":["a","ai","ao","an","ang",["e","e","ê"],"ei",["(e)n","n","en"],["(e)ng","ng","eng"],["∅","","i"],"o","ong",["ou","ou","u"]],
-"overrides": {}
+  "items": {
+    "∅-": "a ao ê er ai an ang e ei en ong eng ou o",
+    "b-": "ba bai bei bao ban ben bang beng bo",
+    "bi-": "bi bie biao bian bin biang bing",
+    "bu-": "bu",
+    "c-": "ci ca ce cai cei cao cou can cen cang ceng cong",
+    "ch-": "chi cha che chai chao chou chan chen chang cheng chong",
+    "chu-": "chu chua chuo chuai chui chuan chun chuang",
+    "cu-": "cu cuo cui cuan cun",
+    "d-": "da de dai dei dao dou dan den dang deng dong",
+    "di-": "di dia die diao diu dian din diang ding",
+    "du-": "du duo dui duan dun duang",
+    "f-": "fa fai fei fou fan fen fang feng fiao fo",
+    "fu-": "fu",
+    "g-": "ga ge gai gei gao gou gan gen gang geng gin ging gong",
+    "gu-": "gu gua guo guai gui guan gun guang",
+    "h-": "ha he hai hei hao hou han hen hang heng hong",
+    "hu-": "hu hua huo huai hui huan hun huang",
+    "ji-": "ji jia jie jiao jiu jian jin jiang jing jiong",
+    "ju-": "ju jue juan jun",
+    "k-": "ka ke kai kei kao kou kan ken kang keng kiu kiang kong",
+    "ku-": "ku kua kuo kuai kui kuan kun kuang",
+    "l-": "la lo le lai lei lao lou lan len lang leng long",
+    "li-": "li lia lie liao liu lian lin liang ling",
+    "lü-": "lü lüe lüan lün",
+    "lu-": "lu luo luan lun",
+    "m-": "ma me mai mei mao mou man men mang meng mo",
+    "mi-": "mi mie miao miu mian min ming",
+    "mu-": "mu",
+    "n-": "na ne nai nei nao nou nan nen nang neng nong",
+    "ni-": "ni nia nie niao niu nian nin niang ning",
+    "nü-": "nü nüe",
+    "nu-": "nu nuo nui nuan nun",
+    "p-": "pa pai pei pao pou pan pen pang peng po pun",
+    "pi-": "pi pia pie piao pian pin ping",
+    "pu-": "pu",
+    "qi-": "qi qia qie qiao qiu qian qin qiang qing qiong",
+    "qu-": "qu que quan qun",
+    "r-": "ri re rao rou ran ren rang reng rong",
+    "ru-": "ru rua ruo rui ruan run",
+    "s-": "si sa se sai sei sao sou san sen sang seng song",
+    "sh-": "shi sha she shai shei shao shou shan shen shang sheng",
+    "shu-": "shu shua shuo shuai shui shuan shun shuang",
+    "su-": "su suo sui suan sun",
+    "t-": "ta te tai tei tao tou tan tang teng tong",
+    "ti-": "ti tie tiao tian ting",
+    "tu-": "tu tuo tui tuan tun",
+    "wu-": "wu wa wo wai wei wan wen wang weng",
+    "xi-": "xi xia xie xiao xiu xian xin xiang xing xiong",
+    "xu-": "xu xue xuan xun",
+    "yi-": "yi ya yo ye yai yao you yan ying yin yang yong",
+    "yu-": "yu yue yuan yun",
+    "z-": "zi za ze zai zei zao zou zan zen zang zeng zong",
+    "zh-": "zhi zha zhe zhai zhei zhao zhou zhan zhen zhang zheng zhong",
+    "zhu-": "zhu zhua zhuo zhuai zhui zhuan zhun zhuang",
+    "zu-": "zu zuo zui zuan zun",
+    "-(e)n": "yin en ben pen men fen den nen len gen ken hen zhen chen shen ren zen cen sen wen bin pin min din nin lin gin jin qin xin zhun chun shun cun run zun sun pun dun tun nun lun gun kun hun jun qun xun yun lün",
+    "-(e)ng": "eng beng peng meng feng deng teng neng leng geng keng heng zheng cheng sheng reng zeng ceng seng weng ying bing ping ming ding ting ning ling ging jing qing xing",
+    "-ou": "ou pou mou fou dou tou nou lou gou kou hou zhou chou shou rou zou cou sou you diu niu liu miu kiu jiu qiu xiu",
+    "-∅": "er si zhi chi shi ri zi ci yi bi pi mi di ti ni li ji qi xi pu mu fu du tu nu lu gu ku hu bu zhu chu shu cu ru zu su ju qu xu yu nü lü wu",
+    "-a": "a pa ma fa da ta na la ga ka ha za ca sa ba ya pia dia nia lia jia qia xia wa gua kua hua zhua chua shua rua cha zha sha",
+    "-ai": "ai bai pai mai fai dai tai nai lai gai kai hai zhai chai shai zai cai sai yai wai guai kuai huai zhuai chuai shuai",
+    "-an": "an ban pan man fan dan tan nan lan gan kan han zhan chan shan ran zan can san yan bian pian mian dian tian nian lian jian qian xian wan duan tuan nuan luan guan kuan huan zhuan chuan shuan ruan zuan cuan suan yuan lüan juan quan xuan",
+    "-ang": "ang bang pang mang fang dang tang nang lang gang kang hang zhang chang shang rang zang cang sang yang biang diang niang liang kiang jiang qiang xiang wang duang guang kuang huang zhuang chuang shuang",
+    "-ao": "ao bao pao mao dao tao nao lao gao kao hao zhao chao shao rao zao cao sao yao biao piao miao fiao diao tiao niao liao jiao qiao xiao",
+    "-e": "e me de te ne le ge ke he re ze ce ye se ê zhe che she bie pie mie die tie nie lie jie qie xie jue que xue yue nüe lüe",
+    "-ei": "ei bei pei mei fei dei tei nei lei gei kei hei zhei shei zei cei sei wei chui cui rui zui sui shui zhui dui tui nui gui kui hui",
+    "-o": "o yo wo bo po mo fo duo tuo nuo luo guo kuo huo zhuo chuo shuo ruo zuo cuo suo lo",
+    "-ong": "ong dong tong nong long gong kong hong zhong chong rong zong cong song yong jiong qiong xiong"
+  },
+  "groups": [
+    {
+      "name": "Basic initials",
+      "items": "zh- ch- sh- r- z- c- s- b- p- m- f- d- t- n- l- g- k- h- ∅-"
+    },
+    {
+      "name": "Initials ending with an \"oo\" sound",
+      "items": "yu- nü- lü- ju- qu- xu-"
+    },
+    {
+      "name": "Initials ending with an \"eeww\" sound",
+      "items": "wu- bu- pu- mu- fu- du- tu- nu- lu- gu- ku- hu- zhu- chu- shu- ru- zu- cu- su-"
+    },
+    {
+      "name": "Initials ends with an \"ee\" sound",
+      "items": "yi- bi- pi- mi- di- ti- ni- li- ji- qi- xi-"
+    },
+    {
+      "name": "Finals",
+      "items": "-(e)ng -ang -ong -ai -ei -ao -ou -an -(e)n -e -a -o -∅"
+    }
+  ]
 }
