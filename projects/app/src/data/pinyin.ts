@@ -329,19 +329,19 @@ export const loadHhhPinyinChart = memoize0(() =>
       // they won't need to be percent-encoded and mangled.
       {
         id: `__-`,
-        items: `zh- ch- sh- r- z- c- s- b- p- m- f- d- t- n- l- g- k- h-`,
+        items: `b- c- ch- d- f- g- h- k- l- m- n- p- r- s- sh- t- z- zh-`,
       },
       {
         id: `__u-`,
-        items: `yu- nü- lü- ju- qu- xu-`,
+        items: `ju- lü- nü- qu- xu- yu-`,
       },
       {
         id: `__ue-`,
-        items: `w- bu- pu- mu- fu- du- tu- nu- lu- gu- ku- hu- zhu- chu- shu- ru- zu- cu- su-`,
+        items: `bu- cu- chu- du- fu- gu- hu- ku- lu- mu- nu- pu- ru- su- shu- tu- w- zu- zhu-`,
       },
       {
         id: `__i-`,
-        items: `y- bi- pi- mi- di- ti- ni- li- ji- qi- xi-`,
+        items: `bi- di- ji- li- mi- ni- pi- qi- ti- xi- y-`,
       },
       {
         id: `.-`,
@@ -349,7 +349,7 @@ export const loadHhhPinyinChart = memoize0(() =>
       },
       {
         id: `-__`,
-        items: `-[e]ng -ang -ong -ai -[e]i -ao -[o]u -an -[e]n -e -a -o -∅`,
+        items: `-∅ -a -ai -an -ang -ao -e -[e]i -[e]n -[e]ng -o  -[o]u -ong`,
       },
       {
         id: `tones`,
@@ -360,10 +360,10 @@ export const loadHhhPinyinChart = memoize0(() =>
 );
 
 export const defaultPinyinSoundGroupNames = {
-  "__-": `Simple initials`,
-  "__u-": `Initials ending with "ooo"`,
-  "__ue-": `Initials ending with "eeww"`,
-  "__i-": `Initials ending with "eee"`,
+  "__-": `Basic`,
+  "__u-": `Ending with "ooo"`,
+  "__ue-": `Ending with "eeww"`,
+  "__i-": `Ending with "eee"`,
   ".-": `Null initial`,
   "-__": `Finals`,
   tones: `Tones`,
@@ -380,7 +380,7 @@ export const defaultPinyinSoundGroupThemes = {
 } as Record<PinyinSoundGroupId, string>;
 
 export const defaultPinyinSoundGroupRanks = Object.fromEntries(
-  [`tones`, `__u-`, `__-`, `__ue-`, `__i-`, `.-`, `-__`].map((id, index) => [
+  [`tones`, `__ue-`, `__-`, `__u-`, `__i-`, `.-`, `-__`].map((id, index) => [
     id,
     index,
   ]),
