@@ -668,7 +668,7 @@ export const defaultPinyinSoundInstructions = {
   "-a": `Like **“ah”** in *father* or *car* — open mouth, low tongue.`,
   "-ai": `Like **“eye”** in *high* — a smooth glide from \`a\` to \`i\`.`,
   "-an": `Like **“an”** in *ban*, but more open — tongue lower and more forward.`,
-  "-ang": `Like **“ahng”** in *song* — open \`a\` followed by soft \`ng\`.`,
+  "-ang": `The long “ah” vowel (as in car), followed by soft \`ng\`.`,
   "-ao": `Like **“ow”** in *cow* — start with \`a\`, glide into \`o\`.`,
   "-e": `Like **“uh”** in *duh*, but without the R sound — central, relaxed vowel.`,
   "-ei": `Like **“ay”** in *say* — may start with a faint \`e\` or glide straight to \`i\`.`,

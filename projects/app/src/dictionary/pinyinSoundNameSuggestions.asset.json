@@ -768,23 +768,71 @@
     "The Vatican": "Vatican ends with 'ahn' sound."
     },
   "-ang": {
-    "Mr Wong": "Restuarant in Sydney",
-    "Hong Kong": "",
-    "Temple": "These often have Gongs"
+    "Kahn Academy": "“Karn” → “karng” → “arng”. Imagine a real world version of the online learning platform.",
+    "Carnegie": "“Carn” → “carng” → “arng”"
   },
   "-ao": {
-    "Powerhouse Museum": "Museum in Sydney"
+    "Powerhouse Museum": "Museum in Sydney",
+    "Powerstation": "",
+    "Flower Market": ""
   },
   "-e": {
     "Pho Restuarant": "Pho ends with the -e 'uh' sound.",
     "River Stage": ""
   },
-  "-[e]i": {},
-  "-[e]n": {},
-  "-[e]ng": {},
-  "-o": {},
-  "-[o]u": {},
-  "-ong": {}
+  "-ei": {
+    "Cafe": "Café ends with the -ei sound.",
+    "Playground": "Play ends with the -ei sound.",
+    "Broadway": "Broadway ends with the -ei sound.",
+    "Bay Bridge": "Bay ends with the -ei sound."
+  },
+  "-en": {
+    "7-Eleven": "Seven ends with the -en sound.",
+    "Ben & Jerry’s": "",
+    "Heaven": "",
+    "Cabin": "",
+    "Prison": "",
+    "Dungeon": ""
+  },
+  "-eng": {
+    "Tongue Hotel": "",
+    "Bunker": "The “unk” without the “k” sounds like “-eng”.",
+    "Jungle Temple": "",
+    "Jungle Gym": ""
+  },
+  "-o": {
+    "Lawson": "Japanese convenience store chain, pronounced as 'lo-son'.",
+    "Dawes Point": "",
+    "Moore Park": "",
+    "Strawberry Hills": "",
+    "Law Society": "",
+    "Straw House": "throwback to fairy tale style (Three Little Pigs)"
+  },
+  "-ou": {
+    "Silo": "“mo-” = “oh” sound. A grain or sugar silo perhaps.",
+    "Apollo Rocket": "",
+    "Show Dome": "",
+    "Soho House": "",
+    "Moma": "“mo-” = “oh” sound",
+    "Studio": "",
+    "Casino": "",
+    "Dojo": "",
+    "Condo": "",
+    "Bungalow": "",
+    "Chateau": "",
+    "Rodeo": ""
+  },
+  "-ong": {
+    "Song Hotel": "",
+    "Long Island Diner": "",
+    "Mong Kok Mall": "",
+    "Long Beach": "",
+    "Longcon Convention": "",
+    "Gong Temple": "",
+    "Gong Cha": "Get some bubble tea.",
+    "Stronghold": "",
+    "Longshore": ""
+  }
 },
 "Areas":{
   "1": {
