@@ -13,14 +13,8 @@ export default function MnemonicsPage() {
       className="flex-1 bg-bg"
       contentContainerClassName="py-safe-offset-4 items-center"
     >
-      <View className="max-w-[800px] gap-4 px-safe-or-4">
-        <View
-          className={`
-            gap-2
-
-            lg:px-0
-          `}
-        >
+      <View className="max-w-[800px] gap-10 px-safe-or-4">
+        <View>
           <Text className="text-3xl font-bold text-fg">Sounds</Text>
         </View>
 
@@ -35,20 +29,22 @@ export default function MnemonicsPage() {
                 )}
               </View>
               <View className="flex-row flex-wrap gap-3.5">
-                {sounds.map((soundId) => (
-                  <Link
-                    key={soundId}
-                    href={`/explore/sounds/${soundId}`}
-                    asChild
-                  >
-                    <PinyinSoundTile
-                      id={soundId}
-                      name={
-                        pinyinSoundsQuery.data?.get(soundId)?.name ?? undefined
-                      }
-                    />
-                  </Link>
-                ))}
+                {sounds.map((soundId) => {
+                  const sound = pinyinSoundsQuery.data?.get(soundId);
+                  return sound == null ? null : (
+                    <Link
+                      key={soundId}
+                      href={`/explore/sounds/${soundId}`}
+                      asChild
+                    >
+                      <PinyinSoundTile
+                        id={soundId}
+                        label={sound.label}
+                        name={sound.name}
+                      />
+                    </Link>
+                  );
+                })}
               </View>
             </View>
           );

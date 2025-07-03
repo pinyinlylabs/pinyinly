@@ -307,41 +307,48 @@ export const loadHhhPinyinChart = memoize0(() =>
 
       // Finals
       //
-      // Instead of using the common -(e)ng convention of parenthesis, we use
-      // square brackets instead as these mean "optional" in many programming
-      // languages.
-      "-[e]ng": `eng beng peng meng feng deng teng neng leng geng keng heng zheng cheng sheng reng zeng ceng seng weng ying bing ping ming ding ting ning ling ging jing qing xing`,
+      // Instead of using the common -(e)ng convention of parenthesis, we omit
+      // them from the IDs so that they don't get percent-encoded in URLs.
+      "-eng": `eng beng peng meng feng deng teng neng leng geng keng heng zheng cheng sheng reng zeng ceng seng weng ying bing ping ming ding ting ning ling ging jing qing xing`,
       "-ang": `ang bang pang mang fang dang tang nang lang gang kang hang zhang chang shang rang zang cang sang yang biang diang niang liang kiang jiang qiang xiang wang duang guang kuang huang zhuang chuang shuang`,
       "-ong": `ong dong tong nong long gong kong hong zhong chong rong zong cong song yong jiong qiong xiong`,
       "-ai": `ai bai pai mai fai dai tai nai lai gai kai hai zhai chai shai zai cai sai yai wai guai kuai huai zhuai chuai shuai`,
-      "-[e]i": `ei bei pei mei fei dei tei nei lei gei kei hei zhei shei zei cei sei wei chui cui rui zui sui shui zhui dui tui nui gui kui hui`,
+      "-ei": `ei bei pei mei fei dei tei nei lei gei kei hei zhei shei zei cei sei wei chui cui rui zui sui shui zhui dui tui nui gui kui hui`,
       "-ao": `ao bao pao mao dao tao nao lao gao kao hao zhao chao shao rao zao cao sao yao biao piao miao fiao diao tiao niao liao jiao qiao xiao`,
-      "-[o]u": `ou pou mou fou dou tou nou lou gou kou hou zhou chou shou rou zou cou sou you diu wu niu liu miu kiu jiu qiu xiu`,
+      "-ou": `ou pou mou fou dou tou nou lou gou kou hou zhou chou shou rou zou cou sou you diu wu niu liu miu kiu jiu qiu xiu`,
       "-an": `an ban pan man fan dan tan nan lan gan kan han zhan chan shan ran zan can san yan bian pian mian dian tian nian lian jian qian xian wan duan tuan nuan luan guan kuan huan zhuan chuan shuan ruan zuan cuan suan yuan lüan juan quan xuan`,
-      "-[e]n": `yin en ben pen men fen den nen len gen ken hen zhen chen shen ren zen cen sen wen bin pin min din nin lin gin jin qin xin zhun chun shun cun run zun sun pun dun tun nun lun gun kun hun jun qun xun yun lün`,
+      "-en": `yin en ben pen men fen den nen len gen ken hen zhen chen shen ren zen cen sen wen bin pin min din nin lin gin jin qin xin zhun chun shun cun run zun sun pun dun tun nun lun gun kun hun jun qun xun yun lün`,
       "-e": `e me de te ne le ge ke he re ze ce ye se ê zhe che she bie pie mie die tie nie lie jie qie xie jue que xue yue nüe lüe`,
       "-a": `a pa ma fa da ta na la ga ka ha za ca sa ba ya pia dia nia lia jia qia xia wa gua kua hua zhua chua shua rua cha zha sha`,
       "-o": `o yo wo bo po mo fo duo tuo nuo luo guo kuo huo zhuo chuo shuo ruo zuo cuo suo lo`,
       "-∅": `er si zhi chi shi ri zi ci yi bi pi mi di ti ni li ji qi xi pu mu fu du tu nu lu gu ku hu bu zhu chu shu cu ru zu su ju qu xu yu nü lü`,
+    },
+    labels: {
+      // Using square brackets to indicate optional characters, other systems
+      // use parentheses.
+      "-eng": `-[e]ng`,
+      "-ei": `-[e]i`,
+      "-ou": `-[o]u`,
+      "-en": `-[e]n`,
     },
     groups: [
       // These group IDs are URL safe so if they do ever need to go in the URL
       // they won't need to be percent-encoded and mangled.
       {
         id: `__-`,
-        items: `zh- ch- sh- r- z- c- s- b- p- m- f- d- t- n- l- g- k- h-`,
-      },
-      {
-        id: `__u-`,
-        items: `yu- nü- lü- ju- qu- xu-`,
+        items: `b- c- ch- d- f- g- h- k- l- m- n- p- r- s- sh- t- z- zh-`,
       },
       {
         id: `__ue-`,
-        items: `w- bu- pu- mu- fu- du- tu- nu- lu- gu- ku- hu- zhu- chu- shu- ru- zu- cu- su-`,
+        items: `ju- lü- nü- qu- xu- yu-`,
+      },
+      {
+        id: `__u-`,
+        items: `bu- cu- chu- du- fu- gu- hu- ku- lu- mu- nu- pu- ru- su- shu- tu- w- zu- zhu-`,
       },
       {
         id: `__i-`,
-        items: `y- bi- pi- mi- di- ti- ni- li- ji- qi- xi-`,
+        items: `bi- di- ji- li- mi- ni- pi- qi- ti- xi- y-`,
       },
       {
         id: `.-`,
@@ -349,7 +356,7 @@ export const loadHhhPinyinChart = memoize0(() =>
       },
       {
         id: `-__`,
-        items: `-[e]ng -ang -ong -ai -[e]i -ao -[o]u -an -[e]n -e -a -o -∅`,
+        items: `-∅ -a -ai -an -ang -ao -e -ei -en -eng -o -ou -ong`,
       },
       {
         id: `tones`,
@@ -360,10 +367,10 @@ export const loadHhhPinyinChart = memoize0(() =>
 );
 
 export const defaultPinyinSoundGroupNames = {
-  "__-": `Simple initials`,
-  "__u-": `Initials ending with "ooo"`,
-  "__ue-": `Initials ending with "eeww"`,
-  "__i-": `Initials ending with "eee"`,
+  "__-": `Basic`,
+  "__u-": `Ending with “ooo”`,
+  "__ue-": `Ending with “eeww”`,
+  "__i-": `Ending with “eee”`,
   ".-": `Null initial`,
   "-__": `Finals`,
   tones: `Tones`,
@@ -372,15 +379,15 @@ export const defaultPinyinSoundGroupNames = {
 export const defaultPinyinSoundGroupThemes = {
   "__-": `Animals`,
   "__u-": `Archetypes`,
-  "__ue-": `Mythical`,
-  "__i-": `Individuals`,
-  ".-": `Special`,
+  "__ue-": `Fiction`,
+  "__i-": `People`,
+  ".-": `Unique`,
   "-__": `Places`,
-  tones: `Sub-locations`,
+  tones: `Areas`,
 } as Record<PinyinSoundGroupId, string>;
 
 export const defaultPinyinSoundGroupRanks = Object.fromEntries(
-  [`tones`, `__u-`, `__-`, `__ue-`, `__i-`, `.-`, `-__`].map((id, index) => [
+  [`tones`, `__u-`, `__-`, `__i-`, `__ue-`, `.-`, `-__`].map((id, index) => [
     id,
     index,
   ]),
@@ -391,7 +398,7 @@ export interface PinyinChart {
   syllableToInitialSound: Record<TonelessSyllable, PinyinSoundId>;
   syllableToFinalSound: Record<TonelessSyllable, PinyinSoundId>;
   syllables: Set<TonelessSyllable>;
-  sounds: Set<PinyinSoundId>;
+  soundToCustomLabel: Record<PinyinSoundId, string>;
   soundToSyllables: Record<PinyinSoundId, TonelessSyllable[]>;
   soundGroups: { id: PinyinSoundGroupId; sounds: PinyinSoundId[] }[];
 }
@@ -404,6 +411,7 @@ function buildPinyinChart(
   const syllables = new Set<string>();
   const sounds = new Set<PinyinSoundId>();
   const soundToSyllables: Record<PinyinSoundId, string[]> = {};
+  const soundToCustomLabel: Record<PinyinSoundId, string> = {};
 
   for (const [_soundId, syllablesSpaceSeparated] of Object.entries(
     chart.items,
@@ -431,6 +439,16 @@ function buildPinyinChart(
     }
   }
 
+  if (chart.labels != null) {
+    for (const [soundId, label] of Object.entries(chart.labels)) {
+      invariant(
+        sounds.has(soundId as PinyinSoundId),
+        `Label rule for ${soundId} does not match a sound ID`,
+      );
+      soundToCustomLabel[soundId as PinyinSoundId] = label;
+    }
+  }
+
   const soundGroups = chart.groups.map((group) => ({
     id: group.id as PinyinSoundGroupId,
     sounds: group.items.split(` `) as PinyinSoundId[],
@@ -441,13 +459,14 @@ function buildPinyinChart(
     syllableToFinalSound,
     syllables,
     soundGroups,
-    sounds,
+    soundToCustomLabel,
     soundToSyllables,
   };
 }
 
 const pinyinChartSpecSchema = z.object({
   items: z.record(z.string(), z.string()),
+  labels: z.record(z.string(), z.string()).optional(),
   groups: z.array(
     z.object({
       id: z.string().optional(),
@@ -580,11 +599,14 @@ export function matchAllPinyinSyllablesWithIndexes(
 }
 
 export const defaultPinyinSoundInstructions = {
+  // Tones
   "1": `high and level`,
   "2": `rising and questioning`,
   "3": `mid-level and neutral`,
   "4": `falling and definitive`,
   "5": `light and short`,
+  // Basic
+  "∅-": `No initial — starts directly with the final (e.g. *ai*, *ou*).`,
   "b-": `Like the English **“b”** in *bat*, but **unaspirated** — no strong puff of air. Say it gently, without the breathy push you’d normally use in English.`,
   "p-": `Like the English **“p”** in *pat*, but **more forceful** — aspirated, with a noticeable puff of air. Hold your hand near your mouth to feel the breath.`,
   "m-": `Exactly like the English **“m”** in *man*. Lips together, nasal sound.`,
@@ -642,4 +664,18 @@ export const defaultPinyinSoundInstructions = {
   "ju-": `This starts with a sound similar to English **“j”** (as in *jeep*), but then goes into **ü**. Curl your tongue slightly up toward the roof of your mouth, then say **“j-ü”** with rounded lips.`,
   "qu-": `Pronounced like a **sharp 'ch'** in *cheese*, followed by **ü**. Say **“ch-ü”**, with a big smile and rounded lips. It’s not *choo*, it’s **qu** with the fronted vowel.`,
   "xu-": `Like a soft **“sh”** sound, but your tongue is much closer to your teeth. Say **“sh-ü”** — smile and round your lips. It’s not *shoe*, it's more hissy and forward.`,
+  // Finals
+  "-a": `Like **“ah”** in *father* or *car* — open mouth, low tongue.`,
+  "-ai": `Like **“eye”** in *high* — a smooth glide from \`a\` to \`i\`.`,
+  "-an": `Like **“an”** in *ban*, but more open — tongue lower and more forward.`,
+  "-ang": `The long “ah” vowel (as in car), followed by soft \`ng\`.`,
+  "-ao": `Like **“ow”** in *cow* — start with \`a\`, glide into \`o\`.`,
+  "-e": `Like **“uh”** in *duh*, but without the R sound — central, relaxed vowel.`,
+  "-ei": `Like **“ay”** in *say* — may start with a faint \`e\` or glide straight to \`i\`.`,
+  "-en": `Like **“un”** in *button* or **“en”** in *pen* — nasal, central vowel.`,
+  "-eng": `Like **“ung”** in *sung* or **“eng”** in *length* — nasal, back of mouth.`,
+  "-o": `Like **“aw”** in *law* — lips rounded, tongue mid-back.`,
+  "-ou": `Like **“oh”** in *go* — rounded lips, smooth glide.`,
+  "-ong": `Like **“ong”** in *song* — starts like \`o\`, ends with soft \`ng\`.`,
+  "-∅": `No final — the syllable ends with the initial only (e.g. *ba*, *di*).`,
 } as Record<PinyinSoundId, string>;

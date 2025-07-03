@@ -6,10 +6,16 @@ import { tv } from "tailwind-variants";
 
 interface PinyinSoundProps {
   id: PinyinSoundId;
-  name?: string;
+  label: string;
+  name: string | null;
 }
 
-export function PinyinSoundTile({ id, name, ...props }: PinyinSoundProps) {
+export function PinyinSoundTile({
+  id,
+  name,
+  label,
+  ...props
+}: PinyinSoundProps) {
   true satisfies IsExhaustedRest<typeof props>;
 
   const decoration = decorationForSound(id);
@@ -29,11 +35,11 @@ export function PinyinSoundTile({ id, name, ...props }: PinyinSoundProps) {
             {decoration}
           </Text>
         )}
-        <Text className="text-2xl leading-none text-fg">{id}</Text>
+        <Text className="text-2xl leading-none text-fg">{label}</Text>
       </View>
       {name == null ? (
         <Text
-          className="overflow-visible leading-none text-fg/20"
+          className="select-none overflow-visible leading-none text-fg/20"
           numberOfLines={1}
         >
           _____
