@@ -21,8 +21,8 @@ export default function MnemonicIdPage() {
   const r = useReplicache();
   const chart = loadHhhPinyinChart();
 
-  const themeSuggestions = useLocalQuery({
-    queryKey: [MnemonicIdPage.name, `mnemonicThemeChoices`],
+  const soundNameSuggestions = useLocalQuery({
+    queryKey: [MnemonicIdPage.name, `themeSuggestions`],
     queryFn: () => loadPinyinSoundNameSuggestions(),
   });
 
@@ -38,6 +38,8 @@ export default function MnemonicIdPage() {
     (g) => g.id === pinyinSoundGroupId,
   );
 
+  const label = chart.soundToCustomLabel[id] ?? id;
+
   return (
     <ScrollView
       className="bg-bg"
@@ -46,10 +48,16 @@ export default function MnemonicIdPage() {
       <View className="mb-5 flex-row items-center gap-4">
         <View className={pinyinPartBox()}>
           <Text className="text-center font-cursive text-2xl text-fg">
-            {id}
+            {label}
           </Text>
         </View>
-        <Text className="text-3xl font-bold text-fg">{pinyinSound?.name}</Text>
+        {nullIfEmpty(pinyinSound?.name) == null ? (
+          <Text className="select-none text-3xl text-fg/20">_________</Text>
+        ) : (
+          <Text className="text-3xl font-bold text-fg">
+            {pinyinSound?.name}
+          </Text>
+        )}
       </View>
 
       <View className="gap-2">
@@ -57,9 +65,11 @@ export default function MnemonicIdPage() {
           {nullIfEmpty(pinyinSoundGroup?.name) ?? `Untitled group`}:
         </Text>
         <View className="flex-row flex-wrap gap-1">
-          {pinyinSoundGroup?.sounds.map((x) => (
-            <Link key={x} href={`/explore/sounds/${x}`}>
-              <Text className={x === id ? `text-fg` : `text-fg/50`}>{x}</Text>
+          {pinyinSoundGroup?.sounds.map((siblingId) => (
+            <Link key={siblingId} href={`/explore/sounds/${siblingId}`}>
+              <Text className={siblingId === id ? `text-fg` : `text-fg/50`}>
+                {pinyinSounds.data?.get(siblingId)?.label}
+              </Text>
             </Link>
           ))}
         </View>
@@ -80,10 +90,10 @@ export default function MnemonicIdPage() {
         </View>
 
         <View className="gap-2">
-          {themeSuggestions.data == null ? (
+          {soundNameSuggestions.data == null ? (
             <Text className="text-fg">null</Text>
           ) : (
-            [...themeSuggestions.data.entries()]
+            [...soundNameSuggestions.data.entries()]
               .flatMap(([theme, namesBySoundId]) => {
                 const names = namesBySoundId.get(id);
                 return names ? ([[theme, names]] as const) : [];
@@ -105,9 +115,9 @@ export default function MnemonicIdPage() {
                       <RectButton
                         onPress={() => {
                           if (pinyinSoundGroup?.id != null) {
-                            void r.mutate.setPinyinSoundGroupName({
+                            void r.mutate.setPinyinSoundGroupTheme({
                               soundGroupId: pinyinSoundGroup.id,
-                              name: theme,
+                              theme,
                               now: new Date(),
                             });
                           }

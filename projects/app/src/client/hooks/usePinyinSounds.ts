@@ -1,31 +1,26 @@
 import type { PinyinSoundId } from "@/data/model";
-import { currentSchema } from "@/data/rizzleSchema";
-import { useRizzleQueryPaged } from "./useRizzleQueryPaged";
+import { loadHhhPinyinChart } from "@/data/pinyin";
+import { useRizzleQuery } from "./useRizzleQuery";
 
 export function usePinyinSounds() {
-  return useRizzleQueryPaged(
-    [`usePinyinSounds`],
-    async (r) =>
-      await r.queryPaged.pinyinSound
-        .scan()
-        .toArray()
-        .then(
-          (x) =>
-            new Map(
-              x.map(([, { soundId, name }]) => {
-                return [
-                  soundId,
-                  {
-                    name,
-                  },
-                ] as const;
-              }),
-            ),
-        ),
-    [
-      currentSchema.pinyinSound._def.interpolateKey({
-        soundId: `` as PinyinSoundId,
-      }),
-    ],
-  );
+  const chart = loadHhhPinyinChart();
+
+  return useRizzleQuery([`usePinyinSounds`], async (r, tx) => {
+    const sounds = new Map<
+      PinyinSoundId,
+      { name: string | null; label: string }
+    >();
+
+    for (const group of chart.soundGroups) {
+      for (const soundId of group.sounds) {
+        const userOverride = await r.query.pinyinSound.get(tx, { soundId });
+        sounds.set(soundId, {
+          name: userOverride?.name ?? null,
+          label: chart.soundToCustomLabel[soundId] ?? soundId,
+        });
+      }
+    }
+
+    return sounds;
+  });
 }

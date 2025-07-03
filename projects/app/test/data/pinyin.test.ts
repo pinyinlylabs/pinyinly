@@ -466,15 +466,15 @@ test(`hhh pinyin chart`, async () => {
     [`cong`, `c-`, `-ong`],
 
     // https://countryoftheblind.blogspot.com/2012/01/mnemonics-for-pronouncing-chinese.html?showComment=1540670199273&m=1#c4879970812355082477
-    [`cheng`, `ch-`, `-[e]ng`],
+    [`cheng`, `ch-`, `-eng`],
     [`chong`, `ch-`, `-ong`],
 
-    [`chui`, `chu-`, `-[e]i`],
-    [`diu`, `di-`, `-[o]u`],
-    [`miu`, `mi-`, `-[o]u`],
-    [`niu`, `ni-`, `-[o]u`],
-    [`you`, `y-`, `-[o]u`],
-    [`yin`, `y-`, `-[e]n`],
+    [`chui`, `chu-`, `-ei`],
+    [`diu`, `di-`, `-ou`],
+    [`miu`, `mi-`, `-ou`],
+    [`niu`, `ni-`, `-ou`],
+    [`you`, `y-`, `-ou`],
+    [`yin`, `y-`, `-en`],
     [`ê`, `∅-`, `-e`],
     [`er`, `∅-`, `-∅`],
 
@@ -502,11 +502,11 @@ test(`hhh pinyin chart`, async () => {
     [`zhong`, `zh-`, `-ong`],
     [`zhe`, `zh-`, `-e`],
     [`ta`, `t-`, `-a`],
-    [`tou`, `t-`, `-[o]u`],
-    [`xiu`, `xi-`, `-[o]u`],
+    [`tou`, `t-`, `-ou`],
+    [`xiu`, `xi-`, `-ou`],
     [`a`, `∅-`, `-a`],
-    [`xing`, `xi-`, `-[e]ng`],
-    [`qing`, `qi-`, `-[e]ng`],
+    [`xing`, `xi-`, `-eng`],
+    [`qing`, `qi-`, `-eng`],
   ]);
 });
 
