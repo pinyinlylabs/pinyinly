@@ -4,6 +4,7 @@ import {
   defaultPinyinSoundGroupNames,
   defaultPinyinSoundGroupRanks,
   defaultPinyinSoundGroupThemes,
+  defaultPinyinSoundInstructions,
   loadHhhPinyinChart,
   loadHhPinyinChart,
   loadHmmPinyinChart,
@@ -443,71 +444,85 @@ test(`hmm pinyin covers kangxi pinyin`, async () => {
   ]);
 });
 
-test(`hhh pinyin chart`, async () => {
-  const chart = loadHhhPinyinChart();
+describe(`hhh pinyin chart`, async () => {
+  test(`sound group ID consistency`, async () => {
+    const chart = loadHhhPinyinChart();
 
-  const chartGroupIds = new Set(chart.soundGroups.map((x) => x.id));
-  expect(chartGroupIds).toEqual(
-    new Set(Object.keys(defaultPinyinSoundGroupRanks)),
-  );
-  expect(chartGroupIds).toEqual(
-    new Set(Object.keys(defaultPinyinSoundGroupNames)),
-  );
-  expect(chartGroupIds).toEqual(
-    new Set(Object.keys(defaultPinyinSoundGroupThemes)),
-  );
+    const chartGroupIds = new Set(chart.soundGroups.map((x) => x.id));
+    expect(chartGroupIds).toEqual(
+      new Set(Object.keys(defaultPinyinSoundGroupRanks)),
+    );
+    expect(chartGroupIds).toEqual(
+      new Set(Object.keys(defaultPinyinSoundGroupNames)),
+    );
+    expect(chartGroupIds).toEqual(
+      new Set(Object.keys(defaultPinyinSoundGroupThemes)),
+    );
+  });
 
-  await testPinyinChart(chart, [
-    [`zhang`, `zh-`, `-ang`],
-    [`bao`, `b-`, `-ao`],
-    [`ao`, `∅-`, `-ao`],
-    [`ba`, `b-`, `-a`],
+  test(`sound ID consistency`, async () => {
+    const chart = loadHhhPinyinChart();
 
-    [`cong`, `c-`, `-ong`],
+    const chartSoundIds = new Set(chart.soundGroups.flatMap((x) => x.sounds));
+    expect(chartSoundIds).toEqual(
+      new Set(Object.keys(defaultPinyinSoundInstructions)),
+    );
+  });
 
-    // https://countryoftheblind.blogspot.com/2012/01/mnemonics-for-pronouncing-chinese.html?showComment=1540670199273&m=1#c4879970812355082477
-    [`cheng`, `ch-`, `-eng`],
-    [`chong`, `ch-`, `-ong`],
+  test(`standard tests`, async () => {
+    const chart = loadHhhPinyinChart();
+    await testPinyinChart(chart, [
+      [`zhang`, `zh-`, `-ang`],
+      [`bao`, `b-`, `-ao`],
+      [`ao`, `∅-`, `-ao`],
+      [`ba`, `b-`, `-a`],
 
-    [`chui`, `chu-`, `-ei`],
-    [`diu`, `di-`, `-ou`],
-    [`miu`, `mi-`, `-ou`],
-    [`niu`, `ni-`, `-ou`],
-    [`you`, `y-`, `-ou`],
-    [`yin`, `y-`, `-en`],
-    [`ê`, `∅-`, `-e`],
-    [`er`, `∅-`, `-∅`],
+      [`cong`, `c-`, `-ong`],
 
-    // When -i- is not an "ee" sound:
-    //
-    // > the "i" in Pinyin "si" is nothing like the "i" in "yi" or "ji". "Si" is
-    // > pronounced more like "sz" than English "sea". Same for "zhi", "chi",
-    // > "shi", "ri", "ci", "zi".
-    //
-    // Source:
-    // https://countryoftheblind.blogspot.com/2012/01/mnemonics-for-pronouncing-chinese.html?m=1
-    [`si`, `s-`, `-∅`],
-    [`zhi`, `zh-`, `-∅`],
-    [`chi`, `ch-`, `-∅`],
-    [`shi`, `sh-`, `-∅`],
-    [`ri`, `r-`, `-∅`],
-    [`ci`, `c-`, `-∅`],
-    [`zi`, `z-`, `-∅`],
+      // https://countryoftheblind.blogspot.com/2012/01/mnemonics-for-pronouncing-chinese.html?showComment=1540670199273&m=1#c4879970812355082477
+      [`cheng`, `ch-`, `-eng`],
+      [`chong`, `ch-`, `-ong`],
 
-    [`zha`, `zh-`, `-a`],
-    // > You will notice some spelling oddities: for example, zhu- + (e)ng becomes
-    // > zhong instead of *zhung, but these merely reflect the way Pinyin works.
-    //
-    // Source: https://countryoftheblind.blogspot.com/2012/01/mnemonics-for-pronouncing-chinese.html?m=1
-    [`zhong`, `zh-`, `-ong`],
-    [`zhe`, `zh-`, `-e`],
-    [`ta`, `t-`, `-a`],
-    [`tou`, `t-`, `-ou`],
-    [`xiu`, `xi-`, `-ou`],
-    [`a`, `∅-`, `-a`],
-    [`xing`, `xi-`, `-eng`],
-    [`qing`, `qi-`, `-eng`],
-  ]);
+      [`chui`, `chu-`, `-ei`],
+      [`diu`, `di-`, `-ou`],
+      [`miu`, `mi-`, `-ou`],
+      [`niu`, `ni-`, `-ou`],
+      [`you`, `y-`, `-ou`],
+      [`yin`, `y-`, `-en`],
+      [`ê`, `∅-`, `-e`],
+      [`er`, `∅-`, `-∅`],
+
+      // When -i- is not an "ee" sound:
+      //
+      // > the "i" in Pinyin "si" is nothing like the "i" in "yi" or "ji". "Si" is
+      // > pronounced more like "sz" than English "sea". Same for "zhi", "chi",
+      // > "shi", "ri", "ci", "zi".
+      //
+      // Source:
+      // https://countryoftheblind.blogspot.com/2012/01/mnemonics-for-pronouncing-chinese.html?m=1
+      [`si`, `s-`, `-∅`],
+      [`zhi`, `zh-`, `-∅`],
+      [`chi`, `ch-`, `-∅`],
+      [`shi`, `sh-`, `-∅`],
+      [`ri`, `r-`, `-∅`],
+      [`ci`, `c-`, `-∅`],
+      [`zi`, `z-`, `-∅`],
+
+      [`zha`, `zh-`, `-a`],
+      // > You will notice some spelling oddities: for example, zhu- + (e)ng becomes
+      // > zhong instead of *zhung, but these merely reflect the way Pinyin works.
+      //
+      // Source: https://countryoftheblind.blogspot.com/2012/01/mnemonics-for-pronouncing-chinese.html?m=1
+      [`zhong`, `zh-`, `-ong`],
+      [`zhe`, `zh-`, `-e`],
+      [`ta`, `t-`, `-a`],
+      [`tou`, `t-`, `-ou`],
+      [`xiu`, `xi-`, `-ou`],
+      [`a`, `∅-`, `-a`],
+      [`xing`, `xi-`, `-eng`],
+      [`qing`, `qi-`, `-eng`],
+    ]);
+  });
 });
 
 async function testPinyinChart(

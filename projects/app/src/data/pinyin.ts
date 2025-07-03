@@ -599,11 +599,14 @@ export function matchAllPinyinSyllablesWithIndexes(
 }
 
 export const defaultPinyinSoundInstructions = {
+  // Tones
   "1": `high and level`,
   "2": `rising and questioning`,
   "3": `mid-level and neutral`,
   "4": `falling and definitive`,
   "5": `light and short`,
+  // Basic
+  "∅-": `No initial — starts directly with the final (e.g. *ai*, *ou*).`,
   "b-": `Like the English **“b”** in *bat*, but **unaspirated** — no strong puff of air. Say it gently, without the breathy push you’d normally use in English.`,
   "p-": `Like the English **“p”** in *pat*, but **more forceful** — aspirated, with a noticeable puff of air. Hold your hand near your mouth to feel the breath.`,
   "m-": `Exactly like the English **“m”** in *man*. Lips together, nasal sound.`,
@@ -661,4 +664,18 @@ export const defaultPinyinSoundInstructions = {
   "ju-": `This starts with a sound similar to English **“j”** (as in *jeep*), but then goes into **ü**. Curl your tongue slightly up toward the roof of your mouth, then say **“j-ü”** with rounded lips.`,
   "qu-": `Pronounced like a **sharp 'ch'** in *cheese*, followed by **ü**. Say **“ch-ü”**, with a big smile and rounded lips. It’s not *choo*, it’s **qu** with the fronted vowel.`,
   "xu-": `Like a soft **“sh”** sound, but your tongue is much closer to your teeth. Say **“sh-ü”** — smile and round your lips. It’s not *shoe*, it's more hissy and forward.`,
+  // Finals
+  "-a": `Like **“ah”** in *father* or *car* — open mouth, low tongue.`,
+  "-ai": `Like **“eye”** in *high* — a smooth glide from \`a\` to \`i\`.`,
+  "-an": `Like **“an”** in *ban*, but more open — tongue lower and more forward.`,
+  "-ang": `Like **“ahng”** in *song* — open \`a\` followed by soft \`ng\`.`,
+  "-ao": `Like **“ow”** in *cow* — start with \`a\`, glide into \`o\`.`,
+  "-e": `Like **“uh”** in *duh*, but without the R sound — central, relaxed vowel.`,
+  "-ei": `Like **“ay”** in *say* — may start with a faint \`e\` or glide straight to \`i\`.`,
+  "-en": `Like **“un”** in *button* or **“en”** in *pen* — nasal, central vowel.`,
+  "-eng": `Like **“ung”** in *sung* or **“eng”** in *length* — nasal, back of mouth.`,
+  "-o": `Like **“aw”** in *law* — lips rounded, tongue mid-back.`,
+  "-ou": `Like **“oh”** in *go* — rounded lips, smooth glide.`,
+  "-ong": `Like **“ong”** in *song* — starts like \`o\`, ends with soft \`ng\`.`,
+  "-∅": `No final — the syllable ends with the initial only (e.g. *ba*, *di*).`,
 } as Record<PinyinSoundId, string>;
