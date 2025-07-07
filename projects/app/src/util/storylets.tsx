@@ -1,0 +1,312 @@
+import { IconImage } from "@/client/ui/IconImage";
+import { SpeechBubble } from "@/client/ui/SpeechBubble";
+import { parseHhhmark } from "@/data/hhhmark";
+import { nonNullable } from "@pinyinly/lib/invariant";
+import { Image } from "expo-image";
+import type { JSX } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Text, View } from "react-native";
+import Reanimated, { FadeIn } from "react-native-reanimated";
+import { tv } from "tailwind-variants";
+import { HanziWordRefText } from "../client/ui/HanziWordRefText";
+
+const Dialogue = ({ text }: { text: string; onContinue: () => void }) => {
+  const [speechBubbleLoaded, setSpeechBubbleLoaded] = useState(false);
+  const [textAnimationDone, setTextAnimationDone] = useState(false);
+
+  return (
+    <View
+      className={`
+        p-4
+
+        ${speechBubbleLoaded ? `` : `invisible`}
+      `}
+    >
+      {speechBubbleLoaded ? (
+        <TypewriterHhhmark
+          source={[text, `**${text}**`, `*${text}*`, text].join(` `)}
+          className="text-lg leading-tight text-fg"
+          delay={200}
+          onAnimateEnd={() => {
+            setTextAnimationDone(true);
+          }}
+        />
+      ) : // <TypewriterText
+      //   text={[text, text, text, text].join(` `)}
+      //   className="text-lg leading-tight text-fg"
+      //   delay={200}
+      //   onAnimateEnd={() => {
+      //     setTextAnimationDone(true);
+      //   }}
+      // />
+      null}
+      <View
+        className={`
+          -mb-2 -mr-2 mt-1 flex-row items-center justify-end gap-1 transition-opacity duration-1000
+
+          ${textAnimationDone ? `opacity-100` : `opacity-0`}
+        `}
+      >
+        <Text className="hhh-button-bare text-fg">Continue</Text>
+        <IconImage
+          source={require(`@/assets/icons/chevron-forward-filled.svg`)}
+          size={24}
+          className="animate-hoscillate"
+        />
+      </View>
+      <SpeechBubble
+        className="pointer-events-none absolute inset-0 left-[-14px]"
+        onLoad={() => {
+          setSpeechBubbleLoaded(true);
+        }}
+      />
+    </View>
+  );
+};
+
+export const TypewriterText = ({
+  text,
+  className,
+  delay = 0,
+  onAnimateEnd,
+}: {
+  text: string;
+  className?: string;
+  delay?: number;
+  onAnimateEnd?: () => void;
+}) => {
+  const words = text.split(` `);
+  return (
+    <Text className={className}>
+      {words.map((word, i, arr) => {
+        const isLastWord = i === arr.length - 1;
+        return (
+          <TypewriterWord
+            key={i}
+            delay={delay}
+            index={i}
+            word={word}
+            onAnimateEnd={isLastWord ? onAnimateEnd : undefined}
+          />
+        );
+      })}
+    </Text>
+  );
+};
+
+const TypewriterWord = ({
+  word,
+  index,
+  delay,
+  onAnimateEnd,
+}: {
+  word: string | JSX.Element;
+  index: number;
+  delay: number;
+  onAnimateEnd?: () => void;
+}) => {
+  let entering = FadeIn.duration(250).delay(delay + 100 * index);
+  if (onAnimateEnd != null) {
+    entering = entering.withCallback(onAnimateEnd);
+  }
+  return (
+    <Reanimated.Text entering={entering}>
+      {index > 0 ? ` ` : ``}
+      {word}
+    </Reanimated.Text>
+  );
+};
+
+const LeafImage = () => null;
+
+export const NewWordDirector = () => {
+  const [state, setState] = useState(`splash`);
+
+  const next = () => {
+    if (state === `splash`) {
+      setState(`intro`);
+    } else if (state === `intro`) {
+      setState(`dependenciesMet`);
+    }
+  };
+
+  switch (state) {
+    case `splash`: {
+      return <NewWordSplash onNext={next} />;
+    }
+    case `intro`: {
+      return <NewWordIntro onNext={next} />;
+    }
+    default: {
+      return null;
+    }
+  }
+};
+
+const NewWordSplash = ({ onNext: next }: { onNext: () => void }) => {
+  return (
+    <View className={screenClass()}>
+      <LeafImage />
+      <AfterDelay ms={100} action={next} />
+    </View>
+  );
+};
+
+const screenClass = tv({
+  base: `h-[480px] w-[320px] bg-[red]`,
+});
+
+const AfterDelay = ({ ms, action }: { ms: number; action: () => void }) => {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      action();
+    }, ms);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [action, ms]);
+
+  return null;
+};
+
+const NewWordIntro = ({ onNext: next }: { onNext: () => void }) => {
+  const learnedDependencies = [] as string[] | null;
+  return (
+    <>
+      <View className="flex-row items-end gap-4">
+        <Image
+          source={require(`@/assets/illustrations/tutor.svg`)}
+          className="h-[94px] w-[80px]"
+        />
+
+        <View className="max-w-[300px] pb-9">
+          {learnedDependencies == null || learnedDependencies.length === 0 ? (
+            <Dialogue onContinue={next} text="It’s time to learn a new word." />
+          ) : learnedDependencies.length === 1 ? (
+            <Dialogue
+              onContinue={next}
+              text={`Since you know ${nonNullable(learnedDependencies[0])}, you’re ready for your next
+          lesson.`}
+            />
+          ) : learnedDependencies.length === 2 ? (
+            <Dialogue
+              onContinue={next}
+              text={`Since you know ${nonNullable(learnedDependencies[0])} and ${nonNullable(learnedDependencies[1])},
+          you’re ready for your next lesson.`}
+            />
+          ) : (
+            <Dialogue
+              onContinue={next}
+              text={`Since you know ${nonNullable(learnedDependencies[0])}, ${nonNullable(learnedDependencies[1])} and ${nonNullable(learnedDependencies[2])}, you’re ready for your next lesson.`}
+            />
+          )}
+        </View>
+      </View>
+    </>
+  );
+};
+
+export const TypewriterHhhmark = ({
+  source,
+  className,
+  delay = 0,
+  onAnimateEnd,
+}: {
+  source: string;
+  className?: string;
+  delay?: number;
+  onAnimateEnd?: () => void;
+}) => {
+  const rendered = useMemo(() => {
+    const parsed = parseHhhmark(source);
+    let i = 0;
+    return parsed.map((node, index) => {
+      const isLastNode = index === parsed.length - 1;
+      switch (node.type) {
+        case `text`: {
+          return (
+            <Text key={`text-${index}`} className="hhh-hhhmark-text">
+              {node.text.split(` `).map((word, j, arr) => {
+                const isLastSubNode = isLastNode && j === arr.length - 1;
+                return (
+                  <TypewriterWord
+                    key={j}
+                    index={i++}
+                    word={word}
+                    delay={delay}
+                    onAnimateEnd={isLastSubNode ? onAnimateEnd : undefined}
+                  />
+                );
+              })}
+            </Text>
+          );
+        }
+        case `hanziWord`: {
+          return (
+            <TypewriterWord
+              index={i++}
+              delay={delay}
+              word={
+                <HanziWordRefText
+                  key={`hanziWord-${index}`}
+                  context="body"
+                  hanziWord={node.hanziWord}
+                  showGloss={node.showGloss}
+                />
+              }
+              onAnimateEnd={isLastNode ? onAnimateEnd : undefined}
+            />
+          );
+        }
+        case `bold`: {
+          return (
+            <Text key={`bold-${index}`} className="hhh-hhhmark-bold">
+              {node.text.split(` `).map((word, j, arr) => {
+                const isLastSubNode = isLastNode && j === arr.length - 1;
+                return (
+                  <TypewriterWord
+                    key={j}
+                    index={i++}
+                    word={word}
+                    delay={delay}
+                    onAnimateEnd={isLastSubNode ? onAnimateEnd : undefined}
+                  />
+                );
+              })}
+            </Text>
+          );
+        }
+        case `italic`: {
+          return (
+            <Text key={`italic-${index}`} className="hhh-hhhmark-italic">
+              {node.text.split(` `).map((word, j, arr) => {
+                const isLastSubNode = isLastNode && j === arr.length - 1;
+                return (
+                  <TypewriterWord
+                    key={j}
+                    index={i++}
+                    word={word}
+                    delay={delay}
+                    onAnimateEnd={isLastSubNode ? onAnimateEnd : undefined}
+                  />
+                );
+              })}
+            </Text>
+          );
+        }
+      }
+    });
+  }, [delay, onAnimateEnd, source]);
+
+  return (
+    <Text
+      className={`
+        hhh-hhhmark
+
+        ${className ?? ``}
+      `}
+    >
+      {rendered}
+    </Text>
+  );
+};

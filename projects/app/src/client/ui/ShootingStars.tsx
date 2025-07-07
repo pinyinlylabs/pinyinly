@@ -28,7 +28,7 @@ export const ShootingStars = ({
   return (
     <View className={className} style={style}>
       <Rive
-        src={require(`@/assets/rive/shooting-stars.riv`)}
+        src={require(`@/assets/rive/shootingStars.riv`)}
         artboardName="main"
         autoplay
         fit="layout"

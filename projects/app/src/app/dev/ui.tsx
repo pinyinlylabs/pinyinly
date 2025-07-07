@@ -28,6 +28,7 @@ import {
   hanziWordToPinyinTone,
 } from "@/data/skills";
 import { buildHanziWord } from "@/dictionary/dictionary";
+import { NewWordDirector } from "@/util/storylets";
 import { subMinutes } from "date-fns/subMinutes";
 import { Link } from "expo-router";
 import shuffle from "lodash/shuffle";
@@ -62,6 +63,10 @@ function DesignSystemPage() {
         </Link>
       </View>
       <ScrollView style={{ flex: 1 }} ref={scrollViewRef}>
+        <Section title={StoryletExamples.name} scrollTo={scrollTo}>
+          <StoryletExamples />
+        </Section>
+
         <Section title={ToggleButtonExamples.name} scrollTo={scrollTo}>
           <ToggleButtonExamples />
         </Section>
@@ -1360,6 +1365,14 @@ function ToggleButtonExamples() {
           }}
         />
       </ExampleStack>
+    </>
+  );
+}
+
+function StoryletExamples() {
+  return (
+    <>
+      <NewWordDirector />
     </>
   );
 }
