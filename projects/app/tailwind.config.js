@@ -110,6 +110,23 @@ module.exports = {
         [`vvw`]: `var(--vvw)`, // VisualViewport width
         [`www-col`]: `988px`,
       },
+
+      animation: {
+        hoscillate: `hoscillate 1s ease-in-out infinite`,
+      },
+
+      keyframes: {
+        hoscillate: {
+          "0%,100%": {
+            transform: `translateX(-1px)`,
+            "animation-timing-function": `ease-in-out`,
+          },
+          "50%": {
+            transform: `translateX(1px)`,
+            "animation-timing-function": `ease-in-out`,
+          },
+        },
+      },
     },
   },
   corePlugins: {

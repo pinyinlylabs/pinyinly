@@ -67,6 +67,17 @@
     tab-size: 2;
   }
 
+  .hhh-hhhmark-text {
+    @apply font-normal;
+  }
+  .hhh-hhhmark-bold {
+    @apply font-bold;
+  }
+
+  .hhh-hhhmark-italic {
+    @apply italic;
+  }
+
   /* hhh/body-2xl */
   .hhh-body-2xl {
     @apply font-sans text-2xl/normal font-thin;
