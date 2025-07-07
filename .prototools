@@ -1,5 +1,5 @@
 moon = "1.38.0" # renovate: datasource=github-releases depName=moonrepo/moon extractVersion=^v(?<version>.*)$
-jq = "1.8.0" # renovate: datasource=github-releases depName=jqlang/jq extractVersion=^jq-(?<version>.*)$
+jq = "1.8.1" # renovate: datasource=github-releases depName=jqlang/jq extractVersion=^jq-(?<version>.*)$
 
 [plugins]
 moon = "https://raw.githubusercontent.com/moonrepo/moon/master/proto-plugin.toml"
