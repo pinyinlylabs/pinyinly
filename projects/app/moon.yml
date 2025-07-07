@@ -219,7 +219,7 @@ tasks:
       NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
 
   expoDoctor:
-    command: npx -y expo-doctor@1.13.3
+    command: npx -y expo-doctor@1.13.5
     env:
       # Don't check that all the expo-* packages are the latest versions. That's
       # already handled by renovate in a way that doesn't break PR builds when a
