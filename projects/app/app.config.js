@@ -124,12 +124,6 @@ export const expo = {
   },
   plugins: [
     [
-      `expo-router`,
-      {
-        origin: `https://${devDomain ?? prodDomain}`,
-      },
-    ],
-    [
       `@sentry/react-native/expo`,
       {
         organization: `pinyinly`,
@@ -137,18 +131,15 @@ export const expo = {
         url: `https://sentry.io/`,
       },
     ],
-    [
-      `expo-dev-client`,
-      {
-        launchMode: `most-recent`,
-      },
-    ],
-    `expo-apple-authentication`,
-    `expo-asset`,
-    `expo-font`,
-    `expo-localization`,
-    `expo-secure-store`,
-    `expo-sqlite`,
+    [`expo-audio`],
+    [`expo-apple-authentication`],
+    [`expo-asset`],
+    [`expo-dev-client`, { launchMode: `most-recent` }],
+    [`expo-font`],
+    [`expo-localization`],
+    [`expo-router`, { origin: `https://${devDomain ?? prodDomain}` }],
+    [`expo-secure-store`],
+    [`expo-sqlite`],
   ],
   experiments: {
     reactCompiler: true,
