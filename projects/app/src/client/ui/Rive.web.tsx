@@ -1,5 +1,5 @@
 import type { ColorRGBA } from "@/util/color";
-import { parseCssColorOrThrow } from "@/util/color";
+import { parseCssColorOrThrow, parseRiveColorPropertyName } from "@/util/color";
 import type { IsExhaustedRest } from "@/util/types";
 import { invariant } from "@pinyinly/lib/invariant";
 import type { ViewModel } from "@rive-app/canvas";
@@ -53,6 +53,7 @@ function applyColorToViewModel(
   viewModel: ViewModelInstance,
   colorName: string,
   color: ColorRGBA,
+  alphaMultipler: number,
 ) {
   const colorVm = viewModel.color(colorName);
   if (colorVm != null) {
@@ -60,7 +61,7 @@ function applyColorToViewModel(
       color.red,
       color.green,
       color.blue,
-      Math.round(color.alpha * 255),
+      Math.round(color.alpha * alphaMultipler * 255),
     );
   }
 }
@@ -86,11 +87,12 @@ function applyThemeFromDom(
   // the value from the DOM.
   for (const property of themeViewModel.properties) {
     if (property.type === PropertyType.Color) {
-      const cssPropertyName = `--color-${property.name}`;
+      const { name, alpha } = parseRiveColorPropertyName(property.name);
+      const cssPropertyName = `--color-${name}`;
       const cssPropertyValue = style.getPropertyValue(cssPropertyName);
       try {
         const color = parseCssColorOrThrow(cssPropertyValue);
-        applyColorToViewModel(themeViewModel, property.name, color);
+        applyColorToViewModel(themeViewModel, property.name, color, alpha);
       } catch (error) {
         console.error(
           `Failed to parse CSS color "${cssPropertyValue}" from "${cssPropertyName}" for Rive theme property "${property.name}"`,

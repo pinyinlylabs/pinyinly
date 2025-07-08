@@ -2,6 +2,7 @@ import type { ColorRGBA } from "#util/color.ts";
 import {
   parseCssColorOrThrow,
   parseHexColor,
+  parseRiveColorPropertyName,
   parseScalar,
 } from "#util/color.ts";
 import assert from "node:assert/strict";
@@ -117,5 +118,30 @@ describe(`${parseHexColor.name} suite`, async () => {
     for (const [input, expected] of fixtures) {
       expect(parseHexColor(input)).toEqual(expected);
     }
+  });
+});
+
+describe(`${parseRiveColorPropertyName.name} suite`, async () => {
+  test(`no alpha suffix`, () => {
+    expect(parseRiveColorPropertyName(`fg`)).toEqual({ name: `fg`, alpha: 1 });
+  });
+
+  test(`alpha suffix`, () => {
+    expect(parseRiveColorPropertyName(`fg@100`)).toEqual({
+      name: `fg`,
+      alpha: 1,
+    });
+    expect(parseRiveColorPropertyName(`fg@50`)).toEqual({
+      name: `fg`,
+      alpha: 0.5,
+    });
+    expect(parseRiveColorPropertyName(`fg@0`)).toEqual({
+      name: `fg`,
+      alpha: 0,
+    });
+  });
+
+  test(`throws on invalid name`, () => {
+    expect(() => parseRiveColorPropertyName(`fg/100`)).toThrow();
   });
 });
