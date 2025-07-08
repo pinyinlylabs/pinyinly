@@ -4,6 +4,7 @@ declare global {
   type RnRequireSource =
     // Web
     | string
+    | { uri: string; width: number; height: number }
     // Native
     | number;
 

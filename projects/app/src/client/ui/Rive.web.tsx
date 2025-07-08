@@ -10,6 +10,7 @@ import type { RiveFit, RiveProps } from "./riveTypes";
 
 export function Rive({
   artboardName,
+  assets,
   autoplay = true,
   fit,
   onRiveLoad,
@@ -27,6 +28,34 @@ export function Rive({
     autoBind: true,
     stateMachines: stateMachineName,
     layout: fit == null ? undefined : new Layout({ fit: fitMap[fit] }),
+    assetLoader(asset) {
+      const expoAsset = assets?.[asset.name];
+
+      invariant(
+        expoAsset != null,
+        `Rive file requested asset ${asset.name}, but it wasn't provided.`,
+      );
+
+      invariant(
+        typeof expoAsset !== `number`,
+        `Received wrong Expo asset format (number)`,
+      );
+
+      const exportAssetUri =
+        typeof expoAsset === `string` ? expoAsset : expoAsset.uri;
+
+      void fetch(exportAssetUri)
+        .then((res) => res.arrayBuffer())
+        .then((arr) => new Uint8Array(arr))
+        .then((image) => {
+          asset.decode(image);
+        })
+        .catch((error: unknown) => {
+          console.error(`Failed to decode image`, error);
+        });
+
+      return true;
+    },
   });
 
   useLayoutEffect(() => {
@@ -53,7 +82,7 @@ function applyColorToViewModel(
   viewModel: ViewModelInstance,
   colorName: string,
   color: ColorRGBA,
-  alphaMultipler: number,
+  alphaFactor: number,
 ) {
   const colorVm = viewModel.color(colorName);
   if (colorVm != null) {
@@ -61,7 +90,7 @@ function applyColorToViewModel(
       color.red,
       color.green,
       color.blue,
-      Math.round(color.alpha * alphaMultipler * 255),
+      Math.round(color.alpha * alphaFactor * 255),
     );
   }
 }
