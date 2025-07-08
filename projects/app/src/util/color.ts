@@ -165,6 +165,14 @@ export function parseRiveColorPropertyName(propertyName: string): {
 
   const [name, after] = propertyName.split(`@`);
   invariant(name != null);
-  const alpha = Number.parseInt(after ?? `100`) / 100;
+  let alpha = 1; // Default to 100% opacity
+  if (after != null) {
+    const parsedAfter = Number.parseInt(after);
+    invariant(
+      Number.isInteger(parsedAfter) && parsedAfter >= 0 && parsedAfter <= 100,
+      `Alpha suffix must be an integer between 0 and 100: ${after}`,
+    );
+    alpha = parsedAfter / 100;
+  }
   return { name, alpha };
 }
