@@ -24,22 +24,14 @@ const Dialogue = ({ text }: { text: string; onContinue: () => void }) => {
     >
       {speechBubbleLoaded ? (
         <TypewriterHhhmark
-          source={[text, `**${text}**`, `*${text}*`, text].join(` `)}
+          source={text}
           className="text-lg leading-tight text-fg"
           delay={200}
           onAnimateEnd={() => {
             setTextAnimationDone(true);
           }}
         />
-      ) : // <TypewriterText
-      //   text={[text, text, text, text].join(` `)}
-      //   className="text-lg leading-tight text-fg"
-      //   delay={200}
-      //   onAnimateEnd={() => {
-      //     setTextAnimationDone(true);
-      //   }}
-      // />
-      null}
+      ) : null}
       <View
         className={`
           -mb-2 -mr-2 mt-1 flex-row items-center justify-end gap-1 transition-opacity duration-1000
@@ -109,12 +101,7 @@ const TypewriterWord = ({
   if (onAnimateEnd != null) {
     entering = entering.withCallback(onAnimateEnd);
   }
-  return (
-    <Reanimated.Text entering={entering}>
-      {index > 0 ? ` ` : ``}
-      {word}
-    </Reanimated.Text>
-  );
+  return <Reanimated.Text entering={entering}>{word}</Reanimated.Text>;
 };
 
 const LeafImage = () => null;
@@ -153,7 +140,7 @@ const NewWordSplash = ({ onNext: next }: { onNext: () => void }) => {
 };
 
 const screenClass = tv({
-  base: `h-[480px] w-[320px] bg-[red]`,
+  base: `h-[200px] w-[400px]`,
 });
 
 const AfterDelay = ({ ms, action }: { ms: number; action: () => void }) => {
@@ -172,16 +159,19 @@ const AfterDelay = ({ ms, action }: { ms: number; action: () => void }) => {
 const NewWordIntro = ({ onNext: next }: { onNext: () => void }) => {
   const learnedDependencies = [] as string[] | null;
   return (
-    <>
-      <View className="flex-row items-end gap-4">
+    <View className={screenClass({ class: `` })}>
+      <View className="mt-auto flex-row items-end gap-4">
         <Image
           source={require(`@/assets/illustrations/tutor.svg`)}
-          className="h-[94px] w-[80px]"
+          className="h-[94px] w-[80px] animate-fadein"
         />
 
-        <View className="max-w-[300px] pb-9">
+        <View className="flex-1 pb-9">
           {learnedDependencies == null || learnedDependencies.length === 0 ? (
-            <Dialogue onContinue={next} text="It’s time to learn a new word." />
+            <Dialogue
+              onContinue={next}
+              text="…you know **辶** means **walk or movement**, and **力** means **strength**… "
+            />
           ) : learnedDependencies.length === 1 ? (
             <Dialogue
               onContinue={next}
@@ -202,7 +192,7 @@ const NewWordIntro = ({ onNext: next }: { onNext: () => void }) => {
           )}
         </View>
       </View>
-    </>
+    </View>
   );
 };
 
@@ -232,7 +222,7 @@ export const TypewriterHhhmark = ({
                   <TypewriterWord
                     key={j}
                     index={i++}
-                    word={word}
+                    word={(j > 0 ? ` ` : ``) + word}
                     delay={delay}
                     onAnimateEnd={isLastSubNode ? onAnimateEnd : undefined}
                   />
@@ -267,7 +257,7 @@ export const TypewriterHhhmark = ({
                   <TypewriterWord
                     key={j}
                     index={i++}
-                    word={word}
+                    word={(j > 0 ? ` ` : ``) + word}
                     delay={delay}
                     onAnimateEnd={isLastSubNode ? onAnimateEnd : undefined}
                   />
@@ -285,7 +275,7 @@ export const TypewriterHhhmark = ({
                   <TypewriterWord
                     key={j}
                     index={i++}
-                    word={word}
+                    word={(j > 0 ? ` ` : ``) + word}
                     delay={delay}
                     onAnimateEnd={isLastSubNode ? onAnimateEnd : undefined}
                   />

@@ -111,10 +111,6 @@ module.exports = {
         [`www-col`]: `988px`,
       },
 
-      animation: {
-        hoscillate: `hoscillate 1s ease-in-out infinite`,
-      },
-
       keyframes: {
         hoscillate: {
           "0%,100%": {
@@ -126,6 +122,16 @@ module.exports = {
             "animation-timing-function": `ease-in-out`,
           },
         },
+
+        fadein: {
+          "0%": { opacity: `0` },
+          "100%": { opacity: `1` },
+        },
+      },
+
+      animation: {
+        hoscillate: `hoscillate 1s ease-in-out infinite`,
+        fadein: `fadein 0.25s ease-in forwards`,
       },
     },
   },
