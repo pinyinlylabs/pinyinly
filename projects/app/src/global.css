@@ -199,6 +199,8 @@
     --color-neutral: var(--color-neutral-dark);
     --color-stone: var(--color-stone-dark);
 
+    --color-cloud: var(--color-cloud-dark);
+
     --color-bg: var(--color-bg-dark);
     --color-bg-1: var(--color-bg-1-dark);
     --color-fg: var(--color-fg-dark);
@@ -234,18 +236,7 @@
     --color-neutral: var(--color-neutral-light);
     --color-stone: var(--color-stone-light);
 
-    --color-slate-1: var(--color-slate-light-1);
-    --color-slate-2: var(--color-slate-light-2);
-    --color-slate-3: var(--color-slate-light-3);
-    --color-slate-4: var(--color-slate-light-4);
-    --color-slate-5: var(--color-slate-light-5);
-    --color-slate-6: var(--color-slate-light-6);
-    --color-slate-7: var(--color-slate-light-7);
-    --color-slate-8: var(--color-slate-light-8);
-    --color-slate-9: var(--color-slate-light-9);
-    --color-slate-10: var(--color-slate-light-10);
-    --color-slate-11: var(--color-slate-light-11);
-    --color-slate-12: var(--color-slate-light-12);
+    --color-cloud: var(--color-cloud-light);
 
     --color-bg: var(--color-bg-light);
     --color-bg-1: var(--color-bg-1-light);
@@ -356,6 +347,9 @@ body {
   --color-stone-light: #57534d;
   --color-stone-dark: #a6a09b;
   /* </tailwind-colors> */
+
+  --color-cloud-light: #cdcdcd;
+  --color-cloud-dark: #d9d9d9;
 
   --color-fg-light: #12191d;
   --color-fg-dark: #d7d8d9;

@@ -2,6 +2,7 @@
 import { useQuizProgress } from "@/client/hooks/useQuizProgress";
 import { HanziText } from "@/client/ui/HanziText";
 import { IconImage } from "@/client/ui/IconImage";
+import { ImageCloud } from "@/client/ui/ImageCloud";
 import { NewSkillModal } from "@/client/ui/NewSkillModal";
 import { PinyinOptionButton } from "@/client/ui/PinyinOptionButton";
 import { QuizDeckHanziToPinyinQuestion } from "@/client/ui/QuizDeckHanziToPinyinQuestion";
@@ -63,6 +64,10 @@ function DesignSystemPage() {
         </Link>
       </View>
       <ScrollView style={{ flex: 1 }} ref={scrollViewRef}>
+        <Section title={ImageCloudExamples.name} scrollTo={scrollTo}>
+          <ImageCloudExamples />
+        </Section>
+
         <Section title={StoryletExamples.name} scrollTo={scrollTo}>
           <StoryletExamples />
         </Section>
@@ -1370,9 +1375,9 @@ function ToggleButtonExamples() {
 }
 
 function StoryletExamples() {
-  return (
-    <>
-      <NewWordDirector />
-    </>
-  );
+  return <NewWordDirector />;
+}
+
+function ImageCloudExamples() {
+  return <ImageCloud className="h-[320px] w-[415px]" />;
 }

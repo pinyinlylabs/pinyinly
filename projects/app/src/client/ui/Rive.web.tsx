@@ -1,15 +1,17 @@
 import type { ColorRGBA } from "@/util/color";
-import { parseCssColorOrThrow } from "@/util/color";
+import { parseCssColorOrThrow, parseRiveColorPropertyName } from "@/util/color";
 import type { IsExhaustedRest } from "@/util/types";
 import { invariant } from "@pinyinly/lib/invariant";
 import type { ViewModel } from "@rive-app/canvas";
 import type { ViewModelInstance } from "@rive-app/react-canvas";
 import { Fit, Layout, useRive } from "@rive-app/react-canvas";
+import { Asset } from "expo-asset";
 import { useLayoutEffect } from "react";
 import type { RiveFit, RiveProps } from "./riveTypes";
 
 export function Rive({
   artboardName,
+  assets,
   autoplay = true,
   fit,
   onRiveLoad,
@@ -27,6 +29,31 @@ export function Rive({
     autoBind: true,
     stateMachines: stateMachineName,
     layout: fit == null ? undefined : new Layout({ fit: fitMap[fit] }),
+    assetLoader(asset) {
+      const expoAsset = assets?.[asset.name];
+
+      invariant(
+        expoAsset != null,
+        `Rive file requested asset ${asset.name}, but it wasn't provided.`,
+      );
+
+      invariant(
+        typeof expoAsset !== `number`,
+        `Received wrong Expo asset format (number)`,
+      );
+
+      void fetch(Asset.fromModule(expoAsset).uri)
+        .then((res) => res.arrayBuffer())
+        .then((arr) => new Uint8Array(arr))
+        .then((image) => {
+          asset.decode(image);
+        })
+        .catch((error: unknown) => {
+          console.error(`Failed to decode image`, error);
+        });
+
+      return true;
+    },
   });
 
   useLayoutEffect(() => {
@@ -53,6 +80,7 @@ function applyColorToViewModel(
   viewModel: ViewModelInstance,
   colorName: string,
   color: ColorRGBA,
+  alphaFactor: number,
 ) {
   const colorVm = viewModel.color(colorName);
   if (colorVm != null) {
@@ -60,7 +88,7 @@ function applyColorToViewModel(
       color.red,
       color.green,
       color.blue,
-      Math.round(color.alpha * 255),
+      Math.round(color.alpha * alphaFactor * 255),
     );
   }
 }
@@ -86,11 +114,12 @@ function applyThemeFromDom(
   // the value from the DOM.
   for (const property of themeViewModel.properties) {
     if (property.type === PropertyType.Color) {
-      const cssPropertyName = `--color-${property.name}`;
+      const { name, alpha } = parseRiveColorPropertyName(property.name);
+      const cssPropertyName = `--color-${name}`;
       const cssPropertyValue = style.getPropertyValue(cssPropertyName);
       try {
         const color = parseCssColorOrThrow(cssPropertyValue);
-        applyColorToViewModel(themeViewModel, property.name, color);
+        applyColorToViewModel(themeViewModel, property.name, color, alpha);
       } catch (error) {
         console.error(
           `Failed to parse CSS color "${cssPropertyValue}" from "${cssPropertyName}" for Rive theme property "${property.name}"`,

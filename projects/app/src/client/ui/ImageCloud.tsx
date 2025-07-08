@@ -3,28 +3,27 @@ import type { ViewProps } from "react-native";
 import { View } from "react-native";
 import { Rive } from "./Rive";
 
-interface SpeechBubbleProps extends Pick<ViewProps, `className` | `style`> {
-  onLoad?: () => void;
+interface ImageCloudProps extends Pick<ViewProps, `className` | `style`> {
+  play?: boolean;
 }
 
-export const SpeechBubble = ({
+export const ImageCloud = ({
   className,
-  onLoad,
+  play = true,
   style,
   ...rest
-}: SpeechBubbleProps) => {
+}: ImageCloudProps) => {
   true satisfies IsExhaustedRest<typeof rest>;
 
   return (
     <View className={className} style={style}>
       <Rive
-        src={require(`@/assets/rive/speech-bubble.riv`)}
+        src={require(`@/assets/rive/image-cloud.riv`)}
         artboardName="main"
+        assets={{ image: require(`@/assets/illustrations/edge.jpg`) }}
         autoplay
-        onRiveLoad={() => {
-          onLoad?.();
-        }}
         fit="layout"
+        stateMachineName="main"
       />
     </View>
   );

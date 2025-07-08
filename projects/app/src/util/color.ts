@@ -142,3 +142,37 @@ export function parseScalar(
   );
   return number;
 }
+
+/**
+ * Allow a Tailwind CSS color alpha inspired modifier convention e.g. `fg@50`
+ * (like Tailwind's `fg/50`) to allow specifying the alpha of the color.
+ *
+ * Currently Rive doesn't support data binding alpha separately from RGB, so we
+ * must use this hack.
+ *
+ * Returns the property name and the alpha value, defaults to 1 (100%).
+ */
+export function parseRiveColorPropertyName(propertyName: string): {
+  name: string;
+  alpha: number;
+} {
+  // Can't use slashes (/) in property names because they're reserved as as the
+  // "path delimiter" in Rive.
+  invariant(
+    !propertyName.includes(`/`),
+    `Rive property names must not include '/' (found in "${propertyName}")`,
+  );
+
+  const [name, after] = propertyName.split(`@`);
+  invariant(name != null);
+  let alpha = 1; // Default to 100% opacity
+  if (after != null) {
+    const parsedAfter = Number.parseInt(after);
+    invariant(
+      Number.isInteger(parsedAfter) && parsedAfter >= 0 && parsedAfter <= 100,
+      `Alpha suffix must be an integer between 0 and 100: ${after}`,
+    );
+    alpha = parsedAfter / 100;
+  }
+  return { name, alpha };
+}

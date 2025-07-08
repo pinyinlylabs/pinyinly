@@ -27,6 +27,11 @@ export type RiveFit =
 
 export interface RiveProps extends CommonProps {
   artboardName?: string;
+  /**
+   * Mapping of Rive asset name to Expo asset (via `require(…)`), for Rive's
+   * "referenced" assets.
+   */
+  assets?: Record<string, RnRequireSource>;
   fit?: RiveFit;
   onRiveLoad?: (rive: RiveInstance) => void;
   src: RnRequireSource;

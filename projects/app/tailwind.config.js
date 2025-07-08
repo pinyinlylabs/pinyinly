@@ -64,6 +64,7 @@ module.exports = {
         bold: `rgb(from var(--color-caption-1) r g b / calc(alpha * <alpha-value>))`,
         ref: `rgb(from var(--color-caption-1) r g b / calc(alpha * <alpha-value>))`,
       },
+      cloud: `rgb(from var(--color-cloud) r g b / calc(alpha * <alpha-value>))`,
 
       red: `rgb(from var(--color-red) r g b / calc(alpha * <alpha-value>))`,
       orange: `rgb(from var(--color-orange) r g b / calc(alpha * <alpha-value>))`,
