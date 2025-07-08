@@ -1,12 +1,8 @@
+import type { Asset } from "expo-asset";
 import type { AudioSource } from "expo-audio";
 
 declare global {
-  type RnRequireSource =
-    // Web
-    | string
-    | { uri: string; width: number; height: number }
-    // Native
-    | number;
+  type RnRequireSource = Parameters<(typeof Asset)[`fromModule`]>[0];
 
   interface NodeRequire {
     // Support for asset files. Anything that starts with a dot and ends with a

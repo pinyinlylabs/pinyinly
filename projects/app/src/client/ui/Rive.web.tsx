@@ -5,6 +5,7 @@ import { invariant } from "@pinyinly/lib/invariant";
 import type { ViewModel } from "@rive-app/canvas";
 import type { ViewModelInstance } from "@rive-app/react-canvas";
 import { Fit, Layout, useRive } from "@rive-app/react-canvas";
+import { Asset } from "expo-asset";
 import { useLayoutEffect } from "react";
 import type { RiveFit, RiveProps } from "./riveTypes";
 
@@ -41,10 +42,7 @@ export function Rive({
         `Received wrong Expo asset format (number)`,
       );
 
-      const exportAssetUri =
-        typeof expoAsset === `string` ? expoAsset : expoAsset.uri;
-
-      void fetch(exportAssetUri)
+      void fetch(Asset.fromModule(expoAsset).uri)
         .then((res) => res.arrayBuffer())
         .then((arr) => new Uint8Array(arr))
         .then((image) => {
