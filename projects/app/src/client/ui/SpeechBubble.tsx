@@ -18,7 +18,7 @@ export const SpeechBubble = ({
   return (
     <View className={className} style={style}>
       <Rive
-        src={require(`@/assets/rive/speechBubble.riv`)}
+        src={require(`@/assets/rive/speech-bubble.riv`)}
         artboardName="main"
         autoplay
         onRiveLoad={() => {
