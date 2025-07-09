@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 import { useQuizProgress } from "@/client/hooks/useQuizProgress";
 import { HanziText } from "@/client/ui/HanziText";
+import { Hhhmark } from "@/client/ui/Hhhmark";
 import { IconImage } from "@/client/ui/IconImage";
 import { ImageCloud } from "@/client/ui/ImageCloud";
 import { NewSkillModal } from "@/client/ui/NewSkillModal";
@@ -65,6 +66,14 @@ function DesignSystemPage() {
         </Link>
       </View>
       <ScrollView style={{ flex: 1 }} ref={scrollViewRef}>
+        <Section title="Typography" scrollTo={scrollTo}>
+          <TypographyExamples />
+        </Section>
+
+        <Section title={HhhmarkExamples.name} scrollTo={scrollTo}>
+          <HhhmarkExamples />
+        </Section>
+
         <Section title={NewSproutExamples.name} scrollTo={scrollTo}>
           <NewSproutExamples />
         </Section>
@@ -140,10 +149,6 @@ function DesignSystemPage() {
           <RectButtonExamples />
         </Section>
 
-        <Section title="Typography" scrollTo={scrollTo}>
-          <TypographyExamples />
-        </Section>
-
         <Section title="Colors" scrollTo={scrollTo}>
           <ColorPalette />
         </Section>
@@ -156,14 +161,14 @@ function DesignSystemPage() {
         <View className="flex-1 flex-row">
           <View
             className={`
-              hhh-color-schema-light
+              hhh-color-schema-light theme-default
 
               ${examplesStackClassName}
             `}
           />
           <View
             className={`
-              hhh-color-scheme-dark
+              hhh-color-scheme-dark theme-default
 
               ${examplesStackClassName}
             `}
@@ -223,41 +228,43 @@ const HanziTextExamples = () => (
 );
 
 const TypographyExamples = () => {
+  const themes = `theme-default theme-success theme-danger theme-accent`.split(
+    ` `,
+  );
   return (
     <View className="flex-1 gap-3">
       {[
-        `hhh-body-2xl`,
-        `hhh-body-2xl-ref`,
-        `hhh-body-2xl-bold`,
-        `hhh-body-2xl-italic`,
         `hhh-body-title`,
         `hhh-body-heading`,
+        `hhh-body-2xl`,
         `hhh-body`,
-        `hhh-body-ref`,
-        `hhh-body-bold`,
-        `hhh-body-italic`,
         `hhh-body-caption`,
-        `hhh-body-caption-ref`,
-        `hhh-body-caption-bold`,
-        `hhh-body-caption-italic`,
         `hhh-body-dt`,
         `hhh-body-input`,
-      ].map((family) => (
-        <View key={family} className="flex-row items-center gap-2">
-          <Text className="hhh-body-dt w-[200px] shrink-0 text-right">
-            {family}
-          </Text>
-          <Text className="text-fg">
-            <Text
-              className={`
-                ${family}
+      ].flatMap((family) => (
+        <View key={family}>
+          <Text className="hhh-body-dt w-[128px] text-right">{family}</Text>
+          {themes.map((theme) => (
+            <View key={theme} className="flex-row items-center gap-2">
+              <View className="w-[128px] shrink-0 items-end">
+                <Text className="hhh-body-dt opacity-50">{theme}</Text>
+              </View>
+              <Text
+                className={`
+                  ${family}
+                  ${theme}
 
-                truncate
-              `}
-            >
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit
-            </Text>
-          </Text>
+                  truncate
+                `}
+              >
+                {/* It's important to make sure that utilities like `font-bold` and `font-italic` combine correctly with the `hhh-` text component styles. */}
+                Lorem ipsum <Text className="hhh-bold">hhh-bold</Text> and
+                {` `}
+                <Text className="hhh-italic">hhh-italic</Text> and{` `}
+                <Text className="hhh-ref">hhh-ref 好 good</Text>.
+              </Text>
+            </View>
+          ))}
         </View>
       ))}
     </View>
@@ -296,7 +303,7 @@ const Section = ({
       <View className="flex-row" ref={ref}>
         <View
           className={`
-            hhh-color-schema-light flex-1 bg-bg/90 p-2
+            hhh-color-schema-light theme-default flex-1 bg-bg/90 p-2
 
             hover:bg-bg
           `}
@@ -316,7 +323,7 @@ const Section = ({
       <View className="flex-row">
         <View
           className={`
-            hhh-color-schema-light
+            hhh-color-schema-light theme-default
 
             ${examplesStackClassName}
           `}
@@ -325,7 +332,7 @@ const Section = ({
         </View>
         <View
           className={`
-            hhh-color-scheme-dark
+            hhh-color-scheme-dark theme-default
 
             ${examplesStackClassName}
           `}
@@ -1195,6 +1202,9 @@ function ColorPalette() {
     `bg-zinc`,
     `bg-neutral`,
     `bg-stone`,
+    `bg-cloud`,
+    `bg-ink`,
+    `bg-ink-1`,
     `bg-fg`,
     `bg-bg-1`,
   ];
@@ -1389,4 +1399,34 @@ function ImageCloudExamples() {
 
 function NewSproutExamples() {
   return <NewSprout className="h-[320px] w-[415px]" />;
+}
+
+function HhhmarkExamples() {
+  return (
+    <View className="gap-2">
+      {(
+        [
+          `hhh-body-title`,
+          `hhh-body-2xl`,
+          `hhh-body`,
+          `hhh-body-caption`,
+        ] as const
+      ).map((textClass) => (
+        <View className="flex-row items-center gap-2" key={textClass}>
+          <Text className="hhh-body-caption w-[128px] text-right">
+            {textClass}
+          </Text>
+          <Text
+            className={`
+              w-[250px]
+
+              ${textClass}
+            `}
+          >
+            <Hhhmark source="Some **bold text** and *italic text* and {好:good} and another line of plain text." />
+          </Text>
+        </View>
+      ))}
+    </View>
+  );
 }

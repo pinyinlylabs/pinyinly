@@ -15,15 +15,8 @@ import {
 } from "@/data/skills";
 import { Text } from "react-native";
 import { HanziWordRefText } from "./HanziWordRefText";
-import type { HhhmarkContext } from "./Hhhmark";
 
-export const SkillRefText = ({
-  skill,
-  context,
-}: {
-  skill: Skill;
-  context: HhhmarkContext;
-}) => {
+export const SkillRefText = ({ skill }: { skill: Skill }) => {
   switch (skillKindFromSkill(skill)) {
     case SkillKind.PinyinFinalAssociation: {
       skill = skill as PinyinFinalAssociationSkill;
@@ -45,12 +38,7 @@ export const SkillRefText = ({
       skill = skill as HanziWordSkill;
       const hanziWord = hanziWordFromSkill(skill);
       return (
-        <HanziWordRefText
-          hanziWord={hanziWord}
-          showGloss={false}
-          showPinyin
-          context={context}
-        />
+        <HanziWordRefText hanziWord={hanziWord} showGloss={false} showPinyin />
       );
     }
     case SkillKind.HanziWordToPinyinInitial: {
@@ -62,7 +50,6 @@ export const SkillRefText = ({
             hanziWord={hanziWord}
             showGloss={false}
             showPinyin
-            context={context}
           />
           <Text className="hhh-body-caption"> (initial)</Text>
         </>
@@ -77,7 +64,6 @@ export const SkillRefText = ({
             hanziWord={hanziWord}
             showGloss={false}
             showPinyin
-            context={context}
           />
           <Text className="hhh-body-caption"> (final)</Text>
         </>
@@ -92,7 +78,6 @@ export const SkillRefText = ({
             hanziWord={hanziWord}
             showGloss={false}
             showPinyin
-            context={context}
           />
           <Text className="hhh-body-caption"> (tone)</Text>
         </>
@@ -104,7 +89,7 @@ export const SkillRefText = ({
     case SkillKind.HanziWordToGloss: {
       skill = skill as HanziWordSkill;
       const hanziWord = hanziWordFromSkill(skill);
-      return <HanziWordRefText hanziWord={hanziWord} context={context} />;
+      return <HanziWordRefText hanziWord={hanziWord} />;
     }
   }
 };

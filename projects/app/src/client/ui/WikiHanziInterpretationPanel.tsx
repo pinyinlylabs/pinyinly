@@ -26,10 +26,7 @@ export const WikiHanziInterpretationPanel = ({
               <Text className="hhh-body">
                 {component.title ??
                   (component.hanziWord == null ? null : (
-                    <HanziWordRefText
-                      hanziWord={component.hanziWord}
-                      context="body"
-                    />
+                    <HanziWordRefText hanziWord={component.hanziWord} />
                   )) ??
                   `???`}
               </Text>
@@ -45,7 +42,7 @@ export const WikiHanziInterpretationPanel = ({
                 <Fragment key={i}>
                   <View className="h-px w-full bg-bg-1" />
                   <Text className="hhh-body">
-                    <Hhhmark source={meaning.glossHint} context="body" />
+                    <Hhhmark source={meaning.glossHint} />
                   </Text>
                 </Fragment>
               ),
@@ -55,7 +52,7 @@ export const WikiHanziInterpretationPanel = ({
           <>
             <View className="h-px w-full bg-bg-1" />
             <Text className="hhh-body">
-              <Hhhmark source={wikiEntry.data.interpretation} context="body" />
+              <Hhhmark source={wikiEntry.data.interpretation} />
             </Text>
           </>
         )}

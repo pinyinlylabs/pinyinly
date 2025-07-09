@@ -25,7 +25,7 @@ const Dialogue = ({ text }: { text: string; onContinue: () => void }) => {
       {speechBubbleLoaded ? (
         <TypewriterHhhmark
           source={text}
-          className="text-lg leading-tight text-fg"
+          className="hhh-body"
           delay={200}
           onAnimateEnd={() => {
             setTextAnimationDone(true);
@@ -215,7 +215,7 @@ export const TypewriterHhhmark = ({
       switch (node.type) {
         case `text`: {
           return (
-            <Text key={`text-${index}`} className="hhh-hhhmark-text">
+            <Text key={index}>
               {node.text.split(` `).map((word, j, arr) => {
                 const isLastSubNode = isLastNode && j === arr.length - 1;
                 return (
@@ -234,12 +234,12 @@ export const TypewriterHhhmark = ({
         case `hanziWord`: {
           return (
             <TypewriterWord
+              key={index}
               index={i++}
               delay={delay}
               word={
                 <HanziWordRefText
                   key={`hanziWord-${index}`}
-                  context="body"
                   hanziWord={node.hanziWord}
                   showGloss={node.showGloss}
                 />
@@ -250,7 +250,7 @@ export const TypewriterHhhmark = ({
         }
         case `bold`: {
           return (
-            <Text key={`bold-${index}`} className="hhh-hhhmark-bold">
+            <Text key={index} className="hhh-bold">
               {node.text.split(` `).map((word, j, arr) => {
                 const isLastSubNode = isLastNode && j === arr.length - 1;
                 return (
@@ -268,7 +268,7 @@ export const TypewriterHhhmark = ({
         }
         case `italic`: {
           return (
-            <Text key={`italic-${index}`} className="hhh-hhhmark-italic">
+            <Text key={index} className="hhh-italic">
               {node.text.split(` `).map((word, j, arr) => {
                 const isLastSubNode = isLastNode && j === arr.length - 1;
                 return (
@@ -288,15 +288,5 @@ export const TypewriterHhhmark = ({
     });
   }, [delay, onAnimateEnd, source]);
 
-  return (
-    <Text
-      className={`
-        hhh-hhhmark
-
-        ${className ?? ``}
-      `}
-    >
-      {rendered}
-    </Text>
-  );
+  return <Text className={className}>{rendered}</Text>;
 };

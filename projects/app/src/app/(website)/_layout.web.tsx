@@ -132,7 +132,7 @@ export default function WebsiteLayout() {
                       className={footerLinkClass()}
                       href="https://github.com/pinyinlylabs/pinyinly/"
                     >
-                      Github
+                      GitHub
                     </Link>
                   </div>
                   <div>

@@ -78,10 +78,7 @@ export default function MnemonicIdPage() {
           <Text className="hhh-body-title">Pronunciation</Text>
 
           <Text className="hhh-body">
-            <Hhhmark
-              source={defaultPinyinSoundInstructions[id] ?? ``}
-              context={`body`}
-            />
+            <Hhhmark source={defaultPinyinSoundInstructions[id] ?? ``} />
           </Text>
         </View>
 

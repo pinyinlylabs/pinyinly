@@ -146,10 +146,11 @@ export function QuizDeckOneCorrectPairQuestion({
                       Your answer:
                     </Text>
                     <View className="flex-1 flex-row flex-wrap items-center">
-                      <Hhhmark
-                        source={`${choiceToHhhmark(selectedAChoice)} + ${choiceToHhhmark(selectedBChoice)}`}
-                        context="caption"
-                      />
+                      <Text className="hhh-body-caption">
+                        <Hhhmark
+                          source={`${choiceToHhhmark(selectedAChoice)} + ${choiceToHhhmark(selectedBChoice)}`}
+                        />
+                      </Text>
                     </View>
                   </View>
                 ) : null}
@@ -360,10 +361,14 @@ const HanziWordToGlossSkillAnswerText = ({
 
   return (
     <>
-      <Hhhmark source={`{${hanziWord}}`} context="body-2xl" />
+      <Text className="hhh-body-2xl">
+        <Hhhmark source={`{${hanziWord}}`} />
+      </Text>
 
       {includeHint && meaningQuery.data?.glossHint != null ? (
-        <Hhhmark source={meaningQuery.data.glossHint} context="caption" />
+        <Text className="hhh-body-caption">
+          <Hhhmark source={meaningQuery.data.glossHint} />
+        </Text>
       ) : null}
     </>
   );
@@ -377,7 +382,9 @@ const HanziWordToPinyinSkillAnswerText = ({
   const hanziWord = hanziWordFromSkill(skill);
 
   return (
-    <HanziWordRefText hanziWord={hanziWord} showPinyin context="body-2xl" />
+    <Text className="hhh-body-2xl">
+      <HanziWordRefText hanziWord={hanziWord} showPinyin />
+    </Text>
   );
 };
 

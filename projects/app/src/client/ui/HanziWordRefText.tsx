@@ -8,33 +8,18 @@ import {
 } from "@/dictionary/dictionary";
 import { useState } from "react";
 import { Text } from "react-native";
-import { tv } from "tailwind-variants";
-import type { HhhmarkContext } from "./Hhhmark";
 import { WikiHanziWordModal } from "./WikiHanziWordModal";
-
-export const hhhTextRef = tv({
-  variants: {
-    context: {
-      [`body-2xl`]: `hhh-body-2xl-ref`,
-      [`body-title`]: `hhh-body-title-ref`,
-      [`body`]: `hhh-body-ref`,
-      [`caption`]: `hhh-body-caption-ref`,
-    },
-  },
-});
 
 export const HanziWordRefText = ({
   hanziWord,
   showHanzi = true,
   showGloss = true,
   showPinyin = false,
-  context,
 }: {
   hanziWord: HanziWord;
   showHanzi?: boolean;
   showGloss?: boolean;
   showPinyin?: boolean;
-  context: HhhmarkContext;
 }) => {
   const meaning = useHanziWordMeaning(hanziWord);
   const [showWiki, setShowWiki] = useState(false);
@@ -69,7 +54,7 @@ export const HanziWordRefText = ({
   return (
     <>
       <Text
-        className={hhhTextRef({ context })}
+        className="hhh-ref"
         onPress={() => {
           setShowWiki(true);
         }}
