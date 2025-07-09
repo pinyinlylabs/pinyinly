@@ -1,4 +1,4 @@
-name: Clear all Github actions caches
+name: Clear all GitHub actions caches
 on:
   workflow_dispatch:
 

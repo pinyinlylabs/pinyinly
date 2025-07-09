@@ -37,7 +37,7 @@ test(`no missing EXPO_PUBLIC_ environment variables`, async () => {
 
   const expectedEnvVars = new Set(expoPublicEnvVars);
 
-  // For each Github workflow, find each `env` key for a step that contains at
+  // For each GitHub workflow, find each `env` key for a step that contains at
   // least one `EXPO_PUBLIC_` environment variable and check that it includes
   // all of the ones defined in `.env.local.sample`.
   const workflowFileNames = await fs.readdir(
