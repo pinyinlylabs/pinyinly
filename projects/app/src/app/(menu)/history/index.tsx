@@ -36,7 +36,7 @@ export default function HistoryPage() {
                         ? `🟢`
                         : value.rating}
                 {` `}
-                <SkillRefText skill={skill} context="body" />:{` `}
+                <SkillRefText skill={skill} />:{` `}
                 {` `}
                 {formatRelativeTime(createdAt)}
               </Text>

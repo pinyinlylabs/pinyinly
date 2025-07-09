@@ -110,7 +110,9 @@ export default function HistoryPage() {
 
             {data2Query.data?.items.slice(0, 100).map((skill, i) => (
               <View key={i} className="items-center">
-                <SkillRefText skill={skill} context="body" />
+                <Text className="hhh-body">
+                  <SkillRefText skill={skill} />
+                </Text>
                 <Text className="hhh-body-caption">
                   {skillKindToShorthand(skillKindFromSkill(skill))}
                 </Text>
@@ -149,7 +151,7 @@ export default function HistoryPage() {
                               ? `🟢`
                               : value.rating}
                       {` `}
-                      <SkillRefText skill={skill} context="body" />:{` `}
+                      <SkillRefText skill={skill} />:{` `}
                       {skillStatesQuery.data
                         ?.get(skill)
                         ?.srs.stability.toFixed(1)}

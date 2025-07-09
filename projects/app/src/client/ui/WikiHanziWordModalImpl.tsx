@@ -118,7 +118,6 @@ export function WikiHanziWordModalImpl({
                   <Fragment key={otherHanziWord}>
                     {i > 0 ? `; ` : ` `}
                     <HanziWordRefText
-                      context="caption"
                       showHanzi={false}
                       hanziWord={otherHanziWord}
                     />
@@ -127,10 +126,9 @@ export function WikiHanziWordModalImpl({
               </Text>
             )}
           </Text>
-          <Hhhmark
-            source={hanziWordSkillData.data.definition}
-            context="caption"
-          />
+          <Text className="hhh-body-caption">
+            <Hhhmark source={hanziWordSkillData.data.definition} />
+          </Text>
         </View>
 
         {wikiEntry.data?.components == null ? null : (
@@ -145,18 +143,14 @@ export function WikiHanziWordModalImpl({
                     <Text className="hhh-body">
                       {component.title ??
                         (component.hanziWord == null ? null : (
-                          <HanziWordRefText
-                            hanziWord={component.hanziWord}
-                            context="body"
-                          />
+                          <HanziWordRefText hanziWord={component.hanziWord} />
                         )) ??
                         `???`}
                     </Text>
                     {component.description == null ? null : (
-                      <Hhhmark
-                        source={component.description}
-                        context="caption"
-                      />
+                      <Text className="hhh-body-caption">
+                        <Hhhmark source={component.description} />
+                      </Text>
                     )}
                   </View>
                 );
@@ -165,20 +159,18 @@ export function WikiHanziWordModalImpl({
               {hanziWordSkillData.data.glossHint == null ? null : (
                 <>
                   <View className="h-px w-full bg-bg-1" />
-                  <Hhhmark
-                    source={hanziWordSkillData.data.glossHint}
-                    context="body"
-                  />
+                  <Text className="hhh-body">
+                    <Hhhmark source={hanziWordSkillData.data.glossHint} />
+                  </Text>
                 </>
               )}
 
               {wikiEntry.data.interpretation == null ? null : (
                 <>
                   <View className="h-px w-full bg-bg-1" />
-                  <Hhhmark
-                    source={wikiEntry.data.interpretation}
-                    context="body"
-                  />
+                  <Text className="hhh-body">
+                    <Hhhmark source={wikiEntry.data.interpretation} />
+                  </Text>
                 </>
               )}
             </View>

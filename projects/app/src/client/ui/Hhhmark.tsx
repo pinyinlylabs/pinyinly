@@ -1,69 +1,22 @@
 import { parseHhhmark } from "@/data/hhhmark";
 import { useMemo } from "react";
 import { Text } from "react-native";
-import { tv } from "tailwind-variants";
 import { HanziWordRefText } from "./HanziWordRefText";
 
-export type HhhmarkContext = `body-2xl` | `body-title` | `body` | `caption`;
-
-export const hhhText = tv({
-  variants: {
-    context: {
-      [`body-title`]: `hhh-body-title`,
-      [`body-2xl`]: `hhh-body-2xl`,
-      [`body`]: `hhh-body`,
-      [`caption`]: `hhh-body-caption`,
-    },
-  },
-});
-
-export const hhhTextBold = tv({
-  variants: {
-    context: {
-      [`body-2xl`]: `hhh-body-2xl-bold`,
-      [`body-title`]: `hhh-body-title-bold`,
-      [`body`]: `hhh-body-bold`,
-      [`caption`]: `hhh-body-caption-bold`,
-    },
-  },
-});
-
-export const hhhTextItalic = tv({
-  variants: {
-    context: {
-      [`body-2xl`]: `hhh-body-2xl-italic`,
-      [`body-title`]: `hhh-body-title-italic`,
-      [`body`]: `hhh-body-italic`,
-      [`caption`]: `hhh-body-caption-italic`,
-    },
-  },
-});
-
-export const Hhhmark = ({
-  source,
-  context,
-}: {
-  source: string;
-  context: HhhmarkContext;
-}) => {
+export const Hhhmark = ({ source }: { source: string }) => {
   const rendered = useMemo(() => {
     const parsed = parseHhhmark(source);
     return (
-      <Text className="hhh-hhhmark">
+      <Text className="tab-size-2 whitespace-pre-wrap">
         {parsed.map((node, index) => {
           switch (node.type) {
             case `text`: {
-              return (
-                <Text key={`text-${index}`} className={hhhText({ context })}>
-                  {node.text}
-                </Text>
-              );
+              return <Text key={index}>{node.text}</Text>;
             }
             case `hanziWord`: {
               return (
                 <HanziWordRefText
-                  key={`hanziWord-${index}`}
-                  context={context}
+                  key={index}
                   hanziWord={node.hanziWord}
                   showGloss={node.showGloss}
                 />
@@ -71,20 +24,14 @@ export const Hhhmark = ({
             }
             case `bold`: {
               return (
-                <Text
-                  key={`bold-${index}`}
-                  className={hhhTextBold({ context })}
-                >
+                <Text key={index} className="hhh-bold">
                   {node.text}
                 </Text>
               );
             }
             case `italic`: {
               return (
-                <Text
-                  key={`italic-${index}`}
-                  className={hhhTextItalic({ context })}
-                >
+                <Text key={index} className="hhh-italic">
                   {node.text}
                 </Text>
               );
@@ -93,7 +40,7 @@ export const Hhhmark = ({
         })}
       </Text>
     );
-  }, [context, source]);
+  }, [source]);
 
   return rendered;
 };
