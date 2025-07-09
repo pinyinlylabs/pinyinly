@@ -4,6 +4,7 @@ import { HanziText } from "@/client/ui/HanziText";
 import { IconImage } from "@/client/ui/IconImage";
 import { ImageCloud } from "@/client/ui/ImageCloud";
 import { NewSkillModal } from "@/client/ui/NewSkillModal";
+import { NewSprout } from "@/client/ui/NewSprout";
 import { PinyinOptionButton } from "@/client/ui/PinyinOptionButton";
 import { QuizDeckHanziToPinyinQuestion } from "@/client/ui/QuizDeckHanziToPinyinQuestion";
 import { QuizFlagText } from "@/client/ui/QuizFlagText";
@@ -64,6 +65,10 @@ function DesignSystemPage() {
         </Link>
       </View>
       <ScrollView style={{ flex: 1 }} ref={scrollViewRef}>
+        <Section title={NewSproutExamples.name} scrollTo={scrollTo}>
+          <NewSproutExamples />
+        </Section>
+
         <Section title={ImageCloudExamples.name} scrollTo={scrollTo}>
           <ImageCloudExamples />
         </Section>
@@ -1380,4 +1385,8 @@ function StoryletExamples() {
 
 function ImageCloudExamples() {
   return <ImageCloud className="h-[320px] w-[415px]" />;
+}
+
+function NewSproutExamples() {
+  return <NewSprout className="h-[320px] w-[415px]" />;
 }
