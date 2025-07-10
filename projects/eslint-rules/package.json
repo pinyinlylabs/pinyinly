@@ -11,5 +11,9 @@
   "dependencies": {
     "eslint": "^9.13.0"
   },
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "@typescript-eslint/parser": "^8.36.0",
+    "typescript": "patch:typescript@npm%3A5.8.2#~/.yarn/patches/typescript-npm-5.8.2-b95d637f6a.patch"
+  }
 }

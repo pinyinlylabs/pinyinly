@@ -300,7 +300,7 @@ export default tseslint.config(
           },
         },
       ],
-      "@pinyinly/require-glob": `error`,
+      "@pinyinly/nameof": `error`,
       "@pinyinly/no-restricted-css-classes": [
         `error`,
         {
@@ -310,6 +310,7 @@ export default tseslint.config(
           ],
         },
       ],
+      "@pinyinly/require-glob": `error`,
 
       //
       // tailwindcss

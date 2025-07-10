@@ -6,6 +6,7 @@ import { IconImage } from "@/client/ui/IconImage";
 import { ImageCloud } from "@/client/ui/ImageCloud";
 import { NewSkillModal } from "@/client/ui/NewSkillModal";
 import { NewSprout } from "@/client/ui/NewSprout";
+import { NewWordTutorial } from "@/client/ui/NewWordTutorial";
 import { PinyinOptionButton } from "@/client/ui/PinyinOptionButton";
 import { QuizDeckHanziToPinyinQuestion } from "@/client/ui/QuizDeckHanziToPinyinQuestion";
 import { QuizFlagText } from "@/client/ui/QuizFlagText";
@@ -66,78 +67,147 @@ function DesignSystemPage() {
         </Link>
       </View>
       <ScrollView style={{ flex: 1 }} ref={scrollViewRef}>
-        <Section title="Typography" scrollTo={scrollTo}>
+        <Section
+          title={`NewWordTutorial` satisfies NameOf<typeof NewWordTutorial>}
+          scrollTo={scrollTo}
+        >
+          <NewWordTutorialExamples />
+        </Section>
+
+        <Section title={`Typography`} scrollTo={scrollTo}>
           <TypographyExamples />
         </Section>
 
-        <Section title={HhhmarkExamples.name} scrollTo={scrollTo}>
+        <Section
+          title={`Hhhmark` satisfies NameOf<typeof Hhhmark>}
+          scrollTo={scrollTo}
+        >
           <HhhmarkExamples />
         </Section>
 
-        <Section title={NewSproutExamples.name} scrollTo={scrollTo}>
+        <Section
+          title={`NewSprout` satisfies NameOf<typeof NewSprout>}
+          scrollTo={scrollTo}
+        >
           <NewSproutExamples />
         </Section>
 
-        <Section title={ImageCloudExamples.name} scrollTo={scrollTo}>
+        <Section
+          title={`ImageCloud` satisfies NameOf<typeof ImageCloud>}
+          scrollTo={scrollTo}
+        >
           <ImageCloudExamples />
         </Section>
 
-        <Section title={StoryletExamples.name} scrollTo={scrollTo}>
-          <StoryletExamples />
+        <Section
+          title={`NewWordDirector` satisfies NameOf<typeof NewWordDirector>}
+          scrollTo={scrollTo}
+        >
+          <NewWordDirectorExamples />
         </Section>
 
-        <Section title={ToggleButtonExamples.name} scrollTo={scrollTo}>
+        <Section
+          title={`ToggleButton` satisfies NameOf<typeof ToggleButton>}
+          scrollTo={scrollTo}
+        >
           <ToggleButtonExamples />
         </Section>
 
-        <Section title={WikiHanziWordModalExamples.name} scrollTo={scrollTo}>
+        <Section
+          title={
+            `WikiHanziWordModal` satisfies NameOf<typeof WikiHanziWordModal>
+          }
+          scrollTo={scrollTo}
+        >
           <WikiHanziWordModalExamples />
         </Section>
 
-        <Section title={SkillTileExamples.name} scrollTo={scrollTo}>
+        <Section
+          title={`SkillTile` satisfies NameOf<typeof SkillTile>}
+          scrollTo={scrollTo}
+        >
           <SkillTileExamples />
         </Section>
 
-        <Section title={IconsExample.name} scrollTo={scrollTo}>
+        <Section
+          title={`IconsExample` satisfies NameOf<typeof IconsExample>}
+          scrollTo={scrollTo}
+        >
           <IconsExample />
         </Section>
 
-        <Section title={QuizFlagTextExample.name} scrollTo={scrollTo}>
+        <Section
+          title={`QuizFlagText` satisfies NameOf<typeof QuizFlagText>}
+          scrollTo={scrollTo}
+        >
           <QuizFlagTextExample />
         </Section>
 
-        <Section title={ShootingStarsExample.name} scrollTo={scrollTo}>
+        <Section
+          title={`ShootingStars` satisfies NameOf<typeof ShootingStars>}
+          scrollTo={scrollTo}
+        >
           <ShootingStarsExample />
         </Section>
 
-        <Section title={IconImageExample.name} scrollTo={scrollTo}>
+        <Section
+          title={`IconImage` satisfies NameOf<typeof IconImage>}
+          scrollTo={scrollTo}
+        >
           <IconImageExample />
         </Section>
 
         <Section
-          title={QuizDeckHanziToPinyinQuestionExample.name}
+          title={
+            `QuizDeckHanziToPinyinQuestion` satisfies NameOf<
+              typeof QuizDeckHanziToPinyinQuestion
+            >
+          }
           scrollTo={scrollTo}
         >
           <QuizDeckHanziToPinyinQuestionExample />
         </Section>
 
-        <Section title={PinyinOptionButtonExample.name} scrollTo={scrollTo}>
+        <Section
+          title={
+            `PinyinOptionButtonExample` satisfies NameOf<
+              typeof PinyinOptionButtonExample
+            >
+          }
+          scrollTo={scrollTo}
+        >
           <PinyinOptionButtonExample />
         </Section>
 
-        <Section title={TextInputSingleExample.name} scrollTo={scrollTo}>
+        <Section
+          title={
+            `TextInputSingleExample` satisfies NameOf<
+              typeof TextInputSingleExample
+            >
+          }
+          scrollTo={scrollTo}
+        >
           <TextInputSingleExample />
         </Section>
 
-        <Section title={QuizQueueButton.name} scrollTo={scrollTo}>
+        <Section
+          title={`QuizQueueButton` satisfies NameOf<typeof QuizQueueButton>}
+          scrollTo={scrollTo}
+        >
           <QuizQueueButtonExample />
         </Section>
 
-        <Section title={QuizProgressBar.name} scrollTo={scrollTo}>
+        <Section
+          title={`QuizProgressBar` satisfies NameOf<typeof QuizProgressBar>}
+          scrollTo={scrollTo}
+        >
           <QuizProgressBarExample />
         </Section>
 
-        <Section title={HanziText.name} scrollTo={scrollTo}>
+        <Section
+          title={`HanziText` satisfies NameOf<typeof HanziText>}
+          scrollTo={scrollTo}
+        >
           <HanziTextExamples />
         </Section>
 
@@ -153,7 +223,14 @@ function DesignSystemPage() {
           <ColorPalette />
         </Section>
 
-        <Section title={NewSkillModalExamples.name} scrollTo={scrollTo}>
+        <Section
+          title={
+            `NewSkillModalExamples` satisfies NameOf<
+              typeof NewSkillModalExamples
+            >
+          }
+          scrollTo={scrollTo}
+        >
           <NewSkillModalExamples />
         </Section>
 
@@ -1392,7 +1469,7 @@ function ToggleButtonExamples() {
   );
 }
 
-function StoryletExamples() {
+function NewWordDirectorExamples() {
   return <NewWordDirector />;
 }
 
@@ -1430,4 +1507,8 @@ function HhhmarkExamples() {
       ))}
     </View>
   );
+}
+
+function NewWordTutorialExamples() {
+  return <NewWordTutorial className="h-[480px] w-[320px]" />;
 }
