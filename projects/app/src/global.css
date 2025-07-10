@@ -25,8 +25,10 @@
   }
 
   /* --- */
+
   .hhh-ref {
-    @apply underline decoration-currentColor/50 hover:decoration-currentColor;
+    text-decoration-skip-ink: none;
+    @apply underline decoration-currentColor/25 hover:decoration-currentColor/50;
   }
   .hhh-italic {
     @apply italic;
@@ -58,7 +60,7 @@
     }
   }
   .hhh-body-title .hhh-ref {
-    @apply leading-tight text-2xl/normal font-bold text-fg-bold underline-circles-2px pb-[4.5px] mb-[-4.5px];
+    @apply leading-tight text-2xl/normal font-bold text-fg-bold decoration-[4px] underline-offset-[3px];
   }
   .hhh-body-title .hhh-bold {
     @apply font-bold text-fg-bold;
@@ -71,7 +73,7 @@
     @apply font-sans text-lg/normal tracking-tight text-fg font-medium;
   }
   .hhh-body-heading .hhh-ref {
-    @apply font-semibold text-lg/normal text-fg-bold underline-circles-1-5px pb-[1.5px] mb-[-1.5px];
+    @apply font-semibold text-lg/normal text-fg-bold decoration-[3px] underline-offset-[3px];
   }
   .hhh-body-heading .hhh-bold {
     @apply font-semibold text-fg-bold;
@@ -86,7 +88,7 @@
     @apply font-sans text-2xl/normal font-light text-fg;
   }
   .hhh-body-2xl .hhh-ref {
-    @apply text-2xl/normal font-medium text-fg-bold underline-circles-1-5px pb-[1px] mb-[-1px];
+    @apply text-2xl/normal font-medium text-fg-bold decoration-[4px] underline-offset-[3px];
   }
   .hhh-body-2xl .hhh-bold {
     @apply font-medium text-fg-bold;
@@ -98,7 +100,7 @@
     @apply font-sans text-base/normal font-light text-fg;
   }
   .hhh-body .hhh-ref {
-    @apply text-base/normal text-fg-ref font-medium underline-circles-1-25px pb-[1.5px] mb-[-1.5px];
+    @apply text-base/normal text-fg-ref font-medium decoration-[3px] underline-offset-[2px];
   }
   .hhh-body .hhh-bold {
     @apply font-medium text-fg-bold;
@@ -110,7 +112,7 @@
     @apply font-sans text-sm/normal font-light text-caption;
   }
   .hhh-body-caption .hhh-ref {
-    @apply text-caption-loud text-sm/normal underline-circles-1px font-medium pb-[1px] mb-[-1px];
+    @apply text-caption-loud text-sm/normal font-medium decoration-[2.5px] underline-offset-[2px];
   }
   .hhh-body-caption .hhh-bold {
     @apply text-caption-loud font-medium;
@@ -125,16 +127,10 @@
     @apply font-sans text-xs/normal font-normal text-caption uppercase;
   }
   .hhh-body-dt .hhh-ref {
-    @apply text-xs/normal underline-circles-1px text-fg-bold font-medium;
+    @apply text-xs/normal text-fg-bold font-medium decoration-[2px] underline-offset-[2px];
   }
   .hhh-body-dt .hhh-bold {
     @apply font-medium text-fg-bold;
-  }
-
-  /* --- */
-
-  .hhh-dev-dt {
-    @apply font-mono text-xs/normal font-normal text-caption uppercase;
   }
 
   /* --- */
@@ -143,10 +139,16 @@
     @apply font-sans text-lg/snug font-light text-fg;
   }
   .hhh-body-input .hhh-ref {
-    @apply text-lg/snug underline-circles-1-25px text-fg-bold font-medium pb-[1.5px] mb-[-1.5px];
+    @apply text-lg/snug text-fg-bold font-medium decoration-[3px] underline-offset-[2.5px];
   }
   .hhh-body-input .hhh-bold {
     @apply font-medium text-fg-bold;
+  }
+
+  /* --- */
+
+  .hhh-dev-dt {
+    @apply font-mono text-xs/normal font-normal text-caption uppercase;
   }
 
   /* www */
@@ -297,80 +299,6 @@
 
   .tab-size-2 {
     tab-size: 2;
-  }
-
-  /* --- */
-
-  .underline-circles-1px {
-    display: inline-block;
-    text-decoration: none;
-    background-image: radial-gradient(
-      rgb(from currentcolor r g b / 0.5) 1px,
-      transparent 0
-    );
-    background-size: 4px 4px;
-    background-repeat: repeat-x;
-    background-position: left 100%;
-  }
-  .underline-circles-1px:hover {
-    background-image: radial-gradient(
-      rgb(from currentcolor r g b / 0.75) 1px,
-      transparent 0
-    );
-  }
-
-  .underline-circles-1-25px {
-    display: inline-block;
-    text-decoration: none;
-    background-image: radial-gradient(
-      rgb(from currentcolor r g b / 0.5) 1.3px,
-      transparent 0
-    );
-    background-size: 5.5px 5.5px;
-    background-repeat: repeat-x;
-    background-position: left 100%;
-  }
-  .underline-circles-1-25px:hover {
-    background-image: radial-gradient(
-      rgb(from currentcolor r g b / 0.75) 1.3px,
-      transparent 0
-    );
-  }
-
-  .underline-circles-1-5px {
-    display: inline-block;
-    text-decoration: none;
-    background-image: radial-gradient(
-      rgb(from currentcolor r g b / 0.5) 1.5px,
-      transparent 0
-    );
-    background-size: 6px 6px;
-    background-repeat: repeat-x;
-    background-position: bottom left;
-  }
-  .underline-circles-1-5px:hover {
-    background-image: radial-gradient(
-      rgb(from currentcolor r g b / 0.75) 1.5px,
-      transparent 0
-    );
-  }
-
-  .underline-circles-2px {
-    display: inline-block;
-    text-decoration: none;
-    background-image: radial-gradient(
-      rgb(from currentcolor r g b / 0.5) 2px,
-      transparent 0
-    );
-    background-size: 7px 7px;
-    background-repeat: repeat-x;
-    background-position: bottom left;
-  }
-  .underline-circles-2px:hover {
-    background-image: radial-gradient(
-      rgb(from currentcolor r g b / 0.75) 2px,
-      transparent 0
-    );
   }
 }
 
