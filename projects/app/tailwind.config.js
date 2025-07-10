@@ -61,8 +61,7 @@ module.exports = {
       },
       caption: {
         DEFAULT: `rgb(from var(--color-caption) r g b / calc(alpha * <alpha-value>))`,
-        bold: `rgb(from var(--color-caption-1) r g b / calc(alpha * <alpha-value>))`,
-        ref: `rgb(from var(--color-caption-1) r g b / calc(alpha * <alpha-value>))`,
+        loud: `rgb(from var(--color-caption-loud) r g b / calc(alpha * <alpha-value>))`,
       },
       cloud: `rgb(from var(--color-cloud) r g b / calc(alpha * <alpha-value>))`,
       ink: {
@@ -106,6 +105,7 @@ module.exports = {
         chinese: `MaShanZheng-Regular`,
         cursive: `ui-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"`,
         sans: `ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"`,
+        mono: `ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace`,
         karla: `Karla`,
       },
 

@@ -243,12 +243,12 @@ const TypographyExamples = () => {
         `hhh-body-input`,
       ].flatMap((family) => (
         <View key={family}>
-          <Text className="hhh-body-dt w-[128px] text-right">{family}</Text>
+          <Text className="hhh-dev-dt">{family}</Text>
           {themes.map((theme) => (
-            <View key={theme} className="flex-row items-center gap-2">
-              <View className="w-[128px] shrink-0 items-end">
-                <Text className="hhh-body-dt opacity-50">{theme}</Text>
-              </View>
+            <View
+              key={theme}
+              className="flex-row items-center justify-between gap-2"
+            >
               <Text
                 className={`
                   ${family}
@@ -263,6 +263,9 @@ const TypographyExamples = () => {
                 <Text className="hhh-italic">hhh-italic</Text> and{` `}
                 <Text className="hhh-ref">hhh-ref 好 good</Text>.
               </Text>
+              <View className="shrink-0 grow-0">
+                <Text className="hhh-dev-dt opacity-50">{theme}</Text>
+              </View>
             </View>
           ))}
         </View>
@@ -275,9 +278,7 @@ const LittlePrimaryHeader = ({ title }: { title: string }) => {
   return (
     <View className="mb-2 mt-4 flex-row items-center gap-2">
       <View className="h-px grow bg-bg-1" />
-      <Text className="text-center text-xs font-bold uppercase text-fg/80">
-        {title}
-      </Text>
+      <Text className="hhh-dev-dt text-center">{title}</Text>
       <View className="h-px grow bg-bg-1" />
     </View>
   );
@@ -358,7 +359,7 @@ const ExampleStack = ({
   showFrame?: boolean;
 }) => (
   <View className="items-center gap-2 p-2">
-    <Text className="text-center text-xs text-caption">{title}</Text>
+    <Text className="hhh-dev-dt text-center">{title}</Text>
     <View
       className={exampleStackChildrenClass({
         showFrame,
@@ -827,7 +828,7 @@ function QuizProgressBarExample() {
       </View>
       <View className="flex-row items-start gap-4">
         <View className="flex-row items-center gap-2">
-          <Text className="font-bold text-caption">Answer:</Text>
+          <Text className="hhh-dev-dt">Answer:</Text>
           <RectButton variant="outline" onPress={logCorrect}>
             Correct
           </RectButton>
@@ -1219,8 +1220,8 @@ function ColorPalette() {
     >
       {opacities.map((o, i) => (
         <View key={i} className="w-9 items-center justify-center">
-          <Text className="text-xs text-fg">
-            <Text className="text-fg/20">/ </Text>
+          <Text className="hhh-dev-dt">
+            <Text className="text-fg/20">/</Text>
             {o * 100}
           </Text>
         </View>
@@ -1254,7 +1255,9 @@ function ColorPalette() {
           </View>
           {bgColors.map((bgColor) => (
             <View key={bgColor} className={`h-9 justify-center`}>
-              <Text className="text-fg">{bgColor.replace(`bg-`, ``)}</Text>
+              <Text className="hhh-dev-dt text-fg">
+                {bgColor.replace(`bg-`, ``)}
+              </Text>
             </View>
           ))}
         </View>
@@ -1413,9 +1416,7 @@ function HhhmarkExamples() {
         ] as const
       ).map((textClass) => (
         <View className="flex-row items-center gap-2" key={textClass}>
-          <Text className="hhh-body-caption w-[128px] text-right">
-            {textClass}
-          </Text>
+          <Text className="hhh-dev-dt w-[128px] text-right">{textClass}</Text>
           <Text
             className={`
               w-[250px]

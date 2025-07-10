@@ -24,6 +24,7 @@
     @apply font-sans text-sm/normal font-bold uppercase text-fg;
   }
 
+  /* --- */
   .hhh-ref {
     @apply underline decoration-currentColor/50 hover:decoration-currentColor;
   }
@@ -109,10 +110,10 @@
     @apply font-sans text-sm/normal font-light text-caption;
   }
   .hhh-body-caption .hhh-ref {
-    @apply text-caption-ref text-sm/normal underline-circles-1px font-medium pb-[1px] mb-[-1px];
+    @apply text-caption-loud text-sm/normal underline-circles-1px font-medium pb-[1px] mb-[-1px];
   }
   .hhh-body-caption .hhh-bold {
-    @apply text-caption-bold font-medium;
+    @apply text-caption-loud font-medium;
   }
   .hhh-body-caption .hhh-italic {
     @apply font-light;
@@ -128,6 +129,12 @@
   }
   .hhh-body-dt .hhh-bold {
     @apply font-medium text-fg-bold;
+  }
+
+  /* --- */
+
+  .hhh-dev-dt {
+    @apply font-mono text-xs/normal font-normal text-caption uppercase;
   }
 
   /* --- */
@@ -255,35 +262,35 @@
     --color-fg: var(--color-ink);
     --color-fg-1: var(--color-ink-1);
     --color-caption: rgb(from var(--color-fg) r g b / 0.6);
-    --color-caption-1: rgb(from var(--color-fg) r g b / 0.9);
+    --color-caption-loud: rgb(from var(--color-fg) r g b / 0.9);
   }
 
   .theme-danger {
     --color-fg: var(--color-brick);
     --color-fg-1: var(--color-brick);
     --color-caption: rgb(from var(--color-fg) r g b / 0.6);
-    --color-caption-1: rgb(from var(--color-fg) r g b / 0.9);
+    --color-caption-loud: rgb(from var(--color-fg) r g b / 0.9);
   }
 
   .theme-success {
     --color-fg: var(--color-wasabi);
     --color-fg-1: var(--color-wasabi);
     --color-caption: rgb(from var(--color-fg) r g b / 0.6);
-    --color-caption-1: rgb(from var(--color-fg) r g b / 0.9);
+    --color-caption-loud: rgb(from var(--color-fg) r g b / 0.9);
   }
 
   .theme-accent {
     --color-fg: var(--color-cyanold);
     --color-fg-1: var(--color-cyanold);
     --color-caption: rgb(from var(--color-fg) r g b / 0.6);
-    --color-caption-1: rgb(from var(--color-fg) r g b / 0.9);
+    --color-caption-loud: rgb(from var(--color-fg) r g b / 0.9);
   }
 
   .theme-warning {
     --color-fg: var(--color-amber);
     --color-fg-1: var(--color-amber);
     --color-caption: rgb(from var(--color-fg) r g b / 0.6);
-    --color-caption-1: rgb(from var(--color-fg) r g b / 0.9);
+    --color-caption-loud: rgb(from var(--color-fg) r g b / 0.9);
   }
 
   /* --- */
