@@ -4708,7 +4708,7 @@ __metadata:
     "@react-native-replicache/deep-freeze": "npm:^1.1.0"
     "@react-navigation/native": "npm:^7.0.0"
     "@react-navigation/stack": "npm:^7.0.0"
-    "@rive-app/react-canvas": "npm:^4.21.3"
+    "@rive-app/react-canvas": "npm:^4.21.4"
     "@sentry/core": "npm:~8.54.0"
     "@sentry/node": "npm:~8.54.0"
     "@sentry/profiling-node": "npm:~8.54.0"
@@ -5618,7 +5618,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rive-app/react-canvas@npm:^4.21.3":
+"@rive-app/react-canvas@npm:^4.21.4":
   version: 4.21.4
   resolution: "@rive-app/react-canvas@npm:4.21.4"
   dependencies:

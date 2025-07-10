@@ -8,11 +8,15 @@ import { HanziWordRefText } from "./HanziWordRefText";
 export const HhhmarkTypewriter = ({
   source,
   className,
-  delay: _delay = 0,
+  delay: initialDelay = 0,
   onAnimateEnd,
 }: {
   source: string;
   className?: string;
+  /**
+   * Allows delaying the presentation of the text while still allowing the
+   * necessary space to be reserved (because it's just rendered opacity-0).
+   */
   delay?: number;
   onAnimateEnd?: () => void;
 }) => {
@@ -23,7 +27,7 @@ export const HhhmarkTypewriter = ({
     const perEllipsisDelay = 500;
     const parsed = parseHhhmark(source);
 
-    let delay = _delay;
+    let delay = initialDelay;
 
     function renderAnimatedText(text: string, isLastNode = false) {
       return text.split(``).map((char, index) => {
@@ -105,7 +109,7 @@ export const HhhmarkTypewriter = ({
         }
       }
     });
-  }, [_delay, onAnimateEnd, source]);
+  }, [initialDelay, onAnimateEnd, source]);
 
   return <Text className={className}>{rendered}</Text>;
 };

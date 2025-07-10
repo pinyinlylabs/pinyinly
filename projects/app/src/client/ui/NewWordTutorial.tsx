@@ -1,9 +1,9 @@
-import { Image } from "expo-image";
 import { useState } from "react";
 import { View } from "react-native";
 import Reanimated, { FadeIn } from "react-native-reanimated";
 import { Delay } from "./Delay";
 import { NewSprout } from "./NewSprout";
+import { TutorHead } from "./TutorHead";
 import { TutorialDialogBox } from "./TutorialDialogBox";
 
 export function NewWordTutorial({ className }: { className?: string }) {
@@ -21,10 +21,10 @@ export function NewWordTutorial({ className }: { className?: string }) {
       ) : null}
       <Delay ms={1500}>
         <View className="absolute bottom-3 left-3 flex-row items-end justify-start gap-1 p-2 pr-6">
-          <Delay ms={500}>
-            <Tutor />
+          <Delay ms={0}>
+            <TutorHead />
           </Delay>
-          <Delay ms={1000}>
+          <Delay ms={1100}>
             <View className="flex-1 pb-10">
               <TutorialDialogBox
                 onContinue={() => {
@@ -37,18 +37,5 @@ export function NewWordTutorial({ className }: { className?: string }) {
         </View>
       </Delay>
     </View>
-  );
-}
-
-function Tutor({ className }: { className?: string }) {
-  return (
-    <Image
-      source={require(`@/assets/illustrations/tutor.svg`)}
-      className={`
-        h-[94px] w-[80px] animate-fadein
-
-        ${className ?? ``}
-      `}
-    />
   );
 }
