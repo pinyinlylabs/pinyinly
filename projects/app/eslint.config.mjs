@@ -391,6 +391,8 @@ export default tseslint.config(
     rules: {
       // See https://github.com/typescript-eslint/typescript-eslint/issues/7941
       "no-var": `off`,
+      // `any` is useful in declaration files, so allow it.
+      "@typescript-eslint/no-explicit-any": `off`,
       // Conflicts when augmenting an interface by adding ` extends …` but
       // leaving the body empty.
       "@typescript-eslint/no-empty-object-type": `off`,
