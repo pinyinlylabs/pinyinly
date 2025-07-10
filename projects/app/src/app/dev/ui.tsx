@@ -32,7 +32,6 @@ import {
   hanziWordToPinyinTone,
 } from "@/data/skills";
 import { buildHanziWord } from "@/dictionary/dictionary";
-import { NewWordDirector } from "@/util/storylets";
 import { subMinutes } from "date-fns/subMinutes";
 import { Link } from "expo-router";
 import shuffle from "lodash/shuffle";
@@ -97,13 +96,6 @@ function DesignSystemPage() {
           scrollTo={scrollTo}
         >
           <ImageCloudExamples />
-        </Section>
-
-        <Section
-          title={`NewWordDirector` satisfies NameOf<typeof NewWordDirector>}
-          scrollTo={scrollTo}
-        >
-          <NewWordDirectorExamples />
         </Section>
 
         <Section
@@ -1469,10 +1461,6 @@ function ToggleButtonExamples() {
   );
 }
 
-function NewWordDirectorExamples() {
-  return <NewWordDirector />;
-}
-
 function ImageCloudExamples() {
   return <ImageCloud className="h-[320px] w-[415px]" />;
 }
@@ -1510,5 +1498,22 @@ function HhhmarkExamples() {
 }
 
 function NewWordTutorialExamples() {
-  return <NewWordTutorial className="h-[480px] w-[320px]" />;
+  const [rerenderCount, setRerenderCount] = useState(0);
+
+  return (
+    <View className="flex-1 items-center justify-center gap-4">
+      <NewWordTutorial
+        className="h-[800px] w-[420px] rounded-xl border border-fg/20"
+        key={rerenderCount}
+      />
+      <RectButton
+        variant="bare"
+        onPress={() => {
+          setRerenderCount((prev) => prev + 1);
+        }}
+      >
+        Restart
+      </RectButton>
+    </View>
+  );
 }
