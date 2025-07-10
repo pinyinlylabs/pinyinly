@@ -1,5 +1,5 @@
 diff --git a/lib/lib.dom.d.ts b/lib/lib.dom.d.ts
-index edf900a5de22fd63305f87e32d5974716eda7ddd..5424fbf6e03778151b444b9907f35aab0e773370 100644
+index edf900a5de22fd63305f87e32d5974716eda7ddd..e7d8383eaad81bdad616da0eda85e5f2b2d4709a 100644
 --- a/lib/lib.dom.d.ts
 +++ b/lib/lib.dom.d.ts
 @@ -19901,7 +19901,7 @@ declare var Response: {
@@ -11,10 +11,6 @@ index edf900a5de22fd63305f87e32d5974716eda7ddd..5424fbf6e03778151b444b9907f35aab
      /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/Response/redirect_static) */
      redirect(url: string | URL, status?: number): Response;
  };
-diff --git a/lib/lib.dom.d.ts b/lib/lib.dom.d.ts
-index 5424fbf6e03778151b444b9907f35aab0e773370..c9e2130aebc9b06bb94ae9af2bdad743206e12e3 100644
---- a/lib/lib.dom.d.ts
-+++ b/lib/lib.dom.d.ts
 @@ -27145,7 +27145,11 @@ interface Window extends EventTarget, AnimationFrameProvider, GlobalEventHandler
       * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Window/releaseEvents)
       */
