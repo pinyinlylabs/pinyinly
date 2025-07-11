@@ -35,7 +35,7 @@ export interface RiveProps extends CommonProps {
   fit?: RiveFit;
   onRiveLoad?: (rive: RiveInstance) => void;
   src: RnRequireSource;
-  stateMachineName?: string;
+  stateMachineName: string | undefined;
 }
 
 export type RiveInstance = Rive;

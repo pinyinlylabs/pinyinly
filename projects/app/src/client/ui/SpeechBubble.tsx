@@ -18,13 +18,14 @@ export const SpeechBubble = ({
   return (
     <View className={className} style={style}>
       <Rive
-        src={require(`@/assets/rive/speech-bubble.riv`)}
         artboardName="main"
         autoplay
+        fit="layout"
         onRiveLoad={() => {
           onLoad?.();
         }}
-        fit="layout"
+        src={require(`@/assets/rive/speech-bubble.riv`)}
+        stateMachineName={undefined}
       />
     </View>
   );
