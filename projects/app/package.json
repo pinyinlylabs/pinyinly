@@ -113,7 +113,7 @@
     "@inkjs/ui": "^2.0.0",
     "@inngest/eslint-plugin": "^0.0.7",
     "@lottiefiles/lottie-js": "^0.4.2",
-    "@stylistic/eslint-plugin": "^4.0.0",
+    "@stylistic/eslint-plugin": "^5.0.0",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
