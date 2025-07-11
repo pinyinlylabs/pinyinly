@@ -6,7 +6,6 @@ import type { ViewModel } from "@rive-app/canvas";
 import type { ViewModelInstance } from "@rive-app/react-canvas";
 import { Fit, Layout, useRive } from "@rive-app/react-canvas";
 import { Asset } from "expo-asset";
-import { useLayoutEffect } from "react";
 import type { RiveFit, RiveProps } from "./riveTypes";
 
 export function Rive({
@@ -22,7 +21,7 @@ export function Rive({
   true satisfies IsExhaustedRest<typeof rest>;
   invariant(typeof src === `string`, `src must be a string`);
 
-  const { rive, RiveComponent, container } = useRive({
+  const { RiveComponent, container } = useRive({
     artboard: artboardName,
     src,
     autoplay,
@@ -54,24 +53,22 @@ export function Rive({
 
       return true;
     },
-  });
+    onRiveReady(rive) {
+      invariant(
+        container != null,
+        `Rive container must not be null in 'onRiveReady' callback`,
+      );
 
-  useLayoutEffect(() => {
-    if (rive != null && container != null) {
       // If there's a `theme` view model in the file, update it with the current
       // theme by reading CSS values.
       const themeVm = rive.viewModelInstance?.viewModel(`theme`);
       if (themeVm != null) {
         applyThemeFromDom(container, themeVm);
       }
-    }
-  }, [rive, container]);
 
-  useLayoutEffect(() => {
-    if (rive != null) {
       onRiveLoad?.(rive);
-    }
-  }, [rive, onRiveLoad]);
+    },
+  });
 
   return <RiveComponent />;
 }
