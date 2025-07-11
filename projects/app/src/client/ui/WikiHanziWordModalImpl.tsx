@@ -13,7 +13,7 @@ import {
   skillKindToShorthand,
 } from "@/data/skills";
 import { hanziFromHanziWord, lookupHanzi } from "@/dictionary/dictionary";
-import { Fragment, useMemo } from "react";
+import { Fragment } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { DevLozenge } from "./DevLozenge";
 import { HanziWordRefText } from "./HanziWordRefText";
@@ -31,16 +31,11 @@ export function WikiHanziWordModalImpl({
   const hanzi = hanziFromHanziWord(hanziWord);
   const wikiEntry = useHanziWikiEntry(hanzi);
 
-  const characters = useMemo(
-    (): string[] => splitHanziText(hanziFromHanziWord(hanziWord)),
-    [hanziWord],
-  );
+  const graphemes = splitHanziText(hanziFromHanziWord(hanziWord));
 
-  const skills = useMemo(() => {
-    return hanziWordSkillKinds.map((skillType) =>
-      hanziWordSkill(skillType, hanziWord),
-    );
-  }, [hanziWord]);
+  const skills = hanziWordSkillKinds.map((skillType) =>
+    hanziWordSkill(skillType, hanziWord),
+  );
 
   const otherMeaningsQuery = useLocalQuery({
     queryKey: [WikiHanziWordModalImpl.name, `otherMeanings`, hanziWord],
@@ -89,10 +84,10 @@ export function WikiHanziWordModalImpl({
       >
         <View className="flex-row items-center gap-2">
           <View className="flex-row gap-1">
-            {characters.map((character) => (
-              <View key={character} className="items-start">
+            {graphemes.map((grapheme) => (
+              <View key={grapheme} className="items-start">
                 <Text className="font-karla text-[60px] text-fg">
-                  {character}
+                  {grapheme}
                 </Text>
               </View>
             ))}
