@@ -1,9 +1,9 @@
 import {
   flattenIds,
-  hanziCharCount,
+  hanziGraphemeCount,
   idsNodeToString,
   IdsOperator,
-  isHanziChar,
+  isHanziGrapheme,
   parseIds,
   walkIdsNode,
 } from "#data/hanzi.ts";
@@ -320,26 +320,26 @@ test(`${idsNodeToString.name} roundtrips`, () => {
   }
 });
 
-test(`${hanziCharCount.name} fixtures`, () => {
+test(`${hanziGraphemeCount.name} fixtures`, () => {
   for (const value of [`木`, `你`] as HanziText[]) {
-    expect(hanziCharCount(value)).toBe(1);
+    expect(hanziGraphemeCount(value)).toBe(1);
   }
 
   for (const value of [`你好`, `再见`] as HanziText[]) {
-    expect(hanziCharCount(value)).toBe(2);
+    expect(hanziGraphemeCount(value)).toBe(2);
   }
 });
 
-describe(`${isHanziChar.name} suite`, () => {
+describe(`${isHanziGrapheme.name} suite`, () => {
   test(`fixtures`, () => {
     const valid = [汉`应`, 汉`兄`, 汉`同`];
     for (const x of valid) {
-      expect(isHanziChar(x)).toBe(true);
+      expect(isHanziGrapheme(x)).toBe(true);
     }
 
     const invalid = [汉`应应`, 汉`兄兄`, 汉`同同`];
     for (const x of invalid) {
-      expect(isHanziChar(x)).toBe(false);
+      expect(isHanziGrapheme(x)).toBe(false);
     }
   });
 });

@@ -1,5 +1,6 @@
-import type { HanziChar, HanziText } from "@/data/model";
+import type { HanziGrapheme, HanziText } from "@/data/model";
 import { UnexpectedValueError } from "@/util/types";
+import { graphemeCount, splitGraphemes } from "@/util/unicode";
 import { invariant } from "@pinyinly/lib/invariant";
 import type { StrictExtract } from "ts-essentials";
 import { z } from "zod/v4";
@@ -87,7 +88,7 @@ export type IdsNode =
     }
   | {
       operator: `LeafCharacter`;
-      character: HanziChar;
+      character: HanziGrapheme;
     }
   | {
       operator: `LeafUnknownCharacter`;
@@ -261,7 +262,7 @@ export function parseIds(ids: string, cursor?: { index: number }): IdsNode {
     return { operator: `LeafUnknownCharacter`, strokeCount };
   }
 
-  return { operator: `LeafCharacter`, character: char as HanziChar };
+  return { operator: `LeafCharacter`, character: char as HanziGrapheme };
 }
 
 export function strokeCountPlaceholderOrNull(
@@ -492,9 +493,8 @@ export function* walkIdsNode(
   }
 }
 
-export function splitHanziText(hanziText: HanziText): HanziChar[] {
-  // eslint-disable-next-line @typescript-eslint/no-misused-spread
-  return [...hanziText] as HanziChar[];
+export function splitHanziText(hanziText: HanziText): HanziGrapheme[] {
+  return splitGraphemes(hanziText) as HanziGrapheme[];
 }
 
 export function strokeCountToCharacter(strokeCount: number): string {
@@ -505,11 +505,10 @@ export const radicalStrokes = [
   1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
 ];
 
-export function isHanziChar(hanzi: HanziText): hanzi is HanziChar {
-  return hanziCharCount(hanzi) === 1;
+export function isHanziGrapheme(hanzi: HanziText): hanzi is HanziGrapheme {
+  return hanziGraphemeCount(hanzi) === 1;
 }
 
-export function hanziCharCount(hanziText: HanziText): number {
-  // eslint-disable-next-line @typescript-eslint/no-misused-spread
-  return [...hanziText].length;
+export function hanziGraphemeCount(hanziText: HanziText): number {
+  return graphemeCount(hanziText);
 }

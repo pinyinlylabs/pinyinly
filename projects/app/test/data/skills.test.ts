@@ -690,7 +690,7 @@ describe(`${skillReviewQueue.name} suite`, () => {
       });
     });
 
-    test(`learns the pinyin for each character in multi-character words`, async () => {
+    test(`learns the pinyin for each grapheme in multi-grapheme words`, async () => {
       const graph = await skillLearningGraph({
         targetSkills: [`hp:一样:same`],
       });

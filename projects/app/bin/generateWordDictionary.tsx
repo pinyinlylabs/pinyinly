@@ -6,13 +6,13 @@ import { useLocalQuery } from "#client/hooks/useLocalQuery.ts";
 import {
   flattenIds,
   idsNodeToString,
-  isHanziChar,
+  isHanziGrapheme,
   parseIds,
   strokeCountToCharacter,
   walkIdsNode,
 } from "#data/hanzi.ts";
 import type {
-  HanziChar,
+  HanziGrapheme,
   HanziText,
   HanziWord,
   PinyinPronunciationSpaceSeparated,
@@ -25,7 +25,7 @@ import type {
   HanziWordWithMeaning,
 } from "#dictionary/dictionary.ts";
 import {
-  allHanziCharacters,
+  allHanziGraphemes,
   allHsk1HanziWords,
   buildHanziWord,
   dictionarySchema,
@@ -148,7 +148,7 @@ function decomp(char: string) {
 }
 // Load all the root words we want to include in the dictionary, this will later
 // expanded to include all the components of each word.
-for (const hanzi of await allHanziCharacters()) {
+for (const hanzi of await allHanziGraphemes()) {
   decomp(hanzi);
 }
 
@@ -649,7 +649,7 @@ async function openAiHanziWordGlossHintQuery(
   invariant(meaning != null);
   const hanzi = hanziFromHanziWord(hanziWord);
 
-  if (isHanziChar(hanzi)) {
+  if (isHanziGrapheme(hanzi)) {
     const componentGlosses = new Map<string, Set<string>>();
     let hanziIds: string = hanzi;
 
@@ -953,7 +953,7 @@ const HanziWordEditor = ({
 
             if (edits.has(`componentFormOf`)) {
               const newComponentFormOf = edits.get(`componentFormOf`) as
-                | HanziChar
+                | HanziGrapheme
                 | undefined;
               invariant(newComponentFormOf != null);
 

@@ -1,9 +1,9 @@
 import type { HanziWordWithMeaning } from "@/dictionary/dictionary";
 import {
-  characterHasGlyph,
   decomposeHanzi,
+  graphemeHasGlyph,
   hanziFromHanziWord,
-  hanziTextFromHanziChar,
+  hanziTextFromHanziGrapheme,
   lookupHanzi,
   lookupHanziWord,
 } from "@/dictionary/dictionary";
@@ -25,7 +25,7 @@ import type { Duration } from "date-fns";
 import { sub } from "date-fns/sub";
 import { subDays } from "date-fns/subDays";
 import type { DeepReadonly } from "ts-essentials";
-import { isHanziChar, splitHanziText } from "./hanzi";
+import { isHanziGrapheme, splitHanziText } from "./hanzi";
 import { parseHhhmark } from "./hhhmark";
 import type {
   HanziText,
@@ -153,7 +153,7 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
 
       // If it's the component form of another base hanzi, learn that
       // first because it can help understand the meaning from the shape.
-      if (isHanziChar(hanzi)) {
+      if (isHanziGrapheme(hanzi)) {
         const meaning = await lookupHanziWord(hanziWord);
 
         if (
@@ -182,28 +182,28 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
       }
 
       // Learn the components of a hanzi word first.
-      for (const hanziChar of await decomposeHanzi(
+      for (const hanziGrapheme of await decomposeHanzi(
         hanziFromHanziWord(hanziWordFromSkill(skill)),
       )) {
-        if (await characterHasGlyph(hanziChar)) {
-          // Check if the character was already added as a dependency by being
+        if (await graphemeHasGlyph(hanziGrapheme)) {
+          // Check if the grapheme was already added as a dependency by being
           // referenced in the gloss hint.
           const depAlreadyAdded = deps.some((x) => {
             if (skillKindFromSkill(x) === SkillKind.HanziWordToGloss) {
               skill = skill as HanziWordSkill;
               return (
                 hanziFromHanziWord(hanziWordFromSkill(skill)) ===
-                hanziTextFromHanziChar(hanziChar)
+                hanziTextFromHanziGrapheme(hanziGrapheme)
               );
             }
             return false;
           });
 
-          // If the character wasn't already added, add it as a dependency by
+          // If the grapheme wasn't already added, add it as a dependency by
           // guessing what disambugation to use for the hanzi.
           if (!depAlreadyAdded) {
             const hanziWordWithMeaning =
-              await hackyGuessHanziWordToLearn(hanziChar);
+              await hackyGuessHanziWordToLearn(hanziGrapheme);
             if (hanziWordWithMeaning != null) {
               const [hanziWord] = hanziWordWithMeaning;
               deps.push(hanziWordToGloss(hanziWord));
@@ -229,14 +229,14 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
 
       // If the hanzi word is multiple characters (e.g. 为什么:why) learn the
       // meaning of each one separately.
-      const characters = splitHanziText(hanzi);
-      if (characters.length > 1) {
-        for (const character of characters) {
-          if (await characterHasGlyph(character)) {
+      const graphemes = splitHanziText(hanzi);
+      if (graphemes.length > 1) {
+        for (const grapheme of graphemes) {
+          if (await graphemeHasGlyph(grapheme)) {
             // We only have a character, but need a hanzi word to learn. So make
             // the best guess for the hanzi word to learn.
             for (const [charHanziWord, charMeaning] of await lookupHanzi(
-              character,
+              grapheme,
             )) {
               if (charMeaning.pinyin != null) {
                 deps.push(hanziWordToPinyin(charHanziWord));
@@ -258,7 +258,7 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
       const hanzi = hanziFromHanziWord(hanziWord);
 
       invariant(
-        isHanziChar(hanzi),
+        isHanziGrapheme(hanzi),
         `${skillKind} only applies to single character hanzi`,
       );
 
@@ -272,7 +272,7 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
       const hanzi = hanziFromHanziWord(hanziWord);
 
       invariant(
-        isHanziChar(hanzi),
+        isHanziGrapheme(hanzi),
         `${skillKind} only applies to single character hanzi`,
       );
 
@@ -286,7 +286,7 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
       const hanzi = hanziFromHanziWord(hanziWord);
 
       invariant(
-        isHanziChar(hanzi),
+        isHanziGrapheme(hanzi),
         `${skillKind} only applies to single character hanzi`,
       );
 

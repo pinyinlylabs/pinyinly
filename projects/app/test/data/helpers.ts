@@ -1,6 +1,6 @@
-import { isHanziChar } from "#data/hanzi.ts";
+import { isHanziGrapheme } from "#data/hanzi.ts";
 import type {
-  HanziChar,
+  HanziGrapheme,
   HanziText,
   PinyinSyllable,
   SrsStateFsrsFourPointFiveType,
@@ -67,12 +67,15 @@ export const fsrsSrsState = (
 };
 
 /**
- * Helper template string tag to make {@link HanziChar}.
+ * Helper template string tag to make {@link HanziGrapheme}.
  */
-export const 汉字 = (strings: TemplateStringsArray): HanziChar => {
+export const 汉字 = (strings: TemplateStringsArray): HanziGrapheme => {
   invariant(strings.length === 1, `汉字 must be a single string`);
   const string = nonNullable(strings[0]) as HanziText;
-  invariant(isHanziChar(string), `汉字 must be given a single Hanzi character`);
+  invariant(
+    isHanziGrapheme(string),
+    `汉字 must be given a single Hanzi character`,
+  );
   return string;
 };
 

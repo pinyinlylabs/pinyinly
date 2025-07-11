@@ -73,7 +73,7 @@ export function QuizDeckHanziToPinyinQuestion({
   }>();
 
   const startTime = useMemo(() => Date.now(), []);
-  const hanziChars = splitHanziText(
+  const hanziGraphemes = splitHanziText(
     hanziFromHanziWord(hanziWordFromSkill(skill)),
   );
 
@@ -190,7 +190,7 @@ export function QuizDeckHanziToPinyinQuestion({
           </View>
         </View>
         <View className="flex-row justify-center gap-2 pb-3">
-          {hanziChars.map((hanzi, i) => {
+          {hanziGraphemes.map((hanzi, i) => {
             return (
               <View className="items-center gap-2" key={i}>
                 <Text className="text-[80px] font-medium text-fg">{hanzi}</Text>

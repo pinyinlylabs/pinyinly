@@ -3,8 +3,8 @@ import { SkillKind } from "@/data/model";
 import type { HanziWordSkill, Skill } from "@/data/rizzleSchema";
 import { hanziWordFromSkill, skillKindFromSkill } from "@/data/skills";
 import {
-  hanziCharsFromHanziWord,
   hanziFromHanziWord,
+  hanziGraphemesFromHanziWord,
 } from "@/dictionary/dictionary";
 import { useMemo, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
@@ -112,7 +112,7 @@ const NewHanziWordToGlossSkillContent = ({
   const hanziWord = hanziWordFromSkill(skill);
   const hanziWordSkillData = useHanziWordMeaning(hanziWord);
   const hanzi = hanziFromHanziWord(hanziWord);
-  const hanziChars = hanziCharsFromHanziWord(hanziWord);
+  const hanziGraphemes = hanziGraphemesFromHanziWord(hanziWord);
 
   return (
     <ContainerWithContinueButton onContinue={dismiss}>
@@ -128,7 +128,7 @@ const NewHanziWordToGlossSkillContent = ({
 
             <View className="items-center gap-2">
               <View className="flex-row gap-1">
-                {hanziChars.map((character) => (
+                {hanziGraphemes.map((character) => (
                   <View key={character} className="items-center">
                     <Text className="rounded-xl bg-bg-1 px-2 py-1 text-[60px] text-fg">
                       {character}
@@ -159,7 +159,7 @@ const NewHanziWordToPinyinSkillContent = ({
 }) => {
   const hanziWord = hanziWordFromSkill(skill);
   const hanziWordSkillData = useHanziWordMeaning(hanziWord);
-  const hanziChars = hanziCharsFromHanziWord(hanziWord);
+  const hanziGraphemes = hanziGraphemesFromHanziWord(hanziWord);
 
   return (
     <ContainerWithContinueButton onContinue={dismiss}>
@@ -175,7 +175,7 @@ const NewHanziWordToPinyinSkillContent = ({
 
             <View className="items-center gap-2">
               <View className="flex-row gap-1">
-                {hanziChars.map((character) => (
+                {hanziGraphemes.map((character) => (
                   <View key={character} className="items-center">
                     <Text className="rounded-xl bg-bg-1 px-2 py-1 text-[60px] text-fg">
                       {character}
@@ -204,7 +204,7 @@ const NewHanziWordToPinyinInitialSkillContent = ({
 }) => {
   const hanziWord = hanziWordFromSkill(skill);
   const hanziWordSkillData = useHanziWordMeaning(hanziWord);
-  const hanziChars = hanziCharsFromHanziWord(hanziWord);
+  const hanziGraphemes = hanziGraphemesFromHanziWord(hanziWord);
 
   return (
     <ContainerWithContinueButton onContinue={dismiss}>
@@ -222,10 +222,10 @@ const NewHanziWordToPinyinInitialSkillContent = ({
 
             <View className="items-center gap-2">
               <View className="flex-row gap-1">
-                {hanziChars.map((character) => (
-                  <View key={character} className="items-center">
+                {hanziGraphemes.map((grapheme) => (
+                  <View key={grapheme} className="items-center">
                     <Text className="rounded-xl bg-bg-1 px-2 py-1 text-[60px] text-fg">
-                      {character}
+                      {grapheme}
                     </Text>
                   </View>
                 ))}
@@ -253,7 +253,7 @@ const NewHanziWordToPinyinFinalSkillContent = ({
   const hanziWordSkillData = useHanziWordMeaning(hanziWord);
 
   const characters = useMemo(
-    (): string[] => hanziCharsFromHanziWord(hanziWord),
+    (): string[] => hanziGraphemesFromHanziWord(hanziWord),
     [hanziWord],
   );
 
@@ -304,7 +304,7 @@ const NewHanziWordToPinyinToneSkillContent = ({
   const hanziWordSkillData = useHanziWordMeaning(hanziWord);
 
   const characters = useMemo(
-    (): string[] => hanziCharsFromHanziWord(hanziWord),
+    (): string[] => hanziGraphemesFromHanziWord(hanziWord),
     [hanziWord],
   );
 

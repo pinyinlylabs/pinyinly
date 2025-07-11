@@ -1,6 +1,6 @@
 import { parseIds, walkIdsNode } from "#data/hanzi.ts";
 import {
-  allHanziCharacters,
+  allHanziGraphemes,
   loadHanziDecomposition,
 } from "#dictionary/dictionary.ts";
 import { jsonStringifyShallowIndent } from "#util/json.ts";
@@ -32,17 +32,17 @@ invariant(pingFangCollection.type === `TTC`, `expected a TTC font`);
 const pingFang = pingFangCollection.fonts[0];
 invariant(pingFang != null);
 
-const allChars = await allHanziCharacters();
+const allGraphemes = await allHanziGraphemes();
 
 const allComponents = new Set<string>();
 const decompositions = await loadHanziDecomposition();
 
-for (const char of allChars) {
-  allComponents.add(char);
-  const ids = decompositions.get(char);
+for (const grapheme of allGraphemes) {
+  allComponents.add(grapheme);
+  const ids = decompositions.get(grapheme);
   invariant(
     ids != null,
-    `character "${char}" (${unicodeShortIdentifier(char)}) has no decomposition`,
+    `character "${grapheme}" (${unicodeShortIdentifier(grapheme)}) has no decomposition`,
   );
   const idsNode = parseIds(ids);
   for (const leaf of walkIdsNode(idsNode)) {

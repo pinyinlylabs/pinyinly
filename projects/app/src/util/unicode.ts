@@ -1,4 +1,5 @@
 import { invariant } from "@pinyinly/lib/invariant";
+import { lruMemoize1 } from "./collections";
 
 export function unicodeShortIdentifier(character: string): string {
   const codePoint = character.codePointAt(0);
@@ -29,13 +30,18 @@ export function isNotCjkUnifiedIdeograph(char: string): boolean {
   return !isCjkUnifiedIdeograph(char);
 }
 
+const segmenter = new Intl.Segmenter(`en`, { granularity: `grapheme` });
+
 /**
- * Calculate the number of glyphs (characters) in a string.
+ * Calculate the number of graphemes (leters/characters) in a string.
  */
-export function glyphCount(text: string): number {
-  // eslint-disable-next-line @typescript-eslint/no-misused-spread
-  return [...text].length;
-}
+export const graphemeCount = (text: string) => splitGraphemes(text).length;
+
+export const splitGraphemes = lruMemoize1(
+  (text: string): readonly string[] =>
+    [...segmenter.segment(text)].map((x) => x.segment),
+  { max: 200 },
+);
 
 /**
  * Coalesce a nullish or empty string to `null`.

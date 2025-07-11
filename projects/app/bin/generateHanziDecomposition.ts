@@ -7,7 +7,7 @@ import z from "zod/v4";
 import type { IdsNode } from "../src/data/hanzi.js";
 import { parseIds, walkIdsNode } from "../src/data/hanzi.js";
 import {
-  allHanziCharacters,
+  allHanziGraphemes,
   loadHanziDecomposition,
 } from "../src/dictionary/dictionary.js";
 import {
@@ -153,25 +153,25 @@ const rawJson = await fetchWithCache(
 );
 const allDecompositions = parseIdsTxt(rawJson);
 
-const allCharacters = await allHanziCharacters();
+const allGraphemes = await allHanziGraphemes();
 
 const existingData = await loadHanziDecomposition();
 
-const decompositionQueue = new Set(allCharacters);
+const decompositionQueue = new Set(allGraphemes);
 
-const charactersWithoutDecomposition = new Set<string>();
+const graphemesWithoutDecomposition = new Set<string>();
 
-const charactersWithAmbiguousDecomposition = new Set<[string, string[]]>();
+const graphemesWithAmbiguousDecomposition = new Set<[string, string[]]>();
 
-for (const character of decompositionQueue) {
+for (const grapheme of decompositionQueue) {
   // If we're only updating specific characters, skip the rest.
-  if (argv.update != null && !argv.update.includes(character)) {
+  if (argv.update != null && !argv.update.includes(grapheme)) {
     continue;
   }
 
-  const decompositions = allDecompositions.get(character);
+  const decompositions = allDecompositions.get(grapheme);
   if (decompositions == null) {
-    charactersWithoutDecomposition.add(character);
+    graphemesWithoutDecomposition.add(grapheme);
     continue;
   }
 
@@ -203,12 +203,12 @@ for (const character of decompositionQueue) {
 
   invariant(bestDecompositions.length > 0);
   const bestDecompositionScoreConflict = bestDecompositions.length > 1;
-  const existing = existingData.get(character);
+  const existing = existingData.get(grapheme);
 
   if (decompositions.length > 1) {
     debug(
       `%O has multiple decompositions: %s`,
-      character,
+      grapheme,
       decompositions
         .map((d, i, arr) =>
           `${bestDecompositions.includes(d) ? (bestDecompositionScoreConflict ? (existing === d.ids ? `🟠${bestDecompositionScore}` : `🔴${bestDecompositionScore}`) : `✅`) : ``}${d.ids}${d.tags.size > 0 ? `[${[...d.tags].sort().join(``)}]` : ``}`.padEnd(
@@ -222,13 +222,13 @@ for (const character of decompositionQueue) {
   // If there's an existing character to use, fall back to it.
   if (bestDecompositionScoreConflict) {
     if (existing == null) {
-      charactersWithAmbiguousDecomposition.add([
-        character,
+      graphemesWithAmbiguousDecomposition.add([
+        grapheme,
         bestDecompositions.map(({ ids }) => ids),
       ]);
     } else {
       debug(
-        `the best decomposition for ${character} (${unicodeShortIdentifier(character)}) is ambiguous, using existing`,
+        `the best decomposition for ${grapheme} (${unicodeShortIdentifier(grapheme)}) is ambiguous, using existing`,
       );
       continue;
     }
@@ -236,7 +236,7 @@ for (const character of decompositionQueue) {
     const bestDecomposition = bestDecompositions[0];
     invariant(bestDecomposition != null);
 
-    updates.set(character, bestDecomposition.ids);
+    updates.set(grapheme, bestDecomposition.ids);
   }
 
   for (const decomposition of bestDecompositions) {
@@ -248,16 +248,16 @@ for (const character of decompositionQueue) {
   }
 }
 
-if (charactersWithAmbiguousDecomposition.size > 0) {
+if (graphemesWithAmbiguousDecomposition.size > 0) {
   debug(
     `ambiguous decomposition for %O`,
-    [...charactersWithAmbiguousDecomposition].sort(),
+    [...graphemesWithAmbiguousDecomposition].sort(),
   );
 }
 
 debug(
   `characters without decomposition: %O`,
-  [...charactersWithoutDecomposition].sort(),
+  [...graphemesWithoutDecomposition].sort(),
 );
 
 debug(`gathered ${updates.size} updates to save`);
