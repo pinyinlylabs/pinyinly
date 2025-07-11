@@ -21,6 +21,7 @@ export const TutorHead = ({
       <Rive
         src={require(`@/assets/rive/tutor-head.riv`)}
         artboardName="main"
+        stateMachineName="main"
         autoplay
         onRiveLoad={() => {
           onLoad?.();

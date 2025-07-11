@@ -1462,7 +1462,16 @@ function ToggleButtonExamples() {
 }
 
 function ImageCloudExamples() {
-  return <ImageCloud className="h-[320px] w-[415px]" />;
+  return (
+    <>
+      <ExampleStack title="415×320" showFrame>
+        <ImageCloud className="h-[320px] w-[415px]" />
+      </ExampleStack>
+      <ExampleStack title="300×200" showFrame>
+        <ImageCloud className="h-[200px] w-[300px]" />
+      </ExampleStack>
+    </>
+  );
 }
 
 function NewSproutExamples() {
@@ -1499,21 +1508,38 @@ function HhhmarkExamples() {
 
 function NewWordTutorialExamples() {
   const [rerenderCount, setRerenderCount] = useState(0);
+  const [initialStep, setInitialStep] =
+    useState<PropsOf<typeof NewWordTutorial>[`initialStep`]>();
 
   return (
     <View className="flex-1 items-center justify-center gap-4">
       <NewWordTutorial
         className="h-[800px] w-[420px] rounded-xl border border-fg/20"
-        key={rerenderCount}
+        key={`${rerenderCount}-${initialStep ?? ``}`}
+        initialStep={initialStep}
       />
-      <RectButton
-        variant="bare"
-        onPress={() => {
-          setRerenderCount((prev) => prev + 1);
-        }}
-      >
-        Restart
-      </RectButton>
+      <View className="flex-row gap-2">
+        {([`splash`, `deps`] as const).map((step) => (
+          <RectButton
+            variant="bare"
+            key={step}
+            onPress={() => {
+              setInitialStep(step);
+            }}
+          >
+            {step}
+          </RectButton>
+        ))}
+
+        <RectButton
+          variant="bare"
+          onPress={() => {
+            setRerenderCount((prev) => prev + 1);
+          }}
+        >
+          Restart
+        </RectButton>
+      </View>
     </View>
   );
 }
