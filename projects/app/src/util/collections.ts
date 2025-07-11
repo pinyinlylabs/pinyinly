@@ -1,4 +1,5 @@
 import { invariant } from "@pinyinly/lib/invariant";
+import { LRUCache } from "lru-cache";
 import type { DeepReadonly } from "ts-essentials";
 
 export const deepReadonly = <T>(value: T) => value as DeepReadonly<T>;
@@ -288,6 +289,32 @@ export function memoize1<
   return Object.assign(memoFn, {
     isCached: (input: T) => cache.has(input),
   });
+}
+
+/**
+ * LRU based caching for a single-argument function.
+ *
+ * See https://github.com/isaacs/node-lru-cache for docs.
+ */
+export function lruMemoize1<
+  R extends NonNullable<unknown>,
+  T extends NonNullable<unknown>,
+>(
+  fn: (input: T) => R,
+  cacheOptions: LRUCache.Options<T, R, unknown>,
+): typeof fn {
+  const cache = new LRUCache(cacheOptions);
+  const memoFn = function <This>(this: This, input: T) {
+    const cached = cache.get(input);
+    if (cached != null) {
+      return cached;
+    }
+    const computed = fn.call(this, input);
+    cache.set(input, computed);
+    return computed;
+  } as typeof fn;
+  Object.defineProperty(memoFn, `name`, { value: fn.name });
+  return memoFn;
 }
 
 /**

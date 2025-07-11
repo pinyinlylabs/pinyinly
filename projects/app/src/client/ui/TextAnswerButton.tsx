@@ -1,4 +1,4 @@
-import { glyphCount } from "@/util/unicode";
+import { graphemeCount } from "@/util/unicode";
 import { useState } from "react";
 import type { Pressable } from "react-native";
 import { Text, View } from "react-native";
@@ -161,7 +161,7 @@ export function TextAnswerButton({
     transform: [{ scale: scaleSv.get() }, { rotateZ: rotationSv.get() }],
   }));
 
-  const charCount = glyphCount(text);
+  const charCount = graphemeCount(text);
   const textLength =
     charCount <= 10
       ? (`tiny` as const)

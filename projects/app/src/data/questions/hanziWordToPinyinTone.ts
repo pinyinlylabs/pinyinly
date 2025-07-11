@@ -1,4 +1,4 @@
-import { isHanziChar } from "@/data/hanzi";
+import { isHanziGrapheme } from "@/data/hanzi";
 import {
   convertPinyinWithToneNumberToToneMark,
   parsePinyinSyllableOrThrow,
@@ -18,7 +18,7 @@ import {
 } from "@pinyinly/lib/invariant";
 import shuffle from "lodash/shuffle";
 import type {
-  HanziChar,
+  HanziGrapheme,
   HanziWord,
   OneCorrectPairQuestion,
   OneCorrectPairQuestionAnswer,
@@ -78,7 +78,7 @@ interface QuestionContext {
    * Keep track of which hanzi have been used so that we don't have multiple
    * choices with the same hanzi or meaning.
    */
-  usedHanzi: Set<HanziChar>;
+  usedHanzi: Set<HanziGrapheme>;
   /**
    * Keep track of which pinyin have been used so that we don't have multiple
    * choices in the quiz that have the same correct answer. Otherwise there
@@ -94,15 +94,15 @@ interface QuestionContext {
    * the same bases and differ by tone
    */
   pinyinAnswersToneless: readonly PinyinSyllable[];
-  hanziDistractors: HanziChar[];
-  hanziAnswers: readonly HanziChar[];
+  hanziDistractors: HanziGrapheme[];
+  hanziAnswers: readonly HanziGrapheme[];
 }
 
 export async function makeQuestionContext(
   correctAnswer: HanziWord,
 ): Promise<QuestionContext> {
   const hanzi = hanziFromHanziWord(correctAnswer);
-  invariant(isHanziChar(hanzi), `expected single-character hanzi`);
+  invariant(isHanziGrapheme(hanzi), `expected single-character hanzi`);
   const meaning = await lookupHanziWord(correctAnswer);
 
   const hanziAnswers = [hanzi];
@@ -141,7 +141,7 @@ export async function makeQuestionContext(
 
 export async function tryHanziDistractor(
   ctx: QuestionContext,
-  hanzi: HanziChar,
+  hanzi: HanziGrapheme,
 ): Promise<boolean> {
   // Don't include if there's overlapping hanzi
   if (ctx.usedHanzi.has(hanzi)) {

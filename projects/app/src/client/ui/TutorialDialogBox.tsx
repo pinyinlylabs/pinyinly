@@ -28,7 +28,9 @@ export const TutorialDialogBox = ({
   const animatedContentStyle = useAnimatedStyle(() => {
     return {
       transform: [
-        { translateX: interpolate(enteringTimelineSv.get(), [0, 1], [-10, 0]) },
+        {
+          translateX: interpolate(enteringTimelineSv.get(), [0, 1], [-20, 0]),
+        },
       ],
       opacity: enteringTimelineSv.get(),
     };
@@ -68,7 +70,7 @@ export const TutorialDialogBox = ({
         onLoad={() => {
           enteringTimelineSv.value = withTiming(1, {
             easing: Easing.out(Easing.cubic),
-            duration: 250,
+            duration: 500,
           });
           setSpeechBubbleLoaded(true);
         }}

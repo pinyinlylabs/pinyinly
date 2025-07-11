@@ -24,7 +24,7 @@ export function NewWordTutorial({ className }: { className?: string }) {
           <Delay ms={0}>
             <TutorHead />
           </Delay>
-          <Delay ms={1100}>
+          <Delay ms={800}>
             <View className="flex-1 pb-10">
               <TutorialDialogBox
                 onContinue={() => {

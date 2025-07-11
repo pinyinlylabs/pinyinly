@@ -142,16 +142,16 @@ export type PinyinPronunciationSpaceSeparated = string &
   z.BRAND<`PinyinPronunciationSpaceSeparated`>;
 
 /**
- * Single Hanzi character.
+ * Single Hanzi grapheme.
  *
  * This is the hanzi companion to {@link PinyinSyllable}.
  */
-export type HanziChar = string & z.BRAND<`HanziChar`>;
+export type HanziGrapheme = string & z.BRAND<`HanziGrapheme`>;
 
 /**
  * Non-space separated hanzi text.
  */
-export type HanziText = (string & z.BRAND<`HanziText`>) | HanziChar;
+export type HanziText = (string & z.BRAND<`HanziText`>) | HanziGrapheme;
 
 export type HanziWordSkillKind =
   | typeof SkillKind.HanziWordToGloss

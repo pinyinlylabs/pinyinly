@@ -1,10 +1,10 @@
 import { parseIds, splitHanziText, walkIdsNode } from "#data/hanzi.ts";
 import { parseHhhmark } from "#data/hhhmark.ts";
-import type { HanziChar } from "#data/model.ts";
+import type { HanziGrapheme } from "#data/model.ts";
 import { pinyinPronunciationDisplayText } from "#data/pinyin.ts";
 import type { Dictionary, HanziWordMeaning } from "#dictionary/dictionary.ts";
 import {
-  allHanziCharacters,
+  allHanziGraphemes,
   allHanziWordsHanzi,
   allHsk1HanziWords,
   allHsk2HanziWords,
@@ -469,16 +469,16 @@ test(`all wiki component hanzi words reference valid hanzi words`, async () => {
 });
 
 test(`expect missing glyphs to be included decomposition data`, async () => {
-  const allChars = await allHanziCharacters();
+  const allGraphemes = await allHanziGraphemes();
   const allComponents = new Set<string>();
   const decompositions = await loadHanziDecomposition();
 
-  for (const char of allChars) {
-    allComponents.add(char);
-    const ids = decompositions.get(char);
+  for (const grapheme of allGraphemes) {
+    allComponents.add(grapheme);
+    const ids = decompositions.get(grapheme);
     invariant(
       ids != null,
-      `character "${char}" (${unicodeShortIdentifier(char)}) has no decomposition`,
+      `character "${grapheme}" (${unicodeShortIdentifier(grapheme)}) has no decomposition`,
     );
     const idsNode = parseIds(ids);
     for (const leaf of walkIdsNode(idsNode)) {
@@ -585,20 +585,20 @@ describe(`${loadHanziWordMigrations.name} suite`, async () => {
 });
 
 test(`dictionary contains entries for decomposition`, async () => {
-  const unknownCharacters = new Map<HanziChar, /* sources */ Set<string>>();
-  const unknownComponents = new Map<HanziChar, /* sources */ Set<string>>();
+  const unknownCharacters = new Map<HanziGrapheme, /* sources */ Set<string>>();
+  const unknownComponents = new Map<HanziGrapheme, /* sources */ Set<string>>();
 
   for (const hanzi of await allHanziWordsHanzi()) {
-    for (const character of splitHanziText(hanzi)) {
-      const lookup = await lookupHanzi(character);
+    for (const grapheme of splitHanziText(hanzi)) {
+      const lookup = await lookupHanzi(grapheme);
       if (lookup.length === 0) {
-        mapSetAdd(unknownCharacters, character, hanzi);
+        mapSetAdd(unknownCharacters, grapheme, hanzi);
       }
 
-      for (const component of await decomposeHanzi(character)) {
+      for (const component of await decomposeHanzi(grapheme)) {
         const lookup = await lookupHanzi(component);
         if (lookup.length === 0) {
-          mapSetAdd(unknownComponents, component, character);
+          mapSetAdd(unknownComponents, component, grapheme);
         }
       }
     }
