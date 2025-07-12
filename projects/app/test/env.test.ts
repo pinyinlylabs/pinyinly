@@ -26,7 +26,7 @@ test(`tests/ tree mirrors src/ tree`, async () => {
   const testRelPaths = await getTreePaths(testRoot, `**/*.{test,test-d}.*`);
 
   // Test that every test files corresponds to a src/ file (or it has a
-  // `// hhh-standalone-test`), and that every standalone test does not have a
+  // `// pyly-standalone-test`), and that every standalone test does not have a
   // src/ file.
   const unexpectedTestPaths: string[] = [];
   const unexpectedStandaloneTestPaths: string[] = [];
@@ -66,9 +66,9 @@ async function getTreePaths(root: string, glob: string): Promise<string[]> {
 
 /**
  * Check if a test file is a standalone test file, which is defined as a
- * file that contains the comment `// hhh-standalone-test` somewhere in it.
+ * file that contains the comment `// pyly-standalone-test` somewhere in it.
  */
 async function isStandaloneTestFile(testPath: string): Promise<boolean> {
   const contents = await fs.readFile(testPath, `utf8`);
-  return /\/\/\s+hhh-standalone-test/m.test(contents);
+  return /\/\/\s+pyly-standalone-test/m.test(contents);
 }

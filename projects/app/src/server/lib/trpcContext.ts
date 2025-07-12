@@ -1,11 +1,14 @@
-import { httpSessionHeader } from "@/util/http";
+import { httpSessionHeaderRx } from "@/util/http";
 import { TRPCError } from "@trpc/server";
 import type { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
 import { withDrizzle } from "./db";
 
 export async function createContext({ req }: FetchCreateContextFnOptions) {
   async function getSessionFromHeader() {
-    const sessionId = req.headers.get(httpSessionHeader);
+    const sessionId = httpSessionHeaderRx
+      .map((header) => req.headers.get(header))
+      .find((x) => x != null);
+
     if (sessionId != null) {
       if (sessionId.length === 0) {
         throw new TRPCError({

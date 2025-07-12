@@ -5,7 +5,7 @@ export default function BillingSettingsPage() {
     <View className="gap-5">
       {/* Header */}
       <View>
-        <Text className="hhh-body-title">Billing</Text>
+        <Text className="pyly-body-title">Billing</Text>
       </View>
     </View>
   );

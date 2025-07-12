@@ -1,10 +1,10 @@
 import type { PinyinSoundId } from "@/data/model";
-import { loadHhhPinyinChart } from "@/data/pinyin";
+import { loadPylyPinyinChart } from "@/data/pinyin";
 import { currentSchema } from "@/data/rizzleSchema";
 import { useRizzleQueryPaged } from "./useRizzleQueryPaged";
 
 export function usePinyinSounds() {
-  const chart = loadHhhPinyinChart();
+  const chart = loadPylyPinyinChart();
 
   return useRizzleQueryPaged(
     [`usePinyinSounds`],

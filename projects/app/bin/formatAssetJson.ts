@@ -4,7 +4,7 @@ import yargs from "yargs";
 import { jsonStringifyShallowIndent } from "../src/util/json.js";
 import { writeUtf8FileIfChanged } from "./util/fs.js";
 
-const debug = makeDebug(`hhh`);
+const debug = makeDebug(`pyly`);
 
 const argv = await yargs(process.argv.slice(2))
   .usage(`$0 <paths..>`, `format .asset.json files`)

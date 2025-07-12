@@ -2,25 +2,25 @@ tasks:
   testMoon1.36.2Regression:
     # See https://discord.com/channels/974160221452763146/974160221452763149/1377543280220438589
     script: |
-      if [ "${HHH_VALUE:+--value=$HHH_VALUE}" = "--value=123" ]; then
+      if [ "${XXX_VALUE:+--value=$XXX_VALUE}" = "--value=123" ]; then
         exit 0
       else
         exit 1
       fi
     env:
-      HHH_VALUE: "123"
+      XXX_VALUE: "123"
     options:
       # moon doesn't use its version in the cache key, so just turn off caching
       cache: false
   deploy:
     command: |
-      npx -y vercel@39.4.2 pull --yes ${HHH_VERCEL_PREVIEW+--environment=preview} ${HHH_VERCEL_PROD+--environment=production} ${VERCEL_TOKEN:+--token=$VERCEL_TOKEN} &&
-      npx -y vercel@39.4.2 build ${HHH_VERCEL_PROD+--prod} &&
-      npx -y vercel@39.4.2 deploy --prebuilt ${HHH_VERCEL_PROD+--prod} ${VERCEL_TOKEN:+--token=$VERCEL_TOKEN}
+      npx -y vercel@39.4.2 pull --yes ${PYLY_VERCEL_PREVIEW+--environment=preview} ${PYLY_VERCEL_PROD+--environment=production} ${VERCEL_TOKEN:+--token=$VERCEL_TOKEN} &&
+      npx -y vercel@39.4.2 build ${PYLY_VERCEL_PROD+--prod} &&
+      npx -y vercel@39.4.2 deploy --prebuilt ${PYLY_VERCEL_PROD+--prod} ${VERCEL_TOKEN:+--token=$VERCEL_TOKEN}
     inputs:
       - $VERCEL_*
-      - $HHH_VERCEL_PREVIEW # Use to turn on "preview" mode.
-      - $HHH_VERCEL_PROD # Use to turn on "production" mode.
+      - $PYLY_VERCEL_PREVIEW # Use to turn on "preview" mode.
+      - $PYLY_VERCEL_PROD # Use to turn on "production" mode.
     options:
       runInCI: false
       shell: true

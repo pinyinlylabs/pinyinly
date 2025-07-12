@@ -1,4 +1,4 @@
-import { parseHhhmark } from "@/data/hhhmark";
+import { parsePylymark } from "@/data/pylymark";
 import { splitGraphemes } from "@/util/unicode";
 import type { JSX, ReactElement } from "react";
 import { cloneElement } from "react";
@@ -7,7 +7,7 @@ import Reanimated, { FadeIn } from "react-native-reanimated";
 import { HanziWordRefText } from "./HanziWordRefText";
 import type { PropsOf } from "./types";
 
-export const HhhmarkTypewriter = ({
+export const PylymarkTypewriter = ({
   source,
   className,
   delay = 0,
@@ -27,7 +27,7 @@ export const HhhmarkTypewriter = ({
   const perCommaDelay = 250;
   let perFullstopDelay = 300;
   const perEllipsisDelay = 500;
-  const parsed = parseHhhmark(source);
+  const parsed = parsePylymark(source);
 
   const nodes: ReactElement<
     PropsOf<typeof EnteringText>,
@@ -98,11 +98,11 @@ export const HhhmarkTypewriter = ({
         break;
       }
       case `bold`: {
-        pushCharacters(node.text, `hhh-bold`);
+        pushCharacters(node.text, `pyly-bold`);
         break;
       }
       case `italic`: {
-        pushCharacters(node.text, `hhh-italic`);
+        pushCharacters(node.text, `pyly-italic`);
         break;
       }
     }

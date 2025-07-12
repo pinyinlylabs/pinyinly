@@ -54,7 +54,7 @@ export const HanziWordRefText = ({
   return (
     <>
       <Text
-        className="hhh-ref"
+        className="pyly-ref"
         onPress={() => {
           setShowWiki(true);
         }}

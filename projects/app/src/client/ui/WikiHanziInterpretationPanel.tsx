@@ -4,7 +4,7 @@ import type { HanziText } from "@/data/model";
 import { Fragment } from "react";
 import { Text, View } from "react-native";
 import { HanziWordRefText } from "./HanziWordRefText";
-import { Hhhmark } from "./Hhhmark";
+import { Pylymark } from "./Pylymark";
 
 export const WikiHanziInterpretationPanel = ({
   hanzi,
@@ -23,14 +23,14 @@ export const WikiHanziInterpretationPanel = ({
         {wikiEntry.data.components.map((component, i) => {
           return (
             <View key={i} className="gap-1">
-              <Text className="hhh-body">
+              <Text className="pyly-body">
                 {component.title ??
                   (component.hanziWord == null ? null : (
                     <HanziWordRefText hanziWord={component.hanziWord} />
                   )) ??
                   `???`}
               </Text>
-              <Text className="hhh-body-caption">{component.description}</Text>
+              <Text className="pyly-body-caption">{component.description}</Text>
             </View>
           );
         })}
@@ -41,8 +41,8 @@ export const WikiHanziInterpretationPanel = ({
               meaning.glossHint == null ? null : (
                 <Fragment key={i}>
                   <View className="h-px w-full bg-bg-1" />
-                  <Text className="hhh-body">
-                    <Hhhmark source={meaning.glossHint} />
+                  <Text className="pyly-body">
+                    <Pylymark source={meaning.glossHint} />
                   </Text>
                 </Fragment>
               ),
@@ -51,8 +51,8 @@ export const WikiHanziInterpretationPanel = ({
         {wikiEntry.data.interpretation == null ? null : (
           <>
             <View className="h-px w-full bg-bg-1" />
-            <Text className="hhh-body">
-              <Hhhmark source={wikiEntry.data.interpretation} />
+            <Text className="pyly-body">
+              <Pylymark source={wikiEntry.data.interpretation} />
             </Text>
           </>
         )}

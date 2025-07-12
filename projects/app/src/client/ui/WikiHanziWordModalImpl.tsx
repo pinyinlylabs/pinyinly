@@ -17,7 +17,7 @@ import { Fragment } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { DevLozenge } from "./DevLozenge";
 import { HanziWordRefText } from "./HanziWordRefText";
-import { Hhhmark } from "./Hhhmark";
+import { Pylymark } from "./Pylymark";
 import { RectButton } from "./RectButton";
 
 export function WikiHanziWordModalImpl({
@@ -107,7 +107,7 @@ export function WikiHanziWordModalImpl({
             {hanziWordSkillData.data.gloss.join(`, `)}
             {otherMeaningsQuery.data == null ||
             otherMeaningsQuery.data.length === 0 ? null : (
-              <Text className="hhh-body-caption">
+              <Text className="pyly-body-caption">
                 ; also
                 {otherMeaningsQuery.data.map(([otherHanziWord], i) => (
                   <Fragment key={otherHanziWord}>
@@ -121,8 +121,8 @@ export function WikiHanziWordModalImpl({
               </Text>
             )}
           </Text>
-          <Text className="hhh-body-caption">
-            <Hhhmark source={hanziWordSkillData.data.definition} />
+          <Text className="pyly-body-caption">
+            <Pylymark source={hanziWordSkillData.data.definition} />
           </Text>
         </View>
 
@@ -135,7 +135,7 @@ export function WikiHanziWordModalImpl({
               {wikiEntry.data.components.map((component, i) => {
                 return (
                   <View key={i} className="gap-1">
-                    <Text className="hhh-body">
+                    <Text className="pyly-body">
                       {component.title ??
                         (component.hanziWord == null ? null : (
                           <HanziWordRefText hanziWord={component.hanziWord} />
@@ -143,8 +143,8 @@ export function WikiHanziWordModalImpl({
                         `???`}
                     </Text>
                     {component.description == null ? null : (
-                      <Text className="hhh-body-caption">
-                        <Hhhmark source={component.description} />
+                      <Text className="pyly-body-caption">
+                        <Pylymark source={component.description} />
                       </Text>
                     )}
                   </View>
@@ -154,8 +154,8 @@ export function WikiHanziWordModalImpl({
               {hanziWordSkillData.data.glossHint == null ? null : (
                 <>
                   <View className="h-px w-full bg-bg-1" />
-                  <Text className="hhh-body">
-                    <Hhhmark source={hanziWordSkillData.data.glossHint} />
+                  <Text className="pyly-body">
+                    <Pylymark source={hanziWordSkillData.data.glossHint} />
                   </Text>
                 </>
               )}
@@ -163,8 +163,8 @@ export function WikiHanziWordModalImpl({
               {wikiEntry.data.interpretation == null ? null : (
                 <>
                   <View className="h-px w-full bg-bg-1" />
-                  <Text className="hhh-body">
-                    <Hhhmark source={wikiEntry.data.interpretation} />
+                  <Text className="pyly-body">
+                    <Pylymark source={wikiEntry.data.interpretation} />
                   </Text>
                 </>
               )}
@@ -194,18 +194,18 @@ export function WikiHanziWordModalImpl({
             <View className="gap-2 text-fg">
               {skillStatesQuery.data.map(([skill, skillState], i) => (
                 <View key={i} className="flex-row items-center gap-2">
-                  <Text className="hhh-body">
+                  <Text className="pyly-body">
                     {skillKindToShorthand(skillKindFromSkill(skill))}
                   </Text>
-                  <Text className="hhh-body">
-                    <Text className="hhh-body-caption">Stability:</Text>
+                  <Text className="pyly-body">
+                    <Text className="pyly-body-caption">Stability:</Text>
                     {` `}
                     {skillState?.srs.stability == null
                       ? `null`
                       : skillState.srs.stability.toFixed(2)}
                   </Text>
-                  <Text className="hhh-body">
-                    <Text className="hhh-body-caption">Difficulty:</Text>
+                  <Text className="pyly-body">
+                    <Text className="pyly-body-caption">Difficulty:</Text>
                     {` `}
                     {skillState?.srs.difficulty == null
                       ? `null`

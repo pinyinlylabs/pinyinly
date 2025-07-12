@@ -17,14 +17,14 @@ export default function HistoryPage() {
     <View className="gap-5">
       {/* Header */}
       <View>
-        <Text className="hhh-body-title">History</Text>
+        <Text className="pyly-body-title">History</Text>
       </View>
       <View className="gap-2">
         {skillRatingsQuery.data?.map(([_key, value], i) => {
           const { skill, createdAt } = value;
           return (
             <View key={i}>
-              <Text className="hhh-body">
+              <Text className="pyly-body">
                 {value.rating === Rating.Again
                   ? `❌`
                   : value.rating === Rating.Hard

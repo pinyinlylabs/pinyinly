@@ -22,13 +22,27 @@ declare global {
       EXPO_PUBLIC_SENTRY_DSN?: string;
       EXPO_PUBLIC_USE_STATIC?: string | boolean; // boolean during static render, string on web
       EXPO_TUNNEL_SUBDOMAIN?: string;
+      /** @deprecated */
       HHH_JWT_KEY_BASE64?: string;
+      PYLY_JWT_KEY_BASE64?: string;
+      /** @deprecated */
       HHH_PREFLIGHT_CHECK_ENV_VARS?: string;
+      PYLY_PREFLIGHT_CHECK_ENV_VARS?: string;
+      /** @deprecated */
       HHH_SENTRY_DEBUG?: string;
+      PYLY_SENTRY_DEBUG?: string;
+      /** @deprecated */
       HHH_SENTRY_ENABLED?: string;
+      PYLY_SENTRY_ENABLED?: string;
+      /** @deprecated */
       HHH_SENTRY_ENVIRONMENT?: string;
+      PYLY_SENTRY_ENVIRONMENT?: string;
+      /** @deprecated */
       HHH_SENTRY_PROFILES_SAMPLE_RATE?: string;
+      PYLY_SENTRY_PROFILES_SAMPLE_RATE?: string;
+      /** @deprecated */
       HHH_SENTRY_TRACES_SAMPLE_RATE?: string;
+      PYLY_SENTRY_TRACES_SAMPLE_RATE?: string;
       NODE_ENV?: string;
       POSTMARK_SERVER_TOKEN?: string;
       SENTRY_DSN?: string;

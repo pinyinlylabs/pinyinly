@@ -21,8 +21,8 @@ index 9171235745e27a5b630601ffc1fc8bf09fe75ffe..2197b5ec5e0ff2a21b23a4585832ac2c
          }),
 -        style: [StyleSheet.absoluteFill, {
 +        dataSet: {
-+          "hhh-react-navigation-screen": "",
-+          "hhh-react-navigation-modal": presentation != null && MODAL_PRESENTATIONS.includes(presentation) ? "" : null
++          "pyly-react-navigation-screen": "",
++          "pyly-react-navigation-modal": presentation != null && MODAL_PRESENTATIONS.includes(presentation) ? "" : null
 +        },
 +        style: [
 +          Platform.OS === 'web' ? {} : StyleSheet.absoluteFill,

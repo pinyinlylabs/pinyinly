@@ -7,7 +7,7 @@ import {
 } from "@/dictionary/dictionary";
 import type { AppRouter } from "@/server/routers/_app";
 import { preflightCheckEnvVars } from "@/util/env";
-import { httpSessionHeader } from "@/util/http";
+import { httpSessionHeaderTx } from "@/util/http";
 import { sentryMiddleware } from "@inngest/middleware-sentry";
 import { invariant } from "@pinyinly/lib/invariant";
 import { createTRPCClient, httpLink } from "@trpc/client";
@@ -109,7 +109,7 @@ function createTrpcClient(url: string, sessionId: string) {
         url,
         headers() {
           return {
-            [httpSessionHeader]: sessionId,
+            [httpSessionHeaderTx]: sessionId,
           };
         },
       }),

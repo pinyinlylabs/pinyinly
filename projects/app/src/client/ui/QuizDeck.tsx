@@ -233,12 +233,12 @@ export const QuizDeck = ({ className }: { className?: string }) => {
                         paddingRight: 20,
                       }}
                     >
-                      <Text className="hhh-body-title">
+                      <Text className="pyly-body-title">
                         👏 You’re all caught up on your reviews!
                       </Text>
                       {/* {nextNotYetDueSkillState.isLoading ||
                       nextNotYetDueSkillState.data == null ? null : (
-                        <Text className="hhh-body-caption">
+                        <Text className="pyly-body-caption">
                           Next review in{` `}
                           {formatDuration(
                             intervalToDuration(

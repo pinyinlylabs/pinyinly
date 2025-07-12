@@ -4,7 +4,7 @@ import path from "node:path";
 import { setTimeout } from "node:timers/promises";
 import { expect } from "vitest";
 
-const debug = makeDebug(`hhh:${path.basename(import.meta.filename)}`);
+const debug = makeDebug(`pyly:${path.basename(import.meta.filename)}`);
 
 export type TestExpoServer = Awaited<ReturnType<typeof testExpoServer>>;
 

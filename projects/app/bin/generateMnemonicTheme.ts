@@ -8,7 +8,7 @@ import { z } from "zod/v4";
 import {
   defaultPinyinSoundGroupNames,
   defaultPinyinSoundGroupThemes,
-  loadHhhPinyinChart,
+  loadPylyPinyinChart,
 } from "../src/data/pinyin.js";
 import type { loadPinyinSoundNameSuggestions } from "../src/dictionary/dictionary.js";
 import {
@@ -28,9 +28,9 @@ import {
 } from "./util/fs.js";
 import { makeSimpleAiClient } from "./util/openai.js";
 
-const debug = makeDebug(`hhh`);
+const debug = makeDebug(`pyly`);
 
-const pinyinChart = loadHhhPinyinChart();
+const pinyinChart = loadPylyPinyinChart();
 const allGroupIds = pinyinChart.soundGroups.map((x) => x.id);
 const allThemes = Object.values(defaultPinyinSoundGroupThemes);
 

@@ -10,7 +10,7 @@ index caf3e9bf2bd3f6c7d3d0bb903bd2be1eff8cf242..0d2865fde89b0e3001ba72e92614e30a
  const debug = require('debug')('expo:babel:env-vars');
  function expoInlineEnvVars(api) {
      const isProduction = api.caller(common_1.getIsProd);
-+    const strictEnvVars = (0, getenv_1.boolish)('HHH_STRICT_EXPO_ENV_VARS', false);
++    const strictEnvVars = (0, getenv_1.boolish)('PYLY_STRICT_EXPO_ENV_VARS', false);
      function isFirstInAssign(path) {
          return core_1.types.isAssignmentExpression(path.parent) && path.parent.left === path.node;
      }

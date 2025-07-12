@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-deprecated */
 import { nonNullable } from "@pinyinly/lib/invariant";
 import { memoize0 } from "./collections";
 
@@ -12,9 +13,15 @@ const truthyStrings: readonly (string | undefined)[] = [`true`, `1`];
 // This isn't needed for `EXPO_PUBLIC_` environment variables as these are
 // already checked as build time.
 export const preflightCheckEnvVars = truthyStrings.includes(
-  process.env.HHH_PREFLIGHT_CHECK_ENV_VARS,
+  process.env.PYLY_PREFLIGHT_CHECK_ENV_VARS ??
+    process.env.HHH_PREFLIGHT_CHECK_ENV_VARS,
 );
 
 export const JWT_KEY = memoize0(() => {
-  return Buffer.from(nonNullable(process.env.HHH_JWT_KEY_BASE64), `base64`);
+  return Buffer.from(
+    nonNullable(
+      process.env.PYLY_JWT_KEY_BASE64 ?? process.env.HHH_JWT_KEY_BASE64,
+    ),
+    `base64`,
+  );
 });

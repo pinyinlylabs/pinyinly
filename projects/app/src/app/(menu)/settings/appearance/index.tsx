@@ -7,15 +7,15 @@ export default function AppearanceSettingsPage() {
     <View className="gap-5">
       {/* Header */}
       <View>
-        <Text className="hhh-body-title">Appearance</Text>
+        <Text className="pyly-body-title">Appearance</Text>
       </View>
       <View className="gap-2">
-        <Text className="hhh-body-dt">Learning</Text>
+        <Text className="pyly-body-dt">Learning</Text>
 
         <View className="flex-row">
           <View className="flex-1">
-            <Text className="hhh-body-heading">Auto check answers</Text>
-            <Text className="hhh-body-caption">
+            <Text className="pyly-body-heading">Auto check answers</Text>
+            <Text className="pyly-body-caption">
               Automatically check the answer rather than needing to press
               &quot;Check&quot;.
             </Text>

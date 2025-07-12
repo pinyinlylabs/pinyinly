@@ -22,7 +22,7 @@ Now you can start the app:
 1. Edit the Drizzle schema.
 1. Run `moon run app:dbGenerate`
 
-## Creating a HHH_JWT_KEY_BASE64
+## Creating a PYLY_JWT_KEY_BASE64
 
 ```sh
 openssl rand -base64 32
@@ -229,7 +229,7 @@ Customise this to suit your scenario.
 
   This means they need to be declared in GitHub's Action Secrets too.
 
-  Expo's Metro plugin is patched to error if `HHH_STRICT_EXPO_ENV_VARS` is set
+  Expo's Metro plugin is patched to error if `PYLY_STRICT_EXPO_ENV_VARS` is set
   when a `EXPO_PUBLIC_` variable is missing. This helps catch errors during
   build before they reach users.
 

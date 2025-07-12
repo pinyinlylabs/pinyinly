@@ -1,7 +1,7 @@
 import { parseIds, splitHanziText, walkIdsNode } from "#data/hanzi.ts";
-import { parseHhhmark } from "#data/hhhmark.ts";
 import type { HanziGrapheme } from "#data/model.ts";
 import { pinyinPronunciationDisplayText } from "#data/pinyin.ts";
+import { parsePylymark } from "#data/pylymark.ts";
 import type { Dictionary, HanziWordMeaning } from "#dictionary/dictionary.ts";
 import {
   allHanziGraphemes,
@@ -202,7 +202,7 @@ test(`hanzi meaning glossHint lint`, async () => {
       continue;
     }
 
-    const hanziWordRefs = parseHhhmark(glossHint).filter(
+    const hanziWordRefs = parsePylymark(glossHint).filter(
       (x) => x.type === `hanziWord`,
     );
 

@@ -1,10 +1,14 @@
+/* eslint-disable @typescript-eslint/no-deprecated */
 const Sentry = require(`@sentry/node`);
 const { captureConsoleIntegration } = require(`@sentry/core`);
 // const { nodeProfilingIntegration } = require(`@sentry/profiling-node`);
 
 Sentry.init({
-  enabled: process.env.HHH_SENTRY_ENABLED !== `false`,
-  debug: process.env.HHH_SENTRY_DEBUG === `true`,
+  enabled:
+    (process.env.PYLY_SENTRY_ENABLED ?? process.env.HHH_SENTRY_ENABLED) !==
+    `false`,
+  debug:
+    (process.env.PYLY_SENTRY_DEBUG ?? process.env.HHH_SENTRY_DEBUG) === `true`,
   dsn: process.env.SENTRY_DSN, // Must be provided at runtime.
   integrations: [
     captureConsoleIntegration({ levels: [`warn`, `error`] }),
@@ -13,12 +17,17 @@ Sentry.init({
     Sentry.onUnhandledRejectionIntegration({ mode: `strict` }),
     // nodeProfilingIntegration(),
   ],
-  environment: process.env.HHH_SENTRY_ENVIRONMENT,
+  environment:
+    process.env.PYLY_SENTRY_ENVIRONMENT ?? process.env.HHH_SENTRY_ENVIRONMENT,
   tracesSampleRate: Number.parseFloat(
-    process.env.HHH_SENTRY_TRACES_SAMPLE_RATE ?? `1`,
+    process.env.PYLY_SENTRY_TRACES_SAMPLE_RATE ??
+      process.env.HHH_SENTRY_TRACES_SAMPLE_RATE ??
+      `1`,
   ), // Keep in sync with the other Sentry.init()
   profilesSampleRate: Number.parseFloat(
-    process.env.HHH_SENTRY_PROFILES_SAMPLE_RATE ?? `1`,
+    process.env.PYLY_SENTRY_PROFILES_SAMPLE_RATE ??
+      process.env.HHH_SENTRY_PROFILES_SAMPLE_RATE ??
+      `1`,
   ),
 });
 

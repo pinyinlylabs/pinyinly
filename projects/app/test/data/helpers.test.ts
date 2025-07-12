@@ -1,4 +1,4 @@
-// hhh-standalone-test
+// pyly-standalone-test
 
 import { fsrsIsStable, Rating } from "#util/fsrs.ts";
 import assert from "node:assert/strict";

@@ -28,7 +28,7 @@ export default () => {
 };
 
 const allIcons = [
-  // <hhh-glob-template dir="../../../../assets/icons" glob="*.svg" template="  require(`${path}`),">
+  // <pyly-glob-template dir="../../../../assets/icons" glob="*.svg" template="  require(`${path}`),">
   require(`../../../../assets/icons/alarm-filled.svg`),
   require(`../../../../assets/icons/alarm.svg`),
   require(`../../../../assets/icons/arrow-down.svg`),
@@ -82,5 +82,5 @@ const allIcons = [
   require(`../../../../assets/icons/trending-up.svg`),
   require(`../../../../assets/icons/undo.svg`),
   require(`../../../../assets/icons/zap-filled.svg`),
-  // </hhh-glob-template>
+  // </pyly-glob-template>
 ];

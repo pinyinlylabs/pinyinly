@@ -44,14 +44,14 @@ function UiDemoPage() {
         <View className="flex-1 flex-row">
           <View
             className={`
-              hhh-color-schema-light theme-default
+              pyly-color-schema-light theme-default
 
               ${examplesStackClassName}
             `}
           />
           <View
             className={`
-              hhh-color-scheme-dark theme-default
+              pyly-color-scheme-dark theme-default
 
               ${examplesStackClassName}
             `}

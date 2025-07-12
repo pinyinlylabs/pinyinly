@@ -234,7 +234,7 @@ const toneVariationsForTonelessSyllable = memoize1(
 export const parsePinyinSyllable = memoize1(function parsePinyinSyllable(
   pinyinSyllable: string,
 ) {
-  const chart = loadHhhPinyinChart();
+  const chart = loadPylyPinyinChart();
 
   return deepReadonly(parsePinyinSyllableWithChart(pinyinSyllable, chart));
 });
@@ -245,7 +245,7 @@ export function parsePinyinSyllableOrThrow(pinyinSyllable: string) {
   return parsed;
 }
 
-export const loadHhhPinyinChart = memoize0(() =>
+export const loadPylyPinyinChart = memoize0(() =>
   buildPinyinChart({
     items: {
       // Initials

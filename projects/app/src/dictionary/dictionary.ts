@@ -25,7 +25,7 @@ import { invariant } from "@pinyinly/lib/invariant";
 import type { DeepReadonly } from "ts-essentials";
 import { z } from "zod/v4";
 
-export const hhhMarkSchema = z.string();
+export const pylyMarkSchema = z.string();
 export const hanziWordSchema = z.string().pipe(z.custom<HanziWord>());
 export const hanziTextSchema = z.string().pipe(z.custom<HanziText>());
 export const hanziGraphemeSchema = z.string().pipe(z.custom<HanziGrapheme>());
@@ -257,7 +257,7 @@ export const wikiEntrySchema = z.object({
     .array(
       z.object({
         hanziWord: hanziWordSchema,
-        mnemonic: hhhMarkSchema,
+        mnemonic: pylyMarkSchema,
       }),
     )
     .optional(),

@@ -17,7 +17,7 @@ export const ExampleStack = ({
   showFrame?: boolean;
 }) => (
   <View className="items-center gap-2 p-2">
-    <Text className="hhh-dev-dt text-center">{title}</Text>
+    <Text className="pyly-dev-dt text-center">{title}</Text>
     <View
       className={exampleStackChildrenClass({
         showFrame,
@@ -53,7 +53,7 @@ export const Section = ({
       <View className="flex-row" ref={ref}>
         <View
           className={`
-            hhh-color-schema-light theme-default flex-1 bg-bg/90 p-2
+            pyly-color-schema-light theme-default flex-1 bg-bg/90 p-2
 
             hover:bg-bg
           `}
@@ -62,12 +62,12 @@ export const Section = ({
             <Text className="text-2xl text-fg">{title}</Text>
           </Link>
         </View>
-        <View className="hhh-color-scheme-dark flex-1 bg-bg-1 p-2" />
+        <View className="pyly-color-scheme-dark flex-1 bg-bg-1 p-2" />
       </View>
       <View className="flex-row">
         <View
           className={`
-            hhh-color-schema-light theme-default
+            pyly-color-schema-light theme-default
 
             ${examplesStackClassName}
           `}
@@ -76,7 +76,7 @@ export const Section = ({
         </View>
         <View
           className={`
-            hhh-color-scheme-dark theme-default
+            pyly-color-scheme-dark theme-default
 
             ${examplesStackClassName}
           `}
@@ -94,7 +94,7 @@ export const LittlePrimaryHeader = ({ title }: { title: string }) => {
   return (
     <View className="mb-2 mt-4 flex-row items-center gap-2">
       <View className="h-px grow bg-bg-1" />
-      <Text className="hhh-dev-dt text-center">{title}</Text>
+      <Text className="pyly-dev-dt text-center">{title}</Text>
       <View className="h-px grow bg-bg-1" />
     </View>
   );

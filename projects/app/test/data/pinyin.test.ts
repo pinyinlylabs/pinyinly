@@ -5,10 +5,10 @@ import {
   defaultPinyinSoundGroupRanks,
   defaultPinyinSoundGroupThemes,
   defaultPinyinSoundInstructions,
-  loadHhhPinyinChart,
   loadHhPinyinChart,
   loadHmmPinyinChart,
   loadMmPinyinChart,
+  loadPylyPinyinChart,
   loadStandardPinyinChart,
   matchAllPinyinSyllables,
   matchAllPinyinSyllablesWithIndexes,
@@ -29,7 +29,7 @@ test(`json data can be loaded and passes the schema validation`, async () => {
   await loadHmmPinyinChart();
   await loadMmPinyinChart();
   await loadStandardPinyinChart();
-  loadHhhPinyinChart();
+  loadPylyPinyinChart();
 });
 
 test(`${convertPinyinWithToneNumberToToneMark.name} fixtures`, () => {
@@ -444,9 +444,9 @@ test(`hmm pinyin covers kangxi pinyin`, async () => {
   ]);
 });
 
-describe(`hhh pinyin chart`, async () => {
+describe(`pyly pinyin chart`, async () => {
   test(`sound group ID consistency`, async () => {
-    const chart = loadHhhPinyinChart();
+    const chart = loadPylyPinyinChart();
 
     const chartGroupIds = new Set(chart.soundGroups.map((x) => x.id));
     expect(chartGroupIds).toEqual(
@@ -461,7 +461,7 @@ describe(`hhh pinyin chart`, async () => {
   });
 
   test(`sound ID consistency`, async () => {
-    const chart = loadHhhPinyinChart();
+    const chart = loadPylyPinyinChart();
 
     const chartSoundIds = new Set(chart.soundGroups.flatMap((x) => x.sounds));
     expect(chartSoundIds).toEqual(
@@ -470,7 +470,7 @@ describe(`hhh pinyin chart`, async () => {
   });
 
   test(`standard tests`, async () => {
-    const chart = loadHhhPinyinChart();
+    const chart = loadPylyPinyinChart();
     await testPinyinChart(chart, [
       [`zhang`, `zh-`, `-ang`],
       [`bao`, `b-`, `-ao`],

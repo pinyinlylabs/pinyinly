@@ -140,7 +140,7 @@ export default function IndexPage() {
             <View className={boxClass()}>
               <View className="items-stretch self-stretch">
                 <View className="flex-row items-center justify-between">
-                  <Text className="hhh-body-title mb-1">
+                  <Text className="pyly-body-title mb-1">
                     {recentHanzi.data.length > 0
                       ? `Continue learning`
                       : `Start learning`}
@@ -213,7 +213,7 @@ export default function IndexPage() {
 
                 {recentHanzi.data.length > 0 ? (
                   <>
-                    <Text className="hhh-body-caption">
+                    <Text className="pyly-body-caption">
                       A few things from last time
                     </Text>
                     <View className="mt-2 flex-row gap-2">
@@ -229,7 +229,7 @@ export default function IndexPage() {
                   </>
                 ) : (
                   <>
-                    <Text className="hhh-body-caption">
+                    <Text className="pyly-body-caption">
                       There’s no time like the present
                     </Text>
                   </>
@@ -252,8 +252,8 @@ export default function IndexPage() {
             style={{ alignSelf: `stretch`, alignItems: `center` }}
           >
             <View className={boxClass()}>
-              <Text className="hhh-body-title mb-1">History</Text>
-              <Text className="hhh-body-caption mb-4">
+              <Text className="pyly-body-title mb-1">History</Text>
+              <Text className="pyly-body-caption mb-4">
                 See your past studies, review characters and words, and
                 reinforce your knowledge with spaced repetition.
               </Text>

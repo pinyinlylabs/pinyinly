@@ -28,7 +28,7 @@ export default () => {
       </View>
       <View className="flex-row items-start gap-4">
         <View className="flex-row items-center gap-2">
-          <Text className="hhh-dev-dt">Answer:</Text>
+          <Text className="pyly-dev-dt">Answer:</Text>
           <RectButton variant="outline" onPress={logCorrect}>
             Correct
           </RectButton>

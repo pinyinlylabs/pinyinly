@@ -1,10 +1,10 @@
-import { parseHhhmark, stringifyHhhmark } from "#data/hhhmark.ts";
+import { parsePylymark, stringifyPylymark } from "#data/pylymark.ts";
 
 import { describe, expect, test } from "vitest";
 
-describe(`${parseHhhmark.name} suite`, () => {
+describe(`${parsePylymark.name} suite`, () => {
   test(`parses plain text correctly`, () => {
-    const nodes = parseHhhmark(`This is a plain text.`);
+    const nodes = parsePylymark(`This is a plain text.`);
     expect(nodes).toEqual([
       {
         text: `This is a plain text.`,
@@ -14,7 +14,7 @@ describe(`${parseHhhmark.name} suite`, () => {
   });
 
   test(`parses HanziWord references correctly`, () => {
-    const nodes = parseHhhmark(`See also {好:good}.`);
+    const nodes = parsePylymark(`See also {好:good}.`);
     expect(nodes).toEqual([
       {
         text: `See also `,
@@ -33,7 +33,7 @@ describe(`${parseHhhmark.name} suite`, () => {
   });
 
   test(`parses HanziWord references with omitted gloss`, () => {
-    const nodes = parseHhhmark(`See also {好:-good}.`);
+    const nodes = parsePylymark(`See also {好:-good}.`);
     expect(nodes).toEqual([
       {
         text: `See also `,
@@ -52,7 +52,7 @@ describe(`${parseHhhmark.name} suite`, () => {
   });
 
   test(`parses bold text correctly`, () => {
-    const nodes = parseHhhmark(`This is **bold** text.`);
+    const nodes = parsePylymark(`This is **bold** text.`);
     expect(nodes).toEqual([
       {
         text: `This is `,
@@ -70,7 +70,7 @@ describe(`${parseHhhmark.name} suite`, () => {
   });
 
   test(`parses italic text correctly`, () => {
-    const nodes = parseHhhmark(`This is *italic* text.`);
+    const nodes = parsePylymark(`This is *italic* text.`);
     expect(nodes).toEqual([
       {
         text: `This is `,
@@ -88,7 +88,7 @@ describe(`${parseHhhmark.name} suite`, () => {
   });
 
   test(`parses single smart quotes correctly`, () => {
-    const nodes = parseHhhmark(`It's a 'quote'.`);
+    const nodes = parsePylymark(`It's a 'quote'.`);
     expect(nodes).toEqual([
       {
         text: `It’s a ‘quote’.`,
@@ -98,7 +98,7 @@ describe(`${parseHhhmark.name} suite`, () => {
   });
 
   test(`parses double smart quotes correctly`, () => {
-    const nodes = parseHhhmark(`He said "hello".`);
+    const nodes = parsePylymark(`He said "hello".`);
     expect(nodes).toEqual([
       {
         text: `He said “hello”.`,
@@ -108,8 +108,8 @@ describe(`${parseHhhmark.name} suite`, () => {
   });
 });
 
-describe(`${stringifyHhhmark.name} suite`, () => {
-  const roundTrip = (str: string) => stringifyHhhmark(parseHhhmark(str));
+describe(`${stringifyPylymark.name} suite`, () => {
+  const roundTrip = (str: string) => stringifyPylymark(parsePylymark(str));
 
   test(`roundtrips bold text`, () => {
     const str = `This is **bold** text.`;

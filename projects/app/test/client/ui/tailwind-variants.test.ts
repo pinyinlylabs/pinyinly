@@ -1,4 +1,4 @@
-// hhh-standalone-test
+// pyly-standalone-test
 
 import { tv } from "tailwind-variants";
 import { expect, test } from "vitest";
