@@ -13,7 +13,7 @@
   "dependencies": {
     "@expo/metro-runtime": "~5.0.4",
     "@inngest/middleware-sentry": "^0.1.1",
-    "@lottiefiles/dotlottie-react": "^0.13.5",
+    "@lottiefiles/dotlottie-react": "^0.14.0",
     "@lucia-auth/adapter-drizzle": "^1.1.0",
     "@neondatabase/serverless": "^1.0.0",
     "@pinyinly/eslint-rules": "workspace:*",
