@@ -310,7 +310,7 @@ export default tseslint.config(
           ],
         },
       ],
-      "@pinyinly/require-glob": `error`,
+      "@pinyinly/glob-template": `error`,
 
       //
       // tailwindcss
@@ -382,6 +382,25 @@ export default tseslint.config(
       // the module's default export at its declaration site and at its import
       // sites.
       "import/no-anonymous-default-export": `error`,
+    },
+  },
+
+  // dev files
+  {
+    files: [`src/app/dev/**/*`],
+    rules: {
+      "no-console": `off`,
+    },
+  },
+
+  // dev UI demo files
+  {
+    files: [`src/app/dev/ui/_demos/*`],
+    rules: {
+      "import/no-named-default": `off`,
+      "import/no-anonymous-default-export": `off`,
+      "unicorn/no-anonymous-default-export": `off`,
+      "react/display-name": `off`, // the display name is the filename
     },
   },
 
