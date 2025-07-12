@@ -4,6 +4,6 @@ module.exports = {
     ["import-path-rewrite"]: require("./import-path-rewrite.cjs"),
     ["nameof"]: require("./nameof.cjs"),
     ["no-restricted-css-classes"]: require("./no-restricted-css-classes.cjs"),
-    ["require-glob"]: require("./require-glob.cjs"),
+    ["glob-template"]: require("./glob-template.cjs"),
   },
 };

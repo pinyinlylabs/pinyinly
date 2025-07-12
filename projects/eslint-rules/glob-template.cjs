@@ -1,9 +1,18 @@
 /**
- * @typedef {import('eslint').Rule.RuleContext} RuleContext
+ * @typede  meta: {
+    type: "problem",
+    docs: {
+      description:
+        "Ensures template-generated code is in sync with files in a directory, using <hhh-glob-template> comments.",
+    },
+    fixable: "code",
+    schema: [],
+  },('eslint').Rule.RuleContext} RuleContext
  * @typedef {import('eslint').Rule.Node} Node
  * @typedef {import('estree').Literal} Literal
  * @typedef {import('estree').TemplateLiteral} TemplateLiteral
  * @typedef {import('eslint').Rule.RuleModule} RuleModule
+ * @typedef {import('eslint').Rule.RuleContext} RuleContext
  */
 
 const fs = require("fs");
@@ -16,7 +25,7 @@ const rule = {
     type: "problem",
     docs: {
       description:
-        "Ensures require arrays are in sync with files in a directory, using <hhh-require-glob> comments.",
+        "Ensures require arrays are in sync with files in a directory, using <hhh-glob-template> comments.",
     },
     fixable: "code",
     schema: [],
@@ -34,17 +43,21 @@ const rule = {
           const comment = comments[i];
           if (!comment) continue;
           // Match the opening tag and capture attributes
-          const openTagMatch = comment.value.match(/<hhh-require-glob([^>]*)>/);
+          // This regex needs to handle > characters within attribute values
+          const openTagMatch = comment.value.match(
+            /<hhh-glob-template((?:\s+[a-zA-Z0-9_-]+\s*=\s*"(?:[^"\\]|\\.)*")*)\s*>/,
+          );
           if (!openTagMatch) continue;
           const attrs = (openTagMatch[1] || "").trim();
-          // Parse attributes (robust, any order, only dir and glob allowed)
+          // Parse attributes (robust, any order)
           let dir = null;
           let globPattern = null;
+          let template = null;
           let attrError = false;
           if (attrs) {
-            // Match all key="value" pairs
+            // Match all key="value" pairs, handling escaped quotes
             const attrPairs = Array.from(
-              attrs.matchAll(/([a-zA-Z0-9_-]+)\s*=\s*"([^"]*)"/g),
+              attrs.matchAll(/([a-zA-Z0-9_-]+)\s*=\s*"((?:[^"\\]|\\.)*)"/g),
             );
             const attrMap = Object.fromEntries(
               attrPairs.map(([_, k, v]) => [k, v]),
@@ -52,29 +65,36 @@ const rule = {
             const keys = Object.keys(attrMap);
             // Remove all matched key="value" pairs from the string
             const cleanedAttrs = attrs
-              .replace(/([a-zA-Z0-9_-]+)\s*=\s*"([^"]*)"/g, "")
+              .replace(/([a-zA-Z0-9_-]+)\s*=\s*"((?:[^"\\]|\\.)*)"/g, "")
               .trim();
-            // Must have exactly dir and glob, no more, no less, and no leftover text
+            // Must have dir, glob, and template, no extra attributes or leftover text
+            const validAttrs = ["dir", "glob", "template"];
+            const hasRequiredAttrs =
+              keys.includes("dir") &&
+              keys.includes("glob") &&
+              keys.includes("template");
+            const hasValidAttrs = keys.every((key) => validAttrs.includes(key));
+            const hasValues = attrMap.dir && attrMap.glob && attrMap.template;
+
             if (
-              keys.length !== 2 ||
-              !keys.includes("dir") ||
-              !keys.includes("glob") ||
-              !attrMap.dir ||
-              !attrMap.glob ||
+              !hasRequiredAttrs ||
+              !hasValidAttrs ||
+              !hasValues ||
               cleanedAttrs.length > 0
             ) {
               attrError = true;
             } else {
               dir = attrMap.dir;
               globPattern = attrMap.glob;
+              template = attrMap.template.replace(/\\\$/g, "$"); // Unescape dollar signs
             }
           } else {
             attrError = true;
           }
-          if (attrError || !dir || !globPattern) {
+          if (attrError || !dir || !globPattern || !template) {
             context.report({
               loc: comment.loc || { line: 1, column: 0 },
-              message: `<hhh-require-glob> must have both dir and glob attributes, and only those attributes, e.g. <hhh-require-glob dir=\"./icons\" glob=\"*.svg\">`,
+              message: `<hhh-glob-template> must have dir, glob, and template attributes, e.g. <hhh-glob-template dir="./icons" glob="*.svg" template="  require('\${path}'),">. Template variables: \${path}, \${pathWithoutExt}, \${filenameWithoutExt}`,
             });
             continue;
           }
@@ -85,7 +105,7 @@ const rule = {
           while (closeIdx < comments.length) {
             if (
               comments[closeIdx] &&
-              comments[closeIdx]?.value.includes("</hhh-require-glob>")
+              comments[closeIdx]?.value.includes("</hhh-glob-template>")
             ) {
               closeComment = comments[closeIdx];
               break;
@@ -94,7 +114,7 @@ const rule = {
           }
           if (!closeComment) continue;
 
-          // Find the array node that contains this comment
+          // Find the array node that contains this comment (optional for template use cases)
           const tokens =
             sourceCode.getTokensBefore(comment, {
               includeComments: false,
@@ -111,7 +131,7 @@ const rule = {
               }
             }
           }
-          if (!arrayNode) continue;
+          // Continue even if no array node is found (for non-array use cases)
 
           // Get all files in the directory
           const filePath = context.getFilename();
@@ -135,9 +155,8 @@ const rule = {
             continue;
           }
 
-          // Build the expected require lines
-          // Use the dir parameter for the require path, converting to an alias if needed
-          const requireLines = files.map((f) => {
+          // Build the expected lines using the template
+          const generatedLines = files.map((f) => {
             let requirePath = dir.replace(/\/$/, "");
             requirePath = requirePath ? `${requirePath}/${f}` : f;
             // Only add ./ if not already relative (doesn't start with ./ or ../)
@@ -147,7 +166,22 @@ const rule = {
             ) {
               requirePath = `./${requirePath}`;
             }
-            return `  require(\`${requirePath}\`),`;
+
+            // Get filename without extension (for variable names)
+            const filenameWithoutExt = f.replace(/\.[^/.]+$/, "");
+
+            // Get path without extension (for $pathWithoutExt compatibility)
+            const pathWithoutExt = requirePath.replace(/\.[^/.]+$/, "");
+
+            // Replace template variables
+            let result = template;
+            result = result.replace(
+              /\$\{filenameWithoutExt\}/g,
+              filenameWithoutExt,
+            );
+            result = result.replace(/\$\{pathWithoutExt\}/g, pathWithoutExt);
+            result = result.replace(/\$\{path\}/g, requirePath);
+            return result;
           });
 
           // Find the range to replace
@@ -155,25 +189,30 @@ const rule = {
           const start = comment.range[1];
           const end = closeComment.range[0];
           const between = sourceCode.text.slice(start, end);
-          const actualRequires = between.match(/require\([^\)]+\),?/g) || [];
+
+          // Extract actual content lines from the code between comments
+          const actualLines = between
+            .split("\n")
+            .map((line) => line.trim())
+            .filter((line) => line.length > 0);
 
           // Compare
           const isOutOfSync =
-            actualRequires.length !== requireLines.length ||
-            actualRequires.some(
-              (line, idx) => line.trim() !== requireLines[idx]?.trim(),
+            actualLines.length !== generatedLines.length ||
+            actualLines.some(
+              (line, idx) => line !== generatedLines[idx]?.trim(),
             );
 
           if (isOutOfSync) {
             context.report({
-              loc: comment.loc || arrayNode.loc || { line: 1, column: 0 },
-              message: `Require array is out of sync with files in ${dir}`,
+              loc: comment.loc || arrayNode?.loc || { line: 1, column: 0 },
+              message: `Generated code is out of sync with files in ${dir}`,
               fix: (fixer) =>
                 fixer.replaceTextRange(
                   [start, end],
                   "\n" +
-                    requireLines.join("\n") +
-                    (requireLines.length ? "\n" : ""),
+                    generatedLines.join("\n") +
+                    (generatedLines.length ? "\n" : ""),
                 ),
             });
           }

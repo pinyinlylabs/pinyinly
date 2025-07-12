@@ -9,6 +9,9 @@ The following commands should be used to test the code:
 - Static type checking: `moon run app:typecheck`
 - Prettier: `moon run root:prettierCheck`
 
+These can be run from any directory, there's no need to `cd` to a particular
+directory.
+
 # Tests directory structure
 
 Test files are located in the `tests/` directory. The directory structure
