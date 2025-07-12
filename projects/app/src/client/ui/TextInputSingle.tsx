@@ -33,7 +33,7 @@ export function TextInputSingle(props: TextInputSingleProps) {
 
 const inputClass = tv({
   base: `
-    hhh-body-input rounded-xl bg-bg-1 px-4 py-3 outline-none
+    pyly-body-input rounded-xl bg-bg-1 px-4 py-3 outline-none
 
     placeholder:text-fg/30
   `,

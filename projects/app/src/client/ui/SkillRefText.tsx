@@ -51,7 +51,7 @@ export const SkillRefText = ({ skill }: { skill: Skill }) => {
             showGloss={false}
             showPinyin
           />
-          <Text className="hhh-body-caption"> (initial)</Text>
+          <Text className="pyly-body-caption"> (initial)</Text>
         </>
       );
     }
@@ -65,7 +65,7 @@ export const SkillRefText = ({ skill }: { skill: Skill }) => {
             showGloss={false}
             showPinyin
           />
-          <Text className="hhh-body-caption"> (final)</Text>
+          <Text className="pyly-body-caption"> (final)</Text>
         </>
       );
     }
@@ -79,7 +79,7 @@ export const SkillRefText = ({ skill }: { skill: Skill }) => {
             showGloss={false}
             showPinyin
           />
-          <Text className="hhh-body-caption"> (tone)</Text>
+          <Text className="pyly-body-caption"> (tone)</Text>
         </>
       );
     }

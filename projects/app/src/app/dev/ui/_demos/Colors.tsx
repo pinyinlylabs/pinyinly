@@ -39,12 +39,12 @@ export default () => {
       className={`
         flex-row gap-2
 
-        [.hhh-color-scheme-dark_&]:flex-row-reverse
+        [.pyly-color-scheme-dark_&]:flex-row-reverse
       `}
     >
       {opacities.map((o, i) => (
         <View key={i} className="w-9 items-center justify-center">
-          <Text className="hhh-dev-dt">
+          <Text className="pyly-dev-dt">
             <Text className="text-fg/20">/</Text>
             {o * 100}
           </Text>
@@ -57,21 +57,21 @@ export default () => {
       className={`
         flex-1 items-end
 
-        [.hhh-color-scheme-dark_&]:items-start
+        [.pyly-color-scheme-dark_&]:items-start
       `}
     >
       <View
         className={`
           flex-row gap-4
 
-          [.hhh-color-scheme-dark_&]:flex-row-reverse
+          [.pyly-color-scheme-dark_&]:flex-row-reverse
         `}
       >
         <View
           className={`
             items-end gap-2
 
-            [.hhh-color-scheme-dark_&]:items-start
+            [.pyly-color-scheme-dark_&]:items-start
           `}
         >
           <View>
@@ -79,7 +79,7 @@ export default () => {
           </View>
           {bgColors.map((bgColor) => (
             <View key={bgColor} className={`h-9 justify-center`}>
-              <Text className="hhh-dev-dt text-fg">
+              <Text className="pyly-dev-dt text-fg">
                 {bgColor.replace(`bg-`, ``)}
               </Text>
             </View>
@@ -93,7 +93,7 @@ export default () => {
               className={`
                 flex-row gap-2
 
-                [.hhh-color-scheme-dark_&]:flex-row-reverse
+                [.pyly-color-scheme-dark_&]:flex-row-reverse
               `}
             >
               {opacities.map((opacity, index) => (

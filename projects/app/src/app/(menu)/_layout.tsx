@@ -72,7 +72,7 @@ export default function MenuLayout() {
                     source={require(`@/assets/icons/arrow-return-left.svg`)}
                     size={24}
                   />
-                  <Text className="hhh-button-bare">Back to app</Text>
+                  <Text className="pyly-button-bare">Back to app</Text>
                 </RectButton>
               </Link>
             </View>
@@ -150,7 +150,7 @@ export default function MenuLayout() {
 function DesktopNavGroupTitle({ name }: { name: string }) {
   return (
     <View className="h-[24px] items-end justify-center px-[24px]">
-      <Text className="hhh-body-dt">{name}</Text>
+      <Text className="pyly-body-dt">{name}</Text>
     </View>
   );
 }
@@ -288,7 +288,7 @@ function MobileNavGroup({
     <View className="gap-2.5">
       {title == null ? null : (
         <View className="px-4">
-          <Text className="hhh-body-dt">{title}</Text>
+          <Text className="pyly-body-dt">{title}</Text>
         </View>
       )}
       <View className={`gap-0.5 overflow-hidden rounded-xl`}>{children}</View>
@@ -307,7 +307,7 @@ const MobileNavGroupItem = customTabTrigger(
           hover:bg-fg/10
         `}
       >
-        <Text className="hhh-button-outline">{name}</Text>
+        <Text className="pyly-button-outline">{name}</Text>
         <View className="flex-1 items-end">
           {isFocused ? (
             <IconImage source={require(`@/assets/icons/check.svg`)} size={24} />
@@ -358,7 +358,7 @@ function MobileTopMenu({
 
       {/* Middle title */}
       <View className="flex-1 items-center">
-        <Text className="hhh-body-heading">{title}</Text>
+        <Text className="pyly-body-heading">{title}</Text>
       </View>
 
       {/* Right icons */}

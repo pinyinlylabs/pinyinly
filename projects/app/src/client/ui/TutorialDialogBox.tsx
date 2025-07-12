@@ -9,7 +9,7 @@ import Reanimated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { HhhmarkTypewriter } from "./HhhmarkTypewriter";
+import { PylymarkTypewriter } from "./PylymarkTypewriter";
 
 export const TutorialDialogBox = ({
   text,
@@ -39,9 +39,9 @@ export const TutorialDialogBox = ({
   return (
     <Reanimated.View style={[animatedContentStyle]} className="p-4 pl-8">
       {speechBubbleLoaded ? (
-        <HhhmarkTypewriter
+        <PylymarkTypewriter
           source={text}
-          className="hhh-body"
+          className="pyly-body"
           delay={500}
           onAnimateEnd={() => {
             setTextAnimationDone(true);
@@ -58,7 +58,7 @@ export const TutorialDialogBox = ({
           onContinue();
         }}
       >
-        <Text className="hhh-button-bare text-fg">Continue</Text>
+        <Text className="pyly-button-bare text-fg">Continue</Text>
         <IconImage
           source={require(`@/assets/icons/chevron-forward-filled.svg`)}
           size={24}

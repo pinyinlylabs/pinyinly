@@ -26,7 +26,6 @@ import { sub } from "date-fns/sub";
 import { subDays } from "date-fns/subDays";
 import type { DeepReadonly } from "ts-essentials";
 import { isHanziGrapheme, splitHanziText } from "./hanzi";
-import { parseHhhmark } from "./hhhmark";
 import type {
   HanziText,
   HanziWord,
@@ -35,6 +34,7 @@ import type {
   UnsavedSkillRating,
 } from "./model";
 import { SkillKind, SrsKind } from "./model";
+import { parsePylymark } from "./pylymark";
 import type {
   HanziWordSkill,
   PinyinFinalAssociationSkill,
@@ -173,7 +173,7 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
         }
 
         if (meaning?.glossHint != null) {
-          for (const node of parseHhhmark(meaning.glossHint)) {
+          for (const node of parsePylymark(meaning.glossHint)) {
             if (node.type === `hanziWord`) {
               deps.push(hanziWordToGloss(node.hanziWord));
             }

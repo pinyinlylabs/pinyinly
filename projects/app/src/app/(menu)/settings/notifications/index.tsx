@@ -5,7 +5,7 @@ export default function NotificationsSettingsPage() {
     <View className="gap-5">
       {/* Header */}
       <View>
-        <Text className="hhh-body-title">Notifications</Text>
+        <Text className="pyly-body-title">Notifications</Text>
       </View>
     </View>
   );

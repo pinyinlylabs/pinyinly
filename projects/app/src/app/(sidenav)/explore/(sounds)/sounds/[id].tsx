@@ -2,12 +2,12 @@ import { useLocalQuery } from "@/client/hooks/useLocalQuery";
 import { usePinyinSoundGroups } from "@/client/hooks/usePinyinSoundGroups";
 import { usePinyinSounds } from "@/client/hooks/usePinyinSounds";
 import { useReplicache } from "@/client/hooks/useReplicache";
-import { Hhhmark } from "@/client/ui/Hhhmark";
+import { Pylymark } from "@/client/ui/Pylymark";
 import { RectButton } from "@/client/ui/RectButton";
 import type { PinyinSoundId } from "@/data/model";
 import {
   defaultPinyinSoundInstructions,
-  loadHhhPinyinChart,
+  loadPylyPinyinChart,
 } from "@/data/pinyin";
 import { loadPinyinSoundNameSuggestions } from "@/dictionary/dictionary";
 import { sortComparatorString } from "@/util/collections";
@@ -19,7 +19,7 @@ import { tv } from "tailwind-variants";
 export default function MnemonicIdPage() {
   const id = useLocalSearchParams<`/explore/sounds/[id]`>().id as PinyinSoundId;
   const r = useReplicache();
-  const chart = loadHhhPinyinChart();
+  const chart = loadPylyPinyinChart();
 
   const soundNameSuggestions = useLocalQuery({
     queryKey: [MnemonicIdPage.name, `themeSuggestions`],
@@ -75,15 +75,15 @@ export default function MnemonicIdPage() {
         </View>
 
         <View>
-          <Text className="hhh-body-title">Pronunciation</Text>
+          <Text className="pyly-body-title">Pronunciation</Text>
 
-          <Text className="hhh-body">
-            <Hhhmark source={defaultPinyinSoundInstructions[id] ?? ``} />
+          <Text className="pyly-body">
+            <Pylymark source={defaultPinyinSoundInstructions[id] ?? ``} />
           </Text>
         </View>
 
         <View className="flex-row flex-wrap gap-1">
-          <Text className="hhh-body-title">Names</Text>
+          <Text className="pyly-body-title">Names</Text>
         </View>
 
         <View className="gap-2">
@@ -104,7 +104,7 @@ export default function MnemonicIdPage() {
               )
               .map(([theme, names]) => (
                 <View key={theme}>
-                  <Text className="hhh-body-heading">
+                  <Text className="pyly-body-heading">
                     {theme}
                     {theme === pinyinSoundGroup?.theme ? (
                       ` ✅`

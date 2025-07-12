@@ -1,5 +1,5 @@
 import type { AppRouter } from "@/server/routers/_app";
-import { httpSessionHeader } from "@/util/http";
+import { httpSessionHeaderTx } from "@/util/http";
 import type { QueryClient } from "@tanstack/react-query";
 import type { HTTPHeaders } from "@trpc/client";
 import { httpLink, retryLink } from "@trpc/client";
@@ -25,7 +25,7 @@ export const TrpcProvider = ({
           retry(opts) {
             // Retry Vercel timeouts. These often happen on cold starts.
             if (
-              opts.error.cause instanceof HhhVercelError &&
+              opts.error.cause instanceof PylyVercelError &&
               opts.error.cause.code === `FUNCTION_INVOCATION_TIMEOUT`
             ) {
               // Retry twice, the second attempt should work.
@@ -44,7 +44,7 @@ export const TrpcProvider = ({
 
             const sessionId = await getServerSessionId();
             if (sessionId != null) {
-              result[httpSessionHeader] = sessionId;
+              result[httpSessionHeaderTx] = sessionId;
             }
 
             return result;
@@ -76,7 +76,7 @@ export const TrpcProvider = ({
   );
 };
 
-class HhhVercelError extends Error {
+class PylyVercelError extends Error {
   code: string;
   id: string;
 
@@ -90,10 +90,10 @@ class HhhVercelError extends Error {
 
 export function maybeParseVercelError(
   response: Response,
-): HhhVercelError | undefined {
+): PylyVercelError | undefined {
   const errorCode = response.headers.get(`x-vercel-error`);
   if (errorCode != null) {
     const errorId = response.headers.get(`x-vercel-id`) ?? ``;
-    return new HhhVercelError(errorCode, errorId);
+    return new PylyVercelError(errorCode, errorId);
   }
 }

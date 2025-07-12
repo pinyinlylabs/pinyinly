@@ -195,10 +195,10 @@ const roundedRect = tv({
 const text = tv({
   variants: {
     variant: {
-      filled: `hhh-button-filled`,
-      outline: `hhh-button-outline`,
-      option: `hhh-button-option`,
-      bare: `hhh-button-bare`,
+      filled: `pyly-button-filled`,
+      outline: `pyly-button-outline`,
+      option: `pyly-button-option`,
+      bare: `pyly-button-bare`,
     },
   },
 });

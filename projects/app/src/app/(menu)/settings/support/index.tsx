@@ -5,7 +5,7 @@ export default function SupportSettingsPage() {
     <View className="gap-5">
       {/* Header */}
       <View>
-        <Text className="hhh-body-title">Support</Text>
+        <Text className="pyly-body-title">Support</Text>
       </View>
     </View>
   );

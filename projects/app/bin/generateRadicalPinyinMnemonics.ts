@@ -21,7 +21,7 @@ import { makeDbCache } from "./util/cache.js";
 import { writeUtf8FileIfChanged } from "./util/fs.js";
 import { openAiWithCache, zodResponseFormat } from "./util/openai.js";
 
-const debug = makeDebug(`hhh`);
+const debug = makeDebug(`pyly`);
 
 const argv = await yargs(process.argv.slice(2))
   .usage(`$0 [args]`)

@@ -8,7 +8,7 @@ import resolvePackagePath from "resolve-package-path";
 import { z } from "zod/v4";
 import { writeUtf8FileIfChanged } from "./util/fs.js";
 
-const debug = makeDebug(`hhh`);
+const debug = makeDebug(`pyly`);
 
 const projectDir = path.join(import.meta.dirname, `../`);
 

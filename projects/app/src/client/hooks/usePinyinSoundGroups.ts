@@ -3,13 +3,13 @@ import {
   defaultPinyinSoundGroupNames,
   defaultPinyinSoundGroupRanks,
   defaultPinyinSoundGroupThemes,
-  loadHhhPinyinChart,
+  loadPylyPinyinChart,
 } from "@/data/pinyin";
 import { sortComparatorNumber } from "@/util/collections";
 import { nullIfEmpty } from "@/util/unicode";
 
 export function usePinyinSoundGroups() {
-  const chart = loadHhhPinyinChart();
+  const chart = loadPylyPinyinChart();
 
   return useRizzleQuery([`usePinyinSoundGroups`], async (r, tx) => {
     const groups = [];

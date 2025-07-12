@@ -13,11 +13,11 @@ export default function AcknowledgementsPage() {
     <View className="gap-5">
       {/* Header */}
       <View>
-        <Text className="hhh-body-title">Acknowledgements</Text>
+        <Text className="pyly-body-title">Acknowledgements</Text>
       </View>
 
       <View>
-        <Text className="hhh-body">
+        <Text className="pyly-body">
           These open-source libraries are used to create Pinyinly:
         </Text>
       </View>
@@ -25,9 +25,9 @@ export default function AcknowledgementsPage() {
       <View className="gap-0.5">
         {billOfMaterials.data?.map(([license, pkgNames]) => (
           <Fragment key={license}>
-            <Text className="hhh-body mt-3">{license} License</Text>
+            <Text className="pyly-body mt-3">{license} License</Text>
             {pkgNames.map((pkgName, index) => (
-              <Text key={index} className="hhh-body-caption">
+              <Text key={index} className="pyly-body-caption">
                 {pkgName}
               </Text>
             ))}

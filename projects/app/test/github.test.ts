@@ -1,4 +1,4 @@
-// hhh-standalone-test
+// pyly-standalone-test
 
 import * as fs from "node:fs/promises";
 import { expect, test } from "vitest";

@@ -52,14 +52,14 @@ function UiDemoIndexPage() {
         <View className="flex-1 flex-row">
           <View
             className={`
-              hhh-color-schema-light theme-default
+              pyly-color-schema-light theme-default
 
               ${examplesStackClassName}
             `}
           />
           <View
             className={`
-              hhh-color-scheme-dark theme-default
+              pyly-color-scheme-dark theme-default
 
               ${examplesStackClassName}
             `}
@@ -88,10 +88,9 @@ const lazyDemo = <Demo extends FunctionComponent>(
 
 // prettier-ignore
 export const demos: Record<string, FunctionComponent> = {
-  // <hhh-glob-template dir="_demos/" glob="*.tsx" template="  ${filenameWithoutExt}: lazyDemo(() => import(`${pathWithoutExt}`)),">
+  // <pyly-glob-template dir="_demos/" glob="*.tsx" template="  ${filenameWithoutExt}: lazyDemo(() => import(`${pathWithoutExt}`)),">
   Colors: lazyDemo(() => import(`./_demos/Colors`)),
   HanziText: lazyDemo(() => import(`./_demos/HanziText`)),
-  Hhhmark: lazyDemo(() => import(`./_demos/Hhhmark`)),
   IconImage: lazyDemo(() => import(`./_demos/IconImage`)),
   Icons: lazyDemo(() => import(`./_demos/Icons`)),
   ImageCloud: lazyDemo(() => import(`./_demos/ImageCloud`)),
@@ -99,6 +98,7 @@ export const demos: Record<string, FunctionComponent> = {
   NewSprout: lazyDemo(() => import(`./_demos/NewSprout`)),
   NewWordTutorial: lazyDemo(() => import(`./_demos/NewWordTutorial`)),
   PinyinOptionButton: lazyDemo(() => import(`./_demos/PinyinOptionButton`)),
+  Pylymark: lazyDemo(() => import(`./_demos/Pylymark`)),
   QuizDeckHanziToPinyinQuestion: lazyDemo(() => import(`./_demos/QuizDeckHanziToPinyinQuestion`)),
   QuizFlagText: lazyDemo(() => import(`./_demos/QuizFlagText`)),
   QuizProgressBar: lazyDemo(() => import(`./_demos/QuizProgressBar`)),
@@ -111,5 +111,5 @@ export const demos: Record<string, FunctionComponent> = {
   ToggleButton: lazyDemo(() => import(`./_demos/ToggleButton`)),
   Typography: lazyDemo(() => import(`./_demos/Typography`)),
   WikiHanziWordModal: lazyDemo(() => import(`./_demos/WikiHanziWordModal`)),
-// </hhh-glob-template>
+// </pyly-glob-template>
 };

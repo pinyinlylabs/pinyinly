@@ -8,36 +8,36 @@
   TEXT STYLES
   
   */
-  .hhh-button-filled {
+  .pyly-button-filled {
     @apply font-sans text-base/snug font-bold uppercase text-bg;
   }
-  .hhh-button-outline {
+  .pyly-button-outline {
     @apply font-sans text-base/snug font-bold uppercase text-fg;
   }
-  .hhh-button-option {
+  .pyly-button-option {
     @apply font-sans text-base/snug text-fg;
   }
-  .hhh-button-option-caption {
+  .pyly-button-option-caption {
     @apply font-sans text-sm/snug font-light text-caption;
   }
-  .hhh-button-bare {
+  .pyly-button-bare {
     @apply font-sans text-sm/normal font-bold uppercase text-fg;
   }
 
   /* --- */
 
-  .hhh-ref {
+  .pyly-ref {
     text-decoration-skip-ink: none;
     @apply underline decoration-currentColor/25 hover:decoration-currentColor/50;
   }
-  .hhh-italic {
+  .pyly-italic {
     @apply italic;
   }
 
   /* --- */
 
-  /* <hhh-body-title> */
-  .hhh-body-title {
+  /* <pyly-body-title> */
+  .pyly-body-title {
     @apply font-sans text-2xl/normal tracking-tight text-fg;
   }
   /*
@@ -48,106 +48,106 @@
   */
   /* web */
   @media (display-mode: browser) {
-    .hhh-body-title {
+    .pyly-body-title {
       @apply font-bold;
     }
   }
 
   @media not (display-mode: browser) {
     /* native */
-    .hhh-body-title {
+    .pyly-body-title {
       @apply font-[800];
     }
   }
-  .hhh-body-title .hhh-ref {
+  .pyly-body-title .pyly-ref {
     @apply leading-tight text-2xl/normal font-bold text-fg-bold decoration-[4px] underline-offset-[3px];
   }
-  .hhh-body-title .hhh-bold {
+  .pyly-body-title .pyly-bold {
     @apply font-bold text-fg-bold;
   }
-  /* </hhh-body-title> */
+  /* </pyly-body-title> */
 
   /* --- */
 
-  .hhh-body-heading {
+  .pyly-body-heading {
     @apply font-sans text-lg/normal tracking-tight text-fg font-medium;
   }
-  .hhh-body-heading .hhh-ref {
+  .pyly-body-heading .pyly-ref {
     @apply font-semibold text-lg/normal text-fg-bold decoration-[3px] underline-offset-[3px];
   }
-  .hhh-body-heading .hhh-bold {
+  .pyly-body-heading .pyly-bold {
     @apply font-semibold text-fg-bold;
   }
-  .hhh-body-heading .hhh-italic {
+  .pyly-body-heading .pyly-italic {
     @apply font-medium;
   }
 
   /* --- */
 
-  .hhh-body-2xl {
+  .pyly-body-2xl {
     @apply font-sans text-2xl/normal font-light text-fg;
   }
-  .hhh-body-2xl .hhh-ref {
+  .pyly-body-2xl .pyly-ref {
     @apply text-2xl/normal font-medium text-fg-bold decoration-[4px] underline-offset-[3px];
   }
-  .hhh-body-2xl .hhh-bold {
+  .pyly-body-2xl .pyly-bold {
     @apply font-medium text-fg-bold;
   }
 
   /* --- */
 
-  .hhh-body {
+  .pyly-body {
     @apply font-sans text-base/normal font-light text-fg;
   }
-  .hhh-body .hhh-ref {
+  .pyly-body .pyly-ref {
     @apply text-base/normal text-fg-ref font-medium decoration-[3px] underline-offset-[2px];
   }
-  .hhh-body .hhh-bold {
+  .pyly-body .pyly-bold {
     @apply font-medium text-fg-bold;
   }
 
   /* --- */
 
-  .hhh-body-caption {
+  .pyly-body-caption {
     @apply font-sans text-sm/normal font-light text-caption;
   }
-  .hhh-body-caption .hhh-ref {
+  .pyly-body-caption .pyly-ref {
     @apply text-caption-loud text-sm/normal font-medium decoration-[2.5px] underline-offset-[2px];
   }
-  .hhh-body-caption .hhh-bold {
+  .pyly-body-caption .pyly-bold {
     @apply text-caption-loud font-medium;
   }
-  .hhh-body-caption .hhh-italic {
+  .pyly-body-caption .pyly-italic {
     @apply font-light;
   }
 
   /* --- */
 
-  .hhh-body-dt {
+  .pyly-body-dt {
     @apply font-sans text-xs/normal font-normal text-caption uppercase;
   }
-  .hhh-body-dt .hhh-ref {
+  .pyly-body-dt .pyly-ref {
     @apply text-xs/normal text-fg-bold font-medium decoration-[2px] underline-offset-[2px];
   }
-  .hhh-body-dt .hhh-bold {
+  .pyly-body-dt .pyly-bold {
     @apply font-medium text-fg-bold;
   }
 
   /* --- */
 
-  .hhh-body-input {
+  .pyly-body-input {
     @apply font-sans text-lg/snug font-light text-fg;
   }
-  .hhh-body-input .hhh-ref {
+  .pyly-body-input .pyly-ref {
     @apply text-lg/snug text-fg-bold font-medium decoration-[3px] underline-offset-[2.5px];
   }
-  .hhh-body-input .hhh-bold {
+  .pyly-body-input .pyly-bold {
     @apply font-medium text-fg-bold;
   }
 
   /* --- */
 
-  .hhh-dev-dt {
+  .pyly-dev-dt {
     @apply font-mono text-xs/normal font-normal text-caption uppercase;
   }
 
@@ -185,7 +185,7 @@
   COLOR SCHEMES
 
   */
-  .hhh-color-scheme-dark {
+  .pyly-color-scheme-dark {
     --color-red: var(--color-red-dark);
     --color-orange: var(--color-orange-dark);
     --color-amber: var(--color-amber-dark);
@@ -219,7 +219,7 @@
     --color-bg-1: var(--color-bg-1-dark);
   }
 
-  .hhh-color-schema-light {
+  .pyly-color-schema-light {
     --color-red: var(--color-red-light);
     --color-orange: var(--color-orange-light);
     --color-amber: var(--color-amber-light);
@@ -372,19 +372,19 @@ body {
   --color-bg-1-light: #f1f3f5;
   --color-bg-1-dark: #1f292b;
 
-  @apply hhh-color-schema-light;
+  @apply pyly-color-schema-light;
   @apply theme-default;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    @apply hhh-color-scheme-dark;
+    @apply pyly-color-scheme-dark;
   }
 }
 
-[data-hhh-react-navigation-screen] {
+[data-pyly-react-navigation-screen] {
   @apply absolute inset-0;
 }
-[data-hhh-react-navigation-screen][data-hhh-react-navigation-modal] {
+[data-pyly-react-navigation-screen][data-pyly-react-navigation-modal] {
   @apply fixed;
 }

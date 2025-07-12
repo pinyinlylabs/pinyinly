@@ -5,35 +5,35 @@ import {
 } from "@/dictionary/dictionary";
 import type { HanziWord } from "./model";
 
-export interface HhhmarkHanziWordNode {
+export interface PylymarkHanziWordNode {
   type: `hanziWord`;
   hanziWord: HanziWord;
   showGloss: boolean;
 }
 
-export interface HhhmarkTextNode {
+export interface PylymarkTextNode {
   type: `text`;
   text: string;
 }
 
-export interface HhhmarkBoldNode {
+export interface PylymarkBoldNode {
   type: `bold`;
   text: string;
 }
 
-export interface HhhmarkItalicNode {
+export interface PylymarkItalicNode {
   type: `italic`;
   text: string;
 }
 
-export type HhhmarkNode =
-  | HhhmarkHanziWordNode
-  | HhhmarkTextNode
-  | HhhmarkBoldNode
-  | HhhmarkItalicNode;
+export type PylymarkNode =
+  | PylymarkHanziWordNode
+  | PylymarkTextNode
+  | PylymarkBoldNode
+  | PylymarkItalicNode;
 
 /**
- * Parse a HHHmark string into an array of nodes.
+ * Parse a Pylymark string into an array of nodes.
  *
  * Supported syntax:
  *
@@ -45,8 +45,8 @@ export type HhhmarkNode =
  * - Single quotes to smart quotes: 'text' -> ‘text’
  * - Double quotes to smart quotes: "text" -> “text”
  */
-export function parseHhhmark(value: string): HhhmarkNode[] {
-  const nodes: HhhmarkNode[] = [];
+export function parsePylymark(value: string): PylymarkNode[] {
+  const nodes: PylymarkNode[] = [];
 
   // Regex patterns for HanziWord, Bold, Italic, and smart quotes
   const regex =
@@ -161,7 +161,7 @@ export function parseHhhmark(value: string): HhhmarkNode[] {
   return nodes;
 }
 
-export function stringifyHhhmark(nodes: HhhmarkNode[]): string {
+export function stringifyPylymark(nodes: PylymarkNode[]): string {
   return nodes
     .map((node) => {
       switch (node.type) {

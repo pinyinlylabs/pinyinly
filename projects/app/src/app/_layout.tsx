@@ -12,8 +12,8 @@ import { routingIntegration } from "@/client/sentry";
 
 import { useAuth } from "@/client/auth";
 import { DeviceStoreProvider } from "@/client/ui/DeviceStoreProvider";
-import { HhhThemeProvider } from "@/client/ui/HhhThemeProvider";
 import { PostHogProvider } from "@/client/ui/PostHogProvider";
+import { PylyThemeProvider } from "@/client/ui/PylyThemeProvider";
 import { SessionStoreProvider } from "@/client/ui/SessionStoreProvider";
 import { SplashScreen } from "@/client/ui/SplashScreen";
 import * as Sentry from "@sentry/react-native";
@@ -49,7 +49,7 @@ function RootLayout() {
   }, [ref]);
 
   return (
-    <HhhThemeProvider>
+    <PylyThemeProvider>
       <DeviceStoreProvider>
         <CurrentSessionStoreProvider>
           <PostHogProvider>
@@ -70,7 +70,7 @@ function RootLayout() {
           </PostHogProvider>
         </CurrentSessionStoreProvider>
       </DeviceStoreProvider>
-    </HhhThemeProvider>
+    </PylyThemeProvider>
   );
 }
 

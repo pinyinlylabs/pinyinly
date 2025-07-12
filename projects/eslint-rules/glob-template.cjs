@@ -3,7 +3,7 @@
     type: "problem",
     docs: {
       description:
-        "Ensures template-generated code is in sync with files in a directory, using <hhh-glob-template> comments.",
+        "Ensures template-generated code is in sync with files in a directory, using <pyly-glob-template> comments.",
     },
     fixable: "code",
     schema: [],
@@ -25,7 +25,7 @@ const rule = {
     type: "problem",
     docs: {
       description:
-        "Ensures require arrays are in sync with files in a directory, using <hhh-glob-template> comments.",
+        "Ensures require arrays are in sync with files in a directory, using <pyly-glob-template> comments.",
     },
     fixable: "code",
     schema: [],
@@ -45,7 +45,7 @@ const rule = {
           // Match the opening tag and capture attributes
           // This regex needs to handle > characters within attribute values
           const openTagMatch = comment.value.match(
-            /<hhh-glob-template((?:\s+[a-zA-Z0-9_-]+\s*=\s*"(?:[^"\\]|\\.)*")*)\s*>/,
+            /<pyly-glob-template((?:\s+[a-zA-Z0-9_-]+\s*=\s*"(?:[^"\\]|\\.)*")*)\s*>/,
           );
           if (!openTagMatch) continue;
           const attrs = (openTagMatch[1] || "").trim();
@@ -94,7 +94,7 @@ const rule = {
           if (attrError || !dir || !globPattern || !template) {
             context.report({
               loc: comment.loc || { line: 1, column: 0 },
-              message: `<hhh-glob-template> must have dir, glob, and template attributes, e.g. <hhh-glob-template dir="./icons" glob="*.svg" template="  require('\${path}'),">. Template variables: \${path}, \${pathWithoutExt}, \${filenameWithoutExt}`,
+              message: `<pyly-glob-template> must have dir, glob, and template attributes, e.g. <pyly-glob-template dir="./icons" glob="*.svg" template="  require('\${path}'),">. Template variables: \${path}, \${pathWithoutExt}, \${filenameWithoutExt}`,
             });
             continue;
           }
@@ -105,7 +105,7 @@ const rule = {
           while (closeIdx < comments.length) {
             if (
               comments[closeIdx] &&
-              comments[closeIdx]?.value.includes("</hhh-glob-template>")
+              comments[closeIdx]?.value.includes("</pyly-glob-template>")
             ) {
               closeComment = comments[closeIdx];
               break;

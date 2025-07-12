@@ -5,7 +5,7 @@ export default function ProfileSettingsPage() {
     <View className="gap-5">
       {/* Header */}
       <View>
-        <Text className="hhh-body-title">Profile</Text>
+        <Text className="pyly-body-title">Profile</Text>
       </View>
     </View>
   );

@@ -1,4 +1,4 @@
-// hhh-standalone-test
+// pyly-standalone-test
 import * as s from "#server/pgSchema.ts";
 import { describe, expect } from "vitest";
 import { dbTest } from "./dbHelpers";

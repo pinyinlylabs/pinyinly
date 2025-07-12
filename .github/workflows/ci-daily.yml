@@ -30,10 +30,10 @@ jobs:
       # for more information.
       - run: git checkout $(git rev-list -1 HEAD)
 
-      - run: moon ci --color --base $HHH_EMPTY_GIT_TREE
+      - run: moon ci --color --base $PYLY_EMPTY_GIT_TREE
         env:
           CHROMATIC_PROJECT_TOKEN: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           # Magic "empty" tree https://jiby.tech/post/git-diff-empty-repo/, so
           # that all files are seen as "affected" by moon ci, and thus all CI
           # tests are run.
-          HHH_EMPTY_GIT_TREE: 4b825dc642cb6eb9a060e54bf8d69288fbee4904
+          PYLY_EMPTY_GIT_TREE: 4b825dc642cb6eb9a060e54bf8d69288fbee4904

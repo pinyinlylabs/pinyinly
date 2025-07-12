@@ -1,11 +1,11 @@
-import { parseHhhmark } from "@/data/hhhmark";
+import { parsePylymark } from "@/data/pylymark";
 import { useMemo } from "react";
 import { Text } from "react-native";
 import { HanziWordRefText } from "./HanziWordRefText";
 
-export const Hhhmark = ({ source }: { source: string }) => {
+export const Pylymark = ({ source }: { source: string }) => {
   const rendered = useMemo(() => {
-    const parsed = parseHhhmark(source);
+    const parsed = parsePylymark(source);
     return (
       <Text className="tab-size-2 whitespace-pre-wrap">
         {parsed.map((node, index) => {
@@ -24,14 +24,14 @@ export const Hhhmark = ({ source }: { source: string }) => {
             }
             case `bold`: {
               return (
-                <Text key={index} className="hhh-bold">
+                <Text key={index} className="pyly-bold">
                   {node.text}
                 </Text>
               );
             }
             case `italic`: {
               return (
-                <Text key={index} className="hhh-italic">
+                <Text key={index} className="pyly-italic">
                   {node.text}
                 </Text>
               );

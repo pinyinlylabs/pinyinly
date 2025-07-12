@@ -42,9 +42,9 @@ import Reanimated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { DeepReadonly } from "ts-essentials";
 import { HanziWordRefText } from "./HanziWordRefText";
-import { Hhhmark } from "./Hhhmark";
 import { IconImage } from "./IconImage";
 import { PinyinOptionButton } from "./PinyinOptionButton";
+import { Pylymark } from "./Pylymark";
 import { QuizFlagText } from "./QuizFlagText";
 import { QuizSubmitButton, QuizSubmitButtonState } from "./QuizSubmitButton";
 import { TextInputSingle } from "./TextInputSingle";
@@ -391,13 +391,13 @@ const HanziWordToGlossSkillAnswerText = ({
 
   return (
     <>
-      <Text className="hhh-body-2xl">
-        <Hhhmark source={`{${hanziWord}}`} />
+      <Text className="pyly-body-2xl">
+        <Pylymark source={`{${hanziWord}}`} />
       </Text>
 
       {includeHint && meaningQuery.data?.glossHint != null ? (
-        <Text className="hhh-body-caption">
-          <Hhhmark source={meaningQuery.data.glossHint} />
+        <Text className="pyly-body-caption">
+          <Pylymark source={meaningQuery.data.glossHint} />
         </Text>
       ) : null}
     </>
@@ -412,7 +412,7 @@ const HanziWordToPinyinSkillAnswerText = ({
   const hanziWord = hanziWordFromSkill(skill);
 
   return (
-    <Text className="hhh-body-2xl">
+    <Text className="pyly-body-2xl">
       <HanziWordRefText hanziWord={hanziWord} showPinyin />
     </Text>
   );

@@ -5,7 +5,7 @@ import { Platform, useColorScheme, View } from "react-native";
 import { tv } from "tailwind-variants";
 import { VisualViewportCssVariables } from "./VisualViewportCssVariables";
 
-export function HhhThemeProvider({ children }: { children: ReactNode }) {
+export function PylyThemeProvider({ children }: { children: ReactNode }) {
   const isDarkMode = useColorScheme() === `dark`;
 
   return (
@@ -55,12 +55,12 @@ const containerClass = tv({
     {
       isWeb: false,
       isDarkMode: true,
-      class: `hhh-color-scheme-dark`,
+      class: `pyly-color-scheme-dark`,
     },
     {
       isWeb: false,
       isDarkMode: false,
-      class: `hhh-color-schema-light`,
+      class: `pyly-color-schema-light`,
     },
   ],
 });

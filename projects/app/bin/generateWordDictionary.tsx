@@ -91,7 +91,7 @@ import {
 } from "./util/fs.js";
 import { makeSimpleAiClient } from "./util/openai.js";
 
-const debug = makeDebug(`hhh`);
+const debug = makeDebug(`pyly`);
 
 const argv = await yargs(process.argv.slice(2))
   .usage(`$0 [args]`)

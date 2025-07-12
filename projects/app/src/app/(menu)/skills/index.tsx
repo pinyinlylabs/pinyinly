@@ -51,7 +51,7 @@ export default function SkillsPage() {
     <View className="gap-5">
       {/* Header */}
       <View>
-        <Text className="hhh-body-title">Skills</Text>
+        <Text className="pyly-body-title">Skills</Text>
       </View>
 
       {/* Rank groups */}
@@ -162,7 +162,7 @@ const skillTileClass = tv({
 });
 
 const skillTileTitleClass = tv({
-  base: `hhh-body-title truncate`,
+  base: `pyly-body-title truncate`,
   variants: {
     rank: {
       0: `text-fg/50`,
@@ -175,7 +175,7 @@ const skillTileTitleClass = tv({
 });
 
 const skillTileGlossClass = tv({
-  base: `hhh-body-caption truncate`,
+  base: `pyly-body-caption truncate`,
   variants: {
     rank: {
       0: `text-fg/50`,
