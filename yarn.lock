@@ -9925,8 +9925,8 @@ __metadata:
   linkType: hard
 
 "eslint-plugin-better-tailwindcss@npm:^3.1.0":
-  version: 3.4.4
-  resolution: "eslint-plugin-better-tailwindcss@npm:3.4.4"
+  version: 3.5.2
+  resolution: "eslint-plugin-better-tailwindcss@npm:3.5.2"
   dependencies:
     "@eslint/css-tree": "npm:^3.6.1"
     enhanced-resolve: "npm:^5.18.2"
@@ -9937,8 +9937,8 @@ __metadata:
     tailwind-csstree: "npm:^0.1.1"
   peerDependencies:
     eslint: ^7.0.0 || ^8.0.0 || ^9.0.0
-    tailwindcss: ^3.3.0 || ^4.0.0
-  checksum: 10c0/6294aaf0db36a6ab72399310e7126b8825a392d3ca29a43a6a7fd1b934f7d1ec61c9afbc6d3e68d8894d25de2491b2a4b47c87e571133eb2cada5e4f0af7d4f6
+    tailwindcss: ^3.3.0 || ^4.1.6
+  checksum: 10c0/473d278b657ed437003b386d6500dc6919fa2394db781a3d624ab72bad771cff9e8ee2b7810d573e5dbce123453b6ac18d838e61e51392ab37b5a111c4a66bea
   languageName: node
   linkType: hard
 
