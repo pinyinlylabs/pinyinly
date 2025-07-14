@@ -15,7 +15,7 @@ import Reanimated, {
 } from "react-native-reanimated";
 
 import { useEventCallback } from "../hooks/useEventCallback";
-import { AnimatedPressable } from "./AnimatedPressable";
+import { ReanimatedPressable } from "./ReanimatedPressable";
 
 interface PageSheetModalProps {
   children: (options: { dismiss: () => void }) => ReactNode;
@@ -189,13 +189,13 @@ const WebImpl = ({
       transparent={true}
       onRequestClose={api.dismiss}
     >
-      <AnimatedPressable
+      <ReanimatedPressable
         className={`absolute size-full cursor-auto items-center justify-center p-4`}
         style={[animatedBackgroundStyle]}
         onPress={onBackgroundPress}
       >
         {content}
-      </AnimatedPressable>
+      </ReanimatedPressable>
     </Modal>
   );
 };

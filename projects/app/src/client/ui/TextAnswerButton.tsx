@@ -17,7 +17,7 @@ import Reanimated, {
 } from "react-native-reanimated";
 import { tv } from "tailwind-variants";
 import { hapticImpactIfMobile } from "../hooks/hapticImpactIfMobile";
-import { AnimatedPressable } from "./AnimatedPressable";
+import { ReanimatedPressable } from "./ReanimatedPressable";
 import { ShootingStars } from "./ShootingStars";
 import type { PropsOf } from "./types";
 
@@ -174,7 +174,7 @@ export function TextAnswerButton({
   const flat = pressed || disabled;
 
   return (
-    <AnimatedPressable
+    <ReanimatedPressable
       {...pressableProps}
       disabled={disabled}
       onHoverIn={(e) => {
@@ -238,7 +238,7 @@ export function TextAnswerButton({
         className="theme-success pointer-events-none absolute -inset-3"
         play={state === `success`}
       />
-    </AnimatedPressable>
+    </ReanimatedPressable>
   );
 }
 

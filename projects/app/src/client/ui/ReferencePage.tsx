@@ -19,7 +19,7 @@ export const ReferencePage = ({
       >
         {header}
 
-        <View className="gap-[12px] p-[12px] pt-quiz-px">{body}</View>
+        <View className="gap-[12px] p-[12px] pt-4">{body}</View>
       </View>
     </View>
   );

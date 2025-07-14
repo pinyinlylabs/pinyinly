@@ -1,5 +1,6 @@
 import { parsePylymark } from "@/data/pylymark";
 import { splitGraphemes } from "@/util/unicode";
+import { invariant } from "@pinyinly/lib/invariant";
 import type { JSX, ReactElement } from "react";
 import { cloneElement } from "react";
 import { Text } from "react-native";
@@ -10,11 +11,13 @@ import type { PropsOf } from "./types";
 export const PylymarkTypewriter = ({
   source,
   className,
+  fastForward = false,
   delay = 0,
   onAnimateEnd,
 }: {
   source: string;
   className?: string;
+  fastForward?: boolean;
   /**
    * Allows delaying the presentation of the text while still allowing the
    * necessary space to be reserved (because it's just rendered opacity-0).
@@ -46,10 +49,11 @@ export const PylymarkTypewriter = ({
       } else {
         nodes.push(
           <EnteringText
+            className={className}
+            delay={delay}
+            fastForward={fastForward}
             key={nodes.length}
             text={grapheme}
-            delay={delay}
-            className={className}
           />,
         );
       }
@@ -80,8 +84,9 @@ export const PylymarkTypewriter = ({
       case `hanziWord`: {
         nodes.push(
           <EnteringText
-            key={nodes.length}
             delay={delay}
+            fastForward={fastForward}
+            key={nodes.length}
             text={
               <HanziWordRefText
                 hanziWord={node.hanziWord}
@@ -124,22 +129,41 @@ export const PylymarkTypewriter = ({
 };
 
 const EnteringText = ({
-  text,
-  delay,
-  onAnimateEnd,
   className,
+  delay,
+  fastForward,
+  onAnimateEnd,
+  text,
 }: {
-  text: string | JSX.Element;
-  delay: number;
-  onAnimateEnd?: () => void;
   className?: string;
+  delay: number;
+  fastForward: boolean;
+  onAnimateEnd?: () => void;
+  text: string | JSX.Element;
 }) => {
-  let entering = FadeIn.duration(250).delay(delay);
+  let entering =
+    // Skip the entering animation if fast-forwarding (unless this is the last
+    // node and we need to call `onAnimateEnd`).
+    onAnimateEnd || !fastForward
+      ? FadeIn.duration(fastForward ? 0 : 250).delay(fastForward ? 0 : delay)
+      : undefined;
+
   if (onAnimateEnd != null) {
+    invariant(entering != null, `onAnimateEnd requires entering animation`);
     entering = entering.withCallback(onAnimateEnd);
   }
+
   return (
-    <Reanimated.Text entering={entering} className={className}>
+    <Reanimated.Text
+      key={
+        // Reanimated doesn't support cancelling `entering` animations, so the
+        // only way to "fast forward" is to throw away the old element and
+        // create a new one.
+        fastForward ? `ff` : `no-ff`
+      }
+      entering={entering}
+      className={className}
+    >
       {text}
     </Reanimated.Text>
   );
