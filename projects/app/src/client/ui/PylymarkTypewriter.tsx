@@ -105,6 +105,10 @@ export const PylymarkTypewriter = ({
         pushCharacters(node.text, `pyly-italic`);
         break;
       }
+      case `highlight`: {
+        pushCharacters(node.text, `pyly-highlight`);
+        break;
+      }
     }
   }
 

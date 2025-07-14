@@ -1,9 +1,8 @@
-import { Link, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { StrictMode } from "react";
-import { ScrollView, Text, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Text, View } from "react-native";
 import { demos } from ".";
-import { examplesStackClassName, Section } from "./_helpers";
+import { Section } from "./_helpers";
 
 const NotFound = () => {
   return (
@@ -16,49 +15,12 @@ const NotFound = () => {
 
 function UiDemoPage() {
   const id = useLocalSearchParams<`/dev/ui/[id]`>().id;
-  const insets = useSafeAreaInsets();
-
   const Demo = demos[id] ?? NotFound;
 
   return (
-    <View style={{ flex: 1, paddingTop: insets.top }}>
-      <View className="flex-row p-2">
-        <Link href="/dev/ui" asChild>
-          <Text
-            className={`
-              text-fg
-
-              hover:underline
-            `}
-          >
-            Back
-          </Text>
-        </Link>
-      </View>
-      <ScrollView className="flex-1" contentContainerClassName="flex-1">
-        <Section title={id} href={`/dev/ui/${id}`}>
-          <Demo />
-        </Section>
-
-        {/* Fill the rest of the page if it's too tall for the content */}
-        <View className="flex-1 flex-row">
-          <View
-            className={`
-              pyly-color-schema-light theme-default
-
-              ${examplesStackClassName}
-            `}
-          />
-          <View
-            className={`
-              pyly-color-scheme-dark theme-default
-
-              ${examplesStackClassName}
-            `}
-          />
-        </View>
-      </ScrollView>
-    </View>
+    <Section title={id} href={`/dev/ui/${id}`}>
+      <Demo />
+    </Section>
   );
 }
 

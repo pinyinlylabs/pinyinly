@@ -26,16 +26,6 @@
 
   /* --- */
 
-  .pyly-ref {
-    text-decoration-skip-ink: none;
-    @apply underline decoration-currentColor/25 hover:decoration-currentColor/50;
-  }
-  .pyly-italic {
-    @apply italic;
-  }
-
-  /* --- */
-
   /* <pyly-body-title> */
   .pyly-body-title {
     @apply font-sans text-2xl/normal tracking-tight text-fg;
@@ -293,6 +283,21 @@
     --color-fg-1: var(--color-amber);
     --color-caption: rgb(from var(--color-fg) r g b / 0.6);
     --color-caption-loud: rgb(from var(--color-fg) r g b / 0.9);
+  }
+
+  /* --- */
+
+  .pyly-ref {
+    text-decoration-skip-ink: none;
+    @apply underline decoration-currentColor/25 hover:decoration-currentColor/50;
+  }
+
+  .pyly-italic {
+    @apply italic;
+  }
+
+  .pyly-highlight {
+    @apply text-yellow font-bold;
   }
 
   /* --- */

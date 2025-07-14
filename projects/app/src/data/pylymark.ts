@@ -26,11 +26,17 @@ export interface PylymarkItalicNode {
   text: string;
 }
 
+export interface PylymarkHighlightNode {
+  type: `highlight`;
+  text: string;
+}
+
 export type PylymarkNode =
   | PylymarkHanziWordNode
   | PylymarkTextNode
   | PylymarkBoldNode
-  | PylymarkItalicNode;
+  | PylymarkItalicNode
+  | PylymarkHighlightNode;
 
 /**
  * Parse a Pylymark string into an array of nodes.
@@ -41,16 +47,13 @@ export type PylymarkNode =
  * - HanziWord: {HanziWord} (e.g. {好:good})
  * - Bold: **text**
  * - Italic: *text*
- * - Single dumb apostrophe to smart quote: don't -> don’t
- * - Single quotes to smart quotes: 'text' -> ‘text’
- * - Double quotes to smart quotes: "text" -> “text”
+ * - Highlight: ==text==
  */
 export function parsePylymark(value: string): PylymarkNode[] {
   const nodes: PylymarkNode[] = [];
 
-  // Regex patterns for HanziWord, Bold, Italic, and smart quotes
-  const regex =
-    /{([^:]+):(-)?([^}]+)}|\*\*(.+?)\*\*|\*(.+?)\*|'([^']+)'|"([^"]+)"|(\b\w+)'(\w+)/g;
+  // Regex patterns for HanziWord, Bold, Italic, and Highlight
+  const regex = /{([^:]+):(-)?([^}]+)}|\*\*(.+?)\*\*|\*(.+?)\*|==(.+?)==/g;
   let match;
   let lastIndex = 0;
 
@@ -62,10 +65,7 @@ export function parsePylymark(value: string): PylymarkNode[] {
       hanziWordMeaningKey,
       boldText,
       italicText,
-      singleQuoteText,
-      doubleQuoteText,
-      apostropheBeforeText,
-      apostropheAfterText,
+      highlightText,
     ] = match;
     const startIndex = match.index;
     const endIndex = regex.lastIndex;
@@ -103,42 +103,12 @@ export function parsePylymark(value: string): PylymarkNode[] {
         type: `italic`,
         text: italicText,
       });
-    } else if (singleQuoteText != null) {
-      // Add or merge Text node with smart single quotes
-      const text = `‘${singleQuoteText}’`;
-      const lastNode = nodes.at(-1);
-      if (lastNode?.type === `text`) {
-        lastNode.text += text; // Merge with the last text node
-      } else {
-        nodes.push({
-          type: `text`,
-          text,
-        });
-      }
-    } else if (doubleQuoteText != null) {
-      // Add or merge Text node with smart double quotes
-      const text = `“${doubleQuoteText}”`;
-      const lastNode = nodes.at(-1);
-      if (lastNode?.type === `text`) {
-        lastNode.text += text; // Merge with the last text node
-      } else {
-        nodes.push({
-          type: `text`,
-          text,
-        });
-      }
-    } else if (apostropheBeforeText != null && apostropheAfterText != null) {
-      // Add or merge Text node with smart single quotes within words
-      const singleQuoteTextNode = `${apostropheBeforeText}’${apostropheAfterText}`;
-      const lastNode = nodes.at(-1);
-      if (lastNode?.type === `text`) {
-        lastNode.text += singleQuoteTextNode; // Merge with the last text node
-      } else {
-        nodes.push({
-          type: `text`,
-          text: singleQuoteTextNode,
-        });
-      }
+    } else if (highlightText != null) {
+      // Add Highlight node for the match
+      nodes.push({
+        type: `highlight`,
+        text: highlightText,
+      });
     }
 
     lastIndex = endIndex;
@@ -176,6 +146,9 @@ export function stringifyPylymark(nodes: PylymarkNode[]): string {
         }
         case `italic`: {
           return `*${node.text}*`;
+        }
+        case `highlight`: {
+          return `==${node.text}==`;
         }
       }
     })

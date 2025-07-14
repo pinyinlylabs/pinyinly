@@ -7,7 +7,7 @@ export function CustomComponent() {
 export function CustomWrapper({ children }: { children: React.ReactNode }) {
   return (
     <View>
-      <Text>Custom Wrapper:</Text> {children}
+      <Text>Custom Wrapper: {children}</Text>
     </View>
   );
 }
