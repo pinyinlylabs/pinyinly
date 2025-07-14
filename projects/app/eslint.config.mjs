@@ -417,6 +417,9 @@ export default tseslint.config(
       "@typescript-eslint/no-empty-object-type": `off`,
       // Interface merging works with interface declarations, not `Record<…>`.
       "@typescript-eslint/consistent-indexed-object-style": `off`,
+      // When defining modules in a declaration file, some will make default
+      // exports.
+      "import/no-default-export": `off`,
     },
   },
 

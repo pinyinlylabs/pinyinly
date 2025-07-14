@@ -94,6 +94,7 @@ export const demos: Record<string, FunctionComponent> = {
   IconImage: lazyDemo(() => import(`./_demos/IconImage`)),
   Icons: lazyDemo(() => import(`./_demos/Icons`)),
   ImageCloud: lazyDemo(() => import(`./_demos/ImageCloud`)),
+  Mdx: lazyDemo(() => import(`./_demos/Mdx`)),
   NewSkillModal: lazyDemo(() => import(`./_demos/NewSkillModal`)),
   NewSprout: lazyDemo(() => import(`./_demos/NewSprout`)),
   NewWordTutorial: lazyDemo(() => import(`./_demos/NewWordTutorial`)),
