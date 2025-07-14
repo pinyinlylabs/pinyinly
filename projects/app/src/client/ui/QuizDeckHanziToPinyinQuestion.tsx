@@ -113,7 +113,7 @@ export function QuizDeckHanziToPinyinQuestion({
         grade == null ? null : (
           <View
             className={`
-              flex-1 gap-[12px] overflow-hidden bg-fg-bg10 px-quiz-px pt-3 pb-safe-offset-[84px]
+              flex-1 gap-[12px] overflow-hidden bg-fg-bg10 px-4 pt-3 pb-safe-offset-[84px]
 
               lg:mb-2 lg:rounded-xl
 
@@ -481,7 +481,7 @@ const Skeleton = ({
   return (
     <>
       <View
-        className="flex-1 px-quiz-px"
+        className="flex-1 px-4"
         style={{ paddingBottom: submitButtonInsetBottom }}
       >
         {children}
@@ -498,7 +498,7 @@ const Skeleton = ({
         </View>
       )}
       <View
-        className="absolute inset-x-quiz-px flex-row items-stretch"
+        className="absolute inset-x-4 flex-row items-stretch"
         style={{
           bottom: submitButtonInsetBottom,
           height: submitButtonHeight,

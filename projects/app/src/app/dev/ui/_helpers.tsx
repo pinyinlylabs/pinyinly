@@ -59,7 +59,7 @@ export const Section = ({
           `}
         >
           <Link href={href} asChild>
-            <Text className="text-2xl text-fg">{title}</Text>
+            <Text className="font-mono text-2xl text-fg">{title}</Text>
           </Link>
         </View>
         <View

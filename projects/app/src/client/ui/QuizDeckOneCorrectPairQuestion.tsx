@@ -106,7 +106,7 @@ export function QuizDeckOneCorrectPairQuestion({
             className={`
               ${isCorrect ? `theme-success` : `theme-danger`}
 
-              flex-1 gap-[12px] overflow-hidden bg-fg-bg10 px-quiz-px pt-3 pb-safe-offset-[84px]
+              flex-1 gap-[12px] overflow-hidden bg-fg-bg10 px-4 pt-3 pb-safe-offset-[84px]
 
               lg:mb-2 lg:rounded-xl
             `}
@@ -190,7 +190,7 @@ export function QuizDeckOneCorrectPairQuestion({
       <View>
         <Text className="text-xl font-bold text-fg">{prompt}</Text>
       </View>
-      <View className="flex-1 justify-center py-quiz-px">
+      <View className="flex-1 justify-center py-4">
         <View
           className="flex-1 flex-row gap-[28px]"
           style={{
@@ -452,7 +452,7 @@ const Skeleton = ({
   return (
     <>
       <View
-        className="flex-1 px-quiz-px"
+        className="flex-1 px-4"
         style={{ paddingBottom: contentInsetBottom }}
       >
         {children}
@@ -463,7 +463,7 @@ const Skeleton = ({
         </View>
       )}
       <View
-        className="absolute inset-x-quiz-px flex-row items-stretch"
+        className="absolute inset-x-4 flex-row items-stretch"
         style={{
           bottom: submitButtonInsetBottom,
           height: submitButtonHeight,
