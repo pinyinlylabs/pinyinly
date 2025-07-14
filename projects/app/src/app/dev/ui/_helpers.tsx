@@ -62,9 +62,15 @@ export const Section = ({
             <Text className="text-2xl text-fg">{title}</Text>
           </Link>
         </View>
-        <View className="pyly-color-scheme-dark flex-1 bg-bg-1 p-2" />
+        <View
+          className={`
+            pyly-color-scheme-dark hidden flex-1 bg-bg-1 p-2
+
+            lg:flex
+          `}
+        />
       </View>
-      <View className="flex-row">
+      <View className="lg:flex-row">
         <View
           className={`
             pyly-color-schema-light theme-default
@@ -88,7 +94,7 @@ export const Section = ({
   );
 };
 
-export const examplesStackClassName = `bg-bg flex-1 shrink basis-1 flex-row flex-wrap justify-center gap-2 p-2 sm:justify-start`;
+export const examplesStackClassName = `bg-bg lg:flex-1 lg:shrink lg:basis-1 flex-row flex-wrap justify-center gap-2 p-2 sm:justify-start`;
 
 export const LittlePrimaryHeader = ({ title }: { title: string }) => {
   return (

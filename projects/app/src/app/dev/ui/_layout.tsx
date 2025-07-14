@@ -2,17 +2,14 @@ import type { Href } from "expo-router";
 import { Link, Slot, usePathname } from "expo-router";
 import { StrictMode } from "react";
 import { ScrollView, Text, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { demos } from ".";
 import { examplesStackClassName } from "./_helpers";
 
 export default function Layout() {
-  const insets = useSafeAreaInsets();
-
   return (
     <StrictMode>
-      <View style={{ flex: 1, paddingTop: insets.top }}>
-        <View className="flex-row flex-wrap items-center gap-2 p-2">
+      <ScrollView contentContainerClassName="flex-1 pt-safe" className="flex-1">
+        <View className={`flex-row flex-wrap items-center gap-2 p-2`}>
           <NavLink href="/dev/ui">(all)</NavLink>
 
           {Object.keys(demos).map((name) => (
@@ -35,28 +32,33 @@ export default function Layout() {
             </Link>
           ))}
         </View>
-        <ScrollView contentContainerClassName="flex-1" className="flex-1">
-          <Slot />
 
-          {/* Fill the rest of the page if it's too tall for the content */}
-          <View className="flex-1 flex-row">
-            <View
-              className={`
-                pyly-color-schema-light theme-default
+        <Slot />
 
-                ${examplesStackClassName}
-              `}
-            />
-            <View
-              className={`
-                pyly-color-scheme-dark theme-default
+        {/* Fill the rest of the page if it's too tall for the content */}
+        <View
+          className={`
+            flex-1
 
-                ${examplesStackClassName}
-              `}
-            />
-          </View>
-        </ScrollView>
-      </View>
+            lg:flex-row
+          `}
+        >
+          <View
+            className={`
+              pyly-color-schema-light theme-default
+
+              ${examplesStackClassName}
+            `}
+          />
+          <View
+            className={`
+              pyly-color-scheme-dark theme-default
+
+              ${examplesStackClassName}
+            `}
+          />
+        </View>
+      </ScrollView>
     </StrictMode>
   );
 }

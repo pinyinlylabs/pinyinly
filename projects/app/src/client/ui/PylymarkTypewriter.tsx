@@ -22,9 +22,9 @@ export const PylymarkTypewriter = ({
   delay?: number;
   onAnimateEnd?: () => void;
 }) => {
-  const perCharDelay = 60;
+  const perCharDelay = 40;
   const perHanziWordDelay = perCharDelay * 10;
-  const perCommaDelay = 250;
+  const perCommaDelay = 400;
   let perFullstopDelay = 300;
   const perEllipsisDelay = 500;
   const parsed = parsePylymark(source);
