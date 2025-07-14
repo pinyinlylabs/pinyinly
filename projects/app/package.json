@@ -11,6 +11,7 @@
     "#*.tsx": "./src/*.tsx"
   },
   "dependencies": {
+    "@bacons/mdx": "^0.4.5",
     "@expo/metro-runtime": "~5.0.4",
     "@inngest/middleware-sentry": "^0.1.1",
     "@lottiefiles/dotlottie-react": "^0.13.5",

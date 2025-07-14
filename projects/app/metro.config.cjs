@@ -2,6 +2,7 @@
 const { getDefaultConfig } = require(`expo/metro-config`);
 const { withSentryConfig } = require(`@sentry/react-native/metro`);
 const { withNativeWind } = require(`nativewind/metro`);
+const { withMdx } = require(`@bacons/mdx/metro`);
 
 let config = getDefaultConfig(__dirname);
 
@@ -32,6 +33,8 @@ config = withNativeWind(config, {
   // @ts-expect-error this is overriden, see https://github.com/nativewind/nativewind/pull/1371
   getCSSForPlatform: undefined,
 });
+
+config = withMdx(config);
 
 // Doing Sentry last is probably important so that the hashed debug IDs are
 // based on the final content of the final and aren't stripped by any other
