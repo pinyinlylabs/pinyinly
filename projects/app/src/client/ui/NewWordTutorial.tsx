@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { View } from "react-native";
-import Reanimated, { FadeIn, FadeOut } from "react-native-reanimated";
+import Reanimated, { FadeOut } from "react-native-reanimated";
 import { Delay } from "./Delay";
 import { ImageCloud } from "./ImageCloud";
 import { NewSprout } from "./NewSprout";
@@ -20,24 +20,21 @@ export function NewWordTutorial({
     <View className={className}>
       {step === `splash` ? (
         <Reanimated.View
-          entering={FadeIn.delay(600)}
           exiting={FadeOut}
           className="size-full items-center justify-center"
         >
           <NewSprout className="size-[200px]" />
         </Reanimated.View>
       ) : step === `deps` ? (
-        <Delay ms={800} key={step}>
-          <Reanimated.View
-            entering={FadeIn.delay(200)}
-            className="size-full items-center justify-center px-10"
-          >
-            <ImageCloud className="aspect-square w-full" />
-          </Reanimated.View>
-        </Delay>
+        <Reanimated.View
+          key={step}
+          className="size-full items-center justify-center px-10"
+        >
+          <ImageCloud className="aspect-square w-full" />
+        </Reanimated.View>
       ) : null}
 
-      <Delay ms={1500}>
+      <Delay ms={2000}>
         <View className="absolute inset-x-3 bottom-3">
           <View className="flex-row items-end justify-start gap-1 p-2 pr-6">
             <Delay ms={0}>
@@ -55,13 +52,13 @@ export function NewWordTutorial({
                 </View>
               </Delay>
             ) : step === `deps` ? (
-              <Delay ms={500} key={step}>
+              <Delay ms={800} key={step}>
                 <View className="flex-1 pb-10">
                   <TutorialDialogBox
                     onContinue={() => {
                       setStep(`end`);
                     }}
-                    text="…you need **strength** when you **walk** close to an ==edge==…"
+                    text="…you need **strength** when you **walk** close to the ==edge==…"
                   />
                 </View>
               </Delay>
