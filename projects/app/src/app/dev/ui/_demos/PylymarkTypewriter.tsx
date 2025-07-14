@@ -1,4 +1,4 @@
-import { Pylymark } from "@/client/ui/Pylymark";
+import { PylymarkTypewriter } from "@/client/ui/PylymarkTypewriter";
 import { Text, View } from "react-native";
 
 export default () => {
@@ -21,7 +21,7 @@ export default () => {
               ${textClass}
             `}
           >
-            <Pylymark source="Some **bold text** and *italic text* and {好:good} and ==highlight text== and another line of plain text." />
+            <PylymarkTypewriter source="Some **bold text** and *italic text* and {好:good} and ==highlight text== and another line of plain text." />
           </Text>
         </View>
       ))}

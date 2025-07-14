@@ -47,7 +47,6 @@ const Span = ({ children }: PropsWithChildren) => {
 };
 
 const CounterText = ({ children }: { children: string }) => {
-  console.log(`children=`, children);
   const ctx = use(Context);
 
   return children.split(``).map((char, i) => (

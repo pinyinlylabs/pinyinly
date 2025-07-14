@@ -50,7 +50,7 @@ export function NewWordTutorial({
                     onContinue={() => {
                       setStep(`deps`);
                     }}
-                    text="…you know **辶** means **walk or movement**, and **力** means **strength**…"
+                    text="…you know ==辶== means **walk or movement**, and ==力== means **strength**…"
                   />
                 </View>
               </Delay>
@@ -61,7 +61,7 @@ export function NewWordTutorial({
                     onContinue={() => {
                       setStep(`splash`);
                     }}
-                    text="…you need **strength** when you **walk** close to an **edge**…"
+                    text="…you need **strength** when you **walk** close to an ==edge==…"
                   />
                 </View>
               </Delay>

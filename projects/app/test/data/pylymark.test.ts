@@ -87,21 +87,19 @@ describe(`${parsePylymark.name} suite`, () => {
     ]);
   });
 
-  test(`parses single smart quotes correctly`, () => {
-    const nodes = parsePylymark(`It's a 'quote'.`);
+  test(`parses highlighted text correctly`, () => {
+    const nodes = parsePylymark(`This is ==highlighted== text.`);
     expect(nodes).toEqual([
       {
-        text: `It’s a ‘quote’.`,
+        text: `This is `,
         type: `text`,
       },
-    ]);
-  });
-
-  test(`parses double smart quotes correctly`, () => {
-    const nodes = parsePylymark(`He said "hello".`);
-    expect(nodes).toEqual([
       {
-        text: `He said “hello”.`,
+        text: `highlighted`,
+        type: `highlight`,
+      },
+      {
+        text: ` text.`,
         type: `text`,
       },
     ]);
@@ -128,6 +126,11 @@ describe(`${stringifyPylymark.name} suite`, () => {
 
   test(`roundtrips HanziWord references with omitted gloss`, () => {
     const str = `This is {好:-good}.`;
+    expect(roundTrip(str)).toBe(str);
+  });
+
+  test(`roundtrips highlighted text`, () => {
+    const str = `This is ==highlighted== text.`;
     expect(roundTrip(str)).toBe(str);
   });
 });

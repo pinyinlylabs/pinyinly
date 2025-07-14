@@ -9,8 +9,8 @@
       "editor.rulers": [80],
     },
     "github.copilot.chat.agent.terminal.allowList": {
-      "moon run app:lint -- --fix": true,
       "/^moon run [\\w-]+:[\\w-]+$/": true,
+      "/^moon run app:\\w+ -- /": true,
     },
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "typescript.tsdk": "node_modules/typescript/lib",
