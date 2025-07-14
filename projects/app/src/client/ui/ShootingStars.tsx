@@ -1,5 +1,5 @@
 import type { IsExhaustedRest } from "@/util/types";
-import { useEffect, useState } from "react";
+import { useLayoutEffect, useRef } from "react";
 import type { ViewProps } from "react-native";
 import { View } from "react-native";
 import { Rive } from "./Rive";
@@ -17,13 +17,13 @@ export const ShootingStars = ({
 }: ShootingStarsProps) => {
   true satisfies IsExhaustedRest<typeof rest>;
 
-  const [rive, setRive] = useState<RiveInstance>();
+  const riveRef = useRef<RiveInstance>(null);
 
-  useEffect(() => {
-    if (rive && play) {
-      rive.viewModelInstance?.trigger(`onSuccess`)?.trigger();
+  useLayoutEffect(() => {
+    if (play) {
+      riveRef.current?.viewModelInstance?.trigger(`onSuccess`)?.trigger();
     }
-  }, [rive, play]);
+  }, [play]);
 
   return (
     <View className={className} style={style}>
@@ -33,7 +33,7 @@ export const ShootingStars = ({
         autoplay
         fit="layout"
         onRiveLoad={(rive) => {
-          setRive(rive);
+          riveRef.current = rive;
         }}
         stateMachineName="main"
       />

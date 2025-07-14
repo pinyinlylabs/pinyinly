@@ -1,20 +1,30 @@
 import type { IsExhaustedRest } from "@/util/types";
+import { useLayoutEffect, useRef } from "react";
 import type { ViewProps } from "react-native";
 import { View } from "react-native";
 import { tv } from "tailwind-variants";
 import { Rive } from "./Rive";
+import type { RiveInstance } from "./riveTypes";
 
 interface TutorHeadProps extends Pick<ViewProps, `className` | `style`> {
-  onLoad?: () => void;
+  exit?: boolean;
 }
 
 export const TutorHead = ({
   className,
-  onLoad,
+  exit,
   style,
   ...rest
 }: TutorHeadProps) => {
   true satisfies IsExhaustedRest<typeof rest>;
+
+  const riveRef = useRef<RiveInstance>(null);
+
+  useLayoutEffect(() => {
+    if (exit === true) {
+      riveRef.current?.viewModelInstance?.trigger(`doExit`)?.trigger();
+    }
+  }, [exit]);
 
   return (
     <View className={wrapperClass({ className })} style={style}>
@@ -23,8 +33,8 @@ export const TutorHead = ({
         artboardName="main"
         stateMachineName="main"
         autoplay
-        onRiveLoad={() => {
-          onLoad?.();
+        onRiveLoad={(rive) => {
+          riveRef.current = rive;
         }}
         fit="layout"
       />
