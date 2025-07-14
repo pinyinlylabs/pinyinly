@@ -41,7 +41,7 @@ export function NewWordTutorial({
         <View className="absolute inset-x-3 bottom-3">
           <View className="flex-row items-end justify-start gap-1 p-2 pr-6">
             <Delay ms={0}>
-              <TutorHead />
+              <TutorHead exit={step === `end`} />
             </Delay>
             {step === `splash` ? (
               <Delay ms={800} key={step}>
@@ -59,7 +59,7 @@ export function NewWordTutorial({
                 <View className="flex-1 pb-10">
                   <TutorialDialogBox
                     onContinue={() => {
-                      setStep(`splash`);
+                      setStep(`end`);
                     }}
                     text="…you need **strength** when you **walk** close to an ==edge==…"
                   />
