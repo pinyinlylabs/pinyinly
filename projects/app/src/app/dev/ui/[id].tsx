@@ -15,9 +15,11 @@ const NotFound = () => {
 
 function UiDemoPage() {
   const id = useLocalSearchParams<`/dev/ui/[id]`>().id;
-  const Demo = demos[id] ?? NotFound;
+  const Demo = demos[id];
 
-  return (
+  return Demo == null ? (
+    <NotFound />
+  ) : (
     <Section title={id} href={`/dev/ui/${id}`}>
       <Demo />
     </Section>

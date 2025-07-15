@@ -229,8 +229,7 @@ export type Dictionary = z.infer<typeof dictionarySchema>;
 export const loadDictionary = memoize0(async () =>
   dictionarySchema
     .transform(deepReadonly)
-    // eslint-disable-next-line unicorn/no-await-expression-member
-    .parse((await import(`./dictionary.asset.json`)).default),
+    .parse(await import(`./dictionary.asset.json`).then((x) => x.default)),
 );
 
 export const wikiEntrySchema = z.object({
@@ -282,12 +281,9 @@ export const wikiSchema = z
 export type Wiki = z.infer<typeof wikiSchema>;
 
 export const loadWiki = memoize0(async function loadWiki() {
-  return (
-    wikiSchema
-      .transform(deepReadonly)
-      // eslint-disable-next-line unicorn/no-await-expression-member
-      .parse((await import(`./wiki.asset.json`)).default)
-  );
+  return wikiSchema
+    .transform(deepReadonly)
+    .parse(await import(`./wiki.asset.json`).then((x) => x.default));
 });
 
 export const hanziWordMigrationsSchema = z
@@ -303,12 +299,11 @@ export const hanziWordMigrationsSchema = z
 
 export const loadHanziWordMigrations = memoize0(
   async function loadHanziWordMigrations() {
-    return (
-      hanziWordMigrationsSchema
-        .transform(deepReadonly)
-        // eslint-disable-next-line unicorn/no-await-expression-member
-        .parse((await import(`./hanziWordMigrations.asset.json`)).default)
-    );
+    return hanziWordMigrationsSchema
+      .transform(deepReadonly)
+      .parse(
+        await import(`./hanziWordMigrations.asset.json`).then((x) => x.default),
+      );
   },
 );
 
@@ -323,30 +318,30 @@ const loadRadicalStrokes = memoize0(async () =>
     )
     .transform((x) => new Map(x.map((r) => [r.strokes, r])))
     .transform(deepReadonly)
-    // eslint-disable-next-line unicorn/no-await-expression-member
-    .parse((await import(`./radicalStrokes.asset.json`)).default),
+    .parse(await import(`./radicalStrokes.asset.json`).then((x) => x.default)),
 );
 
 export const loadHanziWordPinyinMnemonics = memoize0(
   async function loadHanziWordPinyinMnemonics() {
-    return (
-      z
-        .array(
-          z.tuple([
-            z.string(),
-            z.array(
-              z.object({
-                mnemonic: z.string(),
-                strategy: z.string(),
-              }),
-            ),
-          ]),
-        )
-        .transform((x) => new Map(x))
-        .transform(deepReadonly)
-        // eslint-disable-next-line unicorn/no-await-expression-member
-        .parse((await import(`./radicalPinyinMnemonics.asset.json`)).default)
-    );
+    return z
+      .array(
+        z.tuple([
+          z.string(),
+          z.array(
+            z.object({
+              mnemonic: z.string(),
+              strategy: z.string(),
+            }),
+          ),
+        ]),
+      )
+      .transform((x) => new Map(x))
+      .transform(deepReadonly)
+      .parse(
+        await import(`./radicalPinyinMnemonics.asset.json`).then(
+          (x) => x.default,
+        ),
+      );
   },
 );
 

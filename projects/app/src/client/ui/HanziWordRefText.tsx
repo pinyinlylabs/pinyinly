@@ -1,4 +1,4 @@
-import { useHanziWordMeaning } from "@/client/hooks/useHanziWordMeaning";
+import { useHanziWordMeaningSuspense } from "@/client/hooks/useHanziWordMeaning";
 import type { HanziWord } from "@/data/model";
 import { pinyinPronunciationDisplayText } from "@/data/pinyin";
 import {
@@ -6,9 +6,7 @@ import {
   hanziFromHanziWord,
   pinyinOrThrow,
 } from "@/dictionary/dictionary";
-import { useState } from "react";
-import { Text } from "react-native";
-import { WikiHanziWordModal } from "./WikiHanziWordModal";
+import { HanziWordLink } from "./HanziWordLink";
 
 export const HanziWordRefText = ({
   hanziWord,
@@ -21,8 +19,7 @@ export const HanziWordRefText = ({
   showGloss?: boolean;
   showPinyin?: boolean;
 }) => {
-  const meaning = useHanziWordMeaning(hanziWord);
-  const [showWiki, setShowWiki] = useState(false);
+  const meaning = useHanziWordMeaningSuspense(hanziWord);
 
   let text = ``;
 
@@ -30,45 +27,24 @@ export const HanziWordRefText = ({
     text += hanziFromHanziWord(hanziWord);
   }
 
-  if (showGloss && meaning.data != null && meaning.data.gloss.length > 0) {
+  if (showGloss && meaning != null && meaning.gloss.length > 0) {
     const appending = text.length > 0;
     if (appending) {
       text += ` `;
     }
-    text += glossOrThrow(hanziWord, meaning.data);
+    text += glossOrThrow(hanziWord, meaning);
   }
 
-  if (showPinyin && meaning.data?.pinyin != null) {
+  if (showPinyin && meaning?.pinyin != null) {
     const appending = text.length > 0;
     if (appending) {
       text += ` (`;
     }
-    text += pinyinPronunciationDisplayText(
-      pinyinOrThrow(hanziWord, meaning.data),
-    );
+    text += pinyinPronunciationDisplayText(pinyinOrThrow(hanziWord, meaning));
     if (appending) {
       text += `)`;
     }
   }
 
-  return (
-    <>
-      <Text
-        className="pyly-ref"
-        onPress={() => {
-          setShowWiki(true);
-        }}
-      >
-        {text}
-      </Text>
-      {showWiki ? (
-        <WikiHanziWordModal
-          hanziWord={hanziWord}
-          onDismiss={() => {
-            setShowWiki(false);
-          }}
-        />
-      ) : null}
-    </>
-  );
+  return <HanziWordLink hanziWord={hanziWord}>{text}</HanziWordLink>;
 };
