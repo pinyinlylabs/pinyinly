@@ -310,7 +310,14 @@
 
   .pyly-ref {
     text-decoration-skip-ink: none;
+
     @apply underline decoration-currentColor/25 hover:decoration-currentColor/50;
+
+    /* Fix Safari bug where the underline text decoration isn't redrawn
+    correctly because Safari doesn't correctly mark the pixels as dirty on
+    hover. */
+
+    @apply hover:transform-gpu;
   }
 
   .pyly-italic {

@@ -1,18 +1,24 @@
 import { parsePylymark } from "@/data/pylymark";
+import { hanziFromHanziWord, loadDictionary } from "@/dictionary/dictionary";
 import { splitGraphemes } from "@/util/unicode";
 import { invariant } from "@pinyinly/lib/invariant";
-import type { JSX, ReactElement } from "react";
-import { cloneElement } from "react";
+import type { ReactNode } from "react";
+import { use } from "react";
 import { Text } from "react-native";
 import Reanimated, { FadeIn } from "react-native-reanimated";
-import { HanziWordRefText } from "./HanziWordRefText";
-import type { PropsOf } from "./types";
+import { HanziWordLink } from "./HanziWordLink";
+
+interface Clock {
+  ms: number;
+  delay: Record<string, number | undefined>;
+  delayDefault: number;
+}
 
 export const PylymarkTypewriter = ({
   source,
   className,
   fastForward = false,
-  delay = 0,
+  delay = 150,
   onAnimateEnd,
 }: {
   source: string;
@@ -25,121 +31,96 @@ export const PylymarkTypewriter = ({
   delay?: number;
   onAnimateEnd?: () => void;
 }) => {
-  const perCharDelay = 40;
-  const perHanziWordDelay = perCharDelay * 10;
-  const perCommaDelay = 400;
-  let perFullstopDelay = 300;
-  const perEllipsisDelay = 500;
+  const dict = use(loadDictionary());
   const parsed = parsePylymark(source);
 
-  const nodes: ReactElement<
-    PropsOf<typeof EnteringText>,
-    typeof EnteringText
-  >[] = [];
+  const clock: Clock = {
+    ms: delay,
+    delayDefault: 40,
+    delay: {
+      ",": 400,
+      ".": 300,
+      "…": 500,
+    },
+  };
 
-  function pushCharacters(text: string, className?: string) {
-    for (const grapheme of splitGraphemes(text)) {
-      if (grapheme === `…`) {
-        const oldDelay = perFullstopDelay;
-        perFullstopDelay = 100;
-
-        pushCharacters(`...`, className);
-
-        perFullstopDelay = oldDelay;
-      } else {
-        nodes.push(
-          <EnteringText
-            className={className}
-            delay={delay}
-            fastForward={fastForward}
-            key={nodes.length}
-            text={grapheme}
-          />,
-        );
-      }
-
-      switch (grapheme) {
-        case `,`: {
-          delay += perCommaDelay;
-          break;
-        }
-        case `.`: {
-          delay += perFullstopDelay;
-          break;
-        }
-        case `…`: {
-          delay += perEllipsisDelay;
-          break;
-        }
-        default: {
-          delay += perCharDelay;
-          break;
-        }
-      }
-    }
-  }
+  const nodes: ReactNode[] = [];
 
   for (const node of parsed) {
     switch (node.type) {
       case `hanziWord`: {
+        let text: string = hanziFromHanziWord(node.hanziWord);
+        const meaning = dict.get(node.hanziWord);
+        const gloss = meaning?.gloss.at(0);
+        if (node.showGloss && gloss != null) {
+          text += ` ${gloss}`;
+        }
+
         nodes.push(
-          <EnteringText
-            delay={delay}
-            fastForward={fastForward}
-            key={nodes.length}
-            text={
-              <HanziWordRefText
-                hanziWord={node.hanziWord}
-                showGloss={node.showGloss}
-              />
-            }
-          />,
+          <HanziWordLink hanziWord={node.hanziWord} key={nodes.length}>
+            {typeChars(text, clock, fastForward)}
+          </HanziWordLink>,
         );
-        delay += perHanziWordDelay;
         break;
       }
       case `text`: {
-        pushCharacters(node.text);
+        void typeChars(node.text, clock, fastForward, nodes);
         break;
       }
       case `bold`: {
-        pushCharacters(node.text, `pyly-bold`);
+        nodes.push(
+          <Text className="pyly-bold" key={nodes.length}>
+            {typeChars(node.text, clock, fastForward)}
+          </Text>,
+        );
         break;
       }
       case `italic`: {
-        pushCharacters(node.text, `pyly-italic`);
+        nodes.push(
+          <Text className="pyly-italic" key={nodes.length}>
+            {typeChars(node.text, clock, fastForward)}
+          </Text>,
+        );
         break;
       }
       case `highlight`: {
-        pushCharacters(node.text, `pyly-highlight`);
+        nodes.push(
+          <Text className="pyly-highlight" key={nodes.length}>
+            {typeChars(node.text, clock, fastForward)}
+          </Text>,
+        );
         break;
       }
     }
   }
 
-  // Attach `onAnimateEnd` to the last node. Doing it as the last step means it
-  // can be ignored in the rest of the algorithm.
-  const last = nodes.pop();
-  if (last != null && onAnimateEnd != null) {
-    const withOnAnimateEndSet = cloneElement(last, { onAnimateEnd });
-    nodes.push(withOnAnimateEndSet as typeof last);
+  // Add an empty text node to handle `onAnimateEnd`. Doing it as the last step
+  // means it can be ignored in the rest of the algorithm.
+  if (onAnimateEnd != null) {
+    nodes.push(
+      <Char
+        onAnimateEnd={onAnimateEnd}
+        delay={clock.ms}
+        fastForward={fastForward}
+        key={nodes.length}
+        char=""
+      />,
+    );
   }
 
   return <Text className={className}>{nodes}</Text>;
 };
 
-const EnteringText = ({
-  className,
+const Char = ({
+  char,
   delay,
   fastForward,
   onAnimateEnd,
-  text,
 }: {
-  className?: string;
+  char: string;
   delay: number;
   fastForward: boolean;
   onAnimateEnd?: () => void;
-  text: string | JSX.Element;
 }) => {
   let entering =
     // Skip the entering animation if fast-forwarding (unless this is the last
@@ -162,9 +143,40 @@ const EnteringText = ({
         fastForward ? `ff` : `no-ff`
       }
       entering={entering}
-      className={className}
     >
-      {text}
+      {char}
     </Reanimated.Text>
   );
 };
+
+function typeChars(
+  text: string,
+  clock: Clock,
+  fastForward: boolean,
+  result: ReactNode[] = [],
+) {
+  for (const grapheme of splitGraphemes(text)) {
+    if (grapheme === `…`) {
+      // Write an ellipsis as three fullstops, to better mimic a typewriter.
+      const oldDelay = clock.delay[`.`];
+      clock.delay[`.`] = 100;
+
+      void typeChars(`...`, clock, fastForward, result);
+
+      clock.delay[`.`] = oldDelay;
+    } else {
+      result.push(
+        <Char
+          delay={clock.ms}
+          fastForward={fastForward}
+          key={result.length}
+          char={grapheme}
+        />,
+      );
+    }
+
+    clock.ms += clock.delay[grapheme] ?? clock.delayDefault;
+  }
+
+  return result;
+}
