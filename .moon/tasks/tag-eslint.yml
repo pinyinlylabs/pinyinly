@@ -1,6 +1,6 @@
 tasks:
   lint:
-    command: yarn eslint .
+    command: yarn eslint . --cache
     inputs:
       # Config files anywhere within the project
       - "**/*.{cjs,js,mjs,json,ts,tsx}"
