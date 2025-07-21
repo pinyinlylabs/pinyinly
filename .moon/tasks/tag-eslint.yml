@@ -1,6 +1,6 @@
 tasks:
   lint:
-    command: yarn eslint . --cache
+    command: eslint . --cache
     inputs:
       # Config files anywhere within the project
       - "**/*.{cjs,js,mjs,json,ts,tsx}"
@@ -8,3 +8,4 @@ tasks:
       # Environment variables
       - "$ESLINT_CACHE"
       - "$ESLINT_*"
+    toolchain: "node"
