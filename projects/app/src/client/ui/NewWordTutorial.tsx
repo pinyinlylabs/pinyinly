@@ -36,7 +36,7 @@ export function NewWordTutorial({
 
       <Delay ms={2000}>
         <View className="absolute inset-x-3 bottom-3">
-          <View className="flex-row items-end justify-start gap-1 p-2 pr-6">
+          <View className="flex-row items-end justify-start gap-1 p-2">
             <Delay ms={0}>
               <TutorHead exit={step === `end`} />
             </Delay>
