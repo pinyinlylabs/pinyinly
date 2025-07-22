@@ -16,6 +16,8 @@ export function WikiHanziModalImpl({
   hanzi: HanziText;
   onDismiss: () => void;
 }) {
+  const [tab, setTab] = useState<`meaning` | `pronunciation`>(`meaning`);
+
   const wikiEntry = useHanziWikiEntry(hanzi);
   void wikiEntry;
 
@@ -55,9 +57,23 @@ export function WikiHanziModalImpl({
         }
         contentContainerClassName="pb-10"
       >
-        <Header title={title} subtitle={glosses} onDismiss={onDismiss} />
+        <Header
+          title={title}
+          tab={tab}
+          subtitle={glosses}
+          onDismiss={onDismiss}
+          onTabChange={(tab) => {
+            setTab(tab);
+          }}
+        />
 
-        <View className="gap-6 bg-bg py-7">
+        <View
+          className={`
+            gap-6 bg-bg py-7
+
+            ${tab === `meaning` ? `flex` : `hidden`}
+          `}
+        >
           <View className="gap-2 px-4">
             <Text className="pyly-body">
               <Pylymark source="{上:up} is a common Chinese word meaning **up**, **on**, or **start**. It appears in 80% of all movies in the last 10 years." />
@@ -118,14 +134,14 @@ function Header({
   title,
   subtitle,
   onDismiss,
-  onShowMeaning,
-  onShowPronunciation,
+  tab,
+  onTabChange,
 }: {
   title: string;
   subtitle?: string;
   onDismiss?: () => void;
-  onShowMeaning?: () => void;
-  onShowPronunciation?: () => void;
+  tab: `meaning` | `pronunciation`;
+  onTabChange?: (tab: `meaning` | `pronunciation`) => void;
 }) {
   const [ref1, isIntersecting1] = useIntersectionObserver({
     // threshold: 1,
@@ -160,9 +176,9 @@ function Header({
           <Pressable
             onPress={onDismiss}
             className={`
-              size-8 opacity-75
+              size-8 rounded-md
 
-              hover:opacity-100
+              hover:bg-fg-loud/10
             `}
           >
             <IconImage
@@ -204,26 +220,53 @@ function Header({
             ${isIntersecting2 ? `opacity-100` : `opacity-0`}
           `}
         >
-          <Pressable
-            className={`flex-1 items-center border-b-2 border-fg-loud py-3`}
-            onPress={onShowMeaning}
-          >
-            <Text className="font-sans text-[18px]/normal font-semibold text-fg-loud">
-              Meaning
-            </Text>
-          </Pressable>
-          <Pressable
-            className={`flex-1 items-center border-b-0 border-fg-loud py-3 opacity-80`}
-            onPress={onShowPronunciation}
-          >
-            <Text className="font-sans text-[18px]/normal font-semibold text-fg-loud">
-              Pronunciation
-            </Text>
-          </Pressable>
+          <HeaderTab
+            label="Meaning"
+            isActive={tab === `meaning`}
+            onPress={() => {
+              onTabChange?.(`meaning`);
+            }}
+          />
+          <HeaderTab
+            label="Pronunciation"
+            isActive={tab === `pronunciation`}
+            onPress={() => {
+              onTabChange?.(`pronunciation`);
+            }}
+          />
         </View>
         <View className="sticky top-[64px] h-px w-full bg-fg-loud" />
       </View>
     </>
+  );
+}
+
+function HeaderTab({
+  label,
+  isActive,
+  onPress,
+}: {
+  label: string;
+  isActive: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      className={`
+        flex-1 items-center border-fg-loud py-3
+
+        ${isActive ? `border-b-2` : `border-b-0 opacity-80`}
+
+        hover:bg-fg-loud/10
+      `}
+      onPress={() => {
+        onPress();
+      }}
+    >
+      <Text className="font-sans text-[18px]/normal font-semibold text-fg-loud">
+        {label}
+      </Text>
+    </Pressable>
   );
 }
 
