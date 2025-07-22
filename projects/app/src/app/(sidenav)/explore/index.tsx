@@ -6,7 +6,11 @@ import { tv } from "tailwind-variants";
 
 export default function ExplorePage() {
   return (
-    <ScrollView contentContainerClassName="pt-safe-offset-4 px-safe-or-4 items-center gap-[10px] padding-[10px]">
+    <ScrollView
+      contentContainerClassName={`
+        pt-safe-offset-4 px-safe-or-4 items-center gap-[10px] padding-[10px]
+      `}
+    >
       <View className={boxClass()}>
         <Text className={boxTitleClass()}>Mnemonics</Text>
         <Text className="pyly-body-caption mb-4">
