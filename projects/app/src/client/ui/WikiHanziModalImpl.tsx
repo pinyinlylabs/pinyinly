@@ -37,16 +37,7 @@ export function WikiHanziModalImpl({
             bg-[linear-gradient(to_bottom,_var(--color-cyanold)_0%,_var(--color-cyanold)_50%,_var(--color-bg)_50%,_var(--color-bg)_100%)]
           `
         }
-        contentContainerClassName={
-          // Putting the linear gradient on the inner container as well fixes an
-          // edge case where the user does an extreme scroll on a short screen
-          // and the top of the second part of the gradient is visible in the
-          // header (which is transparent).
-          `
-            pb-10
-            bg-[linear-gradient(to_bottom,_var(--color-cyanold)_0%,_var(--color-cyanold)_200px,_var(--color-bg)_200px,_var(--color-bg)_100%)]
-          `
-        }
+        contentContainerClassName="pb-10"
       >
         <Header
           title={`${hanzi} (shàng)`}
@@ -141,7 +132,7 @@ function Header({
     <>
       {/* Scroll detector */}
       <View
-        className="absolute top-[40px] h-0 w-full"
+        className="absolute top-[44px] h-0 w-full"
         ref={(el) => {
           ref1(el as Element | null);
         }}
@@ -155,72 +146,74 @@ function Header({
         }}
       />
 
-      <View className="sticky top-0 z-10 h-16 bg-cyanold">
-        <Pressable
-          onPress={onDismiss}
-          className={`
-            ml-4 mt-4 size-8 opacity-75
+      <View className="sticky top-[-120px] z-10 h-[184px] bg-cyanold">
+        <View className="sticky top-0 z-10 h-[64px] flex-row items-center pl-4">
+          <Pressable
+            onPress={onDismiss}
+            className={`
+              size-8 opacity-75
 
-            hover:opacity-100
-          `}
-        >
-          <IconImage
-            source={require(`@/assets/icons/close.svg`)}
-            size={32}
-            className="text-fg-loud"
-          />
-        </Pressable>
-      </View>
+              hover:opacity-100
+            `}
+          >
+            <IconImage
+              source={require(`@/assets/icons/close.svg`)}
+              size={32}
+              className="text-fg-loud"
+            />
+          </Pressable>
+        </View>
 
-      <View className="sticky top-[11px] z-20 h-[42px] px-4">
-        <Text
-          className={`
-            text-center font-sans text-[28px]/[42px] font-bold text-fg-loud transition-all
+        <View className="sticky top-[11px] z-0 overflow-visible px-4">
+          <Text
+            className={`
+              text-center font-sans text-[28px]/[42px] font-bold text-fg-loud transition-all
 
-            ${isIntersecting1 ? `scale-100` : `scale-[0.75]`}
-          `}
-        >
-          {title}
-        </Text>
-      </View>
-
-      <View className="">
-        <Text
-          className={`
-            text-center font-sans text-[18px] font-semibold text-fg-loud transition-opacity
-
-            ${isIntersecting1 ? `opacity-100` : `opacity-0`}
-          `}
-        >
-          {subtitle}
-        </Text>
-      </View>
-
-      <View
-        className={`
-          h-[32px] flex-1 flex-row transition-opacity
-
-          ${isIntersecting2 ? `opacity-100` : `opacity-0`}
-        `}
-      >
-        <Pressable
-          className={`flex-1 items-center border-b-2 border-fg-loud py-3`}
-          onPress={onShowMeaning}
-        >
-          <Text className="font-sans text-[18px]/normal font-semibold text-fg-loud">
-            Meaning
+              ${isIntersecting1 ? `scale-100` : `scale-[0.75]`}
+            `}
+          >
+            {title}
           </Text>
-        </Pressable>
-        <Pressable
-          className={`flex-1 items-center border-b-0 border-fg-loud py-3 opacity-80`}
-          onPress={onShowPronunciation}
-        >
-          <Text className="font-sans text-[18px]/normal font-semibold text-fg-loud">
-            Pronunciation
+        </View>
+
+        <View className="">
+          <Text
+            className={`
+              text-center font-sans text-[18px] font-semibold text-fg-loud transition-opacity
+
+              ${isIntersecting1 ? `opacity-100` : `opacity-0`}
+            `}
+          >
+            {subtitle}
           </Text>
-        </Pressable>
+        </View>
+
+        <View
+          className={`
+            h-[32px] flex-1 flex-row transition-opacity
+
+            ${isIntersecting2 ? `opacity-100` : `opacity-0`}
+          `}
+        >
+          <Pressable
+            className={`flex-1 items-center border-b-2 border-fg-loud py-3`}
+            onPress={onShowMeaning}
+          >
+            <Text className="font-sans text-[18px]/normal font-semibold text-fg-loud">
+              Meaning
+            </Text>
+          </Pressable>
+          <Pressable
+            className={`flex-1 items-center border-b-0 border-fg-loud py-3 opacity-80`}
+            onPress={onShowPronunciation}
+          >
+            <Text className="font-sans text-[18px]/normal font-semibold text-fg-loud">
+              Pronunciation
+            </Text>
+          </Pressable>
+        </View>
+        <View className="sticky top-[64px] h-px w-full bg-fg-loud" />
       </View>
-      <View className="sticky top-[64px] h-px w-full bg-fg-loud" />
     </>
   );
 }
