@@ -313,43 +313,6 @@
     */
     font-synthesis: none;
   }
-  /*
-  The font weights in Figma seem to render as if they were 100 points lower.
-  */
-  /* .font-sans.font-bold {
-    @apply nationalpark-bold;
-  }
-  .font-sans.font-semibold {
-    @apply nationalpark-semibold;
-  }
-  .font-sans.font-medium {
-    @apply nationalpark-medium;
-  }
-  .font-sans.font-normal {
-    @apply nationalpark-normal;
-  }
-  .font-sans.font-light {
-    @apply nationalpark-light;
-  } */
-
-  /* .nationalpark-extrabold {
-    font-weight: 700;
-  }
-  .nationalpark-bold {
-    font-weight: 600;
-  }
-  .nationalpark-semibold {
-    font-weight: 500;
-  }
-  .nationalpark-medium {
-    font-weight: 400;
-  }
-  .nationalpark-normal {
-    font-weight: 300;
-  }
-  .nationalpark-light {
-    font-weight: 200;
-  } */
 
   /* --- */
 
