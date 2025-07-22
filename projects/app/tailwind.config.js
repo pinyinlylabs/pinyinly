@@ -32,12 +32,11 @@ module.exports = {
       /* EXPERIMENTAL: named semantic colors */
       bg: {
         DEFAULT: `rgb(from var(--color-bg) r g b / calc(alpha * <alpha-value>))`,
-        1: `rgb(from var(--color-bg-1) r g b / calc(alpha * <alpha-value>))`,
+        loud: `rgb(from var(--color-bg-loud) r g b / calc(alpha * <alpha-value>))`,
       },
       fg: {
         DEFAULT: `rgb(from var(--color-fg) r g b / calc(alpha * <alpha-value>))`,
-        bold: `rgb(from var(--color-fg-1) r g b / calc(alpha * <alpha-value>))`,
-        ref: `rgb(from var(--color-fg-1) r g b / calc(alpha * <alpha-value>))`,
+        loud: `rgb(from var(--color-fg-loud) r g b / calc(alpha * <alpha-value>))`,
         bg5: `rgb(from color-mix(in oklab, var(--color-fg) 5%, var(--color-bg)) r g b / calc(alpha * <alpha-value>))`,
         bg10: `rgb(from color-mix(in oklab, var(--color-fg) 10%, var(--color-bg)) r g b / calc(alpha * <alpha-value>))`,
         bg15: `rgb(from color-mix(in oklab, var(--color-fg) 15%, var(--color-bg)) r g b / calc(alpha * <alpha-value>))`,
@@ -66,9 +65,8 @@ module.exports = {
       cloud: `rgb(from var(--color-cloud) r g b / calc(alpha * <alpha-value>))`,
       ink: {
         DEFAULT: `rgb(from var(--color-ink) r g b / calc(alpha * <alpha-value>))`,
-        1: `rgb(from var(--color-ink-1) r g b / calc(alpha * <alpha-value>))`,
+        loud: `rgb(from var(--color-ink-loud) r g b / calc(alpha * <alpha-value>))`,
       },
-
       red: `rgb(from var(--color-red) r g b / calc(alpha * <alpha-value>))`,
       orange: `rgb(from var(--color-orange) r g b / calc(alpha * <alpha-value>))`,
       amber: `rgb(from var(--color-amber) r g b / calc(alpha * <alpha-value>))`,
@@ -88,7 +86,10 @@ module.exports = {
       fuchsia: `rgb(from var(--color-fuchsia) r g b / calc(alpha * <alpha-value>))`,
       pink: `rgb(from var(--color-pink) r g b / calc(alpha * <alpha-value>))`,
       rose: `rgb(from var(--color-rose) r g b / calc(alpha * <alpha-value>))`,
-      brick: `rgb(from var(--color-brick) r g b / calc(alpha * <alpha-value>))`,
+      brick: {
+        DEFAULT: `rgb(from var(--color-brick) r g b / calc(alpha * <alpha-value>))`,
+        loud: `rgb(from var(--color-brick-loud) r g b / calc(alpha * <alpha-value>))`,
+      },
       slate: `rgb(from var(--color-slate) r g b / calc(alpha * <alpha-value>))`,
       gray: `rgb(from var(--color-gray) r g b / calc(alpha * <alpha-value>))`,
       zinc: `rgb(from var(--color-zinc) r g b / calc(alpha * <alpha-value>))`,
@@ -104,7 +105,7 @@ module.exports = {
       fontFamily: {
         chinese: `MaShanZheng-Regular`,
         cursive: `ui-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"`,
-        sans: `ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"`,
+        sans: `NationalPark`,
         mono: `ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace`,
         karla: `Karla`,
       },

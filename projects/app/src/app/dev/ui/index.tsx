@@ -50,6 +50,7 @@ export const demos: Record<string, FunctionComponent> = {
   ToggleButton: lazyDemo(() => import(`./_demos/ToggleButton`)),
   TutorialDialogBox: lazyDemo(() => import(`./_demos/TutorialDialogBox`)),
   Typography: lazyDemo(() => import(`./_demos/Typography`)),
+  WikiHanziModal: lazyDemo(() => import(`./_demos/WikiHanziModal`)),
   WikiHanziWordModal: lazyDemo(() => import(`./_demos/WikiHanziWordModal`)),
 // </pyly-glob-template>
 };

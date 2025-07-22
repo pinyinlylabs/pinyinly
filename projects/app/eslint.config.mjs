@@ -86,6 +86,14 @@ export default tseslint.config(
       react: {
         version: `detect`,
       },
+      "better-tailwindcss": {
+        attributes: [
+          `class`,
+          `className`,
+          // support <ScrollView> attributes e.g. contentContainerClassName
+          `.*ClassName`,
+        ],
+      },
     },
 
     rules: {

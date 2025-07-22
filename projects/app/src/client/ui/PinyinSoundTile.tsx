@@ -58,7 +58,7 @@ export function PinyinSoundTile({
 
 const tileClass = tv({
   base: `
-    size-24 items-center justify-center gap-3 rounded-xl bg-bg-1 p-2
+    size-24 items-center justify-center gap-3 rounded-xl bg-bg-loud p-2
 
     hover:bg-cyan/20
   `,

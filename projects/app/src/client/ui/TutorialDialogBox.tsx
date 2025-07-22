@@ -65,10 +65,10 @@ export const TutorialDialogBox = ({
         <Text className="inline-block w-[24px]"></Text>
 
         <IconImage
-          source={require(`@/assets/icons/chevron-forward-filled.svg`)}
+          source={require(`@/assets/icons/chevron-right.svg`)}
           size={24}
           className={`
-            absolute bottom-0 right-[-6px] animate-hoscillate text-fg-bold transition-opacity
+            absolute bottom-0 right-[-6px] animate-hoscillate text-fg-loud transition-opacity
             duration-300
 
             ${typewriterCompleted ? `opacity-100` : `pointer-events-none opacity-0`}

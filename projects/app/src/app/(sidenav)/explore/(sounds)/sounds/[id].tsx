@@ -171,5 +171,5 @@ export default function MnemonicIdPage() {
 }
 
 const pinyinPartBox = tv({
-  base: `size-20 justify-center gap-1 rounded-xl bg-bg-1 p-2`,
+  base: `size-20 justify-center gap-1 rounded-xl bg-bg-loud p-2`,
 });

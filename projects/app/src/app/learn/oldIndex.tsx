@@ -220,7 +220,7 @@ export default function IndexPage() {
                       {recentHanzi.data.map((char, i) => (
                         <View
                           key={i}
-                          className="rounded border border-bg-1 bg-bg p-2"
+                          className="rounded border border-bg-loud bg-bg p-2"
                         >
                           <Text className="text-fg">{char}</Text>
                         </View>
