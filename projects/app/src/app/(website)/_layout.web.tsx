@@ -31,7 +31,7 @@ export default function WebsiteLayout() {
           www-px-comfortable fixed inset-x-0 top-0 z-50 flex h-[72px] justify-center border-0 bg-bg
           transition-all
 
-          ${isIntersecting ? `` : `border-b-2 border-solid border-bg-1`}
+          ${isIntersecting ? `` : `border-b-2 border-solid border-bg-loud`}
         `}
       >
         <View className="flex w-full max-w-www-col justify-between">
@@ -74,7 +74,7 @@ export default function WebsiteLayout() {
         <Slot />
         <footer
           className={`
-            mt-20 flex justify-center border-0 border-t border-solid border-bg-1 py-6 pt-20
+            mt-20 flex justify-center border-0 border-t border-solid border-bg-loud py-6 pt-20
           `}
         >
           <div className="www-px-comfortable flex w-full max-w-www-col">

@@ -77,7 +77,7 @@ export default function MenuLayout() {
               </Link>
             </View>
 
-            <View className="w-[200px] items-stretch rounded-xl bg-bg-1 py-3">
+            <View className="w-[200px] items-stretch rounded-xl bg-bg-loud py-3">
               {navItems
                 .filter((section) => section.primary === true)
                 .map((section, sectionIndex) => (
@@ -302,7 +302,7 @@ const MobileNavGroupItem = customTabTrigger(
       <Pressable
         {...rest}
         className={`
-          flex-row bg-bg-1 py-2.5 pl-4 pr-3
+          flex-row bg-bg-loud py-2.5 pl-4 pr-3
 
           hover:bg-fg/10
         `}

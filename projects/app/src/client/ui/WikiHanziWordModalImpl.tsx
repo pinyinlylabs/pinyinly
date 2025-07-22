@@ -131,7 +131,7 @@ export function WikiHanziWordModalImpl({
             <Text className="font-karla text-xs uppercase text-caption">
               Interpretation
             </Text>
-            <View className="gap-4 rounded-xl bg-bg-1 p-4">
+            <View className="gap-4 rounded-xl bg-bg-loud p-4">
               {wikiEntry.data.components.map((component, i) => {
                 return (
                   <View key={i} className="gap-1">
@@ -153,7 +153,7 @@ export function WikiHanziWordModalImpl({
 
               {hanziWordSkillData.data.glossHint == null ? null : (
                 <>
-                  <View className="h-px w-full bg-bg-1" />
+                  <View className="h-px w-full bg-bg-loud" />
                   <Text className="pyly-body">
                     <Pylymark source={hanziWordSkillData.data.glossHint} />
                   </Text>
@@ -162,7 +162,7 @@ export function WikiHanziWordModalImpl({
 
               {wikiEntry.data.interpretation == null ? null : (
                 <>
-                  <View className="h-px w-full bg-bg-1" />
+                  <View className="h-px w-full bg-bg-loud" />
                   <Text className="pyly-body">
                     <Pylymark source={wikiEntry.data.interpretation} />
                   </Text>
@@ -225,7 +225,7 @@ export function WikiHanziWordModalImpl({
         )}
       </ScrollView>
 
-      <View className="theme-accent border-t-2 border-bg-1 p-4 mb-safe">
+      <View className="theme-accent border-t-2 border-bg-loud p-4 mb-safe">
         <RectButton variant="filled" onPress={onDismiss}>
           Close
         </RectButton>

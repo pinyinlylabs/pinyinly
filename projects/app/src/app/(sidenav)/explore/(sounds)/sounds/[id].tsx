@@ -43,7 +43,9 @@ export default function MnemonicIdPage() {
   return (
     <ScrollView
       className="bg-bg"
-      contentContainerClassName="max-w-[800px] self-center px-safe-or-4 pb-2 pt-safe-offset-4 px-safe-or-4"
+      contentContainerClassName={`
+        max-w-[800px] self-center px-safe-or-4 pb-2 pt-safe-offset-4 px-safe-or-4
+      `}
     >
       <View className="mb-5 flex-row items-center gap-4">
         <View className={pinyinPartBox()}>
@@ -171,5 +173,5 @@ export default function MnemonicIdPage() {
 }
 
 const pinyinPartBox = tv({
-  base: `size-20 justify-center gap-1 rounded-xl bg-bg-1 p-2`,
+  base: `size-20 justify-center gap-1 rounded-xl bg-bg-loud p-2`,
 });

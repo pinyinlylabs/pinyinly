@@ -28,32 +28,13 @@
 
   /* <pyly-body-title> */
   .pyly-body-title {
-    @apply font-sans text-2xl/normal tracking-tight text-fg;
-  }
-  /*
-  Karla on iOS font-bold looks like font-medium, so we have to bump it up to
-  800, normally we could use the nativewind variants `native:` or `ios:`, but
-  using these causes tailwind to error. See
-  https://github.com/nativewind/nativewind/issues/1400
-  */
-  /* web */
-  @media (display-mode: browser) {
-    .pyly-body-title {
-      @apply font-bold;
-    }
-  }
-
-  @media not (display-mode: browser) {
-    /* native */
-    .pyly-body-title {
-      @apply font-[800];
-    }
+    @apply font-sans text-2xl/normal tracking-tight text-fg font-bold;
   }
   .pyly-body-title .pyly-ref {
-    @apply leading-tight text-2xl/normal font-bold text-fg-bold decoration-[4px] underline-offset-[3px];
+    @apply leading-tight text-2xl/normal font-bold text-fg-loud decoration-[4px] underline-offset-[3px];
   }
   .pyly-body-title .pyly-bold {
-    @apply font-bold text-fg-bold;
+    @apply font-bold text-fg-loud;
   }
   .pyly-body-title .pyly-highlight {
     @apply font-extrabold text-yellow;
@@ -63,19 +44,16 @@
   /* --- */
 
   .pyly-body-heading {
-    @apply font-sans text-lg/normal tracking-tight text-fg font-medium;
+    @apply font-sans text-lg/normal tracking-tight text-fg-loud font-semibold;
   }
   .pyly-body-heading .pyly-ref {
-    @apply font-semibold text-lg/normal text-fg-bold decoration-[3px] underline-offset-[3px];
+    @apply font-bold text-lg/normal text-fg-loud decoration-[3px] underline-offset-[3px];
   }
   .pyly-body-heading .pyly-bold {
-    @apply font-semibold text-fg-bold;
+    @apply font-bold text-fg-loud;
   }
   .pyly-body-heading .pyly-highlight {
-    @apply font-semibold text-yellow;
-  }
-  .pyly-body-heading .pyly-italic {
-    @apply font-medium;
+    @apply font-bold text-yellow;
   }
 
   /* --- */
@@ -84,10 +62,10 @@
     @apply font-sans text-2xl/normal font-light text-fg;
   }
   .pyly-body-2xl .pyly-ref {
-    @apply text-2xl/normal font-medium text-fg-bold decoration-[4px] underline-offset-[3px];
+    @apply text-2xl/normal font-medium text-fg-loud decoration-[4px] underline-offset-[3px];
   }
   .pyly-body-2xl .pyly-bold {
-    @apply font-medium text-fg-bold;
+    @apply font-medium text-fg-loud;
   }
   .pyly-body-2xl .pyly-highlight {
     @apply font-medium text-yellow;
@@ -96,13 +74,13 @@
   /* --- */
 
   .pyly-body {
-    @apply font-sans text-base/normal font-light text-fg;
+    @apply font-sans text-base/normal text-fg font-normal;
   }
   .pyly-body .pyly-ref {
-    @apply text-base/normal text-fg-ref font-medium decoration-[3px] underline-offset-[2px];
+    @apply text-base/normal text-fg-loud font-medium decoration-[3px] underline-offset-[2px];
   }
   .pyly-body .pyly-bold {
-    @apply font-medium text-fg-bold;
+    @apply font-bold text-fg-loud;
   }
   .pyly-body .pyly-highlight {
     @apply font-semibold text-yellow;
@@ -132,10 +110,10 @@
     @apply font-sans text-xs/normal font-normal text-caption uppercase;
   }
   .pyly-body-dt .pyly-ref {
-    @apply text-xs/normal text-fg-bold font-medium decoration-[2px] underline-offset-[2px];
+    @apply text-xs/normal text-fg-loud font-medium decoration-[2px] underline-offset-[2px];
   }
   .pyly-body-dt .pyly-bold {
-    @apply font-medium text-fg-bold;
+    @apply font-medium text-fg-loud;
   }
   .pyly-body-dt .pyly-highlight {
     @apply font-semibold text-yellow;
@@ -147,10 +125,10 @@
     @apply font-sans text-lg/snug font-light text-fg;
   }
   .pyly-body-input .pyly-ref {
-    @apply text-lg/snug text-fg-bold font-medium decoration-[3px] underline-offset-[2.5px];
+    @apply text-lg/snug text-fg-loud font-medium decoration-[3px] underline-offset-[2.5px];
   }
   .pyly-body-input .pyly-bold {
-    @apply font-medium text-fg-bold;
+    @apply font-medium text-fg-loud;
   }
   .pyly-body-input .pyly-highlight {
     @apply font-semibold text-yellow;
@@ -217,6 +195,7 @@
     --color-pink: var(--color-pink-dark);
     --color-rose: var(--color-rose-dark);
     --color-brick: var(--color-brick-dark);
+    --color-brick-loud: var(--color-brick-loud-dark);
     --color-slate: var(--color-slate-dark);
     --color-gray: var(--color-gray-dark);
     --color-zinc: var(--color-zinc-dark);
@@ -224,10 +203,10 @@
     --color-stone: var(--color-stone-dark);
     --color-cloud: var(--color-cloud-dark);
     --color-ink: var(--color-ink-dark);
-    --color-ink-1: var(--color-ink-1-dark);
+    --color-ink-loud: var(--color-ink-loud-dark);
 
     --color-bg: var(--color-bg-dark);
-    --color-bg-1: var(--color-bg-1-dark);
+    --color-bg-loud: var(--color-bg-loud-dark);
   }
 
   .pyly-color-schema-light {
@@ -251,6 +230,7 @@
     --color-pink: var(--color-pink-light);
     --color-rose: var(--color-rose-light);
     --color-brick: var(--color-brick-light);
+    --color-brick-loud: var(--color-brick-loud-light);
     --color-slate: var(--color-slate-light);
     --color-gray: var(--color-gray-light);
     --color-zinc: var(--color-zinc-light);
@@ -258,10 +238,10 @@
     --color-stone: var(--color-stone-light);
     --color-cloud: var(--color-cloud-light);
     --color-ink: var(--color-ink-light);
-    --color-ink-1: var(--color-ink-1-light);
+    --color-ink-loud: var(--color-ink-loud-light);
 
     --color-bg: var(--color-bg-light);
-    --color-bg-1: var(--color-bg-1-light);
+    --color-bg-loud: var(--color-bg-loud-light);
   }
 }
 
@@ -273,35 +253,35 @@
   */
   .theme-default {
     --color-fg: var(--color-ink);
-    --color-fg-1: var(--color-ink-1);
+    --color-fg-loud: var(--color-ink-loud);
     --color-caption: rgb(from var(--color-fg) r g b / 0.6);
     --color-caption-loud: rgb(from var(--color-fg) r g b / 0.9);
   }
 
   .theme-danger {
     --color-fg: var(--color-brick);
-    --color-fg-1: var(--color-brick);
+    --color-fg-loud: var(--color-brick-loud);
     --color-caption: rgb(from var(--color-fg) r g b / 0.6);
     --color-caption-loud: rgb(from var(--color-fg) r g b / 0.9);
   }
 
   .theme-success {
     --color-fg: var(--color-wasabi);
-    --color-fg-1: var(--color-wasabi);
+    --color-fg-loud: var(--color-wasabi);
     --color-caption: rgb(from var(--color-fg) r g b / 0.6);
     --color-caption-loud: rgb(from var(--color-fg) r g b / 0.9);
   }
 
   .theme-accent {
     --color-fg: var(--color-cyanold);
-    --color-fg-1: var(--color-cyanold);
+    --color-fg-loud: var(--color-cyanold);
     --color-caption: rgb(from var(--color-fg) r g b / 0.6);
     --color-caption-loud: rgb(from var(--color-fg) r g b / 0.9);
   }
 
   .theme-warning {
     --color-fg: var(--color-amber);
-    --color-fg-1: var(--color-amber);
+    --color-fg-loud: var(--color-amber);
     --color-caption: rgb(from var(--color-fg) r g b / 0.6);
     --color-caption-loud: rgb(from var(--color-fg) r g b / 0.9);
   }
@@ -322,6 +302,16 @@
 
   .pyly-italic {
     @apply italic;
+  }
+
+  /* --- */
+
+  .font-sans {
+    /*
+    Safari tries to work out its own "bold" weight, because it's a variable
+    weight font. This disables that behaviour.
+    */
+    font-synthesis: none;
   }
 
   /* --- */
@@ -357,7 +347,7 @@ body {
   --color-teal-dark: #00d5be;
   --color-cyan-light: #007595;
   --color-cyan-dark: #00d3f2;
-  --color-cyanold-light: #00b8db;
+  --color-cyanold-light: #00bae9;
   --color-cyanold-dark: #00d3f2;
   --color-sky-light: #0069a8;
   --color-sky-dark: #00a6f4;
@@ -375,8 +365,6 @@ body {
   --color-pink-dark: #f6339a;
   --color-rose-light: #ec003f;
   --color-rose-dark: #ff2056;
-  --color-brick-light: #dc3e43;
-  --color-brick-dark: #f2555a;
   --color-slate-light: #45556c;
   --color-slate-dark: #90a1b9;
   --color-gray-light: #4a5565;
@@ -389,17 +377,21 @@ body {
   --color-stone-dark: #a6a09b;
   /* </tailwind-colors> */
 
+  --color-brick-light: #dc3e43;
+  --color-brick-dark: #f2555a;
+  --color-brick-loud-light: #e43238;
+  --color-brick-loud-dark: #fd333a;
   --color-ink-light: #28353d;
   --color-ink-dark: #d7d8d9;
-  --color-ink-1-light: #000000;
-  --color-ink-1-dark: #ffffff;
+  --color-ink-loud-light: #000000;
+  --color-ink-loud-dark: #ffffff;
   --color-cloud-light: #cdcdcd;
   --color-cloud-dark: #d9d9d9;
 
   --color-bg-light: #f8f9fa;
   --color-bg-dark: #1a1d1e;
-  --color-bg-1-light: #f1f3f5;
-  --color-bg-1-dark: #1f292b;
+  --color-bg-loud-light: #f1f3f5;
+  --color-bg-loud-dark: #1f292b;
 
   @apply pyly-color-schema-light;
   @apply theme-default;

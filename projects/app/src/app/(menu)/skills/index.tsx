@@ -152,7 +152,7 @@ const skillTileClass = tv({
   base: `min-w-[120px] flex-1 rounded-lg px-4 py-3`,
   variants: {
     rank: {
-      0: `bg-bg-1`,
+      0: `bg-bg-loud`,
       1: `bg-cyan/5`,
       2: `bg-blue/5`,
       3: `bg-violet/5`,

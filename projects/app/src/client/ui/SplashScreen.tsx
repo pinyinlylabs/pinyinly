@@ -30,6 +30,9 @@ if (!isExpoGo) {
 export const SplashScreen = ({}: { children?: never }) => {
   const [fontsLoaded, fontError] = useFonts({
     [`Karla`]: require(`@/assets/fonts/Karla.ttf`),
+    [`NationalPark`]: require(
+      `@/assets/fonts/NationalPark/NationalPark-VariableFont_wght.ttf`,
+    ),
     [`MaShanZheng-Regular`]: require(`@/assets/fonts/MaShanZheng-Regular.ttf`),
     [`NotoSerifSC-Medium`]: require(`@/assets/fonts/NotoSerifSC-Medium.otf`),
   });

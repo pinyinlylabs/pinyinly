@@ -29,10 +29,13 @@ export default () => {
     `bg-stone`,
     `bg-cloud`,
     `bg-ink`,
-    `bg-ink-1`,
     `bg-fg`,
-    `bg-bg-1`,
+    `bg-bg`,
   ];
+
+  // force tailwind to include these classes
+  void `bg-fg-loud bg-ink-loud bg-brick-loud bg-bg-loud`;
+
   const opacities = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1];
   const columnLabels = (
     <View
@@ -50,6 +53,9 @@ export default () => {
           </Text>
         </View>
       ))}
+      <View className="w-9 items-center justify-center">
+        <Text className="pyly-dev-dt">loud</Text>
+      </View>
     </View>
   );
   return (
@@ -87,28 +93,39 @@ export default () => {
         </View>
         <View className="gap-2">
           {columnLabels}
-          {bgColors.map((bgColor) => (
-            <View
-              key={bgColor}
-              className={`
-                flex-row gap-2
+          {bgColors.map((bgColor) => {
+            const loudBgColor = `${bgColor}-loud`;
 
-                [.pyly-color-scheme-dark_&]:flex-row-reverse
-              `}
-            >
-              {opacities.map((opacity, index) => (
+            return (
+              <View
+                key={bgColor}
+                className={`
+                  flex-row gap-2
+
+                  [.pyly-color-scheme-dark_&]:flex-row-reverse
+                `}
+              >
+                {opacities.map((opacity, index) => (
+                  <View
+                    className={`
+                      size-9 rounded-lg
+
+                      ${bgColor}
+                    `}
+                    key={index}
+                    style={{ opacity }}
+                  />
+                ))}
                 <View
                   className={`
                     size-9 rounded-lg
 
-                    ${bgColor}
+                    ${loudBgColor}
                   `}
-                  key={index}
-                  style={{ opacity }}
                 />
-              ))}
-            </View>
-          ))}
+              </View>
+            );
+          })}
           {columnLabels}
         </View>
       </View>
