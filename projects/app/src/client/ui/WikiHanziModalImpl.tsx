@@ -1,12 +1,13 @@
 import { useHanziWikiEntry } from "@/client/hooks/useHanziWikiEntry";
-import { useLocalQuery } from "@/client/hooks/useLocalQuery";
-import type { HanziText } from "@/data/model";
-import { lookupHanzi } from "@/dictionary/dictionary";
-import { useState } from "react";
+import { useLookupHanzi } from "@/client/hooks/useLookupHanzi";
+import type { HanziText, PinyinSyllable } from "@/data/model";
+import { Fragment, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useIntersectionObserver } from "usehooks-ts";
 import { IconImage } from "./IconImage";
 import { Pylymark } from "./Pylymark";
+
+const hr = <View className="h-px bg-fg/25" />;
 
 export function WikiHanziModalImpl({
   hanzi,
@@ -18,15 +19,30 @@ export function WikiHanziModalImpl({
   const wikiEntry = useHanziWikiEntry(hanzi);
   void wikiEntry;
 
-  const hanziWordMeanings = useLocalQuery({
-    queryKey: [WikiHanziModalImpl.name, `meanings`, hanzi],
-    queryFn: async () => {
-      const res = await lookupHanzi(hanzi);
-      return res;
-    },
-  });
+  const hanziWordMeanings = useLookupHanzi(hanzi);
 
-  return hanziWordMeanings.data == null ? null : (
+  let pinyin: readonly PinyinSyllable[] | undefined;
+  for (const [, meaning] of hanziWordMeanings) {
+    if (meaning.pinyin != null) {
+      const mainPinyin = meaning.pinyin[0];
+      if (mainPinyin != null) {
+        pinyin = mainPinyin;
+        break;
+      }
+    }
+  }
+
+  let title: string = hanzi;
+  if (pinyin != null) {
+    title += ` (${pinyin.join(` `)})`;
+  }
+
+  const glosses =
+    hanziWordMeanings.length === 1
+      ? hanziWordMeanings[0]?.[1].gloss.join(`, `)
+      : hanziWordMeanings.map(([, meaning]) => meaning.gloss[0]).join(`, `);
+
+  return (
     <>
       <ScrollView
         className={
@@ -39,11 +55,7 @@ export function WikiHanziModalImpl({
         }
         contentContainerClassName="pb-10"
       >
-        <Header
-          title={`${hanzi} (shàng)`}
-          subtitle="up, on, start"
-          onDismiss={onDismiss}
-        />
+        <Header title={title} subtitle={glosses} onDismiss={onDismiss} />
 
         <View className="gap-6 bg-bg py-7">
           <View className="gap-2 px-4">
@@ -56,19 +68,16 @@ export function WikiHanziModalImpl({
           </View>
 
           <View>
-            <View className="h-px bg-fg/25" />
-
-            <ExpandableSection title="上 as “up”" />
-
-            <View className="h-px bg-fg/25" />
-
-            <ExpandableSection title="上 as “on”" />
-
-            <View className="h-px bg-fg/25" />
-
-            <ExpandableSection title="上 as “start”" />
-
-            <View className="h-px bg-fg/25" />
+            {hanziWordMeanings.map(([, meaning], i) => {
+              const gloss = meaning.gloss[0];
+              return gloss == null ? null : (
+                <Fragment key={i}>
+                  {i === 0 ? hr : null}
+                  <ExpandableSection title={`${hanzi} as “${gloss}”`} />
+                  {hr}
+                </Fragment>
+              );
+            })}
           </View>
 
           <View className="gap-6 bg-bg-loud py-5">
@@ -88,15 +97,15 @@ export function WikiHanziModalImpl({
             </View>
 
             <View>
-              <View className="h-px bg-fg/25" />
+              {hr}
 
               <ExpandableSection title="上 as a flag pole" />
 
-              <View className="h-px bg-fg/25" />
+              {hr}
 
               <ExpandableSection title="下 as a tree root" />
 
-              <View className="h-0 bg-fg/25" />
+              <View className="h-0" />
             </View>
           </View>
         </View>
