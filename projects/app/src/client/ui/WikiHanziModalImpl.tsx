@@ -249,7 +249,7 @@ function ExpandableSection({
           className="text-fg-bg50"
         />
       </Pressable>
-      {children}
+      {expanded ? children : null}
     </View>
   );
 }
