@@ -133,11 +133,11 @@ export function WikiHanziModalImpl({
             ) : // Super hacky way to unwrap the meaning content and not have it
             // wrapped in a collapsible section.
             hanziWordMeanings.length === 1 ? (
-              hanziWordMeanings.slice(0, 1).map(([hanziWord, meaning]) => {
+              hanziWordMeanings.slice(0, 1).map(([hanziWord, meaning], i) => {
                 const gloss = meaning.gloss[0];
                 const ContentMdx = wikiMdx[`${hanziWord}.meaning`];
                 return gloss == null || ContentMdx == null ? null : (
-                  <View>
+                  <View key={i}>
                     <ContentMdx />
                   </View>
                 );
