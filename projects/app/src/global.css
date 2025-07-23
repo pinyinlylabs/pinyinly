@@ -243,6 +243,27 @@
     --color-bg: var(--color-bg-light);
     --color-bg-loud: var(--color-bg-loud-light);
   }
+
+  .pyly-mdx {
+  }
+  .pyly-mdx-p {
+  }
+  .pyly-mdx-blockquote {
+    @apply border-l-4 border-l-fg/50 pl-4 py-2;
+  }
+
+  .pyly-mdx > .pyly-mdx-p,
+  .pyly-mdx > ul,
+  .pyly-mdx > .pyly-mdx-blockquote {
+    @apply mx-4;
+  }
+
+  .pyly-mdx ul {
+    @apply pl-6;
+  }
+  .pyly-mdx li ul {
+    @apply my-2;
+  }
 }
 
 @layer utilities {

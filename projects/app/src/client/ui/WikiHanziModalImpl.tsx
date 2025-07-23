@@ -10,7 +10,6 @@ import { Pressable, ScrollView, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 import { useIntersectionObserver } from "usehooks-ts";
 import { IconImage } from "./IconImage";
-import { Pylymark } from "./Pylymark";
 
 type MdxComponent = React.FC<{
   components?: CustomComponentsProp;
@@ -24,17 +23,19 @@ const lazyMdx = <Mdx extends MdxComponent>(
     return await importFn();
   });
 
-const hanziWordWiki: Record<string, MdxComponent> = {
+const wikiMdx: Record<string, MdxComponent> = {
   // <pyly-glob-template dir="../wiki" glob="*.mdx" template="  \"${filenameWithoutExt}\": lazyMdx(() => import(`${path}`)),">
-  "上~above": lazyMdx(() => import(`../wiki/上~above.mdx`)),
-  "上~on": lazyMdx(() => import(`../wiki/上~on.mdx`)),
-  "你好~hello": lazyMdx(() => import(`../wiki/你好~hello.mdx`)),
+  "上.meaning": lazyMdx(() => import(`../wiki/上.meaning.mdx`)),
+  "上.meaningMnemonic": lazyMdx(() => import(`../wiki/上.meaningMnemonic.mdx`)),
+  "上~above.meaning": lazyMdx(() => import(`../wiki/上~above.meaning.mdx`)),
+  "上~on.meaning": lazyMdx(() => import(`../wiki/上~on.meaning.mdx`)),
+  "你好~hello.meaning": lazyMdx(() => import(`../wiki/你好~hello.meaning.mdx`)),
   // </pyly-glob-template>
 };
 
-for (const [key, value] of Object.entries(hanziWordWiki)) {
+for (const [key, value] of Object.entries(wikiMdx)) {
   // Replace the tilde with a colon to match the HanziText format.
-  hanziWordWiki[key.replace(`~`, `:`)] = value;
+  wikiMdx[key.replace(`~`, `:`)] = value;
 }
 
 const hr = <View className="h-px bg-fg/25" />;
@@ -74,6 +75,9 @@ export function WikiHanziModalImpl({
       ? hanziWordMeanings[0]?.[1].gloss.join(`, `)
       : hanziWordMeanings.map(([, meaning]) => meaning.gloss[0]).join(`, `);
 
+  const MeaningMdx = wikiMdx[`${hanzi}.meaning`];
+  const MeaningMnemonicMdx = wikiMdx[`${hanzi}.meaningMnemonic`];
+
   return (
     <>
       <ScrollView
@@ -105,24 +109,17 @@ export function WikiHanziModalImpl({
               ${tab === `meaning` ? `flex` : `hidden`}
             `}
           >
-            <View className="gap-2 px-4">
-              <Text className="pyly-body">
-                <Pylymark source="{上:up} is a common Chinese word meaning **up**, **on**, or **start**. It appears in 80% of all movies in the last 10 years." />
-              </Text>
-              <Text className="pyly-body">
-                <Pylymark source="The opposite of {上:up} is {下:down}." />
-              </Text>
-            </View>
+            {MeaningMdx == null ? null : <MeaningMdx />}
 
             <View>
               {hanziWordMeanings.map(([hanziWord, meaning], i) => {
                 const gloss = meaning.gloss[0];
-                const Content = hanziWordWiki[hanziWord];
+                const ContentMdx = wikiMdx[`${hanziWord}.meaning`];
                 return gloss == null ? null : (
                   <Fragment key={i}>
                     {i === 0 ? hr : null}
                     <ExpandableSection title={`${hanzi} as “${gloss}”`}>
-                      {Content == null ? null : <Content />}
+                      {ContentMdx == null ? null : <ContentMdx />}
                     </ExpandableSection>
                     {hr}
                   </Fragment>
@@ -130,9 +127,9 @@ export function WikiHanziModalImpl({
               })}
             </View>
 
-            <View className="gap-6 bg-bg-loud py-5">
-              <View className="gap-4 px-4">
-                <View className="flex-row gap-2">
+            {MeaningMnemonicMdx == null ? null : (
+              <View className="gap-6 bg-bg-loud py-5">
+                <View className="flex-row gap-2 px-4">
                   <IconImage
                     source={require(`@/assets/icons/bulb.svg`)}
                     size={24}
@@ -141,25 +138,10 @@ export function WikiHanziModalImpl({
                   <Text className="pyly-body-heading">HOW TO REMEMBER IT</Text>
                 </View>
 
-                <Text className="pyly-body">
-                  <Pylymark source="**上** and **下** look distinctive and are almost flipped versions of each other. It’s easy to picture them in your mind as real world objects." />
-                </Text>
+                <MeaningMnemonicMdx />
               </View>
-
-              <View>
-                {hr}
-
-                <ExpandableSection title="上 as a flag pole" />
-
-                {hr}
-
-                <ExpandableSection title="下 as a tree root" />
-
-                <View className="h-0" />
-              </View>
-
-              <View className="h-[500px]" />
-            </View>
+            )}
+            <View className="h-[500px]" />
           </View>
         </PylyMdxComponents>
       </ScrollView>
@@ -290,7 +272,7 @@ function HeaderTab({
   return (
     <Pressable
       className={`
-        flex-1 items-center border-fg-loud py-3
+        min-w-40 flex-1 items-center border-fg-loud py-3
 
         ${isActive ? `border-b-2` : `border-b-0 opacity-80`}
 
@@ -341,12 +323,16 @@ function ExpandableSection({
         </Pressable>
       )}
       <View
-        className={
-          // Always render the content so that any async suspense content is
-          // caught on the first render, rather than having spinners after it's
-          // presented.
-          expanded ? `flex` : `hidden`
-        }
+        className={`
+          mb-4
+
+          ${
+            // Always render the content so that any async suspense content is
+            // caught on the first render, rather than having spinners after it's
+            // presented.
+            expanded ? `flex` : `hidden`
+          }
+        `}
       >
         {children}
       </View>
@@ -362,8 +348,11 @@ function PylyMdxComponents({ children }: PropsWithChildren) {
   return (
     <MDXComponents
       components={{
+        blockquote: ({ children }: PropsWithChildren) => (
+          <View className="pyly-mdx-blockquote">{children}</View>
+        ),
         p: ({ children }: PropsWithChildren) => (
-          <Text className="pyly-body mx-4">{children}</Text>
+          <Text className="pyly-body pyly-mdx-p">{children}</Text>
         ),
         em: ({ children }: PropsWithChildren) => (
           <Text className="pyly-highlight">{children}</Text>
@@ -376,12 +365,11 @@ function PylyMdxComponents({ children }: PropsWithChildren) {
             <Text className="pyly-body">{children}</Text>
           </li>
         ),
-
         strong: ({ children }: PropsWithChildren) => (
           <Text className="pyly-bold">{children}</Text>
         ),
         Wrapper: ({ children }: PropsWithChildren) => (
-          <View className="mb-4 space-y-3">{children}</View>
+          <View className="pyly-mdx space-y-4">{children}</View>
         ),
       }}
     >
