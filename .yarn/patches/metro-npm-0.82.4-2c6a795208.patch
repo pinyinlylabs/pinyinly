@@ -1,0 +1,13 @@
+diff --git a/src/Server.js b/src/Server.js
+index 3f1dc8ef2b2ce89be2d108304c081cdc956fd428..fa2a78548b43cbc96d408cd02c9363186835603d 100644
+--- a/src/Server.js
++++ b/src/Server.js
+@@ -805,7 +805,7 @@ class Server {
+         );
+         mres.setHeader(DELTA_ID_HEADER, String(result.nextRevId));
+         if (serializerOptions?.sourceUrl != null) {
+-          mres.setHeader("Content-Location", serializerOptions.sourceUrl);
++          mres.setHeader("Content-Location", new URL(serializerOptions.sourceUrl)); // https://github.com/facebook/metro/pull/1538
+         }
+         mres.setHeader("Content-Type", "application/javascript; charset=UTF-8");
+         mres.setHeader("Last-Modified", result.lastModifiedDate.toUTCString());

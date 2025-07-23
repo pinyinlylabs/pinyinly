@@ -357,7 +357,7 @@ export const lookupHanziWordPinyinMnemonics = async (hanziWord: HanziWord) =>
  * Build an inverted index of hanzi words to hanzi word meanings and glosses to
  * hanzi word meanings. Useful when building learning graphs.
  */
-const hanziToHanziWordMap = memoize0(
+export const hanziToHanziWordMap = memoize0(
   async (): Promise<
     DeepReadonly<{
       hanziMap: Map<string, HanziWordWithMeaning[]>;

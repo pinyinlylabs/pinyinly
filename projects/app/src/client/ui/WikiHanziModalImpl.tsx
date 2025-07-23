@@ -1,12 +1,43 @@
 import { useHanziWikiEntry } from "@/client/hooks/useHanziWikiEntry";
-import { useLocalQuery } from "@/client/hooks/useLocalQuery";
-import type { HanziText } from "@/data/model";
-import { lookupHanzi } from "@/dictionary/dictionary";
-import { useState } from "react";
+import { useLookupHanzi } from "@/client/hooks/useLookupHanzi";
+import type { HanziText, PinyinSyllable } from "@/data/model";
+import { devToolsSlowQuerySleepIfEnabled } from "@/util/devtools";
+import type { CustomComponentsProp } from "@bacons/mdx";
+import { MDXComponents } from "@bacons/mdx";
+import type { PropsWithChildren } from "react";
+import { Fragment, lazy, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
+import { tv } from "tailwind-variants";
 import { useIntersectionObserver } from "usehooks-ts";
 import { IconImage } from "./IconImage";
 import { Pylymark } from "./Pylymark";
+
+type MdxComponent = React.FC<{
+  components?: CustomComponentsProp;
+}>;
+
+const lazyMdx = <Mdx extends MdxComponent>(
+  importFn: () => Promise<{ default: Mdx }>,
+) =>
+  lazy(async () => {
+    await devToolsSlowQuerySleepIfEnabled();
+    return await importFn();
+  });
+
+const hanziWordWiki: Record<string, MdxComponent> = {
+  // <pyly-glob-template dir="../wiki" glob="*.mdx" template="  \"${filenameWithoutExt}\": lazyMdx(() => import(`${path}`)),">
+  "上~above": lazyMdx(() => import(`../wiki/上~above.mdx`)),
+  "上~on": lazyMdx(() => import(`../wiki/上~on.mdx`)),
+  "你好~hello": lazyMdx(() => import(`../wiki/你好~hello.mdx`)),
+  // </pyly-glob-template>
+};
+
+for (const [key, value] of Object.entries(hanziWordWiki)) {
+  // Replace the tilde with a colon to match the HanziText format.
+  hanziWordWiki[key.replace(`~`, `:`)] = value;
+}
+
+const hr = <View className="h-px bg-fg/25" />;
 
 export function WikiHanziModalImpl({
   hanzi,
@@ -15,18 +46,35 @@ export function WikiHanziModalImpl({
   hanzi: HanziText;
   onDismiss: () => void;
 }) {
+  const [tab, setTab] = useState<`meaning` | `pronunciation`>(`meaning`);
+
   const wikiEntry = useHanziWikiEntry(hanzi);
   void wikiEntry;
 
-  const hanziWordMeanings = useLocalQuery({
-    queryKey: [WikiHanziModalImpl.name, `meanings`, hanzi],
-    queryFn: async () => {
-      const res = await lookupHanzi(hanzi);
-      return res;
-    },
-  });
+  const hanziWordMeanings = useLookupHanzi(hanzi);
 
-  return hanziWordMeanings.data == null ? null : (
+  let pinyin: readonly PinyinSyllable[] | undefined;
+  for (const [, meaning] of hanziWordMeanings) {
+    if (meaning.pinyin != null) {
+      const mainPinyin = meaning.pinyin[0];
+      if (mainPinyin != null) {
+        pinyin = mainPinyin;
+        break;
+      }
+    }
+  }
+
+  let title: string = hanzi;
+  if (pinyin != null) {
+    title += ` (${pinyin.join(` `)})`;
+  }
+
+  const glosses =
+    hanziWordMeanings.length === 1
+      ? hanziWordMeanings[0]?.[1].gloss.join(`, `)
+      : hanziWordMeanings.map(([, meaning]) => meaning.gloss[0]).join(`, `);
+
+  return (
     <>
       <ScrollView
         className={
@@ -40,66 +88,80 @@ export function WikiHanziModalImpl({
         contentContainerClassName="pb-10"
       >
         <Header
-          title={`${hanzi} (shàng)`}
-          subtitle="up, on, start"
+          title={title}
+          tab={tab}
+          subtitle={glosses}
           onDismiss={onDismiss}
+          onTabChange={(tab) => {
+            setTab(tab);
+          }}
         />
 
-        <View className="gap-6 bg-bg py-7">
-          <View className="gap-2 px-4">
-            <Text className="pyly-body">
-              <Pylymark source="{上:up} is a common Chinese word meaning **up**, **on**, or **start**. It appears in 80% of all movies in the last 10 years." />
-            </Text>
-            <Text className="pyly-body">
-              <Pylymark source="The opposite of {上:up} is {下:down}." />
-            </Text>
-          </View>
+        <PylyMdxComponents>
+          <View
+            className={`
+              gap-6 bg-bg py-7
 
-          <View>
-            <View className="h-px bg-fg/25" />
-
-            <ExpandableSection title="上 as “up”" />
-
-            <View className="h-px bg-fg/25" />
-
-            <ExpandableSection title="上 as “on”" />
-
-            <View className="h-px bg-fg/25" />
-
-            <ExpandableSection title="上 as “start”" />
-
-            <View className="h-px bg-fg/25" />
-          </View>
-
-          <View className="gap-6 bg-bg-loud py-5">
-            <View className="gap-4 px-4">
-              <View className="flex-row gap-2">
-                <IconImage
-                  source={require(`@/assets/icons/bulb.svg`)}
-                  size={24}
-                  className="text-yellow"
-                />
-                <Text className="pyly-body-heading">HOW TO REMEMBER IT</Text>
-              </View>
-
+              ${tab === `meaning` ? `flex` : `hidden`}
+            `}
+          >
+            <View className="gap-2 px-4">
               <Text className="pyly-body">
-                <Pylymark source="**上** and **下** look distinctive and are almost flipped versions of each other. It’s easy to picture them in your mind as real world objects." />
+                <Pylymark source="{上:up} is a common Chinese word meaning **up**, **on**, or **start**. It appears in 80% of all movies in the last 10 years." />
+              </Text>
+              <Text className="pyly-body">
+                <Pylymark source="The opposite of {上:up} is {下:down}." />
               </Text>
             </View>
 
             <View>
-              <View className="h-px bg-fg/25" />
+              {hanziWordMeanings.map(([hanziWord, meaning], i) => {
+                const gloss = meaning.gloss[0];
+                const Content = hanziWordWiki[hanziWord];
+                return gloss == null ? null : (
+                  <Fragment key={i}>
+                    {i === 0 ? hr : null}
+                    <ExpandableSection title={`${hanzi} as “${gloss}”`}>
+                      {Content == null ? null : <Content />}
+                    </ExpandableSection>
+                    {hr}
+                  </Fragment>
+                );
+              })}
+            </View>
 
-              <ExpandableSection title="上 as a flag pole" />
+            <View className="gap-6 bg-bg-loud py-5">
+              <View className="gap-4 px-4">
+                <View className="flex-row gap-2">
+                  <IconImage
+                    source={require(`@/assets/icons/bulb.svg`)}
+                    size={24}
+                    className="text-yellow"
+                  />
+                  <Text className="pyly-body-heading">HOW TO REMEMBER IT</Text>
+                </View>
 
-              <View className="h-px bg-fg/25" />
+                <Text className="pyly-body">
+                  <Pylymark source="**上** and **下** look distinctive and are almost flipped versions of each other. It’s easy to picture them in your mind as real world objects." />
+                </Text>
+              </View>
 
-              <ExpandableSection title="下 as a tree root" />
+              <View>
+                {hr}
 
-              <View className="h-0 bg-fg/25" />
+                <ExpandableSection title="上 as a flag pole" />
+
+                {hr}
+
+                <ExpandableSection title="下 as a tree root" />
+
+                <View className="h-0" />
+              </View>
+
+              <View className="h-[500px]" />
             </View>
           </View>
-        </View>
+        </PylyMdxComponents>
       </ScrollView>
     </>
   );
@@ -109,14 +171,14 @@ function Header({
   title,
   subtitle,
   onDismiss,
-  onShowMeaning,
-  onShowPronunciation,
+  tab,
+  onTabChange,
 }: {
   title: string;
   subtitle?: string;
   onDismiss?: () => void;
-  onShowMeaning?: () => void;
-  onShowPronunciation?: () => void;
+  tab: `meaning` | `pronunciation`;
+  onTabChange?: (tab: `meaning` | `pronunciation`) => void;
 }) {
   const [ref1, isIntersecting1] = useIntersectionObserver({
     // threshold: 1,
@@ -151,9 +213,9 @@ function Header({
           <Pressable
             onPress={onDismiss}
             className={`
-              size-8 opacity-75
+              size-8 rounded-md
 
-              hover:opacity-100
+              hover:bg-fg-loud/10
             `}
           >
             <IconImage
@@ -179,7 +241,7 @@ function Header({
         <View className="">
           <Text
             className={`
-              text-center font-sans text-[18px] font-semibold text-fg-loud transition-opacity
+              text-center font-sans text-[18px] font-normal text-fg-loud transition-opacity
 
               ${isIntersecting1 ? `opacity-100` : `opacity-0`}
             `}
@@ -195,26 +257,53 @@ function Header({
             ${isIntersecting2 ? `opacity-100` : `opacity-0`}
           `}
         >
-          <Pressable
-            className={`flex-1 items-center border-b-2 border-fg-loud py-3`}
-            onPress={onShowMeaning}
-          >
-            <Text className="font-sans text-[18px]/normal font-semibold text-fg-loud">
-              Meaning
-            </Text>
-          </Pressable>
-          <Pressable
-            className={`flex-1 items-center border-b-0 border-fg-loud py-3 opacity-80`}
-            onPress={onShowPronunciation}
-          >
-            <Text className="font-sans text-[18px]/normal font-semibold text-fg-loud">
-              Pronunciation
-            </Text>
-          </Pressable>
+          <HeaderTab
+            label="Meaning"
+            isActive={tab === `meaning`}
+            onPress={() => {
+              onTabChange?.(`meaning`);
+            }}
+          />
+          <HeaderTab
+            label="Pronunciation"
+            isActive={tab === `pronunciation`}
+            onPress={() => {
+              onTabChange?.(`pronunciation`);
+            }}
+          />
         </View>
         <View className="sticky top-[64px] h-px w-full bg-fg-loud" />
       </View>
     </>
+  );
+}
+
+function HeaderTab({
+  label,
+  isActive,
+  onPress,
+}: {
+  label: string;
+  isActive: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      className={`
+        flex-1 items-center border-fg-loud py-3
+
+        ${isActive ? `border-b-2` : `border-b-0 opacity-80`}
+
+        hover:bg-fg-loud/10
+      `}
+      onPress={() => {
+        onPress();
+      }}
+    >
+      <Text className="font-sans text-[18px]/normal font-semibold text-fg-loud">
+        {label}
+      </Text>
+    </Pressable>
   );
 }
 
@@ -226,30 +315,77 @@ function ExpandableSection({
   children?: React.ReactNode;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const titleElement = <Text className="pyly-body-heading">{title}</Text>;
+
   return (
     <View>
-      <Pressable
-        onPress={() => {
-          setExpanded((x) => !x);
-        }}
-        className={`
-          flex-row justify-between px-4 py-6
-
-          hover:bg-fg-bg20
-        `}
+      {children == null ? (
+        <View className={containerClass()}>{titleElement}</View>
+      ) : (
+        <Pressable
+          onPress={() => {
+            setExpanded((x) => !x);
+          }}
+          className={containerClass({ className: `hover:bg-fg-bg20` })}
+        >
+          {titleElement}
+          <IconImage
+            source={
+              expanded
+                ? require(`@/assets/icons/chevron-down.svg`)
+                : require(`@/assets/icons/chevron-up.svg`)
+            }
+            size={24}
+            className="text-fg-bg50"
+          />
+        </Pressable>
+      )}
+      <View
+        className={
+          // Always render the content so that any async suspense content is
+          // caught on the first render, rather than having spinners after it's
+          // presented.
+          expanded ? `flex` : `hidden`
+        }
       >
-        <Text className="pyly-body-heading">{title}</Text>
-        <IconImage
-          source={
-            expanded
-              ? require(`@/assets/icons/chevron-down.svg`)
-              : require(`@/assets/icons/chevron-up.svg`)
-          }
-          size={24}
-          className="text-fg-bg50"
-        />
-      </Pressable>
-      {expanded ? children : null}
+        {children}
+      </View>
     </View>
+  );
+}
+
+const containerClass = tv({
+  base: `flex-row justify-between p-4 py-6`,
+});
+
+function PylyMdxComponents({ children }: PropsWithChildren) {
+  return (
+    <MDXComponents
+      components={{
+        p: ({ children }: PropsWithChildren) => (
+          <Text className="pyly-body mx-4">{children}</Text>
+        ),
+        em: ({ children }: PropsWithChildren) => (
+          <Text className="pyly-highlight">{children}</Text>
+        ),
+        ul: ({ children }: PropsWithChildren) => (
+          <ul className="space-y-2">{children}</ul>
+        ),
+        li: ({ children }: PropsWithChildren) => (
+          <li className="pyly-body">
+            <Text className="pyly-body">{children}</Text>
+          </li>
+        ),
+
+        strong: ({ children }: PropsWithChildren) => (
+          <Text className="pyly-bold">{children}</Text>
+        ),
+        Wrapper: ({ children }: PropsWithChildren) => (
+          <View className="mb-4 space-y-3">{children}</View>
+        ),
+      }}
+    >
+      {children}
+    </MDXComponents>
   );
 }

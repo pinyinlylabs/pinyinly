@@ -65,6 +65,8 @@
     "@react-navigation/native-stack@npm:^7.3.10": "patch:@react-navigation/native-stack@npm%3A7.3.13#~/.yarn/patches/@react-navigation-native-stack-npm-7.3.13-ef06339c8f.patch",
     "@react-navigation/elements@npm:^2.4.2": "patch:@react-navigation/elements@npm%3A2.4.2#~/.yarn/patches/@react-navigation-elements-npm-2.4.2-8dda4fb82f.patch",
     "@expo/cli@npm:0.24.18": "patch:@expo/cli@npm%3A0.24.18#~/.yarn/patches/@expo-cli-npm-0.24.18-cea2515949.patch",
-    "babel-preset-expo@npm:~13.2.3": "patch:babel-preset-expo@npm%3A13.2.3#~/.yarn/patches/babel-preset-expo-npm-13.2.3-a123145936.patch"
+    "babel-preset-expo@npm:~13.2.3": "patch:babel-preset-expo@npm%3A13.2.3#~/.yarn/patches/babel-preset-expo-npm-13.2.3-a123145936.patch",
+    "metro@npm:^0.82.0": "patch:metro@npm%3A0.82.4#~/.yarn/patches/metro-npm-0.82.4-2c6a795208.patch",
+    "metro@npm:0.82.4": "patch:metro@npm%3A0.82.4#~/.yarn/patches/metro-npm-0.82.4-2c6a795208.patch"
   }
 }

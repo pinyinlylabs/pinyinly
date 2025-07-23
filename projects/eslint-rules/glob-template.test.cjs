@@ -203,6 +203,32 @@ const simpleValidCode =
   "// </pyly-glob-template>\n" +
   "];";
 
+const validCodeWithQuotesInTemplate =
+  "const allIcons = [\n" +
+  '  // <pyly-glob-template dir="./glob-template.test" glob="*.svg" template="  {\\"name\\": \\"${filenameWithoutExt}\\", path: \\"${path}\\"},">\n' +
+  '  {"name": "a", path: "./glob-template.test/a.svg"},\n' +
+  '  {"name": "b", path: "./glob-template.test/b.svg"},\n' +
+  '  {"name": "c", path: "./glob-template.test/c.svg"},\n' +
+  "// </pyly-glob-template>\n" +
+  "];";
+
+const missingFileWithQuotesInTemplate =
+  "const allIcons = [\n" +
+  '  // <pyly-glob-template dir="./glob-template.test" glob="*.svg" template="  {\\"name\\": \\"${filenameWithoutExt}\\", path: \\"${path}\\"},">\n' +
+  '  {"name": "a", path: "./glob-template.test/a.svg"},\n' +
+  '  {"name": "c", path: "./glob-template.test/c.svg"},\n' +
+  "// </pyly-glob-template>\n" +
+  "];";
+
+const expectedOutputWithQuotesInTemplate =
+  "const allIcons = [\n" +
+  '  // <pyly-glob-template dir="./glob-template.test" glob="*.svg" template="  {\\"name\\": \\"${filenameWithoutExt}\\", path: \\"${path}\\"},">\n' +
+  '  {"name": "a", path: "./glob-template.test/a.svg"},\n' +
+  '  {"name": "b", path: "./glob-template.test/b.svg"},\n' +
+  '  {"name": "c", path: "./glob-template.test/c.svg"},\n' +
+  "// </pyly-glob-template>\n" +
+  "];";
+
 const ruleTester = new RuleTester({
   languageOptions: {
     ecmaVersion: 2020,
@@ -260,6 +286,10 @@ ruleTester.run("glob-template", rule, {
       code: validCodeShowingDifference,
       filename: __filename,
     },
+    {
+      code: validCodeWithQuotesInTemplate,
+      filename: __filename,
+    },
   ],
   invalid: [
     {
@@ -291,6 +321,12 @@ ruleTester.run("glob-template", rule, {
       filename: __filename,
       errors: [{ message: /Generated code is out of sync/ }],
       output: expectedOutput,
+    },
+    {
+      code: missingFileWithQuotesInTemplate,
+      filename: __filename,
+      errors: [{ message: /Generated code is out of sync/ }],
+      output: expectedOutputWithQuotesInTemplate,
     },
     {
       code: invalidNoDir,
