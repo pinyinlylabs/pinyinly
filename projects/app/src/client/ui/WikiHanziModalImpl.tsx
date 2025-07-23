@@ -141,7 +141,6 @@ export function WikiHanziModalImpl({
                 <MeaningMnemonicMdx />
               </View>
             )}
-            <View className="h-[500px]" />
           </View>
         </PylyMdxComponents>
       </ScrollView>
