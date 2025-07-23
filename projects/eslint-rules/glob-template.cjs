@@ -86,7 +86,10 @@ const rule = {
             } else {
               dir = attrMap.dir;
               globPattern = attrMap.glob;
-              template = attrMap.template.replace(/\\\$/g, "$"); // Unescape dollar signs
+              template = attrMap.template
+                .replace(/\\\$/g, "$")
+                .replace(/\\"/g, '"')
+                .replace(/\\'/g, "'"); // Unescape dollar signs and quotes
             }
           } else {
             attrError = true;
