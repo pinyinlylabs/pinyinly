@@ -3,6 +3,7 @@ import inngestPlugin from "@inngest/eslint-plugin";
 import pinyinlyPlugin from "@pinyinly/eslint-rules";
 import stylisticPlugin from "@stylistic/eslint-plugin";
 import betterTailwindcssPlugin from "eslint-plugin-better-tailwindcss";
+import { getDefaultAttributes } from "eslint-plugin-better-tailwindcss/api/defaults";
 import drizzlePlugin from "eslint-plugin-drizzle";
 import importPlugin from "eslint-plugin-import";
 import reactPlugin from "eslint-plugin-react";
@@ -43,6 +44,11 @@ export default tseslint.config(
       "better-tailwindcss": {
         // Tailwind 3 config
         tailwindConfig: `tailwind.config.js`,
+        attributes: [
+          ...getDefaultAttributes(),
+          // support <ScrollView> attributes e.g. contentContainerClassName
+          `.*ClassName`,
+        ],
       },
     },
   },
@@ -85,14 +91,6 @@ export default tseslint.config(
     settings: {
       react: {
         version: `detect`,
-      },
-      "better-tailwindcss": {
-        attributes: [
-          `class`,
-          `className`,
-          // support <ScrollView> attributes e.g. contentContainerClassName
-          `.*ClassName`,
-        ],
       },
     },
 
