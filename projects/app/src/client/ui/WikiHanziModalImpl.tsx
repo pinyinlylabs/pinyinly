@@ -111,21 +111,35 @@ export function WikiHanziModalImpl({
           >
             {MeaningMdx == null ? null : <MeaningMdx />}
 
-            <View>
-              {hanziWordMeanings.map(([hanziWord, meaning], i) => {
+            {hanziWordMeanings.length > 1 ? (
+              <View>
+                {hanziWordMeanings.map(([hanziWord, meaning], i) => {
+                  const gloss = meaning.gloss[0];
+                  const ContentMdx = wikiMdx[`${hanziWord}.meaning`];
+                  return gloss == null ? null : (
+                    <Fragment key={i}>
+                      {i === 0 ? hr : null}
+                      <ExpandableSection title={`${hanzi} as “${gloss}”`}>
+                        {ContentMdx == null ? null : <ContentMdx />}
+                      </ExpandableSection>
+                      {hr}
+                    </Fragment>
+                  );
+                })}
+              </View>
+            ) : // Super hacky way to unwrap the meaning content and not have it
+            // wrapped in a collapsible section.
+            hanziWordMeanings.length === 1 ? (
+              hanziWordMeanings.slice(0, 1).map(([hanziWord, meaning]) => {
                 const gloss = meaning.gloss[0];
                 const ContentMdx = wikiMdx[`${hanziWord}.meaning`];
-                return gloss == null ? null : (
-                  <Fragment key={i}>
-                    {i === 0 ? hr : null}
-                    <ExpandableSection title={`${hanzi} as “${gloss}”`}>
-                      {ContentMdx == null ? null : <ContentMdx />}
-                    </ExpandableSection>
-                    {hr}
-                  </Fragment>
+                return gloss == null || ContentMdx == null ? null : (
+                  <View>
+                    <ContentMdx />
+                  </View>
                 );
-              })}
-            </View>
+              })
+            ) : null}
 
             {MeaningMnemonicMdx == null ? null : (
               <View className="gap-6 bg-bg-loud py-5">
