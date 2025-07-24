@@ -204,6 +204,16 @@ const validCodeWithParentDir =
   "// </pyly-glob-template>\n" +
   "};";
 
+const validCodeWithParentDirAndFilenameWithoutExt =
+  "const iconsByDirectory = {\n" +
+  '  // <pyly-glob-template dir="./glob-template.test" glob="**/*.svg" template="  \\"${parentDir}\\": \'${filenameWithoutExt}\',">\n' +
+  "  \"glob-template.test\": 'a',\n" +
+  "  \"glob-template.test\": 'b',\n" +
+  "  \"glob-template.test\": 'c',\n" +
+  "  \"nested\": 'd',\n" +
+  "// </pyly-glob-template>\n" +
+  "};";
+
 const simpleValidCode =
   "const allIcons = [\n" +
   '  // <pyly-glob-template dir="./glob-template.test" glob="*.svg" template="  require(\'${path}\'),">\n' +
@@ -302,6 +312,10 @@ ruleTester.run("glob-template", rule, {
     },
     {
       code: validCodeWithParentDir,
+      filename: __filename,
+    },
+    {
+      code: validCodeWithParentDirAndFilenameWithoutExt,
       filename: __filename,
     },
   ],

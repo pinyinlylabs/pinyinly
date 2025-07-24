@@ -171,7 +171,9 @@ const rule = {
             }
 
             // Get filename without extension (for variable names)
-            const filenameWithoutExt = f.replace(/\.[^/.]+$/, "");
+            const filenameWithoutExt = path
+              .basename(f)
+              .replace(/\.[^/.]+$/, "");
 
             // Get path without extension (for $pathWithoutExt compatibility)
             const pathWithoutExt = requirePath.replace(/\.[^/.]+$/, "");
