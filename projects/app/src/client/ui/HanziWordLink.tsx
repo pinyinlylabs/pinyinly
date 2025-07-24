@@ -1,8 +1,9 @@
 import type { HanziWord } from "@/data/model";
+import { hanziFromHanziWord } from "@/dictionary/dictionary";
 import type { PropsWithChildren } from "react";
 import { useState } from "react";
 import { Text } from "react-native";
-import { WikiHanziWordModal } from "./WikiHanziWordModal";
+import { WikiHanziModal } from "./WikiHanziModal";
 
 export const HanziWordLink = ({
   hanziWord,
@@ -11,6 +12,7 @@ export const HanziWordLink = ({
   hanziWord: HanziWord;
 }>) => {
   const [showWiki, setShowWiki] = useState(false);
+  const hanzi = hanziFromHanziWord(hanziWord);
 
   return (
     <>
@@ -23,8 +25,8 @@ export const HanziWordLink = ({
         {children}
       </Text>
       {showWiki ? (
-        <WikiHanziWordModal
-          hanziWord={hanziWord}
+        <WikiHanziModal
+          hanzi={hanzi}
           onDismiss={() => {
             setShowWiki(false);
           }}
