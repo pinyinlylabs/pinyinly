@@ -29,12 +29,11 @@ export default () => {
     `bg-stone`,
     `bg-cloud`,
     `bg-ink`,
-    `bg-fg`,
     `bg-bg`,
   ];
 
   // force tailwind to include these classes
-  void `bg-fg-loud bg-ink-loud bg-brick-loud bg-bg-loud`;
+  void `bg-ink-loud bg-brick-loud bg-bg-loud`;
 
   const opacities = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1];
   const columnLabels = (
