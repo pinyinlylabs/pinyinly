@@ -199,6 +199,26 @@ const validCodeWithParentDirAndFilenameWithoutExt =
   "// </pyly-glob-template>\n" +
   "};";
 
+const validCodeWithRelPath =
+  "const fileMapping = {\n" +
+  '  // <pyly-glob-template glob="./glob-template.test/**/*.svg" template="  \\"${path}\\": \'${relpath}\',">\n' +
+  "  \"./glob-template.test/a.svg\": 'a.svg',\n" +
+  "  \"./glob-template.test/b.svg\": 'b.svg',\n" +
+  "  \"./glob-template.test/c.svg\": 'c.svg',\n" +
+  "  \"./glob-template.test/nested/d.svg\": 'nested/d.svg',\n" +
+  "// </pyly-glob-template>\n" +
+  "};";
+
+const validCodeWithRelPathWithoutExt =
+  "const importMapping = {\n" +
+  '  // <pyly-glob-template glob="./glob-template.test/**/*.svg" template="  \\"${relpath}\\": \'${relpathWithoutExt}\',">\n' +
+  "  \"a.svg\": 'a',\n" +
+  "  \"b.svg\": 'b',\n" +
+  "  \"c.svg\": 'c',\n" +
+  "  \"nested/d.svg\": 'nested/d',\n" +
+  "// </pyly-glob-template>\n" +
+  "};";
+
 const simpleValidCode =
   "const allIcons = [\n" +
   '  // <pyly-glob-template glob="./glob-template.test/*.svg" template="  require(\'${path}\'),">\n' +
@@ -297,6 +317,14 @@ ruleTester.run("glob-template", rule, {
     },
     {
       code: validCodeWithParentDirAndFilenameWithoutExt,
+      filename: __filename,
+    },
+    {
+      code: validCodeWithRelPath,
+      filename: __filename,
+    },
+    {
+      code: validCodeWithRelPathWithoutExt,
       filename: __filename,
     },
   ],

@@ -94,7 +94,7 @@ const rule = {
           if (attrError || !globPath || !template) {
             context.report({
               loc: comment.loc || { line: 1, column: 0 },
-              message: `<pyly-glob-template> must have glob and template attributes, e.g. <pyly-glob-template glob="./icons/*.svg" template="  require('\${path}'),">. Template variables: \${path}, \${pathWithoutExt}, \${filenameWithoutExt}, \${parentDir}`,
+              message: `<pyly-glob-template> must have glob and template attributes, e.g. <pyly-glob-template glob="./icons/*.svg" template="  require('\${path}'),">. Template variables: \${path}, \${pathWithoutExt}, \${filenameWithoutExt}, \${parentDir}, \${relpath}, \${relpathWithoutExt}`,
             });
             continue;
           }
@@ -233,6 +233,12 @@ const rule = {
             // Get parent directory name (last directory in the path)
             const parentDir = path.basename(path.dirname(requirePath));
 
+            // Get the relative path (path without the static glob directory part)
+            const relPath = f;
+
+            // Get relative path without extension
+            const relPathWithoutExt = f.replace(/\.[^/.]+$/, "");
+
             // Replace template variables
             let result = template;
             result = result.replace(
@@ -242,6 +248,11 @@ const rule = {
             result = result.replace(/\$\{pathWithoutExt\}/g, pathWithoutExt);
             result = result.replace(/\$\{path\}/g, requirePath);
             result = result.replace(/\$\{parentDir\}/g, parentDir);
+            result = result.replace(/\$\{relpath\}/g, relPath);
+            result = result.replace(
+              /\$\{relpathWithoutExt\}/g,
+              relPathWithoutExt,
+            );
             return result;
           });
 
