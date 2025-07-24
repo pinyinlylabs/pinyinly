@@ -46,12 +46,6 @@ export default function ExplorePage() {
           Learn how Chinese characters come together to form words, understand
           their meanings, and see them in context to reinforce retention.
         </Text>
-
-        <Link href="/explore/words" asChild>
-          <RectButton variant="filled" className="theme-accent self-start">
-            Explore words
-          </RectButton>
-        </Link>
       </View>
     </ScrollView>
   );
