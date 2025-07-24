@@ -25,7 +25,7 @@ const lazyDemo = <Demo extends FunctionComponent>(
 
 // prettier-ignore
 export const demos: Record<string, FunctionComponent> = {
-  // <pyly-glob-template dir="_demos/" glob="*.tsx" template="  [`${filenameWithoutExt}`]: lazyDemo(() => import(`${pathWithoutExt}`)),">
+  // <pyly-glob-template glob="./_demos/*.tsx" template="  [`${filenameWithoutExt}`]: lazyDemo(() => import(`${pathWithoutExt}`)),">
   [`Colors`]: lazyDemo(() => import(`./_demos/Colors`)),
   [`HanziText`]: lazyDemo(() => import(`./_demos/HanziText`)),
   [`IconImage`]: lazyDemo(() => import(`./_demos/IconImage`)),

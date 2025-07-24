@@ -27,8 +27,9 @@ export default () => {
   );
 };
 
+// prettier-ignore
 const allIcons = [
-  // <pyly-glob-template dir="../../../../assets/icons" glob="*.svg" template="  require(`${path}`),">
+  // <pyly-glob-template glob="../../../../assets/icons/*.svg" template="  require(`${path}`),">
   require(`../../../../assets/icons/alarm-filled.svg`),
   require(`../../../../assets/icons/alarm.svg`),
   require(`../../../../assets/icons/arrow-down.svg`),

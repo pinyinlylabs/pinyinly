@@ -25,14 +25,14 @@ const lazyMdx = <Mdx extends MdxComponent>(
 
 // prettier-ignore
 const wikiMdx: Record<string, MdxComponent> = {
-  // <pyly-glob-template dir="../wiki" glob="*/*.mdx" template="  \"${parentDir}/${filenameWithoutExt}\": lazyMdx(() => import(`${path}`)),">
+  // <pyly-glob-template glob="../wiki/**/*.mdx" template="  \"${relpathWithoutExt}\": lazyMdx(() => import(`${path}`)),">
   "上/meaning": lazyMdx(() => import(`../wiki/上/meaning.mdx`)),
   "上/meaningMnemonic": lazyMdx(() => import(`../wiki/上/meaningMnemonic.mdx`)),
   "上/pronunciation": lazyMdx(() => import(`../wiki/上/pronunciation.mdx`)),
-  "上/~above.meaning": lazyMdx(() => import(`../wiki/上/~above.meaning.mdx`)),
-  "上/~on.meaning": lazyMdx(() => import(`../wiki/上/~on.meaning.mdx`)),
+  "上/~above/meaning": lazyMdx(() => import(`../wiki/上/~above/meaning.mdx`)),
+  "上/~on/meaning": lazyMdx(() => import(`../wiki/上/~on/meaning.mdx`)),
   "你好/pronunciation": lazyMdx(() => import(`../wiki/你好/pronunciation.mdx`)),
-  "你好/~hello.meaning": lazyMdx(() => import(`../wiki/你好/~hello.meaning.mdx`)),
+  "你好/~hello/meaning": lazyMdx(() => import(`../wiki/你好/~hello/meaning.mdx`)),
 // </pyly-glob-template>
 };
 
@@ -46,7 +46,7 @@ const wikiMdx: Record<string, MdxComponent> = {
 // - <HanziWord>/meaning
 // - <HanziWord>/pronunciation
 for (const [key, value] of Object.entries(wikiMdx)) {
-  const newKey = key.replaceAll(/\/~(.+?)\.(.+)/g, `:$1/$2`);
+  const newKey = key.replace(`/~`, `:`);
   if (newKey !== key) {
     wikiMdx[newKey] = value;
     // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
