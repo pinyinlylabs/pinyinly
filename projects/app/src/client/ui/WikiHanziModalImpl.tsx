@@ -1,58 +1,19 @@
 import { useHanziWikiEntry } from "@/client/hooks/useHanziWikiEntry";
 import { useLookupHanzi } from "@/client/hooks/useLookupHanzi";
+import {
+  getWikiMdxHanziMeaning,
+  getWikiMdxHanziMeaningMnemonic,
+  getWikiMdxHanziPronunciation,
+  getWikiMdxHanziWordMeaning,
+} from "@/client/wiki";
 import type { HanziText, PinyinSyllable } from "@/data/model";
-import { devToolsSlowQuerySleepIfEnabled } from "@/util/devtools";
-import type { CustomComponentsProp } from "@bacons/mdx";
 import { MDXComponents } from "@bacons/mdx";
 import type { PropsWithChildren } from "react";
-import { Fragment, lazy, useState } from "react";
+import { Fragment, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 import { useIntersectionObserver } from "usehooks-ts";
 import { IconImage } from "./IconImage";
-
-type MdxComponent = React.FC<{
-  components?: CustomComponentsProp;
-}>;
-
-const lazyMdx = <Mdx extends MdxComponent>(
-  importFn: () => Promise<{ default: Mdx }>,
-) =>
-  lazy(async () => {
-    await devToolsSlowQuerySleepIfEnabled();
-    return await importFn();
-  });
-
-// prettier-ignore
-const wikiMdx: Record<string, MdxComponent> = {
-  // <pyly-glob-template glob="../wiki/**/*.mdx" template="  \"${relpathWithoutExt}\": lazyMdx(() => import(`${path}`)),">
-  "上/meaning": lazyMdx(() => import(`../wiki/上/meaning.mdx`)),
-  "上/meaningMnemonic": lazyMdx(() => import(`../wiki/上/meaningMnemonic.mdx`)),
-  "上/pronunciation": lazyMdx(() => import(`../wiki/上/pronunciation.mdx`)),
-  "上/~above/meaning": lazyMdx(() => import(`../wiki/上/~above/meaning.mdx`)),
-  "上/~on/meaning": lazyMdx(() => import(`../wiki/上/~on/meaning.mdx`)),
-  "你好/pronunciation": lazyMdx(() => import(`../wiki/你好/pronunciation.mdx`)),
-  "你好/~hello/meaning": lazyMdx(() => import(`../wiki/你好/~hello/meaning.mdx`)),
-// </pyly-glob-template>
-};
-
-// Rewrite the keys of the object to make it easier to look up specific
-// fragments using the HanziWord or Hanzi. On the filesystem tilde (~) is used
-// as the HanziWord separator, because `:` is not safe.
-//
-// - <Hanzi>/meaning
-// - <Hanzi>/pronunciation
-// - <Hanzi>/meaningMnemonic
-// - <HanziWord>/meaning
-// - <HanziWord>/pronunciation
-for (const [key, value] of Object.entries(wikiMdx)) {
-  const newKey = key.replace(`/~`, `:`);
-  if (newKey !== key) {
-    wikiMdx[newKey] = value;
-    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-    delete wikiMdx[key];
-  }
-}
 
 const hr = <View className="h-px bg-fg/25" />;
 
@@ -91,9 +52,9 @@ export function WikiHanziModalImpl({
       ? hanziWordMeanings[0]?.[1].gloss.join(`, `)
       : hanziWordMeanings.map(([, meaning]) => meaning.gloss[0]).join(`, `);
 
-  const MeaningMdx = wikiMdx[`${hanzi}/meaning`];
-  const PronunciationMdx = wikiMdx[`${hanzi}/pronunciation`];
-  const MeaningMnemonicMdx = wikiMdx[`${hanzi}/meaningMnemonic`];
+  const MeaningMdx = getWikiMdxHanziMeaning(hanzi);
+  const PronunciationMdx = getWikiMdxHanziPronunciation(hanzi);
+  const MeaningMnemonicMdx = getWikiMdxHanziMeaningMnemonic(hanzi);
 
   return (
     <>
@@ -132,12 +93,12 @@ export function WikiHanziModalImpl({
               <View>
                 {hanziWordMeanings.map(([hanziWord, meaning], i) => {
                   const gloss = meaning.gloss[0];
-                  const ContentMdx = wikiMdx[`${hanziWord}/meaning`];
+                  const MeaningMdx = getWikiMdxHanziWordMeaning(hanziWord);
                   return gloss == null ? null : (
                     <Fragment key={i}>
                       {i === 0 ? hr : null}
                       <ExpandableSection title={`${hanzi} as “${gloss}”`}>
-                        {ContentMdx == null ? null : <ContentMdx />}
+                        {MeaningMdx == null ? null : <MeaningMdx />}
                       </ExpandableSection>
                       {hr}
                     </Fragment>
@@ -149,10 +110,10 @@ export function WikiHanziModalImpl({
             hanziWordMeanings.length === 1 ? (
               hanziWordMeanings.slice(0, 1).map(([hanziWord, meaning], i) => {
                 const gloss = meaning.gloss[0];
-                const ContentMdx = wikiMdx[`${hanziWord}/meaning`];
-                return gloss == null || ContentMdx == null ? null : (
+                const MeaningMdx = getWikiMdxHanziWordMeaning(hanziWord);
+                return gloss == null || MeaningMdx == null ? null : (
                   <View key={i}>
-                    <ContentMdx />
+                    <MeaningMdx />
                   </View>
                 );
               })
