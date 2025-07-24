@@ -194,6 +194,16 @@ const validCodeShowingDifference =
   "  // File: c\n" +
   "// </pyly-glob-template>";
 
+const validCodeWithParentDir =
+  "const iconsByDirectory = {\n" +
+  '  // <pyly-glob-template dir="./glob-template.test" glob="**/*.svg" template="  \\"${parentDir}\\": require(\'${path}\'),">\n' +
+  "  \"glob-template.test\": require('./glob-template.test/a.svg'),\n" +
+  "  \"glob-template.test\": require('./glob-template.test/b.svg'),\n" +
+  "  \"glob-template.test\": require('./glob-template.test/c.svg'),\n" +
+  "  \"nested\": require('./glob-template.test/nested/d.svg'),\n" +
+  "// </pyly-glob-template>\n" +
+  "};";
+
 const simpleValidCode =
   "const allIcons = [\n" +
   '  // <pyly-glob-template dir="./glob-template.test" glob="*.svg" template="  require(\'${path}\'),">\n' +
@@ -288,6 +298,10 @@ ruleTester.run("glob-template", rule, {
     },
     {
       code: validCodeWithQuotesInTemplate,
+      filename: __filename,
+    },
+    {
+      code: validCodeWithParentDir,
       filename: __filename,
     },
   ],
