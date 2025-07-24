@@ -167,7 +167,7 @@ const WebImpl = ({
   const content = (
     <Reanimated.View
       className={`
-        max-h-full w-full max-w-[500px] overflow-hidden rounded-xl bg-bg
+        size-full max-h-full max-w-[500px] overflow-hidden rounded-xl bg-bg
 
         lg:h-[80vh] lg:w-[500px]
       `}
