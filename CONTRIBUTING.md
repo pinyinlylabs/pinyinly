@@ -254,3 +254,7 @@ To update the bill of materials run:
 ```
 moon run app:buildBillOfMaterials
 ```
+
+## AI agent instructions
+
+See `.github/instructions/*.md`

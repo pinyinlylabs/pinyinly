@@ -1,3 +1,7 @@
+---
+applyTo: "projects/app/**"
+---
+
 # Pinyinly Design Decisions
 
 This file logs major design decisions and the reasoning behind them.

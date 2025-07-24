@@ -1,3 +1,7 @@
+---
+applyTo: "projects/app/**"
+---
+
 # Skill kinds in Pinyinly
 
 This document describes the different types of skills available in Pinyinly.
