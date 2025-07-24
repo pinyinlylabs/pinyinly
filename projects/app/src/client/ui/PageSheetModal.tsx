@@ -169,7 +169,7 @@ const WebImpl = ({
       className={`
         max-h-full w-full max-w-[500px] overflow-hidden rounded-xl bg-bg
 
-        lg:max-h-[80vh] lg:w-[500px]
+        lg:h-[80vh] lg:w-[500px]
       `}
       style={[animatedContentStyle]}
     >
