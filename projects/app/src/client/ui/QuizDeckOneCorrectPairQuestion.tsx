@@ -1,4 +1,3 @@
-import { useHanziWordMeaning } from "@/client/hooks/useHanziWordMeaning";
 import { useMultiChoiceQuizTimer } from "@/client/hooks/useMultiChoiceQuizTimer";
 import {
   autoCheckUserSetting,
@@ -133,11 +132,7 @@ export function QuizDeckOneCorrectPairQuestion({
                 </Text>
 
                 <Text className="text-fg">
-                  <SkillAnswerText
-                    skill={answer.skill}
-                    includeHint
-                    includeAlternatives
-                  />
+                  <SkillAnswerText skill={answer.skill} includeAlternatives />
                 </Text>
 
                 {selectedAChoice != null && selectedBChoice != null ? (
@@ -304,15 +299,9 @@ function choiceToPylymark(choice: OneCorrectPairQuestionChoice): string {
 
 const SkillAnswerText = ({
   skill,
-  includeHint = false,
-  // hideA = false,
-  // hideB = false,
 }: {
   skill: Skill;
   includeAlternatives?: boolean;
-  includeHint?: boolean;
-  hideA?: boolean;
-  hideB?: boolean;
   small?: boolean;
 }) => {
   switch (skillKindFromSkill(skill)) {
@@ -332,12 +321,7 @@ const SkillAnswerText = ({
     }
     case SkillKind.HanziWordToGloss: {
       skill = skill as HanziWordSkill;
-      return (
-        <HanziWordToGlossSkillAnswerText
-          skill={skill}
-          includeHint={includeHint}
-        />
-      );
+      return <HanziWordToGlossSkillAnswerText skill={skill} />;
     }
     case SkillKind.HanziWordToPinyin:
     case SkillKind.HanziWordToPinyinFinal:
@@ -351,25 +335,17 @@ const SkillAnswerText = ({
 
 const HanziWordToGlossSkillAnswerText = ({
   skill,
-  includeHint = false,
 }: {
   skill: HanziWordSkill;
   includeHint?: boolean;
 }) => {
   const hanziWord = hanziWordFromSkill(skill);
-  const meaningQuery = useHanziWordMeaning(hanziWord);
 
   return (
     <>
       <Text className="pyly-body-2xl">
         <Pylymark source={`{${hanziWord}}`} />
       </Text>
-
-      {includeHint && meaningQuery.data?.glossHint != null ? (
-        <Text className="pyly-body-caption">
-          <Pylymark source={meaningQuery.data.glossHint} />
-        </Text>
-      ) : null}
     </>
   );
 };
