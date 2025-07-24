@@ -50,8 +50,7 @@ const rule = {
           if (!openTagMatch) continue;
           const attrs = (openTagMatch[1] || "").trim();
           // Parse attributes (robust, any order)
-          let dir = null;
-          let globPattern = null;
+          let globPath = null;
           let template = null;
           let attrError = false;
           if (attrs) {
@@ -67,25 +66,23 @@ const rule = {
             const cleanedAttrs = attrs
               .replace(/([a-zA-Z0-9_-]+)\s*=\s*"((?:[^"\\]|\\.)*)"/g, "")
               .trim();
-            // Must have dir, glob, and template, no extra attributes or leftover text
-            const validAttrs = ["dir", "glob", "template"];
-            const hasRequiredAttrs =
-              keys.includes("dir") &&
-              keys.includes("glob") &&
-              keys.includes("template");
+            // Only allow glob and template attributes
+            const validAttrs = ["glob", "template"];
             const hasValidAttrs = keys.every((key) => validAttrs.includes(key));
-            const hasValues = attrMap.dir && attrMap.glob && attrMap.template;
+            const hasGlobAttr = keys.includes("glob");
+            const hasTemplateAttr = keys.includes("template");
+            const hasRequiredAttrs = hasGlobAttr && hasTemplateAttr;
 
             if (
               !hasRequiredAttrs ||
               !hasValidAttrs ||
-              !hasValues ||
               cleanedAttrs.length > 0
             ) {
               attrError = true;
             } else {
-              dir = attrMap.dir;
-              globPattern = attrMap.glob;
+              // Use the glob path directly
+              globPath = attrMap.glob;
+
               template = attrMap.template
                 .replace(/\\\$/g, "$")
                 .replace(/\\"/g, '"')
@@ -94,10 +91,10 @@ const rule = {
           } else {
             attrError = true;
           }
-          if (attrError || !dir || !globPattern || !template) {
+          if (attrError || !globPath || !template) {
             context.report({
               loc: comment.loc || { line: 1, column: 0 },
-              message: `<pyly-glob-template> must have dir, glob, and template attributes, e.g. <pyly-glob-template dir="./icons" glob="*.svg" template="  require('\${path}'),">. Template variables: \${path}, \${pathWithoutExt}, \${filenameWithoutExt}, \${parentDir}`,
+              message: `<pyly-glob-template> must have glob and template attributes, e.g. <pyly-glob-template glob="./icons/*.svg" template="  require('\${path}'),">. Template variables: \${path}, \${pathWithoutExt}, \${filenameWithoutExt}, \${parentDir}`,
             });
             continue;
           }
@@ -136,31 +133,86 @@ const rule = {
           }
           // Continue even if no array node is found (for non-array use cases)
 
-          // Get all files in the directory
+          // Get all files in the glob pattern
           const filePath = context.getFilename();
           const fileDir = path.dirname(filePath);
-          const targetDir = path.resolve(fileDir, dir);
           let files = [];
+          let globDir, globPattern;
           try {
-            // Explicitly check if targetDir exists and is a directory
+            // Parse the glob pattern to extract directory part and pattern
+
+            // Handle absolute paths differently
+            if (path.isAbsolute(globPath)) {
+              const lastSeparatorIndex = Math.max(
+                globPath.lastIndexOf("/"),
+                globPath.lastIndexOf("\\"),
+              );
+              if (lastSeparatorIndex >= 0) {
+                globDir = globPath.substring(0, lastSeparatorIndex);
+                globPattern = globPath.substring(lastSeparatorIndex + 1);
+              } else {
+                globDir = ".";
+                globPattern = globPath;
+              }
+            } else {
+              // For relative paths, find the last directory separator before any glob character
+              let globIndex = Math.min(
+                globPath.indexOf("*") === -1 ? Infinity : globPath.indexOf("*"),
+                globPath.indexOf("?") === -1 ? Infinity : globPath.indexOf("?"),
+                globPath.indexOf("[") === -1 ? Infinity : globPath.indexOf("["),
+              );
+
+              if (globIndex === Infinity) {
+                // No glob characters, treat the whole path as directory
+                globDir = globPath;
+                globPattern = "*";
+              } else {
+                const lastSepBeforeGlob = Math.max(
+                  globPath.lastIndexOf("/", globIndex),
+                  globPath.lastIndexOf("\\", globIndex),
+                );
+
+                if (lastSepBeforeGlob === -1) {
+                  globDir = ".";
+                  globPattern = globPath;
+                } else {
+                  globDir = globPath.substring(0, lastSepBeforeGlob);
+                  globPattern = globPath.substring(lastSepBeforeGlob + 1);
+                }
+              }
+            }
+
+            // Resolve the directory relative to the current file
+            const targetDir = path.resolve(fileDir, globDir);
+
+            // Store the globDir for path construction later
+            // globDir is already defined
+
+            // Verify directory exists
             if (
               !fs.existsSync(targetDir) ||
               !fs.statSync(targetDir).isDirectory()
             ) {
               throw new Error("Not a directory");
             }
+
+            // Get matching files
             files = glob.sync(globPattern, { cwd: targetDir }).sort();
-          } catch (e) {
+          } catch (error) {
+            const errorMessage =
+              error && typeof error === "object" && "message" in error
+                ? error.message
+                : String(error);
             context.report({
               loc: comment.loc || arrayNode?.loc || { line: 1, column: 0 },
-              message: `Could not read directory: ${targetDir}`,
+              message: `Could not process glob pattern: ${globPath}. ${errorMessage}`,
             });
             continue;
           }
 
           // Build the expected lines using the template
           const generatedLines = files.map((f) => {
-            let requirePath = dir.replace(/\/$/, "");
+            let requirePath = globDir.replace(/\/$/, "");
             requirePath = requirePath ? `${requirePath}/${f}` : f;
             // Only add ./ if not already relative (doesn't start with ./ or ../)
             if (
@@ -215,7 +267,7 @@ const rule = {
           if (isOutOfSync) {
             context.report({
               loc: comment.loc || arrayNode?.loc || { line: 1, column: 0 },
-              message: `Generated code is out of sync with files in ${dir}`,
+              message: `Generated code is out of sync with files matching ${globPath}`,
               fix: (fixer) =>
                 fixer.replaceTextRange(
                   [start, end],

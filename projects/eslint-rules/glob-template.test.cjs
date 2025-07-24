@@ -2,24 +2,15 @@ const { RuleTester } = require("eslint");
 const rule = require("./glob-template.cjs");
 
 const validCodeCustomTemplate =
-  '// <pyly-glob-template dir="./glob-template.test" glob="*.svg" template="require(\'${path}\');">\n' +
+  '// <pyly-glob-template glob="./glob-template.test/*.svg" template="require(\'${path}\');">\n' +
   "require('./glob-template.test/a.svg');\n" +
   "require('./glob-template.test/b.svg');\n" +
   "require('./glob-template.test/c.svg');\n" +
   "// </pyly-glob-template>";
 
-const validCodeReversedAttrs =
-  "const allIcons = [\n" +
-  '  // <pyly-glob-template glob="*.svg" dir="./glob-template.test" template="  require(\'${path}\'),">\n' +
-  "  require('./glob-template.test/a.svg'),\n" +
-  "  require('./glob-template.test/b.svg'),\n" +
-  "  require('./glob-template.test/c.svg'),\n" +
-  "// </pyly-glob-template>\n" +
-  "];";
-
 const validCodeExtraWhitespace =
   "const allIcons = [\n" +
-  '  // <pyly-glob-template   dir="./glob-template.test"    glob="*.svg"   template="  require(\'${path}\'),"   >\n' +
+  '  // <pyly-glob-template   glob="./glob-template.test/*.svg"   template="  require(\'${path}\'),"   >\n' +
   "  require('./glob-template.test/a.svg'),\n" +
   "  require('./glob-template.test/b.svg'),\n" +
   "  require('./glob-template.test/c.svg'),\n" +
@@ -28,7 +19,7 @@ const validCodeExtraWhitespace =
 
 const validCodeParentDir =
   "const allIcons = [\n" +
-  '  // <pyly-glob-template dir="../eslint-rules/glob-template.test" glob="*.svg" template="  require(\'${path}\'),">\n' +
+  '  // <pyly-glob-template glob="../eslint-rules/glob-template.test/*.svg" template="  require(\'${path}\'),">\n' +
   "  require('../eslint-rules/glob-template.test/a.svg'),\n" +
   "  require('../eslint-rules/glob-template.test/b.svg'),\n" +
   "  require('../eslint-rules/glob-template.test/c.svg'),\n" +
@@ -37,7 +28,7 @@ const validCodeParentDir =
 
 const validCodeTwoParentDir =
   "const allIcons = [\n" +
-  '  // <pyly-glob-template dir="../../projects/eslint-rules/glob-template.test" glob="*.svg" template="  require(\'${path}\'),">\n' +
+  '  // <pyly-glob-template glob="../../projects/eslint-rules/glob-template.test/*.svg" template="  require(\'${path}\'),">\n' +
   "  require('../../projects/eslint-rules/glob-template.test/a.svg'),\n" +
   "  require('../../projects/eslint-rules/glob-template.test/b.svg'),\n" +
   "  require('../../projects/eslint-rules/glob-template.test/c.svg'),\n" +
@@ -46,35 +37,35 @@ const validCodeTwoParentDir =
 
 const missingFileCode =
   "const allIcons = [\n" +
-  '  // <pyly-glob-template dir="./glob-template.test" glob="*.svg" template="  require(\'${path}\'),">\n' +
+  '  // <pyly-glob-template glob="./glob-template.test/*.svg" template="  require(\'${path}\'),">\n' +
   "  require('./glob-template.test/a.svg'),\n" +
   "  require('./glob-template.test/c.svg'),\n" +
   "// </pyly-glob-template>\n" +
   "];";
 
 const missingFileCodeCustomTemplate =
-  '// <pyly-glob-template dir="./glob-template.test" glob="*.svg" template="require(\'${path}\');">\n' +
+  '// <pyly-glob-template glob="./glob-template.test/*.svg" template="require(\'${path}\');">\n' +
   "require('./glob-template.test/a.svg');\n" +
   "require('./glob-template.test/c.svg');\n" +
   "// </pyly-glob-template>";
 
 const missingFileObjectLiteral =
   "const iconMap = {\n" +
-  '  // <pyly-glob-template dir="./glob-template.test" glob="*.svg" template="  ${filenameWithoutExt}: require(\'${path}\'),">\n' +
+  '  // <pyly-glob-template glob="./glob-template.test/*.svg" template="  ${filenameWithoutExt}: require(\'${path}\'),">\n' +
   "  a: require('./glob-template.test/a.svg'),\n" +
   "  c: require('./glob-template.test/c.svg'),\n" +
   "// </pyly-glob-template>\n" +
   "};";
 
 const missingFileTopLevel =
-  '// <pyly-glob-template dir="./glob-template.test" glob="*.svg" template="const ${filenameWithoutExt} = require(\'${path}\');">\n' +
+  '// <pyly-glob-template glob="./glob-template.test/*.svg" template="const ${filenameWithoutExt} = require(\'${path}\');">\n' +
   "const a = require('./glob-template.test/a.svg');\n" +
   "const c = require('./glob-template.test/c.svg');\n" +
   "// </pyly-glob-template>";
 
 const extraFileCode =
   "const allIcons = [\n" +
-  '  // <pyly-glob-template dir="./glob-template.test" glob="*.svg" template="  require(\'${path}\'),">\n' +
+  '  // <pyly-glob-template glob="./glob-template.test/*.svg" template="  require(\'${path}\'),">\n' +
   "  require('./glob-template.test/a.svg'),\n" +
   "  require('./glob-template.test/b.svg'),\n" +
   "  require('./glob-template.test/c.svg'),\n" +
@@ -84,7 +75,7 @@ const extraFileCode =
 
 const expectedOutput =
   "const allIcons = [\n" +
-  '  // <pyly-glob-template dir="./glob-template.test" glob="*.svg" template="  require(\'${path}\'),">\n' +
+  '  // <pyly-glob-template glob="./glob-template.test/*.svg" template="  require(\'${path}\'),">\n' +
   "  require('./glob-template.test/a.svg'),\n" +
   "  require('./glob-template.test/b.svg'),\n" +
   "  require('./glob-template.test/c.svg'),\n" +
@@ -92,7 +83,7 @@ const expectedOutput =
   "];";
 
 const expectedOutputCustomTemplate =
-  '// <pyly-glob-template dir="./glob-template.test" glob="*.svg" template="require(\'${path}\');">\n' +
+  '// <pyly-glob-template glob="./glob-template.test/*.svg" template="require(\'${path}\');">\n' +
   "require('./glob-template.test/a.svg');\n" +
   "require('./glob-template.test/b.svg');\n" +
   "require('./glob-template.test/c.svg');\n" +
@@ -100,7 +91,7 @@ const expectedOutputCustomTemplate =
 
 const expectedOutputObjectLiteral =
   "const iconMap = {\n" +
-  '  // <pyly-glob-template dir="./glob-template.test" glob="*.svg" template="  ${filenameWithoutExt}: require(\'${path}\'),">\n' +
+  '  // <pyly-glob-template glob="./glob-template.test/*.svg" template="  ${filenameWithoutExt}: require(\'${path}\'),">\n' +
   "  a: require('./glob-template.test/a.svg'),\n" +
   "  b: require('./glob-template.test/b.svg'),\n" +
   "  c: require('./glob-template.test/c.svg'),\n" +
@@ -108,33 +99,27 @@ const expectedOutputObjectLiteral =
   "};";
 
 const expectedOutputTopLevel =
-  '// <pyly-glob-template dir="./glob-template.test" glob="*.svg" template="const ${filenameWithoutExt} = require(\'${path}\');">\n' +
+  '// <pyly-glob-template glob="./glob-template.test/*.svg" template="const ${filenameWithoutExt} = require(\'${path}\');">\n' +
   "const a = require('./glob-template.test/a.svg');\n" +
   "const b = require('./glob-template.test/b.svg');\n" +
   "const c = require('./glob-template.test/c.svg');\n" +
   "// </pyly-glob-template>";
 
-const invalidNoDir =
-  "const allIcons = [\n" +
-  '  // <pyly-glob-template glob="*.svg" template="  require(\'${path}\'),">\n' +
-  "  // </pyly-glob-template>\n" +
-  "];";
-
 const invalidNoGlob =
   "const allIcons = [\n" +
-  '  // <pyly-glob-template dir="./glob-template.test" template="  require(\'${path}\'),">\n' +
+  "  // <pyly-glob-template template=\"  require('${path}'),\">\n" +
   "  // </pyly-glob-template>\n" +
   "];";
 
 const invalidNoTemplate =
   "const allIcons = [\n" +
-  '  // <pyly-glob-template dir="./glob-template.test" glob="*.svg">\n' +
+  '  // <pyly-glob-template glob="./glob-template.test/*.svg">\n' +
   "  // </pyly-glob-template>\n" +
   "];";
 
 const invalidExtraAttr =
   "const allIcons = [\n" +
-  '  // <pyly-glob-template dir="./glob-template.test" glob="*.svg" template="  require(\'${path}\')," foo="bar">\n' +
+  '  // <pyly-glob-template glob="./glob-template.test/*.svg" template="  require(\'${path}\')," foo="bar">\n' +
   "  // </pyly-glob-template>\n" +
   "];";
 
@@ -152,19 +137,19 @@ const invalidTemplateOnly =
 
 const invalidNonexistentDir =
   "const allIcons = [\n" +
-  '  // <pyly-glob-template dir="./glob-template.test/does-not-exist" glob="*.svg" template="  require(\'${path}\'),">\n' +
+  '  // <pyly-glob-template glob="./glob-template.test/does-not-exist/*.svg" template="  require(\'${path}\'),">\n' +
   "  // </pyly-glob-template>\n" +
   "];";
 
 const invalidFileInsteadOfDir =
   "const allIcons = [\n" +
-  '  // <pyly-glob-template dir="./glob-template.test/a.svg" glob="*.svg" template="  require(\'${path}\'),">\n' +
+  '  // <pyly-glob-template glob="./glob-template.test/a.svg/*.svg" template="  require(\'${path}\'),">\n' +
   "  // </pyly-glob-template>\n" +
   "];";
 
 const validCodeObjectLiteral =
   "const iconMap = {\n" +
-  '  // <pyly-glob-template dir="./glob-template.test" glob="*.svg" template="  ${filenameWithoutExt}: require(\'${path}\'),">\n' +
+  '  // <pyly-glob-template glob="./glob-template.test/*.svg" template="  ${filenameWithoutExt}: require(\'${path}\'),">\n' +
   "  a: require('./glob-template.test/a.svg'),\n" +
   "  b: require('./glob-template.test/b.svg'),\n" +
   "  c: require('./glob-template.test/c.svg'),\n" +
@@ -173,7 +158,7 @@ const validCodeObjectLiteral =
 
 const validCodeObjectLiteralImports =
   "const icons = {\n" +
-  '  // <pyly-glob-template dir="./glob-template.test" glob="*.svg" template="  ${filenameWithoutExt}: () => import(\'${path}\'),">\n' +
+  '  // <pyly-glob-template glob="./glob-template.test/*.svg" template="  ${filenameWithoutExt}: () => import(\'${path}\'),">\n' +
   "  a: () => import('./glob-template.test/a.svg'),\n" +
   "  b: () => import('./glob-template.test/b.svg'),\n" +
   "  c: () => import('./glob-template.test/c.svg'),\n" +
@@ -181,14 +166,14 @@ const validCodeObjectLiteralImports =
   "};";
 
 const validCodeTopLevelStatements =
-  '// <pyly-glob-template dir="./glob-template.test" glob="*.svg" template="const ${filenameWithoutExt} = require(\'${path}\');">\n' +
+  '// <pyly-glob-template glob="./glob-template.test/*.svg" template="const ${filenameWithoutExt} = require(\'${path}\');">\n' +
   "const a = require('./glob-template.test/a.svg');\n" +
   "const b = require('./glob-template.test/b.svg');\n" +
   "const c = require('./glob-template.test/c.svg');\n" +
   "// </pyly-glob-template>";
 
 const validCodeShowingDifference =
-  '// <pyly-glob-template dir="./glob-template.test" glob="*.svg" template="  // File: ${filenameWithoutExt}">\n' +
+  '// <pyly-glob-template glob="./glob-template.test/*.svg" template="  // File: ${filenameWithoutExt}">\n' +
   "  // File: a\n" +
   "  // File: b\n" +
   "  // File: c\n" +
@@ -196,7 +181,7 @@ const validCodeShowingDifference =
 
 const validCodeWithParentDir =
   "const iconsByDirectory = {\n" +
-  '  // <pyly-glob-template dir="./glob-template.test" glob="**/*.svg" template="  \\"${parentDir}\\": require(\'${path}\'),">\n' +
+  '  // <pyly-glob-template glob="./glob-template.test/**/*.svg" template="  \\"${parentDir}\\": require(\'${path}\'),">\n' +
   "  \"glob-template.test\": require('./glob-template.test/a.svg'),\n" +
   "  \"glob-template.test\": require('./glob-template.test/b.svg'),\n" +
   "  \"glob-template.test\": require('./glob-template.test/c.svg'),\n" +
@@ -206,7 +191,7 @@ const validCodeWithParentDir =
 
 const validCodeWithParentDirAndFilenameWithoutExt =
   "const iconsByDirectory = {\n" +
-  '  // <pyly-glob-template dir="./glob-template.test" glob="**/*.svg" template="  \\"${parentDir}\\": \'${filenameWithoutExt}\',">\n' +
+  '  // <pyly-glob-template glob="./glob-template.test/**/*.svg" template="  \\"${parentDir}\\": \'${filenameWithoutExt}\',">\n' +
   "  \"glob-template.test\": 'a',\n" +
   "  \"glob-template.test\": 'b',\n" +
   "  \"glob-template.test\": 'c',\n" +
@@ -216,7 +201,7 @@ const validCodeWithParentDirAndFilenameWithoutExt =
 
 const simpleValidCode =
   "const allIcons = [\n" +
-  '  // <pyly-glob-template dir="./glob-template.test" glob="*.svg" template="  require(\'${path}\'),">\n' +
+  '  // <pyly-glob-template glob="./glob-template.test/*.svg" template="  require(\'${path}\'),">\n' +
   "  require('./glob-template.test/a.svg'),\n" +
   "  require('./glob-template.test/b.svg'),\n" +
   "  require('./glob-template.test/c.svg'),\n" +
@@ -225,7 +210,7 @@ const simpleValidCode =
 
 const validCodeWithQuotesInTemplate =
   "const allIcons = [\n" +
-  '  // <pyly-glob-template dir="./glob-template.test" glob="*.svg" template="  {\\"name\\": \\"${filenameWithoutExt}\\", path: \\"${path}\\"},">\n' +
+  '  // <pyly-glob-template glob="./glob-template.test/*.svg" template="  {\\"name\\": \\"${filenameWithoutExt}\\", path: \\"${path}\\"},">\n' +
   '  {"name": "a", path: "./glob-template.test/a.svg"},\n' +
   '  {"name": "b", path: "./glob-template.test/b.svg"},\n' +
   '  {"name": "c", path: "./glob-template.test/c.svg"},\n' +
@@ -234,7 +219,7 @@ const validCodeWithQuotesInTemplate =
 
 const missingFileWithQuotesInTemplate =
   "const allIcons = [\n" +
-  '  // <pyly-glob-template dir="./glob-template.test" glob="*.svg" template="  {\\"name\\": \\"${filenameWithoutExt}\\", path: \\"${path}\\"},">\n' +
+  '  // <pyly-glob-template glob="./glob-template.test/*.svg" template="  {\\"name\\": \\"${filenameWithoutExt}\\", path: \\"${path}\\"},">\n' +
   '  {"name": "a", path: "./glob-template.test/a.svg"},\n' +
   '  {"name": "c", path: "./glob-template.test/c.svg"},\n' +
   "// </pyly-glob-template>\n" +
@@ -242,7 +227,7 @@ const missingFileWithQuotesInTemplate =
 
 const expectedOutputWithQuotesInTemplate =
   "const allIcons = [\n" +
-  '  // <pyly-glob-template dir="./glob-template.test" glob="*.svg" template="  {\\"name\\": \\"${filenameWithoutExt}\\", path: \\"${path}\\"},">\n' +
+  '  // <pyly-glob-template glob="./glob-template.test/*.svg" template="  {\\"name\\": \\"${filenameWithoutExt}\\", path: \\"${path}\\"},">\n' +
   '  {"name": "a", path: "./glob-template.test/a.svg"},\n' +
   '  {"name": "b", path: "./glob-template.test/b.svg"},\n' +
   '  {"name": "c", path: "./glob-template.test/c.svg"},\n' +
@@ -272,10 +257,6 @@ ruleTester.run("glob-template", rule, {
     },
     {
       code: validCodeCustomTemplate,
-      filename: __filename,
-    },
-    {
-      code: validCodeReversedAttrs,
       filename: __filename,
     },
     {
@@ -323,78 +304,85 @@ ruleTester.run("glob-template", rule, {
     {
       code: missingFileCode,
       filename: __filename,
-      errors: [{ message: /Generated code is out of sync/ }],
+      errors: [
+        { message: /Generated code is out of sync with files matching/ },
+      ],
       output: expectedOutput,
     },
     {
       code: missingFileCodeCustomTemplate,
       filename: __filename,
-      errors: [{ message: /Generated code is out of sync/ }],
+      errors: [
+        { message: /Generated code is out of sync with files matching/ },
+      ],
       output: expectedOutputCustomTemplate,
     },
     {
       code: missingFileObjectLiteral,
       filename: __filename,
-      errors: [{ message: /Generated code is out of sync/ }],
+      errors: [
+        { message: /Generated code is out of sync with files matching/ },
+      ],
       output: expectedOutputObjectLiteral,
     },
     {
       code: missingFileTopLevel,
       filename: __filename,
-      errors: [{ message: /Generated code is out of sync/ }],
+      errors: [
+        { message: /Generated code is out of sync with files matching/ },
+      ],
       output: expectedOutputTopLevel,
     },
     {
       code: extraFileCode,
       filename: __filename,
-      errors: [{ message: /Generated code is out of sync/ }],
+      errors: [
+        { message: /Generated code is out of sync with files matching/ },
+      ],
       output: expectedOutput,
     },
     {
       code: missingFileWithQuotesInTemplate,
       filename: __filename,
-      errors: [{ message: /Generated code is out of sync/ }],
+      errors: [
+        { message: /Generated code is out of sync with files matching/ },
+      ],
       output: expectedOutputWithQuotesInTemplate,
-    },
-    {
-      code: invalidNoDir,
-      filename: __filename,
-      errors: [{ message: /must have dir, glob, and template attributes/ }],
     },
     {
       code: invalidNoGlob,
       filename: __filename,
-      errors: [{ message: /must have dir, glob, and template attributes/ }],
+      errors: [{ message: /must have glob and template attributes/ }],
     },
     {
       code: invalidNoTemplate,
       filename: __filename,
-      errors: [{ message: /must have dir, glob, and template attributes/ }],
+      errors: [{ message: /must have glob and template attributes/ }],
     },
     {
       code: invalidTemplateOnly,
       filename: __filename,
-      errors: [{ message: /must have dir, glob, and template attributes/ }],
+      errors: [{ message: /must have glob and template attributes/ }],
     },
     {
       code: invalidExtraAttr,
       filename: __filename,
-      errors: [{ message: /must have dir, glob, and template attributes/ }],
+      errors: [{ message: /must have glob and template attributes/ }],
     },
     {
       code: invalidWrongAttr,
       filename: __filename,
-      errors: [{ message: /must have dir, glob, and template attributes/ }],
+      errors: [{ message: /must have glob and template attributes/ }],
     },
     {
       code: invalidNonexistentDir,
       filename: __filename,
-      errors: [{ message: /Could not read directory/ }],
+      errors: [{ message: /Could not process glob pattern/ }],
     },
     {
       code: invalidFileInsteadOfDir,
       filename: __filename,
-      errors: [{ message: /Could not read directory/ }],
+      errors: [{ message: /Could not process glob pattern/ }],
     },
   ],
 });

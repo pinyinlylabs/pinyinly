@@ -25,7 +25,7 @@ const lazyMdx = <Mdx extends MdxComponent>(
 
 // prettier-ignore
 const wikiMdx: Record<string, MdxComponent> = {
-  // <pyly-glob-template dir="../wiki" glob="*/*.mdx" template="  \"${parentDir}/${filenameWithoutExt}\": lazyMdx(() => import(`${path}`)),">
+  // <pyly-glob-template glob="../wiki/*/*.mdx" template="  \"${parentDir}/${filenameWithoutExt}\": lazyMdx(() => import(`${path}`)),">
   "上/meaning": lazyMdx(() => import(`../wiki/上/meaning.mdx`)),
   "上/meaningMnemonic": lazyMdx(() => import(`../wiki/上/meaningMnemonic.mdx`)),
   "上/pronunciation": lazyMdx(() => import(`../wiki/上/pronunciation.mdx`)),
