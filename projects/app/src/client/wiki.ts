@@ -15,19 +15,6 @@ const lazyMdx = <Mdx extends MdxComponent>(
     return await importFn();
   });
 
-// prettier-ignore
-const registry: Record<string, MdxComponent> = {
-  // <pyly-glob-template glob="./wiki/**/*.mdx" template="  \"${relpathWithoutExt}\": lazyMdx(() => import(`${path}`)),">
-  "上/meaning": lazyMdx(() => import(`./wiki/上/meaning.mdx`)),
-  "上/meaningMnemonic": lazyMdx(() => import(`./wiki/上/meaningMnemonic.mdx`)),
-  "上/pronunciation": lazyMdx(() => import(`./wiki/上/pronunciation.mdx`)),
-  "上/~above/meaning": lazyMdx(() => import(`./wiki/上/~above/meaning.mdx`)),
-  "上/~on/meaning": lazyMdx(() => import(`./wiki/上/~on/meaning.mdx`)),
-  "你好/pronunciation": lazyMdx(() => import(`./wiki/你好/pronunciation.mdx`)),
-  "你好/~hello/meaning": lazyMdx(() => import(`./wiki/你好/~hello/meaning.mdx`)),
-// </pyly-glob-template>
-};
-
 export function getWikiMdxHanziMeaning(
   hanzi: HanziText,
 ): MdxComponent | undefined {
@@ -55,3 +42,16 @@ export function getWikiMdxHanziWordMeaning(
 function hanziWordToPath(hanziWord: HanziWord): string {
   return hanziWord.replace(`:`, `/~`);
 }
+
+// prettier-ignore
+const registry: Record<string, MdxComponent> = {
+  // <pyly-glob-template glob="./wiki/**/*.mdx" template="  \"${relpathWithoutExt}\": lazyMdx(() => import(`${path}`)),">
+  "上/meaning": lazyMdx(() => import(`./wiki/上/meaning.mdx`)),
+  "上/meaningMnemonic": lazyMdx(() => import(`./wiki/上/meaningMnemonic.mdx`)),
+  "上/pronunciation": lazyMdx(() => import(`./wiki/上/pronunciation.mdx`)),
+  "上/~above/meaning": lazyMdx(() => import(`./wiki/上/~above/meaning.mdx`)),
+  "上/~on/meaning": lazyMdx(() => import(`./wiki/上/~on/meaning.mdx`)),
+  "你好/pronunciation": lazyMdx(() => import(`./wiki/你好/pronunciation.mdx`)),
+  "你好/~hello/meaning": lazyMdx(() => import(`./wiki/你好/~hello/meaning.mdx`)),
+// </pyly-glob-template>
+};

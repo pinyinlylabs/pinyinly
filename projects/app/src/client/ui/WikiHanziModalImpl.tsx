@@ -11,7 +11,6 @@ import { MDXComponents } from "@bacons/mdx";
 import type { PropsWithChildren } from "react";
 import { Fragment, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
-import { tv } from "tailwind-variants";
 import { useIntersectionObserver } from "usehooks-ts";
 import { IconImage } from "./IconImage";
 
@@ -303,13 +302,19 @@ function ExpandableSection({
   return (
     <View>
       {children == null ? (
-        <View className={containerClass()}>{titleElement}</View>
+        <View className="flex-row justify-between p-4 py-6">
+          {titleElement}
+        </View>
       ) : (
         <Pressable
           onPress={() => {
             setExpanded((x) => !x);
           }}
-          className={containerClass({ className: `hover:bg-fg-bg20` })}
+          className={`
+            mx-2 my-4 select-none flex-row justify-between rounded-lg p-2
+
+            hover:bg-fg-bg10
+          `}
         >
           {titleElement}
           <IconImage
@@ -340,10 +345,6 @@ function ExpandableSection({
     </View>
   );
 }
-
-const containerClass = tv({
-  base: `flex-row justify-between p-4 py-6`,
-});
 
 function PylyMdxComponents({ children }: PropsWithChildren) {
   return (
