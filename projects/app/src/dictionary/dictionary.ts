@@ -214,7 +214,6 @@ export const hanziWordMeaningSchema = z.object({
     )
     .nullable()
     .optional(),
-  definition: z.string(),
 });
 
 export type HanziWordMeaning = z.infer<typeof hanziWordMeaningSchema>;
@@ -657,10 +656,6 @@ export function upsertHanziWordMeaning(
     patch.pinyin = undefined;
   }
 
-  if (patch.definition?.trim().length === 0) {
-    patch.definition = undefined;
-  }
-
   if (patch.example?.trim().length === 0) {
     patch.example = undefined;
   }
@@ -704,7 +699,6 @@ export function unparseDictionary(
         partOfSpeech: meaning.partOfSpeech,
         componentFormOf: meaning.componentFormOf ?? undefined,
         visualVariants: meaning.visualVariants ?? undefined,
-        definition: meaning.definition,
       } satisfies z.input<typeof hanziWordMeaningSchema>,
     ])
     .sort(sortComparatorString((x) => x[0]));

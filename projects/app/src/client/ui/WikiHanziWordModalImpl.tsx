@@ -121,9 +121,6 @@ export function WikiHanziWordModalImpl({
               </Text>
             )}
           </Text>
-          <Text className="pyly-body-caption">
-            <Pylymark source={hanziWordSkillData.data.definition} />
-          </Text>
         </View>
 
         {wikiEntry.data?.components == null ? null : (

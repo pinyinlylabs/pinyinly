@@ -713,7 +713,6 @@ describe(`${upsertHanziWordMeaning.name} suite`, async () => {
       gloss: [`hello`],
       pinyin: [[拼音`ni`, 拼音`hao`]],
       partOfSpeech: `interjection`,
-      definition: `a greeting`,
     });
     return dict;
   }
@@ -729,7 +728,6 @@ describe(`${upsertHanziWordMeaning.name} suite`, async () => {
       gloss: [`hello`],
       pinyin: [[拼音`nǐ`, 拼音`hǎo`]],
       partOfSpeech: `interjection`,
-      definition: `a greeting`,
     });
   });
 });

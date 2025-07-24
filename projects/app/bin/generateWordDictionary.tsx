@@ -434,7 +434,7 @@ const HanziEditor = ({
   const options = useMemo(
     () =>
       [...(allHanziWords?.entries() ?? [])].map(([hanziWord, meaning]) => ({
-        label: `${hanziWord} ${meaning.partOfSpeech} ${meaning.gloss.map((x) => `"${x}"`).join(`   `)} -- ${meaning.definition}`,
+        label: `${hanziWord} ${meaning.partOfSpeech} ${meaning.gloss.map((x) => `"${x}"`).join(`   `)}`,
         value: hanziWord,
       })),
     [allHanziWords],
@@ -858,11 +858,6 @@ const HanziWordEditor = ({
                   value: meaning.componentFormOf ?? ``,
                 },
                 {
-                  id: `definition`,
-                  label: `Definition`,
-                  value: meaning.definition,
-                },
-                {
                   id: `partOfSpeech`,
                   label: `Part of speech`,
                   value: meaning.partOfSpeech,
@@ -907,18 +902,6 @@ const HanziWordEditor = ({
                 }),
               );
               edits.delete(`partOfSpeech`);
-            }
-
-            if (edits.has(`definition`)) {
-              const newDefinition = edits.get(`definition`)?.trim();
-              invariant(newDefinition != null);
-
-              mutations.push(() =>
-                saveUpsertHanziWordMeaning(hanziWord, {
-                  definition: newDefinition,
-                }),
-              );
-              edits.delete(`definition`);
             }
 
             if (edits.has(`gloss`)) {
@@ -1746,7 +1729,6 @@ async function generateHanziWordResults(
           meaning: {
             gloss,
             pinyin: getDongChinesePinyin(lookup),
-            definition: lookup.hint ?? `<no def>`,
             partOfSpeech: `unknown`,
           },
         });
@@ -1765,7 +1747,6 @@ async function generateHanziWordResults(
             meaning: {
               gloss,
               pinyin: getDongChinesePinyin(lookup),
-              definition: openAiResult.meaning.definition,
               partOfSpeech: openAiResult.meaning.partOfSpeech,
               example: openAiResult.meaning.example,
             },
@@ -2317,13 +2298,6 @@ const DictionaryHanziWordEntry = ({
               />
             </Text>
           )}
-          <Text>
-            <Text bold dimColor>
-              definition:
-            </Text>
-            {` `}
-            {meaning.definition}
-          </Text>
           <Text>
             <Text bold dimColor>
               part of speech:
