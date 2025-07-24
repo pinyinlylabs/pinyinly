@@ -202,7 +202,11 @@ async function checkHsk1HanziWords(
     }
 
     const json = await openai(
-      [`curriculum.md`, `word-representation.md`, `skill-kinds.md`],
+      [
+        `curriculum.instructions.md`,
+        `word-representation.instructions.md`,
+        `skill-kinds.instructions.md`,
+      ],
       `
 Can you check my word list for HSK1 and make sure it's correct. I need to know if the gloss I have for each word is correct.
 
@@ -584,9 +588,9 @@ const HanziEditor = ({
 
                   const { results } = await openai(
                     [
-                      `curriculum.md`,
-                      `word-representation.md`,
-                      `skill-kinds.md`,
+                      `curriculum.instructions.md`,
+                      `word-representation.instructions.md`,
+                      `skill-kinds.instructions.md`,
                     ],
                     `
 I want to create a new HanziWord entry for ${hanzi} based on the gloss: ${query}
@@ -737,7 +741,7 @@ Can you come up with a few suggestions for me?
 
     console.log(query);
     const { suggestions: results } = await openai(
-      [`curriculum.md`],
+      [`curriculum.instructions.md`],
       query,
       z.object({
         suggestions: z.array(
@@ -1666,7 +1670,11 @@ interface GenerateHanziWordQuery {
 
 async function queryOpenAiForHanziWordResults(query: unknown) {
   const { suggestions } = await openai(
-    [`curriculum.md`, `word-representation.md`, `skill-kinds.md`],
+    [
+      `curriculum.instructions.md`,
+      `word-representation.instructions.md`,
+      `skill-kinds.instructions.md`,
+    ],
     `
 I have a hanzi I want to add to a word list, can fill in the rest of the data for me?
 

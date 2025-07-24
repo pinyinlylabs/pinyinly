@@ -81,7 +81,9 @@ async function systemRoleMessageWithProjectContext(
   role: `system`;
   content: string;
 }> {
-  const docsPath = path.join(import.meta.dirname + `../../../../../docs`);
+  const docsPath = path.join(
+    import.meta.dirname + `../../../../../.github/instructions`,
+  );
 
   const messageLines = [
     `You are helping someone build a Chinese language learning app.`,

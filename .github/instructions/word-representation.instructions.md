@@ -1,3 +1,7 @@
+---
+applyTo: "projects/app/**"
+---
+
 # Word Representation in Pinyinly
 
 ## Handling Multiple Meanings in Hanzi
@@ -29,7 +33,7 @@ Each Hanzi word is assigned the **minimum number of meanings necessary** to cove
 | **positive** | "good, nice, friendly" | 这个东西很好。   |
 | **like**     | "to like, to enjoy"    | 我好吃辣的食物。 |
 
-- The **adjective sense** (“good, nice”) and the **verb sense** (“to like”) are distinct enough to be separate meanings.
+- The **adjective sense** ("good, nice") and the **verb sense** ("to like") are distinct enough to be separate meanings.
 - Variations like "great" and "pleasant" are similar enough to be grouped under **positive**.
 
 ---
@@ -40,7 +44,7 @@ To ensure consistency and allow structured learning, each meaning is assigned a 
 
 #### **Why Use a meaning-key?**
 
-- **Stability**: If glosses change (e.g., “nice” becomes “pleasant”), the meaning-key remains consistent.
+- **Stability**: If glosses change (e.g., "nice" becomes "pleasant"), the meaning-key remains consistent.
 - **Uniqueness**: Prevents ambiguity when referring to meanings programmatically.
 - **Graph Structure**: Helps define clear skill dependencies in the learning graph.
 

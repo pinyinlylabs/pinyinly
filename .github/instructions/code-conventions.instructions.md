@@ -1,3 +1,7 @@
+---
+applyTo: "**/*.ts,**/*.tsx"
+---
+
 # Code Conventions
 
 This document outlines code conventions for this codebase. These conventions are intended to guide AI coding agents and human contributors to write code that is consistent, maintainable, and aligned with existing styles.
@@ -47,5 +51,3 @@ function MyComponent({ onClick }: { onClick: () => void }) {
   return <button onClick={handleClick}>Click me</button>;
 }
 ```
-
-## [Add further conventions below as needed]

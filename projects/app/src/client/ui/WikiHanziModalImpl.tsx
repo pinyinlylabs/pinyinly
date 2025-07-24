@@ -11,6 +11,7 @@ import { MDXComponents } from "@bacons/mdx";
 import type { PropsWithChildren } from "react";
 import { Fragment, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
+import { tv } from "tailwind-variants";
 import { useIntersectionObserver } from "usehooks-ts";
 import { IconImage } from "./IconImage";
 
@@ -66,7 +67,7 @@ export function WikiHanziModalImpl({
             bg-[linear-gradient(to_bottom,_var(--color-cyanold)_0%,_var(--color-cyanold)_50%,_var(--color-bg)_50%,_var(--color-bg)_100%)]
           `
         }
-        contentContainerClassName="pb-10"
+        contentContainerClassName="pb-10 flex-1"
       >
         <Header
           title={title}
@@ -79,13 +80,7 @@ export function WikiHanziModalImpl({
         />
 
         <PylyMdxComponents>
-          <View
-            className={`
-              gap-6 bg-bg py-7
-
-              ${tab === `meaning` ? `flex` : `hidden`}
-            `}
-          >
+          <View className={contentClass({ active: tab === `meaning` })}>
             {MeaningMdx == null ? null : <MeaningMdx />}
 
             {hanziWordMeanings.length > 1 ? (
@@ -134,13 +129,7 @@ export function WikiHanziModalImpl({
             )}
           </View>
 
-          <View
-            className={`
-              gap-6 bg-bg py-7
-
-              ${tab === `pronunciation` ? `flex` : `hidden`}
-            `}
-          >
+          <View className={contentClass({ active: tab === `pronunciation` })}>
             {PronunciationMdx == null ? null : <PronunciationMdx />}
           </View>
         </PylyMdxComponents>
@@ -148,6 +137,16 @@ export function WikiHanziModalImpl({
     </>
   );
 }
+
+const contentClass = tv({
+  base: `flex-1 gap-6 bg-bg py-7`,
+  variants: {
+    active: {
+      true: `flex`,
+      false: `hidden`,
+    },
+  },
+});
 
 function Header({
   title,

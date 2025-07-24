@@ -1,3 +1,7 @@
+---
+applyTo: "projects/app/**"
+---
+
 # Pinyinly Skill Dependency Graph
 
 Skills in Pinyinly are organized in a **directed weighted graph**, ensuring users learn components before full words.
