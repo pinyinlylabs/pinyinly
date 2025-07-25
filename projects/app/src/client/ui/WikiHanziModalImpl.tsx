@@ -190,13 +190,15 @@ function Header({
       />
 
       <View className="sticky top-[-120px] z-10 h-[184px] bg-cyanold">
-        <View className="sticky top-0 z-10 h-[64px] flex-row items-center pl-4">
+        <View className="sticky top-1 z-10 h-[56px] flex-row items-center pl-4">
           <Pressable
             onPress={onDismiss}
             className={`
-              size-8 rounded-md
+              size-8 rounded-md transition-transform
 
               hover:bg-fg-loud/10
+
+              active:scale-95
             `}
           >
             <IconImage
@@ -252,6 +254,16 @@ function Header({
               onTabChange?.(`pronunciation`);
             }}
           />
+          <View
+            className={
+              // Half-width view, transitioned between left and middle offset.
+              `
+                -translate-x-1/2 absolute bottom-0 h-1 w-1/2 rounded bg-fg-loud transition-[left]
+
+                ${tab === `meaning` ? `left-0` : `left-1/2`}
+              `
+            }
+          />
         </View>
         <View className="sticky top-[64px] h-px w-full bg-fg-loud" />
       </View>
@@ -269,22 +281,32 @@ function HeaderTab({
   onPress: () => void;
 }) {
   return (
-    <Pressable
-      className={`
-        min-w-40 flex-1 items-center border-fg-loud py-3
+    <View className={`min-w-40 flex-1 px-1 py-3`}>
+      <Pressable
+        className={`
+          w-full select-none items-center rounded px-4 py-2 transition-[opacity,transform]
 
-        ${isActive ? `border-b-2` : `border-b-0 opacity-80`}
+          ${isActive ? `` : `opacity-100`}
 
-        hover:bg-fg-loud/10
-      `}
-      onPress={() => {
-        onPress();
-      }}
-    >
-      <Text className="font-sans text-[18px]/normal font-semibold text-fg-loud">
-        {label}
-      </Text>
-    </Pressable>
+          hover:bg-fg-loud/10
+
+          active:scale-95
+        `}
+        onPress={() => {
+          onPress();
+        }}
+      >
+        <Text
+          className={`
+            font-sans text-[18px]/normal text-fg-loud
+
+            ${isActive ? `font-semibold` : `font-medium`}
+          `}
+        >
+          {label}
+        </Text>
+      </Pressable>
+    </View>
   );
 }
 
