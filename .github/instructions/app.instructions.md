@@ -9,22 +9,23 @@ The following commands should be used to test the code:
 - Static type checking: `moon run app:typecheck`
 - Prettier: `moon run root:prettierCheck`
 
-These can be run from any directory, there's no need to `cd` to a particular
-directory.
+These can be run from any directory, there's no need to `cd` to a particular directory.
 
 # Tests directory structure
 
-Test files are located in the `tests/` directory. The directory structure
-mirrors the `src/` directory. For example a source file at `src/util/date.ts`
-would have its tests at `tests/util/date.test.ts`.
+Test files are located in the `tests/` directory. The directory structure mirrors the `src/`
+directory. For example a source file at `src/util/date.ts` would have its tests at
+`tests/util/date.test.ts`.
 
 # Wiki content structure
 
-The wiki content is stored in MDX files within the `src/client/wiki/` directory. The structure follows this pattern:
+The wiki content is stored in MDX files within the `src/client/wiki/` directory. The structure
+follows this pattern:
 
 - `src/client/wiki/{hanzi}/~{meaningKey}/meaning.mdx` - Contains the meaning/definition of a word
   - Where `{hanzi}` is the Chinese character or word
-  - And `{meaningKey}` is the English identifier that corresponds to the concept from HanziWord in the docs
+  - And `{meaningKey}` is the English identifier that corresponds to the concept from HanziWord in
+    the docs
 
 Example:
 

@@ -24,7 +24,8 @@ This document describes the different types of skills available in Pinyinly.
 
 ## How Hanzi IDs Are Defined
 
-Since characters can have multiple meanings, **each meaning must have a stable identifier** that remains consistent even if glosses change.
+Since characters can have multiple meanings, **each meaning must have a stable identifier** that
+remains consistent even if glosses change.
 
 ### **Hanzi ID Format:**
 

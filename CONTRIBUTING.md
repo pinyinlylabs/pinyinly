@@ -37,9 +37,9 @@ In VS Code open a `JavaScript Debug Terminal` from the command palette
 moon run app:dev
 ```
 
-This works because VS Code configures `NODE_OPTIONS` in the terminal to
-`--require` a special `bootloader.js`, so it's important that moon tasks that
-define `NODE_OPTIONS` pass through the existing value.
+This works because VS Code configures `NODE_OPTIONS` in the terminal to `--require` a special
+`bootloader.js`, so it's important that moon tasks that define `NODE_OPTIONS` pass through the
+existing value.
 
 ## Adding a cross project dependency
 
@@ -49,12 +49,13 @@ Add to `dependsOn:` within `moon.yml`, then run:
 moon sync projects
 ```
 
-This will update `package.json/dependencies`, `tsconfig.json/references`, `tsconfig.json/compilerOptions/paths`.
+This will update `package.json/dependencies`, `tsconfig.json/references`,
+`tsconfig.json/compilerOptions/paths`.
 
 ## Upgrading Yarn
 
-Inside `toolchain.yml` edit `node.yarn.version` and update the version. Run
-`moon sync projects` to apply the change.
+Inside `toolchain.yml` edit `node.yarn.version` and update the version. Run `moon sync projects` to
+apply the change.
 
 ## Upgrading Moon
 
@@ -77,13 +78,13 @@ Edit `.moon/toolchain.yml` edit `node.version`.
 moon run node-version
 ```
 
-Moon will automatically synchronize `package.json` `engines.node`, and it will
-use proto to download and install the right version of Node.js.
+Moon will automatically synchronize `package.json` `engines.node`, and it will use proto to download
+and install the right version of Node.js.
 
 ## Upgrading a transitive Yarn dependency (e.g. for security patch)
 
-A normal `yarn up ___` won't work if no workspace depends on it directly, so you
-need to use `--recursive`. For example to upgrade `tar` use:
+A normal `yarn up ___` won't work if no workspace depends on it directly, so you need to use
+`--recursive`. For example to upgrade `tar` use:
 
 ```sh
 yarn up -R tar
@@ -102,9 +103,8 @@ rm .yarn/patches/expo-image-npm-1.12.9-116d224baf.patch
 
 ## Updating app icons
 
-Icons can be exported directly from Figma. Frames are labelled appropriately
-such that everything in Figma can be exported to the
-`projects/app/src/assets` directory.
+Icons can be exported directly from Figma. Frames are labelled appropriately such that everything in
+Figma can be exported to the `projects/app/src/assets` directory.
 
 ## Writing Pinyin on macOS
 
@@ -113,16 +113,18 @@ such that everything in Figma can be exported to the
 1. Press <kbd>Tab</kbd> to cycle through each tone.
 1. Press <kbd>Enter</kbd> to accept the pinyin.
 
-Example: to write `hǎo` type <kbd>h</kbd> <kbd>a</kbd> <kbd>o</kbd> <kbd>Tab</kbd> <kbd>Tab</kbd> <kbd>Tab</kbd> <kbd>Enter</kbd>.
+Example: to write `hǎo` type <kbd>h</kbd> <kbd>a</kbd> <kbd>o</kbd> <kbd>Tab</kbd> <kbd>Tab</kbd>
+<kbd>Tab</kbd> <kbd>Enter</kbd>.
 
 ## Local development with Sign in with Apple for Web
 
-1. Set `EXPO_TUNNEL_SUBDOMAIN` in `projects/app/.env.local` to something like
-   `pinyinly-<yourname>`.
-1. In [Apple Developer portal](https://developer.apple.com/account/resources/identifiers/list/serviceId) edit the Service ID for the app and click **Configure**.
+1. Set `EXPO_TUNNEL_SUBDOMAIN` in `projects/app/.env.local` to something like `pinyinly-<yourname>`.
+1. In
+   [Apple Developer portal](https://developer.apple.com/account/resources/identifiers/list/serviceId)
+   edit the Service ID for the app and click **Configure**.
 1. Click the + button for **Website URLs**, in the **Return URLs** box add
-   `https://<EXPO_TUNNEL_SUBDOMAIN>.ngrok.io/api/auth/login/apple/callback`
-   (replace `<EXPO_TUNNEL_SUBDOMAIN>` with the value you chose).
+   `https://<EXPO_TUNNEL_SUBDOMAIN>.ngrok.io/api/auth/login/apple/callback` (replace
+   `<EXPO_TUNNEL_SUBDOMAIN>` with the value you chose).
 1. Save the changes.
 1. Start Expo via `moon run app:dev -- --tunnel`.
 
@@ -141,26 +143,24 @@ Add the device to the provisioning profile:
 npx -y eas-cli build --profile=preview --platform=ios
 ```
 
-It's important that this is done using the interactive version of the command so
-that you can authenticate your Apple Developer account and have it synchronize
-the provisioning profile.
+It's important that this is done using the interactive version of the command so that you can
+authenticate your Apple Developer account and have it synchronize the provisioning profile.
 
 ## Manually marking a Drizzle migration as "run"
 
-In local development it can be useful to merge together migrations without
-losing local data. In this case you can manually modify the Drizzle migration
-state in `drizzle.__drizzle_migrations`.
+In local development it can be useful to merge together migrations without losing local data. In
+this case you can manually modify the Drizzle migration state in `drizzle.__drizzle_migrations`.
 
-Copy the timestamp from `_journal.json`, and the hash is the lower-case SHA256
-of the `.sql` migration file.
+Copy the timestamp from `_journal.json`, and the hash is the lower-case SHA256 of the `.sql`
+migration file.
 
 ## Debugging API server running on Vercel
 
-There have been compatibility issues between @expo/server and Vercel in the
-past. To help debug these it's useful to run the Vercel server locally in a
-JavaScript Debug Terminal.
+There have been compatibility issues between @expo/server and Vercel in the past. To help debug
+these it's useful to run the Vercel server locally in a JavaScript Debug Terminal.
 
-To do this you need build the Expo web output, and then point `app/api/index.cjs` to the output directory, then run the vercel dev server.
+To do this you need build the Expo web output, and then point `app/api/index.cjs` to the output
+directory, then run the vercel dev server.
 
 For example you can run something like this:
 
@@ -209,19 +209,17 @@ Customise this to suit your scenario.
 
 ## Environment variables
 
-- **Vercel**: There should be no `EXPO_PUBLIC_` environment variables configured
-  in Vercel's environment variables. `EXPO_PUBLIC_` are inlined at build-time by
-  metro so there's no effect from having them defined in the environment at
-  runtime too. However other environment variables like `DATABASE_URL`
-  **should** be defined here as they are read at run-time.
+- **Vercel**: There should be no `EXPO_PUBLIC_` environment variables configured in Vercel's
+  environment variables. `EXPO_PUBLIC_` are inlined at build-time by metro so there's no effect from
+  having them defined in the environment at runtime too. However other environment variables like
+  `DATABASE_URL` **should** be defined here as they are read at run-time.
 
-  **`SENTRY_DSN`**: Needs to be defined here, even though it's typically defined
-  using `EXPO_PUBLIC_SENTRY_DSN` in other places, the `Sentry.init()` call is
-  not in code compiled by Metro and instead is in the entry-point
-  `projects/app/api/index.cjs`.
+  **`SENTRY_DSN`**: Needs to be defined here, even though it's typically defined using
+  `EXPO_PUBLIC_SENTRY_DSN` in other places, the `Sentry.init()` call is not in code compiled by
+  Metro and instead is in the entry-point `projects/app/api/index.cjs`.
 
-- **`EXPO_PUBLIC_`**: These are inlined into the build and exposed publicly. These
-  need to be configured anywhere that builds are done:
+- **`EXPO_PUBLIC_`**: These are inlined into the build and exposed publicly. These need to be
+  configured anywhere that builds are done:
 
   - `.github/workflows/release.yml`
   - `.github/workflows/expo-eas-build.yml`
@@ -229,9 +227,8 @@ Customise this to suit your scenario.
 
   This means they need to be declared in GitHub's Action Secrets too.
 
-  Expo's Metro plugin is patched to error if `PYLY_STRICT_EXPO_ENV_VARS` is set
-  when a `EXPO_PUBLIC_` variable is missing. This helps catch errors during
-  build before they reach users.
+  Expo's Metro plugin is patched to error if `PYLY_STRICT_EXPO_ENV_VARS` is set when a
+  `EXPO_PUBLIC_` variable is missing. This helps catch errors during build before they reach users.
 
 ## Debugging nativewind
 
@@ -243,9 +240,9 @@ yarn tailwindcss --input src/global.css
 
 ## Updating the bill of materials
 
-The bill of materials is created by looking at what packages were bundled by
-Metro into client bundles. Client bundles are actually being distributed, and
-that's the important point for many OSS licenses.
+The bill of materials is created by looking at what packages were bundled by Metro into client
+bundles. Client bundles are actually being distributed, and that's the important point for many OSS
+licenses.
 
 Bundling data from Metro is collected from data generated by expo-atlas.
 
