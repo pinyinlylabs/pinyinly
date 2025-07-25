@@ -4,7 +4,9 @@ applyTo: "projects/app/**"
 
 # Pinyinly Spaced Repetition Algorithm
 
-The SRS system dynamically adjusts review intervals based on a **trickle-down reinforcement** approach. This prevents premature reviews when related skills have already been practiced indirectly.
+The SRS system dynamically adjusts review intervals based on a **trickle-down reinforcement**
+approach. This prevents premature reviews when related skills have already been practiced
+indirectly.
 
 ## Key Features
 
