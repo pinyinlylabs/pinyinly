@@ -44,7 +44,7 @@
   /* --- */
 
   .pyly-body-heading {
-    @apply font-sans text-lg/normal tracking-tight text-fg-loud font-semibold;
+    @apply font-sans text-lg/normal tracking-tight text-fg-loud font-bold;
   }
   .pyly-body-heading .pyly-ref {
     @apply font-bold text-lg/normal text-fg-loud decoration-[3px] underline-offset-[3px];

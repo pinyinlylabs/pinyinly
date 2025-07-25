@@ -5,7 +5,7 @@ export default () => {
   return (
     <WikiHanziModal
       devUiSnapshotMode
-      hanzi={`单` as HanziText}
+      hanzi={`上` as HanziText}
       onDismiss={() => null}
     />
   );
