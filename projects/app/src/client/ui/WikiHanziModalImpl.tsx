@@ -286,8 +286,6 @@ function HeaderTab({
         className={`
           w-full select-none items-center rounded px-4 py-2 transition-[opacity,transform]
 
-          ${isActive ? `` : `opacity-100`}
-
           hover:bg-fg-loud/10
 
           active:scale-95
