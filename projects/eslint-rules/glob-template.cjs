@@ -94,7 +94,7 @@ const rule = {
           if (attrError || !globPath || !template) {
             context.report({
               loc: comment.loc || { line: 1, column: 0 },
-              message: `<pyly-glob-template> must have glob and template attributes, e.g. <pyly-glob-template glob="./icons/*.svg" template="  require('\${path}'),">. Template variables: \${path}, \${pathWithoutExt}, \${filenameWithoutExt}, \${parentDir}, \${relpath}, \${relpathWithoutExt}`,
+              message: `<pyly-glob-template> must have glob and template attributes, e.g. <pyly-glob-template glob="./icons/*.svg" template="  require('\${path}'),">. Available variables: \${path}, \${pathWithoutExt}, \${filenameWithoutExt}, \${parentDir}, \${relpath}, \${relpathWithoutExt}. You can also use JavaScript expressions like \${path.split('.')[0]} or \${relpath.replace(/-/g, '_')}`,
             });
             continue;
           }
@@ -239,20 +239,38 @@ const rule = {
             // Get relative path without extension
             const relPathWithoutExt = f.replace(/\.[^/.]+$/, "");
 
-            // Replace template variables
-            let result = template;
-            result = result.replace(
-              /\$\{filenameWithoutExt\}/g,
+            // Create context for evaluating expressions
+            const context = {
               filenameWithoutExt,
-            );
-            result = result.replace(/\$\{pathWithoutExt\}/g, pathWithoutExt);
-            result = result.replace(/\$\{path\}/g, requirePath);
-            result = result.replace(/\$\{parentDir\}/g, parentDir);
-            result = result.replace(/\$\{relpath\}/g, relPath);
-            result = result.replace(
-              /\$\{relpathWithoutExt\}/g,
-              relPathWithoutExt,
-            );
+              pathWithoutExt,
+              path: requirePath,
+              parentDir,
+              relpath: relPath,
+              relpathWithoutExt: relPathWithoutExt,
+            };
+
+            // Replace template variables with evaluated expressions
+            /** @type {string} */
+            let result = template;
+
+            // First try to handle as expression evaluation (safer than eval)
+            result = result.replace(/\$\{([^}]+)\}/g, (match, expr) => {
+              try {
+                // Create a function with the context variables as arguments
+                const keys = Object.keys(context);
+                const values = Object.values(context);
+
+                // Create a function that evaluates the expression in the given context
+                // This is safer than using eval() directly
+                const evaluator = new Function(...keys, `return ${expr};`);
+
+                // Execute the function with our context variables
+                return evaluator(...values);
+              } catch (error) {
+                // If evaluation fails, return the original expression
+                return match;
+              }
+            });
             return result;
           });
 

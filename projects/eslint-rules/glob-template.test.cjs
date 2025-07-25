@@ -219,6 +219,16 @@ const validCodeWithRelPathWithoutExt =
   "// </pyly-glob-template>\n" +
   "};";
 
+const validCodeWithJsExpression =
+  "const codeMapping = {\n" +
+  '  // <pyly-glob-template glob="./glob-template.test/**/*.svg" template="  \\"${relpath}\\": \'${relpath.split(\\".\\")[0].toUpperCase()}\',">\n' +
+  "  \"a.svg\": 'A',\n" +
+  "  \"b.svg\": 'B',\n" +
+  "  \"c.svg\": 'C',\n" +
+  "  \"nested/d.svg\": 'NESTED/D',\n" +
+  "// </pyly-glob-template>\n" +
+  "};";
+
 const simpleValidCode =
   "const allIcons = [\n" +
   '  // <pyly-glob-template glob="./glob-template.test/*.svg" template="  require(\'${path}\'),">\n' +
@@ -325,6 +335,10 @@ ruleTester.run("glob-template", rule, {
     },
     {
       code: validCodeWithRelPathWithoutExt,
+      filename: __filename,
+    },
+    {
+      code: validCodeWithJsExpression,
       filename: __filename,
     },
   ],
