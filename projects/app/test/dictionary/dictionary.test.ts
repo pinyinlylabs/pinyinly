@@ -144,8 +144,6 @@ test(`hanzi word meaning gloss lint`, async () => {
     /,/.exec(x) != null ||
     // no banned characters/phrases
     /measure ?word|radical|particle|\(/i.exec(x) != null ||
-    // doesn't start with "to "
-    x.startsWith(`to `) ||
     (x.match(/\s+/g)?.length ?? 0) > maxSpaces;
 
   const violations = new Set(

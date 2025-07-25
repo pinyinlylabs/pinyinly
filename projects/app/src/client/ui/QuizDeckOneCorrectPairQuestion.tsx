@@ -132,7 +132,7 @@ export function QuizDeckOneCorrectPairQuestion({
                 </Text>
 
                 <Text className="text-fg">
-                  <SkillAnswerText skill={answer.skill} includeAlternatives />
+                  <SkillAnswerText skill={answer.skill} />
                 </Text>
 
                 {selectedAChoice != null && selectedBChoice != null ? (
@@ -297,13 +297,7 @@ function choiceToPylymark(choice: OneCorrectPairQuestionChoice): string {
   return `**${oneCorrectPairChoiceText(choice)}**`;
 }
 
-const SkillAnswerText = ({
-  skill,
-}: {
-  skill: Skill;
-  includeAlternatives?: boolean;
-  small?: boolean;
-}) => {
+const SkillAnswerText = ({ skill }: { skill: Skill; small?: boolean }) => {
   switch (skillKindFromSkill(skill)) {
     case SkillKind.Deprecated_EnglishToRadical:
     case SkillKind.Deprecated_PinyinToRadical:

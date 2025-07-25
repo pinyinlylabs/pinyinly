@@ -63,11 +63,11 @@ export function WikiHanziModalImpl({
           // Use a linear gradient on the background so that rubber band
           // scrolling showing the correct color at the top and bottom.
           `
-            flex-1
+            h-screen
             bg-[linear-gradient(to_bottom,_var(--color-cyanold)_0%,_var(--color-cyanold)_50%,_var(--color-bg)_50%,_var(--color-bg)_100%)]
           `
         }
-        contentContainerClassName="pb-10 flex-1"
+        contentContainerClassName="pb-10 min-h-full"
       >
         <Header
           title={title}

@@ -44,7 +44,7 @@
   /* --- */
 
   .pyly-body-heading {
-    @apply font-sans text-lg/normal tracking-tight text-fg-loud font-semibold;
+    @apply font-sans text-lg/normal tracking-tight text-fg-loud font-bold;
   }
   .pyly-body-heading .pyly-ref {
     @apply font-bold text-lg/normal text-fg-loud decoration-[3px] underline-offset-[3px];
@@ -74,7 +74,7 @@
   /* --- */
 
   .pyly-body {
-    @apply font-sans text-base/normal text-fg font-normal;
+    @apply font-sans text-base/normal text-fg font-medium;
   }
   .pyly-body .pyly-ref {
     @apply text-base/normal text-fg-loud font-medium decoration-[3px] underline-offset-[2px];
@@ -333,6 +333,13 @@
     weight font. This disables that behaviour.
     */
     font-synthesis: none;
+    /*
+    Make webkit (e.g. Safari) render the font the same way as Figma
+    https://forum.figma.com/ask-the-community-7/font-in-browser-seem-bolder-than-in-the-figma-8146#post54600
+    */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-smooth: never;
   }
 
   /* --- */

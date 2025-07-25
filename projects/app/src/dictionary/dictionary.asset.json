@@ -786,7 +786,7 @@
 ["啡:morphine",{"gloss":["morphine"],"pinyin":["fēi"],"example":"这个药含有啡。","partOfSpeech":"noun"}],
 ["啤:beer",{"gloss":["beer"],"pinyin":["pí"],"example":"我喜欢喝啤酒。","partOfSpeech":"noun"}],
 ["啤酒:beer",{"gloss":["beer"],"pinyin":["pí jiǔ"],"example":"他们正在喝啤酒。","partOfSpeech":"noun"}],
-["喂:feed",{"gloss":["feed"],"pinyin":["wèi"],"example":"我每天喂猫。","partOfSpeech":"verb"}],
+["喂:feed",{"gloss":["to feed","feed"],"pinyin":["wèi"],"example":"我每天喂猫。","partOfSpeech":"verb"}],
 ["喂:hello",{"gloss":["hello"],"pinyin":["wèi"],"example":"喂，你好！","partOfSpeech":"interjection"}],
 ["善:good",{"gloss":["good"],"pinyin":["shàn"],"example":"他是一个善良的人。","partOfSpeech":"adjective"}],
 ["喊:shout",{"gloss":["shout","yell"],"pinyin":["hǎn"],"example":"他大声喊我的名字。","partOfSpeech":"verb"}],
