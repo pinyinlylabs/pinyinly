@@ -2058,10 +2058,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@expo/html-elements@npm:~0.11.0":
-  version: 0.11.2
-  resolution: "@expo/html-elements@npm:0.11.2"
-  checksum: 10c0/42a31020a76ce4a6219494d900c99347f37c768db9c78d07c94b5a2d9f373da2c8d92d8e06229c6c6bdd671258a4bd022b0dd31a4e8ba15afc4caadb9d9ba063
+"@expo/html-elements@npm:0.12.5":
+  version: 0.12.5
+  resolution: "@expo/html-elements@npm:0.12.5"
+  checksum: 10c0/14b6dc306481485b7f80930406b97d5446a615b22619c8837bbc2587983457b1096481b3e25b850ff864cee8c1dc641b08cc6d2128d8a8a0f745ee3dcac7975e
+  languageName: node
+  linkType: hard
+
+"@expo/html-elements@patch:@expo/html-elements@npm%3A0.12.5#~/.yarn/patches/@expo-html-elements-npm-0.12.5-ada5f53f49.patch":
+  version: 0.12.5
+  resolution: "@expo/html-elements@patch:@expo/html-elements@npm%3A0.12.5#~/.yarn/patches/@expo-html-elements-npm-0.12.5-ada5f53f49.patch::version=0.12.5&hash=046414"
+  checksum: 10c0/3796a8cdfb18cad1cd6e6bd8a1b32d1fdc0b7938e8c7a48dbe3e4e88ec4ac894cec8b479bc20c9b4f1110df908d2e870bfe0add8328e4790a35b04d55252f76f
   languageName: node
   linkType: hard
 
