@@ -45,6 +45,7 @@ import type {
   TextAnswerButtonState,
 } from "./TextAnswerButton";
 import { TextAnswerButton, textAnswerButtonFontSize } from "./TextAnswerButton";
+import { WikiHanziModal } from "./WikiHanziModal";
 
 const buttonThickness = 4;
 const gap = 12;
@@ -490,7 +491,14 @@ const ChoiceButton = ({
       fontSize={fontSize}
       state={state}
       className="flex-1"
-      text={text}
+      text={oneCorrectPairChoiceText(choice)}
+      renderErrorModal={
+        choice.kind === `hanzi`
+          ? (onDismiss) => (
+              <WikiHanziModal hanzi={choice.value} onDismiss={onDismiss} />
+            )
+          : undefined
+      }
     />
   );
 };

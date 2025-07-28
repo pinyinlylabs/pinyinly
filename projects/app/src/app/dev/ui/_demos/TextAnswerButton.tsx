@@ -1,9 +1,7 @@
 import { ExampleStack, LittlePrimaryHeader } from "@/app/dev/ui/_helpers";
-import { HanziLink } from "@/client/ui/HanziLink";
 import type { TextAnswerButtonState } from "@/client/ui/TextAnswerButton";
 import { TextAnswerButton } from "@/client/ui/TextAnswerButton";
 import type { PropsOf } from "@/client/ui/types";
-import type { HanziText } from "@/data/model";
 import shuffle from "lodash/shuffle";
 import { useState } from "react";
 import { View } from "react-native";
@@ -26,18 +24,60 @@ export default () => (
         <SyncedAnswerButtonExample />
       </ExampleStack>
 
-      <ExampleStack title="text overflow" showFrame>
-        <View className="size-[120px]">
-          <TextAnswerButton
-            className="flex-1"
-            text="one two three four five six seven eight nine ten"
-          />
-          <TextAnswerButton
-            className="flex-1"
-            disabled
-            text="one two three four five six seven eight nine ten"
-          />
-        </View>
+      <ExampleStack title="text overflow" childrenClassName="flex-row">
+        <ExampleStack title="tall" showFrame>
+          <View className="h-[400px] w-[120px]">
+            <TextAnswerButton
+              className="flex-1"
+              text="xs xs xs xs xs xs xs xs xs xs xs xs xs xs xs xs"
+            />
+            <TextAnswerButton
+              className="flex-1"
+              fontSize="sm"
+              disabled
+              text="sm sm sm sm sm sm sm sm sm sm sm sm sm sm sm sm"
+            />
+            <TextAnswerButton
+              className="flex-1"
+              fontSize="lg"
+              disabled
+              text="lg lg lg lg lg lg lg lg lg lg lg lg lg lg lg lg"
+            />
+            <TextAnswerButton
+              className="flex-1"
+              fontSize="xl"
+              disabled
+              text="xl xl xl xl xl xl xl xl xl xl xl xl xl xl xl xl"
+            />
+          </View>
+        </ExampleStack>
+
+        <ExampleStack title="short" showFrame>
+          <View className="h-[250px] w-[120px]">
+            <TextAnswerButton
+              className="flex-1"
+              text="xs xs xs xs xs xs xs xs xs xs xs xs xs xs xs xs"
+            />
+            <TextAnswerButton
+              className="flex-1"
+              fontSize="sm"
+              disabled
+              text="sm sm sm sm sm sm sm sm sm sm sm sm sm sm sm sm"
+            />
+            <TextAnswerButton
+              className="flex-1"
+              fontSize="lg"
+              disabled
+              text="lg lg lg lg lg lg lg lg lg lg lg lg lg lg lg lg"
+            />
+            <TextAnswerButton
+              className="flex-1"
+              fontSize="xl"
+              disabled
+              text="xl xl xl xl xl xl xl xl xl xl xl xl xl xl xl xl"
+            />
+          </View>
+        </ExampleStack>
       </ExampleStack>
     </View>
 
@@ -199,22 +239,20 @@ export default () => (
           key={fontSize}
           title={fontSize}
           showFrame
-          childrenClassName="w-[200px] items-start gap-2"
+          childrenClassName="w-[200px] h-[200px] items-start gap-2"
         >
           <TextAnswerButton
             state="error"
             fontSize={fontSize}
-            text={<HanziLink hanzi={`你好` as HanziText}>你好</HanziLink>}
+            text="你好"
+            renderErrorModal={() => null}
             className={`flex-1`}
           />
           <TextAnswerButton
             state="error"
             fontSize={fontSize}
-            text={
-              <HanziLink hanzi={`你好` as HanziText}>
-                你好 你好 你好 你好 你好 你好
-              </HanziLink>
-            }
+            text="你好 你好 你好 你好 你好 你好 你好 你好 你好"
+            renderErrorModal={() => null}
             className={`flex-1`}
           />
         </ExampleStack>

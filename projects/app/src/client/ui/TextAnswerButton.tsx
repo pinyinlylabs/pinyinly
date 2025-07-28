@@ -61,7 +61,7 @@ export type TextAnswerButtonState =
 export type TextAnswerButtonFontSize = `xs` | `sm` | `lg` | `xl`;
 
 export type TextAnswerButtonProps = {
-  text: ReactNode;
+  text: string;
   /**
    * Allow setting the font size explicitly, this allows making all choices in a
    * quiz the same font size which avoids subconsciously biasing answers based
@@ -70,6 +70,7 @@ export type TextAnswerButtonProps = {
   fontSize?: TextAnswerButtonFontSize;
   state?: TextAnswerButtonState;
   className?: string;
+  renderErrorModal?: (onDismiss: () => void) => ReactNode;
   inFlexRowParent?: boolean;
   textClassName?: string;
   disabled?: boolean;
@@ -78,8 +79,9 @@ export type TextAnswerButtonProps = {
 export function TextAnswerButton({
   disabled = false,
   text,
-  fontSize = typeof text === `string` ? textAnswerButtonFontSize(text) : `lg`,
+  fontSize = textAnswerButtonFontSize(text),
   state = `default`,
+  renderErrorModal,
   inFlexRowParent = false,
   className,
   textClassName,
@@ -89,6 +91,7 @@ export function TextAnswerButton({
   const [bgFilled, setBgFilled] = useState(false);
   const [pressed, setPressed] = useState(false);
   const [hovered, setHovered] = useState(false);
+  const [showErrorHelpModal, setShowErrorHelpModal] = useState(false);
 
   const scaleSv = useSharedValue(targetScale[state]);
   const rotationSv = useSharedValue(targetRotation[state]);
@@ -196,9 +199,14 @@ export function TextAnswerButton({
       }}
       onPress={(e) => {
         if (state === `error`) {
-          // Shake the button violently if the user presses it again after they
-          // already made an error.
-          rotationSv.set(withIncorrectShakeAnimation(rotationSv.get()));
+          if (renderErrorModal == null) {
+            // Shake the button violently if the user presses it again after they
+            // already made an error.
+            rotationSv.set(withIncorrectShakeAnimation(rotationSv.get()));
+          } else {
+            // Or if there's a help modal, show it.
+            setShowErrorHelpModal(true);
+          }
         }
         pressableProps.onPress?.(e);
       }}
@@ -224,7 +232,9 @@ export function TextAnswerButton({
           className={textClass({
             state,
             fontSize,
+            hasErrorHelpModal: renderErrorModal != null,
             className: textClassName,
+            hovered,
           })}
           numberOfLines={2}
           ellipsizeMode="tail"
@@ -238,6 +248,11 @@ export function TextAnswerButton({
         className="theme-success pointer-events-none absolute -inset-3"
         play={state === `success`}
       />
+      {showErrorHelpModal && renderErrorModal != null
+        ? renderErrorModal(() => {
+            setShowErrorHelpModal(false);
+          })
+        : null}
     </ReanimatedPressable>
   );
 }
@@ -370,11 +385,17 @@ const textClass = tv({
   // line with accents enough space to not be clipped. Without this words like
   // "lǐ" will have half the accent clipped.
   base: `
-    p-1 text-center font-normal text-fg
+    px-1 py-[2px] text-center font-normal text-fg
 
     web:transition-colors
   `,
   variants: {
+    hovered: {
+      true: ``,
+    },
+    hasErrorHelpModal: {
+      true: ``,
+    },
     state: {
       default: `text-fg`,
       dimmed: `text-fg/90`,
@@ -384,27 +405,60 @@ const textClass = tv({
     },
     fontSize: {
       xl: `
+        pyly-ref-xl
+
+        lg:pyly-ref-2xl
+
         text-xl/tight
 
         lg:text-2xl/tight
       `,
       lg: `
+        pyly-ref-lg
+
+        lg:pyly-ref-xl
+
         text-lg/tight
 
         lg:text-xl/tight
       `,
       sm: `
+        pyly-ref-sm
+
+        lg:pyly-ref-lg
+
         text-sm
 
         lg:text-lg/tight
       `,
       xs: `
+        pyly-ref-xs
+
+        lg:pyly-ref-base
+
         text-xs
 
         lg:text-base/tight
       `,
     },
   },
+  compoundVariants: [
+    {
+      state: `error`,
+      hasErrorHelpModal: true,
+      class: `
+        underline decoration-currentColor/25
+
+        [text-decoration-skip-ink:none]
+      `,
+    },
+    {
+      state: `error`,
+      hasErrorHelpModal: true,
+      hovered: true,
+      class: `decoration-currentColor/50`,
+    },
+  ],
 });
 
 export function textAnswerButtonFontSize(

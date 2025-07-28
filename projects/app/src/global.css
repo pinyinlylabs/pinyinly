@@ -134,23 +134,6 @@
     @apply font-semibold text-yellow;
   }
 
-  /* --- TextAnswerButton --- */
-
-  .text-xs .pyly-ref,
-  .text-xs\/tight .pyly-ref {
-    @apply pyly-ref-xs;
-  }
-  .text-sm .pyly-ref,
-  .text-sm\/tight .pyly-ref {
-    @apply pyly-ref-sm;
-  }
-  .text-lg\/tight .pyly-ref {
-    @apply pyly-ref-lg;
-  }
-  .text-xl\/tight .pyly-ref {
-    @apply pyly-ref-lg;
-  }
-
   /* --- */
 
   .pyly-dev-dt {
@@ -355,6 +338,9 @@
     @apply decoration-[3px] underline-offset-[2px];
   }
   .pyly-ref-lg {
+    @apply decoration-[3px] underline-offset-[3px];
+  }
+  .pyly-ref-xl {
     @apply decoration-[3px] underline-offset-[3px];
   }
   .pyly-ref-2xl {
