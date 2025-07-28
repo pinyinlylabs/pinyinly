@@ -2,7 +2,7 @@
 const { getDefaultConfig } = require(`expo/metro-config`);
 const { withSentryConfig } = require(`@sentry/react-native/metro`);
 const { withNativeWind } = require(`nativewind/metro`);
-const { withMdx } = require(`./src/mdx/index`);
+const { withMdx } = require(`./src/mdx/index.js`);
 
 let config = getDefaultConfig(__dirname);
 

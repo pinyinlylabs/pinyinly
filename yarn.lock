@@ -2127,7 +2127,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@expo/metro-config@npm:0.20.17, @expo/metro-config@npm:~0.20.17":
+"@expo/metro-config@npm:0.20.17, @expo/metro-config@npm:^0.20.17, @expo/metro-config@npm:~0.20.17":
   version: 0.20.17
   resolution: "@expo/metro-config@npm:0.20.17"
   dependencies:
@@ -4629,6 +4629,7 @@ __metadata:
     "@bacons/mdx": "patch:@bacons/mdx@patch%3A@bacons/mdx@npm%253A0.4.5%23~/.yarn/patches/@bacons-mdx-npm-0.4.5-c230ac7389.patch%3A%3Aversion=0.4.5&hash=ae242c#~/.yarn/patches/@bacons-mdx-patch-b1da8776c7.patch"
     "@electric-sql/pglite": "npm:^0.3.0"
     "@eslint/eslintrc": "npm:^3.3.0"
+    "@expo/metro-config": "npm:^0.20.17"
     "@expo/metro-runtime": "npm:~5.0.4"
     "@inkjs/ui": "npm:^2.0.0"
     "@inngest/eslint-plugin": "npm:^0.0.7"

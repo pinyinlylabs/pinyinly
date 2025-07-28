@@ -1,12 +1,16 @@
-import type { createProcessor } from "@mdx-js/mdx";
+// @ts-check
+
 import makeDebug from "debug";
-import type { PluggableList } from "unified";
-import type { Node } from "unist";
 import { visit } from "unist-util-visit";
 
 const debug = makeDebug(`pinyinly:mdx:transform`);
 
-const getTemplate = (rawMdxString: string) => {
+/**
+ * Generates template string from raw MDX string
+ * @param {string} rawMdxString - The raw MDX string to transform
+ * @returns {string} The templated MDX string
+ */
+const getTemplate = (rawMdxString) => {
   return `"use client";
 ${rawMdxString
   // Remove default HTML components:
@@ -51,34 +55,38 @@ function _makeExpoMetroProvided(name, _components) {
 `;
 };
 
-interface ImageNode extends Node {
-  url: string;
-  alt: string;
-  title: string | null;
-  type: `image`;
-}
+/**
+ * @typedef {import('unist').Node} Node
+ * @typedef {import('unified').PluggableList} PluggableList
+ * @typedef {import('@mdx-js/mdx').createProcessor} createProcessorType
+ *
+ * @typedef {Object} ImageNode
+ * @property {string} url - The URL of the image
+ * @property {string} alt - Alt text for the image
+ * @property {string|null} title - Optional title for the image
+ * @property {'image'} type - The type of node
+ */
 
+/**
+ * Creates an MDX transformer for Metro bundler
+ * @param {Object} options - Configuration options
+ * @param {function({filename: string, src: string}): boolean} [options.matchFile] - Function to determine if a file should be transformed
+ * @param {function(string): boolean} [options.matchLocalAsset] - Function to determine if an asset URL is local
+ * @param {PluggableList} [options.remarkPlugins] - List of remark plugins
+ * @returns {MetroBabelTransformer} The transformer object with a transform method
+ */
 export function createTransformer({
   matchFile = (props) => !!/\.mdx?$/.test(props.filename),
   matchLocalAsset = (url) => !!/^[.@]/.test(url),
   remarkPlugins = [],
-}: {
-  /**
-   * @param props Metro transform props.
-   * @returns true if the file should be transformed.
-   * @default Function that matches if a file ends with `.mdx` or `.md`.
-   */
-  matchFile?: (props: { filename: string; src: string }) => boolean;
-  /**
-   * @returns true if the src reference should be converted to a local `require`.
-   * @default Function that matches strings starting with `.` or `@`.
-   */
-  matchLocalAsset?: (url: string) => boolean;
-  remarkPlugins?: PluggableList;
 } = {}) {
+  /**
+   * Custom plugin for handling image paths in MDX
+   * @returns {function(Node): void} A transformer function
+   */
   function expoMdxPlugin() {
-    return (tree: Node) => {
-      visit(tree, `image`, (node: ImageNode) => {
+    return (tree) => {
+      visit(tree, `image`, (/** @type {ImageNode} */ node) => {
         if (matchLocalAsset(node.url)) {
           // Relative path should be turned into a require statement:
           node.url = `EXPO_REQUIRE__${Buffer.from(node.url, `utf-8`).toString(`base64`)}__`;
@@ -87,8 +95,13 @@ export function createTransformer({
     };
   }
 
-  let _compiler: ReturnType<typeof createProcessor> | undefined;
+  /** @type {ReturnType<typeof import('@mdx-js/mdx').createProcessor>|undefined} */
+  let _compiler;
 
+  /**
+   * Creates or returns the cached MDX compiler
+   * @returns {Promise<ReturnType<typeof import('@mdx-js/mdx').createProcessor>>} The MDX compiler
+   */
   async function createCompiler() {
     if (_compiler) {
       return _compiler;
@@ -104,7 +117,11 @@ export function createTransformer({
     return _compiler;
   }
 
-  const transform: MetroBabelTransformer[`transform`] = async (props) => {
+  /**
+   * Transform function for Metro bundler
+   * @type {MetroBabelTransformer['transform']}
+   */
+  const transform = async (props) => {
     if (!matchFile(props)) {
       return props;
     }
@@ -120,7 +137,7 @@ export function createTransformer({
       contents = contents.replaceAll(
         // Rewrite JSX attributes of `="EXPO_REQUIRE__<base64>"` to `={require(<string>)}`.
         /="EXPO_REQUIRE__(.*)__"/g,
-        (_match, p1: string) => {
+        (_match, /** @type {string} */ p1) => {
           return `={require(${JSON.stringify(Buffer.from(p1, `base64`).toString(`utf-8`))})}`;
         },
       );
@@ -141,9 +158,7 @@ export function createTransformer({
 
 export const transform = createTransformer().transform;
 
-export interface MetroBabelTransformer {
-  transform: (args: { filename: string; src: string }) => Promise<{
-    filename: string;
-    src: string;
-  }>;
-}
+/**
+ * @typedef {Object} MetroBabelTransformer
+ * @property {function({filename: string, src: string}): Promise<{filename: string, src: string}>} transform - Transform function
+ */

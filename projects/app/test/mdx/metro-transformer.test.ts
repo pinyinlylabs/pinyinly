@@ -1,4 +1,5 @@
-import { createTransformer, transform } from "#mdx/metro-transformer.ts";
+// pyly-standalone-test
+import { createTransformer, transform } from "#mdx/metro-transformer.js";
 import { describe, expect, it } from "vitest";
 
 function getJsxContent(src: string) {
