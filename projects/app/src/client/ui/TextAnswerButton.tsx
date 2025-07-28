@@ -1,3 +1,4 @@
+import { graphemeCount } from "@/util/unicode";
 import type { ReactNode } from "react";
 import { useState } from "react";
 import type { Pressable } from "react-native";
@@ -409,7 +410,7 @@ const textClass = tv({
 export function textAnswerButtonFontSize(
   text: string,
 ): TextAnswerButtonFontSize {
-  const length = text.length;
+  const length = graphemeCount(text);
   return length <= 10
     ? (`xl` as const)
     : length <= 20
