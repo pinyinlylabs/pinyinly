@@ -1,0 +1,164 @@
+diff --git a/build/Elements.d.ts b/build/Elements.d.ts
+index 76af8794dcddc819b5abd4c65959cf7b87d3e5ba..c856bd813c2b4496f23556adc18e275a6999b625 100644
+--- a/build/Elements.d.ts
++++ b/build/Elements.d.ts
+@@ -1,5 +1,6 @@
+ export * from './elements/Headings';
+ export * from './elements/Anchor';
++export * from './elements/Breaks';
+ export * from './elements/Layout';
+ export * from './elements/Text';
+ export * from './elements/Rules';
+diff --git a/build/Elements.d.ts.map b/build/Elements.d.ts.map
+index eb43a0d02eae340f1bc09ec114b49c284c9854d1..9b68a6cb931ffe099c5f46e670a0d27002ac071d 100644
+--- a/build/Elements.d.ts.map
++++ b/build/Elements.d.ts.map
+@@ -1 +1 @@
+-{"version":3,"file":"Elements.d.ts","sourceRoot":"","sources":["../src/Elements.tsx"],"names":[],"mappings":"AAAA,cAAc,qBAAqB,CAAC;AACpC,cAAc,mBAAmB,CAAC;AAClC,cAAc,mBAAmB,CAAC;AAClC,cAAc,iBAAiB,CAAC;AAChC,cAAc,kBAAkB,CAAC;AACjC,cAAc,kBAAkB,CAAC;AACjC,cAAc,kBAAkB,CAAC"}
+\ No newline at end of file
++{"version":3,"file":"Elements.d.ts","sourceRoot":"","sources":["../src/Elements.tsx"],"names":[],"mappings":"AAAA,cAAc,qBAAqB,CAAC;AACpC,cAAc,mBAAmB,CAAC;AAClC,cAAc,mBAAmB,CAAC;AAClC,cAAc,mBAAmB,CAAC;AAClC,cAAc,iBAAiB,CAAC;AAChC,cAAc,kBAAkB,CAAC;AACjC,cAAc,kBAAkB,CAAC;AACjC,cAAc,kBAAkB,CAAC"}
+\ No newline at end of file
+diff --git a/build/elements/Breaks.d.ts b/build/elements/Breaks.d.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..777d66636004be898be6ad5266e26993d602a563
+--- /dev/null
++++ b/build/elements/Breaks.d.ts
+@@ -0,0 +1,4 @@
++import React from 'react';
++import { TextProps } from '../primitives/Text';
++export declare function BR({ style, ...props }: TextProps): React.JSX.Element;
++//# sourceMappingURL=Breaks.d.ts.map
+\ No newline at end of file
+diff --git a/build/elements/Breaks.d.ts.map b/build/elements/Breaks.d.ts.map
+new file mode 100644
+index 0000000000000000000000000000000000000000..b965fcc013753de6aba8eccef9960b9d28ca3f5f
+--- /dev/null
++++ b/build/elements/Breaks.d.ts.map
+@@ -0,0 +1 @@
++{"version":3,"file":"Breaks.d.ts","sourceRoot":"","sources":["../../src/elements/Breaks.tsx"],"names":[],"mappings":"AAAA,OAAO,KAAK,MAAM,OAAO,CAAC;AAI1B,OAAa,EAAE,SAAS,EAAE,MAAM,oBAAoB,CAAC;AAErD,wBAAgB,EAAE,CAAC,EAAE,KAAK,EAAE,GAAG,KAAK,EAAE,EAAE,SAAS,qBAEhD"}
+\ No newline at end of file
+diff --git a/build/elements/Breaks.web.d.ts b/build/elements/Breaks.web.d.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..a5aa321b6701d2a52ec0482986c34e99b1bc13c0
+--- /dev/null
++++ b/build/elements/Breaks.web.d.ts
+@@ -0,0 +1,3 @@
++import { TextProps } from '../primitives/Text';
++export declare function BR(props: TextProps): import("react").ReactElement<Omit<import("react-native").TextProps & import("react").ClassAttributes<typeof import("react-native").Text>, "style"> & import("../primitives/Text").WebTextProps, string | import("react").JSXElementConstructor<any>>;
++//# sourceMappingURL=Breaks.web.d.ts.map
+\ No newline at end of file
+diff --git a/build/elements/Breaks.web.d.ts.map b/build/elements/Breaks.web.d.ts.map
+new file mode 100644
+index 0000000000000000000000000000000000000000..9af697d11644c475f0ed65f155dba4d074bbd951
+--- /dev/null
++++ b/build/elements/Breaks.web.d.ts.map
+@@ -0,0 +1 @@
++{"version":3,"file":"Breaks.web.d.ts","sourceRoot":"","sources":["../../src/elements/Breaks.web.tsx"],"names":[],"mappings":"AAEA,OAAO,EAAE,SAAS,EAAE,MAAM,oBAAoB,CAAC;AAE/C,wBAAgB,EAAE,CAAC,KAAK,EAAE,SAAS,wPAElC"}
+\ No newline at end of file
+diff --git a/build/elements/Text.d.ts b/build/elements/Text.d.ts
+index 264e32eacd32be34ba7726734939be5d823a481f..03a51c7a9c377a961fe12c0198635af456f9bb86 100644
+--- a/build/elements/Text.d.ts
++++ b/build/elements/Text.d.ts
+@@ -8,7 +8,6 @@ export declare function S({ style, ...props }: TextProps): React.JSX.Element;
+ export declare function I({ style, ...props }: TextProps): React.JSX.Element;
+ export declare function Q({ children, cite, style, ...props }: QuoteProps): React.JSX.Element;
+ export declare function BlockQuote({ style, cite, ...props }: BlockQuoteProps): React.JSX.Element;
+-export declare function BR({ style, ...props }: TextProps): React.JSX.Element;
+ export declare function Mark({ style, ...props }: TextProps): React.JSX.Element;
+ export declare function Code({ style, ...props }: TextProps): React.JSX.Element;
+ type PreProps = TextProps | ViewProps;
+diff --git a/build/elements/Text.d.ts.map b/build/elements/Text.d.ts.map
+index 8a8fd9d7fffcdb2874cc54dadb9303a11c07f0b6..9bd90d3932dddd6d128181bd0371c465a3fd7b04 100644
+--- a/build/elements/Text.d.ts.map
++++ b/build/elements/Text.d.ts.map
+@@ -1 +1 @@
+-{"version":3,"file":"Text.d.ts","sourceRoot":"","sources":["../../src/elements/Text.tsx"],"names":[],"mappings":"AAAA,OAAO,KAAK,MAAM,OAAO,CAAC;AAG1B,OAAO,EAAE,eAAe,EAAE,UAAU,EAAE,SAAS,EAAE,MAAM,cAAc,CAAC;AAEtE,OAAa,EAAE,SAAS,EAAE,MAAM,oBAAoB,CAAC;AACrD,OAAa,EAAE,SAAS,EAAE,MAAM,oBAAoB,CAAC;AAErD,wBAAgB,CAAC,CAAC,EAAE,KAAK,EAAE,GAAG,KAAK,EAAE,EAAE,SAAS,qBAE/C;AAED,wBAAgB,CAAC,CAAC,EAAE,KAAK,EAAE,GAAG,KAAK,EAAE,EAAE,SAAS,qBAE/C;AAED,wBAAgB,CAAC,CAAC,EAAE,KAAK,EAAE,GAAG,KAAK,EAAE,EAAE,SAAS,qBAE/C;AAED,wBAAgB,CAAC,CAAC,EAAE,KAAK,EAAE,GAAG,KAAK,EAAE,EAAE,SAAS,qBAE/C;AAED,wBAAgB,CAAC,CAAC,EAAE,QAAQ,EAAE,IAAI,EAAE,KAAK,EAAE,GAAG,KAAK,EAAE,EAAE,UAAU,qBAMhE;AAED,wBAAgB,UAAU,CAAC,EAAE,KAAK,EAAE,IAAI,EAAE,GAAG,KAAK,EAAE,EAAE,eAAe,qBAEpE;AAED,wBAAgB,EAAE,CAAC,EAAE,KAAK,EAAE,GAAG,KAAK,EAAE,EAAE,SAAS,qBAEhD;AAED,wBAAgB,IAAI,CAAC,EAAE,KAAK,EAAE,GAAG,KAAK,EAAE,EAAE,SAAS,qBAElD;AAED,wBAAgB,IAAI,CAAC,EAAE,KAAK,EAAE,GAAG,KAAK,EAAE,EAAE,SAAS,qBAElD;AAMD,KAAK,QAAQ,GAAG,SAAS,GAAG,SAAS,CAAC;AAEtC,wBAAgB,GAAG,CAAC,KAAK,EAAE,QAAQ,qBAKlC;AAGD,wBAAgB,IAAI,CAAC,EAAE,QAAQ,EAAE,GAAG,KAAK,EAAE,EAAE,SAAS,qBAErD;AAED,eAAO,MAAM,MAAM,UAAI,CAAC;AACxB,eAAO,MAAM,GAAG,UAAI,CAAC;AACrB,eAAO,MAAM,EAAE,UAAI,CAAC;AACpB,eAAO,MAAM,IAAI,gCAAO,CAAC"}
+\ No newline at end of file
++{"version":3,"file":"Text.d.ts","sourceRoot":"","sources":["../../src/elements/Text.tsx"],"names":[],"mappings":"AAAA,OAAO,KAAK,MAAM,OAAO,CAAC;AAG1B,OAAO,EAAE,eAAe,EAAE,UAAU,EAAE,SAAS,EAAE,MAAM,cAAc,CAAC;AAEtE,OAAa,EAAE,SAAS,EAAE,MAAM,oBAAoB,CAAC;AACrD,OAAa,EAAE,SAAS,EAAE,MAAM,oBAAoB,CAAC;AAErD,wBAAgB,CAAC,CAAC,EAAE,KAAK,EAAE,GAAG,KAAK,EAAE,EAAE,SAAS,qBAE/C;AAED,wBAAgB,CAAC,CAAC,EAAE,KAAK,EAAE,GAAG,KAAK,EAAE,EAAE,SAAS,qBAE/C;AAED,wBAAgB,CAAC,CAAC,EAAE,KAAK,EAAE,GAAG,KAAK,EAAE,EAAE,SAAS,qBAE/C;AAED,wBAAgB,CAAC,CAAC,EAAE,KAAK,EAAE,GAAG,KAAK,EAAE,EAAE,SAAS,qBAE/C;AAED,wBAAgB,CAAC,CAAC,EAAE,QAAQ,EAAE,IAAI,EAAE,KAAK,EAAE,GAAG,KAAK,EAAE,EAAE,UAAU,qBAMhE;AAED,wBAAgB,UAAU,CAAC,EAAE,KAAK,EAAE,IAAI,EAAE,GAAG,KAAK,EAAE,EAAE,eAAe,qBAEpE;AAED,wBAAgB,IAAI,CAAC,EAAE,KAAK,EAAE,GAAG,KAAK,EAAE,EAAE,SAAS,qBAElD;AAED,wBAAgB,IAAI,CAAC,EAAE,KAAK,EAAE,GAAG,KAAK,EAAE,EAAE,SAAS,qBAElD;AAMD,KAAK,QAAQ,GAAG,SAAS,GAAG,SAAS,CAAC;AAEtC,wBAAgB,GAAG,CAAC,KAAK,EAAE,QAAQ,qBAKlC;AAGD,wBAAgB,IAAI,CAAC,EAAE,QAAQ,EAAE,GAAG,KAAK,EAAE,EAAE,SAAS,qBAErD;AAED,eAAO,MAAM,MAAM,UAAI,CAAC;AACxB,eAAO,MAAM,GAAG,UAAI,CAAC;AACrB,eAAO,MAAM,EAAE,UAAI,CAAC;AACpB,eAAO,MAAM,IAAI,gCAAO,CAAC"}
+\ No newline at end of file
+diff --git a/src/Elements.tsx b/src/Elements.tsx
+index 8d181fbb06b3deded32cc90a7ba3cedce0f91207..8ea99e518fb8baf87e6a56b6487f23a0b2258f76 100644
+--- a/src/Elements.tsx
++++ b/src/Elements.tsx
+@@ -1,5 +1,6 @@
+ export * from './elements/Headings';
+ export * from './elements/Anchor';
++export * from './elements/Breaks';
+ export * from './elements/Layout';
+ export * from './elements/Text';
+ export * from './elements/Rules';
+diff --git a/src/elements/Breaks.tsx b/src/elements/Breaks.tsx
+new file mode 100644
+index 0000000000000000000000000000000000000000..60f097fdfd895b5446a0e9b449a5502a4ae5798a
+--- /dev/null
++++ b/src/elements/Breaks.tsx
+@@ -0,0 +1,16 @@
++import React from 'react';
++import { DimensionValue, StyleSheet } from 'react-native';
++
++import { em } from '../css/units';
++import Text, { TextProps } from '../primitives/Text';
++
++export function BR({ style, ...props }: TextProps) {
++  return <Text {...props} style={[styles.br, style]} />;
++}
++
++const styles = StyleSheet.create({
++  br: {
++    width: 0,
++    height: em(0.5) as DimensionValue,
++  },
++});
+diff --git a/src/elements/Breaks.web.tsx b/src/elements/Breaks.web.tsx
+new file mode 100644
+index 0000000000000000000000000000000000000000..27661ae351ad17b070793b32625c43928bd8cab8
+--- /dev/null
++++ b/src/elements/Breaks.web.tsx
+@@ -0,0 +1,7 @@
++import createElement from 'react-native-web/dist/exports/createElement';
++
++import { TextProps } from '../primitives/Text';
++
++export function BR(props: TextProps) {
++  return createElement('br', props);
++}
+diff --git a/src/elements/Text.tsx b/src/elements/Text.tsx
+index d565b8721ff488807c91d80a0904d319edb31b71..622af634bca4f7e34794749997336712f980fa79 100644
+--- a/src/elements/Text.tsx
++++ b/src/elements/Text.tsx
+@@ -34,10 +34,6 @@ export function BlockQuote({ style, cite, ...props }: BlockQuoteProps) {
+   return <View {...props} style={[styles.blockQuote, style]} />;
+ }
+ 
+-export function BR({ style, ...props }: TextProps) {
+-  return <Text {...props} style={[styles.br, style]} />;
+-}
+-
+ export function Mark({ style, ...props }: TextProps) {
+   return <Text {...props} style={[styles.mark, style]} />;
+ }
+@@ -81,7 +77,11 @@ const styles = StyleSheet.create({
+     fontStyle: 'italic',
+   },
+   code: {
+-    fontFamily: Platform.select({ default: 'Courier', ios: 'Courier New', android: 'monospace' }),
++    fontFamily: Platform.select({
++      default: `SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace`,
++      ios: 'ui-monospace',
++      android: 'monospace',
++    }),
+     fontWeight: '500',
+   },
+   pre: {
+@@ -92,11 +92,6 @@ const styles = StyleSheet.create({
+     // @ts-ignore
+     marginVertical: em(1),
+   },
+-  br: {
+-    width: 0,
+-    // @ts-ignore
+-    height: em(0.5),
+-  },
+   s: {
+     textDecorationLine: 'line-through',
+     textDecorationStyle: 'solid',

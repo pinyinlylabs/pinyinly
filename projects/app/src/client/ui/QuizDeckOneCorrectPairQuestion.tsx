@@ -20,6 +20,7 @@ import {
   hanziWordFromSkill,
   skillKindFromSkill,
 } from "@/data/skills";
+import { longestTextByGraphemes } from "@/util/unicode";
 import { invariant } from "@pinyinly/lib/invariant";
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
@@ -32,14 +33,19 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { HanziLink } from "./HanziLink";
 import { HanziWordRefText } from "./HanziWordRefText";
 import { IconImage } from "./IconImage";
 import { NewSkillModal } from "./NewSkillModal";
 import { Pylymark } from "./Pylymark";
 import { QuizFlagText } from "./QuizFlagText";
 import { QuizSubmitButton, QuizSubmitButtonState } from "./QuizSubmitButton";
-import type { TextAnswerButtonState } from "./TextAnswerButton";
-import { TextAnswerButton } from "./TextAnswerButton";
+import type {
+  TextAnswerButtonFontSize,
+  TextAnswerButtonState,
+} from "./TextAnswerButton";
+import { TextAnswerButton, textAnswerButtonFontSize } from "./TextAnswerButton";
+import { WikiHanziModal } from "./WikiHanziModal";
 
 const buttonThickness = 4;
 const gap = 12;
@@ -96,6 +102,17 @@ export function QuizDeckOneCorrectPairQuestion({
     setIsCorrect(isCorrect);
     onRating(skillRatings, mistakes);
   };
+
+  const groupAFontSize = textAnswerButtonFontSize(
+    longestTextByGraphemes(
+      groupA.map((choice) => oneCorrectPairChoiceText(choice)),
+    ),
+  );
+  const groupBFontSize = textAnswerButtonFontSize(
+    longestTextByGraphemes(
+      groupB.map((choice) => oneCorrectPairChoiceText(choice)),
+    ),
+  );
 
   return (
     <Skeleton
@@ -201,6 +218,7 @@ export function QuizDeckOneCorrectPairQuestion({
               <ChoiceButton
                 key={i}
                 choice={a}
+                fontSize={groupAFontSize}
                 state={
                   selectedAChoice === undefined
                     ? `default`
@@ -247,6 +265,7 @@ export function QuizDeckOneCorrectPairQuestion({
               <ChoiceButton
                 key={i}
                 choice={b}
+                fontSize={groupBFontSize}
                 state={
                   selectedBChoice === undefined
                     ? `default`
@@ -448,18 +467,38 @@ const Skeleton = ({
 const ChoiceButton = ({
   state,
   choice,
+  fontSize,
   onPress,
 }: {
   state: TextAnswerButtonState;
   choice: OneCorrectPairQuestionChoice;
+  fontSize: TextAnswerButtonFontSize;
   onPress: (choice: OneCorrectPairQuestionChoice) => void;
-}) => (
-  <TextAnswerButton
-    onPress={() => {
-      onPress(choice);
-    }}
-    state={state}
-    className="flex-1"
-    text={oneCorrectPairChoiceText(choice)}
-  />
-);
+}) => {
+  let text: ReactNode = oneCorrectPairChoiceText(choice);
+
+  if (state === `error` && choice.kind === `hanzi`) {
+    // If the choice is a hanzi and the state is error, we don't show the text
+    // because it is likely to be incorrect.
+    text = <HanziLink hanzi={choice.value}>{text}</HanziLink>;
+  }
+
+  return (
+    <TextAnswerButton
+      onPress={() => {
+        onPress(choice);
+      }}
+      fontSize={fontSize}
+      state={state}
+      className="flex-1"
+      text={oneCorrectPairChoiceText(choice)}
+      renderErrorModal={
+        choice.kind === `hanzi`
+          ? (onDismiss) => (
+              <WikiHanziModal hanzi={choice.value} onDismiss={onDismiss} />
+            )
+          : undefined
+      }
+    />
+  );
+};

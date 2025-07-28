@@ -67,6 +67,7 @@
     "@expo/cli@npm:0.24.18": "patch:@expo/cli@npm%3A0.24.18#~/.yarn/patches/@expo-cli-npm-0.24.18-cea2515949.patch",
     "babel-preset-expo@npm:~13.2.3": "patch:babel-preset-expo@npm%3A13.2.3#~/.yarn/patches/babel-preset-expo-npm-13.2.3-a123145936.patch",
     "metro@npm:^0.82.0": "patch:metro@npm%3A0.82.4#~/.yarn/patches/metro-npm-0.82.4-2c6a795208.patch",
-    "metro@npm:0.82.4": "patch:metro@npm%3A0.82.4#~/.yarn/patches/metro-npm-0.82.4-2c6a795208.patch"
+    "metro@npm:0.82.4": "patch:metro@npm%3A0.82.4#~/.yarn/patches/metro-npm-0.82.4-2c6a795208.patch",
+    "@expo/html-elements@npm:~0.11.0": "patch:@expo/html-elements@npm%3A0.12.5#~/.yarn/patches/@expo-html-elements-npm-0.12.5-ada5f53f49.patch"
   }
 }

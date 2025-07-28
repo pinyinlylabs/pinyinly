@@ -35,11 +35,40 @@ const segmenter = new Intl.Segmenter(`en`, { granularity: `grapheme` });
 /**
  * Calculate the number of graphemes (leters/characters) in a string.
  */
-export const graphemeCount = (text: string) => splitGraphemes(text).length;
+export const graphemeCount = lruMemoize1(
+  (text: string) => {
+    let count = 0;
+    for (const _ of segmenter.segment(text)) {
+      count++;
+    }
+    return count;
+  },
+  { max: 200 },
+);
+
+export const longestTextByGraphemes = (texts: readonly string[]): string => {
+  let longest = null;
+  let longestLength = 0;
+  for (const text of texts) {
+    const textLength = graphemeCount(text);
+    if (longest == null || textLength > longestLength) {
+      longestLength = textLength;
+      longest = text;
+    }
+  }
+  invariant(longest != null, `no texts provided`);
+
+  return longest;
+};
 
 export const splitGraphemes = lruMemoize1(
-  (text: string): readonly string[] =>
-    [...segmenter.segment(text)].map((x) => x.segment),
+  (text: string): readonly string[] => {
+    const result = [];
+    for (const segment of segmenter.segment(text)) {
+      result.push(segment.segment);
+    }
+    return result;
+  },
   { max: 200 },
 );
 

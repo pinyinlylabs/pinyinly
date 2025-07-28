@@ -24,18 +24,60 @@ export default () => (
         <SyncedAnswerButtonExample />
       </ExampleStack>
 
-      <ExampleStack title="text overflow" showFrame>
-        <View className="size-[120px]">
-          <TextAnswerButton
-            className="flex-1"
-            text="one two three four five six seven eight nine ten"
-          />
-          <TextAnswerButton
-            className="flex-1"
-            disabled
-            text="one two three four five six seven eight nine ten"
-          />
-        </View>
+      <ExampleStack title="text overflow" childrenClassName="flex-row">
+        <ExampleStack title="tall" showFrame>
+          <View className="h-[400px] w-[120px]">
+            <TextAnswerButton
+              className="flex-1"
+              text="xs xs xs xs xs xs xs xs xs xs xs xs xs xs xs xs"
+            />
+            <TextAnswerButton
+              className="flex-1"
+              fontSize="sm"
+              disabled
+              text="sm sm sm sm sm sm sm sm sm sm sm sm sm sm sm sm"
+            />
+            <TextAnswerButton
+              className="flex-1"
+              fontSize="lg"
+              disabled
+              text="lg lg lg lg lg lg lg lg lg lg lg lg lg lg lg lg"
+            />
+            <TextAnswerButton
+              className="flex-1"
+              fontSize="xl"
+              disabled
+              text="xl xl xl xl xl xl xl xl xl xl xl xl xl xl xl xl"
+            />
+          </View>
+        </ExampleStack>
+
+        <ExampleStack title="short" showFrame>
+          <View className="h-[250px] w-[120px]">
+            <TextAnswerButton
+              className="flex-1"
+              text="xs xs xs xs xs xs xs xs xs xs xs xs xs xs xs xs"
+            />
+            <TextAnswerButton
+              className="flex-1"
+              fontSize="sm"
+              disabled
+              text="sm sm sm sm sm sm sm sm sm sm sm sm sm sm sm sm"
+            />
+            <TextAnswerButton
+              className="flex-1"
+              fontSize="lg"
+              disabled
+              text="lg lg lg lg lg lg lg lg lg lg lg lg lg lg lg lg"
+            />
+            <TextAnswerButton
+              className="flex-1"
+              fontSize="xl"
+              disabled
+              text="xl xl xl xl xl xl xl xl xl xl xl xl xl xl xl xl"
+            />
+          </View>
+        </ExampleStack>
       </ExampleStack>
     </View>
 
@@ -187,6 +229,34 @@ export default () => (
       >
         <SyncedAnswerButtonExample inFlexRowParent className="flex-1" />
       </ExampleStack>
+    </View>
+
+    <LittlePrimaryHeader title="errors with HanziLink" />
+
+    <View className="flex-row flex-wrap">
+      {([`xs`, `sm`, `lg`, `xl`] as const).map((fontSize) => (
+        <ExampleStack
+          key={fontSize}
+          title={fontSize}
+          showFrame
+          childrenClassName="w-[200px] h-[200px] items-start gap-2"
+        >
+          <TextAnswerButton
+            state="error"
+            fontSize={fontSize}
+            text="你好"
+            renderErrorModal={() => null}
+            className={`flex-1`}
+          />
+          <TextAnswerButton
+            state="error"
+            fontSize={fontSize}
+            text="你好 你好 你好 你好 你好 你好 你好 你好 你好"
+            renderErrorModal={() => null}
+            className={`flex-1`}
+          />
+        </ExampleStack>
+      ))}
     </View>
   </View>
 );
