@@ -89,7 +89,7 @@
   /* --- */
 
   .pyly-body-caption {
-    @apply font-sans text-sm/normal font-light text-caption;
+    @apply font-sans text-sm/normal font-normal text-caption;
   }
   .pyly-body-caption .pyly-ref {
     @apply text-caption-loud text-sm/normal font-medium pyly-ref-sm;
@@ -107,13 +107,13 @@
   /* --- */
 
   .pyly-body-dt {
-    @apply font-sans text-xs/normal font-normal text-caption uppercase;
+    @apply font-sans text-xs/normal font-medium text-caption uppercase;
   }
   .pyly-body-dt .pyly-ref {
-    @apply text-xs/normal text-fg-loud font-medium pyly-ref-xs;
+    @apply text-xs/normal text-fg-loud font-semibold pyly-ref-xs;
   }
   .pyly-body-dt .pyly-bold {
-    @apply font-medium text-fg-loud;
+    @apply font-semibold text-fg-loud;
   }
   .pyly-body-dt .pyly-highlight {
     @apply font-semibold text-yellow;

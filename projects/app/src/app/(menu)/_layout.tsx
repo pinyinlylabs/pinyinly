@@ -163,12 +163,12 @@ interface TabTriggerChildProps
 const DesktopNavSubtleItem = customTabTrigger(
   ({ name, isFocused, ...rest }) => {
     return (
-      <Pressable {...rest} className="h-[32px] justify-center">
+      <Pressable {...rest}>
         <Text
           className={`
-            font-sans text-sm/normal font-light uppercase text-caption/90
+            font-sans text-sm/[32px] font-bold uppercase text-caption/90
 
-            hover:text-caption
+            hover:text-caption-loud
           `}
         >
           {name}
@@ -182,7 +182,7 @@ const DesktopNavGroupItem = customTabTrigger(({ isFocused, name, ...rest }) => {
   return (
     <Pressable {...rest}>
       <View className={buttonContainerClass({ isFocused })}>
-        <Text className="font-sans text-sm/normal font-normal uppercase text-fg">
+        <Text className="font-sans text-sm/normal font-bold uppercase text-fg">
           {name}
         </Text>
       </View>
@@ -320,12 +320,12 @@ const MobileNavGroupItem = customTabTrigger(
 
 const MobileNavSubtleItem = customTabTrigger(({ name, isFocused, ...rest }) => {
   return (
-    <Pressable {...rest} className="h-[32px] justify-center">
+    <Pressable {...rest}>
       <Text
         className={`
-          font-sans text-sm/normal font-light uppercase text-caption/90
+          font-sans text-sm/[32px] font-bold uppercase text-caption/90
 
-          hover:text-caption
+          hover:text-caption-loud
         `}
       >
         {name}
