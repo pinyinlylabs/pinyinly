@@ -2745,6 +2745,7 @@ const registry: Record<string, MdxComponent> = {
   "非/~not/meaning": lazyMdx(() => import(`./wiki/非/~not/meaning.mdx`)),
   "非常/~very/meaning": lazyMdx(() => import(`./wiki/非常/~very/meaning.mdx`)),
   "靠/~depend/meaning": lazyMdx(() => import(`./wiki/靠/~depend/meaning.mdx`)),
+  "面/meaning": lazyMdx(() => import(`./wiki/面/meaning.mdx`)),
   "面/~face/meaning": lazyMdx(() => import(`./wiki/面/~face/meaning.mdx`)),
   "面/~surface/meaning": lazyMdx(() => import(`./wiki/面/~surface/meaning.mdx`)),
   "面前/~inFrontOf/meaning": lazyMdx(() => import(`./wiki/面前/~inFrontOf/meaning.mdx`)),

@@ -375,6 +375,28 @@ function PylyMdxComponents({ children }: PropsWithChildren) {
         p: ({ children }: PropsWithChildren) => (
           <Text className="pyly-body pyly-mdx-p">{children}</Text>
         ),
+        Highlight: ({ children }: PropsWithChildren) => (
+          <Text className="pyly-highlight">{children}</Text>
+        ),
+
+        Hanzi: ({ children }: PropsWithChildren) => children,
+        Translated: ({ children }: PropsWithChildren) => children,
+
+        Examples: ({ children }: PropsWithChildren) => <>{children}</>,
+        Example: ({
+          hanzi,
+          translated,
+        }: PropsWithChildren<{ hanzi: string; translated: string }>) => (
+          <View className="px-4">
+            <Text className="pyly-body">{hanzi}</Text>
+            <Text className="pyly-body">{translated}</Text>
+          </View>
+        ),
+        Example2: ({ children }: PropsWithChildren) => (
+          <View className="px-4">
+            <Text>{children}</Text>
+          </View>
+        ),
         em: ({ children }: PropsWithChildren) => (
           <Text className="pyly-highlight">{children}</Text>
         ),
@@ -389,7 +411,7 @@ function PylyMdxComponents({ children }: PropsWithChildren) {
         strong: ({ children }: PropsWithChildren) => (
           <Text className="pyly-bold">{children}</Text>
         ),
-        Wrapper: ({ children }: PropsWithChildren) => (
+        wrapper: ({ children }: PropsWithChildren) => (
           <View className="pyly-mdx space-y-4">{children}</View>
         ),
       }}
