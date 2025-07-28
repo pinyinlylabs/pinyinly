@@ -57,8 +57,11 @@ export type TextAnswerButtonState =
   | `error`
   | `dimmed`;
 
+export type TextAnswerButtonFontSize = `xs` | `sm` | `lg` | `xl`;
+
 export type TextAnswerButtonProps = {
   text: string;
+  fontSize: TextAnswerButtonFontSize;
   state?: TextAnswerButtonState;
   className?: string;
   inFlexRowParent?: boolean;
@@ -69,6 +72,7 @@ export type TextAnswerButtonProps = {
 export function TextAnswerButton({
   disabled = false,
   text,
+  fontSize,
   state = `default`,
   inFlexRowParent = false,
   className,
@@ -161,16 +165,6 @@ export function TextAnswerButton({
     transform: [{ scale: scaleSv.get() }, { rotateZ: rotationSv.get() }],
   }));
 
-  const charCount = graphemeCount(text);
-  const textLength =
-    charCount <= 10
-      ? (`tiny` as const)
-      : charCount <= 20
-        ? (`short` as const)
-        : charCount <= 40
-          ? (`medium` as const)
-          : (`long` as const);
-
   const flat = pressed || disabled;
 
   return (
@@ -223,7 +217,7 @@ export function TextAnswerButton({
         <Text
           className={textClass({
             state,
-            length: textLength,
+            fontSize,
             className: textClassName,
           })}
           numberOfLines={2}
@@ -382,23 +376,23 @@ const textClass = tv({
       success: `text-fg`,
       error: `text-brick`,
     },
-    length: {
-      tiny: `
+    fontSize: {
+      xl: `
         text-xl/tight
 
         lg:text-2xl/tight
       `,
-      short: `
+      lg: `
         text-lg/tight
 
         lg:text-xl/tight
       `,
-      medium: `
+      sm: `
         text-sm
 
         lg:text-lg/tight
       `,
-      long: `
+      xs: `
         text-xs
 
         lg:text-base/tight
@@ -406,3 +400,20 @@ const textClass = tv({
     },
   },
 });
+
+export function textAnswerButtonFontSize(
+  texts: readonly string[],
+): TextAnswerButtonFontSize {
+  let longest = 0;
+  for (const text of texts) {
+    longest = Math.max(longest, graphemeCount(text));
+  }
+
+  return longest <= 10
+    ? (`xl` as const)
+    : longest <= 20
+      ? (`lg` as const)
+      : longest <= 40
+        ? (`sm` as const)
+        : (`xs` as const);
+}

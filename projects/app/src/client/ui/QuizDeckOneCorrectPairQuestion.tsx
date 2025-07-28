@@ -38,8 +38,11 @@ import { NewSkillModal } from "./NewSkillModal";
 import { Pylymark } from "./Pylymark";
 import { QuizFlagText } from "./QuizFlagText";
 import { QuizSubmitButton, QuizSubmitButtonState } from "./QuizSubmitButton";
-import type { TextAnswerButtonState } from "./TextAnswerButton";
-import { TextAnswerButton } from "./TextAnswerButton";
+import type {
+  TextAnswerButtonFontSize,
+  TextAnswerButtonState,
+} from "./TextAnswerButton";
+import { TextAnswerButton, textAnswerButtonFontSize } from "./TextAnswerButton";
 
 const buttonThickness = 4;
 const gap = 12;
@@ -96,6 +99,13 @@ export function QuizDeckOneCorrectPairQuestion({
     setIsCorrect(isCorrect);
     onRating(skillRatings, mistakes);
   };
+
+  const groupAFontSize = textAnswerButtonFontSize(
+    groupA.map((choice) => oneCorrectPairChoiceText(choice)),
+  );
+  const groupBFontSize = textAnswerButtonFontSize(
+    groupB.map((choice) => oneCorrectPairChoiceText(choice)),
+  );
 
   return (
     <Skeleton
@@ -201,6 +211,7 @@ export function QuizDeckOneCorrectPairQuestion({
               <ChoiceButton
                 key={i}
                 choice={a}
+                fontSize={groupAFontSize}
                 state={
                   selectedAChoice === undefined
                     ? `default`
@@ -247,6 +258,7 @@ export function QuizDeckOneCorrectPairQuestion({
               <ChoiceButton
                 key={i}
                 choice={b}
+                fontSize={groupBFontSize}
                 state={
                   selectedBChoice === undefined
                     ? `default`
@@ -448,16 +460,19 @@ const Skeleton = ({
 const ChoiceButton = ({
   state,
   choice,
+  fontSize,
   onPress,
 }: {
   state: TextAnswerButtonState;
   choice: OneCorrectPairQuestionChoice;
+  fontSize: TextAnswerButtonFontSize;
   onPress: (choice: OneCorrectPairQuestionChoice) => void;
 }) => (
   <TextAnswerButton
     onPress={() => {
       onPress(choice);
     }}
+    fontSize={fontSize}
     state={state}
     className="flex-1"
     text={oneCorrectPairChoiceText(choice)}
