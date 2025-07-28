@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { useState } from "react";
 import type { Pressable } from "react-native";
 import { Text, View } from "react-native";
@@ -59,7 +60,7 @@ export type TextAnswerButtonState =
 export type TextAnswerButtonFontSize = `xs` | `sm` | `lg` | `xl`;
 
 export type TextAnswerButtonProps = {
-  text: string;
+  text: ReactNode;
   /**
    * Allow setting the font size explicitly, this allows making all choices in a
    * quiz the same font size which avoids subconsciously biasing answers based
@@ -76,7 +77,7 @@ export type TextAnswerButtonProps = {
 export function TextAnswerButton({
   disabled = false,
   text,
-  fontSize = textAnswerButtonFontSize(text),
+  fontSize = typeof text === `string` ? textAnswerButtonFontSize(text) : `lg`,
   state = `default`,
   inFlexRowParent = false,
   className,
@@ -368,7 +369,7 @@ const textClass = tv({
   // line with accents enough space to not be clipped. Without this words like
   // "lǐ" will have half the accent clipped.
   base: `
-    px-1 text-center font-normal text-fg
+    p-1 text-center font-normal text-fg
 
     web:transition-colors
   `,

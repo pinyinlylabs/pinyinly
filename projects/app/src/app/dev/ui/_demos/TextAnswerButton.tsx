@@ -1,7 +1,9 @@
 import { ExampleStack, LittlePrimaryHeader } from "@/app/dev/ui/_helpers";
+import { HanziLink } from "@/client/ui/HanziLink";
 import type { TextAnswerButtonState } from "@/client/ui/TextAnswerButton";
 import { TextAnswerButton } from "@/client/ui/TextAnswerButton";
 import type { PropsOf } from "@/client/ui/types";
+import type { HanziText } from "@/data/model";
 import shuffle from "lodash/shuffle";
 import { useState } from "react";
 import { View } from "react-native";
@@ -187,6 +189,36 @@ export default () => (
       >
         <SyncedAnswerButtonExample inFlexRowParent className="flex-1" />
       </ExampleStack>
+    </View>
+
+    <LittlePrimaryHeader title="errors with HanziLink" />
+
+    <View className="flex-row flex-wrap">
+      {([`xs`, `sm`, `lg`, `xl`] as const).map((fontSize) => (
+        <ExampleStack
+          key={fontSize}
+          title={fontSize}
+          showFrame
+          childrenClassName="w-[200px] items-start gap-2"
+        >
+          <TextAnswerButton
+            state="error"
+            fontSize={fontSize}
+            text={<HanziLink hanzi={`你好` as HanziText}>你好</HanziLink>}
+            className={`flex-1`}
+          />
+          <TextAnswerButton
+            state="error"
+            fontSize={fontSize}
+            text={
+              <HanziLink hanzi={`你好` as HanziText}>
+                你好 你好 你好 你好 你好 你好
+              </HanziLink>
+            }
+            className={`flex-1`}
+          />
+        </ExampleStack>
+      ))}
     </View>
   </View>
 );

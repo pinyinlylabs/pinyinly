@@ -33,6 +33,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { HanziLink } from "./HanziLink";
 import { HanziWordRefText } from "./HanziWordRefText";
 import { IconImage } from "./IconImage";
 import { NewSkillModal } from "./NewSkillModal";
@@ -472,14 +473,24 @@ const ChoiceButton = ({
   choice: OneCorrectPairQuestionChoice;
   fontSize: TextAnswerButtonFontSize;
   onPress: (choice: OneCorrectPairQuestionChoice) => void;
-}) => (
-  <TextAnswerButton
-    onPress={() => {
-      onPress(choice);
-    }}
-    fontSize={fontSize}
-    state={state}
-    className="flex-1"
-    text={oneCorrectPairChoiceText(choice)}
-  />
-);
+}) => {
+  let text: ReactNode = oneCorrectPairChoiceText(choice);
+
+  if (state === `error` && choice.kind === `hanzi`) {
+    // If the choice is a hanzi and the state is error, we don't show the text
+    // because it is likely to be incorrect.
+    text = <HanziLink hanzi={choice.value}>{text}</HanziLink>;
+  }
+
+  return (
+    <TextAnswerButton
+      onPress={() => {
+        onPress(choice);
+      }}
+      fontSize={fontSize}
+      state={state}
+      className="flex-1"
+      text={text}
+    />
+  );
+};
