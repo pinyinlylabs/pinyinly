@@ -1,4 +1,3 @@
-import { graphemeCount } from "@/util/unicode";
 import { useState } from "react";
 import type { Pressable } from "react-native";
 import { Text, View } from "react-native";
@@ -61,7 +60,12 @@ export type TextAnswerButtonFontSize = `xs` | `sm` | `lg` | `xl`;
 
 export type TextAnswerButtonProps = {
   text: string;
-  fontSize: TextAnswerButtonFontSize;
+  /**
+   * Allow setting the font size explicitly, this allows making all choices in a
+   * quiz the same font size which avoids subconsciously biasing answers based
+   * on font size.
+   */
+  fontSize?: TextAnswerButtonFontSize;
   state?: TextAnswerButtonState;
   className?: string;
   inFlexRowParent?: boolean;
@@ -72,7 +76,7 @@ export type TextAnswerButtonProps = {
 export function TextAnswerButton({
   disabled = false,
   text,
-  fontSize,
+  fontSize = textAnswerButtonFontSize(text),
   state = `default`,
   inFlexRowParent = false,
   className,
@@ -402,18 +406,14 @@ const textClass = tv({
 });
 
 export function textAnswerButtonFontSize(
-  texts: readonly string[],
+  text: string,
 ): TextAnswerButtonFontSize {
-  let longest = 0;
-  for (const text of texts) {
-    longest = Math.max(longest, graphemeCount(text));
-  }
-
-  return longest <= 10
+  const length = text.length;
+  return length <= 10
     ? (`xl` as const)
-    : longest <= 20
+    : length <= 20
       ? (`lg` as const)
-      : longest <= 40
+      : length <= 40
         ? (`sm` as const)
         : (`xs` as const);
 }

@@ -20,6 +20,7 @@ import {
   hanziWordFromSkill,
   skillKindFromSkill,
 } from "@/data/skills";
+import { longestTextByGraphemes } from "@/util/unicode";
 import { invariant } from "@pinyinly/lib/invariant";
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
@@ -101,10 +102,14 @@ export function QuizDeckOneCorrectPairQuestion({
   };
 
   const groupAFontSize = textAnswerButtonFontSize(
-    groupA.map((choice) => oneCorrectPairChoiceText(choice)),
+    longestTextByGraphemes(
+      groupA.map((choice) => oneCorrectPairChoiceText(choice)),
+    ),
   );
   const groupBFontSize = textAnswerButtonFontSize(
-    groupB.map((choice) => oneCorrectPairChoiceText(choice)),
+    longestTextByGraphemes(
+      groupB.map((choice) => oneCorrectPairChoiceText(choice)),
+    ),
   );
 
   return (

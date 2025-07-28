@@ -246,6 +246,7 @@
 
   .pyly-mdx {
   }
+
   .pyly-mdx-p {
     /* Override react-native-web's default `white-space: pre-wrap` so that
     newlines in MDX are not treated as line breaks. In MDX if you want a line
