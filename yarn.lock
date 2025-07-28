@@ -1225,7 +1225,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@bacons/mdx@npm:^0.4.5":
+"@bacons/mdx@npm:0.4.5":
   version: 0.4.5
   resolution: "@bacons/mdx@npm:0.4.5"
   dependencies:
@@ -1236,6 +1236,20 @@ __metadata:
   peerDependencies:
     react-native: "*"
   checksum: 10c0/237f408ef326b7a101c7ddeee124499c126dcda6f9f169bfdb1811de98969db032b557540fc59f8b54064557308705430724f584d90645a7250a4841b7c3086e
+  languageName: node
+  linkType: hard
+
+"@bacons/mdx@patch:@bacons/mdx@npm%3A0.4.5#~/.yarn/patches/@bacons-mdx-npm-0.4.5-c230ac7389.patch":
+  version: 0.4.5
+  resolution: "@bacons/mdx@patch:@bacons/mdx@npm%3A0.4.5#~/.yarn/patches/@bacons-mdx-npm-0.4.5-c230ac7389.patch::version=0.4.5&hash=ae242c"
+  dependencies:
+    "@bacons/react-views": "npm:^1.1.3"
+    "@expo/html-elements": "npm:~0.11.0"
+    "@mdx-js/mdx": "npm:^1.6.22"
+    unist-util-visit: "npm:^1.4.1"
+  peerDependencies:
+    react-native: "*"
+  checksum: 10c0/043513087d1dbd1e0997222414549581349063e5015b782bbfe17b75580abcfc9c968e0e49e18ee24dc501482f5405ccb567932f950421d71974ba443d347c7e
   languageName: node
   linkType: hard
 
@@ -4566,7 +4580,7 @@ __metadata:
   resolution: "@pinyinly/app@workspace:projects/app"
   dependencies:
     "@babel/core": "npm:^7.20.0"
-    "@bacons/mdx": "npm:^0.4.5"
+    "@bacons/mdx": "patch:@bacons/mdx@npm%3A0.4.5#~/.yarn/patches/@bacons-mdx-npm-0.4.5-c230ac7389.patch"
     "@electric-sql/pglite": "npm:^0.3.0"
     "@eslint/eslintrc": "npm:^3.3.0"
     "@expo/metro-runtime": "npm:~5.0.4"

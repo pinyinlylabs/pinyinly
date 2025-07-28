@@ -11,7 +11,7 @@
     "#*.tsx": "./src/*.tsx"
   },
   "dependencies": {
-    "@bacons/mdx": "^0.4.5",
+    "@bacons/mdx": "patch:@bacons/mdx@npm%3A0.4.5#~/.yarn/patches/@bacons-mdx-npm-0.4.5-c230ac7389.patch",
     "@expo/metro-runtime": "~5.0.4",
     "@inngest/middleware-sentry": "^0.1.1",
     "@lottiefiles/dotlottie-react": "^0.13.5",

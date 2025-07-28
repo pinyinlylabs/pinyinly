@@ -247,6 +247,12 @@
   .pyly-mdx {
   }
   .pyly-mdx-p {
+    /* Override react-native-web's default `white-space: pre-wrap` so that
+    newlines in MDX are not treated as line breaks. In MDX if you want a line
+    break you can use two trailing spaces at the end of a line and it is a
+    `<BR>`. */
+
+    @apply whitespace-normal;
   }
   .pyly-mdx-blockquote {
     @apply border-l-4 border-l-fg/50 pl-4 py-2;
