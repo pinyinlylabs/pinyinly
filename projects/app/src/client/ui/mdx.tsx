@@ -20,7 +20,7 @@ function Img({ src, style }: React.ComponentProps<typeof Image>) {
 /* Lint CSS classes */
 const ctl = (classes: string) => classes;
 
-export const defaultMdxComponenets = {
+export const defaultMdxComponents = {
   h1: makeHeading(1, { className: ctl(`pyly-mdx-h1`) }),
   h2: makeHeading(2, { className: ctl(`pyly-mdx-h2`) }),
   h3: makeHeading(3, { className: ctl(`pyly-mdx-h3`) }),
@@ -56,9 +56,8 @@ export const defaultMdxComponenets = {
   blockquote: makeMdx({ className: ctl(`pyly-mdx-blockquote`) }, View),
 } as const satisfies MdxComponentsType;
 
-export const MDXComponentsContext = createContext<MdxComponentsType>(
-  defaultMdxComponenets,
-);
+export const MDXComponentsContext =
+  createContext<MdxComponentsType>(defaultMdxComponents);
 
 function makeMdx(
   staticProps: {
