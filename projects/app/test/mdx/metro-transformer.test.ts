@@ -28,15 +28,11 @@ describe(transform, () => {
 
     expect(result.src.includes(`require("./foo/bar.png")`)).toEqual(true);
     expect(result.src).toMatchInlineSnapshot(`
-      ""use client";
-      /*@jsxRuntime automatic*/
+      "/*@jsxRuntime automatic*/
       /*@jsxImportSource react*/
-      import {useMDXComponents as _provideComponents} from "@bacons/mdx";
+      import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
       function _createMdxContent(props) {
-        const _components = {
-          ..._provideComponents(),
-          ...props.components
-        };
+        const _components = Object.create(_provideComponents(), props.components);
         return <><_components.h1>{"Hello World"}</_components.h1>{"\\n"}<_components.blockquote>{"\\n"}<_components.p>{"Universe"}</_components.p>{"\\n"}</_components.blockquote>{"\\n"}<_components.ul>{"\\n"}<_components.li>{"a"}</_components.li>{"\\n"}<_components.li>{"b"}</_components.li>{"\\n"}</_components.ul>{"\\n"}<_components.p><_components.img src={require("./foo/bar.png")} alt="custom alt text" /></_components.p></>;
       }
       export default function MDXContent(props = {}) {
@@ -45,14 +41,6 @@ describe(transform, () => {
           ...props.components
         };
         return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
-      }
-
-
-      function _makeExpoMetroProvided(name, _components) {
-        return function MDXExpoMetroComponent(props) {
-          console.warn("Component " + name + " was not imported, exported, or provided by MDXProvider as global scope")
-          return <_components.span {...props}/>;
-        };
       }
       "
     `);
@@ -76,16 +64,12 @@ import Foo from './foo'
     });
 
     expect(result.src).toMatchInlineSnapshot(`
-      ""use client";
-      /*@jsxRuntime automatic*/
+      "/*@jsxRuntime automatic*/
       /*@jsxImportSource react*/
-      import {useMDXComponents as _provideComponents} from "@bacons/mdx";
+      import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
       import Foo from './foo';
       function _createMdxContent(props) {
-        const _components = {
-          ..._provideComponents(),
-          ...props.components
-        };
+        const _components = Object.create(_provideComponents(), props.components);
         return <><_components.h1>{"Hello World"}</_components.h1>{"\\n"}{"\\n"}<Foo />{"\\n"}<Foo />{"\\n"}<Foo><Foo /></Foo></>;
       }
       export default function MDXContent(props = {}) {
@@ -94,14 +78,6 @@ import Foo from './foo'
           ...props.components
         };
         return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
-      }
-
-
-      function _makeExpoMetroProvided(name, _components) {
-        return function MDXExpoMetroComponent(props) {
-          console.warn("Component " + name + " was not imported, exported, or provided by MDXProvider as global scope")
-          return <_components.span {...props}/>;
-        };
       }
       "
     `);
@@ -120,16 +96,12 @@ import Foo from './foo'
     });
 
     expect(result.src).toMatchInlineSnapshot(`
-      ""use client";
-      /*@jsxRuntime automatic*/
+      "/*@jsxRuntime automatic*/
       /*@jsxImportSource react*/
-      import {useMDXComponents as _provideComponents} from "@bacons/mdx";
+      import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
       import Foo from './foo';
       function _createMdxContent(props) {
-        const _components = {
-          ..._provideComponents(),
-          ...props.components
-        };
+        const _components = Object.create(_provideComponents(), props.components);
         return <><_components.h1>{"Hello World"}</_components.h1>{"\\n"}{"\\n"}<Foo /></>;
       }
       export default function MDXContent(props = {}) {
@@ -138,14 +110,6 @@ import Foo from './foo'
           ...props.components
         };
         return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
-      }
-
-
-      function _makeExpoMetroProvided(name, _components) {
-        return function MDXExpoMetroComponent(props) {
-          console.warn("Component " + name + " was not imported, exported, or provided by MDXProvider as global scope")
-          return <_components.span {...props}/>;
-        };
       }
       "
     `);
@@ -162,16 +126,11 @@ import Foo from './foo'
     });
 
     expect(result.src).toMatchInlineSnapshot(`
-      ""use client";
-      /*@jsxRuntime automatic*/
+      "/*@jsxRuntime automatic*/
       /*@jsxImportSource react*/
-      import {useMDXComponents as _provideComponents} from "@bacons/mdx";
+      import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
       function _createMdxContent(props) {
-        const _components = {
-          ..._provideComponents(),
-          ...props.components
-        }, {Foo} = _components;
-        Foo ??= _makeExpoMetroProvided("Foo", _components);
+        const _components = Object.create(_provideComponents(), props.components), {Foo} = _components;
         return <><_components.h1>{"Hello World"}</_components.h1>{"\\n"}<Foo /></>;
       }
       export default function MDXContent(props = {}) {
@@ -183,14 +142,6 @@ import Foo from './foo'
       }
       function _missingMdxReference(id, component) {
         throw new Error("Expected " + (component ? "component" : "object") + " \`" + id + "\` to be defined: you likely forgot to import, pass, or provide it.");
-      }
-
-
-      function _makeExpoMetroProvided(name, _components) {
-        return function MDXExpoMetroComponent(props) {
-          console.warn("Component " + name + " was not imported, exported, or provided by MDXProvider as global scope")
-          return <_components.span {...props}/>;
-        };
       }
       "
     `);
@@ -207,16 +158,11 @@ import Foo from './foo'
     });
 
     expect(result.src).toMatchInlineSnapshot(`
-      ""use client";
-      /*@jsxRuntime automatic*/
+      "/*@jsxRuntime automatic*/
       /*@jsxImportSource react*/
-      import {useMDXComponents as _provideComponents} from "@bacons/mdx";
+      import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
       function _createMdxContent(props) {
-        const _components = {
-          ..._provideComponents(),
-          ...props.components
-        }, {Foo} = _components;
-        Foo ??= _makeExpoMetroProvided("Foo", _components);
+        const _components = Object.create(_provideComponents(), props.components), {Foo} = _components;
         return <><_components.h1>{"Hello World"}</_components.h1>{"\\n"}<Foo>{"Some "}<_components.strong>{"bold"}</_components.strong>{" text"}</Foo></>;
       }
       export default function MDXContent(props = {}) {
@@ -228,14 +174,6 @@ import Foo from './foo'
       }
       function _missingMdxReference(id, component) {
         throw new Error("Expected " + (component ? "component" : "object") + " \`" + id + "\` to be defined: you likely forgot to import, pass, or provide it.");
-      }
-
-
-      function _makeExpoMetroProvided(name, _components) {
-        return function MDXExpoMetroComponent(props) {
-          console.warn("Component " + name + " was not imported, exported, or provided by MDXProvider as global scope")
-          return <_components.span {...props}/>;
-        };
       }
       "
     `);

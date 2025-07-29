@@ -11,48 +11,43 @@ const debug = makeDebug(`pinyinly:mdx:transform`);
  * @returns {string} The templated MDX string
  */
 const getTemplate = (rawMdxString) => {
-  return `"use client";
-${rawMdxString
-  // Remove default HTML components:
-  //
-  // Replace:
-  //
-  //   const _components = {
-  //     h1: "h1",
-  //     p: "p",
-  //     ..._provideComponents(),
-  //     ...props.components
-  //   };
-  //
-  // With:
-  //
-  //   const _components = {
-  //     ..._provideComponents(),
-  //     ...props.components
-  //   };
-  .replaceAll(/(const _components = \{\s+).+?(\.\.\.)/gms, `$1$2`)
-  // Add a default implementation for all missing MDX components to make
-  // debugging easier.
-  //
-  // Replace:
-  //
-  // if (!Example) _missingMdxReference("Example", true);
-  //
-  // with:
-  //
-  // Example ??= _makeExpoMetroProvided("Example", _components);
-  .replaceAll(
-    /if \(!([\w.]+)\) _missingMdxReference\("([\w.]+)", true\);/g,
-    `$1 ??= _makeExpoMetroProvided("$2", _components);`,
-  )}
-
-function _makeExpoMetroProvided(name, _components) {
-  return function MDXExpoMetroComponent(props) {
-    console.warn("Component " + name + " was not imported, exported, or provided by MDXProvider as global scope")
-    return <_components.span {...props}/>;
-  };
-}
-`;
+  return (
+    rawMdxString
+      // Remove default HTML components:
+      //
+      // Replace:
+      //
+      //   const _components = {
+      //     h1: "h1",
+      //     p: "p",
+      //     ..._provideComponents(),
+      //     ...props.components
+      //   };
+      //
+      // With:
+      //
+      //   const _components = Object.create(_provideComponents(), props.components);
+      //
+      // This allows `_provideComponents()` to return a `Proxy` object and provide better
+      // debugging for missing components.
+      .replace(
+        /const _components = \{.+?\}/ms,
+        `const _components = Object.create(_provideComponents(), props.components)`,
+      )
+      // Delete all the default implement safe guards because Proxy will be used instead.
+      //
+      // Replace:
+      //
+      // if (!Example) _missingMdxReference("Example", true);
+      //
+      // with:
+      //
+      // <nothing>
+      .replaceAll(
+        /if \(!([\w.]+)\) _missingMdxReference\("([\w.]+)", true\);\s*/gs,
+        ``,
+      )
+  );
 };
 
 /**
@@ -110,7 +105,7 @@ export function createTransformer({
     const { createProcessor } = await import(`@mdx-js/mdx`);
     _compiler = createProcessor({
       jsx: true,
-      providerImportSource: `@bacons/mdx`,
+      providerImportSource: `@/client/hooks/useMDXComponents`,
       remarkPlugins: [...remarkPlugins, expoMdxPlugin],
     });
 
@@ -136,7 +131,7 @@ export function createTransformer({
     if (typeof contents === `string`) {
       contents = contents.replaceAll(
         // Rewrite JSX attributes of `="EXPO_REQUIRE__<base64>"` to `={require(<string>)}`.
-        /="EXPO_REQUIRE__(.*)__"/g,
+        /="EXPO_REQUIRE__(.+?)__"/g,
         (_match, /** @type {string} */ p1) => {
           return `={require(${JSON.stringify(Buffer.from(p1, `base64`).toString(`utf-8`))})}`;
         },
