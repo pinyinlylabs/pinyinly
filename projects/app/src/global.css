@@ -282,6 +282,12 @@
     --ignore-lint-warning: 1;
   }
 
+  .pyly-mdx-h2 {
+    @apply pyly-body-heading;
+  }
+  .pyly-mdx-h3 {
+    @apply pyly-body-heading;
+  }
   .pyly-mdx-p {
     @apply pyly-body;
   }
@@ -302,6 +308,12 @@
   }
 
   .pyly-mdx > .pyly-mdx-p,
+  .pyly-mdx > .pyly-mdx-h1,
+  .pyly-mdx > .pyly-mdx-h2,
+  .pyly-mdx > .pyly-mdx-h3,
+  .pyly-mdx > .pyly-mdx-h4,
+  .pyly-mdx > .pyly-mdx-h5,
+  .pyly-mdx > .pyly-mdx-h6,
   .pyly-mdx > ul,
   .pyly-mdx > .pyly-mdx-blockquote {
     @apply mx-4;
