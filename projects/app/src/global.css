@@ -31,7 +31,7 @@
     @apply font-sans text-2xl/normal tracking-tight text-fg font-bold;
   }
   .pyly-body-title .pyly-ref {
-    @apply leading-tight text-2xl/normal font-bold text-fg-loud pyly-ref-2xl;
+    @apply leading-tight font-bold text-fg-loud pyly-ref-2xl;
   }
   .pyly-body-title .pyly-bold {
     @apply font-bold text-fg-loud;
@@ -47,7 +47,7 @@
     @apply font-sans text-lg/normal tracking-tight text-fg-loud font-bold;
   }
   .pyly-body-heading .pyly-ref {
-    @apply font-bold text-lg/normal text-fg-loud pyly-ref-lg;
+    @apply font-bold text-fg-loud pyly-ref-lg;
   }
   .pyly-body-heading .pyly-bold {
     @apply font-bold text-fg-loud;
@@ -59,10 +59,10 @@
   /* --- */
 
   .pyly-body-2xl {
-    @apply font-sans text-2xl/normal font-light text-fg;
+    @apply font-sans text-2xl/normal font-normal text-fg;
   }
   .pyly-body-2xl .pyly-ref {
-    @apply text-2xl/normal font-medium text-fg-loud pyly-ref-2xl;
+    @apply font-medium text-fg-loud pyly-ref-2xl;
   }
   .pyly-body-2xl .pyly-bold {
     @apply font-medium text-fg-loud;
@@ -77,7 +77,7 @@
     @apply font-sans text-base/normal text-fg font-medium;
   }
   .pyly-body .pyly-ref {
-    @apply text-base/normal text-fg-loud font-medium pyly-ref-base;
+    @apply text-fg-loud font-medium pyly-ref-base;
   }
   .pyly-body .pyly-bold {
     @apply font-bold text-fg-loud;
@@ -92,7 +92,7 @@
     @apply font-sans text-sm/normal font-normal text-caption;
   }
   .pyly-body-caption .pyly-ref {
-    @apply text-caption-loud text-sm/normal font-medium pyly-ref-sm;
+    @apply text-caption-loud font-medium pyly-ref-sm;
   }
   .pyly-body-caption .pyly-bold {
     @apply text-caption-loud font-medium;
@@ -110,7 +110,7 @@
     @apply font-sans text-xs/normal font-medium text-caption uppercase;
   }
   .pyly-body-dt .pyly-ref {
-    @apply text-xs/normal text-fg-loud font-semibold pyly-ref-xs;
+    @apply text-fg-loud font-semibold pyly-ref-xs;
   }
   .pyly-body-dt .pyly-bold {
     @apply font-semibold text-fg-loud;
@@ -125,7 +125,7 @@
     @apply font-sans text-lg/snug font-light text-fg;
   }
   .pyly-body-input .pyly-ref {
-    @apply text-lg/snug text-fg-loud font-medium pyly-ref-lg;
+    @apply text-fg-loud font-medium pyly-ref-lg;
   }
   .pyly-body-input .pyly-bold {
     @apply font-medium text-fg-loud;
