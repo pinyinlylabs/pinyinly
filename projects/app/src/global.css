@@ -244,7 +244,50 @@
     --color-bg-loud: var(--color-bg-loud-light);
   }
 
-  .pyly-mdx {
+  /* declare MDX component clases */
+  .pyly-mdx,
+  .pyly-mdx-b,
+  .pyly-mdx-h1,
+  .pyly-mdx-h2,
+  .pyly-mdx-h3,
+  .pyly-mdx-h4,
+  .pyly-mdx-h5,
+  .pyly-mdx-h6,
+  .pyly-mdx-b,
+  .pyly-mdx-strong,
+  .pyly-mdx-s,
+  .pyly-mdx-del,
+  .pyly-mdx-q,
+  .pyly-mdx-i,
+  .pyly-mdx-em,
+  .pyly-mdx-p,
+  .pyly-mdx-pre,
+  .pyly-mdx-code,
+  .pyly-mdx-mark,
+  .pyly-mdx-inlineCode,
+  .pyly-mdx-span,
+  .pyly-mdx-a,
+  .pyly-mdx-nav,
+  .pyly-mdx-footer,
+  .pyly-mdx-aside,
+  .pyly-mdx-header,
+  .pyly-mdx-main,
+  .pyly-mdx-article,
+  .pyly-mdx-section,
+  .pyly-mdx-br,
+  .pyly-mdx-time,
+  .pyly-mdx-hr,
+  .pyly-mdx-div,
+  .pyly-mdx-img,
+  .pyly-mdx-blockquote {
+    --ignore-lint-warning: 1;
+  }
+
+  .pyly-mdx-p {
+    @apply pyly-body;
+  }
+  .pyly-mdx-strong {
+    @apply font-bold;
   }
 
   .pyly-mdx-p {

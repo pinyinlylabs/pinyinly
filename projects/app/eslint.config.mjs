@@ -207,6 +207,10 @@ export default tseslint.config(
               name: `zod`,
               message: `Please use zod/v4 instead`,
             },
+            {
+              name: `@bacons/mdx`,
+              message: `Please use @/client/mdx instead`,
+            },
           ],
         },
       ],

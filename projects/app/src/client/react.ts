@@ -1,4 +1,6 @@
-import type { FunctionComponent, Ref } from "react";
+import type { FunctionComponent, ReactElement, ReactNode, Ref } from "react";
+import { Children, isValidElement } from "react";
+import type { PropsOf } from "./ui/types";
 
 export function mergeRefs<T>(...refs: (Ref<T> | undefined)[]): Ref<T> {
   return (value) => {
@@ -37,4 +39,37 @@ export function reactInvariant<P>(
     },
     { displayName: component.displayName },
   ) as typeof component;
+}
+
+export function pickChildren<
+  T1 extends FunctionComponent,
+  T2 extends FunctionComponent,
+  T3 extends FunctionComponent,
+>(children: ReactNode, type1: T1, type2?: T2, type3?: T3) {
+  const picked: ReactNode[] = [];
+  Children.forEach(children, (child) => {
+    if (isValidElement(child)) {
+      switch (child.type) {
+        case type1: {
+          picked[0] = child;
+          break;
+        }
+        case type2: {
+          picked[1] = child;
+          break;
+        }
+        case type3: {
+          picked[2] = child;
+          break;
+        }
+        // No default
+      }
+    }
+  });
+
+  return picked as [
+    ReactElement<PropsOf<typeof type1>> | undefined,
+    ReactElement<PropsOf<typeof type2>> | undefined,
+    ReactElement<PropsOf<typeof type3>> | undefined,
+  ];
 }

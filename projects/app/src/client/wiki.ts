@@ -1,13 +1,9 @@
+import type { MdxComponentType } from "@/client/ui/mdx";
 import type { HanziText, HanziWord } from "@/data/model";
 import { devToolsSlowQuerySleepIfEnabled } from "@/util/devtools";
-import type { CustomComponentsProp } from "@bacons/mdx";
 import { lazy } from "react";
 
-type MdxComponent = React.FC<{
-  components?: CustomComponentsProp;
-}>;
-
-const lazyMdx = <Mdx extends MdxComponent>(
+const lazyMdx = <Mdx extends MdxComponentType>(
   importFn: () => Promise<{ default: Mdx }>,
 ) =>
   lazy(async () => {
@@ -17,25 +13,25 @@ const lazyMdx = <Mdx extends MdxComponent>(
 
 export function getWikiMdxHanziMeaning(
   hanzi: HanziText,
-): MdxComponent | undefined {
+): MdxComponentType | undefined {
   return registry[`${hanzi}/meaning`];
 }
 
 export function getWikiMdxHanziMeaningMnemonic(
   hanzi: HanziText,
-): MdxComponent | undefined {
+): MdxComponentType | undefined {
   return registry[`${hanzi}/meaningMnemonic`];
 }
 
 export function getWikiMdxHanziPronunciation(
   hanzi: HanziText,
-): MdxComponent | undefined {
+): MdxComponentType | undefined {
   return registry[`${hanzi}/pronunciation`];
 }
 
 export function getWikiMdxHanziWordMeaning(
   hanziWord: HanziWord,
-): MdxComponent | undefined {
+): MdxComponentType | undefined {
   return registry[`${hanziWordToPath(hanziWord)}/meaning`];
 }
 
@@ -44,7 +40,7 @@ function hanziWordToPath(hanziWord: HanziWord): string {
 }
 
 // prettier-ignore
-const registry: Record<string, MdxComponent> = {
+const registry: Record<string, MdxComponentType> = {
   // <pyly-glob-template glob="./wiki/**/*.mdx" template="  \"${relpathWithoutExt}\": lazyMdx(() => import(`${path}`)),">
   "㐅/~five/meaning": lazyMdx(() => import(`./wiki/㐅/~five/meaning.mdx`)),
   "䒑/~grass/meaning": lazyMdx(() => import(`./wiki/䒑/~grass/meaning.mdx`)),
