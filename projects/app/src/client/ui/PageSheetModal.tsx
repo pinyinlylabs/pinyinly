@@ -17,8 +17,10 @@ import Reanimated, {
 import { useEventCallback } from "../hooks/useEventCallback";
 import { ReanimatedPressable } from "./ReanimatedPressable";
 
+export type PageSheetChild = (options: { dismiss: () => void }) => ReactNode;
+
 interface PageSheetModalProps {
-  children: (options: { dismiss: () => void }) => ReactNode;
+  children: PageSheetChild;
   disableBackgroundDismiss?: boolean;
   /**
    * If `true`, the modal will be presented with a slower animation so it is not

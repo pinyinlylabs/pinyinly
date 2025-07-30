@@ -98,7 +98,7 @@ export default tseslint.config(
       // Expo or react-native or metro or something handles this, so there's no
       // need to import React.
       "react/react-in-jsx-scope": `off`,
-
+      "react/prop-types": `off`, // we use TypeScript for type checking
       "react/no-children-prop": [`error`, { allowFunctions: true }],
 
       "react-compiler/react-compiler": `error`,
