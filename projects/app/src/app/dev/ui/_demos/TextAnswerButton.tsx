@@ -245,14 +245,14 @@ export default () => (
             state="error"
             fontSize={fontSize}
             text="你好"
-            renderErrorModal={() => null}
+            renderWikiModal={() => null}
             className={`flex-1`}
           />
           <TextAnswerButton
             state="error"
             fontSize={fontSize}
             text="你好 你好 你好 你好 你好 你好 你好 你好 你好"
-            renderErrorModal={() => null}
+            renderWikiModal={() => null}
             className={`flex-1`}
           />
         </ExampleStack>

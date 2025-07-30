@@ -70,7 +70,7 @@ export type TextAnswerButtonProps = {
   fontSize?: TextAnswerButtonFontSize;
   state?: TextAnswerButtonState;
   className?: string;
-  renderErrorModal?: (onDismiss: () => void) => ReactNode;
+  renderWikiModal?: (onDismiss: () => void) => ReactNode;
   inFlexRowParent?: boolean;
   textClassName?: string;
   disabled?: boolean;
@@ -81,7 +81,7 @@ export function TextAnswerButton({
   text,
   fontSize = textAnswerButtonFontSize(text),
   state = `default`,
-  renderErrorModal,
+  renderWikiModal,
   inFlexRowParent = false,
   className,
   textClassName,
@@ -91,7 +91,7 @@ export function TextAnswerButton({
   const [bgFilled, setBgFilled] = useState(false);
   const [pressed, setPressed] = useState(false);
   const [hovered, setHovered] = useState(false);
-  const [showErrorHelpModal, setShowErrorHelpModal] = useState(false);
+  const [showWikiModal, setWikiModal] = useState(false);
 
   const scaleSv = useSharedValue(targetScale[state]);
   const rotationSv = useSharedValue(targetRotation[state]);
@@ -176,6 +176,10 @@ export function TextAnswerButton({
 
   const flat = pressed || disabled;
 
+  const handleWikiModalDismiss = () => {
+    setWikiModal(false);
+  };
+
   return (
     <ReanimatedPressable
       {...pressableProps}
@@ -198,17 +202,15 @@ export function TextAnswerButton({
         pressableProps.onPressOut?.(e);
       }}
       onPress={(e) => {
-        if (state === `error`) {
-          if (renderErrorModal == null) {
-            // Shake the button violently if the user presses it again after they
-            // already made an error.
-            rotationSv.set(withIncorrectShakeAnimation(rotationSv.get()));
-          } else {
-            // Or if there's a help modal, show it.
-            setShowErrorHelpModal(true);
-          }
+        if (renderWikiModal) {
+          setWikiModal(true);
+        } else if (state === `error`) {
+          // Shake the button violently if the user presses it again after they
+          // already made an error.
+          rotationSv.set(withIncorrectShakeAnimation(rotationSv.get()));
+        } else {
+          pressableProps.onPress?.(e);
         }
-        pressableProps.onPress?.(e);
       }}
       style={pressableAnimatedStyle}
       className={pressableClass({ state, inFlexRowParent, className })}
@@ -232,7 +234,7 @@ export function TextAnswerButton({
           className={textClass({
             state,
             fontSize,
-            hasErrorHelpModal: renderErrorModal != null,
+            hasWikiModal: renderWikiModal != null,
             className: textClassName,
             hovered,
           })}
@@ -248,10 +250,8 @@ export function TextAnswerButton({
         className="theme-success pointer-events-none absolute -inset-3"
         play={state === `success`}
       />
-      {showErrorHelpModal && renderErrorModal != null
-        ? renderErrorModal(() => {
-            setShowErrorHelpModal(false);
-          })
+      {showWikiModal && renderWikiModal != null
+        ? renderWikiModal(handleWikiModalDismiss)
         : null}
     </ReanimatedPressable>
   );
@@ -393,7 +393,7 @@ const textClass = tv({
     hovered: {
       true: ``,
     },
-    hasErrorHelpModal: {
+    hasWikiModal: {
       true: ``,
     },
     state: {
@@ -444,8 +444,7 @@ const textClass = tv({
   },
   compoundVariants: [
     {
-      state: `error`,
-      hasErrorHelpModal: true,
+      hasWikiModal: true,
       class: `
         underline decoration-currentColor/25
 
@@ -453,8 +452,7 @@ const textClass = tv({
       `,
     },
     {
-      state: `error`,
-      hasErrorHelpModal: true,
+      hasWikiModal: true,
       hovered: true,
       class: `decoration-currentColor/50`,
     },
