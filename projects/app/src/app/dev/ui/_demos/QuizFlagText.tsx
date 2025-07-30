@@ -7,6 +7,7 @@ export default () => {
   return (
     <ExampleStack title="flags">
       <QuizFlagText flag={{ kind: QuestionFlagKind.WeakWord }} />
+      <QuizFlagText flag={{ kind: QuestionFlagKind.NewDifficulty }} />
       <QuizFlagText flag={{ kind: QuestionFlagKind.NewSkill }} />
       <QuizFlagText
         flag={{

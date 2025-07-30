@@ -1,3 +1,4 @@
+/* eslint-disable react/display-name */
 import { useHanziWordMeaning } from "@/client/hooks/useHanziWordMeaning";
 import { SkillKind } from "@/data/model";
 import type { HanziWordSkill, Skill } from "@/data/rizzleSchema";
@@ -6,15 +7,16 @@ import {
   hanziFromHanziWord,
   hanziGraphemesFromHanziWord,
 } from "@/dictionary/dictionary";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { IconImage } from "./IconImage";
+import type { PageSheetChild } from "./PageSheetModal";
 import { PageSheetModal } from "./PageSheetModal";
 import { RectButton } from "./RectButton";
 import { WikiHanziInterpretationPanel } from "./WikiHanziInterpretationPanel";
 
 export const NewSkillModal = ({
-  skill,
+  skill: anySkill,
   passivePresentation,
   devUiSnapshotMode,
 }: {
@@ -22,82 +24,58 @@ export const NewSkillModal = ({
   passivePresentation?: boolean;
   devUiSnapshotMode?: boolean;
 }) => {
-  const [isModalVisible, setIsModalVisible] = useState(true);
+  const [pageSheetChild, setPageSheetChild] = useState(
+    (): PageSheetChild | null => {
+      switch (skillKindFromSkill(anySkill)) {
+        case SkillKind.HanziWordToGloss: {
+          const skill = anySkill as HanziWordSkill;
+          return ({ dismiss }) => (
+            <NewHanziWordToGlossSkillContent skill={skill} dismiss={dismiss} />
+          );
+        }
+        case SkillKind.HanziWordToPinyin: {
+          const skill = anySkill as HanziWordSkill;
+          return ({ dismiss }) => (
+            <NewHanziWordToPinyinSkillContent skill={skill} dismiss={dismiss} />
+          );
+        }
+        case SkillKind.HanziWordToPinyinInitial: {
+          const skill = anySkill as HanziWordSkill;
+          return ({ dismiss }) => (
+            <NewHanziWordToPinyinInitialSkillContent
+              skill={skill}
+              dismiss={dismiss}
+            />
+          );
+        }
+        case SkillKind.HanziWordToPinyinTone:
+        case SkillKind.HanziWordToPinyinFinal:
+        case SkillKind.Deprecated_EnglishToRadical:
+        case SkillKind.Deprecated_PinyinToRadical:
+        case SkillKind.Deprecated_RadicalToEnglish:
+        case SkillKind.Deprecated_RadicalToPinyin:
+        case SkillKind.Deprecated:
+        case SkillKind.GlossToHanziWord:
+        case SkillKind.ImageToHanziWord:
+        case SkillKind.PinyinFinalAssociation:
+        case SkillKind.PinyinInitialAssociation:
+        case SkillKind.PinyinToHanziWord: {
+          return null;
+        }
+      }
+    },
+  );
 
-  return isModalVisible ? (
+  return pageSheetChild ? (
     <PageSheetModal
       disableBackgroundDismiss
       onDismiss={() => {
-        setIsModalVisible(false);
+        setPageSheetChild(null);
       }}
       passivePresentation={passivePresentation}
       devUiSnapshotMode={devUiSnapshotMode}
     >
-      {({ dismiss }) => {
-        switch (skillKindFromSkill(skill)) {
-          case SkillKind.HanziWordToGloss: {
-            skill = skill as HanziWordSkill;
-            return (
-              <NewHanziWordToGlossSkillContent
-                skill={skill}
-                dismiss={dismiss}
-              />
-            );
-          }
-          case SkillKind.HanziWordToPinyin: {
-            skill = skill as HanziWordSkill;
-            return (
-              <NewHanziWordToPinyinSkillContent
-                skill={skill}
-                dismiss={dismiss}
-              />
-            );
-          }
-          case SkillKind.HanziWordToPinyinFinal: {
-            skill = skill as HanziWordSkill;
-            return (
-              <NewHanziWordToPinyinFinalSkillContent
-                skill={skill}
-                dismiss={dismiss}
-              />
-            );
-          }
-          case SkillKind.HanziWordToPinyinInitial: {
-            skill = skill as HanziWordSkill;
-            return (
-              <NewHanziWordToPinyinInitialSkillContent
-                skill={skill}
-                dismiss={dismiss}
-              />
-            );
-          }
-          case SkillKind.HanziWordToPinyinTone: {
-            skill = skill as HanziWordSkill;
-            return (
-              <NewHanziWordToPinyinToneSkillContent
-                skill={skill}
-                dismiss={dismiss}
-              />
-            );
-          }
-          case SkillKind.Deprecated_EnglishToRadical:
-          case SkillKind.Deprecated_PinyinToRadical:
-          case SkillKind.Deprecated_RadicalToEnglish:
-          case SkillKind.Deprecated_RadicalToPinyin:
-          case SkillKind.Deprecated:
-          case SkillKind.GlossToHanziWord:
-          case SkillKind.ImageToHanziWord:
-          case SkillKind.PinyinFinalAssociation:
-          case SkillKind.PinyinInitialAssociation:
-          case SkillKind.PinyinToHanziWord: {
-            return (
-              <ContainerWithContinueButton onContinue={dismiss}>
-                <Text>Not implemented</Text>
-              </ContainerWithContinueButton>
-            );
-          }
-        }
-      }}
+      {pageSheetChild}
     </PageSheetModal>
   ) : null;
 };
@@ -223,108 +201,6 @@ const NewHanziWordToPinyinInitialSkillContent = ({
             <View className="items-center gap-2">
               <View className="flex-row gap-1">
                 {hanziGraphemes.map((grapheme) => (
-                  <View key={grapheme} className="items-center">
-                    <Text className="rounded-xl bg-bg-loud px-2 py-1 text-[60px] text-fg">
-                      {grapheme}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-
-              <Text className="text-4xl font-bold text-fg">
-                {hanziWordSkillData.data.pinyin?.[0]}
-              </Text>
-            </View>
-          </View>
-        </>
-      )}
-    </ContainerWithContinueButton>
-  );
-};
-
-const NewHanziWordToPinyinFinalSkillContent = ({
-  skill,
-  dismiss,
-}: {
-  skill: HanziWordSkill;
-  dismiss: () => void;
-}) => {
-  const hanziWord = hanziWordFromSkill(skill);
-  const hanziWordSkillData = useHanziWordMeaning(hanziWord);
-
-  const graphemes = useMemo(
-    (): string[] => hanziGraphemesFromHanziWord(hanziWord),
-    [hanziWord],
-  );
-
-  return (
-    <ContainerWithContinueButton onContinue={dismiss}>
-      {hanziWordSkillData.data == null ? (
-        <Text className="text-fg">Not implemented</Text>
-      ) : (
-        <>
-          <View className="mb-8 gap-8">
-            <View className="theme-success flex-row items-center gap-2 self-center">
-              <IconImage source={require(`@/assets/icons/plant-filled.svg`)} />
-              <Text className="font-bold uppercase text-fg">
-                New Pinyin Final
-              </Text>
-            </View>
-
-            <View className="items-center gap-2">
-              <View className="flex-row gap-1">
-                {graphemes.map((grapheme) => (
-                  <View key={grapheme} className="items-center">
-                    <Text className="rounded-xl bg-bg-loud px-2 py-1 text-[60px] text-fg">
-                      {grapheme}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-
-              <Text className="text-4xl font-bold text-fg">
-                {hanziWordSkillData.data.pinyin?.[0]}
-              </Text>
-            </View>
-          </View>
-        </>
-      )}
-    </ContainerWithContinueButton>
-  );
-};
-
-const NewHanziWordToPinyinToneSkillContent = ({
-  skill,
-  dismiss,
-}: {
-  skill: HanziWordSkill;
-  dismiss: () => void;
-}) => {
-  const hanziWord = hanziWordFromSkill(skill);
-  const hanziWordSkillData = useHanziWordMeaning(hanziWord);
-
-  const graphemes = useMemo(
-    (): string[] => hanziGraphemesFromHanziWord(hanziWord),
-    [hanziWord],
-  );
-
-  return (
-    <ContainerWithContinueButton onContinue={dismiss}>
-      {hanziWordSkillData.data == null ? (
-        <Text className="text-fg">Not implemented</Text>
-      ) : (
-        <>
-          <View className="mb-8 gap-8">
-            <View className="theme-success flex-row items-center gap-2 self-center">
-              <IconImage source={require(`@/assets/icons/plant-filled.svg`)} />
-              <Text className="font-bold uppercase text-fg">
-                New Pinyin Tone
-              </Text>
-            </View>
-
-            <View className="items-center gap-2">
-              <View className="flex-row gap-1">
-                {graphemes.map((grapheme) => (
                   <View key={grapheme} className="items-center">
                     <Text className="rounded-xl bg-bg-loud px-2 py-1 text-[60px] text-fg">
                       {grapheme}

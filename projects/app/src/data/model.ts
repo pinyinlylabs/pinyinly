@@ -172,6 +172,7 @@ export const hanziWordSkillKinds: HanziWordSkillKind[] = [
 ];
 
 const questionFlagKindSchema = z.enum({
+  NewDifficulty: `debug--NewDifficulty`,
   NewSkill: `debug--NewSkill`,
   Overdue: `debug--Overdue`,
   Retry: `debug--Retry`,
@@ -189,19 +190,24 @@ export interface QuestionFlagOverdueType {
   interval: Interval;
 }
 
-export interface QuestionFlagWeakWordType {
-  kind: typeof QuestionFlagKind.WeakWord;
+export interface QuestionFlagNewDifficultyType {
+  kind: typeof QuestionFlagKind.NewDifficulty;
 }
 
 export interface QuestionFlagNewSkillType {
   kind: typeof QuestionFlagKind.NewSkill;
 }
 
+export interface QuestionFlagWeakWordType {
+  kind: typeof QuestionFlagKind.WeakWord;
+}
+
 export type QuestionFlagType =
-  | QuestionFlagWeakWordType
+  | QuestionFlagNewDifficultyType
   | QuestionFlagNewSkillType
   | QuestionFlagOverdueType
-  | QuestionFlagRetryType;
+  | QuestionFlagRetryType
+  | QuestionFlagWeakWordType;
 
 const questionKindSchema = z.enum({
   OneCorrectPair: `debug--OneCorrectPair`,
