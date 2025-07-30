@@ -189,7 +189,8 @@
     "doctor": {
       "reactNativeDirectoryCheck": {
         "exclude": [
-          "drizzle-orm"
+          "drizzle-orm",
+          "posthog-react-native"
         ],
         "listUnknownPackages": false
       }
