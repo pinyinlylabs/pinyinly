@@ -88,7 +88,7 @@ describe(`${tryPinyinDistractor.name} suite`, async () => {
 });
 
 describe(`${hanziWordToPinyinFinalQuestionOrThrow.name} suite`, async () => {
-  test.skip(`works for all valid single grapheme hanzi`, async () => {
+  test(`works for all valid single grapheme hanzi`, async () => {
     const dictionary = await loadDictionary();
     const sample = [...dictionary].filter(
       ([hanziWord, meaning]) =>

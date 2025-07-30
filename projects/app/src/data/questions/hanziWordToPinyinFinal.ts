@@ -137,14 +137,20 @@ export async function tryHanziDistractor(
 export function tryPinyinDistractor(
   ctx: QuestionContext,
   pinyin: PinyinSyllable,
+  strict = true,
 ): boolean {
   const parsedPinyin = parsePinyinSyllableOrThrow(pinyin);
 
-  if (ctx.answerPinyinInitial !== parsedPinyin.initialSoundId) {
+  if (strict && ctx.answerPinyinInitial !== parsedPinyin.initialSoundId) {
     return false;
   }
 
-  if (ctx.answerPinyinTone !== parsedPinyin.tone) {
+  if (strict && ctx.answerPinyinTone !== parsedPinyin.tone) {
+    return false;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/prefer-string-starts-ends-with
+  if (ctx.answerPinyinInitial[0] !== parsedPinyin.initialSoundId[0]) {
     return false;
   }
 
@@ -170,15 +176,17 @@ async function addDistractors(
     // non-existant pinyin used as fillers
     // ...shuffle(fakePinyin),
   ];
-  for (const tonelessPinyin of pinyinWords) {
-    const pinyin = convertPinyinWithToneNumberToToneMark(
-      `${tonelessPinyin}${ctx.answerPinyinTone}`,
-    );
+  loop: for (const strict of [true, false]) {
+    for (const tonelessPinyin of pinyinWords) {
+      const pinyin = convertPinyinWithToneNumberToToneMark(
+        `${tonelessPinyin}${ctx.answerPinyinTone}`,
+      );
 
-    tryPinyinDistractor(ctx, pinyin);
+      tryPinyinDistractor(ctx, pinyin, strict);
 
-    if (ctx.pinyinDistractors.length === count) {
-      break;
+      if (ctx.pinyinDistractors.length === count) {
+        break loop;
+      }
     }
   }
 
@@ -213,16 +221,23 @@ function validQuestionInvariant(question: OneCorrectPairQuestion) {
     ...question.groupA.map((x) => hanziOrPinyinSyllableCount(x)),
     ...question.groupB.map((x) => hanziOrPinyinSyllableCount(x)),
   ]);
-  // Ensure all pinyin have the same initial and tone.
+  // Ensure all pinyin have the same-ish start (but not necessarily initial)
+  // and tone. We can't guarantee they'll all have the same initial because in
+  // non-strict mode we allow distractors with different initials (as long as
+  // they have the same first letter).
   identicalInvariant(
     question.groupB.map((x) => {
       invariant(x.kind === `pinyin`);
       invariant(hanziOrPinyinSyllableCount(x) === 1);
 
       const syllable = nonNullable(x.value[0]);
-      const { initialSoundId: initial, tone } =
-        parsePinyinSyllableOrThrow(syllable);
-      return `${initial}-${tone}`;
+      const { initialSoundId, tone } = parsePinyinSyllableOrThrow(syllable);
+      // This is the first letter of the sound ID (NOT the first letter of the
+      // pinyin). The difference here is for the "null" initial ∅-. In this case
+      // we allow choices that actually have a different first letter, as long
+      // as their pinyin split initial ID is `∅-`.
+      const fuzzyInitialId = nonNullable(initialSoundId[0]);
+      return `${fuzzyInitialId}…${tone}`;
     }),
   );
 
