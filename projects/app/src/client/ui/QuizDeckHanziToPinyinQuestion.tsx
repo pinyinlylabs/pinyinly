@@ -1,4 +1,3 @@
-import { useHanziWordMeaning } from "@/client/hooks/useHanziWordMeaning";
 import {
   autoCheckUserSetting,
   useUserSetting,
@@ -142,11 +141,7 @@ export function QuizDeckHanziToPinyinQuestion({
                 </Text>
 
                 <Text className="text-fg">
-                  <SkillAnswerText
-                    skill={skill}
-                    includeHint
-                    includeAlternatives
-                  />
+                  <SkillAnswerText skill={skill} includeAlternatives />
                 </Text>
               </>
             )}
@@ -336,11 +331,9 @@ const hiddenPlaceholderOptions = (
 
 const SkillAnswerText = ({
   skill,
-  includeHint = false,
 }: {
   skill: Skill;
   includeAlternatives?: boolean;
-  includeHint?: boolean;
   hideA?: boolean;
   hideB?: boolean;
   small?: boolean;
@@ -362,12 +355,7 @@ const SkillAnswerText = ({
     }
     case SkillKind.HanziWordToGloss: {
       skill = skill as HanziWordSkill;
-      return (
-        <HanziWordToGlossSkillAnswerText
-          skill={skill}
-          includeHint={includeHint}
-        />
-      );
+      return <HanziWordToGlossSkillAnswerText skill={skill} />;
     }
     case SkillKind.HanziWordToPinyin:
     case SkillKind.HanziWordToPinyinFinal:
@@ -381,25 +369,17 @@ const SkillAnswerText = ({
 
 const HanziWordToGlossSkillAnswerText = ({
   skill,
-  includeHint = false,
 }: {
   skill: HanziWordSkill;
   includeHint?: boolean;
 }) => {
   const hanziWord = hanziWordFromSkill(skill);
-  const meaningQuery = useHanziWordMeaning(hanziWord);
 
   return (
     <>
       <Text className="pyly-body-2xl">
         <Pylymark source={`{${hanziWord}}`} />
       </Text>
-
-      {includeHint && meaningQuery.data?.glossHint != null ? (
-        <Text className="pyly-body-caption">
-          <Pylymark source={meaningQuery.data.glossHint} />
-        </Text>
-      ) : null}
     </>
   );
 };

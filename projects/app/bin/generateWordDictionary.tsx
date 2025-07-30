@@ -52,11 +52,7 @@ import {
 import { jsonStringifyShallowIndent } from "#util/json.ts";
 import { Alert, MultiSelect, Select } from "@inkjs/ui";
 import { invariant } from "@pinyinly/lib/invariant";
-import {
-  QueryClient,
-  QueryClientProvider,
-  useQuery,
-} from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import makeDebug from "debug";
 import { Box, render, Text, useFocus, useInput } from "ink";
 import Link from "ink-link";
@@ -645,6 +641,7 @@ Can you give me a few options to pick from.`,
   );
 };
 
+// @ts-expect-error keep it around for now, will be used later
 async function openAiHanziWordGlossHintQuery(
   hanziWord: HanziWord,
   dict: Dictionary,
@@ -764,52 +761,6 @@ Can you come up with a few suggestions for me?
   );
 }
 
-const HanziWordGlossHintEditor = ({
-  hanziWord,
-  onCancel,
-}: {
-  hanziWord: HanziWord;
-  onCancel: () => void;
-  onSave: () => void;
-}) => {
-  const dict = useDictionary().data;
-  const result = useQuery({
-    queryKey: [`HanziWordGlossHintEditor`, hanziWord, dict],
-    queryFn: () =>
-      dict == null ? null : openAiHanziWordGlossHintQuery(hanziWord, dict),
-    staleTime: Infinity,
-    throwOnError: true,
-  });
-
-  return (
-    <>
-      <Text bold>Editing {hanziWord} gloss hint</Text>
-
-      <Text>Status: {result.status}</Text>
-
-      {result.data == null ? null : (
-        <Box flexDirection="column" gap={1}>
-          <Text>Result:</Text>
-          {result.data.map((x, i) => (
-            <Box key={i}>
-              <Text>{JSON.stringify(x, null, 2)}</Text>
-            </Box>
-          ))}
-        </Box>
-      )}
-
-      <Shortcuts>
-        <Button
-          label="Back"
-          action={() => {
-            onCancel();
-          }}
-        />
-      </Shortcuts>
-    </>
-  );
-};
-
 const HanziWordEditor = ({
   hanziWord,
   onCancel,
@@ -845,11 +796,6 @@ const HanziWordEditor = ({
                   id: `pinyin`,
                   label: `pinyin`,
                   value: meaning.pinyin?.join(`;`) ?? ``,
-                },
-                {
-                  id: `glossHint`,
-                  label: `glossHint`,
-                  value: meaning.glossHint ?? ``,
                 },
                 {
                   id: `visualVariants`,
@@ -924,18 +870,6 @@ const HanziWordEditor = ({
                 }),
               );
               edits.delete(`gloss`);
-            }
-
-            if (edits.has(`glossHint`)) {
-              const newGlossHint = edits.get(`glossHint`);
-              invariant(newGlossHint != null);
-
-              mutations.push(() =>
-                saveUpsertHanziWordMeaning(hanziWord, {
-                  glossHint: newGlossHint,
-                }),
-              );
-              edits.delete(`glossHint`);
             }
 
             if (edits.has(`componentFormOf`)) {
@@ -1237,7 +1171,6 @@ const DictionaryEditor = ({ onCancel }: { onCancel: () => void }) => {
     | { type: `list` }
     | { type: `view`; hanziWord: HanziWord }
     | { type: `edit`; hanziWord: HanziWord }
-    | { type: `editGlossHint`; hanziWord: HanziWord }
     | { type: `merge`; hanziWord: HanziWord; otherHanziWord?: HanziWord }
     | null
   >({ type: `list` });
@@ -1285,15 +1218,6 @@ const DictionaryEditor = ({ onCancel }: { onCancel: () => void }) => {
               }}
             />
             <Button
-              label="Edit gloss hint…"
-              action={() => {
-                setLocation({
-                  type: `editGlossHint`,
-                  hanziWord: location.hanziWord,
-                });
-              }}
-            />
-            <Button
               label="Merge…"
               action={() => {
                 setLocation({ type: `merge`, hanziWord: location.hanziWord });
@@ -1313,21 +1237,6 @@ const DictionaryEditor = ({ onCancel }: { onCancel: () => void }) => {
       return (
         <Box flexDirection="column" gap={1}>
           <HanziWordEditor
-            hanziWord={location.hanziWord}
-            onSave={() => {
-              setLocation({ type: `view`, hanziWord: location.hanziWord });
-            }}
-            onCancel={() => {
-              setLocation({ type: `list` });
-            }}
-          />
-        </Box>
-      );
-    }
-    case `editGlossHint`: {
-      return (
-        <Box flexDirection="column" gap={1}>
-          <HanziWordGlossHintEditor
             hanziWord={location.hanziWord}
             onSave={() => {
               setLocation({ type: `view`, hanziWord: location.hanziWord });
@@ -2313,15 +2222,6 @@ const DictionaryHanziWordEntry = ({
             {` `}
             <Text italic>{meaning.partOfSpeech}</Text>
           </Text>
-          {meaning.glossHint == null ? null : (
-            <Text>
-              <Text bold dimColor>
-                gloss hint:
-              </Text>
-              {` `}
-              <Text italic>{meaning.glossHint}</Text>
-            </Text>
-          )}
           <Text>
             <Text bold dimColor>
               example:

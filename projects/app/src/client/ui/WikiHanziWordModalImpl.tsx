@@ -148,15 +148,6 @@ export function WikiHanziWordModalImpl({
                 );
               })}
 
-              {hanziWordSkillData.data.glossHint == null ? null : (
-                <>
-                  <View className="h-px w-full bg-bg-loud" />
-                  <Text className="pyly-body">
-                    <Pylymark source={hanziWordSkillData.data.glossHint} />
-                  </Text>
-                </>
-              )}
-
               {wikiEntry.data.interpretation == null ? null : (
                 <>
                   <View className="h-px w-full bg-bg-loud" />

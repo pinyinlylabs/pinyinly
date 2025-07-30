@@ -34,7 +34,6 @@ import type {
   UnsavedSkillRating,
 } from "./model";
 import { SkillKind, SrsKind } from "./model";
-import { parsePylymark } from "./pylymark";
 import type {
   HanziWordSkill,
   PinyinFinalAssociationSkill,
@@ -169,14 +168,6 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
           if (hanziWordWithMeaning != null) {
             const [hanziWord] = hanziWordWithMeaning;
             deps.push(hanziWordToGloss(hanziWord));
-          }
-        }
-
-        if (meaning?.glossHint != null) {
-          for (const node of parsePylymark(meaning.glossHint)) {
-            if (node.type === `hanziWord`) {
-              deps.push(hanziWordToGloss(node.hanziWord));
-            }
           }
         }
       }

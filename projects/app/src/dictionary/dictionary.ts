@@ -187,7 +187,6 @@ export const partOfSpeechSchema = z.enum([
 
 export const hanziWordMeaningSchema = z.object({
   gloss: z.array(z.string()),
-  glossHint: z.string().nullable().optional(),
   pinyin: z
     .array(pinyinPronunciationSchema)
     .describe(
@@ -660,10 +659,6 @@ export function upsertHanziWordMeaning(
     patch.example = undefined;
   }
 
-  if (patch.glossHint?.trim().length === 0) {
-    patch.glossHint = undefined;
-  }
-
   if (patch.visualVariants?.length === 0) {
     patch.visualVariants = undefined;
   }
@@ -691,7 +686,6 @@ export function unparseDictionary(
       hanziWord,
       {
         gloss: meaning.gloss,
-        glossHint: meaning.glossHint ?? undefined,
         pinyin:
           meaning.pinyin?.map((p) => rPinyinPronunciation().marshal(p)) ??
           undefined,
