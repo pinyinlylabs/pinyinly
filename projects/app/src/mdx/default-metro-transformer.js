@@ -5,16 +5,17 @@ import { transform as expoMdxTransform } from "./metro-transformer.js";
 
 /**
  * @typedef {import('./metro-transformer.js').MetroBabelTransformer} MetroBabelTransformer
- * @typedef {MetroBabelTransformer["transform"]} MetroBabelTransform
  */
 
 /**
  * Transform function for Metro bundler
  *
- * @type {MetroBabelTransform}
+ * @type {MetroBabelTransformer}
  */
 export const transform = async (args) => {
-  return await /** @type {MetroBabelTransformer} */ (
-    upstreamTransformer
-  ).transform(await expoMdxTransform(args));
+  const upstreamTransform =
+    /** @type {{ transform: MetroBabelTransformer }} */ (upstreamTransformer)
+      .transform;
+
+  return await upstreamTransform(await expoMdxTransform(args));
 };

@@ -53,7 +53,7 @@ export const Section = ({
       <View className="flex-row" ref={ref}>
         <View
           className={`
-            pyly-color-schema-light theme-default flex-1 bg-bg/90 p-2
+            pyly-color-scheme-light theme-default flex-1 bg-bg/90 p-2
 
             hover:bg-bg
           `}
@@ -73,7 +73,7 @@ export const Section = ({
       <View className="lg:flex-row">
         <View
           className={`
-            pyly-color-schema-light theme-default
+            pyly-color-scheme-light theme-default
 
             ${examplesStackClassName}
           `}

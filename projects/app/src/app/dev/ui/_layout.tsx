@@ -45,7 +45,7 @@ export default function Layout() {
         >
           <View
             className={`
-              pyly-color-schema-light theme-default
+              pyly-color-scheme-light theme-default
 
               ${examplesStackClassName}
             `}

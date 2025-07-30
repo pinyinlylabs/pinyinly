@@ -36,9 +36,9 @@ export const Pylymark = ({ source }: { source: string }) => {
                 </Text>
               );
             }
-            case `highlight`: {
+            case `mark`: {
               return (
-                <Text key={index} className="pyly-highlight">
+                <Text key={index} className="pyly-mark">
                   {node.text}
                 </Text>
               );

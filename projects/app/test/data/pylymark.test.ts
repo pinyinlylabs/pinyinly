@@ -87,16 +87,16 @@ describe(`${parsePylymark.name} suite`, () => {
     ]);
   });
 
-  test(`parses highlighted text correctly`, () => {
-    const nodes = parsePylymark(`This is ==highlighted== text.`);
+  test(`parses marked text correctly`, () => {
+    const nodes = parsePylymark(`This is ==marked== text.`);
     expect(nodes).toEqual([
       {
         text: `This is `,
         type: `text`,
       },
       {
-        text: `highlighted`,
-        type: `highlight`,
+        text: `marked`,
+        type: `mark`,
       },
       {
         text: ` text.`,
@@ -129,8 +129,8 @@ describe(`${stringifyPylymark.name} suite`, () => {
     expect(roundTrip(str)).toBe(str);
   });
 
-  test(`roundtrips highlighted text`, () => {
-    const str = `This is ==highlighted== text.`;
+  test(`roundtrips marked text`, () => {
+    const str = `This is ==marked== text.`;
     expect(roundTrip(str)).toBe(str);
   });
 });

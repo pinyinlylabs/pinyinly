@@ -21,7 +21,7 @@ export default () => {
               ${textClass}
             `}
           >
-            <Pylymark source="Some **bold text** and *italic text* and {好:good} and ==highlight text== and another line of plain text." />
+            <Pylymark source="Some **bold text** and *italic text* and {好:good} and ==mark text== and another line of plain text." />
           </Text>
         </View>
       ))}

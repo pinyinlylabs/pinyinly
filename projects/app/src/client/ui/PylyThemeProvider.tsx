@@ -60,7 +60,7 @@ const containerClass = tv({
     {
       isWeb: false,
       isDarkMode: false,
-      class: `pyly-color-schema-light`,
+      class: `pyly-color-scheme-light`,
     },
   ],
 });
