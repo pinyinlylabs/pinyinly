@@ -366,6 +366,14 @@
     --color-caption-loud: rgb(from var(--color-fg) r g b / 0.9);
   }
 
+  .theme-sky {
+    --color-bg: var(--color-sky-dark);
+    --color-fg: rgb(from white r g b / 0.95);
+    --color-fg-loud: rgb(from white r g b / 1);
+    --color-caption: rgb(from var(--color-fg) r g b / 0.6);
+    --color-caption-loud: rgb(from var(--color-fg) r g b / 0.9);
+  }
+
   /* --- */
 
   .pyly-ref {
