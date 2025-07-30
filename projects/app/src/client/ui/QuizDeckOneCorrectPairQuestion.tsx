@@ -350,7 +350,6 @@ const HanziWordToGlossSkillAnswerText = ({
   skill,
 }: {
   skill: HanziWordSkill;
-  includeHint?: boolean;
 }) => {
   const hanziWord = hanziWordFromSkill(skill);
 
