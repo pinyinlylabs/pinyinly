@@ -31,7 +31,10 @@ export function identicalInvariant<
   const identity = items[0];
 
   for (const item of items) {
-    invariant(item === identity, `unexpected unique value ${item}`);
+    invariant(
+      item === identity,
+      `unexpected non-identical values ${item}, ${identity}`,
+    );
   }
 }
 

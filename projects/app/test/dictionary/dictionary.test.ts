@@ -1,8 +1,7 @@
 import { parseIds, splitHanziText, walkIdsNode } from "#data/hanzi.ts";
 import type { HanziGrapheme } from "#data/model.ts";
 import { pinyinPronunciationDisplayText } from "#data/pinyin.ts";
-import { parsePylymark } from "#data/pylymark.ts";
-import type { Dictionary, HanziWordMeaning } from "#dictionary/dictionary.ts";
+import type { Dictionary } from "#dictionary/dictionary.ts";
 import {
   allHanziGraphemes,
   allHanziWordsHanzi,
@@ -39,7 +38,6 @@ import {
 import { unicodeShortIdentifier } from "#util/unicode.ts";
 import { invariant } from "@pinyinly/lib/invariant";
 import assert from "node:assert/strict";
-import type { DeepReadonly } from "ts-essentials";
 import { describe, expect, test } from "vitest";
 import { z } from "zod/v4";
 import { 拼音, 汉 } from "../data/helpers";
@@ -156,62 +154,6 @@ test(`hanzi word meaning gloss lint`, async () => {
   );
 
   expect(violations).toEqual(new Set());
-});
-
-test(`hanzi word meaning glossHint lint`, async () => {
-  const dict = await loadDictionary();
-
-  const maxWords = 100;
-  const maxSpaces = maxWords - 1;
-
-  const isViolating = (
-    glossHint: string,
-    meaning: DeepReadonly<HanziWordMeaning>,
-  ) =>
-    // no double space
-    /  /.exec(glossHint) != null ||
-    // referencing "component form of" must match the .componentFormOf
-    (/component form of ([^., ]+)/i.exec(glossHint)?.[1] ??
-      meaning.componentFormOf) != meaning.componentFormOf ||
-    // doesn't exceed word limit
-    (glossHint.match(/\s+/g)?.length ?? 0) > maxSpaces;
-
-  const violations = new Set(
-    [...dict]
-      .filter(
-        ([, meaning]) =>
-          meaning.glossHint != null && isViolating(meaning.glossHint, meaning),
-      )
-      .map(([hanziWord, { glossHint }]) => ({
-        hanziWord,
-        glossHint,
-      })),
-  );
-
-  expect(violations).toEqual(new Set());
-});
-
-test(`hanzi meaning glossHint lint`, async () => {
-  // all HanziWord references should exist in the dictionary
-  const dict = await loadDictionary();
-
-  for (const [hanziWord, { glossHint }] of dict) {
-    if (glossHint == null) {
-      continue;
-    }
-
-    const hanziWordRefs = parsePylymark(glossHint).filter(
-      (x) => x.type === `hanziWord`,
-    );
-
-    for (const hanziWordRef of hanziWordRefs) {
-      if (!dict.has(hanziWordRef.hanziWord)) {
-        assert.fail(
-          `hanzi word ${hanziWord} has references HanziWord ${hanziWordRef.hanziWord} but it is not in the dictionary`,
-        );
-      }
-    }
-  }
 });
 
 test(`hanzi meaning componentFormOf lint`, async () => {

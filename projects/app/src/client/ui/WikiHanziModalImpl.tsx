@@ -190,7 +190,7 @@ function Header({
         }}
       />
 
-      <View className="sticky top-[-120px] z-10 h-[184px] bg-cyanold">
+      <View className="theme-sky sticky top-[-120px] z-10 h-[184px] bg-bg">
         <View className="sticky top-1 z-10 h-[56px] flex-row items-center pl-4">
           <Pressable
             onPress={onDismiss}
@@ -256,17 +256,14 @@ function Header({
             }}
           />
           <View
-            className={
-              // Half-width view, transitioned between left and middle offset.
-              `
-                -translate-x-1/2 absolute bottom-0 h-1 w-1/2 rounded bg-fg-loud transition-[left]
+            // Half-width view, transitioned between left and middle offset.
+            className={`
+              -translate-x-1/2 absolute bottom-0 h-1 w-1/2 rounded-t-lg bg-fg-loud transition-[left]
 
-                ${tab === `meaning` ? `left-0` : `left-1/2`}
-              `
-            }
+              ${tab === `meaning` ? `left-0` : `left-1/2`}
+            `}
           />
         </View>
-        <View className="sticky top-[64px] h-px w-full bg-fg-loud" />
       </View>
     </>
   );

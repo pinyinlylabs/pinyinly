@@ -1,7 +1,5 @@
-import { useHanziMeanings } from "@/client/hooks/useHanziMeanings";
 import { useHanziWikiEntry } from "@/client/hooks/useHanziWikiEntry";
 import type { HanziText } from "@/data/model";
-import { Fragment } from "react";
 import { Text, View } from "react-native";
 import { HanziWordRefText } from "./HanziWordRefText";
 import { Pylymark } from "./Pylymark";
@@ -12,7 +10,6 @@ export const WikiHanziInterpretationPanel = ({
   hanzi: HanziText;
 }) => {
   const wikiEntry = useHanziWikiEntry(hanzi);
-  const meanings = useHanziMeanings(hanzi);
 
   return wikiEntry.data?.components == null ? null : (
     <View className="gap-1">
@@ -34,19 +31,6 @@ export const WikiHanziInterpretationPanel = ({
             </View>
           );
         })}
-
-        {meanings.data == null
-          ? null
-          : meanings.data.map(([, meaning], i) =>
-              meaning.glossHint == null ? null : (
-                <Fragment key={i}>
-                  <View className="h-px w-full bg-bg-loud" />
-                  <Text className="pyly-body">
-                    <Pylymark source={meaning.glossHint} />
-                  </Text>
-                </Fragment>
-              ),
-            )}
 
         {wikiEntry.data.interpretation == null ? null : (
           <>
