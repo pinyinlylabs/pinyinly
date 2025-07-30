@@ -4,7 +4,7 @@ import type {
   QuestionFlagType,
   SrsStateType,
 } from "@/data/model";
-import { QuestionFlagKind, SrsKind } from "@/data/model";
+import { QuestionFlagKind, SkillKind, SrsKind } from "@/data/model";
 import { generateQuestionForSkillOrThrow } from "@/data/questions";
 import type { Rizzle, Skill, SkillRating } from "@/data/rizzleSchema";
 import type { SkillReviewQueue } from "@/data/skills";
@@ -12,6 +12,7 @@ import {
   hanziWordToGloss,
   hanziWordToPinyin,
   skillDueWindow,
+  skillKindFromSkill,
   skillLearningGraph,
   skillReviewQueue,
 } from "@/data/skills";
@@ -44,6 +45,16 @@ export async function questionsForReview2(
         };
       }
       question.flag ??= flagsForSrsState(skillState?.srs);
+
+      // Instead of saying "New Skill" when it's just a harder version of an
+      // existing skill, we say "New Difficulty" instead.
+      if (
+        question.flag?.kind == QuestionFlagKind.NewSkill &&
+        isNewDifficultySkillType(skillKindFromSkill(skill))
+      ) {
+        question.flag = { kind: QuestionFlagKind.NewDifficulty };
+      }
+
       questions.push(question);
     } catch (error) {
       console.error(
@@ -59,6 +70,13 @@ export async function questionsForReview2(
   }
 
   return [questions, reviewQueue];
+}
+
+function isNewDifficultySkillType(skillKind: SkillKind): boolean {
+  return (
+    skillKind === SkillKind.HanziWordToPinyinFinal ||
+    skillKind === SkillKind.HanziWordToPinyinTone
+  );
 }
 
 export function flagsForSrsState(

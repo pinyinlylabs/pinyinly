@@ -8,6 +8,17 @@ import { IconImage } from "./IconImage";
 
 export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
   switch (flag.kind) {
+    case QuestionFlagKind.NewDifficulty: {
+      return (
+        <View className={flagViewClass({ class: `theme-success` })}>
+          <IconImage
+            className={flagIconClass()}
+            source={require(`@/assets/icons/badge-filled.svg`)}
+          />
+          <Text className={flagTextClass()}>New difficulty</Text>
+        </View>
+      );
+    }
     case QuestionFlagKind.NewSkill: {
       return (
         <View className={flagViewClass({ class: `theme-success` })}>
