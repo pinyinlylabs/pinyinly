@@ -151,21 +151,6 @@ export function QuizDeckOneCorrectPairQuestion({
                 <Text className="text-fg">
                   <SkillAnswerText skill={answer.skill} />
                 </Text>
-
-                {selectedAChoice != null && selectedBChoice != null ? (
-                  <View className="flex-row flex-wrap items-center gap-2">
-                    <Text className="shrink-0 font-bold leading-snug text-fg">
-                      Your answer:
-                    </Text>
-                    <View className="flex-1 flex-row flex-wrap items-center">
-                      <Text className="pyly-body-caption">
-                        <Pylymark
-                          source={`${choiceToPylymark(selectedAChoice)} + ${choiceToPylymark(selectedBChoice)}`}
-                        />
-                      </Text>
-                    </View>
-                  </View>
-                ) : null}
               </>
             )}
           </View>
@@ -310,10 +295,6 @@ export function QuizDeckOneCorrectPairQuestion({
       </View>
     </Skeleton>
   );
-}
-
-function choiceToPylymark(choice: OneCorrectPairQuestionChoice): string {
-  return `**${oneCorrectPairChoiceText(choice)}**`;
 }
 
 const SkillAnswerText = ({ skill }: { skill: Skill; small?: boolean }) => {
