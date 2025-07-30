@@ -83,9 +83,9 @@ export const PylymarkTypewriter = ({
         );
         break;
       }
-      case `highlight`: {
+      case `mark`: {
         nodes.push(
-          <Text className="pyly-highlight" key={nodes.length}>
+          <Text className="pyly-mark" key={nodes.length}>
             {typeChars(node.text, clock, fastForward)}
           </Text>,
         );

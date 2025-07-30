@@ -4622,6 +4622,7 @@ __metadata:
     react-native-web: "npm:^0.20.0"
     react-responsive: "npm:^10.0.0"
     react-test-renderer: "npm:19.x"
+    remark-flexible-markers: "npm:^1.3.0"
     replicache: "patch:replicache@patch%3Areplicache@npm%253A15.0.1%23~/.yarn/patches/replicache-npm-15.0.1-daaa5044ba.patch%3A%3Aversion=15.0.1&hash=c643a4#~/.yarn/patches/replicache-patch-1cf70e7f66.patch"
     resolve-package-path: "npm:^4.0.3"
     rive-react-native: "npm:^9.3.4"
@@ -4632,6 +4633,7 @@ __metadata:
     typescript: "patch:typescript@npm%3A5.8.3#~/.yarn/patches/typescript-npm-5.8.3-fbd7aef456.patch"
     typescript-eslint: "npm:^8.26.0"
     ucd-full: "npm:^16.0.0"
+    unified: "npm:^11.0.5"
     unist-util-visit: "npm:^5.0.0"
     usehooks-ts: "npm:^3.1.0"
     vite: "npm:^7.0.0"
@@ -6421,7 +6423,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/mdast@npm:^4.0.0":
+"@types/mdast@npm:^4.0.0, @types/mdast@npm:^4.0.4":
   version: 4.0.4
   resolution: "@types/mdast@npm:4.0.4"
   dependencies:
@@ -6568,7 +6570,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/unist@npm:*, @types/unist@npm:^3.0.0":
+"@types/unist@npm:*, @types/unist@npm:^3.0.0, @types/unist@npm:^3.0.3":
   version: 3.0.3
   resolution: "@types/unist@npm:3.0.3"
   checksum: 10c0/2b1e4adcab78388e088fcc3c0ae8700f76619dbcb4741d7d201f87e2cb346bfc29a89003cfea2d76c996e1061452e14fcd737e8b25aacf949c1f2d6b2bc3dd60
@@ -16863,6 +16865,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"remark-flexible-markers@npm:^1.3.0":
+  version: 1.3.0
+  resolution: "remark-flexible-markers@npm:1.3.0"
+  dependencies:
+    "@types/mdast": "npm:^4.0.4"
+    unist-builder: "npm:^4.0.0"
+    unist-util-find-after: "npm:^5.0.0"
+    unist-util-find-all-after: "npm:^5.0.0"
+    unist-util-find-all-before: "npm:^5.0.0"
+    unist-util-find-between-all: "npm:^1.1.0"
+    unist-util-visit: "npm:^5.0.0"
+  peerDependencies:
+    unified: ^11
+  checksum: 10c0/42c61446401253d36a79d29085870d94d8eeeda9912fbec3f520cf7d0a59fa045f9ffac3971617a7f86dec128b2161c06ccc263ab3bbbd6faaae98c5137c9dd6
+  languageName: node
+  linkType: hard
+
 "remark-mdx@npm:^3.0.0":
   version: 3.1.0
   resolution: "remark-mdx@npm:3.1.0"
@@ -18970,7 +18989,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"unified@npm:^11.0.0":
+"unified@npm:^11.0.0, unified@npm:^11.0.5":
   version: 11.0.5
   resolution: "unified@npm:11.0.5"
   dependencies:
@@ -19009,6 +19028,55 @@ __metadata:
   dependencies:
     crypto-random-string: "npm:^2.0.0"
   checksum: 10c0/11820db0a4ba069d174bedfa96c588fc2c96b083066fafa186851e563951d0de78181ac79c744c1ed28b51f9d82ac5b8196ff3e4560d0178046ef455d8c2244b
+  languageName: node
+  linkType: hard
+
+"unist-builder@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "unist-builder@npm:4.0.0"
+  dependencies:
+    "@types/unist": "npm:^3.0.0"
+  checksum: 10c0/8296a70703bb1be8dfaa2fb59c05480a84df464f359ce61c7db98db2dc4dfb2219a17020a3feaca65c44841e631133cbf829047b9f92941b30dad003f9052d14
+  languageName: node
+  linkType: hard
+
+"unist-util-find-after@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "unist-util-find-after@npm:5.0.0"
+  dependencies:
+    "@types/unist": "npm:^3.0.0"
+    unist-util-is: "npm:^6.0.0"
+  checksum: 10c0/a7cea473c4384df8de867c456b797ff1221b20f822e1af673ff5812ed505358b36f47f3b084ac14c3622cb879ed833b71b288e8aa71025352a2aab4c2925a6eb
+  languageName: node
+  linkType: hard
+
+"unist-util-find-all-after@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "unist-util-find-all-after@npm:5.0.0"
+  dependencies:
+    "@types/unist": "npm:^3.0.0"
+    unist-util-is: "npm:^6.0.0"
+  checksum: 10c0/7689716f07ae8be5519de3247cfd46d3e93b42b759dfc1e72d2050eb3809af8d3c26bef4dff258ddfafaa32a4cec8e607b2ff5ec4d48cf85d780dd295a6edd7a
+  languageName: node
+  linkType: hard
+
+"unist-util-find-all-before@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "unist-util-find-all-before@npm:5.0.0"
+  dependencies:
+    "@types/unist": "npm:^3.0.0"
+    unist-util-is: "npm:^6.0.0"
+  checksum: 10c0/23069b8fcf099315142f77afd1ef590c59e2b691ceeba28d55e7427212cc7d6376876ed68574d1c2c9b72e18b36a6c8b50a014419f2d6e68f0a25f8615987ad0
+  languageName: node
+  linkType: hard
+
+"unist-util-find-between-all@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "unist-util-find-between-all@npm:1.1.0"
+  dependencies:
+    "@types/unist": "npm:^3.0.3"
+    unist-util-is: "npm:^6.0.0"
+  checksum: 10c0/f3fa470117e1d6915ee31e9cb7ac506ade57bae077c2ae833b381510d4d48a4dbc7947e6b2fa0e4851e83de65a43fb6a791ba9ed3f33617bb853c9c129d9ee01
   languageName: node
   linkType: hard
 

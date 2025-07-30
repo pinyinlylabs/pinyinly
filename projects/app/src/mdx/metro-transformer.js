@@ -1,6 +1,7 @@
 // @ts-check
 
 import makeDebug from "debug";
+import remarkFlexibleMarkers from "remark-flexible-markers";
 import { visit } from "unist-util-visit";
 
 const debug = makeDebug(`pinyinly:mdx:transform`);
@@ -68,11 +69,13 @@ const getTemplate = (rawMdxString) => {
  * @param {function({filename: string, src: string}): boolean} [options.matchFile] - Function to determine if a file should be transformed
  * @param {function(string): boolean} [options.matchLocalAsset] - Function to determine if an asset URL is local
  * @param {PluggableList} [options.remarkPlugins] - List of remark plugins
- * @returns {MetroBabelTransformer} The transformer object with a transform method
+ * @param {import("@mdx-js/mdx").ProcessorOptions["providerImportSource"]} [options.providerImportSource] - The import source for MDX components
+ * @returns {MetroBabelTransformer} The transformer function
  */
 export function createTransformer({
   matchFile = (props) => !!/\.mdx?$/.test(props.filename),
   matchLocalAsset = (url) => !!/^[.@]/.test(url),
+  providerImportSource,
   remarkPlugins = [],
 } = {}) {
   /**
@@ -105,7 +108,7 @@ export function createTransformer({
     const { createProcessor } = await import(`@mdx-js/mdx`);
     _compiler = createProcessor({
       jsx: true,
-      providerImportSource: `@/client/hooks/useMDXComponents`,
+      providerImportSource,
       remarkPlugins: [...remarkPlugins, expoMdxPlugin],
     });
 
@@ -114,7 +117,7 @@ export function createTransformer({
 
   /**
    * Transform function for Metro bundler
-   * @type {MetroBabelTransformer['transform']}
+   * @type {MetroBabelTransformer}
    */
   const transform = async (props) => {
     if (!matchFile(props)) {
@@ -148,12 +151,16 @@ export function createTransformer({
     return result;
   };
 
-  return { transform };
+  return transform;
 }
 
-export const transform = createTransformer().transform;
+export const transform = createTransformer({
+  providerImportSource: `@/client/hooks/useMDXComponents`,
+  remarkPlugins: [
+    [remarkFlexibleMarkers, { markerClassName: `pyly-mdx-mark` }],
+  ],
+});
 
 /**
- * @typedef {Object} MetroBabelTransformer
- * @property {function({filename: string, src: string}): Promise<{filename: string, src: string}>} transform - Transform function
+ * @typedef {function({filename: string, src: string}): Promise<{filename: string, src: string}>} MetroBabelTransformer
  */

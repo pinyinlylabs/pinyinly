@@ -193,7 +193,7 @@ import Foo from './foo'
   });
 
   it(`transforms code blocks`, async () => {
-    const { transform } = createTransformer();
+    const transform = createTransformer();
     const result = await transform({
       filename: `test.mdx`,
       src: `

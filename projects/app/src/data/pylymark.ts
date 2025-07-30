@@ -26,8 +26,8 @@ export interface PylymarkItalicNode {
   text: string;
 }
 
-export interface PylymarkHighlightNode {
-  type: `highlight`;
+export interface PylymarkMarkNode {
+  type: `mark`;
   text: string;
 }
 
@@ -36,7 +36,7 @@ export type PylymarkNode =
   | PylymarkTextNode
   | PylymarkBoldNode
   | PylymarkItalicNode
-  | PylymarkHighlightNode;
+  | PylymarkMarkNode;
 
 /**
  * Parse a Pylymark string into an array of nodes.
@@ -47,12 +47,12 @@ export type PylymarkNode =
  * - HanziWord: {HanziWord} (e.g. {好:good})
  * - Bold: **text**
  * - Italic: *text*
- * - Highlight: ==text==
+ * - Mark: ==text==
  */
 export function parsePylymark(value: string): PylymarkNode[] {
   const nodes: PylymarkNode[] = [];
 
-  // Regex patterns for HanziWord, Bold, Italic, and Highlight
+  // Regex patterns for HanziWord, Bold, Italic, and Mark
   const regex = /{([^:]+):(-)?([^}]+)}|\*\*(.+?)\*\*|\*(.+?)\*|==(.+?)==/g;
   let match;
   let lastIndex = 0;
@@ -65,7 +65,7 @@ export function parsePylymark(value: string): PylymarkNode[] {
       hanziWordMeaningKey,
       boldText,
       italicText,
-      highlightText,
+      markText,
     ] = match;
     const startIndex = match.index;
     const endIndex = regex.lastIndex;
@@ -103,11 +103,11 @@ export function parsePylymark(value: string): PylymarkNode[] {
         type: `italic`,
         text: italicText,
       });
-    } else if (highlightText != null) {
-      // Add Highlight node for the match
+    } else if (markText != null) {
+      // Add Mark node for the match
       nodes.push({
-        type: `highlight`,
-        text: highlightText,
+        type: `mark`,
+        text: markText,
       });
     }
 
@@ -147,7 +147,7 @@ export function stringifyPylymark(nodes: PylymarkNode[]): string {
         case `italic`: {
           return `*${node.text}*`;
         }
-        case `highlight`: {
+        case `mark`: {
           return `==${node.text}==`;
         }
       }
