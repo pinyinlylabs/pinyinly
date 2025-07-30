@@ -122,13 +122,13 @@
   /* --- */
 
   .pyly-body-input {
-    @apply font-sans text-lg/snug font-light text-fg;
+    @apply font-sans text-lg/snug font-medium text-fg;
   }
   .pyly-body-input .pyly-ref {
-    @apply text-fg-loud font-medium pyly-ref-lg;
+    @apply text-fg-loud font-semibold pyly-ref-lg;
   }
   .pyly-body-input .pyly-bold {
-    @apply font-medium text-fg-loud;
+    @apply font-semibold text-fg-loud;
   }
   .pyly-body-input .pyly-mark {
     @apply font-semibold text-yellow;
