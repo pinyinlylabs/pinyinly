@@ -9,7 +9,6 @@ import Reanimated, {
   useAnimatedStyle,
   useSharedValue,
   withClamp,
-  withRepeat,
   withSequence,
   withSpring,
   withTiming,
@@ -206,7 +205,7 @@ export function TextAnswerButton({
         } else if (state === `error`) {
           // Shake the button violently if the user presses it again after they
           // already made an error.
-          rotationSv.set(withIncorrectShakeAnimation(rotationSv.get()));
+          rotationSv.set(withIncorrectShakeAnimation());
         } else {
           pressableProps.onPress?.(e);
         }
@@ -278,9 +277,14 @@ const withIncorrectWobbleAnimation = () => {
   return withSpring(`${offset}deg`, { duration: 2 * duration });
 };
 
-const withIncorrectShakeAnimation = (current: string) => {
-  const deg = Number.parseFloat(current.replace(/deg$/, ``));
-  return withRepeat(withSpring(`${deg + 2}deg`, { duration: 80 }), 4, true);
+const withIncorrectShakeAnimation = () => {
+  return withSequence(
+    withTiming(`-5deg`, { duration: 80, easing: Easing.ease }),
+    withTiming(`5deg`, { duration: 80, easing: Easing.ease }),
+    withTiming(`-5deg`, { duration: 80, easing: Easing.ease }),
+    withTiming(`5deg`, { duration: 80, easing: Easing.ease }),
+    withTiming(`0deg`, { duration: 80, easing: Easing.ease }),
+  );
 };
 
 const bgAnimatedClass = tv({
