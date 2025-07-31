@@ -9,7 +9,6 @@ import Reanimated, {
   useAnimatedStyle,
   useSharedValue,
   withClamp,
-  withRepeat,
   withSequence,
   withSpring,
   withTiming,
@@ -206,7 +205,7 @@ export function TextAnswerButton({
         } else if (state === `error`) {
           // Shake the button violently if the user presses it again after they
           // already made an error.
-          rotationSv.set(withIncorrectShakeAnimation(rotationSv.get()));
+          rotationSv.set(withIncorrectShakeAnimation());
         } else {
           pressableProps.onPress?.(e);
         }
@@ -278,9 +277,16 @@ const withIncorrectWobbleAnimation = () => {
   return withSpring(`${offset}deg`, { duration: 2 * duration });
 };
 
-const withIncorrectShakeAnimation = (current: string) => {
-  const deg = Number.parseFloat(current.replace(/deg$/, ``));
-  return withRepeat(withSpring(`${deg + 2}deg`, { duration: 80 }), 4, true);
+const withIncorrectShakeAnimation = () => {
+  const delta = 3; // degrees
+  const options = { duration: 80, easing: Easing.ease };
+  return withSequence(
+    withTiming(`-${delta}deg`, options),
+    withTiming(`${delta}deg`, options),
+    withTiming(`-${delta}deg`, options),
+    withTiming(`${delta}deg`, options),
+    withTiming(`0deg`, options),
+  );
 };
 
 const bgAnimatedClass = tv({
@@ -383,8 +389,11 @@ const textClass = tv({
   // px-1: Horizontal padding is necessary to give first and last letters on a
   // line with accents enough space to not be clipped. Without this words like
   // "lǐ" will have half the accent clipped.
+  //
+  // It's important to have decoration-transparent otherwise when the decoration
+  // animates in it will start as white and look jarring.
   base: `
-    px-1 py-[2px] text-center font-normal text-fg
+    px-1 py-[2px] text-center font-normal text-fg decoration-transparent
 
     web:transition-colors
   `,
@@ -393,7 +402,11 @@ const textClass = tv({
       true: ``,
     },
     hasWikiModal: {
-      true: ``,
+      true: `
+        underline decoration-currentColor/25
+
+        [text-decoration-skip-ink:none]
+      `,
     },
     state: {
       default: `text-fg`,
@@ -442,14 +455,6 @@ const textClass = tv({
     },
   },
   compoundVariants: [
-    {
-      hasWikiModal: true,
-      class: `
-        underline decoration-currentColor/25
-
-        [text-decoration-skip-ink:none]
-      `,
-    },
     {
       hasWikiModal: true,
       hovered: true,

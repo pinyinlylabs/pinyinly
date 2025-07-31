@@ -28,15 +28,9 @@ import {
 import { hanziFromHanziWord } from "@/dictionary/dictionary";
 import { nonNullable } from "@pinyinly/lib/invariant";
 import type { ReactNode, Ref } from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
-import type { StyleProp, TextInput, ViewStyle } from "react-native";
-import {
-  Platform,
-  Animated as RnAnimated,
-  Easing as RnEasing,
-  Text,
-  View,
-} from "react-native";
+import { useMemo, useRef, useState } from "react";
+import type { TextInput } from "react-native";
+import { Text, View } from "react-native";
 import Reanimated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { DeepReadonly } from "ts-essentials";
@@ -44,6 +38,7 @@ import { HanziWordRefText } from "./HanziWordRefText";
 import { IconImage } from "./IconImage";
 import { PinyinOptionButton } from "./PinyinOptionButton";
 import { Pylymark } from "./Pylymark";
+import { QuizDeckToastContainer } from "./QuizDeckToastContainer";
 import { QuizFlagText } from "./QuizFlagText";
 import { QuizSubmitButton, QuizSubmitButtonState } from "./QuizSubmitButton";
 import { TextInputSingle } from "./TextInputSingle";
@@ -410,53 +405,6 @@ const Skeleton = ({
   const submitButtonHeight = 44;
   const submitButtonInsetBottom = insets.bottom + 20;
 
-  const [slideInAnim] = useState(() => new RnAnimated.Value(0));
-  const hasToast = toast !== null;
-
-  useEffect(() => {
-    if (hasToast) {
-      RnAnimated.timing(slideInAnim, {
-        toValue: 1,
-        duration: 200,
-        easing: RnEasing.out(RnEasing.exp),
-        useNativeDriver: false, // layout properties aren't compatible with the native driver on mobile (it works on Web though)
-      }).start();
-    } else {
-      RnAnimated.timing(slideInAnim, {
-        toValue: 0,
-        duration: 0,
-        useNativeDriver: false,
-      }).start();
-    }
-  }, [slideInAnim, hasToast]);
-
-  const slideInStyle: StyleProp<ViewStyle> = useMemo(
-    () =>
-      Platform.OS === `web`
-        ? {
-            // On web the `bottom: <percent>%` approach doesn't work when the
-            // parent is `position: absolute`. But using `translateY: <percent>%`
-            // DOES work (but this doesn't work on mobile native because only
-            // pixel values are accepted).
-            transform: [
-              {
-                translateY: slideInAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [`100%`, `0%`],
-                }),
-              },
-            ],
-          }
-        : {
-            position: `relative`,
-            bottom: slideInAnim.interpolate({
-              inputRange: [0, 1],
-              outputRange: [`-100%`, `0%`],
-            }),
-          },
-    [slideInAnim],
-  );
-
   return (
     <>
       <View
@@ -472,9 +420,7 @@ const Skeleton = ({
         />
       </View>
       {toast === null ? null : (
-        <View className="absolute inset-x-0 bottom-0">
-          <RnAnimated.View style={slideInStyle}>{toast}</RnAnimated.View>
-        </View>
+        <QuizDeckToastContainer>{toast}</QuizDeckToastContainer>
       )}
       <View
         className="absolute inset-x-4 flex-row items-stretch"
