@@ -91,7 +91,7 @@
     "react-native": "0.79.5",
     "react-native-gesture-handler": "~2.24.0",
     "react-native-purchases": "^8.5.2",
-    "react-native-reanimated": "patch:react-native-reanimated@npm%3A4.0.1#~/.yarn/patches/react-native-reanimated-npm-4.0.1-40ff4579cd.patch",
+    "react-native-reanimated": "patch:react-native-reanimated@patch%3Areact-native-reanimated@npm%253A4.0.1%23~/.yarn/patches/react-native-reanimated-npm-4.0.1-40ff4579cd.patch%3A%3Aversion=4.0.1&hash=ad6b46#~/.yarn/patches/react-native-reanimated-patch-347acf5f9a.patch",
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.11.1",
     "react-native-svg": "15.11.2",
