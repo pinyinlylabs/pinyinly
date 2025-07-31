@@ -278,12 +278,14 @@ const withIncorrectWobbleAnimation = () => {
 };
 
 const withIncorrectShakeAnimation = () => {
+  const delta = 3; // degrees
+  const options = { duration: 80, easing: Easing.ease };
   return withSequence(
-    withTiming(`-5deg`, { duration: 80, easing: Easing.ease }),
-    withTiming(`5deg`, { duration: 80, easing: Easing.ease }),
-    withTiming(`-5deg`, { duration: 80, easing: Easing.ease }),
-    withTiming(`5deg`, { duration: 80, easing: Easing.ease }),
-    withTiming(`0deg`, { duration: 80, easing: Easing.ease }),
+    withTiming(`-${delta}deg`, options),
+    withTiming(`${delta}deg`, options),
+    withTiming(`-${delta}deg`, options),
+    withTiming(`${delta}deg`, options),
+    withTiming(`0deg`, options),
   );
 };
 
