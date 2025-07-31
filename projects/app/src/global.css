@@ -15,10 +15,10 @@
     @apply font-sans text-base/snug font-bold uppercase text-fg;
   }
   .pyly-button-option {
-    @apply font-sans text-base/snug text-fg;
+    @apply font-sans text-base/snug font-medium text-fg;
   }
   .pyly-button-option-caption {
-    @apply font-sans text-sm/snug font-light text-caption;
+    @apply font-sans text-sm/snug text-caption;
   }
   .pyly-button-bare {
     @apply font-sans text-sm/normal font-bold uppercase text-fg;
