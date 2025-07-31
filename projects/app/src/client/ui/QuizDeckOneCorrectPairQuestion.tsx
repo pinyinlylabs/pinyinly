@@ -23,14 +23,14 @@ import {
 import { longestTextByGraphemes } from "@/util/unicode";
 import { invariant } from "@pinyinly/lib/invariant";
 import type { ReactNode } from "react";
-import { Suspense, useEffect, useState } from "react";
-import { Platform, Text, View } from "react-native";
-import Reanimated, { Easing, Keyframe } from "react-native-reanimated";
+import { useState } from "react";
+import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { HanziWordRefText } from "./HanziWordRefText";
 import { IconImage } from "./IconImage";
 import { NewSkillModal } from "./NewSkillModal";
 import { Pylymark } from "./Pylymark";
+import { QuizDeckToastContainer } from "./QuizDeckToastContainer";
 import { QuizFlagText } from "./QuizFlagText";
 import { QuizSubmitButton, QuizSubmitButtonState } from "./QuizSubmitButton";
 import type {
@@ -364,33 +364,6 @@ const Skeleton = ({
   const submitButtonInsetBottom = insets.bottom + 20;
   const contentInsetBottom = submitButtonInsetBottom + 5 + submitButtonHeight;
 
-  const keyframe = Platform.select({
-    // On web the `bottom: <percent>%` approach doesn't work when the
-    // parent is `position: absolute`. But using `translateY: <percent>%`
-    // DOES work (but this doesn't work on mobile native because only
-    // pixel values are accepted).
-    web: new Keyframe({
-      0: {
-        transform: [{ translateY: `100%` }],
-      },
-      100: {
-        transform: [{ translateY: `0%` }],
-        easing: Easing.exp,
-      },
-    }),
-    default: new Keyframe({
-      0: {
-        position: `relative`,
-        bottom: `-100%`,
-      },
-      100: {
-        position: `relative`,
-        bottom: 0,
-        easing: Easing.exp,
-      },
-    }),
-  });
-
   return (
     <>
       <View
@@ -400,11 +373,7 @@ const Skeleton = ({
         {children}
       </View>
       {toast === null ? null : (
-        <Suspense fallback={null}>
-          <View className="absolute inset-x-0 bottom-0">
-            <Reanimated.View entering={keyframe}>{toast}</Reanimated.View>
-          </View>
-        </Suspense>
+        <QuizDeckToastContainer>{toast}</QuizDeckToastContainer>
       )}
       <View
         className="absolute inset-x-4 flex-row items-stretch"
