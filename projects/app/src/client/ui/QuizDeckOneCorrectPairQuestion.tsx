@@ -23,15 +23,9 @@ import {
 import { longestTextByGraphemes } from "@/util/unicode";
 import { invariant } from "@pinyinly/lib/invariant";
 import type { ReactNode } from "react";
-import { useEffect, useMemo, useState } from "react";
-import type { StyleProp, ViewStyle } from "react-native";
-import {
-  Platform,
-  Animated as RnAnimated,
-  Easing as RnEasing,
-  Text,
-  View,
-} from "react-native";
+import { Suspense, useEffect, useState } from "react";
+import { Platform, Text, View } from "react-native";
+import Reanimated, { Easing, Keyframe } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { HanziWordRefText } from "./HanziWordRefText";
 import { IconImage } from "./IconImage";
@@ -370,52 +364,32 @@ const Skeleton = ({
   const submitButtonInsetBottom = insets.bottom + 20;
   const contentInsetBottom = submitButtonInsetBottom + 5 + submitButtonHeight;
 
-  const [slideInAnim] = useState(() => new RnAnimated.Value(0));
-  const hasToast = toast !== null;
-
-  useEffect(() => {
-    if (hasToast) {
-      RnAnimated.timing(slideInAnim, {
-        toValue: 1,
-        duration: 200,
-        easing: RnEasing.out(RnEasing.exp),
-        useNativeDriver: false, // layout properties aren't compatible with the native driver on mobile (it works on Web though)
-      }).start();
-    } else {
-      RnAnimated.timing(slideInAnim, {
-        toValue: 0,
-        duration: 0,
-        useNativeDriver: false,
-      }).start();
-    }
-  }, [slideInAnim, hasToast]);
-
-  const slideInStyle: StyleProp<ViewStyle> = useMemo(
-    () =>
-      Platform.OS === `web`
-        ? {
-            // On web the `bottom: <percent>%` approach doesn't work when the
-            // parent is `position: absolute`. But using `translateY: <percent>%`
-            // DOES work (but this doesn't work on mobile native because only
-            // pixel values are accepted).
-            transform: [
-              {
-                translateY: slideInAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [`100%`, `0%`],
-                }),
-              },
-            ],
-          }
-        : {
-            position: `relative`,
-            bottom: slideInAnim.interpolate({
-              inputRange: [0, 1],
-              outputRange: [`-100%`, `0%`],
-            }),
-          },
-    [slideInAnim],
-  );
+  const keyframe = Platform.select({
+    // On web the `bottom: <percent>%` approach doesn't work when the
+    // parent is `position: absolute`. But using `translateY: <percent>%`
+    // DOES work (but this doesn't work on mobile native because only
+    // pixel values are accepted).
+    web: new Keyframe({
+      0: {
+        transform: [{ translateY: `100%` }],
+      },
+      100: {
+        transform: [{ translateY: `0%` }],
+        easing: Easing.exp,
+      },
+    }),
+    default: new Keyframe({
+      0: {
+        position: `relative`,
+        bottom: `-100%`,
+      },
+      100: {
+        position: `relative`,
+        bottom: 0,
+        easing: Easing.exp,
+      },
+    }),
+  });
 
   return (
     <>
@@ -426,9 +400,11 @@ const Skeleton = ({
         {children}
       </View>
       {toast === null ? null : (
-        <View className="absolute inset-x-0 bottom-0">
-          <RnAnimated.View style={slideInStyle}>{toast}</RnAnimated.View>
-        </View>
+        <Suspense fallback={null}>
+          <View className="absolute inset-x-0 bottom-0">
+            <Reanimated.View entering={keyframe}>{toast}</Reanimated.View>
+          </View>
+        </Suspense>
       )}
       <View
         className="absolute inset-x-4 flex-row items-stretch"
