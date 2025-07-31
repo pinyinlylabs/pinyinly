@@ -32,7 +32,7 @@ describe(transform, () => {
       /*@jsxImportSource react*/
       import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
       function _createMdxContent(props) {
-        const _components = Object.create(_provideComponents(), props.components);
+        const _components = Object.assign(Object.create(_provideComponents()), props.components);
         return <><_components.h1>{"Hello World"}</_components.h1>{"\\n"}<_components.blockquote>{"\\n"}<_components.p>{"Universe"}</_components.p>{"\\n"}</_components.blockquote>{"\\n"}<_components.ul>{"\\n"}<_components.li>{"a"}</_components.li>{"\\n"}<_components.li>{"b"}</_components.li>{"\\n"}</_components.ul>{"\\n"}<_components.p><_components.img src={require("./foo/bar.png")} alt="custom alt text" /></_components.p></>;
       }
       export default function MDXContent(props = {}) {
@@ -69,7 +69,7 @@ import Foo from './foo'
       import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
       import Foo from './foo';
       function _createMdxContent(props) {
-        const _components = Object.create(_provideComponents(), props.components);
+        const _components = Object.assign(Object.create(_provideComponents()), props.components);
         return <><_components.h1>{"Hello World"}</_components.h1>{"\\n"}{"\\n"}<Foo />{"\\n"}<Foo />{"\\n"}<Foo><Foo /></Foo></>;
       }
       export default function MDXContent(props = {}) {
@@ -101,7 +101,7 @@ import Foo from './foo'
       import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
       import Foo from './foo';
       function _createMdxContent(props) {
-        const _components = Object.create(_provideComponents(), props.components);
+        const _components = Object.assign(Object.create(_provideComponents()), props.components);
         return <><_components.h1>{"Hello World"}</_components.h1>{"\\n"}{"\\n"}<Foo /></>;
       }
       export default function MDXContent(props = {}) {
@@ -130,7 +130,7 @@ import Foo from './foo'
       /*@jsxImportSource react*/
       import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
       function _createMdxContent(props) {
-        const _components = Object.create(_provideComponents(), props.components), {Foo} = _components;
+        const _components = Object.assign(Object.create(_provideComponents()), props.components), {Foo} = _components;
         return <><_components.h1>{"Hello World"}</_components.h1>{"\\n"}<Foo /></>;
       }
       export default function MDXContent(props = {}) {
@@ -162,7 +162,7 @@ import Foo from './foo'
       /*@jsxImportSource react*/
       import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
       function _createMdxContent(props) {
-        const _components = Object.create(_provideComponents(), props.components), {Foo} = _components;
+        const _components = Object.assign(Object.create(_provideComponents()), props.components), {Foo} = _components;
         return <><_components.h1>{"Hello World"}</_components.h1>{"\\n"}<Foo>{"Some "}<_components.strong>{"bold"}</_components.strong>{" text"}</Foo></>;
       }
       export default function MDXContent(props = {}) {
