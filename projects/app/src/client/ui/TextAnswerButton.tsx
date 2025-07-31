@@ -389,8 +389,11 @@ const textClass = tv({
   // px-1: Horizontal padding is necessary to give first and last letters on a
   // line with accents enough space to not be clipped. Without this words like
   // "lǐ" will have half the accent clipped.
+  //
+  // It's important to have decoration-transparent otherwise when the decoration
+  // animates in it will start as white and look jarring.
   base: `
-    px-1 py-[2px] text-center font-normal text-fg
+    px-1 py-[2px] text-center font-normal text-fg decoration-transparent
 
     web:transition-colors
   `,
@@ -399,7 +402,11 @@ const textClass = tv({
       true: ``,
     },
     hasWikiModal: {
-      true: ``,
+      true: `
+        underline decoration-currentColor/25
+
+        [text-decoration-skip-ink:none]
+      `,
     },
     state: {
       default: `text-fg`,
@@ -448,14 +455,6 @@ const textClass = tv({
     },
   },
   compoundVariants: [
-    {
-      hasWikiModal: true,
-      class: `
-        underline decoration-currentColor/25
-
-        [text-decoration-skip-ink:none]
-      `,
-    },
     {
       hasWikiModal: true,
       hovered: true,
