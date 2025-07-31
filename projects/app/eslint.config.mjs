@@ -306,6 +306,7 @@ export default tseslint.config(
             },
             "react-native": {
               Animated: `RnAnimated`,
+              Easing: `RnEasing`,
             },
           },
         },
