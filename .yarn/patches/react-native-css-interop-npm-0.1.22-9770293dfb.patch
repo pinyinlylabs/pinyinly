@@ -1,0 +1,13 @@
+diff --git a/babel.js b/babel.js
+index 5a8a29ba204e6a2bd4a74d4a30be2329bf94eaf5..d79f57460356f97e69f6470ab0d91d19e5bad8d5 100644
+--- a/babel.js
++++ b/babel.js
+@@ -9,7 +9,7 @@ module.exports = function () {
+           importSource: "react-native-css-interop",
+         },
+       ],
+-      "react-native-reanimated/plugin",
++      "react-native-worklets/plugin",
+     ],
+   };
+ };

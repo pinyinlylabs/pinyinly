@@ -1,7 +1,7 @@
+import { Section } from "@/client/ui/demo/helpers";
 import { devToolsSlowQuerySleepIfEnabled } from "@/util/devtools";
 import type { FunctionComponent } from "react";
 import { lazy } from "react";
-import { Section } from "./_helpers";
 
 export default function UiDemoIndexPage() {
   return (
@@ -25,32 +25,32 @@ const lazyDemo = <Demo extends FunctionComponent>(
 
 // prettier-ignore
 export const demos: Record<string, FunctionComponent> = {
-  // <pyly-glob-template glob="./_demos/*.tsx" template="  [`${filenameWithoutExt}`]: lazyDemo(() => import(`${pathWithoutExt}`)),">
-  [`Colors`]: lazyDemo(() => import(`./_demos/Colors`)),
-  [`HanziText`]: lazyDemo(() => import(`./_demos/HanziText`)),
-  [`IconImage`]: lazyDemo(() => import(`./_demos/IconImage`)),
-  [`Icons`]: lazyDemo(() => import(`./_demos/Icons`)),
-  [`ImageCloud`]: lazyDemo(() => import(`./_demos/ImageCloud`)),
-  [`Mdx`]: lazyDemo(() => import(`./_demos/Mdx`)),
-  [`NewSkillModal`]: lazyDemo(() => import(`./_demos/NewSkillModal`)),
-  [`NewSprout`]: lazyDemo(() => import(`./_demos/NewSprout`)),
-  [`NewWordTutorial`]: lazyDemo(() => import(`./_demos/NewWordTutorial`)),
-  [`PinyinOptionButton`]: lazyDemo(() => import(`./_demos/PinyinOptionButton`)),
-  [`Pylymark`]: lazyDemo(() => import(`./_demos/Pylymark`)),
-  [`PylymarkTypewriter`]: lazyDemo(() => import(`./_demos/PylymarkTypewriter`)),
-  [`QuizDeckHanziToPinyinQuestion`]: lazyDemo(() => import(`./_demos/QuizDeckHanziToPinyinQuestion`)),
-  [`QuizFlagText`]: lazyDemo(() => import(`./_demos/QuizFlagText`)),
-  [`QuizProgressBar`]: lazyDemo(() => import(`./_demos/QuizProgressBar`)),
-  [`QuizQueueButton`]: lazyDemo(() => import(`./_demos/QuizQueueButton`)),
-  [`RectButton`]: lazyDemo(() => import(`./_demos/RectButton`)),
-  [`ShootingStars`]: lazyDemo(() => import(`./_demos/ShootingStars`)),
-  [`SkillTile`]: lazyDemo(() => import(`./_demos/SkillTile`)),
-  [`TextAnswerButton`]: lazyDemo(() => import(`./_demos/TextAnswerButton`)),
-  [`TextInputSingle`]: lazyDemo(() => import(`./_demos/TextInputSingle`)),
-  [`ToggleButton`]: lazyDemo(() => import(`./_demos/ToggleButton`)),
-  [`TutorialDialogBox`]: lazyDemo(() => import(`./_demos/TutorialDialogBox`)),
-  [`Typography`]: lazyDemo(() => import(`./_demos/Typography`)),
-  [`WikiHanziModal`]: lazyDemo(() => import(`./_demos/WikiHanziModal`)),
-  [`WikiHanziWordModal`]: lazyDemo(() => import(`./_demos/WikiHanziWordModal`)),
+  // <pyly-glob-template glob="../../../**/*.demo.tsx" template="  [`${filenameWithoutExt.split('.')[0]}`]: lazyDemo(() => import(`${pathWithoutExt}`)),">
+  [`Colors`]: lazyDemo(() => import(`../../../client/ui/Colors.demo`)),
+  [`HanziText`]: lazyDemo(() => import(`../../../client/ui/HanziText.demo`)),
+  [`IconImage`]: lazyDemo(() => import(`../../../client/ui/IconImage.demo`)),
+  [`Icons`]: lazyDemo(() => import(`../../../client/ui/Icons.demo`)),
+  [`ImageCloud`]: lazyDemo(() => import(`../../../client/ui/ImageCloud.demo`)),
+  [`Mdx`]: lazyDemo(() => import(`../../../client/ui/Mdx.demo`)),
+  [`NewSkillModal`]: lazyDemo(() => import(`../../../client/ui/NewSkillModal.demo`)),
+  [`NewSprout`]: lazyDemo(() => import(`../../../client/ui/NewSprout.demo`)),
+  [`NewWordTutorial`]: lazyDemo(() => import(`../../../client/ui/NewWordTutorial.demo`)),
+  [`PinyinOptionButton`]: lazyDemo(() => import(`../../../client/ui/PinyinOptionButton.demo`)),
+  [`Pylymark`]: lazyDemo(() => import(`../../../client/ui/Pylymark.demo`)),
+  [`PylymarkTypewriter`]: lazyDemo(() => import(`../../../client/ui/PylymarkTypewriter.demo`)),
+  [`QuizDeckHanziToPinyinQuestion`]: lazyDemo(() => import(`../../../client/ui/QuizDeckHanziToPinyinQuestion.demo`)),
+  [`QuizFlagText`]: lazyDemo(() => import(`../../../client/ui/QuizFlagText.demo`)),
+  [`QuizProgressBar`]: lazyDemo(() => import(`../../../client/ui/QuizProgressBar.demo`)),
+  [`QuizQueueButton`]: lazyDemo(() => import(`../../../client/ui/QuizQueueButton.demo`)),
+  [`RectButton`]: lazyDemo(() => import(`../../../client/ui/RectButton.demo`)),
+  [`ShootingStars`]: lazyDemo(() => import(`../../../client/ui/ShootingStars.demo`)),
+  [`SkillTile`]: lazyDemo(() => import(`../../../client/ui/SkillTile.demo`)),
+  [`TextAnswerButton`]: lazyDemo(() => import(`../../../client/ui/TextAnswerButton.demo`)),
+  [`TextInputSingle`]: lazyDemo(() => import(`../../../client/ui/TextInputSingle.demo`)),
+  [`ToggleButton`]: lazyDemo(() => import(`../../../client/ui/ToggleButton.demo`)),
+  [`TutorialDialogBox`]: lazyDemo(() => import(`../../../client/ui/TutorialDialogBox.demo`)),
+  [`Typography`]: lazyDemo(() => import(`../../../client/ui/Typography.demo`)),
+  [`WikiHanziModal`]: lazyDemo(() => import(`../../../client/ui/WikiHanziModal.demo`)),
+  [`WikiHanziWordModal`]: lazyDemo(() => import(`../../../client/ui/WikiHanziWordModal.demo`)),
 // </pyly-glob-template>
 };

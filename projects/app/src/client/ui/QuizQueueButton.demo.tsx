@@ -1,4 +1,4 @@
-import { ExampleStack } from "@/app/dev/ui/_helpers";
+import { ExampleStack } from "@/client/ui/demo/helpers";
 import { QuizQueueButton } from "@/client/ui/QuizQueueButton";
 import { View } from "react-native";
 

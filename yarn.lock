@@ -7703,7 +7703,7 @@ __metadata:
 
 "babel-preset-expo@patch:babel-preset-expo@npm%3A13.2.3#~/.yarn/patches/babel-preset-expo-npm-13.2.3-a123145936.patch":
   version: 13.2.3
-  resolution: "babel-preset-expo@patch:babel-preset-expo@npm%3A13.2.3#~/.yarn/patches/babel-preset-expo-npm-13.2.3-a123145936.patch::version=13.2.3&hash=27ffd4"
+  resolution: "babel-preset-expo@patch:babel-preset-expo@npm%3A13.2.3#~/.yarn/patches/babel-preset-expo-npm-13.2.3-a123145936.patch::version=13.2.3&hash=441647"
   dependencies:
     "@babel/helper-module-imports": "npm:^7.25.9"
     "@babel/plugin-proposal-decorators": "npm:^7.12.9"
@@ -7731,7 +7731,7 @@ __metadata:
   peerDependenciesMeta:
     babel-plugin-react-compiler:
       optional: true
-  checksum: 10c0/4a4496f4b7d63324e08ced81f515e28e758a7d30cbecf1804018834d0e90f2dec88bebd32b13708fe1c74958d7d9d3221e716bfb36fce6bce0333f008902f399
+  checksum: 10c0/4c41ed3fb0744dc4ffa1bba55b89abec6b51cb9c9f242d20fffd15a7fb363b3e7232fffdf0a974098327ce2eba4645fc2a812f1340b515a38f7a82d8d29169a8
   languageName: node
   linkType: hard
 
@@ -16375,6 +16375,30 @@ __metadata:
     react-native-svg:
       optional: true
   checksum: 10c0/d6052499b8615b58e02ee43b7d2906fd2b5ef90410c26af94dd11d6d93ed116ab0c96f7228573734030f1d41b4e8e2878a63b2223eb86c797730df207ed0c2f0
+  languageName: node
+  linkType: hard
+
+"react-native-css-interop@patch:react-native-css-interop@npm%3A0.1.22#~/.yarn/patches/react-native-css-interop-npm-0.1.22-9770293dfb.patch":
+  version: 0.1.22
+  resolution: "react-native-css-interop@patch:react-native-css-interop@npm%3A0.1.22#~/.yarn/patches/react-native-css-interop-npm-0.1.22-9770293dfb.patch::version=0.1.22&hash=d73223"
+  dependencies:
+    "@babel/helper-module-imports": "npm:^7.22.15"
+    "@babel/traverse": "npm:^7.23.0"
+    "@babel/types": "npm:^7.23.0"
+    debug: "npm:^4.3.7"
+    lightningcss: "npm:^1.27.0"
+    semver: "npm:^7.6.3"
+  peerDependencies:
+    react: ">=18"
+    react-native: "*"
+    react-native-reanimated: ">=3.6.2"
+    tailwindcss: ~3
+  peerDependenciesMeta:
+    react-native-safe-area-context:
+      optional: true
+    react-native-svg:
+      optional: true
+  checksum: 10c0/33f1546870f39dab2814f04a0e1053cf5ccc2f8304e03c42be679517d2bd1e4b200005b233f1ce3b71c5dd32efaa419e28c60d800de6ef9dbe0626753965d0ad
   languageName: node
   linkType: hard
 

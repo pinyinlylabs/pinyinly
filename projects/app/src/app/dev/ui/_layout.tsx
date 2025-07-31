@@ -1,9 +1,9 @@
+import { examplesStackClassName } from "@/client/ui/demo/helpers";
 import type { Href } from "expo-router";
 import { Link, Slot, usePathname } from "expo-router";
 import { StrictMode } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { demos } from ".";
-import { examplesStackClassName } from "./_helpers";
 
 export default function Layout() {
   return (

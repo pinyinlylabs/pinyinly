@@ -1,4 +1,4 @@
-import { ExampleStack } from "@/app/dev/ui/_helpers";
+import { ExampleStack } from "@/client/ui/demo/helpers";
 import { IconImage } from "@/client/ui/IconImage";
 import { View } from "react-native";
 

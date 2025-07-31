@@ -24,3 +24,16 @@ index caf3e9bf2bd3f6c7d3d0bb903bd2be1eff8cf242..0d2865fde89b0e3001ba72e92614e30a
                          publicEnvVars.add(envVar);
                          if (isProduction) {
                              path.replaceWith(core_1.types.valueToNode(process.env[envVar]));
+diff --git a/build/index.js b/build/index.js
+index 37c6dda034d8bfe3ea2338ba539119c214bfa8e7..eb2594c0b6090ed9d025c4e26db86759e4f508db 100644
+--- a/build/index.js
++++ b/build/index.js
+@@ -280,7 +280,7 @@ function babelPresetExpo(api, options = {}) {
+             // Automatically add `react-native-reanimated/plugin` when the package is installed.
+             // TODO: Move to be a customTransformOption.
+             (0, common_1.hasModule)('react-native-reanimated') &&
+-                platformOptions.reanimated !== false && [require('react-native-reanimated/plugin')],
++                platformOptions.reanimated !== false && [require('react-native-worklets/plugin')],
+         ].filter(Boolean),
+     };
+ }

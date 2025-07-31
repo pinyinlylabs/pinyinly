@@ -1,4 +1,4 @@
-import { ExampleStack, LittlePrimaryHeader } from "@/app/dev/ui/_helpers";
+import { ExampleStack, LittlePrimaryHeader } from "@/client/ui/demo/helpers";
 import { RectButton } from "@/client/ui/RectButton";
 import type { PropsOf } from "@/client/ui/types";
 import { View } from "react-native";

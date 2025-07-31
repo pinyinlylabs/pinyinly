@@ -68,6 +68,7 @@
     "babel-preset-expo@npm:~13.2.3": "patch:babel-preset-expo@npm%3A13.2.3#~/.yarn/patches/babel-preset-expo-npm-13.2.3-a123145936.patch",
     "metro@npm:^0.82.0": "patch:metro@npm%3A0.82.4#~/.yarn/patches/metro-npm-0.82.4-2c6a795208.patch",
     "metro@npm:0.82.4": "patch:metro@npm%3A0.82.4#~/.yarn/patches/metro-npm-0.82.4-2c6a795208.patch",
-    "@expo/html-elements@npm:~0.11.0": "patch:@expo/html-elements@npm%3A0.12.5#~/.yarn/patches/@expo-html-elements-npm-0.12.5-ada5f53f49.patch"
+    "@expo/html-elements@npm:~0.11.0": "patch:@expo/html-elements@npm%3A0.12.5#~/.yarn/patches/@expo-html-elements-npm-0.12.5-ada5f53f49.patch",
+    "react-native-css-interop@npm:0.1.22": "patch:react-native-css-interop@npm%3A0.1.22#~/.yarn/patches/react-native-css-interop-npm-0.1.22-9770293dfb.patch"
   }
 }
