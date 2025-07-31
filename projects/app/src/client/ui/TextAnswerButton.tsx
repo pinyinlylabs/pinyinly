@@ -5,8 +5,6 @@ import type { Pressable } from "react-native";
 import { Text, View } from "react-native";
 import Reanimated, {
   Easing,
-  runOnJS,
-  runOnUI,
   useAnimatedReaction,
   useAnimatedStyle,
   useSharedValue,
@@ -16,6 +14,7 @@ import Reanimated, {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
+import { runOnJS, runOnUI } from "react-native-worklets";
 import { tv } from "tailwind-variants";
 import { hapticImpactIfMobile } from "../hooks/hapticImpactIfMobile";
 import { ReanimatedPressable } from "./ReanimatedPressable";

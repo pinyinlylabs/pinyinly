@@ -1,0 +1,33 @@
+diff --git a/lib/module/createAnimatedComponent/AnimatedComponent.js b/lib/module/createAnimatedComponent/AnimatedComponent.js
+index c45fa097bc107ce589b535ff3f3a507fcc30d121..d760a7fa092388a797869faaa06b08402d287774 100644
+--- a/lib/module/createAnimatedComponent/AnimatedComponent.js
++++ b/lib/module/createAnimatedComponent/AnimatedComponent.js
+@@ -64,6 +64,16 @@ export default class AnimatedComponent extends ReanimatedAnimatedComponent {
+     }
+     this._configureLayoutAnimation(LayoutAnimationType.LAYOUT, this.props.layout);
+     this._configureLayoutAnimation(LayoutAnimationType.EXITING, this.props.exiting);
++    {
++      // In the case where the component was unmounted and had an exit animation,
++      // move back the elements that were moved into the dummy element.
++      const dummyRef = this._componentDOMRef.reanimatedDummyRef;
++      dummyRef?.getAnimations().forEach(x => x.cancel());
++      while (dummyRef?.firstChild) {
++        this._componentDOMRef.appendChild(dummyRef.firstChild);
++      }
++      this._componentDOMRef.reanimatedDummyRef = null;
++    }
+     if (IS_WEB) {
+       if (this.props.exiting && this._componentDOMRef) {
+         saveSnapshot(this._componentDOMRef);
+diff --git a/lib/module/layoutReanimation/web/componentUtils.js b/lib/module/layoutReanimation/web/componentUtils.js
+index 558d20f1721d3ee84e61ea6abb98b611bbce1520..6258e0ca36a01ef620c0c41c6f772fa712b4c002 100644
+--- a/lib/module/layoutReanimation/web/componentUtils.js
++++ b/lib/module/layoutReanimation/web/componentUtils.js
+@@ -219,6 +219,7 @@ export function handleExitingAnimation(element, animationConfig) {
+   const parent = element.offsetParent;
+   const dummy = element.cloneNode();
+   dummy.reanimatedDummy = true;
++  element.reanimatedDummyRef = dummy;
+   element.style.animationName = '';
+   dummy.style.animationName = '';
+ 

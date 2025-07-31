@@ -1,6 +1,7 @@
 import type { SkillReviewQueue } from "@/data/skills";
 import { Link } from "expo-router";
-import { Text, View } from "react-native";
+import { Text } from "react-native";
+import Reanimated, { Easing, ZoomIn } from "react-native-reanimated";
 import { tv } from "tailwind-variants";
 import { IconImage } from "./IconImage";
 
@@ -57,11 +58,14 @@ function CountLozenge({
 }) {
   const countText = count >= 999 ? `999+` : `${count}`;
   return (
-    <View className={countLozengePillClass({ mode, className })}>
+    <Reanimated.View
+      entering={ZoomIn.easing(Easing.quad)}
+      className={countLozengePillClass({ mode, className })}
+    >
       <Text className="text-[10px] font-bold tabular-nums text-bg">
         {countText}
       </Text>
-    </View>
+    </Reanimated.View>
   );
 }
 
