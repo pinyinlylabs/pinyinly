@@ -1,4 +1,4 @@
-import { ExampleStack, LittlePrimaryHeader } from "@/app/dev/ui/_helpers";
+import { ExampleStack, LittlePrimaryHeader } from "@/client/ui/demo/helpers";
 import type { TextAnswerButtonState } from "@/client/ui/TextAnswerButton";
 import { TextAnswerButton } from "@/client/ui/TextAnswerButton";
 import type { PropsOf } from "@/client/ui/types";

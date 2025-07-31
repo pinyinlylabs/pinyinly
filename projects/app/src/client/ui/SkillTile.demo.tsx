@@ -1,6 +1,6 @@
 import type { RankNumber } from "@/data/skills";
 import { View } from "react-native";
-import { RankLozenge, SkillTile } from "../../../(menu)/skills";
+import { RankLozenge, SkillTile } from "../../app/(menu)/skills";
 
 export default () => {
   return (

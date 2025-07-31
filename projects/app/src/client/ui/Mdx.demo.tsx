@@ -1,7 +1,7 @@
 import type { PropsWithChildren } from "react";
 import { Children, createContext, use } from "react";
 import { Text, View } from "react-native";
-import Demo from "./_mdx/demo.mdx";
+import Template from "./demo/mdx/template.mdx";
 
 export default () => {
   return (
@@ -9,7 +9,7 @@ export default () => {
       <Text>Hello demos</Text>
 
       <Context.Provider value={{ i: 0 }}>
-        <Demo
+        <Template
           components={{
             p: Span,
             b: ({ children }: PropsWithChildren) => (

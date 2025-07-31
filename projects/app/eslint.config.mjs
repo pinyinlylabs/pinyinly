@@ -306,6 +306,7 @@ export default tseslint.config(
             },
             "react-native": {
               Animated: `RnAnimated`,
+              Easing: `RnEasing`,
             },
           },
         },
@@ -403,14 +404,16 @@ export default tseslint.config(
     },
   },
 
-  // dev UI demo files
+  // Demo UI files
   {
-    files: [`src/app/dev/ui/_demos/*`],
+    files: [`src/**/*.demo.tsx`],
     rules: {
-      "import/no-named-default": `off`,
       "import/no-anonymous-default-export": `off`,
-      "unicorn/no-anonymous-default-export": `off`,
+      "import/no-default-export": `off`,
+      "import/no-named-default": `off`,
+      "no-console": `off`,
       "react/display-name": `off`, // the display name is the filename
+      "unicorn/no-anonymous-default-export": `off`,
     },
   },
 

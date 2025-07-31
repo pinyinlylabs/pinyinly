@@ -26,9 +26,9 @@ import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 import type { StyleProp, ViewStyle } from "react-native";
 import {
-  Easing,
   Platform,
   Animated as RnAnimated,
+  Easing as RnEasing,
   Text,
   View,
 } from "react-native";
@@ -378,7 +378,7 @@ const Skeleton = ({
       RnAnimated.timing(slideInAnim, {
         toValue: 1,
         duration: 200,
-        easing: Easing.out(Easing.exp),
+        easing: RnEasing.out(RnEasing.exp),
         useNativeDriver: false, // layout properties aren't compatible with the native driver on mobile (it works on Web though)
       }).start();
     } else {

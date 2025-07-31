@@ -33,7 +33,7 @@ const getTemplate = (rawMdxString) => {
       // debugging for missing components.
       .replace(
         /const _components = \{.+?\}/ms,
-        `const _components = Object.create(_provideComponents(), props.components)`,
+        `const _components = Object.assign(Object.create(_provideComponents()), props.components)`,
       )
       // Delete all the default implement safe guards because Proxy will be used instead.
       //
