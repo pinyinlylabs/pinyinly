@@ -1,11 +1,13 @@
 import type { SrsStateType } from "#data/model.ts";
 import { SkillKind, SrsKind } from "#data/model.ts";
 import type { Skill } from "#data/rizzleSchema.ts";
+import { rSkillKind } from "#data/rizzleSchema.ts";
 import type { RankRules, SkillLearningGraph } from "#data/skills.ts";
 import {
   computeSkillRating,
   getHanziWordRank,
   hanziWordToGloss,
+  isHanziWordSkill,
   rankRules,
   skillKindFromSkill,
   skillLearningGraph,
@@ -15,12 +17,25 @@ import {
   allHsk1HanziWords,
   allHsk2HanziWords,
   allHsk3HanziWords,
+  getIsStructuralHanziWord,
 } from "#dictionary/dictionary.ts";
 import { Rating } from "#util/fsrs.ts";
 import { invariant } from "@pinyinly/lib/invariant";
 import assert from "node:assert/strict";
 import { describe, expect, test } from "vitest";
 import { fsrsSrsState, mockSrsState, 时 } from "./helpers";
+
+const skillTest = test.extend<{
+  isStructuralHanziWord: Awaited<ReturnType<typeof getIsStructuralHanziWord>>;
+}>({
+  isStructuralHanziWord: [
+    async ({}, use) => {
+      const isStructuralHanziWord = await getIsStructuralHanziWord();
+      await use(isStructuralHanziWord);
+    },
+    { scope: `worker` },
+  ],
+});
 
 describe(`${skillLearningGraph.name} suite`, () => {
   test(`no targets gives an empty graph`, async () => {
@@ -313,84 +328,120 @@ describe(`${skillLearningGraph.name} suite`, () => {
 });
 
 describe(`${skillReviewQueue.name} suite`, () => {
-  test(`no target skills or skill states gives an empty queue`, async () => {
-    const graph = await skillLearningGraph({
-      targetSkills: [],
-    });
-    expect(
-      skillReviewQueue({
+  skillTest(
+    `no target skills or skill states gives an empty queue`,
+    async ({ isStructuralHanziWord }) => {
+      const graph = await skillLearningGraph({
+        targetSkills: [],
+      });
+      expect(
+        skillReviewQueue({
+          graph,
+          skillSrsStates: new Map(),
+          latestSkillRatings: new Map(),
+          isStructuralHanziWord,
+        }),
+      ).toMatchObject({
+        blockedItems: [],
+        dueCount: 0,
+        items: [],
+        newCount: 0,
+        newDueAt: null,
+        newOverDueAt: null,
+        overDueCount: 0,
+        retryCount: 0,
+      });
+    },
+  );
+
+  skillTest(
+    `no target skills but some skill states (i.e. introduced skills) includes introduced skills (but not any dependencies of it)`,
+    async ({ isStructuralHanziWord }) => {
+      const graph = await skillLearningGraph({
+        targetSkills: [],
+      });
+      expect(
+        skillReviewQueue({
+          graph,
+          skillSrsStates: new Map([
+            [`he:刀:knife`, mockSrsState(时`-1d`, 时`-5m`)],
+          ]),
+          latestSkillRatings: new Map(),
+          isStructuralHanziWord,
+        }),
+      ).toMatchObject({
+        blockedItems: [],
+        dueCount: 1,
+        items: [`he:刀:knife`],
+        newCount: 0,
+        overDueCount: 0,
+        retryCount: 0,
+      });
+    },
+  );
+
+  skillTest(
+    `introduced skills that would otherwise be blocked are not blocked (because they've been introduced already)`,
+    async ({ isStructuralHanziWord }) => {
+      const graph = await skillLearningGraph({
+        targetSkills: [`he:刀:knife`],
+      });
+      expect(
+        skillReviewQueue({
+          graph,
+          skillSrsStates: new Map([
+            [`he:刀:knife`, mockSrsState(时`-1d`, 时`-5m`)],
+          ]),
+          latestSkillRatings: new Map(),
+          isStructuralHanziWord,
+        }),
+      ).toMatchObject({
+        blockedItems: [],
+        dueCount: 1,
+        items: [
+          // This would normally be blocked but because it's already introduced
+          // (because there's an srs state for it) it's available.
+          `he:刀:knife`,
+
+          // These would normally come first in the queue because they're
+          // dependencies of he:刀:knife, but he:刀:knife is first because it's
+          // "due" while these are not yet.
+          `he:丿:slash`,
+          `he:𠃌:radical`,
+        ],
+        newCount: 2,
+        overDueCount: 0,
+        retryCount: 0,
+      });
+    },
+  );
+
+  skillTest(
+    `new words are introduced before new radicals, because they are more immediately useful`,
+    async ({ isStructuralHanziWord }) => {
+      const graph = await skillLearningGraph({
+        targetSkills: [`he:丿:slash`, `he:人:person`, `he:𠃌:radical`],
+      });
+
+      const queue = skillReviewQueue({
         graph,
         skillSrsStates: new Map(),
         latestSkillRatings: new Map(),
-      }),
-    ).toMatchObject({
-      blockedItems: [],
-      dueCount: 0,
-      items: [],
-      newCount: 0,
-      newDueAt: null,
-      newOverDueAt: null,
-      overDueCount: 0,
-      retryCount: 0,
-    });
-  });
+        isStructuralHanziWord,
+      });
 
-  test(`no target skills but some skill states (i.e. introduced skills) includes introduced skills (but not any dependencies of it)`, async () => {
-    const graph = await skillLearningGraph({
-      targetSkills: [],
-    });
-    expect(
-      skillReviewQueue({
-        graph,
-        skillSrsStates: new Map([
-          [`he:刀:knife`, mockSrsState(时`-1d`, 时`-5m`)],
-        ]),
-        latestSkillRatings: new Map(),
-      }),
-    ).toMatchObject({
-      blockedItems: [],
-      dueCount: 1,
-      items: [`he:刀:knife`],
-      newCount: 0,
-      overDueCount: 0,
-      retryCount: 0,
-    });
-  });
-
-  test(`introduced skills that would otherwise be blocked are not blocked (because they've been introduced already)`, async () => {
-    const graph = await skillLearningGraph({
-      targetSkills: [`he:刀:knife`],
-    });
-    expect(
-      skillReviewQueue({
-        graph,
-        skillSrsStates: new Map([
-          [`he:刀:knife`, mockSrsState(时`-1d`, 时`-5m`)],
-        ]),
-        latestSkillRatings: new Map(),
-      }),
-    ).toMatchObject({
-      blockedItems: [],
-      dueCount: 1,
-      items: [
-        // This would normally be blocked but because it's already introduced
-        // (because there's an srs state for it) it's available.
-        `he:刀:knife`,
-
-        // These would normally come first in the queue because they're
-        // dependencies of he:刀:knife, but he:刀:knife is first because it's
-        // "due" while these are not yet.
-        `he:丿:slash`,
-        `he:𠃌:radical`,
-      ],
-      newCount: 2,
-      overDueCount: 0,
-      retryCount: 0,
-    });
-  });
+      expect(queue.items).toMatchInlineSnapshot(`
+        [
+          "he:人:person",
+          "he:𠃌:radical",
+          "he:丿:slash",
+        ]
+      `);
+    },
+  );
 
   describe(`${SkillKind.HanziWordToGloss} skills`, () => {
-    test(`works for 好`, async () => {
+    skillTest(`works for 好`, async ({ isStructuralHanziWord }) => {
       const graph = await skillLearningGraph({
         targetSkills: [`he:好:good`],
       });
@@ -399,6 +450,7 @@ describe(`${skillReviewQueue.name} suite`, () => {
           graph,
           skillSrsStates: new Map(),
           latestSkillRatings: new Map(),
+          isStructuralHanziWord,
         }),
       ).toMatchObject({
         items: [`he:子:child`, `he:女:woman`],
@@ -406,130 +458,147 @@ describe(`${skillReviewQueue.name} suite`, () => {
       });
     });
 
-    test(`learns the word form of component-form first`, async () => {
-      const graph = await skillLearningGraph({
-        targetSkills: [`he:汉:chinese`],
-      });
+    skillTest(
+      `learns the word form of component-form first`,
+      async ({ isStructuralHanziWord }) => {
+        const graph = await skillLearningGraph({
+          targetSkills: [`he:汉:chinese`],
+        });
 
-      expect(
-        skillReviewQueue({
-          graph,
-          skillSrsStates: new Map(),
-          latestSkillRatings: new Map(),
-        }),
-      ).toMatchObject({
-        items: [`he:丿:slash`, `he:亅:hook`, `he:又:again`],
-        blockedItems: [
-          `he:水:water`, // learns this because of 氵
-          `he:氵:water`,
-          `he:汉:chinese`,
-        ],
-      });
-    });
+        expect(
+          skillReviewQueue({
+            graph,
+            skillSrsStates: new Map(),
+            latestSkillRatings: new Map(),
+            isStructuralHanziWord,
+          }),
+        ).toMatchObject({
+          items: [`he:又:again`, `he:丿:slash`, `he:亅:hook`],
+          blockedItems: [
+            `he:水:water`, // learns this because of 氵
+            `he:氵:water`,
+            `he:汉:chinese`,
+          ],
+        });
+      },
+    );
 
     describe(`retry logic`, () => {
-      test(`skills that were just failed should stay first in queue (so you retry it immediately)`, async () => {
-        const graph = await skillLearningGraph({
-          targetSkills: [`he:八:eight`, `he:丿:slash`],
-        });
+      skillTest(
+        `skills that were just failed should stay first in queue (so you retry it immediately)`,
+        async ({ isStructuralHanziWord }) => {
+          const graph = await skillLearningGraph({
+            targetSkills: [`he:八:eight`, `he:丿:slash`],
+          });
 
-        expect(
-          skillReviewQueue({
-            graph,
-            skillSrsStates: new Map([
-              [`he:八:eight`, mockSrsState(时`-1d`, 时`-5m`)],
-              [`he:丿:slash`, mockSrsState(时`-1d`, 时`-3m`)],
-            ]),
-            latestSkillRatings: new Map([
-              [`he:丿:slash`, { rating: Rating.Again, createdAt: 时`-1m` }],
-            ]),
-          }),
-        ).toMatchObject({
-          blockedItems: [],
-          dueCount: 1,
-          items: [
-            `he:丿:slash`, // hoisted to the top for retry
-            `he:八:eight`,
-          ],
-          newCount: 0,
-          overDueCount: 0,
-          retryCount: 1,
-        });
-      });
+          expect(
+            skillReviewQueue({
+              graph,
+              skillSrsStates: new Map([
+                [`he:八:eight`, mockSrsState(时`-1d`, 时`-5m`)],
+                [`he:丿:slash`, mockSrsState(时`-1d`, 时`-3m`)],
+              ]),
+              latestSkillRatings: new Map([
+                [`he:丿:slash`, { rating: Rating.Again, createdAt: 时`-1m` }],
+              ]),
+              isStructuralHanziWord,
+            }),
+          ).toMatchObject({
+            blockedItems: [],
+            dueCount: 1,
+            items: [
+              `he:丿:slash`, // hoisted to the top for retry
+              `he:八:eight`,
+            ],
+            newCount: 0,
+            overDueCount: 0,
+            retryCount: 1,
+          });
+        },
+      );
 
-      test(`failed skills that are not introduced are not promoted`, async () => {
-        const graph = await skillLearningGraph({
-          targetSkills: [`he:八:eight`, `he:丿:slash`],
-        });
+      skillTest(
+        `failed skills that are not introduced are not promoted`,
+        async ({ isStructuralHanziWord }) => {
+          const graph = await skillLearningGraph({
+            targetSkills: [`he:八:eight`, `he:丿:slash`],
+          });
 
-        expect(
-          skillReviewQueue({
-            graph,
-            skillSrsStates: new Map([
-              [`he:八:eight`, mockSrsState(时`-1d`, 时`-5m`)],
-            ]),
-            latestSkillRatings: new Map([
-              [`he:丿:slash`, { rating: Rating.Again, createdAt: 时`-1m` }], // it's incorrect but was never introduced
-            ]),
-          }),
-        ).toMatchObject({
-          blockedItems: [],
-          dueCount: 1,
-          items: [`he:八:eight`, `he:丿:slash`],
-          newCount: 1,
-          overDueCount: 0,
-          retryCount: 0,
-        });
-      });
+          expect(
+            skillReviewQueue({
+              graph,
+              skillSrsStates: new Map([
+                [`he:八:eight`, mockSrsState(时`-1d`, 时`-5m`)],
+              ]),
+              latestSkillRatings: new Map([
+                [`he:丿:slash`, { rating: Rating.Again, createdAt: 时`-1m` }], // it's incorrect but was never introduced
+              ]),
+              isStructuralHanziWord,
+            }),
+          ).toMatchObject({
+            blockedItems: [],
+            dueCount: 1,
+            items: [`he:八:eight`, `he:丿:slash`],
+            newCount: 1,
+            overDueCount: 0,
+            retryCount: 0,
+          });
+        },
+      );
 
-      test(`multiple failed skills are prioritised in most-recent first`, async () => {
-        const graph = await skillLearningGraph({
-          targetSkills: [`he:八:eight`, `he:丿:slash`],
-        });
+      skillTest(
+        `multiple failed skills are prioritised in most-recent first`,
+        async ({ isStructuralHanziWord }) => {
+          const graph = await skillLearningGraph({
+            targetSkills: [`he:八:eight`, `he:丿:slash`],
+          });
 
-        expect(
-          skillReviewQueue({
-            graph,
-            skillSrsStates: new Map([
-              [`he:八:eight`, mockSrsState(时`-1d`, 时`-5m`)],
-              [`he:丿:slash`, mockSrsState(时`-1d`, 时`-5m`)],
-            ]),
-            latestSkillRatings: new Map([
-              [`he:八:eight`, { rating: Rating.Again, createdAt: 时`-1m` }],
-              [`he:丿:slash`, { rating: Rating.Again, createdAt: 时`-2m` }],
-            ]),
-          }),
-        ).toMatchObject({
-          blockedItems: [],
-          dueCount: 0,
-          items: [`he:八:eight`, `he:丿:slash`],
-          newCount: 0,
-          overDueCount: 0,
-          retryCount: 2,
-        });
+          expect(
+            skillReviewQueue({
+              graph,
+              skillSrsStates: new Map([
+                [`he:八:eight`, mockSrsState(时`-1d`, 时`-5m`)],
+                [`he:丿:slash`, mockSrsState(时`-1d`, 时`-5m`)],
+              ]),
+              latestSkillRatings: new Map([
+                [`he:八:eight`, { rating: Rating.Again, createdAt: 时`-1m` }],
+                [`he:丿:slash`, { rating: Rating.Again, createdAt: 时`-2m` }],
+              ]),
+              isStructuralHanziWord,
+            }),
+          ).toMatchObject({
+            blockedItems: [],
+            dueCount: 0,
+            items: [`he:八:eight`, `he:丿:slash`],
+            newCount: 0,
+            overDueCount: 0,
+            retryCount: 2,
+          });
 
-        // try in reverse order
-        expect(
-          skillReviewQueue({
-            graph,
-            skillSrsStates: new Map([
-              [`he:八:eight`, mockSrsState(时`-1d`, 时`-5m`)],
-              [`he:丿:slash`, mockSrsState(时`-1d`, 时`-5m`)],
-            ]),
-            latestSkillRatings: new Map([
-              [`he:八:eight`, { rating: Rating.Again, createdAt: 时`-2m` }],
-              [`he:丿:slash`, { rating: Rating.Again, createdAt: 时`-1m` }],
-            ]),
-          }),
-        ).toMatchObject({
-          blockedItems: [],
-          dueCount: 0,
-          items: [`he:丿:slash`, `he:八:eight`],
-          newCount: 0,
-          overDueCount: 0,
-          retryCount: 2,
-        });
-      });
+          // try in reverse order
+          expect(
+            skillReviewQueue({
+              graph,
+              skillSrsStates: new Map([
+                [`he:八:eight`, mockSrsState(时`-1d`, 时`-5m`)],
+                [`he:丿:slash`, mockSrsState(时`-1d`, 时`-5m`)],
+              ]),
+              latestSkillRatings: new Map([
+                [`he:八:eight`, { rating: Rating.Again, createdAt: 时`-2m` }],
+                [`he:丿:slash`, { rating: Rating.Again, createdAt: 时`-1m` }],
+              ]),
+              isStructuralHanziWord,
+            }),
+          ).toMatchObject({
+            blockedItems: [],
+            dueCount: 0,
+            items: [`he:丿:slash`, `he:八:eight`],
+            newCount: 0,
+            overDueCount: 0,
+            retryCount: 2,
+          });
+        },
+      );
     });
 
     test(`prioritises due skills with highest value (rather than most over-due)`, async () => {
@@ -545,6 +614,7 @@ describe(`${skillReviewQueue.name} suite`, () => {
             [`he:刀:knife`, mockSrsState(时`-1d`, 时`-5m`)],
           ]),
           latestSkillRatings: new Map(),
+          isStructuralHanziWord: () => false,
         }),
       ).toMatchObject({
         blockedItems: [`he:分:divide`],
@@ -566,6 +636,7 @@ describe(`${skillReviewQueue.name} suite`, () => {
           graph,
           skillSrsStates: new Map(),
           latestSkillRatings: new Map(),
+          isStructuralHanziWord: () => false,
         }),
       ).toMatchObject({
         items: [`he:丿:slash`, `he:𠃌:radical`, `he:八:eight`],
@@ -573,147 +644,166 @@ describe(`${skillReviewQueue.name} suite`, () => {
       });
     });
 
-    test(`schedules skill reviews in order of due, and then deterministic random`, async () => {
-      const graph = await skillLearningGraph({
-        targetSkills: [`he:分:divide`, `he:一:one`],
-      });
+    skillTest(
+      `schedules skill reviews in order of due, and then deterministic random`,
+      async ({ isStructuralHanziWord }) => {
+        const graph = await skillLearningGraph({
+          targetSkills: [`he:分:divide`, `he:一:one`],
+        });
 
-      expect(
-        skillReviewQueue({
-          graph,
-          skillSrsStates: new Map([
-            [`he:一:one`, mockSrsState(时`-10m`, 时`-2h`)], // due two hours ago
-            [`he:𠃌:radical`, mockSrsState(时`0s`, 时`-1h`)], // due one hour ago
-            [`he:八:eight`, mockSrsState(时`-10m`, 时`1h`)], // due in one hour,
-            [`he:刀:knife`, mockSrsState(时`-10m`, 时`2h`)], // due in two hours,
-          ]),
-          latestSkillRatings: new Map(),
-        }),
-      ).toMatchObject({
-        blockedItems: [`he:分:divide`],
-        dueCount: 2,
-        items: [
-          `he:一:one`,
-          `he:𠃌:radical`,
-          `he:丿:slash`,
-          `he:刀:knife`,
-          `he:八:eight`,
-        ],
-        newCount: 1,
-        overDueCount: 0,
-        retryCount: 0,
-      });
-    });
+        expect(
+          skillReviewQueue({
+            graph,
+            skillSrsStates: new Map([
+              [`he:一:one`, mockSrsState(时`-10m`, 时`-2h`)], // due two hours ago
+              [`he:𠃌:radical`, mockSrsState(时`0s`, 时`-1h`)], // due one hour ago
+              [`he:八:eight`, mockSrsState(时`-10m`, 时`1h`)], // due in one hour,
+              [`he:刀:knife`, mockSrsState(时`-10m`, 时`2h`)], // due in two hours,
+            ]),
+            latestSkillRatings: new Map(),
+            isStructuralHanziWord,
+          }),
+        ).toMatchObject({
+          blockedItems: [`he:分:divide`],
+          dueCount: 2,
+          items: [
+            `he:一:one`,
+            `he:𠃌:radical`,
+            `he:丿:slash`,
+            `he:刀:knife`,
+            `he:八:eight`,
+          ],
+          newCount: 1,
+          overDueCount: 0,
+          retryCount: 0,
+        });
+      },
+    );
 
-    test(`throttles the number of new skills in the queue`, async () => {
-      const graph = await skillLearningGraph({
-        targetSkills: [
-          `he:分:divide`,
-          `he:一:one`,
-          `he:一下儿:aBit`,
-          `he:一些:some`,
-          `he:一会儿:aWhile`,
-          `he:一共:inTotal`,
-          `he:一切:everything`,
-          `he:一半:half`,
-          `he:一块儿:together`,
-          `he:一定:certainly`,
-          `he:一方面:onOneHand`,
-          `he:一样:same`,
-          `he:一点儿:aLittle`,
-          `he:一点点:aLittleBit`,
-          `he:一生:lifetime`,
-          `he:一直:continuously`,
-          `he:一般:general`,
-          `he:一起:together`,
-          `he:一路平安:haveGoodTrip`,
-          `he:一路顺风:journeysmooth`,
-          `he:一边:side`,
-          `he:一部分:part`,
-        ],
-      });
+    skillTest(
+      `throttles the number of new skills in the queue`,
+      async ({ isStructuralHanziWord }) => {
+        const graph = await skillLearningGraph({
+          targetSkills: [
+            `he:分:divide`,
+            `he:一:one`,
+            `he:一下儿:aBit`,
+            `he:一些:some`,
+            `he:一会儿:aWhile`,
+            `he:一共:inTotal`,
+            `he:一切:everything`,
+            `he:一半:half`,
+            `he:一块儿:together`,
+            `he:一定:certainly`,
+            `he:一方面:onOneHand`,
+            `he:一样:same`,
+            `he:一点儿:aLittle`,
+            `he:一点点:aLittleBit`,
+            `he:一生:lifetime`,
+            `he:一直:continuously`,
+            `he:一般:general`,
+            `he:一起:together`,
+            `he:一路平安:haveGoodTrip`,
+            `he:一路顺风:journeysmooth`,
+            `he:一边:side`,
+            `he:一部分:part`,
+          ],
+        });
 
-      // When there's no existing SRS state, you can learn 15 new skills.
-      expect(
-        skillReviewQueue({
-          graph,
-          skillSrsStates: new Map(),
-          latestSkillRatings: new Map(),
-        }),
-      ).toMatchObject({
-        dueCount: 0,
-        newCount: 15,
-        overDueCount: 0,
-        retryCount: 0,
-      });
+        // When there's no existing SRS state, you can learn 15 new skills.
+        expect(
+          skillReviewQueue({
+            graph,
+            skillSrsStates: new Map(),
+            latestSkillRatings: new Map(),
+            isStructuralHanziWord,
+          }),
+        ).toMatchObject({
+          dueCount: 0,
+          newCount: 15,
+          overDueCount: 0,
+          retryCount: 0,
+        });
 
-      // When you have partially stablised some skills, that reduces the number
-      // of new skills you can learn.
-      expect(
-        skillReviewQueue({
-          graph,
-          skillSrsStates: new Map([
-            [`he:一:one`, mockSrsState(时`-10m`, 时`-2h`)], // due two hours ago
-            [`he:𠃌:radical`, mockSrsState(时`0s`, 时`-1h`)], // due one hour ago
-            [`he:八:eight`, mockSrsState(时`-10m`, 时`1h`)], // due in one hour,
-            [`he:刀:knife`, mockSrsState(时`-10m`, 时`2h`)], // due in two hours,
-          ]),
-          latestSkillRatings: new Map(),
-        }),
-      ).toMatchObject({
-        dueCount: 2,
-        newCount: 11, // 4 unstablised skills, only 11 slots available for new skills
-        overDueCount: 0,
-        retryCount: 0,
-      });
-    });
+        // When you have partially stablised some skills, that reduces the number
+        // of new skills you can learn.
+        expect(
+          skillReviewQueue({
+            graph,
+            skillSrsStates: new Map([
+              [`he:一:one`, mockSrsState(时`-10m`, 时`-2h`)], // due two hours ago
+              [`he:𠃌:radical`, mockSrsState(时`0s`, 时`-1h`)], // due one hour ago
+              [`he:八:eight`, mockSrsState(时`-10m`, 时`1h`)], // due in one hour,
+              [`he:刀:knife`, mockSrsState(时`-10m`, 时`2h`)], // due in two hours,
+            ]),
+            latestSkillRatings: new Map(),
+            isStructuralHanziWord,
+          }),
+        ).toMatchObject({
+          dueCount: 2,
+          newCount: 11, // 4 unstablised skills, only 11 slots available for new skills
+          overDueCount: 0,
+          retryCount: 0,
+        });
+      },
+    );
   });
 
   describe(`${SkillKind.HanziWordToPinyin} skills`, () => {
-    test(`doesn't learn pinyin for all constituents of a single character`, async () => {
-      const graph = await skillLearningGraph({ targetSkills: [`hp:好:good`] });
-      expect(
-        skillReviewQueue({
+    skillTest(
+      `doesn't learn pinyin for all constituents of a single character`,
+      async ({ isStructuralHanziWord }) => {
+        const graph = await skillLearningGraph({
+          targetSkills: [`hp:好:good`],
+        });
+        expect(
+          skillReviewQueue({
+            graph,
+            skillSrsStates: new Map(),
+            latestSkillRatings: new Map(),
+            isStructuralHanziWord,
+          }),
+        ).toMatchObject({
+          items: [`he:子:child`, `he:女:woman`],
+          blockedItems: [
+            `he:好:good`,
+            `hpi:好:good`,
+            `hpf:好:good`,
+            `hpt:好:good`,
+            `hp:好:good`,
+          ],
+        });
+      },
+    );
+
+    skillTest(
+      `learns the pinyin for each grapheme in multi-grapheme words`,
+      async ({ isStructuralHanziWord }) => {
+        const graph = await skillLearningGraph({
+          targetSkills: [`hp:一样:same`],
+        });
+
+        const queue = skillReviewQueue({
           graph,
           skillSrsStates: new Map(),
           latestSkillRatings: new Map(),
-        }),
-      ).toMatchObject({
-        items: [`he:子:child`, `he:女:woman`],
-        blockedItems: [
-          `he:好:good`,
-          `hpi:好:good`,
-          `hpf:好:good`,
-          `hpt:好:good`,
-          `hp:好:good`,
-        ],
-      });
-    });
+          isStructuralHanziWord,
+        });
 
-    test(`learns the pinyin for each grapheme in multi-grapheme words`, async () => {
-      const graph = await skillLearningGraph({
-        targetSkills: [`hp:一样:same`],
-      });
+        const isHpSkill = (s: Skill) =>
+          skillKindFromSkill(s) === SkillKind.HanziWordToPinyin;
 
-      const queue = skillReviewQueue({
-        graph,
-        skillSrsStates: new Map(),
-        latestSkillRatings: new Map(),
-      });
+        const onlyHpQueue = {
+          items: queue.items.filter((s) => isHpSkill(s)),
+          blockedItems: queue.blockedItems.filter((s) => isHpSkill(s)),
+        };
 
-      const isHpSkill = (s: Skill) =>
-        skillKindFromSkill(s) === SkillKind.HanziWordToPinyin;
-
-      const onlyHpQueue = {
-        items: queue.items.filter((s) => isHpSkill(s)),
-        blockedItems: queue.blockedItems.filter((s) => isHpSkill(s)),
-      };
-
-      assert.deepEqual(onlyHpQueue, {
-        items: [],
-        blockedItems: [`hp:样:shape`, `hp:一:one`, `hp:一样:same`],
-      });
-    });
+        assert.deepEqual(onlyHpQueue, {
+          items: [],
+          blockedItems: [`hp:样:shape`, `hp:一:one`, `hp:一样:same`],
+        });
+      },
+    );
 
     test(`schedules new skills in dependency order`, async () => {
       const graph = await skillLearningGraph({
@@ -725,6 +815,7 @@ describe(`${skillReviewQueue.name} suite`, () => {
           graph,
           skillSrsStates: new Map(),
           latestSkillRatings: new Map(),
+          isStructuralHanziWord: () => false,
         }),
       ).toMatchObject({
         items: [
@@ -759,57 +850,63 @@ describe(`${skillReviewQueue.name} suite`, () => {
       });
     });
 
-    test(`treats non-introduced skills as "not stable" and won't dependant skills`, async () => {
-      const graph = await skillLearningGraph({
-        targetSkills: [`hp:一:one`],
-      });
+    skillTest(
+      `treats non-introduced skills as "not stable" and won't dependant skills`,
+      async ({ isStructuralHanziWord }) => {
+        const graph = await skillLearningGraph({
+          targetSkills: [`hp:一:one`],
+        });
 
-      expect(
-        skillReviewQueue({
-          graph,
-          skillSrsStates: new Map(),
-          latestSkillRatings: new Map(),
-        }),
-      ).toMatchObject({
-        items: [`he:一:one`],
-        blockedItems: [`hpi:一:one`, `hpf:一:one`, `hpt:一:one`, `hp:一:one`],
-      });
+        expect(
+          skillReviewQueue({
+            graph,
+            skillSrsStates: new Map(),
+            latestSkillRatings: new Map(),
+            isStructuralHanziWord,
+          }),
+        ).toMatchObject({
+          items: [`he:一:one`],
+          blockedItems: [`hpi:一:one`, `hpf:一:one`, `hpt:一:one`, `hp:一:one`],
+        });
 
-      expect(
-        skillReviewQueue({
-          graph,
-          skillSrsStates: new Map([
-            [`he:一:one`, fsrsSrsState(时`-1d`, 时`-5m`, Rating.Good)],
-          ]),
-          latestSkillRatings: new Map(),
-        }),
-      ).toMatchObject({
-        blockedItems: [`hpf:一:one`, `hpt:一:one`, `hp:一:one`],
-        dueCount: 1,
-        items: [`he:一:one`, `hpi:一:one`],
-        newCount: 1,
-        overDueCount: 0,
-        retryCount: 0,
-      });
+        expect(
+          skillReviewQueue({
+            graph,
+            skillSrsStates: new Map([
+              [`he:一:one`, fsrsSrsState(时`-1d`, 时`-5m`, Rating.Good)],
+            ]),
+            latestSkillRatings: new Map(),
+            isStructuralHanziWord,
+          }),
+        ).toMatchObject({
+          blockedItems: [`hpf:一:one`, `hpt:一:one`, `hp:一:one`],
+          dueCount: 1,
+          items: [`he:一:one`, `hpi:一:one`],
+          newCount: 1,
+          overDueCount: 0,
+          retryCount: 0,
+        });
 
-      expect(
-        skillReviewQueue({
-          graph,
-          skillSrsStates: new Map([
-            [`he:一:one`, fsrsSrsState(时`-1d`, 时`-6m`, Rating.Good)],
-            [`hpi:一:one`, fsrsSrsState(时`-1d`, 时`-4m`, Rating.Good)],
-          ]),
-          latestSkillRatings: new Map(),
-        }),
-      ).toMatchObject({
-        blockedItems: [`hpt:一:one`, `hp:一:one`],
-        dueCount: 2,
-        items: [`he:一:one`, `hpi:一:one`, `hpf:一:one`],
-        newCount: 1,
-        overDueCount: 0,
-        retryCount: 0,
-      });
-    });
+        expect(
+          skillReviewQueue({
+            graph,
+            skillSrsStates: new Map([
+              [`he:一:one`, fsrsSrsState(时`-1d`, 时`-6m`, Rating.Good)],
+              [`hpi:一:one`, fsrsSrsState(时`-1d`, 时`-4m`, Rating.Good)],
+            ]),
+            latestSkillRatings: new Map(),
+            isStructuralHanziWord,
+          }),
+        ).toMatchObject({
+          blockedItems: [`hpt:一:one`, `hp:一:one`],
+          dueCount: 2,
+          items: [`he:一:one`, `hpi:一:one`, `hpf:一:one`],
+          newCount: 1,
+          overDueCount: 0,
+          retryCount: 0,
+        });
+      },
+    );
   });
 });
 
@@ -1211,4 +1308,33 @@ describe(`${getHanziWordRank.name} suite`, () => {
       });
     });
   });
+});
+
+test(`${`isHanziWordSkill` satisfies NameOf<typeof isHanziWordSkill>} suite`, () => {
+  const skillKinds = Object.fromEntries(
+    Object.values(SkillKind).map((skillKind) => [
+      skillKind,
+      isHanziWordSkill(`${rSkillKind().marshal(skillKind)}:___` as Skill),
+    ]),
+  );
+
+  expect(skillKinds).toMatchInlineSnapshot(`
+    {
+      "debug--Deprecated": false,
+      "debug--EnglishToRadical": false,
+      "debug--GlossToHanziWord": true,
+      "debug--HanziWordToGloss": true,
+      "debug--HanziWordToPinyin": true,
+      "debug--HanziWordToPinyinFinal": true,
+      "debug--HanziWordToPinyinInitial": true,
+      "debug--HanziWordToPinyinTone": true,
+      "debug--ImageToHanzi": false,
+      "debug--PinyinFinalAssociation": false,
+      "debug--PinyinInitialAssociation": false,
+      "debug--PinyinToHanzi": false,
+      "debug--PinyinToRadical": false,
+      "debug--RadicalToEnglish": false,
+      "debug--RadicalToPinyin": false,
+    }
+  `);
 });

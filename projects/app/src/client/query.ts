@@ -16,7 +16,11 @@ import {
   skillLearningGraph,
   skillReviewQueue,
 } from "@/data/skills";
-import { allHsk1HanziWords, allHsk2HanziWords } from "@/dictionary/dictionary";
+import {
+  allHsk1HanziWords,
+  allHsk2HanziWords,
+  getIsStructuralHanziWord,
+} from "@/dictionary/dictionary";
 import { arrayFilterUniqueWithKey } from "@/util/collections";
 import { fsrsIsForgotten } from "@/util/fsrs";
 import { add } from "date-fns/add";
@@ -145,10 +149,13 @@ export async function computeSkillReviewQueue(
     latestSkillRatings.set(v.skill, v);
   }
 
+  const isStructuralHanziWord = await getIsStructuralHanziWord();
+
   return skillReviewQueue({
     graph,
     skillSrsStates,
     latestSkillRatings,
     now,
+    isStructuralHanziWord,
   });
 }

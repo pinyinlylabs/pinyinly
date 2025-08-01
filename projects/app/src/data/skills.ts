@@ -33,7 +33,7 @@ import type {
   SrsStateType,
   UnsavedSkillRating,
 } from "./model";
-import { SkillKind, SrsKind } from "./model";
+import { hanziWordSkillKinds, SkillKind, SrsKind } from "./model";
 import type {
   HanziWordSkill,
   PinyinFinalAssociationSkill,
@@ -97,6 +97,11 @@ export const hanziWordFromSkill = (skill: HanziWordSkill): HanziWord => {
   invariant(hanziWord != null, `couldn't parse hanzi word (after :)`);
 
   return hanziWord as HanziWord;
+};
+
+export const isHanziWordSkill = (skill: Skill): skill is HanziWordSkill => {
+  const skillKind = skillKindFromSkill(skill);
+  return (hanziWordSkillKinds as SkillKind[]).includes(skillKind);
 };
 
 export const initialFromPinyinInitialAssociationSkill = (
@@ -542,11 +547,13 @@ export function skillReviewQueue({
   graph,
   skillSrsStates,
   latestSkillRatings,
+  isStructuralHanziWord,
   now = new Date(),
 }: {
   graph: SkillLearningGraph;
   skillSrsStates: Map<Skill, SrsStateType>;
   latestSkillRatings: Map<Skill, Pick<SkillRating, `rating` | `createdAt`>>;
+  isStructuralHanziWord: (hanziWord: HanziWord) => boolean;
   now?: Date;
 }): SkillReviewQueue {
   // Kahn topological sort
@@ -710,7 +717,25 @@ export function skillReviewQueue({
     );
   }
 
+  // The candidates come out in reverse order from the above algorithm, so flip
+  // them so that it's in proper queue order.
   learningOrderNewCandidates.reverse();
+
+  // Push components to the end of the list, so that words are prioritized for
+  // learning as they're more useful to people trying to apply their knowledge.
+  learningOrderNewCandidates.sort((a, b) => {
+    const aRank =
+      isHanziWordSkill(a) && isStructuralHanziWord(hanziWordFromSkill(a))
+        ? 1
+        : 0;
+    const bRank =
+      isHanziWordSkill(b) && isStructuralHanziWord(hanziWordFromSkill(b))
+        ? 1
+        : 0;
+
+    return aRank - bRank;
+  });
+
   for (const skill of learningOrderNewCandidates) {
     if (hasLearningCapacityForNewSkill(skill)) {
       learningOrderNew.push(skill);

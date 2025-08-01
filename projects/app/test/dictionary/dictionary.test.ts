@@ -11,6 +11,7 @@ import {
   allRadicalHanziWords,
   allRadicalsByStrokes,
   decomposeHanzi,
+  getIsStructuralHanziWord,
   hanziFromHanziOrHanziWord,
   hanziFromHanziWord,
   hanziWordMeaningSchema,
@@ -198,22 +199,6 @@ test(`hanzi meaning componentFormOf lint`, async () => {
   }
 });
 
-test(`hanzi word meaning example is not in english`, async () => {
-  const dict = await loadDictionary();
-
-  const violations = new Set(
-    [...dict]
-      .filter(([, { example }]) => {
-        // Only check for lower-case english letters, because sometimes examples
-        // have words like APP in them.
-        return example != null && /[a-z]/u.test(example);
-      })
-      .map(([hanziWord, meaning]) => `${hanziWord} ${meaning.example}`),
-  );
-
-  expect(violations).toEqual(new Set());
-});
-
 test(`hanzi word meaning pinyin lint`, async () => {
   const dict = await loadDictionary();
 
@@ -248,19 +233,6 @@ test(`hanzi word without visual variants omit the property rather than use an em
     .map(([hanziWord]) => hanziWord);
 
   expect(hanziWordWithEmptyArray).toEqual([]);
-});
-
-test(`hanzi word meanings actually include the hanzi in the example`, async () => {
-  const dict = await loadDictionary();
-
-  const hanziWordWithBadExamples = [...dict]
-    .filter(
-      ([hanziWord, { example }]) =>
-        example != null && !example.includes(hanziFromHanziWord(hanziWord)),
-    )
-    .map(([hanziWord]) => hanziWord);
-
-  expect(hanziWordWithBadExamples).toEqual([]);
 });
 
 test(`hanzi word visual variants shouldn't include the hanzi`, async () => {
@@ -577,6 +549,34 @@ test(`dictionary contains entries for decomposition`, async () => {
   expect(unknownWithMultipleSources).toEqual([]);
 });
 
+test(`dictionary structural components list`, async () => {
+  const dictionary = await loadDictionary();
+
+  const structural = dictionary
+    .entries()
+    .filter(([, meaning]) => meaning.isStructural === true)
+    .map(([hanziWord]) => hanziWord)
+    .toArray();
+
+  expect(structural).toMatchInlineSnapshot(`
+    [
+      "丨:line",
+      "丶:dot",
+      "丷:earsOut",
+      "丿:slash",
+      "𠂇:hand",
+      "𠂉:knife",
+      "𠂊:hands",
+      "乚:hidden",
+      "乚:second",
+      "𠃌:radical",
+      "亅:hook",
+      "𭕄:radical",
+      "忄:heart",
+    ]
+  `);
+});
+
 async function debugNonCjkUnifiedIdeographs(chars: string[]): Promise<string> {
   const swaps = [];
 
@@ -669,5 +669,14 @@ describe(`${upsertHanziWordMeaning.name} suite`, async () => {
       pinyin: [[拼音`nǐ`, 拼音`hǎo`]],
       partOfSpeech: `interjection`,
     });
+  });
+});
+
+describe(`${`getIsStructuralHanziWord` satisfies NameOf<typeof getIsStructuralHanziWord>} suite`, () => {
+  test(`fixtures`, async () => {
+    const isStructuralHanziWord = await getIsStructuralHanziWord();
+
+    expect(isStructuralHanziWord(`丿:slash`)).toBe(true);
+    expect(isStructuralHanziWord(`八:eight`)).toBe(false);
   });
 });
