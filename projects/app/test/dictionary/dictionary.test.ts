@@ -11,6 +11,7 @@ import {
   allRadicalHanziWords,
   allRadicalsByStrokes,
   decomposeHanzi,
+  getIsStructuralHanziWord,
   hanziFromHanziOrHanziWord,
   hanziFromHanziWord,
   hanziWordMeaningSchema,
@@ -599,7 +600,6 @@ test(`dictionary structural components list`, async () => {
       "乚:second",
       "𠃌:radical",
       "亅:hook",
-      "八:eight",
       "𭕄:radical",
       "忄:heart",
     ]
@@ -698,5 +698,14 @@ describe(`${upsertHanziWordMeaning.name} suite`, async () => {
       pinyin: [[拼音`nǐ`, 拼音`hǎo`]],
       partOfSpeech: `interjection`,
     });
+  });
+});
+
+describe(`${`getIsStructuralHanziWord` satisfies NameOf<typeof getIsStructuralHanziWord>} suite`, () => {
+  test(`fixtures`, async () => {
+    const isStructuralHanziWord = await getIsStructuralHanziWord();
+
+    expect(isStructuralHanziWord(`丿:slash`)).toBe(true);
+    expect(isStructuralHanziWord(`八:eight`)).toBe(false);
   });
 });

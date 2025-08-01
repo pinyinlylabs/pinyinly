@@ -393,7 +393,7 @@
 ["全身:wholeBody",{"gloss":["whole body"],"pinyin":["quán shēn"],"partOfSpeech":"noun"}],
 ["全部:whole",{"gloss":["whole","complete"],"pinyin":["quán bù"],"partOfSpeech":"noun"}],
 ["全面:comprehensive",{"gloss":["comprehensive","overall"],"pinyin":["quán miàn"],"partOfSpeech":"adjective"}],
-["八:eight",{"gloss":["eight"],"pinyin":["bā"],"partOfSpeech":"noun","visualVariants":["丷"],"isStructural":true}],
+["八:eight",{"gloss":["eight"],"pinyin":["bā"],"partOfSpeech":"noun","visualVariants":["丷"]}],
 ["公:public",{"gloss":["public"],"pinyin":["gōng"],"partOfSpeech":"adjective"}],
 ["公交车:bus",{"gloss":["bus"],"pinyin":["gōng jiāo chē"],"partOfSpeech":"noun"}],
 ["公共:public",{"gloss":["public"],"pinyin":["gōng gòng"],"partOfSpeech":"adjective"}],

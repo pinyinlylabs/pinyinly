@@ -48,7 +48,7 @@ describe(`${targetSkillsReviewQueue.name} suite`, () => {
     },
   );
 
-  rizzleTest.only(
+  rizzleTest(
     `new users are taught the simplest words first`,
     async ({ rizzle }) => {
       const queue = await targetSkillsReviewQueue(rizzle);
@@ -58,12 +58,12 @@ describe(`${targetSkillsReviewQueue.name} suite`, () => {
           "he:人:person",
           "he:十:ten",
           "he:又:again",
+          "he:八:eight",
           "he:口:mouth",
           "he:头:head",
           "he:肉:meat",
           "he:艮:stopping",
           "he:爪:claw",
-          "he:心:heart",
         ]
       `);
     },
@@ -84,24 +84,35 @@ test(`${simulateSkillReviews.name} returns a review queue`, async () => {
 
 describe(`${computeSkillReviewQueue.name} suite`, () => {
   test(`incorrect answers in a quiz don't get scheduled prematurely`, async () => {
+    // There was a bug where "wrong answers" were being scheduled for review
+    // even though they'd never been introduced yet. This is a regression test
+    // against that scenario.
+
     const { items } = await simulateSkillReviews({
       targetSkills: [`he:分:divide`],
       history: [
-        // first question is 丿:slash but they get it wrong. 八 is one of the
+        // first question is he:八:eight but they get it wrong. 𠃌 is one of the
         // wrong choices they submit so it's also marked wrong.
-        `❌hanziGloss 丿 eight`,
-        `💤 1h`, // wait past he:八:eight due date
+        `❌hanziGloss 八 radical`,
+        `💤 1h`, // wait past he:𠃌:radical due date
       ],
     });
 
-    // Make sure 八 didn't jump the queue before 𠃌 because it hasn't been
-    // introduced yet, instead they should have to answer 𠃌 again.
+    expect(items).toMatchInlineSnapshot(`
+      [
+        "he:八:eight",
+        "he:丿:slash",
+        "he:𠃌:radical",
+      ]
+    `);
+
+    // Make sure 𠃌 didn't jump the queue before 八 because it hasn't been
+    // introduced yet, instead they should have to answer 八 again.
     const 𠃌Index = items.indexOf(`he:𠃌:radical`);
     const 八Index = items.indexOf(`he:八:eight`);
-    assert.ok(
-      𠃌Index < 八Index,
-      `he:𠃌:radical should be scheduled before he:八:eight`,
-    );
+
+    // he:八:eight should be scheduled before he:𠃌:radical
+    expect(𠃌Index).toBeGreaterThan(八Index);
   });
 
   test(`learns new skills before not-due skills (stable sorted to maintain graph order)`, async () => {
