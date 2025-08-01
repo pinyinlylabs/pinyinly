@@ -677,10 +677,6 @@ export function skillReviewQueue({
       }
     }
   }
-  // console.log(`learningOrderRetry=,`, learningOrderRetry);
-  // console.log(`learningOrderOverDue=,`, learningOrderOverDue);
-  // console.log(`learningOrderDue=,`, learningOrderDue);
-  // console.log(`learningOrderNew=,`, learningOrderNew);
 
   // At this point there's an unbounded number of new skills, so we need to
   // enforce a throttle to avoid overwhelming the user with too many new skills
