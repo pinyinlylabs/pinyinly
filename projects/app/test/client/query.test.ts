@@ -9,7 +9,7 @@ import type {
 } from "#data/model.ts";
 import { QuestionFlagKind, SrsKind } from "#data/model.ts";
 import { mutators } from "#data/rizzleMutators.ts";
-import type { Skill } from "#data/rizzleSchema.ts";
+import type { Rizzle, Skill } from "#data/rizzleSchema.ts";
 import { currentSchema, rSpaceSeparatedString } from "#data/rizzleSchema.ts";
 import type { SkillReviewQueue } from "#data/skills.ts";
 import { Rating } from "#util/fsrs.ts";
@@ -21,21 +21,53 @@ import { describe, expect, test } from "vitest";
 import { parseRelativeTimeShorthand } from "../data/helpers";
 import { testReplicacheOptions } from "../util/rizzleHelpers";
 
-describe(`${targetSkillsReviewQueue.name} suite`, () => {
-  test(`returns everything when no skills have state`, async () => {
-    await using rizzle = r.replicache(
-      testReplicacheOptions(),
-      currentSchema,
-      mutators,
-    );
+const rizzleTest = test.extend<{ rizzle: Rizzle }>({
+  rizzle: [
+    async ({}, use) => {
+      await using rizzle = r.replicache(
+        testReplicacheOptions(),
+        currentSchema,
+        mutators,
+      );
+      await use(rizzle);
+    },
+    { scope: `test` },
+  ],
+});
 
-    // Sanity check that there should be a bunch in the queue
-    const queue = await targetSkillsReviewQueue(rizzle);
-    // The queue is throttled by unstable skills, so it starts at 15. This
-    // assert only requires 10 though to avoid brittleness if the throttle value
-    // changes.
-    expect(queue.items.length).toBeGreaterThan(10);
-  });
+describe(`${targetSkillsReviewQueue.name} suite`, () => {
+  rizzleTest(
+    `returns everything when no skills have state`,
+    async ({ rizzle }) => {
+      // Sanity check that there should be a bunch in the queue
+      const queue = await targetSkillsReviewQueue(rizzle);
+      // The queue is throttled by unstable skills, so it starts at 15. This
+      // assert only requires 10 though to avoid brittleness if the throttle value
+      // changes.
+      expect(queue.items.length).toBeGreaterThan(10);
+    },
+  );
+
+  rizzleTest(
+    `new users are taught the simplest words first`,
+    async ({ rizzle }) => {
+      const queue = await targetSkillsReviewQueue(rizzle);
+      expect(queue.items.slice(0, 10)).toMatchInlineSnapshot(`
+        [
+          "he:亅:hook",
+          "he:一:one",
+          "he:丿:slash",
+          "he:丶:dot",
+          "he:人:person",
+          "he:十:ten",
+          "he:丨:line",
+          "he:又:again",
+          "he:八:eight",
+          "he:口:mouth",
+        ]
+      `);
+    },
+  );
 });
 
 test(`${simulateSkillReviews.name} returns a review queue`, async () => {
