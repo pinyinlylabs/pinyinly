@@ -125,7 +125,7 @@ const roundedRect = tv({
   base: `
     box-border select-none items-center justify-center
 
-    web:transition-all
+    web:transition-[border-bottom-width,border-left-width,border-right-width,border-top-width,border-width]
   `,
   variants: {
     variant: {
