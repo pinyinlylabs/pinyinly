@@ -199,22 +199,6 @@ test(`hanzi meaning componentFormOf lint`, async () => {
   }
 });
 
-test(`hanzi word meaning example is not in english`, async () => {
-  const dict = await loadDictionary();
-
-  const violations = new Set(
-    [...dict]
-      .filter(([, { example }]) => {
-        // Only check for lower-case english letters, because sometimes examples
-        // have words like APP in them.
-        return example != null && /[a-z]/u.test(example);
-      })
-      .map(([hanziWord, meaning]) => `${hanziWord} ${meaning.example}`),
-  );
-
-  expect(violations).toEqual(new Set());
-});
-
 test(`hanzi word meaning pinyin lint`, async () => {
   const dict = await loadDictionary();
 
@@ -249,19 +233,6 @@ test(`hanzi word without visual variants omit the property rather than use an em
     .map(([hanziWord]) => hanziWord);
 
   expect(hanziWordWithEmptyArray).toEqual([]);
-});
-
-test(`hanzi word meanings actually include the hanzi in the example`, async () => {
-  const dict = await loadDictionary();
-
-  const hanziWordWithBadExamples = [...dict]
-    .filter(
-      ([hanziWord, { example }]) =>
-        example != null && !example.includes(hanziFromHanziWord(hanziWord)),
-    )
-    .map(([hanziWord]) => hanziWord);
-
-  expect(hanziWordWithBadExamples).toEqual([]);
 });
 
 test(`hanzi word visual variants shouldn't include the hanzi`, async () => {

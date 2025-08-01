@@ -193,11 +193,6 @@ export const hanziWordMeaningSchema = z.object({
     )
     .nullable()
     .optional(),
-  example: z
-    .string()
-    .describe(`a Chinese sentence that includes this hanzi`)
-    .nullable()
-    .optional(),
   partOfSpeech: partOfSpeechSchema.optional(),
   isStructural: z
     .literal(true)
@@ -660,10 +655,6 @@ export function upsertHanziWordMeaning(
     patch.pinyin = undefined;
   }
 
-  if (patch.example?.trim().length === 0) {
-    patch.example = undefined;
-  }
-
   if (patch.visualVariants?.length === 0) {
     patch.visualVariants = undefined;
   }
@@ -694,7 +685,6 @@ export function unparseDictionary(
         pinyin:
           meaning.pinyin?.map((p) => rPinyinPronunciation().marshal(p)) ??
           undefined,
-        example: meaning.example ?? undefined,
         partOfSpeech: meaning.partOfSpeech,
         componentFormOf: meaning.componentFormOf ?? undefined,
         visualVariants: meaning.visualVariants ?? undefined,

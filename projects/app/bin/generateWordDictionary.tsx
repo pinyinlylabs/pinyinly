@@ -812,11 +812,6 @@ const HanziWordEditor = ({
                   label: `Part of speech`,
                   value: meaning.partOfSpeech ?? ``,
                 },
-                {
-                  id: `example`,
-                  label: `Example`,
-                  value: meaning.example ?? ``,
-                },
               ]),
         ]}
         onCancel={() => {
@@ -825,18 +820,6 @@ const HanziWordEditor = ({
         onSubmit={(edits) => {
           void (async () => {
             const mutations = [];
-
-            if (edits.has(`example`)) {
-              const newExample = edits.get(`example`);
-              invariant(newExample != null);
-
-              mutations.push(() =>
-                saveUpsertHanziWordMeaning(hanziWord, {
-                  example: newExample,
-                }),
-              );
-              edits.delete(`example`);
-            }
 
             if (edits.has(`partOfSpeech`)) {
               const newValue = edits.get(`partOfSpeech`)?.trim();
@@ -1664,7 +1647,6 @@ async function generateHanziWordResults(
               gloss,
               pinyin: getDongChinesePinyin(lookup),
               partOfSpeech: openAiResult.meaning.partOfSpeech,
-              example: openAiResult.meaning.example,
             },
           });
         }
@@ -2220,13 +2202,6 @@ const DictionaryHanziWordEntry = ({
             </Text>
             {` `}
             <Text italic>{meaning.partOfSpeech}</Text>
-          </Text>
-          <Text>
-            <Text bold dimColor>
-              example:
-            </Text>
-            {` `}
-            {meaning.example}
           </Text>
           {meaning.visualVariants == null ? null : (
             <Text>
