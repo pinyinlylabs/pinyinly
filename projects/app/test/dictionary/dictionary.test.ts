@@ -577,6 +577,35 @@ test(`dictionary contains entries for decomposition`, async () => {
   expect(unknownWithMultipleSources).toEqual([]);
 });
 
+test(`dictionary structural components list`, async () => {
+  const dictionary = await loadDictionary();
+
+  const structural = dictionary
+    .entries()
+    .filter(([, meaning]) => meaning.isStructural === true)
+    .map(([hanziWord]) => hanziWord)
+    .toArray();
+
+  expect(structural).toMatchInlineSnapshot(`
+    [
+      "丨:line",
+      "丶:dot",
+      "丷:earsOut",
+      "丿:slash",
+      "𠂇:hand",
+      "𠂉:knife",
+      "𠂊:hands",
+      "乚:hidden",
+      "乚:second",
+      "𠃌:radical",
+      "亅:hook",
+      "八:eight",
+      "𭕄:radical",
+      "忄:heart",
+    ]
+  `);
+});
+
 async function debugNonCjkUnifiedIdeographs(chars: string[]): Promise<string> {
   const swaps = [];
 

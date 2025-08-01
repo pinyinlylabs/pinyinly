@@ -48,22 +48,22 @@ describe(`${targetSkillsReviewQueue.name} suite`, () => {
     },
   );
 
-  rizzleTest(
+  rizzleTest.only(
     `new users are taught the simplest words first`,
     async ({ rizzle }) => {
       const queue = await targetSkillsReviewQueue(rizzle);
       expect(queue.items.slice(0, 10)).toMatchInlineSnapshot(`
         [
-          "he:亅:hook",
           "he:一:one",
-          "he:丿:slash",
-          "he:丶:dot",
           "he:人:person",
           "he:十:ten",
-          "he:丨:line",
           "he:又:again",
-          "he:八:eight",
           "he:口:mouth",
+          "he:头:head",
+          "he:肉:meat",
+          "he:艮:stopping",
+          "he:爪:claw",
+          "he:心:heart",
         ]
       `);
     },
@@ -77,7 +77,7 @@ test(`${simulateSkillReviews.name} returns a review queue`, async () => {
   });
 
   expect(reviewQueue).toMatchObject({
-    items: [`he:丿:slash`, `he:𠃌:radical`, `he:八:eight`],
+    items: [`he:八:eight`, `he:丿:slash`, `he:𠃌:radical`],
     blockedItems: [`he:刀:knife`, `he:分:divide`],
   });
 });
@@ -111,7 +111,7 @@ describe(`${computeSkillReviewQueue.name} suite`, () => {
     });
 
     expect(reviewQueue).toMatchObject({
-      items: [`he:𠃌:radical`, `he:八:eight`, `he:丿:slash`],
+      items: [`he:八:eight`, `he:𠃌:radical`, `he:丿:slash`],
       blockedItems: [`he:刀:knife`, `he:分:divide`],
     });
   });

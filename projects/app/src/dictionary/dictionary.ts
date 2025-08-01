@@ -182,7 +182,6 @@ export const partOfSpeechSchema = z.enum([
   `measureWord`,
   `particle`,
   `radical`,
-  `unknown`,
 ]);
 
 export const hanziWordMeaningSchema = z.object({
@@ -199,7 +198,13 @@ export const hanziWordMeaningSchema = z.object({
     .describe(`a Chinese sentence that includes this hanzi`)
     .nullable()
     .optional(),
-  partOfSpeech: partOfSpeechSchema,
+  partOfSpeech: partOfSpeechSchema.optional(),
+  isStructural: z
+    .literal(true)
+    .optional()
+    .describe(
+      `is used as a component in regular Hanzi characters (e.g. parts of 兰, 兴, etc.), but never used independently as a full word or character in modern Mandarin.`,
+    ),
   componentFormOf: hanziGraphemeSchema
     .describe(
       `the primary form of this hanzi (only relevant for component-form hanzi)`,
@@ -697,3 +702,20 @@ export function unparseDictionary(
     ])
     .sort(sortComparatorString((x) => x[0]));
 }
+
+export const getIsStructuralHanziWord = memoize0(async () => {
+  const dictionary = await loadDictionary();
+
+  const structuralHanziWords = new Set();
+
+  for (const [hanziWord, meaning] of dictionary.entries()) {
+    if (meaning.isStructural) {
+      structuralHanziWords.add(hanziWord);
+    }
+  }
+
+  const isStructuralHanziWord = (hanziWord: HanziWord) =>
+    structuralHanziWords.has(hanziWord);
+
+  return isStructuralHanziWord;
+});

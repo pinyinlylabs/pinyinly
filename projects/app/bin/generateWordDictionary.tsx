@@ -434,7 +434,7 @@ const HanziEditor = ({
   const options = useMemo(
     () =>
       [...(allHanziWords?.entries() ?? [])].map(([hanziWord, meaning]) => ({
-        label: `${hanziWord} ${meaning.partOfSpeech} ${meaning.gloss.map((x) => `"${x}"`).join(`   `)}`,
+        label: `${hanziWord} ${meaning.partOfSpeech ?? ``} ${meaning.gloss.map((x) => `"${x}"`).join(`   `)}`,
         value: hanziWord,
       })),
     [allHanziWords],
@@ -720,7 +720,7 @@ async function openAiHanziWordGlossHintQuery(
     hanziIds = idsNodeToString(flattenIds(parseIds(hanziIds)));
 
     const query = `
-I'm having trouble remembering that ${hanzi} means **${meaning.gloss.join(`/`)}** ${meaning.partOfSpeech == `unknown` ? `` : `(${meaning.partOfSpeech})`}.
+I'm having trouble remembering that ${hanzi} means **${meaning.gloss.join(`/`)}** ${meaning.partOfSpeech == null ? `` : `(${meaning.partOfSpeech})`}.
 
 ${hanziIds.length > 1 ? `\nI've worked out that ${hanzi} = ${hanziIds}` : ``}
 ${[...componentGlosses.entries()]
@@ -810,7 +810,7 @@ const HanziWordEditor = ({
                 {
                   id: `partOfSpeech`,
                   label: `Part of speech`,
-                  value: meaning.partOfSpeech,
+                  value: meaning.partOfSpeech ?? ``,
                 },
                 {
                   id: `example`,
@@ -1646,7 +1646,6 @@ async function generateHanziWordResults(
           meaning: {
             gloss,
             pinyin: getDongChinesePinyin(lookup),
-            partOfSpeech: `unknown`,
           },
         });
 
