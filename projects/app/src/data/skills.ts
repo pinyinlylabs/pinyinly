@@ -558,37 +558,11 @@ export function skillReviewQueue({
   const learningOrderRetry: [Skill, Date][] = [];
   const learningOrderOverDue: [Skill, Date][] = [];
   const learningOrderDue: [Skill, Date][] = [];
-  const learningOrderNew: Skill[] = [];
+  const learningOrderNewCandidates: Skill[] = [];
   const learningOrderNotDue: [Skill, SrsStateType | undefined][] = [];
   const learningOrderBlocked: Skill[] = [];
   let newOverDueAt: Date | null = null;
   let newDueAt: Date | null = null;
-
-  // Calculate how many unstable skills there are for each skill kind.
-  const unstableSkillCounts = new Map<SkillKind, number>();
-  for (const [skill, srsState] of skillSrsStates) {
-    const alreadyIntroduced = !needsToBeIntroduced(srsState, now);
-    if (alreadyIntroduced && !isStable(srsState)) {
-      const skillKind = skillKindFromSkill(skill);
-      const count = unstableSkillCounts.get(skillKind) ?? 0;
-      unstableSkillCounts.set(skillKind, count + 1);
-    }
-  }
-
-  // Check if introducing a skill would be too overwhelming. There is a limit on
-  // how many unstable skills can be introduced at once. This is to avoid
-  // overwhelming the user with too many new skills at once.
-  function hasLearningCapacityForNewSkill(skill: Skill): boolean {
-    // 💭 maybe this should be dynamic, based on the number of skills that have
-    // been learned. So if you know 1000 words you can probably learn more at
-    // once than if you only know 10 words.
-    const throttleLimit = 15;
-    return (
-      (unstableSkillCounts.get(skillKindFromSkill(skill)) ?? 0) +
-        learningOrderNew.length <
-      throttleLimit
-    );
-  }
 
   function enqueueReviewOnce(
     skill: Skill,
@@ -600,11 +574,8 @@ export function skillReviewQueue({
     learningOrderIncluded.add(skill);
 
     if (srsState == null || needsToBeIntroduced(srsState, now)) {
-      if (
-        hasStableDependencies(skill) &&
-        hasLearningCapacityForNewSkill(skill)
-      ) {
-        learningOrderNew.push(skill);
+      if (hasStableDependencies(skill)) {
+        learningOrderNewCandidates.push(skill);
       } else {
         learningOrderBlocked.push(skill);
       }
@@ -707,6 +678,47 @@ export function skillReviewQueue({
     }
   }
 
+  // At this point there's an unbounded number of new skills, so we need to
+  // enforce a throttle to avoid overwhelming the user with too many new skills
+  // in a short period of time. So only take a fixed amount of the new
+  // candidates and mark the rest as blocked.
+  const learningOrderNew: Skill[] = [];
+
+  // Calculate how many unstable skills there are for each skill kind.
+  const unstableSkillCounts = new Map<SkillKind, number>();
+  for (const [skill, srsState] of skillSrsStates) {
+    const alreadyIntroduced = !needsToBeIntroduced(srsState, now);
+    if (alreadyIntroduced && !isStable(srsState)) {
+      const skillKind = skillKindFromSkill(skill);
+      const count = unstableSkillCounts.get(skillKind) ?? 0;
+      unstableSkillCounts.set(skillKind, count + 1);
+    }
+  }
+
+  // Check if introducing a skill would be too overwhelming. There is a limit on
+  // how many unstable skills can be introduced at once. This is to avoid
+  // overwhelming the user with too many new skills at once.
+  function hasLearningCapacityForNewSkill(skill: Skill): boolean {
+    // 💭 maybe this should be dynamic, based on the number of skills that have
+    // been learned. So if you know 1000 words you can probably learn more at
+    // once than if you only know 10 words.
+    const throttleLimit = 15;
+    return (
+      (unstableSkillCounts.get(skillKindFromSkill(skill)) ?? 0) +
+        learningOrderNew.length <
+      throttleLimit
+    );
+  }
+
+  learningOrderNewCandidates.reverse();
+  for (const skill of learningOrderNewCandidates) {
+    if (hasLearningCapacityForNewSkill(skill)) {
+      learningOrderNew.push(skill);
+    } else {
+      learningOrderBlocked.push(skill);
+    }
+  }
+
   const items = [
     // First do incorrect answers that need to be retried.
     ...learningOrderRetry
@@ -722,7 +734,7 @@ export function skillReviewQueue({
       .sort(sortComparatorDate(([, due]) => due))
       .map(([skill]) => skill),
     // Then do new skills in the order of the learning graph.
-    ...learningOrderNew.reverse(),
+    ...learningOrderNew,
     // Finally sort the not-due skills.
     ...randomSortSkills(learningOrderNotDue),
   ];
