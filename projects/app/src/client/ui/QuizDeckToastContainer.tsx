@@ -19,7 +19,7 @@ export const QuizDeckToastContainer = ({
   );
 };
 
-const easing = Easing.exp;
+const easing = Easing.quad;
 const entering = Platform.select({
   // On web the `bottom: <percent>%` approach doesn't work when the
   // parent is `position: absolute`. But using `translateY: <percent>%`
