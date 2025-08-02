@@ -1,8 +1,8 @@
 // @ts-check
 
 import makeDebug from "debug";
+import { walk } from "estree-walker";
 import remarkFlexibleMarkers from "remark-flexible-markers";
-import { visit } from "unist-util-visit";
 
 const debug = makeDebug(`pinyinly:mdx:transform`);
 
@@ -64,6 +64,53 @@ const getTemplate = (rawMdxString) => {
  */
 
 /**
+ * Custom recma plugin for handling src attributes in JSX elements
+ * @param {Object} options - Configuration options
+ * @param {function(string): boolean} options.matchLocalAsset - Function to determine if an asset URL is local
+ * @param {function(string): boolean} [options.matchAttributeName] - Function to determine if an attribute name is a source
+ * @returns {function(import('estree').Program): void} A transformer function
+ */
+function jsxSrcAttributePlugin({
+  matchLocalAsset,
+  matchAttributeName = (name) => /(src|source)$/i.test(name),
+}) {
+  return (tree) => {
+    walk(tree, {
+      enter(node) {
+        if (
+          node.type === `JSXAttribute` &&
+          node.name.type === `JSXIdentifier` &&
+          matchAttributeName(node.name.name) &&
+          node.value?.type === `Literal` &&
+          typeof node.value.value === `string` &&
+          matchLocalAsset(node.value.value)
+        ) {
+          // Transform the string literal into a JSX expression with require()
+          node.value = {
+            type: `JSXExpressionContainer`,
+            expression: {
+              type: `CallExpression`,
+              callee: {
+                type: `Identifier`,
+                name: `require`,
+              },
+              arguments: [
+                {
+                  type: `Literal`,
+                  value: node.value.value,
+                  raw: JSON.stringify(node.value.value),
+                },
+              ],
+              optional: false,
+            },
+          };
+        }
+      },
+    });
+  };
+}
+
+/**
  * Creates an MDX transformer for Metro bundler
  * @param {Object} options - Configuration options
  * @param {function({filename: string, src: string}): boolean} [options.matchFile] - Function to determine if a file should be transformed
@@ -78,21 +125,6 @@ export function createTransformer({
   providerImportSource,
   remarkPlugins = [],
 } = {}) {
-  /**
-   * Custom plugin for handling image paths in MDX
-   * @returns {function(Node): void} A transformer function
-   */
-  function expoMdxPlugin() {
-    return (tree) => {
-      visit(tree, `image`, (/** @type {ImageNode} */ node) => {
-        if (matchLocalAsset(node.url)) {
-          // Relative path should be turned into a require statement:
-          node.url = `EXPO_REQUIRE__${Buffer.from(node.url, `utf-8`).toString(`base64`)}__`;
-        }
-      });
-    };
-  }
-
   /** @type {ReturnType<typeof import('@mdx-js/mdx').createProcessor>|undefined} */
   let _compiler;
 
@@ -109,7 +141,8 @@ export function createTransformer({
     _compiler = createProcessor({
       jsx: true,
       providerImportSource,
-      remarkPlugins: [...remarkPlugins, expoMdxPlugin],
+      remarkPlugins,
+      recmaPlugins: [[jsxSrcAttributePlugin, { matchLocalAsset }]],
     });
 
     return _compiler;
@@ -130,16 +163,6 @@ export function createTransformer({
       value: props.src,
       path: props.filename,
     });
-
-    if (typeof contents === `string`) {
-      contents = contents.replaceAll(
-        // Rewrite JSX attributes of `="EXPO_REQUIRE__<base64>"` to `={require(<string>)}`.
-        /="EXPO_REQUIRE__(.+?)__"/g,
-        (_match, /** @type {string} */ p1) => {
-          return `={require(${JSON.stringify(Buffer.from(p1, `base64`).toString(`utf-8`))})}`;
-        },
-      );
-    }
 
     const result = {
       ...props,
