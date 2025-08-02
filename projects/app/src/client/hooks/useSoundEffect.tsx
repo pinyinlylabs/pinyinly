@@ -1,10 +1,10 @@
+import { AudioContextProvider } from "@/client/ui/AudioContextProvider";
 import type { AudioSource } from "expo-audio";
 import { useAudioPlayer } from "expo-audio";
+import { use } from "react";
+import { Platform } from "react-native";
 import { useEventCallback } from "../hooks/useEventCallback";
 import { useLocalQuery } from "../hooks/useLocalQuery";
-
-const audioContext =
-  typeof AudioContext === `undefined` ? null : new AudioContext();
 
 export type UseSoundEffect = (source: AudioSource) => () => void;
 
@@ -23,6 +23,7 @@ const useSoundEffectExpoAudio: UseSoundEffect = (source) => {
 // on the OS.
 const useSoundEffectWebApi: UseSoundEffect = (source) => {
   const sourceUri = typeof source === `string` ? source : null;
+  const audioContext = use(AudioContextProvider.Context);
 
   // Download and cache the audio buffer.
   const { data: audioBuffer } = useLocalQuery({
@@ -49,12 +50,26 @@ const useSoundEffectWebApi: UseSoundEffect = (source) => {
       source.addEventListener(`ended`, () => {
         source.disconnect();
       });
-      source.start();
+
+      if (audioContext.state === `suspended`) {
+        void audioContext
+          .resume()
+          .then(() => {
+            source.start();
+          })
+          .catch((error: unknown) => {
+            console.error(`Failed to resume audio context`, error);
+          });
+      } else {
+        source.start();
+      }
     }
   });
 
   return play;
 };
 
-export const useSoundEffect: UseSoundEffect =
-  audioContext == null ? useSoundEffectExpoAudio : useSoundEffectWebApi;
+export const useSoundEffect = Platform.select<UseSoundEffect>({
+  web: useSoundEffectWebApi,
+  default: useSoundEffectExpoAudio,
+});

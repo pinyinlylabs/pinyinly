@@ -1,6 +1,5 @@
 import { useHanziWikiEntry } from "@/client/hooks/useHanziWikiEntry";
 import { useLookupHanzi } from "@/client/hooks/useLookupHanzi";
-import { pickChildren } from "@/client/react";
 import {
   getWikiMdxHanziMeaning,
   getWikiMdxHanziMeaningMnemonic,
@@ -8,13 +7,12 @@ import {
   getWikiMdxHanziWordMeaning,
 } from "@/client/wiki";
 import type { HanziText, PinyinSyllable } from "@/data/model";
-import type { PropsWithChildren } from "react";
 import React, { Fragment, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 import { useIntersectionObserver } from "usehooks-ts";
 import { IconImage } from "./IconImage";
-import { MDXComponents } from "./MDXComponents";
+import { PylyMdxComponents } from "./PylyMdxComponents";
 
 const hr = <View className="h-px bg-fg/25" />;
 
@@ -361,58 +359,4 @@ function ExpandableSection({
       </View>
     </View>
   );
-}
-
-function PylyMdxComponents({ children }: PropsWithChildren) {
-  return (
-    <MDXComponents
-      components={{
-        Hanzi: HanziComponent,
-        Translated: TranslatedComponent,
-
-        Examples: ({ children }: PropsWithChildren) => {
-          return <View className="gap-5 p-4">{children}</View>;
-        },
-        Example: ({ children }: PropsWithChildren) => {
-          const [hanzi, translated] = pickChildren(
-            children,
-            HanziComponent,
-            TranslatedComponent,
-          );
-
-          return (
-            <View className="border-l-[6px] border-l-fg/20 py-2 pl-3">
-              {hanzi == null ? null : (
-                <Text className="pyly-body">{hanzi.props.children}</Text>
-              )}
-              {translated == null ? null : (
-                <Text className="pyly-body">{translated.props.children}</Text>
-              )}
-            </View>
-          );
-        },
-        ul: ({ children }: PropsWithChildren) => (
-          <ul className="space-y-2">{children}</ul>
-        ),
-        li: ({ children }: PropsWithChildren) => (
-          <li className="pyly-body">
-            <Text className="pyly-body">{children}</Text>
-          </li>
-        ),
-        wrapper: ({ children }: PropsWithChildren) => (
-          <View className="pyly-mdx space-y-4">{children}</View>
-        ),
-      }}
-    >
-      {children}
-    </MDXComponents>
-  );
-}
-
-function TranslatedComponent({ children }: PropsWithChildren) {
-  return <>{children}</>;
-}
-
-function HanziComponent({ children }: PropsWithChildren) {
-  return <>{children}</>;
 }

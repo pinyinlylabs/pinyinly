@@ -10,8 +10,7 @@ tasks:
       NODE_OPTIONS: $NODE_OPTIONS --no-warnings=ExperimentalWarning
     inputs:
       - src/**/*
-    options:
-      runInCI: false
+    preset: watcher
 
 tags:
   - prettier

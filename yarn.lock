@@ -4545,6 +4545,7 @@ __metadata:
     eslint-plugin-react-hooks: "npm:^6.0.0-rc.1"
     eslint-plugin-tailwindcss: "npm:^3.18.0"
     eslint-plugin-unicorn: "npm:^59.0.0"
+    estree-walker: "npm:^3.0.3"
     expo: "npm:53.0.17"
     expo-apple-authentication: "npm:~7.2.4"
     expo-application: "npm:~6.1.5"

@@ -11,6 +11,7 @@ import { routingIntegration } from "@/client/sentry";
 // ------------------------------
 
 import { useAuth } from "@/client/auth";
+import { AudioContextProvider } from "@/client/ui/AudioContextProvider";
 import { DeviceStoreProvider } from "@/client/ui/DeviceStoreProvider";
 import { PostHogProvider } from "@/client/ui/PostHogProvider";
 import { PylyThemeProvider } from "@/client/ui/PylyThemeProvider";
@@ -57,15 +58,17 @@ function RootLayout() {
               <title>Pinyinly - Learn to read Chinese</title>
             </Head>
 
-            <Stack screenOptions={{ headerShown: false, animation: `fade` }}>
-              <Stack.Screen
-                name="login"
-                options={{
-                  presentation: `modal`,
-                  animation: `slide_from_bottom`,
-                }}
-              />
-            </Stack>
+            <AudioContextProvider>
+              <Stack screenOptions={{ headerShown: false, animation: `fade` }}>
+                <Stack.Screen
+                  name="login"
+                  options={{
+                    presentation: `modal`,
+                    animation: `slide_from_bottom`,
+                  }}
+                />
+              </Stack>
+            </AudioContextProvider>
             <SplashScreen />
           </PostHogProvider>
         </CurrentSessionStoreProvider>

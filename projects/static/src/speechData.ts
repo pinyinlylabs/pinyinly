@@ -11,6 +11,7 @@ interface Voice {
 export const phrases: readonly Phrase[] = [
   { id: "1", text: "我最喜欢果汁" },
   { id: "2", text: "您想用现金还是支付宝支付？" },
+  { id: "3", text: "上" },
 ];
 
 export const voices: readonly Voice[] = [

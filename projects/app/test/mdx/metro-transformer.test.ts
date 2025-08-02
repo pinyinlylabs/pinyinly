@@ -207,4 +207,25 @@ console.log("hello")
       `"<_components.pre><_components.code className="language-js">{"console.log(\\"hello\\")\\n"}</_components.code></_components.pre>"`,
     );
   });
+
+  it(`should transform arbitrary JSX elements with src attributes`, async () => {
+    const result = await transform({
+      filename: `test.mdx`,
+      src: `
+# Hello World
+
+<MyComponent src="./image.jpg" />
+<MyComponent imageSrc="./image.jpg" />
+<MyComponent source="./image.jpg" />
+<SomeOtherElement src="https://external.com/image.jpg" />`,
+    });
+
+    expect(result.src).toContain(`src={require("./image.jpg")}`);
+    expect(result.src).toContain(`source={require("./image.jpg")}`);
+    expect(result.src).toContain(`src="https://external.com/image.jpg"`);
+
+    expect(getJsxContent(result.src)).toMatchInlineSnapshot(
+      `"<><_components.h1>{"Hello World"}</_components.h1>{"\\n"}<MyComponent src={require("./image.jpg")} />{"\\n"}<MyComponent imageSrc={require("./image.jpg")} />{"\\n"}<MyComponent source={require("./image.jpg")} />{"\\n"}<SomeOtherElement src="https://external.com/image.jpg" /></>"`,
+    );
+  });
 });
