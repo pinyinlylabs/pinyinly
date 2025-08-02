@@ -53,7 +53,7 @@ export const defaultMdxComponents = {
   hr: makeMdx({ className: ctl(`pyly-mdx-hr`) }, html.HR),
   div: makeMdx({ className: ctl(`pyly-mdx-div`) }, View),
   img: makeMdx({ className: ctl(`pyly-mdx-img`) }, Img),
-  blockquote: makeMdx({ className: ctl(`pyly-mdx-blockquote`) }, View),
+  blockquote: makeMdx({ className: ctl(`pyly-mdx-blockquote`) }, Text),
 } as const satisfies MdxComponentsType;
 
 export const MDXComponentsContext =
