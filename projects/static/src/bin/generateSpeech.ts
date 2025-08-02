@@ -15,19 +15,29 @@ yargs(hideBin(process.argv))
     async () => {
       for (const voice of voices) {
         for (const phrase of phrases) {
-          const tempPath = "speech.aac";
+          const tempAacPath = "speech.aac";
           spawnSync("say", [
             "-v",
             voice.name,
             "-r",
             "50",
             "-o",
-            tempPath,
+            tempAacPath,
             phrase.text,
           ]);
-          const md5Hash = await createMD5(tempPath);
+          const tempM4aPath = "speech.m4a";
+          spawnSync("ffmpeg", [
+            "-i",
+            tempAacPath,
+            "-c:a",
+            "aac",
+            "-b:a",
+            "128k",
+            tempM4aPath,
+          ]);
+          const md5Hash = await createMD5(tempM4aPath);
           const destPathPrefix = `public/speech/${phrase.id}/${voice.id}-`;
-          const destPath = `${destPathPrefix}${md5Hash}.aac`;
+          const destPath = `${destPathPrefix}${md5Hash}.m4a`;
           await mkdir(dirname(destPath), { recursive: true });
 
           // Delete all existing files for the given phase and voice.
@@ -38,7 +48,7 @@ yargs(hideBin(process.argv))
             }
             await rm(path);
           }
-          await rename(tempPath, destPath);
+          await rename(tempM4aPath, destPath);
         }
       }
     },
