@@ -24,3 +24,7 @@ runs:
     - name: Yarn install
       run: yarn install
       shell: bash
+
+    - name: Install ffmpeg (for tests)
+      run: sudo apt-get install -y ffmpeg
+      shell: bash
