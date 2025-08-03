@@ -152,6 +152,7 @@
     "eslint-plugin-tailwindcss": "^3.18.0",
     "eslint-plugin-unicorn": "^59.0.0",
     "estree-walker": "^3.0.3",
+    "execa": "^9.6.0",
     "expo-atlas": "^0.4.0",
     "fontkit": "^2.0.4",
     "globals": "^16.0.0",
