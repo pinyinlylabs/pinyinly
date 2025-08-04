@@ -1,0 +1,22 @@
+{
+  "extends": "../../../tsconfig.base",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "emitDeclarationOnly": false,
+    "esModuleInterop": true,
+    "jsx": "preserve",
+    "lib": ["DOM", "ES2022"],
+    "module": "ES2020",
+    "moduleResolution": "Bundler",
+    "noPropertyAccessFromIndexSignature": true,
+    "outDir": "../dist",
+    "resolveJsonModule": true,
+    "target": "ESNext"
+  },
+  "include": ["**/*"],
+  "references": [
+    {
+      "path": "../../lib"
+    }
+  ]
+}

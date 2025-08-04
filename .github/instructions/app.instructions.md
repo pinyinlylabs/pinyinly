@@ -4,7 +4,7 @@ applyTo: "projects/app/**"
 
 The following commands should be used to test the code:
 
-- Tests: `moon run app:test`
+- Tests: `moon run app:test [-- path/to/test-file.test.ts]`
 - Lint: `moon run app:lint` (and `moon run app:lint -- --fix` to fix issues)
 - Static type checking: `moon run app:typecheck`
 - Prettier: `moon run root:prettierCheck`

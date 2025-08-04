@@ -4,20 +4,22 @@
     "baseUrl": ".",
     "lib": ["ESNext"],
     "module": "NodeNext",
-    "emitDeclarationOnly": false,
     "moduleResolution": "NodeNext",
-    "rootDir": "src",
-    "outDir": "dist",
+    "outDir": "../../.moon/cache/types/projects/expo-audio-sprites",
     "target": "ESNext",
     "types": ["node"]
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    "**/*.mts",
-    "**/*.js",
-    "**/*.cjs",
-    "**/*.mjs"
-  ],
-  "exclude": ["dist", "build", "node_modules"]
+  "include": ["*"],
+  "exclude": ["dist", "build", "node_modules"],
+  "references": [
+    {
+      "path": "./src"
+    },
+    {
+      "path": "./tests"
+    },
+    {
+      "path": "../eslint-rules"
+    }
+  ]
 }
