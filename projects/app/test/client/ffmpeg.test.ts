@@ -1,12 +1,12 @@
 // pyly-not-src-test
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import { parseFfmpegOutput, parseTimestampToSeconds } from "./ffmpeg";
 
 describe(
   `parseFfmpegOutput suite` satisfies HasNameOf<typeof parseFfmpegOutput>,
   () => {
-    it(`extracts loudnorm data`, () => {
+    test(`extracts loudnorm data`, () => {
       expect(parseFfmpegOutput(outputExample1)).toMatchInlineSnapshot(`
         {
           "duration": {
@@ -48,7 +48,7 @@ describe(
     typeof parseTimestampToSeconds
   >,
   () => {
-    it(`parses HH:MM:SS.SS format`, () => {
+    test(`parses HH:MM:SS.SS format`, () => {
       expect(parseTimestampToSeconds(`00:00:00.7`)).toEqual(0.7);
       expect(parseTimestampToSeconds(`00:00:00.69`)).toEqual(0.69);
       expect(parseTimestampToSeconds(`00:00:01`)).toEqual(1);
@@ -57,7 +57,7 @@ describe(
       expect(parseTimestampToSeconds(`01:02:03.04`)).toEqual(3723.04);
     });
 
-    it(`throws on invalid format`, () => {
+    test(`throws on invalid format`, () => {
       expect(() => parseTimestampToSeconds(`invalid`)).toThrow(
         `Invalid time format: invalid`,
       );

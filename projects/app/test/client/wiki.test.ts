@@ -3,7 +3,7 @@ import chalk from "chalk";
 import { execSync } from "node:child_process";
 import * as fs from "node:fs/promises";
 import path from "node:path";
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import { analyzeAudioFile } from "./ffmpeg";
 
 const projectRootDir = path.join(import.meta.dirname, `../..`);
@@ -21,14 +21,14 @@ describe(`speech files`, async () => {
     const projectRelPath = path.relative(projectRootDir, filePath);
 
     describe(projectRelPath, async () => {
-      it(`container and real duration is within allowable tolerance`, async () => {
+      test(`container and real duration is within allowable tolerance`, async () => {
         const { duration } = await analyzeAudioFile(filePath);
 
         const delta = Math.abs(duration.fromStream - duration.fromContainer);
         expect(delta).toBeLessThanOrEqual(0.02); // Allow 20ms tolerance
       });
 
-      it(`loudness is within allowed tolerance`, async () => {
+      test(`loudness is within allowed tolerance`, async () => {
         // ChatGPT recommends to target -18 LUFS because:
         //
         // | Use Case                     | Target LUFS                              | Notes                                                       |
@@ -66,7 +66,7 @@ describe(`speech files`, async () => {
         expect(delta).toBeLessThanOrEqual(allowedTolerance);
       });
 
-      it(`silence is trimmed`, async () => {
+      test(`silence is trimmed`, async () => {
         const { silences, duration } = await analyzeAudioFile(filePath);
 
         // Allow for very small amounts of silence at start/end (e.g., 0.1 seconds)
