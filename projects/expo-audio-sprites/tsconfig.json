@@ -6,8 +6,7 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "outDir": "../../.moon/cache/types/projects/expo-audio-sprites",
-    "target": "ESNext",
-    "types": ["node"]
+    "target": "ESNext"
   },
   "include": ["*"],
   "exclude": ["dist", "build", "node_modules"],
@@ -20,6 +19,9 @@
     },
     {
       "path": "../eslint-rules"
+    },
+    {
+      "path": "../lib"
     }
   ]
 }

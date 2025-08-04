@@ -1,15 +1,18 @@
 import { AudioContextProvider } from "@/client/ui/AudioContextProvider";
-import type { AudioSource } from "expo-audio";
+import type { PylyAudioSource } from "@pinyinly/expo-audio-sprites";
+import { isAudioSpriteSource } from "@pinyinly/expo-audio-sprites";
 import { useAudioPlayer } from "expo-audio";
 import { use } from "react";
 import { Platform } from "react-native";
 import { useEventCallback } from "../hooks/useEventCallback";
 import { useLocalQuery } from "../hooks/useLocalQuery";
 
-export type UseSoundEffect = (source: AudioSource) => () => void;
+export type UseSoundEffect = (source: PylyAudioSource) => () => void;
 
 const useSoundEffectExpoAudio: UseSoundEffect = (source) => {
-  const player = useAudioPlayer(source);
+  const player = useAudioPlayer(
+    source == null || isAudioSpriteSource(source) ? null : source,
+  );
 
   const play = useEventCallback(() => {
     player.play();

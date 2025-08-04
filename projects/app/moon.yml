@@ -157,6 +157,8 @@ tasks:
       #
       # Pass $NODE_OPTIONS to support VS Code "JavaScript Debug Terminal".
       NODE_OPTIONS: --import tsx $NODE_OPTIONS
+    deps:
+      - "expo-audio-sprites:build"
 
   devInngest:
     command: npx -y inngest-cli@1.8.2 dev

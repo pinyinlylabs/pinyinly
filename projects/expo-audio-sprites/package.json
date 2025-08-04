@@ -3,8 +3,14 @@
   "main": "index.cjs",
   "type": "module",
   "exports": {
-    ".": "./dist/index.js",
-    "./babel": "./dist/babel.js"
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.js"
+    },
+    "./babel": {
+      "import": "./dist/babel.js",
+      "types": "./dist/babel.d.js"
+    }
   },
   "imports": {
     "#*.ts": "./src/*.ts"
@@ -14,18 +20,22 @@
   },
   "private": true,
   "dependencies": {
-    "@babel/core": "^7.20.0"
+    "@babel/core": "^7.20.0",
+    "zod": "^3.25.42"
   },
   "peerDependencies": {
     "expo-audio": "~0.4.8"
   },
   "devDependencies": {
     "@pinyinly/eslint-rules": "workspace:*",
-    "@stylistic/eslint-plugin": "^5.2.2",
+    "@pinyinly/lib": "workspace:*",
+    "@stylistic/eslint-plugin": "^4.0.0",
+    "@types/node": "22.x",
     "@typescript-eslint/parser": "^8.36.0",
     "eslint": "^9.13.0",
     "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-unicorn": "^60.0.0",
+    "eslint-plugin-unicorn": "^59.0.0",
+    "memfs": "^4.36.0",
     "prettier": "^3.4.2",
     "typescript": "patch:typescript@npm%3A5.8.3#~/.yarn/patches/typescript-npm-5.8.3-fbd7aef456.patch",
     "vitest": "^3.2.4"

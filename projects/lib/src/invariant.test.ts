@@ -1,48 +1,50 @@
-import assert from "node:assert/strict";
-import test from "node:test";
+import { describe, expect, test } from "vitest";
 import { identicalInvariant, invariant, uniqueInvariant } from "./invariant.js";
 
-await test(
-  `invariant suite` satisfies HasNameOf<typeof invariant>,
-  async () => {
-    await test(`does not throw when true`, () => {
+describe(`invariant suite` satisfies HasNameOf<typeof invariant>, () => {
+  test(`does not throw when true`, () => {
+    expect(() => {
       invariant(1 == 1);
-    });
+    }).not.toThrow();
+  });
 
-    await test(`throws when false`, () => {
-      assert.throws(() => {
-        invariant(false);
-      });
-    });
-  },
-);
+  test(`throws when false`, () => {
+    expect(() => {
+      invariant(false);
+    }).toThrow();
+  });
+});
 
-await test(
+describe(
   `uniqueInvariant suite` satisfies HasNameOf<typeof uniqueInvariant>,
-  async () => {
-    await test(`does not throw when every item is different`, () => {
-      uniqueInvariant([1, 2, 3]);
+  () => {
+    test(`does not throw when every item is different`, () => {
+      expect(() => {
+        uniqueInvariant([1, 2, 3]);
+      }).not.toThrow();
     });
 
-    await test(`throws when there are duplicate items`, () => {
-      assert.throws(() => {
+    test(`throws when there are duplicate items`, () => {
+      expect(() => {
         uniqueInvariant([1, 2, 1]);
-      });
+      }).toThrow();
     });
   },
 );
 
-await test(
+describe(
   `identicalInvariant suite` satisfies HasNameOf<typeof identicalInvariant>,
-  async () => {
-    await test(`does not throw when every item is the same`, () => {
-      identicalInvariant([1, 1, 1]);
+  () => {
+    test(`does not throw when every item is the same`, () => {
+      expect(() => {
+        identicalInvariant([1, 1, 1]);
+      }).not.toThrow();
     });
 
-    await test(`throws when there are different items`, () => {
-      assert.throws(() => {
+    test(`throws when there are different items`, () => {
+      expect(() => {
         identicalInvariant([1, 2, 1]);
-      });
+      }).toThrow();
     });
   },
 );

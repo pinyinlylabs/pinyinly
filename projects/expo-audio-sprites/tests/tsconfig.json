@@ -19,6 +19,9 @@
   "references": [
     {
       "path": "../src"
+    },
+    {
+      "path": "../../lib"
     }
   ]
 }

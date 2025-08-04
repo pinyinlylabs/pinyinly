@@ -92,8 +92,6 @@ export default tseslint.config(
       "import/no-absolute-path": `error`,
       // disallow AMD require/define
       "import/no-amd": `error`,
-      // forbid default exports - we want to standardize on named exports so that imported names are consistent
-      "import/no-default-export": `error`,
       // disallow imports from duplicate paths
       "import/no-duplicates": `error`,
       // Forbid the use of extraneous packages
@@ -153,6 +151,14 @@ export default tseslint.config(
             {
               name: `zod`,
               message: `Please use zod/v4 instead`,
+            },
+            // {
+            //   name: `fs`,
+            //   message: `Please use node:fs instead`,
+            // },
+            {
+              name: `crypto`,
+              message: `Please use node:crypto instead`,
             },
           ],
         },
@@ -250,14 +256,6 @@ export default tseslint.config(
     },
   },
 
-  // config files
-  {
-    files: [`*.config.*`],
-    rules: {
-      "import/no-default-export": `off`,
-    },
-  },
-
   // TypeScript declaration files
   {
     files: [`**/*.d.ts`],
@@ -271,9 +269,6 @@ export default tseslint.config(
       "@typescript-eslint/no-empty-object-type": `off`,
       // Interface merging works with interface declarations, not `Record<…>`.
       "@typescript-eslint/consistent-indexed-object-style": `off`,
-      // When defining modules in a declaration file, some will make default
-      // exports.
-      "import/no-default-export": `off`,
     },
   },
 );

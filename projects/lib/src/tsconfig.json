@@ -14,10 +14,5 @@
     "target": "ESNext",
     "types": ["node"]
   },
-  "include": ["**/*"],
-  "references": [
-    {
-      "path": "../../lib"
-    }
-  ]
+  "include": ["**/*"]
 }
