@@ -412,20 +412,6 @@ test(`expect missing glyphs to be included decomposition data`, async () => {
   expect(knownMissingGlyphs).toEqual(new Set());
 });
 
-test.todo(`hanzi name mnemonics don't include visual variants`, async () => {
-  // const radicalNameMnemonics = await loadHanziWordGlossMnemonics();
-  // const primarySet = new Set(await allRadicalPrimaryForms());
-  // const radicalsWithNameMnemonics = new Set(radicalNameMnemonics.keys());
-  // assert.deepEqual(radicalsWithNameMnemonics.difference(primarySet), new Set());
-});
-
-test.todo(`hanzi pinyin mnemonics don't include visual variants`, async () => {
-  // const pinyinMnemonics = await loadRadicalPinyinMnemonics();
-  // const primarySet = new Set(await allRadicalPrimaryForms());
-  // const radicalsWithNameMnemonics = new Set(pinyinMnemonics.keys());
-  // assert.deepEqual(radicalsWithNameMnemonics.difference(primarySet), new Set());
-});
-
 test(`zod schemas are compatible with OpenAI API`, async () => {
   function assertCompatible(schema: z.ZodType): void {
     const jsonSchema = JSON.stringify(
