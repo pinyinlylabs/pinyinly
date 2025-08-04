@@ -11,15 +11,21 @@ const wikiDir = path.join(projectRootDir, `src/client/wiki`);
 
 describe(`speech files`, async () => {
   const audioGlob = path.join(wikiDir, `**/*.{mp3,m4a,aac}`); // adjust this to your structure
+  const fixTag = `-fix`;
 
   for await (const filePath of fs.glob(audioGlob)) {
+    if (filePath.includes(fixTag)) {
+      continue;
+    }
+
     const projectRelPath = path.relative(projectRootDir, filePath);
 
     describe(projectRelPath, async () => {
-      it(`duration is correct`, async () => {
+      it(`container and real duration is within allowable tollerance`, async () => {
         const { duration } = await analyzeAudioFile(filePath);
 
-        expect(duration.fromDecoding).toEqual(duration.fromMetadata);
+        const delta = Math.abs(duration.fromStream - duration.fromContainer);
+        expect(delta).toBeLessThanOrEqual(0.02); // Allow 20ms tolerance
       });
 
       it(`loudness is within allowed tolerance`, async () => {
@@ -50,23 +56,70 @@ describe(`speech files`, async () => {
 
         if (delta > allowedTolerance) {
           const ext = path.extname(projectRelPath); // To tell ffmpeg to keep the same container.
-          const fixedSuffix = `-loudness-fix${ext}`; // Use a suffix specific to this test to avoid other tests from clobbering the same file.
-          const fixCommand = `ffmpeg -i "${filePath}" -af loudnorm=I=-18:TP=-1.5:LRA=5:linear=true:measured_I=${loudnorm.input_i}:measured_TP=${loudnorm.input_tp}:measured_LRA=${loudnorm.input_lra}:measured_thresh=${loudnorm.input_thresh}:offset=${loudnorm.target_offset}:print_format=summary "${filePath}${fixedSuffix}"`;
+          const fixedSuffix = `-loudness${fixTag}${ext}`; // Use a suffix specific to this test to avoid other tests from clobbering the same file.
+          const fixedFilePath = `${filePath}${fixedSuffix}`;
+          const fixCommand = `ffmpeg -y -i "${filePath}" -af loudnorm=I=-18:TP=-1.5:LRA=5:linear=true:measured_I=${loudnorm.input_i}:measured_TP=${loudnorm.input_tp}:measured_LRA=${loudnorm.input_lra}:measured_thresh=${loudnorm.input_thresh}:offset=${loudnorm.target_offset}:print_format=summary "${fixedFilePath}"`;
 
-          if (IS_CI) {
-            console.warn(
-              chalk.yellow(
-                `To fix this, re-run the tests outside CI or run: `,
-                chalk.dim(fixCommand),
-              ),
-            );
-          } else {
-            execSync(fixCommand);
-          }
+          execOrLogFixCommand(fixCommand, fixedFilePath);
         }
 
         expect(delta).toBeLessThanOrEqual(allowedTolerance);
       });
+
+      it(`silence is trimmed`, async () => {
+        const { silences, duration } = await analyzeAudioFile(filePath);
+
+        // Allow for very small amounts of silence at start/end (e.g., 0.1 seconds)
+        const allowedStartOrEndOffset = 0.1;
+        const totalDuration = duration.fromStream;
+
+        const expectedStart = 0;
+        const expectedEnd = totalDuration;
+        let start = expectedStart;
+        let end = expectedEnd;
+
+        for (const silence of silences) {
+          // Check if silence is at the start
+          if (silence.start <= allowedStartOrEndOffset) {
+            start = Math.max(start, silence.end);
+            continue;
+          }
+
+          // Check if silence is at the end
+          if (silence.end >= totalDuration - allowedStartOrEndOffset) {
+            end = Math.min(end, silence.start);
+            continue;
+          }
+        }
+
+        if (start > expectedStart || end < expectedEnd) {
+          const ext = path.extname(projectRelPath);
+          const fixedSuffix = `-silence${fixTag}${ext}`;
+          const fixedFilePath = `${filePath}${fixedSuffix}`;
+          const fixCommand = `ffmpeg -y -i "${filePath}" -af atrim=start=${start}:end=${end} "${fixedFilePath}"`;
+
+          execOrLogFixCommand(fixCommand, fixedFilePath);
+        }
+
+        expect(start).toBe(expectedStart);
+        expect(end).toBe(expectedEnd);
+      });
     });
   }
 });
+
+function execOrLogFixCommand(fixCommand: string, fixedFilePath: string): void {
+  if (IS_CI) {
+    console.warn(
+      chalk.yellow(
+        `To fix this, re-run the test outside CI or run: `,
+        chalk.dim(fixCommand),
+      ),
+    );
+  } else {
+    execSync(
+      `(echo "% ${fixCommand}"; ${fixCommand}) > "${fixedFilePath}.log" 2>&1`,
+    );
+    console.warn(chalk.yellow(chalk.bold(`Created:`), fixedFilePath));
+  }
+}

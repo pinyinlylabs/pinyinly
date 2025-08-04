@@ -10,8 +10,8 @@ describe(
       expect(parseFfmpegOutput(outputExample1)).toMatchInlineSnapshot(`
         {
           "duration": {
-            "fromDecoding": 1.02,
-            "fromMetadata": 1.02,
+            "fromContainer": 1.02,
+            "fromStream": 1.02,
           },
           "loudnorm": {
             "input_i": -18.04,

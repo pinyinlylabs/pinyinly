@@ -86,8 +86,8 @@ function extractDuration(output: string) {
   const stream = streamDataSchema.parse(streamData?.groups);
 
   return {
-    fromDecoding: parseTimestampToSeconds(stream.time),
-    fromMetadata: parseTimestampToSeconds(container.duration),
+    fromStream: parseTimestampToSeconds(stream.time),
+    fromContainer: parseTimestampToSeconds(container.duration),
   };
 }
 
@@ -176,7 +176,7 @@ export async function analyzeAudioFile(filePath: string) {
         //
         // - `n=` silence threshold
         // - `d=` silence duration (milliseconds)
-        `silencedetect=n=-30dB:d=0.15`,
+        `silencedetect=n=-50dB:d=0.15`,
       ].join(`,`),
       // No output
       `-f`,
