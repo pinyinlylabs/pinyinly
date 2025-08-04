@@ -1,4 +1,4 @@
-// pyly-standalone-test
+// pyly-not-src-test
 
 import { fsrsIsStable, Rating } from "#util/fsrs.ts";
 import assert from "node:assert/strict";

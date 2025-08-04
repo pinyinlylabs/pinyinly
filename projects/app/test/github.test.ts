@@ -1,4 +1,4 @@
-// pyly-standalone-test
+// pyly-not-src-test
 
 import * as fs from "node:fs/promises";
 import { expect, test } from "vitest";

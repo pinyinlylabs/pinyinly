@@ -1,4 +1,4 @@
-// pyly-standalone-test
+// pyly-not-src-test
 
 import type { Shape } from "@lottiefiles/lottie-js";
 import { Animation, MatteMode, ShapeLayer } from "@lottiefiles/lottie-js";

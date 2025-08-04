@@ -1,10 +1,10 @@
 import { IS_CI } from "#util/env.js";
+import chalk from "chalk";
 import { execSync } from "node:child_process";
 import * as fs from "node:fs/promises";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { analyzeAudioFile } from "./ffmpeg";
-import { ansiDim, ansiReset, ansiYellow } from "./helpers";
 
 const projectRootDir = path.join(import.meta.dirname, `../..`);
 const wikiDir = path.join(projectRootDir, `src/client/wiki`);
@@ -56,7 +56,10 @@ describe(`speech files`, async () => {
 
           if (IS_CI) {
             console.warn(
-              `${ansiYellow}To fix this, re-run the tests outside CI or run:${ansiReset} ${ansiDim}${fixCommand}${ansiReset}`,
+              chalk.yellow(
+                `To fix this, re-run the tests outside CI or run: `,
+                chalk.dim(fixCommand),
+              ),
             );
           } else {
             execSync(fixCommand);

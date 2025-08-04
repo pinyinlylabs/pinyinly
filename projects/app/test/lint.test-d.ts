@@ -1,4 +1,4 @@
-// pyly-standalone-test
+// pyly-not-src-test
 
 import { test } from "vitest";
 

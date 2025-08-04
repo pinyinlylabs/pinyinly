@@ -1,4 +1,4 @@
-// pyly-standalone-test
+// pyly-not-src-test
 import { createTransformer, transform } from "#mdx/metro-transformer.js";
 import { describe, expect, it } from "vitest";
 
