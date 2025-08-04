@@ -3,43 +3,65 @@
 import { describe, expect, test } from "vitest";
 import { parseFfmpegOutput, parseTimestampToSeconds } from "./ffmpeg";
 
-describe(
+test(
   `parseFfmpegOutput suite` satisfies HasNameOf<typeof parseFfmpegOutput>,
   () => {
-    test(`extracts loudnorm data`, () => {
-      expect(parseFfmpegOutput(outputExample1)).toMatchInlineSnapshot(`
-        {
-          "duration": {
-            "fromContainer": 1.02,
-            "fromStream": 1.02,
+    expect(parseFfmpegOutput(outputExample1)).toMatchInlineSnapshot(`
+      {
+        "duration": {
+          "aStatsData": {
+            "Abs Peak count": "1.000000",
+            "Bit depth": "31/32/32/32",
+            "Channel": "1",
+            "Crest factor": "5.703953",
+            "DC offset": "-0.000028",
+            "Dynamic range": "223.121343",
+            "Entropy": "0.738100",
+            "Flat factor": "0.000000",
+            "Max difference": "0.072427",
+            "Max level": "0.545900",
+            "Mean difference": "0.005879",
+            "Min difference": "0.000000",
+            "Min level": "-0.669239",
+            "Noise floor count": "2369.000000",
+            "Noise floor dB": "-inf",
+            "Number of Infs": "0.000000",
+            "Number of NaNs": "0.000000",
+            "Number of denormals": "0.000000",
+            "Number of samples": 67584,
+            "Peak count": "2.000000",
+            "Peak level dB": "-3.488379",
+            "RMS difference": "0.009702",
+            "RMS level dB": "-18.611898",
+            "RMS peak dB": "-13.427804",
+            "RMS trough dB": "-inf",
+            "Zero crossings": "2692",
+            "Zero crossings rate": "0.039832",
           },
-          "loudnorm": {
-            "input_i": -18.04,
-            "input_lra": 0,
-            "input_thresh": -28.7,
-            "input_tp": -3.45,
-            "normalization_type": "linear",
-            "output_i": -24.03,
-            "output_lra": 0,
-            "output_thresh": -34.69,
-            "output_tp": -9.41,
-            "target_offset": 0.03,
+          "fromContainer": 0.69,
+          "fromStream": 0.704,
+        },
+        "loudnorm": {
+          "input_i": -17.33,
+          "input_lra": 0,
+          "input_thresh": -27.33,
+          "input_tp": -3.49,
+          "normalization_type": "linear",
+          "output_i": -24.03,
+          "output_lra": 0,
+          "output_thresh": -34.03,
+          "output_tp": -10.16,
+          "target_offset": 0.03,
+        },
+        "silences": [
+          {
+            "duration": 0.179245,
+            "end": 0.179245,
+            "start": 0,
           },
-          "silences": [
-            {
-              "duration": 0.16587,
-              "end": 0.16587,
-              "start": 0,
-            },
-            {
-              "duration": 0.385401,
-              "end": 1.024,
-              "start": 0.638599,
-            },
-          ],
-        }
-      `);
-    });
+        ],
+      }
+    `);
   },
 );
 
@@ -76,26 +98,25 @@ const outputExample1 = `ffmpeg version 7.1.1 Copyright (c) 2000-2025 the FFmpeg 
   libswscale      8.  3.100 /  8.  3.100
   libswresample   5.  3.100 /  5.  3.100
   libpostproc    58.  3.100 / 58.  3.100
-Input #0, mov,mp4,m4a,3gp,3g2,mj2, from 'projects/app/src/client/wiki/上/shàng.m4a':
+Input #0, mov,mp4,m4a,3gp,3g2,mj2, from '/Users/brad/src/pinyinly/projects/app/src/client/wiki/上/shang4.m4a':
   Metadata:
-    major_brand     : M4A
+    major_brand     : M4A 
     minor_version   : 512
     compatible_brands: M4A isomiso2
     encoder         : Lavf61.7.100
-  Duration: 00:00:01.02, start: 0.000000, bitrate: 63 kb/s
-  Stream #0:0[0x1](und): Audio: aac (LC) (mp4a / 0x6134706D), 96000 Hz, mono, fltp, 53 kb/s (default)
+  Duration: 00:00:00.69, start: 0.000000, bitrate: 81 kb/s
+  Stream #0:0[0x1](und): Audio: aac (LC) (mp4a / 0x6134706D), 96000 Hz, mono, fltp, 68 kb/s (default)
       Metadata:
         handler_name    : SoundHandler
         vendor_id       : [0][0][0][0]
 Stream mapping:
   Stream #0:0 -> #0:0 (aac (native) -> pcm_s16le (native))
 Press [q] to stop, [?] for help
-[silencedetect @ 0x1276065b0] silence_start: 0
-[silencedetect @ 0x1276065b0] silence_end: 0.16587 | silence_duration: 0.16587
-[silencedetect @ 0x1276065b0] silence_start: 0.638599
+[silencedetect @ 0x13af3ff50] silence_start: 0
+[silencedetect @ 0x13af3ff50] silence_end: 0.179245 | silence_duration: 0.179245
 Output #0, null, to 'pipe:':
   Metadata:
-    major_brand     : M4A
+    major_brand     : M4A 
     minor_version   : 512
     compatible_brands: M4A isomiso2
     encoder         : Lavf61.7.100
@@ -104,19 +125,68 @@ Output #0, null, to 'pipe:':
         handler_name    : SoundHandler
         vendor_id       : [0][0][0][0]
         encoder         : Lavc61.19.101 pcm_s16le
-[Parsed_loudnorm_0 @ 0x1276060e0]
+[Parsed_astats_0 @ 0x13af3f8e0] Channel: 1
+[Parsed_astats_0 @ 0x13af3f8e0] DC offset: -0.000028
+[Parsed_astats_0 @ 0x13af3f8e0] Min level: -0.669239
+[Parsed_astats_0 @ 0x13af3f8e0] Max level: 0.545900
+[Parsed_astats_0 @ 0x13af3f8e0] Min difference: 0.000000
+[Parsed_astats_0 @ 0x13af3f8e0] Max difference: 0.072427
+[Parsed_astats_0 @ 0x13af3f8e0] Mean difference: 0.005879
+[Parsed_astats_0 @ 0x13af3f8e0] RMS difference: 0.009702
+[Parsed_astats_0 @ 0x13af3f8e0] Peak level dB: -3.488379
+[Parsed_astats_0 @ 0x13af3f8e0] RMS level dB: -18.611898
+[Parsed_astats_0 @ 0x13af3f8e0] RMS peak dB: -13.427804
+[Parsed_astats_0 @ 0x13af3f8e0] RMS trough dB: -inf
+[Parsed_astats_0 @ 0x13af3f8e0] Crest factor: 5.703953
+[Parsed_astats_0 @ 0x13af3f8e0] Flat factor: 0.000000
+[Parsed_astats_0 @ 0x13af3f8e0] Peak count: 2
+[Parsed_astats_0 @ 0x13af3f8e0] Abs Peak count: 1
+[Parsed_astats_0 @ 0x13af3f8e0] Noise floor dB: -inf
+[Parsed_astats_0 @ 0x13af3f8e0] Noise floor count: 2369
+[Parsed_astats_0 @ 0x13af3f8e0] Entropy: 0.738100
+[Parsed_astats_0 @ 0x13af3f8e0] Bit depth: 31/32/32/32
+[Parsed_astats_0 @ 0x13af3f8e0] Dynamic range: 223.121343
+[Parsed_astats_0 @ 0x13af3f8e0] Zero crossings: 2692
+[Parsed_astats_0 @ 0x13af3f8e0] Zero crossings rate: 0.039832
+[Parsed_astats_0 @ 0x13af3f8e0] Number of NaNs: 0
+[Parsed_astats_0 @ 0x13af3f8e0] Number of Infs: 0
+[Parsed_astats_0 @ 0x13af3f8e0] Number of denormals: 0
+[Parsed_astats_0 @ 0x13af3f8e0] Overall
+[Parsed_astats_0 @ 0x13af3f8e0] DC offset: -0.000028
+[Parsed_astats_0 @ 0x13af3f8e0] Min level: -0.669239
+[Parsed_astats_0 @ 0x13af3f8e0] Max level: 0.545900
+[Parsed_astats_0 @ 0x13af3f8e0] Min difference: 0.000000
+[Parsed_astats_0 @ 0x13af3f8e0] Max difference: 0.072427
+[Parsed_astats_0 @ 0x13af3f8e0] Mean difference: 0.005879
+[Parsed_astats_0 @ 0x13af3f8e0] RMS difference: 0.009702
+[Parsed_astats_0 @ 0x13af3f8e0] Peak level dB: -3.488379
+[Parsed_astats_0 @ 0x13af3f8e0] RMS level dB: -18.611898
+[Parsed_astats_0 @ 0x13af3f8e0] RMS peak dB: -13.427804
+[Parsed_astats_0 @ 0x13af3f8e0] RMS trough dB: -inf
+[Parsed_astats_0 @ 0x13af3f8e0] Flat factor: 0.000000
+[Parsed_astats_0 @ 0x13af3f8e0] Peak count: 2.000000
+[Parsed_astats_0 @ 0x13af3f8e0] Abs Peak count: 1.000000
+[Parsed_astats_0 @ 0x13af3f8e0] Noise floor dB: -inf
+[Parsed_astats_0 @ 0x13af3f8e0] Noise floor count: 2369.000000
+[Parsed_astats_0 @ 0x13af3f8e0] Entropy: 0.738100
+[Parsed_astats_0 @ 0x13af3f8e0] Bit depth: 31/32/32/32
+[Parsed_astats_0 @ 0x13af3f8e0] Number of samples: 67584
+[Parsed_astats_0 @ 0x13af3f8e0] Number of NaNs: 0.000000
+[Parsed_astats_0 @ 0x13af3f8e0] Number of Infs: 0.000000
+[Parsed_astats_0 @ 0x13af3f8e0] Number of denormals: 0.000000
+[Parsed_loudnorm_1 @ 0x13af3fa20] 
 {
-        "input_i" : "-18.04",
-        "input_tp" : "-3.45",
-        "input_lra" : "0.00",
-        "input_thresh" : "-28.70",
-        "output_i" : "-24.03",
-        "output_tp" : "-9.41",
-        "output_lra" : "0.00",
-        "output_thresh" : "-34.69",
-        "normalization_type" : "linear",
-        "target_offset" : "0.03"
+	"input_i" : "-17.33",
+	"input_tp" : "-3.49",
+	"input_lra" : "0.00",
+	"input_thresh" : "-27.33",
+	"output_i" : "-24.03",
+	"output_tp" : "-10.16",
+	"output_lra" : "0.00",
+	"output_thresh" : "-34.03",
+	"normalization_type" : "linear",
+	"target_offset" : "0.03"
 }
-[silencedetect @ 0x1276065b0] silence_end: 1.024 | silence_duration: 0.385401
-[out#0/null @ 0x13761ce50] video:0KiB audio:384KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: unknown
-size=N/A time=00:00:01.02 bitrate=N/A speed= 110x`;
+[out#0/null @ 0x13af3a800] video:0KiB audio:264KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: unknown
+size=N/A time=00:00:00.70 bitrate=N/A speed=45.9x    
+`;

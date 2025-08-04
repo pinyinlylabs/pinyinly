@@ -29,6 +29,12 @@ const loudnormSchema = z.object({
   target_offset: stringNumberSchema,
 });
 
+const astatsSchema = z
+  .object({
+    "Number of samples": stringNumberSchema,
+  })
+  .loose();
+
 function extractLoudnorm(output: string) {
   // Extract out the loudnorm information from the ffmpeg output, e.g.:
   //
@@ -47,7 +53,7 @@ function extractLoudnorm(output: string) {
   //         "target_offset" : "0.04"
   // }
   // ```
-  const match = /^\[Parsed_loudnorm_0.+?(^\{.+?^\})/gms.exec(output);
+  const match = /^\[Parsed_loudnorm_.+?(^\{.+?^\})/gms.exec(output);
 
   const json = match?.[1];
   invariant(
@@ -65,13 +71,6 @@ const containerDataSchema = z.object({
   bitrate: z.string(),
 });
 
-const streamDataSchema = z.object({
-  size: z.string(),
-  time: z.string(),
-  bitrate: z.string(),
-  speed: z.string(),
-});
-
 function extractDuration(output: string) {
   const containerData =
     /Duration: (?<duration>.+?), start: (?<start>.+?), bitrate: (?<bitrate>.+?)$/gms.exec(
@@ -79,15 +78,32 @@ function extractDuration(output: string) {
     );
   const container = containerDataSchema.parse(containerData?.groups);
 
-  const streamData =
-    /size=(?<size>.+?) time=(?<time>.+?) bitrate=(?<bitrate>.+?) speed=(?<speed>.+?)/gms.exec(
-      output,
-    );
-  const stream = streamDataSchema.parse(streamData?.groups);
+  const inputSteamData = /^Input #0.+?\n(?:^  .+?\n)+/gm.exec(output)?.[0];
+  invariant(inputSteamData != null, `Failed to extract input stream data`);
+  const inputStreamSampleRateHz = /Stream #0.+, (\d+) Hz,/.exec(
+    inputSteamData,
+  )?.[1];
+  invariant(
+    inputStreamSampleRateHz != null,
+    `Failed to extract input stream sample rate from: ${inputSteamData}`,
+  );
+
+  const astatsRawData: Record<string, unknown> = {};
+  for (const [, key, value] of output.matchAll(
+    // e.g. [Parsed_astats_2 @ 0x145f27bd0] DC offset: -0.000013
+    /^\[Parsed_astats_.+?\] (?<key>.+?): (?<value>.+?)$/gm,
+  )) {
+    invariant(key != null && value != null);
+    astatsRawData[key] = value;
+  }
+  const astatsData = astatsSchema.parse(astatsRawData);
 
   return {
-    fromStream: parseTimestampToSeconds(stream.time),
+    fromStream:
+      astatsData[`Number of samples`] /
+      Number.parseInt(inputStreamSampleRateHz),
     fromContainer: parseTimestampToSeconds(container.duration),
+    aStatsData: astatsData,
   };
 }
 
@@ -170,6 +186,12 @@ export async function analyzeAudioFile(filePath: string) {
       filePath,
       `-af`,
       [
+        // Enable statistics output to get an accurate duration
+        //
+        // IMPORTANT: this must be the first filter in the chain otherwise it
+        // doesn't analyze the input stream, but rather the transformed stream
+        // result (which can be turned into stereo and cause double frames).
+        `astats=metadata=1:reset=0`,
         // Enable loudness normalization
         `loudnorm=print_format=json`,
         // Enable silence detection
@@ -207,7 +229,7 @@ export function parseFfmpegOutput(output: string) {
 
 // Full ffmpeg output example:
 //
-// % ffmpeg -i 'projects/app/src/client/wiki/上/shàng.m4a' -af loudnorm=print_format=json,silencedetect=n=-30dB:d=0.1 -f null -
+// % ffmpeg -i 'projects/app/src/client/wiki/上/shang4.m4a' -af loudnorm=print_format=json,silencedetect=n=-30dB:d=0.1 -f null -
 // ffmpeg version 7.1.1 Copyright (c) 2000-2025 the FFmpeg developers
 //   built with Apple clang version 17.0.0 (clang-1700.0.13.3)
 //   configuration: --prefix=/opt/homebrew/Cellar/ffmpeg/7.1.1_3 --enable-shared --enable-pthreads --enable-version3 --cc=clang --host-cflags= --host-ldflags='-Wl,-ld_classic' --enable-ffplay --enable-gnutls --enable-gpl --enable-libaom --enable-libaribb24 --enable-libbluray --enable-libdav1d --enable-libharfbuzz --enable-libjxl --enable-libmp3lame --enable-libopus --enable-librav1e --enable-librist --enable-librubberband --enable-libsnappy --enable-libsrt --enable-libssh --enable-libsvtav1 --enable-libtesseract --enable-libtheora --enable-libvidstab --enable-libvmaf --enable-libvorbis --enable-libvpx --enable-libwebp --enable-libx264 --enable-libx265 --enable-libxml2 --enable-libxvid --enable-lzma --enable-libfontconfig --enable-libfreetype --enable-frei0r --enable-libass --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libopenjpeg --enable-libspeex --enable-libsoxr --enable-libzmq --enable-libzimg --disable-libjack --disable-indev=jack --enable-videotoolbox --enable-audiotoolbox --enable-neon
@@ -219,23 +241,22 @@ export function parseFfmpegOutput(output: string) {
 //   libswscale      8.  3.100 /  8.  3.100
 //   libswresample   5.  3.100 /  5.  3.100
 //   libpostproc    58.  3.100 / 58.  3.100
-// Input #0, mov,mp4,m4a,3gp,3g2,mj2, from 'projects/app/src/client/wiki/上/shàng.m4a':
+// Input #0, mov,mp4,m4a,3gp,3g2,mj2, from 'projects/app/src/client/wiki/上/shang4.m4a':
 //   Metadata:
 //     major_brand     : M4A
 //     minor_version   : 512
 //     compatible_brands: M4A isomiso2
 //     encoder         : Lavf61.7.100
-//   Duration: 00:00:01.02, start: 0.000000, bitrate: 63 kb/s
-//   Stream #0:0[0x1](und): Audio: aac (LC) (mp4a / 0x6134706D), 96000 Hz, mono, fltp, 53 kb/s (default)
+//   Duration: 00:00:00.69, start: 0.000000, bitrate: 81 kb/s
+//   Stream #0:0[0x1](und): Audio: aac (LC) (mp4a / 0x6134706D), 96000 Hz, mono, fltp, 68 kb/s (default)
 //       Metadata:
 //         handler_name    : SoundHandler
 //         vendor_id       : [0][0][0][0]
 // Stream mapping:
 //   Stream #0:0 -> #0:0 (aac (native) -> pcm_s16le (native))
 // Press [q] to stop, [?] for help
-// [silencedetect @ 0x1276065b0] silence_start: 0
-// [silencedetect @ 0x1276065b0] silence_end: 0.16587 | silence_duration: 0.16587
-// [silencedetect @ 0x1276065b0] silence_start: 0.638599
+// [silencedetect @ 0x145f27af0] silence_start: 0
+// [silencedetect @ 0x145f27af0] silence_end: 0.179245 | silence_duration: 0.179245
 // Output #0, null, to 'pipe:':
 //   Metadata:
 //     major_brand     : M4A
@@ -247,19 +268,67 @@ export function parseFfmpegOutput(output: string) {
 //         handler_name    : SoundHandler
 //         vendor_id       : [0][0][0][0]
 //         encoder         : Lavc61.19.101 pcm_s16le
-// [Parsed_loudnorm_0 @ 0x1276060e0]
+// [Parsed_loudnorm_0 @ 0x145f27580]
 // {
-//         "input_i" : "-18.04",
-//         "input_tp" : "-3.45",
-//         "input_lra" : "0.00",
-//         "input_thresh" : "-28.70",
-//         "output_i" : "-24.03",
-//         "output_tp" : "-9.41",
-//         "output_lra" : "0.00",
-//         "output_thresh" : "-34.69",
-//         "normalization_type" : "linear",
-//         "target_offset" : "0.03"
+// 	"input_i" : "-17.33",
+// 	"input_tp" : "-3.49",
+// 	"input_lra" : "0.00",
+// 	"input_thresh" : "-27.33",
+// 	"output_i" : "-24.03",
+// 	"output_tp" : "-10.16",
+// 	"output_lra" : "0.00",
+// 	"output_thresh" : "-34.03",
+// 	"normalization_type" : "linear",
+// 	"target_offset" : "0.03"
 // }
-// [silencedetect @ 0x1276065b0] silence_end: 1.024 | silence_duration: 0.385401
-// [out#0/null @ 0x13761ce50] video:0KiB audio:384KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: unknown
-// size=N/A time=00:00:01.02 bitrate=N/A speed= 110x
+// [Parsed_astats_2 @ 0x145f27bd0] Channel: 1
+// [Parsed_astats_2 @ 0x145f27bd0] DC offset: -0.000013
+// [Parsed_astats_2 @ 0x145f27bd0] Min level: -0.310349
+// [Parsed_astats_2 @ 0x145f27bd0] Max level: 0.253153
+// [Parsed_astats_2 @ 0x145f27bd0] Min difference: 0.000000
+// [Parsed_astats_2 @ 0x145f27bd0] Max difference: 0.017046
+// [Parsed_astats_2 @ 0x145f27bd0] Mean difference: 0.001366
+// [Parsed_astats_2 @ 0x145f27bd0] RMS difference: 0.002255
+// [Parsed_astats_2 @ 0x145f27bd0] Peak level dB: -10.162994
+// [Parsed_astats_2 @ 0x145f27bd0] RMS level dB: -25.286540
+// [Parsed_astats_2 @ 0x145f27bd0] RMS peak dB: -20.102445
+// [Parsed_astats_2 @ 0x145f27bd0] RMS trough dB: -inf
+// [Parsed_astats_2 @ 0x145f27bd0] Crest factor: 5.703971
+// [Parsed_astats_2 @ 0x145f27bd0] Flat factor: 0.000000
+// [Parsed_astats_2 @ 0x145f27bd0] Peak count: 2
+// [Parsed_astats_2 @ 0x145f27bd0] Abs Peak count: 1
+// [Parsed_astats_2 @ 0x145f27bd0] Noise floor dB: -inf
+// [Parsed_astats_2 @ 0x145f27bd0] Noise floor count: 4706
+// [Parsed_astats_2 @ 0x145f27bd0] Entropy: 0.667780
+// [Parsed_astats_2 @ 0x145f27bd0] Bit depth: 62/64/64/64
+// [Parsed_astats_2 @ 0x145f27bd0] Dynamic range: 310.688776
+// [Parsed_astats_2 @ 0x145f27bd0] Zero crossings: 2719
+// [Parsed_astats_2 @ 0x145f27bd0] Zero crossings rate: 0.020116
+// [Parsed_astats_2 @ 0x145f27bd0] Number of NaNs: 0
+// [Parsed_astats_2 @ 0x145f27bd0] Number of Infs: 0
+// [Parsed_astats_2 @ 0x145f27bd0] Number of denormals: 0
+// [Parsed_astats_2 @ 0x145f27bd0] Overall
+// [Parsed_astats_2 @ 0x145f27bd0] DC offset: -0.000013
+// [Parsed_astats_2 @ 0x145f27bd0] Min level: -0.310349
+// [Parsed_astats_2 @ 0x145f27bd0] Max level: 0.253153
+// [Parsed_astats_2 @ 0x145f27bd0] Min difference: 0.000000
+// [Parsed_astats_2 @ 0x145f27bd0] Max difference: 0.017046
+// [Parsed_astats_2 @ 0x145f27bd0] Mean difference: 0.001366
+// [Parsed_astats_2 @ 0x145f27bd0] RMS difference: 0.002255
+// [Parsed_astats_2 @ 0x145f27bd0] Peak level dB: -10.162994
+// [Parsed_astats_2 @ 0x145f27bd0] RMS level dB: -25.286540
+// [Parsed_astats_2 @ 0x145f27bd0] RMS peak dB: -20.102445
+// [Parsed_astats_2 @ 0x145f27bd0] RMS trough dB: -inf
+// [Parsed_astats_2 @ 0x145f27bd0] Flat factor: 0.000000
+// [Parsed_astats_2 @ 0x145f27bd0] Peak count: 2.000000
+// [Parsed_astats_2 @ 0x145f27bd0] Abs Peak count: 1.000000
+// [Parsed_astats_2 @ 0x145f27bd0] Noise floor dB: -inf
+// [Parsed_astats_2 @ 0x145f27bd0] Noise floor count: 4706.000000
+// [Parsed_astats_2 @ 0x145f27bd0] Entropy: 0.667780
+// [Parsed_astats_2 @ 0x145f27bd0] Bit depth: 62/64/64/64
+// [Parsed_astats_2 @ 0x145f27bd0] Number of samples: 135168
+// [Parsed_astats_2 @ 0x145f27bd0] Number of NaNs: 0.000000
+// [Parsed_astats_2 @ 0x145f27bd0] Number of Infs: 0.000000
+// [Parsed_astats_2 @ 0x145f27bd0] Number of denormals: 0.000000
+// [out#0/null @ 0x14700da40] video:0KiB audio:264KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: unknown
+// size=N/A time=00:00:00.70 bitrate=N/A speed=81.2x
