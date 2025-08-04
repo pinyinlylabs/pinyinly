@@ -21,7 +21,7 @@ describe(`speech files`, async () => {
     const projectRelPath = path.relative(projectRootDir, filePath);
 
     describe(projectRelPath, async () => {
-      it(`container and real duration is within allowable tollerance`, async () => {
+      it(`container and real duration is within allowable tolerance`, async () => {
         const { duration } = await analyzeAudioFile(filePath);
 
         const delta = Math.abs(duration.fromStream - duration.fromContainer);
