@@ -20,6 +20,7 @@
     "@mdx-js/mdx": "^3.1.0",
     "@neondatabase/serverless": "^1.0.0",
     "@pinyinly/eslint-rules": "workspace:*",
+    "@pinyinly/expo-audio-sprites": "workspace:*",
     "@pinyinly/lib": "workspace:*",
     "@react-native-async-storage/async-storage": "2.1.2",
     "@react-native-replicache/deep-freeze": "^1.1.0",

@@ -4489,6 +4489,7 @@ __metadata:
     "@mdx-js/mdx": "npm:^3.1.0"
     "@neondatabase/serverless": "npm:^1.0.0"
     "@pinyinly/eslint-rules": "workspace:*"
+    "@pinyinly/expo-audio-sprites": "workspace:*"
     "@pinyinly/lib": "workspace:*"
     "@react-native-async-storage/async-storage": "npm:2.1.2"
     "@react-native-replicache/deep-freeze": "npm:^1.1.0"
@@ -4662,6 +4663,18 @@ __metadata:
     "@typescript-eslint/parser": "npm:^8.36.0"
     eslint: "npm:^9.13.0"
     typescript: "patch:typescript@npm%3A5.8.3#~/.yarn/patches/typescript-npm-5.8.3-fbd7aef456.patch"
+  languageName: unknown
+  linkType: soft
+
+"@pinyinly/expo-audio-sprites@workspace:*, @pinyinly/expo-audio-sprites@workspace:projects/expo-audio-sprites":
+  version: 0.0.0-use.local
+  resolution: "@pinyinly/expo-audio-sprites@workspace:projects/expo-audio-sprites"
+  dependencies:
+    "@typescript-eslint/parser": "npm:^8.36.0"
+    eslint: "npm:^9.13.0"
+    prettier: "npm:^3.4.2"
+    typescript: "patch:typescript@npm%3A5.8.3#~/.yarn/patches/typescript-npm-5.8.3-fbd7aef456.patch"
+    vitest: "npm:^3.2.4"
   languageName: unknown
   linkType: soft
 

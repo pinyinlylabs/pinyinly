@@ -1,0 +1,11 @@
+tasks:
+  test:
+    command: vitest
+    inputs:
+      - "!dist/"
+      - "**/*"
+
+tags:
+  - eslint
+  - prettier
+  - typescript

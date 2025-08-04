@@ -15,6 +15,7 @@ module.exports = function babelConfig(api) {
         },
       ],
       `nativewind/babel`,
+      `@pinyinly/expo-audio-sprites/babel`,
     ],
     plugins: [`babel-plugin-transform-import-meta`],
   };

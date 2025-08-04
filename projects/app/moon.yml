@@ -244,10 +244,6 @@ tasks:
       NODE_OPTIONS: --import tsx $NODE_OPTIONS
 
   test:
-    # tsx seems to load the tsconfig.json from the current directory, so it's
-    # necessary explicitly specify it as `tsconfig.node.json`. It also doesn't
-    # seem to respect project references so there just needs to be one tsconfig
-    # that is used for all files.
     command: vitest
     inputs:
       - "!dist/"
@@ -263,6 +259,7 @@ tasks:
       - expoGenerateTypes
 
 dependsOn:
+  - expo-audio-sprites
   - lib
 
 tags:
