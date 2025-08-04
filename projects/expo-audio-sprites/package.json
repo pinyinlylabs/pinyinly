@@ -3,6 +3,7 @@
   "main": "index.cjs",
   "type": "module",
   "exports": {
+    ".": "./dist/index.js",
     "./babel": "./dist/babel.js"
   },
   "imports": {
@@ -14,6 +15,9 @@
   "private": true,
   "dependencies": {
     "@babel/core": "^7.20.0"
+  },
+  "peerDependencies": {
+    "expo-audio": "~0.4.8"
   },
   "devDependencies": {
     "@pinyinly/eslint-rules": "workspace:*",

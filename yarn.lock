@@ -4671,6 +4671,8 @@ __metadata:
     prettier: "npm:^3.4.2"
     typescript: "patch:typescript@npm%3A5.8.3#~/.yarn/patches/typescript-npm-5.8.3-fbd7aef456.patch"
     vitest: "npm:^3.2.4"
+  peerDependencies:
+    expo-audio: ~0.4.8
   languageName: unknown
   linkType: soft
 
