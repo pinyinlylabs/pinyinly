@@ -17,10 +17,9 @@ describe(`speech files`, async () => {
 
     describe(projectRelPath, async () => {
       it(`duration is correct`, async () => {
-        const { streamDuration, containerDuration } =
-          await analyzeAudioFile(filePath);
+        const { duration } = await analyzeAudioFile(filePath);
 
-        expect(streamDuration).toEqual(containerDuration);
+        expect(duration.fromDecoding).toEqual(duration.fromMetadata);
       });
 
       it(`loudness is within allowed tolerance`, async () => {
@@ -51,7 +50,7 @@ describe(`speech files`, async () => {
 
         if (delta > allowedTolerance) {
           const ext = path.extname(projectRelPath); // To tell ffmpeg to keep the same container.
-          const fixedSuffix = `-fixed${ext}`;
+          const fixedSuffix = `-loudness-fix${ext}`; // Use a suffix specific to this test to avoid other tests from clobbering the same file.
           const fixCommand = `ffmpeg -i "${filePath}" -af loudnorm=I=-18:TP=-1.5:LRA=5:linear=true:measured_I=${loudnorm.input_i}:measured_TP=${loudnorm.input_tp}:measured_LRA=${loudnorm.input_lra}:measured_thresh=${loudnorm.input_thresh}:offset=${loudnorm.target_offset}:print_format=summary "${filePath}${fixedSuffix}"`;
 
           if (IS_CI) {

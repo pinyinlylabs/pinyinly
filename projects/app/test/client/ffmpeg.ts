@@ -86,9 +86,54 @@ function extractDuration(output: string) {
   const stream = streamDataSchema.parse(streamData?.groups);
 
   return {
-    streamDuration: parseTimestampToSeconds(stream.time),
-    containerDuration: parseTimestampToSeconds(container.duration),
+    fromDecoding: parseTimestampToSeconds(stream.time),
+    fromMetadata: parseTimestampToSeconds(container.duration),
   };
+}
+
+interface Silence {
+  start: number;
+  end: number;
+  duration: number;
+}
+
+function extractSilenceDetection(output: string) {
+  const silences: Silence[] = [];
+  let start: number | null = null;
+
+  const matches = output.matchAll(/^\[silencedetect @ .+?\] (.+?)$/gm);
+  for (const [, message] of matches) {
+    invariant(message != null);
+    const silenceStartMatch = /silence_start: ([\d.]+)/g.exec(message);
+    if (silenceStartMatch) {
+      const silenceStart = silenceStartMatch[1];
+      invariant(silenceStart != null);
+      invariant(start == null);
+      start = Number.parseFloat(silenceStart);
+      continue;
+    }
+
+    const silenceEndMatch =
+      /silence_end: ([\d.]+) \| silence_duration: ([\d.]+)/g.exec(message);
+    if (silenceEndMatch) {
+      invariant(start != null);
+
+      const silenceEnd = silenceEndMatch[1];
+      const silenceDuration = silenceEndMatch[2];
+      invariant(silenceEnd != null);
+      invariant(silenceDuration != null);
+
+      silences.push({
+        start,
+        end: Number.parseFloat(silenceEnd),
+        duration: Number.parseFloat(silenceDuration),
+      });
+      start = null;
+      continue;
+    }
+  }
+
+  return silences;
 }
 
 /**
@@ -120,7 +165,24 @@ export async function analyzeAudioFile(filePath: string) {
 
   const { stderr, exitCode } = await execaCached(
     `ffmpeg`,
-    [`-i`, filePath, `-af`, `loudnorm=print_format=json`, `-f`, `null`, `-`],
+    [
+      `-i`,
+      filePath,
+      `-af`,
+      [
+        // Enable loudness normalization
+        `loudnorm=print_format=json`,
+        // Enable silence detection
+        //
+        // - `n=` silence threshold
+        // - `d=` silence duration (milliseconds)
+        `silencedetect=n=-30dB:d=0.15`,
+      ].join(`,`),
+      // No output
+      `-f`,
+      `null`,
+      `-`,
+    ],
     undefined,
     { ffmpegVersion, fileModTime },
   );
@@ -129,18 +191,23 @@ export async function analyzeAudioFile(filePath: string) {
     throw new Error(`ffmpeg exited with code ${exitCode}: ${stderr}`);
   }
 
-  const { containerDuration, streamDuration } = extractDuration(stderr);
+  return parseFfmpegOutput(stderr);
+}
+
+export function parseFfmpegOutput(output: string) {
+  const loudnorm = extractLoudnorm(output);
+  const duration = extractDuration(output);
 
   return {
-    containerDuration,
-    streamDuration,
-    loudnorm: extractLoudnorm(stderr),
+    loudnorm,
+    silences: extractSilenceDetection(output),
+    duration,
   };
 }
 
 // Full ffmpeg output example:
 //
-// % ffmpeg -i 'projects/app/src/client/wiki/上/shàng.m4a' -af loudnorm=print_format=json -f null -
+// % ffmpeg -i 'projects/app/src/client/wiki/上/shàng.m4a' -af loudnorm=print_format=json,silencedetect=n=-30dB:d=0.1 -f null -
 // ffmpeg version 7.1.1 Copyright (c) 2000-2025 the FFmpeg developers
 //   built with Apple clang version 17.0.0 (clang-1700.0.13.3)
 //   configuration: --prefix=/opt/homebrew/Cellar/ffmpeg/7.1.1_3 --enable-shared --enable-pthreads --enable-version3 --cc=clang --host-cflags= --host-ldflags='-Wl,-ld_classic' --enable-ffplay --enable-gnutls --enable-gpl --enable-libaom --enable-libaribb24 --enable-libbluray --enable-libdav1d --enable-libharfbuzz --enable-libjxl --enable-libmp3lame --enable-libopus --enable-librav1e --enable-librist --enable-librubberband --enable-libsnappy --enable-libsrt --enable-libssh --enable-libsvtav1 --enable-libtesseract --enable-libtheora --enable-libvidstab --enable-libvmaf --enable-libvorbis --enable-libvpx --enable-libwebp --enable-libx264 --enable-libx265 --enable-libxml2 --enable-libxvid --enable-lzma --enable-libfontconfig --enable-libfreetype --enable-frei0r --enable-libass --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libopenjpeg --enable-libspeex --enable-libsoxr --enable-libzmq --enable-libzimg --disable-libjack --disable-indev=jack --enable-videotoolbox --enable-audiotoolbox --enable-neon
@@ -166,6 +233,9 @@ export async function analyzeAudioFile(filePath: string) {
 // Stream mapping:
 //   Stream #0:0 -> #0:0 (aac (native) -> pcm_s16le (native))
 // Press [q] to stop, [?] for help
+// [silencedetect @ 0x1276065b0] silence_start: 0
+// [silencedetect @ 0x1276065b0] silence_end: 0.16587 | silence_duration: 0.16587
+// [silencedetect @ 0x1276065b0] silence_start: 0.638599
 // Output #0, null, to 'pipe:':
 //   Metadata:
 //     major_brand     : M4A
@@ -177,7 +247,7 @@ export async function analyzeAudioFile(filePath: string) {
 //         handler_name    : SoundHandler
 //         vendor_id       : [0][0][0][0]
 //         encoder         : Lavc61.19.101 pcm_s16le
-// [Parsed_loudnorm_0 @ 0x123633230]
+// [Parsed_loudnorm_0 @ 0x1276060e0]
 // {
 //         "input_i" : "-18.04",
 //         "input_tp" : "-3.45",
@@ -190,5 +260,6 @@ export async function analyzeAudioFile(filePath: string) {
 //         "normalization_type" : "linear",
 //         "target_offset" : "0.03"
 // }
-// [out#0/null @ 0x123637e70] video:0KiB audio:384KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: unknown
-// size=N/A time=00:00:01.02 bitrate=N/A speed= 105x
+// [silencedetect @ 0x1276065b0] silence_end: 1.024 | silence_duration: 0.385401
+// [out#0/null @ 0x13761ce50] video:0KiB audio:384KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: unknown
+// size=N/A time=00:00:01.02 bitrate=N/A speed= 110x
