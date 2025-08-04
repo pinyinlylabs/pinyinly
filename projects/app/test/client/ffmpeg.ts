@@ -141,7 +141,7 @@ function extractSilenceDetection(output: string) {
  * @param timeStr - Format: HH:MM:SS.SS (e.g., "00:01:23.45")
  * @returns number of seconds as a float
  */
-function parseTimestampToSeconds(timeStr: string): number {
+export function parseTimestampToSeconds(timeStr: string): number {
   const match = /^(?<hh>\d+):(?<mm>\d+):(?<ss>\d+(?:\.\d+)?)$/.exec(timeStr);
 
   if (!match?.groups) {
