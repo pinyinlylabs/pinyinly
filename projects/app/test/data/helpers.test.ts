@@ -1,36 +1,41 @@
-// pyly-standalone-test
+// pyly-not-src-test
 
 import { fsrsIsStable, Rating } from "#util/fsrs.ts";
 import assert from "node:assert/strict";
 import { describe, expect, test, vi } from "vitest";
 import { date, fsrsSrsState, parseRelativeTimeShorthand, 时 } from "./helpers";
 
-describe(`${parseRelativeTimeShorthand.name} suite`, () => {
-  test(`assumes positive without a sign`, () => {
-    assert.deepEqual(
-      parseRelativeTimeShorthand(`1s`, new Date(0)),
-      new Date(1000),
-    );
-  });
+describe(
+  `parseRelativeTimeShorthand suite` satisfies HasNameOf<
+    typeof parseRelativeTimeShorthand
+  >,
+  () => {
+    test(`assumes positive without a sign`, () => {
+      assert.deepEqual(
+        parseRelativeTimeShorthand(`1s`, new Date(0)),
+        new Date(1000),
+      );
+    });
 
-  test(`supports negative durations`, () => {
-    const now = new Date();
-    assert.deepEqual(
-      parseRelativeTimeShorthand(`-5m`, now),
-      new Date(now.getTime() - 5 * 60 * 1000),
-    );
-  });
+    test(`supports negative durations`, () => {
+      const now = new Date();
+      assert.deepEqual(
+        parseRelativeTimeShorthand(`-5m`, now),
+        new Date(now.getTime() - 5 * 60 * 1000),
+      );
+    });
 
-  test(`supports positive durations`, () => {
-    const now = new Date();
-    assert.deepEqual(
-      parseRelativeTimeShorthand(`+5m`, now),
-      new Date(now.getTime() + 5 * 60 * 1000),
-    );
-  });
-});
+    test(`supports positive durations`, () => {
+      const now = new Date();
+      assert.deepEqual(
+        parseRelativeTimeShorthand(`+5m`, now),
+        new Date(now.getTime() + 5 * 60 * 1000),
+      );
+    });
+  },
+);
 
-describe(`${date.name} suite`, () => {
+describe(`date suite` satisfies HasNameOf<typeof date>, () => {
   test(`parses values`, () => {
     vi.useFakeTimers({
       toFake: [`Date`],
@@ -42,7 +47,7 @@ describe(`${date.name} suite`, () => {
   });
 });
 
-describe(`${fsrsSrsState.name} suite`, () => {
+describe(`fsrsSrsState suite` satisfies HasNameOf<typeof fsrsSrsState>, () => {
   test(`with Hard rating fails "is stable" check`, () => {
     const state = fsrsSrsState(时`-1d`, 时`+1d`, Rating.Hard);
     assert.equal(fsrsIsStable(state), false);

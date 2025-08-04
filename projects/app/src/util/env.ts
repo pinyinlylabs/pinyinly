@@ -19,6 +19,8 @@ export const preflightCheckEnvVars = truthyStrings.has(
 
 export const IS_CI = truthyStrings.has(process.env[`CI`]);
 
+export const IS_TIMING = truthyStrings.has(process.env[`TIMING`]);
+
 export const JWT_KEY = memoize0(() => {
   return Buffer.from(
     nonNullable(

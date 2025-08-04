@@ -2,7 +2,7 @@ import { makePRNG } from "#util/random.ts";
 import assert from "node:assert/strict";
 import { describe, test } from "vitest";
 
-describe(`${makePRNG.name} suite`, async () => {
+describe(`makePRNG suite` satisfies HasNameOf<typeof makePRNG>, async () => {
   test(`returns different numbers for seeds that differ by fractional amount`, () => {
     const bases = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9];
     const diffs = [

@@ -28,6 +28,17 @@ Now you can start the app:
 openssl rand -base64 32
 ```
 
+## Configuring Git for Unicode filenames
+
+Configure Git to display Unicode characters properly:
+
+```sh
+git config core.quotepath false
+```
+
+This prevents Git from escaping Unicode characters in filenames, so instead of seeing escaped
+sequences like `\346\210\221`, you'll see the actual Chinese characters in Git output.
+
 ## Debugging Expo server
 
 In VS Code open a `JavaScript Debug Terminal` from the command palette

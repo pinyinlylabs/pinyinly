@@ -160,6 +160,58 @@ ruleTester.run("nameof", rule, {
   typeof ComplexClass
 >`,
     },
+
+    // HasNameOf tests - valid cases
+    {
+      // Valid - string contains the symbol name
+      code: `'NewWordTutorial suite' satisfies HasNameOf<typeof NewWordTutorial>`,
+    },
+    {
+      // Valid - exact match (should also be valid for HasNameOf)
+      code: `'MyClass' satisfies HasNameOf<typeof MyClass>`,
+    },
+    {
+      // Valid - string contains symbol at the beginning
+      code: `'myFunction tests' satisfies HasNameOf<typeof myFunction>`,
+    },
+    {
+      // Valid - string contains symbol in the middle
+      code: `'Testing MyClass functionality' satisfies HasNameOf<typeof MyClass>`,
+    },
+    {
+      // Valid - string contains symbol at the end
+      code: `'Suite for MyInterface' satisfies HasNameOf<MyInterface>`,
+    },
+    {
+      // Valid - with double quotes
+      code: `"MyClass test suite" satisfies HasNameOf<typeof MyClass>`,
+    },
+    {
+      // Valid - with template literal
+      code: `\`MyFunction test cases\` satisfies HasNameOf<typeof MyFunction>`,
+    },
+    {
+      // Valid - built-in type contained in string
+      code: `'boolean tests' satisfies HasNameOf<boolean>`,
+    },
+    {
+      // Valid - using 'as' syntax
+      code: `'MyComponent suite' as HasNameOf<typeof MyComponent>`,
+    },
+    {
+      // Valid - multiline with HasNameOf
+      code: `'ComplexClass tests' satisfies HasNameOf<
+  typeof ComplexClass
+>`,
+    },
+    {
+      // Valid - case sensitive match
+      code: `'MyClass_Test' satisfies HasNameOf<typeof MyClass>`,
+    },
+    {
+      // Valid - symbol with underscores and numbers
+      code: `'Testing my_function_123 behavior' satisfies HasNameOf<typeof my_function_123>`,
+    },
   ],
   invalid: [
     {
@@ -561,6 +613,36 @@ ruleTester.run("nameof", rule, {
         },
       ],
       output: `'UserType' satisfies NameOf<UserType>`,
+    },
+
+    // HasNameOf tests - invalid cases (basic ones only)
+    {
+      code: `'wrong text' satisfies HasNameOf<typeof MyClass>`,
+      errors: [
+        {
+          messageId: "hasNameOfMismatch",
+          data: {
+            actual: "wrong text",
+            expected: "MyClass",
+          },
+        },
+      ],
+      // Note: fix intentionally makes this valid by including the symbol name
+      output: `'MyClass text' satisfies HasNameOf<typeof MyClass>`,
+    },
+    {
+      code: `'' satisfies HasNameOf<UserType>`,
+      errors: [
+        {
+          messageId: "hasNameOfMismatch",
+          data: {
+            actual: "",
+            expected: "UserType",
+          },
+        },
+      ],
+      // Note: fix intentionally makes this valid by including the symbol name
+      output: `'UserType' satisfies HasNameOf<UserType>`,
     },
   ],
 });

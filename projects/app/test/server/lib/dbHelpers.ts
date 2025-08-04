@@ -1,5 +1,6 @@
 import type { Drizzle, Transaction } from "#server/lib/db.ts";
 import * as s from "#server/pgSchema.ts";
+import { IS_TIMING } from "#util/env.js";
 import { nanoid } from "#util/nanoid.ts";
 import { PGlite } from "@electric-sql/pglite";
 import { nonNullable } from "@pinyinly/lib/invariant";
@@ -16,7 +17,9 @@ let dataDir: File | Blob | undefined;
 async function createTestDb(annotate?: TestContext[`annotate`]) {
   let start = new Date();
   const client = await PGlite.create({ loadDataDir: dataDir });
-  await annotate?.(`created pglite (${Date.now() - start.getTime()}ms)`);
+  if (IS_TIMING) {
+    await annotate?.(`created pglite (${Date.now() - start.getTime()}ms)`);
+  }
 
   const db = drizzle(client, { schema: s });
 
@@ -24,12 +27,18 @@ async function createTestDb(annotate?: TestContext[`annotate`]) {
   if (dataDir == null) {
     start = new Date();
     await migrate(db, { migrationsFolder });
-    await annotate?.(`applied migrations (${Date.now() - start.getTime()}ms)`);
+    if (IS_TIMING) {
+      await annotate?.(
+        `applied migrations (${Date.now() - start.getTime()}ms)`,
+      );
+    }
     start = new Date();
     dataDir = await client.dumpDataDir();
-    await annotate?.(
-      `cached pglite snapshot (${Date.now() - start.getTime()}ms)`,
-    );
+    if (IS_TIMING) {
+      await annotate?.(
+        `cached pglite snapshot (${Date.now() - start.getTime()}ms)`,
+      );
+    }
   }
 
   return Object.assign(db, {

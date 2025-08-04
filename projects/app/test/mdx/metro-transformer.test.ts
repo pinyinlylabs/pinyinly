@@ -1,6 +1,6 @@
-// pyly-standalone-test
+// pyly-not-src-test
 import { createTransformer, transform } from "#mdx/metro-transformer.js";
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 
 function getJsxContent(src: string) {
   const match = /function _createMdxContent\((?:.+?)return (.*?);$/ms.exec(src);
@@ -11,7 +11,7 @@ function getJsxContent(src: string) {
 }
 
 describe(transform, () => {
-  it(`should transform basic MDX`, async () => {
+  test(`should transform basic MDX`, async () => {
     const result = await transform({
       filename: `test.mdx`,
       //   src: `- 123`,
@@ -46,7 +46,7 @@ describe(transform, () => {
     `);
   });
 
-  it(`should transform MDX with sibling and nested custom components`, async () => {
+  test(`should transform MDX with sibling and nested custom components`, async () => {
     const result = await transform({
       filename: `test.mdx`,
       //   src: `- 123`,
@@ -83,7 +83,7 @@ import Foo from './foo'
     `);
   });
 
-  it(`should transform MDX with custom components`, async () => {
+  test(`should transform MDX with custom components`, async () => {
     const result = await transform({
       filename: `test.mdx`,
       //   src: `- 123`,
@@ -115,7 +115,7 @@ import Foo from './foo'
     `);
   });
 
-  it(`should transform MDX with custom components that were not imported`, async () => {
+  test(`should transform MDX with custom components that were not imported`, async () => {
     const result = await transform({
       filename: `test.mdx`,
       //   src: `- 123`,
@@ -147,7 +147,7 @@ import Foo from './foo'
     `);
   });
 
-  it(`should transform MDX with custom components wrapping markdown content`, async () => {
+  test(`should transform MDX with custom components wrapping markdown content`, async () => {
     const result = await transform({
       filename: `test.mdx`,
       //   src: `- 123`,
@@ -179,7 +179,7 @@ import Foo from './foo'
     `);
   });
 
-  it(`should transform MDX images`, async () => {
+  test(`should transform MDX images`, async () => {
     const result = await transform({
       filename: `test.mdx`,
       //   src: `- 123`,
@@ -192,7 +192,7 @@ import Foo from './foo'
     expect(result.src.includes(`require("./foo/bar.png")`)).toEqual(true);
   });
 
-  it(`transforms code blocks`, async () => {
+  test(`transforms code blocks`, async () => {
     const transform = createTransformer();
     const result = await transform({
       filename: `test.mdx`,
@@ -208,7 +208,7 @@ console.log("hello")
     );
   });
 
-  it(`should transform arbitrary JSX elements with src attributes`, async () => {
+  test(`should transform arbitrary JSX elements with src attributes`, async () => {
     const result = await transform({
       filename: `test.mdx`,
       src: `

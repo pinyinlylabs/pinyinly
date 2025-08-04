@@ -1,4 +1,4 @@
-// pyly-standalone-test
+// pyly-not-src-test
 
 import { tv } from "tailwind-variants";
 import { expect, test } from "vitest";

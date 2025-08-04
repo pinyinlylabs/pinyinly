@@ -1,50 +1,48 @@
-// pyly-standalone-test
+// pyly-not-src-test
 
 import type { Shape } from "@lottiefiles/lottie-js";
 import { Animation, MatteMode, ShapeLayer } from "@lottiefiles/lottie-js";
 import * as fs from "node:fs/promises";
 import path from "node:path";
-import { expect, test } from "vitest";
+import { describe, expect, test } from "vitest";
 import { z } from "zod/v4";
 
-test(`no luminance layers in lottie animations (incompatible with lottie-ios)`, async ({
-  annotate,
-}) => {
+describe(`no luminance layers in lottie animations (incompatible with lottie-ios)`, async () => {
   for await (const [lottieFile, anim] of iterLottieAssets()) {
-    await annotate(`file: ${lottieFile}`);
-    // This test checks that no layer in
-    // Check each layer to make sure it's not a luminance mask.
-    for (const layer of anim.layers) {
-      // The custom message is dropped as .not.toBe doesn't support custom messages like assert.notEqual
-      expect(layer.matteMode).not.toBe(MatteMode.LUMA);
-    }
+    test(lottieFile, () => {
+      // This test checks that no layer in
+      // Check each layer to make sure it's not a luminance mask.
+      for (const layer of anim.layers) {
+        // The custom message is dropped as .not.toBe doesn't support custom messages like assert.notEqual
+        expect(layer.matteMode).not.toBe(MatteMode.LUMA);
+      }
+    });
   }
 });
 
-test(`regression https://github.com/Pixofield/keyshape-lottie-format/pull/15`, async ({
-  annotate,
-}) => {
+describe(`regression https://github.com/Pixofield/keyshape-lottie-format/pull/15`, async () => {
   const namedSchema = z.object({ name: z.string().optional() });
 
   for await (const [lottieFile, anim] of iterLottieAssets()) {
-    await annotate(`file: ${lottieFile}`);
-    const validateItem = (
-      value:
-        | Pick<Animation, `name` | `toJSON`>
-        | Pick<Shape, `name` | `toJSON`>,
-    ) => {
-      expect(() => namedSchema.parse(value)).not.toThrow();
-    };
+    test(lottieFile, () => {
+      const validateItem = (
+        value:
+          | Pick<Animation, `name` | `toJSON`>
+          | Pick<Shape, `name` | `toJSON`>,
+      ) => {
+        expect(() => namedSchema.parse(value)).not.toThrow();
+      };
 
-    validateItem(anim);
-    for (const layer of anim.layers) {
-      validateItem(layer);
-      if (layer instanceof ShapeLayer) {
-        for (const shape of layer.shapes) {
-          validateItem(shape);
+      validateItem(anim);
+      for (const layer of anim.layers) {
+        validateItem(layer);
+        if (layer instanceof ShapeLayer) {
+          for (const shape of layer.shapes) {
+            validateItem(shape);
+          }
         }
       }
-    }
+    });
   }
 });
 

@@ -183,6 +183,11 @@ export default tseslint.config(
               message: `Migrate to React 19 patterns.`,
             },
             {
+              name: `vitest`,
+              importNames: [`it`],
+              message: `Use \`test(…)\` instead of \`it(…)\` for consistency.`,
+            },
+            {
               name: `hanzi`,
               message: `Please use @/dictionary/hanzi instead.`,
             },

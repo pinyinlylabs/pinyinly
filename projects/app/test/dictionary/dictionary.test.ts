@@ -412,20 +412,6 @@ test(`expect missing glyphs to be included decomposition data`, async () => {
   expect(knownMissingGlyphs).toEqual(new Set());
 });
 
-test.todo(`hanzi name mnemonics don't include visual variants`, async () => {
-  // const radicalNameMnemonics = await loadHanziWordGlossMnemonics();
-  // const primarySet = new Set(await allRadicalPrimaryForms());
-  // const radicalsWithNameMnemonics = new Set(radicalNameMnemonics.keys());
-  // assert.deepEqual(radicalsWithNameMnemonics.difference(primarySet), new Set());
-});
-
-test.todo(`hanzi pinyin mnemonics don't include visual variants`, async () => {
-  // const pinyinMnemonics = await loadRadicalPinyinMnemonics();
-  // const primarySet = new Set(await allRadicalPrimaryForms());
-  // const radicalsWithNameMnemonics = new Set(pinyinMnemonics.keys());
-  // assert.deepEqual(radicalsWithNameMnemonics.difference(primarySet), new Set());
-});
-
 test(`zod schemas are compatible with OpenAI API`, async () => {
   function assertCompatible(schema: z.ZodType): void {
     const jsonSchema = JSON.stringify(
@@ -460,41 +446,46 @@ test(`hanzi uses consistent unicode characters`, async () => {
   );
 });
 
-describe(`${loadHanziWordMigrations.name} suite`, async () => {
-  test(`no "from" keys are in the dictionary`, async () => {
-    const hanziWordRenames = await loadHanziWordMigrations();
-    const dictionary = await loadDictionary();
-    assert.deepEqual(
-      [...hanziWordRenames].filter(([oldHanziWord]) =>
-        dictionary.has(oldHanziWord),
-      ),
-      [],
-    );
-  });
+describe(
+  `loadHanziWordMigrations suite` satisfies HasNameOf<
+    typeof loadHanziWordMigrations
+  >,
+  async () => {
+    test(`no "from" keys are in the dictionary`, async () => {
+      const hanziWordRenames = await loadHanziWordMigrations();
+      const dictionary = await loadDictionary();
+      assert.deepEqual(
+        [...hanziWordRenames].filter(([oldHanziWord]) =>
+          dictionary.has(oldHanziWord),
+        ),
+        [],
+      );
+    });
 
-  test(`all "to" keys are in the dictionary`, async () => {
-    const hanziWordRenames = await loadHanziWordMigrations();
-    const dictionary = await loadDictionary();
-    assert.deepEqual(
-      [...hanziWordRenames].filter(
-        ([, newHanziWord]) =>
-          newHanziWord != null && !dictionary.has(newHanziWord),
-      ),
-      [],
-    );
-  });
+    test(`all "to" keys are in the dictionary`, async () => {
+      const hanziWordRenames = await loadHanziWordMigrations();
+      const dictionary = await loadDictionary();
+      assert.deepEqual(
+        [...hanziWordRenames].filter(
+          ([, newHanziWord]) =>
+            newHanziWord != null && !dictionary.has(newHanziWord),
+        ),
+        [],
+      );
+    });
 
-  test(`no "to" keys are also "from" keys (could cause loops)`, async () => {
-    const hanziWordRenames = await loadHanziWordMigrations();
-    assert.deepEqual(
-      [...hanziWordRenames].filter(
-        ([, newHanziWord]) =>
-          newHanziWord != null && hanziWordRenames.has(newHanziWord),
-      ),
-      [],
-    );
-  });
-});
+    test(`no "to" keys are also "from" keys (could cause loops)`, async () => {
+      const hanziWordRenames = await loadHanziWordMigrations();
+      assert.deepEqual(
+        [...hanziWordRenames].filter(
+          ([, newHanziWord]) =>
+            newHanziWord != null && hanziWordRenames.has(newHanziWord),
+        ),
+        [],
+      );
+    });
+  },
+);
 
 test(`dictionary contains entries for decomposition`, async () => {
   const unknownCharacters = new Map<HanziGrapheme, /* sources */ Set<string>>();
@@ -636,47 +627,62 @@ async function kangxiRadicalToCjkRadical(
   }
 }
 
-describe(`${hanziFromHanziOrHanziWord.name} suite`, async () => {
-  test(`supports hanzi word`, () => {
-    expect(hanziFromHanziOrHanziWord(`你好:hello`)).toEqual(`你好`);
-  });
-
-  test(`supports hanzi`, () => {
-    expect(hanziFromHanziOrHanziWord(汉`你好`)).toEqual(`你好`);
-  });
-});
-
-describe(`${upsertHanziWordMeaning.name} suite`, async () => {
-  function helloDict(): Dictionary {
-    const dict: Dictionary = new Map();
-    dict.set(`你好:hello`, {
-      gloss: [`hello`],
-      pinyin: [[拼音`ni`, 拼音`hao`]],
-      partOfSpeech: `interjection`,
-    });
-    return dict;
-  }
-
-  test(`can update pinyin`, async () => {
-    const dict = helloDict();
-
-    upsertHanziWordMeaning(dict, `你好:hello`, {
-      pinyin: [[拼音`nǐ`, 拼音`hǎo`]],
+describe(
+  `hanziFromHanziOrHanziWord suite` satisfies HasNameOf<
+    typeof hanziFromHanziOrHanziWord
+  >,
+  async () => {
+    test(`supports hanzi word`, () => {
+      expect(hanziFromHanziOrHanziWord(`你好:hello`)).toEqual(`你好`);
     });
 
-    expect(dict.get(`你好:hello`)).toEqual({
-      gloss: [`hello`],
-      pinyin: [[拼音`nǐ`, 拼音`hǎo`]],
-      partOfSpeech: `interjection`,
+    test(`supports hanzi`, () => {
+      expect(hanziFromHanziOrHanziWord(汉`你好`)).toEqual(`你好`);
     });
-  });
-});
+  },
+);
 
-describe(`${`getIsStructuralHanziWord` satisfies NameOf<typeof getIsStructuralHanziWord>} suite`, () => {
-  test(`fixtures`, async () => {
-    const isStructuralHanziWord = await getIsStructuralHanziWord();
+describe(
+  `upsertHanziWordMeaning suite` satisfies HasNameOf<
+    typeof upsertHanziWordMeaning
+  >,
+  async () => {
+    function helloDict(): Dictionary {
+      const dict: Dictionary = new Map();
+      dict.set(`你好:hello`, {
+        gloss: [`hello`],
+        pinyin: [[拼音`ni`, 拼音`hao`]],
+        partOfSpeech: `interjection`,
+      });
+      return dict;
+    }
 
-    expect(isStructuralHanziWord(`丿:slash`)).toBe(true);
-    expect(isStructuralHanziWord(`八:eight`)).toBe(false);
-  });
-});
+    test(`can update pinyin`, async () => {
+      const dict = helloDict();
+
+      upsertHanziWordMeaning(dict, `你好:hello`, {
+        pinyin: [[拼音`nǐ`, 拼音`hǎo`]],
+      });
+
+      expect(dict.get(`你好:hello`)).toEqual({
+        gloss: [`hello`],
+        pinyin: [[拼音`nǐ`, 拼音`hǎo`]],
+        partOfSpeech: `interjection`,
+      });
+    });
+  },
+);
+
+describe(
+  `getIsStructuralHanziWord suite` satisfies HasNameOf<
+    typeof getIsStructuralHanziWord
+  >,
+  () => {
+    test(`fixtures`, async () => {
+      const isStructuralHanziWord = await getIsStructuralHanziWord();
+
+      expect(isStructuralHanziWord(`丿:slash`)).toBe(true);
+      expect(isStructuralHanziWord(`八:eight`)).toBe(false);
+    });
+  },
+);

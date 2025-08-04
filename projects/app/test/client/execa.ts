@@ -1,8 +1,11 @@
+import makeDebug from "debug";
 import type { Options, Result } from "execa";
 import { execa } from "execa";
 import { createHash } from "node:crypto";
 import * as fs from "node:fs/promises";
 import path from "node:path";
+
+const debug = makeDebug(`pinyinly:execa`);
 
 const CACHE_DIR = path.join(import.meta.dirname, `../../.cache/execa`);
 
@@ -114,7 +117,11 @@ export async function execaCached(
   }
 
   // Cache miss - execute the command
+  debug(`Running command: %s\nwith args: %O`, file, args);
   const result = await execa(file, args, options);
+  debug(`stdout: %s`, result.stdout);
+  debug(`stderr: %s`, result.stderr);
+  debug(`exit code: %s`, result.exitCode);
 
   // Cache the result
   const cachedResult = toCachedResult(result);

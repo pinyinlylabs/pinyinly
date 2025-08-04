@@ -1859,10 +1859,13 @@ typeChecks<RizzleObjectOutput<never>>(() => {
   >;
 });
 
-test(`${keyPathVariableNames.name}()`, () => {
-  assert.deepEqual(keyPathVariableNames(`foo/[id]`), [`id`]);
-  assert.deepEqual(keyPathVariableNames(`foo/[id]/[bar]`), [`id`, `bar`]);
-});
+test(
+  `keyPathVariableNames()` satisfies HasNameOf<typeof keyPathVariableNames>,
+  () => {
+    assert.deepEqual(keyPathVariableNames(`foo/[id]`), [`id`]);
+    assert.deepEqual(keyPathVariableNames(`foo/[id]/[bar]`), [`id`, `bar`]);
+  },
+);
 
 typeChecks<ExtractVariableNames<never>>(() => {
   true satisfies IsEqual<ExtractVariableNames<`a[b]`>, `b`>;
