@@ -28,46 +28,57 @@ typeChecks(`type checks only`, () => {
   [1, 2].sort(sortComparatorString());
 });
 
-test(`${sortComparatorString.name} fixtures`, () => {
-  {
-    const arr = [`c`, `a`, `b`];
-    arr.sort(sortComparatorString());
-    assert.deepEqual(arr, [`a`, `b`, `c`]);
-  }
+test(
+  `sortComparatorString fixtures` satisfies HasNameOf<
+    typeof sortComparatorString
+  >,
+  () => {
+    {
+      const arr = [`c`, `a`, `b`];
+      arr.sort(sortComparatorString());
+      assert.deepEqual(arr, [`a`, `b`, `c`]);
+    }
 
-  {
-    const arr = [[`c`], [`a`], [`b`]];
-    arr.sort(sortComparatorString(([x]) => x!));
-    assert.deepEqual(arr, [[`a`], [`b`], [`c`]]);
-  }
-});
+    {
+      const arr = [[`c`], [`a`], [`b`]];
+      arr.sort(sortComparatorString(([x]) => x!));
+      assert.deepEqual(arr, [[`a`], [`b`], [`c`]]);
+    }
+  },
+);
 
-test(`${sortComparatorNumber.name} suite`, () => {
-  {
-    const arr = [3, 1, 2];
-    arr.sort(sortComparatorNumber());
-    assert.deepEqual(arr, [1, 2, 3]);
-  }
+test(
+  `sortComparatorNumber suite` satisfies HasNameOf<typeof sortComparatorNumber>,
+  () => {
+    {
+      const arr = [3, 1, 2];
+      arr.sort(sortComparatorNumber());
+      assert.deepEqual(arr, [1, 2, 3]);
+    }
 
-  {
-    const arr = [[3], [1], [2]];
-    arr.sort(sortComparatorNumber(([x]) => x!));
-    assert.deepEqual(arr, [[1], [2], [3]]);
-  }
-});
+    {
+      const arr = [[3], [1], [2]];
+      arr.sort(sortComparatorNumber(([x]) => x!));
+      assert.deepEqual(arr, [[1], [2], [3]]);
+    }
+  },
+);
 
-test(`${mergeSortComparators.name} suite`, () => {
-  const arr = [`金`, `现金`, `金`, `金牌`];
-  arr.sort(
-    mergeSortComparators(
-      sortComparatorNumber((x) => x.length),
-      sortComparatorString((x) => x),
-    ),
-  );
-  assert.deepEqual(arr, [`金`, `金`, `现金`, `金牌`]);
-});
+test(
+  `mergeSortComparators suite` satisfies HasNameOf<typeof mergeSortComparators>,
+  () => {
+    const arr = [`金`, `现金`, `金`, `金牌`];
+    arr.sort(
+      mergeSortComparators(
+        sortComparatorNumber((x) => x.length),
+        sortComparatorString((x) => x),
+      ),
+    );
+    assert.deepEqual(arr, [`金`, `金`, `现金`, `金牌`]);
+  },
+);
 
-test(`${merge.name} suite`, () => {
+test(`merge suite` satisfies HasNameOf<typeof merge>, () => {
   assert.deepEqual(merge(null, null), null);
   assert.deepEqual(merge(null, 1), 1);
   assert.deepEqual(merge(1, null), 1);
@@ -96,7 +107,7 @@ test(`${merge.name} suite`, () => {
   );
 });
 
-test(`${deepTransform.name} suite`, () => {
+test(`deepTransform suite` satisfies HasNameOf<typeof deepTransform>, () => {
   assert.deepEqual(
     deepTransform(null, (x) => x),
     null,
@@ -109,12 +120,12 @@ test(`${deepTransform.name} suite`, () => {
   );
 });
 
-test(`${objectInvert.name} fixtures`, () => {
+test(`objectInvert fixtures` satisfies HasNameOf<typeof objectInvert>, () => {
   assert.deepEqual(objectInvert({}), {});
   assert.deepEqual(objectInvert({ a: 1, b: 2 }), { 1: `a`, 2: `b` });
 });
 
-test(`${mapInvert.name} fixtures`, () => {
+test(`mapInvert fixtures` satisfies HasNameOf<typeof mapInvert>, () => {
   assert.deepEqual(mapInvert(new Map()), new Map());
   assert.deepEqual(
     mapInvert(
@@ -130,7 +141,7 @@ test(`${mapInvert.name} fixtures`, () => {
   );
 });
 
-describe(`${makeRange.name} suite`, async () => {
+describe(`makeRange suite` satisfies HasNameOf<typeof makeRange>, async () => {
   test(`ascending range`, () => {
     assert.deepEqual(makeRange(0, 0), [0]);
     assert.deepEqual(makeRange(0, 1), [0, 1]);
@@ -143,7 +154,7 @@ describe(`${makeRange.name} suite`, async () => {
   });
 });
 
-describe(`${objectMap.name} suite`, () => {
+describe(`objectMap suite` satisfies HasNameOf<typeof objectMap>, () => {
   test(`fixtures`, () => {
     assert.deepEqual(
       objectMap({ a: 1, b: 2 }, (key, value) => [`${key}${value}`, value * 2]),
@@ -165,25 +176,28 @@ describe(`${objectMap.name} suite`, () => {
   });
 });
 
-test(`${objectMapToArray.name} suite`, () => {
-  assert.deepEqual(
-    objectMapToArray({ a: 1, b: 2 }, (key, value) => [
-      `${key}${value}`,
-      value * 2,
-    ]),
-    [
-      [`a1`, 2],
-      [`b2`, 4],
-    ],
-  );
+test(
+  `objectMapToArray suite` satisfies HasNameOf<typeof objectMapToArray>,
+  () => {
+    assert.deepEqual(
+      objectMapToArray({ a: 1, b: 2 }, (key, value) => [
+        `${key}${value}`,
+        value * 2,
+      ]),
+      [
+        [`a1`, 2],
+        [`b2`, 4],
+      ],
+    );
 
-  assert.deepEqual(
-    objectMapToArray({ a: `x`, b: `y` }, (key, value) => `${key}${value}`),
-    [`ax`, `by`],
-  );
-});
+    assert.deepEqual(
+      objectMapToArray({ a: `x`, b: `y` }, (key, value) => `${key}${value}`),
+      [`ax`, `by`],
+    );
+  },
+);
 
-describe(`${memoize1.name} suite`, async () => {
+describe(`memoize1 suite` satisfies HasNameOf<typeof memoize1>, async () => {
   test(`fixtures`, () => {
     const fn = (x: string) => x.toUpperCase();
     const memoized = memoize1(fn);

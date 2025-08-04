@@ -12,18 +12,23 @@ import assert from "node:assert/strict";
 import { describe, expect, test } from "vitest";
 import { 汉 } from "./helpers";
 
-test(`${flattenIds.name} handles ⿱⿱ to ⿳ and ⿰⿰ to ⿲`, () => {
-  for (const [input, expected] of [
-    [`⿱⿱abc`, `⿳abc`],
-    [`⿱a⿱bc`, `⿳abc`],
-    [`⿰⿰abc`, `⿲abc`],
-    [`⿰a⿰bc`, `⿲abc`],
-  ] as const) {
-    expect(idsNodeToString(flattenIds(parseIds(input)))).toBe(expected);
-  }
-});
+test(
+  `flattenIds handles ⿱⿱ to ⿳ and ⿰⿰ to ⿲` satisfies HasNameOf<
+    typeof flattenIds
+  >,
+  () => {
+    for (const [input, expected] of [
+      [`⿱⿱abc`, `⿳abc`],
+      [`⿱a⿱bc`, `⿳abc`],
+      [`⿰⿰abc`, `⿲abc`],
+      [`⿰a⿰bc`, `⿲abc`],
+    ] as const) {
+      expect(idsNodeToString(flattenIds(parseIds(input)))).toBe(expected);
+    }
+  },
+);
 
-test(`${parseIds.name} handles 1 depth`, () => {
+test(`parseIds handles 1 depth` satisfies HasNameOf<typeof parseIds>, () => {
   expect(parseIds(`木`)).toEqual({
     operator: `LeafCharacter`,
     character: `木`,
@@ -242,7 +247,7 @@ test(`${parseIds.name} handles 1 depth`, () => {
   });
 });
 
-test(`${parseIds.name} handles 2 depth`, () => {
+test(`parseIds handles 2 depth` satisfies HasNameOf<typeof parseIds>, () => {
   {
     const cursor = { index: 0 };
     expect(parseIds(`⿰a⿱bc`, cursor)).toEqual({
@@ -277,7 +282,7 @@ test(`${parseIds.name} handles 2 depth`, () => {
   }
 });
 
-test(`${parseIds.name} regression tests`, () => {
+test(`parseIds regression tests` satisfies HasNameOf<typeof parseIds>, () => {
   expect(parseIds(`⿱丿𭕄`)).toEqual({
     operator: IdsOperator.AboveToBelow,
     above: { operator: `LeafCharacter`, character: `丿` },
@@ -285,7 +290,7 @@ test(`${parseIds.name} regression tests`, () => {
   });
 });
 
-test(`${walkIdsNode.name} fixture`, () => {
+test(`walkIdsNode fixture` satisfies HasNameOf<typeof walkIdsNode>, () => {
   const ids = parseIds(`⿰a⿱bc`);
 
   const leafs = [...walkIdsNode(ids)].map((x) => {
@@ -302,44 +307,53 @@ test(`${walkIdsNode.name} fixture`, () => {
   assert.deepEqual(leafs, [`a`, `b`, `c`]);
 });
 
-test(`${idsNodeToString.name} roundtrips`, () => {
-  for (const input of [
-    [`木`],
-    [`⿰木目`, `⿱木口`, `⿲彳氵亍`, `⿳亠口小`],
-    [`⿴囗口`, `⿵几皇`, `⿶凵㐅`, `⿷匚斤`, `⿸疒丙`, `⿹戈廾`],
-    [`⿺走召`],
-    [`⿻工从`],
-    [`⿼叉丶`],
-    [`⿽水丶`],
-    [`⿾卍`],
-    [`⿿凹`],
-    [`①`, `②`, `③`, `④`, `⑤`, `⑥`, `⑦`, `⑧`, `⑨`, `⑩`],
-    [`⑪`, `⑫`, `⑬`, `⑭`, `⑮`, `⑯`, `⑰`, `⑱`, `⑲`, `⑳`],
-  ].flat()) {
-    assert.equal(idsNodeToString(parseIds(input)), input);
-  }
-});
+test(
+  `idsNodeToString roundtrips` satisfies HasNameOf<typeof idsNodeToString>,
+  () => {
+    for (const input of [
+      [`木`],
+      [`⿰木目`, `⿱木口`, `⿲彳氵亍`, `⿳亠口小`],
+      [`⿴囗口`, `⿵几皇`, `⿶凵㐅`, `⿷匚斤`, `⿸疒丙`, `⿹戈廾`],
+      [`⿺走召`],
+      [`⿻工从`],
+      [`⿼叉丶`],
+      [`⿽水丶`],
+      [`⿾卍`],
+      [`⿿凹`],
+      [`①`, `②`, `③`, `④`, `⑤`, `⑥`, `⑦`, `⑧`, `⑨`, `⑩`],
+      [`⑪`, `⑫`, `⑬`, `⑭`, `⑮`, `⑯`, `⑰`, `⑱`, `⑲`, `⑳`],
+    ].flat()) {
+      assert.equal(idsNodeToString(parseIds(input)), input);
+    }
+  },
+);
 
-test(`${hanziGraphemeCount.name} fixtures`, () => {
-  for (const value of [`木`, `你`] as HanziText[]) {
-    expect(hanziGraphemeCount(value)).toBe(1);
-  }
-
-  for (const value of [`你好`, `再见`] as HanziText[]) {
-    expect(hanziGraphemeCount(value)).toBe(2);
-  }
-});
-
-describe(`${isHanziGrapheme.name} suite`, () => {
-  test(`fixtures`, () => {
-    const valid = [汉`应`, 汉`兄`, 汉`同`];
-    for (const x of valid) {
-      expect(isHanziGrapheme(x)).toBe(true);
+test(
+  `hanziGraphemeCount fixtures` satisfies HasNameOf<typeof hanziGraphemeCount>,
+  () => {
+    for (const value of [`木`, `你`] as HanziText[]) {
+      expect(hanziGraphemeCount(value)).toBe(1);
     }
 
-    const invalid = [汉`应应`, 汉`兄兄`, 汉`同同`];
-    for (const x of invalid) {
-      expect(isHanziGrapheme(x)).toBe(false);
+    for (const value of [`你好`, `再见`] as HanziText[]) {
+      expect(hanziGraphemeCount(value)).toBe(2);
     }
-  });
-});
+  },
+);
+
+describe(
+  `isHanziGrapheme suite` satisfies HasNameOf<typeof isHanziGrapheme>,
+  () => {
+    test(`fixtures`, () => {
+      const valid = [汉`应`, 汉`兄`, 汉`同`];
+      for (const x of valid) {
+        expect(isHanziGrapheme(x)).toBe(true);
+      }
+
+      const invalid = [汉`应应`, 汉`兄兄`, 汉`同同`];
+      for (const x of invalid) {
+        expect(isHanziGrapheme(x)).toBe(false);
+      }
+    });
+  },
+);
