@@ -7,6 +7,7 @@
  * // Valid usage - string matches the symbol name
  * const className = 'MyComponent' as NameOf<typeof MyComponent>;
  * const typeName = 'UserInterface' as NameOf<UserInterface>;
+ * const typeName = 'UserInterface suite' as HasNameOf<UserInterface>;
  *
  * // Invalid usage - would be caught by ESLint rule
  * const wrong = 'WrongName' as NameOf<typeof MyComponent>; // ESLint error
@@ -15,6 +16,7 @@
  */
 declare global {
   type NameOf<T> = string;
+  type HasNameOf<T> = string;
 }
 
 // This export statement is required to make this file a module

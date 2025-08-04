@@ -1,5 +1,15 @@
 /**
- * @f * @example
+ * @fileoverview ESLint rule to validate string type casts with NameOf and HasNameOf match their type arguments
+ *
+ * This rule validates that type casts like "string" as NameOf<typeof Symbol> or "string" as NameOf<TypeName>
+ * have a string that matches the symbol name in the generic type argument.
+ *
+ * Also supports HasNameOf<> which checks that the string contains the symbol name somewhere within it.
+ *
+ * Supports all string literal types: single quotes, double quotes, and template literals (backticks).
+ * Template literals with expressions are ignored.
+ *
+ * @example
  * // Valid - using typeof with different quote styles (backticks preferred)
  * `MyClass` as NameOf<typeof MyClass>
  * 'MyClass' as NameOf<typeof MyClass>
@@ -17,37 +27,18 @@
  * `boolean` as NameOf<boolean>
  * `string` as NameOf<string>
  *
- * // Invalid
- * 'WrongName' as NameOf<typeof MyClass>  // should be 'MyClass'
- * "WrongName" as NameOf<MyInterface>     // should be "MyInterface"
- * `WrongName` as NameOf<MyType>          // should be `MyType`
- * 'anything' as NameOf<boolean>          // should be `boolean`
- * 'WrongName' satisfies NameOf<typeof MyClass>  // should be 'MyClass' rule to validate string type casts with NameOf match their type arguments
- *
- * This rule validates that type casts like "string" as NameOf<typeof Symbol> or "string" as NameOf<TypeName>
- * have a string that matches the symbol name in the generic type argument.
- *
- * Supports all string literal types: single quotes, double quotes, and template literals (backticks).
- * Template literals with expressions are ignored.
- *
- * @example
- * // Valid - using typeof with different quote styles (backticks preferred)
- * `MyClass` as NameOf<typeof MyClass>
- * 'MyClass' as NameOf<typeof MyClass>
- * "MyClass" as NameOf<typeof MyClass>
- *
- * // Valid - using type name directly (including built-in types)
- * `MyInterface` as NameOf<MyInterface>
- * "MyType" as NameOf<MyType>
- * 'MyComponent' as NameOf<MyComponent>
- * `boolean` as NameOf<boolean>
- * `string` as NameOf<string>
+ * // Valid - using HasNameOf (string contains the symbol name)
+ * 'MyClass suite' satisfies HasNameOf<typeof MyClass>
+ * "Testing MyFunction behavior" satisfies HasNameOf<typeof MyFunction>
+ * `MyInterface tests` satisfies HasNameOf<MyInterface>
  *
  * // Invalid
  * 'WrongName' as NameOf<typeof MyClass>  // should be 'MyClass'
  * "WrongName" as NameOf<MyInterface>     // should be "MyInterface"
  * `WrongName` as NameOf<MyType>          // should be `MyType`
  * 'anything' as NameOf<boolean>          // should be `boolean`
+ * 'WrongName satisfies NameOf<typeof MyClass>  // should be 'MyClass'
+ * 'Wrong suite' satisfies HasNameOf<typeof MyClass>  // should contain 'MyClass'
  *
  * @typedef {import('eslint').Rule.RuleContext} RuleContext
  * @typedef {import('eslint').Rule.Node} Node
@@ -63,12 +54,14 @@ const rule = {
     type: "problem",
     docs: {
       description:
-        "Validates that string type casts with NameOf (using 'as' or 'satisfies') match their generic type arguments",
+        "Validates that string type casts with NameOf or HasNameOf (using 'as' or 'satisfies') match their generic type arguments",
       recommended: true,
     },
     messages: {
       mismatch:
         'String "{{ actual }}" should be "{{ expected }}" to match the symbol name in the NameOf type argument.',
+      hasNameOfMismatch:
+        'String "{{ actual }}" should contain "{{ expected }}" to match the symbol name in the HasNameOf type argument.',
     },
     fixable: "code",
     schema: [],
@@ -103,18 +96,72 @@ const rule = {
     }
 
     /**
-     * Gets the generic type argument text from a NameOf type reference
+     * Gets the generic type argument text from a NameOf or HasNameOf type reference
      * @param {string} typeAnnotationText - The text of the type annotation
-     * @returns {string|null} The generic type text or null if not found
+     * @returns {{typeText: string|null, isHasNameOf: boolean}} The generic type text and whether it's HasNameOf
      */
     function getNameOfTypeText(typeAnnotationText) {
-      // Look for NameOf<...> pattern
-      const nameOfMatch = typeAnnotationText.match(/NameOf\s*<([^>]+)>/);
-      if (!nameOfMatch) {
-        return null;
+      // Look for HasNameOf<...> pattern first
+      const hasNameOfMatch = typeAnnotationText.match(/HasNameOf\s*<([^>]+)>/);
+      if (hasNameOfMatch) {
+        return {
+          typeText: hasNameOfMatch[1]?.trim() || null,
+          isHasNameOf: true,
+        };
       }
 
-      return nameOfMatch[1]?.trim() || null;
+      // Look for NameOf<...> pattern
+      const nameOfMatch = typeAnnotationText.match(/NameOf\s*<([^>]+)>/);
+      if (nameOfMatch) {
+        return {
+          typeText: nameOfMatch[1]?.trim() || null,
+          isHasNameOf: false,
+        };
+      }
+
+      return {
+        typeText: null,
+        isHasNameOf: false,
+      };
+    }
+
+    /**
+     * Determines the quote style used in an expression
+     * @param {any} expression - The expression node
+     * @param {any} sourceCode - The source code object
+     * @returns {'single'|'double'|'template'} The quote style
+     */
+    function getQuoteStyle(expression, sourceCode) {
+      if (expression.type === "TemplateLiteral") {
+        return "template";
+      } else if (expression.type === "Literal") {
+        const originalText = sourceCode.getText(expression);
+        if (originalText.startsWith('"')) {
+          return "double";
+        } else {
+          return "single";
+        }
+      }
+      return "template"; // default fallback
+    }
+
+    /**
+     * Formats a string with the appropriate quote style
+     * @param {string} text - The text to quote
+     * @param {'single'|'double'|'template'} quoteStyle - The quote style to use
+     * @returns {string} The quoted string
+     */
+    function formatWithQuotes(text, quoteStyle) {
+      switch (quoteStyle) {
+        case "double":
+          return `"${text}"`;
+        case "single":
+          return `'${text}'`;
+        case "template":
+          return `\`${text}\``;
+        default:
+          return `\`${text}\``;
+      }
     }
 
     return {
@@ -130,14 +177,14 @@ const rule = {
         // Get the type annotation text
         const typeAnnotationText = sourceCode.getText(node.typeAnnotation);
 
-        // Check if it's a NameOf type
-        const nameOfTypeText = getNameOfTypeText(typeAnnotationText);
-        if (!nameOfTypeText) {
+        // Check if it's a NameOf or HasNameOf type
+        const nameOfResult = getNameOfTypeText(typeAnnotationText);
+        if (!nameOfResult.typeText) {
           return;
         }
 
-        // Extract the symbol name from the NameOf type argument
-        const expectedSymbolName = extractSymbolName(nameOfTypeText);
+        // Extract the symbol name from the type argument
+        const expectedSymbolName = extractSymbolName(nameOfResult.typeText);
         if (!expectedSymbolName) {
           return;
         }
@@ -171,30 +218,104 @@ const rule = {
           return;
         }
 
-        // Check if the string matches the symbol name
-        if (actualString !== expectedSymbolName) {
+        // Check if the string matches the expected pattern
+        let isValid = false;
+        if (nameOfResult.isHasNameOf) {
+          // For HasNameOf, check if the string contains the symbol name
+          isValid = actualString.includes(expectedSymbolName);
+        } else {
+          // For NameOf, check if the string exactly matches the symbol name
+          isValid = actualString === expectedSymbolName;
+        }
+
+        if (!isValid) {
+          const messageId = nameOfResult.isHasNameOf
+            ? "hasNameOfMismatch"
+            : "mismatch";
+
           context.report({
             node: expression,
-            messageId: "mismatch",
+            messageId,
             data: {
               actual: String(actualString),
               expected: expectedSymbolName,
             },
             fix(fixer) {
-              // Preserve the original quote style when possible
+              // Generate replacement based on the type
               let replacement;
-              if (expression.type === "TemplateLiteral") {
-                replacement = `\`${expectedSymbolName}\``;
-              } else if (expression.type === "Literal") {
-                const originalText = sourceCode.getText(expression);
-                if (originalText.startsWith('"')) {
-                  replacement = `"${expectedSymbolName}"`;
+              const quoteStyle = getQuoteStyle(expression, sourceCode);
+
+              if (nameOfResult.isHasNameOf) {
+                // For HasNameOf, try to preserve as much of the original string as possible
+                // If the string is empty, just use the symbol name
+                if (actualString === "") {
+                  replacement = formatWithQuotes(
+                    expectedSymbolName,
+                    quoteStyle,
+                  );
                 } else {
-                  replacement = `'${expectedSymbolName}'`;
+                  // Try to intelligently insert the symbol name
+                  const words = actualString
+                    .split(/\s+/)
+                    .filter(
+                      /** @param {string} word */ (word) => word.length > 0,
+                    );
+
+                  // Words that should be preserved (test-related words)
+                  const preserveWords = [
+                    "test",
+                    "tests",
+                    "testing",
+                    "suite",
+                    "cases",
+                    "behavior",
+                    "functionality",
+                    "else",
+                  ];
+                  // Generic words that are good candidates for replacement
+                  const replaceWords = [
+                    "something",
+                    "anything",
+                    "wrong",
+                    "wrongname",
+                    "different",
+                    "incorrect",
+                  ];
+
+                  let replaced = false;
+
+                  // First, try to replace specific generic words
+                  for (let i = 0; i < words.length; i++) {
+                    if (replaceWords.includes(words[i].toLowerCase())) {
+                      words[i] = expectedSymbolName;
+                      replaced = true;
+                      break;
+                    }
+                  }
+
+                  // If no generic word found, replace the first non-preserve word
+                  if (!replaced) {
+                    for (let i = 0; i < words.length; i++) {
+                      if (!preserveWords.includes(words[i].toLowerCase())) {
+                        words[i] = expectedSymbolName;
+                        replaced = true;
+                        break;
+                      }
+                    }
+                  }
+
+                  // If still not replaced, just prepend the symbol name
+                  if (!replaced) {
+                    words.unshift(expectedSymbolName);
+                  }
+
+                  replacement = formatWithQuotes(words.join(" "), quoteStyle);
                 }
               } else {
-                replacement = `\`${expectedSymbolName}\``;
+                // For NameOf, replace with exact symbol name
+                replacement = formatWithQuotes(expectedSymbolName, quoteStyle);
               }
+
               return fixer.replaceText(expression, replacement);
             },
           });
