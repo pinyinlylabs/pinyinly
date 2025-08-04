@@ -11,15 +11,30 @@ const transformCode = (code: string) => {
 };
 
 describe(`Audio Sprite Babel Preset`, () => {
-  test(`should identify .m4a require calls`, () => {
+  test(`should transform .m4a require calls to audio sprite objects`, () => {
     const input = `const audio = require('./sounds/beep.m4a');`;
 
-    // Since the actual transformation is commented out, we expect the code to remain unchanged
-    // but the plugin should at least process it (you'll see console.log output)
     const output = transformCode(input);
 
-    // For now, expect the code to be unchanged since transformation logic is commented
-    expect(output).toContain(`require('./sounds/beep.m4a')`);
+    expect(output).toMatchInlineSnapshot(`
+      "const audio = {
+        type: "audiosprite",
+        start: 1.2,
+        duration: 0.5,
+        asset: require("./sounds/beep.m4a")
+      };"
+    `);
+  });
+
+  test(`should not create infinite recursion`, () => {
+    const input = `const audio = require('./sounds/beep.m4a');`;
+
+    // This should not hang or throw an error
+    const output = transformCode(input);
+
+    // Should only contain one require call (in the asset property)
+    const requireMatches = output.match(/require\(/g);
+    expect(requireMatches).toHaveLength(1);
   });
 
   test(`should ignore non-.m4a requires`, () => {
@@ -58,48 +73,16 @@ describe(`Audio Sprite Babel Preset`, () => {
     expect(output).toContain(`someFunction('./audio.m4a')`);
   });
 
-  // TODO: Add these tests when the transformation logic is implemented
-  test.todo(`should transform .m4a requires to audio sprite objects`, () => {
-    const input = `const audio = require('./sounds/beep.m4a');`;
-
-    const output = transformCode(input);
-
-    // Expected output when transformation is implemented:
-    // const audio = {
-    //   start: 1.2,
-    //   duration: 0.5,
-    //   asset: require('./sounds/beep.m4a')
-    // };
-    expect(output).toContain(`start:`);
-    expect(output).toContain(`duration:`);
-    expect(output).toContain(`asset:`);
-  });
-
-  test.todo(`should preserve original require for asset property`, () => {
+  test(`should preserve original require for asset property`, () => {
     const input = `const audio = require('./sounds/beep.m4a');`;
 
     const output = transformCode(input);
 
     // The asset property should still contain the original require call
-    expect(output).toContain(`asset: require('./sounds/beep.m4a')`);
+    expect(output).toContain(`asset: require("./sounds/beep.m4a")`);
   });
 
-  test.todo(`should add development comments`, () => {
-    // Set NODE_ENV for this test
-    const originalEnv = process.env[`NODE_ENV`];
-    process.env[`NODE_ENV`] = `development`;
-
-    const input = `const audio = require('./sounds/beep.m4a');`;
-    const output = transformCode(input);
-
-    // Should contain debugging comment in development
-    expect(output).toContain(`Audio sprite:`);
-
-    // Restore original NODE_ENV
-    process.env[`NODE_ENV`] = originalEnv;
-  });
-
-  test.todo(`should handle relative paths correctly`, () => {
+  test(`should handle multiple .m4a files in same code`, () => {
     const input = `
       const audio1 = require('./audio.m4a');
       const audio2 = require('../sounds/beep.m4a');
@@ -109,19 +92,35 @@ describe(`Audio Sprite Babel Preset`, () => {
     const output = transformCode(input);
 
     // All should be transformed to objects
-    expect(output).not.toContain(`require('./audio.m4a')`);
-    expect(output).not.toContain(`require('../sounds/beep.m4a')`);
-    expect(output).not.toContain(`require('../../assets/music.m4a')`);
+    expect(output).toContain(`type: "audiosprite"`);
+    expect(output).toContain(`asset: require("./audio.m4a")`);
+    expect(output).toContain(`asset: require("../sounds/beep.m4a")`);
+    expect(output).toContain(`asset: require("../../assets/music.m4a")`);
+
+    // Should have 3 require calls (one for each asset property)
+    const requireMatches = output.match(/require\(/g);
+    expect(requireMatches).toHaveLength(3);
   });
 
-  test.todo(`should work with import statements in ES modules`, () => {
-    // Test for when you add support for import statements
-    const input = `import audio from './sounds/beep.m4a';`;
+  test(`should handle mixed content (m4a and non-m4a)`, () => {
+    const input = `
+      const audio = require('./sounds/beep.m4a');
+      const image = require('./assets/logo.png');
+      const video = require('./videos/intro.mp4');
+    `;
 
     const output = transformCode(input);
 
-    // Should transform import statements too
-    expect(output).toContain(`start:`);
-    expect(output).toContain(`duration:`);
+    // Only .m4a should be transformed
+    expect(output).toContain(`type: "audiosprite"`);
+    expect(output).toContain(`asset: require("./sounds/beep.m4a")`);
+
+    // Other files should remain unchanged
+    expect(output).toContain(`require('./assets/logo.png')`);
+    expect(output).toContain(`require('./videos/intro.mp4')`);
+
+    // Should have 3 require calls total
+    const requireMatches = output.match(/require\(/g);
+    expect(requireMatches).toHaveLength(3);
   });
 });
