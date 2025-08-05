@@ -1,9 +1,9 @@
-import { hashFile, loadManifest } from "#manifest.ts";
 import type { ConfigAPI, PluginItem } from "@babel/core";
 import { types as t } from "@babel/core";
 import { invariant } from "@pinyinly/lib/invariant";
 import nodePath from "node:path";
-import type { BabelPluginOptions } from "./types.js";
+import { hashFile, loadManifest } from "./manifestRead.ts";
+import type { BabelPluginOptions } from "./types.ts";
 
 // eslint-disable-next-line import/no-default-export
 export default function expoAudioSpritesPreset(
@@ -98,8 +98,8 @@ const audioAssetPlugin = (
           return;
         }
 
-        // Extract sprite data from the segment: [spriteIndex, startTime, duration]
-        const [spriteIndex, startTime, duration] = segmentData;
+        // Extract sprite data from the segment object
+        const { sprite: spriteIndex, start: startTime, duration } = segmentData;
         const spriteFile = manifest.spriteFiles[spriteIndex];
 
         if (spriteFile === undefined) {

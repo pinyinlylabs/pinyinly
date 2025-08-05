@@ -1,5 +1,5 @@
 import audioSpriteBabelPreset from "#babel.ts";
-import { hashFileContent } from "#manifest.ts";
+import { hashFileContent } from "#manifestRead.ts";
 import { transform } from "@babel/core";
 import { vol } from "memfs";
 import { afterEach } from "node:test";
@@ -9,6 +9,12 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 vi.mock(`node:fs`, async () => {
   const memfs = await vi.importActual(`memfs`);
   return memfs[`fs`];
+});
+
+// Redirect `node:fs/promises` to use `memfs`'s `promises` API
+vi.mock(`node:fs/promises`, async () => {
+  const { promises } = await vi.importActual(`memfs`);
+  return promises;
 });
 
 const transformCode = (
@@ -156,6 +162,15 @@ describe(
               "message": "Invalid input: expected array, received undefined"
             },
             {
+              "expected": "object",
+              "code": "invalid_type",
+              "path": [
+                "segments",
+                "123123"
+              ],
+              "message": "Invalid input: expected object, received array"
+            },
+            {
               "expected": "array",
               "code": "invalid_type",
               "path": [
@@ -187,9 +202,16 @@ describe(
         [manifestPath]: JSON.stringify({
           spriteFiles: [`./sprite1-5a7d2c4f.m4a`],
           segments: {
-            // Invalid segment data - should be [number, number, number] but has string
-            [`123123`]: [`invalid`, 1.2, 0.5],
+            // Invalid segment data - should be object with sprite, start, duration, hash properties
+            [`123123`]: {
+              sprite: `invalid`, // should be number
+              start: 1.2,
+              duration: 0.5,
+              hash: `test-hash`,
+            },
           },
+          rules: [],
+          include: [],
         }),
       });
 
@@ -211,25 +233,9 @@ describe(
               "path": [
                 "segments",
                 "123123",
-                0
+                "sprite"
               ],
               "message": "Invalid input: expected number, received string"
-            },
-            {
-              "expected": "array",
-              "code": "invalid_type",
-              "path": [
-                "rules"
-              ],
-              "message": "Invalid input: expected array, received undefined"
-            },
-            {
-              "expected": "array",
-              "code": "invalid_type",
-              "path": [
-                "include"
-              ],
-              "message": "Invalid input: expected array, received undefined"
             }
           ]],
           ]

@@ -5,13 +5,13 @@ import {
   loadHanziWordPinyinMnemonics,
   lookupHanzi,
 } from "#dictionary/dictionary.js";
-import { jsonStringifyShallowIndent } from "#util/json.js";
 import {
   mergeMaps,
   sortComparatorNumber,
   sortComparatorString,
 } from "@pinyinly/lib/collections";
 import { invariant } from "@pinyinly/lib/invariant";
+import { jsonStringifyShallowIndent } from "@pinyinly/lib/json";
 import makeDebug from "debug";
 import path from "node:path";
 import OpenAI from "openai";

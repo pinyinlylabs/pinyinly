@@ -41,7 +41,6 @@ import {
   wordListSchema,
 } from "#dictionary/dictionary.ts";
 import "#types/hanzi.d.ts";
-import { jsonStringifyShallowIndent } from "#util/json.ts";
 import { Alert, MultiSelect, Select } from "@inkjs/ui";
 import {
   arrayFilterUniqueWithKey,
@@ -52,6 +51,7 @@ import {
   sortComparatorString,
 } from "@pinyinly/lib/collections";
 import { invariant } from "@pinyinly/lib/invariant";
+import { jsonStringifyShallowIndent } from "@pinyinly/lib/json";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import makeDebug from "debug";
 import { Box, render, Text, useFocus, useInput } from "ink";

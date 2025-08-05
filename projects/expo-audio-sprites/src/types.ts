@@ -35,20 +35,27 @@ export const spriteRuleSchema = z.object({
 });
 
 /**
+ * Zod schema for validating sprite segment data.
+ */
+export const spriteSegmentSchema = z.object({
+  /** Index of the sprite file this segment belongs to */
+  sprite: z.number().int().min(0),
+  /** Start time of the segment within the sprite in seconds */
+  start: z.number().min(0),
+  /** Duration of the segment in seconds */
+  duration: z.number().min(0),
+  /** Content hash of the original audio file */
+  hash: z.string(),
+});
+
+/**
  * Zod schema for validating sprite manifest JSON structure.
  */
 export const spriteManifestSchema = z.object({
   /** Array of sprite file paths */
   spriteFiles: z.array(z.string()),
-  /** Map of original file hashes to [sprite index, start time, duration] */
-  segments: z.record(
-    z.string(),
-    z.tuple([
-      z.number().int().min(0), // sprite file index
-      z.number().min(0), // start time
-      z.number().min(0), // duration
-    ]),
-  ),
+  /** Map of original file paths to segment data */
+  segments: z.record(z.string(), spriteSegmentSchema),
   /** Rules for automatically mapping files to sprites */
   rules: z.array(spriteRuleSchema),
   /** Glob patterns for input audio files to process */
@@ -61,8 +68,13 @@ export const spriteManifestSchema = z.object({
 export type SpriteRule = z.infer<typeof spriteRuleSchema>;
 
 /**
- * Audio sprite manifest structure that maps file hashes to sprite data.
- * The segments object maps hashes of original audio files to arrays containing:
- * [sprite file index, start time, duration]
+ * Segment data for an audio file within a sprite.
+ */
+export type SpriteSegment = z.infer<typeof spriteSegmentSchema>;
+
+/**
+ * Audio sprite manifest structure that maps file paths to sprite segment data.
+ * The segments object maps relative paths of original audio files to objects containing:
+ * { sprite: sprite file index, start: start time, duration: duration, hash: content hash }
  */
 export type SpriteManifest = z.infer<typeof spriteManifestSchema>;

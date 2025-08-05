@@ -9,13 +9,13 @@ import {
   loadPinyinSoundThemeDetails,
   pinyinSoundNameSuggestionsSchema,
 } from "#dictionary/dictionary.js";
-import { jsonStringifyShallowIndent } from "#util/json.ts";
 import {
   deepTransform,
   merge,
   sortComparatorString,
 } from "@pinyinly/lib/collections";
 import { invariant, nonNullable } from "@pinyinly/lib/invariant";
+import { jsonStringifyShallowIndent } from "@pinyinly/lib/json";
 import makeDebug from "debug";
 import path from "node:path";
 import yargs from "yargs";

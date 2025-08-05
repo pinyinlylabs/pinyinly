@@ -3,8 +3,8 @@ import {
   loadHanziWordGlossMnemonics,
   lookupHanzi,
 } from "#dictionary/dictionary.js";
-import { jsonStringifyShallowIndent } from "#util/json.js";
 import { mergeMaps, sortComparatorString } from "@pinyinly/lib/collections";
+import { jsonStringifyShallowIndent } from "@pinyinly/lib/json";
 import makeDebug from "debug";
 import path from "node:path";
 import OpenAI from "openai";

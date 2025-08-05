@@ -1,7 +1,7 @@
+import { jsonStringifyShallowIndent } from "@pinyinly/lib/json";
 import makeDebug from "debug";
 import { readFile } from "node:fs/promises";
 import yargs from "yargs";
-import { jsonStringifyShallowIndent } from "../src/util/json.js";
 import { writeUtf8FileIfChanged } from "./util/fs.js";
 
 const debug = makeDebug(`pyly`);

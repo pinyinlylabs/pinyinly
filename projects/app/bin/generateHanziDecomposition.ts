@@ -4,7 +4,6 @@ import {
   allHanziGraphemes,
   loadHanziDecomposition,
 } from "#dictionary/dictionary.js";
-import { jsonStringifyShallowIndent } from "#util/json.js";
 import { unicodeShortIdentifier } from "#util/unicode.js";
 import {
   deepReadonly,
@@ -12,6 +11,7 @@ import {
   sortComparatorString,
 } from "@pinyinly/lib/collections";
 import { invariant } from "@pinyinly/lib/invariant";
+import { jsonStringifyShallowIndent } from "@pinyinly/lib/json";
 import makeDebug from "debug";
 import path from "node:path";
 import { expect } from "vitest";
