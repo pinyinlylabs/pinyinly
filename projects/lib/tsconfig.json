@@ -2,6 +2,7 @@
   "extends": "../../tsconfig.base",
   "compilerOptions": {
     "baseUrl": ".",
+    "esModuleInterop": true,
     "lib": ["ESNext"],
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
@@ -9,13 +10,16 @@
     "target": "ESNext",
     "types": ["node"]
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    "**/*.mts",
-    "**/*.js",
-    "**/*.cjs",
-    "**/*.mjs"
-  ],
-  "exclude": ["dist", "build", "node_modules"]
+  "include": ["*"],
+  "references": [
+    {
+      "path": "./src"
+    },
+    {
+      "path": "./test"
+    },
+    {
+      "path": "../eslint-rules"
+    }
+  ]
 }

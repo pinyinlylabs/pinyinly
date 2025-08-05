@@ -12,7 +12,8 @@
     "types": [
       "node",
       // Enable expect().toHaveTextContent() and similar matchers.
-      "@testing-library/jest-dom"
+      "@testing-library/jest-dom",
+      "@pinyinly/eslint-rules/nameof.d.ts"
     ]
   },
   "include": ["**/*"],
@@ -22,6 +23,9 @@
     },
     {
       "path": "../../lib"
+    },
+    {
+      "path": "../../eslint-rules"
     }
   ]
 }

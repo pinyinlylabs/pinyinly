@@ -71,6 +71,27 @@ const containerDataSchema = z.object({
   bitrate: z.string(),
 });
 
+function extractAstats(output: string) {
+  // Extract out the astats data from the ffmpeg output, e.g.:
+  //
+  // ```
+  // [Parsed_astats_2 @ 0x145f27bd0] Channel: 1
+  // [Parsed_astats_2 @ 0x145f27bd0] DC offset: -0.000013
+  // [Parsed_astats_2 @ 0x145f27bd0] Min level: -0.310349
+  // [Parsed_astats_2 @ 0x145f27bd0] Max level: 0.253153
+  // ...
+  // ```
+  const rawData: Record<string, unknown> = {};
+  for (const [, key, value] of output.matchAll(
+    // e.g. [Parsed_astats_2 @ 0x145f27bd0] DC offset: -0.000013
+    /^\[Parsed_astats_.+?\] (?<key>.+?): (?<value>.+?)$/gm,
+  )) {
+    invariant(key != null && value != null);
+    rawData[key] = value;
+  }
+  return astatsSchema.parse(rawData);
+}
+
 function extractDuration(output: string) {
   const containerData =
     /Duration: (?<duration>.+?), start: (?<start>.+?), bitrate: (?<bitrate>.+?)$/gms.exec(
@@ -88,22 +109,12 @@ function extractDuration(output: string) {
     `Failed to extract input stream sample rate from: ${inputSteamData}`,
   );
 
-  const astatsRawData: Record<string, unknown> = {};
-  for (const [, key, value] of output.matchAll(
-    // e.g. [Parsed_astats_2 @ 0x145f27bd0] DC offset: -0.000013
-    /^\[Parsed_astats_.+?\] (?<key>.+?): (?<value>.+?)$/gm,
-  )) {
-    invariant(key != null && value != null);
-    astatsRawData[key] = value;
-  }
-  const astatsData = astatsSchema.parse(astatsRawData);
+  const astats = extractAstats(output);
 
   return {
     fromStream:
-      astatsData[`Number of samples`] /
-      Number.parseInt(inputStreamSampleRateHz),
+      astats[`Number of samples`] / Number.parseInt(inputStreamSampleRateHz),
     fromContainer: parseTimestampToSeconds(container.duration),
-    aStatsData: astatsData,
   };
 }
 
@@ -219,11 +230,13 @@ export async function analyzeAudioFile(filePath: string) {
 export function parseFfmpegOutput(output: string) {
   const loudnorm = extractLoudnorm(output);
   const duration = extractDuration(output);
+  const astats = extractAstats(output);
 
   return {
     loudnorm,
     silences: extractSilenceDetection(output),
     duration,
+    astats,
   };
 }
 

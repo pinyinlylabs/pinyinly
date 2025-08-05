@@ -1,0 +1,24 @@
+{
+  "extends": "../../../tsconfig.base",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "esModuleInterop": true,
+    "jsx": "preserve",
+    "lib": ["DOM", "ESNext"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "outDir": "../../../.moon/cache/types/projects/eslint-rules-test",
+    "target": "ESNext",
+    "types": [
+      "node",
+      // Enable expect().toHaveTextContent() and similar matchers.
+      "@testing-library/jest-dom"
+    ]
+  },
+  "include": ["**/*"],
+  "references": [
+    {
+      "path": "../src"
+    }
+  ]
+}

@@ -3,6 +3,7 @@ tasks:
     command: yarn tsc --build
     inputs:
       - "!dist/"
+      - "!node_modules/"
       - "*.{ts,cts,mts,tsx,mtsx,js,cjs,mjs,json}"
       - "**/*.{ts,cts,mts,tsx,mtsx,js,cjs,mjs,json}"
       - /tsconfig.base.json

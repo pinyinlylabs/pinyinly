@@ -1,0 +1,15 @@
+{
+  "extends": "../../../tsconfig.base",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "esModuleInterop": true,
+    "jsx": "preserve",
+    "lib": ["DOM", "ES2022"],
+    "module": "ES2020",
+    "moduleResolution": "Bundler",
+    "outDir": "../../../.moon/cache/types/projects/eslint-rules-src",
+    "resolveJsonModule": true,
+    "target": "ESNext"
+  },
+  "include": ["**/*"]
+}

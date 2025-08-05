@@ -8,4 +8,5 @@ pnpm-lock.yaml
 /projects/app/.vercel
 /projects/app/src/assets/**/*.svg
 /projects/app/src/assets/**/*.json
+/projects/*/dist
 *.asset.json

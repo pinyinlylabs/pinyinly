@@ -1,19 +1,37 @@
 {
   "name": "@pinyinly/eslint-rules",
-  "main": "index.cjs",
   "type": "module",
   "exports": {
-    ".": "./index.cjs"
+    ".": "./src/index.ts",
+    "./*.d.ts": "./src/types/*.d.ts"
+  },
+  "imports": {
+    "#*.ts": "./src/*.ts"
   },
   "scripts": {
-    "lint": "eslint ."
+    "noop": "echo 1"
   },
   "dependencies": {
-    "eslint": "^9.13.0"
+    "@stylistic/eslint-plugin": "^4.0.0",
+    "@types/eslint-plugin-tailwindcss": "^3 <=3.18.x",
+    "eslint": "^9.13.0",
+    "eslint-plugin-better-tailwindcss": "^3.1.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-react": "^7.37.2",
+    "eslint-plugin-react-compiler": "rc",
+    "eslint-plugin-react-hooks": "^6.0.0-rc.1",
+    "eslint-plugin-tailwindcss": "^3.18.0",
+    "eslint-plugin-unicorn": "^59.0.0",
+    "glob": "^11.0.3",
+    "prettier": "^3.4.2",
+    "tailwindcss": "^3.4.17",
+    "typescript-eslint": "^8.26.0"
   },
   "private": true,
   "devDependencies": {
     "@typescript-eslint/parser": "^8.36.0",
-    "typescript": "patch:typescript@npm%3A5.8.3#~/.yarn/patches/typescript-npm-5.8.3-fbd7aef456.patch"
+    "tsx": "^4.15.7",
+    "typescript": "patch:typescript@npm%3A5.8.3#~/.yarn/patches/typescript-npm-5.8.3-fbd7aef456.patch",
+    "vitest": "^3.2.4"
   }
 }

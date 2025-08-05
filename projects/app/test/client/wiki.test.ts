@@ -21,11 +21,17 @@ describe(`speech files`, async () => {
     const projectRelPath = path.relative(projectRootDir, filePath);
 
     describe(projectRelPath, async () => {
-      test(`container and real duration is within allowable tolerance`, async () => {
+      test(`container and real duration is within allowable tolerance and not corrupted`, async () => {
         const { duration } = await analyzeAudioFile(filePath);
 
         const delta = Math.abs(duration.fromStream - duration.fromContainer);
         expect(delta).toBeLessThanOrEqual(0.02); // Allow 20ms tolerance
+      });
+
+      test(`audio file is not empty (based on duration)`, async () => {
+        const { duration } = await analyzeAudioFile(filePath);
+
+        expect(duration.fromStream).toBeGreaterThanOrEqual(0.5); // Speech must be at least 500ms
       });
 
       test(`loudness is within allowed tolerance`, async () => {

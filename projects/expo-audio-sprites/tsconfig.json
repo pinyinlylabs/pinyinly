@@ -1,0 +1,27 @@
+{
+  "extends": "../../tsconfig.base",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "lib": ["ESNext"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "outDir": "../../.moon/cache/types/projects/expo-audio-sprites",
+    "target": "ESNext"
+  },
+  "include": ["*"],
+  "exclude": ["dist", "build", "node_modules"],
+  "references": [
+    {
+      "path": "./src"
+    },
+    {
+      "path": "./test"
+    },
+    {
+      "path": "../eslint-rules"
+    },
+    {
+      "path": "../lib"
+    }
+  ]
+}

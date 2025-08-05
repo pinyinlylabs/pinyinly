@@ -28,41 +28,40 @@
  * // enforce: import { useState } from 'react'; or import { useState as useState } from 'react';
  * // disallow: import { useState as useStateAlias } from 'react';
  * { "import-names": ["error", { "namedImports": { "react": { "useState": "useState" } } }] }
- *
- * @typedef {import('eslint').Rule.RuleContext} RuleContext
- * @typedef {import('eslint').Rule.Node} Node
- * @typedef {import('estree').ImportDeclaration} ImportDeclaration
- * @typedef {import('estree').ImportSpecifier} ImportSpecifier
- * @typedef {import('estree').ImportDefaultSpecifier} ImportDefaultSpecifier
- * @typedef {import('eslint').Rule.RuleModule} RuleModule
  */
 
-/** @type {RuleModule} */
-const rule = {
+import type { Rule } from "eslint";
+import type { ImportDeclaration, ImportDefaultSpecifier } from "estree";
+
+interface ImportNamesOptions {
+  defaultImports?: Record<string, string>;
+  namedImports?: Record<string, Record<string, string>>;
+}
+
+const rule: Rule.RuleModule = {
   meta: {
-    type: "problem",
+    type: `problem`,
     docs: {
-      description:
-        "Enforce specific naming conventions for default and named imports from specified modules",
+      description: `Enforce specific naming conventions for default and named imports from specified modules`,
       recommended: true,
     },
-    fixable: "code",
+    fixable: `code`,
     schema: [
       {
-        type: "object",
+        type: `object`,
         properties: {
           defaultImports: {
-            type: "object",
+            type: `object`,
             additionalProperties: {
-              type: "string",
+              type: `string`,
             },
           },
           namedImports: {
-            type: "object",
+            type: `object`,
             additionalProperties: {
-              type: "object",
+              type: `object`,
               additionalProperties: {
-                type: "string",
+                type: `string`,
               },
             },
           },
@@ -72,48 +71,44 @@ const rule = {
     ],
   },
 
-  /**
-   * @param {RuleContext} context
-   */
-  create(context) {
-    const options = context.options[0] || {};
-    const defaultImportsConfig = options.defaultImports || {};
-    const namedImportsConfig = options.namedImports || {};
+  create(context: Rule.RuleContext) {
+    const options = (context.options[0] ?? {}) as ImportNamesOptions;
+    const defaultImportsConfig = options.defaultImports ?? {};
+    const namedImportsConfig = options.namedImports ?? {};
 
     return {
-      /**
-       * @param {ImportDeclaration} node
-       */
-      ImportDeclaration(node) {
+      ImportDeclaration(node: ImportDeclaration) {
         const sourceValue = node.source.value;
         // TypeScript needs string assertion because node.source.value could be various types
         const moduleSource =
-          typeof sourceValue === "string" ? sourceValue : String(sourceValue);
+          typeof sourceValue === `string` ? sourceValue : String(sourceValue);
         const expectedDefaultName = defaultImportsConfig[moduleSource];
-        const expectedNamedImports = namedImportsConfig[moduleSource] || {};
+        const expectedNamedImports = namedImportsConfig[moduleSource] ?? {};
 
         // Check for namespace imports (wildcard imports) and disallow them for configured modules
         const hasConfigForThisModule =
-          expectedDefaultName || Object.keys(expectedNamedImports).length > 0;
+          Boolean(expectedDefaultName) ||
+          Object.keys(expectedNamedImports).length > 0;
 
         if (hasConfigForThisModule) {
           const namespaceSpecifier = node.specifiers.find(
-            (s) => s.type === "ImportNamespaceSpecifier",
+            (s) => s.type === `ImportNamespaceSpecifier`,
           );
 
           if (namespaceSpecifier) {
             context.report({
               node: namespaceSpecifier,
-              message: `Namespace import (import * as X) is not allowed for "${sourceValue}". Use specific named or default imports instead.`,
+              message: `Namespace import (import * as X) is not allowed for "${String(sourceValue)}". Use specific named or default imports instead.`,
               // No fix provided as there's no straightforward way to convert wildcard to specific imports
             });
           }
         }
 
         // Check default imports
-        if (expectedDefaultName) {
+        if (expectedDefaultName !== undefined) {
           const defaultSpecifier = node.specifiers.find(
-            (s) => s.type === "ImportDefaultSpecifier",
+            (s): s is ImportDefaultSpecifier =>
+              s.type === `ImportDefaultSpecifier`,
           );
 
           if (
@@ -124,9 +119,9 @@ const rule = {
 
             context.report({
               node: defaultSpecifier,
-              message: `Default import from "${sourceValue}" must be named "${expectedDefaultName}".`,
+              message: `Default import from "${String(sourceValue)}" must be named "${expectedDefaultName}".`,
               fix(fixer) {
-                const sourceCode = context.getSourceCode();
+                const sourceCode = context.sourceCode;
                 const references = sourceCode.getDeclaredVariables(node);
 
                 const fixes = [
@@ -136,15 +131,15 @@ const rule = {
                   ),
                 ];
 
-                references.forEach((variable) => {
+                for (const variable of references) {
                   if (variable.name === badDefaultName) {
-                    variable.references.forEach((ref) => {
+                    for (const ref of variable.references) {
                       fixes.push(
                         fixer.replaceText(ref.identifier, expectedDefaultName),
                       );
-                    });
+                    }
                   }
-                });
+                }
 
                 return fixes;
               },
@@ -154,70 +149,60 @@ const rule = {
 
         // Check named imports
         if (Object.keys(expectedNamedImports).length > 0) {
-          node.specifiers.forEach((specifier) => {
-            if (specifier.type === "ImportSpecifier") {
+          for (const specifier of node.specifiers) {
+            if (specifier.type === `ImportSpecifier`) {
               // Use type assertion since imported can be either an Identifier or a string literal
               const importedIdentifier = specifier.imported;
               const importedName =
-                "name" in importedIdentifier
+                `name` in importedIdentifier
                   ? importedIdentifier.name
-                  : importedIdentifier.value &&
-                      typeof importedIdentifier.value === "string"
+                  : Boolean(importedIdentifier.value) &&
+                      typeof importedIdentifier.value === `string`
                     ? importedIdentifier.value
-                    : "";
+                    : ``;
               const localName = specifier.local.name;
               const expectedName = expectedNamedImports[importedName];
 
-              if (expectedName && localName !== expectedName) {
+              if (expectedName !== undefined && localName !== expectedName) {
                 context.report({
                   node: specifier,
-                  message: `Named import "${importedName}" from "${sourceValue}" must be named "${expectedName}".`,
+                  message: `Named import "${importedName}" from "${String(sourceValue)}" must be named "${expectedName}".`,
 
                   // Skip fixing named imports that are already properly aliased (i.e., `import { x as y }`)
                   // This is because we can't easily detect if the import is already correctly aliased in the syntax
                   // Only fix if the local name is truly different from the expected name
-                  fix: function (fixer) {
-                    const sourceCode = context.getSourceCode();
-                    const references = sourceCode.getDeclaredVariables(node);
+                  fix(fixer) {
+                    const sourceCode = context.sourceCode;
+                    const scope = sourceCode.getScope(node);
                     const fixes = [];
 
-                    // If the imported name and local name already match the pattern of `import { name as alias }`,
-                    // we should be careful about modifying it
-                    const importedHasName = "name" in specifier.imported;
-                    if (
-                      importedName === expectedName &&
-                      importedHasName &&
-                      importedName === specifier.local.name
-                    ) {
-                      // Skip fixing explicitly aliased imports that are already correct
-                      return null;
-                    } else {
-                      // For regular named imports that need to be renamed
-                      fixes.push(
-                        fixer.replaceText(specifier.local, expectedName),
-                      );
+                    // For named imports, we need to update both the import specifier and all references
+                    fixes.push(
+                      fixer.replaceText(specifier.local, expectedName),
+                    );
 
-                      references.forEach((variable) => {
-                        if (variable.name === localName) {
-                          variable.references.forEach((ref) => {
-                            fixes.push(
-                              fixer.replaceText(ref.identifier, expectedName),
-                            );
-                          });
+                    // Find all references to the local variable name
+                    const variable = scope.set.get(localName);
+                    if (variable) {
+                      for (const ref of variable.references) {
+                        if (ref.identifier !== specifier.local) {
+                          fixes.push(
+                            fixer.replaceText(ref.identifier, expectedName),
+                          );
                         }
-                      });
-
-                      return fixes;
+                      }
                     }
+
+                    return fixes;
                   },
                 });
               }
             }
-          });
+          }
         }
       },
     };
   },
 };
 
-module.exports = rule;
+export { rule as importNames };

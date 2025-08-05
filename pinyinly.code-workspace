@@ -24,6 +24,8 @@
       { "directory": "./" },
       { "pattern": "./projects/*" },
     ],
+    // Allow loading ESLint rules written in TypeScript directly
+    "eslint.runtime": "node_modules/.bin/tsx",
     "[markdown]": {
       "editor.defaultFormatter": "esbenp.prettier-vscode",
     },

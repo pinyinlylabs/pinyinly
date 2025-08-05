@@ -4,6 +4,7 @@ fileGroups:
     - "/.prettierignore"
   sources:
     - "**/*"
+    - "!dist/**"
 
 tasks:
   prettier:
@@ -13,6 +14,7 @@ tasks:
       - "@group(config)"
     options:
       runInCI: false
+
   prettierCheck:
     command: yarn prettier --check --ignore-path .gitignore --ignore-path $workspaceRoot/.gitignore --ignore-path $workspaceRoot/.prettierignore .
     inputs:

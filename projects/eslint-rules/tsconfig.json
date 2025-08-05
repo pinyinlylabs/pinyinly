@@ -4,18 +4,19 @@
     "baseUrl": ".",
     "lib": ["ESNext"],
     "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "esModuleInterop": true,
     "outDir": "../../.moon/cache/types/projects/eslint-rules",
     "target": "ESNext",
     "types": ["node"]
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    "**/*.mts",
-    "**/*.js",
-    "**/*.cjs",
-    "**/*.mjs"
-  ],
-  "exclude": ["dist", "build", "node_modules"]
+  "include": ["*"],
+  "exclude": ["dist", "build", "node_modules"],
+  "references": [
+    {
+      "path": "./src"
+    },
+    {
+      "path": "./test"
+    }
+  ]
 }

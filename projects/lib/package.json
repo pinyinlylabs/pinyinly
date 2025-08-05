@@ -4,15 +4,14 @@
   "exports": {
     "./*": "./src/*.ts"
   },
-  "dependencies": {
-    "lodash": "^4.17.21",
-    "nanoid": "patch:nanoid@npm%3A5.1.2#~/.yarn/patches/nanoid-npm-5.1.2-40381f6f88.patch"
+  "imports": {
+    "#*.ts": "./src/*.ts"
   },
   "devDependencies": {
-    "@types/lodash": "4.17.x",
+    "@pinyinly/eslint-rules": "workspace:*",
     "prettier": "^3.4.2",
-    "tsx": "^4.15.7",
-    "typescript": "patch:typescript@npm%3A5.8.3#~/.yarn/patches/typescript-npm-5.8.3-fbd7aef456.patch"
+    "typescript": "patch:typescript@npm%3A5.8.3#~/.yarn/patches/typescript-npm-5.8.3-fbd7aef456.patch",
+    "vitest": "^3.2.4"
   },
   "private": true
 }

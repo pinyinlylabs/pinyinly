@@ -1,6 +1,6 @@
 import { useSoundEffect } from "@/client/hooks/useSoundEffect";
 import { pickChildren } from "@/client/react";
-import type { AudioSource } from "expo-audio";
+import type { PylyAudioSource } from "@pinyinly/expo-audio-sprites";
 import type { PropsWithChildren } from "react";
 import { Pressable, Text, View } from "react-native";
 import { IconImage } from "./IconImage";
@@ -53,11 +53,11 @@ export function PylyMdxComponents({ children }: PropsWithChildren) {
   );
 }
 
-const Audio = ({ src }: { src: AudioSource }) => {
+const Audio = ({ src }: { src: PylyAudioSource }) => {
   const playSound = useSoundEffect(src);
 
   return (
-    <Pressable className="flex-row items-center gap-2" onPress={playSound}>
+    <Pressable className="flex-row items-center gap-2" onPressIn={playSound}>
       <IconImage
         source={require(`@/assets/icons/speaker-2.svg`)}
         size={24}

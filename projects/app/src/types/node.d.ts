@@ -1,3 +1,4 @@
+import type { AudioSpriteSource } from "@pinyinly/expo-audio-sprites";
 import type { Asset } from "expo-asset";
 import type { AudioSource } from "expo-audio";
 
@@ -11,6 +12,7 @@ declare global {
       id: `${string}.${`ttf` | `otf` | `svg` | `png` | `jpg` | `riv` | `lottie.json`}`,
     ): RnRequireSource;
     (id: `${string}.mp3`): AudioSource;
+    (id: `${string}.m4a`): AudioSpriteSource | AudioSource;
   }
 
   namespace NodeJS {
