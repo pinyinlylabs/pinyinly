@@ -21,8 +21,8 @@ import {
   allHsk2HanziWords,
   getIsStructuralHanziWord,
 } from "@/dictionary/dictionary";
-import { arrayFilterUniqueWithKey } from "@/util/collections";
 import { fsrsIsForgotten } from "@/util/fsrs";
+import { arrayFilterUniqueWithKey } from "@pinyinly/lib/collections";
 import { add } from "date-fns/add";
 import { interval } from "date-fns/interval";
 

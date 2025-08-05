@@ -5,9 +5,9 @@ import { createHash } from "node:crypto";
 import * as fs from "node:fs/promises";
 import path from "node:path";
 
-const debug = makeDebug(`pinyinly:execa`);
+const debug = makeDebug(`pinyinly:execaCached`);
 
-const CACHE_DIR = path.join(import.meta.dirname, `../../.cache/execa`);
+const CACHE_DIR = path.join(import.meta.dirname, `../.cache/execaCached`);
 
 export interface CachedExecaResult {
   stdout: string;

@@ -9,7 +9,7 @@ import { invariant } from "@pinyinly/lib/invariant";
 import { eq } from "drizzle-orm";
 import * as pg from "drizzle-orm/pg-core";
 import { describe, expect, vi } from "vitest";
-import { createUser, txTest } from "./dbHelpers";
+import { createUser, txTest } from "./dbHelpers.ts";
 
 function typeChecks(..._args: unknown[]) {
   // This function is only used for type checking, so it should never be called.

@@ -7,7 +7,7 @@ import type {
   RizzleTypeAlias,
 } from "@/util/rizzle";
 import { r } from "@/util/rizzle";
-import type { Flatten } from "@/util/types";
+import type { Flatten } from "@pinyinly/lib/types";
 import { useReplicache } from "./useReplicache";
 import { useRizzleQuery } from "./useRizzleQuery";
 

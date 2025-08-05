@@ -1,7 +1,7 @@
+import type { PropsOf } from "@pinyinly/lib/types";
 import type { Ref } from "react";
 import { TextInput } from "react-native";
 import { tv } from "tailwind-variants";
-import type { PropsOf } from "./types";
 
 interface TextInputSingleProps
   extends Omit<

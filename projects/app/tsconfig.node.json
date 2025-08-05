@@ -12,8 +12,7 @@
     "moduleResolution": "Bundler",
     "outDir": "../../.moon/cache/types/projects/app-node",
     "paths": {
-      "@/*": ["src/*"],
-      "@pinyinly/lib/*": ["../lib/src/*"]
+      "@/*": ["src/*"]
     },
     "resolveJsonModule": true,
     "target": "ESNext",

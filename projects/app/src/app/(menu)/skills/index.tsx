@@ -11,7 +11,7 @@ import {
   rankRules,
 } from "@/data/skills";
 import { meaningKeyFromHanziWord } from "@/dictionary/dictionary";
-import { sortComparatorNumber } from "@/util/collections";
+import { sortComparatorNumber } from "@pinyinly/lib/collections";
 import { Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 

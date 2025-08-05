@@ -1,4 +1,4 @@
-import { deepReadonly, memoize0 } from "@/util/collections";
+import { deepReadonly, memoize0 } from "@pinyinly/lib/collections";
 import { Platform } from "react-native";
 import z from "zod/v4";
 

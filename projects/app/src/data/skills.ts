@@ -8,18 +8,18 @@ import {
   lookupHanziWord,
 } from "@/dictionary/dictionary";
 import {
-  emptySet,
-  memoize1,
-  sortComparatorDate,
-  sortComparatorNumber,
-} from "@/util/collections";
-import {
   fsrsIsForgotten,
   fsrsIsStable,
   fsrsStabilityThreshold,
   Rating,
 } from "@/util/fsrs";
 import { makePRNG } from "@/util/random";
+import {
+  emptySet,
+  memoize1,
+  sortComparatorDate,
+  sortComparatorNumber,
+} from "@pinyinly/lib/collections";
 import { invariant } from "@pinyinly/lib/invariant";
 import type { Duration } from "date-fns";
 import { sub } from "date-fns/sub";

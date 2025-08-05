@@ -6,7 +6,7 @@ import { MistakeKind } from "#data/model.ts";
 import { oneCorrectPairQuestionMistakes } from "#data/questions/oneCorrectPair.ts";
 import { hanziWordToGloss, hanziWordToPinyinTone } from "#data/skills.ts";
 import { describe, expect, test } from "vitest";
-import { 拼音, 汉 } from "../helpers";
+import { 拼音, 汉 } from "../helpers.ts";
 
 describe(
   `oneCorrectPairQuestionMistakes suite` satisfies HasNameOf<

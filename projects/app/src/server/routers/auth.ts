@@ -3,7 +3,7 @@ import { withDrizzle } from "@/server/lib/db";
 import { passkeyTransportEnumSchema } from "@/server/pgSchemaUtil";
 import { jwtSchema, toJwtSchema } from "@/util/jwt";
 import { nanoid } from "@/util/nanoid";
-import type { IsEqual } from "@/util/types";
+import type { IsEqual } from "@pinyinly/lib/types";
 import { invariant } from "@pinyinly/lib/invariant";
 import type {
   PublicKeyCredentialCreationOptionsJSON,

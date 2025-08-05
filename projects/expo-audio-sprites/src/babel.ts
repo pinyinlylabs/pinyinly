@@ -1,11 +1,9 @@
+import { hashFile, loadManifest } from "#manifest.ts";
 import type { ConfigAPI, PluginItem } from "@babel/core";
 import { types as t } from "@babel/core";
 import { invariant } from "@pinyinly/lib/invariant";
-import * as crypto from "node:crypto";
-import * as fs from "node:fs";
 import nodePath from "node:path";
-import type { BabelPluginOptions, SpriteManifest } from "./types.js";
-import { spriteManifestSchema } from "./types.js";
+import type { BabelPluginOptions } from "./types.js";
 
 // eslint-disable-next-line import/no-default-export
 export default function expoAudioSpritesPreset(
@@ -21,36 +19,6 @@ export default function expoAudioSpritesPreset(
   };
 }
 
-const loadManifest = (manifestPath: string): SpriteManifest | null => {
-  try {
-    const manifestContent = fs.readFileSync(manifestPath, `utf-8`);
-    const rawManifest = JSON.parse(manifestContent) as unknown;
-
-    // Validate the manifest structure using Zod
-    const parseResult = spriteManifestSchema.parse(rawManifest);
-
-    return parseResult;
-  } catch (error) {
-    console.error(
-      `Failed to load or parse sprite manifest at ${manifestPath}:`,
-      error,
-    );
-    return {
-      spriteFiles: [],
-      segments: {},
-    };
-  }
-};
-
-export const hashFile = (filePath: string): string => {
-  const fileContent = fs.readFileSync(filePath);
-  return hashFileContent(fileContent);
-};
-
-export const hashFileContent = (fileContent: string | Buffer): string => {
-  return crypto.createHash(`sha256`).update(fileContent).digest(`hex`);
-};
-
 const audioAssetPlugin = (
   _babel: unknown,
   options?: BabelPluginOptions,
@@ -61,7 +29,7 @@ const audioAssetPlugin = (
   const manifest = loadManifest(options.manifestPath);
 
   return {
-    name: `@pinyinly/audio-sprites`,
+    name: `@pinyinly/expo-audio-sprites`,
     visitor: {
       CallExpression(path, state) {
         const { node } = path;

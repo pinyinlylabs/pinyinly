@@ -10,7 +10,7 @@ import {
 import type { HanziText } from "#data/model.ts";
 import assert from "node:assert/strict";
 import { describe, expect, test } from "vitest";
-import { 汉 } from "./helpers";
+import { 汉 } from "./helpers.ts";
 
 test(
   `flattenIds handles ⿱⿱ to ⿳ and ⿰⿰ to ⿲` satisfies HasNameOf<

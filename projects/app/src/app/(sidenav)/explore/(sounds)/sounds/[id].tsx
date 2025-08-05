@@ -10,8 +10,8 @@ import {
   loadPylyPinyinChart,
 } from "@/data/pinyin";
 import { loadPinyinSoundNameSuggestions } from "@/dictionary/dictionary";
-import { sortComparatorString } from "@/util/collections";
 import { nullIfEmpty } from "@/util/unicode";
+import { sortComparatorString } from "@pinyinly/lib/collections";
 import { Link, useLocalSearchParams } from "expo-router";
 import { ScrollView, Text, View } from "react-native";
 import { tv } from "tailwind-variants";

@@ -23,7 +23,7 @@ import { Rating } from "#util/fsrs.ts";
 import { invariant } from "@pinyinly/lib/invariant";
 import assert from "node:assert/strict";
 import { describe, expect, test } from "vitest";
-import { fsrsSrsState, mockSrsState, 时 } from "./helpers";
+import { fsrsSrsState, mockSrsState, 时 } from "./helpers.ts";
 
 const skillTest = test.extend<{
   isStructuralHanziWord: Awaited<ReturnType<typeof getIsStructuralHanziWord>>;

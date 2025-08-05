@@ -1,6 +1,6 @@
 import type { ColorRGBA } from "@/util/color";
 import { parseCssColorOrThrow, parseRiveColorPropertyName } from "@/util/color";
-import type { IsExhaustedRest } from "@/util/types";
+import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import { invariant } from "@pinyinly/lib/invariant";
 import type { ViewModel } from "@rive-app/canvas";
 import type { ViewModelInstance } from "@rive-app/react-canvas";

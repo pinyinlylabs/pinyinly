@@ -11,7 +11,7 @@ import { intervalToDuration } from "date-fns/intervalToDuration";
 import assert from "node:assert/strict";
 import { describe, expect, test, vi } from "vitest";
 import z from "zod/v4";
-import { parseRelativeTimeShorthand, 时 } from "../data/helpers";
+import { parseRelativeTimeShorthand, 时 } from "../data/helpers.ts";
 
 const expectedReviewSchema = z.object({
   stability: z.number(),

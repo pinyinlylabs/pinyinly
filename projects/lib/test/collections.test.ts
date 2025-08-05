@@ -10,8 +10,8 @@ import {
   objectMapToArray,
   sortComparatorNumber,
   sortComparatorString,
-} from "#util/collections.ts";
-import type { IsEqual } from "#util/types.ts";
+} from "#collections.ts";
+import type { IsEqual } from "#types.ts";
 import assert from "node:assert/strict";
 import { describe, test } from "vitest";
 import type z from "zod/v4";

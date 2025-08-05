@@ -1,22 +1,22 @@
 import type { HanziText } from "#data/model.ts";
 import { pinyinPronunciationDisplayText } from "#data/pinyin.ts";
+import {
+  loadHanziDecomposition,
+  loadHanziWordPinyinMnemonics,
+  lookupHanzi,
+} from "#dictionary/dictionary.js";
+import { jsonStringifyShallowIndent } from "#util/json.js";
+import {
+  mergeMaps,
+  sortComparatorNumber,
+  sortComparatorString,
+} from "@pinyinly/lib/collections";
 import { invariant } from "@pinyinly/lib/invariant";
 import makeDebug from "debug";
 import path from "node:path";
 import OpenAI from "openai";
 import yargs from "yargs";
 import { z } from "zod/v4";
-import {
-  loadHanziDecomposition,
-  loadHanziWordPinyinMnemonics,
-  lookupHanzi,
-} from "../src/dictionary/dictionary.js";
-import {
-  mergeMaps,
-  sortComparatorNumber,
-  sortComparatorString,
-} from "../src/util/collections.js";
-import { jsonStringifyShallowIndent } from "../src/util/json.js";
 import { makeDbCache } from "./util/cache.js";
 import { writeUtf8FileIfChanged } from "./util/fs.js";
 import { openAiWithCache, zodResponseFormat } from "./util/openai.js";

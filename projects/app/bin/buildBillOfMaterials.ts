@@ -1,5 +1,5 @@
-import { mapSetAdd, sortComparatorString } from "#util/collections.ts";
 import { jsonStringifyShallowIndent } from "#util/json.ts";
+import { mapSetAdd, sortComparatorString } from "@pinyinly/lib/collections";
 import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import makeDebug from "debug";
 import { readFile, unlink } from "node:fs/promises";

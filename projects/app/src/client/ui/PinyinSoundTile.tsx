@@ -1,5 +1,5 @@
 import type { PinyinSoundId } from "@/data/model";
-import type { IsExhaustedRest } from "@/util/types";
+import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import { nullIfEmpty } from "@/util/unicode";
 import { Text, View } from "react-native";
 import { tv } from "tailwind-variants";

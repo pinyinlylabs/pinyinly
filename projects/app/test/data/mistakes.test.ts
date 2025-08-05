@@ -2,7 +2,7 @@ import { skillsToReReviewForHanziGlossMistake } from "#data/mistakes.ts";
 import type { HanziGlossMistakeType } from "#data/model.ts";
 import { MistakeKind } from "#data/model.ts";
 import { describe, expect, test } from "vitest";
-import { 汉 } from "./helpers";
+import { 汉 } from "./helpers.ts";
 
 describe(
   `skillsToReReviewForHanziGlossMistake suite` satisfies HasNameOf<

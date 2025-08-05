@@ -1,5 +1,5 @@
 import type { HanziGrapheme, HanziText } from "@/data/model";
-import { UnexpectedValueError } from "@/util/types";
+import { UnexpectedValueError } from "@pinyinly/lib/types";
 import { graphemeCount, splitGraphemes } from "@/util/unicode";
 import { invariant } from "@pinyinly/lib/invariant";
 import type { StrictExtract } from "ts-essentials";

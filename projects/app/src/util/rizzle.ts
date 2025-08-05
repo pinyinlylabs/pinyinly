@@ -3,8 +3,9 @@ import {
   memoize0,
   objectInvert,
   weakMemoize1,
-} from "@/util/collections";
+} from "@pinyinly/lib/collections";
 import { invariant } from "@pinyinly/lib/invariant";
+import type { PartialIfUndefined } from "@pinyinly/lib/types";
 import fromAsync from "array-from-async";
 import mapKeys from "lodash/mapKeys";
 import mapValues from "lodash/mapValues";
@@ -20,7 +21,6 @@ import type {
 import { Replicache } from "replicache";
 import type { AnyFunction } from "ts-essentials";
 import { z } from "zod/v4";
-import type { PartialIfUndefined } from "./types";
 
 export interface RizzleTypeDef {
   description?: string;

@@ -6,12 +6,12 @@ import {
   skillKindFromSkill,
   skillKindToShorthand,
 } from "@/data/skills";
+import { fsrsIsStable, Rating } from "@/util/fsrs";
 import {
   emptyArray,
   inverseSortComparator,
   sortComparatorDate,
-} from "@/util/collections";
-import { fsrsIsStable, Rating } from "@/util/fsrs";
+} from "@pinyinly/lib/collections";
 import { useEffect, useMemo, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 

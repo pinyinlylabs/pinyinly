@@ -3,7 +3,12 @@
 import { fsrsIsStable, Rating } from "#util/fsrs.ts";
 import assert from "node:assert/strict";
 import { describe, expect, test, vi } from "vitest";
-import { date, fsrsSrsState, parseRelativeTimeShorthand, 时 } from "./helpers";
+import {
+  date,
+  fsrsSrsState,
+  parseRelativeTimeShorthand,
+  时,
+} from "./helpers.ts";
 
 describe(
   `parseRelativeTimeShorthand suite` satisfies HasNameOf<

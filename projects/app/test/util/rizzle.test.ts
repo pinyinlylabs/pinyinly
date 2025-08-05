@@ -14,7 +14,7 @@ import type {
   RizzleReplicacheQuery,
 } from "#util/rizzle.ts";
 import { keyPathVariableNames, r } from "#util/rizzle.ts";
-import type { IsEqual } from "#util/types.ts";
+import type { IsEqual } from "@pinyinly/lib/types";
 import mapValues from "lodash/mapValues";
 import shuffle from "lodash/shuffle";
 import assert from "node:assert/strict";
@@ -26,7 +26,7 @@ import type {
 import { Replicache } from "replicache";
 import { describe, expect, test, vi } from "vitest";
 import { z } from "zod/v4";
-import { makeMockTx, testReplicacheOptions } from "./rizzleHelpers";
+import { makeMockTx, testReplicacheOptions } from "./rizzleHelpers.ts";
 
 function typeChecks<_T>(..._args: unknown[]) {
   // This function is only used for type checking, so it should never be called.

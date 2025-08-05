@@ -4611,7 +4611,6 @@ __metadata:
     eslint: "npm:^9.13.0"
     eslint-plugin-drizzle: "npm:^0.2.3"
     estree-walker: "patch:estree-walker@npm%3A3.0.3#~/.yarn/patches/estree-walker-npm-3.0.3-0372979673.patch"
-    execa: "npm:^9.6.0"
     expo: "npm:53.0.17"
     expo-apple-authentication: "npm:~7.2.4"
     expo-application: "npm:~6.1.5"
@@ -4652,7 +4651,6 @@ __metadata:
     jose: "npm:^6.0.11"
     lodash: "npm:^4.17.21"
     lottie-react-native: "npm:7.2.2"
-    lru-cache: "npm:^11.1.0"
     lucia: "npm:^3.2.0"
     moti: "npm:^0.30.0"
     nanoid: "patch:nanoid@npm%3A5.1.2#~/.yarn/patches/nanoid-npm-5.1.2-40381f6f88.patch"
@@ -4733,7 +4731,7 @@ __metadata:
     eslint-plugin-react-hooks: "npm:^6.0.0-rc.1"
     eslint-plugin-tailwindcss: "npm:^3.18.0"
     eslint-plugin-unicorn: "npm:^59.0.0"
-    glob: "npm:^11.0.3"
+    glob: "npm:^11.0.0"
     prettier: "npm:^3.4.2"
     tailwindcss: "npm:^3.4.17"
     tsx: "npm:^4.15.7"
@@ -4756,6 +4754,7 @@ __metadata:
     eslint: "npm:^9.13.0"
     eslint-plugin-import: "npm:^2.31.0"
     eslint-plugin-unicorn: "npm:^59.0.0"
+    glob: "npm:^11.0.0"
     memfs: "npm:^4.36.0"
     prettier: "npm:^3.4.2"
     typescript: "patch:typescript@npm%3A5.8.3#~/.yarn/patches/typescript-npm-5.8.3-fbd7aef456.patch"
@@ -4771,9 +4770,15 @@ __metadata:
   resolution: "@pinyinly/lib@workspace:projects/lib"
   dependencies:
     "@pinyinly/eslint-rules": "workspace:*"
+    "@types/debug": "npm:^4 <=4.3.x"
+    "@types/react": "npm:19.1.x"
+    debug: "npm:^4.3.7"
+    execa: "npm:^9.6.0"
+    lru-cache: "npm:^11.1.0"
     prettier: "npm:^3.4.2"
     typescript: "patch:typescript@npm%3A5.8.3#~/.yarn/patches/typescript-npm-5.8.3-fbd7aef456.patch"
     vitest: "npm:^3.2.4"
+    zod: "npm:^3.25.42"
   languageName: unknown
   linkType: soft
 
@@ -11613,7 +11618,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"glob@npm:^11.0.0, glob@npm:^11.0.3":
+"glob@npm:^11.0.0":
   version: 11.0.3
   resolution: "glob@npm:11.0.3"
   dependencies:

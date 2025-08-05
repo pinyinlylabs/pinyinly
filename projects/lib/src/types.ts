@@ -1,4 +1,7 @@
+import type React from "react";
 import type { Prettify } from "ts-essentials";
+
+export type PropsOf<T> = T extends React.ComponentType<infer P> ? P : never;
 
 /**
  * react-query strictly forbids returning `undefined`, but this isn't enforced

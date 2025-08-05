@@ -1,7 +1,5 @@
-// pyly-not-src-test
-
+import { parseFfmpegOutput, parseTimestampToSeconds } from "#ffmpeg.ts";
 import { describe, expect, test } from "vitest";
-import { parseFfmpegOutput, parseTimestampToSeconds } from "./ffmpeg";
 
 test(
   `parseFfmpegOutput suite` satisfies HasNameOf<typeof parseFfmpegOutput>,

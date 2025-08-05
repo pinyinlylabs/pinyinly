@@ -2,7 +2,7 @@ import { currentSchema as schema } from "#data/rizzleSchema.ts";
 import { fetchMutations, pull, push } from "#server/lib/replicache.ts";
 import { nanoid } from "#util/nanoid.ts";
 import { describe, expect } from "vitest";
-import { createUser, txTest } from "./dbHelpers";
+import { createUser, txTest } from "./dbHelpers.ts";
 
 describe(`push suite` satisfies HasNameOf<typeof push>, () => {
   txTest.scoped({ pgConfig: { isolationLevel: `repeatable read` } });

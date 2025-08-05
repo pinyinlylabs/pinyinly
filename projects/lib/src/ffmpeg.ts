@@ -1,8 +1,8 @@
-import { memoize0 } from "#util/collections.js";
-import { invariant } from "@pinyinly/lib/invariant";
 import { $ } from "execa";
 import { z } from "zod/v4";
-import { execaCached, getFileModTime } from "./execa";
+import { memoize0 } from "./collections.ts";
+import { execaCached, getFileModTime } from "./execaCached.ts";
+import { invariant } from "./invariant.ts";
 
 /**
  * Helper function to get ffmpeg version for cache invalidation.
@@ -176,10 +176,14 @@ export function parseTimestampToSeconds(timeStr: string): number {
   }
 
   const { hh, mm, ss } = match.groups;
+  invariant(
+    hh != null && mm != null && ss != null,
+    `Invalid time format: ${timeStr}`,
+  );
   return (
-    Number.parseInt(hh!, 10) * 3600 +
-    Number.parseInt(mm!, 10) * 60 +
-    Number.parseFloat(ss!)
+    Number.parseInt(hh, 10) * 3600 +
+    Number.parseInt(mm, 10) * 60 +
+    Number.parseFloat(ss)
   );
 }
 

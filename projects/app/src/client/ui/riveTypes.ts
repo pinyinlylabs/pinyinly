@@ -1,7 +1,6 @@
-import type { IsEqual } from "@/util/types";
+import type { IsEqual, PropsOf } from "@pinyinly/lib/types";
 import type { Rive, UseRiveParameters } from "@rive-app/react-canvas";
 import type RnRive from "rive-react-native";
-import type { PropsOf } from "./types";
 
 type WebRiveProps = NonNullable<UseRiveParameters>;
 type RnRiveProps = PropsOf<typeof RnRive>;

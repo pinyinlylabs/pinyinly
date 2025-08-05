@@ -25,6 +25,16 @@ export interface BabelPluginOptions {
 }
 
 /**
+ * Zod schema for validating sprite rules.
+ */
+export const spriteRuleSchema = z.object({
+  /** Regex pattern to match file paths (relative to manifest.json) */
+  match: z.string(),
+  /** Template for sprite name using capture groups from match regex */
+  sprite: z.string(),
+});
+
+/**
  * Zod schema for validating sprite manifest JSON structure.
  */
 export const spriteManifestSchema = z.object({
@@ -39,7 +49,16 @@ export const spriteManifestSchema = z.object({
       z.number().min(0), // duration
     ]),
   ),
+  /** Optional rules for automatically mapping files to sprites */
+  rules: z.array(spriteRuleSchema).optional(),
+  /** Optional glob patterns for input audio files to process */
+  include: z.array(z.string()).optional(),
 });
+
+/**
+ * Rule for mapping audio files to sprites based on regex patterns.
+ */
+export type SpriteRule = z.infer<typeof spriteRuleSchema>;
 
 /**
  * Audio sprite manifest structure that maps file hashes to sprite data.

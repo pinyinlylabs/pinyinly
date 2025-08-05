@@ -5,8 +5,8 @@ import {
   defaultPinyinSoundGroupThemes,
   loadPylyPinyinChart,
 } from "@/data/pinyin";
-import { sortComparatorNumber } from "@/util/collections";
 import { nullIfEmpty } from "@/util/unicode";
+import { sortComparatorNumber } from "@pinyinly/lib/collections";
 
 export function usePinyinSoundGroups() {
   const chart = loadPylyPinyinChart();

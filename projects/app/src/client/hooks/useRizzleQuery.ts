@@ -1,5 +1,5 @@
 import type { Rizzle } from "@/data/rizzleSchema";
-import type { ReactQueryValue } from "@/util/types";
+import type { ReactQueryValue } from "@pinyinly/lib/types";
 import type { QueryKey } from "@tanstack/react-query";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";

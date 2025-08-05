@@ -2,7 +2,7 @@ import type { JWTHeaderParameters, JWTPayload, ProduceJWT } from "jose";
 import { SignJWT } from "jose";
 import { jwtVerify } from "jose/jwt/verify";
 import { z } from "zod/v4";
-import { objectMap } from "./collections";
+import { objectMap } from "@pinyinly/lib/collections";
 import { JWT_KEY } from "./env";
 
 const defaultAlg = `HS256`;

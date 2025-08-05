@@ -1,4 +1,14 @@
 {
   "spriteFiles": [],
-  "segments": {}
+  "segments": {},
+  "rules": [
+    {
+      "match": "audio/wiki/(?<page>[^/]+)/(?<file>[^/]+)\\.m4a",
+      "sprite": "wiki-${page}"
+    }
+  ],
+  "include": [
+    "audio/**/*.m4a",
+    "sounds/**/*.m4a"
+  ]
 }

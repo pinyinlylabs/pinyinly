@@ -1,7 +1,7 @@
+import type { PropsOf } from "@pinyinly/lib/types";
 import { Text } from "react-native";
 import { tv } from "tailwind-variants";
 import { RectButton } from "./RectButton";
-import type { PropsOf } from "./types";
 
 interface PinyinOptionButtonProps
   extends Omit<PropsOf<typeof RectButton>, `variant` | `children` | `onPress`> {
