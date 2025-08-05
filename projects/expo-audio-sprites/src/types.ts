@@ -49,10 +49,10 @@ export const spriteManifestSchema = z.object({
       z.number().min(0), // duration
     ]),
   ),
-  /** Optional rules for automatically mapping files to sprites */
-  rules: z.array(spriteRuleSchema).optional(),
-  /** Optional glob patterns for input audio files to process */
-  include: z.array(z.string()).optional(),
+  /** Rules for automatically mapping files to sprites */
+  rules: z.array(spriteRuleSchema),
+  /** Glob patterns for input audio files to process */
+  include: z.array(z.string()),
 });
 
 /**

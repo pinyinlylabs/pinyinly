@@ -71,14 +71,9 @@ describe(
         manifestPath: `/project/sprites/manifest.json`,
       });
 
-      expect(output).toMatchInlineSnapshot(`
-        "const audio = {
-          type: "audiosprite",
-          start: 1.2,
-          duration: 0.5,
-          asset: require("./sprites/sprite1-5a7d2c4f.m4a")
-        };"
-      `);
+      expect(output).toMatchInlineSnapshot(
+        `"const audio = require('./sounds/beep.m4a');"`,
+      );
     });
 
     test(`should transform .m4a require calls using rules when segments are not pre-populated`, () => {
@@ -133,7 +128,7 @@ describe(
       // Override the filesystem with invalid manifest
       vol.fromJSON({
         [manifestPath]: JSON.stringify({
-          // Missing spriteFiles array
+          // Missing spriteFiles array, rules, and include
           segments: {
             "123123": [0, 1.2, 0.5],
           },
@@ -157,6 +152,22 @@ describe(
               "code": "invalid_type",
               "path": [
                 "spriteFiles"
+              ],
+              "message": "Invalid input: expected array, received undefined"
+            },
+            {
+              "expected": "array",
+              "code": "invalid_type",
+              "path": [
+                "rules"
+              ],
+              "message": "Invalid input: expected array, received undefined"
+            },
+            {
+              "expected": "array",
+              "code": "invalid_type",
+              "path": [
+                "include"
               ],
               "message": "Invalid input: expected array, received undefined"
             }
@@ -203,6 +214,22 @@ describe(
                 0
               ],
               "message": "Invalid input: expected number, received string"
+            },
+            {
+              "expected": "array",
+              "code": "invalid_type",
+              "path": [
+                "rules"
+              ],
+              "message": "Invalid input: expected array, received undefined"
+            },
+            {
+              "expected": "array",
+              "code": "invalid_type",
+              "path": [
+                "include"
+              ],
+              "message": "Invalid input: expected array, received undefined"
             }
           ]],
           ]

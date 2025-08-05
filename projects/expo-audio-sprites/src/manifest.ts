@@ -21,6 +21,7 @@ export const loadManifest = (manifestPath: string): SpriteManifest | null => {
     );
     return {
       spriteFiles: [],
+      rules: [],
       segments: {},
     };
   }
@@ -157,10 +158,11 @@ export const getInputFiles = (
 
 /**
  * Update manifest segments with files found using include patterns.
- * Creates placeholder segment entries for files that match the include patterns.
+ * Creates placeholder segment entries for files that match the include patterns,
+ * calculates sprite assignments based on rules, and generates sprite file names.
  * @param manifest The sprite manifest to update
  * @param manifestPath Path to the manifest.json file
- * @returns Updated manifest with populated segments
+ * @returns Updated manifest with populated segments and spriteFiles
  */
 export const updateManifestSegments = (
   manifest: SpriteManifest,
@@ -176,12 +178,16 @@ export const updateManifestSegments = (
   const manifestDir = nodePath.dirname(manifestPath);
   const updatedSegments = { ...manifest.segments };
 
+  // Map to track file paths and their hashes
+  const fileHashMap = new Map<string, string>();
+
   // Hash each file and add placeholder segment data
   for (const relativePath of inputFiles) {
     const absolutePath = nodePath.resolve(manifestDir, relativePath);
 
     try {
       const fileHash = hashFile(absolutePath);
+      fileHashMap.set(relativePath, fileHash);
 
       // Only add if not already present
       if (!(fileHash in updatedSegments)) {
@@ -194,8 +200,77 @@ export const updateManifestSegments = (
     }
   }
 
+  // Apply rules to determine sprite assignments
+  const rules = manifest.rules;
+  const spriteAssignments = generateSpriteAssignments(inputFiles, rules);
+
+  // Generate sprite files based on assignments
+  const spriteFiles: string[] = [];
+  const spriteIndexMap = new Map<string, number>();
+
+  let spriteIndex = 0;
+  for (const [spriteName, filesInSprite] of spriteAssignments) {
+    // Create a deterministic sprite filename by hashing the content of all files in the sprite
+    const sortedFiles = [...filesInSprite].sort();
+    const spriteContentHashes = sortedFiles
+      .map((filePath) => fileHashMap.get(filePath))
+      .filter((hash): hash is string => hash != null)
+      .sort();
+
+    // Create a combined hash of all file hashes in this sprite
+    const combinedContent = spriteContentHashes.join(``);
+    const spriteHash = hashFileContent(combinedContent);
+
+    // Generate sprite filename: spriteName-hash.m4a
+    const spriteFileName = `${spriteName}-${spriteHash.slice(0, 8)}.m4a`;
+    spriteFiles.push(spriteFileName);
+    spriteIndexMap.set(spriteName, spriteIndex);
+
+    // Update segment data with correct sprite index
+    for (const filePath of filesInSprite) {
+      const fileHash = fileHashMap.get(filePath);
+      if (fileHash != null && fileHash in updatedSegments) {
+        updatedSegments[fileHash] = [spriteIndex, 0, 0]; // Still placeholder start/duration
+      }
+    }
+
+    spriteIndex++;
+  }
+
+  // Handle files that don't match any rules - put them in a default sprite
+  const unmatchedFiles = inputFiles.filter((filePath) => {
+    const spriteName = applyRules(filePath, rules);
+    return spriteName == null || spriteName.length === 0;
+  });
+
+  if (unmatchedFiles.length > 0) {
+    // Create a default sprite for unmatched files
+    const unmatchedHashes = unmatchedFiles
+      .map((filePath) => fileHashMap.get(filePath))
+      .filter((hash): hash is string => hash != null)
+      .sort();
+
+    if (unmatchedHashes.length > 0) {
+      const combinedContent = unmatchedHashes.join(``);
+      const spriteHash = hashFileContent(combinedContent);
+      const spriteFileName = `unmatched-${spriteHash.slice(0, 8)}.m4a`;
+
+      spriteFiles.push(spriteFileName);
+      const unmatchedSpriteIndex = spriteIndex;
+
+      // Update segment data for unmatched files
+      for (const filePath of unmatchedFiles) {
+        const fileHash = fileHashMap.get(filePath);
+        if (fileHash != null && fileHash in updatedSegments) {
+          updatedSegments[fileHash] = [unmatchedSpriteIndex, 0, 0];
+        }
+      }
+    }
+  }
+
   return {
     ...manifest,
+    spriteFiles,
     segments: updatedSegments,
   };
 };

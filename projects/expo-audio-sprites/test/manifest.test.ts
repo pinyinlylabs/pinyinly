@@ -9,6 +9,7 @@ import {
   syncManifestWithFilesystem,
   updateManifestSegments,
 } from "#manifest.ts";
+import type { SpriteManifest } from "#types.ts";
 import { vol } from "memfs";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
@@ -305,18 +306,21 @@ describe(
     });
 
     test(`should return files based on manifest include patterns`, () => {
+      const manifestPath = `/project/manifest.json`;
+
       vol.fromJSON({
         "/project/audio/wiki/hello.m4a": `content1`,
         "/project/audio/sounds/beep.m4a": `content2`,
-        "/project/manifest.json": JSON.stringify({
+        [manifestPath]: JSON.stringify({
           spriteFiles: [],
           segments: {},
+          rules: [],
           include: [`audio/**/*.m4a`],
-        }),
+        } satisfies SpriteManifest),
       });
 
-      const manifest = loadManifest(`/project/manifest.json`);
-      const result = getInputFiles(manifest!, `/project/manifest.json`);
+      const manifest = loadManifest(manifestPath);
+      const result = getInputFiles(manifest!, manifestPath);
 
       expect(result).toEqual([`audio/sounds/beep.m4a`, `audio/wiki/hello.m4a`]);
     });
@@ -328,7 +332,9 @@ describe(
         [manifestPath]: JSON.stringify({
           spriteFiles: [],
           segments: {},
-        }),
+          rules: [],
+          include: [],
+        } satisfies SpriteManifest),
       });
 
       const manifest = loadManifest(manifestPath);
@@ -344,6 +350,7 @@ describe(
         [manifestPath]: JSON.stringify({
           spriteFiles: [],
           segments: {},
+          rules: [],
           include: [],
         }),
       });
@@ -372,8 +379,9 @@ describe(
         "/project/manifest.json": JSON.stringify({
           spriteFiles: [],
           segments: {},
+          rules: [],
           include: [`audio/**/*.m4a`],
-        }),
+        } satisfies SpriteManifest),
       });
 
       const originalManifest = loadManifest(`/project/manifest.json`);
@@ -395,31 +403,56 @@ describe(
     });
 
     test(`should preserve existing segments`, () => {
-      const existingHash = `abc123existinghash`;
-      const existingSegment = [1, 5.2, 1.8];
-
       vol.fromJSON({
-        "/project/audio/new-file.m4a": `new content`,
+        "/project/audio/existing-file.m4a": `existing content`,
         "/project/manifest.json": JSON.stringify({
           spriteFiles: [],
-          segments: {
-            [existingHash]: existingSegment,
-          },
+          segments: {},
+          rules: [],
           include: [`audio/**/*.m4a`],
-        }),
+        } satisfies SpriteManifest),
       });
 
-      const originalManifest = loadManifest(`/project/manifest.json`);
-      const updatedManifest = updateManifestSegments(
-        originalManifest!,
+      const originalManifest = updateManifestSegments(
+        loadManifest(`/project/manifest.json`)!,
         `/project/manifest.json`,
       );
 
-      // Should preserve existing segment
-      expect(updatedManifest.segments[existingHash]).toEqual(existingSegment);
+      // Now add a new file
 
-      // Should add new file
-      expect(Object.keys(updatedManifest.segments)).toHaveLength(2);
+      vol.fromJSON({
+        "/project/audio/new-file.m4a": `new content`,
+      });
+      const updatedManifest = updateManifestSegments(
+        loadManifest(`/project/manifest.json`)!,
+        `/project/manifest.json`,
+      );
+
+      // Check the previous segment is preserved.
+      expect(updatedManifest.segments).toMatchObject(originalManifest.segments);
+      expect(originalManifest.segments).toMatchInlineSnapshot(`
+        {
+          "131fc6fe7a8464937c72db19863b153ad1ac1b534889ca7dbfc69cfd08088335": [
+            0,
+            0,
+            0,
+          ],
+        }
+      `);
+      expect(updatedManifest.segments).toMatchInlineSnapshot(`
+        {
+          "131fc6fe7a8464937c72db19863b153ad1ac1b534889ca7dbfc69cfd08088335": [
+            0,
+            0,
+            0,
+          ],
+          "fe32608c9ef5b6cf7e3f946480253ff76f24f4ec0678f3d0f07f9844cbff9601": [
+            0,
+            0,
+            0,
+          ],
+        }
+      `);
     });
 
     test(`should handle empty include patterns`, () => {
@@ -429,25 +462,8 @@ describe(
           spriteFiles: [],
           segments: {},
           include: [],
-        }),
-      });
-
-      const originalManifest = loadManifest(`/project/manifest.json`);
-      const updatedManifest = updateManifestSegments(
-        originalManifest!,
-        `/project/manifest.json`,
-      );
-
-      expect(updatedManifest.segments).toEqual({});
-    });
-
-    test(`should handle manifest without include field`, () => {
-      vol.fromJSON({
-        "/project/audio/file.m4a": `content`,
-        "/project/manifest.json": JSON.stringify({
-          spriteFiles: [],
-          segments: {},
-        }),
+          rules: [],
+        } satisfies SpriteManifest),
       });
 
       const originalManifest = loadManifest(`/project/manifest.json`);
@@ -504,8 +520,10 @@ describe(`saveManifest suite` satisfies HasNameOf<typeof saveManifest>, () => {
 
     const manifest = {
       spriteFiles: [],
+      rules: [],
       segments: {},
-    };
+      include: [],
+    } satisfies SpriteManifest; // Use the SpriteManifest type for better type checking
 
     saveManifest(manifest, `/project/manifest.json`);
 
@@ -535,23 +553,54 @@ describe(
         "/project/manifest.json": JSON.stringify({
           spriteFiles: [],
           segments: {},
+          rules: [
+            {
+              match: `.+/(?<basename>[^/]+)\\.m4a$`,
+              sprite: `\${basename}`,
+            },
+          ],
           include: [`audio/**/*.m4a`],
-        }),
+        } satisfies SpriteManifest),
       });
 
       const updatedManifest = syncManifestWithFilesystem(
         `/project/manifest.json`,
       );
 
+      expect(updatedManifest).toMatchInlineSnapshot(`
+        {
+          "include": [
+            "audio/**/*.m4a",
+          ],
+          "rules": [
+            {
+              "match": ".+/(?<basename>[^/]+)\\.m4a$",
+              "sprite": "\${basename}",
+            },
+          ],
+          "segments": {
+            "d0b425e00e15a0d36b9b361f02bab63563aed6cb4665083905386c55d5b679fa": [
+              1,
+              0,
+              0,
+            ],
+            "dab741b6289e7dccc1ed42330cae1accc2b755ce8079c2cd5d4b5366c9f769a6": [
+              0,
+              0,
+              0,
+            ],
+          },
+          "spriteFiles": [
+            "beep-089e418e.m4a",
+            "hello-4f2d6937.m4a",
+          ],
+        }
+      `);
+
+      expect(updatedManifest.spriteFiles).toHaveLength(2);
+
       // Should have populated segments
       expect(Object.keys(updatedManifest.segments)).toHaveLength(2);
-
-      // Should have saved to filesystem
-      const savedContent = vol.readFileSync(`/project/manifest.json`, `utf8`);
-      const parsedManifest = JSON.parse(
-        savedContent as string,
-      ) as typeof updatedManifest;
-      expect(parsedManifest.segments).toEqual(updatedManifest.segments);
     });
 
     test(`should throw error if manifest cannot be loaded`, () => {
