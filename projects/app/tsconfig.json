@@ -11,8 +11,7 @@
     // references so it just compiles using this tsconfig file instead of the
     // one in `src/`.
     "paths": {
-      "@/*": ["src/*"],
-      "@pinyinly/lib/*": ["../lib/src/*"]
+      "@/*": ["src/*"]
     },
     "target": "ESNext",
     "types": ["@pinyinly/eslint-rules/nameof.d.ts"]

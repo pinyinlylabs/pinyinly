@@ -1,4 +1,5 @@
 import { graphemeCount } from "@/util/unicode";
+import type { PropsOf } from "@pinyinly/lib/types";
 import type { ReactNode } from "react";
 import { useState } from "react";
 import type { Pressable } from "react-native";
@@ -18,7 +19,6 @@ import { tv } from "tailwind-variants";
 import { hapticImpactIfMobile } from "../hooks/hapticImpactIfMobile";
 import { ReanimatedPressable } from "./ReanimatedPressable";
 import { ShootingStars } from "./ShootingStars";
-import type { PropsOf } from "./types";
 
 const targetBgScale: Record<TextAnswerButtonState, number> = {
   dimmed: 0.5,

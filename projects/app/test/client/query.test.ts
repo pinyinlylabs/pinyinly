@@ -18,8 +18,8 @@ import { r } from "#util/rizzle.ts";
 import { invariant } from "@pinyinly/lib/invariant";
 import assert from "node:assert/strict";
 import { describe, expect, test } from "vitest";
-import { parseRelativeTimeShorthand } from "../data/helpers";
-import { testReplicacheOptions } from "../util/rizzleHelpers";
+import { parseRelativeTimeShorthand } from "../data/helpers.ts";
+import { testReplicacheOptions } from "../util/rizzleHelpers.ts";
 
 const rizzleTest = test.extend<{ rizzle: Rizzle }>({
   rizzle: [

@@ -30,18 +30,18 @@ import {
   meaningKeyFromHanziWord,
   upsertHanziWordMeaning,
 } from "#dictionary/dictionary.ts";
+import { unicodeShortIdentifier } from "#util/unicode.ts";
 import {
   mapSetAdd,
   mergeSortComparators,
   sortComparatorNumber,
   sortComparatorString,
-} from "#util/collections.ts";
-import { unicodeShortIdentifier } from "#util/unicode.ts";
+} from "@pinyinly/lib/collections";
 import { invariant } from "@pinyinly/lib/invariant";
 import assert from "node:assert/strict";
 import { describe, expect, test } from "vitest";
 import { z } from "zod/v4";
-import { 拼音, 汉 } from "../data/helpers";
+import { 拼音, 汉 } from "../data/helpers.ts";
 
 test(`radical groups have the right number of elements`, async () => {
   // Data integrity test to ensure that the number of characters in each group

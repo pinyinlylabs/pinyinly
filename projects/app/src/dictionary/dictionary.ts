@@ -20,7 +20,7 @@ import {
   memoize0,
   memoize1,
   sortComparatorString,
-} from "@/util/collections";
+} from "@pinyinly/lib/collections";
 import { invariant } from "@pinyinly/lib/invariant";
 import type { DeepReadonly } from "ts-essentials";
 import { z } from "zod/v4";

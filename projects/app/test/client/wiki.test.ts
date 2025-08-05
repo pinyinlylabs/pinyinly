@@ -1,10 +1,10 @@
 import { IS_CI } from "#util/env.js";
+import { analyzeAudioFile } from "@pinyinly/expo-audio-sprites/server";
 import chalk from "chalk";
 import { execSync } from "node:child_process";
 import * as fs from "node:fs/promises";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
-import { analyzeAudioFile } from "./ffmpeg";
 
 const projectRootDir = path.join(import.meta.dirname, `../..`);
 const wikiDir = path.join(projectRootDir, `src/client/wiki`);

@@ -1,4 +1,4 @@
-import type { IsExhaustedRest } from "@/util/types";
+import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import type { ViewProps } from "react-native";
 import { View } from "react-native";
 import { Rive } from "./Rive";

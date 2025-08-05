@@ -1,5 +1,5 @@
+import { lruMemoize1 } from "@pinyinly/lib/collections";
 import { invariant } from "@pinyinly/lib/invariant";
-import { lruMemoize1 } from "./collections";
 
 export function unicodeShortIdentifier(character: string): string {
   const codePoint = character.codePointAt(0);

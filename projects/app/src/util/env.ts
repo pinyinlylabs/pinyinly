@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-deprecated */
 import { nonNullable } from "@pinyinly/lib/invariant";
-import { memoize0 } from "./collections";
+import { memoize0 } from "@pinyinly/lib/collections";
 
 // true when running under the Node.js test runner.
 export const isRunningTests = `NODE_TEST_CONTEXT` in process.env;

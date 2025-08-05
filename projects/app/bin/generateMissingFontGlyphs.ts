@@ -3,9 +3,9 @@ import {
   allHanziGraphemes,
   loadHanziDecomposition,
 } from "#dictionary/dictionary.ts";
-import { jsonStringifyShallowIndent } from "#util/json.ts";
 import { unicodeShortIdentifier } from "#util/unicode.ts";
 import { invariant } from "@pinyinly/lib/invariant";
+import { jsonStringifyShallowIndent } from "@pinyinly/lib/json";
 import * as fontkit from "fontkit";
 import { glob, writeFile } from "node:fs/promises";
 import path from "node:path";

@@ -1,15 +1,15 @@
 import type { HanziText } from "#data/model.ts";
+import {
+  loadHanziWordGlossMnemonics,
+  lookupHanzi,
+} from "#dictionary/dictionary.js";
+import { mergeMaps, sortComparatorString } from "@pinyinly/lib/collections";
+import { jsonStringifyShallowIndent } from "@pinyinly/lib/json";
 import makeDebug from "debug";
 import path from "node:path";
 import OpenAI from "openai";
 import yargs from "yargs";
 import { z } from "zod/v4";
-import {
-  loadHanziWordGlossMnemonics,
-  lookupHanzi,
-} from "../src/dictionary/dictionary.js";
-import { mergeMaps, sortComparatorString } from "../src/util/collections.js";
-import { jsonStringifyShallowIndent } from "../src/util/json.js";
 import { makeDbCache } from "./util/cache.js";
 import { writeUtf8FileIfChanged } from "./util/fs.js";
 import { openAiWithCache, zodResponseFormat } from "./util/openai.js";

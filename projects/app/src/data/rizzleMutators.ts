@@ -1,8 +1,8 @@
 import { loadDictionary } from "@/dictionary/dictionary";
-import { sortComparatorDate } from "@/util/collections";
 import type { FsrsState } from "@/util/fsrs";
 import { nextReview } from "@/util/fsrs";
 import type { RizzleReplicacheMutators } from "@/util/rizzle";
+import { sortComparatorDate } from "@pinyinly/lib/collections";
 import { invariant } from "@pinyinly/lib/invariant";
 import {
   nextReviewForOtherSkillMistake,

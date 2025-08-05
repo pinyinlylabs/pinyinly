@@ -14,7 +14,7 @@ import { nanoid } from "#util/nanoid.ts";
 import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import { eq } from "drizzle-orm";
 import { describe, expect, test } from "vitest";
-import { createUser, txTest } from "../dbHelpers";
+import { createUser, txTest } from "../dbHelpers.ts";
 
 describe(`push suite` satisfies HasNameOf<typeof push>, () => {
   txTest.scoped({ pgConfig: { isolationLevel: `repeatable read` } });

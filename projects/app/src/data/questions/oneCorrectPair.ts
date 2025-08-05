@@ -9,7 +9,7 @@ import type {
 } from "@/data/model";
 import { MistakeKind } from "@/data/model";
 import { pinyinPronunciationDisplayText } from "@/data/pinyin";
-import { emptyArray } from "@/util/collections";
+import { emptyArray } from "@pinyinly/lib/collections";
 import { invariant, uniqueInvariant } from "@pinyinly/lib/invariant";
 
 export function oneCorrectPairChoiceText(

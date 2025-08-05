@@ -1,10 +1,10 @@
 import { mergeRefs } from "@/client/react";
+import type { PropsOf } from "@pinyinly/lib/types";
 import { useLayoutEffect, useRef } from "react";
 import type { View } from "react-native";
 import { tv } from "tailwind-variants";
 import z from "zod/v4";
 import { RectButton } from "./RectButton";
-import type { PropsOf } from "./types";
 
 const quizSubmitButtonStateSchema = z.enum({
   Disabled: `Disabled`,

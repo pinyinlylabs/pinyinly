@@ -7,7 +7,7 @@ import {
 import { hanziWordToPinyin } from "#data/skills.ts";
 import { loadDictionary } from "#dictionary/dictionary.ts";
 import { describe, expect, test } from "vitest";
-import { 拼音 } from "../helpers";
+import { 拼音 } from "../helpers.ts";
 
 describe(
   `hanziWordToPinyinQuestionOrThrow suite` satisfies HasNameOf<

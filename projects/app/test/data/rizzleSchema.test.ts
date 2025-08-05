@@ -5,7 +5,7 @@ import { r } from "#util/rizzle.ts";
 import assert from "node:assert/strict";
 import type { DeepReadonly, ReadonlyJSONValue } from "replicache";
 import { expect, test, vi } from "vitest";
-import { makeMockTx } from "../util/rizzleHelpers";
+import { makeMockTx } from "../util/rizzleHelpers.ts";
 
 test(`skill as key`, async () => {
   const posts = r.entity(`foo/[skill]`, {

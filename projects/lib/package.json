@@ -7,6 +7,14 @@
   "imports": {
     "#*.ts": "./src/*.ts"
   },
+  "dependencies": {
+    "@types/debug": "^4 <=4.3.x",
+    "@types/react": "19.1.x",
+    "debug": "^4.3.7",
+    "execa": "^9.6.0",
+    "lru-cache": "^11.1.0",
+    "zod": "^3.25.42"
+  },
   "devDependencies": {
     "@pinyinly/eslint-rules": "workspace:*",
     "prettier": "^3.4.2",

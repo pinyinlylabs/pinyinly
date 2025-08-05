@@ -1,6 +1,6 @@
-import { invariant } from "@pinyinly/lib/invariant";
 import { LRUCache } from "lru-cache";
 import type { DeepReadonly } from "ts-essentials";
+import { invariant } from "./invariant.ts";
 
 export const deepReadonly = <T>(value: T) => value as DeepReadonly<T>;
 

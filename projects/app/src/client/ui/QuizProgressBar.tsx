@@ -1,4 +1,4 @@
-import { makeRange } from "@/util/collections";
+import { makeRange } from "@pinyinly/lib/collections";
 import { useEffect, useMemo, useState } from "react";
 import type { LayoutChangeEvent, LayoutRectangle } from "react-native";
 import { View } from "react-native";

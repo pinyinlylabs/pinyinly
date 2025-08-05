@@ -1,25 +1,25 @@
 import type { PinyinSoundGroupId } from "#data/model.ts";
-import { jsonStringifyShallowIndent } from "#util/json.ts";
-import { invariant, nonNullable } from "@pinyinly/lib/invariant";
-import makeDebug from "debug";
-import path from "node:path";
-import yargs from "yargs";
-import { z } from "zod/v4";
 import {
   defaultPinyinSoundGroupNames,
   defaultPinyinSoundGroupThemes,
   loadPylyPinyinChart,
-} from "../src/data/pinyin.js";
-import type { loadPinyinSoundNameSuggestions } from "../src/dictionary/dictionary.js";
+} from "#data/pinyin.js";
+import type { loadPinyinSoundNameSuggestions } from "#dictionary/dictionary.js";
 import {
   loadPinyinSoundThemeDetails,
   pinyinSoundNameSuggestionsSchema,
-} from "../src/dictionary/dictionary.js";
+} from "#dictionary/dictionary.js";
 import {
   deepTransform,
   merge,
   sortComparatorString,
-} from "../src/util/collections.js";
+} from "@pinyinly/lib/collections";
+import { invariant, nonNullable } from "@pinyinly/lib/invariant";
+import { jsonStringifyShallowIndent } from "@pinyinly/lib/json";
+import makeDebug from "debug";
+import path from "node:path";
+import yargs from "yargs";
+import { z } from "zod/v4";
 import { makeDbCache } from "./util/cache.js";
 import {
   dictionaryPath,

@@ -9,7 +9,7 @@ import { hanziWordToPinyinFinal } from "#data/skills.ts";
 import { hanziFromHanziWord, loadDictionary } from "#dictionary/dictionary.ts";
 import assert from "node:assert/strict";
 import { describe, expect, test } from "vitest";
-import { 拼音, 汉字 } from "../helpers";
+import { 拼音, 汉字 } from "../helpers.ts";
 
 describe(
   `tryHanziDistractor suite` satisfies HasNameOf<typeof tryHanziDistractor>,

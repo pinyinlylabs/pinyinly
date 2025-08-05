@@ -1,22 +1,22 @@
+import type { IdsNode } from "#data/hanzi.js";
+import { parseIds, walkIdsNode } from "#data/hanzi.js";
+import {
+  allHanziGraphemes,
+  loadHanziDecomposition,
+} from "#dictionary/dictionary.js";
+import { unicodeShortIdentifier } from "#util/unicode.js";
+import {
+  deepReadonly,
+  mergeMaps,
+  sortComparatorString,
+} from "@pinyinly/lib/collections";
 import { invariant } from "@pinyinly/lib/invariant";
+import { jsonStringifyShallowIndent } from "@pinyinly/lib/json";
 import makeDebug from "debug";
 import path from "node:path";
 import { expect } from "vitest";
 import yargs from "yargs";
 import z from "zod/v4";
-import type { IdsNode } from "../src/data/hanzi.js";
-import { parseIds, walkIdsNode } from "../src/data/hanzi.js";
-import {
-  allHanziGraphemes,
-  loadHanziDecomposition,
-} from "../src/dictionary/dictionary.js";
-import {
-  deepReadonly,
-  mergeMaps,
-  sortComparatorString,
-} from "../src/util/collections.js";
-import { jsonStringifyShallowIndent } from "../src/util/json.js";
-import { unicodeShortIdentifier } from "../src/util/unicode.js";
 import { makeDbCache } from "./util/cache.js";
 import { fetchWithCache } from "./util/fetch.js";
 import { writeUtf8FileIfChanged } from "./util/fs.js";

@@ -8,7 +8,7 @@ import {
   inverseSortComparator,
   memoize0,
   sortComparatorNumber,
-} from "#util/collections.ts";
+} from "@pinyinly/lib/collections";
 import { z } from "zod/v4";
 import { makeDbCache } from "./cache.js";
 import { fetchWithCache } from "./fetch.js";

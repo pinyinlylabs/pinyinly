@@ -1,6 +1,6 @@
 import { useNewQueryClient } from "@/client/hooks/useNewQueryClient";
 import { TrpcProvider } from "@/client/trpc";
-import { memoize0 } from "@/util/collections";
+import { memoize0 } from "@pinyinly/lib/collections";
 import type { QueryClient } from "@tanstack/react-query";
 import type { PropsWithChildren } from "react";
 import { createContext } from "react";

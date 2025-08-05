@@ -1,7 +1,7 @@
 import type { HanziText } from "@/data/model";
 import type { HanziWordWithMeaning } from "@/dictionary/dictionary";
 import { hanziToHanziWordMap } from "@/dictionary/dictionary";
-import { emptyArray } from "@/util/collections";
+import { emptyArray } from "@pinyinly/lib/collections";
 import { use } from "react";
 import type { DeepReadonly } from "ts-essentials";
 

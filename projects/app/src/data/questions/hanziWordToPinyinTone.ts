@@ -10,7 +10,10 @@ import {
   hanziFromHanziWord,
   lookupHanziWord,
 } from "@/dictionary/dictionary";
-import { arrayFilterUniqueWithKey, emptyArray } from "@/util/collections";
+import {
+  arrayFilterUniqueWithKey,
+  emptyArray,
+} from "@pinyinly/lib/collections";
 import {
   identicalInvariant,
   invariant,

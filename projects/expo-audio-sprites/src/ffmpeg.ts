@@ -1,8 +1,8 @@
-import { memoize0 } from "#util/collections.js";
+import { memoize0 } from "@pinyinly/lib/collections";
+import { execaCached, getFileModTime } from "@pinyinly/lib/execaCached";
 import { invariant } from "@pinyinly/lib/invariant";
 import { $ } from "execa";
 import { z } from "zod/v4";
-import { execaCached, getFileModTime } from "./execa";
 
 /**
  * Helper function to get ffmpeg version for cache invalidation.
@@ -176,10 +176,14 @@ export function parseTimestampToSeconds(timeStr: string): number {
   }
 
   const { hh, mm, ss } = match.groups;
+  invariant(
+    hh != null && mm != null && ss != null,
+    `Invalid time format: ${timeStr}`,
+  );
   return (
-    Number.parseInt(hh!, 10) * 3600 +
-    Number.parseInt(mm!, 10) * 60 +
-    Number.parseFloat(ss!)
+    Number.parseInt(hh, 10) * 3600 +
+    Number.parseInt(mm, 10) * 60 +
+    Number.parseFloat(ss)
   );
 }
 
@@ -238,6 +242,117 @@ export function parseFfmpegOutput(output: string) {
     duration,
     astats,
   };
+}
+
+/**
+ * Audio file info for sprite generation.
+ */
+export interface AudioFileInfo {
+  /** Absolute path to the audio file */
+  filePath: string;
+  /** Expected start time in the sprite (in seconds) */
+  startTime: number;
+  /** Duration of the audio file (in seconds) */
+  duration: number;
+}
+
+/**
+ * Generate an ffmpeg command to create an audio sprite from multiple input files.
+ *
+ * The command will:
+ * 1. Concatenate audio files with silence padding to match expected start times
+ * 2. Normalize the output sample rate to 44.1kHz for consistency
+ * 3. Output as M4A format for compatibility
+ *
+ * @param audioFiles Array of audio files with their expected positions
+ * @param outputPath Path where the sprite file should be written
+ * @param sampleRate Target sample rate for the output (default: 44100)
+ * @returns Array of ffmpeg command arguments
+ */
+export function generateSpriteCommand(
+  audioFiles: AudioFileInfo[],
+  outputPath: string,
+  sampleRate = 44_100,
+): string[] {
+  if (audioFiles.length === 0) {
+    throw new Error(`Cannot create sprite from empty audio files array`);
+  }
+
+  // Sort files by start time to ensure correct order
+  const sortedFiles = [...audioFiles].sort((a, b) => a.startTime - b.startTime);
+
+  const command: string[] = [`ffmpeg`];
+
+  // Add input files
+  for (const file of sortedFiles) {
+    command.push(`-i`, file.filePath);
+  }
+
+  // Build filter_complex to concatenate with precise timing
+  const filterParts: string[] = [];
+
+  for (const [i, file] of sortedFiles.entries()) {
+    const inputLabel = `[${i}:0]`;
+    const delayedLabel = `[delayed${i}]`;
+
+    if (file.startTime > 0) {
+      // Delay this file by its absolute start time
+      filterParts.push(
+        `${inputLabel}adelay=${Math.round(file.startTime * 1000)}:all=1${delayedLabel}`,
+      );
+    } else {
+      // No delay needed for files starting at time 0
+      filterParts.push(`${inputLabel}acopy${delayedLabel}`);
+    }
+  }
+
+  // Validate that files don't overlap
+  for (let i = 0; i < sortedFiles.length - 1; i++) {
+    const currentFile = sortedFiles[i];
+    const nextFile = sortedFiles[i + 1];
+
+    if (!currentFile || !nextFile) {
+      continue;
+    }
+
+    const currentEnd = currentFile.startTime + currentFile.duration;
+
+    if (nextFile.startTime < currentEnd) {
+      throw new Error(
+        `Invalid start time: file ${nextFile.filePath} has start time ${nextFile.startTime} but current time is ${currentEnd}`,
+      );
+    }
+  }
+
+  // Mix all delayed streams together
+  const delayedInputs = sortedFiles.map((_, i) => `[delayed${i}]`).join(``);
+
+  // Build the complete filter chain
+  const finalFilterParts = [
+    ...filterParts,
+    `${delayedInputs}amix=inputs=${sortedFiles.length}:duration=longest[mixed]`,
+    `[mixed]aresample=${sampleRate}[output]`,
+  ];
+
+  // Add the complete filter_complex
+  command.push(`-filter_complex`, finalFilterParts.join(`; `));
+
+  // Complete the command with output options
+  const outputOptions = [
+    `-map`,
+    `[output]`,
+    `-c:a`,
+    `aac`, // Use AAC codec for M4A
+    `-b:a`,
+    `128k`, // Set bitrate to 128kbps (good quality/size balance)
+    `-ar`,
+    `${sampleRate}`, // Ensure sample rate
+    `-y`, // Overwrite output file if it exists
+    outputPath, // Output file
+  ];
+  command.push(...outputOptions);
+
+  return command;
 }
 
 // Full ffmpeg output example:

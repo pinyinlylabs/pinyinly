@@ -4,8 +4,8 @@
     "baseUrl": ".",
     "esModuleInterop": true,
     "lib": ["DOM", "ESNext"],
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "outDir": "../../../.moon/cache/types/projects/lib-test",
     "target": "ESNext",
     "types": [

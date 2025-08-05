@@ -4,7 +4,7 @@ import type {
   PinyinSoundId,
   PinyinSyllable,
 } from "@/data/model";
-import { deepReadonly, memoize0, memoize1 } from "@/util/collections";
+import { deepReadonly, memoize0, memoize1 } from "@pinyinly/lib/collections";
 import { invariant } from "@pinyinly/lib/invariant";
 import type { DeepReadonly } from "ts-essentials";
 import z from "zod/v4";

@@ -9,6 +9,7 @@ export function invariant(
   condition: unknown,
   message?: string,
 ): asserts condition {
+  // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
   if (!condition) {
     throw new Invariant(message);
   }
@@ -33,6 +34,7 @@ export function identicalInvariant<
   for (const item of items) {
     invariant(
       item === identity,
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       `unexpected non-identical values ${item}, ${identity}`,
     );
   }
@@ -42,6 +44,7 @@ export function nonNullable<T>(
   value: T | null | undefined,
   message?: string,
 ): NonNullable<T> {
+  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
   invariant(value != null, message ?? `unexpected ${value} value`);
   return value;
 }

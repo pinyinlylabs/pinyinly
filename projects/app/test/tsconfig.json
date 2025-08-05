@@ -5,8 +5,9 @@
     "esModuleInterop": true,
     "jsx": "preserve",
     "lib": ["DOM", "ESNext"],
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
     "outDir": "../../../.moon/cache/types/projects/app-test",
     "target": "ESNext",
     "types": [
