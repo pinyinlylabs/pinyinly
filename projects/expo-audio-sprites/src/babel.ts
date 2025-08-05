@@ -7,6 +7,7 @@ import nodePath from "node:path";
 import type { BabelPluginOptions, SpriteManifest } from "./types.js";
 import { spriteManifestSchema } from "./types.js";
 
+// eslint-disable-next-line import/no-default-export
 export default function expoAudioSpritesPreset(
   api: ConfigAPI,
   options?: BabelPluginOptions,

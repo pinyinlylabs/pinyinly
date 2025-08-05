@@ -1,21 +1,5 @@
-tasks:
-  test:
-    command: vitest
-    inputs:
-      - "!dist/"
-      - "**/*"
-
-  build:
-    command: tsc --build
-    inputs:
-      - "!dist/"
-      - "*.{ts,cts,mts,tsx,mtsx,js,cjs,mjs,json}"
-      - "**/*.{ts,cts,mts,tsx,mtsx,js,cjs,mjs,json}"
-      - /tsconfig.base.json
-    outputs:
-      - dist
-
 tags:
   - eslint
   - prettier
   - typescript
+  - vitest

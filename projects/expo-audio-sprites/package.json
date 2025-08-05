@@ -3,14 +3,8 @@
   "main": "index.cjs",
   "type": "module",
   "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.js"
-    },
-    "./babel": {
-      "import": "./dist/babel.js",
-      "types": "./dist/babel.d.js"
-    }
+    ".": "./src/index.ts",
+    "./babel": "./src/babel.ts"
   },
   "imports": {
     "#*.ts": "./src/*.ts"

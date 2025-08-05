@@ -3,11 +3,10 @@
   "compilerOptions": {
     "baseUrl": ".",
     "esModuleInterop": true,
-    "jsx": "preserve",
     "lib": ["DOM", "ESNext"],
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "outDir": "../../../.moon/cache/types/projects/app-test",
+    "outDir": "../../../.moon/cache/types/projects/expo-audio-sprites-test",
     "target": "ESNext",
     "types": [
       "node",

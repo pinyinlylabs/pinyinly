@@ -1,10 +1,10 @@
+import { identicalInvariant, invariant, uniqueInvariant } from "#invariant.ts";
 import { describe, expect, test } from "vitest";
-import { identicalInvariant, invariant, uniqueInvariant } from "./invariant.js";
 
 describe(`invariant suite` satisfies HasNameOf<typeof invariant>, () => {
   test(`does not throw when true`, () => {
     expect(() => {
-      invariant(1 == 1);
+      invariant(Math.random() > -1);
     }).not.toThrow();
   });
 

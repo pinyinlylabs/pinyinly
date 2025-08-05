@@ -14,7 +14,8 @@
       "@/*": ["src/*"],
       "@pinyinly/lib/*": ["../lib/src/*"]
     },
-    "target": "ESNext"
+    "target": "ESNext",
+    "types": ["@pinyinly/eslint-rules/nameof.d.ts"]
   },
   "include": [
     "*",

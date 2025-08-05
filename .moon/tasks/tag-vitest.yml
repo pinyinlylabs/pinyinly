@@ -1,0 +1,12 @@
+tasks:
+  test:
+    command: vitest
+    inputs:
+      - "!dist/"
+      - "!node_modules/"
+      - "**/*"
+      - "/.github/workflows" # There is a test that checks workflow environment variables.
+      - "/yarn.lock" # Dependencies can change behaviour
+    env:
+      NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
+    toolchain: "node"

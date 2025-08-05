@@ -15,63 +15,71 @@
  * }] }
  */
 
-/** @type {import('eslint').Rule.RuleModule} */
-const rule = {
+import type { Rule } from "eslint";
+import type {
+  ExportAllDeclaration,
+  ExportNamedDeclaration,
+  ImportDeclaration,
+} from "estree";
+
+interface PatternConfig {
+  from: string;
+  to: string;
+}
+
+interface ImportPathRewriteOptions {
+  patterns?: PatternConfig[];
+}
+
+interface RewriteRule {
+  regex: RegExp;
+  replacement: string;
+}
+
+const rule: Rule.RuleModule = {
   meta: {
-    type: "suggestion",
+    type: `suggestion`,
     docs: {
-      description: "Rewrite import paths based on regex patterns",
+      description: `Rewrite import paths based on regex patterns`,
       recommended: false,
     },
-    fixable: "code",
+    fixable: `code`,
     schema: [
       {
-        type: "object",
+        type: `object`,
         properties: {
           patterns: {
-            type: "array",
+            type: `array`,
             items: {
-              type: "object",
+              type: `object`,
               properties: {
-                from: { type: "string" },
-                to: { type: "string" },
+                from: { type: `string` },
+                to: { type: `string` },
               },
-              required: ["from", "to"],
+              required: [`from`, `to`],
               additionalProperties: false,
             },
             minItems: 1,
           },
         },
-        required: ["patterns"],
+        required: [`patterns`],
         additionalProperties: false,
       },
     ],
   },
 
-  create(context) {
-    const options = context.options[0] || {};
-    /**
-     * Import patterns from options
-     * @type {Array<{from: string, to: string}>}
-     */
-    const patterns = options.patterns || [];
+  create(context: Rule.RuleContext) {
+    const options = (context.options[0] ?? {}) as ImportPathRewriteOptions;
+    const patterns = options.patterns ?? [];
 
     // Convert string patterns to RegExp objects
-    /**
-     * Maps import patterns to their corresponding regex and replacement rules.
-     * @type {Array<{regex: RegExp, replacement: string}>}
-     */
-    const rewriteRules = patterns.map((pattern) => ({
+    const rewriteRules: RewriteRule[] = patterns.map((pattern) => ({
       regex: new RegExp(pattern.from),
       replacement: pattern.to,
     }));
 
     // Process a source value and apply rewrite rules if it matches any pattern
-    /**
-     * @param {string} value - The import path to process
-     * @returns {string|null} - The rewritten path or null if no rules match
-     */
-    function processSourceValue(value) {
+    function processSourceValue(value: string): string | null {
       for (const rule of rewriteRules) {
         const match = value.match(rule.regex);
         if (match) {
@@ -84,27 +92,29 @@ const rule = {
     }
 
     // Check and report source paths for declarations
-    /**
-     * @param {import('estree').ImportDeclaration | import('estree').ExportAllDeclaration | import('estree').ExportNamedDeclaration} node - The AST node
-     */
-    function checkSourcePath(node) {
-      if (!node.source || typeof node.source.value !== "string") {
+    function checkSourcePath(
+      node: ImportDeclaration | ExportAllDeclaration | ExportNamedDeclaration,
+    ) {
+      if (
+        node.source === null ||
+        node.source === undefined ||
+        typeof node.source.value !== `string`
+      ) {
         return;
       }
 
       const sourceValue = node.source.value;
       const rewrittenPath = processSourceValue(sourceValue);
 
-      if (rewrittenPath && node.source) {
+      if (rewrittenPath !== null) {
         context.report({
           node: node.source,
           message: `Import path "${sourceValue}" should be rewritten to "${rewrittenPath}"`,
           fix(fixer) {
             // Get the quote character used in the original source
-            const sourceCode = context.getSourceCode();
-            // Ensure node.source is defined before getting its text
+            const sourceCode = context.sourceCode;
             const sourceText = sourceCode.getText(node.source ?? undefined);
-            const quoteChar = sourceText[0]; // First character is the opening quote
+            const quoteChar = sourceText[0] ?? `'`; // First character is the opening quote
 
             return fixer.replaceText(
               node.source,
@@ -123,4 +133,4 @@ const rule = {
   },
 };
 
-module.exports = rule;
+export { rule as importPathRewrite };

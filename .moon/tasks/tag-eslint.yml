@@ -9,3 +9,5 @@ tasks:
       - "$ESLINT_CACHE"
       - "$ESLINT_*"
     toolchain: "node"
+    env:
+      NODE_OPTIONS: --import tsx --experimental-sqlite $NODE_OPTIONS
