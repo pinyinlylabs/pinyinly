@@ -13,7 +13,7 @@ import {
 } from "#collections.ts";
 import type { IsEqual } from "#types.ts";
 import assert from "node:assert/strict";
-import { describe, test } from "vitest";
+import { describe, expect, test } from "vitest";
 import type z from "zod/v4";
 
 function typeChecks<_T>(..._args: unknown[]) {
@@ -226,4 +226,8 @@ describe(`memoize1 suite` satisfies HasNameOf<typeof memoize1>, async () => {
 
     memoize1((x: Branded) => x);
   });
+});
+
+test(`expected error`, () => {
+  expect(true).toBe(false);
 });
