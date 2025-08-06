@@ -26,5 +26,8 @@ runs:
       shell: bash
 
     - name: Install ffmpeg (for tests)
-      run: sudo apt-get install -y ffmpeg
+      run: |
+        tar -xf ffmpeg-release-i686-static.tar.xz
+        echo "${PWD}"/ffmpeg-*-static >> "${GITHUB_PATH}"
       shell: bash
+      working-directory: .github/actions/setup-tools
