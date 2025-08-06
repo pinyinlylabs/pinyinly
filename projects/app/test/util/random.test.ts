@@ -1,6 +1,5 @@
 import { makePRNG } from "#util/random.ts";
-import assert from "node:assert/strict";
-import { describe, test } from "vitest";
+import { describe, expect, test } from "vitest";
 
 describe(`makePRNG suite` satisfies HasNameOf<typeof makePRNG>, async () => {
   test(`returns different numbers for seeds that differ by fractional amount`, () => {
@@ -14,11 +13,15 @@ describe(`makePRNG suite` satisfies HasNameOf<typeof makePRNG>, async () => {
         const prng1 = makePRNG(base);
         const prng2 = makePRNG(base + diff);
         for (let trial = 0; trial < 10; trial++) {
-          assert.notEqual(
-            prng1(),
-            prng2(),
-            `different seeds produce same numbers at trial #${trial} (${JSON.stringify({ base, diff })}`,
-          );
+          const error = `different seeds produce same numbers at trial #${trial} (${JSON.stringify({ base, diff })}`;
+
+          expect({
+            prng: prng1(),
+            error,
+          }).not.toEqual({
+            prng: prng2(),
+            error,
+          });
         }
       }
     }

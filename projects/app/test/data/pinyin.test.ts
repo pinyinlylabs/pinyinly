@@ -20,7 +20,6 @@ import {
 } from "#data/pinyin.ts";
 import { loadPinyinWords } from "#dictionary/dictionary.ts";
 import { uniqueInvariant } from "@pinyinly/lib/invariant";
-import assert from "node:assert/strict";
 import type { DeepReadonly } from "ts-essentials";
 import { describe, expect, test } from "vitest";
 
@@ -112,7 +111,7 @@ test(
       [`jiang4`, `jiàng`],
       [`jiang5`, `jiang`],
     ] as const) {
-      assert.equal(convertPinyinWithToneNumberToToneMark(input), expected);
+      expect(convertPinyinWithToneNumberToToneMark(input)).toEqual(expected);
     }
   },
 );
@@ -263,7 +262,7 @@ describe(
       const regex = new RegExp(pinyinSyllablePattern);
       for (const text of valid) {
         const match = regex.exec(text);
-        assert.equal(match?.at(0), text);
+        expect(match?.at(0)).toEqual(text);
       }
     });
 
@@ -572,26 +571,22 @@ async function testPinyinChart(
     expectedFinalChartLabel,
   ] of testCases) {
     const actual = splitTonelessPinyinSyllable(input, chart);
-    assert.deepEqual(
-      {
-        initialChartLabel: actual?.initialSoundId,
-        finalChartLabel: actual?.finalSoundId,
-      },
-      {
-        initialChartLabel: expectedInitialChartLabel,
-        finalChartLabel: expectedFinalChartLabel,
-      },
-      `${input} didn't split as expected`,
-    );
+    expect({
+      initialChartLabel: actual?.initialSoundId,
+      finalChartLabel: actual?.finalSoundId,
+      input,
+    }).toEqual({
+      initialChartLabel: expectedInitialChartLabel,
+      finalChartLabel: expectedFinalChartLabel,
+      input,
+    });
   }
 
   for (const x of pinyinWords) {
-    assert.notEqual(
+    expect(
       expectedDifferenceFromStandard.has(x) ||
         splitTonelessPinyinSyllable(x, chart),
-      null,
-      `couldn't split ${x}`,
-    );
+    ).not.toEqual(null);
   }
 
   // Ensure that there are no duplicates initials or finals.

@@ -220,7 +220,11 @@ const recommended: InfiniteDepthConfigWithExtends[] = [
             },
             {
               name: `node:assert`,
-              message: `Please use node:assert/strict instead.`,
+              message: `Please use vitest instead.`,
+            },
+            {
+              name: `node:assert/strict`,
+              message: `Please use vitest instead.`,
             },
             {
               name: `node:test`,

@@ -8,7 +8,6 @@ import {
 import type { Duration } from "date-fns";
 import { add } from "date-fns/add";
 import { intervalToDuration } from "date-fns/intervalToDuration";
-import assert from "node:assert/strict";
 import { describe, expect, test, vi } from "vitest";
 import z from "zod/v4";
 import { parseRelativeTimeShorthand, 时 } from "../data/helpers.ts";
@@ -40,18 +39,14 @@ describe(
       const afterGood = nextReview(before, Rating.Good, 时`+1s`);
       const afterHard = nextReview(before, Rating.Hard, 时`+1s`);
 
-      assert.ok(
-        before.stability < afterEasy.stability,
-        `.Easy should increase stability`,
-      );
-      assert.ok(
-        before.stability < afterGood.stability,
-        `.Good should increase stability`,
-      );
-      assert.ok(
-        before.stability < afterHard.stability,
-        `.Hard should increase stability`,
-      );
+      // .Easy should increase stability
+      expect(before.stability).toBeLessThan(afterEasy.stability);
+
+      // .Good should increase stability
+      expect(before.stability).toBeLessThan(afterGood.stability);
+
+      // .Hard should increase stability
+      expect(before.stability).toBeLessThan(afterHard.stability);
     });
 
     test(`stability decreases from .Again`, () => {
@@ -62,7 +57,7 @@ describe(
         parseRelativeTimeShorthand(`+10m`),
       );
 
-      assert.ok(after.stability < before.stability);
+      expect(after.stability).toBeLessThan(before.stability);
     });
 
     test(`difficulty lowers with Easy and increases with Hard`, () => {
@@ -71,18 +66,12 @@ describe(
       const afterGood = nextReview(before, Rating.Good, 时`+1s`);
       const afterHard = nextReview(before, Rating.Hard, 时`+1s`);
 
-      assert.ok(
-        before.difficulty > afterEasy.difficulty,
-        `.Easy should decrease difficulty`,
-      );
-      assert.ok(
-        before.difficulty === afterGood.difficulty,
-        `.Good should keep the same difficulty`,
-      );
-      assert.ok(
-        before.difficulty < afterHard.difficulty,
-        `.Hard should increase difficulty`,
-      );
+      // .Easy should decrease difficulty
+      expect(before.difficulty).toBeGreaterThan(afterEasy.difficulty);
+      // .Good should keep the same difficulty
+      expect(before.difficulty).toBe(afterGood.difficulty);
+      // .Hard should increase difficulty
+      expect(before.difficulty).toBeLessThan(afterHard.difficulty);
     });
   },
 );
@@ -506,17 +495,14 @@ function assertFsrsSequence(
       const lastReview: FsrsState | null = review;
       review = nextReview(lastReview, rating);
 
-      assert.deepEqual(
-        {
-          difficulty: review.difficulty,
-          stability: review.stability,
-          delay: intervalToDuration({
-            start: review.prevReviewAt,
-            end: review.nextReviewAt,
-          }),
-        },
-        expectedReview,
-      );
+      expect({
+        difficulty: review.difficulty,
+        stability: review.stability,
+        delay: intervalToDuration({
+          start: review.prevReviewAt,
+          end: review.nextReviewAt,
+        }),
+      }).toEqual(expectedReview);
 
       // Use .setTime() instead of .tick() to avoid differences in calculations
       // between date-fns and node.js when deciding how to move forward in time.

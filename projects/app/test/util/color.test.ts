@@ -5,7 +5,6 @@ import {
   parseRiveColorPropertyName,
   parseScalar,
 } from "#util/color.ts";
-import assert from "node:assert/strict";
 import { describe, expect, test } from "vitest";
 
 describe(
@@ -49,10 +48,7 @@ describe(
 
       for (const [input, [red, green, blue, alpha]] of fixtures) {
         const expected = { red, green, blue, alpha };
-        assert.deepEqual(
-          [input, parseCssColorOrThrow(input)],
-          [input, expected],
-        );
+        expect([input, parseCssColorOrThrow(input)]).toEqual([input, expected]);
       }
     });
   },

@@ -21,7 +21,6 @@ import {
 } from "#dictionary/dictionary.ts";
 import { Rating } from "#util/fsrs.ts";
 import { invariant } from "@pinyinly/lib/invariant";
-import assert from "node:assert/strict";
 import { describe, expect, test } from "vitest";
 import { fsrsSrsState, mockSrsState, 时 } from "./helpers.ts";
 
@@ -224,7 +223,7 @@ describe(
     test(
       `parseTextGraph basics` satisfies HasNameOf<typeof parseTextGraph>,
       () => {
-        assert.deepEqual(
+        expect(
           parseTextGraph(`
       he:一下儿:aBit
         he:外:outside
@@ -240,6 +239,7 @@ describe(
           he:乚:second
       he:一:one
       `),
+        ).toEqual(
           new Map([
             [
               `he:一下儿:aBit`,
@@ -264,8 +264,7 @@ describe(
       actual: SkillLearningGraph,
       expected: string,
     ) {
-      assert.deepEqual(
-        skillLearningGraphToText(actual),
+      expect(skillLearningGraphToText(actual)).toEqual(
         parseTextGraph(expected),
       );
     }
@@ -808,7 +807,7 @@ describe(
             blockedItems: queue.blockedItems.filter((s) => isHpSkill(s)),
           };
 
-          assert.deepEqual(onlyHpQueue, {
+          expect(onlyHpQueue).toEqual({
             items: [],
             blockedItems: [`hp:样:shape`, `hp:一:one`, `hp:一样:same`],
           });
@@ -951,7 +950,7 @@ describe(
             durationMs: 1000,
             correct: true,
           });
-          assert.equal(rating, Rating.Easy);
+          expect(rating).toEqual(Rating.Easy);
         }
 
         {
@@ -960,7 +959,7 @@ describe(
             durationMs: 6000,
             correct: true,
           });
-          assert.equal(rating, Rating.Good);
+          expect(rating).toEqual(Rating.Good);
         }
 
         {
@@ -969,7 +968,7 @@ describe(
             durationMs: 11_000,
             correct: true,
           });
-          assert.equal(rating, Rating.Hard);
+          expect(rating).toEqual(Rating.Hard);
         }
       });
     });

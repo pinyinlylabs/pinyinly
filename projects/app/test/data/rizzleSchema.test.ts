@@ -2,7 +2,6 @@ import { SkillKind } from "#data/model.ts";
 import { rSkill, rSkillKind } from "#data/rizzleSchema.ts";
 import { hanziWordToGloss } from "#data/skills.ts";
 import { r } from "#util/rizzle.ts";
-import assert from "node:assert/strict";
 import type { DeepReadonly, ReadonlyJSONValue } from "replicache";
 import { expect, test, vi } from "vitest";
 import { makeMockTx } from "../util/rizzleHelpers.ts";
@@ -28,8 +27,8 @@ test(`skill as key`, async () => {
       skill,
       text: `hello`,
     });
-    assert.equal(getSpy.mock.calls.length, 1);
-    assert.deepEqual(getSpy.mock.calls[0], [`foo/${skill}`]);
+    expect(getSpy.mock.calls.length).toEqual(1);
+    expect(getSpy.mock.calls[0]).toEqual([`foo/${skill}`]);
   }
 });
 
