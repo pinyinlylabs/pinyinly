@@ -26,6 +26,7 @@ runs:
       shell: bash
 
     - name: Install ffmpeg (for tests)
+      # Installing from a static build is dramatically faster than using apt-get.
       run: |
         tar -xf ffmpeg-release-i686-static.tar.xz
         echo "${PWD}"/ffmpeg-*-static >> "${GITHUB_PATH}"
