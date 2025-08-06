@@ -1,4 +1,21 @@
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { readFile, writeFile } from "node:fs/promises";
+
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+export {
+  access,
+  mkdir,
+  readdir,
+  readFile,
+  rename,
+  rm,
+  stat,
+  unlink,
+  writeFile,
+} from "node:fs/promises";
+
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+export { glob, globSync } from "glob";
 
 export async function writeUtf8FileIfChanged(
   path: string,

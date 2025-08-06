@@ -1,7 +1,7 @@
+import { glob, mkdir, rename, rm } from "@pinyinly/lib/fs";
 import { createHash } from "crypto";
 import { spawnSync } from "node:child_process";
 import { createReadStream } from "node:fs";
-import { glob, mkdir, rename, rm } from "node:fs/promises";
 import { dirname } from "node:path";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
@@ -41,7 +41,7 @@ yargs(hideBin(process.argv))
           await mkdir(dirname(destPath), { recursive: true });
 
           // Delete all existing files for the given phase and voice.
-          for await (const path of glob(`${destPathPrefix}*`)) {
+          for (const path of await glob(`${destPathPrefix}*`)) {
             const isStale = path !== destPath;
             if (isStale) {
               console.log(`Deleting stale file: ${path}`);

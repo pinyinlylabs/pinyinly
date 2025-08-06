@@ -118,5 +118,5 @@ jobs:
       - run: moon ci --color --job ${{ matrix.index }} --jobTotal 2
 
       - name: 🧾 Results
-        uses: appthrust/moon-ci-retrospect@v1
+        uses: bradleyayers/moon-ci-retrospect@main
         if: ${{ always() }}

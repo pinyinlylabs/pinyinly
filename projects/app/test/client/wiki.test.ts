@@ -1,8 +1,8 @@
 import { IS_CI } from "#util/env.js";
 import { analyzeAudioFile } from "@pinyinly/expo-audio-sprites/server";
+import { glob } from "@pinyinly/lib/fs";
 import chalk from "chalk";
 import { execSync } from "node:child_process";
-import * as fs from "node:fs/promises";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
 
@@ -13,7 +13,7 @@ describe(`speech files`, async () => {
   const audioGlob = path.join(wikiDir, `**/*.{mp3,m4a,aac}`); // adjust this to your structure
   const fixTag = `-fix`;
 
-  for await (const filePath of fs.glob(audioGlob)) {
+  for (const filePath of await glob(audioGlob)) {
     if (filePath.includes(fixTag)) {
       continue;
     }

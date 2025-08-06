@@ -2,7 +2,7 @@
 
 import type { Shape } from "@lottiefiles/lottie-js";
 import { Animation, MatteMode, ShapeLayer } from "@lottiefiles/lottie-js";
-import * as fs from "node:fs/promises";
+import * as fs from "@pinyinly/lib/fs";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
 import { z } from "zod/v4";
@@ -55,7 +55,7 @@ async function* iterLottieAssets(): AsyncGenerator<
   const assetsPath = path.join(projectRoot, `src/assets`);
   let foundFiles = false;
 
-  for await (const lottieFile of fs.glob(`**/*.lottie.json`, {
+  for (const lottieFile of await fs.glob(`**/*.lottie.json`, {
     cwd: assetsPath,
   })) {
     foundFiles = true;

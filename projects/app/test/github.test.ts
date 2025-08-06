@@ -1,6 +1,6 @@
 // pyly-not-src-test
 
-import * as fs from "node:fs/promises";
+import * as fs from "@pinyinly/lib/fs";
 import { expect, test } from "vitest";
 import YAML from "yaml";
 import { z } from "zod/v4";

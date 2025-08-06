@@ -2,8 +2,8 @@
  * @fileoverview Ensures require arrays are in sync with files in a directory, using template comments
  */
 
+import { glob } from "@pinyinly/lib/fs";
 import type { Rule } from "eslint";
-import { glob } from "glob";
 import fs from "node:fs";
 import path from "node:path";
 

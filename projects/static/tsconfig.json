@@ -1,9 +1,5 @@
 {
   "extends": "../../tsconfig.base",
-  "ts-node": {
-    // Include `.d.ts` files (e.g. `src/types/*`)
-    "files": true
-  },
   "compilerOptions": {
     "outDir": "../../.moon/cache/types/projects/static",
     "module": "NodeNext",

@@ -1,18 +1,12 @@
-import {
-  applyRules,
-  getInputFiles,
-  hashFile,
-  loadManifest,
-  resolveIncludePatterns,
-} from "#manifestRead.ts";
+import { findAudioSegment, loadManifest } from "#manifestRead.ts";
 import type { SpriteManifest } from "#types.ts";
 import { vol } from "memfs";
-import { beforeEach, describe, expect, test, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 // Mock fs module to use memfs
 vi.mock(`node:fs`, async () => {
-  const memfs = await vi.importActual(`memfs`);
-  return memfs[`fs`];
+  const { fs } = await vi.importActual(`memfs`);
+  return fs;
 });
 
 // Redirect `node:fs/promises` to use `memfs`'s `promises` API
@@ -21,280 +15,416 @@ vi.mock(`node:fs/promises`, async () => {
   return promises;
 });
 
-// Mock the analyzeAudioFile function to avoid running ffmpeg in tests
-vi.mock(`../src/ffmpeg`, () => ({
-  analyzeAudioFile: vi.fn().mockResolvedValue({
-    duration: {
-      fromContainer: 1.5, // Default duration in seconds
-    },
-  }),
-}));
+describe(`loadManifest suite` satisfies HasNameOf<typeof loadManifest>, () => {
+  let consoleErrorMock: ReturnType<typeof vi.spyOn>;
 
-describe(`hashFile suite` satisfies HasNameOf<typeof hashFile>, () => {
   beforeEach(() => {
     vol.reset();
+    consoleErrorMock = vi.spyOn(console, `error`).mockImplementation(() => {
+      // Mock console.error to avoid cluttering test output
+    });
   });
 
-  test(`should produce different hashes for different file contents`, () => {
-    const file1Path = `/test/file1.m4a`;
-    const file2Path = `/test/file2.m4a`;
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  test(`should load and parse valid manifest`, () => {
+    const manifestPath = `/project/manifest.json`;
+    const manifest: SpriteManifest = {
+      spriteFiles: [`sprite1.m4a`, `sprite2.m4a`],
+      segments: {
+        "audio/file1.m4a": {
+          sprite: 0,
+          start: 0,
+          duration: 1.5,
+          hash: `abc123`,
+        },
+        "audio/file2.m4a": {
+          sprite: 1,
+          start: 0,
+          duration: 2,
+          hash: `def456`,
+        },
+      },
+      rules: [
+        {
+          match: `audio/(?<name>[^/]+)\\.m4a`,
+          sprite: `\${name}`,
+        },
+      ],
+      include: [`audio/**/*.m4a`],
+    };
 
     vol.fromJSON({
-      [file1Path]: `content A`,
-      [file2Path]: `content B`,
+      [manifestPath]: JSON.stringify(manifest),
     });
 
-    const hash1 = hashFile(file1Path);
-    const hash2 = hashFile(file2Path);
+    const result = loadManifest(manifestPath);
 
-    expect(hash1).not.toBe(hash2);
+    expect(result).toEqual(manifest);
+    expect(consoleErrorMock).not.toHaveBeenCalled();
   });
 
-  test(`should error when file doesn't exist`, () => {
-    const nonExistentPath = `/test/nonexistent.m4a`;
+  test(`should return null when manifest file does not exist`, () => {
+    const manifestPath = `/nonexistent/manifest.json`;
 
-    expect(() => hashFile(nonExistentPath)).toThrow();
-  });
+    const result = loadManifest(manifestPath);
 
-  test(`should hash file content consistently`, () => {
-    const filePath = `/test/example.m4a`;
-    const fileContent = `fake audio binary content`;
-
-    vol.fromJSON({
-      [filePath]: fileContent,
-    });
-
-    const hash1 = hashFile(filePath);
-    const hash2 = hashFile(filePath);
-
-    expect(hash1).toBe(hash2);
-    expect(hash1).toHaveLength(64); // SHA-256 hex string length
-  });
-});
-
-describe(`applyRules suite` satisfies HasNameOf<typeof applyRules>, () => {
-  test(`should apply named capture groups correctly`, () => {
-    const rules = [
-      {
-        match: `audio/wiki/(?<page>[^/]+)/(?<file>[^/]+)\\.m4a`,
-        sprite: `wiki-\${page}`,
-      },
-    ];
-
-    const result = applyRules(`audio/wiki/hello/greeting.m4a`, rules);
-    expect(result).toBe(`wiki-hello`);
-  });
-
-  test(`should apply numbered capture groups correctly`, () => {
-    const rules = [
-      {
-        match: `audio/([^/]+)/([^/]+)\\.m4a`,
-        sprite: `$1-$2`,
-      },
-    ];
-
-    const result = applyRules(`audio/wiki/hello.m4a`, rules);
-    expect(result).toBe(`wiki-hello`);
-  });
-
-  test(`should return undefined when no rules match`, () => {
-    const rules = [
-      {
-        match: `audio/wiki/(?<page>[^/]+)/(?<file>[^/]+)\\.m4a`,
-        sprite: `wiki-\${page}`,
-      },
-    ];
-
-    const result = applyRules(`sounds/beep.m4a`, rules);
-    expect(result).toBeUndefined();
-  });
-
-  test(`should use first matching rule`, () => {
-    const rules = [
-      {
-        match: `audio/(?<category>[^/]+)/.*\\.m4a`,
-        sprite: `first-\${category}`,
-      },
-      {
-        match: `audio/wiki/(?<page>[^/]+)/.*\\.m4a`,
-        sprite: `second-\${page}`,
-      },
-    ];
-
-    const result = applyRules(`audio/wiki/hello.m4a`, rules);
-    expect(result).toBe(`first-wiki`);
-  });
-
-  test(`should handle invalid regex gracefully`, () => {
-    const consoleSpy = vi.spyOn(console, `warn`).mockImplementation(() => {
-      // Mock to prevent console output during tests
-    });
-
-    const rules = [
-      {
-        match: `[invalid regex`,
-        sprite: `invalid`,
-      },
-      {
-        match: `audio/(?<page>[^/]+)/.*\\.m4a`,
-        sprite: `valid-\${page}`,
-      },
-    ];
-
-    const result = applyRules(`audio/wiki/hello.m4a`, rules);
-    expect(result).toBe(`valid-wiki`);
-    expect(consoleSpy).toHaveBeenCalledWith(
-      expect.stringContaining(`Invalid regex pattern in rule`),
+    expect(result).toBeNull();
+    expect(consoleErrorMock).toHaveBeenCalledWith(
+      `Failed to load or parse sprite manifest at ${manifestPath}:`,
       expect.any(Error),
     );
-
-    consoleSpy.mockRestore();
   });
 
-  test(`should handle missing capture groups gracefully`, () => {
-    const rules = [
-      {
-        match: `audio/([^/]+)/.*\\.m4a`,
-        sprite: `$1-$2-$3`, // $2 and $3 don't exist
-      },
-    ];
+  test(`should return null when manifest contains invalid JSON`, () => {
+    const manifestPath = `/project/manifest.json`;
 
-    const result = applyRules(`audio/wiki/hello.m4a`, rules);
-    expect(result).toBe(`wiki-$2-$3`); // Non-existent groups remain as-is
+    vol.fromJSON({
+      [manifestPath]: `{ invalid json content`,
+    });
+
+    const result = loadManifest(manifestPath);
+
+    expect(result).toBeNull();
+    expect(consoleErrorMock).toHaveBeenCalledWith(
+      `Failed to load or parse sprite manifest at ${manifestPath}:`,
+      expect.any(SyntaxError),
+    );
+  });
+
+  test(`should return null when manifest has invalid structure - missing required fields`, () => {
+    const manifestPath = `/project/manifest.json`;
+
+    vol.fromJSON({
+      [manifestPath]: JSON.stringify({
+        // Missing spriteFiles, segments, rules, include
+      }),
+    });
+
+    const result = loadManifest(manifestPath);
+
+    expect(result).toBeNull();
+    expect(consoleErrorMock).toHaveBeenCalledWith(
+      `Failed to load or parse sprite manifest at ${manifestPath}:`,
+      expect.any(Error),
+    );
+  });
+
+  test(`should return null when manifest has invalid structure - wrong types`, () => {
+    const manifestPath = `/project/manifest.json`;
+
+    vol.fromJSON({
+      [manifestPath]: JSON.stringify({
+        spriteFiles: `not-an-array`, // Should be array
+        segments: [], // Should be object
+        rules: {}, // Should be array
+        include: `not-an-array`, // Should be array
+      }),
+    });
+
+    const result = loadManifest(manifestPath);
+
+    expect(result).toBeNull();
+    expect(consoleErrorMock).toHaveBeenCalledWith(
+      `Failed to load or parse sprite manifest at ${manifestPath}:`,
+      expect.any(Error),
+    );
+  });
+
+  test(`should return null when segment data has invalid structure`, () => {
+    const manifestPath = `/project/manifest.json`;
+
+    vol.fromJSON({
+      [manifestPath]: JSON.stringify({
+        spriteFiles: [`sprite1.m4a`],
+        segments: {
+          "audio/file1.m4a": {
+            sprite: `invalid`, // Should be number
+            start: 0,
+            duration: 1.5,
+            hash: `abc123`,
+          },
+        },
+        rules: [],
+        include: [],
+      }),
+    });
+
+    const result = loadManifest(manifestPath);
+
+    expect(result).toBeNull();
+    expect(consoleErrorMock).toHaveBeenCalledWith(
+      `Failed to load or parse sprite manifest at ${manifestPath}:`,
+      expect.any(Error),
+    );
+  });
+
+  test(`should return null when rules have invalid structure`, () => {
+    const manifestPath = `/project/manifest.json`;
+
+    vol.fromJSON({
+      [manifestPath]: JSON.stringify({
+        spriteFiles: [],
+        segments: {},
+        rules: [
+          {
+            // Missing sprite property
+            match: `audio/*.m4a`,
+          },
+        ],
+        include: [],
+      }),
+    });
+
+    const result = loadManifest(manifestPath);
+
+    expect(result).toBeNull();
+    expect(consoleErrorMock).toHaveBeenCalledWith(
+      `Failed to load or parse sprite manifest at ${manifestPath}:`,
+      expect.any(Error),
+    );
+  });
+
+  test(`should load manifest with empty arrays and objects`, () => {
+    const manifestPath = `/project/manifest.json`;
+    const manifest: SpriteManifest = {
+      spriteFiles: [],
+      segments: {},
+      rules: [],
+      include: [],
+    };
+
+    vol.fromJSON({
+      [manifestPath]: JSON.stringify(manifest),
+    });
+
+    const result = loadManifest(manifestPath);
+
+    expect(result).toEqual(manifest);
+    expect(consoleErrorMock).not.toHaveBeenCalled();
   });
 });
 
 describe(
-  `resolveIncludePatterns suite` satisfies HasNameOf<
-    typeof resolveIncludePatterns
-  >,
+  `findAudioSegment suite` satisfies HasNameOf<typeof findAudioSegment>,
   () => {
-    beforeEach(() => {
-      vol.reset();
+    afterEach(() => {
+      vi.restoreAllMocks();
     });
 
-    test(`should resolve glob patterns to matching files`, () => {
-      vol.fromJSON({
-        "/project/audio/wiki/hello/greeting.m4a": `content1`,
-        "/project/audio/wiki/world/intro.m4a": `content2`,
-        "/project/audio/sounds/beep.m4a": `content3`,
-        "/project/other/file.txt": `not audio`,
-        "/project/audio/subdir/": null, // Directory
+    const createTestManifest = (): SpriteManifest => ({
+      spriteFiles: [`sprites/audio-sprite.m4a`, `sprites/effects-sprite.m4a`],
+      segments: {
+        "src/sounds/beep.m4a": {
+          sprite: 0,
+          start: 0,
+          duration: 1.5,
+          hash: `abc123`,
+        },
+        "src/sounds/click.m4a": {
+          sprite: 0,
+          start: 1.5,
+          duration: 0.8,
+          hash: `def456`,
+        },
+        "src/effects/explosion.m4a": {
+          sprite: 1,
+          start: 0,
+          duration: 2,
+          hash: `ghi789`,
+        },
+      },
+      rules: [],
+      include: [],
+    });
+
+    test(`should find audio segment and return correct sprite file path`, () => {
+      const manifest = createTestManifest();
+      const manifestPath = `/project/manifest.json`;
+      const currentFilePath = `/project/src/components/Button.tsx`;
+      const audioRequirePath = `../sounds/beep.m4a`;
+
+      const result = findAudioSegment(
+        manifest,
+        manifestPath,
+        currentFilePath,
+        audioRequirePath,
+      );
+
+      expect(result).toEqual({
+        segment: {
+          sprite: 0,
+          start: 0,
+          duration: 1.5,
+          hash: `abc123`,
+        },
+        spriteFilePath: `../../sprites/audio-sprite.m4a`,
       });
-
-      const patterns = [`audio/**/hello/*.m4a`, `audio/sounds/*.m4a`];
-      const result = resolveIncludePatterns(patterns, `/project`);
-
-      expect(result).toEqual([
-        `audio/sounds/beep.m4a`,
-        `audio/wiki/hello/greeting.m4a`,
-      ]);
     });
 
-    test(`should handle patterns that match no files`, () => {
-      vol.fromJSON({
-        "/project/video/clip.mp4": `content`,
+    test(`should handle nested directory structures correctly`, () => {
+      const manifest = createTestManifest();
+      const manifestPath = `/project/manifest.json`;
+      const currentFilePath = `/project/src/pages/home/HomePage.tsx`;
+      const audioRequirePath = `../../sounds/click.m4a`;
+
+      const result = findAudioSegment(
+        manifest,
+        manifestPath,
+        currentFilePath,
+        audioRequirePath,
+      );
+
+      expect(result).toEqual({
+        segment: {
+          sprite: 0,
+          start: 1.5,
+          duration: 0.8,
+          hash: `def456`,
+        },
+        spriteFilePath: `../../../sprites/audio-sprite.m4a`,
       });
-
-      const patterns = [`audio/**/*.m4a`];
-      const result = resolveIncludePatterns(patterns, `/project`);
-
-      expect(result).toEqual([]);
     });
 
-    test(`should remove duplicates when patterns overlap`, () => {
-      vol.fromJSON({
-        "/project/audio/file.m4a": `content`,
+    test(`should handle files in different sprite files`, () => {
+      const manifest = createTestManifest();
+      const manifestPath = `/project/manifest.json`;
+      const currentFilePath = `/project/src/Game.tsx`;
+      const audioRequirePath = `./effects/explosion.m4a`;
+
+      const result = findAudioSegment(
+        manifest,
+        manifestPath,
+        currentFilePath,
+        audioRequirePath,
+      );
+
+      expect(result).toEqual({
+        segment: {
+          sprite: 1,
+          start: 0,
+          duration: 2,
+          hash: `ghi789`,
+        },
+        spriteFilePath: `../sprites/effects-sprite.m4a`,
       });
-
-      const patterns = [`audio/*.m4a`, `audio/file.m4a`];
-      const result = resolveIncludePatterns(patterns, `/project`);
-
-      expect(result).toEqual([`audio/file.m4a`]);
     });
 
-    test(`should handle invalid patterns gracefully`, () => {
+    test(`should return null if audio file not found in manifest`, () => {
+      const manifest = createTestManifest();
+      const manifestPath = `/project/manifest.json`;
+      const currentFilePath = `/project/src/components/Button.tsx`;
+      const audioRequirePath = `./nonexistent.m4a`;
+
+      const result = findAudioSegment(
+        manifest,
+        manifestPath,
+        currentFilePath,
+        audioRequirePath,
+      );
+
+      expect(result).toBeNull();
+    });
+
+    test(`should return null and warn if sprite index is invalid`, () => {
       const consoleSpy = vi.spyOn(console, `warn`).mockImplementation(() => {
-        // Mock to prevent console output during tests
+        // Mock implementation
       });
 
-      vol.fromJSON({
-        "/project/audio/file.m4a": `content`,
-      });
+      const manifest: SpriteManifest = {
+        spriteFiles: [`sprites/audio-sprite.m4a`],
+        segments: {
+          "src/sounds/broken.m4a": {
+            sprite: 999, // Invalid index
+            start: 0,
+            duration: 1,
+            hash: `broken`,
+          },
+        },
+        rules: [],
+        include: [],
+      };
 
-      // Test with a pattern that causes glob to throw
-      const patterns = [`**/**/[**`]; // Very invalid glob pattern
-      const result = resolveIncludePatterns(patterns, `/project`);
+      const manifestPath = `/project/manifest.json`;
+      const currentFilePath = `/project/src/components/Button.tsx`;
+      const audioRequirePath = `../sounds/broken.m4a`;
 
-      expect(result).toEqual([]);
-      // Note: glob library might not throw for all invalid patterns,
-      // so we'll just ensure the function handles errors gracefully
+      const result = findAudioSegment(
+        manifest,
+        manifestPath,
+        currentFilePath,
+        audioRequirePath,
+      );
+
+      expect(result).toBeNull();
+      expect(consoleSpy).toHaveBeenCalledWith(
+        `Invalid sprite index 999 for segment src/sounds/broken.m4a`,
+      );
+
       consoleSpy.mockRestore();
     });
-  },
-);
 
-describe(
-  `getInputFiles suite` satisfies HasNameOf<typeof getInputFiles>,
-  () => {
-    beforeEach(() => {
-      vol.reset();
+    test(`should handle absolute paths correctly`, () => {
+      const manifest = createTestManifest();
+      const manifestPath = `/project/manifest.json`;
+      const currentFilePath = `/project/src/components/Button.tsx`;
+      const audioRequirePath = `/project/src/sounds/beep.m4a`;
+
+      const result = findAudioSegment(
+        manifest,
+        manifestPath,
+        currentFilePath,
+        audioRequirePath,
+      );
+
+      expect(result).toEqual({
+        segment: {
+          sprite: 0,
+          start: 0,
+          duration: 1.5,
+          hash: `abc123`,
+        },
+        spriteFilePath: `../../sprites/audio-sprite.m4a`,
+      });
     });
 
-    test(`should return files based on manifest include patterns`, () => {
+    test(`should normalize sprite file paths that don't start with dot`, () => {
+      const manifest: SpriteManifest = {
+        spriteFiles: [`audio-sprite.m4a`], // No subdirectory
+        segments: {
+          "src/sounds/beep.m4a": {
+            sprite: 0,
+            start: 0,
+            duration: 1.5,
+            hash: `abc123`,
+          },
+        },
+        rules: [],
+        include: [],
+      };
+
       const manifestPath = `/project/manifest.json`;
+      const currentFilePath = `/project/src/components/Button.tsx`;
+      const audioRequirePath = `../sounds/beep.m4a`;
 
-      vol.fromJSON({
-        "/project/audio/wiki/hello.m4a": `content1`,
-        "/project/audio/sounds/beep.m4a": `content2`,
-        [manifestPath]: JSON.stringify({
-          spriteFiles: [],
-          segments: {},
-          rules: [],
-          include: [`audio/**/*.m4a`],
-        } satisfies SpriteManifest),
+      const result = findAudioSegment(
+        manifest,
+        manifestPath,
+        currentFilePath,
+        audioRequirePath,
+      );
+
+      expect(result).toEqual({
+        segment: {
+          sprite: 0,
+          start: 0,
+          duration: 1.5,
+          hash: `abc123`,
+        },
+        spriteFilePath: `../../audio-sprite.m4a`, // Should be normalized with relative path
       });
-
-      const manifest = loadManifest(manifestPath);
-      const result = getInputFiles(manifest!, manifestPath);
-
-      expect(result).toEqual([`audio/sounds/beep.m4a`, `audio/wiki/hello.m4a`]);
-    });
-
-    test(`should return empty array when no include patterns specified`, () => {
-      const manifestPath = `/project/manifest.json`;
-
-      vol.fromJSON({
-        [manifestPath]: JSON.stringify({
-          spriteFiles: [],
-          segments: {},
-          rules: [],
-          include: [],
-        } satisfies SpriteManifest),
-      });
-
-      const manifest = loadManifest(manifestPath);
-      const result = getInputFiles(manifest!, manifestPath);
-
-      expect(result).toEqual([]);
-    });
-
-    test(`should return empty array when include is empty array`, () => {
-      const manifestPath = `/project/manifest.json`;
-
-      vol.fromJSON({
-        [manifestPath]: JSON.stringify({
-          spriteFiles: [],
-          segments: {},
-          rules: [],
-          include: [],
-        }),
-      });
-
-      const manifest = loadManifest(manifestPath);
-      const result = getInputFiles(manifest!, manifestPath);
-
-      expect(result).toEqual([]);
     });
   },
 );

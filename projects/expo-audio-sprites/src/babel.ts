@@ -1,9 +1,14 @@
-import type { ConfigAPI, PluginItem } from "@babel/core";
+import type { ConfigAPI, PluginItem, PluginPass } from "@babel/core";
 import { types as t } from "@babel/core";
 import { invariant } from "@pinyinly/lib/invariant";
-import nodePath from "node:path";
-import { hashFile, loadManifest } from "./manifestRead.ts";
-import type { BabelPluginOptions } from "./types.ts";
+import { LRUCache } from "lru-cache";
+import type { DeepReadonly } from "ts-essentials";
+import { findAudioSegment, loadManifest } from "./manifestRead.ts";
+import type {
+  AudioSpriteSource,
+  BabelPluginOptions,
+  SpriteManifest,
+} from "./types.ts";
 
 // eslint-disable-next-line import/no-default-export
 export default function expoAudioSpritesPreset(
@@ -25,14 +30,21 @@ const audioAssetPlugin = (
 ): PluginItem => {
   invariant(options != null, `plugin options must be provided`);
 
-  // Load the manifest once when the plugin is created
-  const manifest = loadManifest(options.manifestPath);
+  // Cache manifests by path with a short TTL
+  const manifestCache = new LRUCache<string, CachedManifest>({
+    max: 10, // Max 10 different manifest files
+    ttl: 1000, // 1 second TTL
+
+    // When the cache is getting hammered (e.g. during a build) extend the TTL of
+    // the manifest cache.
+    updateAgeOnGet: true,
+  });
 
   return {
     name: `@pinyinly/expo-audio-sprites`,
     visitor: {
-      CallExpression(path, state) {
-        const { node } = path;
+      CallExpression(astNodePath, { filename }: PluginPass) {
+        const { node } = astNodePath;
 
         // Only transform require() calls
         if (!t.isIdentifier(node.callee, { name: `require` })) {
@@ -57,25 +69,15 @@ const audioAssetPlugin = (
         // Prevent infinite recursion: check if this require() is already inside an audio sprite object
         // We do this by checking if the parent is an ObjectProperty with key "asset"
         if (
-          t.isObjectProperty(path.parent) &&
-          t.isIdentifier(path.parent.key, { name: `asset` })
+          t.isObjectProperty(astNodePath.parent) &&
+          t.isIdentifier(astNodePath.parent.key, { name: `asset` })
         ) {
           return;
         }
 
         // Get current file path from Babel state
-        const babelState = state as { filename?: string };
-        const currentFilePath = babelState.filename;
-        invariant(
-          currentFilePath != null,
-          `No filename available in Babel state`,
-        );
-        if (currentFilePath.length === 0) {
-          console.warn(
-            `No filename available in Babel state, skipping sprite lookup`,
-          );
-          return;
-        }
+        invariant(filename != null, `No filename available in Babel state`);
+        const manifest = getCachedManifest(manifestCache, options.manifestPath);
 
         // Check if manifest was loaded successfully
         if (manifest === null) {
@@ -83,66 +85,49 @@ const audioAssetPlugin = (
           return;
         }
 
-        // Resolve the require path relative to the current file being transformed
-        const resolvedPath = nodePath.resolve(
-          nodePath.dirname(currentFilePath),
+        // Use the extracted function to find the audio segment
+        const segmentInfo = findAudioSegment(
+          manifest,
+          options.manifestPath,
+          filename,
           requirePath,
         );
 
-        // Hash the resolved file content to look up in segments
-        const requireHash = hashFile(resolvedPath);
-        const segmentData = manifest.segments[requireHash];
-
-        if (segmentData === undefined) {
-          // File not found in manifest, leave require() call unchanged
+        if (segmentInfo === null) {
+          // File not found in manifest or invalid, leave require() call unchanged
           return;
         }
 
-        // Extract sprite data from the segment object
-        const { sprite: spriteIndex, start: startTime, duration } = segmentData;
-        const spriteFile = manifest.spriteFiles[spriteIndex];
-
-        if (spriteFile === undefined) {
-          console.warn(
-            `Invalid sprite index ${spriteIndex} for segment ${requireHash}`,
-          );
-          return;
-        }
-
-        // Resolve the sprite file path relative to the manifest location
-        const manifestDir = nodePath.dirname(options.manifestPath);
-        const absoluteSpriteFilePath = nodePath.resolve(
-          manifestDir,
-          spriteFile,
-        );
-
-        // Make the sprite file path relative to the current file being transformed
-        const currentFileDir = nodePath.dirname(currentFilePath);
-        const relativeSpriteFilePath = nodePath.relative(
-          currentFileDir,
-          absoluteSpriteFilePath,
-        );
-
-        // Ensure the path starts with ./ or ../ for proper require resolution
-        const normalizedSpriteFilePath = relativeSpriteFilePath.startsWith(`.`)
-          ? relativeSpriteFilePath
-          : `./${relativeSpriteFilePath}`;
+        const { segment, spriteFilePath: normalizedSpriteFilePath } =
+          segmentInfo;
+        const { start: startTime, duration } = segment;
 
         // Create the transformed AST with data from manifest
         // Transform: require('./audio.m4a')
-        // To: { type: "audiosprite", start: <from manifest>, duration: <from manifest>, asset: require(<sprite file>) }
+        // To: { kind: "audiosprite", start: <from manifest>, duration: <from manifest>, asset: require(<sprite file>) }
         const transformedNode = t.objectExpression([
           t.objectProperty(
-            t.identifier(`type`),
-            t.stringLiteral(`audiosprite`),
+            t.identifier(
+              `type` satisfies keyof Pick<AudioSpriteSource, `type`>,
+            ),
+            t.stringLiteral(`audiosprite` satisfies AudioSpriteSource[`type`]),
           ),
-          t.objectProperty(t.identifier(`start`), t.numericLiteral(startTime)),
           t.objectProperty(
-            t.identifier(`duration`),
+            t.identifier(
+              `start` satisfies keyof Pick<AudioSpriteSource, `start`>,
+            ),
+            t.numericLiteral(startTime),
+          ),
+          t.objectProperty(
+            t.identifier(
+              `duration` satisfies keyof Pick<AudioSpriteSource, `duration`>,
+            ),
             t.numericLiteral(duration),
           ),
           t.objectProperty(
-            t.identifier(`asset`),
+            t.identifier(
+              `asset` satisfies keyof Pick<AudioSpriteSource, `asset`>,
+            ),
             t.callExpression(t.identifier(`require`), [
               t.stringLiteral(normalizedSpriteFilePath),
             ]),
@@ -150,8 +135,33 @@ const audioAssetPlugin = (
         ]);
 
         // Replace the original require() call with our transformed object
-        path.replaceWith(transformedNode);
+        astNodePath.replaceWith(transformedNode);
       },
     },
   };
 };
+
+interface CachedManifest {
+  manifest: DeepReadonly<SpriteManifest> | null;
+}
+
+type ManifestLRUCache = LRUCache<string, CachedManifest>;
+
+function getCachedManifest(
+  cache: ManifestLRUCache,
+  manifestPath: string,
+): DeepReadonly<SpriteManifest> | null {
+  const cached = cache.get(manifestPath);
+
+  if (cached) {
+    return cached.manifest;
+  }
+
+  // Cache miss or expired - load fresh
+  const manifest = loadManifest(manifestPath);
+  cache.set(manifestPath, {
+    manifest,
+  });
+
+  return manifest;
+}

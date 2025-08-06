@@ -1,8 +1,8 @@
+import * as fs from "@pinyinly/lib/fs";
 import makeDebug from "debug";
 import type { Options, Result } from "execa";
 import { execa } from "execa";
 import { createHash } from "node:crypto";
-import * as fs from "node:fs/promises";
 import path from "node:path";
 
 const debug = makeDebug(`pinyinly:execaCached`);
