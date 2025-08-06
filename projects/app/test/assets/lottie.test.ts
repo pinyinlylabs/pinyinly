@@ -13,7 +13,6 @@ describe(`no luminance layers in lottie animations (incompatible with lottie-ios
       // This test checks that no layer in
       // Check each layer to make sure it's not a luminance mask.
       for (const layer of anim.layers) {
-        // The custom message is dropped as .not.toBe doesn't support custom messages like assert.notEqual
         expect(layer.matteMode).not.toBe(MatteMode.LUMA);
       }
     });

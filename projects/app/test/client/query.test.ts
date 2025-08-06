@@ -16,7 +16,6 @@ import { Rating } from "#util/fsrs.ts";
 import { nanoid } from "#util/nanoid.ts";
 import { r } from "#util/rizzle.ts";
 import { invariant } from "@pinyinly/lib/invariant";
-import assert from "node:assert/strict";
 import { describe, expect, test } from "vitest";
 import { parseRelativeTimeShorthand } from "../data/helpers.ts";
 import { testReplicacheOptions } from "../util/rizzleHelpers.ts";
@@ -150,7 +149,7 @@ describe(
           targetSkills,
           history,
         });
-        assert.deepEqual(blockedItems, [`he:刀:knife`]);
+        expect(blockedItems).toEqual([`he:刀:knife`]);
       }
 
       history.push(`💤 1d`, `🟢 he:丿:slash he:𠃌:radical`);
@@ -160,7 +159,7 @@ describe(
           targetSkills,
           history,
         });
-        assert.deepEqual(blockedItems, [`he:刀:knife`]);
+        expect(blockedItems).toEqual([`he:刀:knife`]);
       }
 
       history.push(`💤 1d`, `🟢 he:丿:slash he:𠃌:radical`);
@@ -170,7 +169,7 @@ describe(
           targetSkills,
           history,
         });
-        assert.deepEqual(blockedItems, [`he:刀:knife`]);
+        expect(blockedItems).toEqual([`he:刀:knife`]);
       }
 
       history.push(`💤 1d`, `🟢 he:丿:slash he:𠃌:radical`);
@@ -180,7 +179,7 @@ describe(
           targetSkills,
           history,
         });
-        assert.deepEqual(blockedItems, [`he:刀:knife`]);
+        expect(blockedItems).toEqual([`he:刀:knife`]);
       }
 
       history.push(`💤 1d`, `🟢 he:丿:slash he:𠃌:radical`);
@@ -191,7 +190,7 @@ describe(
           history,
         });
         expect(items).toContain(`he:刀:knife`);
-        assert.deepEqual(blockedItems, []);
+        expect(blockedItems).toEqual([]);
       }
     });
 
@@ -216,7 +215,7 @@ describe(
       } = await simulateSkillReviews({ targetSkills, history });
 
       // Doesn't get stuck reviewing he:𠃌:radical just because it had a lower stability.
-      assert.notDeepEqual([review1], [`he:𠃌:radical`]);
+      expect([review1]).not.toEqual([`he:𠃌:radical`]);
     });
 
     test(`skills that are stale (heavily over-due and not stable) are treated as new skills`, async () => {
@@ -273,18 +272,17 @@ describe(
   `flagsForSrsState suite` satisfies HasNameOf<typeof flagsForSrsState>,
   () => {
     test(`marks a question as new if it has no srs`, async () => {
-      assert.deepEqual(
+      expect(
         flagsForSrsState({
           kind: SrsKind.Mock,
           prevReviewAt: new Date(),
           nextReviewAt: new Date(),
         }),
-        { kind: QuestionFlagKind.NewSkill },
-      );
+      ).toEqual({ kind: QuestionFlagKind.NewSkill });
     });
 
     test(`marks a question as new if it has fsrs state but is not stable enough to be introduced`, async () => {
-      assert.deepEqual(flagsForSrsState(undefined), {
+      expect(flagsForSrsState(undefined)).toEqual({
         kind: QuestionFlagKind.NewSkill,
       });
     });

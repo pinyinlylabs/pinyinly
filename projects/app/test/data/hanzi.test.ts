@@ -8,7 +8,6 @@ import {
   walkIdsNode,
 } from "#data/hanzi.ts";
 import type { HanziText } from "#data/model.ts";
-import assert from "node:assert/strict";
 import { describe, expect, test } from "vitest";
 import { 汉 } from "./helpers.ts";
 
@@ -259,7 +258,7 @@ test(`parseIds handles 2 depth` satisfies HasNameOf<typeof parseIds>, () => {
         below: { operator: `LeafCharacter`, character: `c` },
       },
     });
-    assert.deepEqual(cursor, { index: 5 });
+    expect(cursor).toEqual({ index: 5 });
   }
 
   {
@@ -278,7 +277,7 @@ test(`parseIds handles 2 depth` satisfies HasNameOf<typeof parseIds>, () => {
         },
       },
     });
-    assert.deepEqual(cursor, { index: 8 });
+    expect(cursor).toEqual({ index: 8 });
   }
 });
 
@@ -304,7 +303,7 @@ test(`walkIdsNode fixture` satisfies HasNameOf<typeof walkIdsNode>, () => {
     }
   });
 
-  assert.deepEqual(leafs, [`a`, `b`, `c`]);
+  expect(leafs).toEqual([`a`, `b`, `c`]);
 });
 
 test(
@@ -323,7 +322,7 @@ test(
       [`①`, `②`, `③`, `④`, `⑤`, `⑥`, `⑦`, `⑧`, `⑨`, `⑩`],
       [`⑪`, `⑫`, `⑬`, `⑭`, `⑮`, `⑯`, `⑰`, `⑱`, `⑲`, `⑳`],
     ].flat()) {
-      assert.equal(idsNodeToString(parseIds(input)), input);
+      expect(idsNodeToString(parseIds(input))).toEqual(input);
     }
   },
 );

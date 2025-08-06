@@ -38,7 +38,6 @@ import {
   sortComparatorString,
 } from "@pinyinly/lib/collections";
 import { invariant } from "@pinyinly/lib/invariant";
-import assert from "node:assert/strict";
 import { describe, expect, test } from "vitest";
 import { z } from "zod/v4";
 import { 拼音, 汉 } from "../data/helpers.ts";
@@ -48,7 +47,9 @@ test(`radical groups have the right number of elements`, async () => {
   // matches the expected range.
   const radicalsByStrokes = await allRadicalsByStrokes();
   for (const [, group] of radicalsByStrokes.entries()) {
-    assert.ok(group.characters.length === group.range[1] - group.range[0] + 1);
+    expect(
+      group.characters.length === group.range[1] - group.range[0] + 1,
+    ).toBe(true);
   }
 });
 
@@ -102,11 +103,11 @@ test(`hanzi word meaning-keys are not too similar`, async () => {
         const b = meaningKeys[j];
         invariant(a != null && b != null);
 
-        assert.notEqual(
-          b.startsWith(a),
-          true,
-          `${hanzi} meaning-keys ${a} and ${b} are too similar`,
-        );
+        if (b.startsWith(a)) {
+          throw new Error(
+            `${hanzi} meaning-keys ${a} and ${b} are too similar`,
+          );
+        }
       }
     }
   }
@@ -171,7 +172,7 @@ test(`hanzi meaning componentFormOf lint`, async () => {
     const baseHanziMatches = await lookupHanzi(componentFormOf);
 
     if (baseHanziMatches.length !== 1) {
-      assert.fail(
+      throw new Error(
         `hanzi word ${hanziWord} has componentFormOf ${componentFormOf} with ${baseHanziMatches.length} matches (rather than exactly 1)`,
       );
     }
@@ -185,13 +186,13 @@ test(`hanzi meaning componentFormOf lint`, async () => {
       }
 
       if (meaningKeyFromHanziWord(baseHanziWord) !== meaningKey) {
-        assert.fail(
+        throw new Error(
           `hanzi word ${hanziWord} has different meaning key to ${baseHanziWord}`,
         );
       }
 
       if (baseMeaning.gloss[0] !== gloss[0]) {
-        assert.fail(
+        throw new Error(
           `hanzi word ${hanziWord} has different primary gloss to ${baseHanziWord}`,
         );
       }
@@ -283,20 +284,18 @@ test(`hanzi words are unique on (meaning key, primary pinyin)`, async () => {
   );
 
   // Check that there are no duplicates (except for the exceptions).
-  assert.deepEqual(
+  expect(
     duplicates.filter(
       (x) =>
         !exceptions.values().some((e) => x.symmetricDifference(e).size === 0),
     ),
-    [],
-  );
+  ).toEqual([]);
 
   // Check that all exceptions are actually used.
   for (const exception of exceptions) {
-    assert.ok(
-      duplicates.some((x) => x.symmetricDifference(exception).size === 0),
-      `exception ${[...exception]} is not used`,
-    );
+    if (!duplicates.some((x) => x.symmetricDifference(exception).size === 0)) {
+      throw new Error(`exception ${[...exception]} is not used`);
+    }
   }
 });
 
@@ -335,30 +334,28 @@ test(`hanzi words are unique on (hanzi, part-of-speech, pinyin)`, async () => {
 
   // Check that all exceptions are actually used.
   for (const exception of exceptions) {
-    assert.ok(
-      duplicates.some((x) => x.symmetricDifference(exception).size === 0),
-      `exception ${[...exception]} is not used`,
-    );
+    if (!duplicates.some((x) => x.symmetricDifference(exception).size === 0)) {
+      throw new Error(`exception ${[...exception]} is not used`);
+    }
   }
 
   // Check that there are no duplicates (except for the exceptions).
-  assert.deepEqual(
+  expect(
     duplicates.filter(
       (x) =>
         !exceptions.values().some((e) => x.symmetricDifference(e).size === 0),
     ),
-    [],
-  );
+  ).toEqual([]);
 });
 
 test(`all word lists only reference valid hanzi words`, async () => {
   for (const wordList of wordLists) {
     for (const hanziWord of await wordList()) {
-      assert.notEqual(
-        await lookupHanziWord(hanziWord),
-        null,
-        `missing hanzi word lookup for ${hanziWord} in word list`,
-      );
+      if ((await lookupHanziWord(hanziWord)) === null) {
+        throw new Error(
+          `missing hanzi word lookup for ${hanziWord} in word list`,
+        );
+      }
     }
   }
 });
@@ -368,10 +365,8 @@ test(`all wiki component hanzi words reference valid hanzi words`, async () => {
   for (const [hanzi, wikiEntry] of wiki) {
     if (wikiEntry.components != null) {
       for (const { hanziWord } of wikiEntry.components) {
-        if (hanziWord != null) {
-          assert.notEqual(
-            await lookupHanziWord(hanziWord),
-            null,
+        if (hanziWord != null && (await lookupHanziWord(hanziWord)) === null) {
+          throw new Error(
             `missing hanzi word lookup for ${hanziWord} in wiki entry ${hanzi}`,
           );
         }
@@ -418,16 +413,11 @@ test(`zod schemas are compatible with OpenAI API`, async () => {
       z.toJSONSchema(schema, { unrepresentable: `any` }),
     );
 
-    assert.doesNotMatch(
-      jsonSchema,
-      /"minItems":/g,
-      `z.array(…).min(…) is not supported by OpenAI API`,
-    );
-    assert.doesNotMatch(
-      jsonSchema,
-      /"maxItems":/g,
-      `z.array(…).max(…) is not supported by OpenAI API`,
-    );
+    // `z.array(…).min(…) is not supported by OpenAI API`,
+    expect(jsonSchema).not.toMatch(/"minItems":/g);
+
+    // `z.array(…).max(…) is not supported by OpenAI API`,
+    expect(jsonSchema).not.toMatch(/"maxItems":/g);
   }
 
   assertCompatible(hanziWordMeaningSchema);
@@ -439,11 +429,11 @@ test(`hanzi uses consistent unicode characters`, async () => {
     .map((x) => hanziFromHanziWord(x))
     .flatMap((x) => splitHanziText(x))
     .filter((x) => isNotCjkUnifiedIdeograph(x));
-  assert.deepEqual(
-    violations,
-    [],
-    await debugNonCjkUnifiedIdeographs(violations),
-  );
+  if (violations.length > 0) {
+    throw new Error(
+      `found non-CJK unified ideographs: ${await debugNonCjkUnifiedIdeographs(violations)}`,
+    );
+  }
 });
 
 describe(
@@ -454,35 +444,32 @@ describe(
     test(`no "from" keys are in the dictionary`, async () => {
       const hanziWordRenames = await loadHanziWordMigrations();
       const dictionary = await loadDictionary();
-      assert.deepEqual(
+      expect(
         [...hanziWordRenames].filter(([oldHanziWord]) =>
           dictionary.has(oldHanziWord),
         ),
-        [],
-      );
+      ).toEqual([]);
     });
 
     test(`all "to" keys are in the dictionary`, async () => {
       const hanziWordRenames = await loadHanziWordMigrations();
       const dictionary = await loadDictionary();
-      assert.deepEqual(
+      expect(
         [...hanziWordRenames].filter(
           ([, newHanziWord]) =>
             newHanziWord != null && !dictionary.has(newHanziWord),
         ),
-        [],
-      );
+      ).toEqual([]);
     });
 
     test(`no "to" keys are also "from" keys (could cause loops)`, async () => {
       const hanziWordRenames = await loadHanziWordMigrations();
-      assert.deepEqual(
+      expect(
         [...hanziWordRenames].filter(
           ([, newHanziWord]) =>
             newHanziWord != null && hanziWordRenames.has(newHanziWord),
         ),
-        [],
-      );
+      ).toEqual([]);
     });
   },
 );

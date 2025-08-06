@@ -6,8 +6,7 @@ import {
 } from "#data/questions/hanziWordToGloss.ts";
 import { hanziWordToGloss } from "#data/skills.ts";
 import { loadDictionary, lookupHanziWord } from "#dictionary/dictionary.ts";
-import assert from "node:assert/strict";
-import { describe, test } from "vitest";
+import { describe, expect, test } from "vitest";
 
 describe(
   `shouldOmitHanziWord suite` satisfies HasNameOf<typeof shouldOmitHanziWord>,
@@ -16,30 +15,30 @@ describe(
       const ctx = await makeQuizContext();
 
       // not in dictionary
-      assert.equal(await shouldOmitHanziWord(`我:mock`, ctx), true);
+      expect(await shouldOmitHanziWord(`我:mock`, ctx)).toEqual(true);
       // is in dictionary
-      assert.equal(await shouldOmitHanziWord(`我:i`, ctx), false);
+      expect(await shouldOmitHanziWord(`我:i`, ctx)).toEqual(false);
     });
 
     test(`should omit if there is a conflicting gloss`, async () => {
       const ctx = await makeQuizContext();
       ctx.usedGlosses.add(`me`);
 
-      assert.equal(await shouldOmitHanziWord(`我:i`, ctx), true);
+      expect(await shouldOmitHanziWord(`我:i`, ctx)).toEqual(true);
     });
 
     test(`should omit if there is a conflicting hanzi`, async () => {
       const ctx = await makeQuizContext();
       ctx.usedHanzi.add(`我`);
 
-      assert.equal(await shouldOmitHanziWord(`我:i`, ctx), true);
+      expect(await shouldOmitHanziWord(`我:i`, ctx)).toEqual(true);
     });
 
     test(`should not omit if there is no conflict`, async () => {
       const ctx = await makeQuizContext();
 
       await addToQuizContext(`丨:line`, ctx);
-      assert.equal(await shouldOmitHanziWord(`我:i`, ctx), false);
+      expect(await shouldOmitHanziWord(`我:i`, ctx)).toEqual(false);
     });
   },
 );
@@ -53,7 +52,7 @@ describe(
       await addToQuizContext(`我:i`, ctx);
       const meaning = await lookupHanziWord(`我:i`);
 
-      assert.deepEqual(ctx.usedGlosses, new Set(meaning?.gloss));
+      expect(ctx.usedGlosses).toEqual(new Set(meaning?.gloss));
     });
 
     test(`adds to used hanzi`, async () => {
@@ -61,7 +60,7 @@ describe(
 
       await addToQuizContext(`我:i`, ctx);
 
-      assert.deepEqual(ctx.usedHanzi, new Set([`我`]));
+      expect(ctx.usedHanzi).toEqual(new Set([`我`]));
     });
 
     test(`adds to final result`, async () => {
@@ -71,7 +70,7 @@ describe(
 
       await addToQuizContext(hanziWord, ctx);
 
-      assert.deepEqual(ctx.result, [[hanziWord, hanziWordMeaning]]);
+      expect(ctx.result).toEqual([[hanziWord, hanziWordMeaning]]);
     });
   },
 );
