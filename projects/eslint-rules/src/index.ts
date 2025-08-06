@@ -90,6 +90,7 @@ const recommended: InfiniteDepthConfigWithExtends[] = [
         `error`,
         {
           defaultImports: {
+            "node:path": `path`,
             "react-native-reanimated": `Reanimated`,
           },
           namedImports: {

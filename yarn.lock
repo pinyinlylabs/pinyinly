@@ -4756,8 +4756,10 @@ __metadata:
     eslint-plugin-unicorn: "npm:^59.0.0"
     execa: "npm:^9.6.0"
     glob: "npm:^11.0.0"
+    lru-cache: "npm:^11.1.0"
     memfs: "npm:^4.36.0"
     prettier: "npm:^3.4.2"
+    ts-essentials: "npm:^10.1.1"
     typescript: "patch:typescript@npm%3A5.8.3#~/.yarn/patches/typescript-npm-5.8.3-fbd7aef456.patch"
     vitest: "npm:^3.2.4"
     zod: "npm:^3.25.42"
@@ -18844,7 +18846,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-essentials@npm:^10.0.3":
+"ts-essentials@npm:^10.0.3, ts-essentials@npm:^10.1.1":
   version: 10.1.1
   resolution: "ts-essentials@npm:10.1.1"
   peerDependencies:

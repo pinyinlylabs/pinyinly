@@ -1,8 +1,7 @@
-import { globSync } from "glob";
-import * as crypto from "node:crypto";
 import * as fs from "node:fs";
-import nodePath from "node:path";
-import type { SpriteManifest, SpriteRule } from "./types.ts";
+import path from "node:path";
+import type { DeepReadonly } from "ts-essentials";
+import type { SpriteManifest, SpriteSegment } from "./types.ts";
 import { spriteManifestSchema } from "./types.ts";
 
 export const loadManifest = (manifestPath: string): SpriteManifest | null => {
@@ -23,103 +22,70 @@ export const loadManifest = (manifestPath: string): SpriteManifest | null => {
   }
 };
 
-export const hashFile = (filePath: string): string => {
-  const fileContent = fs.readFileSync(filePath);
-  return hashFileContent(fileContent);
-};
-
-export const hashFileContent = (fileContent: string | Buffer): string => {
-  return crypto.createHash(`sha256`).update(fileContent).digest(`hex`);
-};
-
 /**
- * Apply sprite rules to determine which sprite a file should belong to.
- * @param filePath The file path relative to the manifest.json
- * @param rules Array of sprite rules to apply
- * @returns The sprite name if a rule matches, undefined otherwise
+ * Find an audio segment in the manifest based on file paths and resolve sprite information.
+ * This function handles all the relative path calculations needed to look up audio files
+ * in the manifest and returns the corresponding sprite information.
+ *
+ * @param manifest The sprite manifest to search in
+ * @param manifestPath Absolute path to the manifest.json file
+ * @param currentFilePath Absolute path to the JavaScript file making the require() call
+ * @param audioRequirePath The require path (e.g., './sounds/beep.m4a') from the JS file
+ * @returns Sprite information if found, null if not found or invalid
  */
-export const applyRules = (
-  filePath: string,
-  rules: SpriteRule[],
-): string | undefined => {
-  for (const rule of rules) {
-    try {
-      const regex = new RegExp(rule.match);
-      const match = regex.exec(filePath);
-
-      if (match) {
-        // Replace named capture groups and numbered groups in the sprite template
-        let spriteName = rule.sprite;
-
-        // Replace named capture groups ${groupName}
-        if (match.groups) {
-          for (const [groupName, groupValue] of Object.entries(match.groups)) {
-            spriteName = spriteName.replaceAll(`\${${groupName}}`, groupValue);
-          }
-        }
-
-        // Replace numbered capture groups $1, $2, etc.
-        for (let i = 1; i < match.length; i++) {
-          const matchValue = match[i];
-          if (matchValue != null) {
-            spriteName = spriteName.replaceAll(`$${i}`, matchValue);
-          }
-        }
-
-        return spriteName;
-      }
-    } catch (error) {
-      console.warn(`Invalid regex pattern in rule: ${rule.match}`, error);
-    }
-  }
-
-  return undefined;
-};
-
-/**
- * Resolve include glob patterns to find matching audio files.
- * @param includePatterns Array of glob patterns to match
- * @param manifestDir Directory where the manifest.json is located (used as base for glob patterns)
- * @returns Array of file paths relative to manifestDir
- */
-export const resolveIncludePatterns = (
-  includePatterns: string[],
-  manifestDir: string,
-): string[] => {
-  const allFiles: string[] = [];
-
-  for (const pattern of includePatterns) {
-    try {
-      const files = globSync(pattern, {
-        cwd: manifestDir,
-        fs,
-        posix: true, // Use posix-style paths for consistency
-      });
-
-      allFiles.push(...files);
-    } catch (error) {
-      console.warn(`Failed to resolve glob pattern "${pattern}":`, error);
-    }
-  }
-
-  // Remove duplicates and sort for consistent ordering
-  return [...new Set(allFiles)].sort();
-};
-
-/**
- * Get all input files for processing based on manifest include patterns.
- * @param manifest The sprite manifest containing include patterns
- * @param manifestPath Path to the manifest.json file
- * @returns Array of file paths relative to manifest directory
- */
-export const getInputFiles = (
-  manifest: SpriteManifest,
+export const findAudioSegment = (
+  manifest: DeepReadonly<SpriteManifest>,
   manifestPath: string,
-): string[] => {
-  if (manifest.include.length === 0) {
-    return [];
+  currentFilePath: string,
+  audioRequirePath: string,
+): {
+  segment: SpriteSegment;
+  spriteFilePath: string;
+} | null => {
+  // Resolve the require path relative to the current file being transformed
+  const resolvedAudioPath = path.resolve(
+    path.dirname(currentFilePath),
+    audioRequirePath,
+  );
+
+  // Convert to relative path from manifest directory for lookup
+  const manifestDir = path.dirname(manifestPath);
+  const relativePath = path.relative(manifestDir, resolvedAudioPath);
+  const segmentData = manifest.segments[relativePath];
+
+  if (segmentData === undefined) {
+    // File not found in manifest
+    return null;
   }
 
-  const manifestDir = nodePath.dirname(manifestPath);
-  return resolveIncludePatterns(manifest.include, manifestDir);
+  // Extract sprite data from the segment object
+  const { sprite: spriteIndex } = segmentData;
+  const spriteFile = manifest.spriteFiles[spriteIndex];
+
+  if (spriteFile === undefined) {
+    console.warn(
+      `Invalid sprite index ${spriteIndex} for segment ${relativePath}`,
+    );
+    return null;
+  }
+
+  // Resolve the sprite file path relative to the manifest location
+  const absoluteSpriteFilePath = path.resolve(manifestDir, spriteFile);
+
+  // Make the sprite file path relative to the current file being transformed
+  const currentFileDir = path.dirname(currentFilePath);
+  const relativeSpriteFilePath = path.relative(
+    currentFileDir,
+    absoluteSpriteFilePath,
+  );
+
+  // Ensure the path starts with ./ or ../ for proper require resolution
+  const normalizedSpriteFilePath = relativeSpriteFilePath.startsWith(`.`)
+    ? relativeSpriteFilePath
+    : `./${relativeSpriteFilePath}`;
+
+  return {
+    segment: segmentData,
+    spriteFilePath: normalizedSpriteFilePath,
+  };
 };

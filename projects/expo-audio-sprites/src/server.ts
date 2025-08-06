@@ -1,11 +1,9 @@
+export { loadManifest } from "./manifestRead.ts";
 export {
   applyRules,
-  getInputFiles,
-  loadManifest,
-  resolveIncludePatterns,
-} from "./manifestRead.ts";
-export {
   generateSpriteAssignments,
+  getInputFiles,
+  resolveIncludePatterns,
   saveManifest,
   syncManifestWithFilesystem,
   updateManifestSegments,
