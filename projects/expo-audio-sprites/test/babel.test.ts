@@ -2,8 +2,7 @@ import audioSpriteBabelPreset from "#babel.ts";
 import { hashFileContent } from "#manifestWrite.ts";
 import { transform } from "@babel/core";
 import { vol } from "memfs";
-import { afterEach } from "node:test";
-import { beforeEach, describe, expect, test, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 // Mock fs module to use memfs
 vi.mock(`node:fs`, async () => {

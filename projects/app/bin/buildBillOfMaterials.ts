@@ -1,8 +1,8 @@
 import { mapSetAdd, sortComparatorString } from "@pinyinly/lib/collections";
+import { readFile, unlink } from "@pinyinly/lib/fs";
 import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import { jsonStringifyShallowIndent } from "@pinyinly/lib/json";
 import makeDebug from "debug";
-import { readFile, unlink } from "node:fs/promises";
 import path from "node:path";
 import resolvePackagePath from "resolve-package-path";
 import { z } from "zod/v4";

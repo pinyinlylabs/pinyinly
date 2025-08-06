@@ -231,6 +231,13 @@ export async function analyzeAudioFile(filePath: string) {
   return parseFfmpegOutput(stderr);
 }
 
+export const analyzeAudioFileDuration = async (
+  filePath: string,
+): Promise<number> => {
+  const analysisResult = await analyzeAudioFile(filePath);
+  return analysisResult.duration.fromContainer;
+};
+
 export function parseFfmpegOutput(output: string) {
   const loudnorm = extractLoudnorm(output);
   const duration = extractDuration(output);

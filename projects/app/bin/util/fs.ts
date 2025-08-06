@@ -1,4 +1,4 @@
-import { readFile, stat, writeFile } from "node:fs/promises";
+import { readFile, stat, writeFile } from "@pinyinly/lib/fs";
 import path from "node:path";
 import type { z } from "zod/v4";
 

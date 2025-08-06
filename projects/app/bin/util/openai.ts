@@ -1,6 +1,6 @@
+import { readFile } from "@pinyinly/lib/fs";
 import { invariant } from "@pinyinly/lib/invariant";
 import type { Debugger } from "debug";
-import { readFile } from "node:fs/promises";
 import path from "node:path";
 import OpenAI from "openai";
 import type {

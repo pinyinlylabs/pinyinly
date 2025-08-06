@@ -3,6 +3,7 @@
 const { defineConfig } = require("@yarnpkg/types");
 const { parseSyml } = require("@yarnpkg/parsers");
 const fs = require("node:fs/promises");
+const { glob } = require("@pinyinly/lib/fs");
 const YAML = require("yaml");
 
 const semver = require("semver");
@@ -322,7 +323,7 @@ async function enforceAllPatchesAreUsed(ctx) {
     }
   }
 
-  for await (const path of fs.glob(`.yarn/patches/*.patch`)) {
+  for (const path of await glob(`.yarn/patches/*.patch`)) {
     if (!usedPatchPaths.has(path)) {
       reportRootError(ctx, `Unused patch: ${path}`);
     }

@@ -10,6 +10,7 @@
     "@yarnpkg/types": "^4.0.0",
     "prettier": "^3.4.2",
     "semver": "^7.5.0",
+    "tsx": "^4.15.7",
     "typescript": "patch:typescript@npm%3A5.8.3#~/.yarn/patches/typescript-npm-5.8.3-fbd7aef456.patch",
     "yaml": "^2.7.0"
   },

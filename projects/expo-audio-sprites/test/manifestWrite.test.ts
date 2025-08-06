@@ -11,7 +11,7 @@ import {
 } from "#manifestWrite.ts";
 import type { SpriteManifest } from "#types.ts";
 import { vol } from "memfs";
-import { beforeEach, describe, expect, test, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 // Mock fs module to use memfs
 vi.mock(`node:fs`, async () => {
@@ -26,13 +26,27 @@ vi.mock(`node:fs/promises`, async () => {
 });
 
 // Mock the analyzeAudioFile function to avoid running ffmpeg in tests
-vi.mock(`../src/ffmpeg`, () => ({
-  analyzeAudioFile: vi.fn().mockResolvedValue({
-    duration: {
-      fromContainer: 1.5, // Default duration in seconds
-    },
-  }),
-}));
+vi.mock(`#ffmpeg.ts`, async (importOriginal) => {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-imports
+  const module: typeof import("../src/ffmpeg.ts") = await importOriginal();
+  return {
+    ...module,
+    // Mock analyzeAudioFileDuration to return a fixed value and avoid calling
+    // out to spawn a ffmpeg process.
+    analyzeAudioFileDuration: (async () =>
+      1.5) satisfies typeof module.analyzeAudioFileDuration,
+  };
+});
+
+beforeEach(() => {
+  vol.reset();
+  vi.restoreAllMocks();
+});
+
+afterEach(() => {
+  vol.reset();
+  vi.restoreAllMocks();
+});
 
 describe(
   `generateSpriteAssignments suite` satisfies HasNameOf<
@@ -114,10 +128,6 @@ describe(
     typeof updateManifestSegments
   >,
   () => {
-    beforeEach(() => {
-      vol.reset();
-    });
-
     test(`should add file hashes to segments based on include patterns`, async () => {
       vol.fromJSON({
         "/project/audio/wiki/hello.m4a": `content1`,
@@ -348,7 +358,7 @@ describe(
           include: [`audio/**/*.m4a`],
           rules: [
             {
-              match: `audio/test/.*\\.m4a`,
+              match: `.*audio/test/.*\\.m4a`,
               sprite: `test-sprite`,
             },
           ],
@@ -376,14 +386,135 @@ describe(
       expect(segments[0]?.[1]?.start).toBe(0); // first file starts at 0
       expect(segments[1]?.[1]?.start).toBeGreaterThan(0); // second file starts later
     });
+
+    test(`should reuse duration from existing segments when files are moved`, async () => {
+      const manifestPath = `/project/manifest.json`;
+
+      vol.fromJSON({
+        [manifestPath]: JSON.stringify({
+          spriteFiles: [],
+          segments: {},
+          include: [`audio/**/*.m4a`],
+          rules: [
+            {
+              match: `audio/.*\\.m4a`,
+              sprite: `test-sprite`,
+            },
+          ],
+        } satisfies SpriteManifest),
+        "/project/audio/test1.m4a": `different content for file 1`,
+        "/project/audio/test2.m4a": `different content for file 2`,
+      });
+
+      // Update the manifest with the initial values.
+      await syncManifestWithFilesystem(manifestPath);
+
+      // Now create a new file with the same content as another, in this case it
+      // shouldn't need to be analyzed again.
+      vol.fromJSON({
+        "/project/audio/test3.m4a": `different content for file 2`,
+      });
+
+      // Spy analyzeAudioFile to track calls
+      const analyzeAudioFileSpy = vi.spyOn(
+        await import(`#ffmpeg.ts`),
+        `analyzeAudioFile`,
+      );
+
+      const originalManifest = loadManifest(manifestPath);
+      const updatedManifest = await updateManifestSegments(
+        originalManifest!,
+        manifestPath,
+      );
+
+      expect(analyzeAudioFileSpy).toHaveBeenCalledTimes(0);
+
+      expect(updatedManifest.segments).toMatchInlineSnapshot(`
+        {
+          "audio/test1.m4a": {
+            "duration": 1.5,
+            "hash": "96111f6e6a54791b1a91b6fc8cbf5c6ca3474eeab64cf77aec290f0c446d48e5",
+            "sprite": 0,
+            "start": 0,
+          },
+          "audio/test2.m4a": {
+            "duration": 1.5,
+            "hash": "280eb73abfcdb29e9a2253a6db31b07dccebf85d58f4cf45b3aba0f3bfaa3c6f",
+            "sprite": 0,
+            "start": 2.5,
+          },
+          "audio/test3.m4a": {
+            "duration": 1.5,
+            "hash": "280eb73abfcdb29e9a2253a6db31b07dccebf85d58f4cf45b3aba0f3bfaa3c6f",
+            "sprite": 0,
+            "start": 5,
+          },
+        }
+      `);
+    });
+
+    test(`should reuse duration from existing segments when files are moved`, async () => {
+      vol.fromJSON({
+        "/project/manifest.json": JSON.stringify({
+          spriteFiles: [],
+          segments: {},
+          include: [`audio/**/*.m4a`],
+          rules: [
+            {
+              match: `audio/.*\\.m4a`,
+              sprite: `test-sprite`,
+            },
+          ],
+        } satisfies SpriteManifest),
+        "/project/audio/test1.m4a": `different content for file 1`,
+        "/project/audio/test2.m4a": `different content for file 2`,
+      });
+
+      // Mock analyzeAudioFile to track calls
+      const analyzeAudioFileDurationSpy = vi.spyOn(
+        await import(`#ffmpeg.ts`),
+        `analyzeAudioFileDuration`,
+      );
+      analyzeAudioFileDurationSpy.mockResolvedValue(3);
+
+      const originalManifest = loadManifest(`/project/manifest.json`);
+      const updatedManifest = await updateManifestSegments(
+        originalManifest!,
+        `/project/manifest.json`,
+      );
+
+      // Since file content changed, ffmpeg should be called for both files
+      expect(analyzeAudioFileDurationSpy).toHaveBeenCalledTimes(2);
+      expect(analyzeAudioFileDurationSpy.mock.calls).toMatchInlineSnapshot(`
+        [
+          [
+            "/project/audio/test1.m4a",
+          ],
+          [
+            "/project/audio/test2.m4a",
+          ],
+        ]
+      `);
+
+      // Both files should get new durations (3 seconds) since content changed
+      expect(updatedManifest.segments[`audio/test1.m4a`]?.duration).toBe(3);
+      expect(updatedManifest.segments[`audio/test2.m4a`]?.duration).toBe(3);
+
+      // Rename test2.m4a to test3.m4a with same content
+      vol.fromJSON({
+        "/project/audio/test2.m4a": null,
+        "/project/audio/test3.m4a": `different content for file 2`,
+      });
+
+      {
+        await updateManifestSegments(updatedManifest, `/project/manifest.json`);
+        expect(analyzeAudioFileDurationSpy).toHaveBeenCalledTimes(2);
+      }
+    });
   },
 );
 
 describe(`saveManifest suite` satisfies HasNameOf<typeof saveManifest>, () => {
-  beforeEach(() => {
-    vol.reset();
-  });
-
   test(`should save manifest to filesystem`, async () => {
     // Create the directory structure
     vol.fromJSON({
@@ -462,10 +593,6 @@ describe(
     typeof syncManifestWithFilesystem
   >,
   () => {
-    beforeEach(() => {
-      vol.reset();
-    });
-
     test(`should load, update, and save manifest`, async () => {
       vol.fromJSON({
         "/project/audio/wiki/hello.m4a": `content1`,
@@ -538,10 +665,6 @@ describe(
 );
 
 describe(`hashFile suite` satisfies HasNameOf<typeof hashFile>, () => {
-  beforeEach(() => {
-    vol.reset();
-  });
-
   test(`should produce different hashes for different file contents`, () => {
     const file1Path = `/test/file1.m4a`;
     const file2Path = `/test/file2.m4a`;
@@ -676,10 +799,6 @@ describe(
     typeof resolveIncludePatterns
   >,
   () => {
-    beforeEach(() => {
-      vol.reset();
-    });
-
     test(`should resolve glob patterns to matching files`, () => {
       vol.fromJSON({
         "/project/audio/wiki/hello/greeting.m4a": `content1`,
@@ -744,10 +863,6 @@ describe(
 describe(
   `getInputFiles suite` satisfies HasNameOf<typeof getInputFiles>,
   () => {
-    beforeEach(() => {
-      vol.reset();
-    });
-
     test(`should return files based on manifest include patterns`, () => {
       const manifestPath = `/project/manifest.json`;
 

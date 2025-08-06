@@ -220,15 +220,27 @@ const recommended: InfiniteDepthConfigWithExtends[] = [
             },
             {
               name: `node:assert`,
-              message: `Please use node:assert/strict`,
+              message: `Please use node:assert/strict instead.`,
+            },
+            {
+              name: `node:test`,
+              message: `Please use vitest instead.`,
             },
             {
               name: `zod`,
-              message: `Please use zod/v4 instead`,
+              message: `Please use zod/v4 instead.`,
+            },
+            {
+              name: `glob`,
+              message: `Please use glob from @pinyinly/lib/fs instead.`,
+            },
+            {
+              name: `node:fs/promises`,
+              message: `Please use @pinyinly/lib/fs instead.`,
             },
             {
               name: `@bacons/mdx`,
-              message: `Please use @/client/mdx instead`,
+              message: `Please use @/client/mdx instead.`,
             },
           ],
         },

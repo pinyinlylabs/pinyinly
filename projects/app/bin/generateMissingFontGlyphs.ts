@@ -4,10 +4,10 @@ import {
   loadHanziDecomposition,
 } from "#dictionary/dictionary.ts";
 import { unicodeShortIdentifier } from "#util/unicode.ts";
+import { glob, writeFile } from "@pinyinly/lib/fs";
 import { invariant } from "@pinyinly/lib/invariant";
 import { jsonStringifyShallowIndent } from "@pinyinly/lib/json";
 import * as fontkit from "fontkit";
-import { glob, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 const projectRoot = path.join(import.meta.dirname, `..`);
@@ -18,7 +18,7 @@ const notoSansSc = await fontkit.open(
 invariant(notoSansSc.type === `TTF`, `expected a TTF font`);
 
 let pingFangPath;
-for await (const p of glob(
+for (const p of await glob(
   // Sequoia 15.3 path
   `/System/Library/AssetsV2/com_apple_MobileAsset_Font7/*.asset/AssetData/PingFang.ttc`,
 )) {

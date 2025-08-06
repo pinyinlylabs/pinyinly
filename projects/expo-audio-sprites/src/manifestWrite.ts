@@ -1,10 +1,9 @@
-import { writeUtf8FileIfChanged } from "@pinyinly/lib/fs";
+import { analyzeAudioFileDuration } from "#ffmpeg.ts";
+import { globSync, writeUtf8FileIfChanged } from "@pinyinly/lib/fs";
 import { jsonStringifyShallowIndent } from "@pinyinly/lib/json";
-import { globSync } from "glob";
 import * as crypto from "node:crypto";
 import * as fs from "node:fs";
 import path from "node:path";
-import { analyzeAudioFile } from "./ffmpeg";
 import { loadManifest } from "./manifestRead.ts";
 import type { SpriteManifest, SpriteRule, SpriteSegment } from "./types.ts";
 
@@ -140,45 +139,49 @@ export const updateManifestSegments = async (
   const manifestDir = path.dirname(manifestPath);
   const inputFiles = getInputFiles(manifest, manifestPath);
 
-  const updatedSegments: Record<string, SpriteSegment> = {
-    ...manifest.segments,
-  };
+  const updatedSegments: Record<string, SpriteSegment> = {};
 
-  const fileHashMap = new Map<string, string>();
-  const fileDurationMap = new Map<string, number>();
+  const fileHashMap = new Map<
+    /* file name */ string,
+    /* content hash */ string
+  >();
+  const fileDurationMap = new Map<
+    /* file name */ string,
+    /* duration in seconds */ number
+  >();
 
-  // Hash each file, get duration, and add segment data
+  // Create a lookup map of existing segments by their content hash
+  const existingSegmentsByHash = new Map<string, SpriteSegment>();
+  for (const segment of Object.values(manifest.segments)) {
+    existingSegmentsByHash.set(segment.hash, segment);
+  }
+
+  // Process each file to get hash and duration
   for (const relativePath of inputFiles) {
     const absolutePath = path.resolve(manifestDir, relativePath);
 
     try {
-      const [fileHash, analysisResult] = await Promise.all([
-        hashFile(absolutePath),
-        analyzeAudioFile(absolutePath),
-      ]);
-
+      const fileHash = hashFile(absolutePath);
       fileHashMap.set(relativePath, fileHash);
-      fileDurationMap.set(relativePath, analysisResult.duration.fromContainer);
 
-      // Only add if not already present
-      if (updatedSegments[relativePath] == null) {
-        // Placeholder values: sprite index will be updated when sprites are assigned
-        // start time will be set when actual sprites are built
-        updatedSegments[relativePath] = {
-          sprite: 0,
-          start: 0,
-          duration: analysisResult.duration.fromContainer,
-          hash: fileHash,
-        };
-      } else {
-        // Update duration and hash for existing entries
-        const existingSegment = updatedSegments[relativePath];
-        updatedSegments[relativePath] = {
-          ...existingSegment,
-          duration: analysisResult.duration.fromContainer,
-          hash: fileHash,
-        };
-      }
+      // Check if we already have segment data for this content hash
+      const existingSegment = existingSegmentsByHash.get(fileHash);
+
+      const duration = existingSegment
+        ? // Reuse duration from existing segment data (avoid calling ffmpeg)
+          existingSegment.duration
+        : // New file - analyze with ffmpeg to get duration
+          await analyzeAudioFileDuration(absolutePath);
+
+      fileDurationMap.set(relativePath, duration);
+
+      // Create segment entry for this file path
+      updatedSegments[relativePath] = {
+        sprite: 0, // Will be updated when sprites are assigned
+        start: 0, // Will be updated when sprites are built
+        duration,
+        hash: fileHash,
+      };
     } catch (error) {
       console.warn(`Failed to process file ${relativePath}:`, error);
     }

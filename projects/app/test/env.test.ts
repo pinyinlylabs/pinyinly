@@ -1,5 +1,5 @@
+import * as fs from "@pinyinly/lib/fs";
 import chalk from "chalk";
-import * as fs from "node:fs/promises";
 import path from "node:path";
 import { expect, test } from "vitest";
 
@@ -79,14 +79,17 @@ test(`src/ files have consistent NFC and NFD encoding`, async () => {
   const projectRoot = import.meta.dirname + `/..`;
   const srcRoot = `${projectRoot}/src`;
 
-  for await (const path of fs.glob(`${srcRoot}/**/*`)) {
+  for (const path of await fs.glob(`${srcRoot}/**/*`)) {
     expect(path.normalize(`NFD`)).toEqual(path.normalize(`NFC`));
   }
 });
 
-async function getTreePaths(root: string, glob: string): Promise<string[]> {
+async function getTreePaths(
+  root: string,
+  globPattern: string,
+): Promise<string[]> {
   const paths: string[] = [];
-  for await (const p of fs.glob(`${root}/${glob}`)) {
+  for (const p of await fs.glob(`${root}/${globPattern}`)) {
     paths.push(path.relative(root, p));
   }
   return paths;
