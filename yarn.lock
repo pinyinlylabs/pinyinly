@@ -1642,13 +1642,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@eslint/css-tree@npm:^3.6.1":
-  version: 3.6.1
-  resolution: "@eslint/css-tree@npm:3.6.1"
+"@eslint/css-tree@npm:^3.6.3":
+  version: 3.6.3
+  resolution: "@eslint/css-tree@npm:3.6.3"
   dependencies:
     mdn-data: "npm:2.21.0"
     source-map-js: "npm:^1.0.1"
-  checksum: 10c0/bf482dd90061c8f1cd425f0f3da1322254525d96ab1fb5b542934703e349b29e72701bf394e3bb286d6eb2faa8b7172b29a86d8e1809be1038ce0c7367c4bac1
+  checksum: 10c0/5025d106e2a61d14e807f0d26f20e1aa766ef8f2b6fe9ef02ce84c2ff463cbc57022b38d740d56d0683484adf3ac8795f7565f1955f2ee75c0f3a5cc4b3dd47d
   languageName: node
   linkType: hard
 
@@ -4826,10 +4826,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pkgr/core@npm:^0.2.4":
-  version: 0.2.7
-  resolution: "@pkgr/core@npm:0.2.7"
-  checksum: 10c0/951f5ebf2feb6e9dbc202d937f1a364d60f2bf0e3e53594251bcc1d9d2ed0df0a919c49ba162a9499fce73cf46ebe4d7959a8dfbac03511dbe79b69f5fedb804
+"@pkgr/core@npm:^0.2.9":
+  version: 0.2.9
+  resolution: "@pkgr/core@npm:0.2.9"
+  checksum: 10c0/ac8e4e8138b1a7a4ac6282873aef7389c352f1f8b577b4850778f5182e4a39a5241facbe48361fec817f56d02b51691b383010843fb08b34a8e8ea3614688fd5
   languageName: node
   linkType: hard
 
@@ -9550,6 +9550,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"enhanced-resolve@npm:^5.7.0":
+  version: 5.18.3
+  resolution: "enhanced-resolve@npm:5.18.3"
+  dependencies:
+    graceful-fs: "npm:^4.2.4"
+    tapable: "npm:^2.2.0"
+  checksum: 10c0/d413c23c2d494e4c1c9c9ac7d60b812083dc6d446699ed495e69c920988af0a3c66bf3f8d0e7a45cb1686c2d4c1df9f4e7352d973f5b56fe63d8d711dd0ccc54
+  languageName: node
+  linkType: hard
+
 "entities@npm:^4.2.0, entities@npm:^4.4.0":
   version: 4.5.0
   resolution: "entities@npm:4.5.0"
@@ -10027,20 +10037,21 @@ __metadata:
   linkType: hard
 
 "eslint-plugin-better-tailwindcss@npm:^3.1.0":
-  version: 3.6.2
-  resolution: "eslint-plugin-better-tailwindcss@npm:3.6.2"
+  version: 3.7.4
+  resolution: "eslint-plugin-better-tailwindcss@npm:3.7.4"
   dependencies:
-    "@eslint/css-tree": "npm:^3.6.1"
+    "@eslint/css-tree": "npm:^3.6.3"
     enhanced-resolve: "npm:^5.18.2"
-    jiti: "npm:^2.4.2"
+    jiti: "npm:^2.5.1"
     postcss: "npm:^8.5.6"
     postcss-import: "npm:^16.1.1"
-    synckit: "npm:^0.11.8"
-    tailwind-csstree: "npm:^0.1.1"
+    synckit: "npm:^0.11.11"
+    tailwind-csstree: "npm:^0.1.2"
+    tsconfig-paths-webpack-plugin: "npm:^4.2.0"
   peerDependencies:
     eslint: ^7.0.0 || ^8.0.0 || ^9.0.0
     tailwindcss: ^3.3.0 || ^4.1.6
-  checksum: 10c0/a778a98747bd2b1e3ce423c7894c55035a37c7d86e8cb7eba76972c37ed602f39f78ec65dce20aeb1de2109c28565629c01e54a4079c3a8a112d3bbde8e17ac1
+  checksum: 10c0/8c47e2e97ef5f708ee127cad177e80d030c3203733f3f5537f8abb1e78b97503695586ee0390f350b83bb0794180b4fbdbeb4e96df23b5d9b975d34d4bcb4975
   languageName: node
   linkType: hard
 
@@ -13090,7 +13101,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jiti@npm:2.4.2, jiti@npm:^2.4.2":
+"jiti@npm:2.4.2":
   version: 2.4.2
   resolution: "jiti@npm:2.4.2"
   bin:
@@ -13105,6 +13116,15 @@ __metadata:
   bin:
     jiti: bin/jiti.js
   checksum: 10c0/77b61989c758ff32407cdae8ddc77f85e18e1a13fc4977110dbd2e05fc761842f5f71bce684d9a01316e1c4263971315a111385759951080bbfe17cbb5de8f7a
+  languageName: node
+  linkType: hard
+
+"jiti@npm:^2.5.1":
+  version: 2.5.1
+  resolution: "jiti@npm:2.5.1"
+  bin:
+    jiti: lib/jiti-cli.mjs
+  checksum: 10c0/f0a38d7d8842cb35ffe883038166aa2d52ffd21f1a4fc839ae4076ea7301c22a1f11373f8fc52e2667de7acde8f3e092835620dd6f72a0fbe9296b268b0874bb
   languageName: node
   linkType: hard
 
@@ -18527,19 +18547,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"synckit@npm:^0.11.8":
-  version: 0.11.8
-  resolution: "synckit@npm:0.11.8"
+"synckit@npm:^0.11.11":
+  version: 0.11.11
+  resolution: "synckit@npm:0.11.11"
   dependencies:
-    "@pkgr/core": "npm:^0.2.4"
-  checksum: 10c0/a1de5131ee527512afcaafceb2399b2f3e63678e56b831e1cb2dc7019c972a8b654703a3b94ef4166868f87eb984ea252b467c9d9e486b018ec2e6a55c24dfd8
+    "@pkgr/core": "npm:^0.2.9"
+  checksum: 10c0/f0761495953d12d94a86edf6326b3a565496c72f9b94c02549b6961fb4d999f4ca316ce6b3eb8ed2e4bfc5056a8de65cda0bd03a233333a35221cd2fdc0e196b
   languageName: node
   linkType: hard
 
-"tailwind-csstree@npm:^0.1.1":
-  version: 0.1.1
-  resolution: "tailwind-csstree@npm:0.1.1"
-  checksum: 10c0/137215440f59942df640d90efbbac66ba61680d13f73ede4f4c5b3d880a54cc7298b2a70b7cae9d634bc51778445901362217650848e2aebfb481aa75ece2e0e
+"tailwind-csstree@npm:^0.1.2":
+  version: 0.1.2
+  resolution: "tailwind-csstree@npm:0.1.2"
+  checksum: 10c0/4b0d12afa3a55858962753bbec6a96e820ae1d9486905222f17364a6680a125e498a056da65d5e8c4ff711138bd41d9e01011b4f83bc71228f5dea2f13fa027a
   languageName: node
   linkType: hard
 
@@ -18594,7 +18614,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tapable@npm:^2.2.0":
+"tapable@npm:^2.2.0, tapable@npm:^2.2.1":
   version: 2.2.2
   resolution: "tapable@npm:2.2.2"
   checksum: 10c0/8ad130aa705cab6486ad89e42233569a1fb1ff21af115f59cebe9f2b45e9e7995efceaa9cc5062510cdb4ec673b527924b2ab812e3579c55ad659ae92117011e
@@ -18941,7 +18961,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tsconfig-paths@npm:4.2.0":
+"tsconfig-paths-webpack-plugin@npm:^4.2.0":
+  version: 4.2.0
+  resolution: "tsconfig-paths-webpack-plugin@npm:4.2.0"
+  dependencies:
+    chalk: "npm:^4.1.0"
+    enhanced-resolve: "npm:^5.7.0"
+    tapable: "npm:^2.2.1"
+    tsconfig-paths: "npm:^4.1.2"
+  checksum: 10c0/495c5ab7c1cb079217d98fe25d61def01e4bab38047c7ab25ec11876cc8c697ff01f43ea6c9933181875e51e49835407fc71afd92ea6cca1ba1bebf513dfb510
+  languageName: node
+  linkType: hard
+
+"tsconfig-paths@npm:4.2.0, tsconfig-paths@npm:^4.1.2":
   version: 4.2.0
   resolution: "tsconfig-paths@npm:4.2.0"
   dependencies:
