@@ -63,7 +63,7 @@ tasks:
   buildVercelExpoSentry:
     command: |
       rsync -a --delete @group(buildVercelExpoOutdir) @group(buildVercelExpoSentryOutdir) &&
-      npx -y @sentry/cli@2.47.0 sourcemaps inject @group(buildVercelExpoSentryOutdir)
+      npx -y @sentry/cli@2.50.2 sourcemaps inject @group(buildVercelExpoSentryOutdir)
     deps:
       - buildVercelExpo
     inputs:
@@ -145,7 +145,7 @@ tasks:
       - buildVercel
 
   deployVercelSentry:
-    command: npx -y @sentry/cli@2.47.0 sourcemaps upload -o pinyinly -p app @group(buildVercelOutdir)
+    command: npx -y @sentry/cli@2.50.2 sourcemaps upload -o pinyinly -p app @group(buildVercelOutdir)
     deps:
       - buildVercel
     options:
