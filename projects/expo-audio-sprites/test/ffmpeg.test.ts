@@ -15,6 +15,9 @@ import { describe, expect, test } from "vitest";
 
 const execFileAsync = promisify(execFile);
 
+const fixturesDir = path.join(import.meta.dirname, `fixtures`);
+const outputsDir = path.join(fixturesDir, `outputs`);
+
 test(
   `parseFfmpegOutput suite` satisfies HasNameOf<typeof parseFfmpegOutput>,
   () => {
@@ -385,7 +388,6 @@ describe(`Integration tests with real ffmpeg`, () => {
   });
 
   test(`generateSpriteCommand produces working ffmpeg command`, async () => {
-    const fixturesDir = path.join(import.meta.dirname, `fixtures`);
     const outputPath = path.join(fixturesDir, `test-sprite.m4a`);
 
     // Clean up any existing output file
@@ -435,8 +437,7 @@ describe(`Integration tests with real ffmpeg`, () => {
   });
 
   test(`generateSpriteCommand works with three files`, async () => {
-    const fixturesDir = path.join(import.meta.dirname, `fixtures`);
-    const outputPath = path.join(fixturesDir, `test-sprite-three.m4a`);
+    const outputPath = path.join(outputsDir, `test-sprite-three.m4a`);
 
     // Clean up any existing output file
     if (existsSync(outputPath)) {
@@ -491,7 +492,6 @@ describe(`Integration tests with real ffmpeg`, () => {
 
   test(`full filesystem integration with manifest processing`, async () => {
     const testDir = path.join(import.meta.dirname, `integration-test`);
-    const fixturesDir = path.join(import.meta.dirname, `fixtures`);
     const manifestPath = path.join(testDir, `manifest.json`);
 
     // Clean up any existing test directory

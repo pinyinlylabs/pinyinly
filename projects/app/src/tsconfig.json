@@ -1,7 +1,6 @@
 {
   "extends": "../../../tsconfig.base",
   "compilerOptions": {
-    "baseUrl": ".",
     "esModuleInterop": true,
     "jsx": "preserve",
     "lib": ["DOM", "ES2022"],
@@ -9,7 +8,7 @@
     "moduleResolution": "Bundler",
     "outDir": "../../../.moon/cache/types/projects/app-src",
     "paths": {
-      "@/*": ["*"]
+      "@/*": ["./*"]
     },
     "resolveJsonModule": true,
     "target": "ESNext"

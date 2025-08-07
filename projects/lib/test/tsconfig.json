@@ -1,7 +1,6 @@
 {
   "extends": "../../../tsconfig.base",
   "compilerOptions": {
-    "baseUrl": ".",
     "esModuleInterop": true,
     "lib": ["DOM", "ESNext"],
     "module": "nodenext",

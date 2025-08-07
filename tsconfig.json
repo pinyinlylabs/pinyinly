@@ -2,7 +2,6 @@
   "extends": "./tsconfig.base",
   "compilerOptions": {
     "outDir": ".moon/cache/types",
-    "baseUrl": ".",
     "lib": ["ESNext"],
     "target": "ESNext",
     "moduleResolution": "nodenext",
