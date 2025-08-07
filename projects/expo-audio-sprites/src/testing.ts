@@ -240,9 +240,12 @@ export function getAllAudioFilesBySprite(
  * @returns Promise that resolves when all sprites have been generated
  */
 export async function generateSprites(manifestPath: string): Promise<void> {
-  // First, sync the manifest to ensure it's up to date
-  const manifest = await syncManifestWithFilesystem(manifestPath);
+  const manifest = loadManifest(manifestPath);
   const manifestDir = path.dirname(manifestPath);
+
+  if (!manifest) {
+    throw new Error(`Failed to load manifest from ${manifestPath}`);
+  }
 
   // Get all audio files grouped by sprite file path
   const spriteGroups = getAllAudioFilesBySprite(manifest);
@@ -255,6 +258,12 @@ export async function generateSprites(manifestPath: string): Promise<void> {
     // Check if sprite file already exists
     if (fs.existsSync(absoluteSpriteFilePath)) {
       continue;
+    }
+
+    // Ensure the output directory exists
+    const spriteDir = path.dirname(absoluteSpriteFilePath);
+    if (!fs.existsSync(spriteDir)) {
+      fs.mkdirSync(spriteDir, { recursive: true });
     }
 
     // Generate ffmpeg command

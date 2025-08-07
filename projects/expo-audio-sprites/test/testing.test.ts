@@ -1,10 +1,12 @@
 import {
   assertSpritesUpToDate,
   checkSpriteManifest,
+  generateSprites,
   getAllAudioFilesBySprite,
   verifySprites,
 } from "#testing.ts";
 import type { SpriteManifest } from "#types.ts";
+import { globSync } from "@pinyinly/lib/fs";
 import { vol } from "memfs";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
@@ -12,6 +14,12 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 vi.mock(`node:fs`, async () => {
   const { fs } = await vi.importActual(`memfs`);
   return fs;
+});
+
+// Redirect `node:fs/promises` to use `memfs`'s `promises` API
+vi.mock(`node:fs/promises`, async () => {
+  const { promises } = await vi.importActual(`memfs`);
+  return promises;
 });
 
 // Mock the analyzeAudioFile function to avoid running ffmpeg in tests
@@ -33,12 +41,15 @@ vi.mock(`#ffmpeg.ts`, async (importOriginal) => {
 
 // Mock execa to avoid running actual commands
 vi.mock(`execa`, async () => ({
-  execa: vi.fn().mockResolvedValue({ stdout: ``, stderr: `` }),
+  execa: () => ({ stdout: ``, stderr: `` }),
 }));
+
+let consoleWarnSpy: ReturnType<typeof vi.spyOn>;
 
 beforeEach(() => {
   vol.reset();
   vi.restoreAllMocks();
+  consoleWarnSpy = vi.spyOn(console, `warn`).mockImplementation(() => null);
 });
 
 afterEach(() => {
@@ -419,6 +430,88 @@ describe(
 
       const spriteGroups = getAllAudioFilesBySprite(manifest);
       expect(spriteGroups).toMatchInlineSnapshot(`Map {}`);
+    });
+  },
+);
+
+describe(
+  `generateSprites suite` satisfies HasNameOf<typeof generateSprites>,
+  () => {
+    test(`creates output directories when they don't exist`, async () => {
+      // Create a manifest with sprite files in a nested directory
+      const manifestWithNestedSprites: SpriteManifest = {
+        spriteFiles: [`nested/sprites/audio-sprite.m4a`],
+        segments: {
+          "audio1.m4a": {
+            sprite: 0,
+            start: 0,
+            duration: 1.5,
+            hash: `abc123`,
+          },
+        },
+        rules: [],
+        include: [`audio*.m4a`],
+      };
+
+      vol.fromJSON({
+        "/test/manifest.json": JSON.stringify(manifestWithNestedSprites),
+        "/test/audio1.m4a": `fake audio content`,
+      });
+
+      // Verify directory doesn't exist initially
+      expect(vol.existsSync(`/test/nested`)).toBe(false);
+      expect(vol.existsSync(`/test/nested/sprites`)).toBe(false);
+
+      // Generate sprites should create the directory and sprite file
+      await generateSprites(`/test/manifest.json`);
+
+      // Verify directory was created
+      expect(vol.existsSync(`/test/nested`)).toBe(true);
+      expect(vol.existsSync(`/test/nested/sprites`)).toBe(true);
+    });
+
+    test(`skips generation when sprite file already exists`, async () => {
+      const manifestWithExistingSprite: SpriteManifest = {
+        spriteFiles: [`sprite-f1aada43ff61.m4a`],
+        segments: {
+          "audio1.m4a": {
+            sprite: 0,
+            start: 0,
+            duration: 1.5,
+            hash: `abc123`,
+          },
+        },
+        rules: [
+          {
+            match: `(audio.+)\\.m4a$`,
+            sprite: `sprite`,
+          },
+        ],
+        include: [`audio*.m4a`],
+      };
+
+      vol.fromJSON({
+        "/test/manifest.json": JSON.stringify(manifestWithExistingSprite),
+        "/test/audio1.m4a": `fake audio content`,
+        "/test/sprite-f1aada43ff61.m4a": `existing sprite content`,
+      });
+
+      expect(globSync(`/test/**`, { fs: await import(`node:fs`) }))
+        .toMatchInlineSnapshot(`
+          [
+            "/test",
+            "/test/sprite-f1aada43ff61.m4a",
+            "/test/manifest.json",
+            "/test/audio1.m4a",
+          ]
+        `);
+
+      await generateSprites(`/test/manifest.json`);
+
+      // Should not have called ffmpeg since file already exists
+      expect(consoleWarnSpy).not.toHaveBeenCalledWith(
+        expect.stringContaining(`Generat`),
+      );
     });
   },
 );
