@@ -14,6 +14,7 @@ import {
   merge,
   sortComparatorString,
 } from "@pinyinly/lib/collections";
+import { writeUtf8FileIfChanged } from "@pinyinly/lib/fs";
 import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import { jsonStringifyShallowIndent } from "@pinyinly/lib/json";
 import makeDebug from "debug";
@@ -21,11 +22,7 @@ import path from "node:path";
 import yargs from "yargs";
 import { z } from "zod/v4";
 import { makeDbCache } from "./util/cache.js";
-import {
-  dictionaryPath,
-  readFileWithSchema,
-  writeUtf8FileIfChanged,
-} from "./util/fs.js";
+import { dictionaryPath, readFileWithSchema } from "./util/fs.js";
 import { makeSimpleAiClient } from "./util/openai.js";
 
 const debug = makeDebug(`pyly`);

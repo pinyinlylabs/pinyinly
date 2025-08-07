@@ -10,6 +10,7 @@ import {
   mergeMaps,
   sortComparatorString,
 } from "@pinyinly/lib/collections";
+import { writeUtf8FileIfChanged } from "@pinyinly/lib/fs";
 import { invariant } from "@pinyinly/lib/invariant";
 import { jsonStringifyShallowIndent } from "@pinyinly/lib/json";
 import makeDebug from "debug";
@@ -19,7 +20,6 @@ import yargs from "yargs";
 import z from "zod/v4";
 import { makeDbCache } from "./util/cache.js";
 import { fetchWithCache } from "./util/fetch.js";
-import { writeUtf8FileIfChanged } from "./util/fs.js";
 
 const debug = makeDebug(`pyly`);
 

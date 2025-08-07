@@ -1,8 +1,7 @@
-import { readFile } from "@pinyinly/lib/fs";
+import { readFile, writeUtf8FileIfChanged } from "@pinyinly/lib/fs";
 import { jsonStringifyShallowIndent } from "@pinyinly/lib/json";
 import makeDebug from "debug";
 import yargs from "yargs";
-import { writeUtf8FileIfChanged } from "./util/fs.js";
 
 const debug = makeDebug(`pyly`);
 

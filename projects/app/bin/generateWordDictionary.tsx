@@ -50,6 +50,7 @@ import {
   sortComparatorNumber,
   sortComparatorString,
 } from "@pinyinly/lib/collections";
+import { writeUtf8FileIfChanged } from "@pinyinly/lib/fs";
 import { invariant } from "@pinyinly/lib/invariant";
 import { jsonStringifyShallowIndent } from "@pinyinly/lib/json";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -80,11 +81,7 @@ import {
   getDongChineseMeaningKey,
   getDongChinesePinyin,
 } from "./util/dongChinese.js";
-import {
-  dictionaryPath,
-  readFileWithSchema,
-  writeUtf8FileIfChanged,
-} from "./util/fs.js";
+import { dictionaryPath, readFileWithSchema } from "./util/fs.js";
 import { makeSimpleAiClient } from "./util/openai.js";
 
 const debug = makeDebug(`pyly`);
