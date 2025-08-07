@@ -1,7 +1,6 @@
 {
   "extends": "../../tsconfig.base",
   "compilerOptions": {
-    "baseUrl": ".",
     "esModuleInterop": true,
     "jsx": "preserve",
     "module": "NodeNext",
@@ -11,7 +10,7 @@
     // references so it just compiles using this tsconfig file instead of the
     // one in `src/`.
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     },
     "target": "ESNext",
     "types": ["@pinyinly/eslint-rules/nameof.d.ts"]

@@ -4,12 +4,13 @@ import {
   generateSpriteAssignments,
   getInputFiles,
   hashFile,
+  recomputeManifest,
   resolveIncludePatterns,
   saveManifest,
   syncManifestWithFilesystem,
-  updateManifestSegments,
 } from "#manifestWrite.ts";
 import type { SpriteManifest } from "#types.ts";
+import { invariant } from "@pinyinly/lib/invariant";
 import { vol } from "memfs";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
@@ -124,9 +125,7 @@ describe(
 );
 
 describe(
-  `updateManifestSegments suite` satisfies HasNameOf<
-    typeof updateManifestSegments
-  >,
+  `recomputeManifest suite` satisfies HasNameOf<typeof recomputeManifest>,
   () => {
     test(`should add file hashes to segments based on include patterns`, async () => {
       vol.fromJSON({
@@ -137,11 +136,12 @@ describe(
           segments: {},
           rules: [],
           include: [`audio/**/*.m4a`],
+          outDir: `sprites`,
         } satisfies SpriteManifest),
       });
 
       const originalManifest = loadManifest(`/project/manifest.json`);
-      const updatedManifest = await updateManifestSegments(
+      const updatedManifest = await recomputeManifest(
         originalManifest!,
         `/project/manifest.json`,
       );
@@ -176,10 +176,11 @@ describe(
           segments: {},
           rules: [],
           include: [`audio/**/*.m4a`],
+          outDir: `sprites`,
         } satisfies SpriteManifest),
       });
 
-      const originalManifest = await updateManifestSegments(
+      const originalManifest = await recomputeManifest(
         loadManifest(`/project/manifest.json`)!,
         `/project/manifest.json`,
       );
@@ -189,7 +190,7 @@ describe(
       vol.fromJSON({
         "/project/audio/new-file.m4a": `new content`,
       });
-      const updatedManifest = await updateManifestSegments(
+      const updatedManifest = await recomputeManifest(
         loadManifest(`/project/manifest.json`)!,
         `/project/manifest.json`,
       );
@@ -232,11 +233,12 @@ describe(
           segments: {},
           include: [],
           rules: [],
+          outDir: `sprites`,
         } satisfies SpriteManifest),
       });
 
       const originalManifest = loadManifest(`/project/manifest.json`);
-      const updatedManifest = await updateManifestSegments(
+      const updatedManifest = await recomputeManifest(
         originalManifest!,
         `/project/manifest.json`,
       );
@@ -259,11 +261,12 @@ describe(
               sprite: `wiki-\${page}`,
             },
           ],
+          outDir: `sprites`,
         } satisfies SpriteManifest),
       });
 
       const originalManifest = loadManifest(`/project/manifest.json`);
-      const updatedManifest = await updateManifestSegments(
+      const updatedManifest = await recomputeManifest(
         originalManifest!,
         `/project/manifest.json`,
       );
@@ -318,17 +321,18 @@ describe(
               sprite: `test-sprite`,
             },
           ],
+          outDir: `sprites`,
         } satisfies SpriteManifest),
       });
 
       const originalManifest = loadManifest(`/project/manifest.json`);
-      const updatedManifest1 = await updateManifestSegments(
+      const updatedManifest1 = await recomputeManifest(
         originalManifest!,
         `/project/manifest.json`,
       );
 
       // Run it again with same files - should produce same hash
-      const updatedManifest2 = await updateManifestSegments(
+      const updatedManifest2 = await recomputeManifest(
         originalManifest!,
         `/project/manifest.json`,
       );
@@ -362,11 +366,12 @@ describe(
               sprite: `test-sprite`,
             },
           ],
+          outDir: `sprites`,
         } satisfies SpriteManifest),
       });
 
       const originalManifest = loadManifest(`/project/manifest.json`);
-      const updatedManifest = await updateManifestSegments(
+      const updatedManifest = await recomputeManifest(
         originalManifest!,
         `/project/manifest.json`,
       );
@@ -401,6 +406,7 @@ describe(
               sprite: `test-sprite`,
             },
           ],
+          outDir: `sprites`,
         } satisfies SpriteManifest),
         "/project/audio/test1.m4a": `different content for file 1`,
         "/project/audio/test2.m4a": `different content for file 2`,
@@ -422,7 +428,7 @@ describe(
       );
 
       const originalManifest = loadManifest(manifestPath);
-      const updatedManifest = await updateManifestSegments(
+      const updatedManifest = await recomputeManifest(
         originalManifest!,
         manifestPath,
       );
@@ -465,6 +471,7 @@ describe(
               sprite: `test-sprite`,
             },
           ],
+          outDir: `sprites`,
         } satisfies SpriteManifest),
         "/project/audio/test1.m4a": `different content for file 1`,
         "/project/audio/test2.m4a": `different content for file 2`,
@@ -478,7 +485,7 @@ describe(
       analyzeAudioFileDurationSpy.mockResolvedValue(3);
 
       const originalManifest = loadManifest(`/project/manifest.json`);
-      const updatedManifest = await updateManifestSegments(
+      const updatedManifest = await recomputeManifest(
         originalManifest!,
         `/project/manifest.json`,
       );
@@ -507,7 +514,7 @@ describe(
       });
 
       {
-        await updateManifestSegments(updatedManifest, `/project/manifest.json`);
+        await recomputeManifest(updatedManifest, `/project/manifest.json`);
         expect(analyzeAudioFileDurationSpy).toHaveBeenCalledTimes(2);
       }
     });
@@ -538,6 +545,7 @@ describe(`saveManifest suite` satisfies HasNameOf<typeof saveManifest>, () => {
         },
       ],
       include: [`audio/**/*.m4a`],
+      outDir: `sprites`,
     } satisfies SpriteManifest;
 
     await saveManifest(manifest, `/project/manifest.json`);
@@ -562,6 +570,7 @@ describe(`saveManifest suite` satisfies HasNameOf<typeof saveManifest>, () => {
         rules: [],
         segments: {},
         include: [],
+        outDir: `sprites`,
       },
       `/project/manifest.json`,
     );
@@ -582,7 +591,8 @@ describe(`saveManifest suite` satisfies HasNameOf<typeof saveManifest>, () => {
       },
       "include":[
 
-      ]
+      ],
+      "outDir":"sprites"
       }"
     `);
   });
@@ -607,6 +617,7 @@ describe(
             },
           ],
           include: [`audio/**/*.m4a`],
+          outDir: `sprites`,
         } satisfies SpriteManifest),
       });
 
@@ -619,6 +630,7 @@ describe(
           "include": [
             "audio/**/*.m4a",
           ],
+          "outDir": "sprites",
           "rules": [
             {
               "match": ".+/(?<basename>[^/]+)\\.m4a$",
@@ -640,8 +652,8 @@ describe(
             },
           },
           "spriteFiles": [
-            "beep-c74af0ec4db0.m4a",
-            "hello-5a4f170e6d6e.m4a",
+            "beep-8a6b55bfa4b1.m4a",
+            "hello-69005fdb2c21.m4a",
           ],
         }
       `);
@@ -799,7 +811,7 @@ describe(
     typeof resolveIncludePatterns
   >,
   () => {
-    test(`should resolve glob patterns to matching files`, () => {
+    test(`should resolve glob patterns to matching files`, async () => {
       vol.fromJSON({
         "/project/audio/wiki/hello/greeting.m4a": `content1`,
         "/project/audio/wiki/world/intro.m4a": `content2`,
@@ -809,7 +821,7 @@ describe(
       });
 
       const patterns = [`audio/**/hello/*.m4a`, `audio/sounds/*.m4a`];
-      const result = resolveIncludePatterns(patterns, `/project`);
+      const result = await resolveIncludePatterns(patterns, `/project`);
 
       expect(result).toEqual([
         `audio/sounds/beep.m4a`,
@@ -817,29 +829,29 @@ describe(
       ]);
     });
 
-    test(`should handle patterns that match no files`, () => {
+    test(`should handle patterns that match no files`, async () => {
       vol.fromJSON({
         "/project/video/clip.mp4": `content`,
       });
 
       const patterns = [`audio/**/*.m4a`];
-      const result = resolveIncludePatterns(patterns, `/project`);
+      const result = await resolveIncludePatterns(patterns, `/project`);
 
       expect(result).toEqual([]);
     });
 
-    test(`should remove duplicates when patterns overlap`, () => {
+    test(`should remove duplicates when patterns overlap`, async () => {
       vol.fromJSON({
         "/project/audio/file.m4a": `content`,
       });
 
       const patterns = [`audio/*.m4a`, `audio/file.m4a`];
-      const result = resolveIncludePatterns(patterns, `/project`);
+      const result = await resolveIncludePatterns(patterns, `/project`);
 
       expect(result).toEqual([`audio/file.m4a`]);
     });
 
-    test(`should handle invalid patterns gracefully`, () => {
+    test(`should handle invalid patterns gracefully`, async () => {
       const consoleSpy = vi.spyOn(console, `warn`).mockImplementation(() => {
         // Mock to prevent console output during tests
       });
@@ -850,7 +862,7 @@ describe(
 
       // Test with a pattern that causes glob to throw
       const patterns = [`**/**/[**`]; // Very invalid glob pattern
-      const result = resolveIncludePatterns(patterns, `/project`);
+      const result = await resolveIncludePatterns(patterns, `/project`);
 
       expect(result).toEqual([]);
       // Note: glob library might not throw for all invalid patterns,
@@ -863,7 +875,7 @@ describe(
 describe(
   `getInputFiles suite` satisfies HasNameOf<typeof getInputFiles>,
   () => {
-    test(`should return files based on manifest include patterns`, () => {
+    test(`should return files based on manifest include patterns`, async () => {
       const manifestPath = `/project/manifest.json`;
 
       vol.fromJSON({
@@ -874,16 +886,17 @@ describe(
           segments: {},
           rules: [],
           include: [`audio/**/*.m4a`],
+          outDir: `sprites`,
         } satisfies SpriteManifest),
       });
 
       const manifest = loadManifest(manifestPath);
-      const result = getInputFiles(manifest!, manifestPath);
+      const result = await getInputFiles(manifest!, manifestPath);
 
       expect(result).toEqual([`audio/sounds/beep.m4a`, `audio/wiki/hello.m4a`]);
     });
 
-    test(`should return empty array when no include patterns specified`, () => {
+    test(`should return empty array when no include patterns specified`, async () => {
       const manifestPath = `/project/manifest.json`;
 
       vol.fromJSON({
@@ -892,16 +905,18 @@ describe(
           segments: {},
           rules: [],
           include: [],
+          outDir: `sprites`,
         } satisfies SpriteManifest),
       });
 
       const manifest = loadManifest(manifestPath);
-      const result = getInputFiles(manifest!, manifestPath);
+      invariant(manifest != null);
+      const result = await getInputFiles(manifest, manifestPath);
 
       expect(result).toEqual([]);
     });
 
-    test(`should return empty array when include is empty array`, () => {
+    test(`should return empty array when include is empty array`, async () => {
       const manifestPath = `/project/manifest.json`;
 
       vol.fromJSON({
@@ -910,11 +925,13 @@ describe(
           segments: {},
           rules: [],
           include: [],
-        }),
+          outDir: `sprites`,
+        } satisfies SpriteManifest),
       });
 
       const manifest = loadManifest(manifestPath);
-      const result = getInputFiles(manifest!, manifestPath);
+      invariant(manifest != null);
+      const result = await getInputFiles(manifest, manifestPath);
 
       expect(result).toEqual([]);
     });

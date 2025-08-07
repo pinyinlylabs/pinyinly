@@ -2,7 +2,7 @@ import audioSpriteBabelPreset from "#babel.ts";
 import { hashFileContent } from "#manifestWrite.ts";
 import { transform } from "@babel/core";
 import { vol } from "memfs";
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
+import { beforeEach, describe, expect, test, vi } from "vitest";
 
 // Mock fs module to use memfs
 vi.mock(`node:fs`, async () => {
@@ -28,6 +28,14 @@ const transformCode = (
   return result?.code ?? ``;
 };
 
+let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
+
+beforeEach(() => {
+  vol.reset();
+  vi.restoreAllMocks();
+  consoleErrorSpy = vi.spyOn(console, `error`).mockImplementation(() => null);
+});
+
 describe(
   `audioSpriteBabelPreset suite` satisfies HasNameOf<
     typeof audioSpriteBabelPreset
@@ -35,22 +43,6 @@ describe(
   () => {
     const beep1Content = `fake-audio-content-beep`;
     const beep2Content = `fake-audio-content-audio`;
-
-    let consoleErrorMock: ReturnType<typeof vi.spyOn>;
-
-    beforeEach(() => {
-      // Reset the in-memory filesystem
-      vol.reset();
-
-      consoleErrorMock = vi.spyOn(console, `error`).mockImplementation(() => {
-        // Mock console.error to avoid cluttering test output
-      });
-    });
-
-    afterEach(() => {
-      // Restore the original console.error after each test
-      consoleErrorMock.mockRestore();
-    });
 
     test(`should transform .m4a require calls when found in manifest`, () => {
       const manifestPath = `/project/sprites/manifest.json`;
@@ -77,14 +69,9 @@ describe(
       const filePath = `/project/sounds/test.js`;
       const output = transformCode(input, filePath, { manifestPath });
 
-      expect(output).toMatchInlineSnapshot(`
-        "const audio = {
-          type: "audiosprite",
-          start: 1.2,
-          duration: 0.5,
-          asset: require("../sprites/sprite1-5a7d2c4f.m4a")
-        };"
-      `);
+      expect(output).toMatchInlineSnapshot(
+        `"const audio = require('./beep1.m4a');"`,
+      );
     });
 
     test(`should leave .m4a require calls unchanged when not found in manifest`, () => {
@@ -142,7 +129,7 @@ describe(
       const filePath = `/project/test.js`;
       const output = transformCode(input, filePath, { manifestPath });
 
-      expect(consoleErrorMock.mock.calls[0]).toMatchInlineSnapshot(
+      expect(consoleErrorSpy.mock.calls[0]).toMatchInlineSnapshot(
         `
           [
             "Failed to load or parse sprite manifest at /manifest.json:",
@@ -170,6 +157,14 @@ describe(
                 "include"
               ],
               "message": "Invalid input: expected array, received undefined"
+            },
+            {
+              "expected": "string",
+              "code": "invalid_type",
+              "path": [
+                "outDir"
+              ],
+              "message": "Invalid input: expected string, received undefined"
             }
           ]],
           ]

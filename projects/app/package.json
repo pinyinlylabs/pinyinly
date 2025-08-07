@@ -8,6 +8,7 @@
   },
   "imports": {
     "#*.js": "./src/*.js",
+    "#*.json": "./src/*.json",
     "#*.ts": "./src/*.ts",
     "#*.tsx": "./src/*.tsx"
   },

@@ -1,6 +1,6 @@
 import { AudioContextProvider } from "@/client/ui/AudioContextProvider";
-import type { PylyAudioSource } from "@pinyinly/expo-audio-sprites";
-import { isAudioSpriteSource } from "@pinyinly/expo-audio-sprites";
+import type { PylyAudioSource } from "@pinyinly/expo-audio-sprites/client";
+import { isAudioSpriteSource } from "@pinyinly/expo-audio-sprites/client";
 import { useAudioPlayer } from "expo-audio";
 import { use } from "react";
 import { Platform } from "react-native";

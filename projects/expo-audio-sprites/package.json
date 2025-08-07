@@ -25,7 +25,6 @@
   "devDependencies": {
     "@pinyinly/eslint-rules": "workspace:*",
     "@pinyinly/lib": "workspace:*",
-    "@stylistic/eslint-plugin": "^5.0.0",
     "@types/node": "22.x",
     "@typescript-eslint/parser": "^8.36.0",
     "eslint": "^9.13.0",

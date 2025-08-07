@@ -5,9 +5,9 @@ import chalk from "chalk";
 import { execSync } from "node:child_process";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
+import { projectRoot } from "../helpers.ts";
 
-const projectRootDir = path.join(import.meta.dirname, `../..`);
-const wikiDir = path.join(projectRootDir, `src/client/wiki`);
+const wikiDir = path.join(projectRoot, `src/client/wiki`);
 
 describe(`speech files`, async () => {
   const audioGlob = path.join(wikiDir, `**/*.{mp3,m4a,aac}`); // adjust this to your structure
@@ -18,7 +18,7 @@ describe(`speech files`, async () => {
       continue;
     }
 
-    const projectRelPath = path.relative(projectRootDir, filePath);
+    const projectRelPath = path.relative(projectRoot, filePath);
 
     describe(projectRelPath, async () => {
       test(`container and real duration is within allowable tolerance and not corrupted`, async () => {

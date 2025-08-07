@@ -7,13 +7,16 @@ import {
 import { loadManifest } from "#manifestRead.ts";
 import { saveManifest, syncManifestWithFilesystem } from "#manifestWrite.ts";
 import type { SpriteManifest } from "#types.ts";
+import * as fs from "@pinyinly/lib/fs";
 import { execFile } from "node:child_process";
-import { existsSync, mkdirSync, rmSync, unlinkSync } from "node:fs";
 import path from "node:path";
 import { promisify } from "node:util";
 import { describe, expect, test } from "vitest";
 
 const execFileAsync = promisify(execFile);
+
+const fixturesDir = path.join(import.meta.dirname, `fixtures`);
+const outputsDir = path.join(fixturesDir, `outputs`);
 
 test(
   `parseFfmpegOutput suite` satisfies HasNameOf<typeof parseFfmpegOutput>,
@@ -385,12 +388,11 @@ describe(`Integration tests with real ffmpeg`, () => {
   });
 
   test(`generateSpriteCommand produces working ffmpeg command`, async () => {
-    const fixturesDir = path.join(import.meta.dirname, `fixtures`);
     const outputPath = path.join(fixturesDir, `test-sprite.m4a`);
 
     // Clean up any existing output file
-    if (existsSync(outputPath)) {
-      unlinkSync(outputPath);
+    if (fs.existsSync(outputPath)) {
+      fs.unlinkSync(outputPath);
     }
 
     const audioFiles = [
@@ -413,7 +415,7 @@ describe(`Integration tests with real ffmpeg`, () => {
     await execFileAsync(program!, args);
 
     // Verify the output file was created
-    expect(existsSync(outputPath)).toBe(true);
+    expect(fs.existsSync(outputPath)).toBe(true);
 
     // Verify the output duration is approximately correct
     // Should be: 2.2 (start of second file) + 0.864 (duration of second file) = ~3.064 seconds
@@ -431,16 +433,15 @@ describe(`Integration tests with real ffmpeg`, () => {
     expect(duration).toBeCloseTo(3.064, 2);
 
     // Clean up
-    unlinkSync(outputPath);
+    fs.unlinkSync(outputPath);
   });
 
   test(`generateSpriteCommand works with three files`, async () => {
-    const fixturesDir = path.join(import.meta.dirname, `fixtures`);
-    const outputPath = path.join(fixturesDir, `test-sprite-three.m4a`);
+    const outputPath = path.join(outputsDir, `test-sprite-three.m4a`);
 
     // Clean up any existing output file
-    if (existsSync(outputPath)) {
-      unlinkSync(outputPath);
+    if (fs.existsSync(outputPath)) {
+      fs.unlinkSync(outputPath);
     }
 
     const audioFiles = [
@@ -468,7 +469,7 @@ describe(`Integration tests with real ffmpeg`, () => {
     await execFileAsync(program!, args);
 
     // Verify the output file was created
-    expect(existsSync(outputPath)).toBe(true);
+    expect(fs.existsSync(outputPath)).toBe(true);
 
     // Verify the output duration is approximately correct
     // Should be: 4.064 (start of third file) + 1.416 (duration of third file) = ~5.48 seconds
@@ -486,22 +487,21 @@ describe(`Integration tests with real ffmpeg`, () => {
     expect(duration).toBeCloseTo(5.48, 2);
 
     // Clean up
-    unlinkSync(outputPath);
+    fs.unlinkSync(outputPath);
   });
 
   test(`full filesystem integration with manifest processing`, async () => {
     const testDir = path.join(import.meta.dirname, `integration-test`);
-    const fixturesDir = path.join(import.meta.dirname, `fixtures`);
     const manifestPath = path.join(testDir, `manifest.json`);
 
     // Clean up any existing test directory
-    if (existsSync(testDir)) {
-      rmSync(testDir, { recursive: true });
+    if (fs.existsSync(testDir)) {
+      fs.rmSync(testDir, { recursive: true });
     }
 
     // Create test directory structure
-    mkdirSync(testDir, { recursive: true });
-    mkdirSync(path.join(testDir, `audio`), { recursive: true });
+    fs.mkdirSync(testDir, { recursive: true });
+    fs.mkdirSync(path.join(testDir, `audio`), { recursive: true });
 
     // Copy test audio files to the test directory
     await execFileAsync(`cp`, [
@@ -528,12 +528,13 @@ describe(`Integration tests with real ffmpeg`, () => {
         },
       ],
       include: [`audio/*.mp3`],
+      outDir: `sprites`,
     };
 
     await saveManifest(initialManifest, manifestPath);
 
     // Verify initial manifest was saved
-    expect(existsSync(manifestPath)).toBe(true);
+    expect(fs.existsSync(manifestPath)).toBe(true);
 
     // Load and verify the manifest
     const loadedManifest = loadManifest(manifestPath);
@@ -554,7 +555,6 @@ describe(`Integration tests with real ffmpeg`, () => {
         sprite: expect.any(Number) as number,
         start: expect.any(Number) as number,
         duration: expect.any(Number) as number,
-        hash: expect.any(String) as string,
       });
       expect(segment.duration).toBeGreaterThan(0);
       expect(segment.hash).toMatch(/^[a-f0-9]{64}$/); // SHA-256 hash
@@ -614,7 +614,7 @@ describe(`Integration tests with real ffmpeg`, () => {
     await execFileAsync(program!, args);
 
     // Verify the sprite was created
-    expect(existsSync(spriteOutputPath)).toBe(true);
+    expect(fs.existsSync(spriteOutputPath)).toBe(true);
 
     // Check the sprite duration
     const { stdout } = await execFileAsync(`ffprobe`, [
@@ -640,6 +640,6 @@ describe(`Integration tests with real ffmpeg`, () => {
     expect(secondSyncManifest).toEqual(updatedManifest);
 
     // Clean up test directory
-    rmSync(testDir, { recursive: true });
+    fs.rmSync(testDir, { recursive: true });
   });
 });

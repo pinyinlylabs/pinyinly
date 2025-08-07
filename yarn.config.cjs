@@ -409,6 +409,9 @@ async function readPnpmLock() {
   return YAML.parse(pnpmLock);
 }
 
+/**
+ * @type {import('@yarnpkg/types').defineConfig}
+ */
 module.exports = defineConfig({
   async constraints(ctx) {
     await enforceAllPatchesAreUsed(ctx);

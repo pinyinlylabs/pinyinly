@@ -115,7 +115,7 @@ Use numbered groups with `$1`, `$2`, etc.:
 The package exports utilities for build tools to process rules:
 
 ```typescript
-import { applyRules, generateSpriteAssignments } from "@pinyinly/expo-audio-sprites";
+import { applyRules, generateSpriteAssignments } from "@pinyinly/expo-audio-sprites/client";
 
 // Apply rules to a single file
 const spriteName = applyRules("audio/wiki/hello/greeting.m4a", rules);

@@ -30,14 +30,14 @@ export const plugin: ESLint.Plugin = {
 
 const recommended: InfiniteDepthConfigWithExtends[] = [
   {
-    linterOptions: {
-      reportUnusedDisableDirectives: `error`,
-    },
+    // config with just ignores is the replacement for `.eslintignore`
+    ignores: [`.expo/`, `.vercel/`, `dist/`, `drizzle/`, `node_modules/`],
   },
 
   {
-    // config with just ignores is the replacement for `.eslintignore`
-    ignores: [`.expo/`, `.vercel/`, `dist/`, `drizzle/`, `node_modules/`],
+    linterOptions: {
+      reportUnusedDisableDirectives: `error`,
+    },
   },
 
   // All files that should use TypeScript rules.
@@ -62,6 +62,8 @@ const recommended: InfiniteDepthConfigWithExtends[] = [
 
   // Global
   {
+    files: [`**/*.{cjs,js,mjs,ts,tsx}`],
+
     rules: {
       //
       // eslint-base
@@ -243,6 +245,10 @@ const recommended: InfiniteDepthConfigWithExtends[] = [
               message: `Please use @pinyinly/lib/fs instead.`,
             },
             {
+              name: `node:fs`,
+              message: `Please use @pinyinly/lib/fs instead.`,
+            },
+            {
               name: `@bacons/mdx`,
               message: `Please use @/client/mdx instead.`,
             },
@@ -307,7 +313,7 @@ const recommended: InfiniteDepthConfigWithExtends[] = [
 
   // test files
   {
-    files: [`test/**`],
+    files: [`test/**/*.{ts,tsx}`],
     ignores: [`**/lint.test-d.ts`],
     rules: {
       "@typescript-eslint/no-non-null-assertion": `off`,
@@ -351,11 +357,13 @@ const esm: InfiniteDepthConfigWithExtends[] = [
 
 const react: InfiniteDepthConfigWithExtends[] = [
   {
+    files: [`**/*.{ts,tsx}`],
+
     rules: reactPlugin.configs.recommended.rules,
   },
 
   {
-    files: [`**/*.{js,mjs,ts,tsx}`],
+    files: [`**/*.{ts,tsx}`],
 
     rules: {
       //
@@ -391,6 +399,8 @@ const react: InfiniteDepthConfigWithExtends[] = [
 
 const tailwind: InfiniteDepthConfigWithExtends[] = [
   {
+    files: [`**/*.{ts,tsx}`],
+
     rules: {
       //
       // tailwindcss

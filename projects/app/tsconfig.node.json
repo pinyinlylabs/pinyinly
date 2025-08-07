@@ -1,7 +1,6 @@
 {
   "extends": "../../tsconfig.base",
   "compilerOptions": {
-    "baseUrl": ".",
     "rootDir": ".",
     "composite": false,
     "esModuleInterop": true,
@@ -12,7 +11,7 @@
     "moduleResolution": "Bundler",
     "outDir": "../../.moon/cache/types/projects/app-node",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     },
     "resolveJsonModule": true,
     "target": "ESNext",
