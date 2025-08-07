@@ -1,6 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import hanzi from "hanzi";
-
 import { useInternetQuery } from "#client/hooks/useInternetQuery.ts";
 import { useLocalQuery } from "#client/hooks/useLocalQuery.ts";
 import {
@@ -100,8 +97,6 @@ if (argv.debug) {
   makeDebug.enable(`${debug.namespace},${debug.namespace}:*`);
 }
 
-// Load data that we'll later use multiple times.
-hanzi.start();
 const decompositions = await loadHanziDecomposition();
 const dbCache = makeDbCache(import.meta.filename, `openai_chat_cache`, debug);
 const archiveCache = makeDbCache(

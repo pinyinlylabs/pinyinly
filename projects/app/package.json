@@ -71,7 +71,6 @@
     "expo-status-bar": "~2.2.3",
     "expo-system-ui": "~5.0.10",
     "expo-updates": "~0.28.16",
-    "hanzi": "patch:hanzi@npm%3A2.1.5#~/.yarn/patches/hanzi-npm-2.1.5-506390bb41.patch",
     "inngest": "^3.39.1",
     "jose": "^6.0.11",
     "lodash": "^4.17.21",
