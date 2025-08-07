@@ -4,6 +4,7 @@ import * as fs from "@pinyinly/lib/fs";
 import { expect, test } from "vitest";
 import YAML from "yaml";
 import { z } from "zod/v4";
+import { projectRoot } from "./helpers.ts";
 
 const workflowSchema = z.object({
   jobs: z.record(
@@ -22,7 +23,6 @@ const workflowSchema = z.object({
 });
 
 test(`no missing EXPO_PUBLIC_ environment variables`, async () => {
-  const projectRoot = import.meta.dirname + `/..`;
   const workspaceRoot = projectRoot + `/../..`;
   const githubWorkflowsPath = `.github/workflows`;
 

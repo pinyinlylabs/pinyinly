@@ -7,8 +7,8 @@ import {
 import { loadManifest } from "#manifestRead.ts";
 import { saveManifest, syncManifestWithFilesystem } from "#manifestWrite.ts";
 import type { SpriteManifest } from "#types.ts";
+import { existsSync, mkdirSync, rmSync, unlinkSync } from "@pinyinly/lib/fs";
 import { execFile } from "node:child_process";
-import { existsSync, mkdirSync, rmSync, unlinkSync } from "node:fs";
 import path from "node:path";
 import { promisify } from "node:util";
 import { describe, expect, test } from "vitest";

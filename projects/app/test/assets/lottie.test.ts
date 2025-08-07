@@ -6,6 +6,7 @@ import * as fs from "@pinyinly/lib/fs";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
 import { z } from "zod/v4";
+import { projectRoot } from "../helpers.ts";
 
 describe(`no luminance layers in lottie animations (incompatible with lottie-ios)`, async () => {
   for await (const [lottieFile, anim] of iterLottieAssets()) {
@@ -50,7 +51,6 @@ async function* iterLottieAssets(): AsyncGenerator<
   void,
   void
 > {
-  const projectRoot = path.join(import.meta.dirname, `../..`);
   const assetsPath = path.join(projectRoot, `src/assets`);
   let foundFiles = false;
 

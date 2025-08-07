@@ -1,7 +1,12 @@
 import { analyzeAudioFileDuration } from "#ffmpeg.ts";
-import { globSync, writeUtf8FileIfChanged } from "@pinyinly/lib/fs";
+import {
+  globSync,
+  readFileSync,
+  writeUtf8FileIfChanged,
+} from "@pinyinly/lib/fs";
 import { jsonStringifyShallowIndent } from "@pinyinly/lib/json";
 import * as crypto from "node:crypto";
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import * as fs from "node:fs";
 import path from "node:path";
 import { loadManifest } from "./manifestRead.ts";
@@ -276,7 +281,7 @@ export const syncManifestWithFilesystem = async (
 };
 
 export const hashFile = (filePath: string): string => {
-  const fileContent = fs.readFileSync(filePath);
+  const fileContent = readFileSync(filePath);
   return hashFileContent(fileContent);
 };
 
@@ -344,7 +349,7 @@ export const resolveIncludePatterns = (
     try {
       const files = globSync(pattern, {
         cwd: manifestDir,
-        fs,
+        fs, // needed for memfs mocking
         posix: true, // Use posix-style paths for consistency
       });
 

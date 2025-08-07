@@ -2,10 +2,19 @@ import * as fs from "@pinyinly/lib/fs";
 import chalk from "chalk";
 import path from "node:path";
 import { expect, test } from "vitest";
+import { projectRoot } from "./helpers.ts";
+
+test(
+  `projectRoot is correct` satisfies HasNameOf<typeof projectRoot>,
+  async () => {
+    // Check that `projectRoot` is pointing to the correct directory.
+    await expect(
+      fs.access(projectRoot + `/package.json`),
+    ).resolves.not.toThrow();
+  },
+);
 
 test(`.env file does not exist in projects/app`, async () => {
-  const projectRoot = import.meta.dirname + `/..`;
-
   // Check that `projectRoot` is pointing to the correct directory.
   await expect(fs.access(projectRoot + `/package.json`)).resolves.not.toThrow();
 
@@ -18,7 +27,6 @@ test(`.env file does not exist in projects/app`, async () => {
 });
 
 test(`tests/ tree mirrors src/ tree`, async () => {
-  const projectRoot = import.meta.dirname + `/..`;
   const testRoot = `${projectRoot}/test`;
   const srcRoot = `${projectRoot}/src`;
 
@@ -76,7 +84,6 @@ test(`src/ files have consistent NFC and NFD encoding`, async () => {
   //
   // To avoid this problem it's best to just avoid using accented characters
   // in file paths.
-  const projectRoot = import.meta.dirname + `/..`;
   const srcRoot = `${projectRoot}/src`;
 
   for (const path of await fs.glob(`${srcRoot}/**/*`)) {

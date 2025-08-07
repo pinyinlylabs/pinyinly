@@ -1,0 +1,14 @@
+// pyly-not-src-test
+
+import { IS_CI } from "#util/env.ts";
+import { testSprites } from "@pinyinly/expo-audio-sprites/testing";
+import { projectRoot } from "helpers";
+import path from "node:path";
+import { expect, test } from "vitest";
+
+test(`test sprites`, async () => {
+  const manifestPath = path.join(projectRoot, `src/assets/audio/manifest.json`);
+  const result = await testSprites(manifestPath, !IS_CI);
+
+  expect(result.needsRegeneration).toBe(false);
+});

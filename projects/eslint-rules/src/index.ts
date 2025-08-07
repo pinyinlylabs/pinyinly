@@ -243,6 +243,10 @@ const recommended: InfiniteDepthConfigWithExtends[] = [
               message: `Please use @pinyinly/lib/fs instead.`,
             },
             {
+              name: `node:fs`,
+              message: `Please use @pinyinly/lib/fs instead.`,
+            },
+            {
               name: `@bacons/mdx`,
               message: `Please use @/client/mdx instead.`,
             },

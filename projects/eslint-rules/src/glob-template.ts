@@ -2,9 +2,8 @@
  * @fileoverview Ensures require arrays are in sync with files in a directory, using template comments
  */
 
-import { glob } from "@pinyinly/lib/fs";
+import * as fs from "@pinyinly/lib/fs";
 import type { Rule } from "eslint";
-import fs from "node:fs";
 import path from "node:path";
 
 const rule: Rule.RuleModule = {
@@ -206,7 +205,7 @@ const rule: Rule.RuleModule = {
             }
 
             // Get matching files
-            files = glob.sync(globPattern, { cwd: targetDir }).sort();
+            files = fs.globSync(globPattern, { cwd: targetDir }).sort();
           } catch (error: unknown) {
             const errorMessage =
               error !== null && typeof error === `object` && `message` in error

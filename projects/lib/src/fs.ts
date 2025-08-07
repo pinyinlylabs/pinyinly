@@ -15,6 +15,18 @@ export {
 } from "node:fs/promises";
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
+export {
+  createReadStream,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  unlinkSync,
+  writeFileSync,
+} from "node:fs";
+
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 export { glob, globSync } from "glob";
 
 export async function writeUtf8FileIfChanged(

@@ -1,4 +1,4 @@
-import * as fs from "node:fs";
+import * as fs from "@pinyinly/lib/fs";
 import path from "node:path";
 import type { DeepReadonly } from "ts-essentials";
 import type { SpriteManifest, SpriteSegment } from "./types.ts";

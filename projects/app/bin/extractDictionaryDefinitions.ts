@@ -1,4 +1,4 @@
-import fs from "node:fs";
+import * as fs from "@pinyinly/lib/fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
