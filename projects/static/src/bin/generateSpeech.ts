@@ -1,7 +1,6 @@
-import { glob, mkdir, rename, rm } from "@pinyinly/lib/fs";
+import * as fs from "@pinyinly/lib/fs";
 import { createHash } from "crypto";
 import { spawnSync } from "node:child_process";
-import { createReadStream } from "node:fs";
 import { dirname } from "node:path";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
@@ -38,17 +37,17 @@ yargs(hideBin(process.argv))
           const md5Hash = await createMD5(tempM4aPath);
           const destPathPrefix = `public/speech/${phrase.id}/${voice.id}-`;
           const destPath = `${destPathPrefix}${md5Hash}.m4a`;
-          await mkdir(dirname(destPath), { recursive: true });
+          await fs.mkdir(dirname(destPath), { recursive: true });
 
           // Delete all existing files for the given phase and voice.
-          for (const path of await glob(`${destPathPrefix}*`)) {
+          for (const path of await fs.glob(`${destPathPrefix}*`)) {
             const isStale = path !== destPath;
             if (isStale) {
               console.log(`Deleting stale file: ${path}`);
             }
-            await rm(path);
+            await fs.rm(path);
           }
-          await rename(tempM4aPath, destPath);
+          await fs.rename(tempM4aPath, destPath);
         }
       }
     },
@@ -59,7 +58,7 @@ function createMD5(filePath: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const hash = createHash("md5");
 
-    const readStream = createReadStream(filePath);
+    const readStream = fs.createReadStream(filePath);
     readStream.on("data", (data) => {
       hash.update(data);
     });
