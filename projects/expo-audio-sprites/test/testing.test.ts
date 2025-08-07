@@ -123,6 +123,114 @@ describe(
       expect(result.outdatedFiles.length).toBeGreaterThan(0);
       expect(result.needsRegeneration).toBe(true);
     });
+
+    test(`throws when sprite template references missing named capture group`, async () => {
+      const manifestWithInvalidRule = {
+        ...sampleManifest,
+        rules: [
+          {
+            match: `audio/[^/]+/.*\\.m4a`, // Missing (?<page>...) named capture group
+            sprite: `wiki-\${page}`, // References ${page} which doesn't exist
+          },
+        ],
+      };
+
+      vol.fromJSON({
+        "/test/manifest.json": JSON.stringify(manifestWithInvalidRule),
+        "/test/audio1.m4a": `fake audio content`,
+        "/test/audio2.m4a": `fake audio content 2`,
+      });
+
+      await expect(
+        checkSpriteManifest({
+          manifestPath: `/test/manifest.json`,
+          syncManifest: false,
+        }),
+      ).rejects.toThrow(
+        `Rule validation failed: sprite template references variables [page] but regex pattern "audio/[^/]+/.*\\.m4a" does not define corresponding named capture groups`,
+      );
+    });
+
+    test(`passes when sprite template uses correct named capture groups`, async () => {
+      const manifestWithValidRule = {
+        ...sampleManifest,
+        rules: [
+          {
+            match: `audio/(?<page>[^/]+)/.*\\.m4a`, // Has (?<page>...) named capture group
+            sprite: `wiki-\${page}`, // References ${page} which exists
+          },
+        ],
+      };
+
+      vol.fromJSON({
+        "/test/manifest.json": JSON.stringify(manifestWithValidRule),
+        "/test/sprite-1.m4a": `sprite content`,
+        "/test/audio1.m4a": `fake audio content`,
+        "/test/audio2.m4a": `fake audio content 2`,
+      });
+
+      // Should not throw
+      const result = await checkSpriteManifest({
+        manifestPath: `/test/manifest.json`,
+        syncManifest: false,
+      });
+
+      expect(result.manifestExists).toBe(true);
+    });
+
+    test(`passes when sprite template has no variables`, async () => {
+      const manifestWithStaticSprite = {
+        ...sampleManifest,
+        rules: [
+          {
+            match: `audio/.*\\.m4a`,
+            sprite: `static-sprite-name`, // No variables
+          },
+        ],
+      };
+
+      vol.fromJSON({
+        "/test/manifest.json": JSON.stringify(manifestWithStaticSprite),
+        "/test/sprite-1.m4a": `sprite content`,
+        "/test/audio1.m4a": `fake audio content`,
+        "/test/audio2.m4a": `fake audio content 2`,
+      });
+
+      // Should not throw
+      const result = await checkSpriteManifest({
+        manifestPath: `/test/manifest.json`,
+        syncManifest: false,
+      });
+
+      expect(result.manifestExists).toBe(true);
+    });
+
+    test(`passes when sprite template uses numbered capture groups`, async () => {
+      const manifestWithNumberedGroups = {
+        ...sampleManifest,
+        rules: [
+          {
+            match: `audio/([^/]+)/.*\\.m4a`, // Uses numbered capture group
+            sprite: `wiki-$1`, // References $1 (numbered, not named)
+          },
+        ],
+      };
+
+      vol.fromJSON({
+        "/test/manifest.json": JSON.stringify(manifestWithNumberedGroups),
+        "/test/sprite-1.m4a": `sprite content`,
+        "/test/audio1.m4a": `fake audio content`,
+        "/test/audio2.m4a": `fake audio content 2`,
+      });
+
+      // Should not throw (numbered groups don't need validation)
+      const result = await checkSpriteManifest({
+        manifestPath: `/test/manifest.json`,
+        syncManifest: false,
+      });
+
+      expect(result.manifestExists).toBe(true);
+    });
   },
 );
 

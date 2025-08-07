@@ -1,4 +1,5 @@
 // pyly-not-src-test
+import "#assets/audio/manifest.json";
 
 import { IS_CI } from "#util/env.ts";
 import { testSprites } from "@pinyinly/expo-audio-sprites/testing";

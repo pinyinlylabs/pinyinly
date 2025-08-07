@@ -42,6 +42,69 @@ export interface SpriteTestOptions {
 }
 
 /**
+ * Validate that sprite template variables have corresponding named capture groups in the regex.
+ * @param rule The sprite rule to validate
+ * @throws Error if validation fails
+ */
+function validateRuleVariables(rule: { match: string; sprite: string }): void {
+  // Extract variables from sprite template (${varName} format)
+  const templateVariables = new Set<string>();
+  const templateVariableMatches = rule.sprite.matchAll(/\$\{([^}]+)\}/g);
+  for (const match of templateVariableMatches) {
+    const variable = match[1];
+    if (variable != null && variable.length > 0) {
+      templateVariables.add(variable);
+    }
+  }
+
+  // If no template variables, no validation needed
+  if (templateVariables.size === 0) {
+    return;
+  }
+
+  // Extract named capture groups from regex pattern
+  let namedGroups: Set<string>;
+  try {
+    // Validate regex is syntactically correct
+    new RegExp(rule.match);
+
+    // Use the regex source to find named groups
+    namedGroups = new Set<string>();
+    const namedGroupMatches = rule.match.matchAll(/\(\?<([^>]+)>/g);
+    for (const match of namedGroupMatches) {
+      const groupName = match[1];
+      if (groupName != null && groupName.length > 0) {
+        namedGroups.add(groupName);
+      }
+    }
+  } catch {
+    // If regex is invalid, let it be handled elsewhere
+    return;
+  }
+
+  // Check if all template variables have corresponding named capture groups
+  const missingGroups: string[] = [];
+  for (const variable of templateVariables) {
+    if (!namedGroups.has(variable)) {
+      missingGroups.push(variable);
+    }
+  }
+
+  if (missingGroups.length > 0) {
+    const firstMissingGroup = missingGroups[0];
+    if (firstMissingGroup == null) {
+      return; // Should never happen, but satisfy type checker
+    }
+
+    throw new Error(
+      `Rule validation failed: sprite template references variables [${missingGroups.join(`, `)}] but regex pattern "${rule.match}" does not define corresponding named capture groups. ` +
+        `Available named groups: [${[...namedGroups].join(`, `)}]. ` +
+        `Add named capture groups like (?<${firstMissingGroup}>[^/]+) to your regex pattern.`,
+    );
+  }
+}
+
+/**
  * Check if the manifest.json file is up to date with correct hashes for all audio files
  * and verify that sprite files have been generated properly.
  *
@@ -81,6 +144,11 @@ export async function checkSpriteManifest(
       throw new Error(`Failed to load manifest from ${manifestPath}`);
     }
     manifest = loadedManifest;
+  }
+
+  // Validate that all sprite template variables have corresponding named capture groups
+  for (const rule of manifest.rules) {
+    validateRuleVariables(rule);
   }
 
   const manifestDir = path.dirname(manifestPath);
