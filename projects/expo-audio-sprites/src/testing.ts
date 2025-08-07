@@ -24,6 +24,8 @@ export interface ManifestCheckResult {
   missingSpriteFiles: string[];
   /** Array of files with outdated hashes */
   outdatedFiles: string[];
+  /** Array of unused sprite files in the output directory */
+  unusedSpriteFiles: string[];
   /** Whether sprites need to be regenerated */
   needsRegeneration: boolean;
 }
@@ -38,6 +40,42 @@ export interface SpriteTestOptions {
   autoRegenerate?: boolean;
   /** Whether to sync the manifest with filesystem before checking (default: true) */
   syncManifest?: boolean;
+  /** Whether to automatically delete unused sprite files (default: false) */
+  autoCleanup?: boolean;
+}
+
+/**
+ * Delete unused sprite files from the output directory.
+ * @param manifestPath Path to the manifest.json file
+ * @param unusedFiles Array of unused sprite filenames to delete
+ * @returns Promise that resolves when cleanup is complete
+ */
+export async function cleanupUnusedSprites(
+  manifestPath: string,
+  unusedFiles: string[],
+): Promise<void> {
+  if (unusedFiles.length === 0) {
+    return;
+  }
+
+  const manifest = loadManifest(manifestPath);
+  if (!manifest) {
+    throw new Error(`Failed to load manifest from ${manifestPath}`);
+  }
+
+  const manifestDir = path.dirname(manifestPath);
+  const outDirPath = path.resolve(manifestDir, manifest.outDir);
+
+  for (const unusedFile of unusedFiles) {
+    const filePath = path.join(outDirPath, unusedFile);
+
+    try {
+      await fs.unlink(filePath);
+      console.warn(`🗑️  Deleted unused sprite: ${unusedFile}`);
+    } catch (error) {
+      console.warn(`Failed to delete unused sprite ${unusedFile}:`, error);
+    }
+  }
 }
 
 /**
@@ -113,7 +151,7 @@ function validateRuleVariables(rule: { match: string; sprite: string }): void {
 export async function checkSpriteManifest(
   options: SpriteTestOptions,
 ): Promise<ManifestCheckResult> {
-  const { manifestPath, syncManifest = true } = options;
+  const { manifestPath, syncManifest = false } = options;
 
   // Check if manifest file exists
   if (!fs.existsSync(manifestPath)) {
@@ -123,6 +161,7 @@ export async function checkSpriteManifest(
       spriteFilesExist: false,
       missingSpriteFiles: [],
       outdatedFiles: [],
+      unusedSpriteFiles: [],
       needsRegeneration: true,
     };
   }
@@ -175,10 +214,38 @@ export async function checkSpriteManifest(
   const missingSpriteFiles: string[] = [];
 
   for (const spriteFile of manifest.spriteFiles) {
-    const spriteFilePath = path.resolve(manifestDir, spriteFile);
+    const spriteFilePath = path.resolve(
+      manifestDir,
+      manifest.outDir,
+      spriteFile,
+    );
 
     if (!fs.existsSync(spriteFilePath)) {
       missingSpriteFiles.push(spriteFile);
+    }
+  }
+
+  // Check for unused sprite files in the output directory
+  const unusedSpriteFiles: string[] = [];
+  const outDirPath = path.resolve(manifestDir, manifest.outDir);
+
+  if (fs.existsSync(outDirPath)) {
+    try {
+      const allFilesInOutDir = await fs.readdir(outDirPath);
+      const expectedSpriteFiles = new Set(manifest.spriteFiles);
+      const audioFilePattern = /\.(m4a|mp3|wav|aac|ogg)$/i;
+
+      for (const file of allFilesInOutDir) {
+        // Only consider audio files and check if they're not in the expected set
+        if (audioFilePattern.test(file) && !expectedSpriteFiles.has(file)) {
+          unusedSpriteFiles.push(file);
+        }
+      }
+
+      // Sort for deterministic order
+      unusedSpriteFiles.sort();
+    } catch (error) {
+      console.warn(`Failed to read output directory ${outDirPath}:`, error);
     }
   }
 
@@ -192,6 +259,7 @@ export async function checkSpriteManifest(
     spriteFilesExist,
     missingSpriteFiles,
     outdatedFiles,
+    unusedSpriteFiles,
     needsRegeneration,
   };
 }
@@ -293,6 +361,7 @@ export async function generateSprites(manifestPath: string): Promise<void> {
 /**
  * Verify that audio sprites are properly generated and up to date.
  * If sprites are missing or outdated, optionally regenerate them.
+ * If unused sprite files exist, optionally clean them up.
  *
  * @param options Configuration options for verification
  * @returns Promise resolving to the check result
@@ -300,10 +369,34 @@ export async function generateSprites(manifestPath: string): Promise<void> {
 export async function verifySprites(
   options: SpriteTestOptions,
 ): Promise<ManifestCheckResult> {
-  const { autoRegenerate = false } = options;
+  const { autoRegenerate = false, autoCleanup = false } = options;
 
-  const result = await checkSpriteManifest(options);
+  let result = await checkSpriteManifest(options);
 
+  // Handle cleanup of unused sprite files
+  if (result.unusedSpriteFiles.length > 0 && autoCleanup) {
+    console.warn(
+      `Found ${result.unusedSpriteFiles.length} unused sprite files, cleaning up...`,
+    );
+
+    try {
+      await cleanupUnusedSprites(
+        options.manifestPath,
+        result.unusedSpriteFiles,
+      );
+
+      // Re-check after cleanup to update the result
+      result = await checkSpriteManifest({
+        ...options,
+        syncManifest: false, // No need to sync again
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to cleanup unused sprites: ${message}`);
+    }
+  }
+
+  // Handle regeneration of missing/outdated sprites
   if (result.needsRegeneration && autoRegenerate) {
     console.warn(`Sprites need regeneration, auto-generating...`);
 
@@ -311,7 +404,7 @@ export async function verifySprites(
       await generateSprites(options.manifestPath);
 
       // Re-check after generation
-      return await checkSpriteManifest({
+      result = await checkSpriteManifest({
         ...options,
         syncManifest: false, // No need to sync again
       });
@@ -327,13 +420,17 @@ export async function verifySprites(
 /**
  * Assert that sprites are properly generated and up to date.
  * Throws an error if sprites are missing or need regeneration.
+ * Automatically deletes unused sprite files if autoCleanup is enabled.
  *
  * @param options Configuration options for the assertion
  */
 export async function assertSpritesUpToDate(
   options: SpriteTestOptions,
 ): Promise<void> {
-  const result = await verifySprites(options);
+  const result = await verifySprites({
+    ...options,
+    autoCleanup: options.autoCleanup ?? true, // Default to true for cleanup
+  });
 
   if (!result.manifestExists) {
     throw new Error(`Manifest file does not exist: ${options.manifestPath}`);
@@ -351,6 +448,12 @@ export async function assertSpritesUpToDate(
     );
   }
 
+  if (result.unusedSpriteFiles.length > 0) {
+    throw new Error(
+      `Found unused sprite files in output directory. Run with autoCleanup: true to automatically delete them: ${result.unusedSpriteFiles.join(`, `)}`,
+    );
+  }
+
   if (result.needsRegeneration) {
     throw new Error(
       `Sprites need regeneration. Run with autoRegenerate: true or manually regenerate sprites.`,
@@ -364,15 +467,17 @@ export async function assertSpritesUpToDate(
  *
  * @param manifestPath Path to the manifest.json file
  * @param autoRegenerate Whether to automatically regenerate sprites if needed
+ * @param autoCleanup Whether to automatically delete unused sprite files
  * @returns Promise resolving to the check result
  */
 export async function testSprites(
   manifestPath: string,
-  autoRegenerate = false,
+  autoFix = false,
 ): Promise<ManifestCheckResult> {
   return await verifySprites({
     manifestPath,
-    autoRegenerate,
-    syncManifest: true,
+    autoRegenerate: autoFix,
+    autoCleanup: autoFix,
+    syncManifest: autoFix,
   });
 }

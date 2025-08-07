@@ -1,15 +1,15 @@
 {
-  "spriteFiles":[
-
-  ],
-  "segments":{
-
-  },
-  "rules":[
-    {"match":"audio/wiki/(?<page>[^/]+)/(?<file>[^/]+)\\.m4a","sprite":"wiki-${page}"}
-  ],
-  "include":[
-  "audio/**/*.m4a",
-  "sounds/**/*.m4a"
-  ]
+"spriteFiles":[
+ "wiki-5b885d51bea8.m4a"
+],
+"segments":{
+ "../../client/wiki/上/shang4.m4a":{"sprite":0,"start":0,"duration":0.69,"hash":"69445095ac741939b2062019dd3d204be8efeba4f84385c1b7d447ab492712db"}
+},
+"rules":[
+ {"match":"\\.m4a","sprite":"wiki"}
+],
+"include":[
+ "../../client/wiki/**/*.m4a"
+],
+"outDir":"sprites"
 }
