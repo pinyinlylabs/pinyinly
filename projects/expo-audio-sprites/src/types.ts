@@ -30,8 +30,12 @@ export interface BabelPluginOptions {
 export const spriteRuleSchema = z.object({
   /** Regex pattern to match file paths (relative to manifest.json) */
   match: z.string(),
-  /** Template for sprite name using capture groups from match regex */
-  sprite: z.string(),
+  /** Template for sprite filename (without directory path) using capture groups from match regex */
+  sprite: z
+    .string()
+    .refine((value) => !value.includes(`/`) && !value.includes(`\\`), {
+      message: `Sprite name must be a filename only, no directory separators allowed. Use outDir in manifest for output directory.`,
+    }),
 });
 
 /**
@@ -60,6 +64,8 @@ export const spriteManifestSchema = z.object({
   rules: z.array(spriteRuleSchema),
   /** Glob patterns for input audio files to process */
   include: z.array(z.string()),
+  /** Output directory for sprite files (relative to manifest.json) */
+  outDir: z.string(),
 });
 
 /**
@@ -78,3 +84,16 @@ export type SpriteSegment = z.infer<typeof spriteSegmentSchema>;
  * { sprite: sprite file index, start: start time, duration: duration, hash: content hash }
  */
 export type SpriteManifest = z.infer<typeof spriteManifestSchema>;
+
+/**
+ * Audio file info for sprite generation.
+ */
+export interface AudioFileInfo {
+  /** Absolute path to the audio file */
+  filePath: string;
+  /** Expected start time in the sprite (in seconds) */
+  startTime: number;
+  /** Duration of the audio file (in seconds) */
+  duration: number;
+  hash: string;
+}

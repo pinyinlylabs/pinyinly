@@ -80,6 +80,7 @@ const sampleManifest: SpriteManifest = {
     },
   ],
   include: [`audio*.m4a`],
+  outDir: `sprites`,
 };
 
 describe(
@@ -391,6 +392,7 @@ describe(
         },
         rules: [],
         include: [],
+        outDir: `sprites`,
       };
 
       const spriteGroups = getAllAudioFilesBySprite(manifest);
@@ -401,11 +403,13 @@ describe(
             {
               "duration": 1.5,
               "filePath": "audio1.m4a",
+              "hash": "hash1",
               "startTime": 0,
             },
             {
               "duration": 1,
               "filePath": "../audio3.m4a",
+              "hash": "hash3",
               "startTime": 2.5,
             },
           ],
@@ -413,6 +417,7 @@ describe(
             {
               "duration": 2,
               "filePath": "subdir/audio2.m4a",
+              "hash": "hash2",
               "startTime": 0,
             },
           ],
@@ -426,6 +431,7 @@ describe(
         segments: {},
         rules: [],
         include: [],
+        outDir: `sprites`,
       };
 
       const spriteGroups = getAllAudioFilesBySprite(manifest);
@@ -440,7 +446,7 @@ describe(
     test(`creates output directories when they don't exist`, async () => {
       // Create a manifest with sprite files in a nested directory
       const manifestWithNestedSprites: SpriteManifest = {
-        spriteFiles: [`nested/sprites/audio-sprite.m4a`],
+        spriteFiles: [`audio-sprite.m4a`],
         segments: {
           "audio1.m4a": {
             sprite: 0,
@@ -451,6 +457,7 @@ describe(
         },
         rules: [],
         include: [`audio*.m4a`],
+        outDir: `sprites`,
       };
 
       vol.fromJSON({
@@ -459,15 +466,13 @@ describe(
       });
 
       // Verify directory doesn't exist initially
-      expect(vol.existsSync(`/test/nested`)).toBe(false);
-      expect(vol.existsSync(`/test/nested/sprites`)).toBe(false);
+      expect(vol.existsSync(`/test/sprites`)).toBe(false);
 
       // Generate sprites should create the directory and sprite file
       await generateSprites(`/test/manifest.json`);
 
       // Verify directory was created
-      expect(vol.existsSync(`/test/nested`)).toBe(true);
-      expect(vol.existsSync(`/test/nested/sprites`)).toBe(true);
+      expect(vol.existsSync(`/test/sprites`)).toBe(true);
     });
 
     test(`skips generation when sprite file already exists`, async () => {
@@ -488,21 +493,23 @@ describe(
           },
         ],
         include: [`audio*.m4a`],
+        outDir: `sprites`,
       };
 
       vol.fromJSON({
         "/test/manifest.json": JSON.stringify(manifestWithExistingSprite),
         "/test/audio1.m4a": `fake audio content`,
-        "/test/sprite-f1aada43ff61.m4a": `existing sprite content`,
+        "/test/sprites/sprite-f1aada43ff61.m4a": `existing sprite content`,
       });
 
       expect(globSync(`/test/**`, { fs: await import(`node:fs`) }))
         .toMatchInlineSnapshot(`
           [
             "/test",
-            "/test/sprite-f1aada43ff61.m4a",
+            "/test/sprites",
             "/test/manifest.json",
             "/test/audio1.m4a",
+            "/test/sprites/sprite-f1aada43ff61.m4a",
           ]
         `);
 

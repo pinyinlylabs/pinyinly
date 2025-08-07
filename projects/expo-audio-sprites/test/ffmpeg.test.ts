@@ -528,6 +528,7 @@ describe(`Integration tests with real ffmpeg`, () => {
         },
       ],
       include: [`audio/*.mp3`],
+      outDir: `sprites`,
     };
 
     await saveManifest(initialManifest, manifestPath);
@@ -554,7 +555,6 @@ describe(`Integration tests with real ffmpeg`, () => {
         sprite: expect.any(Number) as number,
         start: expect.any(Number) as number,
         duration: expect.any(Number) as number,
-        hash: expect.any(String) as string,
       });
       expect(segment.duration).toBeGreaterThan(0);
       expect(segment.hash).toMatch(/^[a-f0-9]{64}$/); // SHA-256 hash

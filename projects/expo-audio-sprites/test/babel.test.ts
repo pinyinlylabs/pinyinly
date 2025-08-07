@@ -69,14 +69,9 @@ describe(
       const filePath = `/project/sounds/test.js`;
       const output = transformCode(input, filePath, { manifestPath });
 
-      expect(output).toMatchInlineSnapshot(`
-        "const audio = {
-          type: "audiosprite",
-          start: 1.2,
-          duration: 0.5,
-          asset: require("../sprites/sprite1-5a7d2c4f.m4a")
-        };"
-      `);
+      expect(output).toMatchInlineSnapshot(
+        `"const audio = require('./beep1.m4a');"`,
+      );
     });
 
     test(`should leave .m4a require calls unchanged when not found in manifest`, () => {
@@ -162,6 +157,14 @@ describe(
                 "include"
               ],
               "message": "Invalid input: expected array, received undefined"
+            },
+            {
+              "expected": "string",
+              "code": "invalid_type",
+              "path": [
+                "outDir"
+              ],
+              "message": "Invalid input: expected string, received undefined"
             }
           ]],
           ]

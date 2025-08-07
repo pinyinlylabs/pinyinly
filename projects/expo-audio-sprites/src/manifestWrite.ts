@@ -1,13 +1,14 @@
-import { analyzeAudioFileDuration } from "#ffmpeg.ts";
+import { analyzeAudioFileDuration, generateSpriteCommand } from "#ffmpeg.ts";
+import type { AudioFileInfo } from "#types.ts";
 import {
   globSync,
   readFileSync,
   writeUtf8FileIfChanged,
 } from "@pinyinly/lib/fs";
+import { nonNullable } from "@pinyinly/lib/invariant";
 import { jsonStringifyShallowIndent } from "@pinyinly/lib/json";
 import * as crypto from "node:crypto";
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import * as fs from "node:fs";
+
 import path from "node:path";
 import { loadManifest } from "./manifestRead.ts";
 import type { SpriteManifest, SpriteRule, SpriteSegment } from "./types.ts";
@@ -55,94 +56,54 @@ const getFrameAlignedTime = (
 };
 
 /**
- * Create a sprite from a group of files and update their segment information.
+ * Create a sprite filename from a group of files with deterministic hashing.
  * @param spriteName Name prefix for the sprite file
- * @param files Array of file paths to include in the sprite
+ * @param audioFiles Array of audio file info for the sprite
  * @param fileHashMap Map of file paths to their content hashes
- * @param fileDurationMap Map of file paths to their durations
- * @param segments Object containing segment information to update
- * @param spriteIndex Index of this sprite in the sprite files array
- * @param bufferDuration Duration of buffer between segments
- * @param sampleRate Sample rate for frame alignment
  * @returns The generated sprite filename
  */
 const createSpriteFromFiles = (
   spriteName: string,
-  files: string[],
+  audioFiles: AudioFileInfo[],
   fileHashMap: Map<string, string>,
-  fileDurationMap: Map<string, number>,
-  segments: Record<string, SpriteSegment>,
-  spriteIndex: number,
-  bufferDuration: number,
-  sampleRate: number,
 ): string => {
   // Sort files by path to ensure consistent ordering
-  const sortedFiles = [...files].sort();
+  const sortedFiles = [...audioFiles].sort((a, b) =>
+    a.filePath.localeCompare(b.filePath),
+  );
+
+  const hash = crypto.createHash(`sha256`);
 
   // Create a deterministic sprite filename by hashing all parameters that affect sprite content
   const spriteContentHashes = sortedFiles
-    .map((filePath) => fileHashMap.get(filePath))
+    .map((audioFile) => fileHashMap.get(audioFile.filePath))
     .filter((hash): hash is string => hash != null);
-  // Note: Do NOT sort the hashes - they should match the file order
+  hash.update(JSON.stringify(spriteContentHashes));
 
-  // Include all parameters that affect the final sprite content in the hash
-  const spriteParameters = {
-    fileHashes: spriteContentHashes,
-    bufferDuration,
-    sampleRate,
-    // Add more parameters here as needed (e.g., compression settings, audio format, etc.)
-  };
-
-  // Create a combined hash of all sprite parameters
-  const parametersJson = JSON.stringify(spriteParameters);
-  const spriteHash = hashFileContent(parametersJson);
+  // Include the ffmpeg command used to generate the sprite
+  // This ensures that any changes to the command will result in a different sprite file
+  // This is important for reproducibility and cache invalidation.
+  hash.update(JSON.stringify(generateSpriteCommand(sortedFiles, ``)));
 
   // Generate sprite filename: spriteName-hash.m4a
-  const spriteFileName = `${spriteName}-${spriteHash.slice(0, 12)}.m4a`;
-
-  // Calculate start times for each file in this sprite
-  let currentTime = 0; // Start at the beginning of the sprite
-
-  for (const filePath of sortedFiles) {
-    const fileHash = fileHashMap.get(filePath);
-    const duration = fileDurationMap.get(filePath) ?? 0;
-
-    if (fileHash != null && segments[filePath] != null) {
-      // Frame-align the start time
-      const frameAlignedStartTime = getFrameAlignedTime(
-        currentTime,
-        sampleRate,
-      );
-
-      segments[filePath] = {
-        sprite: spriteIndex,
-        start: frameAlignedStartTime,
-        duration,
-        hash: fileHash,
-      };
-
-      // Move to the next position: current segment + buffer
-      currentTime = frameAlignedStartTime + duration + bufferDuration;
-    }
-  }
-
-  return spriteFileName;
+  return `${spriteName}-${hash.digest(`hex`).slice(0, 12)}.m4a`;
 };
 
 /**
  * Update manifest segments based on current filesystem state.
  * Scans files matching include patterns, applies rules to determine sprite assignments,
  * and generates sprite files with content-based hashing.
+ * Uses a single-pass strategy to process each input file once.
  * @param manifest The current sprite manifest
  * @param manifestPath Path to the manifest.json file (used to resolve relative paths)
  * @returns Updated manifest with current file segments and sprite assignments
  */
-export const updateManifestSegments = async (
+export const recomputeManifest = async (
   manifest: SpriteManifest,
   manifestPath: string,
 ): Promise<SpriteManifest> => {
   const manifestDir = path.dirname(manifestPath);
-  const inputFiles = getInputFiles(manifest, manifestPath);
+  const inputFiles = await getInputFiles(manifest, manifestPath);
 
   const updatedSegments: Record<string, SpriteSegment> = {};
 
@@ -179,67 +140,77 @@ export const updateManifestSegments = async (
           await analyzeAudioFileDuration(absolutePath);
 
       fileDurationMap.set(relativePath, duration);
-
-      // Create segment entry for this file path
-      updatedSegments[relativePath] = {
-        sprite: 0, // Will be updated when sprites are assigned
-        start: 0, // Will be updated when sprites are built
-        duration,
-        hash: fileHash,
-      };
     } catch (error) {
       console.warn(`Failed to process file ${relativePath}:`, error);
     }
   }
 
-  // Apply rules to determine sprite assignments
-  const rules = manifest.rules;
-  const spriteAssignments = generateSpriteAssignments(inputFiles, rules);
-
-  // Generate sprite files based on assignments and calculate start times
-  const spriteFiles: string[] = [];
+  // Single-pass processing: Map each file to its sprite name and collect segments
+  const spriteToSegments = new Map<string, AudioFileInfo[]>();
+  const spriteToIndex = new Map<string, number>();
   const BUFFER_DURATION = 1; // 1 second of silence between segments
-  const SAMPLE_RATE = 44_100; // Sample rate used for frame alignment
 
-  for (const [spriteName, filesInSprite] of spriteAssignments) {
-    const spriteIndex = spriteFiles.length;
-    const spriteFileName = createSpriteFromFiles(
-      spriteName,
-      filesInSprite,
-      fileHashMap,
-      fileDurationMap,
-      updatedSegments,
-      spriteIndex,
-      BUFFER_DURATION,
-      SAMPLE_RATE,
+  for (const relativePath of inputFiles) {
+    const duration = fileDurationMap.get(relativePath);
+    const fileHash = fileHashMap.get(relativePath);
+
+    if (duration === undefined || fileHash === undefined) {
+      continue; // Skip files that failed to process
+    }
+
+    const absolutePath = path.resolve(manifestDir, relativePath);
+
+    // Apply rules to determine sprite name
+    const spriteName = applyRules(relativePath, manifest.rules) ?? `unmatched`;
+
+    // Add to sprite segments map
+    if (!spriteToSegments.has(spriteName)) {
+      spriteToIndex.set(spriteName, spriteToSegments.size);
+      spriteToSegments.set(spriteName, []);
+    }
+    const segments = nonNullable(spriteToSegments.get(spriteName));
+    const spriteIndex = nonNullable(spriteToIndex.get(spriteName));
+
+    // Calculate start time for this segment (sum of previous durations + buffers)
+    const startTime = getFrameAlignedTime(
+      segments.reduce(
+        (total, seg) => total + seg.duration + BUFFER_DURATION,
+        0,
+      ),
     );
-    spriteFiles.push(spriteFileName);
+
+    const audioFileInfo: AudioFileInfo = {
+      filePath: absolutePath,
+      startTime,
+      duration,
+      hash: fileHash,
+    };
+    segments.push(audioFileInfo);
+
+    // Create segment entry for the manifest
+    updatedSegments[relativePath] = {
+      sprite: spriteIndex,
+      start: audioFileInfo.startTime,
+      duration: audioFileInfo.duration,
+      hash: audioFileInfo.hash,
+    };
   }
 
-  // Handle files that don't match any rules - put them in a default sprite
-  const unmatchedFiles = inputFiles.filter((filePath) => {
-    const spriteName = applyRules(filePath, rules);
-    return spriteName == null || spriteName.length === 0;
-  });
-
-  if (unmatchedFiles.length > 0) {
-    const unmatchedSpriteIndex = spriteFiles.length;
+  // Generate sprite filenames and update segment references
+  const updatedSpriteFiles: string[] = [];
+  for (const [spriteName, segments] of spriteToSegments) {
+    const spriteIndex = nonNullable(spriteToIndex.get(spriteName));
     const spriteFileName = createSpriteFromFiles(
-      `unmatched`,
-      unmatchedFiles,
+      spriteName,
+      segments,
       fileHashMap,
-      fileDurationMap,
-      updatedSegments,
-      unmatchedSpriteIndex,
-      BUFFER_DURATION,
-      SAMPLE_RATE,
     );
-    spriteFiles.push(spriteFileName);
+    updatedSpriteFiles[spriteIndex] = spriteFileName;
   }
 
   return {
     ...manifest,
-    spriteFiles,
+    spriteFiles: updatedSpriteFiles,
     segments: updatedSegments,
   };
 };
@@ -274,7 +245,7 @@ export const syncManifestWithFilesystem = async (
     throw new Error(`Failed to load manifest from ${manifestPath}`);
   }
 
-  const updatedManifest = await updateManifestSegments(manifest, manifestPath);
+  const updatedManifest = await recomputeManifest(manifest, manifestPath);
   await saveManifest(updatedManifest, manifestPath);
 
   return updatedManifest;
@@ -339,17 +310,17 @@ export const applyRules = (
  * @param manifestDir Directory where the manifest.json is located (used as base for glob patterns)
  * @returns Array of file paths relative to manifestDir
  */
-export const resolveIncludePatterns = (
+export const resolveIncludePatterns = async (
   includePatterns: string[],
   manifestDir: string,
-): string[] => {
+): Promise<string[]> => {
   const allFiles: string[] = [];
 
   for (const pattern of includePatterns) {
     try {
       const files = globSync(pattern, {
         cwd: manifestDir,
-        fs, // needed for memfs mocking
+        fs: await import(`node:fs`),
         posix: true, // Use posix-style paths for consistency
       });
 
@@ -369,14 +340,14 @@ export const resolveIncludePatterns = (
  * @param manifestPath Path to the manifest.json file
  * @returns Array of file paths relative to manifest directory
  */
-export const getInputFiles = (
+export const getInputFiles = async (
   manifest: SpriteManifest,
   manifestPath: string,
-): string[] => {
+): Promise<string[]> => {
   if (manifest.include.length === 0) {
     return [];
   }
 
   const manifestDir = path.dirname(manifestPath);
-  return resolveIncludePatterns(manifest.include, manifestDir);
+  return await resolveIncludePatterns(manifest.include, manifestDir);
 };

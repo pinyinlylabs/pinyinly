@@ -1,3 +1,4 @@
+import type { AudioFileInfo } from "#types.ts";
 import { memoize0 } from "@pinyinly/lib/collections";
 import { execaCached, getFileModTime } from "@pinyinly/lib/execaCached";
 import { invariant } from "@pinyinly/lib/invariant";
@@ -252,18 +253,6 @@ export function parseFfmpegOutput(output: string) {
 }
 
 /**
- * Audio file info for sprite generation.
- */
-export interface AudioFileInfo {
-  /** Absolute path to the audio file */
-  filePath: string;
-  /** Expected start time in the sprite (in seconds) */
-  startTime: number;
-  /** Duration of the audio file (in seconds) */
-  duration: number;
-}
-
-/**
  * Generate an ffmpeg command to create an audio sprite from multiple input files.
  *
  * The command will:
@@ -277,7 +266,7 @@ export interface AudioFileInfo {
  * @returns Array of ffmpeg command arguments
  */
 export function generateSpriteCommand(
-  audioFiles: AudioFileInfo[],
+  audioFiles: Pick<AudioFileInfo, `filePath` | `startTime` | `duration`>[],
   outputPath: string,
   sampleRate = 44_100,
 ): string[] {

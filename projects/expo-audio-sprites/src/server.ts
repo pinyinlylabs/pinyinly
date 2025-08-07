@@ -6,7 +6,7 @@ export {
   resolveIncludePatterns,
   saveManifest,
   syncManifestWithFilesystem,
-  updateManifestSegments,
+  recomputeManifest as updateManifestSegments,
 } from "./manifestWrite.ts";
 
 export { analyzeAudioFile } from "./ffmpeg.ts";

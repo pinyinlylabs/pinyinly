@@ -54,6 +54,7 @@ describe(`loadManifest suite` satisfies HasNameOf<typeof loadManifest>, () => {
         },
       ],
       include: [`audio/**/*.m4a`],
+      outDir: `sprites`,
     };
 
     vol.fromJSON({
@@ -194,6 +195,7 @@ describe(`loadManifest suite` satisfies HasNameOf<typeof loadManifest>, () => {
       segments: {},
       rules: [],
       include: [],
+      outDir: `sprites`,
     };
 
     vol.fromJSON({
@@ -238,6 +240,7 @@ describe(
       },
       rules: [],
       include: [],
+      outDir: `sprites`,
     });
 
     test(`should find audio segment and return correct sprite file path`, () => {
@@ -345,6 +348,7 @@ describe(
         },
         rules: [],
         include: [],
+        outDir: `sprites`,
       };
 
       const manifestPath = `/project/manifest.json`;
@@ -403,6 +407,7 @@ describe(
         },
         rules: [],
         include: [],
+        outDir: `sprites`,
       };
 
       const manifestPath = `/project/manifest.json`;
@@ -416,15 +421,17 @@ describe(
         audioRequirePath,
       );
 
-      expect(result).toEqual({
-        segment: {
-          sprite: 0,
-          start: 0,
-          duration: 1.5,
-          hash: `abc123`,
-        },
-        spriteFilePath: `../../audio-sprite.m4a`, // Should be normalized with relative path
-      });
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "segment": {
+            "duration": 1.5,
+            "hash": "abc123",
+            "sprite": 0,
+            "start": 0,
+          },
+          "spriteFilePath": "../../audio-sprite.m4a",
+        }
+      `);
     });
   },
 );

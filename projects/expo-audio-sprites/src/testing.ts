@@ -1,7 +1,6 @@
 import * as fs from "@pinyinly/lib/fs";
 import { execa } from "execa";
 import path from "node:path";
-import type { AudioFileInfo } from "./ffmpeg.ts";
 import { generateSpriteCommand } from "./ffmpeg.ts";
 import { loadManifest } from "./manifestRead.ts";
 import {
@@ -9,7 +8,7 @@ import {
   hashFile,
   syncManifestWithFilesystem,
 } from "./manifestWrite.ts";
-import type { SpriteManifest } from "./types.ts";
+import type { AudioFileInfo, SpriteManifest } from "./types.ts";
 
 /**
  * Result of checking the sprite manifest status.
@@ -152,7 +151,7 @@ export async function checkSpriteManifest(
   }
 
   const manifestDir = path.dirname(manifestPath);
-  const inputFiles = getInputFiles(manifest, manifestPath);
+  const inputFiles = await getInputFiles(manifest, manifestPath);
 
   // Check if all source files have correct hashes
   const outdatedFiles: string[] = [];
@@ -223,6 +222,7 @@ export function getAllAudioFilesBySprite(
       filePath,
       startTime: segment.start,
       duration: segment.duration,
+      hash: segment.hash,
     };
 
     const existingFiles = spriteGroups.get(spriteFilePath) ?? [];
@@ -251,8 +251,8 @@ export async function generateSprites(manifestPath: string): Promise<void> {
   const spriteGroups = getAllAudioFilesBySprite(manifest);
 
   // Generate each sprite file
-  for (const [spriteFilePath, audioFiles] of spriteGroups) {
-    const spriteFileName = path.basename(spriteFilePath);
+  for (const [spriteFileName, audioFiles] of spriteGroups) {
+    const spriteFilePath = path.join(manifest.outDir, spriteFileName);
     const absoluteSpriteFilePath = path.resolve(manifestDir, spriteFilePath);
 
     // Check if sprite file already exists
