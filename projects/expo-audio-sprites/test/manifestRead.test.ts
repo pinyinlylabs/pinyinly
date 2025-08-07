@@ -217,7 +217,7 @@ describe(
     });
 
     const createTestManifest = (): SpriteManifest => ({
-      spriteFiles: [`sprites/audio-sprite.m4a`, `sprites/effects-sprite.m4a`],
+      spriteFiles: [`audio-sprite.m4a`, `effects-sprite.m4a`],
       segments: {
         "src/sounds/beep.m4a": {
           sprite: 0,
@@ -429,7 +429,7 @@ describe(
             "sprite": 0,
             "start": 0,
           },
-          "spriteFilePath": "../../audio-sprite.m4a",
+          "spriteFilePath": "../../sprites/audio-sprite.m4a",
         }
       `);
     });

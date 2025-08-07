@@ -70,7 +70,9 @@ export const findAudioSegment = (
   }
 
   // Resolve the sprite file path relative to the manifest location
-  const absoluteSpriteFilePath = path.resolve(manifestDir, spriteFile);
+  // Sprite files are stored in the outDir, so combine outDir with the sprite filename
+  const spriteFilePath = path.join(manifest.outDir, spriteFile);
+  const absoluteSpriteFilePath = path.resolve(manifestDir, spriteFilePath);
 
   // Make the sprite file path relative to the current file being transformed
   const currentFileDir = path.dirname(currentFilePath);
