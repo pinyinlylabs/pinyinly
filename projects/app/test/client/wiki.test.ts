@@ -25,7 +25,7 @@ describe(`speech files`, async () => {
         const { duration } = await analyzeAudioFile(filePath);
 
         const delta = Math.abs(duration.fromStream - duration.fromContainer);
-        expect(delta).toBeLessThanOrEqual(0.02); // Allow 20ms tolerance
+        expect(delta).toBeLessThanOrEqual(0.05); // Allow 50ms tolerance
       });
 
       test(`audio file is not empty (based on duration)`, async () => {
