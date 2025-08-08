@@ -516,11 +516,11 @@ describe(`Integration tests with real ffmpeg`, () => {
       segments: {},
       rules: [
         {
+          include: [`audio/*.mp3`],
           match: `^audio/test(\\d+)\\.mp3$`,
           sprite: `test-sprite-$1`,
         },
       ],
-      include: [`audio/*.mp3`],
       outDir: `sprites`,
     };
 

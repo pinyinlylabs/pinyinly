@@ -28,8 +28,8 @@ export interface BabelPluginOptions {
  * Zod schema for validating sprite rules.
  */
 export const spriteRuleSchema = z.object({
-  /** Glob patterns for input audio files to process (optional) */
-  include: z.array(z.string()).optional(),
+  /** Glob patterns for input audio files to process */
+  include: z.array(z.string()),
   /** Regex pattern to match file paths (relative to manifest.json) */
   match: z.string(),
   /** Template for sprite filename (without directory path) using capture groups from match regex */
@@ -64,8 +64,6 @@ export const spriteManifestSchema = z.object({
   segments: z.record(z.string(), spriteSegmentSchema),
   /** Rules for automatically mapping files to sprites */
   rules: z.array(spriteRuleSchema),
-  /** Global glob patterns for input audio files to process (legacy, prefer per-rule include) */
-  include: z.array(z.string()).optional(),
   /** Output directory for sprite files (relative to manifest.json) */
   outDir: z.string(),
 });

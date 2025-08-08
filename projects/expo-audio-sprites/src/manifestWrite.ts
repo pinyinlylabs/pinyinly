@@ -3,10 +3,9 @@ import type { AudioFileInfo } from "#types.ts";
 import {
   globSync,
   readFileSync,
-  writeUtf8FileIfChanged,
+  writeJsonFileIfChanged,
 } from "@pinyinly/lib/fs";
 import { nonNullable } from "@pinyinly/lib/invariant";
-import { jsonStringifyShallowIndent } from "@pinyinly/lib/json";
 import * as crypto from "node:crypto";
 
 import path from "node:path";
@@ -224,10 +223,7 @@ export const saveManifest = async (
   manifest: SpriteManifest,
   manifestPath: string,
 ): Promise<void> => {
-  await writeUtf8FileIfChanged(
-    manifestPath,
-    jsonStringifyShallowIndent(manifest, 1),
-  );
+  await writeJsonFileIfChanged(manifestPath, manifest, 1);
 };
 
 /**
@@ -335,7 +331,7 @@ export const resolveIncludePatterns = async (
 };
 
 /**
- * Get all input files for processing based on include patterns from rules or legacy top-level include.
+ * Get all input files for processing based on include patterns from rules.
  * @param manifest The sprite manifest containing rules with include patterns
  * @param manifestPath Path to the manifest.json file
  * @returns Array of file paths relative to manifest directory
@@ -347,24 +343,13 @@ export const getInputFiles = async (
   const manifestDir = path.dirname(manifestPath);
   const allFiles: string[] = [];
 
-  // Collect include patterns from all rules that have them
+  // Collect include patterns from all rules
   for (const rule of manifest.rules) {
-    if (rule.include) {
-      const filesFromRule = await resolveIncludePatterns(
-        rule.include,
-        manifestDir,
-      );
-      allFiles.push(...filesFromRule);
-    }
-  }
-
-  // If no rules have include patterns, use legacy top-level include
-  if (allFiles.length === 0 && manifest.include) {
-    const legacyFiles = await resolveIncludePatterns(
-      manifest.include,
+    const filesFromRule = await resolveIncludePatterns(
+      rule.include,
       manifestDir,
     );
-    allFiles.push(...legacyFiles);
+    allFiles.push(...filesFromRule);
   }
 
   // Remove duplicates and sort for consistent ordering

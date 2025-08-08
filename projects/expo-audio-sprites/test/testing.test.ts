@@ -142,6 +142,7 @@ describe(
         ...sampleManifest,
         rules: [
           {
+            include: [`audio/**/*.m4a`],
             match: `audio/[^/]+/.*\\.m4a`, // Missing (?<page>...) named capture group
             sprite: `wiki-\${page}`, // References ${page} which doesn't exist
           },
@@ -169,6 +170,7 @@ describe(
         ...sampleManifest,
         rules: [
           {
+            include: [`audio/**/*.m4a`],
             match: `audio/(?<page>[^/]+)/.*\\.m4a`, // Has (?<page>...) named capture group
             sprite: `wiki-\${page}`, // References ${page} which exists
           },
@@ -196,6 +198,7 @@ describe(
         ...sampleManifest,
         rules: [
           {
+            include: [`audio/**/*.m4a`],
             match: `audio/.*\\.m4a`,
             sprite: `static-sprite-name`, // No variables
           },
@@ -223,6 +226,7 @@ describe(
         ...sampleManifest,
         rules: [
           {
+            include: [`audio/**/*.m4a`],
             match: `audio/([^/]+)/.*\\.m4a`, // Uses numbered capture group
             sprite: `wiki-$1`, // References $1 (numbered, not named)
           },
@@ -607,7 +611,6 @@ describe(
           },
         },
         rules: [],
-        include: [],
         outDir: `sprites`,
       };
 
@@ -646,7 +649,6 @@ describe(
         spriteFiles: [],
         segments: {},
         rules: [],
-        include: [],
         outDir: `sprites`,
       };
 
@@ -671,8 +673,13 @@ describe(
             hash: `abc123`,
           },
         },
-        rules: [],
-        include: [`audio*.m4a`],
+        rules: [
+          {
+            include: [`audio*.m4a`],
+            match: `.*`,
+            sprite: `default`,
+          },
+        ],
         outDir: `sprites`,
       };
 
@@ -704,11 +711,11 @@ describe(
         },
         rules: [
           {
+            include: [`audio*.m4a`],
             match: `(audio.+)\\.m4a$`,
             sprite: `sprite`,
           },
         ],
-        include: [`audio*.m4a`],
         outDir: `sprites`,
       };
 
