@@ -28,6 +28,8 @@ export interface BabelPluginOptions {
  * Zod schema for validating sprite rules.
  */
 export const spriteRuleSchema = z.object({
+  /** Glob patterns for input audio files to process */
+  include: z.array(z.string()),
   /** Regex pattern to match file paths (relative to manifest.json) */
   match: z.string(),
   /** Template for sprite filename (without directory path) using capture groups from match regex */
@@ -36,6 +38,8 @@ export const spriteRuleSchema = z.object({
     .refine((value) => !value.includes(`/`) && !value.includes(`\\`), {
       message: `Sprite name must be a filename only, no directory separators allowed. Use outDir in manifest for output directory.`,
     }),
+  /** Audio bitrate for the output sprite (e.g., "128k", "192k", "256k"). Defaults to "128k" if not specified. */
+  bitrate: z.string().optional(),
 });
 
 /**
@@ -62,8 +66,6 @@ export const spriteManifestSchema = z.object({
   segments: z.record(z.string(), spriteSegmentSchema),
   /** Rules for automatically mapping files to sprites */
   rules: z.array(spriteRuleSchema),
-  /** Glob patterns for input audio files to process */
-  include: z.array(z.string()),
   /** Output directory for sprite files (relative to manifest.json) */
   outDir: z.string(),
 });

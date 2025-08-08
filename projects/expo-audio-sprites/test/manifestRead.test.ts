@@ -49,11 +49,11 @@ describe(`loadManifest suite` satisfies HasNameOf<typeof loadManifest>, () => {
       },
       rules: [
         {
+          include: [`audio/**/*.m4a`],
           match: `audio/(?<name>[^/]+)\\.m4a`,
           sprite: `\${name}`,
         },
       ],
-      include: [`audio/**/*.m4a`],
       outDir: `sprites`,
     };
 
@@ -194,7 +194,6 @@ describe(`loadManifest suite` satisfies HasNameOf<typeof loadManifest>, () => {
       spriteFiles: [],
       segments: {},
       rules: [],
-      include: [],
       outDir: `sprites`,
     };
 
@@ -239,7 +238,6 @@ describe(
         },
       },
       rules: [],
-      include: [],
       outDir: `sprites`,
     });
 
@@ -347,7 +345,6 @@ describe(
           },
         },
         rules: [],
-        include: [],
         outDir: `sprites`,
       };
 
@@ -406,7 +403,6 @@ describe(
           },
         },
         rules: [],
-        include: [],
         outDir: `sprites`,
       };
 

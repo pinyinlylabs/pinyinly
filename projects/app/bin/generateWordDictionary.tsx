@@ -1,6 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import hanzi from "hanzi";
-
 import { useInternetQuery } from "#client/hooks/useInternetQuery.ts";
 import { useLocalQuery } from "#client/hooks/useLocalQuery.ts";
 import {
@@ -50,8 +47,8 @@ import {
   sortComparatorNumber,
   sortComparatorString,
 } from "@pinyinly/lib/collections";
+import { writeJsonFileIfChanged } from "@pinyinly/lib/fs";
 import { invariant } from "@pinyinly/lib/invariant";
-import { jsonStringifyShallowIndent } from "@pinyinly/lib/json";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import makeDebug from "debug";
 import { Box, render, Text, useFocus, useInput } from "ink";
@@ -80,11 +77,7 @@ import {
   getDongChineseMeaningKey,
   getDongChinesePinyin,
 } from "./util/dongChinese.js";
-import {
-  dictionaryPath,
-  readFileWithSchema,
-  writeUtf8FileIfChanged,
-} from "./util/fs.js";
+import { dictionaryPath, readFileWithSchema } from "./util/fs.js";
 import { makeSimpleAiClient } from "./util/openai.js";
 
 const debug = makeDebug(`pyly`);
@@ -103,8 +96,6 @@ if (argv.debug) {
   makeDebug.enable(`${debug.namespace},${debug.namespace}:*`);
 }
 
-// Load data that we'll later use multiple times.
-hanzi.start();
 const decompositions = await loadHanziDecomposition();
 const dbCache = makeDbCache(import.meta.filename, `openai_chat_cache`, debug);
 const archiveCache = makeDbCache(
@@ -2304,10 +2295,7 @@ async function saveUpsertHanziWordMeaning(
 }
 
 async function writeDictionary(dict: Dictionary) {
-  await writeUtf8FileIfChanged(
-    dictionaryFilePath,
-    jsonStringifyShallowIndent(unparseDictionary(dict)),
-  );
+  await writeJsonFileIfChanged(dictionaryFilePath, unparseDictionary(dict));
   await queryClient.invalidateQueries({ queryKey: [`loadDictionary`] });
 }
 
@@ -2344,9 +2332,9 @@ async function readHanziWordList(name: string) {
 }
 
 async function writeHanziWordList(wordListFileName: string, data: HanziWord[]) {
-  await writeUtf8FileIfChanged(
+  await writeJsonFileIfChanged(
     path.join(dictionaryPath, `${wordListFileName}.asset.json`),
-    jsonStringifyShallowIndent(data.sort()),
+    data.sort(),
   );
 }
 

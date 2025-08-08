@@ -4,6 +4,7 @@ import path from "node:path";
 import { generateSpriteCommand } from "./ffmpeg.ts";
 import { loadManifest } from "./manifestRead.ts";
 import {
+  applyRulesWithRule,
   getInputFiles,
   hashFile,
   syncManifestWithFilesystem,
@@ -328,17 +329,39 @@ export async function generateSprites(manifestPath: string): Promise<void> {
       continue;
     }
 
+    // Determine bitrate for this sprite by checking which rule matches the first file
+    let bitrate = `128k`; // default
+    if (audioFiles.length > 0) {
+      const firstFile = audioFiles[0];
+      if (firstFile) {
+        // Convert absolute path back to relative path to match against rules
+        const relativePath = path.relative(manifestDir, firstFile.filePath);
+        const ruleResult = applyRulesWithRule(relativePath, manifest.rules);
+        if (
+          ruleResult?.rule.bitrate != null &&
+          ruleResult.rule.bitrate.length > 0
+        ) {
+          bitrate = ruleResult.rule.bitrate;
+        }
+      }
+    }
+
     // Ensure the output directory exists
     const spriteDir = path.dirname(absoluteSpriteFilePath);
     if (!fs.existsSync(spriteDir)) {
       fs.mkdirSync(spriteDir, { recursive: true });
     }
 
-    // Generate ffmpeg command
-    const command = generateSpriteCommand(audioFiles, spriteFilePath);
+    // Generate ffmpeg command with the determined bitrate
+    const command = generateSpriteCommand(
+      audioFiles,
+      spriteFilePath,
+      44_100,
+      bitrate,
+    );
 
     // Execute ffmpeg command
-    console.warn(`Generating sprite: ${spriteFileName}`);
+    console.warn(`Generating sprite: ${spriteFileName} (bitrate: ${bitrate})`);
     console.warn(`Running: ${command.join(` `)}`);
 
     try {

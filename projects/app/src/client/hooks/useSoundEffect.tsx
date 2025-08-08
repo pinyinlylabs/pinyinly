@@ -1,6 +1,7 @@
 import { AudioContextProvider } from "@/client/ui/AudioContextProvider";
 import type { PylyAudioSource } from "@pinyinly/expo-audio-sprites/client";
 import { isAudioSpriteSource } from "@pinyinly/expo-audio-sprites/client";
+import type { AudioSource } from "expo-audio";
 import { useAudioPlayer } from "expo-audio";
 import { use } from "react";
 import { Platform } from "react-native";
@@ -25,8 +26,19 @@ const useSoundEffectExpoAudio: UseSoundEffect = (source) => {
 // that sound effects don't take Audio Focus and take control of the media keys
 // on the OS.
 const useSoundEffectWebApi: UseSoundEffect = (source) => {
-  const sourceUri = typeof source === `string` ? source : null;
   const audioContext = use(AudioContextProvider.Context);
+
+  let duration: number | undefined;
+  let start: number | undefined;
+  let asset: AudioSource;
+  if (isAudioSpriteSource(source)) {
+    duration = source.duration;
+    start = source.start;
+    asset = source.asset;
+  } else {
+    asset = source;
+  }
+  const sourceUri = typeof asset === `string` ? asset : null;
 
   // Download and cache the audio buffer.
   const { data: audioBuffer } = useLocalQuery({
@@ -54,18 +66,18 @@ const useSoundEffectWebApi: UseSoundEffect = (source) => {
         source.disconnect();
       });
 
-      if (audioContext.state === `suspended`) {
-        void audioContext
-          .resume()
-          .then(() => {
-            source.start();
-          })
-          .catch((error: unknown) => {
-            console.error(`Failed to resume audio context`, error);
-          });
-      } else {
-        source.start();
-      }
+      const prepareAudioContext =
+        audioContext.state === `running`
+          ? Promise.resolve()
+          : audioContext.resume();
+
+      prepareAudioContext
+        .then(() => {
+          source.start(0, start, duration);
+        })
+        .catch((error: unknown) => {
+          console.error(`Failed to resume audio context`, error);
+        });
     }
   });
 

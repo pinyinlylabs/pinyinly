@@ -3,10 +3,9 @@ import type { AudioFileInfo } from "#types.ts";
 import {
   globSync,
   readFileSync,
-  writeUtf8FileIfChanged,
+  writeJsonFileIfChanged,
 } from "@pinyinly/lib/fs";
 import { nonNullable } from "@pinyinly/lib/invariant";
-import { jsonStringifyShallowIndent } from "@pinyinly/lib/json";
 import * as crypto from "node:crypto";
 
 import path from "node:path";
@@ -60,12 +59,14 @@ const getFrameAlignedTime = (
  * @param spriteName Name prefix for the sprite file
  * @param audioFiles Array of audio file info for the sprite
  * @param fileHashMap Map of file paths to their content hashes
+ * @param bitrate Audio bitrate for the sprite (defaults to "128k")
  * @returns The generated sprite filename
  */
 const createSpriteFromFiles = (
   spriteName: string,
   audioFiles: AudioFileInfo[],
   fileHashMap: Map<string, string>,
+  bitrate = `128k`,
 ): string => {
   // Sort files by path to ensure consistent ordering
   const sortedFiles = [...audioFiles].sort((a, b) =>
@@ -83,7 +84,9 @@ const createSpriteFromFiles = (
   // Include the ffmpeg command used to generate the sprite
   // This ensures that any changes to the command will result in a different sprite file
   // This is important for reproducibility and cache invalidation.
-  hash.update(JSON.stringify(generateSpriteCommand(sortedFiles, ``)));
+  hash.update(
+    JSON.stringify(generateSpriteCommand(sortedFiles, ``, 44_100, bitrate)),
+  );
 
   // Generate sprite filename: spriteName-hash.m4a
   return `${spriteName}-${hash.digest(`hex`).slice(0, 12)}.m4a`;
@@ -91,7 +94,7 @@ const createSpriteFromFiles = (
 
 /**
  * Update manifest segments based on current filesystem state.
- * Scans files matching include patterns, applies rules to determine sprite assignments,
+ * Scans files matching patterns from rules, applies rules to determine sprite assignments,
  * and generates sprite files with content-based hashing.
  * Uses a single-pass strategy to process each input file once.
  * @param manifest The current sprite manifest
@@ -148,6 +151,7 @@ export const recomputeManifest = async (
   // Single-pass processing: Map each file to its sprite name and collect segments
   const spriteToSegments = new Map<string, AudioFileInfo[]>();
   const spriteToIndex = new Map<string, number>();
+  const spriteToRule = new Map<string, SpriteRule>();
   const BUFFER_DURATION = 1; // 1 second of silence between segments
 
   for (const relativePath of inputFiles) {
@@ -160,13 +164,18 @@ export const recomputeManifest = async (
 
     const absolutePath = path.resolve(manifestDir, relativePath);
 
-    // Apply rules to determine sprite name
-    const spriteName = applyRules(relativePath, manifest.rules) ?? `unmatched`;
+    // Apply rules to determine sprite name and get the matched rule
+    const ruleResult = applyRulesWithRule(relativePath, manifest.rules);
+    const spriteName = ruleResult?.spriteName ?? `unmatched`;
+    const matchedRule = ruleResult?.rule;
 
     // Add to sprite segments map
     if (!spriteToSegments.has(spriteName)) {
       spriteToIndex.set(spriteName, spriteToSegments.size);
       spriteToSegments.set(spriteName, []);
+      if (matchedRule) {
+        spriteToRule.set(spriteName, matchedRule);
+      }
     }
     const segments = nonNullable(spriteToSegments.get(spriteName));
     const spriteIndex = nonNullable(spriteToIndex.get(spriteName));
@@ -200,10 +209,13 @@ export const recomputeManifest = async (
   const updatedSpriteFiles: string[] = [];
   for (const [spriteName, segments] of spriteToSegments) {
     const spriteIndex = nonNullable(spriteToIndex.get(spriteName));
+    const matchedRule = spriteToRule.get(spriteName);
+    const bitrate = matchedRule?.bitrate ?? `128k`;
     const spriteFileName = createSpriteFromFiles(
       spriteName,
       segments,
       fileHashMap,
+      bitrate,
     );
     updatedSpriteFiles[spriteIndex] = spriteFileName;
   }
@@ -224,14 +236,11 @@ export const saveManifest = async (
   manifest: SpriteManifest,
   manifestPath: string,
 ): Promise<void> => {
-  await writeUtf8FileIfChanged(
-    manifestPath,
-    jsonStringifyShallowIndent(manifest, 1),
-  );
+  await writeJsonFileIfChanged(manifestPath, manifest, 2);
 };
 
 /**
- * Synchronize manifest with filesystem by updating segments based on include patterns.
+ * Synchronize manifest with filesystem by updating segments based on rules.
  * Loads manifest, scans filesystem, updates segments, and saves back to disk.
  * @param manifestPath Path to the manifest.json file
  * @returns The updated manifest
@@ -270,6 +279,20 @@ export const applyRules = (
   filePath: string,
   rules: SpriteRule[],
 ): string | undefined => {
+  const result = applyRulesWithRule(filePath, rules);
+  return result?.spriteName;
+};
+
+/**
+ * Apply sprite rules to determine which sprite a file should belong to and return the matched rule.
+ * @param filePath The file path relative to the manifest.json
+ * @param rules Array of sprite rules to apply
+ * @returns Object with sprite name and matched rule if a rule matches, undefined otherwise
+ */
+export const applyRulesWithRule = (
+  filePath: string,
+  rules: SpriteRule[],
+): { spriteName: string; rule: SpriteRule } | undefined => {
   for (const rule of rules) {
     try {
       const regex = new RegExp(rule.match);
@@ -294,7 +317,7 @@ export const applyRules = (
           }
         }
 
-        return spriteName;
+        return { spriteName, rule };
       }
     } catch (error) {
       console.warn(`Invalid regex pattern in rule: ${rule.match}`, error);
@@ -335,8 +358,8 @@ export const resolveIncludePatterns = async (
 };
 
 /**
- * Get all input files for processing based on manifest include patterns.
- * @param manifest The sprite manifest containing include patterns
+ * Get all input files for processing based on include patterns from rules.
+ * @param manifest The sprite manifest containing rules with include patterns
  * @param manifestPath Path to the manifest.json file
  * @returns Array of file paths relative to manifest directory
  */
@@ -344,10 +367,18 @@ export const getInputFiles = async (
   manifest: SpriteManifest,
   manifestPath: string,
 ): Promise<string[]> => {
-  if (manifest.include.length === 0) {
-    return [];
+  const manifestDir = path.dirname(manifestPath);
+  const allFiles: string[] = [];
+
+  // Collect include patterns from all rules
+  for (const rule of manifest.rules) {
+    const filesFromRule = await resolveIncludePatterns(
+      rule.include,
+      manifestDir,
+    );
+    allFiles.push(...filesFromRule);
   }
 
-  const manifestDir = path.dirname(manifestPath);
-  return await resolveIncludePatterns(manifest.include, manifestDir);
+  // Remove duplicates and sort for consistent ordering
+  return [...new Set(allFiles)].sort();
 };

@@ -10,15 +10,14 @@ import {
   sortComparatorNumber,
   sortComparatorString,
 } from "@pinyinly/lib/collections";
+import { writeJsonFileIfChanged } from "@pinyinly/lib/fs";
 import { invariant } from "@pinyinly/lib/invariant";
-import { jsonStringifyShallowIndent } from "@pinyinly/lib/json";
 import makeDebug from "debug";
 import path from "node:path";
 import OpenAI from "openai";
 import yargs from "yargs";
 import { z } from "zod/v4";
 import { makeDbCache } from "./util/cache.js";
-import { writeUtf8FileIfChanged } from "./util/fs.js";
 import { openAiWithCache, zodResponseFormat } from "./util/openai.js";
 
 const debug = makeDebug(`pyly`);
@@ -217,11 +216,11 @@ if (argv[`force-write`] || updates.size > 0) {
     // Sort the map for minimal diffs in PR
     .sort(sortComparatorString(([key]) => key));
 
-  await writeUtf8FileIfChanged(
+  await writeJsonFileIfChanged(
     path.join(
       import.meta.dirname,
       `../src/dictionary/radicalPinyinMnemonics.asset.json`,
     ),
-    jsonStringifyShallowIndent(updatedData),
+    updatedData,
   );
 }

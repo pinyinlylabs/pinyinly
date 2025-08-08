@@ -1,21 +1,6 @@
-import { readFile, stat, writeFile } from "@pinyinly/lib/fs";
+import { readFile, stat } from "@pinyinly/lib/fs";
 import path from "node:path";
 import type { z } from "zod/v4";
-
-export async function writeUtf8FileIfChanged(
-  path: string,
-  content: string,
-  readOnly = false,
-): Promise<boolean> {
-  const encoding = `utf8`;
-
-  const existingContent = await readFile(path, { encoding }).catch(() => null);
-  const hasDiff = existingContent !== content;
-  if (hasDiff && !readOnly) {
-    await writeFile(path, content, { encoding });
-  }
-  return hasDiff;
-}
 
 /**
  * Read and parse a file using a zod schema, or return a fallback value if the

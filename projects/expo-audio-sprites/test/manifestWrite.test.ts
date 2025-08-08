@@ -14,7 +14,7 @@ import { invariant } from "@pinyinly/lib/invariant";
 import { vol } from "memfs";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
-// Mock fs module to use memfs
+// Mock fs to use memfs
 vi.mock(`node:fs`, async () => {
   const { fs } = await vi.importActual(`memfs`);
   return fs;
@@ -65,10 +65,12 @@ describe(
 
       const rules = [
         {
+          include: [`audio/wiki/**/*.m4a`],
           match: `audio/wiki/(?<page>[^/]+)/(?<file>[^/]+)\\.m4a`,
           sprite: `wiki-\${page}`,
         },
         {
+          include: [`audio/sounds/*.m4a`],
           match: `audio/sounds/(?<file>[^/]+)\\.m4a`,
           sprite: `sounds`,
         },
@@ -89,6 +91,7 @@ describe(
       const files: string[] = [];
       const rules = [
         {
+          include: [`audio/**/*.m4a`],
           match: `audio/(?<category>[^/]+)/.*\\.m4a`,
           sprite: `\${category}`,
         },
@@ -101,7 +104,7 @@ describe(
 
     test(`should handle empty rules array`, () => {
       const files = [`audio/wiki/hello.m4a`, `audio/sounds/beep.m4a`];
-      const rules: { match: string; sprite: string }[] = [];
+      const rules: { include: string[]; match: string; sprite: string }[] = [];
 
       const result = generateSpriteAssignments(files, rules);
 
@@ -112,6 +115,7 @@ describe(
       const files = [`video/clip.mp4`, `image/photo.jpg`];
       const rules = [
         {
+          include: [`audio/**/*.m4a`],
           match: `audio/.*\\.m4a`,
           sprite: `audio-files`,
         },
@@ -134,8 +138,13 @@ describe(
         "/project/manifest.json": JSON.stringify({
           spriteFiles: [],
           segments: {},
-          rules: [],
-          include: [`audio/**/*.m4a`],
+          rules: [
+            {
+              include: [`audio/**/*.m4a`],
+              match: `.*`,
+              sprite: `default`,
+            },
+          ],
           outDir: `sprites`,
         } satisfies SpriteManifest),
       });
@@ -174,8 +183,13 @@ describe(
         "/project/manifest.json": JSON.stringify({
           spriteFiles: [],
           segments: {},
-          rules: [],
-          include: [`audio/**/*.m4a`],
+          rules: [
+            {
+              include: [`audio/**/*.m4a`],
+              match: `.*\\.m4a`,
+              sprite: `default`,
+            },
+          ],
           outDir: `sprites`,
         } satisfies SpriteManifest),
       });
@@ -231,7 +245,6 @@ describe(
         "/project/manifest.json": JSON.stringify({
           spriteFiles: [],
           segments: {},
-          include: [],
           rules: [],
           outDir: `sprites`,
         } satisfies SpriteManifest),
@@ -254,9 +267,9 @@ describe(
         "/project/manifest.json": JSON.stringify({
           spriteFiles: [],
           segments: {},
-          include: [`audio/**/*.m4a`],
           rules: [
             {
+              include: [`audio/**/*.m4a`],
               match: `audio/wiki/(?<page>[^/]+)/.*\\.m4a`,
               sprite: `wiki-\${page}`,
             },
@@ -314,9 +327,9 @@ describe(
         "/project/manifest.json": JSON.stringify({
           spriteFiles: [],
           segments: {},
-          include: [`audio/**/*.m4a`],
           rules: [
             {
+              include: [`audio/**/*.m4a`],
               match: `audio/test/.*\\.m4a`,
               sprite: `test-sprite`,
             },
@@ -359,9 +372,9 @@ describe(
         "/project/manifest.json": JSON.stringify({
           spriteFiles: [],
           segments: {},
-          include: [`audio/**/*.m4a`],
           rules: [
             {
+              include: [`audio/**/*.m4a`],
               match: `.*audio/test/.*\\.m4a`,
               sprite: `test-sprite`,
             },
@@ -399,9 +412,9 @@ describe(
         [manifestPath]: JSON.stringify({
           spriteFiles: [],
           segments: {},
-          include: [`audio/**/*.m4a`],
           rules: [
             {
+              include: [`audio/**/*.m4a`],
               match: `audio/.*\\.m4a`,
               sprite: `test-sprite`,
             },
@@ -464,9 +477,9 @@ describe(
         "/project/manifest.json": JSON.stringify({
           spriteFiles: [],
           segments: {},
-          include: [`audio/**/*.m4a`],
           rules: [
             {
+              include: [`audio/**/*.m4a`],
               match: `audio/.*\\.m4a`,
               sprite: `test-sprite`,
             },
@@ -518,6 +531,69 @@ describe(
         expect(analyzeAudioFileDurationSpy).toHaveBeenCalledTimes(2);
       }
     });
+
+    test(`should generate different sprite filenames for different bitrates`, async () => {
+      // Create identical audio files for both tests
+      const audioContent = `same audio content for both tests`;
+
+      // First test with 128k bitrate
+      vol.fromJSON({
+        "/project/audio/test.m4a": audioContent,
+        "/project/manifest.json": JSON.stringify({
+          spriteFiles: [],
+          segments: {},
+          rules: [
+            {
+              include: [`audio/**/*.m4a`],
+              match: `.*`,
+              sprite: `test-sprite`,
+              bitrate: `128k`,
+            },
+          ],
+          outDir: `sprites`,
+        } satisfies SpriteManifest),
+      });
+
+      const manifest128k = loadManifest(`/project/manifest.json`);
+      const updated128k = await recomputeManifest(
+        manifest128k!,
+        `/project/manifest.json`,
+      );
+      const spriteFile128k = updated128k.spriteFiles[0];
+
+      // Reset and test with 256k bitrate
+      vol.reset();
+      vol.fromJSON({
+        "/project/audio/test.m4a": audioContent, // Same content
+        "/project/manifest.json": JSON.stringify({
+          spriteFiles: [],
+          segments: {},
+          rules: [
+            {
+              include: [`audio/**/*.m4a`],
+              match: `.*`,
+              sprite: `test-sprite`,
+              bitrate: `256k`, // Different bitrate
+            },
+          ],
+          outDir: `sprites`,
+        } satisfies SpriteManifest),
+      });
+
+      const manifest256k = loadManifest(`/project/manifest.json`);
+      const updated256k = await recomputeManifest(
+        manifest256k!,
+        `/project/manifest.json`,
+      );
+      const spriteFile256k = updated256k.spriteFiles[0];
+
+      // Sprite filenames should be different due to different bitrates affecting the hash
+      expect(spriteFile128k).toBeDefined();
+      expect(spriteFile256k).toBeDefined();
+      expect(spriteFile128k).not.toBe(spriteFile256k);
+      expect(spriteFile128k).toMatch(/^test-sprite-[a-f0-9]{12}\.m4a$/);
+      expect(spriteFile256k).toMatch(/^test-sprite-[a-f0-9]{12}\.m4a$/);
+    });
   },
 );
 
@@ -540,11 +616,11 @@ describe(`saveManifest suite` satisfies HasNameOf<typeof saveManifest>, () => {
       },
       rules: [
         {
+          include: [`audio/**/*.m4a`],
           match: `audio/*.m4a`,
           sprite: `audio-sprite`,
         },
       ],
-      include: [`audio/**/*.m4a`],
       outDir: `sprites`,
     } satisfies SpriteManifest;
 
@@ -569,7 +645,6 @@ describe(`saveManifest suite` satisfies HasNameOf<typeof saveManifest>, () => {
         spriteFiles: [],
         rules: [],
         segments: {},
-        include: [],
         outDir: `sprites`,
       },
       `/project/manifest.json`,
@@ -580,19 +655,16 @@ describe(`saveManifest suite` satisfies HasNameOf<typeof saveManifest>, () => {
     // Should be formatted with 2-space indentation
     expect(savedContent).toMatchInlineSnapshot(`
       "{
-      "spriteFiles":[
+        "outDir":"sprites",
+        "rules":[
 
-      ],
-      "rules":[
+        ],
+        "segments":{
 
-      ],
-      "segments":{
+        },
+        "spriteFiles":[
 
-      },
-      "include":[
-
-      ],
-      "outDir":"sprites"
+        ]
       }"
     `);
   });
@@ -612,11 +684,11 @@ describe(
           segments: {},
           rules: [
             {
+              include: [`audio/**/*.m4a`],
               match: `.+/(?<basename>[^/]+)\\.m4a$`,
               sprite: `\${basename}`,
             },
           ],
-          include: [`audio/**/*.m4a`],
           outDir: `sprites`,
         } satisfies SpriteManifest),
       });
@@ -627,12 +699,12 @@ describe(
 
       expect(updatedManifest).toMatchInlineSnapshot(`
         {
-          "include": [
-            "audio/**/*.m4a",
-          ],
           "outDir": "sprites",
           "rules": [
             {
+              "include": [
+                "audio/**/*.m4a",
+              ],
               "match": ".+/(?<basename>[^/]+)\\.m4a$",
               "sprite": "\${basename}",
             },
@@ -652,8 +724,8 @@ describe(
             },
           },
           "spriteFiles": [
-            "beep-8a6b55bfa4b1.m4a",
-            "hello-69005fdb2c21.m4a",
+            "beep-0b6e959ae4a1.m4a",
+            "hello-aeb905da46ea.m4a",
           ],
         }
       `);
@@ -718,6 +790,7 @@ describe(`applyRules suite` satisfies HasNameOf<typeof applyRules>, () => {
   test(`should apply named capture groups correctly`, () => {
     const rules = [
       {
+        include: [`audio/**/*.m4a`],
         match: `audio/wiki/(?<page>[^/]+)/(?<file>[^/]+)\\.m4a`,
         sprite: `wiki-\${page}`,
       },
@@ -730,6 +803,7 @@ describe(`applyRules suite` satisfies HasNameOf<typeof applyRules>, () => {
   test(`should apply numbered capture groups correctly`, () => {
     const rules = [
       {
+        include: [`audio/**/*.m4a`],
         match: `audio/([^/]+)/([^/]+)\\.m4a`,
         sprite: `$1-$2`,
       },
@@ -742,6 +816,7 @@ describe(`applyRules suite` satisfies HasNameOf<typeof applyRules>, () => {
   test(`should return undefined when no rules match`, () => {
     const rules = [
       {
+        include: [`audio/**/*.m4a`],
         match: `audio/wiki/(?<page>[^/]+)/(?<file>[^/]+)\\.m4a`,
         sprite: `wiki-\${page}`,
       },
@@ -754,10 +829,12 @@ describe(`applyRules suite` satisfies HasNameOf<typeof applyRules>, () => {
   test(`should use first matching rule`, () => {
     const rules = [
       {
+        include: [`audio/**/*.m4a`],
         match: `audio/(?<category>[^/]+)/.*\\.m4a`,
         sprite: `first-\${category}`,
       },
       {
+        include: [`audio/**/*.m4a`],
         match: `audio/wiki/(?<page>[^/]+)/.*\\.m4a`,
         sprite: `second-\${page}`,
       },
@@ -774,10 +851,12 @@ describe(`applyRules suite` satisfies HasNameOf<typeof applyRules>, () => {
 
     const rules = [
       {
+        include: [`audio/**/*.m4a`],
         match: `[invalid regex`,
         sprite: `invalid`,
       },
       {
+        include: [`audio/**/*.m4a`],
         match: `audio/(?<page>[^/]+)/.*\\.m4a`,
         sprite: `valid-\${page}`,
       },
@@ -796,6 +875,7 @@ describe(`applyRules suite` satisfies HasNameOf<typeof applyRules>, () => {
   test(`should handle missing capture groups gracefully`, () => {
     const rules = [
       {
+        include: [`audio/**/*.m4a`],
         match: `audio/([^/]+)/.*\\.m4a`,
         sprite: `$1-$2-$3`, // $2 and $3 don't exist
       },
@@ -884,8 +964,13 @@ describe(
         [manifestPath]: JSON.stringify({
           spriteFiles: [],
           segments: {},
-          rules: [],
-          include: [`audio/**/*.m4a`],
+          rules: [
+            {
+              include: [`audio/**/*.m4a`],
+              match: `.*\\.m4a`,
+              sprite: `default`,
+            },
+          ],
           outDir: `sprites`,
         } satisfies SpriteManifest),
       });
@@ -904,7 +989,6 @@ describe(
           spriteFiles: [],
           segments: {},
           rules: [],
-          include: [],
           outDir: `sprites`,
         } satisfies SpriteManifest),
       });
@@ -924,7 +1008,6 @@ describe(
           spriteFiles: [],
           segments: {},
           rules: [],
-          include: [],
           outDir: `sprites`,
         } satisfies SpriteManifest),
       });

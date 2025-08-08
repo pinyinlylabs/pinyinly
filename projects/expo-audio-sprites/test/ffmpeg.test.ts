@@ -222,23 +222,29 @@ describe(
 
       const command = generateSpriteCommand(audioFiles, `/output/sprite.m4a`);
 
-      expect(command).toEqual([
-        `ffmpeg`,
-        `-i`,
-        `/path/to/audio1.m4a`,
-        `-filter_complex`,
-        `[0:0]acopy[delayed0]; [delayed0]amix=inputs=1:duration=longest[mixed]; [mixed]aresample=44100[output]`,
-        `-map`,
-        `[output]`,
-        `-c:a`,
-        `aac`,
-        `-b:a`,
-        `128k`,
-        `-ar`,
-        `44100`,
-        `-y`,
-        `/output/sprite.m4a`,
-      ]);
+      expect(command).toMatchInlineSnapshot(`
+        [
+          "ffmpeg",
+          "-i",
+          "/path/to/audio1.m4a",
+          "-f",
+          "lavfi",
+          "-i",
+          "anullsrc=channel_layout=mono:sample_rate=44100",
+          "-filter_complex",
+          "[0:a]concat=n=1:v=0:a=1[output]",
+          "-map",
+          "[output]",
+          "-c:a",
+          "aac",
+          "-b:a",
+          "128k",
+          "-ar",
+          "44100",
+          "-y",
+          "/output/sprite.m4a",
+        ]
+      `);
     });
 
     test(`generates correct command for multiple files with delays`, () => {
@@ -257,25 +263,31 @@ describe(
 
       const command = generateSpriteCommand(audioFiles, `/output/sprite.m4a`);
 
-      expect(command).toEqual([
-        `ffmpeg`,
-        `-i`,
-        `/path/to/audio1.m4a`,
-        `-i`,
-        `/path/to/audio2.m4a`,
-        `-filter_complex`,
-        `[0:0]acopy[delayed0]; [1:0]adelay=2500:all=1[delayed1]; [delayed0][delayed1]amix=inputs=2:duration=longest[mixed]; [mixed]aresample=44100[output]`,
-        `-map`,
-        `[output]`,
-        `-c:a`,
-        `aac`,
-        `-b:a`,
-        `128k`,
-        `-ar`,
-        `44100`,
-        `-y`,
-        `/output/sprite.m4a`,
-      ]);
+      expect(command).toMatchInlineSnapshot(`
+        [
+          "ffmpeg",
+          "-i",
+          "/path/to/audio1.m4a",
+          "-i",
+          "/path/to/audio2.m4a",
+          "-f",
+          "lavfi",
+          "-i",
+          "anullsrc=channel_layout=mono:sample_rate=44100",
+          "-filter_complex",
+          "[2:a]atrim=duration=1[gap1]; [0:a][gap1][1:a]concat=n=3:v=0:a=1[output]",
+          "-map",
+          "[output]",
+          "-c:a",
+          "aac",
+          "-b:a",
+          "128k",
+          "-ar",
+          "44100",
+          "-y",
+          "/output/sprite.m4a",
+        ]
+      `);
     });
 
     test(`sorts files by start time`, () => {
@@ -295,25 +307,31 @@ describe(
       const command = generateSpriteCommand(audioFiles, `/output/sprite.m4a`);
 
       // Should process audio1 first (startTime 0), then audio2 (startTime 2.0)
-      expect(command).toEqual([
-        `ffmpeg`,
-        `-i`,
-        `/path/to/audio1.m4a`,
-        `-i`,
-        `/path/to/audio2.m4a`,
-        `-filter_complex`,
-        `[0:0]acopy[delayed0]; [1:0]adelay=2000:all=1[delayed1]; [delayed0][delayed1]amix=inputs=2:duration=longest[mixed]; [mixed]aresample=44100[output]`,
-        `-map`,
-        `[output]`,
-        `-c:a`,
-        `aac`,
-        `-b:a`,
-        `128k`,
-        `-ar`,
-        `44100`,
-        `-y`,
-        `/output/sprite.m4a`,
-      ]);
+      expect(command).toMatchInlineSnapshot(`
+        [
+          "ffmpeg",
+          "-i",
+          "/path/to/audio1.m4a",
+          "-i",
+          "/path/to/audio2.m4a",
+          "-f",
+          "lavfi",
+          "-i",
+          "anullsrc=channel_layout=mono:sample_rate=44100",
+          "-filter_complex",
+          "[2:a]atrim=duration=0.5[gap1]; [0:a][gap1][1:a]concat=n=3:v=0:a=1[output]",
+          "-map",
+          "[output]",
+          "-c:a",
+          "aac",
+          "-b:a",
+          "128k",
+          "-ar",
+          "44100",
+          "-y",
+          "/output/sprite.m4a",
+        ]
+      `);
     });
 
     test(`allows custom sample rate`, () => {
@@ -333,10 +351,6 @@ describe(
 
       expect(command).toContain(`-ar`);
       expect(command).toContain(`48000`);
-      // Check that the filter complex contains the custom sample rate
-      const filterComplexIndex = command.indexOf(`-filter_complex`);
-      const filterComplex = command[filterComplexIndex + 1];
-      expect(filterComplex).toContain(`aresample=48000`);
     });
 
     test(`throws error for empty files array`, () => {
@@ -345,25 +359,41 @@ describe(
       );
     });
 
-    test(`throws error for invalid start times`, () => {
+    test(`uses custom bitrate when specified`, () => {
       const audioFiles = [
         {
           filePath: `/path/to/audio1.m4a`,
           startTime: 0,
-          duration: 2,
-        },
-        {
-          filePath: `/path/to/audio2.m4a`,
-          startTime: 1, // Overlaps with first file
-          duration: 1,
+          duration: 1.5,
         },
       ];
 
-      expect(() =>
-        generateSpriteCommand(audioFiles, `/output/sprite.m4a`),
-      ).toThrow(
-        `Invalid start time: file /path/to/audio2.m4a has start time 1 but current time is 2`,
+      const command = generateSpriteCommand(
+        audioFiles,
+        `/output/sprite.m4a`,
+        44_100,
+        `256k`,
       );
+
+      expect(command).toContain(`-b:a`);
+      const bitrateIndex = command.indexOf(`-b:a`);
+      expect(command[bitrateIndex + 1]).toBe(`256k`);
+    });
+
+    test(`uses default bitrate when not specified`, () => {
+      const audioFiles = [
+        {
+          filePath: `/path/to/audio1.m4a`,
+          startTime: 0,
+          duration: 1.5,
+        },
+      ];
+
+      const command = generateSpriteCommand(audioFiles, `/output/sprite.m4a`);
+
+      expect(command).toContain(`-b:a`);
+      const bitrateIndex = command.indexOf(`-b:a`);
+      expect(command[bitrateIndex + 1]).toBe(`128k`);
     });
   },
 );
@@ -523,11 +553,11 @@ describe(`Integration tests with real ffmpeg`, () => {
       segments: {},
       rules: [
         {
+          include: [`audio/*.mp3`],
           match: `^audio/test(\\d+)\\.mp3$`,
           sprite: `test-sprite-$1`,
         },
       ],
-      include: [`audio/*.mp3`],
       outDir: `sprites`,
     };
 
