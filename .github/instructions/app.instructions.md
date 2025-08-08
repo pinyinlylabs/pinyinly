@@ -4,11 +4,21 @@ applyTo: "projects/app/**"
 
 The following commands should be used to test the code:
 
-- Tests: `moon run app:test [-- path/to/test-file.test.ts]`
-- Lint: `moon run app:lint [-- [--fix] path/to/test-file.test.ts]` (e.g.
-  `moon run app:lint -- --fix` to fix issues)
-- Static type checking: `moon run app:typecheck`
-- Prettier: `moon run root:prettierCheck`
+- Tests use vitest, so any vitest arguments can be passed after `--`:
+
+  - Run all tests: `moon run app:test`
+  - Run file tests: `moon run app:test -- <filename>`
+  - Update snapshots: `moon run app:test -- -u`
+
+- Lint uses eslint, so any eslint arguments can be passed after `--`:
+
+  - Run all lint: `moon run app:lint`
+  - Run file lint: `moon run app:lint -- <filename>`
+  - Auto-fix lint: `moon run app:lint -- --fix`
+
+- Prettier: `moon run app:prettierCheck`
+
+  - Fix prettier: `moon run app:prettier`
 
 These can be run from any directory, there's no need to `cd` to a particular directory.
 
