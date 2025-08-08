@@ -38,6 +38,8 @@ export const spriteRuleSchema = z.object({
     .refine((value) => !value.includes(`/`) && !value.includes(`\\`), {
       message: `Sprite name must be a filename only, no directory separators allowed. Use outDir in manifest for output directory.`,
     }),
+  /** Audio bitrate for the output sprite (e.g., "128k", "192k", "256k"). Defaults to "128k" if not specified. */
+  bitrate: z.string().optional(),
 });
 
 /**

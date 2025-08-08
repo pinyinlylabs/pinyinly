@@ -263,12 +263,14 @@ export function parseFfmpegOutput(output: string) {
  * @param audioFiles Array of audio files with their expected positions
  * @param outputPath Path where the sprite file should be written
  * @param sampleRate Target sample rate for the output (default: 44100)
+ * @param bitrate Audio bitrate for the output (default: "128k")
  * @returns Array of ffmpeg command arguments
  */
 export function generateSpriteCommand(
   audioFiles: Pick<AudioFileInfo, `filePath` | `startTime` | `duration`>[],
   outputPath: string,
   sampleRate = 44_100,
+  bitrate = `128k`,
 ): string[] {
   if (audioFiles.length === 0) {
     throw new Error(`Cannot create sprite from empty audio files array`);
@@ -338,7 +340,7 @@ export function generateSpriteCommand(
     `-c:a`,
     `aac`, // Use AAC codec for M4A
     `-b:a`,
-    `128k`, // Set bitrate to 128kbps (good quality/size balance)
+    bitrate, // Use the specified bitrate
     `-ar`,
     `${sampleRate}`, // Ensure sample rate
     `-y`, // Overwrite output file if it exists

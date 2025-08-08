@@ -358,6 +358,43 @@ describe(
         `Cannot create sprite from empty audio files array`,
       );
     });
+
+    test(`uses custom bitrate when specified`, () => {
+      const audioFiles = [
+        {
+          filePath: `/path/to/audio1.m4a`,
+          startTime: 0,
+          duration: 1.5,
+        },
+      ];
+
+      const command = generateSpriteCommand(
+        audioFiles,
+        `/output/sprite.m4a`,
+        44_100,
+        `256k`,
+      );
+
+      expect(command).toContain(`-b:a`);
+      const bitrateIndex = command.indexOf(`-b:a`);
+      expect(command[bitrateIndex + 1]).toBe(`256k`);
+    });
+
+    test(`uses default bitrate when not specified`, () => {
+      const audioFiles = [
+        {
+          filePath: `/path/to/audio1.m4a`,
+          startTime: 0,
+          duration: 1.5,
+        },
+      ];
+
+      const command = generateSpriteCommand(audioFiles, `/output/sprite.m4a`);
+
+      expect(command).toContain(`-b:a`);
+      const bitrateIndex = command.indexOf(`-b:a`);
+      expect(command[bitrateIndex + 1]).toBe(`128k`);
+    });
   },
 );
 

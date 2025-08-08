@@ -531,6 +531,69 @@ describe(
         expect(analyzeAudioFileDurationSpy).toHaveBeenCalledTimes(2);
       }
     });
+
+    test(`should generate different sprite filenames for different bitrates`, async () => {
+      // Create identical audio files for both tests
+      const audioContent = `same audio content for both tests`;
+
+      // First test with 128k bitrate
+      vol.fromJSON({
+        "/project/audio/test.m4a": audioContent,
+        "/project/manifest.json": JSON.stringify({
+          spriteFiles: [],
+          segments: {},
+          rules: [
+            {
+              include: [`audio/**/*.m4a`],
+              match: `.*`,
+              sprite: `test-sprite`,
+              bitrate: `128k`,
+            },
+          ],
+          outDir: `sprites`,
+        } satisfies SpriteManifest),
+      });
+
+      const manifest128k = loadManifest(`/project/manifest.json`);
+      const updated128k = await recomputeManifest(
+        manifest128k!,
+        `/project/manifest.json`,
+      );
+      const spriteFile128k = updated128k.spriteFiles[0];
+
+      // Reset and test with 256k bitrate
+      vol.reset();
+      vol.fromJSON({
+        "/project/audio/test.m4a": audioContent, // Same content
+        "/project/manifest.json": JSON.stringify({
+          spriteFiles: [],
+          segments: {},
+          rules: [
+            {
+              include: [`audio/**/*.m4a`],
+              match: `.*`,
+              sprite: `test-sprite`,
+              bitrate: `256k`, // Different bitrate
+            },
+          ],
+          outDir: `sprites`,
+        } satisfies SpriteManifest),
+      });
+
+      const manifest256k = loadManifest(`/project/manifest.json`);
+      const updated256k = await recomputeManifest(
+        manifest256k!,
+        `/project/manifest.json`,
+      );
+      const spriteFile256k = updated256k.spriteFiles[0];
+
+      // Sprite filenames should be different due to different bitrates affecting the hash
+      expect(spriteFile128k).toBeDefined();
+      expect(spriteFile256k).toBeDefined();
+      expect(spriteFile128k).not.toBe(spriteFile256k);
+      expect(spriteFile128k).toMatch(/^test-sprite-[a-f0-9]{12}\.m4a$/);
+      expect(spriteFile256k).toMatch(/^test-sprite-[a-f0-9]{12}\.m4a$/);
+    });
   },
 );
 

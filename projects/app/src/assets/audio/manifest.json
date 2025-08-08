@@ -1,15 +1,16 @@
 {
-"spriteFiles":[
- "wiki-5b885d51bea8.m4a"
-],
-"segments":{
- "../../client/wiki/上/shang4.m4a":{"sprite":0,"start":0,"duration":0.69,"hash":"69445095ac741939b2062019dd3d204be8efeba4f84385c1b7d447ab492712db"}
-},
-"rules":[
- {"match":"\\.m4a","sprite":"wiki"}
-],
-"include":[
- "../../client/wiki/**/*.m4a"
-],
-"outDir":"sprites"
+  "outDir":"sprites",
+  "rules":[
+    {"bitrate":"48k","include":["../../client/wiki/**/*.m4a"],"match":"/wiki/(?<page>.+?)/[^/]+\\.m4a","sprite":"wiki-${page}"}
+  ],
+  "segments":{
+    "../../client/wiki/上/shang4-alloy.m4a":{"duration":0.6,"hash":"3b8e8da0a3feaa76da029ce30b36e856b303863a159d72457238c2d51357a1aa","sprite":0,"start":0},
+    "../../client/wiki/上/shang4-ash.m4a":{"duration":0.57,"hash":"f938e69433f233be069bcf2f9efec6a424c39ec2611c4ee072308043d755b8a0","sprite":0,"start":1.6},
+    "../../client/wiki/上/shang4-echo.m4a":{"duration":0.54,"hash":"acd22f050f8057ec05be746e668fea6d9457a4a0bdfe25a2c95cd1b3699502b7","sprite":0,"start":3.17},
+    "../../client/wiki/上/shang4-nova.m4a":{"duration":0.64,"hash":"7255d25477fc16db0f148c832bcc84cf5a059716125b55d0036bcd8085248519","sprite":0,"start":4.71},
+    "../../client/wiki/上/shang4.m4a":{"duration":0.69,"hash":"69445095ac741939b2062019dd3d204be8efeba4f84385c1b7d447ab492712db","sprite":0,"start":6.35}
+  },
+  "spriteFiles":[
+    "wiki-上-2f7bf8af906c.m4a"
+  ]
 }

@@ -110,6 +110,35 @@ Use numbered groups with `$1`, `$2`, etc.:
 }
 ```
 
+#### Audio Bitrate Control
+
+You can specify a custom bitrate for each rule to control the audio quality and file size of the
+generated sprites:
+
+```json
+{
+  "rules": [
+    {
+      "include": ["audio/music/**/*.m4a"],
+      "match": "audio/music/.*\\.m4a",
+      "sprite": "background-music",
+      "bitrate": "256k"
+    },
+    {
+      "include": ["audio/sfx/**/*.m4a"],
+      "match": "audio/sfx/.*\\.m4a",
+      "sprite": "sound-effects",
+      "bitrate": "128k"
+    }
+  ]
+}
+```
+
+- **`bitrate`**: Optional audio bitrate for the output sprite (e.g., "128k", "192k", "256k")
+- If not specified, defaults to "128k"
+- Higher bitrates result in better quality but larger file sizes
+- Common values: "64k" (low quality), "128k" (standard), "192k" (good), "256k" (high quality)
+
 ### Build-time Utilities
 
 The package exports utilities for build tools to process rules:
@@ -164,7 +193,9 @@ interface AudioSpriteSource {
 }
 
 interface SpriteRule {
+  include: string[]; // Glob patterns for input files
   match: string; // Regex pattern
   sprite: string; // Template string
+  bitrate?: string; // Optional audio bitrate (defaults to "128k")
 }
 ```

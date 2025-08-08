@@ -59,12 +59,14 @@ const getFrameAlignedTime = (
  * @param spriteName Name prefix for the sprite file
  * @param audioFiles Array of audio file info for the sprite
  * @param fileHashMap Map of file paths to their content hashes
+ * @param bitrate Audio bitrate for the sprite (defaults to "128k")
  * @returns The generated sprite filename
  */
 const createSpriteFromFiles = (
   spriteName: string,
   audioFiles: AudioFileInfo[],
   fileHashMap: Map<string, string>,
+  bitrate = `128k`,
 ): string => {
   // Sort files by path to ensure consistent ordering
   const sortedFiles = [...audioFiles].sort((a, b) =>
@@ -82,7 +84,9 @@ const createSpriteFromFiles = (
   // Include the ffmpeg command used to generate the sprite
   // This ensures that any changes to the command will result in a different sprite file
   // This is important for reproducibility and cache invalidation.
-  hash.update(JSON.stringify(generateSpriteCommand(sortedFiles, ``)));
+  hash.update(
+    JSON.stringify(generateSpriteCommand(sortedFiles, ``, 44_100, bitrate)),
+  );
 
   // Generate sprite filename: spriteName-hash.m4a
   return `${spriteName}-${hash.digest(`hex`).slice(0, 12)}.m4a`;
@@ -147,6 +151,7 @@ export const recomputeManifest = async (
   // Single-pass processing: Map each file to its sprite name and collect segments
   const spriteToSegments = new Map<string, AudioFileInfo[]>();
   const spriteToIndex = new Map<string, number>();
+  const spriteToRule = new Map<string, SpriteRule>();
   const BUFFER_DURATION = 1; // 1 second of silence between segments
 
   for (const relativePath of inputFiles) {
@@ -159,13 +164,18 @@ export const recomputeManifest = async (
 
     const absolutePath = path.resolve(manifestDir, relativePath);
 
-    // Apply rules to determine sprite name
-    const spriteName = applyRules(relativePath, manifest.rules) ?? `unmatched`;
+    // Apply rules to determine sprite name and get the matched rule
+    const ruleResult = applyRulesWithRule(relativePath, manifest.rules);
+    const spriteName = ruleResult?.spriteName ?? `unmatched`;
+    const matchedRule = ruleResult?.rule;
 
     // Add to sprite segments map
     if (!spriteToSegments.has(spriteName)) {
       spriteToIndex.set(spriteName, spriteToSegments.size);
       spriteToSegments.set(spriteName, []);
+      if (matchedRule) {
+        spriteToRule.set(spriteName, matchedRule);
+      }
     }
     const segments = nonNullable(spriteToSegments.get(spriteName));
     const spriteIndex = nonNullable(spriteToIndex.get(spriteName));
@@ -199,10 +209,13 @@ export const recomputeManifest = async (
   const updatedSpriteFiles: string[] = [];
   for (const [spriteName, segments] of spriteToSegments) {
     const spriteIndex = nonNullable(spriteToIndex.get(spriteName));
+    const matchedRule = spriteToRule.get(spriteName);
+    const bitrate = matchedRule?.bitrate ?? `128k`;
     const spriteFileName = createSpriteFromFiles(
       spriteName,
       segments,
       fileHashMap,
+      bitrate,
     );
     updatedSpriteFiles[spriteIndex] = spriteFileName;
   }
@@ -266,6 +279,20 @@ export const applyRules = (
   filePath: string,
   rules: SpriteRule[],
 ): string | undefined => {
+  const result = applyRulesWithRule(filePath, rules);
+  return result?.spriteName;
+};
+
+/**
+ * Apply sprite rules to determine which sprite a file should belong to and return the matched rule.
+ * @param filePath The file path relative to the manifest.json
+ * @param rules Array of sprite rules to apply
+ * @returns Object with sprite name and matched rule if a rule matches, undefined otherwise
+ */
+export const applyRulesWithRule = (
+  filePath: string,
+  rules: SpriteRule[],
+): { spriteName: string; rule: SpriteRule } | undefined => {
   for (const rule of rules) {
     try {
       const regex = new RegExp(rule.match);
@@ -290,7 +317,7 @@ export const applyRules = (
           }
         }
 
-        return spriteName;
+        return { spriteName, rule };
       }
     } catch (error) {
       console.warn(`Invalid regex pattern in rule: ${rule.match}`, error);
