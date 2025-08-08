@@ -4,8 +4,7 @@ import {
   lookupHanzi,
 } from "#dictionary/dictionary.js";
 import { mergeMaps, sortComparatorString } from "@pinyinly/lib/collections";
-import { writeUtf8FileIfChanged } from "@pinyinly/lib/fs";
-import { jsonStringifyShallowIndent } from "@pinyinly/lib/json";
+import { writeJsonFileIfChanged } from "@pinyinly/lib/fs";
 import makeDebug from "debug";
 import path from "node:path";
 import OpenAI from "openai";
@@ -159,11 +158,11 @@ if (argv[`force-write`] || updates.size > 0) {
     // Sort the map for minimal diffs in PR
     .sort(sortComparatorString(([key]) => key));
 
-  await writeUtf8FileIfChanged(
+  await writeJsonFileIfChanged(
     path.join(
       import.meta.dirname,
       `../src/dictionary/radicalNameMnemonics.asset.json`,
     ),
-    jsonStringifyShallowIndent(updatedData),
+    updatedData,
   );
 }

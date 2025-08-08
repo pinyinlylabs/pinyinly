@@ -1,5 +1,4 @@
-import { readFile, writeUtf8FileIfChanged } from "@pinyinly/lib/fs";
-import { jsonStringifyShallowIndent } from "@pinyinly/lib/json";
+import { readFile, writeJsonFileIfChanged } from "@pinyinly/lib/fs";
 import makeDebug from "debug";
 import yargs from "yargs";
 
@@ -32,9 +31,10 @@ for (const path of argv.paths) {
   const existingContent = await readFile(path, {
     encoding: `utf8`,
   });
-  const updated = await writeUtf8FileIfChanged(
+  const updated = await writeJsonFileIfChanged(
     path,
-    jsonStringifyShallowIndent(JSON.parse(existingContent), argv.indentLevels),
+    JSON.parse(existingContent) as object,
+    argv.indentLevels,
   );
   debug((updated ? `✨ saved` : `skipped`) + `: %s`, path);
 }

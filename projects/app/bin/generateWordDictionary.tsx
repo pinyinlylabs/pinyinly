@@ -47,9 +47,8 @@ import {
   sortComparatorNumber,
   sortComparatorString,
 } from "@pinyinly/lib/collections";
-import { writeUtf8FileIfChanged } from "@pinyinly/lib/fs";
+import { writeJsonFileIfChanged } from "@pinyinly/lib/fs";
 import { invariant } from "@pinyinly/lib/invariant";
-import { jsonStringifyShallowIndent } from "@pinyinly/lib/json";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import makeDebug from "debug";
 import { Box, render, Text, useFocus, useInput } from "ink";
@@ -2296,10 +2295,7 @@ async function saveUpsertHanziWordMeaning(
 }
 
 async function writeDictionary(dict: Dictionary) {
-  await writeUtf8FileIfChanged(
-    dictionaryFilePath,
-    jsonStringifyShallowIndent(unparseDictionary(dict)),
-  );
+  await writeJsonFileIfChanged(dictionaryFilePath, unparseDictionary(dict));
   await queryClient.invalidateQueries({ queryKey: [`loadDictionary`] });
 }
 
@@ -2336,9 +2332,9 @@ async function readHanziWordList(name: string) {
 }
 
 async function writeHanziWordList(wordListFileName: string, data: HanziWord[]) {
-  await writeUtf8FileIfChanged(
+  await writeJsonFileIfChanged(
     path.join(dictionaryPath, `${wordListFileName}.asset.json`),
-    jsonStringifyShallowIndent(data.sort()),
+    data.sort(),
   );
 }
 
