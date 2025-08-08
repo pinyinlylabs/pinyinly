@@ -104,7 +104,7 @@ describe(
 
     test(`should handle empty rules array`, () => {
       const files = [`audio/wiki/hello.m4a`, `audio/sounds/beep.m4a`];
-      const rules: { match: string; sprite: string }[] = [];
+      const rules: { include: string[]; match: string; sprite: string }[] = [];
 
       const result = generateSpriteAssignments(files, rules);
 
@@ -115,6 +115,7 @@ describe(
       const files = [`video/clip.mp4`, `image/photo.jpg`];
       const rules = [
         {
+          include: [`audio/**/*.m4a`],
           match: `audio/.*\\.m4a`,
           sprite: `audio-files`,
         },
@@ -244,7 +245,6 @@ describe(
         "/project/manifest.json": JSON.stringify({
           spriteFiles: [],
           segments: {},
-          include: [],
           rules: [],
           outDir: `sprites`,
         } satisfies SpriteManifest),
@@ -593,9 +593,15 @@ describe(`saveManifest suite` satisfies HasNameOf<typeof saveManifest>, () => {
     expect(savedContent).toMatchInlineSnapshot(`
       "{
         "outDir":"sprites",
-        "rules":[],
-        "segments":{},
-        "spriteFiles":[]
+        "rules":[
+
+        ],
+        "segments":{
+
+        },
+        "spriteFiles":[
+
+        ]
       }"
     `);
   });
@@ -721,6 +727,7 @@ describe(`applyRules suite` satisfies HasNameOf<typeof applyRules>, () => {
   test(`should apply named capture groups correctly`, () => {
     const rules = [
       {
+        include: [`audio/**/*.m4a`],
         match: `audio/wiki/(?<page>[^/]+)/(?<file>[^/]+)\\.m4a`,
         sprite: `wiki-\${page}`,
       },
@@ -733,6 +740,7 @@ describe(`applyRules suite` satisfies HasNameOf<typeof applyRules>, () => {
   test(`should apply numbered capture groups correctly`, () => {
     const rules = [
       {
+        include: [`audio/**/*.m4a`],
         match: `audio/([^/]+)/([^/]+)\\.m4a`,
         sprite: `$1-$2`,
       },
@@ -745,6 +753,7 @@ describe(`applyRules suite` satisfies HasNameOf<typeof applyRules>, () => {
   test(`should return undefined when no rules match`, () => {
     const rules = [
       {
+        include: [`audio/**/*.m4a`],
         match: `audio/wiki/(?<page>[^/]+)/(?<file>[^/]+)\\.m4a`,
         sprite: `wiki-\${page}`,
       },
@@ -757,10 +766,12 @@ describe(`applyRules suite` satisfies HasNameOf<typeof applyRules>, () => {
   test(`should use first matching rule`, () => {
     const rules = [
       {
+        include: [`audio/**/*.m4a`],
         match: `audio/(?<category>[^/]+)/.*\\.m4a`,
         sprite: `first-\${category}`,
       },
       {
+        include: [`audio/**/*.m4a`],
         match: `audio/wiki/(?<page>[^/]+)/.*\\.m4a`,
         sprite: `second-\${page}`,
       },
@@ -777,10 +788,12 @@ describe(`applyRules suite` satisfies HasNameOf<typeof applyRules>, () => {
 
     const rules = [
       {
+        include: [`audio/**/*.m4a`],
         match: `[invalid regex`,
         sprite: `invalid`,
       },
       {
+        include: [`audio/**/*.m4a`],
         match: `audio/(?<page>[^/]+)/.*\\.m4a`,
         sprite: `valid-\${page}`,
       },
@@ -799,6 +812,7 @@ describe(`applyRules suite` satisfies HasNameOf<typeof applyRules>, () => {
   test(`should handle missing capture groups gracefully`, () => {
     const rules = [
       {
+        include: [`audio/**/*.m4a`],
         match: `audio/([^/]+)/.*\\.m4a`,
         sprite: `$1-$2-$3`, // $2 and $3 don't exist
       },

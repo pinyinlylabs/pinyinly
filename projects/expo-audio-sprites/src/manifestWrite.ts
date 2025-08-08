@@ -223,7 +223,7 @@ export const saveManifest = async (
   manifest: SpriteManifest,
   manifestPath: string,
 ): Promise<void> => {
-  await writeJsonFileIfChanged(manifestPath, manifest, 1);
+  await writeJsonFileIfChanged(manifestPath, manifest, 2);
 };
 
 /**

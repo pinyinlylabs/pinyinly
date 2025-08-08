@@ -4,6 +4,8 @@ applyTo: "projects/eslint-rules/**"
 
 The following commands should be used to test the code:
 
+- Typechecking using TypeScript: `moon run eslint-rules:typecheck`
+
 - Tests use vitest, so any vitest arguments can be passed after `--`:
 
   - Run all tests: `moon run eslint-rules:test`
