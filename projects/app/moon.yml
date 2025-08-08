@@ -45,7 +45,7 @@ tasks:
       - "@group(buildVercelOutdir)"
 
   buildVercelExpo:
-    command: |
+    script: |
       rm -rf @group(buildVercelExpoOutdir) &&
       yarn expo export -p web --source-maps --output-dir @group(buildVercelExpoOutdir)
     inputs:
@@ -53,7 +53,6 @@ tasks:
       - "*.*"
       - "{api,assets,public,src}/**/*"
     options:
-      shell: true
       envFile: .env.local
     outputs:
       - "@group(buildVercelExpoOutdir)"
@@ -61,20 +60,18 @@ tasks:
       NODE_OPTIONS: --import tsx $NODE_OPTIONS
 
   buildVercelExpoSentry:
-    command: |
+    script: |
       rsync -a --delete @group(buildVercelExpoOutdir) @group(buildVercelExpoSentryOutdir) &&
       npx -y @sentry/cli@2.50.2 sourcemaps inject @group(buildVercelExpoSentryOutdir)
     deps:
       - buildVercelExpo
     inputs:
       - "@group(sentryCliEnv)"
-    options:
-      shell: true
     outputs:
       - "@group(buildVercelExpoSentryOutdir)"
 
   buildBillOfMaterials:
-    command: |
+    script: |
       yarn expo export &&
       tsx --tsconfig tsconfig.node.json ./bin/buildBillOfMaterials.ts
     preset: watcher
