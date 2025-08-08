@@ -91,7 +91,7 @@ const createSpriteFromFiles = (
 
 /**
  * Update manifest segments based on current filesystem state.
- * Scans files matching include patterns, applies rules to determine sprite assignments,
+ * Scans files matching patterns from rules, applies rules to determine sprite assignments,
  * and generates sprite files with content-based hashing.
  * Uses a single-pass strategy to process each input file once.
  * @param manifest The current sprite manifest
@@ -231,7 +231,7 @@ export const saveManifest = async (
 };
 
 /**
- * Synchronize manifest with filesystem by updating segments based on include patterns.
+ * Synchronize manifest with filesystem by updating segments based on rules.
  * Loads manifest, scans filesystem, updates segments, and saves back to disk.
  * @param manifestPath Path to the manifest.json file
  * @returns The updated manifest
@@ -335,8 +335,8 @@ export const resolveIncludePatterns = async (
 };
 
 /**
- * Get all input files for processing based on manifest include patterns.
- * @param manifest The sprite manifest containing include patterns
+ * Get all input files for processing based on include patterns from rules or legacy top-level include.
+ * @param manifest The sprite manifest containing rules with include patterns
  * @param manifestPath Path to the manifest.json file
  * @returns Array of file paths relative to manifest directory
  */
@@ -344,10 +344,29 @@ export const getInputFiles = async (
   manifest: SpriteManifest,
   manifestPath: string,
 ): Promise<string[]> => {
-  if (manifest.include.length === 0) {
-    return [];
+  const manifestDir = path.dirname(manifestPath);
+  const allFiles: string[] = [];
+
+  // Collect include patterns from all rules that have them
+  for (const rule of manifest.rules) {
+    if (rule.include) {
+      const filesFromRule = await resolveIncludePatterns(
+        rule.include,
+        manifestDir,
+      );
+      allFiles.push(...filesFromRule);
+    }
   }
 
-  const manifestDir = path.dirname(manifestPath);
-  return await resolveIncludePatterns(manifest.include, manifestDir);
+  // If no rules have include patterns, use legacy top-level include
+  if (allFiles.length === 0 && manifest.include) {
+    const legacyFiles = await resolveIncludePatterns(
+      manifest.include,
+      manifestDir,
+    );
+    allFiles.push(...legacyFiles);
+  }
+
+  // Remove duplicates and sort for consistent ordering
+  return [...new Set(allFiles)].sort();
 };

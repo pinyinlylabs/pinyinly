@@ -134,8 +134,13 @@ describe(
         "/project/manifest.json": JSON.stringify({
           spriteFiles: [],
           segments: {},
-          rules: [],
-          include: [`audio/**/*.m4a`],
+          rules: [
+            {
+              include: [`audio/**/*.m4a`],
+              match: `.*`,
+              sprite: `default`,
+            },
+          ],
           outDir: `sprites`,
         } satisfies SpriteManifest),
       });

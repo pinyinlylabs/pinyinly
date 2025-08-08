@@ -151,14 +151,6 @@ describe(
               "message": "Invalid input: expected array, received undefined"
             },
             {
-              "expected": "array",
-              "code": "invalid_type",
-              "path": [
-                "include"
-              ],
-              "message": "Invalid input: expected array, received undefined"
-            },
-            {
               "expected": "string",
               "code": "invalid_type",
               "path": [

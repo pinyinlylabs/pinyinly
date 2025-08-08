@@ -76,11 +76,11 @@ const sampleManifest: SpriteManifest = {
   },
   rules: [
     {
+      include: [`audio*.m4a`],
       match: `(audio.+)\\.m4a$`,
       sprite: `default`,
     },
   ],
-  include: [`audio*.m4a`],
   outDir: `sprites`,
 };
 
