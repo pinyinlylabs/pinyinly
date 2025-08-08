@@ -652,8 +652,8 @@ describe(
             },
           },
           "spriteFiles": [
-            "beep-8a6b55bfa4b1.m4a",
-            "hello-69005fdb2c21.m4a",
+            "beep-0b6e959ae4a1.m4a",
+            "hello-aeb905da46ea.m4a",
           ],
         }
       `);

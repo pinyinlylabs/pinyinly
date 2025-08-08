@@ -1,7 +1,7 @@
 import type { AudioFileInfo } from "#types.ts";
 import { memoize0 } from "@pinyinly/lib/collections";
 import { execaCached, getFileModTime } from "@pinyinly/lib/execaCached";
-import { invariant } from "@pinyinly/lib/invariant";
+import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import { $ } from "execa";
 import { z } from "zod/v4";
 
@@ -256,7 +256,7 @@ export function parseFfmpegOutput(output: string) {
  * Generate an ffmpeg command to create an audio sprite from multiple input files.
  *
  * The command will:
- * 1. Concatenate audio files with silence padding to match expected start times
+ * 1. Concatenate audio files with silence gaps between them
  * 2. Normalize the output sample rate to 44.1kHz for consistency
  * 3. Output as M4A format for compatibility
  *
@@ -284,54 +284,52 @@ export function generateSpriteCommand(
     command.push(`-i`, file.filePath);
   }
 
-  // Build filter_complex to concatenate with precise timing
+  // Generate silence for padding if needed
+  command.push(
+    `-f`,
+    `lavfi`,
+    `-i`,
+    `anullsrc=channel_layout=mono:sample_rate=${sampleRate}`,
+  );
+  const silenceInputIndex = sortedFiles.length;
+
+  // Build filter_complex for concatenation with silence gaps
   const filterParts: string[] = [];
+  const concatInputs: string[] = [];
 
-  for (const [i, file] of sortedFiles.entries()) {
-    const inputLabel = `[${i}:0]`;
-    const delayedLabel = `[delayed${i}]`;
+  for (let i = 0; i < sortedFiles.length; i++) {
+    const file = nonNullable(sortedFiles[i]);
 
-    if (file.startTime > 0) {
-      // Delay this file by its absolute start time
-      filterParts.push(
-        `${inputLabel}adelay=${Math.round(file.startTime * 1000)}:all=1${delayedLabel}`,
-      );
-    } else {
-      // No delay needed for files starting at time 0
-      filterParts.push(`${inputLabel}acopy${delayedLabel}`);
+    // Add silence gap if this is not the first file
+    if (i > 0) {
+      const prevFile = nonNullable(sortedFiles[i - 1]);
+      const duration =
+        file.startTime - (prevFile.startTime + prevFile.duration);
+
+      if (duration > 0) {
+        const gapLabel = `[gap${i}]`;
+        // Create silence with the calculated gap duration
+        filterParts.push(
+          `[${silenceInputIndex}:a]atrim=duration=${duration}${gapLabel}`,
+        );
+        concatInputs.push(gapLabel);
+      }
     }
+
+    const inputLabel = `[${i}:a]`;
+    concatInputs.push(inputLabel);
   }
 
-  // Validate that files don't overlap
-  for (let i = 0; i < sortedFiles.length - 1; i++) {
-    const currentFile = sortedFiles[i];
-    const nextFile = sortedFiles[i + 1];
-
-    if (!currentFile || !nextFile) {
-      continue;
-    }
-
-    const currentEnd = currentFile.startTime + currentFile.duration;
-
-    if (nextFile.startTime < currentEnd) {
-      throw new Error(
-        `Invalid start time: file ${nextFile.filePath} has start time ${nextFile.startTime} but current time is ${currentEnd}`,
-      );
-    }
+  // Concatenate all inputs (audio files + silence gaps)
+  {
+    const noVideo = `v=0`;
+    const yesAudio = `a=1`;
+    const concatFilter = `${concatInputs.join(``)}concat=n=${concatInputs.length}:${noVideo}:${yesAudio}[output]`;
+    filterParts.push(concatFilter);
   }
-
-  // Mix all delayed streams together
-  const delayedInputs = sortedFiles.map((_, i) => `[delayed${i}]`).join(``);
-
-  // Build the complete filter chain
-  const finalFilterParts = [
-    ...filterParts,
-    `${delayedInputs}amix=inputs=${sortedFiles.length}:duration=longest[mixed]`,
-    `[mixed]aresample=${sampleRate}[output]`,
-  ];
 
   // Add the complete filter_complex
-  command.push(`-filter_complex`, finalFilterParts.join(`; `));
+  command.push(`-filter_complex`, filterParts.join(`; `));
 
   // Complete the command with output options
   const outputOptions = [
