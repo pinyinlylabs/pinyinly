@@ -6988,14 +6988,23 @@ __metadata:
   linkType: hard
 
 "@vercel/functions@npm:^2.0.0":
-  version: 2.2.3
-  resolution: "@vercel/functions@npm:2.2.3"
+  version: 2.2.8
+  resolution: "@vercel/functions@npm:2.2.8"
+  dependencies:
+    "@vercel/oidc": "npm:2.0.0"
   peerDependencies:
     "@aws-sdk/credential-provider-web-identity": "*"
   peerDependenciesMeta:
     "@aws-sdk/credential-provider-web-identity":
       optional: true
-  checksum: 10c0/ce43df3772db8502254514bc577b2284e2dfd2d639b0e36f9328396ac94865fd4b5c08d9dc57b8e16dfa29a70c43b06fd4e1a8d0731bbcea253a1f22e78d8a37
+  checksum: 10c0/ace322af7d90a021a83d3ca909168ee6cc2bc89f9602828aa244ad84a4c8aed5b2d16a5ac9b019768cf24a614e99cc3ccf3fb6ef950a16f89a2586329c0d3283
+  languageName: node
+  linkType: hard
+
+"@vercel/oidc@npm:2.0.0":
+  version: 2.0.0
+  resolution: "@vercel/oidc@npm:2.0.0"
+  checksum: 10c0/a14685faef6d06bb80543d88a08481ef7b92884bec2f621596f0b62d201425d8cfc9ccba8de066c84485985e435e9c40ed47105c3306895589eae1bd856c9acf
   languageName: node
   linkType: hard
 
