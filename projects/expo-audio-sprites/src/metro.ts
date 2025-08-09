@@ -1,7 +1,9 @@
 import { cachedManifestLoader, findSpriteSegment } from "#manifestRead.ts";
 import * as fs from "@pinyinly/lib/fs";
+import { invariant } from "@pinyinly/lib/invariant";
 import type { MetroConfig } from "metro-config";
-import type { Resolution } from "metro-resolver";
+import type { CustomResolutionContext, Resolution } from "metro-resolver";
+import type DependencyGraph from "metro/private/node-haste/DependencyGraph";
 import crypto from "node:crypto";
 import path from "node:path";
 
@@ -24,6 +26,8 @@ export function withAudioSprites<T extends MetroConfig>(
     resolver: {
       ...config.resolver,
       resolveRequest(context, moduleName, platform): Resolution {
+        patchMetroSha1(context, proxyDirPath);
+
         const parentResolver =
           config.resolver?.resolveRequest ?? context.resolveRequest;
 
@@ -103,6 +107,46 @@ export function withAudioSprites<T extends MetroConfig>(
   };
 }
 
+type Patchable<T, K extends keyof T> = Omit<T, K> &
+  Record<K, T[K] & { __pinyinly_patch?: unknown }>;
+
+function patchMetroSha1(
+  context: CustomResolutionContext,
+  proxyDirPath: string,
+) {
+  invariant(
+    `graph` in context,
+    `Metro is missing patch to expose \`DependencyGraph\` in \`resolveRequest\``,
+  );
+  const graph = context.graph as Patchable<DependencyGraph, `getOrComputeSha1`>;
+
+  if (graph.getOrComputeSha1.__pinyinly_patch == null) {
+    const getOrComputeSha1 = graph.getOrComputeSha1.bind(graph);
+
+    // Metro has a crawler which looks at all the files on the filesystem and
+    // then caches them in memory in the node-haste graph. When `resolveRequest`
+    // returns a resolution to a module, it needs to compute the SHA1 hash of
+    // the file contents to ensure that the cache is invalidated when the file
+    // changes.
+    //
+    // However Metro trusts its internal cache and doesn't re-read the file
+    // contents unless it has to. This means Metro is out of sync with the real
+    // filesystem by the time it calls `getOrComputeSha1` because it only
+    // updates its in-memory cache async from the filesystem events, which don't
+    // happen immediately because Metro is generally synchronous.
+    //
+    // So this code patches the `getOrComputeSha1` function to always return a
+    // new SHA1 hash for proxy files.
+    graph.getOrComputeSha1 = async function (mixedPath: string) {
+      if (mixedPath.startsWith(proxyDirPath)) {
+        return { sha1: `${Date.now()}` };
+      }
+      return await getOrComputeSha1(mixedPath);
+    };
+    graph.getOrComputeSha1.__pinyinly_patch = true;
+  }
+}
+
 function writeProxyFileSync(
   segment: NonNullable<ReturnType<typeof findSpriteSegment>>,
   modulePath: string,
@@ -129,7 +173,7 @@ module.exports = {
 
   // Always create the directory in case it was deleted by the developer.
   fs.mkdirSync(proxyDirPath, { recursive: true });
-  fs.writeFileSync(outFilePath, code);
+  fs.writeUtf8FileIfChangedSync(outFilePath, code);
 
   return outFilePath;
 }

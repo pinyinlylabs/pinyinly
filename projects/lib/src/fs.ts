@@ -1,5 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import { readFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { readFile, writeFile } from "node:fs/promises";
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
@@ -66,6 +66,25 @@ export async function writeUtf8FileIfChanged(
   if (hasDiff) {
     await writeFile(path, content, { encoding });
   }
+  return hasDiff;
+}
+
+export function writeUtf8FileIfChangedSync(
+  path: string,
+  content: string,
+): boolean {
+  const encoding = `utf8`;
+  let hasDiff = true;
+
+  try {
+    const existingContent = readFileSync(path, { encoding });
+    hasDiff = existingContent !== content;
+  } catch {}
+
+  if (hasDiff) {
+    writeFileSync(path, content, { encoding });
+  }
+
   return hasDiff;
 }
 
