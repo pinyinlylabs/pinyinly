@@ -31,7 +31,14 @@ export const plugin: ESLint.Plugin = {
 const recommended: InfiniteDepthConfigWithExtends[] = [
   {
     // config with just ignores is the replacement for `.eslintignore`
-    ignores: [`.expo/`, `.vercel/`, `dist/`, `drizzle/`, `node_modules/`],
+    ignores: [
+      `.cache/`,
+      `.expo/`,
+      `.vercel/`,
+      `dist/`,
+      `drizzle/`,
+      `node_modules/`,
+    ],
   },
 
   {

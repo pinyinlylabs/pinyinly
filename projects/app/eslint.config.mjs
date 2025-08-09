@@ -18,11 +18,6 @@ export default config(
     },
   },
 
-  {
-    // config with just ignores is the replacement for `.eslintignore`
-    ignores: [`.expo/`, `.vercel/`, `dist/`, `drizzle/`, `node_modules/`],
-  },
-
   // extends ...
   ...configs.recommended,
   ...configs.esm,
@@ -32,8 +27,9 @@ export default config(
   ...compat.config(drizzlePlugin.configs.recommended),
   ...compat.config(inngestPlugin.configs.recommended),
 
-  // Rules for all lintable files.
+  // TypeScript files
   {
+    files: [`{bin,src,test}/**/*.{ts,tsx}`],
     rules: {
       // Expo or react-native or metro or something handles this, so there's no
       // need to import React.

@@ -120,8 +120,8 @@ function jsxSrcAttributePlugin({
  * @returns {MetroBabelTransformer} The transformer function
  */
 export function createTransformer({
-  matchFile = (props) => !!/\.mdx?$/.test(props.filename),
-  matchLocalAsset = (url) => !!/^[.@]/.test(url),
+  matchFile = (props) => /\.mdx?$/.test(props.filename),
+  matchLocalAsset = (url) => /^[.@]/.test(url),
   providerImportSource,
   remarkPlugins = [],
 } = {}) {

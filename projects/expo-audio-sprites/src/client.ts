@@ -7,5 +7,11 @@ export type PylyAudioSource = AudioSource | AudioSpriteSource;
 export function isAudioSpriteSource(
   source: PylyAudioSource,
 ): source is AudioSpriteSource {
-  return typeof source === `object` && source != null && `type` in source;
+  return (
+    typeof source === `object` &&
+    source != null &&
+    `asset` in source &&
+    `duration` in source &&
+    `start` in source
+  );
 }

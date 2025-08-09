@@ -1,4 +1,5 @@
 import * as fs from "@pinyinly/lib/fs";
+import { LRUCache } from "lru-cache";
 import path from "node:path";
 import type { DeepReadonly } from "ts-essentials";
 import type { SpriteManifest, SpriteSegment } from "./types.ts";
@@ -33,24 +34,18 @@ export const loadManifest = (manifestPath: string): SpriteManifest | null => {
  * @param audioRequirePath The require path (e.g., './sounds/beep.m4a') from the JS file
  * @returns Sprite information if found, null if not found or invalid
  */
-export const findAudioSegment = (
+export const findSpriteSegment = (
   manifest: DeepReadonly<SpriteManifest>,
   manifestPath: string,
-  currentFilePath: string,
-  audioRequirePath: string,
+  audioPath: string,
 ): {
-  segment: SpriteSegment;
-  spriteFilePath: string;
+  start: SpriteSegment[`start`];
+  duration: SpriteSegment[`duration`];
+  spritePath: string;
 } | null => {
-  // Resolve the require path relative to the current file being transformed
-  const resolvedAudioPath = path.resolve(
-    path.dirname(currentFilePath),
-    audioRequirePath,
-  );
-
   // Convert to relative path from manifest directory for lookup
   const manifestDir = path.dirname(manifestPath);
-  const relativePath = path.relative(manifestDir, resolvedAudioPath);
+  const relativePath = path.relative(manifestDir, audioPath);
   const segmentData = manifest.segments[relativePath];
 
   if (segmentData === undefined) {
@@ -71,23 +66,49 @@ export const findAudioSegment = (
 
   // Resolve the sprite file path relative to the manifest location
   // Sprite files are stored in the outDir, so combine outDir with the sprite filename
-  const spriteFilePath = path.join(manifest.outDir, spriteFile);
-  const absoluteSpriteFilePath = path.resolve(manifestDir, spriteFilePath);
-
-  // Make the sprite file path relative to the current file being transformed
-  const currentFileDir = path.dirname(currentFilePath);
-  const relativeSpriteFilePath = path.relative(
-    currentFileDir,
-    absoluteSpriteFilePath,
+  const absoluteSpriteFilePath = path.resolve(
+    manifestDir,
+    manifest.outDir,
+    spriteFile,
   );
 
-  // Ensure the path starts with ./ or ../ for proper require resolution
-  const normalizedSpriteFilePath = relativeSpriteFilePath.startsWith(`.`)
-    ? relativeSpriteFilePath
-    : `./${relativeSpriteFilePath}`;
-
   return {
-    segment: segmentData,
-    spriteFilePath: normalizedSpriteFilePath,
+    start: segmentData.start,
+    duration: segmentData.duration,
+    spritePath: absoluteSpriteFilePath,
   };
 };
+
+interface CachedManifest {
+  manifest: DeepReadonly<SpriteManifest> | null;
+}
+
+export function cachedManifestLoader(
+  manifestPath: string,
+): () => DeepReadonly<SpriteManifest> | null {
+  // Cache manifests by path with a short TTL
+  const cache = new LRUCache<string, CachedManifest>({
+    max: 10, // Max 10 different manifest files
+    ttl: 1000, // 1 second TTL
+
+    // When the cache is getting hammered (e.g. during a build) extend the TTL of
+    // the manifest cache.
+    updateAgeOnGet: true,
+  });
+
+  return () => {
+    const cached = cache.get(manifestPath);
+
+    if (cached) {
+      return cached.manifest;
+    }
+
+    // Cache miss or expired - load fresh
+    const manifest = loadManifest(manifestPath);
+    cache.set(manifestPath, {
+      manifest,
+    });
+
+    return manifest;
+  };
+}
