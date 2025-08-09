@@ -1,4 +1,4 @@
-import { findAudioSegment, loadManifest } from "#manifestRead.ts";
+import { findSpriteSegment, loadManifest } from "#manifestRead.ts";
 import type { SpriteManifest } from "#types.ts";
 import { vol } from "memfs";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
@@ -209,7 +209,7 @@ describe(`loadManifest suite` satisfies HasNameOf<typeof loadManifest>, () => {
 });
 
 describe(
-  `findAudioSegment suite` satisfies HasNameOf<typeof findAudioSegment>,
+  `findSpriteSegment suite` satisfies HasNameOf<typeof findSpriteSegment>,
   () => {
     afterEach(() => {
       vi.restoreAllMocks();
@@ -241,90 +241,28 @@ describe(
       outDir: `sprites`,
     });
 
-    test(`should find audio segment and return correct sprite file path`, () => {
-      const manifest = createTestManifest();
-      const manifestPath = `/project/manifest.json`;
-      const currentFilePath = `/project/src/components/Button.tsx`;
-      const audioRequirePath = `../sounds/beep.m4a`;
-
-      const result = findAudioSegment(
-        manifest,
-        manifestPath,
-        currentFilePath,
-        audioRequirePath,
-      );
-
-      expect(result).toEqual({
-        segment: {
-          sprite: 0,
-          start: 0,
-          duration: 1.5,
-          hash: `abc123`,
-        },
-        spriteFilePath: `../../sprites/audio-sprite.m4a`,
-      });
-    });
-
-    test(`should handle nested directory structures correctly`, () => {
-      const manifest = createTestManifest();
-      const manifestPath = `/project/manifest.json`;
-      const currentFilePath = `/project/src/pages/home/HomePage.tsx`;
-      const audioRequirePath = `../../sounds/click.m4a`;
-
-      const result = findAudioSegment(
-        manifest,
-        manifestPath,
-        currentFilePath,
-        audioRequirePath,
-      );
-
-      expect(result).toEqual({
-        segment: {
-          sprite: 0,
-          start: 1.5,
-          duration: 0.8,
-          hash: `def456`,
-        },
-        spriteFilePath: `../../../sprites/audio-sprite.m4a`,
-      });
-    });
-
     test(`should handle files in different sprite files`, () => {
       const manifest = createTestManifest();
       const manifestPath = `/project/manifest.json`;
-      const currentFilePath = `/project/src/Game.tsx`;
-      const audioRequirePath = `./effects/explosion.m4a`;
+      const currentFilePath = `/project/src/effects/explosion.m4a`;
 
-      const result = findAudioSegment(
-        manifest,
-        manifestPath,
-        currentFilePath,
-        audioRequirePath,
-      );
+      const result = findSpriteSegment(manifest, manifestPath, currentFilePath);
 
-      expect(result).toEqual({
-        segment: {
-          sprite: 1,
-          start: 0,
-          duration: 2,
-          hash: `ghi789`,
-        },
-        spriteFilePath: `../sprites/effects-sprite.m4a`,
-      });
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "duration": 2,
+          "spritePath": "/project/sprites/effects-sprite.m4a",
+          "start": 0,
+        }
+      `);
     });
 
     test(`should return null if audio file not found in manifest`, () => {
       const manifest = createTestManifest();
       const manifestPath = `/project/manifest.json`;
-      const currentFilePath = `/project/src/components/Button.tsx`;
-      const audioRequirePath = `./nonexistent.m4a`;
+      const currentFilePath = `/project/src/components/nonexistent.m4a`;
 
-      const result = findAudioSegment(
-        manifest,
-        manifestPath,
-        currentFilePath,
-        audioRequirePath,
-      );
+      const result = findSpriteSegment(manifest, manifestPath, currentFilePath);
 
       expect(result).toBeNull();
     });
@@ -349,15 +287,9 @@ describe(
       };
 
       const manifestPath = `/project/manifest.json`;
-      const currentFilePath = `/project/src/components/Button.tsx`;
-      const audioRequirePath = `../sounds/broken.m4a`;
+      const currentFilePath = `/project/src/sounds/broken.m4a`;
 
-      const result = findAudioSegment(
-        manifest,
-        manifestPath,
-        currentFilePath,
-        audioRequirePath,
-      );
+      const result = findSpriteSegment(manifest, manifestPath, currentFilePath);
 
       expect(result).toBeNull();
       expect(consoleSpy).toHaveBeenCalledWith(
@@ -370,25 +302,21 @@ describe(
     test(`should handle absolute paths correctly`, () => {
       const manifest = createTestManifest();
       const manifestPath = `/project/manifest.json`;
-      const currentFilePath = `/project/src/components/Button.tsx`;
       const audioRequirePath = `/project/src/sounds/beep.m4a`;
 
-      const result = findAudioSegment(
+      const result = findSpriteSegment(
         manifest,
         manifestPath,
-        currentFilePath,
         audioRequirePath,
       );
 
-      expect(result).toEqual({
-        segment: {
-          sprite: 0,
-          start: 0,
-          duration: 1.5,
-          hash: `abc123`,
-        },
-        spriteFilePath: `../../sprites/audio-sprite.m4a`,
-      });
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "duration": 1.5,
+          "spritePath": "/project/sprites/audio-sprite.m4a",
+          "start": 0,
+        }
+      `);
     });
 
     test(`should normalize sprite file paths that don't start with dot`, () => {
@@ -407,25 +335,15 @@ describe(
       };
 
       const manifestPath = `/project/manifest.json`;
-      const currentFilePath = `/project/src/components/Button.tsx`;
-      const audioRequirePath = `../sounds/beep.m4a`;
+      const currentFilePath = `/project/src/sounds/beep.m4a`;
 
-      const result = findAudioSegment(
-        manifest,
-        manifestPath,
-        currentFilePath,
-        audioRequirePath,
-      );
+      const result = findSpriteSegment(manifest, manifestPath, currentFilePath);
 
       expect(result).toMatchInlineSnapshot(`
         {
-          "segment": {
-            "duration": 1.5,
-            "hash": "abc123",
-            "sprite": 0,
-            "start": 0,
-          },
-          "spriteFilePath": "../../sprites/audio-sprite.m4a",
+          "duration": 1.5,
+          "spritePath": "/project/sprites/audio-sprite.m4a",
+          "start": 0,
         }
       `);
     });

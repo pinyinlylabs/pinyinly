@@ -1,6 +1,9 @@
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { readFileSync } from "node:fs";
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { readFile, writeFile } from "node:fs/promises";
-
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { globSync } from "glob";
 import { jsonStringifyShallowIndent } from "./json.ts";
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
@@ -28,8 +31,18 @@ export {
   writeFileSync,
 } from "node:fs";
 
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
-export { glob, globSync } from "glob";
+export function grepSync(globPattern: string, substring: string): string[] {
+  const files = globSync(globPattern);
+  const matches: string[] = [];
+
+  for (const filePath of files) {
+    const content = readFileSync(filePath, `utf-8`);
+    if (content.includes(substring)) {
+      matches.push(filePath);
+    }
+  }
+  return matches;
+}
 
 export async function writeJsonFileIfChanged(
   path: string,
@@ -55,3 +68,6 @@ export async function writeUtf8FileIfChanged(
   }
   return hasDiff;
 }
+
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+export { glob, globSync } from "glob";
