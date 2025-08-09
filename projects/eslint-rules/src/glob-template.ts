@@ -209,7 +209,7 @@ const rule: Rule.RuleModule = {
           } catch (error: unknown) {
             const errorMessage =
               error !== null && typeof error === `object` && `message` in error
-                ? String((error as Error).message)
+                ? (error as Error).message
                 : String(error);
             context.report({
               loc: comment.loc ?? arrayNode?.loc ?? { line: 1, column: 0 },

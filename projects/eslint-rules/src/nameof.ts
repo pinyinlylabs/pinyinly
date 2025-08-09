@@ -231,7 +231,7 @@ const rule: Rule.RuleModule = {
             node: expression,
             messageId,
             data: {
-              actual: String(actualString),
+              actual: actualString,
               expected: expectedSymbolName,
             },
             fix(fixer) {
