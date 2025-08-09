@@ -29,7 +29,7 @@
     "@typescript-eslint/parser": "^8.36.0",
     "eslint": "^9.13.0",
     "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-unicorn": "^59.0.0",
+    "eslint-plugin-unicorn": "^60.0.0",
     "memfs": "^4.36.0",
     "prettier": "^3.4.2",
     "ts-essentials": "^10.0.3",
