@@ -31,7 +31,7 @@ export function testExpoServer() {
   server.stdout.on(`data`, (chunk: Buffer) => {
     debug(`server stdout: ${chunk.toString().trimEnd()}`);
   });
-  server.stderr.on(`data`, (chunk: string) => {
+  server.stderr.on(`data`, (chunk: Buffer) => {
     debug(`server stderr: ${chunk.toString().trimEnd()}`);
   });
   server.addListener(`error`, (err) => {
