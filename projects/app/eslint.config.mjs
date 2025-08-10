@@ -112,7 +112,7 @@ export default config(
             {
               name: `@tanstack/react-query`,
               importNames: [`useQuery`],
-              message: `Please use a wrapped version (e.g. useLocalQuery).`,
+              message: `Please use useLocalQuery or useInternetQuery.`,
             },
           ],
         },
