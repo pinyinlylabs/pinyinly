@@ -8,9 +8,16 @@ export class Invariant extends Error {
 export function invariant(
   condition: unknown,
   message?: string,
+  ...args: unknown[]
 ): asserts condition {
   // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
   if (!condition) {
+    message ??= `Invariant failed`;
+    // Only pay the string concatenation cost if the invariant fails, rather
+    // than every time the invariant is run.
+    for (const arg of args) {
+      message += ` ${JSON.stringify(arg)}`;
+    }
     throw new Invariant(message);
   }
 }

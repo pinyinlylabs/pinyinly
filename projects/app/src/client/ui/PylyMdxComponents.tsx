@@ -1,4 +1,5 @@
 import { useSoundEffect } from "@/client/hooks/useSoundEffect";
+import { useSoundEffectCycle } from "@/client/hooks/useSoundEffectCycle";
 import { pickChildren } from "@/client/react";
 import type { PylyAudioSource } from "@pinyinly/expo-audio-sprites/client";
 import type { PropsWithChildren } from "react";
@@ -35,6 +36,7 @@ export function PylyMdxComponents({ children }: PropsWithChildren) {
             </View>
           );
         },
+        Speech,
         ul: ({ children }: PropsWithChildren) => (
           <ul className="space-y-2">{children}</ul>
         ),
@@ -55,6 +57,20 @@ export function PylyMdxComponents({ children }: PropsWithChildren) {
 
 const Audio = ({ src }: { src: PylyAudioSource }) => {
   const playSound = useSoundEffect(src);
+
+  return (
+    <Pressable className="flex-row items-center gap-2" onPressIn={playSound}>
+      <IconImage
+        source={require(`@/assets/icons/speaker-2.svg`)}
+        size={24}
+        className="text-fg-loud"
+      />
+    </Pressable>
+  );
+};
+
+const Speech = ({ srcs }: { srcs: PylyAudioSource[] }) => {
+  const playSound = useSoundEffectCycle(srcs);
 
   return (
     <Pressable className="flex-row items-center gap-2" onPressIn={playSound}>

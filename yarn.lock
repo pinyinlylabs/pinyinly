@@ -4678,6 +4678,7 @@ __metadata:
     react-native-svg: "npm:15.11.2"
     react-native-web: "npm:^0.20.0"
     react-native-worklets: "npm:^0.4.1"
+    react-query-kit: "npm:^3.3.2"
     react-responsive: "npm:^10.0.0"
     react-test-renderer: "npm:19.x"
     remark-flexible-markers: "npm:^1.3.0"
@@ -16903,6 +16904,18 @@ __metadata:
   dependencies:
     fast-deep-equal: "npm:^2.0.1"
   checksum: 10c0/ab7a22f5400f9e9933995537bf6430a4c79e33a121aedb51864968e7604e5c40421fd539ead62554f32300b7d49755c79636de06caa36fe52973b626b4ddfebf
+  languageName: node
+  linkType: hard
+
+"react-query-kit@npm:^3.3.2":
+  version: 3.3.2
+  resolution: "react-query-kit@npm:3.3.2"
+  peerDependencies:
+    "@tanstack/react-query": ^4 || ^5
+  peerDependenciesMeta:
+    "@tanstack/react-query":
+      optional: true
+  checksum: 10c0/51f104faca6d81eff8f6b3468ab23140a2c1d39b9aae24f4e0065c73cf7f6bb070a447029c9cc390de91cd6edc7abdf0ddf89b5725e61c8fd440e9cd05fa1c9c
   languageName: node
   linkType: hard
 
