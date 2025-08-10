@@ -744,12 +744,14 @@ export function skillReviewQueue({
     }
   }
 
+  const retryItems = learningOrderRetry
+    .sort(sortComparatorDate(([, when]) => when))
+    .map(([skill]) => skill);
+  retryItems.reverse();
+
   const items = [
     // First do incorrect answers that need to be retried.
-    ...learningOrderRetry
-      .sort(sortComparatorDate(([, when]) => when))
-      .map(([skill]) => skill)
-      .reverse(),
+    ...retryItems,
     // Then do over-due skills, by the most due (oldest date) first.
     ...learningOrderOverDue
       .sort(sortComparatorDate(([, due]) => due))
@@ -763,11 +765,12 @@ export function skillReviewQueue({
     // Finally sort the not-due skills.
     ...randomSortSkills(learningOrderNotDue),
   ];
-  const blockedItems = learningOrderBlocked.reverse();
+
+  learningOrderBlocked.reverse();
 
   return {
     items,
-    blockedItems,
+    blockedItems: learningOrderBlocked,
     retryCount: learningOrderRetry.length,
     dueCount: learningOrderDue.length,
     overDueCount: learningOrderOverDue.length,

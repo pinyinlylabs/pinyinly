@@ -348,6 +348,9 @@ const recommended: InfiniteDepthConfigWithExtends[] = [
       // When defining modules in a declaration file, some will make default
       // exports.
       "import/no-default-export": `off`,
+      // Allow `export {}` to turn .d.ts files into modules, and make `declare
+      // global { … }` work as intended.
+      "unicorn/require-module-specifiers": `off`,
     },
   },
 ];

@@ -118,7 +118,8 @@ const rule: Rule.RuleModule = {
             count: 10,
           });
           let arrayNode = null;
-          for (const token of tokens.reverse()) {
+          tokens.reverse();
+          for (const token of tokens) {
             if (token.type === `Punctuator` && token.value === `[`) {
               // Try to find the array node
               const node = sourceCode.getNodeByRangeIndex(token.range[0]);
