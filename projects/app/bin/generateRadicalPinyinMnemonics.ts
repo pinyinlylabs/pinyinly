@@ -85,7 +85,9 @@ for (const hanzi of radicalsToCheck) {
   const lookup = await lookupHanzi(hanzi as HanziText).then((x) => x[0]?.[1]);
 
   const name = lookup?.gloss[0];
-  const pinyin = lookup?.pinyin?.map(pinyinPronunciationDisplayText)[0];
+  const pinyin = lookup?.pinyin?.map((element) =>
+    pinyinPronunciationDisplayText(element),
+  )[0];
   const decomposition = decompositions.get(hanzi);
   invariant(name != null, `Missing name data for ${hanzi}`);
   invariant(pinyin != null, `Missing pinyin data for ${hanzi}`);

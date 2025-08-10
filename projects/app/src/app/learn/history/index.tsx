@@ -25,7 +25,9 @@ export default function HistoryPage() {
     [HistoryPage.name, `skillRatings`],
     async (r) => {
       const res = await r.queryPaged.skillRating.byCreatedAt().toArray();
-      return res.reverse().slice(0, 100);
+      const recent = res.slice(-100);
+      recent.reverse();
+      return recent;
     },
   );
 

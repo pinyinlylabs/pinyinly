@@ -37,7 +37,10 @@ export default function IndexPage() {
       const ratingHistory = await r.queryPaged.skillRating
         .byCreatedAt()
         .toArray()
-        .then((x) => x.reverse());
+        .then((x) => {
+          x.reverse();
+          return x;
+        });
       pushLoop: for (let [, { skill }] of ratingHistory) {
         switch (skillKindFromSkill(skill)) {
           case SkillKind.GlossToHanziWord:
@@ -80,7 +83,10 @@ export default function IndexPage() {
       const ratingHistory = await r.queryPaged.skillRating
         .byCreatedAt()
         .toArray()
-        .then((x) => x.reverse());
+        .then((x) => {
+          x.reverse();
+          return x;
+        });
 
       const streakEnd = ratingHistory[0]?.[1].createdAt;
       let streakStart: Date | undefined;
