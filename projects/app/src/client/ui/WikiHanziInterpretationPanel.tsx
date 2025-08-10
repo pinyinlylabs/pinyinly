@@ -1,5 +1,6 @@
-import { useHanziWikiEntry } from "@/client/hooks/useHanziWikiEntry";
+import { hanziWikiEntryQuery } from "@/client/query";
 import type { HanziText } from "@/data/model";
+import { useQuery } from "@tanstack/react-query";
 import { Text, View } from "react-native";
 import { HanziWordRefText } from "./HanziWordRefText";
 import { Pylymark } from "./Pylymark";
@@ -9,7 +10,7 @@ export const WikiHanziInterpretationPanel = ({
 }: {
   hanzi: HanziText;
 }) => {
-  const wikiEntry = useHanziWikiEntry(hanzi);
+  const wikiEntry = useQuery(hanziWikiEntryQuery(hanzi));
 
   return wikiEntry.data?.components == null ? null : (
     <View className="gap-1">

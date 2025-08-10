@@ -1,5 +1,3 @@
-import { useInternetQuery } from "#client/hooks/useInternetQuery.ts";
-import { useLocalQuery } from "#client/hooks/useLocalQuery.ts";
 import {
   flattenIds,
   idsNodeToString,
@@ -49,7 +47,11 @@ import {
 } from "@pinyinly/lib/collections";
 import { writeJsonFileIfChanged } from "@pinyinly/lib/fs";
 import { invariant } from "@pinyinly/lib/invariant";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQuery,
+} from "@tanstack/react-query";
 import makeDebug from "debug";
 import { Box, render, Text, useFocus, useInput } from "ink";
 import Link from "ink-link";
@@ -1327,14 +1329,15 @@ const DictionaryEditor = ({ onCancel }: { onCancel: () => void }) => {
 };
 
 const DongChineseHanziEntry = ({ hanzi }: { hanzi: string }) => {
-  const dongChinese = useInternetQuery({
+  const dongChinese = useQuery({
     queryKey: [`dongChineseData`],
     queryFn: dongChineseData,
+    networkMode: `online`,
   });
 
   const lookup = useMemo(
     () => dongChinese.data?.lookupChar(hanzi),
-    [dongChinese, hanzi],
+    [dongChinese.data, hanzi],
   );
 
   if (dongChinese.isLoading) {
@@ -2091,11 +2094,13 @@ function hanziWordQueryFilter(
 }
 
 function useDictionary() {
-  return useLocalQuery({
+  return useQuery({
     queryKey: [`loadDictionary`],
     queryFn: async () => {
       return await readDictionary();
     },
+    networkMode: `offlineFirst`,
+    structuralSharing: false,
   });
 }
 
@@ -2315,11 +2320,13 @@ async function upsertHanziWordWordList(
 }
 
 function useHanziWordList(wordListFileName: string) {
-  return useLocalQuery({
+  return useQuery({
     queryKey: [`loadHanziWordList`, wordListFileName],
     queryFn: async () => {
       return await readHanziWordList(wordListFileName);
     },
+    networkMode: `offlineFirst`,
+    structuralSharing: false,
   });
 }
 

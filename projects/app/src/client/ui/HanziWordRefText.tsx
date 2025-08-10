@@ -1,4 +1,4 @@
-import { useHanziWordMeaningSuspense } from "@/client/hooks/useHanziWordMeaning";
+import { hanziWordMeaningQuery } from "@/client/query";
 import type { HanziWord } from "@/data/model";
 import { pinyinPronunciationDisplayText } from "@/data/pinyin";
 import {
@@ -6,6 +6,7 @@ import {
   hanziFromHanziWord,
   pinyinOrThrow,
 } from "@/dictionary/dictionary";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { HanziWordLink } from "./HanziWordLink";
 
 export const HanziWordRefText = ({
@@ -19,7 +20,7 @@ export const HanziWordRefText = ({
   showGloss?: boolean;
   showPinyin?: boolean;
 }) => {
-  const meaning = useHanziWordMeaningSuspense(hanziWord);
+  const { data: meaning } = useSuspenseQuery(hanziWordMeaningQuery(hanziWord));
 
   let text = ``;
 

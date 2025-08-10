@@ -1,6 +1,7 @@
 import { FlatCompat } from "@eslint/eslintrc";
 import inngestPlugin from "@inngest/eslint-plugin";
 import { config, configs, plugins } from "@pinyinly/eslint-rules";
+import queryPlugin from "@tanstack/eslint-plugin-query";
 import drizzlePlugin from "eslint-plugin-drizzle";
 import { builtinModules } from "node:module";
 
@@ -24,6 +25,7 @@ export default config(
   ...configs.react,
   ...configs.tailwind,
 
+  ...queryPlugin.configs[`flat/recommended`],
   ...compat.config(drizzlePlugin.configs.recommended),
   ...compat.config(inngestPlugin.configs.recommended),
 
@@ -93,7 +95,7 @@ export default config(
       "@pinyinly/import-path-rewrite": [
         `error`,
         {
-          patterns: [{ from: String.raw`^#(.+)\.tsx?$`, to: `@/$1` }],
+          patterns: [{ from: String.raw`^#(.+)\.[jt]sx?$`, to: `@/$1` }],
         },
       ],
       // Files not run in Node.js environment shouldn't do any Node.js imports. Expo
@@ -102,6 +104,7 @@ export default config(
       "@expoCodeImports/no-restricted-imports": [
         `error`,
         {
+          // eslint-disable-next-line unicorn/no-useless-spread
           paths: [
             ...builtinModules
               .flatMap((x) => (x.startsWith(`node:`) ? [x] : [x, `node:` + x]))
@@ -109,11 +112,6 @@ export default config(
                 name,
                 message: `Expo code is universal and doesn't support Node.js packages`,
               })),
-            {
-              name: `@tanstack/react-query`,
-              importNames: [`useQuery`],
-              message: `Please use useLocalQuery or useInternetQuery.`,
-            },
           ],
         },
       ],

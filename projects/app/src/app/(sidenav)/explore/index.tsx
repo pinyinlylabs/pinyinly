@@ -1,7 +1,6 @@
-import { ScrollView, Text, View } from "react-native";
-
 import { RectButton } from "@/client/ui/RectButton";
 import { Link } from "expo-router";
+import { ScrollView, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 
 export default function ExplorePage() {
@@ -32,12 +31,6 @@ export default function ExplorePage() {
           Radicals are the key to recognizing and understanding characters.
           Learn them with memorable stories to boost your reading and recall.
         </Text>
-
-        <Link href="/explore/radicals" asChild>
-          <RectButton variant="filled" className="theme-accent self-start">
-            Explore radicals
-          </RectButton>
-        </Link>
       </View>
 
       <View className={boxClass()}>

@@ -1,10 +1,9 @@
 import type { Rizzle } from "@/data/rizzleSchema";
 import type { ReactQueryValue } from "@pinyinly/lib/types";
 import type { QueryKey } from "@tanstack/react-query";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
 import type { ReadTransaction } from "replicache";
-import { useLocalQuery } from "../hooks/useLocalQuery";
 import { useRenderGuard } from "../hooks/useRenderGuard";
 import { useReplicache } from "./useReplicache";
 
@@ -53,9 +52,11 @@ export function useRizzleQuery<T extends ReactQueryValue>(
     };
   }, [stableKey, stableQuery, queryClient, r]);
 
-  const result = useLocalQuery({
+  const result = useQuery({
     queryKey: key,
     queryFn: () => r.replicache.query((tx) => query(r, tx)),
+    networkMode: `offlineFirst`,
+    structuralSharing: false,
   });
 
   return result;

@@ -45,11 +45,7 @@ const useSoundEffectCycleWebApi: UseSoundEffectCycle = (sources) => {
 
     const resolvedSource = resolvedSources[nextSourceIndex];
 
-    if (
-      audioBuffers.length === 0 ||
-      audioContext == null ||
-      resolvedSource == null
-    ) {
+    if (audioContext == null || resolvedSource == null) {
       return;
     }
 
