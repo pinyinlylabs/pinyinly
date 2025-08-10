@@ -1,13 +1,10 @@
-import { useLocalQuery } from "@/client/hooks/useLocalQuery";
-import { loadBillOfMaterials } from "@/data/bom";
+import { billOfMaterialsQuery } from "@/client/query";
+import { useQuery } from "@tanstack/react-query";
 import { Fragment } from "react";
 import { Text, View } from "react-native";
 
 export default function AcknowledgementsPage() {
-  const billOfMaterials = useLocalQuery({
-    queryKey: [AcknowledgementsPage.name, `billOfMaterials`],
-    queryFn: () => loadBillOfMaterials().then((x) => [...x.entries()]),
-  });
+  const billOfMaterials = useQuery(billOfMaterialsQuery());
 
   return (
     <View className="gap-5">

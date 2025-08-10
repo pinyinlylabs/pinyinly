@@ -1,4 +1,6 @@
+import { loadBillOfMaterials } from "@/data/bom";
 import type {
+  HanziText,
   HanziWord,
   Question,
   QuestionFlagType,
@@ -20,11 +22,20 @@ import {
   allHsk1HanziWords,
   allHsk2HanziWords,
   getIsStructuralHanziWord,
+  hanziFromHanziWord,
+  loadPinyinSoundNameSuggestions,
+  lookupHanzi,
+  lookupHanziWikiEntry,
+  lookupHanziWord,
 } from "@/dictionary/dictionary";
+import { devToolsSlowQuerySleepIfEnabled } from "@/util/devtools";
 import { fsrsIsForgotten } from "@/util/fsrs";
 import { arrayFilterUniqueWithKey } from "@pinyinly/lib/collections";
+import { queryOptions, skipToken } from "@tanstack/react-query";
 import { add } from "date-fns/add";
 import { interval } from "date-fns/interval";
+import type { DeviceStoreEntity } from "./deviceStore";
+import { buildDeviceStoreKey, deviceStoreGet } from "./deviceStore";
 
 export async function questionsForReview2(
   r: Rizzle,
@@ -159,3 +170,116 @@ export async function computeSkillReviewQueue(
     isStructuralHanziWord,
   });
 }
+
+export const hanziMeaningsQuery = (hanzi: HanziText) =>
+  queryOptions({
+    queryKey: [`hanziMeanings`, hanzi],
+    queryFn: async () => {
+      await devToolsSlowQuerySleepIfEnabled();
+      return await lookupHanzi(hanzi);
+    },
+    networkMode: `offlineFirst`,
+    structuralSharing: false,
+    staleTime: Infinity,
+  });
+
+export const soundNameSuggestionsQuery = () =>
+  queryOptions({
+    queryKey: [`soundNameSuggestions`],
+    queryFn: async () => {
+      await devToolsSlowQuerySleepIfEnabled();
+      return await loadPinyinSoundNameSuggestions();
+    },
+    networkMode: `offlineFirst`,
+    structuralSharing: false,
+  });
+
+export const hanziWikiEntryQuery = (hanzi: HanziText) =>
+  queryOptions({
+    queryKey: [`hanziWikiEntry`, hanzi],
+    queryFn: async () => {
+      await devToolsSlowQuerySleepIfEnabled();
+      return await lookupHanziWikiEntry(hanzi);
+    },
+    networkMode: `offlineFirst`,
+    structuralSharing: false,
+    staleTime: Infinity,
+  });
+
+export const hanziWordMeaningQuery = (hanziWord: HanziWord) =>
+  queryOptions({
+    queryKey: [`hanziWordMeaning`, hanziWord],
+    queryFn: async () => {
+      await devToolsSlowQuerySleepIfEnabled();
+      return await lookupHanziWord(hanziWord);
+    },
+    networkMode: `offlineFirst`,
+    structuralSharing: false,
+    staleTime: Infinity,
+  });
+
+export const hanziWordOtherMeaningsQuery = (hanziWord: HanziWord) =>
+  queryOptions({
+    queryKey: [`hanziWordOtherMeanings`, hanziWord],
+    queryFn: async () => {
+      await devToolsSlowQuerySleepIfEnabled();
+      const res = await lookupHanzi(hanziFromHanziWord(hanziWord));
+      return res.filter(([otherHanziWord]) => otherHanziWord !== hanziWord);
+    },
+  });
+
+export const fetchArrayBufferQuery = (uri: string | null) =>
+  queryOptions({
+    queryKey: [`fetchArrayBuffer`, uri],
+    queryFn:
+      uri == null
+        ? skipToken
+        : async ({ signal }) => {
+            await devToolsSlowQuerySleepIfEnabled();
+            return await fetch(uri, { signal }).then((res) =>
+              res.arrayBuffer(),
+            );
+          },
+    staleTime: Infinity,
+  });
+
+export const billOfMaterialsQuery = () =>
+  queryOptions({
+    queryKey: [`billOfMaterials`],
+    queryFn: async () => {
+      await devToolsSlowQuerySleepIfEnabled();
+      return await loadBillOfMaterials().then((x) => [...x.entries()]);
+    },
+    networkMode: `offlineFirst`,
+    structuralSharing: false,
+  });
+
+export const fetchAudioBufferQuery = (
+  uri: string | null,
+  audioContext: AudioContext | null,
+) =>
+  queryOptions({
+    queryKey: [`fetchAudioBuffer`, uri] as const,
+    queryFn:
+      uri == null || audioContext == null
+        ? (skipToken as never)
+        : async (): Promise<AudioBuffer> => {
+            await devToolsSlowQuerySleepIfEnabled();
+            const response = await fetch(uri);
+            const arrayBuffer = await response.arrayBuffer();
+            return await audioContext.decodeAudioData(arrayBuffer);
+          },
+    staleTime: Infinity,
+    structuralSharing: false,
+  });
+
+export const deviceStoryQuery = (key: DeviceStoreEntity) =>
+  queryOptions({
+    queryKey: [`DeviceStore`, buildDeviceStoreKey(key)],
+    queryFn: async () => {
+      await devToolsSlowQuerySleepIfEnabled();
+      return await deviceStoreGet(key);
+    },
+    networkMode: `offlineFirst`,
+    structuralSharing: false,
+  });

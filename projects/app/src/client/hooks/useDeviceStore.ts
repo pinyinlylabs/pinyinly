@@ -3,17 +3,13 @@ import type {
   DeviceStoreEntityInput,
   DeviceStoreEntityOutput,
 } from "@/client/deviceStore";
-import {
-  buildDeviceStoreKey,
-  deviceStoreGet,
-  deviceStoreSet,
-} from "@/client/deviceStore";
+import { buildDeviceStoreKey, deviceStoreSet } from "@/client/deviceStore";
+import { deviceStoryQuery } from "@/client/query";
 import { DeviceStoreProvider } from "@/client/ui/DeviceStoreProvider";
 import type { RizzleEntityInput, RizzleEntityMarshaled } from "@/util/rizzle";
 import { nonNullable } from "@pinyinly/lib/invariant";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { use, useEffect } from "react";
-import { useLocalQuery } from "./useLocalQuery";
 import { windowEventListenerEffect } from "./windowEventListenerEffect";
 
 /**
@@ -22,8 +18,8 @@ import { windowEventListenerEffect } from "./windowEventListenerEffect";
  */
 export const useDeviceStoreQuery = (key: DeviceStoreEntity) => {
   const queryClient = useDeviceStoreQueryClient();
+  const query = deviceStoryQuery(key);
   const storageKey = buildDeviceStoreKey(key);
-  const queryKey = getQueryKey(storageKey);
 
   // Synchronise localStorage changes from other browser tabs.
   useEffect(
@@ -43,7 +39,7 @@ export const useDeviceStoreQuery = (key: DeviceStoreEntity) => {
                 ? null
                 : key.unmarshalValue(marshaledValue);
 
-            queryClient.setQueryData(queryKey, newValue);
+            queryClient.setQueryData(query.queryKey, newValue);
           } catch (error) {
             console.error(
               `Failed to parse device store change event value at "${storageKey}":`,
@@ -52,16 +48,10 @@ export const useDeviceStoreQuery = (key: DeviceStoreEntity) => {
           }
         }
       }),
-    [key, queryClient, storageKey, queryKey],
+    [key, queryClient, storageKey, query.queryKey],
   );
 
-  return useLocalQuery(
-    {
-      queryKey,
-      queryFn: () => deviceStoreGet(key),
-    },
-    queryClient,
-  );
+  return useQuery(query, queryClient);
 };
 
 /**
@@ -70,7 +60,7 @@ export const useDeviceStoreQuery = (key: DeviceStoreEntity) => {
  */
 export const useDeviceStoreMutation = <T extends DeviceStoreEntity>(key: T) => {
   const queryClient = useDeviceStoreQueryClient();
-  const storageKey = buildDeviceStoreKey(key);
+  const query = deviceStoryQuery(key);
 
   return useMutation(
     {
@@ -89,7 +79,7 @@ export const useDeviceStoreMutation = <T extends DeviceStoreEntity>(key: T) => {
         return roundTrippedValue;
       },
       onSuccess: async (data) => {
-        const queryKey = getQueryKey(storageKey);
+        const { queryKey } = query;
 
         if (data === null) {
           await queryClient.invalidateQueries({ queryKey });
@@ -142,11 +132,4 @@ function useDeviceStoreQueryClient() {
     `useDeviceStoreQuery must be used within a DeviceStoreProvider`,
   );
   return ctx.queryClient;
-}
-
-/**
- * Computes a react-query cache key given a device store key.
- */
-function getQueryKey(storageKey: string): readonly string[] {
-  return [`DeviceStore`, storageKey];
 }

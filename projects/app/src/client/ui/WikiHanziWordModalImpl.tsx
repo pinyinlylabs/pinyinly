@@ -1,7 +1,9 @@
-import { useHanziWikiEntry } from "@/client/hooks/useHanziWikiEntry";
-import { useHanziWordMeaning } from "@/client/hooks/useHanziWordMeaning";
-import { useLocalQuery } from "@/client/hooks/useLocalQuery";
 import { useRizzleQueryPaged } from "@/client/hooks/useRizzleQueryPaged";
+import {
+  hanziWikiEntryQuery,
+  hanziWordMeaningQuery,
+  hanziWordOtherMeaningsQuery,
+} from "@/client/query";
 import { splitHanziText } from "@/data/hanzi";
 import type { HanziWord } from "@/data/model";
 import { hanziWordSkillKinds } from "@/data/model";
@@ -12,7 +14,8 @@ import {
   skillKindFromSkill,
   skillKindToShorthand,
 } from "@/data/skills";
-import { hanziFromHanziWord, lookupHanzi } from "@/dictionary/dictionary";
+import { hanziFromHanziWord } from "@/dictionary/dictionary";
+import { useQuery } from "@tanstack/react-query";
 import { Fragment } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { DevLozenge } from "./DevLozenge";
@@ -27,23 +30,16 @@ export function WikiHanziWordModalImpl({
   hanziWord: HanziWord;
   onDismiss: () => void;
 }) {
-  const hanziWordSkillData = useHanziWordMeaning(hanziWord);
+  const hanziWordSkillData = useQuery(hanziWordMeaningQuery(hanziWord));
   const hanzi = hanziFromHanziWord(hanziWord);
-  const wikiEntry = useHanziWikiEntry(hanzi);
+  const wikiEntry = useQuery(hanziWikiEntryQuery(hanzi));
+  const otherMeaningsQuery = useQuery(hanziWordOtherMeaningsQuery(hanziWord));
 
   const graphemes = splitHanziText(hanziFromHanziWord(hanziWord));
 
   const skills = hanziWordSkillKinds.map((skillType) =>
     hanziWordSkill(skillType, hanziWord),
   );
-
-  const otherMeaningsQuery = useLocalQuery({
-    queryKey: [WikiHanziWordModalImpl.name, `otherMeanings`, hanziWord],
-    queryFn: async () => {
-      const res = await lookupHanzi(hanzi);
-      return res.filter(([otherHanziWord]) => otherHanziWord !== hanziWord);
-    },
-  });
 
   const skillStatesQuery = useRizzleQueryPaged(
     [WikiHanziWordModalImpl.name, `skillStates`, hanziWord],

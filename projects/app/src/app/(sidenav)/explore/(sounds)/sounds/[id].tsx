@@ -1,7 +1,7 @@
-import { useLocalQuery } from "@/client/hooks/useLocalQuery";
 import { usePinyinSoundGroups } from "@/client/hooks/usePinyinSoundGroups";
 import { usePinyinSounds } from "@/client/hooks/usePinyinSounds";
 import { useReplicache } from "@/client/hooks/useReplicache";
+import { soundNameSuggestionsQuery } from "@/client/query";
 import { Pylymark } from "@/client/ui/Pylymark";
 import { RectButton } from "@/client/ui/RectButton";
 import type { PinyinSoundId } from "@/data/model";
@@ -9,9 +9,9 @@ import {
   defaultPinyinSoundInstructions,
   loadPylyPinyinChart,
 } from "@/data/pinyin";
-import { loadPinyinSoundNameSuggestions } from "@/dictionary/dictionary";
 import { nullIfEmpty } from "@/util/unicode";
 import { sortComparatorString } from "@pinyinly/lib/collections";
+import { useQuery } from "@tanstack/react-query";
 import { Link, useLocalSearchParams } from "expo-router";
 import { ScrollView, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
@@ -21,10 +21,7 @@ export default function MnemonicIdPage() {
   const r = useReplicache();
   const chart = loadPylyPinyinChart();
 
-  const soundNameSuggestions = useLocalQuery({
-    queryKey: [MnemonicIdPage.name, `themeSuggestions`],
-    queryFn: () => loadPinyinSoundNameSuggestions(),
-  });
+  const soundNameSuggestions = useQuery(soundNameSuggestionsQuery());
 
   const pinyinSounds = usePinyinSounds();
   const pinyinSoundGroups = usePinyinSoundGroups();

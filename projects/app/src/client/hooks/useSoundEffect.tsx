@@ -31,7 +31,7 @@ const useSoundEffectWebApi: UseSoundEffect = (src) => {
   const { uri, range: [start, duration] = [] } = resolveAudioSource(src);
 
   const audioContext = use(AudioContextProvider.Context);
-  const audioBuffer = useFetchAudioBuffer(uri);
+  const { data: audioBuffer } = useFetchAudioBuffer(uri);
 
   const play = useEventCallback(() => {
     if (audioBuffer != null && audioContext != null) {

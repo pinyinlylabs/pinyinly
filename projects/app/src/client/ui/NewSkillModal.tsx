@@ -1,5 +1,5 @@
 /* eslint-disable react/display-name */
-import { useHanziWordMeaning } from "@/client/hooks/useHanziWordMeaning";
+import { hanziWordMeaningQuery } from "@/client/query";
 import { SkillKind } from "@/data/model";
 import type { HanziWordSkill, Skill } from "@/data/rizzleSchema";
 import { hanziWordFromSkill, skillKindFromSkill } from "@/data/skills";
@@ -7,6 +7,7 @@ import {
   hanziFromHanziWord,
   hanziGraphemesFromHanziWord,
 } from "@/dictionary/dictionary";
+import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { IconImage } from "./IconImage";
@@ -88,7 +89,7 @@ const NewHanziWordToGlossSkillContent = ({
   dismiss: () => void;
 }) => {
   const hanziWord = hanziWordFromSkill(skill);
-  const hanziWordSkillData = useHanziWordMeaning(hanziWord);
+  const hanziWordSkillData = useQuery(hanziWordMeaningQuery(hanziWord));
   const hanzi = hanziFromHanziWord(hanziWord);
   const hanziGraphemes = hanziGraphemesFromHanziWord(hanziWord);
 
@@ -136,7 +137,7 @@ const NewHanziWordToPinyinSkillContent = ({
   dismiss: () => void;
 }) => {
   const hanziWord = hanziWordFromSkill(skill);
-  const hanziWordSkillData = useHanziWordMeaning(hanziWord);
+  const hanziWordSkillData = useQuery(hanziWordMeaningQuery(hanziWord));
   const hanziGraphemes = hanziGraphemesFromHanziWord(hanziWord);
 
   return (
@@ -181,7 +182,7 @@ const NewHanziWordToPinyinInitialSkillContent = ({
   dismiss: () => void;
 }) => {
   const hanziWord = hanziWordFromSkill(skill);
-  const hanziWordSkillData = useHanziWordMeaning(hanziWord);
+  const hanziWordSkillData = useQuery(hanziWordMeaningQuery(hanziWord));
   const hanziGraphemes = hanziGraphemesFromHanziWord(hanziWord);
 
   return (
