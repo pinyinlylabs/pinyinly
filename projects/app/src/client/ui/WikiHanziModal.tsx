@@ -3,14 +3,6 @@ import { devToolsSlowQuerySleepIfEnabled } from "@/util/devtools";
 import { lazy, Suspense } from "react";
 import { PageSheetModal } from "./PageSheetModal";
 
-const WikiHanziModalImpl = lazy(async () => {
-  await devToolsSlowQuerySleepIfEnabled();
-
-  return await import(`./WikiHanziModalImpl`).then((x) => ({
-    default: x.WikiHanziModalImpl,
-  }));
-});
-
 export const WikiHanziModal = ({
   hanzi,
   onDismiss,
@@ -30,3 +22,10 @@ export const WikiHanziModal = ({
     </PageSheetModal>
   );
 };
+
+const WikiHanziModalImpl = lazy(async () => {
+  await devToolsSlowQuerySleepIfEnabled();
+
+  const { WikiHanziModalImpl } = await import(`./WikiHanziModalImpl`);
+  return { default: WikiHanziModalImpl };
+});

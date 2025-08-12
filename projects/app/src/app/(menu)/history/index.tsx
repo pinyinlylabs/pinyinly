@@ -1,19 +1,14 @@
-import { useRizzleQueryPaged } from "@/client/hooks/useRizzleQueryPaged";
+import { useReplicache } from "@/client/hooks/useReplicache";
+import { recentSkillRatingsQuery } from "@/client/query";
 import { SkillRefText } from "@/client/ui/SkillRefText";
 import { formatRelativeTime } from "@/util/date";
 import { Rating } from "@/util/fsrs";
+import { useQuery } from "@tanstack/react-query";
 import { Text, View } from "react-native";
 
 export default function HistoryPage() {
-  const skillRatingsQuery = useRizzleQueryPaged(
-    [HistoryPage.name, `skillRatings`],
-    async (r) => {
-      const res = await r.queryPaged.skillRating.byCreatedAt().toArray();
-      const recent = res.slice(-100);
-      recent.reverse();
-      return recent;
-    },
-  );
+  const r = useReplicache();
+  const skillRatingsQuery = useQuery(recentSkillRatingsQuery(r));
 
   return (
     <View className="gap-5">

@@ -1,7 +1,7 @@
 import { usePinyinSoundGroups } from "@/client/hooks/usePinyinSoundGroups";
-import { usePinyinSounds } from "@/client/hooks/usePinyinSounds";
 import { useReplicache } from "@/client/hooks/useReplicache";
-import { soundNameSuggestionsQuery } from "@/client/query";
+import { useRizzleQueryPaged } from "@/client/hooks/useRizzleQueryPaged";
+import { pinyinSoundsQuery, soundNameSuggestionsQuery } from "@/client/query";
 import { Pylymark } from "@/client/ui/Pylymark";
 import { RectButton } from "@/client/ui/RectButton";
 import type { PinyinSoundId } from "@/data/model";
@@ -23,14 +23,14 @@ export default function MnemonicIdPage() {
 
   const soundNameSuggestions = useQuery(soundNameSuggestionsQuery());
 
-  const pinyinSounds = usePinyinSounds();
+  const { data: pinyinSounds } = useRizzleQueryPaged(pinyinSoundsQuery(r));
   const pinyinSoundGroups = usePinyinSoundGroups();
 
   const pinyinSoundGroupId = chart.soundGroups.find((g) =>
     g.sounds.includes(id),
   )?.id;
 
-  const pinyinSound = pinyinSounds.data?.get(id);
+  const pinyinSound = pinyinSounds?.get(id);
   const pinyinSoundGroup = pinyinSoundGroups.data?.find(
     (g) => g.id === pinyinSoundGroupId,
   );
@@ -67,7 +67,7 @@ export default function MnemonicIdPage() {
           {pinyinSoundGroup?.sounds.map((siblingId) => (
             <Link key={siblingId} href={`/explore/sounds/${siblingId}`}>
               <Text className={siblingId === id ? `text-fg` : `text-fg/50`}>
-                {pinyinSounds.data?.get(siblingId)?.label}
+                {pinyinSounds?.get(siblingId)?.label}
               </Text>
             </Link>
           ))}

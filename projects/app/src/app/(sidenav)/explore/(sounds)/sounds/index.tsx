@@ -1,12 +1,16 @@
 import { usePinyinSoundGroups } from "@/client/hooks/usePinyinSoundGroups";
-import { usePinyinSounds } from "@/client/hooks/usePinyinSounds";
+import { useReplicache } from "@/client/hooks/useReplicache";
+import { useRizzleQueryPaged } from "@/client/hooks/useRizzleQueryPaged";
+import { pinyinSoundsQuery } from "@/client/query";
 import { PinyinSoundTile } from "@/client/ui/PinyinSoundTile";
 import { Link } from "expo-router";
 import { ScrollView, Text, View } from "react-native";
 
 export default function MnemonicsPage() {
   const pinyinSoundGroupsQuery = usePinyinSoundGroups();
-  const pinyinSoundsQuery = usePinyinSounds();
+  const r = useReplicache();
+
+  const { data: pinyinSounds } = useRizzleQueryPaged(pinyinSoundsQuery(r));
 
   return (
     <ScrollView
@@ -30,7 +34,7 @@ export default function MnemonicsPage() {
               </View>
               <View className="flex-row flex-wrap gap-3.5">
                 {sounds.map((soundId) => {
-                  const sound = pinyinSoundsQuery.data?.get(soundId);
+                  const sound = pinyinSounds?.get(soundId);
                   return sound == null ? null : (
                     <Link
                       key={soundId}

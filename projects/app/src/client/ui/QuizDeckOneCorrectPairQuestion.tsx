@@ -310,7 +310,7 @@ const SkillAnswerText = ({ skill }: { skill: Skill; small?: boolean }) => {
       skill = skill as HanziWordSkill;
       return <HanziWordToGlossSkillAnswerText skill={skill} />;
     }
-    case SkillKind.HanziWordToPinyin:
+    case SkillKind.HanziWordToPinyinTyped:
     case SkillKind.HanziWordToPinyinFinal:
     case SkillKind.HanziWordToPinyinInitial:
     case SkillKind.HanziWordToPinyinTone: {

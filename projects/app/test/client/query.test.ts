@@ -1,13 +1,11 @@
 import {
   computeSkillReviewQueue,
-  flagsForSrsState,
   targetSkillsReviewQueue,
 } from "#client/query.ts";
 import type {
   HanziText,
   PinyinPronunciationSpaceSeparated,
 } from "#data/model.ts";
-import { QuestionFlagKind, SrsKind } from "#data/model.ts";
 import { mutators } from "#data/rizzleMutators.ts";
 import type { Rizzle, Skill } from "#data/rizzleSchema.ts";
 import { currentSchema, rSpaceSeparatedString } from "#data/rizzleSchema.ts";
@@ -264,27 +262,6 @@ describe(
           newCount: 2,
         });
       }
-    });
-  },
-);
-
-describe(
-  `flagsForSrsState suite` satisfies HasNameOf<typeof flagsForSrsState>,
-  () => {
-    test(`marks a question as new if it has no srs`, async () => {
-      expect(
-        flagsForSrsState({
-          kind: SrsKind.Mock,
-          prevReviewAt: new Date(),
-          nextReviewAt: new Date(),
-        }),
-      ).toEqual({ kind: QuestionFlagKind.NewSkill });
-    });
-
-    test(`marks a question as new if it has fsrs state but is not stable enough to be introduced`, async () => {
-      expect(flagsForSrsState(undefined)).toEqual({
-        kind: QuestionFlagKind.NewSkill,
-      });
     });
   },
 );

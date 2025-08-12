@@ -2,18 +2,30 @@ import { loadBillOfMaterials } from "@/data/bom";
 import type {
   HanziText,
   HanziWord,
+  PinyinSoundId,
   Question,
-  QuestionFlagType,
   SrsStateType,
 } from "@/data/model";
-import { QuestionFlagKind, SkillKind, SrsKind } from "@/data/model";
-import { generateQuestionForSkillOrThrow } from "@/data/questions";
-import type { Rizzle, Skill, SkillRating } from "@/data/rizzleSchema";
-import type { SkillReviewQueue } from "@/data/skills";
+import { hanziWordSkillKinds } from "@/data/model";
+import { loadPylyPinyinChart } from "@/data/pinyin";
 import {
+  flagForQuestion,
+  generateQuestionForSkillOrThrow,
+} from "@/data/questions";
+import type {
+  Rizzle,
+  Skill,
+  SkillRating,
+  SkillState,
+} from "@/data/rizzleSchema";
+import { currentSchema } from "@/data/rizzleSchema";
+import type { RankedHanziWord, SkillReviewQueue } from "@/data/skills";
+import {
+  getHanziWordRank,
+  hanziWordSkill,
   hanziWordToGloss,
   hanziWordToPinyin,
-  skillDueWindow,
+  rankRules,
   skillKindFromSkill,
   skillLearningGraph,
   skillReviewQueue,
@@ -29,92 +41,213 @@ import {
   lookupHanziWord,
 } from "@/dictionary/dictionary";
 import { devToolsSlowQuerySleepIfEnabled } from "@/util/devtools";
-import { fsrsIsForgotten } from "@/util/fsrs";
-import { arrayFilterUniqueWithKey } from "@pinyinly/lib/collections";
+import {
+  arrayFilterUniqueWithKey,
+  sortComparatorNumber,
+} from "@pinyinly/lib/collections";
 import { queryOptions, skipToken } from "@tanstack/react-query";
-import { add } from "date-fns/add";
-import { interval } from "date-fns/interval";
 import type { DeviceStoreEntity } from "./deviceStore";
 import { buildDeviceStoreKey, deviceStoreGet } from "./deviceStore";
 
-export async function questionsForReview2(
-  r: Rizzle,
-  options?: {
-    limit?: number;
-  },
-): Promise<[Question[], SkillReviewQueue]> {
-  const questions: Question[] = [];
-  const reviewQueue = await targetSkillsReviewQueue(r);
+export type WithRizzleWatchPrefixes<T> = T & {
+  rizzleWatchPrefixes?: string[];
+};
 
-  for (const [i, skill] of reviewQueue.items.entries()) {
-    const skillState = await r.replicache.query((tx) =>
-      r.query.skillState.get(tx, { skill }),
-    );
+export const nextQuizQuestionQuery = (r: Rizzle, quizId: string) =>
+  queryOptions({
+    queryKey: [`nextQuizQuestion`, quizId],
+    meta: { r },
+    queryFn: async ({
+      meta,
+    }): Promise<{
+      question: Question;
+      reviewQueue: SkillReviewQueue;
+    }> => {
+      const r = (meta as { r: Rizzle }).r;
+      const reviewQueue = await targetSkillsReviewQueue(r);
 
-    try {
-      const question = await generateQuestionForSkillOrThrow(skill);
-      const isRetry = reviewQueue.retryCount > 0 && i < reviewQueue.retryCount;
-      if (isRetry) {
-        question.flag ??= {
-          kind: QuestionFlagKind.Retry,
-        };
+      for (const [i, skill] of reviewQueue.items.entries()) {
+        try {
+          const skillState = await r.replicache.query((tx) =>
+            r.query.skillState.get(tx, { skill }),
+          );
+
+          const question = await generateQuestionForSkillOrThrow(skill);
+          question.flag ??= flagForQuestion({
+            skillKind: skillKindFromSkill(skill),
+            isInRetryQueue:
+              reviewQueue.retryCount > 0 && i < reviewQueue.retryCount,
+            srsState: skillState?.srs,
+          });
+          return { question, reviewQueue };
+        } catch (error) {
+          console.error(
+            `Error while generating a question for a skill ${JSON.stringify(skill)}`,
+            error,
+          );
+          continue;
+        }
       }
-      question.flag ??= flagsForSrsState(skillState?.srs);
 
-      // Instead of saying "New Skill" when it's just a harder version of an
-      // existing skill, we say "New Difficulty" instead.
-      if (
-        question.flag?.kind == QuestionFlagKind.NewSkill &&
-        isNewDifficultySkillType(skillKindFromSkill(skill))
-      ) {
-        question.flag = { kind: QuestionFlagKind.NewDifficulty };
-      }
+      throw new Error(`No question found for review`);
+    },
+    networkMode: `offlineFirst`,
+    structuralSharing: false,
+  });
 
-      questions.push(question);
-    } catch (error) {
-      console.error(
-        `Error while generating a question for a skill ${JSON.stringify(skill)}`,
-        error,
-      );
-      continue;
-    }
+export const pinyinSoundsQuery = (r: Rizzle) =>
+  withWatchPrefixes(
+    queryOptions({
+      queryKey: [`pinyinSounds`],
+      queryFn: async () => {
+        await devToolsSlowQuerySleepIfEnabled();
 
-    if (options?.limit != null && questions.length === options.limit) {
-      break;
-    }
-  }
+        const chart = loadPylyPinyinChart();
 
-  return [questions, reviewQueue];
-}
+        const sounds = new Map<
+          PinyinSoundId,
+          { name: string | null; label: string }
+        >();
 
-function isNewDifficultySkillType(skillKind: SkillKind): boolean {
-  return (
-    skillKind === SkillKind.HanziWordToPinyinFinal ||
-    skillKind === SkillKind.HanziWordToPinyinTone
+        await r.replicache.query(async (tx) => {
+          for (const group of chart.soundGroups) {
+            for (const soundId of group.sounds) {
+              const userOverride = await r.query.pinyinSound.get(tx, {
+                soundId,
+              });
+              sounds.set(soundId, {
+                name: userOverride?.name ?? null,
+                label: chart.soundToCustomLabel[soundId] ?? soundId,
+              });
+            }
+          }
+        });
+
+        return sounds;
+      },
+      networkMode: `offlineFirst`,
+      structuralSharing: false,
+    }),
+    [currentSchema.pinyinSound.keyPrefix],
   );
-}
 
-export function flagsForSrsState(
-  srsState: SrsStateType | undefined,
-): QuestionFlagType | undefined {
-  if (
-    srsState?.kind !== SrsKind.FsrsFourPointFive ||
-    fsrsIsForgotten(srsState)
-  ) {
-    return {
-      kind: QuestionFlagKind.NewSkill,
-    };
-  }
-  const now = new Date();
-  const overDueDate = add(srsState.nextReviewAt, skillDueWindow);
+export const hanziWordSkillStatesQuery = (r: Rizzle, hanziWord: HanziWord) =>
+  withWatchPrefixes(
+    queryOptions({
+      queryKey: [`hanziWordSkillStates`, hanziWord],
+      queryFn: async () => {
+        await devToolsSlowQuerySleepIfEnabled();
 
-  if (now >= overDueDate) {
-    return {
-      kind: QuestionFlagKind.Overdue,
-      interval: interval(overDueDate.getTime(), now),
-    };
-  }
-}
+        const skills = hanziWordSkillKinds.map((skillType) =>
+          hanziWordSkill(skillType, hanziWord),
+        );
+
+        const skillStates = await r.replicache.query(async (tx) => {
+          const skillStates: [Skill, SkillState | null | undefined][] = [];
+          for (const skill of skills) {
+            const skillState = await r.query.skillState.get(tx, { skill });
+            skillStates.push([skill, skillState]);
+          }
+          return skillStates;
+        });
+
+        return skillStates;
+      },
+      networkMode: `offlineFirst`,
+      structuralSharing: false,
+    }),
+    [
+      // TODO: narrow to the specific hanzi e.g. `he:好:`, but it would have to
+      // be one for each skill type, so maybe it's not worth it.
+      currentSchema.skillState.keyPrefix,
+    ],
+  );
+
+export const hanziWordSkillRatingsQuery = (r: Rizzle, hanziWord: HanziWord) =>
+  withWatchPrefixes(
+    queryOptions({
+      queryKey: [`hanziWordSkillRatings`, hanziWord],
+      queryFn: async () => {
+        await devToolsSlowQuerySleepIfEnabled();
+
+        const skills = hanziWordSkillKinds.map((skillType) =>
+          hanziWordSkill(skillType, hanziWord),
+        );
+
+        const skillToRatings = new Map<
+          Skill,
+          [/* skillRating key */ string, SkillRating][]
+        >();
+        for (const skill of skills) {
+          const ratings = await r.queryPaged.skillRating
+            .bySkill(skill)
+            .toArray();
+          skillToRatings.set(skill, ratings);
+        }
+
+        return skillToRatings;
+      },
+      networkMode: `offlineFirst`,
+      structuralSharing: false,
+    }),
+    [currentSchema.skillRating.keyPrefix],
+  );
+
+export const recentSkillRatingsQuery = (r: Rizzle) =>
+  queryOptions({
+    queryKey: [`recentSkillRatings`],
+    queryFn: async () => {
+      await devToolsSlowQuerySleepIfEnabled();
+      const res = await r.queryPaged.skillRating.byCreatedAt().toArray();
+      const recent = res.slice(-100);
+      recent.reverse();
+      return recent;
+    },
+    networkMode: `offlineFirst`,
+    structuralSharing: false,
+  });
+
+export const hanziWordsByRankQuery = (r: Rizzle) =>
+  withWatchPrefixes(
+    queryOptions({
+      queryKey: [`hanziWordsByRank`],
+      queryFn: async () => {
+        await devToolsSlowQuerySleepIfEnabled();
+
+        const skillSrsStates = new Map<Skill, SrsStateType>();
+        for await (const [, v] of r.queryPaged.skillState.scan()) {
+          skillSrsStates.set(v.skill, v.srs);
+        }
+
+        const hanziWords = await getAllTargetHanziWords();
+        const rankToHanziWords = new Map<number, RankedHanziWord[]>();
+
+        for (const hanziWord of hanziWords) {
+          const rankedHanziWord = getHanziWordRank({
+            hanziWord,
+            skillSrsStates,
+            rankRules,
+          });
+
+          const rankNumber = rankedHanziWord.rank;
+          const existing = rankToHanziWords.get(rankNumber);
+          if (existing == null) {
+            rankToHanziWords.set(rankNumber, [rankedHanziWord]);
+          } else {
+            existing.push(rankedHanziWord);
+          }
+        }
+
+        for (const unsorted of rankToHanziWords.values()) {
+          unsorted.sort(sortComparatorNumber((x) => x.completion));
+        }
+        return rankToHanziWords;
+      },
+      networkMode: `offlineFirst`,
+      structuralSharing: false,
+    }),
+    [currentSchema.skillState.keyPrefix],
+  );
 
 export async function getAllTargetHanziWords(): Promise<HanziWord[]> {
   const [hsk1HanziWords, hsk2HanziWords] = await Promise.all([
@@ -275,7 +408,7 @@ export const fetchAudioBufferQuery = (
 
 export const deviceStoryQuery = (key: DeviceStoreEntity) =>
   queryOptions({
-    queryKey: [`DeviceStore`, buildDeviceStoreKey(key)],
+    queryKey: [`deviceStore`, buildDeviceStoreKey(key)],
     queryFn: async () => {
       await devToolsSlowQuerySleepIfEnabled();
       return await deviceStoreGet(key);
@@ -283,3 +416,12 @@ export const deviceStoryQuery = (key: DeviceStoreEntity) =>
     networkMode: `offlineFirst`,
     structuralSharing: false,
   });
+
+function withWatchPrefixes<T extends object>(
+  query: T,
+  rizzleWatchPrefixes: string[],
+): WithRizzleWatchPrefixes<T> {
+  return Object.assign(query, {
+    rizzleWatchPrefixes,
+  });
+}
