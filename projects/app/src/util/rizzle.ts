@@ -473,6 +473,11 @@ export class RizzleEntity<
   KeyPath extends string,
   S extends RizzleRawObject,
 > extends RizzleRoot<RizzleEntityDef<KeyPath, S>> {
+  /**
+   * The prefix for the entity up to the first variable.
+   */
+  readonly keyPrefix: string;
+
   constructor(def: RizzleEntityDef<KeyPath, S>) {
     super(def);
 
@@ -480,6 +485,14 @@ export class RizzleEntity<
     this.marshalValue = weakMemoize1(this.marshalValue.bind(this));
     this.unmarshalValue = weakMemoize1(this.unmarshalValue.bind(this));
     this.getIndexes = memoize0(this.getIndexes.bind(this));
+
+    {
+      const firstVarIndex = this._def.keyPath.indexOf(`[`);
+      this.keyPrefix =
+        firstVarIndex == -1
+          ? this._def.keyPath
+          : this._def.keyPath.slice(0, firstVarIndex);
+    }
   }
 
   async has(

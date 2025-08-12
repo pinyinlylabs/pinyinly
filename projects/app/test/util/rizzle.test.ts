@@ -809,6 +809,28 @@ test(`object()`, async () => {
   });
 });
 
+describe(`.keyPrefix()`, () => {
+  test(`no key path variables`, () => {
+    const posts = r.entity(`foo`, {
+      id: r.string(),
+      author: r.object({
+        name: r.string().indexed(`byAuthorName`),
+      }),
+    });
+    expect(posts.keyPrefix).toBe(`foo`);
+  });
+
+  test(`one key path variable`, () => {
+    const posts = r.entity(`foo/[id]`, {
+      id: r.string(),
+      author: r.object({
+        name: r.string().indexed(`byAuthorName`),
+      }),
+    });
+    expect(posts.keyPrefix).toBe(`foo/`);
+  });
+});
+
 test(`.getIndexes()`, () => {
   // no key path variables
   {
