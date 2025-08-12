@@ -34,7 +34,7 @@ export const NewSkillModal = ({
             <NewHanziWordToGlossSkillContent skill={skill} dismiss={dismiss} />
           );
         }
-        case SkillKind.HanziWordToPinyin: {
+        case SkillKind.HanziWordToPinyinTyped: {
           const skill = anySkill as HanziWordSkill;
           return ({ dismiss }) => (
             <NewHanziWordToPinyinSkillContent skill={skill} dismiss={dismiss} />

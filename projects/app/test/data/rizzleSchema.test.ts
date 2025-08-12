@@ -47,7 +47,7 @@ test(`rSkillKind()` satisfies HasNameOf<typeof rSkillKind>, async () => {
     SkillKind.Deprecated,
     SkillKind.GlossToHanziWord,
     SkillKind.HanziWordToGloss,
-    SkillKind.HanziWordToPinyin,
+    SkillKind.HanziWordToPinyinTyped,
     SkillKind.HanziWordToPinyinFinal,
     SkillKind.HanziWordToPinyinInitial,
     SkillKind.HanziWordToPinyinTone,

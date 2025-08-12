@@ -58,9 +58,9 @@ const skillKindSchema = z.enum({
   HanziWordToGloss: `debug--HanziWordToGloss`,
   /**
    * When shown a Hanzi be able to write the pinyin using the keyboard without
-   * any other hints.
+   * any other hints or multiple choice options.
    */
-  HanziWordToPinyin: `debug--HanziWordToPinyin`,
+  HanziWordToPinyinTyped: `debug--HanziWordToPinyinTyped`,
   HanziWordToPinyinFinal: `debug--HanziWordToPinyinFinal`,
   HanziWordToPinyinInitial: `debug--HanziWordToPinyinInitial`,
   HanziWordToPinyinTone: `debug--HanziWordToPinyinTone`,
@@ -155,7 +155,7 @@ export type HanziText = (string & z.BRAND<`HanziText`>) | HanziGrapheme;
 
 export type HanziWordSkillKind =
   | typeof SkillKind.HanziWordToGloss
-  | typeof SkillKind.HanziWordToPinyin
+  | typeof SkillKind.HanziWordToPinyinTyped
   | typeof SkillKind.HanziWordToPinyinInitial
   | typeof SkillKind.HanziWordToPinyinFinal
   | typeof SkillKind.HanziWordToPinyinTone
@@ -168,7 +168,7 @@ export const hanziWordSkillKinds: readonly HanziWordSkillKind[] = [
   SkillKind.HanziWordToPinyinInitial,
   SkillKind.HanziWordToPinyinFinal,
   SkillKind.HanziWordToPinyinTone,
-  SkillKind.HanziWordToPinyin,
+  SkillKind.HanziWordToPinyinTyped,
   SkillKind.GlossToHanziWord,
 ];
 

@@ -1,19 +1,16 @@
+import { useReplicache } from "@/client/hooks/useReplicache";
 import { useRizzleQueryPaged } from "@/client/hooks/useRizzleQueryPaged";
 import {
   hanziWikiEntryQuery,
   hanziWordMeaningQuery,
   hanziWordOtherMeaningsQuery,
+  hanziWordSkillRatingsQuery,
+  hanziWordSkillStatesQuery,
 } from "@/client/query";
 import { splitHanziText } from "@/data/hanzi";
 import type { HanziWord } from "@/data/model";
-import { hanziWordSkillKinds } from "@/data/model";
 import { pinyinPronunciationDisplayText } from "@/data/pinyin";
-import type { Skill, SkillRating, SkillState } from "@/data/rizzleSchema";
-import {
-  hanziWordSkill,
-  skillKindFromSkill,
-  skillKindToShorthand,
-} from "@/data/skills";
+import { skillKindFromSkill, skillKindToShorthand } from "@/data/skills";
 import { hanziFromHanziWord } from "@/dictionary/dictionary";
 import { useQuery } from "@tanstack/react-query";
 import { Fragment } from "react";
@@ -37,39 +34,12 @@ export function WikiHanziWordModalImpl({
 
   const graphemes = splitHanziText(hanziFromHanziWord(hanziWord));
 
-  const skills = hanziWordSkillKinds.map((skillType) =>
-    hanziWordSkill(skillType, hanziWord),
-  );
-
+  const r = useReplicache();
   const skillStatesQuery = useRizzleQueryPaged(
-    [WikiHanziWordModalImpl.name, `skillStates`, hanziWord],
-    async (r) => {
-      const skillStates = await r.replicache.query(async (tx) => {
-        const skillStates: [Skill, SkillState | null | undefined][] = [];
-        for (const skill of skills) {
-          const skillState = await r.query.skillState.get(tx, { skill });
-          skillStates.push([skill, skillState]);
-        }
-        return skillStates;
-      });
-
-      return skillStates;
-    },
+    hanziWordSkillStatesQuery(r, hanziWord),
   );
-
   const skillRatingsQuery = useRizzleQueryPaged(
-    [WikiHanziWordModalImpl.name, `skillRatings`, hanziWord],
-    async (r) => {
-      const skillRatings: [
-        Skill,
-        [string, SkillRating][] | null | undefined,
-      ][] = [];
-      for (const skill of skills) {
-        const ratings = await r.queryPaged.skillRating.bySkill(skill).toArray();
-        skillRatings.push([skill, ratings]);
-      }
-      return new Map(skillRatings.map(([skill, ratings]) => [skill, ratings]));
-    },
+    hanziWordSkillRatingsQuery(r, hanziWord),
   );
 
   return hanziWordSkillData.data == null ? null : (

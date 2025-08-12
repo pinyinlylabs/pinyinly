@@ -78,6 +78,19 @@ export async function skillLearningGraph(options: {
   return graph;
 }
 
+/**
+ * Checks if the given skill kind represents a difficulty increase.
+ */
+export function isHarderDifficultyStyleSkillKind(
+  skillKind: SkillKind,
+): boolean {
+  return (
+    skillKind === SkillKind.HanziWordToPinyinFinal ||
+    skillKind === SkillKind.HanziWordToPinyinTone ||
+    skillKind === SkillKind.HanziWordToPinyinTyped
+  );
+}
+
 export const skillKindFromSkill = (skill: Skill): SkillKind => {
   const result = /^(.+?):/.exec(skill);
   invariant(result != null, `doesn't match *:* pattern`);
@@ -210,7 +223,7 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
       break;
     }
 
-    case SkillKind.HanziWordToPinyin: {
+    case SkillKind.HanziWordToPinyinTyped: {
       skill = skill as HanziWordSkill;
       const hanziWord = hanziWordFromSkill(skill);
       const hanzi = hanziFromHanziWord(hanziWord);
@@ -339,7 +352,7 @@ export const hanziWordToGloss = (hanziWord: HanziWord) =>
   hanziWordSkill(SkillKind.HanziWordToGloss, hanziWord);
 
 export const hanziWordToPinyin = (hanziWord: HanziWord) =>
-  hanziWordSkill(SkillKind.HanziWordToPinyin, hanziWord);
+  hanziWordSkill(SkillKind.HanziWordToPinyinTyped, hanziWord);
 
 export const hanziWordToPinyinInitial = (hanziWord: HanziWord) =>
   hanziWordSkill(SkillKind.HanziWordToPinyinInitial, hanziWord);
@@ -447,7 +460,7 @@ export const rankRules: RankRules = [
       { skill: SkillKind.HanziWordToPinyinInitial, stability },
       { skill: SkillKind.HanziWordToPinyinFinal, stability },
       { skill: SkillKind.HanziWordToPinyinTone, stability },
-      { skill: SkillKind.HanziWordToPinyin, stability },
+      { skill: SkillKind.HanziWordToPinyinTyped, stability },
     ],
   },
 ];
@@ -836,7 +849,7 @@ const skillKindShorthandMapping: Record<SkillKind, string> = {
   [SkillKind.Deprecated]: `[deprecated]`,
   [SkillKind.GlossToHanziWord]: `EN → 中文`,
   [SkillKind.HanziWordToGloss]: `中文 → EN`,
-  [SkillKind.HanziWordToPinyin]: `中文 → PY`,
+  [SkillKind.HanziWordToPinyinTyped]: `中文 → PY`,
   [SkillKind.HanziWordToPinyinFinal]: `中文 → PY⁻ᶠ`,
   [SkillKind.HanziWordToPinyinInitial]: `中文 → PYⁱ⁻`,
   [SkillKind.HanziWordToPinyinTone]: `中文 → PYⁿ`,
@@ -870,7 +883,7 @@ export function computeSkillRating(opts: {
   let goodDuration;
 
   switch (skillKindFromSkill(opts.skill)) {
-    case SkillKind.HanziWordToPinyin:
+    case SkillKind.HanziWordToPinyinTyped:
     case SkillKind.HanziWordToPinyinInitial:
     case SkillKind.HanziWordToPinyinFinal:
     case SkillKind.HanziWordToPinyinTone:

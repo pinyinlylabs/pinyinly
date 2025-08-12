@@ -327,6 +327,11 @@ const recommended: InfiniteDepthConfigWithExtends[] = [
       "@typescript-eslint/restrict-template-expressions": `off`,
       "@typescript-eslint/require-await": `off`, // this is annoying when you want a little function to return a promise
       "@typescript-eslint/return-await": `off`, // this is annoying when you want a little function to return a promise
+      // It's useful to use inline type annotations for mocking.
+      "@typescript-eslint/consistent-type-imports": [
+        `error`,
+        { disallowTypeAnnotations: false },
+      ],
       "unicorn/consistent-function-scoping": `off`, // it's useful to write functions in the scope of a test
       "unicorn/no-useless-undefined": `off`, // writing undefined can be useful when writing mocks
     },

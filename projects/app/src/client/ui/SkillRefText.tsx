@@ -34,7 +34,7 @@ export const SkillRefText = ({ skill }: { skill: Skill }) => {
       skill = skill as DeprecatedSkill;
       return <Text>{skillKindToShorthand(skillKindFromSkill(skill))}</Text>;
     }
-    case SkillKind.HanziWordToPinyin: {
+    case SkillKind.HanziWordToPinyinTyped: {
       skill = skill as HanziWordSkill;
       const hanziWord = hanziWordFromSkill(skill);
       return (

@@ -1,30 +1,54 @@
-import type { Rizzle } from "@/data/rizzleSchema";
+import type { WithRizzleWatchPrefixes } from "@/client/query";
 import type { ReactQueryValue } from "@pinyinly/lib/types";
-import type { QueryKey } from "@tanstack/react-query";
+import type {
+  DefaultError,
+  QueryKey,
+  UseQueryOptions,
+} from "@tanstack/react-query";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useRenderGuard } from "../hooks/useRenderGuard";
 import { useReplicache } from "./useReplicache";
 
-export function useRizzleQueryPaged<T extends ReactQueryValue>(
-  key: QueryKey,
-  query: (r: Rizzle) => Promise<T>,
-  watchPrefixes?: string[],
+export function useRizzleQueryPaged<
+  TQueryFnData = ReactQueryValue,
+  TError = DefaultError,
+  TData = TQueryFnData,
+  TQueryKey extends QueryKey = QueryKey,
+>(
+  options: WithRizzleWatchPrefixes<
+    UseQueryOptions<TQueryFnData, TError, TData, TQueryKey>
+  >,
 ) {
   const r = useReplicache();
   const queryClient = useQueryClient();
 
   // Improve debugging.
-  useRenderGuard(useRizzleQueryPaged.name);
+  useRenderGuard(
+    `useRizzleQueryPaged` satisfies HasNameOf<typeof useRizzleQueryPaged>,
+  );
 
-  const watchPrefixesCsv = watchPrefixes?.join(`,`) ?? ``;
+  if (options.networkMode !== `offlineFirst`) {
+    console.warn(
+      `useRizzleQueryPaged query passed a query with unexpected networkMode: ${options.networkMode ?? `<undefined>`}` satisfies HasNameOf<
+        typeof useRizzleQueryPaged
+      >,
+    );
+  }
+
+  // TODO: the default will cause all prefixes to be watched, is that
+  // intentional?
+  const watchPrefixesCsv = options.rizzleWatchPrefixes?.join(`,`) ?? ``;
 
   useEffect(() => {
     const onStoreChange = () => {
       queryClient
-        .invalidateQueries({ queryKey: key })
+        .invalidateQueries({ queryKey: options.queryKey })
         .catch((error: unknown) => {
-          console.error(`Error invalidating query ${key.join(`, `)}:`, error);
+          console.error(
+            `Error invalidating query ${options.queryKey.join(`, `)}:`,
+            error,
+          );
         });
     };
 
@@ -43,21 +67,7 @@ export function useRizzleQueryPaged<T extends ReactQueryValue>(
         unsubscribe();
       }
     };
-  }, [key, queryClient, r.replicache, watchPrefixesCsv]);
+  }, [options.queryKey, queryClient, r.replicache, watchPrefixesCsv]);
 
-  const result = useQuery({
-    // eslint-disable-next-line @tanstack/query/exhaustive-deps
-    queryKey: key,
-    queryFn: () => query(r),
-    networkMode: `offlineFirst`,
-    structuralSharing: false,
-    // TODO: enable these after adding subscribing to replicache mutations and
-    // invalidating the cache.
-    //
-    // refetchOnReconnect: false,
-    // refetchOnWindowFocus: false,
-    // refetchOnMount: false,
-  });
-
-  return result;
+  return useQuery(options);
 }

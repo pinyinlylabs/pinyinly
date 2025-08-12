@@ -4,7 +4,7 @@ import { useQuizProgress } from "@/client/hooks/useQuizProgress";
 import { useReplicache } from "@/client/hooks/useReplicache";
 import { useRizzleQueryPaged } from "@/client/hooks/useRizzleQueryPaged";
 import { useSoundEffect } from "@/client/hooks/useSoundEffect";
-import { questionsForReview2 } from "@/client/query";
+import { nextQuizQuestionQuery } from "@/client/query";
 import type { StackNavigationFor } from "@/client/ui/types";
 import type { MistakeType, Question, UnsavedSkillRating } from "@/data/model";
 import { MistakeKind, QuestionKind } from "@/data/model";
@@ -55,20 +55,11 @@ export const QuizDeck = ({ className }: { className?: string }) => {
   const queryClient = useQueryClient();
   const postHog = usePostHog();
 
-  const questionsQueryKey = [QuizDeck.name, `quiz`, id];
+  const query = nextQuizQuestionQuery(r, id);
 
   // The following is a bit convoluted but allows prefetching the next question
   // when the result for the previous is shown.
-  const nextQuestionQuery = useRizzleQueryPaged(
-    questionsQueryKey,
-    async (r) => {
-      const [questions, reviewQueue] = await questionsForReview2(r, {
-        limit: 5, // TODO: make this 1? does that work?
-      });
-      const question = questions[0] ?? null;
-      return { question, reviewQueue };
-    },
-  );
+  const nextQuestionQuery = useRizzleQueryPaged(query);
   const nextQuestion =
     nextQuestionQuery.isSuccess && !nextQuestionQuery.isFetching
       ? nextQuestionQuery.data.question
@@ -159,7 +150,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
           }
         }
 
-        await queryClient.invalidateQueries({ queryKey: questionsQueryKey });
+        await queryClient.invalidateQueries({ queryKey: query.queryKey });
       })().catch((error: unknown) => {
         console.error(`error in async handling in handleRating`, error);
       });

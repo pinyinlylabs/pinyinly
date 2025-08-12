@@ -1,51 +1,19 @@
+import { useReplicache } from "@/client/hooks/useReplicache";
 import { useRizzleQueryPaged } from "@/client/hooks/useRizzleQueryPaged";
-import { getAllTargetHanziWords } from "@/client/query";
+import { hanziWordsByRankQuery } from "@/client/query";
 import { HanziWordRefText } from "@/client/ui/HanziWordRefText";
-import type { HanziWord, SrsStateType } from "@/data/model";
-import type { Skill } from "@/data/rizzleSchema";
-import type { RankedHanziWord, RankNumber } from "@/data/skills";
-import {
-  coerceRank,
-  getHanziWordRank,
-  rankName,
-  rankRules,
-} from "@/data/skills";
+import type { HanziWord } from "@/data/model";
+import type { RankNumber } from "@/data/skills";
+import { coerceRank, rankName } from "@/data/skills";
 import { meaningKeyFromHanziWord } from "@/dictionary/dictionary";
-import { sortComparatorNumber } from "@pinyinly/lib/collections";
 import { Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 
 export default function SkillsPage() {
-  const x = useRizzleQueryPaged([SkillsPage.name, `skillStates`], async (r) => {
-    const skillSrsStates = new Map<Skill, SrsStateType>();
-    for await (const [, v] of r.queryPaged.skillState.scan()) {
-      skillSrsStates.set(v.skill, v.srs);
-    }
-
-    const hanziWords = await getAllTargetHanziWords();
-    const rankToHanziWords = new Map<number, RankedHanziWord[]>();
-
-    for (const hanziWord of hanziWords) {
-      const rankedHanziWord = getHanziWordRank({
-        hanziWord,
-        skillSrsStates,
-        rankRules,
-      });
-
-      const rankNumber = rankedHanziWord.rank;
-      const existing = rankToHanziWords.get(rankNumber);
-      if (existing == null) {
-        rankToHanziWords.set(rankNumber, [rankedHanziWord]);
-      } else {
-        existing.push(rankedHanziWord);
-      }
-    }
-
-    for (const unsorted of rankToHanziWords.values()) {
-      unsorted.sort(sortComparatorNumber((x) => x.completion));
-    }
-    return { rankToHanziWords };
-  });
+  const r = useReplicache();
+  const { data: hanziWordsByRank } = useRizzleQueryPaged(
+    hanziWordsByRankQuery(r),
+  );
 
   return (
     <View className="gap-5">
@@ -56,7 +24,7 @@ export default function SkillsPage() {
 
       {/* Rank groups */}
       {([1, 2, 3, 4, 0] as const).map((rank) => {
-        const items = x.data?.rankToHanziWords.get(rank);
+        const items = hanziWordsByRank?.get(rank);
         return items == null ? null : (
           <View className="gap-2" key={rank}>
             <RankLozenge rank={rank} />

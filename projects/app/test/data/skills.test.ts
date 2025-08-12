@@ -8,6 +8,7 @@ import {
   getHanziWordRank,
   hanziWordToGloss,
   isHanziWordSkill,
+  isHarderDifficultyStyleSkillKind,
   rankRules,
   skillKindFromSkill,
   skillLearningGraph,
@@ -758,7 +759,7 @@ describe(
       );
     });
 
-    describe(`${SkillKind.HanziWordToPinyin} skills`, () => {
+    describe(`${SkillKind.HanziWordToPinyinTyped} skills`, () => {
       skillTest(
         `doesn't learn pinyin for all constituents of a single character`,
         async ({ isStructuralHanziWord }) => {
@@ -800,7 +801,7 @@ describe(
           });
 
           const isHpSkill = (s: Skill) =>
-            skillKindFromSkill(s) === SkillKind.HanziWordToPinyin;
+            skillKindFromSkill(s) === SkillKind.HanziWordToPinyinTyped;
 
           const onlyHpQueue = {
             items: queue.items.filter((s) => isHpSkill(s)),
@@ -1375,10 +1376,44 @@ test(
         "debug--EnglishToRadical": false,
         "debug--GlossToHanziWord": true,
         "debug--HanziWordToGloss": true,
-        "debug--HanziWordToPinyin": true,
         "debug--HanziWordToPinyinFinal": true,
         "debug--HanziWordToPinyinInitial": true,
         "debug--HanziWordToPinyinTone": true,
+        "debug--HanziWordToPinyinTyped": true,
+        "debug--ImageToHanzi": false,
+        "debug--PinyinFinalAssociation": false,
+        "debug--PinyinInitialAssociation": false,
+        "debug--PinyinToHanzi": false,
+        "debug--PinyinToRadical": false,
+        "debug--RadicalToEnglish": false,
+        "debug--RadicalToPinyin": false,
+      }
+    `);
+  },
+);
+
+test(
+  `isHarderDifficultyStyleSkillKind suite` satisfies HasNameOf<
+    typeof isHarderDifficultyStyleSkillKind
+  >,
+  () => {
+    const skillKinds = Object.fromEntries(
+      Object.values(SkillKind).map((skillKind) => [
+        skillKind,
+        isHarderDifficultyStyleSkillKind(skillKind),
+      ]),
+    );
+
+    expect(skillKinds).toMatchInlineSnapshot(`
+      {
+        "debug--Deprecated": false,
+        "debug--EnglishToRadical": false,
+        "debug--GlossToHanziWord": false,
+        "debug--HanziWordToGloss": false,
+        "debug--HanziWordToPinyinFinal": true,
+        "debug--HanziWordToPinyinInitial": false,
+        "debug--HanziWordToPinyinTone": true,
+        "debug--HanziWordToPinyinTyped": true,
         "debug--ImageToHanzi": false,
         "debug--PinyinFinalAssociation": false,
         "debug--PinyinInitialAssociation": false,

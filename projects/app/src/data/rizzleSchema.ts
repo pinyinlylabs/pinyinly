@@ -25,7 +25,7 @@ export const rSkillKind = memoize0(function rSkillKind() {
     [SkillKind.Deprecated_PinyinToRadical]: `pr`,
     [SkillKind.Deprecated]: `xx`,
     [SkillKind.HanziWordToGloss]: `he`,
-    [SkillKind.HanziWordToPinyin]: `hp`,
+    [SkillKind.HanziWordToPinyinTyped]: `hp`,
     [SkillKind.HanziWordToPinyinInitial]: `hpi`,
     [SkillKind.HanziWordToPinyinFinal]: `hpf`,
     [SkillKind.HanziWordToPinyinTone]: `hpt`,
