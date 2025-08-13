@@ -25,7 +25,6 @@ vi.mock(`node:fs/promises`, async () => {
 
 // Mock the analyzeAudioFile function to avoid running ffmpeg in tests
 vi.mock(`#ffmpeg.ts`, async (importOriginal) => {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-imports
   const module: typeof import("../src/ffmpeg.ts") = await importOriginal();
   return {
     ...module,
