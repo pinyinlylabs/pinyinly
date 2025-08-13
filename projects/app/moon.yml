@@ -254,12 +254,12 @@ tasks:
 
   typecheck:
     deps:
-      - buildExpoRouterTypes
+      - ~:buildExpoRouterTypes
 
   lint:
     deps:
       # Lint does type-checking, so the Expo router types need to be generated first.
-      - buildExpoRouterTypes
+      - ~:buildExpoRouterTypes
 
 tags:
   - eslint

@@ -8,6 +8,8 @@ tasks:
       # Environment variables
       - "$ESLINT_CACHE"
       - "$ESLINT_*"
+    deps:
+      - eslint-rules:src
     toolchain: "node"
     env:
       NODE_OPTIONS: --import tsx --experimental-sqlite $NODE_OPTIONS
