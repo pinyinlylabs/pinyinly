@@ -100,7 +100,7 @@
     "react-responsive": "^10.0.0",
     "replicache": "patch:replicache@patch%3Areplicache@npm%253A15.0.1%23~/.yarn/patches/replicache-npm-15.0.1-daaa5044ba.patch%3A%3Aversion=15.0.1&hash=c643a4#~/.yarn/patches/replicache-patch-1cf70e7f66.patch",
     "rive-react-native": "^9.3.4",
-    "tailwind-variants": "^1.0.0",
+    "tailwind-variants": "^2.0.0",
     "tailwindcss": "^3.4.17",
     "usehooks-ts": "^3.1.0",
     "ws": "^8.17.1",
