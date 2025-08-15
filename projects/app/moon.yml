@@ -220,6 +220,14 @@ tasks:
     env:
       NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
 
+  generateWikiSpeech:
+    command: tsx --tsconfig tsconfig.node.json ./bin/generateWikiSpeech.ts
+    preset: watcher
+    options:
+      envFile: .env.local
+    env:
+      NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
+
   expoDoctor:
     command: npx -y expo-doctor@1.13.5
     env:
