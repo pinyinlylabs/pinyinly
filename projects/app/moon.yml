@@ -46,6 +46,7 @@ tasks:
 
   buildVercelExpo:
     script: |
+      mkdir -p @group(buildVercelExpoOutdir) &&
       rm -rf @group(buildVercelExpoOutdir) &&
       yarn expo export -p web --source-maps --output-dir @group(buildVercelExpoOutdir)
     inputs:
@@ -254,12 +255,12 @@ tasks:
 
   typecheck:
     deps:
-      - buildExpoRouterTypes
+      - ~:buildExpoRouterTypes
 
   lint:
     deps:
       # Lint does type-checking, so the Expo router types need to be generated first.
-      - buildExpoRouterTypes
+      - ~:buildExpoRouterTypes
 
 tags:
   - eslint

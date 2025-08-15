@@ -1,3 +1,10 @@
+tasks:
+  # No-op task that sets all the sources as inputs so that other tasks can
+  # depend on this to be invalidated when the source for this changes.
+  src:
+    inputs:
+      - "**/*"
+
 tags:
   - eslint
   - prettier
