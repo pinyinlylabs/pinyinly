@@ -6,8 +6,21 @@ import OpenAI from "openai";
 import yargs from "yargs";
 
 // Available OpenAI TTS voices
-const AVAILABLE_VOICES = ["alloy", "echo", "fable", "onyx", "nova", "shimmer"] as const;
+const AVAILABLE_VOICES = ["alloy", "ash", "ballad", "echo", "fable", "nova", "onyx", "sage", "shimmer"] as const;
 type Voice = (typeof AVAILABLE_VOICES)[number];
+
+// Voice-specific instructions for better pronunciation
+const VOICE_INSTRUCTIONS: Record<Voice, string> = {
+  alloy: "You are a teaching Mandarin Chinese. Pronounce the words clearly and crisply.",
+  ash: "You are teaching Mandarin Chinese. Speak at conversational speed, pronouncing words clearly and crisply.",
+  ballad: "Speak in Mandarin Chinese.",
+  echo: "You are teaching Mandarin Chinese. Speak at conversational speed, pronouncing words clearly and crisply.",
+  fable: "You are a teaching Mandarin Chinese. Pronounce the words clearly and crisply.",
+  nova: "Speak casually like a local Chinese in Mandarin, do not over annunciate.",
+  onyx: "You are teaching Mandarin Chinese. Speak at conversational speed, pronouncing words clearly and crisply.",
+  sage: "Speak casually like a local Chinese in Mandarin, do not over annunciate.",
+  shimmer: "You are teaching Mandarin Chinese. Speak at conversational speed, pronouncing words clearly and crisply.",
+};
 
 interface GenerateAudioOptions {
   phrase: string;
@@ -26,10 +39,14 @@ async function generateAudioFile(
 ): Promise<Buffer> {
   console.log(`Generating audio for "${text}" with voice "${voice}"...`);
   
+  // Combine voice-specific instructions with the text
+  const instruction = VOICE_INSTRUCTIONS[voice];
+  const fullInput = `${instruction} ${text}`;
+  
   const response = await openai.audio.speech.create({
     model: "tts-1",
     voice: voice,
-    input: text,
+    input: fullInput,
     response_format: "mp3",
     speed: speed,
   });
