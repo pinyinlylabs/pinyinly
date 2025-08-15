@@ -4,7 +4,7 @@ tasks:
       - public/**/*
 
   generateSpeech:
-    command: yarn ts-node-script src/bin/generateSpeech.ts
+    command: yarn tsx --tsconfig tsconfig.json src/bin/generateSpeech.ts
     inputs:
       - src/**/*
     preset: watcher

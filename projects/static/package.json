@@ -5,7 +5,7 @@
     "@types/node": "22.x",
     "@types/yargs": "^17 <=17.7.x",
     "prettier": "^3.4.2",
-    "ts-node": "^10.9.2",
+    "tsx": "^4.15.7",
     "typescript": "patch:typescript@npm%3A5.8.3#~/.yarn/patches/typescript-npm-5.8.3-fbd7aef456.patch",
     "yargs": "^17.7.2"
   }
