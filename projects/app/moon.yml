@@ -46,6 +46,7 @@ tasks:
 
   buildVercelExpo:
     script: |
+      mkdir -p @group(buildVercelExpoOutdir) &&
       rm -rf @group(buildVercelExpoOutdir) &&
       yarn expo export -p web --source-maps --output-dir @group(buildVercelExpoOutdir)
     inputs:
