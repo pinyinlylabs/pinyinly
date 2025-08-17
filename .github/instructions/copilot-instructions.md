@@ -20,13 +20,6 @@
 
 ## Developer Workflows
 
-Use `proto` to install dependencies (like `moon`):
-
-```
-bash <(curl -fsSL https://moonrepo.dev/install/proto.sh)
-proto use
-```
-
 - **Typechecking:** `moon run <project>:typecheck`
 - **Testing:** `moon run <project>:test [-- <args>]` (uses Vitest)
 - **Linting:** `moon run <project>:lint [-- <args>]`
