@@ -2,6 +2,22 @@ import { parseIds, splitHanziText, walkIdsNode } from "#data/hanzi.ts";
 import type { HanziGrapheme } from "#data/model.ts";
 import { pinyinPronunciationDisplayText } from "#data/pinyin.ts";
 import type { Dictionary } from "#dictionary/dictionary.ts";
+
+// Polyfill for Set.symmetricDifference (Node.js 20 compatibility)
+function symmetricDifference<T>(setA: Set<T>, setB: Set<T>): Set<T> {
+  const result = new Set<T>();
+  for (const item of setA) {
+    if (!setB.has(item)) {
+      result.add(item);
+    }
+  }
+  for (const item of setB) {
+    if (!setA.has(item)) {
+      result.add(item);
+    }
+  }
+  return result;
+}
 import {
   allHanziGraphemes,
   allHanziWordsHanzi,
@@ -287,13 +303,13 @@ test(`hanzi words are unique on (meaning key, primary pinyin)`, async () => {
   expect(
     duplicates.filter(
       (x) =>
-        !exceptions.values().some((e) => x.symmetricDifference(e).size === 0),
+        ![...exceptions.values()].some((e) => symmetricDifference(x, e).size === 0),
     ),
   ).toEqual([]);
 
   // Check that all exceptions are actually used.
   for (const exception of exceptions) {
-    if (!duplicates.some((x) => x.symmetricDifference(exception).size === 0)) {
+    if (!duplicates.some((x) => symmetricDifference(x, exception).size === 0)) {
       throw new Error(`exception ${[...exception]} is not used`);
     }
   }
@@ -334,7 +350,7 @@ test(`hanzi words are unique on (hanzi, part-of-speech, pinyin)`, async () => {
 
   // Check that all exceptions are actually used.
   for (const exception of exceptions) {
-    if (!duplicates.some((x) => x.symmetricDifference(exception).size === 0)) {
+    if (!duplicates.some((x) => symmetricDifference(x, exception).size === 0)) {
       throw new Error(`exception ${[...exception]} is not used`);
     }
   }
@@ -343,7 +359,7 @@ test(`hanzi words are unique on (hanzi, part-of-speech, pinyin)`, async () => {
   expect(
     duplicates.filter(
       (x) =>
-        !exceptions.values().some((e) => x.symmetricDifference(e).size === 0),
+        ![...exceptions.values()].some((e) => symmetricDifference(x, e).size === 0),
     ),
   ).toEqual([]);
 });
@@ -397,7 +413,7 @@ test(`expect missing glyphs to be included decomposition data`, async () => {
 
   const knownMissingGlyphs = new Set<string>(
     await loadMissingFontGlyphs().then((fontGlyphs) =>
-      fontGlyphs.values().flatMap((x) => [...x]),
+      [...fontGlyphs.values()].flatMap((x) => [...x]),
     ),
   );
   for (const char of allComponents) {
@@ -520,8 +536,10 @@ test(`dictionary contains entries for decomposition`, async () => {
   ]
     // explicitly ignored cases
     .filter(
-      ([x, sources]) =>
-        allowedMissing.get(x)?.symmetricDifference(sources).size !== 0,
+      ([x, sources]) => {
+        const allowed = allowedMissing.get(x);
+        return allowed ? symmetricDifference(allowed, sources).size !== 0 : true;
+      },
     );
 
   expect(unknownWithMultipleSources).toEqual([]);
@@ -530,11 +548,9 @@ test(`dictionary contains entries for decomposition`, async () => {
 test(`dictionary structural components list`, async () => {
   const dictionary = await loadDictionary();
 
-  const structural = dictionary
-    .entries()
+  const structural = [...dictionary.entries()]
     .filter(([, meaning]) => meaning.isStructural === true)
-    .map(([hanziWord]) => hanziWord)
-    .toArray();
+    .map(([hanziWord]) => hanziWord);
 
   expect(structural).toMatchInlineSnapshot(`
     [

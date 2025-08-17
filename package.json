@@ -5,6 +5,7 @@
     "projects/*"
   ],
   "devDependencies": {
+    "@moonrepo/cli": "^1.39.4",
     "@types/semver": "7.5.x",
     "@yarnpkg/parsers": "^3.0.2",
     "@yarnpkg/types": "^4.0.0",
