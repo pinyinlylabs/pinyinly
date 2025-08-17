@@ -39,14 +39,13 @@ async function generateAudioFile(
 ): Promise<Buffer> {
   console.log(`Generating audio for "${text}" with voice "${voice}"...`);
   
-  // Combine voice-specific instructions with the text
   const instruction = VOICE_INSTRUCTIONS[voice];
-  const fullInput = `${instruction} ${text}`;
   
   const response = await openai.audio.speech.create({
-    model: "tts-1",
+    model: "gpt-4o-mini-tts",
     voice: voice,
-    input: fullInput,
+    input: text,
+    instructions: instruction,
     response_format: "mp3",
     speed: speed,
   });

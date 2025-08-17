@@ -18,22 +18,6 @@ import {
   pinyinSyllableSuggestions,
   splitTonelessPinyinSyllable,
 } from "#data/pinyin.ts";
-
-// Polyfill for Set.symmetricDifference (Node.js 20 compatibility)
-function symmetricDifference<T>(setA: Set<T>, setB: Set<T>): Set<T> {
-  const result = new Set<T>();
-  for (const item of setA) {
-    if (!setB.has(item)) {
-      result.add(item);
-    }
-  }
-  for (const item of setB) {
-    if (!setA.has(item)) {
-      result.add(item);
-    }
-  }
-  return result;
-}
 import { loadPinyinWords } from "#dictionary/dictionary.ts";
 import { uniqueInvariant } from "@pinyinly/lib/invariant";
 import type { DeepReadonly } from "ts-essentials";
@@ -613,13 +597,11 @@ async function testPinyinChart(
   // Ensure all the pinyin syllables in the standard chart are covered by this
   // chart.
   expect(
-    symmetricDifference(
-      symmetricDifference(
-        new Set(Object.keys(chart.syllableToInitialSound)),
+    new Set(Object.keys(chart.syllableToInitialSound))
+      .symmetricDifference(
         new Set(Object.keys(standardChart.syllableToInitialSound)),
-      ),
-      expectedDifferenceFromStandard,
-    ),
+      )
+      .symmetricDifference(expectedDifferenceFromStandard),
   ).toEqual(new Set());
 
   // Test that there are no duplicated group items.
