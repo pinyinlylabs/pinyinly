@@ -1,6 +1,6 @@
 jq = "1.8.1" # renovate: datasource=github-releases depName=jqlang/jq extractVersion=^jq-(?<version>.*)$
 moon = "1.39.4" # renovate: datasource=github-releases depName=moonrepo/moon extractVersion=^v(?<version>.*)$
-pnpm = "10.14.0"
+pnpm = "10.14.0" # Arbitrary version just to ensure the shim is installed.
 
 [plugins]
 jq = "https://raw.githubusercontent.com/appthrust/proto-toml-plugins/main/jq/plugin.toml"
