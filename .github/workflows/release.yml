@@ -50,6 +50,10 @@ jobs:
         with:
           target: app:deployVercel
 
+      - name: Install pnpm
+        run: proto install
+        working-directory: projects/app/api
+
       - name: 🚀 Deploy to Vercel (production)
         run: moon run app:deployVercel --color --affected --remote
         # if: steps.moon-deployVercel-query.target-affected

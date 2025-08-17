@@ -2,10 +2,10 @@
 
 ## Setup
 
-Install [proto](https://moonrepo.dev/proto):
+Install dependencies via [proto](https://moonrepo.dev/proto):
 
 ```sh
-curl -fsSL https://moonrepo.dev/install/proto.sh | bash
+bash <(curl -fsSL https://moonrepo.dev/install/proto.sh)
 proto use
 ```
 
