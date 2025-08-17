@@ -169,73 +169,81 @@ async function generateWikiSpeech(options: GenerateAudioOptions): Promise<void> 
 }
 
 // CLI interface
-const argv = await yargs(process.argv.slice(2))
-  .command(
-    "$0 <phrase>",
-    "Generate speech audio files for a Chinese phrase using OpenAI TTS",
-    (yargs) => {
-      return yargs
-        .positional("phrase", {
-          describe: "Chinese phrase to generate speech for",
-          type: "string",
-          demandOption: true,
-        })
-        .option("voices", {
-          describe: "Comma-separated list of voices to use",
-          type: "string",
-          default: AVAILABLE_VOICES.join(","),
-        })
-        .option("output-dir", {
-          describe: "Output directory for audio files",
-          type: "string",
-          default: "./wiki-audio",
-        })
-        .option("speed", {
-          describe: "Speech speed (0.25 to 4.0)",
-          type: "number",
-          default: 1.0,
-        })
-        .option("format", {
-          describe: "Output audio format",
-          type: "string",
-          choices: ["mp3", "m4a"],
-          default: "m4a",
-        })
-        .option("base-filename", {
-          describe: "Base filename to use (defaults to cleaned phrase)",
-          type: "string",
-        });
-    },
-    async (argv) => {
-      const voices = argv.voices
-        .split(",")
-        .map((v) => v.trim() as Voice)
-        .filter((v) => AVAILABLE_VOICES.includes(v));
-      
-      if (voices.length === 0) {
-        console.error("No valid voices specified. Available voices:", AVAILABLE_VOICES.join(", "));
-        process.exit(1);
-      }
+async function main() {
+  const argv = await yargs(process.argv.slice(2))
+    .command(
+      "$0 <phrase>",
+      "Generate speech audio files for a Chinese phrase using OpenAI TTS",
+      (yargs) => {
+        return yargs
+          .positional("phrase", {
+            describe: "Chinese phrase to generate speech for",
+            type: "string",
+            demandOption: true,
+          })
+          .option("voices", {
+            describe: "Comma-separated list of voices to use",
+            type: "string",
+            default: AVAILABLE_VOICES.join(","),
+          })
+          .option("output-dir", {
+            describe: "Output directory for audio files",
+            type: "string",
+            default: "./wiki-audio",
+          })
+          .option("speed", {
+            describe: "Speech speed (0.25 to 4.0)",
+            type: "number",
+            default: 1.0,
+          })
+          .option("format", {
+            describe: "Output audio format",
+            type: "string",
+            choices: ["mp3", "m4a"],
+            default: "m4a",
+          })
+          .option("base-filename", {
+            describe: "Base filename to use (defaults to cleaned phrase)",
+            type: "string",
+          });
+      },
+      async (argv) => {
+        const voices = argv.voices
+          .split(",")
+          .map((v) => v.trim() as Voice)
+          .filter((v) => AVAILABLE_VOICES.includes(v));
+        
+        if (voices.length === 0) {
+          console.error("No valid voices specified. Available voices:", AVAILABLE_VOICES.join(", "));
+          process.exit(1);
+        }
 
-      await generateWikiSpeech({
-        phrase: argv.phrase,
-        voices,
-        outputDir: argv.outputDir,
-        speed: argv.speed,
-        format: argv.format as "mp3" | "m4a",
-        baseFileName: argv.baseFilename,
-      });
-    },
-  )
-  .option("help", {
-    alias: "h",
-    description: "Show help",
-  })
-  .example("$0 '你好'", "Generate audio files for '你好' with all voices")
-  .example("$0 '你好' --voices alloy,nova", "Generate audio files with only alloy and nova voices")
-  .example("$0 '你好' --output-dir ./custom-output", "Generate audio files in custom directory")
-  .example("$0 '你好' --format mp3", "Generate audio files in MP3 format instead of M4A")
-  .example("$0 '上' --base-filename shang4", "Generate files named shang4-{voice}.m4a for proper wiki structure")
-  .demandCommand(1, "You must provide a Chinese phrase to generate speech for")
-  .strict()
-  .parseAsync();
+        await generateWikiSpeech({
+          phrase: argv.phrase,
+          voices,
+          outputDir: argv.outputDir,
+          speed: argv.speed,
+          format: argv.format as "mp3" | "m4a",
+          baseFileName: argv.baseFilename,
+        });
+      },
+    )
+    .option("help", {
+      alias: "h",
+      description: "Show help",
+    })
+    .example("$0 '你好'", "Generate audio files for '你好' with all voices")
+    .example("$0 '你好' --voices alloy,nova", "Generate audio files with only alloy and nova voices")
+    .example("$0 '你好' --output-dir ./custom-output", "Generate audio files in custom directory")
+    .example("$0 '你好' --format mp3", "Generate audio files in MP3 format instead of M4A")
+    .example("$0 '上' --base-filename shang4", "Generate files named shang4-{voice}.m4a for proper wiki structure")
+    .demandCommand(1, "You must provide a Chinese phrase to generate speech for")
+    .strict()
+    .parseAsync();
+}
+
+// Run the main function
+main().catch((error) => {
+  console.error("Error:", error);
+  process.exit(1);
+});
