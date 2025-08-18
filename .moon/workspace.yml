@@ -1,6 +1,10 @@
 # https://moonrepo.dev/docs/config/workspace
 $schema: "https://moonrepo.dev/schemas/workspace.json"
 
+# Disable telemetry to avoid causing firewall warnings with Github Copilot agent
+# running remotely.
+telemetry: false
+
 # Require a specific version of moon while running commands, otherwise fail.
 # versionConstraint: '>=1.0.0'
 
