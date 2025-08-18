@@ -1,8 +1,8 @@
-diff --git a/out/replicache.d.ts b/out/replicache.d.ts
-index fba8ce1c8fb96636a6ea14673e5d1b682d586c99..54b47c89676d22741cd3328b222cd45a21e0cf87 100644
---- a/out/replicache.d.ts
-+++ b/out/replicache.d.ts
-@@ -12,7 +12,7 @@ type JSONValue =
+diff --git a/out/chunk-C1TWiB5U.d.ts b/out/chunk-C1TWiB5U.d.ts
+index 7d41352eb4442f1b40a7eb6ca4edfe108f34bfec..8285c8f2db0b3b6b201495e8111434fa615fc265 100644
+--- a/out/chunk-C1TWiB5U.d.ts
++++ b/out/chunk-C1TWiB5U.d.ts
+@@ -6,7 +6,7 @@ type JSONValue =
    | string
    | boolean
    | number
@@ -11,7 +11,7 @@ index fba8ce1c8fb96636a6ea14673e5d1b682d586c99..54b47c89676d22741cd3328b222cd45a
    | JSONObject;
  
  /**
-@@ -37,12 +37,12 @@ type ReadonlyJSONValue =
+@@ -31,12 +31,12 @@ type ReadonlyJSONValue =
    | string
    | boolean
    | number
@@ -25,4 +25,4 @@ index fba8ce1c8fb96636a6ea14673e5d1b682d586c99..54b47c89676d22741cd3328b222cd45a
 +  readonly [key: string]: unknown | undefined;
  };
  
- /**
+ type MaybePromise<T> = T | Promise<T>;
