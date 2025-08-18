@@ -1,19 +1,22 @@
 # generateWikiSpeech.ts
 
-A command-line tool for generating speech audio files using OpenAI's TTS API for Chinese phrases in the Pinyinly wiki.
+A command-line tool for generating speech audio files using OpenAI's TTS API for Chinese phrases in
+the Pinyinly wiki.
 
 ## Setup
 
 1. Set your OpenAI API key:
+
    ```bash
    export OPENAI_API_KEY='your-api-key-here'
    ```
 
 2. Ensure you have ffmpeg installed (required for M4A conversion):
+
    ```bash
    # On macOS
    brew install ffmpeg
-   
+
    # On Ubuntu/Debian
    sudo apt-get install ffmpeg
    ```
@@ -44,16 +47,16 @@ tsx --tsconfig tsconfig.node.json ./bin/generateWikiSpeech.ts '你好' --speed 1
 - `alloy` - Neutral, balanced voice
 - `echo` - Male voice
 - `fable` - British accent
-- `onyx` - Deep, resonant voice  
+- `onyx` - Deep, resonant voice
 - `nova` - Young, energetic voice
 - `shimmer` - Soft, whispery voice
 
 ## Output
 
-The script generates audio files with the naming pattern:
-`{phrase}-{voice}.{format}`
+The script generates audio files with the naming pattern: `{phrase}-{voice}.{format}`
 
 For example, running with phrase "你好" will create:
+
 - `你好-alloy.m4a`
 - `你好-echo.m4a`
 - `你好-fable.m4a`
@@ -70,11 +73,13 @@ To place files in the wiki structure, use the output directory option:
 tsx --tsconfig tsconfig.node.json ./bin/generateWikiSpeech.ts '上' --output-dir src/client/wiki/上/
 ```
 
-Note: You may need to rename the files to match the expected pinyin pattern (e.g., `shang4-alloy.m4a`).
+Note: You may need to rename the files to match the expected pinyin pattern (e.g.,
+`shang4-alloy.m4a`).
 
 ## Error Handling
 
 The script will:
+
 - Check for OpenAI API key before starting
 - Generate audio for each voice independently (failures won't stop other voices)
 - Attempt M4A conversion but fall back to MP3 if ffmpeg fails
