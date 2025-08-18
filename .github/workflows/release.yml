@@ -16,6 +16,10 @@ concurrency:
 jobs:
   database:
     runs-on: ubuntu-latest
+    env:
+      DO_NOT_TRACK: 1
+      PROTO_TELEMETRY: off
+      MOON_DISABLE_TELEMETRY: 1
     steps:
       - name: 🏗 Clone repo
         uses: actions/checkout@v4
@@ -37,6 +41,10 @@ jobs:
 
   app-vercel:
     runs-on: ubuntu-latest
+    env:
+      DO_NOT_TRACK: 1
+      PROTO_TELEMETRY: off
+      MOON_DISABLE_TELEMETRY: 1
     steps:
       - name: 🏗 Clone repo
         uses: actions/checkout@v4
@@ -53,6 +61,9 @@ jobs:
       - name: Install pnpm
         run: proto install
         working-directory: projects/app/api
+        env:
+          DO_NOT_TRACK: 1
+          PROTO_TELEMETRY: off
 
       - name: 🚀 Deploy to Vercel (production)
         run: moon run app:deployVercel --color --affected --remote
@@ -70,6 +81,10 @@ jobs:
 
   static-vercel:
     runs-on: ubuntu-latest
+    env:
+      DO_NOT_TRACK: 1
+      PROTO_TELEMETRY: off
+      MOON_DISABLE_TELEMETRY: 1
     steps:
       - name: 🏗 Clone repo
         uses: actions/checkout@v4
@@ -94,6 +109,10 @@ jobs:
 
   app-eas-update:
     runs-on: ubuntu-latest
+    env:
+      DO_NOT_TRACK: 1
+      PROTO_TELEMETRY: off
+      MOON_DISABLE_TELEMETRY: 1
     steps:
       - name: 🏗 Clone repo
         uses: actions/checkout@v4

@@ -8,10 +8,18 @@ runs:
       uses: moonrepo/setup-toolchain@v0.5.0
       with:
         auto-install: true
+      env:
+        DO_NOT_TRACK: 1
+        PROTO_TELEMETRY: off
+        MOON_DISABLE_TELEMETRY: 1
 
     - name: Yarn install
       run: yarn install
       shell: bash
+      env:
+        DO_NOT_TRACK: 1
+        PROTO_TELEMETRY: off
+        MOON_DISABLE_TELEMETRY: 1
 
     - name: Install ffmpeg (for tests)
       # Installing from a static build is dramatically faster than using apt-get.

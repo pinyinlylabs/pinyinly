@@ -13,6 +13,10 @@ permissions:
 jobs:
   moon-ci:
     runs-on: ubuntu-latest
+    env:
+      DO_NOT_TRACK: 1
+      PROTO_TELEMETRY: off
+      MOON_DISABLE_TELEMETRY: 1
     steps:
       - name: 🏗 Clone repo
         uses: actions/checkout@v4

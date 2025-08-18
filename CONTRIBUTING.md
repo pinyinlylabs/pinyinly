@@ -9,6 +9,11 @@ bash <(curl -fsSL https://moonrepo.dev/install/proto.sh)
 proto use
 ```
 
+**Note:** Telemetry is disabled for proto and moon via environment variables in `.env.yarn` to prevent firewall warnings in CI and development environments. These include:
+- `DO_NOT_TRACK=1` (standard telemetry disable flag)
+- `PROTO_TELEMETRY=off` (proto-specific telemetry disable)
+- `MOON_DISABLE_TELEMETRY=1` (moon-specific telemetry disable)
+
 Now you can start the app:
 
 1. `npx inngest-cli@latest dev`

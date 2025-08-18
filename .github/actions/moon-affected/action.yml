@@ -35,6 +35,9 @@ runs:
         echo "match=$MATCH" >> $GITHUB_OUTPUT
       env:
         TARGET: ${{ inputs.target }}
+        DO_NOT_TRACK: 1
+        PROTO_TELEMETRY: off
+        MOON_DISABLE_TELEMETRY: 1
       shell: bash
 
     - name: Log match output
