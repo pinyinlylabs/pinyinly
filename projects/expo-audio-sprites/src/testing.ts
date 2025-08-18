@@ -539,7 +539,7 @@ export interface SpeechFileTestOptions {
 function execOrLogFixCommand(
   fixCommand: string,
   fixedFilePath: string,
-  isCI: boolean = false,
+  isCI = false,
 ): void {
   if (isCI) {
     console.warn(
@@ -562,12 +562,12 @@ function execOrLogFixCommand(
  *
  * @param options Configuration for speech file testing
  */
-export async function createSpeechFileTests(
+export function createSpeechFileTests(
   options: SpeechFileTestOptions,
-): Promise<void> {
+): void {
   const {
     audioGlob,
-    fixTag = "-fix",
+    fixTag = `-fix`,
     targetLufs = -18,
     loudnessTolerance = 1,
     allowedStartOrEndOffset = 0.1,
@@ -583,11 +583,11 @@ export async function createSpeechFileTests(
         continue;
       }
 
-      const projectRelPath = projectRoot
-        ? path.relative(projectRoot, filePath)
-        : filePath;
+      const projectRelPath = projectRoot == null
+        ? filePath
+        : path.relative(projectRoot, filePath);
 
-      describe(projectRelPath, async () => {
+      describe(projectRelPath, () => {
         test(`container and real duration is within allowable tolerance and not corrupted`, async () => {
           const { duration } = await analyzeAudioFile(filePath);
 

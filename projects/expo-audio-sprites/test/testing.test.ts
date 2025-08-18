@@ -5,6 +5,7 @@ import {
   generateSprites,
   getAllAudioFilesBySprite,
   verifySprites,
+  createSpeechFileTests,
 } from "#testing.ts";
 import type { SpriteManifest } from "#types.ts";
 import { globSync } from "@pinyinly/lib/fs";
@@ -741,6 +742,56 @@ describe(
       expect(consoleWarnSpy).not.toHaveBeenCalledWith(
         expect.stringContaining(`Generat`),
       );
+    });
+  },
+);
+
+describe(
+  `createSpeechFileTests` satisfies HasNameOf<typeof createSpeechFileTests>,
+  () => {
+    test(`can be called with minimal options`, async () => {
+      // Create some fake audio files in the virtual filesystem
+      vol.fromJSON({
+        "/test/audio1.m4a": `fake audio content`,
+        "/test/audio2.m4a": `fake audio content 2`,
+      });
+
+      // This should not throw an error
+      expect(() => {
+        createSpeechFileTests({
+          audioGlob: `/test/*.m4a`,
+        });
+      }).not.toThrow();
+    });
+
+    test(`can be called with all options`, async () => {
+      vol.fromJSON({
+        "/test/project/audio/speech1.m4a": `fake speech content`,
+        "/test/project/audio/speech2.aac": `fake speech content 2`,
+      });
+
+      expect(() => {
+        createSpeechFileTests({
+          audioGlob: `/test/project/audio/*.{m4a,aac}`,
+          fixTag: `-fixed`,
+          targetLufs: -16,
+          loudnessTolerance: 2,
+          allowedStartOrEndOffset: 0.2,
+          minDuration: 1,
+          durationTolerance: 0.1,
+          projectRoot: `/test/project`,
+          isCI: true,
+        });
+      }).not.toThrow();
+    });
+
+    test(`handles empty glob results gracefully`, async () => {
+      // Don't create any files, so glob will return empty array
+      expect(() => {
+        createSpeechFileTests({
+          audioGlob: `/nonexistent/*.m4a`,
+        });
+      }).not.toThrow();
     });
   },
 );

@@ -5,7 +5,7 @@ import { projectRoot } from "../helpers.ts";
 
 const wikiDir = path.join(projectRoot, `src/client/wiki`);
 
-await createSpeechFileTests({
+createSpeechFileTests({
   audioGlob: path.join(wikiDir, `**/*.{mp3,m4a,aac}`),
   projectRoot,
   isCI: IS_CI,
