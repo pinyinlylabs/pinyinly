@@ -15,7 +15,6 @@ concurrency:
 
 jobs:
   app-preview:
-    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     env:
       # Format: 'github_test_pr_' <run_id> [ ':' <run_attempt> ]
@@ -79,7 +78,6 @@ jobs:
         if: ${{ always() }}
 
   static-preview:
-    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - name: 🏗 Clone repo
@@ -104,7 +102,6 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
 
   moon-ci:
-    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
