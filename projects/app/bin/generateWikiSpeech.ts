@@ -63,10 +63,7 @@ async function generateAudioFile(
   return Buffer.from(arrayBuffer);
 }
 
-function convertMp3ToM4a(
-  mp3Path: string,
-  m4aPath: string,
-): void {
+function convertMp3ToM4a(mp3Path: string, m4aPath: string): void {
   console.log(`Converting ${mp3Path} to ${m4aPath}...`);
 
   const result = spawnSync(`ffmpeg`, [
@@ -85,9 +82,7 @@ function convertMp3ToM4a(
   }
 
   if (result.status !== 0) {
-    throw new Error(
-      `FFmpeg failed: ${result.stderr.toString()}`,
-    );
+    throw new Error(`FFmpeg failed: ${result.stderr.toString()}`);
   }
 }
 
@@ -123,7 +118,9 @@ async function saveAudioFile(
       console.log(`Saved audio file: ${m4aFilePath}`);
       return m4aFilePath;
     } catch (error: unknown) {
-      console.warn(`Failed to convert to m4a, keeping mp3 format: ${String(error)}`);
+      console.warn(
+        `Failed to convert to m4a, keeping mp3 format: ${String(error)}`,
+      );
       console.log(`Saved audio file: ${mp3FilePath}`);
       return mp3FilePath;
     }
@@ -155,7 +152,10 @@ async function generateWikiSpeech(
   }
 
   // Check if OPENAI_API_KEY is set
-  if (process.env[`OPENAI_API_KEY`] == null || process.env[`OPENAI_API_KEY`] === ``) {
+  if (
+    process.env[`OPENAI_API_KEY`] == null ||
+    process.env[`OPENAI_API_KEY`] === ``
+  ) {
     console.error(`Error: OPENAI_API_KEY environment variable is not set.`);
     console.error(
       `Please set your OpenAI API key: export OPENAI_API_KEY='your-api-key'`,
