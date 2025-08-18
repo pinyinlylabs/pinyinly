@@ -9,7 +9,6 @@ import * as Sentry from "@sentry/core";
 import { TRPCClientError } from "@trpc/client";
 import { createContext, useEffect, useMemo } from "react";
 import type { HTTPRequestInfo, PullResponseV1 } from "replicache";
-import { TEST_LICENSE_KEY } from "replicache";
 import { kvStore } from "./replicacheOptions";
 
 const Context = createContext<Rizzle | null>(null);
@@ -30,8 +29,6 @@ export const ReplicacheProvider = Object.assign(
       const rizzle = r.replicache(
         {
           name: dbName,
-          licenseKey:
-            process.env.EXPO_PUBLIC_REPLICACHE_LICENSE_KEY ?? TEST_LICENSE_KEY,
           kvStore,
           // No need for a custom logSink here, just using normal console.*
           // functions are fine because `Sentry.captureConsoleIntegration`

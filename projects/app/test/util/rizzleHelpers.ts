@@ -3,7 +3,6 @@ import type {
   ReplicacheOptions,
   WriteTransaction,
 } from "replicache";
-import { TEST_LICENSE_KEY } from "replicache";
 
 let _testReplicacheNameId = 0;
 /**
@@ -17,7 +16,6 @@ export const testReplicacheOptions = (
   name = `test${_testReplicacheNameId++}`,
 ): ReplicacheOptions<never> => ({
   name,
-  licenseKey: TEST_LICENSE_KEY,
   kvStore: `mem`,
   pullInterval: null,
   logLevel: `error`,
