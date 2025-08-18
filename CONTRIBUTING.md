@@ -231,7 +231,6 @@ Customise this to suit your scenario.
 
 - **`EXPO_PUBLIC_`**: These are inlined into the build and exposed publicly. These need to be
   configured anywhere that builds are done:
-
   - `.github/workflows/release.yml`
   - `.github/workflows/expo-eas-build.yml`
   - `.github/workflows/pr.yml`
