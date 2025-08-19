@@ -18,9 +18,6 @@ The following commands should be used to test the code:
 
 - Prettier: `moon run app:prettierCheck`
   - Fix prettier: `moon run app:prettier`
-  - **Global prettier (recommended):** `moon run :prettier` - formats all files across all projects
-
-**Important:** Always run `moon run :prettier` before committing changes to avoid CI failures.
 
 These can be run from any directory, there's no need to `cd` to a particular directory.
 
@@ -48,8 +45,4 @@ When modifying or adding wiki content:
 
 1. Create or edit the appropriate .mdx file in the correct directory structure
 2. Ensure the content is formatted in Markdown with appropriate styling
-3. **ALWAYS run `moon run :prettier` after editing MDX files** to ensure proper formatting
-4. The wiki content will be automatically loaded by the application
-
-**Important:** MDX files have specific prettier formatting rules. Running prettier is essential to
-prevent CI build failures.
+3. The wiki content will be automatically loaded by the application
