@@ -111,6 +111,124 @@ function jsxSrcAttributePlugin({
 }
 
 /**
+ * Custom recma plugin to hoist require() calls to top-level imports for Vitest compatibility
+ * @returns {function(import('estree').Program): void} A transformer function
+ */
+function hoistRequiresPlugin() {
+  return (tree) => {
+    /** @type {Map<string, string>} Map from module path to import variable name */
+    const moduleToVariable = new Map();
+    let importCounter = 0;
+
+    /**
+     * Generate a unique variable name for a module path
+     * @param {string} modulePath - The module path to import
+     * @returns {string} A unique variable name
+     */
+    function generateVariableName(modulePath) {
+      // Create a base name from the module path
+      const basename = modulePath
+        .replace(/^[./@]+/, ``) // Remove leading ./ @ characters
+        .replace(/\.[^.]*$/, ``) // Remove file extension
+        .replace(/[^a-zA-Z0-9]/g, `_`) // Replace non-alphanumeric with underscore
+        .replace(/^(\d)/, `_$1`) // Prefix with underscore if starts with digit
+        .replace(/_{2,}/g, `_`) // Collapse multiple underscores
+        .replace(/^_+|_+$/g, ``); // Remove leading/trailing underscores
+
+      const candidateName = basename || `asset`;
+      let variableName = `__mdx_import_${candidateName}_${importCounter++}`;
+      
+      // Ensure uniqueness (though collision is very unlikely with counter)
+      while ([...moduleToVariable.values()].includes(variableName)) {
+        variableName = `__mdx_import_${candidateName}_${importCounter++}`;
+      }
+      
+      return variableName;
+    }
+
+    // First pass: collect all require() calls
+    walk(tree, {
+      enter(node) {
+        if (
+          node.type === `CallExpression` &&
+          node.callee?.type === `Identifier` &&
+          node.callee.name === `require` &&
+          node.arguments.length === 1 &&
+          node.arguments[0]?.type === `Literal` &&
+          typeof node.arguments[0].value === `string`
+        ) {
+          const modulePath = node.arguments[0].value;
+          if (!moduleToVariable.has(modulePath)) {
+            const variableName = generateVariableName(modulePath);
+            moduleToVariable.set(modulePath, variableName);
+          }
+        }
+      },
+    });
+
+    // Second pass: replace require() calls with variable references
+    walk(tree, {
+      enter(node) {
+        if (
+          node.type === `CallExpression` &&
+          node.callee?.type === `Identifier` &&
+          node.callee.name === `require` &&
+          node.arguments.length === 1 &&
+          node.arguments[0]?.type === `Literal` &&
+          typeof node.arguments[0].value === `string`
+        ) {
+          const modulePath = node.arguments[0].value;
+          const variableName = moduleToVariable.get(modulePath);
+          if (variableName) {
+            // Replace the entire CallExpression with an Identifier
+            Object.assign(node, {
+              type: `Identifier`,
+              name: variableName,
+            });
+          }
+        }
+      },
+    });
+
+    // Add import declarations to the beginning of the program
+    if (moduleToVariable.size > 0) {
+      const importDeclarations = [];
+      for (const [modulePath, variableName] of moduleToVariable.entries()) {
+        importDeclarations.push(/** @type {any} */ ({
+          type: `ImportDeclaration`,
+          specifiers: [
+            {
+              type: `ImportDefaultSpecifier`,
+              local: {
+                type: `Identifier`,
+                name: variableName,
+              },
+            },
+          ],
+          source: {
+            type: `Literal`,
+            value: modulePath,
+            raw: JSON.stringify(modulePath),
+          },
+        }));
+      }
+
+      // Insert imports after any existing imports but before other statements
+      let insertIndex = 0;
+      for (let i = 0; i < tree.body.length; i++) {
+        if (tree.body[i]?.type === `ImportDeclaration`) {
+          insertIndex = i + 1;
+        } else {
+          break;
+        }
+      }
+
+      tree.body.splice(insertIndex, 0, ...importDeclarations);
+    }
+  };
+}
+
+/**
  * Creates an MDX transformer for Metro bundler
  * @param {Object} options - Configuration options
  * @param {function({filename: string, src: string}): boolean} [options.matchFile] - Function to determine if a file should be transformed
@@ -142,7 +260,10 @@ export function createTransformer({
       jsx: true,
       providerImportSource,
       remarkPlugins,
-      recmaPlugins: [[jsxSrcAttributePlugin, { matchLocalAsset }]],
+      recmaPlugins: [
+        [jsxSrcAttributePlugin, { matchLocalAsset }],
+        [hoistRequiresPlugin],
+      ],
     });
 
     return _compiler;
