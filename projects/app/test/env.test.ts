@@ -32,7 +32,7 @@ test(`tests/ tree mirrors src/ tree`, async () => {
 
   const srcRelPaths = await getTreePaths(srcRoot, `**/*`);
   const srcRelPathsSet = new Set(srcRelPaths);
-  const testRelPaths = await getTreePaths(testRoot, `**/*.{test,test-d}.*`);
+  const testRelPaths = await getTreePaths(testRoot, `**/*.{test,test-d}.tsx?`);
 
   // Test that every test files corresponds to a src/ file (or it has a
   // `// pyly-not-src-test`), and that every standalone test does not have a
@@ -43,8 +43,8 @@ test(`tests/ tree mirrors src/ tree`, async () => {
   for (const testRelPath of testRelPaths) {
     const hasSrcFile = [
       // Look for both .ts or .tsx source files.
-      testRelPath.replace(/\.test(-d)?\.tsx?/, `.ts`),
-      testRelPath.replace(/\.test(-d)?\.tsx?/, `.tsx`),
+      testRelPath.replace(/\.test(-d)?\.tsx?$/, `.ts`),
+      testRelPath.replace(/\.test(-d)?\.tsx?$/, `.tsx`),
     ].some((x) => srcRelPathsSet.has(x));
     const isStandalone = await isStandaloneTestFile(
       path.resolve(testRoot, testRelPath),
