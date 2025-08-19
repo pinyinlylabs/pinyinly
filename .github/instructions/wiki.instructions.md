@@ -20,4 +20,8 @@ When modifying or adding wiki content:
 
 1. Create or edit the appropriate .mdx file in the correct directory structure
 2. Ensure the content is formatted in Markdown with appropriate styling
-3. The wiki content will be automatically loaded by the application
+3. **ALWAYS run `moon run :prettier` after editing MDX files** to ensure proper formatting
+4. The wiki content will be automatically loaded by the application
+
+**Important:** MDX files have specific prettier formatting rules (100 character line width, prose
+wrapping). Running prettier is essential to prevent CI build failures.
