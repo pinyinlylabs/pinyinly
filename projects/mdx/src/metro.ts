@@ -6,7 +6,10 @@ import path from "node:path";
  */
 export function withMdx<T extends MetroConfig>(config: T): T {
   const currentDir = path.dirname(new URL(import.meta.url).pathname);
-  const defaultTransformerPath = path.join(currentDir, `default-metro-transformer.js`);
+  const defaultTransformerPath = path.join(
+    currentDir,
+    `default-metro-transformer.js`,
+  );
 
   if (
     // !config.transformer.babelTransformerPath ||
