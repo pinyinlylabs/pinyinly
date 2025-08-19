@@ -26,6 +26,7 @@ import type { ReactNode } from "react";
 import { useState } from "react";
 import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Delay } from "./Delay";
 import { HanziWordRefText } from "./HanziWordRefText";
 import { IconImage } from "./IconImage";
 import { NewSkillModal } from "./NewSkillModal";
@@ -121,13 +122,16 @@ export function QuizDeckOneCorrectPairQuestion({
             `}
           >
             {isCorrect ? (
-              <View className="flex-row items-center gap-[8px]">
-                <IconImage
-                  size={32}
-                  source={require(`@/assets/icons/check-circled-filled.svg`)}
-                />
-                <Text className="text-2xl font-bold text-fg">Nice!</Text>
-              </View>
+              <>
+                <View className="flex-row items-center gap-[8px]">
+                  <IconImage
+                    size={32}
+                    source={require(`@/assets/icons/check-circled-filled.svg`)}
+                  />
+                  <Text className="text-2xl font-bold text-fg">Nice!</Text>
+                </View>
+                {autoCheck ? <Delay ms={1500} action={onNext} /> : null}
+              </>
             ) : (
               <>
                 <View className="flex-row items-center gap-[8px]">
