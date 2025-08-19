@@ -1,15 +1,13 @@
-// @ts-check
-
-/**
- * @typedef {import('metro-config').MetroConfig} MetroConfig
- */
+import type { MetroConfig } from "metro-config";
+import path from "node:path";
 
 /**
  * Adds MDX support to a Metro config
- * @param {MetroConfig} config - Metro config loaded with `getDefaultConfig(__dirname);`
- * @returns {MetroConfig} Updated Metro config with MDX support
  */
-export function withMdx(config) {
+export function withMdx<T extends MetroConfig>(config: T): T {
+  const currentDir = path.dirname(new URL(import.meta.url).pathname);
+  const defaultTransformerPath = path.join(currentDir, `default-metro-transformer.js`);
+
   if (
     // !config.transformer.babelTransformerPath ||
     // Overwrite the default expo value.
@@ -21,10 +19,7 @@ export function withMdx(config) {
       ...config,
       transformer: {
         ...config.transformer,
-        babelTransformerPath: new URL(
-          `default-metro-transformer.js`,
-          import.meta.url,
-        ).pathname,
+        babelTransformerPath: defaultTransformerPath,
       },
     };
   } else {

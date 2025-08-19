@@ -1,5 +1,4 @@
-// pyly-not-src-test
-import { createTransformer, transform } from "#mdx/metro-transformer.js";
+import { createTransformer, transform } from "#transformer.ts";
 import { describe, expect, test } from "vitest";
 
 function getJsxContent(src: string) {
