@@ -130,10 +130,10 @@ function hoistRequiresPlugin() {
       const basename = modulePath
         .replace(/^[./@]+/, ``) // Remove leading ./ @ characters
         .replace(/\.[^.]*$/, ``) // Remove file extension
-        .replace(/[^a-zA-Z0-9]/g, `_`) // Replace non-alphanumeric with underscore
+        .replaceAll(/[^a-zA-Z0-9]/g, `_`) // Replace non-alphanumeric with underscore
         .replace(/^(\d)/, `_$1`) // Prefix with underscore if starts with digit
-        .replace(/_{2,}/g, `_`) // Collapse multiple underscores
-        .replace(/^_+|_+$/g, ``); // Remove leading/trailing underscores
+        .replaceAll(/_{2,}/g, `_`) // Collapse multiple underscores
+        .replaceAll(/^_+|_+$/g, ``); // Remove leading/trailing underscores
 
       const candidateName = basename || `asset`;
       let variableName = `__mdx_import_${candidateName}_${importCounter++}`;
@@ -151,10 +151,18 @@ function hoistRequiresPlugin() {
       enter(node) {
         if (
           node.type === `CallExpression` &&
-          node.callee?.type === `Identifier` &&
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+          node.callee !== null &&
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+          node.callee !== undefined &&
+          node.callee.type === `Identifier` &&
           node.callee.name === `require` &&
           node.arguments.length === 1 &&
-          node.arguments[0]?.type === `Literal` &&
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+          node.arguments[0] !== null &&
+           
+          node.arguments[0] !== undefined &&
+          node.arguments[0].type === `Literal` &&
           typeof node.arguments[0].value === `string`
         ) {
           const modulePath = node.arguments[0].value;
@@ -171,15 +179,23 @@ function hoistRequiresPlugin() {
       enter(node) {
         if (
           node.type === `CallExpression` &&
-          node.callee?.type === `Identifier` &&
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+          node.callee !== null &&
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+          node.callee !== undefined &&
+          node.callee.type === `Identifier` &&
           node.callee.name === `require` &&
           node.arguments.length === 1 &&
-          node.arguments[0]?.type === `Literal` &&
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+          node.arguments[0] !== null &&
+           
+          node.arguments[0] !== undefined &&
+          node.arguments[0].type === `Literal` &&
           typeof node.arguments[0].value === `string`
         ) {
           const modulePath = node.arguments[0].value;
           const variableName = moduleToVariable.get(modulePath);
-          if (variableName) {
+          if (variableName !== undefined) {
             // Replace the entire CallExpression with an Identifier
             Object.assign(node, {
               type: `Identifier`,
@@ -223,7 +239,8 @@ function hoistRequiresPlugin() {
         }
       }
 
-      tree.body.splice(insertIndex, 0, ...importDeclarations);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      tree.body.splice(insertIndex, 0, /** @type {any} */ ...importDeclarations);
     }
   };
 }
