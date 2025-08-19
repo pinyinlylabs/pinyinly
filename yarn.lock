@@ -10456,8 +10456,8 @@ __metadata:
   linkType: hard
 
 "expo-atlas@npm:^0.4.0":
-  version: 0.4.0
-  resolution: "expo-atlas@npm:0.4.0"
+  version: 0.4.3
+  resolution: "expo-atlas@npm:0.4.3"
   dependencies:
     "@expo/server": "npm:^0.5.0"
     arg: "npm:^5.0.2"
@@ -10466,7 +10466,7 @@ __metadata:
     connect: "npm:^3.7.0"
     express: "npm:^4.19.2"
     freeport-async: "npm:^2.0.0"
-    getenv: "npm:^1.0.0"
+    getenv: "npm:^2.0.0"
     morgan: "npm:^1.10.0"
     open: "npm:^8.4.2"
     serve-static: "npm:^1.15.0"
@@ -10475,7 +10475,7 @@ __metadata:
     expo: "*"
   bin:
     expo-atlas: build/src/cli/bin.js
-  checksum: 10c0/29f699e4b30e7aec36633d68364c6b4673b2e07262845e626468b66f50b8fe8339d6cedf766faef294355165f8e561fa0342dc6cf0d8af95e0c3cc6376826d73
+  checksum: 10c0/7a24e228030705490f15f10a7f4b64e1b1dd65d11fe43c9c9c6b704f11848ee20a85603287bb32f93e557e0bf9848c90730976d4cff56f6f8ab33f2f69d73a11
   languageName: node
   linkType: hard
 
@@ -11571,13 +11571,6 @@ __metadata:
   dependencies:
     resolve-pkg-maps: "npm:^1.0.0"
   checksum: 10c0/a917dff2ba9ee187c41945736bf9bbab65de31ce5bc1effd76267be483a7340915cff232199406379f26517d2d0a4edcdbcda8cca599c2480a0f2cf1e1de3efa
-  languageName: node
-  linkType: hard
-
-"getenv@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "getenv@npm:1.0.0"
-  checksum: 10c0/9661c5996c7622e12eab1d23448474ae51dbec6f8862eed903ebaa864dcd332895441c23d962e3ff5c180a9e3dff6cb1f569a115e1447db4acb52af2d880d655
   languageName: node
   linkType: hard
 
