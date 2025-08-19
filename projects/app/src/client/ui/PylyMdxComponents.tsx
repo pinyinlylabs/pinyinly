@@ -37,6 +37,9 @@ export function PylyMdxComponents({ children }: PropsWithChildren) {
           );
         },
         Speech,
+        ol: ({ children }: PropsWithChildren) => (
+          <ol className="space-y-2">{children}</ol>
+        ),
         ul: ({ children }: PropsWithChildren) => (
           <ul className="space-y-2">{children}</ul>
         ),
