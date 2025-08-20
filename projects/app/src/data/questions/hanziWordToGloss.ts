@@ -55,7 +55,7 @@ export async function hanziWordToGlossQuestionOrThrow(
 
   return validQuestionInvariant({
     kind: QuestionKind.OneCorrectPair,
-    prompt: `Match a word with its name`,
+    prompt: `Match a word with its meaning`,
     groupA: shuffle([...groupA, ...answer.as]),
     groupB: shuffle([...groupB, ...answer.bs]),
     answer,
