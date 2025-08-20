@@ -1,13 +1,9 @@
 import { useAuth } from "@/client/auth";
 import { RectButton } from "@/client/ui/RectButton";
-import { SignInWithAppleButton } from "@/client/ui/SignInWithAppleButton";
 import { TextInputSingle } from "@/client/ui/TextInputSingle";
-import { invariant } from "@pinyinly/lib/invariant";
-import * as AppleAuthentication from "expo-apple-authentication";
 import { Link } from "expo-router";
 import { useState } from "react";
 import { Platform, Text, View } from "react-native";
-import z from "zod/v4";
 
 export default function LoginPage() {
   return (
@@ -24,9 +20,6 @@ export default function LoginPage() {
       <View className="flex-1 gap-6 px-8">
         {/* Passkey Authentication Section */}
         <PasskeyAuthSection />
-
-        {/* Alternative Sign-in Options */}
-        <AlternativeSignInSection />
       </View>
 
       {/* Back to App Button */}
@@ -62,7 +55,9 @@ function PasskeyAuthSection() {
       await auth.logInWithPasskey();
     } catch (error_) {
       console.error(`Passkey sign-in failed:`, error_);
-      setError(`Sign-in failed. Please try again or create an account.`);
+      // Automatically switch to signup mode instead of showing an error
+      setMode(`signup`);
+      setError(null);
     } finally {
       setIsLoading(false);
     }
@@ -145,69 +140,6 @@ function PasskeyAuthSection() {
           </Text>
         </RectButton>
       </View>
-    </View>
-  );
-}
-
-function AlternativeSignInSection() {
-  const auth = useAuth();
-
-  return (
-    <View className="gap-4">
-      <View className="flex-row items-center gap-4">
-        <View className="h-px flex-1 bg-fg/20" />
-        <Text className="pyly-body-caption text-fg/60">or</Text>
-        <View className="h-px flex-1 bg-fg/20" />
-      </View>
-
-      {/* Apple Sign In */}
-      {Platform.OS === `web` ? (
-        <SignInWithAppleButton
-          clientId="how.haohao.app"
-          onSuccess={(data) => {
-            void auth.logInWithApple(data.authorization.id_token);
-          }}
-          redirectUri={`https://${location.hostname}/api/auth/login/apple/callback`}
-        />
-      ) : Platform.OS === `ios` ? (
-        <AppleAuthentication.AppleAuthenticationButton
-          buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
-          buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
-          cornerRadius={12}
-          className="h-[44px]"
-          // eslint-disable-next-line @typescript-eslint/no-misused-promises
-          onPress={async () => {
-            let credential;
-            try {
-              credential = await AppleAuthentication.signInAsync({
-                requestedScopes: [
-                  AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
-                  AppleAuthentication.AppleAuthenticationScope.EMAIL,
-                ],
-              });
-            } catch (error) {
-              const err = z.object({ code: z.string() }).safeParse(error);
-              if (err.success) {
-                switch (err.data.code) {
-                  case `ERR_REQUEST_CANCELED`: {
-                    console.error(`Apple sign-in canceled`);
-                    break;
-                  }
-                  default: {
-                    console.error(`Apple sign-in error:`, err.data);
-                  }
-                }
-              } else {
-                console.error(`Unknown Apple sign-in error:`, error);
-              }
-              return;
-            }
-
-            invariant(credential.identityToken != null);
-            void auth.logInWithApple(credential.identityToken);
-          }}
-        />
-      ) : null}
     </View>
   );
 }
