@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# Pre-commit hook to auto-format code
+# This ensures all committed code is properly formatted
+
+set -e
+
+echo "🎨 Auto-formatting staged files..."
+
+# Get list of staged files
+STAGED_FILES=$(git diff --cached --name-only)
+
+if [ -z "$STAGED_FILES" ]; then
+    echo "No staged files to format."
+    exit 0
+fi
+
+# Format files in each project if they have staged changes
+if echo "$STAGED_FILES" | grep -q "^projects/app/"; then
+    echo "📦 Formatting app project..."
+    moon run app:prettier || true
+fi
+
+if echo "$STAGED_FILES" | grep -q "^projects/lib/"; then
+    echo "📦 Formatting lib project..."
+    moon run lib:prettier || true
+fi
+
+if echo "$STAGED_FILES" | grep -q "^projects/eslint-rules/"; then
+    echo "📦 Formatting eslint-rules project..."
+    moon run eslint-rules:prettier || true
+fi
+
+if echo "$STAGED_FILES" | grep -q "^projects/expo-audio-sprites/"; then
+    echo "📦 Formatting expo-audio-sprites project..."
+    moon run expo-audio-sprites:prettier || true
+fi
+
+if echo "$STAGED_FILES" | grep -q "^projects/emails/"; then
+    echo "📦 Formatting emails project..."
+    moon run emails:prettier || true
+fi
+
+# Re-stage any files that were formatted
+echo "📦 Re-staging formatted files..."
+echo "$STAGED_FILES" | xargs git add
+
+echo "✅ Pre-commit formatting complete!"

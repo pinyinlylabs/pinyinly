@@ -28,6 +28,35 @@
 - **Emails Dev:** `moon run dev` in `projects/emails/` (see README)
 - **No need to cd:** All moon commands can be run from any directory.
 
+## Code Formatting & Commits
+
+**IMPORTANT:** To prevent CI failures due to prettier formatting issues, **ALWAYS** use the
+automated formatting script when committing changes:
+
+```bash
+./scripts/format-and-commit.sh "Your commit message here"
+```
+
+This script automatically:
+
+- Formats all changed files with prettier
+- Stages the formatted changes
+- Commits with your message
+
+**Alternative:** You can also manually format before committing:
+
+```bash
+# Format specific projects that have changes
+moon run app:prettier
+moon run lib:prettier
+# ... format other projects as needed
+git add .
+git commit -m "Your message"
+```
+
+The repository also has git hooks configured to auto-format on commit, but using the script above is
+more reliable for AI agents.
+
 ## Project-Specific Patterns & Conventions
 
 - **TypeScript Discriminated Unions:** Always use `kind` as the discriminator property (not `type`).

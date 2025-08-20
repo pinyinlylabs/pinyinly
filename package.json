@@ -4,10 +4,34 @@
   "workspaces": [
     "projects/*"
   ],
+  "scripts": {
+    "prepare": "husky",
+    "format": "moon run app:prettier && moon run lib:prettier && moon run eslint-rules:prettier && moon run expo-audio-sprites:prettier && moon run emails:prettier",
+    "format-and-commit": "yarn format && git add . && git commit"
+  },
+  "lint-staged": {
+    "projects/app/**/*": [
+      "moon run app:prettier"
+    ],
+    "projects/lib/**/*": [
+      "moon run lib:prettier"
+    ],
+    "projects/eslint-rules/**/*": [
+      "moon run eslint-rules:prettier"
+    ],
+    "projects/expo-audio-sprites/**/*": [
+      "moon run expo-audio-sprites:prettier"
+    ],
+    "projects/emails/**/*": [
+      "moon run emails:prettier"
+    ]
+  },
   "devDependencies": {
     "@types/semver": "7.5.x",
     "@yarnpkg/parsers": "^3.0.2",
     "@yarnpkg/types": "^4.0.0",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.2",
     "prettier": "^3.4.2",
     "semver": "^7.5.0",
     "tsx": "^4.15.7",
