@@ -210,66 +210,15 @@ const WebImpl = ({
 };
 
 const IosImpl = ({ onDismiss, children }: ImplProps) => {
-  const translateY = useSharedValue(0);
-  const [dismissing, setDismissing] = useState(false);
-
   const api = useMemo(
     () => ({
-      dismiss: () => {
-        setDismissing(true);
-      },
+      dismiss: onDismiss,
     }),
-    [],
+    [onDismiss],
   );
 
-  const handleDismiss = useEventCallback(() => {
-    hapticImpactIfMobile();
-    onDismiss();
-  });
-
-  // Pan gesture for enhanced pull-to-dismiss (supplementing native behavior)
-  const panGesture = Gesture.Pan()
-    .onUpdate((event) => {
-      // Only allow downward movement
-      if (event.translationY > 0) {
-        translateY.set(event.translationY);
-      }
-    })
-    .onEnd((event) => {
-      const shouldDismiss =
-        event.translationY > 150 || // Dragged far enough
-        (event.translationY > 50 && event.velocityY > 500); // Or sufficient velocity
-
-      if (shouldDismiss) {
-        // Animate out and dismiss
-        translateY.set(
-          withTiming(1000, { duration: 300 }, () => {
-            runOnJS(handleDismiss)();
-          }),
-        );
-      } else {
-        // Snap back to original position
-        translateY.set(withSpring(0, { damping: 20, stiffness: 300 }));
-      }
-    });
-
-  // Handle dismissing state
-  useEffect(() => {
-    if (dismissing) {
-      translateY.set(
-        withTiming(1000, { duration: 300 }, () => {
-          runOnJS(handleDismiss)();
-        }),
-      );
-    }
-  }, [dismissing, handleDismiss, translateY]);
-
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ translateY: translateY.get() }],
-    };
-  });
-
+  // iOS pageSheet already supports native pull-to-dismiss,
+  // so we rely on that instead of adding custom gestures
   return (
     <Modal
       animationType="slide"
@@ -292,11 +241,7 @@ const IosImpl = ({ onDismiss, children }: ImplProps) => {
           `
         }
       >
-        <GestureDetector gesture={panGesture}>
-          <Reanimated.View className={`flex-1 bg-bg`} style={animatedStyle}>
-            {children(api)}
-          </Reanimated.View>
-        </GestureDetector>
+        <View className={`flex-1 bg-bg`}>{children(api)}</View>
       </View>
     </Modal>
   );
@@ -322,27 +267,30 @@ const DefaultImpl = ({ children, onDismiss }: ImplProps) => {
 
   // Pan gesture for pull-to-dismiss
   const panGesture = Gesture.Pan()
+    .activeOffsetY(10) // Only activate when dragging down more than 10px
     .onUpdate((event) => {
       // Only allow downward movement
       if (event.translationY > 0) {
-        translateY.set(event.translationY);
+        // Add resistance effect - movement becomes harder as you drag further
+        const resistance = Math.min(event.translationY / 3, 200);
+        translateY.set(resistance);
       }
     })
     .onEnd((event) => {
       const shouldDismiss =
-        event.translationY > 150 || // Dragged far enough
-        (event.translationY > 50 && event.velocityY > 500); // Or sufficient velocity
+        event.translationY > 100 || // Dragged far enough
+        (event.translationY > 40 && event.velocityY > 800); // Or sufficient velocity
 
       if (shouldDismiss) {
-        // Animate out and dismiss
+        // Animate off screen (screen height + padding)
         translateY.set(
-          withTiming(1000, { duration: 300 }, () => {
+          withTiming(600, { duration: 250 }, () => {
             runOnJS(handleDismiss)();
           }),
         );
       } else {
         // Snap back to original position
-        translateY.set(withSpring(0, { damping: 20, stiffness: 300 }));
+        translateY.set(withSpring(0, { damping: 15, stiffness: 400 }));
       }
     });
 
@@ -350,7 +298,7 @@ const DefaultImpl = ({ children, onDismiss }: ImplProps) => {
   useEffect(() => {
     if (dismissing) {
       translateY.set(
-        withTiming(1000, { duration: 300 }, () => {
+        withTiming(600, { duration: 250 }, () => {
           runOnJS(handleDismiss)();
         }),
       );
