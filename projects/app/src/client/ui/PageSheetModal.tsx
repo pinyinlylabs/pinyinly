@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 import type { PressableProps } from "react-native";
 import { Modal, Platform, View } from "react-native";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Reanimated, {
   Easing,
   Extrapolation,
@@ -13,8 +14,10 @@ import Reanimated, {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
+import { runOnJS } from "react-native-worklets";
 
 import { useEventCallback } from "../hooks/useEventCallback";
+import { hapticImpactIfMobile } from "../hooks/hapticImpactIfMobile";
 import { ReanimatedPressable } from "./ReanimatedPressable";
 
 export type PageSheetChild = (options: { dismiss: () => void }) => ReactNode;
@@ -207,12 +210,65 @@ const WebImpl = ({
 };
 
 const IosImpl = ({ onDismiss, children }: ImplProps) => {
+  const translateY = useSharedValue(0);
+  const [dismissing, setDismissing] = useState(false);
+
   const api = useMemo(
     () => ({
-      dismiss: onDismiss,
+      dismiss: () => {
+        setDismissing(true);
+      },
     }),
-    [onDismiss],
+    [],
   );
+
+  const handleDismiss = useEventCallback(() => {
+    hapticImpactIfMobile();
+    onDismiss();
+  });
+
+  // Pan gesture for enhanced pull-to-dismiss (supplementing native behavior)
+  const panGesture = Gesture.Pan()
+    .onUpdate((event) => {
+      // Only allow downward movement
+      if (event.translationY > 0) {
+        translateY.set(event.translationY);
+      }
+    })
+    .onEnd((event) => {
+      const shouldDismiss =
+        event.translationY > 150 || // Dragged far enough
+        (event.translationY > 50 && event.velocityY > 500); // Or sufficient velocity
+
+      if (shouldDismiss) {
+        // Animate out and dismiss
+        translateY.set(
+          withTiming(1000, { duration: 300 }, () => {
+            runOnJS(handleDismiss)();
+          }),
+        );
+      } else {
+        // Snap back to original position
+        translateY.set(withSpring(0, { damping: 20, stiffness: 300 }));
+      }
+    });
+
+  // Handle dismissing state
+  useEffect(() => {
+    if (dismissing) {
+      translateY.set(
+        withTiming(1000, { duration: 300 }, () => {
+          runOnJS(handleDismiss)();
+        }),
+      );
+    }
+  }, [dismissing, handleDismiss, translateY]);
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateY: translateY.get() }],
+    };
+  });
 
   return (
     <Modal
@@ -236,19 +292,76 @@ const IosImpl = ({ onDismiss, children }: ImplProps) => {
           `
         }
       >
-        <View className={`flex-1 bg-bg`}>{children(api)}</View>
+        <GestureDetector gesture={panGesture}>
+          <Reanimated.View className={`flex-1 bg-bg`} style={animatedStyle}>
+            {children(api)}
+          </Reanimated.View>
+        </GestureDetector>
       </View>
     </Modal>
   );
 };
 
 const DefaultImpl = ({ children, onDismiss }: ImplProps) => {
+  const translateY = useSharedValue(0);
+  const [dismissing, setDismissing] = useState(false);
+
   const api = useMemo(
     () => ({
-      dismiss: onDismiss,
+      dismiss: () => {
+        setDismissing(true);
+      },
     }),
-    [onDismiss],
+    [],
   );
+
+  const handleDismiss = useEventCallback(() => {
+    hapticImpactIfMobile();
+    onDismiss();
+  });
+
+  // Pan gesture for pull-to-dismiss
+  const panGesture = Gesture.Pan()
+    .onUpdate((event) => {
+      // Only allow downward movement
+      if (event.translationY > 0) {
+        translateY.set(event.translationY);
+      }
+    })
+    .onEnd((event) => {
+      const shouldDismiss =
+        event.translationY > 150 || // Dragged far enough
+        (event.translationY > 50 && event.velocityY > 500); // Or sufficient velocity
+
+      if (shouldDismiss) {
+        // Animate out and dismiss
+        translateY.set(
+          withTiming(1000, { duration: 300 }, () => {
+            runOnJS(handleDismiss)();
+          }),
+        );
+      } else {
+        // Snap back to original position
+        translateY.set(withSpring(0, { damping: 20, stiffness: 300 }));
+      }
+    });
+
+  // Handle dismissing state
+  useEffect(() => {
+    if (dismissing) {
+      translateY.set(
+        withTiming(1000, { duration: 300 }, () => {
+          runOnJS(handleDismiss)();
+        }),
+      );
+    }
+  }, [dismissing, handleDismiss, translateY]);
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateY: translateY.get() }],
+    };
+  });
 
   return (
     <Modal
@@ -256,7 +369,11 @@ const DefaultImpl = ({ children, onDismiss }: ImplProps) => {
       presentationStyle="pageSheet"
       onRequestClose={api.dismiss}
     >
-      <View className={`flex-1 bg-bg`}>{children(api)}</View>
+      <GestureDetector gesture={panGesture}>
+        <Reanimated.View className={`flex-1 bg-bg`} style={animatedStyle}>
+          {children(api)}
+        </Reanimated.View>
+      </GestureDetector>
     </Modal>
   );
 };
