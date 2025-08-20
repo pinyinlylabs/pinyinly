@@ -30,8 +30,11 @@
 
 ## Code Formatting & Commits
 
-**IMPORTANT:** To prevent CI failures due to prettier formatting issues, **ALWAYS** use the
-automated formatting script when committing changes:
+**IMPORTANT:** To prevent CI failures due to prettier formatting issues, use one of these approaches:
+
+### For AI Agents (Recommended)
+
+**ALWAYS** use the automated formatting script when making changes:
 
 ```bash
 ./scripts/format-and-commit.sh "Your commit message here"
@@ -43,19 +46,31 @@ This script automatically:
 - Stages the formatted changes
 - Commits with your message
 
-**Alternative:** You can also manually format before committing:
+### For Manual Development
+
+The repository has git hooks that automatically format code on commit:
+
+```bash
+# Make your changes
+git add .
+git commit -m "Your message"
+# Git hook will automatically format and re-stage files
+```
+
+### Manual Formatting (if needed)
 
 ```bash
 # Format specific projects that have changes
 moon run app:prettier
 moon run lib:prettier
 # ... format other projects as needed
-git add .
-git commit -m "Your message"
+
+# Or format all projects at once
+yarn format
 ```
 
-The repository also has git hooks configured to auto-format on commit, but using the script above is
-more reliable for AI agents.
+**Note:** The git hook approach works for human developers, but using the script above is more
+reliable and explicit for AI agents.
 
 ## Project-Specific Patterns & Conventions
 

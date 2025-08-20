@@ -43,6 +43,12 @@ fi
 
 # Re-stage any files that were formatted
 echo "📦 Re-staging formatted files..."
-echo "$STAGED_FILES" | xargs git add
+if [ -n "$STAGED_FILES" ]; then
+    echo "$STAGED_FILES" | while read -r file; do
+        if [ -f "$file" ]; then
+            git add "$file"
+        fi
+    done
+fi
 
 echo "✅ Pre-commit formatting complete!"
