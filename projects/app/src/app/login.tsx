@@ -1,7 +1,5 @@
 import { useAuth } from "@/client/auth";
-import { useRizzleQuery } from "@/client/hooks/useRizzleQuery";
 import { RectButton } from "@/client/ui/RectButton";
-import { SessionStoreProvider } from "@/client/ui/SessionStoreProvider";
 import { SignInWithAppleButton } from "@/client/ui/SignInWithAppleButton";
 import { TextInputSingle } from "@/client/ui/TextInputSingle";
 import { invariant } from "@pinyinly/lib/invariant";
@@ -29,14 +27,22 @@ export default function LoginPage() {
 
         {/* Alternative Sign-in Options */}
         <AlternativeSignInSection />
-
-        {/* Development/Debug Section */}
-        {__DEV__ && <DeveloperDebugSection />}
       </View>
 
       {/* Back to App Button */}
       <View className="px-8 pb-4 pb-safe">
         <GoHomeButton />
+        {__DEV__ && (
+          <View className="mt-2">
+            <Link href="/dev" asChild>
+              <RectButton variant="bare">
+                <Text className="pyly-body-caption text-center text-fg/60 underline">
+                  Development Tools
+                </Text>
+              </RectButton>
+            </Link>
+          </View>
+        )}
       </View>
     </View>
   );
@@ -206,109 +212,6 @@ function AlternativeSignInSection() {
   );
 }
 
-function DeveloperDebugSection() {
-  const auth = useAuth();
-
-  return (
-    <View className="mt-8 gap-4 border-t border-fg/10 pt-6">
-      <Text className="pyly-body-caption text-center text-fg/60">Development Tools</Text>
-      
-      {/* Existing Sessions */}
-      {auth.data?.allDeviceSessions && auth.data.allDeviceSessions.length > 0 && (
-        <View className="gap-2">
-          <Text className="pyly-body font-medium text-fg">Existing Sessions</Text>
-          {auth.data.allDeviceSessions.map((session, i) => (
-            <SessionStoreProvider key={i} dbName={session.replicacheDbName}>
-              <View className="flex-row items-center gap-2 rounded-xl bg-bg-loud p-3">
-                <View className="flex-1">
-                  <Text className="pyly-body-caption text-fg/80">
-                    Session: {session.serverSessionId ?? `Anonymous`}
-                  </Text>
-                  <Text className="pyly-body-caption text-fg/60">
-                    Skills: <SkillCount />
-                  </Text>
-                </View>
-                <RectButton
-                  variant="option"
-                  onPress={() => {
-                    auth.logInToExistingDeviceSession(
-                      (s) => s.replicacheDbName === session.replicacheDbName,
-                    );
-                  }}
-                >
-                  Use
-                </RectButton>
-              </View>
-            </SessionStoreProvider>
-          ))}
-        </View>
-      )}
-
-      {/* Current Session Info */}
-      <View className="gap-1">
-        <Text className="pyly-body-caption text-fg/60">
-          Current Session: {auth.data?.activeDeviceSession.serverSessionId ?? `Anonymous`}
-        </Text>
-        <Text className="pyly-body-caption text-fg/60">
-          DB: {auth.data?.activeDeviceSession.replicacheDbName}
-        </Text>
-      </View>
-
-      {/* Dev Actions */}
-      <View className="flex-row gap-2">
-        <RectButton
-          variant="outline"
-          onPress={() => { auth.signOut(); }}
-        >
-          Sign Out
-        </RectButton>
-        <Link href="/dev/ui" asChild>
-          <RectButton variant="outline">UI Demo</RectButton>
-        </Link>
-      </View>
-
-      <ServerSessionIdLoginForm />
-    </View>
-  );
-}
-
-function ServerSessionIdLoginForm() {
-  const auth = useAuth();
-  const [input, setInput] = useState(``);
-
-  return (
-    <View className="gap-2">
-      <Text className="pyly-body-caption text-fg/60">Session ID Login</Text>
-      <View className="flex-row gap-2">
-        <View className="flex-1">
-          <TextInputSingle
-            placeholder="Enter session ID"
-            onKeyPress={(e) => {
-              if (e.nativeEvent.key === `Enter`) {
-                auth.logInWithServerSessionId(input);
-                e.preventDefault();
-              }
-            }}
-            value={input}
-            onChangeText={(text) => {
-              setInput(text);
-            }}
-          />
-        </View>
-        <RectButton
-          variant="option"
-          onPress={() => {
-            auth.logInWithServerSessionId(input);
-          }}
-          disabled={!input.trim()}
-        >
-          Login
-        </RectButton>
-      </View>
-    </View>
-  );
-}
-
 const GoHomeButton = () => (
   <View style={{ height: 44 }}>
     <Link dismissTo href="/learn" asChild>
@@ -317,15 +220,4 @@ const GoHomeButton = () => (
   </View>
 );
 
-function SkillCount() {
-  const result = useRizzleQuery([`wordCount`], async (r, tx) => {
-    const skillStates = await r.query.skillState.scan(tx).toArray();
-    return skillStates.length;
-  });
 
-  return result.isPending ? (
-    <Text>Loading…</Text>
-  ) : (
-    <Text>{result.data} words</Text>
-  );
-}
