@@ -9,16 +9,13 @@ import type {
   OneCorrectPairQuestionChoice,
   UnsavedSkillRating,
 } from "@/data/model";
-import { QuestionFlagKind, SkillKind } from "@/data/model";
+import { QuestionFlagKind } from "@/data/model";
 import {
   oneCorrectPairChoiceText,
   oneCorrectPairQuestionMistakes,
 } from "@/data/questions/oneCorrectPair";
-import type { HanziWordSkill, Skill } from "@/data/rizzleSchema";
 import {
   computeSkillRating,
-  hanziWordFromSkill,
-  skillKindFromSkill,
 } from "@/data/skills";
 import { longestTextByGraphemes } from "@/util/unicode";
 import { invariant } from "@pinyinly/lib/invariant";
@@ -26,11 +23,7 @@ import type { ReactNode } from "react";
 import { useState } from "react";
 import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Delay } from "./Delay";
-import { HanziWordRefText } from "./HanziWordRefText";
-import { IconImage } from "./IconImage";
 import { NewSkillModal } from "./NewSkillModal";
-import { Pylymark } from "./Pylymark";
 import { QuizDeckToastContainer } from "./QuizDeckToastContainer";
 import { QuizFlagText } from "./QuizFlagText";
 import { QuizSubmitButton, QuizSubmitButtonState } from "./QuizSubmitButton";
@@ -95,6 +88,11 @@ export function QuizDeckOneCorrectPairQuestion({
 
     setIsCorrect(isCorrect);
     onRating(skillRatings, mistakes);
+
+    // If auto-check is enabled and the answer is correct, advance immediately
+    if (autoCheck && isCorrect) {
+      onNext();
+    }
   };
 
   const groupAFontSize = textAnswerButtonFontSize(
@@ -110,49 +108,7 @@ export function QuizDeckOneCorrectPairQuestion({
 
   return (
     <Skeleton
-      toast={
-        isCorrect == null ? null : (
-          <View
-            className={`
-              ${isCorrect ? `theme-success` : `theme-danger`}
-
-              flex-1 gap-[12px] overflow-hidden bg-fg-bg10 px-4 pt-3 pb-safe-offset-[84px]
-
-              lg:mb-2 lg:rounded-xl
-            `}
-          >
-            {isCorrect ? (
-              <>
-                <View className="flex-row items-center gap-[8px]">
-                  <IconImage
-                    size={32}
-                    source={require(`@/assets/icons/check-circled-filled.svg`)}
-                  />
-                  <Text className="text-2xl font-bold text-fg">Nice!</Text>
-                </View>
-                {autoCheck ? <Delay ms={1500} action={onNext} /> : null}
-              </>
-            ) : (
-              <>
-                <View className="flex-row items-center gap-[8px]">
-                  <IconImage
-                    size={32}
-                    source={require(`@/assets/icons/close-circled-filled.svg`)}
-                  />
-                  <Text className="text-2xl font-bold text-fg">Incorrect</Text>
-                </View>
-                <Text className="text-xl/none font-medium text-fg">
-                  Correct answer:
-                </Text>
-
-                <Text className="text-fg">
-                  <SkillAnswerText skill={answer.skill} />
-                </Text>
-              </>
-            )}
-          </View>
-        )
-      }
+      toast={null}
       submitButton={
         <QuizSubmitButton
           state={
@@ -293,66 +249,6 @@ export function QuizDeckOneCorrectPairQuestion({
     </Skeleton>
   );
 }
-
-const SkillAnswerText = ({ skill }: { skill: Skill; small?: boolean }) => {
-  switch (skillKindFromSkill(skill)) {
-    case SkillKind.Deprecated_EnglishToRadical:
-    case SkillKind.Deprecated_PinyinToRadical:
-    case SkillKind.Deprecated_RadicalToEnglish:
-    case SkillKind.Deprecated_RadicalToPinyin:
-    case SkillKind.Deprecated:
-    case SkillKind.GlossToHanziWord:
-    case SkillKind.ImageToHanziWord:
-    case SkillKind.PinyinFinalAssociation:
-    case SkillKind.PinyinInitialAssociation:
-    case SkillKind.PinyinToHanziWord: {
-      throw new Error(
-        `ShowSkillAnswer not implemented for ${skillKindFromSkill(skill)}`,
-      );
-    }
-    case SkillKind.HanziWordToGloss: {
-      skill = skill as HanziWordSkill;
-      return <HanziWordToGlossSkillAnswerText skill={skill} />;
-    }
-    case SkillKind.HanziWordToPinyinTyped:
-    case SkillKind.HanziWordToPinyinFinal:
-    case SkillKind.HanziWordToPinyinInitial:
-    case SkillKind.HanziWordToPinyinTone: {
-      skill = skill as HanziWordSkill;
-      return <HanziWordToPinyinSkillAnswerText skill={skill} />;
-    }
-  }
-};
-
-const HanziWordToGlossSkillAnswerText = ({
-  skill,
-}: {
-  skill: HanziWordSkill;
-}) => {
-  const hanziWord = hanziWordFromSkill(skill);
-
-  return (
-    <>
-      <Text className="pyly-body-2xl">
-        <Pylymark source={`{${hanziWord}}`} />
-      </Text>
-    </>
-  );
-};
-
-const HanziWordToPinyinSkillAnswerText = ({
-  skill,
-}: {
-  skill: HanziWordSkill;
-}) => {
-  const hanziWord = hanziWordFromSkill(skill);
-
-  return (
-    <Text className="pyly-body-2xl">
-      <HanziWordRefText hanziWord={hanziWord} showPinyin />
-    </Text>
-  );
-};
 
 const Skeleton = ({
   children,
