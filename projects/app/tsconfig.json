@@ -41,7 +41,7 @@
       "path": "../eslint-rules"
     },
     {
-      "path": "../expo-audio-sprites"
+      "path": "../audio-sprites"
     },
     {
       "path": "../lib"
