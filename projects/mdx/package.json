@@ -3,7 +3,8 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./metro": "./src/metro.ts"
+    "./metro": "./src/metro.ts",
+    "./vite": "./src/viteMdxPlugin.ts"
   },
   "imports": {
     "#*.ts": "./src/*.ts"
@@ -20,7 +21,8 @@
     "unified": "^11.0.0"
   },
   "peerDependencies": {
-    "@expo/metro-config": "*"
+    "@expo/metro-config": "*",
+    "vite": "*"
   },
   "devDependencies": {
     "@pinyinly/eslint-rules": "workspace:*",
