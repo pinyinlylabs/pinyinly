@@ -4,8 +4,13 @@
     "lib": ["ESNext"],
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
+<<<<<<<< HEAD:projects/mdx/tsconfig.json
     "target": "ESNext",
     "outDir": "../../.moon/cache/types/projects/mdx"
+========
+    "outDir": "../../.moon/cache/types/projects/audio-sprites",
+    "target": "ESNext"
+>>>>>>>> origin/main:projects/audio-sprites/tsconfig.json
   },
   "include": ["*"],
   "exclude": ["node_modules", "dist"],
