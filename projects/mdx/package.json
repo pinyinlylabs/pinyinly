@@ -1,6 +1,5 @@
 {
   "name": "@pinyinly/mdx",
-  "main": "index.cjs",
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
