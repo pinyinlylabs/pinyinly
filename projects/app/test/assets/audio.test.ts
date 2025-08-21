@@ -2,7 +2,7 @@
 import "#assets/audio/manifest.json";
 
 import { IS_CI } from "#util/env.ts";
-import { testSprites } from "@pinyinly/expo-audio-sprites/testing";
+import { testSprites } from "@pinyinly/audio-sprites/testing";
 import path from "node:path";
 import { expect, test } from "vitest";
 import { projectRoot } from "../helpers.ts";

@@ -1,7 +1,7 @@
 import { useSoundEffect } from "@/client/hooks/useSoundEffect";
 import { useSoundEffectCycle } from "@/client/hooks/useSoundEffectCycle";
 import { pickChildren } from "@/client/react";
-import type { PylyAudioSource } from "@pinyinly/expo-audio-sprites/client";
+import type { PylyAudioSource } from "@pinyinly/audio-sprites/client";
 import type { PropsWithChildren } from "react";
 import { Pressable, Text, View } from "react-native";
 import { IconImage } from "./IconImage";

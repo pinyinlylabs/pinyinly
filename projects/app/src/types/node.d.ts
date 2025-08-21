@@ -1,4 +1,4 @@
-import type { AudioSpriteSource } from "@pinyinly/expo-audio-sprites/client";
+import type { AudioSpriteSource } from "@pinyinly/audio-sprites/client";
 import type { Asset } from "expo-asset";
 import type { AudioSource } from "expo-audio";
 

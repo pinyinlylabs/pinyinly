@@ -1,5 +1,5 @@
 {
-  "name": "@pinyinly/expo-audio-sprites",
+  "name": "@pinyinly/audio-sprites",
   "main": "index.cjs",
   "type": "module",
   "exports": {
