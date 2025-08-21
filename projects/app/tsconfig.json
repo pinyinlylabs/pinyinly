@@ -6,14 +6,15 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "outDir": "../../.moon/cache/types/projects/app",
-    // HACK: `expo export` doesn't work properly with tsconfig project
-    // references so it just compiles using this tsconfig file instead of the
-    // one in `src/`.
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": [
+        "./src/*"
+      ]
     },
     "target": "ESNext",
-    "types": ["@pinyinly/eslint-rules/nameof.d.ts"]
+    "types": [
+      "@pinyinly/eslint-rules/nameof.d.ts"
+    ]
   },
   "include": [
     "*",
@@ -44,6 +45,9 @@
     },
     {
       "path": "../lib"
+    },
+    {
+      "path": "../mdx"
     }
   ]
 }
