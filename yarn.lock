@@ -2536,7 +2536,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jsonjoy.com/base64@npm:^1.1.1":
+"@jsonjoy.com/base64@npm:^1.1.2":
   version: 1.1.2
   resolution: "@jsonjoy.com/base64@npm:1.1.2"
   peerDependencies:
@@ -2563,18 +2563,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jsonjoy.com/json-pack@npm:^1.0.3":
-  version: 1.8.0
-  resolution: "@jsonjoy.com/json-pack@npm:1.8.0"
+"@jsonjoy.com/json-pack@npm:^1.11.0":
+  version: 1.11.0
+  resolution: "@jsonjoy.com/json-pack@npm:1.11.0"
   dependencies:
-    "@jsonjoy.com/base64": "npm:^1.1.1"
+    "@jsonjoy.com/base64": "npm:^1.1.2"
+    "@jsonjoy.com/buffers": "npm:^1.0.0"
+    "@jsonjoy.com/codegen": "npm:^1.0.0"
     "@jsonjoy.com/json-pointer": "npm:^1.0.1"
-    "@jsonjoy.com/util": "npm:^1.1.2"
+    "@jsonjoy.com/util": "npm:^1.9.0"
     hyperdyperid: "npm:^1.2.0"
-    thingies: "npm:^1.20.0"
+    thingies: "npm:^2.5.0"
   peerDependencies:
     tslib: 2
-  checksum: 10c0/4b51d47df35b8626f8882eadfc99149d874db43a630f02a46a26d2bb83b04a69192d3f97b7dfbd5a7a448efc0e41bfd75ff801972bee46ea3fe3d4d4dc62339f
+  checksum: 10c0/2eeea1fbe410ddaedab43c7f22d869441e9f60062fdf7cd2b91b8ae7954965ec4caeb3d328a01caef6c09bfc760b60f8e2aaba2f1f7777c8bfdf918c568a1c6c
   languageName: node
   linkType: hard
 
@@ -2589,7 +2591,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jsonjoy.com/util@npm:^1.1.2, @jsonjoy.com/util@npm:^1.3.0":
+"@jsonjoy.com/util@npm:^1.3.0, @jsonjoy.com/util@npm:^1.9.0":
   version: 1.9.0
   resolution: "@jsonjoy.com/util@npm:1.9.0"
   dependencies:
@@ -14010,14 +14012,15 @@ __metadata:
   linkType: hard
 
 "memfs@npm:^4.36.0":
-  version: 4.36.0
-  resolution: "memfs@npm:4.36.0"
+  version: 4.36.3
+  resolution: "memfs@npm:4.36.3"
   dependencies:
-    "@jsonjoy.com/json-pack": "npm:^1.0.3"
-    "@jsonjoy.com/util": "npm:^1.3.0"
-    tree-dump: "npm:^1.0.1"
+    "@jsonjoy.com/json-pack": "npm:^1.11.0"
+    "@jsonjoy.com/util": "npm:^1.9.0"
+    thingies: "npm:^2.5.0"
+    tree-dump: "npm:^1.0.3"
     tslib: "npm:^2.0.0"
-  checksum: 10c0/1ba2b507dde155568612737eadc0070c7709a05e7c7d720bf53866c3a68ef265ee5f4e27328c9566c6be4498563ee9afd081d8542be8ec885abd182d2df92e75
+  checksum: 10c0/c0ce5628648c897dec42f8fe51ad18cdbffb6b6d74256b6571b13e39341d446978eee7167a247c99d873ed347dc48eeb65353b3c914579c41ed739e21eeaa7cd
   languageName: node
   linkType: hard
 
@@ -18744,12 +18747,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"thingies@npm:^1.20.0":
-  version: 1.21.0
-  resolution: "thingies@npm:1.21.0"
+"thingies@npm:^2.5.0":
+  version: 2.5.0
+  resolution: "thingies@npm:2.5.0"
   peerDependencies:
     tslib: ^2
-  checksum: 10c0/7570ee855aecb73185a672ecf3eb1c287a6512bf5476449388433b2d4debcf78100bc8bfd439b0edd38d2bc3bfb8341de5ce85b8557dec66d0f27b962c9a8bc1
+  checksum: 10c0/52194642c129615b6af15648621be9a2784ad25526e3facca6c28aa1a36ea32245ef146ebc3fbaf64a3605b8301a5335da505d0c314f851ff293b184e0de7fb9
   languageName: node
   linkType: hard
 
@@ -18858,7 +18861,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tree-dump@npm:^1.0.1":
+"tree-dump@npm:^1.0.3":
   version: 1.0.3
   resolution: "tree-dump@npm:1.0.3"
   peerDependencies:
