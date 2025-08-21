@@ -28,6 +28,18 @@
 - **Emails Dev:** `moon run dev` in `projects/emails/` (see README)
 - **No need to cd:** All moon commands can be run from any directory.
 
+## Critical: Code Formatting Before Commits
+
+**ALWAYS run `moon run :prettier` before committing any changes.** This is especially important
+when:
+
+- Editing or creating MDX files (wiki content)
+- Making any changes to Markdown files
+- Modifying any source code files
+
+**Failure to run prettier will cause CI build failures.** The command `moon run :prettier` formats
+all files across all projects globally.
+
 ## Project-Specific Patterns & Conventions
 
 - **TypeScript Discriminated Unions:** Always use `kind` as the discriminator property (not `type`).
