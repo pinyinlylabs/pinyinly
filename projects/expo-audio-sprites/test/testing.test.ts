@@ -758,7 +758,7 @@ describe(
 
       // This should not throw an error
       expect(() => {
-        createSpeechFileTests({
+        void createSpeechFileTests({
           audioGlob: `/test/*.m4a`,
         });
       }).not.toThrow();
@@ -771,7 +771,7 @@ describe(
       });
 
       expect(() => {
-        createSpeechFileTests({
+        void createSpeechFileTests({
           audioGlob: `/test/project/audio/*.{m4a,aac}`,
           fixTag: `-fixed`,
           targetLufs: -16,
@@ -788,7 +788,7 @@ describe(
     test(`handles empty glob results gracefully`, async () => {
       // Don't create any files, so glob will return empty array
       expect(() => {
-        createSpeechFileTests({
+        void createSpeechFileTests({
           audioGlob: `/nonexistent/*.m4a`,
         });
       }).not.toThrow();

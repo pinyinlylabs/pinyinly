@@ -562,9 +562,9 @@ function execOrLogFixCommand(
  *
  * @param options Configuration for speech file testing
  */
-export function createSpeechFileTests(
+export async function createSpeechFileTests(
   options: SpeechFileTestOptions,
-): void {
+): Promise<void> {
   const {
     audioGlob,
     fixTag = `-fix`,
@@ -577,17 +577,16 @@ export function createSpeechFileTests(
     isCI = false,
   } = options;
 
-  describe(`speech files`, async () => {
-    for (const filePath of await glob(audioGlob)) {
-      if (filePath.includes(fixTag)) {
-        continue;
-      }
+  for (const filePath of await glob(audioGlob)) {
+    if (filePath.includes(fixTag)) {
+      continue;
+    }
 
-      const projectRelPath = projectRoot == null
-        ? filePath
-        : path.relative(projectRoot, filePath);
+    const projectRelPath = projectRoot == null
+      ? filePath
+      : path.relative(projectRoot, filePath);
 
-      describe(projectRelPath, () => {
+    describe(projectRelPath, () => {
         test(`container and real duration is within allowable tolerance and not corrupted`, async () => {
           const { duration } = await analyzeAudioFile(filePath);
 
@@ -675,5 +674,4 @@ export function createSpeechFileTests(
         });
       });
     }
-  });
 }
