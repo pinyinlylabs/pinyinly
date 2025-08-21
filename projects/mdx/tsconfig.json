@@ -1,7 +1,6 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "lib": ["ESNext"],
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
@@ -11,6 +10,12 @@
   "include": ["*"],
   "exclude": ["node_modules", "dist"],
   "references": [
+    {
+      "path": "./src"
+    },
+    {
+      "path": "./test"
+    },
     {
       "path": "../eslint-rules"
     },

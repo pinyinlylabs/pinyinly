@@ -1,8 +1,22 @@
 {
-  "extends": "../tsconfig.json",
+  "extends": "../../../tsconfig.base",
   "compilerOptions": {
-    "types": []
+    "esModuleInterop": true,
+    "lib": ["DOM", "ES2022"],
+    "module": "ES2020",
+    "moduleResolution": "Bundler",
+    "outDir": "../../../.moon/cache/types/projects/mdx-src",
+    "resolveJsonModule": true,
+    "target": "ESNext",
+    "types": ["node", "@pinyinly/eslint-rules/nameof.d.ts"]
   },
-  "include": ["./"],
-  "exclude": ["node_modules"]
+  "include": ["**/*"],
+  "references": [
+    {
+      "path": "../../lib"
+    },
+    {
+      "path": "../../eslint-rules"
+    }
+  ]
 }
