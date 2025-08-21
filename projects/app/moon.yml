@@ -279,5 +279,5 @@ tags:
 
 dependsOn:
   - eslint-rules
-  - expo-audio-sprites
+  - audio-sprites
   - lib

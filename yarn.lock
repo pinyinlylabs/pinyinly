@@ -4751,9 +4751,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@pinyinly/audio-sprites@workspace:*, @pinyinly/audio-sprites@workspace:projects/expo-audio-sprites":
+"@pinyinly/audio-sprites@workspace:*, @pinyinly/audio-sprites@workspace:projects/audio-sprites":
   version: 0.0.0-use.local
-  resolution: "@pinyinly/audio-sprites@workspace:projects/expo-audio-sprites"
+  resolution: "@pinyinly/audio-sprites@workspace:projects/audio-sprites"
   dependencies:
     "@babel/core": "npm:^7.20.0"
     "@pinyinly/eslint-rules": "workspace:*"
