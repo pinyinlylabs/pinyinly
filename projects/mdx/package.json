@@ -4,8 +4,7 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./metro": "./src/metro.ts",
-    "./*": "./src/*.ts"
+    "./metro": "./src/metro.ts"
   },
   "imports": {
     "#*.ts": "./src/*.ts"

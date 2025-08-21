@@ -6,12 +6,9 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "target": "ESNext",
-    "paths": {
-      "#*.ts": ["./src/*.ts"]
-    },
     "outDir": "../../.moon/cache/types/projects/mdx"
   },
-  "include": ["src", "test"],
+  "include": ["*"],
   "exclude": ["node_modules", "dist"],
   "references": [
     {
