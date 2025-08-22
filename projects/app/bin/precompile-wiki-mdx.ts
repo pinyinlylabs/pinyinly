@@ -10,6 +10,8 @@ import { mkdir } from "node:fs/promises";
  */
 function getTypedTemplate(rawMdxString: string): string {
   return (
+    // Add @ts-nocheck to skip TypeScript validation for generated files
+    `// @ts-nocheck\n` +
     rawMdxString
       // Replace the function signature to include proper types
       .replace(
@@ -33,9 +35,9 @@ async function precompileWikiMdx() {
   
   const startTime = Date.now();
   
-  // Find all MDX files in the wiki directory
+  // Find all MDX files in the src directory
   const mdxFiles = await glob(
-    path.join(process.cwd(), "src/client/wiki/**/*.mdx")
+    path.join(process.cwd(), "src/**/*.mdx")
   );
   
   console.log(`📄 Found ${mdxFiles.length} MDX files to precompile`);

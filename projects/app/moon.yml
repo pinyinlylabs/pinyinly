@@ -269,10 +269,10 @@ tasks:
   precompileWikiMdx:
     command: "tsx bin/precompile-wiki-mdx.ts"
     inputs:
-      - "src/client/wiki/**/*.mdx"
+      - "src/**/*.mdx"
       - "bin/precompile-wiki-mdx.ts"
     outputs:
-      - "src/client/wiki/**/*.tsx"
+      - "src/**/*.tsx"
 
   # Update wiki registry to import .tsx instead of .mdx files  
   updateWikiRegistry:
@@ -280,11 +280,17 @@ tasks:
     deps:
       - precompileWikiMdx
     inputs:
-      - "src/client/wiki/**/*.tsx"
+      - "src/**/*.tsx"
       - "bin/update-wiki-registry.ts"
       - "src/client/wiki.ts"
     outputs:
       - "src/client/wiki.ts"
+
+  # Combined task to precompile and update registry in one go
+  precompileMdx:
+    deps:
+      - updateWikiRegistry
+    description: "Precompile all MDX files to TSX and update imports"
 
   lint:
     deps:

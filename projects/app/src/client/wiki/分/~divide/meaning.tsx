@@ -1,3 +1,4 @@
+// @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
 import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
