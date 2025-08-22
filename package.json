@@ -71,6 +71,7 @@
     "@expo/html-elements@npm:~0.11.0": "patch:@expo/html-elements@npm%3A0.12.5#~/.yarn/patches/@expo-html-elements-npm-0.12.5-ada5f53f49.patch",
     "react-native-css-interop@npm:0.1.22": "patch:react-native-css-interop@npm%3A0.1.22#~/.yarn/patches/react-native-css-interop-npm-0.1.22-9770293dfb.patch",
     "estree-walker@npm:^3.0.3": "patch:estree-walker@npm%3A3.0.3#~/.yarn/patches/estree-walker-npm-3.0.3-0372979673.patch",
-    "estree-walker@npm:^3.0.0": "patch:estree-walker@npm%3A3.0.3#~/.yarn/patches/estree-walker-npm-3.0.3-0372979673.patch"
+    "estree-walker@npm:^3.0.0": "patch:estree-walker@npm%3A3.0.3#~/.yarn/patches/estree-walker-npm-3.0.3-0372979673.patch",
+    "@expo/cli@npm:0.24.20": "patch:@expo/cli@npm%3A0.24.20#~/.yarn/patches/@expo-cli-npm-0.24.20-a2a1030ae4.patch"
   }
 }
