@@ -20,10 +20,10 @@
     "unified": "^11.0.0"
   },
   "peerDependencies": {
-    "@expo/metro-config": "*",
     "vite": "*"
   },
   "devDependencies": {
+    "@expo/metro-config": "^0.20.17",
     "@pinyinly/eslint-rules": "workspace:*",
     "@pinyinly/lib": "workspace:*",
     "@types/debug": "^4 <=4.3.x",
@@ -34,7 +34,7 @@
     "eslint-plugin-unicorn": "^60.0.0",
     "prettier": "^3.4.2",
     "ts-essentials": "^10.0.3",
-    "typescript": "patch:typescript@npm%3A5.9.2#~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch",
+    "typescript": "patch:typescript@npm%3A5.8.3#~/.yarn/patches/typescript-npm-5.8.3-fbd7aef456.patch",
     "vitest": "^3.2.4"
   }
 }
