@@ -57,7 +57,7 @@ export const TrpcProvider = ({
             // tRPC spec and would otherwise be swallowed as:
             //
             // > The string did not match the expected pattern.
-            const res = await fetch(input, init);
+            const res = await fetch(input, init as RequestInit);
             if (!res.ok) {
               const vercelError = maybeParseVercelError(res);
               if (vercelError != null) {

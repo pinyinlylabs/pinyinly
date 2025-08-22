@@ -4671,7 +4671,7 @@ __metadata:
     tailwindcss: "npm:^3.4.17"
     ts-essentials: "npm:^10.0.3"
     tsx: "npm:^4.15.7"
-    typescript: "patch:typescript@npm%3A5.8.3#~/.yarn/patches/typescript-npm-5.8.3-fbd7aef456.patch"
+    typescript: "patch:typescript@npm%3A5.9.2#~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch"
     ucd-full: "npm:^16.0.0"
     usehooks-ts: "npm:^3.1.0"
     vite: "npm:^7.0.0"
@@ -4705,7 +4705,7 @@ __metadata:
     memfs: "npm:^4.36.0"
     prettier: "npm:^3.4.2"
     ts-essentials: "npm:^10.0.3"
-    typescript: "patch:typescript@npm%3A5.8.3#~/.yarn/patches/typescript-npm-5.8.3-fbd7aef456.patch"
+    typescript: "patch:typescript@npm%3A5.9.2#~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch"
     vitest: "npm:^3.2.4"
     zod: "npm:^3.25.42"
   peerDependencies:
@@ -4743,7 +4743,7 @@ __metadata:
     prettier: "npm:^3.4.2"
     tailwindcss: "npm:^3.4.17"
     tsx: "npm:^4.15.7"
-    typescript: "patch:typescript@npm%3A5.8.3#~/.yarn/patches/typescript-npm-5.8.3-fbd7aef456.patch"
+    typescript: "patch:typescript@npm%3A5.9.2#~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch"
     typescript-eslint: "npm:^8.26.0"
     vitest: "npm:^3.2.4"
   languageName: unknown
@@ -4761,7 +4761,7 @@ __metadata:
     glob: "npm:^11.0.0"
     lru-cache: "npm:^11.1.0"
     prettier: "npm:^3.4.2"
-    typescript: "patch:typescript@npm%3A5.8.3#~/.yarn/patches/typescript-npm-5.8.3-fbd7aef456.patch"
+    typescript: "patch:typescript@npm%3A5.9.2#~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch"
     vitest: "npm:^3.2.4"
     zod: "npm:^3.25.42"
   languageName: unknown
@@ -4802,7 +4802,7 @@ __metadata:
     "@types/yargs": "npm:^17.0.33"
     prettier: "npm:^3.4.2"
     tsx: "npm:^4.15.7"
-    typescript: "patch:typescript@npm%3A5.8.3#~/.yarn/patches/typescript-npm-5.8.3-fbd7aef456.patch"
+    typescript: "patch:typescript@npm%3A5.9.2#~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch"
     yargs: "npm:^18.0.0"
   languageName: unknown
   linkType: soft
@@ -15912,7 +15912,7 @@ __metadata:
     prettier: "npm:^3.4.2"
     semver: "npm:^7.5.0"
     tsx: "npm:^4.15.7"
-    typescript: "patch:typescript@npm%3A5.8.3#~/.yarn/patches/typescript-npm-5.8.3-fbd7aef456.patch"
+    typescript: "patch:typescript@npm%3A5.9.2#~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch"
     yaml: "npm:^2.7.0"
   languageName: unknown
   linkType: soft
@@ -19086,33 +19086,33 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:5.8.3":
-  version: 5.8.3
-  resolution: "typescript@npm:5.8.3"
+"typescript@npm:5.9.2":
+  version: 5.9.2
+  resolution: "typescript@npm:5.9.2"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 10c0/5f8bb01196e542e64d44db3d16ee0e4063ce4f3e3966df6005f2588e86d91c03e1fb131c2581baf0fb65ee79669eea6e161cd448178986587e9f6844446dbb48
+  checksum: 10c0/cd635d50f02d6cf98ed42de2f76289701c1ec587a363369255f01ed15aaf22be0813226bff3c53e99d971f9b540e0b3cc7583dbe05faded49b1b0bed2f638a18
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@npm%3A5.8.3#~/.yarn/patches/typescript-npm-5.8.3-fbd7aef456.patch":
-  version: 5.8.3
-  resolution: "typescript@patch:typescript@npm%3A5.8.3#~/.yarn/patches/typescript-npm-5.8.3-fbd7aef456.patch::version=5.8.3&hash=d04b42"
+"typescript@patch:typescript@npm%3A5.9.2#~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch":
+  version: 5.9.2
+  resolution: "typescript@patch:typescript@npm%3A5.9.2#~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch::version=5.9.2&hash=4df2dd"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 10c0/0c23ecba682b6a6a2bba630535fceadccff509a9a2ce4901aa2ad8f70a743a456c1adebb63b91cfb9655c2e6b7f7b744f3a33aac4ea5278769291756cc5b386c
+  checksum: 10c0/78c6bd24d445d96683b5a1bfee6552067e50cb41d50d9f2a9c75359d6d906283694bb6a35b8df28b4ae282f010960ff76ab5845525d703bf8b99c66baef535fc
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@patch%3Atypescript@npm%253A5.8.3%23~/.yarn/patches/typescript-npm-5.8.3-fbd7aef456.patch#optional!builtin<compat/typescript>":
-  version: 5.8.3
-  resolution: "typescript@patch:typescript@patch%3Atypescript@npm%253A5.8.3%23~/.yarn/patches/typescript-npm-5.8.3-fbd7aef456.patch%3A%3Aversion=5.8.3&hash=d04b42#optional!builtin<compat/typescript>::version=5.8.3&hash=5786d5"
+"typescript@patch:typescript@patch%3Atypescript@npm%253A5.9.2%23~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch#optional!builtin<compat/typescript>":
+  version: 5.9.2
+  resolution: "typescript@patch:typescript@patch%3Atypescript@npm%253A5.9.2%23~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch%3A%3Aversion=5.9.2&hash=4df2dd#optional!builtin<compat/typescript>::version=5.9.2&hash=5786d5"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 10c0/b30f1e1e0436751a4c34d1114f961d78a41d8152cceaeda2af1211861511ea72732fcd80ffaf64339e9b863326ce56da3c25d283de6d8c595816e0ad81763ed6
+  checksum: 10c0/ce4c0584a0ad65f363ba53344fd3a5f1f7756eb717fc647f9d38b2b8832368a8cf44d5eb757822e9d7abc45ba4de262e33e7e56851f8ce2a193eb7b5cb3cd10f
   languageName: node
   linkType: hard
 
