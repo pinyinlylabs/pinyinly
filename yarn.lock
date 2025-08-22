@@ -85,7 +85,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/core@npm:^7.11.6, @babel/core@npm:^7.12.3, @babel/core@npm:^7.20.0, @babel/core@npm:^7.24.4, @babel/core@npm:^7.25.2, @babel/core@npm:^7.28.0":
+"@babel/core@npm:^7.11.6, @babel/core@npm:^7.12.3, @babel/core@npm:^7.20.0, @babel/core@npm:^7.24.4, @babel/core@npm:^7.25.2, @babel/core@npm:^7.28.3":
   version: 7.28.3
   resolution: "@babel/core@npm:7.28.3"
   dependencies:
@@ -4550,6 +4550,7 @@ __metadata:
     "@pinyinly/audio-sprites": "workspace:*"
     "@pinyinly/eslint-rules": "workspace:*"
     "@pinyinly/lib": "workspace:*"
+    "@pinyinly/mdx": "workspace:*"
     "@react-native-async-storage/async-storage": "npm:2.1.2"
     "@react-native-replicache/deep-freeze": "npm:^1.1.0"
     "@react-navigation/native": "npm:^7.0.0"
@@ -4569,9 +4570,9 @@ __metadata:
     "@testing-library/jest-dom": "npm:^6.6.3"
     "@testing-library/react": "npm:^16.3.0"
     "@testing-library/react-native": "npm:^13.2.0"
-    "@trpc/client": "npm:11.3.1"
-    "@trpc/react-query": "npm:11.3.1"
-    "@trpc/server": "npm:11.3.1"
+    "@trpc/client": "npm:11.4.4"
+    "@trpc/react-query": "npm:11.4.4"
+    "@trpc/server": "npm:11.4.4"
     "@types/apple-signin-api": "npm:^1.5.3"
     "@types/babel__core": "npm:7.20.x"
     "@types/color": "npm:4.x || 5.x"
@@ -4586,7 +4587,7 @@ __metadata:
     "@types/ws": "npm:^8 <=8.17.x"
     "@typescript-eslint/utils": "npm:^8.26.0"
     "@vercel/functions": "npm:^2.0.0"
-    "@vitejs/plugin-react": "npm:^4.6.0"
+    "@vitejs/plugin-react": "npm:^5.0.0"
     array-from-async: "npm:^3.0.0"
     babel-plugin-react-compiler: "npm:19.0.0-beta-ebf51a3-20250411"
     babel-plugin-transform-import-meta: "patch:babel-plugin-transform-import-meta@npm%3A2.2.1#~/.yarn/patches/babel-plugin-transform-import-meta-npm-2.2.1-0927fef047.patch"
@@ -4598,7 +4599,6 @@ __metadata:
     drizzle-orm: "npm:~0.44.0"
     eslint: "npm:^9.13.0"
     eslint-plugin-drizzle: "npm:^0.2.3"
-    estree-walker: "patch:estree-walker@npm%3A3.0.3#~/.yarn/patches/estree-walker-npm-3.0.3-0372979673.patch"
     expo: "npm:53.0.20"
     expo-apple-authentication: "npm:~7.2.4"
     expo-application: "npm:~6.1.5"
@@ -4664,7 +4664,6 @@ __metadata:
     react-native-worklets: "npm:^0.4.1"
     react-responsive: "npm:^10.0.0"
     react-test-renderer: "npm:19.x"
-    remark-flexible-markers: "npm:^1.3.0"
     replicache: "patch:replicache@npm%3A15.3.0#~/.yarn/patches/replicache-npm-15.3.0-abf9574e6e.patch"
     resolve-package-path: "npm:^4.0.3"
     rive-react-native: "npm:^9.3.4"
@@ -4674,8 +4673,6 @@ __metadata:
     tsx: "npm:^4.15.7"
     typescript: "patch:typescript@npm%3A5.8.3#~/.yarn/patches/typescript-npm-5.8.3-fbd7aef456.patch"
     ucd-full: "npm:^16.0.0"
-    unified: "npm:^11.0.5"
-    unist-util-visit: "npm:^5.0.0"
     usehooks-ts: "npm:^3.1.0"
     vite: "npm:^7.0.0"
     vite-tsconfig-paths: "npm:^5.1.4"
@@ -4767,6 +4764,33 @@ __metadata:
     typescript: "patch:typescript@npm%3A5.8.3#~/.yarn/patches/typescript-npm-5.8.3-fbd7aef456.patch"
     vitest: "npm:^3.2.4"
     zod: "npm:^3.25.42"
+  languageName: unknown
+  linkType: soft
+
+"@pinyinly/mdx@workspace:*, @pinyinly/mdx@workspace:projects/mdx":
+  version: 0.0.0-use.local
+  resolution: "@pinyinly/mdx@workspace:projects/mdx"
+  dependencies:
+    "@mdx-js/mdx": "npm:^3.1.0"
+    "@pinyinly/eslint-rules": "workspace:*"
+    "@pinyinly/lib": "workspace:*"
+    "@types/debug": "npm:^4 <=4.3.x"
+    "@types/node": "npm:22.x"
+    "@typescript-eslint/parser": "npm:^8.36.0"
+    debug: "npm:^4.3.7"
+    eslint: "npm:^9.13.0"
+    eslint-plugin-import: "npm:^2.31.0"
+    eslint-plugin-unicorn: "npm:^60.0.0"
+    estree-walker: "patch:estree-walker@npm%3A3.0.3#~/.yarn/patches/estree-walker-npm-3.0.3-0372979673.patch"
+    prettier: "npm:^3.4.2"
+    remark-flexible-markers: "npm:^1.0.0"
+    ts-essentials: "npm:^10.0.3"
+    typescript: "patch:typescript@npm%3A5.8.3#~/.yarn/patches/typescript-npm-5.8.3-fbd7aef456.patch"
+    unified: "npm:^11.0.0"
+    vitest: "npm:^3.2.4"
+  peerDependencies:
+    "@expo/metro-config": "*"
+    vite: "*"
   languageName: unknown
   linkType: soft
 
@@ -5538,10 +5562,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rolldown/pluginutils@npm:1.0.0-beta.27":
-  version: 1.0.0-beta.27
-  resolution: "@rolldown/pluginutils@npm:1.0.0-beta.27"
-  checksum: 10c0/9658f235b345201d4f6bfb1f32da9754ca164f892d1cb68154fe5f53c1df42bd675ecd409836dff46884a7847d6c00bdc38af870f7c81e05bba5c2645eb4ab9c
+"@rolldown/pluginutils@npm:1.0.0-beta.32":
+  version: 1.0.0-beta.32
+  resolution: "@rolldown/pluginutils@npm:1.0.0-beta.32"
+  checksum: 10c0/ba3582fc3c35c8eb57b0df2d22d0733b1be83d37edcc258203364773f094f58fc0cb7a056d604603573a69dd0105a466506cad467f59074e1e53d0dc26191f06
   languageName: node
   linkType: hard
 
@@ -6201,36 +6225,36 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@trpc/client@npm:11.3.1":
-  version: 11.3.1
-  resolution: "@trpc/client@npm:11.3.1"
+"@trpc/client@npm:11.4.4":
+  version: 11.4.4
+  resolution: "@trpc/client@npm:11.4.4"
   peerDependencies:
-    "@trpc/server": 11.3.1
+    "@trpc/server": 11.4.4
     typescript: ">=5.7.2"
-  checksum: 10c0/fd249de46c49837e8e1447b648b2ba66d8f02d29be0146c5d4eebab4da7ae7b7266fda018045fd8af69cb8863974c97c356396713fcb392e7e6caa4d5e6e6c1e
+  checksum: 10c0/718aeb8b5d01af95958c87d03d5746d58e5a204dc6cc30700135ec9a6f2096f0b7031065d2ffd52fe76d08badce846772390147d19e143725459e78c5d00eb27
   languageName: node
   linkType: hard
 
-"@trpc/react-query@npm:11.3.1":
-  version: 11.3.1
-  resolution: "@trpc/react-query@npm:11.3.1"
+"@trpc/react-query@npm:11.4.4":
+  version: 11.4.4
+  resolution: "@trpc/react-query@npm:11.4.4"
   peerDependencies:
     "@tanstack/react-query": ^5.80.3
-    "@trpc/client": 11.3.1
-    "@trpc/server": 11.3.1
+    "@trpc/client": 11.4.4
+    "@trpc/server": 11.4.4
     react: ">=18.2.0"
     react-dom: ">=18.2.0"
     typescript: ">=5.7.2"
-  checksum: 10c0/edffde713ab8dbebb21485e31d279f653ed920b9652620119109b3a331f57cd94f6f016a51258480d636a6d12d4c0bf74aedbdc5b7aee5ce942cb64475e35533
+  checksum: 10c0/e7331b888276d79e82c47d77ad74e15b32babe7a8c54202eb57394c6e3c9c31fada47a1bb21fb26c7e3903ee562142116e7c0b05c279fcf2d1db5b26ce1bb019
   languageName: node
   linkType: hard
 
-"@trpc/server@npm:11.3.1":
-  version: 11.3.1
-  resolution: "@trpc/server@npm:11.3.1"
+"@trpc/server@npm:11.4.4":
+  version: 11.4.4
+  resolution: "@trpc/server@npm:11.4.4"
   peerDependencies:
     typescript: ">=5.7.2"
-  checksum: 10c0/9e4ae2d86de5229aed52b38e7c7ef8d72a09144d45f7e543f32ef67e584b7b5177ccb7b060120685e8cf0fdc1f281d41f5186bebf93bf5109a2f4a4be6b5e7ef
+  checksum: 10c0/94fefaa3538a9c4fe9995dea2563b32d43e7af51014c55ce041282cf008fe3925aa46607c49a68ebe4899cc884a12e96a9f2650c4e744e8aad6d87d09d1ccbba
   languageName: node
   linkType: hard
 
@@ -6954,19 +6978,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vitejs/plugin-react@npm:^4.6.0":
-  version: 4.7.0
-  resolution: "@vitejs/plugin-react@npm:4.7.0"
+"@vitejs/plugin-react@npm:^5.0.0":
+  version: 5.0.1
+  resolution: "@vitejs/plugin-react@npm:5.0.1"
   dependencies:
-    "@babel/core": "npm:^7.28.0"
+    "@babel/core": "npm:^7.28.3"
     "@babel/plugin-transform-react-jsx-self": "npm:^7.27.1"
     "@babel/plugin-transform-react-jsx-source": "npm:^7.27.1"
-    "@rolldown/pluginutils": "npm:1.0.0-beta.27"
+    "@rolldown/pluginutils": "npm:1.0.0-beta.32"
     "@types/babel__core": "npm:^7.20.5"
     react-refresh: "npm:^0.17.0"
   peerDependencies:
     vite: ^4.2.0 || ^5.0.0 || ^6.0.0 || ^7.0.0
-  checksum: 10c0/692f23960972879485d647713663ec299c478222c96567d60285acf7c7dc5c178e71abfe9d2eefddef1eeb01514dacbc2ed68aad84628debf9c7116134734253
+  checksum: 10c0/2641171beedfc38edc5671abb47706906f9af2a79a6dfff4e946106c9550de4f83ccae41c164f3ee26a3edf07127ecc0e415fe5cddbf7abc71fbb2540016c27d
   languageName: node
   linkType: hard
 
@@ -17105,7 +17129,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"remark-flexible-markers@npm:^1.3.0":
+"remark-flexible-markers@npm:^1.0.0":
   version: 1.3.0
   resolution: "remark-flexible-markers@npm:1.3.0"
   dependencies:
@@ -19222,7 +19246,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"unified@npm:^11.0.0, unified@npm:^11.0.5":
+"unified@npm:^11.0.0":
   version: 11.0.5
   resolution: "unified@npm:11.0.5"
   dependencies:
