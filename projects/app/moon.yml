@@ -265,6 +265,27 @@ tasks:
     deps:
       - ~:buildExpoRouterTypes
 
+  # Precompile wiki MDX files to TSX for faster builds
+  precompileWikiMdx:
+    command: "tsx bin/precompile-wiki-mdx.ts"
+    inputs:
+      - "src/client/wiki/**/*.mdx"
+      - "bin/precompile-wiki-mdx.ts"
+    outputs:
+      - "src/client/wiki/**/*.tsx"
+
+  # Update wiki registry to import .tsx instead of .mdx files  
+  updateWikiRegistry:
+    command: "tsx bin/update-wiki-registry.ts"
+    deps:
+      - precompileWikiMdx
+    inputs:
+      - "src/client/wiki/**/*.tsx"
+      - "bin/update-wiki-registry.ts"
+      - "src/client/wiki.ts"
+    outputs:
+      - "src/client/wiki.ts"
+
   lint:
     deps:
       # Lint does type-checking, so the Expo router types need to be generated first.
