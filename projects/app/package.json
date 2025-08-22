@@ -46,7 +46,7 @@
     "color": "^5.0.0",
     "date-fns": "^4.0.0",
     "drizzle-orm": "~0.44.0",
-    "expo": "53.0.17",
+    "expo": "53.0.20",
     "expo-apple-authentication": "~7.2.4",
     "expo-application": "~6.1.5",
     "expo-asset": "~11.1.7",
