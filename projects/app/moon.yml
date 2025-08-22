@@ -278,6 +278,7 @@ tags:
   - vitest
 
 dependsOn:
-  - eslint-rules
   - audio-sprites
+  - eslint-rules
   - lib
+  - mdx
