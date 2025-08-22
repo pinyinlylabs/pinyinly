@@ -4785,7 +4785,7 @@ __metadata:
     prettier: "npm:^3.4.2"
     remark-flexible-markers: "npm:^1.0.0"
     ts-essentials: "npm:^10.0.3"
-    typescript: "patch:typescript@npm%3A5.8.3#~/.yarn/patches/typescript-npm-5.8.3-fbd7aef456.patch"
+    typescript: "patch:typescript@npm%3A5.9.2#~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch"
     unified: "npm:^11.0.0"
     vitest: "npm:^3.2.4"
   peerDependencies:
@@ -19098,21 +19098,21 @@ __metadata:
 
 "typescript@patch:typescript@npm%3A5.9.2#~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch":
   version: 5.9.2
-  resolution: "typescript@patch:typescript@npm%3A5.9.2#~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch::version=5.9.2&hash=4df2dd"
+  resolution: "typescript@patch:typescript@npm%3A5.9.2#~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch::version=5.9.2&hash=aac922"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 10c0/78c6bd24d445d96683b5a1bfee6552067e50cb41d50d9f2a9c75359d6d906283694bb6a35b8df28b4ae282f010960ff76ab5845525d703bf8b99c66baef535fc
+  checksum: 10c0/4e984e66ee89d8a2c9b95e182dc174c1bec1ddc0a7f3f2328691e11f897da33f16c69239a562cfbe16021617f5a0193da5887f7be2e32b0d6b2f15ecc0996c7a
   languageName: node
   linkType: hard
 
 "typescript@patch:typescript@patch%3Atypescript@npm%253A5.9.2%23~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch#optional!builtin<compat/typescript>":
   version: 5.9.2
-  resolution: "typescript@patch:typescript@patch%3Atypescript@npm%253A5.9.2%23~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch%3A%3Aversion=5.9.2&hash=4df2dd#optional!builtin<compat/typescript>::version=5.9.2&hash=5786d5"
+  resolution: "typescript@patch:typescript@patch%3Atypescript@npm%253A5.9.2%23~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch%3A%3Aversion=5.9.2&hash=aac922#optional!builtin<compat/typescript>::version=5.9.2&hash=5786d5"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 10c0/ce4c0584a0ad65f363ba53344fd3a5f1f7756eb717fc647f9d38b2b8832368a8cf44d5eb757822e9d7abc45ba4de262e33e7e56851f8ce2a193eb7b5cb3cd10f
+  checksum: 10c0/6e76bb0f1c8aca481a967617a9c63a94d6e0e2228eff77aa30fe932934d5f83ed54791e9744d01d2dd3d34f81bbe5a03cc6492411412e71b73dd6e326b20d78c
   languageName: node
   linkType: hard
 
