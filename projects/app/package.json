@@ -136,7 +136,7 @@
     "@types/react-dom": "19.1.x",
     "@types/ws": "^8 <=8.17.x",
     "@typescript-eslint/utils": "^8.26.0",
-    "@vitejs/plugin-react": "^4.6.0",
+    "@vitejs/plugin-react": "^5.0.0",
     "babel-plugin-react-compiler": "19.0.0-beta-ebf51a3-20250411",
     "babel-plugin-transform-import-meta": "patch:babel-plugin-transform-import-meta@npm%3A2.2.1#~/.yarn/patches/babel-plugin-transform-import-meta-npm-2.2.1-0927fef047.patch",
     "chalk": "^5.5.0",
