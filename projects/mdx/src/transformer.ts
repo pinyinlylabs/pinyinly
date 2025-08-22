@@ -121,17 +121,17 @@ export interface CreateTransformerOptions {
  * @returns {function(import('estree').Program): void} A transformer function
  */
 function hoistRequiresPlugin() {
-  return (tree) => {
-    /** @type {Map<string, string>} Map from module path to import variable name */
-    const moduleToVariable = new Map();
+  return (tree: Program) => {
+    /** Map from module path to import variable name */
+    const moduleToVariable = new Map<string, string>();
     let importCounter = 0;
 
     /**
      * Generate a unique variable name for a module path
-     * @param {string} modulePath - The module path to import
-     * @returns {string} A unique variable name
+     * @param modulePath - The module path to import
+     * @returns A unique variable name
      */
-    function generateVariableName(modulePath) {
+    function generateVariableName(modulePath: string): string {
       // Create a base name from the module path
       const basename = modulePath
         .replace(/^[./@]+/, ``) // Remove leading ./ @ characters
@@ -157,24 +157,21 @@ function hoistRequiresPlugin() {
       enter(node) {
         if (
           node.type === `CallExpression` &&
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-          node.callee !== null &&
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-          node.callee !== undefined &&
           node.callee.type === `Identifier` &&
           node.callee.name === `require` &&
-          node.arguments.length === 1 &&
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-          node.arguments[0] !== null &&
-           
-          node.arguments[0] !== undefined &&
-          node.arguments[0].type === `Literal` &&
-          typeof node.arguments[0].value === `string`
+          node.arguments.length === 1
         ) {
-          const modulePath = node.arguments[0].value;
-          if (!moduleToVariable.has(modulePath)) {
-            const variableName = generateVariableName(modulePath);
-            moduleToVariable.set(modulePath, variableName);
+          const firstArg = node.arguments[0];
+          if (
+            firstArg &&
+            firstArg.type === `Literal` &&
+            typeof firstArg.value === `string`
+          ) {
+            const modulePath = firstArg.value;
+            if (!moduleToVariable.has(modulePath)) {
+              const variableName = generateVariableName(modulePath);
+              moduleToVariable.set(modulePath, variableName);
+            }
           }
         }
       },
@@ -185,28 +182,25 @@ function hoistRequiresPlugin() {
       enter(node) {
         if (
           node.type === `CallExpression` &&
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-          node.callee !== null &&
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-          node.callee !== undefined &&
           node.callee.type === `Identifier` &&
           node.callee.name === `require` &&
-          node.arguments.length === 1 &&
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-          node.arguments[0] !== null &&
-           
-          node.arguments[0] !== undefined &&
-          node.arguments[0].type === `Literal` &&
-          typeof node.arguments[0].value === `string`
+          node.arguments.length === 1
         ) {
-          const modulePath = node.arguments[0].value;
-          const variableName = moduleToVariable.get(modulePath);
-          if (variableName !== undefined) {
-            // Replace the entire CallExpression with an Identifier
-            Object.assign(node, {
-              type: `Identifier`,
-              name: variableName,
-            });
+          const firstArg = node.arguments[0];
+          if (
+            firstArg &&
+            firstArg.type === `Literal` &&
+            typeof firstArg.value === `string`
+          ) {
+            const modulePath = firstArg.value;
+            const variableName = moduleToVariable.get(modulePath);
+            if (variableName !== undefined) {
+              // Replace the entire CallExpression with an Identifier
+              Object.assign(node, {
+                type: `Identifier`,
+                name: variableName,
+              });
+            }
           }
         }
       },
@@ -216,23 +210,24 @@ function hoistRequiresPlugin() {
     if (moduleToVariable.size > 0) {
       const importDeclarations = [];
       for (const [modulePath, variableName] of moduleToVariable.entries()) {
-        importDeclarations.push(/** @type {any} */ ({
-          type: `ImportDeclaration`,
+        importDeclarations.push({
+          type: `ImportDeclaration` as const,
           specifiers: [
             {
-              type: `ImportDefaultSpecifier`,
+              type: `ImportDefaultSpecifier` as const,
               local: {
-                type: `Identifier`,
+                type: `Identifier` as const,
                 name: variableName,
               },
             },
           ],
           source: {
-            type: `Literal`,
+            type: `Literal` as const,
             value: modulePath,
             raw: JSON.stringify(modulePath),
           },
-        }));
+          attributes: [], // Required property for ImportDeclaration
+        });
       }
 
       // Insert imports after any existing imports but before other statements
@@ -245,8 +240,7 @@ function hoistRequiresPlugin() {
         }
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      tree.body.splice(insertIndex, 0, /** @type {any} */ ...importDeclarations);
+      tree.body.splice(insertIndex, 0, ...importDeclarations);
     }
   };
 }

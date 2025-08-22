@@ -257,10 +257,11 @@ console.log("hello")
     expect(image1Matches).toHaveLength(3); // Once in import, twice in usage
 
     // Check that imports are at the top of the module
-    const lines = result.src.split(`\n`).filter(line => line.trim());
-    const importLines = lines.filter(line => line.startsWith(`import`));
-    const firstNonImportIndex = lines.findIndex(line => !line.startsWith(`import`) && !line.startsWith(`/*`));
-    const lastImportIndex = lines.lastIndexOf(importLines.at(-1));
+    const lines = result.src.split(`\n`).filter((line: string) => line.trim());
+    const importLines = lines.filter((line: string) => line.startsWith(`import`));
+    const firstNonImportIndex = lines.findIndex((line: string) => !line.startsWith(`import`) && !line.startsWith(`/*`));
+    const lastImportLine = importLines.at(-1);
+    const lastImportIndex = lastImportLine ? lines.lastIndexOf(lastImportLine) : -1;
     
     // All imports should come before other code
     expect(lastImportIndex).toBeLessThan(firstNonImportIndex);
@@ -268,7 +269,7 @@ console.log("hello")
 
   test(`should work with createTransformer and custom options`, async () => {
     const customTransform = createTransformer({
-      matchLocalAsset: (url) => url.startsWith(`./custom/`),
+      matchLocalAsset: (url: string) => url.startsWith(`./custom/`),
     });
 
     const result = await customTransform({
