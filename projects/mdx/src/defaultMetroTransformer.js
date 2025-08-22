@@ -6,7 +6,7 @@ const upstreamTransformer = require(
 
 // Import the transformer dynamically to handle the ESM/CommonJS boundary
 async function getTransformer() {
-  const { transform: expoMdxTransform } = await import(`./transformer.js`);
+  const { transform: expoMdxTransform } = await import(`./transformer.ts`);
   return expoMdxTransform;
 }
 

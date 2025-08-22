@@ -1,6 +1,6 @@
 import { readFile } from "@pinyinly/lib/fs";
 import type { Plugin } from "vite";
-import { transform } from "./transformer.js";
+import { transform } from "./transformer.ts";
 
 /**
  * Vite plugin that uses the same MDX transformer as Metro for faithful testing

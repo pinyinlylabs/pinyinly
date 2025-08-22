@@ -2,9 +2,8 @@
   "name": "@pinyinly/mdx",
   "type": "module",
   "exports": {
-    ".": "./src/index.ts",
     "./metro": "./src/metro.ts",
-    "./vite": "./src/viteMdxPlugin.ts"
+    "./vite": "./src/vite.ts"
   },
   "imports": {
     "#*.ts": "./src/*.ts"
@@ -16,7 +15,7 @@
   "dependencies": {
     "@mdx-js/mdx": "^3.1.0",
     "debug": "^4.3.7",
-    "estree-walker": "^3.0.3",
+    "estree-walker": "patch:estree-walker@npm%3A3.0.3#~/.yarn/patches/estree-walker-npm-3.0.3-0372979673.patch",
     "remark-flexible-markers": "^1.0.0",
     "unified": "^11.0.0"
   },
@@ -27,7 +26,7 @@
   "devDependencies": {
     "@pinyinly/eslint-rules": "workspace:*",
     "@pinyinly/lib": "workspace:*",
-    "@types/debug": "^4.1.12",
+    "@types/debug": "^4 <=4.3.x",
     "@types/node": "22.x",
     "@typescript-eslint/parser": "^8.36.0",
     "eslint": "^9.13.0",

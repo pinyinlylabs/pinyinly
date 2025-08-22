@@ -7,14 +7,10 @@
     "moduleResolution": "NodeNext",
     "outDir": "../../.moon/cache/types/projects/app",
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@/*": ["./src/*"]
     },
     "target": "ESNext",
-    "types": [
-      "@pinyinly/eslint-rules/nameof.d.ts"
-    ]
+    "types": ["@pinyinly/eslint-rules/nameof.d.ts"]
   },
   "include": [
     "*",

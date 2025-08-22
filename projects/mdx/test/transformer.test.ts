@@ -9,7 +9,7 @@ function getJsxContent(src: string) {
   return match[1]?.trim();
 }
 
-describe(transform, () => {
+describe(`transform` satisfies HasNameOf<typeof transform>, () => {
   test(`should transform basic MDX`, async () => {
     const result = await transform({
       filename: `test.mdx`,
