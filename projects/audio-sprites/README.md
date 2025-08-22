@@ -1,4 +1,4 @@
-# @pinyinly/expo-audio-sprites
+# @pinyinly/audio-sprites
 
 A package for efficiently handling audio sprites in Expo applications. Audio sprites combine
 multiple small audio files into fewer larger files to reduce the number of HTTP requests and improve
@@ -16,7 +16,7 @@ app performance.
 ## Installation
 
 ```bash
-npm install @pinyinly/expo-audio-sprites
+npm install @pinyinly/audio-sprites
 ```
 
 ## Usage
@@ -52,7 +52,7 @@ npm install @pinyinly/expo-audio-sprites
 module.exports = {
   presets: [
     [
-      "@pinyinly/expo-audio-sprites/babel",
+      "@pinyinly/audio-sprites/babel",
       {
         manifestPath: "./src/assets/audio/manifest.json",
       },
@@ -144,7 +144,7 @@ generated sprites:
 The package exports utilities for build tools to process rules:
 
 ```typescript
-import { applyRules, generateSpriteAssignments } from "@pinyinly/expo-audio-sprites/client";
+import { applyRules, generateSpriteAssignments } from "@pinyinly/audio-sprites/client";
 
 // Apply rules to a single file
 const spriteName = applyRules("audio/wiki/hello/greeting.m4a", rules);

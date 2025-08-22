@@ -1,3 +1,4 @@
+import { viteMdxPlugin } from "@pinyinly/mdx/vite";
 import react from "@vitejs/plugin-react";
 import tsconfigPaths from "vite-tsconfig-paths";
 import { defineConfig } from "vitest/config";
@@ -13,5 +14,5 @@ export default defineConfig({
     },
     testTimeout: 30_000, // pglite can be slow
   },
-  plugins: [tsconfigPaths(), react()],
+  plugins: [viteMdxPlugin(), tsconfigPaths(), react()],
 });

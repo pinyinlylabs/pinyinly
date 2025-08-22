@@ -1,5 +1,5 @@
 import { IS_CI } from "#util/env.js";
-import { analyzeAudioFile } from "@pinyinly/expo-audio-sprites/server";
+import { analyzeAudioFile } from "@pinyinly/audio-sprites/server";
 import { glob } from "@pinyinly/lib/fs";
 import chalk from "chalk";
 import { execSync } from "node:child_process";

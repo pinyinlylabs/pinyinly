@@ -1,5 +1,4 @@
-// pyly-not-src-test
-import { createTransformer, transform } from "#mdx/metro-transformer.js";
+import { createTransformer, transform } from "#transformer.ts";
 import { describe, expect, test } from "vitest";
 
 function getJsxContent(src: string) {
@@ -10,7 +9,7 @@ function getJsxContent(src: string) {
   return match[1]?.trim();
 }
 
-describe(transform, () => {
+describe(`transform` satisfies HasNameOf<typeof transform>, () => {
   test(`should transform basic MDX`, async () => {
     const result = await transform({
       filename: `test.mdx`,
