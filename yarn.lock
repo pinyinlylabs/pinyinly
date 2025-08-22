@@ -4697,6 +4697,7 @@ __metadata:
     "@pinyinly/lib": "workspace:*"
     "@types/node": "npm:22.x"
     "@typescript-eslint/parser": "npm:^8.36.0"
+    chalk: "npm:^5.5.0"
     eslint: "npm:^9.13.0"
     eslint-plugin-import: "npm:^2.31.0"
     eslint-plugin-unicorn: "npm:^60.0.0"
@@ -4748,7 +4749,6 @@ __metadata:
     vitest: "npm:^3.2.4"
   languageName: unknown
   linkType: soft
-
 
 "@pinyinly/lib@workspace:*, @pinyinly/lib@workspace:projects/lib":
   version: 0.0.0-use.local
