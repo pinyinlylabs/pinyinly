@@ -3,11 +3,13 @@ import { httpSessionHeaderTx } from "@/util/http";
 import type { QueryClient } from "@tanstack/react-query";
 import type { HTTPHeaders } from "@trpc/client";
 import { httpLink, retryLink } from "@trpc/client";
+import type { CreateTRPCReact } from "@trpc/react-query";
 import { createTRPCReact } from "@trpc/react-query";
 import type { ReactNode } from "react";
 import { useState } from "react";
 
-export const trpc = createTRPCReact<AppRouter>();
+export const trpc: CreateTRPCReact<AppRouter, unknown> =
+  createTRPCReact<AppRouter>();
 
 export const TrpcProvider = ({
   children,
