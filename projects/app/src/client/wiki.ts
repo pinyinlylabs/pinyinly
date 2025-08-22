@@ -2854,3 +2854,5 @@ const registry: Record<string, MdxComponentType> = {
   "𭕄/~radical/meaning": lazyMdx(() => import(`./wiki/𭕄/~radical/meaning.mdx`)),
 // </pyly-glob-template>
 };
+
+export const registry_ForTesting = registry;

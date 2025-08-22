@@ -1,5 +1,5 @@
 import { IS_CI } from "#util/env.js";
-import { createSpeechFileTests } from "@pinyinly/expo-audio-sprites/testing";
+import { createSpeechFileTests } from "@pinyinly/audio-sprites/testing";
 import path from "node:path";
 import { describe } from "vitest";
 import { projectRoot } from "../helpers.ts";

@@ -5,6 +5,22 @@ import { expect, vi } from "vitest";
 
 expect.extend(matchers);
 
+// Mock expo-audio to avoid pulling in native modules, avoids:
+//
+// ```
+// TypeError: Cannot read properties of undefined (reading 'NativeModule')
+//  ❯ ../../node_modules/expo-modules-core/src/NativeModule.ts:8:32
+//       6| ensureNativeModulesAreInstalled();
+//       7|
+//       8| export default globalThis.expo.NativeModule as typeof NativeModule;
+//        |                                ^
+//       9|
+//  ❯ ../../node_modules/expo-modules-core/src/index.ts:7:1
+// ```
+vi.mock(`expo-audio`, () => {
+  return {};
+});
+
 // Mock react-native to use react-native-web otherwise Node will try to import
 // Flow type files and fail.
 vi.mock(`react-native`, async () => {

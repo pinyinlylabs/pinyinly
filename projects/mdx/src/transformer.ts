@@ -1,17 +1,25 @@
-// @ts-check
-
 import makeDebug from "debug";
 import { walk } from "estree-walker";
 import remarkFlexibleMarkers from "remark-flexible-markers";
+import type { createProcessor } from "@mdx-js/mdx";
+import type { Program } from "estree";
+import type { PluggableList } from "unified";
 
 const debug = makeDebug(`pinyinly:mdx:transform`);
 
+export interface MetroBabelTransformerProps {
+  filename: string;
+  src: string;
+}
+
+export type MetroBabelTransformer = (
+  props: MetroBabelTransformerProps,
+) => Promise<MetroBabelTransformerProps>;
+
 /**
  * Generates template string from raw MDX string
- * @param {string} rawMdxString - The raw MDX string to transform
- * @returns {string} The templated MDX string
  */
-const getTemplate = (rawMdxString) => {
+const getTemplate = (rawMdxString: string): string => {
   return (
     rawMdxString
       // Remove default HTML components:
@@ -27,7 +35,7 @@ const getTemplate = (rawMdxString) => {
       //
       // With:
       //
-      //   const _components = Object.create(_provideComponents(), props.components);
+      //   const _components = Object.assign(Object.create(_provideComponents()), props.components);
       //
       // This allows `_provideComponents()` to return a `Proxy` object and provide better
       // debugging for missing components.
@@ -52,29 +60,16 @@ const getTemplate = (rawMdxString) => {
 };
 
 /**
- * @typedef {import('unist').Node} Node
- * @typedef {import('unified').PluggableList} PluggableList
- * @typedef {import('@mdx-js/mdx').createProcessor} createProcessorType
- *
- * @typedef {Object} ImageNode
- * @property {string} url - The URL of the image
- * @property {string} alt - Alt text for the image
- * @property {string|null} title - Optional title for the image
- * @property {'image'} type - The type of node
- */
-
-/**
  * Custom recma plugin for handling src attributes in JSX elements
- * @param {Object} options - Configuration options
- * @param {function(string): boolean} options.matchLocalAsset - Function to determine if an asset URL is local
- * @param {function(string): boolean} [options.matchAttributeName] - Function to determine if an attribute name is a source
- * @returns {function(import('estree').Program): void} A transformer function
  */
 function jsxSrcAttributePlugin({
   matchLocalAsset,
   matchAttributeName = (name) => /(src|source)$/i.test(name),
+}: {
+  matchLocalAsset: (url: string) => boolean;
+  matchAttributeName?: (name: string) => boolean;
 }) {
-  return (tree) => {
+  return (tree: Program) => {
     walk(tree, {
       enter(node) {
         if (
@@ -110,27 +105,31 @@ function jsxSrcAttributePlugin({
   };
 }
 
+export interface CreateTransformerOptions {
+  /** Function to determine if a file should be transformed */
+  matchFile?: (props: MetroBabelTransformerProps) => boolean;
+  /** Function to determine if an asset URL is local */
+  matchLocalAsset?: (url: string) => boolean;
+  /** List of remark plugins */
+  remarkPlugins?: PluggableList;
+  /** The import source for MDX components */
+  providerImportSource?: string;
+}
+
 /**
  * Creates an MDX transformer for Metro bundler
- * @param {Object} options - Configuration options
- * @param {function({filename: string, src: string}): boolean} [options.matchFile] - Function to determine if a file should be transformed
- * @param {function(string): boolean} [options.matchLocalAsset] - Function to determine if an asset URL is local
- * @param {PluggableList} [options.remarkPlugins] - List of remark plugins
- * @param {import("@mdx-js/mdx").ProcessorOptions["providerImportSource"]} [options.providerImportSource] - The import source for MDX components
- * @returns {MetroBabelTransformer} The transformer function
  */
 export function createTransformer({
   matchFile = (props) => /\.mdx?$/.test(props.filename),
   matchLocalAsset = (url) => /^[.@]/.test(url),
   providerImportSource,
   remarkPlugins = [],
-} = {}) {
-  /** @type {ReturnType<typeof import('@mdx-js/mdx').createProcessor>|undefined} */
-  let _compiler;
+}: CreateTransformerOptions = {}): MetroBabelTransformer {
+  /** Cached MDX compiler */
+  let _compiler: Awaited<ReturnType<typeof createProcessor>> | undefined;
 
   /**
    * Creates or returns the cached MDX compiler
-   * @returns {Promise<ReturnType<typeof import('@mdx-js/mdx').createProcessor>>} The MDX compiler
    */
   async function createCompiler() {
     if (_compiler) {
@@ -150,16 +149,15 @@ export function createTransformer({
 
   /**
    * Transform function for Metro bundler
-   * @type {MetroBabelTransformer}
    */
-  const transform = async (props) => {
+  const transform: MetroBabelTransformer = async (props) => {
     if (!matchFile(props)) {
       return props;
     }
 
     const compiler = await createCompiler();
 
-    let { value: contents } = await compiler.process({
+    const { value: contents } = await compiler.process({
       value: props.src,
       path: props.filename,
     });
@@ -183,7 +181,3 @@ export const transform = createTransformer({
     [remarkFlexibleMarkers, { markerClassName: `pyly-mdx-mark` }],
   ],
 });
-
-/**
- * @typedef {function({filename: string, src: string}): Promise<{filename: string, src: string}>} MetroBabelTransformer
- */

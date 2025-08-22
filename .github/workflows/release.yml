@@ -59,7 +59,6 @@ jobs:
         # if: steps.moon-deployVercel-query.target-affected
         env:
           EXPO_PUBLIC_POSTHOG_API_KEY: ${{ secrets.EXPO_PUBLIC_POSTHOG_API_KEY }}
-          EXPO_PUBLIC_REPLICACHE_LICENSE_KEY: ${{ secrets.EXPO_PUBLIC_REPLICACHE_LICENSE_KEY }}
           EXPO_PUBLIC_SENTRY_DSN: ${{ secrets.EXPO_PUBLIC_SENTRY_DSN }}
           PYLY_STRICT_EXPO_ENV_VARS: "true"
           PYLY_VERCEL_PROD: ""
@@ -112,7 +111,6 @@ jobs:
         # if: steps.moon-deployEasUpdate-query.target-affected
         env:
           EXPO_PUBLIC_POSTHOG_API_KEY: ${{ secrets.EXPO_PUBLIC_POSTHOG_API_KEY }}
-          EXPO_PUBLIC_REPLICACHE_LICENSE_KEY: ${{ secrets.EXPO_PUBLIC_REPLICACHE_LICENSE_KEY }}
           EXPO_PUBLIC_SENTRY_DSN: ${{ secrets.EXPO_PUBLIC_SENTRY_DSN }}
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
           PYLY_STRICT_EXPO_ENV_VARS: "true"
