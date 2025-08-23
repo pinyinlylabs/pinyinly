@@ -143,12 +143,12 @@ function hoistRequiresPlugin() {
 
       const candidateName = basename || `asset`;
       let variableName = `__mdx_import_${candidateName}_${importCounter++}`;
-      
+
       // Ensure uniqueness (though collision is very unlikely with counter)
       while ([...moduleToVariable.values()].includes(variableName)) {
         variableName = `__mdx_import_${candidateName}_${importCounter++}`;
       }
-      
+
       return variableName;
     }
 
