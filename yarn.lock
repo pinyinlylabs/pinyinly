@@ -19152,9 +19152,9 @@ __metadata:
   linkType: hard
 
 "ucd-full@npm:^16.0.0":
-  version: 16.0.0
-  resolution: "ucd-full@npm:16.0.0"
-  checksum: 10c0/ed79f46c908e869d0e776b99d971e3c71f74c1dee5a7a6a7373e2108ed6771125ec0ac07b31a06220fb926c0d00fdc423dd45832bc33ec9c702858d514b5753d
+  version: 16.0.1
+  resolution: "ucd-full@npm:16.0.1"
+  checksum: 10c0/2517dd9c1a964aaddfc41d1578785e40c1be48c64dbcb2d9a4a88b208d93c812210133c8eaef511578a6f4e05c0d24ad5cbd82b3af8c6e6e31b46c7f45af222a
   languageName: node
   linkType: hard
 
