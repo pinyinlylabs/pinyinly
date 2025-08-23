@@ -1,7 +1,7 @@
 import * as fs from "@pinyinly/lib/fs";
 import { execa } from "execa";
 import path from "node:path";
-import { generateSpriteCommand } from "./ffmpeg.ts";
+import { generateSpriteCommand, analyzeAudioFile } from "./ffmpeg.ts";
 import { loadManifest } from "./manifestRead.ts";
 import {
   applyRulesWithRule,
@@ -10,6 +10,10 @@ import {
   syncManifestWithFilesystem,
 } from "./manifestWrite.ts";
 import type { AudioFileInfo, SpriteManifest } from "./types.ts";
+import { glob } from "@pinyinly/lib/fs";
+import chalk from "chalk";
+import { execSync } from "node:child_process";
+import { describe, expect, test } from "vitest";
 
 /**
  * Result of checking the sprite manifest status.
@@ -503,4 +507,170 @@ export async function testSprites(
     autoCleanup: autoFix,
     syncManifest: autoFix,
   });
+}
+
+/**
+ * Configuration options for speech file testing.
+ */
+export interface SpeechFileTestOptions {
+  /** Glob pattern for audio files to test */
+  audioGlob: string;
+  /** Suffix to identify fix files (default: "-fix") */
+  fixTag?: string;
+  /** Target LUFS for loudness testing (default: -18) */
+  targetLufs?: number;
+  /** Allowed tolerance for loudness deviation (default: 1) */
+  loudnessTolerance?: number;
+  /** Allowed silence at start/end in seconds (default: 0.1) */
+  allowedStartOrEndOffset?: number;
+  /** Minimum duration for audio files in seconds (default: 0.5) */
+  minDuration?: number;
+  /** Tolerance for duration comparison in seconds (default: 0.05) */
+  durationTolerance?: number;
+  /** Project root path for relative path calculation */
+  projectRoot?: string;
+  /** Whether we're running in CI environment (affects fix command behavior) */
+  isCI?: boolean;
+}
+
+/**
+ * Helper function to execute or log fix commands based on environment.
+ */
+function execOrLogFixCommand(
+  fixCommand: string,
+  fixedFilePath: string,
+  isCI = false,
+): void {
+  if (isCI) {
+    console.warn(
+      chalk.yellow(
+        `To fix this, re-run the test outside CI or run: `,
+        chalk.dim(fixCommand),
+      ),
+    );
+  } else {
+    execSync(
+      `(echo "% ${fixCommand}"; ${fixCommand}) > "${fixedFilePath}.log" 2>&1`,
+    );
+    console.warn(chalk.yellow(chalk.bold(`Created:`), fixedFilePath));
+  }
+}
+
+/**
+ * Create speech file tests for audio files matching the given pattern.
+ * This function generates vitest test cases for validating speech audio files.
+ *
+ * @param options Configuration for speech file testing
+ */
+export async function createSpeechFileTests(
+  options: SpeechFileTestOptions,
+): Promise<void> {
+  const {
+    audioGlob,
+    fixTag = `-fix`,
+    targetLufs = -18,
+    loudnessTolerance = 1,
+    allowedStartOrEndOffset = 0.1,
+    minDuration = 0.5,
+    durationTolerance = 0.05,
+    projectRoot,
+    isCI = false,
+  } = options;
+
+  for (const filePath of await glob(audioGlob)) {
+    if (filePath.includes(fixTag)) {
+      continue;
+    }
+
+    const projectRelPath =
+      projectRoot == null ? filePath : path.relative(projectRoot, filePath);
+
+    describe(projectRelPath, () => {
+      test(`container and real duration is within allowable tolerance and not corrupted`, async () => {
+        const { duration } = await analyzeAudioFile(filePath);
+
+        const delta = Math.abs(duration.fromStream - duration.fromContainer);
+        expect(delta).toBeLessThanOrEqual(durationTolerance);
+      });
+
+      test(`audio file is not empty (based on duration)`, async () => {
+        const { duration } = await analyzeAudioFile(filePath);
+
+        expect(duration.fromStream).toBeGreaterThanOrEqual(minDuration);
+      });
+
+      test(`loudness is within allowed tolerance`, async () => {
+        // ChatGPT recommends to target -18 LUFS because:
+        //
+        // | Use Case                     | Target LUFS                              | Notes                                                       |
+        // | ---------------------------- | ---------------------------------------- | ----------------------------------------------------------- |
+        // | **Spotify / Apple Music**    | `-14 LUFS`                               | Most streaming platforms normalize to this                  |
+        // | **YouTube**                  | `-14 to -13 LUFS`                        | YouTube doesn't officially disclose, but `-14 LUFS` is safe |
+        // | **Podcast**                  | `-16 LUFS`                               | Mono or low-bandwidth optimized                             |
+        // | **Broadcast (TV / Radio)**   | `-23 LUFS` (Europe) <br> `-24 LUFS` (US) | EBU R128 (Europe), ATSC A/85 (US)                           |
+        // | **Game audio / apps**        | `-16 to -20 LUFS`                        | Depends on platform & purpose                               |
+        // | **Speech for learning apps** | `-18 to -16 LUFS`                        | Good compromise between clarity and comfort                 |
+        //
+        // Target **-18 LUFS** because:
+        //
+        // - 🎧 Less aggressive than music
+        // - 🧠 Good for repeated listening
+        // - 📱 Comfortable on mobile speakers
+        // - 🔄 Balances speech clarity and ear fatigue
+
+        const { loudnorm } = await analyzeAudioFile(filePath);
+
+        const loudness = loudnorm.input_i;
+        const delta = Math.abs(loudness - targetLufs);
+
+        if (delta > loudnessTolerance) {
+          const ext = path.extname(projectRelPath);
+          const fixedSuffix = `-loudness${fixTag}${ext}`;
+          const fixedFilePath = `${filePath}${fixedSuffix}`;
+          const fixCommand = `ffmpeg -y -i "${filePath}" -af loudnorm=I=-18:TP=-1.5:LRA=5:linear=true:measured_I=${loudnorm.input_i}:measured_TP=${loudnorm.input_tp}:measured_LRA=${loudnorm.input_lra}:measured_thresh=${loudnorm.input_thresh}:offset=${loudnorm.target_offset}:print_format=summary "${fixedFilePath}"`;
+
+          execOrLogFixCommand(fixCommand, fixedFilePath, isCI);
+        }
+
+        expect(delta).toBeLessThanOrEqual(loudnessTolerance);
+      });
+
+      test(`silence is trimmed`, async () => {
+        const { silences, duration } = await analyzeAudioFile(filePath);
+
+        const totalDuration = duration.fromStream;
+
+        const expectedStart = 0;
+        const expectedEnd = totalDuration;
+        let start = expectedStart;
+        let end = expectedEnd;
+
+        for (const silence of silences) {
+          // Check if silence is at the start
+          if (silence.start <= allowedStartOrEndOffset) {
+            start = Math.max(start, silence.end);
+            continue;
+          }
+
+          // Check if silence is at the end
+          if (silence.end >= totalDuration - allowedStartOrEndOffset) {
+            end = Math.min(end, silence.start);
+            continue;
+          }
+        }
+
+        if (start > expectedStart || end < expectedEnd) {
+          const ext = path.extname(projectRelPath);
+          const fixedSuffix = `-silence${fixTag}${ext}`;
+          const fixedFilePath = `${filePath}${fixedSuffix}`;
+          const fixCommand = `ffmpeg -y -i "${filePath}" -af atrim=start=${start}:end=${end} "${fixedFilePath}"`;
+
+          execOrLogFixCommand(fixCommand, fixedFilePath, isCI);
+        }
+
+        expect(start).toBe(expectedStart);
+        expect(end).toBe(expectedEnd);
+      });
+    });
+  }
 }
