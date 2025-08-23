@@ -11,7 +11,7 @@
     "prettier": "^3.4.2",
     "semver": "^7.5.0",
     "tsx": "^4.15.7",
-    "typescript": "patch:typescript@npm%3A5.8.3#~/.yarn/patches/typescript-npm-5.8.3-fbd7aef456.patch",
+    "typescript": "patch:typescript@npm%3A5.9.2#~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch",
     "yaml": "^2.7.0"
   },
   "engines": {
@@ -42,8 +42,6 @@
     "metro-runtime@npm:^0.80.3": "patch:metro-runtime@npm%3A0.80.12#~/.yarn/patches/metro-runtime-npm-0.80.12-8e7410ce37.patch",
     "metro-runtime@npm:0.80.9": "patch:metro-runtime@npm%3A0.80.12#~/.yarn/patches/metro-runtime-npm-0.80.12-8e7410ce37.patch",
     "@expo/cli@npm:0.21.8": "patch:@expo/cli@npm%3A0.21.8#~/.yarn/patches/@expo-cli-npm-0.21.8-5950619da9.patch",
-    "typescript@npm:^5.5.2": "patch:typescript@npm%3A5.7.2#~/.yarn/patches/typescript-npm-5.7.2-b1f84a8b28.patch",
-    "typescript@npm:5.1.6": "patch:typescript@npm%3A5.7.2#~/.yarn/patches/typescript-npm-5.7.2-b1f84a8b28.patch",
     "@expo/cli@npm:0.22.7": "patch:@expo/cli@npm%3A0.22.7#~/.yarn/patches/@expo-cli-npm-0.22.7-9efc9f6be8.patch",
     "babel-preset-expo@npm:~12.0.4": "patch:babel-preset-expo@npm%3A12.0.4#~/.yarn/patches/babel-preset-expo-npm-12.0.4-a1ecc381d7.patch",
     "@react-navigation/native-stack@npm:^7.2.0": "patch:@react-navigation/native-stack@npm%3A7.2.0#~/.yarn/patches/@react-navigation-native-stack-npm-7.2.0-17adc45a3e.patch",
@@ -52,8 +50,7 @@
     "nanoid@npm:^3.3.6": "patch:nanoid@npm%3A5.1.2#~/.yarn/patches/nanoid-npm-5.1.2-40381f6f88.patch",
     "nanoid@npm:3.3.8": "patch:nanoid@npm%3A5.1.2#~/.yarn/patches/nanoid-npm-5.1.2-40381f6f88.patch",
     "nanoid@npm:^3.3.7": "patch:nanoid@npm%3A5.1.2#~/.yarn/patches/nanoid-npm-5.1.2-40381f6f88.patch",
-    "typescript@npm:~5.5.2": "patch:typescript@npm%3A5.8.3#~/.yarn/patches/typescript-npm-5.8.3-fbd7aef456.patch",
-    "typescript@npm:^5.7.3": "patch:typescript@npm%3A5.8.3#~/.yarn/patches/typescript-npm-5.8.3-fbd7aef456.patch",
+    "typescript@npm:~5.5.2": "patch:typescript@npm%3A5.9.2#~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch",
     "@expo/cli@npm:0.22.20": "patch:@expo/cli@npm%3A0.22.20#~/.yarn/patches/@expo-cli-npm-0.22.20-0232ba978d.patch",
     "@types/pg@npm:8.6.1": "patch:@types/pg@npm%3A8.11.11#~/.yarn/patches/@types-pg-npm-8.11.11-c5a8a91498.patch",
     "@types/pg@npm:*": "patch:@types/pg@npm%3A8.11.11#~/.yarn/patches/@types-pg-npm-8.11.11-c5a8a91498.patch",
@@ -72,6 +69,6 @@
     "react-native-css-interop@npm:0.1.22": "patch:react-native-css-interop@npm%3A0.1.22#~/.yarn/patches/react-native-css-interop-npm-0.1.22-9770293dfb.patch",
     "estree-walker@npm:^3.0.3": "patch:estree-walker@npm%3A3.0.3#~/.yarn/patches/estree-walker-npm-3.0.3-0372979673.patch",
     "estree-walker@npm:^3.0.0": "patch:estree-walker@npm%3A3.0.3#~/.yarn/patches/estree-walker-npm-3.0.3-0372979673.patch",
-    "@expo/cli@npm:0.24.20": "patch:@expo/cli@npm%3A0.24.20#~/.yarn/patches/@expo-cli-npm-0.24.20-a2a1030ae4.patch"
+    "typescript@npm:^5.7.3": "patch:typescript@npm%3A5.9.2#~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch"
   }
 }
