@@ -1,9 +1,10 @@
 tasks:
   typecheck:
-    command: yarn tsc --build
+    command: tsc --build
     inputs:
       - "!dist/"
       - "!node_modules/"
       - "*.{ts,cts,mts,tsx,mtsx,js,cjs,mjs,json}"
       - "**/*.{ts,cts,mts,tsx,mtsx,js,cjs,mjs,json}"
       - /tsconfig.base.json
+    toolchain: "node"
