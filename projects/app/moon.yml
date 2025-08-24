@@ -63,7 +63,7 @@ tasks:
   buildVercelExpoSentry:
     script: |
       rsync -a --delete @group(buildVercelExpoOutdir) @group(buildVercelExpoSentryOutdir) &&
-      npx -y @sentry/cli@2.50.2 sourcemaps inject @group(buildVercelExpoSentryOutdir)
+      npx -y @sentry/cli@2.52.0 sourcemaps inject @group(buildVercelExpoSentryOutdir)
     deps:
       - buildVercelExpo
     inputs:
@@ -143,7 +143,7 @@ tasks:
       - buildVercel
 
   deployVercelSentry:
-    command: npx -y @sentry/cli@2.50.2 sourcemaps upload -o pinyinly -p app @group(buildVercelOutdir)
+    command: npx -y @sentry/cli@2.52.0 sourcemaps upload -o pinyinly -p app @group(buildVercelOutdir)
     deps:
       - buildVercel
     options:
@@ -229,7 +229,7 @@ tasks:
       NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
 
   expoDoctor:
-    command: npx -y expo-doctor@1.15.1
+    command: npx -y expo-doctor@1.13.5
     env:
       # Don't check that all the expo-* packages are the latest versions. That's
       # already handled by renovate in a way that doesn't break PR builds when a

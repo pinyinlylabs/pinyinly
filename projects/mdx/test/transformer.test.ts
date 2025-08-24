@@ -25,14 +25,18 @@ describe(`transform` satisfies HasNameOf<typeof transform>, () => {
 ![custom alt text](./foo/bar.png)`,
     });
 
-    expect(result.src.includes(`require("./foo/bar.png")`)).toEqual(true);
+    expect(
+      result.src.includes(`import __mdx_import_foo_bar_0 from "./foo/bar.png"`),
+    ).toEqual(true);
+    expect(result.src.includes(`src={__mdx_import_foo_bar_0}`)).toEqual(true);
     expect(result.src).toMatchInlineSnapshot(`
       "/*@jsxRuntime automatic*/
       /*@jsxImportSource react*/
       import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+      import __mdx_import_foo_bar_0 from "./foo/bar.png";
       function _createMdxContent(props) {
         const _components = Object.assign(Object.create(_provideComponents()), props.components);
-        return <><_components.h1>{"Hello World"}</_components.h1>{"\\n"}<_components.blockquote>{"\\n"}<_components.p>{"Universe"}</_components.p>{"\\n"}</_components.blockquote>{"\\n"}<_components.ul>{"\\n"}<_components.li>{"a"}</_components.li>{"\\n"}<_components.li>{"b"}</_components.li>{"\\n"}</_components.ul>{"\\n"}<_components.p><_components.img src={require("./foo/bar.png")} alt="custom alt text" /></_components.p></>;
+        return <><_components.h1>{"Hello World"}</_components.h1>{"\\n"}<_components.blockquote>{"\\n"}<_components.p>{"Universe"}</_components.p>{"\\n"}</_components.blockquote>{"\\n"}<_components.ul>{"\\n"}<_components.li>{"a"}</_components.li>{"\\n"}<_components.li>{"b"}</_components.li>{"\\n"}</_components.ul>{"\\n"}<_components.p><_components.img src={__mdx_import_foo_bar_0} alt="custom alt text" /></_components.p></>;
       }
       export default function MDXContent(props = {}) {
         const {wrapper: MDXLayout} = {
@@ -186,9 +190,11 @@ import Foo from './foo'
     });
 
     expect(getJsxContent(result.src)).toMatchInlineSnapshot(
-      `"<_components.p><_components.img src={require("./foo/bar.png")} alt="alt text" /></_components.p>"`,
+      `"<_components.p><_components.img src={__mdx_import_foo_bar_0} alt="alt text" /></_components.p>"`,
     );
-    expect(result.src.includes(`require("./foo/bar.png")`)).toEqual(true);
+    expect(
+      result.src.includes(`import __mdx_import_foo_bar_0 from "./foo/bar.png"`),
+    ).toEqual(true);
   });
 
   test(`transforms code blocks`, async () => {
@@ -219,12 +225,83 @@ console.log("hello")
 <SomeOtherElement src="https://external.com/image.jpg" />`,
     });
 
-    expect(result.src).toContain(`src={require("./image.jpg")}`);
-    expect(result.src).toContain(`source={require("./image.jpg")}`);
+    expect(result.src).toContain(
+      `import __mdx_import_image_0 from "./image.jpg"`,
+    );
+    expect(result.src).toContain(`src={__mdx_import_image_0}`);
+    expect(result.src).toContain(`source={__mdx_import_image_0}`);
     expect(result.src).toContain(`src="https://external.com/image.jpg"`);
 
     expect(getJsxContent(result.src)).toMatchInlineSnapshot(
-      `"<><_components.h1>{"Hello World"}</_components.h1>{"\\n"}<MyComponent src={require("./image.jpg")} />{"\\n"}<MyComponent imageSrc={require("./image.jpg")} />{"\\n"}<MyComponent source={require("./image.jpg")} />{"\\n"}<SomeOtherElement src="https://external.com/image.jpg" /></>"`,
+      `"<><_components.h1>{"Hello World"}</_components.h1>{"\\n"}<MyComponent src={__mdx_import_image_0} />{"\\n"}<MyComponent imageSrc={__mdx_import_image_0} />{"\\n"}<MyComponent source={__mdx_import_image_0} />{"\\n"}<SomeOtherElement src="https://external.com/image.jpg" /></>"`,
     );
+  });
+
+  test(`should hoist require() calls to top-level imports for Vitest compatibility`, async () => {
+    const result = await transform({
+      filename: `test.mdx`,
+      src: `
+# Test
+
+![image1](./assets/image1.png)
+![image2](./assets/image2.jpg)
+![image1 again](./assets/image1.png)
+
+<MyComponent src="./assets/video.mp4" />`,
+    });
+
+    // Should have imports at the top level
+    expect(result.src).toContain(
+      `import __mdx_import_assets_image1_0 from "./assets/image1.png"`,
+    );
+    expect(result.src).toContain(
+      `import __mdx_import_assets_image2_1 from "./assets/image2.jpg"`,
+    );
+    expect(result.src).toContain(
+      `import __mdx_import_assets_video_2 from "./assets/video.mp4"`,
+    );
+
+    // Should not contain require() calls
+    expect(result.src).not.toContain(`require(`);
+
+    // Should use the same import variable for the same module path
+    const image1Matches = result.src.match(/__mdx_import_assets_image1_0/g);
+    expect(image1Matches).toHaveLength(3); // Once in import, twice in usage
+
+    // Check that imports are at the top of the module
+    const lines = result.src.split(`\n`).filter((line: string) => line.trim());
+    const importLines = lines.filter((line: string) =>
+      line.startsWith(`import`),
+    );
+    const firstNonImportIndex = lines.findIndex(
+      (line: string) => !line.startsWith(`import`) && !line.startsWith(`/*`),
+    );
+    const lastImportLine = importLines.at(-1);
+    const lastImportIndex =
+      lastImportLine == null ? -1 : lines.lastIndexOf(lastImportLine);
+
+    // All imports should come before other code
+    expect(lastImportIndex).toBeLessThan(firstNonImportIndex);
+  });
+
+  test(`should work with createTransformer and custom options`, async () => {
+    const customTransform = createTransformer({
+      matchLocalAsset: (url: string) => url.startsWith(`./custom/`),
+    });
+
+    const result = await customTransform({
+      filename: `test.mdx`,
+      src: `
+![should not transform](./foo/bar.png)
+![should transform](./custom/baz.jpg)`,
+    });
+
+    // Only the custom path should be transformed to import
+    expect(result.src).toContain(
+      `import __mdx_import_custom_baz_0 from "./custom/baz.jpg"`,
+    );
+    expect(result.src).toContain(`src={__mdx_import_custom_baz_0}`);
+    expect(result.src).toContain(`src="./foo/bar.png"`); // should remain as string
+    expect(result.src).not.toContain(`require(`);
   });
 });

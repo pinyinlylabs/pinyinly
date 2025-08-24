@@ -1,0 +1,29 @@
+diff --git a/lib/lib.dom.d.ts b/lib/lib.dom.d.ts
+index 14508e8dc3effb02a4bd808e61770aacbc8b13b7..185f809b5f64b6e98aac2f653122eeadb4d7db2a 100644
+--- a/lib/lib.dom.d.ts
++++ b/lib/lib.dom.d.ts
+@@ -26378,7 +26378,7 @@ declare var Response: {
+      *
+      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Response/json_static)
+      */
+-    json(data: any, init?: ResponseInit): Response;
++    json(data: object | string, init?: ResponseInit): Response;
+     /**
+      * The **`redirect()`** static method of the Response interface returns a `Response` resulting in a redirect to the specified URL.
+      *
+@@ -36749,6 +36749,7 @@ interface Window extends EventTarget, AnimationFrameProvider, GlobalEventHandler
+     releaseEvents(): void;
+     /**
+      * The **`window.requestIdleCallback()`** method queues a function to be called during a browser's idle periods.
++     * @deprecated not supported on Safari
+      *
+      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Window/requestIdleCallback)
+      */
+@@ -38785,6 +38786,7 @@ declare function prompt(message?: string, _default?: string): string | null;
+ declare function releaseEvents(): void;
+ /**
+  * The **`window.requestIdleCallback()`** method queues a function to be called during a browser's idle periods.
++ * @deprecated not supported on Safari
+  *
+  * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Window/requestIdleCallback)
+  */
