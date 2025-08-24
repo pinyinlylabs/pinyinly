@@ -1,7 +1,7 @@
 import type { PropsWithChildren } from "react";
 import { Children, createContext, use } from "react";
 import { Text, View } from "react-native";
-import Template from "./demo/mdx/template.tsx";
+import Template from "./demo/mdx/template.mdx.tsx";
 
 export default () => {
   return (

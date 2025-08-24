@@ -10,7 +10,7 @@ import { mkdir } from "node:fs/promises";
  */
 function getTypedTemplate(rawMdxString: string): string {
   return (
-    // Add @ts-nocheck to skip TypeScript validation for generated files
+    // Add @ts-nocheck for generated files to avoid JSX runtime issues
     `// @ts-nocheck\n` +
     rawMdxString
       // Replace the function signature to include proper types
@@ -59,8 +59,8 @@ async function precompileWikiMdx() {
       // Apply additional typing for precompiled components
       const tsxContent = getTypedTemplate(rawTsxContent);
       
-      // Generate the corresponding TSX file path
-      const tsxFile = mdxFile.replace(/\.mdx$/, ".tsx");
+      // Generate the corresponding .mdx.tsx file path
+      const tsxFile = mdxFile.replace(/\.mdx$/, ".mdx.tsx");
       
       // Ensure the directory exists
       await mkdir(path.dirname(tsxFile), { recursive: true });
