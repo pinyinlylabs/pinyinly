@@ -26,6 +26,7 @@ tasks:
     deps:
       - buildEasUpdate
       - buildVercel
+      - precompileWikiMdx
 
   buildEasUpdate:
     command: yarn expo export -p ios -p android --source-maps --output-dir @group(buildEasUpdateOutdir)
@@ -264,6 +265,21 @@ tasks:
   typecheck:
     deps:
       - ~:buildExpoRouterTypes
+
+  # Precompile wiki MDX files to TSX for faster builds
+  precompileWikiMdx:
+    command: "tsx bin/precompileWikiMdx.ts"
+    inputs:
+      - "src/**/*.mdx"
+      - "bin/precompileWikiMdx.ts"
+    outputs:
+      - "src/**/*.mdx.tsx"
+
+  # Combined task to precompile MDX files
+  precompileMdx:
+    deps:
+      - precompileWikiMdx
+    description: "Precompile all MDX files to TSX"
 
   lint:
     deps:
