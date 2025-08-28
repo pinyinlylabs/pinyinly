@@ -1,15 +1,326 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <_components.p>{"A small spot or point."}</_components.p>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {
+          "A small spot, point, or mark; the fundamental element representing a tiny location or position."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                   |\n| -------------- | ---------------------- |\n| Pinyin         | diǎn                   |\n| Core meaning   | dot; point; spot; mark |\n| Part of speech | radical; noun          |\n| Tone           | third tone             |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Visual Understanding"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 丶 as "}
+        <_components.strong>
+          {'"the beginning of all writing"'}
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"The smallest possible mark you can make with a brush"}
+        </_components.li>
+        {"\n"}
+        <_components.li>{"Like a drop of ink touching paper"}</_components.li>
+        {"\n"}
+        <_components.li>
+          {"The foundation from which all other characters grow"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Represents precision, focus, and starting points"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Shows where attention should be directed"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"As a Radical Component"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"丶 appears in many characters as a semantic or visual element:"}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Character | Meaning      | Role of 丶                 |\n| --------- | ------------ | -------------------------- |\n| "
+        }
+        <_components.strong>{"主"}</_components.strong>
+        {"    | master, main | Emphasizes importance      |\n| "}
+        <_components.strong>{"头"}</_components.strong>
+        {"    | head         | Marks the top/primary part |\n| "}
+        <_components.strong>{"太"}</_components.strong>
+        {"    | too, very    | Adds emphasis              |\n| "}
+        <_components.strong>{"半"}</_components.strong>
+        {"    | half         | Shows division point       |"}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Philosophical Significance"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"In Chinese writing culture, 丶 represents:"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Beginning"}</_components.strong>
+          {" - all complex things start with simple points"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Focus"}</_components.strong>
+          {" - drawing attention to specific locations"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Precision"}</_components.strong>
+          {" - exact placement and attention to detail"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Foundation"}</_components.strong>
+          {" - basic building block of written communication"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Usage in Writing"}</_components.h2>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Calligraphy Context"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"起笔"}</_components.strong>
+          {" - the starting stroke of any character"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"精确"}</_components.strong>
+          {" - precision in placement"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"基础"}</_components.strong>
+          {" - foundational element"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Modern Typography"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"标点"}</_components.strong>
+          {" - punctuation marks"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"重点"}</_components.strong>
+          {" - emphasis points"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"细节"}</_components.strong>
+          {" - attention to small details"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Examples in Characters"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"主人"}</_components.strong>
+          {' (zhǔrén) - "master, host" (丶 emphasizes authority)'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"头脑"}</_components.strong>
+          {' (tóunǎo) - "brain, mind" (丶 marks the top)'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"太阳"}</_components.strong>
+          {' (tàiyáng) - "sun" (丶 adds intensity)'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"半天"}</_components.strong>
+          {' (bàntiān) - "half day" (丶 shows division)'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Cultural Context"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"丶 embodies key Chinese aesthetic principles:"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"简约之美"}</_components.strong>
+          {" - beauty in simplicity"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"细节决定"}</_components.strong>
+          {" - details determine success"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"精工细作"}</_components.strong>
+          {" - careful, precise craftsmanship"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"一点一滴"}</_components.strong>
+          {" - step by step, drop by drop progress"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Learning Significance"}</_components.h2>
+      {"\n"}
+      <_components.p>{"For Chinese learners, 丶 represents:"}</_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Stroke fundamentals"}</_components.strong>
+          {" - mastering basic brush movements"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Character structure"}</_components.strong>
+          {" - understanding how components work"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Visual memory"}</_components.strong>
+          {" - recognizing patterns in complex characters"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Writing practice"}</_components.strong>
+          {" - developing proper stroke order"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Mnemonic Device"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Remember 丶 as "}
+        <_components.strong>{'"the artist\'s first touch"'}</_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"Every masterpiece begins with a single point"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Every character starts with this basic element"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Every student's journey begins with learning simple strokes"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Every conversation starts with focusing on one point"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Related Concepts"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Stroke | Name | Usage               |\n| ------ | ---- | ------------------- |\n| 丶     | 点   | Dot, point          |\n| 一     | 横   | Horizontal line     |\n| 丨     | 竖   | Vertical line       |\n| 丿     | 撇   | Left-falling stroke |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Writing Practice"}</_components.h2>
+      {"\n"}
+      <_components.p>{"When writing 丶:"}</_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Start position"}</_components.strong>
+          {" - top right area"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Movement"}</_components.strong>
+          {" - gentle downward pressure"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"End position"}</_components.strong>
+          {" - clean lift"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Shape"}</_components.strong>
+          {" - small, round dot"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {"丶 teaches us that "}
+        <_components.strong>
+          {"every complex journey begins with a single, focused point"}
+        </_components.strong>
+        {" - the essence of\nlearning Chinese characters."}
+      </_components.p>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

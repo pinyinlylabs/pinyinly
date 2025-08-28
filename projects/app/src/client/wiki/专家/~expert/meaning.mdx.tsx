@@ -1,15 +1,300 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <_components.p>{"A person with extensive knowledge or ability in a given subject."}</_components.p>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {
+          "Expert; specialist; professional with deep knowledge and extensive experience in a specific field."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                                        |\n| -------------- | ------------------------------------------- |\n| Pinyin         | zhuānjiā                                    |\n| Core meaning   | expert; specialist; authority; professional |\n| Part of speech | noun                                        |\n| Tone           | first + first tone                          |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Word Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "专家 combines the concepts of specialization and scholarly knowledge."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component | Meaning                                               |\n| --------- | ----------------------------------------------------- |\n| "
+        }
+        <_components.strong>{"专"}</_components.strong>
+        {"    | Specialized; focused; dedicated; exclusive            |\n| "}
+        <_components.strong>{"家"}</_components.strong>
+        {"    | Person; specialist; scholar; one who embodies a field |"}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Understanding"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 专家 as "}
+        <_components.strong>
+          {'"a person who specializes exclusively"'}
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"专 (zhuān) means focused dedication to one specific area"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {'家 (jiā) indicates someone who has made that field their "home"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {'Like saying "a person who lives and breathes their subject"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"They don't just know about it - they ARE it"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"The combination suggests both deep knowledge and practical mastery"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Core Meaning & Usage"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"专家 represents the highest level of professional competence:"}
+      </_components.p>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Professional Expertise"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"医学专家"}</_components.strong>
+          {' (yīxué zhuānjiā) - "medical expert"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"技术专家"}</_components.strong>
+          {' (jìshù zhuānjiā) - "technical expert; technical specialist"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"法律专家"}</_components.strong>
+          {' (fǎlǜ zhuānjiā) - "legal expert; legal scholar"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Academic Authority"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"教育专家"}</_components.strong>
+          {' (jiàoyù zhuānjiā) - "education expert"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"历史专家"}</_components.strong>
+          {' (lìshǐ zhuānjiā) - "history expert; historian"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"语言专家"}</_components.strong>
+          {' (yǔyán zhuānjiā) - "language expert; linguist"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Practical Specialists"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"计算机专家"}</_components.strong>
+          {' (jìsuànjī zhuānjiā) - "computer expert"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"投资专家"}</_components.strong>
+          {' (tóuzī zhuānjiā) - "investment expert"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"烹饪专家"}</_components.strong>
+          {' (pēngrèn zhuānjiā) - "culinary expert"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Related Terms"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"专业"}</_components.strong>
+          {' (zhuānyè) - "specialty; major; profession"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"专门"}</_components.strong>
+          {' (zhuānmén) - "specialized; dedicated; exclusive"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"内行"}</_components.strong>
+          {' (nèiháng) - "insider; expert" (more colloquial)'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"权威"}</_components.strong>
+          {' (quánwēi) - "authority; authoritative expert"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Cultural Context"}</_components.h2>
+      {"\n"}
+      <_components.p>{"专家 reflects important Chinese values:"}</_components.p>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Respect for Expertise"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"Chinese culture deeply respects specialized knowledge"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"专家 carries significant social prestige and authority"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Their opinions are sought and valued in decision-making"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Often consulted by government and media on important issues"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Dedication and Mastery"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"The concept emphasizes lifelong learning and improvement"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"True 专家 status requires years of dedicated study and practice"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Combines theoretical knowledge with practical experience"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Represents the Confucian ideal of scholarly achievement"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Professional Identity"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"Being called a 专家 is a mark of professional accomplishment"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Often used in formal introductions and credentials"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Carries responsibility to contribute to society through expertise"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Expected to mentor the next generation in their field"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Usage Notes"}</_components.h2>
+      {"\n"}
+      <_components.p>{"专家 is used both:"}</_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"As a title"}</_components.strong>
+          {': 张专家 (Zhāng zhuānjiā) - "Expert Zhang"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"As a description"}</_components.strong>
+          {': 他是专家 (tā shì zhuānjiā) - "He is an expert"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"In formal contexts"}</_components.strong>
+          {": More prestigious than just 老师 (teacher) or 师傅 (master)"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {"The title 专家 represents the pinnacle of "}
+        <_components.strong>
+          {"professional recognition and social respect"}
+        </_components.strong>
+        {" in Chinese\nsociety."}
+      </_components.p>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

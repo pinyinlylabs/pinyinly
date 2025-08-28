@@ -1,15 +1,191 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <><_components.p>{"A person connected by blood or marriage; relative; family member; close; intimate."}</_components.p>{"\n"}<_components.h2>{"Quick Reference"}</_components.h2>{"\n"}<_components.p>{"| Aspect         | Info                              |\n| -------------- | --------------------------------- |\n| Pinyin         | qīn                               |\n| Core meaning   | relative; family; close; intimate |\n| Part of speech | noun; adjective                   |\n| Tone           | first tone (high, flat)           |"}</_components.p>{"\n"}<_components.h2>{"Visual Breakdown"}</_components.h2>{"\n"}<_components.p>{"亲 depicts close personal relationship and affection."}</_components.p>{"\n"}<_components.p>{"| Component | Meaning                                          |\n| --------- | ------------------------------------------------ |\n| "}<_components.strong>{"立"}</_components.strong>{"    | Stand, position - representing close positioning |\n| "}<_components.strong>{"木"}</_components.strong>{"    | Tree, wood - symbolizing family tree/lineage     |\n| "}<_components.strong>{"见"}</_components.strong>{"    | See, meet - representing face-to-face closeness  |"}</_components.p>{"\n"}<_components.p>{"The combination suggests people who stand close together like branches of a family tree."}</_components.p>{"\n"}<_components.h2>{"Mnemonic"}</_components.h2>{"\n"}<_components.p>{"Think of 亲 as "}<_components.strong>{"\"people standing close together like branches on a family tree\""}</_components.strong>{":"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"立 (stand) represents people positioned close to each other"}</_components.li>{"\n"}<_components.li>{"木 (tree) represents the family tree, shared lineage"}</_components.li>{"\n"}<_components.li>{"见 (see/meet) represents the close, face-to-face relationship"}</_components.li>{"\n"}<_components.li>{"Together: people who stand close because they share family connections"}</_components.li>{"\n"}<_components.li>{"Picture family members gathering close together around the family tree"}</_components.li>{"\n"}<_components.li>{"Like relatives who naturally stand near each other at family gatherings"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p>{"This creates the image: "}<_components.strong>{"family members naturally gathering close together due to their shared\nconnections"}</_components.strong>{"."}</_components.p>{"\n"}<_components.h2>{"Core Meaning & Usage"}</_components.h2>{"\n"}<_components.p>{"亲 represents "}<_components.strong>{"family relationships, closeness, and intimate connections"}</_components.strong>{". It's used:"}</_components.p>{"\n"}<_components.ol>{"\n"}<_components.li><_components.strong>{"Family relations"}</_components.strong>{": 亲人 (qīnrén) - \"relatives; family members\""}</_components.li>{"\n"}<_components.li><_components.strong>{"Close relationships"}</_components.strong>{": 亲密 (qīnmì) - \"intimate; close\""}</_components.li>{"\n"}<_components.li><_components.strong>{"Personal action"}</_components.strong>{": 亲自 (qīnzì) - \"personally; in person\""}</_components.li>{"\n"}<_components.li><_components.strong>{"Family terms"}</_components.strong>{": 父亲 (fùqīn) - \"father\"; 母亲 (mǔqīn) - \"mother\""}</_components.li>{"\n"}</_components.ol>{"\n"}<_components.h2>{"Examples"}</_components.h2>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"亲人"}</_components.strong>{" (qīnrén) - \"relatives; family members\""}</_components.li>{"\n"}<_components.li><_components.strong>{"亲密"}</_components.strong>{" (qīnmì) - \"intimate; close\""}</_components.li>{"\n"}<_components.li><_components.strong>{"亲自"}</_components.strong>{" (qīnzì) - \"personally; in person\""}</_components.li>{"\n"}<_components.li><_components.strong>{"父亲"}</_components.strong>{" (fùqīn) - \"father\""}</_components.li>{"\n"}<_components.li><_components.strong>{"母亲"}</_components.strong>{" (mǔqīn) - \"mother\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Cultural Context"}</_components.h2>{"\n"}<_components.p>{"亲 is fundamental to Chinese family-centered culture. The concept extends beyond blood relations to\ninclude close friends who are considered \"like family.\" In Chinese society, 亲 relationships create\nstrong obligations for mutual support and care. The character appears in formal terms for parents\n(父亲, 母亲) and emphasizes the personal, intimate nature of family bonds."}</_components.p></>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {
+          "A person connected by blood or marriage; relative; family member; close; intimate."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                              |\n| -------------- | --------------------------------- |\n| Pinyin         | qīn                               |\n| Core meaning   | relative; family; close; intimate |\n| Part of speech | noun; adjective                   |\n| Tone           | first tone (high, flat)           |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Visual Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"亲 depicts close personal relationship and affection."}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component | Meaning                                          |\n| --------- | ------------------------------------------------ |\n| "
+        }
+        <_components.strong>{"立"}</_components.strong>
+        {"    | Stand, position - representing close positioning |\n| "}
+        <_components.strong>{"木"}</_components.strong>
+        {"    | Tree, wood - symbolizing family tree/lineage     |\n| "}
+        <_components.strong>{"见"}</_components.strong>
+        {"    | See, meet - representing face-to-face closeness  |"}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "The combination suggests people who stand close together like branches of a family tree."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Mnemonic"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 亲 as "}
+        <_components.strong>
+          {'"people standing close together like branches on a family tree"'}
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"立 (stand) represents people positioned close to each other"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"木 (tree) represents the family tree, shared lineage"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"见 (see/meet) represents the close, face-to-face relationship"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "Together: people who stand close because they share family connections"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "Picture family members gathering close together around the family tree"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "Like relatives who naturally stand near each other at family gatherings"
+          }
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {"This creates the image: "}
+        <_components.strong>
+          {
+            "family members naturally gathering close together due to their shared\nconnections"
+          }
+        </_components.strong>
+        {"."}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Core Meaning & Usage"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"亲 represents "}
+        <_components.strong>
+          {"family relationships, closeness, and intimate connections"}
+        </_components.strong>
+        {". It's used:"}
+      </_components.p>
+      {"\n"}
+      <_components.ol>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Family relations"}</_components.strong>
+          {': 亲人 (qīnrén) - "relatives; family members"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Close relationships"}</_components.strong>
+          {': 亲密 (qīnmì) - "intimate; close"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Personal action"}</_components.strong>
+          {': 亲自 (qīnzì) - "personally; in person"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Family terms"}</_components.strong>
+          {': 父亲 (fùqīn) - "father"; 母亲 (mǔqīn) - "mother"'}
+        </_components.li>
+        {"\n"}
+      </_components.ol>
+      {"\n"}
+      <_components.h2>{"Examples"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"亲人"}</_components.strong>
+          {' (qīnrén) - "relatives; family members"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"亲密"}</_components.strong>
+          {' (qīnmì) - "intimate; close"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"亲自"}</_components.strong>
+          {' (qīnzì) - "personally; in person"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"父亲"}</_components.strong>
+          {' (fùqīn) - "father"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"母亲"}</_components.strong>
+          {' (mǔqīn) - "mother"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Cultural Context"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          '亲 is fundamental to Chinese family-centered culture. The concept extends beyond blood relations to\ninclude close friends who are considered "like family." In Chinese society, 亲 relationships create\nstrong obligations for mutual support and care. The character appears in formal terms for parents\n(父亲, 母亲) and emphasizes the personal, intimate nature of family bonds.'
+        }
+      </_components.p>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

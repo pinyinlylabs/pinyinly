@@ -1,15 +1,154 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <><_components.p>{"Good; nice; fine; friendly; well; excellent."}</_components.p>{"\n"}<_components.h2>{"Quick Reference"}</_components.h2>{"\n"}<_components.p>{"| Aspect         | Info                        |\n| -------------- | --------------------------- |\n| Pinyin         | hǎo                         |\n| Core meaning   | good; nice; fine; well      |\n| Part of speech | adjective, adverb           |\n| Tone           | third tone (falling-rising) |"}</_components.p>{"\n"}<_components.h2>{"Visual Breakdown"}</_components.h2>{"\n"}<_components.p>{"好 combines "}<_components.strong>{"woman + child"}</_components.strong>{" to represent harmony and goodness."}</_components.p>{"\n"}<_components.p>{"| Component | Visual Description                          |\n| --------- | ------------------------------------------- |\n| "}<_components.strong>{"女"}</_components.strong>{"    | Woman (女) - represents nurturing, care     |\n| "}<_components.strong>{"子"}</_components.strong>{"    | Child (子) - represents innocence, new life |"}</_components.p>{"\n"}<_components.h2>{"Mnemonic"}</_components.h2>{"\n"}<_components.p>{"Think of 好 as "}<_components.strong>{"\"woman with child\" or \"maternal love\""}</_components.strong>{":"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"The woman radical (女) represents care, nurturing, and kindness"}</_components.li>{"\n"}<_components.li>{"The child component (子) represents innocence and preciousness"}</_components.li>{"\n"}<_components.li>{"Together they show the tender relationship between mother and child"}</_components.li>{"\n"}<_components.li>{"Like the inherent goodness in caring for a child"}</_components.li>{"\n"}<_components.li>{"This natural bond represents the ideal of what is \"good\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p>{"This captures the Chinese cultural understanding of goodness through family bonds and caring\nrelationships."}</_components.p>{"\n"}<_components.h2>{"Usage Examples"}</_components.h2>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"好人"}</_components.strong>{" (hǎo rén) - \"good person\""}</_components.li>{"\n"}<_components.li><_components.strong>{"很好"}</_components.strong>{" (hěn hǎo) - \"very good\""}</_components.li>{"\n"}<_components.li><_components.strong>{"好看"}</_components.strong>{" (hǎo kàn) - \"good-looking; attractive\""}</_components.li>{"\n"}<_components.li><_components.strong>{"好吃"}</_components.strong>{" (hǎo chī) - \"delicious; tasty\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Cultural Context"}</_components.h2>{"\n"}<_components.p>{"好 represents fundamental positive values in Chinese culture:"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"Often used in greetings like 你好 (hello)"}</_components.li>{"\n"}<_components.li>{"Essential for expressing approval and satisfaction"}</_components.li>{"\n"}<_components.li>{"Shows appreciation and positive evaluation"}</_components.li>{"\n"}<_components.li>{"Central to describing quality and desirability"}</_components.li>{"\n"}<_components.li>{"Reflects the importance of harmony and well-being"}</_components.li>{"\n"}</_components.ul></>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {"Good; nice; fine; friendly; well; excellent."}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                        |\n| -------------- | --------------------------- |\n| Pinyin         | hǎo                         |\n| Core meaning   | good; nice; fine; well      |\n| Part of speech | adjective, adverb           |\n| Tone           | third tone (falling-rising) |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Visual Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"好 combines "}
+        <_components.strong>{"woman + child"}</_components.strong>
+        {" to represent harmony and goodness."}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component | Visual Description                          |\n| --------- | ------------------------------------------- |\n| "
+        }
+        <_components.strong>{"女"}</_components.strong>
+        {"    | Woman (女) - represents nurturing, care     |\n| "}
+        <_components.strong>{"子"}</_components.strong>
+        {"    | Child (子) - represents innocence, new life |"}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Mnemonic"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 好 as "}
+        <_components.strong>
+          {'"woman with child" or "maternal love"'}
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"The woman radical (女) represents care, nurturing, and kindness"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"The child component (子) represents innocence and preciousness"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "Together they show the tender relationship between mother and child"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Like the inherent goodness in caring for a child"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {'This natural bond represents the ideal of what is "good"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {
+          "This captures the Chinese cultural understanding of goodness through family bonds and caring\nrelationships."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Usage Examples"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"好人"}</_components.strong>
+          {' (hǎo rén) - "good person"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"很好"}</_components.strong>
+          {' (hěn hǎo) - "very good"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"好看"}</_components.strong>
+          {' (hǎo kàn) - "good-looking; attractive"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"好吃"}</_components.strong>
+          {' (hǎo chī) - "delicious; tasty"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Cultural Context"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"好 represents fundamental positive values in Chinese culture:"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"Often used in greetings like 你好 (hello)"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Essential for expressing approval and satisfaction"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Shows appreciation and positive evaluation"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Central to describing quality and desirability"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Reflects the importance of harmony and well-being"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

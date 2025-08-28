@@ -1,15 +1,370 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <_components.p>{"Describes a state of being displeased or unsatisfied."}</_components.p>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {
+          "Describes a state of being displeased, unsatisfied, or unhappy with a situation or outcome."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                                 |\n| -------------- | ------------------------------------ |\n| Pinyin         | bùmǎn                                |\n| Core meaning   | dissatisfied; displeased; discontent |\n| Part of speech | adjective; emotional state           |\n| Tone           | fourth + third tones                 |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Word Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"不满 negates satisfaction to express discontent:"}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component    | Meaning                            |\n| ------------ | ---------------------------------- |\n| "
+        }
+        <_components.strong>{"不"}</_components.strong>
+        {" (bù)  | Not, negation                      |\n| "}
+        <_components.strong>{"满"}</_components.strong>
+        {" (mǎn) | Full, satisfied, content, complete |"}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Understanding"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 不满 as "}
+        <_components.strong>
+          {'"a container that\'s not full"'}
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"Like expecting a full glass but getting only half"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"The gap between expectations and reality creates dissatisfaction"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Can range from mild disappointment to strong displeasure"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Often implies that improvement or change is needed"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Reflects unmet needs or unfulfilled expectations"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Usage Contexts"}</_components.h2>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Personal Dissatisfaction"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"不满现状"}</_components.strong>
+          {' (bùmǎn xiànzhuàng) - "dissatisfied with the current situation"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"对工作不满"}</_components.strong>
+          {' - "dissatisfied with work"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Social/Political Context"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"民众不满"}</_components.strong>
+          {' - "public dissatisfaction"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"不满政策"}</_components.strong>
+          {' - "dissatisfied with policies"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Relationship Issues"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"对服务不满"}</_components.strong>
+          {' - "dissatisfied with service"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"不满他的态度"}</_components.strong>
+          {' - "displeased with his attitude"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Performance Evaluation"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"对结果不满"}</_components.strong>
+          {' - "unsatisfied with results"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"不满表现"}</_components.strong>
+          {' - "dissatisfied with performance"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Examples"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>{"我对这个结果很不满。"}</_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {'"I\'m very dissatisfied with this result."'}
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>{"员工对薪水不满。"}</_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {'"Employees are dissatisfied with their salaries."'}
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>{"她不满男朋友总是迟到。"}</_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {'"She\'s displeased that her boyfriend is always late."'}
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>
+              {"顾客对服务质量表示不满。"}
+            </_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {'"Customers expressed dissatisfaction with service quality."'}
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>
+              {"学生对这个决定感到不满。"}
+            </_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {'"Students feel dissatisfied with this decision."'}
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>{"不满情绪在社会中蔓延。"}</_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {'"Dissatisfaction is spreading throughout society."'}
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Intensity Levels"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Expression | Intensity | Usage Context         |\n| ---------- | --------- | --------------------- |\n| 有点不满   | Mild      | Slight disappointment |\n| 不满       | Moderate  | Clear dissatisfaction |\n| 很不满     | Strong    | High displeasure      |\n| 极其不满   | Extreme   | Severe discontent     |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Cultural Context"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"不满 reflects important aspects of Chinese social psychology:"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Expectation management"}</_components.strong>
+          {" - balancing hopes with reality"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Social feedback"}</_components.strong>
+          {" - expressing needs for improvement"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Emotional vocabulary"}</_components.strong>
+          {" - precise description of dissatisfaction"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Change catalyst"}</_components.strong>
+          {" - dissatisfaction motivates improvement"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Grammar Notes"}</_components.h2>
+      {"\n"}
+      <_components.p>{"不满 can function as:"}</_components.p>
+      {"\n"}
+      <_components.ol>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Predicate"}</_components.strong>
+          {': 我不满 ("I\'m dissatisfied")'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Attribute"}</_components.strong>
+          {': 不满的表情 ("dissatisfied expression")'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Object"}</_components.strong>
+          {': 表达不满 ("express dissatisfaction")'}
+        </_components.li>
+        {"\n"}
+      </_components.ol>
+      {"\n"}
+      <_components.p>
+        <_components.strong>{"Common patterns:"}</_components.strong>
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"对...不满"}</_components.strong>
+          {' - "dissatisfied with..."'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"感到不满"}</_components.strong>
+          {' - "feel dissatisfied"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"表示不满"}</_components.strong>
+          {' - "express dissatisfaction"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Related Expressions"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Expression | Meaning      | Usage                |\n| ---------- | ------------ | -------------------- |\n| 满意       | satisfied    | Positive opposite    |\n| 失望       | disappointed | Specific expectation |\n| 抱怨       | complain     | Verbal expression    |\n| 不高兴     | unhappy      | General mood         |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {"不满 provides "}
+        <_components.strong>
+          {"precise emotional vocabulary"}
+        </_components.strong>
+        {" for expressing various levels of dissatisfaction and\ndiscontent."}
+      </_components.p>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

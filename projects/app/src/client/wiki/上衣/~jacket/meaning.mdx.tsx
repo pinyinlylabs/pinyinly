@@ -1,15 +1,209 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <><_components.p>{"An outer garment covering the upper body; jacket; top; upper garment."}</_components.p>{"\n"}<_components.h2>{"Quick Reference"}</_components.h2>{"\n"}<_components.p>{"| Aspect         | Info                  |\n| -------------- | --------------------- |\n| Pinyin         | shàngyī               |\n| Core meaning   | jacket; upper garment |\n| Part of speech | noun                  |\n| Tone           | fourth + first tone   |"}</_components.p>{"\n"}<_components.h2>{"Visual Breakdown"}</_components.h2>{"\n"}<_components.p>{"上衣 combines position with clothing:"}</_components.p>{"\n"}<_components.p>{"| Component | Visual Description                                         |\n| --------- | ---------------------------------------------------------- |\n| "}<_components.strong>{"上"}</_components.strong>{"    | Up/above - indicates the upper part of the body            |\n| "}<_components.strong>{"衣"}</_components.strong>{"    | Clothing - represents garments and fabric worn on the body |"}</_components.p>{"\n"}<_components.h2>{"Mnemonic"}</_components.h2>{"\n"}<_components.p>{"Think of 上衣 as "}<_components.strong>{"clothing for the upper body"}</_components.strong>{":"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"上 (up/above) + 衣 (clothing) = \"upper clothing\""}</_components.li>{"\n"}<_components.li>{"Like the clothes that cover your \"upper\" half"}</_components.li>{"\n"}<_components.li>{"The garment that goes \"on top\" of your torso"}</_components.li>{"\n"}<_components.li>{"Clothing that covers everything above your waist"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p>{"This creates a clear image: "}<_components.strong>{"the piece of clothing worn on the upper body"}</_components.strong>{"."}</_components.p>{"\n"}<_components.h2>{"Core Meaning & Usage"}</_components.h2>{"\n"}<_components.p>{"上衣 refers to "}<_components.strong>{"any garment worn on the upper body"}</_components.strong>{". It includes:"}</_components.p>{"\n"}<_components.ol>{"\n"}<_components.li><_components.strong>{"Jackets and coats"}</_components.strong>{": 外套上衣 (wàitào shàngyī) - \"outer jacket\""}</_components.li>{"\n"}<_components.li><_components.strong>{"Shirts and blouses"}</_components.strong>{": 衬衫上衣 (chènshān shàngyī) - \"shirt-style top\""}</_components.li>{"\n"}<_components.li><_components.strong>{"Formal wear"}</_components.strong>{": 正式上衣 (zhèngshì shàngyī) - \"formal upper garment\""}</_components.li>{"\n"}<_components.li><_components.strong>{"Casual tops"}</_components.strong>{": 休闲上衣 (xiūxián shàngyī) - \"casual top\""}</_components.li>{"\n"}</_components.ol>{"\n"}<_components.h2>{"Examples"}</_components.h2>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"脱上衣"}</_components.strong>{" (tuō shàngyī) - \"take off your jacket/top\""}</_components.li>{"\n"}<_components.li><_components.strong>{"穿上衣"}</_components.strong>{" (chuān shàngyī) - \"put on a jacket/top\""}</_components.li>{"\n"}<_components.li><_components.strong>{"新上衣"}</_components.strong>{" (xīn shàngyī) - \"new jacket/top\""}</_components.li>{"\n"}<_components.li><_components.strong>{"厚上衣"}</_components.strong>{" (hòu shàngyī) - \"thick jacket\""}</_components.li>{"\n"}<_components.li><_components.strong>{"薄上衣"}</_components.strong>{" (báo shàngyī) - \"thin top/light jacket\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Cultural Context"}</_components.h2>{"\n"}<_components.p>{"上衣 is a general term that encompasses various upper body garments:"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"More formal than just 衣服 (yīfu) \"clothes\""}</_components.li>{"\n"}<_components.li>{"Often refers to outer layers or structured garments"}</_components.li>{"\n"}<_components.li>{"Commonly used in clothing stores and fashion contexts"}</_components.li>{"\n"}<_components.li>{"Can refer to both casual and formal upper body wear"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Contrast with Other Clothing Terms"}</_components.h2>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"上衣"}</_components.strong>{" (shàngyī) - upper garment (jackets, tops)"}</_components.li>{"\n"}<_components.li><_components.strong>{"裤子"}</_components.strong>{" (kùzi) - lower garment (pants, trousers)"}</_components.li>{"\n"}<_components.li><_components.strong>{"衣服"}</_components.strong>{" (yīfu) - general clothing"}</_components.li>{"\n"}<_components.li><_components.strong>{"外套"}</_components.strong>{" (wàitào) - outer coat/jacket specifically"}</_components.li>{"\n"}</_components.ul></>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {
+          "An outer garment covering the upper body; jacket; top; upper garment."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                  |\n| -------------- | --------------------- |\n| Pinyin         | shàngyī               |\n| Core meaning   | jacket; upper garment |\n| Part of speech | noun                  |\n| Tone           | fourth + first tone   |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Visual Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>{"上衣 combines position with clothing:"}</_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component | Visual Description                                         |\n| --------- | ---------------------------------------------------------- |\n| "
+        }
+        <_components.strong>{"上"}</_components.strong>
+        {
+          "    | Up/above - indicates the upper part of the body            |\n| "
+        }
+        <_components.strong>{"衣"}</_components.strong>
+        {"    | Clothing - represents garments and fabric worn on the body |"}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Mnemonic"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 上衣 as "}
+        <_components.strong>{"clothing for the upper body"}</_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {'上 (up/above) + 衣 (clothing) = "upper clothing"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {'Like the clothes that cover your "upper" half'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {'The garment that goes "on top" of your torso'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Clothing that covers everything above your waist"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {"This creates a clear image: "}
+        <_components.strong>
+          {"the piece of clothing worn on the upper body"}
+        </_components.strong>
+        {"."}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Core Meaning & Usage"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"上衣 refers to "}
+        <_components.strong>
+          {"any garment worn on the upper body"}
+        </_components.strong>
+        {". It includes:"}
+      </_components.p>
+      {"\n"}
+      <_components.ol>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Jackets and coats"}</_components.strong>
+          {': 外套上衣 (wàitào shàngyī) - "outer jacket"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Shirts and blouses"}</_components.strong>
+          {': 衬衫上衣 (chènshān shàngyī) - "shirt-style top"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Formal wear"}</_components.strong>
+          {': 正式上衣 (zhèngshì shàngyī) - "formal upper garment"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Casual tops"}</_components.strong>
+          {': 休闲上衣 (xiūxián shàngyī) - "casual top"'}
+        </_components.li>
+        {"\n"}
+      </_components.ol>
+      {"\n"}
+      <_components.h2>{"Examples"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"脱上衣"}</_components.strong>
+          {' (tuō shàngyī) - "take off your jacket/top"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"穿上衣"}</_components.strong>
+          {' (chuān shàngyī) - "put on a jacket/top"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"新上衣"}</_components.strong>
+          {' (xīn shàngyī) - "new jacket/top"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"厚上衣"}</_components.strong>
+          {' (hòu shàngyī) - "thick jacket"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"薄上衣"}</_components.strong>
+          {' (báo shàngyī) - "thin top/light jacket"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Cultural Context"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"上衣 is a general term that encompasses various upper body garments:"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {'More formal than just 衣服 (yīfu) "clothes"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Often refers to outer layers or structured garments"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Commonly used in clothing stores and fashion contexts"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Can refer to both casual and formal upper body wear"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Contrast with Other Clothing Terms"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"上衣"}</_components.strong>
+          {" (shàngyī) - upper garment (jackets, tops)"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"裤子"}</_components.strong>
+          {" (kùzi) - lower garment (pants, trousers)"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"衣服"}</_components.strong>
+          {" (yīfu) - general clothing"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"外套"}</_components.strong>
+          {" (wàitào) - outer coat/jacket specifically"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

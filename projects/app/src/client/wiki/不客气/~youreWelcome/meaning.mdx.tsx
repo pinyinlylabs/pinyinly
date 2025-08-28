@@ -1,15 +1,218 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <><_components.p>{"A polite response to expressions of thanks."}</_components.p>{"\n"}<_components.h2>{"Quick Reference"}</_components.h2>{"\n"}<_components.p>{"| Aspect         | Info                            |\n| -------------- | ------------------------------- |\n| Pinyin         | bù kè qi                        |\n| Core meaning   | you're welcome; don't be polite |\n| Part of speech | interjection; set phrase        |\n| Tone           | fourth + fourth + neutral tone  |"}</_components.p>{"\n"}<_components.h2>{"Visual Breakdown"}</_components.h2>{"\n"}<_components.p>{"不客气 combines "}<_components.strong>{"not"}</_components.strong>{" (不) with "}<_components.strong>{"polite/guest-like"}</_components.strong>{" (客气) to mean \"don't be polite.\""}</_components.p>{"\n"}<_components.p>{"| Component | Visual Description                                |\n| --------- | ------------------------------------------------- |\n| "}<_components.strong>{"不"}</_components.strong>{"    | Negation - crossing strokes suggesting blocking   |\n| "}<_components.strong>{"客"}</_components.strong>{"    | Guest - roof (宀) + person underneath (hostility) |\n| "}<_components.strong>{"气"}</_components.strong>{"    | Air/manner - flowing energy or attitude           |"}</_components.p>{"\n"}<_components.h2>{"Mnemonic"}</_components.h2>{"\n"}<_components.p>{"Think of 不客气 as "}<_components.strong>{"\"don't act like a formal guest\""}</_components.strong>{":"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"客 represents being a guest (formal, polite, distant)"}</_components.li>{"\n"}<_components.li>{"气 shows the attitude or manner of behavior"}</_components.li>{"\n"}<_components.li>{"不 cancels this formal guest behavior"}</_components.li>{"\n"}<_components.li>{"Together: \"don't be so formal\" = \"you're welcome\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p>{"Like telling someone to relax and not worry about being overly polite."}</_components.p>{"\n"}<_components.h2>{"Usage Examples"}</_components.h2>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"谢谢！不客气！"}</_components.strong>{" (xiè xie! bù kè qi!) - \"Thank you! You're welcome!\""}</_components.li>{"\n"}<_components.li><_components.strong>{"不客气，应该的"}</_components.strong>{" (bù kè qi, yīng gāi de) - \"You're welcome, it's what I should do\""}</_components.li>{"\n"}<_components.li><_components.strong>{"真的不客气"}</_components.strong>{" (zhēn de bù kè qi) - \"really, don't mention it\""}</_components.li>{"\n"}<_components.li><_components.strong>{"跟我不用客气"}</_components.strong>{" (gēn wǒ bù yòng kè qi) - \"don't be polite with me\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Cultural Functions"}</_components.h2>{"\n"}<_components.p>{"不客气 serves important social functions:"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Response to thanks"}</_components.strong>{": Standard reply to 谢谢 (thank you)"}</_components.li>{"\n"}<_components.li><_components.strong>{"Encouraging informality"}</_components.strong>{": Making others feel comfortable"}</_components.li>{"\n"}<_components.li><_components.strong>{"Showing closeness"}</_components.strong>{": Indicating you don't need formal politeness"}</_components.li>{"\n"}<_components.li><_components.strong>{"Downplaying favor"}</_components.strong>{": Minimizing the significance of help given"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Politeness Spectrum"}</_components.h2>{"\n"}<_components.p>{"Chinese has different levels of \"you're welcome\":"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"不客气"}</_components.strong>{" - casual, friendly \"you're welcome\""}</_components.li>{"\n"}<_components.li><_components.strong>{"不用谢"}</_components.strong>{" - \"no need to thank\" (very casual)"}</_components.li>{"\n"}<_components.li><_components.strong>{"别客气"}</_components.strong>{" - \"don't be polite\" (encouraging familiarity)"}</_components.li>{"\n"}<_components.li><_components.strong>{"应该的"}</_components.strong>{" - \"it's what I should do\" (humble)"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Cultural Context"}</_components.h2>{"\n"}<_components.p>{"不客气 reflects Chinese relationship dynamics:"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Breaking formality"}</_components.strong>{": Moving from stranger to friend relationship"}</_components.li>{"\n"}<_components.li><_components.strong>{"Mutual care"}</_components.strong>{": Showing people they don't need to be careful around you"}</_components.li>{"\n"}<_components.li><_components.strong>{"Harmonious interaction"}</_components.strong>{": Creating comfortable social atmosphere"}</_components.li>{"\n"}<_components.li><_components.strong>{"Reciprocal expectations"}</_components.strong>{": Understanding that help flows both ways"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p>{"The phrase embodies the Chinese value of making others feel at ease."}</_components.p></>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {"A polite response to expressions of thanks."}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                            |\n| -------------- | ------------------------------- |\n| Pinyin         | bù kè qi                        |\n| Core meaning   | you're welcome; don't be polite |\n| Part of speech | interjection; set phrase        |\n| Tone           | fourth + fourth + neutral tone  |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Visual Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"不客气 combines "}
+        <_components.strong>{"not"}</_components.strong>
+        {" (不) with "}
+        <_components.strong>{"polite/guest-like"}</_components.strong>
+        {' (客气) to mean "don\'t be polite."'}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component | Visual Description                                |\n| --------- | ------------------------------------------------- |\n| "
+        }
+        <_components.strong>{"不"}</_components.strong>
+        {"    | Negation - crossing strokes suggesting blocking   |\n| "}
+        <_components.strong>{"客"}</_components.strong>
+        {"    | Guest - roof (宀) + person underneath (hostility) |\n| "}
+        <_components.strong>{"气"}</_components.strong>
+        {"    | Air/manner - flowing energy or attitude           |"}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Mnemonic"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 不客气 as "}
+        <_components.strong>
+          {'"don\'t act like a formal guest"'}
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"客 represents being a guest (formal, polite, distant)"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"气 shows the attitude or manner of behavior"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"不 cancels this formal guest behavior"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {'Together: "don\'t be so formal" = "you\'re welcome"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {
+          "Like telling someone to relax and not worry about being overly polite."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Usage Examples"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"谢谢！不客气！"}</_components.strong>
+          {' (xiè xie! bù kè qi!) - "Thank you! You\'re welcome!"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"不客气，应该的"}</_components.strong>
+          {
+            " (bù kè qi, yīng gāi de) - \"You're welcome, it's what I should do\""
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"真的不客气"}</_components.strong>
+          {' (zhēn de bù kè qi) - "really, don\'t mention it"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"跟我不用客气"}</_components.strong>
+          {' (gēn wǒ bù yòng kè qi) - "don\'t be polite with me"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Cultural Functions"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"不客气 serves important social functions:"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Response to thanks"}</_components.strong>
+          {": Standard reply to 谢谢 (thank you)"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Encouraging informality"}</_components.strong>
+          {": Making others feel comfortable"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Showing closeness"}</_components.strong>
+          {": Indicating you don't need formal politeness"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Downplaying favor"}</_components.strong>
+          {": Minimizing the significance of help given"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Politeness Spectrum"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {'Chinese has different levels of "you\'re welcome":'}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"不客气"}</_components.strong>
+          {' - casual, friendly "you\'re welcome"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"不用谢"}</_components.strong>
+          {' - "no need to thank" (very casual)'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"别客气"}</_components.strong>
+          {' - "don\'t be polite" (encouraging familiarity)'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"应该的"}</_components.strong>
+          {' - "it\'s what I should do" (humble)'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Cultural Context"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"不客气 reflects Chinese relationship dynamics:"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Breaking formality"}</_components.strong>
+          {": Moving from stranger to friend relationship"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Mutual care"}</_components.strong>
+          {": Showing people they don't need to be careful around you"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Harmonious interaction"}</_components.strong>
+          {": Creating comfortable social atmosphere"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Reciprocal expectations"}</_components.strong>
+          {": Understanding that help flows both ways"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {"The phrase embodies the Chinese value of making others feel at ease."}
+      </_components.p>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

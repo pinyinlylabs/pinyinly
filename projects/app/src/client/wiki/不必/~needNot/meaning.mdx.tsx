@@ -1,15 +1,373 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <_components.p>{"Indicates that there is no need to do something."}</_components.p>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {
+          "Indicates that there is no necessity or obligation to do something; need not; don't have to."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                                 |\n| -------------- | ------------------------------------ |\n| Pinyin         | bùbì                                 |\n| Core meaning   | need not; don't have to; unnecessary |\n| Part of speech | modal verb; auxiliary                |\n| Tone           | fourth + fourth tones                |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Word Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"不必 combines negation with necessity to express lack of obligation:"}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component   | Meaning                    |\n| ----------- | -------------------------- |\n| "
+        }
+        <_components.strong>{"不"}</_components.strong>
+        {" (bù) | Not, negation              |\n| "}
+        <_components.strong>{"必"}</_components.strong>
+        {" (bì) | Must, necessary, essential |"}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Understanding"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 不必 as "}
+        <_components.strong>
+          {'"lifting the pressure of obligation"'}
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"Like removing a weight from someone's shoulders"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"More formal and polite than 不用 (don't need to)"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "Often used to reassure others that they're not required to do something"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "Can express both practical exemption and polite declining of offers"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Shows consideration for others' time and effort"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Usage Contexts"}</_components.h2>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Reassuring Others"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"你不必担心"}</_components.strong>
+          {' - "you don\'t need to worry"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"不必客气"}</_components.strong>
+          {' - "no need to be polite"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Declining Offers Politely"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"不必了"}</_components.strong>
+          {' - "that\'s not necessary" (polite refusal)'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"不必这样"}</_components.strong>
+          {' - "there\'s no need for this"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Stating Exemptions"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"不必每天来"}</_components.strong>
+          {' - "no need to come every day"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"不必等我"}</_components.strong>
+          {' - "don\'t need to wait for me"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Examples"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>{"你不必每天都练习。"}</_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {'"You don\'t need to practice every day."'}
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>{"不必为这件事着急。"}</_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {'"There\'s no need to worry about this matter."'}
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>{"谢谢，但是不必了。"}</_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {'"Thank you, but that\'s not necessary."'}
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>
+              {"不必等到明天，今天就可以开始。"}
+            </_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {'"No need to wait until tomorrow, you can start today."'}
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>
+              {"这么简单的事，不必请专家。"}
+            </_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {
+                '"For such a simple matter, there\'s no need to hire an expert."'
+              }
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>
+              {"不必把所有细节都告诉他。"}
+            </_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {'"There\'s no need to tell him all the details."'}
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Comparison with Similar Expressions"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Expression | Formality | Usage Context      |\n| ---------- | --------- | ------------------ |\n| 不必       | Formal    | Polite, written    |\n| 不用       | Casual    | Daily conversation |\n| 不需要     | Neutral   | General situations |\n| 无需       | Literary  | Formal writing     |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Cultural Context"}</_components.h2>
+      {"\n"}
+      <_components.p>{"不必 reflects Chinese values of:"}</_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Consideration for others"}</_components.strong>
+          {" - not imposing unnecessary burdens"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Polite communication"}</_components.strong>
+          {" - formal way to decline or exempt"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Social harmony"}</_components.strong>
+          {" - reducing pressure and obligations"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Efficient resource use"}</_components.strong>
+          {" - avoiding unnecessary efforts"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Grammar Notes"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"不必 typically appears before verbs or verb phrases:"}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        <_components.strong>{"Pattern"}</_components.strong>
+        {": 不必 + [verb/verb phrase]"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"不必去"}</_components.strong>
+          {' - "no need to go"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"不必说"}</_components.strong>
+          {' - "needless to say"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"不必介意"}</_components.strong>
+          {' - "no need to mind"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        <_components.strong>{"Special expressions:"}</_components.strong>
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"不必说"}</_components.strong>
+          {' - "needless to say; it goes without saying"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"不必要"}</_components.strong>
+          {' - "unnecessary" (adjective form)'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Polite Usage Tips"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"Use 不必 in formal situations or when being especially courteous"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Often accompanied by explanations: "}
+          <_components.strong>{"不必担心，一切都会好的"}</_components.strong>
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Can soften directives: "}
+          <_components.strong>{"不必每次都汇报"}</_components.strong>
+          {' ("no need to report every time")'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {"不必 provides "}
+        <_components.strong>
+          {"formal, considerate language"}
+        </_components.strong>
+        {" for expressing lack of necessity and polite\nexemption."}
+      </_components.p>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

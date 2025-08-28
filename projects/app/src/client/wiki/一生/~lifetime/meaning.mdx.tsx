@@ -1,15 +1,273 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <><_components.p>{"The duration of a human's life; lifetime; one's whole life; entire existence."}</_components.p>{"\n"}<_components.h2>{"Quick Reference"}</_components.h2>{"\n"}<_components.p>{"| Aspect         | Info                       |\n| -------------- | -------------------------- |\n| Pinyin         | yī shēng                   |\n| Core meaning   | lifetime; one's whole life |\n| Part of speech | noun                       |\n| Tone           | 1st + 1st tone             |"}</_components.p>{"\n"}<_components.h2>{"Visual Breakdown"}</_components.h2>{"\n"}<_components.p>{"一生 combines "}<_components.strong>{"one + life"}</_components.strong>{" to represent the complete span of existence."}</_components.p>{"\n"}<_components.p>{"| Component | Meaning                   | Contribution to 一生                |\n| --------- | ------------------------- | ----------------------------------- |\n| "}<_components.strong>{"一"}</_components.strong>{"    | one; single; complete     | Shows the singular, complete span   |\n| "}<_components.strong>{"生"}</_components.strong>{"    | life; birth; living; grow | Represents the essence of existence |"}</_components.p>{"\n"}<_components.h2>{"Character Analysis: 生"}</_components.h2>{"\n"}<_components.p>{"生 shows "}<_components.strong>{"new life emerging from the earth"}</_components.strong>{":"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"土"}</_components.strong>{" (earth) represents the foundation of life"}</_components.li>{"\n"}<_components.li><_components.strong>{"丿"}</_components.strong>{" (sprouting line) shows growth breaking through the surface"}</_components.li>{"\n"}<_components.li>{"Together: life force emerging and growing from its source"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Mnemonic"}</_components.h2>{"\n"}<_components.p>{"Think of 一生 as "}<_components.strong>{"one complete journey from birth to death"}</_components.strong>{":"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"一 (one) represents the singular path each person travels"}</_components.li>{"\n"}<_components.li>{"生 (life) shows the living, growing, breathing existence"}</_components.li>{"\n"}<_components.li>{"Like a tree that grows from seed to full maturity in one continuous cycle"}</_components.li>{"\n"}<_components.li>{"Picture a timeline stretching from birth to the end - that's one complete life"}</_components.li>{"\n"}<_components.li>{"The emphasis is on the totality and preciousness of human existence"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Usage Examples"}</_components.h2>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"一生中"}</_components.strong>{" (yī shēng zhōng) - \"in one's lifetime; during one's life\""}</_components.li>{"\n"}<_components.li><_components.strong>{"一生的朋友"}</_components.strong>{" (yī shēng de péng yǒu) - \"lifelong friend\""}</_components.li>{"\n"}<_components.li><_components.strong>{"一生难忘"}</_components.strong>{" (yī shēng nán wàng) - \"unforgettable for a lifetime\""}</_components.li>{"\n"}<_components.li><_components.strong>{"奉献一生"}</_components.strong>{" (fèng xiàn yī shēng) - \"dedicate one's life\""}</_components.li>{"\n"}<_components.li><_components.strong>{"一生幸福"}</_components.strong>{" (yī shēng xìng fú) - \"lifetime of happiness\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Grammar Patterns"}</_components.h2>{"\n"}<_components.p>{"一生 functions as:"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Time expression"}</_components.strong>{": 一生都... - \"throughout one's life...\""}</_components.li>{"\n"}<_components.li><_components.strong>{"Modifier"}</_components.strong>{": 一生的经历 - \"lifetime experiences\""}</_components.li>{"\n"}<_components.li><_components.strong>{"Object"}</_components.strong>{": 度过一生 - \"spend one's life\""}</_components.li>{"\n"}<_components.li><_components.strong>{"Duration"}</_components.strong>{": 用一生时间 - \"spend a lifetime\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Philosophical Context"}</_components.h2>{"\n"}<_components.p>{"一生 carries deep meaning in Chinese thought:"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Temporal completeness"}</_components.strong>{": Recognition of life's finite nature"}</_components.li>{"\n"}<_components.li><_components.strong>{"Precious time"}</_components.strong>{": Understanding the value of the time we're given"}</_components.li>{"\n"}<_components.li><_components.strong>{"Legacy thinking"}</_components.strong>{": Considering what one accomplishes in a lifetime"}</_components.li>{"\n"}<_components.li><_components.strong>{"Relationship depth"}</_components.strong>{": Bonds that last an entire life"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Cultural Context"}</_components.h2>{"\n"}<_components.p>{"一生 in Chinese values and expressions:"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Commitment depth"}</_components.strong>{": 一生的承诺 (lifelong commitment)"}</_components.li>{"\n"}<_components.li><_components.strong>{"Learning journey"}</_components.strong>{": 一生学习 (lifelong learning)"}</_components.li>{"\n"}<_components.li><_components.strong>{"Love and marriage"}</_components.strong>{": 一生的伴侣 (lifelong companion)"}</_components.li>{"\n"}<_components.li><_components.strong>{"Achievement scope"}</_components.strong>{": 一生的成就 (lifetime achievements)"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Related Expressions"}</_components.h2>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"终生"}</_components.strong>{" (zhōng shēng) - \"lifelong; for life\""}</_components.li>{"\n"}<_components.li><_components.strong>{"毕生"}</_components.strong>{" (bì shēng) - \"lifetime; all one's life\""}</_components.li>{"\n"}<_components.li><_components.strong>{"此生"}</_components.strong>{" (cǐ shēng) - \"this life; this lifetime\""}</_components.li>{"\n"}<_components.li><_components.strong>{"来生"}</_components.strong>{" (lái shēng) - \"next life; afterlife\""}</_components.li>{"\n"}</_components.ul></>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {
+          "The duration of a human's life; lifetime; one's whole life; entire existence."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                       |\n| -------------- | -------------------------- |\n| Pinyin         | yī shēng                   |\n| Core meaning   | lifetime; one's whole life |\n| Part of speech | noun                       |\n| Tone           | 1st + 1st tone             |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Visual Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"一生 combines "}
+        <_components.strong>{"one + life"}</_components.strong>
+        {" to represent the complete span of existence."}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component | Meaning                   | Contribution to 一生                |\n| --------- | ------------------------- | ----------------------------------- |\n| "
+        }
+        <_components.strong>{"一"}</_components.strong>
+        {
+          "    | one; single; complete     | Shows the singular, complete span   |\n| "
+        }
+        <_components.strong>{"生"}</_components.strong>
+        {
+          "    | life; birth; living; grow | Represents the essence of existence |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Character Analysis: 生"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"生 shows "}
+        <_components.strong>
+          {"new life emerging from the earth"}
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"土"}</_components.strong>
+          {" (earth) represents the foundation of life"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"丿"}</_components.strong>
+          {" (sprouting line) shows growth breaking through the surface"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Together: life force emerging and growing from its source"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Mnemonic"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 一生 as "}
+        <_components.strong>
+          {"one complete journey from birth to death"}
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"一 (one) represents the singular path each person travels"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"生 (life) shows the living, growing, breathing existence"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "Like a tree that grows from seed to full maturity in one continuous cycle"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "Picture a timeline stretching from birth to the end - that's one complete life"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "The emphasis is on the totality and preciousness of human existence"
+          }
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Usage Examples"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"一生中"}</_components.strong>
+          {" (yī shēng zhōng) - \"in one's lifetime; during one's life\""}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"一生的朋友"}</_components.strong>
+          {' (yī shēng de péng yǒu) - "lifelong friend"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"一生难忘"}</_components.strong>
+          {' (yī shēng nán wàng) - "unforgettable for a lifetime"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"奉献一生"}</_components.strong>
+          {' (fèng xiàn yī shēng) - "dedicate one\'s life"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"一生幸福"}</_components.strong>
+          {' (yī shēng xìng fú) - "lifetime of happiness"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Grammar Patterns"}</_components.h2>
+      {"\n"}
+      <_components.p>{"一生 functions as:"}</_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Time expression"}</_components.strong>
+          {': 一生都... - "throughout one\'s life..."'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Modifier"}</_components.strong>
+          {': 一生的经历 - "lifetime experiences"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Object"}</_components.strong>
+          {': 度过一生 - "spend one\'s life"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Duration"}</_components.strong>
+          {': 用一生时间 - "spend a lifetime"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Philosophical Context"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"一生 carries deep meaning in Chinese thought:"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Temporal completeness"}</_components.strong>
+          {": Recognition of life's finite nature"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Precious time"}</_components.strong>
+          {": Understanding the value of the time we're given"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Legacy thinking"}</_components.strong>
+          {": Considering what one accomplishes in a lifetime"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Relationship depth"}</_components.strong>
+          {": Bonds that last an entire life"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Cultural Context"}</_components.h2>
+      {"\n"}
+      <_components.p>{"一生 in Chinese values and expressions:"}</_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Commitment depth"}</_components.strong>
+          {": 一生的承诺 (lifelong commitment)"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Learning journey"}</_components.strong>
+          {": 一生学习 (lifelong learning)"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Love and marriage"}</_components.strong>
+          {": 一生的伴侣 (lifelong companion)"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Achievement scope"}</_components.strong>
+          {": 一生的成就 (lifetime achievements)"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Related Expressions"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"终生"}</_components.strong>
+          {' (zhōng shēng) - "lifelong; for life"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"毕生"}</_components.strong>
+          {' (bì shēng) - "lifetime; all one\'s life"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"此生"}</_components.strong>
+          {' (cǐ shēng) - "this life; this lifetime"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"来生"}</_components.strong>
+          {' (lái shēng) - "next life; afterlife"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

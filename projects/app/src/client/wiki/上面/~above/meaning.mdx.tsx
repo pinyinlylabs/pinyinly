@@ -1,15 +1,191 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <><_components.p>{"The upper surface or part of something; above; on top of."}</_components.p>{"\n"}<_components.h2>{"Quick Reference"}</_components.h2>{"\n"}<_components.p>{"| Aspect         | Info                    |\n| -------------- | ----------------------- |\n| Pinyin         | shàngmiàn               |\n| Core meaning   | above; on top; upper    |\n| Part of speech | noun, locational phrase |\n| Tone           | fourth tone + neutral   |"}</_components.p>{"\n"}<_components.h2>{"Visual Breakdown"}</_components.h2>{"\n"}<_components.p>{"上面 combines two characters to express location:"}</_components.p>{"\n"}<_components.p>{"| Component | Visual Description                                              |\n| --------- | --------------------------------------------------------------- |\n| "}<_components.strong>{"上"}</_components.strong>{"    | Shows upward movement - a line rising above a reference point   |\n| "}<_components.strong>{"面"}</_components.strong>{"    | Face/surface - represents the visible surface or side of things |"}</_components.p>{"\n"}<_components.h2>{"Mnemonic"}</_components.h2>{"\n"}<_components.p>{"Think of 上面 as "}<_components.strong>{"the upper surface that faces you"}</_components.strong>{":"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"上 (up/above) + 面 (face/surface) = the surface that is \"up\" or \"above\""}</_components.li>{"\n"}<_components.li>{"Like the \"face\" or visible part of something that's positioned higher"}</_components.li>{"\n"}<_components.li>{"The top surface of a table that faces upward toward you"}</_components.li>{"\n"}<_components.li>{"The upper side of an object that you can see when looking up"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p>{"Together they create: "}<_components.strong>{"the surface/side that is positioned above"}</_components.strong>{"."}</_components.p>{"\n"}<_components.h2>{"Core Meaning & Usage"}</_components.h2>{"\n"}<_components.p>{"上面 indicates "}<_components.strong>{"the upper position, surface, or area above something"}</_components.strong>{". It's used:"}</_components.p>{"\n"}<_components.ol>{"\n"}<_components.li><_components.strong>{"Physical location"}</_components.strong>{": 桌子上面 (zhuōzi shàngmiàn) - \"on top of the table\""}</_components.li>{"\n"}<_components.li><_components.strong>{"In documents"}</_components.strong>{": 上面写着 (shàngmiàn xiězhe) - \"written above\""}</_components.li>{"\n"}<_components.li><_components.strong>{"Hierarchy"}</_components.strong>{": 上面的人 (shàngmiàn de rén) - \"people above/superiors\""}</_components.li>{"\n"}<_components.li><_components.strong>{"General position"}</_components.strong>{": 在上面 (zài shàngmiàn) - \"on top; above\""}</_components.li>{"\n"}</_components.ol>{"\n"}<_components.h2>{"Examples"}</_components.h2>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"书在桌子上面"}</_components.strong>{" (shū zài zhuōzi shàngmiàn) - \"The book is on the table\""}</_components.li>{"\n"}<_components.li><_components.strong>{"楼上面"}</_components.strong>{" (lóu shàngmiàn) - \"upstairs; above in the building\""}</_components.li>{"\n"}<_components.li><_components.strong>{"天空上面"}</_components.strong>{" (tiānkōng shàngmiàn) - \"above the sky\""}</_components.li>{"\n"}<_components.li><_components.strong>{"页面上面"}</_components.strong>{" (yèmiàn shàngmiàn) - \"at the top of the page\""}</_components.li>{"\n"}<_components.li><_components.strong>{"山上面"}</_components.strong>{" (shān shàngmiàn) - \"on top of the mountain\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Usage Notes"}</_components.h2>{"\n"}<_components.p>{"上面 is more formal than just 上 (shàng) and emphasizes the surface or area aspect. It's commonly\nused in:"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"Describing locations of objects"}</_components.li>{"\n"}<_components.li>{"Giving directions"}</_components.li>{"\n"}<_components.li>{"Technical or formal descriptions"}</_components.li>{"\n"}<_components.li>{"Written instructions"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p>{"Compare with 下面 (xiàmiàn) \"below/underneath\" for the opposite spatial relationship."}</_components.p></>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {"The upper surface or part of something; above; on top of."}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                    |\n| -------------- | ----------------------- |\n| Pinyin         | shàngmiàn               |\n| Core meaning   | above; on top; upper    |\n| Part of speech | noun, locational phrase |\n| Tone           | fourth tone + neutral   |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Visual Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"上面 combines two characters to express location:"}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component | Visual Description                                              |\n| --------- | --------------------------------------------------------------- |\n| "
+        }
+        <_components.strong>{"上"}</_components.strong>
+        {
+          "    | Shows upward movement - a line rising above a reference point   |\n| "
+        }
+        <_components.strong>{"面"}</_components.strong>
+        {
+          "    | Face/surface - represents the visible surface or side of things |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Mnemonic"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 上面 as "}
+        <_components.strong>
+          {"the upper surface that faces you"}
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {
+            '上 (up/above) + 面 (face/surface) = the surface that is "up" or "above"'
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            'Like the "face" or visible part of something that\'s positioned higher'
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"The top surface of a table that faces upward toward you"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"The upper side of an object that you can see when looking up"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {"Together they create: "}
+        <_components.strong>
+          {"the surface/side that is positioned above"}
+        </_components.strong>
+        {"."}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Core Meaning & Usage"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"上面 indicates "}
+        <_components.strong>
+          {"the upper position, surface, or area above something"}
+        </_components.strong>
+        {". It's used:"}
+      </_components.p>
+      {"\n"}
+      <_components.ol>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Physical location"}</_components.strong>
+          {': 桌子上面 (zhuōzi shàngmiàn) - "on top of the table"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"In documents"}</_components.strong>
+          {': 上面写着 (shàngmiàn xiězhe) - "written above"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Hierarchy"}</_components.strong>
+          {': 上面的人 (shàngmiàn de rén) - "people above/superiors"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"General position"}</_components.strong>
+          {': 在上面 (zài shàngmiàn) - "on top; above"'}
+        </_components.li>
+        {"\n"}
+      </_components.ol>
+      {"\n"}
+      <_components.h2>{"Examples"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"书在桌子上面"}</_components.strong>
+          {' (shū zài zhuōzi shàngmiàn) - "The book is on the table"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"楼上面"}</_components.strong>
+          {' (lóu shàngmiàn) - "upstairs; above in the building"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"天空上面"}</_components.strong>
+          {' (tiānkōng shàngmiàn) - "above the sky"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"页面上面"}</_components.strong>
+          {' (yèmiàn shàngmiàn) - "at the top of the page"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"山上面"}</_components.strong>
+          {' (shān shàngmiàn) - "on top of the mountain"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Usage Notes"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "上面 is more formal than just 上 (shàng) and emphasizes the surface or area aspect. It's commonly\nused in:"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>{"Describing locations of objects"}</_components.li>
+        {"\n"}
+        <_components.li>{"Giving directions"}</_components.li>
+        {"\n"}
+        <_components.li>{"Technical or formal descriptions"}</_components.li>
+        {"\n"}
+        <_components.li>{"Written instructions"}</_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {
+          'Compare with 下面 (xiàmiàn) "below/underneath" for the opposite spatial relationship.'
+        }
+      </_components.p>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

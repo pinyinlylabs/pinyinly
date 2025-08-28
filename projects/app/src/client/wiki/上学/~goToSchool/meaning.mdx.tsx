@@ -1,15 +1,240 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <><_components.p>{"To attend school as a student."}</_components.p>{"\n"}<_components.h2>{"Quick Reference"}</_components.h2>{"\n"}<_components.p>{"| Aspect         | Info                        |\n| -------------- | --------------------------- |\n| Pinyin         | shàng xué                   |\n| Core meaning   | go to school; attend school |\n| Part of speech | verb (activity)             |\n| Tone           | fourth + second tone        |"}</_components.p>{"\n"}<_components.h2>{"Visual Breakdown"}</_components.h2>{"\n"}<_components.p>{"上学 combines "}<_components.strong>{"up/go to"}</_components.strong>{" (上) with "}<_components.strong>{"study/school"}</_components.strong>{" (学) to mean \"go to school.\""}</_components.p>{"\n"}<_components.p>{"| Component | Visual Description                                     |\n| --------- | ------------------------------------------------------ |\n| "}<_components.strong>{"上"}</_components.strong>{"    | Up/attend - shows going to or engaging with something  |\n| "}<_components.strong>{"学"}</_components.strong>{"    | Study/learn - shows the process of acquiring knowledge |"}</_components.p>{"\n"}<_components.h2>{"Mnemonic"}</_components.h2>{"\n"}<_components.p>{"Think of 上学 as "}<_components.strong>{"\"going up to learning\""}</_components.strong>{":"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"上 shows the action of going to or engaging with"}</_components.li>{"\n"}<_components.li>{"学 represents learning and education"}</_components.li>{"\n"}<_components.li>{"Together: the act of going to receive education"}</_components.li>{"\n"}<_components.li>{"Like stepping up to a higher level of knowledge"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p>{"The concept captures the daily journey to acquire education."}</_components.p>{"\n"}<_components.h2>{"Usage Examples"}</_components.h2>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"今天上学"}</_components.strong>{" (jīntiān shàng xué) - \"go to school today\""}</_components.li>{"\n"}<_components.li><_components.strong>{"上学了"}</_components.strong>{" (shàng xué le) - \"going to school\" / \"started school\""}</_components.li>{"\n"}<_components.li><_components.strong>{"上学路上"}</_components.strong>{" (shàng xué lù shàng) - \"on the way to school\""}</_components.li>{"\n"}<_components.li><_components.strong>{"几岁上学？"}</_components.strong>{" (jǐ suì shàng xué?) - \"at what age do you start school?\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Educational Journey"}</_components.h2>{"\n"}<_components.p>{"上学 is part of the education system:"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"上幼儿园"}</_components.strong>{" (shàng yòu'éryuán) - attend kindergarten"}</_components.li>{"\n"}<_components.li><_components.strong>{"上小学"}</_components.strong>{" (shàng xiǎoxué) - attend elementary school"}</_components.li>{"\n"}<_components.li><_components.strong>{"上中学"}</_components.strong>{" (shàng zhōngxué) - attend middle/high school"}</_components.li>{"\n"}<_components.li><_components.strong>{"上大学"}</_components.strong>{" (shàng dàxué) - attend university"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Grammar Patterns"}</_components.h2>{"\n"}<_components.p>{"上学 functions as an "}<_components.strong>{"intransitive verb"}</_components.strong>{":"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"去上学"}</_components.strong>{": go to school"}</_components.li>{"\n"}<_components.li><_components.strong>{"开始上学"}</_components.strong>{": start going to school"}</_components.li>{"\n"}<_components.li><_components.strong>{"正在上学"}</_components.strong>{": currently in school"}</_components.li>{"\n"}<_components.li><_components.strong>{"上学时间"}</_components.strong>{": school hours"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Daily Routine Context"}</_components.h2>{"\n"}<_components.p>{"上学 represents important life patterns:"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Morning routine"}</_components.strong>{": Part of daily preparation and departure"}</_components.li>{"\n"}<_components.li><_components.strong>{"Childhood milestone"}</_components.strong>{": Major developmental activity for children"}</_components.li>{"\n"}<_components.li><_components.strong>{"Family coordination"}</_components.strong>{": Parents organizing children's schedules"}</_components.li>{"\n"}<_components.li><_components.strong>{"Social responsibility"}</_components.strong>{": Civic duty to receive education"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Cultural Context"}</_components.h2>{"\n"}<_components.p>{"上学 reflects Chinese educational values:"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Education priority"}</_components.strong>{": Learning viewed as fundamental life activity"}</_components.li>{"\n"}<_components.li><_components.strong>{"Family investment"}</_components.strong>{": Significant family resources devoted to children's schooling"}</_components.li>{"\n"}<_components.li><_components.strong>{"Social advancement"}</_components.strong>{": School attendance as path to better opportunities"}</_components.li>{"\n"}<_components.li><_components.strong>{"Collective responsibility"}</_components.strong>{": Community support for children's education"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p>{"The concept embodies the Chinese cultural emphasis on education as the foundation for personal and\nsocial development."}</_components.p></>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>{"To attend school as a student."}</_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                        |\n| -------------- | --------------------------- |\n| Pinyin         | shàng xué                   |\n| Core meaning   | go to school; attend school |\n| Part of speech | verb (activity)             |\n| Tone           | fourth + second tone        |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Visual Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"上学 combines "}
+        <_components.strong>{"up/go to"}</_components.strong>
+        {" (上) with "}
+        <_components.strong>{"study/school"}</_components.strong>
+        {' (学) to mean "go to school."'}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component | Visual Description                                     |\n| --------- | ------------------------------------------------------ |\n| "
+        }
+        <_components.strong>{"上"}</_components.strong>
+        {"    | Up/attend - shows going to or engaging with something  |\n| "}
+        <_components.strong>{"学"}</_components.strong>
+        {"    | Study/learn - shows the process of acquiring knowledge |"}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Mnemonic"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 上学 as "}
+        <_components.strong>{'"going up to learning"'}</_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"上 shows the action of going to or engaging with"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"学 represents learning and education"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Together: the act of going to receive education"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Like stepping up to a higher level of knowledge"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {"The concept captures the daily journey to acquire education."}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Usage Examples"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"今天上学"}</_components.strong>
+          {' (jīntiān shàng xué) - "go to school today"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"上学了"}</_components.strong>
+          {' (shàng xué le) - "going to school" / "started school"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"上学路上"}</_components.strong>
+          {' (shàng xué lù shàng) - "on the way to school"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"几岁上学？"}</_components.strong>
+          {' (jǐ suì shàng xué?) - "at what age do you start school?"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Educational Journey"}</_components.h2>
+      {"\n"}
+      <_components.p>{"上学 is part of the education system:"}</_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"上幼儿园"}</_components.strong>
+          {" (shàng yòu'éryuán) - attend kindergarten"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"上小学"}</_components.strong>
+          {" (shàng xiǎoxué) - attend elementary school"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"上中学"}</_components.strong>
+          {" (shàng zhōngxué) - attend middle/high school"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"上大学"}</_components.strong>
+          {" (shàng dàxué) - attend university"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Grammar Patterns"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"上学 functions as an "}
+        <_components.strong>{"intransitive verb"}</_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"去上学"}</_components.strong>
+          {": go to school"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"开始上学"}</_components.strong>
+          {": start going to school"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"正在上学"}</_components.strong>
+          {": currently in school"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"上学时间"}</_components.strong>
+          {": school hours"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Daily Routine Context"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"上学 represents important life patterns:"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Morning routine"}</_components.strong>
+          {": Part of daily preparation and departure"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Childhood milestone"}</_components.strong>
+          {": Major developmental activity for children"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Family coordination"}</_components.strong>
+          {": Parents organizing children's schedules"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Social responsibility"}</_components.strong>
+          {": Civic duty to receive education"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Cultural Context"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"上学 reflects Chinese educational values:"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Education priority"}</_components.strong>
+          {": Learning viewed as fundamental life activity"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Family investment"}</_components.strong>
+          {": Significant family resources devoted to children's schooling"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Social advancement"}</_components.strong>
+          {": School attendance as path to better opportunities"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Collective responsibility"}</_components.strong>
+          {": Community support for children's education"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {
+          "The concept embodies the Chinese cultural emphasis on education as the foundation for personal and\nsocial development."
+        }
+      </_components.p>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

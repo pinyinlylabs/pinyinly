@@ -1,15 +1,253 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <_components.p>{"A general term for any inanimate objects."}</_components.p>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {
+          "Thing; object; stuff; item; a general term for inanimate objects, possessions, or abstract concepts."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                       |\n| -------------- | -------------------------- |\n| Pinyin         | dōngxi                     |\n| Core meaning   | thing; object; stuff; item |\n| Part of speech | noun                       |\n| Tone           | first + neutral tone       |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Word Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          '东西 literally means "east-west" but has evolved to mean "thing" - one of the most interesting\netymologies in Chinese.'
+        }
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component | Literal Meaning                     |\n| --------- | ----------------------------------- |\n| "
+        }
+        <_components.strong>{"东"}</_components.strong>
+        {"    | East - direction of the rising sun  |\n| "}
+        <_components.strong>{"西"}</_components.strong>
+        {"    | West - direction of the setting sun |"}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Mnemonic"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 东西 as "}
+        <_components.strong>
+          {'"everything from east to west"'}
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {
+            "Imagine all the objects scattered across the land from east to west"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {'Like saying "everything under the sun" in English'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "The sun travels from east (东) to west (西), covering all things in between"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"It encompasses the entire scope of physical objects in the world"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {'A poetic way to refer to "all the stuff" or "things"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Understanding the Etymology"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {'The evolution from "east-west" to "thing" reflects Chinese thinking:'}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Directional completeness"}</_components.strong>
+          {": East to west covers everything spatially"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Temporal completeness"}</_components.strong>
+          {": Dawn to dusk covers everything temporally"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Metaphorical extension"}</_components.strong>
+          {': From "all space" to "all objects in that space"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Linguistic elegance"}</_components.strong>
+          {': A poetic way to say "anything and everything"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Usage Examples"}</_components.h2>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Physical Objects"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"这是什么东西？"}</_components.strong>
+          {' (zhè shì shénme dōngxi?) - "What is this thing?"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"买东西"}</_components.strong>
+          {' (mǎi dōngxi) - "to buy things; to go shopping"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"好东西"}</_components.strong>
+          {' (hǎo dōngxi) - "good stuff; nice things"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Abstract Concepts"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"有意思的东西"}</_components.strong>
+          {' (yǒuyìsi de dōngxi) - "interesting things/stuff"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"没什么东西"}</_components.strong>
+          {' (méi shénme dōngxi) - "nothing much; nothing important"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Possessions"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"我的东西"}</_components.strong>
+          {' (wǒ de dōngxi) - "my things; my belongings"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"收拾东西"}</_components.strong>
+          {' (shōushi dōngxi) - "to pack up one\'s things"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Grammar Notes"}</_components.h2>
+      {"\n"}
+      <_components.p>{"东西 is extremely versatile:"}</_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Countable"}</_components.strong>
+          {': 一样东西 (yī yàng dōngxi) - "one thing"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Uncountable"}</_components.strong>
+          {': 很多东西 (hěn duō dōngxi) - "a lot of stuff"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Question word"}</_components.strong>
+          {': 什么东西 (shénme dōngxi) - "what thing?"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"With measure words"}</_components.strong>
+          {': 几个东西 (jǐ gè dōngxi) - "several things"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Cultural Context"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"东西 reflects Chinese linguistic creativity:"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Metaphorical thinking"}</_components.strong>
+          {": Using directions to represent objects"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Poetic language"}</_components.strong>
+          {": Even everyday words have beautiful origins"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Completeness concept"}</_components.strong>
+          {": The idea that east + west = everything"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Daily usage"}</_components.strong>
+          {": One of the most common words in spoken Chinese"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {"This word shows how Chinese thinking often uses "}
+        <_components.strong>
+          {"spatial and directional concepts"}
+        </_components.strong>
+        {" to express\nabstract ideas about objects and possessions."}
+      </_components.p>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

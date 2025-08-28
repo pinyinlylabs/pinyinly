@@ -1,15 +1,189 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <><_components.p>{"The quantitative relationship between two amounts, showing the number of times one value contains or\nis contained within the other; proportion; ratio; scale."}</_components.p>{"\n"}<_components.h2>{"Quick Reference"}</_components.h2>{"\n"}<_components.p>{"| Aspect         | Info                              |\n| -------------- | --------------------------------- |\n| Pinyin         | bǐlì                              |\n| Core meaning   | proportion; ratio; scale; balance |\n| Part of speech | noun                              |\n| Tone           | bǐ (3rd), lì (4th)                |"}</_components.p>{"\n"}<_components.h2>{"Visual Breakdown"}</_components.h2>{"\n"}<_components.p>{"比例 combines concepts of comparison and established patterns/precedents."}</_components.p>{"\n"}<_components.p>{"| Component | Meaning                                              |\n| --------- | ---------------------------------------------------- |\n| "}<_components.strong>{"比"}</_components.strong>{"    | Compare, ratio - two people 人 standing side by side |\n| "}<_components.strong>{"例"}</_components.strong>{"    | Example, precedent - person 人 + arranged items 列   |"}</_components.p>{"\n"}<_components.p>{"The combination suggests \"comparing according to established patterns\" or standardized\nrelationships."}</_components.p>{"\n"}<_components.h2>{"Mnemonic"}</_components.h2>{"\n"}<_components.p>{"Think of 比例 as "}<_components.strong>{"\"comparing people or things according to standard examples\""}</_components.strong>{":"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"比 (bǐ) represents comparing, measuring one against another"}</_components.li>{"\n"}<_components.li>{"例 (lì) represents examples, patterns, or established standards"}</_components.li>{"\n"}<_components.li>{"Together: measuring relationships according to standard patterns"}</_components.li>{"\n"}<_components.li>{"Picture architects using scale drawings where everything is proportional"}</_components.li>{"\n"}<_components.li>{"Like a recipe where ingredients must be in the right ratios"}</_components.li>{"\n"}<_components.li>{"The mathematical relationship that keeps things in proper balance"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p>{"This creates the image: "}<_components.strong>{"measuring and maintaining proper relationships between different parts\naccording to established standards"}</_components.strong>{"."}</_components.p>{"\n"}<_components.h2>{"Core Meaning & Usage"}</_components.h2>{"\n"}<_components.p>{"比例 represents "}<_components.strong>{"proportional relationships, ratios, and balanced scaling between quantities"}</_components.strong>{".\nIt's used:"}</_components.p>{"\n"}<_components.ol>{"\n"}<_components.li><_components.strong>{"Mathematics"}</_components.strong>{": 数学比例 (shùxué bǐlì) - \"mathematical proportion\""}</_components.li>{"\n"}<_components.li><_components.strong>{"Design"}</_components.strong>{": 比例协调 (bǐlì xiétiáo) - \"proportional harmony\""}</_components.li>{"\n"}<_components.li><_components.strong>{"Statistics"}</_components.strong>{": 人口比例 (rénkǒu bǐlì) - \"population ratio\""}</_components.li>{"\n"}<_components.li><_components.strong>{"Mixing"}</_components.strong>{": 调配比例 (tiáopèi bǐlì) - \"mixing proportions\""}</_components.li>{"\n"}</_components.ol>{"\n"}<_components.h2>{"Examples"}</_components.h2>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"人口比例"}</_components.strong>{" (rénkǒu bǐlì) - \"population ratio\""}</_components.li>{"\n"}<_components.li><_components.strong>{"比例失调"}</_components.strong>{" (bǐlì shītiáo) - \"out of proportion; disproportionate\""}</_components.li>{"\n"}<_components.li><_components.strong>{"按比例"}</_components.strong>{" (àn bǐlì) - \"proportionally; in proportion\""}</_components.li>{"\n"}<_components.li><_components.strong>{"黄金比例"}</_components.strong>{" (huángjīn bǐlì) - \"golden ratio\""}</_components.li>{"\n"}<_components.li><_components.strong>{"比例尺"}</_components.strong>{" (bǐlìchǐ) - \"scale (on maps/drawings)\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Cultural Context"}</_components.h2>{"\n"}<_components.p>{"比例 reflects Chinese aesthetic and philosophical values of balance and harmony. In traditional\nChinese art, architecture, and medicine, proper 比例 is essential for beauty and effectiveness. The\nconcept extends to social relationships and governance, where maintaining proper proportional\nrelationships between different groups and interests is seen as crucial for social stability and\nharmony."}</_components.p></>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {
+          "The quantitative relationship between two amounts, showing the number of times one value contains or\nis contained within the other; proportion; ratio; scale."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                              |\n| -------------- | --------------------------------- |\n| Pinyin         | bǐlì                              |\n| Core meaning   | proportion; ratio; scale; balance |\n| Part of speech | noun                              |\n| Tone           | bǐ (3rd), lì (4th)                |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Visual Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "比例 combines concepts of comparison and established patterns/precedents."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component | Meaning                                              |\n| --------- | ---------------------------------------------------- |\n| "
+        }
+        <_components.strong>{"比"}</_components.strong>
+        {"    | Compare, ratio - two people 人 standing side by side |\n| "}
+        <_components.strong>{"例"}</_components.strong>
+        {"    | Example, precedent - person 人 + arranged items 列   |"}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          'The combination suggests "comparing according to established patterns" or standardized\nrelationships.'
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Mnemonic"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 比例 as "}
+        <_components.strong>
+          {'"comparing people or things according to standard examples"'}
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"比 (bǐ) represents comparing, measuring one against another"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"例 (lì) represents examples, patterns, or established standards"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Together: measuring relationships according to standard patterns"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "Picture architects using scale drawings where everything is proportional"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Like a recipe where ingredients must be in the right ratios"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"The mathematical relationship that keeps things in proper balance"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {"This creates the image: "}
+        <_components.strong>
+          {
+            "measuring and maintaining proper relationships between different parts\naccording to established standards"
+          }
+        </_components.strong>
+        {"."}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Core Meaning & Usage"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"比例 represents "}
+        <_components.strong>
+          {
+            "proportional relationships, ratios, and balanced scaling between quantities"
+          }
+        </_components.strong>
+        {".\nIt's used:"}
+      </_components.p>
+      {"\n"}
+      <_components.ol>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Mathematics"}</_components.strong>
+          {': 数学比例 (shùxué bǐlì) - "mathematical proportion"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Design"}</_components.strong>
+          {': 比例协调 (bǐlì xiétiáo) - "proportional harmony"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Statistics"}</_components.strong>
+          {': 人口比例 (rénkǒu bǐlì) - "population ratio"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Mixing"}</_components.strong>
+          {': 调配比例 (tiáopèi bǐlì) - "mixing proportions"'}
+        </_components.li>
+        {"\n"}
+      </_components.ol>
+      {"\n"}
+      <_components.h2>{"Examples"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"人口比例"}</_components.strong>
+          {' (rénkǒu bǐlì) - "population ratio"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"比例失调"}</_components.strong>
+          {' (bǐlì shītiáo) - "out of proportion; disproportionate"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"按比例"}</_components.strong>
+          {' (àn bǐlì) - "proportionally; in proportion"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"黄金比例"}</_components.strong>
+          {' (huángjīn bǐlì) - "golden ratio"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"比例尺"}</_components.strong>
+          {' (bǐlìchǐ) - "scale (on maps/drawings)"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Cultural Context"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "比例 reflects Chinese aesthetic and philosophical values of balance and harmony. In traditional\nChinese art, architecture, and medicine, proper 比例 is essential for beauty and effectiveness. The\nconcept extends to social relationships and governance, where maintaining proper proportional\nrelationships between different groups and interests is seen as crucial for social stability and\nharmony."
+        }
+      </_components.p>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

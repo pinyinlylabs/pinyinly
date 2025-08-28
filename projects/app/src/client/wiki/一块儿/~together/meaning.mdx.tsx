@@ -1,15 +1,253 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <_components.p>{"With each other or one another."}</_components.p>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {
+          "Together; with each other; as a group; in the same place or time; collectively."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                              |\n| -------------- | --------------------------------- |\n| Pinyin         | yīkuàir                           |\n| Core meaning   | together; with each other; as one |\n| Part of speech | adverb                            |\n| Tone           | first + fourth + neutral tone     |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Word Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "一块儿 combines the concept of unity with a casual, colloquial feeling."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component | Meaning                                                   |\n| --------- | --------------------------------------------------------- |\n| "
+        }
+        <_components.strong>{"一"}</_components.strong>
+        {
+          "    | One - indicating unity and singularity                    |\n| "
+        }
+        <_components.strong>{"块"}</_components.strong>
+        {
+          "    | Piece/lump - a solid, unified chunk                       |\n| "
+        }
+        <_components.strong>{"儿"}</_components.strong>
+        {"    | Retroflex suffix - adds Beijing dialect flavor and warmth |"}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Mnemonic"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 一块儿 as "}
+        <_components.strong>{'"one solid piece"'}</_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"Like friends who stick together as one unified group"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            'Imagine people gathered so close they form "one lump" or "one piece"'
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"The 儿 (r) sound gives it a warm, friendly, Beijing flavor"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {'It\'s like saying "as one unit" or "in one bunch"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Perfect for describing people doing things together harmoniously"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Usage Examples"}</_components.h2>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Doing Activities Together"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"我们一块儿去吧"}</_components.strong>
+          {' (wǒmen yīkuàir qù ba) - "Let\'s go together"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"一块儿吃饭"}</_components.strong>
+          {' (yīkuàir chīfàn) - "eat together"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"一块儿学习"}</_components.strong>
+          {' (yīkuàir xuéxí) - "study together"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Being in the Same Place"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"坐在一块儿"}</_components.strong>
+          {' (zuò zài yīkuàir) - "sit together"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"住在一块儿"}</_components.strong>
+          {' (zhù zài yīkuàir) - "live together"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"站在一块儿"}</_components.strong>
+          {' (zhàn zài yīkuàir) - "stand together"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Collaborative Actions"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"一块儿努力"}</_components.strong>
+          {' (yīkuàir nǔlì) - "work hard together"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"一块儿解决"}</_components.strong>
+          {' (yīkuàir jiějué) - "solve it together"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Grammar Notes"}</_components.h2>
+      {"\n"}
+      <_components.p>{"一块儿 typically appears:"}</_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Before verbs"}</_components.strong>
+          {": 一块儿 + verb (together + action)"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"After 和"}</_components.strong>
+          {": 和...一块儿 (together with...)"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"In suggestions"}</_components.strong>
+          {": 我们一块儿... (let's... together)"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Regional Note"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"一块儿 is particularly common in "}
+        <_components.strong>{"Northern Chinese dialects"}</_components.strong>
+        {", especially Beijing dialect:"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"The 儿 (retroflex) ending is characteristic of Beijing speech"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"In Southern dialects, people might say "}
+          <_components.strong>{"一起"}</_components.strong>
+          {" (yīqǐ) instead"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {'Both mean "together" but 一块儿 sounds more casual and friendly'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Using 一块儿 gives your Chinese a Beijing flavor"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Cultural Context"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"一块儿 reflects important Chinese social values:"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Collective harmony"}</_components.strong>
+          {": Doing things together is preferred over individual action"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Group solidarity"}</_components.strong>
+          {': The "one piece" metaphor emphasizes unity'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Warm relationships"}</_components.strong>
+          {": The casual tone suggests close, comfortable relationships"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Shared experiences"}</_components.strong>
+          {": Chinese culture values shared activities and mutual support"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {"Using 一块儿 shows you understand the importance of "}
+        <_components.strong>{"togetherness and community"}</_components.strong>
+        {" in Chinese\nculture."}
+      </_components.p>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

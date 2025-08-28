@@ -1,15 +1,187 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <><_components.p>{"To cause harm, danger, or damage to someone or something; to endanger; to jeopardize; harmful\neffects."}</_components.p>{"\n"}<_components.h2>{"Quick Reference"}</_components.h2>{"\n"}<_components.p>{"| Aspect         | Info                                 |\n| -------------- | ------------------------------------ |\n| Pinyin         | wēihài                               |\n| Core meaning   | endanger; harm; jeopardize; threaten |\n| Part of speech | verb; noun                           |\n| Tone           | wēi (1st), hài (4th)                 |"}</_components.p>{"\n"}<_components.h2>{"Visual Breakdown"}</_components.h2>{"\n"}<_components.p>{"危害 combines concepts of danger/risk and direct harm."}</_components.p>{"\n"}<_components.p>{"| Component | Meaning                                   |\n| --------- | ----------------------------------------- |\n| "}<_components.strong>{"危"}</_components.strong>{"    | Danger, risk - person 人 on cliff edge 厂 |\n| "}<_components.strong>{"害"}</_components.strong>{"    | Harm, damage - roof radical 宀 + mouth 口 |"}</_components.p>{"\n"}<_components.p>{"The combination suggests \"dangerous situations that cause actual harm.\""}</_components.p>{"\n"}<_components.h2>{"Mnemonic"}</_components.h2>{"\n"}<_components.p>{"Think of 危害 as "}<_components.strong>{"\"dangerous situations that break through protection and cause real damage\""}</_components.strong>{":"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"危 (wēi) represents danger, risk, precarious situations"}</_components.li>{"\n"}<_components.li>{"害 (hài) represents actual harm, damage, or injury that results"}</_components.li>{"\n"}<_components.li>{"Together: dangerous conditions that lead to real harmful consequences"}</_components.li>{"\n"}<_components.li>{"Picture a dangerous situation that escalates to cause actual damage"}</_components.li>{"\n"}<_components.li>{"Like a hazard that moves from potential threat to actual harm"}</_components.li>{"\n"}<_components.li>{"The progression from risky situation to concrete negative effects"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p>{"This creates the image: "}<_components.strong>{"danger that materializes into real, measurable harm"}</_components.strong>{"."}</_components.p>{"\n"}<_components.h2>{"Core Meaning & Usage"}</_components.h2>{"\n"}<_components.p>{"危害 represents "}<_components.strong>{"serious threats that cause actual damage or negative consequences"}</_components.strong>{". It's used:"}</_components.p>{"\n"}<_components.ol>{"\n"}<_components.li><_components.strong>{"Environmental"}</_components.strong>{": 环境危害 (huánjìng wēihài) - \"environmental harm\""}</_components.li>{"\n"}<_components.li><_components.strong>{"Health risks"}</_components.strong>{": 健康危害 (jiànkāng wēihài) - \"health hazards\""}</_components.li>{"\n"}<_components.li><_components.strong>{"Social problems"}</_components.strong>{": 社会危害 (shèhuì wēihài) - \"social harm\""}</_components.li>{"\n"}<_components.li><_components.strong>{"Safety concerns"}</_components.strong>{": 安全危害 (ānquán wēihài) - \"safety hazards\""}</_components.li>{"\n"}</_components.ol>{"\n"}<_components.h2>{"Examples"}</_components.h2>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"环境危害"}</_components.strong>{" (huánjìng wēihài) - \"environmental harm\""}</_components.li>{"\n"}<_components.li><_components.strong>{"健康危害"}</_components.strong>{" (jiànkāng wēihài) - \"health hazard\""}</_components.li>{"\n"}<_components.li><_components.strong>{"社会危害"}</_components.strong>{" (shèhuì wēihài) - \"social harm\""}</_components.li>{"\n"}<_components.li><_components.strong>{"严重危害"}</_components.strong>{" (yánzhòng wēihài) - \"serious harm\""}</_components.li>{"\n"}<_components.li><_components.strong>{"危害公共安全"}</_components.strong>{" (wēihài gōnggòng ānquán) - \"endanger public safety\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Cultural Context"}</_components.h2>{"\n"}<_components.p>{"危害 in Chinese culture represents threats to social harmony and collective well-being. The concept\nextends beyond individual harm to include damage to communities, traditions, and social order. In\nChinese law and policy, preventing 危害 to society is considered a fundamental responsibility,\nreflecting the cultural emphasis on collective welfare and stability."}</_components.p></>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {
+          "To cause harm, danger, or damage to someone or something; to endanger; to jeopardize; harmful\neffects."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                                 |\n| -------------- | ------------------------------------ |\n| Pinyin         | wēihài                               |\n| Core meaning   | endanger; harm; jeopardize; threaten |\n| Part of speech | verb; noun                           |\n| Tone           | wēi (1st), hài (4th)                 |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Visual Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"危害 combines concepts of danger/risk and direct harm."}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component | Meaning                                   |\n| --------- | ----------------------------------------- |\n| "
+        }
+        <_components.strong>{"危"}</_components.strong>
+        {"    | Danger, risk - person 人 on cliff edge 厂 |\n| "}
+        <_components.strong>{"害"}</_components.strong>
+        {"    | Harm, damage - roof radical 宀 + mouth 口 |"}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          'The combination suggests "dangerous situations that cause actual harm."'
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Mnemonic"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 危害 as "}
+        <_components.strong>
+          {
+            '"dangerous situations that break through protection and cause real damage"'
+          }
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"危 (wēi) represents danger, risk, precarious situations"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"害 (hài) represents actual harm, damage, or injury that results"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "Together: dangerous conditions that lead to real harmful consequences"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "Picture a dangerous situation that escalates to cause actual damage"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Like a hazard that moves from potential threat to actual harm"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"The progression from risky situation to concrete negative effects"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {"This creates the image: "}
+        <_components.strong>
+          {"danger that materializes into real, measurable harm"}
+        </_components.strong>
+        {"."}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Core Meaning & Usage"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"危害 represents "}
+        <_components.strong>
+          {"serious threats that cause actual damage or negative consequences"}
+        </_components.strong>
+        {". It's used:"}
+      </_components.p>
+      {"\n"}
+      <_components.ol>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Environmental"}</_components.strong>
+          {': 环境危害 (huánjìng wēihài) - "environmental harm"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Health risks"}</_components.strong>
+          {': 健康危害 (jiànkāng wēihài) - "health hazards"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Social problems"}</_components.strong>
+          {': 社会危害 (shèhuì wēihài) - "social harm"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Safety concerns"}</_components.strong>
+          {': 安全危害 (ānquán wēihài) - "safety hazards"'}
+        </_components.li>
+        {"\n"}
+      </_components.ol>
+      {"\n"}
+      <_components.h2>{"Examples"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"环境危害"}</_components.strong>
+          {' (huánjìng wēihài) - "environmental harm"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"健康危害"}</_components.strong>
+          {' (jiànkāng wēihài) - "health hazard"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"社会危害"}</_components.strong>
+          {' (shèhuì wēihài) - "social harm"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"严重危害"}</_components.strong>
+          {' (yánzhòng wēihài) - "serious harm"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"危害公共安全"}</_components.strong>
+          {' (wēihài gōnggòng ānquán) - "endanger public safety"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Cultural Context"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "危害 in Chinese culture represents threats to social harmony and collective well-being. The concept\nextends beyond individual harm to include damage to communities, traditions, and social order. In\nChinese law and policy, preventing 危害 to society is considered a fundamental responsibility,\nreflecting the cultural emphasis on collective welfare and stability."
+        }
+      </_components.p>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

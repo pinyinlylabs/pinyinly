@@ -93,13 +93,47 @@ describe(`mdx files exist and are valid`, async () => {
     // Report missing files
     if (missingCompiledFiles.length > 0) {
       const errorMessage = `The following MDX files don't have compiled .mdx.tsx files:\n${missingCompiledFiles.slice(0, 10).join(`\n`)}${missingCompiledFiles.length > 10 ? `\n... and ${missingCompiledFiles.length - 10} more` : ``}`;
-      throw new Error(errorMessage + `\n\nRun: moon run app:precompileMdx`);
+      throw new Error(errorMessage + `\n\nRun: moon run app:codegenMdx`);
     }
 
     // Report outdated files
     if (outdatedCompiledFiles.length > 0) {
       const errorMessage = `The following compiled .mdx.tsx files are outdated:\n${outdatedCompiledFiles.slice(0, 10).join(`\n`)}${outdatedCompiledFiles.length > 10 ? `\n... and ${outdatedCompiledFiles.length - 10} more` : ``}`;
-      throw new Error(errorMessage + `\n\nRun: moon run app:precompileMdx`);
+      throw new Error(errorMessage + `\n\nRun: moon run app:codegenMdx`);
+    }
+  });
+
+  test(`no orphaned .mdx.tsx files exist without corresponding .mdx files`, async () => {
+    // Find all .mdx.tsx files in the wiki directory
+    const mdxTsxFiles = await glob(
+      path.join(projectRoot, `src/client/wiki/**/*.mdx.tsx`),
+    );
+
+    const orphanedCompiledFiles: string[] = [];
+
+    for (const compiledFilePath of mdxTsxFiles) {
+      const sourceFilePath = compiledFilePath.replace(/\.mdx\.tsx$/, `.mdx`);
+      const relativeCompiledPath = path.relative(projectRoot, compiledFilePath);
+      const relativeSourcePath = path.relative(projectRoot, sourceFilePath);
+
+      // Check if source file exists
+      try {
+        await stat(sourceFilePath);
+      } catch {
+        // Source file doesn't exist - this is an orphaned compiled file
+        orphanedCompiledFiles.push(
+          `${relativeCompiledPath} (missing source: ${relativeSourcePath})`,
+        );
+      }
+    }
+
+    // Report orphaned files
+    if (orphanedCompiledFiles.length > 0) {
+      const errorMessage = `The following .mdx.tsx files are orphaned (no corresponding .mdx file):\n${orphanedCompiledFiles.slice(0, 10).join(`\n`)}${orphanedCompiledFiles.length > 10 ? `\n... and ${orphanedCompiledFiles.length - 10} more` : ``}`;
+      throw new Error(
+        errorMessage +
+          `\n\nPlease remove these orphaned files or ensure their corresponding .mdx files exist.`,
+      );
     }
   });
 

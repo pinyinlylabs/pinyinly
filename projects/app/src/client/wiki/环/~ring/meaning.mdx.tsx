@@ -1,15 +1,183 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <><_components.p>{"A circular band or loop; ring; circle; to surround; environment."}</_components.p>{"\n"}<_components.h2>{"Quick Reference"}</_components.h2>{"\n"}<_components.p>{"| Aspect         | Info                         |\n| -------------- | ---------------------------- |\n| Pinyin         | huán                         |\n| Core meaning   | ring; circle; surround; loop |\n| Part of speech | noun; verb                   |\n| Tone           | second tone (rising)         |"}</_components.p>{"\n"}<_components.h2>{"Visual Breakdown"}</_components.h2>{"\n"}<_components.p>{"环 combines concepts of jade/precious material and circular completeness."}</_components.p>{"\n"}<_components.p>{"| Component | Meaning                                              |\n| --------- | ---------------------------------------------------- |\n| "}<_components.strong>{"王"}</_components.strong>{"    | Jade/king radical - precious, valuable material      |\n| "}<_components.strong>{"袁"}</_components.strong>{"    | Robe, garment - suggests something that wraps around |"}</_components.p>{"\n"}<_components.p>{"The combination suggests a precious circular object that wraps around something."}</_components.p>{"\n"}<_components.h2>{"Mnemonic"}</_components.h2>{"\n"}<_components.p>{"Think of 环 as "}<_components.strong>{"\"a precious ring that wraps around completely\""}</_components.strong>{":"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"王 (jade/king) represents something precious and valuable like jade"}</_components.li>{"\n"}<_components.li>{"袁 suggests something that wraps around like a garment"}</_components.li>{"\n"}<_components.li>{"Together: a precious circular band that completely encircles"}</_components.li>{"\n"}<_components.li>{"Picture a beautiful jade ring that forms a perfect circle"}</_components.li>{"\n"}<_components.li>{"Like a precious bracelet that wraps around your wrist"}</_components.li>{"\n"}<_components.li>{"The completeness of a circle with no beginning or end"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p>{"This creates the image: "}<_components.strong>{"a valuable circular band that completely surrounds something"}</_components.strong>{"."}</_components.p>{"\n"}<_components.h2>{"Core Meaning & Usage"}</_components.h2>{"\n"}<_components.p>{"环 represents "}<_components.strong>{"circular shapes, surrounding, and complete enclosure"}</_components.strong>{". It's used:"}</_components.p>{"\n"}<_components.ol>{"\n"}<_components.li><_components.strong>{"Jewelry"}</_components.strong>{": 戒环 (jièhuán) - \"ring (jewelry)\""}</_components.li>{"\n"}<_components.li><_components.strong>{"Environment"}</_components.strong>{": 环境 (huánjìng) - \"environment; surroundings\""}</_components.li>{"\n"}<_components.li><_components.strong>{"Circulation"}</_components.strong>{": 环球 (huánqiú) - \"around the globe\""}</_components.li>{"\n"}<_components.li><_components.strong>{"Linking"}</_components.strong>{": 环节 (huánjié) - \"link; connection\""}</_components.li>{"\n"}</_components.ol>{"\n"}<_components.h2>{"Examples"}</_components.h2>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"环境"}</_components.strong>{" (huánjìng) - \"environment; surroundings\""}</_components.li>{"\n"}<_components.li><_components.strong>{"环球"}</_components.strong>{" (huánqiú) - \"global; worldwide\""}</_components.li>{"\n"}<_components.li><_components.strong>{"环节"}</_components.strong>{" (huánjié) - \"link; stage; step\""}</_components.li>{"\n"}<_components.li><_components.strong>{"环保"}</_components.strong>{" (huánbǎo) - \"environmental protection\""}</_components.li>{"\n"}<_components.li><_components.strong>{"环形"}</_components.strong>{" (huánxíng) - \"ring-shaped; circular\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Cultural Context"}</_components.h2>{"\n"}<_components.p>{"环 is fundamental in Chinese concepts of wholeness and completion. In feng shui and traditional\nChinese philosophy, circular shapes (环形) represent harmony and completeness. 环境 (environment)\nemphasizes how surroundings completely encircle and influence us. The ring shape symbolizes eternal\ncycles and continuity in Chinese culture."}</_components.p></>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {"A circular band or loop; ring; circle; to surround; environment."}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                         |\n| -------------- | ---------------------------- |\n| Pinyin         | huán                         |\n| Core meaning   | ring; circle; surround; loop |\n| Part of speech | noun; verb                   |\n| Tone           | second tone (rising)         |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Visual Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "环 combines concepts of jade/precious material and circular completeness."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component | Meaning                                              |\n| --------- | ---------------------------------------------------- |\n| "
+        }
+        <_components.strong>{"王"}</_components.strong>
+        {"    | Jade/king radical - precious, valuable material      |\n| "}
+        <_components.strong>{"袁"}</_components.strong>
+        {"    | Robe, garment - suggests something that wraps around |"}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "The combination suggests a precious circular object that wraps around something."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Mnemonic"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 环 as "}
+        <_components.strong>
+          {'"a precious ring that wraps around completely"'}
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {
+            "王 (jade/king) represents something precious and valuable like jade"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"袁 suggests something that wraps around like a garment"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Together: a precious circular band that completely encircles"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Picture a beautiful jade ring that forms a perfect circle"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Like a precious bracelet that wraps around your wrist"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"The completeness of a circle with no beginning or end"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {"This creates the image: "}
+        <_components.strong>
+          {"a valuable circular band that completely surrounds something"}
+        </_components.strong>
+        {"."}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Core Meaning & Usage"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"环 represents "}
+        <_components.strong>
+          {"circular shapes, surrounding, and complete enclosure"}
+        </_components.strong>
+        {". It's used:"}
+      </_components.p>
+      {"\n"}
+      <_components.ol>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Jewelry"}</_components.strong>
+          {': 戒环 (jièhuán) - "ring (jewelry)"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Environment"}</_components.strong>
+          {': 环境 (huánjìng) - "environment; surroundings"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Circulation"}</_components.strong>
+          {': 环球 (huánqiú) - "around the globe"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Linking"}</_components.strong>
+          {': 环节 (huánjié) - "link; connection"'}
+        </_components.li>
+        {"\n"}
+      </_components.ol>
+      {"\n"}
+      <_components.h2>{"Examples"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"环境"}</_components.strong>
+          {' (huánjìng) - "environment; surroundings"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"环球"}</_components.strong>
+          {' (huánqiú) - "global; worldwide"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"环节"}</_components.strong>
+          {' (huánjié) - "link; stage; step"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"环保"}</_components.strong>
+          {' (huánbǎo) - "environmental protection"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"环形"}</_components.strong>
+          {' (huánxíng) - "ring-shaped; circular"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Cultural Context"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "环 is fundamental in Chinese concepts of wholeness and completion. In feng shui and traditional\nChinese philosophy, circular shapes (环形) represent harmony and completeness. 环境 (environment)\nemphasizes how surroundings completely encircle and influence us. The ring shape symbolizes eternal\ncycles and continuity in Chinese culture."
+        }
+      </_components.p>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

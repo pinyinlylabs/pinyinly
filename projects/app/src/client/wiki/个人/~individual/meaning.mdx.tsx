@@ -1,15 +1,366 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <_components.p>{"A single person as distinct from a group."}</_components.p>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {
+          "Individual; person; private; personal; a single person as distinct from a group or collective\nentity."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                                         |\n| -------------- | -------------------------------------------- |\n| Pinyin         | gèrén                                        |\n| Core meaning   | individual; personal; private; single person |\n| Part of speech | noun, adjective                              |\n| Tone           | fourth + second tone                         |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Word Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "个人 combines the universal measure word with the concept of humanity."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component | Meaning                                            |\n| --------- | -------------------------------------------------- |\n| "
+        }
+        <_components.strong>{"个"}</_components.strong>
+        {"    | Individual unit; general measure word for counting |\n| "}
+        <_components.strong>{"人"}</_components.strong>
+        {"    | Person; human being; people                        |"}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Understanding"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 个人 as "}
+        <_components.strong>
+          {'"one individual unit of humanity"'}
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {'个 emphasizes the "single" or "individual" nature'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"人 specifies that we're talking about a human being"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Together they contrast individual vs. collective identity"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Highlights personal agency, responsibility, and uniqueness"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Often opposed to group, organization, or societal perspectives"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Core Meanings & Usage"}</_components.h2>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"1. Individual Person (个体)"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"每个人"}</_components.strong>
+          {" (měi gè rén) vs "}
+          <_components.strong>{"个人"}</_components.strong>
+          {' (gèrén) - "each person" vs "the individual"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"个人权利"}</_components.strong>
+          {' (gèrén quánlì) - "individual rights"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"个人选择"}</_components.strong>
+          {' (gèrén xuǎnzé) - "personal choice"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"2. Personal/Private (私人)"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"个人信息"}</_components.strong>
+          {' (gèrén xìnxī) - "personal information"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"个人生活"}</_components.strong>
+          {' (gèrén shēnghuó) - "private life"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"个人空间"}</_components.strong>
+          {' (gèrén kōngjiān) - "personal space"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>
+          {"3. Individual vs. Collective (对比)"}
+        </_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"个人利益"}</_components.strong>
+          {' (gèrén lìyì) - "individual interests" (vs. collective interests)'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"个人主义"}</_components.strong>
+          {' (gèrén zhǔyì) - "individualism"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"个人与社会"}</_components.strong>
+          {' (gèrén yǔ shèhuì) - "individual and society"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Common Expressions"}</_components.h2>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Personal Attributes"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"个人能力"}</_components.strong>
+          {' (gèrén nénglì) - "individual ability; personal capability"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"个人经验"}</_components.strong>
+          {' (gèrén jīngyàn) - "personal experience"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"个人风格"}</_components.strong>
+          {' (gèrén fēnggé) - "personal style"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Privacy and Autonomy"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"个人隐私"}</_components.strong>
+          {' (gèrén yǐnsī) - "personal privacy"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"个人自由"}</_components.strong>
+          {' (gèrén zìyóu) - "individual freedom"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"个人决定"}</_components.strong>
+          {' (gèrén juédìng) - "personal decision"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Professional Context"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"个人简历"}</_components.strong>
+          {' (gèrén jiǎnlì) - "personal resume; CV"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"个人发展"}</_components.strong>
+          {' (gèrén fāzhǎn) - "personal development"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"个人品牌"}</_components.strong>
+          {' (gèrén pǐnpái) - "personal brand"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Cultural Context"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"个人 reflects evolving Chinese social concepts:"}
+      </_components.p>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Traditional Collectivism"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {
+            "Historically, Chinese culture emphasized group harmony over individual desires"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "个人 was often seen as secondary to family (家庭) and society (社会)"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"The concept carried potential negative connotations of selfishness"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Modern Individualism"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {
+            "Contemporary China increasingly values individual rights and choices"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "个人 now has more positive associations with autonomy and self-realization"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "Balance between collective responsibility and individual expression"
+          }
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Philosophical Tension"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"个人与集体"}</_components.strong>
+          {
+            ' (gèrén yǔ jítǐ) - "individual vs. collective" remains a key cultural discussion'
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "Modern Chinese people navigate between personal ambitions and social obligations"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "个人 represents the modern challenge of self-actualization within social context"
+          }
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Grammar Notes"}</_components.h2>
+      {"\n"}
+      <_components.p>{"个人 can function as:"}</_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Noun"}</_components.strong>
+          {': 作为一个个人 (zuòwéi yīgè gèrén) - "as an individual"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Adjective"}</_components.strong>
+          {': 个人观点 (gèrén guāndiǎn) - "personal opinion"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Modifier"}</_components.strong>
+          {': 个人的 (gèrén de) - "personal; individual"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Contrast with Related Terms"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Term     | Focus                     | Usage                    |\n| -------- | ------------------------- | ------------------------ |\n| "
+        }
+        <_components.strong>{"个人"}</_components.strong>
+        {" | Individual vs. collective | Individual rights/choice |\n| "}
+        <_components.strong>{"私人"}</_components.strong>
+        {" | Private vs. public        | Private matters/property |\n| "}
+        <_components.strong>{"自己"}</_components.strong>
+        {" | Self vs. others           | Self-reference/emphasis  |"}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {"Understanding 个人 shows your grasp of the "}
+        <_components.strong>
+          {"individual-collective dynamic"}
+        </_components.strong>
+        {" that shapes modern\nChinese society."}
+      </_components.p>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

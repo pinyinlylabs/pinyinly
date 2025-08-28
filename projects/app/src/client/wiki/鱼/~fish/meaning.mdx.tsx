@@ -1,15 +1,511 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <_components.p>{"A limbless cold-blooded vertebrate animal with gills and fins and living wholly in water."}</_components.p>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {
+          "A limbless cold-blooded vertebrate animal with gills and fins, living wholly in water; aquatic\ncreature."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                     |\n| -------------- | ------------------------ |\n| Pinyin         | yú                       |\n| Core meaning   | fish; aquatic vertebrate |\n| Part of speech | noun; radical            |\n| Tone           | second tone (rising)     |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Visual Understanding"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 鱼 as "}
+        <_components.strong>
+          {'"graceful swimmer of the waters"'}
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {
+            "The character originally depicted a fish with fins, scales, and tail"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Streamlined body designed for moving through water"}
+        </_components.li>
+        {"\n"}
+        <_components.li>{"Gills for breathing underwater"}</_components.li>
+        {"\n"}
+        <_components.li>
+          {"Cold-blooded creatures adapted to aquatic life"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Essential part of the food chain and human diet"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Cultural Significance"}</_components.h2>
+      {"\n"}
+      <_components.p>{"In Chinese culture, 鱼 represents:"}</_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"abundance"}</_components.strong>
+          {' (余) - sounds like "surplus," so fish symbolize wealth'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"prosperity"}</_components.strong>
+          {" - especially during Chinese New Year"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"fertility"}</_components.strong>
+          {" - fish produce many offspring"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"perseverance"}</_components.strong>
+          {" - swimming upstream like salmon"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Types of Fish"}</_components.h2>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Freshwater Fish"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"鲤鱼"}</_components.strong>
+          {' (lǐyú) - "carp" (culturally significant)'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"草鱼"}</_components.strong>
+          {' (cǎoyú) - "grass carp"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"鲫鱼"}</_components.strong>
+          {' (jìyú) - "crucian carp"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Saltwater Fish"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"带鱼"}</_components.strong>
+          {' (dàiyú) - "hairtail fish"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"黄鱼"}</_components.strong>
+          {' (huángyú) - "yellow croaker"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"鲳鱼"}</_components.strong>
+          {' (chāngyú) - "pomfret"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Popular Eating Fish"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"三文鱼"}</_components.strong>
+          {' (sānwényú) - "salmon"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"金枪鱼"}</_components.strong>
+          {' (jīnqiāngyú) - "tuna"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"鳕鱼"}</_components.strong>
+          {' (xuěyú) - "cod"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Culinary Context"}</_components.h2>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Cooking Methods"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"清蒸鱼"}</_components.strong>
+          {' (qīngzhēngyú) - "steamed fish"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"红烧鱼"}</_components.strong>
+          {' (hóngshāoyú) - "braised fish in soy sauce"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"水煮鱼"}</_components.strong>
+          {' (shuǐzhǔyú) - "boiled fish" (Sichuan style)'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Cultural Dining"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"年年有余"}</_components.strong>
+          {' - "may you have abundance every year" (New Year wish)'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"鱼头朝贵客"}</_components.strong>
+          {" - fish head points toward honored guest"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"鱼不能翻"}</_components.strong>
+          {" - don't flip the fish (bad luck for fishermen)"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Examples"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>{"这条鱼很新鲜。"}</_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>{'"This fish is very fresh."'}</_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>{"我们去钓鱼吧。"}</_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>{'"Let\'s go fishing."'}</_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>
+              {"她不吃鱼，因为有很多刺。"}
+            </_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {'"She doesn\'t eat fish because it has many bones."'}
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>{"鱼在水里游泳。"}</_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>{'"Fish swim in the water."'}</_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>
+              {"春节要吃鱼，寓意年年有余。"}
+            </_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {
+                '"We eat fish during Spring Festival, symbolizing abundance every year."'
+              }
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>{"这个鱼汤很鲜美。"}</_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {'"This fish soup is very delicious."'}
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Environmental Context"}</_components.h2>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Habitat Types"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"淡水鱼"}</_components.strong>
+          {' (dànshuǐyú) - "freshwater fish"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"海水鱼"}</_components.strong>
+          {' (hǎishuǐyú) - "saltwater fish"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"深海鱼"}</_components.strong>
+          {' (shēnhǎiyú) - "deep sea fish"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Ecological Role"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"食物链"}</_components.strong>
+          {" - part of the food chain"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"水质指标"}</_components.strong>
+          {" - water quality indicators"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"生态平衡"}</_components.strong>
+          {" - ecological balance"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Fishing Culture"}</_components.h2>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Traditional Methods"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"钓鱼"}</_components.strong>
+          {' (diàoyú) - "angling, fishing with rod"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"网鱼"}</_components.strong>
+          {' (wǎngyú) - "fishing with nets"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"捕鱼"}</_components.strong>
+          {' (bǔyú) - "catching fish"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Modern Aquaculture"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"养鱼"}</_components.strong>
+          {' (yǎngyú) - "fish farming"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"鱼塘"}</_components.strong>
+          {' (yútáng) - "fish pond"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"渔业"}</_components.strong>
+          {' (yúyè) - "fishing industry"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Symbolic Meanings"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Context  | Symbolism             | Usage                       |\n| -------- | --------------------- | --------------------------- |\n| New Year | Abundance, prosperity | 年年有余                    |\n| Art      | Freedom, grace        | Swimming against current    |\n| Idioms   | Various life lessons  | 鱼目混珠 (mixing real/fake) |\n| Dreams   | Wealth, success       | Traditional interpretation  |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Health and Nutrition"}</_components.h2>
+      {"\n"}
+      <_components.p>{"鱼 is valued for:"}</_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"蛋白质"}</_components.strong>
+          {" - high-quality protein"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Omega-3"}</_components.strong>
+          {" - essential fatty acids"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"维生素"}</_components.strong>
+          {" - vitamins and minerals"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"低脂肪"}</_components.strong>
+          {" - lean protein source"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Grammar Notes"}</_components.h2>
+      {"\n"}
+      <_components.p>{"鱼 can function as:"}</_components.p>
+      {"\n"}
+      <_components.ol>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Noun"}</_components.strong>
+          {': 一条鱼 ("one fish")'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Radical"}</_components.strong>
+          {": In characters like 鲜 (fresh)"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Classifier object"}</_components.strong>
+          {": Uses 条 as measure word"}
+        </_components.li>
+        {"\n"}
+      </_components.ol>
+      {"\n"}
+      <_components.p>
+        <_components.strong>{"Common expressions:"}</_components.strong>
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"鱼类"}</_components.strong>
+          {' - "fish species"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"鱼肉"}</_components.strong>
+          {' - "fish meat"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"鱼刺"}</_components.strong>
+          {' - "fish bone"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {"鱼 represents "}
+        <_components.strong>
+          {"abundance, adaptability, and nourishment"}
+        </_components.strong>
+        {
+          " - essential elements for both physical\nand spiritual well-being in Chinese culture."
+        }
+      </_components.p>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

@@ -1,15 +1,290 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <_components.p>{"Used to introduce the first part of a phrase that indicates two related qualities."}</_components.p>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {
+          'A conjunction used to introduce the first part of a statement, indicating "not only" - typically\nfollowed by additional information showing something even more significant.'
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                                     |\n| -------------- | ---------------------------------------- |\n| Pinyin         | bùdàn                                    |\n| Core meaning   | not only; not merely; it's not just that |\n| Part of speech | conjunction; discourse connective        |\n| Tone           | fourth + fourth tones                    |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Word Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"不但 sets up a logical progression from basic to enhanced:"}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component    | Meaning            |\n| ------------ | ------------------ |\n| "
+        }
+        <_components.strong>{"不"}</_components.strong>
+        {" (bù)  | Not, negation      |\n| "}
+        <_components.strong>{"但"}</_components.strong>
+        {" (dàn) | Only, merely, just |"}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Understanding"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 不但 as "}
+        <_components.strong>{'"it goes beyond just that"'}</_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {'Like saying "it\'s not limited to..." in English'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Sets up expectation for something additional or stronger"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Creates a building argument structure"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Often paired with 而且, 还, 也 to complete the thought"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Shows progression from good to better, or bad to worse"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Usage Patterns"}</_components.h2>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>
+          {"不但...而且... (bùdàn...érqiě...)"}
+        </_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.p>
+        {'The most common pattern - "not only...but also..."'}
+      </_components.p>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>
+          {"不但...还... (bùdàn...hái...)"}
+        </_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.p>
+        {'"Not only...but also..." (slightly more emphatic)'}
+      </_components.p>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>
+          {"不但...也... (bùdàn...yě...)"}
+        </_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.p>{'"Not only...but also..." (more casual)'}</_components.p>
+      {"\n"}
+      <_components.h2>{"Examples"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>
+              {"他不但聪明，而且很努力。"}
+            </_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {'"He\'s not only smart, but also very hardworking."'}
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>
+              {"这本书不但有趣，还很有用。"}
+            </_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {'"This book is not only interesting, but also very useful."'}
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>
+              {"她不但会说中文，也会说日文。"}
+            </_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {'"She not only speaks Chinese, but also speaks Japanese."'}
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>
+              {"今天不但下雨，而且很冷。"}
+            </_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {'"Today it\'s not only raining, but also very cold."'}
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Advanced Usage"}</_components.h2>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Negative Progression"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.p>
+        {"不但 can also escalate negative situations:"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>
+            {"他不但没来，还忘了通知我们。"}
+          </_components.strong>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {'"He not only didn\'t come, but also forgot to notify us."'}
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Academic/Formal Writing"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.p>
+        {"Common in essays, reports, and formal analysis:"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>
+            {"这个政策不但有效，而且成本低。"}
+          </_components.strong>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {'"This policy is not only effective, but also low-cost."'}
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Cultural Context"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"不但 reflects Chinese communication patterns that value:"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Comprehensive analysis"}</_components.strong>
+          {" - presenting multiple supporting points"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Logical progression"}</_components.strong>
+          {" - building arguments systematically"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Emphasis through addition"}</_components.strong>
+          {" - strengthening points with extra evidence"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Balanced presentation"}</_components.strong>
+          {" - showing multiple dimensions of situations"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {"Using 不但 correctly demonstrates "}
+        <_components.strong>
+          {"sophisticated language skills"}
+        </_components.strong>
+        {" and structured thinking."}
+      </_components.p>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

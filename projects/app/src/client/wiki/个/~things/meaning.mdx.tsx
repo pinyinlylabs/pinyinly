@@ -1,15 +1,221 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <_components.p>{"A general measure word used for counting."}</_components.p>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {
+          "A general measure word used for counting, the most versatile counter in Chinese for objects, people,\nand abstract concepts."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                                  |\n| -------------- | ------------------------------------- |\n| Pinyin         | gè                                    |\n| Core meaning   | general measure word; individual unit |\n| Part of speech | measure word (量词)                   |\n| Tone           | fourth tone                           |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Word Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"个 (gè) is the "}
+        <_components.strong>{"universal measure word"}</_components.strong>
+        {
+          " that can count almost anything when a specific measure\nword isn't known or needed."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component | Meaning                                                       |\n| --------- | ------------------------------------------------------------- |\n| "
+        }
+        <_components.strong>{"人"}</_components.strong>
+        {
+          "    | Person radical (人) - originally related to individual items  |\n| "
+        }
+        <_components.strong>{"固"}</_components.strong>
+        {
+          "    | Historical evolution - the character has simplified over time |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Understanding"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 个 as the "}
+        <_components.strong>{'"piece" or "unit" counter'}</_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {'Like saying "one piece of..." or "one unit of..." in English'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "It's the default counter when you're unsure which specific measure word to use"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Almost any noun can be counted with 个 in everyday conversation"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"It emphasizes the individual nature of what you're counting"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Usage Examples"}</_components.h2>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"People"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"一个人"}</_components.strong>
+          {' (yī gè rén) - "one person"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"三个学生"}</_components.strong>
+          {' (sān gè xuéshēng) - "three students"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Objects"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"两个苹果"}</_components.strong>
+          {' (liǎng gè píngguǒ) - "two apples"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"一个问题"}</_components.strong>
+          {' (yī gè wèntí) - "one question"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Abstract Concepts"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"一个想法"}</_components.strong>
+          {' (yī gè xiǎngfǎ) - "one idea"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"两个小时"}</_components.strong>
+          {' (liǎng gè xiǎoshí) - "two hours"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Grammar Notes"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"个 is used in the pattern: "}
+        <_components.strong>{"Number + 个 + Noun"}</_components.strong>
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"这个"}</_components.strong>
+          {' (zhè gè) - "this one"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"那个"}</_components.strong>
+          {' (nà gè) - "that one"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"哪个"}</_components.strong>
+          {' (nǎ gè) - "which one?"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"几个"}</_components.strong>
+          {' (jǐ gè) - "how many?" / "several"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Cultural Context"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"个 reflects the Chinese emphasis on "}
+        <_components.strong>{"specificity and precision"}</_components.strong>
+        {" in language:"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>
+            {"Measure words show respect"}
+          </_components.strong>
+          {" for the nature of what you're counting"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"个 is the safe choice"}</_components.strong>
+          {" - when in doubt, use 个 and you'll be understood"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"It's uniquely Chinese"}</_components.strong>
+          {" - this grammatical feature doesn't exist in English"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Shows individuality"}</_components.strong>
+          {" - each thing is counted as a distinct unit"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {"Using 个 correctly is a key step in developing "}
+        <_components.strong>{"natural-sounding Chinese"}</_components.strong>
+        {"."}
+      </_components.p>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

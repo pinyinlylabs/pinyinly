@@ -1,15 +1,187 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <><_components.p>{"The side or part facing north; the north side; northern area."}</_components.p>{"\n"}<_components.h2>{"Quick Reference"}</_components.h2>{"\n"}<_components.p>{"| Aspect         | Info                      |\n| -------------- | ------------------------- |\n| Pinyin         | běibiān                   |\n| Core meaning   | north side; northern area |\n| Part of speech | noun                      |\n| Tone           | běi (3rd), biān (1st)     |"}</_components.p>{"\n"}<_components.h2>{"Visual Breakdown"}</_components.h2>{"\n"}<_components.p>{"北边 combines the direction north with the concept of side/edge."}</_components.p>{"\n"}<_components.p>{"| Component | Meaning                                                                   |\n| --------- | ------------------------------------------------------------------------- |\n| "}<_components.strong>{"北"}</_components.strong>{"    | North - depicts two people sitting back-to-back (facing away from warmth) |\n| "}<_components.strong>{"边"}</_components.strong>{"    | Side, edge, border - movement radical 辶 + 力 (strength)                  |"}</_components.p>{"\n"}<_components.p>{"The combination means \"the side that faces north\" or \"the northern boundary.\""}</_components.p>{"\n"}<_components.h2>{"Mnemonic"}</_components.h2>{"\n"}<_components.p>{"Think of 北边 as "}<_components.strong>{"\"the side where it's cold and away from the sun\""}</_components.strong>{":"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"北 (běi) represents the north direction - cold, away from the warming sun"}</_components.li>{"\n"}<_components.li>{"边 (biān) represents a side, edge, or boundary area"}</_components.li>{"\n"}<_components.li>{"Together: the side/area that faces the cold north direction"}</_components.li>{"\n"}<_components.li>{"Picture standing in a room and pointing to the north-facing side"}</_components.li>{"\n"}<_components.li>{"Like the shadowy, cooler side of a building that faces north"}</_components.li>{"\n"}<_components.li>{"The edge of your property that's oriented toward the north"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p>{"This creates the image: "}<_components.strong>{"the boundary or area that faces toward the cold north"}</_components.strong>{"."}</_components.p>{"\n"}<_components.h2>{"Core Meaning & Usage"}</_components.h2>{"\n"}<_components.p>{"北边 represents "}<_components.strong>{"the northern side, area, or direction relative to a reference point"}</_components.strong>{". It's used:"}</_components.p>{"\n"}<_components.ol>{"\n"}<_components.li><_components.strong>{"Location description"}</_components.strong>{": 在北边 (zài běibiān) - \"on the north side\""}</_components.li>{"\n"}<_components.li><_components.strong>{"Directional reference"}</_components.strong>{": 房子的北边 (fángzi de běibiān) - \"the north side of the house\""}</_components.li>{"\n"}<_components.li><_components.strong>{"Geographic areas"}</_components.strong>{": 城市北边 (chéngshì běibiān) - \"the northern part of the city\""}</_components.li>{"\n"}<_components.li><_components.strong>{"Relative position"}</_components.strong>{": 往北边走 (wǎng běibiān zǒu) - \"go toward the north side\""}</_components.li>{"\n"}</_components.ol>{"\n"}<_components.h2>{"Examples"}</_components.h2>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"房子北边"}</_components.strong>{" (fángzi běibiān) - \"north side of the house\""}</_components.li>{"\n"}<_components.li><_components.strong>{"城市北边"}</_components.strong>{" (chéngshì běibiān) - \"northern part of the city\""}</_components.li>{"\n"}<_components.li><_components.strong>{"在北边"}</_components.strong>{" (zài běibiān) - \"on the north side\""}</_components.li>{"\n"}<_components.li><_components.strong>{"北边的山"}</_components.strong>{" (běibiān de shān) - \"the mountains to the north\""}</_components.li>{"\n"}<_components.li><_components.strong>{"往北边"}</_components.strong>{" (wǎng běibiān) - \"toward the north side\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Cultural Context"}</_components.h2>{"\n"}<_components.p>{"In Chinese culture and feng shui, the 北边 (north side) has special significance. Traditionally,\nit's considered the less favorable direction as it faces away from the sun's warmth. In\narchitecture, the north side receives less sunlight, so understanding 北边 is important for housing,\ngardening, and spatial planning in Chinese culture."}</_components.p></>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {"The side or part facing north; the north side; northern area."}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                      |\n| -------------- | ------------------------- |\n| Pinyin         | běibiān                   |\n| Core meaning   | north side; northern area |\n| Part of speech | noun                      |\n| Tone           | běi (3rd), biān (1st)     |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Visual Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"北边 combines the direction north with the concept of side/edge."}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component | Meaning                                                                   |\n| --------- | ------------------------------------------------------------------------- |\n| "
+        }
+        <_components.strong>{"北"}</_components.strong>
+        {
+          "    | North - depicts two people sitting back-to-back (facing away from warmth) |\n| "
+        }
+        <_components.strong>{"边"}</_components.strong>
+        {
+          "    | Side, edge, border - movement radical 辶 + 力 (strength)                  |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          'The combination means "the side that faces north" or "the northern boundary."'
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Mnemonic"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 北边 as "}
+        <_components.strong>
+          {'"the side where it\'s cold and away from the sun"'}
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {
+            "北 (běi) represents the north direction - cold, away from the warming sun"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"边 (biān) represents a side, edge, or boundary area"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Together: the side/area that faces the cold north direction"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Picture standing in a room and pointing to the north-facing side"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Like the shadowy, cooler side of a building that faces north"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"The edge of your property that's oriented toward the north"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {"This creates the image: "}
+        <_components.strong>
+          {"the boundary or area that faces toward the cold north"}
+        </_components.strong>
+        {"."}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Core Meaning & Usage"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"北边 represents "}
+        <_components.strong>
+          {
+            "the northern side, area, or direction relative to a reference point"
+          }
+        </_components.strong>
+        {". It's used:"}
+      </_components.p>
+      {"\n"}
+      <_components.ol>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Location description"}</_components.strong>
+          {': 在北边 (zài běibiān) - "on the north side"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Directional reference"}</_components.strong>
+          {': 房子的北边 (fángzi de běibiān) - "the north side of the house"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Geographic areas"}</_components.strong>
+          {': 城市北边 (chéngshì běibiān) - "the northern part of the city"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Relative position"}</_components.strong>
+          {': 往北边走 (wǎng běibiān zǒu) - "go toward the north side"'}
+        </_components.li>
+        {"\n"}
+      </_components.ol>
+      {"\n"}
+      <_components.h2>{"Examples"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"房子北边"}</_components.strong>
+          {' (fángzi běibiān) - "north side of the house"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"城市北边"}</_components.strong>
+          {' (chéngshì běibiān) - "northern part of the city"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"在北边"}</_components.strong>
+          {' (zài běibiān) - "on the north side"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"北边的山"}</_components.strong>
+          {' (běibiān de shān) - "the mountains to the north"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"往北边"}</_components.strong>
+          {' (wǎng běibiān) - "toward the north side"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Cultural Context"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "In Chinese culture and feng shui, the 北边 (north side) has special significance. Traditionally,\nit's considered the less favorable direction as it faces away from the sun's warmth. In\narchitecture, the north side receives less sunlight, so understanding 北边 is important for housing,\ngardening, and spatial planning in Chinese culture."
+        }
+      </_components.p>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

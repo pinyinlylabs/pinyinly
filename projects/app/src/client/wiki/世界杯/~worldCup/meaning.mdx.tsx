@@ -1,15 +1,361 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <_components.p>{"An international soccer competition that occurs every four years involving national teams."}</_components.p>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {
+          "World Cup; the FIFA World Cup; the premier international soccer/football tournament held every four\nyears featuring national teams from around the globe."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                                         |\n| -------------- | -------------------------------------------- |\n| Pinyin         | shìjiè bēi                                   |\n| Core meaning   | World Cup; international soccer championship |\n| Part of speech | proper noun                                  |\n| Tone           | fourth + fourth + first tone                 |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Word Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "世界杯 combines global scope with the concept of a championship trophy."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component | Meaning                                   |\n| --------- | ----------------------------------------- |\n| "
+        }
+        <_components.strong>{"世界"}</_components.strong>
+        {"  | World; global; international; all nations |\n| "}
+        <_components.strong>{"杯"}</_components.strong>
+        {"    | Cup; trophy; championship award           |"}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Understanding"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 世界杯 as "}
+        <_components.strong>
+          {'"the cup that represents the entire world"'}
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {
+            "世界 (shìjiè) emphasizes the global nature - all countries participate"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"杯 (bēi) refers to the actual trophy that winners receive"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"It's THE championship that every soccer nation dreams of winning"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Represents the pinnacle of international soccer competition"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Unites the entire world around one sport every four years"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Cultural Significance"}</_components.h2>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Global Phenomenon"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.p>
+        {"The 世界杯 is more than just a sports event:"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>
+            {"Most watched sporting event"}
+          </_components.strong>
+          {" in the world"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Brings nations together"}</_components.strong>
+          {" in peaceful competition"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Cultural celebration"}</_components.strong>
+          {" beyond just soccer"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"National pride"}</_components.strong>
+          {" and identity on display"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Economic impact"}</_components.strong>
+          {" on host countries"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"In Chinese Culture"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"足球热"}</_components.strong>
+          {' (zúqiú rè) - "soccer fever" sweeps China during World Cup years'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"国家荣誉"}</_components.strong>
+          {" (guójiā róngyù) - represents national honor and achievement"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"全民关注"}</_components.strong>
+          {" (quánmín guānzhù) - captures attention of entire population"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"体育强国梦"}</_components.strong>
+          {
+            " (tǐyù qiángguó mèng) - reflects China's dream of becoming a sports powerhouse"
+          }
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Usage Examples"}</_components.h2>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Watching and Following"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"看世界杯"}</_components.strong>
+          {' (kàn shìjiè bēi) - "watch the World Cup"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"世界杯决赛"}</_components.strong>
+          {' (shìjiè bēi juésài) - "World Cup final"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"支持世界杯"}</_components.strong>
+          {' (zhīchí shìjiè bēi) - "support/follow the World Cup"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>
+          {"Participation and Competition"}
+        </_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"进入世界杯"}</_components.strong>
+          {' (jìnrù shìjiè bēi) - "qualify for the World Cup"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"赢得世界杯"}</_components.strong>
+          {' (yíngdé shìjiè bēi) - "win the World Cup"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"世界杯冠军"}</_components.strong>
+          {' (shìjiè bēi guànjūn) - "World Cup champion"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Event Organization"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"举办世界杯"}</_components.strong>
+          {' (jǔbàn shìjiè bēi) - "host the World Cup"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"世界杯申办"}</_components.strong>
+          {' (shìjiè bēi shēnbàn) - "bid for the World Cup"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Related Soccer Terms"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"足球"}</_components.strong>
+          {' (zúqiú) - "soccer/football" (the sport)'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"国际足联"}</_components.strong>
+          {' (guójì zúlián) - "FIFA" (international soccer federation)'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"预选赛"}</_components.strong>
+          {' (yùxuǎnsài) - "qualifying rounds"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"小组赛"}</_components.strong>
+          {' (xiǎozǔsài) - "group stage"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"淘汰赛"}</_components.strong>
+          {' (táotàisài) - "knockout stage"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Historical Context"}</_components.h2>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"China and the World Cup"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"中国队"}</_components.strong>
+          {" (Zhōngguó duì) qualified only once (2002 Korea/Japan)"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"世界杯梦想"}</_components.strong>
+          {
+            ' (shìjiè bēi mèngxiǎng) - "World Cup dream" remains strong in China'
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"足球改革"}</_components.strong>
+          {" (zúqiú gǎigé) - ongoing efforts to improve Chinese soccer"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"青训计划"}</_components.strong>
+          {" (qīngxùn jìhuà) - youth development programs to reach World Cup"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Social Impact"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"The 世界杯 creates unique social phenomena:"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"全球狂欢"}</_components.strong>
+          {' (quánqiú kuánghuān) - "global carnival" atmosphere'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"文化交流"}</_components.strong>
+          {" (wénhuà jiāoliú) - cultural exchange between nations"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"和平竞争"}</_components.strong>
+          {" (hépíng jìngzhēng) - peaceful competition on global stage"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"体育外交"}</_components.strong>
+          {" (tǐyù wàijiāo) - sports diplomacy between countries"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Modern Relevance"}</_components.h2>
+      {"\n"}
+      <_components.p>{"Recent World Cups have showcased:"}</_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"技术创新"}</_components.strong>
+          {
+            " (jìshù chuàngxīn) - technological innovations (VAR, goal-line technology)"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"全媒体转播"}</_components.strong>
+          {" (quán méitǐ zhuǎnbō) - multi-media broadcasting reaching billions"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"社交媒体时代"}</_components.strong>
+          {
+            " (shèjiāo méitǐ shídài) - social media era changing how fans engage"
+          }
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {"The 世界杯 represents humanity's ability to unite around "}
+        <_components.strong>
+          {"shared passion, peaceful competition, and\ncollective celebration"}
+        </_components.strong>
+        {"."}
+      </_components.p>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

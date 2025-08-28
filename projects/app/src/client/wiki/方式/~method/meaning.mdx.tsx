@@ -1,15 +1,171 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <><_components.p>{"A way of doing something; method; approach; manner; style."}</_components.p>{"\n"}<_components.h2>{"Quick Reference"}</_components.h2>{"\n"}<_components.p>{"| Aspect         | Info                  |\n| -------------- | --------------------- |\n| Pinyin         | fāngshì               |\n| Core meaning   | method; way; approach |\n| Part of speech | noun                  |\n| Tone           | first + fourth tone   |"}</_components.p>{"\n"}<_components.h2>{"Visual Breakdown"}</_components.h2>{"\n"}<_components.p>{"方式 combines direction with formal pattern:"}</_components.p>{"\n"}<_components.p>{"| Component | Visual Description                                                      |\n| --------- | ----------------------------------------------------------------------- |\n| "}<_components.strong>{"方"}</_components.strong>{"    | Direction/square - represents organized, systematic approaches          |\n| "}<_components.strong>{"式"}</_components.strong>{"    | Pattern/ceremony - represents formal methods and established procedures |"}</_components.p>{"\n"}<_components.h2>{"Mnemonic"}</_components.h2>{"\n"}<_components.p>{"Think of 方式 as "}<_components.strong>{"a square pattern of approach"}</_components.strong>{":"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"方 (square/direction) + 式 (pattern/style) = \"organized pattern of approach\""}</_components.li>{"\n"}<_components.li>{"Like following a structured, systematic way of doing things"}</_components.li>{"\n"}<_components.li>{"A formal methodology with clear directional steps"}</_components.li>{"\n"}<_components.li>{"The \"square\" represents order, and \"pattern\" represents repeatable method"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p>{"This creates the meaning: "}<_components.strong>{"an organized, systematic way of accomplishing something"}</_components.strong>{"."}</_components.p>{"\n"}<_components.h2>{"Core Meaning & Usage"}</_components.h2>{"\n"}<_components.p>{"方式 refers to "}<_components.strong>{"methods, approaches, or systematic ways of doing things"}</_components.strong>{". It's used for:"}</_components.p>{"\n"}<_components.ol>{"\n"}<_components.li><_components.strong>{"Work methods"}</_components.strong>{": 工作方式 (gōngzuò fāngshì) - \"working method\""}</_components.li>{"\n"}<_components.li><_components.strong>{"Communication"}</_components.strong>{": 联系方式 (liánxì fāngshì) - \"contact method\""}</_components.li>{"\n"}<_components.li><_components.strong>{"Problem-solving"}</_components.strong>{": 解决方式 (jiějué fāngshì) - \"solution method\""}</_components.li>{"\n"}<_components.li><_components.strong>{"Lifestyle"}</_components.strong>{": 生活方式 (shēnghuó fāngshì) - \"lifestyle; way of living\""}</_components.li>{"\n"}</_components.ol>{"\n"}<_components.h2>{"Examples"}</_components.h2>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"学习方式"}</_components.strong>{" (xuéxí fāngshì) - \"learning method\""}</_components.li>{"\n"}<_components.li><_components.strong>{"支付方式"}</_components.strong>{" (zhīfù fāngshì) - \"payment method\""}</_components.li>{"\n"}<_components.li><_components.strong>{"思考方式"}</_components.strong>{" (sīkǎo fāngshì) - \"way of thinking\""}</_components.li>{"\n"}<_components.li><_components.strong>{"教学方式"}</_components.strong>{" (jiàoxué fāngshì) - \"teaching method\""}</_components.li>{"\n"}<_components.li><_components.strong>{"管理方式"}</_components.strong>{" (guǎnlǐ fāngshì) - \"management approach\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p>{"方式 is essential for discussing methodology and systematic approaches."}</_components.p></>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {"A way of doing something; method; approach; manner; style."}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                  |\n| -------------- | --------------------- |\n| Pinyin         | fāngshì               |\n| Core meaning   | method; way; approach |\n| Part of speech | noun                  |\n| Tone           | first + fourth tone   |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Visual Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"方式 combines direction with formal pattern:"}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component | Visual Description                                                      |\n| --------- | ----------------------------------------------------------------------- |\n| "
+        }
+        <_components.strong>{"方"}</_components.strong>
+        {
+          "    | Direction/square - represents organized, systematic approaches          |\n| "
+        }
+        <_components.strong>{"式"}</_components.strong>
+        {
+          "    | Pattern/ceremony - represents formal methods and established procedures |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Mnemonic"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 方式 as "}
+        <_components.strong>
+          {"a square pattern of approach"}
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {
+            '方 (square/direction) + 式 (pattern/style) = "organized pattern of approach"'
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Like following a structured, systematic way of doing things"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"A formal methodology with clear directional steps"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            'The "square" represents order, and "pattern" represents repeatable method'
+          }
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {"This creates the meaning: "}
+        <_components.strong>
+          {"an organized, systematic way of accomplishing something"}
+        </_components.strong>
+        {"."}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Core Meaning & Usage"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"方式 refers to "}
+        <_components.strong>
+          {"methods, approaches, or systematic ways of doing things"}
+        </_components.strong>
+        {". It's used for:"}
+      </_components.p>
+      {"\n"}
+      <_components.ol>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Work methods"}</_components.strong>
+          {': 工作方式 (gōngzuò fāngshì) - "working method"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Communication"}</_components.strong>
+          {': 联系方式 (liánxì fāngshì) - "contact method"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Problem-solving"}</_components.strong>
+          {': 解决方式 (jiějué fāngshì) - "solution method"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Lifestyle"}</_components.strong>
+          {': 生活方式 (shēnghuó fāngshì) - "lifestyle; way of living"'}
+        </_components.li>
+        {"\n"}
+      </_components.ol>
+      {"\n"}
+      <_components.h2>{"Examples"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"学习方式"}</_components.strong>
+          {' (xuéxí fāngshì) - "learning method"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"支付方式"}</_components.strong>
+          {' (zhīfù fāngshì) - "payment method"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"思考方式"}</_components.strong>
+          {' (sīkǎo fāngshì) - "way of thinking"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"教学方式"}</_components.strong>
+          {' (jiàoxué fāngshì) - "teaching method"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"管理方式"}</_components.strong>
+          {' (guǎnlǐ fāngshì) - "management approach"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {
+          "方式 is essential for discussing methodology and systematic approaches."
+        }
+      </_components.p>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

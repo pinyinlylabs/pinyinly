@@ -1,15 +1,158 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <><_components.p>{"Indicates a location or presence; at; in; on; to be (located)."}</_components.p>{"\n"}<_components.h2>{"Quick Reference"}</_components.h2>{"\n"}<_components.p>{"| Aspect         | Info                   |\n| -------------- | ---------------------- |\n| Pinyin         | zài                    |\n| Core meaning   | at; in; on; be located |\n| Part of speech | preposition, verb      |\n| Tone           | fourth tone (falling)  |"}</_components.p>{"\n"}<_components.h2>{"Visual Breakdown"}</_components.h2>{"\n"}<_components.p>{"在 combines "}<_components.strong>{"existence + soil"}</_components.strong>{" to show presence at a location."}</_components.p>{"\n"}<_components.p>{"| Component | Visual Description                                   |\n| --------- | ---------------------------------------------------- |\n| "}<_components.strong>{"才"}</_components.strong>{"    | Talent/existence (才) - indicates being or presence  |\n| "}<_components.strong>{"土"}</_components.strong>{"    | Earth/soil (土) - represents ground, place, location |"}</_components.p>{"\n"}<_components.h2>{"Mnemonic"}</_components.h2>{"\n"}<_components.p>{"Think of 在 as "}<_components.strong>{"\"existing on the ground\" or \"being present on earth\""}</_components.strong>{":"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"The existence component (才) shows the state of being present"}</_components.li>{"\n"}<_components.li>{"The earth component (土) provides the physical location or foundation"}</_components.li>{"\n"}<_components.li>{"Like being physically present at a specific place on earth"}</_components.li>{"\n"}<_components.li>{"Shows the connection between existence and location"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Usage Examples"}</_components.h2>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"我在家"}</_components.strong>{" (wǒ zài jiā) - \"I am at home\""}</_components.li>{"\n"}<_components.li><_components.strong>{"书在桌子上"}</_components.strong>{" (shū zài zhuō zi shàng) - \"The book is on the table\""}</_components.li>{"\n"}<_components.li><_components.strong>{"在哪里？"}</_components.strong>{" (zài nǎ lǐ?) - \"Where is it? / Where are you?\""}</_components.li>{"\n"}<_components.li><_components.strong>{"现在"}</_components.strong>{" (xiàn zài) - \"now; at present\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Grammar Notes"}</_components.h2>{"\n"}<_components.p>{"在 serves multiple grammatical functions:"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Preposition"}</_components.strong>{": Indicates location \"at/in/on\""}</_components.li>{"\n"}<_components.li><_components.strong>{"Verb"}</_components.strong>{": Means \"to be located\" or \"to exist at\""}</_components.li>{"\n"}<_components.li>{"Essential for expressing where things are"}</_components.li>{"\n"}<_components.li>{"Used in progressive aspect: 在 + verb (indicating ongoing action)"}</_components.li>{"\n"}<_components.li>{"Forms the foundation for spatial relationships in Chinese"}</_components.li>{"\n"}<_components.li>{"Critical for giving directions and describing locations"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Cultural Context"}</_components.h2>{"\n"}<_components.p>{"在 is fundamental for expressing presence and location, essential for navigation, meeting\narrangements, and describing the physical world in Chinese."}</_components.p></>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {"Indicates a location or presence; at; in; on; to be (located)."}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                   |\n| -------------- | ---------------------- |\n| Pinyin         | zài                    |\n| Core meaning   | at; in; on; be located |\n| Part of speech | preposition, verb      |\n| Tone           | fourth tone (falling)  |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Visual Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"在 combines "}
+        <_components.strong>{"existence + soil"}</_components.strong>
+        {" to show presence at a location."}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component | Visual Description                                   |\n| --------- | ---------------------------------------------------- |\n| "
+        }
+        <_components.strong>{"才"}</_components.strong>
+        {"    | Talent/existence (才) - indicates being or presence  |\n| "}
+        <_components.strong>{"土"}</_components.strong>
+        {"    | Earth/soil (土) - represents ground, place, location |"}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Mnemonic"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 在 as "}
+        <_components.strong>
+          {'"existing on the ground" or "being present on earth"'}
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"The existence component (才) shows the state of being present"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "The earth component (土) provides the physical location or foundation"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Like being physically present at a specific place on earth"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Shows the connection between existence and location"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Usage Examples"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"我在家"}</_components.strong>
+          {' (wǒ zài jiā) - "I am at home"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"书在桌子上"}</_components.strong>
+          {' (shū zài zhuō zi shàng) - "The book is on the table"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"在哪里？"}</_components.strong>
+          {' (zài nǎ lǐ?) - "Where is it? / Where are you?"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"现在"}</_components.strong>
+          {' (xiàn zài) - "now; at present"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Grammar Notes"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"在 serves multiple grammatical functions:"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Preposition"}</_components.strong>
+          {': Indicates location "at/in/on"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Verb"}</_components.strong>
+          {': Means "to be located" or "to exist at"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Essential for expressing where things are"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Used in progressive aspect: 在 + verb (indicating ongoing action)"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Forms the foundation for spatial relationships in Chinese"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Critical for giving directions and describing locations"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Cultural Context"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "在 is fundamental for expressing presence and location, essential for navigation, meeting\narrangements, and describing the physical world in Chinese."
+        }
+      </_components.p>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

@@ -1,15 +1,148 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <><_components.p>{"A written message from one person to another; correspondence; letter; mail."}</_components.p>{"\n"}<_components.h2>{"Quick Reference"}</_components.h2>{"\n"}<_components.p>{"| Aspect         | Info                    |\n| -------------- | ----------------------- |\n| Pinyin         | xìn                     |\n| Core meaning   | letter; written message |\n| Part of speech | noun                    |\n| Tone           | fourth tone (falling)   |"}</_components.p>{"\n"}<_components.h2>{"Visual Breakdown"}</_components.h2>{"\n"}<_components.p>{"信 combines "}<_components.strong>{"person + words"}</_components.strong>{" to show written communication."}</_components.p>{"\n"}<_components.p>{"| Component | Visual Description                                     |\n| --------- | ------------------------------------------------------ |\n| "}<_components.strong>{"亻"}</_components.strong>{"    | Person radical (人) - indicates this relates to people |\n| "}<_components.strong>{"言"}</_components.strong>{"    | Speech/words (言) - represents written communication   |"}</_components.p>{"\n"}<_components.h2>{"Mnemonic"}</_components.h2>{"\n"}<_components.p>{"Think of 信 as "}<_components.strong>{"a person's words put in writing"}</_components.strong>{":"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"The person radical (亻) shows this is about human communication"}</_components.li>{"\n"}<_components.li>{"The speech component (言) represents the written words or message"}</_components.li>{"\n"}<_components.li>{"When someone puts their thoughts into written form to send to another"}</_components.li>{"\n"}<_components.li>{"Like capturing spoken words on paper to deliver across distance"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p>{"This same character means both \"believe\" and \"letter\" because letters were traditionally trusted\nforms of communication - they carried the authentic words of the sender."}</_components.p>{"\n"}<_components.h2>{"Usage Examples"}</_components.h2>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"写信"}</_components.strong>{" (xiě xìn) - \"write a letter\""}</_components.li>{"\n"}<_components.li><_components.strong>{"收到信"}</_components.strong>{" (shōu dào xìn) - \"receive a letter\""}</_components.li>{"\n"}<_components.li><_components.strong>{"信件"}</_components.strong>{" (xìn jiàn) - \"correspondence; mail\""}</_components.li>{"\n"}<_components.li><_components.strong>{"回信"}</_components.strong>{" (huí xìn) - \"reply to a letter\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Cultural Context"}</_components.h2>{"\n"}<_components.p>{"信 as \"letter\" reflects traditional Chinese communication:"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"Letters were formal and respectful forms of communication"}</_components.li>{"\n"}<_components.li>{"Connected to the concept of trust (same character for \"believe\")"}</_components.li>{"\n"}<_components.li>{"Important for maintaining relationships across distances"}</_components.li>{"\n"}<_components.li>{"Now extends to modern forms like email and messages"}</_components.li>{"\n"}</_components.ul></>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {
+          "A written message from one person to another; correspondence; letter; mail."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                    |\n| -------------- | ----------------------- |\n| Pinyin         | xìn                     |\n| Core meaning   | letter; written message |\n| Part of speech | noun                    |\n| Tone           | fourth tone (falling)   |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Visual Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"信 combines "}
+        <_components.strong>{"person + words"}</_components.strong>
+        {" to show written communication."}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component | Visual Description                                     |\n| --------- | ------------------------------------------------------ |\n| "
+        }
+        <_components.strong>{"亻"}</_components.strong>
+        {"    | Person radical (人) - indicates this relates to people |\n| "}
+        <_components.strong>{"言"}</_components.strong>
+        {"    | Speech/words (言) - represents written communication   |"}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Mnemonic"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 信 as "}
+        <_components.strong>
+          {"a person's words put in writing"}
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"The person radical (亻) shows this is about human communication"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"The speech component (言) represents the written words or message"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "When someone puts their thoughts into written form to send to another"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Like capturing spoken words on paper to deliver across distance"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {
+          'This same character means both "believe" and "letter" because letters were traditionally trusted\nforms of communication - they carried the authentic words of the sender.'
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Usage Examples"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"写信"}</_components.strong>
+          {' (xiě xìn) - "write a letter"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"收到信"}</_components.strong>
+          {' (shōu dào xìn) - "receive a letter"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"信件"}</_components.strong>
+          {' (xìn jiàn) - "correspondence; mail"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"回信"}</_components.strong>
+          {' (huí xìn) - "reply to a letter"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Cultural Context"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {'信 as "letter" reflects traditional Chinese communication:'}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"Letters were formal and respectful forms of communication"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {'Connected to the concept of trust (same character for "believe")'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Important for maintaining relationships across distances"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Now extends to modern forms like email and messages"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

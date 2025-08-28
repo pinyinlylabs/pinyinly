@@ -1,15 +1,144 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <><_components.p>{"To treat or behave towards someone; to wait; to stay; to remain."}</_components.p>{"\n"}<_components.h2>{"Quick Reference"}</_components.h2>{"\n"}<_components.p>{"| Aspect         | Info                      |\n| -------------- | ------------------------- |\n| Pinyin         | dài                       |\n| Core meaning   | wait; treat; stay; remain |\n| Part of speech | verb                      |\n| Tone           | fourth tone (falling)     |"}</_components.p>{"\n"}<_components.h2>{"Visual Breakdown"}</_components.h2>{"\n"}<_components.p>{"待 combines "}<_components.strong>{"double person + temple"}</_components.strong>{" suggesting respectful interaction."}</_components.p>{"\n"}<_components.p>{"| Component | Visual Description                                     |\n| --------- | ------------------------------------------------------ |\n| "}<_components.strong>{"彳"}</_components.strong>{"    | Step/walk radical - indicates human action or movement |\n| "}<_components.strong>{"寺"}</_components.strong>{"    | Temple (寺) - represents respectful, formal places     |"}</_components.p>{"\n"}<_components.h2>{"Mnemonic"}</_components.h2>{"\n"}<_components.p>{"Think of 待 as "}<_components.strong>{"\"walking respectfully in a temple\""}</_components.strong>{" or "}<_components.strong>{"\"behaving properly while waiting\""}</_components.strong>{":"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"The walking radical (彳) shows human action and interaction"}</_components.li>{"\n"}<_components.li>{"The temple component (寺) suggests respectful, proper behavior"}</_components.li>{"\n"}<_components.li>{"Like the way people behave respectfully while waiting in sacred spaces"}</_components.li>{"\n"}<_components.li>{"Combines movement/action with appropriate, courteous conduct"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Usage Examples"}</_components.h2>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"等待"}</_components.strong>{" (děng dài) - \"wait; await\""}</_components.li>{"\n"}<_components.li><_components.strong>{"待会儿"}</_components.strong>{" (dài huì er) - \"in a little while; wait a moment\""}</_components.li>{"\n"}<_components.li><_components.strong>{"对待"}</_components.strong>{" (duì dài) - \"treat; handle; deal with\""}</_components.li>{"\n"}<_components.li><_components.strong>{"接待"}</_components.strong>{" (jiē dài) - \"receive; welcome; host\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Cultural Context"}</_components.h2>{"\n"}<_components.p>{"待 reflects important Chinese social values:"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"Emphasizes proper treatment and courtesy toward others"}</_components.li>{"\n"}<_components.li>{"Shows the importance of patience and respectful waiting"}</_components.li>{"\n"}<_components.li>{"Essential for hospitality and social interactions"}</_components.li>{"\n"}<_components.li>{"Represents the balance between action and appropriate restraint"}</_components.li>{"\n"}</_components.ul></>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {"To treat or behave towards someone; to wait; to stay; to remain."}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                      |\n| -------------- | ------------------------- |\n| Pinyin         | dài                       |\n| Core meaning   | wait; treat; stay; remain |\n| Part of speech | verb                      |\n| Tone           | fourth tone (falling)     |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Visual Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"待 combines "}
+        <_components.strong>{"double person + temple"}</_components.strong>
+        {" suggesting respectful interaction."}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component | Visual Description                                     |\n| --------- | ------------------------------------------------------ |\n| "
+        }
+        <_components.strong>{"彳"}</_components.strong>
+        {"    | Step/walk radical - indicates human action or movement |\n| "}
+        <_components.strong>{"寺"}</_components.strong>
+        {"    | Temple (寺) - represents respectful, formal places     |"}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Mnemonic"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 待 as "}
+        <_components.strong>
+          {'"walking respectfully in a temple"'}
+        </_components.strong>
+        {" or "}
+        <_components.strong>
+          {'"behaving properly while waiting"'}
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"The walking radical (彳) shows human action and interaction"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"The temple component (寺) suggests respectful, proper behavior"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "Like the way people behave respectfully while waiting in sacred spaces"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Combines movement/action with appropriate, courteous conduct"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Usage Examples"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"等待"}</_components.strong>
+          {' (děng dài) - "wait; await"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"待会儿"}</_components.strong>
+          {' (dài huì er) - "in a little while; wait a moment"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"对待"}</_components.strong>
+          {' (duì dài) - "treat; handle; deal with"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"接待"}</_components.strong>
+          {' (jiē dài) - "receive; welcome; host"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Cultural Context"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"待 reflects important Chinese social values:"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"Emphasizes proper treatment and courtesy toward others"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Shows the importance of patience and respectful waiting"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Essential for hospitality and social interactions"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Represents the balance between action and appropriate restraint"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

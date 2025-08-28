@@ -1,15 +1,223 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <><_components.p>{"The indefinite continued progress of existence and events; time; duration; period."}</_components.p>{"\n"}<_components.h2>{"Quick Reference"}</_components.h2>{"\n"}<_components.p>{"| Aspect         | Info                   |\n| -------------- | ---------------------- |\n| Pinyin         | shíjiān                |\n| Core meaning   | time; period; duration |\n| Part of speech | noun                   |\n| Tone           | second + first tone    |"}</_components.p>{"\n"}<_components.h2>{"Visual Breakdown"}</_components.h2>{"\n"}<_components.p>{"时间 combines temporal measurement with space:"}</_components.p>{"\n"}<_components.p>{"| Component | Visual Description                                               |\n| --------- | ---------------------------------------------------------------- |\n| "}<_components.strong>{"时"}</_components.strong>{"    | Time/season - represents temporal divisions and specific moments |\n| "}<_components.strong>{"间"}</_components.strong>{"    | Space/interval - represents gaps, spaces, and intervals between  |"}</_components.p>{"\n"}<_components.h2>{"Mnemonic"}</_components.h2>{"\n"}<_components.p>{"Think of 时间 as "}<_components.strong>{"the space between moments"}</_components.strong>{":"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"时 (time/moment) + 间 (space/interval) = \"the space that time occupies\""}</_components.li>{"\n"}<_components.li>{"Like the gaps between clock ticks, creating duration"}</_components.li>{"\n"}<_components.li>{"The interval that exists between past and future"}</_components.li>{"\n"}<_components.li>{"How we measure the \"space\" that events take up"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p>{"This creates the comprehensive concept: "}<_components.strong>{"the measurable dimension in which events occur"}</_components.strong>{"."}</_components.p>{"\n"}<_components.h2>{"Core Meaning & Usage"}</_components.h2>{"\n"}<_components.p>{"时间 represents "}<_components.strong>{"time as a concept, duration, or specific periods"}</_components.strong>{". It's used for:"}</_components.p>{"\n"}<_components.ol>{"\n"}<_components.li><_components.strong>{"General time concept"}</_components.strong>{": 时间过得很快 (shíjiān guòde hěn kuài) - \"time passes quickly\""}</_components.li>{"\n"}<_components.li><_components.strong>{"Duration"}</_components.strong>{": 花时间 (huā shíjiān) - \"spend/take time\""}</_components.li>{"\n"}<_components.li><_components.strong>{"Scheduling"}</_components.strong>{": 有时间吗？(yǒu shíjiān ma?) - \"do you have time?\""}</_components.li>{"\n"}<_components.li><_components.strong>{"Time periods"}</_components.strong>{": 工作时间 (gōngzuò shíjiān) - \"working hours\""}</_components.li>{"\n"}</_components.ol>{"\n"}<_components.h2>{"Examples"}</_components.h2>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"没有时间"}</_components.strong>{" (méiyǒu shíjiān) - \"don't have time\""}</_components.li>{"\n"}<_components.li><_components.strong>{"时间表"}</_components.strong>{" (shíjiān biǎo) - \"timetable; schedule\""}</_components.li>{"\n"}<_components.li><_components.strong>{"浪费时间"}</_components.strong>{" (làngfèi shíjiān) - \"waste time\""}</_components.li>{"\n"}<_components.li><_components.strong>{"节省时间"}</_components.strong>{" (jiéshěng shíjiān) - \"save time\""}</_components.li>{"\n"}<_components.li><_components.strong>{"时间长"}</_components.strong>{" (shíjiān cháng) - \"long time; long duration\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Cultural Context"}</_components.h2>{"\n"}<_components.p>{"时间 in Chinese culture emphasizes:"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Efficiency"}</_components.strong>{": 时间就是金钱 (time is money)"}</_components.li>{"\n"}<_components.li><_components.strong>{"Respect"}</_components.strong>{": Being on time shows respect for others"}</_components.li>{"\n"}<_components.li><_components.strong>{"Planning"}</_components.strong>{": Proper time management is highly valued"}</_components.li>{"\n"}<_components.li><_components.strong>{"Temporal awareness"}</_components.strong>{": Understanding appropriate timing"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Common Expressions"}</_components.h2>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"什么时间"}</_components.strong>{" (shénme shíjiān) - \"what time; when\""}</_components.li>{"\n"}<_components.li><_components.strong>{"时间到了"}</_components.strong>{" (shíjiān dàole) - \"time's up\""}</_components.li>{"\n"}<_components.li><_components.strong>{"抽时间"}</_components.strong>{" (chōu shíjiān) - \"find/make time\""}</_components.li>{"\n"}<_components.li><_components.strong>{"时间不够"}</_components.strong>{" (shíjiān bùgòu) - \"not enough time\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p>{"时间 is fundamental for discussing schedules, planning, and temporal relationships."}</_components.p></>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {
+          "The indefinite continued progress of existence and events; time; duration; period."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                   |\n| -------------- | ---------------------- |\n| Pinyin         | shíjiān                |\n| Core meaning   | time; period; duration |\n| Part of speech | noun                   |\n| Tone           | second + first tone    |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Visual Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"时间 combines temporal measurement with space:"}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component | Visual Description                                               |\n| --------- | ---------------------------------------------------------------- |\n| "
+        }
+        <_components.strong>{"时"}</_components.strong>
+        {
+          "    | Time/season - represents temporal divisions and specific moments |\n| "
+        }
+        <_components.strong>{"间"}</_components.strong>
+        {
+          "    | Space/interval - represents gaps, spaces, and intervals between  |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Mnemonic"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 时间 as "}
+        <_components.strong>{"the space between moments"}</_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {
+            '时 (time/moment) + 间 (space/interval) = "the space that time occupies"'
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Like the gaps between clock ticks, creating duration"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"The interval that exists between past and future"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {'How we measure the "space" that events take up'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {"This creates the comprehensive concept: "}
+        <_components.strong>
+          {"the measurable dimension in which events occur"}
+        </_components.strong>
+        {"."}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Core Meaning & Usage"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"时间 represents "}
+        <_components.strong>
+          {"time as a concept, duration, or specific periods"}
+        </_components.strong>
+        {". It's used for:"}
+      </_components.p>
+      {"\n"}
+      <_components.ol>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"General time concept"}</_components.strong>
+          {': 时间过得很快 (shíjiān guòde hěn kuài) - "time passes quickly"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Duration"}</_components.strong>
+          {': 花时间 (huā shíjiān) - "spend/take time"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Scheduling"}</_components.strong>
+          {': 有时间吗？(yǒu shíjiān ma?) - "do you have time?"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Time periods"}</_components.strong>
+          {': 工作时间 (gōngzuò shíjiān) - "working hours"'}
+        </_components.li>
+        {"\n"}
+      </_components.ol>
+      {"\n"}
+      <_components.h2>{"Examples"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"没有时间"}</_components.strong>
+          {' (méiyǒu shíjiān) - "don\'t have time"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"时间表"}</_components.strong>
+          {' (shíjiān biǎo) - "timetable; schedule"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"浪费时间"}</_components.strong>
+          {' (làngfèi shíjiān) - "waste time"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"节省时间"}</_components.strong>
+          {' (jiéshěng shíjiān) - "save time"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"时间长"}</_components.strong>
+          {' (shíjiān cháng) - "long time; long duration"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Cultural Context"}</_components.h2>
+      {"\n"}
+      <_components.p>{"时间 in Chinese culture emphasizes:"}</_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Efficiency"}</_components.strong>
+          {": 时间就是金钱 (time is money)"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Respect"}</_components.strong>
+          {": Being on time shows respect for others"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Planning"}</_components.strong>
+          {": Proper time management is highly valued"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Temporal awareness"}</_components.strong>
+          {": Understanding appropriate timing"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Common Expressions"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"什么时间"}</_components.strong>
+          {' (shénme shíjiān) - "what time; when"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"时间到了"}</_components.strong>
+          {' (shíjiān dàole) - "time\'s up"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"抽时间"}</_components.strong>
+          {' (chōu shíjiān) - "find/make time"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"时间不够"}</_components.strong>
+          {' (shíjiān bùgòu) - "not enough time"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {
+          "时间 is fundamental for discussing schedules, planning, and temporal relationships."
+        }
+      </_components.p>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

@@ -1,15 +1,344 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <_components.p>{"Used to compare inferiority to someone or something else."}</_components.p>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {
+          "Used to compare inferiority; indicates that something or someone is not as good as another; inferior\nto."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                                    |\n| -------------- | --------------------------------------- |\n| Pinyin         | bùrú                                    |\n| Core meaning   | not as good as; inferior to; worse than |\n| Part of speech | conjunction; comparative expression     |\n| Tone           | fourth + second tones                   |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Word Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"不如 creates direct comparison expressing inferiority:"}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component   | Meaning                      |\n| ----------- | ---------------------------- |\n| "
+        }
+        <_components.strong>{"不"}</_components.strong>
+        {" (bù) | Not, negation                |\n| "}
+        <_components.strong>{"如"}</_components.strong>
+        {" (rú) | Like, as, equal to, to match |"}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Understanding"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 不如 as "}
+        <_components.strong>
+          {'"falling short of the standard"'}
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"Like a student's grade that doesn't reach the benchmark"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Expresses honest assessment of relative quality or ability"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Can be used for self-deprecation or objective comparison"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Creates clear hierarchy between two options"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Sometimes used to suggest better alternatives"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Usage Patterns"}</_components.h2>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"A + 不如 + B"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.p>
+        {'"A is not as good as B" / "A is inferior to B"'}
+      </_components.p>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Direct Comparison"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"我不如你"}</_components.strong>
+          {' - "I\'m not as good as you"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"这个不如那个"}</_components.strong>
+          {' - "This one isn\'t as good as that one"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Suggesting Alternatives"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"与其...不如..."}</_components.strong>
+          {' - "Rather than...it would be better to..."'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Examples"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>{"我的中文不如他的。"}</_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {'"My Chinese is not as good as his."'}
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>{"这家餐厅不如上次那家。"}</_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {'"This restaurant isn\'t as good as the one last time."'}
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>{"今年的天气不如去年。"}</_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {"\"This year's weather isn't as good as last year's.\""}
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>
+              {"与其在家看电视，不如出去散步。"}
+            </_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {
+                '"Rather than watching TV at home, it would be better to go out for a walk."'
+              }
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>
+              {"手机游戏不如电脑游戏有趣。"}
+            </_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {'"Mobile games aren\'t as interesting as computer games."'}
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Advanced Usage"}</_components.h2>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Self-Deprecation (Modesty)"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"我不如你聪明"}</_components.strong>
+          {' - "I\'m not as smart as you" (humble)'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"我的经验不如老师"}</_components.strong>
+          {" - \"My experience doesn't match the teacher's\""}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Objective Analysis"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"质量不如价格反映的"}</_components.strong>
+          {' - "Quality doesn\'t match what the price suggests"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"现实不如想象"}</_components.strong>
+          {' - "Reality isn\'t as good as imagination"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Cultural Context"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"不如 reflects important Chinese cultural aspects:"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Modest comparison"}</_components.strong>
+          {" - acknowledging others' superior abilities"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Honest assessment"}</_components.strong>
+          {" - making realistic evaluations"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Hierarchical thinking"}</_components.strong>
+          {" - recognizing different levels of quality/skill"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Improvement motivation"}</_components.strong>
+          {" - identifying gaps to work on"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Grammar Notes"}</_components.h2>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Pattern Variations:"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ol>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Simple comparison"}</_components.strong>
+          {": A 不如 B"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Specific aspect"}</_components.strong>
+          {': A 在...方面不如 B ("A is inferior to B in... aspect")'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Degree"}</_components.strong>
+          {': A 远不如 B ("A is far inferior to B")'}
+        </_components.li>
+        {"\n"}
+      </_components.ol>
+      {"\n"}
+      <_components.h2>{"Politeness Considerations"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"When comparing people, 不如 requires cultural sensitivity"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Better used for self-deprecation than criticizing others directly"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "In formal situations, consider softer alternatives like 没有...那么好"
+          }
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {"不如 provides "}
+        <_components.strong>
+          {"precise comparative language"}
+        </_components.strong>
+        {" for honest evaluation and thoughtful analysis."}
+      </_components.p>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

@@ -1,15 +1,208 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <><_components.p>{"Describes something as being not the same as something else."}</_components.p>{"\n"}<_components.h2>{"Quick Reference"}</_components.h2>{"\n"}<_components.p>{"| Aspect         | Info                    |\n| -------------- | ----------------------- |\n| Pinyin         | bù tóng                 |\n| Core meaning   | different; not the same |\n| Part of speech | adjective               |\n| Tone           | fourth + second tone    |"}</_components.p>{"\n"}<_components.h2>{"Visual Breakdown"}</_components.h2>{"\n"}<_components.p>{"不同 combines "}<_components.strong>{"not"}</_components.strong>{" (不) with "}<_components.strong>{"same"}</_components.strong>{" (同) to mean \"not the same.\""}</_components.p>{"\n"}<_components.p>{"| Component | Visual Description                                        |\n| --------- | --------------------------------------------------------- |\n| "}<_components.strong>{"不"}</_components.strong>{"    | Negation - crossing strokes suggesting blocking/denial    |\n| "}<_components.strong>{"同"}</_components.strong>{"    | Same/together - mouth (口) with an opening/joining stroke |"}</_components.p>{"\n"}<_components.h2>{"Mnemonic"}</_components.h2>{"\n"}<_components.p>{"Think of 不同 as "}<_components.strong>{"\"not sharing the same mouth/space\""}</_components.strong>{":"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"同 shows things coming together in the same space (口)"}</_components.li>{"\n"}<_components.li>{"不 blocks or cancels this togetherness"}</_components.li>{"\n"}<_components.li>{"Together: things that don't come together = \"different\""}</_components.li>{"\n"}<_components.li>{"Like people who can't share the same view or opinion"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p>{"The concept is literally \"not same\" - when things don't match or align."}</_components.p>{"\n"}<_components.h2>{"Usage Examples"}</_components.h2>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"不同的人"}</_components.strong>{" (bù tóng de rén) - \"different people\""}</_components.li>{"\n"}<_components.li><_components.strong>{"不同意见"}</_components.strong>{" (bù tóng yìjiàn) - \"different opinions\""}</_components.li>{"\n"}<_components.li><_components.strong>{"完全不同"}</_components.strong>{" (wánquán bù tóng) - \"completely different\""}</_components.li>{"\n"}<_components.li><_components.strong>{"有什么不同"}</_components.strong>{" (yǒu shénme bù tóng) - \"what's the difference\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Grammar Patterns"}</_components.h2>{"\n"}<_components.p>{"不同 functions as an "}<_components.strong>{"adjective"}</_components.strong>{":"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Before nouns"}</_components.strong>{": 不同的 + [noun] (different + noun)"}</_components.li>{"\n"}<_components.li><_components.strong>{"Predicative"}</_components.strong>{": A 和 B 不同 (A and B are different)"}</_components.li>{"\n"}<_components.li><_components.strong>{"Comparisons"}</_components.strong>{": A 跟 B 不同 (A is different from B)"}</_components.li>{"\n"}<_components.li><_components.strong>{"Questions"}</_components.strong>{": 有什么不同? (What's different?)"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Related Words"}</_components.h2>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"一样"}</_components.strong>{" (yīyàng) - \"the same\" (opposite)"}</_components.li>{"\n"}<_components.li><_components.strong>{"相同"}</_components.strong>{" (xiāngtóng) - \"identical; same\""}</_components.li>{"\n"}<_components.li><_components.strong>{"差别"}</_components.strong>{" (chābié) - \"difference; distinction\""}</_components.li>{"\n"}<_components.li><_components.strong>{"各种"}</_components.strong>{" (gèzhǒng) - \"various; different kinds\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Cultural Context"}</_components.h2>{"\n"}<_components.p>{"不同 reflects important Chinese values:"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Diversity acceptance"}</_components.strong>{": Recognizing that differences exist"}</_components.li>{"\n"}<_components.li><_components.strong>{"Comparison culture"}</_components.strong>{": Chinese often compare and contrast things"}</_components.li>{"\n"}<_components.li><_components.strong>{"Analytical thinking"}</_components.strong>{": Breaking down differences helps understanding"}</_components.li>{"\n"}<_components.li><_components.strong>{"Respectful disagreement"}</_components.strong>{": Acknowledging different viewpoints politely"}</_components.li>{"\n"}</_components.ul></>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {"Describes something as being not the same as something else."}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                    |\n| -------------- | ----------------------- |\n| Pinyin         | bù tóng                 |\n| Core meaning   | different; not the same |\n| Part of speech | adjective               |\n| Tone           | fourth + second tone    |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Visual Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"不同 combines "}
+        <_components.strong>{"not"}</_components.strong>
+        {" (不) with "}
+        <_components.strong>{"same"}</_components.strong>
+        {' (同) to mean "not the same."'}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component | Visual Description                                        |\n| --------- | --------------------------------------------------------- |\n| "
+        }
+        <_components.strong>{"不"}</_components.strong>
+        {
+          "    | Negation - crossing strokes suggesting blocking/denial    |\n| "
+        }
+        <_components.strong>{"同"}</_components.strong>
+        {"    | Same/together - mouth (口) with an opening/joining stroke |"}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Mnemonic"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 不同 as "}
+        <_components.strong>
+          {'"not sharing the same mouth/space"'}
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"同 shows things coming together in the same space (口)"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"不 blocks or cancels this togetherness"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {'Together: things that don\'t come together = "different"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Like people who can't share the same view or opinion"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {
+          'The concept is literally "not same" - when things don\'t match or align.'
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Usage Examples"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"不同的人"}</_components.strong>
+          {' (bù tóng de rén) - "different people"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"不同意见"}</_components.strong>
+          {' (bù tóng yìjiàn) - "different opinions"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"完全不同"}</_components.strong>
+          {' (wánquán bù tóng) - "completely different"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"有什么不同"}</_components.strong>
+          {' (yǒu shénme bù tóng) - "what\'s the difference"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Grammar Patterns"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"不同 functions as an "}
+        <_components.strong>{"adjective"}</_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Before nouns"}</_components.strong>
+          {": 不同的 + [noun] (different + noun)"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Predicative"}</_components.strong>
+          {": A 和 B 不同 (A and B are different)"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Comparisons"}</_components.strong>
+          {": A 跟 B 不同 (A is different from B)"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Questions"}</_components.strong>
+          {": 有什么不同? (What's different?)"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Related Words"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"一样"}</_components.strong>
+          {' (yīyàng) - "the same" (opposite)'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"相同"}</_components.strong>
+          {' (xiāngtóng) - "identical; same"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"差别"}</_components.strong>
+          {' (chābié) - "difference; distinction"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"各种"}</_components.strong>
+          {' (gèzhǒng) - "various; different kinds"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Cultural Context"}</_components.h2>
+      {"\n"}
+      <_components.p>{"不同 reflects important Chinese values:"}</_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Diversity acceptance"}</_components.strong>
+          {": Recognizing that differences exist"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Comparison culture"}</_components.strong>
+          {": Chinese often compare and contrast things"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Analytical thinking"}</_components.strong>
+          {": Breaking down differences helps understanding"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Respectful disagreement"}</_components.strong>
+          {": Acknowledging different viewpoints politely"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

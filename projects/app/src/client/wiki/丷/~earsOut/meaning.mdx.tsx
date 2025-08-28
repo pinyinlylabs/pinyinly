@@ -1,15 +1,360 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <_components.p>{"A radical component known as \"ears-out\" used in some Chinese characters."}</_components.p>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {
+          'A radical representing "eight-shaped division" or "separation," often appearing as the top component\nof characters related to opening, dividing, or spreading apart.'
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                                      |\n| -------------- | ----------------------------------------- |\n| Pinyin         | bā zìtóu                                  |\n| Core meaning   | eight-shaped division; separating radical |\n| Part of speech | radical component                         |\n| Visual form    | Two strokes diverging like ∧              |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Visual Understanding"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 丷 as "}
+        <_components.strong>
+          {'"arms opening wide" or "paths diverging"'}
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"Like two roads splitting apart at a fork"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Arms reaching outward in a welcoming gesture"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"A mountain peak with two slopes descending"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "The shape of the character 八 (eight) at the top of other characters"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Represents opening, expansion, and separation"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"As a Radical Component"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "丷 appears in many characters related to opening, covering, or separation:"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Character | Meaning           | Role of 丷                       |\n| --------- | ----------------- | -------------------------------- |\n| "
+        }
+        <_components.strong>{"关"}</_components.strong>
+        {"    | close, shut, pass | Originally represented a barrier |\n| "}
+        <_components.strong>{"兴"}</_components.strong>
+        {"    | interest, rise    | Shows expansion of enthusiasm    |\n| "}
+        <_components.strong>{"共"}</_components.strong>
+        {"    | together, share   | Brings things under one covering |\n| "}
+        <_components.strong>{"兵"}</_components.strong>
+        {"    | soldier, military | Arms spread for battle readiness |"}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Semantic Associations"}</_components.h2>
+      {"\n"}
+      <_components.p>{"丷 often relates to concepts of:"}</_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Opening and closing"}</_components.strong>
+          {" - gate-like functions"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Coverage and protection"}</_components.strong>
+          {" - sheltering from above"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Division and separation"}</_components.strong>
+          {" - splitting into parts"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Expansion and reaching"}</_components.strong>
+          {" - extending outward"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Character Examples"}</_components.h2>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Opening/Closing"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"关门"}</_components.strong>
+          {' (guānmén) - "close the door"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"开关"}</_components.strong>
+          {' (kāiguān) - "switch" (open/close)'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Interest/Enthusiasm"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"兴趣"}</_components.strong>
+          {' (xìngqù) - "interest, hobby"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"高兴"}</_components.strong>
+          {' (gāoxìng) - "happy, pleased"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Togetherness"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"共同"}</_components.strong>
+          {' (gòngtóng) - "together, jointly"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"公共"}</_components.strong>
+          {' (gōnggòng) - "public, common"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Military/Protection"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"士兵"}</_components.strong>
+          {' (shìbīng) - "soldier"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"兵器"}</_components.strong>
+          {' (bīngqì) - "weapon"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Cultural Significance"}</_components.h2>
+      {"\n"}
+      <_components.p>{"丷 embodies important Chinese concepts:"}</_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"包容"}</_components.strong>
+          {" - inclusiveness, embracing diversity"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"分合"}</_components.strong>
+          {" - the cycle of separation and unity"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"守护"}</_components.strong>
+          {" - protection and sheltering"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"开放"}</_components.strong>
+          {" - openness and expansion"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Learning Strategy"}</_components.h2>
+      {"\n"}
+      <_components.p>{"To recognize 丷 in characters:"}</_components.p>
+      {"\n"}
+      <_components.ol>
+        {"\n"}
+        <_components.li>
+          <_components.strong>
+            {"Look for the ∧ shape at the top"}
+          </_components.strong>
+          {" of characters"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>
+            {"Think about opening/expanding meanings"}
+          </_components.strong>
+          {" when you see it"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>
+            {"Remember it often relates to coverage or protection"}
+          </_components.strong>
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>
+            {"Notice it in common characters"}
+          </_components.strong>
+          {" like 关, 兴, 共, 兵"}
+        </_components.li>
+        {"\n"}
+      </_components.ol>
+      {"\n"}
+      <_components.h2>{"Mnemonic Device"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Remember 丷 as "}
+        <_components.strong>{'"open arms of welcome"'}</_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"Like a person spreading their arms wide to embrace someone"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"A roof peak that shelters what's beneath"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Two paths opening up new possibilities"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"The gesture of inclusion and protection"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Writing Context"}</_components.h2>
+      {"\n"}
+      <_components.p>{"In calligraphy and writing:"}</_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Stroke order"}</_components.strong>
+          {" - typically left stroke first, then right"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Balance"}</_components.strong>
+          {" - both strokes should be symmetrical"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Spacing"}</_components.strong>
+          {" - proper distance between the two strokes"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Connection"}</_components.strong>
+          {" - how it joins with components below"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Related Radicals"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Radical | Appearance | Usage                  |\n| ------- | ---------- | ---------------------- |\n| 丷      | ∧ shape    | Opening, division      |\n| 人      | Person     | Human-related meanings |\n| 入      | Enter      | Going into spaces      |\n| 八      | Eight      | Number and separation  |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Character Family Patterns"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Characters with 丷 often share related meanings:"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Protection group"}</_components.strong>
+          {": 关 (guard), 兵 (soldier)"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Emotion group"}</_components.strong>
+          {": 兴 (interest), 其 (his/her)"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Unity group"}</_components.strong>
+          {": 共 (together), 公 (public)"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {"丷 teaches us about "}
+        <_components.strong>
+          {"the power of opening up and embracing"}
+        </_components.strong>
+        {" - fundamental concepts in Chinese\nphilosophy and daily life."}
+      </_components.p>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

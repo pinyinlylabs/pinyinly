@@ -1,15 +1,188 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <><_components.p>{"A part or division of a larger organization; section; department; ministry."}</_components.p>{"\n"}<_components.h2>{"Quick Reference"}</_components.h2>{"\n"}<_components.p>{"| Aspect         | Info                      |\n| -------------- | ------------------------- |\n| Pinyin         | bù                        |\n| Core meaning   | section; department; part |\n| Part of speech | noun; measure word        |\n| Tone           | fourth tone (falling)     |"}</_components.p>{"\n"}<_components.h2>{"Visual Breakdown"}</_components.h2>{"\n"}<_components.p>{"部 represents "}<_components.strong>{"a leader organizing people and territory"}</_components.strong>{"."}</_components.p>{"\n"}<_components.p>{"| Component | Visual Description                                          |\n| --------- | ----------------------------------------------------------- |\n| "}<_components.strong>{"立"}</_components.strong>{"    | Standing person representing leadership/authority           |\n| "}<_components.strong>{"口"}</_components.strong>{"    | Mouth/opening representing territory or administrative unit |\n| "}<_components.strong>{"阝"}</_components.strong>{"    | City/settlement radical showing organized community         |"}</_components.p>{"\n"}<_components.h2>{"Mnemonic"}</_components.h2>{"\n"}<_components.p>{"Think of 部 as "}<_components.strong>{"a leader standing over their domain"}</_components.strong>{":"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"立 (standing person) represents a department head or manager"}</_components.li>{"\n"}<_components.li>{"口 (mouth/territory) shows the area or scope they oversee"}</_components.li>{"\n"}<_components.li>{"阝 (city radical) indicates this is about organized administration"}</_components.li>{"\n"}<_components.li>{"Like a general commanding their battalion, or a director running their department"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p>{"This captures the essence of administrative division and hierarchical organization."}</_components.p>{"\n"}<_components.h2>{"Usage Examples"}</_components.h2>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"教育部"}</_components.strong>{" (jiào yù bù) - \"Ministry of Education\""}</_components.li>{"\n"}<_components.li><_components.strong>{"一部电影"}</_components.strong>{" (yī bù diàn yǐng) - \"one movie\" (measure word)"}</_components.li>{"\n"}<_components.li><_components.strong>{"部分"}</_components.strong>{" (bù fēn) - \"part; portion; section\""}</_components.li>{"\n"}<_components.li><_components.strong>{"总部"}</_components.strong>{" (zǒng bù) - \"headquarters\""}</_components.li>{"\n"}<_components.li><_components.strong>{"内部"}</_components.strong>{" (nèi bù) - \"internal; inside\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Grammar Functions"}</_components.h2>{"\n"}<_components.p>{"部 serves multiple roles:"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Measure word"}</_components.strong>{": For books, movies, machines (一部车 - \"one vehicle\")"}</_components.li>{"\n"}<_components.li><_components.strong>{"Noun"}</_components.strong>{": Department, ministry, section"}</_components.li>{"\n"}<_components.li><_components.strong>{"Component"}</_components.strong>{": In compound words about organization/division"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Cultural Context"}</_components.h2>{"\n"}<_components.p>{"部 reflects Chinese administrative tradition:"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Government structure"}</_components.strong>{": Traditional ministries (六部 - Six Ministries)"}</_components.li>{"\n"}<_components.li><_components.strong>{"Hierarchical organization"}</_components.strong>{": Clear divisions and responsibilities"}</_components.li>{"\n"}<_components.li><_components.strong>{"Collective management"}</_components.strong>{": Group-based rather than individual authority"}</_components.li>{"\n"}<_components.li><_components.strong>{"Systematic thinking"}</_components.strong>{": Breaking large entities into manageable parts"}</_components.li>{"\n"}</_components.ul></>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {
+          "A part or division of a larger organization; section; department; ministry."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                      |\n| -------------- | ------------------------- |\n| Pinyin         | bù                        |\n| Core meaning   | section; department; part |\n| Part of speech | noun; measure word        |\n| Tone           | fourth tone (falling)     |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Visual Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"部 represents "}
+        <_components.strong>
+          {"a leader organizing people and territory"}
+        </_components.strong>
+        {"."}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component | Visual Description                                          |\n| --------- | ----------------------------------------------------------- |\n| "
+        }
+        <_components.strong>{"立"}</_components.strong>
+        {
+          "    | Standing person representing leadership/authority           |\n| "
+        }
+        <_components.strong>{"口"}</_components.strong>
+        {
+          "    | Mouth/opening representing territory or administrative unit |\n| "
+        }
+        <_components.strong>{"阝"}</_components.strong>
+        {"    | City/settlement radical showing organized community         |"}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Mnemonic"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 部 as "}
+        <_components.strong>
+          {"a leader standing over their domain"}
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"立 (standing person) represents a department head or manager"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"口 (mouth/territory) shows the area or scope they oversee"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"阝 (city radical) indicates this is about organized administration"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "Like a general commanding their battalion, or a director running their department"
+          }
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {
+          "This captures the essence of administrative division and hierarchical organization."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Usage Examples"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"教育部"}</_components.strong>
+          {' (jiào yù bù) - "Ministry of Education"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"一部电影"}</_components.strong>
+          {' (yī bù diàn yǐng) - "one movie" (measure word)'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"部分"}</_components.strong>
+          {' (bù fēn) - "part; portion; section"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"总部"}</_components.strong>
+          {' (zǒng bù) - "headquarters"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"内部"}</_components.strong>
+          {' (nèi bù) - "internal; inside"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Grammar Functions"}</_components.h2>
+      {"\n"}
+      <_components.p>{"部 serves multiple roles:"}</_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Measure word"}</_components.strong>
+          {': For books, movies, machines (一部车 - "one vehicle")'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Noun"}</_components.strong>
+          {": Department, ministry, section"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Component"}</_components.strong>
+          {": In compound words about organization/division"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Cultural Context"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"部 reflects Chinese administrative tradition:"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Government structure"}</_components.strong>
+          {": Traditional ministries (六部 - Six Ministries)"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Hierarchical organization"}</_components.strong>
+          {": Clear divisions and responsibilities"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Collective management"}</_components.strong>
+          {": Group-based rather than individual authority"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Systematic thinking"}</_components.strong>
+          {": Breaking large entities into manageable parts"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

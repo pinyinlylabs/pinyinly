@@ -1,15 +1,150 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <><_components.p>{"To make ready for a future event; to prepare; to plan ahead."}</_components.p>{"\n"}<_components.h2>{"Quick Reference"}</_components.h2>{"\n"}<_components.p>{"| Aspect         | Info                  |\n| -------------- | --------------------- |\n| Pinyin         | yù                    |\n| Core meaning   | prepare; plan ahead   |\n| Part of speech | verb                  |\n| Tone           | fourth tone (falling) |"}</_components.p>{"\n"}<_components.h2>{"Visual Breakdown"}</_components.h2>{"\n"}<_components.p>{"预 combines "}<_components.strong>{"head + page"}</_components.strong>{" to suggest foresight and planning."}</_components.p>{"\n"}<_components.p>{"| Component | Visual Description                                            |\n| --------- | ------------------------------------------------------------- |\n| "}<_components.strong>{"页"}</_components.strong>{"    | Page/head (页) - represents mind, thinking, or documents      |\n| "}<_components.strong>{"予"}</_components.strong>{"    | Give/bestow (予) - indicates action of providing or arranging |"}</_components.p>{"\n"}<_components.h2>{"Mnemonic"}</_components.h2>{"\n"}<_components.p>{"Think of 预 as "}<_components.strong>{"\"giving thought ahead of time\""}</_components.strong>{" or "}<_components.strong>{"\"preparing your mind\""}</_components.strong>{":"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"The head/page component (页) represents mental planning and foresight"}</_components.li>{"\n"}<_components.li>{"The giving component (予) suggests the action of arranging or providing"}</_components.li>{"\n"}<_components.li>{"Like using your head to think ahead and prepare for future events"}</_components.li>{"\n"}<_components.li>{"Mental preparation and forward-thinking combined with action"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Usage Examples"}</_components.h2>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"预习"}</_components.strong>{" (yù xí) - \"preview; prepare lessons in advance\""}</_components.li>{"\n"}<_components.li><_components.strong>{"预报"}</_components.strong>{" (yù bào) - \"forecast; predict; advance report\""}</_components.li>{"\n"}<_components.li><_components.strong>{"预定"}</_components.strong>{" (yù dìng) - \"reserve; book in advance\""}</_components.li>{"\n"}<_components.li><_components.strong>{"预防"}</_components.strong>{" (yù fáng) - \"prevent; take preventive measures\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Cultural Context"}</_components.h2>{"\n"}<_components.p>{"预 emphasizes the Chinese cultural value of preparation and foresight:"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"Reflects the importance of planning and being ready"}</_components.li>{"\n"}<_components.li>{"Common in educational contexts (预习 - preparing lessons)"}</_components.li>{"\n"}<_components.li>{"Essential for weather, medical, and business planning"}</_components.li>{"\n"}<_components.li>{"Shows respect for future consequences and responsibility"}</_components.li>{"\n"}</_components.ul></>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {"To make ready for a future event; to prepare; to plan ahead."}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                  |\n| -------------- | --------------------- |\n| Pinyin         | yù                    |\n| Core meaning   | prepare; plan ahead   |\n| Part of speech | verb                  |\n| Tone           | fourth tone (falling) |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Visual Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"预 combines "}
+        <_components.strong>{"head + page"}</_components.strong>
+        {" to suggest foresight and planning."}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component | Visual Description                                            |\n| --------- | ------------------------------------------------------------- |\n| "
+        }
+        <_components.strong>{"页"}</_components.strong>
+        {
+          "    | Page/head (页) - represents mind, thinking, or documents      |\n| "
+        }
+        <_components.strong>{"予"}</_components.strong>
+        {
+          "    | Give/bestow (予) - indicates action of providing or arranging |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Mnemonic"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 预 as "}
+        <_components.strong>
+          {'"giving thought ahead of time"'}
+        </_components.strong>
+        {" or "}
+        <_components.strong>{'"preparing your mind"'}</_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {
+            "The head/page component (页) represents mental planning and foresight"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "The giving component (予) suggests the action of arranging or providing"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Like using your head to think ahead and prepare for future events"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Mental preparation and forward-thinking combined with action"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Usage Examples"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"预习"}</_components.strong>
+          {' (yù xí) - "preview; prepare lessons in advance"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"预报"}</_components.strong>
+          {' (yù bào) - "forecast; predict; advance report"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"预定"}</_components.strong>
+          {' (yù dìng) - "reserve; book in advance"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"预防"}</_components.strong>
+          {' (yù fáng) - "prevent; take preventive measures"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Cultural Context"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "预 emphasizes the Chinese cultural value of preparation and foresight:"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"Reflects the importance of planning and being ready"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Common in educational contexts (预习 - preparing lessons)"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Essential for weather, medical, and business planning"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Shows respect for future consequences and responsibility"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

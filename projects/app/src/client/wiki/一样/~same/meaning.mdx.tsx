@@ -1,15 +1,223 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <_components.p>{"Exactly alike; identical in every way."}</_components.p>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {"Exactly alike; identical in every way; the same; uniform."}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                      |\n| -------------- | ------------------------- |\n| Pinyin         | yíyàng                    |\n| Core meaning   | same; identical; alike    |\n| Part of speech | adjective, adverb         |\n| Tone           | second tone + fourth tone |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Visual Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"一样 combines the concept of "}
+        <_components.strong>
+          {"oneness with appearance/form"}
+        </_components.strong>
+        {"."}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component | Meaning                                         |\n| --------- | ----------------------------------------------- |\n| "
+        }
+        <_components.strong>{"一"}</_components.strong>
+        {"    | One - representing unity, singularity, sameness |\n| "}
+        <_components.strong>{"样"}</_components.strong>
+        {"    | Appearance, form, way, style (木 + 羊)          |"}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Mnemonic"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 一样 as "}
+        <_components.strong>
+          {'"one appearance" or "one form"'}
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"When two things have 一样 (one appearance), they look identical"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {'Like looking at twins and saying "they have one appearance"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Everything matches - same form, same style, same characteristics"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"一 (one) + 样 (way/appearance) = one way of appearing = identical"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {"This emphasizes "}
+        <_components.strong>
+          {"complete similarity with no differences"}
+        </_components.strong>
+        {"."}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Core Meaning & Usage"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"一样 expresses "}
+        <_components.strong>{"sameness and identity"}</_components.strong>
+        {" in various contexts:"}
+      </_components.p>
+      {"\n"}
+      <_components.ol>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Physical similarity"}</_components.strong>
+          {': 这两个苹果一样大 - "These two apples are the same size"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Behavioral similarity"}</_components.strong>
+          {': 我们想的一样 - "We think the same way"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Equality"}</_components.strong>
+          {': 他们的工资一样 - "Their salaries are the same"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Adverbial use"}</_components.strong>
+          {': 一样地工作 - "work in the same way"'}
+        </_components.li>
+        {"\n"}
+      </_components.ol>
+      {"\n"}
+      <_components.h2>{"Grammar Patterns"}</_components.h2>
+      {"\n"}
+      <_components.h3>{"As Adjective"}</_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"A 和 B 一样"}</_components.strong>
+          {' - "A and B are the same"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"一样的"}</_components.strong>
+          {' + noun - "the same" + noun'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>{"As Adverb"}</_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"一样"}</_components.strong>
+          {' + verb - "do something the same way"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Examples"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"我们的想法一样"}</_components.strong>
+          {' - "Our ideas are the same"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"这两本书一样厚"}</_components.strong>
+          {' - "These two books are equally thick"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"他们一样高"}</_components.strong>
+          {' - "They are the same height"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"一样的问题"}</_components.strong>
+          {' - "the same problem"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"一样地努力"}</_components.strong>
+          {' - "work equally hard"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Cultural Context"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"一样 reflects the Chinese philosophical concept of "}
+        <_components.strong>{"harmony and uniformity"}</_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Social harmony"}</_components.strong>
+          {" often values finding common ground"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Educational systems"}</_components.strong>
+          {" emphasize achieving similar standards"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Group unity"}</_components.strong>
+          {" over individual differences in many contexts"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {"The emphasis on 一样 (sameness) reflects cultural values of "}
+        <_components.strong>
+          {"consistency, reliability, and shared\nunderstanding"}
+        </_components.strong>
+        {"."}
+      </_components.p>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

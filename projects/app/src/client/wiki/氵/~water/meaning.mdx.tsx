@@ -1,15 +1,210 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <><_components.p>{"A radical representing water, often used as a component in compound characters."}</_components.p>{"\n"}<_components.h2>{"Mnemonic"}</_components.h2>{"\n"}<_components.p>{"氵 is a component form of 水."}</_components.p></>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {
+          "A radical representing water, often used as a component in compound characters related to liquids,\nflow, and moisture."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                              |\n| -------------- | --------------------------------- |\n| Pinyin         | shuǐ (when standalone as 水)      |\n| Core meaning   | water; liquid; fluid              |\n| Part of speech | radical component                 |\n| Usage          | left side of characters (水 → 氵) |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Visual Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"氵 is the "}
+        <_components.strong>{"three-drop radical"}</_components.strong>
+        {
+          ", a simplified form of 水 (water) used when water appears as the\nleft component of a character."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component | Visual Description                                          |\n| --------- | ----------------------------------------------------------- |\n| "
+        }
+        <_components.strong>{"氵"}</_components.strong>
+        {
+          "    | Three flowing drops or streams of water, simplified from 水 |\n| "
+        }
+        <_components.strong>{"水"}</_components.strong>
+        {"    | Original form showing flowing water with a central stream   |"}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Mnemonic"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 氵 as "}
+        <_components.strong>
+          {"three drops of water flowing down"}
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"The three vertical strokes look like water droplets falling"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Each stroke represents a stream or drop of water"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            'When you see 氵 on the left side of a character, think "water-related"'
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"It's like seeing rain drops or a small waterfall flowing down"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {
+          "This radical immediately tells you the character has something to do with "
+        }
+        <_components.strong>{"water, liquids, or\nflowing"}</_components.strong>
+        {"."}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Core Meaning & Usage"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"氵 appears as the "}
+        <_components.strong>
+          {"left radical in hundreds of water-related characters"}
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ol>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Natural water"}</_components.strong>
+          {': 江 (jiāng) - "river", 湖 (hú) - "lake"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Weather/moisture"}</_components.strong>
+          {': 湿 (shī) - "wet", 滴 (dī) - "drop"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Actions with liquids"}</_components.strong>
+          {': 洗 (xǐ) - "wash", 游 (yóu) - "swim"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Liquid states"}</_components.strong>
+          {': 汤 (tāng) - "soup", 油 (yóu) - "oil"'}
+        </_components.li>
+        {"\n"}
+      </_components.ol>
+      {"\n"}
+      <_components.h2>{"Examples in Characters"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"江"}</_components.strong>
+          {' (jiāng) - "river" (水 + 工)'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"洗"}</_components.strong>
+          {' (xǐ) - "to wash" (水 + 先)'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"海"}</_components.strong>
+          {' (hǎi) - "ocean" (水 + 每)'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"游"}</_components.strong>
+          {' (yóu) - "to swim" (水 + 方)'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"汽"}</_components.strong>
+          {' (qì) - "steam/vapor" (水 + 气)'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"湖"}</_components.strong>
+          {' (hú) - "lake" (水 + 胡)'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Cultural Context"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Water is one of the "}
+        <_components.strong>{"Five Elements"}</_components.strong>
+        {" (五行) in Chinese philosophy, representing:"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Fluidity and adaptability"}</_components.strong>
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Life and nourishment"}</_components.strong>
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>
+            {"Cleansing and purification"}
+          </_components.strong>
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>
+            {"Downward flow and humility"}
+          </_components.strong>
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {
+          "The 氵 radical connects characters to these fundamental water concepts, making it one of the most\ncommon and important radicals in Chinese writing."
+        }
+      </_components.p>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

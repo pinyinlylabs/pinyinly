@@ -1,15 +1,169 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <><_components.p>{"Without doubt; surely; certainly; definitely."}</_components.p>{"\n"}<_components.h2>{"Quick Reference"}</_components.h2>{"\n"}<_components.p>{"| Aspect         | Info                  |\n| -------------- | --------------------- |\n| Pinyin         | yī dìng               |\n| Core meaning   | certainly; definitely |\n| Part of speech | adverb                |\n| Tone           | 1st + 4th tone        |"}</_components.p>{"\n"}<_components.h2>{"Visual Breakdown"}</_components.h2>{"\n"}<_components.p>{"一定 combines "}<_components.strong>{"one + fixed/settled"}</_components.strong>{" to express absolute certainty."}</_components.p>{"\n"}<_components.p>{"| Component | Meaning              | Contribution to 一定                |\n| --------- | -------------------- | ----------------------------------- |\n| "}<_components.strong>{"一"}</_components.strong>{"    | one; unity; single   | Represents absoluteness, no doubt   |\n| "}<_components.strong>{"定"}</_components.strong>{"    | fixed; settled; calm | Represents stability, determination |"}</_components.p>{"\n"}<_components.h2>{"Mnemonic"}</_components.h2>{"\n"}<_components.p>{"Think of 一定 as "}<_components.strong>{"one fixed point"}</_components.strong>{":"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"一 (one) represents singularity - there's only ONE possibility"}</_components.li>{"\n"}<_components.li>{"定 (settled/fixed) shows this possibility is locked in place"}</_components.li>{"\n"}<_components.li>{"Like a compass needle that points to magnetic north - it's fixed, certain, definite"}</_components.li>{"\n"}<_components.li>{"When something is \"one and settled,\" there's no room for doubt"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Usage Examples"}</_components.h2>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"我一定去"}</_components.strong>{" (wǒ yī dìng qù) - \"I will definitely go\""}</_components.li>{"\n"}<_components.li><_components.strong>{"一定要小心"}</_components.strong>{" (yī dìng yào xiǎo xīn) - \"must be careful\""}</_components.li>{"\n"}<_components.li><_components.strong>{"他一定知道"}</_components.strong>{" (tā yī dìng zhī dào) - \"he certainly knows\""}</_components.li>{"\n"}<_components.li><_components.strong>{"一定不行"}</_components.strong>{" (yī dìng bù xíng) - \"definitely won't work\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Grammar Notes"}</_components.h2>{"\n"}<_components.p>{"一定 functions as:"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Adverb"}</_components.strong>{": Modifies verbs to show certainty (一定会来 - \"will definitely come\")"}</_components.li>{"\n"}<_components.li><_components.strong>{"Modal expression"}</_components.strong>{": Shows obligation or necessity (一定要 - \"must/have to\")"}</_components.li>{"\n"}<_components.li><_components.strong>{"Emphatic marker"}</_components.strong>{": Strengthens assertions and promises"}</_components.li>{"\n"}<_components.li><_components.strong>{"Future certainty"}</_components.strong>{": Often used with 会 (huì) for future events"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Cultural Context"}</_components.h2>{"\n"}<_components.p>{"In Chinese communication, 一定 carries strong commitment:"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Promise weight"}</_components.strong>{": Using 一定 makes a statement more binding"}</_components.li>{"\n"}<_components.li><_components.strong>{"Social expectation"}</_components.strong>{": Creates accountability in relationships"}</_components.li>{"\n"}<_components.li><_components.strong>{"Confidence marker"}</_components.strong>{": Shows the speaker's strong belief or determination"}</_components.li>{"\n"}</_components.ul></>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {"Without doubt; surely; certainly; definitely."}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                  |\n| -------------- | --------------------- |\n| Pinyin         | yī dìng               |\n| Core meaning   | certainly; definitely |\n| Part of speech | adverb                |\n| Tone           | 1st + 4th tone        |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Visual Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"一定 combines "}
+        <_components.strong>{"one + fixed/settled"}</_components.strong>
+        {" to express absolute certainty."}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component | Meaning              | Contribution to 一定                |\n| --------- | -------------------- | ----------------------------------- |\n| "
+        }
+        <_components.strong>{"一"}</_components.strong>
+        {
+          "    | one; unity; single   | Represents absoluteness, no doubt   |\n| "
+        }
+        <_components.strong>{"定"}</_components.strong>
+        {"    | fixed; settled; calm | Represents stability, determination |"}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Mnemonic"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 一定 as "}
+        <_components.strong>{"one fixed point"}</_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"一 (one) represents singularity - there's only ONE possibility"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"定 (settled/fixed) shows this possibility is locked in place"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "Like a compass needle that points to magnetic north - it's fixed, certain, definite"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {'When something is "one and settled," there\'s no room for doubt'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Usage Examples"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"我一定去"}</_components.strong>
+          {' (wǒ yī dìng qù) - "I will definitely go"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"一定要小心"}</_components.strong>
+          {' (yī dìng yào xiǎo xīn) - "must be careful"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"他一定知道"}</_components.strong>
+          {' (tā yī dìng zhī dào) - "he certainly knows"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"一定不行"}</_components.strong>
+          {' (yī dìng bù xíng) - "definitely won\'t work"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Grammar Notes"}</_components.h2>
+      {"\n"}
+      <_components.p>{"一定 functions as:"}</_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Adverb"}</_components.strong>
+          {
+            ': Modifies verbs to show certainty (一定会来 - "will definitely come")'
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Modal expression"}</_components.strong>
+          {': Shows obligation or necessity (一定要 - "must/have to")'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Emphatic marker"}</_components.strong>
+          {": Strengthens assertions and promises"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Future certainty"}</_components.strong>
+          {": Often used with 会 (huì) for future events"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Cultural Context"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"In Chinese communication, 一定 carries strong commitment:"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Promise weight"}</_components.strong>
+          {": Using 一定 makes a statement more binding"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Social expectation"}</_components.strong>
+          {": Creates accountability in relationships"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Confidence marker"}</_components.strong>
+          {": Shows the speaker's strong belief or determination"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

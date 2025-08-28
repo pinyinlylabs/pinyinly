@@ -1,15 +1,349 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <_components.p>{"Not correct or true; wrong."}</_components.p>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {"Not correct, accurate, or true; wrong; mistaken; improper."}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                                  |\n| -------------- | ------------------------------------- |\n| Pinyin         | bùduì                                 |\n| Core meaning   | wrong; incorrect; not right; improper |\n| Part of speech | adjective; interjection               |\n| Tone           | fourth + fourth tones                 |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Word Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"不对 directly negates correctness and appropriateness:"}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component    | Meaning                          |\n| ------------ | -------------------------------- |\n| "
+        }
+        <_components.strong>{"不"}</_components.strong>
+        {" (bù)  | Not, negation                    |\n| "}
+        <_components.strong>{"对"}</_components.strong>
+        {" (duì) | Correct, right, proper, accurate |"}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Understanding"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 不对 as "}
+        <_components.strong>{'"missing the target"'}</_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"Like an archer's arrow that doesn't hit the bullseye"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "Can refer to factual errors, inappropriate behavior, or sensing something amiss"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Often used as an immediate reaction when noticing mistakes"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Can express both gentle correction and strong disagreement"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Sometimes indicates intuitive feeling that something is wrong"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Usage Contexts"}</_components.h2>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Factual Correction"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"答案不对"}</_components.strong>
+          {' (dá\'àn bùduì) - "the answer is wrong"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"时间不对"}</_components.strong>
+          {' - "the time is wrong"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Behavioral Correction"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"这样做不对"}</_components.strong>
+          {' - "doing it this way is wrong"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"态度不对"}</_components.strong>
+          {' - "wrong attitude"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Intuitive Sensing"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"感觉不对"}</_components.strong>
+          {' - "something feels wrong"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"情况不对"}</_components.strong>
+          {' - "the situation is not right"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Direct Disagreement"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"不对！"}</_components.strong>
+          {' - "No! That\'s wrong!" (interjection)'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Examples"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>{"这道题的答案不对。"}</_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {'"The answer to this question is wrong."'}
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>{"你的做法不对。"}</_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>{'"Your approach is wrong."'}</_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>
+              {"不对，我记得不是这样的。"}
+            </_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {'"No, that\'s not right. I remember it differently."'}
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>{"时间不对，我们来早了。"}</_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {'"The timing is wrong, we came too early."'}
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>{"今天天气有点不对。"}</_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {'"Today\'s weather feels a bit off."'}
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>{"他的表情看起来不对。"}</_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {'"His expression looks wrong/concerning."'}
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Intensity Levels"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Expression | Intensity | Usage              |\n| ---------- | --------- | ------------------ |\n| 不对       | Moderate  | General wrongness  |\n| 不太对     | Mild      | Slightly incorrect |\n| 很不对     | Strong    | Very wrong         |\n| 完全不对   | Extreme   | Completely wrong   |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Cultural Context"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"不对 reflects Chinese communication patterns:"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Direct feedback"}</_components.strong>
+          {" - honest assessment without being harsh"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Error correction"}</_components.strong>
+          {" - helping others improve accuracy"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Intuitive awareness"}</_components.strong>
+          {" - trusting gut feelings about situations"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Quality consciousness"}</_components.strong>
+          {" - attention to getting things right"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Grammar Notes"}</_components.h2>
+      {"\n"}
+      <_components.p>{"不对 can function as:"}</_components.p>
+      {"\n"}
+      <_components.ol>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Predicate"}</_components.strong>
+          {': 这个不对 ("This is wrong")'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Complement"}</_components.strong>
+          {': 说得不对 ("said incorrectly")'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Interjection"}</_components.strong>
+          {': 不对！("Wrong!" "No!")'}
+        </_components.li>
+        {"\n"}
+      </_components.ol>
+      {"\n"}
+      <_components.p>
+        <_components.strong>{"Common patterns:"}</_components.strong>
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"不对劲"}</_components.strong>
+          {' - "something\'s not right" (more serious)'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"对不对？"}</_components.strong>
+          {' - "Right or not?" (seeking confirmation)'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"不对头"}</_components.strong>
+          {' - "not right" (colloquial, suspicious)'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {"不对 is "}
+        <_components.strong>{"essential vocabulary"}</_components.strong>
+        {" for error correction and expressing disagreement in Chinese."}
+      </_components.p>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

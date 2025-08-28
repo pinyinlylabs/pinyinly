@@ -1,15 +1,145 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <><_components.p>{"The number six; the sixth in a sequence."}</_components.p>{"\n"}<_components.h2>{"Quick Reference"}</_components.h2>{"\n"}<_components.p>{"| Aspect         | Info                  |\n| -------------- | --------------------- |\n| Pinyin         | liù                   |\n| Core meaning   | six; sixth            |\n| Part of speech | number, adjective     |\n| Tone           | fourth tone (falling) |"}</_components.p>{"\n"}<_components.h2>{"Visual Breakdown"}</_components.h2>{"\n"}<_components.p>{"六 represents "}<_components.strong>{"six as a roof-like structure"}</_components.strong>{"."}</_components.p>{"\n"}<_components.p>{"| Component | Visual Description                              |\n| --------- | ----------------------------------------------- |\n| "}<_components.strong>{"亠"}</_components.strong>{"    | Top part like a roof or lid (hat-like shape)    |\n| "}<_components.strong>{"八"}</_components.strong>{"    | Bottom part spreading out like supports or legs |"}</_components.p>{"\n"}<_components.h2>{"Mnemonic"}</_components.h2>{"\n"}<_components.p>{"Think of 六 as "}<_components.strong>{"a roof supported by spreading beams"}</_components.strong>{":"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"The top part (亠) looks like a traditional Chinese roof"}</_components.li>{"\n"}<_components.li>{"The bottom part (八) resembles roof supports spreading outward"}</_components.li>{"\n"}<_components.li>{"Like a pavilion or small building with six supporting elements"}</_components.li>{"\n"}<_components.li>{"The roof protects what's beneath, suggesting completeness"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p>{"This structure reflects six as a stable, well-supported number."}</_components.p>{"\n"}<_components.h2>{"Usage Examples"}</_components.h2>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"六天"}</_components.strong>{" (liù tiān) - \"six days\""}</_components.li>{"\n"}<_components.li><_components.strong>{"六月"}</_components.strong>{" (liù yuè) - \"June\""}</_components.li>{"\n"}<_components.li><_components.strong>{"第六"}</_components.strong>{" (dì liù) - \"sixth\""}</_components.li>{"\n"}<_components.li><_components.strong>{"六十"}</_components.strong>{" (liù shí) - \"sixty\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Cultural Notes"}</_components.h2>{"\n"}<_components.p>{"Six is considered very auspicious in Chinese culture:"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"六六大顺"}</_components.strong>{" (liù liù dà shùn) - \"may everything go smoothly\" (common blessing)"}</_components.li>{"\n"}<_components.li>{"Represents harmony and good fortune"}</_components.li>{"\n"}<_components.li>{"Often used in wedding dates and important celebrations"}</_components.li>{"\n"}<_components.li>{"Associated with smooth progress and success"}</_components.li>{"\n"}</_components.ul></>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {"The number six; the sixth in a sequence."}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                  |\n| -------------- | --------------------- |\n| Pinyin         | liù                   |\n| Core meaning   | six; sixth            |\n| Part of speech | number, adjective     |\n| Tone           | fourth tone (falling) |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Visual Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"六 represents "}
+        <_components.strong>
+          {"six as a roof-like structure"}
+        </_components.strong>
+        {"."}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component | Visual Description                              |\n| --------- | ----------------------------------------------- |\n| "
+        }
+        <_components.strong>{"亠"}</_components.strong>
+        {"    | Top part like a roof or lid (hat-like shape)    |\n| "}
+        <_components.strong>{"八"}</_components.strong>
+        {"    | Bottom part spreading out like supports or legs |"}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Mnemonic"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 六 as "}
+        <_components.strong>
+          {"a roof supported by spreading beams"}
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"The top part (亠) looks like a traditional Chinese roof"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"The bottom part (八) resembles roof supports spreading outward"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Like a pavilion or small building with six supporting elements"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"The roof protects what's beneath, suggesting completeness"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {"This structure reflects six as a stable, well-supported number."}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Usage Examples"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"六天"}</_components.strong>
+          {' (liù tiān) - "six days"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"六月"}</_components.strong>
+          {' (liù yuè) - "June"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"第六"}</_components.strong>
+          {' (dì liù) - "sixth"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"六十"}</_components.strong>
+          {' (liù shí) - "sixty"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Cultural Notes"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Six is considered very auspicious in Chinese culture:"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"六六大顺"}</_components.strong>
+          {
+            ' (liù liù dà shùn) - "may everything go smoothly" (common blessing)'
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>{"Represents harmony and good fortune"}</_components.li>
+        {"\n"}
+        <_components.li>
+          {"Often used in wedding dates and important celebrations"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Associated with smooth progress and success"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

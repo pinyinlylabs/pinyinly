@@ -1,15 +1,264 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <><_components.p>{"To let something fall or to fall."}</_components.p>{"\n"}<_components.h2>{"Mnemonic"}</_components.h2>{"\n"}<_components.p>{"A hand (扌) lets go of something high up (卓) — it falls, drops, or is lost."}</_components.p></>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {
+          "To let something fall or to fall; to drop; to lose; to shed; to turn around."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                         |\n| -------------- | ---------------------------- |\n| Pinyin         | diào                         |\n| Core meaning   | drop; fall; lose; turn; shed |\n| Part of speech | verb                         |\n| Tone           | fourth tone (falling)        |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Visual Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"掉 combines the concept of "}
+        <_components.strong>
+          {"hand action with something elevated being released"}
+        </_components.strong>
+        {"."}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component | Visual Description                                    |\n| --------- | ----------------------------------------------------- |\n| "
+        }
+        <_components.strong>{"扌"}</_components.strong>
+        {"    | Hand radical - representing manual action             |\n| "}
+        <_components.strong>{"卓"}</_components.strong>
+        {"    | Outstanding/elevated - something high up or prominent |"}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Mnemonic"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 掉 as "}
+        <_components.strong>
+          {"a hand (扌) letting go of something high up (卓)"}
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"Your hand releases something that was elevated or held up"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Like dropping a ball from a high table (卓)"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "The outstanding/elevated thing (卓) falls when your hand (扌) lets go"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "Imagine holding something valuable high up, then accidentally dropping it"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"The action of releasing grip causes something to fall down"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {"This creates the image of "}
+        <_components.strong>
+          {"releasing control and letting something fall"}
+        </_components.strong>
+        {"."}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Core Meaning & Usage"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"掉 has several related meanings centered on "}
+        <_components.strong>
+          {"losing control or changing position"}
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ol>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Falling/dropping"}</_components.strong>
+          {': 掉下来 (diào xià lái) - "to fall down"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Losing"}</_components.strong>
+          {': 掉了 (diào le) - "lost it", 掉钱 (diào qián) - "lose money"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Shedding"}</_components.strong>
+          {
+            ': 掉头发 (diào tóu fà) - "lose hair", 掉叶子 (diào yè zi) - "shed leaves"'
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Turning around"}</_components.strong>
+          {': 掉头 (diào tóu) - "turn around/make a U-turn"'}
+        </_components.li>
+        {"\n"}
+      </_components.ol>
+      {"\n"}
+      <_components.h2>{"Examples"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"掉下来"}</_components.strong>
+          {' (diào xià lái) - "to fall down"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"掉了"}</_components.strong>
+          {' (diào le) - "dropped it; lost it"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"掉头"}</_components.strong>
+          {' (diào tóu) - "to turn around; make a U-turn"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"掉色"}</_components.strong>
+          {' (diào sè) - "to fade (color)"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"掉眼泪"}</_components.strong>
+          {' (diào yǎn lèi) - "to shed tears"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"掉队"}</_components.strong>
+          {' (diào duì) - "to fall behind (the group)"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Grammar Patterns"}</_components.h2>
+      {"\n"}
+      <_components.h3>{"As Main Verb"}</_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Subject + 掉 + Object"}</_components.strong>
+          {': 我掉了钱包 - "I lost my wallet"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Object + 掉了"}</_components.strong>
+          {': 苹果掉了 - "The apple fell"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>{"As Complement"}</_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Verb + 掉"}</_components.strong>
+          {': 扔掉 (rēng diào) - "throw away", 忘掉 (wàng diào) - "forget"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Cultural Context"}</_components.h2>
+      {"\n"}
+      <_components.p>{"掉 relates to Chinese concepts of:"}</_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Impermanence"}</_components.strong>
+          {" - things naturally fall, shed, or are lost over time"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Cycles of nature"}</_components.strong>
+          {" - leaves falling (掉叶子) represents seasonal change"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Caution and care"}</_components.strong>
+          {" - losing things (掉东西) requires mindfulness"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Direction changes"}</_components.strong>
+          {" - 掉头 shows flexibility and adaptation"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Common Expressions"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"掉链子"}</_components.strong>
+          {' (diào liàn zi) - "drop the chain" (fail at a crucial moment)'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"掉价"}</_components.strong>
+          {' (diào jià) - "lose value; lose face"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"掉以轻心"}</_components.strong>
+          {' (diào yǐ qīng xīn) - "take lightly; be careless"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {"The character captures the "}
+        <_components.strong>
+          {"universal experience of losing grip or control"}
+        </_components.strong>
+        {" over something\nimportant."}
+      </_components.p>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

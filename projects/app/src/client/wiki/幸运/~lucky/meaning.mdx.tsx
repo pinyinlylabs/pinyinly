@@ -1,15 +1,185 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <><_components.p>{"Describes someone or something that has good luck or fortune; lucky; fortunate."}</_components.p>{"\n"}<_components.h2>{"Quick Reference"}</_components.h2>{"\n"}<_components.p>{"| Aspect         | Info                           |\n| -------------- | ------------------------------ |\n| Pinyin         | xìngyùn                        |\n| Core meaning   | lucky; fortunate; good fortune |\n| Part of speech | adjective                      |\n| Tone           | xìng (4th), yùn (4th)          |"}</_components.p>{"\n"}<_components.h2>{"Visual Breakdown"}</_components.h2>{"\n"}<_components.p>{"幸运 combines concepts of fortune and movement/flow."}</_components.p>{"\n"}<_components.p>{"| Component | Meaning                                                               |\n| --------- | --------------------------------------------------------------------- |\n| "}<_components.strong>{"幸"}</_components.strong>{"    | Fortune, luck, happiness - contains 土 (earth) suggesting stability   |\n| "}<_components.strong>{"运"}</_components.strong>{"    | Movement, transportation, luck flow - movement radical 辶 + 军 (army) |"}</_components.p>{"\n"}<_components.p>{"The combination suggests \"fortune that moves favorably\" or \"good luck flowing your way.\""}</_components.p>{"\n"}<_components.h2>{"Mnemonic"}</_components.h2>{"\n"}<_components.p>{"Think of 幸运 as "}<_components.strong>{"\"good fortune flowing to you\""}</_components.strong>{":"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"幸 (xìng) represents good fortune, happiness, being blessed"}</_components.li>{"\n"}<_components.li>{"运 (yùn) represents movement, flow, transportation of energy"}</_components.li>{"\n"}<_components.li>{"Together: good fortune that flows/moves in your direction"}</_components.li>{"\n"}<_components.li>{"Picture good luck flowing like a river toward you"}</_components.li>{"\n"}<_components.li>{"Like having favorable winds that carry good things your way"}</_components.li>{"\n"}<_components.li>{"The universe moving things in your favor"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p>{"This creates the image: "}<_components.strong>{"good fortune flowing in your direction like a favorable current"}</_components.strong>{"."}</_components.p>{"\n"}<_components.h2>{"Core Meaning & Usage"}</_components.h2>{"\n"}<_components.p>{"幸运 represents "}<_components.strong>{"being blessed with good luck or favorable circumstances"}</_components.strong>{". It's used:"}</_components.p>{"\n"}<_components.ol>{"\n"}<_components.li><_components.strong>{"Personal luck"}</_components.strong>{": 我很幸运 (wǒ hěn xìngyùn) - \"I'm very lucky\""}</_components.li>{"\n"}<_components.li><_components.strong>{"Lucky events"}</_components.strong>{": 幸运的事 (xìngyùn de shì) - \"lucky thing\""}</_components.li>{"\n"}<_components.li><_components.strong>{"Fortune description"}</_components.strong>{": 真幸运 (zhēn xìngyùn) - \"really lucky\""}</_components.li>{"\n"}<_components.li><_components.strong>{"Lucky person"}</_components.strong>{": 幸运儿 (xìngyùn ér) - \"lucky person\""}</_components.li>{"\n"}</_components.ol>{"\n"}<_components.h2>{"Examples"}</_components.h2>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"幸运数字"}</_components.strong>{" (xìngyùn shùzì) - \"lucky number\""}</_components.li>{"\n"}<_components.li><_components.strong>{"幸运儿"}</_components.strong>{" (xìngyùn ér) - \"lucky person\""}</_components.li>{"\n"}<_components.li><_components.strong>{"幸运星"}</_components.strong>{" (xìngyùn xīng) - \"lucky star\""}</_components.li>{"\n"}<_components.li><_components.strong>{"真幸运"}</_components.strong>{" (zhēn xìngyùn) - \"really lucky\""}</_components.li>{"\n"}<_components.li><_components.strong>{"幸运的是"}</_components.strong>{" (xìngyùn de shì) - \"fortunately; luckily\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Cultural Context"}</_components.h2>{"\n"}<_components.p>{"In Chinese culture, 幸运 represents more than random luck - it suggests alignment with positive\ncosmic forces. Many Chinese believe that 幸运 can be influenced through good deeds, proper timing,\nand harmonious relationships. The concept is often connected to feng shui, fortune telling, and the\nidea that luck can be cultivated through wisdom and virtue."}</_components.p></>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {
+          "Describes someone or something that has good luck or fortune; lucky; fortunate."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                           |\n| -------------- | ------------------------------ |\n| Pinyin         | xìngyùn                        |\n| Core meaning   | lucky; fortunate; good fortune |\n| Part of speech | adjective                      |\n| Tone           | xìng (4th), yùn (4th)          |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Visual Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"幸运 combines concepts of fortune and movement/flow."}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component | Meaning                                                               |\n| --------- | --------------------------------------------------------------------- |\n| "
+        }
+        <_components.strong>{"幸"}</_components.strong>
+        {
+          "    | Fortune, luck, happiness - contains 土 (earth) suggesting stability   |\n| "
+        }
+        <_components.strong>{"运"}</_components.strong>
+        {
+          "    | Movement, transportation, luck flow - movement radical 辶 + 军 (army) |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          'The combination suggests "fortune that moves favorably" or "good luck flowing your way."'
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Mnemonic"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 幸运 as "}
+        <_components.strong>
+          {'"good fortune flowing to you"'}
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"幸 (xìng) represents good fortune, happiness, being blessed"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"运 (yùn) represents movement, flow, transportation of energy"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Together: good fortune that flows/moves in your direction"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Picture good luck flowing like a river toward you"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Like having favorable winds that carry good things your way"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"The universe moving things in your favor"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {"This creates the image: "}
+        <_components.strong>
+          {"good fortune flowing in your direction like a favorable current"}
+        </_components.strong>
+        {"."}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Core Meaning & Usage"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"幸运 represents "}
+        <_components.strong>
+          {"being blessed with good luck or favorable circumstances"}
+        </_components.strong>
+        {". It's used:"}
+      </_components.p>
+      {"\n"}
+      <_components.ol>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Personal luck"}</_components.strong>
+          {': 我很幸运 (wǒ hěn xìngyùn) - "I\'m very lucky"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Lucky events"}</_components.strong>
+          {': 幸运的事 (xìngyùn de shì) - "lucky thing"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Fortune description"}</_components.strong>
+          {': 真幸运 (zhēn xìngyùn) - "really lucky"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Lucky person"}</_components.strong>
+          {': 幸运儿 (xìngyùn ér) - "lucky person"'}
+        </_components.li>
+        {"\n"}
+      </_components.ol>
+      {"\n"}
+      <_components.h2>{"Examples"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"幸运数字"}</_components.strong>
+          {' (xìngyùn shùzì) - "lucky number"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"幸运儿"}</_components.strong>
+          {' (xìngyùn ér) - "lucky person"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"幸运星"}</_components.strong>
+          {' (xìngyùn xīng) - "lucky star"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"真幸运"}</_components.strong>
+          {' (zhēn xìngyùn) - "really lucky"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"幸运的是"}</_components.strong>
+          {' (xìngyùn de shì) - "fortunately; luckily"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Cultural Context"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "In Chinese culture, 幸运 represents more than random luck - it suggests alignment with positive\ncosmic forces. Many Chinese believe that 幸运 can be influenced through good deeds, proper timing,\nand harmonious relationships. The concept is often connected to feng shui, fortune telling, and the\nidea that luck can be cultivated through wisdom and virtue."
+        }
+      </_components.p>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

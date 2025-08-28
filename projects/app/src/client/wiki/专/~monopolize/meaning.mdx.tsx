@@ -1,15 +1,224 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <_components.p>{"To concentrate on or focus exclusively on something."}</_components.p>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {
+          "To concentrate on or focus exclusively on something; to monopolize; to specialize in."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                                  |\n| -------------- | ------------------------------------- |\n| Pinyin         | zhuān                                 |\n| Core meaning   | specialize; focus; monopolize; expert |\n| Part of speech | verb, adjective                       |\n| Tone           | first tone (high, flat)               |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Visual Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"专 originally depicted "}
+        <_components.strong>
+          {"a spinning tool used for focused, specialized work"}
+        </_components.strong>
+        {"."}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component | Visual Description                                         |\n| --------- | ---------------------------------------------------------- |\n| "
+        }
+        <_components.strong>{"寸"}</_components.strong>
+        {
+          "    | Hand/measurement - representing controlled, precise action |\n| "
+        }
+        <_components.strong>{"叀"}</_components.strong>
+        {"    | Ancient spinning wheel - tool for specialized craft work   |"}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Mnemonic"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 专 as "}
+        <_components.strong>
+          {"a craftsperson focused on their specialized spinning wheel"}
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {
+            "A skilled artisan uses their hands (寸) to operate a spinning wheel (叀)"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"This requires complete focus and dedication to one craft"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "Like a specialist who devotes all their attention to mastering one skill"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"The spinning motion suggests concentrated, repetitive practice"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Only through exclusive focus can one become truly expert"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {"This creates the image of "}
+        <_components.strong>
+          {"dedicated specialization and focused expertise"}
+        </_components.strong>
+        {"."}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Core Meaning & Usage"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"专 represents "}
+        <_components.strong>
+          {"specialization, focus, and exclusive dedication"}
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ol>
+        {"\n"}
+        <_components.li>
+          <_components.strong>
+            {"Professional specialization"}
+          </_components.strong>
+          {': 专家 (zhuānjiā) - "expert", 专业 (zhuānyè) - "major/profession"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Focused attention"}</_components.strong>
+          {': 专心 (zhuānxīn) - "concentrate", 专注 (zhuānzhù) - "focus"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Exclusive control"}</_components.strong>
+          {
+            ': 专用 (zhuānyòng) - "for special use", 专门 (zhuānmén) - "specialized"'
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Educational fields"}</_components.strong>
+          {
+            ': 专科 (zhuānkē) - "technical college", 专题 (zhuāntí) - "special topic"'
+          }
+        </_components.li>
+        {"\n"}
+      </_components.ol>
+      {"\n"}
+      <_components.h2>{"Examples"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"专业"}</_components.strong>
+          {' (zhuānyè) - "major; profession; specialized"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"专家"}</_components.strong>
+          {' (zhuānjiā) - "expert; specialist"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"专心"}</_components.strong>
+          {' (zhuānxīn) - "concentrate; focus one\'s attention"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"专门"}</_components.strong>
+          {' (zhuānmén) - "specialized; exclusively for"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"专用"}</_components.strong>
+          {' (zhuānyòng) - "for special/exclusive use"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"专题"}</_components.strong>
+          {' (zhuāntí) - "special topic; focused subject"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Cultural Context"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"专 reflects important Chinese values about "}
+        <_components.strong>{"mastery and dedication"}</_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Craftmanship tradition"}</_components.strong>
+          {" - apprentices spend years focusing on one skill"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Academic specialization"}</_components.strong>
+          {" - scholars dedicate themselves to specific fields"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Professional excellence"}</_components.strong>
+          {" - becoming truly skilled requires exclusive focus"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Respect for expertise"}</_components.strong>
+          {" - specialists (专家) are highly valued in society"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {"The concept emphasizes that "}
+        <_components.strong>
+          {"true mastery comes from dedicated, focused practice"}
+        </_components.strong>
+        {" rather than\nspreading attention across many areas."}
+      </_components.p>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

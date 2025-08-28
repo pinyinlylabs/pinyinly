@@ -1,15 +1,272 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <><_components.p>{"To decide or announce that an event will not take place; cancel; call off; revoke."}</_components.p>{"\n"}<_components.h2>{"Quick Reference"}</_components.h2>{"\n"}<_components.p>{"| Aspect         | Info                     |\n| -------------- | ------------------------ |\n| Pinyin         | qǔ xiāo                  |\n| Core meaning   | cancel; call off; revoke |\n| Part of speech | verb                     |\n| Tone           | 3rd + 1st tone           |"}</_components.p>{"\n"}<_components.h2>{"Visual Breakdown"}</_components.h2>{"\n"}<_components.p>{"取消 combines "}<_components.strong>{"take/select + eliminate"}</_components.strong>{" to represent cancellation."}</_components.p>{"\n"}<_components.p>{"| Component | Meaning                    | Contribution to 取消               |\n| --------- | -------------------------- | ---------------------------------- |\n| "}<_components.strong>{"取"}</_components.strong>{"    | take; select; obtain; get  | Shows the action of taking control |\n| "}<_components.strong>{"消"}</_components.strong>{"    | eliminate; disappear; melt | Represents making something vanish |"}</_components.p>{"\n"}<_components.h2>{"Character Analysis: 取"}</_components.h2>{"\n"}<_components.p>{"取 shows "}<_components.strong>{"hand reaching for an ear"}</_components.strong>{" (ancient punishment symbol):"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"又"}</_components.strong>{" (hand) represents active taking or grasping"}</_components.li>{"\n"}<_components.li><_components.strong>{"耳"}</_components.strong>{" (ear) originally related to capturing or obtaining"}</_components.li>{"\n"}<_components.li>{"Together: actively obtaining or taking control of something"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Character Analysis: 消"}</_components.h2>{"\n"}<_components.p>{"消 shows "}<_components.strong>{"water washing away ice"}</_components.strong>{":"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"氵"}</_components.strong>{" (water radical) represents flow and washing"}</_components.li>{"\n"}<_components.li><_components.strong>{"肖"}</_components.strong>{" shows something becoming smaller or disappearing"}</_components.li>{"\n"}<_components.li>{"Together: the process of elimination or making something vanish"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Mnemonic"}</_components.h2>{"\n"}<_components.p>{"Think of 取消 as "}<_components.strong>{"taking control to make something disappear"}</_components.strong>{":"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"取 (take) represents gaining control over a situation or decision"}</_components.li>{"\n"}<_components.li>{"消 (eliminate) shows making the planned event vanish completely"}</_components.li>{"\n"}<_components.li>{"Like being the manager who has the power to make a meeting disappear from everyone's calendar"}</_components.li>{"\n"}<_components.li>{"Or taking charge to remove an unwanted commitment"}</_components.li>{"\n"}<_components.li>{"The emphasis is on active decision-making that results in elimination"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Usage Examples"}</_components.h2>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"取消会议"}</_components.strong>{" (qǔ xiāo huì yì) - \"cancel the meeting\""}</_components.li>{"\n"}<_components.li><_components.strong>{"取消订单"}</_components.strong>{" (qǔ xiāo dìng dān) - \"cancel the order\""}</_components.li>{"\n"}<_components.li><_components.strong>{"取消计划"}</_components.strong>{" (qǔ xiāo jì huà) - \"cancel the plan\""}</_components.li>{"\n"}<_components.li><_components.strong>{"被取消了"}</_components.strong>{" (bèi qǔ xiāo le) - \"was cancelled\""}</_components.li>{"\n"}<_components.li><_components.strong>{"无法取消"}</_components.strong>{" (wú fǎ qǔ xiāo) - \"cannot cancel\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Grammar Patterns"}</_components.h2>{"\n"}<_components.p>{"取消 functions as:"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Transitive verb"}</_components.strong>{": 取消 + object (取消航班 - \"cancel the flight\")"}</_components.li>{"\n"}<_components.li><_components.strong>{"Passive construction"}</_components.strong>{": 被取消 - \"be cancelled\""}</_components.li>{"\n"}<_components.li><_components.strong>{"Completed action"}</_components.strong>{": 已经取消了 - \"already cancelled\""}</_components.li>{"\n"}<_components.li><_components.strong>{"Future intention"}</_components.strong>{": 要取消 - \"going to cancel\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Practical Context"}</_components.h2>{"\n"}<_components.p>{"取消 in modern life:"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Travel"}</_components.strong>{": Flight/hotel cancellations"}</_components.li>{"\n"}<_components.li><_components.strong>{"Business"}</_components.strong>{": Meeting and appointment cancellations"}</_components.li>{"\n"}<_components.li><_components.strong>{"Events"}</_components.strong>{": Party, conference, or performance cancellations"}</_components.li>{"\n"}<_components.li><_components.strong>{"Services"}</_components.strong>{": Subscription or service cancellations"}</_components.li>{"\n"}<_components.li><_components.strong>{"Technology"}</_components.strong>{": User account or feature cancellations"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Cultural Context"}</_components.h2>{"\n"}<_components.p>{"取消 reflects decision-making values:"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Authority"}</_components.strong>{": Recognition of who has power to make cancellation decisions"}</_components.li>{"\n"}<_components.li><_components.strong>{"Responsibility"}</_components.strong>{": Understanding the impact of cancelling on others"}</_components.li>{"\n"}<_components.li><_components.strong>{"Flexibility"}</_components.strong>{": Adaptation to changing circumstances"}</_components.li>{"\n"}<_components.li><_components.strong>{"Communication"}</_components.strong>{": Proper notification when cancelling commitments"}</_components.li>{"\n"}</_components.ul></>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {
+          "To decide or announce that an event will not take place; cancel; call off; revoke."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                     |\n| -------------- | ------------------------ |\n| Pinyin         | qǔ xiāo                  |\n| Core meaning   | cancel; call off; revoke |\n| Part of speech | verb                     |\n| Tone           | 3rd + 1st tone           |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Visual Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"取消 combines "}
+        <_components.strong>{"take/select + eliminate"}</_components.strong>
+        {" to represent cancellation."}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component | Meaning                    | Contribution to 取消               |\n| --------- | -------------------------- | ---------------------------------- |\n| "
+        }
+        <_components.strong>{"取"}</_components.strong>
+        {
+          "    | take; select; obtain; get  | Shows the action of taking control |\n| "
+        }
+        <_components.strong>{"消"}</_components.strong>
+        {
+          "    | eliminate; disappear; melt | Represents making something vanish |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Character Analysis: 取"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"取 shows "}
+        <_components.strong>{"hand reaching for an ear"}</_components.strong>
+        {" (ancient punishment symbol):"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"又"}</_components.strong>
+          {" (hand) represents active taking or grasping"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"耳"}</_components.strong>
+          {" (ear) originally related to capturing or obtaining"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Together: actively obtaining or taking control of something"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Character Analysis: 消"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"消 shows "}
+        <_components.strong>{"water washing away ice"}</_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"氵"}</_components.strong>
+          {" (water radical) represents flow and washing"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"肖"}</_components.strong>
+          {" shows something becoming smaller or disappearing"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Together: the process of elimination or making something vanish"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Mnemonic"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 取消 as "}
+        <_components.strong>
+          {"taking control to make something disappear"}
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"取 (take) represents gaining control over a situation or decision"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"消 (eliminate) shows making the planned event vanish completely"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "Like being the manager who has the power to make a meeting disappear from everyone's calendar"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Or taking charge to remove an unwanted commitment"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "The emphasis is on active decision-making that results in elimination"
+          }
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Usage Examples"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"取消会议"}</_components.strong>
+          {' (qǔ xiāo huì yì) - "cancel the meeting"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"取消订单"}</_components.strong>
+          {' (qǔ xiāo dìng dān) - "cancel the order"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"取消计划"}</_components.strong>
+          {' (qǔ xiāo jì huà) - "cancel the plan"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"被取消了"}</_components.strong>
+          {' (bèi qǔ xiāo le) - "was cancelled"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"无法取消"}</_components.strong>
+          {' (wú fǎ qǔ xiāo) - "cannot cancel"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Grammar Patterns"}</_components.h2>
+      {"\n"}
+      <_components.p>{"取消 functions as:"}</_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Transitive verb"}</_components.strong>
+          {': 取消 + object (取消航班 - "cancel the flight")'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Passive construction"}</_components.strong>
+          {': 被取消 - "be cancelled"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Completed action"}</_components.strong>
+          {': 已经取消了 - "already cancelled"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Future intention"}</_components.strong>
+          {': 要取消 - "going to cancel"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Practical Context"}</_components.h2>
+      {"\n"}
+      <_components.p>{"取消 in modern life:"}</_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Travel"}</_components.strong>
+          {": Flight/hotel cancellations"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Business"}</_components.strong>
+          {": Meeting and appointment cancellations"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Events"}</_components.strong>
+          {": Party, conference, or performance cancellations"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Services"}</_components.strong>
+          {": Subscription or service cancellations"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Technology"}</_components.strong>
+          {": User account or feature cancellations"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Cultural Context"}</_components.h2>
+      {"\n"}
+      <_components.p>{"取消 reflects decision-making values:"}</_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Authority"}</_components.strong>
+          {": Recognition of who has power to make cancellation decisions"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Responsibility"}</_components.strong>
+          {": Understanding the impact of cancelling on others"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Flexibility"}</_components.strong>
+          {": Adaptation to changing circumstances"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Communication"}</_components.strong>
+          {": Proper notification when cancelling commitments"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

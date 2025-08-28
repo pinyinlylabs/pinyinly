@@ -1,15 +1,138 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <><_components.p>{"Used to ask about a location; where; which place."}</_components.p>{"\n"}<_components.h2>{"Quick Reference"}</_components.h2>{"\n"}<_components.p>{"| Aspect         | Info                  |\n| -------------- | --------------------- |\n| Pinyin         | nǎ lǐ                 |\n| Core meaning   | where; which place    |\n| Part of speech | interrogative pronoun |\n| Tone           | third + third tone    |"}</_components.p>{"\n"}<_components.h2>{"Word Breakdown"}</_components.h2>{"\n"}<_components.p>{"哪里 combines "}<_components.strong>{"which + inside"}</_components.strong>{" to ask about locations."}</_components.p>{"\n"}<_components.p>{"| Component | Meaning                                                 |\n| --------- | ------------------------------------------------------- |\n| "}<_components.strong>{"哪"}</_components.strong>{"    | Which; what (interrogative for selection among options) |\n| "}<_components.strong>{"里"}</_components.strong>{"    | Inside; within; place (indicates location or position)  |"}</_components.p>{"\n"}<_components.h2>{"Understanding"}</_components.h2>{"\n"}<_components.p>{"Think of 哪里 as "}<_components.strong>{"\"which place inside\""}</_components.strong>{" or "}<_components.strong>{"\"in what location\""}</_components.strong>{":"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"哪 (nǎ) asks \"which one?\" among possible choices"}</_components.li>{"\n"}<_components.li>{"里 (lǐ) specifies we're talking about a place or location"}</_components.li>{"\n"}<_components.li>{"Together they form the question \"in which place?\" = \"where?\""}</_components.li>{"\n"}<_components.li>{"Like asking \"which location are we talking about?\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Usage Examples"}</_components.h2>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"你在哪里？"}</_components.strong>{" (nǐ zài nǎ lǐ?) - \"Where are you?\""}</_components.li>{"\n"}<_components.li><_components.strong>{"书在哪里？"}</_components.strong>{" (shū zài nǎ lǐ?) - \"Where is the book?\""}</_components.li>{"\n"}<_components.li><_components.strong>{"哪里有银行？"}</_components.strong>{" (nǎ lǐ yǒu yín háng?) - \"Where is there a bank?\""}</_components.li>{"\n"}<_components.li><_components.strong>{"你从哪里来？"}</_components.strong>{" (nǐ cóng nǎ lǐ lái?) - \"Where do you come from?\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Grammar Notes"}</_components.h2>{"\n"}<_components.p>{"哪里 is the standard way to ask \"where\" in Mandarin:"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"Often used with 在 (zài) \"at/in\" to ask about current location"}</_components.li>{"\n"}<_components.li>{"Can be used with 从 (cóng) \"from\" to ask about origin"}</_components.li>{"\n"}<_components.li>{"More formal than 哪儿 (nǎr), which is more colloquial"}</_components.li>{"\n"}<_components.li>{"Essential question word for directions and location discussions"}</_components.li>{"\n"}</_components.ul></>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {"Used to ask about a location; where; which place."}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                  |\n| -------------- | --------------------- |\n| Pinyin         | nǎ lǐ                 |\n| Core meaning   | where; which place    |\n| Part of speech | interrogative pronoun |\n| Tone           | third + third tone    |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Word Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"哪里 combines "}
+        <_components.strong>{"which + inside"}</_components.strong>
+        {" to ask about locations."}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component | Meaning                                                 |\n| --------- | ------------------------------------------------------- |\n| "
+        }
+        <_components.strong>{"哪"}</_components.strong>
+        {"    | Which; what (interrogative for selection among options) |\n| "}
+        <_components.strong>{"里"}</_components.strong>
+        {"    | Inside; within; place (indicates location or position)  |"}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Understanding"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 哪里 as "}
+        <_components.strong>{'"which place inside"'}</_components.strong>
+        {" or "}
+        <_components.strong>{'"in what location"'}</_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {'哪 (nǎ) asks "which one?" among possible choices'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"里 (lǐ) specifies we're talking about a place or location"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {'Together they form the question "in which place?" = "where?"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {'Like asking "which location are we talking about?"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Usage Examples"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"你在哪里？"}</_components.strong>
+          {' (nǐ zài nǎ lǐ?) - "Where are you?"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"书在哪里？"}</_components.strong>
+          {' (shū zài nǎ lǐ?) - "Where is the book?"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"哪里有银行？"}</_components.strong>
+          {' (nǎ lǐ yǒu yín háng?) - "Where is there a bank?"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"你从哪里来？"}</_components.strong>
+          {' (nǐ cóng nǎ lǐ lái?) - "Where do you come from?"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Grammar Notes"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {'哪里 is the standard way to ask "where" in Mandarin:'}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {'Often used with 在 (zài) "at/in" to ask about current location'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {'Can be used with 从 (cóng) "from" to ask about origin'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"More formal than 哪儿 (nǎr), which is more colloquial"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Essential question word for directions and location discussions"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

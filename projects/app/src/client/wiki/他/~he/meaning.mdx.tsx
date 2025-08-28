@@ -1,15 +1,150 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <><_components.p>{"Used to refer to a male person; he; him."}</_components.p>{"\n"}<_components.h2>{"Quick Reference"}</_components.h2>{"\n"}<_components.p>{"| Aspect         | Info                   |\n| -------------- | ---------------------- |\n| Pinyin         | tā                     |\n| Core meaning   | he; him; his           |\n| Part of speech | pronoun                |\n| Tone           | first tone (high flat) |"}</_components.p>{"\n"}<_components.h2>{"Visual Breakdown"}</_components.h2>{"\n"}<_components.p>{"他 combines "}<_components.strong>{"person + other"}</_components.strong>{" to represent another male person."}</_components.p>{"\n"}<_components.p>{"| Component | Visual Description                                     |\n| --------- | ------------------------------------------------------ |\n| "}<_components.strong>{"亻"}</_components.strong>{"    | Person radical (人) - indicates this relates to people |\n| "}<_components.strong>{"也"}</_components.strong>{"    | Also/other (也) - indicates someone other than speaker |"}</_components.p>{"\n"}<_components.h2>{"Mnemonic"}</_components.h2>{"\n"}<_components.p>{"Think of 他 as "}<_components.strong>{"\"that other person (male)\""}</_components.strong>{" or "}<_components.strong>{"\"another person also\""}</_components.strong>{":"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"The person radical (亻) shows this is about a human being"}</_components.li>{"\n"}<_components.li>{"The \"also/other\" component (也) indicates someone different from the speaker"}</_components.li>{"\n"}<_components.li>{"Like saying \"that other person also\" or \"another man too\""}</_components.li>{"\n"}<_components.li>{"Shows acknowledgment of a male person who is separate from the conversation"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Usage Examples"}</_components.h2>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"他是老师"}</_components.strong>{" (tā shì lǎoshī) - \"He is a teacher\""}</_components.li>{"\n"}<_components.li><_components.strong>{"他们"}</_components.strong>{" (tā men) - \"they; them\" (他 + plural marker)"}</_components.li>{"\n"}<_components.li><_components.strong>{"他的"}</_components.strong>{" (tā de) - \"his; him\""}</_components.li>{"\n"}<_components.li><_components.strong>{"他叫什么？"}</_components.strong>{" (tā jiào shénme?) - \"What is his name?\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Cultural Context"}</_components.h2>{"\n"}<_components.p>{"他 is essential for referring to males in Chinese:"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"Part of the fundamental pronoun system (我, 你, 他)"}</_components.li>{"\n"}<_components.li>{"Used for both known and unknown male persons"}</_components.li>{"\n"}<_components.li>{"Contrasts with 她 (tā) for females, which sounds identical but uses different characters"}</_components.li>{"\n"}<_components.li>{"Important for storytelling, descriptions, and social interactions"}</_components.li>{"\n"}<_components.li>{"Foundation for understanding Chinese grammar and social relationships"}</_components.li>{"\n"}</_components.ul></>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {"Used to refer to a male person; he; him."}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                   |\n| -------------- | ---------------------- |\n| Pinyin         | tā                     |\n| Core meaning   | he; him; his           |\n| Part of speech | pronoun                |\n| Tone           | first tone (high flat) |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Visual Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"他 combines "}
+        <_components.strong>{"person + other"}</_components.strong>
+        {" to represent another male person."}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component | Visual Description                                     |\n| --------- | ------------------------------------------------------ |\n| "
+        }
+        <_components.strong>{"亻"}</_components.strong>
+        {"    | Person radical (人) - indicates this relates to people |\n| "}
+        <_components.strong>{"也"}</_components.strong>
+        {"    | Also/other (也) - indicates someone other than speaker |"}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Mnemonic"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 他 as "}
+        <_components.strong>{'"that other person (male)"'}</_components.strong>
+        {" or "}
+        <_components.strong>{'"another person also"'}</_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"The person radical (亻) shows this is about a human being"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            'The "also/other" component (也) indicates someone different from the speaker'
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {'Like saying "that other person also" or "another man too"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "Shows acknowledgment of a male person who is separate from the conversation"
+          }
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Usage Examples"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"他是老师"}</_components.strong>
+          {' (tā shì lǎoshī) - "He is a teacher"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"他们"}</_components.strong>
+          {' (tā men) - "they; them" (他 + plural marker)'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"他的"}</_components.strong>
+          {' (tā de) - "his; him"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"他叫什么？"}</_components.strong>
+          {' (tā jiào shénme?) - "What is his name?"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Cultural Context"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"他 is essential for referring to males in Chinese:"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"Part of the fundamental pronoun system (我, 你, 他)"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Used for both known and unknown male persons"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "Contrasts with 她 (tā) for females, which sounds identical but uses different characters"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Important for storytelling, descriptions, and social interactions"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "Foundation for understanding Chinese grammar and social relationships"
+          }
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

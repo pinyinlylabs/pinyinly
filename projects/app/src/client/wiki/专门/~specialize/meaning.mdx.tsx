@@ -1,15 +1,564 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <_components.p>{"To concentrate on or dedicate oneself to a particular area of interest or skill."}</_components.p>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {
+          "To concentrate on or dedicate oneself to a particular area of interest, skill, or field of study; to\nfocus exclusively."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                                     |\n| -------------- | ---------------------------------------- |\n| Pinyin         | zhuānmén                                 |\n| Core meaning   | specialize; focus exclusively; dedicated |\n| Part of speech | adverb; adjective; verb                  |\n| Tone           | first + second tones                     |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Word Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"专门 combines specialization with focused access:"}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component      | Meaning                               |\n| -------------- | ------------------------------------- |\n| "
+        }
+        <_components.strong>{"专"}</_components.strong>
+        {" (zhuān) | Specialize, focus, monopolize, expert |\n| "}
+        <_components.strong>{"门"}</_components.strong>
+        {" (mén)   | Door, gate, category, field           |"}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Understanding"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 专门 as "}
+        <_components.strong>
+          {'"having exclusive access through a special door"'}
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"Like entering a restricted area that requires special credentials"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"A dedicated pathway for those with specific expertise"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Creating a focused channel for particular activities"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Opening doors only to those with relevant skills or purpose"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Establishing special access for concentrated work"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Usage Contexts"}</_components.h2>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Professional Specialization"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"专门人才"}</_components.strong>
+          {' (zhuānmén réncái) - "specialized personnel"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"专门技术"}</_components.strong>
+          {' - "specialized technology"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"专门知识"}</_components.strong>
+          {' - "specialized knowledge"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Dedicated Purpose"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"专门为了"}</_components.strong>
+          {' - "specifically for"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"专门研究"}</_components.strong>
+          {' - "specialized research"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"专门负责"}</_components.strong>
+          {' - "specifically responsible for"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Exclusive Focus"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"专门做"}</_components.strong>
+          {' - "do exclusively"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"专门学习"}</_components.strong>
+          {' - "study specifically"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"专门训练"}</_components.strong>
+          {' - "specialized training"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Examples"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>{"他专门研究古代历史。"}</_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {'"He specializes in studying ancient history."'}
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>
+              {"这家医院专门治疗心脏病。"}
+            </_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {'"This hospital specializes in treating heart disease."'}
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>
+              {"我专门为你准备了这个礼物。"}
+            </_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {'"I specially prepared this gift for you."'}
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>
+              {"公司专门成立了一个部门。"}
+            </_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {'"The company specifically established a department."'}
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>{"她专门学习计算机编程。"}</_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {'"She specifically studies computer programming."'}
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>
+              {"这个课程专门针对初学者。"}
+            </_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {'"This course is specifically designed for beginners."'}
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Professional Applications"}</_components.h2>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Academic Fields"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"专门学科"}</_components.strong>
+          {' - "specialized disciplines"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"专门研究所"}</_components.strong>
+          {' - "specialized research institutes"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"专门期刊"}</_components.strong>
+          {' - "specialized journals"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Medical Specialization"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"专门医院"}</_components.strong>
+          {' - "specialty hospitals"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"专门科室"}</_components.strong>
+          {' - "specialized departments"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"专门治疗"}</_components.strong>
+          {' - "specialized treatment"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Business Focus"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"专门市场"}</_components.strong>
+          {' - "specialized markets"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"专门服务"}</_components.strong>
+          {' - "specialized services"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"专门产品"}</_components.strong>
+          {' - "specialized products"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Cultural Context"}</_components.h2>
+      {"\n"}
+      <_components.p>{"专门 reflects important Chinese values:"}</_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"精益求精"}</_components.strong>
+          {" - pursuit of excellence through focus"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"术业有专攻"}</_components.strong>
+          {' - "every field has its specialization"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"分工合作"}</_components.strong>
+          {" - division of labor and cooperation"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"专业精神"}</_components.strong>
+          {" - professional dedication and expertise"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Grammar Notes"}</_components.h2>
+      {"\n"}
+      <_components.p>{"专门 can function as:"}</_components.p>
+      {"\n"}
+      <_components.ol>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Adverb"}</_components.strong>
+          {': 专门学习 ("specifically study")'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Adjective"}</_components.strong>
+          {': 专门知识 ("specialized knowledge")'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Verb complement"}</_components.strong>
+          {': 研究得很专门 ("research very specifically")'}
+        </_components.li>
+        {"\n"}
+      </_components.ol>
+      {"\n"}
+      <_components.p>
+        <_components.strong>{"Common patterns:"}</_components.strong>
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"专门 + 动词"}</_components.strong>
+          {' - "specifically do [action]"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"专门的 + 名词"}</_components.strong>
+          {' - "specialized [noun]"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"专门为了 + 目的"}</_components.strong>
+          {' - "specifically for [purpose]"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Comparison with Similar Terms"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Expression | Focus                | Usage Context           |\n| ---------- | -------------------- | ----------------------- |\n| 专门       | Exclusive dedication | Professional focus      |\n| 特别       | Special, particular  | General distinction     |\n| 专业       | Professional field   | Career/academic major   |\n| 特殊       | Special, unique      | Unusual characteristics |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Educational Context"}</_components.h2>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Study Approaches"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"专门训练"}</_components.strong>
+          {' - "specialized training"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"专门课程"}</_components.strong>
+          {' - "specialized courses"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"专门指导"}</_components.strong>
+          {' - "specialized guidance"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Academic Programs"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"专门学校"}</_components.strong>
+          {' - "specialized schools"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"专门教育"}</_components.strong>
+          {' - "specialized education"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"专门培训"}</_components.strong>
+          {' - "specialized training programs"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Technology and Innovation"}</_components.h2>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Modern Applications"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"专门软件"}</_components.strong>
+          {' - "specialized software"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"专门设备"}</_components.strong>
+          {' - "specialized equipment"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"专门技术"}</_components.strong>
+          {' - "specialized technology"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Research and Development"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"专门团队"}</_components.strong>
+          {' - "specialized teams"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"专门项目"}</_components.strong>
+          {' - "specialized projects"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"专门实验室"}</_components.strong>
+          {' - "specialized laboratories"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Institutional Examples"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Institution Type | Chinese Term | Specialization Area     |\n| ---------------- | ------------ | ----------------------- |\n| Hospital         | 专门医院     | Medical specialties     |\n| School           | 专门学校     | Specific skill training |\n| Company          | 专门公司     | Niche market focus      |\n| Department       | 专门部门     | Specific function       |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quality and Expertise"}</_components.h2>
+      {"\n"}
+      <_components.p>{"专门 implies:"}</_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"High level of skill"}</_components.strong>
+          {" - developed through focused practice"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Deep knowledge"}</_components.strong>
+          {" - comprehensive understanding of specific area"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Efficient service"}</_components.strong>
+          {" - streamlined approach to particular needs"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Professional credibility"}</_components.strong>
+          {" - recognized expertise in the field"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {"专门 embodies the "}
+        <_components.strong>{"power of focused dedication"}</_components.strong>
+        {
+          " - the idea that true excellence comes from\nconcentrated effort and specialized knowledge."
+        }
+      </_components.p>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

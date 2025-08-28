@@ -1,15 +1,195 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <><_components.p>{"Relating to the traditional art, culture, or beliefs of the common people; folk; popular;\ngrassroots."}</_components.p>{"\n"}<_components.h2>{"Quick Reference"}</_components.h2>{"\n"}<_components.p>{"| Aspect         | Info                                    |\n| -------------- | --------------------------------------- |\n| Pinyin         | mínjiān                                 |\n| Core meaning   | folk; popular; grassroots; among people |\n| Part of speech | adjective; noun                         |\n| Tone           | mín (2nd), jiān (1st)                   |"}</_components.p>{"\n"}<_components.h2>{"Visual Breakdown"}</_components.h2>{"\n"}<_components.p>{"民间 combines concepts of people/citizens and space/interval."}</_components.p>{"\n"}<_components.p>{"| Component | Meaning                                                   |\n| --------- | --------------------------------------------------------- |\n| "}<_components.strong>{"民"}</_components.strong>{"    | People, citizens - originally depicted as blinded servant |\n| "}<_components.strong>{"间"}</_components.strong>{"    | Between, space, interval - sun 日 coming through door 门  |"}</_components.p>{"\n"}<_components.p>{"The combination suggests \"the space between ordinary people\" or \"among the common folk.\""}</_components.p>{"\n"}<_components.h2>{"Mnemonic"}</_components.h2>{"\n"}<_components.p>{"Think of 民间 as "}<_components.strong>{"\"in the spaces where ordinary people gather and live\""}</_components.strong>{":"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"民 (mín) represents common people, ordinary citizens"}</_components.li>{"\n"}<_components.li>{"间 (jiān) represents the spaces, intervals, or areas between things"}</_components.li>{"\n"}<_components.li>{"Together: the informal spaces where regular people live and interact"}</_components.li>{"\n"}<_components.li>{"Picture village squares, neighborhoods, and community gathering places"}</_components.li>{"\n"}<_components.li>{"Like the grassroots areas where folk culture naturally develops"}</_components.li>{"\n"}<_components.li>{"The spaces between official institutions where people create their own culture"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p>{"This creates the image: "}<_components.strong>{"the informal, community spaces where ordinary people develop their own\ntraditions"}</_components.strong>{"."}</_components.p>{"\n"}<_components.h2>{"Core Meaning & Usage"}</_components.h2>{"\n"}<_components.p>{"民间 represents "}<_components.strong>{"grassroots culture, folk traditions, and things originating from common people"}</_components.strong>{".\nIt's used:"}</_components.p>{"\n"}<_components.ol>{"\n"}<_components.li><_components.strong>{"Folk culture"}</_components.strong>{": 民间艺术 (mínjiān yìshù) - \"folk art\""}</_components.li>{"\n"}<_components.li><_components.strong>{"Traditional practices"}</_components.strong>{": 民间故事 (mínjiān gùshi) - \"folk tales\""}</_components.li>{"\n"}<_components.li><_components.strong>{"Grassroots level"}</_components.strong>{": 民间组织 (mínjiān zǔzhī) - \"grassroots organization\""}</_components.li>{"\n"}<_components.li><_components.strong>{"Popular customs"}</_components.strong>{": 民间传统 (mínjiān chuántǒng) - \"folk traditions\""}</_components.li>{"\n"}</_components.ol>{"\n"}<_components.h2>{"Examples"}</_components.h2>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"民间艺术"}</_components.strong>{" (mínjiān yìshù) - \"folk art\""}</_components.li>{"\n"}<_components.li><_components.strong>{"民间故事"}</_components.strong>{" (mínjiān gùshi) - \"folk tales; folk stories\""}</_components.li>{"\n"}<_components.li><_components.strong>{"民间音乐"}</_components.strong>{" (mínjiān yīnyuè) - \"folk music\""}</_components.li>{"\n"}<_components.li><_components.strong>{"民间传说"}</_components.strong>{" (mínjiān chuánshuō) - \"folk legends\""}</_components.li>{"\n"}<_components.li><_components.strong>{"民间文化"}</_components.strong>{" (mínjiān wénhuà) - \"folk culture\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Cultural Context"}</_components.h2>{"\n"}<_components.p>{"民间 represents the rich cultural traditions that emerge from grassroots communities in Chinese\nsociety. This includes folk arts, traditional stories, local customs, and community practices that\ndevelop organically among ordinary people, often distinct from official or elite\nculture. 民间 culture is valued for its authenticity and connection to everyday life experiences."}</_components.p></>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {
+          "Relating to the traditional art, culture, or beliefs of the common people; folk; popular;\ngrassroots."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                                    |\n| -------------- | --------------------------------------- |\n| Pinyin         | mínjiān                                 |\n| Core meaning   | folk; popular; grassroots; among people |\n| Part of speech | adjective; noun                         |\n| Tone           | mín (2nd), jiān (1st)                   |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Visual Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"民间 combines concepts of people/citizens and space/interval."}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component | Meaning                                                   |\n| --------- | --------------------------------------------------------- |\n| "
+        }
+        <_components.strong>{"民"}</_components.strong>
+        {
+          "    | People, citizens - originally depicted as blinded servant |\n| "
+        }
+        <_components.strong>{"间"}</_components.strong>
+        {"    | Between, space, interval - sun 日 coming through door 门  |"}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          'The combination suggests "the space between ordinary people" or "among the common folk."'
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Mnemonic"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 民间 as "}
+        <_components.strong>
+          {'"in the spaces where ordinary people gather and live"'}
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"民 (mín) represents common people, ordinary citizens"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "间 (jiān) represents the spaces, intervals, or areas between things"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "Together: the informal spaces where regular people live and interact"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "Picture village squares, neighborhoods, and community gathering places"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Like the grassroots areas where folk culture naturally develops"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "The spaces between official institutions where people create their own culture"
+          }
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {"This creates the image: "}
+        <_components.strong>
+          {
+            "the informal, community spaces where ordinary people develop their own\ntraditions"
+          }
+        </_components.strong>
+        {"."}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Core Meaning & Usage"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"民间 represents "}
+        <_components.strong>
+          {
+            "grassroots culture, folk traditions, and things originating from common people"
+          }
+        </_components.strong>
+        {".\nIt's used:"}
+      </_components.p>
+      {"\n"}
+      <_components.ol>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Folk culture"}</_components.strong>
+          {': 民间艺术 (mínjiān yìshù) - "folk art"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Traditional practices"}</_components.strong>
+          {': 民间故事 (mínjiān gùshi) - "folk tales"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Grassroots level"}</_components.strong>
+          {': 民间组织 (mínjiān zǔzhī) - "grassroots organization"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Popular customs"}</_components.strong>
+          {': 民间传统 (mínjiān chuántǒng) - "folk traditions"'}
+        </_components.li>
+        {"\n"}
+      </_components.ol>
+      {"\n"}
+      <_components.h2>{"Examples"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"民间艺术"}</_components.strong>
+          {' (mínjiān yìshù) - "folk art"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"民间故事"}</_components.strong>
+          {' (mínjiān gùshi) - "folk tales; folk stories"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"民间音乐"}</_components.strong>
+          {' (mínjiān yīnyuè) - "folk music"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"民间传说"}</_components.strong>
+          {' (mínjiān chuánshuō) - "folk legends"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"民间文化"}</_components.strong>
+          {' (mínjiān wénhuà) - "folk culture"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Cultural Context"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "民间 represents the rich cultural traditions that emerge from grassroots communities in Chinese\nsociety. This includes folk arts, traditional stories, local customs, and community practices that\ndevelop organically among ordinary people, often distinct from official or elite\nculture. 民间 culture is valued for its authenticity and connection to everyday life experiences."
+        }
+      </_components.p>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

@@ -1,15 +1,258 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <_components.p>{"A well-wishing phrase for someone who is traveling, wishing them a safe journey."}</_components.p>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {
+          "A well-wishing phrase for someone who is traveling, expressing the hope for a safe and peaceful\njourney."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                             |\n| -------------- | -------------------------------- |\n| Pinyin         | yí lù píng ān                    |\n| Core meaning   | have a safe trip; bon voyage     |\n| Part of speech | expression, blessing phrase      |\n| Tone           | second + fourth + second + first |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Visual Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"一路平安 combines concepts of "}
+        <_components.strong>
+          {"journey, way, peace, and safety"}
+        </_components.strong>
+        {"."}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component | Meaning                                                 |\n| --------- | ------------------------------------------------------- |\n| "
+        }
+        <_components.strong>{"一路"}</_components.strong>
+        {"  | One road/journey - the entire trip from start to finish |\n| "}
+        <_components.strong>{"平安"}</_components.strong>
+        {"  | Peace and safety - tranquil and without harm            |"}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Mnemonic"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 一路平安 as "}
+        <_components.strong>{'"one peaceful road"'}</_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"一路 (one road) represents the entire journey you're taking"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "平安 (peace and safety) is what you wish to experience along that road"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Like blessing someone with smooth sailing on their path"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "Imagine a calm, safe road stretching ahead with no dangers or obstacles"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "A protective wish that covers the whole journey from departure to arrival"
+          }
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {"This expresses "}
+        <_components.strong>
+          {"comprehensive care for someone's entire travel experience"}
+        </_components.strong>
+        {"."}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Core Meaning & Usage"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"一路平安 is a "}
+        <_components.strong>
+          {"traditional farewell blessing"}
+        </_components.strong>
+        {" used when:"}
+      </_components.p>
+      {"\n"}
+      <_components.ol>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Departing travelers"}</_components.strong>
+          {": Said to someone leaving on a trip"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Long journeys"}</_components.strong>
+          {": Especially for extended or potentially dangerous travel"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Formal farewells"}</_components.strong>
+          {": Used in more formal or traditional settings"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Written messages"}</_components.strong>
+          {": Often appears in farewell cards or messages"}
+        </_components.li>
+        {"\n"}
+      </_components.ol>
+      {"\n"}
+      <_components.h2>{"Cultural Context"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"This phrase reflects "}
+        <_components.strong>
+          {"Chinese values about journey and safety"}
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Community care"}</_components.strong>
+          {" - showing genuine concern for others' wellbeing"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Traditional blessing"}</_components.strong>
+          {" - passed down through generations of travelers"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Holistic protection"}</_components.strong>
+          {" - covers the entire journey, not just arrival"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Spiritual element"}</_components.strong>
+          {" - implies protection from unseen forces"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Similar Expressions"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"一路顺风"}</_components.strong>
+          {
+            ' (yí lù shùn fēng) - "smooth sailing" (literally "one road favorable wind")'
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"路上小心"}</_components.strong>
+          {' (lù shang xiǎo xīn) - "be careful on the road"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"一路顺利"}</_components.strong>
+          {' (yí lù shùn lì) - "smooth journey"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Usage Examples"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"祝你一路平安！"}</_components.strong>
+          {' - "Wishing you a safe journey!"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"一路平安，早点回来"}</_components.strong>
+          {' - "Have a safe trip and come back soon"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"希望你一路平安"}</_components.strong>
+          {' - "I hope you have a safe journey"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Modern Context"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"While traditional in origin, 一路平安 remains "}
+        <_components.strong>{"commonly used today"}</_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Text messages"}</_components.strong>
+          {" to traveling friends and family"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Social media"}</_components.strong>
+          {" posts for departing travelers"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Business travel"}</_components.strong>
+          {" - colleagues wishing each other safe trips"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Holiday travel"}</_components.strong>
+          {" - especially during busy travel seasons"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {"This timeless expression embodies the "}
+        <_components.strong>
+          {"universal human desire to protect loved ones during\ntravel"}
+        </_components.strong>
+        {"."}
+      </_components.p>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

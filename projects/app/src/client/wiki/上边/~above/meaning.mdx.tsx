@@ -1,15 +1,254 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <><_components.p>{"In or to a higher position than something else."}</_components.p>{"\n"}<_components.h2>{"Quick Reference"}</_components.h2>{"\n"}<_components.p>{"| Aspect         | Info                      |\n| -------------- | ------------------------- |\n| Pinyin         | shàng biān                |\n| Core meaning   | above; on top; upper part |\n| Part of speech | noun (location)           |\n| Tone           | fourth + first tone       |"}</_components.p>{"\n"}<_components.h2>{"Visual Breakdown"}</_components.h2>{"\n"}<_components.p>{"上边 combines "}<_components.strong>{"up/above"}</_components.strong>{" (上) with "}<_components.strong>{"side/direction"}</_components.strong>{" (边) to mean \"upper area.\""}</_components.p>{"\n"}<_components.p>{"| Component | Visual Description                                  |\n| --------- | --------------------------------------------------- |\n| "}<_components.strong>{"上"}</_components.strong>{"    | Up/above - shows upward position or higher location |\n| "}<_components.strong>{"边"}</_components.strong>{"    | Side/edge - represents a directional area or region |"}</_components.p>{"\n"}<_components.h2>{"Mnemonic"}</_components.h2>{"\n"}<_components.p>{"Think of 上边 as "}<_components.strong>{"\"the area that's on the upper side\""}</_components.strong>{":"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"上 indicates the upward direction"}</_components.li>{"\n"}<_components.li>{"边 represents a spatial region or area"}</_components.li>{"\n"}<_components.li>{"Together: the zone or space that's positioned above"}</_components.li>{"\n"}<_components.li>{"Like pointing to the area that's higher up"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p>{"The concept captures spatial relationships in three-dimensional space."}</_components.p>{"\n"}<_components.h2>{"Usage Examples"}</_components.h2>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"桌子上边"}</_components.strong>{" (zhuōzi shàng biān) - \"on top of the table\""}</_components.li>{"\n"}<_components.li><_components.strong>{"楼上边"}</_components.strong>{" (lóu shàng biān) - \"upstairs\""}</_components.li>{"\n"}<_components.li><_components.strong>{"上边写着"}</_components.strong>{" (shàng biān xiě zhe) - \"written above\""}</_components.li>{"\n"}<_components.li><_components.strong>{"看上边"}</_components.strong>{" (kàn shàng biān) - \"look above\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Spatial Reference System"}</_components.h2>{"\n"}<_components.p>{"上边 is part of complete directional vocabulary:"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"上边"}</_components.strong>{" (shàng biān) - above; on top"}</_components.li>{"\n"}<_components.li><_components.strong>{"下边"}</_components.strong>{" (xià biān) - below; underneath"}</_components.li>{"\n"}<_components.li><_components.strong>{"左边"}</_components.strong>{" (zuǒ biān) - left side"}</_components.li>{"\n"}<_components.li><_components.strong>{"右边"}</_components.strong>{" (yòu biān) - right side"}</_components.li>{"\n"}<_components.li><_components.strong>{"前边"}</_components.strong>{" (qián biān) - front"}</_components.li>{"\n"}<_components.li><_components.strong>{"后边"}</_components.strong>{" (hòu biān) - back"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Grammar Patterns"}</_components.h2>{"\n"}<_components.p>{"上边 functions as a "}<_components.strong>{"location noun"}</_components.strong>{":"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"在 + [noun] + 上边"}</_components.strong>{": on top of + [noun]"}</_components.li>{"\n"}<_components.li><_components.strong>{"从上边"}</_components.strong>{": from above"}</_components.li>{"\n"}<_components.li><_components.strong>{"往上边"}</_components.strong>{": toward the upper area"}</_components.li>{"\n"}<_components.li><_components.strong>{"上边的"}</_components.strong>{": the one(s) above"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Spatial Cognition"}</_components.h2>{"\n"}<_components.p>{"上边 helps organize spatial understanding:"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Vertical positioning"}</_components.strong>{": Understanding height relationships"}</_components.li>{"\n"}<_components.li><_components.strong>{"Reference framework"}</_components.strong>{": Creating mental spatial maps"}</_components.li>{"\n"}<_components.li><_components.strong>{"Object location"}</_components.strong>{": Describing where things are positioned"}</_components.li>{"\n"}<_components.li><_components.strong>{"Direction giving"}</_components.strong>{": Helping others navigate space"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Cultural Context"}</_components.h2>{"\n"}<_components.p>{"上边 reflects Chinese spatial thinking:"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Hierarchy awareness"}</_components.strong>{": Higher positions often signify importance"}</_components.li>{"\n"}<_components.li><_components.strong>{"Feng shui principles"}</_components.strong>{": Spatial arrangement affects harmony"}</_components.li>{"\n"}<_components.li><_components.strong>{"Practical navigation"}</_components.strong>{": Essential for describing physical relationships"}</_components.li>{"\n"}<_components.li><_components.strong>{"Respectful positioning"}</_components.strong>{": Understanding proper spatial etiquette"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p>{"The concept embodies systematic approach to describing spatial relationships in Chinese culture."}</_components.p></>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {"In or to a higher position than something else."}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                      |\n| -------------- | ------------------------- |\n| Pinyin         | shàng biān                |\n| Core meaning   | above; on top; upper part |\n| Part of speech | noun (location)           |\n| Tone           | fourth + first tone       |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Visual Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"上边 combines "}
+        <_components.strong>{"up/above"}</_components.strong>
+        {" (上) with "}
+        <_components.strong>{"side/direction"}</_components.strong>
+        {' (边) to mean "upper area."'}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component | Visual Description                                  |\n| --------- | --------------------------------------------------- |\n| "
+        }
+        <_components.strong>{"上"}</_components.strong>
+        {"    | Up/above - shows upward position or higher location |\n| "}
+        <_components.strong>{"边"}</_components.strong>
+        {"    | Side/edge - represents a directional area or region |"}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Mnemonic"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 上边 as "}
+        <_components.strong>
+          {'"the area that\'s on the upper side"'}
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>{"上 indicates the upward direction"}</_components.li>
+        {"\n"}
+        <_components.li>
+          {"边 represents a spatial region or area"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Together: the zone or space that's positioned above"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Like pointing to the area that's higher up"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {
+          "The concept captures spatial relationships in three-dimensional space."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Usage Examples"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"桌子上边"}</_components.strong>
+          {' (zhuōzi shàng biān) - "on top of the table"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"楼上边"}</_components.strong>
+          {' (lóu shàng biān) - "upstairs"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"上边写着"}</_components.strong>
+          {' (shàng biān xiě zhe) - "written above"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"看上边"}</_components.strong>
+          {' (kàn shàng biān) - "look above"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Spatial Reference System"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"上边 is part of complete directional vocabulary:"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"上边"}</_components.strong>
+          {" (shàng biān) - above; on top"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"下边"}</_components.strong>
+          {" (xià biān) - below; underneath"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"左边"}</_components.strong>
+          {" (zuǒ biān) - left side"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"右边"}</_components.strong>
+          {" (yòu biān) - right side"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"前边"}</_components.strong>
+          {" (qián biān) - front"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"后边"}</_components.strong>
+          {" (hòu biān) - back"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Grammar Patterns"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"上边 functions as a "}
+        <_components.strong>{"location noun"}</_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"在 + [noun] + 上边"}</_components.strong>
+          {": on top of + [noun]"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"从上边"}</_components.strong>
+          {": from above"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"往上边"}</_components.strong>
+          {": toward the upper area"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"上边的"}</_components.strong>
+          {": the one(s) above"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Spatial Cognition"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"上边 helps organize spatial understanding:"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Vertical positioning"}</_components.strong>
+          {": Understanding height relationships"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Reference framework"}</_components.strong>
+          {": Creating mental spatial maps"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Object location"}</_components.strong>
+          {": Describing where things are positioned"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Direction giving"}</_components.strong>
+          {": Helping others navigate space"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Cultural Context"}</_components.h2>
+      {"\n"}
+      <_components.p>{"上边 reflects Chinese spatial thinking:"}</_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Hierarchy awareness"}</_components.strong>
+          {": Higher positions often signify importance"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Feng shui principles"}</_components.strong>
+          {": Spatial arrangement affects harmony"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Practical navigation"}</_components.strong>
+          {": Essential for describing physical relationships"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Respectful positioning"}</_components.strong>
+          {": Understanding proper spatial etiquette"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {
+          "The concept embodies systematic approach to describing spatial relationships in Chinese culture."
+        }
+      </_components.p>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

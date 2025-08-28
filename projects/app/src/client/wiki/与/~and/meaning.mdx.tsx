@@ -1,15 +1,217 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <><_components.p>{"Used to indicate a relationship or association between entities; and; with; together with."}</_components.p>{"\n"}<_components.h2>{"Quick Reference"}</_components.h2>{"\n"}<_components.p>{"| Aspect         | Info                     |\n| -------------- | ------------------------ |\n| Pinyin         | yǔ                       |\n| Core meaning   | and; with; together with |\n| Part of speech | preposition, conjunction |\n| Tone           | third tone (low rising)  |"}</_components.p>{"\n"}<_components.h2>{"Visual Breakdown"}</_components.h2>{"\n"}<_components.p>{"与 originally depicted "}<_components.strong>{"hands working together"}</_components.strong>{":"}</_components.p>{"\n"}<_components.p>{"| Component | Visual Description                                              |\n| --------- | --------------------------------------------------------------- |\n| "}<_components.strong>{"与"}</_components.strong>{"    | Multiple hands joining together in cooperation or collaboration |"}</_components.p>{"\n"}<_components.h2>{"Mnemonic"}</_components.h2>{"\n"}<_components.p>{"Think of 与 as "}<_components.strong>{"hands coming together"}</_components.strong>{":"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"Like multiple people reaching out to join hands"}</_components.li>{"\n"}<_components.li>{"Two or more entities connecting and working together"}</_components.li>{"\n"}<_components.li>{"The action of joining or associating with others"}</_components.li>{"\n"}<_components.li>{"Cooperation and partnership between different parties"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p>{"This represents the fundamental concept of "}<_components.strong>{"connection and association"}</_components.strong>{"."}</_components.p>{"\n"}<_components.h2>{"Core Meaning & Usage"}</_components.h2>{"\n"}<_components.p>{"与 indicates "}<_components.strong>{"association, partnership, or conjunction between entities"}</_components.strong>{". It's used for:"}</_components.p>{"\n"}<_components.ol>{"\n"}<_components.li><_components.strong>{"Formal conjunction"}</_components.strong>{": 父亲与母亲 (fùqīn yǔ mǔqīn) - \"father and mother\""}</_components.li>{"\n"}<_components.li><_components.strong>{"Partnership"}</_components.strong>{": 与人合作 (yǔ rén hézuò) - \"cooperate with people\""}</_components.li>{"\n"}<_components.li><_components.strong>{"Comparison"}</_components.strong>{": 与...相比 (yǔ...xiāngbǐ) - \"compared with...\""}</_components.li>{"\n"}<_components.li><_components.strong>{"Accompaniment"}</_components.strong>{": 与朋友一起 (yǔ péngyǒu yīqǐ) - \"together with friends\""}</_components.li>{"\n"}</_components.ol>{"\n"}<_components.h2>{"Examples"}</_components.h2>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"与众不同"}</_components.strong>{" (yǔ zhòng bùtóng) - \"different from the crowd; unique\""}</_components.li>{"\n"}<_components.li><_components.strong>{"参与"}</_components.strong>{" (cānyǔ) - \"participate; take part in\""}</_components.li>{"\n"}<_components.li><_components.strong>{"给与"}</_components.strong>{" (jǐyǔ) - \"give; grant; provide\""}</_components.li>{"\n"}<_components.li><_components.strong>{"与其"}</_components.strong>{" (yǔqí) - \"rather than; instead of\""}</_components.li>{"\n"}<_components.li><_components.strong>{"与日俱增"}</_components.strong>{" (yǔ rì jù zēng) - \"increase day by day\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Formal vs. Informal Usage"}</_components.h2>{"\n"}<_components.p>{"与 is more formal than 和 (hé):"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"与"}</_components.strong>{": Used in formal writing, legal documents, academic texts"}</_components.li>{"\n"}<_components.li><_components.strong>{"和"}</_components.strong>{": Used in casual conversation and informal contexts"}</_components.li>{"\n"}<_components.li><_components.strong>{"与"}</_components.strong>{": Often appears in idioms and set expressions"}</_components.li>{"\n"}<_components.li><_components.strong>{"和"}</_components.strong>{": More common in daily speech"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Grammatical Patterns"}</_components.h2>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"A与B"}</_components.strong>{": \"A and B\" (formal conjunction)"}</_components.li>{"\n"}<_components.li><_components.strong>{"与...相关"}</_components.strong>{": \"related to...\""}</_components.li>{"\n"}<_components.li><_components.strong>{"与...一起"}</_components.strong>{": \"together with...\""}</_components.li>{"\n"}<_components.li><_components.strong>{"与其...不如"}</_components.strong>{": \"rather than... it's better to...\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p>{"与 represents formal connection and professional association in Chinese."}</_components.p></>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {
+          "Used to indicate a relationship or association between entities; and; with; together with."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                     |\n| -------------- | ------------------------ |\n| Pinyin         | yǔ                       |\n| Core meaning   | and; with; together with |\n| Part of speech | preposition, conjunction |\n| Tone           | third tone (low rising)  |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Visual Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"与 originally depicted "}
+        <_components.strong>{"hands working together"}</_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component | Visual Description                                              |\n| --------- | --------------------------------------------------------------- |\n| "
+        }
+        <_components.strong>{"与"}</_components.strong>
+        {
+          "    | Multiple hands joining together in cooperation or collaboration |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Mnemonic"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 与 as "}
+        <_components.strong>{"hands coming together"}</_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"Like multiple people reaching out to join hands"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Two or more entities connecting and working together"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"The action of joining or associating with others"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Cooperation and partnership between different parties"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {"This represents the fundamental concept of "}
+        <_components.strong>{"connection and association"}</_components.strong>
+        {"."}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Core Meaning & Usage"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"与 indicates "}
+        <_components.strong>
+          {"association, partnership, or conjunction between entities"}
+        </_components.strong>
+        {". It's used for:"}
+      </_components.p>
+      {"\n"}
+      <_components.ol>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Formal conjunction"}</_components.strong>
+          {': 父亲与母亲 (fùqīn yǔ mǔqīn) - "father and mother"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Partnership"}</_components.strong>
+          {': 与人合作 (yǔ rén hézuò) - "cooperate with people"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Comparison"}</_components.strong>
+          {': 与...相比 (yǔ...xiāngbǐ) - "compared with..."'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Accompaniment"}</_components.strong>
+          {': 与朋友一起 (yǔ péngyǒu yīqǐ) - "together with friends"'}
+        </_components.li>
+        {"\n"}
+      </_components.ol>
+      {"\n"}
+      <_components.h2>{"Examples"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"与众不同"}</_components.strong>
+          {' (yǔ zhòng bùtóng) - "different from the crowd; unique"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"参与"}</_components.strong>
+          {' (cānyǔ) - "participate; take part in"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"给与"}</_components.strong>
+          {' (jǐyǔ) - "give; grant; provide"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"与其"}</_components.strong>
+          {' (yǔqí) - "rather than; instead of"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"与日俱增"}</_components.strong>
+          {' (yǔ rì jù zēng) - "increase day by day"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Formal vs. Informal Usage"}</_components.h2>
+      {"\n"}
+      <_components.p>{"与 is more formal than 和 (hé):"}</_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"与"}</_components.strong>
+          {": Used in formal writing, legal documents, academic texts"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"和"}</_components.strong>
+          {": Used in casual conversation and informal contexts"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"与"}</_components.strong>
+          {": Often appears in idioms and set expressions"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"和"}</_components.strong>
+          {": More common in daily speech"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Grammatical Patterns"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"A与B"}</_components.strong>
+          {': "A and B" (formal conjunction)'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"与...相关"}</_components.strong>
+          {': "related to..."'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"与...一起"}</_components.strong>
+          {': "together with..."'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"与其...不如"}</_components.strong>
+          {': "rather than... it\'s better to..."'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {
+          "与 represents formal connection and professional association in Chinese."
+        }
+      </_components.p>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

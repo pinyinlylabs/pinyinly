@@ -1,15 +1,174 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <><_components.p>{"The time of day from noon until evening."}</_components.p>{"\n"}<_components.h2>{"Quick Reference"}</_components.h2>{"\n"}<_components.p>{"| Aspect         | Info                   |\n| -------------- | ---------------------- |\n| Pinyin         | xià wǔ                 |\n| Core meaning   | afternoon; P.M.        |\n| Part of speech | noun (time expression) |\n| Tone           | fourth + third tone    |"}</_components.p>{"\n"}<_components.h2>{"Visual Breakdown"}</_components.h2>{"\n"}<_components.p>{"下午 combines "}<_components.strong>{"down/below"}</_components.strong>{" (下) with "}<_components.strong>{"noon"}</_components.strong>{" (午) to mean \"after noon.\""}</_components.p>{"\n"}<_components.p>{"| Component | Visual Description                                       |\n| --------- | -------------------------------------------------------- |\n| "}<_components.strong>{"下"}</_components.strong>{"    | \"Down/below\" - shows downward movement or lower position |\n| "}<_components.strong>{"午"}</_components.strong>{"    | \"Noon\" - represents the midday sun at its highest point  |"}</_components.p>{"\n"}<_components.h2>{"Mnemonic"}</_components.h2>{"\n"}<_components.p>{"Think of 下午 as "}<_components.strong>{"\"when the sun moves down from noon\""}</_components.strong>{":"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"午 represents the sun at its peak (noon)"}</_components.li>{"\n"}<_components.li>{"下 shows the sun beginning to descend"}</_components.li>{"\n"}<_components.li>{"Together: the time when the sun travels downward from noon"}</_components.li>{"\n"}<_components.li>{"Like the \"second half\" of the sun's daily journey"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p>{"Imagine the sun starting its descent after reaching noon peak - that descending period is 下午."}</_components.p>{"\n"}<_components.h2>{"Usage Examples"}</_components.h2>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"下午三点"}</_components.strong>{" (xià wǔ sān diǎn) - \"3 P.M.\""}</_components.li>{"\n"}<_components.li><_components.strong>{"下午好"}</_components.strong>{" (xià wǔ hǎo) - \"good afternoon\""}</_components.li>{"\n"}<_components.li><_components.strong>{"下午茶"}</_components.strong>{" (xià wǔ chá) - \"afternoon tea\""}</_components.li>{"\n"}<_components.li><_components.strong>{"每天下午"}</_components.strong>{" (měi tiān xià wǔ) - \"every afternoon\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Time Contrast"}</_components.h2>{"\n"}<_components.p>{"下午 contrasts directly with 上午:"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"上午"}</_components.strong>{" (shàng wǔ): Morning - sun climbing "}<_components.strong>{"up"}</_components.strong>{" to noon"}</_components.li>{"\n"}<_components.li><_components.strong>{"下午"}</_components.strong>{" (xià wǔ): Afternoon - sun moving "}<_components.strong>{"down"}</_components.strong>{" from noon"}</_components.li>{"\n"}<_components.li>{"Perfect mirror pattern using directional words"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Cultural Context"}</_components.h2>{"\n"}<_components.p>{"下午 in Chinese culture represents:"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Work continuation"}</_components.strong>{": Second productive period of the day"}</_components.li>{"\n"}<_components.li><_components.strong>{"Social time"}</_components.strong>{": Traditional time for visits and tea"}</_components.li>{"\n"}<_components.li><_components.strong>{"Relaxed pace"}</_components.strong>{": Generally less formal than morning meetings"}</_components.li>{"\n"}<_components.li><_components.strong>{"Family time"}</_components.strong>{": Often when people gather after work/school"}</_components.li>{"\n"}</_components.ul></>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {"The time of day from noon until evening."}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                   |\n| -------------- | ---------------------- |\n| Pinyin         | xià wǔ                 |\n| Core meaning   | afternoon; P.M.        |\n| Part of speech | noun (time expression) |\n| Tone           | fourth + third tone    |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Visual Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"下午 combines "}
+        <_components.strong>{"down/below"}</_components.strong>
+        {" (下) with "}
+        <_components.strong>{"noon"}</_components.strong>
+        {' (午) to mean "after noon."'}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component | Visual Description                                       |\n| --------- | -------------------------------------------------------- |\n| "
+        }
+        <_components.strong>{"下"}</_components.strong>
+        {'    | "Down/below" - shows downward movement or lower position |\n| '}
+        <_components.strong>{"午"}</_components.strong>
+        {'    | "Noon" - represents the midday sun at its highest point  |'}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Mnemonic"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 下午 as "}
+        <_components.strong>
+          {'"when the sun moves down from noon"'}
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"午 represents the sun at its peak (noon)"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"下 shows the sun beginning to descend"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Together: the time when the sun travels downward from noon"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {'Like the "second half" of the sun\'s daily journey'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {
+          "Imagine the sun starting its descent after reaching noon peak - that descending period is 下午."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Usage Examples"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"下午三点"}</_components.strong>
+          {' (xià wǔ sān diǎn) - "3 P.M."'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"下午好"}</_components.strong>
+          {' (xià wǔ hǎo) - "good afternoon"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"下午茶"}</_components.strong>
+          {' (xià wǔ chá) - "afternoon tea"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"每天下午"}</_components.strong>
+          {' (měi tiān xià wǔ) - "every afternoon"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Time Contrast"}</_components.h2>
+      {"\n"}
+      <_components.p>{"下午 contrasts directly with 上午:"}</_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"上午"}</_components.strong>
+          {" (shàng wǔ): Morning - sun climbing "}
+          <_components.strong>{"up"}</_components.strong>
+          {" to noon"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"下午"}</_components.strong>
+          {" (xià wǔ): Afternoon - sun moving "}
+          <_components.strong>{"down"}</_components.strong>
+          {" from noon"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Perfect mirror pattern using directional words"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Cultural Context"}</_components.h2>
+      {"\n"}
+      <_components.p>{"下午 in Chinese culture represents:"}</_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Work continuation"}</_components.strong>
+          {": Second productive period of the day"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Social time"}</_components.strong>
+          {": Traditional time for visits and tea"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Relaxed pace"}</_components.strong>
+          {": Generally less formal than morning meetings"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Family time"}</_components.strong>
+          {": Often when people gather after work/school"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

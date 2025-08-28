@@ -1,15 +1,488 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <_components.p>{"Something or someone that causes annoyance or inconvenience."}</_components.p>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {
+          "Something or someone that causes annoyance, inconvenience, or difficulties; trouble or bother."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                                     |\n| -------------- | ---------------------------------------- |\n| Pinyin         | máfan                                    |\n| Core meaning   | trouble; bother; inconvenience; annoying |\n| Part of speech | adjective; noun; verb                    |\n| Tone           | second + second tones                    |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Word Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"麻烦 combines texture with complexity to express difficulty:"}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component    | Meaning                          |\n| ------------ | -------------------------------- |\n| "
+        }
+        <_components.strong>{"麻"}</_components.strong>
+        {" (má)  | Hemp, numb; tangled, complicated |\n| "}
+        <_components.strong>{"烦"}</_components.strong>
+        {" (fán) | Annoyed, irritated, vexed        |"}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Understanding"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 麻烦 as "}
+        <_components.strong>
+          {'"tangled hemp that irritates"'}
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {
+            "Like trying to untangle a complex knot - frustrating and time-consuming"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Hemp fibers that get twisted and difficult to separate"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Situations that create complications and stress"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Problems that require extra effort to resolve"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"The feeling when simple things become complicated"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Usage Contexts"}</_components.h2>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Expressing Inconvenience"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"很麻烦"}</_components.strong>
+          {' (hěn máfan) - "very troublesome"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"太麻烦了"}</_components.strong>
+          {' - "too much trouble"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Polite Requests"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"麻烦你了"}</_components.strong>
+          {' - "sorry to trouble you"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"不麻烦"}</_components.strong>
+          {' - "it\'s no trouble"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Describing Situations"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"这件事很麻烦"}</_components.strong>
+          {' - "this matter is very troublesome"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"避免麻烦"}</_components.strong>
+          {' - "avoid trouble"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"As a Verb (to bother)"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"麻烦您"}</_components.strong>
+          {' - "to trouble you" (polite)'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"别麻烦他"}</_components.strong>
+          {' - "don\'t bother him"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Examples"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>{"搬家真是太麻烦了。"}</_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {'"Moving house is really too much trouble."'}
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>{"麻烦你帮我一下好吗？"}</_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {'"Could you please help me? (Sorry to trouble you)"'}
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>
+              {"这个程序有点麻烦，需要时间学习。"}
+            </_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {'"This program is a bit complicated and takes time to learn."'}
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>{"不好意思，麻烦您了。"}</_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>{'"Sorry to have troubled you."'}</_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>
+              {"为了避免麻烦，我们提前准备。"}
+            </_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {'"To avoid trouble, we prepared in advance."'}
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>{"他总是给别人制造麻烦。"}</_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {'"He always creates trouble for others."'}
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Politeness Levels"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          '| Expression   | Formality   | Usage Context            |\n| ------------ | ----------- | ------------------------ |\n| 麻烦了       | Casual      | Sorry to bother          |\n| 麻烦您了     | Polite      | Formal apology           |\n| 给您添麻烦了 | Very polite | Deep apology for trouble |\n| 不麻烦       | Reassuring  | "It\'s no trouble"        |'
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Cultural Context"}</_components.h2>
+      {"\n"}
+      <_components.p>{"麻烦 reflects Chinese social values:"}</_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Considerate communication"}</_components.strong>
+          {" - acknowledging when you burden others"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Social harmony"}</_components.strong>
+          {" - minimizing disruption to others"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Relationship maintenance"}</_components.strong>
+          {" - showing awareness of inconvenience"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Practical problem-solving"}</_components.strong>
+          {" - recognizing complexity honestly"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Grammar Functions"}</_components.h2>
+      {"\n"}
+      <_components.p>{"麻烦 can be used as:"}</_components.p>
+      {"\n"}
+      <_components.ol>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Adjective"}</_components.strong>
+          {': 很麻烦 ("very troublesome")'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Noun"}</_components.strong>
+          {': 遇到麻烦 ("encounter trouble")'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Verb"}</_components.strong>
+          {': 麻烦你 ("trouble you")'}
+        </_components.li>
+        {"\n"}
+      </_components.ol>
+      {"\n"}
+      <_components.p>
+        <_components.strong>{"Common patterns:"}</_components.strong>
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"麻烦 + 人"}</_components.strong>
+          {' - "trouble someone"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"很麻烦"}</_components.strong>
+          {' - "very troublesome"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"添麻烦"}</_components.strong>
+          {' - "add trouble, cause inconvenience"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Degrees of Trouble"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Expression | Intensity | Usage                 |\n| ---------- | --------- | --------------------- |\n| 有点麻烦   | Mild      | Slightly inconvenient |\n| 很麻烦     | Moderate  | Quite troublesome     |\n| 太麻烦     | High      | Too much trouble      |\n| 特别麻烦   | Extreme   | Extremely complicated |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Problem-Solving Context"}</_components.h2>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Avoiding Trouble"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"预防麻烦"}</_components.strong>
+          {' - "prevent trouble"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"减少麻烦"}</_components.strong>
+          {' - "reduce trouble"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"简化流程"}</_components.strong>
+          {' - "simplify processes"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Dealing with Complications"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"解决麻烦"}</_components.strong>
+          {' - "solve problems"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"处理麻烦"}</_components.strong>
+          {' - "handle difficulties"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"克服困难"}</_components.strong>
+          {' - "overcome obstacles"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Social Etiquette"}</_components.h2>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Making Requests"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"Always acknowledge the 麻烦 you're causing"}
+        </_components.li>
+        {"\n"}
+        <_components.li>{"Use polite forms: 麻烦您了"}</_components.li>
+        {"\n"}
+        <_components.li>{"Show appreciation: 谢谢，麻烦你了"}</_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Declining Gracefully"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"太麻烦了"}</_components.strong>
+          {' - "it\'s too much trouble"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"不想给你添麻烦"}</_components.strong>
+          {' - "don\'t want to trouble you"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Related Concepts"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Expression | Meaning         | Usage Context         |\n| ---------- | --------------- | --------------------- |\n| 困难       | difficulty      | More serious problems |\n| 问题       | problem         | General issues        |\n| 烦恼       | worry, vexation | Mental/emotional      |\n| 复杂       | complex         | Structural complexity |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Modern Usage"}</_components.h2>
+      {"\n"}
+      <_components.p>{"In contemporary contexts:"}</_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"网络麻烦"}</_components.strong>
+          {" - internet troubles"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"技术麻烦"}</_components.strong>
+          {" - technical difficulties"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"程序麻烦"}</_components.strong>
+          {" - procedural complications"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"交通麻烦"}</_components.strong>
+          {" - traffic troubles"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {"麻烦 captures the "}
+        <_components.strong>{"universal human experience"}</_components.strong>
+        {
+          " of complications, inconvenience, and the social\nawareness needed to navigate them gracefully."
+        }
+      </_components.p>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

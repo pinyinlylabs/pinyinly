@@ -1,15 +1,418 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <_components.p>{"Without delay; at once."}</_components.p>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {"Without delay; at once; immediately; right away; instantly."}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                             |\n| -------------- | -------------------------------- |\n| Pinyin         | mǎshàng                          |\n| Core meaning   | immediately; right away; at once |\n| Part of speech | adverb; time expression          |\n| Tone           | third + fourth tones             |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Word Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"马上 uses the imagery of mounting a horse for immediate action:"}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component      | Meaning              |\n| -------------- | -------------------- |\n| "
+        }
+        <_components.strong>{"马"}</_components.strong>
+        {" (mǎ)    | Horse                |\n| "}
+        <_components.strong>{"上"}</_components.strong>
+        {" (shàng) | Go up, mount, get on |"}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Mnemonic Understanding"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 马上 as "}
+        <_components.strong>
+          {'"jumping on a horse and riding off"'}
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"In ancient times, mounting a horse meant instant departure"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"No delay between decision and action"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"The urgency of a rider leaping onto a steed"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Ready for immediate travel or response"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Like a knight charging into action without hesitation"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {"This creates the perfect metaphor for "}
+        <_components.strong>{"immediate, urgent action"}</_components.strong>
+        {"."}
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Usage Contexts"}</_components.h2>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Immediate Action"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"马上就来"}</_components.strong>
+          {' (mǎshàng jiù lái) - "coming right away"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"马上开始"}</_components.strong>
+          {' - "start immediately"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Urgent Responses"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"马上回答"}</_components.strong>
+          {' - "answer immediately"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"马上处理"}</_components.strong>
+          {' - "handle right away"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Time Pressure"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"马上要走了"}</_components.strong>
+          {' - "leaving right away"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"马上就好"}</_components.strong>
+          {' - "ready in just a moment"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h3>
+        <_components.strong>{"Commands/Requests"}</_components.strong>
+      </_components.h3>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"马上停下"}</_components.strong>
+          {' - "stop immediately"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"马上去做"}</_components.strong>
+          {' - "go do it right now"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Examples"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>{"我马上就到。"}</_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>{'"I\'ll be there right away."'}</_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>{"请马上给我回电话。"}</_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {'"Please call me back immediately."'}
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>{"饭马上就好了。"}</_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {'"The food will be ready right away."'}
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>{"他听到消息马上就走了。"}</_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {'"He left immediately when he heard the news."'}
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>
+              {"马上下雨了，我们快走吧。"}
+            </_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {"\"It's about to rain, let's go quickly.\""}
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"\n"}
+          <_components.p>
+            <_components.strong>
+              {"问题很紧急，需要马上解决。"}
+            </_components.strong>
+          </_components.p>
+          {"\n"}
+          <_components.ul>
+            {"\n"}
+            <_components.li>
+              {'"The problem is urgent and needs to be solved immediately."'}
+            </_components.li>
+            {"\n"}
+          </_components.ul>
+          {"\n"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Urgency Levels"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          '| Expression | Urgency   | Usage Context    |\n| ---------- | --------- | ---------------- |\n| 马上       | High      | Immediate action |\n| 立刻       | Very high | Instant response |\n| 立即       | Formal    | Official urgency |\n| 赶快       | Casual    | "hurry up"       |'
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Cultural Context"}</_components.h2>
+      {"\n"}
+      <_components.p>{"马上 reflects Chinese values of:"}</_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Efficiency"}</_components.strong>
+          {" - valuing quick response and action"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Respect for urgency"}</_components.strong>
+          {" - recognizing when speed matters"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Reliability"}</_components.strong>
+          {" - showing you can act promptly when needed"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Practical communication"}</_components.strong>
+          {" - clear time expectations"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Grammar Notes"}</_components.h2>
+      {"\n"}
+      <_components.p>{"马上 typically appears:"}</_components.p>
+      {"\n"}
+      <_components.ol>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Before verbs"}</_components.strong>
+          {': 马上走 ("leave immediately")'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"With 就"}</_components.strong>
+          {': 马上就来 ("coming right away")'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"With 要"}</_components.strong>
+          {': 马上要开始 ("about to start")'}
+        </_components.li>
+        {"\n"}
+      </_components.ol>
+      {"\n"}
+      <_components.p>
+        <_components.strong>{"Common patterns:"}</_components.strong>
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"马上就..."}</_components.strong>
+          {' - "right away" (emphasizing immediacy)'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"马上要..."}</_components.strong>
+          {' - "about to..." (immediate future)'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"马上...了"}</_components.strong>
+          {' - "immediately did/will do"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Time Context"}</_components.h2>
+      {"\n"}
+      <_components.p>{"马上 indicates:"}</_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Present moment action"}</_components.strong>
+          {" - happening now"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Very near future"}</_components.strong>
+          {" - within seconds/minutes"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"No delay tolerance"}</_components.strong>
+          {" - urgency is emphasized"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Priority status"}</_components.strong>
+          {" - this action comes first"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Related Time Expressions"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Expression | Meaning     | Time Frame |\n| ---------- | ----------- | ---------- |\n| 马上       | immediately | Seconds    |\n| 很快       | soon        | Minutes    |\n| 一会儿     | in a moment | Short time |\n| 立刻       | instantly   | No delay   |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Practical Usage Tips"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"Use 马上 when you need to show urgency"}
+        </_components.li>
+        {"\n"}
+        <_components.li>{"Often followed by 就 for emphasis"}</_components.li>
+        {"\n"}
+        <_components.li>
+          {"Common in service situations (restaurants, shops)"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Shows respect for others' time when you respond quickly"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.p>
+        {"马上 is "}
+        <_components.strong>{"essential vocabulary"}</_components.strong>
+        {
+          " for expressing urgency, immediate action, and time-sensitive\ncommunication."
+        }
+      </_components.p>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }

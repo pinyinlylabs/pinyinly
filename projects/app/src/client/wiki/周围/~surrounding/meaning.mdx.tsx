@@ -1,15 +1,244 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(Object.create(_provideComponents()), props.components);
-  return <><_components.p>{"Describes the environment or area around a specific place; surrounding; vicinity; around."}</_components.p>{"\n"}<_components.h2>{"Quick Reference"}</_components.h2>{"\n"}<_components.p>{"| Aspect         | Info                          |\n| -------------- | ----------------------------- |\n| Pinyin         | zhōu wéi                      |\n| Core meaning   | surrounding; around; vicinity |\n| Part of speech | noun; preposition             |\n| Tone           | 1st + 2nd tone                |"}</_components.p>{"\n"}<_components.h2>{"Visual Breakdown"}</_components.h2>{"\n"}<_components.p>{"周围 combines "}<_components.strong>{"cycle/circumference + encircle"}</_components.strong>{" to show complete surrounding."}</_components.p>{"\n"}<_components.p>{"| Component | Meaning                        | Contribution to 周围              |\n| --------- | ------------------------------ | --------------------------------- |\n| "}<_components.strong>{"周"}</_components.strong>{"    | cycle; circumference; complete | Shows the full circular area      |\n| "}<_components.strong>{"围"}</_components.strong>{"    | surround; encircle; enclose    | Emphasizes the enclosing boundary |"}</_components.p>{"\n"}<_components.h2>{"Character Analysis: 周"}</_components.h2>{"\n"}<_components.p>{"周 represents "}<_components.strong>{"completeness and thoroughness"}</_components.strong>{":"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"口"}</_components.strong>{" (mouth/enclosure) shows a bounded area"}</_components.li>{"\n"}<_components.li>{"Internal strokes suggest completeness and attention to detail"}</_components.li>{"\n"}<_components.li>{"Originally meant \"dense\" or \"thorough coverage\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Character Analysis: 围"}</_components.h2>{"\n"}<_components.p>{"围 shows "}<_components.strong>{"enclosure on all sides"}</_components.strong>{":"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"囗"}</_components.strong>{" (enclosure) represents the boundary"}</_components.li>{"\n"}<_components.li><_components.strong>{"韦"}</_components.strong>{" (leather/soft) shows flexible but complete containment"}</_components.li>{"\n"}<_components.li>{"Together: something that wraps around completely"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Mnemonic"}</_components.h2>{"\n"}<_components.p>{"Think of 周围 as "}<_components.strong>{"a complete circle around you"}</_components.strong>{":"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"周 (circumference) represents drawing a full circle"}</_components.li>{"\n"}<_components.li>{"围 (surround) shows you're at the center, with everything else around you"}</_components.li>{"\n"}<_components.li>{"Like standing in the middle of a field and seeing everything in a 360-degree view"}</_components.li>{"\n"}<_components.li>{"Or sitting at a table with friends all around you"}</_components.li>{"\n"}<_components.li>{"The emphasis is on complete, all-directional surrounding"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Usage Examples"}</_components.h2>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"周围的人"}</_components.strong>{" (zhōu wéi de rén) - \"people around/nearby\""}</_components.li>{"\n"}<_components.li><_components.strong>{"在我周围"}</_components.strong>{" (zài wǒ zhōu wéi) - \"around me\""}</_components.li>{"\n"}<_components.li><_components.strong>{"周围环境"}</_components.strong>{" (zhōu wéi huán jìng) - \"surrounding environment\""}</_components.li>{"\n"}<_components.li><_components.strong>{"房子周围"}</_components.strong>{" (fáng zi zhōu wéi) - \"around the house\""}</_components.li>{"\n"}<_components.li><_components.strong>{"看看周围"}</_components.strong>{" (kàn kàn zhōu wéi) - \"look around\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Grammar Patterns"}</_components.h2>{"\n"}<_components.p>{"周围 functions as:"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Noun"}</_components.strong>{": 这个周围很安静 - \"this vicinity is quiet\""}</_components.li>{"\n"}<_components.li><_components.strong>{"Spatial preposition"}</_components.strong>{": 在...周围 - \"around...\""}</_components.li>{"\n"}<_components.li><_components.strong>{"Modifier"}</_components.strong>{": 周围的环境 - \"surrounding environment\""}</_components.li>{"\n"}<_components.li><_components.strong>{"Location reference"}</_components.strong>{": 周围有什么 - \"what's around here\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Cultural Context"}</_components.h2>{"\n"}<_components.p>{"周围 reflects Chinese spatial awareness:"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Contextual thinking"}</_components.strong>{": Understanding situations by examining surroundings"}</_components.li>{"\n"}<_components.li><_components.strong>{"Environmental harmony"}</_components.strong>{": Considering how one fits into their environment"}</_components.li>{"\n"}<_components.li><_components.strong>{"Community awareness"}</_components.strong>{": Being conscious of people and things nearby"}</_components.li>{"\n"}<_components.li><_components.strong>{"Holistic perspective"}</_components.strong>{": Seeing oneself as part of a larger whole"}</_components.li>{"\n"}</_components.ul></>;
+  const _components = Object.assign(
+    Object.create(_provideComponents()),
+    props.components,
+  );
+  return (
+    <>
+      <_components.p>
+        {
+          "Describes the environment or area around a specific place; surrounding; vicinity; around."
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Quick Reference"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {
+          "| Aspect         | Info                          |\n| -------------- | ----------------------------- |\n| Pinyin         | zhōu wéi                      |\n| Core meaning   | surrounding; around; vicinity |\n| Part of speech | noun; preposition             |\n| Tone           | 1st + 2nd tone                |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Visual Breakdown"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"周围 combines "}
+        <_components.strong>
+          {"cycle/circumference + encircle"}
+        </_components.strong>
+        {" to show complete surrounding."}
+      </_components.p>
+      {"\n"}
+      <_components.p>
+        {
+          "| Component | Meaning                        | Contribution to 周围              |\n| --------- | ------------------------------ | --------------------------------- |\n| "
+        }
+        <_components.strong>{"周"}</_components.strong>
+        {
+          "    | cycle; circumference; complete | Shows the full circular area      |\n| "
+        }
+        <_components.strong>{"围"}</_components.strong>
+        {
+          "    | surround; encircle; enclose    | Emphasizes the enclosing boundary |"
+        }
+      </_components.p>
+      {"\n"}
+      <_components.h2>{"Character Analysis: 周"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"周 represents "}
+        <_components.strong>
+          {"completeness and thoroughness"}
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"口"}</_components.strong>
+          {" (mouth/enclosure) shows a bounded area"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Internal strokes suggest completeness and attention to detail"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {'Originally meant "dense" or "thorough coverage"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Character Analysis: 围"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"围 shows "}
+        <_components.strong>{"enclosure on all sides"}</_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"囗"}</_components.strong>
+          {" (enclosure) represents the boundary"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"韦"}</_components.strong>
+          {" (leather/soft) shows flexible but complete containment"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Together: something that wraps around completely"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Mnemonic"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"Think of 周围 as "}
+        <_components.strong>
+          {"a complete circle around you"}
+        </_components.strong>
+        {":"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          {"周 (circumference) represents drawing a full circle"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "围 (surround) shows you're at the center, with everything else around you"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {
+            "Like standing in the middle of a field and seeing everything in a 360-degree view"
+          }
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"Or sitting at a table with friends all around you"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          {"The emphasis is on complete, all-directional surrounding"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Usage Examples"}</_components.h2>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"周围的人"}</_components.strong>
+          {' (zhōu wéi de rén) - "people around/nearby"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"在我周围"}</_components.strong>
+          {' (zài wǒ zhōu wéi) - "around me"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"周围环境"}</_components.strong>
+          {' (zhōu wéi huán jìng) - "surrounding environment"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"房子周围"}</_components.strong>
+          {' (fáng zi zhōu wéi) - "around the house"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"看看周围"}</_components.strong>
+          {' (kàn kàn zhōu wéi) - "look around"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Grammar Patterns"}</_components.h2>
+      {"\n"}
+      <_components.p>{"周围 functions as:"}</_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Noun"}</_components.strong>
+          {': 这个周围很安静 - "this vicinity is quiet"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Spatial preposition"}</_components.strong>
+          {': 在...周围 - "around..."'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Modifier"}</_components.strong>
+          {': 周围的环境 - "surrounding environment"'}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Location reference"}</_components.strong>
+          {': 周围有什么 - "what\'s around here"'}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+      {"\n"}
+      <_components.h2>{"Cultural Context"}</_components.h2>
+      {"\n"}
+      <_components.p>
+        {"周围 reflects Chinese spatial awareness:"}
+      </_components.p>
+      {"\n"}
+      <_components.ul>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Contextual thinking"}</_components.strong>
+          {": Understanding situations by examining surroundings"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Environmental harmony"}</_components.strong>
+          {": Considering how one fits into their environment"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Community awareness"}</_components.strong>
+          {": Being conscious of people and things nearby"}
+        </_components.li>
+        {"\n"}
+        <_components.li>
+          <_components.strong>{"Holistic perspective"}</_components.strong>
+          {": Seeing oneself as part of a larger whole"}
+        </_components.li>
+        {"\n"}
+      </_components.ul>
+    </>
+  );
 }
 export default function MDXContent(props: any = {}) {
-  const {wrapper: MDXLayout} = {
+  const { wrapper: MDXLayout } = {
     ..._provideComponents(),
-    ...props.components
+    ...props.components,
   };
-  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+  return MDXLayout ? (
+    <MDXLayout {...props}>
+      <_createMdxContent {...props} />
+    </MDXLayout>
+  ) : (
+    _createMdxContent(props)
+  );
 }
