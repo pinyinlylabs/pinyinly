@@ -468,12 +468,12 @@ export const configs = {
 
 export const plugins = {
   [`@pinyinly`]: plugin,
-  [`@stylistic`]: stylisticPlugin,
-  [`@typescript-eslint`]: tseslint.plugin,
-  [`better-tailwindcss`]: betterTailwindcssPlugin,
-  [`import`]: importPlugin,
-  [`react-compiler`]: reactCompilerPlugin,
-  [`react-hooks`]: reactHooksPlugin,
-  [`react`]: reactPlugin,
-  [`tailwind`]: tailwindPlugin,
+  [`@stylistic`]: stylisticPlugin as ESLint.Plugin,
+  [`@typescript-eslint`]: tseslint.plugin as ESLint.Plugin,
+  [`better-tailwindcss`]: betterTailwindcssPlugin as ESLint.Plugin,
+  [`import`]: importPlugin as ESLint.Plugin,
+  [`react-compiler`]: reactCompilerPlugin as ESLint.Plugin,
+  [`react-hooks`]: reactHooksPlugin as ESLint.Plugin,
+  [`react`]: reactPlugin as ESLint.Plugin,
+  [`tailwind`]: tailwindPlugin as ESLint.Plugin,
 };

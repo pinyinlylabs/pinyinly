@@ -15,6 +15,7 @@
   "private": true,
   "dependencies": {
     "@babel/core": "^7.20.0",
+    "chalk": "^5.5.0",
     "execa": "^9.6.0",
     "lru-cache": "^11.1.0",
     "zod": "^3.25.42"
@@ -33,7 +34,7 @@
     "memfs": "^4.36.0",
     "prettier": "^3.4.2",
     "ts-essentials": "^10.0.3",
-    "typescript": "patch:typescript@npm%3A5.8.3#~/.yarn/patches/typescript-npm-5.8.3-fbd7aef456.patch",
+    "typescript": "patch:typescript@npm%3A5.9.2#~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch",
     "vitest": "^3.2.4"
   }
 }

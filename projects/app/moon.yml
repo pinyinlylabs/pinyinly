@@ -95,7 +95,7 @@ tasks:
   buildVercelExpoSentry:
     script: |
       rsync -a --delete @group(buildVercelExpoOutdir) @group(buildVercelExpoSentryOutdir) &&
-      npx -y @sentry/cli@2.50.2 sourcemaps inject @group(buildVercelExpoSentryOutdir)
+      npx -y @sentry/cli@2.52.0 sourcemaps inject @group(buildVercelExpoSentryOutdir)
     deps:
       - buildVercelExpo
     inputs:
@@ -175,7 +175,7 @@ tasks:
       - buildVercel
 
   deployVercelSentry:
-    command: npx -y @sentry/cli@2.50.2 sourcemaps upload -o pinyinly -p app @group(buildVercelOutdir)
+    command: npx -y @sentry/cli@2.52.0 sourcemaps upload -o pinyinly -p app @group(buildVercelOutdir)
     deps:
       - buildVercel
     options:
@@ -193,7 +193,7 @@ tasks:
       NODE_OPTIONS: --import tsx $NODE_OPTIONS
 
   devInngest:
-    command: npx -y inngest-cli@1.11.5 dev
+    command: npx -y inngest-cli@1.11.7 dev
     preset: watcher
 
   formatAssetJson:
