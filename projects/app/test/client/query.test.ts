@@ -263,6 +263,29 @@ describe(
         });
       }
     });
+
+    test(`retry items are debounced for 5 minutes before becoming available again`, async () => {
+      const targetSkills: Skill[] = [`he:八:eight`];
+      const history: SkillReviewOp[] = [
+        `❌ he:八:eight`, // Get it wrong initially
+        `💤 2m`, // Wait 2 minutes (less than 5 minute debounce)
+      ];
+
+      // Within debounce period, item should be in due queue, not retry queue
+      const queue1 = await simulateSkillReviews({ targetSkills, history });
+      expect(queue1.retryCount).toBe(0); // Not in retry queue yet
+      expect(queue1.dueCount).toBe(1); // In due queue instead
+      expect(queue1.items[0]).toBe(`he:八:eight`); // Still available, but as due item
+
+      // Wait past the debounce period
+      history.push(`💤 4m`); // Total wait is now 6 minutes
+
+      // After debounce period, item should be in retry queue
+      const queue2 = await simulateSkillReviews({ targetSkills, history });
+      expect(queue2.retryCount).toBe(1); // Now in retry queue
+      expect(queue2.dueCount).toBe(0); // No longer in due queue
+      expect(queue2.items[0]).toBe(`he:八:eight`); // Still prioritized at front
+    });
   },
 );
 

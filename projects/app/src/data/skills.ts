@@ -22,6 +22,7 @@ import {
 } from "@pinyinly/lib/collections";
 import { invariant } from "@pinyinly/lib/invariant";
 import type { Duration } from "date-fns";
+import { add } from "date-fns/add";
 import { sub } from "date-fns/sub";
 import { subDays } from "date-fns/subDays";
 import type { DeepReadonly } from "ts-essentials";
@@ -602,7 +603,14 @@ export function skillReviewQueue({
     } else {
       const skillRating = latestSkillRatings.get(skill);
       if (skillRating?.rating === Rating.Again) {
-        learningOrderRetry.push([skill, skillRating.createdAt]);
+        const debounceEndTime = add(skillRating.createdAt, skillRetryDebounce);
+        if (debounceEndTime <= now) {
+          // Debounce period has passed, treat as retry
+          learningOrderRetry.push([skill, skillRating.createdAt]);
+        } else {
+          // Still in debounce period, treat as due at debounce end time
+          learningOrderDue.push([skill, debounceEndTime]);
+        }
       } else if (srsState.nextReviewAt > now) {
         // Check if it should be the new newDueAt.
         if (newDueAt == null || newDueAt > srsState.nextReviewAt) {
@@ -867,6 +875,13 @@ export function skillKindToShorthand(skillKind: SkillKind): string {
  * You get 1 day to review a skill before it becomes over-due.
  */
 export const skillDueWindow: Duration = { hours: 24 };
+
+/**
+ * Minimum time to wait before retry items (incorrect answers) become available
+ * again. This prevents consecutively asking related questions that would make
+ * the answers too obvious.
+ */
+export const skillRetryDebounce: Duration = { minutes: 5 };
 
 export function isOverdue(srsState: SrsStateType, now: Date): boolean {
   return srsState.nextReviewAt < sub(now, skillDueWindow);
