@@ -41,7 +41,7 @@ function hanziWordToPath(hanziWord: HanziWord): string {
 
 // prettier-ignore
 const registry: Record<string, MdxComponentType> = {
-  // <pyly-glob-template glob="./wiki/**/*.mdx.tsx" template="  \"${relpathWithoutExt}\": lazyMdx(() => import(`${path}`)),">
+  // <pyly-glob-template glob="./wiki/**/*.mdx.tsx" template="  \"${relpathWithoutExt.split('.')[0]}\": lazyMdx(() => import(`${path}`)),">
   "㐅/~five/meaning": lazyMdx(() => import(`./wiki/㐅/~five/meaning.mdx.tsx`)),
   "䒑/~grass/meaning": lazyMdx(() => import(`./wiki/䒑/~grass/meaning.mdx.tsx`)),
   "一/~one/meaning": lazyMdx(() => import(`./wiki/一/~one/meaning.mdx.tsx`)),

@@ -22,14 +22,43 @@ workspace:
       deploy: "deployVercelVercel"
 
 tasks:
+  codegen:
+    deps:
+      - codegenMdx
+      - codegenExpoRouterTypes
+
+  codegenMdx:
+    description: "Precompile wiki MDX files to TSX for faster builds"
+    command: "tsx bin/codegenMdx.ts"
+    inputs:
+      - "src/**/*.mdx"
+      - "bin/codegenMdx.ts"
+    outputs:
+      - "src/**/*.mdx.tsx"
+
+  codegenExpoRouterTypes:
+    # The recommended command from https://docs.expo.dev/router/reference/typed-routes/#type-generation
+    command: yarn expo customize tsconfig.json
+    inputs:
+      - "@group(expoCliEnv)"
+      - "*.*"
+      - "{api,assets,public,src}/**/*"
+    env:
+      # Fixes: (node:97180) Warning: To load an ES module, set "type": "module"
+      # in the package.json or use the .mjs extension.
+      #
+      # Pass $NODE_OPTIONS to support VS Code "JavaScript Debug Terminal".
+      NODE_OPTIONS: --import tsx $NODE_OPTIONS
+
   build:
     deps:
       - buildEasUpdate
       - buildVercel
-      - precompileWikiMdx
 
   buildEasUpdate:
     command: yarn expo export -p ios -p android --source-maps --output-dir @group(buildEasUpdateOutdir)
+    deps:
+      - ~:codegen
     options:
       envFile: .env.local
     outputs:
@@ -50,6 +79,8 @@ tasks:
       mkdir -p @group(buildVercelExpoOutdir) &&
       rm -rf @group(buildVercelExpoOutdir) &&
       yarn expo export -p web --source-maps --output-dir @group(buildVercelExpoOutdir)
+    deps:
+      - ~:codegen
     inputs:
       - "@group(expoCliEnv)"
       - "*.*"
@@ -231,6 +262,8 @@ tasks:
 
   expoDoctor:
     command: npx -y expo-doctor@1.15.1
+    deps:
+      - ~:codegen
     env:
       # Don't check that all the expo-* packages are the latest versions. That's
       # already handled by renovate in a way that doesn't break PR builds when a
@@ -242,49 +275,22 @@ tasks:
       # disabled otherwise the daily CI won't run this.
       cache: false
 
-  buildExpoRouterTypes:
-    # The recommended command from https://docs.expo.dev/router/reference/typed-routes/#type-generation
-    command: yarn expo customize tsconfig.json
-    inputs:
-      - "@group(expoCliEnv)"
-      - "*.*"
-      - "{api,assets,public,src}/**/*"
-    env:
-      # Fixes: (node:97180) Warning: To load an ES module, set "type": "module"
-      # in the package.json or use the .mjs extension.
-      #
-      # Pass $NODE_OPTIONS to support VS Code "JavaScript Debug Terminal".
-      NODE_OPTIONS: --import tsx $NODE_OPTIONS
-
   test:
     env:
       NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
+    deps:
+      - ~:codegen
     options:
       envFile: .env.local
 
   typecheck:
     deps:
-      - ~:buildExpoRouterTypes
-
-  # Precompile wiki MDX files to TSX for faster builds
-  precompileWikiMdx:
-    command: "tsx bin/precompileWikiMdx.ts"
-    inputs:
-      - "src/**/*.mdx"
-      - "bin/precompileWikiMdx.ts"
-    outputs:
-      - "src/**/*.mdx.tsx"
-
-  # Combined task to precompile MDX files
-  precompileMdx:
-    deps:
-      - precompileWikiMdx
-    description: "Precompile all MDX files to TSX"
+      - ~:codegen
 
   lint:
     deps:
       # Lint does type-checking, so the Expo router types need to be generated first.
-      - ~:buildExpoRouterTypes
+      - ~:codegen
 
 tags:
   - eslint

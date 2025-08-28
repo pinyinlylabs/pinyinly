@@ -1,6 +1,7 @@
 import { FlatCompat } from "@eslint/eslintrc";
 import inngestPlugin from "@inngest/eslint-plugin";
 import { config, configs, plugins } from "@pinyinly/eslint-rules";
+import { mdxRecommended } from "@pinyinly/mdx/eslint";
 import queryPlugin from "@tanstack/eslint-plugin-query";
 import drizzlePlugin from "eslint-plugin-drizzle";
 import { builtinModules } from "node:module";
@@ -24,6 +25,7 @@ export default config(
   ...configs.esm,
   ...configs.react,
   ...configs.tailwind,
+  ...mdxRecommended,
 
   ...queryPlugin.configs[`flat/recommended`],
   ...compat.config(drizzlePlugin.configs.recommended),
