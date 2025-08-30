@@ -40,7 +40,7 @@ async function main() {
         src: mdxContent,
       });
       onTheFlySuccess++;
-    } catch (error) {
+    } catch {
       onTheFlyErrors++;
     }
   }
@@ -59,7 +59,7 @@ async function main() {
       const compiledFile = mdxFile.replace(/\.mdx$/, `.mdx.tsx`);
       await readFile(compiledFile, `utf-8`);
       precompiledSuccess++;
-    } catch (error) {
+    } catch {
       precompiledErrors++;
     }
   }
@@ -81,7 +81,7 @@ async function main() {
         src: mdxContent,
       });
       precompilationSuccess++;
-    } catch (error) {
+    } catch {
       precompilationErrors++;
     }
   }
