@@ -1,130 +1,15 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(
-    Object.create(_provideComponents()),
-    props.components,
-  );
-  return (
-    <>
-      <_components.p>
-        {"To like; to enjoy; to be fond of; to prefer."}
-      </_components.p>
-      {"\n"}
-      <_components.h2>{"Quick Reference"}</_components.h2>
-      {"\n"}
-      <_components.p>
-        {
-          "| Aspect         | Info                    |\n| -------------- | ----------------------- |\n| Pinyin         | hào                     |\n| Core meaning   | like; enjoy; be fond of |\n| Part of speech | verb                    |\n| Tone           | fourth tone (falling)   |"
-        }
-      </_components.p>
-      {"\n"}
-      <_components.h2>{"Visual Breakdown"}</_components.h2>
-      {"\n"}
-      <_components.p>
-        {"好 uses the same "}
-        <_components.strong>{"woman + child"}</_components.strong>
-        {" structure but with different pronunciation and meaning."}
-      </_components.p>
-      {"\n"}
-      <_components.p>
-        {
-          "| Component | Visual Description                                 |\n| --------- | -------------------------------------------------- |\n| "
-        }
-        <_components.strong>{"女"}</_components.strong>
-        {"    | Woman (女) - represents affection, caring feelings |\n| "}
-        <_components.strong>{"子"}</_components.strong>
-        {"    | Child (子) - represents the object of affection    |"}
-      </_components.p>
-      {"\n"}
-      <_components.h2>{"Mnemonic"}</_components.h2>
-      {"\n"}
-      <_components.p>
-        {"Think of 好 (hào) as "}
-        <_components.strong>
-          {'"the way a woman feels about her child"'}
-        </_components.strong>
-        {" - deep affection and preference:"}
-      </_components.p>
-      {"\n"}
-      <_components.ul>
-        {"\n"}
-        <_components.li>
-          {'Same visual as 好 (hǎo) "good" but pronounced differently'}
-        </_components.li>
-        {"\n"}
-        <_components.li>
-          {"The woman's natural love and preference for her child"}
-        </_components.li>
-        {"\n"}
-        <_components.li>
-          {"Shows strong positive feelings and attachment"}
-        </_components.li>
-        {"\n"}
-        <_components.li>
-          {"Like having a favorite or preferred choice"}
-        </_components.li>
-        {"\n"}
-        <_components.li>
-          {"The emotional bond that makes you want to be near something"}
-        </_components.li>
-        {"\n"}
-      </_components.ul>
-      {"\n"}
-      <_components.p>
-        {
-          "This demonstrates how the same character can have related but distinct meanings through different\npronunciations."
-        }
-      </_components.p>
-      {"\n"}
-      <_components.h2>{"Usage Examples"}</_components.h2>
-      {"\n"}
-      <_components.ul>
-        {"\n"}
-        <_components.li>
-          <_components.strong>{"好奇"}</_components.strong>
-          {' (hào qí) - "curious; inquisitive"'}
-        </_components.li>
-        {"\n"}
-        <_components.li>
-          <_components.strong>{"爱好"}</_components.strong>
-          {' (ài hào) - "hobby; interest; what one likes"'}
-        </_components.li>
-        {"\n"}
-        <_components.li>
-          <_components.strong>{"好学"}</_components.strong>
-          {' (hào xué) - "studious; eager to learn"'}
-        </_components.li>
-        {"\n"}
-        <_components.li>
-          <_components.strong>{"癖好"}</_components.strong>
-          {' (pǐ hào) - "quirk; personal preference"'}
-        </_components.li>
-        {"\n"}
-      </_components.ul>
-      {"\n"}
-      <_components.h2>{"Grammar Note"}</_components.h2>
-      {"\n"}
-      <_components.p>
-        {
-          "This meaning of 好 (hào) is primarily used in compound words rather than standalone. It forms part\nof words that describe preferences, interests, and tendencies, reflecting deeper character traits\nand inclinations."
-        }
-      </_components.p>
-    </>
-  );
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p>{"To like; to enjoy; to be fond of; to prefer."}</_components.p>{"\n"}<_components.h2>{"Quick Reference"}</_components.h2>{"\n"}<_components.p>{"| Aspect         | Info                    |\n| -------------- | ----------------------- |\n| Pinyin         | hào                     |\n| Core meaning   | like; enjoy; be fond of |\n| Part of speech | verb                    |\n| Tone           | fourth tone (falling)   |"}</_components.p>{"\n"}<_components.h2>{"Visual Breakdown"}</_components.h2>{"\n"}<_components.p>{"好 uses the same "}<_components.strong>{"woman + child"}</_components.strong>{" structure but with different pronunciation and meaning."}</_components.p>{"\n"}<_components.p>{"| Component | Visual Description                                 |\n| --------- | -------------------------------------------------- |\n| "}<_components.strong>{"女"}</_components.strong>{"    | Woman (女) - represents affection, caring feelings |\n| "}<_components.strong>{"子"}</_components.strong>{"    | Child (子) - represents the object of affection    |"}</_components.p>{"\n"}<_components.h2>{"Mnemonic"}</_components.h2>{"\n"}<_components.p>{"Think of 好 (hào) as "}<_components.strong>{"\"the way a woman feels about her child\""}</_components.strong>{" - deep affection and preference:"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"Same visual as 好 (hǎo) \"good\" but pronounced differently"}</_components.li>{"\n"}<_components.li>{"The woman's natural love and preference for her child"}</_components.li>{"\n"}<_components.li>{"Shows strong positive feelings and attachment"}</_components.li>{"\n"}<_components.li>{"Like having a favorite or preferred choice"}</_components.li>{"\n"}<_components.li>{"The emotional bond that makes you want to be near something"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p>{"This demonstrates how the same character can have related but distinct meanings through different\npronunciations."}</_components.p>{"\n"}<_components.h2>{"Usage Examples"}</_components.h2>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"好奇"}</_components.strong>{" (hào qí) - \"curious; inquisitive\""}</_components.li>{"\n"}<_components.li><_components.strong>{"爱好"}</_components.strong>{" (ài hào) - \"hobby; interest; what one likes\""}</_components.li>{"\n"}<_components.li><_components.strong>{"好学"}</_components.strong>{" (hào xué) - \"studious; eager to learn\""}</_components.li>{"\n"}<_components.li><_components.strong>{"癖好"}</_components.strong>{" (pǐ hào) - \"quirk; personal preference\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Grammar Note"}</_components.h2>{"\n"}<_components.p>{"This meaning of 好 (hào) is primarily used in compound words rather than standalone. It forms part\nof words that describe preferences, interests, and tendencies, reflecting deeper character traits\nand inclinations."}</_components.p></>;
 }
 export default function MDXContent(props: any = {}) {
-  const { wrapper: MDXLayout } = {
+  const {wrapper: MDXLayout} = {
     ..._provideComponents(),
-    ...props.components,
+    ...props.components
   };
-  return MDXLayout ? (
-    <MDXLayout {...props}>
-      <_createMdxContent {...props} />
-    </MDXLayout>
-  ) : (
-    _createMdxContent(props)
-  );
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
 }

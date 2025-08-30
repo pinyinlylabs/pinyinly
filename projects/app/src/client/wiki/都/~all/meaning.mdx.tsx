@@ -1,152 +1,15 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(
-    Object.create(_provideComponents()),
-    props.components,
-  );
-  return (
-    <>
-      <_components.p>
-        {"All; every; everyone; everything; completely; entirely."}
-      </_components.p>
-      {"\n"}
-      <_components.h2>{"Quick Reference"}</_components.h2>
-      {"\n"}
-      <_components.p>
-        {
-          "| Aspect         | Info                   |\n| -------------- | ---------------------- |\n| Pinyin         | dōu                    |\n| Core meaning   | all; every; completely |\n| Part of speech | adverb                 |\n| Tone           | first tone (high flat) |"
-        }
-      </_components.p>
-      {"\n"}
-      <_components.h2>{"Visual Breakdown"}</_components.h2>
-      {"\n"}
-      <_components.p>
-        {"都 combines "}
-        <_components.strong>{"person + city"}</_components.strong>
-        {" to represent gathering everyone together."}
-      </_components.p>
-      {"\n"}
-      <_components.p>
-        {
-          "| Component | Visual Description                                          |\n| --------- | ----------------------------------------------------------- |\n| "
-        }
-        <_components.strong>{"者"}</_components.strong>
-        {
-          "    | Person/one who (者) - indicates people or entities          |\n| "
-        }
-        <_components.strong>{"阝"}</_components.strong>
-        {"    | City radical (阝) - represents community or gathering place |"}
-      </_components.p>
-      {"\n"}
-      <_components.h2>{"Mnemonic"}</_components.h2>
-      {"\n"}
-      <_components.p>
-        {"Think of 都 as "}
-        <_components.strong>
-          {'"everyone in the city" or "all people gathered together"'}
-        </_components.strong>
-        {":"}
-      </_components.p>
-      {"\n"}
-      <_components.ul>
-        {"\n"}
-        <_components.li>
-          {"The person component (者) represents individuals or entities"}
-        </_components.li>
-        {"\n"}
-        <_components.li>
-          {"The city radical (阝) shows a place where everyone comes together"}
-        </_components.li>
-        {"\n"}
-        <_components.li>
-          {"Like all the residents of a city or community"}
-        </_components.li>
-        {"\n"}
-        <_components.li>
-          {"Shows the concept of totality through collective gathering"}
-        </_components.li>
-        {"\n"}
-      </_components.ul>
-      {"\n"}
-      <_components.h2>{"Usage Examples"}</_components.h2>
-      {"\n"}
-      <_components.ul>
-        {"\n"}
-        <_components.li>
-          <_components.strong>{"我们都来了"}</_components.strong>
-          {' (wǒ men dōu lái le) - "We all came"'}
-        </_components.li>
-        {"\n"}
-        <_components.li>
-          <_components.strong>{"都是学生"}</_components.strong>
-          {' (dōu shì xuéshēng) - "All are students"'}
-        </_components.li>
-        {"\n"}
-        <_components.li>
-          <_components.strong>{"都没有"}</_components.strong>
-          {' (dōu méi yǒu) - "All don\'t have" / "None have"'}
-        </_components.li>
-        {"\n"}
-        <_components.li>
-          <_components.strong>{"都可以"}</_components.strong>
-          {' (dōu kě yǐ) - "All can" / "Everything is okay"'}
-        </_components.li>
-        {"\n"}
-      </_components.ul>
-      {"\n"}
-      <_components.h2>{"Grammar Notes"}</_components.h2>
-      {"\n"}
-      <_components.p>
-        {"都 is crucial for expressing totality and inclusion:"}
-      </_components.p>
-      {"\n"}
-      <_components.ul>
-        {"\n"}
-        <_components.li>
-          {"Always comes before the verb it modifies"}
-        </_components.li>
-        {"\n"}
-        <_components.li>
-          {"Can refer to all members of a group previously mentioned"}
-        </_components.li>
-        {"\n"}
-        <_components.li>
-          {"Used with plural subjects to emphasize totality"}
-        </_components.li>
-        {"\n"}
-        <_components.li>
-          {"Essential for generalizations and universal statements"}
-        </_components.li>
-        {"\n"}
-        <_components.li>
-          {"Often used with 们 (men) to emphasize group inclusivity"}
-        </_components.li>
-        {"\n"}
-      </_components.ul>
-      {"\n"}
-      <_components.h2>{"Cultural Context"}</_components.h2>
-      {"\n"}
-      <_components.p>
-        {
-          "都 reflects the Chinese cultural emphasis on group unity and collective identity, showing how\nindividual parts come together to form a unified whole."
-        }
-      </_components.p>
-    </>
-  );
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p>{"All; every; everyone; everything; completely; entirely."}</_components.p>{"\n"}<_components.h2>{"Quick Reference"}</_components.h2>{"\n"}<_components.p>{"| Aspect         | Info                   |\n| -------------- | ---------------------- |\n| Pinyin         | dōu                    |\n| Core meaning   | all; every; completely |\n| Part of speech | adverb                 |\n| Tone           | first tone (high flat) |"}</_components.p>{"\n"}<_components.h2>{"Visual Breakdown"}</_components.h2>{"\n"}<_components.p>{"都 combines "}<_components.strong>{"person + city"}</_components.strong>{" to represent gathering everyone together."}</_components.p>{"\n"}<_components.p>{"| Component | Visual Description                                          |\n| --------- | ----------------------------------------------------------- |\n| "}<_components.strong>{"者"}</_components.strong>{"    | Person/one who (者) - indicates people or entities          |\n| "}<_components.strong>{"阝"}</_components.strong>{"    | City radical (阝) - represents community or gathering place |"}</_components.p>{"\n"}<_components.h2>{"Mnemonic"}</_components.h2>{"\n"}<_components.p>{"Think of 都 as "}<_components.strong>{"\"everyone in the city\" or \"all people gathered together\""}</_components.strong>{":"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"The person component (者) represents individuals or entities"}</_components.li>{"\n"}<_components.li>{"The city radical (阝) shows a place where everyone comes together"}</_components.li>{"\n"}<_components.li>{"Like all the residents of a city or community"}</_components.li>{"\n"}<_components.li>{"Shows the concept of totality through collective gathering"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Usage Examples"}</_components.h2>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"我们都来了"}</_components.strong>{" (wǒ men dōu lái le) - \"We all came\""}</_components.li>{"\n"}<_components.li><_components.strong>{"都是学生"}</_components.strong>{" (dōu shì xuéshēng) - \"All are students\""}</_components.li>{"\n"}<_components.li><_components.strong>{"都没有"}</_components.strong>{" (dōu méi yǒu) - \"All don't have\" / \"None have\""}</_components.li>{"\n"}<_components.li><_components.strong>{"都可以"}</_components.strong>{" (dōu kě yǐ) - \"All can\" / \"Everything is okay\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Grammar Notes"}</_components.h2>{"\n"}<_components.p>{"都 is crucial for expressing totality and inclusion:"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"Always comes before the verb it modifies"}</_components.li>{"\n"}<_components.li>{"Can refer to all members of a group previously mentioned"}</_components.li>{"\n"}<_components.li>{"Used with plural subjects to emphasize totality"}</_components.li>{"\n"}<_components.li>{"Essential for generalizations and universal statements"}</_components.li>{"\n"}<_components.li>{"Often used with 们 (men) to emphasize group inclusivity"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Cultural Context"}</_components.h2>{"\n"}<_components.p>{"都 reflects the Chinese cultural emphasis on group unity and collective identity, showing how\nindividual parts come together to form a unified whole."}</_components.p></>;
 }
 export default function MDXContent(props: any = {}) {
-  const { wrapper: MDXLayout } = {
+  const {wrapper: MDXLayout} = {
     ..._provideComponents(),
-    ...props.components,
+    ...props.components
   };
-  return MDXLayout ? (
-    <MDXLayout {...props}>
-      <_createMdxContent {...props} />
-    </MDXLayout>
-  ) : (
-    _createMdxContent(props)
-  );
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
 }

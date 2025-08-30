@@ -1,144 +1,15 @@
 // @ts-nocheck
 /*@jsxRuntime automatic*/
 /*@jsxImportSource react*/
-import { useMDXComponents as _provideComponents } from "@/client/hooks/useMDXComponents";
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
 function _createMdxContent(props: any) {
-  const _components = Object.assign(
-    Object.create(_provideComponents()),
-    props.components,
-  );
-  return (
-    <>
-      <_components.p>
-        {"A part or division of a building enclosed by walls; a room; chamber."}
-      </_components.p>
-      {"\n"}
-      <_components.h2>{"Quick Reference"}</_components.h2>
-      {"\n"}
-      <_components.p>
-        {
-          "| Aspect         | Info                        |\n| -------------- | --------------------------- |\n| Pinyin         | shì                         |\n| Core meaning   | room; chamber; indoor space |\n| Part of speech | noun                        |\n| Tone           | fourth tone (falling)       |"
-        }
-      </_components.p>
-      {"\n"}
-      <_components.h2>{"Visual Breakdown"}</_components.h2>
-      {"\n"}
-      <_components.p>
-        {"室 combines "}
-        <_components.strong>{"roof + arrival"}</_components.strong>
-        {" to show enclosed indoor space."}
-      </_components.p>
-      {"\n"}
-      <_components.p>
-        {
-          "| Component | Visual Description                                     |\n| --------- | ------------------------------------------------------ |\n| "
-        }
-        <_components.strong>{"宀"}</_components.strong>
-        {"    | Roof radical (宀) - indicates building or shelter      |\n| "}
-        <_components.strong>{"至"}</_components.strong>
-        {"    | Arrive/reach (至) - suggests a destination or endpoint |"}
-      </_components.p>
-      {"\n"}
-      <_components.h2>{"Mnemonic"}</_components.h2>
-      {"\n"}
-      <_components.p>
-        {"Think of 室 as "}
-        <_components.strong>
-          {"a place under a roof where you arrive and stay"}
-        </_components.strong>
-        {":"}
-      </_components.p>
-      {"\n"}
-      <_components.ul>
-        {"\n"}
-        <_components.li>
-          {"The roof radical (宀) shows this is about indoor, covered spaces"}
-        </_components.li>
-        {"\n"}
-        <_components.li>
-          {'The "arrive" component (至) suggests reaching a destination'}
-        </_components.li>
-        {"\n"}
-        <_components.li>
-          {"Like arriving at a room where you can stay and rest"}
-        </_components.li>
-        {"\n"}
-        <_components.li>
-          {"A enclosed space under a roof that serves as a destination"}
-        </_components.li>
-        {"\n"}
-      </_components.ul>
-      {"\n"}
-      <_components.p>
-        {
-          "This captures the concept of a room as both a physical shelter and a place of purpose or\ndestination."
-        }
-      </_components.p>
-      {"\n"}
-      <_components.h2>{"Usage Examples"}</_components.h2>
-      {"\n"}
-      <_components.ul>
-        {"\n"}
-        <_components.li>
-          <_components.strong>{"教室"}</_components.strong>
-          {' (jiào shì) - "classroom"'}
-        </_components.li>
-        {"\n"}
-        <_components.li>
-          <_components.strong>{"办公室"}</_components.strong>
-          {' (bàn gōng shì) - "office"'}
-        </_components.li>
-        {"\n"}
-        <_components.li>
-          <_components.strong>{"卧室"}</_components.strong>
-          {' (wò shì) - "bedroom"'}
-        </_components.li>
-        {"\n"}
-        <_components.li>
-          <_components.strong>{"室内"}</_components.strong>
-          {' (shì nèi) - "indoor; inside the room"'}
-        </_components.li>
-        {"\n"}
-      </_components.ul>
-      {"\n"}
-      <_components.h2>{"Cultural Context"}</_components.h2>
-      {"\n"}
-      <_components.p>
-        {"室 appears in many compound words for specific types of rooms:"}
-      </_components.p>
-      {"\n"}
-      <_components.ul>
-        {"\n"}
-        <_components.li>
-          {"Essential for describing building layouts and spaces"}
-        </_components.li>
-        {"\n"}
-        <_components.li>
-          {"Used in both residential and commercial contexts"}
-        </_components.li>
-        {"\n"}
-        <_components.li>
-          {"Often combined with activity words to specify room function"}
-        </_components.li>
-        {"\n"}
-        <_components.li>
-          {"Reflects Chinese attention to organized, purposeful use of space"}
-        </_components.li>
-        {"\n"}
-      </_components.ul>
-    </>
-  );
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p>{"A part or division of a building enclosed by walls; a room; chamber."}</_components.p>{"\n"}<_components.h2>{"Quick Reference"}</_components.h2>{"\n"}<_components.p>{"| Aspect         | Info                        |\n| -------------- | --------------------------- |\n| Pinyin         | shì                         |\n| Core meaning   | room; chamber; indoor space |\n| Part of speech | noun                        |\n| Tone           | fourth tone (falling)       |"}</_components.p>{"\n"}<_components.h2>{"Visual Breakdown"}</_components.h2>{"\n"}<_components.p>{"室 combines "}<_components.strong>{"roof + arrival"}</_components.strong>{" to show enclosed indoor space."}</_components.p>{"\n"}<_components.p>{"| Component | Visual Description                                     |\n| --------- | ------------------------------------------------------ |\n| "}<_components.strong>{"宀"}</_components.strong>{"    | Roof radical (宀) - indicates building or shelter      |\n| "}<_components.strong>{"至"}</_components.strong>{"    | Arrive/reach (至) - suggests a destination or endpoint |"}</_components.p>{"\n"}<_components.h2>{"Mnemonic"}</_components.h2>{"\n"}<_components.p>{"Think of 室 as "}<_components.strong>{"a place under a roof where you arrive and stay"}</_components.strong>{":"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"The roof radical (宀) shows this is about indoor, covered spaces"}</_components.li>{"\n"}<_components.li>{"The \"arrive\" component (至) suggests reaching a destination"}</_components.li>{"\n"}<_components.li>{"Like arriving at a room where you can stay and rest"}</_components.li>{"\n"}<_components.li>{"A enclosed space under a roof that serves as a destination"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p>{"This captures the concept of a room as both a physical shelter and a place of purpose or\ndestination."}</_components.p>{"\n"}<_components.h2>{"Usage Examples"}</_components.h2>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"教室"}</_components.strong>{" (jiào shì) - \"classroom\""}</_components.li>{"\n"}<_components.li><_components.strong>{"办公室"}</_components.strong>{" (bàn gōng shì) - \"office\""}</_components.li>{"\n"}<_components.li><_components.strong>{"卧室"}</_components.strong>{" (wò shì) - \"bedroom\""}</_components.li>{"\n"}<_components.li><_components.strong>{"室内"}</_components.strong>{" (shì nèi) - \"indoor; inside the room\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.h2>{"Cultural Context"}</_components.h2>{"\n"}<_components.p>{"室 appears in many compound words for specific types of rooms:"}</_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"Essential for describing building layouts and spaces"}</_components.li>{"\n"}<_components.li>{"Used in both residential and commercial contexts"}</_components.li>{"\n"}<_components.li>{"Often combined with activity words to specify room function"}</_components.li>{"\n"}<_components.li>{"Reflects Chinese attention to organized, purposeful use of space"}</_components.li>{"\n"}</_components.ul></>;
 }
 export default function MDXContent(props: any = {}) {
-  const { wrapper: MDXLayout } = {
+  const {wrapper: MDXLayout} = {
     ..._provideComponents(),
-    ...props.components,
+    ...props.components
   };
-  return MDXLayout ? (
-    <MDXLayout {...props}>
-      <_createMdxContent {...props} />
-    </MDXLayout>
-  ) : (
-    _createMdxContent(props)
-  );
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
 }
