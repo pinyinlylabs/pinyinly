@@ -193,7 +193,7 @@ tasks:
       NODE_OPTIONS: --import tsx $NODE_OPTIONS
 
   devInngest:
-    command: npx -y inngest-cli@1.11.7 dev
+    command: npx -y inngest-cli@1.11.8 dev
     preset: watcher
 
   formatAssetJson:
