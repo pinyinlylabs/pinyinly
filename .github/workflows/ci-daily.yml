@@ -37,3 +37,7 @@ jobs:
           # that all files are seen as "affected" by moon ci, and thus all CI
           # tests are run.
           PYLY_EMPTY_GIT_TREE: 4b825dc642cb6eb9a060e54bf8d69288fbee4904
+
+      - name: 🧾 Results
+        uses: bradleyayers/moon-ci-retrospect@main
+        if: ${{ always() }}
