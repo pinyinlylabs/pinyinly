@@ -16,6 +16,8 @@ import { importPathRewrite as importPathRewriteRule } from "./import-path-rewrit
 import { nameof as nameofRule } from "./nameof.js";
 import { noRestrictedCssClasses as noRestrictedCssClassesRule } from "./no-restricted-css-classes.js";
 
+export type { InfiniteDepthConfigWithExtends } from "typescript-eslint";
+
 export const config = tseslint.config;
 
 export const plugin: ESLint.Plugin = {

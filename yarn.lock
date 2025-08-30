@@ -1973,7 +1973,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@expo/metro-config@npm:0.20.17, @expo/metro-config@npm:^0.20.17, @expo/metro-config@npm:~0.20.17":
+"@expo/metro-config@npm:0.20.17, @expo/metro-config@npm:~0.20.17":
   version: 0.20.17
   resolution: "@expo/metro-config@npm:0.20.17"
   dependencies:
@@ -4537,7 +4537,6 @@ __metadata:
     "@electric-sql/pglite": "npm:^0.3.0"
     "@eslint/eslintrc": "npm:^3.3.0"
     "@expo/html-elements": "patch:@expo/html-elements@npm%3A0.12.5#~/.yarn/patches/@expo-html-elements-npm-0.12.5-ada5f53f49.patch"
-    "@expo/metro-config": "npm:^0.20.17"
     "@expo/metro-runtime": "npm:~5.0.4"
     "@inkjs/ui": "npm:^2.0.0"
     "@inngest/eslint-plugin": "npm:^0.0.7"
