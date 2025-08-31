@@ -18,27 +18,9 @@
 - **Emails** (`projects/emails/`): React Email templates, previewable via local dev server.
 - **ESLint Rules** (`projects/eslint-rules/`): Custom lint rules for code consistency.
 
-## Developer Workflows
+## CRITICAL: pre-commit checks
 
-- **Typechecking:** `moon run <project>:typecheck`
-- **Testing:** `moon run <project>:test [-- <args>]` (uses Vitest)
-- **Linting:** `moon run <project>:lint [-- <args>]`
-- **Prettier:** `moon run <project>:prettier` / `moon run <project>:prettierCheck`
-- **Build Bill of Materials:** `moon run app:buildBillOfMaterials`
-- **Emails Dev:** `moon run dev` in `projects/emails/` (see README)
-- **No need to cd:** All moon commands can be run from any directory.
-
-## Critical: Code Formatting Before Commits
-
-**ALWAYS run `moon run :prettier` before committing any changes.** This is especially important
-when:
-
-- Editing or creating MDX files (wiki content)
-- Making any changes to Markdown files
-- Modifying any source code files
-
-**Failure to run prettier will cause CI build failures.** The command `moon run :prettier` formats
-all files across all projects globally.
+Before committing code, always manually run `moon ci`. Only open a PR after this passes.
 
 ## Project-Specific Patterns & Conventions
 
@@ -55,26 +37,6 @@ all files across all projects globally.
   Content is auto-loaded.
 - **Tests:** Mirror `src/` structure in `test/` (e.g., `src/util/date.ts` →
   `test/util/date.test.ts`).
-
-## Audio Sprite Rules (expo-audio-sprites)
-
-- **Rule-based assignment:** Use regex and template strings in `manifest.json` to group audio files
-  into sprites.
-- **Babel Plugin:** Transforms `require()` calls for audio files to sprite objects at build time.
-- **API:** See `expo-audio-sprites/README.md` and `RULES_FEATURE.md` for rule syntax and usage.
-
-## Design Decisions
-
-- **Multiple Meanings:** Words with distinct meanings are split into separate skills.
-- **Mistake History:** Mistakes are tracked independently from skill ratings for flexibility and
-  accuracy.
-- **SRS Algorithm:** Uses graph-based, trickle-down spaced repetition (see
-  `srs-algorithm.instructions.md`).
-
-## Integration & External Dependencies
-
-- **Drizzle ORM:** Used for database migrations in `projects/app/drizzle/`.
-- **TRPC, React Query, Sentry, Expo, etc.:** See `package.json` for full dependency list.
 
 ## References
 
