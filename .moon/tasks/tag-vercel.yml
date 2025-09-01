@@ -14,9 +14,9 @@ tasks:
       cache: false
   deploy:
     script: |
-      npx -y vercel@44.7.3 pull --yes ${PYLY_VERCEL_PREVIEW+--environment=preview} ${PYLY_VERCEL_PROD+--environment=production} ${VERCEL_TOKEN:+--token=$VERCEL_TOKEN} &&
-      npx -y vercel@44.7.3 build ${PYLY_VERCEL_PROD+--prod} &&
-      npx -y vercel@44.7.3 deploy --prebuilt ${PYLY_VERCEL_PROD+--prod} ${VERCEL_TOKEN:+--token=$VERCEL_TOKEN} --archive=tgz
+      npx -y vercel@46.1.1 pull --yes ${PYLY_VERCEL_PREVIEW+--environment=preview} ${PYLY_VERCEL_PROD+--environment=production} ${VERCEL_TOKEN:+--token=$VERCEL_TOKEN} &&
+      npx -y vercel@46.1.1 build ${PYLY_VERCEL_PROD+--prod} &&
+      npx -y vercel@46.1.1 deploy --prebuilt ${PYLY_VERCEL_PROD+--prod} ${VERCEL_TOKEN:+--token=$VERCEL_TOKEN} --archive=tgz
     inputs:
       - $VERCEL_*
       - $PYLY_VERCEL_PREVIEW # Use to turn on "preview" mode.
