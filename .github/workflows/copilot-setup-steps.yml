@@ -34,4 +34,6 @@ jobs:
       - uses: ./.github/actions/setup-tools
 
       - name: Pre-commit hook
-        run: cp ./.github/copilot-precommit.sh .git/hooks/pre-commit
+        run: |
+          cp ./.github/copilot-precommit.sh .git/hooks/pre-commit
+          chmod +x .git/hooks/pre-commit
