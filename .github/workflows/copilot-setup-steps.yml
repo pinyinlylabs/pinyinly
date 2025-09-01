@@ -32,3 +32,6 @@ jobs:
         uses: actions/checkout@v5
 
       - uses: ./.github/actions/setup-tools
+
+      - name: Pre-commit hook
+        run: cp ./.github/copilot-precommit.sh .git/hooks/pre-commit

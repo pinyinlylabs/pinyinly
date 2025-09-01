@@ -15,8 +15,7 @@ The following commands should be used to test the code:
   - Run all lint (and fix): `moon run app:lint`
   - Run file lint: `moon run app:lint -- <filename>`
 
-- Prettier: `moon run app:prettierCheck`
-  - Fix prettier: `moon run app:prettier`
+- Prettier: `moon run app:prettier`
 
 These can be run from any directory, there's no need to `cd` to a particular directory.
 

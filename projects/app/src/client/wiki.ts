@@ -605,7 +605,6 @@ const registry: Record<string, MdxComponentType> = {
   "化/~transform/meaning": lazyMdx(() => import(`./wiki/化/~transform/meaning.mdx`)),
   "北/~north/meaning": lazyMdx(() => import(`./wiki/北/~north/meaning.mdx`)),
   "北京/~Beijing/meaning": lazyMdx(() => import(`./wiki/北京/~Beijing/meaning.mdx`)),
-  "北京/~beijing/meaning": lazyMdx(() => import(`./wiki/北京/~beijing/meaning.mdx`)),
   "北方/~north/meaning": lazyMdx(() => import(`./wiki/北方/~north/meaning.mdx`)),
   "北边/~northSide/meaning": lazyMdx(() => import(`./wiki/北边/~northSide/meaning.mdx`)),
   "北部/~northernPart/meaning": lazyMdx(() => import(`./wiki/北部/~northernPart/meaning.mdx`)),
