@@ -63,8 +63,16 @@ async function enforceMoonToolchainVersion(ctx) {
  * @param {Context} context
  */
 function enforceConsistentDependenciesAcrossTheProject({ Yarn }) {
+  /** @type {Record<string, string>} */
+  const preferredVersions = {}; // The version to keep.
+
   for (const dependency of Yarn.dependencies()) {
     if (dependency.type === `peerDependencies`) continue;
+
+    // Pick the first version we see as the "preferred" version, otherwise when
+    // there are 2 different dependencies we might just swap them and end up
+    // with the same problem in reverse.
+    preferredVersions[dependency.ident] ??= dependency.range;
 
     for (const otherDependency of Yarn.dependencies({
       ident: dependency.ident,
@@ -75,7 +83,7 @@ function enforceConsistentDependenciesAcrossTheProject({ Yarn }) {
       )
         continue;
 
-      dependency.update(otherDependency.range);
+      dependency.update(preferredVersions[dependency.ident]);
     }
   }
 }
@@ -425,11 +433,12 @@ module.exports = defineConfig({
       "pg@^8.14.0":
         "patch:@types/pg@npm%3A8.11.11#~/.yarn/patches/@types-pg-npm-8.11.11-c5a8a91498.patch",
       "ws@^8.17.1": "^8 <=8.17.x",
-      "yargs@^18.0.0": "^17.0.33",
+      "yargs@^18.0.0": "^17 <=17.x",
     });
     await enforceMoonToolchainVersion(ctx);
     await enforceConsistentAppPnpmAndYarnDependencies(ctx);
     await enforceSingleDependencyVersion(ctx, [
+      /^@expo\//,
       /^@sentry\//,
       /^@vercel\//,
       /^expo-/,

@@ -15,7 +15,6 @@ The following commands should be used to test the code:
   - Run all lint (and fix): `moon run expo-audio-sprites:lint`
   - Run file lint: `moon run expo-audio-sprites:lint -- <filename>`
 
-- Prettier: `moon run expo-audio-sprites:prettierCheck`
-  - Fix prettier: `moon run expo-audio-sprites:prettier`
+- Prettier: `moon run expo-audio-sprites:prettier`
 
 These can be run from any directory, there's no need to `cd` to a particular directory.
