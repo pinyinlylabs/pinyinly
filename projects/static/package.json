@@ -3,7 +3,7 @@
   "private": true,
   "devDependencies": {
     "@types/node": "22.x",
-    "@types/yargs": "^17.0.33",
+    "@types/yargs": "^17 <=17.x",
     "prettier": "^3.4.2",
     "tsx": "^4.15.7",
     "typescript": "patch:typescript@npm%3A5.9.2#~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch",

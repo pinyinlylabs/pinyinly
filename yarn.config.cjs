@@ -425,11 +425,12 @@ module.exports = defineConfig({
       "pg@^8.14.0":
         "patch:@types/pg@npm%3A8.11.11#~/.yarn/patches/@types-pg-npm-8.11.11-c5a8a91498.patch",
       "ws@^8.17.1": "^8 <=8.17.x",
-      "yargs@^18.0.0": "^17.0.33",
+      "yargs@^18.0.0": "^17 <=17.x",
     });
     await enforceMoonToolchainVersion(ctx);
     await enforceConsistentAppPnpmAndYarnDependencies(ctx);
     await enforceSingleDependencyVersion(ctx, [
+      /^@expo\//,
       /^@sentry\//,
       /^@vercel\//,
       /^expo-/,
