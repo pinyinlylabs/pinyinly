@@ -15,7 +15,6 @@ The following commands should be used to test the code:
   - Run all lint (and fix): `moon run eslint-rules:lint`
   - Run file lint: `moon run eslint-rules:lint -- <filename>`
 
-- Prettier: `moon run eslint-rules:prettierCheck`
-  - Fix prettier: `moon run eslint-rules:prettier`
+- Prettier: `moon run eslint-rules:prettier`
 
 These can be run from any directory, there's no need to `cd` to a particular directory.

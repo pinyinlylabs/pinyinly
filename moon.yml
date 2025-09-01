@@ -10,20 +10,9 @@ fileGroups:
     - "yarn.lock"
 
 tasks:
-  prettierCheck:
-    inputs:
-      - "!./projects/**/*"
-    args:
-      - "'!projects/**'"
-  prettier:
-    inputs:
-      - "!./projects/**/*"
-    args:
-      - "'!projects/**/*'"
-
   yarnConstraints:
     script: |
-      [[ -z ${CI:-} ]] && FIX_FLAG="--fix"
+      [ -z ${CI:-} ] && FIX_FLAG="--fix"
 
       yarn constraints ${FIX_FLAG:-}
     inputs:
@@ -42,7 +31,7 @@ tasks:
 
   test:
     deps:
-      - prettierCheck
+      - prettier
       - renovateCheck
       - yarnConstraints
 

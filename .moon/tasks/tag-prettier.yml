@@ -8,15 +8,14 @@ fileGroups:
 
 tasks:
   prettier:
-    command: yarn prettier --write --check --ignore-path .gitignore --ignore-path $workspaceRoot/.gitignore --ignore-path $workspaceRoot/.prettierignore .
-    inputs:
-      - "@globs(sources)"
-      - "@group(config)"
-    options:
-      runInCI: false
+    description: "Run Prettier and fix code formatting issues (except in CI)."
+    script: |
+      [ -z ${CI:-} ] && WRITE_FLAG="--write"
 
-  prettierCheck:
-    command: yarn prettier --check --ignore-path .gitignore --ignore-path $workspaceRoot/.gitignore --ignore-path $workspaceRoot/.prettierignore .
+      yarn prettier ${WRITE_FLAG:-} --check --ignore-path .gitignore --ignore-path $workspaceRoot/.gitignore --ignore-path $workspaceRoot/.prettierignore . '!projects/**'
     inputs:
       - "@globs(sources)"
       - "@group(config)"
+      - "!./projects/**/*"
+      # Environment variables
+      - "$CI"

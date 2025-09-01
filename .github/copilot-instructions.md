@@ -23,7 +23,7 @@
 - **Typechecking:** `moon run <project>:typecheck`
 - **Testing:** `moon run <project>:test [-- <args>]` (uses Vitest)
 - **Linting:** `moon run <project>:lint [-- <args>]`
-- **Prettier:** `moon run <project>:prettier` / `moon run <project>:prettierCheck`
+- **Prettier:** `moon run <project>:prettier`
 - **Build Bill of Materials:** `moon run app:buildBillOfMaterials`
 - **Emails Dev:** `moon run dev` in `projects/emails/` (see README)
 - **No need to cd:** All moon commands can be run from any directory.
