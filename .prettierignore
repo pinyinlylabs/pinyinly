@@ -10,3 +10,4 @@ pnpm-lock.yaml
 /projects/app/src/assets/**/*.json
 /projects/*/dist
 *.asset.json
+*.m4a
