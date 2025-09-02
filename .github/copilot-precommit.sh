@@ -1,5 +1,5 @@
 #!/bin/sh
-moon run --affected :lint :typecheck :prettier :yarnConstraints :test
+moon run :lint :typecheck :prettier :yarnConstraints :test
 
 RESULT=$?
 if [ $RESULT -ne 0 ]; then
