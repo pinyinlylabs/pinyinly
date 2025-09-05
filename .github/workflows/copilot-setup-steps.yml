@@ -42,3 +42,7 @@ jobs:
         # core.quotepath tells Git whether to quote “unsafe” characters in paths using C-style escapes (\344\271\237).
         # Setting it to false disables that quoting, so Git prints raw UTF-8.
         run: git config core.quotepath false
+
+      - name: Debug environment
+        run: |
+          echo CI=$CI
