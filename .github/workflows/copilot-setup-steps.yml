@@ -33,12 +33,12 @@ jobs:
 
       - uses: ./.github/actions/setup-tools
 
-      - name: Pre-commit hook
+      - name: Setup Git pre-commit hook
         run: |
           cp ./.github/copilot-precommit.sh .git/hooks/pre-commit
           chmod +x .git/hooks/pre-commit
 
-      - name: Git config
+      - name: Setup Git config
         # core.quotepath tells Git whether to quote “unsafe” characters in paths using C-style escapes (\344\271\237).
         # Setting it to false disables that quoting, so Git prints raw UTF-8.
         run: git config core.quotepath false
