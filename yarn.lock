@@ -1624,13 +1624,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@eslint/css-tree@npm:^3.6.3":
-  version: 3.6.3
-  resolution: "@eslint/css-tree@npm:3.6.3"
+"@eslint/css-tree@npm:^3.6.5":
+  version: 3.6.5
+  resolution: "@eslint/css-tree@npm:3.6.5"
   dependencies:
-    mdn-data: "npm:2.21.0"
+    mdn-data: "npm:2.23.0"
     source-map-js: "npm:^1.0.1"
-  checksum: 10c0/5025d106e2a61d14e807f0d26f20e1aa766ef8f2b6fe9ef02ce84c2ff463cbc57022b38d740d56d0683484adf3ac8795f7565f1955f2ee75c0f3a5cc4b3dd47d
+  checksum: 10c0/dd6baf8c88d6014e0afa8ddf13067b87a728484a2805093c4c9e0ec57427bc3462016a5b1ac0d9e590218a5d99440f8d43bfdcea8025b834e0adb8e4005e7b0e
   languageName: node
   linkType: hard
 
@@ -10125,10 +10125,10 @@ __metadata:
   linkType: hard
 
 "eslint-plugin-better-tailwindcss@npm:^3.1.0":
-  version: 3.7.5
-  resolution: "eslint-plugin-better-tailwindcss@npm:3.7.5"
+  version: 3.7.6
+  resolution: "eslint-plugin-better-tailwindcss@npm:3.7.6"
   dependencies:
-    "@eslint/css-tree": "npm:^3.6.3"
+    "@eslint/css-tree": "npm:^3.6.5"
     enhanced-resolve: "npm:^5.18.3"
     jiti: "npm:^2.5.1"
     postcss: "npm:^8.5.6"
@@ -10139,7 +10139,7 @@ __metadata:
   peerDependencies:
     eslint: ^7.0.0 || ^8.0.0 || ^9.0.0
     tailwindcss: ^3.3.0 || ^4.1.6
-  checksum: 10c0/3bce3f1e478b54f6135901de1edce9bc10f034bf5db8e19ce8e93a174dcf6d322df617f38aba20eea021be547f04d87dd704832a67ed724af40a121d044f3b83
+  checksum: 10c0/1471ca63b97d6e7f8bee2f778607ae40eedca35bddbf9543b655b713ff25e5886b09cdccd8fd9c603314f87efc4be797dff6d649c8ce1aac26b9c8c7500919d3
   languageName: node
   linkType: hard
 
@@ -14087,10 +14087,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mdn-data@npm:2.21.0":
-  version: 2.21.0
-  resolution: "mdn-data@npm:2.21.0"
-  checksum: 10c0/cd26902551af2cc29f06f130893cb04bca9ee278939fce3ffbcb759497cc80d53a6f4abdef2ae2f3ed3c95ac8d651f53fc141defd580ebf4ae2f93aea325957b
+"mdn-data@npm:2.23.0":
+  version: 2.23.0
+  resolution: "mdn-data@npm:2.23.0"
+  checksum: 10c0/7da2e4dda68da8f26077a328172afd8c1b167d8e9ac0518b8297d752b30a093debe5c6260fd7330e6d2d704a04b9ad0f7499a95a0526d50d7b32aae29d9db4e6
   languageName: node
   linkType: hard
 
