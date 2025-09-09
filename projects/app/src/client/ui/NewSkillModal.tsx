@@ -11,10 +11,10 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { IconImage } from "./IconImage";
+import { NewSkillModalContentNewWord } from "./NewSkillModalContentNewWord";
 import type { PageSheetChild } from "./PageSheetModal";
 import { PageSheetModal } from "./PageSheetModal";
 import { RectButton } from "./RectButton";
-import { WikiHanziInterpretationPanel } from "./WikiHanziInterpretationPanel";
 
 export const NewSkillModal = ({
   skill: anySkill,
@@ -30,14 +30,18 @@ export const NewSkillModal = ({
       switch (skillKindFromSkill(anySkill)) {
         case SkillKind.HanziWordToGloss: {
           const skill = anySkill as HanziWordSkill;
+          const hanzi = hanziFromHanziWord(hanziWordFromSkill(skill));
           return ({ dismiss }) => (
-            <NewHanziWordToGlossSkillContent skill={skill} dismiss={dismiss} />
+            <NewSkillModalContentNewWord hanzi={hanzi} onDismiss={dismiss} />
           );
         }
         case SkillKind.HanziWordToPinyinTyped: {
           const skill = anySkill as HanziWordSkill;
           return ({ dismiss }) => (
-            <NewHanziWordToPinyinSkillContent skill={skill} dismiss={dismiss} />
+            <NewHanziWordToPinyinSkillContent
+              skill={skill}
+              onDismiss={dismiss}
+            />
           );
         }
         case SkillKind.HanziWordToPinyinInitial: {
@@ -45,7 +49,7 @@ export const NewSkillModal = ({
           return ({ dismiss }) => (
             <NewHanziWordToPinyinInitialSkillContent
               skill={skill}
-              dismiss={dismiss}
+              onDismiss={dismiss}
             />
           );
         }
@@ -81,67 +85,19 @@ export const NewSkillModal = ({
   ) : null;
 };
 
-const NewHanziWordToGlossSkillContent = ({
-  skill,
-  dismiss,
-}: {
-  skill: HanziWordSkill;
-  dismiss: () => void;
-}) => {
-  const hanziWord = hanziWordFromSkill(skill);
-  const hanziWordSkillData = useQuery(hanziWordMeaningQuery(hanziWord));
-  const hanzi = hanziFromHanziWord(hanziWord);
-  const hanziGraphemes = hanziGraphemesFromHanziWord(hanziWord);
-
-  return (
-    <ContainerWithContinueButton onContinue={dismiss}>
-      {hanziWordSkillData.data == null ? (
-        <Text className="text-fg">Not implemented</Text>
-      ) : (
-        <>
-          <View className="mb-8 gap-8">
-            <View className="theme-success flex-row items-center gap-2 self-center">
-              <IconImage source={require(`@/assets/icons/plant-filled.svg`)} />
-              <Text className="font-bold uppercase text-fg">New Word</Text>
-            </View>
-
-            <View className="items-center gap-2">
-              <View className="flex-row gap-1">
-                {hanziGraphemes.map((grapheme) => (
-                  <View key={grapheme} className="items-center">
-                    <Text className="rounded-xl bg-bg-loud px-2 py-1 text-[60px] text-fg">
-                      {grapheme}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-
-              <Text className="text-4xl font-bold text-fg">
-                {hanziWordSkillData.data.gloss[0]}
-              </Text>
-            </View>
-
-            <WikiHanziInterpretationPanel hanzi={hanzi} />
-          </View>
-        </>
-      )}
-    </ContainerWithContinueButton>
-  );
-};
-
 const NewHanziWordToPinyinSkillContent = ({
   skill,
-  dismiss,
+  onDismiss,
 }: {
   skill: HanziWordSkill;
-  dismiss: () => void;
+  onDismiss: () => void;
 }) => {
   const hanziWord = hanziWordFromSkill(skill);
   const hanziWordSkillData = useQuery(hanziWordMeaningQuery(hanziWord));
   const hanziGraphemes = hanziGraphemesFromHanziWord(hanziWord);
 
   return (
-    <ContainerWithContinueButton onContinue={dismiss}>
+    <ContainerWithContinueButton onContinue={onDismiss}>
       {hanziWordSkillData.data == null ? (
         <Text className="text-fg">Not implemented</Text>
       ) : (
@@ -176,17 +132,17 @@ const NewHanziWordToPinyinSkillContent = ({
 
 const NewHanziWordToPinyinInitialSkillContent = ({
   skill,
-  dismiss,
+  onDismiss,
 }: {
   skill: HanziWordSkill;
-  dismiss: () => void;
+  onDismiss: () => void;
 }) => {
   const hanziWord = hanziWordFromSkill(skill);
   const hanziWordSkillData = useQuery(hanziWordMeaningQuery(hanziWord));
   const hanziGraphemes = hanziGraphemesFromHanziWord(hanziWord);
 
   return (
-    <ContainerWithContinueButton onContinue={dismiss}>
+    <ContainerWithContinueButton onContinue={onDismiss}>
       {hanziWordSkillData.data == null ? (
         <Text className="text-fg">Not implemented</Text>
       ) : (
