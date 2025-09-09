@@ -163,7 +163,7 @@
     "tsx": "^4.15.7",
     "typescript": "patch:typescript@npm%3A5.9.2#~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch",
     "ucd-full": "^16.0.0",
-    "vite": "^7.0.0",
+    "vite": "^7.1.5",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.4",
     "yaml": "^2.7.0",
