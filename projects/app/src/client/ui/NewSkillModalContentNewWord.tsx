@@ -59,7 +59,7 @@ export const NewSkillModalContentNewWord = ({
           // scrolling showing the correct color at the top and bottom.
           `
             h-screen
-            bg-[linear-gradient(to_bottom,_var(--color-theme-sky-bg)_0%,_var(--color-theme-sky-bg)_50%,_var(--color-bg)_50%,_var(--color-bg)_100%)]
+            bg-[linear-gradient(to_bottom,_var(--color-theme-grass-bg)_0%,_var(--color-theme-grass-bg)_50%,_var(--color-bg)_50%,_var(--color-bg)_100%)]
           `
         }
         contentContainerClassName="pb-10 min-h-full"
@@ -72,7 +72,7 @@ export const NewSkillModalContentNewWord = ({
               <IconImage
                 source={require(`@/assets/icons/note-2.svg`)}
                 size={32}
-                className="theme-sky text-bg"
+                className="theme-grass text-bg"
               />
               <Text className="pyly-body-title text-fg-loud">Meaning</Text>
             </View>
@@ -157,7 +157,7 @@ function Header({
         }}
       />
 
-      <View className="theme-sky sticky top-[-120px] z-10 h-[184px] bg-bg">
+      <View className="theme-grass sticky top-[-120px] z-10 h-[184px] bg-bg">
         <View className="sticky top-1 z-10 h-[56px] flex-row items-center pl-4">
           <Pressable
             onPress={onDismiss}

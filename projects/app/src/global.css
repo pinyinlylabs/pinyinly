@@ -271,6 +271,12 @@
     --color-theme-sky-fg-loud: rgb(from white r g b / 1);
     --color-theme-sky-caption: rgb(from var(--color-fg) r g b / 0.6);
     --color-theme-sky-caption-loud: rgb(from var(--color-fg) r g b / 0.9);
+
+    --color-theme-grass-bg: #00c286;
+    --color-theme-grass-fg: rgb(from white r g b / 0.95);
+    --color-theme-grass-fg-loud: rgb(from white r g b / 1);
+    --color-theme-grass-caption: rgb(from var(--color-fg) r g b / 0.6);
+    --color-theme-grass-caption-loud: rgb(from var(--color-fg) r g b / 0.9);
   }
 
   /* declare MDX component clases */
@@ -404,6 +410,14 @@
     --color-fg-loud: var(--color-theme-sky-fg-loud);
     --color-caption: var(--color-theme-sky-caption);
     --color-caption-loud: var(--color-theme-sky-caption-loud);
+  }
+
+  .theme-grass {
+    --color-bg: var(--color-theme-grass-bg);
+    --color-fg: var(--color-theme-grass-fg);
+    --color-fg-loud: var(--color-theme-grass-fg-loud);
+    --color-caption: var(--color-theme-grass-caption);
+    --color-caption-loud: var(--color-theme-grass-caption-loud);
   }
 
   /* --- */
