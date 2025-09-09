@@ -33,9 +33,11 @@ export default function HistoryPage() {
                         ? `🟢`
                         : value.rating}
                 {` `}
-                <SkillRefText skill={skill} />:{` `}
-                {` `}
-                {formatRelativeTime(createdAt)}
+                <SkillRefText skill={skill} />
+                <Text className="pyly-body-caption">
+                  {` `}•{` `}
+                  {formatRelativeTime(createdAt)}
+                </Text>
               </Text>
             </View>
           );

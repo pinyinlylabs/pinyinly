@@ -6964,17 +6964,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/types@npm:8.41.0, @typescript-eslint/types@npm:^8.41.0":
+"@typescript-eslint/types@npm:8.41.0, @typescript-eslint/types@npm:^8.38.0, @typescript-eslint/types@npm:^8.41.0":
   version: 8.41.0
   resolution: "@typescript-eslint/types@npm:8.41.0"
   checksum: 10c0/4945a7ed7789e0527833ee378b962416d6d0d61eb6c891fe49cb6c8dc8a9adbfc58676080ca767a1f034f74f9a981caf5f4d4706cba5025c0520a801fb45d7e1
-  languageName: node
-  linkType: hard
-
-"@typescript-eslint/types@npm:^8.38.0":
-  version: 8.40.0
-  resolution: "@typescript-eslint/types@npm:8.40.0"
-  checksum: 10c0/225374fff36d59288a5780667a7a1316c75090d5d60b70a8035ac18786120333ccd08dfdf0e05e30d5a82217e44c57b8708b769dd1eed89f12f2ac4d3a769f76
   languageName: node
   linkType: hard
 
