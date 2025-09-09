@@ -11,10 +11,6 @@ on:
     paths:
       - .github/workflows/copilot-setup-steps.yml
 
-concurrency:
-  group: ${{ github.workflow }}-pr-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
-
 jobs:
   # The job MUST be called `copilot-setup-steps` or it will not be picked up by Copilot.
   copilot-setup-steps:
@@ -54,6 +50,8 @@ jobs:
       - name: Debug environment 0
         run: |
           echo CI=$CI
+          [ -z ${CI:-} ] && WRITE_FLAG="--write"
+          echo WRITE_FLAG=$WRITE_FLAG
 
       - name: Override $CI
         run: echo "CI=" >> $GITHUB_ENV
@@ -61,3 +59,5 @@ jobs:
       - name: Debug environment 1
         run: |
           echo CI=$CI
+          [ -z ${CI:-} ] && WRITE_FLAG="--write"
+          echo WRITE_FLAG=$WRITE_FLAG
