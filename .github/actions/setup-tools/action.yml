@@ -5,7 +5,7 @@ runs:
   using: composite
   steps:
     - name: 📦 Install Moon toolchain
-      uses: moonrepo/setup-toolchain@v0.5.0
+      uses: moonrepo/setup-toolchain@v0.6.0
       with:
         auto-install: true
 
