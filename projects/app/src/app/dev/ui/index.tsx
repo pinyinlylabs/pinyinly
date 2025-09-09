@@ -38,6 +38,7 @@ export const demos: Record<string, FunctionComponent> = {
   [`NewSprout`]: lazyDemo(() => import(`../../../client/ui/NewSprout.demo`)),
   [`NewWordTutorial`]: lazyDemo(() => import(`../../../client/ui/NewWordTutorial.demo`)),
   [`PinyinOptionButton`]: lazyDemo(() => import(`../../../client/ui/PinyinOptionButton.demo`)),
+  [`PylyMdxComponents`]: lazyDemo(() => import(`../../../client/ui/PylyMdxComponents.demo`)),
   [`Pylymark`]: lazyDemo(() => import(`../../../client/ui/Pylymark.demo`)),
   [`PylymarkTypewriter`]: lazyDemo(() => import(`../../../client/ui/PylymarkTypewriter.demo`)),
   [`QuizDeckHanziToPinyinQuestion`]: lazyDemo(() => import(`../../../client/ui/QuizDeckHanziToPinyinQuestion.demo`)),

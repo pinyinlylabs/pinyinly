@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: [`./src/**/*.{js,jsx,ts,tsx}`],
+  content: [`./src/**/*.{js,jsx,ts,tsx,mdx}`],
   darkMode: `class`,
   presets: [
     // @ts-expect-error this is correct as per the docs, but the TS config seems

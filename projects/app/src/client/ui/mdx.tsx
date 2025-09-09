@@ -54,6 +54,10 @@ export const defaultMdxComponents = {
   div: makeMdx({ className: ctl(`pyly-mdx-div`) }, View),
   img: makeMdx({ className: ctl(`pyly-mdx-img`) }, Img),
   blockquote: makeMdx({ className: ctl(`pyly-mdx-blockquote`) }, Text),
+  table: makeMdx({ className: ctl(`pyly-mdx-table`) }, View),
+  thead: makeMdx({ className: ctl(`pyly-mdx-thead`) }, View),
+  tbody: makeMdx({ className: ctl(`pyly-mdx-tbody`) }, View),
+  tr: makeMdx({ className: ctl(`pyly-mdx-tr`) }, View),
 } as const satisfies MdxComponentsType;
 
 export const MDXComponentsContext =

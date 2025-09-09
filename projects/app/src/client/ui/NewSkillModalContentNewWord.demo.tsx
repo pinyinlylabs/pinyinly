@@ -1,4 +1,4 @@
-import { useDemoHanzi } from "@/client/hooks/useDemoHanzi";
+import { useDemoHanzi } from "@/client/ui/demo/helpers";
 import { NewSkillModalContentNewWord } from "@/client/ui/NewSkillModalContentNewWord";
 import type { HanziText } from "@/data/model";
 import { View } from "react-native";

@@ -1,9 +1,9 @@
+import type { createProcessor } from "@mdx-js/mdx";
 import makeDebug from "debug";
+import type { Program } from "estree";
 import { walk } from "estree-walker";
 import remarkFlexibleMarkers from "remark-flexible-markers";
-import type { createProcessor } from "@mdx-js/mdx";
-import type { Program } from "estree";
-import type { PluggableList } from "unified";
+import remarkGfm from "remark-gfm";
 
 const debug = makeDebug(`pinyinly:mdx:transform`);
 
@@ -103,17 +103,6 @@ function jsxSrcAttributePlugin({
       },
     });
   };
-}
-
-export interface CreateTransformerOptions {
-  /** Function to determine if a file should be transformed */
-  matchFile?: (props: MetroBabelTransformerProps) => boolean;
-  /** Function to determine if an asset URL is local */
-  matchLocalAsset?: (url: string) => boolean;
-  /** List of remark plugins */
-  remarkPlugins?: PluggableList;
-  /** The import source for MDX components */
-  providerImportSource?: string;
 }
 
 /**
@@ -245,15 +234,17 @@ function hoistRequiresPlugin() {
   };
 }
 
+/** Function to determine if a file should be transformed */
+const matchFile = (props: MetroBabelTransformerProps) =>
+  /\.mdx?$/.test(props.filename);
+
+/** Function to determine if an asset URL is local */
+const matchLocalAsset = (url: string) => /^[.@]/.test(url);
+
 /**
  * Creates an MDX transformer for Metro bundler
  */
-export function createTransformer({
-  matchFile = (props) => /\.mdx?$/.test(props.filename),
-  matchLocalAsset = (url) => /^[.@]/.test(url),
-  providerImportSource,
-  remarkPlugins = [],
-}: CreateTransformerOptions = {}): MetroBabelTransformer {
+function createTransformer(): MetroBabelTransformer {
   /** Cached MDX compiler */
   let _compiler: Awaited<ReturnType<typeof createProcessor>> | undefined;
 
@@ -268,8 +259,11 @@ export function createTransformer({
     const { createProcessor } = await import(`@mdx-js/mdx`);
     _compiler = createProcessor({
       jsx: true,
-      providerImportSource,
-      remarkPlugins,
+      providerImportSource: `@/client/hooks/useMDXComponents`,
+      remarkPlugins: [
+        [remarkFlexibleMarkers, { markerClassName: `pyly-mdx-mark` }],
+        [remarkGfm],
+      ],
       recmaPlugins: [
         [jsxSrcAttributePlugin, { matchLocalAsset }],
         [hoistRequiresPlugin],
@@ -307,9 +301,4 @@ export function createTransformer({
   return transform;
 }
 
-export const transform = createTransformer({
-  providerImportSource: `@/client/hooks/useMDXComponents`,
-  remarkPlugins: [
-    [remarkFlexibleMarkers, { markerClassName: `pyly-mdx-mark` }],
-  ],
-});
+export const transform = createTransformer();
