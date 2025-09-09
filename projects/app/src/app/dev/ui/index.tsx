@@ -33,6 +33,7 @@ export const demos: Record<string, FunctionComponent> = {
   [`ImageCloud`]: lazyDemo(() => import(`../../../client/ui/ImageCloud.demo`)),
   [`Mdx`]: lazyDemo(() => import(`../../../client/ui/Mdx.demo`)),
   [`NewSkillModal`]: lazyDemo(() => import(`../../../client/ui/NewSkillModal.demo`)),
+  [`NewSkillModalContentNewPronunciation`]: lazyDemo(() => import(`../../../client/ui/NewSkillModalContentNewPronunciation.demo`)),
   [`NewSkillModalContentNewWord`]: lazyDemo(() => import(`../../../client/ui/NewSkillModalContentNewWord.demo`)),
   [`NewSprout`]: lazyDemo(() => import(`../../../client/ui/NewSprout.demo`)),
   [`NewWordTutorial`]: lazyDemo(() => import(`../../../client/ui/NewWordTutorial.demo`)),
