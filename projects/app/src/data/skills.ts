@@ -398,18 +398,18 @@ export interface SkillReviewQueue {
    */
   dueCount: number;
   /**
-   * The number of new (never seen before) items in the queue that are not
+   * The number of new (never seen before) content items in the queue that are not
    * harder difficulty variations.
    */
-  newSkillCount: number;
+  newContentCount: number;
   /**
    * The number of new (never seen before) items in the queue that are
    * harder difficulty variations of existing skills.
    */
   newDifficultyCount: number;
   /**
-   * The total number of new items (newSkillCount + newDifficultyCount).
-   * @deprecated Use newSkillCount and newDifficultyCount separately
+   * The total number of new items (newContentCount + newDifficultyCount).
+   * @deprecated Use newContentCount and newDifficultyCount separately
    */
   newCount: number;
   /**
@@ -806,7 +806,7 @@ export function skillReviewQueue({
     retryCount: learningOrderRetry.length,
     dueCount: learningOrderDue.length,
     overDueCount: learningOrderOverDue.length,
-    newSkillCount: newSkills.length,
+    newContentCount: newSkills.length,
     newDifficultyCount: newDifficultySkills.length,
     newCount: learningOrderNew.length, // Maintain backward compatibility
     newDueAt,

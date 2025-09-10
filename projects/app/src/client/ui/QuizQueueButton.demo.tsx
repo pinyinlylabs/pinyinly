@@ -11,37 +11,37 @@ export default () => {
 
       <ExampleStack title="overdue">
         <QuizQueueButton
-          queueStats={{ overDueCount: 1, dueCount: 0, newSkillCount: 0 }}
+          queueStats={{ overDueCount: 1, dueCount: 0, newContentCount: 0 }}
         />
         <QuizQueueButton
-          queueStats={{ overDueCount: 10, dueCount: 0, newSkillCount: 0 }}
+          queueStats={{ overDueCount: 10, dueCount: 0, newContentCount: 0 }}
         />
         <QuizQueueButton
-          queueStats={{ overDueCount: 100, dueCount: 0, newSkillCount: 0 }}
+          queueStats={{ overDueCount: 100, dueCount: 0, newContentCount: 0 }}
         />
       </ExampleStack>
 
       <ExampleStack title="due">
         <QuizQueueButton
-          queueStats={{ overDueCount: 0, dueCount: 1, newSkillCount: 0 }}
+          queueStats={{ overDueCount: 0, dueCount: 1, newContentCount: 0 }}
         />
         <QuizQueueButton
-          queueStats={{ overDueCount: 0, dueCount: 10, newSkillCount: 0 }}
+          queueStats={{ overDueCount: 0, dueCount: 10, newContentCount: 0 }}
         />
         <QuizQueueButton
-          queueStats={{ overDueCount: 0, dueCount: 100, newSkillCount: 0 }}
+          queueStats={{ overDueCount: 0, dueCount: 100, newContentCount: 0 }}
         />
       </ExampleStack>
 
       <ExampleStack title="new">
         <QuizQueueButton
-          queueStats={{ overDueCount: 0, dueCount: 0, newSkillCount: 1 }}
+          queueStats={{ overDueCount: 0, dueCount: 0, newContentCount: 1 }}
         />
         <QuizQueueButton
-          queueStats={{ overDueCount: 0, dueCount: 0, newSkillCount: 10 }}
+          queueStats={{ overDueCount: 0, dueCount: 0, newContentCount: 10 }}
         />
         <QuizQueueButton
-          queueStats={{ overDueCount: 0, dueCount: 0, newSkillCount: 100 }}
+          queueStats={{ overDueCount: 0, dueCount: 0, newContentCount: 100 }}
         />
       </ExampleStack>
     </View>
