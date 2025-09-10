@@ -305,19 +305,26 @@
   .pyly-mdx-time,
   .pyly-mdx-div,
   .pyly-mdx-img,
+  .pyly-mdx-tbody,
   .pyly-mdx-blockquote {
-    --ignore-lint-warning: 1;
+    --pyly-ignore-lint-warning: 1;
   }
 
   .pyly-mdx-mark {
     @apply text-yellow font-bold;
   }
 
-  .pyly-mdx-h2 {
+  .pyly-mdx-h1 {
+    @apply pyly-body-title;
+  }
+  .pyly-mdx-h2,
+  .pyly-mdx-h3,
+  .pyly-mdx-h4 {
     @apply pyly-body-heading;
   }
-  .pyly-mdx-h3 {
-    @apply pyly-body-heading;
+  .pyly-mdx-h5,
+  .pyly-mdx-h6 {
+    @apply pyly-body font-bold;
   }
   .pyly-mdx-p {
     @apply pyly-body;
@@ -338,6 +345,7 @@
     @apply border-l-4 border-l-fg/50 pl-4 py-2;
   }
 
+  .pyly-mdx > .pyly-mdx-table,
   .pyly-mdx > .pyly-mdx-p,
   .pyly-mdx > .pyly-mdx-h1,
   .pyly-mdx > .pyly-mdx-h2,
@@ -355,10 +363,20 @@
     @apply border-t-[0.5px] border-fg/25 border-dashed my-4 flex-1;
   }
 
-  .pyly-mdx ul {
+  .pyly-mdx-table {
+    @apply my-4 overflow-hidden rounded-lg border border-fg/20;
+  }
+  .pyly-mdx-thead {
+    @apply bg-fg/5;
+  }
+  .pyly-mdx-tr {
+    @apply flex-row border-b border-fg/10 last:border-b-0;
+  }
+
+  .pyly-mdx > ul {
     @apply pl-6;
   }
-  .pyly-mdx li ul {
+  .pyly-mdx > ul > li > ul {
     @apply my-2;
   }
 }

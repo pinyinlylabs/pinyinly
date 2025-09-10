@@ -1,4 +1,4 @@
-import { createTransformer, transform } from "#transformer.ts";
+import { transform } from "#transformer.ts";
 import { describe, expect, test } from "vitest";
 
 function getJsxContent(src: string) {
@@ -198,7 +198,6 @@ import Foo from './foo'
   });
 
   test(`transforms code blocks`, async () => {
-    const transform = createTransformer();
     const result = await transform({
       filename: `test.mdx`,
       src: `
@@ -282,26 +281,5 @@ console.log("hello")
 
     // All imports should come before other code
     expect(lastImportIndex).toBeLessThan(firstNonImportIndex);
-  });
-
-  test(`should work with createTransformer and custom options`, async () => {
-    const customTransform = createTransformer({
-      matchLocalAsset: (url: string) => url.startsWith(`./custom/`),
-    });
-
-    const result = await customTransform({
-      filename: `test.mdx`,
-      src: `
-![should not transform](./foo/bar.png)
-![should transform](./custom/baz.jpg)`,
-    });
-
-    // Only the custom path should be transformed to import
-    expect(result.src).toContain(
-      `import __mdx_import_custom_baz_0 from "./custom/baz.jpg"`,
-    );
-    expect(result.src).toContain(`src={__mdx_import_custom_baz_0}`);
-    expect(result.src).toContain(`src="./foo/bar.png"`); // should remain as string
-    expect(result.src).not.toContain(`require(`);
   });
 });

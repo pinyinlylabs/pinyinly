@@ -1,4 +1,4 @@
-import { useDemoHanzi } from "@/client/hooks/useDemoHanzi";
+import { useDemoHanzi } from "@/client/ui/demo/helpers";
 import { WikiHanziModal } from "@/client/ui/WikiHanziModal";
 import type { HanziText } from "@/data/model";
 
