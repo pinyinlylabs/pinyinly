@@ -41,10 +41,13 @@ describe(`mdx rendering (via registry)`, () => {
         </Suspense>,
       );
 
-      // Wait for component to load
-      await waitForElementToBeRemoved(() =>
-        screen.queryByTestId(`suspense-fallback`),
-      );
+      // Wait for component to load - handle race condition where fallback might not be rendered
+      const fallback = screen.queryByTestId(`suspense-fallback`);
+
+      // If fallback exists, wait for it to be removed; otherwise just wait a tick to ensure rendering is complete
+      await (fallback
+        ? waitForElementToBeRemoved(fallback)
+        : new Promise((resolve) => setTimeout(resolve, 0)));
 
       // Basic checks
       expect(container.firstChild).toBeDefined();
