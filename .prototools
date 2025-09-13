@@ -1,5 +1,5 @@
 jq = "1.8.1" # renovate: datasource=github-releases depName=jqlang/jq extractVersion=^jq-(?<version>.*)$
-moon = "1.40.1" # renovate: datasource=github-releases depName=moonrepo/moon extractVersion=^v(?<version>.*)$
+moon = "1.40.2" # renovate: datasource=github-releases depName=moonrepo/moon extractVersion=^v(?<version>.*)$
 pnpm = "10.14.0" # Arbitrary version just to ensure the shim is installed.
 
 [plugins]
