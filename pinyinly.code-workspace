@@ -8,10 +8,6 @@
     "[git-commit]": {
       "editor.rulers": [80],
     },
-    "github.copilot.chat.agent.terminal.allowList": {
-      "/^moon run app:\\w+ -- /": true,
-      "/\\s*moon run [\\w-]+:[\\w-]+\\s*/": true,
-    },
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "typescript.tsdk": "node_modules/typescript/lib",
     "editor.codeActionsOnSave": {
@@ -51,5 +47,8 @@
       "**/.react-email/**",
     ],
     "tailwindCSS.validate": false,
+    "chat.tools.terminal.autoApprove": {
+      "/^moon run [\\w-]+:\\w+/": true,
+    },
   },
 }

@@ -439,9 +439,15 @@ describe(
 
       for (let i = 1; i < 100; i++) {
         expect(
-          fsrsPredictedRecallProbability(srsState.stability, i),
+          fsrsPredictedRecallProbability(
+            srsState,
+            parseRelativeTimeShorthand(`+${i}d`),
+          ),
         ).toBeLessThan(
-          fsrsPredictedRecallProbability(srsState.stability, i - 1),
+          fsrsPredictedRecallProbability(
+            srsState,
+            parseRelativeTimeShorthand(`+${i - 1}d`),
+          ),
         );
       }
     });
@@ -451,26 +457,33 @@ describe(
 describe(
   `fsrsIsForgotten suite` satisfies HasNameOf<typeof fsrsIsForgotten>,
   async () => {
-    test(`is forgotten if waiting more than a week after one good review`, () => {
+    test(`is "forgotten" if waited more than ~3 weeks after a single "good" review`, () => {
       vi.useFakeTimers({ toFake: [`Date`] });
 
       const srsState = nextReview(null, Rating.Good);
 
       expect(fsrsIsForgotten(srsState)).toBe(false);
       vi.advanceTimersByTime(1000 * 60 * 60 * 24 * 1);
-      expect(fsrsIsForgotten(srsState)).toBe(false); // 1 day
+      expect(fsrsIsForgotten(srsState)).toBe(false); // after 1 day
+      vi.advanceTimersByTime(1000 * 60 * 60 * 24 * 18);
+      expect(fsrsIsForgotten(srsState)).toBe(false); // after 19 days
       vi.advanceTimersByTime(1000 * 60 * 60 * 24 * 1);
-      expect(fsrsIsForgotten(srsState)).toBe(false); // 2 days
-      vi.advanceTimersByTime(1000 * 60 * 60 * 24 * 1);
-      expect(fsrsIsForgotten(srsState)).toBe(false); // 3 days
-      vi.advanceTimersByTime(1000 * 60 * 60 * 24 * 1);
-      expect(fsrsIsForgotten(srsState)).toBe(false); // 4 days
-      vi.advanceTimersByTime(1000 * 60 * 60 * 24 * 1);
-      expect(fsrsIsForgotten(srsState)).toBe(false); // 5 days
-      vi.advanceTimersByTime(1000 * 60 * 60 * 24 * 1);
-      expect(fsrsIsForgotten(srsState)).toBe(false); // 6 days
-      vi.advanceTimersByTime(1000 * 60 * 60 * 24 * 1);
-      expect(fsrsIsForgotten(srsState)).toBe(true); // 7 days
+      expect(fsrsIsForgotten(srsState)).toBe(true); // after 20 days
+    });
+
+    test(`not "forgotten" within a few days of being introduced, regardless of probability`, () => {
+      vi.useFakeTimers({ toFake: [`Date`] });
+
+      let srsState = nextReview(null, Rating.Hard);
+      vi.advanceTimersByTime(1000 * 60 * 60 * 24 * 1); // after 1 days
+      srsState = nextReview(srsState, Rating.Again);
+      vi.advanceTimersByTime(1000 * 60 * 60 * 24 * 4); // after 5 days
+
+      // The probability of recall should be very low.
+      expect(fsrsPredictedRecallProbability(srsState)).toBeLessThan(0.01);
+
+      // But it shouldn't be considered "forgotten" yet.
+      expect(fsrsIsForgotten(srsState)).toBe(false);
     });
   },
 );
