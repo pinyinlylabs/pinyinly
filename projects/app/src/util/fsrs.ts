@@ -280,15 +280,6 @@ export function fsrsIsStable(options: Pick<FsrsState, `stability`>): boolean {
   return options.stability >= fsrsStabilityThreshold;
 }
 
-export function ratingName(rating: Rating) {
-  return {
-    [Rating.Again]: `Again`,
-    [Rating.Hard]: `Hard`,
-    [Rating.Good]: `Good`,
-    [Rating.Easy]: `Easy`,
-  }[rating];
-}
-
 export function fsrsPredictedRecallProbability(
   state: FsrsState,
   now = new Date(),
