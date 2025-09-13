@@ -66,6 +66,8 @@ export const nextQuizQuestionQuery = (r: Rizzle, quizId: string) =>
       const r = (meta as { r: Rizzle }).r;
       const reviewQueue = await targetSkillsReviewQueue(r);
 
+      // Take the next skill in queue and generate a question for it. Even
+      // though this is a for…loop, it usually only loops once then exits.
       for (const [i, skill] of reviewQueue.items.entries()) {
         try {
           const skillState = await r.replicache.query((tx) =>
@@ -288,7 +290,6 @@ export async function computeSkillReviewQueue(
   }
 
   const latestSkillRatings = new Map<Skill, SkillRating>();
-  // const res = await r.queryPaged.skillRating.byCreatedAt().toArray();
   for await (const [, v] of r.queryPaged.skillRating.byCreatedAt()) {
     latestSkillRatings.set(v.skill, v);
   }
