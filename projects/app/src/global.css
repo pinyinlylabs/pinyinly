@@ -354,6 +354,7 @@
   .pyly-mdx > .pyly-mdx-h5,
   .pyly-mdx > .pyly-mdx-h6,
   .pyly-mdx > ul,
+  .pyly-mdx > ol,
   .pyly-mdx > .pyly-mdx-blockquote,
   .pyly-mdx-hr {
     @apply mx-4;
@@ -373,7 +374,8 @@
     @apply flex-row border-b border-fg/10 last:border-b-0;
   }
 
-  .pyly-mdx > ul {
+  .pyly-mdx > ul,
+  .pyly-mdx > ol {
     @apply pl-6;
   }
   .pyly-mdx > ul > li > ul {
