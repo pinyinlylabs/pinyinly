@@ -48,7 +48,7 @@
     ],
     "tailwindCSS.validate": false,
     "chat.tools.terminal.autoApprove": {
-      "/^moon run [\\w-]:\\w+/": true,
+      "/^moon run [\\w-]+:\\w+/": true,
     },
   },
 }
