@@ -10,6 +10,7 @@ import {
 import {
   fsrsIsForgotten,
   fsrsIsStable,
+  fsrsPredictedRecallProbability,
   fsrsStabilityThreshold,
   Rating,
 } from "@/util/fsrs";
@@ -17,6 +18,7 @@ import { makePRNG } from "@/util/random";
 import {
   emptySet,
   memoize1,
+  mutableArrayFilter,
   sortComparatorDate,
   sortComparatorNumber,
 } from "@pinyinly/lib/collections";
@@ -85,6 +87,15 @@ export function isHarderDifficultyStyleSkillKind(
   skillKind: SkillKind,
 ): boolean {
   return (
+    skillKind === SkillKind.HanziWordToPinyinFinal ||
+    skillKind === SkillKind.HanziWordToPinyinTone ||
+    skillKind === SkillKind.HanziWordToPinyinTyped
+  );
+}
+
+export function isHanziWordToPinyinSkillKind(skillKind: SkillKind): boolean {
+  return (
+    skillKind === SkillKind.HanziWordToPinyinInitial ||
     skillKind === SkillKind.HanziWordToPinyinFinal ||
     skillKind === SkillKind.HanziWordToPinyinTone ||
     skillKind === SkillKind.HanziWordToPinyinTyped
@@ -556,6 +567,85 @@ export function getHanziWordRank({
   return { hanziWord, rank: highestRank, completion: highestRankCompletion };
 }
 
+/**
+ * Determines if we should prioritize a pronunciation skill after a successful
+ * hanzi-to-english review, based on the user's competency with pronunciation skills.
+ */
+function getReactivePronunciationSkill({
+  latestSkillRatings,
+  skillSrsStates,
+  graph,
+  now = new Date(),
+}: {
+  latestSkillRatings: Map<Skill, Pick<SkillRating, `rating` | `createdAt`>>;
+  skillSrsStates: Map<Skill, SrsStateType>;
+  graph: SkillLearningGraph;
+  now?: Date;
+}): Skill | null {
+  // Find the most recent skill review of any kind
+  let mostRecentSkillReview: { skill: Skill; createdAt: Date } | null = null;
+
+  for (const [skill, rating] of latestSkillRatings) {
+    if (
+      !mostRecentSkillReview ||
+      rating.createdAt > mostRecentSkillReview.createdAt
+    ) {
+      mostRecentSkillReview = { skill, createdAt: rating.createdAt };
+    }
+  }
+
+  // Check if the most recent skill review was a successful HanziWordToGloss skill
+  if (
+    mostRecentSkillReview == null ||
+    skillKindFromSkill(mostRecentSkillReview.skill) !==
+      SkillKind.HanziWordToGloss
+  ) {
+    // Skipping because the most recent review wasn't hanzi-to-gloss question.
+    return null;
+  }
+
+  const mostRecentRating = latestSkillRatings.get(mostRecentSkillReview.skill);
+  if (mostRecentRating == null || mostRecentRating.rating === Rating.Again) {
+    // Skipping because the most recent review was not successful.
+    return null;
+  }
+
+  // Check if the user has sufficient competency with pronunciation skills
+  // We require at least basic competency (rank 1 or higher) with pronunciation skills
+  const hanziWord = hanziWordFromSkill(
+    mostRecentSkillReview.skill as HanziWordSkill,
+  );
+
+  // Find the corresponding pronunciation skill
+  const pronunciationSkill = hanziWordToPinyinTyped(hanziWord);
+
+  for (const dep of walkSkillAndDependencies(graph, pronunciationSkill)) {
+    if (!isHanziWordToPinyinSkillKind(skillKindFromSkill(dep))) {
+      // Skipping because it's not a pronunciation skill, we're only interested
+      // in reviewing the pronunciation after a meaning review.
+      continue;
+    }
+
+    const srsState = skillSrsStates.get(dep);
+
+    if (needsToBeIntroduced(srsState, now)) {
+      // Skipping because the skill hasn't been introduced yet, and reviewing it
+      // would be too hard for the user.
+      continue;
+    }
+
+    if (isVeryEasy(srsState, now)) {
+      // Skipping because it's too easy, it would feel like you're wasting your
+      // time if you're answering questions that are too easy for you.
+      continue;
+    }
+
+    return dep;
+  }
+
+  return null;
+}
+
 export function skillReviewQueue({
   graph,
   skillSrsStates,
@@ -741,14 +831,48 @@ export function skillReviewQueue({
     }
   }
 
+  // Put the retry items in the correct order.
   const retryItems = learningOrderRetry
     .sort(sortComparatorDate(([, when]) => when))
     .map(([skill]) => skill);
   retryItems.reverse();
 
+  // Check if we should prioritize a pronunciation skill after successful hanzi-to-english review
+  const reactivePronunciationSkill = getReactivePronunciationSkill({
+    latestSkillRatings,
+    skillSrsStates,
+    graph,
+    now,
+  });
+
+  const reactiveItems =
+    reactivePronunciationSkill == null ? [] : [reactivePronunciationSkill];
+
+  // Remove reactive items from the other queues so that items aren't duplicated
+  // and counts are correct.
+
+  mutableArrayFilter(
+    learningOrderOverDue,
+    ([skill]) => !reactiveItems.includes(skill),
+  );
+  mutableArrayFilter(
+    learningOrderDue,
+    ([skill]) => !reactiveItems.includes(skill),
+  );
+  mutableArrayFilter(
+    learningOrderNew,
+    (skill) => !reactiveItems.includes(skill),
+  );
+  mutableArrayFilter(
+    learningOrderNotDue,
+    ([skill]) => !reactiveItems.includes(skill),
+  );
+
   const items = [
     // First do incorrect answers that need to be retried.
     ...retryItems,
+    // Then do any prioritized reactive items.
+    ...reactiveItems,
     // Then do over-due skills, by the most due (oldest date) first.
     ...learningOrderOverDue
       .sort(sortComparatorDate(([, due]) => due))
@@ -970,6 +1094,25 @@ export function isStable(srsState: SrsStateType | undefined | null): boolean {
         srsState.nextReviewAt.getTime() - srsState.prevReviewAt.getTime() >
         weekInMillis
       );
+    }
+  }
+}
+
+export function isVeryEasy(
+  srsState: SrsStateType | undefined | null,
+  now: Date,
+): boolean {
+  if (srsState == null) {
+    return false;
+  }
+
+  switch (srsState.kind) {
+    case SrsKind.FsrsFourPointFive: {
+      return fsrsPredictedRecallProbability(srsState, now) > 0.9;
+    }
+    case SrsKind.Mock: {
+      // Naive mock implementation
+      return false;
     }
   }
 }
