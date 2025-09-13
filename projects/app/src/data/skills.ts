@@ -248,7 +248,7 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
               grapheme,
             )) {
               if (charMeaning.pinyin != null) {
-                deps.push(hanziWordToPinyin(charHanziWord));
+                deps.push(hanziWordToPinyinTyped(charHanziWord));
                 break;
               }
             }
@@ -351,7 +351,7 @@ export function hanziWordSkill(
 export const hanziWordToGloss = (hanziWord: HanziWord) =>
   hanziWordSkill(SkillKind.HanziWordToGloss, hanziWord);
 
-export const hanziWordToPinyin = (hanziWord: HanziWord) =>
+export const hanziWordToPinyinTyped = (hanziWord: HanziWord) =>
   hanziWordSkill(SkillKind.HanziWordToPinyinTyped, hanziWord);
 
 export const hanziWordToPinyinInitial = (hanziWord: HanziWord) =>

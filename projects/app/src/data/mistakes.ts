@@ -9,7 +9,7 @@ import type { HanziGlossMistakeType, HanziPinyinMistakeType } from "./model";
 import { SrsKind } from "./model";
 import type { Skill } from "./rizzleSchema";
 import { srsStateFromFsrsState } from "./rizzleSchema";
-import { hanziWordToGloss, hanziWordToPinyin } from "./skills";
+import { hanziWordToGloss, hanziWordToPinyinTyped } from "./skills";
 
 export async function skillsToReReviewForHanziGlossMistake(
   mistake: HanziGlossMistakeType,
@@ -43,7 +43,7 @@ export async function skillsToReReviewForHanziPinyinMistake(
 
   // Queue all skills relevant to the hanzi.
   for (const [hanziWord] of await lookupHanzi(mistake.hanziOrHanziWord)) {
-    skills.add(hanziWordToPinyin(hanziWord));
+    skills.add(hanziWordToPinyinTyped(hanziWord));
   }
 
   return skills;

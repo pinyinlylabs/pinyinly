@@ -24,7 +24,7 @@ import {
   getHanziWordRank,
   hanziWordSkill,
   hanziWordToGloss,
-  hanziWordToPinyin,
+  hanziWordToPinyinTyped,
   rankRules,
   skillKindFromSkill,
   skillLearningGraph,
@@ -264,7 +264,10 @@ export async function getAllTargetHanziWords(): Promise<HanziWord[]> {
 
 export async function getAllTargetSkills(): Promise<Skill[]> {
   const hanziWords = await getAllTargetHanziWords();
-  return hanziWords.flatMap((w) => [hanziWordToGloss(w), hanziWordToPinyin(w)]);
+  return hanziWords.flatMap((w) => [
+    hanziWordToGloss(w),
+    hanziWordToPinyinTyped(w),
+  ]);
 }
 
 export async function targetSkillsReviewQueue(
