@@ -777,6 +777,33 @@ export function skillReviewQueue({
   };
 }
 
+export function* walkSkillAndDependencies(
+  graph: SkillLearningGraph,
+  skill: Skill,
+): Generator<Skill> {
+  const visited = new Set<Skill>();
+  const stack = [skill];
+  while (stack.length > 0) {
+    const current = stack.pop();
+    if (current == null) {
+      break;
+    }
+
+    if (!visited.has(current)) {
+      visited.add(current);
+      yield current;
+      const node = graph.get(current);
+      if (node) {
+        for (const dep of node.dependencies) {
+          if (!visited.has(dep)) {
+            stack.push(dep);
+          }
+        }
+      }
+    }
+  }
+}
+
 /**
  * Randomly sort skills for review based on their SRS state to form a
  * probability distribution weighted by each skill's difficulty. It's designed

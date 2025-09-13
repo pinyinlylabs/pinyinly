@@ -13,6 +13,7 @@ import {
   skillKindFromSkill,
   skillLearningGraph,
   skillReviewQueue,
+  walkSkillAndDependencies,
 } from "#data/skills.ts";
 import {
   allHsk1HanziWords,
@@ -1423,5 +1424,181 @@ test(
         "debug--RadicalToPinyin": false,
       }
     `);
+  },
+);
+
+describe(
+  `walkSkillAndDependencies suite` satisfies HasNameOf<
+    typeof walkSkillAndDependencies
+  >,
+  () => {
+    test(`walks single skill with no dependencies`, () => {
+      const skill1 = `he:我:i` as Skill;
+
+      const graph: SkillLearningGraph = new Map([
+        [skill1, { skill: skill1, dependencies: new Set() }],
+      ]);
+
+      const result = [...walkSkillAndDependencies(graph, skill1)];
+      expect(result).toEqual([skill1]);
+    });
+
+    test(`walks single skill with one dependency`, () => {
+      const skill1 = `he:我:i` as Skill;
+      const skill2 = `he:人:person` as Skill;
+
+      const graph: SkillLearningGraph = new Map([
+        [skill1, { skill: skill1, dependencies: new Set([skill2]) }],
+        [skill2, { skill: skill2, dependencies: new Set() }],
+      ]);
+
+      const result = [...walkSkillAndDependencies(graph, skill1)];
+      expect(result).toEqual([skill1, skill2]);
+    });
+
+    test(`walks skill with multiple dependencies`, () => {
+      const skill1 = `he:我们:we` as Skill;
+      const skill2 = `he:我:i` as Skill;
+      const skill3 = `he:人:person` as Skill;
+
+      const graph: SkillLearningGraph = new Map([
+        [skill1, { skill: skill1, dependencies: new Set([skill2, skill3]) }],
+        [skill2, { skill: skill2, dependencies: new Set() }],
+        [skill3, { skill: skill3, dependencies: new Set() }],
+      ]);
+
+      const result = [...walkSkillAndDependencies(graph, skill1)];
+      // Should include all three skills
+      expect(result).toHaveLength(3);
+      expect(result).toContain(skill1);
+      expect(result).toContain(skill2);
+      expect(result).toContain(skill3);
+      // The starting skill should be first
+      expect(result[0]).toBe(skill1);
+    });
+
+    test(`walks deeply nested dependencies`, () => {
+      const skill1 = `hp:好:positive` as Skill;
+      const skill2 = `he:好:positive` as Skill;
+      const skill3 = `he:女:woman` as Skill;
+      const skill4 = `he:子:child` as Skill;
+
+      const graph: SkillLearningGraph = new Map([
+        [skill1, { skill: skill1, dependencies: new Set([skill2]) }],
+        [skill2, { skill: skill2, dependencies: new Set([skill3, skill4]) }],
+        [skill3, { skill: skill3, dependencies: new Set() }],
+        [skill4, { skill: skill4, dependencies: new Set() }],
+      ]);
+
+      const result = [...walkSkillAndDependencies(graph, skill1)];
+      expect(result).toHaveLength(4);
+      expect(result).toContain(skill1);
+      expect(result).toContain(skill2);
+      expect(result).toContain(skill3);
+      expect(result).toContain(skill4);
+      // The starting skill should be first
+      expect(result[0]).toBe(skill1);
+    });
+
+    test(`handles circular dependencies correctly`, () => {
+      const skill1 = `he:A:a` as Skill;
+      const skill2 = `he:B:b` as Skill;
+      const skill3 = `he:C:c` as Skill;
+
+      // Create a circular dependency: skill1 -> skill2 -> skill3 -> skill1
+      const graph: SkillLearningGraph = new Map([
+        [skill1, { skill: skill1, dependencies: new Set([skill2]) }],
+        [skill2, { skill: skill2, dependencies: new Set([skill3]) }],
+        [skill3, { skill: skill3, dependencies: new Set([skill1]) }],
+      ]);
+
+      const result = [...walkSkillAndDependencies(graph, skill1)];
+      // Should visit each skill exactly once despite circular dependency
+      expect(result).toHaveLength(3);
+      expect(result).toContain(skill1);
+      expect(result).toContain(skill2);
+      expect(result).toContain(skill3);
+      // The starting skill should be first
+      expect(result[0]).toBe(skill1);
+    });
+
+    test(`handles skill not in graph`, () => {
+      const skill1 = `he:我:i` as Skill;
+      const skill2 = `he:不存在:nonexistent` as Skill;
+
+      const graph: SkillLearningGraph = new Map([
+        [skill1, { skill: skill1, dependencies: new Set() }],
+      ]);
+
+      // Try to walk a skill that's not in the graph
+      const result = [...walkSkillAndDependencies(graph, skill2)];
+      // Should still return the skill itself, even if it has no node in the graph
+      expect(result).toEqual([skill2]);
+    });
+
+    test(`handles empty graph`, () => {
+      const skill1 = `he:我:i` as Skill;
+      const graph: SkillLearningGraph = new Map();
+
+      const result = [...walkSkillAndDependencies(graph, skill1)];
+      // Should return just the skill itself
+      expect(result).toEqual([skill1]);
+    });
+
+    test(`walks complex dependency tree`, () => {
+      // Create a more complex tree structure
+      const skillA = `he:A:a` as Skill;
+      const skillB = `he:B:b` as Skill;
+      const skillC = `he:C:c` as Skill;
+      const skillD = `he:D:d` as Skill;
+      const skillE = `he:E:e` as Skill;
+      const skillF = `he:F:f` as Skill;
+
+      // Tree: A -> [B, C], B -> [D], C -> [E, F]
+      const graph: SkillLearningGraph = new Map([
+        [skillA, { skill: skillA, dependencies: new Set([skillB, skillC]) }],
+        [skillB, { skill: skillB, dependencies: new Set([skillD]) }],
+        [skillC, { skill: skillC, dependencies: new Set([skillE, skillF]) }],
+        [skillD, { skill: skillD, dependencies: new Set() }],
+        [skillE, { skill: skillE, dependencies: new Set() }],
+        [skillF, { skill: skillF, dependencies: new Set() }],
+      ]);
+
+      const result = [...walkSkillAndDependencies(graph, skillA)];
+      expect(result).toHaveLength(6);
+      expect(result).toContain(skillA);
+      expect(result).toContain(skillB);
+      expect(result).toContain(skillC);
+      expect(result).toContain(skillD);
+      expect(result).toContain(skillE);
+      expect(result).toContain(skillF);
+      // The starting skill should be first
+      expect(result[0]).toBe(skillA);
+    });
+
+    test(`handles diamond dependency pattern`, () => {
+      // Diamond pattern: A -> [B, C], B -> D, C -> D
+      const skillA = `he:A:a` as Skill;
+      const skillB = `he:B:b` as Skill;
+      const skillC = `he:C:c` as Skill;
+      const skillD = `he:D:d` as Skill;
+
+      const graph: SkillLearningGraph = new Map([
+        [skillA, { skill: skillA, dependencies: new Set([skillB, skillC]) }],
+        [skillB, { skill: skillB, dependencies: new Set([skillD]) }],
+        [skillC, { skill: skillC, dependencies: new Set([skillD]) }],
+        [skillD, { skill: skillD, dependencies: new Set() }],
+      ]);
+
+      const result = [...walkSkillAndDependencies(graph, skillA)];
+      // Should visit D only once despite being reachable through both B and C
+      expect(result).toHaveLength(4);
+      expect(result).toContain(skillA);
+      expect(result).toContain(skillB);
+      expect(result).toContain(skillC);
+      expect(result).toContain(skillD);
+      // The starting skill should be first
+      expect(result[0]).toBe(skillA);
+    });
   },
 );
