@@ -398,7 +398,18 @@ export interface SkillReviewQueue {
    */
   dueCount: number;
   /**
-   * The number of new (never seen before) items in the queue.
+   * The number of new (never seen before) content items in the queue that are not
+   * harder difficulty variations.
+   */
+  newContentCount: number;
+  /**
+   * The number of new (never seen before) items in the queue that are
+   * harder difficulty variations of existing skills.
+   */
+  newDifficultyCount: number;
+  /**
+   * The total number of new items (newContentCount + newDifficultyCount).
+   * @deprecated Use newContentCount and newDifficultyCount separately
    */
   newCount: number;
   /**
@@ -781,13 +792,23 @@ export function skillReviewQueue({
 
   learningOrderBlocked.reverse();
 
+  // Separate new skills by type
+  const newSkills = learningOrderNew.filter(
+    (skill) => !isHarderDifficultyStyleSkillKind(skillKindFromSkill(skill)),
+  );
+  const newDifficultySkills = learningOrderNew.filter((skill) =>
+    isHarderDifficultyStyleSkillKind(skillKindFromSkill(skill)),
+  );
+
   return {
     items,
     blockedItems: learningOrderBlocked,
     retryCount: learningOrderRetry.length,
     dueCount: learningOrderDue.length,
     overDueCount: learningOrderOverDue.length,
-    newCount: learningOrderNew.length,
+    newContentCount: newSkills.length,
+    newDifficultyCount: newDifficultySkills.length,
+    newCount: learningOrderNew.length, // Maintain backward compatibility
     newDueAt,
     newOverDueAt,
   };

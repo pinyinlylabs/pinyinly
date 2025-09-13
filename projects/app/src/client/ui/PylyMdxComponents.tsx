@@ -48,26 +48,6 @@ export function PylyMdxComponents({ children }: PropsWithChildren) {
             <Text className="pyly-body">{children}</Text>
           </li>
         ),
-        table: ({ children }: PropsWithChildren) => (
-          <View className="my-4 overflow-hidden rounded-lg border border-fg/20">
-            {children}
-          </View>
-        ),
-        thead: ({ children }: PropsWithChildren) => (
-          <View className="bg-fg/5">{children}</View>
-        ),
-        tbody: ({ children }: PropsWithChildren) => <View>{children}</View>,
-        tr: ({ children }: PropsWithChildren) => (
-          <View
-            className={`
-              flex-row border-b border-fg/10
-
-              last:border-b-0
-            `}
-          >
-            {children}
-          </View>
-        ),
         th: ({ children }: PropsWithChildren) => (
           <View
             className={`

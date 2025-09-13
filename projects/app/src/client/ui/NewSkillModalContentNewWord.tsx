@@ -3,29 +3,25 @@ import { hanziWikiEntryQuery } from "@/client/query";
 import {
   getWikiMdxHanziMeaning,
   getWikiMdxHanziMeaningMnemonic,
-  getWikiMdxHanziPronunciation,
   getWikiMdxHanziWordMeaning,
 } from "@/client/wiki";
 import type { HanziText, PinyinSyllable } from "@/data/model";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import React, { Fragment, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
-import { tv } from "tailwind-variants";
 import { useIntersectionObserver } from "usehooks-ts";
 import { IconImage } from "./IconImage";
 import { PylyMdxComponents } from "./PylyMdxComponents";
 
 const hr = <View className="h-px bg-fg/25" />;
 
-export function WikiHanziModalImpl({
+export const NewSkillModalContentNewWord = ({
   hanzi,
   onDismiss,
 }: {
   hanzi: HanziText;
   onDismiss: () => void;
-}) {
-  const [tab, setTab] = useState<`meaning` | `pronunciation`>(`meaning`);
-
+}) => {
   const wikiEntry = useSuspenseQuery(hanziWikiEntryQuery(hanzi));
   void wikiEntry;
 
@@ -53,7 +49,6 @@ export function WikiHanziModalImpl({
       : hanziWordMeanings.map(([, meaning]) => meaning.gloss[0]).join(`, `);
 
   const MeaningMdx = getWikiMdxHanziMeaning(hanzi);
-  const PronunciationMdx = getWikiMdxHanziPronunciation(hanzi);
   const MeaningMnemonicMdx = getWikiMdxHanziMeaningMnemonic(hanzi);
 
   return (
@@ -64,23 +59,24 @@ export function WikiHanziModalImpl({
           // scrolling showing the correct color at the top and bottom.
           `
             h-screen
-            bg-[linear-gradient(to_bottom,_var(--color-theme-sky-bg)_0%,_var(--color-theme-sky-bg)_50%,_var(--color-bg)_50%,_var(--color-bg)_100%)]
+            bg-[linear-gradient(to_bottom,_var(--color-theme-grass-bg)_0%,_var(--color-theme-grass-bg)_50%,_var(--color-bg)_50%,_var(--color-bg)_100%)]
           `
         }
         contentContainerClassName="pb-10 min-h-full"
       >
-        <Header
-          title={title}
-          tab={tab}
-          subtitle={glosses}
-          onDismiss={onDismiss}
-          onTabChange={(tab) => {
-            setTab(tab);
-          }}
-        />
+        <Header title={title} subtitle={glosses} onDismiss={onDismiss} />
 
         <PylyMdxComponents>
-          <View className={contentClass({ active: tab === `meaning` })}>
+          <View className="flex-1 gap-2 bg-bg py-7">
+            <View className="flex-row items-center gap-2 px-4">
+              <IconImage
+                source={require(`@/assets/icons/note-2.svg`)}
+                size={32}
+                className="theme-grass text-bg"
+              />
+              <Text className="pyly-body-title text-fg-loud">Meaning</Text>
+            </View>
+
             {MeaningMdx == null ? null : <MeaningMdx />}
 
             {hanziWordMeanings.length > 1 ? (
@@ -90,8 +86,11 @@ export function WikiHanziModalImpl({
                   const MeaningMdx = getWikiMdxHanziWordMeaning(hanziWord);
                   return gloss == null ? null : (
                     <Fragment key={i}>
-                      {i === 0 ? hr : null}
-                      <ExpandableSection title={`${hanzi} as “${gloss}”`}>
+                      {/* {i === 0 ? hr : null} */}
+                      <ExpandableSection
+                        title={`${hanzi} as “${gloss}”`}
+                        defaultExpanded
+                      >
                         {MeaningMdx == null ? null : <MeaningMdx />}
                       </ExpandableSection>
                       {hr}
@@ -128,45 +127,22 @@ export function WikiHanziModalImpl({
               </View>
             )}
           </View>
-
-          <View className={contentClass({ active: tab === `pronunciation` })}>
-            {PronunciationMdx == null ? null : <PronunciationMdx />}
-          </View>
         </PylyMdxComponents>
       </ScrollView>
     </>
   );
-}
-
-const contentClass = tv({
-  base: `flex-1 gap-6 bg-bg py-7`,
-  variants: {
-    active: {
-      true: `flex`,
-      false: `hidden`,
-    },
-  },
-});
+};
 
 function Header({
   title,
   subtitle,
   onDismiss,
-  tab,
-  onTabChange,
 }: {
   title: string;
   subtitle?: string;
   onDismiss?: () => void;
-  tab: `meaning` | `pronunciation`;
-  onTabChange?: (tab: `meaning` | `pronunciation`) => void;
 }) {
   const [ref1, isIntersecting1] = useIntersectionObserver({
-    // threshold: 1,
-    initialIsIntersecting: true,
-  });
-
-  const [ref2, isIntersecting2] = useIntersectionObserver({
     // threshold: 1,
     initialIsIntersecting: true,
   });
@@ -175,21 +151,13 @@ function Header({
     <>
       {/* Scroll detector */}
       <View
-        className="absolute top-[44px] h-0 w-full"
+        className="absolute top-[60px] h-0 w-full"
         ref={(el) => {
           ref1(el as Element | null);
         }}
       />
 
-      {/* Scroll detector */}
-      <View
-        className="absolute top-[72px] h-0 w-full"
-        ref={(el) => {
-          ref2(el as Element | null);
-        }}
-      />
-
-      <View className="theme-sky sticky top-[-120px] z-10 h-[184px] bg-bg">
+      <View className="theme-grass sticky top-[-120px] z-10 h-[184px] bg-bg">
         <View className="sticky top-1 z-10 h-[56px] flex-row items-center pl-4">
           <Pressable
             onPress={onDismiss}
@@ -207,6 +175,17 @@ function Header({
               className="text-fg-loud"
             />
           </Pressable>
+        </View>
+
+        <View className="mb-2 self-center rounded-md bg-fg-loud/10 px-2 py-1">
+          <Text
+            className={`
+              text-center font-sans text-[12px]/[14px] font-bold uppercase text-fg-loud
+              transition-all
+            `}
+          >
+            New word
+          </Text>
         </View>
 
         <View className="sticky top-[11px] z-0 overflow-visible px-4">
@@ -232,87 +211,21 @@ function Header({
             {subtitle}
           </Text>
         </View>
-
-        <View
-          className={`
-            h-[32px] flex-1 flex-row transition-opacity
-
-            ${isIntersecting2 ? `opacity-100` : `opacity-0`}
-          `}
-        >
-          <HeaderTab
-            label="Meaning"
-            isActive={tab === `meaning`}
-            onPress={() => {
-              onTabChange?.(`meaning`);
-            }}
-          />
-          <HeaderTab
-            label="Pronunciation"
-            isActive={tab === `pronunciation`}
-            onPress={() => {
-              onTabChange?.(`pronunciation`);
-            }}
-          />
-          <View
-            // Half-width view, transitioned between left and middle offset.
-            className={`
-              -translate-x-1/2 absolute bottom-0 h-1 w-1/2 rounded-t-lg bg-fg-loud transition-[left]
-
-              ${tab === `meaning` ? `left-0` : `left-1/2`}
-            `}
-          />
-        </View>
       </View>
     </>
-  );
-}
-
-function HeaderTab({
-  label,
-  isActive,
-  onPress,
-}: {
-  label: string;
-  isActive: boolean;
-  onPress: () => void;
-}) {
-  return (
-    <View className={`min-w-40 flex-1 px-1 py-3`}>
-      <Pressable
-        className={`
-          w-full select-none items-center rounded px-4 py-2 transition-[opacity,transform]
-
-          hover:bg-fg-loud/10
-
-          active:scale-95
-        `}
-        onPress={() => {
-          onPress();
-        }}
-      >
-        <Text
-          className={`
-            font-sans text-[18px]/normal text-fg-loud
-
-            ${isActive ? `font-semibold` : `font-medium`}
-          `}
-        >
-          {label}
-        </Text>
-      </Pressable>
-    </View>
   );
 }
 
 function ExpandableSection({
   title,
   children,
+  defaultExpanded = false,
 }: {
   title: string;
   children?: React.ReactNode;
+  defaultExpanded?: boolean;
 }) {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(defaultExpanded);
   const titleElement = <Text className="pyly-body-heading">{title}</Text>;
 
   return (

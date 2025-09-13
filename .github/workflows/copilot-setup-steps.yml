@@ -43,6 +43,21 @@ jobs:
         # Setting it to false disables that quoting, so Git prints raw UTF-8.
         run: git config core.quotepath false
 
-      - name: Debug environment
+      - name: Setup environment
         run: |
           echo CI=$CI
+
+      - name: Debug environment 0
+        run: |
+          echo CI=$CI
+          [ -z ${CI:-} ] && WRITE_FLAG="--write"
+          echo WRITE_FLAG=$WRITE_FLAG
+
+      - name: Override $CI
+        run: echo "CI=" >> $GITHUB_ENV
+
+      - name: Debug environment 1
+        run: |
+          echo CI=$CI
+          [ -z ${CI:-} ] && WRITE_FLAG="--write"
+          echo WRITE_FLAG=$WRITE_FLAG

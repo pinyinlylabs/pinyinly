@@ -271,6 +271,12 @@
     --color-theme-sky-fg-loud: rgb(from white r g b / 1);
     --color-theme-sky-caption: rgb(from var(--color-fg) r g b / 0.6);
     --color-theme-sky-caption-loud: rgb(from var(--color-fg) r g b / 0.9);
+
+    --color-theme-grass-bg: #00c286;
+    --color-theme-grass-fg: rgb(from white r g b / 0.95);
+    --color-theme-grass-fg-loud: rgb(from white r g b / 1);
+    --color-theme-grass-caption: rgb(from var(--color-fg) r g b / 0.6);
+    --color-theme-grass-caption-loud: rgb(from var(--color-fg) r g b / 0.9);
   }
 
   /* declare MDX component clases */
@@ -299,19 +305,26 @@
   .pyly-mdx-time,
   .pyly-mdx-div,
   .pyly-mdx-img,
+  .pyly-mdx-tbody,
   .pyly-mdx-blockquote {
-    --ignore-lint-warning: 1;
+    --pyly-ignore-lint-warning: 1;
   }
 
   .pyly-mdx-mark {
     @apply text-yellow font-bold;
   }
 
-  .pyly-mdx-h2 {
+  .pyly-mdx-h1 {
+    @apply pyly-body-title;
+  }
+  .pyly-mdx-h2,
+  .pyly-mdx-h3,
+  .pyly-mdx-h4 {
     @apply pyly-body-heading;
   }
-  .pyly-mdx-h3 {
-    @apply pyly-body-heading;
+  .pyly-mdx-h5,
+  .pyly-mdx-h6 {
+    @apply pyly-body font-bold;
   }
   .pyly-mdx-p {
     @apply pyly-body;
@@ -332,6 +345,7 @@
     @apply border-l-4 border-l-fg/50 pl-4 py-2;
   }
 
+  .pyly-mdx > .pyly-mdx-table,
   .pyly-mdx > .pyly-mdx-p,
   .pyly-mdx > .pyly-mdx-h1,
   .pyly-mdx > .pyly-mdx-h2,
@@ -340,6 +354,7 @@
   .pyly-mdx > .pyly-mdx-h5,
   .pyly-mdx > .pyly-mdx-h6,
   .pyly-mdx > ul,
+  .pyly-mdx > ol,
   .pyly-mdx > .pyly-mdx-blockquote,
   .pyly-mdx-hr {
     @apply mx-4;
@@ -349,10 +364,21 @@
     @apply border-t-[0.5px] border-fg/25 border-dashed my-4 flex-1;
   }
 
-  .pyly-mdx ul {
+  .pyly-mdx-table {
+    @apply my-4 overflow-hidden rounded-lg border border-fg/20;
+  }
+  .pyly-mdx-thead {
+    @apply bg-fg/5;
+  }
+  .pyly-mdx-tr {
+    @apply flex-row border-b border-fg/10 last:border-b-0;
+  }
+
+  .pyly-mdx > ul,
+  .pyly-mdx > ol {
     @apply pl-6;
   }
-  .pyly-mdx li ul {
+  .pyly-mdx > ul > li > ul {
     @apply my-2;
   }
 }
@@ -404,6 +430,14 @@
     --color-fg-loud: var(--color-theme-sky-fg-loud);
     --color-caption: var(--color-theme-sky-caption);
     --color-caption-loud: var(--color-theme-sky-caption-loud);
+  }
+
+  .theme-grass {
+    --color-bg: var(--color-theme-grass-bg);
+    --color-fg: var(--color-theme-grass-fg);
+    --color-fg-loud: var(--color-theme-grass-fg-loud);
+    --color-caption: var(--color-theme-grass-caption);
+    --color-caption-loud: var(--color-theme-grass-caption-loud);
   }
 
   /* --- */

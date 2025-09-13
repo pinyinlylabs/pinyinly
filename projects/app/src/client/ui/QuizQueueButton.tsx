@@ -10,13 +10,15 @@ export function QuizQueueButton({
 }: {
   queueStats: Pick<
     SkillReviewQueue,
-    `overDueCount` | `dueCount` | `newCount`
+    `overDueCount` | `dueCount` | `newContentCount`
   > | null;
 }) {
   const queueCount =
     queueStats == null
       ? null
-      : queueStats.overDueCount + queueStats.dueCount + queueStats.newCount;
+      : queueStats.overDueCount +
+        queueStats.dueCount +
+        queueStats.newContentCount;
   return (
     <Link
       href="/history"

@@ -10,12 +10,12 @@ export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
   switch (flag.kind) {
     case QuestionFlagKind.NewDifficulty: {
       return (
-        <View className={flagViewClass({ class: `theme-success` })}>
+        <View className={flagViewClass({ class: `theme-danger` })}>
           <IconImage
             className={flagIconClass()}
-            source={require(`@/assets/icons/badge-filled.svg`)}
+            source={require(`@/assets/icons/circle-warning.svg`)}
           />
-          <Text className={flagTextClass()}>New difficulty</Text>
+          <Text className={flagTextClass()}>Hard question</Text>
         </View>
       );
     }
