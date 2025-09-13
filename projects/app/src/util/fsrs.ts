@@ -290,21 +290,29 @@ export function ratingName(rating: Rating) {
 }
 
 export function fsrsPredictedRecallProbability(
-  /**
-   * Stability — expected retention duration (in days). Higher stability =
-   * slower forgetting.
-   */
-  stability: number,
-  /**
-   * Number of days since the last review.
-   */
-  elapsedDays: number,
+  state: FsrsState,
+  now = new Date(),
 ) {
-  return Math.exp(-elapsedDays / stability);
+  const elapsedDays = daysDiff(state.prevReviewAt, now);
+  return Math.exp(
+    // Number of days since the last review.
+    -elapsedDays /
+      // Stability — expected retention duration (in days). Higher stability slower forgetting.
+      state.stability,
+  );
 }
 
 export function fsrsIsForgotten(state: FsrsState, now = new Date()) {
   const elapsed = daysDiff(state.prevReviewAt, now);
-  const probability = fsrsPredictedRecallProbability(state.stability, elapsed);
-  return probability < 0.2;
+
+  // Never consider it forgotten if it's been less than 1 week since the last
+  // review. This prevents the system from overreacting to small fluctuations in
+  // the forgetting curve.
+  if (elapsed < 7) {
+    return false;
+  }
+
+  const probability = fsrsPredictedRecallProbability(state, now);
+  // Consider it "forgotten" if the probability of remembering it is less than 2%.
+  return probability < 0.01;
 }

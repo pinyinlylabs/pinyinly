@@ -929,6 +929,10 @@ export function needsToBeIntroduced(
     return true;
   }
 
+  return isForgotten(srsState, now);
+}
+
+export function isForgotten(srsState: SrsStateType, now: Date): boolean {
   switch (srsState.kind) {
     case SrsKind.FsrsFourPointFive: {
       return fsrsIsForgotten(srsState, now);
