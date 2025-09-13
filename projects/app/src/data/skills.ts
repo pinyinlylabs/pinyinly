@@ -646,23 +646,7 @@ export function skillReviewQueue({
     for (const dep of graph.get(skill)?.dependencies ?? emptySet) {
       const srsState = skillSrsStates.get(dep);
 
-      switch (srsState?.kind) {
-        case SrsKind.Mock: {
-          break;
-        }
-        case SrsKind.FsrsFourPointFive: {
-          if (!fsrsIsStable(srsState)) {
-            return false;
-          }
-          break;
-        }
-        case undefined: {
-          // The dep hasn't been introduced yet, so it can't be stable.
-          return false;
-        }
-      }
-
-      if (!hasStableDependencies(dep)) {
+      if (!isStable(srsState) || !hasStableDependencies(dep)) {
         return false;
       }
     }
