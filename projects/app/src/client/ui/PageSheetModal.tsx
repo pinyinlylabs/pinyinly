@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import type { PressableProps } from "react-native";
 import { Modal, Platform, View } from "react-native";
 import Reanimated, {
@@ -34,6 +34,11 @@ interface PageSheetModalProps {
    * This is useful for snapshot testing.
    */
   devUiSnapshotMode?: boolean;
+  /**
+   * What the Suspense boundary wrapping the child content should fallback to
+   * rendering when there is suspense content.
+   */
+  suspenseFallback: ReactNode;
 }
 
 export const PageSheetModal = ({
@@ -42,6 +47,7 @@ export const PageSheetModal = ({
   onDismiss,
   passivePresentation = false,
   devUiSnapshotMode = false,
+  suspenseFallback,
 }: PageSheetModalProps) => {
   return (
     <PageSheetModalImpl
@@ -50,12 +56,14 @@ export const PageSheetModal = ({
       disableBackgroundDismiss={disableBackgroundDismiss}
       devUiSnapshotMode={devUiSnapshotMode}
     >
-      {children}
+      {(api) => (
+        <Suspense fallback={suspenseFallback}>{children(api)}</Suspense>
+      )}
     </PageSheetModalImpl>
   );
 };
 
-type ImplProps = Required<PageSheetModalProps>;
+type ImplProps = Required<Omit<PageSheetModalProps, `suspenseFallback`>>;
 
 const WebImpl = ({
   children,

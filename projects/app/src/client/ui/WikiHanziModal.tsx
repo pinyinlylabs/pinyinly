@@ -1,6 +1,6 @@
 import type { HanziText } from "@/data/model";
 import { devToolsSlowQuerySleepIfEnabled } from "@/util/devtools";
-import { lazy, Suspense } from "react";
+import { lazy } from "react";
 import { PageSheetModal } from "./PageSheetModal";
 
 export const WikiHanziModal = ({
@@ -13,11 +13,13 @@ export const WikiHanziModal = ({
   devUiSnapshotMode?: boolean;
 }) => {
   return (
-    <PageSheetModal onDismiss={onDismiss} devUiSnapshotMode={devUiSnapshotMode}>
+    <PageSheetModal
+      onDismiss={onDismiss}
+      devUiSnapshotMode={devUiSnapshotMode}
+      suspenseFallback={null}
+    >
       {({ dismiss }) => (
-        <Suspense fallback={null}>
-          <WikiHanziModalImpl hanzi={hanzi} onDismiss={dismiss} />
-        </Suspense>
+        <WikiHanziModalImpl hanzi={hanzi} onDismiss={dismiss} />
       )}
     </PageSheetModal>
   );

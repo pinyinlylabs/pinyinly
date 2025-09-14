@@ -24,6 +24,7 @@ export default defineConfig(
   configs.esm,
   configs.react,
   configs.tailwind,
+
   queryPlugin.configs[`flat/recommended`],
   compat.config(drizzlePlugin.configs.recommended),
   compat.config(inngestPlugin.configs.recommended),
@@ -49,7 +50,7 @@ export default defineConfig(
 
   // expo-router pages
   {
-    files: [`src/app/**/*`],
+    files: [`src/app/**/*.{ts,tsx}`],
     ignores: [
       `**/*+api.*`, // API routes should use named exports
     ],
@@ -65,7 +66,7 @@ export default defineConfig(
 
   // dev files
   {
-    files: [`src/app/dev/**/*`],
+    files: [`src/app/dev/**/*.{ts,tsx}`],
     rules: {
       "no-console": `off`,
     },
