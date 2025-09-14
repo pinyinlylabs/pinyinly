@@ -312,7 +312,7 @@ const recommended: ConfigWithExtendsArray = [
 
   // bin scripts
   {
-    files: [`bin/**/*`],
+    files: [`bin/**/*.{ts,tsx}`],
     rules: {
       "no-console": `off`,
     },

@@ -45,9 +45,9 @@ describe(`mdx rendering (via registry)`, () => {
       const fallback = screen.queryByTestId(`suspense-fallback`);
 
       // If fallback exists, wait for it to be removed; otherwise just wait a tick to ensure rendering is complete
-      await (fallback
-        ? waitForElementToBeRemoved(fallback)
-        : new Promise((resolve) => setTimeout(resolve, 0)));
+      if (fallback) {
+        await waitForElementToBeRemoved(fallback);
+      }
 
       // Basic checks
       expect(container.firstChild).toBeDefined();
