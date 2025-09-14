@@ -845,7 +845,7 @@ export function skillReviewQueue({
         sortComparatorDate(([, { createdAt }]) => createdAt),
       ),
     )
-    .slice(0, 20) // only consider the a fixed number of recent ratings to limit computation.
+    .slice(0, 20) // only consider a fixed number of recent ratings to limit computation.
     .map(([skill, { createdAt, rating }]) => ({ skill, createdAt, rating }));
 
   const reactiveItems = [
