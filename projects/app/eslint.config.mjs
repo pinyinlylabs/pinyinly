@@ -50,7 +50,7 @@ export default defineConfig(
 
   // expo-router pages
   {
-    files: [`src/app/**/*`],
+    files: [`src/app/**/*.{ts,tsx}`],
     ignores: [
       `**/*+api.*`, // API routes should use named exports
     ],
@@ -66,7 +66,7 @@ export default defineConfig(
 
   // dev files
   {
-    files: [`src/app/dev/**/*`],
+    files: [`src/app/dev/**/*.{ts,tsx}`],
     rules: {
       "no-console": `off`,
     },
