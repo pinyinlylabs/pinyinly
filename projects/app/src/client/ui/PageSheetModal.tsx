@@ -63,7 +63,7 @@ export const PageSheetModal = ({
   );
 };
 
-type ImplProps = Required<Omit<PageSheetModalProps, "suspenseFallback">>;
+type ImplProps = Required<Omit<PageSheetModalProps, `suspenseFallback`>>;
 
 const WebImpl = ({
   children,
