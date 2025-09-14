@@ -16,7 +16,9 @@ import {
 } from "@/util/fsrs";
 import { makePRNG } from "@/util/random";
 import {
+  emptyArray,
   emptySet,
+  inverseSortComparator,
   memoize1,
   mutableArrayFilter,
   sortComparatorDate,
@@ -582,50 +584,39 @@ export function getHanziWordRank({
  * Determines if we should prioritize a pronunciation skill after a successful
  * hanzi-to-english review, based on the user's competency with pronunciation skills.
  */
-function getReactivePronunciationSkill({
-  latestSkillRatings,
+function getReactivePronunciationSkills({
+  recentSkillRatingHistory,
   skillSrsStates,
   graph,
-  now = new Date(),
+  now,
 }: {
-  latestSkillRatings: Map<Skill, Pick<SkillRating, `rating` | `createdAt`>>;
+  recentSkillRatingHistory: ({ skill: Skill } & Pick<
+    SkillRating,
+    `rating` | `createdAt`
+  >)[];
   skillSrsStates: Map<Skill, SrsStateType>;
   graph: SkillLearningGraph;
-  now?: Date;
-}): Skill | null {
-  // Find the most recent skill review of any kind
-  let mostRecentSkillReview: { skill: Skill; createdAt: Date } | null = null;
-
-  for (const [skill, rating] of latestSkillRatings) {
-    if (
-      !mostRecentSkillReview ||
-      rating.createdAt > mostRecentSkillReview.createdAt
-    ) {
-      mostRecentSkillReview = { skill, createdAt: rating.createdAt };
-    }
-  }
+  now: Date;
+}): readonly Skill[] {
+  const lastSkillRating = recentSkillRatingHistory[0];
 
   // Check if the most recent skill review was a successful HanziWordToGloss skill
   if (
-    mostRecentSkillReview == null ||
-    skillKindFromSkill(mostRecentSkillReview.skill) !==
-      SkillKind.HanziWordToGloss
+    lastSkillRating == null ||
+    skillKindFromSkill(lastSkillRating.skill) !== SkillKind.HanziWordToGloss
   ) {
     // Skipping because the most recent review wasn't hanzi-to-gloss question.
-    return null;
+    return emptyArray;
   }
 
-  const mostRecentRating = latestSkillRatings.get(mostRecentSkillReview.skill);
-  if (mostRecentRating == null || mostRecentRating.rating === Rating.Again) {
+  if (lastSkillRating.rating === Rating.Again) {
     // Skipping because the most recent review was not successful.
-    return null;
+    return emptyArray;
   }
 
   // Check if the user has sufficient competency with pronunciation skills
   // We require at least basic competency (rank 1 or higher) with pronunciation skills
-  const hanziWord = hanziWordFromSkill(
-    mostRecentSkillReview.skill as HanziWordSkill,
-  );
+  const hanziWord = hanziWordFromSkill(lastSkillRating.skill as HanziWordSkill);
 
   // Find the corresponding pronunciation skill
   const pronunciationSkill = hanziWordToPinyinTyped(hanziWord);
@@ -651,10 +642,10 @@ function getReactivePronunciationSkill({
       continue;
     }
 
-    return dep;
+    return [dep];
   }
 
-  return null;
+  return emptyArray;
 }
 
 export function skillReviewQueue({
@@ -848,16 +839,24 @@ export function skillReviewQueue({
     .map(([skill]) => skill);
   retryItems.reverse();
 
-  // Check if we should prioritize a pronunciation skill after successful hanzi-to-english review
-  const reactivePronunciationSkill = getReactivePronunciationSkill({
-    latestSkillRatings,
-    skillSrsStates,
-    graph,
-    now,
-  });
+  const recentSkillRatingHistory = Array.from(latestSkillRatings.entries())
+    .sort(
+      inverseSortComparator(
+        sortComparatorDate(([, { createdAt }]) => createdAt),
+      ),
+    )
+    .slice(0, 20) // only consider the a fixed number of recent ratings to limit computation.
+    .map(([skill, { createdAt, rating }]) => ({ skill, createdAt, rating }));
 
-  const reactiveItems =
-    reactivePronunciationSkill == null ? [] : [reactivePronunciationSkill];
+  const reactiveItems = [
+    // Check if we should prioritize a pronunciation skill after successful hanzi-to-english review
+    ...getReactivePronunciationSkills({
+      recentSkillRatingHistory,
+      skillSrsStates,
+      graph,
+      now,
+    }),
+  ];
 
   // Remove reactive items from the other queues so that items aren't duplicated
   // and counts are correct.
