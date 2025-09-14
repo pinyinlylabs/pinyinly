@@ -57,6 +57,20 @@ export function readonlyMapDelete<K, V>(
   return copy;
 }
 
+export function mutableArrayFilter<X>(arr: X[], predicate: (x: X) => boolean) {
+  let writeIndex = 0;
+  // eslint-disable-next-line @typescript-eslint/prefer-for-of
+  for (let readIndex = 0; readIndex < arr.length; readIndex++) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const item = arr[readIndex]!;
+    if (predicate(item)) {
+      arr[writeIndex] = item;
+      writeIndex++;
+    }
+  }
+  arr.length = writeIndex;
+}
+
 export function objectMap<K extends string, V, K2 extends string, V2>(
   object: Partial<Record<K, V>>,
   mapFn: (key: K, value: V) => [K2, V2],

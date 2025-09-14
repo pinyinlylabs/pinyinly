@@ -1,10 +1,10 @@
 import { NewSkillModal } from "@/client/ui/NewSkillModal";
 import {
   hanziWordToGloss,
-  hanziWordToPinyin,
   hanziWordToPinyinFinal,
   hanziWordToPinyinInitial,
   hanziWordToPinyinTone,
+  hanziWordToPinyinTyped,
 } from "@/data/skills";
 import { View } from "react-native";
 
@@ -13,7 +13,7 @@ export default () => {
     <>
       <View>
         <NewSkillModal
-          skill={hanziWordToPinyin(`你好:hello`)}
+          skill={hanziWordToPinyinTyped(`你好:hello`)}
           devUiSnapshotMode
         />
       </View>

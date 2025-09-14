@@ -1,5 +1,5 @@
 #!/bin/sh
-moon run :prettier
+moon run :typecheck :lint :prettier
 
 RESULT=$?
 if [ $RESULT -ne 0 ]; then

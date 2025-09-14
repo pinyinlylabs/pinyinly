@@ -4,7 +4,7 @@ import {
   hanziToPinyinQuestionMistakes,
   hanziWordToPinyinQuestionOrThrow,
 } from "#data/questions/hanziWordToPinyin.ts";
-import { hanziWordToPinyin } from "#data/skills.ts";
+import { hanziWordToPinyinTyped } from "#data/skills.ts";
 import { loadDictionary } from "#dictionary/dictionary.ts";
 import { describe, expect, test } from "vitest";
 import { 拼音 } from "../helpers.ts";
@@ -15,7 +15,7 @@ describe(
   >,
   async () => {
     test(`simple case`, async () => {
-      const skill = hanziWordToPinyin(`你好:hello`);
+      const skill = hanziWordToPinyinTyped(`你好:hello`);
       await expect(hanziWordToPinyinQuestionOrThrow(skill)).resolves.toEqual({
         kind: QuestionKind.HanziWordToPinyin,
         answers: [[`nǐ`, `hǎo`]],
@@ -24,12 +24,12 @@ describe(
     });
 
     test(`throws if the hanzi word has no pinyin`, async () => {
-      const skill = hanziWordToPinyin(`亼:assemble`); // 亼:assemble has no pinyin
+      const skill = hanziWordToPinyinTyped(`亼:assemble`); // 亼:assemble has no pinyin
       await expect(hanziWordToPinyinQuestionOrThrow(skill)).rejects.toThrow();
     });
 
     test(`supports hanzi word with multiple pinyin`, async () => {
-      const skill = hanziWordToPinyin(`什:what`); // 什:what has shén and shen
+      const skill = hanziWordToPinyinTyped(`什:what`); // 什:what has shén and shen
       await expect(
         hanziWordToPinyinQuestionOrThrow(skill),
       ).resolves.not.toBeNull();
@@ -42,7 +42,7 @@ describe(
       );
 
       for (const [hanziWord] of sample) {
-        const skill = hanziWordToPinyin(hanziWord);
+        const skill = hanziWordToPinyinTyped(hanziWord);
         await hanziWordToPinyinQuestionOrThrow(skill);
       }
     });
@@ -58,7 +58,7 @@ describe(
       const question: HanziWordToPinyinQuestion = {
         kind: QuestionKind.HanziWordToPinyin,
         answers: [[拼音`nǐ`, 拼音`hǎo`]],
-        skill: hanziWordToPinyin(`你好:hello`),
+        skill: hanziWordToPinyinTyped(`你好:hello`),
       };
 
       const fixtures = [`nǐhǎo`, `nǐ hǎo`, `nǐ hǎo `, `nǐhǎo `, ` nǐhǎo`];
@@ -74,7 +74,7 @@ describe(
       const question: HanziWordToPinyinQuestion = {
         kind: QuestionKind.HanziWordToPinyin,
         answers: [[拼音`nǐ`, 拼音`hǎo`]],
-        skill: hanziWordToPinyin(`你好:hello`),
+        skill: hanziWordToPinyinTyped(`你好:hello`),
       };
 
       const fixtures: [string, string[]][] = [
@@ -110,7 +110,7 @@ describe(
           [拼音`nǐ`, 拼音`hǎo`],
           [拼音`ni`, 拼音`hao`],
         ],
-        skill: hanziWordToPinyin(`你好:hello`),
+        skill: hanziWordToPinyinTyped(`你好:hello`),
       };
 
       const fixtures = [`nihao`, `ni hao`];
