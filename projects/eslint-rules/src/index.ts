@@ -8,15 +8,13 @@ import reactCompilerPlugin from "eslint-plugin-react-compiler";
 import reactHooksPlugin from "eslint-plugin-react-hooks";
 import tailwindPlugin from "eslint-plugin-tailwindcss";
 import unicornPlugin from "eslint-plugin-unicorn";
-import type { InfiniteDepthConfigWithExtends } from "typescript-eslint";
+import type { defineConfig } from "eslint/config";
 import tseslint from "typescript-eslint";
 import { globTemplate as globTemplateRule } from "./glob-template.js";
 import { importNames as importNamesRule } from "./import-names.js";
 import { importPathRewrite as importPathRewriteRule } from "./import-path-rewrite.js";
 import { nameof as nameofRule } from "./nameof.js";
 import { noRestrictedCssClasses as noRestrictedCssClassesRule } from "./no-restricted-css-classes.js";
-
-export const config = tseslint.config;
 
 export const plugin: ESLint.Plugin = {
   rules: {
@@ -28,7 +26,9 @@ export const plugin: ESLint.Plugin = {
   },
 };
 
-const recommended: InfiniteDepthConfigWithExtends[] = [
+export type ConfigWithExtendsArray = Parameters<typeof defineConfig>;
+
+const recommended: ConfigWithExtendsArray = [
   {
     // config with just ignores is the replacement for `.eslintignore`
     ignores: [
@@ -360,7 +360,7 @@ const recommended: InfiniteDepthConfigWithExtends[] = [
   },
 ];
 
-const esm: InfiniteDepthConfigWithExtends[] = [
+const esm: ConfigWithExtendsArray = [
   // Ban CommonJS globals in ESM files, use import.meta.* instead
   {
     files: [`**/*.{js,mjs,ts,tsx}`],
@@ -370,7 +370,7 @@ const esm: InfiniteDepthConfigWithExtends[] = [
   },
 ];
 
-const react: InfiniteDepthConfigWithExtends[] = [
+const react: ConfigWithExtendsArray = [
   {
     files: [`**/*.{ts,tsx}`],
 
@@ -412,7 +412,7 @@ const react: InfiniteDepthConfigWithExtends[] = [
   },
 ];
 
-const tailwind: InfiniteDepthConfigWithExtends[] = [
+const tailwind: ConfigWithExtendsArray = [
   {
     files: [`**/*.{ts,tsx}`],
 
@@ -457,7 +457,14 @@ const tailwind: InfiniteDepthConfigWithExtends[] = [
   },
 ];
 
-export const configs = {
+interface Configs {
+  recommended: ConfigWithExtendsArray;
+  esm: ConfigWithExtendsArray;
+  react: ConfigWithExtendsArray;
+  tailwind: ConfigWithExtendsArray;
+}
+
+export const configs: Configs = {
   esm,
   react,
   recommended,
@@ -475,3 +482,5 @@ export const plugins = {
   [`react`]: reactPlugin as ESLint.Plugin,
   [`tailwind`]: tailwindPlugin as ESLint.Plugin,
 };
+
+export { defineConfig } from "eslint/config";
