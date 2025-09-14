@@ -22,3 +22,5 @@ node_modules
 
 # eslint
 .eslintcache
+
+# Test comment for precommit hooks
