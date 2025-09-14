@@ -992,6 +992,7 @@ const registry: Record<string, MdxComponentType> = {
   "奶茶/~milkTea/meaning": lazyMdx(() => import(`./wiki/奶茶/~milkTea/meaning.mdx`)),
   "她/~she/meaning": lazyMdx(() => import(`./wiki/她/~she/meaning.mdx`)),
   "她们/~they/meaning": lazyMdx(() => import(`./wiki/她们/~they/meaning.mdx`)),
+  "好/pronunciation": lazyMdx(() => import(`./wiki/好/pronunciation.mdx`)),
   "好/~good/meaning": lazyMdx(() => import(`./wiki/好/~good/meaning.mdx`)),
   "好/~like/meaning": lazyMdx(() => import(`./wiki/好/~like/meaning.mdx`)),
   "好久/~longTime/meaning": lazyMdx(() => import(`./wiki/好久/~longTime/meaning.mdx`)),
