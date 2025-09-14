@@ -24,6 +24,7 @@ export default defineConfig(
   configs.esm,
   configs.react,
   configs.tailwind,
+
   queryPlugin.configs[`flat/recommended`],
   compat.config(drizzlePlugin.configs.recommended),
   compat.config(inngestPlugin.configs.recommended),
