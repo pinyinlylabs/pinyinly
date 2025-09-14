@@ -3,7 +3,7 @@ import { SkillKind } from "@/data/model";
 import type { HanziWordSkill, Skill } from "@/data/rizzleSchema";
 import { hanziWordFromSkill, skillKindFromSkill } from "@/data/skills";
 import { hanziFromHanziWord } from "@/dictionary/dictionary";
-import { Suspense, useState } from "react";
+import { useState } from "react";
 import { NewSkillModalContentNewPronunciation } from "./NewSkillModalContentNewPronunciation";
 import { NewSkillModalContentNewWord } from "./NewSkillModalContentNewWord";
 import type { PageSheetChild } from "./PageSheetModal";
@@ -65,10 +65,9 @@ export const NewSkillModal = ({
       }}
       passivePresentation={passivePresentation}
       devUiSnapshotMode={devUiSnapshotMode}
+      suspenseFallback={null}
     >
-      {(dismiss) => (
-        <Suspense fallback={null}>{pageSheetChild(dismiss)}</Suspense>
-      )}
+      {(dismiss) => pageSheetChild(dismiss)}
     </PageSheetModal>
   ) : null;
 };
