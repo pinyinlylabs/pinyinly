@@ -839,7 +839,7 @@ export function skillReviewQueue({
     .map(([skill]) => skill);
   retryItems.reverse();
 
-  const recentSkillRatingHistory = Array.from(latestSkillRatings.entries())
+  const recentSkillRatingHistory = [...latestSkillRatings.entries()]
     .sort(
       inverseSortComparator(
         sortComparatorDate(([, { createdAt }]) => createdAt),
