@@ -1,6 +1,6 @@
 import { FlatCompat } from "@eslint/eslintrc";
 import inngestPlugin from "@inngest/eslint-plugin";
-import { config, configs, plugins } from "@pinyinly/eslint-rules";
+import { configs, defineConfig, plugins } from "@pinyinly/eslint-rules";
 import queryPlugin from "@tanstack/eslint-plugin-query";
 import drizzlePlugin from "eslint-plugin-drizzle";
 import { builtinModules } from "node:module";
@@ -8,7 +8,7 @@ import { builtinModules } from "node:module";
 const compat = new FlatCompat({ baseDirectory: import.meta.dirname });
 
 // Based on https://github.com/typescript-eslint/typescript-eslint/blob/41323746de299e6d62b4d6122975301677d7c8e0/eslint.config.mjs
-export default config(
+export default defineConfig(
   {
     // note - intentionally uses computed syntax to make it easy to sort the keys
     plugins: {
@@ -20,14 +20,13 @@ export default config(
   },
 
   // extends ...
-  ...configs.recommended,
-  ...configs.esm,
-  ...configs.react,
-  ...configs.tailwind,
-
-  ...queryPlugin.configs[`flat/recommended`],
-  ...compat.config(drizzlePlugin.configs.recommended),
-  ...compat.config(inngestPlugin.configs.recommended),
+  configs.recommended,
+  configs.esm,
+  configs.react,
+  configs.tailwind,
+  queryPlugin.configs[`flat/recommended`],
+  compat.config(drizzlePlugin.configs.recommended),
+  compat.config(inngestPlugin.configs.recommended),
 
   // TypeScript files
   {

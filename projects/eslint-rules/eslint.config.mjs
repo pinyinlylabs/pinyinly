@@ -1,6 +1,6 @@
-import { config, configs, plugins } from "#index.ts";
+import { configs, defineConfig, plugins } from "#index.ts";
 
-export default config(
+export default defineConfig(
   { plugins },
 
   ...configs.recommended,
