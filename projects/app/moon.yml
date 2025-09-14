@@ -29,6 +29,8 @@ tasks:
 
   buildEasUpdate:
     command: yarn expo export -p ios -p android --source-maps --output-dir @group(buildEasUpdateOutdir)
+    deps:
+      - ~:codegen
     options:
       envFile: .env.local
     outputs:
@@ -49,6 +51,8 @@ tasks:
       mkdir -p @group(buildVercelExpoOutdir) &&
       rm -rf @group(buildVercelExpoOutdir) &&
       yarn expo export -p web --source-maps --output-dir @group(buildVercelExpoOutdir)
+    deps:
+      - ~:codegen
     inputs:
       - "@group(expoCliEnv)"
       - "*.*"
@@ -80,6 +84,24 @@ tasks:
       envFile: .env.local
     env:
       NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
+
+  codegen:
+    deps:
+      - codegenExpoRouterTypes
+
+  codegenExpoRouterTypes:
+    # The recommended command from https://docs.expo.dev/router/reference/typed-routes/#type-generation
+    command: yarn expo customize tsconfig.json
+    inputs:
+      - "@group(expoCliEnv)"
+      - "*.*"
+      - "{api,assets,public,src}/**/*"
+    env:
+      # Fixes: (node:97180) Warning: To load an ES module, set "type": "module"
+      # in the package.json or use the .mjs extension.
+      #
+      # Pass $NODE_OPTIONS to support VS Code "JavaScript Debug Terminal".
+      NODE_OPTIONS: --import tsx $NODE_OPTIONS
 
   dbCheck:
     command: drizzle-kit check
@@ -230,6 +252,8 @@ tasks:
 
   expoDoctor:
     command: npx -y expo-doctor@1.13.5
+    deps:
+      - ~:codegen
     env:
       # Don't check that all the expo-* packages are the latest versions. That's
       # already handled by renovate in a way that doesn't break PR builds when a
@@ -241,21 +265,9 @@ tasks:
       # disabled otherwise the daily CI won't run this.
       cache: false
 
-  buildExpoRouterTypes:
-    # The recommended command from https://docs.expo.dev/router/reference/typed-routes/#type-generation
-    command: yarn expo customize tsconfig.json
-    inputs:
-      - "@group(expoCliEnv)"
-      - "*.*"
-      - "{api,assets,public,src}/**/*"
-    env:
-      # Fixes: (node:97180) Warning: To load an ES module, set "type": "module"
-      # in the package.json or use the .mjs extension.
-      #
-      # Pass $NODE_OPTIONS to support VS Code "JavaScript Debug Terminal".
-      NODE_OPTIONS: --import tsx $NODE_OPTIONS
-
   test:
+    deps:
+      - ~:codegen
     env:
       NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
     options:
@@ -263,12 +275,12 @@ tasks:
 
   typecheck:
     deps:
-      - ~:buildExpoRouterTypes
+      - ~:codegen
 
   lint:
     deps:
       # Lint does type-checking, so the Expo router types need to be generated first.
-      - ~:buildExpoRouterTypes
+      - ~:codegen
 
 tags:
   - eslint
