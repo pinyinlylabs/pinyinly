@@ -13,8 +13,9 @@ tasks:
       - "*.{cjs,js,mjs,json,ts,tsx}"
       # Environment variables
       - "$CI"
-      - "$ESLINT_CACHE"
+      - "$DEBUG"
       - "$ESLINT_*"
+      - "$TIMING"
     deps:
       - eslint-rules:src
     toolchain: "node"
