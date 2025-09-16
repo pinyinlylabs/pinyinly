@@ -35,6 +35,8 @@ tasks:
       - "bin/codegenMdx.ts"
     outputs:
       - "src/**/*.mdx.tsx"
+    deps:
+      - mdx:src
 
   codegenExpoRouterTypes:
     # The recommended command from https://docs.expo.dev/router/reference/typed-routes/#type-generation
