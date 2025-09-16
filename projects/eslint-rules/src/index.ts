@@ -7,7 +7,7 @@ import reactPlugin from "eslint-plugin-react";
 import reactCompilerPlugin from "eslint-plugin-react-compiler";
 import reactHooksPlugin from "eslint-plugin-react-hooks";
 import tailwindPlugin from "eslint-plugin-tailwindcss";
-import unicornPlugin from "eslint-plugin-unicorn";
+import unicorn from "eslint-plugin-unicorn";
 import type { defineConfig } from "eslint/config";
 import tseslint from "typescript-eslint";
 import { globTemplate as globTemplateRule } from "./glob-template.js";
@@ -15,6 +15,8 @@ import { importNames as importNamesRule } from "./import-names.js";
 import { importPathRewrite as importPathRewriteRule } from "./import-path-rewrite.js";
 import { nameof as nameofRule } from "./nameof.js";
 import { noRestrictedCssClasses as noRestrictedCssClassesRule } from "./no-restricted-css-classes.js";
+
+export { includeIgnoreFile } from "@eslint/compat";
 
 export const plugin: ESLint.Plugin = {
   rules: {
@@ -28,25 +30,10 @@ export const plugin: ESLint.Plugin = {
 
 export type ConfigWithExtendsArray = Parameters<typeof defineConfig>;
 
+// Strip out the plugin to avoid double declaring it.
+const { plugins: _, ...unicornRecommendedConfig } = unicorn.configs.recommended;
+
 const recommended: ConfigWithExtendsArray = [
-  {
-    // config with just ignores is the replacement for `.eslintignore`
-    ignores: [
-      `.cache/`,
-      `.expo/`,
-      `.vercel/`,
-      `dist/`,
-      `drizzle/`,
-      `node_modules/`,
-    ],
-  },
-
-  {
-    linterOptions: {
-      reportUnusedDisableDirectives: `error`,
-    },
-  },
-
   // All files that should use TypeScript rules.
   {
     files: [`**/*.{cjs,js,mjs,ts,tsx}`],
@@ -55,7 +42,9 @@ const recommended: ConfigWithExtendsArray = [
         projectService: true,
       },
     },
-
+    linterOptions: {
+      reportUnusedDisableDirectives: `error`,
+    },
     settings: {
       react: {
         version: `detect`,
@@ -65,7 +54,7 @@ const recommended: ConfigWithExtendsArray = [
 
   ...tseslint.configs.strictTypeChecked,
   ...tseslint.configs.stylisticTypeChecked,
-  unicornPlugin.configs.recommended,
+  unicornRecommendedConfig,
 
   // Global
   {
@@ -373,13 +362,11 @@ const esm: ConfigWithExtendsArray = [
 const react: ConfigWithExtendsArray = [
   {
     files: [`**/*.{ts,tsx}`],
-
     rules: reactPlugin.configs.recommended.rules,
   },
 
   {
     files: [`**/*.{ts,tsx}`],
-
     rules: {
       //
       // react
@@ -407,6 +394,7 @@ const react: ConfigWithExtendsArray = [
 
   {
     // Strip out `plugins` to avoid declaring it.
+    files: [`**/*.{ts,tsx}`],
     name: reactHooksPlugin.configs[`recommended-latest`].name,
     rules: reactHooksPlugin.configs[`recommended-latest`].rules,
   },
@@ -458,9 +446,9 @@ const tailwind: ConfigWithExtendsArray = [
 ];
 
 interface Configs {
-  recommended: ConfigWithExtendsArray;
   esm: ConfigWithExtendsArray;
   react: ConfigWithExtendsArray;
+  recommended: ConfigWithExtendsArray;
   tailwind: ConfigWithExtendsArray;
 }
 
@@ -481,6 +469,9 @@ export const plugins = {
   [`react-hooks`]: reactHooksPlugin as ESLint.Plugin,
   [`react`]: reactPlugin as ESLint.Plugin,
   [`tailwind`]: tailwindPlugin as ESLint.Plugin,
+  [`unicorn`]: unicorn,
 };
 
 export { defineConfig } from "eslint/config";
+
+export { default as tseslint } from "typescript-eslint";

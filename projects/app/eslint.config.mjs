@@ -1,23 +1,36 @@
 import { FlatCompat } from "@eslint/eslintrc";
 import inngestPlugin from "@inngest/eslint-plugin";
-import { configs, defineConfig, plugins } from "@pinyinly/eslint-rules";
+import {
+  configs,
+  defineConfig,
+  includeIgnoreFile,
+  plugins,
+} from "@pinyinly/eslint-rules";
 import queryPlugin from "@tanstack/eslint-plugin-query";
 import drizzlePlugin from "eslint-plugin-drizzle";
 import { builtinModules } from "node:module";
+import { fileURLToPath } from "node:url";
 
 const compat = new FlatCompat({ baseDirectory: import.meta.dirname });
 
+const gitignorePath = fileURLToPath(new URL(`.gitignore`, import.meta.url));
+export const gitignoreConfig = includeIgnoreFile(gitignorePath);
+
+export const pluginsConfig = {
+  // note - intentionally uses computed syntax to make it easy to sort the keys
+  plugins: {
+    ...plugins,
+    [`@expoCodeImports`]: plugins[`@typescript-eslint`], // an extra scope for no-restricted-imports so they don't clobber other configs
+    [`@inngest`]: inngestPlugin,
+    [`drizzle`]: drizzlePlugin,
+  },
+};
+
 // Based on https://github.com/typescript-eslint/typescript-eslint/blob/41323746de299e6d62b4d6122975301677d7c8e0/eslint.config.mjs
 export default defineConfig(
-  {
-    // note - intentionally uses computed syntax to make it easy to sort the keys
-    plugins: {
-      ...plugins,
-      [`@expoCodeImports`]: plugins[`@typescript-eslint`], // an extra scope for no-restricted-imports so they don't clobber other configs
-      [`@inngest`]: inngestPlugin,
-      [`drizzle`]: drizzlePlugin,
-    },
-  },
+  gitignoreConfig,
+
+  pluginsConfig,
 
   // extends ...
   configs.recommended,
@@ -31,7 +44,7 @@ export default defineConfig(
 
   // TypeScript files
   {
-    files: [`{bin,src,test}/**/*.{ts,tsx}`],
+    files: [`**/*.{ts,tsx}`],
     rules: {
       // Expo or react-native or metro or something handles this, so there's no
       // need to import React.
@@ -104,15 +117,12 @@ export default defineConfig(
       "@expoCodeImports/no-restricted-imports": [
         `error`,
         {
-          // eslint-disable-next-line unicorn/no-useless-spread
-          paths: [
-            ...builtinModules
-              .flatMap((x) => (x.startsWith(`node:`) ? [x] : [x, `node:` + x]))
-              .map((name) => ({
-                name,
-                message: `Expo code is universal and doesn't support Node.js packages`,
-              })),
-          ],
+          paths: builtinModules
+            .flatMap((x) => (x.startsWith(`node:`) ? [x] : [x, `node:` + x]))
+            .map((name) => ({
+              name,
+              message: `Expo code is universal and doesn't support Node.js packages`,
+            })),
         },
       ],
     },
