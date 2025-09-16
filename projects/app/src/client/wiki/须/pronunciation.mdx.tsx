@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 须 (xū)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" xū"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: First tone"}</_components.strong>{" — "}<_components.strong>{"high and flat"}</_components.strong>{" tone, like a steady note"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"x"}</_components.strong>{" like "}<_components.strong>{"\"sh\""}</_components.strong>{" in \"ship\""}</_components.li>{"\n"}<_components.li><_components.strong>{"ū"}</_components.strong>{" sounds like "}<_components.strong>{"\"oo\""}</_components.strong>{" in \"zoo\" but held steady and high"}</_components.li>{"\n"}<_components.li><_components.strong>{"xū"}</_components.strong>{" sounds like "}<_components.strong>{"\"shoo\""}</_components.strong>{" with a steady high pitch"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"first tone"}</_components.strong>{" (ˉ) is a "}<_components.strong>{"high and steady"}</_components.strong>{" tone. Say "}<_components.strong>{"\"xū\""}</_components.strong>{" with a firm, level tone when\nexpressing necessity: \"You "}<_components.strong>{"must"}</_components.strong>{"!\""}</_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"须 (xū) - \"must/beard\""}</_components.li>{"\n"}<_components.li>{"必须 (bì xū) - \"must/have to\""}</_components.li>{"\n"}<_components.li>{"须要 (xū yào) - \"need to\""}</_components.li>{"\n"}<_components.li>{"胡须 (hú xū) - \"beard/whiskers\""}</_components.li>{"\n"}<_components.li>{"须知 (xū zhī) - \"need to know\""}</_components.li>{"\n"}<_components.li>{"不须 (bù xū) - \"need not\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Memory Tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"When you say someone "}<_components.strong>{"must"}</_components.strong>{" do something, use a high, steady tone to show certainty — that's\n"}<_components.strong>{"xū"}</_components.strong>{"!"}</_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}

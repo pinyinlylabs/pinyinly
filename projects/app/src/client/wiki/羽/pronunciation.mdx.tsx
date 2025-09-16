@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 羽 (yǔ)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" yǔ"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: Third tone"}</_components.strong>{" — "}<_components.strong>{"falling-rising"}</_components.strong>{" tone, like saying \"uh-huh\" when nodding"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"y"}</_components.strong>{" like "}<_components.strong>{"\"y\""}</_components.strong>{" in \"yes\""}</_components.li>{"\n"}<_components.li><_components.strong>{"ǔ"}</_components.strong>{" sounds like "}<_components.strong>{"\"ü\""}</_components.strong>{" (like German \"ü\" or French \"u\"), but with third tone → dip down and rise\nup"}</_components.li>{"\n"}<_components.li><_components.strong>{"yǔ"}</_components.strong>{" sounds like "}<_components.strong>{"\"yü\""}</_components.strong>{" with a contemplative dip-then-rise"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"third tone"}</_components.strong>{" (ˇ) is a "}<_components.strong>{"fall–then-rise"}</_components.strong>{" tone:"}</_components.p>{"\n"}<_components.p>{"Say it like you're gently touching a feather: "}<_components.strong>{"\"yǔ...\""}</_components.strong>{" — that's the soft, thoughtful tone pattern\nof "}<_components.strong>{"yǔ"}</_components.strong>{"."}</_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"羽 (yǔ) - \"feather\""}</_components.li>{"\n"}<_components.li>{"羽毛 (yǔ máo) - \"feather, plumage\""}</_components.li>{"\n"}<_components.li>{"羽毛球 (yǔ máo qiú) - \"badminton\" (literally \"feather ball\")"}</_components.li>{"\n"}<_components.li>{"鸟羽 (niǎo yǔ) - \"bird feathers\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Memory Tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"A feather is soft and delicate — pronounce "}<_components.strong>{"yǔ"}</_components.strong>{" with that gentle third tone, like you're admiring\nits lightness!"}</_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}

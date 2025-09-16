@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 迎 (yíng)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" yíng"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: Second tone"}</_components.strong>{" — "}<_components.strong>{"rising"}</_components.strong>{" tone, like asking a question: "}<_components.strong>{"\"Really?\""}</_components.strong></_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"y"}</_components.strong>{" like "}<_components.strong>{"\"y\""}</_components.strong>{" in \"yes\""}</_components.li>{"\n"}<_components.li><_components.strong>{"íng"}</_components.strong>{" sounds like "}<_components.strong>{"\"eeng\""}</_components.strong>{" but with second tone → starts low and rises up"}</_components.li>{"\n"}<_components.li><_components.strong>{"yíng"}</_components.strong>{" sounds like "}<_components.strong>{"\"yeeng?\""}</_components.strong>{" with a questioning rise"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"second tone"}</_components.strong>{" (´) is a "}<_components.strong>{"rising"}</_components.strong>{" tone:"}</_components.p>{"\n"}<_components.p>{"Say it like welcoming someone with surprise: "}<_components.strong>{"\"yíng?\""}</_components.strong>{" — that's the rising tone pattern of\n"}<_components.strong>{"yíng"}</_components.strong>{"."}</_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"欢迎 (huān yíng) - \"welcome\""}</_components.li>{"\n"}<_components.li>{"迎接 (yíng jiē) - \"to meet; to greet\""}</_components.li>{"\n"}<_components.li>{"迎来 (yíng lái) - \"to welcome; to usher in\""}</_components.li>{"\n"}<_components.li>{"迎面 (yíng miàn) - \"head-on; face to face\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Memory Tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"迎 means "}<_components.strong>{"to receive/welcome"}</_components.strong>{" — pronounce it with a rising "}<_components.strong>{"yíng"}</_components.strong>{" like greeting someone with\npleasant surprise!"}</_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}

@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 曰 (yuē)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" yuē"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: First tone"}</_components.strong>{" — "}<_components.strong>{"high and flat"}</_components.strong>{" tone, like a steady note"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"y"}</_components.strong>{" like "}<_components.strong>{"\"y\""}</_components.strong>{" in \"yes\""}</_components.li>{"\n"}<_components.li><_components.strong>{"uē"}</_components.strong>{" sounds like "}<_components.strong>{"\"way\""}</_components.strong>{" but shorter, with first tone → steady and high"}</_components.li>{"\n"}<_components.li><_components.strong>{"yuē"}</_components.strong>{" sounds like "}<_components.strong>{"\"yweh\""}</_components.strong>{" with a steady high pitch"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"first tone"}</_components.strong>{" (¯) is a "}<_components.strong>{"high and flat"}</_components.strong>{" tone:"}</_components.p>{"\n"}<_components.p>{"Keep it steady and high, like stating something definitively. Perfect for the formal, classical tone\nof \"to say.\""}</_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"子曰 (zǐ yuē) - \"Confucius said\" (classical Chinese)"}</_components.li>{"\n"}<_components.li>{"诗曰 (shī yuē) - \"the poem says\" (classical style)"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"📚 Special Notes:"}</_components.strong></_components.p>{"\n"}<_components.p>{"曰 is primarily used in "}<_components.strong>{"classical Chinese"}</_components.strong>{" and formal literary contexts. In modern\nChinese, 说 (shuō) is used for \"to say.\""}</_components.p>{"\n"}<_components.p><_components.strong>{"💡 Memory Tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"曰 is the classical/formal way to say \"say\" - imagine ancient scholars making formal pronouncements\nwith that steady, authoritative first tone: "}<_components.strong>{"\"yuē!\""}</_components.strong></_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}

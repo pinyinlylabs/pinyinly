@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 龜 (guī)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" guī"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: First tone"}</_components.strong>{" — "}<_components.strong>{"high and flat"}</_components.strong>{" tone, like a steady note"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"g"}</_components.strong>{" like "}<_components.strong>{"\"g\""}</_components.strong>{" in \"go\""}</_components.li>{"\n"}<_components.li><_components.strong>{"uī"}</_components.strong>{" sounds like "}<_components.strong>{"\"way\""}</_components.strong>{" but with the "}<_components.strong>{"\"w\""}</_components.strong>{" sound softer, with first tone → high and steady"}</_components.li>{"\n"}<_components.li><_components.strong>{"guī"}</_components.strong>{" sounds like "}<_components.strong>{"\"gway\""}</_components.strong>{" held steady and high"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"first tone"}</_components.strong>{" (¯) is a "}<_components.strong>{"high and flat"}</_components.strong>{" tone:"}</_components.p>{"\n"}<_components.p>{"Keep it high and steady, like humming a consistent note: "}<_components.strong>{"\"guī\""}</_components.strong>{" — that's the tone pattern of\n"}<_components.strong>{"guī"}</_components.strong>{"."}</_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"龜 (guī) - \"turtle\""}</_components.li>{"\n"}<_components.li>{"烏龜 (wū guī) - \"tortoise; turtle\""}</_components.li>{"\n"}<_components.li>{"龜速 (guī sù) - \"turtle speed; very slow\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Memory Tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"Think of a turtle moving "}<_components.strong>{"steadily"}</_components.strong>{" and "}<_components.strong>{"consistently"}</_components.strong>{" slow with that flat, unchanging "}<_components.strong>{"\"guī\""}</_components.strong>{"\ntone!"}</_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}

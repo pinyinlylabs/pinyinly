@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 最 (zuì)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" zuì"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: Fourth tone"}</_components.strong>{" — sharp "}<_components.strong>{"falling"}</_components.strong>{" tone, like giving a command"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"z"}</_components.strong>{" like "}<_components.strong>{"\"dz\""}</_components.strong>{" sound, similar to "}<_components.strong>{"\"ds\""}</_components.strong>{" in \"suds\""}</_components.li>{"\n"}<_components.li><_components.strong>{"uì"}</_components.strong>{" sounds like "}<_components.strong>{"\"way\""}</_components.strong>{", but with fourth tone → sharp fall down"}</_components.li>{"\n"}<_components.li><_components.strong>{"zuì"}</_components.strong>{" sounds like "}<_components.strong>{"\"dzway!\""}</_components.strong>{" with a sharp drop"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"fourth tone"}</_components.strong>{" (`) is a "}<_components.strong>{"sharp falling"}</_components.strong>{" tone:"}</_components.p>{"\n"}<_components.p>{"Start high and drop down sharply, like making an emphatic declaration. Perfect for expressing \"the\nMOST\" of something!"}</_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"最好 (zuì hǎo) - \"best; the best\""}</_components.li>{"\n"}<_components.li>{"最后 (zuì hòu) - \"last; final; finally\""}</_components.li>{"\n"}<_components.li>{"最近 (zuì jìn) - \"recently; nearest\""}</_components.li>{"\n"}<_components.li>{"最多 (zuì duō) - \"most; at most\""}</_components.li>{"\n"}<_components.li>{"最喜欢 (zuì xǐ huan) - \"like the most; favorite\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Memory Tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"最 means \"most\" - when you want to emphasize that something is THE MOST, you naturally use that\nemphatic, definitive fourth tone: "}<_components.strong>{"\"zuì!\""}</_components.strong></_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}

@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 麦 (mài)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" mài"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: Fourth tone"}</_components.strong>{" — sharp "}<_components.strong>{"falling"}</_components.strong>{" tone, like giving a command"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"m"}</_components.strong>{" like "}<_components.strong>{"\"m\""}</_components.strong>{" in \"my\""}</_components.li>{"\n"}<_components.li><_components.strong>{"ài"}</_components.strong>{" sounds like "}<_components.strong>{"\"eye\""}</_components.strong>{" but with a sharp falling tone"}</_components.li>{"\n"}<_components.li><_components.strong>{"mài"}</_components.strong>{" sounds like "}<_components.strong>{"\"my\""}</_components.strong>{" with a sharp drop in pitch, similar to \"my!\" said emphatically"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"fourth tone"}</_components.strong>{" (ˋ) is a "}<_components.strong>{"sharp falling"}</_components.strong>{" tone:"}</_components.p>{"\n"}<_components.p>{"Say it like you're proudly declaring ownership of your wheat field: "}<_components.strong>{"\"mài!\""}</_components.strong>{" — that emphatic,\nfalling tone."}</_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"麦 (mài) - \"wheat\""}</_components.li>{"\n"}<_components.li>{"小麦 (xiǎo mài) - \"wheat\""}</_components.li>{"\n"}<_components.li>{"燕麦 (yàn mài) - \"oats\""}</_components.li>{"\n"}<_components.li>{"麦子 (mài zi) - \"wheat grain\""}</_components.li>{"\n"}<_components.li>{"麦田 (mài tián) - \"wheat field\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Memory Tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"麦 sounds like \"my!\" with a falling tone — imagine a farmer proudly saying "}<_components.strong>{"\"mài!\""}</_components.strong>{" (my wheat!)\nwhen showing off their golden wheat field."}</_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}

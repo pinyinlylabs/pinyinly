@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 六 (liù)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" liù"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: Fourth tone"}</_components.strong>{" — sharp "}<_components.strong>{"falling"}</_components.strong>{" tone, like giving a command"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"l"}</_components.strong>{" like "}<_components.strong>{"\"l\""}</_components.strong>{" in \"love\""}</_components.li>{"\n"}<_components.li><_components.strong>{"iù"}</_components.strong>{" sounds like "}<_components.strong>{"\"ee-oo\""}</_components.strong>{" blended together with a sharp falling tone"}</_components.li>{"\n"}<_components.li><_components.strong>{"liù"}</_components.strong>{" sounds like "}<_components.strong>{"\"lee-oo!\""}</_components.strong>{" with a sharp drop"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"fourth tone"}</_components.strong>{" (`) is a "}<_components.strong>{"sharp falling"}</_components.strong>{" tone:"}</_components.p>{"\n"}<_components.p>{"Say it like you're giving a firm command: "}<_components.strong>{"\"liù!\""}</_components.strong>{" — that's the tone pattern of "}<_components.strong>{"liù"}</_components.strong>{"."}</_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"六 (liù) - \"six\""}</_components.li>{"\n"}<_components.li>{"六月 (liù yuè) - \"June\""}</_components.li>{"\n"}<_components.li>{"十六 (shí liù) - \"sixteen\""}</_components.li>{"\n"}<_components.li>{"六十 (liù shí) - \"sixty\""}</_components.li>{"\n"}<_components.li>{"六点 (liù diǎn) - \"six o'clock\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Special Notes:"}</_components.strong></_components.p>{"\n"}<_components.p>{"六 consistently uses the fourth tone (liù) as the number \"six.\" The pronunciation combines the \"l\"\nsound with a diphthong \"iù\" that flows from \"ee\" to \"oo\" with a falling tone."}</_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}

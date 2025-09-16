@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 冫 (bīng)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" bīng"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: First tone"}</_components.strong>{" — "}<_components.strong>{"high and flat"}</_components.strong>{" tone, like a steady note: "}<_components.strong>{"\"Eeee\""}</_components.strong></_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"b"}</_components.strong>{" like "}<_components.strong>{"\"b\""}</_components.strong>{" in \"bee\""}</_components.li>{"\n"}<_components.li><_components.strong>{"īng"}</_components.strong>{" sounds like "}<_components.strong>{"\"eeng\""}</_components.strong>{" but held steady and high"}</_components.li>{"\n"}<_components.li><_components.strong>{"bīng"}</_components.strong>{" sounds like "}<_components.strong>{"\"beeng\""}</_components.strong>{" with steady high pitch"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"first tone"}</_components.strong>{" (¯) is "}<_components.strong>{"high and flat"}</_components.strong>{":"}</_components.p>{"\n"}<_components.p>{"Keep your voice "}<_components.strong>{"steady and high"}</_components.strong>{" throughout — like the sound of ice crystals: "}<_components.strong>{"\"bīīīng\""}</_components.strong></_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"冫 (bīng) - \"ice\" (radical meaning)"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Memory Tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"This radical looks like two drops of ice — imagine the clear, steady sound of ice: "}<_components.strong>{"\"bīng\""}</_components.strong>{"!"}</_components.p>{"\n"}<_components.p><_components.strong>{"📌 Note:"}</_components.strong></_components.p>{"\n"}<_components.p>{"冫 is primarily used as a radical component (the \"ice\" radical) in other characters\nlike 冷 (cold), 冰 (ice), 冻 (freeze), rather than as a standalone character in modern Chinese. It\nrepresents concepts related to cold or ice."}</_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}

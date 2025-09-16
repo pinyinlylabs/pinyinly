@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 送 (sòng)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" sòng"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: Fourth tone"}</_components.strong>{" — sharp "}<_components.strong>{"falling"}</_components.strong>{" tone, like giving a command"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"s"}</_components.strong>{" like "}<_components.strong>{"\"s\""}</_components.strong>{" in \"song\""}</_components.li>{"\n"}<_components.li><_components.strong>{"òng"}</_components.strong>{" sounds like "}<_components.strong>{"\"ong\""}</_components.strong>{" in \"gong\" but with a sharp falling tone"}</_components.li>{"\n"}<_components.li><_components.strong>{"sòng"}</_components.strong>{" sounds like "}<_components.strong>{"\"song!\""}</_components.strong>{" with a sharp drop"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"fourth tone"}</_components.strong>{" (`) is a "}<_components.strong>{"sharp falling"}</_components.strong>{" tone:"}</_components.p>{"\n"}<_components.p>{"Start high and drop quickly, like saying "}<_components.strong>{"\"Here!\""}</_components.strong>{" when giving something: "}<_components.strong>{"\"sòng!\""}</_components.strong>{" — that's the\ntone pattern of "}<_components.strong>{"sòng"}</_components.strong>{"."}</_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"送 (sòng) - \"to give as a gift; to deliver\""}</_components.li>{"\n"}<_components.li>{"送给 (sòng gěi) - \"to give to\""}</_components.li>{"\n"}<_components.li>{"送到 (sòng dào) - \"to deliver to\""}</_components.li>{"\n"}<_components.li>{"送礼 (sòng lǐ) - \"to give gifts\""}</_components.li>{"\n"}<_components.li>{"运送 (yùn sòng) - \"to transport\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Memory Tip:"}</_components.strong></_components.p>{"\n"}<_components.p><_components.strong>{"Giving"}</_components.strong>{" something is a definitive action — the falling tone shows the decisiveness of the giving\ngesture!"}</_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}

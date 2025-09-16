@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 皮 (pí)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" pí"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: Second tone"}</_components.strong>{" — "}<_components.strong>{"rising"}</_components.strong>{" tone, like asking a question"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"p"}</_components.strong>{" like "}<_components.strong>{"\"p\""}</_components.strong>{" in \"pat\" but with a stronger puff of air"}</_components.li>{"\n"}<_components.li><_components.strong>{"í"}</_components.strong>{" sounds like "}<_components.strong>{"\"ee\""}</_components.strong>{" in \"see\", but with a "}<_components.strong>{"rising tone"}</_components.strong></_components.li>{"\n"}<_components.li><_components.strong>{"pí"}</_components.strong>{" sounds like "}<_components.strong>{"\"pee?\""}</_components.strong>{" with a questioning rise"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"second tone"}</_components.strong>{" (ˊ) "}<_components.strong>{"rises"}</_components.strong>{" like asking a question:"}</_components.p>{"\n"}<_components.p>{"Say it like you're asking \"Is that skin?\": "}<_components.strong>{"\"pí?\""}</_components.strong>{" — that's the rising energy of "}<_components.strong>{"pí"}</_components.strong>{"."}</_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"皮 (pí) - \"skin; leather; fur\""}</_components.li>{"\n"}<_components.li>{"皮包 (pí bāo) - \"leather bag\""}</_components.li>{"\n"}<_components.li>{"皮肤 (pí fū) - \"skin\""}</_components.li>{"\n"}<_components.li>{"橘子皮 (jú zi pí) - \"orange peel\""}</_components.li>{"\n"}<_components.li>{"土豆皮 (tǔ dòu pí) - \"potato skin\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Memory Tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"皮 means \"skin\" — the rising second tone sounds like someone exclaiming when they touch something\nwith an interesting texture!"}</_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}

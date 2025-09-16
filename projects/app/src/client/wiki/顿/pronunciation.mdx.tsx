@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 顿 (dùn)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" dùn"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: Fourth tone"}</_components.strong>{" — sharp "}<_components.strong>{"falling"}</_components.strong>{" tone, like giving a command"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"d"}</_components.strong>{" like "}<_components.strong>{"\"d\""}</_components.strong>{" in \"dog\""}</_components.li>{"\n"}<_components.li><_components.strong>{"ùn"}</_components.strong>{" sounds like "}<_components.strong>{"\"oon\""}</_components.strong>{" in \"moon\" but with sharp falling tone"}</_components.li>{"\n"}<_components.li><_components.strong>{"dùn"}</_components.strong>{" sounds like "}<_components.strong>{"\"done!\""}</_components.strong>{" with a sharp drop"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"fourth tone"}</_components.strong>{" (ˋ) is a "}<_components.strong>{"sharp falling"}</_components.strong>{" tone. Say "}<_components.strong>{"\"dùn\""}</_components.strong>{" like you're commanding a sudden\nstop: \""}<_components.strong>{"Pause"}</_components.strong>{"!\""}</_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"顿 (dùn) - \"pause/suddenly\""}</_components.li>{"\n"}<_components.li>{"顿时 (dùn shí) - \"immediately/at once\""}</_components.li>{"\n"}<_components.li>{"顿号 (dùn hào) - \"Chinese comma (、)\""}</_components.li>{"\n"}<_components.li>{"一顿饭 (yí dùn fàn) - \"a meal\""}</_components.li>{"\n"}<_components.li>{"停顿 (tíng dùn) - \"pause/stop\""}</_components.li>{"\n"}<_components.li>{"顿悟 (dùn wù) - \"sudden enlightenment\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Memory Tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"When you command someone to "}<_components.strong>{"pause"}</_components.strong>{", you use a sharp, abrupt tone — that's the fourth tone of\n"}<_components.strong>{"dùn"}</_components.strong>{"!"}</_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}

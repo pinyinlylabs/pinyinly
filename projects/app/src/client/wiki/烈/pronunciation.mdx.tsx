@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 烈 (liè)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" liè"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: Fourth tone"}</_components.strong>{" — sharp "}<_components.strong>{"falling"}</_components.strong>{" tone, like giving a command"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"l"}</_components.strong>{" like "}<_components.strong>{"\"l\""}</_components.strong>{" in \"love\""}</_components.li>{"\n"}<_components.li><_components.strong>{"iè"}</_components.strong>{" sounds like "}<_components.strong>{"\"yeh\""}</_components.strong>{" but with fourth tone → sharp falling"}</_components.li>{"\n"}<_components.li><_components.strong>{"liè"}</_components.strong>{" sounds like "}<_components.strong>{"\"lyeh!\""}</_components.strong>{" with a sharp drop"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"fourth tone"}</_components.strong>{" (`) is a "}<_components.strong>{"sharp falling"}</_components.strong>{" tone:"}</_components.p>{"\n"}<_components.p>{"Say it like you're reacting to intense heat: "}<_components.strong>{"\"liè!\""}</_components.strong>{" — that sharp, definitive falling tone\npattern of "}<_components.strong>{"liè"}</_components.strong>{"."}</_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"烈 (liè) - \"fiery; intense; fierce\""}</_components.li>{"\n"}<_components.li>{"强烈 (qiáng liè) - \"strong; intense\""}</_components.li>{"\n"}<_components.li>{"热烈 (rè liè) - \"warm; enthusiastic\""}</_components.li>{"\n"}<_components.li>{"烈日 (liè rì) - \"scorching sun\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Memory Tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"When you feel something "}<_components.strong>{"fiery"}</_components.strong>{" or intense, you might exclaim "}<_components.strong>{"\"Yikes!\""}</_components.strong>{" with that sharp,\nfalling tone — just like "}<_components.strong>{"liè"}</_components.strong>{"!"}</_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}

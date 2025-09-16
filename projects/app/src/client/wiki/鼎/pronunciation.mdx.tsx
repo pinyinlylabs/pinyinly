@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 鼎 (dǐng)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" dǐng"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: Third tone"}</_components.strong>{" — "}<_components.strong>{"falling-rising"}</_components.strong>{" tone, like saying \"uh-huh\" when nodding"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"d"}</_components.strong>{" like "}<_components.strong>{"\"d\""}</_components.strong>{" in \"ding\""}</_components.li>{"\n"}<_components.li><_components.strong>{"ǐng"}</_components.strong>{" sounds like "}<_components.strong>{"\"ing\""}</_components.strong>{" in \"sing\" but with third tone → dip down and rise up"}</_components.li>{"\n"}<_components.li><_components.strong>{"dǐng"}</_components.strong>{" sounds like "}<_components.strong>{"\"ding\""}</_components.strong>{" with a dip-then-rise"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"third tone"}</_components.strong>{" (ˇ) is a "}<_components.strong>{"fall–then-rise"}</_components.strong>{" tone:"}</_components.p>{"\n"}<_components.p>{"Say it like you're thoughtfully examining an ancient bronze cauldron: "}<_components.strong>{"\"dǐng...\""}</_components.strong>{" — that\ncontemplative tone pattern when appreciating historical artifacts."}</_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"鼎 (dǐng) - \"cauldron; tripod vessel\""}</_components.li>{"\n"}<_components.li>{"鼎盛 (dǐng shèng) - \"flourishing; at its peak\""}</_components.li>{"\n"}<_components.li>{"九鼎 (jiǔ dǐng) - \"nine tripod cauldrons\" (symbol of imperial power)"}</_components.li>{"\n"}<_components.li>{"问鼎 (wèn dǐng) - \"to contend for power\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Memory Tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"鼎 sounds like \"ding\" with a falling-rising tone — imagine the resonant "}<_components.strong>{"\"dǐng\""}</_components.strong>{" sound an ancient\nbronze cauldron makes when struck, with that distinctive dipping tone."}</_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}

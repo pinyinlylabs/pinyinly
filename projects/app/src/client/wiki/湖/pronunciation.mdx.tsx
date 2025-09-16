@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 湖 (hú)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" hú"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: Second tone"}</_components.strong>{" — "}<_components.strong>{"rising"}</_components.strong>{" tone, like asking a question"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"h"}</_components.strong>{" like "}<_components.strong>{"\"h\""}</_components.strong>{" in \"home\""}</_components.li>{"\n"}<_components.li><_components.strong>{"ú"}</_components.strong>{" sounds like "}<_components.strong>{"\"oo\""}</_components.strong>{" in \"food\" but with second tone → rising up"}</_components.li>{"\n"}<_components.li><_components.strong>{"hú"}</_components.strong>{" sounds like "}<_components.strong>{"\"hoo?\""}</_components.strong>{" with a rising pitch"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"second tone"}</_components.strong>{" (´) is a "}<_components.strong>{"rising"}</_components.strong>{" tone:"}</_components.p>{"\n"}<_components.p>{"Say it like you're asking someone about a body of water: "}<_components.strong>{"\"hú?\""}</_components.strong>{" — that questioning, upward tone\npattern of "}<_components.strong>{"hú"}</_components.strong>{"."}</_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"湖 (hú) - \"lake\""}</_components.li>{"\n"}<_components.li>{"湖水 (hú shuǐ) - \"lake water\""}</_components.li>{"\n"}<_components.li>{"西湖 (xī hú) - \"West Lake\" (famous lake in Hangzhou)"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Memory Tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"When you see a beautiful "}<_components.strong>{"lake"}</_components.strong>{", you might ask "}<_components.strong>{"\"Hoo, is that a lake?\""}</_components.strong>{" — the rising tone in\n"}<_components.strong>{"\"Hoo?\""}</_components.strong>{" matches the second tone of "}<_components.strong>{"hú"}</_components.strong>{"!"}</_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}

@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 备 (bèi)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" bèi"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: Fourth tone"}</_components.strong>{" — "}<_components.strong>{"falling"}</_components.strong>{" tone, like giving a command: "}<_components.strong>{"\"Bay!\""}</_components.strong></_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"b"}</_components.strong>{" like "}<_components.strong>{"\"b\""}</_components.strong>{" in \"bay\""}</_components.li>{"\n"}<_components.li><_components.strong>{"èi"}</_components.strong>{" sounds like "}<_components.strong>{"\"ay\""}</_components.strong>{" in \"bay\" but with a sharp falling tone"}</_components.li>{"\n"}<_components.li><_components.strong>{"bèi"}</_components.strong>{" sounds like "}<_components.strong>{"\"bay\""}</_components.strong>{" with a decisive drop"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"fourth tone"}</_components.strong>{" (ˋ) is "}<_components.strong>{"authoritative and falling"}</_components.strong>{":"}</_components.p>{"\n"}<_components.p>{"Start "}<_components.strong>{"high and drop decisively"}</_components.strong>{" — like giving an order to prepare: "}<_components.strong>{"\"bèi!\""}</_components.strong>{" (get ready!)"}</_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"备 (bèi) - \"prepare\""}</_components.li>{"\n"}<_components.li>{"准备 (zhǔn bèi) - \"prepare\""}</_components.li>{"\n"}<_components.li>{"设备 (shè bèi) - \"equipment\""}</_components.li>{"\n"}<_components.li>{"装备 (zhuāng bèi) - \"equipment\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Memory Tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"Think of the sharp falling tone like a drill sergeant commanding "}<_components.strong>{"\"bèi!\""}</_components.strong>{" (prepare!) — the\ndecisive drop reflects the urgency of getting ready!"}</_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}

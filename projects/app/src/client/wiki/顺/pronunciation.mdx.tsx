@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 顺 (shùn)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" shùn"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: Fourth tone"}</_components.strong>{" — sharp "}<_components.strong>{"falling"}</_components.strong>{" tone, like giving a command"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"sh"}</_components.strong>{" like "}<_components.strong>{"\"sh\""}</_components.strong>{" in \"ship\""}</_components.li>{"\n"}<_components.li><_components.strong>{"ùn"}</_components.strong>{" sounds like "}<_components.strong>{"\"oon\""}</_components.strong>{" in \"moon\" but with sharp falling tone"}</_components.li>{"\n"}<_components.li><_components.strong>{"shùn"}</_components.strong>{" sounds like "}<_components.strong>{"\"shoon!\""}</_components.strong>{" with a sharp drop"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"fourth tone"}</_components.strong>{" (ˋ) is a "}<_components.strong>{"sharp falling"}</_components.strong>{" tone. Say "}<_components.strong>{"\"shùn\""}</_components.strong>{" like you're giving a firm\ncommand to obey: \""}<_components.strong>{"Obey"}</_components.strong>{"!\""}</_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"顺 (shùn) - \"obey/smooth\""}</_components.li>{"\n"}<_components.li>{"顺利 (shùn lì) - \"smooth/successful\""}</_components.li>{"\n"}<_components.li>{"顺序 (shùn xù) - \"sequence/order\""}</_components.li>{"\n"}<_components.li>{"顺便 (shùn biàn) - \"by the way\""}</_components.li>{"\n"}<_components.li>{"顺从 (shùn cóng) - \"obedient\""}</_components.li>{"\n"}<_components.li>{"一路顺风 (yí lù shùn fēng) - \"bon voyage\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Memory Tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"When you order someone to "}<_components.strong>{"obey"}</_components.strong>{", you use a commanding, falling tone — that's the fourth tone of\n"}<_components.strong>{"shùn"}</_components.strong>{"!"}</_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}

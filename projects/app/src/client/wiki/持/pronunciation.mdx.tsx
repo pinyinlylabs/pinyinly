@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 持 (chí)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" chí"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: Second tone"}</_components.strong>{" — "}<_components.strong>{"rising"}</_components.strong>{" tone, like asking a question"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"ch"}</_components.strong>{" like "}<_components.strong>{"\"ch\""}</_components.strong>{" in \"chair\" but with tongue curled back"}</_components.li>{"\n"}<_components.li><_components.strong>{"í"}</_components.strong>{" sounds like "}<_components.strong>{"\"ee\""}</_components.strong>{" in \"see\", but with rising tone"}</_components.li>{"\n"}<_components.li><_components.strong>{"chí"}</_components.strong>{" sounds like "}<_components.strong>{"\"chee?\""}</_components.strong>{" with a questioning rise"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"second tone"}</_components.strong>{" (ˊ) is a "}<_components.strong>{"rising"}</_components.strong>{" tone:"}</_components.p>{"\n"}<_components.p>{"Say it like you're asking \"Really?\" in English: "}<_components.strong>{"\"chí?\""}</_components.strong>{" — start lower and rise up."}</_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"持 (chí) - \"to hold; to maintain; to sustain\""}</_components.li>{"\n"}<_components.li>{"持续 (chí xù) - \"to continue; to persist\""}</_components.li>{"\n"}<_components.li>{"保持 (bǎo chí) - \"to maintain; to keep\""}</_components.li>{"\n"}<_components.li>{"坚持 (jiān chí) - \"to persist; to insist\""}</_components.li>{"\n"}<_components.li>{"持有 (chí yǒu) - \"to hold; to possess\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Pronunciation Note:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"ch"}</_components.strong>{" sound is a retroflex consonant - curl your tongue tip back towards the roof of your mouth\nwhen making the sound."}</_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}

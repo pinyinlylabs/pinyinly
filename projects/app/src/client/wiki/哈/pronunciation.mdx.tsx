@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 哈 (hā)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" hā"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: First tone"}</_components.strong>{" — "}<_components.strong>{"high and flat"}</_components.strong>{" tone, like a steady note: "}<_components.strong>{"\"Haaa\""}</_components.strong></_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"h"}</_components.strong>{" like "}<_components.strong>{"\"h\""}</_components.strong>{" in \"hat\""}</_components.li>{"\n"}<_components.li><_components.strong>{"ā"}</_components.strong>{" sounds like "}<_components.strong>{"\"ah\""}</_components.strong>{" in \"father\", held steady and high"}</_components.li>{"\n"}<_components.li><_components.strong>{"hā"}</_components.strong>{" sounds like "}<_components.strong>{"\"hah\""}</_components.strong>{" with a steady high pitch"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"first tone"}</_components.strong>{" (ˉ) is "}<_components.strong>{"high and level"}</_components.strong>{":"}</_components.p>{"\n"}<_components.p>{"Say it like you're laughing heartily: "}<_components.strong>{"\"hā!\""}</_components.strong>{" — maintain that high, steady pitch throughout."}</_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"哈 (hā) - exclamation of laughter"}</_components.li>{"\n"}<_components.li>{"哈哈 (hā hā) - \"haha\" (laughter)"}</_components.li>{"\n"}<_components.li>{"哈尔滨 (Hā ěr bīn) - \"Harbin\" (city name)"}</_components.li>{"\n"}<_components.li>{"哈密瓜 (hā mì guā) - \"cantaloupe\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Memory Tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"mouth radical (口)"}</_components.strong>{" plus "}<_components.strong>{"合"}</_components.strong>{" suggests the sound that comes from your mouth when you laugh\n— "}<_components.strong>{"\"hā hā!\""}</_components.strong></_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}

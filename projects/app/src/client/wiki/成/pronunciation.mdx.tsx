@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 成 (chéng)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" chéng"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: Second tone"}</_components.strong>{" — "}<_components.strong>{"rising"}</_components.strong>{" tone, like asking a question: "}<_components.strong>{"\"Chéng?\""}</_components.strong></_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"ch"}</_components.strong>{" like "}<_components.strong>{"\"ch\""}</_components.strong>{" in \"church\" but softer"}</_components.li>{"\n"}<_components.li><_components.strong>{"éng"}</_components.strong>{" sounds like "}<_components.strong>{"\"ung\""}</_components.strong>{" in \"hung\" but with rising tone"}</_components.li>{"\n"}<_components.li><_components.strong>{"chéng"}</_components.strong>{" sounds like "}<_components.strong>{"\"chung\""}</_components.strong>{" with a rising pitch"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"second tone"}</_components.strong>{" (´) is a "}<_components.strong>{"rising"}</_components.strong>{" tone:"}</_components.p>{"\n"}<_components.p>{"Say it like you're asking \"成?\" (Did it succeed?) — that's the questioning, rising tone pattern of\n"}<_components.strong>{"chéng"}</_components.strong>{"."}</_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"成 (chéng) - \"become; succeed\""}</_components.li>{"\n"}<_components.li>{"成功 (chéng gōng) - \"success; succeed\""}</_components.li>{"\n"}<_components.li>{"成为 (chéng wéi) - \"become; turn into\""}</_components.li>{"\n"}<_components.li>{"完成 (wán chéng) - \"complete; finish\""}</_components.li>{"\n"}<_components.li>{"成长 (chéng zhǎng) - \"grow up; develop\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Memory Tip:"}</_components.strong></_components.p>{"\n"}<_components.p><_components.strong>{"Become"}</_components.strong>{" — the rising second tone suggests growth and progression, like becoming something better!"}</_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}

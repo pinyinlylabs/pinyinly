@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 鬯 (chàng)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" chàng"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: Fourth tone"}</_components.strong>{" — sharp "}<_components.strong>{"falling"}</_components.strong>{" tone, like giving a command"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"ch"}</_components.strong>{" like "}<_components.strong>{"\"ch\""}</_components.strong>{" in \"change\""}</_components.li>{"\n"}<_components.li><_components.strong>{"àng"}</_components.strong>{" sounds like "}<_components.strong>{"\"ahng\""}</_components.strong>{" but with fourth tone → sharp drop"}</_components.li>{"\n"}<_components.li><_components.strong>{"chàng"}</_components.strong>{" sounds like "}<_components.strong>{"\"chahng!\""}</_components.strong>{" with a sharp falling pitch"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"fourth tone"}</_components.strong>{" (ˋ) is a "}<_components.strong>{"sharp falling"}</_components.strong>{" tone: Say it like making a solemn proclamation:\n"}<_components.strong>{"\"chàng!\""}</_components.strong>{" — that's the ceremonial, decisive tone pattern."}</_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"鬯 (chàng) - \"sacrificial wine\" (ancient ritual wine)"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Special Notes:"}</_components.strong></_components.p>{"\n"}<_components.p>{"鬯 is an "}<_components.strong>{"ancient character"}</_components.strong>{" rarely used in modern Chinese. It refers to a fragrant wine used in\nancient Chinese religious ceremonies and sacrifices. It primarily appears in classical texts and as\na radical in some characters."}</_components.p>{"\n"}<_components.p><_components.strong>{"💡 Memory Tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"Think of the "}<_components.strong>{"solemn, ceremonial"}</_components.strong>{" pouring of ritual wine — that matches the serious, falling tone\nof 鬯!"}</_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}

@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 刻 (kè)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" kè"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: Fourth tone"}</_components.strong>{" — sharp "}<_components.strong>{"falling"}</_components.strong>{" tone, like giving a command"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"k"}</_components.strong>{" like "}<_components.strong>{"\"k\""}</_components.strong>{" in \"kept\""}</_components.li>{"\n"}<_components.li><_components.strong>{"è"}</_components.strong>{" sounds like "}<_components.strong>{"\"eh\""}</_components.strong>{" in \"get\", but with fourth tone → sharp falling"}</_components.li>{"\n"}<_components.li><_components.strong>{"kè"}</_components.strong>{" sounds like "}<_components.strong>{"\"keh!\""}</_components.strong>{" with a sharp drop"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"fourth tone"}</_components.strong>{" (`) is a "}<_components.strong>{"sharp falling"}</_components.strong>{" tone:"}</_components.p>{"\n"}<_components.p>{"Say it like you're marking time precisely: "}<_components.strong>{"\"kè!\""}</_components.strong>{" — that's the tone pattern of "}<_components.strong>{"kè"}</_components.strong>{"."}</_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"刻 (kè) - \"quarter of an hour; moment\""}</_components.li>{"\n"}<_components.li>{"一刻 (yí kè) - \"a quarter of an hour; 15 minutes\""}</_components.li>{"\n"}<_components.li>{"时刻 (shí kè) - \"moment; time\""}</_components.li>{"\n"}<_components.li>{"刻苦 (kè kǔ) - \"hardworking; diligent\""}</_components.li>{"\n"}<_components.li>{"深刻 (shēn kè) - \"deep; profound\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Memory Tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"刻 means \"quarter hour\" — imagine the sharp "}<_components.strong>{"falling"}</_components.strong>{" tone as the precise tick of a clock marking\ntime!"}</_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}

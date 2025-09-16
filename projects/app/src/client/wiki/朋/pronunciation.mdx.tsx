@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 朋 (péng)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" péng"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: Second tone"}</_components.strong>{" — "}<_components.strong>{"rising"}</_components.strong>{" tone, like asking a question with enthusiasm"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"p"}</_components.strong>{" like "}<_components.strong>{"\"p\""}</_components.strong>{" in \"pen\""}</_components.li>{"\n"}<_components.li><_components.strong>{"éng"}</_components.strong>{" sounds like "}<_components.strong>{"\"ung\""}</_components.strong>{" in \"hung\", but with rising tone → goes up like asking a question"}</_components.li>{"\n"}<_components.li><_components.strong>{"péng"}</_components.strong>{" sounds like "}<_components.strong>{"\"pung?\""}</_components.strong>{" with an upward rise"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"second tone"}</_components.strong>{" (´) is a "}<_components.strong>{"rising"}</_components.strong>{" tone:"}</_components.p>{"\n"}<_components.p>{"Start low and rise up high, like calling out to a friend with excitement: \"Hey friend!\""}</_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"朋友 (péng you) - \"friend\""}</_components.li>{"\n"}<_components.li>{"老朋友 (lǎo péng you) - \"old friend\""}</_components.li>{"\n"}<_components.li>{"小朋友 (xiǎo péng you) - \"little friend; child\""}</_components.li>{"\n"}<_components.li>{"交朋友 (jiāo péng you) - \"make friends\""}</_components.li>{"\n"}<_components.li>{"男朋友 (nán péng you) - \"boyfriend\""}</_components.li>{"\n"}<_components.li>{"女朋友 (nǚ péng you) - \"girlfriend\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Memory Tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"朋 means \"friend\" - when you see a friend and want to greet them, you naturally call out with that\nbright, rising tone: "}<_components.strong>{"\"péng!\""}</_components.strong>{" (like calling \"Hey!\")"}</_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}

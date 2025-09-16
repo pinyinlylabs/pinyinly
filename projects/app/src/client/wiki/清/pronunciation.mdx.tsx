@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 清 (qīng)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" qīng"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: First tone"}</_components.strong>{" — "}<_components.strong>{"high and flat"}</_components.strong>{" tone, like a steady note"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"q"}</_components.strong>{" like "}<_components.strong>{"\"ch\""}</_components.strong>{" in \"cheese\" (but with more air)"}</_components.li>{"\n"}<_components.li><_components.strong>{"īng"}</_components.strong>{" sounds like "}<_components.strong>{"\"ing\""}</_components.strong>{" in \"sing\", but with first tone → high and steady"}</_components.li>{"\n"}<_components.li><_components.strong>{"qīng"}</_components.strong>{" sounds like "}<_components.strong>{"\"ching\""}</_components.strong>{" with a steady high pitch"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"first tone"}</_components.strong>{" (ˉ) is a "}<_components.strong>{"high and flat"}</_components.strong>{" tone:"}</_components.p>{"\n"}<_components.p>{"Say it like you're holding a steady note: "}<_components.strong>{"\"qīng\""}</_components.strong>{" — that's the tone pattern of "}<_components.strong>{"qīng"}</_components.strong>{"."}</_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"清 (qīng) - \"clear\""}</_components.li>{"\n"}<_components.li>{"清楚 (qīng chu) - \"clear/distinct\""}</_components.li>{"\n"}<_components.li>{"清洁 (qīng jié) - \"clean\""}</_components.li>{"\n"}<_components.li>{"清水 (qīng shuǐ) - \"clear water\""}</_components.li>{"\n"}<_components.li>{"清晨 (qīng chén) - \"early morning\""}</_components.li>{"\n"}<_components.li>{"清香 (qīng xiāng) - \"fragrant/fresh scent\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Memory Tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"清 (qīng) contains the water radical (氵) on the left. Think of crystal clear water — when water is\npure and transparent, it's 清 (clear)!"}</_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}

@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 流 (liú)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" liú"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: Second tone"}</_components.strong>{" — "}<_components.strong>{"rising"}</_components.strong>{" tone, like asking a question"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"l"}</_components.strong>{" like "}<_components.strong>{"\"l\""}</_components.strong>{" in \"love\""}</_components.li>{"\n"}<_components.li><_components.strong>{"iú"}</_components.strong>{" sounds like "}<_components.strong>{"\"yo\""}</_components.strong>{" in \"yo-yo\", but with second tone → rise up"}</_components.li>{"\n"}<_components.li><_components.strong>{"liú"}</_components.strong>{" sounds like "}<_components.strong>{"\"lee-yo?\""}</_components.strong>{" with a rising inflection"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"second tone"}</_components.strong>{" (´) is a "}<_components.strong>{"rising"}</_components.strong>{" tone:"}</_components.p>{"\n"}<_components.p>{"Say it like you're asking a question: "}<_components.strong>{"\"liú?\""}</_components.strong>{" — that's the tone pattern of "}<_components.strong>{"liú"}</_components.strong>{"."}</_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"流 (liú) - \"flow\""}</_components.li>{"\n"}<_components.li>{"流水 (liú shuǐ) - \"flowing water\""}</_components.li>{"\n"}<_components.li>{"流行 (liú xíng) - \"popular/trendy\""}</_components.li>{"\n"}<_components.li>{"流利 (liú lì) - \"fluent\""}</_components.li>{"\n"}<_components.li>{"流传 (liú chuán) - \"pass down/spread\""}</_components.li>{"\n"}<_components.li>{"交流 (jiāo liú) - \"exchange/communicate\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Memory Tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"流 (liú) contains the water radical (氵) on the left, which perfectly represents the concept of\nwater flowing — the core meaning of this character!"}</_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}

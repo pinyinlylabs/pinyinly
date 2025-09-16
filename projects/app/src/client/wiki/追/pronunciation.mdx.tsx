@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 追 (zhuī)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" zhuī"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: First tone"}</_components.strong>{" — "}<_components.strong>{"high and flat"}</_components.strong>{" tone, like a steady note"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"zh"}</_components.strong>{" like "}<_components.strong>{"\"j\""}</_components.strong>{" in \"jam\" but with tongue curled back"}</_components.li>{"\n"}<_components.li><_components.strong>{"uī"}</_components.strong>{" sounds like "}<_components.strong>{"\"way\""}</_components.strong>{" but with a high flat tone"}</_components.li>{"\n"}<_components.li><_components.strong>{"zhuī"}</_components.strong>{" sounds like "}<_components.strong>{"\"jway\""}</_components.strong>{" with a steady high pitch"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"first tone"}</_components.strong>{" (¯) is a "}<_components.strong>{"high and flat"}</_components.strong>{" tone:"}</_components.p>{"\n"}<_components.p>{"Keep it steady and high, like singing a sustained note: "}<_components.strong>{"\"zhuīīī\""}</_components.strong>{" — that's the tone pattern of\n"}<_components.strong>{"zhuī"}</_components.strong>{"."}</_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"追 (zhuī) - \"to chase; to pursue\""}</_components.li>{"\n"}<_components.li>{"追求 (zhuī qiú) - \"to pursue; to seek\""}</_components.li>{"\n"}<_components.li>{"追赶 (zhuī gǎn) - \"to catch up with\""}</_components.li>{"\n"}<_components.li>{"追逐 (zhuī zhú) - \"to chase after\""}</_components.li>{"\n"}<_components.li>{"追问 (zhuī wèn) - \"to question closely\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Memory Tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"When "}<_components.strong>{"chasing"}</_components.strong>{" something, you maintain steady focus — just like the steady first tone!"}</_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}
