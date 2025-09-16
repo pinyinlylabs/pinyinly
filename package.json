@@ -1,6 +1,6 @@
 {
   "name": "pinyinly",
-  "packageManager": "yarn@4.9.3",
+  "packageManager": "yarn@4.9.4",
   "workspaces": [
     "projects/*"
   ],
@@ -15,7 +15,7 @@
     "yaml": "^2.7.0"
   },
   "engines": {
-    "node": "22.18.0"
+    "node": "22.19.0"
   },
   "resolutions": {
     "@testing-library/user-event@npm:14.3.0": "npm:@testing-library/user-event@^14.5.0",
@@ -69,6 +69,8 @@
     "react-native-css-interop@npm:0.1.22": "patch:react-native-css-interop@npm%3A0.1.22#~/.yarn/patches/react-native-css-interop-npm-0.1.22-9770293dfb.patch",
     "estree-walker@npm:^3.0.3": "patch:estree-walker@npm%3A3.0.3#~/.yarn/patches/estree-walker-npm-3.0.3-0372979673.patch",
     "estree-walker@npm:^3.0.0": "patch:estree-walker@npm%3A3.0.3#~/.yarn/patches/estree-walker-npm-3.0.3-0372979673.patch",
-    "typescript@npm:^5.7.3": "patch:typescript@npm%3A5.9.2#~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch"
+    "typescript@npm:^5.7.3": "patch:typescript@npm%3A5.9.2#~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch",
+    "@expo/server@npm:^0.5.0": "0.5.1",
+    "@expo/server@npm:^0.6.3": "0.5.1"
   }
 }

@@ -10,23 +10,17 @@ fileGroups:
     - "yarn.lock"
 
 tasks:
-  prettierCheck:
-    inputs:
-      - "!./projects/**/*"
-    args:
-      - "'!projects/**'"
-  prettier:
-    inputs:
-      - "!./projects/**/*"
-    args:
-      - "'!projects/**/*'"
-
   yarnConstraints:
-    command: yarn constraints
+    script: |
+      [ -z ${CI:-} ] && FIX_FLAG="--fix"
+
+      yarn constraints ${FIX_FLAG:-}
     inputs:
       - "@group(yarnConfig)"
       - "projects/app/api/package.json"
       - "projects/app/api/pnpm-lock.yaml"
+      # Environment variables
+      - "$CI"
     env:
       NODE_OPTIONS: --import tsx $NODE_OPTIONS
 
@@ -37,7 +31,7 @@ tasks:
 
   test:
     deps:
-      - prettierCheck
+      - prettier
       - renovateCheck
       - yarnConstraints
 

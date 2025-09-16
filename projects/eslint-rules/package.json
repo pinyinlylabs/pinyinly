@@ -12,6 +12,7 @@
     "noop": "echo 1"
   },
   "dependencies": {
+    "@eslint/compat": "^1.3.2",
     "@stylistic/eslint-plugin": "^5.0.0",
     "@types/eslint-plugin-tailwindcss": "^3 <=3.18.x",
     "eslint": "^9.13.0",

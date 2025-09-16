@@ -1,11 +1,11 @@
 import { QuizDeckHanziToPinyinQuestion } from "@/client/ui/QuizDeckHanziToPinyinQuestion";
 import { Use } from "@/client/ui/Use";
 import { hanziWordToPinyinQuestionOrThrow } from "@/data/questions/hanziWordToPinyin";
-import { hanziWordToPinyin } from "@/data/skills";
+import { hanziWordToPinyinTyped } from "@/data/skills";
 import { buildHanziWord } from "@/dictionary/dictionary";
 
 export default () => {
-  const skill = hanziWordToPinyin(buildHanziWord(`你好`, `hello`));
+  const skill = hanziWordToPinyinTyped(buildHanziWord(`你好`, `hello`));
   const questionPromise = hanziWordToPinyinQuestionOrThrow(skill);
 
   return (

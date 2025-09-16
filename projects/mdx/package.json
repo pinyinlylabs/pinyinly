@@ -20,13 +20,14 @@
     "debug": "^4.3.7",
     "estree-walker": "patch:estree-walker@npm%3A3.0.3#~/.yarn/patches/estree-walker-npm-3.0.3-0372979673.patch",
     "remark-flexible-markers": "^1.0.0",
+    "remark-gfm": "^4.0.1",
     "unified": "^11.0.0"
   },
   "peerDependencies": {
-    "@expo/metro-config": "*",
     "vite": "*"
   },
   "devDependencies": {
+    "@expo/metro-config": "^0.20.17",
     "@pinyinly/eslint-rules": "workspace:*",
     "@pinyinly/lib": "workspace:*",
     "@types/debug": "^4 <=4.3.x",

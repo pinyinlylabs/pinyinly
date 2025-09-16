@@ -22,36 +22,6 @@ workspace:
       deploy: "deployVercelVercel"
 
 tasks:
-  codegen:
-    deps:
-      - codegenMdx
-      - codegenExpoRouterTypes
-
-  codegenMdx:
-    description: "Precompile wiki MDX files to TSX for faster builds"
-    command: "tsx bin/codegenMdx.ts"
-    inputs:
-      - "src/**/*.mdx"
-      - "bin/codegenMdx.ts"
-    outputs:
-      - "src/**/*.mdx.tsx"
-    deps:
-      - mdx:src
-
-  codegenExpoRouterTypes:
-    # The recommended command from https://docs.expo.dev/router/reference/typed-routes/#type-generation
-    command: yarn expo customize tsconfig.json
-    inputs:
-      - "@group(expoCliEnv)"
-      - "*.*"
-      - "{api,assets,public,src}/**/*"
-    env:
-      # Fixes: (node:97180) Warning: To load an ES module, set "type": "module"
-      # in the package.json or use the .mjs extension.
-      #
-      # Pass $NODE_OPTIONS to support VS Code "JavaScript Debug Terminal".
-      NODE_OPTIONS: --import tsx $NODE_OPTIONS
-
   build:
     deps:
       - buildEasUpdate
@@ -97,7 +67,7 @@ tasks:
   buildVercelExpoSentry:
     script: |
       rsync -a --delete @group(buildVercelExpoOutdir) @group(buildVercelExpoSentryOutdir) &&
-      npx -y @sentry/cli@2.52.0 sourcemaps inject @group(buildVercelExpoSentryOutdir)
+      npx -y @sentry/cli@2.53.0 sourcemaps inject @group(buildVercelExpoSentryOutdir)
     deps:
       - buildVercelExpo
     inputs:
@@ -114,6 +84,61 @@ tasks:
       envFile: .env.local
     env:
       NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
+
+  codegen:
+    deps:
+      - ~:codegenEslint
+      - ~:codegenExpoRouterTypes
+      - ~:codegenMdx
+
+  codegenEslint:
+    description: "Run ESLint with codegen rules. This is separate from lint and doesn't use ESLint caching intentionally."
+    script: |
+      [ "${CI:-}" = "1" ] && {
+        echo -e "\033[33m⚠️  CI environment detected, skipping execution.\033[0m"
+        exit 0
+      }
+
+      eslint . --config eslint-codegen.config.mjs --fix
+    inputs:
+      # Config files anywhere within the project
+      - "**/*.{cjs,js,mjs,json,ts,tsx}"
+      - "*.{cjs,js,mjs,json,ts,tsx}"
+      # Environment variables
+      - "$DEBUG"
+      - "$ESLINT_*"
+      - "$TIMING"
+    deps:
+      - eslint-rules:src
+    env:
+      NODE_OPTIONS: --import tsx $NODE_OPTIONS
+
+    toolchain: "node"
+
+  codegenExpoRouterTypes:
+    # The recommended command from https://docs.expo.dev/router/reference/typed-routes/#type-generation
+    command: yarn expo customize tsconfig.json
+    inputs:
+      - "@group(expoCliEnv)"
+      - "*.*"
+      - "{api,assets,public,src}/**/*"
+    env:
+      # Fixes: (node:97180) Warning: To load an ES module, set "type": "module"
+      # in the package.json or use the .mjs extension.
+      #
+      # Pass $NODE_OPTIONS to support VS Code "JavaScript Debug Terminal".
+      NODE_OPTIONS: --import tsx $NODE_OPTIONS
+
+  codegenMdx:
+    description: "Precompile wiki MDX files to TSX for faster builds"
+    command: "tsx bin/codegenMdx.ts"
+    inputs:
+      - "src/**/*.mdx"
+      - "bin/codegenMdx.ts"
+    outputs:
+      - "src/**/*.mdx.tsx"
+    deps:
+      - mdx:src
 
   dbCheck:
     command: drizzle-kit check
@@ -149,7 +174,7 @@ tasks:
       runInCI: false
 
   deployEasUpdateEas:
-    command: npx -y eas-cli@16.17.4 update --skip-bundler --input-dir @group(buildEasUpdateOutdir) --auto --non-interactive
+    command: npx -y eas-cli@16.18.1 update --skip-bundler --input-dir @group(buildEasUpdateOutdir) --auto --non-interactive
     deps:
       - buildEasUpdate
     options:
@@ -177,7 +202,7 @@ tasks:
       - buildVercel
 
   deployVercelSentry:
-    command: npx -y @sentry/cli@2.52.0 sourcemaps upload -o pinyinly -p app @group(buildVercelOutdir)
+    command: npx -y @sentry/cli@2.53.0 sourcemaps upload -o pinyinly -p app @group(buildVercelOutdir)
     deps:
       - buildVercel
     options:
@@ -195,7 +220,7 @@ tasks:
       NODE_OPTIONS: --import tsx $NODE_OPTIONS
 
   devInngest:
-    command: npx -y inngest-cli@1.11.8 dev
+    command: npx -y inngest-cli@1.11.10 dev
     preset: watcher
 
   formatAssetJson:
@@ -278,10 +303,10 @@ tasks:
       cache: false
 
   test:
-    env:
-      NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
     deps:
       - ~:codegen
+    env:
+      NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
     options:
       envFile: .env.local
 

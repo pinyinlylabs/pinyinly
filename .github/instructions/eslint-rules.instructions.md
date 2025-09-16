@@ -12,11 +12,9 @@ The following commands should be used to test the code:
   - Update snapshots: `moon run eslint-rules:test -- -u`
 
 - Lint uses eslint, so any eslint arguments can be passed after `--`:
-  - Run all lint: `moon run eslint-rules:lint`
+  - Run all lint (and fix): `moon run eslint-rules:lint`
   - Run file lint: `moon run eslint-rules:lint -- <filename>`
-  - Auto-fix lint: `moon run eslint-rules:lint -- --fix`
 
-- Prettier: `moon run eslint-rules:prettierCheck`
-  - Fix prettier: `moon run eslint-rules:prettier`
+- Prettier: `moon run eslint-rules:prettier`
 
 These can be run from any directory, there's no need to `cd` to a particular directory.

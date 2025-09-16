@@ -7,7 +7,7 @@ import {
   getWikiMdxHanziWordMeaning,
 } from "@/client/wiki";
 import type { HanziText, PinyinSyllable } from "@/data/model";
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import React, { Fragment, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
@@ -26,7 +26,7 @@ export function WikiHanziModalImpl({
 }) {
   const [tab, setTab] = useState<`meaning` | `pronunciation`>(`meaning`);
 
-  const wikiEntry = useQuery(hanziWikiEntryQuery(hanzi));
+  const wikiEntry = useSuspenseQuery(hanziWikiEntryQuery(hanzi));
   void wikiEntry;
 
   const hanziWordMeanings = useLookupHanzi(hanzi);

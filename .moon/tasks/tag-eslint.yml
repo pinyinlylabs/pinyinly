@@ -1,13 +1,21 @@
 tasks:
   lint:
-    command: eslint . --cache
+    description: "Run ESLint and fix errors (unless in CI)."
+    # Auto-fixing errors outside CI is intended to make this more AI-agent friendly.
+    script: |
+      [ -z ${CI:-} ] && CACHE_FLAG="--cache"
+      [ -z ${CI:-} ] && FIX_FLAG="--fix"
+
+      eslint . ${CACHE_FLAG:-} ${FIX_FLAG:-}
     inputs:
       # Config files anywhere within the project
       - "**/*.{cjs,js,mjs,json,ts,tsx}"
       - "*.{cjs,js,mjs,json,ts,tsx}"
       # Environment variables
-      - "$ESLINT_CACHE"
+      - "$CI"
+      - "$DEBUG"
       - "$ESLINT_*"
+      - "$TIMING"
     deps:
       - eslint-rules:src
     toolchain: "node"

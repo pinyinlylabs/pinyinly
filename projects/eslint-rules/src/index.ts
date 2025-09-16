@@ -7,8 +7,8 @@ import reactPlugin from "eslint-plugin-react";
 import reactCompilerPlugin from "eslint-plugin-react-compiler";
 import reactHooksPlugin from "eslint-plugin-react-hooks";
 import tailwindPlugin from "eslint-plugin-tailwindcss";
-import unicornPlugin from "eslint-plugin-unicorn";
-import type { InfiniteDepthConfigWithExtends } from "typescript-eslint";
+import unicorn from "eslint-plugin-unicorn";
+import type { defineConfig } from "eslint/config";
 import tseslint from "typescript-eslint";
 import { globTemplate as globTemplateRule } from "./glob-template.js";
 import { importNames as importNamesRule } from "./import-names.js";
@@ -16,9 +16,7 @@ import { importPathRewrite as importPathRewriteRule } from "./import-path-rewrit
 import { nameof as nameofRule } from "./nameof.js";
 import { noRestrictedCssClasses as noRestrictedCssClassesRule } from "./no-restricted-css-classes.js";
 
-export type { InfiniteDepthConfigWithExtends } from "typescript-eslint";
-
-export const config = tseslint.config;
+export { includeIgnoreFile } from "@eslint/compat";
 
 export const plugin: ESLint.Plugin = {
   rules: {
@@ -30,25 +28,12 @@ export const plugin: ESLint.Plugin = {
   },
 };
 
-const recommended: InfiniteDepthConfigWithExtends[] = [
-  {
-    // config with just ignores is the replacement for `.eslintignore`
-    ignores: [
-      `.cache/`,
-      `.expo/`,
-      `.vercel/`,
-      `dist/`,
-      `drizzle/`,
-      `node_modules/`,
-    ],
-  },
+export type ConfigWithExtendsArray = Parameters<typeof defineConfig>;
 
-  {
-    linterOptions: {
-      reportUnusedDisableDirectives: `error`,
-    },
-  },
+// Strip out the plugin to avoid double declaring it.
+const { plugins: _, ...unicornRecommendedConfig } = unicorn.configs.recommended;
 
+const recommended: ConfigWithExtendsArray = [
   // All files that should use TypeScript rules.
   {
     files: [`**/*.{cjs,js,mjs,ts,tsx}`],
@@ -57,7 +42,9 @@ const recommended: InfiniteDepthConfigWithExtends[] = [
         projectService: true,
       },
     },
-
+    linterOptions: {
+      reportUnusedDisableDirectives: `error`,
+    },
     settings: {
       react: {
         version: `detect`,
@@ -67,7 +54,7 @@ const recommended: InfiniteDepthConfigWithExtends[] = [
 
   ...tseslint.configs.strictTypeChecked,
   ...tseslint.configs.stylisticTypeChecked,
-  unicornPlugin.configs.recommended,
+  unicornRecommendedConfig,
 
   // Global
   {
@@ -314,7 +301,7 @@ const recommended: InfiniteDepthConfigWithExtends[] = [
 
   // bin scripts
   {
-    files: [`bin/**/*`],
+    files: [`bin/**/*.{ts,tsx}`],
     rules: {
       "no-console": `off`,
     },
@@ -362,7 +349,7 @@ const recommended: InfiniteDepthConfigWithExtends[] = [
   },
 ];
 
-const esm: InfiniteDepthConfigWithExtends[] = [
+const esm: ConfigWithExtendsArray = [
   // Ban CommonJS globals in ESM files, use import.meta.* instead
   {
     files: [`**/*.{js,mjs,ts,tsx}`],
@@ -372,16 +359,14 @@ const esm: InfiniteDepthConfigWithExtends[] = [
   },
 ];
 
-const react: InfiniteDepthConfigWithExtends[] = [
+const react: ConfigWithExtendsArray = [
   {
     files: [`**/*.{ts,tsx}`],
-
     rules: reactPlugin.configs.recommended.rules,
   },
 
   {
     files: [`**/*.{ts,tsx}`],
-
     rules: {
       //
       // react
@@ -409,12 +394,13 @@ const react: InfiniteDepthConfigWithExtends[] = [
 
   {
     // Strip out `plugins` to avoid declaring it.
+    files: [`**/*.{ts,tsx}`],
     name: reactHooksPlugin.configs[`recommended-latest`].name,
     rules: reactHooksPlugin.configs[`recommended-latest`].rules,
   },
 ];
 
-const tailwind: InfiniteDepthConfigWithExtends[] = [
+const tailwind: ConfigWithExtendsArray = [
   {
     files: [`**/*.{ts,tsx}`],
 
@@ -459,7 +445,14 @@ const tailwind: InfiniteDepthConfigWithExtends[] = [
   },
 ];
 
-export const configs = {
+interface Configs {
+  esm: ConfigWithExtendsArray;
+  react: ConfigWithExtendsArray;
+  recommended: ConfigWithExtendsArray;
+  tailwind: ConfigWithExtendsArray;
+}
+
+export const configs: Configs = {
   esm,
   react,
   recommended,
@@ -476,4 +469,9 @@ export const plugins = {
   [`react-hooks`]: reactHooksPlugin as ESLint.Plugin,
   [`react`]: reactPlugin as ESLint.Plugin,
   [`tailwind`]: tailwindPlugin as ESLint.Plugin,
+  [`unicorn`]: unicorn,
 };
+
+export { defineConfig } from "eslint/config";
+
+export { default as tseslint } from "typescript-eslint";

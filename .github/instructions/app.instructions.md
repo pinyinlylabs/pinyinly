@@ -12,12 +12,10 @@ The following commands should be used to test the code:
   - Update snapshots: `moon run app:test -- -u`
 
 - Lint uses eslint, so any eslint arguments can be passed after `--`:
-  - Run all lint: `moon run app:lint`
+  - Run all lint (and fix): `moon run app:lint`
   - Run file lint: `moon run app:lint -- <filename>`
-  - Auto-fix lint: `moon run app:lint -- --fix`
 
-- Prettier: `moon run app:prettierCheck`
-  - Fix prettier: `moon run app:prettier`
+- Prettier: `moon run app:prettier`
 
 These can be run from any directory, there's no need to `cd` to a particular directory.
 

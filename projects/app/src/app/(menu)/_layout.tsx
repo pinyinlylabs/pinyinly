@@ -385,7 +385,7 @@ const navItems: NavGroup[] = [
     title: `Learning`,
     primary: true,
     items: [
-      { name: `Overview`, href: `/overview` },
+      // { name: `Overview`, href: `/overview` },
       { name: `Skills`, href: `/skills` },
       { name: `History`, href: `/history` },
       // { name: `Tutoring`, href: `/tutoring` },

@@ -1,14 +1,10 @@
 declare module "@inngest/eslint-plugin" {
-  import type {
-    ClassicConfig,
-    Linter,
-  } from "@typescript-eslint/utils/ts-eslint";
+  import type { ESLint, Linter } from "eslint";
 
-  declare const exprt: {
+  declare const exprt: ESLint.Plugin & {
     configs: {
-      recommended: ClassicConfig.Config;
+      recommended: Linter.LegacyConfig;
     };
-    rules: NonNullable<Linter.Plugin[`rules`]>;
   };
   export = exprt;
 }

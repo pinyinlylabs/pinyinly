@@ -11,3 +11,4 @@ pnpm-lock.yaml
 /projects/app/src/**/*.mdx.tsx
 /projects/*/dist
 *.asset.json
+*.m4a

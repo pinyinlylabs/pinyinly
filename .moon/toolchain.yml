@@ -4,10 +4,10 @@ $schema: "./cache/schemas/toolchain.json"
 # ^^^ Refactor after https://github.com/redhat-developer/yaml-language-server/pull/970
 
 node:
-  version: "22.18.0" # renovate: datasource=node-version depName=node versioning=node
+  version: "22.19.0" # renovate: datasource=node-version depName=node versioning=node
   packageManager: "yarn"
   yarn:
-    version: "4.9.3" # renovate: datasource=npm depName=@yarnpkg/cli
+    version: "4.9.4" # renovate: datasource=npm depName=@yarnpkg/cli
 
 typescript:
   # Prevent Moon from syncing `references` and `compilerOptions.paths` in the

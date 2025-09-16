@@ -13,6 +13,7 @@ import {
   skillKindFromSkill,
   skillLearningGraph,
   skillReviewQueue,
+  walkSkillAndDependencies,
 } from "#data/skills.ts";
 import {
   allHsk1HanziWords,
@@ -607,6 +608,182 @@ describe(
               overDueCount: 0,
               retryCount: 2,
             });
+          },
+        );
+      });
+
+      describe(`pronunciation skill prioritization after successful hanzi-to-english`, () => {
+        skillTest(
+          `prioritizes pronunciation skill after successful he: review if user has reached rank 1`,
+          async ({ isStructuralHanziWord }) => {
+            const graph = await skillLearningGraph({
+              targetSkills: [
+                `he:好:good`,
+                `hp:好:good`,
+                `he:人:person`,
+                `he:八:eight`,
+              ],
+            });
+
+            const queue = skillReviewQueue({
+              graph,
+              skillSrsStates: new Map<Skill, SrsStateType>([
+                // Multiple skills are due for review at different times
+                [`he:好:good`, mockSrsState(时`-1d`, 时`-5m`)],
+                [`hp:好:good`, mockSrsState(时`-1d`, 时`-10m`)], // More overdue
+                [`he:人:person`, mockSrsState(时`-1d`, 时`-3m`)], // Less overdue than hp:好:good
+                [`he:八:eight`, mockSrsState(时`-1d`, 时`-8m`)], // More overdue than hp:好:good
+                // User has sufficient pronunciation competency (rank 1+)
+                [
+                  `hpi:好:good`,
+                  {
+                    kind: SrsKind.FsrsFourPointFive,
+                    prevReviewAt: 时`-1d`,
+                    nextReviewAt: 时`1h`,
+                    stability: 35, // Above threshold for rank 1
+                    difficulty: 5,
+                  },
+                ],
+              ]),
+              latestSkillRatings: new Map([
+                // Most recent successful HanziWordToGloss review
+                [`he:好:good`, { rating: Rating.Good, createdAt: 时`-1m` }],
+              ]),
+              isStructuralHanziWord,
+            });
+
+            // The pronunciation skill should be prioritized first, despite other skills being due
+            expect(queue.items[0]).toBe(`hp:好:good`);
+            // Without prioritization, he:八:eight (-8m) would normally come before hp:好:good (-10m)
+            // because due skills are sorted by most overdue first, but hp:好:good is prioritized
+            expect(queue.items.indexOf(`hp:好:good`)).toBeLessThan(
+              queue.items.indexOf(`he:八:eight`),
+            );
+            expect(queue.items).toContain(`he:好:good`);
+            expect(queue.items).toContain(`he:人:person`);
+          },
+        );
+
+        skillTest(
+          `does not prioritize pronunciation skill if user has not reached rank 1`,
+          async ({ isStructuralHanziWord }) => {
+            const graph = await skillLearningGraph({
+              targetSkills: [
+                `he:好:good`,
+                `hp:好:good`,
+                `he:人:person`,
+                `he:八:eight`,
+              ],
+            });
+
+            const queue = skillReviewQueue({
+              graph,
+              skillSrsStates: new Map<Skill, SrsStateType>([
+                [`he:好:good`, mockSrsState(时`-1d`, 时`-5m`)],
+                [`hp:好:good`, mockSrsState(时`-1d`, 时`-10m`)],
+                [`he:人:person`, mockSrsState(时`-1d`, 时`-3m`)],
+                [`he:八:eight`, mockSrsState(时`-1d`, 时`-8m`)],
+                // User does not have sufficient pronunciation competency (rank < 1)
+              ]),
+              latestSkillRatings: new Map([
+                [`he:好:good`, { rating: Rating.Good, createdAt: 时`-1m` }],
+              ]),
+              isStructuralHanziWord,
+            });
+
+            // Normal ordering should apply based on overdue time, no special prioritization
+            expect(queue.items[0]).toBe(`hp:好:good`); // most overdue (-10m)
+            expect(queue.items[1]).toBe(`he:八:eight`); // second most overdue (-8m)
+            expect(queue.items[2]).toBe(`he:好:good`); // third most overdue (-5m)
+            expect(queue.items[3]).toBe(`he:人:person`); // least overdue (-3m)
+          },
+        );
+
+        skillTest(
+          `does not prioritize if no recent successful he: review`,
+          async ({ isStructuralHanziWord }) => {
+            const graph = await skillLearningGraph({
+              targetSkills: [
+                `he:好:good`,
+                `hp:好:good`,
+                `he:人:person`,
+                `he:八:eight`,
+              ],
+            });
+
+            const queue = skillReviewQueue({
+              graph,
+              skillSrsStates: new Map<Skill, SrsStateType>([
+                [`he:好:good`, mockSrsState(时`-1d`, 时`-5m`)],
+                [`hp:好:good`, mockSrsState(时`-1d`, 时`-10m`)],
+                [`he:人:person`, mockSrsState(时`-1d`, 时`-3m`)],
+                [`he:八:eight`, mockSrsState(时`-1d`, 时`-8m`)],
+                [
+                  `hpi:好:good`,
+                  {
+                    kind: SrsKind.FsrsFourPointFive,
+                    prevReviewAt: 时`-1d`,
+                    nextReviewAt: 时`1h`,
+                    stability: 35, // Above threshold for rank 1
+                    difficulty: 5,
+                  },
+                ],
+              ]),
+              latestSkillRatings: new Map([
+                // No recent successful reviews - failed review instead
+                [`he:好:good`, { rating: Rating.Again, createdAt: 时`-1m` }],
+              ]),
+              isStructuralHanziWord,
+            });
+
+            // Normal ordering should apply, he:好:good goes to retry section, others by overdue time
+            expect(queue.items[0]).toBe(`he:好:good`); // retry comes first
+            expect(queue.items[1]).toBe(`hp:好:good`); // most overdue in due section
+            expect(queue.items[2]).toBe(`he:八:eight`); // second most overdue
+            expect(queue.items[3]).toBe(`he:人:person`); // least overdue
+          },
+        );
+
+        skillTest(
+          `prioritizes pronunciation skill even when it's in not-due section`,
+          async ({ isStructuralHanziWord }) => {
+            const graph = await skillLearningGraph({
+              targetSkills: [`he:好:good`, `hp:好:good`, `he:人:person`],
+            });
+
+            const queue = skillReviewQueue({
+              graph,
+              skillSrsStates: new Map<Skill, SrsStateType>([
+                // he:好:good is due
+                [`he:好:good`, mockSrsState(时`-1d`, 时`-5m`)],
+                // hp:好:good is not due yet (future due date)
+                [`hp:好:good`, mockSrsState(时`-1d`, 时`+1h`)],
+                // he:人:person is new (no SRS state)
+                // User has sufficient pronunciation competency (rank 1+)
+                [
+                  `hpi:好:good`,
+                  {
+                    kind: SrsKind.FsrsFourPointFive,
+                    prevReviewAt: 时`-1d`,
+                    nextReviewAt: 时`1h`,
+                    stability: 35, // Above threshold for rank 1
+                    difficulty: 5,
+                  },
+                ],
+              ]),
+              latestSkillRatings: new Map([
+                // Most recent successful HanziWordToGloss review
+                [`he:好:good`, { rating: Rating.Good, createdAt: 时`-1m` }],
+              ]),
+              isStructuralHanziWord,
+            });
+
+            // The pronunciation skill should be prioritized first, even though it was not due yet
+            expect(queue.items[0]).toBe(`hp:好:good`);
+            // The due skill comes after the prioritized pronunciation skill
+            expect(queue.items[1]).toBe(`he:好:good`);
+            // New skills follow
+            expect(queue.items).toContain(`he:人:person`);
           },
         );
       });
@@ -1423,5 +1600,181 @@ test(
         "debug--RadicalToPinyin": false,
       }
     `);
+  },
+);
+
+describe(
+  `walkSkillAndDependencies suite` satisfies HasNameOf<
+    typeof walkSkillAndDependencies
+  >,
+  () => {
+    test(`walks single skill with no dependencies`, () => {
+      const skill1 = `he:我:i` as Skill;
+
+      const graph: SkillLearningGraph = new Map([
+        [skill1, { skill: skill1, dependencies: new Set() }],
+      ]);
+
+      const result = [...walkSkillAndDependencies(graph, skill1)];
+      expect(result).toEqual([skill1]);
+    });
+
+    test(`walks single skill with one dependency`, () => {
+      const skill1 = `he:我:i` as Skill;
+      const skill2 = `he:人:person` as Skill;
+
+      const graph: SkillLearningGraph = new Map([
+        [skill1, { skill: skill1, dependencies: new Set([skill2]) }],
+        [skill2, { skill: skill2, dependencies: new Set() }],
+      ]);
+
+      const result = [...walkSkillAndDependencies(graph, skill1)];
+      expect(result).toEqual([skill1, skill2]);
+    });
+
+    test(`walks skill with multiple dependencies`, () => {
+      const skill1 = `he:我们:we` as Skill;
+      const skill2 = `he:我:i` as Skill;
+      const skill3 = `he:人:person` as Skill;
+
+      const graph: SkillLearningGraph = new Map([
+        [skill1, { skill: skill1, dependencies: new Set([skill2, skill3]) }],
+        [skill2, { skill: skill2, dependencies: new Set() }],
+        [skill3, { skill: skill3, dependencies: new Set() }],
+      ]);
+
+      const result = [...walkSkillAndDependencies(graph, skill1)];
+      // Should include all three skills
+      expect(result).toHaveLength(3);
+      expect(result).toContain(skill1);
+      expect(result).toContain(skill2);
+      expect(result).toContain(skill3);
+      // The starting skill should be first
+      expect(result[0]).toBe(skill1);
+    });
+
+    test(`walks deeply nested dependencies`, () => {
+      const skill1 = `hp:好:positive` as Skill;
+      const skill2 = `he:好:positive` as Skill;
+      const skill3 = `he:女:woman` as Skill;
+      const skill4 = `he:子:child` as Skill;
+
+      const graph: SkillLearningGraph = new Map([
+        [skill1, { skill: skill1, dependencies: new Set([skill2]) }],
+        [skill2, { skill: skill2, dependencies: new Set([skill3, skill4]) }],
+        [skill3, { skill: skill3, dependencies: new Set() }],
+        [skill4, { skill: skill4, dependencies: new Set() }],
+      ]);
+
+      const result = [...walkSkillAndDependencies(graph, skill1)];
+      expect(result).toHaveLength(4);
+      expect(result).toContain(skill1);
+      expect(result).toContain(skill2);
+      expect(result).toContain(skill3);
+      expect(result).toContain(skill4);
+      // The starting skill should be first
+      expect(result[0]).toBe(skill1);
+    });
+
+    test(`handles circular dependencies correctly`, () => {
+      const skill1 = `he:A:a` as Skill;
+      const skill2 = `he:B:b` as Skill;
+      const skill3 = `he:C:c` as Skill;
+
+      // Create a circular dependency: skill1 -> skill2 -> skill3 -> skill1
+      const graph: SkillLearningGraph = new Map([
+        [skill1, { skill: skill1, dependencies: new Set([skill2]) }],
+        [skill2, { skill: skill2, dependencies: new Set([skill3]) }],
+        [skill3, { skill: skill3, dependencies: new Set([skill1]) }],
+      ]);
+
+      const result = [...walkSkillAndDependencies(graph, skill1)];
+      // Should visit each skill exactly once despite circular dependency
+      expect(result).toHaveLength(3);
+      expect(result).toContain(skill1);
+      expect(result).toContain(skill2);
+      expect(result).toContain(skill3);
+      // The starting skill should be first
+      expect(result[0]).toBe(skill1);
+    });
+
+    test(`handles skill not in graph`, () => {
+      const skill1 = `he:我:i` as Skill;
+      const skill2 = `he:不存在:nonexistent` as Skill;
+
+      const graph: SkillLearningGraph = new Map([
+        [skill1, { skill: skill1, dependencies: new Set() }],
+      ]);
+
+      // Try to walk a skill that's not in the graph
+      const result = [...walkSkillAndDependencies(graph, skill2)];
+      // Should still return the skill itself, even if it has no node in the graph
+      expect(result).toEqual([skill2]);
+    });
+
+    test(`handles empty graph`, () => {
+      const skill1 = `he:我:i` as Skill;
+      const graph: SkillLearningGraph = new Map();
+
+      const result = [...walkSkillAndDependencies(graph, skill1)];
+      // Should return just the skill itself
+      expect(result).toEqual([skill1]);
+    });
+
+    test(`walks complex dependency tree`, () => {
+      // Create a more complex tree structure
+      const skillA = `he:A:a` as Skill;
+      const skillB = `he:B:b` as Skill;
+      const skillC = `he:C:c` as Skill;
+      const skillD = `he:D:d` as Skill;
+      const skillE = `he:E:e` as Skill;
+      const skillF = `he:F:f` as Skill;
+
+      // Tree: A -> [B, C], B -> [D], C -> [E, F]
+      const graph: SkillLearningGraph = new Map([
+        [skillA, { skill: skillA, dependencies: new Set([skillB, skillC]) }],
+        [skillB, { skill: skillB, dependencies: new Set([skillD]) }],
+        [skillC, { skill: skillC, dependencies: new Set([skillE, skillF]) }],
+        [skillD, { skill: skillD, dependencies: new Set() }],
+        [skillE, { skill: skillE, dependencies: new Set() }],
+        [skillF, { skill: skillF, dependencies: new Set() }],
+      ]);
+
+      const result = [...walkSkillAndDependencies(graph, skillA)];
+      expect(result).toHaveLength(6);
+      expect(result).toContain(skillA);
+      expect(result).toContain(skillB);
+      expect(result).toContain(skillC);
+      expect(result).toContain(skillD);
+      expect(result).toContain(skillE);
+      expect(result).toContain(skillF);
+      // The starting skill should be first
+      expect(result[0]).toBe(skillA);
+    });
+
+    test(`handles diamond dependency pattern`, () => {
+      // Diamond pattern: A -> [B, C], B -> D, C -> D
+      const skillA = `he:A:a` as Skill;
+      const skillB = `he:B:b` as Skill;
+      const skillC = `he:C:c` as Skill;
+      const skillD = `he:D:d` as Skill;
+
+      const graph: SkillLearningGraph = new Map([
+        [skillA, { skill: skillA, dependencies: new Set([skillB, skillC]) }],
+        [skillB, { skill: skillB, dependencies: new Set([skillD]) }],
+        [skillC, { skill: skillC, dependencies: new Set([skillD]) }],
+        [skillD, { skill: skillD, dependencies: new Set() }],
+      ]);
+
+      const result = [...walkSkillAndDependencies(graph, skillA)];
+      // Should visit D only once despite being reachable through both B and C
+      expect(result).toHaveLength(4);
+      expect(result).toContain(skillA);
+      expect(result).toContain(skillB);
+      expect(result).toContain(skillC);
+      expect(result).toContain(skillD);
+      // The starting skill should be first
+      expect(result[0]).toBe(skillA);
+    });
   },
 );

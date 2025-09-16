@@ -32,3 +32,32 @@ jobs:
         uses: actions/checkout@v5
 
       - uses: ./.github/actions/setup-tools
+
+      - name: Setup Git pre-commit hook
+        run: |
+          cp ./.github/copilot-precommit.sh .git/hooks/pre-commit
+          chmod +x .git/hooks/pre-commit
+
+      - name: Setup Git config
+        # core.quotepath tells Git whether to quote “unsafe” characters in paths using C-style escapes (\344\271\237).
+        # Setting it to false disables that quoting, so Git prints raw UTF-8.
+        run: git config core.quotepath false
+
+      - name: Setup environment
+        run: |
+          echo CI=$CI
+
+      - name: Debug environment 0
+        run: |
+          echo CI=$CI
+          [ -z ${CI:-} ] && WRITE_FLAG="--write"
+          echo WRITE_FLAG=$WRITE_FLAG
+
+      - name: Override $CI
+        run: echo "CI=" >> $GITHUB_ENV
+
+      - name: Debug environment 1
+        run: |
+          echo CI=$CI
+          [ -z ${CI:-} ] && WRITE_FLAG="--write"
+          echo WRITE_FLAG=$WRITE_FLAG

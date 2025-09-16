@@ -1,9 +1,57 @@
-import { CustomComponent, CustomWrapper } from "./helpers";
+import { CustomComponent, CustomWrapper, Separator } from "./helpers";
 
-# Hello World
+<Separator title="Body text" />
 
-I **am** a _markdown_ file!
+Body text with **bold** and _italic_ and `inline code` and ==highlighted text==.
+
+<Separator title="Headings" />
+
+# Heading 1
+
+## Heading 2
+
+### Heading 3
+
+#### Heading 4
+
+##### Heading 5
+
+###### Heading 6
+
+<Separator title="Ordered list" />
+
+1. First item
+2. Second item
+   1. Nested first
+   2. Nested second
+      1. Nested third
+3. Third item
+
+<Separator title="Unordered list" />
+
+- First item
+- Second item
+  - Nested first
+    - Nested second
+- Third item
+
+<Separator title="Horizontal rule" />
+
+---
+
+<Separator title="Tables" />
+
+| Left align     |           Center           | Right align | Normal |
+| :------------- | :------------------------: | ----------: | ------ |
+| Pinyin         |             mù             |           1 | 1      |
+| Core meaning   | tree; wood; timber; wooden |           2 | 2      |
+| Part of speech |            noun            |           3 | 3      |
+| Tone           |        fourth tone         |           4 | 4      |
+
+<Separator title="Custom leaf components" />
 
 <CustomComponent />
 
-One <CustomWrapper>two **three**</CustomWrapper> four
+<Separator title="Custom wrapper components" />
+
+Some <CustomWrapper>normal and **bold** content</CustomWrapper> wrapped in a custom component.
