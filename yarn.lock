@@ -8380,7 +8380,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chalk@npm:^5.0.0, chalk@npm:^5.3.0, chalk@npm:^5.5.0":
+"chalk@npm:^5.3.0, chalk@npm:^5.5.0":
   version: 5.6.2
   resolution: "chalk@npm:5.6.2"
   checksum: 10c0/99a4b0f0e7991796b1e7e3f52dceb9137cae2a9dfc8fc0784a550dc4c558e15ab32ed70b14b21b52beb2679b4892b41a0aa44249bcb996f01e125d58477c6976
@@ -16917,12 +16917,11 @@ __metadata:
   linkType: hard
 
 "react-email@npm:^4.0.15":
-  version: 4.2.8
-  resolution: "react-email@npm:4.2.8"
+  version: 4.2.11
+  resolution: "react-email@npm:4.2.11"
   dependencies:
     "@babel/parser": "npm:^7.27.0"
     "@babel/traverse": "npm:^7.27.0"
-    chalk: "npm:^5.0.0"
     chokidar: "npm:^4.0.3"
     commander: "npm:^13.0.0"
     debounce: "npm:^2.0.0"
@@ -16939,7 +16938,7 @@ __metadata:
     tsconfig-paths: "npm:4.2.0"
   bin:
     email: dist/index.js
-  checksum: 10c0/4c4be6de622e19378b302c87624964f05774a0d9eaffc24ee2bc2b1e4ee246a234b1b3a641f055d7eb7ed10796b16647c9e53adb29db979302c59be0ff6ebca1
+  checksum: 10c0/f7c183ae2cd224b54f95b5f39c21b970b04cdbe2305396c8daea9d0033c176324e9e39927983617088c9850edd7670726f0da638c22f38e163d45f6d512c61e9
   languageName: node
   linkType: hard
 
