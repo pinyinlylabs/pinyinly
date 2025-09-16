@@ -25,7 +25,7 @@ tasks:
       NODE_OPTIONS: --import tsx $NODE_OPTIONS
 
   renovateCheck:
-    command: npx -y -p renovate@37.424.1 renovate-config-validator --strict
+    command: npx -y renovate@37.424.1 renovate-config-validator --strict
     inputs:
       - renovate.json
 
