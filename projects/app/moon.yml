@@ -87,7 +87,8 @@ tasks:
 
   codegen:
     deps:
-      - codegenExpoRouterTypes
+      - ~:codegenExpoRouterTypes
+      - ~:codegenEslint
 
   codegenExpoRouterTypes:
     # The recommended command from https://docs.expo.dev/router/reference/typed-routes/#type-generation
@@ -102,6 +103,30 @@ tasks:
       #
       # Pass $NODE_OPTIONS to support VS Code "JavaScript Debug Terminal".
       NODE_OPTIONS: --import tsx $NODE_OPTIONS
+
+  codegenEslint:
+    description: "Run ESLint with codegen rules. This is separate from lint and doesn't use ESLint caching intentionally."
+    script: |
+      [ "${CI:-}" = "1" ] && {
+        echo -e "\033[33m⚠️  CI environment detected, skipping execution.\033[0m"
+        exit 0
+      }
+
+      eslint . --config eslint-codegen.config.mjs --fix
+    inputs:
+      # Config files anywhere within the project
+      - "**/*.{cjs,js,mjs,json,ts,tsx}"
+      - "*.{cjs,js,mjs,json,ts,tsx}"
+      # Environment variables
+      - "$DEBUG"
+      - "$ESLINT_*"
+      - "$TIMING"
+    deps:
+      - eslint-rules:src
+    env:
+      NODE_OPTIONS: --import tsx $NODE_OPTIONS
+
+    toolchain: "node"
 
   dbCheck:
     command: drizzle-kit check
