@@ -9,7 +9,7 @@
     "rootDir": "../../..",
     "outDir": "../../../.moon/cache/types/projects/app-bin"
   },
-  "include": ["**/*", "../src/types/**/*.ts", "../../mdx/src/transformer.ts"],
+  "include": ["**/*"],
   "references": [
     {
       "path": "../src"
