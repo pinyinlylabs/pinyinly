@@ -42,7 +42,7 @@
     "@trpc/react-query": "11.5.1",
     "@trpc/server": "11.5.1",
     "@types/apple-signin-api": "^1.5.3",
-    "@vercel/functions": "^2.0.0",
+    "@vercel/functions": "^3.0.0",
     "array-from-async": "^3.0.0",
     "color": "^5.0.0",
     "date-fns": "^4.0.0",
