@@ -42,9 +42,6 @@ export default defineConfig(
       // it's always run. It should still be part of normal linting though for
       // convenience.
       "@pinyinly/glob-template": `error`,
-
-      // Disable ununused rules
-      "unicorn/consistent-function-scoping": `off`,
     },
   },
 );
