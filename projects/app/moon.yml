@@ -302,10 +302,10 @@ tasks:
     deps:
       - ~:codegen
 
-  # lint:
-  # deps:
-  #   # Lint does type-checking, so the Expo router types need to be generated first.
-  #   - ~:codegen
+  lint:
+    deps:
+      # Lint does type-checking, so the Expo router types need to be generated first.
+      - ~:codegen
 
 tags:
   - eslint
