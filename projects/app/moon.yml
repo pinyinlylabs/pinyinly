@@ -22,11 +22,6 @@ workspace:
       deploy: "deployVercelVercel"
 
 tasks:
-  build:
-    deps:
-      - buildEasUpdate
-      - buildVercel
-
   buildEasUpdate:
     command: yarn expo export -p ios -p android --source-maps --output-dir @group(buildEasUpdateOutdir)
     deps:
