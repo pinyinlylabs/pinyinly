@@ -140,20 +140,22 @@ tasks:
       NODE_OPTIONS: --import tsx $NODE_OPTIONS
 
   codegenMdx:
-    description: "Precompile wiki MDX files to TSX for faster builds"
     script: |
       [ "${CI:-}" = "1" ] && {
         echo -e "\033[33m⚠️  CI environment detected, skipping execution.\033[0m"
         exit 0
       }
+      echo CI="$CI"
       tsx bin/codegenMdx.ts
+    deps:
+      - mdx:src
+    description: "Precompile wiki MDX files to TSX for faster builds"
     inputs:
       - "src/**/*.mdx"
       - "bin/codegenMdx.ts"
     outputs:
       - "src/**/*.mdx.tsx"
-    deps:
-      - mdx:src
+    toolchain: "node"
 
   dbCheck:
     command: drizzle-kit check
