@@ -9,8 +9,20 @@ runs:
       with:
         auto-install: true
 
+    - uses: actions/cache@v4
+      with:
+        path: .yarn/cache
+        key: yarn-cache-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          yarn-cache-${{ runner.os }}-
+
     - name: Yarn install
       run: yarn install
+      env:
+        YARN_CACHE_FOLDER: .yarn/cache
+        YARN_ENABLE_GLOBAL_CACHE: "0"
+        # Run hardened mode only if the PR head repo is a fork
+        YARN_ENABLE_HARDENED_MODE: ${{ github.event.pull_request.head.repo.fork && '1' || '0' }}
       shell: bash
 
     - name: Install ffmpeg (for tests)

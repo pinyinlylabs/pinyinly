@@ -98,27 +98,13 @@ tasks:
 
   codegen:
     deps:
-      - ~:codegenExpoRouterTypes
       - ~:codegenEslint
-
-  codegenExpoRouterTypes:
-    # The recommended command from https://docs.expo.dev/router/reference/typed-routes/#type-generation
-    command: yarn expo customize tsconfig.json
-    inputs:
-      - "@group(expoCliEnv)"
-      - "*.*"
-      - "{api,assets,public,src}/**/*"
-    env:
-      # Fixes: (node:97180) Warning: To load an ES module, set "type": "module"
-      # in the package.json or use the .mjs extension.
-      #
-      # Pass $NODE_OPTIONS to support VS Code "JavaScript Debug Terminal".
-      NODE_OPTIONS: --import tsx $NODE_OPTIONS
+      - ~:codegenExpoRouterTypes
 
   codegenEslint:
     description: "Run ESLint with codegen rules. This is separate from lint and doesn't use ESLint caching intentionally."
     script: |
-      [ "${CI:-}" = "1" ] && {
+      [ -n "${CI:-}" ] && {
         echo -e "\033[33m⚠️  CI environment detected, skipping execution.\033[0m"
         exit 0
       }
@@ -137,6 +123,20 @@ tasks:
     env:
       NODE_OPTIONS: --import tsx $NODE_OPTIONS
     toolchain: "node"
+
+  codegenExpoRouterTypes:
+    # The recommended command from https://docs.expo.dev/router/reference/typed-routes/#type-generation
+    command: yarn expo customize tsconfig.json
+    inputs:
+      - "@group(expoCliEnv)"
+      - "*.*"
+      - "{api,assets,public,src}/**/*"
+    env:
+      # Fixes: (node:97180) Warning: To load an ES module, set "type": "module"
+      # in the package.json or use the .mjs extension.
+      #
+      # Pass $NODE_OPTIONS to support VS Code "JavaScript Debug Terminal".
+      NODE_OPTIONS: --import tsx $NODE_OPTIONS
 
   dbCheck:
     command: drizzle-kit check
@@ -286,7 +286,7 @@ tasks:
       NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
 
   expoDoctor:
-    command: npx -y expo-doctor@1.13.5
+    command: npx -y expo-doctor@1.15.1
     deps:
       - ~:codegen
     env:
