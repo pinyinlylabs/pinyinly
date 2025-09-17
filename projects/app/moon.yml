@@ -153,6 +153,7 @@ tasks:
     inputs:
       - "src/**/*.mdx"
       - "bin/codegenMdx.ts"
+      - "$CI"
     outputs:
       - "src/**/*.mdx.tsx"
     toolchain: "node"
