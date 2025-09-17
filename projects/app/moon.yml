@@ -105,7 +105,7 @@ tasks:
   codegenEslint:
     description: "Run ESLint with codegen rules. This is separate from lint and doesn't use ESLint caching intentionally."
     script: |
-      [ -n ${CI:-} ] && {
+      [ -n "${CI:-}" ] && {
         echo -e "\033[33m⚠️  CI environment detected, skipping execution.\033[0m"
         exit 0
       }
@@ -141,7 +141,7 @@ tasks:
 
   codegenMdx:
     script: |
-      [ -n ${CI:-} ] && {
+      [ -n "${CI:-}" ] && {
         echo -e "\033[33m⚠️  CI environment detected, skipping execution.\033[0m"
         exit 0
       }

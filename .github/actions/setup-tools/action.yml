@@ -11,6 +11,9 @@ runs:
 
     - name: Yarn install
       run: yarn install
+      env:
+        # Run hardened mode only if the PR head repo is a fork
+        YARN_ENABLE_HARDENED_MODE: ${{ github.event.pull_request.head.repo.fork && '1' || '0' }}
       shell: bash
 
     - name: Install ffmpeg (for tests)
