@@ -2,7 +2,6 @@ id: root
 
 fileGroups:
   yarnConfig:
-    - ".env.yarn"
     - ".yarnrc.yml"
     - "package.json"
     - "projects/*/package.json"
