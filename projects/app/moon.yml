@@ -30,15 +30,20 @@ tasks:
       runInCI: false
 
   buildEasUpdate:
-    command: yarn expo export -p ios -p android --source-maps --output-dir @group(buildEasUpdateOutdir)
+    # Do iOS and Android separately to avoid IO contention and maybe allow metro bundler cache re-use.
+    script: |
+      expo export -p ios --source-maps --output-dir @group(buildEasUpdateOutdir)
+      expo export -p android --source-maps --output-dir @group(buildEasUpdateOutdir)
     deps:
       - ~:codegen
-    options:
-      envFile: .env.local
-    outputs:
-      - "@group(buildEasUpdateOutdir)"
     env:
       NODE_OPTIONS: --import tsx $NODE_OPTIONS
+    options:
+      envFile: .env.local
+      mutex: expo-export # reduce IO contention
+    outputs:
+      - "@group(buildEasUpdateOutdir)"
+    toolchain: "node"
 
   buildVercel:
     # Copy to final destination.
@@ -61,6 +66,7 @@ tasks:
       - "{api,assets,public,src}/**/*"
     options:
       envFile: .env.local
+      mutex: expo-export # reduce IO contention
     outputs:
       - "@group(buildVercelExpoOutdir)"
     env:
@@ -127,7 +133,6 @@ tasks:
       - eslint-rules:src
     env:
       NODE_OPTIONS: --import tsx $NODE_OPTIONS
-
     toolchain: "node"
 
   dbCheck:
