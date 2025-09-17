@@ -126,7 +126,12 @@ tasks:
 
   codegenMdx:
     description: "Precompile wiki MDX files to TSX for faster builds"
-    command: "tsx bin/codegenMdx.ts"
+    script: |
+      [ "${CI:-}" = "1" ] && {
+        echo -e "\033[33m⚠️  CI environment detected, skipping execution.\033[0m"
+        exit 0
+      }
+      tsx bin/codegenMdx.ts
     inputs:
       - "src/**/*.mdx"
       - "bin/codegenMdx.ts"
