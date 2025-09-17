@@ -27,7 +27,7 @@ tasks:
   renovateCheck:
     command: npx -y -p renovate@37.424.1 renovate-config-validator --strict
     inputs:
-      - renovate.json
+      - renovate.json5
 
   test:
     deps:
