@@ -57,7 +57,7 @@ tasks:
     script: |
       mkdir -p @group(buildVercelExpoOutdir) &&
       rm -rf @group(buildVercelExpoOutdir) &&
-      yarn expo export -p web --source-maps --output-dir @group(buildVercelExpoOutdir)
+      yarn expo export -p web --source-maps --output-dir @group(buildVercelExpoOutdir) --max-workers 1
     deps:
       - ~:codegen
     inputs:
