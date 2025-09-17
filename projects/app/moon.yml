@@ -26,6 +26,8 @@ tasks:
     deps:
       - buildEasUpdate
       - buildVercel
+    options:
+      runInCI: false
 
   buildEasUpdate:
     command: yarn expo export -p ios -p android --source-maps --output-dir @group(buildEasUpdateOutdir)
