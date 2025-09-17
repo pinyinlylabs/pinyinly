@@ -107,7 +107,7 @@ jobs:
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_STATIC }}
     strategy:
       matrix:
-        index: [0, 1]
+        index: [0, 1, 2]
     steps:
       - name: 🏗 Clone repo
         uses: actions/checkout@v5
@@ -116,7 +116,7 @@ jobs:
 
       - uses: ./.github/actions/setup-tools
 
-      - run: moon ci --color --job ${{ matrix.index }} --jobTotal 2
+      - run: moon ci --color --job ${{ matrix.index }} --jobTotal 3
 
       - name: 🧾 Results
         uses: bradleyayers/moon-ci-retrospect@main

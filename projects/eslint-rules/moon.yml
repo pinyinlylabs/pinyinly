@@ -4,6 +4,8 @@ tasks:
   src:
     inputs:
       - "**/*"
+    options:
+      internal: true
 
 tags:
   - eslint
