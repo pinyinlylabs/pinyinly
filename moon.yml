@@ -31,7 +31,6 @@ tasks:
 
   test:
     deps:
-      - prettier
       - renovateCheck
       - yarnConstraints
 
