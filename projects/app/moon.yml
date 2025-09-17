@@ -66,6 +66,7 @@ tasks:
       - "{api,assets,public,src}/**/*"
     options:
       envFile: .env.local
+      internal: true
       mutex: expo-export # reduce IO contention
     outputs:
       - "@group(buildVercelExpoOutdir)"
@@ -80,6 +81,8 @@ tasks:
       - buildVercelExpo
     inputs:
       - "@group(sentryCliEnv)"
+    options:
+      internal: true
     outputs:
       - "@group(buildVercelExpoSentryOutdir)"
 
