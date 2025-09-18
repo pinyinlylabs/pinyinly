@@ -13,12 +13,12 @@ export function QuizQueueButton({
     `overDueCount` | `dueCount` | `newContentCount`
   > | null;
 }) {
-  const queueCount =
-    queueStats == null
-      ? null
-      : queueStats.overDueCount +
-        queueStats.dueCount +
-        queueStats.newContentCount;
+  const hasAnyItems =
+    queueStats != null &&
+    (queueStats.overDueCount > 0 ||
+      queueStats.dueCount > 0 ||
+      queueStats.newContentCount > 0);
+
   return (
     <Link
       href="/history"
@@ -33,36 +33,94 @@ export function QuizQueueButton({
         className="self-center text-fg"
         source={require(`@/assets/icons/inbox-filled.svg`)}
       />
-      {queueStats == null || queueCount == null ? null : queueCount > 0 ? (
-        <CountLozenge
-          count={queueCount}
-          mode={
-            queueStats.overDueCount > 0
-              ? `overdue`
-              : queueStats.dueCount > 0
-                ? `due`
-                : `new`
-          }
-        />
-      ) : null}
+      {hasAnyItems ? <StackedCountLozenges queueStats={queueStats} /> : null}
     </Link>
+  );
+}
+
+function StackedCountLozenges({
+  queueStats,
+}: {
+  queueStats: Pick<
+    SkillReviewQueue,
+    `overDueCount` | `dueCount` | `newContentCount`
+  >;
+}) {
+  // Determine which lozenges to show and their stacking order
+  const lozenges: {
+    count: number;
+    mode: `overdue` | `due` | `new`;
+    stackIndex: number;
+  }[] = [];
+
+  let stackIndex = 0;
+
+  // Add lozenges in stacking order (top to bottom)
+  if (queueStats.overDueCount > 0) {
+    lozenges.push({
+      count: queueStats.overDueCount,
+      mode: `overdue`,
+      stackIndex: stackIndex++,
+    });
+  }
+  if (queueStats.dueCount > 0) {
+    lozenges.push({
+      count: queueStats.dueCount,
+      mode: `due`,
+      stackIndex: stackIndex++,
+    });
+  }
+  if (queueStats.newContentCount > 0) {
+    lozenges.push({
+      count: queueStats.newContentCount,
+      mode: `new`,
+      stackIndex: stackIndex++,
+    });
+  }
+
+  return (
+    <>
+      {lozenges.map(({ count, mode, stackIndex }) => (
+        <CountLozenge
+          key={mode}
+          count={count}
+          mode={mode}
+          stackIndex={stackIndex}
+        />
+      ))}
+    </>
   );
 }
 
 function CountLozenge({
   count,
   mode,
+  stackIndex,
   className,
 }: {
   count: number;
   mode: `overdue` | `due` | `new`;
+  stackIndex: number;
   className?: string;
 }) {
   const countText = count >= 999 ? `999+` : `${count}`;
+
+  // Calculate positioning based on stack index
+  const stackOffsets = {
+    left: 52 + stackIndex * 6, // Start at 52%, move right by 6% per stack
+    top: 60 + stackIndex * 3, // Start at 60%, move down by 3% per stack
+    zIndex: 30 - stackIndex * 10, // Start at z-30, decrease by 10 per stack
+  };
+
   return (
     <Reanimated.View
-      entering={ZoomIn.easing(Easing.quad)}
+      entering={ZoomIn.easing(Easing.quad).delay(stackIndex * 50)}
       className={countLozengePillClass({ mode, className })}
+      style={{
+        left: `${stackOffsets.left}%`,
+        top: `${stackOffsets.top}%`,
+        zIndex: stackOffsets.zIndex,
+      }}
     >
       <Text className="text-[10px] font-bold tabular-nums text-bg">
         {countText}
@@ -73,8 +131,8 @@ function CountLozenge({
 
 const countLozengePillClass = tv({
   base: `
-    absolute left-[52%] top-[60%] flex h-[20px] min-w-[20px] items-center justify-center
-    rounded-full border-2 border-solid border-bg px-[4px]
+    absolute flex h-[20px] min-w-[20px] items-center justify-center rounded-full border-2
+    border-solid border-bg px-[4px]
   `,
   variants: {
     mode: {
