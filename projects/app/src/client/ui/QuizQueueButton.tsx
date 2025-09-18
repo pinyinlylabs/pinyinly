@@ -151,9 +151,9 @@ const stackedLozengePillClass = tv({
       28: `z-10`,
     },
     topOffset: {
-      0: `top-[60%]`,
-      1: `top-[63%]`, // Slight offset to show the edge underneath
-      2: `top-[66%]`, // More offset for the third lozenge
+      0: `left-[52%] top-[60%]`, // Top lozenge fully visible
+      1: `left-[54%] top-[62%]`, // Second lozenge slightly offset down and right
+      2: `left-[56%] top-[64%]`, // Third lozenge more offset, showing just the edge
     },
   },
 });
