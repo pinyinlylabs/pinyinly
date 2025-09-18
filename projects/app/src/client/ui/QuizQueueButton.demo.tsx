@@ -44,6 +44,21 @@ export default () => {
           queueStats={{ overDueCount: 0, dueCount: 0, newContentCount: 100 }}
         />
       </ExampleStack>
+
+      <ExampleStack title="combinations">
+        <QuizQueueButton
+          queueStats={{ overDueCount: 5, dueCount: 3, newContentCount: 0 }}
+        />
+        <QuizQueueButton
+          queueStats={{ overDueCount: 2, dueCount: 0, newContentCount: 4 }}
+        />
+        <QuizQueueButton
+          queueStats={{ overDueCount: 0, dueCount: 7, newContentCount: 2 }}
+        />
+        <QuizQueueButton
+          queueStats={{ overDueCount: 3, dueCount: 5, newContentCount: 8 }}
+        />
+      </ExampleStack>
     </View>
   );
 };
