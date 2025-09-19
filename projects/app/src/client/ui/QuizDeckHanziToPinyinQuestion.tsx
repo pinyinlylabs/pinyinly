@@ -9,7 +9,6 @@ import type {
   PinyinPronunciation,
   UnsavedSkillRating,
 } from "@/data/model";
-import { SkillKind } from "@/data/model";
 import type {
   PinyinSyllableSuggestion,
   PinyinSyllableSuggestions,
@@ -19,11 +18,9 @@ import {
   pinyinSyllableSuggestions,
 } from "@/data/pinyin";
 import { hanziToPinyinQuestionMistakes } from "@/data/questions/hanziWordToPinyin";
-import type { HanziWordSkill, Skill } from "@/data/rizzleSchema";
 import {
   computeSkillRating,
   hanziWordFromSkill,
-  skillKindFromSkill,
 } from "@/data/skills";
 import { hanziFromHanziWord } from "@/dictionary/dictionary";
 import { nonNullable } from "@pinyinly/lib/invariant";
@@ -34,10 +31,7 @@ import { Text, View } from "react-native";
 import Reanimated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { DeepReadonly } from "ts-essentials";
-import { HanziWordRefText } from "./HanziWordRefText";
-import { IconImage } from "./IconImage";
 import { PinyinOptionButton } from "./PinyinOptionButton";
-import { Pylymark } from "./Pylymark";
 import { QuizDeckToastContainer } from "./QuizDeckToastContainer";
 import { QuizFlagText } from "./QuizFlagText";
 import { QuizSubmitButton, QuizSubmitButtonState } from "./QuizSubmitButton";
@@ -96,6 +90,11 @@ export function QuizDeckHanziToPinyinQuestion({
         expectedAnswer: nonNullable(answers[0]),
       });
       onRating(skillRatings, mistakes);
+
+      // If auto-check is enabled and the answer is correct, advance immediately
+      if (autoCheck && correct) {
+        onNext();
+      }
     } else {
       onNext();
     }
@@ -103,46 +102,7 @@ export function QuizDeckHanziToPinyinQuestion({
 
   return (
     <Skeleton
-      toast={
-        grade == null ? null : (
-          <View
-            className={`
-              flex-1 gap-[12px] overflow-hidden bg-fg-bg10 px-4 pt-3 pb-safe-offset-[84px]
-
-              lg:mb-2 lg:rounded-xl
-
-              ${grade.correct ? `theme-success` : `theme-danger`}
-            `}
-          >
-            {grade.correct ? (
-              <View className="flex-row items-center gap-[8px]">
-                <IconImage
-                  size={32}
-                  source={require(`@/assets/icons/check-circled-filled.svg`)}
-                />
-                <Text className="text-2xl font-bold text-fg">Nice!</Text>
-              </View>
-            ) : (
-              <>
-                <View className="flex-row items-center gap-[8px]">
-                  <IconImage
-                    size={32}
-                    source={require(`@/assets/icons/close-circled-filled.svg`)}
-                  />
-                  <Text className="text-2xl font-bold text-fg">Incorrect</Text>
-                </View>
-                <Text className="text-xl/none font-medium text-fg">
-                  Correct answer:
-                </Text>
-
-                <Text className="text-fg">
-                  <SkillAnswerText skill={skill} includeAlternatives />
-                </Text>
-              </>
-            )}
-          </View>
-        )
-      }
+      toast={null}
       submitButton={
         <QuizSubmitButton
           autoFocus={grade != null}
@@ -323,74 +283,6 @@ const hiddenPlaceholderOptions = (
     <PinyinOptionButton pinyin="xxxxxx" shortcutKey="x" className="invisible" />
   </>
 );
-
-const SkillAnswerText = ({
-  skill,
-}: {
-  skill: Skill;
-  includeAlternatives?: boolean;
-  hideA?: boolean;
-  hideB?: boolean;
-  small?: boolean;
-}) => {
-  switch (skillKindFromSkill(skill)) {
-    case SkillKind.Deprecated_EnglishToRadical:
-    case SkillKind.Deprecated_PinyinToRadical:
-    case SkillKind.Deprecated_RadicalToEnglish:
-    case SkillKind.Deprecated_RadicalToPinyin:
-    case SkillKind.Deprecated:
-    case SkillKind.GlossToHanziWord:
-    case SkillKind.ImageToHanziWord:
-    case SkillKind.PinyinFinalAssociation:
-    case SkillKind.PinyinInitialAssociation:
-    case SkillKind.PinyinToHanziWord: {
-      throw new Error(
-        `ShowSkillAnswer not implemented for ${skillKindFromSkill(skill)}`,
-      );
-    }
-    case SkillKind.HanziWordToGloss: {
-      skill = skill as HanziWordSkill;
-      return <HanziWordToGlossSkillAnswerText skill={skill} />;
-    }
-    case SkillKind.HanziWordToPinyinTyped:
-    case SkillKind.HanziWordToPinyinFinal:
-    case SkillKind.HanziWordToPinyinInitial:
-    case SkillKind.HanziWordToPinyinTone: {
-      skill = skill as HanziWordSkill;
-      return <HanziWordToPinyinSkillAnswerText skill={skill} />;
-    }
-  }
-};
-
-const HanziWordToGlossSkillAnswerText = ({
-  skill,
-}: {
-  skill: HanziWordSkill;
-}) => {
-  const hanziWord = hanziWordFromSkill(skill);
-
-  return (
-    <>
-      <Text className="pyly-body-2xl">
-        <Pylymark source={`{${hanziWord}}`} />
-      </Text>
-    </>
-  );
-};
-
-const HanziWordToPinyinSkillAnswerText = ({
-  skill,
-}: {
-  skill: HanziWordSkill;
-}) => {
-  const hanziWord = hanziWordFromSkill(skill);
-
-  return (
-    <Text className="pyly-body-2xl">
-      <HanziWordRefText hanziWord={hanziWord} showPinyin />
-    </Text>
-  );
-};
 
 const Skeleton = ({
   children,

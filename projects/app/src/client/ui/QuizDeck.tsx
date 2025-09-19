@@ -1,3 +1,7 @@
+import {
+  autoCheckUserSetting,
+  useUserSetting,
+} from "@/client/hooks/useUserSetting";
 import { useEventCallback } from "@/client/hooks/useEventCallback";
 import { usePrefetchImages } from "@/client/hooks/usePrefetchImages";
 import { useQuizProgress } from "@/client/hooks/useQuizProgress";
@@ -30,9 +34,12 @@ import React, { useEffect, useId, useRef, useState } from "react";
 import { Animated as RnAnimated, Text, View } from "react-native";
 import Reanimated, { FadeIn } from "react-native-reanimated";
 import { CloseButton } from "./CloseButton";
+import { Delay } from "./Delay";
+import { IconImage } from "./IconImage";
 import { usePostHog } from "./PostHogProvider";
 import { QuizDeckHanziToPinyinQuestion } from "./QuizDeckHanziToPinyinQuestion";
 import { QuizDeckOneCorrectPairQuestion } from "./QuizDeckOneCorrectPairQuestion";
+import { QuizDeckToastContainer } from "./QuizDeckToastContainer";
 import { QuizProgressBar } from "./QuizProgressBar";
 import { QuizQueueButton } from "./QuizQueueButton";
 import { RectButton } from "./RectButton";
@@ -55,6 +62,9 @@ export const QuizDeck = ({ className }: { className?: string }) => {
   const queryClient = useQueryClient();
   const postHog = usePostHog();
 
+  const autoCheck =
+    useUserSetting(autoCheckUserSetting).value?.enabled ?? false;
+
   const query = nextQuizQuestionQuery(r, id);
 
   // The following is a bit convoluted but allows prefetching the next question
@@ -67,6 +77,10 @@ export const QuizDeck = ({ className }: { className?: string }) => {
   const reviewQueue = nextQuestionQuery.data?.reviewQueue ?? null;
 
   const [question, setQuestion] = useState<Question>();
+  const [toastState, setToastState] = useState<{
+    correct: boolean;
+    show: boolean;
+  } | null>(null);
 
   useEffect(() => {
     if (question == null && nextQuestion != null) {
@@ -90,6 +104,8 @@ export const QuizDeck = ({ className }: { className?: string }) => {
   const handleNext = useEventCallback(() => {
     // Clear the current question so that we swap to the next question.
     setQuestion(undefined);
+    // Clear the toast
+    setToastState(null);
   });
 
   const handleRating = useEventCallback(
@@ -105,6 +121,15 @@ export const QuizDeck = ({ className }: { className?: string }) => {
 
       if (success) {
         playSuccessSound();
+      }
+
+      // Show the toast
+      setToastState({ correct: success, show: true });
+
+      // If auto-check is enabled and the answer is correct, advance immediately
+      if (autoCheck && success) {
+        // Clear the current question immediately to start transition
+        setQuestion(undefined);
       }
 
       const now = Date.now();
@@ -289,6 +314,47 @@ export const QuizDeck = ({ className }: { className?: string }) => {
           </Stack.Navigator>
         </NavigationContainer>
       </NavigationIndependentTree>
+
+      {/* Toast shown at deck level */}
+      {toastState?.show === true ? (
+        <QuizDeckToastContainer>
+          <View
+            className={`
+              flex-1 gap-[12px] overflow-hidden bg-fg-bg10 px-4 pt-3 pb-safe-offset-[84px]
+
+              lg:mb-2 lg:rounded-xl
+
+              ${toastState.correct ? `theme-success` : `theme-danger`}
+            `}
+          >
+            {toastState.correct ? (
+              <>
+                <View className="flex-row items-center gap-[8px]">
+                  <IconImage
+                    size={32}
+                    source={require(`@/assets/icons/check-circled-filled.svg`)}
+                  />
+                  <Text className="text-2xl font-bold text-fg">Nice!</Text>
+                </View>
+                <Delay
+                  ms={1000}
+                  action={() => {
+                    setToastState(null);
+                  }}
+                />
+              </>
+            ) : (
+              <View className="flex-row items-center gap-[8px]">
+                <IconImage
+                  size={32}
+                  source={require(`@/assets/icons/close-circled-filled.svg`)}
+                />
+                <Text className="text-2xl font-bold text-fg">Incorrect</Text>
+              </View>
+            )}
+          </View>
+        </QuizDeckToastContainer>
+      ) : null}
     </View>
   );
 };
