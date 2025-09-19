@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 自 (zì)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" zì"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: Fourth tone"}</_components.strong>{" — sharp "}<_components.strong>{"falling"}</_components.strong>{" tone, like giving a confident statement"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"z"}</_components.strong>{" like "}<_components.strong>{"\"ds\""}</_components.strong>{" in \"beds\" (voiced z sound)"}</_components.li>{"\n"}<_components.li><_components.strong>{"ì"}</_components.strong>{" sounds like "}<_components.strong>{"\"er\""}</_components.strong>{" in \"her\", but with fourth tone → sharp drop"}</_components.li>{"\n"}<_components.li><_components.strong>{"zì"}</_components.strong>{" sounds like "}<_components.strong>{"\"dzuh\""}</_components.strong>{" with a sharp falling tone"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"fourth tone"}</_components.strong>{" (ˋ) is a "}<_components.strong>{"sharp falling"}</_components.strong>{" tone:"}</_components.p>{"\n"}<_components.p>{"Say it decisively, like saying "}<_components.strong>{"\"Stop!\""}</_components.strong>{" with authority: "}<_components.strong>{"\"zì!\""}</_components.strong>{" — that's the falling pattern."}</_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"自 (zì) - \"self; from\""}</_components.li>{"\n"}<_components.li>{"自己 (zì jǐ) - \"oneself; myself\""}</_components.li>{"\n"}<_components.li>{"自然 (zì rán) - \"natural; nature\""}</_components.li>{"\n"}<_components.li>{"来自 (lái zì) - \"come from\""}</_components.li>{"\n"}<_components.li>{"自由 (zì yóu) - \"freedom; free\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Usage Note:"}</_components.strong></_components.p>{"\n"}<_components.p>{"自 (zì) is commonly used as a prefix meaning \"self-\" or \"auto-\" in compound words, and also means\n\"from\" when indicating origin."}</_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}

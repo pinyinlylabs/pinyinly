@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 秋 (qiū)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" qiū"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: First tone"}</_components.strong>{" — "}<_components.strong>{"high and flat"}</_components.strong>{" tone, like a steady note"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"q"}</_components.strong>{" like "}<_components.strong>{"\"ch\""}</_components.strong>{" in \"cheese\" (but with lips more rounded)"}</_components.li>{"\n"}<_components.li><_components.strong>{"iū"}</_components.strong>{" sounds like "}<_components.strong>{"\"yo\""}</_components.strong>{" in \"yo-yo\", but with first tone → steady and high"}</_components.li>{"\n"}<_components.li><_components.strong>{"qiū"}</_components.strong>{" sounds like "}<_components.strong>{"\"chyo\""}</_components.strong>{" with a steady high pitch"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"first tone"}</_components.strong>{" (ˉ) is a "}<_components.strong>{"high and flat"}</_components.strong>{" tone:"}</_components.p>{"\n"}<_components.p>{"Say it like you're stating something clearly: "}<_components.strong>{"\"qiū\""}</_components.strong>{" — hold that high, steady pitch like\n"}<_components.strong>{"\"qiūūū\""}</_components.strong>{"."}</_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"秋 (qiū) - \"autumn; fall\""}</_components.li>{"\n"}<_components.li>{"秋天 (qiū tiān) - \"autumn; fall season\""}</_components.li>{"\n"}<_components.li>{"秋季 (qiū jì) - \"autumn season\""}</_components.li>{"\n"}<_components.li>{"中秋 (zhōng qiū) - \"Mid-Autumn (Festival)\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Cultural Note:"}</_components.strong></_components.p>{"\n"}<_components.p>{"秋 represents the harvest season in Chinese culture. The character combines 禾 (grain)\nwith 火 (fire), symbolizing the time when crops are ready and the weather becomes cooler."}</_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}

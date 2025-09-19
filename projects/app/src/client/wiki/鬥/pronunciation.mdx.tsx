@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 鬥 (dòu)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" dòu"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: Fourth tone"}</_components.strong>{" — sharp "}<_components.strong>{"falling"}</_components.strong>{" tone, like giving a command"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"d"}</_components.strong>{" like "}<_components.strong>{"\"d\""}</_components.strong>{" in \"do\""}</_components.li>{"\n"}<_components.li><_components.strong>{"òu"}</_components.strong>{" sounds like "}<_components.strong>{"\"oh\""}</_components.strong>{" but with fourth tone → sharp drop"}</_components.li>{"\n"}<_components.li><_components.strong>{"dòu"}</_components.strong>{" sounds like "}<_components.strong>{"\"doh!\""}</_components.strong>{" with a sharp falling pitch"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"fourth tone"}</_components.strong>{" (ˋ) is a "}<_components.strong>{"sharp falling"}</_components.strong>{" tone: Say it like you're shouting in battle:\n"}<_components.strong>{"\"dòu!\""}</_components.strong>{" — that's the forceful, decisive tone pattern."}</_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"鬥 (dòu) - \"fight; struggle\""}</_components.li>{"\n"}<_components.li>{"战斗 (zhàn dòu) - \"battle; combat\""}</_components.li>{"\n"}<_components.li>{"斗争 (dòu zhēng) - \"struggle; fight\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Special Notes:"}</_components.strong></_components.p>{"\n"}<_components.p>{"鬥 is the traditional form. In simplified Chinese, it's written as 斗. Both have the same\npronunciation and meaning."}</_components.p>{"\n"}<_components.p><_components.strong>{"💡 Memory Tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"When you "}<_components.strong>{"fight"}</_components.strong>{", you strike with force and determination — that matches the sharp, falling tone\nof 鬥!"}</_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}

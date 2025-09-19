@@ -2,7 +2,10 @@
   "name": "@pinyinly/mdx",
   "type": "module",
   "exports": {
+    "./eslint": "./src/eslint.ts",
+    "./types": "./src/types.d.ts",
     "./metro": "./src/metro.ts",
+    "./transformer": "./src/transformer.ts",
     "./vite": "./src/vite.ts"
   },
   "imports": {

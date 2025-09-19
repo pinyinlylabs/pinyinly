@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 屋 (wū)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" wū"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: First tone"}</_components.strong>{" — "}<_components.strong>{"high and flat"}</_components.strong>{" tone, like a steady hum: "}<_components.strong>{"\"Woooo\""}</_components.strong></_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"w"}</_components.strong>{" like "}<_components.strong>{"\"w\""}</_components.strong>{" in \"wood\""}</_components.li>{"\n"}<_components.li><_components.strong>{"ū"}</_components.strong>{" sounds like "}<_components.strong>{"\"oo\""}</_components.strong>{" in \"soon\" but held steady and high"}</_components.li>{"\n"}<_components.li><_components.strong>{"wū"}</_components.strong>{" sounds like "}<_components.strong>{"\"woo\""}</_components.strong>{" with a steady high pitch"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"first tone"}</_components.strong>{" (ˉ) is "}<_components.strong>{"high and steady"}</_components.strong>{":"}</_components.p>{"\n"}<_components.p>{"Stay "}<_components.strong>{"high and flat"}</_components.strong>{" throughout — like humming contentedly while sitting in a cozy house:\n"}<_components.strong>{"\"wūūū\""}</_components.strong></_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"屋 (wū) - \"house; room\""}</_components.li>{"\n"}<_components.li>{"屋子 (wū zi) - \"room; house\""}</_components.li>{"\n"}<_components.li>{"房屋 (fáng wū) - \"house; building\""}</_components.li>{"\n"}<_components.li>{"屋顶 (wū dǐng) - \"roof\""}</_components.li>{"\n"}<_components.li>{"屋里 (wū lǐ) - \"inside the house\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Memory Tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The steady, high tone sounds like the satisfied \"woooo\" you might make when entering a warm, cozy\nhouse on a cold day!"}</_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}

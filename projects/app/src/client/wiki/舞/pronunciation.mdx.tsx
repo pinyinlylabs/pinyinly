@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 舞 (wǔ)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" wǔ"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: Third tone"}</_components.strong>{" — "}<_components.strong>{"falling-rising"}</_components.strong>{" tone, like saying \"uh-huh\" while nodding"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"w"}</_components.strong>{" like "}<_components.strong>{"\"w\""}</_components.strong>{" in \"wonder\""}</_components.li>{"\n"}<_components.li><_components.strong>{"ǔ"}</_components.strong>{" sounds like "}<_components.strong>{"\"oo\""}</_components.strong>{" in \"book\", but with third tone → dip down and rise up"}</_components.li>{"\n"}<_components.li><_components.strong>{"wǔ"}</_components.strong>{" sounds like "}<_components.strong>{"\"woo\""}</_components.strong>{" with a graceful dip-then-rise (like a dance move!)"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"third tone"}</_components.strong>{" (ˇ) is a "}<_components.strong>{"fall–then-rise"}</_components.strong>{" tone:"}</_components.p>{"\n"}<_components.p>{"Say it rhythmically, like the flow of a dance: "}<_components.strong>{"\"wǔ...\""}</_components.strong>{" — that flowing dip and rise matches the\nmovement of dance."}</_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"舞 (wǔ) - \"dance; to dance\""}</_components.li>{"\n"}<_components.li>{"跳舞 (tiào wǔ) - \"to dance\""}</_components.li>{"\n"}<_components.li>{"舞蹈 (wǔ dào) - \"dance (as an art form)\""}</_components.li>{"\n"}<_components.li>{"舞台 (wǔ tái) - \"stage; platform\""}</_components.li>{"\n"}<_components.li>{"歌舞 (gē wǔ) - \"song and dance\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Movement Note:"}</_components.strong></_components.p>{"\n"}<_components.p>{"舞 (wǔ) captures both the noun \"dance\" and the verb \"to dance.\" The third tone's flowing pattern\nmirrors the graceful movements of dancing."}</_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}

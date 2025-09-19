@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 批 (pī)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" pī"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: First tone"}</_components.strong>{" — "}<_components.strong>{"high and flat"}</_components.strong>{" tone, like a steady note: "}<_components.strong>{"\"Eeee\""}</_components.strong></_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"p"}</_components.strong>{" like "}<_components.strong>{"\"p\""}</_components.strong>{" in \"pat\" (aspirated, with puff of air)"}</_components.li>{"\n"}<_components.li><_components.strong>{"ī"}</_components.strong>{" sounds like "}<_components.strong>{"\"ee\""}</_components.strong>{" in \"see\" but held steady and high"}</_components.li>{"\n"}<_components.li><_components.strong>{"pī"}</_components.strong>{" sounds like "}<_components.strong>{"\"pee\""}</_components.strong>{" with a steady high pitch"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"first tone"}</_components.strong>{" (¯) is "}<_components.strong>{"high and flat"}</_components.strong>{":"}</_components.p>{"\n"}<_components.p>{"Keep your voice "}<_components.strong>{"steady and high"}</_components.strong>{" throughout — like the sustained tone when criticizing:\n"}<_components.strong>{"\"pī...\""}</_components.strong></_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"批 (pī) - \"criticize; batch; approve\""}</_components.li>{"\n"}<_components.li>{"批评 (pī píng) - \"criticize; criticism\""}</_components.li>{"\n"}<_components.li>{"批准 (pī zhǔn) - \"approve; ratify\""}</_components.li>{"\n"}<_components.li>{"一批 (yī pī) - \"a batch; a group\""}</_components.li>{"\n"}<_components.li>{"批发 (pī fā) - \"wholesale\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Memory Tip:"}</_components.strong></_components.p>{"\n"}<_components.p><_components.strong>{"Criticize"}</_components.strong>{" — the steady first tone is like maintaining a consistent critical stance!"}</_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}
