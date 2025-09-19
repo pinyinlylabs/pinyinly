@@ -510,7 +510,7 @@ describe(
                   [`he:丿:slash`, mockSrsState(时`-1d`, 时`-3m`)],
                 ]),
                 latestSkillRatings: new Map([
-                  [`he:丿:slash`, { rating: Rating.Again, createdAt: 时`-1m` }],
+                  [`he:丿:slash`, { rating: Rating.Again, createdAt: 时`-6m` }], // Past debounce period
                 ]),
                 isStructuralHanziWord,
               }),
@@ -572,8 +572,8 @@ describe(
                   [`he:丿:slash`, mockSrsState(时`-1d`, 时`-5m`)],
                 ]),
                 latestSkillRatings: new Map([
-                  [`he:八:eight`, { rating: Rating.Again, createdAt: 时`-1m` }],
-                  [`he:丿:slash`, { rating: Rating.Again, createdAt: 时`-2m` }],
+                  [`he:八:eight`, { rating: Rating.Again, createdAt: 时`-6m` }],
+                  [`he:丿:slash`, { rating: Rating.Again, createdAt: 时`-7m` }],
                 ]),
                 isStructuralHanziWord,
               }),
@@ -595,8 +595,8 @@ describe(
                   [`he:丿:slash`, mockSrsState(时`-1d`, 时`-5m`)],
                 ]),
                 latestSkillRatings: new Map([
-                  [`he:八:eight`, { rating: Rating.Again, createdAt: 时`-2m` }],
-                  [`he:丿:slash`, { rating: Rating.Again, createdAt: 时`-1m` }],
+                  [`he:八:eight`, { rating: Rating.Again, createdAt: 时`-7m` }],
+                  [`he:丿:slash`, { rating: Rating.Again, createdAt: 时`-6m` }],
                 ]),
                 isStructuralHanziWord,
               }),
@@ -607,6 +607,51 @@ describe(
               newCount: 0,
               overDueCount: 0,
               retryCount: 2,
+            });
+          },
+        );
+
+        skillTest(
+          `failed skills are debounced for 5 minutes before becoming retry items`,
+          async ({ isStructuralHanziWord }) => {
+            const graph = await skillLearningGraph({
+              targetSkills: [`he:八:eight`],
+            });
+
+            // Test case 1: Within debounce period (skill failed 2 minutes ago)
+            expect(
+              skillReviewQueue({
+                graph,
+                skillSrsStates: new Map([
+                  [`he:八:eight`, mockSrsState(时`-1d`, 时`-10m`)],
+                ]),
+                latestSkillRatings: new Map([
+                  [`he:八:eight`, { rating: Rating.Again, createdAt: 时`-2m` }],
+                ]),
+                isStructuralHanziWord,
+              }),
+            ).toMatchObject({
+              retryCount: 0, // Not yet available for retry
+              dueCount: 1, // In due queue instead
+              items: [`he:八:eight`], // Still available, but as due item
+            });
+
+            // Test case 2: After debounce period (skill failed 6 minutes ago)
+            expect(
+              skillReviewQueue({
+                graph,
+                skillSrsStates: new Map([
+                  [`he:八:eight`, mockSrsState(时`-1d`, 时`-10m`)],
+                ]),
+                latestSkillRatings: new Map([
+                  [`he:八:eight`, { rating: Rating.Again, createdAt: 时`-6m` }],
+                ]),
+                isStructuralHanziWord,
+              }),
+            ).toMatchObject({
+              retryCount: 1, // Now available for retry
+              dueCount: 0, // No longer in due queue
+              items: [`he:八:eight`], // Still prioritized at front
             });
           },
         );
