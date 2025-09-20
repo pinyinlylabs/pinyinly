@@ -45,7 +45,7 @@ describe(
         // The queue is throttled by unstable skills, so it starts at 15. This
         // assert only requires 10 though to avoid brittleness if the throttle value
         // changes.
-        expect(queue.items.length).toBeGreaterThan(10);
+        expect(queue.reviewQueue.items.length).toBeGreaterThan(10);
       },
     );
 
@@ -53,7 +53,7 @@ describe(
       `new users are taught the simplest words first`,
       async ({ rizzle }) => {
         const queue = await targetSkillsReviewQueue(rizzle);
-        expect(queue.items.slice(0, 10)).toMatchInlineSnapshot(`
+        expect(queue.reviewQueue.items.slice(0, 10)).toMatchInlineSnapshot(`
           [
             "he:一:one",
             "he:人:person",
@@ -357,5 +357,6 @@ async function simulateSkillReviews({
     }
   }
 
-  return await computeSkillReviewQueue(rizzle, targetSkills, now);
+  const result = await computeSkillReviewQueue(rizzle, targetSkills, now);
+  return result.reviewQueue;
 }

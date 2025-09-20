@@ -437,6 +437,26 @@ export interface SkillReviewQueue {
    * The number of items in the queue overdue for review.
    */
   overDueCount: number;
+  /**
+   * Index ranges for different types of items in the queue.
+   * These ranges help determine what type of flag to show for each item.
+   */
+  indexRanges: {
+    /** Range for retry items: [0, retryCount) */
+    retry: { start: number; end: number };
+    /** Range for reactive items (prioritized after successful reviews) */
+    reactive: { start: number; end: number };
+    /** Range for overdue items */
+    overdue: { start: number; end: number };
+    /** Range for due items */
+    due: { start: number; end: number };
+    /** Range for new content items (not harder difficulty variations) */
+    newContent: { start: number; end: number };
+    /** Range for new difficulty items (harder variations of existing skills) */
+    newDifficulty: { start: number; end: number };
+    /** Range for not-due items (future reviews) */
+    notDue: { start: number; end: number };
+  };
 }
 
 export interface RankGoal {
@@ -878,34 +898,81 @@ export function skillReviewQueue({
     ([skill]) => !reactiveItems.includes(skill),
   );
 
-  const items = [
-    // First do incorrect answers that need to be retried.
-    ...retryItems,
-    // Then do any prioritized reactive items.
-    ...reactiveItems,
-    // Then do over-due skills, by the most due (oldest date) first.
-    ...learningOrderOverDue
-      .sort(sortComparatorDate(([, due]) => due))
-      .map(([skill]) => skill),
-    // Then do due skills, by the most due (oldest date) first.
-    ...learningOrderDue
-      .sort(sortComparatorDate(([, due]) => due))
-      .map(([skill]) => skill),
-    // Then do new skills in the order of the learning graph.
-    ...learningOrderNew,
-    // Finally sort the not-due skills.
-    ...randomSortSkills(learningOrderNotDue),
-  ];
-
-  learningOrderBlocked.reverse();
-
-  // Separate new skills by type
+  // Separate new skills by type before adding to items array
   const newSkills = learningOrderNew.filter(
     (skill) => !isHarderDifficultyStyleSkillKind(skillKindFromSkill(skill)),
   );
   const newDifficultySkills = learningOrderNew.filter((skill) =>
     isHarderDifficultyStyleSkillKind(skillKindFromSkill(skill)),
   );
+
+  // Prepare sorted arrays for consistent ordering
+  const sortedOverDueItems = learningOrderOverDue
+    .sort(sortComparatorDate(([, due]) => due))
+    .map(([skill]) => skill);
+  const sortedDueItems = learningOrderDue
+    .sort(sortComparatorDate(([, due]) => due))
+    .map(([skill]) => skill);
+  const sortedNotDueItems = randomSortSkills(learningOrderNotDue);
+
+  // Build items array and track index ranges
+  const items: Skill[] = [];
+  let currentIndex = 0;
+
+  // 1. Retry items
+  const retryStart = currentIndex;
+  items.push(...retryItems);
+  currentIndex += retryItems.length;
+  const retryEnd = currentIndex;
+
+  // 2. Reactive items
+  const reactiveStart = currentIndex;
+  items.push(...reactiveItems);
+  currentIndex += reactiveItems.length;
+  const reactiveEnd = currentIndex;
+
+  // 3. Overdue items
+  const overdueStart = currentIndex;
+  items.push(...sortedOverDueItems);
+  currentIndex += sortedOverDueItems.length;
+  const overdueEnd = currentIndex;
+
+  // 4. Due items
+  const dueStart = currentIndex;
+  items.push(...sortedDueItems);
+  currentIndex += sortedDueItems.length;
+  const dueEnd = currentIndex;
+
+  // 5. New content items
+  const newContentStart = currentIndex;
+  items.push(...newSkills);
+  currentIndex += newSkills.length;
+  const newContentEnd = currentIndex;
+
+  // 6. New difficulty items
+  const newDifficultyStart = currentIndex;
+  items.push(...newDifficultySkills);
+  currentIndex += newDifficultySkills.length;
+  const newDifficultyEnd = currentIndex;
+
+  // 7. Not due items
+  const notDueStart = currentIndex;
+  items.push(...sortedNotDueItems);
+  currentIndex += sortedNotDueItems.length;
+  const notDueEnd = currentIndex;
+
+  // Create index ranges
+  const indexRanges = {
+    retry: { start: retryStart, end: retryEnd },
+    reactive: { start: reactiveStart, end: reactiveEnd },
+    overdue: { start: overdueStart, end: overdueEnd },
+    due: { start: dueStart, end: dueEnd },
+    newContent: { start: newContentStart, end: newContentEnd },
+    newDifficulty: { start: newDifficultyStart, end: newDifficultyEnd },
+    notDue: { start: notDueStart, end: notDueEnd },
+  };
+
+  learningOrderBlocked.reverse();
 
   return {
     items,
@@ -918,6 +985,7 @@ export function skillReviewQueue({
     newCount: learningOrderNew.length, // Maintain backward compatibility
     newDueAt,
     newOverDueAt,
+    indexRanges,
   };
 }
 

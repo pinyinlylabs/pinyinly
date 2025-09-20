@@ -26,7 +26,6 @@ import {
   hanziWordToGloss,
   hanziWordToPinyinTyped,
   rankRules,
-  skillKindFromSkill,
   skillLearningGraph,
   skillReviewQueue,
 } from "@/data/skills";
@@ -64,23 +63,18 @@ export const nextQuizQuestionQuery = (r: Rizzle, quizId: string) =>
       reviewQueue: SkillReviewQueue;
     }> => {
       const r = (meta as { r: Rizzle }).r;
-      const reviewQueue = await targetSkillsReviewQueue(r);
+      const { reviewQueue, skillSrsStates } = await targetSkillsReviewQueue(r);
 
       // Take the next skill in queue and generate a question for it. Even
       // though this is a for…loop, it usually only loops once then exits.
-      for (const [i, skill] of reviewQueue.items.entries()) {
+      for (const [queueIndex, skill] of reviewQueue.items.entries()) {
         try {
-          const skillState = await r.replicache.query((tx) =>
-            r.query.skillState.get(tx, { skill }),
-          );
-
           const question = await generateQuestionForSkillOrThrow(skill);
-          question.flag ??= flagForQuestion({
-            skillKind: skillKindFromSkill(skill),
-            isInRetryQueue:
-              reviewQueue.retryCount > 0 && i < reviewQueue.retryCount,
-            srsState: skillState?.srs,
-          });
+          question.flag ??= flagForQuestion(
+            queueIndex,
+            reviewQueue,
+            skillSrsStates,
+          );
           return { question, reviewQueue };
         } catch (error) {
           console.error(
@@ -270,9 +264,10 @@ export async function getAllTargetSkills(): Promise<Skill[]> {
   ]);
 }
 
-export async function targetSkillsReviewQueue(
-  r: Rizzle,
-): Promise<SkillReviewQueue> {
+export async function targetSkillsReviewQueue(r: Rizzle): Promise<{
+  reviewQueue: SkillReviewQueue;
+  skillSrsStates: Map<Skill, SrsStateType>;
+}> {
   const targetSkills = await getAllTargetSkills();
   return await computeSkillReviewQueue(r, targetSkills);
 }
@@ -284,7 +279,10 @@ export async function computeSkillReviewQueue(
    * exposed for testing/simulating different times
    */
   now = new Date(),
-): Promise<SkillReviewQueue> {
+): Promise<{
+  reviewQueue: SkillReviewQueue;
+  skillSrsStates: Map<Skill, SrsStateType>;
+}> {
   const graph = await skillLearningGraph({ targetSkills });
 
   const skillSrsStates = new Map<Skill, SrsStateType>();
@@ -299,13 +297,15 @@ export async function computeSkillReviewQueue(
 
   const isStructuralHanziWord = await getIsStructuralHanziWord();
 
-  return skillReviewQueue({
+  const reviewQueue = skillReviewQueue({
     graph,
     skillSrsStates,
     latestSkillRatings,
     now,
     isStructuralHanziWord,
   });
+
+  return { reviewQueue, skillSrsStates };
 }
 
 export const hanziMeaningsQuery = (hanzi: HanziText) =>
