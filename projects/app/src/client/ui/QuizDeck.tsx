@@ -2,12 +2,15 @@ import { useEventCallback } from "@/client/hooks/useEventCallback";
 import { usePrefetchImages } from "@/client/hooks/usePrefetchImages";
 import { useQuizProgress } from "@/client/hooks/useQuizProgress";
 import { useReplicache } from "@/client/hooks/useReplicache";
-import { useRizzleQueryPaged } from "@/client/hooks/useRizzleQueryPaged";
+import { useSkillQueue } from "@/client/hooks/useSkillQueue";
 import { useSoundEffect } from "@/client/hooks/useSoundEffect";
-import { nextQuizQuestionQuery } from "@/client/query";
 import type { StackNavigationFor } from "@/client/ui/types";
 import type { MistakeType, Question, UnsavedSkillRating } from "@/data/model";
 import { MistakeKind, QuestionKind } from "@/data/model";
+import {
+  flagForQuestion,
+  generateQuestionForSkillOrThrow,
+} from "@/data/questions";
 import { Rating } from "@/util/fsrs";
 import { nanoid } from "@/util/nanoid";
 import { invariant } from "@pinyinly/lib/invariant";
@@ -24,9 +27,8 @@ import {
   createStackNavigator,
   TransitionPresets,
 } from "@react-navigation/stack";
-import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "expo-router";
-import React, { useEffect, useId, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Animated as RnAnimated, Text, View } from "react-native";
 import Reanimated, { FadeIn } from "react-native-reanimated";
 import { CloseButton } from "./CloseButton";
@@ -48,31 +50,104 @@ const Stack = createStackNavigator<{
 type Navigation = StackNavigationFor<typeof Stack>;
 
 export const QuizDeck = ({ className }: { className?: string }) => {
-  const id = useId();
   const theme = useTheme();
   const navigationRef = useRef<Navigation>(undefined);
   const r = useReplicache();
-  const queryClient = useQueryClient();
   const postHog = usePostHog();
 
-  const query = nextQuizQuestionQuery(r, id);
-
-  // The following is a bit convoluted but allows prefetching the next question
-  // when the result for the previous is shown.
-  const nextQuestionQuery = useRizzleQueryPaged(query);
-  const nextQuestion =
-    nextQuestionQuery.isSuccess && !nextQuestionQuery.isFetching
-      ? nextQuestionQuery.data.question
-      : null;
-  const reviewQueue = nextQuestionQuery.data?.reviewQueue ?? null;
+  const skillQueue = useSkillQueue();
 
   const [question, setQuestion] = useState<Question>();
+  const [questionVersion, setQuestionVersion] = useState<number>();
 
+  // Generate a question from the first item in the queue
   useEffect(() => {
-    if (question == null && nextQuestion != null) {
-      setQuestion(nextQuestion);
+    if (skillQueue.loading) {
+      return;
     }
-  }, [question, nextQuestion]);
+
+    const { version, reviewQueue, skillSrsStates } = skillQueue;
+
+    // Don't generate if we already have a question
+    if (question != null) {
+      return;
+    }
+
+    // Don't generate until we have a question from a newer version
+    if (questionVersion != null && version <= questionVersion) {
+      return;
+    }
+
+    if (reviewQueue.items.length === 0) {
+      // No items in queue, clear question and stay on loading screen
+      setQuestion(undefined);
+      setQuestionVersion(undefined);
+      return;
+    }
+
+    // Use AbortController to prevent race conditions
+    const abortController = new AbortController();
+
+    const generateQuestion = async () => {
+      // Loop through queue items until we find one that can generate a question
+      // (matching the original nextQuizQuestionQuery logic)
+      for (const [queueIndex, skill] of reviewQueue.items.entries()) {
+        if (abortController.signal.aborted) {
+          return;
+        }
+
+        try {
+          const generatedQuestion =
+            await generateQuestionForSkillOrThrow(skill);
+
+          // Add flag if not already set (matching old nextQuizQuestionQuery logic)
+          generatedQuestion.flag ??= flagForQuestion(
+            queueIndex,
+            reviewQueue,
+            skillSrsStates,
+          );
+
+          // Check if this effect was cancelled before setting state
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+          if (abortController.signal.aborted) {
+            return;
+          }
+          // Ensure we're only moving forward in version (or setting initial version)
+          invariant(
+            questionVersion == null || version > questionVersion,
+            `Queue version must increase when generating new question: ${questionVersion ?? `undefined`} -> ${version}`,
+          );
+          setQuestion(generatedQuestion);
+          setQuestionVersion(version);
+
+          // Successfully generated a question, exit the loop
+          return;
+        } catch (error_) {
+          console.error(
+            `Error while generating a question for skill ${JSON.stringify(skill)}`,
+            error_,
+          );
+
+          // Continue to next skill in queue
+          continue;
+        }
+      }
+
+      // If we get here, no question could be generated for any skill
+      if (!abortController.signal.aborted) {
+        console.error(
+          `No question found for review in queue of ${reviewQueue.items.length} items`,
+        );
+      }
+    };
+
+    void generateQuestion();
+
+    // Cleanup function to abort ongoing generation when dependencies change
+    return () => {
+      abortController.abort();
+    };
+  }, [question, questionVersion, skillQueue]);
 
   useEffect(() => {
     if (question != null) {
@@ -88,7 +163,8 @@ export const QuizDeck = ({ className }: { className?: string }) => {
   const quizProgress = useQuizProgress();
 
   const handleNext = useEventCallback(() => {
-    // Clear the current question so that we swap to the next question.
+    // Clear the current question so the next one loads when version changes
+    // Keep questionVersion so we can detect when queue updates to a newer version
     setQuestion(undefined);
   });
 
@@ -149,8 +225,6 @@ export const QuizDeck = ({ className }: { className?: string }) => {
             }
           }
         }
-
-        await queryClient.invalidateQueries({ queryKey: query.queryKey });
       })().catch((error: unknown) => {
         console.error(`error in async handling in handleRating`, error);
       });
@@ -172,12 +246,15 @@ export const QuizDeck = ({ className }: { className?: string }) => {
       >
         <CloseButton />
         <QuizProgressBar progress={quizProgress.progress} />
-        <QuizQueueButton queueStats={reviewQueue} />
+        {skillQueue.loading ? null : (
+          <QuizQueueButton queueStats={skillQueue.reviewQueue} />
+        )}
       </View>
 
       <NavigationIndependentTree>
         <NavigationContainer theme={theme} documentTitle={{ enabled: false }}>
           <Stack.Navigator
+            initialRouteName="loading"
             screenOptions={{
               gestureEnabled: false,
               headerShown: false,

@@ -1,7 +1,9 @@
 import {
   computeSkillReviewQueue,
+  getAllTargetSkills,
   targetSkillsReviewQueue,
 } from "#client/query.ts";
+import { createSkillQueueStore } from "#client/ui/SkillQueueStore.ts";
 import type {
   HanziText,
   PinyinPronunciationSpaceSeparated,
@@ -10,6 +12,7 @@ import { mutators } from "#data/rizzleMutators.ts";
 import type { Rizzle, Skill } from "#data/rizzleSchema.ts";
 import { currentSchema, rSpaceSeparatedString } from "#data/rizzleSchema.ts";
 import type { SkillReviewQueue } from "#data/skills.ts";
+import { skillLearningGraph } from "#data/skills.ts";
 import { Rating } from "#util/fsrs.ts";
 import { nanoid } from "#util/nanoid.ts";
 import { r } from "#util/rizzle.ts";
@@ -32,8 +35,43 @@ const rizzleTest = test.extend<{ rizzle: Rizzle }>({
   ],
 });
 
+describe(`SkillQueueStore suite`, () => {
+  rizzleTest(
+    `returns everything when no skills have state`,
+    async ({ rizzle }) => {
+      // Sanity check that there should be a bunch in the queue
+      const queue = await targetSkillsReviewQueueWithStore(rizzle);
+      // The queue is throttled by unstable skills, so it starts at 15. This
+      // assert only requires 10 though to avoid brittleness if the throttle value
+      // changes.
+      expect(queue.reviewQueue.items.length).toBeGreaterThan(10);
+    },
+  );
+
+  rizzleTest(
+    `new users are taught the simplest words first`,
+    async ({ rizzle }) => {
+      const queue = await targetSkillsReviewQueueWithStore(rizzle);
+      expect(queue.reviewQueue.items.slice(0, 10)).toMatchInlineSnapshot(`
+        [
+          "he:一:one",
+          "he:人:person",
+          "he:十:ten",
+          "he:又:again",
+          "he:八:eight",
+          "he:口:mouth",
+          "he:头:head",
+          "he:肉:meat",
+          "he:艮:stopping",
+          "he:爪:claw",
+        ]
+      `);
+    },
+  );
+});
+
 describe(
-  `targetSkillsReviewQueue suite` satisfies HasNameOf<
+  `targetSkillsReviewQueue suite (legacy)` satisfies HasNameOf<
     typeof targetSkillsReviewQueue
   >,
   () => {
@@ -359,4 +397,185 @@ async function simulateSkillReviews({
 
   const result = await computeSkillReviewQueue(rizzle, targetSkills, now);
   return result.reviewQueue;
+}
+
+/**
+ * Helper function to create a SkillQueueStore and populate it with data for testing.
+ * This replaces the old targetSkillsReviewQueue approach.
+ */
+async function createPopulatedSkillQueueStore(rizzle: Rizzle) {
+  const store = createSkillQueueStore();
+
+  // Get all the data needed for the store
+  const targetSkills = await getAllTargetSkills();
+  const graph = await skillLearningGraph({ targetSkills });
+
+  const skillSrsStates = new Map<
+    Skill,
+    import("#data/model.ts").SrsStateType
+  >();
+  for await (const [, v] of rizzle.queryPaged.skillState.scan()) {
+    skillSrsStates.set(v.skill, v.srs);
+  }
+
+  const latestSkillRatings = new Map<
+    Skill,
+    import("#data/rizzleSchema.ts").SkillRating
+  >();
+  for await (const [, v] of rizzle.queryPaged.skillRating.byCreatedAt()) {
+    latestSkillRatings.set(v.skill, v);
+  }
+
+  // Populate the store with the data
+  store.setState({
+    skillGraph: graph,
+    skillSrsStates,
+    latestSkillRatings,
+  });
+
+  // Compute the queue
+  await store.getState().computeQueue();
+
+  return store;
+}
+
+/**
+ * Helper function to get a review queue using the new SkillQueueStore approach.
+ * This is the new version of targetSkillsReviewQueue for tests.
+ * @internal - For testing purposes only
+ */
+export async function targetSkillsReviewQueueWithStore(
+  rizzle: Rizzle,
+): Promise<{
+  reviewQueue: SkillReviewQueue;
+  skillSrsStates: Map<Skill, import("#data/model.ts").SrsStateType>;
+}> {
+  const store = await createPopulatedSkillQueueStore(rizzle);
+  const state = store.getState();
+
+  return {
+    reviewQueue: state.reviewQueue!,
+    skillSrsStates: state.skillSrsStates!,
+  };
+}
+
+/**
+ * Store-based version of simulateSkillReviews using SkillQueueStore.
+ * This is the modernized approach for testing skill review scenarios.
+ * @internal - For testing purposes only
+ */
+export async function simulateSkillReviewsWithStore({
+  targetSkills,
+  history,
+}: {
+  targetSkills: Skill[];
+  history: SkillReviewOp[];
+}): Promise<SkillReviewQueue> {
+  const store = createSkillQueueStore();
+  let now = new Date();
+
+  await using rizzle = r.replicache(
+    testReplicacheOptions(),
+    currentSchema,
+    mutators,
+  );
+
+  // Process the history to populate rizzle with skill states and ratings
+  for (const event of history) {
+    const [op, ...args] = event.split(` `);
+    invariant(op != null);
+
+    switch (op) {
+      // jump forward in time
+      case `💤`: {
+        invariant(args[0] != null);
+        now = parseRelativeTimeShorthand(args[0], now);
+        break;
+      }
+      // mistakes
+      case `❌hanziGloss`: {
+        const [hanzi, gloss] = args as [HanziText, string];
+        await rizzle.mutate.saveHanziGlossMistake({
+          id: nanoid(),
+          hanziOrHanziWord: hanzi,
+          gloss,
+          now,
+        });
+        break;
+      }
+      case `❌hanziPinyin`: {
+        const [hanzi, pinyin] = args as [
+          HanziText,
+          PinyinPronunciationSpaceSeparated,
+        ];
+        await rizzle.mutate.saveHanziPinyinMistake({
+          id: nanoid(),
+          hanziOrHanziWord: hanzi,
+          pinyin: rSpaceSeparatedString().unmarshal(pinyin),
+          now,
+        });
+        break;
+      }
+      // skill rating
+      case `❌`:
+      case `🟢`:
+      case `🟡`:
+      case `🟠`: {
+        const rating =
+          op === `🟢`
+            ? Rating.Easy
+            : op === `🟡`
+              ? Rating.Good
+              : op === `🟠`
+                ? Rating.Hard
+                : Rating.Again;
+        const skills = args as Skill[];
+
+        for (const skill of skills) {
+          await rizzle.mutate.rateSkill({
+            id: nanoid(),
+            skill,
+            rating,
+            now,
+            durationMs: null,
+          });
+        }
+        break;
+      }
+      default: {
+        throw new Error(`Invalid operation: ${op}`);
+      }
+    }
+  }
+
+  // Set up the store with the necessary data
+  const graph = await skillLearningGraph({ targetSkills });
+
+  const skillSrsStates = new Map<
+    Skill,
+    import("#data/model.ts").SrsStateType
+  >();
+  for await (const [, v] of rizzle.queryPaged.skillState.scan()) {
+    skillSrsStates.set(v.skill, v.srs);
+  }
+
+  const latestSkillRatings = new Map<
+    Skill,
+    import("#data/rizzleSchema.ts").SkillRating
+  >();
+  for await (const [, v] of rizzle.queryPaged.skillRating.byCreatedAt()) {
+    latestSkillRatings.set(v.skill, v);
+  }
+
+  // Populate the store
+  store.setState({
+    skillGraph: graph,
+    skillSrsStates,
+    latestSkillRatings,
+  });
+
+  // Compute the queue with the specific time
+  await store.getState().computeQueue();
+
+  return store.getState().reviewQueue!;
 }

@@ -1,0 +1,53 @@
+diff --git a/dist/esm/query/compiler/joins.js b/dist/esm/query/compiler/joins.js
+index 64d705c626cf89fbaf49719236f6896b082f664a..a7c2bf62aa5ffc1625222cde233fddab82f725b4 100644
+--- a/dist/esm/query/compiler/joins.js
++++ b/dist/esm/query/compiler/joins.js
+@@ -3,7 +3,7 @@ import { JoinCollectionNotFoundError, UnsupportedJoinTypeError, UnsupportedJoinS
+ import { findIndexForField } from "../../utils/index-optimization.js";
+ import { ensureIndexForField } from "../../indexes/auto-index.js";
+ import { compileExpression } from "./evaluators.js";
+-import { followRef, compileQuery } from "./index.js";
++import * as _index from "./index.js";
+ function processJoins(pipeline, joinClauses, tables, mainTableId, mainTableAlias, allInputs, cache, queryMapping, collections, callbacks, lazyCollections, optimizableOrderByCollections, rawQuery) {
+   let resultPipeline = pipeline;
+   for (const joinClause of joinClauses) {
+@@ -87,7 +87,7 @@ function processJoin(pipeline, joinClause, tables, mainTableId, mainTableAlias,
+       const activePipeline = activeCollection === `main` ? mainPipeline : joinedPipeline;
+       let index;
+       const lazyCollectionJoinExpr = activeCollection === `main` ? joinedExpr : mainExpr;
+-      const followRefResult = followRef(
++      const followRefResult = _index.followRef(
+         rawQuery,
+         lazyCollectionJoinExpr,
+         lazyCollection
+@@ -196,7 +196,7 @@ function processJoinSource(from, allInputs, collections, callbacks, lazyCollecti
+     }
+     case `queryRef`: {
+       const originalQuery = queryMapping.get(from.query) || from.query;
+-      const subQueryResult = compileQuery(
++      const subQueryResult = _index.compileQuery(
+         originalQuery,
+         allInputs,
+         collections,
+diff --git a/dist/esm/query/compiler/order-by.js b/dist/esm/query/compiler/order-by.js
+index a9ac3e1d7632a7bce47c6dcf28d66e58bc40f6b9..da7ae30a2e87ec03a15473f2c91d31d413290b01 100644
+--- a/dist/esm/query/compiler/order-by.js
++++ b/dist/esm/query/compiler/order-by.js
+@@ -5,7 +5,7 @@ import { ensureIndexForField } from "../../indexes/auto-index.js";
+ import { findIndexForField } from "../../utils/index-optimization.js";
+ import { compileExpression } from "./evaluators.js";
+ import { replaceAggregatesByRefs } from "./group-by.js";
+-import { followRef } from "./index.js";
++import * as _index from "./index.js";
+ function processOrderBy(rawQuery, pipeline, orderByClause, selectClause, collection, optimizableOrderByCollections, limit, offset) {
+   const compiledOrderBy = orderByClause.map((clause) => {
+     const clauseWithoutAggregates = replaceAggregatesByRefs(
+@@ -59,7 +59,7 @@ function processOrderBy(rawQuery, pipeline, orderByClause, selectClause, collect
+     const clause = orderByClause[0];
+     const orderByExpression = clause.expression;
+     if (orderByExpression.type === `ref`) {
+-      const followRefResult = followRef(
++      const followRefResult = _index.followRef(
+         rawQuery,
+         orderByExpression,
+         collection

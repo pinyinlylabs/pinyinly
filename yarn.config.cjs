@@ -440,6 +440,7 @@ module.exports = defineConfig({
     await enforceSingleDependencyVersion(ctx, [
       /^@expo\//,
       /^@sentry\//,
+      /^@tanstack\//,
       /^@vercel\//,
       /^expo-/,
       /^react-native$/,

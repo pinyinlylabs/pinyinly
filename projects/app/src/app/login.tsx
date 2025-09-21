@@ -1,5 +1,6 @@
 import { useAuth } from "@/client/auth";
 import { useRizzleQuery } from "@/client/hooks/useRizzleQuery";
+import { useSkillQueue } from "@/client/hooks/useSkillQueue";
 import { RectButton } from "@/client/ui/RectButton";
 import { SessionStoreProvider } from "@/client/ui/SessionStoreProvider";
 import { SignInWithAppleButton } from "@/client/ui/SignInWithAppleButton";
@@ -72,6 +73,7 @@ export default function LoginPage() {
                 <Text className="text-fg">
                   Skill count: <SkillCount />
                 </Text>
+                <SkillQueueStats />
                 <Text className="text-fg">Session ID: {x.serverSessionId}</Text>
                 <Text className="text-fg">DB name: {x.replicacheDbName}</Text>
               </View>
@@ -207,5 +209,23 @@ function SkillCount() {
     <Text>Loading…</Text>
   ) : (
     <Text>{result.data} words</Text>
+  );
+}
+
+function SkillQueueStats() {
+  const skillQueue = useSkillQueue();
+
+  if (skillQueue.loading) {
+    return <Text className="text-fg">Queue: Loading…</Text>;
+  }
+
+  const { reviewQueue } = skillQueue;
+
+  return (
+    <Text className="text-fg">
+      Queue: {reviewQueue.items.length} items ({reviewQueue.overDueCount}
+      {` `}
+      overdue, {reviewQueue.dueCount} due, {reviewQueue.newContentCount} new)
+    </Text>
   );
 }

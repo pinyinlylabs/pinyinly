@@ -40,10 +40,13 @@ import {
   lookupHanziWord,
 } from "@/dictionary/dictionary";
 import { devToolsSlowQuerySleepIfEnabled } from "@/util/devtools";
+import type { RizzleAnyEntity, RizzleEntityOutput } from "@/util/rizzle";
 import {
   arrayFilterUniqueWithKey,
+  memoize0,
   sortComparatorNumber,
 } from "@pinyinly/lib/collections";
+import type { Collection, CollectionConfig } from "@tanstack/react-db";
 import { queryOptions, skipToken } from "@tanstack/react-query";
 import type { DeviceStoreEntity } from "./deviceStore";
 import { buildDeviceStoreKey, deviceStoreGet } from "./deviceStore";
@@ -126,6 +129,45 @@ export const pinyinSoundsQuery = (r: Rizzle) =>
     }),
     [currentSchema.pinyinSound.keyPrefix],
   );
+
+export const targetSkillsQuery = () =>
+  queryOptions({
+    queryKey: [`targetSkills`],
+    queryFn: async () => {
+      await devToolsSlowQuerySleepIfEnabled();
+
+      const targetSkills = await getAllTargetSkills();
+      return targetSkills;
+    },
+    networkMode: `offlineFirst`,
+    structuralSharing: false,
+  });
+
+export const isStructuralHanziWordQuery = () =>
+  queryOptions({
+    queryKey: [`isStructuralHanziWord`],
+    queryFn: async () => {
+      await devToolsSlowQuerySleepIfEnabled();
+
+      return await getIsStructuralHanziWord();
+    },
+    networkMode: `offlineFirst`,
+    structuralSharing: false,
+  });
+
+export const skillLearningGraphQuery = () =>
+  queryOptions({
+    queryKey: [`skillLearningGraph`],
+    queryFn: async ({ client }) => {
+      await devToolsSlowQuerySleepIfEnabled();
+
+      const targetSkills = await client.ensureQueryData(targetSkillsQuery());
+      const graph = await skillLearningGraph({ targetSkills });
+      return graph;
+    },
+    networkMode: `offlineFirst`,
+    structuralSharing: false,
+  });
 
 export const hanziWordSkillStatesQuery = (r: Rizzle, hanziWord: HanziWord) =>
   withWatchPrefixes(
@@ -429,3 +471,224 @@ function withWatchPrefixes<T extends object>(
     rizzleWatchPrefixes,
   });
 }
+
+export type SkillStateCollection = Collection<
+  RizzleEntityOutput<typeof currentSchema.skillState>,
+  Skill
+>;
+export type SkillRatingCollection = Collection<
+  RizzleEntityOutput<typeof currentSchema.skillRating>,
+  string
+>;
+export type TargetSkillsCollection = Collection<{ skill: Skill }, Skill>;
+export type LatestSkillRatingsCollection = Collection<SkillRating, Skill>;
+
+export const rizzleCollectionOptions = <
+  RizzleEntity extends RizzleAnyEntity,
+  TKey extends string | number = string | number,
+>({
+  id,
+  rizzle,
+  entity,
+  getKey,
+}: {
+  id?: string;
+  rizzle: Rizzle;
+  entity: RizzleEntity;
+  getKey: (item: RizzleEntityOutput<RizzleEntity>) => TKey;
+}): CollectionConfig<RizzleEntityOutput<RizzleEntity>, TKey> => ({
+  id,
+  sync: {
+    rowUpdateMode: `full`,
+    sync: (params) => {
+      const { begin, write, commit, collection } = params;
+
+      const markReadyOnce = memoize0(() => {
+        params.markReady();
+      });
+      const markReadyTimeout = setTimeout(() => {
+        markReadyOnce();
+      }, 5000);
+
+      const unsubscribe = rizzle.replicache.experimentalWatch(
+        (ops) => {
+          try {
+            begin();
+
+            // eslint-disable-next-line no-console
+            console.debug(
+              `rizzleCollection(id=${collection.id}) sync processing ${ops.length} ops…`,
+            );
+
+            for (const op of ops) {
+              switch (op.op) {
+                case `add`: {
+                  const value = entity.unmarshalValue(
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+                    op.newValue as any,
+                  );
+                  write({ type: `insert`, value });
+                  break;
+                }
+                case `change`: {
+                  const value = entity.unmarshalValue(
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+                    op.newValue as any,
+                  );
+                  write({ type: `update`, value });
+                  break;
+                }
+                case `del`: {
+                  const value = entity.unmarshalValue(
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+                    op.oldValue as any,
+                  );
+                  write({ type: `delete`, value });
+                  break;
+                }
+              }
+            }
+
+            commit();
+          } finally {
+            markReadyOnce();
+          }
+        },
+        {
+          prefix: entity.keyPrefix,
+          initialValuesInFirstDiff: true,
+        },
+      );
+
+      return () => {
+        clearTimeout(markReadyTimeout);
+        unsubscribe();
+      };
+    },
+  },
+  getKey,
+});
+
+export const staticCollectionOptions = <
+  T extends object,
+  TKey extends string | number = string | number,
+>({
+  id,
+  queryFn,
+  getKey,
+}: {
+  id?: string;
+  queryFn: (signal?: AbortSignal) => Promise<T[]>;
+  getKey: (item: T) => TKey;
+}): CollectionConfig<T, TKey> => ({
+  id,
+  sync: {
+    sync: (params) => {
+      const { begin, write, commit, markReady, collection } = params;
+
+      const abortController = new AbortController();
+      const signal = abortController.signal;
+
+      queryFn(signal)
+        .then((items) => {
+          if (signal.aborted) {
+            return;
+          }
+
+          begin();
+
+          // eslint-disable-next-line no-console
+          console.debug(
+            `staticCollection(id=${collection.id}) sync processing ${items.length} items…`,
+          );
+
+          for (const item of items) {
+            write({ type: `insert`, value: item });
+          }
+
+          commit();
+        })
+        .finally(() => {
+          markReady();
+        })
+        .catch((error: unknown) => {
+          console.error(`staticCollection(id=${collection.id}) error:`, error);
+        });
+
+      return () => {
+        abortController.abort();
+      };
+    },
+  },
+  getKey,
+});
+
+export const latestSkillRatingCollectionOptions = ({
+  rizzle,
+}: {
+  rizzle: Rizzle;
+}): CollectionConfig<SkillRating, Skill> => ({
+  id: `latestSkillRatings`,
+  sync: {
+    rowUpdateMode: `full`,
+    sync: (params) => {
+      const { begin, write, commit, markReady, collection } = params;
+      const entity = currentSchema.skillRating;
+
+      const unsubscribe = rizzle.replicache.experimentalWatch(
+        (ops) => {
+          begin();
+
+          // eslint-disable-next-line no-console
+          console.debug(
+            `rizzleCollection(id=${collection.id}) sync processing ${ops.length} ops…`,
+          );
+
+          const pendingTxLatest = new Map<Skill, SkillRating>();
+
+          for (const op of ops) {
+            switch (op.op) {
+              case `add`: {
+                const value = entity.unmarshalValue(
+                  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+                  op.newValue as any,
+                );
+
+                const existing =
+                  collection.get(value.skill) ??
+                  pendingTxLatest.get(value.skill);
+
+                if (existing == null) {
+                  write({ type: `insert`, value });
+                  pendingTxLatest.set(value.skill, value);
+                } else if (existing.createdAt < value.createdAt) {
+                  write({ type: `update`, value });
+                  pendingTxLatest.set(value.skill, value);
+                }
+                break;
+              }
+              case `change`:
+              case `del`: {
+                console.error(`unsupported op=${op.op} for latestSkillRatings`);
+                break;
+              }
+            }
+          }
+
+          commit();
+        },
+        {
+          prefix: entity.keyPrefix,
+          initialValuesInFirstDiff: true,
+        },
+      );
+
+      markReady();
+
+      return () => {
+        unsubscribe();
+      };
+    },
+  },
+  getKey: (item) => item.skill,
+});
