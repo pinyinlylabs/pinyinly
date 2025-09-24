@@ -830,22 +830,25 @@ export function skillReviewQueue({
   // them so that it's in proper queue order.
   learningOrderNewCandidates.reverse();
 
-  // Push components to the end of the list, so that words are prioritized for
+  // Split out components ("structural") and words, so that words are prioritized first for
   // learning as they're more useful to people trying to apply their knowledge.
-  learningOrderNewCandidates.sort((a, b) => {
-    const aRank =
-      isHanziWordSkill(a) && isStructuralHanziWord(hanziWordFromSkill(a))
-        ? 1
-        : 0;
-    const bRank =
-      isHanziWordSkill(b) && isStructuralHanziWord(hanziWordFromSkill(b))
-        ? 1
-        : 0;
-
-    return aRank - bRank;
-  });
-
+  const learningOrderNewWordCandidates: Skill[] = [];
+  const learningOrderNewComponentCandidates: Skill[] = [];
   for (const skill of learningOrderNewCandidates) {
+    if (
+      isHanziWordSkill(skill) &&
+      isStructuralHanziWord(hanziWordFromSkill(skill))
+    ) {
+      learningOrderNewComponentCandidates.push(skill);
+    } else {
+      learningOrderNewWordCandidates.push(skill);
+    }
+  }
+
+  for (const skill of [
+    ...learningOrderNewWordCandidates,
+    ...learningOrderNewComponentCandidates,
+  ]) {
     if (hasLearningCapacityForNewSkill(skill)) {
       learningOrderNew.push(skill);
     } else {
