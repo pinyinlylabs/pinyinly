@@ -379,3 +379,78 @@ export const makeRange = (start: number, end: number) => {
   }
   return range;
 };
+
+export class MinHeap<T> {
+  #items: T[] = [];
+  #comparator: (a: T, b: T) => number;
+  #capacity: number;
+
+  constructor(comparator: (a: T, b: T) => number, capacity: number) {
+    this.#comparator = comparator;
+    this.#capacity = capacity;
+  }
+
+  insert(item: T) {
+    if (this.#items.length < this.#capacity) {
+      this.#items.push(item);
+      this.#bubbleUp(this.#items.length - 1);
+    } else if (
+      this.#items.length > 0 &&
+      this.#comparator(item, this.#items[0] as T) > 0
+    ) {
+      this.#items[0] = item;
+      this.#bubbleDown(0);
+    }
+  }
+
+  toArray(): T[] {
+    return [...this.#items].sort(this.#comparator);
+  }
+
+  #bubbleUp(index: number) {
+    while (index > 0) {
+      const parentIndex = Math.floor((index - 1) / 2);
+      const curr = this.#items[index] as T;
+      const parent = this.#items[parentIndex] as T;
+      if (this.#comparator(curr, parent) >= 0) {
+        break;
+      }
+      [this.#items[index], this.#items[parentIndex]] = [
+        this.#items[parentIndex] as T,
+        this.#items[index] as T,
+      ];
+      index = parentIndex;
+    }
+  }
+
+  #bubbleDown(index: number) {
+    const length = this.#items.length;
+    let next: number;
+    do {
+      next = index;
+      const left = 2 * index + 1;
+      const right = 2 * index + 2;
+
+      if (
+        left < length &&
+        this.#comparator(this.#items[left] as T, this.#items[next] as T) < 0
+      ) {
+        next = left;
+      }
+      if (
+        right < length &&
+        this.#comparator(this.#items[right] as T, this.#items[next] as T) < 0
+      ) {
+        next = right;
+      }
+
+      if (next !== index) {
+        [this.#items[index], this.#items[next]] = [
+          this.#items[next] as T,
+          this.#items[index] as T,
+        ];
+        index = next;
+      }
+    } while (next !== index);
+  }
+}
