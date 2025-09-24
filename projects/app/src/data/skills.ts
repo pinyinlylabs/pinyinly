@@ -860,9 +860,8 @@ export function skillReviewQueue({
 
   // Put the retry items in the correct order.
   const retryItems = learningOrderRetry
-    .sort(sortComparatorDate(([, when]) => when))
+    .sort(inverseSortComparator(sortComparatorDate(([, when]) => when)))
     .map(([skill]) => skill);
-  retryItems.reverse();
 
   const recentSkillRatingHistory = [...latestSkillRatings.entries()]
     .sort(
