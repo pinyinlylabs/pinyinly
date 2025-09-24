@@ -557,7 +557,6 @@ describe(
               blockedItems: [],
               dueCount: 1,
               items: [`he:八:eight`, `he:丿:slash`],
-
               newContentCount: 1,
               newDifficultyCount: 0,
               overDueCount: 0,
@@ -924,7 +923,6 @@ describe(
             }),
           ).toMatchObject({
             dueCount: 0,
-
             newContentCount: 15,
             newDifficultyCount: 0,
             overDueCount: 0,

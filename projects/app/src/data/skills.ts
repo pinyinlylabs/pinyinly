@@ -793,7 +793,8 @@ export function skillReviewQueue({
   // enforce a throttle to avoid overwhelming the user with too many new skills
   // in a short period of time. So only take a fixed amount of the new
   // candidates and mark the rest as blocked.
-  const learningOrderNew: Skill[] = [];
+  const learningOrderNewContent: Skill[] = [];
+  const learningOrderNewDifficulty: Skill[] = [];
 
   // Calculate how many unstable skills there are for each skill kind.
   const unstableSkillCounts = new Map<SkillKind, number>();
@@ -816,7 +817,7 @@ export function skillReviewQueue({
     const throttleLimit = 15;
     return (
       (unstableSkillCounts.get(skillKindFromSkill(skill)) ?? 0) +
-        learningOrderNew.length <
+        (learningOrderNewContent.length + learningOrderNewDifficulty.length) <
       throttleLimit
     );
   }
@@ -846,7 +847,11 @@ export function skillReviewQueue({
   ]) {
     for (const skill of skillGroup) {
       if (hasLearningCapacityForNewSkill(skill)) {
-        learningOrderNew.push(skill);
+        if (isHarderDifficultyStyleSkillKind(skillKindFromSkill(skill))) {
+          learningOrderNewDifficulty.push(skill);
+        } else {
+          learningOrderNewContent.push(skill);
+        }
       } else {
         learningOrderBlocked.push(skill);
       }
@@ -890,20 +895,16 @@ export function skillReviewQueue({
     ([skill]) => !reactiveItems.includes(skill),
   );
   mutableArrayFilter(
-    learningOrderNew,
+    learningOrderNewContent,
+    (skill) => !reactiveItems.includes(skill),
+  );
+  mutableArrayFilter(
+    learningOrderNewDifficulty,
     (skill) => !reactiveItems.includes(skill),
   );
   mutableArrayFilter(
     learningOrderNotDue,
     ([skill]) => !reactiveItems.includes(skill),
-  );
-
-  // Separate new skills by type before adding to items array
-  const newSkills = learningOrderNew.filter(
-    (skill) => !isHarderDifficultyStyleSkillKind(skillKindFromSkill(skill)),
-  );
-  const newDifficultySkills = learningOrderNew.filter((skill) =>
-    isHarderDifficultyStyleSkillKind(skillKindFromSkill(skill)),
   );
 
   // Prepare sorted arrays for consistent ordering
@@ -945,14 +946,14 @@ export function skillReviewQueue({
 
   // 5. New content items
   const newContentStart = currentIndex;
-  items.push(...newSkills);
-  currentIndex += newSkills.length;
+  items.push(...learningOrderNewContent);
+  currentIndex += learningOrderNewContent.length;
   const newContentEnd = currentIndex;
 
   // 6. New difficulty items
   const newDifficultyStart = currentIndex;
-  items.push(...newDifficultySkills);
-  currentIndex += newDifficultySkills.length;
+  items.push(...learningOrderNewDifficulty);
+  currentIndex += learningOrderNewDifficulty.length;
   const newDifficultyEnd = currentIndex;
 
   // 7. Not due items
@@ -980,8 +981,8 @@ export function skillReviewQueue({
     retryCount: learningOrderRetry.length,
     dueCount: learningOrderDue.length,
     overDueCount: learningOrderOverDue.length,
-    newContentCount: newSkills.length,
-    newDifficultyCount: newDifficultySkills.length,
+    newContentCount: learningOrderNewContent.length,
+    newDifficultyCount: learningOrderNewDifficulty.length,
     newDueAt,
     newOverDueAt,
     indexRanges,
