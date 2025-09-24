@@ -4,7 +4,6 @@
     "editorconfig.editorconfig",
     "esbenp.prettier-vscode",
     "expo.vscode-expo-tools",
-    "dnut.rewrap-revived",
-    "tamasfe.even-better-toml"
+    "dnut.rewrap-revived"
   ]
 }
