@@ -845,14 +845,16 @@ export function skillReviewQueue({
     }
   }
 
-  for (const skill of [
-    ...learningOrderNewWordCandidates,
-    ...learningOrderNewComponentCandidates,
+  for (const skillGroup of [
+    learningOrderNewWordCandidates,
+    learningOrderNewComponentCandidates,
   ]) {
-    if (hasLearningCapacityForNewSkill(skill)) {
-      learningOrderNew.push(skill);
-    } else {
-      learningOrderBlocked.push(skill);
+    for (const skill of skillGroup) {
+      if (hasLearningCapacityForNewSkill(skill)) {
+        learningOrderNew.push(skill);
+      } else {
+        learningOrderBlocked.push(skill);
+      }
     }
   }
 
