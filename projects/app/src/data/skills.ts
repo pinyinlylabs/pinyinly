@@ -421,11 +421,6 @@ export interface SkillReviewQueue {
    */
   newDifficultyCount: number;
   /**
-   * The total number of new items (newContentCount + newDifficultyCount).
-   * @deprecated Use newContentCount and newDifficultyCount separately
-   */
-  newCount: number;
-  /**
    * When the number of "due" items will increase.
    */
   newDueAt: Date | null;
@@ -987,7 +982,6 @@ export function skillReviewQueue({
     overDueCount: learningOrderOverDue.length,
     newContentCount: newSkills.length,
     newDifficultyCount: newDifficultySkills.length,
-    newCount: learningOrderNew.length, // Maintain backward compatibility
     newDueAt,
     newOverDueAt,
     indexRanges,

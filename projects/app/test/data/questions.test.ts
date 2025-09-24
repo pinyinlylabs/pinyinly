@@ -21,7 +21,6 @@ describe(
       dueCount: 0,
       newContentCount: 0,
       newDifficultyCount: 0,
-      newCount: 0,
       overDueCount: 0,
       newDueAt: null,
       newOverDueAt: null,

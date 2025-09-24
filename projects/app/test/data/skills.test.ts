@@ -356,7 +356,8 @@ describe(
           blockedItems: [],
           dueCount: 0,
           items: [],
-          newCount: 0,
+          newContentCount: 0,
+          newDifficultyCount: 0,
           newDueAt: null,
           newOverDueAt: null,
           overDueCount: 0,
@@ -384,7 +385,9 @@ describe(
           blockedItems: [],
           dueCount: 1,
           items: [`he:刀:knife`],
-          newCount: 0,
+
+          newContentCount: 0,
+          newDifficultyCount: 0,
           overDueCount: 0,
           retryCount: 0,
         });
@@ -420,7 +423,9 @@ describe(
             `he:丿:slash`,
             `he:𠃌:radical`,
           ],
-          newCount: 2,
+
+          newContentCount: 2,
+          newDifficultyCount: 0,
           overDueCount: 0,
           retryCount: 0,
         });
@@ -521,7 +526,9 @@ describe(
                 `he:丿:slash`, // hoisted to the top for retry
                 `he:八:eight`,
               ],
-              newCount: 0,
+
+              newContentCount: 0,
+              newDifficultyCount: 0,
               overDueCount: 0,
               retryCount: 1,
             });
@@ -550,7 +557,9 @@ describe(
               blockedItems: [],
               dueCount: 1,
               items: [`he:八:eight`, `he:丿:slash`],
-              newCount: 1,
+
+              newContentCount: 1,
+              newDifficultyCount: 0,
               overDueCount: 0,
               retryCount: 0,
             });
@@ -581,7 +590,9 @@ describe(
               blockedItems: [],
               dueCount: 0,
               items: [`he:八:eight`, `he:丿:slash`],
-              newCount: 0,
+
+              newContentCount: 0,
+              newDifficultyCount: 0,
               overDueCount: 0,
               retryCount: 2,
             });
@@ -604,7 +615,9 @@ describe(
               blockedItems: [],
               dueCount: 0,
               items: [`he:丿:slash`, `he:八:eight`],
-              newCount: 0,
+
+              newContentCount: 0,
+              newDifficultyCount: 0,
               overDueCount: 0,
               retryCount: 2,
             });
@@ -807,7 +820,9 @@ describe(
           blockedItems: [`he:分:divide`],
           dueCount: 2,
           items: [`he:八:eight`, `he:刀:knife`, `he:丿:slash`, `he:𠃌:radical`],
-          newCount: 2,
+
+          newContentCount: 2,
+          newDifficultyCount: 0,
           overDueCount: 0,
           retryCount: 0,
         });
@@ -860,7 +875,9 @@ describe(
               `he:刀:knife`,
               `he:八:eight`,
             ],
-            newCount: 1,
+
+            newContentCount: 1,
+            newDifficultyCount: 0,
             overDueCount: 0,
             retryCount: 0,
           });
@@ -907,7 +924,9 @@ describe(
             }),
           ).toMatchObject({
             dueCount: 0,
-            newCount: 15,
+
+            newContentCount: 15,
+            newDifficultyCount: 0,
             overDueCount: 0,
             retryCount: 0,
           });
@@ -928,7 +947,9 @@ describe(
             }),
           ).toMatchObject({
             dueCount: 2,
-            newCount: 11, // 4 unstablised skills, only 11 slots available for new skills
+
+            newContentCount: 11,
+            newDifficultyCount: 0,
             overDueCount: 0,
             retryCount: 0,
           });
@@ -1074,7 +1095,9 @@ describe(
             blockedItems: [`hpf:一:one`, `hpt:一:one`, `hp:一:one`],
             dueCount: 1,
             items: [`he:一:one`, `hpi:一:one`],
-            newCount: 1,
+
+            newContentCount: 1,
+            newDifficultyCount: 0,
             overDueCount: 0,
             retryCount: 0,
           });
@@ -1093,7 +1116,9 @@ describe(
             blockedItems: [`hpt:一:one`, `hp:一:one`],
             dueCount: 2,
             items: [`he:一:one`, `hpi:一:one`, `hpf:一:one`],
-            newCount: 1,
+
+            newContentCount: 0,
+            newDifficultyCount: 1,
             overDueCount: 0,
             retryCount: 0,
           });
