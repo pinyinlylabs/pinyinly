@@ -69,14 +69,6 @@ export const SkillQueueProvider = Object.assign(
     );
 
     useEffect(() => {
-      console.log(`skillSrsStates changed`);
-    }, [skillSrsStates]);
-
-    useEffect(() => {
-      console.log(`latestSkillRatings changed`);
-    }, [latestSkillRatings]);
-
-    useEffect(() => {
       if (
         latestSkillRatingsisLoading ||
         skillStatesisLoading ||
@@ -90,9 +82,7 @@ export const SkillQueueProvider = Object.assign(
         return;
       }
 
-      // eslint-disable-next-line no-console
-      console.debug(`recomputing skill queue…`);
-
+      // Recompute the review queue when inputs are ready
       const reviewQueue = skillReviewQueue({
         graph: skillLearningGraph,
         skillSrsStates,
@@ -122,112 +112,6 @@ export const SkillQueueProvider = Object.assign(
     const [skillQueue, setSkillQueue] = useState<SkillQueueContextValue>({
       loading: true,
     });
-
-    console.debug(`skillQueue:`, skillQueue);
-
-    // Create a new store instance for this provider
-    // Each session gets its own store to avoid conflicts
-    // const [store] = useState(() => createSkillQueueStore());
-
-    // useEffect(() => {
-    //   if (skillLearningGraph != null) {
-    //     store.setState({ skillGraph: skillLearningGraph });
-    //   }
-    // }, [skillLearningGraph, store]);
-
-    // Set up automatic invalidation when Replicache data changes
-    // useEffect(() => {
-    //   const unsubscribeSkillState = rizzle.replicache.experimentalWatch(
-    //     (ops) => {
-    //       const skillSrsStates: SkillQueueState[`skillSrsStates`] =
-    //         store.getState().skillSrsStates ?? new Map();
-
-    //       // eslint-disable-next-line no-console
-    //       console.debug(
-    //         `SkillQueueProvider: processing ${ops.length} skillSrsStates ops…` satisfies HasNameOf<
-    //           typeof SkillQueueProvider
-    //         >,
-    //       );
-
-    //       for (const op of ops) {
-    //         if (op.op === `add` || op.op === `change`) {
-    //           if (op.newValue == null) {
-    //             continue;
-    //           }
-
-    //           const skillState = currentSchema.skillState.unmarshalValue(
-    //             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
-    //             op.newValue as any,
-    //           );
-
-    //           skillSrsStates.set(skillState.skill, skillState.srs);
-    //         }
-    //       }
-
-    //       store.setState({ skillSrsStates });
-
-    //       // Whenever skill data changes, invalidate the queue so it will be recomputed next time
-    //       store.getState().invalidate();
-    //     },
-    //     // Watch all changes by not specifying a prefix
-    //     {
-    //       prefix: currentSchema.skillState.keyPrefix,
-    //       initialValuesInFirstDiff: true,
-    //     },
-    //   );
-
-    //   const unsubscribeSkillRating = rizzle.replicache.experimentalWatch(
-    //     (ops) => {
-    //       const latestSkillRatings: SkillQueueState[`latestSkillRatings`] =
-    //         store.getState().latestSkillRatings ?? new Map();
-
-    //       // eslint-disable-next-line no-console
-    //       console.debug(
-    //         `SkillQueueProvider: processing ${ops.length} skillRating ops…` satisfies HasNameOf<
-    //           typeof SkillQueueProvider
-    //         >,
-    //       );
-
-    //       for (const op of ops) {
-    //         if (op.op === `add` || op.op === `change`) {
-    //           if (op.newValue == null) {
-    //             continue;
-    //           }
-
-    //           const skillRating = currentSchema.skillRating.unmarshalValue(
-    //             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
-    //             op.newValue as any,
-    //           );
-
-    //           const existing = latestSkillRatings.get(skillRating.skill);
-
-    //           // Only update if the new skill rating is more recent than the existing one
-    //           if (
-    //             existing == null ||
-    //             skillRating.createdAt > existing.createdAt
-    //           ) {
-    //             latestSkillRatings.set(skillRating.skill, skillRating);
-    //           }
-    //         }
-    //       }
-
-    //       store.setState({ latestSkillRatings });
-
-    //       // Whenever skill data changes, invalidate the queue so it will be recomputed next time
-    //       store.getState().invalidate();
-    //     },
-    //     // Watch all changes by not specifying a prefix
-    //     {
-    //       prefix: currentSchema.skillRating.keyPrefix,
-    //       initialValuesInFirstDiff: true,
-    //     },
-    //   );
-
-    //   return () => {
-    //     unsubscribeSkillState();
-    //     unsubscribeSkillRating();
-    //   };
-    // }, [rizzle, store]);
 
     return <Context.Provider value={skillQueue}>{children}</Context.Provider>;
   },

@@ -3,15 +3,10 @@ import type {
   HanziText,
   HanziWord,
   PinyinSoundId,
-  Question,
   SrsStateType,
 } from "@/data/model";
 import { hanziWordSkillKinds } from "@/data/model";
 import { loadPylyPinyinChart } from "@/data/pinyin";
-import {
-  flagForQuestion,
-  generateQuestionForSkillOrThrow,
-} from "@/data/questions";
 import type {
   Rizzle,
   Skill,
@@ -54,45 +49,6 @@ import { buildDeviceStoreKey, deviceStoreGet } from "./deviceStore";
 export type WithRizzleWatchPrefixes<T> = T & {
   rizzleWatchPrefixes?: string[];
 };
-
-export const nextQuizQuestionQuery = (r: Rizzle, quizId: string) =>
-  queryOptions({
-    queryKey: [`nextQuizQuestion`, quizId],
-    meta: { r },
-    queryFn: async ({
-      meta,
-    }): Promise<{
-      question: Question;
-      reviewQueue: SkillReviewQueue;
-    }> => {
-      const r = (meta as { r: Rizzle }).r;
-      const { reviewQueue, skillSrsStates } = await targetSkillsReviewQueue(r);
-
-      // Take the next skill in queue and generate a question for it. Even
-      // though this is a for…loop, it usually only loops once then exits.
-      for (const [queueIndex, skill] of reviewQueue.items.entries()) {
-        try {
-          const question = await generateQuestionForSkillOrThrow(skill);
-          question.flag ??= flagForQuestion(
-            queueIndex,
-            reviewQueue,
-            skillSrsStates,
-          );
-          return { question, reviewQueue };
-        } catch (error) {
-          console.error(
-            `Error while generating a question for a skill ${JSON.stringify(skill)}`,
-            error,
-          );
-          continue;
-        }
-      }
-
-      throw new Error(`No question found for review`);
-    },
-    networkMode: `offlineFirst`,
-    structuralSharing: false,
-  });
 
 export const pinyinSoundsQuery = (r: Rizzle) =>
   withWatchPrefixes(
