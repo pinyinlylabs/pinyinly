@@ -277,7 +277,8 @@ describe(
           retryCount: 1,
           dueCount: 0,
           overDueCount: 0,
-          newCount: 2,
+          newContentCount: 2,
+          newDifficultyCount: 0,
         });
       }
 
@@ -297,7 +298,8 @@ describe(
           retryCount: 0,
           dueCount: 0,
           overDueCount: 0,
-          newCount: 2,
+          newContentCount: 2,
+          newDifficultyCount: 0,
         });
       }
     });
