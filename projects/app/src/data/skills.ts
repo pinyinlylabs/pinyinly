@@ -908,9 +908,6 @@ export function skillReviewQueue({
     ([skill]) => !reactiveItems.includes(skill),
   );
 
-  // Prepare sorted arrays for consistent ordering
-  const sortedNotDueItems = randomSortSkills(learningOrderNotDue);
-
   // Build items array and track index ranges
   const items: Skill[] = [];
   let currentIndex = 0;
@@ -984,9 +981,15 @@ export function skillReviewQueue({
 
   // 7. Not due items
   const notDueStart = currentIndex;
-  items.push(...sortedNotDueItems.slice(0, maxQueueItems - items.length));
-  currentIndex += sortedNotDueItems.length;
+  currentIndex += learningOrderNotDue.length;
   const notDueEnd = currentIndex;
+  if (items.length < maxQueueItems) {
+    pullTopKItems(
+      randomWeightSkills(learningOrderNotDue),
+      sortComparatorNumber(([, x]) => x),
+      ([skill]) => skill,
+    );
+  }
 
   // Create index ranges
   const indexRanges = {
@@ -1045,7 +1048,7 @@ export function* walkSkillAndDependencies(
 }
 
 /**
- * Randomly sort skills for review based on their SRS state to form a
+ * Randomly weight skills for review based on their SRS state to form a
  * probability distribution weighted by each skill's difficulty. It's designed
  * to be efficient and deterministic so it can be tested and predictable. In
  * practice it probably doesn't make sense to compute all of the upcoming skills
@@ -1056,7 +1059,9 @@ export function* walkSkillAndDependencies(
  * @param skillStates
  * @returns
  */
-const randomSortSkills = (skillStates: [Skill, SrsStateType | undefined][]) => {
+const randomWeightSkills = (
+  skillStates: readonly [Skill, SrsStateType | undefined][],
+): [Skill, number][] => {
   let totalWeight = 0;
 
   const weighted = skillStates.map(([skill, srsState]): [Skill, number] => {
@@ -1086,10 +1091,7 @@ const randomSortSkills = (skillStates: [Skill, SrsStateType | undefined][]) => {
     x[1] = random() / normalizedWeight;
   }
 
-  // Order the skills
-  weighted.sort(sortComparatorNumber(([, weight]) => weight));
-
-  return weighted.map(([skill]) => skill);
+  return weighted;
 };
 
 const skillKindShorthandMapping: Record<SkillKind, string> = {
