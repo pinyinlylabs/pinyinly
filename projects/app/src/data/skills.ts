@@ -15,11 +15,13 @@ import {
   Rating,
 } from "@/util/fsrs";
 import { makePRNG } from "@/util/random";
+import type { SortComparator } from "@pinyinly/lib/collections";
 import {
   emptyArray,
   emptySet,
   inverseSortComparator,
   memoize1,
+  MinHeap,
   mutableArrayFilter,
   sortComparatorDate,
   sortComparatorNumber,
@@ -609,7 +611,7 @@ function getReactivePronunciationSkills({
     SkillRating,
     `rating` | `createdAt`
   >)[];
-  skillSrsStates: Map<Skill, SrsStateType>;
+  skillSrsStates: ReadonlyMap<Skill, SrsStateType>;
   graph: SkillLearningGraph;
   now: Date;
 }): readonly Skill[] {
@@ -669,12 +671,17 @@ export function skillReviewQueue({
   latestSkillRatings,
   isStructuralHanziWord,
   now = new Date(),
+  maxQueueItems = Infinity,
 }: {
   graph: SkillLearningGraph;
-  skillSrsStates: Map<Skill, SrsStateType>;
-  latestSkillRatings: Map<Skill, Pick<SkillRating, `rating` | `createdAt`>>;
+  skillSrsStates: ReadonlyMap<Skill, SrsStateType>;
+  latestSkillRatings: ReadonlyMap<
+    Skill,
+    Pick<SkillRating, `rating` | `createdAt`>
+  >;
   isStructuralHanziWord: (hanziWord: HanziWord) => boolean;
   now?: Date;
+  maxQueueItems?: number;
 }): SkillReviewQueue {
   // Kahn topological sort
   const inDegree = new Map<Skill, number>();
@@ -858,11 +865,6 @@ export function skillReviewQueue({
     }
   }
 
-  // Put the retry items in the correct order.
-  const retryItems = learningOrderRetry
-    .sort(inverseSortComparator(sortComparatorDate(([, when]) => when)))
-    .map(([skill]) => skill);
-
   const recentSkillRatingHistory = [...latestSkillRatings.entries()]
     .sort(
       inverseSortComparator(
@@ -907,23 +909,38 @@ export function skillReviewQueue({
   );
 
   // Prepare sorted arrays for consistent ordering
-  const sortedOverDueItems = learningOrderOverDue
-    .sort(sortComparatorDate(([, due]) => due))
-    .map(([skill]) => skill);
-  const sortedDueItems = learningOrderDue
-    .sort(sortComparatorDate(([, due]) => due))
-    .map(([skill]) => skill);
   const sortedNotDueItems = randomSortSkills(learningOrderNotDue);
 
   // Build items array and track index ranges
   const items: Skill[] = [];
   let currentIndex = 0;
 
+  function pullTopKItems<T>(
+    source: T[],
+    cmp: SortComparator<T>,
+    getSkill: (x: T) => Skill,
+  ) {
+    const capacity = maxQueueItems - items.length;
+    if (capacity > 0) {
+      const heap = new MinHeap<T>(cmp, capacity);
+      for (const item of source) {
+        heap.insert(item);
+      }
+      for (const item of heap.toArray()) {
+        items.push(getSkill(item));
+      }
+    }
+  }
+
   // 1. Retry items
   const retryStart = currentIndex;
-  items.push(...retryItems);
-  currentIndex += retryItems.length;
+  currentIndex += learningOrderRetry.length;
   const retryEnd = currentIndex;
+  pullTopKItems(
+    learningOrderRetry,
+    inverseSortComparator(sortComparatorDate(([, x]) => x)),
+    ([skill]) => skill,
+  );
 
   // 2. Reactive items
   const reactiveStart = currentIndex;
@@ -933,31 +950,41 @@ export function skillReviewQueue({
 
   // 3. Overdue items
   const overdueStart = currentIndex;
-  items.push(...sortedOverDueItems);
-  currentIndex += sortedOverDueItems.length;
+  currentIndex += learningOrderOverDue.length;
   const overdueEnd = currentIndex;
+  pullTopKItems(
+    learningOrderOverDue,
+    inverseSortComparator(sortComparatorDate(([, x]) => x)),
+    ([skill]) => skill,
+  );
 
   // 4. Due items
   const dueStart = currentIndex;
-  items.push(...sortedDueItems);
-  currentIndex += sortedDueItems.length;
+  currentIndex += learningOrderDue.length;
   const dueEnd = currentIndex;
+  pullTopKItems(
+    learningOrderDue,
+    sortComparatorDate(([, x]) => x),
+    ([skill]) => skill,
+  );
 
   // 5. New content items
   const newContentStart = currentIndex;
-  items.push(...learningOrderNewContent);
+  items.push(...learningOrderNewContent.slice(0, maxQueueItems - items.length));
   currentIndex += learningOrderNewContent.length;
   const newContentEnd = currentIndex;
 
   // 6. New difficulty items
   const newDifficultyStart = currentIndex;
-  items.push(...learningOrderNewDifficulty);
+  items.push(
+    ...learningOrderNewDifficulty.slice(0, maxQueueItems - items.length),
+  );
   currentIndex += learningOrderNewDifficulty.length;
   const newDifficultyEnd = currentIndex;
 
   // 7. Not due items
   const notDueStart = currentIndex;
-  items.push(...sortedNotDueItems);
+  items.push(...sortedNotDueItems.slice(0, maxQueueItems - items.length));
   currentIndex += sortedNotDueItems.length;
   const notDueEnd = currentIndex;
 
@@ -973,6 +1000,8 @@ export function skillReviewQueue({
   };
 
   learningOrderBlocked.reverse();
+
+  invariant(items.length <= maxQueueItems);
 
   return {
     items,

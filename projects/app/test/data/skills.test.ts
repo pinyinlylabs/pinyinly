@@ -1,6 +1,6 @@
 import type { SrsStateType } from "#data/model.ts";
 import { SkillKind, SrsKind } from "#data/model.ts";
-import type { Skill } from "#data/rizzleSchema.ts";
+import type { Skill, SkillRating } from "#data/rizzleSchema.ts";
 import { rSkillKind } from "#data/rizzleSchema.ts";
 import type { RankRules, SkillLearningGraph } from "#data/skills.ts";
 import {
@@ -455,6 +455,106 @@ describe(
         `);
       },
     );
+
+    describe(`maxQueueItems argument`, () => {
+      function makeMockData() {
+        const skillA = `he:A:a` as Skill;
+        const skillB = `he:B:b` as Skill;
+        const skillC = `he:C:c` as Skill;
+        const graph: SkillLearningGraph = new Map([
+          [skillA, { skill: skillA, dependencies: new Set([skillB, skillC]) }],
+          [skillB, { skill: skillB, dependencies: new Set() }],
+          [skillC, { skill: skillC, dependencies: new Set() }],
+        ]);
+
+        const skillSrsStates = new Map(
+          Object.entries({
+            [skillA]: {
+              nextReviewAt: new Date(),
+              stability: 0.5,
+              kind: SrsKind.FsrsFourPointFive,
+              difficulty: 1,
+              prevReviewAt: new Date(),
+            },
+            [skillB]: {
+              nextReviewAt: new Date(),
+              stability: 0.5,
+              kind: SrsKind.FsrsFourPointFive,
+              difficulty: 1,
+              prevReviewAt: new Date(),
+            },
+            [skillC]: {
+              nextReviewAt: new Date(),
+              stability: 0.5,
+              kind: SrsKind.FsrsFourPointFive,
+              difficulty: 1,
+              prevReviewAt: new Date(),
+            },
+          }),
+        ) as Map<Skill, SrsStateType>;
+
+        const latestSkillRatings = new Map<
+          Skill,
+          Pick<SkillRating, `rating` | `createdAt`>
+        >();
+
+        return {
+          skillA,
+          skillB,
+          skillC,
+          graph,
+          skillSrsStates,
+          latestSkillRatings,
+        };
+      }
+
+      skillTest(
+        `limits the number of items in the queue`,
+        async ({ isStructuralHanziWord }) => {
+          const { graph, skillSrsStates, latestSkillRatings } = makeMockData();
+
+          const queue = skillReviewQueue({
+            graph,
+            skillSrsStates,
+            latestSkillRatings,
+            isStructuralHanziWord,
+            maxQueueItems: 2,
+          });
+
+          expect(queue.items.length).toBeLessThanOrEqual(2);
+          expect(queue.items).toMatchInlineSnapshot(`
+            [
+              "he:A:a",
+              "he:B:b",
+            ]
+          `);
+        },
+      );
+
+      skillTest(
+        `does not limit the queue when maxQueueItems is Infinity`,
+        async ({ isStructuralHanziWord }) => {
+          const { graph, skillSrsStates, latestSkillRatings } = makeMockData();
+
+          const queue = skillReviewQueue({
+            graph,
+            skillSrsStates,
+            latestSkillRatings,
+            isStructuralHanziWord,
+            maxQueueItems: Infinity,
+          });
+
+          expect(queue.items.length).toBe(3);
+          expect(queue.items).toMatchInlineSnapshot(`
+            [
+              "he:A:a",
+              "he:B:b",
+              "he:C:c",
+            ]
+          `);
+        },
+      );
+    });
 
     describe(`${SkillKind.HanziWordToGloss} skills`, () => {
       skillTest(`works for 好`, async ({ isStructuralHanziWord }) => {
