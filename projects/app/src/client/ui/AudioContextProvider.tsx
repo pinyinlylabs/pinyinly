@@ -9,6 +9,8 @@ const Context = createContext<AudioContext | null>(null);
  */
 export const AudioContextProvider = Object.assign(
   function AudioContextProvider({ children }: PropsWithChildren) {
+    "use memo"; // Object.assign(…) wrapped components aren't inferred.
+
     const [audioContext] = useState(() => new AudioContext());
 
     // Clean up the audio context on unmount. This is useful in development mode

@@ -41,6 +41,8 @@ const mockable = {
  */
 export const SkillQueueProvider = Object.assign(
   function SkillQueueProvider({ children }: PropsWithChildren) {
+    "use memo"; // Object.assign(…) wrapped components aren't inferred.
+
     const db = useDb();
 
     const { data: skillLearningGraph, isLoading: isSkillLearningGraphLoading } =
