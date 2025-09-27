@@ -62,40 +62,6 @@ export const DbProvider = Object.assign(
       latestSkillRatingCollectionOptions({ rizzle }),
     );
 
-    //   id: `latestSkillRatings`,
-    //   query: (q) => {
-    //     // Build the subquery first
-    //     const latestRatings = q
-    //       .from({ skillRating: skillRatingCollection })
-    //       .orderBy(({ skillRating }) => skillRating.createdAt, `desc`);
-
-    //     const allSkills = q
-    //       .from({ skillRating: skillRatingCollection })
-    //       .select(({ skillRating }) => ({ skill: skillRating.skill }))
-    //       .distinct();
-
-    //     // Use the subquery in the main query
-
-    //     return (
-    //       q
-    //         .from({ skill: allSkills })
-    //         .leftJoin(
-    //           { latestRating: latestRatings },
-    //           ({ skill, latestRating }) =>
-    //             eq(skill.skill, latestRating.skill),
-    //         )
-    //         // .where(({ skill, latestRating, skillRating }) => eq(skill.skill, skillRating.skill))
-    //         .select(({ skill, latestRating }) => ({
-    //           // id: latestRating.id,
-    //           skill,
-    //           latestRating,
-    //           // ...latestRating,
-    //         }))
-    //     );
-    //   },
-    //   // getKey: (item) => item.skill,
-    // });
-
     const db: Db = {
       latestSkillRatings,
       skillStateCollection,
