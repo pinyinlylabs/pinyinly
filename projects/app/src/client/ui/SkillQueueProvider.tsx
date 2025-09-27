@@ -49,13 +49,13 @@ export const SkillQueueProvider = Object.assign(
       useQuery(skillLearningGraphQuery);
     const {
       data: isStructuralHanziWord,
-      isLoading: isStructuralHanziWordLoading,
+      isLoading: isStructuralHanziWordsLoading,
     } = useQuery(isStructuralHanziWordQuery());
     const {
       data: latestSkillRatingsData,
-      isLoading: latestSkillRatingsisLoading,
+      isLoading: isLatestSkillRatingsLoading,
     } = useLiveQuery(db.latestSkillRatings);
-    const { data: skillStateData, isLoading: skillStatesisLoading } =
+    const { data: skillStateData, isLoading: isSkillStatesLoading } =
       useLiveQuery(db.skillStateCollection);
 
     const skillSrsStates = useMemo(
@@ -76,10 +76,10 @@ export const SkillQueueProvider = Object.assign(
 
     useEffect(() => {
       if (
-        latestSkillRatingsisLoading ||
-        skillStatesisLoading ||
+        isLatestSkillRatingsLoading ||
+        isSkillStatesLoading ||
         isSkillLearningGraphLoading ||
-        isStructuralHanziWordLoading
+        isStructuralHanziWordsLoading
       ) {
         return;
       }
@@ -116,13 +116,13 @@ export const SkillQueueProvider = Object.assign(
     }, [
       isSkillLearningGraphLoading,
       isStructuralHanziWord,
-      isStructuralHanziWordLoading,
+      isStructuralHanziWordsLoading,
       latestSkillRatingsData,
-      latestSkillRatingsisLoading,
+      isLatestSkillRatingsLoading,
       skillLearningGraph,
       skillSrsStates,
       latestSkillRatings,
-      skillStatesisLoading,
+      isSkillStatesLoading,
     ]);
 
     const [skillQueue, setSkillQueue] = useState<SkillQueueContextValue>({
