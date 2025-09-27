@@ -471,11 +471,6 @@ export const rizzleCollectionOptions = <
           try {
             begin();
 
-            // eslint-disable-next-line no-console
-            console.debug(
-              `rizzleCollection(id=${collection.id}) sync processing ${ops.length} ops…`,
-            );
-
             for (const op of ops) {
               switch (op.op) {
                 case `add`: {
@@ -553,11 +548,6 @@ export const staticCollectionOptions = <
 
           begin();
 
-          // eslint-disable-next-line no-console
-          console.debug(
-            `staticCollection(id=${collection.id}) sync processing ${items.length} items…`,
-          );
-
           for (const item of items) {
             write({ type: `insert`, value: item });
           }
@@ -594,11 +584,6 @@ export const latestSkillRatingCollectionOptions = ({
       const unsubscribe = rizzle.replicache.experimentalWatch(
         (ops) => {
           begin();
-
-          // eslint-disable-next-line no-console
-          console.debug(
-            `rizzleCollection(id=${collection.id}) sync processing ${ops.length} ops…`,
-          );
 
           const pendingTxLatest = new Map<Skill, SkillRating>();
 
