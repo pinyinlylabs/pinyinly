@@ -33,32 +33,4 @@ export function useSkillQueue(): SkillQueueContextValue {
   );
 
   return store;
-
-  // const queue = useStore(store);
-
-  // // Automatically trigger computation when needed
-  // useEffect(() => {
-  //   // Compute if we don't have a queue yet, or if the queue is stale (invalidated)
-  //   // This ensures recomputation after invalidation while avoiding UI flicker
-  //   const needsComputation =
-  //     (queue.reviewQueue == null || queue.lastComputedAt == null) &&
-  //     !queue.isLoading &&
-  //     queue.error == null;
-
-  //   if (needsComputation) {
-  //     void queue.computeQueue();
-  //   }
-  // }, [
-  //   queue.reviewQueue,
-  //   queue.lastComputedAt,
-  //   queue.isLoading,
-  //   queue.error,
-  //   // This is subtle but critical, because it means when dependencies are
-  //   // updated (e.g. queue.skillSrsStates or queue.skillGraph) that might unlock
-  //   // the queue to actually be computed. Without this dependency, the queue
-  //   // might never compute if it was initially missing data.
-  //   queue,
-  // ]);
-
-  // return queue;
 }
