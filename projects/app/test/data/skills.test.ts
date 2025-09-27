@@ -389,7 +389,6 @@ describe(
           blockedItems: [],
           dueCount: 1,
           items: [`he:刀:knife`],
-
           newContentCount: 0,
           newDifficultyCount: 0,
           overDueCount: 0,
@@ -427,7 +426,6 @@ describe(
             `he:丿:slash`,
             `he:𠃌:radical`,
           ],
-
           newContentCount: 2,
           newDifficultyCount: 0,
           overDueCount: 0,
