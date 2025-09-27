@@ -665,6 +665,11 @@ function getReactivePronunciationSkills({
   return emptyArray;
 }
 
+export type LatestSkillRating = Pick<
+  SkillRating,
+  `skill` | `rating` | `createdAt`
+>;
+
 export function skillReviewQueue({
   graph,
   skillSrsStates,
@@ -675,10 +680,7 @@ export function skillReviewQueue({
 }: {
   graph: SkillLearningGraph;
   skillSrsStates: ReadonlyMap<Skill, SrsStateType>;
-  latestSkillRatings: ReadonlyMap<
-    Skill,
-    Pick<SkillRating, `rating` | `createdAt`>
-  >;
+  latestSkillRatings: ReadonlyMap<Skill, LatestSkillRating>;
   isStructuralHanziWord: (hanziWord: HanziWord) => boolean;
   now?: Date;
   maxQueueItems?: number;

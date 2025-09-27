@@ -1,8 +1,12 @@
 import type { SrsStateType } from "#data/model.ts";
 import { SkillKind, SrsKind } from "#data/model.ts";
-import type { Skill, SkillRating } from "#data/rizzleSchema.ts";
+import type { Skill } from "#data/rizzleSchema.ts";
 import { rSkillKind } from "#data/rizzleSchema.ts";
-import type { RankRules, SkillLearningGraph } from "#data/skills.ts";
+import type {
+  LatestSkillRating,
+  RankRules,
+  SkillLearningGraph,
+} from "#data/skills.ts";
 import {
   computeSkillRating,
   getHanziWordRank,
@@ -349,7 +353,7 @@ describe(
           skillReviewQueue({
             graph,
             skillSrsStates: new Map(),
-            latestSkillRatings: new Map(),
+            latestSkillRatings: latestSkillRatings(),
             isStructuralHanziWord,
           }),
         ).toMatchObject({
@@ -378,7 +382,7 @@ describe(
             skillSrsStates: new Map([
               [`he:刀:knife`, mockSrsState(时`-1d`, 时`-5m`)],
             ]),
-            latestSkillRatings: new Map(),
+            latestSkillRatings: latestSkillRatings(),
             isStructuralHanziWord,
           }),
         ).toMatchObject({
@@ -406,7 +410,7 @@ describe(
             skillSrsStates: new Map([
               [`he:刀:knife`, mockSrsState(时`-1d`, 时`-5m`)],
             ]),
-            latestSkillRatings: new Map(),
+            latestSkillRatings: latestSkillRatings(),
             isStructuralHanziWord,
           }),
         ).toMatchObject({
@@ -442,7 +446,7 @@ describe(
         const queue = skillReviewQueue({
           graph,
           skillSrsStates: new Map(),
-          latestSkillRatings: new Map(),
+          latestSkillRatings: latestSkillRatings(),
           isStructuralHanziWord,
         });
 
@@ -493,10 +497,7 @@ describe(
           }),
         ) as Map<Skill, SrsStateType>;
 
-        const latestSkillRatings = new Map<
-          Skill,
-          Pick<SkillRating, `rating` | `createdAt`>
-        >();
+        const latestSkillRatings = new Map<Skill, LatestSkillRating>();
 
         return {
           skillA,
@@ -565,7 +566,7 @@ describe(
           skillReviewQueue({
             graph,
             skillSrsStates: new Map(),
-            latestSkillRatings: new Map(),
+            latestSkillRatings: latestSkillRatings(),
             isStructuralHanziWord,
           }),
         ).toMatchObject({
@@ -585,7 +586,7 @@ describe(
             skillReviewQueue({
               graph,
               skillSrsStates: new Map(),
-              latestSkillRatings: new Map(),
+              latestSkillRatings: latestSkillRatings(),
               isStructuralHanziWord,
             }),
           ).toMatchObject({
@@ -614,9 +615,9 @@ describe(
                   [`he:八:eight`, mockSrsState(时`-1d`, 时`-5m`)],
                   [`he:丿:slash`, mockSrsState(时`-1d`, 时`-3m`)],
                 ]),
-                latestSkillRatings: new Map([
-                  [`he:丿:slash`, { rating: Rating.Again, createdAt: 时`-1m` }],
-                ]),
+                latestSkillRatings: latestSkillRatings({
+                  "he:丿:slash": [Rating.Again, 时`-1m`],
+                }),
                 isStructuralHanziWord,
               }),
             ).toMatchObject({
@@ -648,9 +649,9 @@ describe(
                 skillSrsStates: new Map([
                   [`he:八:eight`, mockSrsState(时`-1d`, 时`-5m`)],
                 ]),
-                latestSkillRatings: new Map([
-                  [`he:丿:slash`, { rating: Rating.Again, createdAt: 时`-1m` }], // it's incorrect but was never introduced
-                ]),
+                latestSkillRatings: latestSkillRatings({
+                  "he:丿:slash": [Rating.Again, 时`-1m`], // it's incorrect but was never introduced
+                }),
                 isStructuralHanziWord,
               }),
             ).toMatchObject({
@@ -679,10 +680,10 @@ describe(
                   [`he:八:eight`, mockSrsState(时`-1d`, 时`-5m`)],
                   [`he:丿:slash`, mockSrsState(时`-1d`, 时`-5m`)],
                 ]),
-                latestSkillRatings: new Map([
-                  [`he:八:eight`, { rating: Rating.Again, createdAt: 时`-1m` }],
-                  [`he:丿:slash`, { rating: Rating.Again, createdAt: 时`-2m` }],
-                ]),
+                latestSkillRatings: latestSkillRatings({
+                  "he:八:eight": [Rating.Again, 时`-1m`],
+                  "he:丿:slash": [Rating.Again, 时`-2m`],
+                }),
                 isStructuralHanziWord,
               }),
             ).toMatchObject({
@@ -704,10 +705,10 @@ describe(
                   [`he:八:eight`, mockSrsState(时`-1d`, 时`-5m`)],
                   [`he:丿:slash`, mockSrsState(时`-1d`, 时`-5m`)],
                 ]),
-                latestSkillRatings: new Map([
-                  [`he:八:eight`, { rating: Rating.Again, createdAt: 时`-2m` }],
-                  [`he:丿:slash`, { rating: Rating.Again, createdAt: 时`-1m` }],
-                ]),
+                latestSkillRatings: latestSkillRatings({
+                  "he:八:eight": [Rating.Again, 时`-2m`],
+                  "he:丿:slash": [Rating.Again, 时`-1m`],
+                }),
                 isStructuralHanziWord,
               }),
             ).toMatchObject({
@@ -757,10 +758,9 @@ describe(
                   },
                 ],
               ]),
-              latestSkillRatings: new Map([
-                // Most recent successful HanziWordToGloss review
-                [`he:好:good`, { rating: Rating.Good, createdAt: 时`-1m` }],
-              ]),
+              latestSkillRatings: latestSkillRatings({
+                "he:好:good": [Rating.Good, 时`-1m`], // Most recent successful HanziWordToGloss review
+              }),
               isStructuralHanziWord,
             });
 
@@ -797,9 +797,9 @@ describe(
                 [`he:八:eight`, mockSrsState(时`-1d`, 时`-8m`)],
                 // User does not have sufficient pronunciation competency (rank < 1)
               ]),
-              latestSkillRatings: new Map([
-                [`he:好:good`, { rating: Rating.Good, createdAt: 时`-1m` }],
-              ]),
+              latestSkillRatings: latestSkillRatings({
+                "he:好:good": [Rating.Good, 时`-1m`],
+              }),
               isStructuralHanziWord,
             });
 
@@ -841,10 +841,9 @@ describe(
                   },
                 ],
               ]),
-              latestSkillRatings: new Map([
-                // No recent successful reviews - failed review instead
-                [`he:好:good`, { rating: Rating.Again, createdAt: 时`-1m` }],
-              ]),
+              latestSkillRatings: latestSkillRatings({
+                "he:好:good": [Rating.Again, 时`-1m`], // No recent successful reviews - failed review instead
+              }),
               isStructuralHanziWord,
             });
 
@@ -883,10 +882,9 @@ describe(
                   },
                 ],
               ]),
-              latestSkillRatings: new Map([
-                // Most recent successful HanziWordToGloss review
-                [`he:好:good`, { rating: Rating.Good, createdAt: 时`-1m` }],
-              ]),
+              latestSkillRatings: latestSkillRatings({
+                "he:好:good": [Rating.Good, 时`-1m`], // Most recent successful HanziWordToGloss review
+              }),
               isStructuralHanziWord,
             });
 
@@ -912,7 +910,7 @@ describe(
               [`he:八:eight`, mockSrsState(时`-1d`, 时`-5m`)],
               [`he:刀:knife`, mockSrsState(时`-1d`, 时`-5m`)],
             ]),
-            latestSkillRatings: new Map(),
+            latestSkillRatings: latestSkillRatings(),
             isStructuralHanziWord: () => false,
           }),
         ).toMatchObject({
@@ -936,7 +934,7 @@ describe(
           skillReviewQueue({
             graph,
             skillSrsStates: new Map(),
-            latestSkillRatings: new Map(),
+            latestSkillRatings: latestSkillRatings(),
             isStructuralHanziWord: () => false,
           }),
         ).toMatchObject({
@@ -961,7 +959,7 @@ describe(
                 [`he:八:eight`, mockSrsState(时`-10m`, 时`1h`)], // due in one hour,
                 [`he:刀:knife`, mockSrsState(时`-10m`, 时`2h`)], // due in two hours,
               ]),
-              latestSkillRatings: new Map(),
+              latestSkillRatings: latestSkillRatings(),
               isStructuralHanziWord,
             }),
           ).toMatchObject({
@@ -1018,7 +1016,7 @@ describe(
             skillReviewQueue({
               graph,
               skillSrsStates: new Map(),
-              latestSkillRatings: new Map(),
+              latestSkillRatings: latestSkillRatings(),
               isStructuralHanziWord,
             }),
           ).toMatchObject({
@@ -1040,7 +1038,7 @@ describe(
                 [`he:八:eight`, mockSrsState(时`-10m`, 时`1h`)], // due in one hour,
                 [`he:刀:knife`, mockSrsState(时`-10m`, 时`2h`)], // due in two hours,
               ]),
-              latestSkillRatings: new Map(),
+              latestSkillRatings: latestSkillRatings(),
               isStructuralHanziWord,
             }),
           ).toMatchObject({
@@ -1066,7 +1064,7 @@ describe(
             skillReviewQueue({
               graph,
               skillSrsStates: new Map(),
-              latestSkillRatings: new Map(),
+              latestSkillRatings: latestSkillRatings(),
               isStructuralHanziWord,
             }),
           ).toMatchObject({
@@ -1092,7 +1090,7 @@ describe(
           const queue = skillReviewQueue({
             graph,
             skillSrsStates: new Map(),
-            latestSkillRatings: new Map(),
+            latestSkillRatings: latestSkillRatings(),
             isStructuralHanziWord,
           });
 
@@ -1120,7 +1118,7 @@ describe(
           skillReviewQueue({
             graph,
             skillSrsStates: new Map(),
-            latestSkillRatings: new Map(),
+            latestSkillRatings: latestSkillRatings(),
             isStructuralHanziWord: () => false,
           }),
         ).toMatchObject({
@@ -1167,7 +1165,7 @@ describe(
             skillReviewQueue({
               graph,
               skillSrsStates: new Map(),
-              latestSkillRatings: new Map(),
+              latestSkillRatings: latestSkillRatings(),
               isStructuralHanziWord,
             }),
           ).toMatchObject({
@@ -1186,7 +1184,7 @@ describe(
               skillSrsStates: new Map([
                 [`he:一:one`, fsrsSrsState(时`-1d`, 时`-5m`, Rating.Good)],
               ]),
-              latestSkillRatings: new Map(),
+              latestSkillRatings: latestSkillRatings(),
               isStructuralHanziWord,
             }),
           ).toMatchObject({
@@ -1207,7 +1205,7 @@ describe(
                 [`he:一:one`, fsrsSrsState(时`-1d`, 时`-6m`, Rating.Good)],
                 [`hpi:一:one`, fsrsSrsState(时`-1d`, 时`-4m`, Rating.Good)],
               ]),
-              latestSkillRatings: new Map(),
+              latestSkillRatings: latestSkillRatings(),
               isStructuralHanziWord,
             }),
           ).toMatchObject({
@@ -1901,3 +1899,20 @@ describe(
     });
   },
 );
+
+type LatestSkillRatingSpec = [rating: Rating, createdAt: Date];
+
+function latestSkillRatings(
+  spec: Record<Skill, LatestSkillRatingSpec> = {},
+): Map<Skill, LatestSkillRating> {
+  const result = new Map<Skill, LatestSkillRating>();
+
+  for (const [skill, [rating, createdAt]] of Object.entries(spec) as [
+    Skill,
+    LatestSkillRatingSpec,
+  ][]) {
+    result.set(skill, { skill, rating, createdAt });
+  }
+
+  return result;
+}
