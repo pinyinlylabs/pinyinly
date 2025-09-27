@@ -739,12 +739,20 @@ export function skillReviewQueue({
     }
   }
 
+  let now1 = performance.now();
   // Add already introduced skills to the learning order, unless they're too
   // stale and probably forgotten.
   for (const [skill, srsState] of skillSrsStates) {
     if (!needsToBeIntroduced(srsState, now)) {
       enqueueReviewOnce(skill, srsState);
     }
+  }
+  if (__DEV__) {
+    // eslint-disable-next-line no-console
+    console.log(
+      `Enqueuing review took ${(performance.now() - now1).toFixed(4)} ms`,
+    );
+    now1 = performance.now();
   }
 
   // Compute in-degree
@@ -756,6 +764,13 @@ export function skillReviewQueue({
     for (const dependency of node.dependencies) {
       inDegree.set(dependency, (inDegree.get(dependency) ?? 0) + 1);
     }
+  }
+  if (__DEV__) {
+    // eslint-disable-next-line no-console
+    console.log(
+      `Computing in-degrees took ${(performance.now() - now1).toFixed(4)} ms`,
+    );
+    now1 = performance.now();
   }
 
   const hasStableDependencies = memoize1((skill: Skill): boolean => {
@@ -775,6 +790,13 @@ export function skillReviewQueue({
     if (deg === 0) {
       queue.push(skill);
     }
+  }
+  if (__DEV__) {
+    // eslint-disable-next-line no-console
+    console.log(
+      `Finding zero in-degree nodes took ${(performance.now() - now1).toFixed(4)} ms`,
+    );
+    now1 = performance.now();
   }
 
   // Process queue
@@ -797,6 +819,13 @@ export function skillReviewQueue({
       }
     }
   }
+  if (__DEV__) {
+    // eslint-disable-next-line no-console
+    console.log(
+      `Processing queue took ${(performance.now() - now1).toFixed(4)} ms`,
+    );
+    now1 = performance.now();
+  }
 
   // At this point there's an unbounded number of new skills, so we need to
   // enforce a throttle to avoid overwhelming the user with too many new skills
@@ -814,6 +843,13 @@ export function skillReviewQueue({
       const count = unstableSkillCounts.get(skillKind) ?? 0;
       unstableSkillCounts.set(skillKind, count + 1);
     }
+  }
+  if (__DEV__) {
+    // eslint-disable-next-line no-console
+    console.log(
+      `Counting unstable skills took ${(performance.now() - now1).toFixed(4)} ms`,
+    );
+    now1 = performance.now();
   }
 
   // Check if introducing a skill would be too overwhelming. There is a limit on
@@ -849,6 +885,13 @@ export function skillReviewQueue({
       learningOrderNewWordCandidates.push(skill);
     }
   }
+  if (__DEV__) {
+    // eslint-disable-next-line no-console
+    console.log(
+      `Classifying new candidates took ${(performance.now() - now1).toFixed(4)} ms`,
+    );
+    now1 = performance.now();
+  }
 
   for (const skillGroup of [
     learningOrderNewWordCandidates,
@@ -866,15 +909,30 @@ export function skillReviewQueue({
       }
     }
   }
+  if (__DEV__) {
+    // eslint-disable-next-line no-console
+    console.log(
+      `Selecting new skills took ${(performance.now() - now1).toFixed(4)} ms`,
+    );
+    now1 = performance.now();
+  }
 
-  const recentSkillRatingHistory = [...latestSkillRatings.entries()]
-    .sort(
-      inverseSortComparator(
-        sortComparatorDate(([, { createdAt }]) => createdAt),
-      ),
-    )
-    .slice(0, 20) // only consider a fixed number of recent ratings to limit computation.
-    .map(([skill, { createdAt, rating }]) => ({ skill, createdAt, rating }));
+  const recentSkillRatingHistoryHeap = new MinHeap<LatestSkillRating>(
+    inverseSortComparator(sortComparatorDate(({ createdAt }) => createdAt)),
+    20,
+  );
+  for (const rating of latestSkillRatings.values()) {
+    recentSkillRatingHistoryHeap.insert(rating);
+  }
+  const recentSkillRatingHistory = recentSkillRatingHistoryHeap.toArray();
+
+  if (__DEV__) {
+    // eslint-disable-next-line no-console
+    console.log(
+      `Mapping recent skill ratings took ${(performance.now() - now1).toFixed(4)} ms`,
+    );
+    now1 = performance.now();
+  }
 
   const reactiveItems = [
     // Check if we should prioritize a pronunciation skill after successful hanzi-to-english review
@@ -885,6 +943,14 @@ export function skillReviewQueue({
       now,
     }),
   ];
+
+  if (__DEV__) {
+    // eslint-disable-next-line no-console
+    console.log(
+      `Getting reactive skills took ${(performance.now() - now1).toFixed(4)} ms`,
+    );
+    now1 = performance.now();
+  }
 
   // Remove reactive items from the other queues so that items aren't duplicated
   // and counts are correct.
@@ -910,6 +976,14 @@ export function skillReviewQueue({
     ([skill]) => !reactiveItems.includes(skill),
   );
 
+  if (__DEV__) {
+    // eslint-disable-next-line no-console
+    console.log(
+      `Removing duplicates took ${(performance.now() - now1).toFixed(4)} ms`,
+    );
+    now1 = performance.now();
+  }
+
   // Build items array and track index ranges
   const items: Skill[] = [];
   let currentIndex = 0;
@@ -929,6 +1003,14 @@ export function skillReviewQueue({
         items.push(getSkill(item));
       }
     }
+  }
+
+  if (__DEV__) {
+    // eslint-disable-next-line no-console
+    console.log(
+      `Pull top-K setup took ${(performance.now() - now1).toFixed(4)} ms`,
+    );
+    now1 = performance.now();
   }
 
   // 1. Retry items
@@ -993,6 +1075,14 @@ export function skillReviewQueue({
     );
   }
 
+  if (__DEV__) {
+    // eslint-disable-next-line no-console
+    console.log(
+      `Pulling items took ${(performance.now() - now1).toFixed(4)} ms`,
+    );
+    now1 = performance.now();
+  }
+
   // Create index ranges
   const indexRanges = {
     retry: { start: retryStart, end: retryEnd },
@@ -1007,6 +1097,11 @@ export function skillReviewQueue({
   learningOrderBlocked.reverse();
 
   invariant(items.length <= maxQueueItems);
+
+  if (__DEV__) {
+    // eslint-disable-next-line no-console
+    console.log(`Final stuff took ${(performance.now() - now1).toFixed(4)} ms`);
+  }
 
   return {
     items,

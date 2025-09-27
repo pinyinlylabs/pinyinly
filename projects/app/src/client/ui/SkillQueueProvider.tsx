@@ -4,8 +4,8 @@ import {
   skillLearningGraphQuery,
 } from "@/client/query";
 import type { SrsStateType } from "@/data/model";
-import type { Skill, SkillRating } from "@/data/rizzleSchema";
-import type { SkillReviewQueue } from "@/data/skills";
+import type { Skill } from "@/data/rizzleSchema";
+import type { LatestSkillRating, SkillReviewQueue } from "@/data/skills";
 import { skillReviewQueue } from "@/data/skills";
 import { useLiveQuery } from "@tanstack/react-db";
 import { useQuery } from "@tanstack/react-query";
@@ -25,6 +25,10 @@ export type SkillQueueContextValue =
 
 const Context = createContext<SkillQueueContextValue | null>(null);
 
+const mockable = {
+  getMaxQueueItems: () => 1,
+};
+
 /**
  * Provides a global skill queue that's scoped to the session.
  *
@@ -40,7 +44,7 @@ export const SkillQueueProvider = Object.assign(
     const db = useDb();
 
     const { data: skillLearningGraph, isLoading: isSkillLearningGraphLoading } =
-      useQuery(skillLearningGraphQuery());
+      useQuery(skillLearningGraphQuery);
     const {
       data: isStructuralHanziWord,
       isLoading: isStructuralHanziWordLoading,
@@ -62,7 +66,7 @@ export const SkillQueueProvider = Object.assign(
 
     const latestSkillRatings = useMemo(
       () =>
-        new Map<Skill, Pick<SkillRating, `rating` | `createdAt`>>(
+        new Map<Skill, LatestSkillRating>(
           latestSkillRatingsData.map((x) => [x.skill, x]),
         ),
       [latestSkillRatingsData],
@@ -82,6 +86,8 @@ export const SkillQueueProvider = Object.assign(
         return;
       }
 
+      const now1 = performance.now();
+
       // Recompute the review queue when inputs are ready
       const reviewQueue = skillReviewQueue({
         graph: skillLearningGraph,
@@ -89,7 +95,15 @@ export const SkillQueueProvider = Object.assign(
         latestSkillRatings,
         now: new Date(),
         isStructuralHanziWord,
+        maxQueueItems: mockable.getMaxQueueItems(),
       });
+
+      if (__DEV__) {
+        // eslint-disable-next-line no-console
+        console.log(
+          `skillReviewQueue took ${(performance.now() - now1).toFixed(4)} ms`,
+        );
+      }
 
       setSkillQueue((prev) => ({
         loading: false,
@@ -115,5 +129,5 @@ export const SkillQueueProvider = Object.assign(
 
     return <Context.Provider value={skillQueue}>{children}</Context.Provider>;
   },
-  { Context },
+  { Context, mockable },
 );

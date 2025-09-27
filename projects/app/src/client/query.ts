@@ -111,19 +111,18 @@ export const isStructuralHanziWordQuery = () =>
     structuralSharing: false,
   });
 
-export const skillLearningGraphQuery = () =>
-  queryOptions({
-    queryKey: [`skillLearningGraph`],
-    queryFn: async ({ client }) => {
-      await devToolsSlowQuerySleepIfEnabled();
+export const skillLearningGraphQuery = queryOptions({
+  queryKey: [`skillLearningGraph`],
+  queryFn: async ({ client }) => {
+    await devToolsSlowQuerySleepIfEnabled();
 
-      const targetSkills = await client.ensureQueryData(targetSkillsQuery());
-      const graph = await skillLearningGraph({ targetSkills });
-      return graph;
-    },
-    networkMode: `offlineFirst`,
-    structuralSharing: false,
-  });
+    const targetSkills = await client.ensureQueryData(targetSkillsQuery());
+    const graph = await skillLearningGraph({ targetSkills });
+    return graph;
+  },
+  networkMode: `offlineFirst`,
+  structuralSharing: false,
+});
 
 export const hanziWordSkillStatesQuery = (r: Rizzle, hanziWord: HanziWord) =>
   withWatchPrefixes(
@@ -260,14 +259,6 @@ export async function getAllTargetSkills(): Promise<Skill[]> {
     hanziWordToGloss(w),
     hanziWordToPinyinTyped(w),
   ]);
-}
-
-export async function targetSkillsReviewQueue(r: Rizzle): Promise<{
-  reviewQueue: SkillReviewQueue;
-  skillSrsStates: Map<Skill, SrsStateType>;
-}> {
-  const targetSkills = await getAllTargetSkills();
-  return await computeSkillReviewQueue(r, targetSkills);
 }
 
 export async function computeSkillReviewQueue(
@@ -439,6 +430,23 @@ export type SkillRatingCollection = Collection<
 export type TargetSkillsCollection = Collection<{ skill: Skill }, Skill>;
 export type LatestSkillRatingsCollection = Collection<SkillRating, Skill>;
 
+export type CollectionOutput<T> =
+  T extends Collection<
+    infer U,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    any
+  >
+    ? U
+    : never;
+export type CollectionKey<T> =
+  T extends Collection<
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    any,
+    infer K
+  >
+    ? K
+    : never;
+
 export const rizzleCollectionOptions = <
   RizzleEntity extends RizzleAnyEntity,
   TKey extends string | number = string | number,
@@ -457,7 +465,7 @@ export const rizzleCollectionOptions = <
   sync: {
     rowUpdateMode: `full`,
     sync: (params) => {
-      const { begin, write, commit, collection } = params;
+      const { begin, write, commit } = params;
 
       const markReadyOnce = memoize0(() => {
         params.markReady();

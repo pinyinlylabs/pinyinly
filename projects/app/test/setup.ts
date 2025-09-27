@@ -76,6 +76,17 @@ vi.mock(`nativewind`, () => {
   };
 });
 
+// Avoid pulling in expo-sqlite, as it crashes vitest.
+vi.mock(
+  `../src/client/ui/replicacheOptions.ts`,
+  (): typeof import("../src/client/ui/replicacheOptions.ts") => ({
+    kvStore: {
+      create: vi.fn(),
+      drop: vi.fn(),
+    },
+  }),
+);
+
 // Set up __DEV__ global variable
 // @ts-expect-error __DEV__ is not defined in Node
 globalThis.__DEV__ = true;

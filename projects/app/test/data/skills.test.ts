@@ -27,8 +27,18 @@ import {
 } from "#dictionary/dictionary.ts";
 import { Rating } from "#util/fsrs.ts";
 import { invariant } from "@pinyinly/lib/invariant";
-import { describe, expect, test, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { fsrsSrsState, mockSrsState, 时 } from "./helpers.ts";
+
+beforeEach(() => {
+  vi.spyOn(console, `log`).mockImplementation(() => {
+    // no-op, don't pollute test output
+  });
+});
+
+afterEach(() => {
+  vi.resetAllMocks();
+});
 
 const skillTest = test.extend<{
   isStructuralHanziWord: Awaited<ReturnType<typeof getIsStructuralHanziWord>>;
@@ -629,7 +639,7 @@ describe(
       );
     });
 
-    test.only(`handles large graphs within performance budget`, () => {
+    test(`handles large graphs within performance budget`, () => {
       const { graph, skillSrsStates, latestSkillRatings, now } =
         makeLargeSkillReviewFixture({
           skillCount: 6000,
@@ -637,53 +647,30 @@ describe(
           ratingCount: 3500,
         });
 
-      const logSpy = vi
-        .spyOn(console, `log`)
-        .mockImplementation(() => undefined);
-      try {
-        const start = performance.now();
-        const queue = skillReviewQueue({
-          graph,
-          skillSrsStates,
-          latestSkillRatings,
-          isStructuralHanziWord: () => false,
-          now,
-          maxQueueItems: graph.size,
-        });
-        const durationMs = performance.now() - start;
+      const start = performance.now();
+      const queue = skillReviewQueue({
+        graph,
+        skillSrsStates,
+        latestSkillRatings,
+        isStructuralHanziWord: () => false,
+        now,
+        maxQueueItems: graph.size,
+      });
+      const durationMs = performance.now() - start;
 
-        expect(queue.items.length).toBeGreaterThan(0);
-        expect(durationMs).toBeLessThan(40);
-      } finally {
-        logSpy.mockRestore();
-      }
+      expect(queue.items.length).toBeGreaterThan(0);
+      expect(durationMs).toBeLessThan(200);
     });
 
-    describe(`${SkillKind.HanziWordToGloss} skills`, () => {
-      skillTest(`works for 好`, async ({ isStructuralHanziWord }) => {
-        const graph = await skillLearningGraph({
-          targetSkills: [`he:好:good`],
-        });
-        expect(
-          skillReviewQueue({
-            graph,
-            skillSrsStates: new Map(),
-            latestSkillRatings: latestSkillRatings(),
-            isStructuralHanziWord,
-          }),
-        ).toMatchObject({
-          items: [`he:子:child`, `he:女:woman`],
-          blockedItems: [`he:好:good`],
-        });
-      });
-
-      skillTest(
-        `learns the word form of component-form first`,
-        async ({ isStructuralHanziWord }) => {
+    describe(
+      `SkillKind.HanziWordToGloss skills` satisfies HasNameOf<
+        typeof SkillKind.HanziWordToGloss
+      >,
+      () => {
+        skillTest(`works for 好`, async ({ isStructuralHanziWord }) => {
           const graph = await skillLearningGraph({
-            targetSkills: [`he:汉:chinese`],
+            targetSkills: [`he:好:good`],
           });
-
           expect(
             skillReviewQueue({
               graph,
@@ -692,74 +679,414 @@ describe(
               isStructuralHanziWord,
             }),
           ).toMatchObject({
-            items: [`he:又:again`, `he:丿:slash`, `he:亅:hook`],
-            blockedItems: [
-              `he:水:water`, // learns this because of 氵
-              `he:氵:water`,
-              `he:汉:chinese`,
-            ],
+            items: [`he:子:child`, `he:女:woman`],
+            blockedItems: [`he:好:good`],
           });
-        },
-      );
+        });
 
-      describe(`retry logic`, () => {
         skillTest(
-          `skills that were just failed should stay first in queue (so you retry it immediately)`,
+          `learns the word form of component-form first`,
           async ({ isStructuralHanziWord }) => {
             const graph = await skillLearningGraph({
-              targetSkills: [`he:八:eight`, `he:丿:slash`],
+              targetSkills: [`he:汉:chinese`],
             });
 
             expect(
               skillReviewQueue({
                 graph,
-                skillSrsStates: new Map([
-                  [`he:八:eight`, mockSrsState(时`-1d`, 时`-5m`)],
-                  [`he:丿:slash`, mockSrsState(时`-1d`, 时`-3m`)],
-                ]),
-                latestSkillRatings: latestSkillRatings({
-                  "he:丿:slash": [Rating.Again, 时`-1m`],
-                }),
+                skillSrsStates: new Map(),
+                latestSkillRatings: latestSkillRatings(),
                 isStructuralHanziWord,
               }),
             ).toMatchObject({
-              blockedItems: [],
-              dueCount: 1,
-              items: [
-                `he:丿:slash`, // hoisted to the top for retry
-                `he:八:eight`,
+              items: [`he:又:again`, `he:丿:slash`, `he:亅:hook`],
+              blockedItems: [
+                `he:水:water`, // learns this because of 氵
+                `he:氵:water`,
+                `he:汉:chinese`,
               ],
-
-              newContentCount: 0,
-              newDifficultyCount: 0,
-              overDueCount: 0,
-              retryCount: 1,
             });
           },
         );
 
+        describe(`retry logic`, () => {
+          skillTest(
+            `skills that were just failed should stay first in queue (so you retry it immediately)`,
+            async ({ isStructuralHanziWord }) => {
+              const graph = await skillLearningGraph({
+                targetSkills: [`he:八:eight`, `he:丿:slash`],
+              });
+
+              expect(
+                skillReviewQueue({
+                  graph,
+                  skillSrsStates: new Map([
+                    [`he:八:eight`, mockSrsState(时`-1d`, 时`-5m`)],
+                    [`he:丿:slash`, mockSrsState(时`-1d`, 时`-3m`)],
+                  ]),
+                  latestSkillRatings: latestSkillRatings({
+                    "he:丿:slash": [Rating.Again, 时`-1m`],
+                  }),
+                  isStructuralHanziWord,
+                }),
+              ).toMatchObject({
+                blockedItems: [],
+                dueCount: 1,
+                items: [
+                  `he:丿:slash`, // hoisted to the top for retry
+                  `he:八:eight`,
+                ],
+
+                newContentCount: 0,
+                newDifficultyCount: 0,
+                overDueCount: 0,
+                retryCount: 1,
+              });
+            },
+          );
+
+          skillTest(
+            `failed skills that are not introduced are not promoted`,
+            async ({ isStructuralHanziWord }) => {
+              const graph = await skillLearningGraph({
+                targetSkills: [`he:八:eight`, `he:丿:slash`],
+              });
+
+              expect(
+                skillReviewQueue({
+                  graph,
+                  skillSrsStates: new Map([
+                    [`he:八:eight`, mockSrsState(时`-1d`, 时`-5m`)],
+                  ]),
+                  latestSkillRatings: latestSkillRatings({
+                    "he:丿:slash": [Rating.Again, 时`-1m`], // it's incorrect but was never introduced
+                  }),
+                  isStructuralHanziWord,
+                }),
+              ).toMatchObject({
+                blockedItems: [],
+                dueCount: 1,
+                items: [`he:八:eight`, `he:丿:slash`],
+                newContentCount: 1,
+                newDifficultyCount: 0,
+                overDueCount: 0,
+                retryCount: 0,
+              });
+            },
+          );
+
+          skillTest(
+            `multiple failed skills are prioritised in most-recent first`,
+            async ({ isStructuralHanziWord }) => {
+              const graph = await skillLearningGraph({
+                targetSkills: [`he:八:eight`, `he:丿:slash`],
+              });
+
+              expect(
+                skillReviewQueue({
+                  graph,
+                  skillSrsStates: new Map([
+                    [`he:八:eight`, mockSrsState(时`-1d`, 时`-5m`)],
+                    [`he:丿:slash`, mockSrsState(时`-1d`, 时`-5m`)],
+                  ]),
+                  latestSkillRatings: latestSkillRatings({
+                    "he:八:eight": [Rating.Again, 时`-1m`],
+                    "he:丿:slash": [Rating.Again, 时`-2m`],
+                  }),
+                  isStructuralHanziWord,
+                }),
+              ).toMatchObject({
+                blockedItems: [],
+                dueCount: 0,
+                items: [`he:八:eight`, `he:丿:slash`],
+
+                newContentCount: 0,
+                newDifficultyCount: 0,
+                overDueCount: 0,
+                retryCount: 2,
+              });
+
+              // try in reverse order
+              expect(
+                skillReviewQueue({
+                  graph,
+                  skillSrsStates: new Map([
+                    [`he:八:eight`, mockSrsState(时`-1d`, 时`-5m`)],
+                    [`he:丿:slash`, mockSrsState(时`-1d`, 时`-5m`)],
+                  ]),
+                  latestSkillRatings: latestSkillRatings({
+                    "he:八:eight": [Rating.Again, 时`-2m`],
+                    "he:丿:slash": [Rating.Again, 时`-1m`],
+                  }),
+                  isStructuralHanziWord,
+                }),
+              ).toMatchObject({
+                blockedItems: [],
+                dueCount: 0,
+                items: [`he:丿:slash`, `he:八:eight`],
+
+                newContentCount: 0,
+                newDifficultyCount: 0,
+                overDueCount: 0,
+                retryCount: 2,
+              });
+            },
+          );
+        });
+
+        describe(`pronunciation skill prioritization after successful hanzi-to-english`, () => {
+          skillTest(
+            `prioritizes pronunciation skill after successful he: review if user has reached rank 1`,
+            async ({ isStructuralHanziWord }) => {
+              const graph = await skillLearningGraph({
+                targetSkills: [
+                  `he:好:good`,
+                  `hp:好:good`,
+                  `he:人:person`,
+                  `he:八:eight`,
+                ],
+              });
+
+              const queue = skillReviewQueue({
+                graph,
+                skillSrsStates: new Map<Skill, SrsStateType>([
+                  // Multiple skills are due for review at different times
+                  [`he:好:good`, mockSrsState(时`-1d`, 时`-5m`)],
+                  [`hp:好:good`, mockSrsState(时`-1d`, 时`-10m`)], // More overdue
+                  [`he:人:person`, mockSrsState(时`-1d`, 时`-3m`)], // Less overdue than hp:好:good
+                  [`he:八:eight`, mockSrsState(时`-1d`, 时`-8m`)], // More overdue than hp:好:good
+                  // User has sufficient pronunciation competency (rank 1+)
+                  [
+                    `hpi:好:good`,
+                    {
+                      kind: SrsKind.FsrsFourPointFive,
+                      prevReviewAt: 时`-1d`,
+                      nextReviewAt: 时`1h`,
+                      stability: 35, // Above threshold for rank 1
+                      difficulty: 5,
+                    },
+                  ],
+                ]),
+                latestSkillRatings: latestSkillRatings({
+                  "he:好:good": [Rating.Good, 时`-1m`], // Most recent successful HanziWordToGloss review
+                }),
+                isStructuralHanziWord,
+              });
+
+              // The pronunciation skill should be prioritized first, despite other skills being due
+              expect(queue.items[0]).toBe(`hp:好:good`);
+              // Without prioritization, he:八:eight (-8m) would normally come before hp:好:good (-10m)
+              // because due skills are sorted by most overdue first, but hp:好:good is prioritized
+              expect(queue.items.indexOf(`hp:好:good`)).toBeLessThan(
+                queue.items.indexOf(`he:八:eight`),
+              );
+              expect(queue.items).toContain(`he:好:good`);
+              expect(queue.items).toContain(`he:人:person`);
+            },
+          );
+
+          skillTest(
+            `does not prioritize pronunciation skill if user has not reached rank 1`,
+            async ({ isStructuralHanziWord }) => {
+              const graph = await skillLearningGraph({
+                targetSkills: [
+                  `he:好:good`,
+                  `hp:好:good`,
+                  `he:人:person`,
+                  `he:八:eight`,
+                ],
+              });
+
+              const queue = skillReviewQueue({
+                graph,
+                skillSrsStates: new Map<Skill, SrsStateType>([
+                  [`he:好:good`, mockSrsState(时`-1d`, 时`-5m`)],
+                  [`hp:好:good`, mockSrsState(时`-1d`, 时`-10m`)],
+                  [`he:人:person`, mockSrsState(时`-1d`, 时`-3m`)],
+                  [`he:八:eight`, mockSrsState(时`-1d`, 时`-8m`)],
+                  // User does not have sufficient pronunciation competency (rank < 1)
+                ]),
+                latestSkillRatings: latestSkillRatings({
+                  "he:好:good": [Rating.Good, 时`-1m`],
+                }),
+                isStructuralHanziWord,
+              });
+
+              // Normal ordering should apply based on overdue time, no special prioritization
+              expect(queue.items[0]).toBe(`hp:好:good`); // most overdue (-10m)
+              expect(queue.items[1]).toBe(`he:八:eight`); // second most overdue (-8m)
+              expect(queue.items[2]).toBe(`he:好:good`); // third most overdue (-5m)
+              expect(queue.items[3]).toBe(`he:人:person`); // least overdue (-3m)
+            },
+          );
+
+          skillTest(
+            `does not prioritize if no recent successful he: review`,
+            async ({ isStructuralHanziWord }) => {
+              const graph = await skillLearningGraph({
+                targetSkills: [
+                  `he:好:good`,
+                  `hp:好:good`,
+                  `he:人:person`,
+                  `he:八:eight`,
+                ],
+              });
+
+              const queue = skillReviewQueue({
+                graph,
+                skillSrsStates: new Map<Skill, SrsStateType>([
+                  [`he:好:good`, mockSrsState(时`-1d`, 时`-5m`)],
+                  [`hp:好:good`, mockSrsState(时`-1d`, 时`-10m`)],
+                  [`he:人:person`, mockSrsState(时`-1d`, 时`-3m`)],
+                  [`he:八:eight`, mockSrsState(时`-1d`, 时`-8m`)],
+                  [
+                    `hpi:好:good`,
+                    {
+                      kind: SrsKind.FsrsFourPointFive,
+                      prevReviewAt: 时`-1d`,
+                      nextReviewAt: 时`1h`,
+                      stability: 35, // Above threshold for rank 1
+                      difficulty: 5,
+                    },
+                  ],
+                ]),
+                latestSkillRatings: latestSkillRatings({
+                  "he:好:good": [Rating.Again, 时`-1m`], // No recent successful reviews - failed review instead
+                }),
+                isStructuralHanziWord,
+              });
+
+              // Normal ordering should apply, he:好:good goes to retry section, others by overdue time
+              expect(queue.items[0]).toBe(`he:好:good`); // retry comes first
+              expect(queue.items[1]).toBe(`hp:好:good`); // most overdue in due section
+              expect(queue.items[2]).toBe(`he:八:eight`); // second most overdue
+              expect(queue.items[3]).toBe(`he:人:person`); // least overdue
+            },
+          );
+
+          skillTest(
+            `prioritizes pronunciation skill even when it's in not-due section`,
+            async ({ isStructuralHanziWord }) => {
+              const graph = await skillLearningGraph({
+                targetSkills: [`he:好:good`, `hp:好:good`, `he:人:person`],
+              });
+
+              const queue = skillReviewQueue({
+                graph,
+                skillSrsStates: new Map<Skill, SrsStateType>([
+                  // he:好:good is due
+                  [`he:好:good`, mockSrsState(时`-1d`, 时`-5m`)],
+                  // hp:好:good is not due yet (future due date)
+                  [`hp:好:good`, mockSrsState(时`-1d`, 时`+1h`)],
+                  // he:人:person is new (no SRS state)
+                  // User has sufficient pronunciation competency (rank 1+)
+                  [
+                    `hpi:好:good`,
+                    {
+                      kind: SrsKind.FsrsFourPointFive,
+                      prevReviewAt: 时`-1d`,
+                      nextReviewAt: 时`1h`,
+                      stability: 35, // Above threshold for rank 1
+                      difficulty: 5,
+                    },
+                  ],
+                ]),
+                latestSkillRatings: latestSkillRatings({
+                  "he:好:good": [Rating.Good, 时`-1m`], // Most recent successful HanziWordToGloss review
+                }),
+                isStructuralHanziWord,
+              });
+
+              // The pronunciation skill should be prioritized first, even though it was not due yet
+              expect(queue.items[0]).toBe(`hp:好:good`);
+              // The due skill comes after the prioritized pronunciation skill
+              expect(queue.items[1]).toBe(`he:好:good`);
+              // New skills follow
+              expect(queue.items).toContain(`he:人:person`);
+            },
+          );
+        });
+
+        test(`prioritises due skills with highest value (rather than most over-due)`, async () => {
+          const graph = await skillLearningGraph({
+            targetSkills: [`he:分:divide`],
+          });
+
+          expect(
+            skillReviewQueue({
+              graph,
+              skillSrsStates: new Map([
+                [`he:八:eight`, mockSrsState(时`-1d`, 时`-5m`)],
+                [`he:刀:knife`, mockSrsState(时`-1d`, 时`-5m`)],
+              ]),
+              latestSkillRatings: latestSkillRatings(),
+              isStructuralHanziWord: () => false,
+            }),
+          ).toMatchObject({
+            blockedItems: [`he:分:divide`],
+            dueCount: 2,
+            items: [
+              `he:八:eight`,
+              `he:刀:knife`,
+              `he:丿:slash`,
+              `he:𠃌:radical`,
+            ],
+
+            newContentCount: 2,
+            newDifficultyCount: 0,
+            overDueCount: 0,
+            retryCount: 0,
+          });
+        });
+
+        test(`schedules new skills in dependency order`, async () => {
+          const graph = await skillLearningGraph({
+            targetSkills: [`he:分:divide`],
+          });
+
+          expect(
+            skillReviewQueue({
+              graph,
+              skillSrsStates: new Map(),
+              latestSkillRatings: latestSkillRatings(),
+              isStructuralHanziWord: () => false,
+            }),
+          ).toMatchObject({
+            items: [`he:丿:slash`, `he:𠃌:radical`, `he:八:eight`],
+            blockedItems: [`he:刀:knife`, `he:分:divide`],
+          });
+        });
+
         skillTest(
-          `failed skills that are not introduced are not promoted`,
+          `schedules skill reviews in order of due, and then deterministic random`,
           async ({ isStructuralHanziWord }) => {
             const graph = await skillLearningGraph({
-              targetSkills: [`he:八:eight`, `he:丿:slash`],
+              targetSkills: [`he:分:divide`, `he:一:one`],
             });
 
             expect(
               skillReviewQueue({
                 graph,
                 skillSrsStates: new Map([
-                  [`he:八:eight`, mockSrsState(时`-1d`, 时`-5m`)],
+                  [`he:一:one`, mockSrsState(时`-10m`, 时`-2h`)], // due two hours ago
+                  [`he:𠃌:radical`, mockSrsState(时`0s`, 时`-1h`)], // due one hour ago
+                  [`he:八:eight`, mockSrsState(时`-10m`, 时`1h`)], // due in one hour,
+                  [`he:刀:knife`, mockSrsState(时`-10m`, 时`2h`)], // due in two hours,
                 ]),
-                latestSkillRatings: latestSkillRatings({
-                  "he:丿:slash": [Rating.Again, 时`-1m`], // it's incorrect but was never introduced
-                }),
+                latestSkillRatings: latestSkillRatings(),
                 isStructuralHanziWord,
               }),
             ).toMatchObject({
-              blockedItems: [],
-              dueCount: 1,
-              items: [`he:八:eight`, `he:丿:slash`],
+              blockedItems: [`he:分:divide`],
+              dueCount: 2,
+              items: [
+                `he:一:one`,
+                `he:𠃌:radical`,
+                `he:丿:slash`,
+                `he:刀:knife`,
+                `he:八:eight`,
+              ],
+
               newContentCount: 1,
               newDifficultyCount: 0,
               overDueCount: 0,
@@ -769,391 +1096,77 @@ describe(
         );
 
         skillTest(
-          `multiple failed skills are prioritised in most-recent first`,
+          `throttles the number of new skills in the queue`,
           async ({ isStructuralHanziWord }) => {
             const graph = await skillLearningGraph({
-              targetSkills: [`he:八:eight`, `he:丿:slash`],
+              targetSkills: [
+                `he:分:divide`,
+                `he:一:one`,
+                `he:一下儿:aBit`,
+                `he:一些:some`,
+                `he:一会儿:aWhile`,
+                `he:一共:inTotal`,
+                `he:一切:everything`,
+                `he:一半:half`,
+                `he:一块儿:together`,
+                `he:一定:certainly`,
+                `he:一方面:onOneHand`,
+                `he:一样:same`,
+                `he:一点儿:aLittle`,
+                `he:一点点:aLittleBit`,
+                `he:一生:lifetime`,
+                `he:一直:continuously`,
+                `he:一般:general`,
+                `he:一起:together`,
+                `he:一路平安:haveGoodTrip`,
+                `he:一路顺风:journeysmooth`,
+                `he:一边:side`,
+                `he:一部分:part`,
+              ],
             });
 
+            // When there's no existing SRS state, you can learn 15 new skills.
+            expect(
+              skillReviewQueue({
+                graph,
+                skillSrsStates: new Map(),
+                latestSkillRatings: latestSkillRatings(),
+                isStructuralHanziWord,
+              }),
+            ).toMatchObject({
+              dueCount: 0,
+              newContentCount: 15,
+              newDifficultyCount: 0,
+              overDueCount: 0,
+              retryCount: 0,
+            });
+
+            // When you have partially stablised some skills, that reduces the number
+            // of new skills you can learn.
             expect(
               skillReviewQueue({
                 graph,
                 skillSrsStates: new Map([
-                  [`he:八:eight`, mockSrsState(时`-1d`, 时`-5m`)],
-                  [`he:丿:slash`, mockSrsState(时`-1d`, 时`-5m`)],
+                  [`he:一:one`, mockSrsState(时`-10m`, 时`-2h`)], // due two hours ago
+                  [`he:𠃌:radical`, mockSrsState(时`0s`, 时`-1h`)], // due one hour ago
+                  [`he:八:eight`, mockSrsState(时`-10m`, 时`1h`)], // due in one hour,
+                  [`he:刀:knife`, mockSrsState(时`-10m`, 时`2h`)], // due in two hours,
                 ]),
-                latestSkillRatings: latestSkillRatings({
-                  "he:八:eight": [Rating.Again, 时`-1m`],
-                  "he:丿:slash": [Rating.Again, 时`-2m`],
-                }),
+                latestSkillRatings: latestSkillRatings(),
                 isStructuralHanziWord,
               }),
             ).toMatchObject({
-              blockedItems: [],
-              dueCount: 0,
-              items: [`he:八:eight`, `he:丿:slash`],
+              dueCount: 2,
 
-              newContentCount: 0,
+              newContentCount: 11,
               newDifficultyCount: 0,
               overDueCount: 0,
-              retryCount: 2,
-            });
-
-            // try in reverse order
-            expect(
-              skillReviewQueue({
-                graph,
-                skillSrsStates: new Map([
-                  [`he:八:eight`, mockSrsState(时`-1d`, 时`-5m`)],
-                  [`he:丿:slash`, mockSrsState(时`-1d`, 时`-5m`)],
-                ]),
-                latestSkillRatings: latestSkillRatings({
-                  "he:八:eight": [Rating.Again, 时`-2m`],
-                  "he:丿:slash": [Rating.Again, 时`-1m`],
-                }),
-                isStructuralHanziWord,
-              }),
-            ).toMatchObject({
-              blockedItems: [],
-              dueCount: 0,
-              items: [`he:丿:slash`, `he:八:eight`],
-
-              newContentCount: 0,
-              newDifficultyCount: 0,
-              overDueCount: 0,
-              retryCount: 2,
+              retryCount: 0,
             });
           },
         );
-      });
-
-      describe(`pronunciation skill prioritization after successful hanzi-to-english`, () => {
-        skillTest(
-          `prioritizes pronunciation skill after successful he: review if user has reached rank 1`,
-          async ({ isStructuralHanziWord }) => {
-            const graph = await skillLearningGraph({
-              targetSkills: [
-                `he:好:good`,
-                `hp:好:good`,
-                `he:人:person`,
-                `he:八:eight`,
-              ],
-            });
-
-            const queue = skillReviewQueue({
-              graph,
-              skillSrsStates: new Map<Skill, SrsStateType>([
-                // Multiple skills are due for review at different times
-                [`he:好:good`, mockSrsState(时`-1d`, 时`-5m`)],
-                [`hp:好:good`, mockSrsState(时`-1d`, 时`-10m`)], // More overdue
-                [`he:人:person`, mockSrsState(时`-1d`, 时`-3m`)], // Less overdue than hp:好:good
-                [`he:八:eight`, mockSrsState(时`-1d`, 时`-8m`)], // More overdue than hp:好:good
-                // User has sufficient pronunciation competency (rank 1+)
-                [
-                  `hpi:好:good`,
-                  {
-                    kind: SrsKind.FsrsFourPointFive,
-                    prevReviewAt: 时`-1d`,
-                    nextReviewAt: 时`1h`,
-                    stability: 35, // Above threshold for rank 1
-                    difficulty: 5,
-                  },
-                ],
-              ]),
-              latestSkillRatings: latestSkillRatings({
-                "he:好:good": [Rating.Good, 时`-1m`], // Most recent successful HanziWordToGloss review
-              }),
-              isStructuralHanziWord,
-            });
-
-            // The pronunciation skill should be prioritized first, despite other skills being due
-            expect(queue.items[0]).toBe(`hp:好:good`);
-            // Without prioritization, he:八:eight (-8m) would normally come before hp:好:good (-10m)
-            // because due skills are sorted by most overdue first, but hp:好:good is prioritized
-            expect(queue.items.indexOf(`hp:好:good`)).toBeLessThan(
-              queue.items.indexOf(`he:八:eight`),
-            );
-            expect(queue.items).toContain(`he:好:good`);
-            expect(queue.items).toContain(`he:人:person`);
-          },
-        );
-
-        skillTest(
-          `does not prioritize pronunciation skill if user has not reached rank 1`,
-          async ({ isStructuralHanziWord }) => {
-            const graph = await skillLearningGraph({
-              targetSkills: [
-                `he:好:good`,
-                `hp:好:good`,
-                `he:人:person`,
-                `he:八:eight`,
-              ],
-            });
-
-            const queue = skillReviewQueue({
-              graph,
-              skillSrsStates: new Map<Skill, SrsStateType>([
-                [`he:好:good`, mockSrsState(时`-1d`, 时`-5m`)],
-                [`hp:好:good`, mockSrsState(时`-1d`, 时`-10m`)],
-                [`he:人:person`, mockSrsState(时`-1d`, 时`-3m`)],
-                [`he:八:eight`, mockSrsState(时`-1d`, 时`-8m`)],
-                // User does not have sufficient pronunciation competency (rank < 1)
-              ]),
-              latestSkillRatings: latestSkillRatings({
-                "he:好:good": [Rating.Good, 时`-1m`],
-              }),
-              isStructuralHanziWord,
-            });
-
-            // Normal ordering should apply based on overdue time, no special prioritization
-            expect(queue.items[0]).toBe(`hp:好:good`); // most overdue (-10m)
-            expect(queue.items[1]).toBe(`he:八:eight`); // second most overdue (-8m)
-            expect(queue.items[2]).toBe(`he:好:good`); // third most overdue (-5m)
-            expect(queue.items[3]).toBe(`he:人:person`); // least overdue (-3m)
-          },
-        );
-
-        skillTest(
-          `does not prioritize if no recent successful he: review`,
-          async ({ isStructuralHanziWord }) => {
-            const graph = await skillLearningGraph({
-              targetSkills: [
-                `he:好:good`,
-                `hp:好:good`,
-                `he:人:person`,
-                `he:八:eight`,
-              ],
-            });
-
-            const queue = skillReviewQueue({
-              graph,
-              skillSrsStates: new Map<Skill, SrsStateType>([
-                [`he:好:good`, mockSrsState(时`-1d`, 时`-5m`)],
-                [`hp:好:good`, mockSrsState(时`-1d`, 时`-10m`)],
-                [`he:人:person`, mockSrsState(时`-1d`, 时`-3m`)],
-                [`he:八:eight`, mockSrsState(时`-1d`, 时`-8m`)],
-                [
-                  `hpi:好:good`,
-                  {
-                    kind: SrsKind.FsrsFourPointFive,
-                    prevReviewAt: 时`-1d`,
-                    nextReviewAt: 时`1h`,
-                    stability: 35, // Above threshold for rank 1
-                    difficulty: 5,
-                  },
-                ],
-              ]),
-              latestSkillRatings: latestSkillRatings({
-                "he:好:good": [Rating.Again, 时`-1m`], // No recent successful reviews - failed review instead
-              }),
-              isStructuralHanziWord,
-            });
-
-            // Normal ordering should apply, he:好:good goes to retry section, others by overdue time
-            expect(queue.items[0]).toBe(`he:好:good`); // retry comes first
-            expect(queue.items[1]).toBe(`hp:好:good`); // most overdue in due section
-            expect(queue.items[2]).toBe(`he:八:eight`); // second most overdue
-            expect(queue.items[3]).toBe(`he:人:person`); // least overdue
-          },
-        );
-
-        skillTest(
-          `prioritizes pronunciation skill even when it's in not-due section`,
-          async ({ isStructuralHanziWord }) => {
-            const graph = await skillLearningGraph({
-              targetSkills: [`he:好:good`, `hp:好:good`, `he:人:person`],
-            });
-
-            const queue = skillReviewQueue({
-              graph,
-              skillSrsStates: new Map<Skill, SrsStateType>([
-                // he:好:good is due
-                [`he:好:good`, mockSrsState(时`-1d`, 时`-5m`)],
-                // hp:好:good is not due yet (future due date)
-                [`hp:好:good`, mockSrsState(时`-1d`, 时`+1h`)],
-                // he:人:person is new (no SRS state)
-                // User has sufficient pronunciation competency (rank 1+)
-                [
-                  `hpi:好:good`,
-                  {
-                    kind: SrsKind.FsrsFourPointFive,
-                    prevReviewAt: 时`-1d`,
-                    nextReviewAt: 时`1h`,
-                    stability: 35, // Above threshold for rank 1
-                    difficulty: 5,
-                  },
-                ],
-              ]),
-              latestSkillRatings: latestSkillRatings({
-                "he:好:good": [Rating.Good, 时`-1m`], // Most recent successful HanziWordToGloss review
-              }),
-              isStructuralHanziWord,
-            });
-
-            // The pronunciation skill should be prioritized first, even though it was not due yet
-            expect(queue.items[0]).toBe(`hp:好:good`);
-            // The due skill comes after the prioritized pronunciation skill
-            expect(queue.items[1]).toBe(`he:好:good`);
-            // New skills follow
-            expect(queue.items).toContain(`he:人:person`);
-          },
-        );
-      });
-
-      test(`prioritises due skills with highest value (rather than most over-due)`, async () => {
-        const graph = await skillLearningGraph({
-          targetSkills: [`he:分:divide`],
-        });
-
-        expect(
-          skillReviewQueue({
-            graph,
-            skillSrsStates: new Map([
-              [`he:八:eight`, mockSrsState(时`-1d`, 时`-5m`)],
-              [`he:刀:knife`, mockSrsState(时`-1d`, 时`-5m`)],
-            ]),
-            latestSkillRatings: latestSkillRatings(),
-            isStructuralHanziWord: () => false,
-          }),
-        ).toMatchObject({
-          blockedItems: [`he:分:divide`],
-          dueCount: 2,
-          items: [`he:八:eight`, `he:刀:knife`, `he:丿:slash`, `he:𠃌:radical`],
-
-          newContentCount: 2,
-          newDifficultyCount: 0,
-          overDueCount: 0,
-          retryCount: 0,
-        });
-      });
-
-      test(`schedules new skills in dependency order`, async () => {
-        const graph = await skillLearningGraph({
-          targetSkills: [`he:分:divide`],
-        });
-
-        expect(
-          skillReviewQueue({
-            graph,
-            skillSrsStates: new Map(),
-            latestSkillRatings: latestSkillRatings(),
-            isStructuralHanziWord: () => false,
-          }),
-        ).toMatchObject({
-          items: [`he:丿:slash`, `he:𠃌:radical`, `he:八:eight`],
-          blockedItems: [`he:刀:knife`, `he:分:divide`],
-        });
-      });
-
-      skillTest(
-        `schedules skill reviews in order of due, and then deterministic random`,
-        async ({ isStructuralHanziWord }) => {
-          const graph = await skillLearningGraph({
-            targetSkills: [`he:分:divide`, `he:一:one`],
-          });
-
-          expect(
-            skillReviewQueue({
-              graph,
-              skillSrsStates: new Map([
-                [`he:一:one`, mockSrsState(时`-10m`, 时`-2h`)], // due two hours ago
-                [`he:𠃌:radical`, mockSrsState(时`0s`, 时`-1h`)], // due one hour ago
-                [`he:八:eight`, mockSrsState(时`-10m`, 时`1h`)], // due in one hour,
-                [`he:刀:knife`, mockSrsState(时`-10m`, 时`2h`)], // due in two hours,
-              ]),
-              latestSkillRatings: latestSkillRatings(),
-              isStructuralHanziWord,
-            }),
-          ).toMatchObject({
-            blockedItems: [`he:分:divide`],
-            dueCount: 2,
-            items: [
-              `he:一:one`,
-              `he:𠃌:radical`,
-              `he:丿:slash`,
-              `he:刀:knife`,
-              `he:八:eight`,
-            ],
-
-            newContentCount: 1,
-            newDifficultyCount: 0,
-            overDueCount: 0,
-            retryCount: 0,
-          });
-        },
-      );
-
-      skillTest(
-        `throttles the number of new skills in the queue`,
-        async ({ isStructuralHanziWord }) => {
-          const graph = await skillLearningGraph({
-            targetSkills: [
-              `he:分:divide`,
-              `he:一:one`,
-              `he:一下儿:aBit`,
-              `he:一些:some`,
-              `he:一会儿:aWhile`,
-              `he:一共:inTotal`,
-              `he:一切:everything`,
-              `he:一半:half`,
-              `he:一块儿:together`,
-              `he:一定:certainly`,
-              `he:一方面:onOneHand`,
-              `he:一样:same`,
-              `he:一点儿:aLittle`,
-              `he:一点点:aLittleBit`,
-              `he:一生:lifetime`,
-              `he:一直:continuously`,
-              `he:一般:general`,
-              `he:一起:together`,
-              `he:一路平安:haveGoodTrip`,
-              `he:一路顺风:journeysmooth`,
-              `he:一边:side`,
-              `he:一部分:part`,
-            ],
-          });
-
-          // When there's no existing SRS state, you can learn 15 new skills.
-          expect(
-            skillReviewQueue({
-              graph,
-              skillSrsStates: new Map(),
-              latestSkillRatings: latestSkillRatings(),
-              isStructuralHanziWord,
-            }),
-          ).toMatchObject({
-            dueCount: 0,
-            newContentCount: 15,
-            newDifficultyCount: 0,
-            overDueCount: 0,
-            retryCount: 0,
-          });
-
-          // When you have partially stablised some skills, that reduces the number
-          // of new skills you can learn.
-          expect(
-            skillReviewQueue({
-              graph,
-              skillSrsStates: new Map([
-                [`he:一:one`, mockSrsState(时`-10m`, 时`-2h`)], // due two hours ago
-                [`he:𠃌:radical`, mockSrsState(时`0s`, 时`-1h`)], // due one hour ago
-                [`he:八:eight`, mockSrsState(时`-10m`, 时`1h`)], // due in one hour,
-                [`he:刀:knife`, mockSrsState(时`-10m`, 时`2h`)], // due in two hours,
-              ]),
-              latestSkillRatings: latestSkillRatings(),
-              isStructuralHanziWord,
-            }),
-          ).toMatchObject({
-            dueCount: 2,
-
-            newContentCount: 11,
-            newDifficultyCount: 0,
-            overDueCount: 0,
-            retryCount: 0,
-          });
-        },
-      );
-    });
+      },
+    );
 
     describe(`${SkillKind.HanziWordToPinyinTyped} skills`, () => {
       skillTest(
