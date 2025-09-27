@@ -399,7 +399,7 @@ export const fetchAudioBufferQuery = (
     structuralSharing: false,
   });
 
-export const deviceStoryQuery = (key: DeviceStoreEntity) =>
+export const deviceStoreQuery = (key: DeviceStoreEntity) =>
   queryOptions({
     queryKey: [`deviceStore`, buildDeviceStoreKey(key)],
     queryFn: async () => {
