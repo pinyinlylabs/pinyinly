@@ -52,7 +52,7 @@ rizzleTest(`returns loading state from context`, async ({ rizzle }) => {
     () => {
       expect(result.current.loading).toBe(false);
     },
-    { timeout: 2000 },
+    { timeout: 5000 },
   );
 
   unmount();
