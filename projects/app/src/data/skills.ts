@@ -7,6 +7,7 @@ import {
   lookupHanzi,
   lookupHanziWord,
 } from "@/dictionary/dictionary";
+import { startPerformanceMilestones } from "@/util/devtools";
 import {
   fsrsIsForgotten,
   fsrsIsStable,
@@ -700,6 +701,10 @@ export function skillReviewQueue({
   let newOverDueAt: Date | null = null;
   let newDueAt: Date | null = null;
 
+  const perfMilestone = startPerformanceMilestones(
+    `skillReviewQueue` satisfies NameOf<typeof skillReviewQueue>,
+  );
+
   function enqueueReviewOnce(
     skill: Skill,
     srsState: SrsStateType | null | undefined,
@@ -739,7 +744,8 @@ export function skillReviewQueue({
     }
   }
 
-  let now1 = performance.now();
+  perfMilestone(`enqueueReview`);
+
   // Add already introduced skills to the learning order, unless they're too
   // stale and probably forgotten.
   for (const [skill, srsState] of skillSrsStates) {
@@ -747,13 +753,8 @@ export function skillReviewQueue({
       enqueueReviewOnce(skill, srsState);
     }
   }
-  if (__DEV__) {
-    // eslint-disable-next-line no-console
-    console.log(
-      `Enqueuing review took ${(performance.now() - now1).toFixed(4)} ms`,
-    );
-    now1 = performance.now();
-  }
+
+  perfMilestone(`computeInDegrees`);
 
   // Compute in-degree
   for (const [skill, node] of graph.entries()) {
@@ -765,13 +766,8 @@ export function skillReviewQueue({
       inDegree.set(dependency, (inDegree.get(dependency) ?? 0) + 1);
     }
   }
-  if (__DEV__) {
-    // eslint-disable-next-line no-console
-    console.log(
-      `Computing in-degrees took ${(performance.now() - now1).toFixed(4)} ms`,
-    );
-    now1 = performance.now();
-  }
+
+  perfMilestone(`findZeroInDegreeNodes`);
 
   const hasStableDependencies = memoize1((skill: Skill): boolean => {
     for (const dep of graph.get(skill)?.dependencies ?? emptySet) {
@@ -791,13 +787,8 @@ export function skillReviewQueue({
       queue.push(skill);
     }
   }
-  if (__DEV__) {
-    // eslint-disable-next-line no-console
-    console.log(
-      `Finding zero in-degree nodes took ${(performance.now() - now1).toFixed(4)} ms`,
-    );
-    now1 = performance.now();
-  }
+
+  perfMilestone(`processQueue`);
 
   // Process queue
   while (queue.length > 0) {
@@ -819,13 +810,8 @@ export function skillReviewQueue({
       }
     }
   }
-  if (__DEV__) {
-    // eslint-disable-next-line no-console
-    console.log(
-      `Processing queue took ${(performance.now() - now1).toFixed(4)} ms`,
-    );
-    now1 = performance.now();
-  }
+
+  perfMilestone(`countUnstableSkills`);
 
   // At this point there's an unbounded number of new skills, so we need to
   // enforce a throttle to avoid overwhelming the user with too many new skills
@@ -844,28 +830,8 @@ export function skillReviewQueue({
       unstableSkillCounts.set(skillKind, count + 1);
     }
   }
-  if (__DEV__) {
-    // eslint-disable-next-line no-console
-    console.log(
-      `Counting unstable skills took ${(performance.now() - now1).toFixed(4)} ms`,
-    );
-    now1 = performance.now();
-  }
 
-  // Check if introducing a skill would be too overwhelming. There is a limit on
-  // how many unstable skills can be introduced at once. This is to avoid
-  // overwhelming the user with too many new skills at once.
-  function hasLearningCapacityForNewSkill(skill: Skill): boolean {
-    // 💭 maybe this should be dynamic, based on the number of skills that have
-    // been learned. So if you know 1000 words you can probably learn more at
-    // once than if you only know 10 words.
-    const throttleLimit = 15;
-    return (
-      (unstableSkillCounts.get(skillKindFromSkill(skill)) ?? 0) +
-        (learningOrderNewContent.length + learningOrderNewDifficulty.length) <
-      throttleLimit
-    );
-  }
+  perfMilestone(`segmentWordsAndComponents`);
 
   // The candidates come out in reverse order from the above algorithm, so flip
   // them so that it's in proper queue order.
@@ -885,12 +851,22 @@ export function skillReviewQueue({
       learningOrderNewWordCandidates.push(skill);
     }
   }
-  if (__DEV__) {
-    // eslint-disable-next-line no-console
-    console.log(
-      `Classifying new candidates took ${(performance.now() - now1).toFixed(4)} ms`,
+
+  perfMilestone(`segmentNewSkills`);
+
+  // Check if introducing a skill would be too overwhelming. There is a limit on
+  // how many unstable skills can be introduced at once. This is to avoid
+  // overwhelming the user with too many new skills at once.
+  function hasLearningCapacityForNewSkill(skill: Skill): boolean {
+    // 💭 maybe this should be dynamic, based on the number of skills that have
+    // been learned. So if you know 1000 words you can probably learn more at
+    // once than if you only know 10 words.
+    const throttleLimit = 15;
+    return (
+      (unstableSkillCounts.get(skillKindFromSkill(skill)) ?? 0) +
+        (learningOrderNewContent.length + learningOrderNewDifficulty.length) <
+      throttleLimit
     );
-    now1 = performance.now();
   }
 
   for (const skillGroup of [
@@ -909,13 +885,9 @@ export function skillReviewQueue({
       }
     }
   }
-  if (__DEV__) {
-    // eslint-disable-next-line no-console
-    console.log(
-      `Selecting new skills took ${(performance.now() - now1).toFixed(4)} ms`,
-    );
-    now1 = performance.now();
-  }
+  learningOrderBlocked.reverse();
+
+  perfMilestone(`recentSkillRatingHistory`);
 
   const recentSkillRatingHistoryHeap = new MinHeap<LatestSkillRating>(
     inverseSortComparator(sortComparatorDate(({ createdAt }) => createdAt)),
@@ -926,13 +898,7 @@ export function skillReviewQueue({
   }
   const recentSkillRatingHistory = recentSkillRatingHistoryHeap.toArray();
 
-  if (__DEV__) {
-    // eslint-disable-next-line no-console
-    console.log(
-      `Mapping recent skill ratings took ${(performance.now() - now1).toFixed(4)} ms`,
-    );
-    now1 = performance.now();
-  }
+  perfMilestone(`reactiveItems`);
 
   const reactiveItems = [
     // Check if we should prioritize a pronunciation skill after successful hanzi-to-english review
@@ -943,14 +909,6 @@ export function skillReviewQueue({
       now,
     }),
   ];
-
-  if (__DEV__) {
-    // eslint-disable-next-line no-console
-    console.log(
-      `Getting reactive skills took ${(performance.now() - now1).toFixed(4)} ms`,
-    );
-    now1 = performance.now();
-  }
 
   // Remove reactive items from the other queues so that items aren't duplicated
   // and counts are correct.
@@ -976,13 +934,7 @@ export function skillReviewQueue({
     ([skill]) => !reactiveItems.includes(skill),
   );
 
-  if (__DEV__) {
-    // eslint-disable-next-line no-console
-    console.log(
-      `Removing duplicates took ${(performance.now() - now1).toFixed(4)} ms`,
-    );
-    now1 = performance.now();
-  }
+  perfMilestone(`queueItems`);
 
   // Build items array and track index ranges
   const items: Skill[] = [];
@@ -1003,14 +955,6 @@ export function skillReviewQueue({
         items.push(getSkill(item));
       }
     }
-  }
-
-  if (__DEV__) {
-    // eslint-disable-next-line no-console
-    console.log(
-      `Pull top-K setup took ${(performance.now() - now1).toFixed(4)} ms`,
-    );
-    now1 = performance.now();
   }
 
   // 1. Retry items
@@ -1075,13 +1019,7 @@ export function skillReviewQueue({
     );
   }
 
-  if (__DEV__) {
-    // eslint-disable-next-line no-console
-    console.log(
-      `Pulling items took ${(performance.now() - now1).toFixed(4)} ms`,
-    );
-    now1 = performance.now();
-  }
+  perfMilestone(`prepareFinalResult`);
 
   // Create index ranges
   const indexRanges = {
@@ -1094,27 +1032,24 @@ export function skillReviewQueue({
     notDue: { start: notDueStart, end: notDueEnd },
   };
 
-  learningOrderBlocked.reverse();
-
   invariant(items.length <= maxQueueItems);
 
-  if (__DEV__) {
-    // eslint-disable-next-line no-console
-    console.log(`Final stuff took ${(performance.now() - now1).toFixed(4)} ms`);
+  try {
+    return {
+      items,
+      blockedItems: learningOrderBlocked,
+      retryCount: learningOrderRetry.length,
+      dueCount: learningOrderDue.length,
+      overDueCount: learningOrderOverDue.length,
+      newContentCount: learningOrderNewContent.length,
+      newDifficultyCount: learningOrderNewDifficulty.length,
+      newDueAt,
+      newOverDueAt,
+      indexRanges,
+    };
+  } finally {
+    perfMilestone();
   }
-
-  return {
-    items,
-    blockedItems: learningOrderBlocked,
-    retryCount: learningOrderRetry.length,
-    dueCount: learningOrderDue.length,
-    overDueCount: learningOrderOverDue.length,
-    newContentCount: learningOrderNewContent.length,
-    newDifficultyCount: learningOrderNewDifficulty.length,
-    newDueAt,
-    newOverDueAt,
-    indexRanges,
-  };
 }
 
 export function* walkSkillAndDependencies(

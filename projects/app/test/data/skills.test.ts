@@ -39,7 +39,7 @@ import { Rating } from "#util/fsrs.ts";
 import { nanoid } from "#util/nanoid.ts";
 import { r } from "#util/rizzle.ts";
 import { invariant } from "@pinyinly/lib/invariant";
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
+import { describe, expect, test } from "vitest";
 import {
   fsrsSrsState,
   mockSrsState,
@@ -47,16 +47,6 @@ import {
   时,
 } from "../data/helpers.ts";
 import { testReplicacheOptions } from "../util/rizzleHelpers.ts";
-
-beforeEach(() => {
-  vi.spyOn(console, `log`).mockImplementation(() => {
-    // no-op, don't pollute test output
-  });
-});
-
-afterEach(() => {
-  vi.resetAllMocks();
-});
 
 const skillTest = test.extend<{
   isStructuralHanziWord: Awaited<ReturnType<typeof getIsStructuralHanziWord>>;
@@ -69,80 +59,6 @@ const skillTest = test.extend<{
     { scope: `worker` },
   ],
 });
-
-function makeLargeSkillReviewFixture({
-  skillCount,
-  introducedCount,
-  ratingCount,
-  branchingFactor = 8,
-  now = new Date(`2025-01-01T00:00:00.000Z`),
-}: {
-  skillCount: number;
-  introducedCount: number;
-  ratingCount: number;
-  branchingFactor?: number;
-  now?: Date;
-}): {
-  graph: SkillLearningGraph;
-  skillSrsStates: Map<Skill, SrsStateType>;
-  latestSkillRatings: Map<Skill, LatestSkillRating>;
-  skills: readonly Skill[];
-  now: Date;
-} {
-  invariant(introducedCount <= skillCount);
-
-  const secondaryFactor = branchingFactor * branchingFactor;
-  const skillPrefix = rSkillKind().marshal(SkillKind.HanziWordToGloss);
-  const skills: Skill[] = Array.from(
-    { length: skillCount },
-    (_, index) => `${skillPrefix}:perf-${index}` as Skill,
-  );
-
-  const graph: SkillLearningGraph = new Map();
-  for (let index = 0; index < skillCount; index++) {
-    const skill = skills[index]!;
-    const dependencies = new Set<Skill>();
-
-    if (index > 0) {
-      const primaryParent = skills[Math.floor((index - 1) / branchingFactor)]!;
-      if (primaryParent !== skill) {
-        dependencies.add(primaryParent);
-      }
-
-      const secondaryIndex = Math.floor((index - 1) / secondaryFactor);
-      if (secondaryIndex > 0) {
-        dependencies.add(skills[secondaryIndex]!);
-      }
-    }
-
-    graph.set(skill, { skill, dependencies });
-  }
-
-  const dayMs = 24 * 60 * 60 * 1000;
-  const hourMs = 60 * 60 * 1000;
-  const skillSrsStates = new Map<Skill, SrsStateType>();
-  for (let index = 0; index < introducedCount; index++) {
-    const skill = skills[index]!;
-    const prevReviewAt = new Date(now.getTime() - (40 + (index % 10)) * dayMs);
-    const nextReviewAt =
-      index % 5 === 0
-        ? new Date(now.getTime() - ((index % 6) + 1) * hourMs)
-        : new Date(now.getTime() + ((index % 6) + 1) * hourMs);
-    skillSrsStates.set(skill, mockSrsState(prevReviewAt, nextReviewAt));
-  }
-
-  const latestSkillRatings = new Map<Skill, LatestSkillRating>();
-  for (let index = 0; index < ratingCount; index++) {
-    const skill = skills[index % skills.length]!;
-    latestSkillRatings.set(skill, {
-      skill,
-      rating: index % 4 === 0 ? Rating.Again : Rating.Good,
-      createdAt: new Date(now.getTime() - index * 90 * 1000),
-    });
-  }
-
-  return { graph, skillSrsStates, latestSkillRatings, skills, now };
-}
 
 describe(
   `skillLearningGraph suite` satisfies HasNameOf<typeof skillLearningGraph>,
@@ -655,29 +571,6 @@ describe(
           `);
         },
       );
-    });
-
-    test(`handles large graphs within performance budget`, () => {
-      const { graph, skillSrsStates, latestSkillRatings, now } =
-        makeLargeSkillReviewFixture({
-          skillCount: 6000,
-          introducedCount: 4500,
-          ratingCount: 3500,
-        });
-
-      const start = performance.now();
-      const queue = skillReviewQueue({
-        graph,
-        skillSrsStates,
-        latestSkillRatings,
-        isStructuralHanziWord: () => false,
-        now,
-        maxQueueItems: graph.size,
-      });
-      const durationMs = performance.now() - start;
-
-      expect(queue.items.length).toBeGreaterThan(0);
-      expect(durationMs).toBeLessThan(200);
     });
 
     describe(

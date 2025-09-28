@@ -88,8 +88,6 @@ export const SkillQueueProvider = Object.assign(
         return;
       }
 
-      const now1 = performance.now();
-
       // Recompute the review queue when inputs are ready
       const reviewQueue = skillReviewQueue({
         graph: skillLearningGraph,
@@ -99,13 +97,6 @@ export const SkillQueueProvider = Object.assign(
         isStructuralHanziWord,
         maxQueueItems: mockable.getMaxQueueItems(),
       });
-
-      if (__DEV__) {
-        // eslint-disable-next-line no-console
-        console.log(
-          `skillReviewQueue took ${(performance.now() - now1).toFixed(4)} ms`,
-        );
-      }
 
       setSkillQueue((prev) => ({
         loading: false,

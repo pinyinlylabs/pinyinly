@@ -9,14 +9,8 @@ import type { Rizzle } from "#data/rizzleSchema.ts";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react";
 import type { PropsWithChildren } from "react";
-import { afterEach, beforeEach, expect, test, vi } from "vitest";
+import { afterEach, expect, test, vi } from "vitest";
 import { rizzleTest } from "../../util/rizzleHelpers.ts";
-
-beforeEach(() => {
-  vi.spyOn(console, `log`).mockImplementation(() => {
-    // no-op, don't pollute test output
-  });
-});
 
 afterEach(() => {
   vi.resetAllMocks();
