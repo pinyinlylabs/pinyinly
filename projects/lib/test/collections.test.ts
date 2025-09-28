@@ -12,6 +12,7 @@ import {
   objectMapToArray,
   sortComparatorNumber,
   sortComparatorString,
+  topK,
 } from "#collections.ts";
 import type { IsEqual } from "#types.ts";
 import { describe, expect, test } from "vitest";
@@ -400,5 +401,40 @@ describe(`MinHeap` satisfies HasNameOf<typeof MinHeap>, () => {
   test(`handles empty heap`, () => {
     const heap = new MinHeap<number>((a, b) => a - b, 3);
     expect(heap.toArray()).toEqual([]);
+  });
+});
+
+describe(`topK suite` satisfies HasNameOf<typeof topK>, () => {
+  test(`returns top-k largest numbers`, () => {
+    const result = [...topK([5, 1, 9, 3, 7, 2], 3, sortComparatorNumber())];
+    expect(result).toEqual([5, 7, 9]);
+  });
+
+  test(`returns all items when capacity exceeds length`, () => {
+    const result = [...topK([2, 4, 1], 5, sortComparatorNumber())];
+    expect(result).toEqual([1, 2, 4]);
+  });
+
+  test(`returns empty iterable when capacity is zero`, () => {
+    const result = [...topK([1, 2, 3], 0, sortComparatorNumber())];
+    expect(result).toEqual([]);
+  });
+
+  test(`works with comparator on object properties`, () => {
+    const items = [{ value: 10 }, { value: 5 }, { value: 20 }, { value: 15 }];
+    const result = [
+      ...topK(
+        items,
+        3,
+        sortComparatorNumber((x) => x.value),
+      ),
+    ].map((item) => item.value);
+
+    expect(result).toEqual([10, 15, 20]);
+  });
+
+  test(`handles duplicate values consistently`, () => {
+    const result = [...topK([3, 3, 2, 2, 1], 3, sortComparatorNumber())];
+    expect(result).toEqual([2, 3, 3]);
   });
 });

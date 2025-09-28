@@ -454,3 +454,21 @@ export class MinHeap<T> {
     } while (next !== index);
   }
 }
+
+export function* topK<T>(
+  source: T[],
+  capacity: number,
+  cmp: SortComparator<T>,
+) {
+  if (capacity === 0) {
+    return;
+  }
+
+  const heap = new MinHeap<T>(cmp, capacity);
+  for (const item of source) {
+    heap.insert(item);
+  }
+  for (const item of heap.toArray()) {
+    yield item;
+  }
+}
