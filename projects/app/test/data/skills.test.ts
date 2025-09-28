@@ -3,7 +3,7 @@ import type {
   PinyinPronunciationSpaceSeparated,
   SrsStateType,
 } from "#data/model.ts";
-import { QuestionFlagKind, SkillKind, SrsKind } from "#data/model.ts";
+import { SkillKind, SrsKind } from "#data/model.ts";
 import { mutators } from "#data/rizzleMutators.ts";
 import type { Skill } from "#data/rizzleSchema.ts";
 import {
@@ -16,7 +16,6 @@ import type {
   RankRules,
   SkillLearningGraph,
   SkillReviewQueue,
-  SkillReviewQueueItem,
 } from "#data/skills.ts";
 import {
   computeSkillRating,
@@ -45,6 +44,7 @@ import {
   fsrsSrsState,
   mockSrsState,
   parseRelativeTimeShorthand,
+  prettyQueue,
   时,
 } from "../data/helpers.ts";
 import { testReplicacheOptions } from "../util/rizzleHelpers.ts";
@@ -2278,40 +2278,4 @@ async function simulateSkillReviews({
     now,
     isStructuralHanziWord,
   });
-}
-
-function prettyQueue(queue: SkillReviewQueue): string[] {
-  return queue.items.map((item) => skillQueueItemPretty(item));
-}
-
-function skillQueueItemPretty(item: SkillReviewQueueItem): string {
-  let pretty = `${item.skill}`;
-
-  switch (item.flag?.kind) {
-    case QuestionFlagKind.Overdue: {
-      pretty = `${pretty} (😡 OVERDUE)`;
-      break;
-    }
-    case QuestionFlagKind.NewDifficulty: {
-      pretty = `${pretty} (📈 NEW DIFFICULTY)`;
-      break;
-    }
-    case QuestionFlagKind.NewSkill: {
-      pretty = `${pretty} (🌱 NEW SKILL)`;
-      break;
-    }
-    case QuestionFlagKind.Retry: {
-      pretty = `${pretty} (⚠️ RETRY)`;
-      break;
-    }
-    case QuestionFlagKind.WeakWord: {
-      pretty = `${pretty} (😰 WEAK WORD)`;
-      break;
-    }
-    case undefined: {
-      break;
-    }
-  }
-
-  return pretty;
 }

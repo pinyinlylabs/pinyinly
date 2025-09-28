@@ -6,10 +6,12 @@ import type {
   SrsStateFsrsFourPointFiveType,
   SrsStateMockType,
 } from "#data/model.ts";
-import { SrsKind } from "#data/model.ts";
+import { QuestionFlagKind, SrsKind } from "#data/model.ts";
+import type { SkillReviewQueue, SkillReviewQueueItem } from "#data/skills.js";
 import type { Rating } from "#util/fsrs.ts";
 import { nextReview } from "#util/fsrs.ts";
 import { invariant, nonNullable } from "@pinyinly/lib/invariant";
+import type { DeepReadonly } from "ts-essentials";
 
 export const date = (strings: TemplateStringsArray): Date => {
   const shorthand = strings.reduce((acc, str) => acc + str, ``);
@@ -95,3 +97,39 @@ export const 汉 = (strings: TemplateStringsArray): HanziText => {
  */
 export const 拼音 = (strings: TemplateStringsArray) =>
   strings[0] as PinyinSyllable;
+
+export function prettyQueue(queue: DeepReadonly<SkillReviewQueue>): string[] {
+  return queue.items.map((item) => skillQueueItemPretty(item));
+}
+
+export function skillQueueItemPretty(item: SkillReviewQueueItem): string {
+  let pretty = `${item.skill}`;
+
+  switch (item.flag?.kind) {
+    case QuestionFlagKind.Overdue: {
+      pretty = `${pretty} (😡 OVERDUE)`;
+      break;
+    }
+    case QuestionFlagKind.NewDifficulty: {
+      pretty = `${pretty} (📈 NEW DIFFICULTY)`;
+      break;
+    }
+    case QuestionFlagKind.NewSkill: {
+      pretty = `${pretty} (🌱 NEW SKILL)`;
+      break;
+    }
+    case QuestionFlagKind.Retry: {
+      pretty = `${pretty} (⚠️ RETRY)`;
+      break;
+    }
+    case QuestionFlagKind.WeakWord: {
+      pretty = `${pretty} (😰 WEAK WORD)`;
+      break;
+    }
+    case undefined: {
+      break;
+    }
+  }
+
+  return pretty;
+}

@@ -6,10 +6,12 @@ import { DbProvider } from "#client/ui/DbProvider.tsx";
 import { ReplicacheProvider } from "#client/ui/ReplicacheProvider.tsx";
 import { SkillQueueProvider } from "#client/ui/SkillQueueProvider.tsx";
 import type { Rizzle } from "#data/rizzleSchema.ts";
+import { invariant } from "@pinyinly/lib/invariant";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react";
 import type { PropsWithChildren } from "react";
 import { afterEach, expect, test, vi } from "vitest";
+import { prettyQueue } from "../../data/helpers.ts";
 import { rizzleTest } from "../../util/rizzleHelpers.ts";
 
 afterEach(() => {
@@ -63,29 +65,25 @@ rizzleTest(
       expect(result.current.loading).toBe(false);
     });
 
-    if (result.current.loading) {
-      throw new Error(`expected skill queue to be loaded`);
-    }
+    invariant(!result.current.loading, `expected skill queue to be loaded`);
 
-    const { items, blockedItems } = result.current.reviewQueue;
-
-    const itemSkills = items.map(({ skill }) => skill);
-    expect(itemSkills).toMatchInlineSnapshot(`
+    const queue = result.current.reviewQueue;
+    expect(prettyQueue(queue)).toMatchInlineSnapshot(`
       [
-        "he:一:one",
-        "he:人:person",
-        "he:十:ten",
-        "he:又:again",
-        "he:八:eight",
-        "he:口:mouth",
-        "he:头:head",
-        "he:肉:meat",
-        "he:艮:stopping",
-        "he:爪:claw",
+        "he:一:one (🌱 NEW SKILL)",
+        "he:人:person (🌱 NEW SKILL)",
+        "he:十:ten (🌱 NEW SKILL)",
+        "he:又:again (🌱 NEW SKILL)",
+        "he:八:eight (🌱 NEW SKILL)",
+        "he:口:mouth (🌱 NEW SKILL)",
+        "he:头:head (🌱 NEW SKILL)",
+        "he:肉:meat (🌱 NEW SKILL)",
+        "he:艮:stopping (🌱 NEW SKILL)",
+        "he:爪:claw (🌱 NEW SKILL)",
       ]
     `);
 
-    expect(blockedItems.slice(0, 5)).toEqual([
+    expect(queue.blockedItems.slice(0, 5)).toEqual([
       `he:𠂇:hand`,
       `he:𠂉:knife`,
       `he:乚:hidden`,
