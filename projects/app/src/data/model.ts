@@ -173,6 +173,7 @@ export const hanziWordSkillKinds: readonly HanziWordSkillKind[] = [
 ];
 
 const questionFlagKindSchema = z.enum({
+  Blocked: `debug--Blocked`,
   NewDifficulty: `debug--NewDifficulty`,
   NewSkill: `debug--NewSkill`,
   Overdue: `debug--Overdue`,
@@ -181,6 +182,10 @@ const questionFlagKindSchema = z.enum({
 });
 export const QuestionFlagKind = questionFlagKindSchema.enum;
 export type QuestionFlagKind = z.infer<typeof questionFlagKindSchema>;
+
+export interface QuestionFlagBlockedType {
+  kind: typeof QuestionFlagKind.Blocked;
+}
 
 export interface QuestionFlagRetryType {
   kind: typeof QuestionFlagKind.Retry;
@@ -204,6 +209,7 @@ export interface QuestionFlagWeakWordType {
 }
 
 export type QuestionFlagType =
+  | QuestionFlagBlockedType
   | QuestionFlagNewDifficultyType
   | QuestionFlagNewSkillType
   | QuestionFlagOverdueType

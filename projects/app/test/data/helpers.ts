@@ -98,7 +98,9 @@ export const 汉 = (strings: TemplateStringsArray): HanziText => {
 export const 拼音 = (strings: TemplateStringsArray) =>
   strings[0] as PinyinSyllable;
 
-export function prettyQueue(queue: DeepReadonly<SkillReviewQueue>): string[] {
+export function prettyQueue(
+  queue: Pick<DeepReadonly<SkillReviewQueue>, `items`>,
+): string[] {
   return queue.items.map((item) => skillQueueItemPretty(item));
 }
 
@@ -106,6 +108,10 @@ export function skillQueueItemPretty(item: SkillReviewQueueItem): string {
   let pretty = `${item.skill}`;
 
   switch (item.flag?.kind) {
+    case QuestionFlagKind.Blocked: {
+      pretty = `${pretty} (🟥 BLOCKED)`;
+      break;
+    }
     case QuestionFlagKind.Overdue: {
       pretty = `${pretty} (😡 OVERDUE)`;
       break;

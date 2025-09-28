@@ -413,10 +413,10 @@ export interface SkillReviewQueue {
    */
   items: SkillReviewQueueItem[];
   /**
-   * Skills that are blocked from being reviewed (or introduced) because their
-   * dependencies aren't met yet.
+   * The number of items in the queue that are blocked because their dependencies
+   * aren't met yet.
    */
-  blockedItems: Skill[];
+  blockedCount: number;
   /**
    * The number of items in the queue that need to be retried because they were
    * answered incorrectly.
@@ -997,6 +997,14 @@ export function skillReviewQueue({
     items.push({ skill });
   }
 
+  // 8. Blocked items
+  for (const skill of learningOrderBlocked.slice(
+    0,
+    maxQueueItems - items.length,
+  )) {
+    items.push({ skill, flag: { kind: QuestionFlagKind.Blocked } });
+  }
+
   perfMilestone(`prepareFinalResult`);
 
   invariant(items.length <= maxQueueItems);
@@ -1004,7 +1012,7 @@ export function skillReviewQueue({
   try {
     return {
       items,
-      blockedItems: learningOrderBlocked,
+      blockedCount: learningOrderBlocked.length,
       retryCount: learningOrderRetry.length,
       dueCount: learningOrderDue.length,
       overDueCount: learningOrderOverDue.length,

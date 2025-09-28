@@ -5,6 +5,7 @@ import { useSkillQueue } from "#client/hooks/useSkillQueue.ts";
 import { DbProvider } from "#client/ui/DbProvider.tsx";
 import { ReplicacheProvider } from "#client/ui/ReplicacheProvider.tsx";
 import { SkillQueueProvider } from "#client/ui/SkillQueueProvider.tsx";
+import { QuestionFlagKind } from "#data/model.js";
 import type { Rizzle } from "#data/rizzleSchema.ts";
 import { sleep } from "#util/devtools.js";
 import { invariant } from "@pinyinly/lib/invariant";
@@ -63,7 +64,7 @@ rizzleTest(
   async ({ rizzle }) => {
     // Increase the number of queue items to 10 so we can check more than one.
     vi.spyOn(SkillQueueProvider.mockable, `getMaxQueueItems`).mockReturnValue(
-      10,
+      Infinity,
     );
 
     const { result, unmount } = renderHook(useSkillQueue, {
@@ -82,7 +83,7 @@ rizzleTest(
     invariant(!result.current.loading, `expected skill queue to be loaded`);
 
     const queue = result.current.reviewQueue;
-    expect(prettyQueue(queue)).toMatchInlineSnapshot(`
+    expect(prettyQueue(queue).slice(0, 10)).toMatchInlineSnapshot(`
       [
         "he:一:one (🌱 NEW SKILL)",
         "he:人:person (🌱 NEW SKILL)",
@@ -97,13 +98,21 @@ rizzleTest(
       ]
     `);
 
-    expect(queue.blockedItems.slice(0, 5)).toEqual([
-      `he:𠂇:hand`,
-      `he:𠂉:knife`,
-      `he:乚:hidden`,
-      `he:𠂊:hands`,
-      `he:𭕄:radical`,
-    ]);
+    const blockedQueue = {
+      items: queue.items.filter(
+        ({ flag }) => flag?.kind === QuestionFlagKind.Blocked,
+      ),
+    };
+
+    expect(prettyQueue(blockedQueue).slice(0, 5)).toMatchInlineSnapshot(`
+      [
+        "he:𠂇:hand (🟥 BLOCKED)",
+        "he:𠂉:knife (🟥 BLOCKED)",
+        "he:乚:hidden (🟥 BLOCKED)",
+        "he:𠂊:hands (🟥 BLOCKED)",
+        "he:𭕄:radical (🟥 BLOCKED)",
+      ]
+    `);
 
     unmount();
   },

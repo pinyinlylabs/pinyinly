@@ -8,6 +8,9 @@ import { IconImage } from "./IconImage";
 
 export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
   switch (flag.kind) {
+    case QuestionFlagKind.Blocked: {
+      return null;
+    }
     case QuestionFlagKind.NewDifficulty: {
       return (
         <View className={flagViewClass({ class: `theme-danger` })}>
