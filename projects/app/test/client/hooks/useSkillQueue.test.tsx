@@ -6,10 +6,12 @@ import { DbProvider } from "#client/ui/DbProvider.tsx";
 import { ReplicacheProvider } from "#client/ui/ReplicacheProvider.tsx";
 import { SkillQueueProvider } from "#client/ui/SkillQueueProvider.tsx";
 import type { Rizzle } from "#data/rizzleSchema.ts";
+import { sleep } from "#util/devtools.js";
 import { invariant } from "@pinyinly/lib/invariant";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react";
 import type { PropsWithChildren } from "react";
+import { act } from "react";
 import { afterEach, expect, test, vi } from "vitest";
 import { prettyQueue } from "../../data/helpers.ts";
 import { rizzleTest } from "../../util/rizzleHelpers.ts";
@@ -39,12 +41,19 @@ const testContextProviders = (opts: { rizzle: Rizzle }) =>
     );
   };
 
-rizzleTest(`returns loading state from context`, ({ rizzle }) => {
+rizzleTest(`returns loading state from context`, async ({ rizzle }) => {
   const { result, unmount } = renderHook(useSkillQueue, {
     wrapper: testContextProviders({ rizzle }),
   });
 
   expect(result.current).toEqual({ loading: true });
+
+  await waitFor(
+    () => {
+      expect(result.current.loading).toBe(false);
+    },
+    { timeout: 2000 },
+  );
 
   unmount();
 });
@@ -61,9 +70,14 @@ rizzleTest(
       wrapper: testContextProviders({ rizzle }),
     });
 
-    await waitFor(() => {
-      expect(result.current.loading).toBe(false);
-    });
+    // Wait a little bit so to skip past initial "loading false" state.
+    await act(() => sleep(5));
+    await waitFor(
+      () => {
+        expect(result.current.loading).toBe(false);
+      },
+      { timeout: 2000 },
+    );
 
     invariant(!result.current.loading, `expected skill queue to be loaded`);
 
