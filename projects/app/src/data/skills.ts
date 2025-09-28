@@ -16,7 +16,6 @@ import {
   Rating,
 } from "@/util/fsrs";
 import { makePRNG } from "@/util/random";
-import type { SortComparator } from "@pinyinly/lib/collections";
 import {
   emptyArray,
   emptySet,
@@ -26,9 +25,12 @@ import {
   mutableArrayFilter,
   sortComparatorDate,
   sortComparatorNumber,
+  topK,
 } from "@pinyinly/lib/collections";
-import { invariant } from "@pinyinly/lib/invariant";
+import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import type { Duration } from "date-fns";
+import { add } from "date-fns/add";
+import { interval } from "date-fns/interval";
 import { sub } from "date-fns/sub";
 import { subDays } from "date-fns/subDays";
 import type { DeepReadonly } from "ts-essentials";
@@ -37,10 +39,16 @@ import type {
   HanziText,
   HanziWord,
   HanziWordSkillKind,
+  QuestionFlagType,
   SrsStateType,
   UnsavedSkillRating,
 } from "./model";
-import { hanziWordSkillKinds, SkillKind, SrsKind } from "./model";
+import {
+  hanziWordSkillKinds,
+  QuestionFlagKind,
+  SkillKind,
+  SrsKind,
+} from "./model";
 import type {
   HanziWordSkill,
   PinyinFinalAssociationSkill,
@@ -394,7 +402,10 @@ export function pinyinInitialAssociation(
   return `${rSkillKind().marshal(SkillKind.PinyinInitialAssociation)}:${initial}` as PinyinInitialAssociationSkill;
 }
 
-export type SkillReviewQueueItem = { skill: Skill };
+export type SkillReviewQueueItem = {
+  skill: Skill;
+  flag?: QuestionFlagType;
+};
 
 export interface SkillReviewQueue {
   /**
@@ -939,39 +950,26 @@ export function skillReviewQueue({
   perfMilestone(`queueItems`);
 
   // Build items array and track index ranges
-  const items: Skill[] = [];
+  const items: SkillReviewQueueItem[] = [];
   let currentIndex = 0;
-
-  function pullTopKItems<T>(
-    source: T[],
-    cmp: SortComparator<T>,
-    getSkill: (x: T) => Skill,
-  ) {
-    const capacity = maxQueueItems - items.length;
-    if (capacity > 0) {
-      const heap = new MinHeap<T>(cmp, capacity);
-      for (const item of source) {
-        heap.insert(item);
-      }
-      for (const item of heap.toArray()) {
-        items.push(getSkill(item));
-      }
-    }
-  }
 
   // 1. Retry items
   const retryStart = currentIndex;
   currentIndex += learningOrderRetry.length;
   const retryEnd = currentIndex;
-  pullTopKItems(
+  for (const [skill] of topK(
     learningOrderRetry,
+    maxQueueItems - items.length,
     inverseSortComparator(sortComparatorDate(([, x]) => x)),
-    ([skill]) => skill,
-  );
+  )) {
+    items.push({ skill, flag: { kind: QuestionFlagKind.Retry } });
+  }
 
   // 2. Reactive items
   const reactiveStart = currentIndex;
-  items.push(...reactiveItems);
+  for (const skill of reactiveItems.slice(0, maxQueueItems - items.length)) {
+    items.push({ skill });
+  }
   currentIndex += reactiveItems.length;
   const reactiveEnd = currentIndex;
 
@@ -979,33 +977,54 @@ export function skillReviewQueue({
   const overdueStart = currentIndex;
   currentIndex += learningOrderOverDue.length;
   const overdueEnd = currentIndex;
-  pullTopKItems(
+
+  for (const [skill] of topK(
     learningOrderOverDue,
+    maxQueueItems - items.length,
     inverseSortComparator(sortComparatorDate(([, x]) => x)),
-    ([skill]) => skill,
-  );
+  )) {
+    const srsState = nonNullable(skillSrsStates.get(skill));
+    const overDueDate = add(srsState.nextReviewAt, skillDueWindow);
+    items.push({
+      skill,
+      flag: {
+        kind: QuestionFlagKind.Overdue,
+        interval: interval(overDueDate.getTime(), now),
+      },
+    });
+  }
 
   // 4. Due items
   const dueStart = currentIndex;
   currentIndex += learningOrderDue.length;
   const dueEnd = currentIndex;
-  pullTopKItems(
+  for (const [skill] of topK(
     learningOrderDue,
+    maxQueueItems - items.length,
     sortComparatorDate(([, x]) => x),
-    ([skill]) => skill,
-  );
+  )) {
+    items.push({ skill });
+  }
 
   // 5. New content items
   const newContentStart = currentIndex;
-  items.push(...learningOrderNewContent.slice(0, maxQueueItems - items.length));
+  for (const skill of learningOrderNewContent.slice(
+    0,
+    maxQueueItems - items.length,
+  )) {
+    items.push({ skill, flag: { kind: QuestionFlagKind.NewSkill } });
+  }
   currentIndex += learningOrderNewContent.length;
   const newContentEnd = currentIndex;
 
   // 6. New difficulty items
   const newDifficultyStart = currentIndex;
-  items.push(
-    ...learningOrderNewDifficulty.slice(0, maxQueueItems - items.length),
-  );
+  for (const skill of learningOrderNewDifficulty.slice(
+    0,
+    maxQueueItems - items.length,
+  )) {
+    items.push({ skill, flag: { kind: QuestionFlagKind.NewDifficulty } });
+  }
   currentIndex += learningOrderNewDifficulty.length;
   const newDifficultyEnd = currentIndex;
 
@@ -1013,19 +1032,13 @@ export function skillReviewQueue({
   const notDueStart = currentIndex;
   currentIndex += learningOrderNotDue.length;
   const notDueEnd = currentIndex;
-  if (items.length < maxQueueItems) {
-    pullTopKItems(
-      randomWeightSkills(learningOrderNotDue),
-      sortComparatorNumber(([, x]) => x),
-      ([skill]) => skill,
-    );
+  for (const [skill] of topK(
+    randomWeightSkills(learningOrderNotDue),
+    maxQueueItems - items.length,
+    sortComparatorNumber(([, x]) => x),
+  )) {
+    items.push({ skill });
   }
-
-  const itemsWithFlags: SkillReviewQueueItem[] = items.map(
-    (skill): SkillReviewQueueItem => {
-      return { skill };
-    },
-  );
 
   perfMilestone(`prepareFinalResult`);
 
@@ -1040,11 +1053,11 @@ export function skillReviewQueue({
     notDue: { start: notDueStart, end: notDueEnd },
   };
 
-  invariant(itemsWithFlags.length <= maxQueueItems);
+  invariant(items.length <= maxQueueItems);
 
   try {
     return {
-      items: itemsWithFlags,
+      items,
       blockedItems: learningOrderBlocked,
       retryCount: learningOrderRetry.length,
       dueCount: learningOrderDue.length,

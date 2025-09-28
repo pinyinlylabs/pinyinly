@@ -3,7 +3,7 @@ import type {
   PinyinPronunciationSpaceSeparated,
   SrsStateType,
 } from "#data/model.ts";
-import { SkillKind, SrsKind } from "#data/model.ts";
+import { QuestionFlagKind, SkillKind, SrsKind } from "#data/model.ts";
 import { mutators } from "#data/rizzleMutators.ts";
 import type { Skill } from "#data/rizzleSchema.ts";
 import {
@@ -16,6 +16,7 @@ import type {
   RankRules,
   SkillLearningGraph,
   SkillReviewQueue,
+  SkillReviewQueueItem,
 } from "#data/skills.ts";
 import {
   computeSkillRating,
@@ -466,17 +467,11 @@ describe(
           isStructuralHanziWord,
         });
 
-        expect(queue.items).toMatchInlineSnapshot(`
+        expect(prettyQueue(queue)).toMatchInlineSnapshot(`
           [
-            {
-              "skill": "he:人:person",
-            },
-            {
-              "skill": "he:𠃌:radical",
-            },
-            {
-              "skill": "he:丿:slash",
-            },
+            "he:人:person (🌱 NEW SKILL)",
+            "he:𠃌:radical (🌱 NEW SKILL)",
+            "he:丿:slash (🌱 NEW SKILL)",
           ]
         `);
       },
@@ -545,14 +540,10 @@ describe(
           });
 
           expect(queue.items.length).toBeLessThanOrEqual(2);
-          expect(queue.items).toMatchInlineSnapshot(`
+          expect(prettyQueue(queue)).toMatchInlineSnapshot(`
             [
-              {
-                "skill": "he:A:a",
-              },
-              {
-                "skill": "he:B:b",
-              },
+              "he:A:a",
+              "he:B:b",
             ]
           `);
         },
@@ -572,17 +563,11 @@ describe(
           });
 
           expect(queue.items.length).toBe(3);
-          expect(queue.items).toMatchInlineSnapshot(`
+          expect(prettyQueue(queue)).toMatchInlineSnapshot(`
             [
-              {
-                "skill": "he:A:a",
-              },
-              {
-                "skill": "he:B:b",
-              },
-              {
-                "skill": "he:C:c",
-              },
+              "he:A:a",
+              "he:B:b",
+              "he:C:c",
             ]
           `);
         },
@@ -598,17 +583,20 @@ describe(
           const graph = await skillLearningGraph({
             targetSkills: [`he:好:good`],
           });
-          expect(
-            skillReviewQueue({
-              graph,
-              skillSrsStates: new Map(),
-              latestSkillRatings: latestSkillRatings(),
-              isStructuralHanziWord,
-            }),
-          ).toMatchObject({
-            items: [{ skill: `he:子:child` }, { skill: `he:女:woman` }],
-            blockedItems: [`he:好:good`],
+          const queue = skillReviewQueue({
+            graph,
+            skillSrsStates: new Map(),
+            latestSkillRatings: latestSkillRatings(),
+            isStructuralHanziWord,
           });
+
+          expect(prettyQueue(queue)).toMatchInlineSnapshot(`
+            [
+              "he:子:child (🌱 NEW SKILL)",
+              "he:女:woman (🌱 NEW SKILL)",
+            ]
+          `);
+          expect(queue.blockedItems).toEqual([`he:好:good`]);
         });
 
         skillTest(
@@ -618,25 +606,25 @@ describe(
               targetSkills: [`he:汉:chinese`],
             });
 
-            expect(
-              skillReviewQueue({
-                graph,
-                skillSrsStates: new Map(),
-                latestSkillRatings: latestSkillRatings(),
-                isStructuralHanziWord,
-              }),
-            ).toMatchObject({
-              items: [
-                { skill: `he:又:again` },
-                { skill: `he:丿:slash` },
-                { skill: `he:亅:hook` },
-              ],
-              blockedItems: [
-                `he:水:water`, // learns this because of 氵
-                `he:氵:water`,
-                `he:汉:chinese`,
-              ],
+            const queue = skillReviewQueue({
+              graph,
+              skillSrsStates: new Map(),
+              latestSkillRatings: latestSkillRatings(),
+              isStructuralHanziWord,
             });
+
+            expect(prettyQueue(queue)).toMatchInlineSnapshot(`
+              [
+                "he:又:again (🌱 NEW SKILL)",
+                "he:丿:slash (🌱 NEW SKILL)",
+                "he:亅:hook (🌱 NEW SKILL)",
+              ]
+            `);
+            expect(queue.blockedItems).toEqual([
+              `he:水:water`, // learns this because of 氵
+              `he:氵:water`,
+              `he:汉:chinese`,
+            ]);
           },
         );
 
@@ -645,7 +633,7 @@ describe(
           // even though they'd never been introduced yet. This is a regression test
           // against that scenario.
 
-          const { items } = await simulateSkillReviews({
+          const queue = await simulateSkillReviews({
             targetSkills: [`he:分:divide`],
             history: [
               // first question is he:八:eight but they get it wrong. 𠃌 is one of the
@@ -655,26 +643,20 @@ describe(
             ],
           });
 
-          expect(items).toMatchInlineSnapshot(`
+          expect(prettyQueue(queue)).toMatchInlineSnapshot(`
             [
-              {
-                "skill": "he:八:eight",
-              },
-              {
-                "skill": "he:丿:slash",
-              },
-              {
-                "skill": "he:𠃌:radical",
-              },
+              "he:八:eight (🌱 NEW SKILL)",
+              "he:丿:slash (🌱 NEW SKILL)",
+              "he:𠃌:radical (🌱 NEW SKILL)",
             ]
           `);
 
           // Make sure 𠃌 didn't jump the queue before 八 because it hasn't been
           // introduced yet, instead they should have to answer 八 again.
-          const 𠃌Index = items.findIndex(
+          const 𠃌Index = queue.items.findIndex(
             ({ skill }) => skill === `he:𠃌:radical`,
           );
-          const 八Index = items.findIndex(
+          const 八Index = queue.items.findIndex(
             ({ skill }) => skill === `he:八:eight`,
           );
 
@@ -683,17 +665,19 @@ describe(
         });
 
         test(`learns new skills before not-due skills (stable sorted to maintain graph order)`, async () => {
-          const reviewQueue = await simulateSkillReviews({
+          const queue = await simulateSkillReviews({
             targetSkills: [`he:分:divide`],
             history: [`🟡 he:丿:slash`, `💤 1m`],
           });
 
-          expect(reviewQueue).toMatchObject({
-            items: [
-              { skill: `he:八:eight` },
-              { skill: `he:𠃌:radical` },
-              { skill: `he:丿:slash` },
-            ],
+          expect(prettyQueue(queue)).toMatchInlineSnapshot(`
+            [
+              "he:八:eight (🌱 NEW SKILL)",
+              "he:𠃌:radical (🌱 NEW SKILL)",
+              "he:丿:slash",
+            ]
+          `);
+          expect(queue).toMatchObject({
             blockedItems: [`he:刀:knife`, `he:分:divide`],
           });
         });
@@ -743,12 +727,14 @@ describe(
           history.push(`💤 1d`, `🟢 he:丿:slash he:𠃌:radical`);
 
           {
-            const { items, blockedItems } = await simulateSkillReviews({
+            const queue = await simulateSkillReviews({
               targetSkills,
               history,
             });
-            expect(items).toContainEqual({ skill: `he:刀:knife` });
-            expect(blockedItems).toEqual([]);
+            expect(prettyQueue(queue)).toContainEqual(
+              `he:刀:knife (🌱 NEW SKILL)`,
+            );
+            expect(queue.blockedItems).toEqual([]);
           }
         });
 
@@ -773,7 +759,7 @@ describe(
           } = await simulateSkillReviews({ targetSkills, history });
 
           // Doesn't get stuck reviewing he:𠃌:radical just because it had a lower stability.
-          expect([review1]).not.toEqual([`he:𠃌:radical`]);
+          expect([review1?.skill]).not.toEqual([`he:𠃌:radical`]);
         });
 
         test(`skills that are stale (heavily over-due and not stable) are treated as new skills`, async () => {
@@ -788,13 +774,15 @@ describe(
               targetSkills,
               history,
             });
+            // he:丿:slash and he:𠃌:radical should come later because he:刀:knife is due.
+            expect(prettyQueue(queue)).toMatchInlineSnapshot(`
+              [
+                "he:刀:knife (⚠️ RETRY)",
+                "he:丿:slash (🌱 NEW SKILL)",
+                "he:𠃌:radical (🌱 NEW SKILL)",
+              ]
+            `);
             expect(queue).toMatchObject({
-              items: [
-                { skill: `he:刀:knife` },
-                // These come later because he:刀:knife is due.
-                { skill: `he:丿:slash` },
-                { skill: `he:𠃌:radical` },
-              ],
               blockedItems: [],
               retryCount: 1,
               dueCount: 0,
@@ -811,8 +799,13 @@ describe(
               targetSkills,
               history,
             });
+            expect(prettyQueue(queue)).toMatchInlineSnapshot(`
+              [
+                "he:丿:slash (🌱 NEW SKILL)",
+                "he:𠃌:radical (🌱 NEW SKILL)",
+              ]
+            `);
             expect(queue).toMatchObject({
-              items: [{ skill: `he:丿:slash` }, { skill: `he:𠃌:radical` }],
               blockedItems: [
                 // Now this comes last because it's "stale" and reset to new.
                 `he:刀:knife`,
@@ -834,26 +827,29 @@ describe(
                 targetSkills: [`he:八:eight`, `he:丿:slash`],
               });
 
-              expect(
-                skillReviewQueue({
-                  graph,
-                  skillSrsStates: new Map([
-                    [`he:八:eight`, mockSrsState(时`-1d`, 时`-5m`)],
-                    [`he:丿:slash`, mockSrsState(时`-1d`, 时`-3m`)],
-                  ]),
-                  latestSkillRatings: latestSkillRatings({
-                    "he:丿:slash": [Rating.Again, 时`-1m`],
-                  }),
-                  isStructuralHanziWord,
+              const queue = skillReviewQueue({
+                graph,
+                skillSrsStates: new Map([
+                  [`he:八:eight`, mockSrsState(时`-1d`, 时`-5m`)],
+                  [`he:丿:slash`, mockSrsState(时`-1d`, 时`-3m`)],
+                ]),
+                latestSkillRatings: latestSkillRatings({
+                  "he:丿:slash": [Rating.Again, 时`-1m`],
                 }),
-              ).toMatchObject({
+                isStructuralHanziWord,
+              });
+
+              // he:丿:slash should be hoisted first for retry
+              expect(prettyQueue(queue)).toMatchInlineSnapshot(`
+                [
+                  "he:丿:slash (⚠️ RETRY)",
+                  "he:八:eight",
+                ]
+              `);
+
+              expect(queue).toMatchObject({
                 blockedItems: [],
                 dueCount: 1,
-                items: [
-                  { skill: `he:丿:slash` }, // hoisted to the top for retry
-                  { skill: `he:八:eight` },
-                ],
-
                 newContentCount: 0,
                 newDifficultyCount: 0,
                 overDueCount: 0,
@@ -869,21 +865,26 @@ describe(
                 targetSkills: [`he:八:eight`, `he:丿:slash`],
               });
 
-              expect(
-                skillReviewQueue({
-                  graph,
-                  skillSrsStates: new Map([
-                    [`he:八:eight`, mockSrsState(时`-1d`, 时`-5m`)],
-                  ]),
-                  latestSkillRatings: latestSkillRatings({
-                    "he:丿:slash": [Rating.Again, 时`-1m`], // it's incorrect but was never introduced
-                  }),
-                  isStructuralHanziWord,
+              const queue = skillReviewQueue({
+                graph,
+                skillSrsStates: new Map([
+                  [`he:八:eight`, mockSrsState(时`-1d`, 时`-5m`)],
+                ]),
+                latestSkillRatings: latestSkillRatings({
+                  "he:丿:slash": [Rating.Again, 时`-1m`], // it's incorrect but was never introduced
                 }),
-              ).toMatchObject({
+                isStructuralHanziWord,
+              });
+
+              expect(prettyQueue(queue)).toMatchInlineSnapshot(`
+                [
+                  "he:八:eight",
+                  "he:丿:slash (🌱 NEW SKILL)",
+                ]
+              `);
+              expect(queue).toMatchObject({
                 blockedItems: [],
                 dueCount: 1,
-                items: [{ skill: `he:八:eight` }, { skill: `he:丿:slash` }],
                 newContentCount: 1,
                 newDifficultyCount: 0,
                 overDueCount: 0,
@@ -899,8 +900,8 @@ describe(
                 targetSkills: [`he:八:eight`, `he:丿:slash`],
               });
 
-              expect(
-                skillReviewQueue({
+              {
+                const queue = skillReviewQueue({
                   graph,
                   skillSrsStates: new Map([
                     [`he:八:eight`, mockSrsState(时`-1d`, 时`-5m`)],
@@ -911,21 +912,26 @@ describe(
                     "he:丿:slash": [Rating.Again, 时`-2m`],
                   }),
                   isStructuralHanziWord,
-                }),
-              ).toMatchObject({
-                blockedItems: [],
-                dueCount: 0,
-                items: [{ skill: `he:八:eight` }, { skill: `he:丿:slash` }],
-
-                newContentCount: 0,
-                newDifficultyCount: 0,
-                overDueCount: 0,
-                retryCount: 2,
-              });
+                });
+                expect(prettyQueue(queue)).toMatchInlineSnapshot(`
+                  [
+                    "he:八:eight (⚠️ RETRY)",
+                    "he:丿:slash (⚠️ RETRY)",
+                  ]
+                `);
+                expect(queue).toMatchObject({
+                  blockedItems: [],
+                  dueCount: 0,
+                  newContentCount: 0,
+                  newDifficultyCount: 0,
+                  overDueCount: 0,
+                  retryCount: 2,
+                });
+              }
 
               // try in reverse order
-              expect(
-                skillReviewQueue({
+              {
+                const queue = skillReviewQueue({
                   graph,
                   skillSrsStates: new Map([
                     [`he:八:eight`, mockSrsState(时`-1d`, 时`-5m`)],
@@ -936,17 +942,22 @@ describe(
                     "he:丿:slash": [Rating.Again, 时`-1m`],
                   }),
                   isStructuralHanziWord,
-                }),
-              ).toMatchObject({
-                blockedItems: [],
-                dueCount: 0,
-                items: [{ skill: `he:丿:slash` }, { skill: `he:八:eight` }],
-
-                newContentCount: 0,
-                newDifficultyCount: 0,
-                overDueCount: 0,
-                retryCount: 2,
-              });
+                });
+                expect(prettyQueue(queue)).toMatchInlineSnapshot(`
+                  [
+                    "he:丿:slash (⚠️ RETRY)",
+                    "he:八:eight (⚠️ RETRY)",
+                  ]
+                `);
+                expect(queue).toMatchObject({
+                  blockedItems: [],
+                  dueCount: 0,
+                  newContentCount: 0,
+                  newDifficultyCount: 0,
+                  overDueCount: 0,
+                  retryCount: 2,
+                });
+              }
             },
           );
         });
@@ -991,16 +1002,18 @@ describe(
               });
 
               // The pronunciation skill should be prioritized first, despite other skills being due
-              expect(queue.items[0]).toEqual({ skill: `hp:好:good` });
+              expect(prettyQueue(queue)[0]).toEqual(`hp:好:good`);
+              const 好Index = queue.items.findIndex(
+                ({ skill }) => skill === `hp:好:good`,
+              );
+              const 八Index = queue.items.findIndex(
+                ({ skill }) => skill === `he:八:eight`,
+              );
               // Without prioritization, he:八:eight (-8m) would normally come before hp:好:good (-10m)
               // because due skills are sorted by most overdue first, but hp:好:good is prioritized
-              expect(
-                queue.items.findIndex(({ skill }) => skill === `hp:好:good`),
-              ).toBeLessThan(
-                queue.items.findIndex(({ skill }) => skill === `he:八:eight`),
-              );
-              expect(queue.items).toContainEqual({ skill: `he:好:good` });
-              expect(queue.items).toContainEqual({ skill: `he:人:person` });
+              expect(好Index).toBeLessThan(八Index);
+              expect(prettyQueue(queue)).toContainEqual(`he:好:good`);
+              expect(prettyQueue(queue)).toContainEqual(`he:人:person`);
             },
           );
 
@@ -1032,10 +1045,11 @@ describe(
               });
 
               // Normal ordering should apply based on overdue time, no special prioritization
-              expect(queue.items[0]).toEqual({ skill: `hp:好:good` }); // most overdue (-10m)
-              expect(queue.items[1]).toEqual({ skill: `he:八:eight` }); // second most overdue (-8m)
-              expect(queue.items[2]).toEqual({ skill: `he:好:good` }); // third most overdue (-5m)
-              expect(queue.items[3]).toEqual({ skill: `he:人:person` }); // least overdue (-3m)
+              const queueText = prettyQueue(queue);
+              expect(queueText[0]).toEqual(`hp:好:good`); // most overdue (-10m)
+              expect(queueText[1]).toEqual(`he:八:eight`); // second most overdue (-8m)
+              expect(queueText[2]).toEqual(`he:好:good`); // third most overdue (-5m)
+              expect(queueText[3]).toEqual(`he:人:person`); // least overdue (-3m)
             },
           );
 
@@ -1075,11 +1089,12 @@ describe(
                 isStructuralHanziWord,
               });
 
+              const queueText = prettyQueue(queue);
               // Normal ordering should apply, he:好:good goes to retry section, others by overdue time
-              expect(queue.items[0]).toEqual({ skill: `he:好:good` }); // retry comes first
-              expect(queue.items[1]).toEqual({ skill: `hp:好:good` }); // most overdue in due section
-              expect(queue.items[2]).toEqual({ skill: `he:八:eight` }); // second most overdue
-              expect(queue.items[3]).toEqual({ skill: `he:人:person` }); // least overdue
+              expect(queueText[0]).toBe(`he:好:good (⚠️ RETRY)`); // retry comes first
+              expect(queueText[1]).toBe(`hp:好:good`); // most overdue in due section
+              expect(queueText[2]).toBe(`he:八:eight`); // second most overdue
+              expect(queueText[3]).toBe(`he:人:person`); // least overdue
             },
           );
 
@@ -1116,12 +1131,13 @@ describe(
                 isStructuralHanziWord,
               });
 
+              const queueText = prettyQueue(queue);
               // The pronunciation skill should be prioritized first, even though it was not due yet
-              expect(queue.items[0]).toEqual({ skill: `hp:好:good` });
+              expect(queueText[0]).toEqual(`hp:好:good`);
               // The due skill comes after the prioritized pronunciation skill
-              expect(queue.items[1]).toEqual({ skill: `he:好:good` });
+              expect(queueText[1]).toEqual(`he:好:good`);
               // New skills follow
-              expect(queue.items).toContainEqual({ skill: `he:人:person` });
+              expect(queueText).toContainEqual(`he:人:person (🌱 NEW SKILL)`);
             },
           );
         });
@@ -1131,25 +1147,26 @@ describe(
             targetSkills: [`he:分:divide`],
           });
 
-          expect(
-            skillReviewQueue({
-              graph,
-              skillSrsStates: new Map([
-                [`he:八:eight`, mockSrsState(时`-1d`, 时`-5m`)],
-                [`he:刀:knife`, mockSrsState(时`-1d`, 时`-5m`)],
-              ]),
-              latestSkillRatings: latestSkillRatings(),
-              isStructuralHanziWord: () => false,
-            }),
-          ).toMatchObject({
+          const queue = skillReviewQueue({
+            graph,
+            skillSrsStates: new Map([
+              [`he:八:eight`, mockSrsState(时`-1d`, 时`-5m`)],
+              [`he:刀:knife`, mockSrsState(时`-1d`, 时`-5m`)],
+            ]),
+            latestSkillRatings: latestSkillRatings(),
+            isStructuralHanziWord: () => false,
+          });
+          expect(prettyQueue(queue)).toMatchInlineSnapshot(`
+            [
+              "he:八:eight",
+              "he:刀:knife",
+              "he:丿:slash (🌱 NEW SKILL)",
+              "he:𠃌:radical (🌱 NEW SKILL)",
+            ]
+          `);
+          expect(queue).toMatchObject({
             blockedItems: [`he:分:divide`],
             dueCount: 2,
-            items: [
-              { skill: `he:八:eight` },
-              { skill: `he:刀:knife` },
-              { skill: `he:丿:slash` },
-              { skill: `he:𠃌:radical` },
-            ],
             newContentCount: 2,
             newDifficultyCount: 0,
             overDueCount: 0,
@@ -1162,19 +1179,20 @@ describe(
             targetSkills: [`he:分:divide`],
           });
 
-          expect(
-            skillReviewQueue({
-              graph,
-              skillSrsStates: new Map(),
-              latestSkillRatings: latestSkillRatings(),
-              isStructuralHanziWord: () => false,
-            }),
-          ).toMatchObject({
-            items: [
-              { skill: `he:丿:slash` },
-              { skill: `he:𠃌:radical` },
-              { skill: `he:八:eight` },
-            ],
+          const queue = skillReviewQueue({
+            graph,
+            skillSrsStates: new Map(),
+            latestSkillRatings: latestSkillRatings(),
+            isStructuralHanziWord: () => false,
+          });
+          expect(prettyQueue(queue)).toMatchInlineSnapshot(`
+            [
+              "he:丿:slash (🌱 NEW SKILL)",
+              "he:𠃌:radical (🌱 NEW SKILL)",
+              "he:八:eight (🌱 NEW SKILL)",
+            ]
+          `);
+          expect(queue).toMatchObject({
             blockedItems: [`he:刀:knife`, `he:分:divide`],
           });
         });
@@ -1186,29 +1204,29 @@ describe(
               targetSkills: [`he:分:divide`, `he:一:one`],
             });
 
-            expect(
-              skillReviewQueue({
-                graph,
-                skillSrsStates: new Map([
-                  [`he:一:one`, mockSrsState(时`-10m`, 时`-2h`)], // due two hours ago
-                  [`he:𠃌:radical`, mockSrsState(时`0s`, 时`-1h`)], // due one hour ago
-                  [`he:八:eight`, mockSrsState(时`-10m`, 时`1h`)], // due in one hour,
-                  [`he:刀:knife`, mockSrsState(时`-10m`, 时`2h`)], // due in two hours,
-                ]),
-                latestSkillRatings: latestSkillRatings(),
-                isStructuralHanziWord,
-              }),
-            ).toMatchObject({
+            const queue = skillReviewQueue({
+              graph,
+              skillSrsStates: new Map([
+                [`he:一:one`, mockSrsState(时`-10m`, 时`-2h`)], // due two hours ago
+                [`he:𠃌:radical`, mockSrsState(时`0s`, 时`-1h`)], // due one hour ago
+                [`he:八:eight`, mockSrsState(时`-10m`, 时`1h`)], // due in one hour,
+                [`he:刀:knife`, mockSrsState(时`-10m`, 时`2h`)], // due in two hours,
+              ]),
+              latestSkillRatings: latestSkillRatings(),
+              isStructuralHanziWord,
+            });
+            expect(prettyQueue(queue)).toMatchInlineSnapshot(`
+              [
+                "he:一:one",
+                "he:𠃌:radical",
+                "he:丿:slash (🌱 NEW SKILL)",
+                "he:刀:knife",
+                "he:八:eight",
+              ]
+            `);
+            expect(queue).toMatchObject({
               blockedItems: [`he:分:divide`],
               dueCount: 2,
-              items: [
-                { skill: `he:一:one` },
-                { skill: `he:𠃌:radical` },
-                { skill: `he:丿:slash` },
-                { skill: `he:刀:knife` },
-                { skill: `he:八:eight` },
-              ],
-
               newContentCount: 1,
               newDifficultyCount: 0,
               overDueCount: 0,
@@ -1279,7 +1297,6 @@ describe(
               }),
             ).toMatchObject({
               dueCount: 2,
-
               newContentCount: 11,
               newDifficultyCount: 0,
               overDueCount: 0,
@@ -1297,15 +1314,19 @@ describe(
           const graph = await skillLearningGraph({
             targetSkills: [`hp:好:good`],
           });
-          expect(
-            skillReviewQueue({
-              graph,
-              skillSrsStates: new Map(),
-              latestSkillRatings: latestSkillRatings(),
-              isStructuralHanziWord,
-            }),
-          ).toMatchObject({
-            items: [{ skill: `he:子:child` }, { skill: `he:女:woman` }],
+          const queue = skillReviewQueue({
+            graph,
+            skillSrsStates: new Map(),
+            latestSkillRatings: latestSkillRatings(),
+            isStructuralHanziWord,
+          });
+          expect(prettyQueue(queue)).toMatchInlineSnapshot(`
+            [
+              "he:子:child (🌱 NEW SKILL)",
+              "he:女:woman (🌱 NEW SKILL)",
+            ]
+          `);
+          expect(queue).toMatchObject({
             blockedItems: [
               `he:好:good`,
               `hpi:好:good`,
@@ -1351,22 +1372,23 @@ describe(
           targetSkills: [`hp:一点儿:aLittle`],
         });
 
-        expect(
-          skillReviewQueue({
-            graph,
-            skillSrsStates: new Map(),
-            latestSkillRatings: latestSkillRatings(),
-            isStructuralHanziWord: () => false,
-          }),
-        ).toMatchObject({
-          items: [
-            { skill: `he:人:person` },
-            { skill: `he:八:eight` },
-            { skill: `he:口:mouth` },
-            { skill: `he:乚:hidden` },
-            { skill: `he:丿:slash` },
-            { skill: `he:一:one` },
-          ],
+        const queue = skillReviewQueue({
+          graph,
+          skillSrsStates: new Map(),
+          latestSkillRatings: latestSkillRatings(),
+          isStructuralHanziWord: () => false,
+        });
+        expect(prettyQueue(queue)).toMatchInlineSnapshot(`
+          [
+            "he:人:person (🌱 NEW SKILL)",
+            "he:八:eight (🌱 NEW SKILL)",
+            "he:口:mouth (🌱 NEW SKILL)",
+            "he:乚:hidden (🌱 NEW SKILL)",
+            "he:丿:slash (🌱 NEW SKILL)",
+            "he:一:one (🌱 NEW SKILL)",
+          ]
+        `);
+        expect(queue).toMatchObject({
           blockedItems: [
             `he:火:fire`,
             `he:灬:fire`,
@@ -1399,21 +1421,19 @@ describe(
           });
 
           {
-            const { items, blockedItems } = skillReviewQueue({
+            const queue = skillReviewQueue({
               graph,
               skillSrsStates: new Map(),
               latestSkillRatings: latestSkillRatings(),
               isStructuralHanziWord,
             });
 
-            const itemSkills = items.map(({ skill }) => skill);
-
-            expect(itemSkills).toMatchInlineSnapshot(`
+            expect(prettyQueue(queue)).toMatchInlineSnapshot(`
               [
-                "he:一:one",
+                "he:一:one (🌱 NEW SKILL)",
               ]
             `);
-            expect(blockedItems).toMatchInlineSnapshot(`
+            expect(queue.blockedItems).toMatchInlineSnapshot(`
               [
                 "hpi:一:one",
                 "hpf:一:one",
@@ -1423,27 +1443,33 @@ describe(
             `);
           }
 
-          expect(
-            skillReviewQueue({
+          {
+            const queue = skillReviewQueue({
               graph,
               skillSrsStates: new Map([
                 [`he:一:one`, fsrsSrsState(时`-1d`, 时`-5m`, Rating.Good)],
               ]),
               latestSkillRatings: latestSkillRatings(),
               isStructuralHanziWord,
-            }),
-          ).toMatchObject({
-            blockedItems: [`hpf:一:one`, `hpt:一:one`, `hp:一:one`],
-            dueCount: 1,
-            items: [{ skill: `he:一:one` }, { skill: `hpi:一:one` }],
-            newContentCount: 1,
-            newDifficultyCount: 0,
-            overDueCount: 0,
-            retryCount: 0,
-          });
+            });
+            expect(prettyQueue(queue)).toMatchInlineSnapshot(`
+              [
+                "he:一:one",
+                "hpi:一:one (🌱 NEW SKILL)",
+              ]
+            `);
+            expect(queue).toMatchObject({
+              blockedItems: [`hpf:一:one`, `hpt:一:one`, `hp:一:one`],
+              dueCount: 1,
+              newContentCount: 1,
+              newDifficultyCount: 0,
+              overDueCount: 0,
+              retryCount: 0,
+            });
+          }
 
-          expect(
-            skillReviewQueue({
+          {
+            const queue = skillReviewQueue({
               graph,
               skillSrsStates: new Map([
                 [`he:一:one`, fsrsSrsState(时`-1d`, 时`-6m`, Rating.Good)],
@@ -1451,20 +1477,23 @@ describe(
               ]),
               latestSkillRatings: latestSkillRatings(),
               isStructuralHanziWord,
-            }),
-          ).toMatchObject({
-            blockedItems: [`hpt:一:one`, `hp:一:one`],
-            dueCount: 2,
-            items: [
-              { skill: `he:一:one` },
-              { skill: `hpi:一:one` },
-              { skill: `hpf:一:one` },
-            ],
-            newContentCount: 0,
-            newDifficultyCount: 1,
-            overDueCount: 0,
-            retryCount: 0,
-          });
+            });
+            expect(prettyQueue(queue)).toMatchInlineSnapshot(`
+              [
+                "he:一:one",
+                "hpi:一:one",
+                "hpf:一:one (📈 NEW DIFFICULTY)",
+              ]
+            `);
+            expect(queue).toMatchObject({
+              blockedItems: [`hpt:一:one`, `hp:一:one`],
+              dueCount: 2,
+              newContentCount: 0,
+              newDifficultyCount: 1,
+              overDueCount: 0,
+              retryCount: 0,
+            });
+          }
         },
       );
     });
@@ -2277,4 +2306,40 @@ async function simulateSkillReviews({
     now,
     isStructuralHanziWord,
   });
+}
+
+function prettyQueue(queue: SkillReviewQueue): string[] {
+  return queue.items.map((item) => skillQueueItemPretty(item));
+}
+
+function skillQueueItemPretty(item: SkillReviewQueueItem): string {
+  let pretty = `${item.skill}`;
+
+  switch (item.flag?.kind) {
+    case QuestionFlagKind.Overdue: {
+      pretty = `${pretty} (😡 OVERDUE)`;
+      break;
+    }
+    case QuestionFlagKind.NewDifficulty: {
+      pretty = `${pretty} (📈 NEW DIFFICULTY)`;
+      break;
+    }
+    case QuestionFlagKind.NewSkill: {
+      pretty = `${pretty} (🌱 NEW SKILL)`;
+      break;
+    }
+    case QuestionFlagKind.Retry: {
+      pretty = `${pretty} (⚠️ RETRY)`;
+      break;
+    }
+    case QuestionFlagKind.WeakWord: {
+      pretty = `${pretty} (😰 WEAK WORD)`;
+      break;
+    }
+    case undefined: {
+      break;
+    }
+  }
+
+  return pretty;
 }
