@@ -50,7 +50,7 @@ export const SkillQueueProvider = Object.assign(
     const {
       data: isStructuralHanziWord,
       isLoading: isStructuralHanziWordsLoading,
-    } = useQuery(isStructuralHanziWordQuery());
+    } = useQuery(isStructuralHanziWordQuery);
     const {
       data: latestSkillRatingsData,
       isLoading: isLatestSkillRatingsLoading,

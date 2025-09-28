@@ -14,7 +14,7 @@ import type {
   SkillState,
 } from "@/data/rizzleSchema";
 import { currentSchema } from "@/data/rizzleSchema";
-import type { RankedHanziWord, SkillReviewQueue } from "@/data/skills";
+import type { RankedHanziWord } from "@/data/skills";
 import {
   getHanziWordRank,
   hanziWordSkill,
@@ -22,7 +22,6 @@ import {
   hanziWordToPinyinTyped,
   rankRules,
   skillLearningGraph,
-  skillReviewQueue,
 } from "@/data/skills";
 import {
   allHsk1HanziWords,
@@ -99,17 +98,16 @@ export const targetSkillsQuery = () =>
     structuralSharing: false,
   });
 
-export const isStructuralHanziWordQuery = () =>
-  queryOptions({
-    queryKey: [`isStructuralHanziWord`],
-    queryFn: async () => {
-      await devToolsSlowQuerySleepIfEnabled();
+export const isStructuralHanziWordQuery = queryOptions({
+  queryKey: [`isStructuralHanziWord`],
+  queryFn: async () => {
+    await devToolsSlowQuerySleepIfEnabled();
 
-      return await getIsStructuralHanziWord();
-    },
-    networkMode: `offlineFirst`,
-    structuralSharing: false,
-  });
+    return await getIsStructuralHanziWord();
+  },
+  networkMode: `offlineFirst`,
+  structuralSharing: false,
+});
 
 export const skillLearningGraphQuery = queryOptions({
   queryKey: [`skillLearningGraph`],
@@ -259,42 +257,6 @@ export async function getAllTargetSkills(): Promise<Skill[]> {
     hanziWordToGloss(w),
     hanziWordToPinyinTyped(w),
   ]);
-}
-
-export async function computeSkillReviewQueue(
-  r: Rizzle,
-  targetSkills: Skill[],
-  /**
-   * exposed for testing/simulating different times
-   */
-  now = new Date(),
-): Promise<{
-  reviewQueue: SkillReviewQueue;
-  skillSrsStates: Map<Skill, SrsStateType>;
-}> {
-  const graph = await skillLearningGraph({ targetSkills });
-
-  const skillSrsStates = new Map<Skill, SrsStateType>();
-  for await (const [, v] of r.queryPaged.skillState.scan()) {
-    skillSrsStates.set(v.skill, v.srs);
-  }
-
-  const latestSkillRatings = new Map<Skill, SkillRating>();
-  for await (const [, v] of r.queryPaged.skillRating.byCreatedAt()) {
-    latestSkillRatings.set(v.skill, v);
-  }
-
-  const isStructuralHanziWord = await getIsStructuralHanziWord();
-
-  const reviewQueue = skillReviewQueue({
-    graph,
-    skillSrsStates,
-    latestSkillRatings,
-    now,
-    isStructuralHanziWord,
-  });
-
-  return { reviewQueue, skillSrsStates };
 }
 
 export const hanziMeaningsQuery = (hanzi: HanziText) =>
