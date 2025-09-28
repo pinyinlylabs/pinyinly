@@ -17,7 +17,6 @@ export type SkillQueueContextValue = DeepReadonly<
   | {
       loading: false;
       reviewQueue: SkillReviewQueue;
-      skillSrsStates: Map<Skill, SrsStateType>;
       version: number;
     }
   | {
@@ -103,7 +102,6 @@ export const SkillQueueProvider = Object.assign(
       setSkillQueue((prev) => ({
         loading: false,
         reviewQueue,
-        skillSrsStates,
         version: prev.loading ? 0 : prev.version + 1,
       }));
     }, [

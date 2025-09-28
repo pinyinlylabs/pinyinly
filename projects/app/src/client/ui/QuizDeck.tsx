@@ -7,10 +7,7 @@ import { useSoundEffect } from "@/client/hooks/useSoundEffect";
 import type { StackNavigationFor } from "@/client/ui/types";
 import type { MistakeType, Question, UnsavedSkillRating } from "@/data/model";
 import { MistakeKind, QuestionKind } from "@/data/model";
-import {
-  flagForQuestion,
-  generateQuestionForSkillOrThrow,
-} from "@/data/questions";
+import { generateQuestionForSkillOrThrow } from "@/data/questions";
 import { Rating } from "@/util/fsrs";
 import { nanoid } from "@/util/nanoid";
 import { invariant } from "@pinyinly/lib/invariant";
@@ -66,7 +63,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
       return;
     }
 
-    const { version, reviewQueue, skillSrsStates } = skillQueue;
+    const { version, reviewQueue } = skillQueue;
 
     // Don't generate if we already have a question
     if (question != null) {
@@ -91,7 +88,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
     const generateQuestion = async () => {
       // Loop through queue items until we find one that can generate a question
       // (matching the original nextQuizQuestionQuery logic)
-      for (const [queueIndex, { skill }] of reviewQueue.items.entries()) {
+      for (const { skill, flag } of reviewQueue.items) {
         if (abortController.signal.aborted) {
           return;
         }
@@ -101,11 +98,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
             await generateQuestionForSkillOrThrow(skill);
 
           // Add flag if not already set (matching old nextQuizQuestionQuery logic)
-          generatedQuestion.flag ??= flagForQuestion(
-            queueIndex,
-            reviewQueue,
-            skillSrsStates,
-          );
+          generatedQuestion.flag ??= flag;
 
           // Check if this effect was cancelled before setting state
           // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
