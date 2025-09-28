@@ -448,26 +448,6 @@ export interface SkillReviewQueue {
    * The number of items in the queue overdue for review.
    */
   overDueCount: number;
-  /**
-   * Index ranges for different types of items in the queue.
-   * These ranges help determine what type of flag to show for each item.
-   */
-  indexRanges: {
-    /** Range for retry items: [0, retryCount) */
-    retry: { start: number; end: number };
-    /** Range for reactive items (prioritized after successful reviews) */
-    reactive: { start: number; end: number };
-    /** Range for overdue items */
-    overdue: { start: number; end: number };
-    /** Range for due items */
-    due: { start: number; end: number };
-    /** Range for new content items (not harder difficulty variations) */
-    newContent: { start: number; end: number };
-    /** Range for new difficulty items (harder variations of existing skills) */
-    newDifficulty: { start: number; end: number };
-    /** Range for not-due items (future reviews) */
-    notDue: { start: number; end: number };
-  };
 }
 
 export interface RankGoal {
@@ -951,12 +931,8 @@ export function skillReviewQueue({
 
   // Build items array and track index ranges
   const items: SkillReviewQueueItem[] = [];
-  let currentIndex = 0;
 
   // 1. Retry items
-  const retryStart = currentIndex;
-  currentIndex += learningOrderRetry.length;
-  const retryEnd = currentIndex;
   for (const [skill] of topK(
     learningOrderRetry,
     maxQueueItems - items.length,
@@ -966,18 +942,11 @@ export function skillReviewQueue({
   }
 
   // 2. Reactive items
-  const reactiveStart = currentIndex;
   for (const skill of reactiveItems.slice(0, maxQueueItems - items.length)) {
     items.push({ skill });
   }
-  currentIndex += reactiveItems.length;
-  const reactiveEnd = currentIndex;
 
   // 3. Overdue items
-  const overdueStart = currentIndex;
-  currentIndex += learningOrderOverDue.length;
-  const overdueEnd = currentIndex;
-
   for (const [skill] of topK(
     learningOrderOverDue,
     maxQueueItems - items.length,
@@ -995,9 +964,6 @@ export function skillReviewQueue({
   }
 
   // 4. Due items
-  const dueStart = currentIndex;
-  currentIndex += learningOrderDue.length;
-  const dueEnd = currentIndex;
   for (const [skill] of topK(
     learningOrderDue,
     maxQueueItems - items.length,
@@ -1007,31 +973,22 @@ export function skillReviewQueue({
   }
 
   // 5. New content items
-  const newContentStart = currentIndex;
   for (const skill of learningOrderNewContent.slice(
     0,
     maxQueueItems - items.length,
   )) {
     items.push({ skill, flag: { kind: QuestionFlagKind.NewSkill } });
   }
-  currentIndex += learningOrderNewContent.length;
-  const newContentEnd = currentIndex;
 
   // 6. New difficulty items
-  const newDifficultyStart = currentIndex;
   for (const skill of learningOrderNewDifficulty.slice(
     0,
     maxQueueItems - items.length,
   )) {
     items.push({ skill, flag: { kind: QuestionFlagKind.NewDifficulty } });
   }
-  currentIndex += learningOrderNewDifficulty.length;
-  const newDifficultyEnd = currentIndex;
 
   // 7. Not due items
-  const notDueStart = currentIndex;
-  currentIndex += learningOrderNotDue.length;
-  const notDueEnd = currentIndex;
   for (const [skill] of topK(
     randomWeightSkills(learningOrderNotDue),
     maxQueueItems - items.length,
@@ -1041,17 +998,6 @@ export function skillReviewQueue({
   }
 
   perfMilestone(`prepareFinalResult`);
-
-  // Create index ranges
-  const indexRanges = {
-    retry: { start: retryStart, end: retryEnd },
-    reactive: { start: reactiveStart, end: reactiveEnd },
-    overdue: { start: overdueStart, end: overdueEnd },
-    due: { start: dueStart, end: dueEnd },
-    newContent: { start: newContentStart, end: newContentEnd },
-    newDifficulty: { start: newDifficultyStart, end: newDifficultyEnd },
-    notDue: { start: notDueStart, end: notDueEnd },
-  };
 
   invariant(items.length <= maxQueueItems);
 
@@ -1066,7 +1012,6 @@ export function skillReviewQueue({
       newDifficultyCount: learningOrderNewDifficulty.length,
       newDueAt,
       newOverDueAt,
-      indexRanges,
     };
   } finally {
     perfMilestone();
