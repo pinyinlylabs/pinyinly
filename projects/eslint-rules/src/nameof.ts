@@ -54,8 +54,11 @@ interface NameOfTypeResult {
  * Extracts the symbol name from a type expression
  */
 function extractSymbolName(typeText: string): string | null {
-  // Match patterns like "typeof Symbol" and extract "Symbol"
-  const typeofMatch = /typeof\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/.exec(typeText);
+  // Match patterns like "typeof Symbol" or "typeof Foo.Bar" and extract the full path
+  const typeofMatch =
+    /typeof\s+([a-zA-Z_$][a-zA-Z0-9_$]*(?:\.[a-zA-Z_$][a-zA-Z0-9_$]*)*)/.exec(
+      typeText,
+    );
   if (typeofMatch?.[1] !== undefined) {
     return typeofMatch[1];
   }

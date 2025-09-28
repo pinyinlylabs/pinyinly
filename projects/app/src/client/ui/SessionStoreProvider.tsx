@@ -3,7 +3,10 @@ import { useNewQueryClient } from "@/client/hooks/useNewQueryClient";
 import { TrpcProvider } from "@/client/trpc";
 import { QueryClientProvider } from "@tanstack/react-query";
 import type { PropsWithChildren } from "react";
+import { Suspense } from "react";
+import { DbProvider } from "./DbProvider";
 import { ReplicacheProvider } from "./ReplicacheProvider";
+import { SkillQueueProvider } from "./SkillQueueProvider";
 
 /**
  * All the data/store contexts that should be scoped to a single device session.
@@ -14,6 +17,8 @@ import { ReplicacheProvider } from "./ReplicacheProvider";
  *   associated with the device session.
  * - <ReplicacheProvider> -- so that `useRizzleQuery()` and `useReplicache()`
  *   fetched data is comes from the correct device session.
+ * - <SkillQueueProvider> -- so that the skill queue is computed and cached
+ *   per session, with lazy computation and automatic invalidation.
  */
 export function SessionStoreProvider({
   children,
@@ -35,7 +40,17 @@ export function SessionStoreProvider({
     >
       <QueryClientProvider client={queryClient}>
         <ReplicacheProvider dbName={dbName} serverSessionId={serverSessionId}>
-          {children}
+          <DbProvider>
+            <SkillQueueProvider>
+              <Suspense
+                // Use a <Suspense> here as a final safe-guard against trashing
+                // Replicache+ReactQuery+etc  and causing them to re-initialize
+                fallback={null}
+              >
+                {children}
+              </Suspense>
+            </SkillQueueProvider>
+          </DbProvider>
         </ReplicacheProvider>
       </QueryClientProvider>
     </TrpcProvider>

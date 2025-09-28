@@ -1,6 +1,3 @@
-import * as SecureStore from "expo-secure-store";
-import { Platform } from "react-native";
-
 import type {
   RizzleAnyEntity,
   RizzleBoolean,
@@ -11,6 +8,8 @@ import type {
   RizzleTypeAlias,
 } from "@/util/rizzle";
 import { invariant } from "@pinyinly/lib/invariant";
+import * as SecureStore from "expo-secure-store";
+import { Platform } from "react-native";
 
 export type DeviceStoreToggleableEntity = RizzleEntity<
   string,

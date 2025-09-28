@@ -1,8 +1,13 @@
+import { mutators } from "#data/rizzleMutators.js";
+import type { Rizzle } from "#data/rizzleSchema.js";
+import { currentSchema } from "#data/rizzleSchema.js";
+import { r } from "#util/rizzle.ts";
 import type {
   ReadTransaction,
   ReplicacheOptions,
   WriteTransaction,
 } from "replicache";
+import { test } from "vitest";
 
 let _testReplicacheNameId = 0;
 /**
@@ -51,3 +56,17 @@ export function makeMockTx() {
     [Symbol.dispose]: () => null,
   };
 }
+
+export const rizzleTest = test.extend<{ rizzle: Rizzle }>({
+  rizzle: [
+    async ({}, use) => {
+      await using rizzle = r.replicache(
+        testReplicacheOptions(),
+        currentSchema,
+        mutators,
+      );
+      await use(rizzle);
+    },
+    { scope: `test` },
+  ],
+});

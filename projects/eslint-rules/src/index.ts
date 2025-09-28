@@ -313,6 +313,7 @@ const recommended: ConfigWithExtendsArray = [
     ignores: [`**/lint.test-d.ts`],
     rules: {
       "@typescript-eslint/no-non-null-assertion": `off`,
+      "@typescript-eslint/no-unsafe-assignment": `off`,
       "@typescript-eslint/restrict-template-expressions": `off`,
       "@typescript-eslint/require-await": `off`, // this is annoying when you want a little function to return a promise
       "@typescript-eslint/return-await": `off`, // this is annoying when you want a little function to return a promise

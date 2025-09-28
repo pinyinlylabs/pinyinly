@@ -3,15 +3,10 @@ import type {
   HanziText,
   HanziWord,
   PinyinSoundId,
-  Question,
   SrsStateType,
 } from "@/data/model";
 import { hanziWordSkillKinds } from "@/data/model";
 import { loadPylyPinyinChart } from "@/data/pinyin";
-import {
-  flagForQuestion,
-  generateQuestionForSkillOrThrow,
-} from "@/data/questions";
 import type {
   Rizzle,
   Skill,
@@ -19,16 +14,14 @@ import type {
   SkillState,
 } from "@/data/rizzleSchema";
 import { currentSchema } from "@/data/rizzleSchema";
-import type { RankedHanziWord, SkillReviewQueue } from "@/data/skills";
+import type { RankedHanziWord } from "@/data/skills";
 import {
   getHanziWordRank,
   hanziWordSkill,
   hanziWordToGloss,
   hanziWordToPinyinTyped,
   rankRules,
-  skillKindFromSkill,
   skillLearningGraph,
-  skillReviewQueue,
 } from "@/data/skills";
 import {
   allHsk1HanziWords,
@@ -41,10 +34,13 @@ import {
   lookupHanziWord,
 } from "@/dictionary/dictionary";
 import { devToolsSlowQuerySleepIfEnabled } from "@/util/devtools";
+import type { RizzleAnyEntity, RizzleEntityOutput } from "@/util/rizzle";
 import {
   arrayFilterUniqueWithKey,
+  memoize0,
   sortComparatorNumber,
 } from "@pinyinly/lib/collections";
+import type { Collection, CollectionConfig } from "@tanstack/react-db";
 import { queryOptions, skipToken } from "@tanstack/react-query";
 import type { DeviceStoreEntity } from "./deviceStore";
 import { buildDeviceStoreKey, deviceStoreGet } from "./deviceStore";
@@ -52,50 +48,6 @@ import { buildDeviceStoreKey, deviceStoreGet } from "./deviceStore";
 export type WithRizzleWatchPrefixes<T> = T & {
   rizzleWatchPrefixes?: string[];
 };
-
-export const nextQuizQuestionQuery = (r: Rizzle, quizId: string) =>
-  queryOptions({
-    queryKey: [`nextQuizQuestion`, quizId],
-    meta: { r },
-    queryFn: async ({
-      meta,
-    }): Promise<{
-      question: Question;
-      reviewQueue: SkillReviewQueue;
-    }> => {
-      const r = (meta as { r: Rizzle }).r;
-      const reviewQueue = await targetSkillsReviewQueue(r);
-
-      // Take the next skill in queue and generate a question for it. Even
-      // though this is a for…loop, it usually only loops once then exits.
-      for (const [i, skill] of reviewQueue.items.entries()) {
-        try {
-          const skillState = await r.replicache.query((tx) =>
-            r.query.skillState.get(tx, { skill }),
-          );
-
-          const question = await generateQuestionForSkillOrThrow(skill);
-          question.flag ??= flagForQuestion({
-            skillKind: skillKindFromSkill(skill),
-            isInRetryQueue:
-              reviewQueue.retryCount > 0 && i < reviewQueue.retryCount,
-            srsState: skillState?.srs,
-          });
-          return { question, reviewQueue };
-        } catch (error) {
-          console.error(
-            `Error while generating a question for a skill ${JSON.stringify(skill)}`,
-            error,
-          );
-          continue;
-        }
-      }
-
-      throw new Error(`No question found for review`);
-    },
-    networkMode: `offlineFirst`,
-    structuralSharing: false,
-  });
 
 export const pinyinSoundsQuery = (r: Rizzle) =>
   withWatchPrefixes(
@@ -132,6 +84,43 @@ export const pinyinSoundsQuery = (r: Rizzle) =>
     }),
     [currentSchema.pinyinSound.keyPrefix],
   );
+
+export const targetSkillsQuery = () =>
+  queryOptions({
+    queryKey: [`targetSkills`],
+    queryFn: async () => {
+      await devToolsSlowQuerySleepIfEnabled();
+
+      const targetSkills = await getAllTargetSkills();
+      return targetSkills;
+    },
+    networkMode: `offlineFirst`,
+    structuralSharing: false,
+  });
+
+export const isStructuralHanziWordQuery = queryOptions({
+  queryKey: [`isStructuralHanziWord`],
+  queryFn: async () => {
+    await devToolsSlowQuerySleepIfEnabled();
+
+    return await getIsStructuralHanziWord();
+  },
+  networkMode: `offlineFirst`,
+  structuralSharing: false,
+});
+
+export const skillLearningGraphQuery = queryOptions({
+  queryKey: [`skillLearningGraph`],
+  queryFn: async ({ client }) => {
+    await devToolsSlowQuerySleepIfEnabled();
+
+    const targetSkills = await client.ensureQueryData(targetSkillsQuery());
+    const graph = await skillLearningGraph({ targetSkills });
+    return graph;
+  },
+  networkMode: `offlineFirst`,
+  structuralSharing: false,
+});
 
 export const hanziWordSkillStatesQuery = (r: Rizzle, hanziWord: HanziWord) =>
   withWatchPrefixes(
@@ -270,44 +259,6 @@ export async function getAllTargetSkills(): Promise<Skill[]> {
   ]);
 }
 
-export async function targetSkillsReviewQueue(
-  r: Rizzle,
-): Promise<SkillReviewQueue> {
-  const targetSkills = await getAllTargetSkills();
-  return await computeSkillReviewQueue(r, targetSkills);
-}
-
-export async function computeSkillReviewQueue(
-  r: Rizzle,
-  targetSkills: Skill[],
-  /**
-   * exposed for testing/simulating different times
-   */
-  now = new Date(),
-): Promise<SkillReviewQueue> {
-  const graph = await skillLearningGraph({ targetSkills });
-
-  const skillSrsStates = new Map<Skill, SrsStateType>();
-  for await (const [, v] of r.queryPaged.skillState.scan()) {
-    skillSrsStates.set(v.skill, v.srs);
-  }
-
-  const latestSkillRatings = new Map<Skill, SkillRating>();
-  for await (const [, v] of r.queryPaged.skillRating.byCreatedAt()) {
-    latestSkillRatings.set(v.skill, v);
-  }
-
-  const isStructuralHanziWord = await getIsStructuralHanziWord();
-
-  return skillReviewQueue({
-    graph,
-    skillSrsStates,
-    latestSkillRatings,
-    now,
-    isStructuralHanziWord,
-  });
-}
-
 export const hanziMeaningsQuery = (hanzi: HanziText) =>
   queryOptions({
     queryKey: [`hanziMeanings`, hanzi],
@@ -410,7 +361,7 @@ export const fetchAudioBufferQuery = (
     structuralSharing: false,
   });
 
-export const deviceStoryQuery = (key: DeviceStoreEntity) =>
+export const deviceStoreQuery = (key: DeviceStoreEntity) =>
   queryOptions({
     queryKey: [`deviceStore`, buildDeviceStoreKey(key)],
     queryFn: async () => {
@@ -429,3 +380,226 @@ function withWatchPrefixes<T extends object>(
     rizzleWatchPrefixes,
   });
 }
+
+export type SkillStateCollection = Collection<
+  RizzleEntityOutput<typeof currentSchema.skillState>,
+  Skill
+>;
+export type SkillRatingCollection = Collection<
+  RizzleEntityOutput<typeof currentSchema.skillRating>,
+  string
+>;
+export type TargetSkillsCollection = Collection<{ skill: Skill }, Skill>;
+export type LatestSkillRatingsCollection = Collection<SkillRating, Skill>;
+
+export type CollectionOutput<T> =
+  T extends Collection<
+    infer U,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    any
+  >
+    ? U
+    : never;
+export type CollectionKey<T> =
+  T extends Collection<
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    any,
+    infer K
+  >
+    ? K
+    : never;
+
+export const rizzleCollectionOptions = <
+  RizzleEntity extends RizzleAnyEntity,
+  TKey extends string | number = string | number,
+>({
+  id,
+  rizzle,
+  entity,
+  getKey,
+}: {
+  id?: string;
+  rizzle: Rizzle;
+  entity: RizzleEntity;
+  getKey: (item: RizzleEntityOutput<RizzleEntity>) => TKey;
+}): CollectionConfig<RizzleEntityOutput<RizzleEntity>, TKey> => ({
+  id,
+  sync: {
+    rowUpdateMode: `full`,
+    sync: (params) => {
+      const { begin, write, commit } = params;
+
+      const markReadyOnce = memoize0(() => {
+        params.markReady();
+      });
+      const markReadyTimeout = setTimeout(() => {
+        markReadyOnce();
+      }, 5000);
+
+      const unsubscribe = rizzle.replicache.experimentalWatch(
+        (ops) => {
+          try {
+            begin();
+
+            for (const op of ops) {
+              switch (op.op) {
+                case `add`: {
+                  const value = entity.unmarshalValue(
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+                    op.newValue as any,
+                  );
+                  write({ type: `insert`, value });
+                  break;
+                }
+                case `change`: {
+                  const value = entity.unmarshalValue(
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+                    op.newValue as any,
+                  );
+                  write({ type: `update`, value });
+                  break;
+                }
+                case `del`: {
+                  const value = entity.unmarshalValue(
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+                    op.oldValue as any,
+                  );
+                  write({ type: `delete`, value });
+                  break;
+                }
+              }
+            }
+
+            commit();
+          } finally {
+            markReadyOnce();
+          }
+        },
+        {
+          prefix: entity.keyPrefix,
+          initialValuesInFirstDiff: true,
+        },
+      );
+
+      return () => {
+        clearTimeout(markReadyTimeout);
+        unsubscribe();
+      };
+    },
+  },
+  getKey,
+});
+
+export const staticCollectionOptions = <
+  T extends object,
+  TKey extends string | number = string | number,
+>({
+  id,
+  queryFn,
+  getKey,
+}: {
+  id?: string;
+  queryFn: (signal?: AbortSignal) => Promise<T[]>;
+  getKey: (item: T) => TKey;
+}): CollectionConfig<T, TKey> => ({
+  id,
+  sync: {
+    sync: (params) => {
+      const { begin, write, commit, markReady, collection } = params;
+
+      const abortController = new AbortController();
+      const signal = abortController.signal;
+
+      queryFn(signal)
+        .then((items) => {
+          if (signal.aborted) {
+            return;
+          }
+
+          begin();
+
+          for (const item of items) {
+            write({ type: `insert`, value: item });
+          }
+
+          commit();
+        })
+        .finally(() => {
+          markReady();
+        })
+        .catch((error: unknown) => {
+          console.error(`staticCollection(id=${collection.id}) error:`, error);
+        });
+
+      return () => {
+        abortController.abort();
+      };
+    },
+  },
+  getKey,
+});
+
+export const latestSkillRatingCollectionOptions = ({
+  rizzle,
+}: {
+  rizzle: Rizzle;
+}): CollectionConfig<SkillRating, Skill> => ({
+  id: `latestSkillRatings`,
+  sync: {
+    rowUpdateMode: `full`,
+    sync: (params) => {
+      const { begin, write, commit, markReady, collection } = params;
+      const entity = currentSchema.skillRating;
+
+      const unsubscribe = rizzle.replicache.experimentalWatch(
+        (ops) => {
+          begin();
+
+          const pendingTxLatest = new Map<Skill, SkillRating>();
+
+          for (const op of ops) {
+            switch (op.op) {
+              case `add`: {
+                const value = entity.unmarshalValue(
+                  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+                  op.newValue as any,
+                );
+
+                const existing =
+                  collection.get(value.skill) ??
+                  pendingTxLatest.get(value.skill);
+
+                if (existing == null) {
+                  write({ type: `insert`, value });
+                  pendingTxLatest.set(value.skill, value);
+                } else if (existing.createdAt < value.createdAt) {
+                  write({ type: `update`, value });
+                  pendingTxLatest.set(value.skill, value);
+                }
+                break;
+              }
+              case `change`:
+              case `del`: {
+                console.error(`unsupported op=${op.op} for latestSkillRatings`);
+                break;
+              }
+            }
+          }
+
+          commit();
+        },
+        {
+          prefix: entity.keyPrefix,
+          initialValuesInFirstDiff: true,
+        },
+      );
+
+      markReady();
+
+      return () => {
+        unsubscribe();
+      };
+    },
+  },
+  getKey: (item) => item.skill,
+});

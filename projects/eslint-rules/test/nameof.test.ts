@@ -29,8 +29,16 @@ ruleTester.run(`nameof`, nameof, {
       code: `'myFunction' as NameOf<typeof myFunction>`,
     },
     {
+      // Different symbol name that matches
+      code: `'Foo.Bar' as NameOf<typeof Foo.Bar>`,
+    },
+    {
       // Valid with HasNameOf
       code: `'hasNameOfTest' as HasNameOf<typeof hasNameOfTest>`,
+    },
+    {
+      // Valid with HasNameOf
+      code: `'Foo.Bar other text' as HasNameOf<typeof Foo.Bar>`,
     },
   ],
   invalid: [
@@ -49,6 +57,20 @@ ruleTester.run(`nameof`, nameof, {
       output: `'NewWordTutorial' as NameOf<typeof NewWordTutorial>`,
     },
     {
+      // Incorrect string - doesn't match symbol name
+      code: `'Foo.Baz' as NameOf<typeof Foo.Bar>`,
+      errors: [
+        {
+          messageId: `mismatch`,
+          data: {
+            actual: `Foo.Baz`,
+            expected: `Foo.Bar`,
+          },
+        },
+      ],
+      output: `'Foo.Bar' as NameOf<typeof Foo.Bar>`,
+    },
+    {
       // HasNameOf with wrong string
       code: `'wrong text' satisfies HasNameOf<typeof MyClass>`,
       errors: [
@@ -61,6 +83,20 @@ ruleTester.run(`nameof`, nameof, {
         },
       ],
       output: `'MyClass text' satisfies HasNameOf<typeof MyClass>`,
+    },
+    {
+      // HasNameOf with wrong string
+      code: `'Foo.Baz text' satisfies HasNameOf<typeof Foo.Bar>`,
+      errors: [
+        {
+          messageId: `hasNameOfMismatch`,
+          data: {
+            actual: `Foo.Baz text`,
+            expected: `Foo.Bar`,
+          },
+        },
+      ],
+      output: `'Foo.Bar text' satisfies HasNameOf<typeof Foo.Bar>`,
     },
   ],
 });

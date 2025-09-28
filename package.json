@@ -71,6 +71,7 @@
     "estree-walker@npm:^3.0.0": "patch:estree-walker@npm%3A3.0.3#~/.yarn/patches/estree-walker-npm-3.0.3-0372979673.patch",
     "typescript@npm:^5.7.3": "patch:typescript@npm%3A5.9.2#~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch",
     "@expo/server@npm:^0.5.0": "0.5.1",
-    "@expo/server@npm:^0.6.3": "0.5.1"
+    "@expo/server@npm:^0.6.3": "0.5.1",
+    "@tanstack/db@npm:0.3.2": "patch:@tanstack/db@npm%3A0.3.2#~/.yarn/patches/@tanstack-db-npm-0.3.2-4549d65956.patch"
   }
 }

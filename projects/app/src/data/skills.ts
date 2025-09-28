@@ -7,6 +7,7 @@ import {
   lookupHanzi,
   lookupHanziWord,
 } from "@/dictionary/dictionary";
+import { startPerformanceMilestones } from "@/util/devtools";
 import {
   fsrsIsForgotten,
   fsrsIsStable,
@@ -20,12 +21,16 @@ import {
   emptySet,
   inverseSortComparator,
   memoize1,
+  MinHeap,
   mutableArrayFilter,
   sortComparatorDate,
   sortComparatorNumber,
+  topK,
 } from "@pinyinly/lib/collections";
-import { invariant } from "@pinyinly/lib/invariant";
+import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import type { Duration } from "date-fns";
+import { add } from "date-fns/add";
+import { interval } from "date-fns/interval";
 import { sub } from "date-fns/sub";
 import { subDays } from "date-fns/subDays";
 import type { DeepReadonly } from "ts-essentials";
@@ -34,10 +39,16 @@ import type {
   HanziText,
   HanziWord,
   HanziWordSkillKind,
+  QuestionFlagType,
   SrsStateType,
   UnsavedSkillRating,
 } from "./model";
-import { hanziWordSkillKinds, SkillKind, SrsKind } from "./model";
+import {
+  hanziWordSkillKinds,
+  QuestionFlagKind,
+  SkillKind,
+  SrsKind,
+} from "./model";
 import type {
   HanziWordSkill,
   PinyinFinalAssociationSkill,
@@ -391,16 +402,21 @@ export function pinyinInitialAssociation(
   return `${rSkillKind().marshal(SkillKind.PinyinInitialAssociation)}:${initial}` as PinyinInitialAssociationSkill;
 }
 
+export type SkillReviewQueueItem = {
+  skill: Skill;
+  flag?: QuestionFlagType;
+};
+
 export interface SkillReviewQueue {
   /**
    * The skills in the review queue.
    */
-  items: readonly Skill[];
+  items: SkillReviewQueueItem[];
   /**
-   * Skills that are blocked from being reviewed (or introduced) because their
-   * dependencies aren't met yet.
+   * The number of items in the queue that are blocked because their dependencies
+   * aren't met yet.
    */
-  blockedItems: readonly Skill[];
+  blockedCount: number;
   /**
    * The number of items in the queue that need to be retried because they were
    * answered incorrectly.
@@ -420,11 +436,6 @@ export interface SkillReviewQueue {
    * harder difficulty variations of existing skills.
    */
   newDifficultyCount: number;
-  /**
-   * The total number of new items (newContentCount + newDifficultyCount).
-   * @deprecated Use newContentCount and newDifficultyCount separately
-   */
-  newCount: number;
   /**
    * When the number of "due" items will increase.
    */
@@ -594,7 +605,7 @@ function getReactivePronunciationSkills({
     SkillRating,
     `rating` | `createdAt`
   >)[];
-  skillSrsStates: Map<Skill, SrsStateType>;
+  skillSrsStates: ReadonlyMap<Skill, SrsStateType>;
   graph: SkillLearningGraph;
   now: Date;
 }): readonly Skill[] {
@@ -648,18 +659,25 @@ function getReactivePronunciationSkills({
   return emptyArray;
 }
 
+export type LatestSkillRating = Pick<
+  SkillRating,
+  `skill` | `rating` | `createdAt`
+>;
+
 export function skillReviewQueue({
   graph,
   skillSrsStates,
   latestSkillRatings,
   isStructuralHanziWord,
   now = new Date(),
+  maxQueueItems = Infinity,
 }: {
   graph: SkillLearningGraph;
-  skillSrsStates: Map<Skill, SrsStateType>;
-  latestSkillRatings: Map<Skill, Pick<SkillRating, `rating` | `createdAt`>>;
+  skillSrsStates: ReadonlyMap<Skill, SrsStateType>;
+  latestSkillRatings: ReadonlyMap<Skill, LatestSkillRating>;
   isStructuralHanziWord: (hanziWord: HanziWord) => boolean;
   now?: Date;
+  maxQueueItems?: number;
 }): SkillReviewQueue {
   // Kahn topological sort
   const inDegree = new Map<Skill, number>();
@@ -675,6 +693,10 @@ export function skillReviewQueue({
   const learningOrderBlocked: Skill[] = [];
   let newOverDueAt: Date | null = null;
   let newDueAt: Date | null = null;
+
+  const perfMilestone = startPerformanceMilestones(
+    `skillReviewQueue` satisfies NameOf<typeof skillReviewQueue>,
+  );
 
   function enqueueReviewOnce(
     skill: Skill,
@@ -715,6 +737,8 @@ export function skillReviewQueue({
     }
   }
 
+  perfMilestone(`enqueueReview`);
+
   // Add already introduced skills to the learning order, unless they're too
   // stale and probably forgotten.
   for (const [skill, srsState] of skillSrsStates) {
@@ -722,6 +746,8 @@ export function skillReviewQueue({
       enqueueReviewOnce(skill, srsState);
     }
   }
+
+  perfMilestone(`computeInDegrees`);
 
   // Compute in-degree
   for (const [skill, node] of graph.entries()) {
@@ -733,6 +759,8 @@ export function skillReviewQueue({
       inDegree.set(dependency, (inDegree.get(dependency) ?? 0) + 1);
     }
   }
+
+  perfMilestone(`findZeroInDegreeNodes`);
 
   const hasStableDependencies = memoize1((skill: Skill): boolean => {
     for (const dep of graph.get(skill)?.dependencies ?? emptySet) {
@@ -752,6 +780,8 @@ export function skillReviewQueue({
       queue.push(skill);
     }
   }
+
+  perfMilestone(`processQueue`);
 
   // Process queue
   while (queue.length > 0) {
@@ -774,11 +804,14 @@ export function skillReviewQueue({
     }
   }
 
+  perfMilestone(`countUnstableSkills`);
+
   // At this point there's an unbounded number of new skills, so we need to
   // enforce a throttle to avoid overwhelming the user with too many new skills
   // in a short period of time. So only take a fixed amount of the new
   // candidates and mark the rest as blocked.
-  const learningOrderNew: Skill[] = [];
+  const learningOrderNewContent: Skill[] = [];
+  const learningOrderNewDifficulty: Skill[] = [];
 
   // Calculate how many unstable skills there are for each skill kind.
   const unstableSkillCounts = new Map<SkillKind, number>();
@@ -791,6 +824,29 @@ export function skillReviewQueue({
     }
   }
 
+  perfMilestone(`segmentWordsAndComponents`);
+
+  // The candidates come out in reverse order from the above algorithm, so flip
+  // them so that it's in proper queue order.
+  learningOrderNewCandidates.reverse();
+
+  // Split out components ("structural") and words, so that words are prioritized first for
+  // learning as they're more useful to people trying to apply their knowledge.
+  const learningOrderNewWordCandidates: Skill[] = [];
+  const learningOrderNewComponentCandidates: Skill[] = [];
+  for (const skill of learningOrderNewCandidates) {
+    if (
+      isHanziWordSkill(skill) &&
+      isStructuralHanziWord(hanziWordFromSkill(skill))
+    ) {
+      learningOrderNewComponentCandidates.push(skill);
+    } else {
+      learningOrderNewWordCandidates.push(skill);
+    }
+  }
+
+  perfMilestone(`segmentNewSkills`);
+
   // Check if introducing a skill would be too overwhelming. There is a limit on
   // how many unstable skills can be introduced at once. This is to avoid
   // overwhelming the user with too many new skills at once.
@@ -801,52 +857,41 @@ export function skillReviewQueue({
     const throttleLimit = 15;
     return (
       (unstableSkillCounts.get(skillKindFromSkill(skill)) ?? 0) +
-        learningOrderNew.length <
+        (learningOrderNewContent.length + learningOrderNewDifficulty.length) <
       throttleLimit
     );
   }
 
-  // The candidates come out in reverse order from the above algorithm, so flip
-  // them so that it's in proper queue order.
-  learningOrderNewCandidates.reverse();
-
-  // Push components to the end of the list, so that words are prioritized for
-  // learning as they're more useful to people trying to apply their knowledge.
-  learningOrderNewCandidates.sort((a, b) => {
-    const aRank =
-      isHanziWordSkill(a) && isStructuralHanziWord(hanziWordFromSkill(a))
-        ? 1
-        : 0;
-    const bRank =
-      isHanziWordSkill(b) && isStructuralHanziWord(hanziWordFromSkill(b))
-        ? 1
-        : 0;
-
-    return aRank - bRank;
-  });
-
-  for (const skill of learningOrderNewCandidates) {
-    if (hasLearningCapacityForNewSkill(skill)) {
-      learningOrderNew.push(skill);
-    } else {
-      learningOrderBlocked.push(skill);
+  for (const skillGroup of [
+    learningOrderNewWordCandidates,
+    learningOrderNewComponentCandidates,
+  ]) {
+    for (const skill of skillGroup) {
+      if (hasLearningCapacityForNewSkill(skill)) {
+        if (isHarderDifficultyStyleSkillKind(skillKindFromSkill(skill))) {
+          learningOrderNewDifficulty.push(skill);
+        } else {
+          learningOrderNewContent.push(skill);
+        }
+      } else {
+        learningOrderBlocked.push(skill);
+      }
     }
   }
+  learningOrderBlocked.reverse();
 
-  // Put the retry items in the correct order.
-  const retryItems = learningOrderRetry
-    .sort(sortComparatorDate(([, when]) => when))
-    .map(([skill]) => skill);
-  retryItems.reverse();
+  perfMilestone(`recentSkillRatingHistory`);
 
-  const recentSkillRatingHistory = [...latestSkillRatings.entries()]
-    .sort(
-      inverseSortComparator(
-        sortComparatorDate(([, { createdAt }]) => createdAt),
-      ),
-    )
-    .slice(0, 20) // only consider a fixed number of recent ratings to limit computation.
-    .map(([skill, { createdAt, rating }]) => ({ skill, createdAt, rating }));
+  const recentSkillRatingHistoryHeap = new MinHeap<LatestSkillRating>(
+    inverseSortComparator(sortComparatorDate(({ createdAt }) => createdAt)),
+    20,
+  );
+  for (const rating of latestSkillRatings.values()) {
+    recentSkillRatingHistoryHeap.insert(rating);
+  }
+  const recentSkillRatingHistory = recentSkillRatingHistoryHeap.toArray();
+
+  perfMilestone(`reactiveItems`);
 
   const reactiveItems = [
     // Check if we should prioritize a pronunciation skill after successful hanzi-to-english review
@@ -870,7 +915,11 @@ export function skillReviewQueue({
     ([skill]) => !reactiveItems.includes(skill),
   );
   mutableArrayFilter(
-    learningOrderNew,
+    learningOrderNewContent,
+    (skill) => !reactiveItems.includes(skill),
+  );
+  mutableArrayFilter(
+    learningOrderNewDifficulty,
     (skill) => !reactiveItems.includes(skill),
   );
   mutableArrayFilter(
@@ -878,47 +927,103 @@ export function skillReviewQueue({
     ([skill]) => !reactiveItems.includes(skill),
   );
 
-  const items = [
-    // First do incorrect answers that need to be retried.
-    ...retryItems,
-    // Then do any prioritized reactive items.
-    ...reactiveItems,
-    // Then do over-due skills, by the most due (oldest date) first.
-    ...learningOrderOverDue
-      .sort(sortComparatorDate(([, due]) => due))
-      .map(([skill]) => skill),
-    // Then do due skills, by the most due (oldest date) first.
-    ...learningOrderDue
-      .sort(sortComparatorDate(([, due]) => due))
-      .map(([skill]) => skill),
-    // Then do new skills in the order of the learning graph.
-    ...learningOrderNew,
-    // Finally sort the not-due skills.
-    ...randomSortSkills(learningOrderNotDue),
-  ];
+  perfMilestone(`queueItems`);
 
-  learningOrderBlocked.reverse();
+  // Build items array and track index ranges
+  const items: SkillReviewQueueItem[] = [];
 
-  // Separate new skills by type
-  const newSkills = learningOrderNew.filter(
-    (skill) => !isHarderDifficultyStyleSkillKind(skillKindFromSkill(skill)),
-  );
-  const newDifficultySkills = learningOrderNew.filter((skill) =>
-    isHarderDifficultyStyleSkillKind(skillKindFromSkill(skill)),
-  );
+  // 1. Retry items
+  for (const [skill] of topK(
+    learningOrderRetry,
+    maxQueueItems - items.length,
+    inverseSortComparator(sortComparatorDate(([, x]) => x)),
+  )) {
+    items.push({ skill, flag: { kind: QuestionFlagKind.Retry } });
+  }
 
-  return {
-    items,
-    blockedItems: learningOrderBlocked,
-    retryCount: learningOrderRetry.length,
-    dueCount: learningOrderDue.length,
-    overDueCount: learningOrderOverDue.length,
-    newContentCount: newSkills.length,
-    newDifficultyCount: newDifficultySkills.length,
-    newCount: learningOrderNew.length, // Maintain backward compatibility
-    newDueAt,
-    newOverDueAt,
-  };
+  // 2. Reactive items
+  for (const skill of reactiveItems.slice(0, maxQueueItems - items.length)) {
+    items.push({ skill });
+  }
+
+  // 3. Overdue items
+  for (const [skill] of topK(
+    learningOrderOverDue,
+    maxQueueItems - items.length,
+    inverseSortComparator(sortComparatorDate(([, x]) => x)),
+  )) {
+    const srsState = nonNullable(skillSrsStates.get(skill));
+    const overDueDate = add(srsState.nextReviewAt, skillDueWindow);
+    items.push({
+      skill,
+      flag: {
+        kind: QuestionFlagKind.Overdue,
+        interval: interval(overDueDate.getTime(), now),
+      },
+    });
+  }
+
+  // 4. Due items
+  for (const [skill] of topK(
+    learningOrderDue,
+    maxQueueItems - items.length,
+    sortComparatorDate(([, x]) => x),
+  )) {
+    items.push({ skill });
+  }
+
+  // 5. New content items
+  for (const skill of learningOrderNewContent.slice(
+    0,
+    maxQueueItems - items.length,
+  )) {
+    items.push({ skill, flag: { kind: QuestionFlagKind.NewSkill } });
+  }
+
+  // 6. New difficulty items
+  for (const skill of learningOrderNewDifficulty.slice(
+    0,
+    maxQueueItems - items.length,
+  )) {
+    items.push({ skill, flag: { kind: QuestionFlagKind.NewDifficulty } });
+  }
+
+  // 7. Not due items
+  for (const [skill] of topK(
+    randomWeightSkills(learningOrderNotDue),
+    maxQueueItems - items.length,
+    sortComparatorNumber(([, x]) => x),
+  )) {
+    items.push({ skill });
+  }
+
+  // 8. Blocked items
+  for (const skill of learningOrderBlocked.slice(
+    0,
+    maxQueueItems - items.length,
+  )) {
+    items.push({ skill, flag: { kind: QuestionFlagKind.Blocked } });
+  }
+
+  perfMilestone(`prepareFinalResult`);
+
+  invariant(items.length <= maxQueueItems);
+
+  try {
+    return {
+      items,
+      blockedCount: learningOrderBlocked.length,
+      retryCount: learningOrderRetry.length,
+      dueCount: learningOrderDue.length,
+      overDueCount: learningOrderOverDue.length,
+      newContentCount: learningOrderNewContent.length,
+      newDifficultyCount: learningOrderNewDifficulty.length,
+      newDueAt,
+      newOverDueAt,
+    };
+  } finally {
+    perfMilestone();
+  }
 }
 
 export function* walkSkillAndDependencies(
@@ -949,7 +1054,7 @@ export function* walkSkillAndDependencies(
 }
 
 /**
- * Randomly sort skills for review based on their SRS state to form a
+ * Randomly weight skills for review based on their SRS state to form a
  * probability distribution weighted by each skill's difficulty. It's designed
  * to be efficient and deterministic so it can be tested and predictable. In
  * practice it probably doesn't make sense to compute all of the upcoming skills
@@ -960,7 +1065,9 @@ export function* walkSkillAndDependencies(
  * @param skillStates
  * @returns
  */
-const randomSortSkills = (skillStates: [Skill, SrsStateType | undefined][]) => {
+const randomWeightSkills = (
+  skillStates: readonly [Skill, SrsStateType | undefined][],
+): [Skill, number][] => {
   let totalWeight = 0;
 
   const weighted = skillStates.map(([skill, srsState]): [Skill, number] => {
@@ -990,10 +1097,7 @@ const randomSortSkills = (skillStates: [Skill, SrsStateType | undefined][]) => {
     x[1] = random() / normalizedWeight;
   }
 
-  // Order the skills
-  weighted.sort(sortComparatorNumber(([, weight]) => weight));
-
-  return weighted.map(([skill]) => skill);
+  return weighted;
 };
 
 const skillKindShorthandMapping: Record<SkillKind, string> = {

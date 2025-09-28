@@ -1,5 +1,5 @@
-import { isHarderDifficultyStyleSkillKind } from "#data/skills.ts";
 import { SkillKind } from "#data/model.ts";
+import { isHarderDifficultyStyleSkillKind } from "#data/skills.ts";
 import { describe, expect, test } from "vitest";
 
 describe(`Quiz flag and lozenge integration`, () => {
@@ -34,17 +34,11 @@ describe(`Quiz flag and lozenge integration`, () => {
       `newDifficultyCount` extends keyof import("#data/skills.ts").SkillReviewQueue
         ? true
         : false;
-    type HasNewCount =
-      `newCount` extends keyof import("#data/skills.ts").SkillReviewQueue
-        ? true
-        : false;
 
     const hasNewContentCount: HasNewContentCount = true;
     const hasNewDifficultyCount: HasNewDifficultyCount = true;
-    const hasNewCount: HasNewCount = true; // Backward compatibility
 
     expect(hasNewContentCount).toBe(true);
     expect(hasNewDifficultyCount).toBe(true);
-    expect(hasNewCount).toBe(true);
   });
 });

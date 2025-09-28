@@ -1,9 +1,8 @@
 tasks:
-  test:
-    command: vitest
+  bench:
+    command: vitest bench
     inputs:
       - "**/*"
-      - "/.github/workflows" # There is a test that checks workflow environment variables.
       - "/yarn.lock" # Dependencies can change behaviour
     env:
       NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS

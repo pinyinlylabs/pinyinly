@@ -5,12 +5,14 @@ import {
   memoize1,
   merge,
   mergeSortComparators,
+  MinHeap,
   mutableArrayFilter,
   objectInvert,
   objectMap,
   objectMapToArray,
   sortComparatorNumber,
   sortComparatorString,
+  topK,
 } from "#collections.ts";
 import type { IsEqual } from "#types.ts";
 import { describe, expect, test } from "vitest";
@@ -350,3 +352,89 @@ describe(
     });
   },
 );
+
+describe(`MinHeap` satisfies HasNameOf<typeof MinHeap>, () => {
+  test(`returns top-k largest items for numbers`, () => {
+    const heap = new MinHeap<number>((a, b) => a - b, 3);
+    for (const n of [5, 1, 9, 3, 7, 2]) {
+      heap.insert(n);
+    }
+    const result = heap.toArray();
+    expect(result).toEqual([5, 7, 9]);
+  });
+
+  test(`returns all items if less than capacity`, () => {
+    const heap = new MinHeap<number>((a, b) => a - b, 5);
+    for (const n of [2, 4, 1]) {
+      heap.insert(n);
+    }
+    expect(heap.toArray()).toEqual([1, 2, 4]);
+  });
+
+  test(`handles duplicate values`, () => {
+    const heap = new MinHeap<number>((a, b) => a - b, 3);
+    for (const n of [2, 2, 2, 2]) {
+      heap.insert(n);
+    }
+    expect(heap.toArray()).toEqual([2, 2, 2]);
+  });
+
+  test(`returns top-k objects by property`, () => {
+    type Obj = { v: number };
+    const heap = new MinHeap<Obj>((a, b) => a.v - b.v, 2);
+    heap.insert({ v: 10 });
+    heap.insert({ v: 5 });
+    heap.insert({ v: 20 });
+    heap.insert({ v: 15 });
+    const result = heap.toArray().map((x) => x.v);
+    expect(result).toEqual([15, 20]);
+  });
+
+  test(`does not insert if comparator returns 0 and at capacity`, () => {
+    const heap = new MinHeap<number>((a, b) => a - b, 2);
+    heap.insert(1);
+    heap.insert(1);
+    heap.insert(1);
+    expect(heap.toArray()).toEqual([1, 1]);
+  });
+
+  test(`handles empty heap`, () => {
+    const heap = new MinHeap<number>((a, b) => a - b, 3);
+    expect(heap.toArray()).toEqual([]);
+  });
+});
+
+describe(`topK suite` satisfies HasNameOf<typeof topK>, () => {
+  test(`returns top-k largest numbers`, () => {
+    const result = [...topK([5, 1, 9, 3, 7, 2], 3, sortComparatorNumber())];
+    expect(result).toEqual([5, 7, 9]);
+  });
+
+  test(`returns all items when capacity exceeds length`, () => {
+    const result = [...topK([2, 4, 1], 5, sortComparatorNumber())];
+    expect(result).toEqual([1, 2, 4]);
+  });
+
+  test(`returns empty iterable when capacity is zero`, () => {
+    const result = [...topK([1, 2, 3], 0, sortComparatorNumber())];
+    expect(result).toEqual([]);
+  });
+
+  test(`works with comparator on object properties`, () => {
+    const items = [{ value: 10 }, { value: 5 }, { value: 20 }, { value: 15 }];
+    const result = [
+      ...topK(
+        items,
+        3,
+        sortComparatorNumber((x) => x.value),
+      ),
+    ].map((item) => item.value);
+
+    expect(result).toEqual([10, 15, 20]);
+  });
+
+  test(`handles duplicate values consistently`, () => {
+    const result = [...topK([3, 3, 2, 2, 1], 3, sortComparatorNumber())];
+    expect(result).toEqual([2, 3, 3]);
+  });
+});

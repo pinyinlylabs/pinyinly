@@ -4,7 +4,7 @@ import type {
   DeviceStoreEntityOutput,
 } from "@/client/deviceStore";
 import { buildDeviceStoreKey, deviceStoreSet } from "@/client/deviceStore";
-import { deviceStoryQuery } from "@/client/query";
+import { deviceStoreQuery } from "@/client/query";
 import { DeviceStoreProvider } from "@/client/ui/DeviceStoreProvider";
 import type { RizzleEntityInput, RizzleEntityMarshaled } from "@/util/rizzle";
 import { nonNullable } from "@pinyinly/lib/invariant";
@@ -18,7 +18,7 @@ import { windowEventListenerEffect } from "./windowEventListenerEffect";
  */
 export const useDeviceStoreQuery = (key: DeviceStoreEntity) => {
   const queryClient = useDeviceStoreQueryClient();
-  const query = deviceStoryQuery(key);
+  const query = deviceStoreQuery(key);
   const storageKey = buildDeviceStoreKey(key);
 
   // Synchronise localStorage changes from other browser tabs.
@@ -60,7 +60,7 @@ export const useDeviceStoreQuery = (key: DeviceStoreEntity) => {
  */
 export const useDeviceStoreMutation = <T extends DeviceStoreEntity>(key: T) => {
   const queryClient = useDeviceStoreQueryClient();
-  const query = deviceStoryQuery(key);
+  const query = deviceStoreQuery(key);
 
   return useMutation(
     {
