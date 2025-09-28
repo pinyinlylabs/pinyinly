@@ -487,33 +487,7 @@ describe(
           [skillB, { skill: skillB, dependencies: new Set() }],
           [skillC, { skill: skillC, dependencies: new Set() }],
         ]);
-
-        const skillSrsStates = new Map(
-          Object.entries({
-            [skillA]: {
-              nextReviewAt: new Date(),
-              stability: 0.5,
-              kind: SrsKind.FsrsFourPointFive,
-              difficulty: 1,
-              prevReviewAt: new Date(),
-            },
-            [skillB]: {
-              nextReviewAt: new Date(),
-              stability: 0.5,
-              kind: SrsKind.FsrsFourPointFive,
-              difficulty: 1,
-              prevReviewAt: new Date(),
-            },
-            [skillC]: {
-              nextReviewAt: new Date(),
-              stability: 0.5,
-              kind: SrsKind.FsrsFourPointFive,
-              difficulty: 1,
-              prevReviewAt: new Date(),
-            },
-          }),
-        ) as Map<Skill, SrsStateType>;
-
+        const skillSrsStates = new Map<Skill, SrsStateType>();
         const latestSkillRatings = new Map<Skill, LatestSkillRating>();
 
         return {
@@ -536,14 +510,13 @@ describe(
             skillSrsStates,
             latestSkillRatings,
             isStructuralHanziWord,
-            maxQueueItems: 2,
+            maxQueueItems: 1,
           });
 
           expect(queue.items.length).toBeLessThanOrEqual(2);
           expect(prettyQueue(queue)).toMatchInlineSnapshot(`
             [
-              "he:A:a",
-              "he:B:b",
+              "he:C:c (🌱 NEW SKILL)",
             ]
           `);
         },
@@ -562,12 +535,11 @@ describe(
             maxQueueItems: Infinity,
           });
 
-          expect(queue.items.length).toBe(3);
+          expect(queue.items.length).toBe(2);
           expect(prettyQueue(queue)).toMatchInlineSnapshot(`
             [
-              "he:A:a",
-              "he:B:b",
-              "he:C:c",
+              "he:C:c (🌱 NEW SKILL)",
+              "he:B:b (🌱 NEW SKILL)",
             ]
           `);
         },
