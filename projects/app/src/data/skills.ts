@@ -394,16 +394,18 @@ export function pinyinInitialAssociation(
   return `${rSkillKind().marshal(SkillKind.PinyinInitialAssociation)}:${initial}` as PinyinInitialAssociationSkill;
 }
 
+export type SkillReviewQueueItem = { skill: Skill };
+
 export interface SkillReviewQueue {
   /**
    * The skills in the review queue.
    */
-  items: readonly Skill[];
+  items: SkillReviewQueueItem[];
   /**
    * Skills that are blocked from being reviewed (or introduced) because their
    * dependencies aren't met yet.
    */
-  blockedItems: readonly Skill[];
+  blockedItems: Skill[];
   /**
    * The number of items in the queue that need to be retried because they were
    * answered incorrectly.
@@ -1019,6 +1021,12 @@ export function skillReviewQueue({
     );
   }
 
+  const itemsWithFlags: SkillReviewQueueItem[] = items.map(
+    (skill): SkillReviewQueueItem => {
+      return { skill };
+    },
+  );
+
   perfMilestone(`prepareFinalResult`);
 
   // Create index ranges
@@ -1032,11 +1040,11 @@ export function skillReviewQueue({
     notDue: { start: notDueStart, end: notDueEnd },
   };
 
-  invariant(items.length <= maxQueueItems);
+  invariant(itemsWithFlags.length <= maxQueueItems);
 
   try {
     return {
-      items,
+      items: itemsWithFlags,
       blockedItems: learningOrderBlocked,
       retryCount: learningOrderRetry.length,
       dueCount: learningOrderDue.length,

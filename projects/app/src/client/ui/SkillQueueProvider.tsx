@@ -11,8 +11,9 @@ import { useLiveQuery } from "@tanstack/react-db";
 import { useQuery } from "@tanstack/react-query";
 import type { PropsWithChildren } from "react";
 import { createContext, useEffect, useMemo, useState } from "react";
+import type { DeepReadonly } from "ts-essentials";
 
-export type SkillQueueContextValue =
+export type SkillQueueContextValue = DeepReadonly<
   | {
       loading: false;
       reviewQueue: SkillReviewQueue;
@@ -21,7 +22,8 @@ export type SkillQueueContextValue =
     }
   | {
       loading: true;
-    };
+    }
+>;
 
 const Context = createContext<SkillQueueContextValue | null>(null);
 

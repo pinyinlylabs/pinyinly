@@ -69,7 +69,8 @@ rizzleTest(
 
     const { items, blockedItems } = result.current.reviewQueue;
 
-    expect(items).toMatchInlineSnapshot(`
+    const itemSkills = items.map(({ skill }) => skill);
+    expect(itemSkills).toMatchInlineSnapshot(`
       [
         "he:一:one",
         "he:人:person",

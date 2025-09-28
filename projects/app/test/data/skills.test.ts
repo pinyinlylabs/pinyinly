@@ -406,7 +406,7 @@ describe(
         ).toMatchObject({
           blockedItems: [],
           dueCount: 1,
-          items: [`he:刀:knife`],
+          items: [{ skill: `he:刀:knife` }],
           newContentCount: 0,
           newDifficultyCount: 0,
           overDueCount: 0,
@@ -436,13 +436,13 @@ describe(
           items: [
             // This would normally be blocked but because it's already introduced
             // (because there's an srs state for it) it's available.
-            `he:刀:knife`,
+            { skill: `he:刀:knife` },
 
             // These would normally come first in the queue because they're
             // dependencies of he:刀:knife, but he:刀:knife is first because it's
             // "due" while these are not yet.
-            `he:丿:slash`,
-            `he:𠃌:radical`,
+            { skill: `he:丿:slash` },
+            { skill: `he:𠃌:radical` },
           ],
           newContentCount: 2,
           newDifficultyCount: 0,
@@ -468,9 +468,15 @@ describe(
 
         expect(queue.items).toMatchInlineSnapshot(`
           [
-            "he:人:person",
-            "he:𠃌:radical",
-            "he:丿:slash",
+            {
+              "skill": "he:人:person",
+            },
+            {
+              "skill": "he:𠃌:radical",
+            },
+            {
+              "skill": "he:丿:slash",
+            },
           ]
         `);
       },
@@ -541,8 +547,12 @@ describe(
           expect(queue.items.length).toBeLessThanOrEqual(2);
           expect(queue.items).toMatchInlineSnapshot(`
             [
-              "he:A:a",
-              "he:B:b",
+              {
+                "skill": "he:A:a",
+              },
+              {
+                "skill": "he:B:b",
+              },
             ]
           `);
         },
@@ -564,9 +574,15 @@ describe(
           expect(queue.items.length).toBe(3);
           expect(queue.items).toMatchInlineSnapshot(`
             [
-              "he:A:a",
-              "he:B:b",
-              "he:C:c",
+              {
+                "skill": "he:A:a",
+              },
+              {
+                "skill": "he:B:b",
+              },
+              {
+                "skill": "he:C:c",
+              },
             ]
           `);
         },
@@ -590,7 +606,7 @@ describe(
               isStructuralHanziWord,
             }),
           ).toMatchObject({
-            items: [`he:子:child`, `he:女:woman`],
+            items: [{ skill: `he:子:child` }, { skill: `he:女:woman` }],
             blockedItems: [`he:好:good`],
           });
         });
@@ -610,7 +626,11 @@ describe(
                 isStructuralHanziWord,
               }),
             ).toMatchObject({
-              items: [`he:又:again`, `he:丿:slash`, `he:亅:hook`],
+              items: [
+                { skill: `he:又:again` },
+                { skill: `he:丿:slash` },
+                { skill: `he:亅:hook` },
+              ],
               blockedItems: [
                 `he:水:water`, // learns this because of 氵
                 `he:氵:water`,
@@ -637,16 +657,26 @@ describe(
 
           expect(items).toMatchInlineSnapshot(`
             [
-              "he:八:eight",
-              "he:丿:slash",
-              "he:𠃌:radical",
+              {
+                "skill": "he:八:eight",
+              },
+              {
+                "skill": "he:丿:slash",
+              },
+              {
+                "skill": "he:𠃌:radical",
+              },
             ]
           `);
 
           // Make sure 𠃌 didn't jump the queue before 八 because it hasn't been
           // introduced yet, instead they should have to answer 八 again.
-          const 𠃌Index = items.indexOf(`he:𠃌:radical`);
-          const 八Index = items.indexOf(`he:八:eight`);
+          const 𠃌Index = items.findIndex(
+            ({ skill }) => skill === `he:𠃌:radical`,
+          );
+          const 八Index = items.findIndex(
+            ({ skill }) => skill === `he:八:eight`,
+          );
 
           // he:八:eight should be scheduled before he:𠃌:radical
           expect(𠃌Index).toBeGreaterThan(八Index);
@@ -659,7 +689,11 @@ describe(
           });
 
           expect(reviewQueue).toMatchObject({
-            items: [`he:八:eight`, `he:𠃌:radical`, `he:丿:slash`],
+            items: [
+              { skill: `he:八:eight` },
+              { skill: `he:𠃌:radical` },
+              { skill: `he:丿:slash` },
+            ],
             blockedItems: [`he:刀:knife`, `he:分:divide`],
           });
         });
@@ -713,7 +747,7 @@ describe(
               targetSkills,
               history,
             });
-            expect(items).toContain(`he:刀:knife`);
+            expect(items).toContainEqual({ skill: `he:刀:knife` });
             expect(blockedItems).toEqual([]);
           }
         });
@@ -756,10 +790,10 @@ describe(
             });
             expect(queue).toMatchObject({
               items: [
-                `he:刀:knife`,
+                { skill: `he:刀:knife` },
                 // These come later because he:刀:knife is due.
-                `he:丿:slash`,
-                `he:𠃌:radical`,
+                { skill: `he:丿:slash` },
+                { skill: `he:𠃌:radical` },
               ],
               blockedItems: [],
               retryCount: 1,
@@ -778,7 +812,7 @@ describe(
               history,
             });
             expect(queue).toMatchObject({
-              items: [`he:丿:slash`, `he:𠃌:radical`],
+              items: [{ skill: `he:丿:slash` }, { skill: `he:𠃌:radical` }],
               blockedItems: [
                 // Now this comes last because it's "stale" and reset to new.
                 `he:刀:knife`,
@@ -816,8 +850,8 @@ describe(
                 blockedItems: [],
                 dueCount: 1,
                 items: [
-                  `he:丿:slash`, // hoisted to the top for retry
-                  `he:八:eight`,
+                  { skill: `he:丿:slash` }, // hoisted to the top for retry
+                  { skill: `he:八:eight` },
                 ],
 
                 newContentCount: 0,
@@ -849,7 +883,7 @@ describe(
               ).toMatchObject({
                 blockedItems: [],
                 dueCount: 1,
-                items: [`he:八:eight`, `he:丿:slash`],
+                items: [{ skill: `he:八:eight` }, { skill: `he:丿:slash` }],
                 newContentCount: 1,
                 newDifficultyCount: 0,
                 overDueCount: 0,
@@ -881,7 +915,7 @@ describe(
               ).toMatchObject({
                 blockedItems: [],
                 dueCount: 0,
-                items: [`he:八:eight`, `he:丿:slash`],
+                items: [{ skill: `he:八:eight` }, { skill: `he:丿:slash` }],
 
                 newContentCount: 0,
                 newDifficultyCount: 0,
@@ -906,7 +940,7 @@ describe(
               ).toMatchObject({
                 blockedItems: [],
                 dueCount: 0,
-                items: [`he:丿:slash`, `he:八:eight`],
+                items: [{ skill: `he:丿:slash` }, { skill: `he:八:eight` }],
 
                 newContentCount: 0,
                 newDifficultyCount: 0,
@@ -957,14 +991,16 @@ describe(
               });
 
               // The pronunciation skill should be prioritized first, despite other skills being due
-              expect(queue.items[0]).toBe(`hp:好:good`);
+              expect(queue.items[0]).toEqual({ skill: `hp:好:good` });
               // Without prioritization, he:八:eight (-8m) would normally come before hp:好:good (-10m)
               // because due skills are sorted by most overdue first, but hp:好:good is prioritized
-              expect(queue.items.indexOf(`hp:好:good`)).toBeLessThan(
-                queue.items.indexOf(`he:八:eight`),
+              expect(
+                queue.items.findIndex(({ skill }) => skill === `hp:好:good`),
+              ).toBeLessThan(
+                queue.items.findIndex(({ skill }) => skill === `he:八:eight`),
               );
-              expect(queue.items).toContain(`he:好:good`);
-              expect(queue.items).toContain(`he:人:person`);
+              expect(queue.items).toContainEqual({ skill: `he:好:good` });
+              expect(queue.items).toContainEqual({ skill: `he:人:person` });
             },
           );
 
@@ -996,10 +1032,10 @@ describe(
               });
 
               // Normal ordering should apply based on overdue time, no special prioritization
-              expect(queue.items[0]).toBe(`hp:好:good`); // most overdue (-10m)
-              expect(queue.items[1]).toBe(`he:八:eight`); // second most overdue (-8m)
-              expect(queue.items[2]).toBe(`he:好:good`); // third most overdue (-5m)
-              expect(queue.items[3]).toBe(`he:人:person`); // least overdue (-3m)
+              expect(queue.items[0]).toEqual({ skill: `hp:好:good` }); // most overdue (-10m)
+              expect(queue.items[1]).toEqual({ skill: `he:八:eight` }); // second most overdue (-8m)
+              expect(queue.items[2]).toEqual({ skill: `he:好:good` }); // third most overdue (-5m)
+              expect(queue.items[3]).toEqual({ skill: `he:人:person` }); // least overdue (-3m)
             },
           );
 
@@ -1040,10 +1076,10 @@ describe(
               });
 
               // Normal ordering should apply, he:好:good goes to retry section, others by overdue time
-              expect(queue.items[0]).toBe(`he:好:good`); // retry comes first
-              expect(queue.items[1]).toBe(`hp:好:good`); // most overdue in due section
-              expect(queue.items[2]).toBe(`he:八:eight`); // second most overdue
-              expect(queue.items[3]).toBe(`he:人:person`); // least overdue
+              expect(queue.items[0]).toEqual({ skill: `he:好:good` }); // retry comes first
+              expect(queue.items[1]).toEqual({ skill: `hp:好:good` }); // most overdue in due section
+              expect(queue.items[2]).toEqual({ skill: `he:八:eight` }); // second most overdue
+              expect(queue.items[3]).toEqual({ skill: `he:人:person` }); // least overdue
             },
           );
 
@@ -1081,11 +1117,11 @@ describe(
               });
 
               // The pronunciation skill should be prioritized first, even though it was not due yet
-              expect(queue.items[0]).toBe(`hp:好:good`);
+              expect(queue.items[0]).toEqual({ skill: `hp:好:good` });
               // The due skill comes after the prioritized pronunciation skill
-              expect(queue.items[1]).toBe(`he:好:good`);
+              expect(queue.items[1]).toEqual({ skill: `he:好:good` });
               // New skills follow
-              expect(queue.items).toContain(`he:人:person`);
+              expect(queue.items).toContainEqual({ skill: `he:人:person` });
             },
           );
         });
@@ -1109,12 +1145,11 @@ describe(
             blockedItems: [`he:分:divide`],
             dueCount: 2,
             items: [
-              `he:八:eight`,
-              `he:刀:knife`,
-              `he:丿:slash`,
-              `he:𠃌:radical`,
+              { skill: `he:八:eight` },
+              { skill: `he:刀:knife` },
+              { skill: `he:丿:slash` },
+              { skill: `he:𠃌:radical` },
             ],
-
             newContentCount: 2,
             newDifficultyCount: 0,
             overDueCount: 0,
@@ -1135,7 +1170,11 @@ describe(
               isStructuralHanziWord: () => false,
             }),
           ).toMatchObject({
-            items: [`he:丿:slash`, `he:𠃌:radical`, `he:八:eight`],
+            items: [
+              { skill: `he:丿:slash` },
+              { skill: `he:𠃌:radical` },
+              { skill: `he:八:eight` },
+            ],
             blockedItems: [`he:刀:knife`, `he:分:divide`],
           });
         });
@@ -1163,11 +1202,11 @@ describe(
               blockedItems: [`he:分:divide`],
               dueCount: 2,
               items: [
-                `he:一:one`,
-                `he:𠃌:radical`,
-                `he:丿:slash`,
-                `he:刀:knife`,
-                `he:八:eight`,
+                { skill: `he:一:one` },
+                { skill: `he:𠃌:radical` },
+                { skill: `he:丿:slash` },
+                { skill: `he:刀:knife` },
+                { skill: `he:八:eight` },
               ],
 
               newContentCount: 1,
@@ -1266,7 +1305,7 @@ describe(
               isStructuralHanziWord,
             }),
           ).toMatchObject({
-            items: [`he:子:child`, `he:女:woman`],
+            items: [{ skill: `he:子:child` }, { skill: `he:女:woman` }],
             blockedItems: [
               `he:好:good`,
               `hpi:好:good`,
@@ -1296,7 +1335,7 @@ describe(
             skillKindFromSkill(s) === SkillKind.HanziWordToPinyinTyped;
 
           const onlyHpQueue = {
-            items: queue.items.filter((s) => isHpSkill(s)),
+            items: queue.items.filter(({ skill }) => isHpSkill(skill)),
             blockedItems: queue.blockedItems.filter((s) => isHpSkill(s)),
           };
 
@@ -1321,12 +1360,12 @@ describe(
           }),
         ).toMatchObject({
           items: [
-            `he:人:person`,
-            `he:八:eight`,
-            `he:口:mouth`,
-            `he:乚:hidden`,
-            `he:丿:slash`,
-            `he:一:one`,
+            { skill: `he:人:person` },
+            { skill: `he:八:eight` },
+            { skill: `he:口:mouth` },
+            { skill: `he:乚:hidden` },
+            { skill: `he:丿:slash` },
+            { skill: `he:一:one` },
           ],
           blockedItems: [
             `he:火:fire`,
@@ -1359,22 +1398,30 @@ describe(
             targetSkills: [`hp:一:one`],
           });
 
-          expect(
-            skillReviewQueue({
+          {
+            const { items, blockedItems } = skillReviewQueue({
               graph,
               skillSrsStates: new Map(),
               latestSkillRatings: latestSkillRatings(),
               isStructuralHanziWord,
-            }),
-          ).toMatchObject({
-            items: [`he:一:one`],
-            blockedItems: [
-              `hpi:一:one`,
-              `hpf:一:one`,
-              `hpt:一:one`,
-              `hp:一:one`,
-            ],
-          });
+            });
+
+            const itemSkills = items.map(({ skill }) => skill);
+
+            expect(itemSkills).toMatchInlineSnapshot(`
+              [
+                "he:一:one",
+              ]
+            `);
+            expect(blockedItems).toMatchInlineSnapshot(`
+              [
+                "hpi:一:one",
+                "hpf:一:one",
+                "hpt:一:one",
+                "hp:一:one",
+              ]
+            `);
+          }
 
           expect(
             skillReviewQueue({
@@ -1388,8 +1435,7 @@ describe(
           ).toMatchObject({
             blockedItems: [`hpf:一:one`, `hpt:一:one`, `hp:一:one`],
             dueCount: 1,
-            items: [`he:一:one`, `hpi:一:one`],
-
+            items: [{ skill: `he:一:one` }, { skill: `hpi:一:one` }],
             newContentCount: 1,
             newDifficultyCount: 0,
             overDueCount: 0,
@@ -1409,8 +1455,11 @@ describe(
           ).toMatchObject({
             blockedItems: [`hpt:一:one`, `hp:一:one`],
             dueCount: 2,
-            items: [`he:一:one`, `hpi:一:one`, `hpf:一:one`],
-
+            items: [
+              { skill: `he:一:one` },
+              { skill: `hpi:一:one` },
+              { skill: `hpf:一:one` },
+            ],
             newContentCount: 0,
             newDifficultyCount: 1,
             overDueCount: 0,

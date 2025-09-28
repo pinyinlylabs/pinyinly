@@ -1,5 +1,6 @@
 import { add } from "date-fns/add";
 import { interval } from "date-fns/interval";
+import type { DeepReadonly } from "ts-essentials";
 import type { Question, QuestionFlagType, SrsStateType } from "./model";
 import { QuestionFlagKind, SkillKind } from "./model";
 import { hanziWordToGlossQuestionOrThrow } from "./questions/hanziWordToGloss";
@@ -52,11 +53,11 @@ export async function generateQuestionForSkillOrThrow(
 
 export function flagForQuestion(
   queueIndex: number,
-  reviewQueue: SkillReviewQueue,
-  skillSrsStates: Map<Skill, SrsStateType>,
+  reviewQueue: DeepReadonly<SkillReviewQueue>,
+  skillSrsStates: ReadonlyMap<Skill, SrsStateType>,
 ): QuestionFlagType | undefined {
   const { indexRanges, items } = reviewQueue;
-  const skill = items[queueIndex];
+  const skill = items[queueIndex]?.skill;
   if (skill === undefined) {
     throw new Error(`No skill at queue index ${queueIndex}`);
   }

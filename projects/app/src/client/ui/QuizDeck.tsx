@@ -91,7 +91,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
     const generateQuestion = async () => {
       // Loop through queue items until we find one that can generate a question
       // (matching the original nextQuizQuestionQuery logic)
-      for (const [queueIndex, skill] of reviewQueue.items.entries()) {
+      for (const [queueIndex, { skill }] of reviewQueue.items.entries()) {
         if (abortController.signal.aborted) {
           return;
         }

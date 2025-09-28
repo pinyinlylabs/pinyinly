@@ -2,7 +2,7 @@ import type { SrsStateType } from "#data/model.js";
 import { QuestionFlagKind, SrsKind } from "#data/model.js";
 import { flagForQuestion } from "#data/questions.js";
 import type { Skill } from "#data/rizzleSchema.js";
-import type { SkillReviewQueue } from "#data/skills.js";
+import type { SkillReviewQueue, SkillReviewQueueItem } from "#data/skills.js";
 import { afterEach, describe, expect, test, vi } from "vitest";
 
 afterEach(() => {
@@ -12,10 +12,13 @@ afterEach(() => {
 describe(
   `flagForQuestion suite` satisfies HasNameOf<typeof flagForQuestion>,
   () => {
+    const mockSkill: Skill = `he:你:you`;
+    const mockQueueItem: SkillReviewQueueItem = { skill: mockSkill };
+
     const createMockReviewQueue = (
       overrides: Partial<SkillReviewQueue> = {},
     ): SkillReviewQueue => ({
-      items: [mockSkill, mockSkill, mockSkill], // Add multiple skills for testing different indices
+      items: [mockQueueItem, mockQueueItem, mockQueueItem], // Add multiple skills for testing different indices
       blockedItems: [],
       retryCount: 0,
       dueCount: 0,
@@ -35,8 +38,6 @@ describe(
       },
       ...overrides,
     });
-
-    const mockSkill: Skill = `he:你:you`;
 
     test(`marks a question as retry if within retry index range`, async () => {
       const reviewQueue = createMockReviewQueue({
