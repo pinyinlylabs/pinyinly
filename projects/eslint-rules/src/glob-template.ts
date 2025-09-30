@@ -2,8 +2,9 @@
  * @fileoverview Ensures require arrays are in sync with files in a directory, using template comments
  */
 
-import * as fs from "@pinyinly/lib/fs";
 import type { Rule } from "eslint";
+import { globSync } from "glob";
+import { existsSync, statSync } from "node:fs";
 import path from "node:path";
 
 const rule: Rule.RuleModule = {
@@ -198,15 +199,12 @@ const rule: Rule.RuleModule = {
             // globDir is already defined
 
             // Verify directory exists
-            if (
-              !fs.existsSync(targetDir) ||
-              !fs.statSync(targetDir).isDirectory()
-            ) {
+            if (!existsSync(targetDir) || !statSync(targetDir).isDirectory()) {
               throw new Error(`Not a directory`);
             }
 
             // Get matching files
-            files = fs.globSync(globPattern, { cwd: targetDir }).sort();
+            files = globSync(globPattern, { cwd: targetDir }).sort();
           } catch (error: unknown) {
             const errorMessage =
               error !== null && typeof error === `object` && `message` in error
