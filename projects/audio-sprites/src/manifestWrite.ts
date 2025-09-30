@@ -1,5 +1,5 @@
 import { analyzeAudioFileDuration, generateSpriteCommand } from "#ffmpeg.ts";
-import type { AudioFileInfo } from "#types.ts";
+import type { AudioFileInfo, SpriteManifest, SpriteRule, SpriteSegment  } from "#types.ts";
 import {
   globSync,
   readFileSync,
@@ -10,7 +10,6 @@ import * as crypto from "node:crypto";
 
 import path from "node:path";
 import { loadManifest } from "./manifestRead.ts";
-import type { SpriteManifest, SpriteRule, SpriteSegment } from "./types.ts";
 
 /**
  * Generate sprite assignments for files based on rules.

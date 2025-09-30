@@ -2,10 +2,10 @@ import stylisticPlugin from "@stylistic/eslint-plugin";
 import type { ESLint } from "eslint";
 import betterTailwindcssPlugin from "eslint-plugin-better-tailwindcss";
 import { getDefaultAttributes } from "eslint-plugin-better-tailwindcss/api/defaults";
-import importPlugin from "eslint-plugin-import";
+import { importX } from "eslint-plugin-import-x";
 import reactPlugin from "eslint-plugin-react";
 import reactCompilerPlugin from "eslint-plugin-react-compiler";
-import reactHooksPlugin from "eslint-plugin-react-hooks";
+import * as reactHooksPlugin from "eslint-plugin-react-hooks";
 import tailwindPlugin from "eslint-plugin-tailwindcss";
 import unicorn from "eslint-plugin-unicorn";
 import type { defineConfig } from "eslint/config";
@@ -31,7 +31,8 @@ export const plugin: ESLint.Plugin = {
 export type ConfigWithExtendsArray = Parameters<typeof defineConfig>;
 
 // Strip out the plugin to avoid double declaring it.
-const { plugins: _, ...unicornRecommendedConfig } = unicorn.configs.recommended;
+const { plugins: _1, ...unicornRecommendedConfig } =
+  unicorn.configs.recommended;
 
 const recommended: ConfigWithExtendsArray = [
   // All files that should use TypeScript rules.
@@ -52,6 +53,20 @@ const recommended: ConfigWithExtendsArray = [
     },
   },
 
+  importX.flatConfigs.typescript,
+  {
+    rules: {
+      "import-x/no-named-as-default-member": `off`,
+    },
+    settings: {
+      "import-x/resolver": {
+        node: {
+          extensions: [`.js`, `.web.js`, `.ios.js`, `.android.js`],
+        },
+        typescript: true,
+      },
+    },
+  },
   ...tseslint.configs.strictTypeChecked,
   ...tseslint.configs.stylisticTypeChecked,
   unicornRecommendedConfig,
@@ -111,25 +126,29 @@ const recommended: ConfigWithExtendsArray = [
       "@pinyinly/glob-template": `error`,
 
       //
-      // eslint-plugin-import
+      // eslint-plugin-import-x
       //
 
       // enforces consistent type specifier style for named imports
-      "import/consistent-type-specifier-style": `error`,
+      "import-x/consistent-type-specifier-style": `error`,
+      "import-x/default": `error`,
+      "import-x/export": `error`,
       // disallow non-import statements appearing before import statements
-      "import/first": `error`,
-      // Require a newline after the last import/require in a group
-      "import/newline-after-import": `error`,
+      "import-x/first": `error`,
+      "import-x/named": `error`,
+      "import-x/namespace": `error`,
+      // Require a newline after the last import-x/require in a group
+      "import-x/newline-after-import": `error`,
       // Forbid import of modules using absolute paths
-      "import/no-absolute-path": `error`,
+      "import-x/no-absolute-path": `error`,
       // disallow AMD require/define
-      "import/no-amd": `error`,
+      "import-x/no-amd": `error`,
       // forbid default exports - we want to standardize on named exports so that imported names are consistent
-      "import/no-default-export": `error`,
+      "import-x/no-default-export": `error`,
       // disallow imports from duplicate paths
-      "import/no-duplicates": `error`,
+      "import-x/no-duplicates": `error`,
       // Forbid the use of extraneous packages
-      "import/no-extraneous-dependencies": [
+      "import-x/no-extraneous-dependencies": [
         `error`,
         {
           devDependencies: true,
@@ -138,15 +157,17 @@ const recommended: ConfigWithExtendsArray = [
         },
       ],
       // Forbid mutable exports
-      "import/no-mutable-exports": `error`,
+      "import-x/no-mutable-exports": `error`,
       // Prevent importing the default as if it were named
-      "import/no-named-default": `error`,
+      "import-x/no-named-default": `error`,
+      "import-x/no-named-as-default": `error`,
       // Prohibit named exports
-      "import/no-named-export": `off`, // we want everything to be a named export
+      "import-x/no-named-export": `off`, // we want everything to be a named export
       // Forbid a module from importing itself
-      "import/no-self-import": `error`,
+      "import-x/no-self-import": `error`,
+      "import-x/no-unresolved": `error`,
       // Require modules with a single export to use a default export
-      "import/prefer-default-export": `off`, // we want everything to be named
+      "import-x/prefer-default-export": `off`, // we want everything to be named
 
       //
       // @stylistic
@@ -295,7 +316,7 @@ const recommended: ConfigWithExtendsArray = [
   {
     files: [`*.config.*`],
     rules: {
-      "import/no-default-export": `off`,
+      "import-x/no-default-export": `off`,
     },
   },
 
@@ -341,7 +362,7 @@ const recommended: ConfigWithExtendsArray = [
       "@typescript-eslint/consistent-indexed-object-style": `off`,
       // When defining modules in a declaration file, some will make default
       // exports.
-      "import/no-default-export": `off`,
+      "import-x/no-default-export": `off`,
       // Allow `export {}` to turn .d.ts files into modules, and make `declare
       // global { … }` work as intended.
       "unicorn/require-module-specifiers": `off`,
@@ -464,7 +485,7 @@ export const plugins = {
   [`@stylistic`]: stylisticPlugin as ESLint.Plugin,
   [`@typescript-eslint`]: tseslint.plugin as ESLint.Plugin,
   [`better-tailwindcss`]: betterTailwindcssPlugin as ESLint.Plugin,
-  [`import`]: importPlugin as ESLint.Plugin,
+  [`import-x`]: importX as unknown as ESLint.Plugin,
   [`react-compiler`]: reactCompilerPlugin as ESLint.Plugin,
   [`react-hooks`]: reactHooksPlugin as ESLint.Plugin,
   [`react`]: reactPlugin as ESLint.Plugin,

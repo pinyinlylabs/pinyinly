@@ -35,7 +35,6 @@ import {
   upsertHanziWordMeaning,
   wordListSchema,
 } from "#dictionary/dictionary.ts";
-import "#types/hanzi.d.ts";
 import { Alert, MultiSelect, Select } from "@inkjs/ui";
 import {
   arrayFilterUniqueWithKey,

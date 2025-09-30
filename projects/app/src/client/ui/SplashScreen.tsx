@@ -1,5 +1,5 @@
 import { invariant } from "@pinyinly/lib/invariant";
-import Constants, { ExecutionEnvironment } from "expo-constants";
+import ExpoConstants, { ExecutionEnvironment } from "expo-constants";
 import { useFonts } from "expo-font";
 import * as ExpoSplashScreen from "expo-splash-screen";
 import LottieView from "lottie-react-native";
@@ -8,7 +8,7 @@ import { Platform, View } from "react-native";
 import Reanimated, { FadeOut } from "react-native-reanimated";
 
 const isExpoGo =
-  Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
+  ExpoConstants.executionEnvironment === ExecutionEnvironment.StoreClient;
 
 // Keep the splash screen visible while we fetch resources
 //

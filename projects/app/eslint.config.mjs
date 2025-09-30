@@ -68,12 +68,12 @@ export default defineConfig(
       `**/*+api.*`, // API routes should use named exports
     ],
     rules: {
-      "import/no-default-export": `off`,
+      "import-x/no-default-export": `off`,
       // Ensuring that default exports are named helps improve the grepability
       // of the codebase by encouraging the re-use of the same identifier for
       // the module's default export at its declaration site and at its import
       // sites.
-      "import/no-anonymous-default-export": `error`,
+      "import-x/no-anonymous-default-export": `error`,
     },
   },
 
@@ -89,9 +89,9 @@ export default defineConfig(
   {
     files: [`src/**/*.demo.tsx`],
     rules: {
-      "import/no-anonymous-default-export": `off`,
-      "import/no-default-export": `off`,
-      "import/no-named-default": `off`,
+      "import-x/no-anonymous-default-export": `off`,
+      "import-x/no-default-export": `off`,
+      "import-x/no-named-default": `off`,
       "no-console": `off`,
       "react/display-name": `off`, // the display name is the filename
       "unicorn/no-anonymous-default-export": `off`,

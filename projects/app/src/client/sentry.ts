@@ -1,5 +1,4 @@
-/* eslint-disable import/first */
-
+/* eslint-disable import-x/first */
 import { captureConsoleIntegration } from "@sentry/core";
 import * as Sentry from "@sentry/react-native";
 import { isRunningInExpoGo } from "expo";

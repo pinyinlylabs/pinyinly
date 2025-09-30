@@ -1,11 +1,10 @@
-import type { SrsStateType } from "@/data/model";
+import type { SrsStateType, HanziGlossMistakeType, HanziPinyinMistakeType  } from "@/data/model";
 import {
   hanziFromHanziOrHanziWord,
   isHanziWord,
   lookupGloss,
   lookupHanzi,
 } from "../dictionary/dictionary";
-import type { HanziGlossMistakeType, HanziPinyinMistakeType } from "./model";
 import { SrsKind } from "./model";
 import type { Skill } from "./rizzleSchema";
 import { srsStateFromFsrsState } from "./rizzleSchema";
