@@ -17,6 +17,9 @@
     },
     {
       "path": "./test"
+    },
+    {
+      "path": "../eslint-rules"
     }
   ]
 }

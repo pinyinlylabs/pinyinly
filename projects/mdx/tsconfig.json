@@ -1,22 +1,14 @@
 {
   "extends": "../../tsconfig.base",
   "compilerOptions": {
-    "lib": [
-      "ESNext"
-    ],
+    "lib": ["ESNext"],
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "target": "ESNext",
     "outDir": "../../.moon/cache/types/projects/mdx"
   },
-  "include": [
-    "*"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "eslint.config.mjs"
-  ],
+  "include": ["*"],
+  "exclude": ["node_modules", "dist", "eslint.config.mjs"],
   "references": [
     {
       "path": "./src"

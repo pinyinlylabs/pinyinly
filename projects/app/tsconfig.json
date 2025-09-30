@@ -7,14 +7,10 @@
     "moduleResolution": "NodeNext",
     "outDir": "../../.moon/cache/types/projects/app",
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@/*": ["./src/*"]
     },
     "target": "ESNext",
-    "types": [
-      "@pinyinly/eslint-rules/nameof.d.ts"
-    ]
+    "types": ["@pinyinly/eslint-rules/nameof.d.ts"]
   },
   "include": [
     "*",
@@ -23,9 +19,7 @@
     "expo-env.d.ts",
     "nativewind-env.d.ts"
   ],
-  "exclude": [
-    "eslint.config.mjs"
-  ],
+  "exclude": ["eslint.config.mjs"],
   "references": [
     {
       "path": "./api"

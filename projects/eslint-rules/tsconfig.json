@@ -1,26 +1,15 @@
 {
   "extends": "../../tsconfig.base",
   "compilerOptions": {
-    "lib": [
-      "ESNext"
-    ],
+    "lib": ["ESNext"],
     "module": "NodeNext",
     "esModuleInterop": true,
     "outDir": "../../.moon/cache/types/projects/eslint-rules",
     "target": "ESNext",
-    "types": [
-      "node"
-    ]
+    "types": ["node"]
   },
-  "include": [
-    "*"
-  ],
-  "exclude": [
-    "dist",
-    "build",
-    "node_modules",
-    "eslint.config.mjs"
-  ],
+  "include": ["*"],
+  "exclude": ["dist", "build", "node_modules", "eslint.config.mjs"],
   "references": [
     {
       "path": "./src"
