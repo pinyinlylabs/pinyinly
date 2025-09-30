@@ -10,15 +10,13 @@
     "types": ["node"]
   },
   "include": ["*"],
+  "exclude": ["eslint.config.mjs", "node_modules"],
   "references": [
     {
       "path": "./src"
     },
     {
       "path": "./test"
-    },
-    {
-      "path": "../eslint-rules"
     }
   ]
 }

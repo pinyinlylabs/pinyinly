@@ -7,20 +7,12 @@
     "moduleResolution": "nodenext",
     "outDir": "../../../.moon/cache/types/projects/lib-test",
     "target": "ESNext",
-    "types": [
-      "node",
-      // Enable expect().toHaveTextContent() and similar matchers.
-      "@testing-library/jest-dom",
-      "@pinyinly/eslint-rules/nameof.d.ts"
-    ]
+    "types": ["node", "@testing-library/jest-dom"]
   },
   "include": ["**/*"],
   "references": [
     {
       "path": "../src"
-    },
-    {
-      "path": "../../eslint-rules"
     }
   ]
 }

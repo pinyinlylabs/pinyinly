@@ -1,5 +1,10 @@
 import { analyzeAudioFileDuration, generateSpriteCommand } from "#ffmpeg.ts";
-import type { AudioFileInfo, SpriteManifest, SpriteRule, SpriteSegment  } from "#types.ts";
+import type {
+  AudioFileInfo,
+  SpriteManifest,
+  SpriteRule,
+  SpriteSegment,
+} from "#types.ts";
 import {
   globSync,
   readFileSync,

@@ -1,4 +1,8 @@
-import type { SrsStateType, HanziGlossMistakeType, HanziPinyinMistakeType  } from "@/data/model";
+import type {
+  SrsStateType,
+  HanziGlossMistakeType,
+  HanziPinyinMistakeType,
+} from "@/data/model";
 import {
   hanziFromHanziOrHanziWord,
   isHanziWord,
