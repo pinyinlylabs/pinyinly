@@ -6239,6 +6239,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/db-ivm@npm:0.1.9":
+  version: 0.1.9
+  resolution: "@tanstack/db-ivm@npm:0.1.9"
+  dependencies:
+    fractional-indexing: "npm:^3.2.0"
+    sorted-btree: "npm:^1.8.1"
+  peerDependencies:
+    typescript: ">=4.7"
+  checksum: 10c0/8594780b2da3d112516e5f86f7d626a411a12f8e56e10e923827b73e8ea007d8850f155cf10fb052c619bab4e8468a02271665df9007a0e345818188ddede7df
+  languageName: node
+  linkType: hard
+
 "@tanstack/db@npm:0.3.2":
   version: 0.3.2
   resolution: "@tanstack/db@npm:0.3.2"
@@ -6248,6 +6260,18 @@ __metadata:
   peerDependencies:
     typescript: ">=4.7"
   checksum: 10c0/8a283554d14827648a3d8b9c2bb91b67f828253556c654d86e383e92dc479fab65f58c516fc7b5eb51d8d6f42ada0fb1daa088a4785d882c98d2ea55cb174003
+  languageName: node
+  linkType: hard
+
+"@tanstack/db@npm:0.4.3":
+  version: 0.4.3
+  resolution: "@tanstack/db@npm:0.4.3"
+  dependencies:
+    "@standard-schema/spec": "npm:^1.0.0"
+    "@tanstack/db-ivm": "npm:0.1.9"
+  peerDependencies:
+    typescript: ">=4.7"
+  checksum: 10c0/92957cd346c03d48458ab102d403889d99ba729ac64e4c39f93cc879552be24556bd203bbab603448e273d09e59df985b4b76f59b1b3b545c32cef5d027a47bb
   languageName: node
   linkType: hard
 
@@ -6282,15 +6306,15 @@ __metadata:
   linkType: hard
 
 "@tanstack/query-db-collection@npm:^0.2.20":
-  version: 0.2.20
-  resolution: "@tanstack/query-db-collection@npm:0.2.20"
+  version: 0.2.24
+  resolution: "@tanstack/query-db-collection@npm:0.2.24"
   dependencies:
     "@standard-schema/spec": "npm:^1.0.0"
-    "@tanstack/db": "npm:0.3.2"
+    "@tanstack/db": "npm:0.4.3"
   peerDependencies:
     "@tanstack/query-core": ^5.0.0
     typescript: ">=4.7"
-  checksum: 10c0/237ddb9d26f3cd6f16e3470e90c0707fd87a8957f486d0f00a9f5faa6aa915b83bfe8def99081a6c8777c282aaa4701dd48095d47a4a638e7af0d2a3ef0c8440
+  checksum: 10c0/ef0347f4893d14d7883fa0dd1525fe0a93c338c6c1bbef948dfe0c71403e327c368e45fc521e691d0efee6a885e7f4e97e8d61a8723487a73b6722642cc9411c
   languageName: node
   linkType: hard
 
