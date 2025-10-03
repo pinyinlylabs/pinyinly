@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 夏 (xià)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" xià"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: Fourth tone"}</_components.strong>{" — "}<_components.strong>{"falling"}</_components.strong>{" tone, like stating a fact: "}<_components.strong>{"\"Shyah!\""}</_components.strong></_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"x"}</_components.strong>{" like "}<_components.strong>{"\"sh\""}</_components.strong>{" in \"sheep\""}</_components.li>{"\n"}<_components.li><_components.strong>{"ià"}</_components.strong>{" sounds like "}<_components.strong>{"\"yah\""}</_components.strong>{" but with a sharp falling tone"}</_components.li>{"\n"}<_components.li><_components.strong>{"xià"}</_components.strong>{" sounds like "}<_components.strong>{"\"shyah!\""}</_components.strong>{" with a sharp drop"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"fourth tone"}</_components.strong>{" (ˋ) is a "}<_components.strong>{"sharp falling"}</_components.strong>{" tone:"}</_components.p>{"\n"}<_components.p>{"Say it like you're definitively naming the hottest season: "}<_components.strong>{"\"xià!\""}</_components.strong>{" — that decisive tone is the\n"}<_components.strong>{"fourth tone"}</_components.strong>{"."}</_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"夏 (xià) - \"summer\""}</_components.li>{"\n"}<_components.li>{"夏天 (xià tiān) - \"summer (season)\""}</_components.li>{"\n"}<_components.li>{"夏日 (xià rì) - \"summer day\""}</_components.li>{"\n"}<_components.li>{"夏季 (xià jì) - \"summer season\""}</_components.li>{"\n"}<_components.li>{"立夏 (lì xià) - \"beginning of summer\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Special Notes:"}</_components.strong></_components.p>{"\n"}<_components.p>{"夏 is one of the four seasons and represents the hottest time of year. It's also historically\nsignificant as it refers to the Xia Dynasty, the first dynasty in traditional Chinese\nhistoriography."}</_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}

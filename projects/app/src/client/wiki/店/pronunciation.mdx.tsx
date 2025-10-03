@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 店 (diàn)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" diàn"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: Fourth tone"}</_components.strong>{" — sharp "}<_components.strong>{"falling"}</_components.strong>{" tone, like giving a firm command"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"d"}</_components.strong>{" like "}<_components.strong>{"\"d\""}</_components.strong>{" in \"dog\""}</_components.li>{"\n"}<_components.li><_components.strong>{"iàn"}</_components.strong>{" sounds like "}<_components.strong>{"\"yen\""}</_components.strong>{" but with fourth tone → sharp falling"}</_components.li>{"\n"}<_components.li><_components.strong>{"diàn"}</_components.strong>{" sounds like "}<_components.strong>{"\"dyen!\""}</_components.strong>{" with a sharp drop in pitch"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"fourth tone"}</_components.strong>{" (ˋ) is a "}<_components.strong>{"sharp falling"}</_components.strong>{" tone:"}</_components.p>{"\n"}<_components.p>{"Start high and drop quickly and decisively, like when you say \"Stop!\" firmly. "}<_components.strong>{"diàn"}</_components.strong>{" should sound\ncrisp and definitive."}</_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"店 (diàn) - \"shop; store\""}</_components.li>{"\n"}<_components.li>{"商店 (shāng diàn) - \"shop; store\""}</_components.li>{"\n"}<_components.li>{"饭店 (fàn diàn) - \"restaurant; hotel\""}</_components.li>{"\n"}<_components.li>{"书店 (shū diàn) - \"bookstore\""}</_components.li>{"\n"}<_components.li>{"药店 (yào diàn) - \"pharmacy\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Memory Tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"店 means \"shop\" — the "}<_components.strong>{"sharp, decisive"}</_components.strong>{" fourth tone sounds like a shopkeeper firmly calling out\n\"Shop!\" to attract customers!"}</_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}

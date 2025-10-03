@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 别 (bié)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" bié"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: Second tone"}</_components.strong>{" — "}<_components.strong>{"rising"}</_components.strong>{" tone, like asking a question"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"b"}</_components.strong>{" like "}<_components.strong>{"\"b\""}</_components.strong>{" in \"bee\""}</_components.li>{"\n"}<_components.li><_components.strong>{"ié"}</_components.strong>{" sounds like "}<_components.strong>{"\"yeh\""}</_components.strong>{", but with second tone → rising"}</_components.li>{"\n"}<_components.li><_components.strong>{"bié"}</_components.strong>{" sounds like "}<_components.strong>{"\"byeh?\""}</_components.strong>{" with a questioning rise"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"second tone"}</_components.strong>{" (´) is a "}<_components.strong>{"rising"}</_components.strong>{" tone:"}</_components.p>{"\n"}<_components.p>{"Say it like you're telling someone \"don't!\" with concern: "}<_components.strong>{"\"bié?\""}</_components.strong>{" — that's the tone pattern of\n"}<_components.strong>{"bié"}</_components.strong>{"."}</_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"别 (bié) - \"don't; do not\""}</_components.li>{"\n"}<_components.li>{"别人 (bié rén) - \"other people\""}</_components.li>{"\n"}<_components.li>{"别的 (bié de) - \"other; else\""}</_components.li>{"\n"}<_components.li>{"分别 (fēn bié) - \"separate; part\""}</_components.li>{"\n"}<_components.li>{"特别 (tè bié) - \"especially; particularly\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Memory Tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"别 means \"don't\" — imagine the "}<_components.strong>{"rising"}</_components.strong>{" tone as the concerned inflection when warning someone not\nto do something!"}</_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}

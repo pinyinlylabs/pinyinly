@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 哥 (gē)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" gē"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: First tone"}</_components.strong>{" — "}<_components.strong>{"high and flat"}</_components.strong>{" tone, like a steady note: "}<_components.strong>{"\"Geee\""}</_components.strong></_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"g"}</_components.strong>{" like "}<_components.strong>{"\"g\""}</_components.strong>{" in \"go\" (but softer, more like \"k\" sound)"}</_components.li>{"\n"}<_components.li><_components.strong>{"ē"}</_components.strong>{" sounds like "}<_components.strong>{"\"uh\""}</_components.strong>{" in \"duh\", held steady and high"}</_components.li>{"\n"}<_components.li><_components.strong>{"gē"}</_components.strong>{" sounds like "}<_components.strong>{"\"guh\""}</_components.strong>{" with a steady high pitch"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"first tone"}</_components.strong>{" (ˉ) is "}<_components.strong>{"high and level"}</_components.strong>{":"}</_components.p>{"\n"}<_components.p>{"Say it like calling your big brother affectionately: "}<_components.strong>{"\"gē!\""}</_components.strong>{" — maintain that high, steady pitch."}</_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"哥 (gē) - \"older brother\""}</_components.li>{"\n"}<_components.li>{"哥哥 (gē ge) - \"older brother\" (casual)"}</_components.li>{"\n"}<_components.li>{"大哥 (dà gē) - \"big brother\""}</_components.li>{"\n"}<_components.li>{"表哥 (biǎo gē) - \"male cousin (older)\""}</_components.li>{"\n"}<_components.li>{"堂哥 (táng gē) - \"male cousin (older, same surname)\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Memory Tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The character shows "}<_components.strong>{"two mouths (口)"}</_components.strong>{" stacked — like an older brother singing or speaking with\nauthority from above!"}</_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}

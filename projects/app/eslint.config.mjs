@@ -6,6 +6,7 @@ import {
   includeIgnoreFile,
   plugins,
 } from "@pinyinly/eslint-rules";
+import { mdxRecommended } from "@pinyinly/mdx/eslint";
 import queryPlugin from "@tanstack/eslint-plugin-query";
 import drizzlePlugin from "eslint-plugin-drizzle";
 import { builtinModules } from "node:module";
@@ -29,6 +30,7 @@ export const pluginsConfig = {
 // Based on https://github.com/typescript-eslint/typescript-eslint/blob/41323746de299e6d62b4d6122975301677d7c8e0/eslint.config.mjs
 export default defineConfig(
   gitignoreConfig,
+  mdxRecommended,
 
   pluginsConfig,
 

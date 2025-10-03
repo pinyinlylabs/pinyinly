@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 末 (mò)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" mò"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: Fourth tone"}</_components.strong>{" — sharp "}<_components.strong>{"falling"}</_components.strong>{" tone, like giving a command"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"m"}</_components.strong>{" like "}<_components.strong>{"\"m\""}</_components.strong>{" in \"moon\""}</_components.li>{"\n"}<_components.li><_components.strong>{"ò"}</_components.strong>{" sounds like "}<_components.strong>{"\"aw\""}</_components.strong>{" in \"raw\", but with fourth tone → sharp downward fall"}</_components.li>{"\n"}<_components.li><_components.strong>{"mò"}</_components.strong>{" sounds like "}<_components.strong>{"\"maw!\""}</_components.strong>{" with a sharp drop"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"fourth tone"}</_components.strong>{" (`) is a "}<_components.strong>{"sharp falling"}</_components.strong>{" tone:"}</_components.p>{"\n"}<_components.p>{"Say it like you're declaring something final: "}<_components.strong>{"\"mò!\""}</_components.strong>{" — that decisive drop is the fourth tone\npattern."}</_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"末 (mò) - \"end, final part\""}</_components.li>{"\n"}<_components.li>{"末尾 (mò wěi) - \"end, tail end\""}</_components.li>{"\n"}<_components.li>{"期末 (qī mò) - \"end of term, final exam period\""}</_components.li>{"\n"}<_components.li>{"年末 (nián mò) - \"end of year\""}</_components.li>{"\n"}<_components.li>{"周末 (zhōu mò) - \"weekend\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Memory Tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"Think of "}<_components.strong>{"末"}</_components.strong>{" as the decisive \"end\" — the sharp falling tone perfectly matches the finality of\nsomething coming to an end!"}</_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}
