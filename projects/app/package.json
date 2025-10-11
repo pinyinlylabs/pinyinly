@@ -151,7 +151,7 @@
     "expo-atlas": "^0.4.0",
     "fontkit": "^2.0.4",
     "globals": "^16.0.0",
-    "happy-dom": "^18.0.1",
+    "happy-dom": "^20.0.0",
     "ink": "patch:ink@npm%3A5.2.1#~/.yarn/patches/ink-npm-5.2.1-41d086a4b7.patch",
     "ink-link": "^4.1.0",
     "ink-multi-select": "^2.0.0",
