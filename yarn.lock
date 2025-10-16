@@ -6227,6 +6227,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/db-ivm@npm:0.1.11":
+  version: 0.1.11
+  resolution: "@tanstack/db-ivm@npm:0.1.11"
+  dependencies:
+    fractional-indexing: "npm:^3.2.0"
+    sorted-btree: "npm:^1.8.1"
+  peerDependencies:
+    typescript: ">=4.7"
+  checksum: 10c0/8bb53ed970b9aa3919028dd0e40fa757243a01e01c62d202fad5af6ecb7f29661965d092676d505b6c6cee1f7e9579f735d963b3ae54e48c076cb1347b7bc166
+  languageName: node
+  linkType: hard
+
 "@tanstack/db-ivm@npm:0.1.7":
   version: 0.1.7
   resolution: "@tanstack/db-ivm@npm:0.1.7"
@@ -6248,6 +6260,18 @@ __metadata:
   peerDependencies:
     typescript: ">=4.7"
   checksum: 10c0/8a283554d14827648a3d8b9c2bb91b67f828253556c654d86e383e92dc479fab65f58c516fc7b5eb51d8d6f42ada0fb1daa088a4785d882c98d2ea55cb174003
+  languageName: node
+  linkType: hard
+
+"@tanstack/db@npm:0.4.11":
+  version: 0.4.11
+  resolution: "@tanstack/db@npm:0.4.11"
+  dependencies:
+    "@standard-schema/spec": "npm:^1.0.0"
+    "@tanstack/db-ivm": "npm:0.1.11"
+  peerDependencies:
+    typescript: ">=4.7"
+  checksum: 10c0/b8825d71ab09f402bb2a232ff28493ebdf7a6c7e37604702e538aa4f697471ce1eef092b2b9b5bdc5f453ea64131efb249afe6c8ec278a3a89072afa847652b9
   languageName: node
   linkType: hard
 
@@ -6282,15 +6306,15 @@ __metadata:
   linkType: hard
 
 "@tanstack/query-db-collection@npm:^0.2.20":
-  version: 0.2.20
-  resolution: "@tanstack/query-db-collection@npm:0.2.20"
+  version: 0.2.32
+  resolution: "@tanstack/query-db-collection@npm:0.2.32"
   dependencies:
     "@standard-schema/spec": "npm:^1.0.0"
-    "@tanstack/db": "npm:0.3.2"
+    "@tanstack/db": "npm:0.4.11"
   peerDependencies:
     "@tanstack/query-core": ^5.0.0
     typescript: ">=4.7"
-  checksum: 10c0/237ddb9d26f3cd6f16e3470e90c0707fd87a8957f486d0f00a9f5faa6aa915b83bfe8def99081a6c8777c282aaa4701dd48095d47a4a638e7af0d2a3ef0c8440
+  checksum: 10c0/4c4615225b644a4052a285d95f658fdb3b4cd2b5ed1dd61aca65bb6321b4bfe5bee49654cbbb8d949c5afa683281c0b225a2bc5b72596500f6793ee339d6166e
   languageName: node
   linkType: hard
 
