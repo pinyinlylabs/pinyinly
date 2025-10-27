@@ -27,6 +27,7 @@ const lazyDemo = <Demo extends FunctionComponent>(
 export const demos: Record<string, FunctionComponent> = {
   // <pyly-glob-template glob="../../../**/*.demo.tsx" template="  [`${filenameWithoutExt.split('.')[0]}`]: lazyDemo(() => import(`${pathWithoutExt}`)),">
   [`Colors`]: lazyDemo(() => import(`../../../client/ui/Colors.demo`)),
+  [`Glyph`]: lazyDemo(() => import(`../../../client/ui/Glyph.demo`)),
   [`HanziText`]: lazyDemo(() => import(`../../../client/ui/HanziText.demo`)),
   [`IconImage`]: lazyDemo(() => import(`../../../client/ui/IconImage.demo`)),
   [`Icons`]: lazyDemo(() => import(`../../../client/ui/Icons.demo`)),
