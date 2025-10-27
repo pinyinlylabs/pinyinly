@@ -4631,7 +4631,7 @@ __metadata:
     expo-updates: "npm:~0.28.16"
     fontkit: "npm:^2.0.4"
     globals: "npm:^16.0.0"
-    happy-dom: "npm:^18.0.1"
+    happy-dom: "npm:^20.0.0"
     ink: "patch:ink@npm%3A5.2.1#~/.yarn/patches/ink-npm-5.2.1-41d086a4b7.patch"
     ink-link: "npm:^4.1.0"
     ink-multi-select: "npm:^2.0.0"
@@ -11962,14 +11962,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"happy-dom@npm:^18.0.1":
-  version: 18.0.1
-  resolution: "happy-dom@npm:18.0.1"
+"happy-dom@npm:^20.0.0":
+  version: 20.0.7
+  resolution: "happy-dom@npm:20.0.7"
   dependencies:
     "@types/node": "npm:^20.0.0"
     "@types/whatwg-mimetype": "npm:^3.0.2"
     whatwg-mimetype: "npm:^3.0.0"
-  checksum: 10c0/10f2115f5001fdaf1aedcbda89c15248a1c2e43a25d7e774cb641a35bf6763cef9097b438ef3c2248ab59a0ef33b3e88cb94da096f2bb0fc109ba3f43f7c66d4
+  checksum: 10c0/55783eb6a8b660d5dd093ed40bd4e5a7da0ec6827ffee544c7697cc753c23f29a432de09f5dfa3e9e8d99b10be26a630975689ad92522686a83b27811990532e
   languageName: node
   linkType: hard
 
