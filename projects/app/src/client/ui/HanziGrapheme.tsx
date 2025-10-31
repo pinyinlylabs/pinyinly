@@ -5,7 +5,7 @@ import { PathCss } from "./svg";
 export function HanziGrapheme(props: {
   strokesData: string[];
   highlightStrokes: number[];
-  highlightColor?: `blue` | `yellow`;
+  highlightColor?: `blue` | `yellow` | `amber`;
 }) {
   const highlightedStrokes = new Set(props.highlightStrokes);
 
@@ -56,6 +56,7 @@ const outlineClass = tv({
     color: {
       blue: `stroke-blue`,
       yellow: `stroke-yellow`,
+      amber: `stroke-amber`,
     },
   },
 });
