@@ -6227,6 +6227,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/db-ivm@npm:0.1.12":
+  version: 0.1.12
+  resolution: "@tanstack/db-ivm@npm:0.1.12"
+  dependencies:
+    fractional-indexing: "npm:^3.2.0"
+    sorted-btree: "npm:^1.8.1"
+  peerDependencies:
+    typescript: ">=4.7"
+  checksum: 10c0/749a7fd0128704b6e9fdc2252fde46fef6c654f405f982bd99e9e5672f22de773b7398ce64a2eb8665e44e105f6fba8845e232a9e4ee4031fbeb22f4fefa1682
+  languageName: node
+  linkType: hard
+
 "@tanstack/db-ivm@npm:0.1.7":
   version: 0.1.7
   resolution: "@tanstack/db-ivm@npm:0.1.7"
@@ -6248,6 +6260,19 @@ __metadata:
   peerDependencies:
     typescript: ">=4.7"
   checksum: 10c0/8a283554d14827648a3d8b9c2bb91b67f828253556c654d86e383e92dc479fab65f58c516fc7b5eb51d8d6f42ada0fb1daa088a4785d882c98d2ea55cb174003
+  languageName: node
+  linkType: hard
+
+"@tanstack/db@npm:0.4.16":
+  version: 0.4.16
+  resolution: "@tanstack/db@npm:0.4.16"
+  dependencies:
+    "@standard-schema/spec": "npm:^1.0.0"
+    "@tanstack/db-ivm": "npm:0.1.12"
+    "@tanstack/pacer": "npm:^0.1.0"
+  peerDependencies:
+    typescript: ">=4.7"
+  checksum: 10c0/273722bcc9a53f711337b5dee1ae2305d73fd02661283596df9c68fc4f561cc235289d31c225c2cece6c255d93e1f4f5b254910761e1ef2f6060866bebaddc69
   languageName: node
   linkType: hard
 
@@ -6274,6 +6299,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/pacer@npm:^0.1.0":
+  version: 0.1.0
+  resolution: "@tanstack/pacer@npm:0.1.0"
+  checksum: 10c0/7a8ec1e1918d1cfd57b4cc14775b2d27d0743ca9f24babec637c229bc013b667420a32360540a83f100092b138b069b2df307993a3e6abb59bf717aea7073f75
+  languageName: node
+  linkType: hard
+
 "@tanstack/query-core@npm:5.89.0, @tanstack/query-core@npm:^5.89.0":
   version: 5.89.0
   resolution: "@tanstack/query-core@npm:5.89.0"
@@ -6282,15 +6314,15 @@ __metadata:
   linkType: hard
 
 "@tanstack/query-db-collection@npm:^0.2.20":
-  version: 0.2.20
-  resolution: "@tanstack/query-db-collection@npm:0.2.20"
+  version: 0.2.39
+  resolution: "@tanstack/query-db-collection@npm:0.2.39"
   dependencies:
     "@standard-schema/spec": "npm:^1.0.0"
-    "@tanstack/db": "npm:0.3.2"
+    "@tanstack/db": "npm:0.4.16"
   peerDependencies:
     "@tanstack/query-core": ^5.0.0
     typescript: ">=4.7"
-  checksum: 10c0/237ddb9d26f3cd6f16e3470e90c0707fd87a8957f486d0f00a9f5faa6aa915b83bfe8def99081a6c8777c282aaa4701dd48095d47a4a638e7af0d2a3ef0c8440
+  checksum: 10c0/8463fd2515d408931ec7496685d15856023804b19883949a847dc6c7c2313fe2f4d21e1a329ac89d6447ebe00d268e77d2af4fd1fe3a7b439ff15ec9027414b3
   languageName: node
   linkType: hard
 
