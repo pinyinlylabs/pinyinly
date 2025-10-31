@@ -356,6 +356,7 @@
   .pyly-mdx > ul,
   .pyly-mdx > ol,
   .pyly-mdx > .pyly-mdx-blockquote,
+  .pyly-mdx > .pyly-mdx-grapheme-decomposition,
   .pyly-mdx-hr {
     @apply mx-4;
   }

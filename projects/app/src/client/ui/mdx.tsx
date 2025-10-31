@@ -1,10 +1,11 @@
 // Adaptation from https://github.com/EvanBacon/expo-mdx/blob/6f27605c23400ed42d014dcef77ba11244d08f82/packages/mdx/src/
 
 import * as html from "@expo/html-elements";
+import { Image } from "expo-image";
 import type { ComponentType, JSX } from "react";
 import { createContext } from "react";
 import type { TextProps, ViewProps } from "react-native";
-import { Image, Platform, Text, View } from "react-native";
+import { Platform, Text, View } from "react-native";
 
 export type MdxComponentsType = Record<string, ComponentType>;
 
@@ -12,7 +13,13 @@ export type MdxComponentType = React.FC<{
   components?: MdxComponentsType;
 }>;
 
-function Img({ src, style }: React.ComponentProps<typeof Image>) {
+function Img({
+  src,
+  style,
+}: {
+  src?: React.ComponentProps<typeof Image>[`source`];
+  style?: React.ComponentProps<typeof Image>[`style`];
+}) {
   const source = typeof src === `string` ? { uri: src } : src;
   return <Image source={source} style={style} className="pyly-mdx-img" />;
 }

@@ -41,6 +41,15 @@ vi.mock(`expo-image`, () => {
   };
 });
 
+vi.mock(`react-native-svg`, () => {
+  return {
+    // SyntaxError: Unexpected token 'typeof'
+    G: () => null,
+    Path: () => null,
+    Svg: () => null,
+  };
+});
+
 vi.mock(`expo-secure-store`, () => {
   return {
     getItemAsync: () => null,
