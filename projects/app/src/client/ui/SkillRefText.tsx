@@ -38,7 +38,7 @@ export const SkillRefText = ({ skill }: { skill: Skill }) => {
       skill = skill as HanziWordSkill;
       const hanziWord = hanziWordFromSkill(skill);
       return (
-        <HanziWordRefText hanziWord={hanziWord} showGloss={false} showPinyin />
+        <HanziWordRefText hanziWord={hanziWord} gloss={false} showPinyin />
       );
     }
     case SkillKind.HanziWordToPinyinInitial: {
@@ -46,11 +46,7 @@ export const SkillRefText = ({ skill }: { skill: Skill }) => {
       const hanziWord = hanziWordFromSkill(skill);
       return (
         <>
-          <HanziWordRefText
-            hanziWord={hanziWord}
-            showGloss={false}
-            showPinyin
-          />
+          <HanziWordRefText hanziWord={hanziWord} gloss={false} showPinyin />
           <Text className="pyly-body-caption"> (initial)</Text>
         </>
       );
@@ -60,11 +56,7 @@ export const SkillRefText = ({ skill }: { skill: Skill }) => {
       const hanziWord = hanziWordFromSkill(skill);
       return (
         <>
-          <HanziWordRefText
-            hanziWord={hanziWord}
-            showGloss={false}
-            showPinyin
-          />
+          <HanziWordRefText hanziWord={hanziWord} gloss={false} showPinyin />
           <Text className="pyly-body-caption"> (final)</Text>
         </>
       );
@@ -74,11 +66,7 @@ export const SkillRefText = ({ skill }: { skill: Skill }) => {
       const hanziWord = hanziWordFromSkill(skill);
       return (
         <>
-          <HanziWordRefText
-            hanziWord={hanziWord}
-            showGloss={false}
-            showPinyin
-          />
+          <HanziWordRefText hanziWord={hanziWord} gloss={false} showPinyin />
           <Text className="pyly-body-caption"> (tone)</Text>
         </>
       );

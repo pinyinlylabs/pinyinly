@@ -18,7 +18,7 @@ export const Pylymark = ({ source }: { source: string }) => {
                 <HanziWordRefText
                   key={index}
                   hanziWord={node.hanziWord}
-                  showGloss={node.showGloss}
+                  gloss={node.showGloss}
                 />
               );
             }

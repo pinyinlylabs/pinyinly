@@ -27,7 +27,7 @@ const lazyDemo = <Demo extends FunctionComponent>(
 export const demos: Record<string, FunctionComponent> = {
   // <pyly-glob-template glob="../../../**/*.demo.tsx" template="  [`${filenameWithoutExt.split('.')[0]}`]: lazyDemo(() => import(`${pathWithoutExt}`)),">
   [`Colors`]: lazyDemo(() => import(`../../../client/ui/Colors.demo`)),
-  [`Glyph`]: lazyDemo(() => import(`../../../client/ui/Glyph.demo`)),
+  [`HanziGrapheme`]: lazyDemo(() => import(`../../../client/ui/HanziGrapheme.demo`)),
   [`HanziText`]: lazyDemo(() => import(`../../../client/ui/HanziText.demo`)),
   [`IconImage`]: lazyDemo(() => import(`../../../client/ui/IconImage.demo`)),
   [`Icons`]: lazyDemo(() => import(`../../../client/ui/Icons.demo`)),
@@ -53,6 +53,7 @@ export const demos: Record<string, FunctionComponent> = {
   [`ToggleButton`]: lazyDemo(() => import(`../../../client/ui/ToggleButton.demo`)),
   [`TutorialDialogBox`]: lazyDemo(() => import(`../../../client/ui/TutorialDialogBox.demo`)),
   [`Typography`]: lazyDemo(() => import(`../../../client/ui/Typography.demo`)),
+  [`WikiHanziGraphemeDecomposition`]: lazyDemo(() => import(`../../../client/ui/WikiHanziGraphemeDecomposition.demo`)),
   [`WikiHanziModal`]: lazyDemo(() => import(`../../../client/ui/WikiHanziModal.demo`)),
   [`WikiHanziWordModal`]: lazyDemo(() => import(`../../../client/ui/WikiHanziWordModal.demo`)),
 // </pyly-glob-template>

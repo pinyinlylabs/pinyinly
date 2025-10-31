@@ -190,6 +190,11 @@ const recommended: ConfigWithExtendsArray = [
               message: `Please use \`useSafeAreaInsets\` from \`react-native-safe-area-context\` instead.`,
             },
             {
+              name: `react-native`,
+              importNames: [`Image`],
+              message: `Please use \`expo-image\` instead.`,
+            },
+            {
               name: `react`,
               importNames: [`forwardRef`, `memo`, `useContext`],
               message: `Migrate to React 19 patterns.`,

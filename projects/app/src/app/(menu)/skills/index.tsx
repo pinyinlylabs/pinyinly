@@ -100,7 +100,7 @@ export function SkillTile({
     <View className={skillTileClass({ rank, className })}>
       <Text className={skillTileTitleClass({ rank })}>
         {hanziWord == null ? null : (
-          <HanziWordRefText hanziWord={hanziWord} showGloss={false} />
+          <HanziWordRefText hanziWord={hanziWord} gloss={false} />
         )}
       </Text>
       <Text className={skillTileGlossClass({ rank })}>{gloss}</Text>

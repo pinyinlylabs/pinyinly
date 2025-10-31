@@ -12,12 +12,12 @@ import { HanziWordLink } from "./HanziWordLink";
 export const HanziWordRefText = ({
   hanziWord,
   showHanzi = true,
-  showGloss = true,
+  gloss = true,
   showPinyin = false,
 }: {
   hanziWord: HanziWord;
   showHanzi?: boolean;
-  showGloss?: boolean;
+  gloss?: boolean | string;
   showPinyin?: boolean;
 }) => {
   const { data: meaning } = useSuspenseQuery(hanziWordMeaningQuery(hanziWord));
@@ -28,12 +28,16 @@ export const HanziWordRefText = ({
     text += hanziFromHanziWord(hanziWord);
   }
 
-  if (showGloss && meaning != null && meaning.gloss.length > 0) {
+  if (
+    gloss !== false &&
+    (typeof gloss === `string` || (meaning != null && meaning.gloss.length > 0))
+  ) {
     const appending = text.length > 0;
     if (appending) {
       text += ` `;
     }
-    text += glossOrThrow(hanziWord, meaning);
+    text +=
+      typeof gloss === `string` ? gloss : glossOrThrow(hanziWord, meaning);
   }
 
   if (showPinyin && meaning?.pinyin != null) {
