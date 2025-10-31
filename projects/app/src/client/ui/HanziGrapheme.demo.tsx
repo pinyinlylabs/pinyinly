@@ -1,6 +1,3 @@
-import { Image } from "expo-image";
-import type { ReactNode } from "react";
-import React, { Children } from "react";
 import { Text, View } from "react-native";
 import { ExampleStack } from "./demo/helpers";
 import { HanziGrapheme } from "./HanziGrapheme";
@@ -72,91 +69,7 @@ export default () => {
             </Text>
           </View>
         </View>
-
-        <GPanel strokesData={xueStrokes}>
-          <Text className="pyly-body">
-            A child using their hand to <strong>learn</strong> about the world.
-          </Text>
-          <GPanelComponent strokes="0,1,2">
-            <Text className="pyly-body">
-              the child’s <HanziWordRefText hanziWord="𭕄:radical" gloss />
-              {` `}
-              poking up through the blanket
-            </Text>
-          </GPanelComponent>
-          <GPanelComponent strokes="3,4" color="yellow">
-            <Text className="pyly-body">
-              a <HanziWordRefText hanziWord="冖:cover" gloss /> depicting a
-              blanket
-            </Text>
-          </GPanelComponent>
-          <GPanelComponent strokes="5,6,7,8" color="blue">
-            <Text className="pyly-body">
-              the <HanziWordRefText hanziWord="子:child" gloss /> laying under a
-              blanket
-            </Text>
-          </GPanelComponent>
-        </GPanel>
       </View>
     </>
   );
 };
-
-function GPanel(props: { children: React.ReactNode; strokesData: string[] }) {
-  const mnemonic: ReactNode[] = [];
-  const components: ReactNode[] = [];
-
-  Children.forEach(props.children, (child) => {
-    if (React.isValidElement(child)) {
-      if (child.type === GPanelComponent) {
-        const props2 = child.props as GPanelComponentProps;
-        components.push(<GPanelComponentImpl {...props2} />);
-        return;
-      }
-
-      mnemonic.push(child);
-      return;
-    }
-  });
-
-  return (
-    <View className="rounded-lg bg-fg-bg5">
-      <View className="gap-4 p-4">
-        {mnemonic}
-
-        <View className="border-t-[0.5px] border-dashed border-fg/25" />
-
-        <View className="gap-5">{components}</View>
-      </View>
-
-      <Image
-        source={require(`./demo/child.png`)}
-        contentFit="contain"
-        className="h-[200px] w-full"
-      />
-    </View>
-  );
-}
-
-interface GPanelComponentProps {
-  strokes: string;
-  color?: `blue` | `yellow`;
-  children: React.ReactNode;
-}
-
-function GPanelComponent(_props: GPanelComponentProps) {
-  return null;
-}
-
-function GPanelComponentImpl(props2: GPanelComponentProps) {
-  return (
-    <View className="flex-row items-center gap-3">
-      <HanziGrapheme
-        strokesData={xueStrokes}
-        highlightStrokes={props2.strokes.split(`,`).map(Number)}
-        highlightColor={props2.color}
-      />
-      {props2.children}
-    </View>
-  );
-}

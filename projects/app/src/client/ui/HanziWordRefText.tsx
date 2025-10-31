@@ -17,6 +17,10 @@ export const HanziWordRefText = ({
 }: {
   hanziWord: HanziWord;
   showHanzi?: boolean;
+  /**
+   * If `true`, shows the default gloss. If a string, shows that string as the
+   * gloss. If `false`, no gloss is shown.
+   */
   gloss?: boolean | string;
   showPinyin?: boolean;
 }) => {

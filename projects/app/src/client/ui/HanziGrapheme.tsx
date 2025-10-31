@@ -20,7 +20,6 @@ export function HanziGrapheme(props: {
               d={d}
               className="fill-bg-loud stroke-fg-bg40"
               strokeWidth={20}
-              // strokeDasharray="20,20"
             />
           ))}
         {/* Outline */}
