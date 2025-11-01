@@ -6,7 +6,7 @@ import { HanziGrapheme } from "./HanziGrapheme";
 
 interface ComponentProps {
   strokes: string;
-  color?: `blue` | `yellow`;
+  color?: `blue` | `yellow` | `amber`;
   children: React.ReactNode;
 }
 
@@ -58,8 +58,8 @@ export const WikiHanziGraphemeDecomposition = Object.assign(
         {illustrationSrc == null ? null : (
           <Image
             source={illustrationSrc}
-            contentFit="contain"
-            className="h-[200px] w-full"
+            contentFit="fill"
+            className="h-[200px] w-full rounded-b-lg"
           />
         )}
       </View>
