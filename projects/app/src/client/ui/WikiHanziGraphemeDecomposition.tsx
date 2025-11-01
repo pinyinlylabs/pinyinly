@@ -58,7 +58,7 @@ export const WikiHanziGraphemeDecomposition = Object.assign(
         {illustrationSrc == null ? null : (
           <Image
             source={illustrationSrc}
-            contentFit="fill"
+            contentFit="cover"
             className="h-[200px] w-full rounded-b-lg"
           />
         )}
