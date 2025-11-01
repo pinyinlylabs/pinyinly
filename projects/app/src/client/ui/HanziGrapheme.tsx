@@ -10,7 +10,12 @@ export function HanziGrapheme(props: {
   const highlightedStrokes = new Set(props.highlightStrokes);
 
   return (
-    <Svg viewBox="0 0 1024 1024" width="256" height="256" className="size-8">
+    <Svg
+      viewBox="0 0 1024 1024"
+      width="256"
+      height="256"
+      className="size-8 shrink-0"
+    >
       <G transform="scale(1, -1) translate(0, -900)">
         {props.strokesData
           .filter((_, i) => !highlightedStrokes.has(i))

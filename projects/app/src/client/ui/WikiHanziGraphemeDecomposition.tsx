@@ -1,12 +1,12 @@
 import { Image } from "expo-image";
 import type { ReactNode } from "react";
-import React, { Children } from "react";
+import React, { Children, Fragment } from "react";
 import { View } from "react-native";
 import { HanziGrapheme } from "./HanziGrapheme";
 
 interface ComponentProps {
   strokes: string;
-  color?: `blue` | `yellow`;
+  color?: `blue` | `yellow` | `amber`;
   children: React.ReactNode;
 }
 
@@ -30,17 +30,17 @@ export const WikiHanziGraphemeDecomposition = Object.assign(
     const mnemonic: ReactNode[] = [];
     const components: ReactNode[] = [];
 
-    Children.forEach(children, (child) => {
+    Children.forEach(children, (child, i) => {
       if (React.isValidElement(child)) {
         if (child.type === Component) {
           const props2 = child.props as ComponentProps;
           components.push(
-            <ComponentImpl {...props2} strokesData={strokesData} />,
+            <ComponentImpl {...props2} strokesData={strokesData} key={i} />,
           );
           return;
         }
 
-        mnemonic.push(child);
+        mnemonic.push(<Fragment key={i}>{child}</Fragment>);
         return;
       }
     });
@@ -58,8 +58,8 @@ export const WikiHanziGraphemeDecomposition = Object.assign(
         {illustrationSrc == null ? null : (
           <Image
             source={illustrationSrc}
-            contentFit="contain"
-            className="h-[200px] w-full"
+            contentFit="cover"
+            className="h-[200px] w-full rounded-b-lg"
           />
         )}
       </View>
