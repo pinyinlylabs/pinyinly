@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 且 (qiě)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" qiě"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: Third tone"}</_components.strong>{" — "}<_components.strong>{"falling-rising"}</_components.strong>{" tone, like saying \"uh-huh\" when nodding"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"q"}</_components.strong>{" like "}<_components.strong>{"\"ch\""}</_components.strong>{" in \"cheese\" (but with more air)"}</_components.li>{"\n"}<_components.li><_components.strong>{"iě"}</_components.strong>{" sounds like "}<_components.strong>{"\"yeh\""}</_components.strong>{" with third tone → dip down and rise up"}</_components.li>{"\n"}<_components.li><_components.strong>{"qiě"}</_components.strong>{" sounds like "}<_components.strong>{"\"chyeh\""}</_components.strong>{" with a dip-then-rise"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"third tone"}</_components.strong>{" (ˇ) is a "}<_components.strong>{"fall–then-rise"}</_components.strong>{" tone:"}</_components.p>{"\n"}<_components.p>{"Say it like you're thinking or being thoughtful: "}<_components.strong>{"\"qiě...\""}</_components.strong>{" — that's the tone pattern of "}<_components.strong>{"qiě"}</_components.strong>{"."}</_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"且 (qiě) - \"moreover; and; also\""}</_components.li>{"\n"}<_components.li>{"而且 (ér qiě) - \"furthermore; moreover\""}</_components.li>{"\n"}<_components.li>{"且不说 (qiě bù shuō) - \"not to mention\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Special Notes:"}</_components.strong></_components.p>{"\n"}<_components.p>{"且 is a conjunction meaning \"moreover,\" \"and,\" or \"also,\" commonly used in formal or literary\nChinese to connect ideas or add additional information. It's often seen in the phrase 而且 (ér qiě),\nwhich means \"furthermore\" or \"moreover.\""}</_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}

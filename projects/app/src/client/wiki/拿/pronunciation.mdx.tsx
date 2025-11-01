@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 拿 (ná)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" ná"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: Second tone"}</_components.strong>{" — "}<_components.strong>{"rising"}</_components.strong>{" tone, like asking a question"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"n"}</_components.strong>{" like "}<_components.strong>{"\"n\""}</_components.strong>{" in \"nice\""}</_components.li>{"\n"}<_components.li><_components.strong>{"á"}</_components.strong>{" sounds like "}<_components.strong>{"\"ah\""}</_components.strong>{" in \"father\", but with rising tone"}</_components.li>{"\n"}<_components.li><_components.strong>{"ná"}</_components.strong>{" sounds like "}<_components.strong>{"\"nah?\""}</_components.strong>{" with a questioning rise"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"second tone"}</_components.strong>{" (ˊ) is a "}<_components.strong>{"rising"}</_components.strong>{" tone:"}</_components.p>{"\n"}<_components.p>{"Say it like you're asking \"Really?\" in English: "}<_components.strong>{"\"ná?\""}</_components.strong>{" — start lower and rise up."}</_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"拿 (ná) - \"to take; to hold; to carry\""}</_components.li>{"\n"}<_components.li>{"拿出 (ná chū) - \"to take out\""}</_components.li>{"\n"}<_components.li>{"拿到 (ná dào) - \"to get; to obtain\""}</_components.li>{"\n"}<_components.li>{"拿走 (ná zǒu) - \"to take away\""}</_components.li>{"\n"}<_components.li>{"拿手 (ná shǒu) - \"to be good at; specialty\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Memory Tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"When you "}<_components.strong>{"take"}</_components.strong>{" something, you might ask \"Can I take this?\" — that questioning, rising intonation\nis like "}<_components.strong>{"ná"}</_components.strong>{"."}</_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}

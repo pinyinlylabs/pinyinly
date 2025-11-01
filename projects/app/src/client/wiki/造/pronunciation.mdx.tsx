@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 造 (zào)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" zào"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: Fourth tone"}</_components.strong>{" — sharp "}<_components.strong>{"falling"}</_components.strong>{" tone, like giving a command"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"z"}</_components.strong>{" like "}<_components.strong>{"\"z\""}</_components.strong>{" in \"zero\""}</_components.li>{"\n"}<_components.li><_components.strong>{"ào"}</_components.strong>{" sounds like "}<_components.strong>{"\"ow\""}</_components.strong>{" in \"cow\" but with a sharp falling tone"}</_components.li>{"\n"}<_components.li><_components.strong>{"zào"}</_components.strong>{" sounds like "}<_components.strong>{"\"zow!\""}</_components.strong>{" with a sharp drop"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"fourth tone"}</_components.strong>{" (`) is a "}<_components.strong>{"sharp falling"}</_components.strong>{" tone:"}</_components.p>{"\n"}<_components.p>{"Start high and drop quickly, like saying "}<_components.strong>{"\"Build!\""}</_components.strong>{" with determination: "}<_components.strong>{"\"zào!\""}</_components.strong>{" — that's the\ntone pattern of "}<_components.strong>{"zào"}</_components.strong>{"."}</_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"造 (zào) - \"to make; to build\""}</_components.li>{"\n"}<_components.li>{"造成 (zào chéng) - \"to cause; to result in\""}</_components.li>{"\n"}<_components.li>{"制造 (zhì zào) - \"to manufacture\""}</_components.li>{"\n"}<_components.li>{"建造 (jiàn zào) - \"to construct\""}</_components.li>{"\n"}<_components.li>{"创造 (chuàng zào) - \"to create\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Memory Tip:"}</_components.strong></_components.p>{"\n"}<_components.p><_components.strong>{"Making"}</_components.strong>{" or building something requires decisive action — the falling tone shows that determined\neffort to create!"}</_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}
