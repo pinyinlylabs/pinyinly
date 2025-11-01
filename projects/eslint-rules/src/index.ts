@@ -103,6 +103,7 @@ const recommended: ConfigWithExtendsArray = [
             "react-native": {
               Animated: `RnAnimated`,
               Easing: `RnEasing`,
+              Image: `RnImage`,
             },
           },
         },
@@ -188,11 +189,6 @@ const recommended: ConfigWithExtendsArray = [
               name: `react-native`,
               importNames: [`SafeAreaView`],
               message: `Please use \`useSafeAreaInsets\` from \`react-native-safe-area-context\` instead.`,
-            },
-            {
-              name: `react-native`,
-              importNames: [`Image`],
-              message: `Please use \`expo-image\` instead.`,
             },
             {
               name: `react`,
