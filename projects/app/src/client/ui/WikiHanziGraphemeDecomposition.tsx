@@ -17,16 +17,20 @@ function Component(_props: ComponentProps) {
   return null;
 }
 
+interface WikiHanziGraphemeDecompositionProps {
+  children: React.ReactNode;
+  strokesData: string[];
+  illustrationSrc?: RnRequireSource;
+  illustrationFit?: `cover` | `contain`;
+}
+
 export const WikiHanziGraphemeDecomposition = Object.assign(
   function WikiHanziGraphemeDecomposition({
     children,
     strokesData,
     illustrationSrc,
-  }: {
-    children: React.ReactNode;
-    strokesData: string[];
-    illustrationSrc?: RnRequireSource;
-  }) {
+    illustrationFit,
+  }: WikiHanziGraphemeDecompositionProps) {
     const mnemonic: ReactNode[] = [];
     const components: ReactNode[] = [];
 
@@ -58,7 +62,8 @@ export const WikiHanziGraphemeDecomposition = Object.assign(
         {illustrationSrc == null ? null : (
           <Image
             source={illustrationSrc}
-            contentFit="cover"
+            contentFit={illustrationFit}
+            contentPosition="top center"
             className="h-[200px] w-full rounded-b-lg"
           />
         )}
