@@ -436,6 +436,7 @@
 ["再:again",{"gloss":["again"],"pinyin":["zài"],"partOfSpeech":"adverb"}],
 ["再见:goodbye",{"gloss":["goodbye"],"pinyin":["zài jiàn"],"partOfSpeech":"interjection"}],
 ["冒:risk",{"gloss":["risk"],"pinyin":["mào"],"partOfSpeech":"verb"}],
+["畐:fill",{"gloss":["fill"],"partOfSpeech":"verb","pinyin":["fú"]}],
 ["最:most",{"gloss":["most"],"pinyin":["zuì"],"partOfSpeech":"adverb"}],
 ["最后:last",{"gloss":["last","finally"],"pinyin":["zuì hòu"],"partOfSpeech":"adverb"}],
 ["最好:best",{"gloss":["best"],"pinyin":["zuì hǎo"],"partOfSpeech":"adjective"}],

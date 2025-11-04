@@ -35,7 +35,6 @@ import {
   upsertHanziWordMeaning,
   wordListSchema,
 } from "#dictionary/dictionary.ts";
-import "#types/hanzi.d.ts";
 import { Alert, MultiSelect, Select } from "@inkjs/ui";
 import {
   arrayFilterUniqueWithKey,
@@ -2300,7 +2299,7 @@ async function saveUpsertHanziWordMeaning(
 }
 
 async function writeDictionary(dict: Dictionary) {
-  await writeJsonFileIfChanged(dictionaryFilePath, unparseDictionary(dict));
+  await writeJsonFileIfChanged(dictionaryFilePath, unparseDictionary(dict), 1);
   await queryClient.invalidateQueries({ queryKey: [`loadDictionary`] });
 }
 
