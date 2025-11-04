@@ -1,0 +1,14 @@
+{
+  "mnemonic": "If you pray, you'll be **blessed** (福) with abundance.",
+  "illustrationPrompt": "a figure stands with hands clasped in prayer in front of a farm (square plot with a grid of plants), a thought cloud containing a rectangular basket overflowing with food from a successful harvest",
+  "components": {
+    "礻": {
+      "illustrationElement": "person",
+      "color": "blue"
+    },
+    "畐": {
+      "illustrationElement": "farm and square basket of food",
+      "color": "yellow"
+    }
+  }
+}
