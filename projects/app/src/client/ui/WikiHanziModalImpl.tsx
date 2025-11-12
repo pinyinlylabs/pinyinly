@@ -5,7 +5,6 @@ import { hanziWikiEntryQuery, pinyinSoundsQuery } from "@/client/query";
 import {
   getWikiMdxHanziMeaning,
   getWikiMdxHanziMeaningMnemonic,
-  getWikiMdxHanziPronunciation,
   getWikiMdxHanziWordMeaning,
 } from "@/client/wiki";
 import type { HanziText, PinyinSoundId, PinyinSyllable } from "@/data/model";
@@ -13,7 +12,6 @@ import { parsePinyinSyllable } from "@/data/pinyin";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import React, { Fragment, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
-import { tv } from "tailwind-variants";
 import { useIntersectionObserver } from "usehooks-ts";
 import { IconImage } from "./IconImage";
 import { PylyMdxComponents } from "./PylyMdxComponents";
@@ -28,8 +26,6 @@ export function WikiHanziModalImpl({
   hanzi: HanziText;
   onDismiss: () => void;
 }) {
-  const [tab, setTab] = useState<`meaning` | `pronunciation`>(`meaning`);
-
   const wikiEntry = useSuspenseQuery(hanziWikiEntryQuery(hanzi));
   void wikiEntry;
 
@@ -59,11 +55,11 @@ export function WikiHanziModalImpl({
   const glosses = glossesArray?.join(`, `);
 
   const MeaningMdx = getWikiMdxHanziMeaning(hanzi);
-  const PronunciationMdx = getWikiMdxHanziPronunciation(hanzi);
   const MeaningMnemonicMdx = getWikiMdxHanziMeaningMnemonic(hanzi);
 
   const primaryGloss = glossesArray?.[0];
-  const primaryPinyin = pinyin?.[0];
+  const firstPinyin = pinyin?.[0];
+  const isSingleSyllable = pinyin?.length === 1;
 
   return (
     <>
@@ -78,18 +74,10 @@ export function WikiHanziModalImpl({
         }
         contentContainerClassName="pb-10 min-h-full"
       >
-        <Header
-          title={title}
-          tab={tab}
-          subtitle={glosses}
-          onDismiss={onDismiss}
-          onTabChange={(tab) => {
-            setTab(tab);
-          }}
-        />
+        <Header title={title} subtitle={glosses} onDismiss={onDismiss} />
 
         <PylyMdxComponents>
-          <View className={contentClass({ active: tab === `meaning` })}>
+          <View className="flex-1 gap-6 bg-bg py-7">
             {MeaningMdx == null ? null : <MeaningMdx />}
 
             {hanziWordMeanings.length > 1 ? (
@@ -137,17 +125,17 @@ export function WikiHanziModalImpl({
               </View>
             )}
 
-            {primaryPinyin == null || primaryGloss == null ? null : (
+            {!isSingleSyllable ||
+            firstPinyin == null ||
+            primaryGloss == null ? null : (
+              // Only render the pronunciation section if this is a single
+              // character word, and there's a pinyin and gloss.
               <PronunciationMnemonicSection
                 hanzi={hanzi}
-                primaryPinyin={primaryPinyin}
+                primaryPinyin={firstPinyin}
                 gloss={primaryGloss}
               />
             )}
-          </View>
-
-          <View className={contentClass({ active: tab === `pronunciation` })}>
-            {PronunciationMdx == null ? null : <PronunciationMdx />}
           </View>
         </PylyMdxComponents>
       </ScrollView>
@@ -167,6 +155,19 @@ function PronunciationMnemonicSection({
   const parsedPinyin = parsePinyinSyllable(pinyin);
   const r = useReplicache();
   const { data: pinyinSounds } = useRizzleQueryPaged(pinyinSoundsQuery(r));
+
+  const initialPinyinSound =
+    parsedPinyin == null
+      ? null
+      : pinyinSounds?.get(parsedPinyin.initialSoundId as PinyinSoundId);
+  const finalPinyinSound =
+    parsedPinyin == null
+      ? null
+      : pinyinSounds?.get(parsedPinyin.finalSoundId as PinyinSoundId);
+  const tonePinyinSound =
+    parsedPinyin == null
+      ? null
+      : pinyinSounds?.get(parsedPinyin.tone.toString() as PinyinSoundId);
 
   return (
     <View className="mt-4 gap-3">
@@ -207,25 +208,27 @@ function PronunciationMnemonicSection({
                   <Text className="pyly-body text-center text-fg/50">
                     {parsedPinyin.initialSoundId}
                   </Text>
-                  <DownArrow />
-                  <Text className="pyly-body underline decoration-dashed underline-offset-4">
-                    {
-                      pinyinSounds?.get(
-                        parsedPinyin.initialSoundId as PinyinSoundId,
-                      )?.name
-                    }
-                  </Text>
+                  {initialPinyinSound == null ? null : (
+                    <>
+                      <DownArrow />
+                      <Text className="pyly-body underline decoration-dashed underline-offset-4">
+                        {initialPinyinSound.name}
+                      </Text>
+                    </>
+                  )}
                 </View>
                 <View className="flex-1 items-center gap-1 border-fg/10">
                   <Text className="pyly-body text-center text-fg/50">
                     {parsedPinyin.finalSoundId}
                   </Text>
-                  <DownArrow />
-                  <Text className="pyly-body underline decoration-dashed underline-offset-4">
-                    {pinyinSounds?.get(
-                      parsedPinyin.finalSoundId as PinyinSoundId,
-                    )?.name ?? `??`}
-                  </Text>
+                  {finalPinyinSound == null ? null : (
+                    <>
+                      <DownArrow />
+                      <Text className="pyly-body underline decoration-dashed underline-offset-4">
+                        {finalPinyinSound.name}
+                      </Text>
+                    </>
+                  )}
                 </View>
                 <View className="flex-1 items-center gap-1 border-fg/10">
                   <Text className="pyly-body text-center text-fg/50">
@@ -234,14 +237,14 @@ function PronunciationMnemonicSection({
                       {ordinalSuffix(parsedPinyin.tone)}
                     </Text>
                   </Text>
-                  <DownArrow />
-                  <Text className="pyly-body underline decoration-dashed underline-offset-4">
-                    {
-                      pinyinSounds?.get(
-                        parsedPinyin.tone.toString() as PinyinSoundId,
-                      )?.name
-                    }
-                  </Text>
+                  {tonePinyinSound == null ? null : (
+                    <>
+                      <DownArrow />
+                      <Text className="pyly-body underline decoration-dashed underline-offset-4">
+                        {tonePinyinSound.name}
+                      </Text>
+                    </>
+                  )}
                 </View>
               </View>
             </View>
@@ -291,35 +294,16 @@ function ordinalSuffix(n: number): string {
   }
 }
 
-const contentClass = tv({
-  base: `flex-1 gap-6 bg-bg py-7`,
-  variants: {
-    active: {
-      true: `flex`,
-      false: `hidden`,
-    },
-  },
-});
-
 function Header({
   title,
   subtitle,
   onDismiss,
-  tab,
-  onTabChange,
 }: {
   title: string;
   subtitle?: string;
   onDismiss?: () => void;
-  tab: `meaning` | `pronunciation`;
-  onTabChange?: (tab: `meaning` | `pronunciation`) => void;
 }) {
   const [ref1, isIntersecting1] = useIntersectionObserver({
-    // threshold: 1,
-    initialIsIntersecting: true,
-  });
-
-  const [ref2, isIntersecting2] = useIntersectionObserver({
     // threshold: 1,
     initialIsIntersecting: true,
   });
@@ -331,14 +315,6 @@ function Header({
         className="absolute top-[44px] h-0 w-full"
         ref={(el) => {
           ref1(el as Element | null);
-        }}
-      />
-
-      {/* Scroll detector */}
-      <View
-        className="absolute top-[72px] h-0 w-full"
-        ref={(el) => {
-          ref2(el as Element | null);
         }}
       />
 
@@ -385,76 +361,8 @@ function Header({
             {subtitle}
           </Text>
         </View>
-
-        <View
-          className={`
-            h-[32px] flex-1 flex-row transition-opacity
-
-            ${isIntersecting2 ? `opacity-100` : `opacity-0`}
-          `}
-        >
-          <HeaderTab
-            label="Meaning"
-            isActive={tab === `meaning`}
-            onPress={() => {
-              onTabChange?.(`meaning`);
-            }}
-          />
-          <HeaderTab
-            label="Pronunciation"
-            isActive={tab === `pronunciation`}
-            onPress={() => {
-              onTabChange?.(`pronunciation`);
-            }}
-          />
-          <View
-            // Half-width view, transitioned between left and middle offset.
-            className={`
-              -translate-x-1/2 absolute bottom-0 h-1 w-1/2 rounded-t-lg bg-fg-loud transition-[left]
-
-              ${tab === `meaning` ? `left-0` : `left-1/2`}
-            `}
-          />
-        </View>
       </View>
     </>
-  );
-}
-
-function HeaderTab({
-  label,
-  isActive,
-  onPress,
-}: {
-  label: string;
-  isActive: boolean;
-  onPress: () => void;
-}) {
-  return (
-    <View className={`min-w-40 flex-1 px-1 py-3`}>
-      <Pressable
-        className={`
-          w-full select-none items-center rounded px-4 py-2 transition-[opacity,transform]
-
-          hover:bg-fg-loud/10
-
-          active:scale-95
-        `}
-        onPress={() => {
-          onPress();
-        }}
-      >
-        <Text
-          className={`
-            font-sans text-[18px]/normal text-fg-loud
-
-            ${isActive ? `font-semibold` : `font-medium`}
-          `}
-        >
-          {label}
-        </Text>
-      </Pressable>
-    </View>
   );
 }
 
