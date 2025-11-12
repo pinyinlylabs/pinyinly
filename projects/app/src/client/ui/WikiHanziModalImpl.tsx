@@ -1,12 +1,15 @@
 import { useLookupHanzi } from "@/client/hooks/useLookupHanzi";
-import { hanziWikiEntryQuery } from "@/client/query";
+import { useReplicache } from "@/client/hooks/useReplicache";
+import { useRizzleQueryPaged } from "@/client/hooks/useRizzleQueryPaged";
+import { hanziWikiEntryQuery, pinyinSoundsQuery } from "@/client/query";
 import {
   getWikiMdxHanziMeaning,
   getWikiMdxHanziMeaningMnemonic,
   getWikiMdxHanziPronunciation,
   getWikiMdxHanziWordMeaning,
 } from "@/client/wiki";
-import type { HanziText, PinyinSyllable } from "@/data/model";
+import type { HanziText, PinyinSoundId, PinyinSyllable } from "@/data/model";
+import { parsePinyinSyllable } from "@/data/pinyin";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import React, { Fragment, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
@@ -14,6 +17,7 @@ import { tv } from "tailwind-variants";
 import { useIntersectionObserver } from "usehooks-ts";
 import { IconImage } from "./IconImage";
 import { PylyMdxComponents } from "./PylyMdxComponents";
+import { ThreeSplitLinesDown } from "./ThreeSplitLinesDown";
 
 const hr = <View className="h-px bg-fg/25" />;
 
@@ -47,14 +51,19 @@ export function WikiHanziModalImpl({
     title += ` (${pinyin.join(` `)})`;
   }
 
-  const glosses =
+  const glossesArray =
     hanziWordMeanings.length === 1
-      ? hanziWordMeanings[0]?.[1].gloss.join(`, `)
-      : hanziWordMeanings.map(([, meaning]) => meaning.gloss[0]).join(`, `);
+      ? hanziWordMeanings[0]?.[1].gloss
+      : hanziWordMeanings.map(([, meaning]) => meaning.gloss[0]);
+
+  const glosses = glossesArray?.join(`, `);
 
   const MeaningMdx = getWikiMdxHanziMeaning(hanzi);
   const PronunciationMdx = getWikiMdxHanziPronunciation(hanzi);
   const MeaningMnemonicMdx = getWikiMdxHanziMeaningMnemonic(hanzi);
+
+  const primaryGloss = glossesArray?.[0];
+  const primaryPinyin = pinyin?.[0];
 
   return (
     <>
@@ -127,6 +136,14 @@ export function WikiHanziModalImpl({
                 <MeaningMnemonicMdx />
               </View>
             )}
+
+            {primaryPinyin == null || primaryGloss == null ? null : (
+              <PronunciationMnemonicSection
+                hanzi={hanzi}
+                primaryPinyin={primaryPinyin}
+                gloss={primaryGloss}
+              />
+            )}
           </View>
 
           <View className={contentClass({ active: tab === `pronunciation` })}>
@@ -136,6 +153,142 @@ export function WikiHanziModalImpl({
       </ScrollView>
     </>
   );
+}
+
+function PronunciationMnemonicSection({
+  hanzi,
+  primaryPinyin: pinyin,
+  gloss,
+}: {
+  gloss: string;
+  hanzi: HanziText;
+  primaryPinyin: PinyinSyllable;
+}) {
+  const parsedPinyin = parsePinyinSyllable(pinyin);
+  const r = useReplicache();
+  const { data: pinyinSounds } = useRizzleQueryPaged(pinyinSoundsQuery(r));
+
+  return (
+    <View className="mt-4 gap-3">
+      <View className="mx-4">
+        <Text className="pyly-body-heading">
+          Use a story to learn the pronunciation
+        </Text>
+      </View>
+
+      <View className="mx-4 rounded-lg bg-fg/5">
+        <View className="gap-4 p-4">
+          <Text className="pyly-body">
+            <Text className="pyly-bold">{hanzi}</Text> is pronounced
+            {` `}
+            <Text className="pyly-bold">{pinyin}</Text>.
+          </Text>
+
+          <Text className="pyly-body">
+            Use a story about &ldquo;
+            <Text className="pyly-bold">{gloss}</Text>
+            &rdquo; to remember the initial, the final, and the tone of
+            {` `}
+            <Text className="pyly-bold">{pinyin}</Text>.
+          </Text>
+        </View>
+
+        {parsedPinyin == null ? null : (
+          <View className="gap-4 p-4">
+            <View className="">
+              <Text className="pyly-body text-center">
+                <Text className="pyly-bold">{pinyin}</Text>
+              </Text>
+              <View className="px-[15%] py-2">
+                <ThreeSplitLinesDown className="h-[10px] w-full" />
+              </View>
+              <View className="flex-row gap-4">
+                <View className="flex-1 items-center gap-1 border-fg/10">
+                  <Text className="pyly-body text-center text-fg/50">
+                    {parsedPinyin.initialSoundId}
+                  </Text>
+                  <DownArrow />
+                  <Text className="pyly-body underline decoration-dashed underline-offset-4">
+                    {
+                      pinyinSounds?.get(
+                        parsedPinyin.initialSoundId as PinyinSoundId,
+                      )?.name
+                    }
+                  </Text>
+                </View>
+                <View className="flex-1 items-center gap-1 border-fg/10">
+                  <Text className="pyly-body text-center text-fg/50">
+                    {parsedPinyin.finalSoundId}
+                  </Text>
+                  <DownArrow />
+                  <Text className="pyly-body underline decoration-dashed underline-offset-4">
+                    {pinyinSounds?.get(
+                      parsedPinyin.finalSoundId as PinyinSoundId,
+                    )?.name ?? `??`}
+                  </Text>
+                </View>
+                <View className="flex-1 items-center gap-1 border-fg/10">
+                  <Text className="pyly-body text-center text-fg/50">
+                    {parsedPinyin.tone}
+                    <Text className="align-super text-[10px]">
+                      {ordinalSuffix(parsedPinyin.tone)}
+                    </Text>
+                  </Text>
+                  <DownArrow />
+                  <Text className="pyly-body underline decoration-dashed underline-offset-4">
+                    {
+                      pinyinSounds?.get(
+                        parsedPinyin.tone.toString() as PinyinSoundId,
+                      )?.name
+                    }
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </View>
+        )}
+        {__DEV__ ? (
+          <>
+            <View className="h-[400px] w-full border-fg/50 bg-fg/50"></View>
+            <View className="px-4 py-2">
+              <Text className="pyly-body-caption text-fg">
+                In the lavish, dimly lit Broadway Bathroom, a crucial
+                business MEETING is violently interrupted. A neon-clad Hula
+                Hooper, mistaking the tall-ceilinged space for a fitness studio,
+                spins her giant hoop wildly, scattering papers and forcing the
+                shocked attendees to immediately adjourn their makeshift
+                conference.
+              </Text>
+            </View>
+          </>
+        ) : null}
+      </View>
+    </View>
+  );
+}
+
+function DownArrow() {
+  return <Text className="pyly-body h-6 text-fg/40">↓</Text>;
+}
+
+function ordinalSuffix(n: number): string {
+  if (n >= 11 && n <= 13) {
+    return `th`;
+  }
+  switch (n % 10) {
+    case 1: {
+      return `st`;
+    }
+    case 2: {
+      return `nd`;
+    }
+    case 3: {
+      return `rd`;
+    }
+    default: {
+      return `th`;
+    }
+  }
 }
 
 const contentClass = tv({

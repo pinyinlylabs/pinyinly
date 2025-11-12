@@ -504,7 +504,10 @@ describe(`pyly pinyin chart`, async () => {
       [`ao`, `∅-`, `-ao`],
       [`ba`, `b-`, `-a`],
 
+      [`gong`, `g-`, `-ong`],
       [`cong`, `c-`, `-ong`],
+
+      [`hui`, `hu-`, `-ei`],
 
       // https://countryoftheblind.blogspot.com/2012/01/mnemonics-for-pronouncing-chinese.html?showComment=1540670199273&m=1#c4879970812355082477
       [`cheng`, `ch-`, `-eng`],
@@ -534,6 +537,7 @@ describe(`pyly pinyin chart`, async () => {
       [`ri`, `r-`, `-∅`],
       [`ci`, `c-`, `-∅`],
       [`zi`, `z-`, `-∅`],
+      [`qi`, `qi-`, `-∅`],
 
       [`zha`, `zh-`, `-a`],
       // > You will notice some spelling oddities: for example, zhu- + (e)ng becomes
@@ -545,7 +549,9 @@ describe(`pyly pinyin chart`, async () => {
       [`ta`, `t-`, `-a`],
       [`tou`, `t-`, `-ou`],
       [`xiu`, `xi-`, `-ou`],
+      [`mao`, `m-`, `-ao`],
       [`a`, `∅-`, `-a`],
+      [`an`, `∅-`, `-an`],
       [`xing`, `xi-`, `-eng`],
       [`qing`, `qi-`, `-eng`],
     ]);

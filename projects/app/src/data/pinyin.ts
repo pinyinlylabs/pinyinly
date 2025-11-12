@@ -114,10 +114,7 @@ export const parsePinyinSyllableTone = memoize1(function parsePinyinTone(
 export function splitTonelessPinyinSyllable(
   pinyin: string,
   chart: DeepReadonly<PinyinChart>,
-): {
-  initialSoundId: string;
-  finalSoundId: string;
-} | null {
+): Pick<ParsedPinyinSyllable, `initialSoundId` | `finalSoundId`> | null {
   const initialSoundId = chart.syllableToInitialSound[pinyin];
   const finalSoundId = chart.syllableToFinalSound[pinyin];
 
@@ -128,15 +125,17 @@ export function splitTonelessPinyinSyllable(
   return { initialSoundId, finalSoundId };
 }
 
-export function parsePinyinSyllableWithChart(
-  pinyinSyllable: string,
-  chart: DeepReadonly<PinyinChart>,
-): {
+export interface ParsedPinyinSyllable {
   initialSoundId: string;
   finalSoundId: string;
   tone: number;
   tonelessSyllable: PinyinSyllable;
-} | null {
+}
+
+export function parsePinyinSyllableWithChart(
+  pinyinSyllable: string,
+  chart: DeepReadonly<PinyinChart>,
+): ParsedPinyinSyllable | null {
   if (pinyinSyllable === ``) {
     return null;
   }
