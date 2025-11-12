@@ -172,7 +172,7 @@ function PronunciationMnemonicSection({
     <View className="mt-4 gap-3">
       <View className="mx-4">
         <Text className="pyly-body-heading">
-          Use a story to learn the the pronunciation
+          Use a story to learn the pronunciation
         </Text>
       </View>
 
