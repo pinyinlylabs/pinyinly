@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 疼 (téng)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" téng"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: Second tone"}</_components.strong>{" — "}<_components.strong>{"rising"}</_components.strong>{" tone, like asking a question"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"t"}</_components.strong>{" like "}<_components.strong>{"\"t\""}</_components.strong>{" in \"top\" but "}<_components.strong>{"stronger and more aspirated"}</_components.strong>{" — with a clear puff of air"}</_components.li>{"\n"}<_components.li><_components.strong>{"éng"}</_components.strong>{" sounds like "}<_components.strong>{"\"ung\""}</_components.strong>{" in \"hung\" but with a "}<_components.strong>{"rising tone"}</_components.strong></_components.li>{"\n"}<_components.li><_components.strong>{"téng"}</_components.strong>{" sounds like "}<_components.strong>{"\"tung?\""}</_components.strong>{" with a questioning rise"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"second tone"}</_components.strong>{" (ˊ) "}<_components.strong>{"rises"}</_components.strong>{" like asking a question:"}</_components.p>{"\n"}<_components.p>{"Say it like you're asking \"Does it hurt?\": "}<_components.strong>{"\"téng?\""}</_components.strong>{" — that's the rising energy of "}<_components.strong>{"téng"}</_components.strong>{"."}</_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"疼 (téng) - \"pain; ache\""}</_components.li>{"\n"}<_components.li>{"疼痛 (téng tòng) - \"pain; ache\""}</_components.li>{"\n"}<_components.li>{"头疼 (tóu téng) - \"headache\""}</_components.li>{"\n"}<_components.li>{"肚子疼 (dù zi téng) - \"stomachache\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Memory Tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"疼 means \"pain\" — the rising second tone sounds like someone's voice going up when they're in pain:\n"}<_components.strong>{"\"Ow, it hurts!\""}</_components.strong></_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}

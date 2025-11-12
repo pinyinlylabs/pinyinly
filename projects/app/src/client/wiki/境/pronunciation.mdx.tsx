@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 境 (jìng)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" jìng"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: Fourth tone"}</_components.strong>{" — "}<_components.strong>{"falling"}</_components.strong>{" tone, like giving a command: "}<_components.strong>{"\"Jing!\""}</_components.strong></_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"j"}</_components.strong>{" like "}<_components.strong>{"\"j\""}</_components.strong>{" in \"jeep\" (but more forward tongue position)"}</_components.li>{"\n"}<_components.li><_components.strong>{"ìng"}</_components.strong>{" sounds like "}<_components.strong>{"\"ing\""}</_components.strong>{" with a sharp falling tone"}</_components.li>{"\n"}<_components.li><_components.strong>{"jìng"}</_components.strong>{" sounds like "}<_components.strong>{"\"jing\""}</_components.strong>{" with a decisive drop"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"fourth tone"}</_components.strong>{" (ˋ) is "}<_components.strong>{"authoritative and falling"}</_components.strong>{":"}</_components.p>{"\n"}<_components.p>{"Start "}<_components.strong>{"high and drop decisively"}</_components.strong>{" — like declaring a boundary: "}<_components.strong>{"\"jìng!\""}</_components.strong></_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"境 (jìng) - \"boundary\""}</_components.li>{"\n"}<_components.li>{"环境 (huán jìng) - \"environment\""}</_components.li>{"\n"}<_components.li>{"境界 (jìng jiè) - \"realm\""}</_components.li>{"\n"}<_components.li>{"出境 (chū jìng) - \"exit the country\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Memory Tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"Think of "}<_components.strong>{"境"}</_components.strong>{" as drawing a firm "}<_components.strong>{"boundary"}</_components.strong>{" — the sharp falling fourth tone represents the\ndecisive line being drawn!"}</_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}

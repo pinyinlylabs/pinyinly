@@ -100,6 +100,7 @@ tasks:
     deps:
       - ~:codegenEslint
       - ~:codegenExpoRouterTypes
+      - ~:codegenMdx
 
   codegenEslint:
     description: "Run ESLint with codegen rules. This is separate from lint and doesn't use ESLint caching intentionally."
@@ -137,6 +138,24 @@ tasks:
       #
       # Pass $NODE_OPTIONS to support VS Code "JavaScript Debug Terminal".
       NODE_OPTIONS: --import tsx $NODE_OPTIONS
+
+  codegenMdx:
+    script: |
+      [ -n "${CI:-}" ] && {
+        echo -e "\033[33m⚠️  CI environment detected, skipping execution.\033[0m"
+        exit 0
+      }
+      tsx bin/codegenMdx.ts
+    deps:
+      - mdx:src
+    description: "Precompile wiki MDX files to TSX for faster builds"
+    inputs:
+      - "src/**/*.mdx"
+      - "bin/codegenMdx.ts"
+      - "$CI"
+    outputs:
+      - "src/**/*.mdx.tsx"
+    toolchain: "node"
 
   dbCheck:
     command: drizzle-kit check

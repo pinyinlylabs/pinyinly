@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 吧 (ba)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" ba"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: Neutral tone"}</_components.strong>{" — "}<_components.strong>{"light and quick"}</_components.strong>{", unstressed"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"b"}</_components.strong>{" like "}<_components.strong>{"\"b\""}</_components.strong>{" in \"baby\""}</_components.li>{"\n"}<_components.li><_components.strong>{"a"}</_components.strong>{" sounds like "}<_components.strong>{"\"ah\""}</_components.strong>{" but very light and quick"}</_components.li>{"\n"}<_components.li><_components.strong>{"ba"}</_components.strong>{" sounds like a quick "}<_components.strong>{"\"bah\""}</_components.strong></_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"neutral tone"}</_components.strong>{" is "}<_components.strong>{"light and unstressed"}</_components.strong>{" — like a quick afterthought:"}</_components.p>{"\n"}<_components.p>{"Say it lightly and quickly, like making a gentle suggestion — that's "}<_components.strong>{"ba"}</_components.strong>{"."}</_components.p>{"\n"}<_components.p><_components.strong>{"📝 Special Notes:"}</_components.strong></_components.p>{"\n"}<_components.p>{"吧 (ba) is a "}<_components.strong>{"suggestion particle"}</_components.strong>{" that makes statements into gentle suggestions or invitations.\nIt's always pronounced with neutral tone and comes at the end of sentences."}</_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"我们走吧。 (wǒ men zǒu ba.) - \"Let's go.\""}</_components.li>{"\n"}<_components.li>{"你吃吧。 (nǐ chī ba.) - \"Go ahead and eat.\""}</_components.li>{"\n"}<_components.li>{"坐下吧。 (zuò xià ba.) - \"Please sit down.\""}</_components.li>{"\n"}<_components.li>{"别担心吧。 (bié dān xīn ba.) - \"Don't worry.\""}</_components.li>{"\n"}<_components.li>{"试试吧。 (shì shi ba.) - \"Give it a try.\""}</_components.li>{"\n"}</_components.ul></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}

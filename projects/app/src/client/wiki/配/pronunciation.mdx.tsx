@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 配 (pèi)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" pèi"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: Fourth tone"}</_components.strong>{" — sharp "}<_components.strong>{"falling"}</_components.strong>{" tone, like giving a command"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"p"}</_components.strong>{" like "}<_components.strong>{"\"p\""}</_components.strong>{" in \"pay\""}</_components.li>{"\n"}<_components.li><_components.strong>{"èi"}</_components.strong>{" sounds like "}<_components.strong>{"\"ay\""}</_components.strong>{" in \"way\" but with fourth tone → sharp falling pitch"}</_components.li>{"\n"}<_components.li><_components.strong>{"pèi"}</_components.strong>{" sounds like "}<_components.strong>{"\"pay!\""}</_components.strong>{" with a sharp drop"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"fourth tone"}</_components.strong>{" (ˋ) is a "}<_components.strong>{"sharp falling"}</_components.strong>{" tone:"}</_components.p>{"\n"}<_components.p>{"Start high and drop quickly, like saying \"Match!\" decisively: "}<_components.strong>{"\"pèi!\""}</_components.strong>{" — that's the tone pattern\nof "}<_components.strong>{"pèi"}</_components.strong>{"."}</_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"配 (pèi) - \"to match; to pair; to deserve\""}</_components.li>{"\n"}<_components.li>{"配合 (pèi hé) - \"to cooperate; to coordinate\""}</_components.li>{"\n"}<_components.li>{"配菜 (pèi cài) - \"side dish\""}</_components.li>{"\n"}<_components.li>{"配音 (pèi yīn) - \"dubbing; voice-over\""}</_components.li>{"\n"}<_components.li>{"配偶 (pèi ǒu) - \"spouse; partner\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Note:"}</_components.strong></_components.p>{"\n"}<_components.p>{"配 contains the 酉 (wine) radical, originally related to mixing or blending alcoholic beverages. The\nmeaning has expanded to general concepts of matching, pairing, and coordination."}</_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}

@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 才 (cái)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" cái"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: Second tone"}</_components.strong>{" — "}<_components.strong>{"rising"}</_components.strong>{" tone, like asking a question: "}<_components.strong>{"\"Cái?\""}</_components.strong></_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"c"}</_components.strong>{" like "}<_components.strong>{"\"ts\""}</_components.strong>{" in \"cats\" (aspirated)"}</_components.li>{"\n"}<_components.li><_components.strong>{"ái"}</_components.strong>{" sounds like "}<_components.strong>{"\"eye\""}</_components.strong>{" but with rising tone"}</_components.li>{"\n"}<_components.li><_components.strong>{"cái"}</_components.strong>{" sounds like "}<_components.strong>{"\"tsai\""}</_components.strong>{" with a rising pitch"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"second tone"}</_components.strong>{" (´) is a "}<_components.strong>{"rising"}</_components.strong>{" tone:"}</_components.p>{"\n"}<_components.p>{"Say it like you just realized something: "}<_components.strong>{"\"cái!\""}</_components.strong>{" (Oh, just now!) — that's the sudden realization\ntone pattern of "}<_components.strong>{"cái"}</_components.strong>{"."}</_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"才 (cái) - \"just now; only then; talent\""}</_components.li>{"\n"}<_components.li>{"刚才 (gāng cái) - \"just now; a moment ago\""}</_components.li>{"\n"}<_components.li>{"人才 (rén cái) - \"talent; talented person\""}</_components.li>{"\n"}<_components.li>{"才能 (cái néng) - \"ability; talent\""}</_components.li>{"\n"}<_components.li>{"天才 (tiān cái) - \"genius; talent\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Memory Tip:"}</_components.strong></_components.p>{"\n"}<_components.p><_components.strong>{"Just now"}</_components.strong>{" — the rising second tone captures the \"aha!\" moment of sudden realization!"}</_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}

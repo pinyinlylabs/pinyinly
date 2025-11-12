@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 船 (chuán)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" chuán"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: Second tone"}</_components.strong>{" — "}<_components.strong>{"rising"}</_components.strong>{" tone, like asking about a journey"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"ch"}</_components.strong>{" like "}<_components.strong>{"\"ch\""}</_components.strong>{" in \"choose\""}</_components.li>{"\n"}<_components.li><_components.strong>{"uán"}</_components.strong>{" sounds like "}<_components.strong>{"\"wan\""}</_components.strong>{" in \"want\", but with second tone → rises up"}</_components.li>{"\n"}<_components.li><_components.strong>{"chuán"}</_components.strong>{" sounds like "}<_components.strong>{"\"chwan\""}</_components.strong>{" with a questioning rise"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"second tone"}</_components.strong>{" (ˊ) is a "}<_components.strong>{"rising"}</_components.strong>{" tone:"}</_components.p>{"\n"}<_components.p>{"Start low and rise smoothly, like asking "}<_components.strong>{"\"Going by boat?\""}</_components.strong>{": "}<_components.strong>{"\"chuán?\""}</_components.strong>{" — that upward motion."}</_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"船 (chuán) - \"ship; boat; vessel\""}</_components.li>{"\n"}<_components.li>{"小船 (xiǎo chuán) - \"small boat\""}</_components.li>{"\n"}<_components.li>{"大船 (dà chuán) - \"big ship\""}</_components.li>{"\n"}<_components.li>{"划船 (huá chuán) - \"to row a boat\""}</_components.li>{"\n"}<_components.li>{"船只 (chuán zhī) - \"vessels; ships\""}</_components.li>{"\n"}<_components.li>{"轮船 (lún chuán) - \"steamship\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Size Note:"}</_components.strong></_components.p>{"\n"}<_components.p>{"船 (chuán) typically refers to larger vessels compared to 舟 (zhōu). It's the modern word for ships\nand boats of various sizes."}</_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}

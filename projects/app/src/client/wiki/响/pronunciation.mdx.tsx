@@ -1,0 +1,15 @@
+// @ts-nocheck
+/*@jsxRuntime automatic*/
+/*@jsxImportSource react*/
+import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+function _createMdxContent(props: any) {
+  const _components = Object.assign(Object.create(_provideComponents()), props.components);
+  return <><_components.p><_components.strong>{"🗣️ Pronunciation of 响 (xiǎng)"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"Pinyin:"}</_components.strong>{" xiǎng"}</_components.li>{"\n"}<_components.li><_components.strong>{"Tone: Third tone"}</_components.strong>{" — "}<_components.strong>{"falling-rising"}</_components.strong>{" tone, like saying \"uh-huh\" when nodding"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🔤 Breakdown:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li><_components.strong>{"x"}</_components.strong>{" like "}<_components.strong>{"\"sh\""}</_components.strong>{" in \"she\" but with tongue tip down"}</_components.li>{"\n"}<_components.li><_components.strong>{"iǎng"}</_components.strong>{" sounds like "}<_components.strong>{"\"yahng\""}</_components.strong>{" with third tone → dip down and rise up"}</_components.li>{"\n"}<_components.li><_components.strong>{"xiǎng"}</_components.strong>{" sounds like "}<_components.strong>{"\"shyahng\""}</_components.strong>{" with a dip-then-rise"}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"🎧 Tone tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"third tone"}</_components.strong>{" (ˇ) is a "}<_components.strong>{"fall–then-rise"}</_components.strong>{" tone:"}</_components.p>{"\n"}<_components.p>{"Say it like you're pondering the sound you just heard: "}<_components.strong>{"\"xiǎng...\""}</_components.strong>{" — that's the tone pattern."}</_components.p>{"\n"}<_components.p><_components.strong>{"📝 Common Examples:"}</_components.strong></_components.p>{"\n"}<_components.ul>{"\n"}<_components.li>{"响 (xiǎng) - \"sound; loud\""}</_components.li>{"\n"}<_components.li>{"响声 (xiǎng shēng) - \"sound; noise\""}</_components.li>{"\n"}<_components.li>{"影响 (yǐng xiǎng) - \"influence; effect\""}</_components.li>{"\n"}<_components.li>{"响应 (xiǎng yìng) - \"respond\""}</_components.li>{"\n"}<_components.li>{"巨响 (jù xiǎng) - \"loud sound; boom\""}</_components.li>{"\n"}</_components.ul>{"\n"}<_components.p><_components.strong>{"💡 Memory Tip:"}</_components.strong></_components.p>{"\n"}<_components.p>{"The "}<_components.strong>{"sound radical (音)"}</_components.strong>{" suggests something that makes noise, and when you hear a loud "}<_components.strong>{"sound"}</_components.strong>{",\nyou often react with that falling-rising \"xiǎng\" tone!"}</_components.p></>;
+}
+export default function MDXContent(props: any = {}) {
+  const {wrapper: MDXLayout} = {
+    ..._provideComponents(),
+    ...props.components
+  };
+  return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
+}
