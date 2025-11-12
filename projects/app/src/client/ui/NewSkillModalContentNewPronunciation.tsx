@@ -1,6 +1,5 @@
 import { useLookupHanzi } from "@/client/hooks/useLookupHanzi";
 import { hanziWikiEntryQuery } from "@/client/query";
-import { getWikiMdxHanziPronunciation } from "@/client/wiki";
 import type { HanziText, PinyinSyllable } from "@/data/model";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Pressable, ScrollView, Text, View } from "react-native";
@@ -41,8 +40,6 @@ export const NewSkillModalContentNewPronunciation = ({
       ? hanziWordMeanings[0]?.[1].gloss.join(`, `)
       : hanziWordMeanings.map(([, meaning]) => meaning.gloss[0]).join(`, `);
 
-  const PronunciationMdx = getWikiMdxHanziPronunciation(hanzi);
-
   return (
     <>
       <ScrollView
@@ -70,8 +67,6 @@ export const NewSkillModalContentNewPronunciation = ({
                 Pronunciation
               </Text>
             </View>
-
-            {PronunciationMdx == null ? null : <PronunciationMdx />}
           </View>
         </PylyMdxComponents>
       </ScrollView>
