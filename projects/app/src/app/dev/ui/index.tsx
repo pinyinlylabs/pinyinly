@@ -50,6 +50,7 @@ export const demos: Record<string, FunctionComponent> = {
   [`SkillTile`]: lazyDemo(() => import(`../../../client/ui/SkillTile.demo`)),
   [`TextAnswerButton`]: lazyDemo(() => import(`../../../client/ui/TextAnswerButton.demo`)),
   [`TextInputSingle`]: lazyDemo(() => import(`../../../client/ui/TextInputSingle.demo`)),
+  [`ThreeSplitLinesDown`]: lazyDemo(() => import(`../../../client/ui/ThreeSplitLinesDown.demo`)),
   [`ToggleButton`]: lazyDemo(() => import(`../../../client/ui/ToggleButton.demo`)),
   [`TutorialDialogBox`]: lazyDemo(() => import(`../../../client/ui/TutorialDialogBox.demo`)),
   [`Typography`]: lazyDemo(() => import(`../../../client/ui/Typography.demo`)),
