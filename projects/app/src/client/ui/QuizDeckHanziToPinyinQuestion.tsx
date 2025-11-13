@@ -34,10 +34,10 @@ import { Text, View } from "react-native";
 import Reanimated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { DeepReadonly } from "ts-essentials";
-import { HanziWordRefText } from "./HanziWordRefText";
+import { HanziWordToGlossSkillAnswerText } from "./HanziWordToGlossSkillAnswerText";
+import { HanziWordToPinyinSkillAnswerText } from "./HanziWordToPinyinSkillAnswerText";
 import { IconImage } from "./IconImage";
 import { PinyinOptionButton } from "./PinyinOptionButton";
-import { Pylymark } from "./Pylymark";
 import { QuizDeckToastContainer } from "./QuizDeckToastContainer";
 import { QuizFlagText } from "./QuizFlagText";
 import { QuizSubmitButton, QuizSubmitButtonState } from "./QuizSubmitButton";
@@ -360,36 +360,6 @@ const SkillAnswerText = ({
       return <HanziWordToPinyinSkillAnswerText skill={skill} />;
     }
   }
-};
-
-const HanziWordToGlossSkillAnswerText = ({
-  skill,
-}: {
-  skill: HanziWordSkill;
-}) => {
-  const hanziWord = hanziWordFromSkill(skill);
-
-  return (
-    <>
-      <Text className="pyly-body-2xl">
-        <Pylymark source={`{${hanziWord}}`} />
-      </Text>
-    </>
-  );
-};
-
-const HanziWordToPinyinSkillAnswerText = ({
-  skill,
-}: {
-  skill: HanziWordSkill;
-}) => {
-  const hanziWord = hanziWordFromSkill(skill);
-
-  return (
-    <Text className="pyly-body-2xl">
-      <HanziWordRefText hanziWord={hanziWord} showPinyin />
-    </Text>
-  );
 };
 
 const Skeleton = ({
