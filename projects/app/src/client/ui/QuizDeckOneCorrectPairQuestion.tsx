@@ -15,21 +15,17 @@ import {
   oneCorrectPairQuestionMistakes,
 } from "@/data/questions/oneCorrectPair";
 import type { HanziWordSkill, Skill } from "@/data/rizzleSchema";
-import {
-  computeSkillRating,
-  hanziWordFromSkill,
-  skillKindFromSkill,
-} from "@/data/skills";
+import { computeSkillRating, skillKindFromSkill } from "@/data/skills";
 import { longestTextByGraphemes } from "@/util/unicode";
 import { invariant } from "@pinyinly/lib/invariant";
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { HanziWordRefText } from "./HanziWordRefText";
+import { HanziWordToGlossSkillAnswerText } from "./HanziWordToGlossSkillAnswerText";
+import { HanziWordToPinyinSkillAnswerText } from "./HanziWordToPinyinSkillAnswerText";
 import { IconImage } from "./IconImage";
 import { NewSkillModal } from "./NewSkillModal";
-import { Pylymark } from "./Pylymark";
 import { QuizDeckToastContainer } from "./QuizDeckToastContainer";
 import { QuizFlagText } from "./QuizFlagText";
 import { QuizSubmitButton, QuizSubmitButtonState } from "./QuizSubmitButton";
@@ -318,36 +314,6 @@ const SkillAnswerText = ({ skill }: { skill: Skill; small?: boolean }) => {
       return <HanziWordToPinyinSkillAnswerText skill={skill} />;
     }
   }
-};
-
-const HanziWordToGlossSkillAnswerText = ({
-  skill,
-}: {
-  skill: HanziWordSkill;
-}) => {
-  const hanziWord = hanziWordFromSkill(skill);
-
-  return (
-    <>
-      <Text className="pyly-body-2xl">
-        <Pylymark source={`{${hanziWord}}`} />
-      </Text>
-    </>
-  );
-};
-
-const HanziWordToPinyinSkillAnswerText = ({
-  skill,
-}: {
-  skill: HanziWordSkill;
-}) => {
-  const hanziWord = hanziWordFromSkill(skill);
-
-  return (
-    <Text className="pyly-body-2xl">
-      <HanziWordRefText hanziWord={hanziWord} showPinyin />
-    </Text>
-  );
 };
 
 const Skeleton = ({
