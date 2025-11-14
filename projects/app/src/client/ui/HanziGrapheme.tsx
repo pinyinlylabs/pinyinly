@@ -17,17 +17,18 @@ export function HanziGrapheme(props: {
       className="size-8 shrink-0"
     >
       <G transform="scale(1, -1) translate(0, -900)">
+        {/* Placeholder */}
         {props.strokesData
           .filter((_, i) => !highlightedStrokes.has(i))
           .map((d, i) => (
             <PathCss
               key={i}
               d={d}
-              className="fill-bg-loud stroke-fg-bg40"
+              className="fill-fg-bg40 stroke-fg-bg40"
               strokeWidth={20}
             />
           ))}
-        {/* Outline */}
+        {/* Bold Outline */}
         {props.strokesData
           .filter((_, i) => highlightedStrokes.has(i))
           .map((d, i) => (
@@ -38,7 +39,7 @@ export function HanziGrapheme(props: {
               strokeWidth={120}
             />
           ))}
-        {/* Fill */}
+        {/* Bold Fill */}
         {props.strokesData
           .filter((_, i) => highlightedStrokes.has(i))
           .map((d, i) => (
