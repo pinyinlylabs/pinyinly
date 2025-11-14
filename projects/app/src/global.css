@@ -330,7 +330,7 @@
     @apply pyly-body;
   }
   .pyly-mdx-strong {
-    @apply font-bold;
+    @apply font-bold text-fg-loud;
   }
 
   .pyly-mdx-p {
