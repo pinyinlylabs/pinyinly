@@ -1,7 +1,7 @@
 import type { HanziText } from "@/data/model";
 import { Image } from "expo-image";
 import type { ReactNode } from "react";
-import React, { Children, Fragment } from "react";
+import React from "react";
 import { Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 import { HanziGrapheme } from "./HanziGrapheme";
@@ -38,34 +38,17 @@ interface WikiHanziGraphemeDecomposition2Props {
 export const WikiHanziGraphemeDecomposition2 = Object.assign(
   function WikiHanziGraphemeDecomposition2({
     children,
-    components: visualComponentsData,
+    components,
     hanzi,
     strokesData,
     mnemonicTitle,
     illustrationSrc,
     illustrationFit,
   }: WikiHanziGraphemeDecomposition2Props) {
-    const mnemonic: ReactNode[] = [];
-    const components: ReactNode[] = [];
-    const visualComponents: ReactNode[] = [];
+    const componentsElements: ReactNode[] = [];
 
-    Children.forEach(children, (child, i) => {
-      if (React.isValidElement(child)) {
-        if (child.type === Component) {
-          const props2 = child.props as ComponentProps;
-          components.push(
-            <ComponentImpl {...props2} strokesData={strokesData} key={i} />,
-          );
-          return;
-        }
-
-        mnemonic.push(<Fragment key={i}>{child}</Fragment>);
-        return;
-      }
-    });
-
-    for (const [i, visualComponent] of visualComponentsData.entries()) {
-      visualComponents.push(
+    for (const [i, visualComponent] of components.entries()) {
+      componentsElements.push(
         <View className="flex-1 items-center gap-2" key={i}>
           <View className="flex-row items-center gap-2">
             <HanziGrapheme
@@ -97,7 +80,7 @@ export const WikiHanziGraphemeDecomposition2 = Object.assign(
             elements for a story:
           </Text>
 
-          <View className="flex-row gap-5">{visualComponents}</View>
+          <View className="flex-row gap-5">{componentsElements}</View>
         </View>
 
         {illustrationSrc == null ? null : (
@@ -128,21 +111,3 @@ export const WikiHanziGraphemeDecomposition2 = Object.assign(
 const visualCharClass = tv({
   base: `pyly-body text-fg/50`,
 });
-
-function ComponentImpl({
-  strokes,
-  strokesData,
-  color,
-  children,
-}: ComponentProps & { strokesData: string[] }) {
-  return (
-    <View className="flex-row items-center gap-3">
-      <HanziGrapheme
-        strokesData={strokesData}
-        highlightStrokes={strokes.split(`,`).map(Number)}
-        highlightColor={color}
-      />
-      {children}
-    </View>
-  );
-}
