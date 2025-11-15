@@ -1,6 +1,7 @@
 import type { Question } from "./model";
 import { SkillKind } from "./model";
 import { hanziWordToGlossQuestionOrThrow } from "./questions/hanziWordToGloss";
+import { hanziWordToGlossTypedQuestionOrThrow } from "./questions/hanziWordToGlossTyped";
 import { hanziWordToPinyinQuestionOrThrow } from "./questions/hanziWordToPinyin";
 import { hanziWordToPinyinFinalQuestionOrThrow } from "./questions/hanziWordToPinyinFinal";
 import { hanziWordToPinyinInitialQuestionOrThrow } from "./questions/hanziWordToPinyinInitial";
@@ -15,6 +16,10 @@ export async function generateQuestionForSkillOrThrow(
     case SkillKind.HanziWordToGloss: {
       skill = skill as HanziWordSkill;
       return await hanziWordToGlossQuestionOrThrow(skill);
+    }
+    case SkillKind.HanziWordToGlossTyped: {
+      skill = skill as HanziWordSkill;
+      return await hanziWordToGlossTypedQuestionOrThrow(skill);
     }
     case SkillKind.HanziWordToPinyinTyped: {
       skill = skill as HanziWordSkill;

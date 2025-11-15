@@ -13,7 +13,6 @@ import shuffle from "lodash/shuffle";
 import type { DeepReadonly } from "ts-essentials";
 import type {
   HanziWord,
-  OneCorrectPairQuestion,
   OneCorrectPairQuestionAnswer,
   OneCorrectPairQuestionChoice,
   Question,
@@ -23,7 +22,6 @@ import type { HanziWordSkill } from "../rizzleSchema";
 import { hanziWordFromSkill } from "../skills";
 import { oneCorrectPairQuestionInvariant } from "./oneCorrectPair";
 
-// generate a question to test a skill
 export async function hanziWordToGlossQuestionOrThrow(
   skill: HanziWordSkill,
 ): Promise<Question> {
@@ -53,13 +51,15 @@ export async function hanziWordToGlossQuestionOrThrow(
     }),
   );
 
-  return validQuestionInvariant({
+  const question = {
     kind: QuestionKind.OneCorrectPair,
     prompt: `Match a word with its meaning`,
     groupA: shuffle([...groupA, ...answer.as]),
     groupB: shuffle([...groupB, ...answer.bs]),
     answer,
-  });
+  };
+  oneCorrectPairQuestionInvariant(question);
+  return question;
 }
 
 type OtherHanziResult = [HanziWord, DeepReadonly<HanziWordMeaning>][];
@@ -179,9 +179,4 @@ async function getWrongHanziWordAnswers(
   );
 
   return ctx.result;
-}
-
-function validQuestionInvariant(question: OneCorrectPairQuestion) {
-  oneCorrectPairQuestionInvariant(question);
-  return question;
 }

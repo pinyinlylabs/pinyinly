@@ -102,7 +102,8 @@ export function isHarderDifficultyStyleSkillKind(
   return (
     skillKind === SkillKind.HanziWordToPinyinFinal ||
     skillKind === SkillKind.HanziWordToPinyinTone ||
-    skillKind === SkillKind.HanziWordToPinyinTyped
+    skillKind === SkillKind.HanziWordToPinyinTyped ||
+    skillKind === SkillKind.HanziWordToGlossTyped
   );
 }
 
@@ -165,14 +166,6 @@ export const finalFromPinyinFinalAssociationSkill = (
   invariant(final != null, `couldn't parse pinyin final (after :)`);
 
   return final;
-};
-
-export const hanziWordToGlossHanziWord = (
-  skill: Skill,
-): HanziWord | undefined => {
-  if (skill.startsWith(`he:`)) {
-    return skill.slice(3) as HanziWord;
-  }
 };
 
 export async function skillDependencies(skill: Skill): Promise<Skill[]> {
@@ -244,6 +237,13 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
           }
         }
       }
+      break;
+    }
+
+    case SkillKind.HanziWordToGlossTyped: {
+      skill = skill as HanziWordSkill;
+      const hanziWord = hanziWordFromSkill(skill);
+      deps.push(hanziWordToGloss(hanziWord));
       break;
     }
 
@@ -374,6 +374,9 @@ export function hanziWordSkill(
 
 export const hanziWordToGloss = (hanziWord: HanziWord) =>
   hanziWordSkill(SkillKind.HanziWordToGloss, hanziWord);
+
+export const hanziWordToGlossTyped = (hanziWord: HanziWord) =>
+  hanziWordSkill(SkillKind.HanziWordToGlossTyped, hanziWord);
 
 export const hanziWordToPinyinTyped = (hanziWord: HanziWord) =>
   hanziWordSkill(SkillKind.HanziWordToPinyinTyped, hanziWord);
@@ -1108,6 +1111,7 @@ const skillKindShorthandMapping: Record<SkillKind, string> = {
   [SkillKind.Deprecated]: `[deprecated]`,
   [SkillKind.GlossToHanziWord]: `EN → 中文`,
   [SkillKind.HanziWordToGloss]: `中文 → EN`,
+  [SkillKind.HanziWordToGlossTyped]: `中文 → EN`,
   [SkillKind.HanziWordToPinyinTyped]: `中文 → PY`,
   [SkillKind.HanziWordToPinyinFinal]: `中文 → PY⁻ᶠ`,
   [SkillKind.HanziWordToPinyinInitial]: `中文 → PYⁱ⁻`,
@@ -1151,7 +1155,8 @@ export function computeSkillRating(opts: {
     case SkillKind.GlossToHanziWord:
     case SkillKind.PinyinToHanziWord:
     case SkillKind.ImageToHanziWord:
-    case SkillKind.HanziWordToGloss: {
+    case SkillKind.HanziWordToGloss:
+    case SkillKind.HanziWordToGlossTyped: {
       easyDuration = 5000;
       goodDuration = 10_000;
       break;

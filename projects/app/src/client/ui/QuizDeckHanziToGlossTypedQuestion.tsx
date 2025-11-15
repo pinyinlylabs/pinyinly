@@ -1,23 +1,10 @@
-import {
-  autoCheckUserSetting,
-  useUserSetting,
-} from "@/client/hooks/useUserSetting";
 import { splitHanziText } from "@/data/hanzi";
 import type {
-  HanziWordToPinyinQuestion,
+  HanziWordToGlossQuestion,
   MistakeType,
-  PinyinPronunciation,
   UnsavedSkillRating,
 } from "@/data/model";
-import type {
-  PinyinSyllableSuggestion,
-  PinyinSyllableSuggestions,
-} from "@/data/pinyin";
-import {
-  matchAllPinyinSyllables,
-  pinyinSyllableSuggestions,
-} from "@/data/pinyin";
-import { hanziToPinyinQuestionMistakes } from "@/data/questions/hanziWordToPinyin";
+import { hanziToGlossTypedQuestionMistakes } from "@/data/questions/hanziWordToGlossTyped";
 import { computeSkillRating, hanziWordFromSkill } from "@/data/skills";
 import { hanziFromHanziWord } from "@/dictionary/dictionary";
 import { nonNullable } from "@pinyinly/lib/invariant";
@@ -25,50 +12,43 @@ import type { ReactNode, Ref } from "react";
 import { useMemo, useRef, useState } from "react";
 import type { TextInput } from "react-native";
 import { Text, View } from "react-native";
-import Reanimated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import type { DeepReadonly } from "ts-essentials";
 import { IconImage } from "./IconImage";
-import { PinyinOptionButton } from "./PinyinOptionButton";
 import { QuizDeckToastContainer } from "./QuizDeckToastContainer";
 import { QuizFlagText } from "./QuizFlagText";
 import { QuizSubmitButton, QuizSubmitButtonState } from "./QuizSubmitButton";
 import { SkillAnswerText } from "./SkillAnswerText";
 import { TextInputSingle } from "./TextInputSingle";
 
-export function QuizDeckHanziToPinyinQuestion({
+export function QuizDeckHanziToGlossTypedQuestion({
   noAutoFocus = true,
   question,
   onNext,
   onRating,
 }: {
   noAutoFocus?: boolean;
-  question: HanziWordToPinyinQuestion;
+  question: HanziWordToGlossQuestion;
   onNext: () => void;
   onRating: (ratings: UnsavedSkillRating[], mistakes: MistakeType[]) => void;
 }) {
   const { skill, flag, answers } = question;
 
-  const autoCheck =
-    useUserSetting(autoCheckUserSetting).value?.enabled ?? false;
-
   const userAnswerRef = useRef(``);
   const [userAnswerEmpty, setUserAnswerEmpty] = useState(true);
   const [grade, setGrade] = useState<{
     correct: boolean;
-    expectedAnswer: Readonly<PinyinPronunciation>;
+    expectedAnswer: string;
   }>();
 
   const startTime = useMemo(() => Date.now(), []);
-  const hanziGraphemes = splitHanziText(
-    hanziFromHanziWord(hanziWordFromSkill(skill)),
-  );
+  const hanziWord = hanziWordFromSkill(skill);
+  const hanziGraphemes = splitHanziText(hanziFromHanziWord(hanziWord));
 
   const submit = () => {
     // First time you press the button it will grade your answer, the next time
     // it moves you to the next question.
     if (grade == null) {
-      const mistakes = hanziToPinyinQuestionMistakes(
+      const mistakes = hanziToGlossTypedQuestionMistakes(
         question,
         userAnswerRef.current,
       );
@@ -168,7 +148,7 @@ export function QuizDeckHanziToPinyinQuestion({
           {flag == null ? null : <QuizFlagText flag={flag} />}
           <View>
             <Text className="text-xl font-bold text-fg">
-              What sound does this make?
+              What does this mean?
             </Text>
           </View>
         </View>
@@ -176,6 +156,7 @@ export function QuizDeckHanziToPinyinQuestion({
           {hanziGraphemes.map((hanzi, i) => {
             return (
               <View className="items-center gap-2" key={i}>
+                {/* TODO: add pinyin to disambiguate the hanzi */}
                 <Text className="text-[80px] font-medium text-fg">{hanzi}</Text>
               </View>
             );
@@ -188,26 +169,12 @@ export function QuizDeckHanziToPinyinQuestion({
           className="h-0"
         />
       </View>
-      <PinyinTextInputSingle
+      <GlossTextInputSingle
         autoFocus={!noAutoFocus}
         disabled={grade != null}
         onChangeText={(text) => {
           userAnswerRef.current = text;
           setUserAnswerEmpty(text.trim().length === 0);
-
-          if (
-            autoCheck &&
-            // It's important to only trigger when there's a space at the end,
-            // otherwise as soon as you type "ni" it will submit, before you've
-            // had a chance to change the tone.
-            text.endsWith(` `)
-          ) {
-            const expectedSyllableCount = nonNullable(answers[0]).length;
-            const actualSyllableCount = matchAllPinyinSyllables(text).length;
-            if (expectedSyllableCount === actualSyllableCount) {
-              submit();
-            }
-          }
         }}
         onSubmit={submit}
       />
@@ -215,7 +182,7 @@ export function QuizDeckHanziToPinyinQuestion({
   );
 }
 
-const PinyinTextInputSingle = ({
+const GlossTextInputSingle = ({
   autoFocus,
   disabled,
   inputRef,
@@ -230,37 +197,13 @@ const PinyinTextInputSingle = ({
 }) => {
   const [text, setText] = useState(``);
 
-  const suggestions = disabled ? null : pinyinSyllableSuggestions(text);
-
   const updateText = (text: string) => {
     setText(text);
     onChangeText(text);
   };
 
   const handleChangeText = (text: string) => {
-    if (suggestions !== null) {
-      for (const option of suggestions.syllables) {
-        if (text.endsWith(option.tone.toString())) {
-          acceptSuggestion(suggestions, option);
-          return;
-        }
-      }
-    }
-
     updateText(text);
-  };
-
-  const acceptSuggestion = (
-    suggestions: DeepReadonly<PinyinSyllableSuggestions>,
-    syllable: PinyinSyllableSuggestion,
-  ) => {
-    const newText =
-      text.slice(0, suggestions.from) +
-      syllable.pinyinSyllable +
-      text.slice(suggestions.to) +
-      // Trailing space ensures "autoSubmit" works.
-      ` `;
-    updateText(newText);
   };
 
   return (
@@ -268,7 +211,11 @@ const PinyinTextInputSingle = ({
       <TextInputSingle
         autoFocus={autoFocus}
         autoCapitalize="none"
-        autoCorrect={false}
+        autoCorrect={
+          // Using the system auto-correct should make writing in English
+          // faster.
+          true
+        }
         onChangeText={handleChangeText}
         disabled={disabled}
         onKeyPress={(e) => {
@@ -277,45 +224,14 @@ const PinyinTextInputSingle = ({
             onSubmit();
           }
         }}
-        placeholder="Type in pinyin"
+        placeholder="Type in English"
         textAlign="center"
         ref={inputRef}
         value={text}
       />
-      <View className="flex-row flex-wrap justify-center gap-2">
-        {hiddenPlaceholderOptions}
-        <View className="absolute inset-0 flex-row flex-wrap content-start justify-center gap-2">
-          {suggestions?.syllables.map((syllable) => (
-            <Reanimated.View
-              key={`${syllable.pinyinSyllable}-${syllable.tone}`}
-              entering={FadeIn.duration(200)}
-              exiting={FadeOut.duration(100)}
-            >
-              <PinyinOptionButton
-                pinyin={syllable.pinyinSyllable}
-                shortcutKey={syllable.tone.toString()}
-                onPress={() => {
-                  acceptSuggestion(suggestions, syllable);
-                }}
-              />
-            </Reanimated.View>
-          ))}
-        </View>
-      </View>
     </View>
   );
 };
-
-// Reserve the space
-const hiddenPlaceholderOptions = (
-  <>
-    <PinyinOptionButton pinyin="xxxxxx" shortcutKey="x" className="invisible" />
-    <PinyinOptionButton pinyin="xxxxxx" shortcutKey="x" className="invisible" />
-    <PinyinOptionButton pinyin="xxxxxx" shortcutKey="x" className="invisible" />
-    <PinyinOptionButton pinyin="xxxxxx" shortcutKey="x" className="invisible" />
-    <PinyinOptionButton pinyin="xxxxxx" shortcutKey="x" className="invisible" />
-  </>
-);
 
 const Skeleton = ({
   children,
