@@ -10,10 +10,10 @@ export default function Layout() {
     <StrictMode>
       <ScrollView contentContainerClassName="flex-1 pt-safe" className="flex-1">
         <View className={`flex-row flex-wrap items-center gap-2 p-2`}>
-          <NavLink href="/dev/ui">(all)</NavLink>
+          <NavLink href="/dev/demo">(all)</NavLink>
 
           {Object.keys(demos).map((name) => (
-            <NavLink href={`/dev/ui/${name}`} key={name}>
+            <NavLink href={`/dev/demo/${name}`} key={name}>
               {name}
             </NavLink>
           ))}

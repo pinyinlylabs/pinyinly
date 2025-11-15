@@ -159,8 +159,8 @@ export default function LoginPage() {
           }}
         />
       ) : null}
-      <Link href="/dev/ui" asChild>
-        <RectButton variant="filled">UI</RectButton>
+      <Link href="/dev/demo" asChild>
+        <RectButton variant="filled">Dev demo</RectButton>
       </Link>
 
       <GoHomeButton />
