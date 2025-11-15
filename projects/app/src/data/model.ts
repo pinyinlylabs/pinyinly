@@ -335,7 +335,7 @@ export interface HanziWordToGlossQuestion {
   kind: typeof QuestionKind.HanziWordToGloss;
   /**
    * There can be multiple correct answers, e.g. for a word like `好` which
-   * can be pronounced as `good` or `okay`.
+   * can be translated as `good` or `okay`.
    */
   answers: readonly string[];
   skill: HanziWordSkill;
