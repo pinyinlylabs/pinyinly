@@ -350,7 +350,7 @@
 ["修:repair",{"gloss":["repair","fix","prune","trim"],"pinyin":["xiū"],"partOfSpeech":"verb"}],
 ["修改:modify",{"gloss":["modify","amend","revise"],"pinyin":["xiū gǎi"],"partOfSpeech":"verb"}],
 ["倒:pour",{"gloss":["pour"],"pinyin":["dào"],"partOfSpeech":"verb"}],
-["候:wait",{"gloss":["wait"],"pinyin":["hou","hòu"],"partOfSpeech":"verb"}],
+["候:wait",{"gloss":["wait"],"pinyin":["hòu"],"partOfSpeech":"verb"}],
 ["借:toBorrow",{"gloss":["borrow","lend"],"pinyin":["jiè"],"partOfSpeech":"verb"}],
 ["值:value",{"gloss":["be worth","value","worth"],"pinyin":["zhí"],"partOfSpeech":"verb"}],
 ["值得:worth",{"gloss":["be worth","deserve"],"pinyin":["zhí dé"],"partOfSpeech":"verb"}],
