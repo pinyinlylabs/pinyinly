@@ -73,6 +73,25 @@ describe(
       // .Hard should increase difficulty
       expect(before.difficulty).toBeLessThan(afterHard.difficulty);
     });
+
+    test(`regression test: InvariantException: neither stability nor difficulty changed after review`, () => {
+      // Presumably some floating point precision issue with these specific numbers,
+      // even though the review happened 4 seconds after the previous review.
+      const fixture = {
+        currentState: {
+          prevReviewAt: new Date(`2025-11-15T09:05:49.194Z`),
+          difficulty: 1,
+          stability: 1368.483_363_29,
+          nextReviewAt: new Date(`2029-08-14T20:41:49.194Z`),
+        },
+        rating: Rating.Easy,
+        now: new Date(`2025-11-15T09:05:53.351Z`),
+      };
+
+      expect(() =>
+        nextReview(fixture.currentState, fixture.rating, fixture.now),
+      ).not.toThrow();
+    });
   },
 );
 

@@ -189,7 +189,7 @@ function nextStability(
   const easyBound = rating === Rating.Easy ? w[16] : 1;
 
   // implementation from next_recall_stability()
-  return constrainStability(
+  const nextStability = constrainStability(
     lastReview.stability *
       (1 +
         Math.exp(w[8]) *
@@ -199,6 +199,12 @@ function nextStability(
           hardPenalty *
           easyBound),
   );
+
+  return nextStability === lastReview.stability
+    ? // Make sure that stability always increases on a successful review, rather
+      // than getting stuck due to rounding or small periods between reviews.
+      nextStability + 0.1
+    : nextStability;
 }
 
 /**
