@@ -38,6 +38,7 @@ export const NewSkillModal = ({
             />
           );
         }
+        case SkillKind.HanziWordToGlossTyped:
         case SkillKind.HanziWordToPinyinTyped:
         case SkillKind.HanziWordToPinyinTone:
         case SkillKind.HanziWordToPinyinFinal:

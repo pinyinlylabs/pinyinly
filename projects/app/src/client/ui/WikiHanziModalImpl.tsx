@@ -211,8 +211,10 @@ function PronunciationMnemonicSection({
                   {initialPinyinSound == null ? null : (
                     <>
                       <DownArrow />
-                      <Text className="pyly-body underline decoration-dashed underline-offset-4">
-                        {initialPinyinSound.name}
+                      <Text className="pyly-body">
+                        <Text className="pyly-ref">
+                          {initialPinyinSound.name}
+                        </Text>
                       </Text>
                     </>
                   )}
@@ -224,8 +226,10 @@ function PronunciationMnemonicSection({
                   {finalPinyinSound == null ? null : (
                     <>
                       <DownArrow />
-                      <Text className="pyly-body underline decoration-dashed underline-offset-4">
-                        {finalPinyinSound.name}
+                      <Text className="pyly-body">
+                        <Text className="pyly-ref">
+                          {finalPinyinSound.name}
+                        </Text>
                       </Text>
                     </>
                   )}
@@ -240,8 +244,8 @@ function PronunciationMnemonicSection({
                   {tonePinyinSound == null ? null : (
                     <>
                       <DownArrow />
-                      <Text className="pyly-body underline decoration-dashed underline-offset-4">
-                        {tonePinyinSound.name}
+                      <Text className="pyly-body">
+                        <Text className="pyly-ref">{tonePinyinSound.name}</Text>
                       </Text>
                     </>
                   )}

@@ -74,7 +74,8 @@ export const SkillRefText = ({ skill }: { skill: Skill }) => {
     case SkillKind.GlossToHanziWord:
     case SkillKind.PinyinToHanziWord:
     case SkillKind.ImageToHanziWord:
-    case SkillKind.HanziWordToGloss: {
+    case SkillKind.HanziWordToGloss:
+    case SkillKind.HanziWordToGlossTyped: {
       skill = skill as HanziWordSkill;
       const hanziWord = hanziWordFromSkill(skill);
       return <HanziWordRefText hanziWord={hanziWord} />;

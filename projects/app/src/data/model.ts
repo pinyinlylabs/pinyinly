@@ -53,9 +53,13 @@ export type SrsStateType = SrsStateMockType | SrsStateFsrsFourPointFiveType;
 
 const skillKindSchema = z.enum({
   /**
-   * When shown a hanzi word, write the english translation.
+   * When shown a hanzi word, pick the english translation from a list (easy).
    */
   HanziWordToGloss: `debug--HanziWordToGloss`,
+  /**
+   * When shown a hanzi word, type the english translation (hard).
+   */
+  HanziWordToGlossTyped: `debug--HanziWordToGlossTyped`,
   /**
    * When shown a Hanzi be able to write the pinyin using the keyboard without
    * any other hints or multiple choice options.
@@ -155,6 +159,7 @@ export type HanziText = (string & z.BRAND<`HanziText`>) | HanziGrapheme;
 
 export type HanziWordSkillKind =
   | typeof SkillKind.HanziWordToGloss
+  | typeof SkillKind.HanziWordToGlossTyped
   | typeof SkillKind.HanziWordToPinyinTyped
   | typeof SkillKind.HanziWordToPinyinInitial
   | typeof SkillKind.HanziWordToPinyinFinal
@@ -165,6 +170,7 @@ export type HanziWordSkillKind =
 
 export const hanziWordSkillKinds: readonly HanziWordSkillKind[] = [
   SkillKind.HanziWordToGloss,
+  SkillKind.HanziWordToGlossTyped,
   SkillKind.HanziWordToPinyinInitial,
   SkillKind.HanziWordToPinyinFinal,
   SkillKind.HanziWordToPinyinTone,
@@ -219,6 +225,7 @@ export type QuestionFlagType =
 const questionKindSchema = z.enum({
   OneCorrectPair: `debug--OneCorrectPair`,
   HanziWordToPinyin: `debug--HanziWordToPinyin`,
+  HanziWordToGloss: `debug--HanziWordToGloss`,
 });
 export const QuestionKind = questionKindSchema.enum;
 export type QuestionKind = z.infer<typeof questionKindSchema>;
@@ -324,6 +331,17 @@ export interface OneCorrectPairQuestion {
   flag?: QuestionFlagType;
 }
 
+export interface HanziWordToGlossQuestion {
+  kind: typeof QuestionKind.HanziWordToGloss;
+  /**
+   * There can be multiple correct answers, e.g. for a word like `好` which
+   * can be translated as `good` or `okay`.
+   */
+  answers: readonly string[];
+  skill: HanziWordSkill;
+  flag?: QuestionFlagType;
+}
+
 export interface HanziWordToPinyinQuestion {
   kind: typeof QuestionKind.HanziWordToPinyin;
   /**
@@ -335,7 +353,10 @@ export interface HanziWordToPinyinQuestion {
   flag?: QuestionFlagType;
 }
 
-export type Question = OneCorrectPairQuestion | HanziWordToPinyinQuestion;
+export type Question =
+  | OneCorrectPairQuestion
+  | HanziWordToGlossQuestion
+  | HanziWordToPinyinQuestion;
 
 export interface PinyinInitialAssociation {
   initial: string;

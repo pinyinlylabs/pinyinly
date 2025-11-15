@@ -55,6 +55,7 @@ const allIcons = [
   require(`../../assets/icons/close-circled-filled.svg`),
   require(`../../assets/icons/close.svg`),
   require(`../../assets/icons/document.svg`),
+  require(`../../assets/icons/dumbbell.svg`),
   require(`../../assets/icons/flag-1.svg`),
   require(`../../assets/icons/flag.svg`),
   require(`../../assets/icons/flame-filled.svg`),

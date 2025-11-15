@@ -9,26 +9,24 @@ import type {
   OneCorrectPairQuestionChoice,
   UnsavedSkillRating,
 } from "@/data/model";
-import { QuestionFlagKind, SkillKind } from "@/data/model";
+import { QuestionFlagKind } from "@/data/model";
 import {
   oneCorrectPairChoiceText,
   oneCorrectPairQuestionMistakes,
 } from "@/data/questions/oneCorrectPair";
-import type { HanziWordSkill, Skill } from "@/data/rizzleSchema";
-import { computeSkillRating, skillKindFromSkill } from "@/data/skills";
+import { computeSkillRating } from "@/data/skills";
 import { longestTextByGraphemes } from "@/util/unicode";
 import { invariant } from "@pinyinly/lib/invariant";
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { HanziWordToGlossSkillAnswerText } from "./HanziWordToGlossSkillAnswerText";
-import { HanziWordToPinyinSkillAnswerText } from "./HanziWordToPinyinSkillAnswerText";
 import { IconImage } from "./IconImage";
 import { NewSkillModal } from "./NewSkillModal";
 import { QuizDeckToastContainer } from "./QuizDeckToastContainer";
 import { QuizFlagText } from "./QuizFlagText";
 import { QuizSubmitButton, QuizSubmitButtonState } from "./QuizSubmitButton";
+import { SkillAnswerText } from "./SkillAnswerText";
 import type {
   TextAnswerButtonFontSize,
   TextAnswerButtonState,
@@ -285,36 +283,6 @@ export function QuizDeckOneCorrectPairQuestion({
     </Skeleton>
   );
 }
-
-const SkillAnswerText = ({ skill }: { skill: Skill; small?: boolean }) => {
-  switch (skillKindFromSkill(skill)) {
-    case SkillKind.Deprecated_EnglishToRadical:
-    case SkillKind.Deprecated_PinyinToRadical:
-    case SkillKind.Deprecated_RadicalToEnglish:
-    case SkillKind.Deprecated_RadicalToPinyin:
-    case SkillKind.Deprecated:
-    case SkillKind.GlossToHanziWord:
-    case SkillKind.ImageToHanziWord:
-    case SkillKind.PinyinFinalAssociation:
-    case SkillKind.PinyinInitialAssociation:
-    case SkillKind.PinyinToHanziWord: {
-      throw new Error(
-        `ShowSkillAnswer not implemented for ${skillKindFromSkill(skill)}`,
-      );
-    }
-    case SkillKind.HanziWordToGloss: {
-      skill = skill as HanziWordSkill;
-      return <HanziWordToGlossSkillAnswerText skill={skill} />;
-    }
-    case SkillKind.HanziWordToPinyinTyped:
-    case SkillKind.HanziWordToPinyinFinal:
-    case SkillKind.HanziWordToPinyinInitial:
-    case SkillKind.HanziWordToPinyinTone: {
-      skill = skill as HanziWordSkill;
-      return <HanziWordToPinyinSkillAnswerText skill={skill} />;
-    }
-  }
-};
 
 const Skeleton = ({
   children,

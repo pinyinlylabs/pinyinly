@@ -16,7 +16,7 @@ export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
         <View className={flagViewClass({ class: `theme-danger` })}>
           <IconImage
             className={flagIconClass()}
-            source={require(`@/assets/icons/circle-warning.svg`)}
+            source={require(`@/assets/icons/dumbbell.svg`)}
           />
           <Text className={flagTextClass()}>Hard question</Text>
         </View>

@@ -7,7 +7,7 @@ export default function UiDemoIndexPage() {
   return (
     <>
       {Object.entries(demos).map(([name, Demo]) => (
-        <Section key={name} title={name} href={`/dev/ui/${name}`}>
+        <Section key={name} title={name} href={`/dev/demo/${name}`}>
           <Demo />
         </Section>
       ))}
@@ -41,6 +41,7 @@ export const demos: Record<string, FunctionComponent> = {
   [`PylyMdxComponents`]: lazyDemo(() => import(`../../../client/ui/PylyMdxComponents.demo`)),
   [`Pylymark`]: lazyDemo(() => import(`../../../client/ui/Pylymark.demo`)),
   [`PylymarkTypewriter`]: lazyDemo(() => import(`../../../client/ui/PylymarkTypewriter.demo`)),
+  [`QuizDeckHanziToGlossTypedQuestion`]: lazyDemo(() => import(`../../../client/ui/QuizDeckHanziToGlossTypedQuestion.demo`)),
   [`QuizDeckHanziToPinyinQuestion`]: lazyDemo(() => import(`../../../client/ui/QuizDeckHanziToPinyinQuestion.demo`)),
   [`QuizFlagText`]: lazyDemo(() => import(`../../../client/ui/QuizFlagText.demo`)),
   [`QuizProgressBar`]: lazyDemo(() => import(`../../../client/ui/QuizProgressBar.demo`)),

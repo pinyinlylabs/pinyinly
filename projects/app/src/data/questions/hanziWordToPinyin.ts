@@ -32,6 +32,9 @@ function validQuestionInvariant<T extends Question>(question: T): T {
     case QuestionKind.HanziWordToPinyin: {
       break;
     }
+    case QuestionKind.HanziWordToGloss: {
+      throw new Error(`unexpected question kind HanziWordToGloss`);
+    }
   }
 
   return question;

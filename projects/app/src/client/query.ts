@@ -18,7 +18,7 @@ import type { RankedHanziWord } from "@/data/skills";
 import {
   getHanziWordRank,
   hanziWordSkill,
-  hanziWordToGloss,
+  hanziWordToGlossTyped,
   hanziWordToPinyinTyped,
   rankRules,
   skillLearningGraph,
@@ -254,7 +254,7 @@ export async function getAllTargetHanziWords(): Promise<HanziWord[]> {
 export async function getAllTargetSkills(): Promise<Skill[]> {
   const hanziWords = await getAllTargetHanziWords();
   return hanziWords.flatMap((w) => [
-    hanziWordToGloss(w),
+    hanziWordToGlossTyped(w),
     hanziWordToPinyinTyped(w),
   ]);
 }
