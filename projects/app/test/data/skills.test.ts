@@ -23,6 +23,7 @@ import {
   hanziWordToGloss,
   isHanziWordSkill,
   isHarderDifficultyStyleSkillKind,
+  randomPickSkillsForReview,
   rankRules,
   skillKindFromSkill,
   skillLearningGraph,
@@ -687,8 +688,8 @@ describe(
             // Still blocked, but the other two skills aren't new anymore.
             expect(prettyQueue(queue)).toMatchInlineSnapshot(`
               [
-                "he:丿:slash",
                 "he:𠃌:radical",
+                "he:丿:slash",
                 "he:刀:knife (🟥 BLOCKED)",
               ]
             `);
@@ -704,8 +705,8 @@ describe(
             // Still growing in stability but still blocked.
             expect(prettyQueue(queue)).toMatchInlineSnapshot(`
               [
-                "he:𠃌:radical",
                 "he:丿:slash",
+                "he:𠃌:radical",
                 "he:刀:knife (🟥 BLOCKED)",
               ]
             `);
@@ -2002,6 +2003,202 @@ test(
         "debug--RadicalToPinyin": false,
       }
     `);
+  },
+);
+
+describe(
+  `randomPickSkillsForReview suite` satisfies HasNameOf<
+    typeof randomPickSkillsForReview
+  >,
+  () => {
+    function monteCarloSample(
+      stabilityValues: number[],
+      numRuns = 10_000,
+    ): number[] {
+      const priorityCounts = new Map<Skill, number>([]);
+
+      const inputs: [Skill, number][] = stabilityValues.map(
+        (stability, index) => {
+          const skill = `skill${index + 1}` as Skill;
+          return [skill, stability];
+        },
+      );
+
+      // Test with different PRNG seeds by varying stability slightly
+      for (let run = 0; run < numRuns; run++) {
+        // Tiny variation to change seed on each run to get different samples,
+        // otherwise every sample would produce the same results.
+        const randomSeedJitter = run * 0.0001;
+
+        const skillStates: [Skill, SrsStateType][] = inputs.map(
+          ([skill, stability]) => [
+            skill,
+            {
+              kind: SrsKind.FsrsFourPointFive,
+              prevReviewAt: 时`-1d`, // arbitrary
+              nextReviewAt: 时`+1d`, // arbitrary
+              stability: stability + randomSeedJitter,
+              difficulty: 5, // arbitrary
+            },
+          ],
+        );
+
+        // Sort by priority (lower priority value = higher priority)
+        const [topPrioritySkill] = randomPickSkillsForReview(skillStates, 1);
+
+        // Count which skill was top priority
+        if (topPrioritySkill != null) {
+          const currentCount = priorityCounts.get(topPrioritySkill) ?? 0;
+          priorityCounts.set(topPrioritySkill, currentCount + 1);
+        }
+      }
+
+      return inputs.map(
+        ([skill]) => (priorityCounts.get(skill) ?? 0) / numRuns,
+      );
+    }
+
+    test(`functional monte carlo testing`, () => {
+      // Actually perform monte carlo sampling to verify priority distribution
+      // matches expectations.
+
+      expect(monteCarloSample([10, 100])).toMatchInlineSnapshot(`
+        [
+          0.6965,
+          0.3035,
+        ]
+      `);
+
+      expect(monteCarloSample([100, 1000])).toMatchInlineSnapshot(`
+        [
+          0.6513,
+          0.3487,
+        ]
+      `);
+
+      // Increasing orders of magnitude, very high stability should still be
+      // sampled occasionally, and lowest stability should be sampled often.
+      expect(monteCarloSample([1, 10, 100, 1000, 10_000]))
+        .toMatchInlineSnapshot(`
+          [
+            0.5794,
+            0.181,
+            0.1071,
+            0.0732,
+            0.0593,
+          ]
+        `);
+
+      expect(
+        monteCarloSample([1, 1, 10, 10, 100, 100, 1000, 1000, 10_000, 10_000]),
+      ).toMatchInlineSnapshot(`
+        [
+          0.2626,
+          0.2618,
+          0.1059,
+          0.0978,
+          0.061,
+          0.0617,
+          0.0421,
+          0.041,
+          0.0337,
+          0.0324,
+        ]
+      `);
+    });
+
+    test(`deterministic with same inputs`, () => {
+      // Test that the function is deterministic when given the same inputs
+
+      const skill1 = `he:好:good` as Skill;
+      const skill2 = `he:我:i` as Skill;
+      const skill3 = `he:你:you` as Skill;
+
+      const skillStates: [Skill, SrsStateType][] = [
+        [
+          skill1,
+          {
+            kind: SrsKind.FsrsFourPointFive,
+            prevReviewAt: 时`-1d`,
+            nextReviewAt: 时`+1d`,
+            stability: 5,
+            difficulty: 3,
+          },
+        ],
+        [
+          skill2,
+          {
+            kind: SrsKind.FsrsFourPointFive,
+            prevReviewAt: 时`-1d`,
+            nextReviewAt: 时`+1d`,
+            stability: 10,
+            difficulty: 4,
+          },
+        ],
+        [
+          skill3,
+          {
+            kind: SrsKind.FsrsFourPointFive,
+            prevReviewAt: 时`-1d`,
+            nextReviewAt: 时`+1d`,
+            stability: 20,
+            difficulty: 5,
+          },
+        ],
+      ];
+
+      // Call the function multiple times with identical inputs
+      const result1 = randomPickSkillsForReview(skillStates);
+      const result2 = randomPickSkillsForReview(skillStates);
+      const result3 = randomPickSkillsForReview(skillStates);
+
+      // Results should be identical (deterministic)
+      expect(result1).toEqual(result2);
+      expect(result2).toEqual(result3);
+
+      // And should contain all three skills
+      expect(result1).toHaveLength(3);
+      expect(result1.map((skill) => skill).sort()).toEqual(
+        [skill1, skill2, skill3].sort(),
+      );
+    });
+
+    test(`handles undefined SRS states`, () => {
+      // Test that skills with undefined SRS states get maximum weight (highest priority)
+
+      const skill1 = `he:好:good` as Skill;
+      const skill2 = `he:我:i` as Skill;
+
+      const skillStates: [Skill, SrsStateType | undefined][] = [
+        [
+          skill1,
+          {
+            kind: SrsKind.FsrsFourPointFive,
+            prevReviewAt: 时`-1d`,
+            nextReviewAt: 时`+1d`,
+            stability: 5,
+            difficulty: 3,
+          },
+        ],
+        [skill2, undefined], // No SRS state - should get maximum weight
+      ];
+
+      const result = randomPickSkillsForReview(skillStates);
+
+      // Should contain both skills
+      expect(result).toHaveLength(2);
+
+      // Find the skill with undefined state
+      const undefinedStateIndex = result.indexOf(skill2);
+      const definedStateIndex = result.indexOf(skill1);
+
+      expect(undefinedStateIndex).toBeGreaterThan(-1);
+      expect(definedStateIndex).toBeGreaterThan(-1);
+
+      // The skill with undefined state should have a lower priority value (higher priority)
+      // because it gets weight = 1, while the defined state gets a much lower weight
+      expect(undefinedStateIndex).toBeLessThan(definedStateIndex);
+    });
   },
 );
 

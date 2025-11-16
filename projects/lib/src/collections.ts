@@ -396,7 +396,7 @@ export class MinHeap<T> {
       this.#bubbleUp(this.#items.length - 1);
     } else if (
       this.#items.length > 0 &&
-      this.#comparator(item, this.#items[0] as T) > 0
+      this.#comparator(item, this.#items[0] as T) < 0
     ) {
       this.#items[0] = item;
       this.#bubbleDown(0);
@@ -412,7 +412,7 @@ export class MinHeap<T> {
       const parentIndex = Math.floor((index - 1) / 2);
       const curr = this.#items[index] as T;
       const parent = this.#items[parentIndex] as T;
-      if (this.#comparator(curr, parent) >= 0) {
+      if (this.#comparator(curr, parent) <= 0) {
         break;
       }
       [this.#items[index], this.#items[parentIndex]] = [
@@ -433,13 +433,13 @@ export class MinHeap<T> {
 
       if (
         left < length &&
-        this.#comparator(this.#items[left] as T, this.#items[next] as T) < 0
+        this.#comparator(this.#items[left] as T, this.#items[next] as T) > 0
       ) {
         next = left;
       }
       if (
         right < length &&
-        this.#comparator(this.#items[right] as T, this.#items[next] as T) < 0
+        this.#comparator(this.#items[right] as T, this.#items[next] as T) > 0
       ) {
         next = right;
       }
@@ -455,20 +455,48 @@ export class MinHeap<T> {
   }
 }
 
-export function* topK<T>(
-  source: T[],
+/**
+ * Returns the top K items according to the provided comparator.
+ * Selects K items using a min-heap based on the comparator.
+ */
+export function topK<T>(
+  source: readonly T[],
   capacity: number,
-  cmp: SortComparator<T>,
-) {
+  comparator: SortComparator<T>,
+): readonly T[] {
   if (capacity === 0) {
-    return;
+    return emptyArray;
   }
 
-  const heap = new MinHeap<T>(cmp, capacity);
+  const heap = new MinHeap<T>(comparator, capacity);
   for (const item of source) {
     heap.insert(item);
   }
-  for (const item of heap.toArray()) {
-    yield item;
-  }
+  return heap.toArray();
+}
+
+/**
+ * Top-K algorithm to select the smallest N values. Returned in ascending order.
+ */
+export function minK<T>(
+  source: readonly T[],
+  capacity: number,
+  getCompareValue: (item: T) => number,
+): readonly T[] {
+  return topK(source, capacity, sortComparatorNumber(getCompareValue));
+}
+
+/**
+ * Top-K algorithm to select the largest N values. Returned in descending order.
+ */
+export function maxK<T>(
+  source: readonly T[],
+  capacity: number,
+  getCompareValue: (item: T) => number,
+): readonly T[] {
+  return topK(
+    source,
+    capacity,
+    inverseSortComparator(sortComparatorNumber(getCompareValue)),
+  );
 }
