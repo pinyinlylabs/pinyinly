@@ -1078,7 +1078,7 @@ export const randomPickSkillsForReview = (
   // Compute a score for each skill by scaling FSRS stability logarithmically to
   // avoid extreme values dominating the weights. Also compute the total
   // culumative score to use as the random seed. This will order items
-  // deterministically and and makes testing easier because results are
+  // deterministically and makes testing easier because results are
   // deterministic.
 
   for (const [skill, srsState] of skillStates) {
