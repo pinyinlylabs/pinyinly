@@ -456,7 +456,8 @@ export class MinHeap<T> {
 }
 
 /**
- * Return the first K items.
+ * Returns the top K items according to the provided comparator.
+ * Selects K items using a min-heap based on the comparator.
  */
 export function topK<T>(
   source: readonly T[],
