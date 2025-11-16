@@ -992,10 +992,9 @@ export function skillReviewQueue({
   }
 
   // 7. Not due items
-  for (const [skill] of topK(
-    randomWeightSkills(learningOrderNotDue),
+  for (const skill of randomPickSkillsForReview(
+    learningOrderNotDue,
     maxQueueItems - items.length,
-    sortComparatorNumber(([, x]) => x),
   )) {
     items.push({ skill });
   }
@@ -1057,7 +1056,7 @@ export function* walkSkillAndDependencies(
 }
 
 /**
- * Randomly weight skills for review based on their SRS state to form a
+ * Randomly pick skills for review based on their SRS state to form a
  * probability distribution weighted by each skill's difficulty. It's designed
  * to be efficient and deterministic so it can be tested and predictable. In
  * practice it probably doesn't make sense to compute all of the upcoming skills
@@ -1068,12 +1067,21 @@ export function* walkSkillAndDependencies(
  * @param skillStates
  * @returns
  */
-export const randomWeightSkills = (
+export const randomPickSkillsForReview = (
   skillStates: readonly [Skill, SrsStateType | undefined][],
-): [Skill, number][] => {
-  let totalWeight = 0;
+  limit = Infinity,
+): Skill[] => {
+  let totalScoreSum = 0;
 
-  const weighted = skillStates.map(([skill, srsState]): [Skill, number] => {
+  const skillLearnedScores = new Map<Skill, number>();
+
+  // Compute a score fo each skill by scaling FSRS stability logarithmically to
+  // avoid extreme values dominating the weights. Also compute the total
+  // culumative score to use as the random seed. This will order items
+  // deterministically and and makes testing easier because results are
+  // deterministic.
+
+  for (const [skill, srsState] of skillStates) {
     // Compute weights: lower stability = higher selection weight
     const learningScore =
       1 + // Minimum weight, avoids divide by zero.
@@ -1086,24 +1094,22 @@ export const randomWeightSkills = (
         : 0);
     // Weight (probability) is inversely proportional to learning score, the
     // more stable a skill is, the less likely it should be chosen.
-    const weight = learningScore;
-    totalWeight += weight;
-    return [skill, weight];
-  });
-
-  // Create a pseudo-random number generator seeded from the total weight of
-  // the skills. This way the order is deterministic but should change each
-  // time a skill is reviewed (since the total weight will change).
-  const random = makePRNG(totalWeight);
-
-  // Normalize the weights and convert into a "priority" value for sorting.
-  for (const x of weighted) {
-    const normalizedWeight = x[1] / totalWeight;
-    // Randomize the order (weight turns into "priority")
-    x[1] = random() / normalizedWeight;
+    totalScoreSum += learningScore;
+    skillLearnedScores.set(skill, learningScore);
   }
 
-  return weighted;
+  const random = makePRNG(totalScoreSum);
+
+  // Now apply random sorting to the skills.
+  for (const [skill, score] of skillLearnedScores) {
+    skillLearnedScores.set(skill, random() * score);
+  }
+
+  return topK(
+    skillStates,
+    limit,
+    sortComparatorNumber(([skill]) => skillLearnedScores.get(skill) ?? 0),
+  ).map(([skill]) => skill);
 };
 
 const skillKindShorthandMapping: Record<SkillKind, string> = {
