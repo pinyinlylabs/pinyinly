@@ -40,7 +40,7 @@ import { Rating } from "#util/fsrs.ts";
 import { nanoid } from "#util/nanoid.ts";
 import { r } from "#util/rizzle.ts";
 import { invariant } from "@pinyinly/lib/invariant";
-import { describe, expect, test } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 import {
   fsrsSrsState,
   mockSrsState,
@@ -605,6 +605,8 @@ describe(
         );
 
         test(`incorrect answers in a quiz don't get scheduled prematurely`, async () => {
+          vi.useFakeTimers({ toFake: [`Date`] });
+
           // There was a bug where "wrong answers" were being scheduled for review
           // even though they'd never been introduced yet. This is a regression test
           // against that scenario.
@@ -660,6 +662,8 @@ describe(
         });
 
         test(`skills unblock dependant skills when they become stable enough`, async () => {
+          vi.useFakeTimers({ toFake: [`Date`] });
+
           const targetSkills: Skill[] = [`he:刀:knife`];
           const history: SkillReviewOp[] = [];
 
@@ -705,8 +709,8 @@ describe(
             // Still growing in stability but still blocked.
             expect(prettyQueue(queue)).toMatchInlineSnapshot(`
               [
-                "he:丿:slash",
                 "he:𠃌:radical",
+                "he:丿:slash",
                 "he:刀:knife (🟥 BLOCKED)",
               ]
             `);
@@ -729,7 +733,7 @@ describe(
             `);
           }
 
-          history.push(`💤 1d`, `🟢 he:丿:slash he:𠃌:radical`);
+          history.push(`💤 1d`, `🟢 he:丿:slash`, `💤 10s`, `🟢 he:𠃌:radical`);
 
           {
             const queue = await simulateSkillReviews({
@@ -744,6 +748,8 @@ describe(
         });
 
         test(`doesn't get stuck reviewing the same skill after all due skills are done`, async () => {
+          vi.useFakeTimers({ toFake: [`Date`] });
+
           const targetSkills: Skill[] = [`he:分:divide`];
           const history: SkillReviewOp[] = [
             `❌ he:𠃌:radical`, // Get it wrong initially (so after all the reviews it will have lower "stability" than the others).
@@ -759,10 +765,16 @@ describe(
             `🟡 he:丿:slash`,
           ];
 
-          const queue = await simulateSkillReviews({ targetSkills, history });
-          const {
-            items: [review1],
-          } = queue;
+          let queue = await simulateSkillReviews({ targetSkills, history });
+          let review1 = queue.items[0];
+
+          // If he:𠃌:radical is the next review, then answer it correctly and
+          // move to the next item in the queue.
+          if (review1?.skill === `he:𠃌:radical`) {
+            history.push(`💤 5s`, `🟡 he:𠃌:radical`);
+            queue = await simulateSkillReviews({ targetSkills, history });
+            review1 = queue.items[0];
+          }
 
           // Doesn't get stuck reviewing he:𠃌:radical just because it had a lower stability.
           expect([review1?.skill]).not.toEqual([`he:𠃌:radical`]);
@@ -772,6 +784,8 @@ describe(
         });
 
         test(`skills that are stale (heavily over-due and not stable) are treated as new skills`, async () => {
+          vi.useFakeTimers({ toFake: [`Date`] });
+
           const targetSkills: Skill[] = [`he:刀:knife`];
           const history: SkillReviewOp[] = [
             `❌ he:刀:knife`, // Get it wrong initially so it's considered introduced but not very stable.
@@ -831,6 +845,8 @@ describe(
           skillTest(
             `skills that were just failed should stay first in queue (so you retry it immediately)`,
             async ({ isStructuralHanziWord }) => {
+              vi.useFakeTimers({ toFake: [`Date`] });
+
               const graph = await skillLearningGraph({
                 targetSkills: [`he:八:eight`, `he:丿:slash`],
               });
@@ -869,6 +885,8 @@ describe(
           skillTest(
             `failed skills that are not introduced are not promoted`,
             async ({ isStructuralHanziWord }) => {
+              vi.useFakeTimers({ toFake: [`Date`] });
+
               const graph = await skillLearningGraph({
                 targetSkills: [`he:八:eight`, `he:丿:slash`],
               });
@@ -904,6 +922,8 @@ describe(
           skillTest(
             `multiple failed skills are prioritised in most-recent first`,
             async ({ isStructuralHanziWord }) => {
+              vi.useFakeTimers({ toFake: [`Date`] });
+
               const graph = await skillLearningGraph({
                 targetSkills: [`he:八:eight`, `he:丿:slash`],
               });
@@ -974,6 +994,8 @@ describe(
           skillTest(
             `prioritizes pronunciation skill after successful he: review if user has reached rank 1`,
             async ({ isStructuralHanziWord }) => {
+              vi.useFakeTimers({ toFake: [`Date`] });
+
               const graph = await skillLearningGraph({
                 targetSkills: [
                   `he:好:good`,
@@ -2015,6 +2037,8 @@ describe(
       stabilityValues: number[],
       numRuns = 10_000,
     ): number[] {
+      invariant(vi.isFakeTimers(), `monteCarloSample requires fake timers`);
+
       const priorityCounts = new Map<Skill, number>([]);
 
       const inputs: [Skill, number][] = stabilityValues.map(
@@ -2027,8 +2051,9 @@ describe(
       // Test with different PRNG seeds by varying stability slightly
       for (let run = 0; run < numRuns; run++) {
         // Tiny variation to change seed on each run to get different samples,
-        // otherwise every sample would produce the same results.
-        const randomSeedJitter = run * 0.0001;
+        // otherwise every sample would produce the same results and it wouldn't
+        // be monte carlo.
+        vi.advanceTimersByTime(1000);
 
         const skillStates: [Skill, SrsStateType][] = inputs.map(
           ([skill, stability]) => [
@@ -2037,14 +2062,14 @@ describe(
               kind: SrsKind.FsrsFourPointFive,
               prevReviewAt: 时`-1d`, // arbitrary
               nextReviewAt: 时`+1d`, // arbitrary
-              stability: stability + randomSeedJitter,
+              stability,
               difficulty: 5, // arbitrary
             },
           ],
         );
 
         // Sort by priority (lower priority value = higher priority)
-        const [topPrioritySkill] = randomPickSkillsForReview(skillStates, 1);
+        const [topPrioritySkill] = randomPickSkillsForReview(skillStates);
 
         // Count which skill was top priority
         if (topPrioritySkill != null) {
@@ -2059,20 +2084,22 @@ describe(
     }
 
     test(`functional monte carlo testing`, () => {
+      vi.useFakeTimers({ toFake: [`Date`] });
+
       // Actually perform monte carlo sampling to verify priority distribution
       // matches expectations.
 
       expect(monteCarloSample([10, 100])).toMatchInlineSnapshot(`
         [
-          0.6965,
-          0.3035,
+          0.5449,
+          0.4551,
         ]
       `);
 
       expect(monteCarloSample([100, 1000])).toMatchInlineSnapshot(`
         [
-          0.6513,
-          0.3487,
+          0.5089,
+          0.4911,
         ]
       `);
 
@@ -2081,11 +2108,11 @@ describe(
       expect(monteCarloSample([1, 10, 100, 1000, 10_000]))
         .toMatchInlineSnapshot(`
           [
-            0.5794,
-            0.181,
-            0.1071,
-            0.0732,
-            0.0593,
+            0.4819,
+            0.1366,
+            0.1272,
+            0.1285,
+            0.1258,
           ]
         `);
 
@@ -2093,22 +2120,23 @@ describe(
         monteCarloSample([1, 1, 10, 10, 100, 100, 1000, 1000, 10_000, 10_000]),
       ).toMatchInlineSnapshot(`
         [
-          0.2626,
-          0.2618,
-          0.1059,
-          0.0978,
-          0.061,
-          0.0617,
-          0.0421,
-          0.041,
-          0.0337,
-          0.0324,
+          0.2143,
+          0.2138,
+          0.0817,
+          0.0764,
+          0.0723,
+          0.0651,
+          0.0676,
+          0.0679,
+          0.0715,
+          0.0694,
         ]
       `);
     });
 
     test(`deterministic with same inputs`, () => {
       // Test that the function is deterministic when given the same inputs
+      vi.useFakeTimers({ toFake: [`Date`] });
 
       const skill1 = `he:好:good` as Skill;
       const skill2 = `he:我:i` as Skill;
@@ -2412,12 +2440,13 @@ async function simulateSkillReviews({
   targetSkills: Skill[];
   history: SkillReviewOp[];
 }): Promise<SkillReviewQueue> {
+  invariant(vi.isFakeTimers(), `simulateSkillReviews requires fake timers`);
+
   await using rizzle = r.replicache(
     testReplicacheOptions(),
     currentSchema,
     mutators,
   );
-  let now = new Date();
 
   for (const event of history) {
     const [op, ...args] = event.split(` `);
@@ -2427,7 +2456,7 @@ async function simulateSkillReviews({
       // jump forward in time
       case `💤`: {
         invariant(args[0] != null);
-        now = parseRelativeTimeShorthand(args[0], now);
+        vi.setSystemTime(parseRelativeTimeShorthand(args[0]));
         break;
       }
       // mistakes
@@ -2437,7 +2466,7 @@ async function simulateSkillReviews({
           id: nanoid(),
           hanziOrHanziWord: hanzi,
           gloss,
-          now,
+          now: new Date(),
         });
         break;
       }
@@ -2450,7 +2479,7 @@ async function simulateSkillReviews({
           id: nanoid(),
           hanziOrHanziWord: hanzi,
           pinyin: rSpaceSeparatedString().unmarshal(pinyin),
-          now,
+          now: new Date(),
         });
         break;
       }
@@ -2474,7 +2503,7 @@ async function simulateSkillReviews({
             id: nanoid(),
             skill,
             rating,
-            now,
+            now: new Date(),
             durationMs: null,
           });
         }
@@ -2505,7 +2534,6 @@ async function simulateSkillReviews({
     graph,
     skillSrsStates,
     latestSkillRatings,
-    now,
     isStructuralHanziWord,
   });
 }

@@ -995,6 +995,7 @@ export function skillReviewQueue({
   for (const skill of randomPickSkillsForReview(
     learningOrderNotDue,
     maxQueueItems - items.length,
+    now,
   )) {
     items.push({ skill });
   }
@@ -1057,58 +1058,42 @@ export function* walkSkillAndDependencies(
 
 /**
  * Randomly pick skills for review based on their SRS state to form a
- * probability distribution weighted by each skill's difficulty. It's designed
- * to be efficient and deterministic so it can be tested and predictable. In
- * practice it probably doesn't make sense to compute all of the upcoming skills
- * (rather than just "the next one") because each time a skill is reviewed the
- * sequence will change. But it can be used to allow batches of skills to be
- * selected and reviewed as a quiz rather than just taking one-by-one.
+ * probability distribution weighted by each skill's recall probability. It's
+ * designed to be efficient and deterministic so it can be tested and
+ * predictable.
  *
- * @param skillStates
- * @returns
+ * Having randomness makes the quiz more interesting, otherwise you would be
+ * stuck in answering the same sequence of questions over and over.
  */
 export const randomPickSkillsForReview = (
   skillStates: readonly [Skill, SrsStateType | undefined][],
   limit = Infinity,
+  /**
+   * The current time to use for SRS recall probability calculations.
+   *
+   * This is also used as the random seed, so it can be fixed for testing.
+   */
+  now = new Date(),
 ): Skill[] => {
-  let totalScoreSum = 0;
+  const skillStrength = new Map<Skill, number>();
 
-  const skillLearnedScores = new Map<Skill, number>();
-
-  // Compute a score for each skill by scaling FSRS stability logarithmically to
-  // avoid extreme values dominating the weights. Also compute the total
-  // cumulative score to use as the random seed. This will order items
-  // deterministically and makes testing easier because results are
-  // deterministic.
+  const random = makePRNG(now.getTime());
 
   for (const [skill, srsState] of skillStates) {
-    // Compute weights: lower stability = higher selection weight
-    const learningScore =
-      1 + // Minimum weight, avoids divide by zero.
-      (srsState?.kind === SrsKind.FsrsFourPointFive
-        ? // either difficulty or stability should always change after each
-          // review, so combining them ensures each review changes the random
-          // order and avoids getting stuck in a loop repeating a review for the
-          // same skill over and over again.
-          1 / srsState.difficulty + Math.log(srsState.stability)
-        : 0);
-    // Weight (probability) is inversely proportional to learning score, the
-    // more stable a skill is, the less likely it should be chosen.
-    totalScoreSum += learningScore;
-    skillLearnedScores.set(skill, learningScore);
-  }
+    const recallProbability =
+      srsState?.kind === SrsKind.FsrsFourPointFive
+        ? fsrsPredictedRecallProbability(srsState, now)
+        : 0.5;
 
-  const random = makePRNG(totalScoreSum);
-
-  // Now apply random sorting to the skills.
-  for (const [skill, score] of skillLearnedScores) {
-    skillLearnedScores.set(skill, random() * score);
+    // Multiplying by a random value has the same effect as a weighted random
+    // sort.
+    skillStrength.set(skill, random() * recallProbability);
   }
 
   return topK(
     skillStates,
     limit,
-    sortComparatorNumber(([skill]) => skillLearnedScores.get(skill) ?? 0),
+    sortComparatorNumber(([skill]) => skillStrength.get(skill) ?? 0),
   ).map(([skill]) => skill);
 };
 
