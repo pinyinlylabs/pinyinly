@@ -1068,7 +1068,7 @@ export function* walkSkillAndDependencies(
  * @param skillStates
  * @returns
  */
-const randomWeightSkills = (
+export const randomWeightSkills = (
   skillStates: readonly [Skill, SrsStateType | undefined][],
 ): [Skill, number][] => {
   let totalWeight = 0;
@@ -1076,14 +1076,17 @@ const randomWeightSkills = (
   const weighted = skillStates.map(([skill, srsState]): [Skill, number] => {
     // Compute weights: lower stability = higher selection weight
     const learningScore =
-      srsState?.kind === SrsKind.FsrsFourPointFive
+      1 + // Minimum weight, avoids divide by zero.
+      (srsState?.kind === SrsKind.FsrsFourPointFive
         ? // either difficulty or stability should always change after each
           // review, so combining them ensures each review changes the random
           // order and avoids getting stuck in a loop repeating a review for the
           // same skill over and over again.
-          (1 / srsState.difficulty) * Math.sqrt(1 + srsState.stability)
-        : 0;
-    const weight = 1 / (learningScore + 1);
+          1 / srsState.difficulty + Math.log(srsState.stability)
+        : 0);
+    // Weight (probability) is inversely proportional to learning score, the
+    // more stable a skill is, the less likely it should be chosen.
+    const weight = learningScore;
     totalWeight += weight;
     return [skill, weight];
   });
