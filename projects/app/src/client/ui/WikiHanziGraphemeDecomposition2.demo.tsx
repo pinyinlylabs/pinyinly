@@ -1,5 +1,5 @@
 import type { HanziText } from "@/data/model";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 import { WikiHanziGraphemeDecomposition2 } from "./WikiHanziGraphemeDecomposition2";
 
 const strokesData = [
@@ -22,12 +22,12 @@ export default () => {
           components={[
             {
               hanzi: [`龵` as HanziText, `手` as HanziText],
-              gloss: `hand`,
+              label: `hand`,
               strokes: `0,1,2,3`,
             },
             {
               hanzi: `目` as HanziText,
-              gloss: `eye`,
+              label: `eye`,
               strokes: `4,5,6,7,8`,
             },
           ]}
@@ -35,20 +35,13 @@ export default () => {
           strokesData={strokesData}
           illustrationSrc={require(`./demo/看.jpg`)}
           illustrationFit="contain"
-          mnemonicTitle="The Sun Blocker"
-        >
-          <Text className="pyly-body">
-            You need to <Text className="pyly-bold">look (看)</Text> actively!
-            How do you spot something far away on a sunny day? You use your
-            {` `}
-            <Text className="pyly-bold">Hand (手)</Text> to help your{` `}
-            <Text className="pyly-bold">Eye (目)</Text>. When you shade your
-            forehead or shield your face with your Hand, you can stop squinting
-            and really{` `}
-            <Text className="pyly-bold">SEE!</Text> That&apos;s why the Hand is
-            sitting right on top—it’s helping the Eye look intently.
-          </Text>
-        </WikiHanziGraphemeDecomposition2>
+          mnemonics={[
+            {
+              meaning: `see`,
+              story: `You need to **look (看)** actively! How do you spot something far away on a sunny day? You use your **Hand (手)** to help your **Eye (目)**. When you shade your forehead or shield your face with your Hand, you can stop squinting and really **SEE!** That's why the Hand is sitting right on top—it’s helping the Eye look intently.`,
+            },
+          ]}
+        />
       </View>
     </>
   );
