@@ -6,6 +6,7 @@ export function HanziGrapheme(props: {
   strokesData: string[];
   highlightStrokes: number[];
   highlightColor?: `blue` | `yellow` | `amber`;
+  className?: string;
 }) {
   const highlightedStrokes = new Set(props.highlightStrokes);
 
@@ -14,7 +15,7 @@ export function HanziGrapheme(props: {
       viewBox="0 0 1024 1024"
       width="256"
       height="256"
-      className="size-8 shrink-0"
+      className={props.className ?? `size-8 shrink-0`}
     >
       <G transform="scale(1, -1) translate(0, -900)">
         {/* Placeholder */}
