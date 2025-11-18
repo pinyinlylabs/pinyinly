@@ -4,6 +4,37 @@ import { devToolsSlowQuerySleepIfEnabled } from "@/util/devtools";
 import { lazy } from "react";
 import z from "zod/v4";
 
+const graphemeComponentSchema = z.object({
+  /**
+   * The hanzi grapheme (if any) formed by the strokes. Usually this can
+   * be populated, but in some cases the strokes don't form a valid
+   * grapheme and instead are combined for more creative visual reasons.
+   */
+  hanzi: z.string().optional(),
+  label: z.string(),
+  /**
+   * Comma-separated list of stroke indices (0-based) for strokes that are
+   * part of this grapheme. Allows shorthand ranges (e.g. 0-2,5 is the same as
+   * 0,1,2,5).
+   */
+  strokes: z.string(),
+});
+
+export type GraphemeComponent = z.infer<typeof graphemeComponentSchema>;
+
+/**
+ * The layout of the components. The first element is the combining
+ * operator, and the remaining are the components for each slot.
+ */
+const graphemeComponentLayoutSchema = z.union([
+  z.tuple([z.literal(`⿰`), graphemeComponentSchema, graphemeComponentSchema]),
+  z.tuple([z.literal(`⿱`), graphemeComponentSchema, graphemeComponentSchema]),
+]);
+
+export type GraphemeComponentLayout = z.infer<
+  typeof graphemeComponentLayoutSchema
+>;
+
 /**
  * Schema for grapheme.json files.
  */
@@ -21,35 +52,10 @@ export const graphemeDataSchema = z.object({
   mnemonic: z
     .object({
       /**
-       * IDS format string describing the layout of the components, using
-       * 0-based indexes instead of characters (e.g. ⿱01 means the first
-       * component is positioned above the second component).
-       *
-       * If only one combining character (e.g. ⿰) is needed, then it can be
-       * used as shorthand and omit the indexes (e.g. ⿰01 can be written as
-       * just ⿰).
+       * The layout of the components. The first element is the combining
+       * operator, and the remaining are the components for each slot.
        */
-      layout: z.string(),
-      /**
-       * Each component used in the mnemonic.
-       */
-      components: z.array(
-        z.object({
-          /**
-           * The hanzi grapheme (if any) formed by the strokes. Usually this can
-           * be populated, but in some cases the strokes don't form a valid
-           * grapheme and instead are combined for more creative visual reasons.
-           */
-          hanzi: z.string().optional(),
-          label: z.string(),
-          /**
-           * Comma-separated list of stroke indices (0-based) for strokes that are
-           * part of this grapheme. Allows shorthand ranges (e.g. 0-2,5 is the same as
-           * 0,1,2,5).
-           */
-          strokes: z.string(),
-        }),
-      ),
+      components: graphemeComponentLayoutSchema,
       stories: z
         .array(
           z.object({
@@ -76,6 +82,20 @@ export const graphemeDataSchema = z.object({
 
 export type GraphemeData = z.infer<typeof graphemeDataSchema>;
 
+export function* allGraphemeComponents(
+  graphemeLayout: GraphemeComponentLayout,
+): Generator<GraphemeComponent> {
+  const operator = graphemeLayout[0];
+  switch (operator) {
+    case `⿰`:
+    case `⿱`: {
+      yield graphemeLayout[1];
+      yield graphemeLayout[2];
+      break;
+    }
+  }
+}
+
 const lazyMdx = <Mdx extends MdxComponentType>(
   importFn: () => Promise<{ default: Mdx }>,
 ) =>
@@ -88,6 +108,27 @@ export function getWikiMdxHanziMeaning(
   hanzi: HanziText,
 ): MdxComponentType | undefined {
   return registry[`${hanzi}/meaning`];
+}
+
+/**
+ * Parse a comma-separated list of stroke indices (0-based), allowing shorthand
+ * ranges (e.g. 0-2,5 is the same as 0,1,2,5).
+ */
+export function parseRanges(ranges: string): number[] {
+  const result: number[] = [];
+  for (const part of ranges.split(`,`)) {
+    const rangeMatch = /^(\d+)-(\d+)$/.exec(part);
+    if (rangeMatch) {
+      const start = Number(rangeMatch[1]);
+      const end = Number(rangeMatch[2]);
+      for (let i = start; i <= end; i++) {
+        result.push(i);
+      }
+    } else {
+      result.push(Number(part));
+    }
+  }
+  return result;
 }
 
 export function getWikiMdxHanziWordMeaning(

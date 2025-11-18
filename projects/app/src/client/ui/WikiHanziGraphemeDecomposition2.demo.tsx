@@ -19,8 +19,8 @@ export default () => {
 const graphemeData: GraphemeData = {
   hanzi: `看`,
   mnemonic: {
-    layout: `⿰`,
     components: [
+      `⿰`,
       {
         hanzi: `龵,手`,
         label: `hand`,

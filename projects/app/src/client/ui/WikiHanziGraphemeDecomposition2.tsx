@@ -1,4 +1,5 @@
 import type { GraphemeData } from "@/client/wiki";
+import { allGraphemeComponents, parseRanges } from "@/client/wiki";
 import { Image } from "expo-image";
 import type { ReactNode } from "react";
 import React from "react";
@@ -35,19 +36,16 @@ export const WikiHanziGraphemeDecomposition2 = Object.assign(
     const componentsElements: ReactNode[] = [];
 
     if (graphemeData.mnemonic) {
-      for (const [
-        i,
-        visualComponent,
-      ] of graphemeData.mnemonic.components.entries()) {
+      for (const [i, visualComponent] of [
+        ...allGraphemeComponents(graphemeData.mnemonic.components),
+      ].entries()) {
         componentsElements.push(
           <View className="flex-1 items-center gap-2" key={i}>
             <View className="flex-row items-center gap-2">
               <HanziGrapheme
                 className="size-12"
                 strokesData={graphemeData.strokes}
-                highlightStrokes={visualComponent.strokes
-                  .split(`,`)
-                  .map(Number)}
+                highlightStrokes={parseRanges(visualComponent.strokes)}
               />
               {visualComponent.hanzi?.split(`,`).map((hanzi, i) => (
                 <Text className={visualCharClass()} key={i}>
