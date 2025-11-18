@@ -1,30 +1,8 @@
-export const visualComponents = [
-  {
-    hanzi: [`戶`, `户`],
-    label: `door`,
-    strokes: `0,1,2,3`,
-  },
-  {
-    hanzi: `斤`,
-    label: `resembles an axe`,
-    strokes: `4,5,6,7,8`,
-  },
-];
-export const hanzi = `所`;
 export const gloss = `place`;
 export const pinyin = `suǒ`;
-export const mnemonics = [
-  {
-    meaning: "place",
-    story: `A true **place** (所) you can call your own is where you’ve put up a **door** to mark your space and keep an axe handy by the entrance for wood, work, and protection. Wherever there’s a **door** and an **axe**, that’s your PLACE (所).`,
-  },
-];
+export const data = require("../grapheme.json");
+export const { hanzi } = data;
 
 **{hanzi}** generally means **{gloss}** in modern Mandarin. It’s pronounced **{pinyin}**.
 
-<GraphemeDecomposition2
-  components={visualComponents}
-  hanzi={hanzi}
-  strokesData={require("../strokes.json")}
-  mnemonics={mnemonics}
-/>
+<GraphemeDecomposition2 graphemeData={data} />

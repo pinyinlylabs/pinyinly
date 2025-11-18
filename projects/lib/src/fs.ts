@@ -55,6 +55,35 @@ export async function writeJsonFileIfChanged(
   );
 }
 
+export async function updateJsonFileKey(
+  path: string,
+  key: string,
+  value: unknown,
+  indentLevels?: number,
+): Promise<boolean> {
+  const encoding = `utf8`;
+
+  let existingData: Record<string, unknown> = {};
+  try {
+    const existingContent = await readFile(path, { encoding });
+    const parsed = JSON.parse(existingContent) as unknown;
+    if (
+      typeof parsed === `object` &&
+      parsed !== null &&
+      !Array.isArray(parsed)
+    ) {
+      existingData = parsed as Record<string, unknown>;
+    }
+  } catch {
+    // File doesn't exist or invalid JSON, start with empty object
+  }
+
+  // Update the specific key
+  const updatedData = { ...existingData, [key]: value };
+
+  return await writeJsonFileIfChanged(path, updatedData, indentLevels);
+}
+
 export async function writeUtf8FileIfChanged(
   path: string,
   content: string,

@@ -1,6 +1,6 @@
 import { allHanziGraphemes } from "#dictionary/dictionary.js";
 import { memoize0 } from "@pinyinly/lib/collections";
-import { existsSync, writeJsonFileIfChanged } from "@pinyinly/lib/fs";
+import { existsSync, updateJsonFileKey } from "@pinyinly/lib/fs";
 import { invariant } from "@pinyinly/lib/invariant";
 import makeDebug from "debug";
 import path from "node:path";
@@ -92,6 +92,8 @@ for (const grapheme of allGraphemes) {
     existsSync(graphemeWikiDir),
     `directory does not exist: ${graphemeWikiDir}`,
   );
-  const dataFile = path.join(graphemeWikiDir, `strokes.json`);
-  await writeJsonFileIfChanged(dataFile, record.strokes, 1);
+  const dataFile = path.join(graphemeWikiDir, `grapheme.json`);
+  const indentLevels = 2;
+  await updateJsonFileKey(dataFile, `hanzi`, grapheme, indentLevels);
+  await updateJsonFileKey(dataFile, `strokes`, record.strokes, indentLevels);
 }
