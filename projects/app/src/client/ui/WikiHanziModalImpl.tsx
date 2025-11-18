@@ -4,7 +4,6 @@ import { useRizzleQueryPaged } from "@/client/hooks/useRizzleQueryPaged";
 import { hanziWikiEntryQuery, pinyinSoundsQuery } from "@/client/query";
 import {
   getWikiMdxHanziMeaning,
-  getWikiMdxHanziMeaningMnemonic,
   getWikiMdxHanziWordMeaning,
 } from "@/client/wiki";
 import type { HanziText, PinyinSoundId, PinyinSyllable } from "@/data/model";
@@ -55,7 +54,6 @@ export function WikiHanziModalImpl({
   const glosses = glossesArray?.join(`, `);
 
   const MeaningMdx = getWikiMdxHanziMeaning(hanzi);
-  const MeaningMnemonicMdx = getWikiMdxHanziMeaningMnemonic(hanzi);
 
   const primaryGloss = glossesArray?.[0];
   const firstPinyin = pinyin?.[0];
@@ -109,21 +107,6 @@ export function WikiHanziModalImpl({
                 );
               })
             ) : null}
-
-            {MeaningMnemonicMdx == null ? null : (
-              <View className="gap-6 bg-bg-loud py-5">
-                <View className="flex-row gap-2 px-4">
-                  <IconImage
-                    source={require(`@/assets/icons/bulb.svg`)}
-                    size={24}
-                    className="text-yellow"
-                  />
-                  <Text className="pyly-body-heading">HOW TO REMEMBER IT</Text>
-                </View>
-
-                <MeaningMnemonicMdx />
-              </View>
-            )}
 
             {!isSingleSyllable ||
             firstPinyin == null ||

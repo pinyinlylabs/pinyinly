@@ -2,7 +2,6 @@ import { useLookupHanzi } from "@/client/hooks/useLookupHanzi";
 import { hanziWikiEntryQuery } from "@/client/query";
 import {
   getWikiMdxHanziMeaning,
-  getWikiMdxHanziMeaningMnemonic,
   getWikiMdxHanziWordMeaning,
 } from "@/client/wiki";
 import type { HanziText, PinyinSyllable } from "@/data/model";
@@ -49,7 +48,6 @@ export const NewSkillModalContentNewWord = ({
       : hanziWordMeanings.map(([, meaning]) => meaning.gloss[0]).join(`, `);
 
   const MeaningMdx = getWikiMdxHanziMeaning(hanzi);
-  const MeaningMnemonicMdx = getWikiMdxHanziMeaningMnemonic(hanzi);
 
   return (
     <>
@@ -111,21 +109,6 @@ export const NewSkillModalContentNewWord = ({
                 );
               })
             ) : null}
-
-            {MeaningMnemonicMdx == null ? null : (
-              <View className="gap-6 bg-bg-loud py-5">
-                <View className="flex-row gap-2 px-4">
-                  <IconImage
-                    source={require(`@/assets/icons/bulb.svg`)}
-                    size={24}
-                    className="text-yellow"
-                  />
-                  <Text className="pyly-body-heading">HOW TO REMEMBER IT</Text>
-                </View>
-
-                <MeaningMnemonicMdx />
-              </View>
-            )}
           </View>
         </PylyMdxComponents>
       </ScrollView>

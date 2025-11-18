@@ -90,12 +90,6 @@ export function getWikiMdxHanziMeaning(
   return registry[`${hanzi}/meaning`];
 }
 
-export function getWikiMdxHanziMeaningMnemonic(
-  hanzi: HanziText,
-): MdxComponentType | undefined {
-  return registry[`${hanzi}/meaningMnemonic`];
-}
-
 export function getWikiMdxHanziWordMeaning(
   hanziWord: HanziWord,
 ): MdxComponentType | undefined {
@@ -138,7 +132,6 @@ const registry: Record<string, MdxComponentType> = {
   "万/~tenThousand/meaning": lazyMdx(() => import(`./wiki/万/~tenThousand/meaning.mdx`)),
   "三/~three/meaning": lazyMdx(() => import(`./wiki/三/~three/meaning.mdx`)),
   "上/meaning": lazyMdx(() => import(`./wiki/上/meaning.mdx`)),
-  "上/meaningMnemonic": lazyMdx(() => import(`./wiki/上/meaningMnemonic.mdx`)),
   "上/~above/meaning": lazyMdx(() => import(`./wiki/上/~above/meaning.mdx`)),
   "上/~on/meaning": lazyMdx(() => import(`./wiki/上/~on/meaning.mdx`)),
   "上升/~rise/meaning": lazyMdx(() => import(`./wiki/上升/~rise/meaning.mdx`)),
@@ -698,7 +691,6 @@ const registry: Record<string, MdxComponentType> = {
   "华人/~chinesePeople/meaning": lazyMdx(() => import(`./wiki/华人/~chinesePeople/meaning.mdx`)),
   "卓/~outstanding/meaning": lazyMdx(() => import(`./wiki/卓/~outstanding/meaning.mdx`)),
   "单/meaning": lazyMdx(() => import(`./wiki/单/meaning.mdx`)),
-  "单/meaningMnemonic": lazyMdx(() => import(`./wiki/单/meaningMnemonic.mdx`)),
   "单/~single/meaning": lazyMdx(() => import(`./wiki/单/~single/meaning.mdx`)),
   "单位/~unit/meaning": lazyMdx(() => import(`./wiki/单位/~unit/meaning.mdx`)),
   "单元/~unit/meaning": lazyMdx(() => import(`./wiki/单元/~unit/meaning.mdx`)),
@@ -894,7 +886,6 @@ const registry: Record<string, MdxComponentType> = {
   "啤/~beer/meaning": lazyMdx(() => import(`./wiki/啤/~beer/meaning.mdx`)),
   "啤酒/~beer/meaning": lazyMdx(() => import(`./wiki/啤酒/~beer/meaning.mdx`)),
   "喂/meaning": lazyMdx(() => import(`./wiki/喂/meaning.mdx`)),
-  "喂/meaningMnemonic": lazyMdx(() => import(`./wiki/喂/meaningMnemonic.mdx`)),
   "喂/~feed/meaning": lazyMdx(() => import(`./wiki/喂/~feed/meaning.mdx`)),
   "喂/~hello/meaning": lazyMdx(() => import(`./wiki/喂/~hello/meaning.mdx`)),
   "善/~good/meaning": lazyMdx(() => import(`./wiki/善/~good/meaning.mdx`)),
