@@ -33,7 +33,7 @@ describe(`grapheme.json files`, async () => {
         const json = readFileSync(filePath, `utf-8`);
         const graphemeData = graphemeDataSchema.parse(JSON.parse(json));
 
-        // Test: no duplicate stroke indicies in components (e.g. ❌ 0-3,2).
+        // Test: no duplicate stroke indices in components (e.g. ❌ 0-3,2).
         if (graphemeData.mnemonic?.components) {
           for (const component of allGraphemeComponents(
             graphemeData.mnemonic.components,
