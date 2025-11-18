@@ -93,5 +93,7 @@ for (const grapheme of allGraphemes) {
     `directory does not exist: ${graphemeWikiDir}`,
   );
   const dataFile = path.join(graphemeWikiDir, `grapheme.json`);
-  await updateJsonFileKey(dataFile, `strokes`, record.strokes, 1);
+  const indentLevels = 2;
+  await updateJsonFileKey(dataFile, `hanzi`, grapheme, indentLevels);
+  await updateJsonFileKey(dataFile, `strokes`, record.strokes, indentLevels);
 }

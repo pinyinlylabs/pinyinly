@@ -1,33 +1,13 @@
-export const visualComponents = [
-  {
-    hanzi: [`龵`, `手`],
-    label: `hand`,
-    strokes: `0,1,2,3`,
-  },
-  {
-    hanzi: `目`,
-    label: `eye`,
-    strokes: `4,5,6,7,8`,
-  },
-];
-export const hanzi = `看`;
 export const gloss = `see`;
 export const pinyin = `kàn`;
-export const mnemonics = [
-  {
-    meaning: "see",
-    story: `You need to **look (看)** actively! How do you spot something far away on a sunny day? You use your **Hand (手)** to help your **Eye (目)**. When you shade your forehead or shield your face with your Hand, you can stop squinting and really **SEE!** That's why the Hand is sitting right on top—it’s helping the Eye look intently.`,
-  },
-];
+export const data = require("../grapheme.json");
+export const { hanzi } = data;
 
 **{hanzi}** generally means **{gloss}** in modern Mandarin. It’s pronounced **{pinyin}**.
 
 <GraphemeDecomposition2
-  components={visualComponents}
-  hanzi={hanzi}
-  strokesData={require("../grapheme.json").strokes}
+  graphemeData={require("../grapheme.json")}
   illustrationSrc="./meaning.jpg"
-  mnemonics={mnemonics}
 />
 
 ## Core Meaning & Usage
