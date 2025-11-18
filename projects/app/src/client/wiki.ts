@@ -2,6 +2,79 @@ import type { MdxComponentType } from "@/client/ui/mdx";
 import type { HanziText, HanziWord } from "@/data/model";
 import { devToolsSlowQuerySleepIfEnabled } from "@/util/devtools";
 import { lazy } from "react";
+import z from "zod/v4";
+
+/**
+ * Schema for grapheme.json files.
+ */
+export const graphemeDataSchema = z.object({
+  /**
+   * The hanzi character represented by this grapheme (e.g. 看).
+   */
+  hanzi: z.string(),
+  strokes: z.array(z.string()),
+  /**
+   * The meaning mnemonic for the grapheme. This doesn't necessarily correspond
+   * to the etymological components, and their meanings can differ too. It's
+   * intended for beginner learners and optimised for mnemonic usefulness.
+   */
+  mnemonic: z
+    .object({
+      /**
+       * IDS format string describing the layout of the components, using
+       * 0-based indexes instead of characters (e.g. ⿱01 means the first
+       * component is positioned above the second component).
+       *
+       * If only one combining character (e.g. ⿰) is needed, then it can be
+       * used as shorthand and omit the indexes (e.g. ⿰01 can be written as
+       * just ⿰).
+       */
+      layout: z.string(),
+      /**
+       * Each component used in the mnemonic.
+       */
+      components: z.array(
+        z.object({
+          /**
+           * The hanzi grapheme (if any) formed by the strokes. Usually this can
+           * be populated, but in some cases the strokes don't form a valid
+           * grapheme and instead are combined for more creative visual reasons.
+           */
+          hanzi: z.string().optional(),
+          label: z.string(),
+          /**
+           * Comma-separated list of stroke indices (0-based) for strokes that are
+           * part of this grapheme. Allows shorthand ranges (e.g. 0-2,5 is the same as
+           * 0,1,2,5).
+           */
+          strokes: z.string(),
+        }),
+      ),
+      stories: z
+        .array(
+          z.object({
+            gloss: z.string(),
+            story: z.string(),
+            /**
+             * If there are other stories that depend on this one to make sense,
+             * they can be nested inside their dependency.
+             */
+            children: z
+              .array(
+                z.object({
+                  gloss: z.string(),
+                  story: z.string(),
+                }),
+              )
+              .optional(),
+          }),
+        )
+        .optional(),
+    })
+    .optional(),
+});
+
+export type GraphemeData = z.infer<typeof graphemeDataSchema>;
 
 const lazyMdx = <Mdx extends MdxComponentType>(
   importFn: () => Promise<{ default: Mdx }>,
