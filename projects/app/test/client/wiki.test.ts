@@ -45,6 +45,32 @@ describe(`grapheme.json files`, async () => {
           }
         }
 
+        // Test: all strokes are covered by mnemonic components
+        if (graphemeData.mnemonic?.components) {
+          const allComponentStrokes = new Set<number>();
+          for (const component of allGraphemeComponents(
+            graphemeData.mnemonic.components,
+          )) {
+            const strokeIndices = parseRanges(component.strokes);
+            for (const index of strokeIndices) {
+              allComponentStrokes.add(index);
+            }
+          }
+
+          const totalStrokes = graphemeData.strokes.length;
+          const expectedStrokes = Array.from(
+            { length: totalStrokes },
+            (_, i) => i,
+          );
+
+          for (const strokeIndex of expectedStrokes) {
+            expect(
+              allComponentStrokes.has(strokeIndex),
+              `Stroke ${strokeIndex} is not covered by any mnemonic component`,
+            ).toBe(true);
+          }
+        }
+
         // Test: number of mnemonic stories matches number of meanings for hanzi
         if (graphemeData.mnemonic?.stories) {
           const hanzi = graphemeData.hanzi as HanziText;
