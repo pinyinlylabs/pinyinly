@@ -11,7 +11,7 @@ const graphemeComponentSchema = z.object({
    * grapheme and instead are combined for more creative visual reasons.
    */
   hanzi: z.string().optional(),
-  label: z.string(),
+  label: z.string().optional(),
   /**
    * Comma-separated list of stroke indices (0-based) for strokes that are
    * part of this grapheme. Allows shorthand ranges (e.g. 0-2,5 is the same as
