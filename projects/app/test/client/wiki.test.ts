@@ -84,6 +84,17 @@ describe(`grapheme.json files`, async () => {
             `Hanzi "${hanzi}" has ${storiesCount} mnemonic stories but ${meaningsCount} meanings in dictionary`,
           ).toBe(meaningsCount);
         }
+
+        // Test: TODO check that ② and other numbers are not used as "hanzi" in components
+        if (graphemeData.mnemonic?.components) {
+          for (const component of allGraphemeComponents(
+            graphemeData.mnemonic.components,
+          )) {
+            expect(component.hanzi).not.toMatch(
+              /⿰|⿱|⿲|⿳|⿴|⿵|⿶|⿷|⿼|⿸|⿹|⿺|⿽|⿻|⿾|⿿|①|②|③|④|⑤|⑥|⑦|⑧|⑨|⑩|⑪|⑫|⑬|⑭|⑮|⑯|⑰|⑱|⑲|⑳/,
+            );
+          }
+        }
       });
     });
   }
