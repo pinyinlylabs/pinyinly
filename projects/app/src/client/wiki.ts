@@ -33,7 +33,18 @@ export type GraphemeComponent = z.infer<typeof graphemeComponentSchema>;
  */
 const graphemeComponentLayoutSchema = z.union([
   z.tuple([
-    z.union([z.literal(`⿰`), z.literal(`⿱`)]),
+    z.union([
+      z.literal(`⿰`),
+      z.literal(`⿱`),
+      z.literal(`⿵`),
+      z.literal(`⿶`),
+      z.literal(`⿴`),
+      z.literal(`⿻`),
+      z.literal(`⿸`),
+      z.literal(`⿺`),
+      z.literal(`⿹`),
+      z.literal(`⿷`),
+    ]),
     graphemeComponentSchema,
     graphemeComponentSchema,
   ]),
@@ -102,6 +113,14 @@ export function* allGraphemeComponents(
   const operator = graphemeLayout[0];
   switch (operator) {
     case `⿰`:
+    case `⿵`:
+    case `⿶`:
+    case `⿴`:
+    case `⿸`:
+    case `⿺`:
+    case `⿹`:
+    case `⿻`:
+    case `⿷`:
     case `⿱`: {
       yield graphemeLayout[1];
       yield graphemeLayout[2];
