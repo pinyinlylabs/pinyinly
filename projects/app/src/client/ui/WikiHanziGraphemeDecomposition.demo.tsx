@@ -1,56 +1,53 @@
-import { Text, View } from "react-native";
-import { HanziWordRefText } from "./HanziWordRefText";
+import type { GraphemeData } from "@/client/wiki";
+import { View } from "react-native";
 import { WikiHanziGraphemeDecomposition } from "./WikiHanziGraphemeDecomposition";
-
-const xueStrokes = [
-  `M 311 681 Q 332 656 354 626 Q 364 611 380 610 Q 390 609 397 621 Q 404 634 399 664 Q 395 694 313 727 Q 298 733 292 731 Q 288 728 287 715 Q 288 705 311 681 Z`,
-  `M 456 744 Q 475 717 495 685 Q 504 672 517 669 Q 526 668 533 677 Q 540 689 539 715 Q 536 745 462 785 Q 450 792 444 791 Q 440 788 438 777 Q 439 767 456 744 Z`,
-  `M 669 770 Q 642 724 586 650 Q 580 643 587 635 Q 594 634 603 639 Q 700 721 749 752 Q 768 759 763 770 Q 756 786 734 806 Q 712 824 688 825 Q 672 824 674 802 Q 678 787 669 770 Z`,
-  `M 241 550 Q 231 569 222 576 Q 203 589 201 564 Q 207 527 148 466 Q 129 445 155 387 Q 170 360 190 388 Q 217 454 246 522 C 251 533 251 533 241 550 Z`,
-  `M 246 522 Q 276 504 310 515 Q 472 560 708 577 Q 745 580 761 577 Q 776 570 775 563 Q 775 562 727 483 Q 720 470 725 464 Q 732 460 750 470 Q 813 507 862 516 Q 904 526 903 536 Q 902 546 832 605 Q 808 626 745 613 Q 598 600 365 564 Q 307 555 248 551 Q 244 551 241 550 C 211 547 218 534 246 522 Z`,
-  `M 516 320 Q 519 321 599 382 Q 636 410 663 419 Q 682 425 676 441 Q 673 457 610 492 Q 592 502 570 494 Q 510 472 420 447 Q 396 440 339 442 Q 317 443 324 423 Q 331 411 350 400 Q 378 384 411 402 Q 433 411 546 449 Q 559 455 570 448 Q 582 441 576 427 Q 546 382 508 326 C 493 304 493 304 516 320 Z`,
-  `M 538 295 Q 529 310 516 320 L 508 326 Q 502 330 498 332 Q 488 339 483 331 Q 479 327 486 314 Q 490 304 495 290 L 506 247 Q 518 163 508 105 Q 502 68 492 60 Q 489 57 408 73 Q 398 76 392 72 Q 388 71 402 59 Q 454 11 482 -28 Q 498 -46 516 -37 Q 538 -25 555 27 Q 579 117 557 250 L 538 295 Z`,
-  `M 557 250 Q 701 269 878 253 Q 902 250 908 259 Q 915 272 903 284 Q 875 312 831 332 Q 816 338 790 330 Q 742 321 538 295 L 495 290 Q 384 281 328 274 Q 264 264 170 264 Q 157 264 155 253 Q 154 240 173 226 Q 189 213 220 201 Q 232 197 249 205 Q 265 211 332 221 Q 408 239 506 247 L 557 250 Z`,
-];
 
 export default () => {
   return (
     <>
-      <View className="w-full flex-row gap-2">
+      <View className="max-w-[500px] flex-1 gap-2">
         <WikiHanziGraphemeDecomposition
-          strokesData={xueStrokes}
-          illustrationSrc={require(`./demo/child.png`)}
-        >
-          <Text className="pyly-body">
-            A child using their hand to <strong>learn</strong> about the world.
-          </Text>
-          <WikiHanziGraphemeDecomposition.Component strokes="0,1,2">
-            <Text className="pyly-body">
-              the child’s <HanziWordRefText hanziWord="𭕄:radical" gloss />
-              {` `}
-              poking up through the blanket
-            </Text>
-          </WikiHanziGraphemeDecomposition.Component>
-          <WikiHanziGraphemeDecomposition.Component
-            strokes="3,4"
-            color="yellow"
-          >
-            <Text className="pyly-body">
-              a <HanziWordRefText hanziWord="冖:cover" gloss /> depicting a
-              blanket
-            </Text>
-          </WikiHanziGraphemeDecomposition.Component>
-          <WikiHanziGraphemeDecomposition.Component
-            strokes="5,6,7,8"
-            color="blue"
-          >
-            <Text className="pyly-body">
-              the <HanziWordRefText hanziWord="子:child" gloss /> laying under a
-              blanket
-            </Text>
-          </WikiHanziGraphemeDecomposition.Component>
-        </WikiHanziGraphemeDecomposition>
+          graphemeData={graphemeData}
+          illustrationSrc={require(`./demo/看.jpg`)}
+          illustrationFit="contain"
+        />
       </View>
     </>
   );
+};
+
+const graphemeData: GraphemeData = {
+  hanzi: `看`,
+  mnemonic: {
+    components: [
+      `⿰`,
+      {
+        hanzi: `龵,手`,
+        label: `hand`,
+        strokes: `0,1,2,3`,
+      },
+      {
+        hanzi: `目`,
+        label: `eye`,
+        strokes: `4,5,6,7,8`,
+      },
+    ],
+    stories: [
+      {
+        gloss: `see`,
+        story: `You need to **look (看)** actively! How do you spot something far away on a sunny day? You use your **Hand (手)** to help your **Eye (目)**. When you shade your forehead or shield your face with your Hand, you can stop squinting and really **SEE!** That's why the Hand is sitting right on top—it’s helping the Eye look intently.`,
+      },
+    ],
+  },
+  strokes: [
+    `M 493 738 Q 622 771 657 772 Q 675 771 679 777 Q 685 787 674 800 Q 629 848 588 853 Q 581 850 578 839 Q 574 808 393 748 Q 347 735 291 719 Q 284 712 289 708 Q 307 702 428 726 Q 435 727 444 728 L 493 738 Z`,
+    `M 478 589 Q 554 605 635 618 Q 690 630 698 637 Q 707 644 703 652 Q 696 664 668 672 Q 640 679 610 668 Q 553 650 495 636 L 429 624 Q 377 617 318 611 Q 282 607 307 590 Q 346 563 401 576 Q 407 577 414 577 L 478 589 Z`,
+    `M 427 456 Q 463 474 691 483 Q 746 486 809 487 Q 890 487 896 497 Q 902 510 884 525 Q 821 568 756 549 Q 650 528 486 500 Q 464 497 442 492 L 380 484 Q 256 468 117 448 Q 95 445 112 427 Q 127 412 146 407 Q 168 401 186 407 Q 271 432 364 447 L 427 456 Z`,
+    `M 391 383 Q 410 420 427 456 L 442 492 Q 460 540 478 589 L 495 636 Q 495 637 496 637 Q 503 656 515 676 Q 527 688 523 703 Q 513 722 493 738 C 471 759 442 758 444 728 Q 450 692 434 642 Q 431 635 429 624 L 414 577 Q 398 529 380 484 L 364 447 Q 295 278 154 141 Q 118 104 82 69 Q 75 65 71 58 Q 67 48 77 47 Q 110 46 222 146 Q 252 176 283 212 Q 331 273 374 350 L 391 383 Z`,
+    `M 417 368 Q 405 378 391 383 C 366 394 369 380 374 350 Q 402 194 368 76 Q 353 27 386 -8 Q 396 -21 405 -8 Q 415 4 420 26 L 426 59 Q 429 89 430 127 L 430 152 Q 430 189 431 228 L 431 254 Q 431 317 435 337 C 437 353 437 353 417 368 Z`,
+    `M 604 46 Q 637 9 660 -28 Q 670 -46 681 -45 Q 697 -44 711 -9 Q 727 30 723 76 Q 713 157 702 306 Q 701 337 716 360 Q 725 373 715 382 Q 696 401 644 424 Q 625 433 611 423 Q 554 396 417 368 C 388 362 405 332 435 337 Q 453 338 597 372 Q 619 376 631 368 Q 650 352 651 79 Q 651 78 651 76 Q 648 66 640 63 C 624 38 589 63 604 46 Z`,
+    `M 431 228 Q 435 227 444 228 Q 526 243 587 251 Q 609 255 601 268 Q 591 283 565 287 Q 540 290 431 254 C 403 245 401 231 431 228 Z`,
+    `M 430 127 Q 436 126 448 127 Q 530 140 590 148 Q 614 152 605 164 Q 595 179 569 183 Q 547 187 430 152 C 401 143 400 129 430 127 Z`,
+    `M 420 26 Q 426 26 432 27 Q 487 39 604 46 C 634 48 652 49 640 63 Q 636 70 616 84 Q 601 93 572 86 Q 493 68 426 59 C 396 55 390 24 420 26 Z`,
+  ],
 };

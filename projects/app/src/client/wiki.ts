@@ -18,6 +18,11 @@ const graphemeComponentSchema = z.object({
    * 0,1,2,5).
    */
   strokes: z.string(),
+  /**
+   * What color to render this component in the decomposition illustration. This
+   * allows highlighting different components in different colors for clarity.
+   */
+  color: z.string().optional(),
 });
 
 export type GraphemeComponent = z.infer<typeof graphemeComponentSchema>;
@@ -27,8 +32,17 @@ export type GraphemeComponent = z.infer<typeof graphemeComponentSchema>;
  * operator, and the remaining are the components for each slot.
  */
 const graphemeComponentLayoutSchema = z.union([
-  z.tuple([z.literal(`⿰`), graphemeComponentSchema, graphemeComponentSchema]),
-  z.tuple([z.literal(`⿱`), graphemeComponentSchema, graphemeComponentSchema]),
+  z.tuple([
+    z.union([z.literal(`⿰`), z.literal(`⿱`)]),
+    graphemeComponentSchema,
+    graphemeComponentSchema,
+  ]),
+  z.tuple([
+    z.union([z.literal(`⿲`), z.literal(`⿳`)]),
+    graphemeComponentSchema,
+    graphemeComponentSchema,
+    graphemeComponentSchema,
+  ]),
 ]);
 
 export type GraphemeComponentLayout = z.infer<
@@ -91,6 +105,13 @@ export function* allGraphemeComponents(
     case `⿱`: {
       yield graphemeLayout[1];
       yield graphemeLayout[2];
+      break;
+    }
+    case `⿲`:
+    case `⿳`: {
+      yield graphemeLayout[1];
+      yield graphemeLayout[2];
+      yield graphemeLayout[3];
       break;
     }
   }

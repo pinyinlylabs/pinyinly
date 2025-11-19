@@ -1,26 +1,10 @@
 import { HanziWordRefText } from "../../ui/HanziWordRefText";
+import data from "./grapheme.json";
 
 To acquire knowledge or skill in a subject or activity by study, experience, or being taught; to
 study.
 
-## Mnemonic
-
-<GraphemeDecomposition strokesData={require("./grapheme.json").strokes} illustrationSrc="./child.png">
-A child using their hand to **learn** about the world.
-
-<GraphemeDecomposition.Component strokes="0,1,2">
-  <HanziWordRefText hanziWord="𭕄:radical" gloss="fingers" /> reaching up into the air
-</GraphemeDecomposition.Component>
-
-<GraphemeDecomposition.Component strokes="3,4" color="yellow">
-  a blanket (<HanziWordRefText hanziWord="冖:cover" gloss />) covering a child
-</GraphemeDecomposition.Component>
-
-<GraphemeDecomposition.Component strokes="5,6,7,8" color="blue">
-  a <HanziWordRefText hanziWord="子:child" gloss="child" /> on the floor
-</GraphemeDecomposition.Component>
-
-</GraphemeDecomposition>
+<GraphemeDecomposition graphemeData={data} illustrationSrc="./child.png" />
 
 ## Quick Reference
 
