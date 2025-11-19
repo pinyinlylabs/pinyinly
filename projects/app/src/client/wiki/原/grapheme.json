@@ -1,10 +1,24 @@
 {
-  "hanzi":"原",
-  "mnemonic":{
-    "components":["⿰",{"hanzi":"厂","label":"cliff","strokes":"0-1","color":"yellow"},{"hanzi":"泉","label":"waterfall","strokes":"2-9","color":"cyanold"}],
-    "stories":[{"gloss":"source","story":"A waterflow flowing off a cliff is the **source** of water."}]
+  "hanzi": "原",
+  "mnemonic": {
+    "components": [
+      "⿰",
+      { "hanzi": "厂", "label": "cliff", "strokes": "0-1", "color": "yellow" },
+      {
+        "hanzi": "泉",
+        "label": "waterfall",
+        "strokes": "2-9",
+        "color": "cyanold"
+      }
+    ],
+    "stories": [
+      {
+        "gloss": "source",
+        "story": "A waterflow flowing off a cliff is the **source** of water."
+      }
+    ]
   },
-  "strokes":[
+  "strokes": [
     "M 563 725 Q 627 735 697 744 Q 763 754 773 762 Q 782 769 778 777 Q 772 789 746 797 Q 718 804 598 774 Q 448 747 339 745 Q 333 745 330 743 C 300 738 312 723 341 716 Q 359 709 422 708 Q 461 714 506 716 L 563 725 Z",
     "M 330 743 Q 282 782 259 774 Q 246 767 253 753 Q 274 725 270 662 Q 249 431 205 310 Q 160 196 75 71 Q 71 64 68 58 Q 65 48 76 49 Q 112 55 198 189 Q 211 214 227 242 Q 297 393 320 596 Q 327 677 341 716 C 346 731 346 731 330 743 Z",
     "M 483 569 Q 570 680 582 689 Q 597 702 584 715 Q 575 721 563 725 C 535 735 496 744 506 716 Q 518 692 490 630 Q 477 599 462 565 C 450 538 464 545 483 569 Z",

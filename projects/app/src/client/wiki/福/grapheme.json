@@ -1,10 +1,29 @@
 {
-  "hanzi":"福",
-  "mnemonic":{
-    "components":["⿰",{"hanzi":"礻","label":"person praying","strokes":"0-3","color":"blue"},{"hanzi":"畐","label":"basket in a crop field","strokes":"4-12","color":"yellow"}],
-    "stories":[{"gloss":"blessing","story":"If you pray, you'll be **blessed** (福) with abundance. Imagine **畐** as a crop **field (田)** and **basket (囗)** if you have a big harvest you'll be blessed with riches."}]
+  "hanzi": "福",
+  "mnemonic": {
+    "components": [
+      "⿰",
+      {
+        "hanzi": "礻",
+        "label": "person praying",
+        "strokes": "0-3",
+        "color": "blue"
+      },
+      {
+        "hanzi": "畐",
+        "label": "basket in a crop field",
+        "strokes": "4-12",
+        "color": "yellow"
+      }
+    ],
+    "stories": [
+      {
+        "gloss": "blessing",
+        "story": "If you pray, you'll be **blessed** (福) with abundance. Imagine **畐** as a crop **field (田)** and **basket (囗)** if you have a big harvest you'll be blessed with riches."
+      }
+    ]
   },
-  "strokes":[
+  "strokes": [
     "M 298 770 Q 329 748 361 719 Q 377 706 395 707 Q 408 708 412 724 Q 416 742 404 775 Q 397 796 361 809 Q 277 830 264 823 Q 258 819 261 804 Q 265 791 298 770 Z",
     "M 270 379 Q 298 416 329 460 Q 363 514 412 548 Q 428 558 415 574 Q 396 590 367 601 Q 345 611 327 599 Q 237 541 87 534 Q 74 537 71 528 Q 68 518 83 508 Q 120 480 138 483 Q 156 486 288 537 Q 306 544 310 536 Q 314 527 302 505 Q 220 358 48 203 Q 33 193 36 189 Q 39 186 52 191 Q 148 236 245 349 L 270 379 Z",
     "M 245 349 Q 260 301 261 264 Q 261 174 242 99 Q 230 50 265 9 L 266 7 Q 282 -8 294 17 Q 307 56 307 99 Q 308 262 315 299 Q 322 324 313 334 Q 280 373 270 379 C 247 398 236 378 245 349 Z",
