@@ -13,7 +13,7 @@ export function PylyMdxComponents({ children }: PropsWithChildren) {
     <MDXComponents
       components={{
         Audio,
-        GraphemeDecomposition: WikiHanziGraphemeDecomposition,
+        WikiHanziGraphemeDecomposition,
         Hanzi: HanziComponent,
         Translated: TranslatedComponent,
 
