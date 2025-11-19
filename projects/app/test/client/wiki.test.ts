@@ -3,6 +3,8 @@ import {
   graphemeDataSchema,
   parseRanges,
 } from "#client/wiki.js";
+import type { HanziText } from "#data/model.js";
+import { lookupHanzi } from "#dictionary/dictionary.js";
 import { IS_CI } from "#util/env.js";
 import { createSpeechFileTests } from "@pinyinly/audio-sprites/testing";
 import { glob, readFileSync } from "@pinyinly/lib/fs";
@@ -41,6 +43,20 @@ describe(`grapheme.json files`, async () => {
             const strokeIndices = parseRanges(component.strokes);
             uniqueInvariant(strokeIndices);
           }
+        }
+
+        // Test: number of mnemonic stories matches number of meanings for hanzi
+        if (graphemeData.mnemonic?.stories) {
+          const hanzi = graphemeData.hanzi as HanziText;
+          const hanziWordMeanings = await lookupHanzi(hanzi);
+
+          const storiesCount = graphemeData.mnemonic.stories.length;
+          const meaningsCount = hanziWordMeanings.length;
+
+          expect(
+            storiesCount,
+            `Hanzi "${hanzi}" has ${storiesCount} mnemonic stories but ${meaningsCount} meanings in dictionary`,
+          ).toBe(meaningsCount);
         }
       });
     });
