@@ -4,9 +4,10 @@ import {
   parseRanges,
 } from "#client/wiki.js";
 import type { HanziText } from "#data/model.js";
-import { lookupHanzi } from "#dictionary/dictionary.js";
+import { loadMissingFontGlyphs, lookupHanzi } from "#dictionary/dictionary.js";
 import { IS_CI } from "#util/env.js";
 import { createSpeechFileTests } from "@pinyinly/audio-sprites/testing";
+import { memoize0 } from "@pinyinly/lib/collections";
 import { glob, readFileSync } from "@pinyinly/lib/fs";
 import { uniqueInvariant } from "@pinyinly/lib/invariant";
 import path from "node:path";
@@ -29,13 +30,17 @@ describe(`grapheme.json files`, async () => {
 
   for (const filePath of graphemeFilePaths) {
     const projectRelPath = path.relative(projectRoot, filePath);
+    const getJson = memoize0(() => JSON.parse(readFileSync(filePath, `utf-8`)));
+    const getParsedJson = memoize0(() => graphemeDataSchema.parse(getJson()));
 
     describe(projectRelPath, () => {
-      test(`adheres to schema and rules`, async () => {
-        const json = readFileSync(filePath, `utf-8`);
-        const graphemeData = graphemeDataSchema.parse(JSON.parse(json));
+      test(`adheres to schema`, async () => {
+        getParsedJson();
+      });
 
-        // Test: no duplicate stroke indices in components (e.g. ❌ 0-3,2).
+      test(`no duplicate stroke indicies in components (e.g. ❌ 0-3,2)`, async () => {
+        const graphemeData = getParsedJson();
+
         if (graphemeData.mnemonic?.components) {
           for (const component of allGraphemeComponents(
             graphemeData.mnemonic.components,
@@ -44,8 +49,11 @@ describe(`grapheme.json files`, async () => {
             uniqueInvariant(strokeIndices);
           }
         }
+      });
 
-        // Test: all strokes are covered by mnemonic components
+      test(`all strokes are covered by mnemonic components`, async () => {
+        const graphemeData = getParsedJson();
+
         if (graphemeData.mnemonic?.components) {
           const allComponentStrokes = new Set<number>();
           for (const component of allGraphemeComponents(
@@ -70,8 +78,11 @@ describe(`grapheme.json files`, async () => {
             ).toBe(true);
           }
         }
+      });
 
-        // Test: number of mnemonic stories matches number of meanings for hanzi
+      test(`number of mnemonic stories matches number of meanings for hanzi`, async () => {
+        const graphemeData = getParsedJson();
+
         if (graphemeData.mnemonic?.stories) {
           const hanzi = graphemeData.hanzi as HanziText;
           const hanziWordMeanings = await lookupHanzi(hanzi);
@@ -84,15 +95,39 @@ describe(`grapheme.json files`, async () => {
             `Hanzi "${hanzi}" has ${storiesCount} mnemonic stories but ${meaningsCount} meanings in dictionary`,
           ).toBe(meaningsCount);
         }
+      });
 
-        // Test: TODO check that ② and other numbers are not used as "hanzi" in components
+      test(`components do not use invalid "hanzi" strings`, async () => {
+        const graphemeData = getParsedJson();
+
         if (graphemeData.mnemonic?.components) {
+          const bannedCharacters = new Set();
+
+          // Only allow characters that have a glyph.
+          for (const missingGlyph of await loadMissingFontGlyphs()) {
+            bannedCharacters.add(missingGlyph);
+          }
+
+          // Don't allow IDS combining characters or circled numbers (meaning "unknown N stroke character").
+          for (const char of `⿰|⿱|⿲|⿳|⿴|⿵|⿶|⿷|⿼|⿸|⿹|⿺|⿽|⿻|⿾|⿿|①|②|③|④|⑤|⑥|⑦|⑧|⑨|⑩|⑪|⑫|⑬|⑭|⑮|⑯|⑰|⑱|⑲|⑳`.split(
+            `|`,
+          )) {
+            bannedCharacters.add(char);
+          }
+
+          // Other characters
+          for (const char of [
+            `\uD840 \uD841 \uD842 \uD843 \uD845 \uD846 \uD847 \uD848 \uD84E \uD853 \uD856 \uD858 \uD85A \uD85D \uD85F \uD86A`,
+            `\uD86C \uD86D \uD86E \uD86F \uD871 \uD875 \uD876 \uD877 \uDC20 \uDC60 \uDC8B \uDCB8 \uDCFB \uDD3C \uDD44 \uDD9D`,
+            `\uDDBC \uDDD7 \uDDE6 \uDE04 \uDE27 \uDE60 \uDED3 \uDED4 \uDED7 \uDF4C \uDFA6 \uDFB7 \uDFE8`,
+          ].flatMap((x) => x.split(/\s+/g))) {
+            bannedCharacters.add(char);
+          }
+
           for (const component of allGraphemeComponents(
             graphemeData.mnemonic.components,
           )) {
-            expect(component.hanzi).not.toMatch(
-              /⿰|⿱|⿲|⿳|⿴|⿵|⿶|⿷|⿼|⿸|⿹|⿺|⿽|⿻|⿾|⿿|①|②|③|④|⑤|⑥|⑦|⑧|⑨|⑩|⑪|⑫|⑬|⑭|⑮|⑯|⑰|⑱|⑲|⑳/,
-            );
+            expect(bannedCharacters).not.toContain(component.hanzi);
           }
         }
       });
