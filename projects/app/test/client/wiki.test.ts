@@ -2,18 +2,20 @@ import type { GraphemeData } from "#client/wiki.js";
 import {
   allGraphemeComponents,
   graphemeDataSchema,
-  parseRanges,
+  graphemeStrokeCount,
 } from "#client/wiki.js";
+import { isHanziGrapheme } from "#data/hanzi.js";
 import type { HanziText } from "#data/model.js";
 import { loadMissingFontGlyphs, lookupHanzi } from "#dictionary/dictionary.js";
 import { IS_CI } from "#util/env.js";
+import { normalizeIndexRanges, parseIndexRanges } from "#util/indexRanges.js";
 import { createSpeechFileTests } from "@pinyinly/audio-sprites/testing";
 import { deepReadonly, memoize1 } from "@pinyinly/lib/collections";
 import {
   existsSync,
   glob,
   readFileSync,
-  writeFileSync,
+  writeJsonFileIfChanged,
 } from "@pinyinly/lib/fs";
 import { nonNullable, uniqueInvariant } from "@pinyinly/lib/invariant";
 import path from "node:path";
@@ -31,7 +33,15 @@ describe(`speech files`, async () => {
 });
 
 describe(`grapheme.json files`, async () => {
-  const graphemeFilePaths = await glob(path.join(wikiDir, `**/grapheme.json`));
+  // For every grapheme wiki directory, there should be a grapheme.json file.
+  const graphemeFilePaths = await glob(path.join(wikiDir, `*/`)).then(
+    (dirPaths) =>
+      dirPaths
+        .filter((dirPath) =>
+          isHanziGrapheme(path.basename(dirPath) as HanziText),
+        )
+        .map((dirPath) => path.join(dirPath, `grapheme.json`)),
+  );
   expect(graphemeFilePaths.length).toBeGreaterThan(0);
 
   const getDataForGrapheme = memoize1(
@@ -62,7 +72,7 @@ describe(`grapheme.json files`, async () => {
           for (const component of allGraphemeComponents(
             graphemeData.mnemonic.components,
           )) {
-            const strokeIndices = parseRanges(component.strokes);
+            const strokeIndices = parseIndexRanges(component.strokes);
             uniqueInvariant(strokeIndices);
           }
         }
@@ -78,13 +88,13 @@ describe(`grapheme.json files`, async () => {
             if (component.hanzi != null) {
               const hanziData = getDataForGrapheme(component.hanzi);
               if (hanziData != null) {
-                const claimedStrokeCount = parseRanges(
+                const claimedStrokeCount = parseIndexRanges(
                   component.strokes,
                 ).length;
                 const expectedStrokeCount =
-                  hanziData.strokes.length + (component.strokeDiff ?? 0);
+                  graphemeStrokeCount(hanziData) + (component.strokeDiff ?? 0);
 
-                // Update in-place
+                // AUTO-FIXER CODE
                 if (claimedStrokeCount !== expectedStrokeCount) {
                   const newGraphemeData = structuredClone(graphemeData);
                   const newComponents = allGraphemeComponents(
@@ -92,29 +102,29 @@ describe(`grapheme.json files`, async () => {
                   ).toArray();
                   const newComponent = nonNullable(newComponents[i]);
                   if (i === newComponents.length - 1) {
-                    newComponent.strokes = `${graphemeData.strokes.length - expectedStrokeCount}-${graphemeData.strokes.length - 1}`;
+                    newComponent.strokes = normalizeIndexRanges(
+                      `${graphemeStrokeCount(graphemeData) - expectedStrokeCount}-${graphemeStrokeCount(graphemeData) - 1}`,
+                    );
                   } else if (i === 0 || i === 1) {
                     const startIndex =
                       Math.max(
                         -1,
                         ...newComponents
                           .slice(0, i)
-                          .flatMap((c) => parseRanges(c.strokes))
-                          .flat(),
+                          .flatMap((c) => parseIndexRanges(c.strokes)),
                       ) + 1;
-                    newComponent.strokes = `${startIndex}-${startIndex + expectedStrokeCount - 1}`;
+                    newComponent.strokes = normalizeIndexRanges(
+                      `${startIndex}-${startIndex + expectedStrokeCount - 1}`,
+                    );
                   } else {
                     console.warn(
                       `Cannot auto-fix component strokes for component ${i} in ${grapheme} mnemonic`,
                     );
                   }
                   if (!IS_CI) {
-                    console.warn(
-                      `Auto-fixing component strokes for ${grapheme} mnemonic`,
-                    );
-                    writeFileSync(
-                      filePath,
-                      JSON.stringify(newGraphemeData, null, 2),
+                    await writeJsonFileIfChanged(filePath, newGraphemeData);
+                    throw new Error(
+                      `Auto-fixed component strokes for ${grapheme} mnemonic - please re-run tests`,
                     );
                   }
                 }
@@ -122,15 +132,28 @@ describe(`grapheme.json files`, async () => {
                 expect(
                   claimedStrokeCount,
                   `${component.hanzi} stroke count does not match wiki data`,
-                ).toBe(expectedStrokeCount);
+                ).toEqual(expectedStrokeCount);
               }
             }
           }
         }
       });
 
-      test.todo(`component ranges are normalized`); // e.g. "0-2,2" => "0-2" or "0-0" => "0"
-      test.todo(`component hanzi have wiki pages`);
+      test(`component index ranges are normalized`, () => {
+        const graphemeData = getData();
+
+        if (graphemeData.mnemonic?.components) {
+          for (const [i, component] of [
+            ...allGraphemeComponents(graphemeData.mnemonic.components),
+          ].entries()) {
+            const normalized = normalizeIndexRanges(component.strokes);
+            expect(
+              component.strokes,
+              `Component ${i} strokes are not normalized`,
+            ).toEqual(normalized);
+          }
+        }
+      });
 
       test(`all strokes are covered by mnemonic components`, async () => {
         const graphemeData = getData();
@@ -140,13 +163,13 @@ describe(`grapheme.json files`, async () => {
           for (const component of allGraphemeComponents(
             graphemeData.mnemonic.components,
           )) {
-            const strokeIndices = parseRanges(component.strokes);
+            const strokeIndices = parseIndexRanges(component.strokes);
             for (const index of strokeIndices) {
               allComponentStrokes.add(index);
             }
           }
 
-          const totalStrokes = graphemeData.strokes.length;
+          const totalStrokes = graphemeStrokeCount(graphemeData);
           const expectedStrokes = Array.from(
             { length: totalStrokes },
             (_, i) => i,
@@ -217,39 +240,4 @@ describe(`grapheme.json files`, async () => {
       });
     });
   }
-});
-
-describe(`parseRanges suite` satisfies HasNameOf<typeof parseRanges>, () => {
-  test(`handles single number`, () => {
-    expect(parseRanges(`5`)).toEqual([5]);
-    expect(parseRanges(`0`)).toEqual([0]);
-    expect(parseRanges(`123`)).toEqual([123]);
-  });
-
-  test(`single range`, () => {
-    expect(parseRanges(`0-2`)).toEqual([0, 1, 2]);
-    expect(parseRanges(`5-7`)).toEqual([5, 6, 7]);
-    expect(parseRanges(`10-10`)).toEqual([10]);
-  });
-
-  test(`comma separated ranges and numbers`, () => {
-    expect(parseRanges(`0-2,5`)).toEqual([0, 1, 2, 5]);
-    expect(parseRanges(`1,3-5,8`)).toEqual([1, 3, 4, 5, 8]);
-    expect(parseRanges(`0,2,4-6`)).toEqual([0, 2, 4, 5, 6]);
-    expect(parseRanges(`10-12,15,20-21`)).toEqual([10, 11, 12, 15, 20, 21]);
-  });
-
-  test(`overlapping ranges and duplicate numbers`, () => {
-    // Overlapping ranges should produce duplicates
-    expect(parseRanges(`0-2,1-3`)).toEqual([0, 1, 2, 1, 2, 3]);
-    expect(parseRanges(`5-7,6-8`)).toEqual([5, 6, 7, 6, 7, 8]);
-
-    // Duplicate individual numbers
-    expect(parseRanges(`1,1,1`)).toEqual([1, 1, 1]);
-    expect(parseRanges(`3,5,3,7`)).toEqual([3, 5, 3, 7]);
-
-    // Mix of overlapping ranges and duplicate numbers
-    expect(parseRanges(`0-2,2,1-3`)).toEqual([0, 1, 2, 2, 1, 2, 3]);
-    expect(parseRanges(`5,5-7,6`)).toEqual([5, 5, 6, 7, 6]);
-  });
 });

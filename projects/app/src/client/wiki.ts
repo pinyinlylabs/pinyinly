@@ -75,7 +75,13 @@ export const graphemeDataSchema = z.object({
    * The hanzi character represented by this grapheme (e.g. 看).
    */
   hanzi: z.string(),
-  strokes: z.array(z.string()),
+  /**
+   * Stroke information, ideally SVG paths but otherwise just the count.
+   */
+  strokes: z.union([
+    z.number().describe(`Stroke count`),
+    z.array(z.string()).describe(`SVG paths for each stroke (in order)`),
+  ]),
   /**
    * The meaning mnemonic for the grapheme. This doesn't necessarily correspond
    * to the etymological components, and their meanings can differ too. It's
@@ -113,6 +119,14 @@ export const graphemeDataSchema = z.object({
 });
 
 export type GraphemeData = z.infer<typeof graphemeDataSchema>;
+
+export function graphemeStrokeCount(
+  graphemeData: DeepReadonly<GraphemeData>,
+): number {
+  return typeof graphemeData.strokes === `number`
+    ? graphemeData.strokes
+    : graphemeData.strokes.length;
+}
 
 export function* allGraphemeComponents(
   graphemeLayout: DeepReadonly<GraphemeComponentLayout>,
@@ -155,27 +169,6 @@ export function getWikiMdxHanziMeaning(
   hanzi: HanziText,
 ): MdxComponentType | undefined {
   return registry[`${hanzi}/meaning`];
-}
-
-/**
- * Parse a comma-separated list of stroke indices (0-based), allowing shorthand
- * ranges (e.g. 0-2,5 is the same as 0,1,2,5).
- */
-export function parseRanges(ranges: string): number[] {
-  const result: number[] = [];
-  for (const part of ranges.split(`,`)) {
-    const rangeMatch = /^(\d+)-(\d+)$/.exec(part);
-    if (rangeMatch) {
-      const start = Number(rangeMatch[1]);
-      const end = Number(rangeMatch[2]);
-      for (let i = start; i <= end; i++) {
-        result.push(i);
-      }
-    } else {
-      result.push(Number(part));
-    }
-  }
-  return result;
 }
 
 export function getWikiMdxHanziWordMeaning(

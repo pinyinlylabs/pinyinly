@@ -4761,10 +4761,12 @@ __metadata:
   dependencies:
     "@pinyinly/eslint-rules": "workspace:*"
     "@types/debug": "npm:^4 <=4.3.x"
+    "@types/lodash": "npm:4.17.x"
     "@types/react": "npm:19.1.x"
     debug: "npm:^4.3.7"
     execa: "npm:^9.6.0"
     glob: "npm:^11.0.0"
+    lodash: "npm:^4.17.21"
     lru-cache: "npm:^11.1.0"
     prettier: "npm:^3.4.2"
     typescript: "patch:typescript@npm%3A5.9.2#~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch"

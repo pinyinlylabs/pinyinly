@@ -4,6 +4,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { readFile, writeFile } from "node:fs/promises";
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { globSync } from "glob";
+import isEqual from "lodash/isEqual.js";
 import { jsonStringifyShallowIndent } from "./json.ts";
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
@@ -52,6 +53,7 @@ export async function writeJsonFileIfChanged(
   return await writeUtf8FileIfChanged(
     path,
     jsonStringifyShallowIndent(content, indentLevels),
+    (a, b) => isEqual(JSON.parse(a), JSON.parse(b)),
   );
 }
 
@@ -87,11 +89,13 @@ export async function updateJsonFileKey(
 export async function writeUtf8FileIfChanged(
   path: string,
   content: string,
+  isEqualFn: (a: string, b: string) => boolean = (a, b) => a === b,
 ): Promise<boolean> {
   const encoding = `utf8`;
 
   const existingContent = await readFile(path, { encoding }).catch(() => null);
-  const hasDiff = existingContent !== content;
+  const hasDiff =
+    existingContent == null || !isEqualFn(existingContent, content);
   if (hasDiff) {
     await writeFile(path, content, { encoding });
   }
@@ -101,13 +105,14 @@ export async function writeUtf8FileIfChanged(
 export function writeUtf8FileIfChangedSync(
   path: string,
   content: string,
+  isEqualFn: (a: string, b: string) => boolean = (a, b) => a === b,
 ): boolean {
   const encoding = `utf8`;
   let hasDiff = true;
 
   try {
     const existingContent = readFileSync(path, { encoding });
-    hasDiff = existingContent !== content;
+    hasDiff = !isEqualFn(existingContent, content);
   } catch {}
 
   if (hasDiff) {
