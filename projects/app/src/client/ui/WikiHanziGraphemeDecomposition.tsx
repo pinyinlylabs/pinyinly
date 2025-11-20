@@ -1,5 +1,6 @@
 import type { GraphemeData } from "@/client/wiki";
-import { allGraphemeComponents, parseRanges } from "@/client/wiki";
+import { allGraphemeComponents } from "@/client/wiki";
+import { parseIndexRanges } from "@/util/indexRanges";
 import { Image } from "expo-image";
 import type { ReactNode } from "react";
 import { Text, View } from "react-native";
@@ -33,7 +34,7 @@ export function WikiHanziGraphemeDecomposition({
                 visualComponent.color,
               )}
               strokesData={graphemeData.strokes}
-              highlightStrokes={parseRanges(visualComponent.strokes)}
+              highlightStrokes={parseIndexRanges(visualComponent.strokes)}
             />
             {visualComponent.hanzi?.split(`,`).map((hanzi, i) => (
               <Text className={visualCharClass()} key={i}>
