@@ -1,11 +1,12 @@
 import { G, Svg } from "react-native-svg";
 import { tv } from "tailwind-variants";
+import z from "zod/v4";
 import { PathCss } from "./svg";
 
 export function HanziGrapheme(props: {
   strokesData: string[];
   highlightStrokes: number[];
-  highlightColor?: `blue` | `yellow` | `amber`;
+  highlightColor?: HanziGraphemeColor;
   className?: string;
 }) {
   const highlightedStrokes = new Set(props.highlightStrokes);
@@ -57,6 +58,16 @@ export function HanziGrapheme(props: {
   );
 }
 
+export const hanziGraphemeColorSchema = z.enum([
+  `blue`,
+  `yellow`,
+  `amber`,
+  `cyanold`,
+  `fg`,
+]);
+
+export type HanziGraphemeColor = z.infer<typeof hanziGraphemeColorSchema>;
+
 const outlineClass = tv({
   base: `fill-bg-loud stroke-fg-loud`,
   variants: {
@@ -64,6 +75,8 @@ const outlineClass = tv({
       blue: `stroke-blue`,
       yellow: `stroke-yellow`,
       amber: `stroke-amber`,
+      cyanold: `stroke-cyanold`,
+      fg: `stroke-fg-loud`,
     },
   },
 });

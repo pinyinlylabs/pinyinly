@@ -1,6 +1,24 @@
 {
-  "hanzi":"坏",
-  "strokes":[
+  "hanzi": "坏",
+  "mnemonic": {
+    "components": [
+      "⿰",
+      {
+        "color": "amber",
+        "hanzi": "土",
+        "label": "the ground",
+        "strokes": "0-2"
+      },
+      { "hanzi": "不", "label": "not", "strokes": "3-6" }
+    ],
+    "stories": [
+      {
+        "gloss": "bad",
+        "story": "If you're growing crops, everything is good is you have good **soil (土)**, but if the soil isn't fertile that's very **bad**."
+      }
+    ]
+  },
+  "strokes": [
     "M 303 510 Q 396 537 400 539 Q 409 548 404 556 Q 397 568 366 574 Q 335 578 305 565 Q 304 565 304 564 L 253 546 Q 178 527 124 518 Q 87 511 114 495 Q 159 471 218 489 Q 234 493 254 497 L 303 510 Z",
     "M 295 313 Q 299 415 303 510 L 304 564 Q 305 639 326 747 Q 330 759 308 775 Q 271 794 244 799 Q 226 802 218 793 Q 211 784 219 768 Q 247 728 248 699 Q 252 626 253 546 L 254 497 Q 254 401 250 296 C 249 266 294 283 295 313 Z",
     "M 250 296 Q 121 251 91 249 Q 78 246 76 236 Q 75 223 85 214 Q 110 199 145 182 Q 155 181 168 190 Q 201 220 359 304 Q 381 316 397 330 Q 410 339 410 349 Q 401 355 295 313 L 250 296 Z",

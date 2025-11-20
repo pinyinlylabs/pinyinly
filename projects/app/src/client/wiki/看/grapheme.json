@@ -1,10 +1,19 @@
 {
-  "hanzi":"看",
-  "mnemonic":{
-    "components":["⿰",{"hanzi":"龵","label":"hand","strokes":"0-3"},{"hanzi":"目","label":"eye","strokes":"4-8"}],
-    "stories":[{"gloss":"see","story":"You need to **look (看)** actively! How do you spot something far away on a sunny day? You use your **Hand (手)** to help your **Eye (目)**. When you shade your forehead or shield your face with your Hand, you can stop squinting and really **SEE!** That's why the Hand is sitting right on top—it’s helping the Eye look intently."}]
+  "hanzi": "看",
+  "mnemonic": {
+    "components": [
+      "⿰",
+      { "hanzi": "龵", "label": "hand", "strokes": "0-3" },
+      { "hanzi": "目", "label": "eye", "strokes": "4-8" }
+    ],
+    "stories": [
+      {
+        "gloss": "see",
+        "story": "You need to **look (看)** actively! How do you spot something far away on a sunny day? You use your **Hand (手)** to help your **Eye (目)**. When you shade your forehead or shield your face with your Hand, you can stop squinting and really **SEE!** That's why the Hand is sitting right on top—it’s helping the Eye look intently."
+      }
+    ]
   },
-  "strokes":[
+  "strokes": [
     "M 493 738 Q 622 771 657 772 Q 675 771 679 777 Q 685 787 674 800 Q 629 848 588 853 Q 581 850 578 839 Q 574 808 393 748 Q 347 735 291 719 Q 284 712 289 708 Q 307 702 428 726 Q 435 727 444 728 L 493 738 Z",
     "M 478 589 Q 554 605 635 618 Q 690 630 698 637 Q 707 644 703 652 Q 696 664 668 672 Q 640 679 610 668 Q 553 650 495 636 L 429 624 Q 377 617 318 611 Q 282 607 307 590 Q 346 563 401 576 Q 407 577 414 577 L 478 589 Z",
     "M 427 456 Q 463 474 691 483 Q 746 486 809 487 Q 890 487 896 497 Q 902 510 884 525 Q 821 568 756 549 Q 650 528 486 500 Q 464 497 442 492 L 380 484 Q 256 468 117 448 Q 95 445 112 427 Q 127 412 146 407 Q 168 401 186 407 Q 271 432 364 447 L 427 456 Z",

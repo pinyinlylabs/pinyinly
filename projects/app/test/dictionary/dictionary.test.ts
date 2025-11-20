@@ -501,11 +501,13 @@ test(`dictionary contains entries for decomposition`, async () => {
     // Couldn't find any standard meaning for this. In most cases this is used
     // at the top and looks like "上", so maybe the decomposition should just
     // pick that instead of going further to "⺊"?
-    [`⺊`, new Set([`上`, `占`, `卤`, `攴`, `桌`, `虍`])],
+    [`⺊`, new Set([`上`, `卓`, `占`, `卤`, `攴`, `桌`, `虍`])],
     // Only 3 cases and isn't visually distinctive in the characters.
-    [`乀`, new Set([`展`, `水`, `辰`])],
+    [`乀`, new Set([`乂`, `展`, `水`, `畏`, `辰`])],
     // Only 3 cases and there doens't seem to be an obvious common meaning.
     [`乛`, new Set([`买`, `了`, `敢`])],
+    [`𠄌`, new Set([`辰`, `展`, `畏`])],
+    [`𠃊`, new Set([`亡`, `断`, `继`])],
   ]);
 
   // There's not much value in learning components that are only used once, so

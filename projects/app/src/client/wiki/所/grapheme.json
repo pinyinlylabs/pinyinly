@@ -1,10 +1,19 @@
 {
-  "hanzi":"所",
-  "mnemonic":{
-    "components":["⿰",{"hanzi":"戶,户","label":"door","strokes":"0-3"},{"hanzi":"斤","label":"resembles an axe","strokes":"4-8"}],
-    "stories":[{"gloss":"place","story":"A true **place** (所) you can call your own is where you’ve put up a **door** to mark your space and keep an axe handy by the entrance for wood, work, and protection. Wherever there’s a **door** and an **axe**, that’s your PLACE (所)."}]
+  "hanzi": "所",
+  "mnemonic": {
+    "components": [
+      "⿰",
+      { "hanzi": "戶,户", "label": "door", "strokes": "0-3" },
+      { "hanzi": "斤", "label": "resembles an axe", "strokes": "4-7" }
+    ],
+    "stories": [
+      {
+        "gloss": "place",
+        "story": "A true **place** (所) you can call your own is where you’ve put up a **door** to mark your space and keep an axe handy by the entrance for wood, work, and protection. Wherever there’s a **door** and an **axe**, that’s your PLACE (所)."
+      }
+    ]
   },
-  "strokes":[
+  "strokes": [
     "M 268 652 Q 442 724 444 725 Q 468 731 461 752 Q 451 771 427 793 Q 405 812 392 812 Q 379 813 380 798 Q 377 768 301 710 Q 277 694 254 675 C 231 656 240 641 268 652 Z",
     "M 257 533 Q 257 539 258 544 Q 261 619 265 639 Q 268 646 268 652 C 271 665 271 665 254 675 Q 203 708 184 698 Q 172 691 180 677 Q 201 653 201 585 Q 201 398 174 294 Q 144 189 81 79 Q 77 72 75 66 Q 74 56 83 58 Q 99 61 131 109 Q 195 188 233 339 L 239 369 Q 248 397 256 506 L 257 533 Z",
     "M 424 399 Q 443 489 469 516 Q 491 541 467 555 Q 406 588 398 586 Q 391 586 384 581 Q 344 553 257 533 C 228 526 226 506 256 506 Q 271 505 292 511 Q 331 523 365 531 Q 387 537 393 527 Q 399 521 376 407 C 370 378 418 370 424 399 Z",

@@ -1,6 +1,25 @@
 {
-  "hanzi":"学",
-  "strokes":[
+  "hanzi": "学",
+  "mnemonic": {
+    "components": [
+      "⿳",
+      { "hanzi": "𭕄", "label": "raised fingers", "strokes": "0-2" },
+      {
+        "color": "yellow",
+        "hanzi": "冖",
+        "label": "a blanket",
+        "strokes": "3-4"
+      },
+      { "color": "blue", "hanzi": "子", "label": "a child", "strokes": "5-7" }
+    ],
+    "stories": [
+      {
+        "gloss": "learn",
+        "story": "A child using their hand to **learn** about the world."
+      }
+    ]
+  },
+  "strokes": [
     "M 311 681 Q 332 656 354 626 Q 364 611 380 610 Q 390 609 397 621 Q 404 634 399 664 Q 395 694 313 727 Q 298 733 292 731 Q 288 728 287 715 Q 288 705 311 681 Z",
     "M 456 744 Q 475 717 495 685 Q 504 672 517 669 Q 526 668 533 677 Q 540 689 539 715 Q 536 745 462 785 Q 450 792 444 791 Q 440 788 438 777 Q 439 767 456 744 Z",
     "M 669 770 Q 642 724 586 650 Q 580 643 587 635 Q 594 634 603 639 Q 700 721 749 752 Q 768 759 763 770 Q 756 786 734 806 Q 712 824 688 825 Q 672 824 674 802 Q 678 787 669 770 Z",

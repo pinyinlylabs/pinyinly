@@ -104,13 +104,18 @@ rizzleTest(
       ),
     };
 
-    expect(prettyQueue(blockedQueue).slice(0, 5)).toMatchInlineSnapshot(`
+    expect(prettyQueue(blockedQueue).slice(0, 10)).toMatchInlineSnapshot(`
       [
         "he:𠂇:hand (🟥 BLOCKED)",
         "he:𠂉:knife (🟥 BLOCKED)",
-        "he:乚:hidden (🟥 BLOCKED)",
         "he:𠂊:hands (🟥 BLOCKED)",
         "he:𭕄:radical (🟥 BLOCKED)",
+        "he:丷:earsOut (🟥 BLOCKED)",
+        "he:𠃌:radical (🟥 BLOCKED)",
+        "he:丨:line (🟥 BLOCKED)",
+        "he:丶:dot (🟥 BLOCKED)",
+        "he:亅:hook (🟥 BLOCKED)",
+        "he:丿:slash (🟥 BLOCKED)",
       ]
     `);
 
