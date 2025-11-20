@@ -184,6 +184,9 @@ describe(`grapheme.json files`, async () => {
         if (graphemeData.mnemonic?.components) {
           const bannedCharacters = new Set();
 
+          // Don't self-reference
+          bannedCharacters.add(graphemeData.hanzi);
+
           // Only allow characters that have a glyph.
           for (const missingGlyph of await loadMissingFontGlyphs()) {
             bannedCharacters.add(missingGlyph);
