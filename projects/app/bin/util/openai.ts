@@ -57,7 +57,7 @@ export function makeSimpleAiClient(dbCache: DbCache) {
     docs: string[],
     userMessage: string,
     schema: Schema,
-    model = `o3`,
+    model = `gpt-5`,
   ): Promise<z.infer<Schema>> {
     const rawJson = await openAiWithCache(
       {

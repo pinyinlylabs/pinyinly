@@ -4,16 +4,16 @@
     "components": [
       "⿰",
       {
+        "color": "blue",
         "hanzi": "礻",
         "label": "person praying",
-        "strokes": "0-3",
-        "color": "blue"
+        "strokes": "0-3"
       },
       {
+        "color": "yellow",
         "hanzi": "畐",
         "label": "basket in a crop field",
-        "strokes": "4-12",
-        "color": "yellow"
+        "strokes": "4-12"
       }
     ],
     "stories": [

@@ -3,12 +3,12 @@
   "mnemonic": {
     "components": [
       "⿰",
-      { "hanzi": "厂", "label": "cliff", "strokes": "0-1", "color": "yellow" },
+      { "color": "yellow", "hanzi": "厂", "label": "cliff", "strokes": "0-1" },
       {
+        "color": "cyanold",
         "hanzi": "泉",
         "label": "waterfall",
-        "strokes": "2-9",
-        "color": "cyanold"
+        "strokes": "2-9"
       }
     ],
     "stories": [

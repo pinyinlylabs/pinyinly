@@ -2,9 +2,8 @@ import type {
   PinyinPronunciation,
   PinyinPronunciationSpaceSeparated,
 } from "#data/model.ts";
-import { rPinyinPronunciation } from "#data/rizzleSchema.ts";
+import { rPinyinPronunciation } from "#data/rizzleSchema.js";
 import {
-  emptyArray,
   inverseSortComparator,
   memoize0,
   sortComparatorNumber,
@@ -201,43 +200,20 @@ export const dongChineseSchema = z
 
 export type DongChineseRecord = z.infer<typeof dongChineseSchema>;
 
-export function getDongChinesePinyin(
-  record: DongChineseRecord,
-): PinyinPronunciation[] | null | undefined {
-  let result: PinyinPronunciationSpaceSeparated[] | undefined;
-
-  const useCountComparator =
-    record.pinyinFrequencies?.some((x) => `count` in x) ?? false;
-  const useFrequencyComparator =
-    record.pinyinFrequencies?.some((x) => `frequency` in x) ?? false;
-
-  for (const x of record.pinyinFrequencies?.sort(
-    useCountComparator
-      ? inverseSortComparator(
-          sortComparatorNumber(
-            (x) => x.count ?? record.pinyinFrequencies?.indexOf(x) ?? 0,
-          ),
-        )
-      : useFrequencyComparator
-        ? sortComparatorNumber(
-            (x) => x.frequency ?? record.pinyinFrequencies?.indexOf(x) ?? 0,
-          )
-        : sortComparatorNumber(() => 0),
-  ) ?? emptyArray) {
-    (result ??= []).push(x.pinyin as PinyinPronunciationSpaceSeparated);
-  }
-
-  if (result == null) {
-    for (const x of record.oldPronunciations ?? emptyArray) {
-      const pinyin = x.pinyin as PinyinPronunciationSpaceSeparated | undefined;
-      // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
-      if (pinyin != null && (result == null || !result.includes(pinyin))) {
-        (result ??= []).push(pinyin);
-      }
-    }
-  }
-
-  return result?.map((x) => rPinyinPronunciation().unmarshal(x));
+export function getDongChinesePronunciation(
+  lookup: z.infer<typeof dongChineseSchema>,
+): PinyinPronunciation[] | undefined {
+  return lookup.pinyinFrequencies
+    ?.sort(
+      inverseSortComparator(
+        sortComparatorNumber((x) => x.frequency ?? x.count ?? 0),
+      ),
+    )
+    .map((x) =>
+      rPinyinPronunciation().unmarshal(
+        x.pinyin as PinyinPronunciationSpaceSeparated,
+      ),
+    );
 }
 
 function cleanGloss(gloss: string): string {

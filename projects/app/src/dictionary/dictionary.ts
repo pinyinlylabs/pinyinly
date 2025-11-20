@@ -1,9 +1,4 @@
-import {
-  isHanziGrapheme,
-  parseIds,
-  splitHanziText,
-  walkIdsNode,
-} from "@/data/hanzi";
+import { parseIds, splitHanziText, walkIdsNode } from "@/data/hanzi";
 import type {
   HanziGrapheme,
   HanziText,
@@ -406,28 +401,13 @@ export const lookupHanziWikiEntry = async (
 export const lookupRadicalsByStrokes = async (strokes: number) =>
   await loadRadicalStrokes().then((x) => x.get(strokes) ?? null);
 
-export const allHanziWordsHanzi = memoize0(async function allHanziWordsHanzi() {
-  return new Set(
-    [
-      ...(await allRadicalHanziWords()),
-      ...(await allHsk1HanziWords()),
-      ...(await allHsk2HanziWords()),
-      ...(await allHsk3HanziWords()),
-    ].map((x) => hanziFromHanziWord(x)),
-  );
-});
-
-export const allOneSyllableHanzi = memoize0(
-  async function allOneSyllableHanzi() {
-    return new Set<HanziGrapheme>(
+export const allHanziWordsHanzi = memoize0(
+  async function allHanziWordsHanzi2() {
+    return new Set<HanziText>(
       [
         ...(await allRadicalHanziWords()),
-        ...(await allHsk1HanziWords()),
-        ...(await allHsk2HanziWords()),
-        ...(await allHsk3HanziWords()),
-      ]
-        .map((x) => hanziFromHanziWord(x))
-        .filter((x) => isHanziGrapheme(x)) as unknown as HanziGrapheme[],
+        ...(await loadDictionary().then((x) => [...x.keys()])),
+      ].map((x) => hanziFromHanziWord(x)),
     );
   },
 );
@@ -625,8 +605,8 @@ export const allPronunciationsForHanzi = memoize1(
   },
 );
 
-export const allOneSyllablePronunciationsForHanzi = memoize1(
-  async function allOneSyllablePronunciationsForHanzi(
+export const allHanziGraphemePronunciationsForHanzi = memoize1(
+  async function allHanziGraphemePronunciationsForHanzi(
     hanzi: HanziText,
   ): Promise<Set<PinyinSyllable>> {
     const hanziWordMeanings = await lookupHanzi(hanzi);
@@ -678,18 +658,17 @@ export function unparseDictionary(
   dict: Dictionary,
 ): z.input<typeof dictionarySchema> {
   return [...dict.entries()]
-    .map(([hanziWord, meaning]): z.input<typeof dictionarySchema>[number] => [
-      hanziWord,
-      {
-        gloss: meaning.gloss,
-        pinyin:
-          meaning.pinyin?.map((p) => rPinyinPronunciation().marshal(p)) ??
-          undefined,
-        partOfSpeech: meaning.partOfSpeech,
-        componentFormOf: meaning.componentFormOf ?? undefined,
-        visualVariants: meaning.visualVariants ?? undefined,
-      } satisfies z.input<typeof hanziWordMeaningSchema>,
-    ])
+    .map(([hanziWord, meaning]): z.input<typeof dictionarySchema>[number] => {
+      return [
+        hanziWord,
+        {
+          ...meaning,
+          pinyin:
+            meaning.pinyin?.map((p) => rPinyinPronunciation().marshal(p)) ??
+            undefined,
+        } satisfies z.input<typeof hanziWordMeaningSchema>,
+      ];
+    })
     .sort(sortComparatorString((x) => x[0]));
 }
 

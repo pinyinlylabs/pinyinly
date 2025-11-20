@@ -4,10 +4,10 @@
     "components": [
       "⿰",
       {
+        "color": "amber",
         "hanzi": "土",
         "label": "the ground",
-        "strokes": "0-2",
-        "color": "amber"
+        "strokes": "0-2"
       },
       { "hanzi": "不", "label": "not", "strokes": "3-6" }
     ],

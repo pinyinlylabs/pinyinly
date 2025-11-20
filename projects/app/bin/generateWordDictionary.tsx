@@ -76,7 +76,7 @@ import {
   dongChineseData,
   getDongChineseGloss,
   getDongChineseMeaningKey,
-  getDongChinesePinyin,
+  getDongChinesePronunciation,
 } from "./util/dongChinese.js";
 import { dictionaryPath, readFileWithSchema } from "./util/fs.js";
 import { makeSimpleAiClient } from "./util/openai.js";
@@ -1390,8 +1390,8 @@ const DongChineseHanziEntry = ({ hanzi }: { hanzi: string }) => {
             <Text dimColor>pinyin:</Text>
             {` `}
             <SemiColonList
-              items={(getDongChinesePinyin(lookup) ?? emptyArray).map((x) =>
-                pinyinPronunciationDisplayText(x),
+              items={(getDongChinesePronunciation(lookup) ?? emptyArray).map(
+                (x) => pinyinPronunciationDisplayText(x),
               )}
             />
           </Text>
@@ -1621,7 +1621,7 @@ async function generateHanziWordResults(
           hanziWord,
           meaning: {
             gloss,
-            pinyin: getDongChinesePinyin(lookup),
+            pinyin: getDongChinesePronunciation(lookup),
           },
         });
 
@@ -1638,7 +1638,7 @@ async function generateHanziWordResults(
             hanziWord,
             meaning: {
               gloss,
-              pinyin: getDongChinesePinyin(lookup),
+              pinyin: getDongChinesePronunciation(lookup),
               partOfSpeech: openAiResult.meaning.partOfSpeech,
             },
           });

@@ -1,3 +1,4 @@
+import type { GraphemeData } from "#client/wiki.js";
 import {
   allGraphemeComponents,
   graphemeDataSchema,
@@ -7,9 +8,14 @@ import type { HanziText } from "#data/model.js";
 import { loadMissingFontGlyphs, lookupHanzi } from "#dictionary/dictionary.js";
 import { IS_CI } from "#util/env.js";
 import { createSpeechFileTests } from "@pinyinly/audio-sprites/testing";
-import { memoize0 } from "@pinyinly/lib/collections";
-import { glob, readFileSync } from "@pinyinly/lib/fs";
-import { uniqueInvariant } from "@pinyinly/lib/invariant";
+import { deepReadonly, memoize1 } from "@pinyinly/lib/collections";
+import {
+  existsSync,
+  glob,
+  readFileSync,
+  writeFileSync,
+} from "@pinyinly/lib/fs";
+import { nonNullable, uniqueInvariant } from "@pinyinly/lib/invariant";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
 import { projectRoot } from "../helpers.ts";
@@ -28,18 +34,29 @@ describe(`grapheme.json files`, async () => {
   const graphemeFilePaths = await glob(path.join(wikiDir, `**/grapheme.json`));
   expect(graphemeFilePaths.length).toBeGreaterThan(0);
 
+  const getDataForGrapheme = memoize1(
+    (grapheme: string): GraphemeData | undefined => {
+      const filePath = path.join(wikiDir, grapheme, `grapheme.json`);
+      if (existsSync(filePath)) {
+        const json = JSON.parse(readFileSync(filePath, `utf-8`));
+        return graphemeDataSchema.parse(json);
+      }
+    },
+  );
+
   for (const filePath of graphemeFilePaths) {
+    const grapheme = path.basename(path.dirname(filePath));
     const projectRelPath = path.relative(projectRoot, filePath);
-    const getJson = memoize0(() => JSON.parse(readFileSync(filePath, `utf-8`)));
-    const getParsedJson = memoize0(() => graphemeDataSchema.parse(getJson()));
+    const getData = () =>
+      deepReadonly(nonNullable(getDataForGrapheme(grapheme)));
 
     describe(projectRelPath, () => {
       test(`adheres to schema`, async () => {
-        getParsedJson();
+        getData();
       });
 
       test(`no duplicate stroke indicies in components (e.g. ❌ 0-3,2)`, async () => {
-        const graphemeData = getParsedJson();
+        const graphemeData = getData();
 
         if (graphemeData.mnemonic?.components) {
           for (const component of allGraphemeComponents(
@@ -51,8 +68,72 @@ describe(`grapheme.json files`, async () => {
         }
       });
 
+      test(`mnemonic component strokes match the hanzi stroke count`, async () => {
+        const graphemeData = getData();
+
+        if (graphemeData.mnemonic?.components) {
+          for (const [i, component] of [
+            ...allGraphemeComponents(graphemeData.mnemonic.components),
+          ].entries()) {
+            if (component.hanzi != null) {
+              const hanziData = getDataForGrapheme(component.hanzi);
+              if (hanziData != null) {
+                const claimedStrokeCount = parseRanges(
+                  component.strokes,
+                ).length;
+                const expectedStrokeCount =
+                  hanziData.strokes.length + (component.strokeDiff ?? 0);
+
+                // Update in-place
+                if (claimedStrokeCount !== expectedStrokeCount) {
+                  const newGraphemeData = structuredClone(graphemeData);
+                  const newComponents = allGraphemeComponents(
+                    newGraphemeData.mnemonic!.components,
+                  ).toArray();
+                  const newComponent = nonNullable(newComponents[i]);
+                  if (i === newComponents.length - 1) {
+                    newComponent.strokes = `${graphemeData.strokes.length - expectedStrokeCount}-${graphemeData.strokes.length - 1}`;
+                  } else if (i === 0 || i === 1) {
+                    const startIndex =
+                      Math.max(
+                        -1,
+                        ...newComponents
+                          .slice(0, i)
+                          .flatMap((c) => parseRanges(c.strokes))
+                          .flat(),
+                      ) + 1;
+                    newComponent.strokes = `${startIndex}-${startIndex + expectedStrokeCount - 1}`;
+                  } else {
+                    console.warn(
+                      `Cannot auto-fix component strokes for component ${i} in ${grapheme} mnemonic`,
+                    );
+                  }
+                  if (!IS_CI) {
+                    console.warn(
+                      `Auto-fixing component strokes for ${grapheme} mnemonic`,
+                    );
+                    writeFileSync(
+                      filePath,
+                      JSON.stringify(newGraphemeData, null, 2),
+                    );
+                  }
+                }
+
+                expect(
+                  claimedStrokeCount,
+                  `${component.hanzi} stroke count does not match wiki data`,
+                ).toBe(expectedStrokeCount);
+              }
+            }
+          }
+        }
+      });
+
+      test.todo(`component ranges are normalized`); // e.g. "0-2,2" => "0-2" or "0-0" => "0"
+      test.todo(`component hanzi have wiki pages`);
+
       test(`all strokes are covered by mnemonic components`, async () => {
-        const graphemeData = getParsedJson();
+        const graphemeData = getData();
 
         if (graphemeData.mnemonic?.components) {
           const allComponentStrokes = new Set<number>();
@@ -81,7 +162,7 @@ describe(`grapheme.json files`, async () => {
       });
 
       test(`number of mnemonic stories matches number of meanings for hanzi`, async () => {
-        const graphemeData = getParsedJson();
+        const graphemeData = getData();
 
         if (graphemeData.mnemonic?.stories) {
           const hanzi = graphemeData.hanzi as HanziText;
@@ -98,7 +179,7 @@ describe(`grapheme.json files`, async () => {
       });
 
       test(`components do not use invalid "hanzi" strings`, async () => {
-        const graphemeData = getParsedJson();
+        const graphemeData = getData();
 
         if (graphemeData.mnemonic?.components) {
           const bannedCharacters = new Set();

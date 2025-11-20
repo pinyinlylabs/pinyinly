@@ -2,6 +2,7 @@ import type { MdxComponentType } from "@/client/ui/mdx";
 import type { HanziText, HanziWord } from "@/data/model";
 import { devToolsSlowQuerySleepIfEnabled } from "@/util/devtools";
 import { lazy } from "react";
+import type { DeepReadonly } from "ts-essentials";
 import z from "zod/v4";
 
 const graphemeComponentSchema = z.object({
@@ -18,6 +19,12 @@ const graphemeComponentSchema = z.object({
    * 0,1,2,5).
    */
   strokes: z.string(),
+  /**
+   * When the component uses a different number of strokes than `hanzi` it's
+   * normally marked as a bug. However in cases when it's intentional (e.g. 禸)
+   * this field can be used to specify the different in stroke count.
+   */
+  strokeDiff: z.number().optional(),
   /**
    * What color to render this component in the decomposition illustration. This
    * allows highlighting different components in different colors for clarity.
@@ -108,7 +115,7 @@ export const graphemeDataSchema = z.object({
 export type GraphemeData = z.infer<typeof graphemeDataSchema>;
 
 export function* allGraphemeComponents(
-  graphemeLayout: GraphemeComponentLayout,
+  graphemeLayout: DeepReadonly<GraphemeComponentLayout>,
 ): Generator<GraphemeComponent> {
   const operator = graphemeLayout[0];
   switch (operator) {
