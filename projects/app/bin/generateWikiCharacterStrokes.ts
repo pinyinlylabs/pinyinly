@@ -1,6 +1,6 @@
 import { allHanziGraphemes } from "#dictionary/dictionary.js";
 import { memoize0 } from "@pinyinly/lib/collections";
-import { existsSync, updateJsonFileKey } from "@pinyinly/lib/fs";
+import { existsSync, mkdirSync, updateJsonFileKey } from "@pinyinly/lib/fs";
 import { invariant } from "@pinyinly/lib/invariant";
 import makeDebug from "debug";
 import path from "node:path";
@@ -82,18 +82,27 @@ for (const grapheme of allGraphemes) {
 
   const graphics = await graphicsData();
   const record = graphics.lookupChar(grapheme);
+
+  const graphemeWikiDir = path.join(wikiDir, grapheme);
+  if (!existsSync(graphemeWikiDir)) {
+    mkdirSync(graphemeWikiDir);
+  }
+
+  const dataFile = path.join(graphemeWikiDir, `grapheme.json`);
+  const indentLevels = 2;
+
+  if (await updateJsonFileKey(dataFile, `hanzi`, grapheme, indentLevels)) {
+    debug(`wrote hanzi for %O`, grapheme);
+  }
+
   if (record == null) {
     debug(`no graphics data for %O`, grapheme);
     continue;
+  } else {
+    if (
+      await updateJsonFileKey(dataFile, `strokes`, record.strokes, indentLevels)
+    ) {
+      debug(`wrote strokes for %O`, grapheme);
+    }
   }
-
-  const graphemeWikiDir = path.join(wikiDir, grapheme);
-  invariant(
-    existsSync(graphemeWikiDir),
-    `directory does not exist: ${graphemeWikiDir}`,
-  );
-  const dataFile = path.join(graphemeWikiDir, `grapheme.json`);
-  const indentLevels = 2;
-  await updateJsonFileKey(dataFile, `hanzi`, grapheme, indentLevels);
-  await updateJsonFileKey(dataFile, `strokes`, record.strokes, indentLevels);
 }

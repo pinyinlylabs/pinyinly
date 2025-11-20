@@ -2,8 +2,10 @@ import type { GraphemeData } from "#client/wiki.js";
 import {
   allGraphemeComponents,
   graphemeDataSchema,
+  graphemeStrokeCount,
   parseRanges,
 } from "#client/wiki.js";
+import { isHanziGrapheme } from "#data/hanzi.js";
 import type { HanziText } from "#data/model.js";
 import { loadMissingFontGlyphs, lookupHanzi } from "#dictionary/dictionary.js";
 import { IS_CI } from "#util/env.js";
@@ -13,7 +15,7 @@ import {
   existsSync,
   glob,
   readFileSync,
-  writeFileSync,
+  writeJsonFileIfChanged,
 } from "@pinyinly/lib/fs";
 import { nonNullable, uniqueInvariant } from "@pinyinly/lib/invariant";
 import path from "node:path";
@@ -31,7 +33,15 @@ describe(`speech files`, async () => {
 });
 
 describe(`grapheme.json files`, async () => {
-  const graphemeFilePaths = await glob(path.join(wikiDir, `**/grapheme.json`));
+  // For every grapheme wiki directory, there should be a grapheme.json file.
+  const graphemeFilePaths = await glob(path.join(wikiDir, `*/`)).then(
+    (dirPaths) =>
+      dirPaths
+        .filter((dirPath) =>
+          isHanziGrapheme(path.basename(dirPath) as HanziText),
+        )
+        .map((dirPath) => path.join(dirPath, `grapheme.json`)),
+  );
   expect(graphemeFilePaths.length).toBeGreaterThan(0);
 
   const getDataForGrapheme = memoize1(
@@ -82,9 +92,9 @@ describe(`grapheme.json files`, async () => {
                   component.strokes,
                 ).length;
                 const expectedStrokeCount =
-                  hanziData.strokes.length + (component.strokeDiff ?? 0);
+                  graphemeStrokeCount(hanziData) + (component.strokeDiff ?? 0);
 
-                // Update in-place
+                // AUTO-FIXER CODE
                 if (claimedStrokeCount !== expectedStrokeCount) {
                   const newGraphemeData = structuredClone(graphemeData);
                   const newComponents = allGraphemeComponents(
@@ -92,7 +102,7 @@ describe(`grapheme.json files`, async () => {
                   ).toArray();
                   const newComponent = nonNullable(newComponents[i]);
                   if (i === newComponents.length - 1) {
-                    newComponent.strokes = `${graphemeData.strokes.length - expectedStrokeCount}-${graphemeData.strokes.length - 1}`;
+                    newComponent.strokes = `${graphemeStrokeCount(graphemeData) - expectedStrokeCount}-${graphemeStrokeCount(graphemeData) - 1}`;
                   } else if (i === 0 || i === 1) {
                     const startIndex =
                       Math.max(
@@ -109,12 +119,9 @@ describe(`grapheme.json files`, async () => {
                     );
                   }
                   if (!IS_CI) {
-                    console.warn(
-                      `Auto-fixing component strokes for ${grapheme} mnemonic`,
-                    );
-                    writeFileSync(
-                      filePath,
-                      JSON.stringify(newGraphemeData, null, 2),
+                    await writeJsonFileIfChanged(filePath, newGraphemeData);
+                    throw new Error(
+                      `Auto-fixed component strokes for ${grapheme} mnemonic - please re-run tests`,
                     );
                   }
                 }
@@ -122,7 +129,7 @@ describe(`grapheme.json files`, async () => {
                 expect(
                   claimedStrokeCount,
                   `${component.hanzi} stroke count does not match wiki data`,
-                ).toBe(expectedStrokeCount);
+                ).toEqual(expectedStrokeCount);
               }
             }
           }
@@ -146,7 +153,7 @@ describe(`grapheme.json files`, async () => {
             }
           }
 
-          const totalStrokes = graphemeData.strokes.length;
+          const totalStrokes = graphemeStrokeCount(graphemeData);
           const expectedStrokes = Array.from(
             { length: totalStrokes },
             (_, i) => i,

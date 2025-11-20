@@ -75,7 +75,13 @@ export const graphemeDataSchema = z.object({
    * The hanzi character represented by this grapheme (e.g. 看).
    */
   hanzi: z.string(),
-  strokes: z.array(z.string()),
+  /**
+   * Stroke information, ideally SVG paths but otherwise just the count.
+   */
+  strokes: z.union([
+    z.number().describe(`Stroke count`),
+    z.array(z.string()).describe(`SVG paths for each stroke (in order)`),
+  ]),
   /**
    * The meaning mnemonic for the grapheme. This doesn't necessarily correspond
    * to the etymological components, and their meanings can differ too. It's
@@ -113,6 +119,14 @@ export const graphemeDataSchema = z.object({
 });
 
 export type GraphemeData = z.infer<typeof graphemeDataSchema>;
+
+export function graphemeStrokeCount(
+  graphemeData: DeepReadonly<GraphemeData>,
+): number {
+  return typeof graphemeData.strokes === `number`
+    ? graphemeData.strokes
+    : graphemeData.strokes.length;
+}
 
 export function* allGraphemeComponents(
   graphemeLayout: DeepReadonly<GraphemeComponentLayout>,

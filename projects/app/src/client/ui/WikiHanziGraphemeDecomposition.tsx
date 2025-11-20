@@ -20,7 +20,7 @@ export function WikiHanziGraphemeDecomposition({
 }: WikiHanziGraphemeDecompositionProps) {
   const componentsElements: ReactNode[] = [];
 
-  if (graphemeData.mnemonic) {
+  if (graphemeData.mnemonic && Array.isArray(graphemeData.strokes)) {
     for (const [i, visualComponent] of [
       ...allGraphemeComponents(graphemeData.mnemonic.components),
     ].entries()) {
