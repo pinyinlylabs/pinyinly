@@ -26,7 +26,7 @@ import {
 import {
   allHsk1HanziWords,
   allHsk2HanziWords,
-  getIsStructuralHanziWord,
+  getIsStructuralHanzi,
   hanziFromHanziWord,
   loadPinyinSoundNameSuggestions,
   lookupHanzi,
@@ -98,12 +98,12 @@ export const targetSkillsQuery = () =>
     structuralSharing: false,
   });
 
-export const isStructuralHanziWordQuery = queryOptions({
-  queryKey: [`isStructuralHanziWord`],
+export const isStructuralHanziQuery = queryOptions({
+  queryKey: [`isStructuralHanzi`],
   queryFn: async () => {
     await devToolsSlowQuerySleepIfEnabled();
 
-    return await getIsStructuralHanziWord();
+    return await getIsStructuralHanzi();
   },
   networkMode: `offlineFirst`,
   structuralSharing: false,

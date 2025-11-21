@@ -1,6 +1,6 @@
 import { useDb } from "@/client/hooks/useDb";
 import {
-  isStructuralHanziWordQuery,
+  isStructuralHanziQuery,
   skillLearningGraphQuery,
 } from "@/client/query";
 import type { SrsStateType } from "@/data/model";
@@ -48,10 +48,8 @@ export const SkillQueueProvider = Object.assign(
 
     const { data: skillLearningGraph, isLoading: isSkillLearningGraphLoading } =
       useQuery(skillLearningGraphQuery);
-    const {
-      data: isStructuralHanziWord,
-      isLoading: isStructuralHanziWordsLoading,
-    } = useQuery(isStructuralHanziWordQuery);
+    const { data: isStructuralHanzi, isLoading: isStructuralHanziLoading } =
+      useQuery(isStructuralHanziQuery);
     const {
       data: latestSkillRatingsData,
       isLoading: isLatestSkillRatingsLoading,
@@ -80,12 +78,12 @@ export const SkillQueueProvider = Object.assign(
         isLatestSkillRatingsLoading ||
         isSkillStatesLoading ||
         isSkillLearningGraphLoading ||
-        isStructuralHanziWordsLoading
+        isStructuralHanziLoading
       ) {
         return;
       }
 
-      if (skillLearningGraph == null || isStructuralHanziWord == null) {
+      if (skillLearningGraph == null || isStructuralHanzi == null) {
         return;
       }
 
@@ -95,7 +93,7 @@ export const SkillQueueProvider = Object.assign(
         skillSrsStates,
         latestSkillRatings,
         now: new Date(),
-        isStructuralHanziWord,
+        isStructuralHanzi,
         maxQueueItems: mockable.getMaxQueueItems(),
       });
 
@@ -106,8 +104,8 @@ export const SkillQueueProvider = Object.assign(
       }));
     }, [
       isSkillLearningGraphLoading,
-      isStructuralHanziWord,
-      isStructuralHanziWordsLoading,
+      isStructuralHanzi,
+      isStructuralHanziLoading,
       latestSkillRatingsData,
       isLatestSkillRatingsLoading,
       skillLearningGraph,

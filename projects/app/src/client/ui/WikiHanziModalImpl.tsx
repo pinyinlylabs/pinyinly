@@ -9,7 +9,8 @@ import {
 import type { HanziText, PinyinSoundId, PinyinSyllable } from "@/data/model";
 import { parsePinyinSyllable } from "@/data/pinyin";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import React, { Fragment, useState } from "react";
+import type { ReactNode } from "react";
+import { Fragment, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useIntersectionObserver } from "usehooks-ts";
 import { IconImage } from "./IconImage";
@@ -192,14 +193,9 @@ function PronunciationMnemonicSection({
                     {parsedPinyin.initialSoundId}
                   </Text>
                   {initialPinyinSound == null ? null : (
-                    <>
-                      <DownArrow />
-                      <Text className="pyly-body">
-                        <Text className="pyly-ref">
-                          {initialPinyinSound.name}
-                        </Text>
-                      </Text>
-                    </>
+                    <ArrowToSoundName>
+                      {initialPinyinSound.name}
+                    </ArrowToSoundName>
                   )}
                 </View>
                 <View className="flex-1 items-center gap-1 border-fg/10">
@@ -207,14 +203,7 @@ function PronunciationMnemonicSection({
                     {parsedPinyin.finalSoundId}
                   </Text>
                   {finalPinyinSound == null ? null : (
-                    <>
-                      <DownArrow />
-                      <Text className="pyly-body">
-                        <Text className="pyly-ref">
-                          {finalPinyinSound.name}
-                        </Text>
-                      </Text>
-                    </>
+                    <ArrowToSoundName>{finalPinyinSound.name}</ArrowToSoundName>
                   )}
                 </View>
                 <View className="flex-1 items-center gap-1 border-fg/10">
@@ -225,12 +214,7 @@ function PronunciationMnemonicSection({
                     </Text>
                   </Text>
                   {tonePinyinSound == null ? null : (
-                    <>
-                      <DownArrow />
-                      <Text className="pyly-body">
-                        <Text className="pyly-ref">{tonePinyinSound.name}</Text>
-                      </Text>
-                    </>
+                    <ArrowToSoundName>{tonePinyinSound.name}</ArrowToSoundName>
                   )}
                 </View>
               </View>
@@ -254,6 +238,15 @@ function PronunciationMnemonicSection({
         ) : null}
       </View>
     </View>
+  );
+}
+
+function ArrowToSoundName({ children }: { children: ReactNode }) {
+  return (
+    <>
+      <DownArrow />
+      <Text className="pyly-body pyly-ref text-center">{children}</Text>
+    </>
   );
 }
 
@@ -358,7 +351,7 @@ function ExpandableSection({
   children,
 }: {
   title: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }) {
   const [expanded, setExpanded] = useState(false);
   const titleElement = <Text className="pyly-body-heading">{title}</Text>;

@@ -671,14 +671,14 @@ export function skillReviewQueue({
   graph,
   skillSrsStates,
   latestSkillRatings,
-  isStructuralHanziWord,
+  isStructuralHanzi,
   now = new Date(),
   maxQueueItems = Infinity,
 }: {
   graph: SkillLearningGraph;
   skillSrsStates: ReadonlyMap<Skill, SrsStateType>;
   latestSkillRatings: ReadonlyMap<Skill, LatestSkillRating>;
-  isStructuralHanziWord: (hanziWord: HanziWord) => boolean;
+  isStructuralHanzi: (hanzi: HanziText) => boolean;
   now?: Date;
   maxQueueItems?: number;
 }): SkillReviewQueue {
@@ -840,7 +840,7 @@ export function skillReviewQueue({
   for (const skill of learningOrderNewCandidates) {
     if (
       isHanziWordSkill(skill) &&
-      isStructuralHanziWord(hanziWordFromSkill(skill))
+      isStructuralHanzi(hanziFromHanziWord(hanziWordFromSkill(skill)))
     ) {
       learningOrderNewComponentCandidates.push(skill);
     } else {

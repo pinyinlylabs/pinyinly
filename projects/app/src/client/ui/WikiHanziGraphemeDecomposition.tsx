@@ -42,7 +42,7 @@ export function WikiHanziGraphemeDecomposition({
               </Text>
             ))}
           </View>
-          <Text className="pyly-body">{visualComponent.label}</Text>
+          <Text className="pyly-body text-center">{visualComponent.label}</Text>
         </View>,
       );
     }
