@@ -3,8 +3,8 @@
   "mnemonic": {
     "components": [
       "⿱",
-      { "hanzi": "㐫", "strokes": "0-4" },
-      { "hanzi": "禸", "strokes": "5-9" }
+      { "hanzi": "㐫", "strokes": "0-5" },
+      { "hanzi": "禸", "strokes": "6-9", "strokeDiff": -1 }
     ]
   },
   "strokes": [

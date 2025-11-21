@@ -7,6 +7,7 @@ import {
 import { isHanziGrapheme } from "#data/hanzi.js";
 import type { HanziText } from "#data/model.js";
 import {
+  getIsComponentFormHanzi,
   getIsStructuralHanzi,
   loadMissingFontGlyphs,
   lookupHanzi,
@@ -21,7 +22,11 @@ import {
   readFileSync,
   writeJsonFileIfChanged,
 } from "@pinyinly/lib/fs";
-import { nonNullable, uniqueInvariant } from "@pinyinly/lib/invariant";
+import {
+  invariant,
+  nonNullable,
+  uniqueInvariant,
+} from "@pinyinly/lib/invariant";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
 import { projectRoot } from "../helpers.ts";
@@ -42,18 +47,20 @@ describe(`/meaning.mdx files`, async () => {
   );
   expect(meaningFilePaths.length).toBeGreaterThan(0);
   const isStructuralHanzi = await getIsStructuralHanzi();
+  const isComponentFormHanzi = await getIsComponentFormHanzi();
 
   for (const filePath of meaningFilePaths) {
     const hanzi = path.basename(path.dirname(filePath)) as HanziText;
     const isGrapheme = isHanziGrapheme(hanzi);
     const isStructuralGrapheme = isStructuralHanzi(hanzi);
+    const isComponentFormGrapheme = isComponentFormHanzi(hanzi);
     const projectRelPath = path.relative(projectRoot, filePath);
     const hasMdx = memoize0(() => existsSync(filePath));
     const getMdx = memoize0(() => readFileSync(filePath, `utf-8`));
 
     describe(projectRelPath, () => {
       test(`existence`, () => {
-        if (isGrapheme && !isStructuralGrapheme) {
+        if (isGrapheme && !isStructuralGrapheme && !isComponentFormGrapheme) {
           expect(hasMdx()).toBeTruthy();
         }
       });
@@ -127,55 +134,58 @@ describe(`grapheme.json files`, async () => {
           for (const [i, component] of [
             ...allGraphemeComponents(graphemeData.mnemonic.components),
           ].entries()) {
-            if (component.hanzi != null) {
-              const hanziData = getDataForGrapheme(component.hanzi);
-              if (hanziData != null) {
-                const claimedStrokeCount = parseIndexRanges(
-                  component.strokes,
-                ).length;
-                const expectedStrokeCount =
-                  graphemeStrokeCount(hanziData) + (component.strokeDiff ?? 0);
+            const primaryHanzi = component.hanzi?.split(`,`)[0];
+            if (primaryHanzi != null) {
+              const hanziData = getDataForGrapheme(primaryHanzi);
+              invariant(
+                hanziData,
+                `wiki grapheme.json missing for ${primaryHanzi}`,
+              );
+              const claimedStrokeCount = parseIndexRanges(
+                component.strokes,
+              ).length;
+              const expectedStrokeCount =
+                graphemeStrokeCount(hanziData) + (component.strokeDiff ?? 0);
 
-                // AUTO-FIXER CODE
-                if (claimedStrokeCount !== expectedStrokeCount) {
-                  const newGraphemeData = structuredClone(graphemeData);
-                  const newComponents = allGraphemeComponents(
-                    newGraphemeData.mnemonic!.components,
-                  ).toArray();
-                  const newComponent = nonNullable(newComponents[i]);
-                  if (i === newComponents.length - 1) {
-                    newComponent.strokes = normalizeIndexRanges(
-                      `${graphemeStrokeCount(graphemeData) - expectedStrokeCount}-${graphemeStrokeCount(graphemeData) - 1}`,
-                    );
-                  } else if (i === 0 || i === 1) {
-                    const startIndex =
-                      Math.max(
-                        -1,
-                        ...newComponents
-                          .slice(0, i)
-                          .flatMap((c) => parseIndexRanges(c.strokes)),
-                      ) + 1;
-                    newComponent.strokes = normalizeIndexRanges(
-                      `${startIndex}-${startIndex + expectedStrokeCount - 1}`,
-                    );
-                  } else {
-                    console.warn(
-                      `Cannot auto-fix component strokes for component ${i} in ${grapheme} mnemonic`,
-                    );
-                  }
-                  if (!IS_CI) {
-                    await writeJsonFileIfChanged(filePath, newGraphemeData);
-                    throw new Error(
-                      `Auto-fixed component strokes for ${grapheme} mnemonic - please re-run tests`,
-                    );
-                  }
+              // AUTO-FIXER CODE
+              if (claimedStrokeCount !== expectedStrokeCount) {
+                const newGraphemeData = structuredClone(graphemeData);
+                const newComponents = allGraphemeComponents(
+                  newGraphemeData.mnemonic!.components,
+                ).toArray();
+                const newComponent = nonNullable(newComponents[i]);
+                if (i === newComponents.length - 1) {
+                  newComponent.strokes = normalizeIndexRanges(
+                    `${graphemeStrokeCount(graphemeData) - expectedStrokeCount}-${graphemeStrokeCount(graphemeData) - 1}`,
+                  );
+                } else if (i === 0 || i === 1) {
+                  const startIndex =
+                    Math.max(
+                      -1,
+                      ...newComponents
+                        .slice(0, i)
+                        .flatMap((c) => parseIndexRanges(c.strokes)),
+                    ) + 1;
+                  newComponent.strokes = normalizeIndexRanges(
+                    `${startIndex}-${startIndex + expectedStrokeCount - 1}`,
+                  );
+                } else {
+                  console.warn(
+                    `Cannot auto-fix component strokes for component ${i} in ${grapheme} mnemonic`,
+                  );
                 }
-
-                expect(
-                  claimedStrokeCount,
-                  `${component.hanzi} stroke count does not match wiki data`,
-                ).toEqual(expectedStrokeCount);
+                if (!IS_CI) {
+                  await writeJsonFileIfChanged(filePath, newGraphemeData);
+                  throw new Error(
+                    `Auto-fixed component strokes for ${grapheme} mnemonic - please re-run tests`,
+                  );
+                }
               }
+
+              expect(
+                claimedStrokeCount,
+                `${primaryHanzi} stroke count does not match wiki data`,
+              ).toEqual(expectedStrokeCount);
             }
           }
         }
