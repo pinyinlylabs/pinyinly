@@ -5,6 +5,7 @@ import {
   allHsk3HanziWords,
   glossOrThrow,
   hanziFromHanziWord,
+  lookupHanzi,
   lookupHanziWord,
 } from "@/dictionary/dictionary";
 import { evenHalve } from "@pinyinly/lib/collections";
@@ -134,8 +135,10 @@ export async function addToQuizContext(
     return;
   }
 
-  for (const gloss of hanziWordMeaning.gloss) {
-    ctx.usedGlosses.add(gloss);
+  for (const [, meaning] of await lookupHanzi(hanziFromHanziWord(hanziWord))) {
+    for (const gloss of meaning.gloss) {
+      ctx.usedGlosses.add(gloss);
+    }
   }
 
   ctx.usedHanzi.add(hanziFromHanziWord(hanziWord));

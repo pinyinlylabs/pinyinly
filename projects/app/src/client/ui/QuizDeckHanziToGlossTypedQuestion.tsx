@@ -174,7 +174,7 @@ export function QuizDeckHanziToGlossTypedQuestion({
         disabled={grade != null}
         onChangeText={(text) => {
           userAnswerRef.current = text;
-          setUserAnswerEmpty(text.trim().length === 0);
+          setUserAnswerEmpty(text.length === 0);
         }}
         onSubmit={submit}
       />
@@ -197,13 +197,15 @@ const GlossTextInputSingle = ({
 }) => {
   const [text, setText] = useState(``);
 
-  const updateText = (text: string) => {
-    setText(text);
-    onChangeText(text);
-  };
-
   const handleChangeText = (text: string) => {
-    updateText(text);
+    setText(text);
+    onChangeText(
+      // Expose a white-space trimmed value so that consumers checking for a
+      // correct answer don't need to also trim, but internally keep the
+      // original value so that it's possible to write spaces without them
+      // instantly being trimmed.
+      text.trim(),
+    );
   };
 
   return (
