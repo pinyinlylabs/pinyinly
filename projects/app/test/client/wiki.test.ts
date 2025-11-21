@@ -10,7 +10,7 @@ import { loadMissingFontGlyphs, lookupHanzi } from "#dictionary/dictionary.js";
 import { IS_CI } from "#util/env.js";
 import { normalizeIndexRanges, parseIndexRanges } from "#util/indexRanges.js";
 import { createSpeechFileTests } from "@pinyinly/audio-sprites/testing";
-import { deepReadonly, memoize1 } from "@pinyinly/lib/collections";
+import { deepReadonly, memoize0, memoize1 } from "@pinyinly/lib/collections";
 import {
   existsSync,
   glob,
@@ -30,6 +30,35 @@ describe(`speech files`, async () => {
     projectRoot,
     isCI: IS_CI,
   });
+});
+
+describe(`/meaning.mdx files`, async () => {
+  const meaningFilePaths = await glob(path.join(wikiDir, `*/meaning.mdx`));
+  expect(meaningFilePaths.length).toBeGreaterThan(0);
+
+  for (const filePath of meaningFilePaths) {
+    const isGrapheme = isHanziGrapheme(
+      path.basename(path.dirname(filePath)) as HanziText,
+    );
+    const projectRelPath = path.relative(projectRoot, filePath);
+
+    const getMdx = memoize0(() => readFileSync(filePath, `utf-8`));
+
+    if (isGrapheme) {
+      describe(projectRelPath, () => {
+        test(`should contain a <WikiHanziGraphemeDecomposition>`, () => {
+          const mdx = getMdx();
+          const match = [
+            ...mdx.matchAll(/<WikiHanziGraphemeDecomposition\s+/g),
+          ];
+          expect(
+            match.length,
+            `MDX does not have exactly one <WikiHanziGraphemeDecomposition> component`,
+          ).toEqual(1);
+        });
+      });
+    }
+  }
 });
 
 describe(`grapheme.json files`, async () => {
