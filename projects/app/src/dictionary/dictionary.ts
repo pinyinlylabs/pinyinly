@@ -687,3 +687,60 @@ export const getIsStructuralHanzi = memoize0(async () => {
 
   return isStructuralHanzi;
 });
+
+export const getIsComponentFormHanzi = memoize0(async () => {
+  const dictionary = await loadDictionary();
+
+  const componentFormHanzi = new Set([
+    `龱`,
+    `镸`,
+    `觜`,
+    `肀`,
+    `罙`,
+    `禹`,
+    `畀`,
+    `甬`,
+    `爰`,
+    `戉`,
+    `厃`,
+    `叚`,
+    `冋`,
+    `冃`,
+    `円`,
+    `㡀`,
+    `㝵`,
+    `㐬`,
+    `㐫`,
+    `㐄`,
+    `㇇`,
+    `㇀`,
+    `⺀`,
+    `丩`,
+    `亇`,
+    `弗`,
+    `允`,
+    `亽`,
+    `亦`,
+    `亘`,
+    `亍`,
+    `予`,
+    `乞`,
+    `卅`,
+  ]);
+
+  for (const [hanziWord, meaning] of dictionary.entries()) {
+    if (meaning.componentFormOf != null) {
+      componentFormHanzi.add(hanziFromHanziWord(hanziWord));
+    }
+    if (meaning.visualVariants != null) {
+      for (const variant of meaning.visualVariants) {
+        componentFormHanzi.add(variant);
+      }
+    }
+  }
+
+  const isComponentFormHanzi = (hanzi: HanziText) =>
+    componentFormHanzi.has(hanzi);
+
+  return isComponentFormHanzi;
+});

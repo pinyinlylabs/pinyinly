@@ -1,6 +1,12 @@
-import { allHanziGraphemes } from "#dictionary/dictionary.js";
+import { isHanziGrapheme } from "#data/hanzi.js";
+import type { HanziText } from "#data/model.js";
 import { memoize0 } from "@pinyinly/lib/collections";
-import { existsSync, mkdirSync, updateJsonFileKey } from "@pinyinly/lib/fs";
+import {
+  existsSync,
+  glob,
+  mkdirSync,
+  updateJsonFileKey,
+} from "@pinyinly/lib/fs";
 import { invariant } from "@pinyinly/lib/invariant";
 import makeDebug from "debug";
 import path from "node:path";
@@ -68,9 +74,13 @@ export const graphicsRecordSchema = z
 
 export type GraphicsRecord = z.infer<typeof graphicsRecordSchema>;
 
-const allGraphemes = await allHanziGraphemes();
-
 const wikiDir = new URL(`../src/client/wiki/`, import.meta.url).pathname;
+
+const allGraphemes = await glob(`${wikiDir}/*`).then((ps) =>
+  ps
+    .map((p) => path.basename(p))
+    .filter((p) => isHanziGrapheme(p as HanziText)),
+);
 
 invariant(existsSync(wikiDir), `wiki directory does not exist: ${wikiDir}`);
 
