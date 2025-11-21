@@ -6,6 +6,7 @@ import {
 } from "#data/questions/hanziWordToGloss.ts";
 import { hanziWordToGloss } from "#data/skills.ts";
 import { loadDictionary, lookupHanziWord } from "#dictionary/dictionary.ts";
+import { nonNullable } from "@pinyinly/lib/invariant";
 import { describe, expect, test } from "vitest";
 
 describe(
@@ -46,13 +47,25 @@ describe(
 describe(
   `addToQuizContext suite` satisfies HasNameOf<typeof addToQuizContext>,
   async () => {
-    test(`adds to used glosses`, async () => {
+    test(`adds the glosses from the hanzi word`, async () => {
       const ctx = await makeQuizContext();
 
       await addToQuizContext(`我:i`, ctx);
       const meaning = await lookupHanziWord(`我:i`);
 
       expect(ctx.usedGlosses).toEqual(new Set(meaning?.gloss));
+    });
+
+    test(`adds the glosses from other meanings of the hanzi (regression test)`, async () => {
+      const ctx = await makeQuizContext();
+
+      await addToQuizContext(`乐:happy`, ctx);
+      const happyMeaning = nonNullable(await lookupHanziWord(`乐:happy`));
+      const musicMeaning = nonNullable(await lookupHanziWord(`乐:music`));
+
+      expect(ctx.usedGlosses).toEqual(
+        new Set([...happyMeaning.gloss, ...musicMeaning.gloss]),
+      );
     });
 
     test(`adds to used hanzi`, async () => {
