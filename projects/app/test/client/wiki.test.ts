@@ -52,7 +52,7 @@ describe(`/meaning.mdx files`, async () => {
     const getMdx = memoize0(() => readFileSync(filePath, `utf-8`));
 
     describe(projectRelPath, () => {
-      test(`existance`, () => {
+      test(`existence`, () => {
         if (isGrapheme && !isStructuralGrapheme) {
           expect(hasMdx()).toBeTruthy();
         }

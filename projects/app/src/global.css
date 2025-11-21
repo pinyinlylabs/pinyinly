@@ -53,7 +53,7 @@
   .pyly-body-heading .pyly-ref {
     @apply font-bold text-fg-loud pyly-ref-lg;
   }
-  .pyly-body-heading .pyly-bold,
+  .pyly-body-heading.pyly-bold,
   .pyly-body-heading .pyly-bold {
     @apply font-bold text-fg-loud;
   }
