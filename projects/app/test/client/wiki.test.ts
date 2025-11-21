@@ -6,7 +6,11 @@ import {
 } from "#client/wiki.js";
 import { isHanziGrapheme } from "#data/hanzi.js";
 import type { HanziText } from "#data/model.js";
-import { loadMissingFontGlyphs, lookupHanzi } from "#dictionary/dictionary.js";
+import {
+  getIsStructuralHanzi,
+  loadMissingFontGlyphs,
+  lookupHanzi,
+} from "#dictionary/dictionary.js";
 import { IS_CI } from "#util/env.js";
 import { normalizeIndexRanges, parseIndexRanges } from "#util/indexRanges.js";
 import { createSpeechFileTests } from "@pinyinly/audio-sprites/testing";
@@ -33,19 +37,28 @@ describe(`speech files`, async () => {
 });
 
 describe(`/meaning.mdx files`, async () => {
-  const meaningFilePaths = await glob(path.join(wikiDir, `*/meaning.mdx`));
+  const meaningFilePaths = await glob(path.join(wikiDir, `*/`)).then(
+    (dirPaths) => dirPaths.map((dirPath) => path.join(dirPath, `meaning.mdx`)),
+  );
   expect(meaningFilePaths.length).toBeGreaterThan(0);
+  const isStructuralHanzi = await getIsStructuralHanzi();
 
   for (const filePath of meaningFilePaths) {
-    const isGrapheme = isHanziGrapheme(
-      path.basename(path.dirname(filePath)) as HanziText,
-    );
+    const hanzi = path.basename(path.dirname(filePath)) as HanziText;
+    const isGrapheme = isHanziGrapheme(hanzi);
+    const isStructuralGrapheme = isStructuralHanzi(hanzi);
     const projectRelPath = path.relative(projectRoot, filePath);
-
+    const hasMdx = memoize0(() => existsSync(filePath));
     const getMdx = memoize0(() => readFileSync(filePath, `utf-8`));
 
-    if (isGrapheme) {
-      describe(projectRelPath, () => {
+    describe(projectRelPath, () => {
+      test(`existance`, () => {
+        if (isGrapheme && !isStructuralGrapheme) {
+          expect(hasMdx()).toBeTruthy();
+        }
+      });
+
+      if (isGrapheme && hasMdx()) {
         test(`should contain a <WikiHanziGraphemeDecomposition>`, () => {
           const mdx = getMdx();
           const match = [
@@ -56,8 +69,8 @@ describe(`/meaning.mdx files`, async () => {
             `MDX does not have exactly one <WikiHanziGraphemeDecomposition> component`,
           ).toEqual(1);
         });
-      });
-    }
+      }
+    });
   }
 });
 

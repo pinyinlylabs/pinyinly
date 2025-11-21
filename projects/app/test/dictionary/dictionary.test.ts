@@ -1,5 +1,5 @@
 import { parseIds, splitHanziText, walkIdsNode } from "#data/hanzi.ts";
-import type { HanziGrapheme } from "#data/model.ts";
+import type { HanziGrapheme, HanziText } from "#data/model.ts";
 import { pinyinPronunciationDisplayText } from "#data/pinyin.ts";
 import type { Dictionary } from "#dictionary/dictionary.ts";
 import {
@@ -11,7 +11,7 @@ import {
   allRadicalHanziWords,
   allRadicalsByStrokes,
   decomposeHanzi,
-  getIsStructuralHanziWord,
+  getIsStructuralHanzi,
   hanziFromHanziOrHanziWord,
   hanziFromHanziWord,
   hanziWordMeaningSchema,
@@ -663,15 +663,13 @@ describe(
 );
 
 describe(
-  `getIsStructuralHanziWord suite` satisfies HasNameOf<
-    typeof getIsStructuralHanziWord
-  >,
+  `getIsStructuralHanzi suite` satisfies HasNameOf<typeof getIsStructuralHanzi>,
   () => {
     test(`fixtures`, async () => {
-      const isStructuralHanziWord = await getIsStructuralHanziWord();
+      const isStructuralHanzi = await getIsStructuralHanzi();
 
-      expect(isStructuralHanziWord(`丿:slash`)).toBe(true);
-      expect(isStructuralHanziWord(`八:eight`)).toBe(false);
+      expect(isStructuralHanzi(`丿` as HanziText)).toBe(true);
+      expect(isStructuralHanzi(`八` as HanziText)).toBe(false);
     });
   },
 );

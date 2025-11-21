@@ -672,19 +672,18 @@ export function unparseDictionary(
     .sort(sortComparatorString((x) => x[0]));
 }
 
-export const getIsStructuralHanziWord = memoize0(async () => {
+export const getIsStructuralHanzi = memoize0(async () => {
   const dictionary = await loadDictionary();
 
-  const structuralHanziWords = new Set();
+  const structuralHanzi = new Set([`丆`]);
 
   for (const [hanziWord, meaning] of dictionary.entries()) {
     if (meaning.isStructural) {
-      structuralHanziWords.add(hanziWord);
+      structuralHanzi.add(hanziFromHanziWord(hanziWord));
     }
   }
 
-  const isStructuralHanziWord = (hanziWord: HanziWord) =>
-    structuralHanziWords.has(hanziWord);
+  const isStructuralHanzi = (hanzi: HanziText) => structuralHanzi.has(hanzi);
 
-  return isStructuralHanziWord;
+  return isStructuralHanzi;
 });

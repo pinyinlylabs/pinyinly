@@ -102,7 +102,7 @@ bench(
       graph,
       skillSrsStates,
       latestSkillRatings,
-      isStructuralHanziWord: () => false,
+      isStructuralHanzi: () => false,
       now,
       maxQueueItems: graph.size,
     });
