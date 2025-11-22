@@ -34,38 +34,63 @@ const graphemeComponentSchema = z.object({
 
 export type GraphemeComponent = z.infer<typeof graphemeComponentSchema>;
 
-/**
- * The layout of the components. The first element is the combining
- * operator, and the remaining are the components for each slot.
- */
-const graphemeComponentLayoutSchema = z.union([
+const combiningCharacter2 = z.union([
+  z.literal(`⿰`),
+  z.literal(`⿱`),
+  z.literal(`⿵`),
+  z.literal(`⿶`),
+  z.literal(`⿴`),
+  z.literal(`⿻`),
+  z.literal(`⿸`),
+  z.literal(`⿺`),
+  z.literal(`⿹`),
+  z.literal(`⿷`),
+]);
+
+const combiningCharacter3 = z.union([z.literal(`⿲`), z.literal(`⿳`)]);
+
+const graphemeComponentLayoutLeafSchema = z.union([
   z.tuple([
-    z.union([
-      z.literal(`⿰`),
-      z.literal(`⿱`),
-      z.literal(`⿵`),
-      z.literal(`⿶`),
-      z.literal(`⿴`),
-      z.literal(`⿻`),
-      z.literal(`⿸`),
-      z.literal(`⿺`),
-      z.literal(`⿹`),
-      z.literal(`⿷`),
-    ]),
+    combiningCharacter2,
     graphemeComponentSchema,
     graphemeComponentSchema,
   ]),
   z.tuple([
-    z.union([z.literal(`⿲`), z.literal(`⿳`)]),
+    combiningCharacter3,
     graphemeComponentSchema,
     graphemeComponentSchema,
     graphemeComponentSchema,
   ]),
 ]);
 
+const graphemeComponentOrNested = z.union([
+  graphemeComponentSchema,
+  graphemeComponentLayoutLeafSchema,
+]);
+
+/**
+ * The layout of the components. The first element is the combining
+ * operator, and the remaining are the components for each slot.
+ */
+const graphemeComponentLayoutSchema = z.union([
+  z.tuple([
+    combiningCharacter2,
+    graphemeComponentOrNested,
+    graphemeComponentOrNested,
+  ]),
+  z.tuple([
+    combiningCharacter3,
+    graphemeComponentOrNested,
+    graphemeComponentOrNested,
+    graphemeComponentOrNested,
+  ]),
+]);
+
 export type GraphemeComponentLayout = z.infer<
   typeof graphemeComponentLayoutSchema
 >;
+
+const zHanziText = z.custom<HanziText>((x) => typeof x === `string`);
 
 /**
  * Schema for grapheme.json files.
@@ -82,6 +107,17 @@ export const graphemeDataSchema = z.object({
     z.number().describe(`Stroke count`),
     z.array(z.string()).describe(`SVG paths for each stroke (in order)`),
   ]),
+  /**
+   * The simplified form of this grapheme, if it is a traditional form.
+   *
+   * The property is used on traditional graphemes because it's expected there
+   * are fewer of those in the dataset since this app focuses on Mandarin.
+   */
+  traditionalFormOf: zHanziText.optional(),
+  /**
+   * If this grapheme is a component form of another grapheme, that hanzi.
+   */
+  componentFormOf: zHanziText.optional(),
   /**
    * The meaning mnemonic for the grapheme. This doesn't necessarily correspond
    * to the etymological components, and their meanings can differ too. It's
@@ -129,8 +165,15 @@ export function graphemeStrokeCount(
 }
 
 export function* allGraphemeComponents(
-  graphemeLayout: DeepReadonly<GraphemeComponentLayout>,
-): Generator<GraphemeComponent> {
+  graphemeLayout: DeepReadonly<GraphemeComponentLayout | GraphemeComponent>,
+): Generator<DeepReadonly<GraphemeComponent>> {
+  // Base case: a leaf component
+  if (`strokes` in graphemeLayout) {
+    yield graphemeLayout;
+    return;
+  }
+
+  // Recursive case: a layout with nested components
   const operator = graphemeLayout[0];
   switch (operator) {
     case `⿰`:
@@ -143,15 +186,15 @@ export function* allGraphemeComponents(
     case `⿻`:
     case `⿷`:
     case `⿱`: {
-      yield graphemeLayout[1];
-      yield graphemeLayout[2];
+      yield* allGraphemeComponents(graphemeLayout[1]);
+      yield* allGraphemeComponents(graphemeLayout[2]);
       break;
     }
     case `⿲`:
     case `⿳`: {
-      yield graphemeLayout[1];
-      yield graphemeLayout[2];
-      yield graphemeLayout[3];
+      yield* allGraphemeComponents(graphemeLayout[1]);
+      yield* allGraphemeComponents(graphemeLayout[2]);
+      yield* allGraphemeComponents(graphemeLayout[3]);
       break;
     }
   }
@@ -1811,6 +1854,7 @@ const registry: Record<string, MdxComponentType> = {
   "暖/meaning": lazyMdx(() => import(`./wiki/暖/meaning.mdx`)),
   "暖和/meaning": lazyMdx(() => import(`./wiki/暖和/meaning.mdx`)),
   "曰/meaning": lazyMdx(() => import(`./wiki/曰/meaning.mdx`)),
+  "曲/meaning": lazyMdx(() => import(`./wiki/曲/meaning.mdx`)),
   "更/meaning": lazyMdx(() => import(`./wiki/更/meaning.mdx`)),
   "更加/meaning": lazyMdx(() => import(`./wiki/更加/meaning.mdx`)),
   "曷/meaning": lazyMdx(() => import(`./wiki/曷/meaning.mdx`)),
