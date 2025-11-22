@@ -53,13 +53,36 @@ export function WikiHanziGraphemeDecomposition({
       <Text className="pyly-mdx-h2"> Use a story to learn the meaning</Text>
       <View className="pyly-mdx-grapheme-decomposition rounded-lg bg-fg-bg5">
         <View className="gap-4 p-4 pb-0">
-          <Text className="pyly-body">
-            Split{` `}
-            <Text className="pyly-bold">{graphemeData.hanzi}</Text> into
-            distinctive components:
-          </Text>
+          {componentsElements.length > 0 ? (
+            <>
+              <Text className="pyly-body">
+                Split{` `}
+                <Text className="pyly-bold">{graphemeData.hanzi}</Text> into
+                distinctive components:
+              </Text>
 
-          <View className="flex-row gap-5">{componentsElements}</View>
+              <View className="flex-row gap-5">{componentsElements}</View>
+            </>
+          ) : Array.isArray(graphemeData.strokes) ? (
+            <>
+              <Text className="pyly-body">
+                What does{` `}
+                <Text className="pyly-bold">{graphemeData.hanzi}</Text>
+                {` `}
+                resemble?
+              </Text>
+
+              <View className="flex-1 items-center">
+                <HanziGrapheme
+                  className="size-12"
+                  strokesData={graphemeData.strokes}
+                  highlightStrokes={parseIndexRanges(
+                    `0-${graphemeData.strokes.length - 1}`,
+                  )}
+                />
+              </View>
+            </>
+          ) : null}
         </View>
 
         {illustrationSrc == null ? (
