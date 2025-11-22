@@ -675,7 +675,7 @@ export function unparseDictionary(
 export const getIsStructuralHanzi = memoize0(async () => {
   const dictionary = await loadDictionary();
 
-  const structuralHanzi = new Set([`丆`]);
+  const structuralHanzi = new Set([`丆`, `ュ`]);
 
   for (const [hanziWord, meaning] of dictionary.entries()) {
     if (meaning.isStructural) {
