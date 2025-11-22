@@ -4,7 +4,13 @@ import {
   graphemeDataSchema,
   graphemeStrokeCount,
 } from "#client/wiki.js";
-import { isHanziGrapheme } from "#data/hanzi.js";
+import type { IdsNode } from "#data/hanzi.js";
+import {
+  IdsOperator,
+  isHanziGrapheme,
+  parseIds,
+  strokeCountToCharacter,
+} from "#data/hanzi.js";
 import type { HanziText } from "#data/model.js";
 import {
   getIsComponentFormHanzi,
@@ -151,13 +157,13 @@ describe(`grapheme.json files`, async () => {
   const isComponentFormHanzi = await getIsComponentFormHanzi();
   const decompositions = await loadHanziDecomposition();
 
-  test(`graphemes in the dictionary with 12+ strokes have mnemonic components`, async () => {
+  test(`graphemes in the dictionary with 11+ strokes have mnemonic components`, async () => {
     const errors = [];
 
     for (const { grapheme, graphemeData } of graphemeFilePaths) {
       const meanings = await lookupHanzi(grapheme);
       if (
-        graphemeStrokeCount(graphemeData) <= 11 ||
+        graphemeStrokeCount(graphemeData) <= 10 ||
         meanings.length === 0 ||
         isComponentFormHanzi(grapheme) ||
         graphemeData.traditionalFormOf != null
@@ -173,7 +179,11 @@ describe(`grapheme.json files`, async () => {
         const toPush = [grapheme, error];
         const hint = decompositions.get(grapheme);
         if (hint != null) {
-          toPush.push(`(decomposition guess: ${hint})`);
+          toPush.push(`(decomposition guess: ${hint})`, {
+            mnemonic: {
+              components: idsNodeToMnemonicComponents(parseIds(hint)),
+            },
+          });
         }
         errors.push(toPush);
       }
@@ -371,6 +381,140 @@ describe(`grapheme.json files`, async () => {
 
     expect(errors).toEqual([]);
   });
+
+  function idsNodeToMnemonicComponents(
+    ids: IdsNode,
+    cursor?: { strokesCounted: number },
+  ): unknown {
+    cursor ??= { strokesCounted: 0 };
+
+    switch (ids.operator) {
+      case IdsOperator.LeftToRight: {
+        return [
+          ids.operator,
+          idsNodeToMnemonicComponents(ids.left, cursor),
+          idsNodeToMnemonicComponents(ids.right, cursor),
+        ];
+      }
+      case IdsOperator.AboveToBelow: {
+        return [
+          ids.operator,
+          idsNodeToMnemonicComponents(ids.above, cursor),
+          idsNodeToMnemonicComponents(ids.below, cursor),
+        ];
+      }
+      case IdsOperator.LeftToMiddleToRight: {
+        return [
+          ids.operator,
+          idsNodeToMnemonicComponents(ids.left, cursor),
+          idsNodeToMnemonicComponents(ids.middle, cursor),
+          idsNodeToMnemonicComponents(ids.right, cursor),
+        ];
+      }
+      case IdsOperator.AboveToMiddleAndBelow: {
+        return [
+          ids.operator,
+          idsNodeToMnemonicComponents(ids.above, cursor),
+          idsNodeToMnemonicComponents(ids.middle, cursor),
+          idsNodeToMnemonicComponents(ids.below, cursor),
+        ];
+      }
+      case IdsOperator.FullSurround: {
+        return [
+          ids.operator,
+          idsNodeToMnemonicComponents(ids.surrounding, cursor),
+          idsNodeToMnemonicComponents(ids.surrounded, cursor),
+        ];
+      }
+      case IdsOperator.SurroundFromAbove: {
+        return [
+          ids.operator,
+          idsNodeToMnemonicComponents(ids.above, cursor),
+          idsNodeToMnemonicComponents(ids.surrounded, cursor),
+        ];
+      }
+      case IdsOperator.SurroundFromBelow: {
+        return [
+          ids.operator,
+          idsNodeToMnemonicComponents(ids.below, cursor),
+          idsNodeToMnemonicComponents(ids.surrounded, cursor),
+        ];
+      }
+      case IdsOperator.SurroundFromLeft: {
+        return [
+          ids.operator,
+          idsNodeToMnemonicComponents(ids.left, cursor),
+          idsNodeToMnemonicComponents(ids.surrounded, cursor),
+        ];
+      }
+      case IdsOperator.SurroundFromRight: {
+        return [
+          ids.operator,
+          idsNodeToMnemonicComponents(ids.right, cursor),
+          idsNodeToMnemonicComponents(ids.surrounded, cursor),
+        ];
+      }
+      case IdsOperator.SurroundFromUpperLeft: {
+        return [
+          ids.operator,
+          idsNodeToMnemonicComponents(ids.upperLeft, cursor),
+          idsNodeToMnemonicComponents(ids.surrounded, cursor),
+        ];
+      }
+      case IdsOperator.SurroundFromUpperRight: {
+        return [
+          ids.operator,
+          idsNodeToMnemonicComponents(ids.upperRight, cursor),
+          idsNodeToMnemonicComponents(ids.surrounded, cursor),
+        ];
+      }
+      case IdsOperator.SurroundFromLowerLeft: {
+        return [
+          ids.operator,
+          idsNodeToMnemonicComponents(ids.lowerLeft, cursor),
+          idsNodeToMnemonicComponents(ids.surrounded, cursor),
+        ];
+      }
+      case IdsOperator.SurroundFromLowerRight: {
+        return [
+          ids.operator,
+          idsNodeToMnemonicComponents(ids.lowerRight, cursor),
+          idsNodeToMnemonicComponents(ids.surrounded, cursor),
+        ];
+      }
+      case IdsOperator.Overlaid: {
+        return [
+          ids.operator,
+          idsNodeToMnemonicComponents(ids.overlay, cursor),
+          idsNodeToMnemonicComponents(ids.underlay, cursor),
+        ];
+      }
+      case IdsOperator.HorizontalReflection: {
+        return [
+          ids.operator,
+          idsNodeToMnemonicComponents(ids.reflected, cursor),
+        ];
+      }
+      case IdsOperator.Rotation: {
+        return [ids.operator, idsNodeToMnemonicComponents(ids.rotated, cursor)];
+      }
+      case `LeafCharacter`: {
+        const data = getDataForGrapheme(ids.character);
+        const strokeCount = data == null ? 1 : graphemeStrokeCount(data);
+        const result = {
+          hanzi: ids.character,
+          strokes: normalizeIndexRanges(
+            `${cursor.strokesCounted}-${(cursor.strokesCounted += strokeCount - 1)}`,
+          ),
+        };
+        cursor.strokesCounted += 1;
+        return result;
+      }
+      case `LeafUnknownCharacter`: {
+        return { hanzi: strokeCountToCharacter(ids.strokeCount), strokes: `` };
+      }
+    }
+  }
 });
 
 describe(
