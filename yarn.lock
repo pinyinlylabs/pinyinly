@@ -4566,7 +4566,7 @@ __metadata:
     "@tanstack/db": "patch:@tanstack/db@npm%3A0.3.2#~/.yarn/patches/@tanstack-db-npm-0.3.2-4549d65956.patch"
     "@tanstack/eslint-plugin-query": "npm:^5.83.1"
     "@tanstack/query-core": "npm:^5.89.0"
-    "@tanstack/query-db-collection": "npm:^0.2.20"
+    "@tanstack/query-db-collection": "npm:^0.3.0"
     "@tanstack/react-db": "npm:^0.1.21"
     "@tanstack/react-query": "npm:^5.89.0"
     "@tanstack/react-query-devtools": "npm:^5.89.0"
@@ -6285,16 +6285,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/query-db-collection@npm:^0.2.20":
-  version: 0.2.20
-  resolution: "@tanstack/query-db-collection@npm:0.2.20"
+"@tanstack/query-db-collection@npm:^0.3.0":
+  version: 0.3.0
+  resolution: "@tanstack/query-db-collection@npm:0.3.0"
   dependencies:
     "@standard-schema/spec": "npm:^1.0.0"
-    "@tanstack/db": "npm:0.3.2"
   peerDependencies:
+    "@tanstack/db": "*"
     "@tanstack/query-core": ^5.0.0
     typescript: ">=4.7"
-  checksum: 10c0/237ddb9d26f3cd6f16e3470e90c0707fd87a8957f486d0f00a9f5faa6aa915b83bfe8def99081a6c8777c282aaa4701dd48095d47a4a638e7af0d2a3ef0c8440
+  checksum: 10c0/6263a964b203c0a0a06aaa123d5ce411eed7d2bd3eb13fe943fd464bfd912d050e3fab0877e43e0e7bfa715ffc9fdd74436d9d079c65e42f066f677fc96e66d3
   languageName: node
   linkType: hard
 
