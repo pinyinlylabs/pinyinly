@@ -67,6 +67,8 @@ export type GraphemeComponentLayout = z.infer<
   typeof graphemeComponentLayoutSchema
 >;
 
+const zHanziText = z.custom<HanziText>((x) => typeof x === `string`);
+
 /**
  * Schema for grapheme.json files.
  */
@@ -82,6 +84,13 @@ export const graphemeDataSchema = z.object({
     z.number().describe(`Stroke count`),
     z.array(z.string()).describe(`SVG paths for each stroke (in order)`),
   ]),
+  /**
+   * The simplified form of this grapheme, if it is a traditional form.
+   *
+   * The property is used on traditional graphemes because it's expected there
+   * are fewer of those in the dataset since this app focuses on Mandarin.
+   */
+  traditionalFormOf: zHanziText.optional(),
   /**
    * The meaning mnemonic for the grapheme. This doesn't necessarily correspond
    * to the etymological components, and their meanings can differ too. It's
