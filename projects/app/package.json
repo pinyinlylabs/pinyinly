@@ -16,7 +16,7 @@
     "@expo/html-elements": "patch:@expo/html-elements@npm%3A0.12.5#~/.yarn/patches/@expo-html-elements-npm-0.12.5-ada5f53f49.patch",
     "@expo/metro-runtime": "~5.0.4",
     "@inngest/middleware-sentry": "^0.1.1",
-    "@lottiefiles/dotlottie-react": "^0.13.5",
+    "@lottiefiles/dotlottie-react": "^0.17.0",
     "@lucia-auth/adapter-drizzle": "^1.1.0",
     "@mdx-js/mdx": "^3.1.0",
     "@neondatabase/serverless": "^1.0.0",
