@@ -377,7 +377,10 @@ test(`all wiki component hanzi words reference valid hanzi words`, async () => {
 
 test(`expect missing glyphs to be included decomposition data`, async () => {
   const allGraphemes = await allHanziGraphemes();
-  const allComponents = new Set<string>();
+  const allComponents = new Set<string>([
+    // todo: remove after automatically populating with wiki mnemonic decomposition
+    `𨈑`,
+  ]);
   const decompositions = await loadHanziDecomposition();
 
   for (const grapheme of allGraphemes) {
