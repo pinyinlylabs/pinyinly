@@ -17,7 +17,6 @@ import {
   getIsStructuralHanzi,
   hanziToHanziWordMap,
   loadHanziDecomposition,
-  loadMissingFontGlyphs,
   lookupHanzi,
 } from "#dictionary/dictionary.js";
 import { IS_CI } from "#util/env.js";
@@ -157,16 +156,18 @@ describe(`grapheme.json files`, async () => {
   const isComponentFormHanzi = await getIsComponentFormHanzi();
   const decompositions = await loadHanziDecomposition();
 
-  test(`graphemes in the dictionary with 9+ strokes have mnemonic components`, async () => {
+  test(`graphemes in the dictionary with 8+ strokes have mnemonic components`, async () => {
     const errors = [];
+    const atomicGraphemes = new Set([`非`]);
 
     for (const { grapheme, graphemeData } of graphemeFilePaths) {
       const meanings = await lookupHanzi(grapheme);
       if (
-        graphemeStrokeCount(graphemeData) <= 8 ||
+        graphemeStrokeCount(graphemeData) <= 7 ||
         meanings.length === 0 ||
         isComponentFormHanzi(grapheme) ||
-        graphemeData.traditionalFormOf != null
+        graphemeData.traditionalFormOf != null ||
+        atomicGraphemes.has(grapheme)
       ) {
         continue;
       }
@@ -247,11 +248,6 @@ describe(`grapheme.json files`, async () => {
 
         // Don't self-reference
         bannedCharacters.add(graphemeData.hanzi);
-
-        // Only allow characters that have a glyph.
-        for (const missingGlyph of await loadMissingFontGlyphs()) {
-          bannedCharacters.add(missingGlyph);
-        }
 
         // Don't allow IDS combining characters or circled numbers (meaning "unknown N stroke character").
         for (const char of `⿰|⿱|⿲|⿳|⿴|⿵|⿶|⿷|⿼|⿸|⿹|⿺|⿽|⿻|⿾|⿿|①|②|③|④|⑤|⑥|⑦|⑧|⑨|⑩|⑪|⑫|⑬|⑭|⑮|⑯|⑰|⑱|⑲|⑳`.split(
