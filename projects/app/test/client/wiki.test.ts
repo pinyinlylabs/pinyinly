@@ -157,13 +157,13 @@ describe(`grapheme.json files`, async () => {
   const isComponentFormHanzi = await getIsComponentFormHanzi();
   const decompositions = await loadHanziDecomposition();
 
-  test(`graphemes in the dictionary with 10+ strokes have mnemonic components`, async () => {
+  test(`graphemes in the dictionary with 9+ strokes have mnemonic components`, async () => {
     const errors = [];
 
     for (const { grapheme, graphemeData } of graphemeFilePaths) {
       const meanings = await lookupHanzi(grapheme);
       if (
-        graphemeStrokeCount(graphemeData) <= 9 ||
+        graphemeStrokeCount(graphemeData) <= 8 ||
         meanings.length === 0 ||
         isComponentFormHanzi(grapheme) ||
         graphemeData.traditionalFormOf != null
@@ -520,7 +520,13 @@ describe(`grapheme.json files`, async () => {
         };
       }
       case `LeafUnknownCharacter`: {
-        return { hanzi: strokeCountToCharacter(ids.strokeCount), strokes: `` };
+        const startStroke = cursor.strokesCounted;
+        const endStroke = cursor.strokesCounted + ids.strokeCount - 1;
+        cursor.strokesCounted += ids.strokeCount;
+        return {
+          hanzi: strokeCountToCharacter(ids.strokeCount),
+          strokes: normalizeIndexRanges(`${startStroke}-${endStroke}`),
+        };
       }
     }
   }
