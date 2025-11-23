@@ -157,13 +157,13 @@ describe(`grapheme.json files`, async () => {
   const isComponentFormHanzi = await getIsComponentFormHanzi();
   const decompositions = await loadHanziDecomposition();
 
-  test(`graphemes in the dictionary with 11+ strokes have mnemonic components`, async () => {
+  test(`graphemes in the dictionary with 10+ strokes have mnemonic components`, async () => {
     const errors = [];
 
     for (const { grapheme, graphemeData } of graphemeFilePaths) {
       const meanings = await lookupHanzi(grapheme);
       if (
-        graphemeStrokeCount(graphemeData) <= 10 ||
+        graphemeStrokeCount(graphemeData) <= 9 ||
         meanings.length === 0 ||
         isComponentFormHanzi(grapheme) ||
         graphemeData.traditionalFormOf != null
@@ -172,9 +172,10 @@ describe(`grapheme.json files`, async () => {
       }
 
       try {
-        expect(graphemeData.mnemonic?.components.length).toBeGreaterThanOrEqual(
-          2,
-        );
+        invariant(graphemeData.mnemonic != null, `missing mnemonic`);
+        expect(
+          [...allGraphemeComponents(graphemeData.mnemonic.components)].length,
+        ).toBeGreaterThanOrEqual(2);
       } catch (error) {
         const toPush = [grapheme, error];
         const hint = decompositions.get(grapheme);
@@ -382,6 +383,15 @@ describe(`grapheme.json files`, async () => {
     expect(errors).toEqual([]);
   });
 
+  /**
+   * Converts an IDS (Ideographic Description Sequence) node into the mnemonic
+   * component structure format used in grapheme.json files. This is used to
+   * generate helpful hints in test error messages.
+   *
+   * @param ids - The IDS node to convert
+   * @param cursor - Tracks stroke indices across recursive calls
+   * @returns A nested structure matching the GraphemeComponentLayout format
+   */
   function idsNodeToMnemonicComponents(
     ids: IdsNode,
     cursor?: { strokesCounted: number },
@@ -501,14 +511,13 @@ describe(`grapheme.json files`, async () => {
       case `LeafCharacter`: {
         const data = getDataForGrapheme(ids.character);
         const strokeCount = data == null ? 1 : graphemeStrokeCount(data);
-        const result = {
+        const startStroke = cursor.strokesCounted;
+        const endStroke = cursor.strokesCounted + strokeCount - 1;
+        cursor.strokesCounted += strokeCount;
+        return {
           hanzi: ids.character,
-          strokes: normalizeIndexRanges(
-            `${cursor.strokesCounted}-${(cursor.strokesCounted += strokeCount - 1)}`,
-          ),
+          strokes: normalizeIndexRanges(`${startStroke}-${endStroke}`),
         };
-        cursor.strokesCounted += 1;
-        return result;
       }
       case `LeafUnknownCharacter`: {
         return { hanzi: strokeCountToCharacter(ids.strokeCount), strokes: `` };

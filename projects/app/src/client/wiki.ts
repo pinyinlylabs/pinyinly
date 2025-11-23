@@ -49,45 +49,54 @@ const combiningCharacter2 = z.union([
 
 const combiningCharacter3 = z.union([z.literal(`⿲`), z.literal(`⿳`)]);
 
-const graphemeComponentLayoutLeafSchema = z.union([
-  z.tuple([
-    combiningCharacter2,
-    graphemeComponentSchema,
-    graphemeComponentSchema,
-  ]),
-  z.tuple([
-    combiningCharacter3,
-    graphemeComponentSchema,
-    graphemeComponentSchema,
-    graphemeComponentSchema,
-  ]),
-]);
-
-const graphemeComponentOrNested = z.union([
+// TODO [zod@>=4.1.12] try refactor to use https://github.com/colinhacks/zod/issues/5089
+const graphemeComponentOrLayout0Schema = z.union([
   graphemeComponentSchema,
-  graphemeComponentLayoutLeafSchema,
-]);
-
-/**
- * The layout of the components. The first element is the combining
- * operator, and the remaining are the components for each slot.
- */
-const graphemeComponentLayoutSchema = z.union([
   z.tuple([
     combiningCharacter2,
-    graphemeComponentOrNested,
-    graphemeComponentOrNested,
+    graphemeComponentSchema,
+    graphemeComponentSchema,
   ]),
   z.tuple([
     combiningCharacter3,
-    graphemeComponentOrNested,
-    graphemeComponentOrNested,
-    graphemeComponentOrNested,
+    graphemeComponentSchema,
+    graphemeComponentSchema,
+    graphemeComponentSchema,
   ]),
 ]);
 
-export type GraphemeComponentLayout = z.infer<
-  typeof graphemeComponentLayoutSchema
+const graphemeComponentOrLayout1Schema = z.union([
+  graphemeComponentSchema,
+  z.tuple([
+    combiningCharacter2,
+    graphemeComponentOrLayout0Schema,
+    graphemeComponentOrLayout0Schema,
+  ]),
+  z.tuple([
+    combiningCharacter3,
+    graphemeComponentOrLayout0Schema,
+    graphemeComponentOrLayout0Schema,
+    graphemeComponentOrLayout0Schema,
+  ]),
+]);
+
+const graphemeComponentOrLayout2Schema = z.union([
+  graphemeComponentSchema,
+  z.tuple([
+    combiningCharacter2,
+    graphemeComponentOrLayout1Schema,
+    graphemeComponentOrLayout1Schema,
+  ]),
+  z.tuple([
+    combiningCharacter3,
+    graphemeComponentOrLayout1Schema,
+    graphemeComponentOrLayout1Schema,
+    graphemeComponentOrLayout1Schema,
+  ]),
+]);
+
+export type GraphemeComponentOrLayout = z.infer<
+  typeof graphemeComponentOrLayout2Schema
 >;
 
 const zHanziText = z.custom<HanziText>((x) => typeof x === `string`);
@@ -129,7 +138,7 @@ export const graphemeDataSchema = z.object({
        * The layout of the components. The first element is the combining
        * operator, and the remaining are the components for each slot.
        */
-      components: graphemeComponentLayoutSchema,
+      components: graphemeComponentOrLayout2Schema,
       stories: z
         .array(
           z.object({
@@ -165,7 +174,7 @@ export function graphemeStrokeCount(
 }
 
 export function* allGraphemeComponents(
-  graphemeLayout: DeepReadonly<GraphemeComponentLayout | GraphemeComponent>,
+  graphemeLayout: DeepReadonly<GraphemeComponentOrLayout>,
 ): Generator<DeepReadonly<GraphemeComponent>> {
   // Base case: a leaf component
   if (`strokes` in graphemeLayout) {
