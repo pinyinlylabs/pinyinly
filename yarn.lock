@@ -2226,13 +2226,13 @@ __metadata:
   linkType: hard
 
 "@inngest/middleware-sentry@npm:^0.1.1":
-  version: 0.1.2
-  resolution: "@inngest/middleware-sentry@npm:0.1.2"
+  version: 0.1.3
+  resolution: "@inngest/middleware-sentry@npm:0.1.3"
   peerDependencies:
     "@sentry/core": ">=8.0.0"
     "@sentry/types": ">=8.0.0"
-    inngest: ">=3.0.0"
-  checksum: 10c0/51b8d07a772743bed123a31911231d37ff1edc7f76063160f3aa25acdfbca7198965c245ae732e9f8041daef84b372a4bde15a4a54f5c3e8a181b83ac418375c
+    inngest: ">=3.42.3"
+  checksum: 10c0/901f26898cf8d247c42957e8354cdfb5fcaff44a60cc3192f8451d17ff4f7d69bb57b5379c952943f87516152fa4a3d195561101889b78bd57d4ffb7c499400f
   languageName: node
   linkType: hard
 
