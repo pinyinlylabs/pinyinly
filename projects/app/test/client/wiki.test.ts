@@ -156,14 +156,14 @@ describe(`grapheme.json files`, async () => {
   const isComponentFormHanzi = await getIsComponentFormHanzi();
   const decompositions = await loadHanziDecomposition();
 
-  test(`graphemes in the dictionary with 7+ strokes have mnemonic components`, async () => {
+  test(`graphemes in the dictionary with 6+ strokes have mnemonic components`, async () => {
     const errors = [];
-    const atomicGraphemes = new Set([`非`]);
+    const atomicGraphemes = new Set([`非`, `臣`, `襾`, `舟`]);
 
     for (const { grapheme, graphemeData } of graphemeFilePaths) {
       const meanings = await lookupHanzi(grapheme);
       if (
-        graphemeStrokeCount(graphemeData) <= 6 ||
+        graphemeStrokeCount(graphemeData) <= 5 ||
         meanings.length === 0 ||
         isComponentFormHanzi(grapheme) ||
         graphemeData.traditionalFormOf != null ||
