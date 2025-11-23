@@ -4939,10 +4939,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@posthog/core@npm:1.0.2":
-  version: 1.0.2
-  resolution: "@posthog/core@npm:1.0.2"
-  checksum: 10c0/b6cb66df077230c5cbd0de15b708b7e6fa47dac20a1bcfe5308d5c1b1ec487e57c923e22a51d6f8d45acea8239562fa9546c528d5c2bef1487419c70d3a76a43
+"@posthog/core@npm:1.5.5":
+  version: 1.5.5
+  resolution: "@posthog/core@npm:1.5.5"
+  dependencies:
+    cross-spawn: "npm:^7.0.6"
+  checksum: 10c0/f71b08fa26b26c7a478e2a848deb26690e6bb03b48cf10593dc30fee54af010e173c07ad46780be303f3aa9f9f3ab17f86c514b37d3b99776fa936447c57f536
   languageName: node
   linkType: hard
 
@@ -16764,23 +16766,15 @@ __metadata:
   linkType: hard
 
 "posthog-js@npm:^1.252.1":
-  version: 1.262.0
-  resolution: "posthog-js@npm:1.262.0"
+  version: 1.297.2
+  resolution: "posthog-js@npm:1.297.2"
   dependencies:
-    "@posthog/core": "npm:1.0.2"
+    "@posthog/core": "npm:1.5.5"
     core-js: "npm:^3.38.1"
     fflate: "npm:^0.4.8"
     preact: "npm:^10.19.3"
     web-vitals: "npm:^4.2.4"
-  peerDependencies:
-    "@rrweb/types": 2.0.0-alpha.17
-    rrweb-snapshot: 2.0.0-alpha.17
-  peerDependenciesMeta:
-    "@rrweb/types":
-      optional: true
-    rrweb-snapshot:
-      optional: true
-  checksum: 10c0/4c3cbeec787afd3768fe1e0856e0575b3699ed93cbe4041620a0457dd582acc2c5fc0a88f7f5086a04564ee4bc1e774d50c588e90565818fc183dff78c8a9ab9
+  checksum: 10c0/4053628bde6f467afa263182b7386a7707c825a972722e92b3e837d9873af67d53d7d36c6e8dd71da8addcacb49ca680c47d9d16e8e58e9f08d92cb971b75b47
   languageName: node
   linkType: hard
 
