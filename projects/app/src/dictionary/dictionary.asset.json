@@ -1500,7 +1500,7 @@
   ["文学:literature",{"gloss":["literature"],"partOfSpeech":"noun","pinyin":["wén xué"]}],
   ["文明:civilization",{"gloss":["civilization","culture"],"partOfSpeech":"noun","pinyin":["wén míng"]}],
   ["文章:article",{"gloss":["article","essay"],"partOfSpeech":"noun","pinyin":["wén zhāng"]}],
-  ["斗:measurement",{"gloss":["measurement"],"partOfSpeech":"radical","pinyin":["dǒu"]}],
+  ["斗:fight",{"gloss":["fight","battle","struggle"],"partOfSpeech":"verb","pinyin":["dòu"]}],
   ["斤:catty",{"gloss":["500 grams","jin","catty"],"partOfSpeech":"measureWord","pinyin":["jīn"]}],
   ["断:break",{"gloss":["break"],"partOfSpeech":"verb","pinyin":["duàn"]}],
   ["新:new",{"gloss":["new"],"partOfSpeech":"adjective","pinyin":["xīn"]}],
