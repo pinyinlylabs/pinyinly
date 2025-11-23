@@ -390,7 +390,7 @@ describe(`grapheme.json files`, async () => {
    *
    * @param ids - The IDS node to convert
    * @param cursor - Tracks stroke indices across recursive calls
-   * @returns A nested structure matching the GraphemeComponentLayout format
+   * @returns A nested structure matching the layout format
    */
   function idsNodeToMnemonicComponents(
     ids: IdsNode,
