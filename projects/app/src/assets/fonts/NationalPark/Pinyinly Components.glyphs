@@ -1,0 +1,229 @@
+{
+.appVersion = "3436";
+.formatVersion = 3;
+DisplayStrings = (
+"",
+"",
+"𠮛",
+"",
+""
+);
+axes = (
+{
+name = Weight;
+tag = wght;
+}
+);
+date = "2025-11-24 00:41:17 +0000";
+familyName = "Pinyinly Components";
+fontMaster = (
+{
+axesValues = (
+100
+);
+iconName = Light;
+id = m003;
+metricValues = (
+{
+over = 16;
+pos = 800;
+},
+{
+over = -16;
+},
+{
+over = -16;
+pos = -200;
+},
+{
+pos = 840;
+},
+{
+pos = -160;
+}
+);
+name = ExtraLight;
+},
+{
+axesValues = (
+400
+);
+id = m01;
+metricValues = (
+{
+over = 16;
+pos = 800;
+},
+{
+over = -16;
+},
+{
+over = -16;
+pos = -200;
+},
+{
+pos = 840;
+},
+{
+pos = -160;
+}
+);
+name = Regular;
+},
+{
+axesValues = (
+800
+);
+iconName = SemiBold;
+id = m002;
+metricValues = (
+{
+over = 16;
+pos = 800;
+},
+{
+over = -16;
+},
+{
+over = -16;
+pos = -200;
+},
+{
+pos = 840;
+},
+{
+pos = -160;
+}
+);
+name = ExtraBold;
+}
+);
+glyphs = (
+{
+glyphname = uni20b9b;
+lastChange = "2025-11-24 03:23:36 +0000";
+layers = (
+{
+layerId = m01;
+shapes = (
+{
+attr = {
+strokeWidth = 70;
+};
+closed = 1;
+nodes = (
+(197,0,l),
+(801,0,l),
+(801,454,l),
+(197,454,l)
+);
+},
+{
+attr = {
+lineCapEnd = 3;
+lineCapStart = 3;
+strokeWidth = 70;
+};
+closed = 0;
+nodes = (
+(197,678,l),
+(801,678,l)
+);
+}
+);
+width = 1000;
+},
+{
+layerId = m002;
+shapes = (
+{
+attr = {
+strokeWidth = 110;
+};
+closed = 1;
+nodes = (
+(197,0,l),
+(801,0,l),
+(801,454,l),
+(197,454,l)
+);
+},
+{
+attr = {
+lineCapEnd = "3";
+lineCapStart = "3";
+strokeWidth = 110;
+};
+closed = 0;
+nodes = (
+(197,678,l),
+(801,678,l)
+);
+}
+);
+width = 1000;
+},
+{
+layerId = m003;
+shapes = (
+{
+attr = {
+strokeWidth = 20;
+};
+closed = 1;
+nodes = (
+(197,0,l),
+(801,0,l),
+(801,454,l),
+(197,454,l)
+);
+},
+{
+attr = {
+lineCapEnd = "3";
+lineCapStart = "3";
+strokeWidth = 20;
+};
+closed = 0;
+nodes = (
+(197,678,l),
+(801,678,l)
+);
+}
+);
+width = 1000;
+}
+);
+script = han;
+unicode = 134043;
+}
+);
+metrics = (
+{
+type = ascender;
+},
+{
+type = baseline;
+},
+{
+type = descender;
+},
+{
+filter = "script == \"han\"";
+type = ascender;
+},
+{
+filter = "script == \"han\"";
+type = descender;
+}
+);
+unitsPerEm = 1000;
+userData = {
+GSDimensionPlugin.Dimensions = {
+m01 = {
+};
+};
+};
+versionMajor = 1;
+versionMinor = 0;
+}

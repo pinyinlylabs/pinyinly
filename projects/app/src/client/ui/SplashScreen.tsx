@@ -34,6 +34,7 @@ export const SplashScreen = ({}: { children?: never }) => {
       `@/assets/fonts/NationalPark/NationalPark-VariableFont_wght.ttf`,
     ),
     [`MaShanZheng-Regular`]: require(`@/assets/fonts/MaShanZheng-Regular.ttf`),
+    [`PinyinlyComponents`]: require(`@/assets/fonts/PinyinlyComponentsVF.ttf`),
     [`NotoSerifSC-Medium`]: require(`@/assets/fonts/NotoSerifSC-Medium.otf`),
   });
   const isReady = fontsLoaded || fontError != null; // (lottieLoaded || lottieError) &&
