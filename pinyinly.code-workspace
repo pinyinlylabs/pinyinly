@@ -50,5 +50,6 @@
     "chat.tools.terminal.autoApprove": {
       "/^moon run [\\w-]+:\\w+/": true,
     },
+    "editor.fontFamily": "'Pinyinly Components', Menlo, Monaco, 'Courier New', monospace",
   },
 }
