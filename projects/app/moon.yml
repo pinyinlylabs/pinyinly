@@ -29,6 +29,20 @@ tasks:
     options:
       runInCI: false
 
+  buildIosDevClient:
+    script: expo run:ios
+    options:
+      runInCI: false
+      cache: false
+    toolchain: "node"
+
+  buildAndroidDevClient:
+    script: expo run:ios
+    options:
+      runInCI: false
+      cache: false
+    toolchain: "node"
+
   buildEasUpdate:
     # Do iOS and Android separately to avoid IO contention and maybe allow metro bundler cache re-use.
     script: |
