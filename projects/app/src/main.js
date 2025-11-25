@@ -1,7 +1,9 @@
 import { installCryptoPolyfill } from "./polyfill/crypto";
+import { installIntlSegmenter } from "./polyfill/intlSegmenter";
 import { installSymbolAsyncInteratorPolyfill } from "./polyfill/symbolAsyncIterator";
 
 installCryptoPolyfill();
+installIntlSegmenter();
 installSymbolAsyncInteratorPolyfill();
 
 // Works around an issue where metro couldn't resolve

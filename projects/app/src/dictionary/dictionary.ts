@@ -116,25 +116,6 @@ export const loadHanziDecomposition = memoize0(
   },
 );
 
-export const loadHanziWordGlossMnemonics = memoize0(
-  async function loadHanziWordGlossMnemonics() {
-    return z
-      .array(
-        z.tuple([
-          hanziWordSchema,
-          z.array(z.object({ mnemonic: z.string(), rationale: z.string() })),
-        ]),
-      )
-      .transform((x) => new Map(x))
-      .transform(deepReadonly)
-      .parse(
-        await import(`./hanziWordGlossMnemonics.asset.json`).then(
-          (x) => x.default,
-        ),
-      );
-  },
-);
-
 export const wordListSchema = z.array(hanziWordSchema);
 
 export const allRadicalHanziWords = memoize0(
@@ -339,9 +320,6 @@ export const loadHanziWordPinyinMnemonics = memoize0(
 );
 
 export const allRadicalsByStrokes = async () => await loadRadicalStrokes();
-
-export const lookupHanziWordGlossMnemonics = async (hanziWord: HanziWord) =>
-  await loadHanziWordGlossMnemonics().then((x) => x.get(hanziWord) ?? null);
 
 export const lookupHanziWordPinyinMnemonics = async (hanziWord: HanziWord) =>
   await loadHanziWordPinyinMnemonics().then((x) => x.get(hanziWord) ?? null);
