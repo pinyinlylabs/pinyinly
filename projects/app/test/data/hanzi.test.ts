@@ -146,103 +146,103 @@ test(`parseIds handles 1 depth` satisfies HasNameOf<typeof parseIds>, () => {
   });
 
   expect(parseIds(`①`)).toEqual({
-    operator: `LeafUnknownCharacter`,
-    strokeCount: 1,
+    operator: `LeafCharacter`,
+    character: `①`,
   });
 
   expect(parseIds(`②`)).toEqual({
-    operator: `LeafUnknownCharacter`,
-    strokeCount: 2,
+    operator: `LeafCharacter`,
+    character: `②`,
   });
 
   expect(parseIds(`③`)).toEqual({
-    operator: `LeafUnknownCharacter`,
-    strokeCount: 3,
+    operator: `LeafCharacter`,
+    character: `③`,
   });
 
   expect(parseIds(`④`)).toEqual({
-    operator: `LeafUnknownCharacter`,
-    strokeCount: 4,
+    operator: `LeafCharacter`,
+    character: `④`,
   });
 
   expect(parseIds(`⑤`)).toEqual({
-    operator: `LeafUnknownCharacter`,
-    strokeCount: 5,
+    operator: `LeafCharacter`,
+    character: `⑤`,
   });
 
   expect(parseIds(`⑥`)).toEqual({
-    operator: `LeafUnknownCharacter`,
-    strokeCount: 6,
+    operator: `LeafCharacter`,
+    character: `⑥`,
   });
 
   expect(parseIds(`⑦`)).toEqual({
-    operator: `LeafUnknownCharacter`,
-    strokeCount: 7,
+    operator: `LeafCharacter`,
+    character: `⑦`,
   });
 
   expect(parseIds(`⑧`)).toEqual({
-    operator: `LeafUnknownCharacter`,
-    strokeCount: 8,
+    operator: `LeafCharacter`,
+    character: `⑧`,
   });
 
   expect(parseIds(`⑨`)).toEqual({
-    operator: `LeafUnknownCharacter`,
-    strokeCount: 9,
+    operator: `LeafCharacter`,
+    character: `⑨`,
   });
 
   expect(parseIds(`⑩`)).toEqual({
-    operator: `LeafUnknownCharacter`,
-    strokeCount: 10,
+    operator: `LeafCharacter`,
+    character: `⑩`,
   });
 
   expect(parseIds(`⑪`)).toEqual({
-    operator: `LeafUnknownCharacter`,
-    strokeCount: 11,
+    operator: `LeafCharacter`,
+    character: `⑪`,
   });
 
   expect(parseIds(`⑫`)).toEqual({
-    operator: `LeafUnknownCharacter`,
-    strokeCount: 12,
+    operator: `LeafCharacter`,
+    character: `⑫`,
   });
 
   expect(parseIds(`⑬`)).toEqual({
-    operator: `LeafUnknownCharacter`,
-    strokeCount: 13,
+    operator: `LeafCharacter`,
+    character: `⑬`,
   });
 
   expect(parseIds(`⑭`)).toEqual({
-    operator: `LeafUnknownCharacter`,
-    strokeCount: 14,
+    operator: `LeafCharacter`,
+    character: `⑭`,
   });
 
   expect(parseIds(`⑮`)).toEqual({
-    operator: `LeafUnknownCharacter`,
-    strokeCount: 15,
+    operator: `LeafCharacter`,
+    character: `⑮`,
   });
 
   expect(parseIds(`⑯`)).toEqual({
-    operator: `LeafUnknownCharacter`,
-    strokeCount: 16,
+    operator: `LeafCharacter`,
+    character: `⑯`,
   });
 
   expect(parseIds(`⑰`)).toEqual({
-    operator: `LeafUnknownCharacter`,
-    strokeCount: 17,
+    operator: `LeafCharacter`,
+    character: `⑰`,
   });
 
   expect(parseIds(`⑱`)).toEqual({
-    operator: `LeafUnknownCharacter`,
-    strokeCount: 18,
+    operator: `LeafCharacter`,
+    character: `⑱`,
   });
 
   expect(parseIds(`⑲`)).toEqual({
-    operator: `LeafUnknownCharacter`,
-    strokeCount: 19,
+    operator: `LeafCharacter`,
+    character: `⑲`,
   });
 
   expect(parseIds(`⑳`)).toEqual({
-    operator: `LeafUnknownCharacter`,
-    strokeCount: 20,
+    operator: `LeafCharacter`,
+    character: `⑳`,
   });
 });
 
@@ -292,16 +292,7 @@ test(`parseIds regression tests` satisfies HasNameOf<typeof parseIds>, () => {
 test(`walkIdsNode fixture` satisfies HasNameOf<typeof walkIdsNode>, () => {
   const ids = parseIds(`⿰a⿱bc`);
 
-  const leafs = [...walkIdsNode(ids)].map((x) => {
-    switch (x.operator) {
-      case `LeafCharacter`: {
-        return x.character;
-      }
-      case `LeafUnknownCharacter`: {
-        return x.strokeCount;
-      }
-    }
-  });
+  const leafs = [...walkIdsNode(ids)].map((x) => x.character);
 
   expect(leafs).toEqual([`a`, `b`, `c`]);
 });

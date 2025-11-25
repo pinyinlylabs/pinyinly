@@ -1,9 +1,15 @@
-import { describe, expect, test } from "vitest";
 import { normalizeIndexRanges, parseIndexRanges } from "#util/indexRanges.ts";
+import { describe, expect, test } from "vitest";
 
 describe(
   `parseIndexRanges suite` satisfies HasNameOf<typeof parseIndexRanges>,
   () => {
+    test(`handles empty string`, () => {
+      expect(parseIndexRanges(``)).toEqual([]);
+      expect(parseIndexRanges(` `)).toEqual([]);
+      expect(parseIndexRanges(`  `)).toEqual([]);
+    });
+
     test(`handles single number`, () => {
       expect(parseIndexRanges(`5`)).toEqual([5]);
       expect(parseIndexRanges(`0`)).toEqual([0]);

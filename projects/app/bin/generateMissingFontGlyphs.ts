@@ -1,4 +1,8 @@
-import { parseIds, walkIdsNode } from "#data/hanzi.ts";
+import {
+  parseIds,
+  strokeCountPlaceholderOrNull,
+  walkIdsNode,
+} from "#data/hanzi.ts";
 import {
   allHanziGraphemes,
   loadHanziDecomposition,
@@ -46,7 +50,7 @@ for (const grapheme of allGraphemes) {
   );
   const idsNode = parseIds(ids);
   for (const leaf of walkIdsNode(idsNode)) {
-    if (leaf.operator === `LeafCharacter`) {
+    if (strokeCountPlaceholderOrNull(leaf.character) == null) {
       allComponents.add(leaf.character);
     }
   }

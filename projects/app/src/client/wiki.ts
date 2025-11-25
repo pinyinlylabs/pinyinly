@@ -1,172 +1,17 @@
 import type { MdxComponentType } from "@/client/ui/mdx";
-import type { HanziText, HanziWord } from "@/data/model";
+import type {
+  HanziText,
+  HanziWord,
+  WikiGraphemeComponent,
+  WikiGraphemeComponentOrLayout,
+  WikiGraphemeData,
+} from "@/data/model";
 import { devToolsSlowQuerySleepIfEnabled } from "@/util/devtools";
 import { lazy } from "react";
 import type { DeepReadonly } from "ts-essentials";
-import z from "zod/v4";
-
-const graphemeComponentSchema = z.object({
-  /**
-   * The hanzi grapheme (if any) formed by the strokes. Usually this can
-   * be populated, but in some cases the strokes don't form a valid
-   * grapheme and instead are combined for more creative visual reasons.
-   */
-  hanzi: z.string().optional(),
-  label: z.string().optional(),
-  /**
-   * Comma-separated list of stroke indices (0-based) for strokes that are
-   * part of this grapheme. Allows shorthand ranges (e.g. 0-2,5 is the same as
-   * 0,1,2,5).
-   */
-  strokes: z.string(),
-  /**
-   * When the component uses a different number of strokes than `hanzi` it's
-   * normally marked as a bug. However in cases when it's intentional (e.g. 禸)
-   * this field can be used to specify the different in stroke count.
-   */
-  strokeDiff: z.number().optional(),
-  /**
-   * What color to render this component in the decomposition illustration. This
-   * allows highlighting different components in different colors for clarity.
-   */
-  color: z.string().optional(),
-});
-
-export type GraphemeComponent = z.infer<typeof graphemeComponentSchema>;
-
-const combiningCharacter2 = z.union([
-  z.literal(`⿰`),
-  z.literal(`⿱`),
-  z.literal(`⿵`),
-  z.literal(`⿶`),
-  z.literal(`⿴`),
-  z.literal(`⿻`),
-  z.literal(`⿸`),
-  z.literal(`⿺`),
-  z.literal(`⿹`),
-  z.literal(`⿷`),
-]);
-
-const combiningCharacter3 = z.union([z.literal(`⿲`), z.literal(`⿳`)]);
-
-// TODO [zod@>=4.1.12] try refactor to use https://github.com/colinhacks/zod/issues/5089
-const graphemeComponentOrLayout0Schema = z.union([
-  graphemeComponentSchema,
-  z.tuple([
-    combiningCharacter2,
-    graphemeComponentSchema,
-    graphemeComponentSchema,
-  ]),
-  z.tuple([
-    combiningCharacter3,
-    graphemeComponentSchema,
-    graphemeComponentSchema,
-    graphemeComponentSchema,
-  ]),
-]);
-
-const graphemeComponentOrLayout1Schema = z.union([
-  graphemeComponentSchema,
-  z.tuple([
-    combiningCharacter2,
-    graphemeComponentOrLayout0Schema,
-    graphemeComponentOrLayout0Schema,
-  ]),
-  z.tuple([
-    combiningCharacter3,
-    graphemeComponentOrLayout0Schema,
-    graphemeComponentOrLayout0Schema,
-    graphemeComponentOrLayout0Schema,
-  ]),
-]);
-
-const graphemeComponentOrLayout2Schema = z.union([
-  graphemeComponentSchema,
-  z.tuple([
-    combiningCharacter2,
-    graphemeComponentOrLayout1Schema,
-    graphemeComponentOrLayout1Schema,
-  ]),
-  z.tuple([
-    combiningCharacter3,
-    graphemeComponentOrLayout1Schema,
-    graphemeComponentOrLayout1Schema,
-    graphemeComponentOrLayout1Schema,
-  ]),
-]);
-
-export type GraphemeComponentOrLayout = z.infer<
-  typeof graphemeComponentOrLayout2Schema
->;
-
-const zHanziText = z.custom<HanziText>((x) => typeof x === `string`);
-
-/**
- * Schema for grapheme.json files.
- */
-export const graphemeDataSchema = z.object({
-  /**
-   * The hanzi character represented by this grapheme (e.g. 看).
-   */
-  hanzi: z.string(),
-  /**
-   * Stroke information, ideally SVG paths but otherwise just the count.
-   */
-  strokes: z.union([
-    z.number().describe(`Stroke count`),
-    z.array(z.string()).describe(`SVG paths for each stroke (in order)`),
-  ]),
-  /**
-   * The simplified form of this grapheme, if it is a traditional form.
-   *
-   * The property is used on traditional graphemes because it's expected there
-   * are fewer of those in the dataset since this app focuses on Mandarin.
-   */
-  traditionalFormOf: zHanziText.optional(),
-  /**
-   * If this grapheme is a component form of another grapheme, that hanzi.
-   */
-  componentFormOf: zHanziText.optional(),
-  /**
-   * The meaning mnemonic for the grapheme. This doesn't necessarily correspond
-   * to the etymological components, and their meanings can differ too. It's
-   * intended for beginner learners and optimised for mnemonic usefulness.
-   */
-  mnemonic: z
-    .object({
-      /**
-       * The layout of the components. The first element is the combining
-       * operator, and the remaining are the components for each slot.
-       */
-      components: graphemeComponentOrLayout2Schema,
-      stories: z
-        .array(
-          z.object({
-            gloss: z.string(),
-            story: z.string(),
-            /**
-             * If there are other stories that depend on this one to make sense,
-             * they can be nested inside their dependency.
-             */
-            children: z
-              .array(
-                z.object({
-                  gloss: z.string(),
-                  story: z.string(),
-                }),
-              )
-              .optional(),
-          }),
-        )
-        .optional(),
-    })
-    .optional(),
-});
-
-export type GraphemeData = z.infer<typeof graphemeDataSchema>;
 
 export function graphemeStrokeCount(
-  graphemeData: DeepReadonly<GraphemeData>,
+  graphemeData: DeepReadonly<WikiGraphemeData>,
 ): number {
   return typeof graphemeData.strokes === `number`
     ? graphemeData.strokes
@@ -174,8 +19,8 @@ export function graphemeStrokeCount(
 }
 
 export function* allGraphemeComponents(
-  graphemeLayout: DeepReadonly<GraphemeComponentOrLayout>,
-): Generator<DeepReadonly<GraphemeComponent>> {
+  graphemeLayout: DeepReadonly<WikiGraphemeComponentOrLayout>,
+): Generator<DeepReadonly<WikiGraphemeComponent>> {
   // Base case: a leaf component
   if (`strokes` in graphemeLayout) {
     yield graphemeLayout;

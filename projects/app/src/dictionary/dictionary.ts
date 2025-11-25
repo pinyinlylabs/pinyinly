@@ -1,4 +1,9 @@
-import { parseIds, splitHanziText, walkIdsNode } from "@/data/hanzi";
+import {
+  parseIds,
+  splitHanziText,
+  strokeCountPlaceholderOrNull,
+  walkIdsNode,
+} from "@/data/hanzi";
 import type {
   HanziGrapheme,
   HanziText,
@@ -295,34 +300,7 @@ const loadRadicalStrokes = memoize0(async () =>
     .parse(await import(`./radicalStrokes.asset.json`).then((x) => x.default)),
 );
 
-export const loadHanziWordPinyinMnemonics = memoize0(
-  async function loadHanziWordPinyinMnemonics() {
-    return z
-      .array(
-        z.tuple([
-          z.string(),
-          z.array(
-            z.object({
-              mnemonic: z.string(),
-              strategy: z.string(),
-            }),
-          ),
-        ]),
-      )
-      .transform((x) => new Map(x))
-      .transform(deepReadonly)
-      .parse(
-        await import(`./radicalPinyinMnemonics.asset.json`).then(
-          (x) => x.default,
-        ),
-      );
-  },
-);
-
 export const allRadicalsByStrokes = async () => await loadRadicalStrokes();
-
-export const lookupHanziWordPinyinMnemonics = async (hanziWord: HanziWord) =>
-  await loadHanziWordPinyinMnemonics().then((x) => x.get(hanziWord) ?? null);
 
 /**
  * Build an inverted index of hanzi words to hanzi word meanings and glosses to
@@ -513,10 +491,10 @@ export async function decomposeHanzi(
         const idsNode = parseIds(ids);
         for (const leaf of walkIdsNode(idsNode)) {
           if (
-            leaf.operator === `LeafCharacter` &&
+            strokeCountPlaceholderOrNull(leaf.character) == null &&
             leaf.character !== char // todo turn into invariant?
           ) {
-            result.push(leaf.character);
+            result.push(leaf.character as HanziGrapheme);
           }
         }
       }
@@ -704,6 +682,8 @@ export const getIsComponentFormHanzi = memoize0(async () => {
     `予`,
     `乞`,
     `卅`,
+    `钅`,
+    `鸟`,
   ]);
 
   for (const [hanziWord, meaning] of dictionary.entries()) {

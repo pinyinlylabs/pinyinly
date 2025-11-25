@@ -1,5 +1,10 @@
 import type { IdsNode } from "#data/hanzi.js";
-import { parseIds, walkIdsNode } from "#data/hanzi.js";
+import {
+  parseIds,
+  strokeCountPlaceholderOrNull,
+  walkIdsNode,
+} from "#data/hanzi.js";
+import type { HanziGrapheme } from "#data/model.js";
 import {
   allHanziGraphemes,
   loadHanziDecomposition,
@@ -180,16 +185,12 @@ for (const grapheme of decompositionQueue) {
   for (const decomposition of decompositions) {
     let score = decomposition.tags.has(SourceTag.China) ? 100 : 0;
     for (const leaf of walkIdsNode(decomposition.idsNode)) {
-      switch (leaf.operator) {
-        case `LeafCharacter`: {
-          score -= allDecompositions.has(leaf.character) ? 1 : 3;
-          break;
-        }
-        case `LeafUnknownCharacter`: {
-          score -= 10;
-          break;
-        }
-      }
+      score -=
+        strokeCountPlaceholderOrNull(leaf.character) == null
+          ? 10
+          : allDecompositions.has(leaf.character)
+            ? 1
+            : 3;
     }
 
     if (score > bestDecompositionScore) {
@@ -240,8 +241,8 @@ for (const grapheme of decompositionQueue) {
 
   for (const decomposition of bestDecompositions) {
     for (const leaf of walkIdsNode(decomposition.idsNode)) {
-      if (leaf.operator === `LeafCharacter`) {
-        decompositionQueue.add(leaf.character);
+      if (strokeCountPlaceholderOrNull(leaf.character) == null) {
+        decompositionQueue.add(leaf.character as HanziGrapheme);
       }
     }
   }
