@@ -19,7 +19,7 @@
   "mnemonic": {
     "components": [
       "⿱",
-      { "strokes": "0-9" },
+      { "hanzi": "𡨄", "strokes": "0-9" },
       { "hanzi": "贝", "strokes": "10-13" }
     ]
   }
