@@ -12,7 +12,7 @@ export function parseIndexRanges(ranges: string): number[] {
       for (let i = start; i <= end; i++) {
         result.push(i);
       }
-    } else {
+    } else if (part.trim() !== ``) {
       result.push(Number(part));
     }
   }

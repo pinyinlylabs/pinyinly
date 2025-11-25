@@ -196,7 +196,7 @@ describe(`grapheme.json files`, async () => {
     expect(errors, `graphemes missing 2+ mnemonic components`).toEqual([]);
   });
 
-  test(`no duplicate stroke indicies in components (e.g. ❌ 0-3,2)`, async () => {
+  test(`component strokes conformance`, async () => {
     const errors = [];
 
     for (const { grapheme, graphemeData } of graphemeFilePaths) {
@@ -206,7 +206,10 @@ describe(`grapheme.json files`, async () => {
         )) {
           const strokeIndices = parseIndexRanges(component.strokes);
           try {
+            // no duplicate stroke indicies in components (e.g. ❌ 0-3,2)
             uniqueInvariant(strokeIndices);
+            // at least one stroke
+            expect(strokeIndices.length).toBeGreaterThan(0);
           } catch (error) {
             errors.push([grapheme, error]);
           }
