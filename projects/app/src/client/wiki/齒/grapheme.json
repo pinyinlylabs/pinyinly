@@ -4,16 +4,7 @@
     "components": [
       "⿱",
       { "hanzi": "止", "strokes": "0-3" },
-      [
-        "⿶",
-        { "hanzi": "凵", "strokes": "13-14" },
-        [
-          "⿳",
-          { "hanzi": "从", "strokes": "4-7" },
-          { "hanzi": "一", "strokes": "8" },
-          { "hanzi": "从", "strokes": "9-12" }
-        ]
-      ]
+      { "hanzi": "𠚕", "strokes": "4-12" }
     ]
   },
   "strokes": [
