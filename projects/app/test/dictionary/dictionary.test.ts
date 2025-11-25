@@ -18,7 +18,6 @@ import {
   loadDictionary,
   loadHanziDecomposition,
   loadHanziWordMigrations,
-  loadHanziWordPinyinMnemonics,
   loadMissingFontGlyphs,
   loadPinyinSoundNameSuggestions,
   loadPinyinSoundThemeDetails,
@@ -60,7 +59,6 @@ test(`json data can be loaded and passes the schema validation`, async () => {
   await loadPinyinSoundNameSuggestions();
   await loadPinyinSoundThemeDetails();
   await loadPinyinWords();
-  await loadHanziWordPinyinMnemonics();
   await loadDictionary();
   await loadWiki();
 });

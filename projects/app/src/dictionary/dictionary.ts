@@ -300,34 +300,7 @@ const loadRadicalStrokes = memoize0(async () =>
     .parse(await import(`./radicalStrokes.asset.json`).then((x) => x.default)),
 );
 
-export const loadHanziWordPinyinMnemonics = memoize0(
-  async function loadHanziWordPinyinMnemonics() {
-    return z
-      .array(
-        z.tuple([
-          z.string(),
-          z.array(
-            z.object({
-              mnemonic: z.string(),
-              strategy: z.string(),
-            }),
-          ),
-        ]),
-      )
-      .transform((x) => new Map(x))
-      .transform(deepReadonly)
-      .parse(
-        await import(`./radicalPinyinMnemonics.asset.json`).then(
-          (x) => x.default,
-        ),
-      );
-  },
-);
-
 export const allRadicalsByStrokes = async () => await loadRadicalStrokes();
-
-export const lookupHanziWordPinyinMnemonics = async (hanziWord: HanziWord) =>
-  await loadHanziWordPinyinMnemonics().then((x) => x.get(hanziWord) ?? null);
 
 /**
  * Build an inverted index of hanzi words to hanzi word meanings and glosses to
