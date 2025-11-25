@@ -3,10 +3,7 @@ import {
   strokeCountPlaceholderOrNull,
   walkIdsNode,
 } from "#data/hanzi.ts";
-import {
-  allHanziGraphemes,
-  loadHanziDecomposition,
-} from "#dictionary/dictionary.ts";
+import { allHanziGraphemes, loadCharacters } from "#dictionary/dictionary.ts";
 import { unicodeShortIdentifier } from "#util/unicode.ts";
 import { glob, writeFile } from "@pinyinly/lib/fs";
 import { invariant } from "@pinyinly/lib/invariant";
@@ -39,11 +36,11 @@ invariant(pingFang != null);
 const allGraphemes = await allHanziGraphemes();
 
 const allComponents = new Set<string>();
-const decompositions = await loadHanziDecomposition();
+const charactersData = await loadCharacters();
 
 for (const grapheme of allGraphemes) {
   allComponents.add(grapheme);
-  const ids = decompositions.get(grapheme);
+  const ids = charactersData.get(grapheme)?.decomposition;
   invariant(
     ids != null,
     `character "${grapheme}" (${unicodeShortIdentifier(grapheme)}) has no decomposition`,

@@ -381,7 +381,7 @@ const wikiGraphemeComponentSchema = z.object({
    * part of this grapheme. Allows shorthand ranges (e.g. 0-2,5 is the same as
    * 0,1,2,5).
    */
-  strokes: z.string(),
+  strokes: z.string().default(``),
   /**
    * When the component uses a different number of strokes than `hanzi` it's
    * normally marked as a bug. However in cases when it's intentional (e.g. 禸)

@@ -1,6 +1,7 @@
 import { idsNodeToArrays, isHanziGrapheme, parseIds } from "#data/hanzi.js";
 import type { HanziText } from "#data/model.js";
 import { wikiGraphemeDataSchema } from "#data/model.js";
+import { loadOldHanziDecomposition } from "#dictionary/dictionary.js";
 import { normalizeIndexRanges } from "#util/indexRanges.ts";
 import {
   existsSync,
@@ -118,7 +119,6 @@ for (const grapheme of allGraphemes) {
   }
 
   const graphicsRecord = graphicsDataByCharacter.get(grapheme);
-  const dictionaryRecord = dictionaryDataByCharacter.get(grapheme);
 
   const graphemeWikiDir = path.join(wikiDir, grapheme);
   if (!existsSync(graphemeWikiDir)) {
@@ -150,7 +150,7 @@ for (const grapheme of allGraphemes) {
 
   {
     //
-    // .mnemonic updates
+    // .mnemonic updates from dictionary.txt
     //
     let existing;
     try {
@@ -160,6 +160,8 @@ for (const grapheme of allGraphemes) {
     } catch (error) {
       debug(`failed to read existing data for %O: %O`, grapheme, error);
     }
+
+    const dictionaryRecord = dictionaryDataByCharacter.get(grapheme);
 
     if (
       existing?.mnemonic == null &&
@@ -198,6 +200,39 @@ for (const grapheme of allGraphemes) {
 
         debug(`wrote mnemonic for %O`, grapheme);
       }
+    }
+  }
+
+  {
+    //
+    // .mnemonic updates from hanziDecomposition.asset.json
+    //
+    let existing;
+    try {
+      existing = wikiGraphemeDataSchema.parse(
+        JSON.parse(readFileSync(dataFile, `utf-8`)),
+      );
+    } catch (error) {
+      debug(
+        `failed to read old hanzi decomposition for %O: %O`,
+        grapheme,
+        error,
+      );
+    }
+
+    const dictionaryRecord = await loadOldHanziDecomposition().then((x) =>
+      x.get(grapheme),
+    );
+    if (existing?.mnemonic == null && dictionaryRecord != null) {
+      const newMnemonic = {
+        components: idsNodeToArrays(parseIds(dictionaryRecord), (character) => {
+          return { hanzi: character };
+        }),
+      };
+
+      await updateJsonFileKey(dataFile, `mnemonic`, newMnemonic, indentLevels);
+
+      debug(`wrote mnemonic for %O`, grapheme);
     }
   }
 }

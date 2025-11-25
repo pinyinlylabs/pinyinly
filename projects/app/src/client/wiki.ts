@@ -1,4 +1,5 @@
 import type { MdxComponentType } from "@/client/ui/mdx";
+import { strokeCountToCharacter } from "@/data/hanzi";
 import type {
   HanziText,
   HanziWord,
@@ -7,6 +8,7 @@ import type {
   WikiGraphemeData,
 } from "@/data/model";
 import { devToolsSlowQuerySleepIfEnabled } from "@/util/devtools";
+import { parseIndexRanges } from "@/util/indexRanges";
 import { lazy } from "react";
 import type { DeepReadonly } from "ts-essentials";
 
@@ -54,6 +56,40 @@ export function* allGraphemeComponents(
   }
 }
 
+export function graphemeLayoutToString(
+  graphemeLayout: DeepReadonly<WikiGraphemeComponentOrLayout>,
+): string {
+  // Base case: a leaf component
+  if (`hanzi` in graphemeLayout && graphemeLayout.hanzi != null) {
+    return graphemeLayout.hanzi;
+  } else if (`strokes` in graphemeLayout) {
+    return strokeCountToCharacter(
+      parseIndexRanges(graphemeLayout.strokes).length,
+    );
+  }
+
+  // Recursive case: a layout with nested components
+  const operator = graphemeLayout[0];
+  switch (operator) {
+    case `⿰`:
+    case `⿵`:
+    case `⿶`:
+    case `⿴`:
+    case `⿸`:
+    case `⿺`:
+    case `⿹`:
+    case `⿻`:
+    case `⿷`:
+    case `⿱`: {
+      return `${operator}${graphemeLayoutToString(graphemeLayout[1])}${graphemeLayoutToString(graphemeLayout[2])}`;
+    }
+    case `⿲`:
+    case `⿳`: {
+      return `${operator}${graphemeLayoutToString(graphemeLayout[1])}${graphemeLayoutToString(graphemeLayout[2])}${graphemeLayoutToString(graphemeLayout[3])}`;
+    }
+  }
+}
+
 const lazyMdx = <Mdx extends MdxComponentType>(
   importFn: () => Promise<{ default: Mdx }>,
 ) =>
@@ -81,6 +117,7 @@ function hanziWordToPath(hanziWord: HanziWord): string {
 // prettier-ignore
 const registry: Record<string, MdxComponentType> = {
   // <pyly-glob-template glob="./wiki/**/*.mdx" template="  \"${relpathWithoutExt}\": lazyMdx(() => import(`${path}`)),">
+  "⺼/meaning": lazyMdx(() => import(`./wiki/⺼/meaning.mdx`)),
   "㐅/meaning": lazyMdx(() => import(`./wiki/㐅/meaning.mdx`)),
   "䒑/meaning": lazyMdx(() => import(`./wiki/䒑/meaning.mdx`)),
   "一/meaning": lazyMdx(() => import(`./wiki/一/meaning.mdx`)),
@@ -2460,6 +2497,7 @@ const registry: Record<string, MdxComponentType> = {
   "西边/meaning": lazyMdx(() => import(`./wiki/西边/meaning.mdx`)),
   "西部/meaning": lazyMdx(() => import(`./wiki/西部/meaning.mdx`)),
   "西餐/meaning": lazyMdx(() => import(`./wiki/西餐/meaning.mdx`)),
+  "覀/meaning": lazyMdx(() => import(`./wiki/覀/meaning.mdx`)),
   "要/meaning": lazyMdx(() => import(`./wiki/要/meaning.mdx`)),
   "要是/meaning": lazyMdx(() => import(`./wiki/要是/meaning.mdx`)),
   "要求/meaning": lazyMdx(() => import(`./wiki/要求/meaning.mdx`)),

@@ -1,25 +1,33 @@
-import { allGraphemeComponents, graphemeStrokeCount } from "#client/wiki.js";
-import type { IdsNode } from "#data/hanzi.js";
 import {
-  idsNodeToArrays,
-  isHanziGrapheme,
-  parseIds,
-  strokeCountPlaceholderOrNull,
-} from "#data/hanzi.js";
+  allGraphemeComponents,
+  graphemeLayoutToString,
+  graphemeStrokeCount,
+} from "#client/wiki.js";
+import { isHanziGrapheme } from "#data/hanzi.js";
 import type { HanziText, WikiGraphemeData } from "#data/model.js";
 import { wikiGraphemeDataSchema } from "#data/model.js";
+import type { CharactersKey, CharactersValue } from "#dictionary/dictionary.js";
 import {
   getIsComponentFormHanzi,
   getIsStructuralHanzi,
   hanziToHanziWordMap,
-  loadHanziDecomposition,
+  loadCharacters,
   lookupHanzi,
 } from "#dictionary/dictionary.js";
 import { IS_CI } from "#util/env.js";
 import { normalizeIndexRanges, parseIndexRanges } from "#util/indexRanges.js";
 import { createSpeechFileTests } from "@pinyinly/audio-sprites/testing";
-import { memoize0, memoize1 } from "@pinyinly/lib/collections";
-import { existsSync, glob, readFileSync } from "@pinyinly/lib/fs";
+import {
+  memoize0,
+  memoize1,
+  sortComparatorString,
+} from "@pinyinly/lib/collections";
+import {
+  existsSync,
+  glob,
+  readFileSync,
+  writeJsonFileIfChanged,
+} from "@pinyinly/lib/fs";
 import {
   invariant,
   nonNullable,
@@ -31,6 +39,7 @@ import { describe, expect, test } from "vitest";
 import { projectRoot } from "../helpers.ts";
 
 const wikiDir = path.join(projectRoot, `src/client/wiki`);
+const dictionaryDir = path.join(projectRoot, `src/dictionary`);
 
 describe(`speech files`, async () => {
   await createSpeechFileTests({
@@ -138,31 +147,29 @@ describe(`grapheme.json files`, async () => {
       }
     },
   );
-  const graphemeFilePaths = await glob(path.join(wikiDir, `*/`)).then(
-    (dirPaths) =>
-      dirPaths.flatMap((dirPath) => {
-        const grapheme = path.basename(dirPath) as HanziText;
-        const filePath = path.join(wikiDir, grapheme, `grapheme.json`);
-        return isHanziGrapheme(grapheme)
-          ? ([
-              {
-                grapheme,
-                graphemeData: nonNullable(getDataForGrapheme(grapheme)),
-                filePath,
-              },
-            ] as const)
-          : [];
-      }),
+  const graphemeFiles = await glob(path.join(wikiDir, `*/`)).then((dirPaths) =>
+    dirPaths.flatMap((dirPath) => {
+      const grapheme = path.basename(dirPath) as HanziText;
+      const filePath = path.join(wikiDir, grapheme, `grapheme.json`);
+      return isHanziGrapheme(grapheme)
+        ? ([
+            {
+              grapheme,
+              graphemeData: nonNullable(getDataForGrapheme(grapheme)),
+              filePath,
+            },
+          ] as const)
+        : [];
+    }),
   );
-  expect(graphemeFilePaths.length).toBeGreaterThan(0);
+  expect(graphemeFiles.length).toBeGreaterThan(0);
   const isComponentFormHanzi = await getIsComponentFormHanzi();
-  const decompositions = await loadHanziDecomposition();
 
   test(`graphemes in the dictionary with 5+ strokes have mnemonic components`, async () => {
     const errors = [];
     const atomicGraphemes = new Set([`非`, `臣`, `襾`, `舟`]);
 
-    for (const { grapheme, graphemeData } of graphemeFilePaths) {
+    for (const { grapheme, graphemeData } of graphemeFiles) {
       const meanings = await lookupHanzi(grapheme);
       if (
         graphemeStrokeCount(graphemeData) <= 4 ||
@@ -180,16 +187,7 @@ describe(`grapheme.json files`, async () => {
           [...allGraphemeComponents(graphemeData.mnemonic.components)].length,
         ).toBeGreaterThanOrEqual(2);
       } catch (error) {
-        const toPush = [grapheme, error];
-        const hint = decompositions.get(grapheme);
-        if (hint != null) {
-          toPush.push(`(decomposition guess: ${hint})`, {
-            mnemonic: {
-              components: idsNodeToMnemonicComponents(parseIds(hint)),
-            },
-          });
-        }
-        errors.push(toPush);
+        errors.push([grapheme, error]);
       }
     }
 
@@ -199,7 +197,7 @@ describe(`grapheme.json files`, async () => {
   test(`component strokes conformance`, async () => {
     const errors = [];
 
-    for (const { grapheme, graphemeData } of graphemeFilePaths) {
+    for (const { grapheme, graphemeData } of graphemeFiles) {
       if (graphemeData.mnemonic?.components) {
         for (const component of allGraphemeComponents(
           graphemeData.mnemonic.components,
@@ -223,7 +221,7 @@ describe(`grapheme.json files`, async () => {
   test(`component index ranges are normalized`, () => {
     const errors = [];
 
-    for (const { grapheme, graphemeData } of graphemeFilePaths) {
+    for (const { grapheme, graphemeData } of graphemeFiles) {
       if (graphemeData.mnemonic?.components) {
         for (const [i, component] of [
           ...allGraphemeComponents(graphemeData.mnemonic.components),
@@ -247,12 +245,9 @@ describe(`grapheme.json files`, async () => {
   test(`components do not use invalid "hanzi" strings`, async () => {
     const errors = [];
 
-    for (const { grapheme, graphemeData } of graphemeFilePaths) {
+    for (const { grapheme, graphemeData } of graphemeFiles) {
       if (graphemeData.mnemonic?.components) {
         const bannedCharacters = new Set();
-
-        // Don't self-reference
-        bannedCharacters.add(graphemeData.hanzi);
 
         // Don't allow IDS combining characters or circled numbers (meaning "unknown N stroke character").
         for (const char of `⿰|⿱|⿲|⿳|⿴|⿵|⿶|⿷|⿼|⿸|⿹|⿺|⿽|⿻|⿾|⿿|①|②|③|④|⑤|⑥|⑦|⑧|⑨|⑩|⑪|⑫|⑬|⑭|⑮|⑯|⑰|⑱|⑲|⑳`.split(
@@ -288,7 +283,7 @@ describe(`grapheme.json files`, async () => {
   test(`number of mnemonic stories matches number of meanings for hanzi`, async () => {
     const errors = [];
 
-    for (const { grapheme, graphemeData } of graphemeFilePaths) {
+    for (const { grapheme, graphemeData } of graphemeFiles) {
       if (graphemeData.mnemonic?.stories) {
         const hanzi = graphemeData.hanzi as HanziText;
         const hanziWordMeanings = await lookupHanzi(hanzi);
@@ -313,7 +308,7 @@ describe(`grapheme.json files`, async () => {
   test(`all strokes are covered by mnemonic components`, async () => {
     const errors = [];
 
-    for (const { grapheme, graphemeData } of graphemeFilePaths) {
+    for (const { grapheme, graphemeData } of graphemeFiles) {
       if (graphemeData.mnemonic?.components) {
         const allComponentStrokes = new Set<number>();
         for (const component of allGraphemeComponents(
@@ -350,7 +345,7 @@ describe(`grapheme.json files`, async () => {
   test(`mnemonic component strokes match the hanzi stroke count`, async () => {
     const errors = [];
 
-    for (const { grapheme, graphemeData } of graphemeFilePaths) {
+    for (const { grapheme, graphemeData } of graphemeFiles) {
       if (graphemeData.mnemonic?.components) {
         for (const [, component] of [
           ...allGraphemeComponents(graphemeData.mnemonic.components),
@@ -384,30 +379,32 @@ describe(`grapheme.json files`, async () => {
     expect(errors).toEqual([]);
   });
 
-  function idsNodeToMnemonicComponents(ids: IdsNode): unknown {
-    let strokesCounted = 0;
-    return idsNodeToArrays(ids, (character) => {
-      let hanzi: string | undefined;
+  test(`consistency with characters.asset.json`, async () => {
+    const expected = new Map<CharactersKey, CharactersValue>();
 
-      // Handle ①, ②, …, ⑳
-      let strokeCount = strokeCountPlaceholderOrNull(character);
-
-      // Handle normal hanzi characters
-      if (strokeCount == null) {
-        hanzi = character;
-        const data = getDataForGrapheme(character);
-        strokeCount = data == null ? 1 : graphemeStrokeCount(data);
+    for (const { grapheme, graphemeData } of graphemeFiles) {
+      if (graphemeData.mnemonic) {
+        expected.set(grapheme, {
+          decomposition: graphemeLayoutToString(
+            graphemeData.mnemonic.components,
+          ),
+        });
       }
+    }
 
-      const startStroke = strokesCounted;
-      const endStroke = strokesCounted + strokeCount - 1;
-      const strokes = normalizeIndexRanges(`${startStroke}-${endStroke}`);
+    if (!IS_CI) {
+      await writeJsonFileIfChanged(
+        path.join(dictionaryDir, `characters.asset.json`),
+        [...expected.entries()].sort(
+          sortComparatorString(([character]) => character),
+        ),
+        2,
+      );
+    }
 
-      strokesCounted += strokeCount;
-
-      return hanzi == null ? { strokes } : { hanzi, strokes };
-    });
-  }
+    const actual = await loadCharacters();
+    expect(expected).toEqual(actual);
+  });
 });
 
 describe(
@@ -441,6 +438,21 @@ describe(
         component2,
         component3,
       ]);
+    });
+  },
+);
+
+describe(
+  `graphemeLayoutToString suite` satisfies HasNameOf<
+    typeof graphemeLayoutToString
+  >,
+  () => {
+    test(`flat depth`, () => {
+      const component1 = { hanzi: `A`, strokes: `0-1` };
+      const component2 = { hanzi: `B`, strokes: `2-3` };
+
+      const layout = [`⿰`, component1, component2] as const;
+      expect(graphemeLayoutToString(layout)).toEqual(`⿰AB`);
     });
   },
 );
