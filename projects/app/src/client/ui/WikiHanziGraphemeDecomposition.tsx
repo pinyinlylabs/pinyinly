@@ -1,5 +1,5 @@
-import type { GraphemeData } from "@/client/wiki";
 import { allGraphemeComponents } from "@/client/wiki";
+import type { WikiGraphemeData } from "@/data/model";
 import { parseIndexRanges } from "@/util/indexRanges";
 import { Image } from "expo-image";
 import type { ReactNode } from "react";
@@ -9,7 +9,7 @@ import { HanziGrapheme, hanziGraphemeColorSchema } from "./HanziGrapheme";
 import { Pylymark } from "./Pylymark";
 
 interface WikiHanziGraphemeDecompositionProps {
-  graphemeData: GraphemeData;
+  graphemeData: WikiGraphemeData;
   illustrationSrc?: RnRequireSource;
   illustrationFit?: `cover` | `contain`;
 }

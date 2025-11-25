@@ -1,7 +1,7 @@
 import type { HanziGrapheme, HanziText } from "@/data/model";
-import { UnexpectedValueError } from "@pinyinly/lib/types";
 import { graphemeCount, splitGraphemes } from "@/util/unicode";
 import { invariant } from "@pinyinly/lib/invariant";
+import { UnexpectedValueError } from "@pinyinly/lib/types";
 import type { StrictExtract } from "ts-essentials";
 import { z } from "zod/v4";
 
@@ -88,11 +88,7 @@ export type IdsNode =
     }
   | {
       operator: `LeafCharacter`;
-      character: HanziGrapheme;
-    }
-  | {
-      operator: `LeafUnknownCharacter`;
-      strokeCount: number;
+      character: string;
     };
 
 const idsOperatorSchema = z.enum({
@@ -257,12 +253,7 @@ export function parseIds(ids: string, cursor?: { index: number }): IdsNode {
     }
   }
 
-  const strokeCount = strokeCountPlaceholderOrNull(charCodePoint);
-  if (strokeCount != null) {
-    return { operator: `LeafUnknownCharacter`, strokeCount };
-  }
-
-  return { operator: `LeafCharacter`, character: char as HanziGrapheme };
+  return { operator: `LeafCharacter`, character: char };
 }
 
 export function strokeCountPlaceholderOrNull(
@@ -345,9 +336,145 @@ export function idsNodeToString(ids: IdsNode): string {
     case `LeafCharacter`: {
       return ids.character;
     }
-    case `LeafUnknownCharacter`: {
-      return strokeCountToCharacter(ids.strokeCount);
+  }
+}
+
+/**
+ * Index path to an IDS node, represented as an array of child indices.
+ */
+export type IdsNodePath = number[];
+
+/**
+ * Converts an IDS (Ideographic Description Sequence) node into a nested array
+ * structure.
+ */
+export function idsNodeToArrays<Leaf = unknown>(
+  ids: IdsNode,
+  buildLeaf: (character: string, path: IdsNodePath) => Leaf,
+  ctx?: { path: IdsNodePath },
+): unknown {
+  ctx ??= { path: [] };
+
+  try {
+    switch (ids.operator) {
+      case IdsOperator.LeftToRight: {
+        return [
+          ids.operator,
+          (ctx.path.push(0), idsNodeToArrays(ids.left, buildLeaf, ctx)),
+          (ctx.path.push(1), idsNodeToArrays(ids.right, buildLeaf, ctx)),
+        ];
+      }
+      case IdsOperator.AboveToBelow: {
+        return [
+          ids.operator,
+          (ctx.path.push(0), idsNodeToArrays(ids.above, buildLeaf, ctx)),
+          (ctx.path.push(1), idsNodeToArrays(ids.below, buildLeaf, ctx)),
+        ];
+      }
+      case IdsOperator.LeftToMiddleToRight: {
+        return [
+          ids.operator,
+          (ctx.path.push(0), idsNodeToArrays(ids.left, buildLeaf, ctx)),
+          (ctx.path.push(1), idsNodeToArrays(ids.middle, buildLeaf, ctx)),
+          (ctx.path.push(2), idsNodeToArrays(ids.right, buildLeaf, ctx)),
+        ];
+      }
+      case IdsOperator.AboveToMiddleAndBelow: {
+        return [
+          ids.operator,
+          (ctx.path.push(0), idsNodeToArrays(ids.above, buildLeaf, ctx)),
+          (ctx.path.push(1), idsNodeToArrays(ids.middle, buildLeaf, ctx)),
+          (ctx.path.push(2), idsNodeToArrays(ids.below, buildLeaf, ctx)),
+        ];
+      }
+      case IdsOperator.FullSurround: {
+        return [
+          ids.operator,
+          (ctx.path.push(0), idsNodeToArrays(ids.surrounding, buildLeaf, ctx)),
+          (ctx.path.push(1), idsNodeToArrays(ids.surrounded, buildLeaf, ctx)),
+        ];
+      }
+      case IdsOperator.SurroundFromAbove: {
+        return [
+          ids.operator,
+          (ctx.path.push(0), idsNodeToArrays(ids.above, buildLeaf, ctx)),
+          (ctx.path.push(1), idsNodeToArrays(ids.surrounded, buildLeaf, ctx)),
+        ];
+      }
+      case IdsOperator.SurroundFromBelow: {
+        return [
+          ids.operator,
+          (ctx.path.push(0), idsNodeToArrays(ids.below, buildLeaf, ctx)),
+          (ctx.path.push(1), idsNodeToArrays(ids.surrounded, buildLeaf, ctx)),
+        ];
+      }
+      case IdsOperator.SurroundFromLeft: {
+        return [
+          ids.operator,
+          (ctx.path.push(0), idsNodeToArrays(ids.left, buildLeaf, ctx)),
+          (ctx.path.push(1), idsNodeToArrays(ids.surrounded, buildLeaf, ctx)),
+        ];
+      }
+      case IdsOperator.SurroundFromRight: {
+        return [
+          ids.operator,
+          (ctx.path.push(0), idsNodeToArrays(ids.right, buildLeaf, ctx)),
+          (ctx.path.push(1), idsNodeToArrays(ids.surrounded, buildLeaf, ctx)),
+        ];
+      }
+      case IdsOperator.SurroundFromUpperLeft: {
+        return [
+          ids.operator,
+          (ctx.path.push(0), idsNodeToArrays(ids.upperLeft, buildLeaf, ctx)),
+          (ctx.path.push(1), idsNodeToArrays(ids.surrounded, buildLeaf, ctx)),
+        ];
+      }
+      case IdsOperator.SurroundFromUpperRight: {
+        return [
+          ids.operator,
+          (ctx.path.push(0), idsNodeToArrays(ids.upperRight, buildLeaf, ctx)),
+          (ctx.path.push(1), idsNodeToArrays(ids.surrounded, buildLeaf, ctx)),
+        ];
+      }
+      case IdsOperator.SurroundFromLowerLeft: {
+        return [
+          ids.operator,
+          (ctx.path.push(0), idsNodeToArrays(ids.lowerLeft, buildLeaf, ctx)),
+          (ctx.path.push(1), idsNodeToArrays(ids.surrounded, buildLeaf, ctx)),
+        ];
+      }
+      case IdsOperator.SurroundFromLowerRight: {
+        return [
+          ids.operator,
+          (ctx.path.push(0), idsNodeToArrays(ids.lowerRight, buildLeaf, ctx)),
+          (ctx.path.push(1), idsNodeToArrays(ids.surrounded, buildLeaf, ctx)),
+        ];
+      }
+      case IdsOperator.Overlaid: {
+        return [
+          ids.operator,
+          (ctx.path.push(0), idsNodeToArrays(ids.overlay, buildLeaf, ctx)),
+          (ctx.path.push(1), idsNodeToArrays(ids.underlay, buildLeaf, ctx)),
+        ];
+      }
+      case IdsOperator.HorizontalReflection: {
+        return [
+          ids.operator,
+          (ctx.path.push(0), idsNodeToArrays(ids.reflected, buildLeaf, ctx)),
+        ];
+      }
+      case IdsOperator.Rotation: {
+        return [
+          ids.operator,
+          (ctx.path.push(0), idsNodeToArrays(ids.rotated, buildLeaf, ctx)),
+        ];
+      }
+      case `LeafCharacter`: {
+        return buildLeaf(ids.character, ctx.path);
+      }
     }
+  } finally {
+    ctx.path.pop();
   }
 }
 
@@ -395,12 +522,7 @@ export function flattenIds(ids: IdsNode): IdsNode {
 
 export function* walkIdsNode(
   ids: IdsNode,
-): Generator<
-  StrictExtract<
-    IdsNode,
-    { operator: `LeafCharacter` } | { operator: `LeafUnknownCharacter` }
-  >
-> {
+): Generator<StrictExtract<IdsNode, { operator: `LeafCharacter` }>> {
   switch (ids.operator) {
     case IdsOperator.LeftToRight: {
       yield* walkIdsNode(ids.left);
@@ -482,8 +604,7 @@ export function* walkIdsNode(
       yield* walkIdsNode(ids.rotated);
       return;
     }
-    case `LeafCharacter`:
-    case `LeafUnknownCharacter`: {
+    case `LeafCharacter`: {
       yield ids;
       return;
     }

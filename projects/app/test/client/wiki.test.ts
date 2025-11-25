@@ -1,17 +1,13 @@
-import type { GraphemeData } from "#client/wiki.js";
-import {
-  allGraphemeComponents,
-  graphemeDataSchema,
-  graphemeStrokeCount,
-} from "#client/wiki.js";
+import { allGraphemeComponents, graphemeStrokeCount } from "#client/wiki.js";
 import type { IdsNode } from "#data/hanzi.js";
 import {
-  IdsOperator,
+  idsNodeToArrays,
   isHanziGrapheme,
   parseIds,
-  strokeCountToCharacter,
+  strokeCountPlaceholderOrNull,
 } from "#data/hanzi.js";
-import type { HanziText } from "#data/model.js";
+import type { HanziText, WikiGraphemeData } from "#data/model.js";
+import { wikiGraphemeDataSchema } from "#data/model.js";
 import {
   getIsComponentFormHanzi,
   getIsStructuralHanzi,
@@ -128,11 +124,17 @@ describe(`/meaning.mdx files`, async () => {
 
 describe(`grapheme.json files`, async () => {
   const getDataForGrapheme = memoize1(
-    (grapheme: string): DeepReadonly<GraphemeData> | undefined => {
+    (grapheme: string): DeepReadonly<WikiGraphemeData> | undefined => {
       const filePath = path.join(wikiDir, grapheme, `grapheme.json`);
       if (existsSync(filePath)) {
-        const json = JSON.parse(readFileSync(filePath, `utf-8`));
-        return graphemeDataSchema.parse(json);
+        try {
+          const json = JSON.parse(readFileSync(filePath, `utf-8`));
+          return wikiGraphemeDataSchema.parse(json);
+        } catch (error) {
+          throw new Error(`failed to read and parse ${filePath}`, {
+            cause: error,
+          });
+        }
       }
     },
   );
@@ -156,14 +158,14 @@ describe(`grapheme.json files`, async () => {
   const isComponentFormHanzi = await getIsComponentFormHanzi();
   const decompositions = await loadHanziDecomposition();
 
-  test(`graphemes in the dictionary with 6+ strokes have mnemonic components`, async () => {
+  test(`graphemes in the dictionary with 5+ strokes have mnemonic components`, async () => {
     const errors = [];
     const atomicGraphemes = new Set([`非`, `臣`, `襾`, `舟`]);
 
     for (const { grapheme, graphemeData } of graphemeFilePaths) {
       const meanings = await lookupHanzi(grapheme);
       if (
-        graphemeStrokeCount(graphemeData) <= 5 ||
+        graphemeStrokeCount(graphemeData) <= 4 ||
         meanings.length === 0 ||
         isComponentFormHanzi(grapheme) ||
         graphemeData.traditionalFormOf != null ||
@@ -353,10 +355,10 @@ describe(`grapheme.json files`, async () => {
           const primaryHanzi = component.hanzi?.split(`,`)[0];
           if (primaryHanzi != null) {
             const hanziData = getDataForGrapheme(primaryHanzi);
-            invariant(
-              hanziData,
-              `wiki grapheme.json missing for ${primaryHanzi}`,
-            );
+            if (hanziData == null) {
+              errors.push(`wiki grapheme.json missing for ${primaryHanzi}`);
+              continue;
+            }
             const claimedStrokeCount = parseIndexRanges(
               component.strokes,
             ).length;
@@ -379,152 +381,29 @@ describe(`grapheme.json files`, async () => {
     expect(errors).toEqual([]);
   });
 
-  /**
-   * Converts an IDS (Ideographic Description Sequence) node into the mnemonic
-   * component structure format used in grapheme.json files. This is used to
-   * generate helpful hints in test error messages.
-   *
-   * @param ids - The IDS node to convert
-   * @param cursor - Tracks stroke indices across recursive calls
-   * @returns A nested structure matching the layout format
-   */
-  function idsNodeToMnemonicComponents(
-    ids: IdsNode,
-    cursor?: { strokesCounted: number },
-  ): unknown {
-    cursor ??= { strokesCounted: 0 };
+  function idsNodeToMnemonicComponents(ids: IdsNode): unknown {
+    let strokesCounted = 0;
+    return idsNodeToArrays(ids, (character) => {
+      let hanzi: string | undefined;
 
-    switch (ids.operator) {
-      case IdsOperator.LeftToRight: {
-        return [
-          ids.operator,
-          idsNodeToMnemonicComponents(ids.left, cursor),
-          idsNodeToMnemonicComponents(ids.right, cursor),
-        ];
+      // Handle ①, ②, …, ⑳
+      let strokeCount = strokeCountPlaceholderOrNull(character);
+
+      // Handle normal hanzi characters
+      if (strokeCount == null) {
+        hanzi = character;
+        const data = getDataForGrapheme(character);
+        strokeCount = data == null ? 1 : graphemeStrokeCount(data);
       }
-      case IdsOperator.AboveToBelow: {
-        return [
-          ids.operator,
-          idsNodeToMnemonicComponents(ids.above, cursor),
-          idsNodeToMnemonicComponents(ids.below, cursor),
-        ];
-      }
-      case IdsOperator.LeftToMiddleToRight: {
-        return [
-          ids.operator,
-          idsNodeToMnemonicComponents(ids.left, cursor),
-          idsNodeToMnemonicComponents(ids.middle, cursor),
-          idsNodeToMnemonicComponents(ids.right, cursor),
-        ];
-      }
-      case IdsOperator.AboveToMiddleAndBelow: {
-        return [
-          ids.operator,
-          idsNodeToMnemonicComponents(ids.above, cursor),
-          idsNodeToMnemonicComponents(ids.middle, cursor),
-          idsNodeToMnemonicComponents(ids.below, cursor),
-        ];
-      }
-      case IdsOperator.FullSurround: {
-        return [
-          ids.operator,
-          idsNodeToMnemonicComponents(ids.surrounding, cursor),
-          idsNodeToMnemonicComponents(ids.surrounded, cursor),
-        ];
-      }
-      case IdsOperator.SurroundFromAbove: {
-        return [
-          ids.operator,
-          idsNodeToMnemonicComponents(ids.above, cursor),
-          idsNodeToMnemonicComponents(ids.surrounded, cursor),
-        ];
-      }
-      case IdsOperator.SurroundFromBelow: {
-        return [
-          ids.operator,
-          idsNodeToMnemonicComponents(ids.below, cursor),
-          idsNodeToMnemonicComponents(ids.surrounded, cursor),
-        ];
-      }
-      case IdsOperator.SurroundFromLeft: {
-        return [
-          ids.operator,
-          idsNodeToMnemonicComponents(ids.left, cursor),
-          idsNodeToMnemonicComponents(ids.surrounded, cursor),
-        ];
-      }
-      case IdsOperator.SurroundFromRight: {
-        return [
-          ids.operator,
-          idsNodeToMnemonicComponents(ids.right, cursor),
-          idsNodeToMnemonicComponents(ids.surrounded, cursor),
-        ];
-      }
-      case IdsOperator.SurroundFromUpperLeft: {
-        return [
-          ids.operator,
-          idsNodeToMnemonicComponents(ids.upperLeft, cursor),
-          idsNodeToMnemonicComponents(ids.surrounded, cursor),
-        ];
-      }
-      case IdsOperator.SurroundFromUpperRight: {
-        return [
-          ids.operator,
-          idsNodeToMnemonicComponents(ids.upperRight, cursor),
-          idsNodeToMnemonicComponents(ids.surrounded, cursor),
-        ];
-      }
-      case IdsOperator.SurroundFromLowerLeft: {
-        return [
-          ids.operator,
-          idsNodeToMnemonicComponents(ids.lowerLeft, cursor),
-          idsNodeToMnemonicComponents(ids.surrounded, cursor),
-        ];
-      }
-      case IdsOperator.SurroundFromLowerRight: {
-        return [
-          ids.operator,
-          idsNodeToMnemonicComponents(ids.lowerRight, cursor),
-          idsNodeToMnemonicComponents(ids.surrounded, cursor),
-        ];
-      }
-      case IdsOperator.Overlaid: {
-        return [
-          ids.operator,
-          idsNodeToMnemonicComponents(ids.overlay, cursor),
-          idsNodeToMnemonicComponents(ids.underlay, cursor),
-        ];
-      }
-      case IdsOperator.HorizontalReflection: {
-        return [
-          ids.operator,
-          idsNodeToMnemonicComponents(ids.reflected, cursor),
-        ];
-      }
-      case IdsOperator.Rotation: {
-        return [ids.operator, idsNodeToMnemonicComponents(ids.rotated, cursor)];
-      }
-      case `LeafCharacter`: {
-        const data = getDataForGrapheme(ids.character);
-        const strokeCount = data == null ? 1 : graphemeStrokeCount(data);
-        const startStroke = cursor.strokesCounted;
-        const endStroke = cursor.strokesCounted + strokeCount - 1;
-        cursor.strokesCounted += strokeCount;
-        return {
-          hanzi: ids.character,
-          strokes: normalizeIndexRanges(`${startStroke}-${endStroke}`),
-        };
-      }
-      case `LeafUnknownCharacter`: {
-        const startStroke = cursor.strokesCounted;
-        const endStroke = cursor.strokesCounted + ids.strokeCount - 1;
-        cursor.strokesCounted += ids.strokeCount;
-        return {
-          hanzi: strokeCountToCharacter(ids.strokeCount),
-          strokes: normalizeIndexRanges(`${startStroke}-${endStroke}`),
-        };
-      }
-    }
+
+      const startStroke = strokesCounted;
+      const endStroke = strokesCounted + strokeCount - 1;
+      const strokes = normalizeIndexRanges(`${startStroke}-${endStroke}`);
+
+      strokesCounted += strokeCount;
+
+      return hanzi == null ? { strokes } : { hanzi, strokes };
+    });
   }
 });
 

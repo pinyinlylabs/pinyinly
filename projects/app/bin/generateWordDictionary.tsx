@@ -3,7 +3,7 @@ import {
   idsNodeToString,
   isHanziGrapheme,
   parseIds,
-  strokeCountToCharacter,
+  strokeCountPlaceholderOrNull,
   walkIdsNode,
 } from "#data/hanzi.ts";
 import type {
@@ -128,7 +128,10 @@ function decomp(char: string) {
   if (ids != null) {
     const idsNode = parseIds(ids);
     for (const leaf of walkIdsNode(idsNode)) {
-      if (leaf.operator === `LeafCharacter` && leaf.character !== char) {
+      if (
+        strokeCountPlaceholderOrNull(leaf.character) == null &&
+        leaf.character !== char
+      ) {
         decomp(leaf.character);
       }
     }
@@ -659,38 +662,27 @@ async function openAiHanziWordGlossHintQuery(
       hanziIds = hanziIds.replaceAll(char, ids);
 
       for (const leaf of walkIdsNode(parseIds(ids))) {
-        switch (leaf.operator) {
-          case `LeafUnknownCharacter`: {
+        if (strokeCountPlaceholderOrNull(leaf.character) == null) {
+          if (leaf.character === char) {
             mapSetAdd(
               componentGlosses,
-              strokeCountToCharacter(leaf.strokeCount),
-              `an unknown ${leaf.strokeCount}-stroke character`,
+              leaf.character,
+              `anything as it has no specific meaning since it's purely structural`,
             );
-            break;
-          }
-          case `LeafCharacter`: {
-            if (leaf.character === char) {
-              mapSetAdd(
-                componentGlosses,
-                leaf.character,
-                `anything as it has no specific meaning since it's purely structural`,
-              );
-            } else {
-              const lookups = await lookupHanzi(leaf.character);
-              if (lookups.length > 0) {
-                for (const [, leafMeaning] of lookups) {
-                  mapSetAdd(
-                    componentGlosses,
-                    leaf.character,
-                    `**${leafMeaning.gloss.join(`/`)}**`,
-                  );
-                }
-              } else {
-                // No definition for the character, try decomposing it further.
-                await decomp(leaf.character);
+          } else {
+            const lookups = await lookupHanzi(leaf.character as HanziText);
+            if (lookups.length > 0) {
+              for (const [, leafMeaning] of lookups) {
+                mapSetAdd(
+                  componentGlosses,
+                  leaf.character,
+                  `**${leafMeaning.gloss.join(`/`)}**`,
+                );
               }
+            } else {
+              // No definition for the character, try decomposing it further.
+              await decomp(leaf.character);
             }
-            break;
           }
         }
       }

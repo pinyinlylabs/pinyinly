@@ -1,4 +1,9 @@
-import { parseIds, splitHanziText, walkIdsNode } from "@/data/hanzi";
+import {
+  parseIds,
+  splitHanziText,
+  strokeCountPlaceholderOrNull,
+  walkIdsNode,
+} from "@/data/hanzi";
 import type {
   HanziGrapheme,
   HanziText,
@@ -513,10 +518,10 @@ export async function decomposeHanzi(
         const idsNode = parseIds(ids);
         for (const leaf of walkIdsNode(idsNode)) {
           if (
-            leaf.operator === `LeafCharacter` &&
+            strokeCountPlaceholderOrNull(leaf.character) == null &&
             leaf.character !== char // todo turn into invariant?
           ) {
-            result.push(leaf.character);
+            result.push(leaf.character as HanziGrapheme);
           }
         }
       }
@@ -704,6 +709,8 @@ export const getIsComponentFormHanzi = memoize0(async () => {
     `予`,
     `乞`,
     `卅`,
+    `钅`,
+    `鸟`,
   ]);
 
   for (const [hanziWord, meaning] of dictionary.entries()) {

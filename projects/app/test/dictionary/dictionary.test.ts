@@ -378,6 +378,8 @@ test(`expect missing glyphs to be included decomposition data`, async () => {
   const allComponents = new Set<string>([
     // todo: remove after automatically populating with wiki mnemonic decomposition
     `𨈑`,
+    `㇖`,
+    `㇚`,
   ]);
   const decompositions = await loadHanziDecomposition();
 
@@ -390,9 +392,7 @@ test(`expect missing glyphs to be included decomposition data`, async () => {
     );
     const idsNode = parseIds(ids);
     for (const leaf of walkIdsNode(idsNode)) {
-      if (leaf.operator === `LeafCharacter`) {
-        allComponents.add(leaf.character);
-      }
+      allComponents.add(leaf.character);
     }
   }
 

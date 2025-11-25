@@ -1,4 +1,4 @@
-import type { GraphemeData } from "@/client/wiki";
+import type { WikiGraphemeData } from "@/data/model";
 import { View } from "react-native";
 import { WikiHanziGraphemeDecomposition } from "./WikiHanziGraphemeDecomposition";
 
@@ -16,7 +16,7 @@ export default () => {
   );
 };
 
-const graphemeData: GraphemeData = {
+const graphemeData: WikiGraphemeData = {
   hanzi: `看`,
   mnemonic: {
     components: [
