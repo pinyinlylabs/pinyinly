@@ -37,7 +37,7 @@ tasks:
     toolchain: "node"
 
   buildAndroidDevClient:
-    script: expo run:ios
+    script: expo run:android
     options:
       runInCI: false
       cache: false
