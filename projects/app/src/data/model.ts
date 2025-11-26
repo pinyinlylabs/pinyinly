@@ -398,7 +398,7 @@ const wikiGraphemeComponentSchema = z.object({
 
 export type WikiGraphemeComponent = z.infer<typeof wikiGraphemeComponentSchema>;
 
-const combiningCharacter2 = z.union([
+const operatorArity2 = z.union([
   z.literal(`⿰`),
   z.literal(`⿱`),
   z.literal(`⿵`),
@@ -412,56 +412,37 @@ const combiningCharacter2 = z.union([
   z.literal(`⿷`),
 ]);
 
-const combiningCharacter3 = z.union([z.literal(`⿲`), z.literal(`⿳`)]);
+const operatorArity3 = z.union([z.literal(`⿲`), z.literal(`⿳`)]);
+
+function buildIdsNodesArraySchema<T extends z.ZodType>(leafSchema: T) {
+  const depth0Schema = z.union([
+    leafSchema,
+    z.tuple([operatorArity2, leafSchema, leafSchema]),
+    z.tuple([operatorArity3, leafSchema, leafSchema, leafSchema]),
+  ]);
+
+  const depth1Schema = z.union([
+    leafSchema,
+    z.tuple([operatorArity2, depth0Schema, depth0Schema]),
+    z.tuple([operatorArity3, depth0Schema, depth0Schema, depth0Schema]),
+  ]);
+
+  const depth2Schema = z.union([
+    leafSchema,
+    z.tuple([operatorArity2, depth1Schema, depth1Schema]),
+    z.tuple([operatorArity3, depth1Schema, depth1Schema, depth1Schema]),
+  ]);
+
+  return depth2Schema;
+}
 
 // TODO [zod@>=4.1.12] try refactor to use https://github.com/colinhacks/zod/issues/5089
-const wikiGraphemeComponentOrLayout0Schema = z.union([
+const wikiGraphemeDecomposition = buildIdsNodesArraySchema(
   wikiGraphemeComponentSchema,
-  z.tuple([
-    combiningCharacter2,
-    wikiGraphemeComponentSchema,
-    wikiGraphemeComponentSchema,
-  ]),
-  z.tuple([
-    combiningCharacter3,
-    wikiGraphemeComponentSchema,
-    wikiGraphemeComponentSchema,
-    wikiGraphemeComponentSchema,
-  ]),
-]);
+);
 
-const wikiGraphemeComponentOrLayout1Schema = z.union([
-  wikiGraphemeComponentSchema,
-  z.tuple([
-    combiningCharacter2,
-    wikiGraphemeComponentOrLayout0Schema,
-    wikiGraphemeComponentOrLayout0Schema,
-  ]),
-  z.tuple([
-    combiningCharacter3,
-    wikiGraphemeComponentOrLayout0Schema,
-    wikiGraphemeComponentOrLayout0Schema,
-    wikiGraphemeComponentOrLayout0Schema,
-  ]),
-]);
-
-const wikiGraphemeComponentOrLayout2Schema = z.union([
-  wikiGraphemeComponentSchema,
-  z.tuple([
-    combiningCharacter2,
-    wikiGraphemeComponentOrLayout1Schema,
-    wikiGraphemeComponentOrLayout1Schema,
-  ]),
-  z.tuple([
-    combiningCharacter3,
-    wikiGraphemeComponentOrLayout1Schema,
-    wikiGraphemeComponentOrLayout1Schema,
-    wikiGraphemeComponentOrLayout1Schema,
-  ]),
-]);
-
-export type WikiGraphemeComponentOrLayout = z.infer<
-  typeof wikiGraphemeComponentOrLayout2Schema
+export type WikiGraphemeDecomposition = z.infer<
+  typeof wikiGraphemeDecomposition
 >;
 
 const zHanziText = z.custom<HanziText>((x) => typeof x === `string`);
@@ -507,7 +488,7 @@ export const wikiGraphemeDataSchema = z.object({
        * The layout of the components. The first element is the combining
        * operator, and the remaining are the components for each slot.
        */
-      components: wikiGraphemeComponentOrLayout2Schema,
+      components: wikiGraphemeDecomposition,
       stories: z
         .array(
           z.object({

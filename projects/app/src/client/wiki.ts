@@ -4,8 +4,8 @@ import type {
   HanziText,
   HanziWord,
   WikiGraphemeComponent,
-  WikiGraphemeComponentOrLayout,
   WikiGraphemeData,
+  WikiGraphemeDecomposition,
 } from "@/data/model";
 import { devToolsSlowQuerySleepIfEnabled } from "@/util/devtools";
 import { parseIndexRanges } from "@/util/indexRanges";
@@ -21,7 +21,7 @@ export function graphemeStrokeCount(
 }
 
 export function* allGraphemeComponents(
-  graphemeLayout: DeepReadonly<WikiGraphemeComponentOrLayout>,
+  graphemeLayout: DeepReadonly<WikiGraphemeDecomposition>,
 ): Generator<DeepReadonly<WikiGraphemeComponent>> {
   // Base case: a leaf component
   if (`strokes` in graphemeLayout) {
@@ -58,7 +58,7 @@ export function* allGraphemeComponents(
 }
 
 export function graphemeLayoutToString(
-  graphemeLayout: DeepReadonly<WikiGraphemeComponentOrLayout>,
+  graphemeLayout: DeepReadonly<WikiGraphemeDecomposition>,
 ): string {
   // Base case: a leaf component
   if (`hanzi` in graphemeLayout && graphemeLayout.hanzi != null) {

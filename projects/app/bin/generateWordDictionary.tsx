@@ -129,10 +129,10 @@ function decomp(char: string) {
     const idsNode = parseIds(ids);
     for (const leaf of walkIdsNodeLeafs(idsNode)) {
       if (
-        strokeCountPlaceholderOrNull(leaf.character) == null &&
-        leaf.character !== char
+        strokeCountPlaceholderOrNull(leaf.leaf) == null &&
+        leaf.leaf !== char
       ) {
-        decomp(leaf.character);
+        decomp(leaf.leaf);
       }
     }
   }
@@ -662,26 +662,26 @@ async function openAiHanziWordGlossHintQuery(
       hanziIds = hanziIds.replaceAll(char, ids);
 
       for (const leaf of walkIdsNodeLeafs(parseIds(ids))) {
-        if (strokeCountPlaceholderOrNull(leaf.character) == null) {
-          if (leaf.character === char) {
+        if (strokeCountPlaceholderOrNull(leaf.leaf) == null) {
+          if (leaf.leaf === char) {
             mapSetAdd(
               componentGlosses,
-              leaf.character,
+              leaf.leaf,
               `anything as it has no specific meaning since it's purely structural`,
             );
           } else {
-            const lookups = await lookupHanzi(leaf.character as HanziText);
+            const lookups = await lookupHanzi(leaf.leaf as HanziText);
             if (lookups.length > 0) {
               for (const [, leafMeaning] of lookups) {
                 mapSetAdd(
                   componentGlosses,
-                  leaf.character,
+                  leaf.leaf,
                   `**${leafMeaning.gloss.join(`/`)}**`,
                 );
               }
             } else {
               // No definition for the character, try decomposing it further.
-              await decomp(leaf.character);
+              await decomp(leaf.leaf);
             }
           }
         }

@@ -5,90 +5,90 @@ import { UnexpectedValueError } from "@pinyinly/lib/types";
 import type { StrictExtract } from "ts-essentials";
 import { z } from "zod/v4";
 
-export type IdsNode =
+export type IdsNode<T> =
   | {
       operator: typeof IdsOperator.LeftToRight;
-      left: IdsNode;
-      right: IdsNode;
+      left: IdsNode<T>;
+      right: IdsNode<T>;
     }
   | {
       operator: typeof IdsOperator.AboveToBelow;
-      above: IdsNode;
-      below: IdsNode;
+      above: IdsNode<T>;
+      below: IdsNode<T>;
     }
   | {
       operator: typeof IdsOperator.LeftToMiddleToRight;
-      left: IdsNode;
-      middle: IdsNode;
-      right: IdsNode;
+      left: IdsNode<T>;
+      middle: IdsNode<T>;
+      right: IdsNode<T>;
     }
   | {
       operator: typeof IdsOperator.AboveToMiddleAndBelow;
-      above: IdsNode;
-      middle: IdsNode;
-      below: IdsNode;
+      above: IdsNode<T>;
+      middle: IdsNode<T>;
+      below: IdsNode<T>;
     }
   | {
       operator: typeof IdsOperator.FullSurround;
-      surrounding: IdsNode;
-      surrounded: IdsNode;
+      surrounding: IdsNode<T>;
+      surrounded: IdsNode<T>;
     }
   | {
       operator: typeof IdsOperator.SurroundFromAbove;
-      above: IdsNode;
-      surrounded: IdsNode;
+      above: IdsNode<T>;
+      surrounded: IdsNode<T>;
     }
   | {
       operator: typeof IdsOperator.SurroundFromBelow;
-      below: IdsNode;
-      surrounded: IdsNode;
+      below: IdsNode<T>;
+      surrounded: IdsNode<T>;
     }
   | {
       operator: typeof IdsOperator.SurroundFromLeft;
-      left: IdsNode;
-      surrounded: IdsNode;
+      left: IdsNode<T>;
+      surrounded: IdsNode<T>;
     }
   | {
       operator: typeof IdsOperator.SurroundFromRight;
-      right: IdsNode;
-      surrounded: IdsNode;
+      right: IdsNode<T>;
+      surrounded: IdsNode<T>;
     }
   | {
       operator: typeof IdsOperator.SurroundFromUpperLeft;
-      upperLeft: IdsNode;
-      surrounded: IdsNode;
+      upperLeft: IdsNode<T>;
+      surrounded: IdsNode<T>;
     }
   | {
       operator: typeof IdsOperator.SurroundFromUpperRight;
-      upperRight: IdsNode;
-      surrounded: IdsNode;
+      upperRight: IdsNode<T>;
+      surrounded: IdsNode<T>;
     }
   | {
       operator: typeof IdsOperator.SurroundFromLowerLeft;
-      lowerLeft: IdsNode;
-      surrounded: IdsNode;
+      lowerLeft: IdsNode<T>;
+      surrounded: IdsNode<T>;
     }
   | {
       operator: typeof IdsOperator.SurroundFromLowerRight;
-      lowerRight: IdsNode;
-      surrounded: IdsNode;
+      lowerRight: IdsNode<T>;
+      surrounded: IdsNode<T>;
     }
   | {
       operator: typeof IdsOperator.Overlaid;
-      overlay: IdsNode;
-      underlay: IdsNode;
+      overlay: IdsNode<T>;
+      underlay: IdsNode<T>;
     }
   | {
       operator: typeof IdsOperator.HorizontalReflection;
-      reflected: IdsNode;
+      reflected: IdsNode<T>;
     }
   | {
       operator: typeof IdsOperator.Rotation;
-      rotated: IdsNode;
+      rotated: IdsNode<T>;
     }
   | {
-      operator: `LeafCharacter`;
-      character: string;
+      operator: `Leaf`;
+      leaf: T;
     };
 
 const idsOperatorSchema = z.enum({
@@ -115,7 +115,10 @@ type IdsOperator = z.infer<typeof idsOperatorSchema>;
 
 export { IdsOperator };
 
-export function parseIds(ids: string, cursor?: { index: number }): IdsNode {
+export function parseIds(
+  ids: string,
+  cursor?: { index: number },
+): IdsNode<string> {
   cursor ??= { index: 0 };
   const charCodePoint = ids.codePointAt(cursor.index);
   invariant(charCodePoint != null);
@@ -253,7 +256,7 @@ export function parseIds(ids: string, cursor?: { index: number }): IdsNode {
     }
   }
 
-  return { operator: `LeafCharacter`, character: char };
+  return { operator: `Leaf`, leaf: char };
 }
 
 export function strokeCountPlaceholderOrNull(
@@ -269,7 +272,7 @@ export function strokeCountPlaceholderOrNull(
   }
 }
 
-export function idsNodeToString(ids: IdsNode): string {
+export function idsNodeToString(ids: IdsNode<string>): string {
   switch (ids.operator) {
     case IdsOperator.LeftToRight: {
       return `${ids.operator}${idsNodeToString(ids.left)}${idsNodeToString(ids.right)}`;
@@ -333,8 +336,8 @@ export function idsNodeToString(ids: IdsNode): string {
     case IdsOperator.Rotation: {
       return `${ids.operator}${idsNodeToString(ids.rotated)}`;
     }
-    case `LeafCharacter`: {
-      return ids.character;
+    case `Leaf`: {
+      return ids.leaf;
     }
   }
 }
@@ -348,9 +351,9 @@ export type IdsNodePath = number[];
  * Converts an IDS (Ideographic Description Sequence) node into a nested array
  * structure.
  */
-export function idsNodeToArrays<Leaf = unknown>(
-  ids: IdsNode,
-  buildLeaf: (character: string, path: IdsNodePath) => Leaf,
+export function idsNodeToArrays<T, Leaf = unknown>(
+  ids: IdsNode<T>,
+  buildLeaf: (character: T, path: IdsNodePath) => Leaf,
   ctx?: { path: IdsNodePath },
 ): unknown {
   ctx ??= { path: [] };
@@ -469,8 +472,8 @@ export function idsNodeToArrays<Leaf = unknown>(
           (ctx.path.push(0), idsNodeToArrays(ids.rotated, buildLeaf, ctx)),
         ];
       }
-      case `LeafCharacter`: {
-        return buildLeaf(ids.character, ctx.path);
+      case `Leaf`: {
+        return buildLeaf(ids.leaf, ctx.path);
       }
     }
   } finally {
@@ -483,19 +486,19 @@ export function idsNodeToArrays<Leaf = unknown>(
  *
  * For example `⿰x⿰yz` can be flattened to `⿲xyz`.
  */
-export function flattenIds(ids: IdsNode): IdsNode {
+export function flattenIds<T>(ids: IdsNode<T>): IdsNode<T> {
   return idsApplyTransforms(ids, [
     verticalPairToTripleMergeIdsTransform,
     horizontalPairToTripleMergeIdsTransform,
   ]);
 }
 
-export type IdsTransform = (ids: IdsNode) => IdsNode | null;
+export type IdsTransform<T> = (ids: IdsNode<T>) => IdsNode<T> | null;
 
-export function idsApplyTransforms(
-  ids: IdsNode,
-  transforms: readonly IdsTransform[],
-): IdsNode {
+export function idsApplyTransforms<T>(
+  ids: IdsNode<T>,
+  transforms: readonly IdsTransform<T>[],
+): IdsNode<T> {
   let result = ids;
 
   loop: for (;;) {
@@ -533,7 +536,7 @@ export function idsApplyTransforms(
   return result;
 }
 
-export function* walkIdsNode(ids: IdsNode): Generator<IdsNode> {
+export function* walkIdsNode<T>(ids: IdsNode<T>): Generator<IdsNode<T>> {
   yield ids;
   switch (ids.operator) {
     case IdsOperator.LeftToRight: {
@@ -616,7 +619,7 @@ export function* walkIdsNode(ids: IdsNode): Generator<IdsNode> {
       yield* walkIdsNodeLeafs(ids.rotated);
       return;
     }
-    case `LeafCharacter`: {
+    case `Leaf`: {
       return;
     }
     default: {
@@ -625,11 +628,11 @@ export function* walkIdsNode(ids: IdsNode): Generator<IdsNode> {
   }
 }
 
-export function* walkIdsNodeLeafs(
-  ids: IdsNode,
-): Generator<StrictExtract<IdsNode, { operator: `LeafCharacter` }>> {
+export function* walkIdsNodeLeafs<T>(
+  ids: IdsNode<T>,
+): Generator<StrictExtract<IdsNode<T>, { operator: `Leaf` }>> {
   for (const n of walkIdsNode(ids)) {
-    if (n.operator === `LeafCharacter`) {
+    if (n.operator === `Leaf`) {
       yield n;
     }
   }
@@ -661,9 +664,9 @@ export function hanziGraphemeCount(hanziText: HanziText): number {
  * - `⿰⿰xyz` → `⿲xyz`
  * - `⿰x⿰yz` → `⿲xyz`
  */
-export function horizontalPairToTripleMergeIdsTransform(
-  ids: IdsNode,
-): IdsNode | null {
+export function horizontalPairToTripleMergeIdsTransform<T>(
+  ids: IdsNode<T>,
+): IdsNode<T> | null {
   if (ids.operator === IdsOperator.LeftToRight) {
     if (ids.left.operator === IdsOperator.LeftToRight) {
       return {
@@ -691,9 +694,9 @@ export function horizontalPairToTripleMergeIdsTransform(
  * - `⿱⿱xyz` → `⿳xyz`
  * - `⿱x⿱yz` → `⿳xyz`
  */
-export function verticalPairToTripleMergeIdsTransform(
-  ids: IdsNode,
-): IdsNode | null {
+export function verticalPairToTripleMergeIdsTransform<T>(
+  ids: IdsNode<T>,
+): IdsNode<T> | null {
   if (ids.operator === IdsOperator.AboveToBelow) {
     if (ids.above.operator === IdsOperator.AboveToBelow) {
       return {
@@ -715,20 +718,22 @@ export function verticalPairToTripleMergeIdsTransform(
   return null;
 }
 
-export function makeVerticalMergeCharacterIdsTransform(
-  above: string,
-  below: string,
-  merged: string,
-): IdsTransform {
+export function makeVerticalMergeCharacterIdsTransform<T>(
+  above: T,
+  below: T,
+  merged: T,
+): IdsTransform<T> {
   return (ids) => {
     if (
       ids.operator === IdsOperator.AboveToBelow &&
-      idsNodeToString(ids.above) === above &&
-      idsNodeToString(ids.below) === below
+      ids.above.operator === `Leaf` &&
+      ids.above.leaf === above &&
+      ids.below.operator === `Leaf` &&
+      ids.below.leaf === below
     ) {
       return {
-        operator: `LeafCharacter`,
-        character: merged,
+        operator: `Leaf`,
+        leaf: merged,
       };
     }
 

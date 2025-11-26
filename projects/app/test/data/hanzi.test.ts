@@ -60,142 +60,142 @@ test.for([
 
 test(`parseIds handles 1 depth` satisfies HasNameOf<typeof parseIds>, () => {
   expect(parseIds(`木`)).toEqual({
-    operator: `LeafCharacter`,
-    character: `木`,
+    operator: `Leaf`,
+    leaf: `木`,
   });
 
   // 相
   expect(parseIds(`⿰木目`)).toEqual({
     operator: IdsOperator.LeftToRight,
-    left: { operator: `LeafCharacter`, character: `木` },
-    right: { operator: `LeafCharacter`, character: `目` },
+    left: { operator: `Leaf`, leaf: `木` },
+    right: { operator: `Leaf`, leaf: `目` },
   });
 
   // 杏
   expect(parseIds(`⿱木口`)).toEqual({
     operator: IdsOperator.AboveToBelow,
-    above: { operator: `LeafCharacter`, character: `木` },
-    below: { operator: `LeafCharacter`, character: `口` },
+    above: { operator: `Leaf`, leaf: `木` },
+    below: { operator: `Leaf`, leaf: `口` },
   });
 
   // 衍
   expect(parseIds(`⿲彳氵亍`)).toEqual({
     operator: IdsOperator.LeftToMiddleToRight,
-    left: { operator: `LeafCharacter`, character: `彳` },
-    middle: { operator: `LeafCharacter`, character: `氵` },
-    right: { operator: `LeafCharacter`, character: `亍` },
+    left: { operator: `Leaf`, leaf: `彳` },
+    middle: { operator: `Leaf`, leaf: `氵` },
+    right: { operator: `Leaf`, leaf: `亍` },
   });
 
   // 京
   expect(parseIds(`⿳亠口小`)).toEqual({
     operator: IdsOperator.AboveToMiddleAndBelow,
-    above: { operator: `LeafCharacter`, character: `亠` },
-    middle: { operator: `LeafCharacter`, character: `口` },
-    below: { operator: `LeafCharacter`, character: `小` },
+    above: { operator: `Leaf`, leaf: `亠` },
+    middle: { operator: `Leaf`, leaf: `口` },
+    below: { operator: `Leaf`, leaf: `小` },
   });
 
   // 回
   expect(parseIds(`⿴囗口`)).toEqual({
     operator: IdsOperator.FullSurround,
-    surrounding: { operator: `LeafCharacter`, character: `囗` },
-    surrounded: { operator: `LeafCharacter`, character: `口` },
+    surrounding: { operator: `Leaf`, leaf: `囗` },
+    surrounded: { operator: `Leaf`, leaf: `口` },
   });
 
   // 凰
   expect(parseIds(`⿵几皇`)).toEqual({
     operator: IdsOperator.SurroundFromAbove,
-    above: { operator: `LeafCharacter`, character: `几` },
-    surrounded: { operator: `LeafCharacter`, character: `皇` },
+    above: { operator: `Leaf`, leaf: `几` },
+    surrounded: { operator: `Leaf`, leaf: `皇` },
   });
 
   // 凶
   expect(parseIds(`⿶凵㐅`)).toEqual({
     operator: IdsOperator.SurroundFromBelow,
-    below: { operator: `LeafCharacter`, character: `凵` },
-    surrounded: { operator: `LeafCharacter`, character: `㐅` },
+    below: { operator: `Leaf`, leaf: `凵` },
+    surrounded: { operator: `Leaf`, leaf: `㐅` },
   });
 
   // 匠
   expect(parseIds(`⿷匚斤`)).toEqual({
     operator: IdsOperator.SurroundFromLeft,
-    left: { operator: `LeafCharacter`, character: `匚` },
-    surrounded: { operator: `LeafCharacter`, character: `斤` },
+    left: { operator: `Leaf`, leaf: `匚` },
+    surrounded: { operator: `Leaf`, leaf: `斤` },
   });
 
   // 㕚
   expect(parseIds(`⿼叉丶`)).toEqual({
     operator: IdsOperator.SurroundFromRight,
-    right: { operator: `LeafCharacter`, character: `叉` },
-    surrounded: { operator: `LeafCharacter`, character: `丶` },
+    right: { operator: `Leaf`, leaf: `叉` },
+    surrounded: { operator: `Leaf`, leaf: `丶` },
   });
 
   // 病
   expect(parseIds(`⿸疒丙`)).toEqual({
     operator: IdsOperator.SurroundFromUpperLeft,
-    upperLeft: { operator: `LeafCharacter`, character: `疒` },
-    surrounded: { operator: `LeafCharacter`, character: `丙` },
+    upperLeft: { operator: `Leaf`, leaf: `疒` },
+    surrounded: { operator: `Leaf`, leaf: `丙` },
   });
 
   // 戒
   expect(parseIds(`⿹戈廾`)).toEqual({
     operator: IdsOperator.SurroundFromUpperRight,
-    upperRight: { operator: `LeafCharacter`, character: `戈` },
-    surrounded: { operator: `LeafCharacter`, character: `廾` },
+    upperRight: { operator: `Leaf`, leaf: `戈` },
+    surrounded: { operator: `Leaf`, leaf: `廾` },
   });
 
   // 超
   expect(parseIds(`⿺走召`)).toEqual({
     operator: IdsOperator.SurroundFromLowerLeft,
-    lowerLeft: { operator: `LeafCharacter`, character: `走` },
-    surrounded: { operator: `LeafCharacter`, character: `召` },
+    lowerLeft: { operator: `Leaf`, leaf: `走` },
+    surrounded: { operator: `Leaf`, leaf: `召` },
   });
 
   // 氷
   expect(parseIds(`⿽水丶`)).toEqual({
     operator: IdsOperator.SurroundFromLowerRight,
-    lowerRight: { operator: `LeafCharacter`, character: `水` },
-    surrounded: { operator: `LeafCharacter`, character: `丶` },
+    lowerRight: { operator: `Leaf`, leaf: `水` },
+    surrounded: { operator: `Leaf`, leaf: `丶` },
   });
 
   // 巫
   expect(parseIds(`⿻工从`)).toEqual({
     operator: IdsOperator.Overlaid,
-    overlay: { operator: `LeafCharacter`, character: `工` },
-    underlay: { operator: `LeafCharacter`, character: `从` },
+    overlay: { operator: `Leaf`, leaf: `工` },
+    underlay: { operator: `Leaf`, leaf: `从` },
   });
 
   // 卐
   expect(parseIds(`⿾卍`)).toEqual({
     operator: IdsOperator.HorizontalReflection,
-    reflected: { operator: `LeafCharacter`, character: `卍` },
+    reflected: { operator: `Leaf`, leaf: `卍` },
   });
 
   // 𠕄
   expect(parseIds(`⿿凹`)).toEqual({
     operator: IdsOperator.Rotation,
-    rotated: { operator: `LeafCharacter`, character: `凹` },
+    rotated: { operator: `Leaf`, leaf: `凹` },
   });
 
-  expect(parseIds(`①`)).toEqual({ operator: `LeafCharacter`, character: `①` });
-  expect(parseIds(`②`)).toEqual({ operator: `LeafCharacter`, character: `②` });
-  expect(parseIds(`③`)).toEqual({ operator: `LeafCharacter`, character: `③` });
-  expect(parseIds(`④`)).toEqual({ operator: `LeafCharacter`, character: `④` });
-  expect(parseIds(`⑤`)).toEqual({ operator: `LeafCharacter`, character: `⑤` });
-  expect(parseIds(`⑥`)).toEqual({ operator: `LeafCharacter`, character: `⑥` });
-  expect(parseIds(`⑦`)).toEqual({ operator: `LeafCharacter`, character: `⑦` });
-  expect(parseIds(`⑧`)).toEqual({ operator: `LeafCharacter`, character: `⑧` });
-  expect(parseIds(`⑨`)).toEqual({ operator: `LeafCharacter`, character: `⑨` });
-  expect(parseIds(`⑩`)).toEqual({ operator: `LeafCharacter`, character: `⑩` });
-  expect(parseIds(`⑪`)).toEqual({ operator: `LeafCharacter`, character: `⑪` });
-  expect(parseIds(`⑫`)).toEqual({ operator: `LeafCharacter`, character: `⑫` });
-  expect(parseIds(`⑬`)).toEqual({ operator: `LeafCharacter`, character: `⑬` });
-  expect(parseIds(`⑭`)).toEqual({ operator: `LeafCharacter`, character: `⑭` });
-  expect(parseIds(`⑮`)).toEqual({ operator: `LeafCharacter`, character: `⑮` });
-  expect(parseIds(`⑯`)).toEqual({ operator: `LeafCharacter`, character: `⑯` });
-  expect(parseIds(`⑰`)).toEqual({ operator: `LeafCharacter`, character: `⑰` });
-  expect(parseIds(`⑱`)).toEqual({ operator: `LeafCharacter`, character: `⑱` });
-  expect(parseIds(`⑲`)).toEqual({ operator: `LeafCharacter`, character: `⑲` });
-  expect(parseIds(`⑳`)).toEqual({ operator: `LeafCharacter`, character: `⑳` });
+  expect(parseIds(`①`)).toEqual({ operator: `Leaf`, leaf: `①` });
+  expect(parseIds(`②`)).toEqual({ operator: `Leaf`, leaf: `②` });
+  expect(parseIds(`③`)).toEqual({ operator: `Leaf`, leaf: `③` });
+  expect(parseIds(`④`)).toEqual({ operator: `Leaf`, leaf: `④` });
+  expect(parseIds(`⑤`)).toEqual({ operator: `Leaf`, leaf: `⑤` });
+  expect(parseIds(`⑥`)).toEqual({ operator: `Leaf`, leaf: `⑥` });
+  expect(parseIds(`⑦`)).toEqual({ operator: `Leaf`, leaf: `⑦` });
+  expect(parseIds(`⑧`)).toEqual({ operator: `Leaf`, leaf: `⑧` });
+  expect(parseIds(`⑨`)).toEqual({ operator: `Leaf`, leaf: `⑨` });
+  expect(parseIds(`⑩`)).toEqual({ operator: `Leaf`, leaf: `⑩` });
+  expect(parseIds(`⑪`)).toEqual({ operator: `Leaf`, leaf: `⑪` });
+  expect(parseIds(`⑫`)).toEqual({ operator: `Leaf`, leaf: `⑫` });
+  expect(parseIds(`⑬`)).toEqual({ operator: `Leaf`, leaf: `⑬` });
+  expect(parseIds(`⑭`)).toEqual({ operator: `Leaf`, leaf: `⑭` });
+  expect(parseIds(`⑮`)).toEqual({ operator: `Leaf`, leaf: `⑮` });
+  expect(parseIds(`⑯`)).toEqual({ operator: `Leaf`, leaf: `⑯` });
+  expect(parseIds(`⑰`)).toEqual({ operator: `Leaf`, leaf: `⑰` });
+  expect(parseIds(`⑱`)).toEqual({ operator: `Leaf`, leaf: `⑱` });
+  expect(parseIds(`⑲`)).toEqual({ operator: `Leaf`, leaf: `⑲` });
+  expect(parseIds(`⑳`)).toEqual({ operator: `Leaf`, leaf: `⑳` });
 });
 
 test(`parseIds handles 2 depth` satisfies HasNameOf<typeof parseIds>, () => {
@@ -203,11 +203,11 @@ test(`parseIds handles 2 depth` satisfies HasNameOf<typeof parseIds>, () => {
     const cursor = { index: 0 };
     expect(parseIds(`⿰a⿱bc`, cursor)).toEqual({
       operator: IdsOperator.LeftToRight,
-      left: { operator: `LeafCharacter`, character: `a` },
+      left: { operator: `Leaf`, leaf: `a` },
       right: {
         operator: IdsOperator.AboveToBelow,
-        above: { operator: `LeafCharacter`, character: `b` },
-        below: { operator: `LeafCharacter`, character: `c` },
+        above: { operator: `Leaf`, leaf: `b` },
+        below: { operator: `Leaf`, leaf: `c` },
       },
     });
     expect(cursor).toEqual({ index: 5 });
@@ -217,15 +217,15 @@ test(`parseIds handles 2 depth` satisfies HasNameOf<typeof parseIds>, () => {
     const cursor = { index: 0 };
     expect(parseIds(`⿱a⿳bc⿴de`, cursor)).toEqual({
       operator: IdsOperator.AboveToBelow,
-      above: { operator: `LeafCharacter`, character: `a` },
+      above: { operator: `Leaf`, leaf: `a` },
       below: {
         operator: IdsOperator.AboveToMiddleAndBelow,
-        above: { operator: `LeafCharacter`, character: `b` },
-        middle: { operator: `LeafCharacter`, character: `c` },
+        above: { operator: `Leaf`, leaf: `b` },
+        middle: { operator: `Leaf`, leaf: `c` },
         below: {
           operator: IdsOperator.FullSurround,
-          surrounding: { operator: `LeafCharacter`, character: `d` },
-          surrounded: { operator: `LeafCharacter`, character: `e` },
+          surrounding: { operator: `Leaf`, leaf: `d` },
+          surrounded: { operator: `Leaf`, leaf: `e` },
         },
       },
     });
@@ -236,8 +236,8 @@ test(`parseIds handles 2 depth` satisfies HasNameOf<typeof parseIds>, () => {
 test(`parseIds regression tests` satisfies HasNameOf<typeof parseIds>, () => {
   expect(parseIds(`⿱丿𭕄`)).toEqual({
     operator: IdsOperator.AboveToBelow,
-    above: { operator: `LeafCharacter`, character: `丿` },
-    below: { operator: `LeafCharacter`, character: `𭕄` },
+    above: { operator: `Leaf`, leaf: `丿` },
+    below: { operator: `Leaf`, leaf: `𭕄` },
   });
 });
 
@@ -246,7 +246,7 @@ test(
   () => {
     const ids = parseIds(`⿰a⿱bc`);
 
-    const leafs = [...walkIdsNodeLeafs(ids)].map((x) => x.character);
+    const leafs = [...walkIdsNodeLeafs(ids)].map((x) => x.leaf);
 
     expect(leafs).toEqual([`a`, `b`, `c`]);
   },
