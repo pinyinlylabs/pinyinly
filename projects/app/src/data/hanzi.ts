@@ -512,7 +512,14 @@ export function idsApplyTransforms(
             continue loop;
           }
 
+          // Overwrite the object in-place.
+          for (const key in node) {
+            // @ts-expect-error unsafe code
+            // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+            delete node[key];
+          }
           Object.assign(node, transformed);
+
           mutated = true;
         }
       }
