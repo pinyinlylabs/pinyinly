@@ -197,49 +197,41 @@ test(`hanzi word meaning pinyin lint`, async () => {
   const dict = await loadDictionary();
 
   // `pinyin` key should be omitted rather than an empty
-  {
-    const violations = [...dict]
-      .filter(([, { pinyin }]) => pinyin?.length === 0)
-      .map(([hanziWord]) => hanziWord);
-    expect(violations).toEqual([]);
+  for (const [hanziWord, { pinyin }] of dict) {
+    expect
+      .soft(
+        pinyin?.length,
+        `${hanziWord} pinyin key should be omitted rather than an empty array;`,
+      )
+      .not.toBe(0);
   }
 
   // Multiple pinyin entries should have the same number of words
-  {
-    const violations = [...dict]
-      .filter(([, { pinyin }]) => {
-        if (pinyin == null) {
-          return false;
-        }
-        const syllableCounts = pinyin.map((p) => p.length);
-        return new Set(syllableCounts).size > 1;
-      })
-      .map(([hanziWord]) => hanziWord);
-    expect(violations).toEqual([]);
+  for (const [hanziWord, { pinyin }] of dict) {
+    expect
+      .soft(new Set(pinyin?.map((p) => p.length)).size, hanziWord)
+      .not.toBeGreaterThan(1);
   }
 });
 
 test(`hanzi word without visual variants omit the property rather than use an empty array`, async () => {
   const dict = await loadDictionary();
 
-  const hanziWordWithEmptyArray = [...dict]
-    .filter(([, { visualVariants }]) => visualVariants?.length === 0)
-    .map(([hanziWord]) => hanziWord);
-
-  expect(hanziWordWithEmptyArray).toEqual([]);
+  for (const [hanziWord, { visualVariants }] of dict) {
+    expect.soft(visualVariants?.length, hanziWord).not.toBe(0);
+  }
 });
 
 test(`hanzi word visual variants shouldn't include the hanzi`, async () => {
   const dict = await loadDictionary();
 
-  const hanziWordWithBadVisualVariants = [...dict]
-    .filter(
-      ([hanziWord, { visualVariants }]) =>
-        visualVariants?.includes(hanziFromHanziWord(hanziWord)) === true,
-    )
-    .map(([hanziWord]) => hanziWord);
-
-  expect(hanziWordWithBadVisualVariants).toEqual([]);
+  for (const [hanziWord, { visualVariants }] of dict) {
+    if (visualVariants != null) {
+      expect
+        .soft(visualVariants, hanziWord)
+        .not.toContain(hanziFromHanziWord(hanziWord));
+    }
+  }
 });
 
 test(`hanzi words are unique on (meaning key, primary pinyin)`, async () => {
@@ -405,22 +397,25 @@ describe(
     test(`no "from" keys are in the dictionary`, async () => {
       const hanziWordRenames = await loadHanziWordMigrations();
       const dictionary = await loadDictionary();
-      expect(
-        [...hanziWordRenames].filter(([oldHanziWord]) =>
+      for (const [oldHanziWord] of hanziWordRenames) {
+        expect(
           dictionary.has(oldHanziWord),
-        ),
-      ).toEqual([]);
+          `${oldHanziWord} should not be in the dictionary`,
+        ).toBe(false);
+      }
     });
 
     test(`all "to" keys are in the dictionary`, async () => {
       const hanziWordRenames = await loadHanziWordMigrations();
       const dictionary = await loadDictionary();
-      expect(
-        [...hanziWordRenames].filter(
-          ([, newHanziWord]) =>
-            newHanziWord != null && !dictionary.has(newHanziWord),
-        ),
-      ).toEqual([]);
+      for (const [, newHanziWord] of hanziWordRenames) {
+        if (newHanziWord != null) {
+          expect(
+            dictionary.has(newHanziWord),
+            `${newHanziWord} should  be in the dictionary`,
+          ).toBe(true);
+        }
+      }
     });
 
     test(`no "to" keys are also "from" keys (could cause loops)`, async () => {
