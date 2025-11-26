@@ -714,3 +714,24 @@ export function verticalPairToTripleMergeIdsTransform(
 
   return null;
 }
+
+export function makeVerticalMergeCharacterIdsTransform(
+  above: string,
+  below: string,
+  merged: string,
+): IdsTransform {
+  return (ids) => {
+    if (
+      ids.operator === IdsOperator.AboveToBelow &&
+      idsNodeToString(ids.above) === above &&
+      idsNodeToString(ids.below) === below
+    ) {
+      return {
+        operator: `LeafCharacter`,
+        character: merged,
+      };
+    }
+
+    return null;
+  };
+}

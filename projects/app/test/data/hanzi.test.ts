@@ -2,9 +2,11 @@ import {
   flattenIds,
   hanziGraphemeCount,
   horizontalPairToTripleMergeIdsTransform,
+  idsApplyTransforms,
   idsNodeToString,
   IdsOperator,
   isHanziGrapheme,
+  makeVerticalMergeCharacterIdsTransform,
   parseIds,
   verticalPairToTripleMergeIdsTransform,
   walkIdsNodeLeafs,
@@ -298,5 +300,28 @@ describe(
         expect(isHanziGrapheme(x)).toBe(false);
       }
     });
+  },
+);
+
+test.for([
+  [`-→_→=`, `⿱-_`, `=`],
+  [`宀→丰→𫲸`, `⿱宀丰`, `𫲸`],
+] as const)(
+  `makeVerticalMergeCharacterIdsTransform %s` satisfies HasNameOf<
+    typeof makeVerticalMergeCharacterIdsTransform
+  >,
+  ([spec, input, expected]) => {
+    const [top, bottom, merged] = spec.split(`→`);
+
+    const transform = makeVerticalMergeCharacterIdsTransform(
+      top!,
+      bottom!,
+      merged!,
+    );
+    const result = idsNodeToString(
+      idsApplyTransforms(parseIds(input), [transform]),
+    );
+
+    expect(result).toEqual(expected);
   },
 );
