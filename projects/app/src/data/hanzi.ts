@@ -484,132 +484,146 @@ export function idsNodeToArrays<Leaf = unknown>(
  * For example `⿰x⿰yz` can be flattened to `⿲xyz`.
  */
 export function flattenIds(ids: IdsNode): IdsNode {
-  if (ids.operator === IdsOperator.AboveToBelow) {
-    if (ids.above.operator === IdsOperator.AboveToBelow) {
-      return {
-        operator: IdsOperator.AboveToMiddleAndBelow,
-        above: flattenIds(ids.above.above),
-        middle: flattenIds(ids.above.below),
-        below: flattenIds(ids.below),
-      };
-    } else if (ids.below.operator === IdsOperator.AboveToBelow) {
-      return {
-        operator: IdsOperator.AboveToMiddleAndBelow,
-        above: flattenIds(ids.above),
-        middle: flattenIds(ids.below.above),
-        below: flattenIds(ids.below.below),
-      };
-    }
-  } else if (ids.operator === IdsOperator.LeftToRight) {
-    if (ids.left.operator === IdsOperator.LeftToRight) {
-      return {
-        operator: IdsOperator.LeftToMiddleToRight,
-        left: flattenIds(ids.left.left),
-        middle: flattenIds(ids.left.right),
-        right: flattenIds(ids.right),
-      };
-    } else if (ids.right.operator === IdsOperator.LeftToRight) {
-      return {
-        operator: IdsOperator.LeftToMiddleToRight,
-        left: flattenIds(ids.left),
-        middle: flattenIds(ids.right.left),
-        right: flattenIds(ids.right.right),
-      };
-    }
-  }
-  return ids;
+  return idsApplyTransforms(ids, [
+    verticalPairToTripleMergeIdsTransform,
+    horizontalPairToTripleMergeIdsTransform,
+  ]);
 }
 
-export function* walkIdsNode(
+export type IdsTransform = (ids: IdsNode) => IdsNode | null;
+
+export function idsApplyTransforms(
   ids: IdsNode,
-): Generator<StrictExtract<IdsNode, { operator: `LeafCharacter` }>> {
+  transforms: readonly IdsTransform[],
+): IdsNode {
+  let result = ids;
+
+  loop: for (;;) {
+    let mutated = false;
+
+    for (const transform of transforms) {
+      for (const node of walkIdsNode(result)) {
+        const transformed = transform(node);
+        if (transformed != null) {
+          if (result === ids) {
+            result = structuredClone(ids);
+            // Restart again on a copy of the data, since now we know mutations
+            // are needed.
+            continue loop;
+          }
+
+          Object.assign(node, transformed);
+          mutated = true;
+        }
+      }
+    }
+
+    if (!mutated) {
+      break;
+    }
+  }
+
+  return result;
+}
+
+export function* walkIdsNode(ids: IdsNode): Generator<IdsNode> {
+  yield ids;
   switch (ids.operator) {
     case IdsOperator.LeftToRight: {
-      yield* walkIdsNode(ids.left);
-      yield* walkIdsNode(ids.right);
+      yield* walkIdsNodeLeafs(ids.left);
+      yield* walkIdsNodeLeafs(ids.right);
       return;
     }
     case IdsOperator.AboveToBelow: {
-      yield* walkIdsNode(ids.above);
-      yield* walkIdsNode(ids.below);
+      yield* walkIdsNodeLeafs(ids.above);
+      yield* walkIdsNodeLeafs(ids.below);
       return;
     }
     case IdsOperator.LeftToMiddleToRight: {
-      yield* walkIdsNode(ids.left);
-      yield* walkIdsNode(ids.middle);
-      yield* walkIdsNode(ids.right);
+      yield* walkIdsNodeLeafs(ids.left);
+      yield* walkIdsNodeLeafs(ids.middle);
+      yield* walkIdsNodeLeafs(ids.right);
       return;
     }
     case IdsOperator.AboveToMiddleAndBelow: {
-      yield* walkIdsNode(ids.above);
-      yield* walkIdsNode(ids.middle);
-      yield* walkIdsNode(ids.below);
+      yield* walkIdsNodeLeafs(ids.above);
+      yield* walkIdsNodeLeafs(ids.middle);
+      yield* walkIdsNodeLeafs(ids.below);
       return;
     }
     case IdsOperator.FullSurround: {
-      yield* walkIdsNode(ids.surrounding);
-      yield* walkIdsNode(ids.surrounded);
+      yield* walkIdsNodeLeafs(ids.surrounding);
+      yield* walkIdsNodeLeafs(ids.surrounded);
       return;
     }
     case IdsOperator.SurroundFromAbove: {
-      yield* walkIdsNode(ids.above);
-      yield* walkIdsNode(ids.surrounded);
+      yield* walkIdsNodeLeafs(ids.above);
+      yield* walkIdsNodeLeafs(ids.surrounded);
       return;
     }
     case IdsOperator.SurroundFromBelow: {
-      yield* walkIdsNode(ids.below);
-      yield* walkIdsNode(ids.surrounded);
+      yield* walkIdsNodeLeafs(ids.below);
+      yield* walkIdsNodeLeafs(ids.surrounded);
       return;
     }
     case IdsOperator.SurroundFromLeft: {
-      yield* walkIdsNode(ids.left);
-      yield* walkIdsNode(ids.surrounded);
+      yield* walkIdsNodeLeafs(ids.left);
+      yield* walkIdsNodeLeafs(ids.surrounded);
       return;
     }
     case IdsOperator.SurroundFromRight: {
-      yield* walkIdsNode(ids.right);
-      yield* walkIdsNode(ids.surrounded);
+      yield* walkIdsNodeLeafs(ids.right);
+      yield* walkIdsNodeLeafs(ids.surrounded);
       return;
     }
     case IdsOperator.SurroundFromUpperLeft: {
-      yield* walkIdsNode(ids.upperLeft);
-      yield* walkIdsNode(ids.surrounded);
+      yield* walkIdsNodeLeafs(ids.upperLeft);
+      yield* walkIdsNodeLeafs(ids.surrounded);
       return;
     }
     case IdsOperator.SurroundFromUpperRight: {
-      yield* walkIdsNode(ids.upperRight);
-      yield* walkIdsNode(ids.surrounded);
+      yield* walkIdsNodeLeafs(ids.upperRight);
+      yield* walkIdsNodeLeafs(ids.surrounded);
       return;
     }
     case IdsOperator.SurroundFromLowerLeft: {
-      yield* walkIdsNode(ids.lowerLeft);
-      yield* walkIdsNode(ids.surrounded);
+      yield* walkIdsNodeLeafs(ids.lowerLeft);
+      yield* walkIdsNodeLeafs(ids.surrounded);
       return;
     }
     case IdsOperator.SurroundFromLowerRight: {
-      yield* walkIdsNode(ids.lowerRight);
-      yield* walkIdsNode(ids.surrounded);
+      yield* walkIdsNodeLeafs(ids.lowerRight);
+      yield* walkIdsNodeLeafs(ids.surrounded);
       return;
     }
     case IdsOperator.Overlaid: {
-      yield* walkIdsNode(ids.underlay);
-      yield* walkIdsNode(ids.overlay);
+      yield* walkIdsNodeLeafs(ids.underlay);
+      yield* walkIdsNodeLeafs(ids.overlay);
       return;
     }
     case IdsOperator.HorizontalReflection: {
-      yield* walkIdsNode(ids.reflected);
+      yield* walkIdsNodeLeafs(ids.reflected);
       return;
     }
     case IdsOperator.Rotation: {
-      yield* walkIdsNode(ids.rotated);
+      yield* walkIdsNodeLeafs(ids.rotated);
       return;
     }
     case `LeafCharacter`: {
-      yield ids;
       return;
     }
     default: {
       throw new UnexpectedValueError(ids);
+    }
+  }
+}
+
+export function* walkIdsNodeLeafs(
+  ids: IdsNode,
+): Generator<StrictExtract<IdsNode, { operator: `LeafCharacter` }>> {
+  for (const n of walkIdsNode(ids)) {
+    if (n.operator === `LeafCharacter`) {
+      yield n;
     }
   }
 }
@@ -640,7 +654,9 @@ export function hanziGraphemeCount(hanziText: HanziText): number {
  * - `⿰⿰xyz` → `⿲xyz`
  * - `⿰x⿰yz` → `⿲xyz`
  */
-export function leftRightMergeIdsMod(ids: IdsNode): IdsNode | null {
+export function horizontalPairToTripleMergeIdsTransform(
+  ids: IdsNode,
+): IdsNode | null {
   if (ids.operator === IdsOperator.LeftToRight) {
     if (ids.left.operator === IdsOperator.LeftToRight) {
       return {
@@ -668,7 +684,9 @@ export function leftRightMergeIdsMod(ids: IdsNode): IdsNode | null {
  * - `⿱⿱xyz` → `⿳xyz`
  * - `⿱x⿱yz` → `⿳xyz`
  */
-export function aboveBelowMergeIdsMod(ids: IdsNode): IdsNode | null {
+export function verticalPairToTripleMergeIdsTransform(
+  ids: IdsNode,
+): IdsNode | null {
   if (ids.operator === IdsOperator.AboveToBelow) {
     if (ids.above.operator === IdsOperator.AboveToBelow) {
       return {

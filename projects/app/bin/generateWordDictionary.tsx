@@ -4,7 +4,7 @@ import {
   isHanziGrapheme,
   parseIds,
   strokeCountPlaceholderOrNull,
-  walkIdsNode,
+  walkIdsNodeLeafs,
 } from "#data/hanzi.ts";
 import type {
   HanziGrapheme,
@@ -127,7 +127,7 @@ function decomp(char: string) {
   const ids = charactersData.get(char)?.decomposition;
   if (ids != null) {
     const idsNode = parseIds(ids);
-    for (const leaf of walkIdsNode(idsNode)) {
+    for (const leaf of walkIdsNodeLeafs(idsNode)) {
       if (
         strokeCountPlaceholderOrNull(leaf.character) == null &&
         leaf.character !== char
@@ -661,7 +661,7 @@ async function openAiHanziWordGlossHintQuery(
       invariant(ids != null, `missing decomposition for ${char}`);
       hanziIds = hanziIds.replaceAll(char, ids);
 
-      for (const leaf of walkIdsNode(parseIds(ids))) {
+      for (const leaf of walkIdsNodeLeafs(parseIds(ids))) {
         if (strokeCountPlaceholderOrNull(leaf.character) == null) {
           if (leaf.character === char) {
             mapSetAdd(

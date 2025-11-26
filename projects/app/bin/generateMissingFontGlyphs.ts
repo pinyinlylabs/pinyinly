@@ -1,7 +1,7 @@
 import {
   parseIds,
   strokeCountPlaceholderOrNull,
-  walkIdsNode,
+  walkIdsNodeLeafs,
 } from "#data/hanzi.ts";
 import { allHanziGraphemes, loadCharacters } from "#dictionary/dictionary.ts";
 import { unicodeShortIdentifier } from "#util/unicode.ts";
@@ -46,7 +46,7 @@ for (const grapheme of allGraphemes) {
     `character "${grapheme}" (${unicodeShortIdentifier(grapheme)}) has no decomposition`,
   );
   const idsNode = parseIds(ids);
-  for (const leaf of walkIdsNode(idsNode)) {
+  for (const leaf of walkIdsNodeLeafs(idsNode)) {
     if (strokeCountPlaceholderOrNull(leaf.character) == null) {
       allComponents.add(leaf.character);
     }

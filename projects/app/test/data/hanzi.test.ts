@@ -1,32 +1,30 @@
 import {
-  aboveBelowMergeIdsMod,
   flattenIds,
   hanziGraphemeCount,
+  horizontalPairToTripleMergeIdsTransform,
   idsNodeToString,
   IdsOperator,
   isHanziGrapheme,
-  leftRightMergeIdsMod,
   parseIds,
-  walkIdsNode,
+  verticalPairToTripleMergeIdsTransform,
+  walkIdsNodeLeafs,
 } from "#data/hanzi.ts";
 import type { HanziText } from "#data/model.ts";
 import { invariant } from "@pinyinly/lib/invariant";
 import { describe, expect, test } from "vitest";
 import { 汉 } from "./helpers.ts";
 
-test(
+test.for([
+  [`⿱⿱abc`, `⿳abc`],
+  [`⿱a⿱bc`, `⿳abc`],
+  [`⿰⿰abc`, `⿲abc`],
+  [`⿰a⿰bc`, `⿲abc`],
+] as const)(
   `flattenIds handles ⿱⿱ to ⿳ and ⿰⿰ to ⿲` satisfies HasNameOf<
     typeof flattenIds
   >,
-  () => {
-    for (const [input, expected] of [
-      [`⿱⿱abc`, `⿳abc`],
-      [`⿱a⿱bc`, `⿳abc`],
-      [`⿰⿰abc`, `⿲abc`],
-      [`⿰a⿰bc`, `⿲abc`],
-    ] as const) {
-      expect(idsNodeToString(flattenIds(parseIds(input)))).toBe(expected);
-    }
+  ([input, expected]) => {
+    expect(idsNodeToString(flattenIds(parseIds(input))), input).toBe(expected);
   },
 );
 
@@ -34,11 +32,11 @@ test.for([
   [`⿰⿰abc`, `⿲abc`],
   [`⿰a⿰bc`, `⿲abc`],
 ] as const)(
-  `leftRightMergeIdsMod %s -> %s` satisfies HasNameOf<
-    typeof leftRightMergeIdsMod
+  `horizontalPairToTripleMergeIdsTransform %s -> %s` satisfies HasNameOf<
+    typeof horizontalPairToTripleMergeIdsTransform
   >,
   ([input, expected]) => {
-    const result = leftRightMergeIdsMod(parseIds(input));
+    const result = horizontalPairToTripleMergeIdsTransform(parseIds(input));
     invariant(result != null);
     expect(idsNodeToString(result)).toBe(expected);
   },
@@ -48,9 +46,11 @@ test.for([
   [`⿱⿱abc`, `⿳abc`],
   [`⿱a⿱bc`, `⿳abc`],
 ] as const)(
-  `aboveBelowMergeIdsMod ` satisfies HasNameOf<typeof aboveBelowMergeIdsMod>,
+  `verticalPairToTripleMergeIdsTransform` satisfies HasNameOf<
+    typeof verticalPairToTripleMergeIdsTransform
+  >,
   ([input, expected]) => {
-    const result = aboveBelowMergeIdsMod(parseIds(input));
+    const result = verticalPairToTripleMergeIdsTransform(parseIds(input));
     invariant(result != null);
     expect(idsNodeToString(result)).toBe(expected);
   },
@@ -239,13 +239,16 @@ test(`parseIds regression tests` satisfies HasNameOf<typeof parseIds>, () => {
   });
 });
 
-test(`walkIdsNode fixture` satisfies HasNameOf<typeof walkIdsNode>, () => {
-  const ids = parseIds(`⿰a⿱bc`);
+test(
+  `walkIdsNodeLeafs fixture` satisfies HasNameOf<typeof walkIdsNodeLeafs>,
+  () => {
+    const ids = parseIds(`⿰a⿱bc`);
 
-  const leafs = [...walkIdsNode(ids)].map((x) => x.character);
+    const leafs = [...walkIdsNodeLeafs(ids)].map((x) => x.character);
 
-  expect(leafs).toEqual([`a`, `b`, `c`]);
-});
+    expect(leafs).toEqual([`a`, `b`, `c`]);
+  },
+);
 
 test(
   `idsNodeToString roundtrips` satisfies HasNameOf<typeof idsNodeToString>,
