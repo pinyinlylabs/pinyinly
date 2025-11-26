@@ -243,14 +243,6 @@ tasks:
     env:
       NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
 
-  generateHanziDecomposition:
-    command: tsx --tsconfig tsconfig.node.json ./bin/generateHanziDecomposition.ts
-    preset: watcher
-    options:
-      envFile: .env.local
-    env:
-      NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
-
   generateMissingFontGlyphs:
     command: tsx --tsconfig tsconfig.node.json ./bin/generateMissingFontGlyphs.ts
     preset: watcher

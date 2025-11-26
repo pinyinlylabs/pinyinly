@@ -7,14 +7,16 @@
   ],
   "mnemonic": {
     "components": [
-      "⿱",
+      "⿺",
       {
-        "strokes": "2",
-        "label": "a bullet"
-      },
-      {
+        "hanzi": "𫠠",
         "strokes": "0-1",
         "label": "a man falling backwards"
+      },
+      {
+        "hanzi": "丶",
+        "strokes": "2",
+        "label": "a bullet"
       }
     ]
   }

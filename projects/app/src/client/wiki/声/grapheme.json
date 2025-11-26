@@ -11,14 +11,14 @@
   ],
   "mnemonic": {
     "components": [
-      "⿸",
-      {
-        "hanzi": "𠃜",
-        "strokes": "3-6"
-      },
+      "⿱",
       {
         "hanzi": "士",
         "strokes": "0-2"
+      },
+      {
+        "hanzi": "𠃜",
+        "strokes": "3-6"
       }
     ]
   }

@@ -1,13 +1,16 @@
 import {
+  aboveBelowMergeIdsMod,
   flattenIds,
   hanziGraphemeCount,
   idsNodeToString,
   IdsOperator,
   isHanziGrapheme,
+  leftRightMergeIdsMod,
   parseIds,
   walkIdsNode,
 } from "#data/hanzi.ts";
 import type { HanziText } from "#data/model.ts";
+import { invariant } from "@pinyinly/lib/invariant";
 import { describe, expect, test } from "vitest";
 import { 汉 } from "./helpers.ts";
 
@@ -24,6 +27,32 @@ test(
     ] as const) {
       expect(idsNodeToString(flattenIds(parseIds(input)))).toBe(expected);
     }
+  },
+);
+
+test.for([
+  [`⿰⿰abc`, `⿲abc`],
+  [`⿰a⿰bc`, `⿲abc`],
+] as const)(
+  `leftRightMergeIdsMod %s -> %s` satisfies HasNameOf<
+    typeof leftRightMergeIdsMod
+  >,
+  ([input, expected]) => {
+    const result = leftRightMergeIdsMod(parseIds(input));
+    invariant(result != null);
+    expect(idsNodeToString(result)).toBe(expected);
+  },
+);
+
+test.for([
+  [`⿱⿱abc`, `⿳abc`],
+  [`⿱a⿱bc`, `⿳abc`],
+] as const)(
+  `aboveBelowMergeIdsMod ` satisfies HasNameOf<typeof aboveBelowMergeIdsMod>,
+  ([input, expected]) => {
+    const result = aboveBelowMergeIdsMod(parseIds(input));
+    invariant(result != null);
+    expect(idsNodeToString(result)).toBe(expected);
   },
 );
 
@@ -145,105 +174,26 @@ test(`parseIds handles 1 depth` satisfies HasNameOf<typeof parseIds>, () => {
     rotated: { operator: `LeafCharacter`, character: `凹` },
   });
 
-  expect(parseIds(`①`)).toEqual({
-    operator: `LeafCharacter`,
-    character: `①`,
-  });
-
-  expect(parseIds(`②`)).toEqual({
-    operator: `LeafCharacter`,
-    character: `②`,
-  });
-
-  expect(parseIds(`③`)).toEqual({
-    operator: `LeafCharacter`,
-    character: `③`,
-  });
-
-  expect(parseIds(`④`)).toEqual({
-    operator: `LeafCharacter`,
-    character: `④`,
-  });
-
-  expect(parseIds(`⑤`)).toEqual({
-    operator: `LeafCharacter`,
-    character: `⑤`,
-  });
-
-  expect(parseIds(`⑥`)).toEqual({
-    operator: `LeafCharacter`,
-    character: `⑥`,
-  });
-
-  expect(parseIds(`⑦`)).toEqual({
-    operator: `LeafCharacter`,
-    character: `⑦`,
-  });
-
-  expect(parseIds(`⑧`)).toEqual({
-    operator: `LeafCharacter`,
-    character: `⑧`,
-  });
-
-  expect(parseIds(`⑨`)).toEqual({
-    operator: `LeafCharacter`,
-    character: `⑨`,
-  });
-
-  expect(parseIds(`⑩`)).toEqual({
-    operator: `LeafCharacter`,
-    character: `⑩`,
-  });
-
-  expect(parseIds(`⑪`)).toEqual({
-    operator: `LeafCharacter`,
-    character: `⑪`,
-  });
-
-  expect(parseIds(`⑫`)).toEqual({
-    operator: `LeafCharacter`,
-    character: `⑫`,
-  });
-
-  expect(parseIds(`⑬`)).toEqual({
-    operator: `LeafCharacter`,
-    character: `⑬`,
-  });
-
-  expect(parseIds(`⑭`)).toEqual({
-    operator: `LeafCharacter`,
-    character: `⑭`,
-  });
-
-  expect(parseIds(`⑮`)).toEqual({
-    operator: `LeafCharacter`,
-    character: `⑮`,
-  });
-
-  expect(parseIds(`⑯`)).toEqual({
-    operator: `LeafCharacter`,
-    character: `⑯`,
-  });
-
-  expect(parseIds(`⑰`)).toEqual({
-    operator: `LeafCharacter`,
-    character: `⑰`,
-  });
-
-  expect(parseIds(`⑱`)).toEqual({
-    operator: `LeafCharacter`,
-    character: `⑱`,
-  });
-
-  expect(parseIds(`⑲`)).toEqual({
-    operator: `LeafCharacter`,
-    character: `⑲`,
-  });
-
-  expect(parseIds(`⑳`)).toEqual({
-    operator: `LeafCharacter`,
-    character: `⑳`,
-  });
+  expect(parseIds(`①`)).toEqual({ operator: `LeafCharacter`, character: `①` });
+  expect(parseIds(`②`)).toEqual({ operator: `LeafCharacter`, character: `②` });
+  expect(parseIds(`③`)).toEqual({ operator: `LeafCharacter`, character: `③` });
+  expect(parseIds(`④`)).toEqual({ operator: `LeafCharacter`, character: `④` });
+  expect(parseIds(`⑤`)).toEqual({ operator: `LeafCharacter`, character: `⑤` });
+  expect(parseIds(`⑥`)).toEqual({ operator: `LeafCharacter`, character: `⑥` });
+  expect(parseIds(`⑦`)).toEqual({ operator: `LeafCharacter`, character: `⑦` });
+  expect(parseIds(`⑧`)).toEqual({ operator: `LeafCharacter`, character: `⑧` });
+  expect(parseIds(`⑨`)).toEqual({ operator: `LeafCharacter`, character: `⑨` });
+  expect(parseIds(`⑩`)).toEqual({ operator: `LeafCharacter`, character: `⑩` });
+  expect(parseIds(`⑪`)).toEqual({ operator: `LeafCharacter`, character: `⑪` });
+  expect(parseIds(`⑫`)).toEqual({ operator: `LeafCharacter`, character: `⑫` });
+  expect(parseIds(`⑬`)).toEqual({ operator: `LeafCharacter`, character: `⑬` });
+  expect(parseIds(`⑭`)).toEqual({ operator: `LeafCharacter`, character: `⑭` });
+  expect(parseIds(`⑮`)).toEqual({ operator: `LeafCharacter`, character: `⑮` });
+  expect(parseIds(`⑯`)).toEqual({ operator: `LeafCharacter`, character: `⑯` });
+  expect(parseIds(`⑰`)).toEqual({ operator: `LeafCharacter`, character: `⑰` });
+  expect(parseIds(`⑱`)).toEqual({ operator: `LeafCharacter`, character: `⑱` });
+  expect(parseIds(`⑲`)).toEqual({ operator: `LeafCharacter`, character: `⑲` });
+  expect(parseIds(`⑳`)).toEqual({ operator: `LeafCharacter`, character: `⑳` });
 });
 
 test(`parseIds handles 2 depth` satisfies HasNameOf<typeof parseIds>, () => {

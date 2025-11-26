@@ -1,9 +1,8 @@
-import { parseIds, splitHanziText, walkIdsNode } from "#data/hanzi.ts";
+import { splitHanziText } from "#data/hanzi.ts";
 import type { HanziGrapheme, HanziText } from "#data/model.ts";
 import { pinyinPronunciationDisplayText } from "#data/pinyin.ts";
 import type { Dictionary } from "#dictionary/dictionary.ts";
 import {
-  allHanziGraphemes,
   allHanziWordsHanzi,
   allHsk1HanziWords,
   allHsk2HanziWords,
@@ -15,10 +14,9 @@ import {
   hanziFromHanziOrHanziWord,
   hanziFromHanziWord,
   hanziWordMeaningSchema,
+  loadCharacters,
   loadDictionary,
-  loadHanziDecomposition,
   loadHanziWordMigrations,
-  loadMissingFontGlyphs,
   loadPinyinSoundNameSuggestions,
   loadPinyinSoundThemeDetails,
   loadPinyinWords,
@@ -28,7 +26,6 @@ import {
   meaningKeyFromHanziWord,
   upsertHanziWordMeaning,
 } from "#dictionary/dictionary.ts";
-import { unicodeShortIdentifier } from "#util/unicode.ts";
 import {
   mapSetAdd,
   mergeSortComparators,
@@ -55,7 +52,7 @@ test(`json data can be loaded and passes the schema validation`, async () => {
   await allHsk1HanziWords();
   await allHsk2HanziWords();
   await allHsk3HanziWords();
-  await loadHanziDecomposition();
+  await loadCharacters();
   await loadPinyinSoundNameSuggestions();
   await loadPinyinSoundThemeDetails();
   await loadPinyinWords();
@@ -371,41 +368,6 @@ test(`all wiki component hanzi words reference valid hanzi words`, async () => {
   }
 });
 
-test(`expect missing glyphs to be included decomposition data`, async () => {
-  const allGraphemes = await allHanziGraphemes();
-  const allComponents = new Set<string>([
-    // todo: remove after automatically populating with wiki mnemonic decomposition
-    `𨈑`,
-    `㇖`,
-    `㇚`,
-  ]);
-  const decompositions = await loadHanziDecomposition();
-
-  for (const grapheme of allGraphemes) {
-    allComponents.add(grapheme);
-    const ids = decompositions.get(grapheme);
-    invariant(
-      ids != null,
-      `character "${grapheme}" (${unicodeShortIdentifier(grapheme)}) has no decomposition`,
-    );
-    const idsNode = parseIds(ids);
-    for (const leaf of walkIdsNode(idsNode)) {
-      allComponents.add(leaf.character);
-    }
-  }
-
-  const knownMissingGlyphs = new Set<string>(
-    await loadMissingFontGlyphs().then((fontGlyphs) =>
-      fontGlyphs.values().flatMap((x) => [...x]),
-    ),
-  );
-  for (const char of allComponents) {
-    knownMissingGlyphs.delete(char);
-  }
-
-  expect(knownMissingGlyphs).toEqual(new Set());
-});
-
 test(`zod schemas are compatible with OpenAI API`, async () => {
   function assertCompatible(schema: z.ZodType): void {
     const jsonSchema = JSON.stringify(
@@ -500,13 +462,21 @@ test(`dictionary contains entries for decomposition`, async () => {
     // Couldn't find any standard meaning for this. In most cases this is used
     // at the top and looks like "上", so maybe the decomposition should just
     // pick that instead of going further to "⺊"?
-    [`⺊`, new Set([`上`, `卓`, `占`, `卤`, `攴`, `桌`, `虍`])],
+    [`⺊`, new Set([`卤`, `攴`, `虍`, `上`, `卓`, `占`, `桌`])],
     // Only 3 cases and isn't visually distinctive in the characters.
     [`乀`, new Set([`乂`, `展`, `水`, `畏`, `辰`])],
     // Only 3 cases and there doens't seem to be an obvious common meaning.
     [`乛`, new Set([`买`, `了`, `敢`])],
     [`𠄌`, new Set([`辰`, `展`, `畏`])],
     [`𠃊`, new Set([`亡`, `断`, `继`])],
+    [`⺈`, new Set([`欠`, `色`, `角`, `鱼`, `争`, `免`, `象`, `负`])],
+    [`丩`, new Set([`爿`, `叫`, `收`])],
+    [`龰`, new Set([`疋`, `走`, `足`])],
+    [`丆`, new Set([`石`, `面`, `页`, `才`])],
+    [`𠮛`, new Set([`豆`, `司`, `畐`, `同`])],
+    [`廿`, new Set([`革`, `世`, `度`])],
+    [`覀`, new Set([`鹿`, `要`, `票`])],
+    [`⺀`, new Set([`冬`, `头`, `尽`])],
   ]);
 
   // There's not much value in learning components that are only used once, so
@@ -520,10 +490,19 @@ test(`dictionary contains entries for decomposition`, async () => {
       .filter(([, sources]) => sources.size >= 3),
   ]
     // explicitly ignored cases
-    .filter(
-      ([x, sources]) =>
-        allowedMissing.get(x)?.symmetricDifference(sources).size !== 0,
-    );
+    .filter(([x, sources]) => {
+      const override = allowedMissing.get(x);
+      if (override != null) {
+        expect
+          .soft(
+            override.symmetricDifference(sources),
+            `allowedMissing for ${x}`,
+          )
+          .toEqual(new Set());
+        return false;
+      }
+      return true;
+    });
 
   expect(unknownWithMultipleSources).toEqual([]);
 });

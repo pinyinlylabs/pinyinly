@@ -11,19 +11,22 @@
   ],
   "mnemonic": {
     "components": [
-      "⿳",
+      "⿱",
       {
         "hanzi": "一",
         "strokes": "0"
       },
-      {
-        "hanzi": "从",
-        "strokes": "3-6"
-      },
-      {
-        "hanzi": "冂",
-        "strokes": "1-2"
-      }
+      [
+        "⿻",
+        {
+          "hanzi": "从",
+          "strokes": "3-6"
+        },
+        {
+          "hanzi": "冂",
+          "strokes": "1-2"
+        }
+      ]
     ]
   }
 }

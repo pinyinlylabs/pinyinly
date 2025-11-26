@@ -8,6 +8,7 @@ import {
   mkdirSync,
   readFileSync,
   updateJsonFileKey,
+  writeFileSync,
 } from "@pinyinly/lib/fs";
 import { invariant } from "@pinyinly/lib/invariant";
 import makeDebug from "debug";
@@ -118,7 +119,6 @@ for (const grapheme of allGraphemes) {
   }
 
   const graphicsRecord = graphicsDataByCharacter.get(grapheme);
-  const dictionaryRecord = dictionaryDataByCharacter.get(grapheme);
 
   const graphemeWikiDir = path.join(wikiDir, grapheme);
   if (!existsSync(graphemeWikiDir)) {
@@ -126,6 +126,7 @@ for (const grapheme of allGraphemes) {
   }
 
   const dataFile = path.join(graphemeWikiDir, `grapheme.json`);
+  const mdxFile = path.join(graphemeWikiDir, `meaning.mdx`);
   const indentLevels = 2;
 
   if (await updateJsonFileKey(dataFile, `hanzi`, grapheme, indentLevels)) {
@@ -134,7 +135,6 @@ for (const grapheme of allGraphemes) {
 
   if (graphicsRecord == null) {
     debug(`no graphics data for %O`, grapheme);
-    continue;
   } else {
     if (
       await updateJsonFileKey(
@@ -150,7 +150,7 @@ for (const grapheme of allGraphemes) {
 
   {
     //
-    // .mnemonic updates
+    // .mnemonic updates from dictionary.txt
     //
     let existing;
     try {
@@ -160,6 +160,8 @@ for (const grapheme of allGraphemes) {
     } catch (error) {
       debug(`failed to read existing data for %O: %O`, grapheme, error);
     }
+
+    const dictionaryRecord = dictionaryDataByCharacter.get(grapheme);
 
     if (
       existing?.mnemonic == null &&
@@ -198,6 +200,20 @@ for (const grapheme of allGraphemes) {
 
         debug(`wrote mnemonic for %O`, grapheme);
       }
+    }
+  }
+
+  {
+    // Make sure there's a meaning.mdx file
+    if (!existsSync(mdxFile)) {
+      writeFileSync(
+        mdxFile,
+        `import data from "./grapheme.json";
+
+<WikiHanziGraphemeDecomposition graphemeData={data} />
+`,
+      );
+      debug(`wrote meaning.mdx for %O`, grapheme);
     }
   }
 }

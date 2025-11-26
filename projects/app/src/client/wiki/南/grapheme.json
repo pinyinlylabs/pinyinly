@@ -15,7 +15,11 @@
     "components": [
       "⿱",
       { "hanzi": "十", "strokes": "0-1" },
-      ["⿻", { "hanzi": "冂", "strokes": "2-3" }, { "strokes": "4-8" }]
+      [
+        "⿵",
+        { "hanzi": "冂", "strokes": "2-3" },
+        { "hanzi": "𢆉", "strokes": "4-8" }
+      ]
     ]
   }
 }

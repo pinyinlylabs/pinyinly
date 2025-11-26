@@ -3,7 +3,15 @@
   "mnemonic": {
     "components": [
       "⿱",
-      { "strokes": "0-4" },
+      [
+        "⿰",
+        { "hanzi": "〢", "strokes": "0-1" },
+        [
+          "⿱",
+          { "hanzi": "𠂉", "strokes": "2-3" },
+          { "hanzi": "丶", "strokes": "4" }
+        ]
+      ],
       { "hanzi": "皿", "strokes": "5-9" }
     ]
   },

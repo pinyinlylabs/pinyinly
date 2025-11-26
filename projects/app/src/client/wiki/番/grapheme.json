@@ -3,7 +3,7 @@
   "mnemonic": {
     "components": [
       "⿱",
-      ["⿱", { "strokes": "0" }, { "hanzi": "米", "strokes": "1-6" }],
+      { "hanzi": "釆", "strokes": "0-6" },
       { "hanzi": "田", "strokes": "7-11" }
     ]
   },

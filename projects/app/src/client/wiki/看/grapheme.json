@@ -2,7 +2,7 @@
   "hanzi": "看",
   "mnemonic": {
     "components": [
-      "⿰",
+      "⿱",
       { "hanzi": "龵", "label": "hand", "strokes": "0-3" },
       { "hanzi": "目", "label": "eye", "strokes": "4-8" }
     ],

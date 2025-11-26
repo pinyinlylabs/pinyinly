@@ -5,12 +5,9 @@
       "⿱",
       { "hanzi": "宀", "strokes": "0-2" },
       [
-        "⿱",
-        [
-          "⿱",
-          { "hanzi": "一", "strokes": "3" },
-          { "hanzi": "由", "strokes": "4-8" }
-        ],
+        "⿳",
+        { "hanzi": "一", "strokes": "3" },
+        { "hanzi": "由", "strokes": "4-8" },
         { "hanzi": "八", "strokes": "9-10" }
       ]
     ]

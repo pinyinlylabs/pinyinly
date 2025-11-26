@@ -87,14 +87,14 @@ rizzleTest(
       [
         "he:一:one (🌱 NEW SKILL)",
         "he:人:person (🌱 NEW SKILL)",
-        "he:十:ten (🌱 NEW SKILL)",
-        "he:又:again (🌱 NEW SKILL)",
         "he:八:eight (🌱 NEW SKILL)",
-        "he:口:mouth (🌱 NEW SKILL)",
-        "he:头:head (🌱 NEW SKILL)",
-        "he:肉:meat (🌱 NEW SKILL)",
-        "he:艮:stopping (🌱 NEW SKILL)",
-        "he:爪:claw (🌱 NEW SKILL)",
+        "he:又:again (🌱 NEW SKILL)",
+        "he:冖:cover (🌱 NEW SKILL)",
+        "he:心:heart (🌱 NEW SKILL)",
+        "he:乙:second (🌱 NEW SKILL)",
+        "he:厂:cliff (🌱 NEW SKILL)",
+        "he:厶:private (🌱 NEW SKILL)",
+        "he:朩:rank (🌱 NEW SKILL)",
       ]
     `);
 
@@ -110,12 +110,12 @@ rizzleTest(
         "he:𠂉:knife (🟥 BLOCKED)",
         "he:𠂊:hands (🟥 BLOCKED)",
         "he:𭕄:radical (🟥 BLOCKED)",
-        "he:丷:earsOut (🟥 BLOCKED)",
-        "he:𠃌:radical (🟥 BLOCKED)",
-        "he:丨:line (🟥 BLOCKED)",
-        "he:丶:dot (🟥 BLOCKED)",
         "he:亅:hook (🟥 BLOCKED)",
+        "he:丶:dot (🟥 BLOCKED)",
         "he:丿:slash (🟥 BLOCKED)",
+        "he:乚:hidden (🟥 BLOCKED)",
+        "he:丨:line (🟥 BLOCKED)",
+        "he:𠃌:radical (🟥 BLOCKED)",
       ]
     `);
 

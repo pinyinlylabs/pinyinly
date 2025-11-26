@@ -262,7 +262,7 @@ export function weakMemoize1<T, R>(fn: (input: T) => R): typeof fn {
 
 export function memoize0<R>(
   fn: () => R,
-): (() => R) & { isCached: () => boolean } {
+): (() => R) & { isCached: () => boolean; resetCache: () => void } {
   let cache: R | undefined;
   let cacheSet = false;
   const memoFn = function <This>(this: This) {
@@ -275,7 +275,13 @@ export function memoize0<R>(
     return cache;
   };
   Object.defineProperty(memoFn, `name`, { value: fn.name });
-  return Object.assign(memoFn, { isCached: () => cacheSet });
+  return Object.assign(memoFn, {
+    isCached: () => cacheSet,
+    resetCache: () => {
+      cache = undefined;
+      cacheSet = false;
+    },
+  });
 }
 
 /**
@@ -288,7 +294,7 @@ export function memoize1<
   R,
   Fn extends (input: never) => R,
   T extends Parameters<Fn>[0],
->(fn: Fn): Fn & { isCached: (input: T) => boolean } {
+>(fn: Fn): Fn & { isCached: (input: T) => boolean; resetCache: () => void } {
   const cache = new Map<T, R>();
   const memoFn = function <This>(this: This, input: T) {
     if (cache.has(input)) {
@@ -302,6 +308,9 @@ export function memoize1<
   Object.defineProperty(memoFn, `name`, { value: fn.name });
   return Object.assign(memoFn, {
     isCached: (input: T) => cache.has(input),
+    resetCache: () => {
+      cache.clear();
+    },
   });
 }
 

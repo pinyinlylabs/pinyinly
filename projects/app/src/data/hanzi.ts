@@ -633,3 +633,59 @@ export function isHanziGrapheme(hanzi: HanziText): hanzi is HanziGrapheme {
 export function hanziGraphemeCount(hanziText: HanziText): number {
   return graphemeCount(hanziText);
 }
+
+/**
+ * Merge nested `⿰` into a `⿲`, e.g.:
+ *
+ * - `⿰⿰xyz` → `⿲xyz`
+ * - `⿰x⿰yz` → `⿲xyz`
+ */
+export function leftRightMergeIdsMod(ids: IdsNode): IdsNode | null {
+  if (ids.operator === IdsOperator.LeftToRight) {
+    if (ids.left.operator === IdsOperator.LeftToRight) {
+      return {
+        operator: IdsOperator.LeftToMiddleToRight,
+        left: ids.left.left,
+        middle: ids.left.right,
+        right: ids.right,
+      };
+    } else if (ids.right.operator === IdsOperator.LeftToRight) {
+      return {
+        operator: IdsOperator.LeftToMiddleToRight,
+        left: ids.left,
+        middle: ids.right.left,
+        right: ids.right.right,
+      };
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Merge nested `⿱` into a `⿳`, e.g.:
+ *
+ * - `⿱⿱xyz` → `⿳xyz`
+ * - `⿱x⿱yz` → `⿳xyz`
+ */
+export function aboveBelowMergeIdsMod(ids: IdsNode): IdsNode | null {
+  if (ids.operator === IdsOperator.AboveToBelow) {
+    if (ids.above.operator === IdsOperator.AboveToBelow) {
+      return {
+        operator: IdsOperator.AboveToMiddleAndBelow,
+        above: ids.above.above,
+        middle: ids.above.below,
+        below: ids.below,
+      };
+    } else if (ids.below.operator === IdsOperator.AboveToBelow) {
+      return {
+        operator: IdsOperator.AboveToMiddleAndBelow,
+        above: ids.above,
+        middle: ids.below.above,
+        below: ids.below.below,
+      };
+    }
+  }
+
+  return null;
+}

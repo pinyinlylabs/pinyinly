@@ -19,11 +19,7 @@
     "components": [
       "⿰",
       { "hanzi": "角", "strokes": "0-6" },
-      [
-        "⿱",
-        { "hanzi": "刀", "strokes": "7-8" },
-        { "hanzi": "牛", "strokes": "9-12" }
-      ]
+      { "hanzi": "𭷔", "strokes": "7-12" }
     ]
   }
 }

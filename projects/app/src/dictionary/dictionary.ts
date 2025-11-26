@@ -109,17 +109,24 @@ export const loadPinyinSoundNameSuggestions = memoize0(
   },
 );
 
-export const loadHanziDecomposition = memoize0(
-  async function loadHanziDecomposition() {
-    return z
-      .array(z.tuple([z.string(), z.string()]))
-      .transform((x) => new Map(x))
-      .transform(deepReadonly)
-      .parse(
-        await import(`./hanziDecomposition.asset.json`).then((x) => x.default),
-      );
-  },
+export const charactersSchema = z.array(
+  z.tuple([
+    z.string(),
+    z.object({
+      decomposition: z.string(),
+    }),
+  ]),
 );
+
+export type CharactersKey = z.infer<typeof charactersSchema.element>[0];
+export type CharactersValue = z.infer<typeof charactersSchema.element>[1];
+
+export const loadCharacters = memoize0(async function loadCharacters() {
+  return charactersSchema
+    .transform((x) => new Map(x))
+    .transform(deepReadonly)
+    .parse(await import(`./characters.asset.json`).then((x) => x.default));
+});
 
 export const wordListSchema = z.array(hanziWordSchema);
 
@@ -474,7 +481,7 @@ export function buildHanziWord(hanzi: string, meaningKey: string): HanziWord {
 export async function decomposeHanzi(
   hanzi: HanziText,
 ): Promise<HanziGrapheme[]> {
-  const decompositions = await loadHanziDecomposition();
+  const charactersData = await loadCharacters();
   const hanziGraphemes = splitHanziText(hanzi);
 
   // For multi-grapheme hanzi, learn each grapheme, but for for
@@ -486,7 +493,7 @@ export async function decomposeHanzi(
     }
   } else {
     for (const char of hanziGraphemes) {
-      const ids = decompositions.get(char);
+      const ids = charactersData.get(char)?.decomposition;
       if (ids != null) {
         const idsNode = parseIds(ids);
         for (const leaf of walkIdsNode(idsNode)) {

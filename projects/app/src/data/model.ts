@@ -1,6 +1,7 @@
 import type { Rating } from "@/util/fsrs";
 import type { Interval } from "date-fns";
 import { z } from "zod/v4";
+import { IdsOperator } from "./hanzi";
 import type { HanziWordSkill, Skill } from "./rizzleSchema";
 
 /**
@@ -381,7 +382,7 @@ const wikiGraphemeComponentSchema = z.object({
    * part of this grapheme. Allows shorthand ranges (e.g. 0-2,5 is the same as
    * 0,1,2,5).
    */
-  strokes: z.string(),
+  strokes: z.string().default(``),
   /**
    * When the component uses a different number of strokes than `hanzi` it's
    * normally marked as a bug. However in cases when it's intentional (e.g. 禸)
@@ -402,6 +403,7 @@ const combiningCharacter2 = z.union([
   z.literal(`⿱`),
   z.literal(`⿵`),
   z.literal(`⿶`),
+  z.literal(IdsOperator.SurroundFromRight),
   z.literal(`⿴`),
   z.literal(`⿻`),
   z.literal(`⿸`),
@@ -490,6 +492,10 @@ export const wikiGraphemeDataSchema = z.object({
    * If this grapheme is a component form of another grapheme, that hanzi.
    */
   componentFormOf: zHanziText.optional(),
+  /**
+   * Alternative IDS decompositions
+   */
+  decompositions: z.array(z.string()).optional(),
   /**
    * The meaning mnemonic for the grapheme. This doesn't necessarily correspond
    * to the etymological components, and their meanings can differ too. It's

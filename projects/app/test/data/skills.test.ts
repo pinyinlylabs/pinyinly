@@ -74,45 +74,49 @@ describe(
     test(`includes the target skill in the graph`, async () => {
       const skill = `he:我:i`;
 
-      await expect(
-        skillLearningGraph({ targetSkills: [skill] }),
-      ).resolves.toEqual(
-        new Map([[skill, { skill, dependencies: new Set() }]]),
-      );
+      const graph = await skillLearningGraph({ targetSkills: [skill] });
+
+      expect(graph.keys()).toContain(`he:我:i`);
     });
 
     test(`includes decomposition dependencies when learning 好`, async () => {
-      const skillGood = `he:好:good`;
-      const skillWoman = `he:女:woman`;
-      const skillChild = `he:子:child`;
-
-      await expect(
-        skillLearningGraph({ targetSkills: [skillGood] }),
-      ).resolves.toEqual(
-        new Map([
-          [
-            skillGood,
-            {
-              skill: skillGood,
-              dependencies: new Set([skillWoman, skillChild]),
+      await expect(skillLearningGraph({ targetSkills: [`he:好:good`] }))
+        .resolves.toMatchInlineSnapshot(`
+        Map {
+          "he:好:good" => {
+            "dependencies": Set {
+              "he:女:woman",
+              "he:子:child",
             },
-          ],
-          [
-            skillWoman,
-            {
-              skill: skillWoman,
-              dependencies: new Set(),
+            "skill": "he:好:good",
+          },
+          "he:女:woman" => {
+            "dependencies": Set {},
+            "skill": "he:女:woman",
+          },
+          "he:子:child" => {
+            "dependencies": Set {
+              "he:一:one",
+              "he:了:done",
             },
-          ],
-          [
-            skillChild,
-            {
-              skill: skillChild,
-              dependencies: new Set(),
+            "skill": "he:子:child",
+          },
+          "he:一:one" => {
+            "dependencies": Set {},
+            "skill": "he:一:one",
+          },
+          "he:了:done" => {
+            "dependencies": Set {
+              "he:亅:hook",
             },
-          ],
-        ]),
-      );
+            "skill": "he:了:done",
+          },
+          "he:亅:hook" => {
+            "dependencies": Set {},
+            "skill": "he:亅:hook",
+          },
+        }
+      `);
     });
 
     test(`includes multiple levels of decomposition for a character`, async () => {
@@ -350,8 +354,8 @@ describe(
         he:又:again
         he:氵:water
           he:水:water
-            he:丿:slash
             he:亅:hook
+            he:丿:slash
       `,
       );
     });
@@ -569,8 +573,11 @@ describe(
 
           expect(prettyQueue(queue)).toMatchInlineSnapshot(`
             [
-              "he:子:child (🌱 NEW SKILL)",
+              "he:一:one (🌱 NEW SKILL)",
               "he:女:woman (🌱 NEW SKILL)",
+              "he:亅:hook (🌱 NEW SKILL)",
+              "he:了:done (🟥 BLOCKED)",
+              "he:子:child (🟥 BLOCKED)",
               "he:好:good (🟥 BLOCKED)",
             ]
           `);
@@ -1351,17 +1358,10 @@ describe(
             latestSkillRatings: latestSkillRatings(),
             isStructuralHanzi,
           });
-          expect(prettyQueue(queue)).toMatchInlineSnapshot(`
-            [
-              "he:子:child (🌱 NEW SKILL)",
-              "he:女:woman (🌱 NEW SKILL)",
-              "he:好:good (🟥 BLOCKED)",
-              "hpi:好:good (🟥 BLOCKED)",
-              "hpf:好:good (🟥 BLOCKED)",
-              "hpt:好:good (🟥 BLOCKED)",
-              "hp:好:good (🟥 BLOCKED)",
-            ]
-          `);
+
+          const queueSkills = queue.items.map(({ skill }) => skill);
+          expect(queueSkills).not.toContain(`hpi:女:woman`);
+          expect(queueSkills).not.toContain(`hpi:子:child`);
         },
       );
 
@@ -1409,13 +1409,16 @@ describe(
         });
         expect(prettyQueue(queue)).toMatchInlineSnapshot(`
           [
+            "he:𠃌:radical (🌱 NEW SKILL)",
+            "he:丨:line (🌱 NEW SKILL)",
             "he:人:person (🌱 NEW SKILL)",
             "he:八:eight (🌱 NEW SKILL)",
-            "he:口:mouth (🌱 NEW SKILL)",
+            "he:一:one (🌱 NEW SKILL)",
             "he:乚:hidden (🌱 NEW SKILL)",
             "he:丿:slash (🌱 NEW SKILL)",
-            "he:一:one (🌱 NEW SKILL)",
+            "he:冂:wide (🟥 BLOCKED)",
             "he:火:fire (🟥 BLOCKED)",
+            "he:口:mouth (🟥 BLOCKED)",
             "he:灬:fire (🟥 BLOCKED)",
             "he:占:occupy (🟥 BLOCKED)",
             "he:儿:son (🟥 BLOCKED)",

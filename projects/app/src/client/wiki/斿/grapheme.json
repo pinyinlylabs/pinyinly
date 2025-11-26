@@ -4,7 +4,11 @@
     "components": [
       "⿰",
       { "hanzi": "方", "strokes": "0-3" },
-      ["⿱", { "strokes": "4-5" }, { "hanzi": "子", "strokes": "6-8" }]
+      [
+        "⿱",
+        { "hanzi": "𠂉", "strokes": "4-5" },
+        { "hanzi": "子", "strokes": "6-8" }
+      ]
     ]
   },
   "strokes": [

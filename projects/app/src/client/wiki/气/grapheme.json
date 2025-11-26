@@ -2,9 +2,10 @@
   "hanzi": "气",
   "mnemonic": {
     "components": [
-      "⿱",
-      { "hanzi": "亻", "strokes": "0-1" },
-      { "strokes": "2-3" }
+      "⿳",
+      { "hanzi": "𠂉", "strokes": "0-1" },
+      { "hanzi": "一", "strokes": "2" },
+      { "hanzi": "乁", "strokes": "3" }
     ]
   },
   "strokes": [

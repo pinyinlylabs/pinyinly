@@ -26,7 +26,7 @@ import {
   dictionarySchema,
   hanziFromHanziWord,
   hanziWordMeaningSchema,
-  loadHanziDecomposition,
+  loadCharacters,
   lookupHanzi,
   lookupHanziWord,
   meaningKeyFromHanziWord,
@@ -97,7 +97,7 @@ if (argv.debug) {
   makeDebug.enable(`${debug.namespace},${debug.namespace}:*`);
 }
 
-const decompositions = await loadHanziDecomposition();
+const charactersData = await loadCharacters();
 const dbCache = makeDbCache(import.meta.filename, `openai_chat_cache`, debug);
 const archiveCache = makeDbCache(
   import.meta.filename,
@@ -124,7 +124,7 @@ function decomp(char: string) {
   }
 
   allWords.add(char);
-  const ids = decompositions.get(char);
+  const ids = charactersData.get(char)?.decomposition;
   if (ids != null) {
     const idsNode = parseIds(ids);
     for (const leaf of walkIdsNode(idsNode)) {
@@ -657,7 +657,7 @@ async function openAiHanziWordGlossHintQuery(
       visited.add(char);
 
       // single character
-      const ids = decompositions.get(char);
+      const ids = charactersData.get(char)?.decomposition;
       invariant(ids != null, `missing decomposition for ${char}`);
       hanziIds = hanziIds.replaceAll(char, ids);
 
