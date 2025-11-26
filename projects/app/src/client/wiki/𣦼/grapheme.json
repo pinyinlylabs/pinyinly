@@ -1,4 +1,8 @@
 {
+  "decompositions": ["⿰歺又"],
   "hanzi": "𣦼",
+  "mnemonic": {
+    "components": ["⿰", { "hanzi": "歺" }, { "hanzi": "又" }]
+  },
   "strokes": 6
 }

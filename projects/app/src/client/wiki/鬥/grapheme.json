@@ -2,17 +2,9 @@
   "hanzi": "鬥",
   "mnemonic": {
     "components": [
-      "⿻",
-      [
-        "⿰",
-        { "hanzi": "丨", "strokes": "0" },
-        { "hanzi": "亅", "strokes": "9" }
-      ],
-      [
-        "⿰",
-        { "hanzi": "王", "strokes": "1-4" },
-        { "hanzi": "王", "strokes": "5-8" }
-      ]
+      "⿰",
+      { "hanzi": "𩰋", "strokes": "0-4" },
+      { "hanzi": "𩰊", "strokes": "5-9" }
     ]
   },
   "strokes": [

@@ -18,5 +18,6 @@
       { "hanzi": "玨", "strokes": "0-3,6-9" },
       { "hanzi": "刂", "strokes": "4-5" }
     ]
-  }
+  },
+  "decompositions": ["⿲王②王"]
 }

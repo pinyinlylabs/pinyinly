@@ -128,18 +128,6 @@ export const loadCharacters = memoize0(async function loadCharacters() {
     .parse(await import(`./characters.asset.json`).then((x) => x.default));
 });
 
-export const loadOldHanziDecomposition = memoize0(
-  async function loadHanziDecomposition() {
-    return z
-      .array(z.tuple([z.string(), z.string()]))
-      .transform((x) => new Map(x))
-      .transform(deepReadonly)
-      .parse(
-        await import(`./hanziDecomposition.asset.json`).then((x) => x.default),
-      );
-  },
-);
-
 export const wordListSchema = z.array(hanziWordSchema);
 
 export const allRadicalHanziWords = memoize0(

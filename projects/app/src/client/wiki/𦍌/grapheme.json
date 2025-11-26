@@ -1,5 +1,8 @@
 {
+  "componentFormOf": "羊",
   "hanzi": "𦍌",
-  "strokes": 6,
-  "componentFormOf": "羊"
+  "mnemonic": {
+    "components": ["⿱", { "hanzi": "䒑" }, { "hanzi": "土" }]
+  },
+  "strokes": 6
 }

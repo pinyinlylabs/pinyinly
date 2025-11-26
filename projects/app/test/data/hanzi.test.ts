@@ -1,13 +1,16 @@
 import {
+  aboveBelowMergeIdsMod,
   flattenIds,
   hanziGraphemeCount,
   idsNodeToString,
   IdsOperator,
   isHanziGrapheme,
+  leftRightMergeIdsMod,
   parseIds,
   walkIdsNode,
 } from "#data/hanzi.ts";
 import type { HanziText } from "#data/model.ts";
+import { invariant } from "@pinyinly/lib/invariant";
 import { describe, expect, test } from "vitest";
 import { 汉 } from "./helpers.ts";
 
@@ -24,6 +27,32 @@ test(
     ] as const) {
       expect(idsNodeToString(flattenIds(parseIds(input)))).toBe(expected);
     }
+  },
+);
+
+test.for([
+  [`⿰⿰abc`, `⿲abc`],
+  [`⿰a⿰bc`, `⿲abc`],
+] as const)(
+  `leftRightMergeIdsMod %s -> %s` satisfies HasNameOf<
+    typeof leftRightMergeIdsMod
+  >,
+  ([input, expected]) => {
+    const result = leftRightMergeIdsMod(parseIds(input));
+    invariant(result != null);
+    expect(idsNodeToString(result)).toBe(expected);
+  },
+);
+
+test.for([
+  [`⿱⿱abc`, `⿳abc`],
+  [`⿱a⿱bc`, `⿳abc`],
+] as const)(
+  `aboveBelowMergeIdsMod ` satisfies HasNameOf<typeof aboveBelowMergeIdsMod>,
+  ([input, expected]) => {
+    const result = aboveBelowMergeIdsMod(parseIds(input));
+    invariant(result != null);
+    expect(idsNodeToString(result)).toBe(expected);
   },
 );
 

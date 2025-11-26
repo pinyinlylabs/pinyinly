@@ -1,1 +1,7 @@
-{ "hanzi": "圡", "strokes": 4 }
+{
+  "hanzi": "圡",
+  "mnemonic": {
+    "components": ["⿷", { "hanzi": "土" }, { "hanzi": "丶" }]
+  },
+  "strokes": 4
+}

@@ -21,11 +21,7 @@
   "mnemonic": {
     "components": [
       "⿱",
-      [
-        "⿰",
-        { "hanzi": "歺", "strokes": "0-4" },
-        { "hanzi": "又", "strokes": "5-6" }
-      ],
+      { "hanzi": "𣦼", "strokes": "0-6", "strokeDiff": 1 },
       { "hanzi": "食", "strokes": "7-15" }
     ]
   }

@@ -1,7 +1,6 @@
 import { idsNodeToArrays, isHanziGrapheme, parseIds } from "#data/hanzi.js";
 import type { HanziText } from "#data/model.js";
 import { wikiGraphemeDataSchema } from "#data/model.js";
-import { loadOldHanziDecomposition } from "#dictionary/dictionary.js";
 import { normalizeIndexRanges } from "#util/indexRanges.ts";
 import {
   existsSync,
@@ -9,6 +8,7 @@ import {
   mkdirSync,
   readFileSync,
   updateJsonFileKey,
+  writeFileSync,
 } from "@pinyinly/lib/fs";
 import { invariant } from "@pinyinly/lib/invariant";
 import makeDebug from "debug";
@@ -126,6 +126,7 @@ for (const grapheme of allGraphemes) {
   }
 
   const dataFile = path.join(graphemeWikiDir, `grapheme.json`);
+  const mdxFile = path.join(graphemeWikiDir, `meaning.mdx`);
   const indentLevels = 2;
 
   if (await updateJsonFileKey(dataFile, `hanzi`, grapheme, indentLevels)) {
@@ -134,7 +135,6 @@ for (const grapheme of allGraphemes) {
 
   if (graphicsRecord == null) {
     debug(`no graphics data for %O`, grapheme);
-    continue;
   } else {
     if (
       await updateJsonFileKey(
@@ -204,35 +204,16 @@ for (const grapheme of allGraphemes) {
   }
 
   {
-    //
-    // .mnemonic updates from hanziDecomposition.asset.json
-    //
-    let existing;
-    try {
-      existing = wikiGraphemeDataSchema.parse(
-        JSON.parse(readFileSync(dataFile, `utf-8`)),
+    // Make sure there's a meaning.mdx file
+    if (!existsSync(mdxFile)) {
+      writeFileSync(
+        mdxFile,
+        `import data from "./grapheme.json";
+
+<WikiHanziGraphemeDecomposition graphemeData={data} />
+`,
       );
-    } catch (error) {
-      debug(
-        `failed to read old hanzi decomposition for %O: %O`,
-        grapheme,
-        error,
-      );
-    }
-
-    const dictionaryRecord = await loadOldHanziDecomposition().then((x) =>
-      x.get(grapheme),
-    );
-    if (existing?.mnemonic == null && dictionaryRecord != null) {
-      const newMnemonic = {
-        components: idsNodeToArrays(parseIds(dictionaryRecord), (character) => {
-          return { hanzi: character };
-        }),
-      };
-
-      await updateJsonFileKey(dataFile, `mnemonic`, newMnemonic, indentLevels);
-
-      debug(`wrote mnemonic for %O`, grapheme);
+      debug(`wrote meaning.mdx for %O`, grapheme);
     }
   }
 }

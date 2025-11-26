@@ -19,11 +19,7 @@
         "hanzi": "䏍",
         "strokes": "0-5"
       },
-      [
-        "⿱",
-        { "hanzi": "匕", "strokes": "6-7" },
-        { "hanzi": "匕", "strokes": "8-9" }
-      ]
+      { "hanzi": "𫧇", "strokes": "6-9" }
     ]
   }
 }

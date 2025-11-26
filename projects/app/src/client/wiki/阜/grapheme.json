@@ -2,9 +2,8 @@
   "hanzi": "阜",
   "mnemonic": {
     "components": [
-      "⿳",
-      { "hanzi": "丿", "strokes": "0" },
-      { "hanzi": "㠯", "strokes": "1-5" },
+      "⿱",
+      { "hanzi": "𠂤", "strokes": "0-5" },
       { "hanzi": "十", "strokes": "6-7" }
     ]
   },

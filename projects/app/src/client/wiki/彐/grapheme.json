@@ -2,9 +2,9 @@
   "hanzi": "彐",
   "mnemonic": {
     "components": [
-      "⿹",
-      { "strokes": "0" },
-      { "hanzi": "二", "strokes": "1-2" }
+      "⿼",
+      { "hanzi": "コ", "strokes": "0,2" },
+      { "hanzi": "一", "strokes": "1" }
     ]
   },
   "strokes": [

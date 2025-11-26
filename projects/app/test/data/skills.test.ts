@@ -355,6 +355,7 @@ describe(
         he:氵:water
           he:水:water
             he:亅:hook
+            he:丿:slash
       `,
       );
     });
@@ -600,6 +601,7 @@ describe(
             expect(prettyQueue(queue)).toMatchInlineSnapshot(`
               [
                 "he:又:again (🌱 NEW SKILL)",
+                "he:丿:slash (🌱 NEW SKILL)",
                 "he:亅:hook (🌱 NEW SKILL)",
                 "he:水:water (🟥 BLOCKED)",
                 "he:氵:water (🟥 BLOCKED)",

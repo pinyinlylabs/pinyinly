@@ -4,11 +4,7 @@
     "components": [
       "⿵",
       { "hanzi": "戊", "strokes": "0-1,6-8" },
-      [
-        "⿱",
-        { "hanzi": "一", "strokes": "2" },
-        { "hanzi": "口", "strokes": "3-5" }
-      ]
+      { "hanzi": "𠮛", "strokes": "2-5" }
     ]
   },
   "strokes": [

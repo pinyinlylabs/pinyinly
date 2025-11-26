@@ -3,11 +3,7 @@
   "mnemonic": {
     "components": [
       "⿰",
-      [
-        "⿱",
-        { "hanzi": "立", "strokes": "0-4" },
-        { "hanzi": "月", "strokes": "5-8" }
-      ],
+      { "hanzi": "𦚏", "strokes": "0-8" },
       { "strokes": "9-15" }
     ]
   },

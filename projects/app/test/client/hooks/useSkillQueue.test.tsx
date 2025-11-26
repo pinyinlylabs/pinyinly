@@ -90,11 +90,11 @@ rizzleTest(
         "he:八:eight (🌱 NEW SKILL)",
         "he:又:again (🌱 NEW SKILL)",
         "he:冖:cover (🌱 NEW SKILL)",
-        "he:䒑:grass (🌱 NEW SKILL)",
         "he:心:heart (🌱 NEW SKILL)",
-        "he:廾:hands (🌱 NEW SKILL)",
         "he:乙:second (🌱 NEW SKILL)",
-        "he:弋:shoot (🌱 NEW SKILL)",
+        "he:厂:cliff (🌱 NEW SKILL)",
+        "he:厶:private (🌱 NEW SKILL)",
+        "he:朩:rank (🌱 NEW SKILL)",
       ]
     `);
 
@@ -107,11 +107,11 @@ rizzleTest(
     expect(prettyQueue(blockedQueue).slice(0, 10)).toMatchInlineSnapshot(`
       [
         "he:𠂇:hand (🟥 BLOCKED)",
-        "he:𭕄:radical (🟥 BLOCKED)",
         "he:𠂉:knife (🟥 BLOCKED)",
         "he:𠂊:hands (🟥 BLOCKED)",
-        "he:丶:dot (🟥 BLOCKED)",
+        "he:𭕄:radical (🟥 BLOCKED)",
         "he:亅:hook (🟥 BLOCKED)",
+        "he:丶:dot (🟥 BLOCKED)",
         "he:丿:slash (🟥 BLOCKED)",
         "he:乚:hidden (🟥 BLOCKED)",
         "he:丨:line (🟥 BLOCKED)",

@@ -18,11 +18,7 @@
         "hanzi": "丬",
         "strokes": "0-2"
       },
-      [
-        "⿱",
-        { "hanzi": "夕", "strokes": "3-5" },
-        { "hanzi": "寸", "strokes": "6-8" }
-      ]
+      { "hanzi": "𪧷", "strokes": "3-8" }
     ]
   }
 }

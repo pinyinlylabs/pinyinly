@@ -17,7 +17,6 @@ import {
   loadCharacters,
   loadDictionary,
   loadHanziWordMigrations,
-  loadOldHanziDecomposition,
   loadPinyinSoundNameSuggestions,
   loadPinyinSoundThemeDetails,
   loadPinyinWords,
@@ -385,21 +384,6 @@ test(`zod schemas are compatible with OpenAI API`, async () => {
   assertCompatible(hanziWordMeaningSchema);
 });
 
-test(`migration`, async () => {
-  const oldDecomp = await loadOldHanziDecomposition();
-  const charactersData = await loadCharacters();
-
-  const mismatches = [];
-  for (const [hanzi, oldIds] of oldDecomp) {
-    const newIds = charactersData.get(hanzi)?.decomposition;
-    if (oldIds != newIds) {
-      mismatches.push({ hanzi, oldIds, newIds });
-    }
-  }
-
-  expect(mismatches).toEqual([]);
-});
-
 test(`hanzi uses consistent unicode characters`, async () => {
   const dict = await loadDictionary();
   const violations = [...dict.keys()]
@@ -478,19 +462,18 @@ test(`dictionary contains entries for decomposition`, async () => {
     // Couldn't find any standard meaning for this. In most cases this is used
     // at the top and looks like "上", so maybe the decomposition should just
     // pick that instead of going further to "⺊"?
-    [`⺊`, new Set([`上`, `卓`, `占`, `卤`, `攴`, `桌`, `虍`])],
+    [`⺊`, new Set([`卤`, `攴`, `虍`, `上`, `卓`, `占`, `桌`])],
     // Only 3 cases and isn't visually distinctive in the characters.
     [`乀`, new Set([`乂`, `展`, `水`, `畏`, `辰`])],
     // Only 3 cases and there doens't seem to be an obvious common meaning.
     [`乛`, new Set([`买`, `了`, `敢`])],
     [`𠄌`, new Set([`辰`, `展`, `畏`])],
     [`𠃊`, new Set([`亡`, `断`, `继`])],
-    [`⺊`, new Set([`卤`, `攴`, `上`, `卓`, `占`, `桌`])],
     [`⺈`, new Set([`欠`, `色`, `角`, `鱼`, `争`, `免`, `象`, `负`])],
-    [`丩`, new Set([`爿`, `亥`, `叫`, `收`])],
+    [`丩`, new Set([`爿`, `叫`, `收`])],
     [`龰`, new Set([`疋`, `走`, `足`])],
     [`丆`, new Set([`石`, `面`, `页`, `才`])],
-    [`𠮛`, new Set([`豆`, `司`, `畐`])],
+    [`𠮛`, new Set([`豆`, `司`, `畐`, `同`])],
     [`廿`, new Set([`革`, `世`, `度`])],
     [`覀`, new Set([`鹿`, `要`, `票`])],
     [`⺀`, new Set([`冬`, `头`, `尽`])],
@@ -507,10 +490,19 @@ test(`dictionary contains entries for decomposition`, async () => {
       .filter(([, sources]) => sources.size >= 3),
   ]
     // explicitly ignored cases
-    .filter(
-      ([x, sources]) =>
-        allowedMissing.get(x)?.symmetricDifference(sources).size !== 0,
-    );
+    .filter(([x, sources]) => {
+      const override = allowedMissing.get(x);
+      if (override != null) {
+        expect
+          .soft(
+            override.symmetricDifference(sources),
+            `allowedMissing for ${x}`,
+          )
+          .toEqual(new Set());
+        return false;
+      }
+      return true;
+    });
 
   expect(unknownWithMultipleSources).toEqual([]);
 });
