@@ -373,7 +373,7 @@ describe(`grapheme.json files`, async () => {
           sourceFontUsage.set(font, usage);
 
           const subsetHasGlyph = font.subset?.hasGlyphForCodePoint(codePoint);
-          if (!subsetHasGlyph) {
+          if (subsetHasGlyph !== true) {
             const missing = subsetFontMissingChars.get(font) ?? [];
             missing.push(grapheme);
             subsetFontMissingChars.set(font, missing);
