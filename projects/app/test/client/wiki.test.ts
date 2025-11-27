@@ -22,6 +22,7 @@ import { createSpeechFileTests } from "@pinyinly/audio-sprites/testing";
 import {
   memoize0,
   memoize1,
+  sortComparatorNumber,
   sortComparatorString,
 } from "@pinyinly/lib/collections";
 import {
@@ -35,6 +36,7 @@ import {
   nonNullable,
   uniqueInvariant,
 } from "@pinyinly/lib/invariant";
+import * as fontkit from "fontkit";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
 import { projectRoot } from "../helpers.ts";
@@ -353,6 +355,66 @@ describe(`grapheme.json files`, async () => {
     }
   });
 
+  test(`has font glyph`, async () => {
+    const fonts = await getFonts();
+    const sourceFontUsage = new Map<(typeof fonts)[number], string[]>();
+    const subsetFontMissingChars = new Map<(typeof fonts)[number], string[]>();
+
+    for (const { grapheme } of graphemeFiles) {
+      const codePoint = nonNullable(grapheme.codePointAt(0));
+      const codePointHuman = `${grapheme} (U+${codePoint.toString(16)})`;
+
+      const hasFontGlyph = fonts.some((font) => {
+        // Check the source font, then make sure it's in the source.
+        const isInSource = font.source.hasGlyphForCodePoint(codePoint);
+        if (isInSource) {
+          const usage = sourceFontUsage.get(font) ?? [];
+          usage.push(grapheme);
+          sourceFontUsage.set(font, usage);
+
+          const subsetHasGlyph = font.subset?.hasGlyphForCodePoint(codePoint);
+          if (!subsetHasGlyph) {
+            const missing = subsetFontMissingChars.get(font) ?? [];
+            missing.push(grapheme);
+            subsetFontMissingChars.set(font, missing);
+          }
+
+          expect
+            .soft(
+              subsetHasGlyph,
+              `${codePointHuman} should be in ${font.subsetPath}`,
+            )
+            .toBe(true);
+        }
+
+        return isInSource;
+      });
+
+      expect.soft(hasFontGlyph, codePointHuman).toBe(true);
+    }
+
+    const fontsByUsage = [...sourceFontUsage.entries()].sort(
+      sortComparatorNumber(([_, chars]) => -chars.length),
+    );
+
+    // Make sure the font usage is in descending order.
+    expect(
+      fontsByUsage.map(([{ name }]) => name),
+      `font order should be match usage`,
+    ).toEqual(fonts.map(({ name }) => name));
+
+    const requiredUpdateCommands = [...subsetFontMissingChars.keys()].map(
+      (font) => {
+        const chars = nonNullable(sourceFontUsage.get(font));
+        return `fonttools subset '${font.sourcePath}' --unicodes='${chars.map((c) => nonNullable(c.codePointAt(0)).toString(16)).join(`,`)}'`;
+      },
+    );
+
+    expect(requiredUpdateCommands, `commands to update font subsets`).toEqual(
+      [],
+    );
+  });
+
   test(`consistency with characters.asset.json`, async () => {
     const expected = new Map<CharactersKey, CharactersValue>();
 
@@ -381,3 +443,50 @@ describe(`grapheme.json files`, async () => {
     expect(expected).toEqual(actual);
   });
 });
+
+interface TestFont {
+  name: string;
+  subset: fontkit.Font | null;
+  source: fontkit.Font;
+  sourcePath: string;
+  subsetPath: string;
+}
+
+async function getFonts(): Promise<TestFont[]> {
+  async function openTtf(ttfPath: string): Promise<fontkit.Font | null> {
+    let font;
+    try {
+      font = await fontkit.open(ttfPath);
+    } catch (error) {
+      console.warn(`couldn't open font at ${ttfPath}: ${error}`);
+      return null;
+    }
+    invariant(font.type === `TTF`, `expected ${ttfPath} to be a TTF font`);
+    return font;
+  }
+
+  async function getTestFont(relativeBasePath: string): Promise<TestFont> {
+    const basePath = path.join(
+      projectRoot,
+      `src/assets/fonts`,
+      relativeBasePath,
+    );
+    const sourcePath = `${basePath}.ttf`;
+    const subsetPath = `${basePath}.subset.ttf`;
+
+    return {
+      name: path.basename(relativeBasePath),
+      subset: await openTtf(subsetPath),
+      subsetPath,
+      source: nonNullable(await openTtf(sourcePath)),
+      sourcePath,
+    };
+  }
+
+  return [
+    await getTestFont(`MiSans/MiSansVF`),
+    await getTestFont(`MiSans/MiSans L3`),
+    await getTestFont(`NotoSansSC-VariableFont_wght`),
+    await getTestFont(`PinyinlyComponentsVF`),
+  ];
+}

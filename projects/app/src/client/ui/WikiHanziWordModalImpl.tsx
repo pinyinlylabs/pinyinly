@@ -52,7 +52,7 @@ export function WikiHanziWordModalImpl({
           <View className="flex-row gap-1">
             {graphemes.map((grapheme) => (
               <View key={grapheme} className="items-start">
-                <Text className="font-karla text-[60px] text-fg">
+                <Text className="font-sans text-[60px] text-fg">
                   {grapheme}
                 </Text>
               </View>
@@ -60,7 +60,7 @@ export function WikiHanziWordModalImpl({
           </View>
 
           {hanziWordSkillData.data.pinyin == null ? null : (
-            <Text className="font-karla text-2xl text-fg/50">
+            <Text className="font-sans text-2xl text-fg/50">
               {hanziWordSkillData.data.pinyin
                 .map((x) => pinyinPronunciationDisplayText(x))
                 .join(`, `)}
@@ -69,7 +69,7 @@ export function WikiHanziWordModalImpl({
         </View>
 
         <View className="gap-1">
-          <Text className="font-karla text-2xl text-fg">
+          <Text className="font-sans text-2xl text-fg">
             {hanziWordSkillData.data.gloss.join(`, `)}
             {otherMeaningsQuery.data == null ||
             otherMeaningsQuery.data.length === 0 ? null : (
@@ -91,7 +91,7 @@ export function WikiHanziWordModalImpl({
 
         {wikiEntry.data?.components == null ? null : (
           <View className="gap-1">
-            <Text className="font-karla text-xs uppercase text-caption">
+            <Text className="font-sans text-xs uppercase text-caption">
               Interpretation
             </Text>
             <View className="gap-4 rounded-xl bg-bg-loud p-4">
@@ -127,7 +127,7 @@ export function WikiHanziWordModalImpl({
         )}
 
         {wikiEntry.data?.visuallySimilar == null ? null : (
-          <View className="gap-1 font-karla">
+          <View className="gap-1 font-sans">
             <Text className="text-xs uppercase text-fg/90">
               Visually Similar
             </Text>
@@ -141,7 +141,7 @@ export function WikiHanziWordModalImpl({
         )}
 
         {!__DEV__ || skillStatesQuery.data == null ? null : (
-          <View className="gap-1 font-karla">
+          <View className="gap-1 font-sans">
             <Text className="text-xs uppercase text-fg/90">
               Skills <DevLozenge />
             </Text>

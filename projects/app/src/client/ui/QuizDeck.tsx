@@ -271,7 +271,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
                     entering={FadeIn}
                     className="my-auto items-center"
                   >
-                    <Text className="font-karla text-lg text-caption">
+                    <Text className="font-sans text-lg text-caption">
                       Loading
                     </Text>
                   </Reanimated.View>
