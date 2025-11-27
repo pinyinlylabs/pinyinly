@@ -29,13 +29,14 @@ if (!isExpoGo) {
 
 export const SplashScreen = ({}: { children?: never }) => {
   const [fontsLoaded, fontError] = useFonts({
-    [`Karla`]: require(`@/assets/fonts/Karla.ttf`),
     [`NationalPark`]: require(
       `@/assets/fonts/NationalPark/NationalPark-VariableFont_wght.ttf`,
     ),
-    [`MaShanZheng-Regular`]: require(`@/assets/fonts/MaShanZheng-Regular.ttf`),
-    [`PinyinlyComponents`]: require(`@/assets/fonts/PinyinlyComponentsVF.ttf`),
-    [`NotoSerifSC-Medium`]: require(`@/assets/fonts/NotoSerifSC-Medium.otf`),
+    [`MiSansL3`]: require(`@/assets/fonts/MiSans/MiSans L3.subset.ttf`),
+    [`MiSans`]: require(`@/assets/fonts/MiSans/MiSansVF.subset.ttf`),
+    [`PinyinlyComponents`]: require(
+      `@/assets/fonts/PinyinlyComponentsVF.subset.ttf`,
+    ),
   });
   const isReady = fontsLoaded || fontError != null; // (lottieLoaded || lottieError) &&
 

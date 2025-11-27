@@ -1,7 +1,6 @@
 import type { HanziWordWithMeaning } from "@/dictionary/dictionary";
 import {
   decomposeHanzi,
-  graphemeHasGlyph,
   hanziFromHanziWord,
   hanziTextFromHanziGrapheme,
   lookupHanzi,
@@ -211,29 +210,27 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
       for (const hanziGrapheme of await decomposeHanzi(
         hanziFromHanziWord(hanziWordFromSkill(skill)),
       )) {
-        if (await graphemeHasGlyph(hanziGrapheme)) {
-          // Check if the grapheme was already added as a dependency by being
-          // referenced in the gloss hint.
-          const depAlreadyAdded = deps.some((x) => {
-            if (skillKindFromSkill(x) === SkillKind.HanziWordToGloss) {
-              skill = skill as HanziWordSkill;
-              return (
-                hanziFromHanziWord(hanziWordFromSkill(skill)) ===
-                hanziTextFromHanziGrapheme(hanziGrapheme)
-              );
-            }
-            return false;
-          });
+        // Check if the grapheme was already added as a dependency by being
+        // referenced in the gloss hint.
+        const depAlreadyAdded = deps.some((x) => {
+          if (skillKindFromSkill(x) === SkillKind.HanziWordToGloss) {
+            skill = skill as HanziWordSkill;
+            return (
+              hanziFromHanziWord(hanziWordFromSkill(skill)) ===
+              hanziTextFromHanziGrapheme(hanziGrapheme)
+            );
+          }
+          return false;
+        });
 
-          // If the grapheme wasn't already added, add it as a dependency by
-          // guessing what disambugation to use for the hanzi.
-          if (!depAlreadyAdded) {
-            const hanziWordWithMeaning =
-              await hackyGuessHanziWordToLearn(hanziGrapheme);
-            if (hanziWordWithMeaning != null) {
-              const [hanziWord] = hanziWordWithMeaning;
-              deps.push(hanziWordToGloss(hanziWord));
-            }
+        // If the grapheme wasn't already added, add it as a dependency by
+        // guessing what disambugation to use for the hanzi.
+        if (!depAlreadyAdded) {
+          const hanziWordWithMeaning =
+            await hackyGuessHanziWordToLearn(hanziGrapheme);
+          if (hanziWordWithMeaning != null) {
+            const [hanziWord] = hanziWordWithMeaning;
+            deps.push(hanziWordToGloss(hanziWord));
           }
         }
       }
@@ -265,16 +262,14 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
       const graphemes = splitHanziText(hanzi);
       if (graphemes.length > 1) {
         for (const grapheme of graphemes) {
-          if (await graphemeHasGlyph(grapheme)) {
-            // We only have a character, but need a hanzi word to learn. So make
-            // the best guess for the hanzi word to learn.
-            for (const [charHanziWord, charMeaning] of await lookupHanzi(
-              grapheme,
-            )) {
-              if (charMeaning.pinyin != null) {
-                deps.push(hanziWordToPinyinTyped(charHanziWord));
-                break;
-              }
+          // We only have a character, but need a hanzi word to learn. So make
+          // the best guess for the hanzi word to learn.
+          for (const [charHanziWord, charMeaning] of await lookupHanzi(
+            grapheme,
+          )) {
+            if (charMeaning.pinyin != null) {
+              deps.push(hanziWordToPinyinTyped(charHanziWord));
+              break;
             }
           }
         }

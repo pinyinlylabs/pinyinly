@@ -14,7 +14,7 @@ export const WikiHanziInterpretationPanel = ({
 
   return wikiEntry.data?.components == null ? null : (
     <View className="gap-1">
-      <Text className="font-karla text-xs uppercase text-caption">
+      <Text className="font-sans text-xs uppercase text-caption">
         Interpretation
       </Text>
       <View className="gap-4 rounded-xl bg-bg-loud p-4">

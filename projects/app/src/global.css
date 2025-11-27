@@ -164,19 +164,19 @@
 
   /* www */
   .www-text-hero {
-    @apply font-karla text-5xl/tight font-bold tracking-tighter text-fg transition-all md:text-6xl/tight;
+    @apply font-sans text-5xl/tight font-bold tracking-tighter text-fg transition-all md:text-6xl/tight;
   }
 
   .www-text-title {
-    @apply font-karla text-3xl/normal font-bold tracking-tighter text-fg transition-all md:text-4xl/normal;
+    @apply font-sans text-3xl/normal font-bold tracking-tighter text-fg transition-all md:text-4xl/normal;
   }
 
   .www-text-subtitle {
-    @apply font-karla text-base uppercase text-cyanold;
+    @apply font-sans text-base uppercase text-cyanold;
   }
 
   .www-text-body {
-    @apply font-karla text-fg text-[17px]/[24px];
+    @apply font-sans text-fg text-[17px]/[24px];
   }
 
   .www-px-comfortable {
@@ -184,11 +184,11 @@
   }
 
   .www-text-footer-title {
-    @apply font-karla text-[19px]/normal font-medium text-fg;
+    @apply font-sans text-[19px]/normal font-medium text-fg;
   }
 
   .www-text-footer-link {
-    @apply font-karla text-[15px]/normal font-medium text-fg antialiased;
+    @apply font-sans text-[15px]/normal font-medium text-fg antialiased;
   }
 
   /* 

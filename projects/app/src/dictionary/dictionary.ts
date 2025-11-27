@@ -40,20 +40,6 @@ export const loadPinyinWords = memoize0(async function loadPinyinWords() {
     .parse(await import(`./pinyinWords.asset.json`).then((x) => x.default));
 });
 
-export const loadMissingFontGlyphs = memoize0(
-  async function loadMissingFontGlyphs() {
-    return z
-      .record(z.string(), z.array(z.string()))
-      .transform(
-        (x) => new Map(Object.entries(x).map(([k, v]) => [k, new Set(v)])),
-      )
-      .transform(deepReadonly)
-      .parse(
-        await import(`./missingFontGlyphs.asset.json`).then((x) => x.default),
-      );
-  },
-);
-
 export const loadPinyinSoundThemeDetails = memoize0(
   async function loadPinyinSoundThemeDetails() {
     return z
@@ -382,19 +368,6 @@ export const allHanziGraphemes = memoize0(async function allHanziGraphemes() {
       .flatMap((x) => splitHanziText(x)),
   );
 });
-
-/**
- * Return true if the grapheme can be rendered (i.e. it has a font glyph).
- */
-export async function graphemeHasGlyph(grapheme: string): Promise<boolean> {
-  const missingFontGlyphs = await loadMissingFontGlyphs();
-  for (const [_platform, missingGlyphs] of missingFontGlyphs.entries()) {
-    if (missingGlyphs.has(grapheme)) {
-      return false;
-    }
-  }
-  return true;
-}
 
 export function shorthandPartOfSpeech(partOfSpeech: PartOfSpeech) {
   switch (partOfSpeech) {
