@@ -64,7 +64,7 @@ test(`tests/ tree mirrors src/ tree`, async () => {
       expect
         .soft(
           srcRelPath,
-          `${testRelPath} should have matching source file in src/, or should be marked as "standlone" by adding a "// pyly-not-src-test" comment`,
+          `${testRelPath} should have matching source file in src/, or should be marked as "standalone" by adding a "// pyly-not-src-test" comment`,
         )
         .not.toBeUndefined();
     }
