@@ -15,6 +15,11 @@ test(`font bill of materials`, async () => {
   const fontsDir = path.join(projectRoot, `src/assets/fonts`);
   const fontDirs = await glob(`*/LICENSE`, { cwd: fontsDir });
 
+  expect(
+    fontDirs.length,
+    `Expected to find at least one font with a LICENSE file`,
+  ).toBeGreaterThan(0);
+
   const fontBom: FontBomEntry[] = [];
 
   for (const licensePath of fontDirs) {

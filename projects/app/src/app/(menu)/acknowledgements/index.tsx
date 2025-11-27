@@ -24,6 +24,8 @@ export default function AcknowledgementsPage() {
         {fontBillOfMaterials.data?.map((font) => (
           <View key={font.name}>
             <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`${font.name} font license${expandedFont === font.name ? `, expanded` : ``}`}
               onPress={() => {
                 setExpandedFont(expandedFont === font.name ? null : font.name);
               }}
