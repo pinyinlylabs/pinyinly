@@ -1,0 +1,21 @@
+// pyly-not-src-test
+
+import { expect, test } from "vitest";
+import { getFonts } from "../helpers.ts";
+
+test(`MiSans font weight correction`, async () => {
+  const fonts = await getFonts();
+
+  const miSans = fonts.find((font) => font.name === `MiSansVF`);
+  const miSansL3 = fonts.find((font) => font.name === `MiSans L3`);
+
+  expect(miSans, `MiSans`).toBeDefined();
+  expect(miSansL3, `MiSans L3`).toBeDefined();
+
+  expect
+    .soft(
+      miSans?.subset?.variationAxes[`wght`]?.max,
+      `MiSans max weight needs to be adjusted after subsetting`,
+    )
+    .toEqual(900);
+});

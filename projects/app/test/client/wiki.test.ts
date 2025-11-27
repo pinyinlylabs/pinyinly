@@ -36,10 +36,9 @@ import {
   nonNullable,
   uniqueInvariant,
 } from "@pinyinly/lib/invariant";
-import * as fontkit from "fontkit";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
-import { projectRoot } from "../helpers.ts";
+import { getFonts, projectRoot } from "../helpers.ts";
 
 const wikiDir = path.join(projectRoot, `src/client/wiki`);
 const dictionaryDir = path.join(projectRoot, `src/dictionary`);
@@ -443,50 +442,3 @@ describe(`grapheme.json files`, async () => {
     expect(expected).toEqual(actual);
   });
 });
-
-interface TestFont {
-  name: string;
-  subset: fontkit.Font | null;
-  source: fontkit.Font;
-  sourcePath: string;
-  subsetPath: string;
-}
-
-async function getFonts(): Promise<TestFont[]> {
-  async function openTtf(ttfPath: string): Promise<fontkit.Font | null> {
-    let font;
-    try {
-      font = await fontkit.open(ttfPath);
-    } catch (error) {
-      console.warn(`couldn't open font at ${ttfPath}: ${error}`);
-      return null;
-    }
-    invariant(font.type === `TTF`, `expected ${ttfPath} to be a TTF font`);
-    return font;
-  }
-
-  async function getTestFont(relativeBasePath: string): Promise<TestFont> {
-    const basePath = path.join(
-      projectRoot,
-      `src/assets/fonts`,
-      relativeBasePath,
-    );
-    const sourcePath = `${basePath}.ttf`;
-    const subsetPath = `${basePath}.subset.ttf`;
-
-    return {
-      name: path.basename(relativeBasePath),
-      subset: await openTtf(subsetPath),
-      subsetPath,
-      source: nonNullable(await openTtf(sourcePath)),
-      sourcePath,
-    };
-  }
-
-  return [
-    await getTestFont(`MiSans/MiSansVF`),
-    await getTestFont(`MiSans/MiSans L3`),
-    await getTestFont(`NotoSansSC-VariableFont_wght`),
-    await getTestFont(`PinyinlyComponentsVF`),
-  ];
-}
