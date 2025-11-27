@@ -1,4 +1,4 @@
-import { loadBillOfMaterials } from "@/data/bom";
+import { loadBillOfMaterials, loadFontBillOfMaterials } from "@/data/bom";
 import type {
   HanziText,
   HanziWord,
@@ -337,6 +337,17 @@ export const billOfMaterialsQuery = () =>
     queryFn: async () => {
       await devToolsSlowQuerySleepIfEnabled();
       return await loadBillOfMaterials().then((x) => [...x.entries()]);
+    },
+    networkMode: `offlineFirst`,
+    structuralSharing: false,
+  });
+
+export const fontBillOfMaterialsQuery = () =>
+  queryOptions({
+    queryKey: [`fontBillOfMaterials`],
+    queryFn: async () => {
+      await devToolsSlowQuerySleepIfEnabled();
+      return await loadFontBillOfMaterials();
     },
     networkMode: `offlineFirst`,
     structuralSharing: false,

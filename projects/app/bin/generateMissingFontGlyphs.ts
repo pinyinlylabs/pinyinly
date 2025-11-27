@@ -14,7 +14,10 @@ import path from "node:path";
 const projectRoot = path.join(import.meta.dirname, `..`);
 
 const notoSansSc = await fontkit.open(
-  path.join(projectRoot, `src/assets/fonts/NotoSansSC-VariableFont_wght.ttf`),
+  path.join(
+    projectRoot,
+    `src/assets/fonts/NotoSansSC/NotoSansSC-VariableFont_wght.ttf`,
+  ),
 );
 invariant(notoSansSc.type === `TTF`, `expected a TTF font`);
 
