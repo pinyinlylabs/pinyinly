@@ -400,7 +400,7 @@ describe(`grapheme.json files`, async () => {
     // Make sure the font usage is in descending order.
     expect(
       fontsByUsage.map(([{ name }]) => name),
-      `font order should be match usage`,
+      `font order should match usage`,
     ).toEqual(fonts.map(({ name }) => name));
 
     const requiredUpdateCommands = [...subsetFontMissingChars.keys()].map(
