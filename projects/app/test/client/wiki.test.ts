@@ -365,7 +365,7 @@ describe(`grapheme.json files`, async () => {
       const codePointHuman = `${grapheme} (U+${codePoint.toString(16)})`;
 
       const hasFontGlyph = fonts.some((font) => {
-        // Check the source font, then make sure it's in the source.
+        // Check the source font for the glyph, then ensure it's present in the subset font.
         const isInSource = font.source.hasGlyphForCodePoint(codePoint);
         if (isInSource) {
           const usage = sourceFontUsage.get(font) ?? [];
