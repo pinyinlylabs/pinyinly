@@ -1,5 +1,5 @@
-import { allGraphemeComponents } from "@/client/wiki";
-import type { WikiGraphemeData } from "@/data/model";
+import type { WikiGraphemeData } from "@/data/hanzi";
+import { walkIdsNodeLeafs } from "@/data/hanzi";
 import { parseIndexRanges } from "@/util/indexRanges";
 import { Image } from "expo-image";
 import type { ReactNode } from "react";
@@ -23,7 +23,7 @@ export function WikiHanziGraphemeDecomposition({
 
   if (graphemeData.mnemonic && Array.isArray(graphemeData.strokes)) {
     for (const [i, visualComponent] of [
-      ...allGraphemeComponents(graphemeData.mnemonic.components),
+      ...walkIdsNodeLeafs(graphemeData.mnemonic.components),
     ].entries()) {
       componentsElements.push(
         <View className="flex-1 items-center gap-2" key={i}>

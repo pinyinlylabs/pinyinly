@@ -1,32 +1,35 @@
 import {
-  aboveBelowMergeIdsMod,
+  componentToString,
   flattenIds,
   hanziGraphemeCount,
+  horizontalPairToTripleMergeIdsTransform,
+  idsApplyTransforms,
   idsNodeToString,
-  IdsOperator,
   isHanziGrapheme,
-  leftRightMergeIdsMod,
+  makeVerticalMergeCharacterIdsTransform,
+  mapIdsNodeLeafs,
   parseIds,
-  walkIdsNode,
+  verticalPairToTripleMergeIdsTransform,
+  walkIdsNodeLeafs,
 } from "#data/hanzi.ts";
 import type { HanziText } from "#data/model.ts";
 import { invariant } from "@pinyinly/lib/invariant";
 import { describe, expect, test } from "vitest";
 import { 汉 } from "./helpers.ts";
 
-test(
+test.for([
+  [`⿱⿱abc`, `⿳abc`],
+  [`⿱a⿱bc`, `⿳abc`],
+  [`⿰⿰abc`, `⿲abc`],
+  [`⿰a⿰bc`, `⿲abc`],
+] as const)(
   `flattenIds handles ⿱⿱ to ⿳ and ⿰⿰ to ⿲` satisfies HasNameOf<
     typeof flattenIds
   >,
-  () => {
-    for (const [input, expected] of [
-      [`⿱⿱abc`, `⿳abc`],
-      [`⿱a⿱bc`, `⿳abc`],
-      [`⿰⿰abc`, `⿲abc`],
-      [`⿰a⿰bc`, `⿲abc`],
-    ] as const) {
-      expect(idsNodeToString(flattenIds(parseIds(input)))).toBe(expected);
-    }
+  ([input, expected]) => {
+    expect(idsNodeToString(flattenIds(parseIds(input)), (x) => x)).toBe(
+      expected,
+    );
   },
 );
 
@@ -34,13 +37,13 @@ test.for([
   [`⿰⿰abc`, `⿲abc`],
   [`⿰a⿰bc`, `⿲abc`],
 ] as const)(
-  `leftRightMergeIdsMod %s -> %s` satisfies HasNameOf<
-    typeof leftRightMergeIdsMod
+  `horizontalPairToTripleMergeIdsTransform %s -> %s` satisfies HasNameOf<
+    typeof horizontalPairToTripleMergeIdsTransform
   >,
   ([input, expected]) => {
-    const result = leftRightMergeIdsMod(parseIds(input));
+    const result = horizontalPairToTripleMergeIdsTransform(parseIds(input));
     invariant(result != null);
-    expect(idsNodeToString(result)).toBe(expected);
+    expect(idsNodeToString(result, (x) => x)).toBe(expected);
   },
 );
 
@@ -48,207 +51,248 @@ test.for([
   [`⿱⿱abc`, `⿳abc`],
   [`⿱a⿱bc`, `⿳abc`],
 ] as const)(
-  `aboveBelowMergeIdsMod ` satisfies HasNameOf<typeof aboveBelowMergeIdsMod>,
+  `verticalPairToTripleMergeIdsTransform` satisfies HasNameOf<
+    typeof verticalPairToTripleMergeIdsTransform
+  >,
   ([input, expected]) => {
-    const result = aboveBelowMergeIdsMod(parseIds(input));
+    const result = verticalPairToTripleMergeIdsTransform(parseIds(input));
     invariant(result != null);
-    expect(idsNodeToString(result)).toBe(expected);
+    expect(idsNodeToString(result, (x) => x)).toBe(expected);
   },
 );
 
 test(`parseIds handles 1 depth` satisfies HasNameOf<typeof parseIds>, () => {
-  expect(parseIds(`木`)).toEqual({
-    operator: `LeafCharacter`,
-    character: `木`,
-  });
+  expect.soft(parseIds(`木`)).toMatchInlineSnapshot(`"木"`);
 
   // 相
-  expect(parseIds(`⿰木目`)).toEqual({
-    operator: IdsOperator.LeftToRight,
-    left: { operator: `LeafCharacter`, character: `木` },
-    right: { operator: `LeafCharacter`, character: `目` },
-  });
+  expect.soft(parseIds(`⿰木目`)).toMatchInlineSnapshot(`
+    [
+      "⿰",
+      "木",
+      "目",
+    ]
+  `);
 
   // 杏
-  expect(parseIds(`⿱木口`)).toEqual({
-    operator: IdsOperator.AboveToBelow,
-    above: { operator: `LeafCharacter`, character: `木` },
-    below: { operator: `LeafCharacter`, character: `口` },
-  });
+  expect.soft(parseIds(`⿱木口`)).toMatchInlineSnapshot(`
+    [
+      "⿱",
+      "木",
+      "口",
+    ]
+  `);
 
   // 衍
-  expect(parseIds(`⿲彳氵亍`)).toEqual({
-    operator: IdsOperator.LeftToMiddleToRight,
-    left: { operator: `LeafCharacter`, character: `彳` },
-    middle: { operator: `LeafCharacter`, character: `氵` },
-    right: { operator: `LeafCharacter`, character: `亍` },
-  });
+  expect.soft(parseIds(`⿲彳氵亍`)).toMatchInlineSnapshot(`
+    [
+      "⿲",
+      "彳",
+      "氵",
+      "亍",
+    ]
+  `);
 
   // 京
-  expect(parseIds(`⿳亠口小`)).toEqual({
-    operator: IdsOperator.AboveToMiddleAndBelow,
-    above: { operator: `LeafCharacter`, character: `亠` },
-    middle: { operator: `LeafCharacter`, character: `口` },
-    below: { operator: `LeafCharacter`, character: `小` },
-  });
+  expect.soft(parseIds(`⿳亠口小`)).toMatchInlineSnapshot(`
+    [
+      "⿳",
+      "亠",
+      "口",
+      "小",
+    ]
+  `);
 
   // 回
-  expect(parseIds(`⿴囗口`)).toEqual({
-    operator: IdsOperator.FullSurround,
-    surrounding: { operator: `LeafCharacter`, character: `囗` },
-    surrounded: { operator: `LeafCharacter`, character: `口` },
-  });
+  expect.soft(parseIds(`⿴囗口`)).toMatchInlineSnapshot(`
+    [
+      "⿴",
+      "囗",
+      "口",
+    ]
+  `);
 
   // 凰
-  expect(parseIds(`⿵几皇`)).toEqual({
-    operator: IdsOperator.SurroundFromAbove,
-    above: { operator: `LeafCharacter`, character: `几` },
-    surrounded: { operator: `LeafCharacter`, character: `皇` },
-  });
+  expect.soft(parseIds(`⿵几皇`)).toMatchInlineSnapshot(`
+    [
+      "⿵",
+      "几",
+      "皇",
+    ]
+  `);
 
   // 凶
-  expect(parseIds(`⿶凵㐅`)).toEqual({
-    operator: IdsOperator.SurroundFromBelow,
-    below: { operator: `LeafCharacter`, character: `凵` },
-    surrounded: { operator: `LeafCharacter`, character: `㐅` },
-  });
+  expect.soft(parseIds(`⿶凵㐅`)).toMatchInlineSnapshot(`
+    [
+      "⿶",
+      "凵",
+      "㐅",
+    ]
+  `);
 
   // 匠
-  expect(parseIds(`⿷匚斤`)).toEqual({
-    operator: IdsOperator.SurroundFromLeft,
-    left: { operator: `LeafCharacter`, character: `匚` },
-    surrounded: { operator: `LeafCharacter`, character: `斤` },
-  });
+  expect.soft(parseIds(`⿷匚斤`)).toMatchInlineSnapshot(`
+    [
+      "⿷",
+      "匚",
+      "斤",
+    ]
+  `);
 
   // 㕚
-  expect(parseIds(`⿼叉丶`)).toEqual({
-    operator: IdsOperator.SurroundFromRight,
-    right: { operator: `LeafCharacter`, character: `叉` },
-    surrounded: { operator: `LeafCharacter`, character: `丶` },
-  });
+  expect.soft(parseIds(`⿼叉丶`)).toMatchInlineSnapshot(`
+    [
+      "⿼",
+      "叉",
+      "丶",
+    ]
+  `);
 
   // 病
-  expect(parseIds(`⿸疒丙`)).toEqual({
-    operator: IdsOperator.SurroundFromUpperLeft,
-    upperLeft: { operator: `LeafCharacter`, character: `疒` },
-    surrounded: { operator: `LeafCharacter`, character: `丙` },
-  });
+  expect.soft(parseIds(`⿸疒丙`)).toMatchInlineSnapshot(`
+    [
+      "⿸",
+      "疒",
+      "丙",
+    ]
+  `);
 
   // 戒
-  expect(parseIds(`⿹戈廾`)).toEqual({
-    operator: IdsOperator.SurroundFromUpperRight,
-    upperRight: { operator: `LeafCharacter`, character: `戈` },
-    surrounded: { operator: `LeafCharacter`, character: `廾` },
-  });
+  expect.soft(parseIds(`⿹戈廾`)).toMatchInlineSnapshot(`
+    [
+      "⿹",
+      "戈",
+      "廾",
+    ]
+  `);
 
   // 超
-  expect(parseIds(`⿺走召`)).toEqual({
-    operator: IdsOperator.SurroundFromLowerLeft,
-    lowerLeft: { operator: `LeafCharacter`, character: `走` },
-    surrounded: { operator: `LeafCharacter`, character: `召` },
-  });
+  expect.soft(parseIds(`⿺走召`)).toMatchInlineSnapshot(`
+    [
+      "⿺",
+      "走",
+      "召",
+    ]
+  `);
 
   // 氷
-  expect(parseIds(`⿽水丶`)).toEqual({
-    operator: IdsOperator.SurroundFromLowerRight,
-    lowerRight: { operator: `LeafCharacter`, character: `水` },
-    surrounded: { operator: `LeafCharacter`, character: `丶` },
-  });
+  expect.soft(parseIds(`⿽水丶`)).toMatchInlineSnapshot(`
+    [
+      "⿽",
+      "水",
+      "丶",
+    ]
+  `);
 
   // 巫
-  expect(parseIds(`⿻工从`)).toEqual({
-    operator: IdsOperator.Overlaid,
-    overlay: { operator: `LeafCharacter`, character: `工` },
-    underlay: { operator: `LeafCharacter`, character: `从` },
-  });
+  expect.soft(parseIds(`⿻工从`)).toMatchInlineSnapshot(`
+    [
+      "⿻",
+      "工",
+      "从",
+    ]
+  `);
 
   // 卐
-  expect(parseIds(`⿾卍`)).toEqual({
-    operator: IdsOperator.HorizontalReflection,
-    reflected: { operator: `LeafCharacter`, character: `卍` },
-  });
+  expect.soft(parseIds(`⿾卍`)).toMatchInlineSnapshot(`
+    [
+      "⿾",
+      "卍",
+    ]
+  `);
 
   // 𠕄
-  expect(parseIds(`⿿凹`)).toEqual({
-    operator: IdsOperator.Rotation,
-    rotated: { operator: `LeafCharacter`, character: `凹` },
-  });
+  expect.soft(parseIds(`⿿凹`)).toMatchInlineSnapshot(`
+    [
+      "⿿",
+      "凹",
+    ]
+  `);
 
-  expect(parseIds(`①`)).toEqual({ operator: `LeafCharacter`, character: `①` });
-  expect(parseIds(`②`)).toEqual({ operator: `LeafCharacter`, character: `②` });
-  expect(parseIds(`③`)).toEqual({ operator: `LeafCharacter`, character: `③` });
-  expect(parseIds(`④`)).toEqual({ operator: `LeafCharacter`, character: `④` });
-  expect(parseIds(`⑤`)).toEqual({ operator: `LeafCharacter`, character: `⑤` });
-  expect(parseIds(`⑥`)).toEqual({ operator: `LeafCharacter`, character: `⑥` });
-  expect(parseIds(`⑦`)).toEqual({ operator: `LeafCharacter`, character: `⑦` });
-  expect(parseIds(`⑧`)).toEqual({ operator: `LeafCharacter`, character: `⑧` });
-  expect(parseIds(`⑨`)).toEqual({ operator: `LeafCharacter`, character: `⑨` });
-  expect(parseIds(`⑩`)).toEqual({ operator: `LeafCharacter`, character: `⑩` });
-  expect(parseIds(`⑪`)).toEqual({ operator: `LeafCharacter`, character: `⑪` });
-  expect(parseIds(`⑫`)).toEqual({ operator: `LeafCharacter`, character: `⑫` });
-  expect(parseIds(`⑬`)).toEqual({ operator: `LeafCharacter`, character: `⑬` });
-  expect(parseIds(`⑭`)).toEqual({ operator: `LeafCharacter`, character: `⑭` });
-  expect(parseIds(`⑮`)).toEqual({ operator: `LeafCharacter`, character: `⑮` });
-  expect(parseIds(`⑯`)).toEqual({ operator: `LeafCharacter`, character: `⑯` });
-  expect(parseIds(`⑰`)).toEqual({ operator: `LeafCharacter`, character: `⑰` });
-  expect(parseIds(`⑱`)).toEqual({ operator: `LeafCharacter`, character: `⑱` });
-  expect(parseIds(`⑲`)).toEqual({ operator: `LeafCharacter`, character: `⑲` });
-  expect(parseIds(`⑳`)).toEqual({ operator: `LeafCharacter`, character: `⑳` });
+  expect.soft(parseIds(`①`)).toMatchInlineSnapshot(`"①"`);
+  expect.soft(parseIds(`②`)).toMatchInlineSnapshot(`"②"`);
+  expect.soft(parseIds(`③`)).toMatchInlineSnapshot(`"③"`);
+  expect.soft(parseIds(`④`)).toMatchInlineSnapshot(`"④"`);
+  expect.soft(parseIds(`⑤`)).toMatchInlineSnapshot(`"⑤"`);
+  expect.soft(parseIds(`⑥`)).toMatchInlineSnapshot(`"⑥"`);
+  expect.soft(parseIds(`⑦`)).toMatchInlineSnapshot(`"⑦"`);
+  expect.soft(parseIds(`⑧`)).toMatchInlineSnapshot(`"⑧"`);
+  expect.soft(parseIds(`⑨`)).toMatchInlineSnapshot(`"⑨"`);
+  expect.soft(parseIds(`⑩`)).toMatchInlineSnapshot(`"⑩"`);
+  expect.soft(parseIds(`⑪`)).toMatchInlineSnapshot(`"⑪"`);
+  expect.soft(parseIds(`⑫`)).toMatchInlineSnapshot(`"⑫"`);
+  expect.soft(parseIds(`⑬`)).toMatchInlineSnapshot(`"⑬"`);
+  expect.soft(parseIds(`⑭`)).toMatchInlineSnapshot(`"⑭"`);
+  expect.soft(parseIds(`⑮`)).toMatchInlineSnapshot(`"⑮"`);
+  expect.soft(parseIds(`⑯`)).toMatchInlineSnapshot(`"⑯"`);
+  expect.soft(parseIds(`⑰`)).toMatchInlineSnapshot(`"⑰"`);
+  expect.soft(parseIds(`⑱`)).toMatchInlineSnapshot(`"⑱"`);
+  expect.soft(parseIds(`⑲`)).toMatchInlineSnapshot(`"⑲"`);
+  expect.soft(parseIds(`⑳`)).toMatchInlineSnapshot(`"⑳"`);
 });
 
 test(`parseIds handles 2 depth` satisfies HasNameOf<typeof parseIds>, () => {
   {
     const cursor = { index: 0 };
-    expect(parseIds(`⿰a⿱bc`, cursor)).toEqual({
-      operator: IdsOperator.LeftToRight,
-      left: { operator: `LeafCharacter`, character: `a` },
-      right: {
-        operator: IdsOperator.AboveToBelow,
-        above: { operator: `LeafCharacter`, character: `b` },
-        below: { operator: `LeafCharacter`, character: `c` },
-      },
-    });
+    expect(parseIds(`⿰a⿱bc`, cursor)).toMatchInlineSnapshot(`
+      [
+        "⿰",
+        "a",
+        [
+          "⿱",
+          "b",
+          "c",
+        ],
+      ]
+    `);
     expect(cursor).toEqual({ index: 5 });
   }
 
   {
     const cursor = { index: 0 };
-    expect(parseIds(`⿱a⿳bc⿴de`, cursor)).toEqual({
-      operator: IdsOperator.AboveToBelow,
-      above: { operator: `LeafCharacter`, character: `a` },
-      below: {
-        operator: IdsOperator.AboveToMiddleAndBelow,
-        above: { operator: `LeafCharacter`, character: `b` },
-        middle: { operator: `LeafCharacter`, character: `c` },
-        below: {
-          operator: IdsOperator.FullSurround,
-          surrounding: { operator: `LeafCharacter`, character: `d` },
-          surrounded: { operator: `LeafCharacter`, character: `e` },
-        },
-      },
-    });
+    expect(parseIds(`⿱a⿳bc⿴de`, cursor)).toMatchInlineSnapshot(`
+      [
+        "⿱",
+        "a",
+        [
+          "⿳",
+          "b",
+          "c",
+          [
+            "⿴",
+            "d",
+            "e",
+          ],
+        ],
+      ]
+    `);
     expect(cursor).toEqual({ index: 8 });
   }
 });
 
 test(`parseIds regression tests` satisfies HasNameOf<typeof parseIds>, () => {
-  expect(parseIds(`⿱丿𭕄`)).toEqual({
-    operator: IdsOperator.AboveToBelow,
-    above: { operator: `LeafCharacter`, character: `丿` },
-    below: { operator: `LeafCharacter`, character: `𭕄` },
-  });
-});
-
-test(`walkIdsNode fixture` satisfies HasNameOf<typeof walkIdsNode>, () => {
-  const ids = parseIds(`⿰a⿱bc`);
-
-  const leafs = [...walkIdsNode(ids)].map((x) => x.character);
-
-  expect(leafs).toEqual([`a`, `b`, `c`]);
+  expect(parseIds(`⿱丿𭕄`)).toMatchInlineSnapshot(`
+    [
+      "⿱",
+      "丿",
+      "𭕄",
+    ]
+  `);
 });
 
 test(
-  `idsNodeToString roundtrips` satisfies HasNameOf<typeof idsNodeToString>,
+  `walkIdsNodeLeafs fixture` satisfies HasNameOf<typeof walkIdsNodeLeafs>,
+  () => {
+    const ids = parseIds(`⿰a⿱bc`);
+    const leafs = [...walkIdsNodeLeafs(ids)];
+
+    expect(leafs).toEqual([`a`, `b`, `c`]);
+  },
+);
+
+test(
+  `idsNodeToStringCustom roundtrips` satisfies HasNameOf<
+    typeof idsNodeToString
+  >,
   () => {
     for (const input of [
       [`木`],
@@ -263,7 +307,7 @@ test(
       [`①`, `②`, `③`, `④`, `⑤`, `⑥`, `⑦`, `⑧`, `⑨`, `⑩`],
       [`⑪`, `⑫`, `⑬`, `⑭`, `⑮`, `⑯`, `⑰`, `⑱`, `⑲`, `⑳`],
     ].flat()) {
-      expect(idsNodeToString(parseIds(input))).toEqual(input);
+      expect(idsNodeToString(parseIds(input), (x) => x)).toEqual(input);
     }
   },
 );
@@ -295,5 +339,62 @@ describe(
         expect(isHanziGrapheme(x)).toBe(false);
       }
     });
+  },
+);
+
+test.for([
+  [`-→_→=`, `⿱-_`, `=`],
+  [`宀→丰→𫲸`, `⿱宀丰`, `𫲸`],
+] as const)(
+  `makeVerticalMergeCharacterIdsTransform %s` satisfies HasNameOf<
+    typeof makeVerticalMergeCharacterIdsTransform
+  >,
+  ([spec, input, expected]) => {
+    const [top, bottom, merged] = spec.split(`→`);
+
+    const transform = makeVerticalMergeCharacterIdsTransform(
+      top!,
+      bottom!,
+      merged!,
+    );
+    const result = idsNodeToString(
+      idsApplyTransforms(parseIds(input), [transform]),
+      (x) => x,
+    );
+
+    expect(result).toEqual(expected);
+  },
+);
+
+test.for([
+  [{ hanzi: `A`, strokes: `` }, `A`],
+  [{ strokes: `0-4` }, `⑤`],
+] as const)(
+  `idsNodeToString %s -> %s` satisfies HasNameOf<typeof idsNodeToString>,
+  ([component, expected]) => {
+    expect(componentToString(component)).toBe(expected);
+  },
+);
+
+test(
+  `walkIdsNodeLeafs fixture` satisfies HasNameOf<typeof walkIdsNodeLeafs>,
+  () => {
+    const ids = parseIds(`⿰a⿱bc`);
+    const mapped = mapIdsNodeLeafs(
+      ids,
+      (leaf, path) => `${leaf.toUpperCase()}(${path.join(`,`)})`,
+    );
+
+    expect(mapped).toMatchInlineSnapshot(`
+      [
+        "⿰",
+        "A(0)",
+        [
+          "⿱",
+          "B(1,0)",
+          "C(1,1)",
+        ],
+      ]
+    `);
   },
 );

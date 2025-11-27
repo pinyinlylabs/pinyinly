@@ -2,7 +2,7 @@ import {
   parseIds,
   splitHanziText,
   strokeCountPlaceholderOrNull,
-  walkIdsNode,
+  walkIdsNodeLeafs,
 } from "@/data/hanzi";
 import type {
   HanziGrapheme,
@@ -496,12 +496,12 @@ export async function decomposeHanzi(
       const ids = charactersData.get(char)?.decomposition;
       if (ids != null) {
         const idsNode = parseIds(ids);
-        for (const leaf of walkIdsNode(idsNode)) {
+        for (const leaf of walkIdsNodeLeafs(idsNode)) {
           if (
-            strokeCountPlaceholderOrNull(leaf.character) == null &&
-            leaf.character !== char // todo turn into invariant?
+            strokeCountPlaceholderOrNull(leaf) == null &&
+            leaf !== char // todo turn into invariant?
           ) {
-            result.push(leaf.character as HanziGrapheme);
+            result.push(leaf as HanziGrapheme);
           }
         }
       }

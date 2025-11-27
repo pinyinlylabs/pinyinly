@@ -4824,7 +4824,7 @@ __metadata:
     rive-react-native: "npm:^9.3.4"
     tailwind-variants: "npm:^1.0.0"
     tailwindcss: "npm:^3.4.17"
-    ts-essentials: "npm:^10.0.3"
+    ts-essentials: "npm:^10.1.1"
     tsx: "npm:^4.15.7"
     typescript: "patch:typescript@npm%3A5.9.2#~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch"
     ucd-full: "npm:^16.0.0"
@@ -4860,7 +4860,7 @@ __metadata:
     lru-cache: "npm:^11.1.0"
     memfs: "npm:^4.36.0"
     prettier: "npm:^3.4.2"
-    ts-essentials: "npm:^10.0.3"
+    ts-essentials: "npm:^10.1.1"
     typescript: "patch:typescript@npm%3A5.9.2#~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch"
     vitest: "npm:^3.2.4"
     zod: "npm:^3.25.76"
@@ -4945,7 +4945,7 @@ __metadata:
     prettier: "npm:^3.4.2"
     remark-flexible-markers: "npm:^1.0.0"
     remark-gfm: "npm:^4.0.1"
-    ts-essentials: "npm:^10.0.3"
+    ts-essentials: "npm:^10.1.1"
     typescript: "patch:typescript@npm%3A5.9.2#~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch"
     unified: "npm:^11.0.0"
     vitest: "npm:^3.2.4"
@@ -19572,7 +19572,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-essentials@npm:^10.0.3":
+"ts-essentials@npm:^10.1.1":
   version: 10.1.1
   resolution: "ts-essentials@npm:10.1.1"
   peerDependencies:

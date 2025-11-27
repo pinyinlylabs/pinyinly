@@ -1,6 +1,10 @@
-import { idsNodeToArrays, isHanziGrapheme, parseIds } from "#data/hanzi.js";
+import {
+  isHanziGrapheme,
+  mapIdsNodeLeafs,
+  parseIds,
+  wikiGraphemeDataSchema,
+} from "#data/hanzi.js";
 import type { HanziText } from "#data/model.js";
-import { wikiGraphemeDataSchema } from "#data/model.js";
 import { normalizeIndexRanges } from "#util/indexRanges.ts";
 import {
   existsSync,
@@ -86,7 +90,12 @@ const graphicsDataByCharacter = await (async () => {
     .parse(rawJsonl)
     .map((obj) => graphicsRecordSchema.parse(obj));
 
-  return new Map(data.map((entry) => [entry.character, entry]));
+  const result = new Map(data.map((entry) => [entry.character, entry]));
+
+  // Has the wrong strokes data as of 2025-11-26
+  result.delete(`戶`);
+
+  return result;
 })();
 
 const dictionaryDataByCharacter = await (async () => {
@@ -173,7 +182,7 @@ for (const grapheme of allGraphemes) {
         debug(`more than one ？, skipping`);
       } else {
         const newMnemonic = {
-          components: idsNodeToArrays(
+          components: mapIdsNodeLeafs(
             parseIds(dictionaryRecord.decomposition),
             (character, path) => {
               const matchesPath = character === `？` ? null : path;

@@ -4,7 +4,7 @@ import {
   isHanziGrapheme,
   parseIds,
   strokeCountPlaceholderOrNull,
-  walkIdsNode,
+  walkIdsNodeLeafs,
 } from "#data/hanzi.ts";
 import type {
   HanziGrapheme,
@@ -127,12 +127,9 @@ function decomp(char: string) {
   const ids = charactersData.get(char)?.decomposition;
   if (ids != null) {
     const idsNode = parseIds(ids);
-    for (const leaf of walkIdsNode(idsNode)) {
-      if (
-        strokeCountPlaceholderOrNull(leaf.character) == null &&
-        leaf.character !== char
-      ) {
-        decomp(leaf.character);
+    for (const leaf of walkIdsNodeLeafs(idsNode)) {
+      if (strokeCountPlaceholderOrNull(leaf) == null && leaf !== char) {
+        decomp(leaf);
       }
     }
   }
@@ -661,27 +658,27 @@ async function openAiHanziWordGlossHintQuery(
       invariant(ids != null, `missing decomposition for ${char}`);
       hanziIds = hanziIds.replaceAll(char, ids);
 
-      for (const leaf of walkIdsNode(parseIds(ids))) {
-        if (strokeCountPlaceholderOrNull(leaf.character) == null) {
-          if (leaf.character === char) {
+      for (const leaf of walkIdsNodeLeafs(parseIds(ids))) {
+        if (strokeCountPlaceholderOrNull(leaf) == null) {
+          if (leaf === char) {
             mapSetAdd(
               componentGlosses,
-              leaf.character,
+              leaf,
               `anything as it has no specific meaning since it's purely structural`,
             );
           } else {
-            const lookups = await lookupHanzi(leaf.character as HanziText);
+            const lookups = await lookupHanzi(leaf as HanziText);
             if (lookups.length > 0) {
               for (const [, leafMeaning] of lookups) {
                 mapSetAdd(
                   componentGlosses,
-                  leaf.character,
+                  leaf,
                   `**${leafMeaning.gloss.join(`/`)}**`,
                 );
               }
             } else {
               // No definition for the character, try decomposing it further.
-              await decomp(leaf.character);
+              await decomp(leaf);
             }
           }
         }
@@ -701,7 +698,7 @@ async function openAiHanziWordGlossHintQuery(
       );
     }
 
-    hanziIds = idsNodeToString(flattenIds(parseIds(hanziIds)));
+    hanziIds = idsNodeToString(flattenIds(parseIds(hanziIds)), (x) => x);
 
     const query = `
 I'm having trouble remembering that ${hanzi} means **${meaning.gloss.join(`/`)}** ${meaning.partOfSpeech == null ? `` : `(${meaning.partOfSpeech})`}.

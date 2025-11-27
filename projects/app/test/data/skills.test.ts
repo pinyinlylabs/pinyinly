@@ -96,14 +96,10 @@ describe(
           },
           "he:子:child" => {
             "dependencies": Set {
-              "he:一:one",
               "he:了:done",
+              "he:一:one",
             },
             "skill": "he:子:child",
-          },
-          "he:一:one" => {
-            "dependencies": Set {},
-            "skill": "he:一:one",
           },
           "he:了:done" => {
             "dependencies": Set {
@@ -114,6 +110,10 @@ describe(
           "he:亅:hook" => {
             "dependencies": Set {},
             "skill": "he:亅:hook",
+          },
+          "he:一:one" => {
+            "dependencies": Set {},
+            "skill": "he:一:one",
           },
         }
       `);
@@ -2006,6 +2006,25 @@ test(
         skillKind,
         isHarderDifficultyStyleSkillKind(skillKind),
       ]),
+    );
+
+    // These should be identified as harder difficulty
+    expect(
+      isHarderDifficultyStyleSkillKind(SkillKind.HanziWordToPinyinFinal),
+    ).toBe(true);
+    expect(
+      isHarderDifficultyStyleSkillKind(SkillKind.HanziWordToPinyinTone),
+    ).toBe(true);
+    expect(
+      isHarderDifficultyStyleSkillKind(SkillKind.HanziWordToPinyinTyped),
+    ).toBe(true);
+
+    // These should NOT be identified as harder difficulty
+    expect(isHarderDifficultyStyleSkillKind(SkillKind.HanziWordToGloss)).toBe(
+      false,
+    );
+    expect(isHarderDifficultyStyleSkillKind(SkillKind.GlossToHanziWord)).toBe(
+      false,
     );
 
     expect(skillKinds).toMatchInlineSnapshot(`
