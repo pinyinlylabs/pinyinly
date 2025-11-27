@@ -412,7 +412,7 @@ describe(
         if (newHanziWord != null) {
           expect(
             dictionary.has(newHanziWord),
-            `${newHanziWord} should  be in the dictionary`,
+            `${newHanziWord} should be in the dictionary`,
           ).toBe(true);
         }
       }
