@@ -457,7 +457,7 @@ export function idsApplyTransforms<T>(
 ): IdsNode<T> {
   let result = ids;
 
-  loop: for (;;) {
+  for (;;) {
     let mutated = false;
 
     for (const transform of transforms) {
