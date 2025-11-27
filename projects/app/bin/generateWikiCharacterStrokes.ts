@@ -1,6 +1,10 @@
-import { idsNodeToArrays, isHanziGrapheme, parseIds } from "#data/hanzi.js";
+import {
+  isHanziGrapheme,
+  mapIdsNodeLeafs,
+  parseIds,
+  wikiGraphemeDataSchema,
+} from "#data/hanzi.js";
 import type { HanziText } from "#data/model.js";
-import { wikiGraphemeDataSchema } from "#data/model.js";
 import { normalizeIndexRanges } from "#util/indexRanges.ts";
 import {
   existsSync,
@@ -178,7 +182,7 @@ for (const grapheme of allGraphemes) {
         debug(`more than one ？, skipping`);
       } else {
         const newMnemonic = {
-          components: idsNodeToArrays(
+          components: mapIdsNodeLeafs(
             parseIds(dictionaryRecord.decomposition),
             (character, path) => {
               const matchesPath = character === `？` ? null : path;

@@ -47,8 +47,8 @@ for (const grapheme of allGraphemes) {
   );
   const idsNode = parseIds(ids);
   for (const leaf of walkIdsNodeLeafs(idsNode)) {
-    if (strokeCountPlaceholderOrNull(leaf.leaf) == null) {
-      allComponents.add(leaf.leaf);
+    if (strokeCountPlaceholderOrNull(leaf) == null) {
+      allComponents.add(leaf);
     }
   }
 }

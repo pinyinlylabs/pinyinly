@@ -163,7 +163,7 @@
     "prettier": "^3.4.2",
     "react-test-renderer": "19.x",
     "resolve-package-path": "^4.0.3",
-    "ts-essentials": "^10.0.3",
+    "ts-essentials": "^10.1.1",
     "tsx": "^4.15.7",
     "typescript": "patch:typescript@npm%3A5.9.2#~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch",
     "ucd-full": "^16.0.0",

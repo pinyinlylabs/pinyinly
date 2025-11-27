@@ -1,7 +1,6 @@
 import type { Rating } from "@/util/fsrs";
 import type { Interval } from "date-fns";
 import { z } from "zod/v4";
-import { IdsOperator } from "./hanzi";
 import type { HanziWordSkill, Skill } from "./rizzleSchema";
 
 /**
@@ -157,6 +156,10 @@ export type HanziGrapheme = string & z.BRAND<`HanziGrapheme`>;
  * Non-space separated hanzi text.
  */
 export type HanziText = (string & z.BRAND<`HanziText`>) | HanziGrapheme;
+
+export const hanziTextSchema = z.custom<HanziText>(
+  (x) => typeof x === `string`,
+);
 
 export type HanziWordSkillKind =
   | typeof SkillKind.HanziWordToGloss
@@ -368,149 +371,3 @@ export interface PinyinFinalAssociation {
   final: string;
   name: string;
 }
-
-const wikiGraphemeComponentSchema = z.object({
-  /**
-   * The hanzi grapheme (if any) formed by the strokes. Usually this can
-   * be populated, but in some cases the strokes don't form a valid
-   * grapheme and instead are combined for more creative visual reasons.
-   */
-  hanzi: z.string().optional(),
-  label: z.string().optional(),
-  /**
-   * Comma-separated list of stroke indices (0-based) for strokes that are
-   * part of this grapheme. Allows shorthand ranges (e.g. 0-2,5 is the same as
-   * 0,1,2,5).
-   */
-  strokes: z.string().default(``),
-  /**
-   * When the component uses a different number of strokes than `hanzi` it's
-   * normally marked as a bug. However in cases when it's intentional (e.g. 禸)
-   * this field can be used to specify the different in stroke count.
-   */
-  strokeDiff: z.number().optional(),
-  /**
-   * What color to render this component in the decomposition illustration. This
-   * allows highlighting different components in different colors for clarity.
-   */
-  color: z.string().optional(),
-});
-
-export type WikiGraphemeComponent = z.infer<typeof wikiGraphemeComponentSchema>;
-
-const operatorArity2 = z.union([
-  z.literal(`⿰`),
-  z.literal(`⿱`),
-  z.literal(`⿵`),
-  z.literal(`⿶`),
-  z.literal(IdsOperator.SurroundFromRight),
-  z.literal(`⿴`),
-  z.literal(`⿻`),
-  z.literal(`⿸`),
-  z.literal(`⿺`),
-  z.literal(`⿹`),
-  z.literal(`⿷`),
-]);
-
-const operatorArity3 = z.union([z.literal(`⿲`), z.literal(`⿳`)]);
-
-function buildIdsNodesArraySchema<T extends z.ZodType>(leafSchema: T) {
-  const depth0Schema = z.union([
-    leafSchema,
-    z.tuple([operatorArity2, leafSchema, leafSchema]),
-    z.tuple([operatorArity3, leafSchema, leafSchema, leafSchema]),
-  ]);
-
-  const depth1Schema = z.union([
-    leafSchema,
-    z.tuple([operatorArity2, depth0Schema, depth0Schema]),
-    z.tuple([operatorArity3, depth0Schema, depth0Schema, depth0Schema]),
-  ]);
-
-  const depth2Schema = z.union([
-    leafSchema,
-    z.tuple([operatorArity2, depth1Schema, depth1Schema]),
-    z.tuple([operatorArity3, depth1Schema, depth1Schema, depth1Schema]),
-  ]);
-
-  return depth2Schema;
-}
-
-// TODO [zod@>=4.1.12] try refactor to use https://github.com/colinhacks/zod/issues/5089
-const wikiGraphemeDecomposition = buildIdsNodesArraySchema(
-  wikiGraphemeComponentSchema,
-);
-
-export type WikiGraphemeDecomposition = z.infer<
-  typeof wikiGraphemeDecomposition
->;
-
-const zHanziText = z.custom<HanziText>((x) => typeof x === `string`);
-
-/**
- * Schema for grapheme.json files.
- */
-export const wikiGraphemeDataSchema = z.object({
-  /**
-   * The hanzi character represented by this grapheme (e.g. 看).
-   */
-  hanzi: z.string(),
-  /**
-   * Stroke information, ideally SVG paths but otherwise just the count.
-   */
-  strokes: z.union([
-    z.number().describe(`Stroke count`),
-    z.array(z.string()).describe(`SVG paths for each stroke (in order)`),
-  ]),
-  /**
-   * The simplified form of this grapheme, if it is a traditional form.
-   *
-   * The property is used on traditional graphemes because it's expected there
-   * are fewer of those in the dataset since this app focuses on Mandarin.
-   */
-  traditionalFormOf: zHanziText.optional(),
-  /**
-   * If this grapheme is a component form of another grapheme, that hanzi.
-   */
-  componentFormOf: zHanziText.optional(),
-  /**
-   * Alternative IDS decompositions
-   */
-  decompositions: z.array(z.string()).optional(),
-  /**
-   * The meaning mnemonic for the grapheme. This doesn't necessarily correspond
-   * to the etymological components, and their meanings can differ too. It's
-   * intended for beginner learners and optimised for mnemonic usefulness.
-   */
-  mnemonic: z
-    .object({
-      /**
-       * The layout of the components. The first element is the combining
-       * operator, and the remaining are the components for each slot.
-       */
-      components: wikiGraphemeDecomposition,
-      stories: z
-        .array(
-          z.object({
-            gloss: z.string(),
-            story: z.string(),
-            /**
-             * If there are other stories that depend on this one to make sense,
-             * they can be nested inside their dependency.
-             */
-            children: z
-              .array(
-                z.object({
-                  gloss: z.string(),
-                  story: z.string(),
-                }),
-              )
-              .optional(),
-          }),
-        )
-        .optional(),
-    })
-    .optional(),
-});
-
-export type WikiGraphemeData = z.infer<typeof wikiGraphemeDataSchema>;

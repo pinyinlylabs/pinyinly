@@ -498,10 +498,10 @@ export async function decomposeHanzi(
         const idsNode = parseIds(ids);
         for (const leaf of walkIdsNodeLeafs(idsNode)) {
           if (
-            strokeCountPlaceholderOrNull(leaf.leaf) == null &&
-            leaf.leaf !== char // todo turn into invariant?
+            strokeCountPlaceholderOrNull(leaf) == null &&
+            leaf !== char // todo turn into invariant?
           ) {
-            result.push(leaf.leaf as HanziGrapheme);
+            result.push(leaf as HanziGrapheme);
           }
         }
       }

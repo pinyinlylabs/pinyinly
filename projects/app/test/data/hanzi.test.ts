@@ -1,12 +1,13 @@
 import {
+  componentToString,
   flattenIds,
   hanziGraphemeCount,
   horizontalPairToTripleMergeIdsTransform,
   idsApplyTransforms,
   idsNodeToString,
-  IdsOperator,
   isHanziGrapheme,
   makeVerticalMergeCharacterIdsTransform,
+  mapIdsNodeLeafs,
   parseIds,
   verticalPairToTripleMergeIdsTransform,
   walkIdsNodeLeafs,
@@ -26,7 +27,9 @@ test.for([
     typeof flattenIds
   >,
   ([input, expected]) => {
-    expect(idsNodeToString(flattenIds(parseIds(input))), input).toBe(expected);
+    expect(idsNodeToString(flattenIds(parseIds(input)), (x) => x)).toBe(
+      expected,
+    );
   },
 );
 
@@ -40,7 +43,7 @@ test.for([
   ([input, expected]) => {
     const result = horizontalPairToTripleMergeIdsTransform(parseIds(input));
     invariant(result != null);
-    expect(idsNodeToString(result)).toBe(expected);
+    expect(idsNodeToString(result, (x) => x)).toBe(expected);
   },
 );
 
@@ -54,206 +57,242 @@ test.for([
   ([input, expected]) => {
     const result = verticalPairToTripleMergeIdsTransform(parseIds(input));
     invariant(result != null);
-    expect(idsNodeToString(result)).toBe(expected);
+    expect(idsNodeToString(result, (x) => x)).toBe(expected);
   },
 );
 
 test(`parseIds handles 1 depth` satisfies HasNameOf<typeof parseIds>, () => {
-  expect(parseIds(`木`)).toEqual({
-    operator: `Leaf`,
-    leaf: `木`,
-  });
+  expect.soft(parseIds(`木`)).toMatchInlineSnapshot(`"木"`);
 
   // 相
-  expect(parseIds(`⿰木目`)).toEqual({
-    operator: IdsOperator.LeftToRight,
-    left: { operator: `Leaf`, leaf: `木` },
-    right: { operator: `Leaf`, leaf: `目` },
-  });
+  expect.soft(parseIds(`⿰木目`)).toMatchInlineSnapshot(`
+    [
+      "⿰",
+      "木",
+      "目",
+    ]
+  `);
 
   // 杏
-  expect(parseIds(`⿱木口`)).toEqual({
-    operator: IdsOperator.AboveToBelow,
-    above: { operator: `Leaf`, leaf: `木` },
-    below: { operator: `Leaf`, leaf: `口` },
-  });
+  expect.soft(parseIds(`⿱木口`)).toMatchInlineSnapshot(`
+    [
+      "⿱",
+      "木",
+      "口",
+    ]
+  `);
 
   // 衍
-  expect(parseIds(`⿲彳氵亍`)).toEqual({
-    operator: IdsOperator.LeftToMiddleToRight,
-    left: { operator: `Leaf`, leaf: `彳` },
-    middle: { operator: `Leaf`, leaf: `氵` },
-    right: { operator: `Leaf`, leaf: `亍` },
-  });
+  expect.soft(parseIds(`⿲彳氵亍`)).toMatchInlineSnapshot(`
+    [
+      "⿲",
+      "彳",
+      "氵",
+      "亍",
+    ]
+  `);
 
   // 京
-  expect(parseIds(`⿳亠口小`)).toEqual({
-    operator: IdsOperator.AboveToMiddleAndBelow,
-    above: { operator: `Leaf`, leaf: `亠` },
-    middle: { operator: `Leaf`, leaf: `口` },
-    below: { operator: `Leaf`, leaf: `小` },
-  });
+  expect.soft(parseIds(`⿳亠口小`)).toMatchInlineSnapshot(`
+    [
+      "⿳",
+      "亠",
+      "口",
+      "小",
+    ]
+  `);
 
   // 回
-  expect(parseIds(`⿴囗口`)).toEqual({
-    operator: IdsOperator.FullSurround,
-    surrounding: { operator: `Leaf`, leaf: `囗` },
-    surrounded: { operator: `Leaf`, leaf: `口` },
-  });
+  expect.soft(parseIds(`⿴囗口`)).toMatchInlineSnapshot(`
+    [
+      "⿴",
+      "囗",
+      "口",
+    ]
+  `);
 
   // 凰
-  expect(parseIds(`⿵几皇`)).toEqual({
-    operator: IdsOperator.SurroundFromAbove,
-    above: { operator: `Leaf`, leaf: `几` },
-    surrounded: { operator: `Leaf`, leaf: `皇` },
-  });
+  expect.soft(parseIds(`⿵几皇`)).toMatchInlineSnapshot(`
+    [
+      "⿵",
+      "几",
+      "皇",
+    ]
+  `);
 
   // 凶
-  expect(parseIds(`⿶凵㐅`)).toEqual({
-    operator: IdsOperator.SurroundFromBelow,
-    below: { operator: `Leaf`, leaf: `凵` },
-    surrounded: { operator: `Leaf`, leaf: `㐅` },
-  });
+  expect.soft(parseIds(`⿶凵㐅`)).toMatchInlineSnapshot(`
+    [
+      "⿶",
+      "凵",
+      "㐅",
+    ]
+  `);
 
   // 匠
-  expect(parseIds(`⿷匚斤`)).toEqual({
-    operator: IdsOperator.SurroundFromLeft,
-    left: { operator: `Leaf`, leaf: `匚` },
-    surrounded: { operator: `Leaf`, leaf: `斤` },
-  });
+  expect.soft(parseIds(`⿷匚斤`)).toMatchInlineSnapshot(`
+    [
+      "⿷",
+      "匚",
+      "斤",
+    ]
+  `);
 
   // 㕚
-  expect(parseIds(`⿼叉丶`)).toEqual({
-    operator: IdsOperator.SurroundFromRight,
-    right: { operator: `Leaf`, leaf: `叉` },
-    surrounded: { operator: `Leaf`, leaf: `丶` },
-  });
+  expect.soft(parseIds(`⿼叉丶`)).toMatchInlineSnapshot(`
+    [
+      "⿼",
+      "叉",
+      "丶",
+    ]
+  `);
 
   // 病
-  expect(parseIds(`⿸疒丙`)).toEqual({
-    operator: IdsOperator.SurroundFromUpperLeft,
-    upperLeft: { operator: `Leaf`, leaf: `疒` },
-    surrounded: { operator: `Leaf`, leaf: `丙` },
-  });
+  expect.soft(parseIds(`⿸疒丙`)).toMatchInlineSnapshot(`
+    [
+      "⿸",
+      "疒",
+      "丙",
+    ]
+  `);
 
   // 戒
-  expect(parseIds(`⿹戈廾`)).toEqual({
-    operator: IdsOperator.SurroundFromUpperRight,
-    upperRight: { operator: `Leaf`, leaf: `戈` },
-    surrounded: { operator: `Leaf`, leaf: `廾` },
-  });
+  expect.soft(parseIds(`⿹戈廾`)).toMatchInlineSnapshot(`
+    [
+      "⿹",
+      "戈",
+      "廾",
+    ]
+  `);
 
   // 超
-  expect(parseIds(`⿺走召`)).toEqual({
-    operator: IdsOperator.SurroundFromLowerLeft,
-    lowerLeft: { operator: `Leaf`, leaf: `走` },
-    surrounded: { operator: `Leaf`, leaf: `召` },
-  });
+  expect.soft(parseIds(`⿺走召`)).toMatchInlineSnapshot(`
+    [
+      "⿺",
+      "走",
+      "召",
+    ]
+  `);
 
   // 氷
-  expect(parseIds(`⿽水丶`)).toEqual({
-    operator: IdsOperator.SurroundFromLowerRight,
-    lowerRight: { operator: `Leaf`, leaf: `水` },
-    surrounded: { operator: `Leaf`, leaf: `丶` },
-  });
+  expect.soft(parseIds(`⿽水丶`)).toMatchInlineSnapshot(`
+    [
+      "⿽",
+      "水",
+      "丶",
+    ]
+  `);
 
   // 巫
-  expect(parseIds(`⿻工从`)).toEqual({
-    operator: IdsOperator.Overlaid,
-    overlay: { operator: `Leaf`, leaf: `工` },
-    underlay: { operator: `Leaf`, leaf: `从` },
-  });
+  expect.soft(parseIds(`⿻工从`)).toMatchInlineSnapshot(`
+    [
+      "⿻",
+      "工",
+      "从",
+    ]
+  `);
 
   // 卐
-  expect(parseIds(`⿾卍`)).toEqual({
-    operator: IdsOperator.HorizontalReflection,
-    reflected: { operator: `Leaf`, leaf: `卍` },
-  });
+  expect.soft(parseIds(`⿾卍`)).toMatchInlineSnapshot(`
+    [
+      "⿾",
+      "卍",
+    ]
+  `);
 
   // 𠕄
-  expect(parseIds(`⿿凹`)).toEqual({
-    operator: IdsOperator.Rotation,
-    rotated: { operator: `Leaf`, leaf: `凹` },
-  });
+  expect.soft(parseIds(`⿿凹`)).toMatchInlineSnapshot(`
+    [
+      "⿿",
+      "凹",
+    ]
+  `);
 
-  expect(parseIds(`①`)).toEqual({ operator: `Leaf`, leaf: `①` });
-  expect(parseIds(`②`)).toEqual({ operator: `Leaf`, leaf: `②` });
-  expect(parseIds(`③`)).toEqual({ operator: `Leaf`, leaf: `③` });
-  expect(parseIds(`④`)).toEqual({ operator: `Leaf`, leaf: `④` });
-  expect(parseIds(`⑤`)).toEqual({ operator: `Leaf`, leaf: `⑤` });
-  expect(parseIds(`⑥`)).toEqual({ operator: `Leaf`, leaf: `⑥` });
-  expect(parseIds(`⑦`)).toEqual({ operator: `Leaf`, leaf: `⑦` });
-  expect(parseIds(`⑧`)).toEqual({ operator: `Leaf`, leaf: `⑧` });
-  expect(parseIds(`⑨`)).toEqual({ operator: `Leaf`, leaf: `⑨` });
-  expect(parseIds(`⑩`)).toEqual({ operator: `Leaf`, leaf: `⑩` });
-  expect(parseIds(`⑪`)).toEqual({ operator: `Leaf`, leaf: `⑪` });
-  expect(parseIds(`⑫`)).toEqual({ operator: `Leaf`, leaf: `⑫` });
-  expect(parseIds(`⑬`)).toEqual({ operator: `Leaf`, leaf: `⑬` });
-  expect(parseIds(`⑭`)).toEqual({ operator: `Leaf`, leaf: `⑭` });
-  expect(parseIds(`⑮`)).toEqual({ operator: `Leaf`, leaf: `⑮` });
-  expect(parseIds(`⑯`)).toEqual({ operator: `Leaf`, leaf: `⑯` });
-  expect(parseIds(`⑰`)).toEqual({ operator: `Leaf`, leaf: `⑰` });
-  expect(parseIds(`⑱`)).toEqual({ operator: `Leaf`, leaf: `⑱` });
-  expect(parseIds(`⑲`)).toEqual({ operator: `Leaf`, leaf: `⑲` });
-  expect(parseIds(`⑳`)).toEqual({ operator: `Leaf`, leaf: `⑳` });
+  expect.soft(parseIds(`①`)).toMatchInlineSnapshot(`"①"`);
+  expect.soft(parseIds(`②`)).toMatchInlineSnapshot(`"②"`);
+  expect.soft(parseIds(`③`)).toMatchInlineSnapshot(`"③"`);
+  expect.soft(parseIds(`④`)).toMatchInlineSnapshot(`"④"`);
+  expect.soft(parseIds(`⑤`)).toMatchInlineSnapshot(`"⑤"`);
+  expect.soft(parseIds(`⑥`)).toMatchInlineSnapshot(`"⑥"`);
+  expect.soft(parseIds(`⑦`)).toMatchInlineSnapshot(`"⑦"`);
+  expect.soft(parseIds(`⑧`)).toMatchInlineSnapshot(`"⑧"`);
+  expect.soft(parseIds(`⑨`)).toMatchInlineSnapshot(`"⑨"`);
+  expect.soft(parseIds(`⑩`)).toMatchInlineSnapshot(`"⑩"`);
+  expect.soft(parseIds(`⑪`)).toMatchInlineSnapshot(`"⑪"`);
+  expect.soft(parseIds(`⑫`)).toMatchInlineSnapshot(`"⑫"`);
+  expect.soft(parseIds(`⑬`)).toMatchInlineSnapshot(`"⑬"`);
+  expect.soft(parseIds(`⑭`)).toMatchInlineSnapshot(`"⑭"`);
+  expect.soft(parseIds(`⑮`)).toMatchInlineSnapshot(`"⑮"`);
+  expect.soft(parseIds(`⑯`)).toMatchInlineSnapshot(`"⑯"`);
+  expect.soft(parseIds(`⑰`)).toMatchInlineSnapshot(`"⑰"`);
+  expect.soft(parseIds(`⑱`)).toMatchInlineSnapshot(`"⑱"`);
+  expect.soft(parseIds(`⑲`)).toMatchInlineSnapshot(`"⑲"`);
+  expect.soft(parseIds(`⑳`)).toMatchInlineSnapshot(`"⑳"`);
 });
 
 test(`parseIds handles 2 depth` satisfies HasNameOf<typeof parseIds>, () => {
   {
     const cursor = { index: 0 };
-    expect(parseIds(`⿰a⿱bc`, cursor)).toEqual({
-      operator: IdsOperator.LeftToRight,
-      left: { operator: `Leaf`, leaf: `a` },
-      right: {
-        operator: IdsOperator.AboveToBelow,
-        above: { operator: `Leaf`, leaf: `b` },
-        below: { operator: `Leaf`, leaf: `c` },
-      },
-    });
+    expect(parseIds(`⿰a⿱bc`, cursor)).toMatchInlineSnapshot(`
+      [
+        "⿰",
+        "a",
+        [
+          "⿱",
+          "b",
+          "c",
+        ],
+      ]
+    `);
     expect(cursor).toEqual({ index: 5 });
   }
 
   {
     const cursor = { index: 0 };
-    expect(parseIds(`⿱a⿳bc⿴de`, cursor)).toEqual({
-      operator: IdsOperator.AboveToBelow,
-      above: { operator: `Leaf`, leaf: `a` },
-      below: {
-        operator: IdsOperator.AboveToMiddleAndBelow,
-        above: { operator: `Leaf`, leaf: `b` },
-        middle: { operator: `Leaf`, leaf: `c` },
-        below: {
-          operator: IdsOperator.FullSurround,
-          surrounding: { operator: `Leaf`, leaf: `d` },
-          surrounded: { operator: `Leaf`, leaf: `e` },
-        },
-      },
-    });
+    expect(parseIds(`⿱a⿳bc⿴de`, cursor)).toMatchInlineSnapshot(`
+      [
+        "⿱",
+        "a",
+        [
+          "⿳",
+          "b",
+          "c",
+          [
+            "⿴",
+            "d",
+            "e",
+          ],
+        ],
+      ]
+    `);
     expect(cursor).toEqual({ index: 8 });
   }
 });
 
 test(`parseIds regression tests` satisfies HasNameOf<typeof parseIds>, () => {
-  expect(parseIds(`⿱丿𭕄`)).toEqual({
-    operator: IdsOperator.AboveToBelow,
-    above: { operator: `Leaf`, leaf: `丿` },
-    below: { operator: `Leaf`, leaf: `𭕄` },
-  });
+  expect(parseIds(`⿱丿𭕄`)).toMatchInlineSnapshot(`
+    [
+      "⿱",
+      "丿",
+      "𭕄",
+    ]
+  `);
 });
 
 test(
   `walkIdsNodeLeafs fixture` satisfies HasNameOf<typeof walkIdsNodeLeafs>,
   () => {
     const ids = parseIds(`⿰a⿱bc`);
-
-    const leafs = [...walkIdsNodeLeafs(ids)].map((x) => x.leaf);
+    const leafs = [...walkIdsNodeLeafs(ids)];
 
     expect(leafs).toEqual([`a`, `b`, `c`]);
   },
 );
 
 test(
-  `idsNodeToString roundtrips` satisfies HasNameOf<typeof idsNodeToString>,
+  `idsNodeToStringCustom roundtrips` satisfies HasNameOf<
+    typeof idsNodeToString
+  >,
   () => {
     for (const input of [
       [`木`],
@@ -268,7 +307,7 @@ test(
       [`①`, `②`, `③`, `④`, `⑤`, `⑥`, `⑦`, `⑧`, `⑨`, `⑩`],
       [`⑪`, `⑫`, `⑬`, `⑭`, `⑮`, `⑯`, `⑰`, `⑱`, `⑲`, `⑳`],
     ].flat()) {
-      expect(idsNodeToString(parseIds(input))).toEqual(input);
+      expect(idsNodeToString(parseIds(input), (x) => x)).toEqual(input);
     }
   },
 );
@@ -320,8 +359,42 @@ test.for([
     );
     const result = idsNodeToString(
       idsApplyTransforms(parseIds(input), [transform]),
+      (x) => x,
     );
 
     expect(result).toEqual(expected);
+  },
+);
+
+test.for([
+  [{ hanzi: `A`, strokes: `` }, `A`],
+  [{ strokes: `0-4` }, `⑤`],
+] as const)(
+  `idsNodeToString %s -> %s` satisfies HasNameOf<typeof idsNodeToString>,
+  ([component, expected]) => {
+    expect(componentToString(component)).toBe(expected);
+  },
+);
+
+test(
+  `walkIdsNodeLeafs fixture` satisfies HasNameOf<typeof walkIdsNodeLeafs>,
+  () => {
+    const ids = parseIds(`⿰a⿱bc`);
+    const mapped = mapIdsNodeLeafs(
+      ids,
+      (leaf, path) => `${leaf.toUpperCase()}(${path.join(`,`)})`,
+    );
+
+    expect(mapped).toMatchInlineSnapshot(`
+      [
+        "⿰",
+        "A(0)",
+        [
+          "⿱",
+          "B(1,0)",
+          "C(1,1)",
+        ],
+      ]
+    `);
   },
 );

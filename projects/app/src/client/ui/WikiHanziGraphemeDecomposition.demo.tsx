@@ -1,4 +1,4 @@
-import type { WikiGraphemeData } from "@/data/model";
+import type { WikiGraphemeData } from "@/data/hanzi";
 import { View } from "react-native";
 import { WikiHanziGraphemeDecomposition } from "./WikiHanziGraphemeDecomposition";
 

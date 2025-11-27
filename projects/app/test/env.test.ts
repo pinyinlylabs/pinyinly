@@ -35,28 +35,38 @@ test(`tests/ tree mirrors src/ tree`, async () => {
 
   const srcRelPaths = await getTreePaths(srcRoot, `**/*`);
   const srcRelPathsSet = new Set(srcRelPaths);
-  const testRelPaths = await getTreePaths(testRoot, `**/*.{test,test-d}.tsx?`);
+  const testRelPaths = await getTreePaths(
+    testRoot,
+    `**/*.{test,test-d}.ts{,x}`,
+  );
+
+  expect(srcRelPaths.length).toBeGreaterThan(20);
+  expect(testRelPaths.length).toBeGreaterThan(20);
 
   for (const testRelPath of testRelPaths) {
-    const hasSrcFile = [
+    const srcRelPath = [
       // Look for both .ts or .tsx source files.
       testRelPath.replace(/\.test(-d)?\.tsx?$/, `.ts`),
       testRelPath.replace(/\.test(-d)?\.tsx?$/, `.tsx`),
-    ].some((x) => srcRelPathsSet.has(x));
+    ].find((x) => srcRelPathsSet.has(x));
     const isStandalone = await isStandaloneTestFile(
       path.resolve(testRoot, testRelPath),
     );
 
     if (isStandalone) {
-      expect(
-        hasSrcFile,
-        `${testRelPath} test is marked as "standalone" but has a matches file in src/, or remove "// pyly-not-src-test"`,
-      ).toBe(false);
+      expect
+        .soft(
+          srcRelPath,
+          `${testRelPath} test is marked as "standalone" but has a corresponding file in src/ as ${srcRelPath}, or remove "// pyly-not-src-test" `,
+        )
+        .toBeUndefined();
     } else {
-      expect(
-        hasSrcFile,
-        `${testRelPath} should have matching source file in src/, or have "// pyly-not-src-test" comment`,
-      ).toBe(true);
+      expect
+        .soft(
+          srcRelPath,
+          `${testRelPath} should have matching source file in src/, or should be marked as "standlone" by adding a "// pyly-not-src-test" comment`,
+        )
+        .not.toBeUndefined();
     }
   }
 });

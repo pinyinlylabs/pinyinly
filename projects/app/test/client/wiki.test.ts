@@ -1,11 +1,13 @@
+import type { WikiGraphemeData } from "#data/hanzi.js";
 import {
-  allGraphemeComponents,
-  graphemeLayoutToString,
+  componentToString,
   graphemeStrokeCount,
-} from "#client/wiki.js";
-import { isHanziGrapheme } from "#data/hanzi.js";
-import type { HanziText, WikiGraphemeData } from "#data/model.js";
-import { wikiGraphemeDataSchema } from "#data/model.js";
+  idsNodeToString,
+  isHanziGrapheme,
+  walkIdsNodeLeafs,
+  wikiGraphemeDataSchema,
+} from "#data/hanzi.js";
+import type { HanziText } from "#data/model.js";
 import type { CharactersKey, CharactersValue } from "#dictionary/dictionary.js";
 import {
   getIsComponentFormHanzi,
@@ -34,7 +36,6 @@ import {
   uniqueInvariant,
 } from "@pinyinly/lib/invariant";
 import path from "node:path";
-import type { DeepReadonly } from "ts-essentials";
 import { describe, expect, test } from "vitest";
 import { projectRoot } from "../helpers.ts";
 
@@ -119,7 +120,7 @@ describe(`/meaning.mdx files`, async () => {
 
 describe(`grapheme.json files`, async () => {
   const getDataForGrapheme = memoize1(
-    (grapheme: string): DeepReadonly<WikiGraphemeData> | undefined => {
+    (grapheme: string): WikiGraphemeData | undefined => {
       const filePath = path.join(wikiDir, grapheme, `grapheme.json`);
       if (existsSync(filePath)) {
         try {
@@ -169,7 +170,7 @@ describe(`grapheme.json files`, async () => {
       invariant(graphemeData.mnemonic != null, `missing mnemonic`);
       expect
         .soft(
-          [...allGraphemeComponents(graphemeData.mnemonic.components)].length,
+          [...walkIdsNodeLeafs(graphemeData.mnemonic.components)].length,
           `${grapheme} missing 2+ mnemonic components`,
         )
         .toBeGreaterThanOrEqual(2);
@@ -179,7 +180,7 @@ describe(`grapheme.json files`, async () => {
   test(`component strokes conformance`, async () => {
     for (const { grapheme, graphemeData } of graphemeFiles) {
       if (graphemeData.mnemonic?.components) {
-        for (const component of allGraphemeComponents(
+        for (const component of walkIdsNodeLeafs(
           graphemeData.mnemonic.components,
         )) {
           const strokeIndices = parseIndexRanges(component.strokes);
@@ -203,7 +204,7 @@ describe(`grapheme.json files`, async () => {
     for (const { grapheme, graphemeData } of graphemeFiles) {
       if (graphemeData.mnemonic?.components) {
         for (const [i, component] of [
-          ...allGraphemeComponents(graphemeData.mnemonic.components),
+          ...walkIdsNodeLeafs(graphemeData.mnemonic.components),
         ].entries()) {
           const normalized = normalizeIndexRanges(component.strokes);
           expect
@@ -238,7 +239,7 @@ describe(`grapheme.json files`, async () => {
 
     for (const { grapheme, graphemeData } of graphemeFiles) {
       if (graphemeData.mnemonic?.components) {
-        for (const component of allGraphemeComponents(
+        for (const component of walkIdsNodeLeafs(
           graphemeData.mnemonic.components,
         )) {
           expect
@@ -277,7 +278,7 @@ describe(`grapheme.json files`, async () => {
 
       if (graphemeData.mnemonic?.components) {
         const allComponentStrokes = new Set<number>();
-        for (const component of allGraphemeComponents(
+        for (const component of walkIdsNodeLeafs(
           graphemeData.mnemonic.components,
         )) {
           const strokeIndices = parseIndexRanges(component.strokes);
@@ -308,7 +309,7 @@ describe(`grapheme.json files`, async () => {
     for (const { grapheme, graphemeData } of graphemeFiles) {
       if (graphemeData.mnemonic?.components) {
         for (const [i, component] of [
-          ...allGraphemeComponents(graphemeData.mnemonic.components),
+          ...walkIdsNodeLeafs(graphemeData.mnemonic.components),
         ].entries()) {
           const primaryHanzi = component.hanzi?.split(`,`)[0];
           if (primaryHanzi != null) {
@@ -358,8 +359,9 @@ describe(`grapheme.json files`, async () => {
     for (const { grapheme, graphemeData } of graphemeFiles) {
       if (graphemeData.mnemonic) {
         expected.set(grapheme, {
-          decomposition: graphemeLayoutToString(
+          decomposition: idsNodeToString(
             graphemeData.mnemonic.components,
+            componentToString,
           ),
         });
       }
@@ -379,53 +381,3 @@ describe(`grapheme.json files`, async () => {
     expect(expected).toEqual(actual);
   });
 });
-
-describe(
-  `allGraphemeComponents suite` satisfies HasNameOf<
-    typeof allGraphemeComponents
-  >,
-  () => {
-    test(`flat depth`, () => {
-      const component1 = { hanzi: `A`, strokes: `0-1` };
-      const component2 = { hanzi: `B`, strokes: `2-3` };
-
-      const layout = [`⿰`, component1, component2] as const;
-      expect([...allGraphemeComponents(layout)]).toEqual([
-        component1,
-        component2,
-      ]);
-    });
-
-    test(`nested depth`, () => {
-      const component1 = { hanzi: `A`, strokes: `0-1` };
-      const component2 = { hanzi: `B`, strokes: `2-3` };
-      const component3 = { hanzi: `C`, strokes: `4-5` };
-
-      const layout = [
-        `⿰`,
-        component1,
-        [`⿱`, component2, component3],
-      ] as const;
-      expect([...allGraphemeComponents(layout)]).toEqual([
-        component1,
-        component2,
-        component3,
-      ]);
-    });
-  },
-);
-
-describe(
-  `graphemeLayoutToString suite` satisfies HasNameOf<
-    typeof graphemeLayoutToString
-  >,
-  () => {
-    test(`flat depth`, () => {
-      const component1 = { hanzi: `A`, strokes: `0-1` };
-      const component2 = { hanzi: `B`, strokes: `2-3` };
-
-      const layout = [`⿰`, component1, component2] as const;
-      expect(graphemeLayoutToString(layout)).toEqual(`⿰AB`);
-    });
-  },
-);

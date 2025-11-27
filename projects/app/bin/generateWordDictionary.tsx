@@ -128,11 +128,8 @@ function decomp(char: string) {
   if (ids != null) {
     const idsNode = parseIds(ids);
     for (const leaf of walkIdsNodeLeafs(idsNode)) {
-      if (
-        strokeCountPlaceholderOrNull(leaf.leaf) == null &&
-        leaf.leaf !== char
-      ) {
-        decomp(leaf.leaf);
+      if (strokeCountPlaceholderOrNull(leaf) == null && leaf !== char) {
+        decomp(leaf);
       }
     }
   }
@@ -662,26 +659,26 @@ async function openAiHanziWordGlossHintQuery(
       hanziIds = hanziIds.replaceAll(char, ids);
 
       for (const leaf of walkIdsNodeLeafs(parseIds(ids))) {
-        if (strokeCountPlaceholderOrNull(leaf.leaf) == null) {
-          if (leaf.leaf === char) {
+        if (strokeCountPlaceholderOrNull(leaf) == null) {
+          if (leaf === char) {
             mapSetAdd(
               componentGlosses,
-              leaf.leaf,
+              leaf,
               `anything as it has no specific meaning since it's purely structural`,
             );
           } else {
-            const lookups = await lookupHanzi(leaf.leaf as HanziText);
+            const lookups = await lookupHanzi(leaf as HanziText);
             if (lookups.length > 0) {
               for (const [, leafMeaning] of lookups) {
                 mapSetAdd(
                   componentGlosses,
-                  leaf.leaf,
+                  leaf,
                   `**${leafMeaning.gloss.join(`/`)}**`,
                 );
               }
             } else {
               // No definition for the character, try decomposing it further.
-              await decomp(leaf.leaf);
+              await decomp(leaf);
             }
           }
         }
@@ -701,7 +698,7 @@ async function openAiHanziWordGlossHintQuery(
       );
     }
 
-    hanziIds = idsNodeToString(flattenIds(parseIds(hanziIds)));
+    hanziIds = idsNodeToString(flattenIds(parseIds(hanziIds)), (x) => x);
 
     const query = `
 I'm having trouble remembering that ${hanzi} means **${meaning.gloss.join(`/`)}** ${meaning.partOfSpeech == null ? `` : `(${meaning.partOfSpeech})`}.
