@@ -562,9 +562,9 @@ export function mapIdsNodeLeafs<T, U>(
         const old1 = ids[1];
         const old2 = ids[2];
         const old3 = ids[3];
-        const new1 = (ctx.path.push(0), mapIdsNodeLeafs(old1, mapFn));
-        const new2 = (ctx.path.push(1), mapIdsNodeLeafs(old2, mapFn));
-        const new3 = (ctx.path.push(2), mapIdsNodeLeafs(old3, mapFn));
+        const new1 = (ctx.path.push(0), mapIdsNodeLeafs(old1, mapFn, ctx));
+        const new2 = (ctx.path.push(1), mapIdsNodeLeafs(old2, mapFn, ctx));
+        const new3 = (ctx.path.push(2), mapIdsNodeLeafs(old3, mapFn, ctx));
         return new1 === old1 && new2 === old2 && new3 === old3
           ? (ids as IdsNode<U>)
           : [ids[0], new1, new2, new3];
