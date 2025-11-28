@@ -5,7 +5,7 @@ import { tv } from "tailwind-variants";
 
 export interface IconImageProps
   extends Pick<ImageProps, `source` | `className`> {
-  size?: 12 | 24 | 32;
+  size?: 12 | 16 | 24 | 32;
 }
 
 export function IconImage({ source, className, size }: IconImageProps) {
@@ -34,6 +34,7 @@ const imageClass = tv({
   variants: {
     size: {
       12: `size-[12px]`,
+      16: `size-[16px]`,
       24: `size-[24px]`,
       32: `size-[32px]`,
     },

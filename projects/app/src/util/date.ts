@@ -1,3 +1,4 @@
+import type { Duration } from "date-fns";
 import { formatDuration } from "date-fns/formatDuration";
 import { intervalToDuration } from "date-fns/intervalToDuration";
 
@@ -52,4 +53,23 @@ export function formatRelativeTime(date: Date, now = new Date()): string {
 
   // Add "in" prefix for future dates, "ago" suffix for past dates
   return isFuture ? `in ${formatted}` : `${formatted} ago`;
+}
+
+export function formatDurationShort(duration: Duration): string {
+  const parts = [];
+
+  if (duration.days != null && duration.days > 0) {
+    parts.push(`${duration.days}d`);
+  }
+  if (duration.hours != null && duration.hours > 0) {
+    parts.push(`${duration.hours}h`);
+  }
+  if (duration.minutes != null && duration.minutes > 0) {
+    parts.push(`${duration.minutes}m`);
+  }
+  if (duration.seconds != null && duration.seconds > 0) {
+    parts.push(`${duration.seconds}s`);
+  }
+
+  return parts.join(` `);
 }

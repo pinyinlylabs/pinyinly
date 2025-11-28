@@ -40,6 +40,7 @@ import {
   memoize0,
   sortComparatorNumber,
 } from "@pinyinly/lib/collections";
+import { nonNullable } from "@pinyinly/lib/invariant";
 import type { Collection, CollectionConfig } from "@tanstack/react-db";
 import { queryOptions, skipToken } from "@tanstack/react-query";
 import type { DeviceStoreEntity } from "./deviceStore";
@@ -197,6 +198,74 @@ export const recentSkillRatingsQuery = (r: Rizzle) =>
     networkMode: `offlineFirst`,
     structuralSharing: false,
   });
+
+export const historyPageQuery = (r: Rizzle) =>
+  queryOptions({
+    queryKey: [`historyPageQuery` satisfies NameOf<typeof historyPageQuery>],
+    queryFn: async () => {
+      await devToolsSlowQuerySleepIfEnabled();
+      const res = await r.queryPaged.skillRating.byCreatedAt().toArray();
+      const recent = res.slice(-100);
+      recent.reverse();
+
+      // Group skill ratings into sessions (5 minute gaps create new sessions)
+      const sessionTimeoutMs = 5 * 60 * 1000;
+      const sessions: SkillRating[][] = [];
+      let currentSession: SkillRating[] = [];
+
+      for (const [, rating] of recent) {
+        if (currentSession.length === 0) {
+          currentSession.push(rating);
+        } else {
+          const lastRating = nonNullable(currentSession.at(-1));
+          const timeDiffMs =
+            lastRating.createdAt.getTime() - rating.createdAt.getTime();
+
+          if (timeDiffMs > sessionTimeoutMs) {
+            sessions.push(currentSession);
+            currentSession = [rating];
+          } else {
+            currentSession.push(rating);
+          }
+        }
+      }
+
+      if (currentSession.length > 0) {
+        sessions.push(currentSession);
+      }
+
+      return sessions.map((session) => ({
+        endTime: nonNullable(session[0]).createdAt,
+        startTime: nonNullable(session.at(-1)).createdAt,
+        groups: groupRatingsBySkill(session),
+      }));
+    },
+    networkMode: `offlineFirst`,
+    structuralSharing: false,
+  });
+
+function groupRatingsBySkill(
+  ratings: SkillRating[],
+): { skill: Skill; ratings: SkillRating[] }[] {
+  const groups: { skill: Skill; ratings: SkillRating[] }[] = [];
+
+  for (const rating of ratings) {
+    const lastGroup = groups.at(-1);
+
+    if (lastGroup && lastGroup.skill === rating.skill) {
+      // Same skill as the previous rating, add to the current group
+      lastGroup.ratings.push(rating);
+    } else {
+      // Different skill or first rating, start a new group
+      groups.push({
+        skill: rating.skill,
+        ratings: [rating],
+      });
+    }
+  }
+
+  return groups;
+}
 
 export const hanziWordsByRankQuery = (r: Rizzle) =>
   withWatchPrefixes(
