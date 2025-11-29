@@ -292,7 +292,7 @@ tasks:
       NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
 
   expoDoctor:
-    command: npx -y expo-doctor@1.15.1
+    command: npx -y expo-doctor@1.17.11
     deps:
       - ~:codegen
     env:
