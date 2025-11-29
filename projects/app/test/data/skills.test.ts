@@ -1,16 +1,8 @@
-import type {
-  HanziText,
-  PinyinPronunciationSpaceSeparated,
-  SrsStateType,
-} from "#data/model.ts";
+import type { SrsStateType } from "#data/model.ts";
 import { SkillKind, SrsKind } from "#data/model.ts";
 import { mutators } from "#data/rizzleMutators.ts";
 import type { Skill } from "#data/rizzleSchema.ts";
-import {
-  currentSchema,
-  rSkillKind,
-  rSpaceSeparatedString,
-} from "#data/rizzleSchema.ts";
+import { currentSchema, rSkillKind } from "#data/rizzleSchema.ts";
 import type {
   LatestSkillRating,
   RankRules,
@@ -37,15 +29,15 @@ import {
   allHsk3HanziWords,
 } from "#dictionary/dictionary.ts";
 import { Rating } from "#util/fsrs.ts";
-import { nanoid } from "#util/nanoid.ts";
 import { r } from "#util/rizzle.ts";
 import { invariant } from "@pinyinly/lib/invariant";
 import { describe, expect, test, vi } from "vitest";
+import type { SkillReviewOp } from "../data/helpers.ts";
 import {
   fsrsSrsState,
   mockSrsState,
-  parseRelativeTimeShorthand,
   prettyQueue,
+  seedSkillReviews as seedSkillHistory,
   时,
 } from "../data/helpers.ts";
 import { testReplicacheOptions } from "../util/rizzleHelpers.ts";
@@ -2445,12 +2437,6 @@ function latestSkillRatings(
   return result;
 }
 
-type SkillReviewOp =
-  | `${`🟢` | `🟡` | `🟠` | `❌`} ${Skill}`
-  | `❌hanziGloss ${string} ${string}`
-  | `❌hanziPinyin ${string} ${string}`
-  | `💤 ${string}`;
-
 /**
  * Testing helper to calculate a skill review queue based on a history of
  * simulated reviews.
@@ -2462,80 +2448,13 @@ async function simulateSkillReviews({
   targetSkills: Skill[];
   history: SkillReviewOp[];
 }): Promise<SkillReviewQueue> {
-  invariant(vi.isFakeTimers(), `simulateSkillReviews requires fake timers`);
-
   await using rizzle = r.replicache(
     testReplicacheOptions(),
     currentSchema,
     mutators,
   );
 
-  for (const event of history) {
-    const [op, ...args] = event.split(` `);
-    invariant(op != null);
-
-    switch (op) {
-      // jump forward in time
-      case `💤`: {
-        invariant(args[0] != null);
-        vi.setSystemTime(parseRelativeTimeShorthand(args[0]));
-        break;
-      }
-      // mistakes
-      case `❌hanziGloss`: {
-        const [hanzi, gloss] = args as [HanziText, string];
-        await rizzle.mutate.saveHanziGlossMistake({
-          id: nanoid(),
-          hanziOrHanziWord: hanzi,
-          gloss,
-          now: new Date(),
-        });
-        break;
-      }
-      case `❌hanziPinyin`: {
-        const [hanzi, pinyin] = args as [
-          HanziText,
-          PinyinPronunciationSpaceSeparated,
-        ];
-        await rizzle.mutate.saveHanziPinyinMistake({
-          id: nanoid(),
-          hanziOrHanziWord: hanzi,
-          pinyin: rSpaceSeparatedString().unmarshal(pinyin),
-          now: new Date(),
-        });
-        break;
-      }
-      // skill rating
-      case `❌`:
-      case `🟢`:
-      case `🟡`:
-      case `🟠`: {
-        const rating =
-          op === `🟢`
-            ? Rating.Easy
-            : op === `🟡`
-              ? Rating.Good
-              : op === `🟠`
-                ? Rating.Hard
-                : Rating.Again;
-        const skills = args as Skill[]; // TODO: shuffle the skills to see if it's sensitive to ordering?
-
-        for (const skill of skills) {
-          await rizzle.mutate.rateSkill({
-            id: nanoid(),
-            skill,
-            rating,
-            now: new Date(),
-            durationMs: null,
-          });
-        }
-        break;
-      }
-      default: {
-        throw new Error(`Invalid operation: ${op}`);
-      }
-    }
-  }
+  await seedSkillHistory(rizzle, history);
 
   // Now compute the skill review queue using data from replicache.
   const graph = await skillLearningGraph({ targetSkills });

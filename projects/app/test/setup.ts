@@ -96,6 +96,35 @@ vi.mock(
   }),
 );
 
+// Setup localStorage global.
+{
+  const localStorageMock: Storage = (() => {
+    let store: Record<string, string> = {};
+
+    return {
+      getItem: (key: string): string | null => store[key] ?? null,
+      setItem: (key: string, value: string): void => {
+        store[key] = value;
+      },
+      removeItem: (key: string): void => {
+        // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+        delete store[key];
+      },
+      clear: (): void => {
+        store = {};
+      },
+      key: (_index: number): string | null => {
+        throw new Error(`Not implemented`);
+      },
+      get length() {
+        return Object.keys(store).length;
+      },
+    };
+  })();
+
+  vi.stubGlobal(`localStorage`, localStorageMock);
+}
+
 // Set up __DEV__ global variable
 // @ts-expect-error __DEV__ is not defined in Node
 globalThis.__DEV__ = true;

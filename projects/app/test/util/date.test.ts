@@ -1,4 +1,4 @@
-import { formatRelativeTime } from "#util/date.ts";
+import { formatDurationShort, formatRelativeTime } from "#util/date.ts";
 import { describe, expect, test } from "vitest";
 
 describe(
@@ -111,6 +111,18 @@ describe(
       const futureDate = new Date(Date.now() + 60_000); // 1 minute in future
       const result = formatRelativeTime(futureDate);
       expect(result).toMatch(/in \d+ minutes?/);
+    });
+  },
+);
+
+describe(
+  `formatDurationShort suite` satisfies HasNameOf<typeof formatDurationShort>,
+  () => {
+    test.for([
+      [{ days: 2, hours: 5, minutes: 30 }, `2d 5h 30m`],
+      [{}, `0s`],
+    ] as const)(`formats %s -> %s`, ([input, output]) => {
+      expect(formatDurationShort(input)).toEqual(output);
     });
   },
 );

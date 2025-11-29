@@ -1,14 +1,18 @@
 import { useReplicache } from "@/client/hooks/useReplicache";
-import { recentSkillRatingsQuery } from "@/client/query";
+import { historyPageQuery } from "@/client/query";
+import { IconImage } from "@/client/ui/IconImage";
 import { SkillRefText } from "@/client/ui/SkillRefText";
-import { formatRelativeTime } from "@/util/date";
+import { formatDurationShort, formatRelativeTime } from "@/util/date";
 import { Rating } from "@/util/fsrs";
+import { nonNullable } from "@pinyinly/lib/invariant";
 import { useQuery } from "@tanstack/react-query";
+import { interval } from "date-fns/interval";
+import { intervalToDuration } from "date-fns/intervalToDuration";
 import { Text, View } from "react-native";
 
 export default function HistoryPage() {
   const r = useReplicache();
-  const skillRatingsQuery = useQuery(recentSkillRatingsQuery(r));
+  const historyResult = useQuery(historyPageQuery(r));
 
   return (
     <View className="gap-5">
@@ -16,32 +20,55 @@ export default function HistoryPage() {
       <View>
         <Text className="pyly-body-title">History</Text>
       </View>
-      <View className="gap-2">
-        {skillRatingsQuery.data?.map(([_key, value], i) => {
-          const { skill, createdAt } = value;
-          return (
-            <View key={i}>
-              <Text className="pyly-body">
-                {value.rating === Rating.Again
-                  ? `❌`
-                  : value.rating === Rating.Hard
-                    ? `🟠`
-                    : value.rating === Rating.Good
-                      ? `🟡`
-                      : // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-                        value.rating === Rating.Easy
-                        ? `🟢`
-                        : value.rating}
-                {` `}
-                <SkillRefText skill={skill} />
-                <Text className="pyly-body-caption">
-                  {` `}•{` `}
-                  {formatRelativeTime(createdAt)}
-                </Text>
+
+      <View className="gap-5">
+        {historyResult.data?.map((session, i) => (
+          <View key={i} className="gap-2">
+            <View className="flex-1 flex-row gap-4">
+              <Text className="pyly-body text-fg/50">
+                {formatRelativeTime(session.endTime)}
+              </Text>
+              <Text className="pyly-body text-fg/25">
+                {formatDurationShort(
+                  intervalToDuration(
+                    interval(session.startTime, session.endTime),
+                  ),
+                )}
               </Text>
             </View>
-          );
-        })}
+            {session.groups.map((skillGroup, j) => {
+              const finalRating = nonNullable(skillGroup.ratings[0]);
+              const otherRatings = skillGroup.ratings.slice(1);
+              return (
+                <View key={j} className="flex-row items-center gap-2">
+                  <IconImage
+                    size={16}
+                    source={
+                      finalRating.rating === Rating.Again
+                        ? require(`@/assets/icons/close.svg`)
+                        : require(`@/assets/icons/check.svg`)
+                    }
+                  />
+                  <Text className="pyly-body">
+                    <SkillRefText skill={skillGroup.skill} />
+                  </Text>
+                  {otherRatings
+                    .filter((rating) => rating.rating === Rating.Again)
+                    .map((_rating, k) => {
+                      return (
+                        <View
+                          key={k}
+                          className="flex-row items-center gap-[2px]"
+                        >
+                          <Text className="pyly-body text-fg-bg50">⊘</Text>
+                        </View>
+                      );
+                    })}
+                </View>
+              );
+            })}
+          </View>
+        ))}
       </View>
     </View>
   );
