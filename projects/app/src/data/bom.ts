@@ -26,3 +26,21 @@ export const loadBillOfMaterials = memoize0(async () =>
     }),
   ),
 );
+
+const fontBomSchema = z
+  .array(
+    z.object({
+      name: z.string().describe(`Font name`),
+      license: z.string().describe(`License text`),
+    }),
+  )
+  .transform(deepReadonly);
+
+export type FontBomEntry = z.infer<typeof fontBomSchema>[number];
+
+export const loadFontBillOfMaterials = memoize0(async () =>
+  fontBomSchema.parse(
+    // eslint-disable-next-line unicorn/no-await-expression-member
+    (await import(`./bom/fontBillOfMaterials.asset.json`)).default,
+  ),
+);
