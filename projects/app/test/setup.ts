@@ -116,7 +116,9 @@ vi.mock(
       key: (_index: number): string | null => {
         throw new Error(`Not implemented`);
       },
-      length: Object.keys(store).length,
+      get length() {
+        return Object.keys(store).length;
+      },
     };
   })();
 
