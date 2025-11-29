@@ -12,7 +12,7 @@ import { Text, View } from "react-native";
 
 export default function HistoryPage() {
   const r = useReplicache();
-  const skillRatingsQuery2 = useQuery(historyPageQuery(r));
+  const historyResult = useQuery(historyPageQuery(r));
 
   return (
     <View className="gap-5">
@@ -22,7 +22,7 @@ export default function HistoryPage() {
       </View>
 
       <View className="gap-5">
-        {skillRatingsQuery2.data?.map((session, i) => (
+        {historyResult.data?.map((session, i) => (
           <View key={i} className="gap-2">
             <View className="flex-1 flex-row gap-4">
               <Text className="pyly-body text-fg/50">
@@ -42,7 +42,6 @@ export default function HistoryPage() {
               return (
                 <View key={j} className="flex-row items-center gap-2">
                   <IconImage
-                    key={i}
                     size={16}
                     source={
                       finalRating.rating === Rating.Again

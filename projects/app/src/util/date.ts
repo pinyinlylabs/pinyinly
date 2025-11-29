@@ -70,6 +70,9 @@ export function formatDurationShort(duration: Duration): string {
   if (duration.seconds != null && duration.seconds > 0) {
     parts.push(`${duration.seconds}s`);
   }
+  if (parts.length === 0) {
+    return `0s`;
+  }
 
   return parts.join(` `);
 }
