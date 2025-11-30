@@ -35,7 +35,7 @@ export const SplashScreen = ({}: { children?: never }) => {
     [`MiSansL3`]: require(`@/assets/fonts/MiSans/MiSans L3.subset.ttf`),
     [`MiSans`]: require(`@/assets/fonts/MiSans/MiSansVF.subset.ttf`),
     [`PinyinlyComponents`]: require(
-      `@/assets/fonts/PinyinlyComponentsVF.subset.ttf`,
+      `@/assets/fonts/PinyinlyComponents/PinyinlyComponentsVF.subset.ttf`,
     ),
   });
   const isReady = fontsLoaded || fontError != null; // (lottieLoaded || lottieError) &&
