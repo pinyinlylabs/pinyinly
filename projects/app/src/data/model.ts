@@ -75,8 +75,8 @@ const skillKindSchema = z.enum({
   /**
    * Given a pinyin word, write the hanzi character.
    */
-  PinyinToHanziWord: `debug--PinyinToHanzi`,
-  ImageToHanziWord: `debug--ImageToHanzi`,
+  PinyinToHanziWord: `debug--PinyinToHanziWord`,
+  ImageToHanziWord: `debug--ImageToHanziWord`,
   /**
    * Given an initial like `p`, remember the name of the associated
    * character/actor/entity etc.
@@ -88,10 +88,10 @@ const skillKindSchema = z.enum({
   // Deprecated
   //
   Deprecated: `debug--Deprecated`,
-  Deprecated_RadicalToEnglish: `debug--RadicalToEnglish`,
-  Deprecated_EnglishToRadical: `debug--EnglishToRadical`,
-  Deprecated_RadicalToPinyin: `debug--RadicalToPinyin`,
-  Deprecated_PinyinToRadical: `debug--PinyinToRadical`,
+  Deprecated_RadicalToEnglish: `debug--Deprecated_RadicalToEnglish`,
+  Deprecated_EnglishToRadical: `debug--Deprecated_EnglishToRadical`,
+  Deprecated_RadicalToPinyin: `debug--Deprecated_RadicalToPinyin`,
+  Deprecated_PinyinToRadical: `debug--Deprecated_PinyinToRadical`,
 });
 export const SkillKind = skillKindSchema.enum;
 export type SkillKind = z.infer<typeof skillKindSchema>;

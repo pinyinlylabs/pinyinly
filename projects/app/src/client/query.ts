@@ -34,6 +34,7 @@ import {
   lookupHanziWord,
 } from "@/dictionary/dictionary";
 import { devToolsSlowQuerySleepIfEnabled } from "@/util/devtools";
+import type { Rating } from "@/util/fsrs";
 import type { RizzleAnyEntity, RizzleEntityOutput } from "@/util/rizzle";
 import {
   arrayFilterUniqueWithKey,
@@ -42,13 +43,168 @@ import {
 } from "@pinyinly/lib/collections";
 import { nonNullable } from "@pinyinly/lib/invariant";
 import type { Collection, CollectionConfig } from "@tanstack/react-db";
+import {
+  and,
+  concat,
+  createCollection,
+  createLiveQueryCollection,
+  eq,
+  gte,
+  isUndefined,
+  like,
+  or,
+} from "@tanstack/react-db";
 import { queryOptions, skipToken } from "@tanstack/react-query";
+import { subDays } from "date-fns/subDays";
 import type { DeviceStoreEntity } from "./deviceStore";
 import { buildDeviceStoreKey, deviceStoreGet } from "./deviceStore";
 
 export type WithRizzleWatchPrefixes<T> = T & {
   rizzleWatchPrefixes?: string[];
 };
+
+export function historyPageCollection(
+  skillRatingsCollection: SkillRatingCollection,
+  hanziGlossMistakesCollection: HanziGlossMistakeCollection,
+  hanziPinyinMistakesCollection: HanziPinyinMistakeCollection,
+) {
+  const startDate = subDays(new Date(), 7);
+
+  return createLiveQueryCollection((q) =>
+    q
+      .from({ skillRating: skillRatingsCollection })
+      .orderBy(({ skillRating }) => skillRating.createdAt, `desc`)
+      .leftJoin(
+        { hanziGlossMistake: hanziGlossMistakesCollection },
+        ({ skillRating, hanziGlossMistake }) =>
+          eq(
+            concat(skillRating.createdAt, ``),
+            concat(hanziGlossMistake.createdAt, ``),
+          ),
+      )
+      .leftJoin(
+        { hanziPinyinMistake: hanziPinyinMistakesCollection },
+        ({ skillRating, hanziPinyinMistake }) =>
+          eq(
+            concat(skillRating.createdAt, ``),
+            concat(hanziPinyinMistake.createdAt, ``),
+          ),
+      )
+      .where(({ skillRating, hanziGlossMistake, hanziPinyinMistake }) =>
+        and(
+          gte(skillRating.createdAt, startDate),
+          // These are probably overkill and can be removed. They're an attempt
+          // to work around not being able to have multiple conditions on a
+          // join, because it's theoretically possible to have multiple mistakes
+          // at the same timestamp (though in practice probably would never
+          // happen).
+          or(
+            isUndefined(hanziGlossMistake),
+            like(
+              skillRating.skill,
+              concat(
+                /* skill kind */ `%:`,
+                hanziGlossMistake?.hanziOrHanziWord,
+                `%`,
+              ),
+            ),
+          ),
+          or(
+            isUndefined(hanziPinyinMistake),
+            like(
+              skillRating.skill,
+              concat(
+                /* skill kind */ `%:`,
+                hanziPinyinMistake?.hanziOrHanziWord,
+                `%`,
+              ),
+            ),
+          ),
+        ),
+      ),
+  );
+}
+
+export type HistoryPageCollection = ReturnType<typeof historyPageCollection>;
+
+export function historyPageData(
+  historyCollection: CollectionOutput<HistoryPageCollection>[],
+) {
+  // Group skill ratings into sessions (5 minute gaps create new sessions)
+  const sessionTimeoutMs = 5 * 60 * 1000;
+  const sessions: CollectionOutput<HistoryPageCollection>[][] = [];
+  let currentSession: CollectionOutput<HistoryPageCollection>[] = [];
+
+  for (const item of historyCollection) {
+    if (currentSession.length === 0) {
+      currentSession.push(item);
+    } else {
+      const lastItem = nonNullable(currentSession.at(-1));
+      const timeDiffMs =
+        lastItem.skillRating.createdAt.getTime() -
+        item.skillRating.createdAt.getTime();
+
+      if (timeDiffMs > sessionTimeoutMs) {
+        sessions.push(currentSession);
+        currentSession = [item];
+      } else {
+        currentSession.push(item);
+      }
+    }
+  }
+
+  if (currentSession.length > 0) {
+    sessions.push(currentSession);
+  }
+
+  return sessions.map((session) => ({
+    endTime: nonNullable(session[0]).skillRating.createdAt,
+    startTime: nonNullable(session.at(-1)).skillRating.createdAt,
+    groups: groupRatingsBySkill2(session),
+  }));
+}
+
+export type HistoryPageData = ReturnType<typeof historyPageData>;
+
+function groupRatingsBySkill2(
+  items: CollectionOutput<HistoryPageCollection>[],
+) {
+  const groups: {
+    skill: Skill;
+    ratings: { rating: Rating; createdAt: Date; answer?: string }[];
+  }[] = [];
+
+  for (const item of items) {
+    const lastGroup = groups.at(-1);
+
+    if (lastGroup && lastGroup.skill === item.skillRating.skill) {
+      // Same skill as the previous rating, add to the current group
+      lastGroup.ratings.push({
+        rating: item.skillRating.rating,
+        createdAt: item.skillRating.createdAt,
+        answer:
+          item.hanziGlossMistake?.gloss ??
+          item.hanziPinyinMistake?.pinyin.join(` `),
+      });
+    } else {
+      // Different skill or first rating, start a new group
+      groups.push({
+        skill: item.skillRating.skill,
+        ratings: [
+          {
+            rating: item.skillRating.rating,
+            createdAt: item.skillRating.createdAt,
+            answer:
+              item.hanziGlossMistake?.gloss ??
+              item.hanziPinyinMistake?.pinyin.join(` `),
+          },
+        ],
+      });
+    }
+  }
+
+  return groups;
+}
 
 export const pinyinSoundsQuery = (r: Rizzle) =>
   withWatchPrefixes(
@@ -458,7 +614,21 @@ export type SkillRatingCollection = Collection<
   RizzleEntityOutput<typeof currentSchema.skillRating>,
   string
 >;
+export type HanziGlossMistakeCollection = Collection<
+  RizzleEntityOutput<typeof currentSchema.hanziGlossMistake>,
+  string
+>;
+export type HanziPinyinMistakeCollection = Collection<
+  RizzleEntityOutput<typeof currentSchema.hanziPinyinMistake>,
+  string
+>;
 export type TargetSkillsCollection = Collection<{ skill: Skill }, Skill>;
+
+/**
+ * A collection that tracks the most recent {@link SkillRating} for each
+ * {@link Skill}. This can be used to determine whether a skill needs to be
+ * repeated.
+ */
 export type LatestSkillRatingsCollection = Collection<SkillRating, Skill>;
 
 export type CollectionOutput<T> =
@@ -672,3 +842,75 @@ export const latestSkillRatingCollectionOptions = ({
   },
   getKey: (item) => item.skill,
 });
+
+export interface Db {
+  skillStateCollection: SkillStateCollection;
+  skillRatingCollection: SkillRatingCollection;
+  hanziGlossMistakeCollection: HanziGlossMistakeCollection;
+  hanziPinyinMistakeCollection: HanziPinyinMistakeCollection;
+  targetSkillsCollection: TargetSkillsCollection;
+  latestSkillRatingsCollection: LatestSkillRatingsCollection;
+}
+
+export function makeDb(rizzle: Rizzle): Db {
+  const skillStateCollection: SkillStateCollection = createCollection(
+    rizzleCollectionOptions({
+      id: `skillState`,
+      rizzle,
+      entity: currentSchema.skillState,
+      getKey: (item) => item.skill,
+    }),
+  );
+
+  const skillRatingCollection: SkillRatingCollection = createCollection(
+    rizzleCollectionOptions({
+      id: `skillRating`,
+      rizzle,
+      entity: currentSchema.skillRating,
+      getKey: (item) => item.id,
+    }),
+  );
+
+  const hanziGlossMistakeCollection: HanziGlossMistakeCollection =
+    createCollection(
+      rizzleCollectionOptions({
+        id: `hanziGlossMistake`,
+        rizzle,
+        entity: currentSchema.hanziGlossMistake,
+        getKey: (item) => item.id,
+      }),
+    );
+
+  const hanziPinyinMistakeCollection: HanziPinyinMistakeCollection =
+    createCollection(
+      rizzleCollectionOptions({
+        id: `hanziPinyinMistake`,
+        rizzle,
+        entity: currentSchema.hanziPinyinMistake,
+        getKey: (item) => item.id,
+      }),
+    );
+
+  const targetSkillsCollection: TargetSkillsCollection = createCollection(
+    staticCollectionOptions({
+      id: `targetSkills`,
+      queryFn: async () => {
+        const targetSkills = await getAllTargetSkills();
+        return targetSkills.map((skill) => ({ skill }));
+      },
+      getKey: (item) => item.skill,
+    }),
+  );
+
+  const latestSkillRatingsCollection: LatestSkillRatingsCollection =
+    createCollection(latestSkillRatingCollectionOptions({ rizzle }));
+
+  return {
+    latestSkillRatingsCollection,
+    skillStateCollection,
+    skillRatingCollection,
+    hanziGlossMistakeCollection,
+    hanziPinyinMistakeCollection,
+    targetSkillsCollection,
+  };
+}

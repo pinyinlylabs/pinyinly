@@ -1,4 +1,4 @@
-import type { Db } from "@/client/ui/DbProvider";
+import type { Db } from "@/client/query";
 import { DbProvider } from "@/client/ui/DbProvider";
 import { invariant } from "@pinyinly/lib/invariant";
 import { use } from "react";

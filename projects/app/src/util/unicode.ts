@@ -88,3 +88,35 @@ export function nullIfEmpty<T extends string>(
   }
   return text;
 }
+
+export function splitN(str: string, sep: string, n: number): string[] {
+  if (sep.length === 0) {
+    throw new Error(`separator must be non-empty`);
+  }
+
+  if (n < 0) {
+    throw new Error(`limit must be non-negative`);
+  }
+
+  const idxs = [];
+  let pos = 0;
+  for (let i = 0; i < n; i++) {
+    const idx = str.indexOf(sep, pos);
+    if (idx === -1) {
+      break;
+    }
+    idxs.push(idx);
+    pos = idx + sep.length;
+  }
+
+  const out = [];
+  let last = 0;
+
+  for (const idx of idxs) {
+    out.push(str.slice(last, idx));
+    last = idx + sep.length;
+  }
+
+  out.push(str.slice(last));
+  return out;
+}
