@@ -53,9 +53,11 @@ export const SkillQueueProvider = Object.assign(
     const {
       data: latestSkillRatingsData,
       isLoading: isLatestSkillRatingsLoading,
-    } = useLiveQuery(db.latestSkillRatings);
+    } = useLiveQuery((q) =>
+      q.from({ latestSkillRatings: db.latestSkillRatingsCollection }),
+    );
     const { data: skillStateData, isLoading: isSkillStatesLoading } =
-      useLiveQuery(db.skillStateCollection);
+      useLiveQuery((q) => q.from({ skillState: db.skillStateCollection }));
 
     const skillSrsStates = useMemo(
       () =>

@@ -32,7 +32,7 @@ import { Rating } from "#util/fsrs.ts";
 import { r } from "#util/rizzle.ts";
 import { invariant } from "@pinyinly/lib/invariant";
 import { describe, expect, test, vi } from "vitest";
-import type { SkillReviewOp } from "../data/helpers.ts";
+import type { HistoryCommand } from "../data/helpers.ts";
 import {
   fsrsSrsState,
   mockSrsState,
@@ -664,7 +664,7 @@ describe(
           vi.useFakeTimers({ toFake: [`Date`] });
 
           const targetSkills: Skill[] = [`he:刀:knife`];
-          const history: SkillReviewOp[] = [];
+          const history: HistoryCommand[] = [];
 
           {
             const queue = await simulateSkillReviews({
@@ -681,7 +681,7 @@ describe(
             `);
           }
 
-          history.push(`💤 1d`, `🟢 he:丿:slash he:𠃌:radical`);
+          history.push(`💤 1d`, `🟢 he:丿:slash`, `🟢 he:𠃌:radical`);
 
           {
             const queue = await simulateSkillReviews({
@@ -698,7 +698,7 @@ describe(
             `);
           }
 
-          history.push(`💤 1d`, `🟢 he:丿:slash he:𠃌:radical`);
+          history.push(`💤 1d`, `🟢 he:丿:slash`, `🟢 he:𠃌:radical`);
 
           {
             const queue = await simulateSkillReviews({
@@ -715,7 +715,7 @@ describe(
             `);
           }
 
-          history.push(`💤 1d`, `🟢 he:丿:slash he:𠃌:radical`);
+          history.push(`💤 1d`, `🟢 he:丿:slash`, `🟢 he:𠃌:radical`);
 
           {
             const queue = await simulateSkillReviews({
@@ -750,7 +750,7 @@ describe(
           vi.useFakeTimers({ toFake: [`Date`] });
 
           const targetSkills: Skill[] = [`he:分:divide`];
-          const history: SkillReviewOp[] = [
+          const history: HistoryCommand[] = [
             `❌ he:𠃌:radical`, // Get it wrong initially (so after all the reviews it will have lower "stability" than the others).
             `💤 5s`,
             `🟡 he:𠃌:radical`, // Then answer it correctly.
@@ -786,7 +786,7 @@ describe(
           vi.useFakeTimers({ toFake: [`Date`] });
 
           const targetSkills: Skill[] = [`he:刀:knife`];
-          const history: SkillReviewOp[] = [
+          const history: HistoryCommand[] = [
             `❌ he:刀:knife`, // Get it wrong initially so it's considered introduced but not very stable.
             `💤 1h`, // Wait a short time so we can test that it's actually scheduled first again (base case).
           ];
@@ -1968,7 +1968,10 @@ test(
     expect(skillKinds).toMatchInlineSnapshot(`
       {
         "debug--Deprecated": false,
-        "debug--EnglishToRadical": false,
+        "debug--Deprecated_EnglishToRadical": false,
+        "debug--Deprecated_PinyinToRadical": false,
+        "debug--Deprecated_RadicalToEnglish": false,
+        "debug--Deprecated_RadicalToPinyin": false,
         "debug--GlossToHanziWord": true,
         "debug--HanziWordToGloss": true,
         "debug--HanziWordToGlossTyped": true,
@@ -1976,13 +1979,10 @@ test(
         "debug--HanziWordToPinyinInitial": true,
         "debug--HanziWordToPinyinTone": true,
         "debug--HanziWordToPinyinTyped": true,
-        "debug--ImageToHanzi": false,
+        "debug--ImageToHanziWord": false,
         "debug--PinyinFinalAssociation": false,
         "debug--PinyinInitialAssociation": false,
-        "debug--PinyinToHanzi": false,
-        "debug--PinyinToRadical": false,
-        "debug--RadicalToEnglish": false,
-        "debug--RadicalToPinyin": false,
+        "debug--PinyinToHanziWord": false,
       }
     `);
   },
@@ -2022,7 +2022,10 @@ test(
     expect(skillKinds).toMatchInlineSnapshot(`
       {
         "debug--Deprecated": false,
-        "debug--EnglishToRadical": false,
+        "debug--Deprecated_EnglishToRadical": false,
+        "debug--Deprecated_PinyinToRadical": false,
+        "debug--Deprecated_RadicalToEnglish": false,
+        "debug--Deprecated_RadicalToPinyin": false,
         "debug--GlossToHanziWord": false,
         "debug--HanziWordToGloss": false,
         "debug--HanziWordToGlossTyped": true,
@@ -2030,13 +2033,10 @@ test(
         "debug--HanziWordToPinyinInitial": false,
         "debug--HanziWordToPinyinTone": true,
         "debug--HanziWordToPinyinTyped": true,
-        "debug--ImageToHanzi": false,
+        "debug--ImageToHanziWord": false,
         "debug--PinyinFinalAssociation": false,
         "debug--PinyinInitialAssociation": false,
-        "debug--PinyinToHanzi": false,
-        "debug--PinyinToRadical": false,
-        "debug--RadicalToEnglish": false,
-        "debug--RadicalToPinyin": false,
+        "debug--PinyinToHanziWord": false,
       }
     `);
   },
@@ -2446,7 +2446,7 @@ async function simulateSkillReviews({
   history,
 }: {
   targetSkills: Skill[];
-  history: SkillReviewOp[];
+  history: HistoryCommand[];
 }): Promise<SkillReviewQueue> {
   await using rizzle = r.replicache(
     testReplicacheOptions(),

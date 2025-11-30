@@ -1,20 +1,34 @@
 import { isHanziGrapheme } from "#data/hanzi.ts";
 import type {
+  HanziGlossMistakeType,
   HanziGrapheme,
+  HanziPinyinMistakeType,
   HanziText,
+  HanziWord,
+  MistakeType,
   PinyinPronunciationSpaceSeparated,
   PinyinSyllable,
   SrsStateFsrsFourPointFiveType,
   SrsStateMockType,
 } from "#data/model.ts";
-import { QuestionFlagKind, SrsKind } from "#data/model.ts";
-import type { Rizzle, Skill } from "#data/rizzleSchema.js";
+import {
+  MistakeKind,
+  QuestionFlagKind,
+  SkillKind,
+  SrsKind,
+} from "#data/model.ts";
+import type { HanziWordSkill, Rizzle, Skill } from "#data/rizzleSchema.js";
 import { rSpaceSeparatedString } from "#data/rizzleSchema.js";
 import type { SkillReviewQueue, SkillReviewQueueItem } from "#data/skills.js";
+import { hanziWordFromSkill, skillKindFromSkill } from "#data/skills.js";
 import type { Rating } from "#util/fsrs.ts";
 import { nextReview } from "#util/fsrs.ts";
 import { nanoid } from "#util/nanoid.js";
+import { splitN } from "#util/unicode.js";
 import { invariant, nonNullable } from "@pinyinly/lib/invariant";
+import { UnexpectedValueError } from "@pinyinly/lib/types";
+import type { Duration } from "date-fns";
+import { add } from "date-fns/add";
 import type { DeepReadonly } from "ts-essentials";
 import { vi } from "vitest";
 import { emojiToRating } from "../helpers";
@@ -26,6 +40,40 @@ export const date = (strings: TemplateStringsArray): Date => {
 
 export const 时 = date;
 
+export const parseDurationShorthand = (shorthand: string): Duration => {
+  const result: Duration = {};
+
+  const regex = /(-|\+)?(\d+)([\w])/g;
+  for (const match of shorthand.matchAll(regex)) {
+    const [, sign, multiple, unit] = match;
+    const scalar = (sign === `-` ? -1 : 1) * Number(multiple);
+
+    switch (unit ?? ``) {
+      case `s`: {
+        result.seconds = scalar;
+        break;
+      }
+      case `m`: {
+        result.minutes = scalar;
+        break;
+      }
+      case `h`: {
+        result.hours = scalar;
+        break;
+      }
+      case `d`: {
+        result.days = scalar;
+        break;
+      }
+      default: {
+        throw new Error(`invalid duration unit ${unit}`);
+      }
+    }
+  }
+
+  return result;
+};
+
 /**
  * Convert a string like "+1d" or "-5s" to a date.
  */
@@ -33,14 +81,8 @@ export const parseRelativeTimeShorthand = (
   shorthand: string,
   now = new Date(),
 ): Date => {
-  const parseResult = /^(-|\+?)(\d+)([smhd])$/.exec(shorthand);
-  invariant(parseResult != null, `invalid shorthand ${shorthand}`);
-  const [, sign, multiple, unit] = parseResult;
-  const duration =
-    (sign === `-` ? -1 : 1) *
-    Number(multiple) *
-    { s: 1, m: 60 * 1, h: 60 * 60, d: 60 * 60 * 24 }[unit!]!;
-  return new Date(now.getTime() + duration * 1000);
+  const duration = parseDurationShorthand(shorthand);
+  return add(now, duration);
 };
 
 export const mockSrsState = (
@@ -146,11 +188,180 @@ export function skillQueueItemPretty(item: SkillReviewQueueItem): string {
   return pretty;
 }
 
-export type SkillReviewOp =
+export type HistoryCommand =
   | `${`🟢` | `🟡` | `🟠` | `❌`} ${Skill}`
   | `❌hanziGloss ${string} ${string}`
   | `❌hanziPinyin ${string} ${string}`
   | `💤 ${string}`;
+
+export type HistoryEventSleep = {
+  kind: `sleep`;
+  duration: Duration;
+};
+
+export type HistoryEventSkillReview = {
+  kind: `skillReview`;
+  skill: Skill;
+  rating: Rating;
+  mistake?: MistakeType;
+};
+
+export type HistoryEventHanziGlossMistake = {
+  kind: `hanziGlossMistake`;
+  mistake: HanziGlossMistakeType;
+};
+
+export type HistoryEventHanziPinyinMistake = {
+  kind: `hanziPinyinMistake`;
+  mistake: HanziPinyinMistakeType;
+};
+
+export type HistoryEvent =
+  | HistoryEventSleep
+  | HistoryEventSkillReview
+  | HistoryEventHanziGlossMistake
+  | HistoryEventHanziPinyinMistake;
+
+export function parseHistoryCommand(
+  historyCommand: HistoryCommand,
+): HistoryEvent[] {
+  const events: HistoryEvent[] = [];
+
+  const [op, opArgs] = splitN(historyCommand, ` `, 1);
+  invariant(op != null);
+
+  switch (op) {
+    // jump forward in time
+    case `💤`: {
+      events.push({
+        kind: `sleep`,
+        duration: parseDurationShorthand(opArgs!),
+      });
+      break;
+    }
+    // mistakes
+    case `❌hanziGloss`: {
+      const [hanzi, gloss] = splitN(opArgs!, ` `, 1) as [HanziText, string];
+      events.push({
+        kind: `hanziGlossMistake`,
+        mistake: {
+          kind: MistakeKind.HanziGloss,
+          hanziOrHanziWord: hanzi,
+          gloss,
+        },
+      });
+      break;
+    }
+    case `❌hanziPinyin`: {
+      const [hanzi, pinyin] = splitN(opArgs!, ` `, 1) as [
+        HanziText,
+        PinyinPronunciationSpaceSeparated,
+      ];
+      events.push({
+        kind: `hanziPinyinMistake`,
+        mistake: {
+          kind: MistakeKind.HanziPinyin,
+          hanziOrHanziWord: hanzi,
+          pinyin: rSpaceSeparatedString().unmarshal(pinyin),
+        },
+      });
+      break;
+    }
+    // skill reviews
+    case `❌`:
+    case `🟢`:
+    case `🟡`:
+    case `🟠`: {
+      const rating = emojiToRating(op);
+      // eslint-disable-next-line prefer-const
+      let [skill, skillArgs] = splitN(opArgs!, ` `, 1) as [Skill, string?];
+      const event: HistoryEventSkillReview = {
+        kind: `skillReview`,
+        skill,
+        rating,
+      };
+
+      if (skillArgs != null) {
+        const skillKind = skillKindFromSkill(skill);
+        switch (skillKind) {
+          case SkillKind.HanziWordToGloss:
+          case SkillKind.HanziWordToGlossTyped: {
+            skill = skill as HanziWordSkill;
+            // `❌ he:刀:knife (刀→legs)`,
+            const match = /^\((?:(.+)→)?(.+)\)$/.exec(skillArgs);
+            invariant(match != null, `invalid mistake format ${skillArgs}`);
+            const gloss = nonNullable(match[2], `gloss match missing`);
+            const hanziOrHanziWord =
+              match[1] == null
+                ? // (legs)
+                  hanziWordFromSkill(skill)
+                : // (刀→legs)
+                  // (刀:strength→legs)
+                  (match[1] as HanziWord | HanziText);
+
+            event.mistake = {
+              kind: MistakeKind.HanziGloss,
+              hanziOrHanziWord,
+              gloss,
+            };
+            break;
+          }
+          case SkillKind.HanziWordToPinyinTyped:
+          case SkillKind.HanziWordToPinyinFinal:
+          case SkillKind.HanziWordToPinyinInitial:
+          case SkillKind.HanziWordToPinyinTone: {
+            skill = skill as HanziWordSkill;
+            // `❌ he:刀:knife (刀→legs)`,
+            const match = /^\((?:(.+)→)?(.+)\)$/.exec(skillArgs);
+            invariant(match != null, `invalid mistake format ${skillArgs}`);
+            const pinyin = rSpaceSeparatedString().unmarshal(
+              nonNullable(match[2], `gloss match missing`),
+            );
+            const hanziOrHanziWord =
+              match[1] == null
+                ? // (pǐ)
+                  hanziWordFromSkill(skill)
+                : // (刀→pǐ)
+                  // (刀:strength→pǐ)
+                  (match[1] as HanziWord | HanziText);
+
+            event.mistake = {
+              kind: MistakeKind.HanziPinyin,
+              hanziOrHanziWord,
+              pinyin,
+            };
+            break;
+          }
+          case SkillKind.GlossToHanziWord:
+          case SkillKind.PinyinToHanziWord:
+          case SkillKind.ImageToHanziWord:
+          case SkillKind.PinyinInitialAssociation:
+          case SkillKind.PinyinFinalAssociation:
+          case SkillKind.Deprecated:
+          case SkillKind.Deprecated_RadicalToEnglish:
+          case SkillKind.Deprecated_EnglishToRadical:
+          case SkillKind.Deprecated_RadicalToPinyin:
+          case SkillKind.Deprecated_PinyinToRadical: {
+            throw new Error(
+              `unsupported skill kind (${skillKind}) for mistake: ${skill}`,
+            );
+          }
+          default: {
+            throw new UnexpectedValueError(skillKind);
+          }
+        }
+      }
+
+      events.push(event);
+      break;
+    }
+    default: {
+      throw new Error(`Invalid operation: ${op}`);
+    }
+  }
+
+  return events;
+}
 
 export async function seedSkillReviews(
   rizzle: Rizzle,
@@ -171,7 +382,7 @@ export async function seedSkillReviews(
    *    `🟡 he:丿:slash`,
    *   ]
    */
-  history: SkillReviewOp[],
+  history: HistoryCommand[],
 ) {
   invariant(
     vi.isFakeTimers(),
@@ -180,62 +391,69 @@ export async function seedSkillReviews(
     >,
   );
 
-  for (const event of history) {
-    const [op, ...args] = event.split(` `);
-    invariant(op != null);
+  const historyEvents = history.flatMap((command) =>
+    parseHistoryCommand(command),
+  );
 
-    switch (op) {
-      // jump forward in time
-      case `💤`: {
-        invariant(args[0] != null);
-        vi.setSystemTime(parseRelativeTimeShorthand(args[0]));
+  for (const event of historyEvents) {
+    switch (event.kind) {
+      case `sleep`: {
+        vi.setSystemTime(add(new Date(), event.duration));
         break;
       }
-      // mistakes
-      case `❌hanziGloss`: {
-        const [hanzi, gloss] = args as [HanziText, string];
-        await rizzle.mutate.saveHanziGlossMistake({
+      case `skillReview`: {
+        await rizzle.mutate.rateSkill({
           id: nanoid(),
-          hanziOrHanziWord: hanzi,
-          gloss,
+          skill: event.skill,
+          rating: event.rating,
           now: new Date(),
+          durationMs: null,
         });
-        break;
-      }
-      case `❌hanziPinyin`: {
-        const [hanzi, pinyin] = args as [
-          HanziText,
-          PinyinPronunciationSpaceSeparated,
-        ];
-        await rizzle.mutate.saveHanziPinyinMistake({
-          id: nanoid(),
-          hanziOrHanziWord: hanzi,
-          pinyin: rSpaceSeparatedString().unmarshal(pinyin),
-          now: new Date(),
-        });
-        break;
-      }
-      // skill rating
-      case `❌`:
-      case `🟢`:
-      case `🟡`:
-      case `🟠`: {
-        const rating = emojiToRating(op);
-        const skills = args as Skill[]; // TODO: shuffle the skills to see if it's sensitive to ordering?
-
-        for (const skill of skills) {
-          await rizzle.mutate.rateSkill({
-            id: nanoid(),
-            skill,
-            rating,
-            now: new Date(),
-            durationMs: null,
-          });
+        if (event.mistake) {
+          switch (event.mistake.kind) {
+            case MistakeKind.HanziPinyinInitial: {
+              throw new Error(`not implemented`);
+            }
+            case MistakeKind.HanziGloss: {
+              await rizzle.mutate.saveHanziGlossMistake({
+                id: nanoid(),
+                hanziOrHanziWord: event.mistake.hanziOrHanziWord,
+                gloss: event.mistake.gloss,
+                now: new Date(),
+              });
+              break;
+            }
+            case MistakeKind.HanziPinyin: {
+              await rizzle.mutate.saveHanziPinyinMistake({
+                id: nanoid(),
+                hanziOrHanziWord: event.mistake.hanziOrHanziWord,
+                pinyin: event.mistake.pinyin,
+                now: new Date(),
+              });
+              break;
+            }
+          }
         }
         break;
       }
-      default: {
-        throw new Error(`Invalid operation: ${op}`);
+
+      case `hanziGlossMistake`: {
+        await rizzle.mutate.saveHanziGlossMistake({
+          id: nanoid(),
+          hanziOrHanziWord: event.mistake.hanziOrHanziWord,
+          gloss: event.mistake.gloss,
+          now: new Date(),
+        });
+        break;
+      }
+      case `hanziPinyinMistake`: {
+        await rizzle.mutate.saveHanziPinyinMistake({
+          id: nanoid(),
+          hanziOrHanziWord: event.mistake.hanziOrHanziWord,
+          pinyin: event.mistake.pinyin,
+          now: new Date(),
+        });
+        break;
       }
     }
   }
