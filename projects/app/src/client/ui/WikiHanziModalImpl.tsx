@@ -1,14 +1,13 @@
 import { useLookupHanzi } from "@/client/hooks/useLookupHanzi";
 import { useReplicache } from "@/client/hooks/useReplicache";
 import { useRizzleQueryPaged } from "@/client/hooks/useRizzleQueryPaged";
-import { hanziWikiEntryQuery, pinyinSoundsQuery } from "@/client/query";
+import { pinyinSoundsQuery } from "@/client/query";
 import {
   getWikiMdxHanziMeaning,
   getWikiMdxHanziWordMeaning,
 } from "@/client/wiki";
 import type { HanziText, PinyinSoundId, PinyinSyllable } from "@/data/model";
 import { parsePinyinSyllable } from "@/data/pinyin";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { Fragment, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
@@ -26,9 +25,6 @@ export function WikiHanziModalImpl({
   hanzi: HanziText;
   onDismiss: () => void;
 }) {
-  const wikiEntry = useSuspenseQuery(hanziWikiEntryQuery(hanzi));
-  void wikiEntry;
-
   const hanziWordMeanings = useLookupHanzi(hanzi);
 
   let pinyin: readonly PinyinSyllable[] | undefined;

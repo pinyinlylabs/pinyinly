@@ -100,6 +100,9 @@ const recommended: ConfigWithExtendsArray = [
               PostHogProvider: `WebPostHogProvider`,
               usePostHog: `webUsePostHog`,
             },
+            react: {
+              Suspense: `ReactSuspense`,
+            },
             "react-native": {
               Animated: `RnAnimated`,
               Easing: `RnEasing`,

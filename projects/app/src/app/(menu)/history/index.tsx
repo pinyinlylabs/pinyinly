@@ -2,13 +2,13 @@ import { useDb } from "@/client/hooks/useDb";
 import { historyPageCollection, historyPageData } from "@/client/query";
 import { IconImage } from "@/client/ui/IconImage";
 import { SkillRefText } from "@/client/ui/SkillRefText";
+import { Suspense } from "@/client/ui/Suspense";
 import { formatDurationShort, formatRelativeTime } from "@/util/date";
 import { Rating } from "@/util/fsrs";
 import { nonNullable } from "@pinyinly/lib/invariant";
 import { useLiveQuery } from "@tanstack/react-db";
 import { interval } from "date-fns/interval";
 import { intervalToDuration } from "date-fns/intervalToDuration";
-import { Suspense } from "react";
 import { Text, View } from "react-native";
 
 export default function HistoryPage() {

@@ -2,6 +2,7 @@
 // @vitest-environment happy-dom
 
 import { PylyMdxComponents } from "#client/ui/PylyMdxComponents.tsx";
+import { Suspense } from "#client/ui/Suspense.tsx";
 import { registry_ForTesting } from "#client/wiki.js";
 import { glob, readFileSync } from "@pinyinly/lib/fs";
 import {
@@ -10,7 +11,6 @@ import {
   waitForElementToBeRemoved,
 } from "@testing-library/react";
 import path from "node:path";
-import { Suspense } from "react";
 import { describe, expect, test } from "vitest";
 import { projectRoot } from "../helpers.ts";
 

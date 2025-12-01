@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
-import { Suspense } from "react";
 import { Platform, View } from "react-native";
 import Reanimated, { Easing, Keyframe } from "react-native-reanimated";
+import { Suspense } from "./Suspense";
 
 export const QuizDeckToastContainer = ({
   children,

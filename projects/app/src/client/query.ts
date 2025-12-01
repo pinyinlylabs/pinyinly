@@ -30,8 +30,6 @@ import {
   hanziFromHanziWord,
   loadPinyinSoundNameSuggestions,
   lookupHanzi,
-  lookupHanziWikiEntry,
-  lookupHanziWord,
 } from "@/dictionary/dictionary";
 import { devToolsSlowQuerySleepIfEnabled } from "@/util/devtools";
 import type { Rating } from "@/util/fsrs";
@@ -437,30 +435,6 @@ export const soundNameSuggestionsQuery = () =>
     },
     networkMode: `offlineFirst`,
     structuralSharing: false,
-  });
-
-export const hanziWikiEntryQuery = (hanzi: HanziText) =>
-  queryOptions({
-    queryKey: [`hanziWikiEntry`, hanzi],
-    queryFn: async () => {
-      await devToolsSlowQuerySleepIfEnabled();
-      return await lookupHanziWikiEntry(hanzi);
-    },
-    networkMode: `offlineFirst`,
-    structuralSharing: false,
-    staleTime: Infinity,
-  });
-
-export const hanziWordMeaningQuery = (hanziWord: HanziWord) =>
-  queryOptions({
-    queryKey: [`hanziWordMeaning`, hanziWord],
-    queryFn: async () => {
-      await devToolsSlowQuerySleepIfEnabled();
-      return await lookupHanziWord(hanziWord);
-    },
-    networkMode: `offlineFirst`,
-    structuralSharing: false,
-    staleTime: Infinity,
   });
 
 export const hanziWordOtherMeaningsQuery = (hanziWord: HanziWord) =>

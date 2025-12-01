@@ -1,8 +1,7 @@
+import { useLookupHanziWord } from "@/client/hooks/useLookupHanziWord";
 import { useReplicache } from "@/client/hooks/useReplicache";
 import { useRizzleQueryPaged } from "@/client/hooks/useRizzleQueryPaged";
 import {
-  hanziWikiEntryQuery,
-  hanziWordMeaningQuery,
   hanziWordOtherMeaningsQuery,
   hanziWordSkillRatingsQuery,
   hanziWordSkillStatesQuery,
@@ -17,7 +16,6 @@ import { Fragment } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { DevLozenge } from "./DevLozenge";
 import { HanziWordRefText } from "./HanziWordRefText";
-import { Pylymark } from "./Pylymark";
 import { RectButton } from "./RectButton";
 
 export function WikiHanziWordModalImpl({
@@ -27,9 +25,7 @@ export function WikiHanziWordModalImpl({
   hanziWord: HanziWord;
   onDismiss: () => void;
 }) {
-  const hanziWordSkillData = useQuery(hanziWordMeaningQuery(hanziWord));
-  const hanzi = hanziFromHanziWord(hanziWord);
-  const wikiEntry = useQuery(hanziWikiEntryQuery(hanzi));
+  const hanziWordMeaning = useLookupHanziWord(hanziWord);
   const otherMeaningsQuery = useQuery(hanziWordOtherMeaningsQuery(hanziWord));
 
   const graphemes = splitHanziText(hanziFromHanziWord(hanziWord));
@@ -42,7 +38,7 @@ export function WikiHanziWordModalImpl({
     hanziWordSkillRatingsQuery(r, hanziWord),
   );
 
-  return hanziWordSkillData.data == null ? null : (
+  return hanziWordMeaning == null ? null : (
     <>
       <ScrollView
         className="flex-1"
@@ -59,9 +55,9 @@ export function WikiHanziWordModalImpl({
             ))}
           </View>
 
-          {hanziWordSkillData.data.pinyin == null ? null : (
+          {hanziWordMeaning.pinyin == null ? null : (
             <Text className="font-sans text-2xl text-fg/50">
-              {hanziWordSkillData.data.pinyin
+              {hanziWordMeaning.pinyin
                 .map((x) => pinyinPronunciationDisplayText(x))
                 .join(`, `)}
             </Text>
@@ -70,7 +66,7 @@ export function WikiHanziWordModalImpl({
 
         <View className="gap-1">
           <Text className="font-sans text-2xl text-fg">
-            {hanziWordSkillData.data.gloss.join(`, `)}
+            {hanziWordMeaning.gloss.join(`, `)}
             {otherMeaningsQuery.data == null ||
             otherMeaningsQuery.data.length === 0 ? null : (
               <Text className="pyly-body-caption">
@@ -88,57 +84,6 @@ export function WikiHanziWordModalImpl({
             )}
           </Text>
         </View>
-
-        {wikiEntry.data?.components == null ? null : (
-          <View className="gap-1">
-            <Text className="font-sans text-xs uppercase text-caption">
-              Interpretation
-            </Text>
-            <View className="gap-4 rounded-xl bg-bg-loud p-4">
-              {wikiEntry.data.components.map((component, i) => {
-                return (
-                  <View key={i} className="gap-1">
-                    <Text className="pyly-body">
-                      {component.title ??
-                        (component.hanziWord == null ? null : (
-                          <HanziWordRefText hanziWord={component.hanziWord} />
-                        )) ??
-                        `???`}
-                    </Text>
-                    {component.description == null ? null : (
-                      <Text className="pyly-body-caption">
-                        <Pylymark source={component.description} />
-                      </Text>
-                    )}
-                  </View>
-                );
-              })}
-
-              {wikiEntry.data.interpretation == null ? null : (
-                <>
-                  <View className="h-px w-full bg-bg-loud" />
-                  <Text className="pyly-body">
-                    <Pylymark source={wikiEntry.data.interpretation} />
-                  </Text>
-                </>
-              )}
-            </View>
-          </View>
-        )}
-
-        {wikiEntry.data?.visuallySimilar == null ? null : (
-          <View className="gap-1 font-sans">
-            <Text className="text-xs uppercase text-fg/90">
-              Visually Similar
-            </Text>
-
-            <View className="flex-row flex-wrap gap-2 text-fg">
-              {wikiEntry.data.visuallySimilar.map((hanzi, i) => (
-                <Text key={i}>{hanzi}</Text>
-              ))}
-            </View>
-          </View>
-        )}
 
         {!__DEV__ || skillStatesQuery.data == null ? null : (
           <View className="gap-1 font-sans">

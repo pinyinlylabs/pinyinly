@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { PressableProps } from "react-native";
 import { Modal, Platform, View } from "react-native";
 import Reanimated, {
@@ -16,6 +16,7 @@ import Reanimated, {
 
 import { useEventCallback } from "../hooks/useEventCallback";
 import { ReanimatedPressable } from "./ReanimatedPressable";
+import { Suspense } from "./Suspense";
 
 export type PageSheetChild = (options: { dismiss: () => void }) => ReactNode;
 

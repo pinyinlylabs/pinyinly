@@ -3,10 +3,10 @@ import { useNewQueryClient } from "@/client/hooks/useNewQueryClient";
 import { TrpcProvider } from "@/client/trpc";
 import { QueryClientProvider } from "@tanstack/react-query";
 import type { PropsWithChildren } from "react";
-import { Suspense } from "react";
 import { DbProvider } from "./DbProvider";
 import { ReplicacheProvider } from "./ReplicacheProvider";
 import { SkillQueueProvider } from "./SkillQueueProvider";
+import { Suspense } from "./Suspense";
 
 /**
  * All the data/store contexts that should be scoped to a single device session.
