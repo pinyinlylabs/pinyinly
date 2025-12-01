@@ -1,7 +1,7 @@
 import { usePinyinSoundGroups } from "@/client/hooks/usePinyinSoundGroups";
 import { useReplicache } from "@/client/hooks/useReplicache";
 import { useRizzleQueryPaged } from "@/client/hooks/useRizzleQueryPaged";
-import { pinyinSoundsQuery, soundNameSuggestionsQuery } from "@/client/query";
+import { pinyinSoundsQuery } from "@/client/query";
 import { Pylymark } from "@/client/ui/Pylymark";
 import { RectButton } from "@/client/ui/RectButton";
 import type { PinyinSoundId } from "@/data/model";
@@ -9,10 +9,11 @@ import {
   defaultPinyinSoundInstructions,
   loadPylyPinyinChart,
 } from "@/data/pinyin";
+import { loadPinyinSoundNameSuggestions } from "@/dictionary/dictionary";
 import { nullIfEmpty } from "@/util/unicode";
 import { sortComparatorString } from "@pinyinly/lib/collections";
-import { useQuery } from "@tanstack/react-query";
 import { Link, useLocalSearchParams } from "expo-router";
+import { use } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 
@@ -21,7 +22,7 @@ export default function MnemonicIdPage() {
   const r = useReplicache();
   const chart = loadPylyPinyinChart();
 
-  const soundNameSuggestions = useQuery(soundNameSuggestionsQuery());
+  const soundNameSuggestions = use(loadPinyinSoundNameSuggestions());
 
   const { data: pinyinSounds } = useRizzleQueryPaged(pinyinSoundsQuery(r));
   const pinyinSoundGroups = usePinyinSoundGroups();
@@ -86,83 +87,79 @@ export default function MnemonicIdPage() {
         </View>
 
         <View className="gap-2">
-          {soundNameSuggestions.data == null ? (
-            <Text className="text-fg">null</Text>
-          ) : (
-            [...soundNameSuggestions.data.entries()]
-              .flatMap(([theme, namesBySoundId]) => {
-                const names = namesBySoundId.get(id);
-                return names ? ([[theme, names]] as const) : [];
-              })
-              .sort(
-                // Put the current theme at the top.
-                sortComparatorString(
-                  ([theme]) =>
-                    `${theme === pinyinSoundGroup?.theme ? 0 : 1}-${theme}`,
-                ),
-              )
-              .map(([theme, names]) => (
-                <View key={theme}>
-                  <Text className="pyly-body-heading">
-                    {theme}
-                    {theme === pinyinSoundGroup?.theme ? (
-                      ` ✅`
-                    ) : (
-                      <RectButton
-                        onPress={() => {
-                          if (pinyinSoundGroup?.id != null) {
-                            void r.mutate.setPinyinSoundGroupTheme({
-                              soundGroupId: pinyinSoundGroup.id,
-                              theme,
-                              now: new Date(),
-                            });
-                          }
-                        }}
-                        variant="bare"
-                      >
-                        Use theme
-                      </RectButton>
-                    )}
-                  </Text>
-                  {[...names.entries()].map(([name, nameDescription], i) => (
-                    <View key={i} className="flex-row items-center gap-2">
-                      <Text
-                        className={`
-                          text-caption
-
-                          hover:text-fg
-                        `}
-                        onPress={() => {
-                          void r.mutate.setPinyinSoundName({
-                            soundId: id,
-                            name,
+          {[...soundNameSuggestions.entries()]
+            .flatMap(([theme, namesBySoundId]) => {
+              const names = namesBySoundId.get(id);
+              return names ? ([[theme, names]] as const) : [];
+            })
+            .sort(
+              // Put the current theme at the top.
+              sortComparatorString(
+                ([theme]) =>
+                  `${theme === pinyinSoundGroup?.theme ? 0 : 1}-${theme}`,
+              ),
+            )
+            .map(([theme, names]) => (
+              <View key={theme}>
+                <Text className="pyly-body-heading">
+                  {theme}
+                  {theme === pinyinSoundGroup?.theme ? (
+                    ` ✅`
+                  ) : (
+                    <RectButton
+                      onPress={() => {
+                        if (pinyinSoundGroup?.id != null) {
+                          void r.mutate.setPinyinSoundGroupTheme({
+                            soundGroupId: pinyinSoundGroup.id,
+                            theme,
                             now: new Date(),
                           });
-                        }}
-                      >
-                        Use
-                      </Text>
-                      <Text className="font-bold text-fg">
-                        <Text
-                          className={
-                            pinyinSound?.name === name
-                              ? `text-[green]`
-                              : undefined
-                          }
-                        >
-                          {name}
-                        </Text>
+                        }
+                      }}
+                      variant="bare"
+                    >
+                      Use theme
+                    </RectButton>
+                  )}
+                </Text>
+                {[...names.entries()].map(([name, nameDescription], i) => (
+                  <View key={i} className="flex-row items-center gap-2">
+                    <Text
+                      className={`
+                        text-caption
 
-                        {` `}
-                        <Text className="text-sm font-normal text-caption">
-                          {nameDescription}
-                        </Text>
+                        hover:text-fg
+                      `}
+                      onPress={() => {
+                        void r.mutate.setPinyinSoundName({
+                          soundId: id,
+                          name,
+                          now: new Date(),
+                        });
+                      }}
+                    >
+                      Use
+                    </Text>
+                    <Text className="font-bold text-fg">
+                      <Text
+                        className={
+                          pinyinSound?.name === name
+                            ? `text-[green]`
+                            : undefined
+                        }
+                      >
+                        {name}
                       </Text>
-                    </View>
-                  ))}
-                </View>
-              ))
-          )}
+
+                      {` `}
+                      <Text className="text-sm font-normal text-caption">
+                        {nameDescription}
+                      </Text>
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            ))}
         </View>
       </View>
     </ScrollView>
