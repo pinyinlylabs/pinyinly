@@ -1,11 +1,9 @@
 import { useLookupHanzi } from "@/client/hooks/useLookupHanzi";
-import { hanziWikiEntryQuery } from "@/client/query";
 import {
   getWikiMdxHanziMeaning,
   getWikiMdxHanziWordMeaning,
 } from "@/client/wiki";
 import type { HanziText, PinyinSyllable } from "@/data/model";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import React, { Fragment, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useIntersectionObserver } from "usehooks-ts";
@@ -21,9 +19,6 @@ export const NewSkillModalContentNewWord = ({
   hanzi: HanziText;
   onDismiss: () => void;
 }) => {
-  const wikiEntry = useSuspenseQuery(hanziWikiEntryQuery(hanzi));
-  void wikiEntry;
-
   const hanziWordMeanings = useLookupHanzi(hanzi);
 
   let pinyin: readonly PinyinSyllable[] | undefined;

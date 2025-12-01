@@ -1,4 +1,4 @@
-import { hanziWordMeaningQuery } from "@/client/query";
+import { useLookupHanziWord } from "@/client/hooks/useLookupHanziWord";
 import type { HanziWord } from "@/data/model";
 import { pinyinPronunciationDisplayText } from "@/data/pinyin";
 import {
@@ -6,7 +6,6 @@ import {
   hanziFromHanziWord,
   pinyinOrThrow,
 } from "@/dictionary/dictionary";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { HanziWordLink } from "./HanziWordLink";
 
 export const HanziWordRefText = ({
@@ -24,7 +23,7 @@ export const HanziWordRefText = ({
   gloss?: boolean | string;
   showPinyin?: boolean;
 }) => {
-  const { data: meaning } = useSuspenseQuery(hanziWordMeaningQuery(hanziWord));
+  const meaning = useLookupHanziWord(hanziWord);
 
   let text = ``;
 
@@ -32,16 +31,17 @@ export const HanziWordRefText = ({
     text += hanziFromHanziWord(hanziWord);
   }
 
-  if (
-    gloss !== false &&
-    (typeof gloss === `string` || (meaning != null && meaning.gloss.length > 0))
-  ) {
+  // Convert `gloss: true` into the actual gloss string.
+  if (gloss === true && meaning != null && meaning.gloss.length > 0) {
+    gloss = glossOrThrow(hanziWord, meaning);
+  }
+
+  if (typeof gloss === `string`) {
     const appending = text.length > 0;
     if (appending) {
       text += ` `;
     }
-    text +=
-      typeof gloss === `string` ? gloss : glossOrThrow(hanziWord, meaning);
+    text += gloss;
   }
 
   if (showPinyin && meaning?.pinyin != null) {

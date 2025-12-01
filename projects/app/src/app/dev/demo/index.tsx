@@ -57,6 +57,5 @@ export const demos: Record<string, FunctionComponent> = {
   [`Typography`]: lazyDemo(() => import(`../../../client/ui/Typography.demo`)),
   [`WikiHanziGraphemeDecomposition`]: lazyDemo(() => import(`../../../client/ui/WikiHanziGraphemeDecomposition.demo`)),
   [`WikiHanziModal`]: lazyDemo(() => import(`../../../client/ui/WikiHanziModal.demo`)),
-  [`WikiHanziWordModal`]: lazyDemo(() => import(`../../../client/ui/WikiHanziWordModal.demo`)),
 // </pyly-glob-template>
 };

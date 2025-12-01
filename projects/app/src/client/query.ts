@@ -1,23 +1,15 @@
-import { loadBillOfMaterials } from "@/data/bom";
 import type {
   HanziText,
   HanziWord,
   PinyinSoundId,
   SrsStateType,
 } from "@/data/model";
-import { hanziWordSkillKinds } from "@/data/model";
 import { loadPylyPinyinChart } from "@/data/pinyin";
-import type {
-  Rizzle,
-  Skill,
-  SkillRating,
-  SkillState,
-} from "@/data/rizzleSchema";
+import type { Rizzle, Skill, SkillRating } from "@/data/rizzleSchema";
 import { currentSchema } from "@/data/rizzleSchema";
 import type { RankedHanziWord } from "@/data/skills";
 import {
   getHanziWordRank,
-  hanziWordSkill,
   hanziWordToGlossTyped,
   hanziWordToPinyinTyped,
   rankRules,
@@ -27,11 +19,7 @@ import {
   allHsk1HanziWords,
   allHsk2HanziWords,
   getIsStructuralHanzi,
-  hanziFromHanziWord,
-  loadPinyinSoundNameSuggestions,
   lookupHanzi,
-  lookupHanziWikiEntry,
-  lookupHanziWord,
 } from "@/dictionary/dictionary";
 import { devToolsSlowQuerySleepIfEnabled } from "@/util/devtools";
 import type { Rating } from "@/util/fsrs";
@@ -279,150 +267,6 @@ export const skillLearningGraphQuery = queryOptions({
   structuralSharing: false,
 });
 
-export const hanziWordSkillStatesQuery = (r: Rizzle, hanziWord: HanziWord) =>
-  withWatchPrefixes(
-    queryOptions({
-      queryKey: [`hanziWordSkillStates`, hanziWord],
-      queryFn: async () => {
-        await devToolsSlowQuerySleepIfEnabled();
-
-        const skills = hanziWordSkillKinds.map((skillType) =>
-          hanziWordSkill(skillType, hanziWord),
-        );
-
-        const skillStates = await r.replicache.query(async (tx) => {
-          const skillStates: [Skill, SkillState | null | undefined][] = [];
-          for (const skill of skills) {
-            const skillState = await r.query.skillState.get(tx, { skill });
-            skillStates.push([skill, skillState]);
-          }
-          return skillStates;
-        });
-
-        return skillStates;
-      },
-      networkMode: `offlineFirst`,
-      structuralSharing: false,
-    }),
-    [
-      // TODO: narrow to the specific hanzi e.g. `he:好:`, but it would have to
-      // be one for each skill type, so maybe it's not worth it.
-      currentSchema.skillState.keyPrefix,
-    ],
-  );
-
-export const hanziWordSkillRatingsQuery = (r: Rizzle, hanziWord: HanziWord) =>
-  withWatchPrefixes(
-    queryOptions({
-      queryKey: [`hanziWordSkillRatings`, hanziWord],
-      queryFn: async () => {
-        await devToolsSlowQuerySleepIfEnabled();
-
-        const skills = hanziWordSkillKinds.map((skillType) =>
-          hanziWordSkill(skillType, hanziWord),
-        );
-
-        const skillToRatings = new Map<
-          Skill,
-          [/* skillRating key */ string, SkillRating][]
-        >();
-        for (const skill of skills) {
-          const ratings = await r.queryPaged.skillRating
-            .bySkill(skill)
-            .toArray();
-          skillToRatings.set(skill, ratings);
-        }
-
-        return skillToRatings;
-      },
-      networkMode: `offlineFirst`,
-      structuralSharing: false,
-    }),
-    [currentSchema.skillRating.keyPrefix],
-  );
-
-export const recentSkillRatingsQuery = (r: Rizzle) =>
-  queryOptions({
-    queryKey: [`recentSkillRatings`],
-    queryFn: async () => {
-      await devToolsSlowQuerySleepIfEnabled();
-      const res = await r.queryPaged.skillRating.byCreatedAt().toArray();
-      const recent = res.slice(-100);
-      recent.reverse();
-      return recent;
-    },
-    networkMode: `offlineFirst`,
-    structuralSharing: false,
-  });
-
-export const historyPageQuery = (r: Rizzle) =>
-  queryOptions({
-    queryKey: [`historyPageQuery` satisfies NameOf<typeof historyPageQuery>],
-    queryFn: async () => {
-      await devToolsSlowQuerySleepIfEnabled();
-      const res = await r.queryPaged.skillRating.byCreatedAt().toArray();
-      const recent = res.slice(-100);
-      recent.reverse();
-
-      // Group skill ratings into sessions (5 minute gaps create new sessions)
-      const sessionTimeoutMs = 5 * 60 * 1000;
-      const sessions: SkillRating[][] = [];
-      let currentSession: SkillRating[] = [];
-
-      for (const [, rating] of recent) {
-        if (currentSession.length === 0) {
-          currentSession.push(rating);
-        } else {
-          const lastRating = nonNullable(currentSession.at(-1));
-          const timeDiffMs =
-            lastRating.createdAt.getTime() - rating.createdAt.getTime();
-
-          if (timeDiffMs > sessionTimeoutMs) {
-            sessions.push(currentSession);
-            currentSession = [rating];
-          } else {
-            currentSession.push(rating);
-          }
-        }
-      }
-
-      if (currentSession.length > 0) {
-        sessions.push(currentSession);
-      }
-
-      return sessions.map((session) => ({
-        endTime: nonNullable(session[0]).createdAt,
-        startTime: nonNullable(session.at(-1)).createdAt,
-        groups: groupRatingsBySkill(session),
-      }));
-    },
-    networkMode: `offlineFirst`,
-    structuralSharing: false,
-  });
-
-function groupRatingsBySkill(
-  ratings: SkillRating[],
-): { skill: Skill; ratings: SkillRating[] }[] {
-  const groups: { skill: Skill; ratings: SkillRating[] }[] = [];
-
-  for (const rating of ratings) {
-    const lastGroup = groups.at(-1);
-
-    if (lastGroup && lastGroup.skill === rating.skill) {
-      // Same skill as the previous rating, add to the current group
-      lastGroup.ratings.push(rating);
-    } else {
-      // Different skill or first rating, start a new group
-      groups.push({
-        skill: rating.skill,
-        ratings: [rating],
-      });
-    }
-  }
-
-  return groups;
-}
-
 export const hanziWordsByRankQuery = (r: Rizzle) =>
   withWatchPrefixes(
     queryOptions({
@@ -496,51 +340,6 @@ export const hanziMeaningsQuery = (hanzi: HanziText) =>
     staleTime: Infinity,
   });
 
-export const soundNameSuggestionsQuery = () =>
-  queryOptions({
-    queryKey: [`soundNameSuggestions`],
-    queryFn: async () => {
-      await devToolsSlowQuerySleepIfEnabled();
-      return await loadPinyinSoundNameSuggestions();
-    },
-    networkMode: `offlineFirst`,
-    structuralSharing: false,
-  });
-
-export const hanziWikiEntryQuery = (hanzi: HanziText) =>
-  queryOptions({
-    queryKey: [`hanziWikiEntry`, hanzi],
-    queryFn: async () => {
-      await devToolsSlowQuerySleepIfEnabled();
-      return await lookupHanziWikiEntry(hanzi);
-    },
-    networkMode: `offlineFirst`,
-    structuralSharing: false,
-    staleTime: Infinity,
-  });
-
-export const hanziWordMeaningQuery = (hanziWord: HanziWord) =>
-  queryOptions({
-    queryKey: [`hanziWordMeaning`, hanziWord],
-    queryFn: async () => {
-      await devToolsSlowQuerySleepIfEnabled();
-      return await lookupHanziWord(hanziWord);
-    },
-    networkMode: `offlineFirst`,
-    structuralSharing: false,
-    staleTime: Infinity,
-  });
-
-export const hanziWordOtherMeaningsQuery = (hanziWord: HanziWord) =>
-  queryOptions({
-    queryKey: [`hanziWordOtherMeanings`, hanziWord],
-    queryFn: async () => {
-      await devToolsSlowQuerySleepIfEnabled();
-      const res = await lookupHanzi(hanziFromHanziWord(hanziWord));
-      return res.filter(([otherHanziWord]) => otherHanziWord !== hanziWord);
-    },
-  });
-
 export const fetchArrayBufferQuery = (uri: string | null) =>
   queryOptions({
     queryKey: [`fetchArrayBuffer`, uri],
@@ -554,17 +353,6 @@ export const fetchArrayBufferQuery = (uri: string | null) =>
             );
           },
     staleTime: Infinity,
-  });
-
-export const billOfMaterialsQuery = () =>
-  queryOptions({
-    queryKey: [`billOfMaterials`],
-    queryFn: async () => {
-      await devToolsSlowQuerySleepIfEnabled();
-      return await loadBillOfMaterials().then((x) => [...x.entries()]);
-    },
-    networkMode: `offlineFirst`,
-    structuralSharing: false,
   });
 
 export const fetchAudioBufferQuery = (
