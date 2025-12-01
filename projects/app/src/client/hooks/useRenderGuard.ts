@@ -32,5 +32,8 @@ const noOp = () => {};
  * bugs and makes tracking them down much simpler.
  *
  * Only runs in dev mode.
+ *
+ * NOTE: this won't detect re-renders caused by Suspense because these don't run
+ * effects.
  */
 export const useRenderGuard = __DEV__ ? useRenderGuardImpl : () => noOp;
