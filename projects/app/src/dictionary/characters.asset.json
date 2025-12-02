@@ -1,7 +1,55 @@
 [
   [
+    "㇀",
+    {}
+  ],
+  [
+    "㇂",
+    {}
+  ],
+  [
+    "㇆",
+    {}
+  ],
+  [
+    "㇇",
+    {}
+  ],
+  [
+    "㇉",
+    {}
+  ],
+  [
+    "㇖",
+    {}
+  ],
+  [
+    "㇗",
+    {}
+  ],
+  [
+    "㇚",
+    {}
+  ],
+  [
     "〢",
     {"decomposition":"⿰丨丨"}
+  ],
+  [
+    "コ",
+    {}
+  ],
+  [
+    "ス",
+    {}
+  ],
+  [
+    "ュ",
+    {"isStructural":true}
+  ],
+  [
+    "一",
+    {}
   ],
   [
     "丁",
@@ -25,7 +73,7 @@
   ],
   [
     "丆",
-    {"decomposition":"⿱一丿"}
+    {"decomposition":"⿱一丿","isStructural":true}
   ],
   [
     "万",
@@ -54,6 +102,10 @@
   [
     "卄",
     {"decomposition":"⿻十丨"}
+  ],
+  [
+    "𫝀",
+    {}
   ],
   [
     "不",
@@ -96,6 +148,10 @@
     {"decomposition":"⿱中一"}
   ],
   [
+    "𫠣",
+    {}
+  ],
+  [
     "两",
     {"decomposition":"⿱一⿻从冂"}
   ],
@@ -106,6 +162,10 @@
   [
     "並",
     {"decomposition":"⿱丷亚"}
+  ],
+  [
+    "丨",
+    {"isStructural":true}
   ],
   [
     "丩",
@@ -120,6 +180,10 @@
     {"decomposition":"⿱丷丨"}
   ],
   [
+    "㐄",
+    {}
+  ],
+  [
     "中",
     {"decomposition":"⿻口丨"}
   ],
@@ -128,12 +192,20 @@
     {"decomposition":"⿻三丨"}
   ],
   [
+    "𠁣",
+    {}
+  ],
+  [
+    "丶",
+    {"isStructural":true}
+  ],
+  [
     "⺀",
     {"decomposition":"⿱丶丶"}
   ],
   [
     "丷",
-    {"decomposition":"⿰丶①"}
+    {"componentFormOf":"八","decomposition":"⿰丶①","isStructural":true}
   ],
   [
     "丸",
@@ -156,6 +228,18 @@
     {"decomposition":"⿱兴③"}
   ],
   [
+    "丿",
+    {"isStructural":true}
+  ],
+  [
+    "乀",
+    {}
+  ],
+  [
+    "乁",
+    {}
+  ],
+  [
     "乂",
     {"decomposition":"⿻丿乀"}
   ],
@@ -164,8 +248,28 @@
     {"decomposition":"⿹𠄎丿"}
   ],
   [
+    "㐅",
+    {}
+  ],
+  [
+    "𠂆",
+    {"componentFormOf":"厂"}
+  ],
+  [
+    "𠂇",
+    {"isStructural":true}
+  ],
+  [
     "𠂈",
     {"decomposition":"⿰𠃋丿"}
+  ],
+  [
+    "𠂉",
+    {"isStructural":true}
+  ],
+  [
+    "𠂊",
+    {"isStructural":true}
   ],
   [
     "久",
@@ -216,8 +320,40 @@
     {"decomposition":"⿻㐅⿳丶⿰丶丶丶"}
   ],
   [
+    "乙",
+    {}
+  ],
+  [
+    "⺄",
+    {}
+  ],
+  [
+    "乚",
+    {"isStructural":true}
+  ],
+  [
+    "乛",
+    {"componentFormOf":"乙"}
+  ],
+  [
+    "𠃊",
+    {}
+  ],
+  [
+    "𠃋",
+    {}
+  ],
+  [
+    "𠃌",
+    {"isStructural":true}
+  ],
+  [
     "九",
-    {"decomposition":"⿻丿乙"}
+    {"decomposition":"⿻丿⺄"}
+  ],
+  [
+    "龴",
+    {}
   ],
   [
     "乞",
@@ -232,8 +368,20 @@
     {"decomposition":"⿹𠃌冫"}
   ],
   [
+    "𠃓",
+    {}
+  ],
+  [
     "书",
     {"decomposition":"⿻③丨"}
+  ],
+  [
+    "𠃛",
+    {}
+  ],
+  [
+    "𠃜",
+    {}
   ],
   [
     "买",
@@ -244,8 +392,20 @@
     {"decomposition":"⿰舌乚"}
   ],
   [
+    "亅",
+    {"isStructural":true}
+  ],
+  [
+    "𠄌",
+    {}
+  ],
+  [
     "了",
     {"decomposition":"⿱乛亅"}
+  ],
+  [
+    "𠄎",
+    {}
   ],
   [
     "𠄐",
@@ -358,6 +518,14 @@
   [
     "亲",
     {"decomposition":"⿱立朩"}
+  ],
+  [
+    "人",
+    {}
+  ],
+  [
+    "亻",
+    {"componentFormOf":"人"}
   ],
   [
     "亼",
@@ -640,8 +808,16 @@
     {"decomposition":"⿱丷兄"}
   ],
   [
+    "入",
+    {}
+  ],
+  [
     "全",
     {"decomposition":"⿱人王"}
+  ],
+  [
+    "八",
+    {}
   ],
   [
     "公",
@@ -688,6 +864,10 @@
     {"decomposition":"⿰丨𠃌"}
   ],
   [
+    "⺆",
+    {}
+  ],
+  [
     "𠔼",
     {"decomposition":"⿵冂一"}
   ],
@@ -716,6 +896,10 @@
     {"decomposition":"⿵冂口"}
   ],
   [
+    "𠕁",
+    {}
+  ],
+  [
     "再",
     {"decomposition":"⿱一冉"}
   ],
@@ -734,6 +918,10 @@
   [
     "最",
     {"decomposition":"⿱日取"}
+  ],
+  [
+    "冖",
+    {}
   ],
   [
     "㓁",
@@ -788,6 +976,10 @@
     {"decomposition":"⿵几丶"}
   ],
   [
+    "凵",
+    {}
+  ],
+  [
     "凶",
     {"decomposition":"⿶凵㐅"}
   ],
@@ -808,8 +1000,12 @@
     {"decomposition":"⿹𠃌丿"}
   ],
   [
+    "⺈",
+    {"componentFormOf":"𠂊"}
+  ],
+  [
     "刂",
-    {"decomposition":"⿰丨亅"}
+    {"componentFormOf":"刀","decomposition":"⿰丨亅"}
   ],
   [
     "分",
@@ -964,6 +1160,10 @@
     {"decomposition":"⿱一①"}
   ],
   [
+    "匸",
+    {}
+  ],
+  [
     "区",
     {"decomposition":"⿷匚㐅"}
   ],
@@ -1056,6 +1256,14 @@
     {"decomposition":"⿱卩一"}
   ],
   [
+    "㔾",
+    {"componentFormOf":"卩"}
+  ],
+  [
+    "㔿",
+    {}
+  ],
+  [
     "卬",
     {"decomposition":"⿰②卩"}
   ],
@@ -1070,6 +1278,14 @@
   [
     "却",
     {"decomposition":"⿰去卩"}
+  ],
+  [
+    "厂",
+    {}
+  ],
+  [
+    "⺁",
+    {"canonicalForm":"厂"}
   ],
   [
     "厃",
@@ -1092,6 +1308,10 @@
     {"decomposition":"⿰厂泉"}
   ],
   [
+    "厶",
+    {}
+  ],
+  [
     "𠫓",
     {"decomposition":"⿻一厶"}
   ],
@@ -1106,6 +1326,10 @@
   [
     "参",
     {"decomposition":"⿳厶大彡"}
+  ],
+  [
+    "又",
+    {}
   ],
   [
     "及",
@@ -1465,7 +1689,7 @@
   ],
   [
     "龱",
-    {"decomposition":"⿴囗㐅"}
+    {"decomposition":"⿴囗㐅","isStructural":true}
   ],
   [
     "𠁤",
@@ -1514,6 +1738,10 @@
   [
     "圡",
     {"decomposition":"⿷土丶"}
+  ],
+  [
+    "龶",
+    {}
   ],
   [
     "圣",
@@ -1612,6 +1840,10 @@
     {"decomposition":"⿱夂田"}
   ],
   [
+    "夊",
+    {}
+  ],
+  [
     "复",
     {"decomposition":"⿳𠂉日夂"}
   ],
@@ -1694,6 +1926,10 @@
   [
     "套",
     {"decomposition":"⿱大镸"}
+  ],
+  [
+    "女",
+    {}
   ],
   [
     "奴",
@@ -1864,6 +2100,10 @@
     {"decomposition":"⿱宀祭"}
   ],
   [
+    "寸",
+    {}
+  ],
+  [
     "对",
     {"decomposition":"⿰又寸"}
   ],
@@ -1898,6 +2138,18 @@
   [
     "小",
     {"decomposition":"⿻亅八"}
+  ],
+  [
+    "⺌",
+    {"componentFormOf":"小"}
+  ],
+  [
+    "⺍",
+    {"componentFormOf":"小"}
+  ],
+  [
+    "𭕄",
+    {"isStructural":true}
   ],
   [
     "少",
@@ -1988,6 +2240,10 @@
     {"decomposition":"⿲丿丨丨"}
   ],
   [
+    "𡿨",
+    {}
+  ],
+  [
     "𫶧",
     {"decomposition":"⿴儿丨"}
   ],
@@ -2018,6 +2274,10 @@
   [
     "己",
     {"decomposition":"⿱②乚"}
+  ],
+  [
+    "已",
+    {}
   ],
   [
     "巳",
@@ -2082,6 +2342,10 @@
   [
     "平",
     {"decomposition":"⿻干丷"}
+  ],
+  [
+    "𢆉",
+    {}
   ],
   [
     "年",
@@ -2152,6 +2416,10 @@
     {"decomposition":"⿸广隶"}
   ],
   [
+    "廴",
+    {}
+  ],
+  [
     "廷",
     {"decomposition":"⿺廴壬"}
   ],
@@ -2186,6 +2454,10 @@
   [
     "式",
     {"decomposition":"⿹弋工"}
+  ],
+  [
+    "弓",
+    {}
   ],
   [
     "弔",
@@ -2268,8 +2540,12 @@
     {"decomposition":"⿰彳㝵"}
   ],
   [
+    "心",
+    {}
+  ],
+  [
     "忄",
-    {"decomposition":"⿻八丨"}
+    {"componentFormOf":"心","decomposition":"⿻八丨","isStructural":true}
   ],
   [
     "必",
@@ -2420,6 +2696,10 @@
     {"decomposition":"⿱丶尸"}
   ],
   [
+    "戸",
+    {}
+  ],
+  [
     "房",
     {"decomposition":"⿸户方"}
   ],
@@ -2432,12 +2712,20 @@
     {"decomposition":"⿸户𠕁"}
   ],
   [
+    "手",
+    {}
+  ],
+  [
     "扌",
-    {"decomposition":"⿻二亅"}
+    {"componentFormOf":"手","decomposition":"⿻二亅"}
   ],
   [
     "才",
     {"decomposition":"⿻丆亅"}
+  ],
+  [
+    "龵",
+    {"componentFormOf":"手"}
   ],
   [
     "打",
@@ -2557,7 +2845,7 @@
   ],
   [
     "攵",
-    {"decomposition":"⿱②乂"}
+    {"componentFormOf":"攴","decomposition":"⿱②乂"}
   ],
   [
     "收",
@@ -2658,6 +2946,10 @@
   [
     "无",
     {"decomposition":"⿱一尢"}
+  ],
+  [
+    "旡",
+    {}
   ],
   [
     "既",
@@ -2789,7 +3081,7 @@
   ],
   [
     "月",
-    {"decomposition":"⿵冂二"}
+    {"componentFormOf":"肉","decomposition":"⿵冂二"}
   ],
   [
     "有",
@@ -2818,6 +3110,10 @@
   [
     "木",
     {"decomposition":"⿻十八"}
+  ],
+  [
+    "朩",
+    {}
   ],
   [
     "未",
@@ -2976,6 +3272,14 @@
     {"decomposition":"⿻上丨"}
   ],
   [
+    "龰",
+    {"componentFormOf":"止"}
+  ],
+  [
+    "𣥂",
+    {}
+  ],
+  [
     "正",
     {"decomposition":"⿱一止"}
   ],
@@ -3016,8 +3320,16 @@
     {"decomposition":"⿰⑤殳"}
   ],
   [
+    "毋",
+    {}
+  ],
+  [
     "毌",
     {"decomposition":"⿻②十"}
+  ],
+  [
+    "母",
+    {}
   ],
   [
     "每",
@@ -3030,6 +3342,10 @@
   [
     "毛",
     {"decomposition":"⿻乇一"}
+  ],
+  [
+    "氏",
+    {}
   ],
   [
     "氐",
@@ -3048,8 +3364,12 @@
     {"decomposition":"⿲㇇亅⿺乀丿"}
   ],
   [
+    "氵",
+    {"componentFormOf":"水"}
+  ],
+  [
     "氺",
-    {"decomposition":"⿻亅④"}
+    {"componentFormOf":"水","decomposition":"⿻亅④"}
   ],
   [
     "永",
@@ -3192,6 +3512,10 @@
     {"decomposition":"⿱八人"}
   ],
   [
+    "灬",
+    {"componentFormOf":"火"}
+  ],
+  [
     "灯",
     {"decomposition":"⿰火丁"}
   ],
@@ -3241,7 +3565,7 @@
   ],
   [
     "爫",
-    {"decomposition":"⿱丿𭕄"}
+    {"componentFormOf":"爪","decomposition":"⿱丿𭕄"}
   ],
   [
     "爬",
@@ -3273,15 +3597,31 @@
   ],
   [
     "丬",
-    {"decomposition":"⿰冫丨"}
+    {"componentFormOf":"爿","decomposition":"⿰冫丨"}
   ],
   [
     "爿",
     {"decomposition":"⿹丩厂"}
   ],
   [
+    "片",
+    {}
+  ],
+  [
     "牌",
     {"decomposition":"⿰片卑"}
+  ],
+  [
+    "牙",
+    {}
+  ],
+  [
+    "牛",
+    {}
+  ],
+  [
+    "⺧",
+    {}
   ],
   [
     "𭷔",
@@ -3298,6 +3638,10 @@
   [
     "犬",
     {"decomposition":"⿻大丶"}
+  ],
+  [
+    "犭",
+    {"componentFormOf":"犬"}
   ],
   [
     "状",
@@ -3358,6 +3702,10 @@
   [
     "瓜",
     {"decomposition":"⿵③厶"}
+  ],
+  [
+    "瓦",
+    {}
   ],
   [
     "瓶",
@@ -3581,7 +3929,7 @@
   ],
   [
     "礻",
-    {"decomposition":"⿱②卜"}
+    {"componentFormOf":"示","decomposition":"⿱②卜"}
   ],
   [
     "礼",
@@ -3688,6 +4036,10 @@
     {"decomposition":"⿰亇亇"}
   ],
   [
+    "𥫗",
+    {"componentFormOf":"竹"}
+  ],
+  [
     "笑",
     {"decomposition":"⿱𥫗夭"}
   ],
@@ -3760,8 +4112,12 @@
     {"decomposition":"⿱幺小"}
   ],
   [
+    "糹",
+    {"componentFormOf":"糸","decomposition":"⿱幺③"}
+  ],
+  [
     "纟",
-    {"decomposition":"⿱②一"}
+    {"componentFormOf":"糸","decomposition":"⿱②一"}
   ],
   [
     "系",
@@ -3884,8 +4240,12 @@
     {"decomposition":"⿻兰丨"}
   ],
   [
+    "⺶",
+    {"componentFormOf":"羊"}
+  ],
+  [
     "𦍌",
-    {"decomposition":"⿱䒑土"}
+    {"componentFormOf":"羊","decomposition":"⿱䒑土"}
   ],
   [
     "美",
@@ -3905,7 +4265,7 @@
   ],
   [
     "耂",
-    {"decomposition":"⿻土丿"}
+    {"componentFormOf":"老","decomposition":"⿻土丿"}
   ],
   [
     "考",
@@ -3948,12 +4308,16 @@
     {"decomposition":"⿻彐丨"}
   ],
   [
+    "⺺",
+    {}
+  ],
+  [
     "肉",
     {"decomposition":"⿵冂仌"}
   ],
   [
     "⺼",
-    {"decomposition":"⿵⺆冫"}
+    {"componentFormOf":"肉","decomposition":"⿵⺆冫"}
   ],
   [
     "䏍",
@@ -3986,6 +4350,10 @@
   [
     "胡",
     {"decomposition":"⿰古月"}
+  ],
+  [
+    "𦚏",
+    {}
   ],
   [
     "能",
@@ -4052,6 +4420,10 @@
     {"decomposition":"⿱⿳𠂉卌一舛"}
   ],
   [
+    "舟",
+    {}
+  ],
+  [
     "般",
     {"decomposition":"⿰舟殳"}
   ],
@@ -4077,7 +4449,7 @@
   ],
   [
     "艹",
-    {"decomposition":"⿻十丨"}
+    {"componentFormOf":"艸","decomposition":"⿻十丨"}
   ],
   [
     "䒑",
@@ -4169,7 +4541,11 @@
   ],
   [
     "虍",
-    {"decomposition":"⿱⺊⿸厂七"}
+    {"componentFormOf":"虎","decomposition":"⿱⺊⿸厂七"}
+  ],
+  [
+    "虎",
+    {"decomposition":"⿸虍几"}
   ],
   [
     "虫",
@@ -4204,6 +4580,14 @@
     {"decomposition":"⿱亠𧘇"}
   ],
   [
+    "衤",
+    {"componentFormOf":"衣"}
+  ],
+  [
+    "𧘇",
+    {}
+  ],
+  [
     "补",
     {"decomposition":"⿰衤卜"}
   ],
@@ -4234,6 +4618,10 @@
   [
     "裤",
     {"decomposition":"⿰衤库"}
+  ],
+  [
+    "襾",
+    {}
   ],
   [
     "西",
@@ -4282,6 +4670,14 @@
   [
     "言",
     {"decomposition":"⿱亠⿱二口"}
+  ],
+  [
+    "訁",
+    {"componentFormOf":"言"}
+  ],
+  [
+    "讠",
+    {"componentFormOf":"言"}
   ],
   [
     "计",
@@ -4424,6 +4820,10 @@
     {"decomposition":"⿱一𧰨"}
   ],
   [
+    "𧰨",
+    {}
+  ],
+  [
     "象",
     {"decomposition":"⿳⺈口豕"}
   ],
@@ -4501,7 +4901,7 @@
   ],
   [
     "𧾷",
-    {"decomposition":"⿱口止"}
+    {"componentFormOf":"足","decomposition":"⿱口止"}
   ],
   [
     "跑",
@@ -4522,6 +4922,10 @@
   [
     "身",
     {"decomposition":"⿻𨈑丿"}
+  ],
+  [
+    "𨈑",
+    {}
   ],
   [
     "车",
@@ -4558,6 +4962,10 @@
   [
     "辵",
     {"decomposition":"⿱彡龰"}
+  ],
+  [
+    "辶",
+    {"componentFormOf":"辵"}
   ],
   [
     "边",
@@ -4712,6 +5120,14 @@
     {"decomposition":"⿱人⿻王丷"}
   ],
   [
+    "釒",
+    {"componentFormOf":"金"}
+  ],
+  [
+    "钅",
+    {"componentFormOf":"金"}
+  ],
+  [
     "钟",
     {"decomposition":"⿰钅中"}
   ],
@@ -4737,7 +5153,7 @@
   ],
   [
     "镸",
-    {"decomposition":"⿱④𠫔"}
+    {"componentFormOf":"長","decomposition":"⿱④𠫔"}
   ],
   [
     "长",
@@ -4856,6 +5272,10 @@
     {"decomposition":"⿰青争"}
   ],
   [
+    "非",
+    {}
+  ],
+  [
     "靠",
     {"decomposition":"⿱告非"}
   ],
@@ -4938,6 +5358,10 @@
   [
     "风",
     {"decomposition":"⿵几㐅"}
+  ],
+  [
+    "飞",
+    {}
   ],
   [
     "食",
@@ -5132,7 +5556,15 @@
     {"decomposition":"⿻尤丿"}
   ],
   [
+    "龜",
+    {}
+  ],
+  [
     "龠",
     {"decomposition":"⿳亼𠱠𠕁"}
+  ],
+  [
+    "",
+    {}
   ]
 ]

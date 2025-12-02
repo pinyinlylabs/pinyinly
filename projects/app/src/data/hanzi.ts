@@ -1,5 +1,5 @@
 import type { HanziGrapheme, HanziText } from "@/data/model";
-import { hanziTextSchema } from "@/data/model";
+import { hanziGraphemeSchema } from "@/data/model";
 import { parseIndexRanges } from "@/util/indexRanges";
 import { graphemeCount, splitGraphemes } from "@/util/unicode";
 import { invariant } from "@pinyinly/lib/invariant";
@@ -901,11 +901,24 @@ export const wikiGraphemeDataSchema = z.object({
    * The property is used on traditional graphemes because it's expected there
    * are fewer of those in the dataset since this app focuses on Mandarin.
    */
-  traditionalFormOf: hanziTextSchema.optional(),
+  traditionalFormOf: hanziGraphemeSchema.optional(),
   /**
    * If this grapheme is a component form of another grapheme, that hanzi.
    */
-  componentFormOf: hanziTextSchema.optional(),
+  componentFormOf: hanziGraphemeSchema.optional(),
+  /**
+   * If this is variant of another character (for the purposes of learning),
+   * point to the canonical form.
+   *
+   * e.g. ⺁ -> 厂
+   */
+  canonicalForm: hanziGraphemeSchema.optional(),
+  isStructural: z
+    .literal(true)
+    .optional()
+    .describe(
+      `is used as a component in regular Hanzi characters (e.g. parts of 兰, 兴, etc.), but never used independently as a full word or character in modern Mandarin.`,
+    ),
   /**
    * Alternative IDS decompositions
    */

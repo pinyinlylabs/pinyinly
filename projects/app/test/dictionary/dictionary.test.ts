@@ -10,6 +10,7 @@ import {
   allRadicalHanziWords,
   allRadicalsByStrokes,
   decomposeHanzi,
+  getIsComponentFormHanzi,
   getIsStructuralHanzi,
   hanziFromHanziOrHanziWord,
   hanziFromHanziWord,
@@ -20,7 +21,6 @@ import {
   loadPinyinSoundNameSuggestions,
   loadPinyinSoundThemeDetails,
   loadPinyinWords,
-  loadWiki,
   lookupHanzi,
   lookupHanziWord,
   meaningKeyFromHanziWord,
@@ -57,7 +57,6 @@ test(`json data can be loaded and passes the schema validation`, async () => {
   await loadPinyinSoundThemeDetails();
   await loadPinyinWords();
   await loadDictionary();
-  await loadWiki();
 });
 
 const wordLists = [
@@ -151,44 +150,20 @@ test(`hanzi word meaning gloss lint`, async () => {
   expect(violations).toEqual(new Set());
 });
 
-test(`hanzi meaning componentFormOf lint`, async () => {
-  const dict = await loadDictionary();
+test(`hanzi meaning canonicalForm lint`, async () => {
+  const characters = await loadCharacters();
 
-  const meaningExceptions = new Set([[`示:show`, `礻:ritual`]]);
+  for (const [hanzi, data] of characters) {
+    if (data.canonicalForm != null) {
+      await expect(
+        lookupHanzi(hanzi),
+        `${hanzi} is not the canonical form and shouldn't have a dictionary entry`,
+      ).resolves.toEqual([]);
 
-  for (const [hanziWord, { gloss, componentFormOf }] of dict) {
-    if (componentFormOf == null) {
-      continue;
-    }
-
-    const meaningKey = meaningKeyFromHanziWord(hanziWord);
-    const baseHanziMatches = await lookupHanzi(componentFormOf);
-
-    if (baseHanziMatches.length !== 1) {
-      throw new Error(
-        `hanzi word ${hanziWord} has componentFormOf ${componentFormOf} with ${baseHanziMatches.length} matches (rather than exactly 1)`,
-      );
-    }
-
-    meaningLint: for (const [baseHanziWord, baseMeaning] of baseHanziMatches) {
-      // exceptions
-      for (const exception of meaningExceptions) {
-        if (baseHanziWord === exception[0] && hanziWord === exception[1]) {
-          continue meaningLint;
-        }
-      }
-
-      if (meaningKeyFromHanziWord(baseHanziWord) !== meaningKey) {
-        throw new Error(
-          `hanzi word ${hanziWord} has different meaning key to ${baseHanziWord}`,
-        );
-      }
-
-      if (baseMeaning.gloss[0] !== gloss[0]) {
-        throw new Error(
-          `hanzi word ${hanziWord} has different primary gloss to ${baseHanziWord}`,
-        );
-      }
+      await expect(
+        lookupHanzi(data.canonicalForm),
+        `${hanzi} canonical form exists`,
+      ).resolves.not.toEqual([]);
     }
   }
 });
@@ -214,45 +189,23 @@ test(`hanzi word meaning pinyin lint`, async () => {
   }
 });
 
-test(`hanzi word without visual variants omit the property rather than use an empty array`, async () => {
-  const dict = await loadDictionary();
-
-  for (const [hanziWord, { visualVariants }] of dict) {
-    expect.soft(visualVariants?.length, hanziWord).not.toBe(0);
-  }
-});
-
-test(`hanzi word visual variants shouldn't include the hanzi`, async () => {
-  const dict = await loadDictionary();
-
-  for (const [hanziWord, { visualVariants }] of dict) {
-    if (visualVariants != null) {
-      expect
-        .soft(visualVariants, hanziWord)
-        .not.toContain(hanziFromHanziWord(hanziWord));
-    }
-  }
-});
-
 test(`hanzi words are unique on (meaning key, primary pinyin)`, async () => {
   const exceptions = new Set(
-    [
-      [`他们:they`, `它们:they`, `她们:they`],
-      [`艹:grass`, `草:grass`],
-    ].map((x) => new Set(x)),
+    [[`他们:they`, `它们:they`, `她们:they`]].map((x) => new Set(x)),
   );
 
   const dict = await loadDictionary();
+  const isComponentFormHanzi = await getIsComponentFormHanzi();
 
   const byMeaningKeyAndPinyin = new Map<string, Set<string>>();
-  for (const [hanziWord, { pinyin, componentFormOf }] of dict) {
+  for (const [hanziWord, { pinyin }] of dict) {
     const meaningKey = meaningKeyFromHanziWord(hanziWord);
     // special case allow "radical" to have overlaps
     if (meaningKey === `radical`) {
       continue;
     }
     // allow component-form of hanzi to have overlaps
-    if (componentFormOf != null) {
+    if (isComponentFormHanzi(hanziFromHanziWord(hanziWord))) {
       continue;
     }
     const primaryPinyin = pinyin?.[0];
@@ -340,21 +293,6 @@ test(`all word lists only reference valid hanzi words`, async () => {
         throw new Error(
           `missing hanzi word lookup for ${hanziWord} in word list`,
         );
-      }
-    }
-  }
-});
-
-test(`all wiki component hanzi words reference valid hanzi words`, async () => {
-  const wiki = await loadWiki();
-  for (const [hanzi, wikiEntry] of wiki) {
-    if (wikiEntry.components != null) {
-      for (const { hanziWord } of wikiEntry.components) {
-        if (hanziWord != null && (await lookupHanziWord(hanziWord)) === null) {
-          throw new Error(
-            `missing hanzi word lookup for ${hanziWord} in wiki entry ${hanzi}`,
-          );
-        }
       }
     }
   }
@@ -504,10 +442,11 @@ test(`dictionary contains entries for decomposition`, async () => {
 
 test(`dictionary structural components list`, async () => {
   const dictionary = await loadDictionary();
+  const isStructuralHanzi = await getIsStructuralHanzi();
 
   const structural = dictionary
     .entries()
-    .filter(([, meaning]) => meaning.isStructural === true)
+    .filter(([hanziWord]) => isStructuralHanzi(hanziFromHanziWord(hanziWord)))
     .map(([hanziWord]) => hanziWord)
     .toArray();
 

@@ -11,7 +11,11 @@ import type {
   PinyinPronunciation,
   PinyinSyllable,
 } from "@/data/model";
-import { PartOfSpeech } from "@/data/model";
+import {
+  hanziGraphemeSchema,
+  hanziWordSchema,
+  PartOfSpeech,
+} from "@/data/model";
 import { rPinyinPronunciation } from "@/data/rizzleSchema";
 import {
   deepReadonly,
@@ -25,10 +29,6 @@ import { invariant } from "@pinyinly/lib/invariant";
 import type { DeepReadonly } from "ts-essentials";
 import { z } from "zod/v4";
 
-export const pylyMarkSchema = z.string();
-export const hanziWordSchema = z.string().pipe(z.custom<HanziWord>());
-export const hanziTextSchema = z.string().pipe(z.custom<HanziText>());
-export const hanziGraphemeSchema = z.string().pipe(z.custom<HanziGrapheme>());
 export const pinyinPronunciationSchema = rPinyinPronunciation()
   .getUnmarshal()
   .describe(`space separated pinyin for each word`);
@@ -97,9 +97,21 @@ export const loadPinyinSoundNameSuggestions = memoize0(
 
 export const charactersSchema = z.array(
   z.tuple([
-    z.string(),
+    hanziGraphemeSchema,
     z.object({
-      decomposition: z.string(),
+      decomposition: z.string().optional(),
+      componentFormOf: hanziGraphemeSchema
+        .describe(
+          `the primary form of this hanzi (only relevant for component-form hanzi)`,
+        )
+        .optional(),
+      isStructural: z
+        .literal(true)
+        .optional()
+        .describe(
+          `is used as a component in regular Hanzi characters (e.g. parts of 兰, 兴, etc.), but never used independently as a full word or character in modern Mandarin.`,
+        ),
+      canonicalForm: hanziGraphemeSchema.optional(),
     }),
   ]),
 );
@@ -158,36 +170,19 @@ export const partOfSpeechSchema = z.enum([
   `radical`,
 ]);
 
-export const hanziWordMeaningSchema = z.object({
-  gloss: z.array(z.string()),
-  pinyin: z
-    .array(pinyinPronunciationSchema)
-    .describe(
-      `all valid pinyin variations for this meaning (might be omitted for radicals without pronunciation)`,
-    )
-    .nullable()
-    .optional(),
-  partOfSpeech: partOfSpeechSchema.optional(),
-  isStructural: z
-    .literal(true)
-    .optional()
-    .describe(
-      `is used as a component in regular Hanzi characters (e.g. parts of 兰, 兴, etc.), but never used independently as a full word or character in modern Mandarin.`,
-    ),
-  componentFormOf: hanziGraphemeSchema
-    .describe(
-      `the primary form of this hanzi (only relevant for component-form hanzi)`,
-    )
-    .nullable()
-    .optional(),
-  visualVariants: z
-    .array(hanziTextSchema)
-    .describe(
-      `Hanzi with the same meaning but visually different. Only included in rare cases (e.g. radicals with multiple visual forms).`,
-    )
-    .nullable()
-    .optional(),
-});
+export const hanziWordMeaningSchema = z
+  .object({
+    gloss: z.array(z.string()),
+    pinyin: z
+      .array(pinyinPronunciationSchema)
+      .describe(
+        `all valid pinyin variations for this meaning (might be omitted for radicals without pronunciation)`,
+      )
+      .nullable()
+      .optional(),
+    partOfSpeech: partOfSpeechSchema.optional(),
+  })
+  .strict();
 
 export type HanziWordMeaning = z.infer<typeof hanziWordMeaningSchema>;
 export type HanziWordWithMeaning = [HanziWord, HanziWordMeaning];
@@ -203,60 +198,6 @@ export const loadDictionary = memoize0(async () =>
     .transform(deepReadonly)
     .parse(await import(`./dictionary.asset.json`).then((x) => x.default)),
 );
-
-export const wikiEntrySchema = z.object({
-  componentsIdc: z
-    .string()
-    .describe(`Ideographic Description Character for the components, e.g. ⿰`)
-    .optional(),
-  components: z
-    .array(
-      z.object({
-        hanziWord: hanziWordSchema
-          .describe(`Optional link to a specific hanzi word`)
-          .optional(),
-        title: z.string().optional(),
-        description: z.string().optional(),
-      }),
-    )
-    .optional(),
-  interpretation: z
-    .string()
-    .describe(`Interpretation of the character`)
-    .optional(),
-  mnemonics: z
-    .array(
-      z.object({
-        hanziWord: hanziWordSchema,
-        mnemonic: pylyMarkSchema,
-      }),
-    )
-    .optional(),
-  relatedMeaning: z
-    .array(
-      z.object({
-        gloss: z.string(),
-        hanziWords: z.array(hanziWordSchema),
-      }),
-    )
-    .optional()
-    .nullable(),
-  visuallySimilar: z.array(hanziTextSchema).optional().nullable(),
-});
-
-export type WikiEntry = z.infer<typeof wikiEntrySchema>;
-
-export const wikiSchema = z
-  .array(z.tuple([hanziTextSchema, wikiEntrySchema]))
-  .transform((x) => new Map(x));
-
-export type Wiki = z.infer<typeof wikiSchema>;
-
-export const loadWiki = memoize0(async function loadWiki() {
-  return wikiSchema
-    .transform(deepReadonly)
-    .parse(await import(`./wiki.asset.json`).then((x) => x.default));
-});
 
 export const hanziWordMigrationsSchema = z
   .array(
@@ -341,11 +282,6 @@ export const lookupHanziWord = async (
   hanziWord: HanziWord,
 ): Promise<DeepReadonly<HanziWordMeaning> | null> =>
   await loadDictionary().then((x) => x.get(hanziWord) ?? null);
-
-export const lookupHanziWikiEntry = async (
-  hanzi: HanziText,
-): Promise<DeepReadonly<WikiEntry> | null> =>
-  await loadWiki().then((x) => x.get(hanzi) ?? null);
 
 export const lookupRadicalsByStrokes = async (strokes: number) =>
   await loadRadicalStrokes().then((x) => x.get(strokes) ?? null);
@@ -571,14 +507,6 @@ export function upsertHanziWordMeaning(
     patch.pinyin = undefined;
   }
 
-  if (patch.visualVariants?.length === 0) {
-    patch.visualVariants = undefined;
-  }
-
-  if (patch.componentFormOf?.trim().length === 0) {
-    patch.componentFormOf = undefined;
-  }
-
   const meaning = dict.get(hanziWord);
   if (meaning == null) {
     dict.set(hanziWord, patch as HanziWordMeaning);
@@ -609,13 +537,13 @@ export function unparseDictionary(
 }
 
 export const getIsStructuralHanzi = memoize0(async () => {
-  const dictionary = await loadDictionary();
+  const characters = await loadCharacters();
 
-  const structuralHanzi = new Set([`丆`, `ュ`]);
+  const structuralHanzi = new Set<HanziText>();
 
-  for (const [hanziWord, meaning] of dictionary.entries()) {
-    if (meaning.isStructural) {
-      structuralHanzi.add(hanziFromHanziWord(hanziWord));
+  for (const [character, data] of characters.entries()) {
+    if (data.isStructural != null) {
+      structuralHanzi.add(character);
     }
   }
 
@@ -625,55 +553,12 @@ export const getIsStructuralHanzi = memoize0(async () => {
 });
 
 export const getIsComponentFormHanzi = memoize0(async () => {
-  const dictionary = await loadDictionary();
+  const characters = await loadCharacters();
+  const componentFormHanzi = new Set<HanziText>();
 
-  const componentFormHanzi = new Set([
-    `龱`,
-    `镸`,
-    `觜`,
-    `肀`,
-    `罙`,
-    `禹`,
-    `畀`,
-    `甬`,
-    `爰`,
-    `戉`,
-    `厃`,
-    `叚`,
-    `冋`,
-    `冃`,
-    `円`,
-    `㡀`,
-    `㝵`,
-    `㐬`,
-    `㐫`,
-    `㐄`,
-    `㇇`,
-    `㇀`,
-    `⺀`,
-    `丩`,
-    `亇`,
-    `弗`,
-    `允`,
-    `亽`,
-    `亦`,
-    `亘`,
-    `亍`,
-    `予`,
-    `乞`,
-    `卅`,
-    `钅`,
-    `鸟`,
-  ]);
-
-  for (const [hanziWord, meaning] of dictionary.entries()) {
-    if (meaning.componentFormOf != null) {
-      componentFormHanzi.add(hanziFromHanziWord(hanziWord));
-    }
-    if (meaning.visualVariants != null) {
-      for (const variant of meaning.visualVariants) {
-        componentFormHanzi.add(variant);
-      }
+  for (const [character, data] of characters.entries()) {
+    if (data.componentFormOf != null) {
+      componentFormHanzi.add(character);
     }
   }
 

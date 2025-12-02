@@ -342,13 +342,10 @@ describe(
       assertLearningGraphEqual(
         await skillLearningGraph({ targetSkills: [`he:汉:chinese`] }),
         `
-      he:汉:chinese
-        he:又:again
-        he:氵:water
-          he:水:water
-            he:亅:hook
-            he:丿:slash
-      `,
+        he:汉:chinese
+          he:又:again
+          he:氵:water
+        `,
       );
     });
 
@@ -593,10 +590,7 @@ describe(
             expect(prettyQueue(queue)).toMatchInlineSnapshot(`
               [
                 "he:又:again (🌱 NEW SKILL)",
-                "he:丿:slash (🌱 NEW SKILL)",
-                "he:亅:hook (🌱 NEW SKILL)",
-                "he:水:water (🟥 BLOCKED)",
-                "he:氵:water (🟥 BLOCKED)",
+                "he:氵:water (🌱 NEW SKILL)",
                 "he:汉:chinese (🟥 BLOCKED)",
               ]
             `);
@@ -1403,15 +1397,12 @@ describe(
           [
             "he:𠃌:radical (🌱 NEW SKILL)",
             "he:丨:line (🌱 NEW SKILL)",
-            "he:人:person (🌱 NEW SKILL)",
-            "he:八:eight (🌱 NEW SKILL)",
             "he:一:one (🌱 NEW SKILL)",
             "he:乚:hidden (🌱 NEW SKILL)",
             "he:丿:slash (🌱 NEW SKILL)",
+            "he:灬:fire (🌱 NEW SKILL)",
             "he:冂:wide (🟥 BLOCKED)",
-            "he:火:fire (🟥 BLOCKED)",
             "he:口:mouth (🟥 BLOCKED)",
-            "he:灬:fire (🟥 BLOCKED)",
             "he:占:occupy (🟥 BLOCKED)",
             "he:儿:son (🟥 BLOCKED)",
             "he:点:oClock (🟥 BLOCKED)",

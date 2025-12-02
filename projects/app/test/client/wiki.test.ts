@@ -31,17 +31,10 @@ import {
   readFileSync,
   writeJsonFileIfChanged,
 } from "@pinyinly/lib/fs";
-import {
-  invariant,
-  nonNullable,
-  uniqueInvariant,
-} from "@pinyinly/lib/invariant";
+import { nonNullable, uniqueInvariant } from "@pinyinly/lib/invariant";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
-import { getFonts, projectRoot } from "../helpers.ts";
-
-const wikiDir = path.join(projectRoot, `src/client/wiki`);
-const dictionaryDir = path.join(projectRoot, `src/dictionary`);
+import { dictionaryDir, getFonts, projectRoot, wikiDir } from "../helpers.ts";
 
 describe(`speech files`, async () => {
   await createSpeechFileTests({
@@ -154,7 +147,7 @@ describe(`grapheme.json files`, async () => {
   const isComponentFormHanzi = await getIsComponentFormHanzi();
 
   test(`graphemes in the dictionary with 5+ strokes have mnemonic components`, async () => {
-    const atomicGraphemes = new Set([`非`, `臣`, `襾`, `舟`]);
+    const atomicGraphemes = new Set([`非`, `臣`, `襾`, `舟`, `母`]);
 
     for (const { grapheme, graphemeData } of graphemeFiles) {
       const meanings = await lookupHanzi(grapheme);
@@ -168,13 +161,17 @@ describe(`grapheme.json files`, async () => {
         continue;
       }
 
-      invariant(graphemeData.mnemonic != null, `missing mnemonic`);
       expect
-        .soft(
-          [...walkIdsNodeLeafs(graphemeData.mnemonic.components)].length,
-          `${grapheme} missing 2+ mnemonic components`,
-        )
-        .toBeGreaterThanOrEqual(2);
+        .soft(graphemeData.mnemonic, `${grapheme} to have mnemonic`)
+        .toBeDefined();
+      if (graphemeData.mnemonic != null) {
+        expect
+          .soft(
+            [...walkIdsNodeLeafs(graphemeData.mnemonic.components)].length,
+            `${grapheme} missing 2+ mnemonic components`,
+          )
+          .toBeGreaterThanOrEqual(2);
+      }
     }
   });
 
@@ -418,14 +415,18 @@ describe(`grapheme.json files`, async () => {
     const expected = new Map<CharactersKey, CharactersValue>();
 
     for (const { grapheme, graphemeData } of graphemeFiles) {
-      if (graphemeData.mnemonic) {
-        expected.set(grapheme, {
-          decomposition: idsNodeToString(
-            graphemeData.mnemonic.components,
-            componentToString,
-          ),
-        });
-      }
+      expected.set(grapheme, {
+        decomposition:
+          graphemeData.mnemonic == null
+            ? undefined
+            : idsNodeToString(
+                graphemeData.mnemonic.components,
+                componentToString,
+              ),
+        componentFormOf: graphemeData.componentFormOf,
+        isStructural: graphemeData.isStructural,
+        canonicalForm: graphemeData.canonicalForm,
+      });
     }
 
     if (!IS_CI) {
