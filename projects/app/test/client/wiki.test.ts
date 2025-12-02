@@ -112,10 +112,10 @@ describe(`/meaning.mdx files`, async () => {
   });
 });
 
-describe(`grapheme.json files`, async () => {
+describe(`character.json files`, async () => {
   const getDataForGrapheme = memoize1(
     (grapheme: string): WikiGraphemeData | undefined => {
-      const filePath = path.join(wikiDir, grapheme, `grapheme.json`);
+      const filePath = path.join(wikiDir, grapheme, `character.json`);
       if (existsSync(filePath)) {
         try {
           const json = JSON.parse(readFileSync(filePath, `utf-8`));
@@ -131,7 +131,7 @@ describe(`grapheme.json files`, async () => {
   const graphemeFiles = await glob(path.join(wikiDir, `*/`)).then((dirPaths) =>
     dirPaths.flatMap((dirPath) => {
       const grapheme = path.basename(dirPath) as HanziText;
-      const filePath = path.join(wikiDir, grapheme, `grapheme.json`);
+      const filePath = path.join(wikiDir, grapheme, `character.json`);
       return isHanziGrapheme(grapheme)
         ? ([
             {

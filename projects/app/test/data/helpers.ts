@@ -1,7 +1,7 @@
 import { isHanziGrapheme } from "#data/hanzi.ts";
 import type {
+  HanziCharacter,
   HanziGlossMistakeType,
-  HanziGrapheme,
   HanziPinyinMistakeType,
   HanziText,
   HanziWord,
@@ -117,9 +117,9 @@ export const fsrsSrsState = (
 };
 
 /**
- * {@link HanziGrapheme} template string tag.
+ * {@link HanziCharacter} template string tag.
  */
-export const 汉字 = (strings: TemplateStringsArray): HanziGrapheme => {
+export const 汉字 = (strings: TemplateStringsArray): HanziCharacter => {
   invariant(strings.length === 1, `汉字 must be a single string`);
   const string = nonNullable(strings[0]) as HanziText;
   invariant(

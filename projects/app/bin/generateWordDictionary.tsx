@@ -8,7 +8,7 @@ import {
   walkIdsNodeLeafs,
 } from "#data/hanzi.ts";
 import type {
-  HanziGrapheme,
+  HanziCharacter,
   HanziText,
   HanziWord,
   PinyinPronunciationSpaceSeparated,
@@ -119,7 +119,7 @@ const allWords = new Set<string>();
 
 // Recursively decompose each hanzi and gather together all the components that
 // aren't already in the list.
-function decomp(char: HanziGrapheme) {
+function decomp(char: HanziCharacter) {
   if (allWords.has(char)) {
     return;
   }
@@ -127,7 +127,7 @@ function decomp(char: HanziGrapheme) {
   allWords.add(char);
   const ids = charactersData.get(char)?.decomposition;
   if (ids != null) {
-    const idsNode = parseIds(ids) as IdsNode<HanziGrapheme>;
+    const idsNode = parseIds(ids) as IdsNode<HanziCharacter>;
     for (const leaf of walkIdsNodeLeafs(idsNode)) {
       if (strokeCountPlaceholderOrNull(leaf) == null && leaf !== char) {
         decomp(leaf);
@@ -648,7 +648,7 @@ async function openAiHanziWordGlossHintQuery(
     let hanziIds: string = hanzi;
 
     const visited = new Set<string>();
-    async function decomp(char: HanziGrapheme) {
+    async function decomp(char: HanziCharacter) {
       if (visited.has(char)) {
         return;
       }
@@ -660,7 +660,7 @@ async function openAiHanziWordGlossHintQuery(
       hanziIds = hanziIds.replaceAll(char, ids);
 
       for (const leaf of walkIdsNodeLeafs(
-        parseIds(ids) as IdsNode<HanziGrapheme>,
+        parseIds(ids) as IdsNode<HanziCharacter>,
       )) {
         if (strokeCountPlaceholderOrNull(leaf) == null) {
           if (leaf === char) {

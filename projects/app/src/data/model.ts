@@ -146,16 +146,16 @@ export type PinyinPronunciationSpaceSeparated = string &
   z.BRAND<`PinyinPronunciationSpaceSeparated`>;
 
 /**
- * Single Hanzi grapheme.
+ * Single Hanzi character (in the Unicode sense).
  *
  * This is the hanzi companion to {@link PinyinSyllable}.
  */
-export type HanziGrapheme = string & z.BRAND<`HanziGrapheme`>;
+export type HanziCharacter = string & z.BRAND<`HanziCharacter`>;
 
 /**
  * Non-space separated hanzi text.
  */
-export type HanziText = (string & z.BRAND<`HanziText`>) | HanziGrapheme;
+export type HanziText = (string & z.BRAND<`HanziText`>) | HanziCharacter;
 
 export const hanziTextSchema = z.custom<HanziText>(
   (x) => typeof x === `string`,
@@ -164,7 +164,7 @@ export const pylyMarkSchema = z.string();
 export const hanziWordSchema = z.custom<HanziWord>(
   (x) => typeof x === `string`,
 );
-export const hanziGraphemeSchema = z.custom<HanziGrapheme>(
+export const hanziGraphemeSchema = z.custom<HanziCharacter>(
   (x) => typeof x === `string`,
 );
 

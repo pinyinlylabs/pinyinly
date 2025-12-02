@@ -1,4 +1,4 @@
-import type { HanziGrapheme, HanziText } from "@/data/model";
+import type { HanziCharacter, HanziText } from "@/data/model";
 import { hanziGraphemeSchema } from "@/data/model";
 import { parseIndexRanges } from "@/util/indexRanges";
 import { graphemeCount, splitGraphemes } from "@/util/unicode";
@@ -639,8 +639,8 @@ export function* walkIdsNodeLeafs<T>(ids: IdsNode<T>): Generator<T> {
   }
 }
 
-export function splitHanziText(hanziText: HanziText): HanziGrapheme[] {
-  return splitGraphemes(hanziText) as HanziGrapheme[];
+export function splitHanziText(hanziText: HanziText): HanziCharacter[] {
+  return splitGraphemes(hanziText) as HanziCharacter[];
 }
 
 export function strokeCountToCharacter(strokeCount: number): string {
@@ -651,7 +651,7 @@ export const radicalStrokes = [
   1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
 ];
 
-export function isHanziGrapheme(hanzi: HanziText): hanzi is HanziGrapheme {
+export function isHanziGrapheme(hanzi: HanziText): hanzi is HanziCharacter {
   return hanziGraphemeCount(hanzi) === 1;
 }
 
@@ -881,7 +881,7 @@ const wikiGraphemeDecompositionSchema = buildIdsNodeSchema(
 export type WikiGraphemeDecomposition = IdsNode<WikiGraphemeComponent>;
 
 /**
- * Schema for grapheme.json files.
+ * Schema for character.json files.
  */
 export const wikiGraphemeDataSchema = z.object({
   /**

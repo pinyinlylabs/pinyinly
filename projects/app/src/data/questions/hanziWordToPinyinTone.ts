@@ -21,7 +21,7 @@ import {
 } from "@pinyinly/lib/invariant";
 import shuffle from "lodash/shuffle";
 import type {
-  HanziGrapheme,
+  HanziCharacter,
   HanziWord,
   OneCorrectPairQuestion,
   OneCorrectPairQuestionAnswer,
@@ -81,7 +81,7 @@ interface QuestionContext {
    * Keep track of which hanzi have been used so that we don't have multiple
    * choices with the same hanzi or meaning.
    */
-  usedHanzi: Set<HanziGrapheme>;
+  usedHanzi: Set<HanziCharacter>;
   /**
    * Keep track of which pinyin have been used so that we don't have multiple
    * choices in the quiz that have the same correct answer. Otherwise there
@@ -97,8 +97,8 @@ interface QuestionContext {
    * the same bases and differ by tone
    */
   pinyinAnswersToneless: readonly PinyinSyllable[];
-  hanziDistractors: HanziGrapheme[];
-  hanziAnswers: readonly HanziGrapheme[];
+  hanziDistractors: HanziCharacter[];
+  hanziAnswers: readonly HanziCharacter[];
 }
 
 export async function makeQuestionContext(
@@ -144,7 +144,7 @@ export async function makeQuestionContext(
 
 export async function tryHanziDistractor(
   ctx: QuestionContext,
-  hanzi: HanziGrapheme,
+  hanzi: HanziCharacter,
 ): Promise<boolean> {
   // Don't include if there's overlapping hanzi
   if (ctx.usedHanzi.has(hanzi)) {

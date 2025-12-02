@@ -18,7 +18,7 @@ import {
 } from "@pinyinly/lib/invariant";
 import shuffle from "lodash/shuffle";
 import type {
-  HanziGrapheme,
+  HanziCharacter,
   HanziText,
   HanziWord,
   OneCorrectPairQuestion,
@@ -113,7 +113,7 @@ export async function makeQuestionContext(
 
 export async function tryHanziDistractor(
   ctx: QuestionContext,
-  hanzi: HanziGrapheme,
+  hanzi: HanziCharacter,
 ): Promise<boolean> {
   // Don't include if there's overlapping hanzi
   if (ctx.usedHanzi.has(hanzi)) {

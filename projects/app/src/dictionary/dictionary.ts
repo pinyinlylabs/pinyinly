@@ -5,7 +5,7 @@ import {
   walkIdsNodeLeafs,
 } from "@/data/hanzi";
 import type {
-  HanziGrapheme,
+  HanziCharacter,
   HanziText,
   HanziWord,
   PinyinPronunciation,
@@ -340,7 +340,9 @@ export function shorthandPartOfSpeech(partOfSpeech: PartOfSpeech) {
   }
 }
 
-export function hanziTextFromHanziGrapheme(grapheme: HanziGrapheme): HanziText {
+export function hanziTextFromHanziGrapheme(
+  grapheme: HanziCharacter,
+): HanziText {
   return grapheme as unknown as HanziText;
 }
 
@@ -363,7 +365,7 @@ export const hanziFromHanziWord = memoize1(function hanziFromHanziWord(
 });
 
 export const hanziGraphemesFromHanziWord = memoize1(
-  function hanziGraphemesFromHanziWord(hanziWord: HanziWord): HanziGrapheme[] {
+  function hanziGraphemesFromHanziWord(hanziWord: HanziWord): HanziCharacter[] {
     const hanzi = hanziFromHanziWord(hanziWord);
     return splitHanziText(hanzi);
   },
@@ -389,13 +391,13 @@ export function buildHanziWord(hanzi: string, meaningKey: string): HanziWord {
  */
 export async function decomposeHanzi(
   hanzi: HanziText,
-): Promise<HanziGrapheme[]> {
+): Promise<HanziCharacter[]> {
   const charactersData = await loadCharacters();
   const hanziGraphemes = splitHanziText(hanzi);
 
   // For multi-grapheme hanzi, learn each grapheme, but for for
   // single-grapheme hanzi, decompose it into radicals and learn those.
-  const result: HanziGrapheme[] = [];
+  const result: HanziCharacter[] = [];
   if (hanziGraphemes.length > 1) {
     for (const char of hanziGraphemes) {
       result.push(char);
@@ -410,7 +412,7 @@ export async function decomposeHanzi(
             strokeCountPlaceholderOrNull(leaf) == null &&
             leaf !== char // todo turn into invariant?
           ) {
-            result.push(leaf as HanziGrapheme);
+            result.push(leaf as HanziCharacter);
           }
         }
       }
