@@ -6,9 +6,9 @@ import {
 import type {
   HanziGlossMistakeType,
   HanziPinyinMistakeType,
+  Skill,
 } from "@/data/model";
 import { MistakeKind } from "@/data/model";
-import type { Skill } from "@/data/rizzleSchema";
 import { v8 as schema } from "@/data/rizzleSchema";
 import type {
   ClientStateNotFoundResponse,

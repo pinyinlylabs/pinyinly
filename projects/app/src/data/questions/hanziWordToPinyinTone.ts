@@ -23,6 +23,7 @@ import shuffle from "lodash/shuffle";
 import type {
   HanziCharacter,
   HanziWord,
+  HanziWordSkill,
   OneCorrectPairQuestion,
   OneCorrectPairQuestionAnswer,
   OneCorrectPairQuestionChoice,
@@ -30,7 +31,6 @@ import type {
   Question,
 } from "../model";
 import { QuestionKind } from "../model";
-import type { HanziWordSkill } from "../rizzleSchema";
 import { hanziWordFromSkill } from "../skills";
 import {
   hanziOrPinyinSyllableCount,

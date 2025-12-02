@@ -4,9 +4,12 @@ import {
   isHanziWord,
   loadDictionary,
 } from "../dictionary/dictionary";
-import type { HanziGlossMistakeType, HanziPinyinMistakeType } from "./model";
+import type {
+  HanziGlossMistakeType,
+  HanziPinyinMistakeType,
+  Skill,
+} from "./model";
 import { SrsKind } from "./model";
-import type { Skill } from "./rizzleSchema";
 import { srsStateFromFsrsState } from "./rizzleSchema";
 import { hanziWordToGloss, hanziWordToPinyinTyped } from "./skills";
 

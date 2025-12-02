@@ -5,9 +5,11 @@ import type {
   HanziPinyinMistakeType,
   HanziText,
   HanziWord,
+  HanziWordSkill,
   MistakeType,
   PinyinPronunciationSpaceSeparated,
   PinyinSyllable,
+  Skill,
   SrsStateFsrsFourPointFiveType,
   SrsStateMockType,
 } from "#data/model.ts";
@@ -17,7 +19,7 @@ import {
   SkillKind,
   SrsKind,
 } from "#data/model.ts";
-import type { HanziWordSkill, Rizzle, Skill } from "#data/rizzleSchema.js";
+import type { Rizzle } from "#data/rizzleSchema.js";
 import { rSpaceSeparatedString } from "#data/rizzleSchema.js";
 import type { SkillReviewQueue, SkillReviewQueueItem } from "#data/skills.js";
 import { hanziWordFromSkill, skillKindFromSkill } from "#data/skills.js";

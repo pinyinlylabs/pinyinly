@@ -2,12 +2,12 @@ import { matchAllPinyinSyllables } from "@/data/pinyin";
 import { loadDictionary } from "@/dictionary/dictionary";
 import { invariant } from "@pinyinly/lib/invariant";
 import type {
+  HanziWordSkill,
   HanziWordToPinyinQuestion,
   MistakeType,
   Question,
 } from "../model";
 import { MistakeKind, QuestionKind } from "../model";
-import type { HanziWordSkill } from "../rizzleSchema";
 import { hanziWordFromSkill } from "../skills";
 
 export async function hanziWordToPinyinQuestionOrThrow(

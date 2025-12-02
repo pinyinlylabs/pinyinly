@@ -1,10 +1,6 @@
-import {
-  isHanziCharacter,
-  mapIdsNodeLeafs,
-  parseIds,
-  wikiCharacterDataSchema,
-} from "#data/hanzi.js";
+import { isHanziCharacter, mapIdsNodeLeafs, parseIds } from "#data/hanzi.js";
 import type { HanziText } from "#data/model.js";
+import { wikiCharacterDataSchema } from "#data/model.js";
 import { normalizeIndexRanges } from "#util/indexRanges.ts";
 import {
   existsSync,
@@ -219,7 +215,7 @@ for (const character of allCharacters) {
         mdxFile,
         `import data from "./character.json";
 
-<WikiHanziCharacterDecomposition characterData={data} />
+<WikiHanziCharacterIntro characterData={data} />
 `,
       );
       debug(`wrote meaning.mdx for %O`, character);

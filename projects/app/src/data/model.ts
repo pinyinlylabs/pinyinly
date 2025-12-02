@@ -1,7 +1,28 @@
 import type { Rating } from "@/util/fsrs";
 import type { Interval } from "date-fns";
 import { z } from "zod/v4";
-import type { HanziWordSkill, Skill } from "./rizzleSchema";
+
+export type Skill =
+  | DeprecatedSkill
+  | HanziWordSkill
+  | PinyinInitialAssociationSkill
+  | PinyinFinalAssociationSkill;
+
+export type DeprecatedSkill =
+  | (string & z.BRAND<`DeprecatedSkill`>)
+  | `${`xx` | `re` | `er` | `rp` | `pr`}:${string}:${string}`;
+
+export type HanziWordSkill =
+  | (string & z.BRAND<`HanziWordSkill`>)
+  | `${`he` | `het` | `hp` | `hpi` | `hpf` | `hpt` | `eh` | `ph` | `ih`}:${string}:${string}`;
+
+export type PinyinInitialAssociationSkill =
+  | (string & z.BRAND<`PinyinInitialAssociationSkill`>)
+  | `pia:${string}:${string}`;
+
+export type PinyinFinalAssociationSkill =
+  | (string & z.BRAND<`PinyinFinalAssociationSkill`>)
+  | `pfa:${string}:${string}`;
 
 /**
  * A static ID for the different components of a pinyin sound, including the
@@ -378,3 +399,242 @@ export interface PinyinFinalAssociation {
   final: string;
   name: string;
 }
+
+const wikiCharacterComponentSchema = z.strictObject({
+  /**
+   * The hanzi character (if any) formed by the strokes. Usually this can
+   * be populated, but in some cases the strokes don't form a valid
+   * character and instead are combined for more creative visual reasons.
+   */
+  hanzi: hanziCharacterSchema.optional(),
+  label: z.string().optional(),
+  /**
+   * Comma-separated list of stroke indices (0-based) for strokes that are
+   * part of this character. Allows shorthand ranges (e.g. 0-2,5 is the same as
+   * 0,1,2,5).
+   */
+  strokes: z.string().default(``),
+  /**
+   * When the component uses a different number of strokes than `hanzi` it's
+   * normally marked as a bug. However in cases when it's intentional (e.g. 禸)
+   * this field can be used to specify the different in stroke count.
+   */
+  strokeDiff: z.number().optional(),
+  /**
+   * What color to render this component in the decomposition illustration. This
+   * allows highlighting different components in different colors for clarity.
+   */
+  color: z.string().optional(),
+});
+
+export type WikiCharacterComponent = z.infer<
+  typeof wikiCharacterComponentSchema
+>;
+
+export const idsOperatorSchema = z.enum({
+  LeftToRight: `⿰`,
+  AboveToBelow: `⿱`,
+  LeftToMiddleToRight: `⿲`,
+  AboveToMiddleAndBelow: `⿳`,
+  FullSurround: `⿴`,
+  SurroundFromAbove: `⿵`,
+  SurroundFromBelow: `⿶`,
+  SurroundFromLeft: `⿷`,
+  SurroundFromRight: `⿼`,
+  SurroundFromUpperLeft: `⿸`,
+  SurroundFromUpperRight: `⿹`,
+  SurroundFromLowerLeft: `⿺`,
+  SurroundFromLowerRight: `⿽`,
+  Overlaid: `⿻`,
+  HorizontalReflection: `⿾`,
+  Rotation: `⿿`,
+});
+
+const IdsOperator = idsOperatorSchema.enum;
+type IdsOperator = z.infer<typeof idsOperatorSchema>;
+
+export { IdsOperator };
+
+const idsOperatorArity1 = z.union([
+  z.literal(IdsOperator.HorizontalReflection),
+  z.literal(IdsOperator.Rotation),
+]);
+
+const idsOperatorArity2 = z.union([
+  z.literal(IdsOperator.LeftToRight),
+  z.literal(IdsOperator.AboveToBelow),
+  z.literal(IdsOperator.FullSurround),
+  z.literal(IdsOperator.SurroundFromAbove),
+  z.literal(IdsOperator.SurroundFromBelow),
+  z.literal(IdsOperator.SurroundFromLeft),
+  z.literal(IdsOperator.SurroundFromRight),
+  z.literal(IdsOperator.SurroundFromUpperLeft),
+  z.literal(IdsOperator.SurroundFromUpperRight),
+  z.literal(IdsOperator.SurroundFromLowerLeft),
+  z.literal(IdsOperator.SurroundFromLowerRight),
+  z.literal(IdsOperator.Overlaid),
+]);
+
+const idsOperatorArity3 = z.union([
+  z.literal(IdsOperator.LeftToMiddleToRight),
+  z.literal(IdsOperator.AboveToMiddleAndBelow),
+]);
+
+export type IdsOperatorArity1 = z.infer<typeof idsOperatorArity1>;
+export type IdsOperatorArity2 = z.infer<typeof idsOperatorArity2>;
+export type IdsOperatorArity3 = z.infer<typeof idsOperatorArity3>;
+
+export type IdsNode<T> =
+  | [typeof IdsOperator.LeftToRight, IdsNode<T>, IdsNode<T>]
+  | [typeof IdsOperator.AboveToBelow, IdsNode<T>, IdsNode<T>]
+  | [typeof IdsOperator.LeftToMiddleToRight, IdsNode<T>, IdsNode<T>, IdsNode<T>]
+  | [
+      typeof IdsOperator.AboveToMiddleAndBelow,
+      IdsNode<T>,
+      IdsNode<T>,
+      IdsNode<T>,
+    ]
+  | [typeof IdsOperator.FullSurround, IdsNode<T>, IdsNode<T>]
+  | [typeof IdsOperator.SurroundFromAbove, IdsNode<T>, IdsNode<T>]
+  | [typeof IdsOperator.SurroundFromBelow, IdsNode<T>, IdsNode<T>]
+  | [typeof IdsOperator.SurroundFromLeft, IdsNode<T>, IdsNode<T>]
+  | [typeof IdsOperator.SurroundFromRight, IdsNode<T>, IdsNode<T>]
+  | [typeof IdsOperator.SurroundFromUpperLeft, IdsNode<T>, IdsNode<T>]
+  | [typeof IdsOperator.SurroundFromUpperRight, IdsNode<T>, IdsNode<T>]
+  | [typeof IdsOperator.SurroundFromLowerLeft, IdsNode<T>, IdsNode<T>]
+  | [typeof IdsOperator.SurroundFromLowerRight, IdsNode<T>, IdsNode<T>]
+  | [typeof IdsOperator.Overlaid, IdsNode<T>, IdsNode<T>]
+  | [typeof IdsOperator.HorizontalReflection, IdsNode<T>]
+  | [typeof IdsOperator.Rotation, IdsNode<T>]
+  | T;
+
+export function buildIdsNodeSchema<T extends z.ZodType>(
+  leafSchema: T,
+): z.ZodType<IdsNode<z.infer<T>>> {
+  const depth0Schema = leafSchema;
+
+  const depth1Schema = z.union([
+    depth0Schema,
+    z.tuple([idsOperatorArity1, depth0Schema]),
+    z.tuple([idsOperatorArity2, depth0Schema, depth0Schema]),
+    z.tuple([idsOperatorArity3, depth0Schema, depth0Schema, depth0Schema]),
+  ]);
+
+  const depth2Schema = z.union([
+    depth1Schema,
+    z.tuple([idsOperatorArity1, depth1Schema]),
+    z.tuple([idsOperatorArity2, depth1Schema, depth1Schema]),
+    z.tuple([idsOperatorArity3, depth1Schema, depth1Schema, depth1Schema]),
+  ]);
+
+  const depth3Schema = z.union([
+    depth2Schema,
+    z.tuple([idsOperatorArity1, depth2Schema]),
+    z.tuple([idsOperatorArity2, depth2Schema, depth2Schema]),
+    z.tuple([idsOperatorArity3, depth2Schema, depth2Schema, depth2Schema]),
+  ]);
+
+  const depth4Schema = z.union([
+    depth3Schema,
+    z.tuple([idsOperatorArity1, depth3Schema]),
+    z.tuple([idsOperatorArity2, depth3Schema, depth3Schema]),
+    z.tuple([idsOperatorArity3, depth3Schema, depth3Schema, depth3Schema]),
+  ]);
+
+  const depth5Schema = z.union([
+    depth4Schema,
+    z.tuple([idsOperatorArity1, depth4Schema]),
+    z.tuple([idsOperatorArity2, depth4Schema, depth4Schema]),
+    z.tuple([idsOperatorArity3, depth4Schema, depth4Schema, depth4Schema]),
+  ]);
+
+  return depth5Schema as z.ZodType<IdsNode<z.infer<T>>>;
+}
+
+// TODO [zod@>=4.1.12] try refactor to use https://github.com/colinhacks/zod/issues/5089
+const wikiCharacterDecompositionSchema = buildIdsNodeSchema(
+  wikiCharacterComponentSchema,
+);
+
+export type WikiCharacterDecomposition = IdsNode<WikiCharacterComponent>;
+
+/**
+ * Schema for character.json files.
+ */
+export const wikiCharacterDataSchema = z.strictObject({
+  /**
+   * The hanzi character represented by this character (e.g. 看).
+   */
+  hanzi: hanziCharacterSchema,
+  /**
+   * Stroke information, ideally SVG paths but otherwise just the count.
+   */
+  strokes: z.union([
+    z.number().describe(`Stroke count`),
+    z.array(z.string()).describe(`SVG paths for each stroke (in order)`),
+  ]),
+  /**
+   * The simplified form of this character, if it is a traditional form.
+   *
+   * The property is used on traditional characters because it's expected there
+   * are fewer of those in the dataset since this app focuses on Mandarin.
+   */
+  simplifiedForm: hanziCharacterSchema.optional(),
+  /**
+   * If this character is a component form of another character, that hanzi.
+   */
+  componentFormOf: hanziCharacterSchema.optional(),
+  /**
+   * If this is variant of another character (for the purposes of learning),
+   * point to the canonical form.
+   *
+   * e.g. ⺁ -> 厂
+   */
+  canonicalForm: hanziCharacterSchema.optional(),
+  isStructural: z
+    .literal(true)
+    .optional()
+    .describe(
+      `is used as a component in regular Hanzi characters (e.g. parts of 兰, 兴, etc.), but never used independently as a full word or character in modern Mandarin.`,
+    ),
+  /**
+   * Alternative IDS decompositions
+   */
+  decompositions: z.array(z.string()).optional(),
+  /**
+   * The meaning mnemonic for the character. This doesn't necessarily correspond
+   * to the etymological components, and their meanings can differ too. It's
+   * intended for beginner learners and optimised for mnemonic usefulness.
+   */
+  mnemonic: z
+    .strictObject({
+      /**
+       * The layout of the components. The first element is the combining
+       * operator, and the remaining are the components for each slot.
+       */
+      components: wikiCharacterDecompositionSchema,
+      stories: z
+        .array(
+          z.strictObject({
+            gloss: z.string(),
+            story: z.string(),
+            /**
+             * If there are other stories that depend on this one to make sense,
+             * they can be nested inside their dependency.
+             */
+            children: z
+              .array(
+                z.strictObject({
+                  gloss: z.string(),
+                  story: z.string(),
+                }),
+              )
+              .optional(),
+          }),
+        )
+        .optional(),
+    })
+    .optional(),
+});
+
+export type WikiCharacterData = z.infer<typeof wikiCharacterDataSchema>;

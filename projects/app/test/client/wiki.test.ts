@@ -1,13 +1,12 @@
-import type { WikiCharacterData } from "#data/hanzi.js";
 import {
   characterStrokeCount,
   componentToString,
   idsNodeToString,
   isHanziCharacter,
   walkIdsNodeLeafs,
-  wikiCharacterDataSchema,
 } from "#data/hanzi.js";
-import type { HanziText } from "#data/model.js";
+import type { HanziText, WikiCharacterData } from "#data/model.js";
+import { wikiCharacterDataSchema } from "#data/model.js";
 import type { CharactersKey, CharactersValue } from "#dictionary/dictionary.js";
 import {
   getIsComponentFormHanzi,
@@ -84,15 +83,15 @@ describe(`/meaning.mdx files`, async () => {
     }
   });
 
-  test(`should contain a <WikiHanziCharacterDecomposition>`, () => {
+  test(`should contain a <WikiHanziCharacterIntro>`, () => {
     for (const { hanzi, hasMdx, getMdx } of data) {
       if (isHanziCharacter(hanzi) && hasMdx()) {
         const mdx = getMdx();
-        const match = [...mdx.matchAll(/<WikiHanziCharacterDecomposition\s+/g)];
+        const match = [...mdx.matchAll(/<WikiHanziCharacterIntro\s+/g)];
         expect
           .soft(
             match.length,
-            `${hanzi} MDX does not have exactly one <WikiHanziCharacterDecomposition> component`,
+            `${hanzi} MDX does not have exactly one <WikiHanziCharacterIntro> component`,
           )
           .toEqual(1);
       }
@@ -144,7 +143,7 @@ describe(`character.json files`, async () => {
         characterStrokeCount(characterData) <= 4 ||
         meanings.length === 0 ||
         isComponentFormHanzi(character) ||
-        characterData.traditionalFormOf != null ||
+        characterData.simplifiedForm != null ||
         atomicCharacters.has(character)
       ) {
         continue;

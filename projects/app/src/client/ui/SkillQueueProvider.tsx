@@ -3,8 +3,7 @@ import {
   isStructuralHanziQuery,
   skillLearningGraphQuery,
 } from "@/client/query";
-import type { SrsStateType } from "@/data/model";
-import type { Skill } from "@/data/rizzleSchema";
+import type { Skill, SrsStateType } from "@/data/model";
 import type { LatestSkillRating, SkillReviewQueue } from "@/data/skills";
 import { skillReviewQueue } from "@/data/skills";
 import { useLiveQuery } from "@tanstack/react-db";

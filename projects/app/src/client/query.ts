@@ -2,10 +2,11 @@ import type {
   HanziText,
   HanziWord,
   PinyinSoundId,
+  Skill,
   SrsStateType,
 } from "@/data/model";
 import { loadPylyPinyinChart } from "@/data/pinyin";
-import type { Rizzle, Skill, SkillRating } from "@/data/rizzleSchema";
+import type { Rizzle, SkillRating } from "@/data/rizzleSchema";
 import { currentSchema } from "@/data/rizzleSchema";
 import type { RankedHanziWord } from "@/data/skills";
 import {

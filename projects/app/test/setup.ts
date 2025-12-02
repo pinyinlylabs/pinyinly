@@ -29,6 +29,11 @@ vi.mock(`react-native`, async () => {
   };
 });
 
+// Mock rive-react-native to avoid pulling in native modules.
+vi.mock(`rive-react-native`, () => {
+  return {};
+});
+
 vi.mock(`expo-haptics`, () => {
   return {};
 });

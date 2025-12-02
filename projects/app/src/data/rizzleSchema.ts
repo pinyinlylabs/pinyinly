@@ -13,6 +13,7 @@ import type {
   PinyinSoundGroupId,
   PinyinSoundId,
   PinyinSyllable,
+  Skill,
   SrsStateType,
 } from "./model";
 import { PartOfSpeech, SkillKind, SrsKind } from "./model";
@@ -39,27 +40,6 @@ export const rSkillKind = memoize0(function rSkillKind() {
 });
 
 // Skill e.g. `he:好:good`
-export type Skill =
-  | DeprecatedSkill
-  | HanziWordSkill
-  | PinyinInitialAssociationSkill
-  | PinyinFinalAssociationSkill;
-
-export type DeprecatedSkill =
-  | (string & z.BRAND<`DeprecatedSkill`>)
-  | `${`xx` | `re` | `er` | `rp` | `pr`}:${string}:${string}`;
-
-export type HanziWordSkill =
-  | (string & z.BRAND<`HanziWordSkill`>)
-  | `${`he` | `het` | `hp` | `hpi` | `hpf` | `hpt` | `eh` | `ph` | `ih`}:${string}:${string}`;
-
-export type PinyinInitialAssociationSkill =
-  | (string & z.BRAND<`PinyinInitialAssociationSkill`>)
-  | `pia:${string}:${string}`;
-
-export type PinyinFinalAssociationSkill =
-  | (string & z.BRAND<`PinyinFinalAssociationSkill`>)
-  | `pfa:${string}:${string}`;
 
 export const rPartOfSpeech = memoize0(function rPartOfSpeech() {
   return r.enum(PartOfSpeech, {

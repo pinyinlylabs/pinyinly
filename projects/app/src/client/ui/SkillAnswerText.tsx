@@ -1,5 +1,5 @@
+import type { HanziWordSkill, Skill } from "@/data/model";
 import { SkillKind } from "@/data/model";
-import type { HanziWordSkill, Skill } from "@/data/rizzleSchema";
 import { skillKindFromSkill } from "@/data/skills";
 import { HanziWordToGlossSkillAnswerText } from "./HanziWordToGlossSkillAnswerText";
 import { HanziWordToPinyinSkillAnswerText } from "./HanziWordToPinyinSkillAnswerText";

@@ -6,14 +6,14 @@ import type { PropsWithChildren } from "react";
 import { Pressable, Text, View } from "react-native";
 import { IconImage } from "./IconImage";
 import { MDXComponents } from "./MDXComponents";
-import { WikiHanziCharacterDecomposition } from "./WikiHanziCharacterDecomposition";
+import { WikiHanziCharacterIntro } from "./WikiHanziCharacterIntro";
 
 export function PylyMdxComponents({ children }: PropsWithChildren) {
   return (
     <MDXComponents
       components={{
         Audio,
-        WikiHanziCharacterDecomposition,
+        WikiHanziCharacterIntro,
         Hanzi: HanziComponent,
         Translated: TranslatedComponent,
 

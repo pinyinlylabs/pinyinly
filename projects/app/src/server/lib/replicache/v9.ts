@@ -8,9 +8,9 @@ import type {
   HanziPinyinMistakeType,
   PinyinSoundGroupId,
   PinyinSoundId,
+  Skill,
 } from "@/data/model";
 import { MistakeKind } from "@/data/model";
-import type { Skill } from "@/data/rizzleSchema";
 import { v9 as schema } from "@/data/rizzleSchema";
 import type {
   ClientStateNotFoundResponse,

@@ -1,6 +1,5 @@
-import type { SrsStateType } from "@/data/model";
+import type { Skill, SrsStateType } from "@/data/model";
 import { SrsKind } from "@/data/model";
-import type { Skill } from "@/data/rizzleSchema";
 import type { FsrsState } from "@/util/fsrs";
 import { nextReview } from "@/util/fsrs";
 import { invariant } from "@pinyinly/lib/invariant";

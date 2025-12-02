@@ -36,8 +36,12 @@ import { isHanziCharacter, splitHanziText } from "./hanzi";
 import type {
   HanziText,
   HanziWord,
+  HanziWordSkill,
   HanziWordSkillKind,
+  PinyinFinalAssociationSkill,
+  PinyinInitialAssociationSkill,
   QuestionFlagType,
+  Skill,
   SrsStateType,
   UnsavedSkillRating,
 } from "./model";
@@ -47,13 +51,7 @@ import {
   SkillKind,
   SrsKind,
 } from "./model";
-import type {
-  HanziWordSkill,
-  PinyinFinalAssociationSkill,
-  PinyinInitialAssociationSkill,
-  Skill,
-  SkillRating,
-} from "./rizzleSchema";
+import type { SkillRating } from "./rizzleSchema";
 import { rSkillKind } from "./rizzleSchema";
 
 export interface Node {
