@@ -1,4 +1,5 @@
 import type { WikiCharacterData } from "@/data/hanzi";
+import type { HanziCharacter } from "@/data/model";
 import { View } from "react-native";
 import { WikiHanziCharacterDecomposition } from "./WikiHanziCharacterDecomposition";
 
@@ -22,12 +23,12 @@ const characterData: WikiCharacterData = {
     components: [
       `⿰`,
       {
-        hanzi: `龵,手`,
+        hanzi: `龵` as HanziCharacter,
         label: `hand`,
         strokes: `0,1,2,3`,
       },
       {
-        hanzi: `目`,
+        hanzi: `目` as HanziCharacter,
         label: `eye`,
         strokes: `4,5,6,7,8`,
       },

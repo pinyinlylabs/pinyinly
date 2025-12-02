@@ -6,8 +6,8 @@ import {
   allHanziCharacterPronunciationsForHanzi,
   allHanziCharacters,
   hanziFromHanziWord,
+  loadDictionary,
   loadPinyinWords,
-  lookupHanziWord,
   oneSyllablePinyinOrThrow,
   pinyinOrThrow,
 } from "@/dictionary/dictionary";
@@ -38,7 +38,8 @@ export async function hanziWordToPinyinInitialQuestionOrThrow(
   skill: HanziWordSkill,
 ): Promise<OneCorrectPairQuestion> {
   const hanziWord = hanziWordFromSkill(skill);
-  const meaning = await lookupHanziWord(hanziWord);
+  const dictionary = await loadDictionary();
+  const meaning = dictionary.lookupHanziWord(hanziWord);
   const rowCount = 5;
   const answer: OneCorrectPairQuestionAnswer = {
     as: [{ kind: `hanzi`, value: hanziFromHanziWord(hanziWord) }],
@@ -95,7 +96,8 @@ export async function makeQuestionContext(
   correctAnswer: HanziWord,
 ): Promise<QuestionContext> {
   const hanzi = hanziFromHanziWord(correctAnswer);
-  const meaning = await lookupHanziWord(correctAnswer);
+  const dictionary = await loadDictionary();
+  const meaning = dictionary.lookupHanziWord(correctAnswer);
   const pinyin = oneSyllablePinyinOrThrow(correctAnswer, meaning);
   const parsedPinyin = parsePinyinSyllableOrThrow(pinyin);
 

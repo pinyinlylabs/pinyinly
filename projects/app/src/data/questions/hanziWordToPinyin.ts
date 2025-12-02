@@ -1,5 +1,5 @@
 import { matchAllPinyinSyllables } from "@/data/pinyin";
-import { lookupHanziWord } from "@/dictionary/dictionary";
+import { loadDictionary } from "@/dictionary/dictionary";
 import { invariant } from "@pinyinly/lib/invariant";
 import type {
   HanziWordToPinyinQuestion,
@@ -14,7 +14,8 @@ export async function hanziWordToPinyinQuestionOrThrow(
   skill: HanziWordSkill,
 ): Promise<HanziWordToPinyinQuestion> {
   const hanziWord = hanziWordFromSkill(skill);
-  const meaning = await lookupHanziWord(hanziWord);
+  const dictionary = await loadDictionary();
+  const meaning = dictionary.lookupHanziWord(hanziWord);
 
   const answers = meaning?.pinyin;
   invariant(answers != null, `hanzi word ${hanziWord} has no pinyin`);

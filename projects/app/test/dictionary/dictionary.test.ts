@@ -21,8 +21,6 @@ import {
   loadPinyinSoundNameSuggestions,
   loadPinyinSoundThemeDetails,
   loadPinyinWords,
-  lookupHanzi,
-  lookupHanziWord,
   meaningKeyFromHanziWord,
   upsertHanziWordMeaning,
 } from "#dictionary/dictionary.ts";
@@ -72,7 +70,7 @@ test(`hanzi word meaning-keys are not too similar`, async () => {
   const hanziToMeaningKey = new Map<string, string[]>();
 
   // Group by hanzi, and keep a sorted array of meaning-keys.
-  for (const hanziWord of dict.keys()) {
+  for (const hanziWord of dict.allHanziWords) {
     const hanzi = hanziFromHanziWord(hanziWord);
     const meaningKey = meaningKeyFromHanziWord(hanziWord);
 
@@ -115,11 +113,9 @@ test(`hanzi word meaning-key lint`, async () => {
     !/^[a-zA-Z]+$/.test(x);
 
   const violations = new Set(
-    [...dict]
-      .filter(([hanziWord]) => isViolating(meaningKeyFromHanziWord(hanziWord)))
-      .map(([hanziWord]) => ({
-        hanziWord,
-      })),
+    dict.allHanziWords.filter((hanziWord) =>
+      isViolating(meaningKeyFromHanziWord(hanziWord)),
+    ),
   );
 
   expect(violations).toEqual(new Set());
@@ -139,7 +135,7 @@ test(`hanzi word meaning gloss lint`, async () => {
     (x.match(/\s+/g)?.length ?? 0) > maxSpaces;
 
   const violations = new Set(
-    [...dict]
+    dict.allEntries
       .filter(([, { gloss }]) => gloss.some((x) => isViolating(x)))
       .map(([hanziWord, { gloss }]) => ({
         hanziWord,
@@ -152,18 +148,19 @@ test(`hanzi word meaning gloss lint`, async () => {
 
 test(`hanzi meaning canonicalForm lint`, async () => {
   const characters = await loadCharacters();
+  const dictionary = await loadDictionary();
 
   for (const [hanzi, data] of characters) {
     if (data.canonicalForm != null) {
-      await expect(
-        lookupHanzi(hanzi),
+      expect(
+        dictionary.lookupHanzi(hanzi),
         `${hanzi} is not the canonical form and shouldn't have a dictionary entry`,
-      ).resolves.toEqual([]);
+      ).toEqual([]);
 
-      await expect(
-        lookupHanzi(data.canonicalForm),
+      expect(
+        dictionary.lookupHanzi(data.canonicalForm),
         `${hanzi} canonical form exists`,
-      ).resolves.not.toEqual([]);
+      ).not.toEqual([]);
     }
   }
 });
@@ -172,7 +169,7 @@ test(`hanzi word meaning pinyin lint`, async () => {
   const dict = await loadDictionary();
 
   // `pinyin` key should be omitted rather than an empty
-  for (const [hanziWord, { pinyin }] of dict) {
+  for (const [hanziWord, { pinyin }] of dict.allEntries) {
     expect
       .soft(
         pinyin?.length,
@@ -182,7 +179,7 @@ test(`hanzi word meaning pinyin lint`, async () => {
   }
 
   // Multiple pinyin entries should have the same number of words
-  for (const [hanziWord, { pinyin }] of dict) {
+  for (const [hanziWord, { pinyin }] of dict.allEntries) {
     expect
       .soft(new Set(pinyin?.map((p) => p.length)).size, hanziWord)
       .not.toBeGreaterThan(1);
@@ -198,7 +195,7 @@ test(`hanzi words are unique on (meaning key, primary pinyin)`, async () => {
   const isComponentFormHanzi = await getIsComponentFormHanzi();
 
   const byMeaningKeyAndPinyin = new Map<string, Set<string>>();
-  for (const [hanziWord, { pinyin }] of dict) {
+  for (const [hanziWord, { pinyin }] of dict.allEntries) {
     const meaningKey = meaningKeyFromHanziWord(hanziWord);
     // special case allow "radical" to have overlaps
     if (meaningKey === `radical`) {
@@ -258,7 +255,7 @@ test(`hanzi words are unique on (hanzi, part-of-speech, pinyin)`, async () => {
   const dict = await loadDictionary();
 
   const byHanziAndPinyin = new Map<string, Set<string>>();
-  for (const [hanziWord, { partOfSpeech, pinyin }] of dict) {
+  for (const [hanziWord, { partOfSpeech, pinyin }] of dict.allEntries) {
     const hanzi = hanziFromHanziWord(hanziWord);
     const key = `${hanzi}:${partOfSpeech}:${pinyin}`;
     const set = byHanziAndPinyin.get(key) ?? new Set();
@@ -287,9 +284,10 @@ test(`hanzi words are unique on (hanzi, part-of-speech, pinyin)`, async () => {
 });
 
 test(`all word lists only reference valid hanzi words`, async () => {
+  const dict = await loadDictionary();
   for (const wordList of wordLists) {
     for (const hanziWord of await wordList()) {
-      if ((await lookupHanziWord(hanziWord)) === null) {
+      if (dict.lookupHanziWord(hanziWord) === null) {
         throw new Error(
           `missing hanzi word lookup for ${hanziWord} in word list`,
         );
@@ -316,7 +314,7 @@ test(`zod schemas are compatible with OpenAI API`, async () => {
 
 test(`hanzi uses consistent unicode characters`, async () => {
   const dict = await loadDictionary();
-  const violations = [...dict.keys()]
+  const violations = dict.allHanziWords
     .map((x) => hanziFromHanziWord(x))
     .flatMap((x) => splitHanziText(x))
     .filter((x) => isNotCjkUnifiedIdeograph(x));
@@ -336,10 +334,12 @@ describe(
       const hanziWordRenames = await loadHanziWordMigrations();
       const dictionary = await loadDictionary();
       for (const [oldHanziWord] of hanziWordRenames) {
-        expect(
-          dictionary.has(oldHanziWord),
-          `${oldHanziWord} should not be in the dictionary`,
-        ).toBe(false);
+        expect
+          .soft(
+            dictionary.lookupHanziWord(oldHanziWord),
+            `${oldHanziWord} should not be in the dictionary`,
+          )
+          .toBeNull();
       }
     });
 
@@ -348,22 +348,26 @@ describe(
       const dictionary = await loadDictionary();
       for (const [, newHanziWord] of hanziWordRenames) {
         if (newHanziWord != null) {
-          expect(
-            dictionary.has(newHanziWord),
-            `${newHanziWord} should be in the dictionary`,
-          ).toBe(true);
+          expect
+            .soft(
+              dictionary.lookupHanziWord(newHanziWord),
+              `${newHanziWord} should be in the dictionary`,
+            )
+            .not.toBeNull();
         }
       }
     });
 
     test(`no "to" keys are also "from" keys (could cause loops)`, async () => {
       const hanziWordRenames = await loadHanziWordMigrations();
-      expect(
-        [...hanziWordRenames].filter(
-          ([, newHanziWord]) =>
-            newHanziWord != null && hanziWordRenames.has(newHanziWord),
-        ),
-      ).toEqual([]);
+      expect
+        .soft(
+          [...hanziWordRenames].filter(
+            ([, newHanziWord]) =>
+              newHanziWord != null && hanziWordRenames.has(newHanziWord),
+          ),
+        )
+        .toEqual([]);
     });
   },
 );
@@ -377,16 +381,17 @@ test(`dictionary contains entries for decomposition`, async () => {
     HanziCharacter,
     /* sources */ Set<string>
   >();
+  const dictionaryLookup = await loadDictionary();
 
   for (const hanzi of await allHanziWordsHanzi()) {
     for (const character of splitHanziText(hanzi)) {
-      const lookup = await lookupHanzi(character);
+      const lookup = dictionaryLookup.lookupHanzi(character);
       if (lookup.length === 0) {
         mapSetAdd(unknownCharacters, character, hanzi);
       }
 
       for (const component of await decomposeHanzi(character)) {
-        const lookup = await lookupHanzi(component);
+        const lookup = dictionaryLookup.lookupHanzi(component);
         if (lookup.length === 0) {
           mapSetAdd(unknownComponents, component, character);
         }
@@ -450,11 +455,9 @@ test(`dictionary structural components list`, async () => {
   const dictionary = await loadDictionary();
   const isStructuralHanzi = await getIsStructuralHanzi();
 
-  const structural = dictionary
-    .entries()
-    .filter(([hanziWord]) => isStructuralHanzi(hanziFromHanziWord(hanziWord)))
-    .map(([hanziWord]) => hanziWord)
-    .toArray();
+  const structural = dictionary.allHanziWords.filter((hanziWord) =>
+    isStructuralHanzi(hanziFromHanziWord(hanziWord)),
+  );
 
   expect(structural).toMatchInlineSnapshot(`
     [

@@ -477,7 +477,6 @@ const dataIntegrityDictionary = inngest.createFunction(
   { cron: `30 * * * *` },
   async ({ step }) => {
     const dict = await loadDictionary();
-    const allHanziWords = [...dict.keys()];
 
     await step.run(`check skillRating.skill`, async () => {
       const unknownSkills = await withDrizzle(
@@ -488,7 +487,7 @@ const dataIntegrityDictionary = inngest.createFunction(
             .where(
               notInArray(
                 substring(s.skillRating.skill, /^\w+:(.+)$/),
-                allHanziWords,
+                dict.allHanziWords,
               ),
             ),
       ).then((x) => x.map((r) => r.skill));
@@ -512,7 +511,7 @@ const dataIntegrityDictionary = inngest.createFunction(
             .where(
               notInArray(
                 substring(s.skillState.skill, /^\w+:(.+)$/),
-                allHanziWords,
+                dict.allHanziWords,
               ),
             ),
       ).then((x) => x.map((r) => r.skill));

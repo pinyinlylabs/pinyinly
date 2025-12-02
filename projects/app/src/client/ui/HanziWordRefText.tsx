@@ -1,11 +1,12 @@
-import { useLookupHanziWord } from "@/client/hooks/useLookupHanziWord";
 import type { HanziWord } from "@/data/model";
 import { pinyinPronunciationDisplayText } from "@/data/pinyin";
 import {
   glossOrThrow,
   hanziFromHanziWord,
+  loadDictionary,
   pinyinOrThrow,
 } from "@/dictionary/dictionary";
+import { use } from "react";
 import { HanziWordLink } from "./HanziWordLink";
 
 export const HanziWordRefText = ({
@@ -23,7 +24,8 @@ export const HanziWordRefText = ({
   gloss?: boolean | string;
   showPinyin?: boolean;
 }) => {
-  const meaning = useLookupHanziWord(hanziWord);
+  const dictionary = use(loadDictionary());
+  const meaning = dictionary.lookupHanziWord(hanziWord);
 
   let text = ``;
 

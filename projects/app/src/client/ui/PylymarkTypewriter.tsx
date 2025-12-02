@@ -50,7 +50,7 @@ export const PylymarkTypewriter = ({
     switch (node.type) {
       case `hanziWord`: {
         let text: string = hanziFromHanziWord(node.hanziWord);
-        const meaning = dict.get(node.hanziWord);
+        const meaning = dict.lookupHanziWord(node.hanziWord);
         const gloss = meaning?.gloss.at(0);
         if (node.showGloss && gloss != null) {
           text += ` ${gloss}`;

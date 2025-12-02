@@ -15,7 +15,7 @@ import {
 import type { HanziText } from "#data/model.ts";
 import { invariant } from "@pinyinly/lib/invariant";
 import { describe, expect, test } from "vitest";
-import { 汉 } from "./helpers.ts";
+import { 汉, 汉字 } from "./helpers.ts";
 
 test.for([
   [`⿱⿱abc`, `⿳abc`],
@@ -369,7 +369,7 @@ test.for([
 );
 
 test.for([
-  [{ hanzi: `A`, strokes: `` }, `A`],
+  [{ hanzi: 汉字`A`, strokes: `` }, `A`],
   [{ strokes: `0-4` }, `⑤`],
 ] as const)(
   `idsNodeToString %s -> %s` satisfies HasNameOf<typeof idsNodeToString>,

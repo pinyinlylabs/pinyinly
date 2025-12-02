@@ -5,7 +5,7 @@ import {
   shouldOmitHanziWord,
 } from "#data/questions/hanziWordToGloss.ts";
 import { hanziWordToGloss } from "#data/skills.ts";
-import { loadDictionary, lookupHanziWord } from "#dictionary/dictionary.ts";
+import { loadDictionary } from "#dictionary/dictionary.ts";
 import { nonNullable } from "@pinyinly/lib/invariant";
 import { describe, expect, test } from "vitest";
 
@@ -47,11 +47,13 @@ describe(
 describe(
   `addToQuizContext suite` satisfies HasNameOf<typeof addToQuizContext>,
   async () => {
+    const dictionary = await loadDictionary();
+
     test(`adds the glosses from the hanzi word`, async () => {
       const ctx = await makeQuizContext();
 
       await addToQuizContext(`我:i`, ctx);
-      const meaning = await lookupHanziWord(`我:i`);
+      const meaning = dictionary.lookupHanziWord(`我:i`);
 
       expect(ctx.usedGlosses).toEqual(new Set(meaning?.gloss));
     });
@@ -60,8 +62,8 @@ describe(
       const ctx = await makeQuizContext();
 
       await addToQuizContext(`乐:happy`, ctx);
-      const happyMeaning = nonNullable(await lookupHanziWord(`乐:happy`));
-      const musicMeaning = nonNullable(await lookupHanziWord(`乐:music`));
+      const happyMeaning = nonNullable(dictionary.lookupHanziWord(`乐:happy`));
+      const musicMeaning = nonNullable(dictionary.lookupHanziWord(`乐:music`));
 
       expect(ctx.usedGlosses).toEqual(
         new Set([...happyMeaning.gloss, ...musicMeaning.gloss]),
@@ -79,7 +81,7 @@ describe(
     test(`adds to final result`, async () => {
       const ctx = await makeQuizContext();
       const hanziWord = `我:i`;
-      const hanziWordMeaning = await lookupHanziWord(`我:i`);
+      const hanziWordMeaning = dictionary.lookupHanziWord(`我:i`);
 
       await addToQuizContext(hanziWord, ctx);
 
@@ -96,7 +98,7 @@ describe(
     test(`works for the entire dictionary`, async () => {
       const dictionary = await loadDictionary();
 
-      for (const [hanziWord] of dictionary) {
+      for (const hanziWord of dictionary.allHanziWords) {
         const skill = hanziWordToGloss(hanziWord);
         await hanziWordToGlossQuestionOrThrow(skill);
       }

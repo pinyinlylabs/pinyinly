@@ -1,4 +1,3 @@
-import { useLookupHanzi } from "@/client/hooks/useLookupHanzi";
 import { useReplicache } from "@/client/hooks/useReplicache";
 import { useRizzleQueryPaged } from "@/client/hooks/useRizzleQueryPaged";
 import { pinyinSoundsQuery } from "@/client/query";
@@ -8,8 +7,9 @@ import {
 } from "@/client/wiki";
 import type { HanziText, PinyinSoundId, PinyinSyllable } from "@/data/model";
 import { parsePinyinSyllable } from "@/data/pinyin";
+import { loadDictionary } from "@/dictionary/dictionary";
 import type { ReactNode } from "react";
-import { Fragment, useState } from "react";
+import { Fragment, use, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useIntersectionObserver } from "usehooks-ts";
 import { IconImage } from "./IconImage";
@@ -25,7 +25,8 @@ export function WikiHanziModalImpl({
   hanzi: HanziText;
   onDismiss: () => void;
 }) {
-  const hanziWordMeanings = useLookupHanzi(hanzi);
+  const dictionary = use(loadDictionary());
+  const hanziWordMeanings = dictionary.lookupHanzi(hanzi);
 
   let pinyin: readonly PinyinSyllable[] | undefined;
   for (const [, meaning] of hanziWordMeanings) {

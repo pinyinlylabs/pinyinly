@@ -5,8 +5,7 @@ import {
   allHsk3HanziWords,
   glossOrThrow,
   hanziFromHanziWord,
-  lookupHanzi,
-  lookupHanziWord,
+  loadDictionary,
 } from "@/dictionary/dictionary";
 import { evenHalve } from "@pinyinly/lib/collections";
 import { invariant } from "@pinyinly/lib/invariant";
@@ -27,7 +26,8 @@ export async function hanziWordToGlossQuestionOrThrow(
   skill: HanziWordSkill,
 ): Promise<Question> {
   const hanziWord = hanziWordFromSkill(skill);
-  const meaning = await lookupHanziWord(hanziWord);
+  const dictionary = await loadDictionary();
+  const meaning = dictionary.lookupHanziWord(hanziWord);
   const rowCount = 5;
   const answer: OneCorrectPairQuestionAnswer = {
     as: [{ kind: `hanzi`, value: hanziFromHanziWord(hanziWord) }],
@@ -88,7 +88,8 @@ export async function shouldOmitHanziWord(
   hanziWord: HanziWord,
   ctx: WrongAnswersQuizContext,
 ): Promise<boolean> {
-  const meaning = await lookupHanziWord(hanziWord);
+  const dictionary = await loadDictionary();
+  const meaning = dictionary.lookupHanziWord(hanziWord);
   if (meaning == null) {
     return true;
   }
@@ -130,12 +131,15 @@ export async function addToQuizContext(
   hanziWord: HanziWord,
   ctx: WrongAnswersQuizContext,
 ): Promise<void> {
-  const hanziWordMeaning = await lookupHanziWord(hanziWord);
+  const dictionary = await loadDictionary();
+  const hanziWordMeaning = dictionary.lookupHanziWord(hanziWord);
   if (!hanziWordMeaning) {
     return;
   }
 
-  for (const [, meaning] of await lookupHanzi(hanziFromHanziWord(hanziWord))) {
+  for (const [, meaning] of dictionary.lookupHanzi(
+    hanziFromHanziWord(hanziWord),
+  )) {
     for (const gloss of meaning.gloss) {
       ctx.usedGlosses.add(gloss);
     }

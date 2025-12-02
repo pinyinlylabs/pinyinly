@@ -37,7 +37,7 @@ describe(
 
     test(`works for all valid dictionary items`, async () => {
       const dictionary = await loadDictionary();
-      const sample = [...dictionary].filter(
+      const sample = dictionary.allEntries.filter(
         ([, meaning]) => meaning.pinyin != null,
       );
 

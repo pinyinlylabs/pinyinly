@@ -3,8 +3,7 @@ import {
   decomposeHanzi,
   hanziFromHanziWord,
   loadCharacters,
-  lookupHanzi,
-  lookupHanziWord,
+  loadDictionary,
 } from "@/dictionary/dictionary";
 import { startPerformanceMilestones } from "@/util/devtools";
 import {
@@ -171,6 +170,7 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
   const deps: Skill[] = [];
   const skillKind = skillKindFromSkill(skill);
   const characters = await loadCharacters();
+  const dictionary = await loadDictionary();
 
   switch (skillKind) {
     case SkillKind.GlossToHanziWord: {
@@ -236,7 +236,7 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
       const hanzi = hanziFromHanziWord(hanziWord);
 
       // Make sure it's valid to learn pinyin for this hanzi word.
-      const meaning = await lookupHanziWord(hanziWord);
+      const meaning = dictionary.lookupHanziWord(hanziWord);
       invariant(meaning?.pinyin != null, `no pinyin for ${hanziWord}`);
 
       // Learn the Hanzi -> Gloss first. Knowing the meaning of the character
@@ -250,7 +250,7 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
         for (const character of characters) {
           // We only have a character, but need a hanzi word to learn. So make
           // the best guess for the hanzi word to learn.
-          for (const [charHanziWord, charMeaning] of await lookupHanzi(
+          for (const [charHanziWord, charMeaning] of dictionary.lookupHanzi(
             character,
           )) {
             if (charMeaning.pinyin != null) {
@@ -340,7 +340,8 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
 async function hackyGuessHanziWordToLearn(
   hanzi: HanziText,
 ): Promise<DeepReadonly<HanziWordWithMeaning> | undefined> {
-  const hanziWords = await lookupHanzi(hanzi);
+  const dictionary = await loadDictionary();
+  const hanziWords = dictionary.lookupHanzi(hanzi);
   for (const item of hanziWords) {
     return item;
   }

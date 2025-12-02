@@ -807,7 +807,7 @@ const wikiCharacterComponentSchema = z.object({
    * be populated, but in some cases the strokes don't form a valid
    * character and instead are combined for more creative visual reasons.
    */
-  hanzi: z.string().optional(),
+  hanzi: hanziCharacterSchema.optional(),
   label: z.string().optional(),
   /**
    * Comma-separated list of stroke indices (0-based) for strokes that are
