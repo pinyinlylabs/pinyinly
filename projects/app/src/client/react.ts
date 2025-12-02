@@ -1,5 +1,5 @@
 import type { FunctionComponent, ReactElement, ReactNode, Ref } from "react";
-import { Children, isValidElement } from "react";
+import { Children, cloneElement, isValidElement } from "react";
 import type { PropsOf } from "./ui/types";
 
 export function mergeRefs<T>(...refs: (Ref<T> | undefined)[]): Ref<T> {
@@ -72,4 +72,18 @@ export function pickChildren<
     ReactElement<PropsOf<typeof type2>> | undefined,
     ReactElement<PropsOf<typeof type3>> | undefined,
   ];
+}
+
+export function intersperse<T extends ReactNode>(
+  items: readonly T[],
+  sep: ReactElement,
+) {
+  const result: ReactNode[] = [];
+  for (let i = 0; i < items.length; i++) {
+    result.push(items[i]);
+    if (i < items.length - 1) {
+      result.push(cloneElement(sep, { key: `intersperse-${i}` }));
+    }
+  }
+  return result;
 }
