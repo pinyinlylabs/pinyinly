@@ -1,4 +1,3 @@
-import type { IdsNode } from "#data/hanzi.ts";
 import {
   flattenIds,
   idsNodeToString,
@@ -11,6 +10,7 @@ import type {
   HanziCharacter,
   HanziText,
   HanziWord,
+  IdsNode,
   PinyinPronunciationSpaceSeparated,
 } from "#data/model.ts";
 import { pinyinPronunciationDisplayText } from "#data/pinyin.ts";

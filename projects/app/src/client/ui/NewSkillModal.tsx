@@ -1,6 +1,6 @@
 /* eslint-disable react/display-name */
+import type { HanziWordSkill, Skill } from "@/data/model";
 import { SkillKind } from "@/data/model";
-import type { HanziWordSkill, Skill } from "@/data/rizzleSchema";
 import { hanziWordFromSkill, skillKindFromSkill } from "@/data/skills";
 import { hanziFromHanziWord } from "@/dictionary/dictionary";
 import { useState } from "react";

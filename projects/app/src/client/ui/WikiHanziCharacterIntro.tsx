@@ -1,4 +1,4 @@
-import type { WikiCharacterData } from "@/data/hanzi";
+import type { WikiCharacterData } from "@/data/model";
 import type { HanziWordWithMeaning } from "@/dictionary/dictionary";
 import { hanziFromHanziWord, loadDictionary } from "@/dictionary/dictionary";
 import { use } from "react";

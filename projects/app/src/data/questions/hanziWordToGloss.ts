@@ -13,12 +13,12 @@ import shuffle from "lodash/shuffle";
 import type { DeepReadonly } from "ts-essentials";
 import type {
   HanziWord,
+  HanziWordSkill,
   OneCorrectPairQuestionAnswer,
   OneCorrectPairQuestionChoice,
   Question,
 } from "../model";
 import { QuestionKind } from "../model";
-import type { HanziWordSkill } from "../rizzleSchema";
 import { hanziWordFromSkill } from "../skills";
 import { oneCorrectPairQuestionInvariant } from "./oneCorrectPair";
 

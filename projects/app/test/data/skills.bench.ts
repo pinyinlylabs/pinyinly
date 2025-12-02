@@ -1,6 +1,5 @@
-import type { SrsStateType } from "#data/model.ts";
+import type { Skill, SrsStateType } from "#data/model.ts";
 import { SkillKind } from "#data/model.ts";
-import type { Skill } from "#data/rizzleSchema.ts";
 import { rSkillKind } from "#data/rizzleSchema.ts";
 import type { LatestSkillRating, SkillLearningGraph } from "#data/skills.ts";
 import { skillReviewQueue } from "#data/skills.ts";

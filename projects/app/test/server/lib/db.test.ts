@@ -1,4 +1,4 @@
-import type { Skill } from "#data/rizzleSchema.ts";
+import type { Skill } from "#data/model.ts";
 import { srsStateFromFsrsState } from "#data/rizzleSchema.ts";
 import { glossToHanziWord } from "#data/skills.ts";
 import type { Drizzle } from "#server/lib/db.ts";

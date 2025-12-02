@@ -2,11 +2,11 @@ import { loadDictionary } from "@/dictionary/dictionary";
 import { invariant } from "@pinyinly/lib/invariant";
 import type {
   HanziGlossMistakeType,
+  HanziWordSkill,
   HanziWordToGlossQuestion,
   MistakeType,
 } from "../model";
 import { MistakeKind, QuestionKind } from "../model";
-import type { HanziWordSkill } from "../rizzleSchema";
 import { hanziWordFromSkill } from "../skills";
 
 export async function hanziWordToGlossTypedQuestionOrThrow(

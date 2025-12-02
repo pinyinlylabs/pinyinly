@@ -1,4 +1,4 @@
-import type { Question } from "./model";
+import type { HanziWordSkill, Question, Skill } from "./model";
 import { SkillKind } from "./model";
 import { hanziWordToGlossQuestionOrThrow } from "./questions/hanziWordToGloss";
 import { hanziWordToGlossTypedQuestionOrThrow } from "./questions/hanziWordToGlossTyped";
@@ -6,7 +6,6 @@ import { hanziWordToPinyinQuestionOrThrow } from "./questions/hanziWordToPinyin"
 import { hanziWordToPinyinFinalQuestionOrThrow } from "./questions/hanziWordToPinyinFinal";
 import { hanziWordToPinyinInitialQuestionOrThrow } from "./questions/hanziWordToPinyinInitial";
 import { hanziWordToPinyinToneQuestionOrThrow } from "./questions/hanziWordToPinyinTone";
-import type { HanziWordSkill, Skill } from "./rizzleSchema";
 import { skillKindFromSkill } from "./skills";
 
 export async function generateQuestionForSkillOrThrow(

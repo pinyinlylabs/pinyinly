@@ -21,13 +21,13 @@ import type {
   HanziCharacter,
   HanziText,
   HanziWord,
+  HanziWordSkill,
   OneCorrectPairQuestion,
   OneCorrectPairQuestionAnswer,
   OneCorrectPairQuestionChoice,
   PinyinSyllable,
 } from "../model";
 import { QuestionKind } from "../model";
-import type { HanziWordSkill } from "../rizzleSchema";
 import { hanziWordFromSkill } from "../skills";
 import {
   hanziOrPinyinSyllableCount,

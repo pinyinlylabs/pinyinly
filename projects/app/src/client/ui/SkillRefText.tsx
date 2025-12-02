@@ -1,11 +1,11 @@
-import { SkillKind } from "@/data/model";
 import type {
   DeprecatedSkill,
   HanziWordSkill,
   PinyinFinalAssociationSkill,
   PinyinInitialAssociationSkill,
   Skill,
-} from "@/data/rizzleSchema";
+} from "@/data/model";
+import { SkillKind } from "@/data/model";
 import {
   finalFromPinyinFinalAssociationSkill,
   hanziWordFromSkill,

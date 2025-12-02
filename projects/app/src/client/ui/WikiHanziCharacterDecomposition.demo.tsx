@@ -1,5 +1,4 @@
-import type { WikiCharacterData } from "@/data/hanzi";
-import type { HanziCharacter } from "@/data/model";
+import type { HanziCharacter, WikiCharacterData } from "@/data/model";
 import { View } from "react-native";
 import { WikiHanziCharacterDecomposition } from "./WikiHanziCharacterDecomposition";
 

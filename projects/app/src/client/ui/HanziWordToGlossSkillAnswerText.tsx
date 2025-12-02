@@ -1,4 +1,4 @@
-import type { HanziWordSkill } from "@/data/rizzleSchema";
+import type { HanziWordSkill } from "@/data/model";
 import { hanziWordFromSkill } from "@/data/skills";
 import { Text } from "react-native";
 import { Pylymark } from "./Pylymark";
