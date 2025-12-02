@@ -1,3 +1,4 @@
+import { intersperse } from "#client/react.ts";
 import {
   flattenIds,
   idsNodeToString,
@@ -60,14 +61,7 @@ import chunk from "lodash/chunk.js";
 import isEqual from "lodash/isEqual.js";
 import path from "node:path";
 import type { ReactNode } from "react";
-import {
-  Children,
-  Fragment,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { Children, useCallback, useEffect, useMemo, useState } from "react";
 import type { DeepReadonly } from "ts-essentials";
 import yargs from "yargs";
 import { z } from "zod/v4";
@@ -894,14 +888,7 @@ const HanziWordEditor = ({
 const Shortcuts = ({ children }: { children: ReactNode }) => {
   const nonNullChilds = Children.map(children, (child) => child);
   return nonNullChilds == null || nonNullChilds.length === 0 ? null : (
-    <Box gap={1}>
-      {nonNullChilds.map((child, index) => (
-        <Fragment key={index}>
-          {index > 0 ? <Text dimColor>•</Text> : null}
-          {child}
-        </Fragment>
-      ))}
-    </Box>
+    <Box gap={1}>{intersperse(nonNullChilds, <Text dimColor>•</Text>)}</Box>
   );
 };
 
@@ -2074,14 +2061,7 @@ const DictionaryHanziWordEntry = ({
   const flagElement = useMemo(() => {
     const nonNullChilds = Children.map(flags, (child) => child);
     return nonNullChilds == null || nonNullChilds.length === 0 ? null : (
-      <Box gap={1}>
-        {nonNullChilds.map((child, index) => (
-          <Fragment key={index}>
-            {index > 0 ? <Text>{` `}</Text> : null}
-            {child}
-          </Fragment>
-        ))}
-      </Box>
+      <Box gap={1}>{intersperse(nonNullChilds, <Text>{` `}</Text>)}</Box>
     );
   }, [flags]);
 
