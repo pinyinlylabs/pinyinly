@@ -143,7 +143,7 @@ describe(`character.json files`, async () => {
         characterStrokeCount(characterData) <= 4 ||
         meanings.length === 0 ||
         isComponentFormHanzi(character) ||
-        characterData.traditionalFormOf != null ||
+        characterData.simplifiedForm != null ||
         atomicCharacters.has(character)
       ) {
         continue;

@@ -400,7 +400,7 @@ export interface PinyinFinalAssociation {
   name: string;
 }
 
-const wikiCharacterComponentSchema = z.object({
+const wikiCharacterComponentSchema = z.strictObject({
   /**
    * The hanzi character (if any) formed by the strokes. Usually this can
    * be populated, but in some cases the strokes don't form a valid
@@ -561,7 +561,7 @@ export type WikiCharacterDecomposition = IdsNode<WikiCharacterComponent>;
 /**
  * Schema for character.json files.
  */
-export const wikiCharacterDataSchema = z.object({
+export const wikiCharacterDataSchema = z.strictObject({
   /**
    * The hanzi character represented by this character (e.g. 看).
    */
@@ -579,7 +579,7 @@ export const wikiCharacterDataSchema = z.object({
    * The property is used on traditional characters because it's expected there
    * are fewer of those in the dataset since this app focuses on Mandarin.
    */
-  traditionalFormOf: hanziCharacterSchema.optional(),
+  simplifiedForm: hanziCharacterSchema.optional(),
   /**
    * If this character is a component form of another character, that hanzi.
    */
@@ -607,7 +607,7 @@ export const wikiCharacterDataSchema = z.object({
    * intended for beginner learners and optimised for mnemonic usefulness.
    */
   mnemonic: z
-    .object({
+    .strictObject({
       /**
        * The layout of the components. The first element is the combining
        * operator, and the remaining are the components for each slot.
@@ -615,7 +615,7 @@ export const wikiCharacterDataSchema = z.object({
       components: wikiCharacterDecompositionSchema,
       stories: z
         .array(
-          z.object({
+          z.strictObject({
             gloss: z.string(),
             story: z.string(),
             /**
@@ -624,7 +624,7 @@ export const wikiCharacterDataSchema = z.object({
              */
             children: z
               .array(
-                z.object({
+                z.strictObject({
                   gloss: z.string(),
                   story: z.string(),
                 }),
