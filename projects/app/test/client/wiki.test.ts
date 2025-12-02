@@ -1,11 +1,11 @@
-import type { WikiGraphemeData } from "#data/hanzi.js";
+import type { WikiCharacterData } from "#data/hanzi.js";
 import {
+  characterStrokeCount,
   componentToString,
-  graphemeStrokeCount,
   idsNodeToString,
-  isHanziGrapheme,
+  isHanziCharacter,
   walkIdsNodeLeafs,
-  wikiGraphemeDataSchema,
+  wikiCharacterDataSchema,
 } from "#data/hanzi.js";
 import type { HanziText } from "#data/model.js";
 import type { CharactersKey, CharactersValue } from "#dictionary/dictionary.js";
@@ -55,9 +55,7 @@ describe(`/meaning.mdx files`, async () => {
 
   const data = meaningFilePaths.map((filePath) => {
     const hanzi = path.basename(path.dirname(filePath)) as HanziText;
-    const isGrapheme = isHanziGrapheme(hanzi);
-    const isStructuralGrapheme = isStructuralHanzi(hanzi);
-    const isComponentFormGrapheme = isComponentFormHanzi(hanzi);
+    const isStructural = isStructuralHanzi(hanzi);
     const isInDictionary = hanziMap.has(hanzi);
     const projectRelPath = path.relative(projectRoot, filePath);
     const hasMdx = memoize0(() => existsSync(filePath));
@@ -65,9 +63,7 @@ describe(`/meaning.mdx files`, async () => {
 
     return {
       hanzi,
-      isGrapheme,
-      isStructuralGrapheme,
-      isComponentFormGrapheme,
+      isStructural,
       isInDictionary,
       projectRelPath,
       hasMdx,
@@ -77,18 +73,11 @@ describe(`/meaning.mdx files`, async () => {
   });
 
   test(`existence`, () => {
-    for (const {
-      hanzi,
-      isGrapheme,
-      isStructuralGrapheme,
-      isComponentFormGrapheme,
-      hasMdx,
-      isInDictionary,
-    } of data) {
+    for (const { hanzi, isStructural, hasMdx, isInDictionary } of data) {
       if (
-        isGrapheme &&
-        !isStructuralGrapheme &&
-        !isComponentFormGrapheme &&
+        isHanziCharacter(hanzi) &&
+        !isStructural &&
+        !isComponentFormHanzi(hanzi) &&
         isInDictionary
       ) {
         expect.soft(hasMdx(), hanzi).toBeTruthy();
@@ -96,15 +85,15 @@ describe(`/meaning.mdx files`, async () => {
     }
   });
 
-  test(`should contain a <WikiHanziGraphemeDecomposition>`, () => {
-    for (const { hanzi, isGrapheme, hasMdx, getMdx } of data) {
-      if (isGrapheme && hasMdx()) {
+  test(`should contain a <WikiHanziCharacterDecomposition>`, () => {
+    for (const { hanzi, hasMdx, getMdx } of data) {
+      if (isHanziCharacter(hanzi) && hasMdx()) {
         const mdx = getMdx();
-        const match = [...mdx.matchAll(/<WikiHanziGraphemeDecomposition\s+/g)];
+        const match = [...mdx.matchAll(/<WikiHanziCharacterDecomposition\s+/g)];
         expect
           .soft(
             match.length,
-            `${hanzi} MDX does not have exactly one <WikiHanziGraphemeDecomposition> component`,
+            `${hanzi} MDX does not have exactly one <WikiHanziCharacterDecomposition> component`,
           )
           .toEqual(1);
       }
@@ -113,13 +102,13 @@ describe(`/meaning.mdx files`, async () => {
 });
 
 describe(`character.json files`, async () => {
-  const getDataForGrapheme = memoize1(
-    (grapheme: string): WikiGraphemeData | undefined => {
-      const filePath = path.join(wikiDir, grapheme, `character.json`);
+  const getCharacterData = memoize1(
+    (character: string): WikiCharacterData | undefined => {
+      const filePath = path.join(wikiDir, character, `character.json`);
       if (existsSync(filePath)) {
         try {
           const json = JSON.parse(readFileSync(filePath, `utf-8`));
-          return wikiGraphemeDataSchema.parse(json);
+          return wikiCharacterDataSchema.parse(json);
         } catch (error) {
           throw new Error(`failed to read and parse ${filePath}`, {
             cause: error,
@@ -128,47 +117,47 @@ describe(`character.json files`, async () => {
       }
     },
   );
-  const graphemeFiles = await glob(path.join(wikiDir, `*/`)).then((dirPaths) =>
+  const characterFiles = await glob(path.join(wikiDir, `*/`)).then((dirPaths) =>
     dirPaths.flatMap((dirPath) => {
-      const grapheme = path.basename(dirPath) as HanziText;
-      const filePath = path.join(wikiDir, grapheme, `character.json`);
-      return isHanziGrapheme(grapheme)
+      const character = path.basename(dirPath) as HanziText;
+      const filePath = path.join(wikiDir, character, `character.json`);
+      return isHanziCharacter(character)
         ? ([
             {
-              grapheme,
-              graphemeData: nonNullable(getDataForGrapheme(grapheme)),
+              character,
+              characterData: nonNullable(getCharacterData(character)),
               filePath,
             },
           ] as const)
         : [];
     }),
   );
-  expect(graphemeFiles.length).toBeGreaterThan(0);
+  expect(characterFiles.length).toBeGreaterThan(0);
   const isComponentFormHanzi = await getIsComponentFormHanzi();
 
-  test(`graphemes in the dictionary with 5+ strokes have mnemonic components`, async () => {
-    const atomicGraphemes = new Set([`非`, `臣`, `襾`, `舟`, `母`]);
+  test(`characters in the dictionary with 5+ strokes have mnemonic components`, async () => {
+    const atomicCharacters = new Set([`非`, `臣`, `襾`, `舟`, `母`]);
 
-    for (const { grapheme, graphemeData } of graphemeFiles) {
-      const meanings = await lookupHanzi(grapheme);
+    for (const { character, characterData } of characterFiles) {
+      const meanings = await lookupHanzi(character);
       if (
-        graphemeStrokeCount(graphemeData) <= 4 ||
+        characterStrokeCount(characterData) <= 4 ||
         meanings.length === 0 ||
-        isComponentFormHanzi(grapheme) ||
-        graphemeData.traditionalFormOf != null ||
-        atomicGraphemes.has(grapheme)
+        isComponentFormHanzi(character) ||
+        characterData.traditionalFormOf != null ||
+        atomicCharacters.has(character)
       ) {
         continue;
       }
 
       expect
-        .soft(graphemeData.mnemonic, `${grapheme} to have mnemonic`)
+        .soft(characterData.mnemonic, `${character} to have mnemonic`)
         .toBeDefined();
-      if (graphemeData.mnemonic != null) {
+      if (characterData.mnemonic != null) {
         expect
           .soft(
-            [...walkIdsNodeLeafs(graphemeData.mnemonic.components)].length,
-            `${grapheme} missing 2+ mnemonic components`,
+            [...walkIdsNodeLeafs(characterData.mnemonic.components)].length,
+            `${character} missing 2+ mnemonic components`,
           )
           .toBeGreaterThanOrEqual(2);
       }
@@ -176,22 +165,22 @@ describe(`character.json files`, async () => {
   });
 
   test(`component strokes conformance`, async () => {
-    for (const { grapheme, graphemeData } of graphemeFiles) {
-      if (graphemeData.mnemonic?.components) {
+    for (const { character, characterData } of characterFiles) {
+      if (characterData.mnemonic?.components) {
         for (const component of walkIdsNodeLeafs(
-          graphemeData.mnemonic.components,
+          characterData.mnemonic.components,
         )) {
           const strokeIndices = parseIndexRanges(component.strokes);
           // no duplicate stroke indicies in components (e.g. ❌ 0-3,2)
           expect
             .soft(() => {
               uniqueInvariant(strokeIndices);
-            }, grapheme)
+            }, character)
             .not.toThrow();
 
-          if (Array.isArray(graphemeData.strokes)) {
+          if (Array.isArray(characterData.strokes)) {
             // at least one stroke if there's SVG stroke data
-            expect.soft(strokeIndices.length, grapheme).toBeGreaterThan(0);
+            expect.soft(strokeIndices.length, character).toBeGreaterThan(0);
           }
         }
       }
@@ -199,16 +188,16 @@ describe(`character.json files`, async () => {
   });
 
   test(`component index ranges are normalized`, () => {
-    for (const { grapheme, graphemeData } of graphemeFiles) {
-      if (graphemeData.mnemonic?.components) {
+    for (const { character, characterData } of characterFiles) {
+      if (characterData.mnemonic?.components) {
         for (const [i, component] of [
-          ...walkIdsNodeLeafs(graphemeData.mnemonic.components),
+          ...walkIdsNodeLeafs(characterData.mnemonic.components),
         ].entries()) {
           const normalized = normalizeIndexRanges(component.strokes);
           expect
             .soft(
               component.strokes,
-              `${grapheme} component ${i} strokes are not normalized`,
+              `${character} component ${i} strokes are not normalized`,
             )
             .toEqual(normalized);
         }
@@ -235,13 +224,13 @@ describe(`character.json files`, async () => {
       bannedCharacters.add(char);
     }
 
-    for (const { grapheme, graphemeData } of graphemeFiles) {
-      if (graphemeData.mnemonic?.components) {
+    for (const { character, characterData } of characterFiles) {
+      if (characterData.mnemonic?.components) {
         for (const component of walkIdsNodeLeafs(
-          graphemeData.mnemonic.components,
+          characterData.mnemonic.components,
         )) {
           expect
-            .soft(bannedCharacters, grapheme)
+            .soft(bannedCharacters, character)
             .not.toContain(component.hanzi);
         }
       }
@@ -249,17 +238,17 @@ describe(`character.json files`, async () => {
   });
 
   test(`number of mnemonic stories matches number of meanings for hanzi`, async () => {
-    for (const { grapheme, graphemeData } of graphemeFiles) {
-      if (graphemeData.mnemonic?.stories) {
-        const hanziWordMeanings = await lookupHanzi(grapheme);
+    for (const { character, characterData } of characterFiles) {
+      if (characterData.mnemonic?.stories) {
+        const hanziWordMeanings = await lookupHanzi(character);
 
-        const storiesCount = graphemeData.mnemonic.stories.length;
+        const storiesCount = characterData.mnemonic.stories.length;
         const meaningsCount = hanziWordMeanings.length;
 
         expect
           .soft(
             storiesCount,
-            `${grapheme} has ${storiesCount} mnemonic stories but ${meaningsCount} meanings in dictionary`,
+            `${character} has ${storiesCount} mnemonic stories but ${meaningsCount} meanings in dictionary`,
           )
           .toBe(meaningsCount);
       }
@@ -267,17 +256,17 @@ describe(`character.json files`, async () => {
   });
 
   test(`all strokes are covered by mnemonic components`, async () => {
-    for (const { grapheme, graphemeData } of graphemeFiles) {
-      if (!Array.isArray(graphemeData.strokes)) {
+    for (const { character, characterData } of characterFiles) {
+      if (!Array.isArray(characterData.strokes)) {
         // There's no point having components referencing strokes if we don't
         // have any SVG stroke paths to draw.
         continue;
       }
 
-      if (graphemeData.mnemonic?.components) {
+      if (characterData.mnemonic?.components) {
         const allComponentStrokes = new Set<number>();
         for (const component of walkIdsNodeLeafs(
-          graphemeData.mnemonic.components,
+          characterData.mnemonic.components,
         )) {
           const strokeIndices = parseIndexRanges(component.strokes);
           for (const index of strokeIndices) {
@@ -285,7 +274,7 @@ describe(`character.json files`, async () => {
           }
         }
 
-        const totalStrokes = graphemeStrokeCount(graphemeData);
+        const totalStrokes = characterStrokeCount(characterData);
         const expectedStrokes = Array.from(
           { length: totalStrokes },
           (_, i) => i,
@@ -295,7 +284,7 @@ describe(`character.json files`, async () => {
           expect
             .soft(
               allComponentStrokes.has(strokeIndex),
-              `${grapheme} stroke ${strokeIndex} is not covered by any mnemonic component`,
+              `${character} stroke ${strokeIndex} is not covered by any mnemonic component`,
             )
             .toBe(true);
         }
@@ -304,19 +293,19 @@ describe(`character.json files`, async () => {
   });
 
   test(`mnemonic component strokes match the hanzi stroke count`, async () => {
-    for (const { grapheme, graphemeData } of graphemeFiles) {
-      if (graphemeData.mnemonic?.components) {
+    for (const { character, characterData } of characterFiles) {
+      if (characterData.mnemonic?.components) {
         for (const [i, component] of [
-          ...walkIdsNodeLeafs(graphemeData.mnemonic.components),
+          ...walkIdsNodeLeafs(characterData.mnemonic.components),
         ].entries()) {
           const primaryHanzi = component.hanzi?.split(`,`)[0];
           if (primaryHanzi != null) {
-            const hanziData = getDataForGrapheme(primaryHanzi);
+            const hanziData = getCharacterData(primaryHanzi);
 
             expect
               .soft(
                 hanziData,
-                `${grapheme} component ${i} (${primaryHanzi}) data`,
+                `${character} component ${i} (${primaryHanzi}) data`,
               )
               .toBeTruthy();
             if (hanziData == null) {
@@ -329,7 +318,7 @@ describe(`character.json files`, async () => {
 
             if (
               claimedStrokeCount === 0 &&
-              !Array.isArray(graphemeData.strokes)
+              !Array.isArray(characterData.strokes)
             ) {
               // There's no point having components referencing strokes if we don't
               // have any SVG stroke paths to draw.
@@ -337,12 +326,12 @@ describe(`character.json files`, async () => {
             }
 
             const expectedStrokeCount =
-              graphemeStrokeCount(hanziData) + (component.strokeDiff ?? 0);
+              characterStrokeCount(hanziData) + (component.strokeDiff ?? 0);
 
             expect
               .soft(
                 claimedStrokeCount,
-                `${grapheme} component ${i} (${primaryHanzi}) stroke count does not match character data`,
+                `${character} component ${i} (${primaryHanzi}) stroke count does not match character data`,
               )
               .toEqual(expectedStrokeCount);
           }
@@ -356,22 +345,22 @@ describe(`character.json files`, async () => {
     const sourceFontUsage = new Map<(typeof fonts)[number], string[]>();
     const subsetFontMissingChars = new Map<(typeof fonts)[number], string[]>();
 
-    for (const { grapheme } of graphemeFiles) {
-      const codePoint = nonNullable(grapheme.codePointAt(0));
-      const codePointHuman = `${grapheme} (U+${codePoint.toString(16)})`;
+    for (const { character } of characterFiles) {
+      const codePoint = nonNullable(character.codePointAt(0));
+      const codePointHuman = `${character} (U+${codePoint.toString(16)})`;
 
       const hasFontGlyph = fonts.some((font) => {
         // Check the source font for the glyph, then ensure it's present in the subset font.
         const isInSource = font.source.hasGlyphForCodePoint(codePoint);
         if (isInSource) {
           const usage = sourceFontUsage.get(font) ?? [];
-          usage.push(grapheme);
+          usage.push(character);
           sourceFontUsage.set(font, usage);
 
           const subsetHasGlyph = font.subset?.hasGlyphForCodePoint(codePoint);
           if (subsetHasGlyph !== true) {
             const missing = subsetFontMissingChars.get(font) ?? [];
-            missing.push(grapheme);
+            missing.push(character);
             subsetFontMissingChars.set(font, missing);
           }
 
@@ -414,18 +403,18 @@ describe(`character.json files`, async () => {
   test(`consistency with characters.asset.json`, async () => {
     const expected = new Map<CharactersKey, CharactersValue>();
 
-    for (const { grapheme, graphemeData } of graphemeFiles) {
-      expected.set(grapheme, {
+    for (const { character, characterData } of characterFiles) {
+      expected.set(character, {
         decomposition:
-          graphemeData.mnemonic == null
+          characterData.mnemonic == null
             ? undefined
             : idsNodeToString(
-                graphemeData.mnemonic.components,
+                characterData.mnemonic.components,
                 componentToString,
               ),
-        componentFormOf: graphemeData.componentFormOf,
-        isStructural: graphemeData.isStructural,
-        canonicalForm: graphemeData.canonicalForm,
+        componentFormOf: characterData.componentFormOf,
+        isStructural: characterData.isStructural,
+        canonicalForm: characterData.canonicalForm,
       });
     }
 

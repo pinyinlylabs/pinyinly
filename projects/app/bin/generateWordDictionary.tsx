@@ -2,7 +2,7 @@ import type { IdsNode } from "#data/hanzi.ts";
 import {
   flattenIds,
   idsNodeToString,
-  isHanziGrapheme,
+  isHanziCharacter,
   parseIds,
   strokeCountPlaceholderOrNull,
   walkIdsNodeLeafs,
@@ -21,7 +21,7 @@ import type {
   HanziWordWithMeaning,
 } from "#dictionary/dictionary.ts";
 import {
-  allHanziGraphemes,
+  allHanziCharacters,
   allHsk1HanziWords,
   buildHanziWord,
   dictionarySchema,
@@ -137,7 +137,7 @@ function decomp(char: HanziCharacter) {
 }
 // Load all the root words we want to include in the dictionary, this will later
 // expanded to include all the components of each word.
-for (const hanzi of await allHanziGraphemes()) {
+for (const hanzi of await allHanziCharacters()) {
   decomp(hanzi);
 }
 
@@ -643,7 +643,7 @@ async function openAiHanziWordGlossHintQuery(
   invariant(meaning != null);
   const hanzi = hanziFromHanziWord(hanziWord);
 
-  if (isHanziGrapheme(hanzi)) {
+  if (isHanziCharacter(hanzi)) {
     const componentGlosses = new Map<string, Set<string>>();
     let hanziIds: string = hanzi;
 

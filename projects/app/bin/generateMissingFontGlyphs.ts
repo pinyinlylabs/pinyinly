@@ -3,7 +3,7 @@ import {
   strokeCountPlaceholderOrNull,
   walkIdsNodeLeafs,
 } from "#data/hanzi.ts";
-import { allHanziGraphemes, loadCharacters } from "#dictionary/dictionary.ts";
+import { loadCharacters } from "#dictionary/dictionary.ts";
 import { unicodeShortIdentifier } from "#util/unicode.ts";
 import { glob, writeFile } from "@pinyinly/lib/fs";
 import { invariant } from "@pinyinly/lib/invariant";
@@ -33,17 +33,15 @@ invariant(pingFangCollection.type === `TTC`, `expected a TTC font`);
 const pingFang = pingFangCollection.fonts[0];
 invariant(pingFang != null);
 
-const allGraphemes = await allHanziGraphemes();
-
 const allComponents = new Set<string>();
 const charactersData = await loadCharacters();
 
-for (const grapheme of allGraphemes) {
-  allComponents.add(grapheme);
-  const ids = charactersData.get(grapheme)?.decomposition;
+for (const [character, characterData] of charactersData) {
+  allComponents.add(character);
+  const ids = characterData.decomposition;
   invariant(
     ids != null,
-    `character "${grapheme}" (${unicodeShortIdentifier(grapheme)}) has no decomposition`,
+    `character "${character}" (${unicodeShortIdentifier(character)}) has no decomposition`,
   );
   const idsNode = parseIds(ids);
   for (const leaf of walkIdsNodeLeafs(idsNode)) {

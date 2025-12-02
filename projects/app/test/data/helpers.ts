@@ -1,4 +1,4 @@
-import { isHanziGrapheme } from "#data/hanzi.ts";
+import { isHanziCharacter } from "#data/hanzi.ts";
 import type {
   HanziCharacter,
   HanziGlossMistakeType,
@@ -123,7 +123,7 @@ export const 汉字 = (strings: TemplateStringsArray): HanziCharacter => {
   invariant(strings.length === 1, `汉字 must be a single string`);
   const string = nonNullable(strings[0]) as HanziText;
   invariant(
-    isHanziGrapheme(string),
+    isHanziCharacter(string),
     `汉字 must be given a single Hanzi character`,
   );
   return string;

@@ -379,16 +379,16 @@ test(`dictionary contains entries for decomposition`, async () => {
   >();
 
   for (const hanzi of await allHanziWordsHanzi()) {
-    for (const grapheme of splitHanziText(hanzi)) {
-      const lookup = await lookupHanzi(grapheme);
+    for (const character of splitHanziText(hanzi)) {
+      const lookup = await lookupHanzi(character);
       if (lookup.length === 0) {
-        mapSetAdd(unknownCharacters, grapheme, hanzi);
+        mapSetAdd(unknownCharacters, character, hanzi);
       }
 
-      for (const component of await decomposeHanzi(grapheme)) {
+      for (const component of await decomposeHanzi(character)) {
         const lookup = await lookupHanzi(component);
         if (lookup.length === 0) {
-          mapSetAdd(unknownComponents, component, grapheme);
+          mapSetAdd(unknownComponents, component, character);
         }
       }
     }

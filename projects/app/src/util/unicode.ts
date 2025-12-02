@@ -33,9 +33,9 @@ export function isNotCjkUnifiedIdeograph(char: string): boolean {
 const segmenter = new Intl.Segmenter(`en`, { granularity: `grapheme` });
 
 /**
- * Calculate the number of graphemes (leters/characters) in a string.
+ * Calculate the number of character in a string.
  */
-export const graphemeCount = lruMemoize1(
+export const characterCount = lruMemoize1(
   (text: string) => {
     let count = 0;
     for (const _ of segmenter.segment(text)) {
@@ -46,11 +46,11 @@ export const graphemeCount = lruMemoize1(
   { max: 200 },
 );
 
-export const longestTextByGraphemes = (texts: readonly string[]): string => {
+export const longestTextByCharacters = (texts: readonly string[]): string => {
   let longest = null;
   let longestLength = 0;
   for (const text of texts) {
-    const textLength = graphemeCount(text);
+    const textLength = characterCount(text);
     if (longest == null || textLength > longestLength) {
       longestLength = textLength;
       longest = text;
@@ -61,7 +61,7 @@ export const longestTextByGraphemes = (texts: readonly string[]): string => {
   return longest;
 };
 
-export const splitGraphemes = lruMemoize1(
+export const splitCharacters = lruMemoize1(
   (text: string): readonly string[] => {
     const result = [];
     for (const segment of segmenter.segment(text)) {

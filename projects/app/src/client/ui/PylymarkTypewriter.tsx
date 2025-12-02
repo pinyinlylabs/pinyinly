@@ -1,6 +1,6 @@
 import { parsePylymark } from "@/data/pylymark";
 import { hanziFromHanziWord, loadDictionary } from "@/dictionary/dictionary";
-import { splitGraphemes } from "@/util/unicode";
+import { splitCharacters } from "@/util/unicode";
 import { invariant } from "@pinyinly/lib/invariant";
 import type { ReactNode } from "react";
 import { use } from "react";
@@ -155,8 +155,8 @@ function typeChars(
   fastForward: boolean,
   result: ReactNode[] = [],
 ) {
-  for (const grapheme of splitGraphemes(text)) {
-    if (grapheme === `…`) {
+  for (const character of splitCharacters(text)) {
+    if (character === `…`) {
       // Write an ellipsis as three fullstops, to better mimic a typewriter.
       const oldDelay = clock.delay[`.`];
       clock.delay[`.`] = 100;
@@ -170,12 +170,12 @@ function typeChars(
           delay={clock.ms}
           fastForward={fastForward}
           key={result.length}
-          char={grapheme}
+          char={character}
         />,
       );
     }
 
-    clock.ms += clock.delay[grapheme] ?? clock.delayDefault;
+    clock.ms += clock.delay[character] ?? clock.delayDefault;
   }
 
   return result;

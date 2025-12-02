@@ -1,4 +1,4 @@
-import { isHanziGrapheme } from "#data/hanzi.ts";
+import { isHanziCharacter } from "#data/hanzi.ts";
 import {
   hanziWordToPinyinFinalQuestionOrThrow,
   makeQuestionContext,
@@ -97,11 +97,11 @@ describe(
     typeof hanziWordToPinyinFinalQuestionOrThrow
   >,
   async () => {
-    test(`works for all valid single grapheme hanzi`, async () => {
+    test(`works for all valid single character hanzi`, async () => {
       const dictionary = await loadDictionary();
       const sample = [...dictionary].filter(
         ([hanziWord, meaning]) =>
-          isHanziGrapheme(hanziFromHanziWord(hanziWord)) &&
+          isHanziCharacter(hanziFromHanziWord(hanziWord)) &&
           meaning.pinyin != null,
       );
 

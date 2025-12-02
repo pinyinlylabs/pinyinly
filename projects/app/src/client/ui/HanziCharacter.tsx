@@ -3,10 +3,10 @@ import { tv } from "tailwind-variants";
 import z from "zod/v4";
 import { PathCss } from "./svg";
 
-export function HanziGrapheme(props: {
+export function HanziCharacter(props: {
   strokesData: string[];
   highlightStrokes: number[];
-  highlightColor?: HanziGraphemeColor;
+  highlightColor?: HanziCharacterColor;
   className?: string;
 }) {
   const highlightedStrokes = new Set(props.highlightStrokes);
@@ -58,7 +58,7 @@ export function HanziGrapheme(props: {
   );
 }
 
-export const hanziGraphemeColorSchema = z.enum([
+export const hanziCharacterColorSchema = z.enum([
   `blue`,
   `yellow`,
   `amber`,
@@ -66,7 +66,7 @@ export const hanziGraphemeColorSchema = z.enum([
   `fg`,
 ]);
 
-export type HanziGraphemeColor = z.infer<typeof hanziGraphemeColorSchema>;
+export type HanziCharacterColor = z.infer<typeof hanziCharacterColorSchema>;
 
 const outlineClass = tv({
   base: `fill-bg-loud stroke-fg-loud`,

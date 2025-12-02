@@ -1,7 +1,7 @@
 import type { HanziCharacter, HanziText } from "@/data/model";
-import { hanziGraphemeSchema } from "@/data/model";
+import { hanziCharacterSchema } from "@/data/model";
 import { parseIndexRanges } from "@/util/indexRanges";
-import { graphemeCount, splitGraphemes } from "@/util/unicode";
+import { characterCount, splitCharacters } from "@/util/unicode";
 import { invariant } from "@pinyinly/lib/invariant";
 import { UnexpectedValueError } from "@pinyinly/lib/types";
 import { z } from "zod/v4";
@@ -640,7 +640,7 @@ export function* walkIdsNodeLeafs<T>(ids: IdsNode<T>): Generator<T> {
 }
 
 export function splitHanziText(hanziText: HanziText): HanziCharacter[] {
-  return splitGraphemes(hanziText) as HanziCharacter[];
+  return splitCharacters(hanziText) as HanziCharacter[];
 }
 
 export function strokeCountToCharacter(strokeCount: number): string {
@@ -651,12 +651,12 @@ export const radicalStrokes = [
   1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
 ];
 
-export function isHanziGrapheme(hanzi: HanziText): hanzi is HanziCharacter {
-  return hanziGraphemeCount(hanzi) === 1;
+export function isHanziCharacter(hanzi: HanziText): hanzi is HanziCharacter {
+  return hanziCharacterCount(hanzi) === 1;
 }
 
-export function hanziGraphemeCount(hanziText: HanziText): number {
-  return graphemeCount(hanziText);
+export function hanziCharacterCount(hanziText: HanziText): number {
+  return characterCount(hanziText);
 }
 
 /**
@@ -801,17 +801,17 @@ export function idsNodeToString<T>(
   }
 }
 
-const wikiGraphemeComponentSchema = z.object({
+const wikiCharacterComponentSchema = z.object({
   /**
-   * The hanzi grapheme (if any) formed by the strokes. Usually this can
+   * The hanzi character (if any) formed by the strokes. Usually this can
    * be populated, but in some cases the strokes don't form a valid
-   * grapheme and instead are combined for more creative visual reasons.
+   * character and instead are combined for more creative visual reasons.
    */
   hanzi: z.string().optional(),
   label: z.string().optional(),
   /**
    * Comma-separated list of stroke indices (0-based) for strokes that are
-   * part of this grapheme. Allows shorthand ranges (e.g. 0-2,5 is the same as
+   * part of this character. Allows shorthand ranges (e.g. 0-2,5 is the same as
    * 0,1,2,5).
    */
   strokes: z.string().default(``),
@@ -828,7 +828,9 @@ const wikiGraphemeComponentSchema = z.object({
   color: z.string().optional(),
 });
 
-export type WikiGraphemeComponent = z.infer<typeof wikiGraphemeComponentSchema>;
+export type WikiCharacterComponent = z.infer<
+  typeof wikiCharacterComponentSchema
+>;
 
 function buildIdsNodeSchema<T extends z.ZodType>(
   leafSchema: T,
@@ -874,18 +876,18 @@ function buildIdsNodeSchema<T extends z.ZodType>(
 }
 
 // TODO [zod@>=4.1.12] try refactor to use https://github.com/colinhacks/zod/issues/5089
-const wikiGraphemeDecompositionSchema = buildIdsNodeSchema(
-  wikiGraphemeComponentSchema,
+const wikiCharacterDecompositionSchema = buildIdsNodeSchema(
+  wikiCharacterComponentSchema,
 );
 
-export type WikiGraphemeDecomposition = IdsNode<WikiGraphemeComponent>;
+export type WikiCharacterDecomposition = IdsNode<WikiCharacterComponent>;
 
 /**
  * Schema for character.json files.
  */
-export const wikiGraphemeDataSchema = z.object({
+export const wikiCharacterDataSchema = z.object({
   /**
-   * The hanzi character represented by this grapheme (e.g. 看).
+   * The hanzi character represented by this character (e.g. 看).
    */
   hanzi: z.string(),
   /**
@@ -896,23 +898,23 @@ export const wikiGraphemeDataSchema = z.object({
     z.array(z.string()).describe(`SVG paths for each stroke (in order)`),
   ]),
   /**
-   * The simplified form of this grapheme, if it is a traditional form.
+   * The simplified form of this character, if it is a traditional form.
    *
-   * The property is used on traditional graphemes because it's expected there
+   * The property is used on traditional characters because it's expected there
    * are fewer of those in the dataset since this app focuses on Mandarin.
    */
-  traditionalFormOf: hanziGraphemeSchema.optional(),
+  traditionalFormOf: hanziCharacterSchema.optional(),
   /**
-   * If this grapheme is a component form of another grapheme, that hanzi.
+   * If this character is a component form of another character, that hanzi.
    */
-  componentFormOf: hanziGraphemeSchema.optional(),
+  componentFormOf: hanziCharacterSchema.optional(),
   /**
    * If this is variant of another character (for the purposes of learning),
    * point to the canonical form.
    *
    * e.g. ⺁ -> 厂
    */
-  canonicalForm: hanziGraphemeSchema.optional(),
+  canonicalForm: hanziCharacterSchema.optional(),
   isStructural: z
     .literal(true)
     .optional()
@@ -924,7 +926,7 @@ export const wikiGraphemeDataSchema = z.object({
    */
   decompositions: z.array(z.string()).optional(),
   /**
-   * The meaning mnemonic for the grapheme. This doesn't necessarily correspond
+   * The meaning mnemonic for the character. This doesn't necessarily correspond
    * to the etymological components, and their meanings can differ too. It's
    * intended for beginner learners and optimised for mnemonic usefulness.
    */
@@ -934,7 +936,7 @@ export const wikiGraphemeDataSchema = z.object({
        * The layout of the components. The first element is the combining
        * operator, and the remaining are the components for each slot.
        */
-      components: wikiGraphemeDecompositionSchema,
+      components: wikiCharacterDecompositionSchema,
       stories: z
         .array(
           z.object({
@@ -959,9 +961,9 @@ export const wikiGraphemeDataSchema = z.object({
     .optional(),
 });
 
-export type WikiGraphemeData = z.infer<typeof wikiGraphemeDataSchema>;
+export type WikiCharacterData = z.infer<typeof wikiCharacterDataSchema>;
 
-export function componentToString(component: WikiGraphemeComponent): string {
+export function componentToString(component: WikiCharacterComponent): string {
   if (`hanzi` in component && component.hanzi != null) {
     return component.hanzi;
   } else if (`strokes` in component) {
@@ -970,8 +972,8 @@ export function componentToString(component: WikiGraphemeComponent): string {
   throw new Error(`Invalid component format`);
 }
 
-export function graphemeStrokeCount(graphemeData: WikiGraphemeData): number {
-  return typeof graphemeData.strokes === `number`
-    ? graphemeData.strokes
-    : graphemeData.strokes.length;
+export function characterStrokeCount(characterData: WikiCharacterData): number {
+  return typeof characterData.strokes === `number`
+    ? characterData.strokes
+    : characterData.strokes.length;
 }

@@ -164,7 +164,7 @@ export const pylyMarkSchema = z.string();
 export const hanziWordSchema = z.custom<HanziWord>(
   (x) => typeof x === `string`,
 );
-export const hanziGraphemeSchema = z.custom<HanziCharacter>(
+export const hanziCharacterSchema = z.custom<HanziCharacter>(
   (x) => typeof x === `string`,
 );
 

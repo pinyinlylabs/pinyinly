@@ -1,4 +1,4 @@
-import { hanziGraphemeCount } from "@/data/hanzi";
+import { hanziCharacterCount } from "@/data/hanzi";
 import type {
   HanziGlossMistakeType,
   HanziPinyinMistakeType,
@@ -33,7 +33,7 @@ export function hanziOrPinyinSyllableCount(
 ): number {
   switch (choice.kind) {
     case `hanzi`: {
-      return hanziGraphemeCount(choice.value);
+      return hanziCharacterCount(choice.value);
     }
     case `pinyin`: {
       return choice.value.length;

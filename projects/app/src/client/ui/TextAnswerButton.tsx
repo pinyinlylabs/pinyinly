@@ -1,4 +1,4 @@
-import { graphemeCount } from "@/util/unicode";
+import { characterCount } from "@/util/unicode";
 import type { PropsOf } from "@pinyinly/lib/types";
 import type { ReactNode } from "react";
 import { useState } from "react";
@@ -466,7 +466,7 @@ const textClass = tv({
 export function textAnswerButtonFontSize(
   text: string,
 ): TextAnswerButtonFontSize {
-  const length = graphemeCount(text);
+  const length = characterCount(text);
   return length <= 10
     ? (`xl` as const)
     : length <= 20

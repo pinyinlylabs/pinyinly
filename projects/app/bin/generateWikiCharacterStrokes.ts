@@ -1,8 +1,8 @@
 import {
-  isHanziGrapheme,
+  isHanziCharacter,
   mapIdsNodeLeafs,
   parseIds,
-  wikiGraphemeDataSchema,
+  wikiCharacterDataSchema,
 } from "#data/hanzi.js";
 import type { HanziText } from "#data/model.js";
 import { normalizeIndexRanges } from "#util/indexRanges.ts";
@@ -113,15 +113,15 @@ const dictionaryDataByCharacter = await (async () => {
 
 const wikiDir = new URL(`../src/client/wiki/`, import.meta.url).pathname;
 
-const allGraphemes = await glob(`${wikiDir}/*`).then((ps) =>
+const allCharacters = await glob(`${wikiDir}/*`).then((ps) =>
   ps
     .map((p) => path.basename(p))
-    .filter((p) => isHanziGrapheme(p as HanziText)),
+    .filter((p) => isHanziCharacter(p as HanziText)),
 );
 
 invariant(existsSync(wikiDir), `wiki directory does not exist: ${wikiDir}`);
 
-for (const character of allGraphemes) {
+for (const character of allCharacters) {
   // If we're only updating specific characters, skip the rest.
   if (argv.update != null && !argv.update.includes(character)) {
     continue;
@@ -163,7 +163,7 @@ for (const character of allGraphemes) {
     //
     let existing;
     try {
-      existing = wikiGraphemeDataSchema.parse(
+      existing = wikiCharacterDataSchema.parse(
         JSON.parse(readFileSync(dataFile, `utf-8`)),
       );
     } catch (error) {
@@ -219,7 +219,7 @@ for (const character of allGraphemes) {
         mdxFile,
         `import data from "./character.json";
 
-<WikiHanziGraphemeDecomposition graphemeData={data} />
+<WikiHanziCharacterDecomposition characterData={data} />
 `,
       );
       debug(`wrote meaning.mdx for %O`, character);

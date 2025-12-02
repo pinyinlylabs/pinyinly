@@ -42,7 +42,7 @@ export function QuizDeckHanziToGlossTypedQuestion({
 
   const startTime = useMemo(() => Date.now(), []);
   const hanziWord = hanziWordFromSkill(skill);
-  const hanziGraphemes = splitHanziText(hanziFromHanziWord(hanziWord));
+  const hanziCharacters = splitHanziText(hanziFromHanziWord(hanziWord));
 
   const submit = () => {
     // First time you press the button it will grade your answer, the next time
@@ -153,7 +153,7 @@ export function QuizDeckHanziToGlossTypedQuestion({
           </View>
         </View>
         <View className="flex-row justify-center gap-2 pb-3">
-          {hanziGraphemes.map((hanzi, i) => {
+          {hanziCharacters.map((hanzi, i) => {
             return (
               <View className="items-center gap-2" key={i}>
                 {/* TODO: add pinyin to disambiguate the hanzi */}
