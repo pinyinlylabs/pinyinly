@@ -103,7 +103,7 @@ describe(
   async () => {
     test(`works for all valid single character hanzi`, async () => {
       const dictionary = await loadDictionary();
-      const sample = [...dictionary].filter(
+      const sample = dictionary.allEntries.filter(
         ([hanziWord, meaning]) =>
           isHanziCharacter(hanziFromHanziWord(hanziWord)) &&
           meaning.pinyin != null,

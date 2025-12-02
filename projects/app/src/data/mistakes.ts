@@ -2,8 +2,7 @@ import type { SrsStateType } from "@/data/model";
 import {
   hanziFromHanziOrHanziWord,
   isHanziWord,
-  lookupGloss,
-  lookupHanzi,
+  loadDictionary,
 } from "../dictionary/dictionary";
 import type { HanziGlossMistakeType, HanziPinyinMistakeType } from "./model";
 import { SrsKind } from "./model";
@@ -16,12 +15,13 @@ export async function skillsToReReviewForHanziGlossMistake(
 ): Promise<ReadonlySet<Skill>> {
   const skills = new Set<Skill>();
   const hanzi = hanziFromHanziOrHanziWord(mistake.hanziOrHanziWord);
+  const dictionary = await loadDictionary();
 
   for (const [hanziWord] of [
     // Queue all skills relevant to the gloss.
-    ...(await lookupGloss(mistake.gloss)),
+    ...dictionary.lookupGloss(mistake.gloss),
     // Queue all skills relevant to the hanzi.
-    ...(await lookupHanzi(hanzi)),
+    ...dictionary.lookupHanzi(hanzi),
   ]) {
     if (hanziWord !== mistake.hanziOrHanziWord) {
       skills.add(hanziWordToGloss(hanziWord));
@@ -35,6 +35,7 @@ export async function skillsToReReviewForHanziPinyinMistake(
   mistake: HanziPinyinMistakeType,
 ): Promise<ReadonlySet<Skill>> {
   const skills = new Set<Skill>();
+  const dictionary = await loadDictionary();
 
   if (isHanziWord(mistake.hanziOrHanziWord)) {
     // TODO: work out the appropriate skills to review in this case.
@@ -42,7 +43,7 @@ export async function skillsToReReviewForHanziPinyinMistake(
   }
 
   // Queue all skills relevant to the hanzi.
-  for (const [hanziWord] of await lookupHanzi(mistake.hanziOrHanziWord)) {
+  for (const [hanziWord] of dictionary.lookupHanzi(mistake.hanziOrHanziWord)) {
     skills.add(hanziWordToPinyinTyped(hanziWord));
   }
 

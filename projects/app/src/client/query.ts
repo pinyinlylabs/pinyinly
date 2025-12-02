@@ -19,7 +19,7 @@ import {
   allHsk1HanziWords,
   allHsk2HanziWords,
   getIsStructuralHanzi,
-  lookupHanzi,
+  loadDictionary,
 } from "@/dictionary/dictionary";
 import { devToolsSlowQuerySleepIfEnabled } from "@/util/devtools";
 import type { Rating } from "@/util/fsrs";
@@ -333,7 +333,8 @@ export const hanziMeaningsQuery = (hanzi: HanziText) =>
     queryKey: [`hanziMeanings`, hanzi],
     queryFn: async () => {
       await devToolsSlowQuerySleepIfEnabled();
-      return await lookupHanzi(hanzi);
+      const dictionary = await loadDictionary();
+      return dictionary.lookupHanzi(hanzi);
     },
     networkMode: `offlineFirst`,
     structuralSharing: false,

@@ -193,7 +193,7 @@ export const dictionarySchema = z
 
 export type Dictionary = z.infer<typeof dictionarySchema>;
 
-export const loadDictionary = memoize0(async () =>
+export const loadDictionaryJson = memoize0(async () =>
   dictionarySchema
     .transform(deepReadonly)
     .parse(await import(`./dictionary.asset.json`).then((x) => x.default)),
@@ -240,17 +240,21 @@ export const allRadicalsByStrokes = async () => await loadRadicalStrokes();
  * Build an inverted index of hanzi words to hanzi word meanings and glosses to
  * hanzi word meanings. Useful when building learning graphs.
  */
-export const hanziToHanziWordMap = memoize0(
+export const loadDictionary = memoize0(
   async (): Promise<
-    DeepReadonly<{
-      hanziMap: Map<string, HanziWordWithMeaning[]>;
-      glossMap: Map<string, HanziWordWithMeaning[]>;
+    Readonly<{
+      lookupHanzi(hanzi: HanziText): readonly HanziWordWithMeaning[];
+      lookupHanziWord(hanzi: HanziWord): DeepReadonly<HanziWordMeaning> | null;
+      lookupGloss(gloss: string): readonly HanziWordWithMeaning[];
+      allEntries: [HanziWord, DeepReadonly<HanziWordMeaning>][];
+      allHanziWords: HanziWord[];
     }>
   > => {
     const hanziMap = new Map<string, HanziWordWithMeaning[]>();
     const glossMap = new Map<string, HanziWordWithMeaning[]>();
+    const dictionaryJson = await loadDictionaryJson();
 
-    for (const item of await loadDictionary()) {
+    for (const item of dictionaryJson) {
       const [hanziWord, meaning] = item;
 
       mapArrayAdd(hanziMap, hanziFromHanziWord(hanziWord), item);
@@ -260,28 +264,21 @@ export const hanziToHanziWordMap = memoize0(
       }
     }
 
-    return { hanziMap, glossMap };
+    return {
+      lookupHanzi(hanzi: HanziText) {
+        return hanziMap.get(hanzi) ?? emptyArray;
+      },
+      lookupHanziWord(hanziWord: HanziWord) {
+        return dictionaryJson.get(hanziWord) ?? null;
+      },
+      lookupGloss(gloss: string) {
+        return glossMap.get(gloss) ?? emptyArray;
+      },
+      allEntries: [...dictionaryJson.entries()],
+      allHanziWords: [...dictionaryJson.keys()],
+    };
   },
 );
-
-export const lookupHanzi = async (
-  hanzi: HanziText,
-): Promise<DeepReadonly<HanziWordWithMeaning[]>> => {
-  const { hanziMap } = await hanziToHanziWordMap();
-  return hanziMap.get(hanzi) ?? emptyArray;
-};
-
-export const lookupGloss = async (
-  gloss: string,
-): Promise<DeepReadonly<HanziWordWithMeaning[]>> => {
-  const { glossMap } = await hanziToHanziWordMap();
-  return glossMap.get(gloss) ?? emptyArray;
-};
-
-export const lookupHanziWord = async (
-  hanziWord: HanziWord,
-): Promise<DeepReadonly<HanziWordMeaning> | null> =>
-  await loadDictionary().then((x) => x.get(hanziWord) ?? null);
 
 export const lookupRadicalsByStrokes = async (strokes: number) =>
   await loadRadicalStrokes().then((x) => x.get(strokes) ?? null);
@@ -291,7 +288,7 @@ export const allHanziWordsHanzi = memoize0(
     return new Set<HanziText>(
       [
         ...(await allRadicalHanziWords()),
-        ...(await loadDictionary().then((x) => [...x.keys()])),
+        ...(await loadDictionaryJson().then((x) => [...x.keys()])),
       ].map((x) => hanziFromHanziWord(x)),
     );
   },
@@ -468,7 +465,8 @@ export const allPronunciationsForHanzi = memoize1(
   async function allPronunciationsForHanzi(
     hanzi: HanziText,
   ): Promise<Set<Readonly<PinyinPronunciation>>> {
-    const hanziWordMeanings = await lookupHanzi(hanzi);
+    const dictionary = await loadDictionary();
+    const hanziWordMeanings = dictionary.lookupHanzi(hanzi);
     const pronunciations = new Set<Readonly<PinyinPronunciation>>();
 
     for (const [, meaning] of hanziWordMeanings) {
@@ -485,7 +483,8 @@ export const allHanziCharacterPronunciationsForHanzi = memoize1(
   async function allHanziCharacterPronunciationsForHanzi(
     hanzi: HanziText,
   ): Promise<Set<PinyinSyllable>> {
-    const hanziWordMeanings = await lookupHanzi(hanzi);
+    const dictionary = await loadDictionary();
+    const hanziWordMeanings = dictionary.lookupHanzi(hanzi);
     const pronunciations = new Set<PinyinSyllable>();
 
     for (const [, meaning] of hanziWordMeanings) {

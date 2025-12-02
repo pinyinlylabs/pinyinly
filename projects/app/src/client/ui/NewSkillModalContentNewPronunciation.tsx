@@ -1,5 +1,6 @@
-import { useLookupHanzi } from "@/client/hooks/useLookupHanzi";
 import type { HanziText, PinyinSyllable } from "@/data/model";
+import { loadDictionary } from "@/dictionary/dictionary";
+import { use } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useIntersectionObserver } from "usehooks-ts";
 import { IconImage } from "./IconImage";
@@ -12,7 +13,8 @@ export const NewSkillModalContentNewPronunciation = ({
   hanzi: HanziText;
   onDismiss: () => void;
 }) => {
-  const hanziWordMeanings = useLookupHanzi(hanzi);
+  const dictionary = use(loadDictionary());
+  const hanziWordMeanings = dictionary.lookupHanzi(hanzi);
 
   let pinyin: readonly PinyinSyllable[] | undefined;
   for (const [, meaning] of hanziWordMeanings) {

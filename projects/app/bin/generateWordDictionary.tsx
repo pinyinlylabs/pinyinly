@@ -28,8 +28,7 @@ import {
   hanziFromHanziWord,
   hanziWordMeaningSchema,
   loadCharacters,
-  lookupHanzi,
-  lookupHanziWord,
+  loadDictionary,
   meaningKeyFromHanziWord,
   partOfSpeechSchema,
   unparseDictionary,
@@ -158,6 +157,7 @@ async function checkHsk1HanziWords(
   signal?: AbortSignal,
 ) {
   const hsk1HanziWords = await allHsk1HanziWords();
+  const dictionary = await loadDictionary();
   const results: HanziWordCheckResult[] = [];
 
   onProgress({
@@ -184,7 +184,7 @@ async function checkHsk1HanziWords(
     let i = 0;
     for (const hanziWord of wordList) {
       const id = `738274${i++}`;
-      const meaning = await lookupHanziWord(hanziWord);
+      const meaning = dictionary.lookupHanziWord(hanziWord);
       invariant(meaning != null, `Missing hanzi word for ${hanziWord}`);
       inflated.push({ hanziWord, id, meaning });
       lookupById.set(id, { hanziWord, meaning });
@@ -640,6 +640,7 @@ async function openAiHanziWordGlossHintQuery(
   dict: Dictionary,
 ) {
   const meaning = dict.get(hanziWord);
+  const dictionary = await loadDictionary();
   invariant(meaning != null);
   const hanzi = hanziFromHanziWord(hanziWord);
 
@@ -670,7 +671,7 @@ async function openAiHanziWordGlossHintQuery(
               `anything as it has no specific meaning since it's purely structural`,
             );
           } else {
-            const lookups = await lookupHanzi(leaf as HanziText);
+            const lookups = dictionary.lookupHanzi(leaf as HanziText);
             if (lookups.length > 0) {
               for (const [, leafMeaning] of lookups) {
                 mapSetAdd(
@@ -1684,6 +1685,7 @@ const DictionaryPicker = ({
         onSubmit={(lines) => {
           void (async () => {
             const queries: GenerateHanziWordQuery[] = [];
+            const dictionary = await loadDictionary();
 
             linesLoop: for (const line of lines) {
               if (line.trim() === ``) {
@@ -1697,7 +1699,7 @@ const DictionaryPicker = ({
               const description =
                 rest == null || rest.trim() === `` ? null : rest.trim();
 
-              const existingItems = await lookupHanzi(hanzi as HanziText);
+              const existingItems = dictionary.lookupHanzi(hanzi as HanziText);
               queries.push({ hanzi, description, existingItems });
             }
 

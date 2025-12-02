@@ -8,7 +8,7 @@ import {
   allHanziCharacterPronunciationsForHanzi,
   allHanziCharacters,
   hanziFromHanziWord,
-  lookupHanziWord,
+  loadDictionary,
 } from "@/dictionary/dictionary";
 import {
   arrayFilterUniqueWithKey,
@@ -106,7 +106,8 @@ export async function makeQuestionContext(
 ): Promise<QuestionContext> {
   const hanzi = hanziFromHanziWord(correctAnswer);
   invariant(isHanziCharacter(hanzi), `expected single-character hanzi`);
-  const meaning = await lookupHanziWord(correctAnswer);
+  const dictionary = await loadDictionary();
+  const meaning = dictionary.lookupHanziWord(correctAnswer);
 
   const hanziAnswers = [hanzi];
   const pinyinAnswers =

@@ -1,4 +1,4 @@
-import { lookupHanziWord } from "@/dictionary/dictionary";
+import { loadDictionary } from "@/dictionary/dictionary";
 import { invariant } from "@pinyinly/lib/invariant";
 import type {
   HanziGlossMistakeType,
@@ -13,7 +13,8 @@ export async function hanziWordToGlossTypedQuestionOrThrow(
   skill: HanziWordSkill,
 ): Promise<HanziWordToGlossQuestion> {
   const hanziWord = hanziWordFromSkill(skill);
-  const meaning = await lookupHanziWord(hanziWord);
+  const dictionary = await loadDictionary();
+  const meaning = dictionary.lookupHanziWord(hanziWord);
 
   const answers = meaning?.gloss ?? [];
   invariant(answers.length > 0, `hanzi word ${hanziWord} has no gloss`);

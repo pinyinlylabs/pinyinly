@@ -1,10 +1,10 @@
-import { useLookupHanzi } from "@/client/hooks/useLookupHanzi";
 import {
   getWikiMdxHanziMeaning,
   getWikiMdxHanziWordMeaning,
 } from "@/client/wiki";
 import type { HanziText, PinyinSyllable } from "@/data/model";
-import React, { Fragment, useState } from "react";
+import { loadDictionary } from "@/dictionary/dictionary";
+import React, { Fragment, use, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useIntersectionObserver } from "usehooks-ts";
 import { IconImage } from "./IconImage";
@@ -19,7 +19,8 @@ export const NewSkillModalContentNewWord = ({
   hanzi: HanziText;
   onDismiss: () => void;
 }) => {
-  const hanziWordMeanings = useLookupHanzi(hanzi);
+  const dictionary = use(loadDictionary());
+  const hanziWordMeanings = dictionary.lookupHanzi(hanzi);
 
   let pinyin: readonly PinyinSyllable[] | undefined;
   for (const [, meaning] of hanziWordMeanings) {

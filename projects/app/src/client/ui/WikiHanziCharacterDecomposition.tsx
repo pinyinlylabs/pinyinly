@@ -1,11 +1,14 @@
 import type { WikiCharacterData } from "@/data/hanzi";
 import { walkIdsNodeLeafs } from "@/data/hanzi";
+import { loadDictionary } from "@/dictionary/dictionary";
 import { parseIndexRanges } from "@/util/indexRanges";
 import { Image } from "expo-image";
 import type { ReactNode } from "react";
+import { use } from "react";
 import { Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 import { HanziCharacter, hanziCharacterColorSchema } from "./HanziCharacter";
+import { HanziLink } from "./HanziLink";
 import { Pylymark } from "./Pylymark";
 
 interface WikiHanziCharacterDecompositionProps {
@@ -20,6 +23,7 @@ export function WikiHanziCharacterDecomposition({
   illustrationFit,
 }: WikiHanziCharacterDecompositionProps) {
   const componentsElements: ReactNode[] = [];
+  const dictionary = use(loadDictionary());
 
   if (characterData.mnemonic && Array.isArray(characterData.strokes)) {
     for (const [i, visualComponent] of [
@@ -36,13 +40,23 @@ export function WikiHanziCharacterDecomposition({
               strokesData={characterData.strokes}
               highlightStrokes={parseIndexRanges(visualComponent.strokes)}
             />
-            {visualComponent.hanzi?.split(`,`).map((hanzi, i) => (
-              <Text className={visualCharClass()} key={i}>
-                {hanzi}
+            {visualComponent.hanzi == null ? null : (
+              <Text className={visualCharClass()}>
+                <HanziLink hanzi={visualComponent.hanzi}>
+                  {visualComponent.hanzi}
+                </HanziLink>
               </Text>
-            ))}
+            )}
           </View>
-          <Text className="pyly-body text-center">{visualComponent.label}</Text>
+          <Text className="pyly-body text-center">
+            {visualComponent.label ??
+              (visualComponent.hanzi == null
+                ? null
+                : dictionary
+                    .lookupHanzi(visualComponent.hanzi)
+                    .map(([, meaning]) => meaning.gloss[0])
+                    .join(` / `))}
+          </Text>
         </View>,
       );
     }

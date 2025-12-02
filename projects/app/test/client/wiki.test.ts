@@ -12,9 +12,8 @@ import type { CharactersKey, CharactersValue } from "#dictionary/dictionary.js";
 import {
   getIsComponentFormHanzi,
   getIsStructuralHanzi,
-  hanziToHanziWordMap,
   loadCharacters,
-  lookupHanzi,
+  loadDictionary,
 } from "#dictionary/dictionary.js";
 import { IS_CI } from "#util/env.js";
 import { normalizeIndexRanges, parseIndexRanges } from "#util/indexRanges.js";
@@ -51,12 +50,12 @@ describe(`/meaning.mdx files`, async () => {
   expect(meaningFilePaths.length).toBeGreaterThan(0);
   const isStructuralHanzi = await getIsStructuralHanzi();
   const isComponentFormHanzi = await getIsComponentFormHanzi();
-  const { hanziMap } = await hanziToHanziWordMap();
+  const dictionary = await loadDictionary();
 
   const data = meaningFilePaths.map((filePath) => {
     const hanzi = path.basename(path.dirname(filePath)) as HanziText;
     const isStructural = isStructuralHanzi(hanzi);
-    const isInDictionary = hanziMap.has(hanzi);
+    const isInDictionary = dictionary.lookupHanzi(hanzi).length > 0;
     const projectRelPath = path.relative(projectRoot, filePath);
     const hasMdx = memoize0(() => existsSync(filePath));
     const getMdx = memoize0(() => readFileSync(filePath, `utf-8`));
@@ -137,9 +136,10 @@ describe(`character.json files`, async () => {
 
   test(`characters in the dictionary with 5+ strokes have mnemonic components`, async () => {
     const atomicCharacters = new Set([`非`, `臣`, `襾`, `舟`, `母`]);
+    const dictionary = await loadDictionary();
 
     for (const { character, characterData } of characterFiles) {
-      const meanings = await lookupHanzi(character);
+      const meanings = dictionary.lookupHanzi(character);
       if (
         characterStrokeCount(characterData) <= 4 ||
         meanings.length === 0 ||
@@ -238,9 +238,11 @@ describe(`character.json files`, async () => {
   });
 
   test(`number of mnemonic stories matches number of meanings for hanzi`, async () => {
+    const dictionary = await loadDictionary();
+
     for (const { character, characterData } of characterFiles) {
       if (characterData.mnemonic?.stories) {
-        const hanziWordMeanings = await lookupHanzi(character);
+        const hanziWordMeanings = dictionary.lookupHanzi(character);
 
         const storiesCount = characterData.mnemonic.stories.length;
         const meaningsCount = hanziWordMeanings.length;
