@@ -219,7 +219,7 @@ for (const character of allCharacters) {
         mdxFile,
         `import data from "./character.json";
 
-<WikiHanziCharacterDecomposition characterData={data} />
+<WikiHanziCharacterIntro characterData={data} />
 `,
       );
       debug(`wrote meaning.mdx for %O`, character);

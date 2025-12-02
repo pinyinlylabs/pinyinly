@@ -5,20 +5,18 @@ import { WikiHanziCharacterDecomposition } from "./WikiHanziCharacterDecompositi
 
 export default () => {
   return (
-    <>
-      <View className="max-w-[500px] flex-1 gap-2">
-        <WikiHanziCharacterDecomposition
-          characterData={characterData}
-          illustrationSrc={require(`./demo/看.jpg`)}
-          illustrationFit="contain"
-        />
-      </View>
-    </>
+    <View className="max-w-[500px] flex-1 gap-2">
+      <WikiHanziCharacterDecomposition
+        characterData={characterData}
+        illustrationSrc={require(`./demo/看.jpg`)}
+        illustrationFit="contain"
+      />
+    </View>
   );
 };
 
-const characterData: WikiCharacterData = {
-  hanzi: `看`,
+export const characterData: WikiCharacterData = {
+  hanzi: `看` as HanziCharacter,
   mnemonic: {
     components: [
       `⿰`,

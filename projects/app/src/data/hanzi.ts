@@ -889,7 +889,7 @@ export const wikiCharacterDataSchema = z.object({
   /**
    * The hanzi character represented by this character (e.g. 看).
    */
-  hanzi: z.string(),
+  hanzi: hanziCharacterSchema,
   /**
    * Stroke information, ideally SVG paths but otherwise just the count.
    */
