@@ -33,7 +33,7 @@ import { interval } from "date-fns/interval";
 import { sub } from "date-fns/sub";
 import { subDays } from "date-fns/subDays";
 import type { DeepReadonly } from "ts-essentials";
-import { isHanziGrapheme, splitHanziText } from "./hanzi";
+import { isHanziCharacter, splitHanziText } from "./hanzi";
 import type {
   HanziText,
   HanziWord,
@@ -186,34 +186,34 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
       const hanzi = hanziFromHanziWord(hanziWord);
 
       // Learn the components of a hanzi word first.
-      for (let hanziGrapheme of await decomposeHanzi(hanzi)) {
-        // Use the canonical form of the grapheme.
+      for (let hanziCharacter of await decomposeHanzi(hanzi)) {
+        // Use the canonical form of the character.
         {
-          let character = characters.get(hanziGrapheme);
+          let character = characters.get(hanziCharacter);
           while (character?.canonicalForm != null) {
-            hanziGrapheme = character.canonicalForm;
+            hanziCharacter = character.canonicalForm;
             character = characters.get(character.canonicalForm);
           }
         }
 
-        // Check if the grapheme was already added as a dependency by being
+        // Check if the character was already added as a dependency by being
         // referenced in the gloss hint.
         const depAlreadyAdded = deps.some((x) => {
           if (skillKindFromSkill(x) === SkillKind.HanziWordToGloss) {
             return (
               hanziFromHanziWord(
                 hanziWordFromSkill(skill as HanziWordSkill),
-              ) === hanziGrapheme
+              ) === hanziCharacter
             );
           }
           return false;
         });
 
-        // If the grapheme wasn't already added, add it as a dependency by
+        // If the character wasn't already added, add it as a dependency by
         // guessing what disambugation to use for the hanzi.
         if (!depAlreadyAdded) {
           const hanziWordWithMeaning =
-            await hackyGuessHanziWordToLearn(hanziGrapheme);
+            await hackyGuessHanziWordToLearn(hanziCharacter);
           if (hanziWordWithMeaning != null) {
             const [hanziWord] = hanziWordWithMeaning;
             deps.push(hanziWordToGloss(hanziWord));
@@ -245,13 +245,13 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
 
       // If the hanzi word is multiple characters (e.g. 为什么:why) learn the
       // meaning of each one separately.
-      const graphemes = splitHanziText(hanzi);
-      if (graphemes.length > 1) {
-        for (const grapheme of graphemes) {
+      const characters = splitHanziText(hanzi);
+      if (characters.length > 1) {
+        for (const character of characters) {
           // We only have a character, but need a hanzi word to learn. So make
           // the best guess for the hanzi word to learn.
           for (const [charHanziWord, charMeaning] of await lookupHanzi(
-            grapheme,
+            character,
           )) {
             if (charMeaning.pinyin != null) {
               deps.push(hanziWordToPinyinTyped(charHanziWord));
@@ -272,7 +272,7 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
       const hanzi = hanziFromHanziWord(hanziWord);
 
       invariant(
-        isHanziGrapheme(hanzi),
+        isHanziCharacter(hanzi),
         `${skillKind} only applies to single character hanzi`,
       );
 
@@ -286,7 +286,7 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
       const hanzi = hanziFromHanziWord(hanziWord);
 
       invariant(
-        isHanziGrapheme(hanzi),
+        isHanziCharacter(hanzi),
         `${skillKind} only applies to single character hanzi`,
       );
 
@@ -300,7 +300,7 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
       const hanzi = hanziFromHanziWord(hanziWord);
 
       invariant(
-        isHanziGrapheme(hanzi),
+        isHanziCharacter(hanzi),
         `${skillKind} only applies to single character hanzi`,
       );
 

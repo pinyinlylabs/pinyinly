@@ -1,6 +1,6 @@
 import { Text, View } from "react-native";
 import { ExampleStack } from "./demo/helpers";
-import { HanziGrapheme } from "./HanziGrapheme";
+import { HanziCharacter } from "./HanziCharacter";
 import { HanziWordRefText } from "./HanziWordRefText";
 
 const xueStrokes = [
@@ -19,16 +19,16 @@ export default () => {
     <>
       <View className="w-full flex-row gap-2">
         <ExampleStack title="Fingers">
-          <HanziGrapheme
+          <HanziCharacter
             strokesData={xueStrokes}
             highlightStrokes={[0, 1, 2]}
           />
         </ExampleStack>
         <ExampleStack title="Roof">
-          <HanziGrapheme strokesData={xueStrokes} highlightStrokes={[3, 4]} />
+          <HanziCharacter strokesData={xueStrokes} highlightStrokes={[3, 4]} />
         </ExampleStack>
         <ExampleStack title="Child">
-          <HanziGrapheme
+          <HanziCharacter
             strokesData={xueStrokes}
             highlightStrokes={[5, 6, 7, 8]}
           />
@@ -36,7 +36,7 @@ export default () => {
       </View>
       <View className="w-full gap-2">
         <View className="flex-row gap-2">
-          <HanziGrapheme
+          <HanziCharacter
             strokesData={xueStrokes}
             highlightStrokes={[0, 1, 2]}
           />
@@ -49,7 +49,7 @@ export default () => {
           </View>
         </View>
         <View className="flex-row gap-2">
-          <HanziGrapheme strokesData={xueStrokes} highlightStrokes={[3, 4]} />
+          <HanziCharacter strokesData={xueStrokes} highlightStrokes={[3, 4]} />
           <View>
             <Text className="pyly-body">
               a <HanziWordRefText hanziWord="冖:cover" gloss /> depicting a
@@ -58,7 +58,7 @@ export default () => {
           </View>
         </View>
         <View className="flex-row gap-2">
-          <HanziGrapheme
+          <HanziCharacter
             strokesData={xueStrokes}
             highlightStrokes={[5, 6, 7, 8]}
           />

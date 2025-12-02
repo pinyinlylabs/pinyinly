@@ -15,7 +15,7 @@ import {
   oneCorrectPairQuestionMistakes,
 } from "@/data/questions/oneCorrectPair";
 import { computeSkillRating } from "@/data/skills";
-import { longestTextByGraphemes } from "@/util/unicode";
+import { longestTextByCharacters } from "@/util/unicode";
 import { invariant } from "@pinyinly/lib/invariant";
 import type { ReactNode } from "react";
 import { useState } from "react";
@@ -91,12 +91,12 @@ export function QuizDeckOneCorrectPairQuestion({
   };
 
   const groupAFontSize = textAnswerButtonFontSize(
-    longestTextByGraphemes(
+    longestTextByCharacters(
       groupA.map((choice) => oneCorrectPairChoiceText(choice)),
     ),
   );
   const groupBFontSize = textAnswerButtonFontSize(
-    longestTextByGraphemes(
+    longestTextByCharacters(
       groupB.map((choice) => oneCorrectPairChoiceText(choice)),
     ),
   );

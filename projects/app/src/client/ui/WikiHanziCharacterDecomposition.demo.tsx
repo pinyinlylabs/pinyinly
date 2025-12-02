@@ -1,13 +1,13 @@
-import type { WikiGraphemeData } from "@/data/hanzi";
+import type { WikiCharacterData } from "@/data/hanzi";
 import { View } from "react-native";
-import { WikiHanziGraphemeDecomposition } from "./WikiHanziGraphemeDecomposition";
+import { WikiHanziCharacterDecomposition } from "./WikiHanziCharacterDecomposition";
 
 export default () => {
   return (
     <>
       <View className="max-w-[500px] flex-1 gap-2">
-        <WikiHanziGraphemeDecomposition
-          graphemeData={graphemeData}
+        <WikiHanziCharacterDecomposition
+          characterData={characterData}
           illustrationSrc={require(`./demo/看.jpg`)}
           illustrationFit="contain"
         />
@@ -16,7 +16,7 @@ export default () => {
   );
 };
 
-const graphemeData: WikiGraphemeData = {
+const characterData: WikiCharacterData = {
   hanzi: `看`,
   mnemonic: {
     components: [

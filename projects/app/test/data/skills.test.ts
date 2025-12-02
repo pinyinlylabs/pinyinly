@@ -1352,7 +1352,7 @@ describe(
       );
 
       skillTest(
-        `learns the pinyin for each grapheme in multi-grapheme words`,
+        `learns the pinyin for each character in multi-character words`,
         async ({ isStructuralHanzi }) => {
           const graph = await skillLearningGraph({
             targetSkills: [`hp:一样:same`],

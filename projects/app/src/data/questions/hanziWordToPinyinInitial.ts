@@ -3,8 +3,8 @@ import {
   parsePinyinSyllableOrThrow,
 } from "@/data/pinyin";
 import {
-  allHanziGraphemePronunciationsForHanzi,
-  allHanziGraphemes,
+  allHanziCharacterPronunciationsForHanzi,
+  allHanziCharacters,
   hanziFromHanziWord,
   loadPinyinWords,
   lookupHanziWord,
@@ -18,7 +18,7 @@ import {
 } from "@pinyinly/lib/invariant";
 import shuffle from "lodash/shuffle";
 import type {
-  HanziGrapheme,
+  HanziCharacter,
   HanziText,
   HanziWord,
   OneCorrectPairQuestion,
@@ -103,7 +103,7 @@ export async function makeQuestionContext(
     answerPinyinFinal: parsedPinyin.finalSoundId,
     answerPinyinTone: parsedPinyin.tone,
     usedHanzi: new Set([hanzi]),
-    usedPinyin: new Set(await allHanziGraphemePronunciationsForHanzi(hanzi)),
+    usedPinyin: new Set(await allHanziCharacterPronunciationsForHanzi(hanzi)),
     pinyinDistractors: [],
     hanziDistractors: [],
   };
@@ -113,7 +113,7 @@ export async function makeQuestionContext(
 
 export async function tryHanziDistractor(
   ctx: QuestionContext,
-  hanzi: HanziGrapheme,
+  hanzi: HanziCharacter,
 ): Promise<boolean> {
   // Don't include if there's overlapping hanzi
   if (ctx.usedHanzi.has(hanzi)) {
@@ -121,7 +121,7 @@ export async function tryHanziDistractor(
   }
 
   // Don't use any words that have overlapping pinyin.
-  for (const pinyin of await allHanziGraphemePronunciationsForHanzi(hanzi)) {
+  for (const pinyin of await allHanziCharacterPronunciationsForHanzi(hanzi)) {
     if (ctx.usedPinyin.has(pinyin)) {
       return false;
     }
@@ -185,7 +185,7 @@ async function addDistractors(
   //
   // Add hanzi distractors.
   //
-  const allHanziCandiates = shuffle([...(await allHanziGraphemes())]);
+  const allHanziCandiates = shuffle([...(await allHanziCharacters())]);
   for (const hanzi of allHanziCandiates) {
     await tryHanziDistractor(ctx, hanzi);
 

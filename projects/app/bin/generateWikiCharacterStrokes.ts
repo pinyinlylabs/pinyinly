@@ -1,8 +1,8 @@
 import {
-  isHanziGrapheme,
+  isHanziCharacter,
   mapIdsNodeLeafs,
   parseIds,
-  wikiGraphemeDataSchema,
+  wikiCharacterDataSchema,
 } from "#data/hanzi.js";
 import type { HanziText } from "#data/model.js";
 import { normalizeIndexRanges } from "#util/indexRanges.ts";
@@ -113,37 +113,37 @@ const dictionaryDataByCharacter = await (async () => {
 
 const wikiDir = new URL(`../src/client/wiki/`, import.meta.url).pathname;
 
-const allGraphemes = await glob(`${wikiDir}/*`).then((ps) =>
+const allCharacters = await glob(`${wikiDir}/*`).then((ps) =>
   ps
     .map((p) => path.basename(p))
-    .filter((p) => isHanziGrapheme(p as HanziText)),
+    .filter((p) => isHanziCharacter(p as HanziText)),
 );
 
 invariant(existsSync(wikiDir), `wiki directory does not exist: ${wikiDir}`);
 
-for (const grapheme of allGraphemes) {
+for (const character of allCharacters) {
   // If we're only updating specific characters, skip the rest.
-  if (argv.update != null && !argv.update.includes(grapheme)) {
+  if (argv.update != null && !argv.update.includes(character)) {
     continue;
   }
 
-  const graphicsRecord = graphicsDataByCharacter.get(grapheme);
+  const graphicsRecord = graphicsDataByCharacter.get(character);
 
-  const graphemeWikiDir = path.join(wikiDir, grapheme);
-  if (!existsSync(graphemeWikiDir)) {
-    mkdirSync(graphemeWikiDir);
+  const characterWikiDir = path.join(wikiDir, character);
+  if (!existsSync(characterWikiDir)) {
+    mkdirSync(characterWikiDir);
   }
 
-  const dataFile = path.join(graphemeWikiDir, `grapheme.json`);
-  const mdxFile = path.join(graphemeWikiDir, `meaning.mdx`);
+  const dataFile = path.join(characterWikiDir, `character.json`);
+  const mdxFile = path.join(characterWikiDir, `meaning.mdx`);
   const indentLevels = 2;
 
-  if (await updateJsonFileKey(dataFile, `hanzi`, grapheme, indentLevels)) {
-    debug(`wrote hanzi for %O`, grapheme);
+  if (await updateJsonFileKey(dataFile, `hanzi`, character, indentLevels)) {
+    debug(`wrote hanzi for %O`, character);
   }
 
   if (graphicsRecord == null) {
-    debug(`no graphics data for %O`, grapheme);
+    debug(`no graphics data for %O`, character);
   } else {
     if (
       await updateJsonFileKey(
@@ -153,7 +153,7 @@ for (const grapheme of allGraphemes) {
         indentLevels,
       )
     ) {
-      debug(`wrote strokes for %O`, grapheme);
+      debug(`wrote strokes for %O`, character);
     }
   }
 
@@ -163,21 +163,21 @@ for (const grapheme of allGraphemes) {
     //
     let existing;
     try {
-      existing = wikiGraphemeDataSchema.parse(
+      existing = wikiCharacterDataSchema.parse(
         JSON.parse(readFileSync(dataFile, `utf-8`)),
       );
     } catch (error) {
-      debug(`failed to read existing data for %O: %O`, grapheme, error);
+      debug(`failed to read existing data for %O: %O`, character, error);
     }
 
-    const dictionaryRecord = dictionaryDataByCharacter.get(grapheme);
+    const dictionaryRecord = dictionaryDataByCharacter.get(character);
 
     if (
       existing?.mnemonic == null &&
       dictionaryRecord?.decomposition != null &&
       dictionaryRecord.decomposition !== `？`
     ) {
-      debug(`no mnemonic for %O`, grapheme);
+      debug(`no mnemonic for %O`, character);
       if (dictionaryRecord.decomposition.split(`？`).length > 2) {
         debug(`more than one ？, skipping`);
       } else {
@@ -207,7 +207,7 @@ for (const grapheme of allGraphemes) {
           indentLevels,
         );
 
-        debug(`wrote mnemonic for %O`, grapheme);
+        debug(`wrote mnemonic for %O`, character);
       }
     }
   }
@@ -217,12 +217,12 @@ for (const grapheme of allGraphemes) {
     if (!existsSync(mdxFile)) {
       writeFileSync(
         mdxFile,
-        `import data from "./grapheme.json";
+        `import data from "./character.json";
 
-<WikiHanziGraphemeDecomposition graphemeData={data} />
+<WikiHanziCharacterDecomposition characterData={data} />
 `,
       );
-      debug(`wrote meaning.mdx for %O`, grapheme);
+      debug(`wrote meaning.mdx for %O`, character);
     }
   }
 }

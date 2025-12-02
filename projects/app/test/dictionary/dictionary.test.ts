@@ -1,5 +1,5 @@
 import { splitHanziText } from "#data/hanzi.ts";
-import type { HanziGrapheme, HanziText } from "#data/model.ts";
+import type { HanziCharacter, HanziText } from "#data/model.ts";
 import { pinyinPronunciationDisplayText } from "#data/pinyin.ts";
 import type { Dictionary } from "#dictionary/dictionary.ts";
 import {
@@ -369,20 +369,26 @@ describe(
 );
 
 test(`dictionary contains entries for decomposition`, async () => {
-  const unknownCharacters = new Map<HanziGrapheme, /* sources */ Set<string>>();
-  const unknownComponents = new Map<HanziGrapheme, /* sources */ Set<string>>();
+  const unknownCharacters = new Map<
+    HanziCharacter,
+    /* sources */ Set<string>
+  >();
+  const unknownComponents = new Map<
+    HanziCharacter,
+    /* sources */ Set<string>
+  >();
 
   for (const hanzi of await allHanziWordsHanzi()) {
-    for (const grapheme of splitHanziText(hanzi)) {
-      const lookup = await lookupHanzi(grapheme);
+    for (const character of splitHanziText(hanzi)) {
+      const lookup = await lookupHanzi(character);
       if (lookup.length === 0) {
-        mapSetAdd(unknownCharacters, grapheme, hanzi);
+        mapSetAdd(unknownCharacters, character, hanzi);
       }
 
-      for (const component of await decomposeHanzi(grapheme)) {
+      for (const component of await decomposeHanzi(character)) {
         const lookup = await lookupHanzi(component);
         if (lookup.length === 0) {
-          mapSetAdd(unknownComponents, component, grapheme);
+          mapSetAdd(unknownComponents, component, character);
         }
       }
     }

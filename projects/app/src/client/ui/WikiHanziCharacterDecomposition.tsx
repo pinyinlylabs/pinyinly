@@ -1,39 +1,39 @@
-import type { WikiGraphemeData } from "@/data/hanzi";
+import type { WikiCharacterData } from "@/data/hanzi";
 import { walkIdsNodeLeafs } from "@/data/hanzi";
 import { parseIndexRanges } from "@/util/indexRanges";
 import { Image } from "expo-image";
 import type { ReactNode } from "react";
 import { Text, View } from "react-native";
 import { tv } from "tailwind-variants";
-import { HanziGrapheme, hanziGraphemeColorSchema } from "./HanziGrapheme";
+import { HanziCharacter, hanziCharacterColorSchema } from "./HanziCharacter";
 import { Pylymark } from "./Pylymark";
 
-interface WikiHanziGraphemeDecompositionProps {
-  graphemeData: WikiGraphemeData;
+interface WikiHanziCharacterDecompositionProps {
+  characterData: WikiCharacterData;
   illustrationSrc?: RnRequireSource;
   illustrationFit?: `cover` | `contain`;
 }
 
-export function WikiHanziGraphemeDecomposition({
-  graphemeData,
+export function WikiHanziCharacterDecomposition({
+  characterData,
   illustrationSrc,
   illustrationFit,
-}: WikiHanziGraphemeDecompositionProps) {
+}: WikiHanziCharacterDecompositionProps) {
   const componentsElements: ReactNode[] = [];
 
-  if (graphemeData.mnemonic && Array.isArray(graphemeData.strokes)) {
+  if (characterData.mnemonic && Array.isArray(characterData.strokes)) {
     for (const [i, visualComponent] of [
-      ...walkIdsNodeLeafs(graphemeData.mnemonic.components),
+      ...walkIdsNodeLeafs(characterData.mnemonic.components),
     ].entries()) {
       componentsElements.push(
         <View className="flex-1 items-center gap-2" key={i}>
           <View className="flex-row items-center gap-2">
-            <HanziGrapheme
+            <HanziCharacter
               className="size-12"
-              highlightColor={hanziGraphemeColorSafeSchema.parse(
+              highlightColor={hanziCharacterColorSafeSchema.parse(
                 visualComponent.color,
               )}
-              strokesData={graphemeData.strokes}
+              strokesData={characterData.strokes}
               highlightStrokes={parseIndexRanges(visualComponent.strokes)}
             />
             {visualComponent.hanzi?.split(`,`).map((hanzi, i) => (
@@ -51,33 +51,33 @@ export function WikiHanziGraphemeDecomposition({
   return (
     <>
       <Text className="pyly-mdx-h2"> Use a story to learn the meaning</Text>
-      <View className="pyly-mdx-grapheme-decomposition rounded-lg bg-fg-bg5">
+      <View className="pyly-mdx-character-decomposition rounded-lg bg-fg-bg5">
         <View className="gap-4 p-4 pb-0">
           {componentsElements.length > 0 ? (
             <>
               <Text className="pyly-body">
                 Split{` `}
-                <Text className="pyly-bold">{graphemeData.hanzi}</Text> into
+                <Text className="pyly-bold">{characterData.hanzi}</Text> into
                 distinctive components:
               </Text>
 
               <View className="flex-row gap-5">{componentsElements}</View>
             </>
-          ) : Array.isArray(graphemeData.strokes) ? (
+          ) : Array.isArray(characterData.strokes) ? (
             <>
               <Text className="pyly-body">
                 What does{` `}
-                <Text className="pyly-bold">{graphemeData.hanzi}</Text>
+                <Text className="pyly-bold">{characterData.hanzi}</Text>
                 {` `}
                 resemble?
               </Text>
 
               <View className="flex-1 items-center">
-                <HanziGrapheme
+                <HanziCharacter
                   className="size-12"
-                  strokesData={graphemeData.strokes}
+                  strokesData={characterData.strokes}
                   highlightStrokes={parseIndexRanges(
-                    `0-${graphemeData.strokes.length - 1}`,
+                    `0-${characterData.strokes.length - 1}`,
                   )}
                 />
               </View>
@@ -96,12 +96,12 @@ export function WikiHanziGraphemeDecomposition({
           />
         )}
 
-        {graphemeData.mnemonic?.stories == null ? null : (
+        {characterData.mnemonic?.stories == null ? null : (
           <View className="gap-4 p-4 pt-0">
             <Text className="pyly-body">Then connect it to the meaning:</Text>
 
             <View className="gap-1">
-              {graphemeData.mnemonic.stories.map((mnemonic, i) => (
+              {characterData.mnemonic.stories.map((mnemonic, i) => (
                 <View className="gap-1" key={i}>
                   <View className="flex-row items-center gap-2">
                     <View className="m-1 size-3 rounded-full border-2 border-fg-bg25" />
@@ -125,7 +125,7 @@ export function WikiHanziGraphemeDecomposition({
 }
 
 // eslint-disable-next-line unicorn/prefer-top-level-await
-const hanziGraphemeColorSafeSchema = hanziGraphemeColorSchema.catch(`fg`);
+const hanziCharacterColorSafeSchema = hanziCharacterColorSchema.catch(`fg`);
 
 const visualCharClass = tv({
   base: `pyly-body text-fg/50`,

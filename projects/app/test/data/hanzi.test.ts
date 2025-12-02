@@ -1,11 +1,11 @@
 import {
   componentToString,
   flattenIds,
-  hanziGraphemeCount,
+  hanziCharacterCount,
   horizontalPairToTripleMergeIdsTransform,
   idsApplyTransforms,
   idsNodeToString,
-  isHanziGrapheme,
+  isHanziCharacter,
   makeVerticalMergeCharacterIdsTransform,
   mapIdsNodeLeafs,
   parseIds,
@@ -313,30 +313,32 @@ test(
 );
 
 test(
-  `hanziGraphemeCount fixtures` satisfies HasNameOf<typeof hanziGraphemeCount>,
+  `hanziCharacterCount fixtures` satisfies HasNameOf<
+    typeof hanziCharacterCount
+  >,
   () => {
     for (const value of [`木`, `你`] as HanziText[]) {
-      expect(hanziGraphemeCount(value)).toBe(1);
+      expect(hanziCharacterCount(value)).toBe(1);
     }
 
     for (const value of [`你好`, `再见`] as HanziText[]) {
-      expect(hanziGraphemeCount(value)).toBe(2);
+      expect(hanziCharacterCount(value)).toBe(2);
     }
   },
 );
 
 describe(
-  `isHanziGrapheme suite` satisfies HasNameOf<typeof isHanziGrapheme>,
+  `isHanziCharacter suite` satisfies HasNameOf<typeof isHanziCharacter>,
   () => {
     test(`fixtures`, () => {
       const valid = [汉`应`, 汉`兄`, 汉`同`];
       for (const x of valid) {
-        expect(isHanziGrapheme(x)).toBe(true);
+        expect(isHanziCharacter(x)).toBe(true);
       }
 
       const invalid = [汉`应应`, 汉`兄兄`, 汉`同同`];
       for (const x of invalid) {
-        expect(isHanziGrapheme(x)).toBe(false);
+        expect(isHanziCharacter(x)).toBe(false);
       }
     });
   },
