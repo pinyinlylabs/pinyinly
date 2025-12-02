@@ -1,5 +1,6 @@
 {
   "hanzi": "丆",
+  "isStructural": true,
   "mnemonic": {
     "components": ["⿱", { "hanzi": "一" }, { "hanzi": "丿" }]
   },

@@ -1,5 +1,6 @@
 {
   "hanzi": "長",
+  "traditionalFormOf": "长",
   "mnemonic": {
     "components": ["⿱", { "strokes": "0-3" }, { "strokes": "4-8" }]
   },

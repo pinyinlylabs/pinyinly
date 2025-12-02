@@ -1,3 +1,4 @@
+import type { IdsNode } from "#data/hanzi.ts";
 import {
   flattenIds,
   idsNodeToString,
@@ -118,7 +119,7 @@ const allWords = new Set<string>();
 
 // Recursively decompose each hanzi and gather together all the components that
 // aren't already in the list.
-function decomp(char: string) {
+function decomp(char: HanziGrapheme) {
   if (allWords.has(char)) {
     return;
   }
@@ -126,7 +127,7 @@ function decomp(char: string) {
   allWords.add(char);
   const ids = charactersData.get(char)?.decomposition;
   if (ids != null) {
-    const idsNode = parseIds(ids);
+    const idsNode = parseIds(ids) as IdsNode<HanziGrapheme>;
     for (const leaf of walkIdsNodeLeafs(idsNode)) {
       if (strokeCountPlaceholderOrNull(leaf) == null && leaf !== char) {
         decomp(leaf);
@@ -647,7 +648,7 @@ async function openAiHanziWordGlossHintQuery(
     let hanziIds: string = hanzi;
 
     const visited = new Set<string>();
-    async function decomp(char: string) {
+    async function decomp(char: HanziGrapheme) {
       if (visited.has(char)) {
         return;
       }
@@ -658,7 +659,9 @@ async function openAiHanziWordGlossHintQuery(
       invariant(ids != null, `missing decomposition for ${char}`);
       hanziIds = hanziIds.replaceAll(char, ids);
 
-      for (const leaf of walkIdsNodeLeafs(parseIds(ids))) {
+      for (const leaf of walkIdsNodeLeafs(
+        parseIds(ids) as IdsNode<HanziGrapheme>,
+      )) {
         if (strokeCountPlaceholderOrNull(leaf) == null) {
           if (leaf === char) {
             mapSetAdd(
@@ -779,16 +782,6 @@ const HanziWordEditor = ({
                   value: meaning.pinyin?.join(`;`) ?? ``,
                 },
                 {
-                  id: `visualVariants`,
-                  label: `Visual variants`,
-                  value: meaning.visualVariants?.join(`;`) ?? ``,
-                },
-                {
-                  id: `componentFormOf`,
-                  label: `Component form of`,
-                  value: meaning.componentFormOf ?? ``,
-                },
-                {
                   id: `partOfSpeech`,
                   label: `Part of speech`,
                   value: meaning.partOfSpeech ?? ``,
@@ -834,39 +827,6 @@ const HanziWordEditor = ({
                 }),
               );
               edits.delete(`gloss`);
-            }
-
-            if (edits.has(`componentFormOf`)) {
-              const newComponentFormOf = edits.get(`componentFormOf`) as
-                | HanziGrapheme
-                | undefined;
-              invariant(newComponentFormOf != null);
-
-              mutations.push(() =>
-                saveUpsertHanziWordMeaning(hanziWord, {
-                  componentFormOf: newComponentFormOf,
-                }),
-              );
-              edits.delete(`componentFormOf`);
-            }
-
-            if (edits.has(`visualVariants`)) {
-              const newValue = edits.get(`visualVariants`);
-              invariant(newValue != null);
-
-              const newArray = newValue
-                .split(`;`)
-                .map((x) => x.trim())
-                .filter((x) => x !== ``) as HanziText[];
-              const newVisualVariants =
-                newArray.length > 0 ? newArray : undefined;
-
-              mutations.push(() =>
-                saveUpsertHanziWordMeaning(hanziWord, {
-                  visualVariants: newVisualVariants,
-                }),
-              );
-              edits.delete(`visualVariants`);
             }
 
             if (edits.has(`pinyin`)) {
@@ -2073,7 +2033,6 @@ function hanziWordQueryFilter(
   return (
     hanziWord.includes(query) ||
     meaning.gloss.some((x) => x.includes(query)) ||
-    (meaning.visualVariants?.some((x) => x.includes(query)) ?? false) ||
     (meaning.pinyin?.some((pronunciation) =>
       pronunciation.some((syllable) => syllable.includes(query)),
     ) ??
@@ -2187,24 +2146,6 @@ const DictionaryHanziWordEntry = ({
             {` `}
             <Text italic>{meaning.partOfSpeech}</Text>
           </Text>
-          {meaning.visualVariants == null ? null : (
-            <Text>
-              <Text bold dimColor>
-                visual variants:
-              </Text>
-              {` `}
-              <SemiColonList items={meaning.visualVariants} />
-            </Text>
-          )}
-          {meaning.componentFormOf == null ? null : (
-            <Text>
-              <Text bold dimColor>
-                component form of:
-              </Text>
-              {` `}
-              {meaning.componentFormOf}
-            </Text>
-          )}
         </Box>
       )}
     </Box>

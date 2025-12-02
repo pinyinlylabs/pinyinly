@@ -6,6 +6,8 @@ import { vi } from "vitest";
 
 export const projectRoot = path.resolve(import.meta.dirname, `..`);
 export const workspaceRoot = path.resolve(projectRoot, `../..`);
+export const wikiDir = path.join(projectRoot, `src/client/wiki`);
+export const dictionaryDir = path.join(projectRoot, `src/dictionary`);
 
 interface TestFont {
   name: string;

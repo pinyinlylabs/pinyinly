@@ -90,10 +90,10 @@ rizzleTest(
         "he:八:eight (🌱 NEW SKILL)",
         "he:又:again (🌱 NEW SKILL)",
         "he:冖:cover (🌱 NEW SKILL)",
-        "he:心:heart (🌱 NEW SKILL)",
         "he:乙:second (🌱 NEW SKILL)",
         "he:厂:cliff (🌱 NEW SKILL)",
         "he:厶:private (🌱 NEW SKILL)",
+        "he:亻:person (🌱 NEW SKILL)",
         "he:朩:rank (🌱 NEW SKILL)",
       ]
     `);

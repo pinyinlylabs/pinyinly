@@ -160,6 +160,13 @@ export type HanziText = (string & z.BRAND<`HanziText`>) | HanziGrapheme;
 export const hanziTextSchema = z.custom<HanziText>(
   (x) => typeof x === `string`,
 );
+export const pylyMarkSchema = z.string();
+export const hanziWordSchema = z.custom<HanziWord>(
+  (x) => typeof x === `string`,
+);
+export const hanziGraphemeSchema = z.custom<HanziGrapheme>(
+  (x) => typeof x === `string`,
+);
 
 export type HanziWordSkillKind =
   | typeof SkillKind.HanziWordToGloss

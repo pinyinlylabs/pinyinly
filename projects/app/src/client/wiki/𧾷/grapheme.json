@@ -1,5 +1,6 @@
 {
   "hanzi": "𧾷",
+  "componentFormOf": "足",
   "mnemonic": {
     "components": ["⿱", { "hanzi": "口" }, { "hanzi": "止" }]
   },

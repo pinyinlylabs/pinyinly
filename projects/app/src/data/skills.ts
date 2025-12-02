@@ -2,7 +2,7 @@ import type { HanziWordWithMeaning } from "@/dictionary/dictionary";
 import {
   decomposeHanzi,
   hanziFromHanziWord,
-  hanziTextFromHanziGrapheme,
+  loadCharacters,
   lookupHanzi,
   lookupHanziWord,
 } from "@/dictionary/dictionary";
@@ -170,6 +170,7 @@ export const finalFromPinyinFinalAssociationSkill = (
 export async function skillDependencies(skill: Skill): Promise<Skill[]> {
   const deps: Skill[] = [];
   const skillKind = skillKindFromSkill(skill);
+  const characters = await loadCharacters();
 
   switch (skillKind) {
     case SkillKind.GlossToHanziWord: {
@@ -184,40 +185,25 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
       const hanziWord = hanziWordFromSkill(skill);
       const hanzi = hanziFromHanziWord(hanziWord);
 
-      // If it's the component form of another base hanzi, learn that
-      // first because it can help understand the meaning from the shape.
-      if (isHanziGrapheme(hanzi)) {
-        const meaning = await lookupHanziWord(hanziWord);
-
-        if (
-          meaning?.componentFormOf != null &&
-          // Avoid circular loops e.g. he:老:old→he:耂:old→he:老:old
-          (await decomposeHanzi(meaning.componentFormOf).then(
-            (x) => !x.includes(hanzi),
-          ))
-        ) {
-          const hanziWordWithMeaning = await hackyGuessHanziWordToLearn(
-            meaning.componentFormOf,
-          );
-          if (hanziWordWithMeaning != null) {
-            const [hanziWord] = hanziWordWithMeaning;
-            deps.push(hanziWordToGloss(hanziWord));
+      // Learn the components of a hanzi word first.
+      for (let hanziGrapheme of await decomposeHanzi(hanzi)) {
+        // Use the canonical form of the grapheme.
+        {
+          let character = characters.get(hanziGrapheme);
+          while (character?.canonicalForm != null) {
+            hanziGrapheme = character.canonicalForm;
+            character = characters.get(character.canonicalForm);
           }
         }
-      }
 
-      // Learn the components of a hanzi word first.
-      for (const hanziGrapheme of await decomposeHanzi(
-        hanziFromHanziWord(hanziWordFromSkill(skill)),
-      )) {
         // Check if the grapheme was already added as a dependency by being
         // referenced in the gloss hint.
         const depAlreadyAdded = deps.some((x) => {
           if (skillKindFromSkill(x) === SkillKind.HanziWordToGloss) {
-            skill = skill as HanziWordSkill;
             return (
-              hanziFromHanziWord(hanziWordFromSkill(skill)) ===
-              hanziTextFromHanziGrapheme(hanziGrapheme)
+              hanziFromHanziWord(
+                hanziWordFromSkill(skill as HanziWordSkill),
+              ) === hanziGrapheme
             );
           }
           return false;
