@@ -1,4 +1,4 @@
-import type { HanziText } from "@/data/model";
+import type { HanziText, HanziWord } from "@/data/model";
 import type { Href } from "expo-router";
 import { Link, useLocalSearchParams, useRouter } from "expo-router";
 import type { ReactNode } from "react";
@@ -108,42 +108,82 @@ export const LittlePrimaryHeader = ({ title }: { title: string }) => {
   );
 };
 
-type HanziSearchParams = {
-  hanzi?: HanziText;
+/**
+ * A hook that provides a demo hanzi word and ensures it's part of the URL,
+ * so that the URL is the UI for editing the value (rather than needing a
+ * separate UI widget).
+ */
+export function useDemoHanziWordKnob(defaultHanziWord: HanziWord): {
+  hanziWord: HanziWord;
+  setHanziWord: (hanziWord: HanziWord) => void;
 };
+export function useDemoHanziWordKnob(defaultHanziWord?: HanziWord): {
+  hanziWord: HanziWord | undefined;
+  setHanziWord: (hanziWord: HanziWord) => void;
+};
+export function useDemoHanziWordKnob(defaultHanziWord?: HanziWord) {
+  const { hanziWord } = useLocalSearchParams<{
+    hanziWord?: HanziWord;
+  }>();
+  const router = useRouter();
+
+  function setHanziWord(hanziWord: HanziWord) {
+    router.setParams({ hanziWord });
+  }
+
+  if (hanziWord == null && defaultHanziWord != null) {
+    // Redirect to set a default hanzi. This way the query string is always
+    // visible in the URL and it's self documenting if you want to preview a
+    // different hanzi.
+    setHanziWord(defaultHanziWord);
+  }
+
+  return {
+    hanziWord: hanziWord ?? defaultHanziWord,
+    setHanziWord,
+  };
+}
 
 /**
  * A hook that provides a demo hanzi character and ensures it's part of the URL,
  * so that the URL is the UI for editing the value (rather than needing a
  * separate UI widget).
  */
-export function useDemoHanzi(defaultHanzi: HanziText) {
-  const { hanzi } = useLocalSearchParams<HanziSearchParams>();
+export function useDemoHanziKnob(defaultHanzi: HanziText): {
+  hanzi: HanziText;
+  setHanzi: (hanzi: HanziText) => void;
+};
+export function useDemoHanziKnob(defaultHanzi?: HanziText): {
+  hanzi: HanziText | undefined;
+  setHanzi: (hanzi: HanziText) => void;
+};
+export function useDemoHanziKnob(defaultHanzi?: HanziText) {
+  const { hanzi } = useLocalSearchParams<{
+    hanzi?: HanziText;
+  }>();
   const router = useRouter();
 
-  if (hanzi == null) {
+  function setHanzi(hanzi: HanziText) {
+    router.setParams({ hanzi });
+  }
+
+  if (hanzi == null && defaultHanzi != null) {
     // Redirect to set a default hanzi. This way the query string is always
     // visible in the URL and it's self documenting if you want to preview a
     // different hanzi.
-    router.setParams({ hanzi: defaultHanzi });
+    setHanzi(defaultHanzi);
   }
 
-  return hanzi ?? defaultHanzi;
+  return {
+    hanzi: hanzi ?? defaultHanzi,
+    setHanzi,
+  };
 }
 
-export function DemoHanziLinks() {
-  const router = useRouter();
-  const { hanzi: currentHanzi } = useLocalSearchParams<HanziSearchParams>();
-  const hanzis = [
-    `一`,
-    `长`,
-    `好`,
-    `你好`,
-    `学`,
-    `习`,
-    `汉`,
-    `字`,
-  ] as HanziText[];
+export function DemoHanziKnob({ hanzis }: { hanzis?: HanziText[] }) {
+  const { hanzi: currentHanzi, setHanzi } = useDemoHanziKnob(hanzis?.[0]);
+
+  hanzis ??= [`一`, `长`, `好`, `你好`, `学`, `习`, `汉`, `字`] as HanziText[];
 
   return (
     <View className="flex-row items-end gap-1 border-b-4 border-fg/10 pb-2">
@@ -153,10 +193,41 @@ export function DemoHanziLinks() {
           className={hanzi === currentHanzi ? `theme-accent` : undefined}
           variant="filled"
           onPressIn={() => {
-            router.setParams({ hanzi });
+            setHanzi(hanzi);
           }}
         >
           {hanzi}
+        </RectButton>
+      ))}
+    </View>
+  );
+}
+
+export function DemoHanziWordKnob({
+  hanziWords,
+}: {
+  hanziWords?: HanziWord[];
+}) {
+  const { hanziWord: currentHanziWord, setHanziWord } = useDemoHanziWordKnob(
+    hanziWords?.[0],
+  );
+
+  hanziWords ??= [`你好:hello`] as HanziWord[];
+
+  return (
+    <View className="flex-row items-end gap-1 border-b-4 border-fg/10 pb-2">
+      {hanziWords.map((hanziWord) => (
+        <RectButton
+          key={hanziWord}
+          className={
+            hanziWord === currentHanziWord ? `theme-accent` : undefined
+          }
+          variant="filled"
+          onPressIn={() => {
+            setHanziWord(hanziWord);
+          }}
+        >
+          {hanziWord}
         </RectButton>
       ))}
     </View>
