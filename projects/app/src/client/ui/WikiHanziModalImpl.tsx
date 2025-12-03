@@ -2,12 +2,13 @@ import {
   getWikiMdxHanziMeaning,
   getWikiMdxHanziWordMeaning,
 } from "@/client/wiki";
-import type { HanziText, PinyinSyllable } from "@/data/model";
+import type { HanziText } from "@/data/model";
 import { loadDictionary } from "@/dictionary/dictionary";
 import type { ReactNode } from "react";
 import { Fragment, use, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useIntersectionObserver } from "usehooks-ts";
+import { CloseButton2 } from "./CloseButton2";
 import { IconImage } from "./IconImage";
 import { PylyMdxComponents } from "./PylyMdxComponents";
 
@@ -23,29 +24,6 @@ export function WikiHanziModalImpl({
   const dictionary = use(loadDictionary());
   const hanziWordMeanings = dictionary.lookupHanzi(hanzi);
 
-  let pinyin: readonly PinyinSyllable[] | undefined;
-  for (const [, meaning] of hanziWordMeanings) {
-    if (meaning.pinyin != null) {
-      const mainPinyin = meaning.pinyin[0];
-      if (mainPinyin != null) {
-        pinyin = mainPinyin;
-        break;
-      }
-    }
-  }
-
-  let title: string = hanzi;
-  if (pinyin != null) {
-    title += ` (${pinyin.join(` `)})`;
-  }
-
-  const glossesArray =
-    hanziWordMeanings.length === 1
-      ? hanziWordMeanings[0]?.[1].gloss
-      : hanziWordMeanings.map(([, meaning]) => meaning.gloss[0]);
-
-  const glosses = glossesArray?.join(`, `);
-
   const MeaningMdx = getWikiMdxHanziMeaning(hanzi);
 
   return (
@@ -54,14 +32,12 @@ export function WikiHanziModalImpl({
         className={
           // Use a linear gradient on the background so that rubber band
           // scrolling showing the correct color at the top and bottom.
-          `
-            h-screen
-            bg-[linear-gradient(to_bottom,_var(--color-theme-sky-bg)_0%,_var(--color-theme-sky-bg)_50%,_var(--color-bg)_50%,_var(--color-bg)_100%)]
-          `
+          // bg-[linear-gradient(to_bottom,_var(--color-theme-sky-bg)_0%,_var(--color-theme-sky-bg)_50%,_var(--color-bg)_50%,_var(--color-bg)_100%)]
+          `h-screen`
         }
         contentContainerClassName="pb-10 min-h-full"
       >
-        <Header title={title} subtitle={glosses} onDismiss={onDismiss} />
+        <Header title={hanzi} onDismiss={onDismiss} />
 
         <PylyMdxComponents>
           <View className="flex-1 gap-6 bg-bg py-7">
@@ -105,11 +81,9 @@ export function WikiHanziModalImpl({
 
 function Header({
   title,
-  subtitle,
   onDismiss,
 }: {
   title: string;
-  subtitle?: string;
   onDismiss?: () => void;
 }) {
   const [ref1, isIntersecting1] = useIntersectionObserver({
@@ -127,47 +101,29 @@ function Header({
         }}
       />
 
-      <View className="theme-sky sticky top-[-120px] z-10 h-[184px] bg-bg">
-        <View className="sticky top-1 z-10 h-[56px] flex-row items-center pl-4">
-          <Pressable
-            onPress={onDismiss}
-            className={`
-              size-8 rounded-md transition-transform
-
-              hover:bg-fg-loud/10
-
-              active:scale-95
-            `}
-          >
-            <IconImage
-              source={require(`@/assets/icons/close.svg`)}
-              size={32}
-              className="text-fg-loud"
-            />
-          </Pressable>
+      <View className="sticky top-[-102px] z-10">
+        <View
+          className={`
+            sticky top-0 z-10 h-[56px] flex-row items-center
+            bg-[linear-gradient(to_bottom,_var(--color-bg)_0%,_var(--color-bg)_70%,_var(--color-bg)_70%,_rgb(from_var(--color-bg)_r_g_b_/_0)_100%)]
+            pl-4
+          `}
+        >
+          <CloseButton2 onPress={onDismiss} />
         </View>
 
-        <View className="sticky top-[11px] z-0 overflow-visible px-4">
-          <Text
-            className={`
-              text-center font-sans text-[28px]/[42px] font-bold text-fg-loud transition-all
+        <View
+          className={`
+            theme-sky z-20 h-[150px] min-w-[150px] items-center justify-center place-self-center
+            overflow-visible rounded-lg bg-bg px-4 transition-all
 
-              ${isIntersecting1 ? `scale-100` : `scale-[0.75]`}
-            `}
+            ${isIntersecting1 ? `scale-100` : `scale-[0.25]`}
+          `}
+        >
+          <Text
+            className={`text-center font-sans text-[100px]/[100px] font-bold text-fg-loud`}
           >
             {title}
-          </Text>
-        </View>
-
-        <View className="">
-          <Text
-            className={`
-              text-center font-sans text-[18px] font-normal text-fg-loud transition-opacity
-
-              ${isIntersecting1 ? `opacity-100` : `opacity-0`}
-            `}
-          >
-            {subtitle}
           </Text>
         </View>
       </View>

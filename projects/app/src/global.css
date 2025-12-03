@@ -91,7 +91,7 @@
   }
   .pyly-body.pyly-bold,
   .pyly-body .pyly-bold {
-    @apply font-bold text-fg-loud;
+    @apply font-semibold text-fg-loud;
   }
   .pyly-body.pyly-mark,
   .pyly-body .pyly-mark {
@@ -351,8 +351,9 @@
   .pyly-mdx-p {
     @apply pyly-body;
   }
+  .pyly-mdx-b,
   .pyly-mdx-strong {
-    @apply font-bold text-fg-loud;
+    @apply font-semibold text-fg-loud;
   }
 
   .pyly-mdx-p {
