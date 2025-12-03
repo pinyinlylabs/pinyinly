@@ -1,11 +1,9 @@
-import { intersperse } from "@/client/react";
-import type { HanziCharacter, WikiCharacterData } from "@/data/model";
+import type { WikiCharacterData } from "@/data/model";
 import type { HanziWordWithMeaning } from "@/dictionary/dictionary";
 import { hanziFromHanziWord, loadDictionary } from "@/dictionary/dictionary";
-import { arrayFilterUniqueWithKey } from "@pinyinly/lib/collections";
 import { use } from "react";
-import { Text } from "react-native";
 import { WikiHanziCharacterDecomposition } from "./WikiHanziCharacterDecomposition";
+import { WikiHanziCharacterMeanings } from "./WikiHanziCharacterMeanings";
 import { WikiHanziCharacterPronunciation } from "./WikiHanziCharacterPronunciation";
 
 interface WikiHanziCharacterIntroProps {
@@ -24,7 +22,10 @@ export function WikiHanziCharacterIntro({
 
   return (
     <>
-      <MeaningSentence hanzi={characterData.hanzi} meanings={meanings} />
+      <WikiHanziCharacterMeanings
+        hanzi={characterData.hanzi}
+        meanings={meanings}
+      />
 
       <WikiHanziCharacterDecomposition
         characterData={characterData}
@@ -36,51 +37,6 @@ export function WikiHanziCharacterIntro({
         <OnePronunciation hanziWordWithMeaning={meanings[0]} />
       ) : null}
     </>
-  );
-}
-
-function MeaningSentence({
-  hanzi,
-  meanings,
-}: {
-  hanzi: HanziCharacter;
-  meanings: readonly HanziWordWithMeaning[];
-}) {
-  const glosses = meanings.map(([, meaning]) => meaning.gloss[0]);
-  const pinyins = meanings
-    .map(([, meaning]) => meaning.pinyin?.[0]?.[0])
-    .filter((x) => x != null)
-    .filter(arrayFilterUniqueWithKey((x) => x));
-
-  return (
-    <Text className="pyly-mdx-p">
-      <Text className="pyly-bold">{hanzi}</Text> generally means{` `}
-      {intersperse(
-        glosses.map((gloss, i) => (
-          <Text key={i} className="pyly-bold">
-            {gloss}
-          </Text>
-        )),
-        <Text> or </Text>,
-      )}
-      {` `}
-      in modern Mandarin.
-      {` `}
-      {glosses.length === 2 && pinyins.length === 1
-        ? `In both cases it’s pronounced `
-        : pinyins.length > 1
-          ? `Depending on the meaning, it’s pronounced `
-          : `It’s pronounced `}
-      {intersperse(
-        pinyins.map((pinyin, i) => (
-          <Text key={i} className="pyly-bold">
-            {pinyin}
-          </Text>
-        )),
-        <Text> or </Text>,
-      )}
-      .
-    </Text>
   );
 }
 

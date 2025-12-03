@@ -134,7 +134,16 @@ export function useDemoHanzi(defaultHanzi: HanziText) {
 export function DemoHanziLinks() {
   const router = useRouter();
   const { hanzi: currentHanzi } = useLocalSearchParams<HanziSearchParams>();
-  const hanzis = [`一`, `好`, `你好`, `学`, `习`, `汉`, `字`] as HanziText[];
+  const hanzis = [
+    `一`,
+    `长`,
+    `好`,
+    `你好`,
+    `学`,
+    `习`,
+    `汉`,
+    `字`,
+  ] as HanziText[];
 
   return (
     <View className="flex-row items-end gap-1 border-b-4 border-fg/10 pb-2">
