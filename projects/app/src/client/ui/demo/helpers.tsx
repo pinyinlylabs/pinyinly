@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { useRef } from "react";
 import { Text, View } from "react-native";
 import { tv } from "tailwind-variants";
+import { RectButton } from "../RectButton";
 
 export const ExampleStack = ({
   children,
@@ -107,13 +108,17 @@ export const LittlePrimaryHeader = ({ title }: { title: string }) => {
   );
 };
 
+type HanziSearchParams = {
+  hanzi?: HanziText;
+};
+
 /**
  * A hook that provides a demo hanzi character and ensures it's part of the URL,
  * so that the URL is the UI for editing the value (rather than needing a
  * separate UI widget).
  */
 export function useDemoHanzi(defaultHanzi: HanziText) {
-  const { hanzi } = useLocalSearchParams<{ hanzi?: HanziText }>();
+  const { hanzi } = useLocalSearchParams<HanziSearchParams>();
   const router = useRouter();
 
   if (hanzi == null) {
@@ -124,4 +129,27 @@ export function useDemoHanzi(defaultHanzi: HanziText) {
   }
 
   return hanzi ?? defaultHanzi;
+}
+
+export function DemoHanziLinks() {
+  const router = useRouter();
+  const { hanzi: currentHanzi } = useLocalSearchParams<HanziSearchParams>();
+  const hanzis = [`一`, `好`, `你好`, `学`, `习`, `汉`, `字`] as HanziText[];
+
+  return (
+    <View className="flex-row items-end gap-1 border-b-4 border-fg/10 pb-2">
+      {hanzis.map((hanzi) => (
+        <RectButton
+          key={hanzi}
+          className={hanzi === currentHanzi ? `theme-accent` : undefined}
+          variant="filled"
+          onPressIn={() => {
+            router.setParams({ hanzi });
+          }}
+        >
+          {hanzi}
+        </RectButton>
+      ))}
+    </View>
+  );
 }
