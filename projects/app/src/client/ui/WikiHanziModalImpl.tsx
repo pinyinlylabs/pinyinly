@@ -32,7 +32,6 @@ export function WikiHanziModalImpl({
         className={
           // Use a linear gradient on the background so that rubber band
           // scrolling showing the correct color at the top and bottom.
-          // bg-[linear-gradient(to_bottom,_var(--color-theme-sky-bg)_0%,_var(--color-theme-sky-bg)_50%,_var(--color-bg)_50%,_var(--color-bg)_100%)]
           `h-screen`
         }
         contentContainerClassName="pb-10 min-h-full"
@@ -103,11 +102,7 @@ function Header({
 
       <View className="sticky top-[-102px] z-10">
         <View
-          className={`
-            sticky top-0 z-10 h-[56px] flex-row items-center
-            bg-[linear-gradient(to_bottom,_var(--color-bg)_0%,_var(--color-bg)_70%,_var(--color-bg)_70%,_rgb(from_var(--color-bg)_r_g_b_/_0)_100%)]
-            pl-4
-          `}
+          className={`sticky top-0 z-10 h-[56px] flex-row items-center bg-bg/90 pl-4`}
         >
           <CloseButton2 onPress={onDismiss} />
         </View>
