@@ -37,7 +37,11 @@ export const loadPinyinWords = memoize0(async function loadPinyinWords() {
   return z
     .array(z.string())
     .transform(deepReadonly)
-    .parse(await import(`./pinyinWords.asset.json`).then((x) => x.default));
+    .parse(
+      await import(`./dictionary/pinyinWords.asset.json`).then(
+        (x) => x.default,
+      ),
+    );
 });
 
 export const loadPinyinSoundThemeDetails = memoize0(
@@ -53,7 +57,7 @@ export const loadPinyinSoundThemeDetails = memoize0(
       .transform((x) => new Map(Object.entries(x)))
       .transform(deepReadonly)
       .parse(
-        await import(`./pinyinSoundThemeDetails.asset.json`).then(
+        await import(`./dictionary/pinyinSoundThemeDetails.asset.json`).then(
           (x) => x.default,
         ),
       );
@@ -88,7 +92,7 @@ export const loadPinyinSoundNameSuggestions = memoize0(
     return pinyinSoundNameSuggestionsSchema
       .transform(deepReadonly)
       .parse(
-        await import(`./pinyinSoundNameSuggestions.asset.json`).then(
+        await import(`./dictionary/pinyinSoundNameSuggestions.asset.json`).then(
           (x) => x.default,
         ),
       );
@@ -123,7 +127,9 @@ export const loadCharacters = memoize0(async function loadCharacters() {
   return charactersSchema
     .transform((x) => new Map(x))
     .transform(deepReadonly)
-    .parse(await import(`./characters.asset.json`).then((x) => x.default));
+    .parse(
+      await import(`./dictionary/characters.asset.json`).then((x) => x.default),
+    );
 });
 
 export const wordListSchema = z.array(hanziWordSchema);
@@ -133,7 +139,9 @@ export const allRadicalHanziWords = memoize0(
     return wordListSchema
       .transform(deepReadonly)
       .parse(
-        await import(`./radicalsHanziWords.asset.json`).then((x) => x.default),
+        await import(`./dictionary/radicalsHanziWords.asset.json`).then(
+          (x) => x.default,
+        ),
       );
   },
 );
@@ -141,19 +149,31 @@ export const allRadicalHanziWords = memoize0(
 export const allHsk1HanziWords = memoize0(async function allHsk1HanziWords() {
   return wordListSchema
     .transform(deepReadonly)
-    .parse(await import(`./hsk1HanziWords.asset.json`).then((x) => x.default));
+    .parse(
+      await import(`./dictionary/hsk1HanziWords.asset.json`).then(
+        (x) => x.default,
+      ),
+    );
 });
 
 export const allHsk2HanziWords = memoize0(async function allHsk2HanziWords() {
   return wordListSchema
     .transform(deepReadonly)
-    .parse(await import(`./hsk2HanziWords.asset.json`).then((x) => x.default));
+    .parse(
+      await import(`./dictionary/hsk2HanziWords.asset.json`).then(
+        (x) => x.default,
+      ),
+    );
 });
 
 export const allHsk3HanziWords = memoize0(async function allHsk3HanziWords() {
   return wordListSchema
     .transform(deepReadonly)
-    .parse(await import(`./hsk3HanziWords.asset.json`).then((x) => x.default));
+    .parse(
+      await import(`./dictionary/hsk3HanziWords.asset.json`).then(
+        (x) => x.default,
+      ),
+    );
 });
 
 export const partOfSpeechSchema = z.enum([
@@ -196,7 +216,9 @@ export type Dictionary = z.infer<typeof dictionarySchema>;
 export const loadDictionaryJson = memoize0(async () =>
   dictionarySchema
     .transform(deepReadonly)
-    .parse(await import(`./dictionary.asset.json`).then((x) => x.default)),
+    .parse(
+      await import(`./dictionary/dictionary.asset.json`).then((x) => x.default),
+    ),
 );
 
 export const hanziWordMigrationsSchema = z
@@ -215,7 +237,9 @@ export const loadHanziWordMigrations = memoize0(
     return hanziWordMigrationsSchema
       .transform(deepReadonly)
       .parse(
-        await import(`./hanziWordMigrations.asset.json`).then((x) => x.default),
+        await import(`./dictionary/hanziWordMigrations.asset.json`).then(
+          (x) => x.default,
+        ),
       );
   },
 );
@@ -231,7 +255,11 @@ const loadRadicalStrokes = memoize0(async () =>
     )
     .transform((x) => new Map(x.map((r) => [r.strokes, r])))
     .transform(deepReadonly)
-    .parse(await import(`./radicalStrokes.asset.json`).then((x) => x.default)),
+    .parse(
+      await import(`./dictionary/radicalStrokes.asset.json`).then(
+        (x) => x.default,
+      ),
+    ),
 );
 
 export const allRadicalsByStrokes = async () => await loadRadicalStrokes();

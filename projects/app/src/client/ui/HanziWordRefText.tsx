@@ -5,7 +5,7 @@ import {
   hanziFromHanziWord,
   loadDictionary,
   pinyinOrThrow,
-} from "@/dictionary/dictionary";
+} from "@/dictionary";
 import { use } from "react";
 import { HanziWordLink } from "./HanziWordLink";
 

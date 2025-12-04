@@ -1,7 +1,7 @@
 import { QuestionFlagKind } from "#data/model.js";
 import { hanziWordToGlossTypedQuestionOrThrow } from "#data/questions/hanziWordToGlossTyped.ts";
 import { hanziWordToGlossTyped } from "#data/skills.js";
-import { loadDictionary } from "#dictionary/dictionary.ts";
+import { loadDictionary } from "#dictionary.ts";
 import { describe, expect, test } from "vitest";
 
 describe(

@@ -3,7 +3,7 @@ import {
   hanziFromHanziOrHanziWord,
   isHanziWord,
   loadDictionary,
-} from "../dictionary/dictionary";
+} from "@/dictionary";
 import type {
   HanziGlossMistakeType,
   HanziPinyinMistakeType,

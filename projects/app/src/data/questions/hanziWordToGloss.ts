@@ -1,4 +1,4 @@
-import type { HanziWordMeaning } from "@/dictionary/dictionary";
+import type { HanziWordMeaning } from "@/dictionary";
 import {
   allHsk1HanziWords,
   allHsk2HanziWords,
@@ -6,7 +6,7 @@ import {
   glossOrThrow,
   hanziFromHanziWord,
   loadDictionary,
-} from "@/dictionary/dictionary";
+} from "@/dictionary";
 import { evenHalve } from "@pinyinly/lib/collections";
 import { invariant } from "@pinyinly/lib/invariant";
 import shuffle from "lodash/shuffle";

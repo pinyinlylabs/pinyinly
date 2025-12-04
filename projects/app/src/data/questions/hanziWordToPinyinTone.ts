@@ -9,7 +9,7 @@ import {
   allHanziCharacters,
   hanziFromHanziWord,
   loadDictionary,
-} from "@/dictionary/dictionary";
+} from "@/dictionary";
 import {
   arrayFilterUniqueWithKey,
   emptyArray,

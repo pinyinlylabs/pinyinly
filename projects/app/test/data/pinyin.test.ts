@@ -18,7 +18,7 @@ import {
   pinyinSyllableSuggestions,
   splitTonelessPinyinSyllable,
 } from "#data/pinyin.ts";
-import { loadPinyinWords } from "#dictionary/dictionary.ts";
+import { loadPinyinWords } from "#dictionary.ts";
 import { uniqueInvariant } from "@pinyinly/lib/invariant";
 import type { DeepReadonly } from "ts-essentials";
 import { describe, expect, test } from "vitest";

@@ -1,6 +1,6 @@
 import { walkIdsNodeLeafs } from "@/data/hanzi";
 import type { WikiCharacterData } from "@/data/model";
-import { loadDictionary } from "@/dictionary/dictionary";
+import { loadDictionary } from "@/dictionary";
 import { parseIndexRanges } from "@/util/indexRanges";
 import { Image } from "expo-image";
 import type { ReactNode } from "react";

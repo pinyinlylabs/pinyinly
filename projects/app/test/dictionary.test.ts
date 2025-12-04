@@ -1,7 +1,7 @@
 import { splitHanziText } from "#data/hanzi.ts";
 import type { HanziCharacter, HanziText } from "#data/model.ts";
 import { pinyinPronunciationDisplayText } from "#data/pinyin.ts";
-import type { Dictionary } from "#dictionary/dictionary.ts";
+import type { Dictionary } from "#dictionary.ts";
 import {
   allHanziWordsHanzi,
   allHsk1HanziWords,
@@ -23,7 +23,7 @@ import {
   loadPinyinWords,
   meaningKeyFromHanziWord,
   upsertHanziWordMeaning,
-} from "#dictionary/dictionary.ts";
+} from "#dictionary.ts";
 import {
   mapSetAdd,
   mergeSortComparators,
@@ -33,7 +33,7 @@ import {
 import { invariant } from "@pinyinly/lib/invariant";
 import { describe, expect, test } from "vitest";
 import { z } from "zod/v4";
-import { 拼音, 汉 } from "../data/helpers.ts";
+import { 拼音, 汉 } from "./data/helpers.ts";
 
 test(`radical groups have the right number of elements`, async () => {
   // Data integrity test to ensure that the number of characters in each group

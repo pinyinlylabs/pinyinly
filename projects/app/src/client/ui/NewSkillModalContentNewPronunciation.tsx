@@ -1,5 +1,5 @@
 import type { HanziText, PinyinSyllable } from "@/data/model";
-import { loadDictionary } from "@/dictionary/dictionary";
+import { loadDictionary } from "@/dictionary";
 import { use } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useIntersectionObserver } from "usehooks-ts";

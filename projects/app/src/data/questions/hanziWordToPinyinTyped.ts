@@ -1,5 +1,5 @@
 import { matchAllPinyinSyllables } from "@/data/pinyin";
-import { loadDictionary } from "@/dictionary/dictionary";
+import { loadDictionary } from "@/dictionary";
 import { invariant } from "@pinyinly/lib/invariant";
 import type {
   HanziWordSkill,

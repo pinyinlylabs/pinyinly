@@ -1,6 +1,6 @@
 import type { WikiCharacterData } from "@/data/model";
-import type { HanziWordWithMeaning } from "@/dictionary/dictionary";
-import { hanziFromHanziWord, loadDictionary } from "@/dictionary/dictionary";
+import type { HanziWordWithMeaning } from "@/dictionary";
+import { hanziFromHanziWord, loadDictionary } from "@/dictionary";
 import { use } from "react";
 import { WikiHanziCharacterDecomposition } from "./WikiHanziCharacterDecomposition";
 import { WikiHanziCharacterMeanings } from "./WikiHanziCharacterMeanings";

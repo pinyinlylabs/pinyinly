@@ -6,7 +6,7 @@ import {
   tryPinyinDistractor,
 } from "#data/questions/hanziWordToPinyinInitial.ts";
 import { hanziWordToPinyinInitial } from "#data/skills.ts";
-import { hanziFromHanziWord, loadDictionary } from "#dictionary/dictionary.ts";
+import { hanziFromHanziWord, loadDictionary } from "#dictionary.ts";
 import { describe, expect, test } from "vitest";
 import { 拼音, 汉字 } from "../helpers.ts";
 

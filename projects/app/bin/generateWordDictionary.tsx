@@ -20,7 +20,7 @@ import type {
   Dictionary,
   HanziWordMeaning,
   HanziWordWithMeaning,
-} from "#dictionary/dictionary.ts";
+} from "#dictionary.ts";
 import {
   allHanziCharacters,
   allHsk1HanziWords,
@@ -35,7 +35,7 @@ import {
   unparseDictionary,
   upsertHanziWordMeaning,
   wordListSchema,
-} from "#dictionary/dictionary.ts";
+} from "#dictionary.ts";
 import { Alert, MultiSelect, Select } from "@inkjs/ui";
 import {
   arrayFilterUniqueWithKey,

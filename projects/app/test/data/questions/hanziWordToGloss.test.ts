@@ -5,7 +5,7 @@ import {
   shouldOmitHanziWord,
 } from "#data/questions/hanziWordToGloss.ts";
 import { hanziWordToGloss } from "#data/skills.ts";
-import { loadDictionary } from "#dictionary/dictionary.ts";
+import { loadDictionary } from "#dictionary.ts";
 import { nonNullable } from "@pinyinly/lib/invariant";
 import { describe, expect, test } from "vitest";
 

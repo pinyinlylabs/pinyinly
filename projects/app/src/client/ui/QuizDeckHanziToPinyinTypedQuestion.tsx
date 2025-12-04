@@ -19,7 +19,7 @@ import {
 } from "@/data/pinyin";
 import { hanziToPinyinTypedQuestionMistakes } from "@/data/questions/hanziWordToPinyinTyped";
 import { computeSkillRating, hanziWordFromSkill } from "@/data/skills";
-import { hanziFromHanziWord } from "@/dictionary/dictionary";
+import { hanziFromHanziWord } from "@/dictionary";
 import { nonNullable } from "@pinyinly/lib/invariant";
 import type { ReactNode, Ref } from "react";
 import { useMemo, useRef, useState } from "react";

@@ -1,4 +1,4 @@
-import { hanziFromHanziWord, loadDictionary } from "@/dictionary/dictionary";
+import { hanziFromHanziWord, loadDictionary } from "@/dictionary";
 import { nonNullable } from "@pinyinly/lib/invariant";
 import type { Mutable } from "@pinyinly/lib/types";
 import type {

@@ -21,7 +21,7 @@ import {
   allHsk2HanziWords,
   getIsStructuralHanzi,
   loadDictionary,
-} from "@/dictionary/dictionary";
+} from "@/dictionary";
 import { devToolsSlowQuerySleepIfEnabled } from "@/util/devtools";
 import type { Rating } from "@/util/fsrs";
 import type { RizzleAnyEntity, RizzleEntityOutput } from "@/util/rizzle";

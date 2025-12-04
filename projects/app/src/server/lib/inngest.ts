@@ -1,10 +1,7 @@
 import { hanziWordSkillKinds } from "@/data/model";
 import { supportedSchemas } from "@/data/rizzleSchema";
 import { hanziWordSkill } from "@/data/skills";
-import {
-  loadDictionary,
-  loadHanziWordMigrations,
-} from "@/dictionary/dictionary";
+import { loadDictionary, loadHanziWordMigrations } from "@/dictionary";
 import type { AppRouter } from "@/server/routers/_app";
 import { preflightCheckEnvVars } from "@/util/env";
 import { httpSessionHeaderTx } from "@/util/http";

@@ -10,7 +10,7 @@ import {
   loadPinyinWords,
   oneSyllablePinyinOrThrow,
   pinyinOrThrow,
-} from "@/dictionary/dictionary";
+} from "@/dictionary";
 import {
   identicalInvariant,
   invariant,
