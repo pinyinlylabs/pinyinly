@@ -1330,107 +1330,17 @@ describe(
       },
     );
 
-    describe(`${SkillKind.HanziWordToPinyinTyped} skills`, () => {
-      skillTest(
-        `doesn't learn pinyin for all constituents of a single character`,
-        async ({ isStructuralHanzi }) => {
-          const graph = await skillLearningGraph({
-            targetSkills: [`hp:好:good`],
-          });
-          const queue = skillReviewQueue({
-            graph,
-            skillSrsStates: new Map(),
-            latestSkillRatings: latestSkillRatings(),
-            isStructuralHanzi,
-          });
-
-          const queueSkills = queue.items.map(({ skill }) => skill);
-          expect(queueSkills).not.toContain(`hpi:女:woman`);
-          expect(queueSkills).not.toContain(`hpi:子:child`);
-        },
-      );
-
-      skillTest(
-        `learns the pinyin for each character in multi-character words`,
-        async ({ isStructuralHanzi }) => {
-          const graph = await skillLearningGraph({
-            targetSkills: [`hp:一样:same`],
-          });
-
-          const queue = skillReviewQueue({
-            graph,
-            skillSrsStates: new Map(),
-            latestSkillRatings: latestSkillRatings(),
-            isStructuralHanzi,
-          });
-
-          const isHpSkill = (s: Skill) =>
-            skillKindFromSkill(s) === SkillKind.HanziWordToPinyinTyped;
-
-          const onlyHpQueue = {
-            items: queue.items.filter(({ skill }) => isHpSkill(skill)),
-          };
-
-          expect(prettyQueue(onlyHpQueue)).toMatchInlineSnapshot(`
-            [
-              "hp:样:shape (🟥 BLOCKED)",
-              "hp:一:one (🟥 BLOCKED)",
-              "hp:一样:same (🟥 BLOCKED)",
-            ]
-          `);
-        },
-      );
-
-      test(`schedules new skills in dependency order`, async () => {
-        const graph = await skillLearningGraph({
-          targetSkills: [`hp:一点儿:aLittle`],
-        });
-
-        const queue = skillReviewQueue({
-          graph,
-          skillSrsStates: new Map(),
-          latestSkillRatings: latestSkillRatings(),
-          isStructuralHanzi: () => false,
-        });
-        expect(prettyQueue(queue)).toMatchInlineSnapshot(`
-          [
-            "he:𠃌:radical (🌱 NEW SKILL)",
-            "he:丨:line (🌱 NEW SKILL)",
-            "he:一:one (🌱 NEW SKILL)",
-            "he:乚:hidden (🌱 NEW SKILL)",
-            "he:丿:slash (🌱 NEW SKILL)",
-            "he:灬:fire (🌱 NEW SKILL)",
-            "he:冂:wide (🟥 BLOCKED)",
-            "he:口:mouth (🟥 BLOCKED)",
-            "he:占:occupy (🟥 BLOCKED)",
-            "he:儿:son (🟥 BLOCKED)",
-            "he:点:oClock (🟥 BLOCKED)",
-            "hpi:儿:son (🟥 BLOCKED)",
-            "hpi:点:oClock (🟥 BLOCKED)",
-            "hpi:一:one (🟥 BLOCKED)",
-            "hpf:儿:son (🟥 BLOCKED)",
-            "hpf:点:oClock (🟥 BLOCKED)",
-            "hpf:一:one (🟥 BLOCKED)",
-            "hpt:儿:son (🟥 BLOCKED)",
-            "hpt:点:oClock (🟥 BLOCKED)",
-            "hpt:一:one (🟥 BLOCKED)",
-            "hp:儿:son (🟥 BLOCKED)",
-            "hp:点:oClock (🟥 BLOCKED)",
-            "hp:一:one (🟥 BLOCKED)",
-            "he:一点儿:aLittle (🟥 BLOCKED)",
-            "hp:一点儿:aLittle (🟥 BLOCKED)",
-          ]
-        `);
-      });
-
-      skillTest(
-        `treats non-introduced skills as "not stable" and won't dependant skills`,
-        async ({ isStructuralHanzi }) => {
-          const graph = await skillLearningGraph({
-            targetSkills: [`hp:一:one`],
-          });
-
-          {
+    describe(
+      `SkillKind.HanziWordToPinyinTyped skills` satisfies HasNameOf<
+        typeof SkillKind.HanziWordToPinyinTyped
+      >,
+      () => {
+        skillTest(
+          `doesn't learn pinyin for all constituents of a single character`,
+          async ({ isStructuralHanzi }) => {
+            const graph = await skillLearningGraph({
+              targetSkills: [`hp:好:good`],
+            });
             const queue = skillReviewQueue({
               graph,
               skillSrsStates: new Map(),
@@ -1438,76 +1348,171 @@ describe(
               isStructuralHanzi,
             });
 
-            expect(prettyQueue(queue)).toMatchInlineSnapshot(`
-              [
-                "he:一:one (🌱 NEW SKILL)",
-                "hpi:一:one (🟥 BLOCKED)",
-                "hpf:一:one (🟥 BLOCKED)",
-                "hpt:一:one (🟥 BLOCKED)",
-                "hp:一:one (🟥 BLOCKED)",
-              ]
-            `);
-          }
+            const queueSkills = queue.items.map(({ skill }) => skill);
+            expect(queueSkills).not.toContain(`hpi:女:woman`);
+            expect(queueSkills).not.toContain(`hpi:子:child`);
+          },
+        );
 
-          {
+        skillTest(
+          `learns the pinyin for each character in multi-character words`,
+          async ({ isStructuralHanzi }) => {
+            const graph = await skillLearningGraph({
+              targetSkills: [`hp:一样:same`],
+            });
+
             const queue = skillReviewQueue({
               graph,
-              skillSrsStates: new Map([
-                [`he:一:one`, fsrsSrsState(时`-1d`, 时`-5m`, Rating.Good)],
-              ]),
+              skillSrsStates: new Map(),
               latestSkillRatings: latestSkillRatings(),
               isStructuralHanzi,
             });
-            expect(prettyQueue(queue)).toMatchInlineSnapshot(`
-              [
-                "he:一:one",
-                "hpi:一:one (🌱 NEW SKILL)",
-                "hpf:一:one (🟥 BLOCKED)",
-                "hpt:一:one (🟥 BLOCKED)",
-                "hp:一:one (🟥 BLOCKED)",
-              ]
-            `);
-            expect(queue).toMatchObject({
-              blockedCount: 3,
-              dueCount: 1,
-              newContentCount: 1,
-              newDifficultyCount: 0,
-              overDueCount: 0,
-              retryCount: 0,
-            });
-          }
 
-          {
-            const queue = skillReviewQueue({
-              graph,
-              skillSrsStates: new Map([
-                [`he:一:one`, fsrsSrsState(时`-1d`, 时`-6m`, Rating.Good)],
-                [`hpi:一:one`, fsrsSrsState(时`-1d`, 时`-4m`, Rating.Good)],
-              ]),
-              latestSkillRatings: latestSkillRatings(),
-              isStructuralHanzi,
-            });
-            expect(prettyQueue(queue)).toMatchInlineSnapshot(`
+            const isHpSkill = (s: Skill) =>
+              skillKindFromSkill(s) === SkillKind.HanziWordToPinyinTyped;
+
+            const onlyHpQueue = {
+              items: queue.items.filter(({ skill }) => isHpSkill(skill)),
+            };
+
+            expect(prettyQueue(onlyHpQueue)).toMatchInlineSnapshot(`
               [
-                "he:一:one",
-                "hpi:一:one",
-                "hpf:一:one (📈 NEW DIFFICULTY)",
-                "hpt:一:one (🟥 BLOCKED)",
+                "hp:样:shape (🟥 BLOCKED)",
                 "hp:一:one (🟥 BLOCKED)",
+                "hp:一样:same (🟥 BLOCKED)",
               ]
             `);
-            expect(queue).toMatchObject({
-              blockedCount: 2,
-              dueCount: 2,
-              newContentCount: 0,
-              newDifficultyCount: 1,
-              overDueCount: 0,
-              retryCount: 0,
+          },
+        );
+
+        test(`schedules new skills in dependency order`, async () => {
+          const graph = await skillLearningGraph({
+            targetSkills: [`hp:一点儿:aLittle`],
+          });
+
+          const queue = skillReviewQueue({
+            graph,
+            skillSrsStates: new Map(),
+            latestSkillRatings: latestSkillRatings(),
+            isStructuralHanzi: () => false,
+          });
+          expect(prettyQueue(queue)).toMatchInlineSnapshot(`
+            [
+              "he:𠃌:radical (🌱 NEW SKILL)",
+              "he:丨:line (🌱 NEW SKILL)",
+              "he:一:one (🌱 NEW SKILL)",
+              "he:乚:hidden (🌱 NEW SKILL)",
+              "he:丿:slash (🌱 NEW SKILL)",
+              "he:灬:fire (🌱 NEW SKILL)",
+              "he:冂:wide (🟥 BLOCKED)",
+              "he:口:mouth (🟥 BLOCKED)",
+              "he:占:occupy (🟥 BLOCKED)",
+              "he:儿:son (🟥 BLOCKED)",
+              "he:点:oClock (🟥 BLOCKED)",
+              "hpi:儿:son (🟥 BLOCKED)",
+              "hpi:点:oClock (🟥 BLOCKED)",
+              "hpi:一:one (🟥 BLOCKED)",
+              "hpf:儿:son (🟥 BLOCKED)",
+              "hpf:点:oClock (🟥 BLOCKED)",
+              "hpf:一:one (🟥 BLOCKED)",
+              "hpt:儿:son (🟥 BLOCKED)",
+              "hpt:点:oClock (🟥 BLOCKED)",
+              "hpt:一:one (🟥 BLOCKED)",
+              "hp:儿:son (🟥 BLOCKED)",
+              "hp:点:oClock (🟥 BLOCKED)",
+              "hp:一:one (🟥 BLOCKED)",
+              "he:一点儿:aLittle (🟥 BLOCKED)",
+              "hp:一点儿:aLittle (🟥 BLOCKED)",
+            ]
+          `);
+        });
+
+        skillTest(
+          `treats non-introduced skills as "not stable" and won't dependant skills`,
+          async ({ isStructuralHanzi }) => {
+            const graph = await skillLearningGraph({
+              targetSkills: [`hp:一:one`],
             });
-          }
-        },
-      );
-    });
+
+            {
+              const queue = skillReviewQueue({
+                graph,
+                skillSrsStates: new Map(),
+                latestSkillRatings: latestSkillRatings(),
+                isStructuralHanzi,
+              });
+
+              expect(prettyQueue(queue)).toMatchInlineSnapshot(`
+                [
+                  "he:一:one (🌱 NEW SKILL)",
+                  "hpi:一:one (🟥 BLOCKED)",
+                  "hpf:一:one (🟥 BLOCKED)",
+                  "hpt:一:one (🟥 BLOCKED)",
+                  "hp:一:one (🟥 BLOCKED)",
+                ]
+              `);
+            }
+
+            {
+              const queue = skillReviewQueue({
+                graph,
+                skillSrsStates: new Map([
+                  [`he:一:one`, fsrsSrsState(时`-1d`, 时`-5m`, Rating.Good)],
+                ]),
+                latestSkillRatings: latestSkillRatings(),
+                isStructuralHanzi,
+              });
+              expect(prettyQueue(queue)).toMatchInlineSnapshot(`
+                [
+                  "he:一:one",
+                  "hpi:一:one (🌱 NEW SKILL)",
+                  "hpf:一:one (🟥 BLOCKED)",
+                  "hpt:一:one (🟥 BLOCKED)",
+                  "hp:一:one (🟥 BLOCKED)",
+                ]
+              `);
+              expect(queue).toMatchObject({
+                blockedCount: 3,
+                dueCount: 1,
+                newContentCount: 1,
+                newDifficultyCount: 0,
+                overDueCount: 0,
+                retryCount: 0,
+              });
+            }
+
+            {
+              const queue = skillReviewQueue({
+                graph,
+                skillSrsStates: new Map([
+                  [`he:一:one`, fsrsSrsState(时`-1d`, 时`-6m`, Rating.Good)],
+                  [`hpi:一:one`, fsrsSrsState(时`-1d`, 时`-4m`, Rating.Good)],
+                ]),
+                latestSkillRatings: latestSkillRatings(),
+                isStructuralHanzi,
+              });
+              expect(prettyQueue(queue)).toMatchInlineSnapshot(`
+                [
+                  "he:一:one",
+                  "hpi:一:one",
+                  "hpf:一:one (📈 NEW DIFFICULTY)",
+                  "hpt:一:one (🟥 BLOCKED)",
+                  "hp:一:one (🟥 BLOCKED)",
+                ]
+              `);
+              expect(queue).toMatchObject({
+                blockedCount: 2,
+                dueCount: 2,
+                newContentCount: 0,
+                newDifficultyCount: 1,
+                overDueCount: 0,
+                retryCount: 0,
+              });
+            }
+          },
+        );
+      },
+    );
   },
 );
 
@@ -1526,38 +1531,43 @@ describe(
       expect(rating).toMatchObject({ skill, durationMs });
     });
 
-    describe(`${SkillKind.HanziWordToGloss} suites`, () => {
-      const skill = `he:我:i`;
+    describe(
+      `SkillKind.HanziWordToGloss suites` satisfies HasNameOf<
+        typeof SkillKind.HanziWordToGloss
+      >,
+      () => {
+        const skill = `he:我:i`;
 
-      test(`gives rating based on duration`, async () => {
-        {
-          const { rating } = computeSkillRating({
-            skill,
-            durationMs: 1000,
-            correct: true,
-          });
-          expect(rating).toEqual(Rating.Easy);
-        }
+        test(`gives rating based on duration`, async () => {
+          {
+            const { rating } = computeSkillRating({
+              skill,
+              durationMs: 1000,
+              correct: true,
+            });
+            expect(rating).toEqual(Rating.Easy);
+          }
 
-        {
-          const { rating } = computeSkillRating({
-            skill,
-            durationMs: 6000,
-            correct: true,
-          });
-          expect(rating).toEqual(Rating.Good);
-        }
+          {
+            const { rating } = computeSkillRating({
+              skill,
+              durationMs: 6000,
+              correct: true,
+            });
+            expect(rating).toEqual(Rating.Good);
+          }
 
-        {
-          const { rating } = computeSkillRating({
-            skill,
-            durationMs: 11_000,
-            correct: true,
-          });
-          expect(rating).toEqual(Rating.Hard);
-        }
-      });
-    });
+          {
+            const { rating } = computeSkillRating({
+              skill,
+              durationMs: 11_000,
+              correct: true,
+            });
+            expect(rating).toEqual(Rating.Hard);
+          }
+        });
+      },
+    );
   },
 );
 
