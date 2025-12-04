@@ -214,6 +214,7 @@ const questionFlagKindSchema = z.enum({
   Blocked: `debug--Blocked`,
   NewDifficulty: `debug--NewDifficulty`,
   NewSkill: `debug--NewSkill`,
+  OtherMeaning: `debug--OtherMeaning`,
   Overdue: `debug--Overdue`,
   Retry: `debug--Retry`,
   WeakWord: `debug--WeakWord`,
@@ -234,6 +235,10 @@ export interface QuestionFlagOverdueType {
   interval: Interval;
 }
 
+export interface QuestionFlagOtherMeaningType {
+  kind: typeof QuestionFlagKind.OtherMeaning;
+}
+
 export interface QuestionFlagNewDifficultyType {
   kind: typeof QuestionFlagKind.NewDifficulty;
 }
@@ -250,6 +255,7 @@ export type QuestionFlagType =
   | QuestionFlagBlockedType
   | QuestionFlagNewDifficultyType
   | QuestionFlagNewSkillType
+  | QuestionFlagOtherMeaningType
   | QuestionFlagOverdueType
   | QuestionFlagRetryType
   | QuestionFlagWeakWordType;

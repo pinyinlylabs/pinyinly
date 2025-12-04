@@ -162,6 +162,10 @@ export function skillQueueItemPretty(item: SkillReviewQueueItem): string {
       pretty = `${pretty} (🟥 BLOCKED)`;
       break;
     }
+    case QuestionFlagKind.OtherMeaning: {
+      pretty = `${pretty} (🔀 OTHER MEANING)`;
+      break;
+    }
     case QuestionFlagKind.Overdue: {
       pretty = `${pretty} (😡 OVERDUE)`;
       break;

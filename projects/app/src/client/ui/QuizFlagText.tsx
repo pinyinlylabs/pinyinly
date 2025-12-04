@@ -33,6 +33,17 @@ export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
         </View>
       );
     }
+    case QuestionFlagKind.OtherMeaning: {
+      return (
+        <View className={flagViewClass({ class: `theme-warning` })}>
+          <IconImage
+            className={flagIconClass()}
+            source={require(`@/assets/icons/shuffle.svg`)}
+          />
+          <Text className={flagTextClass()}>Multiple meanings</Text>
+        </View>
+      );
+    }
     case QuestionFlagKind.Overdue: {
       return (
         <View className={flagViewClass({ class: `theme-danger` })}>

@@ -84,6 +84,7 @@ const allIcons = [
   require(`../../assets/icons/settings-filled.svg`),
   require(`../../assets/icons/settings.svg`),
   require(`../../assets/icons/show.svg`),
+  require(`../../assets/icons/shuffle.svg`),
   require(`../../assets/icons/speaker-2.svg`),
   require(`../../assets/icons/star-filled.svg`),
   require(`../../assets/icons/star.svg`),
