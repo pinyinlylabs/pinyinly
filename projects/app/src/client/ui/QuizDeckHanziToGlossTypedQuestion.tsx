@@ -4,10 +4,11 @@ import type {
   MistakeType,
   UnsavedSkillRating,
 } from "@/data/model";
-import { hanziToGlossTypedQuestionMistakes } from "@/data/questions/hanziWordToGlossTyped";
-import { computeSkillRating, hanziWordFromSkill } from "@/data/skills";
+import type { HanziToGlossTypedQuestionGrade } from "@/data/questions/hanziWordToGlossTyped";
+import { gradeHanziToGlossTypedQuestion } from "@/data/questions/hanziWordToGlossTyped";
+import { hanziWordFromSkill } from "@/data/skills";
 import { hanziFromHanziWord } from "@/dictionary/dictionary";
-import { nonNullable } from "@pinyinly/lib/invariant";
+import { emptyArray } from "@pinyinly/lib/collections";
 import type { ReactNode, Ref } from "react";
 import { useMemo, useRef, useState } from "react";
 import type { TextInput } from "react-native";
@@ -29,16 +30,16 @@ export function QuizDeckHanziToGlossTypedQuestion({
   noAutoFocus?: boolean;
   question: HanziWordToGlossTypedQuestion;
   onNext: () => void;
-  onRating: (ratings: UnsavedSkillRating[], mistakes: MistakeType[]) => void;
+  onRating: (
+    ratings: UnsavedSkillRating[],
+    mistakes: readonly MistakeType[],
+  ) => void;
 }) {
-  const { skill, flag, answers } = question;
+  const { skill, flag } = question;
 
   const userAnswerRef = useRef(``);
   const [userAnswerEmpty, setUserAnswerEmpty] = useState(true);
-  const [grade, setGrade] = useState<{
-    correct: boolean;
-    expectedAnswer: string;
-  }>();
+  const [grade, setGrade] = useState<HanziToGlossTypedQuestionGrade>();
 
   const startTime = useMemo(() => Date.now(), []);
   const hanziWord = hanziWordFromSkill(skill);
@@ -48,27 +49,18 @@ export function QuizDeckHanziToGlossTypedQuestion({
     // First time you press the button it will grade your answer, the next time
     // it moves you to the next question.
     if (grade == null) {
-      const mistakes = hanziToGlossTypedQuestionMistakes(
+      const durationMs = Date.now() - startTime;
+
+      const grade = gradeHanziToGlossTypedQuestion(
         question,
         userAnswerRef.current,
+        durationMs,
       );
 
-      const correct = mistakes.length === 0;
+      const mistakes = grade.correct ? emptyArray : grade.mistakes;
 
-      const durationMs = Date.now() - startTime;
-      const skillRatings: UnsavedSkillRating[] = [
-        computeSkillRating({
-          skill,
-          correct,
-          durationMs,
-        }),
-      ];
-
-      setGrade({
-        correct,
-        expectedAnswer: nonNullable(answers[0]),
-      });
-      onRating(skillRatings, mistakes);
+      setGrade(grade);
+      onRating(grade.skillRatings, mistakes);
     } else {
       onNext();
     }

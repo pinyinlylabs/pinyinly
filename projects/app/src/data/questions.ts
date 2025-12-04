@@ -1,5 +1,6 @@
 import type {
   HanziWordSkill,
+  HanziWordToGlossTypedSkill,
   Question,
   QuestionFlagType,
   Skill,
@@ -23,7 +24,7 @@ export async function generateQuestionForSkillOrThrow(
       return await hanziWordToGlossQuestionOrThrow(skill);
     }
     case SkillKind.HanziWordToGlossTyped: {
-      skill = skill as HanziWordSkill;
+      skill = skill as HanziWordToGlossTypedSkill;
       return await hanziWordToGlossTypedQuestionOrThrow(skill, flag);
     }
     case SkillKind.HanziWordToPinyinTyped: {

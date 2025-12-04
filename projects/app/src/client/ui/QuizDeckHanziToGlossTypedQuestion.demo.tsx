@@ -1,13 +1,13 @@
 import { QuizDeckHanziToGlossTypedQuestion } from "@/client/ui/QuizDeckHanziToGlossTypedQuestion";
 import { Use } from "@/client/ui/Use";
 import { hanziWordToGlossTypedQuestionOrThrow } from "@/data/questions/hanziWordToGlossTyped";
-import { hanziWordToGloss } from "@/data/skills";
+import { hanziWordToGlossTyped } from "@/data/skills";
 import { View } from "react-native";
 import { DemoHanziWordKnob, useDemoHanziWordKnob } from "./demo/helpers";
 
 export default () => {
   const { hanziWord } = useDemoHanziWordKnob(`你好:hello`);
-  const skill = hanziWordToGloss(hanziWord);
+  const skill = hanziWordToGlossTyped(hanziWord);
   const questionPromise = hanziWordToGlossTypedQuestionOrThrow(skill);
 
   return (

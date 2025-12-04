@@ -38,6 +38,7 @@ import type {
   HanziWord,
   HanziWordSkill,
   HanziWordSkillKind,
+  HanziWordToGlossTypedSkill,
   PinyinFinalAssociationSkill,
   PinyinInitialAssociationSkill,
   QuestionFlagType,
@@ -136,6 +137,12 @@ export const hanziWordFromSkill = (skill: HanziWordSkill): HanziWord => {
 export const isHanziWordSkill = (skill: Skill): skill is HanziWordSkill => {
   const skillKind = skillKindFromSkill(skill);
   return (hanziWordSkillKinds as SkillKind[]).includes(skillKind);
+};
+
+export const isHanziWordToGlossTypedSkill = (
+  skill: Skill,
+): skill is HanziWordToGlossTypedSkill => {
+  return skillKindFromSkill(skill) === SkillKind.HanziWordToGlossTyped;
 };
 
 export const initialFromPinyinInitialAssociationSkill = (
@@ -344,7 +351,14 @@ async function hackyGuessHanziWordToLearn(
     return item;
   }
 }
-
+export function hanziWordSkill(
+  type: typeof SkillKind.HanziWordToGlossTyped,
+  hanziWord: HanziWord,
+): HanziWordToGlossTypedSkill;
+export function hanziWordSkill(
+  type: HanziWordSkillKind,
+  hanziWord: HanziWord,
+): HanziWordSkill;
 export function hanziWordSkill(
   type: HanziWordSkillKind,
   hanziWord: HanziWord,
@@ -591,7 +605,7 @@ function getReactivePronunciationSkills({
   skillSrsStates: ReadonlyMap<Skill, SrsStateType>;
   graph: SkillLearningGraph;
   now: Date;
-}): readonly Skill[] {
+}): readonly SkillReviewQueueItem[] {
   const lastSkillRating = recentSkillRatingHistory[0];
 
   // Check if the most recent skill review was a successful HanziWordToGloss skill
@@ -636,10 +650,99 @@ function getReactivePronunciationSkills({
       continue;
     }
 
-    return [dep];
+    return [{ skill: dep }];
   }
 
   return emptyArray;
+}
+
+/**
+ * Determines if we should prioritize a @see HanziWordToGlossTyped skill with
+ * @see QuestionFlagKind.OtherMeaning flag a successful
+ * @see HanziWordToGlossTyped review, in case of the scenario when someone gives
+ * a correct-but-not-asked meaning for a hanzi word with multiple meanings. In
+ * this case we immediately ask all the other definitions for the same hanzi
+ * word to force practicing other meanings.
+ */
+function getReactiveHanziToTypedGlossSkills({
+  recentSkillRatingHistory,
+  graph,
+}: {
+  recentSkillRatingHistory: ({ skill: Skill } & Pick<
+    SkillRating,
+    `rating` | `createdAt`
+  >)[];
+  graph: SkillLearningGraph;
+}): readonly SkillReviewQueueItem[] {
+  let hanzi: HanziText | undefined;
+  let previousSkills: HanziWordToGlossTypedSkill[] | undefined;
+
+  // Step through the recent ratings and group together consecutive successful
+  // HanziWordToGlossTyped ratings for the same hanzi word.
+  for (const recentSkillRating of recentSkillRatingHistory) {
+    if (!isHanziWordToGlossTypedSkill(recentSkillRating.skill)) {
+      break;
+    }
+
+    if (recentSkillRating.rating === Rating.Again) {
+      // Avoid completing to react to skill retries.
+      break;
+    }
+
+    const recentHanzi = hanziFromHanziWord(
+      hanziWordFromSkill(recentSkillRating.skill),
+    );
+
+    if (hanzi == null) {
+      hanzi = recentHanzi;
+    } else if (hanzi !== recentHanzi) {
+      break;
+    }
+
+    previousSkills ??= [];
+    previousSkills.push(recentSkillRating.skill);
+  }
+
+  if (hanzi == null) {
+    return emptyArray;
+  }
+
+  invariant(
+    previousSkills != null && previousSkills.length > 0,
+    `previousSkills must be set`,
+  );
+
+  // Pick one of the remaining hanzi word skills to learn.
+  let targetSkill: HanziWordSkill | undefined;
+  for (const [skill] of graph) {
+    if (
+      !isHanziWordToGlossTypedSkill(skill) ||
+      previousSkills.includes(skill)
+    ) {
+      continue;
+    }
+    const skillHanzi = hanziFromHanziWord(hanziWordFromSkill(skill));
+    if (skillHanzi === hanzi) {
+      targetSkill = skill;
+      break;
+    }
+  }
+
+  if (targetSkill == null) {
+    return emptyArray;
+  }
+
+  // At this point we've found a new hanzi word to prioritize, and we have the
+  // previous hanzi words that were already answered.
+  return [
+    {
+      skill: targetSkill,
+      flag: {
+        kind: QuestionFlagKind.OtherMeaning,
+        previousHanziWords: previousSkills.map((s) => hanziWordFromSkill(s)),
+      },
+    },
+  ];
 }
 
 export type LatestSkillRating = Pick<
@@ -876,13 +979,17 @@ export function skillReviewQueue({
 
   perfMilestone(`reactiveItems`);
 
-  const reactiveItems = [
+  const reactiveItems: SkillReviewQueueItem[] = [
     // Check if we should prioritize a pronunciation skill after successful hanzi-to-english review
     ...getReactivePronunciationSkills({
       recentSkillRatingHistory,
       skillSrsStates,
       graph,
       now,
+    }),
+    ...getReactiveHanziToTypedGlossSkills({
+      recentSkillRatingHistory,
+      graph,
     }),
   ];
 
@@ -891,23 +998,38 @@ export function skillReviewQueue({
 
   mutableArrayFilter(
     learningOrderOverDue,
-    ([skill]) => !reactiveItems.includes(skill),
+    ([skill]) =>
+      !reactiveItems.some(
+        ({ skill: reactiveSkill }) => reactiveSkill === skill,
+      ),
   );
   mutableArrayFilter(
     learningOrderDue,
-    ([skill]) => !reactiveItems.includes(skill),
+    ([skill]) =>
+      !reactiveItems.some(
+        ({ skill: reactiveSkill }) => reactiveSkill === skill,
+      ),
   );
   mutableArrayFilter(
     learningOrderNewContent,
-    (skill) => !reactiveItems.includes(skill),
+    (skill) =>
+      !reactiveItems.some(
+        ({ skill: reactiveSkill }) => reactiveSkill === skill,
+      ),
   );
   mutableArrayFilter(
     learningOrderNewDifficulty,
-    (skill) => !reactiveItems.includes(skill),
+    (skill) =>
+      !reactiveItems.some(
+        ({ skill: reactiveSkill }) => reactiveSkill === skill,
+      ),
   );
   mutableArrayFilter(
     learningOrderNotDue,
-    ([skill]) => !reactiveItems.includes(skill),
+    ([skill]) =>
+      !reactiveItems.some(
+        ({ skill: reactiveSkill }) => reactiveSkill === skill,
+      ),
   );
 
   perfMilestone(`queueItems`);
@@ -925,8 +1047,8 @@ export function skillReviewQueue({
   }
 
   // 2. Reactive items
-  for (const skill of reactiveItems.slice(0, maxQueueItems - items.length)) {
-    items.push({ skill });
+  for (const item of reactiveItems.slice(0, maxQueueItems - items.length)) {
+    items.push(item);
   }
 
   // 3. Overdue items

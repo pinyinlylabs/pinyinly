@@ -12,9 +12,12 @@ export type DeprecatedSkill =
   | (string & z.BRAND<`DeprecatedSkill`>)
   | `${`xx` | `re` | `er` | `rp` | `pr`}:${string}:${string}`;
 
+export type HanziWordToGlossTypedSkill = `het:${string}:${string}`;
+
 export type HanziWordSkill =
   | (string & z.BRAND<`HanziWordSkill`>)
-  | `${`he` | `het` | `hp` | `hpi` | `hpf` | `hpt` | `eh` | `ph` | `ih`}:${string}:${string}`;
+  | HanziWordToGlossTypedSkill
+  | `${`he` | `hp` | `hpi` | `hpf` | `hpt` | `eh` | `ph` | `ih`}:${string}:${string}`;
 
 export type PinyinInitialAssociationSkill =
   | (string & z.BRAND<`PinyinInitialAssociationSkill`>)
@@ -237,6 +240,11 @@ export interface QuestionFlagOverdueType {
 
 export interface QuestionFlagOtherMeaningType {
   kind: typeof QuestionFlagKind.OtherMeaning;
+  /**
+   * When there are multiple meanings for a hanzi word, the previously given
+   * meanings should be avoided when answering the question again.
+   */
+  previousHanziWords?: readonly HanziWord[];
 }
 
 export interface QuestionFlagNewDifficultyType {
@@ -372,10 +380,17 @@ export interface OneCorrectPairQuestion {
 export interface HanziWordToGlossTypedQuestion {
   kind: typeof QuestionKind.HanziWordToGlossTyped;
   /**
-   * There can be multiple correct answers, e.g. for a word like `好` which
-   * can be translated as `good` or `okay`.
+   * There can be multiple correct answers, e.g. for a hanzi word like `好:good`
+   * has multiple correct glosses i.e. "good", "nice", "friendly".
    */
-  answers: readonly string[];
+  answers: { skill: HanziWordSkill; glosses: string[] }[];
+  /**
+   * Previous glosses that should be avoided.
+   */
+  bannedMeaningPrimaryGlossHint: readonly string[];
+  /**
+   * The skill being quizzed, used for rating a wrong answer.
+   */
   skill: HanziWordSkill;
   flag?: QuestionFlagType;
 }

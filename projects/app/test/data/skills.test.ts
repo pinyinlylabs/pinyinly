@@ -30,7 +30,7 @@ import {
 import { Rating } from "#util/fsrs.ts";
 import { r } from "#util/rizzle.ts";
 import { invariant } from "@pinyinly/lib/invariant";
-import { describe, expect, test, vi } from "vitest";
+import { beforeEach, describe, expect, test, vi } from "vitest";
 import type { HistoryCommand } from "../data/helpers.ts";
 import {
   fsrsSrsState,
@@ -1327,6 +1327,86 @@ describe(
             });
           },
         );
+      },
+    );
+
+    describe(
+      `SkillKind.HanziWordToGlossTyped skills` satisfies HasNameOf<
+        typeof SkillKind.HanziWordToGlossTyped
+      >,
+      () => {
+        describe(`uses an OtherMeaning flag if the previous question was the same hanzi (for any hanzi->gloss type skill)`, () => {
+          beforeEach(() => {
+            vi.useFakeTimers({ toFake: [`Date`] });
+          });
+
+          skillTest(`two meanings`, async ({ isStructuralHanzi }) => {
+            const graph = await skillLearningGraph({
+              targetSkills: [`het:好:good`, `het:好:like`],
+            });
+            const queue = skillReviewQueue({
+              graph,
+              skillSrsStates: new Map([
+                // 好:good was just reviewed, and 好:like is due, so it should be asked next.
+                [`het:好:good`, fsrsSrsState(时`-1s`, 时`1d`, Rating.Good)],
+                [`het:好:like`, fsrsSrsState(时`-1d`, 时`5m`, Rating.Good)],
+              ]),
+              latestSkillRatings: latestSkillRatings({
+                // TODO refactor to combine with `skillSrsStates` to keep them consistent.
+                "het:好:good": [Rating.Good, 时`-1s`],
+                // "het:好:like": [Rating.Good, 时`-1d`],
+              }),
+              isStructuralHanzi,
+            });
+
+            expect(prettyQueue(queue)).toMatchInlineSnapshot(`
+              [
+                "het:好:like (🔀 OTHER MEANING past 好:good)",
+                "he:一:one (🌱 NEW SKILL)",
+                "he:女:woman (🌱 NEW SKILL)",
+                "he:亅:hook (🌱 NEW SKILL)",
+                "het:好:good",
+                "he:了:done (🟥 BLOCKED)",
+                "he:子:child (🟥 BLOCKED)",
+                "he:好:like (🟥 BLOCKED)",
+                "he:好:good (🟥 BLOCKED)",
+              ]
+            `);
+          });
+
+          skillTest(`three meanings`, async ({ isStructuralHanzi }) => {
+            const graph = await skillLearningGraph({
+              targetSkills: [`het:任:any`, `het:任:appoint`, `het:任:duty`],
+            });
+            const queue = skillReviewQueue({
+              graph,
+              skillSrsStates: new Map([
+                [`het:任:any`, fsrsSrsState(时`-5s`, 时`5m`, Rating.Good)],
+                [`het:任:appoint`, fsrsSrsState(时`-10s`, 时`6m`, Rating.Good)],
+                [`het:任:duty`, fsrsSrsState(时`-1d`, 时`7m`, Rating.Good)],
+              ]),
+              latestSkillRatings: latestSkillRatings({
+                // TODO refactor to combine with `skillSrsStates` to keep them consistent.
+                "het:任:any": [Rating.Good, 时`-5s`],
+                "het:任:appoint": [Rating.Good, 时`-10s`],
+                // "het:任:duty": [Rating.Good, 时`-1d`],
+              }),
+              isStructuralHanzi,
+            });
+
+            expect(prettyQueue(queue)).toMatchInlineSnapshot(`
+              [
+                "het:任:duty (🔀 OTHER MEANING past 任:any,任:appoint)",
+                "he:亻:person (🌱 NEW SKILL)",
+                "het:任:appoint",
+                "het:任:any",
+                "he:任:duty (🟥 BLOCKED)",
+                "he:任:appoint (🟥 BLOCKED)",
+                "he:任:any (🟥 BLOCKED)",
+              ]
+            `);
+          });
+        });
       },
     );
 

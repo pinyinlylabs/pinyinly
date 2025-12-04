@@ -1,61 +1,121 @@
-import { loadDictionary } from "@/dictionary/dictionary";
-import { invariant } from "@pinyinly/lib/invariant";
+import { hanziFromHanziWord, loadDictionary } from "@/dictionary/dictionary";
+import { nonNullable } from "@pinyinly/lib/invariant";
+import type { Mutable } from "@pinyinly/lib/types";
 import type {
-  HanziGlossMistakeType,
-  HanziWordSkill,
   HanziWordToGlossTypedQuestion,
+  HanziWordToGlossTypedSkill,
   MistakeType,
   QuestionFlagType,
+  UnsavedSkillRating,
 } from "../model";
-import { MistakeKind, QuestionKind } from "../model";
-import { hanziWordFromSkill } from "../skills";
+import { MistakeKind, QuestionFlagKind, QuestionKind } from "../model";
+import {
+  computeSkillRating,
+  hanziWordFromSkill,
+  hanziWordToGlossTyped,
+} from "../skills";
 
 export async function hanziWordToGlossTypedQuestionOrThrow(
-  skill: HanziWordSkill,
-  _flag?: QuestionFlagType,
+  skill: HanziWordToGlossTypedSkill,
+  flag?: QuestionFlagType,
 ): Promise<HanziWordToGlossTypedQuestion> {
   const hanziWord = hanziWordFromSkill(skill);
+  const hanzi = hanziFromHanziWord(hanziWord);
   const dictionary = await loadDictionary();
-  const meaning = dictionary.lookupHanziWord(hanziWord);
 
-  const answers = meaning?.gloss ?? [];
-  invariant(answers.length > 0, `hanzi word ${hanziWord} has no gloss`);
+  const bannedMeaningPrimaryGlossHint: Mutable<
+    HanziWordToGlossTypedQuestion[`bannedMeaningPrimaryGlossHint`]
+  > = [];
+  const answers: HanziWordToGlossTypedQuestion[`answers`] = [];
+
+  const previousHanziWords =
+    flag?.kind === QuestionFlagKind.OtherMeaning
+      ? flag.previousHanziWords
+      : null;
+  for (const [dictionaryHanziWord, dictionaryMeaning] of dictionary.lookupHanzi(
+    hanzi,
+  )) {
+    if (previousHanziWords?.includes(dictionaryHanziWord) === true) {
+      bannedMeaningPrimaryGlossHint.push(
+        nonNullable(dictionaryMeaning.gloss[0]),
+      );
+    } else {
+      answers.push({
+        skill: hanziWordToGlossTyped(dictionaryHanziWord),
+        glosses: dictionaryMeaning.gloss,
+      });
+    }
+  }
 
   return {
     kind: QuestionKind.HanziWordToGlossTyped,
     answers,
     skill,
+    bannedMeaningPrimaryGlossHint,
   };
 }
+
+export type HanziToGlossTypedQuestionGrade =
+  | {
+      correct: true;
+      skillRatings: UnsavedSkillRating[];
+    }
+  | {
+      correct: false;
+      skillRatings: UnsavedSkillRating[];
+      expectedAnswer: string;
+      mistakes: MistakeType[];
+    };
 
 /**
  * Determine if the user's answer is correct, and if not returning 1 or more
  * mistakes.
  */
-export function hanziToGlossTypedQuestionMistakes(
+export function gradeHanziToGlossTypedQuestion(
   question: HanziWordToGlossTypedQuestion,
-  userAnswer: string,
-): MistakeType[] {
-  const mistakes: HanziGlossMistakeType[] = [];
-
-  for (const [i, expectedAnswer] of question.answers.entries()) {
-    const isLastChance = i === question.answers.length - 1;
-    const isCorrect = userAnswer === expectedAnswer;
-
-    if (isCorrect) {
-      return [];
-    }
-
-    if (isLastChance) {
-      // Push a single mistake for the whole word, not per syllable. This might be
-      // something that's changed in the future, but for now it's simple.
-      mistakes.push({
-        kind: MistakeKind.HanziGloss,
-        hanziOrHanziWord: hanziWordFromSkill(question.skill),
-        gloss: userAnswer,
-      });
+  userGloss: string,
+  durationMs: number,
+): HanziToGlossTypedQuestionGrade {
+  // Look for a correct answer.
+  for (const { skill, glosses } of question.answers) {
+    if (glosses.includes(userGloss)) {
+      const correct = true;
+      return {
+        correct,
+        skillRatings: [
+          computeSkillRating({
+            skill,
+            correct,
+            durationMs,
+          }),
+        ],
+      };
     }
   }
 
-  return mistakes;
+  // Report a mistake.
+  {
+    const correct = false;
+    const expectedGloss = nonNullable(
+      question.answers.find((a) => a.skill === question.skill)?.glosses[0],
+    );
+    return {
+      correct,
+      skillRatings: [
+        computeSkillRating({
+          skill: question.skill,
+          correct,
+          durationMs,
+        }),
+      ],
+      expectedAnswer: expectedGloss,
+      mistakes: [
+        {
+          kind: MistakeKind.HanziGloss,
+          hanziOrHanziWord: hanziWordFromSkill(question.skill),
+          gloss: userGloss,
+        },
+      ],
+    };
+  }
 }

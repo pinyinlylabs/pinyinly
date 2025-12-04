@@ -163,7 +163,11 @@ export function skillQueueItemPretty(item: SkillReviewQueueItem): string {
       break;
     }
     case QuestionFlagKind.OtherMeaning: {
-      pretty = `${pretty} (🔀 OTHER MEANING)`;
+      const past =
+        item.flag.previousHanziWords == null
+          ? ``
+          : ` past ${item.flag.previousHanziWords.join(`,`)}`;
+      pretty = `${pretty} (🔀 OTHER MEANING${past})`;
       break;
     }
     case QuestionFlagKind.Overdue: {
