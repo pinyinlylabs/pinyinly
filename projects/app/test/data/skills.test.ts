@@ -1406,6 +1406,36 @@ describe(
               ]
             `);
           });
+
+          skillTest(
+            `doesn't ask follow-up questions for skills that aren't introduced, even if they're in the graph`,
+            async ({ isStructuralHanzi }) => {
+              const graph = await skillLearningGraph({
+                targetSkills: [`het:任:any`, `het:任:appoint`],
+              });
+              const queue = skillReviewQueue({
+                graph,
+                skillSrsStates: new Map([
+                  [`het:任:any`, fsrsSrsState(时`-5s`, 时`5m`, Rating.Good)],
+                ]),
+                latestSkillRatings: latestSkillRatings({
+                  // TODO refactor to combine with `skillSrsStates` to keep them consistent.
+                  "het:任:any": [Rating.Good, 时`-5s`],
+                }),
+                isStructuralHanzi,
+              });
+
+              expect(prettyQueue(queue)).toMatchInlineSnapshot(`
+                [
+                  "he:亻:person (🌱 NEW SKILL)",
+                  "het:任:any",
+                  "he:任:appoint (🟥 BLOCKED)",
+                  "he:任:any (🟥 BLOCKED)",
+                  "het:任:appoint (🟥 BLOCKED)",
+                ]
+              `);
+            },
+          );
         });
       },
     );
