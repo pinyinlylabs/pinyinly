@@ -666,13 +666,17 @@ function getReactivePronunciationSkills({
  */
 function getReactiveHanziToTypedGlossSkills({
   recentSkillRatingHistory,
+  skillSrsStates,
   graph,
+  now,
 }: {
   recentSkillRatingHistory: ({ skill: Skill } & Pick<
     SkillRating,
     `rating` | `createdAt`
   >)[];
+  skillSrsStates: ReadonlyMap<Skill, SrsStateType>;
   graph: SkillLearningGraph;
+  now: Date;
 }): readonly SkillReviewQueueItem[] {
   let hanzi: HanziText | undefined;
   let previousSkills: HanziWordToGlossTypedSkill[] | undefined;
@@ -721,6 +725,15 @@ function getReactiveHanziToTypedGlossSkills({
     ) {
       continue;
     }
+
+    const srsState = skillSrsStates.get(skill);
+
+    if (needsToBeIntroduced(srsState, now)) {
+      // Skipping because the skill hasn't been introduced yet, and reviewing it
+      // would be too hard for the user.
+      continue;
+    }
+
     const skillHanzi = hanziFromHanziWord(hanziWordFromSkill(skill));
     if (skillHanzi === hanzi) {
       targetSkill = skill;
@@ -989,7 +1002,9 @@ export function skillReviewQueue({
     }),
     ...getReactiveHanziToTypedGlossSkills({
       recentSkillRatingHistory,
+      skillSrsStates,
       graph,
+      now,
     }),
   ];
 
