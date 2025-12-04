@@ -1,8 +1,5 @@
 import type { HanziCharacter } from "@/data/model";
-import type {
-  HanziWordMeaning,
-  HanziWordWithMeaning,
-} from "@/dictionary/dictionary";
+import type { HanziWordMeaning, HanziWordWithMeaning } from "@/dictionary";
 import { arrayFilterUniqueWithKey } from "@pinyinly/lib/collections";
 import { Text, View } from "react-native";
 

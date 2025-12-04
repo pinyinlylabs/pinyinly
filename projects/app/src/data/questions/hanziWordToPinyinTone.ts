@@ -9,7 +9,7 @@ import {
   allHanziCharacters,
   hanziFromHanziWord,
   loadDictionary,
-} from "@/dictionary/dictionary";
+} from "@/dictionary";
 import {
   arrayFilterUniqueWithKey,
   emptyArray,
@@ -29,6 +29,7 @@ import type {
   OneCorrectPairQuestionChoice,
   PinyinSyllable,
   Question,
+  QuestionFlagType,
 } from "../model";
 import { QuestionKind } from "../model";
 import { hanziWordFromSkill } from "../skills";
@@ -39,6 +40,7 @@ import {
 
 export async function hanziWordToPinyinToneQuestionOrThrow(
   skill: HanziWordSkill,
+  flag: QuestionFlagType | null,
 ): Promise<Question> {
   const hanziWord = hanziWordFromSkill(skill);
   const rowCount = 5;
@@ -73,6 +75,7 @@ export async function hanziWordToPinyinToneQuestionOrThrow(
     groupA: shuffle(groupA),
     groupB: shuffle(groupB),
     answer,
+    flag,
   });
 }
 

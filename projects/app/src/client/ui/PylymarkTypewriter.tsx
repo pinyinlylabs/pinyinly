@@ -1,5 +1,5 @@
 import { parsePylymark } from "@/data/pylymark";
-import { hanziFromHanziWord, loadDictionary } from "@/dictionary/dictionary";
+import { hanziFromHanziWord, loadDictionary } from "@/dictionary";
 import { splitCharacters } from "@/util/unicode";
 import { invariant } from "@pinyinly/lib/invariant";
 import type { ReactNode } from "react";

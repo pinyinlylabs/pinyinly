@@ -9,7 +9,7 @@ import { QuestionFlagKind } from "@/data/model";
 import type { HanziToGlossTypedQuestionGrade } from "@/data/questions/hanziWordToGlossTyped";
 import { gradeHanziToGlossTypedQuestion } from "@/data/questions/hanziWordToGlossTyped";
 import { hanziWordFromSkill } from "@/data/skills";
-import { hanziFromHanziWord, loadDictionary } from "@/dictionary/dictionary";
+import { hanziFromHanziWord, loadDictionary } from "@/dictionary";
 import { emptyArray } from "@pinyinly/lib/collections";
 import { nonNullable } from "@pinyinly/lib/invariant";
 import type { ReactNode, Ref } from "react";

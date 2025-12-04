@@ -2,7 +2,7 @@
 import type { HanziWordSkill, Skill } from "@/data/model";
 import { SkillKind } from "@/data/model";
 import { hanziWordFromSkill, skillKindFromSkill } from "@/data/skills";
-import { hanziFromHanziWord } from "@/dictionary/dictionary";
+import { hanziFromHanziWord } from "@/dictionary";
 import { useState } from "react";
 import { NewSkillModalContentNewPronunciation } from "./NewSkillModalContentNewPronunciation";
 import { NewSkillModalContentNewWord } from "./NewSkillModalContentNewWord";

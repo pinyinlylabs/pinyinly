@@ -3,7 +3,7 @@ import {
   getWikiMdxHanziWordMeaning,
 } from "@/client/wiki";
 import type { HanziText } from "@/data/model";
-import { loadDictionary } from "@/dictionary/dictionary";
+import { loadDictionary } from "@/dictionary";
 import type { ReactNode } from "react";
 import { Fragment, use, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";

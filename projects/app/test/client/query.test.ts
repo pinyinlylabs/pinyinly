@@ -8,7 +8,7 @@ import {
   historyPageData,
   makeDb,
 } from "#client/query.js";
-import { loadDictionary } from "#dictionary/dictionary.js";
+import { loadDictionary } from "#dictionary.js";
 import { IS_CI } from "#util/env.js";
 import { QueryClient } from "@tanstack/query-core";
 import { afterEach, beforeAll, beforeEach, describe, expect, vi } from "vitest";

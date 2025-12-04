@@ -1,5 +1,5 @@
 import type { HanziWord } from "@/data/model";
-import { hanziFromHanziWord } from "@/dictionary/dictionary";
+import { hanziFromHanziWord } from "@/dictionary";
 import type { PropsWithChildren } from "react";
 import { HanziLink } from "./HanziLink";
 

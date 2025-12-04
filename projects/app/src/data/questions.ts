@@ -16,12 +16,12 @@ import { skillKindFromSkill } from "./skills";
 
 export async function generateQuestionForSkillOrThrow(
   skill: Skill,
-  flag?: QuestionFlagType,
+  flag: QuestionFlagType | null,
 ): Promise<Question> {
   switch (skillKindFromSkill(skill)) {
     case SkillKind.HanziWordToGloss: {
       skill = skill as HanziWordSkill;
-      return await hanziWordToGlossQuestionOrThrow(skill);
+      return await hanziWordToGlossQuestionOrThrow(skill, flag);
     }
     case SkillKind.HanziWordToGlossTyped: {
       skill = skill as HanziWordToGlossTypedSkill;
@@ -29,19 +29,19 @@ export async function generateQuestionForSkillOrThrow(
     }
     case SkillKind.HanziWordToPinyinTyped: {
       skill = skill as HanziWordSkill;
-      return await hanziWordToPinyinTypedQuestionOrThrow(skill);
+      return await hanziWordToPinyinTypedQuestionOrThrow(skill, flag);
     }
     case SkillKind.HanziWordToPinyinInitial: {
       skill = skill as HanziWordSkill;
-      return await hanziWordToPinyinInitialQuestionOrThrow(skill);
+      return await hanziWordToPinyinInitialQuestionOrThrow(skill, flag);
     }
     case SkillKind.HanziWordToPinyinFinal: {
       skill = skill as HanziWordSkill;
-      return await hanziWordToPinyinFinalQuestionOrThrow(skill);
+      return await hanziWordToPinyinFinalQuestionOrThrow(skill, flag);
     }
     case SkillKind.HanziWordToPinyinTone: {
       skill = skill as HanziWordSkill;
-      return await hanziWordToPinyinToneQuestionOrThrow(skill);
+      return await hanziWordToPinyinToneQuestionOrThrow(skill, flag);
     }
     case SkillKind.Deprecated_EnglishToRadical:
     case SkillKind.Deprecated_PinyinToRadical:

@@ -1,4 +1,4 @@
-import { hanziFromHanziWord, loadDictionary } from "@/dictionary/dictionary";
+import { hanziFromHanziWord, loadDictionary } from "@/dictionary";
 import { nonNullable } from "@pinyinly/lib/invariant";
 import type { Mutable } from "@pinyinly/lib/types";
 import type {
@@ -17,7 +17,7 @@ import {
 
 export async function hanziWordToGlossTypedQuestionOrThrow(
   skill: HanziWordToGlossTypedSkill,
-  flag?: QuestionFlagType,
+  flag: QuestionFlagType | null,
 ): Promise<HanziWordToGlossTypedQuestion> {
   const hanziWord = hanziWordFromSkill(skill);
   const hanzi = hanziFromHanziWord(hanziWord);

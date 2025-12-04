@@ -9,7 +9,7 @@ import {
   defaultPinyinSoundInstructions,
   loadPylyPinyinChart,
 } from "@/data/pinyin";
-import { loadPinyinSoundNameSuggestions } from "@/dictionary/dictionary";
+import { loadPinyinSoundNameSuggestions } from "@/dictionary";
 import { nullIfEmpty } from "@/util/unicode";
 import { sortComparatorString } from "@pinyinly/lib/collections";
 import { Link, useLocalSearchParams } from "expo-router";

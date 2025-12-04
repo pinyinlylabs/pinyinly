@@ -6,7 +6,7 @@ import {
   tryPinyinDistractor,
 } from "#data/questions/hanziWordToPinyinFinal.ts";
 import { hanziWordToPinyinFinal } from "#data/skills.ts";
-import { hanziFromHanziWord, loadDictionary } from "#dictionary/dictionary.ts";
+import { hanziFromHanziWord, loadDictionary } from "#dictionary.ts";
 import { describe, expect, test } from "vitest";
 import { 拼音, 汉字 } from "../helpers.ts";
 
@@ -107,7 +107,7 @@ describe(
 
       for (const [hanziWord] of sample) {
         const skill = hanziWordToPinyinFinal(hanziWord);
-        await hanziWordToPinyinFinalQuestionOrThrow(skill);
+        await hanziWordToPinyinFinalQuestionOrThrow(skill, null);
       }
     });
   },

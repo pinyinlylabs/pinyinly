@@ -5,7 +5,7 @@ import { HanziWordRefText } from "@/client/ui/HanziWordRefText";
 import type { HanziWord } from "@/data/model";
 import type { RankNumber } from "@/data/skills";
 import { coerceRank, rankName } from "@/data/skills";
-import { meaningKeyFromHanziWord } from "@/dictionary/dictionary";
+import { meaningKeyFromHanziWord } from "@/dictionary";
 import { Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 

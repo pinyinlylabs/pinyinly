@@ -3,7 +3,7 @@ import { Use } from "@/client/ui/Use";
 import { QuestionFlagKind } from "@/data/model";
 import { hanziWordToGlossTypedQuestionOrThrow } from "@/data/questions/hanziWordToGlossTyped";
 import { hanziWordToGlossTyped } from "@/data/skills";
-import { hanziFromHanziWord, loadDictionary } from "@/dictionary/dictionary";
+import { hanziFromHanziWord, loadDictionary } from "@/dictionary";
 import { use } from "react";
 import { View } from "react-native";
 import { DemoHanziWordKnob, useDemoHanziWordKnob } from "./demo/helpers";
@@ -21,7 +21,7 @@ export default () => {
             .map(([h]) => h)
             .filter((h) => h !== hanziWord),
         }
-      : undefined;
+      : null;
   const questionPromise = hanziWordToGlossTypedQuestionOrThrow(skill, flag);
 
   return (

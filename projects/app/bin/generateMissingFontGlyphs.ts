@@ -3,7 +3,7 @@ import {
   strokeCountPlaceholderOrNull,
   walkIdsNodeLeafs,
 } from "#data/hanzi.ts";
-import { loadCharacters } from "#dictionary/dictionary.ts";
+import { loadCharacters } from "#dictionary.ts";
 import { unicodeShortIdentifier } from "#util/unicode.ts";
 import { glob, writeFile } from "@pinyinly/lib/fs";
 import { invariant } from "@pinyinly/lib/invariant";

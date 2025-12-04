@@ -21,12 +21,12 @@ import {
   skillReviewQueue,
   walkSkillAndDependencies,
 } from "#data/skills.ts";
-import { getIsStructuralHanzi } from "#dictionary/dictionary.js";
+import { getIsStructuralHanzi } from "#dictionary.js";
 import {
   allHsk1HanziWords,
   allHsk2HanziWords,
   allHsk3HanziWords,
-} from "#dictionary/dictionary.ts";
+} from "#dictionary.ts";
 import { Rating } from "#util/fsrs.ts";
 import { r } from "#util/rizzle.ts";
 import { invariant } from "@pinyinly/lib/invariant";

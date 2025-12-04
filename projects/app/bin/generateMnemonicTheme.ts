@@ -4,11 +4,11 @@ import {
   defaultPinyinSoundGroupThemes,
   loadPylyPinyinChart,
 } from "#data/pinyin.js";
-import type { loadPinyinSoundNameSuggestions } from "#dictionary/dictionary.js";
+import type { loadPinyinSoundNameSuggestions } from "#dictionary.js";
 import {
   loadPinyinSoundThemeDetails,
   pinyinSoundNameSuggestionsSchema,
-} from "#dictionary/dictionary.js";
+} from "#dictionary.js";
 import {
   deepTransform,
   merge,

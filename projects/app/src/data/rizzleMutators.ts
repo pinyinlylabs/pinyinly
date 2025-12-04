@@ -1,4 +1,4 @@
-import { loadDictionary } from "@/dictionary/dictionary";
+import { loadDictionary } from "@/dictionary";
 import type { FsrsState } from "@/util/fsrs";
 import { nextReview } from "@/util/fsrs";
 import type { RizzleReplicacheMutators } from "@/util/rizzle";

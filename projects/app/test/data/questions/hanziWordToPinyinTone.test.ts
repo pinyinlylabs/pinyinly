@@ -6,7 +6,7 @@ import {
   tryPinyinDistractor,
 } from "#data/questions/hanziWordToPinyinTone.ts";
 import { hanziWordToPinyinTone } from "#data/skills.ts";
-import { hanziFromHanziWord, loadDictionary } from "#dictionary/dictionary.ts";
+import { hanziFromHanziWord, loadDictionary } from "#dictionary.ts";
 import { describe, expect, test } from "vitest";
 import { 拼音, 汉字 } from "../helpers.ts";
 
@@ -112,7 +112,7 @@ describe(
       for (const [hanziWord] of sample) {
         const skill = hanziWordToPinyinTone(hanziWord);
         await expect(
-          hanziWordToPinyinToneQuestionOrThrow(skill),
+          hanziWordToPinyinToneQuestionOrThrow(skill, null),
         ).resolves.toBeDefined();
       }
 

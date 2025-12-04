@@ -10,7 +10,7 @@ import {
   loadPinyinWords,
   oneSyllablePinyinOrThrow,
   pinyinOrThrow,
-} from "@/dictionary/dictionary";
+} from "@/dictionary";
 import {
   identicalInvariant,
   invariant,
@@ -27,6 +27,7 @@ import type {
   OneCorrectPairQuestionChoice,
   PinyinSyllable,
   Question,
+  QuestionFlagType,
 } from "../model";
 import { QuestionKind } from "../model";
 import { hanziWordFromSkill } from "../skills";
@@ -37,6 +38,7 @@ import {
 
 export async function hanziWordToPinyinFinalQuestionOrThrow(
   skill: HanziWordSkill,
+  flag: QuestionFlagType | null,
 ): Promise<Question> {
   const hanziWord = hanziWordFromSkill(skill);
   const dictionary = await loadDictionary();
@@ -64,6 +66,7 @@ export async function hanziWordToPinyinFinalQuestionOrThrow(
     groupA: shuffle([...groupA, ...answer.as]),
     groupB: shuffle([...groupB, ...answer.bs]),
     answer,
+    flag,
   });
 }
 

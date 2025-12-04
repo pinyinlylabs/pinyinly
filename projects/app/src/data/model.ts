@@ -374,7 +374,7 @@ export interface OneCorrectPairQuestion {
   answer: OneCorrectPairQuestionAnswer;
   groupA: readonly OneCorrectPairQuestionChoice[];
   groupB: readonly OneCorrectPairQuestionChoice[];
-  flag?: QuestionFlagType;
+  flag: QuestionFlagType | null;
 }
 
 export interface HanziWordToGlossTypedQuestion {
@@ -392,7 +392,7 @@ export interface HanziWordToGlossTypedQuestion {
    * The skill being quizzed, used for rating a wrong answer.
    */
   skill: HanziWordSkill;
-  flag?: QuestionFlagType;
+  flag: QuestionFlagType | null;
 }
 
 export interface HanziWordToPinyinTypedQuestion {
@@ -403,7 +403,7 @@ export interface HanziWordToPinyinTypedQuestion {
    */
   answers: readonly Readonly<PinyinPronunciation>[];
   skill: HanziWordSkill;
-  flag?: QuestionFlagType;
+  flag: QuestionFlagType | null;
 }
 
 export type Question =

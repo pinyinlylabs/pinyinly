@@ -1,10 +1,10 @@
-import type { HanziWordWithMeaning } from "@/dictionary/dictionary";
+import type { HanziWordWithMeaning } from "@/dictionary";
 import {
   decomposeHanzi,
   hanziFromHanziWord,
   loadCharacters,
   loadDictionary,
-} from "@/dictionary/dictionary";
+} from "@/dictionary";
 import { startPerformanceMilestones } from "@/util/devtools";
 import {
   fsrsIsForgotten,

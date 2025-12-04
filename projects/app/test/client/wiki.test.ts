@@ -7,13 +7,13 @@ import {
 } from "#data/hanzi.js";
 import type { HanziText, WikiCharacterData } from "#data/model.js";
 import { wikiCharacterDataSchema } from "#data/model.js";
-import type { CharactersKey, CharactersValue } from "#dictionary/dictionary.js";
+import type { CharactersKey, CharactersValue } from "#dictionary.js";
 import {
   getIsComponentFormHanzi,
   getIsStructuralHanzi,
   loadCharacters,
   loadDictionary,
-} from "#dictionary/dictionary.js";
+} from "#dictionary.js";
 import { IS_CI } from "#util/env.js";
 import { normalizeIndexRanges, parseIndexRanges } from "#util/indexRanges.js";
 import { createSpeechFileTests } from "@pinyinly/audio-sprites/testing";

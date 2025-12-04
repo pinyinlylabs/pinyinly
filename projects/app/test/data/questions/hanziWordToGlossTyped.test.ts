@@ -1,7 +1,7 @@
 import { QuestionFlagKind } from "#data/model.js";
 import { hanziWordToGlossTypedQuestionOrThrow } from "#data/questions/hanziWordToGlossTyped.ts";
 import { hanziWordToGlossTyped } from "#data/skills.js";
-import { loadDictionary } from "#dictionary/dictionary.ts";
+import { loadDictionary } from "#dictionary.ts";
 import { describe, expect, test } from "vitest";
 
 describe(
@@ -14,14 +14,17 @@ describe(
 
       for (const hanziWord of dictionary.allHanziWords) {
         const skill = hanziWordToGlossTyped(hanziWord);
-        await hanziWordToGlossTypedQuestionOrThrow(skill);
+        await hanziWordToGlossTypedQuestionOrThrow(skill, null);
       }
     });
 
     test(`correctly handles OtherMeaning flag (two meanings)`, async () => {
       {
-        const question =
-          await hanziWordToGlossTypedQuestionOrThrow(`het:好:good`);
+        // Base case -- no flag
+        const question = await hanziWordToGlossTypedQuestionOrThrow(
+          `het:好:good`,
+          null,
+        );
 
         expect(question).toMatchInlineSnapshot(`
           {
@@ -43,7 +46,7 @@ describe(
               },
             ],
             "bannedMeaningPrimaryGlossHint": [],
-            "flag": undefined,
+            "flag": null,
             "kind": "debug--HanziWordToGlossTyped",
             "skill": "het:好:good",
           }

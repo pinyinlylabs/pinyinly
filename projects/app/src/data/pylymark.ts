@@ -2,7 +2,7 @@ import {
   buildHanziWord,
   hanziFromHanziWord,
   meaningKeyFromHanziWord,
-} from "@/dictionary/dictionary";
+} from "@/dictionary";
 import type { HanziWord } from "./model";
 
 export interface PylymarkHanziWordNode {
