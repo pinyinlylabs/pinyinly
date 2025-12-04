@@ -52,6 +52,7 @@ export async function hanziWordToGlossTypedQuestionOrThrow(
     answers,
     skill,
     bannedMeaningPrimaryGlossHint,
+    flag,
   };
 }
 

@@ -43,6 +43,7 @@ describe(
               },
             ],
             "bannedMeaningPrimaryGlossHint": [],
+            "flag": undefined,
             "kind": "debug--HanziWordToGlossTyped",
             "skill": "het:好:good",
           }
@@ -73,6 +74,12 @@ describe(
             "bannedMeaningPrimaryGlossHint": [
               "like",
             ],
+            "flag": {
+              "kind": "debug--OtherMeaning",
+              "previousHanziWords": [
+                "好:like",
+              ],
+            },
             "kind": "debug--HanziWordToGlossTyped",
             "skill": "het:好:good",
           }
@@ -110,6 +117,12 @@ describe(
           "bannedMeaningPrimaryGlossHint": [
             "appoint",
           ],
+          "flag": {
+            "kind": "debug--OtherMeaning",
+            "previousHanziWords": [
+              "任:appoint",
+            ],
+          },
           "kind": "debug--HanziWordToGlossTyped",
           "skill": "het:任:any",
         }

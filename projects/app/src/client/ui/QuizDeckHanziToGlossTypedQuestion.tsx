@@ -1,16 +1,19 @@
+import { intersperse } from "@/client/react";
 import { splitHanziText } from "@/data/hanzi";
 import type {
   HanziWordToGlossTypedQuestion,
   MistakeType,
   UnsavedSkillRating,
 } from "@/data/model";
+import { QuestionFlagKind } from "@/data/model";
 import type { HanziToGlossTypedQuestionGrade } from "@/data/questions/hanziWordToGlossTyped";
 import { gradeHanziToGlossTypedQuestion } from "@/data/questions/hanziWordToGlossTyped";
 import { hanziWordFromSkill } from "@/data/skills";
-import { hanziFromHanziWord } from "@/dictionary/dictionary";
+import { hanziFromHanziWord, loadDictionary } from "@/dictionary/dictionary";
 import { emptyArray } from "@pinyinly/lib/collections";
+import { nonNullable } from "@pinyinly/lib/invariant";
 import type { ReactNode, Ref } from "react";
-import { useMemo, useRef, useState } from "react";
+import { use, useMemo, useRef, useState } from "react";
 import type { TextInput } from "react-native";
 import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -40,6 +43,14 @@ export function QuizDeckHanziToGlossTypedQuestion({
   const userAnswerRef = useRef(``);
   const [userAnswerEmpty, setUserAnswerEmpty] = useState(true);
   const [grade, setGrade] = useState<HanziToGlossTypedQuestionGrade>();
+  const dictionary = use(loadDictionary());
+  const previousGlosses =
+    flag?.kind === QuestionFlagKind.OtherMeaning &&
+    flag.previousHanziWords != null
+      ? flag.previousHanziWords.map((hanziWord) =>
+          nonNullable(dictionary.lookupHanziWord(hanziWord)?.gloss[0]),
+        )
+      : emptyArray;
 
   const startTime = useMemo(() => Date.now(), []);
   const hanziWord = hanziWordFromSkill(skill);
@@ -140,7 +151,9 @@ export function QuizDeckHanziToGlossTypedQuestion({
           {flag == null ? null : <QuizFlagText flag={flag} />}
           <View>
             <Text className="text-xl font-bold text-fg">
-              What does this mean?
+              {flag?.kind === QuestionFlagKind.OtherMeaning
+                ? `What is another meaning?`
+                : `What does this mean?`}
             </Text>
           </View>
         </View>
@@ -148,7 +161,6 @@ export function QuizDeckHanziToGlossTypedQuestion({
           {hanziCharacters.map((hanzi, i) => {
             return (
               <View className="items-center gap-2" key={i}>
-                {/* TODO: add pinyin to disambiguate the hanzi */}
                 <Text className="text-[80px] font-medium text-fg">{hanzi}</Text>
               </View>
             );
@@ -168,6 +180,24 @@ export function QuizDeckHanziToGlossTypedQuestion({
           userAnswerRef.current = text;
           setUserAnswerEmpty(text.length === 0);
         }}
+        hintText={
+          previousGlosses.length > 0 ? (
+            <>
+              You have already answered{` `}
+              {intersperse(
+                previousGlosses.map((gloss, i) => (
+                  <Text className="pyly-bold" key={i}>
+                    {gloss}
+                  </Text>
+                )),
+                <Text>
+                  {` `}and{` `}
+                </Text>,
+              )}
+              .
+            </>
+          ) : undefined
+        }
         onSubmit={submit}
       />
     </Skeleton>
@@ -180,12 +210,14 @@ const GlossTextInputSingle = ({
   inputRef,
   onChangeText,
   onSubmit,
+  hintText,
 }: {
   autoFocus: boolean;
   disabled: boolean;
   inputRef?: Ref<TextInput>;
   onChangeText: (text: string) => void;
   onSubmit: () => void;
+  hintText?: ReactNode;
 }) => {
   const [text, setText] = useState(``);
 
@@ -201,7 +233,7 @@ const GlossTextInputSingle = ({
   };
 
   return (
-    <View className="gap-2">
+    <View className="items-center gap-2">
       <TextInputSingle
         autoFocus={autoFocus}
         autoCapitalize="none"
@@ -223,6 +255,9 @@ const GlossTextInputSingle = ({
         ref={inputRef}
         value={text}
       />
+      {hintText == null ? null : (
+        <Text className="pyly-body-caption">{hintText}</Text>
+      )}
     </View>
   );
 };
