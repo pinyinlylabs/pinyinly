@@ -95,8 +95,10 @@ export const QuizDeck = ({ className }: { className?: string }) => {
         }
 
         try {
-          const generatedQuestion =
-            await generateQuestionForSkillOrThrow(skill);
+          const generatedQuestion = await generateQuestionForSkillOrThrow(
+            skill,
+            flag,
+          );
 
           // Add flag if not already set (matching old nextQuizQuestionQuery logic)
           generatedQuestion.flag ??= flag;
