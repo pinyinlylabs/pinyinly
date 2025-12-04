@@ -3,6 +3,10 @@ import type { Prettify } from "ts-essentials";
 
 export type PropsOf<T> = T extends React.ComponentType<infer P> ? P : never;
 
+export type Mutable<T> = {
+  -readonly [P in keyof T]: T[P];
+};
+
 /**
  * react-query strictly forbids returning `undefined`, but this isn't enforced
  * by its types. This type is used to enforce that rule.

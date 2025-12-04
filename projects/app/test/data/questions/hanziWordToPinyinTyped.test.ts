@@ -1,23 +1,25 @@
-import type { HanziWordToPinyinQuestion } from "#data/model.ts";
+import type { HanziWordToPinyinTypedQuestion } from "#data/model.ts";
 import { MistakeKind, QuestionKind } from "#data/model.ts";
 import {
-  hanziToPinyinQuestionMistakes,
-  hanziWordToPinyinQuestionOrThrow,
-} from "#data/questions/hanziWordToPinyin.ts";
+  hanziToPinyinTypedQuestionMistakes,
+  hanziWordToPinyinTypedQuestionOrThrow,
+} from "#data/questions/hanziWordToPinyinTyped.ts";
 import { hanziWordToPinyinTyped } from "#data/skills.ts";
 import { loadDictionary } from "#dictionary/dictionary.ts";
 import { describe, expect, test } from "vitest";
 import { 拼音 } from "../helpers.ts";
 
 describe(
-  `hanziWordToPinyinQuestionOrThrow suite` satisfies HasNameOf<
-    typeof hanziWordToPinyinQuestionOrThrow
+  `hanziWordToPinyinTypedQuestionOrThrow suite` satisfies HasNameOf<
+    typeof hanziWordToPinyinTypedQuestionOrThrow
   >,
   async () => {
     test(`simple case`, async () => {
       const skill = hanziWordToPinyinTyped(`你好:hello`);
-      await expect(hanziWordToPinyinQuestionOrThrow(skill)).resolves.toEqual({
-        kind: QuestionKind.HanziWordToPinyin,
+      await expect(
+        hanziWordToPinyinTypedQuestionOrThrow(skill),
+      ).resolves.toEqual({
+        kind: QuestionKind.HanziWordToPinyinTyped,
         answers: [[`nǐ`, `hǎo`]],
         skill,
       });
@@ -25,13 +27,15 @@ describe(
 
     test(`throws if the hanzi word has no pinyin`, async () => {
       const skill = hanziWordToPinyinTyped(`亼:assemble`); // 亼:assemble has no pinyin
-      await expect(hanziWordToPinyinQuestionOrThrow(skill)).rejects.toThrow();
+      await expect(
+        hanziWordToPinyinTypedQuestionOrThrow(skill),
+      ).rejects.toThrow();
     });
 
     test(`supports hanzi word with multiple pinyin`, async () => {
       const skill = hanziWordToPinyinTyped(`什:what`); // 什:what has shén and shen
       await expect(
-        hanziWordToPinyinQuestionOrThrow(skill),
+        hanziWordToPinyinTypedQuestionOrThrow(skill),
       ).resolves.not.toBeNull();
     });
 
@@ -43,20 +47,20 @@ describe(
 
       for (const [hanziWord] of sample) {
         const skill = hanziWordToPinyinTyped(hanziWord);
-        await hanziWordToPinyinQuestionOrThrow(skill);
+        await hanziWordToPinyinTypedQuestionOrThrow(skill);
       }
     });
   },
 );
 
 describe(
-  `hanziToPinyinQuestionMistakes suite` satisfies HasNameOf<
-    typeof hanziToPinyinQuestionMistakes
+  `hanziToPinyinTypedQuestionMistakes suite` satisfies HasNameOf<
+    typeof hanziToPinyinTypedQuestionMistakes
   >,
   async () => {
     test(`correctness ignores whitespace`, async () => {
-      const question: HanziWordToPinyinQuestion = {
-        kind: QuestionKind.HanziWordToPinyin,
+      const question: HanziWordToPinyinTypedQuestion = {
+        kind: QuestionKind.HanziWordToPinyinTyped,
         answers: [[拼音`nǐ`, 拼音`hǎo`]],
         skill: hanziWordToPinyinTyped(`你好:hello`),
       };
@@ -65,14 +69,14 @@ describe(
       for (const answer of fixtures) {
         expect([
           answer,
-          hanziToPinyinQuestionMistakes(question, answer),
+          hanziToPinyinTypedQuestionMistakes(question, answer),
         ]).toEqual([answer, []]);
       }
     });
 
     test(`incorrect returns a mistake`, async () => {
-      const question: HanziWordToPinyinQuestion = {
-        kind: QuestionKind.HanziWordToPinyin,
+      const question: HanziWordToPinyinTypedQuestion = {
+        kind: QuestionKind.HanziWordToPinyinTyped,
         answers: [[拼音`nǐ`, 拼音`hǎo`]],
         skill: hanziWordToPinyinTyped(`你好:hello`),
       };
@@ -89,7 +93,7 @@ describe(
       for (const [answer, mistakePinyin] of fixtures) {
         expect([
           answer,
-          hanziToPinyinQuestionMistakes(question, answer),
+          hanziToPinyinTypedQuestionMistakes(question, answer),
         ]).toEqual([
           answer,
           [
@@ -104,8 +108,8 @@ describe(
     });
 
     test(`secondary pinyin definitions are still correct`, async () => {
-      const question: HanziWordToPinyinQuestion = {
-        kind: QuestionKind.HanziWordToPinyin,
+      const question: HanziWordToPinyinTypedQuestion = {
+        kind: QuestionKind.HanziWordToPinyinTyped,
         answers: [
           [拼音`nǐ`, 拼音`hǎo`],
           [拼音`ni`, 拼音`hao`],
@@ -117,7 +121,7 @@ describe(
       for (const answer of fixtures) {
         expect([
           answer,
-          hanziToPinyinQuestionMistakes(question, answer),
+          hanziToPinyinTypedQuestionMistakes(question, answer),
         ]).toEqual([answer, []]);
       }
     });

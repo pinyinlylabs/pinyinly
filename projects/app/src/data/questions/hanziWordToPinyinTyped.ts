@@ -3,16 +3,16 @@ import { loadDictionary } from "@/dictionary/dictionary";
 import { invariant } from "@pinyinly/lib/invariant";
 import type {
   HanziWordSkill,
-  HanziWordToPinyinQuestion,
+  HanziWordToPinyinTypedQuestion,
   MistakeType,
   Question,
 } from "../model";
 import { MistakeKind, QuestionKind } from "../model";
 import { hanziWordFromSkill } from "../skills";
 
-export async function hanziWordToPinyinQuestionOrThrow(
+export async function hanziWordToPinyinTypedQuestionOrThrow(
   skill: HanziWordSkill,
-): Promise<HanziWordToPinyinQuestion> {
+): Promise<HanziWordToPinyinTypedQuestion> {
   const hanziWord = hanziWordFromSkill(skill);
   const dictionary = await loadDictionary();
   const meaning = dictionary.lookupHanziWord(hanziWord);
@@ -21,7 +21,7 @@ export async function hanziWordToPinyinQuestionOrThrow(
   invariant(answers != null, `hanzi word ${hanziWord} has no pinyin`);
 
   return validQuestionInvariant({
-    kind: QuestionKind.HanziWordToPinyin,
+    kind: QuestionKind.HanziWordToPinyinTyped,
     answers,
     skill,
   });
@@ -30,10 +30,10 @@ export async function hanziWordToPinyinQuestionOrThrow(
 function validQuestionInvariant<T extends Question>(question: T): T {
   switch (question.kind) {
     case QuestionKind.OneCorrectPair:
-    case QuestionKind.HanziWordToPinyin: {
+    case QuestionKind.HanziWordToPinyinTyped: {
       break;
     }
-    case QuestionKind.HanziWordToGloss: {
+    case QuestionKind.HanziWordToGlossTyped: {
       throw new Error(`unexpected question kind HanziWordToGloss`);
     }
   }
@@ -45,8 +45,8 @@ function validQuestionInvariant<T extends Question>(question: T): T {
  * Determine if the user's answer is correct, and if not returning 1 or more
  * mistakes.
  */
-export function hanziToPinyinQuestionMistakes(
-  question: HanziWordToPinyinQuestion,
+export function hanziToPinyinTypedQuestionMistakes(
+  question: HanziWordToPinyinTypedQuestion,
   userAnswer: string,
 ): MistakeType[] {
   const mistakes: MistakeType[] = [];

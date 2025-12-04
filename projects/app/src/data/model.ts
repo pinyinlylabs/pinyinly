@@ -12,9 +12,12 @@ export type DeprecatedSkill =
   | (string & z.BRAND<`DeprecatedSkill`>)
   | `${`xx` | `re` | `er` | `rp` | `pr`}:${string}:${string}`;
 
+export type HanziWordToGlossTypedSkill = `het:${string}:${string}`;
+
 export type HanziWordSkill =
   | (string & z.BRAND<`HanziWordSkill`>)
-  | `${`he` | `het` | `hp` | `hpi` | `hpf` | `hpt` | `eh` | `ph` | `ih`}:${string}:${string}`;
+  | HanziWordToGlossTypedSkill
+  | `${`he` | `hp` | `hpi` | `hpf` | `hpt` | `eh` | `ph` | `ih`}:${string}:${string}`;
 
 export type PinyinInitialAssociationSkill =
   | (string & z.BRAND<`PinyinInitialAssociationSkill`>)
@@ -214,6 +217,7 @@ const questionFlagKindSchema = z.enum({
   Blocked: `debug--Blocked`,
   NewDifficulty: `debug--NewDifficulty`,
   NewSkill: `debug--NewSkill`,
+  OtherMeaning: `debug--OtherMeaning`,
   Overdue: `debug--Overdue`,
   Retry: `debug--Retry`,
   WeakWord: `debug--WeakWord`,
@@ -234,6 +238,15 @@ export interface QuestionFlagOverdueType {
   interval: Interval;
 }
 
+export interface QuestionFlagOtherMeaningType {
+  kind: typeof QuestionFlagKind.OtherMeaning;
+  /**
+   * When there are multiple meanings for a hanzi word, the previously given
+   * meanings should be avoided when answering the question again.
+   */
+  previousHanziWords?: readonly HanziWord[];
+}
+
 export interface QuestionFlagNewDifficultyType {
   kind: typeof QuestionFlagKind.NewDifficulty;
 }
@@ -250,14 +263,15 @@ export type QuestionFlagType =
   | QuestionFlagBlockedType
   | QuestionFlagNewDifficultyType
   | QuestionFlagNewSkillType
+  | QuestionFlagOtherMeaningType
   | QuestionFlagOverdueType
   | QuestionFlagRetryType
   | QuestionFlagWeakWordType;
 
 const questionKindSchema = z.enum({
   OneCorrectPair: `debug--OneCorrectPair`,
-  HanziWordToPinyin: `debug--HanziWordToPinyin`,
-  HanziWordToGloss: `debug--HanziWordToGloss`,
+  HanziWordToPinyinTyped: `debug--HanziWordToPinyinTyped`,
+  HanziWordToGlossTyped: `debug--HanziWordToGlossTyped`,
 });
 export const QuestionKind = questionKindSchema.enum;
 export type QuestionKind = z.infer<typeof questionKindSchema>;
@@ -363,19 +377,26 @@ export interface OneCorrectPairQuestion {
   flag?: QuestionFlagType;
 }
 
-export interface HanziWordToGlossQuestion {
-  kind: typeof QuestionKind.HanziWordToGloss;
+export interface HanziWordToGlossTypedQuestion {
+  kind: typeof QuestionKind.HanziWordToGlossTyped;
   /**
-   * There can be multiple correct answers, e.g. for a word like `好` which
-   * can be translated as `good` or `okay`.
+   * There can be multiple correct answers, e.g. for a hanzi word like `好:good`
+   * has multiple correct glosses i.e. "good", "nice", "friendly".
    */
-  answers: readonly string[];
+  answers: { skill: HanziWordSkill; glosses: string[] }[];
+  /**
+   * Previous glosses that should be avoided.
+   */
+  bannedMeaningPrimaryGlossHint: readonly string[];
+  /**
+   * The skill being quizzed, used for rating a wrong answer.
+   */
   skill: HanziWordSkill;
   flag?: QuestionFlagType;
 }
 
-export interface HanziWordToPinyinQuestion {
-  kind: typeof QuestionKind.HanziWordToPinyin;
+export interface HanziWordToPinyinTypedQuestion {
+  kind: typeof QuestionKind.HanziWordToPinyinTyped;
   /**
    * There can be multiple correct answers, e.g. for a word like `好` which
    * can be pronounced as `hǎo` or `hào`.
@@ -387,8 +408,8 @@ export interface HanziWordToPinyinQuestion {
 
 export type Question =
   | OneCorrectPairQuestion
-  | HanziWordToGlossQuestion
-  | HanziWordToPinyinQuestion;
+  | HanziWordToGlossTypedQuestion
+  | HanziWordToPinyinTypedQuestion;
 
 export interface PinyinInitialAssociation {
   initial: string;

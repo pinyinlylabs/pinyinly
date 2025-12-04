@@ -6,9 +6,11 @@ import { subMinutes } from "date-fns/subMinutes";
 export default () => {
   return (
     <ExampleStack title="flags">
+      <QuizFlagText flag={{ kind: QuestionFlagKind.Blocked }} />
       <QuizFlagText flag={{ kind: QuestionFlagKind.WeakWord }} />
       <QuizFlagText flag={{ kind: QuestionFlagKind.NewDifficulty }} />
       <QuizFlagText flag={{ kind: QuestionFlagKind.NewSkill }} />
+      <QuizFlagText flag={{ kind: QuestionFlagKind.OtherMeaning }} />
       <QuizFlagText
         flag={{
           kind: QuestionFlagKind.Overdue,

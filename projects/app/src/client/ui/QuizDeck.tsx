@@ -31,7 +31,7 @@ import Reanimated, { FadeIn } from "react-native-reanimated";
 import { CloseButton } from "./CloseButton";
 import { usePostHog } from "./PostHogProvider";
 import { QuizDeckHanziToGlossTypedQuestion } from "./QuizDeckHanziToGlossTypedQuestion";
-import { QuizDeckHanziToPinyinQuestion } from "./QuizDeckHanziToPinyinQuestion";
+import { QuizDeckHanziToPinyinTypedQuestion } from "./QuizDeckHanziToPinyinTypedQuestion";
 import { QuizDeckOneCorrectPairQuestion } from "./QuizDeckOneCorrectPairQuestion";
 import { QuizProgressBar } from "./QuizProgressBar";
 import { QuizQueueButton } from "./QuizQueueButton";
@@ -328,7 +328,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
                 let screen: React.ReactNode;
 
                 switch (question.kind) {
-                  case QuestionKind.HanziWordToGloss: {
+                  case QuestionKind.HanziWordToGlossTyped: {
                     screen = (
                       <QuizDeckHanziToGlossTypedQuestion
                         question={question}
@@ -338,9 +338,9 @@ export const QuizDeck = ({ className }: { className?: string }) => {
                     );
                     break;
                   }
-                  case QuestionKind.HanziWordToPinyin: {
+                  case QuestionKind.HanziWordToPinyinTyped: {
                     screen = (
-                      <QuizDeckHanziToPinyinQuestion
+                      <QuizDeckHanziToPinyinTypedQuestion
                         question={question}
                         onNext={handleNext}
                         onRating={handleRating}
