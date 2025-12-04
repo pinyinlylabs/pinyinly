@@ -262,8 +262,8 @@ export type QuestionFlagType =
 
 const questionKindSchema = z.enum({
   OneCorrectPair: `debug--OneCorrectPair`,
-  HanziWordToPinyin: `debug--HanziWordToPinyin`,
-  HanziWordToGloss: `debug--HanziWordToGloss`,
+  HanziWordToPinyinTyped: `debug--HanziWordToPinyinTyped`,
+  HanziWordToGlossTyped: `debug--HanziWordToGlossTyped`,
 });
 export const QuestionKind = questionKindSchema.enum;
 export type QuestionKind = z.infer<typeof questionKindSchema>;
@@ -369,8 +369,8 @@ export interface OneCorrectPairQuestion {
   flag?: QuestionFlagType;
 }
 
-export interface HanziWordToGlossQuestion {
-  kind: typeof QuestionKind.HanziWordToGloss;
+export interface HanziWordToGlossTypedQuestion {
+  kind: typeof QuestionKind.HanziWordToGlossTyped;
   /**
    * There can be multiple correct answers, e.g. for a word like `好` which
    * can be translated as `good` or `okay`.
@@ -380,8 +380,8 @@ export interface HanziWordToGlossQuestion {
   flag?: QuestionFlagType;
 }
 
-export interface HanziWordToPinyinQuestion {
-  kind: typeof QuestionKind.HanziWordToPinyin;
+export interface HanziWordToPinyinTypedQuestion {
+  kind: typeof QuestionKind.HanziWordToPinyinTyped;
   /**
    * There can be multiple correct answers, e.g. for a word like `好` which
    * can be pronounced as `hǎo` or `hào`.
@@ -393,8 +393,8 @@ export interface HanziWordToPinyinQuestion {
 
 export type Question =
   | OneCorrectPairQuestion
-  | HanziWordToGlossQuestion
-  | HanziWordToPinyinQuestion;
+  | HanziWordToGlossTypedQuestion
+  | HanziWordToPinyinTypedQuestion;
 
 export interface PinyinInitialAssociation {
   initial: string;

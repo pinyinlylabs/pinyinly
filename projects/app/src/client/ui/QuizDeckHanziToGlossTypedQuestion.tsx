@@ -1,6 +1,6 @@
 import { splitHanziText } from "@/data/hanzi";
 import type {
-  HanziWordToGlossQuestion,
+  HanziWordToGlossTypedQuestion,
   MistakeType,
   UnsavedSkillRating,
 } from "@/data/model";
@@ -27,7 +27,7 @@ export function QuizDeckHanziToGlossTypedQuestion({
   onRating,
 }: {
   noAutoFocus?: boolean;
-  question: HanziWordToGlossQuestion;
+  question: HanziWordToGlossTypedQuestion;
   onNext: () => void;
   onRating: (ratings: UnsavedSkillRating[], mistakes: MistakeType[]) => void;
 }) {

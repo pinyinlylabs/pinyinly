@@ -3,15 +3,17 @@ import { invariant } from "@pinyinly/lib/invariant";
 import type {
   HanziGlossMistakeType,
   HanziWordSkill,
-  HanziWordToGlossQuestion,
+  HanziWordToGlossTypedQuestion,
   MistakeType,
+  QuestionFlagType,
 } from "../model";
 import { MistakeKind, QuestionKind } from "../model";
 import { hanziWordFromSkill } from "../skills";
 
 export async function hanziWordToGlossTypedQuestionOrThrow(
   skill: HanziWordSkill,
-): Promise<HanziWordToGlossQuestion> {
+  _flag?: QuestionFlagType,
+): Promise<HanziWordToGlossTypedQuestion> {
   const hanziWord = hanziWordFromSkill(skill);
   const dictionary = await loadDictionary();
   const meaning = dictionary.lookupHanziWord(hanziWord);
@@ -20,7 +22,7 @@ export async function hanziWordToGlossTypedQuestionOrThrow(
   invariant(answers.length > 0, `hanzi word ${hanziWord} has no gloss`);
 
   return {
-    kind: QuestionKind.HanziWordToGloss,
+    kind: QuestionKind.HanziWordToGlossTyped,
     answers,
     skill,
   };
@@ -31,7 +33,7 @@ export async function hanziWordToGlossTypedQuestionOrThrow(
  * mistakes.
  */
 export function hanziToGlossTypedQuestionMistakes(
-  question: HanziWordToGlossQuestion,
+  question: HanziWordToGlossTypedQuestion,
   userAnswer: string,
 ): MistakeType[] {
   const mistakes: HanziGlossMistakeType[] = [];

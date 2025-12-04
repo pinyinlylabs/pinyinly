@@ -1,15 +1,21 @@
-import type { HanziWordSkill, Question, Skill } from "./model";
+import type {
+  HanziWordSkill,
+  Question,
+  QuestionFlagType,
+  Skill,
+} from "./model";
 import { SkillKind } from "./model";
 import { hanziWordToGlossQuestionOrThrow } from "./questions/hanziWordToGloss";
 import { hanziWordToGlossTypedQuestionOrThrow } from "./questions/hanziWordToGlossTyped";
-import { hanziWordToPinyinQuestionOrThrow } from "./questions/hanziWordToPinyin";
 import { hanziWordToPinyinFinalQuestionOrThrow } from "./questions/hanziWordToPinyinFinal";
 import { hanziWordToPinyinInitialQuestionOrThrow } from "./questions/hanziWordToPinyinInitial";
 import { hanziWordToPinyinToneQuestionOrThrow } from "./questions/hanziWordToPinyinTone";
+import { hanziWordToPinyinTypedQuestionOrThrow } from "./questions/hanziWordToPinyinTyped";
 import { skillKindFromSkill } from "./skills";
 
 export async function generateQuestionForSkillOrThrow(
   skill: Skill,
+  flag?: QuestionFlagType,
 ): Promise<Question> {
   switch (skillKindFromSkill(skill)) {
     case SkillKind.HanziWordToGloss: {
@@ -18,11 +24,11 @@ export async function generateQuestionForSkillOrThrow(
     }
     case SkillKind.HanziWordToGlossTyped: {
       skill = skill as HanziWordSkill;
-      return await hanziWordToGlossTypedQuestionOrThrow(skill);
+      return await hanziWordToGlossTypedQuestionOrThrow(skill, flag);
     }
     case SkillKind.HanziWordToPinyinTyped: {
       skill = skill as HanziWordSkill;
-      return await hanziWordToPinyinQuestionOrThrow(skill);
+      return await hanziWordToPinyinTypedQuestionOrThrow(skill);
     }
     case SkillKind.HanziWordToPinyinInitial: {
       skill = skill as HanziWordSkill;

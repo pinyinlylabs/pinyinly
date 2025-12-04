@@ -4,7 +4,7 @@ import {
 } from "@/client/hooks/useUserSetting";
 import { splitHanziText } from "@/data/hanzi";
 import type {
-  HanziWordToPinyinQuestion,
+  HanziWordToPinyinTypedQuestion,
   MistakeType,
   PinyinPronunciation,
   UnsavedSkillRating,
@@ -17,7 +17,7 @@ import {
   matchAllPinyinSyllables,
   pinyinSyllableSuggestions,
 } from "@/data/pinyin";
-import { hanziToPinyinQuestionMistakes } from "@/data/questions/hanziWordToPinyin";
+import { hanziToPinyinTypedQuestionMistakes } from "@/data/questions/hanziWordToPinyinTyped";
 import { computeSkillRating, hanziWordFromSkill } from "@/data/skills";
 import { hanziFromHanziWord } from "@/dictionary/dictionary";
 import { nonNullable } from "@pinyinly/lib/invariant";
@@ -36,14 +36,14 @@ import { QuizSubmitButton, QuizSubmitButtonState } from "./QuizSubmitButton";
 import { SkillAnswerText } from "./SkillAnswerText";
 import { TextInputSingle } from "./TextInputSingle";
 
-export function QuizDeckHanziToPinyinQuestion({
+export function QuizDeckHanziToPinyinTypedQuestion({
   noAutoFocus = true,
   question,
   onNext,
   onRating,
 }: {
   noAutoFocus?: boolean;
-  question: HanziWordToPinyinQuestion;
+  question: HanziWordToPinyinTypedQuestion;
   onNext: () => void;
   onRating: (ratings: UnsavedSkillRating[], mistakes: MistakeType[]) => void;
 }) {
@@ -68,7 +68,7 @@ export function QuizDeckHanziToPinyinQuestion({
     // First time you press the button it will grade your answer, the next time
     // it moves you to the next question.
     if (grade == null) {
-      const mistakes = hanziToPinyinQuestionMistakes(
+      const mistakes = hanziToPinyinTypedQuestionMistakes(
         question,
         userAnswerRef.current,
       );
