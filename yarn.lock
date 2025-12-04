@@ -19890,21 +19890,21 @@ __metadata:
 
 "typescript@patch:typescript@npm%3A5.9.2#~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch":
   version: 5.9.2
-  resolution: "typescript@patch:typescript@npm%3A5.9.2#~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch::version=5.9.2&hash=aac922"
+  resolution: "typescript@patch:typescript@npm%3A5.9.2#~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch::version=5.9.2&hash=ff5365"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 10c0/4e984e66ee89d8a2c9b95e182dc174c1bec1ddc0a7f3f2328691e11f897da33f16c69239a562cfbe16021617f5a0193da5887f7be2e32b0d6b2f15ecc0996c7a
+  checksum: 10c0/c76db933d0544b7e85c3512f961b802297217d1ecf659a5305a75f9b1005d92eb317973e05ae975b42c26b7b4e1e6fe4087af02388fe5ea584cdf48e5a9d8f65
   languageName: node
   linkType: hard
 
 "typescript@patch:typescript@patch%3Atypescript@npm%253A5.9.2%23~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch#optional!builtin<compat/typescript>":
   version: 5.9.2
-  resolution: "typescript@patch:typescript@patch%3Atypescript@npm%253A5.9.2%23~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch%3A%3Aversion=5.9.2&hash=aac922#optional!builtin<compat/typescript>::version=5.9.2&hash=5786d5"
+  resolution: "typescript@patch:typescript@patch%3Atypescript@npm%253A5.9.2%23~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch%3A%3Aversion=5.9.2&hash=ff5365#optional!builtin<compat/typescript>::version=5.9.2&hash=5786d5"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 10c0/6e76bb0f1c8aca481a967617a9c63a94d6e0e2228eff77aa30fe932934d5f83ed54791e9744d01d2dd3d34f81bbe5a03cc6492411412e71b73dd6e326b20d78c
+  checksum: 10c0/d6d4e931410465d88ed49fe4a9ff89a4c2fb9795c7ef6ef204a8695bfeceafc0c8d399341af131b437389db4f958f904eb0200fd9c977db0b504298a37251994
   languageName: node
   linkType: hard
 

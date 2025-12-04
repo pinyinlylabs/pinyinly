@@ -1,5 +1,5 @@
 diff --git a/lib/lib.dom.d.ts b/lib/lib.dom.d.ts
-index 14508e8dc3effb02a4bd808e61770aacbc8b13b7..185f809b5f64b6e98aac2f653122eeadb4d7db2a 100644
+index 14508e8dc3effb02a4bd808e61770aacbc8b13b7..f4d19ebe21c537e6ace41617e8eb89667046192b 100644
 --- a/lib/lib.dom.d.ts
 +++ b/lib/lib.dom.d.ts
 @@ -26378,7 +26378,7 @@ declare var Response: {
@@ -27,3 +27,16 @@ index 14508e8dc3effb02a4bd808e61770aacbc8b13b7..185f809b5f64b6e98aac2f653122eead
   *
   * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Window/requestIdleCallback)
   */
+diff --git a/lib/typescript.js b/lib/typescript.js
+index 2643aa12aa6497ca0b90ecd99b202f37ea0e6330..5c165de6fd31e0eee2043e17aa4d6472bec51fde 100644
+--- a/lib/typescript.js
++++ b/lib/typescript.js
+@@ -146297,7 +146297,7 @@ function getFunctionOrClassName(node) {
+       if (name.length > maxLength) {
+         return `${name} callback`;
+       }
+-      const args = cleanText(mapDefined(parent2.arguments, (a) => isStringLiteralLike(a) || isTemplateLiteral(a) ? a.getText(curSourceFile) : void 0).join(", "));
++      const args = cleanText(mapDefined(parent2.arguments, (a) => { if (isSatisfiesExpression(a)) { a = a.expression; } return isStringLiteralLike(a) || isTemplateLiteral(a) ? a.getText(curSourceFile) : void 0; }).join(", "));
+       return `${name}(${args}) callback`;
+     }
+   }
