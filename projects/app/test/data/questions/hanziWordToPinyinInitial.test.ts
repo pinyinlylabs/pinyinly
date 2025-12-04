@@ -107,7 +107,7 @@ describe(
 
       for (const [hanziWord] of sample) {
         const skill = hanziWordToPinyinInitial(hanziWord);
-        await hanziWordToPinyinInitialQuestionOrThrow(skill);
+        await hanziWordToPinyinInitialQuestionOrThrow(skill, null);
       }
     });
   },

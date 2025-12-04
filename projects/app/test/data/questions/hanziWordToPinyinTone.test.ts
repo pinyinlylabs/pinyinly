@@ -112,7 +112,7 @@ describe(
       for (const [hanziWord] of sample) {
         const skill = hanziWordToPinyinTone(hanziWord);
         await expect(
-          hanziWordToPinyinToneQuestionOrThrow(skill),
+          hanziWordToPinyinToneQuestionOrThrow(skill, null),
         ).resolves.toBeDefined();
       }
 

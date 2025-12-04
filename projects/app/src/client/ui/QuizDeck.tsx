@@ -97,11 +97,8 @@ export const QuizDeck = ({ className }: { className?: string }) => {
         try {
           const generatedQuestion = await generateQuestionForSkillOrThrow(
             skill,
-            flag,
+            flag ?? null,
           );
-
-          // Add flag if not already set (matching old nextQuizQuestionQuery logic)
-          generatedQuestion.flag ??= flag;
 
           // Check if this effect was cancelled before setting state
           // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition

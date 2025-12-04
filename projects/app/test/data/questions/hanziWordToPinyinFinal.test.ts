@@ -107,7 +107,7 @@ describe(
 
       for (const [hanziWord] of sample) {
         const skill = hanziWordToPinyinFinal(hanziWord);
-        await hanziWordToPinyinFinalQuestionOrThrow(skill);
+        await hanziWordToPinyinFinalQuestionOrThrow(skill, null);
       }
     });
   },

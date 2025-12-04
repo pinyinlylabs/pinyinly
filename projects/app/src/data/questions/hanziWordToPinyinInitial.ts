@@ -26,6 +26,7 @@ import type {
   OneCorrectPairQuestionAnswer,
   OneCorrectPairQuestionChoice,
   PinyinSyllable,
+  QuestionFlagType,
 } from "../model";
 import { QuestionKind } from "../model";
 import { hanziWordFromSkill } from "../skills";
@@ -36,6 +37,7 @@ import {
 
 export async function hanziWordToPinyinInitialQuestionOrThrow(
   skill: HanziWordSkill,
+  flag: QuestionFlagType | null,
 ): Promise<OneCorrectPairQuestion> {
   const hanziWord = hanziWordFromSkill(skill);
   const dictionary = await loadDictionary();
@@ -63,6 +65,7 @@ export async function hanziWordToPinyinInitialQuestionOrThrow(
     groupA: shuffle([...groupA, ...answer.as]),
     groupB: shuffle([...groupB, ...answer.bs]),
     answer,
+    flag,
   });
 }
 

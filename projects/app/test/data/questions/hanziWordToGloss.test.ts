@@ -100,7 +100,7 @@ describe(
 
       for (const hanziWord of dictionary.allHanziWords) {
         const skill = hanziWordToGloss(hanziWord);
-        await hanziWordToGlossQuestionOrThrow(skill);
+        await hanziWordToGlossQuestionOrThrow(skill, null);
       }
     });
   },

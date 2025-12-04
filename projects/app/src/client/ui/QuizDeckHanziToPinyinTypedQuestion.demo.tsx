@@ -6,7 +6,7 @@ import { buildHanziWord } from "@/dictionary/dictionary";
 
 export default () => {
   const skill = hanziWordToPinyinTyped(buildHanziWord(`你好`, `hello`));
-  const questionPromise = hanziWordToPinyinTypedQuestionOrThrow(skill);
+  const questionPromise = hanziWordToPinyinTypedQuestionOrThrow(skill, null);
 
   return (
     <Use

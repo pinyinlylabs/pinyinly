@@ -6,12 +6,14 @@ import type {
   HanziWordToPinyinTypedQuestion,
   MistakeType,
   Question,
+  QuestionFlagType,
 } from "../model";
 import { MistakeKind, QuestionKind } from "../model";
 import { hanziWordFromSkill } from "../skills";
 
 export async function hanziWordToPinyinTypedQuestionOrThrow(
   skill: HanziWordSkill,
+  flag: QuestionFlagType | null,
 ): Promise<HanziWordToPinyinTypedQuestion> {
   const hanziWord = hanziWordFromSkill(skill);
   const dictionary = await loadDictionary();
@@ -24,6 +26,7 @@ export async function hanziWordToPinyinTypedQuestionOrThrow(
     kind: QuestionKind.HanziWordToPinyinTyped,
     answers,
     skill,
+    flag,
   });
 }
 

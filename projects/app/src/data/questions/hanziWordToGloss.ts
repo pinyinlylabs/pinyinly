@@ -17,6 +17,7 @@ import type {
   OneCorrectPairQuestionAnswer,
   OneCorrectPairQuestionChoice,
   Question,
+  QuestionFlagType,
 } from "../model";
 import { QuestionKind } from "../model";
 import { hanziWordFromSkill } from "../skills";
@@ -24,6 +25,7 @@ import { oneCorrectPairQuestionInvariant } from "./oneCorrectPair";
 
 export async function hanziWordToGlossQuestionOrThrow(
   skill: HanziWordSkill,
+  flag: QuestionFlagType | null,
 ): Promise<Question> {
   const hanziWord = hanziWordFromSkill(skill);
   const dictionary = await loadDictionary();
@@ -58,6 +60,7 @@ export async function hanziWordToGlossQuestionOrThrow(
     groupA: shuffle([...groupA, ...answer.as]),
     groupB: shuffle([...groupB, ...answer.bs]),
     answer,
+    flag,
   };
   oneCorrectPairQuestionInvariant(question);
   return question;

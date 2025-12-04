@@ -21,7 +21,7 @@ export default () => {
             .map(([h]) => h)
             .filter((h) => h !== hanziWord),
         }
-      : undefined;
+      : null;
   const questionPromise = hanziWordToGlossTypedQuestionOrThrow(skill, flag);
 
   return (
