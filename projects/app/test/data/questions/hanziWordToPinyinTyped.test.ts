@@ -1,7 +1,7 @@
 import type { HanziWordToPinyinTypedQuestion } from "#data/model.ts";
 import { MistakeKind, QuestionKind } from "#data/model.ts";
 import {
-  hanziToPinyinTypedQuestionMistakes,
+  gradeHanziToPinyinTypedQuestion,
   hanziWordToPinyinTypedQuestionOrThrow,
 } from "#data/questions/hanziWordToPinyinTyped.ts";
 import { hanziWordToPinyinTyped } from "#data/skills.ts";
@@ -55,8 +55,8 @@ describe(
 );
 
 describe(
-  `hanziToPinyinTypedQuestionMistakes suite` satisfies HasNameOf<
-    typeof hanziToPinyinTypedQuestionMistakes
+  `gradeHanziToPinyinTypedQuestion suite` satisfies HasNameOf<
+    typeof gradeHanziToPinyinTypedQuestion
   >,
   async () => {
     test(`correctness ignores whitespace`, async () => {
@@ -69,10 +69,8 @@ describe(
 
       const fixtures = [`nǐhǎo`, `nǐ hǎo`, `nǐ hǎo `, `nǐhǎo `, ` nǐhǎo`];
       for (const answer of fixtures) {
-        expect([
-          answer,
-          hanziToPinyinTypedQuestionMistakes(question, answer),
-        ]).toEqual([answer, []]);
+        const grade = gradeHanziToPinyinTypedQuestion(question, answer, 1000);
+        expect([answer, grade.correct]).toEqual([answer, true]);
       }
     });
 
@@ -94,19 +92,20 @@ describe(
         [`x x`, [`x`, `x`]],
       ];
       for (const [answer, mistakePinyin] of fixtures) {
-        expect([
-          answer,
-          hanziToPinyinTypedQuestionMistakes(question, answer),
-        ]).toEqual([
-          answer,
-          [
-            {
-              kind: MistakeKind.HanziPinyin,
-              hanziOrHanziWord: `你好:hello`,
-              pinyin: mistakePinyin,
-            },
-          ],
-        ]);
+        const grade = gradeHanziToPinyinTypedQuestion(question, answer, 1000);
+        expect([answer, grade.correct]).toEqual([answer, false]);
+        if (!grade.correct) {
+          expect([answer, grade.mistakes]).toEqual([
+            answer,
+            [
+              {
+                kind: MistakeKind.HanziPinyin,
+                hanziOrHanziWord: `你好:hello`,
+                pinyin: mistakePinyin,
+              },
+            ],
+          ]);
+        }
       }
     });
 
@@ -123,10 +122,8 @@ describe(
 
       const fixtures = [`nihao`, `ni hao`];
       for (const answer of fixtures) {
-        expect([
-          answer,
-          hanziToPinyinTypedQuestionMistakes(question, answer),
-        ]).toEqual([answer, []]);
+        const grade = gradeHanziToPinyinTypedQuestion(question, answer, 1000);
+        expect([answer, grade.correct]).toEqual([answer, true]);
       }
     });
   },
