@@ -13,11 +13,19 @@ export type DeprecatedSkill =
   | `${`xx` | `re` | `er` | `rp` | `pr`}:${string}:${string}`;
 
 export type HanziWordToGlossTypedSkill = `het:${string}:${string}`;
+export type HanziWordToPinyinTypedSkill = `hp:${string}:${string}`;
+export type HanziWordToPinyinInitialSkill = `hpi:${string}:${string}`;
+export type HanziWordToPinyinToneSkill = `hpt:${string}:${string}`;
+export type HanziWordToPinyinFinalSkill = `hpf:${string}:${string}`;
 
 export type HanziWordSkill =
   | (string & z.BRAND<`HanziWordSkill`>)
   | HanziWordToGlossTypedSkill
-  | `${`he` | `hp` | `hpi` | `hpf` | `hpt` | `eh` | `ph` | `ih`}:${string}:${string}`;
+  | HanziWordToPinyinTypedSkill
+  | HanziWordToPinyinInitialSkill
+  | HanziWordToPinyinToneSkill
+  | HanziWordToPinyinFinalSkill
+  | `${`he` | `eh` | `ph` | `ih`}:${string}:${string}`;
 
 export type PinyinInitialAssociationSkill =
   | (string & z.BRAND<`PinyinInitialAssociationSkill`>)

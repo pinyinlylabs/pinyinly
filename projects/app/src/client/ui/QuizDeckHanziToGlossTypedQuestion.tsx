@@ -68,10 +68,8 @@ export function QuizDeckHanziToGlossTypedQuestion({
         durationMs,
       );
 
-      const mistakes = grade.correct ? emptyArray : grade.mistakes;
-
       setGrade(grade);
-      onRating(grade.skillRatings, mistakes);
+      onRating(grade.skillRatings, grade.correct ? emptyArray : grade.mistakes);
     } else {
       onNext();
     }

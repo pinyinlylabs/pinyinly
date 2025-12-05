@@ -1,15 +1,17 @@
 import { matchAllPinyinSyllables } from "@/data/pinyin";
 import { loadDictionary } from "@/dictionary";
-import { invariant } from "@pinyinly/lib/invariant";
+import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import type {
   HanziWordSkill,
   HanziWordToPinyinTypedQuestion,
   MistakeType,
+  PinyinPronunciation,
   Question,
   QuestionFlagType,
+  UnsavedSkillRating,
 } from "../model";
 import { MistakeKind, QuestionKind } from "../model";
-import { hanziWordFromSkill } from "../skills";
+import { computeSkillRating, hanziWordFromSkill } from "../skills";
 
 export async function hanziWordToPinyinTypedQuestionOrThrow(
   skill: HanziWordSkill,
@@ -44,16 +46,27 @@ function validQuestionInvariant<T extends Question>(question: T): T {
   return question;
 }
 
+export type HanziToPinyinTypedQuestionGrade =
+  | {
+      correct: true;
+      skillRatings: UnsavedSkillRating[];
+    }
+  | {
+      correct: false;
+      skillRatings: UnsavedSkillRating[];
+      expectedAnswer: Readonly<PinyinPronunciation>;
+      mistakes: MistakeType[];
+    };
+
 /**
  * Determine if the user's answer is correct, and if not returning 1 or more
  * mistakes.
  */
-export function hanziToPinyinTypedQuestionMistakes(
+export function gradeHanziToPinyinTypedQuestion(
   question: HanziWordToPinyinTypedQuestion,
   userAnswer: string,
-): MistakeType[] {
-  const mistakes: MistakeType[] = [];
-
+  durationMs: number,
+): HanziToPinyinTypedQuestionGrade {
   let actualSyllables = matchAllPinyinSyllables(userAnswer);
 
   // If there were no syllables found (e.g. the user entered some invalid pinyin
@@ -62,26 +75,48 @@ export function hanziToPinyinTypedQuestionMistakes(
     actualSyllables = userAnswer.split(/\s+/g).filter((x) => x.length > 0);
   }
 
-  for (const [i, expectedSyllables] of question.answers.entries()) {
-    const isLastChance = i === question.answers.length - 1;
+  // Check if the answer is correct
+  for (const expectedSyllables of question.answers) {
     const isCorrect =
       expectedSyllables.length === actualSyllables.length &&
       expectedSyllables.every((syllable, i) => syllable === actualSyllables[i]);
 
     if (isCorrect) {
-      return [];
-    }
-
-    if (isLastChance) {
-      // Push a single mistake for the whole word, not per syllable. This might be
-      // something that's changed in the future, but for now it's simple.
-      mistakes.push({
-        kind: MistakeKind.HanziPinyin,
-        hanziOrHanziWord: hanziWordFromSkill(question.skill),
-        pinyin: actualSyllables,
-      });
+      const correct = true;
+      return {
+        correct,
+        skillRatings: [
+          computeSkillRating({
+            skill: question.skill,
+            correct,
+            durationMs,
+          }),
+        ],
+      };
     }
   }
 
-  return mistakes;
+  // Report a mistake
+  {
+    const correct = false;
+    const expectedAnswer = nonNullable(question.answers[0]);
+    return {
+      correct,
+      skillRatings: [
+        computeSkillRating({
+          skill: question.skill,
+          correct,
+          durationMs,
+        }),
+      ],
+      expectedAnswer,
+      mistakes: [
+        {
+          kind: MistakeKind.HanziPinyin,
+          hanziOrHanziWord: hanziWordFromSkill(question.skill),
+          pinyin: actualSyllables,
+        },
+      ],
+    };
+  }
 }

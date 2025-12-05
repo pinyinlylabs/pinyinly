@@ -6,7 +6,6 @@ import { splitHanziText } from "@/data/hanzi";
 import type {
   HanziWordToPinyinTypedQuestion,
   MistakeType,
-  PinyinPronunciation,
   UnsavedSkillRating,
 } from "@/data/model";
 import type {
@@ -17,9 +16,11 @@ import {
   matchAllPinyinSyllables,
   pinyinSyllableSuggestions,
 } from "@/data/pinyin";
-import { hanziToPinyinTypedQuestionMistakes } from "@/data/questions/hanziWordToPinyinTyped";
-import { computeSkillRating, hanziWordFromSkill } from "@/data/skills";
+import type { HanziToPinyinTypedQuestionGrade } from "@/data/questions/hanziWordToPinyinTyped";
+import { gradeHanziToPinyinTypedQuestion } from "@/data/questions/hanziWordToPinyinTyped";
+import { hanziWordFromSkill } from "@/data/skills";
 import { hanziFromHanziWord } from "@/dictionary";
+import { emptyArray } from "@pinyinly/lib/collections";
 import { nonNullable } from "@pinyinly/lib/invariant";
 import type { ReactNode, Ref } from "react";
 import { useMemo, useRef, useState } from "react";
@@ -45,7 +46,10 @@ export function QuizDeckHanziToPinyinTypedQuestion({
   noAutoFocus?: boolean;
   question: HanziWordToPinyinTypedQuestion;
   onNext: () => void;
-  onRating: (ratings: UnsavedSkillRating[], mistakes: MistakeType[]) => void;
+  onRating: (
+    ratings: UnsavedSkillRating[],
+    mistakes: readonly MistakeType[],
+  ) => void;
 }) {
   const { skill, flag, answers } = question;
 
@@ -54,10 +58,7 @@ export function QuizDeckHanziToPinyinTypedQuestion({
 
   const userAnswerRef = useRef(``);
   const [userAnswerEmpty, setUserAnswerEmpty] = useState(true);
-  const [grade, setGrade] = useState<{
-    correct: boolean;
-    expectedAnswer: Readonly<PinyinPronunciation>;
-  }>();
+  const [grade, setGrade] = useState<HanziToPinyinTypedQuestionGrade>();
 
   const startTime = useMemo(() => Date.now(), []);
   const hanziCharacters = splitHanziText(
@@ -68,27 +69,15 @@ export function QuizDeckHanziToPinyinTypedQuestion({
     // First time you press the button it will grade your answer, the next time
     // it moves you to the next question.
     if (grade == null) {
-      const mistakes = hanziToPinyinTypedQuestionMistakes(
+      const durationMs = Date.now() - startTime;
+      const grade = gradeHanziToPinyinTypedQuestion(
         question,
         userAnswerRef.current,
+        durationMs,
       );
 
-      const correct = mistakes.length === 0;
-
-      const durationMs = Date.now() - startTime;
-      const skillRatings: UnsavedSkillRating[] = [
-        computeSkillRating({
-          skill,
-          correct,
-          durationMs,
-        }),
-      ];
-
-      setGrade({
-        correct,
-        expectedAnswer: nonNullable(answers[0]),
-      });
-      onRating(skillRatings, mistakes);
+      setGrade(grade);
+      onRating(grade.skillRatings, grade.correct ? emptyArray : grade.mistakes);
     } else {
       onNext();
     }

@@ -3,14 +3,14 @@ import type {
   OneCorrectPairQuestionChoice,
 } from "#data/model.ts";
 import { MistakeKind } from "#data/model.ts";
-import { oneCorrectPairQuestionMistakes } from "#data/questions/oneCorrectPair.ts";
+import { gradeOneCorrectPairQuestion } from "#data/questions/oneCorrectPair.ts";
 import { hanziWordToGloss, hanziWordToPinyinTone } from "#data/skills.ts";
 import { describe, expect, test } from "vitest";
 import { 拼音, 汉 } from "../helpers.ts";
 
 describe(
-  `oneCorrectPairQuestionMistakes suite` satisfies HasNameOf<
-    typeof oneCorrectPairQuestionMistakes
+  `gradeOneCorrectPairQuestion suite` satisfies HasNameOf<
+    typeof gradeOneCorrectPairQuestion
   >,
   async () => {
     test(`correct when A choice is correct and B choice is correct`, async () => {
@@ -25,7 +25,8 @@ describe(
         skill: hanziWordToPinyinTone(`好:good`),
       };
 
-      expect(oneCorrectPairQuestionMistakes(answer, a, b)).toEqual([]);
+      const grade = gradeOneCorrectPairQuestion(answer, a, b, 1000);
+      expect(grade.correct).toBe(true);
     });
 
     test(`hanzi↔gloss / gloss↔hanzi incorrect`, async () => {
@@ -43,7 +44,11 @@ describe(
       };
 
       for (const [a, b] of combinations) {
-        expect(oneCorrectPairQuestionMistakes(answer, a, b)).toEqual([mistake]);
+        const grade = gradeOneCorrectPairQuestion(answer, a, b, 1000);
+        expect(grade.correct).toBe(false);
+        if (!grade.correct) {
+          expect(grade.mistakes).toEqual([mistake]);
+        }
       }
     });
 
@@ -62,7 +67,11 @@ describe(
       };
 
       for (const [a, b] of combinations) {
-        expect(oneCorrectPairQuestionMistakes(answer, a, b)).toEqual([mistake]);
+        const grade = gradeOneCorrectPairQuestion(answer, a, b, 1000);
+        expect(grade.correct).toBe(false);
+        if (!grade.correct) {
+          expect(grade.mistakes).toEqual([mistake]);
+        }
       }
     });
   },
