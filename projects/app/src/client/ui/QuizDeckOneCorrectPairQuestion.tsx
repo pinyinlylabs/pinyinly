@@ -11,10 +11,9 @@ import type {
 } from "@/data/model";
 import { QuestionFlagKind } from "@/data/model";
 import {
+  gradeOneCorrectPairQuestion,
   oneCorrectPairChoiceText,
-  oneCorrectPairQuestionMistakes,
 } from "@/data/questions/oneCorrectPair";
-import { computeSkillRating } from "@/data/skills";
 import { longestTextByCharacters } from "@/util/unicode";
 import { invariant } from "@pinyinly/lib/invariant";
 import type { ReactNode } from "react";
@@ -74,20 +73,16 @@ export function QuizDeckOneCorrectPairQuestion({
     aChoice: OneCorrectPairQuestionChoice,
     bChoice: OneCorrectPairQuestionChoice,
   ) => {
-    const mistakes = oneCorrectPairQuestionMistakes(answer, aChoice, bChoice);
-    const isCorrect = mistakes.length === 0;
-
     const durationMs = (timer.endTime ?? Date.now()) - timer.startTime;
-    const skillRatings: UnsavedSkillRating[] = [
-      computeSkillRating({
-        skill: answer.skill,
-        correct: isCorrect,
-        durationMs,
-      }),
-    ];
+    const grade = gradeOneCorrectPairQuestion(
+      answer,
+      aChoice,
+      bChoice,
+      durationMs,
+    );
 
-    setIsCorrect(isCorrect);
-    onRating(skillRatings, mistakes);
+    setIsCorrect(grade.correct);
+    onRating(grade.skillRatings, grade.correct ? [] : grade.mistakes);
   };
 
   const groupAFontSize = textAnswerButtonFontSize(

@@ -6,10 +6,11 @@ import type {
   OneCorrectPairQuestion,
   OneCorrectPairQuestionAnswer,
   OneCorrectPairQuestionChoice,
+  UnsavedSkillRating,
 } from "@/data/model";
 import { MistakeKind } from "@/data/model";
 import { pinyinPronunciationDisplayText } from "@/data/pinyin";
-import { emptyArray } from "@pinyinly/lib/collections";
+import { computeSkillRating } from "@/data/skills";
 import { invariant, uniqueInvariant } from "@pinyinly/lib/invariant";
 
 export function oneCorrectPairChoiceText(
@@ -70,19 +71,46 @@ export function oneCorrectPairQuestionHanziPinyinMistake(
   }
 }
 
+export type OneCorrectPairQuestionGrade =
+  | {
+      correct: true;
+      skillRatings: UnsavedSkillRating[];
+    }
+  | {
+      correct: false;
+      skillRatings: UnsavedSkillRating[];
+      mistakes: MistakeType[];
+    };
+
 /**
  * Determine if the user's answer is correct, and if not returning 1 or more
  * mistakes.
  */
-export function oneCorrectPairQuestionMistakes(
+export function gradeOneCorrectPairQuestion(
   answer: OneCorrectPairQuestionAnswer,
   aChoice: OneCorrectPairQuestionChoice,
   bChoice: OneCorrectPairQuestionChoice,
-): readonly MistakeType[] {
-  if (answer.as.includes(aChoice) && answer.bs.includes(bChoice)) {
-    return emptyArray;
+  durationMs: number,
+): OneCorrectPairQuestionGrade {
+  const isCorrect = answer.as.includes(aChoice) && answer.bs.includes(bChoice);
+  const correct = isCorrect;
+
+  const skillRatings: UnsavedSkillRating[] = [
+    computeSkillRating({
+      skill: answer.skill,
+      correct,
+      durationMs,
+    }),
+  ];
+
+  if (isCorrect) {
+    return {
+      correct: true,
+      skillRatings,
+    };
   }
 
+  // Report mistakes
   const mistakes: MistakeType[] = [];
 
   const mistakeChecks = [
@@ -105,7 +133,11 @@ export function oneCorrectPairQuestionMistakes(
     }
   }
 
-  return mistakes;
+  return {
+    correct: false,
+    skillRatings,
+    mistakes,
+  };
 }
 
 export function oneCorrectPairQuestionInvariant(
