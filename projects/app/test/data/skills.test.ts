@@ -1437,6 +1437,83 @@ describe(
             },
           );
         });
+
+        describe(`uses an OtherMeaning flag if the previous question was the same hanzi with a different pronunciation`, () => {
+          beforeEach(() => {
+            vi.useFakeTimers({ toFake: [`Date`] });
+          });
+
+          skillTest(`two pronunciations`, async ({ isStructuralHanzi }) => {
+            const graph = await skillLearningGraph({
+              targetSkills: [`hp:几:howMany`, `hp:几:table`],
+            });
+            const queue = skillReviewQueue({
+              graph,
+              skillSrsStates: new Map([
+                // 几:howMany was just reviewed, and 几:table is due, so it should be asked next.
+                [`hp:几:howMany`, fsrsSrsState(时`-1s`, 时`1d`, Rating.Good)],
+                [`hp:几:table`, fsrsSrsState(时`-1d`, 时`5m`, Rating.Good)],
+              ]),
+              latestSkillRatings: latestSkillRatings({
+                "hp:几:howMany": [Rating.Good, 时`-1s`],
+              }),
+              isStructuralHanzi,
+            });
+
+            expect(prettyQueue(queue)).toMatchInlineSnapshot(`
+              [
+                "hp:几:table (🔀 OTHER MEANING past 几:howMany)",
+                "he:乙:second (🌱 NEW SKILL)",
+                "he:丿:slash (🌱 NEW SKILL)",
+                "hp:几:howMany",
+                "he:几:table (🟥 BLOCKED)",
+                "he:几:howMany (🟥 BLOCKED)",
+                "hpi:几:table (🟥 BLOCKED)",
+                "hpi:几:howMany (🟥 BLOCKED)",
+                "hpf:几:table (🟥 BLOCKED)",
+                "hpf:几:howMany (🟥 BLOCKED)",
+                "hpt:几:table (🟥 BLOCKED)",
+                "hpt:几:howMany (🟥 BLOCKED)",
+              ]
+            `);
+          });
+
+          skillTest(
+            `doesn't ask follow-up questions for skills that aren't introduced, even if they're in the graph`,
+            async ({ isStructuralHanzi }) => {
+              const graph = await skillLearningGraph({
+                targetSkills: [`hp:几:howMany`, `hp:几:table`],
+              });
+              const queue = skillReviewQueue({
+                graph,
+                skillSrsStates: new Map([
+                  [`hp:几:howMany`, fsrsSrsState(时`-5s`, 时`5m`, Rating.Good)],
+                ]),
+                latestSkillRatings: latestSkillRatings({
+                  "hp:几:howMany": [Rating.Good, 时`-5s`],
+                }),
+                isStructuralHanzi,
+              });
+
+              expect(prettyQueue(queue)).toMatchInlineSnapshot(`
+                [
+                  "he:乙:second (🌱 NEW SKILL)",
+                  "he:丿:slash (🌱 NEW SKILL)",
+                  "hp:几:howMany",
+                  "he:几:table (🟥 BLOCKED)",
+                  "he:几:howMany (🟥 BLOCKED)",
+                  "hpi:几:table (🟥 BLOCKED)",
+                  "hpi:几:howMany (🟥 BLOCKED)",
+                  "hpf:几:table (🟥 BLOCKED)",
+                  "hpf:几:howMany (🟥 BLOCKED)",
+                  "hpt:几:table (🟥 BLOCKED)",
+                  "hpt:几:howMany (🟥 BLOCKED)",
+                  "hp:几:table (🟥 BLOCKED)",
+                ]
+              `);
+            },
+          );
+        });
       },
     );
 

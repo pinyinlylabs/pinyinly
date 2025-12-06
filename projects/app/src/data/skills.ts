@@ -39,6 +39,7 @@ import type {
   HanziWordSkill,
   HanziWordSkillKind,
   HanziWordToGlossTypedSkill,
+  HanziWordToPinyinTypedSkill,
   PinyinFinalAssociationSkill,
   PinyinInitialAssociationSkill,
   QuestionFlagType,
@@ -143,6 +144,12 @@ export const isHanziWordToGlossTypedSkill = (
   skill: Skill,
 ): skill is HanziWordToGlossTypedSkill => {
   return skillKindFromSkill(skill) === SkillKind.HanziWordToGlossTyped;
+};
+
+export const isHanziWordToPinyinTypedSkill = (
+  skill: Skill,
+): skill is HanziWordToPinyinTypedSkill => {
+  return skillKindFromSkill(skill) === SkillKind.HanziWordToPinyinTyped;
 };
 
 export const initialFromPinyinInitialAssociationSkill = (
@@ -758,6 +765,108 @@ function getReactiveHanziToTypedGlossSkills({
   ];
 }
 
+/**
+ * Determines if we should prioritize a @see HanziWordToPinyinTyped skill with
+ * @see QuestionFlagKind.OtherMeaning flag after a successful
+ * @see HanziWordToPinyinTyped review, in case of the scenario when someone gives
+ * a correct-but-not-asked pronunciation for a hanzi word with multiple pronunciations.
+ * In this case we immediately ask all the other pronunciations for the same hanzi
+ * word to force practicing other meanings.
+ */
+function getReactiveHanziToPinyinTypedSkills({
+  recentSkillRatingHistory,
+  skillSrsStates,
+  graph,
+  now,
+}: {
+  recentSkillRatingHistory: ({ skill: Skill } & Pick<
+    SkillRating,
+    `rating` | `createdAt`
+  >)[];
+  skillSrsStates: ReadonlyMap<Skill, SrsStateType>;
+  graph: SkillLearningGraph;
+  now: Date;
+}): readonly SkillReviewQueueItem[] {
+  let hanzi: HanziText | undefined;
+  let previousSkills: HanziWordToPinyinTypedSkill[] | undefined;
+
+  // Step through the recent ratings and group together consecutive successful
+  // HanziWordToPinyinTyped ratings for the same hanzi word.
+  for (const recentSkillRating of recentSkillRatingHistory) {
+    if (!isHanziWordToPinyinTypedSkill(recentSkillRating.skill)) {
+      break;
+    }
+
+    if (recentSkillRating.rating === Rating.Again) {
+      // Avoid completing to react to skill retries.
+      break;
+    }
+
+    const recentHanzi = hanziFromHanziWord(
+      hanziWordFromSkill(recentSkillRating.skill),
+    );
+
+    if (hanzi == null) {
+      hanzi = recentHanzi;
+    } else if (hanzi !== recentHanzi) {
+      break;
+    }
+
+    previousSkills ??= [];
+    previousSkills.push(recentSkillRating.skill);
+  }
+
+  if (hanzi == null) {
+    return emptyArray;
+  }
+
+  invariant(
+    previousSkills != null && previousSkills.length > 0,
+    `previousSkills must be set`,
+  );
+
+  // Pick one of the remaining hanzi word skills to learn.
+  let targetSkill: HanziWordSkill | undefined;
+  for (const [skill] of graph) {
+    if (
+      !isHanziWordToPinyinTypedSkill(skill) ||
+      previousSkills.includes(skill)
+    ) {
+      continue;
+    }
+
+    const srsState = skillSrsStates.get(skill);
+
+    if (needsToBeIntroduced(srsState, now)) {
+      // Skipping because the skill hasn't been introduced yet, and reviewing it
+      // would be too hard for the user.
+      continue;
+    }
+
+    const skillHanzi = hanziFromHanziWord(hanziWordFromSkill(skill));
+    if (skillHanzi === hanzi) {
+      targetSkill = skill;
+      break;
+    }
+  }
+
+  if (targetSkill == null) {
+    return emptyArray;
+  }
+
+  // At this point we've found a new hanzi word to prioritize, and we have the
+  // previous hanzi words that were already answered.
+  return [
+    {
+      skill: targetSkill,
+      flag: {
+        kind: QuestionFlagKind.OtherMeaning,
+        previousHanziWords: previousSkills.map((s) => hanziWordFromSkill(s)),
+      },
+    },
+  ];
+}
+
 export type LatestSkillRating = Pick<
   SkillRating,
   `skill` | `rating` | `createdAt`
@@ -1001,6 +1110,12 @@ export function skillReviewQueue({
       now,
     }),
     ...getReactiveHanziToTypedGlossSkills({
+      recentSkillRatingHistory,
+      skillSrsStates,
+      graph,
+      now,
+    }),
+    ...getReactiveHanziToPinyinTypedSkills({
       recentSkillRatingHistory,
       skillSrsStates,
       graph,
