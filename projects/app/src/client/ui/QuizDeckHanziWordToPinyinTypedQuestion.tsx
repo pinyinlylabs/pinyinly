@@ -38,7 +38,7 @@ import { QuizSubmitButton, QuizSubmitButtonState } from "./QuizSubmitButton";
 import { SkillAnswerText } from "./SkillAnswerText";
 import { TextInputSingle } from "./TextInputSingle";
 
-export function QuizDeckHanziToPinyinTypedQuestion({
+export function QuizDeckHanziWordToPinyinTypedQuestion({
   noAutoFocus = true,
   question,
   onNext,

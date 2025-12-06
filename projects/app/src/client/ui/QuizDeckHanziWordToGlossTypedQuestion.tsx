@@ -23,7 +23,7 @@ import { QuizSubmitButton, QuizSubmitButtonState } from "./QuizSubmitButton";
 import { SkillAnswerText } from "./SkillAnswerText";
 import { TextInputSingle } from "./TextInputSingle";
 
-export function QuizDeckHanziToGlossTypedQuestion({
+export function QuizDeckHanziWordToGlossTypedQuestion({
   noAutoFocus = true,
   question,
   onNext,

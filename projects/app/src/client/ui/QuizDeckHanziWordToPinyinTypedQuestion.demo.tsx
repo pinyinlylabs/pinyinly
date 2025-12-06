@@ -1,4 +1,4 @@
-import { QuizDeckHanziToPinyinTypedQuestion } from "@/client/ui/QuizDeckHanziToPinyinTypedQuestion";
+import { QuizDeckHanziWordToPinyinTypedQuestion } from "@/client/ui/QuizDeckHanziWordToPinyinTypedQuestion";
 import { Use } from "@/client/ui/Use";
 import { QuestionFlagKind } from "@/data/model";
 import { hanziWordToPinyinTypedQuestionOrThrow } from "@/data/questions/hanziWordToPinyinTyped";
@@ -30,7 +30,7 @@ export default () => {
       <Use
         promise={questionPromise}
         render={(question) => (
-          <QuizDeckHanziToPinyinTypedQuestion
+          <QuizDeckHanziWordToPinyinTypedQuestion
             noAutoFocus
             onNext={() => {
               console.log(`onNext()`);

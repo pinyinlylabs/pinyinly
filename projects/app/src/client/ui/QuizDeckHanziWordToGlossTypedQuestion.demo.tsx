@@ -1,4 +1,4 @@
-import { QuizDeckHanziToGlossTypedQuestion } from "@/client/ui/QuizDeckHanziToGlossTypedQuestion";
+import { QuizDeckHanziWordToGlossTypedQuestion } from "@/client/ui/QuizDeckHanziWordToGlossTypedQuestion";
 import { Use } from "@/client/ui/Use";
 import { QuestionFlagKind } from "@/data/model";
 import { hanziWordToGlossTypedQuestionOrThrow } from "@/data/questions/hanziWordToGlossTyped";
@@ -31,7 +31,7 @@ export default () => {
         key={skill}
         promise={questionPromise}
         render={(question) => (
-          <QuizDeckHanziToGlossTypedQuestion
+          <QuizDeckHanziWordToGlossTypedQuestion
             noAutoFocus
             onNext={() => {
               console.log(`onNext()`);
