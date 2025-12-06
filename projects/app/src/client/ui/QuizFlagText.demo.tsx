@@ -10,7 +10,7 @@ export default () => {
       <QuizFlagText flag={{ kind: QuestionFlagKind.WeakWord }} />
       <QuizFlagText flag={{ kind: QuestionFlagKind.NewDifficulty }} />
       <QuizFlagText flag={{ kind: QuestionFlagKind.NewSkill }} />
-      <QuizFlagText flag={{ kind: QuestionFlagKind.OtherMeaning }} />
+      <QuizFlagText flag={{ kind: QuestionFlagKind.OtherAnswer }} />
       <QuizFlagText
         flag={{
           kind: QuestionFlagKind.Overdue,

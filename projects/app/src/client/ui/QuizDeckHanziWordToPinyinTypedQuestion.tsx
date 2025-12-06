@@ -9,6 +9,7 @@ import type {
   MistakeType,
   UnsavedSkillRating,
 } from "@/data/model";
+import { QuestionFlagKind } from "@/data/model";
 import type {
   PinyinSyllableSuggestion,
   PinyinSyllableSuggestions,
@@ -37,7 +38,7 @@ import { QuizSubmitButton, QuizSubmitButtonState } from "./QuizSubmitButton";
 import { SkillAnswerText } from "./SkillAnswerText";
 import { TextInputSingle } from "./TextInputSingle";
 
-export function QuizDeckHanziToPinyinTypedQuestion({
+export function QuizDeckHanziWordToPinyinTypedQuestion({
   noAutoFocus = true,
   question,
   onNext,
@@ -157,7 +158,9 @@ export function QuizDeckHanziToPinyinTypedQuestion({
           {flag == null ? null : <QuizFlagText flag={flag} />}
           <View>
             <Text className="text-xl font-bold text-fg">
-              What sound does this make?
+              {flag?.kind === QuestionFlagKind.OtherAnswer
+                ? `What is the other pronunciation?`
+                : `What sound does this make?`}
             </Text>
           </View>
         </View>

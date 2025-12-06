@@ -23,7 +23,7 @@ import { QuizSubmitButton, QuizSubmitButtonState } from "./QuizSubmitButton";
 import { SkillAnswerText } from "./SkillAnswerText";
 import { TextInputSingle } from "./TextInputSingle";
 
-export function QuizDeckHanziToGlossTypedQuestion({
+export function QuizDeckHanziWordToGlossTypedQuestion({
   noAutoFocus = true,
   question,
   onNext,
@@ -140,7 +140,7 @@ export function QuizDeckHanziToGlossTypedQuestion({
           {flag == null ? null : <QuizFlagText flag={flag} />}
           <View>
             <Text className="text-xl font-bold text-fg">
-              {flag?.kind === QuestionFlagKind.OtherMeaning
+              {flag?.kind === QuestionFlagKind.OtherAnswer
                 ? `What is another meaning?`
                 : `What does this mean?`}
             </Text>

@@ -53,7 +53,7 @@ describe(
       }
     });
 
-    test(`correctly handles OtherMeaning flag (two meanings)`, async () => {
+    test(`correctly handles OtherAnswer flag (two meanings)`, async () => {
       {
         // Base case -- no flag
         const question = await hanziWordToPinyinTypedQuestionOrThrow(
@@ -93,7 +93,7 @@ describe(
         const question = await hanziWordToPinyinTypedQuestionOrThrow(
           `hp:几:howMany`,
           {
-            kind: QuestionFlagKind.OtherMeaning,
+            kind: QuestionFlagKind.OtherAnswer,
             previousHanziWords: [`几:table`],
           },
         );
@@ -116,7 +116,7 @@ describe(
               ],
             ],
             "flag": {
-              "kind": "debug--OtherMeaning",
+              "kind": "debug--OtherAnswer",
               "previousHanziWords": [
                 "几:table",
               ],

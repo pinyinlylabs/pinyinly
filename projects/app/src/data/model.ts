@@ -225,7 +225,7 @@ const questionFlagKindSchema = z.enum({
   Blocked: `debug--Blocked`,
   NewDifficulty: `debug--NewDifficulty`,
   NewSkill: `debug--NewSkill`,
-  OtherMeaning: `debug--OtherMeaning`,
+  OtherAnswer: `debug--OtherAnswer`,
   Overdue: `debug--Overdue`,
   Retry: `debug--Retry`,
   WeakWord: `debug--WeakWord`,
@@ -246,8 +246,8 @@ export interface QuestionFlagOverdueType {
   interval: Interval;
 }
 
-export interface QuestionFlagOtherMeaningType {
-  kind: typeof QuestionFlagKind.OtherMeaning;
+export interface QuestionFlagOtherAnswerType {
+  kind: typeof QuestionFlagKind.OtherAnswer;
   /**
    * When there are multiple meanings for a hanzi word, the previously given
    * meanings should be avoided when answering the question again.
@@ -271,7 +271,7 @@ export type QuestionFlagType =
   | QuestionFlagBlockedType
   | QuestionFlagNewDifficultyType
   | QuestionFlagNewSkillType
-  | QuestionFlagOtherMeaningType
+  | QuestionFlagOtherAnswerType
   | QuestionFlagOverdueType
   | QuestionFlagRetryType
   | QuestionFlagWeakWordType;

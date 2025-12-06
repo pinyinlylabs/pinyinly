@@ -34,7 +34,7 @@ export async function hanziWordToPinyinTypedQuestionOrThrow(
   const answers: HanziWordToPinyinTypedQuestion[`answers`] = [];
 
   const previousHanziWords =
-    flag?.kind === QuestionFlagKind.OtherMeaning
+    flag?.kind === QuestionFlagKind.OtherAnswer
       ? flag.previousHanziWords
       : null;
 

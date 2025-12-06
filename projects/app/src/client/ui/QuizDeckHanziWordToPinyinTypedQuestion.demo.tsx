@@ -1,8 +1,8 @@
-import { QuizDeckHanziToGlossTypedQuestion } from "@/client/ui/QuizDeckHanziToGlossTypedQuestion";
+import { QuizDeckHanziWordToPinyinTypedQuestion } from "@/client/ui/QuizDeckHanziWordToPinyinTypedQuestion";
 import { Use } from "@/client/ui/Use";
 import { QuestionFlagKind } from "@/data/model";
-import { hanziWordToGlossTypedQuestionOrThrow } from "@/data/questions/hanziWordToGlossTyped";
-import { hanziWordToGlossTyped } from "@/data/skills";
+import { hanziWordToPinyinTypedQuestionOrThrow } from "@/data/questions/hanziWordToPinyinTyped";
+import { hanziWordToPinyinTyped } from "@/data/skills";
 import { hanziFromHanziWord, loadDictionary } from "@/dictionary";
 import { use } from "react";
 import { View } from "react-native";
@@ -10,28 +10,27 @@ import { DemoHanziWordKnob, useDemoHanziWordKnob } from "./demo/helpers";
 
 export default () => {
   const { hanziWord } = useDemoHanziWordKnob(`你好:hello`);
-  const skill = hanziWordToGlossTyped(hanziWord);
+  const skill = hanziWordToPinyinTyped(hanziWord);
   const dictionary = use(loadDictionary());
   const meanings = dictionary.lookupHanzi(hanziFromHanziWord(hanziWord));
   const flag =
     meanings.length > 1
       ? {
-          kind: QuestionFlagKind.OtherMeaning,
+          kind: QuestionFlagKind.OtherAnswer,
           previousHanziWords: meanings
             .map(([h]) => h)
             .filter((h) => h !== hanziWord),
         }
       : null;
-  const questionPromise = hanziWordToGlossTypedQuestionOrThrow(skill, flag);
+  const questionPromise = hanziWordToPinyinTypedQuestionOrThrow(skill, flag);
 
   return (
     <View className="gap-4">
-      <DemoHanziWordKnob hanziWords={[`你好:hello`, `长:grow`]} />
+      <DemoHanziWordKnob hanziWords={[`你好:hello`, `几:table`]} />
       <Use
-        key={skill}
         promise={questionPromise}
         render={(question) => (
-          <QuizDeckHanziToGlossTypedQuestion
+          <QuizDeckHanziWordToPinyinTypedQuestion
             noAutoFocus
             onNext={() => {
               console.log(`onNext()`);

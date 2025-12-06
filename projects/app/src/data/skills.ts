@@ -758,7 +758,7 @@ function getReactiveHanziToTypedGlossSkills({
     {
       skill: targetSkill,
       flag: {
-        kind: QuestionFlagKind.OtherMeaning,
+        kind: QuestionFlagKind.OtherAnswer,
         previousHanziWords: previousSkills.map((s) => hanziWordFromSkill(s)),
       },
     },
@@ -767,7 +767,7 @@ function getReactiveHanziToTypedGlossSkills({
 
 /**
  * Determines if we should prioritize a @see HanziWordToPinyinTyped skill with
- * @see QuestionFlagKind.OtherMeaning flag after a successful
+ * @see QuestionFlagKind.OtherAnswer flag after a successful
  * @see HanziWordToPinyinTyped review, in case of the scenario when someone gives
  * a correct-but-not-asked pronunciation for a hanzi word with multiple pronunciations.
  * In this case we immediately ask all the other pronunciations for the same hanzi
@@ -860,7 +860,7 @@ function getReactiveHanziToPinyinTypedSkills({
     {
       skill: targetSkill,
       flag: {
-        kind: QuestionFlagKind.OtherMeaning,
+        kind: QuestionFlagKind.OtherAnswer,
         previousHanziWords: previousSkills.map((s) => hanziWordFromSkill(s)),
       },
     },

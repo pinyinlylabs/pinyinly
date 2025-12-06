@@ -94,13 +94,13 @@ function Header({
     <>
       {/* Scroll detector */}
       <View
-        className="absolute top-[44px] h-0 w-full"
+        className="absolute top-[150px] h-0 w-full"
         ref={(el) => {
           ref1(el as Element | null);
         }}
       />
 
-      <View className="sticky top-[-102px] z-10">
+      <View className="sticky top-[-150px] z-10">
         <View
           className={`sticky top-0 z-10 h-[56px] flex-row items-center bg-bg/90 pl-4`}
         >
@@ -109,10 +109,10 @@ function Header({
 
         <View
           className={`
-            theme-sky z-20 h-[150px] min-w-[150px] items-center justify-center place-self-center
-            overflow-visible rounded-lg bg-bg px-4 transition-all
+            theme-sky top-0 z-20 h-[150px] min-w-[150px] items-center justify-center
+            place-self-center overflow-visible rounded-lg bg-bg px-4 transition-all
 
-            ${isIntersecting1 ? `scale-100` : `scale-[0.25]`}
+            ${isIntersecting1 ? `scale-100` : `top-[47px] scale-[0.25]`}
           `}
         >
           <Text
