@@ -9,6 +9,7 @@ import type {
   MistakeType,
   UnsavedSkillRating,
 } from "@/data/model";
+import { QuestionFlagKind } from "@/data/model";
 import type {
   PinyinSyllableSuggestion,
   PinyinSyllableSuggestions,
@@ -157,7 +158,9 @@ export function QuizDeckHanziToPinyinTypedQuestion({
           {flag == null ? null : <QuizFlagText flag={flag} />}
           <View>
             <Text className="text-xl font-bold text-fg">
-              What sound does this make?
+              {flag?.kind === QuestionFlagKind.OtherMeaning
+                ? `What is the other pronunciation?`
+                : `What sound does this make?`}
             </Text>
           </View>
         </View>
