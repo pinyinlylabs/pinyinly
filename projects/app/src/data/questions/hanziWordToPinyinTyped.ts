@@ -1,5 +1,6 @@
 import { matchAllPinyinSyllables } from "@/data/pinyin";
 import { hanziFromHanziWord, loadDictionary } from "@/dictionary";
+import { sortComparatorNumber } from "@pinyinly/lib/collections";
 import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import type { Mutable } from "@pinyinly/lib/types";
 import type {
@@ -108,8 +109,12 @@ export function gradeHanziToPinyinTypedQuestion(
     actualSyllables = userAnswer.split(/\s+/g).filter((x) => x.length > 0);
   }
 
+  // Put the skill we're testing first.
+  const answers = [...question.answers].sort(
+    sortComparatorNumber((x) => (x.skill === question.skill ? 0 : 1)),
+  );
   // Check if the answer is correct
-  for (const { skill, pinyin: pinyinOptions } of question.answers) {
+  for (const { skill, pinyin: pinyinOptions } of answers) {
     for (const expectedSyllables of pinyinOptions) {
       const isCorrect =
         expectedSyllables.length === actualSyllables.length &&
