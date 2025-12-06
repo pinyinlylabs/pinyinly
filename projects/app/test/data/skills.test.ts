@@ -1335,7 +1335,7 @@ describe(
         typeof SkillKind.HanziWordToGlossTyped
       >,
       () => {
-        describe(`uses an OtherMeaning flag if the previous question was the same hanzi (for any hanzi->gloss type skill)`, () => {
+        describe(`uses an OtherAnswer flag if the previous question was the same hanzi (for any hanzi->gloss type skill)`, () => {
           beforeEach(() => {
             vi.useFakeTimers({ toFake: [`Date`] });
           });
@@ -1361,7 +1361,7 @@ describe(
 
             expect(prettyQueue(queue)).toMatchInlineSnapshot(`
               [
-                "het:好:like (🔀 OTHER MEANING past 好:good)",
+                "het:好:like (🔀 OTHER ANSWER past 好:good)",
                 "he:一:one (🌱 NEW SKILL)",
                 "he:女:woman (🌱 NEW SKILL)",
                 "he:亅:hook (🌱 NEW SKILL)",
@@ -1396,7 +1396,7 @@ describe(
 
             expect(prettyQueue(queue)).toMatchInlineSnapshot(`
               [
-                "het:任:duty (🔀 OTHER MEANING past 任:any,任:appoint)",
+                "het:任:duty (🔀 OTHER ANSWER past 任:any,任:appoint)",
                 "he:亻:person (🌱 NEW SKILL)",
                 "het:任:appoint",
                 "het:任:any",
@@ -1438,7 +1438,7 @@ describe(
           );
         });
 
-        describe(`uses an OtherMeaning flag if the previous question was the same hanzi with a different pronunciation`, () => {
+        describe(`uses an OtherAnswer flag if the previous question was the same hanzi with a different pronunciation`, () => {
           beforeEach(() => {
             vi.useFakeTimers({ toFake: [`Date`] });
           });
@@ -1462,7 +1462,7 @@ describe(
 
             expect(prettyQueue(queue)).toMatchInlineSnapshot(`
               [
-                "hp:几:table (🔀 OTHER MEANING past 几:howMany)",
+                "hp:几:table (🔀 OTHER ANSWER past 几:howMany)",
                 "he:乙:second (🌱 NEW SKILL)",
                 "he:丿:slash (🌱 NEW SKILL)",
                 "hp:几:howMany",

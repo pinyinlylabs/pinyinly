@@ -158,7 +158,7 @@ export function QuizDeckHanziToPinyinTypedQuestion({
           {flag == null ? null : <QuizFlagText flag={flag} />}
           <View>
             <Text className="text-xl font-bold text-fg">
-              {flag?.kind === QuestionFlagKind.OtherMeaning
+              {flag?.kind === QuestionFlagKind.OtherAnswer
                 ? `What is the other pronunciation?`
                 : `What sound does this make?`}
             </Text>

@@ -29,7 +29,7 @@ export async function hanziWordToGlossTypedQuestionOrThrow(
   const answers: HanziWordToGlossTypedQuestion[`answers`] = [];
 
   const previousHanziWords =
-    flag?.kind === QuestionFlagKind.OtherMeaning
+    flag?.kind === QuestionFlagKind.OtherAnswer
       ? flag.previousHanziWords
       : null;
   for (const [dictionaryHanziWord, dictionaryMeaning] of dictionary.lookupHanzi(

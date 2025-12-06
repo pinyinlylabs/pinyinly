@@ -16,7 +16,7 @@ export default () => {
   const flag =
     meanings.length > 1
       ? {
-          kind: QuestionFlagKind.OtherMeaning,
+          kind: QuestionFlagKind.OtherAnswer,
           previousHanziWords: meanings
             .map(([h]) => h)
             .filter((h) => h !== hanziWord),

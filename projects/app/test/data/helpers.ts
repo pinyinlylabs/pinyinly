@@ -162,12 +162,12 @@ export function skillQueueItemPretty(item: SkillReviewQueueItem): string {
       pretty = `${pretty} (🟥 BLOCKED)`;
       break;
     }
-    case QuestionFlagKind.OtherMeaning: {
+    case QuestionFlagKind.OtherAnswer: {
       const past =
         item.flag.previousHanziWords == null
           ? ``
           : ` past ${item.flag.previousHanziWords.join(`,`)}`;
-      pretty = `${pretty} (🔀 OTHER MEANING${past})`;
+      pretty = `${pretty} (🔀 OTHER ANSWER${past})`;
       break;
     }
     case QuestionFlagKind.Overdue: {

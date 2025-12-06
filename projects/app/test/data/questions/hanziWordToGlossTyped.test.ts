@@ -18,7 +18,7 @@ describe(
       }
     });
 
-    test(`correctly handles OtherMeaning flag (two meanings)`, async () => {
+    test(`correctly handles OtherAnswer flag (two meanings)`, async () => {
       {
         // Base case -- no flag
         const question = await hanziWordToGlossTypedQuestionOrThrow(
@@ -57,7 +57,7 @@ describe(
         const question = await hanziWordToGlossTypedQuestionOrThrow(
           `het:好:good`,
           {
-            kind: QuestionFlagKind.OtherMeaning,
+            kind: QuestionFlagKind.OtherAnswer,
             previousHanziWords: [`好:like`],
           },
         );
@@ -78,7 +78,7 @@ describe(
               "like",
             ],
             "flag": {
-              "kind": "debug--OtherMeaning",
+              "kind": "debug--OtherAnswer",
               "previousHanziWords": [
                 "好:like",
               ],
@@ -90,11 +90,11 @@ describe(
       }
     });
 
-    test(`correctly handles OtherMeaning flag (three meanings)`, async () => {
+    test(`correctly handles OtherAnswer flag (three meanings)`, async () => {
       const question = await hanziWordToGlossTypedQuestionOrThrow(
         `het:任:any`,
         {
-          kind: QuestionFlagKind.OtherMeaning,
+          kind: QuestionFlagKind.OtherAnswer,
           previousHanziWords: [`任:appoint`],
         },
       );
@@ -121,7 +121,7 @@ describe(
             "appoint",
           ],
           "flag": {
-            "kind": "debug--OtherMeaning",
+            "kind": "debug--OtherAnswer",
             "previousHanziWords": [
               "任:appoint",
             ],
