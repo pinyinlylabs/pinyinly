@@ -2,6 +2,7 @@ import {
   autoCheckUserSetting,
   useUserSetting,
 } from "@/client/hooks/useUserSetting";
+import { intersperse } from "@/client/react";
 import { splitHanziText } from "@/data/hanzi";
 import type {
   HanziWordToPinyinTypedQuestion,
@@ -21,7 +22,6 @@ import { gradeHanziToPinyinTypedQuestion } from "@/data/questions/hanziWordToPin
 import { hanziWordFromSkill } from "@/data/skills";
 import { hanziFromHanziWord } from "@/dictionary";
 import { emptyArray } from "@pinyinly/lib/collections";
-import { nonNullable } from "@pinyinly/lib/invariant";
 import type { ReactNode, Ref } from "react";
 import { useMemo, useRef, useState } from "react";
 import type { TextInput } from "react-native";
@@ -51,7 +51,7 @@ export function QuizDeckHanziToPinyinTypedQuestion({
     mistakes: readonly MistakeType[],
   ) => void;
 }) {
-  const { skill, flag, answers } = question;
+  const { skill, flag, answers, bannedMeaningPinyinHint } = question;
 
   const autoCheck =
     useUserSetting(autoCheckUserSetting).value?.enabled ?? false;
@@ -191,13 +191,32 @@ export function QuizDeckHanziToPinyinTypedQuestion({
             // had a chance to change the tone.
             text.endsWith(` `)
           ) {
-            const expectedSyllableCount = nonNullable(answers[0]).length;
+            const firstAnswer = answers.find((a) => a.skill === skill);
+            const expectedSyllableCount = firstAnswer?.pinyin[0]?.length ?? 0;
             const actualSyllableCount = matchAllPinyinSyllables(text).length;
             if (expectedSyllableCount === actualSyllableCount) {
               submit();
             }
           }
         }}
+        hintText={
+          bannedMeaningPinyinHint.length > 0 ? (
+            <>
+              You have already answered{` `}
+              {intersperse(
+                bannedMeaningPinyinHint.map((pinyin, i) => (
+                  <Text className="pyly-bold" key={i}>
+                    {pinyin.join(` `)}
+                  </Text>
+                )),
+                <Text>
+                  {` `}and{` `}
+                </Text>,
+              )}
+              .
+            </>
+          ) : undefined
+        }
         onSubmit={submit}
       />
     </Skeleton>
@@ -210,12 +229,14 @@ const PinyinTextInputSingle = ({
   inputRef,
   onChangeText,
   onSubmit,
+  hintText,
 }: {
   autoFocus: boolean;
   disabled: boolean;
   inputRef?: Ref<TextInput>;
   onChangeText: (text: string) => void;
   onSubmit: () => void;
+  hintText?: ReactNode;
 }) => {
   const [text, setText] = useState(``);
 
@@ -274,21 +295,27 @@ const PinyinTextInputSingle = ({
       <View className="flex-row flex-wrap justify-center gap-2">
         {hiddenPlaceholderOptions}
         <View className="absolute inset-0 flex-row flex-wrap content-start justify-center gap-2">
-          {suggestions?.syllables.map((syllable) => (
-            <Reanimated.View
-              key={`${syllable.pinyinSyllable}-${syllable.tone}`}
-              entering={FadeIn.duration(200)}
-              exiting={FadeOut.duration(100)}
-            >
-              <PinyinOptionButton
-                pinyin={syllable.pinyinSyllable}
-                shortcutKey={syllable.tone.toString()}
-                onPress={() => {
-                  acceptSuggestion(suggestions, syllable);
-                }}
-              />
-            </Reanimated.View>
-          ))}
+          {suggestions == null ? (
+            hintText == null ? null : (
+              <Text className="pyly-body-caption">{hintText}</Text>
+            )
+          ) : (
+            suggestions.syllables.map((syllable) => (
+              <Reanimated.View
+                key={`${syllable.pinyinSyllable}-${syllable.tone}`}
+                entering={FadeIn.duration(200)}
+                exiting={FadeOut.duration(100)}
+              >
+                <PinyinOptionButton
+                  pinyin={syllable.pinyinSyllable}
+                  shortcutKey={syllable.tone.toString()}
+                  onPress={() => {
+                    acceptSuggestion(suggestions, syllable);
+                  }}
+                />
+              </Reanimated.View>
+            ))
+          )}
         </View>
       </View>
     </View>

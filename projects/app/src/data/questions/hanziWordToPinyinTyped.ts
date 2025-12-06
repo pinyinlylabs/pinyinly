@@ -1,6 +1,7 @@
 import { matchAllPinyinSyllables } from "@/data/pinyin";
-import { loadDictionary } from "@/dictionary";
+import { hanziFromHanziWord, loadDictionary } from "@/dictionary";
 import { invariant, nonNullable } from "@pinyinly/lib/invariant";
+import type { Mutable } from "@pinyinly/lib/types";
 import type {
   HanziWordSkill,
   HanziWordToPinyinTypedQuestion,
@@ -10,8 +11,12 @@ import type {
   QuestionFlagType,
   UnsavedSkillRating,
 } from "../model";
-import { MistakeKind, QuestionKind } from "../model";
-import { computeSkillRating, hanziWordFromSkill } from "../skills";
+import { MistakeKind, QuestionFlagKind, QuestionKind } from "../model";
+import {
+  computeSkillRating,
+  hanziWordFromSkill,
+  hanziWordToPinyinTyped,
+} from "../skills";
 
 export async function hanziWordToPinyinTypedQuestionOrThrow(
   skill: HanziWordSkill,
@@ -21,12 +26,40 @@ export async function hanziWordToPinyinTypedQuestionOrThrow(
   const dictionary = await loadDictionary();
   const meaning = dictionary.lookupHanziWord(hanziWord);
 
-  const answers = meaning?.pinyin;
-  invariant(answers != null, `hanzi word ${hanziWord} has no pinyin`);
+  invariant(meaning?.pinyin != null, `hanzi word ${hanziWord} has no pinyin`);
+
+  const bannedMeaningPinyinHint: Mutable<
+    HanziWordToPinyinTypedQuestion[`bannedMeaningPinyinHint`]
+  > = [];
+  const answers: HanziWordToPinyinTypedQuestion[`answers`] = [];
+
+  const previousHanziWords =
+    flag?.kind === QuestionFlagKind.OtherMeaning
+      ? flag.previousHanziWords
+      : null;
+
+  // Include all meanings of this hanzi as valid answers
+  const hanzi = hanziFromHanziWord(hanziWord);
+  for (const [dictionaryHanziWord, dictionaryMeaning] of dictionary.lookupHanzi(
+    hanzi,
+  )) {
+    if (previousHanziWords?.includes(dictionaryHanziWord) === true) {
+      // Add the primary pinyin of banned meanings as hints
+      if (dictionaryMeaning.pinyin?.[0] != null) {
+        bannedMeaningPinyinHint.push(dictionaryMeaning.pinyin[0]);
+      }
+    } else if (dictionaryMeaning.pinyin != null) {
+      answers.push({
+        skill: hanziWordToPinyinTyped(dictionaryHanziWord),
+        pinyin: dictionaryMeaning.pinyin,
+      });
+    }
+  }
 
   return validQuestionInvariant({
     kind: QuestionKind.HanziWordToPinyinTyped,
     answers,
+    bannedMeaningPinyinHint,
     skill,
     flag,
   });
@@ -76,30 +109,36 @@ export function gradeHanziToPinyinTypedQuestion(
   }
 
   // Check if the answer is correct
-  for (const expectedSyllables of question.answers) {
-    const isCorrect =
-      expectedSyllables.length === actualSyllables.length &&
-      expectedSyllables.every((syllable, i) => syllable === actualSyllables[i]);
+  for (const { skill, pinyin: pinyinOptions } of question.answers) {
+    for (const expectedSyllables of pinyinOptions) {
+      const isCorrect =
+        expectedSyllables.length === actualSyllables.length &&
+        expectedSyllables.every(
+          (syllable, i) => syllable === actualSyllables[i],
+        );
 
-    if (isCorrect) {
-      const correct = true;
-      return {
-        correct,
-        skillRatings: [
-          computeSkillRating({
-            skill: question.skill,
-            correct,
-            durationMs,
-          }),
-        ],
-      };
+      if (isCorrect) {
+        const correct = true;
+        return {
+          correct,
+          skillRatings: [
+            computeSkillRating({
+              skill,
+              correct,
+              durationMs,
+            }),
+          ],
+        };
+      }
     }
   }
 
   // Report a mistake
   {
     const correct = false;
-    const expectedAnswer = nonNullable(question.answers[0]);
+    const expectedAnswer = nonNullable(
+      question.answers.find((a) => a.skill === question.skill)?.pinyin[0],
+    );
     return {
       correct,
       skillRatings: [

@@ -406,10 +406,20 @@ export interface HanziWordToGlossTypedQuestion {
 export interface HanziWordToPinyinTypedQuestion {
   kind: typeof QuestionKind.HanziWordToPinyinTyped;
   /**
-   * There can be multiple correct answers, e.g. for a word like `好` which
-   * can be pronounced as `hǎo` or `hào`.
+   * There can be multiple correct answers, e.g. for a hanzi that has multiple
+   * meanings with different pronunciations.
    */
-  answers: readonly Readonly<PinyinPronunciation>[];
+  answers: {
+    skill: HanziWordSkill;
+    pinyin: readonly Readonly<PinyinPronunciation>[];
+  }[];
+  /**
+   * Previous pinyin that should be avoided.
+   */
+  bannedMeaningPinyinHint: readonly PinyinPronunciation[];
+  /**
+   * The skill being quizzed, used for rating a wrong answer.
+   */
   skill: HanziWordSkill;
   flag: QuestionFlagType | null;
 }
