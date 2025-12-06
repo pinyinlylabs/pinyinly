@@ -1,5 +1,5 @@
 import type { HanziWordToPinyinTypedQuestion } from "#data/model.ts";
-import { MistakeKind, QuestionKind } from "#data/model.ts";
+import { MistakeKind, QuestionFlagKind, QuestionKind } from "#data/model.ts";
 import {
   gradeHanziToPinyinTypedQuestion,
   hanziWordToPinyinTypedQuestionOrThrow,
@@ -13,17 +13,18 @@ describe(
   `hanziWordToPinyinTypedQuestionOrThrow suite` satisfies HasNameOf<
     typeof hanziWordToPinyinTypedQuestionOrThrow
   >,
-  async () => {
+  () => {
     test(`simple case`, async () => {
       const skill = hanziWordToPinyinTyped(`你好:hello`);
-      await expect(
-        hanziWordToPinyinTypedQuestionOrThrow(skill, null),
-      ).resolves.toEqual({
-        kind: QuestionKind.HanziWordToPinyinTyped,
-        answers: [[`nǐ`, `hǎo`]],
-        skill,
-        flag: null,
-      });
+      const result = await hanziWordToPinyinTypedQuestionOrThrow(skill, null);
+      expect(result.kind).toEqual(QuestionKind.HanziWordToPinyinTyped);
+      expect(result.skill).toEqual(skill);
+      expect(result.flag).toEqual(null);
+      expect(result.answers.length).toBeGreaterThan(0);
+      // Should include the requested skill's answer
+      const matchingAnswer = result.answers.find((a) => a.skill === skill);
+      expect(matchingAnswer).toBeDefined();
+      expect(matchingAnswer?.pinyin).toEqual([[`nǐ`, `hǎo`]]);
     });
 
     test(`throws if the hanzi word has no pinyin`, async () => {
@@ -51,6 +52,81 @@ describe(
         await hanziWordToPinyinTypedQuestionOrThrow(skill, null);
       }
     });
+
+    test(`correctly handles OtherMeaning flag (two meanings)`, async () => {
+      {
+        // Base case -- no flag
+        const question = await hanziWordToPinyinTypedQuestionOrThrow(
+          `hp:几:howMany`,
+          null,
+        );
+
+        expect(question).toMatchInlineSnapshot(`
+          {
+            "answers": [
+              {
+                "pinyin": [
+                  [
+                    "jǐ",
+                  ],
+                ],
+                "skill": "hp:几:howMany",
+              },
+              {
+                "pinyin": [
+                  [
+                    "jī",
+                  ],
+                ],
+                "skill": "hp:几:table",
+              },
+            ],
+            "bannedMeaningPinyinHint": [],
+            "flag": null,
+            "kind": "debug--HanziWordToPinyinTyped",
+            "skill": "hp:几:howMany",
+          }
+        `);
+      }
+
+      {
+        const question = await hanziWordToPinyinTypedQuestionOrThrow(
+          `hp:几:howMany`,
+          {
+            kind: QuestionFlagKind.OtherMeaning,
+            previousHanziWords: [`几:table`],
+          },
+        );
+
+        expect(question).toMatchInlineSnapshot(`
+          {
+            "answers": [
+              {
+                "pinyin": [
+                  [
+                    "jǐ",
+                  ],
+                ],
+                "skill": "hp:几:howMany",
+              },
+            ],
+            "bannedMeaningPinyinHint": [
+              [
+                "jī",
+              ],
+            ],
+            "flag": {
+              "kind": "debug--OtherMeaning",
+              "previousHanziWords": [
+                "几:table",
+              ],
+            },
+            "kind": "debug--HanziWordToPinyinTyped",
+            "skill": "hp:几:howMany",
+          }
+        `);
+      }
+    });
   },
 );
 
@@ -60,10 +136,17 @@ describe(
   >,
   async () => {
     test(`correctness ignores whitespace`, async () => {
+      const skill = hanziWordToPinyinTyped(`你好:hello`);
       const question: HanziWordToPinyinTypedQuestion = {
         kind: QuestionKind.HanziWordToPinyinTyped,
-        answers: [[拼音`nǐ`, 拼音`hǎo`]],
-        skill: hanziWordToPinyinTyped(`你好:hello`),
+        answers: [
+          {
+            skill,
+            pinyin: [[拼音`nǐ`, 拼音`hǎo`]],
+          },
+        ],
+        bannedMeaningPinyinHint: [],
+        skill,
         flag: null,
       };
 
@@ -75,10 +158,17 @@ describe(
     });
 
     test(`incorrect returns a mistake`, async () => {
+      const skill = hanziWordToPinyinTyped(`你好:hello`);
       const question: HanziWordToPinyinTypedQuestion = {
         kind: QuestionKind.HanziWordToPinyinTyped,
-        answers: [[拼音`nǐ`, 拼音`hǎo`]],
-        skill: hanziWordToPinyinTyped(`你好:hello`),
+        answers: [
+          {
+            skill,
+            pinyin: [[拼音`nǐ`, 拼音`hǎo`]],
+          },
+        ],
+        bannedMeaningPinyinHint: [],
+        skill,
         flag: null,
       };
 
@@ -110,13 +200,20 @@ describe(
     });
 
     test(`secondary pinyin definitions are still correct`, async () => {
+      const skill = hanziWordToPinyinTyped(`你好:hello`);
       const question: HanziWordToPinyinTypedQuestion = {
         kind: QuestionKind.HanziWordToPinyinTyped,
         answers: [
-          [拼音`nǐ`, 拼音`hǎo`],
-          [拼音`ni`, 拼音`hao`],
+          {
+            skill,
+            pinyin: [
+              [拼音`nǐ`, 拼音`hǎo`],
+              [拼音`ni`, 拼音`hao`],
+            ],
+          },
         ],
-        skill: hanziWordToPinyinTyped(`你好:hello`),
+        bannedMeaningPinyinHint: [],
+        skill,
         flag: null,
       };
 

@@ -9,11 +9,10 @@ import { QuestionFlagKind } from "@/data/model";
 import type { HanziToGlossTypedQuestionGrade } from "@/data/questions/hanziWordToGlossTyped";
 import { gradeHanziToGlossTypedQuestion } from "@/data/questions/hanziWordToGlossTyped";
 import { hanziWordFromSkill } from "@/data/skills";
-import { hanziFromHanziWord, loadDictionary } from "@/dictionary";
+import { hanziFromHanziWord } from "@/dictionary";
 import { emptyArray } from "@pinyinly/lib/collections";
-import { nonNullable } from "@pinyinly/lib/invariant";
 import type { ReactNode, Ref } from "react";
-import { use, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import type { TextInput } from "react-native";
 import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -38,19 +37,11 @@ export function QuizDeckHanziToGlossTypedQuestion({
     mistakes: readonly MistakeType[],
   ) => void;
 }) {
-  const { skill, flag } = question;
+  const { skill, flag, bannedMeaningPrimaryGlossHint } = question;
 
   const userAnswerRef = useRef(``);
   const [userAnswerEmpty, setUserAnswerEmpty] = useState(true);
   const [grade, setGrade] = useState<HanziToGlossTypedQuestionGrade>();
-  const dictionary = use(loadDictionary());
-  const previousGlosses =
-    flag?.kind === QuestionFlagKind.OtherMeaning &&
-    flag.previousHanziWords != null
-      ? flag.previousHanziWords.map((hanziWord) =>
-          nonNullable(dictionary.lookupHanziWord(hanziWord)?.gloss[0]),
-        )
-      : emptyArray;
 
   const startTime = useMemo(() => Date.now(), []);
   const hanziWord = hanziWordFromSkill(skill);
@@ -179,11 +170,11 @@ export function QuizDeckHanziToGlossTypedQuestion({
           setUserAnswerEmpty(text.length === 0);
         }}
         hintText={
-          previousGlosses.length > 0 ? (
+          bannedMeaningPrimaryGlossHint.length > 0 ? (
             <>
               You have already answered{` `}
               {intersperse(
-                previousGlosses.map((gloss, i) => (
+                bannedMeaningPrimaryGlossHint.map((gloss, i) => (
                   <Text className="pyly-bold" key={i}>
                     {gloss}
                   </Text>
