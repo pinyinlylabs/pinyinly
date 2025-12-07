@@ -72,7 +72,7 @@ export default function MenuLayout() {
                     source={require(`@/assets/icons/arrow-return-left.svg`)}
                     size={24}
                   />
-                  <Text className="pyly-button-bare">Back to app</Text>
+                  <Text className="pyly-button-bare">Back to practice</Text>
                 </RectButton>
               </Link>
             </View>
