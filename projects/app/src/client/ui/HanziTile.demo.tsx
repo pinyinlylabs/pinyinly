@@ -19,7 +19,7 @@ export default () => (
             title={`${config.title} (${variant})`}
             childrenClassName="gap-2"
           >
-            {([`47`, `20`, `4`] as HanziTileProps[`size`][]).map((size) => (
+            {([`47`, `20`, `10`] as HanziTileProps[`size`][]).map((size) => (
               <View className="flex-row flex-wrap gap-2" key={size}>
                 <HanziTile hanzi={config.hanzi} variant={variant} size={size} />
                 <HanziTile
