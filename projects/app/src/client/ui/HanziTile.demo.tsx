@@ -1,118 +1,50 @@
 import { ExampleStack } from "@/client/ui/demo/helpers";
 import type { HanziText } from "@/data/model";
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import type { HanziTileProps } from "./HanziTile";
 import { HanziTile } from "./HanziTile";
 
 export default () => (
   <View className="max-w-full gap-4">
-    {([`outline`, `filled`] as const).map((variant) => (
-      <View key={variant} className="items-start">
-        <Text className="pyly-dev-dt">variant={variant}</Text>
-        <ExampleStack title="character" childrenClassName="gap-2">
-          <View className="flex-row flex-wrap gap-2">
-            <HanziTile hanzi={`好` as HanziText} variant={variant} size="xl" />
-            <HanziTile
-              hanzi={`好` as HanziText}
-              pinyin="hǎo"
-              variant={variant}
-              size="xl"
-            />
-            <HanziTile
-              hanzi={`好` as HanziText}
-              gloss="good"
-              variant={variant}
-              size="xl"
-            />
-            <HanziTile
-              hanzi={`好` as HanziText}
-              gloss="good"
-              pinyin="hǎo"
-              variant={variant}
-              size="xl"
-            />
-          </View>
-          <View className="flex-row flex-wrap gap-2">
-            <HanziTile
-              hanzi={`好` as HanziText}
-              variant={variant}
-              size="normal"
-            />
-            <HanziTile
-              hanzi={`好` as HanziText}
-              pinyin="hǎo"
-              variant={variant}
-              size="normal"
-            />
-            <HanziTile
-              hanzi={`好` as HanziText}
-              gloss="good"
-              variant={variant}
-              size="normal"
-            />
-            <HanziTile
-              hanzi={`好` as HanziText}
-              gloss="good"
-              pinyin="hǎo"
-              variant={variant}
-              size="normal"
-            />
-          </View>
-        </ExampleStack>
-
-        <ExampleStack title="word" childrenClassName="gap-2">
-          <View className="flex-row flex-wrap gap-2">
-            <HanziTile
-              hanzi={`你好` as HanziText}
-              variant={variant}
-              size="xl"
-            />
-            <HanziTile
-              hanzi={`你好` as HanziText}
-              variant={variant}
-              size="xl"
-              pinyin="nǐhǎo"
-            />
-            <HanziTile
-              hanzi={`你好` as HanziText}
-              variant={variant}
-              size="xl"
-              gloss="hello"
-            />
-            <HanziTile
-              hanzi={`你好` as HanziText}
-              variant={variant}
-              size="xl"
-              pinyin="nǐhǎo"
-              gloss="hello"
-            />
-          </View>
-          <View className="flex-row flex-wrap gap-2">
-            <HanziTile
-              hanzi={`你好` as HanziText}
-              variant={variant}
-              size="normal"
-            />
-            <HanziTile
-              hanzi={`你好` as HanziText}
-              variant={variant}
-              size="normal"
-              pinyin="nǐhǎo"
-            />
-            <HanziTile
-              hanzi={`你好` as HanziText}
-              variant={variant}
-              size="normal"
-              gloss="hello"
-            />
-            <HanziTile
-              hanzi={`你好` as HanziText}
-              variant={variant}
-              size="normal"
-              pinyin="nǐhǎo"
-              gloss="hello"
-            />
-          </View>
-        </ExampleStack>
+    {(
+      [
+        { title: `character`, hanzi: `好` as HanziText, pinyin: `hǎo` },
+        { title: `word`, hanzi: `你好` as HanziText, pinyin: `nǐhǎo` },
+      ] as const
+    ).map((config, i) => (
+      <View key={i}>
+        {([`outline`, `filled`] as const).map((variant) => (
+          <ExampleStack
+            key={variant}
+            title={`${config.title} (${variant})`}
+            childrenClassName="gap-2"
+          >
+            {([`47`, `20`, `4`] as HanziTileProps[`size`][]).map((size) => (
+              <View className="flex-row flex-wrap gap-2" key={size}>
+                <HanziTile hanzi={config.hanzi} variant={variant} size={size} />
+                <HanziTile
+                  hanzi={config.hanzi}
+                  pinyin="hǎo"
+                  variant={variant}
+                  size={size}
+                />
+                <HanziTile
+                  hanzi={config.hanzi}
+                  gloss="good"
+                  variant={variant}
+                  size={size}
+                />
+                <HanziTile
+                  hanzi={config.hanzi}
+                  gloss="good"
+                  pinyin="hǎo"
+                  variant={variant}
+                  size={size}
+                />
+              </View>
+            ))}
+          </ExampleStack>
+        ))}
       </View>
     ))}
   </View>

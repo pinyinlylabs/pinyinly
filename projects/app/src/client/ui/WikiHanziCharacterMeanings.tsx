@@ -2,6 +2,7 @@ import type { HanziCharacter } from "@/data/model";
 import type { HanziWordMeaning, HanziWordWithMeaning } from "@/dictionary";
 import { arrayFilterUniqueWithKey } from "@pinyinly/lib/collections";
 import { Text, View } from "react-native";
+import { HanziTile } from "./HanziTile";
 
 export function WikiHanziCharacterMeanings({
   hanzi,
@@ -73,23 +74,23 @@ function MultipleMeanings({
             <Text className="pyly-bold">{pinyins[0]}</Text>
           </>
         ) : (
-          `with different pronunciations`
+          <>
+            with <Text className="pyly-bold">different pronunciations</Text>
+          </>
         )}
         :
       </Text>
       <View className="flex-row gap-2 px-4">
-        {meanings.map(([, meaning], i) => {
+        {meanings.map(([hanziWord, meaning]) => {
           const gloss = meaning.gloss[0];
           const primaryPinyin = meaning.pinyin?.[0];
           return (
-            <View key={i} className="rounded-lg bg-fg/5 px-4 py-3">
-              <Text
-                className={`pyly-body pyly-bold underline decoration-dotted underline-offset-[3px]`}
-              >
-                {gloss}
-              </Text>
-              <Text className="pyly-body">{primaryPinyin?.join(` `)}</Text>
-            </View>
+            <HanziTile
+              key={hanziWord}
+              hanzi={hanzi}
+              pinyin={primaryPinyin?.join(` `)}
+              gloss={gloss}
+            />
           );
         })}
       </View>

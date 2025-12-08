@@ -11,14 +11,14 @@ export function HanziTile({
   pinyin,
   className = ``,
   variant = `filled`,
-  size = `normal`,
+  size = `20`,
 }: {
   hanzi: HanziText;
   gloss?: string;
   pinyin?: string;
   className?: string;
   variant?: `outline` | `filled`;
-  size?: `normal` | `xl`;
+  size?: `10` | `20` | `47`;
 }) {
   return (
     <View className={tileClass({ variant, size, class: className })}>
@@ -34,15 +34,16 @@ export function HanziTile({
 }
 
 const tileClass = tv({
-  base: `rounded-lg`,
+  base: `rounded-lg bg-bg`,
   variants: {
     variant: {
       outline: `items-center justify-center border border-b-2 border-fg-loud`,
       filled: `theme-sky items-center justify-center bg-bg`,
     },
     size: {
-      normal: `min-w-[80px] px-4 py-3`,
-      xl: `min-h-[150px] min-w-[150px] px-4 py-3`,
+      "10": `h-[40px] min-w-[40px] px-3`,
+      "20": `min-w-[80px] px-4 py-2`,
+      "47": `min-h-[188px] min-w-[188px] px-6 py-3`,
     },
   },
 });
@@ -51,8 +52,9 @@ const pinyinTextClass = tv({
   base: `text-center font-sans text-fg-loud`,
   variants: {
     size: {
-      normal: `text-sm`,
-      xl: `text-lg/5`,
+      "10": `hidden`,
+      "20": `mb-1 text-sm`,
+      "47": `mb-1 text-lg/5`,
     },
   },
 });
@@ -61,8 +63,9 @@ const hanziTextClass = tv({
   base: `text-center font-sans font-medium text-fg-loud`,
   variants: {
     size: {
-      normal: `text-[38px]/[46px]`,
-      xl: `text-[100px]/[110px]`,
+      "10": `text-[16px]/[16px]`,
+      "20": `text-[38px]/[46px]`,
+      "47": `text-[100px]/[110px]`,
     },
   },
 });
@@ -71,8 +74,9 @@ const glossTextClass = tv({
   base: `text-center font-sans text-fg-loud`,
   variants: {
     size: {
-      normal: `text-base font-semibold`,
-      xl: `text-2xl/6 font-bold`,
+      "10": `hidden`,
+      "20": `text-base font-semibold`,
+      "47": `text-2xl/6 font-bold`,
     },
   },
 });

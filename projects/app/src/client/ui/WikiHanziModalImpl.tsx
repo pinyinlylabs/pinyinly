@@ -4,11 +4,13 @@ import {
 } from "@/client/wiki";
 import type { HanziText } from "@/data/model";
 import { loadDictionary } from "@/dictionary";
+import type { IsExhaustedRest, PropsOf } from "@pinyinly/lib/types";
 import type { ReactNode } from "react";
 import { Fragment, use, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
-import { useIntersectionObserver } from "usehooks-ts";
+import { useIntersectionObserver, useTimeout } from "usehooks-ts";
 import { CloseButton2 } from "./CloseButton2";
+import { HanziTile } from "./HanziTile";
 import { IconImage } from "./IconImage";
 import { PylyMdxComponents } from "./PylyMdxComponents";
 
@@ -36,7 +38,21 @@ export function WikiHanziModalImpl({
         }
         contentContainerClassName="pb-10 min-h-full"
       >
-        <Header title={hanzi} onDismiss={onDismiss} />
+        <Header
+          hanzi={hanzi}
+          pinyin={
+            hanziWordMeanings.length === 1
+              ? hanziWordMeanings[0]?.[1].pinyin?.[0]?.join(` `)
+              : undefined
+          }
+          gloss={
+            hanziWordMeanings.length === 1
+              ? hanziWordMeanings[0]?.[1].gloss[0]
+              : undefined
+          }
+          variant={hanziWordMeanings.length === 1 ? `filled` : `outline`}
+          onDismiss={onDismiss}
+        />
 
         <PylyMdxComponents>
           <View className="flex-1 gap-6 bg-bg py-7">
@@ -79,49 +95,76 @@ export function WikiHanziModalImpl({
 }
 
 function Header({
-  title,
+  gloss,
+  pinyin,
+  hanzi,
   onDismiss,
+  variant,
+  ...rest
 }: {
-  title: string;
   onDismiss?: () => void;
-}) {
+} & Pick<PropsOf<typeof HanziTile>, `gloss` | `hanzi` | `pinyin` | `variant`>) {
+  true satisfies IsExhaustedRest<typeof rest>;
+
+  // Fix some glitchiness when opening the modal by delaying showing the
+  // header hanzi tile until after a short timeout.
+  const [uiStable, setUiStable] = useState(false);
+  useTimeout(() => {
+    setUiStable(true);
+  }, 250);
+
   const [ref1, isIntersecting1] = useIntersectionObserver({
     // threshold: 1,
     initialIsIntersecting: true,
   });
 
+  const showHeaderHanziTile = uiStable && !isIntersecting1;
+
   return (
     <>
+      <View className="sticky top-0 z-10">
+        <View
+          className={`
+            sticky top-0 z-10 h-[56px] flex-row content-between items-center bg-bg/90 pl-4
+          `}
+        >
+          <CloseButton2 onPress={onDismiss} />
+
+          <View className="flex-1 content-center items-center">
+            <HanziTile
+              hanzi={hanzi}
+              gloss={gloss}
+              className={`
+                justify-self-center transition-opacity
+
+                ${showHeaderHanziTile ? `opacity-100` : `opacity-0`}
+              `}
+              variant={variant}
+              size="10"
+            />
+          </View>
+
+          <View className="invisible">
+            <CloseButton2 onPress={onDismiss} />
+          </View>
+        </View>
+      </View>
+
+      <HanziTile
+        hanzi={hanzi}
+        pinyin={pinyin}
+        gloss={gloss}
+        className="place-self-center"
+        variant={variant}
+        size="47"
+      />
       {/* Scroll detector */}
       <View
-        className="absolute top-[150px] h-0 w-full"
+        className="h-0 w-full"
         ref={(el) => {
           ref1(el as Element | null);
         }}
       />
-
-      <View className="sticky top-[-150px] z-10">
-        <View
-          className={`sticky top-0 z-10 h-[56px] flex-row items-center bg-bg/90 pl-4`}
-        >
-          <CloseButton2 onPress={onDismiss} />
-        </View>
-
-        <View
-          className={`
-            theme-sky top-0 z-20 h-[150px] min-w-[150px] items-center justify-center
-            place-self-center overflow-visible rounded-lg bg-bg px-4 transition-all
-
-            ${isIntersecting1 ? `scale-100` : `top-[47px] scale-[0.25]`}
-          `}
-        >
-          <Text
-            className={`text-center font-sans text-[100px]/[100px] font-bold text-fg-loud`}
-          >
-            {title}
-          </Text>
-        </View>
-      </View>
     </>
   );
 }
