@@ -183,7 +183,17 @@ export function useDemoHanziKnob(defaultHanzi?: HanziText) {
 export function DemoHanziKnob({ hanzis }: { hanzis?: HanziText[] }) {
   const { hanzi: currentHanzi, setHanzi } = useDemoHanziKnob(hanzis?.[0]);
 
-  hanzis ??= [`一`, `长`, `好`, `你好`, `学`, `习`, `汉`, `字`] as HanziText[];
+  hanzis ??= [
+    `一`,
+    `长`,
+    `好`,
+    `你好`,
+    `学`,
+    `习`,
+    `汉`,
+    `字`,
+    `为`,
+  ] as HanziText[];
 
   return (
     <View className="flex-row items-end gap-1 border-b-4 border-fg/10 pb-2">
