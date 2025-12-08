@@ -1,5 +1,5 @@
+import type { PropsOf } from "@pinyinly/lib/types";
 import { Suspense as ReactSuspense, useEffect, useRef } from "react";
-import type { PropsOf } from "./types";
 
 const intervalMs = 5000;
 

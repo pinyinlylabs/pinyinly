@@ -1,7 +1,7 @@
 import { ExampleStack, LittlePrimaryHeader } from "@/client/ui/demo/helpers";
 import type { TextAnswerButtonState } from "@/client/ui/TextAnswerButton";
 import { TextAnswerButton } from "@/client/ui/TextAnswerButton";
-import type { PropsOf } from "@/client/ui/types";
+import type { PropsOf } from "@pinyinly/lib/types";
 import shuffle from "lodash/shuffle";
 import { useState } from "react";
 import { View } from "react-native";
