@@ -1,6 +1,6 @@
+import type { PropsOf } from "@pinyinly/lib/types";
 import type { FunctionComponent, ReactElement, ReactNode, Ref } from "react";
 import { Children, cloneElement, isValidElement } from "react";
-import type { PropsOf } from "./ui/types";
 
 export function mergeRefs<T>(...refs: (Ref<T> | undefined)[]): Ref<T> {
   return (value) => {

@@ -1,6 +1,6 @@
 import { ExampleStack, LittlePrimaryHeader } from "@/client/ui/demo/helpers";
 import { RectButton } from "@/client/ui/RectButton";
-import type { PropsOf } from "@/client/ui/types";
+import type { PropsOf } from "@pinyinly/lib/types";
 import { View } from "react-native";
 
 export default () => (
