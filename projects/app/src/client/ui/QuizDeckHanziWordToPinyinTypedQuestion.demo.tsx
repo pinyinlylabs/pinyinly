@@ -25,7 +25,7 @@ export default () => {
   const questionPromise = hanziWordToPinyinTypedQuestionOrThrow(skill, flag);
 
   return (
-    <View className="gap-4">
+    <View className="flex-1 gap-4">
       <DemoHanziWordKnob hanziWords={[`你好:hello`, `几:table`]} />
       <Use
         promise={questionPromise}

@@ -222,7 +222,7 @@ const GlossTextInputSingle = ({
   };
 
   return (
-    <View className="items-center gap-2">
+    <View className="gap-2">
       <TextInputSingle
         autoFocus={autoFocus}
         autoCapitalize="none"

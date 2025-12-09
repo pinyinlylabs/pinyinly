@@ -25,7 +25,7 @@ export default () => {
   const questionPromise = hanziWordToGlossTypedQuestionOrThrow(skill, flag);
 
   return (
-    <View className="gap-4">
+    <View className="flex-1 gap-4">
       <DemoHanziWordKnob hanziWords={[`你好:hello`, `长:grow`]} />
       <Use
         key={skill}
