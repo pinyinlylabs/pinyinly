@@ -229,6 +229,7 @@
 
     --color-bg: var(--color-bg-dark);
     --color-bg-loud: var(--color-bg-loud-dark);
+    --color-bg-inverted: #fff;
   }
 
   .pyly-color-scheme-light {
@@ -264,6 +265,7 @@
 
     --color-bg: var(--color-bg-light);
     --color-bg-loud: var(--color-bg-loud-light);
+    --color-bg-inverted: #000;
   }
 
   .pyly-color-scheme-dark,
@@ -288,7 +290,7 @@
     --color-theme-accent-caption: rgb(from var(--color-fg) r g b / 0.6);
     --color-theme-accent-caption-loud: rgb(from var(--color-fg) r g b / 0.9);
 
-    --color-theme-sky-bg: var(--color-sky-dark);
+    --color-theme-sky-bg: var(--color-sky);
     --color-theme-sky-fg: rgb(from white r g b / 0.95);
     --color-theme-sky-fg-loud: rgb(from white r g b / 1);
     --color-theme-sky-caption: rgb(from var(--color-fg) r g b / 0.6);
@@ -554,7 +556,7 @@ body {
   --color-cyanold-light: #00bae9;
   --color-cyanold-dark: #00d3f2;
   --color-sky-light: #3b82f6;
-  --color-sky-dark: #3b82f6;
+  --color-sky-dark: #075985;
   --color-blue-light: #1447e6;
   --color-blue-dark: #2b7fff;
   --color-indigo-light: #4f39f6;
@@ -588,7 +590,7 @@ body {
   --color-ink-light: #535353;
   --color-ink-dark: #b7b7b7;
   --color-ink-loud-light: #000000;
-  --color-ink-loud-dark: #ffffff;
+  --color-ink-loud-dark: #ececec;
   --color-cloud-light: #cdcdcd;
   --color-cloud-dark: #d9d9d9;
 

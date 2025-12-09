@@ -38,7 +38,10 @@ const tileClass = tv({
   variants: {
     variant: {
       outline: `items-center justify-center border border-b-2 border-fg-loud`,
-      filled: `theme-sky items-center justify-center bg-bg`,
+      filled: `
+        theme-sky items-center justify-center outline outline-1 -outline-offset-1
+        outline-bg-inverted/10
+      `,
     },
     size: {
       "10": `h-[40px] min-w-[40px] rounded-md px-3`,

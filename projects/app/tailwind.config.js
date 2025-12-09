@@ -33,6 +33,7 @@ module.exports = {
       bg: {
         DEFAULT: `rgb(from var(--color-bg) r g b / calc(alpha * <alpha-value>))`,
         loud: `rgb(from var(--color-bg-loud) r g b / calc(alpha * <alpha-value>))`,
+        inverted: `rgb(from var(--color-bg-inverted) r g b / calc(alpha * <alpha-value>))`,
       },
       fg: {
         DEFAULT: `rgb(from var(--color-fg) r g b / calc(alpha * <alpha-value>))`,
