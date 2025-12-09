@@ -18,5 +18,6 @@
 ["请客:treatGuests","请客:treat"],
 ["非:wrong","非:not"],
 ["斗:measurement",null],
-["𭕄:earth","𭕄:radical"]
+["𭕄:earth","𭕄:radical"],
+["另:bones", null]
 ]
