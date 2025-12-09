@@ -34,16 +34,16 @@ export function HanziTile({
 }
 
 const tileClass = tv({
-  base: `rounded-lg bg-bg`,
+  base: `bg-bg`,
   variants: {
     variant: {
       outline: `items-center justify-center border border-b-2 border-fg-loud`,
       filled: `theme-sky items-center justify-center bg-bg`,
     },
     size: {
-      "10": `h-[40px] min-w-[40px] px-3`,
-      "20": `min-w-[80px] px-4 py-2`,
-      "47": `min-h-[188px] min-w-[188px] px-6 py-3`,
+      "10": `h-[40px] min-w-[40px] rounded-md px-3`,
+      "20": `min-w-[80px] rounded-lg px-4 py-2`,
+      "47": `min-h-[188px] min-w-[188px] rounded-lg px-6 py-3`,
     },
   },
 });

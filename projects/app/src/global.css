@@ -83,7 +83,7 @@
   /* --- */
 
   .pyly-body {
-    @apply font-sans text-base/normal text-fg font-medium;
+    @apply font-sans text-base/normal text-ink font-medium;
   }
   .pyly-body.pyly-ref,
   .pyly-body .pyly-ref {
@@ -585,8 +585,8 @@ body {
   --color-brick-dark: #f2555a;
   --color-brick-loud-light: #d8373d;
   --color-brick-loud-dark: #f46368;
-  --color-ink-light: #28353d;
-  --color-ink-dark: #d7d8d9;
+  --color-ink-light: #535353;
+  --color-ink-dark: #b7b7b7;
   --color-ink-loud-light: #000000;
   --color-ink-loud-dark: #ffffff;
   --color-cloud-light: #cdcdcd;

@@ -29,6 +29,14 @@ export function WikiHanziCharacterDecomposition({
     for (const [i, visualComponent] of [
       ...walkIdsNodeLeafs(characterData.mnemonic.components),
     ].entries()) {
+      const label =
+        visualComponent.label ??
+        (visualComponent.hanzi == null
+          ? null
+          : dictionary
+              .lookupHanzi(visualComponent.hanzi)
+              .map(([, meaning]) => meaning.gloss[0])
+              .join(` / `));
       componentsElements.push(
         <View className="flex-1 items-center gap-2" key={i}>
           <View className="flex-row items-center gap-2">
@@ -40,22 +48,15 @@ export function WikiHanziCharacterDecomposition({
               strokesData={characterData.strokes}
               highlightStrokes={parseIndexRanges(visualComponent.strokes)}
             />
-            {visualComponent.hanzi == null ? null : (
-              <Text className={visualCharClass()}>
-                <HanziLink hanzi={visualComponent.hanzi}>
-                  {visualComponent.hanzi}
-                </HanziLink>
-              </Text>
-            )}
           </View>
           <Text className="pyly-body text-center">
-            {visualComponent.label ??
-              (visualComponent.hanzi == null
-                ? null
-                : dictionary
-                    .lookupHanzi(visualComponent.hanzi)
-                    .map(([, meaning]) => meaning.gloss[0])
-                    .join(` / `))}
+            {visualComponent.hanzi == null ? (
+              label
+            ) : (
+              <HanziLink hanzi={visualComponent.hanzi}>
+                {visualComponent.hanzi} {label}
+              </HanziLink>
+            )}
           </Text>
         </View>,
       );
@@ -64,15 +65,15 @@ export function WikiHanziCharacterDecomposition({
 
   return (
     <>
-      <Text className="pyly-mdx-h2"> Use a story to learn the meaning</Text>
+      <Text className="pyly-mdx-h2">Recognize the meaning</Text>
       <View className="pyly-mdx-character-decomposition rounded-lg bg-fg-bg5">
         <View className="gap-4 p-4 pb-0">
           {componentsElements.length > 0 ? (
             <>
               <Text className="pyly-body">
-                Split{` `}
-                <Text className="pyly-bold">{characterData.hanzi}</Text> into
-                distinctive components:
+                Use the components of{` `}
+                <Text className="pyly-bold">{characterData.hanzi}</Text> to
+                help:
               </Text>
 
               <View className="flex-row gap-5">{componentsElements}</View>

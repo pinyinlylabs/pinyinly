@@ -139,7 +139,7 @@ export function QuizDeckHanziWordToGlossTypedQuestion({
         <View>
           {flag == null ? null : <QuizFlagText flag={flag} />}
           <View>
-            <Text className="text-xl font-bold text-fg">
+            <Text className="text-xl font-bold text-ink-loud">
               {flag?.kind === QuestionFlagKind.OtherAnswer
                 ? `What is another meaning?`
                 : `What does this mean?`}
@@ -150,7 +150,9 @@ export function QuizDeckHanziWordToGlossTypedQuestion({
           {hanziCharacters.map((hanzi, i) => {
             return (
               <View className="items-center gap-2" key={i}>
-                <Text className="text-[80px] font-medium text-fg">{hanzi}</Text>
+                <Text className="text-[80px] font-medium text-ink-loud">
+                  {hanzi}
+                </Text>
               </View>
             );
           })}
