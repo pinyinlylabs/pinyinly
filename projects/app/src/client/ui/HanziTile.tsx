@@ -49,11 +49,11 @@ const tileClass = tv({
 });
 
 const pinyinTextClass = tv({
-  base: `text-center font-sans text-fg-loud`,
+  base: `text-center font-sans font-medium text-fg-loud`,
   variants: {
     size: {
       "10": `hidden`,
-      "20": `mb-1 text-sm`,
+      "20": `mb-1 text-base`,
       "47": `mb-1 text-lg/5`,
     },
   },
@@ -76,7 +76,7 @@ const glossTextClass = tv({
     size: {
       "10": `hidden`,
       "20": `text-base font-semibold`,
-      "47": `text-2xl/6 font-bold`,
+      "47": `mb-1 text-2xl/7 font-bold`,
     },
   },
 });
