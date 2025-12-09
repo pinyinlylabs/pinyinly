@@ -105,7 +105,7 @@ module.exports = {
     extend: {
       fontFamily: {
         cursive: `ui-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"`,
-        sans: `NationalPark, MiSans, MiSansL3, PinyinlyComponents`,
+        sans: `MiSans, MiSansL3, PinyinlyComponents, NationalPark`,
         mono: `ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace`,
       },
 

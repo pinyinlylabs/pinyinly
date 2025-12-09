@@ -6,7 +6,6 @@ import { Image } from "expo-image";
 import type { ReactNode } from "react";
 import { use } from "react";
 import { Text, View } from "react-native";
-import { tv } from "tailwind-variants";
 import { HanziCharacter, hanziCharacterColorSchema } from "./HanziCharacter";
 import { HanziLink } from "./HanziLink";
 import { Pylymark } from "./Pylymark";
@@ -64,9 +63,9 @@ export function WikiHanziCharacterDecomposition({
   }
 
   return (
-    <>
-      <Text className="pyly-mdx-h2">Recognize the meaning</Text>
-      <View className="pyly-mdx-character-decomposition rounded-lg bg-fg-bg5">
+    <View className="mx-4 gap-2">
+      <Text className="pyly-body-subheading">Recognize the meaning</Text>
+      <View className="rounded-lg bg-fg-bg5">
         <View className="gap-4 p-4 pb-0">
           {componentsElements.length > 0 ? (
             <>
@@ -135,13 +134,9 @@ export function WikiHanziCharacterDecomposition({
           </View>
         )}
       </View>
-    </>
+    </View>
   );
 }
 
 // eslint-disable-next-line unicorn/prefer-top-level-await
 const hanziCharacterColorSafeSchema = hanziCharacterColorSchema.catch(`fg`);
-
-const visualCharClass = tv({
-  base: `pyly-body text-fg/50`,
-});

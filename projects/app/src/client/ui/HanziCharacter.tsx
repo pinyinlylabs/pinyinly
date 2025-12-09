@@ -31,7 +31,7 @@ export function HanziCharacter(props: {
             />
           ))}
         {/* Bold Outline */}
-        {props.strokesData
+        {/* {props.strokesData
           .filter((_, i) => highlightedStrokes.has(i))
           .map((d, i) => (
             <PathCss
@@ -40,7 +40,7 @@ export function HanziCharacter(props: {
               className={outlineClass({ color: props.highlightColor })}
               strokeWidth={120}
             />
-          ))}
+          ))} */}
         {/* Bold Fill */}
         {props.strokesData
           .filter((_, i) => highlightedStrokes.has(i))
@@ -48,7 +48,7 @@ export function HanziCharacter(props: {
             <PathCss
               key={i}
               d={d}
-              className="fill-bg-loud stroke-bg-loud"
+              className="fill-fg-loud stroke-fg-loud"
               // Make the character appear a bit bolder by using a thicker stroke.
               strokeWidth={20}
             />

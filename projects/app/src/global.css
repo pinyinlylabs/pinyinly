@@ -64,6 +64,24 @@
 
   /* --- */
 
+  .pyly-body-subheading {
+    @apply font-sans text-sm/normal text-ink-loud font-bold uppercase;
+  }
+  .pyly-body-subheading.pyly-ref,
+  .pyly-body-subheading .pyly-ref {
+    @apply font-bold text-fg-loud pyly-ref-lg;
+  }
+  .pyly-body-subheading.pyly-bold,
+  .pyly-body-subheading .pyly-bold {
+    @apply font-bold text-fg-loud;
+  }
+  .pyly-body-subheading.pyly-mark,
+  .pyly-body-subheading .pyly-mark {
+    @apply font-bold text-yellow;
+  }
+
+  /* --- */
+
   .pyly-body-2xl {
     @apply font-sans text-2xl/normal font-normal text-fg;
   }
@@ -381,7 +399,6 @@
   .pyly-mdx > ul,
   .pyly-mdx > ol,
   .pyly-mdx > .pyly-mdx-blockquote,
-  .pyly-mdx > .pyly-mdx-character-decomposition,
   .pyly-mdx-hr {
     @apply mx-4;
   }

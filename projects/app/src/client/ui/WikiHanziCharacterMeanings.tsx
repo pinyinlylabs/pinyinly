@@ -39,10 +39,9 @@ function SingleMeaning({
       in modern Mandarin.
       {pinyin == null ? null : (
         <>
-          {` `}It’s pronounced <Text className="pyly-bold">{pinyin}</Text>
+          {` `}It’s pronounced <Text className="pyly-bold">{pinyin}</Text>.
         </>
       )}
-      .
     </Text>
   );
 }
