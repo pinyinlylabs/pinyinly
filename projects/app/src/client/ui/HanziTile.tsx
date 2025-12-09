@@ -21,7 +21,14 @@ export function HanziTile({
   size?: `10` | `20` | `47`;
 }) {
   return (
-    <View className={tileClass({ variant, size, class: className })}>
+    <View
+      className={tileClass({
+        variant,
+        size,
+        class: className,
+        isCharacter: hanzi.length === 1,
+      })}
+    >
       {pinyin == null ? null : (
         <Text className={pinyinTextClass({ size })}>{pinyin}</Text>
       )}
@@ -43,12 +50,22 @@ const tileClass = tv({
         outline-bg-inverted/10
       `,
     },
+    isCharacter: {
+      true: ``,
+    },
     size: {
-      "10": `h-[40px] min-w-[40px] rounded-md px-3`,
+      "10": `h-[40px] rounded-md px-3`,
       "20": `min-w-[80px] rounded-lg px-4 py-2`,
       "47": `min-h-[188px] min-w-[188px] rounded-lg px-6 py-3`,
     },
   },
+  compoundVariants: [
+    {
+      size: `10`,
+      isCharacter: true,
+      class: `aspect-square`,
+    },
+  ],
 });
 
 const pinyinTextClass = tv({
@@ -66,7 +83,7 @@ const hanziTextClass = tv({
   base: `text-center font-sans font-medium text-fg-loud`,
   variants: {
     size: {
-      "10": `text-[16px]/[16px]`,
+      "10": `text-[24px]/normal`,
       "20": `text-[38px]/[46px]`,
       "47": `text-[100px]/[110px]`,
     },
