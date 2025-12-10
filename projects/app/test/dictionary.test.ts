@@ -417,7 +417,7 @@ test(`dictionary contains entries for decomposition`, async () => {
     [`丩`, new Set([`爿`, `叫`, `收`])],
     [`龰`, new Set([`疋`, `走`, `足`])],
     [`丆`, new Set([`石`, `面`, `页`, `才`])],
-    [`𠮛`, new Set([`豆`, `司`, `畐`, `同`])],
+    [`𠮛`, new Set([`豆`, `司`, `畐`, `同`, `鬲`])],
     [`廿`, new Set([`革`, `世`, `度`])],
     [`覀`, new Set([`鹿`, `要`, `票`])],
     [`⺀`, new Set([`冬`, `头`, `尽`])],
