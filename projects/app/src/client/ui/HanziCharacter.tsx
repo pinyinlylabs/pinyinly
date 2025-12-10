@@ -1,5 +1,4 @@
 import { G, Svg } from "react-native-svg";
-import { tv } from "tailwind-variants";
 import z from "zod/v4";
 import { PathCss } from "./svg";
 
@@ -67,16 +66,3 @@ export const hanziCharacterColorSchema = z.enum([
 ]);
 
 export type HanziCharacterColor = z.infer<typeof hanziCharacterColorSchema>;
-
-const outlineClass = tv({
-  base: `fill-bg-loud stroke-fg-loud`,
-  variants: {
-    color: {
-      blue: `stroke-blue`,
-      yellow: `stroke-yellow`,
-      amber: `stroke-amber`,
-      cyanold: `stroke-cyanold`,
-      fg: `stroke-fg-loud`,
-    },
-  },
-});
