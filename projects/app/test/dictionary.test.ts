@@ -382,15 +382,22 @@ test(`dictionary contains entries for decomposition`, async () => {
     /* sources */ Set<string>
   >();
   const dictionaryLookup = await loadDictionary();
+  const characters = await loadCharacters();
 
   for (const hanzi of await allHanziWordsHanzi()) {
     for (const character of splitHanziText(hanzi)) {
-      const lookup = dictionaryLookup.lookupHanzi(character);
-      if (lookup.length === 0) {
+      const meanings = dictionaryLookup.lookupHanzi(character);
+      if (meanings.length === 0) {
         mapSetAdd(unknownCharacters, character, hanzi);
       }
 
       for (const component of await decomposeHanzi(character)) {
+        if (characters.get(component)?.canonicalForm != null) {
+          // The character is a pointer to another character, so it itself
+          // doesn't need a dictionary entry.
+          continue;
+        }
+
         const lookup = dictionaryLookup.lookupHanzi(component);
         if (lookup.length === 0) {
           mapSetAdd(unknownComponents, component, character);
@@ -399,56 +406,42 @@ test(`dictionary contains entries for decomposition`, async () => {
     }
   }
 
-  // Explicit exceptions that are not in the dictionary. The "sources" are
-  // stored so that if new items are added to the dictionary that relate to this
-  // list, the list can be manually reviewed and updated.
-  const allowedMissing = new Map([
-    // Couldn't find any standard meaning for this. In most cases this is used
-    // at the top and looks like "上", so maybe the decomposition should just
-    // pick that instead of going further to "⺊"?
-    [`⺊`, new Set([`卤`, `攴`, `虍`, `上`, `卓`, `占`, `桌`])],
-    // Only 3 cases and isn't visually distinctive in the characters.
-    [`乀`, new Set([`乂`, `展`, `水`, `畏`, `辰`])],
-    // Only 3 cases and there doens't seem to be an obvious common meaning.
-    [`乛`, new Set([`买`, `了`, `敢`])],
-    [`𠄌`, new Set([`辰`, `展`, `畏`])],
-    [`𠃊`, new Set([`亡`, `断`, `继`])],
-    [`⺈`, new Set([`欠`, `色`, `角`, `鱼`, `争`, `免`, `象`, `负`])],
-    [`丩`, new Set([`爿`, `叫`, `收`])],
-    [`龰`, new Set([`疋`, `走`, `足`])],
-    [`丆`, new Set([`石`, `面`, `页`, `才`])],
-    [`𠮛`, new Set([`豆`, `司`, `畐`, `同`, `鬲`])],
-    [`廿`, new Set([`革`, `世`, `度`])],
-    [`覀`, new Set([`鹿`, `要`, `票`])],
-    [`⺀`, new Set([`冬`, `头`, `尽`])],
-  ]);
-
   // There's not much value in learning components that are only used once, so
   // we only test that there are dictionary entries for components that are used
   // multiple times.
-  const unknownWithMultipleSources = [
-    // always learn characters of a word
-    ...unknownCharacters,
-    ...[...unknownComponents]
-      // only learn components that are used at least a few times
-      .filter(([, sources]) => sources.size >= 3),
-  ]
-    // explicitly ignored cases
-    .filter(([x, sources]) => {
-      const override = allowedMissing.get(x);
-      if (override != null) {
-        expect
-          .soft(
-            override.symmetricDifference(sources),
-            `allowedMissing for ${x}`,
-          )
-          .toEqual(new Set());
-        return false;
-      }
-      return true;
-    });
+  const actualMissing = new Map<HanziCharacter, /* sources */ Set<string>>();
 
-  expect(unknownWithMultipleSources).toEqual([]);
+  for (const [character, sources] of unknownCharacters) {
+    for (const source of sources) {
+      mapSetAdd(actualMissing, character, source);
+    }
+  }
+  for (const [component, sources] of unknownComponents) {
+    if (sources.size < 3) {
+      continue;
+    }
+    for (const source of sources) {
+      mapSetAdd(actualMissing, component, source);
+    }
+  }
+
+  const actualMissingPretty = [...actualMissing]
+    .map(([char, sources]) => `${char} via ${[...sources].join(`, `)}`)
+    .sort();
+
+  expect(actualMissingPretty).toMatchInlineSnapshot(`
+    [
+      "⺀ via 冬, 头, 尽",
+      "⺈ via 欠, 色, 角, 鱼, 争, 免, 象, 负",
+      "丆 via 石, 面, 页, 才",
+      "丩 via 爿, 叫, 收",
+      "廿 via 革, 世, 度",
+      "覀 via 鹿, 要, 票",
+      "龰 via 疋, 走, 足",
+      "𠃊 via 断, 亡, 继",
+      "𠮛 via 豆, 鬲, 同, 司, 畐",
+    ]
+  `);
 });
 
 test(`dictionary structural components list`, async () => {
