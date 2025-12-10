@@ -1,5 +1,5 @@
 {
-  "decompositions": ["⿱丿虫"],
+  "decompositions": [["⿱", { "hanzi": "丿" }, { "hanzi": "虫" }]],
   "hanzi": "䖝",
   "mnemonic": {
     "components": ["⿱", { "hanzi": "丿" }, { "hanzi": "虫" }]

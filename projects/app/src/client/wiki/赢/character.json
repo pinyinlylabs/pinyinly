@@ -32,5 +32,11 @@
       ]
     ]
   },
-  "decompositions": ["⿱吂⿲月贝凡"]
+  "decompositions": [
+    [
+      "⿱",
+      { "hanzi": "吂" },
+      ["⿲", { "hanzi": "月" }, { "hanzi": "贝" }, { "hanzi": "凡" }]
+    ]
+  ]
 }

@@ -1,8 +1,9 @@
 {
-  "decompositions": ["⿰王亅"],
   "hanzi": "𩰊",
+  "canonicalForm": "𩰋",
   "mnemonic": {
     "components": { "hanzi": "𩰊" }
   },
-  "strokes": 5
+  "strokes": 5,
+  "decompositions": [["⿰", { "hanzi": "王" }, { "hanzi": "亅" }]]
 }

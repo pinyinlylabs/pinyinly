@@ -18,5 +18,7 @@
       { "hanzi": "八", "strokes": "6-7" }
     ]
   },
-  "decompositions": ["⿱⿴且一八"]
+  "decompositions": [
+    ["⿱", ["⿴", { "hanzi": "且" }, { "hanzi": "一" }], { "hanzi": "八" }]
+  ]
 }

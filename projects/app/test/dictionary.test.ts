@@ -146,21 +146,27 @@ test(`hanzi word meaning gloss lint`, async () => {
   expect(violations).toEqual(new Set());
 });
 
-test(`hanzi meaning canonicalForm lint`, async () => {
+test(`hanzi meaning canonicalForm`, async () => {
   const characters = await loadCharacters();
   const dictionary = await loadDictionary();
 
   for (const [hanzi, data] of characters) {
     if (data.canonicalForm != null) {
-      expect(
-        dictionary.lookupHanzi(hanzi),
-        `${hanzi} is not the canonical form and shouldn't have a dictionary entry`,
-      ).toEqual([]);
+      // A character with a `canonicalForm` shouldn't exist in the dictionary.
+      expect
+        .soft(
+          dictionary.lookupHanzi(hanzi),
+          `${hanzi} is not the canonical form and shouldn't have a dictionary entry`,
+        )
+        .toEqual([]);
 
-      expect(
-        dictionary.lookupHanzi(data.canonicalForm),
-        `${hanzi} canonical form exists`,
-      ).not.toEqual([]);
+      // The character pointed to by `canonicalForm` *SHOULD* be in the dictionary.
+      expect
+        .soft(
+          dictionary.lookupHanzi(data.canonicalForm),
+          `${hanzi} canonical form should exist`,
+        )
+        .not.toEqual([]);
     }
   }
 });
@@ -426,11 +432,13 @@ test(`dictionary contains entries for decomposition`, async () => {
     }
   }
 
-  const actualMissingPretty = [...actualMissing]
-    .map(([char, sources]) => `${char} via ${[...sources].join(`, `)}`)
-    .sort();
+  function prettify(map: typeof unknownCharacters): string[] {
+    return [...map]
+      .map(([char, sources]) => `${char} via ${[...sources].join(`, `)}`)
+      .sort();
+  }
 
-  expect(actualMissingPretty).toMatchInlineSnapshot(`
+  expect(prettify(actualMissing)).toMatchInlineSnapshot(`
     [
       "⺀ via 冬, 头, 尽",
       "⺄ via 九",
@@ -455,7 +463,6 @@ test(`dictionary contains entries for decomposition`, async () => {
       "㝵 via 得",
       "㡀 via 黹",
       "䏍 via 能",
-      "丄 via 工",
       "丅 via 斤, 鬲",
       "丆 via 石, 面, 页, 才",
       "丙 via 病",
@@ -464,7 +471,6 @@ test(`dictionary contains entries for decomposition`, async () => {
       "丬 via 将, 状",
       "乀 via 水, 乂",
       "乁 via 气",
-      "乃 via 仍, 奶",
       "乇 via 毛",
       "乔 via 桥",
       "乛 via 了, 买",
@@ -616,6 +622,7 @@ test(`dictionary contains entries for decomposition`, async () => {
       "𠃊 via 断, 亡, 继",
       "𠃓 via 场, 汤",
       "𠃜 via 声",
+      "𠄎 via 乃",
       "𠄐 via 矛",
       "𠕁 via 龠",
       "𠕒 via 雨",
@@ -644,8 +651,6 @@ test(`dictionary contains entries for decomposition`, async () => {
       "𦣻 via 夏",
       "𧰨 via 豕",
       "𨈑 via 身",
-      "𩰊 via 鬥",
-      "𩰋 via 鬥",
       "𪧷 via 将",
       "𫝀 via 五",
       "𫠠 via 弋",

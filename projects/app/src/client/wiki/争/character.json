@@ -25,5 +25,11 @@
       }
     ]
   },
-  "decompositions": ["⿱𠂊⿻⿻コ一亅"]
+  "decompositions": [
+    [
+      "⿱",
+      { "hanzi": "𠂊" },
+      ["⿻", ["⿻", { "hanzi": "コ" }, { "hanzi": "一" }], { "hanzi": "亅" }]
+    ]
+  ]
 }
