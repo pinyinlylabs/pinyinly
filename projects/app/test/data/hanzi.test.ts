@@ -345,10 +345,16 @@ describe(
 );
 
 test.for([
-  [`-→_→=`, `⿱-_`, `=`],
-  [`宀→丰→𫲸`, `⿱宀丰`, `𫲸`],
+  [`1→2→⑫`, `⿱12`, `⑫`],
+  [`1→2→⑫`, `⿱1⿱23`, `⿱⑫3`],
+  [`1→2→⑫`, `⿱⿱012`, `⿱0⑫`],
+  [`1→2→⑫`, `⿳123`, `⿱⑫3`],
+  [`1→2→⑫`, `⿳012`, `⿱0⑫`],
+  [`1→2→⑫`, `⿳⿱0123`, `⿳0⑫3`],
+  [`1→2→⑫`, `⿳1⿱234`, `⿳⑫34`],
+  [`1→2→⑫`, `⿳01⿱23`, `⿳0⑫3`],
 ] as const)(
-  `makeVerticalMergeCharacterIdsTransform %s` satisfies HasNameOf<
+  `makeVerticalMergeCharacterIdsTransform %s (%s)` satisfies HasNameOf<
     typeof makeVerticalMergeCharacterIdsTransform
   >,
   ([spec, input, expected]) => {
