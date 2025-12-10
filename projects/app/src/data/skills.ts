@@ -201,10 +201,10 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
       for (let hanziCharacter of await decomposeHanzi(hanzi)) {
         // Use the canonical form of the character.
         {
-          let character = characters.get(hanziCharacter);
-          while (character?.canonicalForm != null) {
-            hanziCharacter = character.canonicalForm;
-            character = characters.get(character.canonicalForm);
+          let hanziCharacterData = characters.get(hanziCharacter);
+          while (hanziCharacterData?.canonicalForm != null) {
+            hanziCharacter = hanziCharacterData.canonicalForm;
+            hanziCharacterData = characters.get(hanziCharacter);
           }
         }
 
@@ -346,6 +346,7 @@ export async function skillDependencies(skill: Skill): Promise<Skill[]> {
       break;
     }
   }
+
   return deps;
 }
 
