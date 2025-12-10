@@ -9,7 +9,7 @@ export default function SkillsHsk2Page() {
   return (
     <View className="gap-5">
       <View>
-        <Text className="pyly-body-title">HSK 1</Text>
+        <Text className="pyly-body-title">HSK 2</Text>
       </View>
 
       <View className="flex-row flex-wrap gap-2">
