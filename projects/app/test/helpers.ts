@@ -52,7 +52,7 @@ export async function getFonts(): Promise<TestFont[]> {
 
   return [
     await getTestFont(`MiSans/MiSansVF`),
-    await getTestFont(`MiSans/MiSans L3`),
+    await getTestFont(`MiSans/MiSansL3`),
     await getTestFont(`NotoSansSC-VariableFont_wght`),
     await getTestFont(`PinyinlyComponentsVF`),
   ];
