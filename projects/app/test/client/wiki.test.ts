@@ -1,8 +1,11 @@
 import {
   characterStrokeCount,
   componentToString,
+  idsApplyTransforms,
   idsNodeToString,
   isHanziCharacter,
+  makeVerticalMergeCharacterIdsTransform,
+  mapIdsNodeLeafs,
   walkIdsNodeLeafs,
 } from "#data/hanzi.js";
 import type { HanziText, WikiCharacterData } from "#data/model.js";
@@ -29,7 +32,11 @@ import {
   readFileSync,
   writeJsonFileIfChanged,
 } from "@pinyinly/lib/fs";
-import { nonNullable, uniqueInvariant } from "@pinyinly/lib/invariant";
+import {
+  invariant,
+  nonNullable,
+  uniqueInvariant,
+} from "@pinyinly/lib/invariant";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
 import { dictionaryDir, getFonts, projectRoot, wikiDir } from "../helpers.ts";
@@ -132,6 +139,45 @@ describe(`character.json files`, async () => {
   );
   expect(characterFiles.length).toBeGreaterThan(0);
   const isComponentFormHanzi = await getIsComponentFormHanzi();
+
+  test(`𠮛 is used instead of ⿱一口 in decompositions`, async () => {
+    const specs: [pattern: string, replacement: string, ignored: string[]][] = [
+      [`⿱一口`, `𠮛`, [`事`]],
+    ];
+
+    for (const [pattern, replacement, ignored] of specs) {
+      let transform;
+
+      if (pattern.startsWith(`⿱`)) {
+        transform = makeVerticalMergeCharacterIdsTransform(
+          pattern[1]!,
+          pattern[2]!,
+          replacement,
+        );
+      }
+
+      invariant(transform != null, `unable to parse transform for ${pattern}`);
+
+      for (const { character, characterData } of characterFiles) {
+        if (character === replacement || ignored.includes(character)) {
+          continue;
+        }
+
+        if (characterData.mnemonic?.components) {
+          const x = mapIdsNodeLeafs(characterData.mnemonic.components, (x) =>
+            componentToString(x),
+          );
+          const x2 = idsApplyTransforms(x, [transform]);
+
+          const xString = idsNodeToString(x, (x) => x);
+          const x2String = idsNodeToString(x2, (x) => x);
+          expect
+            .soft(x2String, `${character} normalized form`)
+            .toEqual(xString);
+        }
+      }
+    }
+  });
 
   test(`characters in the dictionary with 5+ strokes have mnemonic components`, async () => {
     const atomicCharacters = new Set([`非`, `臣`, `襾`, `舟`, `母`]);

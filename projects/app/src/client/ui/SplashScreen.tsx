@@ -32,7 +32,7 @@ export const SplashScreen = ({}: { children?: never }) => {
     [`NationalPark`]: require(
       `@/assets/fonts/NationalPark/NationalPark-VariableFont_wght.ttf`,
     ),
-    [`MiSansL3`]: require(`@/assets/fonts/MiSans/MiSans L3.subset.ttf`),
+    [`MiSansL3`]: require(`@/assets/fonts/MiSans/MiSansL3.ttf`),
     [`MiSans`]: require(`@/assets/fonts/MiSans/MiSansVF.subset.ttf`),
     [`PinyinlyComponents`]: require(
       `@/assets/fonts/PinyinlyComponentsVF.subset.ttf`,
