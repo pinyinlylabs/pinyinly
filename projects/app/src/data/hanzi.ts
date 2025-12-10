@@ -33,7 +33,24 @@ export function isAboveToMiddleAndBelowNode<T>(
   return getOperator(ids) === IdsOperator.AboveToMiddleAndBelow;
 }
 
-export function isLeaf<T>(ids: Readonly<IdsNode<T>>): ids is T {
+export function isLeftToRightNode<T>(
+  ids: Readonly<IdsNode<T>>,
+): ids is [typeof IdsOperator.LeftToRight, IdsNode<T>, IdsNode<T>] {
+  return getOperator(ids) === IdsOperator.LeftToRight;
+}
+
+export function isLeftToMiddleToRightNode<T>(
+  ids: Readonly<IdsNode<T>>,
+): ids is [
+  typeof IdsOperator.LeftToMiddleToRight,
+  IdsNode<T>,
+  IdsNode<T>,
+  IdsNode<T>,
+] {
+  return getOperator(ids) === IdsOperator.LeftToMiddleToRight;
+}
+
+export function isLeafNode<T>(ids: Readonly<IdsNode<T>>): ids is T {
   return !Array.isArray(ids);
 }
 
@@ -578,7 +595,7 @@ export function mapIdsNode<T>(
 
 export function* walkIdsNodeLeafs<T>(ids: IdsNode<T>): Generator<T> {
   for (const n of walkIdsNode(ids)) {
-    if (isLeaf(n)) {
+    if (isLeafNode(n)) {
       yield n;
     }
   }
@@ -613,23 +630,18 @@ export function hanziCharacterCount(hanziText: HanziText): number {
 export function horizontalPairToTripleMergeIdsTransform<T>(
   ids: IdsNode<T>,
 ): IdsNode<T> | null {
-  if (!Array.isArray(ids)) {
-    return null;
-  }
+  if (isLeftToRightNode(ids)) {
+    const left = getLeftToRightLeft(ids);
+    const right = getLeftToRightRight(ids);
 
-  if (ids[0] === IdsOperator.LeftToRight) {
-    const typedIds = ids;
-    const left = getLeftToRightLeft(typedIds);
-    const right = getLeftToRightRight(typedIds);
-
-    if (Array.isArray(left) && left[0] === IdsOperator.LeftToRight) {
+    if (isLeftToRightNode(left)) {
       return [
         IdsOperator.LeftToMiddleToRight,
         getLeftToRightLeft(left),
         getLeftToRightRight(left),
         right,
       ];
-    } else if (Array.isArray(right) && right[0] === IdsOperator.LeftToRight) {
+    } else if (isLeftToRightNode(right)) {
       return [
         IdsOperator.LeftToMiddleToRight,
         left,
@@ -687,9 +699,9 @@ export function makeVerticalMergeCharacterIdsTransform<T>(
 
       // ⿱12 -> ⑫
       if (
-        isLeaf(aboveNode) &&
+        isLeafNode(aboveNode) &&
         aboveNode === above &&
-        isLeaf(belowNode) &&
+        isLeafNode(belowNode) &&
         belowNode === below
       ) {
         return merged;
@@ -697,7 +709,7 @@ export function makeVerticalMergeCharacterIdsTransform<T>(
 
       // ⿱1⿱23 -> ⿱⑫3
       if (
-        isLeaf(aboveNode) &&
+        isLeafNode(aboveNode) &&
         aboveNode === above &&
         isAboveToBelowNode(belowNode) &&
         getAboveToBelowAbove(belowNode) === below
@@ -713,7 +725,7 @@ export function makeVerticalMergeCharacterIdsTransform<T>(
       if (
         isAboveToBelowNode(aboveNode) &&
         getAboveToBelowBelow(aboveNode) === above &&
-        isLeaf(belowNode) &&
+        isLeafNode(belowNode) &&
         belowNode === below
       ) {
         return [
@@ -729,9 +741,9 @@ export function makeVerticalMergeCharacterIdsTransform<T>(
 
       // ⿳123 -> ⿱⑫3
       if (
-        isLeaf(aboveNode) &&
+        isLeafNode(aboveNode) &&
         aboveNode === above &&
-        isLeaf(middleNode) &&
+        isLeafNode(middleNode) &&
         middleNode === below
       ) {
         return [IdsOperator.AboveToBelow, merged, belowNode];
@@ -739,9 +751,9 @@ export function makeVerticalMergeCharacterIdsTransform<T>(
 
       // ⿳012 -> ⿱0⑫
       if (
-        isLeaf(middleNode) &&
+        isLeafNode(middleNode) &&
         middleNode === above &&
-        isLeaf(belowNode) &&
+        isLeafNode(belowNode) &&
         belowNode === below
       ) {
         return [IdsOperator.AboveToBelow, aboveNode, merged];
@@ -749,10 +761,10 @@ export function makeVerticalMergeCharacterIdsTransform<T>(
 
       // ⿳1⿱234 -> ⿳⑫34
       if (
-        isLeaf(aboveNode) &&
+        isLeafNode(aboveNode) &&
         aboveNode === above &&
         isAboveToBelowNode(middleNode) &&
-        isLeaf(getAboveToBelowAbove(middleNode)) &&
+        isLeafNode(getAboveToBelowAbove(middleNode)) &&
         getAboveToBelowAbove(middleNode) === below
       ) {
         return [
@@ -766,9 +778,9 @@ export function makeVerticalMergeCharacterIdsTransform<T>(
       // ⿳⿱0123 -> ⿳0⑫3
       if (
         isAboveToBelowNode(aboveNode) &&
-        isLeaf(getAboveToBelowBelow(aboveNode)) &&
+        isLeafNode(getAboveToBelowBelow(aboveNode)) &&
         getAboveToBelowBelow(aboveNode) === above &&
-        isLeaf(middleNode) &&
+        isLeafNode(middleNode) &&
         middleNode === below
       ) {
         return [
@@ -781,10 +793,10 @@ export function makeVerticalMergeCharacterIdsTransform<T>(
 
       // ⿳01⿱23 -> ⿳0⑫3
       if (
-        isLeaf(middleNode) &&
+        isLeafNode(middleNode) &&
         middleNode === above &&
         isAboveToBelowNode(belowNode) &&
-        isLeaf(getAboveToBelowAbove(belowNode)) &&
+        isLeafNode(getAboveToBelowAbove(belowNode)) &&
         getAboveToBelowAbove(belowNode) === below
       ) {
         return [
@@ -792,6 +804,127 @@ export function makeVerticalMergeCharacterIdsTransform<T>(
           aboveNode,
           merged,
           getAboveToBelowBelow(belowNode),
+        ];
+      }
+    }
+
+    return null;
+  };
+}
+
+export function makeHorizontalMergeCharacterIdsTransform<T>(
+  left: T,
+  right: T,
+  merged: T,
+): IdsTransform<T> {
+  return (ids) => {
+    if (isLeftToRightNode(ids)) {
+      const leftNode = getLeftToRightLeft(ids);
+      const rightNode = getLeftToRightRight(ids);
+
+      // ⿰12 -> ⑫
+      if (
+        isLeafNode(leftNode) &&
+        leftNode === left &&
+        isLeafNode(rightNode) &&
+        rightNode === right
+      ) {
+        return merged;
+      }
+
+      // ⿰1⿰23 -> ⿰⑫3
+      if (
+        isLeafNode(leftNode) &&
+        leftNode === left &&
+        isLeftToRightNode(rightNode) &&
+        getLeftToRightLeft(rightNode) === right
+      ) {
+        return [
+          IdsOperator.LeftToRight,
+          merged,
+          getLeftToRightRight(rightNode),
+        ];
+      }
+
+      // ⿰⿰012 -> ⿰0⑫
+      if (
+        isLeftToRightNode(leftNode) &&
+        getLeftToRightRight(leftNode) === left &&
+        isLeafNode(rightNode) &&
+        rightNode === right
+      ) {
+        return [IdsOperator.LeftToRight, getLeftToRightLeft(leftNode), merged];
+      }
+    } else if (isLeftToMiddleToRightNode(ids)) {
+      const leftNode = getLeftToMiddleToRightLeft(ids);
+      const middleNode = getLeftToMiddleToRightMiddle(ids);
+      const rightNode = getLeftToMiddleToRightRight(ids);
+
+      // ⿲123 -> ⿰⑫3
+      if (
+        isLeafNode(leftNode) &&
+        leftNode === left &&
+        isLeafNode(middleNode) &&
+        middleNode === right
+      ) {
+        return [IdsOperator.LeftToRight, merged, rightNode];
+      }
+
+      // ⿲012 -> ⿰0⑫
+      if (
+        isLeafNode(middleNode) &&
+        middleNode === left &&
+        isLeafNode(rightNode) &&
+        rightNode === right
+      ) {
+        return [IdsOperator.LeftToRight, leftNode, merged];
+      }
+
+      // ⿲1⿰234 -> ⿲⑫34
+      if (
+        isLeafNode(leftNode) &&
+        leftNode === left &&
+        isLeftToRightNode(middleNode) &&
+        isLeafNode(getLeftToRightLeft(middleNode)) &&
+        getLeftToRightLeft(middleNode) === right
+      ) {
+        return [
+          IdsOperator.LeftToMiddleToRight,
+          merged,
+          getLeftToRightRight(middleNode),
+          rightNode,
+        ];
+      }
+
+      // ⿲⿰0123 -> ⿲0⑫3
+      if (
+        isLeftToRightNode(leftNode) &&
+        isLeafNode(getLeftToRightRight(leftNode)) &&
+        getLeftToRightRight(leftNode) === left &&
+        isLeafNode(middleNode) &&
+        middleNode === right
+      ) {
+        return [
+          IdsOperator.LeftToMiddleToRight,
+          getLeftToRightLeft(leftNode),
+          merged,
+          rightNode,
+        ];
+      }
+
+      // ⿲01⿰23 -> ⿲0⑫3
+      if (
+        isLeafNode(middleNode) &&
+        middleNode === left &&
+        isLeftToRightNode(rightNode) &&
+        isLeafNode(getLeftToRightLeft(rightNode)) &&
+        getLeftToRightLeft(rightNode) === right
+      ) {
+        return [
+          IdsOperator.LeftToMiddleToRight,
+          leftNode,
+          merged,
+          getLeftToRightRight(rightNode),
         ];
       }
     }
