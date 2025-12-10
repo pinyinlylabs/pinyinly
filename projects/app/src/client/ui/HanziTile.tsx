@@ -1,7 +1,9 @@
 import type { HanziText } from "@/data/model";
 import type { PropsOf } from "@pinyinly/lib/types";
-import { Text, View } from "react-native";
+import { useState } from "react";
+import { Pressable, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
+import { WikiHanziModal } from "./WikiHanziModal";
 
 export type HanziTileProps = PropsOf<typeof HanziTile>;
 
@@ -12,6 +14,7 @@ export function HanziTile({
   className = ``,
   variant = `filled`,
   size = `20`,
+  linked = false,
 }: {
   hanzi: HanziText;
   gloss?: string;
@@ -19,24 +22,42 @@ export function HanziTile({
   className?: string;
   variant?: `outline` | `filled`;
   size?: `10` | `20` | `47`;
+  linked?: boolean;
 }) {
+  const [showWiki, setShowWiki] = useState(false);
+  const handlePress = linked
+    ? () => {
+        setShowWiki(true);
+      }
+    : undefined;
+
   return (
-    <View
-      className={tileClass({
-        variant,
-        size,
-        class: className,
-        isCharacter: hanzi.length === 1,
-      })}
-    >
-      {pinyin == null ? null : (
-        <Text className={pinyinTextClass({ size })}>{pinyin}</Text>
-      )}
-      <Text className={hanziTextClass({ size })}>{hanzi}</Text>
-      {gloss == null ? null : (
-        <Text className={glossTextClass({ size })}>{gloss}</Text>
-      )}
-    </View>
+    <Pressable onPress={handlePress}>
+      <View
+        className={tileClass({
+          variant,
+          size,
+          class: className,
+          isCharacter: hanzi.length === 1,
+        })}
+      >
+        {pinyin == null ? null : (
+          <Text className={pinyinTextClass({ size })}>{pinyin}</Text>
+        )}
+        <Text className={hanziTextClass({ size })}>{hanzi}</Text>
+        {gloss == null ? null : (
+          <Text className={glossTextClass({ size })}>{gloss}</Text>
+        )}
+      </View>
+      {showWiki ? (
+        <WikiHanziModal
+          hanzi={hanzi}
+          onDismiss={() => {
+            setShowWiki(false);
+          }}
+        />
+      ) : null}
+    </Pressable>
   );
 }
 

@@ -21,11 +21,11 @@ import {
   skillReviewQueue,
   walkSkillAndDependencies,
 } from "#data/skills.ts";
-import { getIsStructuralHanzi } from "#dictionary.js";
 import {
   allHsk1HanziWords,
   allHsk2HanziWords,
   allHsk3HanziWords,
+  getIsStructuralHanzi,
 } from "#dictionary.ts";
 import { Rating } from "#util/fsrs.ts";
 import { r } from "#util/rizzle.ts";

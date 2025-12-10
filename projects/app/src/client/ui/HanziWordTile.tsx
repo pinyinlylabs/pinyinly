@@ -1,5 +1,6 @@
 import type { HanziWord } from "@/data/model";
 import { hanziFromHanziWord, loadDictionary } from "@/dictionary";
+import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import { use } from "react";
 import type { HanziTileProps } from "./HanziTile";
 import { HanziTile } from "./HanziTile";
@@ -9,9 +10,12 @@ export function HanziWordTile({
   className = ``,
   variant,
   size,
+  linked,
+  ...rest
 }: {
   hanziWord: HanziWord;
-} & Pick<HanziTileProps, `className` | `variant` | `size`>) {
+} & Pick<HanziTileProps, `className` | `variant` | `size` | `linked`>) {
+  true satisfies IsExhaustedRest<typeof rest>;
   const hanzi = hanziFromHanziWord(hanziWord);
   const dictionary = use(loadDictionary());
   const meaning = dictionary.lookupHanziWord(hanziWord);
@@ -24,6 +28,7 @@ export function HanziWordTile({
       pinyin={meaning?.pinyin?.[0]?.join(` `)}
       size={size}
       variant={variant}
+      linked={linked}
     />
   );
 }
