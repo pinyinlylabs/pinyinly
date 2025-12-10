@@ -134,19 +134,19 @@ export const loadCharacters = memoize0(async function loadCharacters() {
 
 export const wordListSchema = z.array(hanziWordSchema);
 
-export const allRadicalHanziWords = memoize0(
-  async function allRadicalHanziWords() {
+export const loadKangXiRadicalsHanziWords = memoize0(
+  async function loadKangXiRadicalsHanziWords() {
     return wordListSchema
       .transform(deepReadonly)
       .parse(
-        await import(`./dictionary/radicalsHanziWords.asset.json`).then(
+        await import(`./dictionary/kangXiRadicalsHanziWords.asset.json`).then(
           (x) => x.default,
         ),
       );
   },
 );
 
-export const allHsk1HanziWords = memoize0(async function allHsk1HanziWords() {
+export const loadHsk1HanziWords = memoize0(async function loadHsk1HanziWords() {
   return wordListSchema
     .transform(deepReadonly)
     .parse(
@@ -156,7 +156,7 @@ export const allHsk1HanziWords = memoize0(async function allHsk1HanziWords() {
     );
 });
 
-export const allHsk2HanziWords = memoize0(async function allHsk2HanziWords() {
+export const loadHsk2HanziWords = memoize0(async function loadHsk2HanziWords() {
   return wordListSchema
     .transform(deepReadonly)
     .parse(
@@ -166,7 +166,7 @@ export const allHsk2HanziWords = memoize0(async function allHsk2HanziWords() {
     );
 });
 
-export const allHsk3HanziWords = memoize0(async function allHsk3HanziWords() {
+export const loadHsk3HanziWords = memoize0(async function loadHsk3HanziWords() {
   return wordListSchema
     .transform(deepReadonly)
     .parse(
@@ -244,7 +244,7 @@ export const loadHanziWordMigrations = memoize0(
   },
 );
 
-const loadRadicalStrokes = memoize0(async () =>
+export const loadKangXiRadicalsStrokes = memoize0(async () =>
   z
     .array(
       z.object({
@@ -256,13 +256,11 @@ const loadRadicalStrokes = memoize0(async () =>
     .transform((x) => new Map(x.map((r) => [r.strokes, r])))
     .transform(deepReadonly)
     .parse(
-      await import(`./dictionary/radicalStrokes.asset.json`).then(
+      await import(`./dictionary/kangXiRadicalsStrokes.asset.json`).then(
         (x) => x.default,
       ),
     ),
 );
-
-export const allRadicalsByStrokes = async () => await loadRadicalStrokes();
 
 /**
  * Build an inverted index of hanzi words to hanzi word meanings and glosses to
@@ -309,25 +307,12 @@ export const loadDictionary = memoize0(
 );
 
 export const lookupRadicalsByStrokes = async (strokes: number) =>
-  await loadRadicalStrokes().then((x) => x.get(strokes) ?? null);
-
-export const allHanziWordsHanzi = memoize0(
-  async function allHanziWordsHanzi2() {
-    return new Set<HanziText>(
-      [
-        ...(await allRadicalHanziWords()),
-        ...(await loadDictionaryJson().then((x) => [...x.keys()])),
-      ].map((x) => hanziFromHanziWord(x)),
-    );
-  },
-);
+  await loadKangXiRadicalsStrokes().then((x) => x.get(strokes) ?? null);
 
 export const allHanziCharacters = memoize0(async function allHanziCharacters() {
-  return new Set(
-    [...(await allHanziWordsHanzi())]
-      // Split words into characters because decomposition is per-character.
-      .flatMap((x) => splitHanziText(x)),
-  );
+  const characters = await loadCharacters();
+
+  return new Set([...characters].map(([char]) => char));
 });
 
 export function shorthandPartOfSpeech(partOfSpeech: PartOfSpeech) {

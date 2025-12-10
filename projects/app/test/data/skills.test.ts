@@ -22,10 +22,10 @@ import {
   walkSkillAndDependencies,
 } from "#data/skills.ts";
 import {
-  allHsk1HanziWords,
-  allHsk2HanziWords,
-  allHsk3HanziWords,
   getIsStructuralHanzi,
+  loadHsk1HanziWords,
+  loadHsk2HanziWords,
+  loadHsk3HanziWords,
 } from "#dictionary.ts";
 import { Rating } from "#util/fsrs.ts";
 import { r } from "#util/rizzle.ts";
@@ -330,9 +330,9 @@ describe(
     test(`works for hsk words`, async () => {
       await skillLearningGraph({
         targetSkills: [
-          ...(await allHsk1HanziWords()),
-          ...(await allHsk2HanziWords()),
-          ...(await allHsk3HanziWords()),
+          ...(await loadHsk1HanziWords()),
+          ...(await loadHsk2HanziWords()),
+          ...(await loadHsk3HanziWords()),
         ].map((w) => hanziWordToGloss(w)),
       });
     });

@@ -23,13 +23,13 @@ import type {
 } from "#dictionary.ts";
 import {
   allHanziCharacters,
-  allHsk1HanziWords,
   buildHanziWord,
   dictionarySchema,
   hanziFromHanziWord,
   hanziWordMeaningSchema,
   loadCharacters,
   loadDictionary,
+  loadHsk1HanziWords,
   meaningKeyFromHanziWord,
   partOfSpeechSchema,
   unparseDictionary,
@@ -150,7 +150,7 @@ async function checkHsk1HanziWords(
   onProgress: (progress: HanziWordCheckProgress) => void,
   signal?: AbortSignal,
 ) {
-  const hsk1HanziWords = await allHsk1HanziWords();
+  const hsk1HanziWords = await loadHsk1HanziWords();
   const dictionary = await loadDictionary();
   const results: HanziWordCheckResult[] = [];
 

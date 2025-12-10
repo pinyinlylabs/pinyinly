@@ -1,11 +1,11 @@
 import type { HanziWordMeaning } from "@/dictionary";
 import {
-  allHsk1HanziWords,
-  allHsk2HanziWords,
-  allHsk3HanziWords,
   glossOrThrow,
   hanziFromHanziWord,
   loadDictionary,
+  loadHsk1HanziWords,
+  loadHsk2HanziWords,
+  loadHsk3HanziWords,
 } from "@/dictionary";
 import { evenHalve } from "@pinyinly/lib/collections";
 import { invariant } from "@pinyinly/lib/invariant";
@@ -161,9 +161,9 @@ async function getWrongHanziWordAnswers(
   const ctx = await makeQuizContext(hanziWord);
 
   const [hsk1HanziWords, hsk2HanziWords, hsk3HanziWords] = await Promise.all([
-    allHsk1HanziWords(),
-    allHsk2HanziWords(),
-    allHsk3HanziWords(),
+    loadHsk1HanziWords(),
+    loadHsk2HanziWords(),
+    loadHsk3HanziWords(),
   ]);
 
   // Use words from the same HSK word list if possible, so that they're more
