@@ -15,6 +15,7 @@ export function HanziTile({
   variant = `filled`,
   size = `20`,
   linked = false,
+  progress,
 }: {
   hanzi: HanziText;
   gloss?: string;
@@ -23,6 +24,7 @@ export function HanziTile({
   variant?: `outline` | `filled`;
   size?: `10` | `20` | `47`;
   linked?: boolean;
+  progress?: number;
 }) {
   const [showWiki, setShowWiki] = useState(false);
   const handlePress = linked
@@ -48,6 +50,15 @@ export function HanziTile({
         {gloss == null ? null : (
           <Text className={glossTextClass({ size })}>{gloss}</Text>
         )}
+        {progress == null ? null : (
+          <View
+            className={progressBarClass({ variant, size })}
+            style={{ "--progress": `${progress * 100}%` }}
+          >
+            <View className={progressBarMaskClass({ size })} />
+          </View>
+        )}
+        <View className={outlineClass({ variant, size })} />
       </View>
       {showWiki ? (
         <WikiHanziModal
@@ -62,14 +73,11 @@ export function HanziTile({
 }
 
 const tileClass = tv({
-  base: `bg-bg`,
+  base: `overflow-hidden bg-bg`,
   variants: {
     variant: {
       outline: `items-center justify-center border border-b-2 border-fg-loud`,
-      filled: `
-        theme-sky items-center justify-center outline outline-1 -outline-offset-1
-        outline-bg-inverted/10
-      `,
+      filled: `theme-sky items-center justify-center`,
     },
     isCharacter: {
       true: ``,
@@ -87,6 +95,49 @@ const tileClass = tv({
       class: `aspect-square`,
     },
   ],
+});
+
+const outlineClass = tv({
+  base: `absolute inset-0 z-10 select-none`,
+  variants: {
+    variant: {
+      outline: ``,
+      filled: `rounded-lg outline outline-1 -outline-offset-1 outline-bg-inverted/10`,
+    },
+    size: {
+      "10": `rounded-md`,
+      "20": `rounded-lg`,
+      "47": `rounded-lg`,
+    },
+  },
+});
+
+const progressBarClass = tv({
+  base: `
+    bg-[linear-gradient(to_right,_#FBBF24,_#FBBF24_var(--progress),_rgb(from_var(--color-bg-inverted)_r_g_b_/_10%)_calc(var(--progress)+0.01%))]
+  `,
+  variants: {
+    variant: {
+      outline: `hidden`,
+      filled: `absolute inset-x-0 bottom-0 bg-bg-inverted/10`,
+    },
+    size: {
+      "10": `h-[7px]`,
+      "20": `h-[8px]`,
+      "47": `h-[12px]`,
+    },
+  },
+});
+
+const progressBarMaskClass = tv({
+  base: `absolute inset-x-0 bg-bg`,
+  variants: {
+    size: {
+      "10": `bottom-[3px] h-[5px] rounded-b-md`,
+      "20": `bottom-[4px] h-[6px] rounded-b-md`,
+      "47": `bottom-[6px] h-[8px] rounded-b-lg`,
+    },
+  },
 });
 
 const pinyinTextClass = tv({
