@@ -1,16 +1,11 @@
-import {
-  getWikiMdxHanziMeaning,
-  getWikiMdxHanziWordMeaning,
-} from "@/client/wiki";
+import { getWikiMdxHanziMeaning } from "@/client/wiki";
 import type { HanziText, PinyinSyllable } from "@/data/model";
 import { loadDictionary } from "@/dictionary";
-import React, { Fragment, use, useState } from "react";
+import { use } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useIntersectionObserver } from "usehooks-ts";
 import { IconImage } from "./IconImage";
 import { PylyMdxComponents } from "./PylyMdxComponents";
-
-const hr = <View className="h-px bg-fg/25" />;
 
 export const NewSkillModalContentNewWord = ({
   hanzi,
@@ -72,39 +67,6 @@ export const NewSkillModalContentNewWord = ({
             </View>
 
             {MeaningMdx == null ? null : <MeaningMdx />}
-
-            {hanziWordMeanings.length > 1 ? (
-              <View>
-                {hanziWordMeanings.map(([hanziWord, meaning], i) => {
-                  const gloss = meaning.gloss[0];
-                  const MeaningMdx = getWikiMdxHanziWordMeaning(hanziWord);
-                  return gloss == null ? null : (
-                    <Fragment key={i}>
-                      {/* {i === 0 ? hr : null} */}
-                      <ExpandableSection
-                        title={`${hanzi} as “${gloss}”`}
-                        defaultExpanded
-                      >
-                        {MeaningMdx == null ? null : <MeaningMdx />}
-                      </ExpandableSection>
-                      {hr}
-                    </Fragment>
-                  );
-                })}
-              </View>
-            ) : // Super hacky way to unwrap the meaning content and not have it
-            // wrapped in a collapsible section.
-            hanziWordMeanings.length === 1 ? (
-              hanziWordMeanings.slice(0, 1).map(([hanziWord, meaning], i) => {
-                const gloss = meaning.gloss[0];
-                const MeaningMdx = getWikiMdxHanziWordMeaning(hanziWord);
-                return gloss == null || MeaningMdx == null ? null : (
-                  <View key={i}>
-                    <MeaningMdx />
-                  </View>
-                );
-              })
-            ) : null}
           </View>
         </PylyMdxComponents>
       </ScrollView>
@@ -192,64 +154,5 @@ function Header({
         </View>
       </View>
     </>
-  );
-}
-
-function ExpandableSection({
-  title,
-  children,
-  defaultExpanded = false,
-}: {
-  title: string;
-  children?: React.ReactNode;
-  defaultExpanded?: boolean;
-}) {
-  const [expanded, setExpanded] = useState(defaultExpanded);
-  const titleElement = <Text className="pyly-body-heading">{title}</Text>;
-
-  return (
-    <View>
-      {children == null ? (
-        <View className="flex-row justify-between p-4 py-6">
-          {titleElement}
-        </View>
-      ) : (
-        <Pressable
-          onPress={() => {
-            setExpanded((x) => !x);
-          }}
-          className={`
-            mx-2 my-4 select-none flex-row justify-between rounded-lg p-2
-
-            hover:bg-fg-bg10
-          `}
-        >
-          {titleElement}
-          <IconImage
-            source={
-              expanded
-                ? require(`@/assets/icons/chevron-down.svg`)
-                : require(`@/assets/icons/chevron-up.svg`)
-            }
-            size={24}
-            className="text-fg-bg50"
-          />
-        </Pressable>
-      )}
-      <View
-        className={`
-          mb-4
-
-          ${
-            // Always render the content so that any async suspense content is
-            // caught on the first render, rather than having spinners after it's
-            // presented.
-            expanded ? `flex` : `hidden`
-          }
-        `}
-      >
-        {children}
-      </View>
-    </View>
   );
 }

@@ -1,5 +1,4 @@
 import { G, Svg } from "react-native-svg";
-import { tv } from "tailwind-variants";
 import z from "zod/v4";
 import { PathCss } from "./svg";
 
@@ -31,7 +30,7 @@ export function HanziCharacter(props: {
             />
           ))}
         {/* Bold Outline */}
-        {props.strokesData
+        {/* {props.strokesData
           .filter((_, i) => highlightedStrokes.has(i))
           .map((d, i) => (
             <PathCss
@@ -40,7 +39,7 @@ export function HanziCharacter(props: {
               className={outlineClass({ color: props.highlightColor })}
               strokeWidth={120}
             />
-          ))}
+          ))} */}
         {/* Bold Fill */}
         {props.strokesData
           .filter((_, i) => highlightedStrokes.has(i))
@@ -48,7 +47,7 @@ export function HanziCharacter(props: {
             <PathCss
               key={i}
               d={d}
-              className="fill-bg-loud stroke-bg-loud"
+              className="fill-fg-loud stroke-fg-loud"
               // Make the character appear a bit bolder by using a thicker stroke.
               strokeWidth={20}
             />
@@ -67,16 +66,3 @@ export const hanziCharacterColorSchema = z.enum([
 ]);
 
 export type HanziCharacterColor = z.infer<typeof hanziCharacterColorSchema>;
-
-const outlineClass = tv({
-  base: `fill-bg-loud stroke-fg-loud`,
-  variants: {
-    color: {
-      blue: `stroke-blue`,
-      yellow: `stroke-yellow`,
-      amber: `stroke-amber`,
-      cyanold: `stroke-cyanold`,
-      fg: `stroke-fg-loud`,
-    },
-  },
-});

@@ -671,7 +671,7 @@
   ["古代:ancientTimes",{"gloss":["ancient times"],"partOfSpeech":"noun","pinyin":["gǔ dài"]}],
   ["句:sentence",{"gloss":["sentence"],"partOfSpeech":"noun","pinyin":["jù"]}],
   ["句子:sentenceStructure",{"gloss":["sentence"],"partOfSpeech":"noun","pinyin":["jù zi"]}],
-  ["另:bones",{"gloss":["bones"],"partOfSpeech":"radical","pinyin":["lìng"]}],
+  ["另:other",{"gloss":["other"],"partOfSpeech":"adjective","pinyin":["lìng"]}],
   ["另一方面:onTheOtherHand",{"gloss":["on the other hand"],"partOfSpeech":"conjunction","pinyin":["lìng yī fāng miàn"]}],
   ["另外:additional",{"gloss":["in addition","besides"],"partOfSpeech":"adverb","pinyin":["lìng wài"]}],
   ["只:only",{"gloss":["only","just"],"partOfSpeech":"adverb","pinyin":["zhǐ"]}],

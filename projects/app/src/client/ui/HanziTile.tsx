@@ -1,7 +1,9 @@
 import type { HanziText } from "@/data/model";
 import type { PropsOf } from "@pinyinly/lib/types";
-import { Text, View } from "react-native";
+import { useState } from "react";
+import { Pressable, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
+import { WikiHanziModal } from "./WikiHanziModal";
 
 export type HanziTileProps = PropsOf<typeof HanziTile>;
 
@@ -12,6 +14,7 @@ export function HanziTile({
   className = ``,
   variant = `filled`,
   size = `20`,
+  linked = false,
 }: {
   hanzi: HanziText;
   gloss?: string;
@@ -19,41 +22,79 @@ export function HanziTile({
   className?: string;
   variant?: `outline` | `filled`;
   size?: `10` | `20` | `47`;
+  linked?: boolean;
 }) {
+  const [showWiki, setShowWiki] = useState(false);
+  const handlePress = linked
+    ? () => {
+        setShowWiki(true);
+      }
+    : undefined;
+
   return (
-    <View className={tileClass({ variant, size, class: className })}>
-      {pinyin == null ? null : (
-        <Text className={pinyinTextClass({ size })}>{pinyin}</Text>
-      )}
-      <Text className={hanziTextClass({ size })}>{hanzi}</Text>
-      {gloss == null ? null : (
-        <Text className={glossTextClass({ size })}>{gloss}</Text>
-      )}
-    </View>
+    <Pressable onPress={handlePress}>
+      <View
+        className={tileClass({
+          variant,
+          size,
+          class: className,
+          isCharacter: hanzi.length === 1,
+        })}
+      >
+        {pinyin == null ? null : (
+          <Text className={pinyinTextClass({ size })}>{pinyin}</Text>
+        )}
+        <Text className={hanziTextClass({ size })}>{hanzi}</Text>
+        {gloss == null ? null : (
+          <Text className={glossTextClass({ size })}>{gloss}</Text>
+        )}
+      </View>
+      {showWiki ? (
+        <WikiHanziModal
+          hanzi={hanzi}
+          onDismiss={() => {
+            setShowWiki(false);
+          }}
+        />
+      ) : null}
+    </Pressable>
   );
 }
 
 const tileClass = tv({
-  base: `rounded-lg bg-bg`,
+  base: `bg-bg`,
   variants: {
     variant: {
       outline: `items-center justify-center border border-b-2 border-fg-loud`,
-      filled: `theme-sky items-center justify-center bg-bg`,
+      filled: `
+        theme-sky items-center justify-center outline outline-1 -outline-offset-1
+        outline-bg-inverted/10
+      `,
+    },
+    isCharacter: {
+      true: ``,
     },
     size: {
-      "10": `h-[40px] min-w-[40px] px-3`,
-      "20": `min-w-[80px] px-4 py-2`,
-      "47": `min-h-[188px] min-w-[188px] px-6 py-3`,
+      "10": `h-[40px] rounded-md px-3`,
+      "20": `min-w-[80px] rounded-lg px-4 py-2`,
+      "47": `min-h-[188px] min-w-[188px] rounded-lg px-6 py-3`,
     },
   },
+  compoundVariants: [
+    {
+      size: `10`,
+      isCharacter: true,
+      class: `aspect-square`,
+    },
+  ],
 });
 
 const pinyinTextClass = tv({
-  base: `text-center font-sans text-fg-loud`,
+  base: `text-center font-sans font-medium text-fg-loud`,
   variants: {
     size: {
       "10": `hidden`,
-      "20": `mb-1 text-sm`,
+      "20": `mb-1 text-base`,
       "47": `mb-1 text-lg/5`,
     },
   },
@@ -63,7 +104,7 @@ const hanziTextClass = tv({
   base: `text-center font-sans font-medium text-fg-loud`,
   variants: {
     size: {
-      "10": `text-[16px]/[16px]`,
+      "10": `text-[24px]/normal`,
       "20": `text-[38px]/[46px]`,
       "47": `text-[100px]/[110px]`,
     },
@@ -76,7 +117,7 @@ const glossTextClass = tv({
     size: {
       "10": `hidden`,
       "20": `text-base font-semibold`,
-      "47": `text-2xl/6 font-bold`,
+      "47": `mb-1 text-2xl/7 font-bold`,
     },
   },
 });

@@ -393,7 +393,7 @@ const textClass = tv({
   // It's important to have decoration-transparent otherwise when the decoration
   // animates in it will start as white and look jarring.
   base: `
-    px-1 py-[2px] text-center font-normal text-fg decoration-transparent
+    px-1 py-[2px] text-center font-normal decoration-transparent
 
     web:transition-colors
   `,
@@ -409,8 +409,8 @@ const textClass = tv({
       `,
     },
     state: {
-      default: `text-fg`,
-      dimmed: `text-fg/90`,
+      default: `text-ink-loud`,
+      dimmed: `text-ink`,
       selected: `text-cyanold`,
       success: `text-fg`,
       error: `text-brick`,

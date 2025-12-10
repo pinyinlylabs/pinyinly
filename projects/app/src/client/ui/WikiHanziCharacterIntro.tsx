@@ -2,6 +2,7 @@ import type { WikiCharacterData } from "@/data/model";
 import type { HanziWordWithMeaning } from "@/dictionary";
 import { hanziFromHanziWord, loadDictionary } from "@/dictionary";
 import { use } from "react";
+import { View } from "react-native";
 import { WikiHanziCharacterDecomposition } from "./WikiHanziCharacterDecomposition";
 import { WikiHanziCharacterMeanings } from "./WikiHanziCharacterMeanings";
 import { WikiHanziCharacterPronunciation } from "./WikiHanziCharacterPronunciation";
@@ -27,6 +28,8 @@ export function WikiHanziCharacterIntro({
         meanings={meanings}
       />
 
+      <View className="h-2" />
+
       <WikiHanziCharacterDecomposition
         characterData={characterData}
         illustrationFit={illustrationFit}
@@ -34,7 +37,10 @@ export function WikiHanziCharacterIntro({
       />
 
       {meanings.length === 1 && meanings[0] != null ? (
-        <OnePronunciation hanziWordWithMeaning={meanings[0]} />
+        <>
+          <View className="h-2" />
+          <OnePronunciation hanziWordWithMeaning={meanings[0]} />
+        </>
       ) : null}
     </>
   );

@@ -1,20 +1,13 @@
-import {
-  getWikiMdxHanziMeaning,
-  getWikiMdxHanziWordMeaning,
-} from "@/client/wiki";
+import { getWikiMdxHanziMeaning } from "@/client/wiki";
 import type { HanziText } from "@/data/model";
 import { loadDictionary } from "@/dictionary";
 import type { IsExhaustedRest, PropsOf } from "@pinyinly/lib/types";
-import type { ReactNode } from "react";
-import { Fragment, use, useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { use, useState } from "react";
+import { ScrollView, View } from "react-native";
 import { useIntersectionObserver, useTimeout } from "usehooks-ts";
 import { CloseButton2 } from "./CloseButton2";
 import { HanziTile } from "./HanziTile";
-import { IconImage } from "./IconImage";
 import { PylyMdxComponents } from "./PylyMdxComponents";
-
-const hr = <View className="h-px bg-fg/25" />;
 
 export function WikiHanziModalImpl({
   hanzi,
@@ -57,36 +50,6 @@ export function WikiHanziModalImpl({
         <PylyMdxComponents>
           <View className="flex-1 gap-6 bg-bg py-7">
             {MeaningMdx == null ? null : <MeaningMdx />}
-
-            {hanziWordMeanings.length > 1 ? (
-              <View>
-                {hanziWordMeanings.map(([hanziWord, meaning], i) => {
-                  const gloss = meaning.gloss[0];
-                  const MeaningMdx = getWikiMdxHanziWordMeaning(hanziWord);
-                  return gloss == null ? null : (
-                    <Fragment key={i}>
-                      {i === 0 ? hr : null}
-                      <ExpandableSection title={`${hanzi} as “${gloss}”`}>
-                        {MeaningMdx == null ? null : <MeaningMdx />}
-                      </ExpandableSection>
-                      {hr}
-                    </Fragment>
-                  );
-                })}
-              </View>
-            ) : // Super hacky way to unwrap the meaning content and not have it
-            // wrapped in a collapsible section.
-            hanziWordMeanings.length === 1 ? (
-              hanziWordMeanings.slice(0, 1).map(([hanziWord, meaning], i) => {
-                const gloss = meaning.gloss[0];
-                const MeaningMdx = getWikiMdxHanziWordMeaning(hanziWord);
-                return gloss == null || MeaningMdx == null ? null : (
-                  <View key={i}>
-                    <MeaningMdx />
-                  </View>
-                );
-              })
-            ) : null}
           </View>
         </PylyMdxComponents>
       </ScrollView>
@@ -166,62 +129,5 @@ function Header({
         }}
       />
     </>
-  );
-}
-
-function ExpandableSection({
-  title,
-  children,
-}: {
-  title: string;
-  children?: ReactNode;
-}) {
-  const [expanded, setExpanded] = useState(false);
-  const titleElement = <Text className="pyly-body-heading">{title}</Text>;
-
-  return (
-    <View>
-      {children == null ? (
-        <View className="flex-row justify-between p-4 py-6">
-          {titleElement}
-        </View>
-      ) : (
-        <Pressable
-          onPress={() => {
-            setExpanded((x) => !x);
-          }}
-          className={`
-            mx-2 my-4 select-none flex-row justify-between rounded-lg p-2
-
-            hover:bg-fg-bg10
-          `}
-        >
-          {titleElement}
-          <IconImage
-            source={
-              expanded
-                ? require(`@/assets/icons/chevron-down.svg`)
-                : require(`@/assets/icons/chevron-up.svg`)
-            }
-            size={24}
-            className="text-fg-bg50"
-          />
-        </Pressable>
-      )}
-      <View
-        className={`
-          mb-4
-
-          ${
-            // Always render the content so that any async suspense content is
-            // caught on the first render, rather than having spinners after it's
-            // presented.
-            expanded ? `flex` : `hidden`
-          }
-        `}
-      >
-        {children}
-      </View>
-    </View>
   );
 }

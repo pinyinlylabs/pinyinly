@@ -34,11 +34,9 @@ export function WikiHanziCharacterPronunciation({
       : pinyinSounds?.get(parsedPinyin.tone.toString() as PinyinSoundId);
 
   return (
-    <View className="mt-4 gap-3">
+    <View className="mt-4 gap-2">
       <View className="mx-4">
-        <Text className="pyly-body-heading">
-          Use a story to learn the pronunciation
-        </Text>
+        <Text className="pyly-body-subheading">Memorize the pronunciation</Text>
       </View>
 
       <View className="mx-4 rounded-lg bg-fg/5">

@@ -6,7 +6,6 @@ import { Image } from "expo-image";
 import type { ReactNode } from "react";
 import { use } from "react";
 import { Text, View } from "react-native";
-import { tv } from "tailwind-variants";
 import { HanziCharacter, hanziCharacterColorSchema } from "./HanziCharacter";
 import { HanziLink } from "./HanziLink";
 import { Pylymark } from "./Pylymark";
@@ -29,6 +28,14 @@ export function WikiHanziCharacterDecomposition({
     for (const [i, visualComponent] of [
       ...walkIdsNodeLeafs(characterData.mnemonic.components),
     ].entries()) {
+      const label =
+        visualComponent.label ??
+        (visualComponent.hanzi == null
+          ? null
+          : dictionary
+              .lookupHanzi(visualComponent.hanzi)
+              .map(([, meaning]) => meaning.gloss[0])
+              .join(` / `));
       componentsElements.push(
         <View className="flex-1 items-center gap-2" key={i}>
           <View className="flex-row items-center gap-2">
@@ -40,22 +47,15 @@ export function WikiHanziCharacterDecomposition({
               strokesData={characterData.strokes}
               highlightStrokes={parseIndexRanges(visualComponent.strokes)}
             />
-            {visualComponent.hanzi == null ? null : (
-              <Text className={visualCharClass()}>
-                <HanziLink hanzi={visualComponent.hanzi}>
-                  {visualComponent.hanzi}
-                </HanziLink>
-              </Text>
-            )}
           </View>
           <Text className="pyly-body text-center">
-            {visualComponent.label ??
-              (visualComponent.hanzi == null
-                ? null
-                : dictionary
-                    .lookupHanzi(visualComponent.hanzi)
-                    .map(([, meaning]) => meaning.gloss[0])
-                    .join(` / `))}
+            {visualComponent.hanzi == null ? (
+              label
+            ) : (
+              <HanziLink hanzi={visualComponent.hanzi}>
+                {visualComponent.hanzi} {label}
+              </HanziLink>
+            )}
           </Text>
         </View>,
       );
@@ -63,16 +63,16 @@ export function WikiHanziCharacterDecomposition({
   }
 
   return (
-    <>
-      <Text className="pyly-mdx-h2"> Use a story to learn the meaning</Text>
-      <View className="pyly-mdx-character-decomposition rounded-lg bg-fg-bg5">
+    <View className="mx-4 gap-2">
+      <Text className="pyly-body-subheading">Recognize the meaning</Text>
+      <View className="rounded-lg bg-fg-bg5">
         <View className="gap-4 p-4 pb-0">
           {componentsElements.length > 0 ? (
             <>
               <Text className="pyly-body">
-                Split{` `}
-                <Text className="pyly-bold">{characterData.hanzi}</Text> into
-                distinctive components:
+                Use the components of{` `}
+                <Text className="pyly-bold">{characterData.hanzi}</Text> to
+                help:
               </Text>
 
               <View className="flex-row gap-5">{componentsElements}</View>
@@ -134,13 +134,9 @@ export function WikiHanziCharacterDecomposition({
           </View>
         )}
       </View>
-    </>
+    </View>
   );
 }
 
 // eslint-disable-next-line unicorn/prefer-top-level-await
 const hanziCharacterColorSafeSchema = hanziCharacterColorSchema.catch(`fg`);
-
-const visualCharClass = tv({
-  base: `pyly-body text-fg/50`,
-});

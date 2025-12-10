@@ -393,6 +393,15 @@ const navItems: NavGroup[] = [
     ] satisfies NavItem[],
   },
   {
+    title: `Courses`,
+    primary: true,
+    items: [
+      { name: `HSK 1`, href: `/skills/hsk1` },
+      { name: `HSK 2`, href: `/skills/hsk2` },
+      { name: `HSK 3`, href: `/skills/hsk3` },
+    ] satisfies NavItem[],
+  },
+  {
     title: `Settings`,
     primary: true,
     items: [
