@@ -1989,14 +1989,6 @@ const App = () => {
 
                 break;
               }
-              case `editRadicalsWordList`: {
-                setLocation({
-                  type: `wordListEditor`,
-                  wordListName: `radicalsHanziWords`,
-                });
-
-                break;
-              }
               case `dictionaryEditor`: {
                 setLocation({
                   type: `dictionaryEditor`,
@@ -2056,7 +2048,6 @@ const DictionaryHanziWordEntry = ({
   const hsk1WordList = useHanziWordList(`hsk1HanziWords`).data;
   const hsk2WordList = useHanziWordList(`hsk2HanziWords`).data;
   const hsk3WordList = useHanziWordList(`hsk3HanziWords`).data;
-  const radicalsWordList = useHanziWordList(`radicalsHanziWords`).data;
 
   const flagElement = useMemo(() => {
     const nonNullChilds = Children.map(flags, (child) => child);
@@ -2071,14 +2062,13 @@ const DictionaryHanziWordEntry = ({
       [`hsk1`, hsk1WordList],
       [`hsk2`, hsk2WordList],
       [`hsk3`, hsk3WordList],
-      [`radicals`, radicalsWordList],
     ] as const) {
       if (wordList?.includes(hanziWord) === true) {
         refs.push(wordListName);
       }
     }
     return refs;
-  }, [hanziWord, hsk1WordList, hsk2WordList, hsk3WordList, radicalsWordList]);
+  }, [hanziWord, hsk1WordList, hsk2WordList, hsk3WordList]);
 
   return (
     <Box flexDirection="column" width="100%">
