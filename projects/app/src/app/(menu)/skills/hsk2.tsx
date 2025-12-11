@@ -1,10 +1,10 @@
 import { HanziWordTile } from "@/client/ui/HanziWordTile";
-import { allHsk2HanziWords } from "@/dictionary";
+import { loadHsk2HanziWords } from "@/dictionary";
 import { use } from "react";
 import { Text, View } from "react-native";
 
 export default function SkillsHsk2Page() {
-  const hanziWords = use(allHsk2HanziWords());
+  const hanziWords = use(loadHsk2HanziWords());
 
   return (
     <View className="gap-5">

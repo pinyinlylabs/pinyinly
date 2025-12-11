@@ -3,12 +3,6 @@ import type { HanziCharacter, HanziText } from "#data/model.ts";
 import { pinyinPronunciationDisplayText } from "#data/pinyin.ts";
 import type { Dictionary } from "#dictionary.ts";
 import {
-  allHanziWordsHanzi,
-  allHsk1HanziWords,
-  allHsk2HanziWords,
-  allHsk3HanziWords,
-  allRadicalHanziWords,
-  allRadicalsByStrokes,
   decomposeHanzi,
   getIsComponentFormHanzi,
   getIsStructuralHanzi,
@@ -18,6 +12,11 @@ import {
   loadCharacters,
   loadDictionary,
   loadHanziWordMigrations,
+  loadHsk1HanziWords,
+  loadHsk2HanziWords,
+  loadHsk3HanziWords,
+  loadKangXiRadicalsHanziWords,
+  loadKangXiRadicalsStrokes,
   loadPinyinSoundNameSuggestions,
   loadPinyinSoundThemeDetails,
   loadPinyinWords,
@@ -38,7 +37,7 @@ import { 拼音, 汉 } from "./data/helpers.ts";
 test(`radical groups have the right number of elements`, async () => {
   // Data integrity test to ensure that the number of characters in each group
   // matches the expected range.
-  const radicalsByStrokes = await allRadicalsByStrokes();
+  const radicalsByStrokes = await loadKangXiRadicalsStrokes();
   for (const [, group] of radicalsByStrokes.entries()) {
     expect(
       group.characters.length === group.range[1] - group.range[0] + 1,
@@ -47,9 +46,9 @@ test(`radical groups have the right number of elements`, async () => {
 });
 
 test(`json data can be loaded and passes the schema validation`, async () => {
-  await allHsk1HanziWords();
-  await allHsk2HanziWords();
-  await allHsk3HanziWords();
+  await loadHsk1HanziWords();
+  await loadHsk2HanziWords();
+  await loadHsk3HanziWords();
   await loadCharacters();
   await loadPinyinSoundNameSuggestions();
   await loadPinyinSoundThemeDetails();
@@ -58,10 +57,10 @@ test(`json data can be loaded and passes the schema validation`, async () => {
 });
 
 const wordLists = [
-  allHsk1HanziWords,
-  allHsk2HanziWords,
-  allHsk3HanziWords,
-  allRadicalHanziWords,
+  loadHsk1HanziWords,
+  loadHsk2HanziWords,
+  loadHsk3HanziWords,
+  loadKangXiRadicalsHanziWords,
 ];
 
 test(`hanzi word meaning-keys are not too similar`, async () => {
@@ -146,21 +145,27 @@ test(`hanzi word meaning gloss lint`, async () => {
   expect(violations).toEqual(new Set());
 });
 
-test(`hanzi meaning canonicalForm lint`, async () => {
+test(`hanzi meaning canonicalForm`, async () => {
   const characters = await loadCharacters();
   const dictionary = await loadDictionary();
 
   for (const [hanzi, data] of characters) {
     if (data.canonicalForm != null) {
-      expect(
-        dictionary.lookupHanzi(hanzi),
-        `${hanzi} is not the canonical form and shouldn't have a dictionary entry`,
-      ).toEqual([]);
+      // A character with a `canonicalForm` shouldn't exist in the dictionary.
+      expect
+        .soft(
+          dictionary.lookupHanzi(hanzi),
+          `${hanzi} is not the canonical form and shouldn't have a dictionary entry`,
+        )
+        .toEqual([]);
 
-      expect(
-        dictionary.lookupHanzi(data.canonicalForm),
-        `${hanzi} canonical form exists`,
-      ).not.toEqual([]);
+      // The character pointed to by `canonicalForm` *SHOULD* be in the dictionary.
+      expect
+        .soft(
+          dictionary.lookupHanzi(data.canonicalForm),
+          `${hanzi} canonical form should exist`,
+        )
+        .not.toEqual([]);
     }
   }
 });
@@ -313,16 +318,20 @@ test(`zod schemas are compatible with OpenAI API`, async () => {
 });
 
 test(`hanzi uses consistent unicode characters`, async () => {
+  const debugNonCjkUnifiedIdeograph = await loadDebugNonCjkUnifiedIdeograph();
   const dict = await loadDictionary();
+  const characters = await loadCharacters();
+
   const violations = dict.allHanziWords
     .map((x) => hanziFromHanziWord(x))
     .flatMap((x) => splitHanziText(x))
-    .filter((x) => isNotCjkUnifiedIdeograph(x));
-  if (violations.length > 0) {
-    throw new Error(
-      `found non-CJK unified ideographs: ${await debugNonCjkUnifiedIdeographs(violations)}`,
-    );
-  }
+    .filter((x) => characters.get(x)?.isStructural !== true)
+    .filter((x) => isNotCjkUnifiedIdeograph(x))
+    .map((x) => debugNonCjkUnifiedIdeograph(x));
+
+  expect(violations, `found non-CJK unified ideographs`).toMatchInlineSnapshot(
+    `[]`,
+  );
 });
 
 describe(
@@ -375,22 +384,33 @@ describe(
 test(`dictionary contains entries for decomposition`, async () => {
   const unknownCharacters = new Map<
     HanziCharacter,
-    /* sources */ Set<string>
+    /* sources */ Set<HanziCharacter>
   >();
   const unknownComponents = new Map<
     HanziCharacter,
-    /* sources */ Set<string>
+    /* sources */ Set<HanziCharacter>
   >();
   const dictionaryLookup = await loadDictionary();
+  const characters = await loadCharacters();
 
-  for (const hanzi of await allHanziWordsHanzi()) {
+  const allHanzi = dictionaryLookup.allHanziWords.map((hanziWord) =>
+    hanziFromHanziWord(hanziWord),
+  );
+
+  for (const hanzi of allHanzi) {
     for (const character of splitHanziText(hanzi)) {
-      const lookup = dictionaryLookup.lookupHanzi(character);
-      if (lookup.length === 0) {
+      const meanings = dictionaryLookup.lookupHanzi(character);
+      if (meanings.length === 0) {
         mapSetAdd(unknownCharacters, character, hanzi);
       }
 
       for (const component of await decomposeHanzi(character)) {
+        if (characters.get(component)?.canonicalForm != null) {
+          // The character is a pointer to another character, so it itself
+          // doesn't need a dictionary entry.
+          continue;
+        }
+
         const lookup = dictionaryLookup.lookupHanzi(component);
         if (lookup.length === 0) {
           mapSetAdd(unknownComponents, component, character);
@@ -399,56 +419,288 @@ test(`dictionary contains entries for decomposition`, async () => {
     }
   }
 
-  // Explicit exceptions that are not in the dictionary. The "sources" are
-  // stored so that if new items are added to the dictionary that relate to this
-  // list, the list can be manually reviewed and updated.
-  const allowedMissing = new Map([
-    // Couldn't find any standard meaning for this. In most cases this is used
-    // at the top and looks like "上", so maybe the decomposition should just
-    // pick that instead of going further to "⺊"?
-    [`⺊`, new Set([`卤`, `攴`, `虍`, `上`, `卓`, `占`, `桌`])],
-    // Only 3 cases and isn't visually distinctive in the characters.
-    [`乀`, new Set([`乂`, `展`, `水`, `畏`, `辰`])],
-    // Only 3 cases and there doens't seem to be an obvious common meaning.
-    [`乛`, new Set([`买`, `了`, `敢`])],
-    [`𠄌`, new Set([`辰`, `展`, `畏`])],
-    [`𠃊`, new Set([`亡`, `断`, `继`])],
-    [`⺈`, new Set([`欠`, `色`, `角`, `鱼`, `争`, `免`, `象`, `负`])],
-    [`丩`, new Set([`爿`, `叫`, `收`])],
-    [`龰`, new Set([`疋`, `走`, `足`])],
-    [`丆`, new Set([`石`, `面`, `页`, `才`])],
-    [`𠮛`, new Set([`豆`, `司`, `畐`, `同`, `鬲`])],
-    [`廿`, new Set([`革`, `世`, `度`])],
-    [`覀`, new Set([`鹿`, `要`, `票`])],
-    [`⺀`, new Set([`冬`, `头`, `尽`])],
-  ]);
-
   // There's not much value in learning components that are only used once, so
   // we only test that there are dictionary entries for components that are used
   // multiple times.
-  const unknownWithMultipleSources = [
-    // always learn characters of a word
-    ...unknownCharacters,
-    ...[...unknownComponents]
-      // only learn components that are used at least a few times
-      .filter(([, sources]) => sources.size >= 3),
-  ]
-    // explicitly ignored cases
-    .filter(([x, sources]) => {
-      const override = allowedMissing.get(x);
-      if (override != null) {
-        expect
-          .soft(
-            override.symmetricDifference(sources),
-            `allowedMissing for ${x}`,
-          )
-          .toEqual(new Set());
-        return false;
-      }
-      return true;
-    });
+  const actualMissing = new Map<
+    HanziCharacter,
+    /* sources */ Set<HanziCharacter>
+  >();
 
-  expect(unknownWithMultipleSources).toEqual([]);
+  for (const [character, sources] of unknownCharacters) {
+    for (const source of sources) {
+      mapSetAdd(actualMissing, character, source);
+    }
+  }
+  for (const [component, sources] of unknownComponents) {
+    for (const source of sources) {
+      mapSetAdd(actualMissing, component, source);
+    }
+  }
+
+  const hsk1HanziWords = new Set(
+    await loadHsk1HanziWords().then((wordList) =>
+      wordList.map((hanziWord) => hanziFromHanziWord(hanziWord)),
+    ),
+  );
+  const hsk2HanziWords = new Set(
+    await loadHsk2HanziWords().then((wordList) =>
+      wordList.map((hanziWord) => hanziFromHanziWord(hanziWord)),
+    ),
+  );
+  const hsk3HanziWords = new Set(
+    await loadHsk3HanziWords().then((wordList) =>
+      wordList.map((hanziWord) => hanziFromHanziWord(hanziWord)),
+    ),
+  );
+  function hskLabel(hanzi: HanziText): string {
+    return hsk1HanziWords.has(hanzi)
+      ? `[HSK1]`
+      : hsk2HanziWords.has(hanzi)
+        ? `[HSK2]`
+        : hsk3HanziWords.has(hanzi)
+          ? `[HSK3]`
+          : ``;
+  }
+
+  function prettify(map: typeof unknownCharacters): string[] {
+    return [...map]
+      .map(
+        ([char, sources]) =>
+          `${char} via ${[...sources]
+            .sort()
+            .map((char) => char + hskLabel(char))
+            .join(`, `)}`,
+      )
+      .sort();
+  }
+
+  expect(prettify(actualMissing)).toMatchInlineSnapshot(`
+    [
+      "⺀ via 冬, 头[HSK2], 尽",
+      "⺄ via 九[HSK1]",
+      "⺆ via 周[HSK2]",
+      "⺈ via 争[HSK3], 免, 欠, 色, 角[HSK2], 象, 负, 鱼[HSK2]",
+      "⺧ via 先[HSK1], 告",
+      "⺶ via 养[HSK2]",
+      "⺺ via 隶",
+      "〢 via 坚, 紧[HSK3]",
+      "コ via 彐",
+      "ュ via 候, 敢[HSK3]",
+      "㇀ via 七[HSK1]",
+      "㇂ via 民",
+      "㇇ via 今, 水[HSK1]",
+      "㇉ via 丂",
+      "㇖ via 疋",
+      "㐄 via 舛",
+      "㐫 via 离[HSK2], 脑",
+      "㐬 via 流[HSK2]",
+      "㔾 via 危",
+      "㔿 via 耳",
+      "㝵 via 得[HSK2]",
+      "㡀 via 黹",
+      "䏍 via 能[HSK1]",
+      "丅 via 斤[HSK2], 鬲",
+      "丆 via 才[HSK2], 石, 面[HSK2], 页[HSK1]",
+      "丙 via 病[HSK1]",
+      "並 via 普, 碰[HSK2]",
+      "丩 via 叫[HSK1], 收[HSK2], 爿",
+      "丬 via 将, 状",
+      "乀 via 乂, 水[HSK1]",
+      "乁 via 气[HSK2]",
+      "乇 via 毛[HSK1]",
+      "乔 via 桥[HSK3]",
+      "乛 via 买[HSK1], 了[HSK1]",
+      "乞 via 吃[HSK1]",
+      "亇 via 竹",
+      "予 via 舒, 预",
+      "亍 via 行[HSK1], 街[HSK2]",
+      "亘 via 宣",
+      "亦 via 变[HSK2]",
+      "亭 via 停[HSK2]",
+      "亽 via 今, 令",
+      "仌 via 肉[HSK1]",
+      "仑 via 论",
+      "仓 via 创",
+      "余 via 除",
+      "俞 via 输[HSK3]",
+      "允 via 充",
+      "兆 via 跳[HSK3]",
+      "兑 via 说[HSK1]",
+      "兰 via 羊[HSK3]",
+      "冃 via 冒",
+      "円 via 靑",
+      "冈 via 刚[HSK2]",
+      "冉 via 再[HSK1]",
+      "冋 via 向[HSK2], 高[HSK1]",
+      "冏 via 商",
+      "凡 via 赢[HSK3]",
+      "刍 via 急[HSK2]",
+      "刖 via 前[HSK1]",
+      "列 via 例, 烈",
+      "勺 via 的[HSK1], 约[HSK3]",
+      "卄 via 甘, 龷",
+      "卅 via 带[HSK2]",
+      "卌 via 舞",
+      "卑 via 啤, 牌",
+      "卬 via 迎",
+      "却 via 脚[HSK2]",
+      "厃 via 危",
+      "厄 via 顾",
+      "叚 via 假[HSK2]",
+      "叩 via 命",
+      "召 via 绍, 超",
+      "吉 via 结",
+      "吏 via 使[HSK3]",
+      "吕 via 营",
+      "君 via 群[HSK3], 裙",
+      "吴 via 误",
+      "吾 via 语",
+      "呆 via 保[HSK3]",
+      "呈 via 程",
+      "咅 via 部[HSK3]",
+      "咸 via 喊[HSK2], 感",
+      "唐 via 糖[HSK3]",
+      "啬 via 墙[HSK2]",
+      "喿 via 澡",
+      "囬 via 面[HSK2]",
+      "圡 via 压[HSK3]",
+      "圣 via 怪",
+      "垂 via 睡[HSK1]",
+      "壬 via 任[HSK3]",
+      "壮 via 装[HSK2]",
+      "壴 via 喜, 鼓",
+      "央 via 英",
+      "奂 via 换[HSK2]",
+      "奴 via 努",
+      "妾 via 接[HSK2]",
+      "娄 via 数[HSK2], 楼[HSK1]",
+      "孝 via 教[HSK1]",
+      "孰 via 熟[HSK2]",
+      "官 via 管[HSK3], 馆",
+      "宛 via 碗[HSK2]",
+      "寅 via 演[HSK3]",
+      "射 via 谢",
+      "尔 via 你[HSK1], 称[HSK2]",
+      "尺 via 尽",
+      "尼 via 呢[HSK1]",
+      "居 via 剧, 据",
+      "屯 via 顿[HSK3]",
+      "川 via 训, 顺",
+      "巩 via 恐",
+      "帀 via 师",
+      "庄 via 脏[HSK2]",
+      "库 via 裤",
+      "廷 via 庭, 挺[HSK2]",
+      "廿 via 世, 度[HSK2], 革",
+      "弗 via 费[HSK3]",
+      "彑 via 互",
+      "彦 via 颜",
+      "戉 via 越[HSK2]",
+      "戊 via 成[HSK2]",
+      "戶 via 所[HSK3]",
+      "扁 via 篇[HSK2], 遍[HSK2]",
+      "执 via 势, 热[HSK1]",
+      "敕 via 整[HSK3]",
+      "敬 via 警",
+      "斥 via 诉",
+      "斿 via 游[HSK3]",
+      "既 via 概",
+      "旨 via 指[HSK3]",
+      "昌 via 唱[HSK1]",
+      "昏 via 婚",
+      "昭 via 照[HSK3]",
+      "昷 via 温",
+      "曷 via 喝[HSK1], 渴[HSK1]",
+      "杲 via 桌",
+      "林 via 楚, 麻",
+      "氾 via 范",
+      "泉 via 原",
+      "洛 via 落",
+      "炎 via 谈[HSK3]",
+      "焦 via 蕉",
+      "爰 via 暖",
+      "玨 via 班[HSK1]",
+      "甬 via 痛[HSK3], 通[HSK2]",
+      "甲 via 单, 里[HSK1]",
+      "申 via 神",
+      "甶 via 鬼",
+      "畀 via 鼻",
+      "番 via 播",
+      "监 via 篮, 蓝[HSK2]",
+      "祭 via 察",
+      "禹 via 属[HSK3]",
+      "竟 via 境",
+      "罒 via 曼",
+      "罙 via 深[HSK3]",
+      "肀 via 聿",
+      "肖 via 消",
+      "肰 via 然",
+      "胡 via 湖[HSK2]",
+      "舍 via 舒",
+      "苗 via 猫[HSK2]",
+      "董 via 懂[HSK2]",
+      "覀 via 票[HSK1], 要[HSK1], 鹿",
+      "觜 via 嘴[HSK2]",
+      "贯 via 惯",
+      "迶 via 随[HSK3]",
+      "邦 via 帮[HSK1]",
+      "镸 via 套[HSK2], 髟",
+      "阿 via 啊[HSK2]",
+      "龰 via 疋, 走[HSK1], 足",
+      "龱 via 卤",
+      "龴 via 令, 矛",
+      "龵 via 看[HSK1]",
+      "𠀐 via 贵[HSK1]",
+      "𠂈 via 亥",
+      "𠂋 via 后[HSK1]",
+      "𠂢 via 派[HSK3]",
+      "𠂤 via 追[HSK3]",
+      "𠃊 via 亡, 断[HSK3], 继",
+      "𠃓 via 场[HSK2], 汤[HSK3]",
+      "𠃜 via 声",
+      "𠄎 via 乃",
+      "𠄐 via 矛",
+      "𠕁 via 龠",
+      "𠕒 via 雨[HSK1]",
+      "𠚍 via 鬯",
+      "𠚕 via 齒",
+      "𠤎 via 化[HSK3]",
+      "𠦝 via 朝[HSK3]",
+      "𠫓 via 育",
+      "𠫔 via 至",
+      "𠬝 via 报[HSK3], 服",
+      "𠮛 via 司, 同, 畐, 豆, 鬲",
+      "𠮦 via 总[HSK3]",
+      "𠮷 via 周[HSK2]",
+      "𠱠 via 龠",
+      "𡗗 via 春",
+      "𡨄 via 赛",
+      "𡿨 via 巛",
+      "𢀖 via 经, 轻[HSK2]",
+      "𢆉 via 南[HSK1], 幸",
+      "𢎨 via 弟, 第[HSK1]",
+      "𣥂 via 步[HSK3]",
+      "𣦼 via 餐",
+      "𤴓 via 定, 是[HSK1]",
+      "𦍌 via 美[HSK3]",
+      "𦓐 via 而",
+      "𦣻 via 夏",
+      "𧰨 via 豕",
+      "𨈑 via 身",
+      "𪧷 via 将",
+      "𫝀 via 五[HSK1]",
+      "𫠠 via 弋",
+      "𫠣 via 练[HSK2]",
+      "𫧇 via 能[HSK1]",
+      "𫩠 via 堂, 常[HSK1]",
+      "𫲸 via 害",
+      "𬜯 via 满[HSK2]",
+      "𭥴 via 曾",
+      "𭷔 via 解",
+      " via 夜[HSK2]",
+    ]
+  `);
 });
 
 test(`dictionary structural components list`, async () => {
@@ -478,19 +730,16 @@ test(`dictionary structural components list`, async () => {
   `);
 });
 
-async function debugNonCjkUnifiedIdeographs(chars: string[]): Promise<string> {
-  const swaps = [];
-
-  for (const x of chars) {
-    const unified = await kangxiRadicalToCjkRadical(x);
-    const msg =
-      unified == null
-        ? `${x} -> ???`
-        : `${x} (${x.codePointAt(0)?.toString(16)}) -> ${unified} (${unified.codePointAt(0)?.toString(16)})`;
-    swaps.push(msg);
-  }
-
-  return swaps.join(`, `);
+async function loadDebugNonCjkUnifiedIdeograph(): Promise<
+  (char: string) => string
+> {
+  const kangxiRadicalToCjkRadical = await loadKangxiRadicalToCjkRadical();
+  return (char: string) => {
+    const unified = kangxiRadicalToCjkRadical(char);
+    return unified == null
+      ? `${char} -> ???`
+      : `${char} (${char.codePointAt(0)?.toString(16)}) -> ${unified} (${unified.codePointAt(0)?.toString(16)})`;
+  };
 }
 
 function isCjkUnifiedIdeograph(char: string): boolean {
@@ -513,28 +762,29 @@ function isNotCjkUnifiedIdeograph(char: string): boolean {
   return !isCjkUnifiedIdeograph(char);
 }
 
-async function kangxiRadicalToCjkRadical(
-  kangxi: string,
-): Promise<string | undefined> {
-  const xCodePoint = kangxi.codePointAt(0)!;
-
+async function loadKangxiRadicalToCjkRadical(): Promise<
+  (kangxi: string) => string | undefined
+> {
   const { EquivalentUnifiedIdeograph } = await import(
     `ucd-full/EquivalentUnifiedIdeograph.json`
   );
+  return (kangxi: string): string | undefined => {
+    const xCodePoint = kangxi.codePointAt(0)!;
 
-  const newCodePoint = EquivalentUnifiedIdeograph.find((rule) => {
-    const minHex = rule.range[0]!;
-    const maxHex = rule.range[1] ?? rule.range[0]!;
+    const newCodePoint = EquivalentUnifiedIdeograph.find((rule) => {
+      const minHex = rule.range[0]!;
+      const maxHex = rule.range[1] ?? rule.range[0]!;
 
-    const min = Number.parseInt(minHex, 16);
-    const max = Number.parseInt(maxHex, 16);
+      const min = Number.parseInt(minHex, 16);
+      const max = Number.parseInt(maxHex, 16);
 
-    return xCodePoint >= min && xCodePoint <= max;
-  })?.unified;
+      return xCodePoint >= min && xCodePoint <= max;
+    })?.unified;
 
-  if (newCodePoint != null) {
-    return String.fromCodePoint(Number.parseInt(newCodePoint, 16));
-  }
+    if (newCodePoint != null) {
+      return String.fromCodePoint(Number.parseInt(newCodePoint, 16));
+    }
+  };
 }
 
 describe(

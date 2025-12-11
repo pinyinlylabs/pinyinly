@@ -23,5 +23,7 @@
       }
     ]
   },
-  "decompositions": ["⿱兴⿻二丨"]
+  "decompositions": [
+    ["⿱", { "hanzi": "兴" }, ["⿻", { "hanzi": "二" }, { "hanzi": "丨" }]]
+  ]
 }

@@ -1,5 +1,5 @@
 {
-  "decompositions": ["⿰丨王"],
+  "decompositions": [["⿰", { "hanzi": "丨" }, { "hanzi": "王" }]],
   "hanzi": "𩰋",
   "mnemonic": {
     "components": { "hanzi": "𩰋" }

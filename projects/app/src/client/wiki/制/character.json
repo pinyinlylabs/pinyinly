@@ -21,5 +21,7 @@
       { "hanzi": "刂", "strokes": "6-7" }
     ]
   },
-  "decompositions": ["⿰⿻牛冂刂"]
+  "decompositions": [
+    ["⿰", ["⿻", { "hanzi": "牛" }, { "hanzi": "冂" }], { "hanzi": "刂" }]
+  ]
 }

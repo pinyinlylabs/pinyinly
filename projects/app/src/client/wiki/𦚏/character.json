@@ -1,5 +1,5 @@
 {
   "hanzi": "𦚏",
   "strokes": 9,
-  "decompositions": ["⿱立月"]
+  "decompositions": [["⿱", { "hanzi": "立" }, { "hanzi": "月" }]]
 }

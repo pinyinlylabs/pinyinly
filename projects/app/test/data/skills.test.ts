@@ -22,10 +22,10 @@ import {
   walkSkillAndDependencies,
 } from "#data/skills.ts";
 import {
-  allHsk1HanziWords,
-  allHsk2HanziWords,
-  allHsk3HanziWords,
   getIsStructuralHanzi,
+  loadHsk1HanziWords,
+  loadHsk2HanziWords,
+  loadHsk3HanziWords,
 } from "#dictionary.ts";
 import { Rating } from "#util/fsrs.ts";
 import { r } from "#util/rizzle.ts";
@@ -330,9 +330,9 @@ describe(
     test(`works for hsk words`, async () => {
       await skillLearningGraph({
         targetSkills: [
-          ...(await allHsk1HanziWords()),
-          ...(await allHsk2HanziWords()),
-          ...(await allHsk3HanziWords()),
+          ...(await loadHsk1HanziWords()),
+          ...(await loadHsk2HanziWords()),
+          ...(await loadHsk3HanziWords()),
         ].map((w) => hanziWordToGloss(w)),
       });
     });
@@ -1588,11 +1588,13 @@ describe(
               "he:𠃌:radical (🌱 NEW SKILL)",
               "he:丨:line (🌱 NEW SKILL)",
               "he:一:one (🌱 NEW SKILL)",
+              "he:丶:dot (🌱 NEW SKILL)",
               "he:乚:hidden (🌱 NEW SKILL)",
               "he:丿:slash (🌱 NEW SKILL)",
               "he:灬:fire (🌱 NEW SKILL)",
               "he:冂:wide (🟥 BLOCKED)",
               "he:口:mouth (🟥 BLOCKED)",
+              "he:卜:divine (🟥 BLOCKED)",
               "he:占:occupy (🟥 BLOCKED)",
               "he:儿:son (🟥 BLOCKED)",
               "he:点:oClock (🟥 BLOCKED)",

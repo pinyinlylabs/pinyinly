@@ -31,5 +31,15 @@
       ]
     ]
   },
-  "decompositions": ["⿸尸⿱龷⿰𠄌⿺乀丿"]
+  "decompositions": [
+    [
+      "⿸",
+      { "hanzi": "尸" },
+      [
+        "⿱",
+        { "hanzi": "龷" },
+        ["⿰", { "hanzi": "𠄌" }, ["⿺", { "hanzi": "乀" }, { "hanzi": "丿" }]]
+      ]
+    ]
+  ]
 }

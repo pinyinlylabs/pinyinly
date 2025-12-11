@@ -253,7 +253,7 @@
   ],
   [
     "𠂆",
-    {"componentFormOf":"厂"}
+    {"canonicalForm":"厂"}
   ],
   [
     "𠂇",
@@ -1233,7 +1233,7 @@
   ],
   [
     "⺊",
-    {"decomposition":"⿰丨①"}
+    {"canonicalForm":"卜","decomposition":"⿰丨丶"}
   ],
   [
     "占",
@@ -2141,7 +2141,7 @@
   ],
   [
     "⺌",
-    {"componentFormOf":"小"}
+    {"canonicalForm":"𭕄","componentFormOf":"小"}
   ],
   [
     "⺍",
@@ -2249,7 +2249,7 @@
   ],
   [
     "工",
-    {"decomposition":"⿱一丄"}
+    {}
   ],
   [
     "左",
@@ -5437,7 +5437,7 @@
   ],
   [
     "𩰊",
-    {"decomposition":"𩰊"}
+    {"canonicalForm":"𩰋","decomposition":"𩰊"}
   ],
   [
     "𩰋",

@@ -24,5 +24,7 @@
       { "hanzi": "攵", "strokes": "7-10" }
     ]
   },
-  "decompositions": ["⿰⿱乛耳攵"]
+  "decompositions": [
+    ["⿰", ["⿱", { "hanzi": "乛" }, { "hanzi": "耳" }], { "hanzi": "攵" }]
+  ]
 }

@@ -21,5 +21,7 @@
       }
     ]
   },
-  "decompositions": ["⿱⿱亠丷厂"]
+  "decompositions": [
+    ["⿱", ["⿱", { "hanzi": "亠" }, { "hanzi": "丷" }], { "hanzi": "厂" }]
+  ]
 }

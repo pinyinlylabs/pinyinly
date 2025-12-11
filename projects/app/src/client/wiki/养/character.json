@@ -18,5 +18,5 @@
       { "hanzi": "介", "strokes": "5-8" }
     ]
   },
-  "decompositions": ["⿱𦍌介"]
+  "decompositions": [["⿱", { "hanzi": "𦍌" }, { "hanzi": "介" }]]
 }

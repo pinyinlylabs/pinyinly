@@ -639,7 +639,7 @@ export const wikiCharacterDataSchema = z.strictObject({
   /**
    * Alternative IDS decompositions
    */
-  decompositions: z.array(z.string()).optional(),
+  decompositions: z.array(wikiCharacterDecompositionSchema).optional(),
   /**
    * The meaning mnemonic for the character. This doesn't necessarily correspond
    * to the etymological components, and their meanings can differ too. It's

@@ -17,10 +17,10 @@ import {
   skillLearningGraph,
 } from "@/data/skills";
 import {
-  allHsk1HanziWords,
-  allHsk2HanziWords,
   getIsStructuralHanzi,
   loadDictionary,
+  loadHsk1HanziWords,
+  loadHsk2HanziWords,
 } from "@/dictionary";
 import { devToolsSlowQuerySleepIfEnabled } from "@/util/devtools";
 import type { Rating } from "@/util/fsrs";
@@ -312,8 +312,8 @@ export const hanziWordsByRankQuery = (r: Rizzle) =>
 
 export async function getAllTargetHanziWords(): Promise<HanziWord[]> {
   const [hsk1HanziWords, hsk2HanziWords] = await Promise.all([
-    allHsk1HanziWords(),
-    allHsk2HanziWords(),
+    loadHsk1HanziWords(),
+    loadHsk2HanziWords(),
   ]);
 
   return [...hsk1HanziWords, ...hsk2HanziWords].filter(
