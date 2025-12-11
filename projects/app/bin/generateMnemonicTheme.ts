@@ -21,7 +21,7 @@ import path from "node:path";
 import yargs from "yargs";
 import { z } from "zod/v4";
 import { makeDbCache } from "./util/cache.js";
-import { dictionaryPath, readFileWithSchema } from "./util/fs.js";
+import { dataPath, readFileWithSchema } from "./util/fs.js";
 import { makeSimpleAiClient } from "./util/openai.js";
 
 const debug = makeDebug(`pyly`);
@@ -66,10 +66,7 @@ if (argv.debug) {
 
 const pinyinSoundThemeDetails = await loadPinyinSoundThemeDetails();
 
-const dataFilePath = path.join(
-  dictionaryPath,
-  `mnemonicThemeChoices.asset.json`,
-);
+const dataFilePath = path.join(dataPath, `mnemonicThemeChoices.asset.json`);
 const dbCache = makeDbCache(import.meta.filename, `openai_chat_cache`, debug);
 const openai = makeSimpleAiClient(dbCache);
 

@@ -20,7 +20,4 @@ export async function readFileWithSchema<Schema extends z.ZodType>(
   return schema.parse(JSON.parse(content));
 }
 
-export const dictionaryPath = path.join(
-  import.meta.dirname,
-  `../../src/dictionary/`,
-);
+export const dataPath = path.join(import.meta.dirname, `../../src/data/`);

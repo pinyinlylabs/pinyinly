@@ -38,9 +38,7 @@ export const loadPinyinWords = memoize0(async function loadPinyinWords() {
     .array(z.string())
     .transform(deepReadonly)
     .parse(
-      await import(`./dictionary/pinyinWords.asset.json`).then(
-        (x) => x.default,
-      ),
+      await import(`./data/pinyinWords.asset.json`).then((x) => x.default),
     );
 });
 
@@ -57,7 +55,7 @@ export const loadPinyinSoundThemeDetails = memoize0(
       .transform((x) => new Map(Object.entries(x)))
       .transform(deepReadonly)
       .parse(
-        await import(`./dictionary/pinyinSoundThemeDetails.asset.json`).then(
+        await import(`./data/pinyinSoundThemeDetails.asset.json`).then(
           (x) => x.default,
         ),
       );
@@ -92,7 +90,7 @@ export const loadPinyinSoundNameSuggestions = memoize0(
     return pinyinSoundNameSuggestionsSchema
       .transform(deepReadonly)
       .parse(
-        await import(`./dictionary/pinyinSoundNameSuggestions.asset.json`).then(
+        await import(`./data/pinyinSoundNameSuggestions.asset.json`).then(
           (x) => x.default,
         ),
       );
@@ -127,9 +125,7 @@ export const loadCharacters = memoize0(async function loadCharacters() {
   return charactersSchema
     .transform((x) => new Map(x))
     .transform(deepReadonly)
-    .parse(
-      await import(`./dictionary/characters.asset.json`).then((x) => x.default),
-    );
+    .parse(await import(`./data/characters.asset.json`).then((x) => x.default));
 });
 
 export const wordListSchema = z.array(hanziWordSchema);
@@ -139,7 +135,7 @@ export const loadKangXiRadicalsHanziWords = memoize0(
     return wordListSchema
       .transform(deepReadonly)
       .parse(
-        await import(`./dictionary/kangXiRadicalsHanziWords.asset.json`).then(
+        await import(`./data/kangXiRadicalsHanziWords.asset.json`).then(
           (x) => x.default,
         ),
       );
@@ -150,9 +146,7 @@ export const loadHsk1HanziWords = memoize0(async function loadHsk1HanziWords() {
   return wordListSchema
     .transform(deepReadonly)
     .parse(
-      await import(`./dictionary/hsk1HanziWords.asset.json`).then(
-        (x) => x.default,
-      ),
+      await import(`./data/hsk1HanziWords.asset.json`).then((x) => x.default),
     );
 });
 
@@ -160,9 +154,7 @@ export const loadHsk2HanziWords = memoize0(async function loadHsk2HanziWords() {
   return wordListSchema
     .transform(deepReadonly)
     .parse(
-      await import(`./dictionary/hsk2HanziWords.asset.json`).then(
-        (x) => x.default,
-      ),
+      await import(`./data/hsk2HanziWords.asset.json`).then((x) => x.default),
     );
 });
 
@@ -170,9 +162,7 @@ export const loadHsk3HanziWords = memoize0(async function loadHsk3HanziWords() {
   return wordListSchema
     .transform(deepReadonly)
     .parse(
-      await import(`./dictionary/hsk3HanziWords.asset.json`).then(
-        (x) => x.default,
-      ),
+      await import(`./data/hsk3HanziWords.asset.json`).then((x) => x.default),
     );
 });
 
@@ -216,9 +206,7 @@ export type Dictionary = z.infer<typeof dictionarySchema>;
 export const loadDictionaryJson = memoize0(async () =>
   dictionarySchema
     .transform(deepReadonly)
-    .parse(
-      await import(`./dictionary/dictionary.asset.json`).then((x) => x.default),
-    ),
+    .parse(await import(`./data/dictionary.asset.json`).then((x) => x.default)),
 );
 
 export const hanziWordMigrationsSchema = z
@@ -237,7 +225,7 @@ export const loadHanziWordMigrations = memoize0(
     return hanziWordMigrationsSchema
       .transform(deepReadonly)
       .parse(
-        await import(`./dictionary/hanziWordMigrations.asset.json`).then(
+        await import(`./data/hanziWordMigrations.asset.json`).then(
           (x) => x.default,
         ),
       );
@@ -256,7 +244,7 @@ export const loadKangXiRadicalsStrokes = memoize0(async () =>
     .transform((x) => new Map(x.map((r) => [r.strokes, r])))
     .transform(deepReadonly)
     .parse(
-      await import(`./dictionary/kangXiRadicalsStrokes.asset.json`).then(
+      await import(`./data/kangXiRadicalsStrokes.asset.json`).then(
         (x) => x.default,
       ),
     ),

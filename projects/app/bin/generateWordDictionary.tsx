@@ -72,7 +72,7 @@ import {
   getDongChineseMeaningKey,
   getDongChinesePronunciation,
 } from "./util/dongChinese.js";
-import { dictionaryPath, readFileWithSchema } from "./util/fs.js";
+import { dataPath, readFileWithSchema } from "./util/fs.js";
 import { makeSimpleAiClient } from "./util/openai.js";
 
 const debug = makeDebug(`pyly`);
@@ -2135,7 +2135,7 @@ const SemiColonList = ({ items }: { items: readonly string[] }) => (
   </>
 );
 
-const dictionaryFilePath = path.join(dictionaryPath, `dictionary.asset.json`);
+const dictionaryFilePath = path.join(dataPath, `dictionary.asset.json`);
 
 const readDictionary = (): Promise<Dictionary> =>
   readFileWithSchema(dictionaryFilePath, dictionarySchema, new Map());
@@ -2233,7 +2233,7 @@ function useHanziWordList(wordListFileName: string) {
 
 async function readHanziWordList(name: string) {
   return await readFileWithSchema(
-    path.join(dictionaryPath, `${name}.asset.json`),
+    path.join(dataPath, `${name}.asset.json`),
     wordListSchema,
     [],
   );
@@ -2241,7 +2241,7 @@ async function readHanziWordList(name: string) {
 
 async function writeHanziWordList(wordListFileName: string, data: HanziWord[]) {
   await writeJsonFileIfChanged(
-    path.join(dictionaryPath, `${wordListFileName}.asset.json`),
+    path.join(dataPath, `${wordListFileName}.asset.json`),
     data.sort(),
   );
 }
