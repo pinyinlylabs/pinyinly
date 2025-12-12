@@ -8,16 +8,15 @@ import {
   memoize0,
   sortComparatorNumber,
 } from "@pinyinly/lib/collections";
+import { fetchWithFsDbCache, makeFsDbCache } from "@pinyinly/lib/fs";
 import { z } from "zod/v4";
-import { makeDbCache } from "./cache.js";
-import { fetchWithCache } from "./fetch.js";
 
-const dbCache = makeDbCache(import.meta.filename);
+const fsDbCache = makeFsDbCache(import.meta.filename);
 
 export const dongChineseData = memoize0(async () => {
-  const rawJsonl = await fetchWithCache(
+  const rawJsonl = await fetchWithFsDbCache(
     `https://data.dong-chinese.com/dump/dictionary_char_2024-06-17.jsonl`,
-    { dbCache },
+    { fsDbCache },
   );
 
   const data = rawJsonl

@@ -14,13 +14,12 @@ import {
   merge,
   sortComparatorString,
 } from "@pinyinly/lib/collections";
-import { writeJsonFileIfChanged } from "@pinyinly/lib/fs";
+import { makeFsDbCache, writeJsonFileIfChanged } from "@pinyinly/lib/fs";
 import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import makeDebug from "debug";
 import path from "node:path";
 import yargs from "yargs";
 import { z } from "zod/v4";
-import { makeDbCache } from "./util/cache.js";
 import { dataPath, readFileWithSchema } from "./util/fs.js";
 import { makeSimpleAiClient } from "./util/openai.js";
 
@@ -67,8 +66,12 @@ if (argv.debug) {
 const pinyinSoundThemeDetails = await loadPinyinSoundThemeDetails();
 
 const dataFilePath = path.join(dataPath, `mnemonicThemeChoices.asset.json`);
-const dbCache = makeDbCache(import.meta.filename, `openai_chat_cache`, debug);
-const openai = makeSimpleAiClient(dbCache);
+const fsDbCache = makeFsDbCache(
+  import.meta.filename,
+  `openai_chat_cache`,
+  debug,
+);
+const openai = makeSimpleAiClient(fsDbCache);
 
 for (const groupId of argv.groupIds) {
   for (const theme of argv.themes) {

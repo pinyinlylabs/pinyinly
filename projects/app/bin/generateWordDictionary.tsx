@@ -45,7 +45,7 @@ import {
   sortComparatorNumber,
   sortComparatorString,
 } from "@pinyinly/lib/collections";
-import { writeJsonFileIfChanged } from "@pinyinly/lib/fs";
+import { makeFsDbCache, writeJsonFileIfChanged } from "@pinyinly/lib/fs";
 import { invariant } from "@pinyinly/lib/invariant";
 import {
   QueryClient,
@@ -65,7 +65,6 @@ import { Children, useCallback, useEffect, useMemo, useState } from "react";
 import type { DeepReadonly } from "ts-essentials";
 import yargs from "yargs";
 import { z } from "zod/v4";
-import { makeDbCache } from "./util/cache.js";
 import {
   dongChineseData,
   getDongChineseGloss,
@@ -92,13 +91,17 @@ if (argv.debug) {
 }
 
 const charactersData = await loadCharacters();
-const dbCache = makeDbCache(import.meta.filename, `openai_chat_cache`, debug);
-const archiveCache = makeDbCache(
+const fsDbCache = makeFsDbCache(
+  import.meta.filename,
+  `openai_chat_cache`,
+  debug,
+);
+const archiveCache = makeFsDbCache(
   import.meta.filename,
   `archive_messages`,
   debug,
 );
-const openai = makeSimpleAiClient(dbCache);
+const openai = makeSimpleAiClient(fsDbCache);
 
 const wordListFileNames = [
   `hsk1HanziWords`,

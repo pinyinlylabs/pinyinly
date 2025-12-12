@@ -4,7 +4,9 @@ import { wikiCharacterDataSchema } from "#data/model.js";
 import { normalizeIndexRanges } from "#util/indexRanges.ts";
 import {
   existsSync,
+  fetchWithFsDbCache,
   glob,
+  makeFsDbCache,
   mkdirSync,
   readFileSync,
   updateJsonFileKey,
@@ -16,8 +18,6 @@ import isEqual from "lodash/isEqual.js";
 import path from "node:path";
 import yargs from "yargs";
 import z from "zod/v4";
-import { makeDbCache } from "./util/cache.js";
-import { fetchWithCache } from "./util/fetch.js";
 
 const debug = makeDebug(`pyly`);
 
@@ -44,7 +44,7 @@ if (argv.debug) {
   makeDebug.enable(`${debug.namespace},${debug.namespace}:*`);
 }
 
-const dbCache = makeDbCache(import.meta.filename, `fetch_cache`, debug);
+const fsDbCache = makeFsDbCache(import.meta.filename, `fetch_cache`, debug);
 const jsonlSchema = z.string().transform((str) =>
   str
     .split(`\n`)
@@ -77,9 +77,9 @@ export const graphicsRecordSchema = z
 export type GraphicsRecord = z.infer<typeof graphicsRecordSchema>;
 
 const graphicsDataByCharacter = await (async () => {
-  const rawJsonl = await fetchWithCache(
+  const rawJsonl = await fetchWithFsDbCache(
     `https://raw.githubusercontent.com/skishore/makemeahanzi/refs/heads/master/graphics.txt`,
-    { dbCache },
+    { fsDbCache },
   );
 
   const data = jsonlSchema
@@ -95,9 +95,9 @@ const graphicsDataByCharacter = await (async () => {
 })();
 
 const dictionaryDataByCharacter = await (async () => {
-  const rawJsonl = await fetchWithCache(
+  const rawJsonl = await fetchWithFsDbCache(
     `https://raw.githubusercontent.com/skishore/makemeahanzi/refs/heads/master/dictionary.txt`,
-    { dbCache },
+    { fsDbCache },
   );
 
   const data = jsonlSchema

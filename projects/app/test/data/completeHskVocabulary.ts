@@ -1,10 +1,9 @@
 import { hanziCharacterSchema, hanziTextSchema } from "#data/model.ts";
 import { memoize0 } from "@pinyinly/lib/collections";
+import { fetchWithFsDbCache, makeFsDbCache } from "@pinyinly/lib/fs";
 import { z } from "zod/v4";
-import { makeDbCache } from "./cache.js";
-import { fetchWithCache } from "./fetch.js";
 
-const dbCache = makeDbCache(import.meta.filename);
+const fsDbCache = makeFsDbCache(import.meta.filename);
 
 export const completeHskVocabularyItemSchema = z
   .object({
@@ -112,9 +111,9 @@ export type CompleteHskVocabularyItem = z.infer<
 >;
 
 export const loadCompleteHskVocabulary = memoize0(async () => {
-  const rawJson = await fetchWithCache(
+  const rawJson = await fetchWithFsDbCache(
     `https://raw.githubusercontent.com/drkameleon/complete-hsk-vocabulary/refs/heads/main/complete.json`,
-    { dbCache },
+    { fsDbCache },
   );
 
   const data = z

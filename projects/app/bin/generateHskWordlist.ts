@@ -1,7 +1,7 @@
 import { hanziFromHanziWord, loadHsk2HanziWords } from "#dictionary.js";
 import makeDebug from "debug";
 import yargs from "yargs";
-import { loadCompleteHskVocabulary } from "./util/completeHskVocabulary.ts";
+import { loadCompleteHskVocabulary } from "../test/data/completeHskVocabulary.ts";
 
 const debug = makeDebug(`pyly`);
 
