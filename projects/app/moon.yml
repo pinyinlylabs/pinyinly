@@ -51,7 +51,7 @@ tasks:
     deps:
       - ~:codegen
     env:
-      NODE_OPTIONS: --import tsx $NODE_OPTIONS
+      NODE_OPTIONS: --import tsx --disable-warning=ExperimentalWarning $NODE_OPTIONS
     options:
       envFile: .env.local
       mutex: expo-export # reduce IO contention
@@ -85,7 +85,7 @@ tasks:
     outputs:
       - "@group(buildVercelExpoOutdir)"
     env:
-      NODE_OPTIONS: --import tsx $NODE_OPTIONS
+      NODE_OPTIONS: --import tsx --disable-warning=ExperimentalWarning $NODE_OPTIONS
 
   buildVercelExpoSentry:
     script: |
@@ -108,7 +108,7 @@ tasks:
     options:
       envFile: .env.local
     env:
-      NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
+      NODE_OPTIONS: --disable-warning=ExperimentalWarning $NODE_OPTIONS
 
   codegen:
     deps:
@@ -135,7 +135,7 @@ tasks:
     deps:
       - eslint-rules:src
     env:
-      NODE_OPTIONS: --import tsx $NODE_OPTIONS
+      NODE_OPTIONS: --import tsx --disable-warning=ExperimentalWarning $NODE_OPTIONS
     toolchain: "node"
 
   codegenExpoRouterTypes:
@@ -150,7 +150,7 @@ tasks:
       # in the package.json or use the .mjs extension.
       #
       # Pass $NODE_OPTIONS to support VS Code "JavaScript Debug Terminal".
-      NODE_OPTIONS: --import tsx $NODE_OPTIONS
+      NODE_OPTIONS: --import tsx --disable-warning=ExperimentalWarning $NODE_OPTIONS
 
   dbCheck:
     command: drizzle-kit check
@@ -168,7 +168,7 @@ tasks:
     options:
       envFile: .env.local
     env:
-      NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
+      NODE_OPTIONS: --disable-warning=ExperimentalWarning $NODE_OPTIONS
 
   deploy:
     deps:
@@ -229,7 +229,7 @@ tasks:
       # in the package.json or use the .mjs extension.
       #
       # Pass $NODE_OPTIONS to support VS Code "JavaScript Debug Terminal".
-      NODE_OPTIONS: --import tsx $NODE_OPTIONS
+      NODE_OPTIONS: --import tsx --disable-warning=ExperimentalWarning $NODE_OPTIONS
 
   devInngest:
     command: npx -y inngest-cli@1.14.0 dev
@@ -241,7 +241,7 @@ tasks:
     options:
       envFile: .env.local
     env:
-      NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
+      NODE_OPTIONS: --disable-warning=ExperimentalWarning $NODE_OPTIONS
 
   generateHskWordlist:
     command: tsx --tsconfig tsconfig.node.json ./bin/generateHskWordlist.ts
@@ -249,7 +249,7 @@ tasks:
     options:
       envFile: .env.local
     env:
-      NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
+      NODE_OPTIONS: --disable-warning=ExperimentalWarning $NODE_OPTIONS
 
   generateMissingFontGlyphs:
     command: tsx --tsconfig tsconfig.node.json ./bin/generateMissingFontGlyphs.ts
@@ -257,7 +257,7 @@ tasks:
     options:
       envFile: .env.local
     env:
-      NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
+      NODE_OPTIONS: --disable-warning=ExperimentalWarning $NODE_OPTIONS
 
   generateMnemonicTheme:
     command: tsx --tsconfig tsconfig.node.json ./bin/generateMnemonicTheme.ts
@@ -265,7 +265,7 @@ tasks:
     options:
       envFile: .env.local
     env:
-      NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
+      NODE_OPTIONS: --disable-warning=ExperimentalWarning $NODE_OPTIONS
 
   generateRadicalNameMnemonics:
     command: tsx --tsconfig tsconfig.node.json ./bin/generateRadicalNameMnemonics.ts
@@ -273,7 +273,7 @@ tasks:
     options:
       envFile: .env.local
     env:
-      NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
+      NODE_OPTIONS: --disable-warning=ExperimentalWarning $NODE_OPTIONS
 
   generateWikiCharacterStrokes:
     command: tsx --tsconfig tsconfig.node.json ./bin/generateWikiCharacterStrokes.ts
@@ -281,7 +281,7 @@ tasks:
     options:
       envFile: .env.local
     env:
-      NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
+      NODE_OPTIONS: --disable-warning=ExperimentalWarning $NODE_OPTIONS
 
   generateWordDictionary:
     command: tsx --tsconfig tsconfig.node.json ./bin/generateWordDictionary.tsx
@@ -289,7 +289,7 @@ tasks:
     options:
       envFile: .env.local
     env:
-      NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
+      NODE_OPTIONS: --disable-warning=ExperimentalWarning $NODE_OPTIONS
 
   generateWikiSpeech:
     command: tsx --tsconfig tsconfig.node.json ./bin/generateWikiSpeech.ts
@@ -297,7 +297,7 @@ tasks:
     options:
       envFile: .env.local
     env:
-      NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
+      NODE_OPTIONS: --disable-warning=ExperimentalWarning $NODE_OPTIONS
 
   expoDoctor:
     command: npx -y expo-doctor@1.15.1
@@ -318,7 +318,7 @@ tasks:
     deps:
       - ~:codegen
     env:
-      NODE_OPTIONS: --experimental-sqlite $NODE_OPTIONS
+      NODE_OPTIONS: --disable-warning=ExperimentalWarning $NODE_OPTIONS
     options:
       envFile: .env.local
 
