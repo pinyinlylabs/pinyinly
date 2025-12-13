@@ -6021,20 +6021,20 @@ __metadata:
   linkType: hard
 
 "@react-navigation/stack@npm:^7.0.0":
-  version: 7.6.8
-  resolution: "@react-navigation/stack@npm:7.6.8"
+  version: 7.6.12
+  resolution: "@react-navigation/stack@npm:7.6.12"
   dependencies:
-    "@react-navigation/elements": "npm:^2.8.4"
+    "@react-navigation/elements": "npm:^2.9.2"
     color: "npm:^4.2.3"
     use-latest-callback: "npm:^0.2.4"
   peerDependencies:
-    "@react-navigation/native": ^7.1.22
+    "@react-navigation/native": ^7.1.25
     react: ">= 18.2.0"
     react-native: "*"
     react-native-gesture-handler: ">= 2.0.0"
     react-native-safe-area-context: ">= 4.0.0"
     react-native-screens: ">= 4.0.0"
-  checksum: 10c0/39ea543ab7e274f6952e1024321cab32d78be2589f095224572d9cbb7ef51efb8047f2c2572a09e1430c8b7d4889eef0a55396ddd14fc73b5a4a4e4ef79c6475
+  checksum: 10c0/342473e6d1d1e55732c3d6ffecad30f6debab02ea8cbfb72614c3c2966f840c251f80b91b894440376005c4680e0da15d37f93e210fa3fe8f44a7bb858dd3750
   languageName: node
   linkType: hard
 
