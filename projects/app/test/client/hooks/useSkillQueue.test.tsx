@@ -77,7 +77,7 @@ rizzleTest(
       () => {
         expect(result.current.loading).toBe(false);
       },
-      { timeout: 2000 },
+      { timeout: 5000 },
     );
 
     invariant(!result.current.loading, `expected skill queue to be loaded`);

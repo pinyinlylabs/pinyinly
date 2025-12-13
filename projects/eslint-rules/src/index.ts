@@ -10,11 +10,11 @@ import tailwindPlugin from "eslint-plugin-tailwindcss";
 import unicorn from "eslint-plugin-unicorn";
 import type { defineConfig } from "eslint/config";
 import tseslint from "typescript-eslint";
-import { globTemplate as globTemplateRule } from "./glob-template.js";
-import { importNames as importNamesRule } from "./import-names.js";
-import { importPathRewrite as importPathRewriteRule } from "./import-path-rewrite.js";
-import { nameof as nameofRule } from "./nameof.js";
-import { noRestrictedCssClasses as noRestrictedCssClassesRule } from "./no-restricted-css-classes.js";
+import { globTemplate as globTemplateRule } from "./glob-template.ts";
+import { importNames as importNamesRule } from "./import-names.ts";
+import { importPathRewrite as importPathRewriteRule } from "./import-path-rewrite.ts";
+import { nameof as nameofRule } from "./nameof.ts";
+import { noRestrictedCssClasses as noRestrictedCssClassesRule } from "./no-restricted-css-classes.ts";
 
 export { includeIgnoreFile } from "@eslint/compat";
 

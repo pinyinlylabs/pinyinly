@@ -211,7 +211,7 @@ export function QuizDeckHanziWordToPinyinTypedQuestion({
               {intersperse(
                 bannedMeaningPinyinHint.map((pinyin, i) => (
                   <Text className="pyly-bold" key={i}>
-                    {pinyin.join(` `)}
+                    {pinyin}
                   </Text>
                 )),
                 <Text>

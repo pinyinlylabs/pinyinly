@@ -39,7 +39,7 @@ import {
 } from "@pinyinly/lib/invariant";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
-import { dictionaryDir, getFonts, projectRoot, wikiDir } from "../helpers.ts";
+import { dataDir, getFonts, projectRoot, wikiDir } from "../helpers.ts";
 
 describe(`speech files`, async () => {
   await createSpeechFileTests({
@@ -467,7 +467,7 @@ describe(`character.json files`, async () => {
 
     if (!IS_CI) {
       await writeJsonFileIfChanged(
-        path.join(dictionaryDir, `characters.asset.json`),
+        path.join(dataDir, `characters.asset.json`),
         [...expected.entries()].sort(
           sortComparatorString(([character]) => character),
         ),

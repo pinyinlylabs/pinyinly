@@ -9,7 +9,7 @@ import type {
   UnsavedSkillRating,
 } from "@/data/model";
 import { MistakeKind } from "@/data/model";
-import { pinyinPronunciationDisplayText } from "@/data/pinyin";
+import { pinyinSyllableCount } from "@/data/pinyin";
 import { computeSkillRating } from "@/data/skills";
 import { invariant, uniqueInvariant } from "@pinyinly/lib/invariant";
 
@@ -24,7 +24,7 @@ export function oneCorrectPairChoiceText(
       return choice.value;
     }
     case `pinyin`: {
-      return pinyinPronunciationDisplayText(choice.value);
+      return choice.value;
     }
   }
 }
@@ -37,7 +37,7 @@ export function hanziOrPinyinSyllableCount(
       return hanziCharacterCount(choice.value);
     }
     case `pinyin`: {
-      return choice.value.length;
+      return pinyinSyllableCount(choice.value);
     }
     case `gloss`: {
       throw new Error(`unexpected gloss choice in HanziWordToPinyin`);

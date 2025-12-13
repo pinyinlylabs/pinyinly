@@ -5,10 +5,15 @@ import * as Sentry from "@sentry/react-native";
 import { isRunningInExpoGo } from "expo";
 import * as Updates from "expo-updates";
 
+export type RoutingIntegration = ReturnType<
+  typeof Sentry.reactNavigationIntegration
+>;
+
 // Construct a new instrumentation instance. This is needed to communicate between the integration and React
-export const routingIntegration = Sentry.reactNavigationIntegration({
-  enableTimeToInitialDisplay: !isRunningInExpoGo(),
-});
+export const routingIntegration: RoutingIntegration =
+  Sentry.reactNavigationIntegration({
+    enableTimeToInitialDisplay: !isRunningInExpoGo(),
+  });
 
 Sentry.init({
   dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,

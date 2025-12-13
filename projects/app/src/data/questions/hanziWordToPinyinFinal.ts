@@ -57,7 +57,7 @@ export async function hanziWordToPinyinFinalQuestionOrThrow(
     (hanzi) => ({ kind: `hanzi`, value: hanzi }),
   );
   const groupB: OneCorrectPairQuestionChoice[] = ctx.pinyinDistractors.map(
-    (pinyin) => ({ kind: `pinyin`, value: [pinyin] }),
+    (pinyin) => ({ kind: `pinyin`, value: pinyin }),
   );
 
   return validQuestionInvariant({
@@ -235,8 +235,7 @@ function validQuestionInvariant(question: OneCorrectPairQuestion) {
       invariant(x.kind === `pinyin`);
       invariant(hanziOrPinyinSyllableCount(x) === 1);
 
-      const syllable = nonNullable(x.value[0]);
-      const { initialSoundId, tone } = parsePinyinSyllableOrThrow(syllable);
+      const { initialSoundId, tone } = parsePinyinSyllableOrThrow(x.value);
       // This is the first letter of the sound ID (NOT the first letter of the
       // pinyin). The difference here is for the "null" initial ∅-. In this case
       // we allow choices that actually have a different first letter, as long

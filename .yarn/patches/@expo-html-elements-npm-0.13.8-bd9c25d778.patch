@@ -123,7 +123,7 @@ index 0000000000000000000000000000000000000000..27661ae351ad17b070793b32625c4392
 +  return createElement('br', props);
 +}
 diff --git a/src/elements/Text.tsx b/src/elements/Text.tsx
-index d565b8721ff488807c91d80a0904d319edb31b71..622af634bca4f7e34794749997336712f980fa79 100644
+index 33e1aa6a49435fcfb46f447bfe640858a63eb60a..622af634bca4f7e34794749997336712f980fa79 100644
 --- a/src/elements/Text.tsx
 +++ b/src/elements/Text.tsx
 @@ -34,10 +34,6 @@ export function BlockQuote({ style, cite, ...props }: BlockQuoteProps) {
@@ -137,20 +137,7 @@ index d565b8721ff488807c91d80a0904d319edb31b71..622af634bca4f7e34794749997336712
  export function Mark({ style, ...props }: TextProps) {
    return <Text {...props} style={[styles.mark, style]} />;
  }
-@@ -81,7 +77,11 @@ const styles = StyleSheet.create({
-     fontStyle: 'italic',
-   },
-   code: {
--    fontFamily: Platform.select({ default: 'Courier', ios: 'Courier New', android: 'monospace' }),
-+    fontFamily: Platform.select({
-+      default: `SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace`,
-+      ios: 'ui-monospace',
-+      android: 'monospace',
-+    }),
-     fontWeight: '500',
-   },
-   pre: {
-@@ -92,11 +92,6 @@ const styles = StyleSheet.create({
+@@ -96,11 +92,6 @@ const styles = StyleSheet.create({
      // @ts-ignore
      marginVertical: em(1),
    },

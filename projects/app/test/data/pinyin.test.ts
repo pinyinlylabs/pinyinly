@@ -14,6 +14,7 @@ import {
   matchAllPinyinSyllablesWithIndexes,
   parsePinyinSyllable,
   parsePinyinSyllableTone,
+  pinyinSyllableCount,
   pinyinSyllablePattern,
   pinyinSyllableSuggestions,
   splitTonelessPinyinSyllable,
@@ -22,6 +23,7 @@ import { loadPinyinWords } from "#dictionary.ts";
 import { uniqueInvariant } from "@pinyinly/lib/invariant";
 import type { DeepReadonly } from "ts-essentials";
 import { describe, expect, test } from "vitest";
+import { 拼音 } from "./helpers";
 
 test(`json data can be loaded and passes the schema validation`, async () => {
   await loadHhPinyinChart();
@@ -557,6 +559,25 @@ describe(`pyly pinyin chart`, async () => {
     ]);
   });
 });
+
+describe(
+  `pinyinSyllableCount suite` satisfies HasNameOf<typeof pinyinSyllableCount>,
+  () => {
+    test.for([
+      [拼音`hǎo`, 1],
+      [拼音`nǐ hǎo`, 2],
+      [拼音`nǐ  hǎo`, 2],
+      [拼音`māma`, 2],
+      [拼音`nǐ hǎo māma`, 4],
+      [拼音``, 0],
+      [拼音`   `, 0],
+      [拼音`  nǐ hǎo  `, 2],
+      [拼音`yǒu yī diǎn r`, 4],
+    ] as const)(`%s -> %s`, ([pinyin, count]) => {
+      expect(pinyinSyllableCount(pinyin)).toBe(count);
+    });
+  },
+);
 
 async function testPinyinChart(
   chart: DeepReadonly<PinyinChart>,
