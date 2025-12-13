@@ -87,7 +87,7 @@ function MultipleMeanings({
             <HanziTile
               key={hanziWord}
               hanzi={hanzi}
-              pinyin={primaryPinyin?.join(` `)}
+              pinyin={primaryPinyin}
               gloss={gloss}
             />
           );

@@ -164,8 +164,12 @@ export type PinyinSyllable = string & z.BRAND<`PinyinSyllable`>;
  * Differs from being generic "pinyin" in that punctuation is not included so
  * it's not intended to describe a full sentence, but rather a single
  * pronunciation of a word or phrase.
+ *
+ * @deprecated use {@link PinyinText} instead
  */
 export type PinyinPronunciation = PinyinSyllable[];
+
+export type PinyinText = PinyinSyllable | (string & z.BRAND<`PinyinText`>);
 
 /**
  * Space-separated pinyin syllables, used for efficient storage.
@@ -197,6 +201,10 @@ export const hanziWordSchema = z.custom<HanziWord>(
   (x) => typeof x === `string`,
 );
 export const hanziCharacterSchema = z.custom<HanziCharacter>(
+  (x) => typeof x === `string`,
+);
+
+export const pinyinTextSchema = z.custom<PinyinText>(
   (x) => typeof x === `string`,
 );
 
@@ -326,11 +334,11 @@ export interface HanziPinyinMistakeType {
    */
   hanziOrHanziWord: HanziWord | HanziText;
   /**
-   * This is intentionally **not** a {@link PinyinPronunciation} and instead a
+   * This is intentionally **not** a {@link PinyinText} and instead a
    * string because the user might have answered with junk and there's no
    * guarantee what it is.
    */
-  pinyin: readonly string[];
+  pinyin: string;
 }
 
 export interface HanziPinyinInitialMistakeType {
@@ -362,7 +370,7 @@ export type OneCorrectPairQuestionGlossChoice = {
 
 export type OneCorrectPairQuestionPinyinChoice = {
   kind: `pinyin`;
-  value: Readonly<PinyinPronunciation>;
+  value: PinyinText;
 };
 
 export type OneCorrectPairQuestionChoice =
@@ -411,12 +419,12 @@ export interface HanziWordToPinyinTypedQuestion {
    */
   answers: {
     skill: HanziWordSkill;
-    pinyin: readonly Readonly<PinyinPronunciation>[];
+    pinyin: readonly PinyinText[];
   }[];
   /**
    * Previous pinyin that should be avoided.
    */
-  bannedMeaningPinyinHint: readonly PinyinPronunciation[];
+  bannedMeaningPinyinHint: readonly PinyinText[];
   /**
    * The skill being quizzed, used for rating a wrong answer.
    */

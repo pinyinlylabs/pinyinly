@@ -7,7 +7,7 @@ import type {
   HanziWordSkill,
   HanziWordToPinyinTypedQuestion,
   MistakeType,
-  PinyinPronunciation,
+  PinyinText,
   Question,
   QuestionFlagType,
   UnsavedSkillRating,
@@ -88,7 +88,7 @@ export type HanziToPinyinTypedQuestionGrade =
   | {
       correct: false;
       skillRatings: UnsavedSkillRating[];
-      expectedAnswer: Readonly<PinyinPronunciation>;
+      expectedAnswer: PinyinText;
       mistakes: MistakeType[];
     };
 
@@ -115,12 +115,11 @@ export function gradeHanziToPinyinTypedQuestion(
   );
   // Check if the answer is correct
   for (const { skill, pinyin: pinyinOptions } of answers) {
-    for (const expectedSyllables of pinyinOptions) {
-      const isCorrect =
-        expectedSyllables.length === actualSyllables.length &&
-        expectedSyllables.every(
-          (syllable, i) => syllable === actualSyllables[i],
-        );
+    for (const pinyin of pinyinOptions) {
+      // Normalize both answers by removing spaces for comparison
+      const normalizedPinyin = pinyin.replaceAll(/\s+/g, ``);
+      const normalizedUserAnswer = userAnswer.replaceAll(/\s+/g, ``);
+      const isCorrect = normalizedPinyin === normalizedUserAnswer;
 
       if (isCorrect) {
         const correct = true;
@@ -158,7 +157,7 @@ export function gradeHanziToPinyinTypedQuestion(
         {
           kind: MistakeKind.HanziPinyin,
           hanziOrHanziWord: hanziWordFromSkill(question.skill),
-          pinyin: actualSyllables,
+          pinyin: userAnswer,
         },
       ],
     };

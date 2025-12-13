@@ -172,8 +172,7 @@ function groupRatingsBySkill2(
         rating: item.skillRating.rating,
         createdAt: item.skillRating.createdAt,
         answer:
-          item.hanziGlossMistake?.gloss ??
-          item.hanziPinyinMistake?.pinyin.join(` `),
+          item.hanziGlossMistake?.gloss ?? item.hanziPinyinMistake?.pinyin,
       });
     } else {
       // Different skill or first rating, start a new group
@@ -184,8 +183,7 @@ function groupRatingsBySkill2(
             rating: item.skillRating.rating,
             createdAt: item.skillRating.createdAt,
             answer:
-              item.hanziGlossMistake?.gloss ??
-              item.hanziPinyinMistake?.pinyin.join(` `),
+              item.hanziGlossMistake?.gloss ?? item.hanziPinyinMistake?.pinyin,
           },
         ],
       });

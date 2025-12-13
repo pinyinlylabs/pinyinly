@@ -12,10 +12,8 @@ import type {
   HanziText,
   HanziWord,
   IdsNode,
-  PinyinPronunciationSpaceSeparated,
+  PinyinText,
 } from "#data/model.ts";
-import { pinyinPronunciationDisplayText } from "#data/pinyin.ts";
-import { rPinyinPronunciation } from "#data/rizzleSchema.ts";
 import type {
   Dictionary,
   HanziWordMeaning,
@@ -841,12 +839,7 @@ const HanziWordEditor = ({
                     .trim(),
                 )
                 .filter((x) => x !== ``)
-                .map((x) =>
-                  rPinyinPronunciation().unmarshal(
-                    x as PinyinPronunciationSpaceSeparated,
-                  ),
-                );
-
+                .map((x) => x as PinyinText);
               mutations.push(() =>
                 saveUpsertHanziWordMeaning(hanziWord, {
                   pinyin: newPinyin,
@@ -1330,9 +1323,7 @@ const DongChineseHanziEntry = ({ hanzi }: { hanzi: string }) => {
             <Text dimColor>pinyin:</Text>
             {` `}
             <SemiColonList
-              items={(getDongChinesePronunciation(lookup) ?? emptyArray).map(
-                (x) => pinyinPronunciationDisplayText(x),
-              )}
+              items={getDongChinesePronunciation(lookup) ?? emptyArray}
             />
           </Text>
         )}
@@ -2017,9 +2008,7 @@ function hanziWordQueryFilter(
   return (
     hanziWord.includes(query) ||
     meaning.gloss.some((x) => x.includes(query)) ||
-    (meaning.pinyin?.some((pronunciation) =>
-      pronunciation.some((syllable) => syllable.includes(query)),
-    ) ??
+    (meaning.pinyin?.some((pronunciation) => pronunciation.includes(query)) ??
       false)
   );
 }
@@ -2107,11 +2096,7 @@ const DictionaryHanziWordEntry = ({
                 pinyin:
               </Text>
               {` `}
-              <SemiColonList
-                items={meaning.pinyin.map((x) =>
-                  pinyinPronunciationDisplayText(x),
-                )}
-              />
+              <SemiColonList items={meaning.pinyin} />
             </Text>
           )}
           <Text>

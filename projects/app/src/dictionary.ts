@@ -8,15 +8,16 @@ import type {
   HanziCharacter,
   HanziText,
   HanziWord,
-  PinyinPronunciation,
   PinyinSyllable,
+  PinyinText,
 } from "@/data/model";
 import {
   hanziCharacterSchema,
   hanziWordSchema,
   PartOfSpeech,
+  pinyinTextSchema,
 } from "@/data/model";
-import { rPinyinPronunciation } from "@/data/rizzleSchema";
+import { parsePinyinSyllable } from "@/data/pinyin";
 import {
   deepReadonly,
   emptyArray,
@@ -28,10 +29,6 @@ import {
 import { invariant } from "@pinyinly/lib/invariant";
 import type { DeepReadonly } from "ts-essentials";
 import { z } from "zod/v4";
-
-export const pinyinPronunciationSchema = rPinyinPronunciation()
-  .getUnmarshal()
-  .describe(`space separated pinyin for each word`);
 
 export const loadPinyinWords = memoize0(async function loadPinyinWords() {
   return z
@@ -184,7 +181,7 @@ export const hanziWordMeaningSchema = z
   .object({
     gloss: z.array(z.string()),
     pinyin: z
-      .array(pinyinPronunciationSchema)
+      .array(pinyinTextSchema)
       .describe(
         `all valid pinyin variations for this meaning (might be omitted for radicals without pronunciation)`,
       )
@@ -425,7 +422,7 @@ export async function decomposeHanzi(
 export function pinyinOrThrow(
   hanziWord: HanziWord,
   meaning: DeepReadonly<HanziWordMeaning> | null,
-): Readonly<PinyinPronunciation> {
+): PinyinText {
   const pinyin = meaning?.pinyin?.[0];
   invariant(pinyin != null, `missing pinyin for hanzi word ${hanziWord}`);
   return pinyin;
@@ -454,31 +451,13 @@ export function oneSyllablePinyinOrThrow(
   meaning: DeepReadonly<HanziWordMeaning> | null,
 ): PinyinSyllable {
   const pronunciation = pinyinOrThrow(hanziWord, meaning);
-  const syllable = pronunciation[0];
+  const parsed = parsePinyinSyllable(pronunciation);
   invariant(
-    syllable != null && pronunciation.length === 1,
-    `expected only one syllable`,
+    parsed != null,
+    `couldn't parse pinyin syllable "${pronunciation}" for hanzi word ${hanziWord}`,
   );
-  return syllable;
+  return parsed.syllable;
 }
-
-export const allPronunciationsForHanzi = memoize1(
-  async function allPronunciationsForHanzi(
-    hanzi: HanziText,
-  ): Promise<Set<Readonly<PinyinPronunciation>>> {
-    const dictionary = await loadDictionary();
-    const hanziWordMeanings = dictionary.lookupHanzi(hanzi);
-    const pronunciations = new Set<Readonly<PinyinPronunciation>>();
-
-    for (const [, meaning] of hanziWordMeanings) {
-      for (const pronunciation of meaning.pinyin ?? emptyArray) {
-        pronunciations.add(pronunciation);
-      }
-    }
-
-    return pronunciations;
-  },
-);
 
 export const allHanziCharacterPronunciationsForHanzi = memoize1(
   async function allHanziCharacterPronunciationsForHanzi(
@@ -490,11 +469,11 @@ export const allHanziCharacterPronunciationsForHanzi = memoize1(
 
     for (const [, meaning] of hanziWordMeanings) {
       for (const pronunciation of meaning.pinyin ?? emptyArray) {
-        if (pronunciation.length === 1) {
-          const syllable = pronunciation[0];
-          invariant(syllable != null);
-          pronunciations.add(syllable);
-        }
+        invariant(
+          parsePinyinSyllable(pronunciation) != null,
+          `couldn't parse pinyin syllable "${pronunciation}"`,
+        );
+        pronunciations.add(pronunciation as PinyinSyllable);
       }
     }
 
@@ -529,12 +508,7 @@ export function unparseDictionary(
     .map(([hanziWord, meaning]): z.input<typeof dictionarySchema>[number] => {
       return [
         hanziWord,
-        {
-          ...meaning,
-          pinyin:
-            meaning.pinyin?.map((p) => rPinyinPronunciation().marshal(p)) ??
-            undefined,
-        } satisfies z.input<typeof hanziWordMeaningSchema>,
+        meaning satisfies z.input<typeof hanziWordMeaningSchema>,
       ];
     })
     .sort(sortComparatorString((x) => x[0]));

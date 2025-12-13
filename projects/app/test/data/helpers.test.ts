@@ -201,16 +201,11 @@ describe(
     );
 
     test.for([
-      [`❌ hpi:分:divide (piě)`, `hpi:分:divide`, `分:divide`, [`piě`]],
-      [
-        `❌ hpi:分:divide (piě bāo)`,
-        `hpi:分:divide`,
-        `分:divide`,
-        [`piě`, `bāo`],
-      ],
-      [`❌ hpi:分:divide (刀→piě)`, `hpi:分:divide`, `刀`, [`piě`]],
-      [`❌ hpi:分:divide (刀:foo→piě)`, `hpi:分:divide`, `刀:foo`, [`piě`]],
-      [`❌ hpt:分:divide (刀:foo→piě)`, `hpt:分:divide`, `刀:foo`, [`piě`]],
+      [`❌ hpi:分:divide (piě)`, `hpi:分:divide`, `分:divide`, `piě`],
+      [`❌ hpi:分:divide (piě bāo)`, `hpi:分:divide`, `分:divide`, `piě bāo`],
+      [`❌ hpi:分:divide (刀→piě)`, `hpi:分:divide`, `刀`, `piě`],
+      [`❌ hpi:分:divide (刀:foo→piě)`, `hpi:分:divide`, `刀:foo`, `piě`],
+      [`❌ hpt:分:divide (刀:foo→piě)`, `hpt:分:divide`, `刀:foo`, `piě`],
     ] as const)(
       `hanzi pinyin mistakes cases`,
       ([event, expectedSkill, expectedHanziOrHanziWord, expectedPinyin]) => {
@@ -252,10 +247,7 @@ describe(
             "mistake": {
               "hanziOrHanziWord": "a",
               "kind": "debug--HanziPinyin",
-              "pinyin": [
-                "b",
-                "c",
-              ],
+              "pinyin": "b c",
             },
           },
         ]

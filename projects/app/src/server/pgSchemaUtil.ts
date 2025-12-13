@@ -1,7 +1,6 @@
 import {
   rFsrsRating,
   rHanziOrHanziWord,
-  rPinyinPronunciation,
   rPinyinSoundGroupId,
   rPinyinSoundId,
   rSkill,
@@ -243,11 +242,7 @@ export const pgPinyinSoundGroupId = rizzleCustomType(
   `text`,
 );
 export const pgPinyinInitialGroupId = rizzleCustomType(r.string(), `text`);
-export const pgPinyinPronunciation = rizzleCustomType(
-  rPinyinPronunciation(),
-  `text`,
-);
-export const pgSpaceSeparatoredString = rizzleCustomType(
+export const pgSpaceSeparatedString = rizzleCustomType(
   rSpaceSeparatedString(),
   `text`,
 );

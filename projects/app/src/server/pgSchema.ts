@@ -14,7 +14,6 @@ import {
   pgPinyinSoundGroupId,
   pgPinyinSoundId,
   pgSkill,
-  pgSpaceSeparatoredString,
   rizzleCustomType,
   zodJson,
 } from "./pgSchemaUtil";
@@ -163,8 +162,8 @@ export const hanziPinyinMistake = schema.table(
       .references(() => user.id)
       .notNull(),
     hanziOrHanziWord: pgHanziOrHanziWord(`hanzi`).notNull(),
-    // Intentionally left as strings because it's user input.
-    pinyin: pgSpaceSeparatoredString(`pinyin`).notNull(),
+    // Intentionally left as string because it's user input.
+    pinyin: pg.text(`pinyin`).notNull(),
     createdAt: pg.timestamp(`timestamp`).defaultNow().notNull(),
   },
   (t) => [pg.index().on(t.userId)],

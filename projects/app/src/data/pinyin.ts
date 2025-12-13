@@ -1,5 +1,4 @@
 import type {
-  PinyinPronunciation,
   PinyinSoundGroupId,
   PinyinSoundId,
   PinyinSyllable,
@@ -130,6 +129,7 @@ export interface ParsedPinyinSyllable {
   finalSoundId: string;
   tone: number;
   tonelessSyllable: PinyinSyllable;
+  syllable: PinyinSyllable;
 }
 
 export function parsePinyinSyllableWithChart(
@@ -161,6 +161,7 @@ export function parsePinyinSyllableWithChart(
     finalSoundId,
     tone,
     tonelessSyllable,
+    syllable: pinyinSyllable as PinyinSyllable,
   };
 }
 
@@ -505,15 +506,6 @@ export const loadHmmPinyinChart = memoize0(async () =>
     // eslint-disable-next-line unicorn/no-await-expression-member
     .parse((await import(`./hmmPinyinChart.asset.json`)).default),
 );
-
-export function pinyinPronunciationDisplayText(
-  value: Readonly<PinyinPronunciation>,
-): string {
-  // When learning pinyin (i.e. single words) the syllables are space separated.
-  // But when learning a sentence then the words become space separated and the
-  // syllables are joined without spaces.
-  return value.join(` `);
-}
 
 export const pinyinSyllablePattern = (() => {
   const a = `(?:a|ā|à|á|ǎ)`;

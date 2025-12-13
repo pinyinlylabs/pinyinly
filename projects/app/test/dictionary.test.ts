@@ -1,6 +1,6 @@
 import { splitHanziText } from "#data/hanzi.ts";
 import type { HanziCharacter, HanziText } from "#data/model.ts";
-import { pinyinPronunciationDisplayText } from "#data/pinyin.ts";
+import { pinyinSyllableCount } from "#data/questions/oneCorrectPair.ts";
 import type { Dictionary } from "#dictionary.ts";
 import {
   decomposeHanzi,
@@ -183,11 +183,10 @@ test(`hanzi word meaning pinyin lint`, async () => {
       .not.toBe(0);
   }
 
-  // Multiple pinyin entries should have the same number of words
+  // Multiple pinyin entries should have the same number of syllables
   for (const [hanziWord, { pinyin }] of dict.allEntries) {
-    expect
-      .soft(new Set(pinyin?.map((p) => p.length)).size, hanziWord)
-      .not.toBeGreaterThan(1);
+    const syllableCounts = pinyin?.map((p) => pinyinSyllableCount(p)) ?? [];
+    expect.soft(new Set(syllableCounts).size, hanziWord).not.toBeGreaterThan(1);
   }
 });
 
@@ -211,7 +210,7 @@ test(`hanzi words are unique on (meaning key, primary pinyin)`, async () => {
       continue;
     }
     const primaryPinyin = pinyin?.[0];
-    const key = `${meaningKey}:${primaryPinyin == null ? `<nullish>` : pinyinPronunciationDisplayText(primaryPinyin)}`;
+    const key = `${meaningKey}:${primaryPinyin ?? `<nullish>`}`;
     const set = byMeaningKeyAndPinyin.get(key) ?? new Set();
     set.add(hanziWord);
     byMeaningKeyAndPinyin.set(key, set);
@@ -811,7 +810,7 @@ describe(
       const dict: Dictionary = new Map();
       dict.set(`你好:hello`, {
         gloss: [`hello`],
-        pinyin: [[拼音`ni`, 拼音`hao`]],
+        pinyin: [拼音`ni hao`],
         partOfSpeech: `interjection`,
       });
       return dict;
@@ -821,12 +820,12 @@ describe(
       const dict = helloDict();
 
       upsertHanziWordMeaning(dict, `你好:hello`, {
-        pinyin: [[拼音`nǐ`, 拼音`hǎo`]],
+        pinyin: [拼音`nǐ hǎo`],
       });
 
       expect(dict.get(`你好:hello`)).toEqual({
         gloss: [`hello`],
-        pinyin: [[拼音`nǐ`, 拼音`hǎo`]],
+        pinyin: [拼音`nǐ hǎo`],
         partOfSpeech: `interjection`,
       });
     });

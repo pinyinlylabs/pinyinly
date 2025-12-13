@@ -1,8 +1,4 @@
-import type {
-  PinyinPronunciation,
-  PinyinPronunciationSpaceSeparated,
-} from "#data/model.ts";
-import { rPinyinPronunciation } from "#data/rizzleSchema.js";
+import type { PinyinText } from "#data/model.ts";
 import {
   inverseSortComparator,
   memoize0,
@@ -201,18 +197,14 @@ export type DongChineseRecord = z.infer<typeof dongChineseSchema>;
 
 export function getDongChinesePronunciation(
   lookup: z.infer<typeof dongChineseSchema>,
-): PinyinPronunciation[] | undefined {
+): PinyinText[] | undefined {
   return lookup.pinyinFrequencies
     ?.sort(
       inverseSortComparator(
         sortComparatorNumber((x) => x.frequency ?? x.count ?? 0),
       ),
     )
-    .map((x) =>
-      rPinyinPronunciation().unmarshal(
-        x.pinyin as PinyinPronunciationSpaceSeparated,
-      ),
-    );
+    .map((x) => x.pinyin as PinyinText);
 }
 
 function cleanGloss(gloss: string): string {
