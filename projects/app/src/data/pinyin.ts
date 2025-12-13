@@ -670,3 +670,20 @@ export const defaultPinyinSoundInstructions = {
   "-ong": `Like **“ong”** in *song* — starts like \`o\`, ends with soft \`ng\`.`,
   "-∅": `No final — the syllable ends with the initial only (e.g. *ba*, *di*).`,
 } as Record<PinyinSoundId, string>;
+
+/**
+ * Count the number of syllables in a pinyin string. Handles both
+ * space-separated syllables ("nǐ hǎo") and unseparated syllables ("māma").
+ *
+ * A syllable corresponds to one hanzi character.
+ */
+export function pinyinSyllableCount(pinyin: string): number {
+  const trimmed = pinyin.trim();
+  if (trimmed === ``) {
+    return 0;
+  }
+  const matches = matchAllPinyinSyllables(trimmed);
+  // Fallback to space-splitting if regex doesn't match (handles edge cases
+  // where the pinyin regex may not recognize all valid syllables)
+  return matches.length > 0 ? matches.length : trimmed.split(/\s+/).length;
+}

@@ -152,15 +152,20 @@ export async function writeHanziWordList(
   );
 }
 
+export type WordListFileBaseName =
+  | `hsk1HanziWords`
+  | `hsk2HanziWords`
+  | `hsk3HanziWords`;
+
 export async function upsertHanziWordWordList(
   hanziWord: HanziWord,
-  wordListFileName: string,
+  wordListFileBaseName: WordListFileBaseName,
 ) {
-  const data = await readHanziWordList(wordListFileName);
+  const data = await readHanziWordList(wordListFileBaseName);
 
   if (!data.includes(hanziWord)) {
     data.push(hanziWord);
-    await writeHanziWordList(wordListFileName, data);
+    await writeHanziWordList(wordListFileBaseName, data);
   }
 }
 

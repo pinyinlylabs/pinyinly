@@ -224,6 +224,7 @@ export const pinyinSoundsQuery = (r: Rizzle) =>
         return sounds;
       },
       networkMode: `offlineFirst`,
+      retry: false,
       structuralSharing: false,
     }),
     [currentSchema.pinyinSound.keyPrefix],
@@ -239,6 +240,7 @@ export const targetSkillsQuery = () =>
       return targetSkills;
     },
     networkMode: `offlineFirst`,
+    retry: false,
     structuralSharing: false,
   });
 
@@ -250,6 +252,7 @@ export const isStructuralHanziQuery = queryOptions({
     return await getIsStructuralHanzi();
   },
   networkMode: `offlineFirst`,
+  retry: false,
   structuralSharing: false,
 });
 
@@ -263,7 +266,9 @@ export const skillLearningGraphQuery = queryOptions({
     return graph;
   },
   networkMode: `offlineFirst`,
+  retry: false,
   structuralSharing: false,
+  throwOnError: true,
 });
 
 export const hanziWordsByRankQuery = (r: Rizzle) =>
@@ -303,7 +308,9 @@ export const hanziWordsByRankQuery = (r: Rizzle) =>
         return rankToHanziWords;
       },
       networkMode: `offlineFirst`,
+      retry: false,
       structuralSharing: false,
+      throwOnError: true,
     }),
     [currentSchema.skillState.keyPrefix],
   );
@@ -336,8 +343,10 @@ export const hanziMeaningsQuery = (hanzi: HanziText) =>
       return dictionary.lookupHanzi(hanzi);
     },
     networkMode: `offlineFirst`,
+    retry: false,
     structuralSharing: false,
     staleTime: Infinity,
+    throwOnError: true,
   });
 
 export const fetchArrayBufferQuery = (uri: string | null) =>
@@ -372,6 +381,7 @@ export const fetchAudioBufferQuery = (
           },
     staleTime: Infinity,
     structuralSharing: false,
+    throwOnError: true,
   });
 
 export const deviceStoreQuery = (key: DeviceStoreEntity) =>
@@ -382,7 +392,9 @@ export const deviceStoreQuery = (key: DeviceStoreEntity) =>
       return await deviceStoreGet(key);
     },
     networkMode: `offlineFirst`,
+    retry: false,
     structuralSharing: false,
+    throwOnError: true,
   });
 
 function withWatchPrefixes<T extends object>(

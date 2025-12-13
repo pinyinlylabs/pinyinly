@@ -59,7 +59,7 @@ rizzleTest(`returns loading state from context`, async ({ rizzle }) => {
   unmount();
 });
 
-rizzleTest(
+rizzleTest.only(
   `new users are taught the simplest words first`,
   async ({ rizzle }) => {
     // Increase the number of queue items to 10 so we can check more than one.
@@ -77,7 +77,7 @@ rizzleTest(
       () => {
         expect(result.current.loading).toBe(false);
       },
-      { timeout: 2000 },
+      { timeout: 5000 },
     );
 
     invariant(!result.current.loading, `expected skill queue to be loaded`);

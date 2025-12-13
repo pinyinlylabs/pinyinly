@@ -9,7 +9,7 @@ import type {
   UnsavedSkillRating,
 } from "@/data/model";
 import { MistakeKind } from "@/data/model";
-import { matchAllPinyinSyllables } from "@/data/pinyin";
+import { pinyinSyllableCount } from "@/data/pinyin";
 import { computeSkillRating } from "@/data/skills";
 import { invariant, uniqueInvariant } from "@pinyinly/lib/invariant";
 
@@ -27,21 +27,6 @@ export function oneCorrectPairChoiceText(
       return choice.value;
     }
   }
-}
-
-/**
- * Count the number of syllables in a pinyin string.
- * Handles both space-separated syllables ("nǐ hǎo") and unseparated syllables ("māma").
- */
-export function pinyinSyllableCount(pinyin: string): number {
-  const trimmed = pinyin.trim();
-  if (trimmed === ``) {
-    return 0;
-  }
-  const matches = matchAllPinyinSyllables(trimmed);
-  // Fallback to space-splitting if regex doesn't match (handles edge cases
-  // where the pinyin regex may not recognize all valid syllables)
-  return matches.length > 0 ? matches.length : trimmed.split(/\s+/).length;
 }
 
 export function hanziOrPinyinSyllableCount(

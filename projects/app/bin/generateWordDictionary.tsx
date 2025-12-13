@@ -58,6 +58,7 @@ import { Children, useCallback, useEffect, useMemo, useState } from "react";
 import type { DeepReadonly } from "ts-essentials";
 import yargs from "yargs";
 import { z } from "zod/v4";
+import type { WordListFileBaseName } from "../test/helpers.ts";
 import {
   readDictionary,
   readHanziWordList,
@@ -1362,10 +1363,10 @@ const DongChineseHanziEntry = ({ hanzi }: { hanzi: string }) => {
 };
 
 const WordListEditor = ({
-  wordListName,
+  wordListFileBaseName,
   onCancel,
 }: {
-  wordListName: string;
+  wordListFileBaseName: WordListFileBaseName;
   onCancel: () => void;
 }) => {
   const [location, setLocation] = useState<
@@ -1380,7 +1381,7 @@ const WordListEditor = ({
       return (
         <Box gap={1} flexDirection="column">
           <WordListHanziPicker
-            wordListName={wordListName}
+            wordListName={wordListFileBaseName}
             onSubmit={(hanziWord) => {
               setLocation({ type: `edit`, hanziWord });
             }}
@@ -1405,7 +1406,7 @@ const WordListEditor = ({
       return (
         <HanziEditor
           hanzi={hanziFromHanziWord(location.hanziWord)}
-          wordListFileBaseName={wordListName}
+          wordListFileBaseName={wordListFileBaseName}
           onCloseAction={() => {
             setLocation({ type: `list` });
           }}
@@ -1420,7 +1421,7 @@ const WordListEditor = ({
               for (const hanziWord of hanziWords) {
                 await upsertHanziWordWordListAndInvalidateCache(
                   hanziWord,
-                  wordListName,
+                  wordListFileBaseName,
                 );
               }
               setLocation({ type: `list` });
@@ -1906,7 +1907,7 @@ const queryClient = new QueryClient();
 const App = () => {
   const [location, setLocation] = useState<
     | { type: `checkHsk1HanziWords` }
-    | { type: `wordListEditor`; wordListName: string }
+    | { type: `wordListEditor`; wordListFileBaseName: WordListFileBaseName }
     | { type: `dictionaryEditor` }
     | null
   >();
@@ -1921,7 +1922,7 @@ const App = () => {
         />
       ) : location?.type === `wordListEditor` ? (
         <WordListEditor
-          wordListName={location.wordListName}
+          wordListFileBaseName={location.wordListFileBaseName}
           onCancel={() => {
             setLocation(undefined);
           }}
@@ -1967,7 +1968,7 @@ const App = () => {
               case `hsk1WordList`: {
                 setLocation({
                   type: `wordListEditor`,
-                  wordListName: `hsk1HanziWords`,
+                  wordListFileBaseName: `hsk1HanziWords`,
                 });
 
                 break;
@@ -1975,7 +1976,7 @@ const App = () => {
               case `hsk2WordList`: {
                 setLocation({
                   type: `wordListEditor`,
-                  wordListName: `hsk2HanziWords`,
+                  wordListFileBaseName: `hsk2HanziWords`,
                 });
 
                 break;
@@ -1983,7 +1984,7 @@ const App = () => {
               case `hsk3WordList`: {
                 setLocation({
                   type: `wordListEditor`,
-                  wordListName: `hsk3HanziWords`,
+                  wordListFileBaseName: `hsk3HanziWords`,
                 });
 
                 break;
@@ -2195,11 +2196,11 @@ async function writeDictionaryAndInvalidateCache(dict: Dictionary) {
 
 async function upsertHanziWordWordListAndInvalidateCache(
   hanziWord: HanziWord,
-  wordListFileName: string,
+  wordListFileBaseName: WordListFileBaseName,
 ) {
-  await upsertHanziWordWordList(hanziWord, wordListFileName);
+  await upsertHanziWordWordList(hanziWord, wordListFileBaseName);
   await queryClient.invalidateQueries({
-    queryKey: [`loadHanziWordList`, wordListFileName],
+    queryKey: [`loadHanziWordList`, wordListFileBaseName],
   });
 }
 

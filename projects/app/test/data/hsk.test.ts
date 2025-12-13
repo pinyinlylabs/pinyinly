@@ -1,16 +1,27 @@
 // pyly-not-src-test
 
+import type { HanziWordMeaning } from "#dictionary.js";
 import {
+  buildHanziWord,
   hanziFromHanziWord,
   loadDictionary,
   loadHsk1HanziWords,
   loadHsk2HanziWords,
   loadHsk3HanziWords,
 } from "#dictionary.js";
+import { IS_CI } from "#util/env.js";
+import { toCamelCase } from "#util/unicode.js";
+import { nonNullable } from "@pinyinly/lib/invariant";
 import { expect, test } from "vitest";
+import {
+  readDictionary,
+  upsertHanziWordMeaning,
+  upsertHanziWordWordList,
+  writeDictionary,
+} from "../helpers.ts";
 import { loadCompleteHskVocabulary } from "./completeHskVocabulary.ts";
 
-test.skip(`hsk word lists match vendor data`, async () => {
+test(`hsk word lists match vendor data`, async () => {
   const completeHskVocabulary = await loadCompleteHskVocabulary();
   const dictionary = await loadDictionary();
 
@@ -28,10 +39,10 @@ test.skip(`hsk word lists match vendor data`, async () => {
   const hsk2HanziWords = await loadHsk2HanziWords();
   const hsk3HanziWords = await loadHsk3HanziWords();
 
-  for (const [label, vendorList, localList] of [
-    [`HSK 1`, vendorHsk1Items, hsk1HanziWords],
-    [`HSK 2`, vendorHsk2Items, hsk2HanziWords],
-    [`HSK 3`, vendorHsk3Items, hsk3HanziWords],
+  for (const [wordListFileBaseName, vendorList, localList] of [
+    [`hsk1HanziWords`, vendorHsk1Items, hsk1HanziWords],
+    [`hsk2HanziWords`, vendorHsk2Items, hsk2HanziWords],
+    [`hsk3HanziWords`, vendorHsk3Items, hsk3HanziWords],
   ] as const) {
     const localHanziList = new Set(
       localList.map((hanziWord) => hanziFromHanziWord(hanziWord)),
@@ -43,7 +54,7 @@ test.skip(`hsk word lists match vendor data`, async () => {
       expect
         .soft(
           isInVendor,
-          `${label} local hanzi ${localHanzi} missing from vendor data`,
+          `${wordListFileBaseName} local hanzi ${localHanzi} missing from vendor data`,
         )
         .toBe(true);
 
@@ -56,41 +67,55 @@ test.skip(`hsk word lists match vendor data`, async () => {
       expect
         .soft(
           isInLocalWordList,
-          `${label} vendor hanzi ${vendorHanzi} missing from local data`,
+          `${wordListFileBaseName} vendor hanzi ${vendorHanzi} missing from local data`,
         )
         .toBe(true);
 
-      const isInDictionary = dictionary.lookupHanzi(vendorHanzi).length > 0;
+      const dictionaryItems = dictionary.lookupHanzi(vendorHanzi);
+      const isInDictionary = dictionaryItems.length > 0;
       expect
         .soft(
           isInDictionary,
-          `${label} vendor hanzi ${vendorHanzi} missing from dictionary`,
+          `${wordListFileBaseName} vendor hanzi ${vendorHanzi} missing from dictionary`,
         )
         .toBe(true);
 
-      // if (!isInDictionary) {
-      //   const hasOneMeaning = vendorItem.forms.length === 1;
-      //   expect
-      //     .soft(
-      //       hasOneMeaning,
-      //       `${label} ${vendorHanzi} has multiple meanings in vendor data`,
-      //     )
-      //     .toBe(true);
+      if (isInDictionary) {
+        for (const [hanziWord] of dictionaryItems) {
+          await upsertHanziWordWordList(hanziWord, wordListFileBaseName);
+        }
+      } else {
+        const hasOneMeaning = vendorItem.forms.length === 1;
+        expect
+          .soft(
+            hasOneMeaning,
+            `${wordListFileBaseName} ${vendorHanzi} has multiple meanings in vendor data`,
+          )
+          .toBe(true);
 
-      //   if (hasOneMeaning) {
-      //     const form = vendorItem.forms[0]!;
+        if (hasOneMeaning) {
+          const form = vendorItem.forms[0]!;
 
-      //     const newDictionaryMeaningKey = ``;
-      //     const newDictionaryMeaning: HanziWordMeaning = {
-      //       gloss: form.meanings,
-      //       pinyin: form.transcriptions.pinyin,
-      //     };
-      //     console.log(
-      //       `Suggested new dictionary meaning for ${vendorHanzi}:`,
-      //       newDictionaryMeaning,
-      //     );
-      //   }
-      // }
+          const newDictionaryMeaningKey = toCamelCase(
+            nonNullable(form.meanings[0]),
+          );
+
+          const newHanziWord = buildHanziWord(
+            vendorHanzi,
+            newDictionaryMeaningKey,
+          );
+          const newDictionaryMeaning: HanziWordMeaning = {
+            gloss: form.meanings,
+            pinyin: [form.transcriptions.pinyin],
+          };
+
+          if (!IS_CI) {
+            const dict = await readDictionary();
+            upsertHanziWordMeaning(dict, newHanziWord, newDictionaryMeaning);
+            await writeDictionary(dict);
+          }
+        }
+      }
     }
   }
 });

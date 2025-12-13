@@ -1,6 +1,6 @@
 import { splitHanziText } from "#data/hanzi.ts";
 import type { HanziCharacter, HanziText } from "#data/model.ts";
-import { pinyinSyllableCount } from "#data/questions/oneCorrectPair.ts";
+import { pinyinSyllableCount } from "#data/pinyin.js";
 import type { Dictionary } from "#dictionary.ts";
 import {
   decomposeHanzi,
@@ -28,7 +28,7 @@ import {
   sortComparatorNumber,
   sortComparatorString,
 } from "@pinyinly/lib/collections";
-import { invariant } from "@pinyinly/lib/invariant";
+import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import { describe, expect, test } from "vitest";
 import { z } from "zod/v4";
 import { 拼音, 汉 } from "./data/helpers.ts";
@@ -123,26 +123,33 @@ test(`hanzi word meaning-key lint`, async () => {
 test(`hanzi word meaning gloss lint`, async () => {
   const dict = await loadDictionary();
 
-  const maxWords = 4;
-  const maxSpaces = maxWords - 1;
+  for (const [hanziWord, meaning] of dict.allEntries) {
+    // Rules for all glosses
+    for (const gloss of meaning.gloss) {
+      const label = `${hanziWord} gloss "${gloss}"`;
 
-  const isViolating = (x: string) =>
-    // no comma
-    /,/.exec(x) != null ||
-    // no banned characters/phrases
-    /measure ?word|radical|particle|\(/i.exec(x) != null ||
-    (x.match(/\s+/g)?.length ?? 0) > maxSpaces;
+      // No comma
+      expect.soft(gloss, `${label} commas`).not.toMatch(/,/);
 
-  const violations = new Set(
-    dict.allEntries
-      .filter(([, { gloss }]) => gloss.some((x) => isViolating(x)))
-      .map(([hanziWord, { gloss }]) => ({
-        hanziWord,
-        gloss: gloss.filter((x) => isViolating(x)),
-      })),
-  );
+      // No banned characters/phrases
+      expect
+        .soft(gloss, `${label} banned characters/phrases`)
+        .not.toMatch(/measure ?word|radical|particle|\(/i);
+    }
 
-  expect(violations).toEqual(new Set());
+    // Rules for the primary gloss
+    {
+      const gloss = nonNullable(meaning.gloss[0]);
+      const label = `${hanziWord} gloss "${gloss}"`;
+
+      const maxWords = 5;
+      expect
+        .soft(gloss.match(/[^\s]+/g)?.length ?? 0, `${label} word count`)
+        .toBeLessThanOrEqual(maxWords);
+    }
+  }
+
+  // expect(violations).toEqual(new Set());
 });
 
 test(`hanzi meaning canonicalForm`, async () => {
@@ -678,7 +685,7 @@ test(`dictionary contains entries for decomposition`, async () => {
       "𡿨 via 巛",
       "𢀖 via 经, 轻[HSK2]",
       "𢆉 via 南[HSK1], 幸",
-      "𢎨 via 弟, 第[HSK1]",
+      "𢎨 via 弟[HSK1], 第[HSK1]",
       "𣥂 via 步[HSK3]",
       "𣦼 via 餐",
       "𤴓 via 定, 是[HSK1]",

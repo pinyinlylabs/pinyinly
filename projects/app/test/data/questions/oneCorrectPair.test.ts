@@ -1,13 +1,9 @@
 import type {
   OneCorrectPairQuestionAnswer,
   OneCorrectPairQuestionChoice,
-  PinyinText,
 } from "#data/model.ts";
 import { MistakeKind } from "#data/model.ts";
-import {
-  gradeOneCorrectPairQuestion,
-  hanziOrPinyinSyllableCount,
-} from "#data/questions/oneCorrectPair.ts";
+import { gradeOneCorrectPairQuestion } from "#data/questions/oneCorrectPair.ts";
 import { hanziWordToGloss, hanziWordToPinyinTone } from "#data/skills.ts";
 import { describe, expect, test } from "vitest";
 import { 拼音, 汉 } from "../helpers.ts";
@@ -77,93 +73,6 @@ describe(
           expect(grade.mistakes).toEqual([mistake]);
         }
       }
-    });
-  },
-);
-
-describe(
-  `hanziOrPinyinSyllableCount suite` satisfies HasNameOf<
-    typeof hanziOrPinyinSyllableCount
-  >,
-  () => {
-    test(`single hanzi character`, () => {
-      const choice: OneCorrectPairQuestionChoice = {
-        kind: `hanzi`,
-        value: 汉`好`,
-      };
-      expect(hanziOrPinyinSyllableCount(choice)).toBe(1);
-    });
-
-    test(`multiple hanzi characters`, () => {
-      const choice: OneCorrectPairQuestionChoice = {
-        kind: `hanzi`,
-        value: 汉`你好`,
-      };
-      expect(hanziOrPinyinSyllableCount(choice)).toBe(2);
-    });
-
-    test(`single pinyin syllable`, () => {
-      const choice: OneCorrectPairQuestionChoice = {
-        kind: `pinyin`,
-        value: 拼音`hǎo`,
-      };
-      expect(hanziOrPinyinSyllableCount(choice)).toBe(1);
-    });
-
-    test(`multiple pinyin syllables with space`, () => {
-      const choice: OneCorrectPairQuestionChoice = {
-        kind: `pinyin`,
-        value: 拼音`nǐ hǎo`,
-      };
-      expect(hanziOrPinyinSyllableCount(choice)).toBe(2);
-    });
-
-    test(`multiple pinyin syllables with multiple spaces`, () => {
-      const choice: OneCorrectPairQuestionChoice = {
-        kind: `pinyin`,
-        value: 拼音`nǐ  hǎo`,
-      };
-      expect(hanziOrPinyinSyllableCount(choice)).toBe(2);
-    });
-
-    test(`pinyin with no spaces (single word)`, () => {
-      const choice: OneCorrectPairQuestionChoice = {
-        kind: `pinyin`,
-        value: 拼音`māma`,
-      };
-      expect(hanziOrPinyinSyllableCount(choice)).toBe(2);
-    });
-
-    test(`pinyin with mixed spacing (two words)`, () => {
-      const choice: OneCorrectPairQuestionChoice = {
-        kind: `pinyin`,
-        value: 拼音`nǐ hǎo māma`,
-      };
-      expect(hanziOrPinyinSyllableCount(choice)).toBe(4);
-    });
-
-    test(`empty pinyin string`, () => {
-      const choice: OneCorrectPairQuestionChoice = {
-        kind: `pinyin`,
-        value: `` as PinyinText,
-      };
-      expect(hanziOrPinyinSyllableCount(choice)).toBe(0);
-    });
-
-    test(`pinyin with only spaces`, () => {
-      const choice: OneCorrectPairQuestionChoice = {
-        kind: `pinyin`,
-        value: `   ` as PinyinText,
-      };
-      expect(hanziOrPinyinSyllableCount(choice)).toBe(0);
-    });
-
-    test(`pinyin with leading and trailing spaces`, () => {
-      const choice: OneCorrectPairQuestionChoice = {
-        kind: `pinyin`,
-        value: `  nǐ hǎo  ` as PinyinText,
-      };
-      expect(hanziOrPinyinSyllableCount(choice)).toBe(2);
     });
   },
 );
