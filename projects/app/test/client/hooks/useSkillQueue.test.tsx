@@ -59,7 +59,7 @@ rizzleTest(`returns loading state from context`, async ({ rizzle }) => {
   unmount();
 });
 
-rizzleTest.only(
+rizzleTest(
   `new users are taught the simplest words first`,
   async ({ rizzle }) => {
     // Increase the number of queue items to 10 so we can check more than one.
