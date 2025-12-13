@@ -300,14 +300,9 @@ tasks:
       NODE_OPTIONS: --disable-warning=ExperimentalWarning $NODE_OPTIONS
 
   expoDoctor:
-    command: npx -y expo-doctor@1.15.1
+    command: npx -y expo-doctor@1.17.11
     deps:
       - ~:codegen
-    env:
-      # Don't check that all the expo-* packages are the latest versions. That's
-      # already handled by renovate in a way that doesn't break PR builds when a
-      # new version comes out.
-      EXPO_OFFLINE: "1"
     options:
       # This checks the latest version of dependencies from the internet, so it
       # can't cache purely off local filesystem. It's important cache is
@@ -330,6 +325,8 @@ tasks:
     deps:
       # Lint does type-checking, so the Expo router types need to be generated first.
       - ~:codegen
+    env:
+      NODE_OPTIONS: --disable-warning=ExperimentalWarning $NODE_OPTIONS
 
 tags:
   - eslint

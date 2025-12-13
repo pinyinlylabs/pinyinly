@@ -14,7 +14,7 @@ import Reanimated, {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
-import { runOnJS, runOnUI } from "react-native-worklets";
+import { scheduleOnRN, scheduleOnUI } from "react-native-worklets";
 import { tv } from "tailwind-variants";
 import { hapticImpactIfMobile } from "../hooks/hapticImpactIfMobile";
 import { ReanimatedPressable } from "./ReanimatedPressable";
@@ -102,7 +102,7 @@ export function TextAnswerButton({
     let newRotation = targetRotation[state];
     let newBgOpacity = targetBgOpacity[state];
 
-    runOnUI(() => {
+    scheduleOnUI(() => {
       switch (state) {
         case `dimmed`:
         case `default`: {
@@ -141,7 +141,7 @@ export function TextAnswerButton({
       bgScaleSv.set(newBgScale);
       bgOpacitySv.set(newBgOpacity);
       rotationSv.set(newRotation);
-    })();
+    });
 
     setPrevState(state);
   }
@@ -152,12 +152,12 @@ export function TextAnswerButton({
     () => bgScaleSv.get(),
     (currentValue, previousValue) => {
       if (currentValue < 1 && (previousValue === null || previousValue >= 1)) {
-        runOnJS(setBgFilled)(false);
+        scheduleOnRN(setBgFilled, false);
       } else if (
         currentValue >= 1 &&
         (previousValue === null || previousValue < 1)
       ) {
-        runOnJS(setBgFilled)(true);
+        scheduleOnRN(setBgFilled, true);
       }
     },
     [bgScaleSv],
