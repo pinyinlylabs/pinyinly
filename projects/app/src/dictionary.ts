@@ -24,7 +24,6 @@ import {
   mapArrayAdd,
   memoize0,
   memoize1,
-  sortComparatorString,
 } from "@pinyinly/lib/collections";
 import { invariant } from "@pinyinly/lib/invariant";
 import type { DeepReadonly } from "ts-essentials";
@@ -480,39 +479,6 @@ export const allHanziCharacterPronunciationsForHanzi = memoize1(
     return pronunciations;
   },
 );
-
-export function upsertHanziWordMeaning(
-  dict: Dictionary,
-  hanziWord: HanziWord,
-  patch: Partial<HanziWordMeaning>,
-): void {
-  if (patch.pinyin?.length === 0) {
-    patch.pinyin = undefined;
-  }
-
-  const meaning = dict.get(hanziWord);
-  if (meaning == null) {
-    dict.set(hanziWord, patch as HanziWordMeaning);
-  } else {
-    dict.set(hanziWord, { ...meaning, ...patch });
-  }
-
-  // Test the validity of the dictionary.
-  dictionarySchema.parse(unparseDictionary(dict));
-}
-
-export function unparseDictionary(
-  dict: Dictionary,
-): z.input<typeof dictionarySchema> {
-  return [...dict.entries()]
-    .map(([hanziWord, meaning]): z.input<typeof dictionarySchema>[number] => {
-      return [
-        hanziWord,
-        meaning satisfies z.input<typeof hanziWordMeaningSchema>,
-      ];
-    })
-    .sort(sortComparatorString((x) => x[0]));
-}
 
 export const getIsStructuralHanzi = memoize0(async () => {
   const characters = await loadCharacters();

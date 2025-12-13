@@ -7,10 +7,12 @@ import { readFile, writeFile } from "node:fs/promises";
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { globSync } from "glob";
 
+import { stat } from "@pinyinly/lib/fs";
 import { invariant } from "@pinyinly/lib/invariant";
 import type { Debugger } from "debug";
 import isEqual from "lodash/isEqual.js";
 import { DatabaseSync } from "node:sqlite";
+import type { z } from "zod/v4";
 import { jsonStringifyShallowIndent } from "./json.ts";
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
@@ -197,3 +199,21 @@ export const fetchWithFsDbCache = async (
   invariant(typeof cached === `string`);
   return cached;
 };
+
+/**
+ * Read and parse a file using a zod schema, or return a fallback value if the
+ * file doesn't exist.
+ */
+export async function readFileWithSchema<Schema extends z.ZodType>(
+  path: string,
+  schema: Schema,
+  valueIfMissing: z.infer<Schema>,
+): Promise<z.infer<Schema>> {
+  // Handle the case where the file doesn't exist yet.
+  if ((await stat(path).catch(() => null)) == null) {
+    return valueIfMissing;
+  }
+
+  const content = await readFile(path, `utf8`);
+  return schema.parse(JSON.parse(content));
+}

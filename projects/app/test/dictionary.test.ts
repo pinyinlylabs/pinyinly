@@ -21,7 +21,6 @@ import {
   loadPinyinSoundThemeDetails,
   loadPinyinWords,
   meaningKeyFromHanziWord,
-  upsertHanziWordMeaning,
 } from "#dictionary.ts";
 import {
   mapSetAdd,
@@ -33,6 +32,7 @@ import { invariant } from "@pinyinly/lib/invariant";
 import { describe, expect, test } from "vitest";
 import { z } from "zod/v4";
 import { 拼音, 汉 } from "./data/helpers.ts";
+import { upsertHanziWordMeaning } from "./helpers.ts";
 
 test(`radical groups have the right number of elements`, async () => {
   // Data integrity test to ensure that the number of characters in each group

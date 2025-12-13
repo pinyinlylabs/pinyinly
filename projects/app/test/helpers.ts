@@ -4,10 +4,22 @@ import type * as fontkit from "fontkit";
 import path from "node:path";
 import { vi } from "vitest";
 
+import type { HanziWord } from "#data/model.ts";
+import type {
+  Dictionary,
+  HanziWordMeaning,
+  hanziWordMeaningSchema,
+} from "#dictionary.ts";
+import { dictionarySchema, wordListSchema } from "#dictionary.ts";
+import { sortComparatorString } from "@pinyinly/lib/collections";
+import { readFileWithSchema, writeJsonFileIfChanged } from "@pinyinly/lib/fs";
+import type { z } from "zod/v4";
+
 export const projectRoot = path.resolve(import.meta.dirname, `..`);
 export const workspaceRoot = path.resolve(projectRoot, `../..`);
 export const wikiDir = path.join(projectRoot, `src/client/wiki`);
 export const dataDir = path.join(projectRoot, `src/data`);
+export const dictionaryFilePath = path.join(dataDir, `dictionary.asset.json`);
 
 interface TestFont {
   name: string;
@@ -113,4 +125,74 @@ export function formatTimeOffset(timestamp: Date): string {
   const seconds = totalSeconds % 60;
 
   return `${hours.toString().padStart(2, `0`)}:${minutes.toString().padStart(2, `0`)}:${seconds.toString().padStart(2, `0`)}`;
+}
+
+export const readDictionary = (): Promise<Dictionary> =>
+  readFileWithSchema(dictionaryFilePath, dictionarySchema, new Map());
+
+export async function writeDictionary(dict: Dictionary) {
+  await writeJsonFileIfChanged(dictionaryFilePath, unparseDictionary(dict), 1);
+}
+
+export async function readHanziWordList(name: string) {
+  return await readFileWithSchema(
+    path.join(dataDir, `${name}.asset.json`),
+    wordListSchema,
+    [],
+  );
+}
+
+export async function writeHanziWordList(
+  wordListFileName: string,
+  data: HanziWord[],
+) {
+  await writeJsonFileIfChanged(
+    path.join(dataDir, `${wordListFileName}.asset.json`),
+    data.sort(),
+  );
+}
+
+export async function upsertHanziWordWordList(
+  hanziWord: HanziWord,
+  wordListFileName: string,
+) {
+  const data = await readHanziWordList(wordListFileName);
+
+  if (!data.includes(hanziWord)) {
+    data.push(hanziWord);
+    await writeHanziWordList(wordListFileName, data);
+  }
+}
+
+export function upsertHanziWordMeaning(
+  dict: Dictionary,
+  hanziWord: HanziWord,
+  patch: Partial<HanziWordMeaning>,
+): void {
+  if (patch.pinyin?.length === 0) {
+    patch.pinyin = undefined;
+  }
+
+  const meaning = dict.get(hanziWord);
+  if (meaning == null) {
+    dict.set(hanziWord, patch as HanziWordMeaning);
+  } else {
+    dict.set(hanziWord, { ...meaning, ...patch });
+  }
+
+  // Test the validity of the dictionary.
+  dictionarySchema.parse(unparseDictionary(dict));
+}
+
+export function unparseDictionary(
+  dict: Dictionary,
+): z.input<typeof dictionarySchema> {
+  return [...dict.entries()]
+    .map(([hanziWord, meaning]): z.input<typeof dictionarySchema>[number] => {
+      return [
+        hanziWord,
+        meaning satisfies z.input<typeof hanziWordMeaningSchema>,
+      ];
+    })
+    .sort(sortComparatorString((x) => x[0]));
 }

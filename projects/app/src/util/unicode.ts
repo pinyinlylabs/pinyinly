@@ -120,3 +120,14 @@ export function splitN(str: string, sep: string, n: number): string[] {
   out.push(str.slice(last));
   return out;
 }
+
+export function toCamelCase(text: string) {
+  return text
+    .split(/\s+/)
+    .map((word, index) =>
+      index === 0
+        ? word.toLowerCase()
+        : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase(),
+    )
+    .join(``);
+}

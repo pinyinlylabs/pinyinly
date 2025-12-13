@@ -22,7 +22,6 @@ import type {
 import {
   allHanziCharacters,
   buildHanziWord,
-  dictionarySchema,
   hanziFromHanziWord,
   hanziWordMeaningSchema,
   loadCharacters,
@@ -30,9 +29,6 @@ import {
   loadHsk1HanziWords,
   meaningKeyFromHanziWord,
   partOfSpeechSchema,
-  unparseDictionary,
-  upsertHanziWordMeaning,
-  wordListSchema,
 } from "#dictionary.ts";
 import { Alert, MultiSelect, Select } from "@inkjs/ui";
 import {
@@ -43,7 +39,7 @@ import {
   sortComparatorNumber,
   sortComparatorString,
 } from "@pinyinly/lib/collections";
-import { makeFsDbCache, writeJsonFileIfChanged } from "@pinyinly/lib/fs";
+import { makeFsDbCache } from "@pinyinly/lib/fs";
 import { invariant } from "@pinyinly/lib/invariant";
 import {
   QueryClient,
@@ -57,19 +53,25 @@ import Spinner from "ink-spinner";
 import TextInput from "ink-text-input";
 import chunk from "lodash/chunk.js";
 import isEqual from "lodash/isEqual.js";
-import path from "node:path";
 import type { ReactNode } from "react";
 import { Children, useCallback, useEffect, useMemo, useState } from "react";
 import type { DeepReadonly } from "ts-essentials";
 import yargs from "yargs";
 import { z } from "zod/v4";
 import {
+  readDictionary,
+  readHanziWordList,
+  upsertHanziWordMeaning,
+  upsertHanziWordWordList,
+  writeDictionary,
+  writeHanziWordList,
+} from "../test/helpers.ts";
+import {
   dongChineseData,
   getDongChineseGloss,
   getDongChineseMeaningKey,
   getDongChinesePronunciation,
 } from "./util/dongChinese.js";
-import { dataPath, readFileWithSchema } from "./util/fs.js";
 import { makeSimpleAiClient } from "./util/openai.js";
 
 const debug = makeDebug(`pyly`);
@@ -1416,7 +1418,10 @@ const WordListEditor = ({
           onSubmit={(hanziWords) => {
             void (async () => {
               for (const hanziWord of hanziWords) {
-                await upsertHanziWordWordList(hanziWord, wordListName);
+                await upsertHanziWordWordListAndInvalidateCache(
+                  hanziWord,
+                  wordListName,
+                );
               }
               setLocation({ type: `list` });
             })();
@@ -2123,11 +2128,6 @@ const SemiColonList = ({ items }: { items: readonly string[] }) => (
   </>
 );
 
-const dictionaryFilePath = path.join(dataPath, `dictionary.asset.json`);
-
-const readDictionary = (): Promise<Dictionary> =>
-  readFileWithSchema(dictionaryFilePath, dictionarySchema, new Map());
-
 async function renameHanziWord(
   oldHanziWord: HanziWord,
   newHanziWord: HanziWord,
@@ -2141,7 +2141,7 @@ async function renameHanziWord(
 
   dict.set(newHanziWord, meaning);
   dict.delete(oldHanziWord);
-  await writeDictionary(dict);
+  await writeDictionaryAndInvalidateCache(dict);
 
   for (const wordListFileName of wordListFileNames) {
     const hanziWordList = await readHanziWordList(wordListFileName);
@@ -2165,7 +2165,7 @@ async function mergeHanziWord(
 
   dict.delete(hanziWordToRemove);
 
-  await writeDictionary(dict);
+  await writeDictionaryAndInvalidateCache(dict);
 
   // Update all word lists
   for (const wordListFileName of wordListFileNames) {
@@ -2185,27 +2185,22 @@ async function saveUpsertHanziWordMeaning(
 
   upsertHanziWordMeaning(dict, hanziWord, patch);
 
-  await writeDictionary(dict);
+  await writeDictionaryAndInvalidateCache(dict);
 }
 
-async function writeDictionary(dict: Dictionary) {
-  await writeJsonFileIfChanged(dictionaryFilePath, unparseDictionary(dict), 1);
+async function writeDictionaryAndInvalidateCache(dict: Dictionary) {
+  await writeDictionary(dict);
   await queryClient.invalidateQueries({ queryKey: [`loadDictionary`] });
 }
 
-async function upsertHanziWordWordList(
+async function upsertHanziWordWordListAndInvalidateCache(
   hanziWord: HanziWord,
   wordListFileName: string,
 ) {
-  const data = await readHanziWordList(wordListFileName);
-
-  if (!data.includes(hanziWord)) {
-    data.push(hanziWord);
-    await writeHanziWordList(wordListFileName, data);
-    await queryClient.invalidateQueries({
-      queryKey: [`loadHanziWordList`, wordListFileName],
-    });
-  }
+  await upsertHanziWordWordList(hanziWord, wordListFileName);
+  await queryClient.invalidateQueries({
+    queryKey: [`loadHanziWordList`, wordListFileName],
+  });
 }
 
 function useHanziWordList(wordListFileName: string) {
@@ -2217,21 +2212,6 @@ function useHanziWordList(wordListFileName: string) {
     networkMode: `offlineFirst`,
     structuralSharing: false,
   });
-}
-
-async function readHanziWordList(name: string) {
-  return await readFileWithSchema(
-    path.join(dataPath, `${name}.asset.json`),
-    wordListSchema,
-    [],
-  );
-}
-
-async function writeHanziWordList(wordListFileName: string, data: HanziWord[]) {
-  await writeJsonFileIfChanged(
-    path.join(dataPath, `${wordListFileName}.asset.json`),
-    data.sort(),
-  );
 }
 
 const GoogleTranslateLink = ({ hanzi }: { hanzi: string }) => (

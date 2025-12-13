@@ -1,4 +1,8 @@
-import { hanziCharacterSchema, hanziTextSchema } from "#data/model.ts";
+import {
+  hanziCharacterSchema,
+  hanziTextSchema,
+  pinyinTextSchema,
+} from "#data/model.ts";
 import { memoize0 } from "@pinyinly/lib/collections";
 import { fetchWithFsDbCache, makeFsDbCache } from "@pinyinly/lib/fs";
 import { z } from "zod/v4";
@@ -91,7 +95,7 @@ export const completeHskVocabularyItemSchema = z
           traditional: hanziTextSchema,
           transcriptions: z
             .object({
-              pinyin: z.string(),
+              pinyin: pinyinTextSchema,
               numeric: z.string(),
               wadegiles: z.string(),
               bopomofo: z.string(),
