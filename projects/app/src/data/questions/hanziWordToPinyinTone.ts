@@ -52,7 +52,7 @@ export async function hanziWordToPinyinToneQuestionOrThrow(
     as: ctx.hanziAnswers.map((hanzi) => ({ kind: `hanzi`, value: hanzi })),
     bs: ctx.pinyinAnswers.map((pinyin) => ({
       kind: `pinyin`,
-      value: [pinyin],
+      value: pinyin,
     })),
     skill,
   };
@@ -64,7 +64,7 @@ export async function hanziWordToPinyinToneQuestionOrThrow(
   ];
   const groupB: OneCorrectPairQuestionChoice[] = [
     ...ctx.pinyinDistractors.map(
-      (pinyin) => ({ kind: `pinyin`, value: [pinyin] }) as const,
+      (pinyin) => ({ kind: `pinyin`, value: pinyin }) as const,
     ),
     ...answer.bs,
   ];
@@ -115,8 +115,7 @@ export async function makeQuestionContext(
   const hanziAnswers = [hanzi];
   const pinyinAnswers =
     meaning?.pinyin?.map((p) => {
-      invariant(p.length === 1, `expected single-syllable pinyin`);
-      return nonNullable(p[0]);
+      return parsePinyinSyllableOrThrow(p).syllable;
     }) ?? emptyArray;
   invariant(
     pinyinAnswers.length > 0,
@@ -254,14 +253,12 @@ function validQuestionInvariant(question: OneCorrectPairQuestion) {
   // (e.g. 似:resemble is shì/sì).
   const answerPinyinParts = question.answer.bs.map((x) => {
     invariant(x.kind === `pinyin`);
-    const syllable = nonNullable(x.value[0]);
-    return parsePinyinSyllableOrThrow(syllable);
+    return parsePinyinSyllableOrThrow(x.value);
   });
   for (const b of question.groupB) {
     invariant(b.kind === `pinyin`);
-    const syllable = nonNullable(b.value[0]);
     const { initialSoundId: initialChartLabel, finalSoundId: finalChartLabel } =
-      parsePinyinSyllableOrThrow(syllable);
+      parsePinyinSyllableOrThrow(b.value);
     invariant(
       answerPinyinParts.some(
         (x) =>

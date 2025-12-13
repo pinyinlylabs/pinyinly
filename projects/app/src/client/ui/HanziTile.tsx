@@ -1,4 +1,4 @@
-import type { HanziText } from "@/data/model";
+import type { HanziText, PinyinText } from "@/data/model";
 import type { PropsOf } from "@pinyinly/lib/types";
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
@@ -19,7 +19,7 @@ export function HanziTile({
 }: {
   hanzi: HanziText;
   gloss?: string;
-  pinyin?: string;
+  pinyin?: PinyinText;
   className?: string;
   variant?: `outline` | `filled`;
   size?: `10` | `20` | `47`;

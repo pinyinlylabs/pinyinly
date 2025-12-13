@@ -1,10 +1,18 @@
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { readFileSync, writeFileSync } from "node:fs";
+
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { readFile, writeFile } from "node:fs/promises";
+
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { globSync } from "glob";
+
+import { stat } from "@pinyinly/lib/fs";
+import { invariant } from "@pinyinly/lib/invariant";
+import type { Debugger } from "debug";
 import isEqual from "lodash/isEqual.js";
+import { DatabaseSync } from "node:sqlite";
+import type { z } from "zod/v4";
 import { jsonStringifyShallowIndent } from "./json.ts";
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
@@ -124,3 +132,88 @@ export function writeUtf8FileIfChangedSync(
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 export { glob, globSync } from "glob";
+
+export function makeFsDbCache<K, V>(
+  scriptFilename: string,
+  tableName = `cache`,
+  parentDebug?: Debugger,
+) {
+  const debug = parentDebug?.extend(`makeFsDbCache`);
+  const dbLocation = scriptFilename.replace(/\.[^.]+$/, `.cache.db`);
+  debug?.(`using db: ${dbLocation}`);
+  const db = new DatabaseSync(dbLocation);
+
+  db.exec(`
+  CREATE TABLE IF NOT EXISTS ${tableName}(
+    request TEXT PRIMARY KEY,
+    response TEXT,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+  ) STRICT
+  `);
+
+  return {
+    get(key: K): V | undefined {
+      const keyText = JSON.stringify(key);
+      debug?.(`getting cache for key: %O`, keyText);
+
+      const result = db
+        .prepare(`SELECT * FROM ${tableName} WHERE request = ?`)
+        .get(keyText) as
+        | { request: string; response: string; created_at: string }
+        | undefined;
+
+      return result == null ? undefined : (JSON.parse(result.response) as V);
+    },
+    set(key: K, value: V): void {
+      const keyText = JSON.stringify(key);
+      const valueText = JSON.stringify(value);
+      debug?.(`inserting cache for key: %O, value: %O`, keyText, valueText);
+
+      db.prepare(
+        `INSERT INTO ${tableName} (request, response) VALUES (?, ?)`,
+      ).run(keyText, valueText);
+    },
+  };
+}
+
+export type FsDbCache = ReturnType<typeof makeFsDbCache>;
+
+export const fetchWithFsDbCache = async (
+  body: Parameters<typeof fetch>[0],
+  ctx: {
+    fsDbCache: FsDbCache;
+    debug?: Debugger;
+  },
+) => {
+  const debug = ctx.debug?.extend(`fetchWithFsDbCache`);
+  const cacheKey = JSON.stringify(body);
+  const cached = ctx.fsDbCache.get(cacheKey);
+  if (cached == null) {
+    debug?.(`Making fetch request: %O`, body);
+    const response = await fetch(body);
+    const result = await response.text();
+    debug?.(`response size: %O`, result.length);
+    ctx.fsDbCache.set(cacheKey, result);
+    return result;
+  }
+  invariant(typeof cached === `string`);
+  return cached;
+};
+
+/**
+ * Read and parse a file using a zod schema, or return a fallback value if the
+ * file doesn't exist.
+ */
+export async function readFileWithSchema<Schema extends z.ZodType>(
+  path: string,
+  schema: Schema,
+  valueIfMissing: z.infer<Schema>,
+): Promise<z.infer<Schema>> {
+  // Handle the case where the file doesn't exist yet.
+  if ((await stat(path).catch(() => null)) == null) {
+    return valueIfMissing;
+  }
+
+  const content = await readFile(path, `utf8`);
+  return schema.parse(JSON.parse(content));
+}

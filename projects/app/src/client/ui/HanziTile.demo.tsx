@@ -1,5 +1,5 @@
 import { ExampleStack } from "@/client/ui/demo/helpers";
-import type { HanziText } from "@/data/model";
+import type { HanziText, PinyinText } from "@/data/model";
 import { View } from "react-native";
 import type { HanziTileProps } from "./HanziTile";
 import { HanziTile } from "./HanziTile";
@@ -8,8 +8,18 @@ export default () => (
   <View className="max-w-full gap-4">
     {(
       [
-        { title: `character`, hanzi: `好` as HanziText, pinyin: `hǎo` },
-        { title: `word`, hanzi: `你好` as HanziText, pinyin: `nǐhǎo` },
+        {
+          title: `character`,
+          hanzi: `好` as HanziText,
+          gloss: `good`,
+          pinyin: `hǎo` as PinyinText,
+        },
+        {
+          title: `word`,
+          hanzi: `你好` as HanziText,
+          gloss: `hello`,
+          pinyin: `nǐhǎo` as PinyinText,
+        },
       ] as const
     ).map((config, i) => (
       <View key={i}>
@@ -35,22 +45,22 @@ export default () => (
                 />
                 <HanziTile
                   hanzi={config.hanzi}
-                  pinyin="hǎo"
+                  pinyin={config.pinyin}
                   variant={variant}
                   size={size}
                   progress={progress}
                 />
                 <HanziTile
                   hanzi={config.hanzi}
-                  gloss="good"
+                  gloss={config.gloss}
                   variant={variant}
                   size={size}
                   progress={progress}
                 />
                 <HanziTile
                   hanzi={config.hanzi}
-                  gloss="good"
-                  pinyin="hǎo"
+                  gloss={config.gloss}
+                  pinyin={config.pinyin}
                   variant={variant}
                   size={size}
                   progress={progress}

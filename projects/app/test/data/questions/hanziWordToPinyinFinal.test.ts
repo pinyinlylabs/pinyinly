@@ -1,4 +1,5 @@
 import { isHanziCharacter } from "#data/hanzi.ts";
+import type { PinyinSyllable } from "#data/model.js";
 import {
   hanziWordToPinyinFinalQuestionOrThrow,
   makeQuestionContext,
@@ -8,7 +9,7 @@ import {
 import { hanziWordToPinyinFinal } from "#data/skills.ts";
 import { hanziFromHanziWord, loadDictionary } from "#dictionary.ts";
 import { describe, expect, test } from "vitest";
-import { 拼音, 汉字 } from "../helpers.ts";
+import { 汉字 } from "../helpers.ts";
 
 describe(
   `tryHanziDistractor suite` satisfies HasNameOf<typeof tryHanziDistractor>,
@@ -64,28 +65,28 @@ describe(
     test(`should omit if it is the same`, async () => {
       const ctx = await makeQuestionContext(`我:i`);
       // wǒ conflicts with wǒ
-      expect(tryPinyinDistractor(ctx, 拼音`wǒ`)).toEqual(false);
+      expect(tryPinyinDistractor(ctx, `wǒ` as PinyinSyllable)).toEqual(false);
     });
 
     test(`should omit if the initial differs`, async () => {
       const ctx = await makeQuestionContext(`堂:hall`); // táng
 
       // u doesn't match o
-      expect(tryPinyinDistractor(ctx, 拼音`fá`)).toEqual(false);
+      expect(tryPinyinDistractor(ctx, `fá` as PinyinSyllable)).toEqual(false);
     });
 
     test(`should omit if the tone differs`, async () => {
       const ctx = await makeQuestionContext(`我:i`);
 
       // ō doesn't match ǒ
-      expect(tryPinyinDistractor(ctx, 拼音`ō`)).toEqual(false);
+      expect(tryPinyinDistractor(ctx, `ō` as PinyinSyllable)).toEqual(false);
     });
 
     test(`should add viable candidates`, async () => {
       const ctx = await makeQuestionContext(`我:i`);
       expect(ctx.usedPinyin).toEqual(new Set([`wǒ`]));
 
-      expect(tryPinyinDistractor(ctx, 拼音`wǔ`)).toEqual(true);
+      expect(tryPinyinDistractor(ctx, `wǔ` as PinyinSyllable)).toEqual(true);
       expect(ctx.pinyinDistractors).toEqual([`wǔ`]);
       expect(ctx.usedPinyin).toEqual(new Set([`wǔ`, `wǒ`]));
     });

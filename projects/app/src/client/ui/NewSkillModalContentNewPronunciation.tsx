@@ -1,4 +1,4 @@
-import type { HanziText, PinyinSyllable } from "@/data/model";
+import type { HanziText, PinyinText } from "@/data/model";
 import { loadDictionary } from "@/dictionary";
 import { use } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
@@ -16,7 +16,7 @@ export const NewSkillModalContentNewPronunciation = ({
   const dictionary = use(loadDictionary());
   const hanziWordMeanings = dictionary.lookupHanzi(hanzi);
 
-  let pinyin: readonly PinyinSyllable[] | undefined;
+  let pinyin: PinyinText | undefined;
   for (const [, meaning] of hanziWordMeanings) {
     if (meaning.pinyin != null) {
       const mainPinyin = meaning.pinyin[0];
@@ -29,7 +29,7 @@ export const NewSkillModalContentNewPronunciation = ({
 
   let title: string = hanzi;
   if (pinyin != null) {
-    title += ` (${pinyin.join(` `)})`;
+    title += ` (${pinyin})`;
   }
 
   const glosses =

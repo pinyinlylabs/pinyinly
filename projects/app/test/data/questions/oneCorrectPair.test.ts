@@ -17,7 +17,7 @@ describe(
       const a: OneCorrectPairQuestionChoice = { kind: `hanzi`, value: 汉`好` };
       const b: OneCorrectPairQuestionChoice = {
         kind: `pinyin`,
-        value: [拼音`hǎo`],
+        value: 拼音`hǎo`,
       };
       const answer: OneCorrectPairQuestionAnswer = {
         as: [a],
@@ -55,7 +55,7 @@ describe(
     test(`hanzi↔pinyin / pinyin↔hanzi incorrect`, async () => {
       const answer = { as: [], bs: [], skill: hanziWordToGloss(`好:good`) };
       const choice1 = { kind: `hanzi`, value: 汉`好` } as const;
-      const choice2 = { kind: `pinyin`, value: [拼音`hǎo`] } as const;
+      const choice2 = { kind: `pinyin`, value: 拼音`hǎo` } as const;
       const combinations = [
         [choice1, choice2],
         [choice2, choice1],
@@ -63,7 +63,7 @@ describe(
       const mistake = {
         kind: MistakeKind.HanziPinyin,
         hanziOrHanziWord: `好`,
-        pinyin: [`hǎo`],
+        pinyin: `hǎo`,
       };
 
       for (const [a, b] of combinations) {

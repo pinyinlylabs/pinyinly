@@ -65,10 +65,7 @@ for (const char of allComponents) {
 }
 
 await writeFile(
-  path.join(
-    import.meta.dirname,
-    `../src/dictionary/missingFontGlyphs.asset.json`,
-  ),
+  path.join(import.meta.dirname, `../src/data/missingFontGlyphs.asset.json`),
   jsonStringifyShallowIndent({ [`macOS`]: [...missingGlyphs].sort() }),
   `utf8`,
 );

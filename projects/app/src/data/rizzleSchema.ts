@@ -8,8 +8,6 @@ import { z } from "zod/v4";
 import type {
   HanziText,
   HanziWord,
-  PinyinPronunciation,
-  PinyinPronunciationSpaceSeparated,
   PinyinSoundGroupId,
   PinyinSoundId,
   PinyinSyllable,
@@ -95,21 +93,6 @@ export const rSpaceSeparatedString = memoize0(function rSpaceSeparatedString() {
   return RizzleCustom.create<readonly string[], string, readonly string[]>(
     z.array(z.string()).transform((x) => x.join(` `)),
     z.string().transform((x) => x.split(/ +/) as readonly string[]),
-  );
-});
-
-export const rPinyinPronunciation = memoize0(function rPinyinPronunciation() {
-  return RizzleCustom.create<
-    Readonly<PinyinPronunciation>,
-    PinyinPronunciationSpaceSeparated,
-    PinyinPronunciation
-  >(
-    z
-      .array(pinyinSyllableSchema)
-      .transform((x) => x.join(` `) as PinyinPronunciationSpaceSeparated),
-    z
-      .custom<PinyinPronunciationSpaceSeparated>((x) => typeof x === `string`)
-      .transform((x) => x.split(/\s+/) as PinyinSyllable[]),
   );
 });
 
@@ -203,7 +186,7 @@ export const v8 = {
   hanziPinyinMistake: r.entity(`m/hp/[id]`, {
     id: r.string().alias(`i`),
     hanziOrHanziWord: rHanziOrHanziWord().alias(`h`),
-    pinyin: rSpaceSeparatedString().alias(`p`),
+    pinyin: r.string().alias(`p`),
     createdAt: r.datetime().alias(`c`).indexed(`byCreatedAt`),
   }),
 
@@ -274,7 +257,7 @@ export const v8 = {
        * Intentionally left as strings because this is user input and might not
        * be valid pinyin.
        */
-      pinyin: rSpaceSeparatedString().alias(`p`),
+      pinyin: r.string().alias(`p`),
       now: r.timestamp().alias(`n`),
     })
     .alias(`shpm`),

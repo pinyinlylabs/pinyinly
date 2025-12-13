@@ -21,7 +21,7 @@ tasks:
       # Environment variables
       - "$CI"
     env:
-      NODE_OPTIONS: --import tsx $NODE_OPTIONS
+      NODE_OPTIONS: --import tsx --disable-warning=ExperimentalWarning $NODE_OPTIONS
 
   renovateCheck:
     command: npx -y -p renovate@37.424.1 renovate-config-validator --strict

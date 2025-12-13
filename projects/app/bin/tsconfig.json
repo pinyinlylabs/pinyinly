@@ -4,7 +4,7 @@
     "module": "NodeNext",
     "target": "ESNext",
     "moduleResolution": "NodeNext",
-    "lib": ["ES2024"],
+    "lib": ["ESNext"],
     "jsx": "react-jsx",
     "outDir": "../../../.moon/cache/types/projects/app-bin"
   },
@@ -12,6 +12,9 @@
   "references": [
     {
       "path": "../src"
+    },
+    {
+      "path": "../test"
     }
   ]
 }

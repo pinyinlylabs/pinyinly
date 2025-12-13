@@ -35,7 +35,7 @@ export function WikiHanziModalImpl({
           hanzi={hanzi}
           pinyin={
             hanziWordMeanings.length === 1
-              ? hanziWordMeanings[0]?.[1].pinyin?.[0]?.join(` `)
+              ? hanziWordMeanings[0]?.[1].pinyin?.[0]
               : undefined
           }
           gloss={

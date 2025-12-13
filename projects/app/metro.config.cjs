@@ -1,11 +1,13 @@
 // Learn more https://docs.expo.io/guides/customizing-metro
-const { getDefaultConfig } = require(`expo/metro-config`);
-const { withSentryConfig } = require(`@sentry/react-native/metro`);
 const { withNativeWind } = require(`nativewind/metro`);
 const { withMdx } = require(`@pinyinly/mdx/metro`);
 const { withAudioSprites } = require(`@pinyinly/audio-sprites/metro`);
 
-let config = getDefaultConfig(__dirname);
+const { getSentryExpoConfig } = require(`@sentry/react-native/metro`);
+
+// TODO: [@sentry/react-native@>7.7.0] try swapping back to `getDefaultConfig`
+// from `expo/metro-config`.
+let config = getSentryExpoConfig(__dirname);
 
 config = {
   ...config,
@@ -45,6 +47,11 @@ config = withMdx(config);
 // Doing Sentry last is probably important so that the hashed debug IDs are
 // based on the final content of the final and aren't stripped by any other
 // processors.
-config = withSentryConfig(config);
+//
+// TODO: [@sentry/react-native@>7.7.0] try re-enabling
+// config = withSentryConfig(config, {
+//   annotateReactComponents: false,
+//   enableSourceContextInDevelopment: false,
+// });
 
 module.exports = config;

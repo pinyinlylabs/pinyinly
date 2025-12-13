@@ -1,0 +1,700 @@
+diff --git a/src/node-haste/DependencyGraph/ModuleResolution.js b/src/node-haste/DependencyGraph/ModuleResolution.js
+index 0eea9a6f39593acf4ebac257595ec541b827b5d2..823009226cd6debb94b1f10984e182db4bc31a98 100644
+--- a/src/node-haste/DependencyGraph/ModuleResolution.js
++++ b/src/node-haste/DependencyGraph/ModuleResolution.js
+@@ -82,6 +82,7 @@ class ModuleResolver {
+       doesFileExist,
+       extraNodeModules,
+       fileSystemLookup,
++      graph,
+       mainFields,
+       nodeModulesPaths,
+       preferNativePlatform,
+@@ -103,6 +104,7 @@ class ModuleResolver {
+             doesFileExist,
+             extraNodeModules,
+             fileSystemLookup,
++            graph,
+             isESMImport: dependency.data.isESMImport,
+             mainFields,
+             nodeModulesPaths,
+diff --git a/src/node-haste/DependencyGraph/ModuleResolution.js.orig b/src/node-haste/DependencyGraph/ModuleResolution.js.orig
+new file mode 100644
+index 0000000000000000000000000000000000000000..0eea9a6f39593acf4ebac257595ec541b827b5d2
+--- /dev/null
++++ b/src/node-haste/DependencyGraph/ModuleResolution.js.orig
+@@ -0,0 +1,363 @@
++"use strict";
++
++Object.defineProperty(exports, "__esModule", {
++  value: true,
++});
++exports.UnableToResolveError = exports.ModuleResolver = void 0;
++var _codeFrame = require("@babel/code-frame");
++var _fs = _interopRequireDefault(require("fs"));
++var _invariant = _interopRequireDefault(require("invariant"));
++var Resolver = _interopRequireWildcard(require("metro-resolver"));
++var _createDefaultContext = _interopRequireDefault(
++  require("metro-resolver/private/createDefaultContext"),
++);
++var _path = _interopRequireDefault(require("path"));
++var _util = _interopRequireDefault(require("util"));
++function _getRequireWildcardCache(e) {
++  if ("function" != typeof WeakMap) return null;
++  var r = new WeakMap(),
++    t = new WeakMap();
++  return (_getRequireWildcardCache = function (e) {
++    return e ? t : r;
++  })(e);
++}
++function _interopRequireWildcard(e, r) {
++  if (!r && e && e.__esModule) return e;
++  if (null === e || ("object" != typeof e && "function" != typeof e))
++    return { default: e };
++  var t = _getRequireWildcardCache(r);
++  if (t && t.has(e)) return t.get(e);
++  var n = { __proto__: null },
++    a = Object.defineProperty && Object.getOwnPropertyDescriptor;
++  for (var u in e)
++    if ("default" !== u && {}.hasOwnProperty.call(e, u)) {
++      var i = a ? Object.getOwnPropertyDescriptor(e, u) : null;
++      i && (i.get || i.set) ? Object.defineProperty(n, u, i) : (n[u] = e[u]);
++    }
++  return ((n.default = e), t && t.set(e, n), n);
++}
++function _interopRequireDefault(e) {
++  return e && e.__esModule ? e : { default: e };
++}
++class ModuleResolver {
++  constructor(options) {
++    this._options = options;
++    const { projectRoot } = this._options;
++    this._projectRootFakeModulePath = _path.default.join(projectRoot, "_");
++  }
++  _getEmptyModule() {
++    let emptyModule = this._cachedEmptyModule;
++    if (!emptyModule) {
++      emptyModule = this.resolveDependency(
++        this._projectRootFakeModulePath,
++        {
++          name: this._options.emptyModulePath,
++          data: {
++            key: this._options.emptyModulePath,
++            asyncType: null,
++            isESMImport: false,
++            locs: [],
++          },
++        },
++        false,
++        null,
++        {
++          dev: false,
++        },
++      );
++      this._cachedEmptyModule = emptyModule;
++    }
++    return emptyModule;
++  }
++  resolveDependency(
++    originModulePath,
++    dependency,
++    allowHaste,
++    platform,
++    resolverOptions,
++  ) {
++    const {
++      assetExts,
++      disableHierarchicalLookup,
++      doesFileExist,
++      extraNodeModules,
++      fileSystemLookup,
++      mainFields,
++      nodeModulesPaths,
++      preferNativePlatform,
++      resolveAsset,
++      resolveRequest,
++      sourceExts,
++      unstable_conditionNames,
++      unstable_conditionsByPlatform,
++      unstable_enablePackageExports,
++    } = this._options;
++    try {
++      const result = Resolver.resolve(
++        (0, _createDefaultContext.default)(
++          {
++            allowHaste,
++            assetExts,
++            dev: resolverOptions.dev,
++            disableHierarchicalLookup,
++            doesFileExist,
++            extraNodeModules,
++            fileSystemLookup,
++            isESMImport: dependency.data.isESMImport,
++            mainFields,
++            nodeModulesPaths,
++            preferNativePlatform,
++            resolveAsset,
++            resolveRequest,
++            sourceExts,
++            unstable_conditionNames,
++            unstable_conditionsByPlatform,
++            unstable_enablePackageExports,
++            unstable_logWarning: this._logWarning,
++            customResolverOptions: resolverOptions.customResolverOptions ?? {},
++            originModulePath,
++            resolveHasteModule: (name) =>
++              this._options.getHasteModulePath(name, platform),
++            resolveHastePackage: (name) =>
++              this._options.getHastePackagePath(name, platform),
++            getPackage: this._getPackage,
++            getPackageForModule: (absoluteModulePath) =>
++              this._getPackageForModule(absoluteModulePath),
++          },
++          dependency,
++        ),
++        dependency.name,
++        platform,
++      );
++      return this._getFileResolvedModule(result);
++    } catch (error) {
++      if (error instanceof Resolver.FailedToResolvePathError) {
++        const { candidates } = error;
++        throw new UnableToResolveError(
++          originModulePath,
++          dependency.name,
++          "\n\nNone of these files exist:\n" +
++            [candidates.file, candidates.dir]
++              .filter(Boolean)
++              .map(
++                (candidates) =>
++                  `  * ${Resolver.formatFileCandidates(this._removeRoot(candidates))}`,
++              )
++              .join("\n"),
++          {
++            cause: error,
++            dependency,
++          },
++        );
++      } else if (error instanceof Resolver.FailedToResolveUnsupportedError) {
++        throw new UnableToResolveError(
++          originModulePath,
++          dependency.name,
++          error.message,
++          {
++            cause: error,
++            dependency,
++          },
++        );
++      } else if (error instanceof Resolver.FailedToResolveNameError) {
++        const dirPaths = error.dirPaths;
++        const extraPaths = error.extraPaths;
++        const displayDirPaths = dirPaths
++          .filter((dirPath) => this._options.dirExists(dirPath))
++          .map((dirPath) =>
++            _path.default.relative(this._options.projectRoot, dirPath),
++          )
++          .concat(extraPaths);
++        const hint = displayDirPaths.length ? " or in these directories:" : "";
++        throw new UnableToResolveError(
++          originModulePath,
++          dependency.name,
++          [
++            `${dependency.name} could not be found within the project${hint || "."}`,
++            ...displayDirPaths.map((dirPath) => `  ${dirPath}`),
++          ].join("\n"),
++          {
++            cause: error,
++            dependency,
++          },
++        );
++      }
++      throw error;
++    }
++  }
++  _getPackage = (packageJsonPath) => {
++    try {
++      return this._options.packageCache.getPackage(packageJsonPath).read();
++    } catch (e) {}
++    return null;
++  };
++  _getPackageForModule = (absolutePath) => {
++    let result;
++    try {
++      result = this._options.packageCache.getPackageOf(absolutePath);
++    } catch (e) {}
++    return result != null
++      ? {
++          rootPath: _path.default.dirname(result.pkg.path),
++          packageJson: result.pkg.read(),
++          packageRelativePath: result.packageRelativePath,
++        }
++      : null;
++  };
++  _getFileResolvedModule(resolution) {
++    switch (resolution.type) {
++      case "sourceFile":
++        return resolution;
++      case "assetFiles":
++        const arbitrary = getArrayLowestItem(resolution.filePaths);
++        (0, _invariant.default)(arbitrary != null, "invalid asset resolution");
++        return {
++          type: "sourceFile",
++          filePath: arbitrary,
++        };
++      case "empty":
++        return this._getEmptyModule();
++      default:
++        resolution.type;
++        throw new Error("invalid type");
++    }
++  }
++  _logWarning = (message) => {
++    this._options.reporter.update({
++      type: "resolver_warning",
++      message,
++    });
++  };
++  _removeRoot(candidates) {
++    if (candidates.filePathPrefix) {
++      candidates.filePathPrefix = _path.default.relative(
++        this._options.projectRoot,
++        candidates.filePathPrefix,
++      );
++    }
++    return candidates;
++  }
++}
++exports.ModuleResolver = ModuleResolver;
++function getArrayLowestItem(a) {
++  if (a.length === 0) {
++    return undefined;
++  }
++  let lowest = a[0];
++  for (let i = 1; i < a.length; ++i) {
++    if (a[i] < lowest) {
++      lowest = a[i];
++    }
++  }
++  return lowest;
++}
++class UnableToResolveError extends Error {
++  type = "UnableToResolveError";
++  constructor(originModulePath, targetModuleName, message, options) {
++    super();
++    this.originModulePath = originModulePath;
++    this.targetModuleName = targetModuleName;
++    const codeFrameMessage = this.buildCodeFrameMessage(options?.dependency);
++    this.message =
++      _util.default.format(
++        "Unable to resolve module %s from %s: %s",
++        targetModuleName,
++        originModulePath,
++        message,
++      ) + (codeFrameMessage ? "\n" + codeFrameMessage : "");
++    this.cause = options?.cause;
++  }
++  buildCodeFrameMessage(dependency) {
++    let file;
++    try {
++      file = _fs.default.readFileSync(this.originModulePath, "utf8");
++    } catch (error) {
++      if (error.code === "ENOENT" || error.code === "EISDIR") {
++        return null;
++      }
++      throw error;
++    }
++    const location = dependency?.data.locs.length
++      ? refineDependencyLocation(
++          dependency.data.locs[0],
++          file,
++          this.targetModuleName,
++        )
++      : guessDependencyLocation(file, this.targetModuleName);
++    return (0, _codeFrame.codeFrameColumns)(
++      _fs.default.readFileSync(this.originModulePath, "utf8"),
++      location,
++      {
++        forceColor: process.env.NODE_ENV !== "test",
++      },
++    );
++  }
++}
++exports.UnableToResolveError = UnableToResolveError;
++function refineDependencyLocation(loc, fileContents, targetSpecifier) {
++  const lines = fileContents.split("\n");
++  for (let line = loc.end.line - 1; line >= loc.start.line - 1; line--) {
++    const maxColumn =
++      line === loc.end.line ? loc.end.column + 2 : lines[line].length;
++    const minColumn = line === loc.start.line ? loc.start.column - 1 : 0;
++    const lineStr = lines[line];
++    const lineSlice = lineStr.slice(minColumn, maxColumn);
++    for (
++      let offset = lineSlice.lastIndexOf(targetSpecifier);
++      offset !== -1 && offset > 0 && offset < lineSlice.length - 1;
++      offset = lineSlice.lastIndexOf(targetSpecifier, offset - 1)
++    ) {
++      const maybeQuoteBefore = lineSlice[minColumn + offset - 1];
++      const maybeQuoteAfter =
++        lineStr[minColumn + offset + targetSpecifier.length];
++      if (isQuote(maybeQuoteBefore) && maybeQuoteBefore === maybeQuoteAfter) {
++        return {
++          start: {
++            line: line + 1,
++            column: minColumn + offset + 1,
++          },
++        };
++      }
++    }
++  }
++  if (loc.start.line === loc.end.line) {
++    return {
++      start: {
++        line: loc.start.line,
++        column: loc.start.column + 1,
++      },
++      end: {
++        line: loc.end.line,
++        column: loc.end.column + 1,
++      },
++    };
++  }
++  return {
++    start: {
++      line: loc.start.line,
++      column: loc.start.column + 1,
++    },
++  };
++}
++function guessDependencyLocation(fileContents, targetSpecifier) {
++  const lines = fileContents.split("\n");
++  let lineNumber = 0;
++  let column = -1;
++  for (let line = 0; line < lines.length; line++) {
++    const columnLocation = lines[line].lastIndexOf(targetSpecifier);
++    if (columnLocation >= 0) {
++      lineNumber = line;
++      column = columnLocation;
++      break;
++    }
++  }
++  return {
++    start: {
++      column: column + 1,
++      line: lineNumber + 1,
++    },
++  };
++}
++function isQuote(str) {
++  return str === '"' || str === "'" || str === "`";
++}
+diff --git a/src/node-haste/DependencyGraph.js b/src/node-haste/DependencyGraph.js
+index bd42485a8a6647757c0f5b2f2c4a5e659125fcdd..397a691932bb5ed39bc1d8fe7eb2d9fc48db4628 100644
+--- a/src/node-haste/DependencyGraph.js
++++ b/src/node-haste/DependencyGraph.js
+@@ -128,6 +128,7 @@ class DependencyGraph extends _events.default {
+       emptyModulePath: this._config.resolver.emptyModulePath,
+       extraNodeModules: this._config.resolver.extraNodeModules,
+       fileSystemLookup,
++      graph: this,
+       getHasteModulePath: (name, platform) =>
+         this._hasteMap.getModule(name, platform, true),
+       getHastePackagePath: (name, platform) =>
+diff --git a/src/node-haste/DependencyGraph.js.orig b/src/node-haste/DependencyGraph.js.orig
+new file mode 100644
+index 0000000000000000000000000000000000000000..bd42485a8a6647757c0f5b2f2c4a5e659125fcdd
+--- /dev/null
++++ b/src/node-haste/DependencyGraph.js.orig
+@@ -0,0 +1,293 @@
++"use strict";
++
++Object.defineProperty(exports, "__esModule", {
++  value: true,
++});
++exports.default = void 0;
++var _createFileMap = _interopRequireDefault(
++  require("./DependencyGraph/createFileMap"),
++);
++var _ModuleResolution = require("./DependencyGraph/ModuleResolution");
++var _PackageCache = require("./PackageCache");
++var _events = _interopRequireDefault(require("events"));
++var _fs = _interopRequireDefault(require("fs"));
++var _metroCore = require("metro-core");
++var _canonicalize = _interopRequireDefault(
++  require("metro-core/private/canonicalize"),
++);
++var _metroFileMap = require("metro-file-map");
++var _metroResolver = require("metro-resolver");
++var _nullthrows = _interopRequireDefault(require("nullthrows"));
++var _path = _interopRequireDefault(require("path"));
++function _interopRequireDefault(e) {
++  return e && e.__esModule ? e : { default: e };
++}
++const { createActionStartEntry, createActionEndEntry, log } = _metroCore.Logger;
++const NULL_PLATFORM = Symbol();
++function getOrCreateMap(map, field) {
++  let subMap = map.get(field);
++  if (!subMap) {
++    subMap = new Map();
++    map.set(field, subMap);
++  }
++  return subMap;
++}
++class DependencyGraph extends _events.default {
++  #packageCache;
++  constructor(config, options) {
++    super();
++    this._config = config;
++    const { hasReducedPerformance, watch } = options ?? {};
++    const initializingMetroLogEntry = log(
++      createActionStartEntry("Initializing Metro"),
++    );
++    config.reporter.update({
++      type: "dep_graph_loading",
++      hasReducedPerformance: !!hasReducedPerformance,
++    });
++    const fileMap = (0, _createFileMap.default)(config, {
++      throwOnModuleCollision: false,
++      watch,
++    });
++    fileMap.setMaxListeners(1000);
++    this._haste = fileMap;
++    this._haste.on("status", (status) => this._onWatcherStatus(status));
++    this._initializedPromise = fileMap
++      .build()
++      .then(({ fileSystem, hasteMap }) => {
++        log(createActionEndEntry(initializingMetroLogEntry));
++        config.reporter.update({
++          type: "dep_graph_loaded",
++        });
++        this._fileSystem = fileSystem;
++        this._hasteMap = hasteMap;
++        this._haste.on("change", (changeEvent) =>
++          this._onHasteChange(changeEvent),
++        );
++        this._haste.on("healthCheck", (result) =>
++          this._onWatcherHealthCheck(result),
++        );
++        this._resolutionCache = new Map();
++        this.#packageCache = this._createPackageCache();
++        this._createModuleResolver();
++      });
++  }
++  _onWatcherHealthCheck(result) {
++    this._config.reporter.update({
++      type: "watcher_health_check_result",
++      result,
++    });
++  }
++  _onWatcherStatus(status) {
++    this._config.reporter.update({
++      type: "watcher_status",
++      status,
++    });
++  }
++  async ready() {
++    await this._initializedPromise;
++  }
++  static async load(config, options) {
++    const self = new DependencyGraph(config, options);
++    await self.ready();
++    return self;
++  }
++  _onHasteChange({ eventsQueue }) {
++    this._resolutionCache = new Map();
++    eventsQueue.forEach(({ filePath }) =>
++      this.#packageCache.invalidate(filePath),
++    );
++    this._createModuleResolver();
++    this.emit("change");
++  }
++  _createModuleResolver() {
++    const fileSystemLookup = (path) => {
++      const result = this._fileSystem.lookup(path);
++      if (result.exists) {
++        return {
++          exists: true,
++          realPath: result.realPath,
++          type: result.type,
++        };
++      }
++      return {
++        exists: false,
++      };
++    };
++    this._moduleResolver = new _ModuleResolution.ModuleResolver({
++      assetExts: new Set(this._config.resolver.assetExts),
++      dirExists: (filePath) => {
++        try {
++          return _fs.default.lstatSync(filePath).isDirectory();
++        } catch (e) {}
++        return false;
++      },
++      disableHierarchicalLookup:
++        this._config.resolver.disableHierarchicalLookup,
++      doesFileExist: this._doesFileExist,
++      emptyModulePath: this._config.resolver.emptyModulePath,
++      extraNodeModules: this._config.resolver.extraNodeModules,
++      fileSystemLookup,
++      getHasteModulePath: (name, platform) =>
++        this._hasteMap.getModule(name, platform, true),
++      getHastePackagePath: (name, platform) =>
++        this._hasteMap.getPackage(name, platform, true),
++      mainFields: this._config.resolver.resolverMainFields,
++      nodeModulesPaths: this._config.resolver.nodeModulesPaths,
++      packageCache: this.#packageCache,
++      preferNativePlatform: true,
++      projectRoot: this._config.projectRoot,
++      reporter: this._config.reporter,
++      resolveAsset: (dirPath, assetName, extension) => {
++        const basePath = dirPath + _path.default.sep + assetName;
++        const assets = [
++          basePath + extension,
++          ...this._config.resolver.assetResolutions.map(
++            (resolution) => basePath + "@" + resolution + "x" + extension,
++          ),
++        ]
++          .map((assetPath) => fileSystemLookup(assetPath).realPath)
++          .filter(Boolean);
++        return assets.length ? assets : null;
++      },
++      resolveRequest: this._config.resolver.resolveRequest,
++      sourceExts: this._config.resolver.sourceExts,
++      unstable_conditionNames: this._config.resolver.unstable_conditionNames,
++      unstable_conditionsByPlatform:
++        this._config.resolver.unstable_conditionsByPlatform,
++      unstable_enablePackageExports:
++        this._config.resolver.unstable_enablePackageExports,
++    });
++  }
++  _getClosestPackage(absoluteModulePath) {
++    const result = this._fileSystem.hierarchicalLookup(
++      absoluteModulePath,
++      "package.json",
++      {
++        breakOnSegment: "node_modules",
++        invalidatedBy: null,
++        subpathType: "f",
++      },
++    );
++    return result
++      ? {
++          packageJsonPath: result.absolutePath,
++          packageRelativePath: result.containerRelativePath,
++        }
++      : null;
++  }
++  _createPackageCache() {
++    return new _PackageCache.PackageCache({
++      getClosestPackage: (absolutePath) =>
++        this._getClosestPackage(absolutePath),
++    });
++  }
++  getAllFiles() {
++    return (0, _nullthrows.default)(this._fileSystem).getAllFiles();
++  }
++  async getOrComputeSha1(mixedPath) {
++    const result = await this._fileSystem.getOrComputeSha1(mixedPath);
++    if (!result || !result.sha1) {
++      throw new Error(`Failed to get the SHA-1 for: ${mixedPath}.
++      Potential causes:
++        1) The file is not watched. Ensure it is under the configured \`projectRoot\` or \`watchFolders\`.
++        2) Check \`blockList\` in your metro.config.js and make sure it isn't excluding the file path.
++        3) The file may have been deleted since it was resolved - try refreshing your app.
++        4) Otherwise, this is a bug in Metro or the configured resolver - please report it.`);
++    }
++    return result;
++  }
++  getWatcher() {
++    return this._haste;
++  }
++  async end() {
++    await this.ready();
++    await this._haste.end();
++  }
++  matchFilesWithContext(from, context) {
++    return this._fileSystem.matchFiles({
++      rootDir: from,
++      recursive: context.recursive,
++      filter: context.filter,
++      filterComparePosix: true,
++      follow: true,
++    });
++  }
++  resolveDependency(
++    originModulePath,
++    dependency,
++    platform,
++    resolverOptions,
++    { assumeFlatNodeModules } = {
++      assumeFlatNodeModules: false,
++    },
++  ) {
++    const to = dependency.name;
++    const isSensitiveToOriginFolder =
++      !assumeFlatNodeModules ||
++      to.includes("/") ||
++      to === "." ||
++      to === ".." ||
++      originModulePath.includes(
++        _path.default.sep + "node_modules" + _path.default.sep,
++      );
++    const resolverOptionsKey =
++      JSON.stringify(resolverOptions ?? {}, _canonicalize.default) ?? "";
++    const originKey = isSensitiveToOriginFolder
++      ? _path.default.dirname(originModulePath)
++      : "";
++    const targetKey =
++      to + (dependency.data.isESMImport === true ? "\0esm" : "\0cjs");
++    const platformKey = platform ?? NULL_PLATFORM;
++    const mapByResolverOptions = this._resolutionCache;
++    const mapByOrigin = getOrCreateMap(
++      mapByResolverOptions,
++      resolverOptionsKey,
++    );
++    const mapByTarget = getOrCreateMap(mapByOrigin, originKey);
++    const mapByPlatform = getOrCreateMap(mapByTarget, targetKey);
++    let resolution = mapByPlatform.get(platformKey);
++    if (!resolution) {
++      try {
++        resolution = this._moduleResolver.resolveDependency(
++          originModulePath,
++          dependency,
++          true,
++          platform,
++          resolverOptions,
++        );
++      } catch (error) {
++        if (error instanceof _metroFileMap.DuplicateHasteCandidatesError) {
++          throw new _metroCore.AmbiguousModuleResolutionError(
++            originModulePath,
++            error,
++          );
++        }
++        if (error instanceof _metroResolver.InvalidPackageError) {
++          throw new _metroCore.PackageResolutionError({
++            packageError: error,
++            originModulePath,
++            targetModuleName: to,
++          });
++        }
++        throw error;
++      }
++    }
++    mapByPlatform.set(platformKey, resolution);
++    return resolution;
++  }
++  _doesFileExist = (filePath) => {
++    return this._fileSystem.exists(filePath);
++  };
++  getHasteName(filePath) {
++    const hasteName = this._fileSystem.getModuleName(filePath);
++    if (hasteName) {
++      return hasteName;
++    }
++    return _path.default.relative(this._config.projectRoot, filePath);
++  }
++  getDependencies(filePath) {
++    return (0, _nullthrows.default)(this._fileSystem.getDependencies(filePath));
++  }
++}
++exports.default = DependencyGraph;

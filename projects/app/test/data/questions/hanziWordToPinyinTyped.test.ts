@@ -1,4 +1,7 @@
-import type { HanziWordToPinyinTypedQuestion } from "#data/model.ts";
+import type {
+  HanziWordToPinyinTypedQuestion,
+  PinyinText,
+} from "#data/model.ts";
 import { MistakeKind, QuestionFlagKind, QuestionKind } from "#data/model.ts";
 import {
   gradeHanziToPinyinTypedQuestion,
@@ -24,7 +27,7 @@ describe(
       // Should include the requested skill's answer
       const matchingAnswer = result.answers.find((a) => a.skill === skill);
       expect(matchingAnswer).toBeDefined();
-      expect(matchingAnswer?.pinyin).toEqual([[`nǐ`, `hǎo`]]);
+      expect(matchingAnswer?.pinyin).toEqual([拼音`nǐ hǎo`]);
     });
 
     test(`throws if the hanzi word has no pinyin`, async () => {
@@ -66,17 +69,13 @@ describe(
             "answers": [
               {
                 "pinyin": [
-                  [
-                    "jǐ",
-                  ],
+                  "jǐ",
                 ],
                 "skill": "hp:几:howMany",
               },
               {
                 "pinyin": [
-                  [
-                    "jī",
-                  ],
+                  "jī",
                 ],
                 "skill": "hp:几:table",
               },
@@ -103,17 +102,13 @@ describe(
             "answers": [
               {
                 "pinyin": [
-                  [
-                    "jǐ",
-                  ],
+                  "jǐ",
                 ],
                 "skill": "hp:几:howMany",
               },
             ],
             "bannedMeaningPinyinHint": [
-              [
-                "jī",
-              ],
+              "jī",
             ],
             "flag": {
               "kind": "debug--OtherAnswer",
@@ -142,7 +137,7 @@ describe(
         answers: [
           {
             skill,
-            pinyin: [[拼音`nǐ`, 拼音`hǎo`]],
+            pinyin: [拼音`nǐ hǎo`],
           },
         ],
         bannedMeaningPinyinHint: [],
@@ -164,7 +159,7 @@ describe(
         answers: [
           {
             skill,
-            pinyin: [[拼音`nǐ`, 拼音`hǎo`]],
+            pinyin: [拼音`nǐ hǎo`],
           },
         ],
         bannedMeaningPinyinHint: [],
@@ -172,28 +167,25 @@ describe(
         flag: null,
       };
 
-      const fixtures: [string, string[]][] = [
-        [`nǐ`, [`nǐ`]], // less syllables than the answer
-        [`nǐhǎomá`, [`nǐ`, `hǎo`, `má`]], // more syllables than the answer
-        [`nihǎo`, [`ni`, `hǎo`]],
-        [`ni  hǎo`, [`ni`, `hǎo`]],
-        [`nǐhao`, [`nǐ`, `hao`]],
-        [``, []],
-        [`x x`, [`x`, `x`]],
+      const fixtures: PinyinText[] = [
+        拼音`nǐ`, // less syllables than the answer
+        拼音`nǐhǎomá`, // more syllables than the answer
+        拼音`nihǎo`,
+        拼音`ni  hǎo`,
+        拼音`nǐhao`,
+        拼音``,
+        拼音`x x`,
       ];
-      for (const [answer, mistakePinyin] of fixtures) {
+      for (const answer of fixtures) {
         const grade = gradeHanziToPinyinTypedQuestion(question, answer, 1000);
-        expect([answer, grade.correct]).toEqual([answer, false]);
+        expect.soft(grade.correct, `${answer} should be incorrect`).toBe(false);
         if (!grade.correct) {
-          expect([answer, grade.mistakes]).toEqual([
-            answer,
-            [
-              {
-                kind: MistakeKind.HanziPinyin,
-                hanziOrHanziWord: `你好:hello`,
-                pinyin: mistakePinyin,
-              },
-            ],
+          expect.soft(grade.mistakes, `${answer} mistake`).toEqual([
+            {
+              kind: MistakeKind.HanziPinyin,
+              hanziOrHanziWord: `你好:hello`,
+              pinyin: answer,
+            },
           ]);
         }
       }
@@ -206,10 +198,7 @@ describe(
         answers: [
           {
             skill,
-            pinyin: [
-              [拼音`nǐ`, 拼音`hǎo`],
-              [拼音`ni`, 拼音`hao`],
-            ],
+            pinyin: [拼音`nǐ hǎo`, 拼音`ni hao`],
           },
         ],
         bannedMeaningPinyinHint: [],

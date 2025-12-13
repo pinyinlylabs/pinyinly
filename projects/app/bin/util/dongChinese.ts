@@ -1,23 +1,18 @@
-import type {
-  PinyinPronunciation,
-  PinyinPronunciationSpaceSeparated,
-} from "#data/model.ts";
-import { rPinyinPronunciation } from "#data/rizzleSchema.js";
+import type { PinyinText } from "#data/model.ts";
 import {
   inverseSortComparator,
   memoize0,
   sortComparatorNumber,
 } from "@pinyinly/lib/collections";
+import { fetchWithFsDbCache, makeFsDbCache } from "@pinyinly/lib/fs";
 import { z } from "zod/v4";
-import { makeDbCache } from "./cache.js";
-import { fetchWithCache } from "./fetch.js";
 
-const dbCache = makeDbCache(import.meta.filename);
+const fsDbCache = makeFsDbCache(import.meta.filename);
 
 export const dongChineseData = memoize0(async () => {
-  const rawJsonl = await fetchWithCache(
+  const rawJsonl = await fetchWithFsDbCache(
     `https://data.dong-chinese.com/dump/dictionary_char_2024-06-17.jsonl`,
-    { dbCache },
+    { fsDbCache },
   );
 
   const data = rawJsonl
@@ -202,18 +197,14 @@ export type DongChineseRecord = z.infer<typeof dongChineseSchema>;
 
 export function getDongChinesePronunciation(
   lookup: z.infer<typeof dongChineseSchema>,
-): PinyinPronunciation[] | undefined {
+): PinyinText[] | undefined {
   return lookup.pinyinFrequencies
     ?.sort(
       inverseSortComparator(
         sortComparatorNumber((x) => x.frequency ?? x.count ?? 0),
       ),
     )
-    .map((x) =>
-      rPinyinPronunciation().unmarshal(
-        x.pinyin as PinyinPronunciationSpaceSeparated,
-      ),
-    );
+    .map((x) => x.pinyin as PinyinText);
 }
 
 function cleanGloss(gloss: string): string {

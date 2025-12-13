@@ -1,3 +1,4 @@
+import type { FsDbCache } from "@pinyinly/lib/fs";
 import { readFile } from "@pinyinly/lib/fs";
 import { invariant } from "@pinyinly/lib/invariant";
 import type { Debugger } from "debug";
@@ -8,19 +9,18 @@ import type {
   ResponseFormatJSONSchema,
 } from "openai/resources/index.mjs";
 import { z } from "zod/v4";
-import type { DbCache } from "./cache.js";
 
-export const openAiWithCache = async (
+export const openAiWithFsDbCache = async (
   body: ChatCompletionCreateParamsNonStreaming,
   ctx: {
-    dbCache: DbCache;
+    fsDbCache: FsDbCache;
     openai?: OpenAI;
     debug?: Debugger;
   },
 ) => {
   const openai = ctx.openai ?? new OpenAI();
   const debug = ctx.debug?.extend(`openAi`);
-  const cached = ctx.dbCache.get(body);
+  const cached = ctx.fsDbCache.get(body);
 
   if (debug?.enabled === true) {
     for (const message of body.messages) {
@@ -43,14 +43,14 @@ export const openAiWithCache = async (
       result != null,
       `No result for OpenAI request:\n${JSON.stringify(body, null, 2)}`,
     );
-    ctx.dbCache.set(body, result);
+    ctx.fsDbCache.set(body, result);
     return result;
   }
   invariant(typeof cached === `string`);
   return cached;
 };
 
-export function makeSimpleAiClient(dbCache: DbCache) {
+export function makeSimpleAiClient(fsDbCache: FsDbCache) {
   const openai = new OpenAI();
 
   return async function simpleOpenAiWithCache<Schema extends z.ZodType>(
@@ -59,7 +59,7 @@ export function makeSimpleAiClient(dbCache: DbCache) {
     schema: Schema,
     model = `gpt-5`,
   ): Promise<z.infer<Schema>> {
-    const rawJson = await openAiWithCache(
+    const rawJson = await openAiWithFsDbCache(
       {
         model,
         messages: [
@@ -68,7 +68,7 @@ export function makeSimpleAiClient(dbCache: DbCache) {
         ],
         response_format: zodResponseFormat(schema, `result_shape`),
       },
-      { dbCache, openai },
+      { fsDbCache, openai },
     );
 
     return schema.parse(JSON.parse(rawJson));

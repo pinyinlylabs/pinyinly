@@ -7,8 +7,7 @@ import type {
   HanziWord,
   HanziWordSkill,
   MistakeType,
-  PinyinPronunciationSpaceSeparated,
-  PinyinSyllable,
+  PinyinText,
   Skill,
   SrsStateFsrsFourPointFiveType,
   SrsStateMockType,
@@ -20,7 +19,6 @@ import {
   SrsKind,
 } from "#data/model.ts";
 import type { Rizzle } from "#data/rizzleSchema.js";
-import { rSpaceSeparatedString } from "#data/rizzleSchema.js";
 import type { SkillReviewQueue, SkillReviewQueueItem } from "#data/skills.js";
 import { hanziWordFromSkill, skillKindFromSkill } from "#data/skills.js";
 import type { Rating } from "#util/fsrs.ts";
@@ -140,13 +138,11 @@ export const 汉 = (strings: TemplateStringsArray): HanziText => {
 };
 
 /**
- * {@link PinyinSyllable} template string tag.
+ * {@link PinyinText} template string tag.
  *
- * 拼音 means syllable in Chinese, and since it's written using Chinese it's
- * inferred it's for Pinyin syllables.
+ * 拼音 means pinyin in Chinese.
  */
-export const 拼音 = (strings: TemplateStringsArray) =>
-  strings[0] as PinyinSyllable;
+export const 拼音 = (strings: TemplateStringsArray) => strings[0] as PinyinText;
 
 export function prettyQueue(
   queue: Pick<DeepReadonly<SkillReviewQueue>, `items`>,
@@ -265,14 +261,14 @@ export function parseHistoryCommand(
     case `❌hanziPinyin`: {
       const [hanzi, pinyin] = splitN(opArgs!, ` `, 1) as [
         HanziText,
-        PinyinPronunciationSpaceSeparated,
+        PinyinText,
       ];
       events.push({
         kind: `hanziPinyinMistake`,
         mistake: {
           kind: MistakeKind.HanziPinyin,
           hanziOrHanziWord: hanzi,
-          pinyin: rSpaceSeparatedString().unmarshal(pinyin),
+          pinyin,
         },
       });
       break;
@@ -322,11 +318,9 @@ export function parseHistoryCommand(
           case SkillKind.HanziWordToPinyinTone: {
             skill = skill as HanziWordSkill;
             // `❌ he:刀:knife (刀→legs)`,
-            const match = /^\((?:(.+)→)?(.+)\)$/.exec(skillArgs);
+            const match = /^\((?:(.+)→)?(.+?)\)$/.exec(skillArgs);
             invariant(match != null, `invalid mistake format ${skillArgs}`);
-            const pinyin = rSpaceSeparatedString().unmarshal(
-              nonNullable(match[2], `gloss match missing`),
-            );
+            const pinyin = match[2] as PinyinText;
             const hanziOrHanziWord =
               match[1] == null
                 ? // (pǐ)

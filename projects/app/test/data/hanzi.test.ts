@@ -13,7 +13,6 @@ import {
   verticalPairToTripleMergeIdsTransform,
   walkIdsNodeLeafs,
 } from "#data/hanzi.ts";
-import type { HanziText } from "#data/model.ts";
 import { invariant } from "@pinyinly/lib/invariant";
 import { describe, expect, test } from "vitest";
 import { 汉, 汉字 } from "./helpers.ts";
@@ -313,18 +312,19 @@ test(
   },
 );
 
-test(
+describe(
   `hanziCharacterCount fixtures` satisfies HasNameOf<
     typeof hanziCharacterCount
   >,
   () => {
-    for (const value of [`木`, `你`] as HanziText[]) {
-      expect(hanziCharacterCount(value)).toBe(1);
-    }
-
-    for (const value of [`你好`, `再见`] as HanziText[]) {
-      expect(hanziCharacterCount(value)).toBe(2);
-    }
+    test.for([
+      [汉`木`, 1],
+      [汉`你`, 1],
+      [汉`你好`, 2],
+      [汉`再见`, 2],
+    ] as const)(`%s -> %s`, ([value, count]) => {
+      expect(hanziCharacterCount(value)).toBe(count);
+    });
   },
 );
 

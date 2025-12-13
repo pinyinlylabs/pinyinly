@@ -37,8 +37,8 @@ yarn-error.*
 # Vercel
 .vercel
 
-# bin/ caches
-bin/**/*.db
+# bin/ and test/ caches
+/**/*.cache.db
 
 # test caches
 .cache

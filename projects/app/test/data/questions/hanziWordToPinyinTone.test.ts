@@ -1,4 +1,5 @@
 import { isHanziCharacter } from "#data/hanzi.ts";
+import type { PinyinSyllable } from "#data/model.js";
 import {
   hanziWordToPinyinToneQuestionOrThrow,
   makeQuestionContext,
@@ -8,7 +9,7 @@ import {
 import { hanziWordToPinyinTone } from "#data/skills.ts";
 import { hanziFromHanziWord, loadDictionary } from "#dictionary.ts";
 import { describe, expect, test } from "vitest";
-import { 拼音, 汉字 } from "../helpers.ts";
+import { 汉字 } from "../helpers.ts";
 
 describe(
   `tryHanziDistractor suite` satisfies HasNameOf<typeof tryHanziDistractor>,
@@ -65,14 +66,14 @@ describe(
     test(`should omit if it is the same`, async () => {
       const ctx = await makeQuestionContext(`我:i`);
       // wǒ conflicts with wǒ
-      expect(tryPinyinDistractor(ctx, 拼音`wǒ`)).toEqual(false);
+      expect(tryPinyinDistractor(ctx, `wǒ` as PinyinSyllable)).toEqual(false);
     });
 
     test(`should add viable candidates`, async () => {
       const ctx = await makeQuestionContext(`我:i`);
       expect(ctx.usedPinyin).toEqual(new Set([`wǒ`]));
 
-      expect(tryPinyinDistractor(ctx, 拼音`wǔ`)).toEqual(true);
+      expect(tryPinyinDistractor(ctx, `wǔ` as PinyinSyllable)).toEqual(true);
       expect(ctx.pinyinDistractors).toEqual([`wǔ`]);
       expect(ctx.usedPinyin).toEqual(new Set([`wǔ`, `wǒ`]));
     });
@@ -90,7 +91,7 @@ describe(
       );
       expect(ctx.pinyinAnswers).toEqual([`wéi`]);
 
-      expect(tryPinyinDistractor(ctx, 拼音`wèi`)).toEqual(false);
+      expect(tryPinyinDistractor(ctx, `wèi` as PinyinSyllable)).toEqual(false);
       expect(ctx.pinyinDistractors).toEqual([]);
     });
   },

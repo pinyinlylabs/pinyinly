@@ -25,7 +25,7 @@ export function HanziWordTile({
       className={className}
       gloss={meaning?.gloss[0]}
       hanzi={hanzi}
-      pinyin={meaning?.pinyin?.[0]?.join(` `)}
+      pinyin={meaning?.pinyin?.[0]}
       size={size}
       variant={variant}
       linked={linked}

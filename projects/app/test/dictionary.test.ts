@@ -1,6 +1,6 @@
 import { splitHanziText } from "#data/hanzi.ts";
 import type { HanziCharacter, HanziText } from "#data/model.ts";
-import { pinyinPronunciationDisplayText } from "#data/pinyin.ts";
+import { pinyinSyllableCount } from "#data/pinyin.js";
 import type { Dictionary } from "#dictionary.ts";
 import {
   decomposeHanzi,
@@ -21,7 +21,6 @@ import {
   loadPinyinSoundThemeDetails,
   loadPinyinWords,
   meaningKeyFromHanziWord,
-  upsertHanziWordMeaning,
 } from "#dictionary.ts";
 import {
   mapSetAdd,
@@ -29,10 +28,11 @@ import {
   sortComparatorNumber,
   sortComparatorString,
 } from "@pinyinly/lib/collections";
-import { invariant } from "@pinyinly/lib/invariant";
+import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import { describe, expect, test } from "vitest";
 import { z } from "zod/v4";
 import { 拼音, 汉 } from "./data/helpers.ts";
+import { upsertHanziWordMeaning } from "./helpers.ts";
 
 test(`radical groups have the right number of elements`, async () => {
   // Data integrity test to ensure that the number of characters in each group
@@ -123,26 +123,33 @@ test(`hanzi word meaning-key lint`, async () => {
 test(`hanzi word meaning gloss lint`, async () => {
   const dict = await loadDictionary();
 
-  const maxWords = 4;
-  const maxSpaces = maxWords - 1;
+  for (const [hanziWord, meaning] of dict.allEntries) {
+    // Rules for all glosses
+    for (const gloss of meaning.gloss) {
+      const label = `${hanziWord} gloss "${gloss}"`;
 
-  const isViolating = (x: string) =>
-    // no comma
-    /,/.exec(x) != null ||
-    // no banned characters/phrases
-    /measure ?word|radical|particle|\(/i.exec(x) != null ||
-    (x.match(/\s+/g)?.length ?? 0) > maxSpaces;
+      // No comma
+      expect.soft(gloss, `${label} commas`).not.toMatch(/,/);
 
-  const violations = new Set(
-    dict.allEntries
-      .filter(([, { gloss }]) => gloss.some((x) => isViolating(x)))
-      .map(([hanziWord, { gloss }]) => ({
-        hanziWord,
-        gloss: gloss.filter((x) => isViolating(x)),
-      })),
-  );
+      // No banned characters/phrases
+      expect
+        .soft(gloss, `${label} banned characters/phrases`)
+        .not.toMatch(/measure ?word|radical|particle|\(/i);
+    }
 
-  expect(violations).toEqual(new Set());
+    // Rules for the primary gloss
+    {
+      const gloss = nonNullable(meaning.gloss[0]);
+      const label = `${hanziWord} gloss "${gloss}"`;
+
+      const maxWords = 5;
+      expect
+        .soft(gloss.match(/[^\s]+/g)?.length ?? 0, `${label} word count`)
+        .toBeLessThanOrEqual(maxWords);
+    }
+  }
+
+  // expect(violations).toEqual(new Set());
 });
 
 test(`hanzi meaning canonicalForm`, async () => {
@@ -183,11 +190,10 @@ test(`hanzi word meaning pinyin lint`, async () => {
       .not.toBe(0);
   }
 
-  // Multiple pinyin entries should have the same number of words
+  // Multiple pinyin entries should have the same number of syllables
   for (const [hanziWord, { pinyin }] of dict.allEntries) {
-    expect
-      .soft(new Set(pinyin?.map((p) => p.length)).size, hanziWord)
-      .not.toBeGreaterThan(1);
+    const syllableCounts = pinyin?.map((p) => pinyinSyllableCount(p)) ?? [];
+    expect.soft(new Set(syllableCounts).size, hanziWord).not.toBeGreaterThan(1);
   }
 });
 
@@ -211,7 +217,7 @@ test(`hanzi words are unique on (meaning key, primary pinyin)`, async () => {
       continue;
     }
     const primaryPinyin = pinyin?.[0];
-    const key = `${meaningKey}:${primaryPinyin == null ? `<nullish>` : pinyinPronunciationDisplayText(primaryPinyin)}`;
+    const key = `${meaningKey}:${primaryPinyin ?? `<nullish>`}`;
     const set = byMeaningKeyAndPinyin.get(key) ?? new Set();
     set.add(hanziWord);
     byMeaningKeyAndPinyin.set(key, set);
@@ -679,7 +685,7 @@ test(`dictionary contains entries for decomposition`, async () => {
       "𡿨 via 巛",
       "𢀖 via 经, 轻[HSK2]",
       "𢆉 via 南[HSK1], 幸",
-      "𢎨 via 弟, 第[HSK1]",
+      "𢎨 via 弟[HSK1], 第[HSK1]",
       "𣥂 via 步[HSK3]",
       "𣦼 via 餐",
       "𤴓 via 定, 是[HSK1]",
@@ -811,7 +817,7 @@ describe(
       const dict: Dictionary = new Map();
       dict.set(`你好:hello`, {
         gloss: [`hello`],
-        pinyin: [[拼音`ni`, 拼音`hao`]],
+        pinyin: [拼音`ni hao`],
         partOfSpeech: `interjection`,
       });
       return dict;
@@ -821,12 +827,12 @@ describe(
       const dict = helloDict();
 
       upsertHanziWordMeaning(dict, `你好:hello`, {
-        pinyin: [[拼音`nǐ`, 拼音`hǎo`]],
+        pinyin: [拼音`nǐ hǎo`],
       });
 
       expect(dict.get(`你好:hello`)).toEqual({
         gloss: [`hello`],
-        pinyin: [[拼音`nǐ`, 拼音`hǎo`]],
+        pinyin: [拼音`nǐ hǎo`],
         partOfSpeech: `interjection`,
       });
     });

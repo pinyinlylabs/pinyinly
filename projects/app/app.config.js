@@ -5,7 +5,7 @@ const devDomain =
     ? `${process.env.EXPO_TUNNEL_SUBDOMAIN}.ngrok.io`
     : null;
 
-/** @type {import('expo/config.d.ts').ExpoConfig} */
+/** @type {import('@expo/config').ExpoConfig} */
 export const expo = {
   name: `Pinyinly`,
   slug: `hao`,

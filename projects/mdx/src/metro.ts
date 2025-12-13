@@ -8,7 +8,7 @@ export function withMdx<T extends MetroConfig>(config: T): T {
   const currentDir = path.dirname(new URL(import.meta.url).pathname);
   const defaultTransformerPath = path.join(
     currentDir,
-    `defaultMetroTransformer.js`,
+    `defaultMetroTransformer.cjs`,
   );
 
   if (

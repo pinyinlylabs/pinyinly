@@ -1,4 +1,4 @@
-import { splitN, unicodeShortIdentifier } from "#util/unicode.ts";
+import { splitN, toCamelCase, unicodeShortIdentifier } from "#util/unicode.ts";
 import { describe, expect, test } from "vitest";
 
 describe(
@@ -37,5 +37,18 @@ describe(`splitN suite` satisfies HasNameOf<typeof splitN>, () => {
     expect(() => splitN(`a`, ` `, -1)).toThrowErrorMatchingInlineSnapshot(
       `[Error: limit must be non-negative]`,
     );
+  });
+});
+
+describe(`toCamelCase suite` satisfies HasNameOf<typeof toCamelCase>, () => {
+  test.for([
+    [`hello world`, `helloWorld`],
+    [`Hello World`, `helloWorld`],
+    [`multiple   spaces here`, `multipleSpacesHere`],
+    [`single`, `single`],
+    [`UPPER CASE`, `upperCase`],
+    [`mixed CASE Example`, `mixedCaseExample`],
+  ] as const)(`converts "%s" to camelCase "%s"`, ([input, expected]) => {
+    expect(toCamelCase(input)).toEqual(expected);
   });
 });

@@ -11,11 +11,7 @@ import {
   oneSyllablePinyinOrThrow,
   pinyinOrThrow,
 } from "@/dictionary";
-import {
-  identicalInvariant,
-  invariant,
-  nonNullable,
-} from "@pinyinly/lib/invariant";
+import { identicalInvariant, invariant } from "@pinyinly/lib/invariant";
 import shuffle from "lodash/shuffle";
 import type {
   HanziCharacter,
@@ -56,7 +52,7 @@ export async function hanziWordToPinyinInitialQuestionOrThrow(
     (hanzi) => ({ kind: `hanzi`, value: hanzi }),
   );
   const groupB: OneCorrectPairQuestionChoice[] = ctx.pinyinDistractors.map(
-    (pinyin) => ({ kind: `pinyin`, value: [pinyin] }),
+    (pinyin) => ({ kind: `pinyin`, value: pinyin }),
   );
 
   return validQuestionInvariant({
@@ -219,9 +215,7 @@ function validQuestionInvariant(question: OneCorrectPairQuestion) {
       invariant(x.kind === `pinyin`);
       invariant(hanziOrPinyinSyllableCount(x) === 1);
 
-      const syllable = nonNullable(x.value[0]);
-      const { finalSoundId: final, tone } =
-        parsePinyinSyllableOrThrow(syllable);
+      const { finalSoundId: final, tone } = parsePinyinSyllableOrThrow(x.value);
       return `${final}-${tone}`;
     }),
   );
