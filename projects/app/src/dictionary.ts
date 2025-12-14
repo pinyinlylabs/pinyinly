@@ -452,10 +452,11 @@ export function oneSyllablePinyinOrNull(
   const pinyin = meaning?.pinyin?.[0];
 
   if (pinyin != null) {
-    const syllable = matchAllPinyinSyllables(pinyin)[0];
-    if (syllable === pinyin) {
-      // It's safe to cast here, because all pinyin in the dictionary are already normalized.
-      return syllable as PinyinSyllable;
+    const syllables = matchAllPinyinSyllables(pinyin);
+    if (syllables.length === 1 && syllables[0] === pinyin) {
+      // It's safe to cast here, because all pinyin in the dictionary are
+      // already normalized.
+      return pinyin as PinyinSyllable;
     }
   }
 

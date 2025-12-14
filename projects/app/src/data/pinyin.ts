@@ -41,8 +41,8 @@ export const normalizePinyinText = (pinyin: string): PinyinText => {
  * mark instead (also converts v to ü).
  */
 export const normalizePinyinSyllable = memoize1(
-  function normalizePinyinSyllable(pinyin: string): PinyinSyllable {
-    invariant(pinyin.length > 0, `pinyin must not be empty`);
+  function normalizePinyinSyllable(pinyinOrNumeric: string): PinyinSyllable {
+    invariant(pinyinOrNumeric.length > 0, `pinyin must not be empty`);
 
     // An algorithm to find the correct vowel letter (when there is more than one) is as follows:
     //
@@ -51,22 +51,22 @@ export const normalizePinyinSyllable = memoize1(
     // 3. Otherwise, the second vowel takes the tone mark
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    let tone = `012345`.indexOf(pinyin.at(-1)!);
+    let tone = `012345`.indexOf(pinyinOrNumeric.at(-1)!);
 
     const pinyinLengthWithoutTone =
-      tone >= 0 ? pinyin.length - 1 : pinyin.length;
+      tone >= 0 ? pinyinOrNumeric.length - 1 : pinyinOrNumeric.length;
 
     let result = ``;
     for (let i = 0; i < pinyinLengthWithoutTone; i++) {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      let char = pinyin[i]!;
-      let nextChar = pinyin[i + 1];
+      let char = pinyinOrNumeric[i]!;
+      let nextChar = pinyinOrNumeric[i + 1];
 
       // Handle u: → v → ü
       if (char === `u` && nextChar === `:`) {
         i++;
         char = `v`;
-        nextChar = pinyin[i + 1];
+        nextChar = pinyinOrNumeric[i + 1];
       }
 
       if (tone > 0) {
@@ -264,7 +264,7 @@ export const splitPinyinSyllable = memoize1(function splitPinyinSyllable(
 });
 
 /**
- * Convience wrapper around @see splitPinyinSyllable.
+ * Convenience wrapper around @see splitPinyinSyllable.
  */
 export const splitPinyinSyllableOrThrow = memoize1(
   function splitPinyinSyllableOrThrow(
