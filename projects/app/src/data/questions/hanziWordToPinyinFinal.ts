@@ -1,6 +1,6 @@
 import {
-  convertPinyinWithToneNumberToToneMark,
-  parsePinyinSyllableOrThrow,
+  normalizePinyinSyllable,
+  splitPinyinSyllableOrThrow,
 } from "@/data/pinyin";
 import {
   allHanziCharacterPronunciationsForHanzi,
@@ -8,7 +8,7 @@ import {
   hanziFromHanziWord,
   loadDictionary,
   loadPinyinWords,
-  oneSyllablePinyinOrThrow,
+  oneSyllablePinyinOrNull,
   pinyinOrThrow,
 } from "@/dictionary";
 import {
@@ -101,13 +101,21 @@ export async function makeQuestionContext(
 ): Promise<QuestionContext> {
   const hanzi = hanziFromHanziWord(correctAnswer);
   const dictionary = await loadDictionary();
-  const meaning = dictionary.lookupHanziWord(correctAnswer);
-  const pinyin = oneSyllablePinyinOrThrow(correctAnswer, meaning);
-  const parsedPinyin = parsePinyinSyllableOrThrow(pinyin);
+  const meaning = nonNullable(
+    dictionary.lookupHanziWord(correctAnswer),
+    `expected meaning in the dictionary for %s`,
+    correctAnswer,
+  );
+  const pinyin = nonNullable(
+    oneSyllablePinyinOrNull(meaning),
+    `expected single-syllable for %s`,
+    correctAnswer,
+  );
+  const pinyinParts = splitPinyinSyllableOrThrow(pinyin);
 
   const ctx: QuestionContext = {
-    answerPinyinInitial: parsedPinyin.initialSoundId,
-    answerPinyinTone: parsedPinyin.tone,
+    answerPinyinInitial: pinyinParts.initialSoundId,
+    answerPinyinTone: pinyinParts.tone,
     usedHanzi: new Set([hanzi]),
     usedPinyin: new Set(await allHanziCharacterPronunciationsForHanzi(hanzi)),
     pinyinDistractors: [],
@@ -144,18 +152,18 @@ export function tryPinyinDistractor(
   pinyin: PinyinSyllable,
   strict = true,
 ): boolean {
-  const parsedPinyin = parsePinyinSyllableOrThrow(pinyin);
+  const pinyinParts = splitPinyinSyllableOrThrow(pinyin);
 
-  if (strict && ctx.answerPinyinInitial !== parsedPinyin.initialSoundId) {
+  if (strict && ctx.answerPinyinInitial !== pinyinParts.initialSoundId) {
     return false;
   }
 
-  if (strict && ctx.answerPinyinTone !== parsedPinyin.tone) {
+  if (strict && ctx.answerPinyinTone !== pinyinParts.tone) {
     return false;
   }
 
   // eslint-disable-next-line @typescript-eslint/prefer-string-starts-ends-with
-  if (ctx.answerPinyinInitial[0] !== parsedPinyin.initialSoundId[0]) {
+  if (ctx.answerPinyinInitial[0] !== pinyinParts.initialSoundId[0]) {
     return false;
   }
 
@@ -183,7 +191,7 @@ async function addDistractors(
   ];
   loop: for (const strict of [true, false]) {
     for (const tonelessPinyin of pinyinWords) {
-      const pinyin = convertPinyinWithToneNumberToToneMark(
+      const pinyin = normalizePinyinSyllable(
         `${tonelessPinyin}${ctx.answerPinyinTone}`,
       );
 
@@ -235,7 +243,9 @@ function validQuestionInvariant(question: OneCorrectPairQuestion) {
       invariant(x.kind === `pinyin`);
       invariant(hanziOrPinyinSyllableCount(x) === 1);
 
-      const { initialSoundId, tone } = parsePinyinSyllableOrThrow(x.value);
+      const { initialSoundId, tone } = splitPinyinSyllableOrThrow(
+        x.value as PinyinSyllable,
+      );
       // This is the first letter of the sound ID (NOT the first letter of the
       // pinyin). The difference here is for the "null" initial ∅-. In this case
       // we allow choices that actually have a different first letter, as long

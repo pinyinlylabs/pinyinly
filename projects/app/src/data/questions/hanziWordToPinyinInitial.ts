@@ -1,6 +1,6 @@
 import {
-  convertPinyinWithToneNumberToToneMark,
-  parsePinyinSyllableOrThrow,
+  normalizePinyinSyllable,
+  splitPinyinSyllableOrThrow,
 } from "@/data/pinyin";
 import {
   allHanziCharacterPronunciationsForHanzi,
@@ -8,10 +8,14 @@ import {
   hanziFromHanziWord,
   loadDictionary,
   loadPinyinWords,
-  oneSyllablePinyinOrThrow,
+  oneSyllablePinyinOrNull,
   pinyinOrThrow,
 } from "@/dictionary";
-import { identicalInvariant, invariant } from "@pinyinly/lib/invariant";
+import {
+  identicalInvariant,
+  invariant,
+  nonNullable,
+} from "@pinyinly/lib/invariant";
 import shuffle from "lodash/shuffle";
 import type {
   HanziCharacter,
@@ -96,13 +100,21 @@ export async function makeQuestionContext(
 ): Promise<QuestionContext> {
   const hanzi = hanziFromHanziWord(correctAnswer);
   const dictionary = await loadDictionary();
-  const meaning = dictionary.lookupHanziWord(correctAnswer);
-  const pinyin = oneSyllablePinyinOrThrow(correctAnswer, meaning);
-  const parsedPinyin = parsePinyinSyllableOrThrow(pinyin);
+  const meaning = nonNullable(
+    dictionary.lookupHanziWord(correctAnswer),
+    `expected meaning in the dictionary for %s`,
+    correctAnswer,
+  );
+  const pinyin = nonNullable(
+    oneSyllablePinyinOrNull(meaning),
+    `expected single-syllable for %s`,
+    correctAnswer,
+  );
+  const pinyinParts = splitPinyinSyllableOrThrow(pinyin);
 
   const ctx: QuestionContext = {
-    answerPinyinFinal: parsedPinyin.finalSoundId,
-    answerPinyinTone: parsedPinyin.tone,
+    answerPinyinFinal: pinyinParts.finalSoundId,
+    answerPinyinTone: pinyinParts.tone,
     usedHanzi: new Set([hanzi]),
     usedPinyin: new Set(await allHanziCharacterPronunciationsForHanzi(hanzi)),
     pinyinDistractors: [],
@@ -138,13 +150,13 @@ export function tryPinyinDistractor(
   ctx: QuestionContext,
   pinyin: PinyinSyllable,
 ): boolean {
-  const parsedPinyin = parsePinyinSyllableOrThrow(pinyin);
+  const pinyinParts = splitPinyinSyllableOrThrow(pinyin);
 
-  if (ctx.answerPinyinFinal !== parsedPinyin.finalSoundId) {
+  if (ctx.answerPinyinFinal !== pinyinParts.finalSoundId) {
     return false;
   }
 
-  if (ctx.answerPinyinTone !== parsedPinyin.tone) {
+  if (ctx.answerPinyinTone !== pinyinParts.tone) {
     return false;
   }
 
@@ -167,7 +179,7 @@ async function addDistractors(
   // they don't conflict.
   const pinyinWords = shuffle(await loadPinyinWords());
   for (const tonelessPinyin of pinyinWords) {
-    const pinyin = convertPinyinWithToneNumberToToneMark(
+    const pinyin = normalizePinyinSyllable(
       `${tonelessPinyin}${ctx.answerPinyinTone}`,
     );
 
@@ -215,7 +227,9 @@ function validQuestionInvariant(question: OneCorrectPairQuestion) {
       invariant(x.kind === `pinyin`);
       invariant(hanziOrPinyinSyllableCount(x) === 1);
 
-      const { finalSoundId: final, tone } = parsePinyinSyllableOrThrow(x.value);
+      const { finalSoundId: final, tone } = splitPinyinSyllableOrThrow(
+        x.value as PinyinSyllable,
+      );
       return `${final}-${tone}`;
     }),
   );

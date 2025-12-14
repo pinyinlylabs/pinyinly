@@ -13,6 +13,24 @@ describe(`invariant suite` satisfies HasNameOf<typeof invariant>, () => {
       invariant(false);
     }).toThrow();
   });
+
+  test(`allows message placeholders`, () => {
+    expect
+      .soft(() => {
+        invariant(false, `value %s is not %s`, 42, `allowed`);
+      }, `all arguments used`)
+      .toThrowErrorMatchingInlineSnapshot(
+        `[InvariantException: value 42 is not allowed]`,
+      );
+
+    expect
+      .soft(() => {
+        invariant(false, `value %s is not %s`, 42, `allowed`, `bar`);
+      }, `extra unused arguments`)
+      .toThrowErrorMatchingInlineSnapshot(
+        `[InvariantException: value 42 is not allowed (args: ["bar"])]`,
+      );
+  });
 });
 
 describe(

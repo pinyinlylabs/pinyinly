@@ -152,22 +152,21 @@ export type PartOfSpeech = z.infer<typeof partOfSpeechSchema>;
 export type HanziWord = (string & z.BRAND<`HanziWord`>) | `${string}:${string}`; // useful when writing literal strings in tests
 
 /**
- * A single pinyin syllable (e.g. `hǎo`).
+ * A single pinyin syllable (e.g. `hǎo`). This should not include numeric
+ * notation, use `normalizePinyin__` functions to convert numeric to diacritic
+ * forms.
  *
- * An syllable is a single sound (e.g. nǐ), so `nǐ hǎo` would be two syllables: `nǐ` and `hǎo`.
+ * An syllable is a single sound (e.g. nǐ), so `nǐ hǎo` would be two syllables:
+ * `nǐ` and `hǎo`.
  */
 export type PinyinSyllable = string & z.BRAND<`PinyinSyllable`>;
 
 /**
- * A sequence of pinyin syllables that make up a pronunciation.
+ * A single pinyin syllable in numeric tone form (e.g. `hao3`).
  *
- * Differs from being generic "pinyin" in that punctuation is not included so
- * it's not intended to describe a full sentence, but rather a single
- * pronunciation of a word or phrase.
- *
- * @deprecated use {@link PinyinText} instead
+ * An syllable is a single sound (e.g. ni3), so `ni3 hao3` would be two syllables: `ni3` and `hao3`.
  */
-export type PinyinPronunciation = PinyinSyllable[];
+export type PinyinNumericSyllable = string & z.BRAND<`PinyinNumericSyllable`>;
 
 export type PinyinText = PinyinSyllable | (string & z.BRAND<`PinyinText`>);
 

@@ -1,7 +1,7 @@
 import { splitHanziText } from "#data/hanzi.ts";
 import type { HanziCharacter, HanziText } from "#data/model.ts";
 import { pinyinSyllableCount } from "#data/pinyin.js";
-import type { Dictionary } from "#dictionary.ts";
+import type { Dictionary, HanziWordMeaning } from "#dictionary.ts";
 import {
   decomposeHanzi,
   getIsComponentFormHanzi,
@@ -21,6 +21,7 @@ import {
   loadPinyinSoundThemeDetails,
   loadPinyinWords,
   meaningKeyFromHanziWord,
+  oneSyllablePinyinOrNull,
 } from "#dictionary.ts";
 import {
   mapSetAdd,
@@ -848,5 +849,31 @@ describe(
       expect(isStructuralHanzi(`丿` as HanziText)).toBe(true);
       expect(isStructuralHanzi(`八` as HanziText)).toBe(false);
     });
+  },
+);
+
+describe(
+  `oneSyllablePinyinOrNull suite` satisfies HasNameOf<
+    typeof oneSyllablePinyinOrNull
+  >,
+  () => {
+    const meaning: HanziWordMeaning = {
+      gloss: [`test`],
+    };
+
+    test.for([
+      [meaning, null],
+      [{ ...meaning, pinyin: [] }, null],
+      [{ ...meaning, pinyin: [`nīhǎo`] }, null],
+      [{ ...meaning, pinyin: [`nī hǎo`] }, null],
+      [{ ...meaning, pinyin: [`nī hǎo`] }, null],
+      [{ ...meaning, pinyin: [`nī`] }, `nī`],
+      [{ ...meaning, pinyin: [`hǎo`] }, `hǎo`],
+    ] as [HanziWordMeaning, string | null][])(
+      `%s → %s`,
+      ([input, expected]) => {
+        expect(oneSyllablePinyinOrNull(input)).toBe(expected);
+      },
+    );
   },
 );

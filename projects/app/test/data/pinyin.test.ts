@@ -1,6 +1,6 @@
+import type { PinyinSyllable } from "#data/model.js";
 import type { PinyinChart } from "#data/pinyin.ts";
 import {
-  convertPinyinWithToneNumberToToneMark,
   defaultPinyinSoundGroupNames,
   defaultPinyinSoundGroupRanks,
   defaultPinyinSoundGroupThemes,
@@ -12,12 +12,14 @@ import {
   loadStandardPinyinChart,
   matchAllPinyinSyllables,
   matchAllPinyinSyllablesWithIndexes,
-  parsePinyinSyllable,
-  parsePinyinSyllableTone,
+  normalizePinyinSyllable,
+  normalizePinyinText,
   pinyinSyllableCount,
   pinyinSyllablePattern,
   pinyinSyllableSuggestions,
-  splitTonelessPinyinSyllable,
+  splitPinyinSyllable,
+  splitPinyinSyllableTone,
+  splitPinyinSyllableWithChart,
 } from "#data/pinyin.ts";
 import { loadPinyinWords } from "#dictionary.ts";
 import { uniqueInvariant } from "@pinyinly/lib/invariant";
@@ -33,9 +35,9 @@ test(`json data can be loaded and passes the schema validation`, async () => {
   loadPylyPinyinChart();
 });
 
-test(
-  `convertPinyinWithToneNumberToToneMark fixtures` satisfies HasNameOf<
-    typeof convertPinyinWithToneNumberToToneMark
+describe(
+  `normalizePinyinSyllable fixtures` satisfies HasNameOf<
+    typeof normalizePinyinSyllable
   >,
   () => {
     // Rules: (from https://en.wikipedia.org/wiki/Pinyin)
@@ -43,7 +45,7 @@ test(
     // 2. If there is an ou, then the o takes the tone mark
     // 3. Otherwise, the second vowel takes the tone mark
 
-    for (const [input, expected] of [
+    test.for([
       // a
       [`a`, `a`],
       [`a1`, `ā`],
@@ -93,6 +95,13 @@ test(
       [`v3`, `ǚ`],
       [`v4`, `ǜ`],
       [`v5`, `ü`],
+      // ü (as ascii u:)
+      [`u:`, `ü`],
+      [`u:1`, `ǖ`],
+      [`u:2`, `ǘ`],
+      [`u:3`, `ǚ`],
+      [`u:4`, `ǜ`],
+      [`u:5`, `ü`],
 
       // If there is an ou, then the o takes the tone mark
       [`dou`, `dou`],
@@ -112,42 +121,89 @@ test(
       [`jiang3`, `jiǎng`],
       [`jiang4`, `jiàng`],
       [`jiang5`, `jiang`],
-    ] as const) {
-      expect(convertPinyinWithToneNumberToToneMark(input)).toEqual(expected);
-    }
-  },
-);
+      [`r`, `r`],
 
-describe(
-  `parsePinyinSyllableTone fixtures` satisfies HasNameOf<
-    typeof parsePinyinSyllableTone
-  >,
-  () => {
-    test(`static test cases`, () => {
-      for (const [input, expected] of [
-        [`niú`, [`niu`, 2]],
-        [`hǎo`, [`hao`, 3]],
-        [`ǖ`, [`ü`, 1]],
-        [`ǘ`, [`ü`, 2]],
-        [`ǚ`, [`ü`, 3]],
-        [`ǜ`, [`ü`, 4]],
-        [`ü`, [`ü`, 5]],
-      ] as const) {
-        const [tonelessSyllable, tone] = expected;
-        expect(parsePinyinSyllableTone(input)).toEqual({
-          tonelessSyllable,
-          tone,
-        });
-      }
+      // Leaves diacritic forms as-is
+      [`hǎo`, `hǎo`],
+      [`nü`, `nü`],
+      [`nǖ`, `nǖ`],
+      [`nǘ`, `nǘ`],
+      [`nǚ`, `nǚ`],
+      [`nǜ`, `nǜ`],
+      [`nü`, `nü`],
+    ] as const)(`%s → %s`, ([input, expected]) => {
+      expect(normalizePinyinSyllable(input as PinyinSyllable)).toEqual(
+        expected,
+      );
     });
   },
 );
 
 describe(
-  `parsePinyinSyllable suite` satisfies HasNameOf<typeof parsePinyinSyllable>,
+  `normalizePinyinText fixtures` satisfies HasNameOf<
+    typeof normalizePinyinText
+  >,
   () => {
-    test(`fixtures`, () => {
-      expect(parsePinyinSyllable(``)).toBeNull();
+    // Rules: (from https://en.wikipedia.org/wiki/Pinyin)
+    // 1. If there is an a or an e, it will take the tone mark
+    // 2. If there is an ou, then the o takes the tone mark
+    // 3. Otherwise, the second vowel takes the tone mark
+
+    test.for([
+      // Multiple single-syllable words
+      [`hǎo hao3 nü nv nu: nǖ nv1 nu:1`, `hǎo hǎo nü nü nü nǖ nǖ nǖ`],
+      // Multiple multi-syllable words
+      [`hǎohao3 nü nvnu: nǖ nv1nu:1hao3`, `hǎohǎo nü nünü nǖ nǖnǖhǎo`],
+      // Leaves punctuation alone
+      [
+        `hǎohao3. nü nvnu: nǖ 【nv1nu:1hao3】`,
+        `hǎohǎo. nü nünü nǖ 【nǖnǖhǎo】`,
+      ],
+    ] as const)(`%s → %s`, ([input, expected]) => {
+      expect(normalizePinyinText(input as PinyinSyllable)).toEqual(expected);
+    });
+  },
+);
+
+describe(
+  `splitPinyinSyllableTone fixtures` satisfies HasNameOf<
+    typeof splitPinyinSyllableTone
+  >,
+  () => {
+    test.for([
+      [`niú`, [`niu`, 2]],
+      [`hǎo`, [`hao`, 3]],
+      [`nǖ`, [`nü`, 1]],
+      [`nǘ`, [`nü`, 2]],
+      [`nǚ`, [`nü`, 3]],
+      [`nǜ`, [`nü`, 4]],
+      [`nü`, [`nü`, 5]],
+    ] as const)(`%s → %s`, ([input, [tonelessSyllable, tone]]) => {
+      expect(splitPinyinSyllableTone(input as PinyinSyllable)).toEqual({
+        tonelessSyllable,
+        tone,
+      });
+    });
+  },
+);
+
+describe(
+  `splitPinyinSyllable suite` satisfies HasNameOf<typeof splitPinyinSyllable>,
+  () => {
+    // For all the tests, see tests for `loadPylyPinyinChart`.
+    test.for([
+      [`niú`, { tonelessSyllable: `niu`, tone: 2 }],
+      [`hǎo`, { tonelessSyllable: `hao`, tone: 3 }],
+      [`nǖ`, { tonelessSyllable: `nü`, tone: 1 }],
+      [`nǘ`, { tonelessSyllable: `nü`, tone: 2 }],
+      [`nǚ`, { tonelessSyllable: `nü`, tone: 3 }],
+      [`nǜ`, { tonelessSyllable: `nü`, tone: 4 }],
+      [`nü`, { tonelessSyllable: `nü`, tone: 5 }],
+      [`nu`, { tonelessSyllable: `nu`, tone: 5 }],
+    ] as const)(`%s → %s`, ([input, partial]) => {
+      expect(splitPinyinSyllable(input as PinyinSyllable)).toMatchObject(
+        partial,
+      );
     });
   },
 );
@@ -240,6 +296,8 @@ const pinyinWithIndexesFixtures: [string, (number | string)[]][] = [
   [`nǐ‧hǎo`, [0, `nǐ`, 3, `hǎo`]], // \u2027 HYPHENATION POINT
   // Sentences
   [`nǐ hǎo`, [0, `nǐ`, 3, `hǎo`]],
+  [`Bù yīhuǐ'er`, [0, `Bù`, 3, `yī`, 5, `huǐ`, 9, `er`]],
+  [`bù yīhuǐr`, [0, `bù`, 3, `yī`, 5, `huǐ`, 8, `r`]],
 ];
 
 describe(
@@ -524,6 +582,8 @@ describe(`pyly pinyin chart`, async () => {
       [`ê`, `∅-`, `-e`],
       [`er`, `∅-`, `-∅`],
 
+      [`nü`, `nü-`, `-∅`],
+
       // When -i- is not an "ee" sound:
       //
       // > the "i" in Pinyin "si" is nothing like the "i" in "yi" or "ji". "Si" is
@@ -573,7 +633,9 @@ describe(
       [拼音`   `, 0],
       [拼音`  nǐ hǎo  `, 2],
       [拼音`yǒu yī diǎn r`, 4],
-    ] as const)(`%s -> %s`, ([pinyin, count]) => {
+      [拼音`bù yīhuǐ'er`, 4],
+      [拼音`Bù yīhuǐ'er`, 4],
+    ] as const)(`%s → %s`, ([pinyin, count]) => {
       expect(pinyinSyllableCount(pinyin)).toBe(count);
     });
   },
@@ -597,22 +659,25 @@ async function testPinyinChart(
     expectedInitialChartLabel,
     expectedFinalChartLabel,
   ] of testCases) {
-    const actual = splitTonelessPinyinSyllable(input, chart);
-    expect({
-      initialChartLabel: actual?.initialSoundId,
-      finalChartLabel: actual?.finalSoundId,
-      input,
-    }).toEqual({
-      initialChartLabel: expectedInitialChartLabel,
-      finalChartLabel: expectedFinalChartLabel,
-      input,
-    });
+    const actual = splitPinyinSyllableWithChart(input as PinyinSyllable, chart);
+    expect
+      .soft(
+        {
+          initialChartLabel: actual?.initialSoundId,
+          finalChartLabel: actual?.finalSoundId,
+        },
+        `input: ${input}`,
+      )
+      .toEqual({
+        initialChartLabel: expectedInitialChartLabel,
+        finalChartLabel: expectedFinalChartLabel,
+      });
   }
 
   for (const x of pinyinWords) {
     expect(
       expectedDifferenceFromStandard.has(x) ||
-        splitTonelessPinyinSyllable(x, chart),
+        splitPinyinSyllableWithChart(x as PinyinSyllable, chart),
     ).not.toEqual(null);
   }
 
