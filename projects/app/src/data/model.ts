@@ -152,30 +152,31 @@ export type PartOfSpeech = z.infer<typeof partOfSpeechSchema>;
 export type HanziWord = (string & z.BRAND<`HanziWord`>) | `${string}:${string}`; // useful when writing literal strings in tests
 
 /**
- * A single pinyin syllable (e.g. `hǎo`). This should not include numeric
+ * A single pinyin unit (e.g. `hǎo`). This should not include numeric
  * notation, use `normalizePinyin__` functions to convert numeric to diacritic
  * forms.
  *
- * An syllable is a single sound (e.g. nǐ), so `nǐ hǎo` would be two syllables:
- * `nǐ` and `hǎo`.
+ * A unit is a single sound or component (e.g. nǐ, or 儿 in 一点儿), so `nǐ hǎo`
+ * would be two units: `nǐ` and `hǎo`.
  */
-export type PinyinSyllable = string & z.BRAND<`PinyinSyllable`>;
+export type PinyinUnit = string & z.BRAND<`PinyinUnit`>;
 
 /**
- * A single pinyin syllable in numeric tone form (e.g. `hao3`).
+ * A single pinyin unit in numeric tone form (e.g. `hao3`).
  *
- * An syllable is a single sound (e.g. ni3), so `ni3 hao3` would be two syllables: `ni3` and `hao3`.
+ * A unit is a single sound or component (e.g. ni3, or r5 for 儿), so `ni3 hao3`
+ * would be two units: `ni3` and `hao3`.
  */
-export type PinyinNumericSyllable = string & z.BRAND<`PinyinNumericSyllable`>;
+export type PinyinNumericUnit = string & z.BRAND<`PinyinNumericUnit`>;
 
-export type PinyinText = PinyinSyllable | (string & z.BRAND<`PinyinText`>);
+export type PinyinText = PinyinUnit | (string & z.BRAND<`PinyinText`>);
 
 /**
- * Space-separated pinyin syllables, used for efficient storage.
+ * Space-separated pinyin units, used for efficient storage.
  *
  * Being space-separated (rather than no-separation) makes it simpler to split
- * back into individual pinyin syllables rather than parsing valid pinyin
- * syllable boundaries.
+ * back into individual pinyin units rather than parsing valid pinyin
+ * unit boundaries.
  */
 export type PinyinPronunciationSpaceSeparated = string &
   z.BRAND<`PinyinPronunciationSpaceSeparated`>;
@@ -183,7 +184,7 @@ export type PinyinPronunciationSpaceSeparated = string &
 /**
  * Single Hanzi character (in the Unicode sense).
  *
- * This is the hanzi companion to {@link PinyinSyllable}.
+ * This is the hanzi companion to {@link PinyinUnit}.
  */
 export type HanziCharacter = string & z.BRAND<`HanziCharacter`>;
 
@@ -204,6 +205,10 @@ export const hanziCharacterSchema = z.custom<HanziCharacter>(
 );
 
 export const pinyinTextSchema = z.custom<PinyinText>(
+  (x) => typeof x === `string`,
+);
+
+export const pinyinUnitSchema = z.custom<PinyinUnit>(
   (x) => typeof x === `string`,
 );
 

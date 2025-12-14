@@ -1,4 +1,4 @@
-import { matchAllPinyinSyllables } from "@/data/pinyin";
+import { matchAllPinyinUnits } from "@/data/pinyin";
 import { hanziFromHanziWord, loadDictionary } from "@/dictionary";
 import { sortComparatorNumber } from "@pinyinly/lib/collections";
 import { invariant, nonNullable } from "@pinyinly/lib/invariant";
@@ -101,12 +101,12 @@ export function gradeHanziToPinyinTypedQuestion(
   userAnswer: string,
   durationMs: number,
 ): HanziToPinyinTypedQuestionGrade {
-  let actualSyllables = matchAllPinyinSyllables(userAnswer);
+  let actualUnits = matchAllPinyinUnits(userAnswer);
 
   // If there were no syllables found (e.g. the user entered some invalid pinyin
   // like "x x") then still have a go at parsing it.
-  if (actualSyllables.length === 0) {
-    actualSyllables = userAnswer.split(/\s+/g).filter((x) => x.length > 0);
+  if (actualUnits.length === 0) {
+    actualUnits = userAnswer.split(/\s+/g).filter((x) => x.length > 0);
   }
 
   // Put the skill we're testing first.

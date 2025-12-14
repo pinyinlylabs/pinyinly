@@ -11,13 +11,10 @@ import type {
 } from "@/data/model";
 import { QuestionFlagKind } from "@/data/model";
 import type {
-  PinyinSyllableSuggestion,
-  PinyinSyllableSuggestions,
+  PinyinUnitSuggestion,
+  PinyinUnitSuggestions,
 } from "@/data/pinyin";
-import {
-  matchAllPinyinSyllables,
-  pinyinSyllableSuggestions,
-} from "@/data/pinyin";
+import { matchAllPinyinUnits, pinyinUnitSuggestions } from "@/data/pinyin";
 import type { HanziToPinyinTypedQuestionGrade } from "@/data/questions/hanziWordToPinyinTyped";
 import { gradeHanziToPinyinTypedQuestion } from "@/data/questions/hanziWordToPinyinTyped";
 import { hanziWordFromSkill } from "@/data/skills";
@@ -197,9 +194,9 @@ export function QuizDeckHanziWordToPinyinTypedQuestion({
             text.endsWith(` `)
           ) {
             const firstAnswer = answers.find((a) => a.skill === skill);
-            const expectedSyllableCount = firstAnswer?.pinyin[0]?.length ?? 0;
-            const actualSyllableCount = matchAllPinyinSyllables(text).length;
-            if (expectedSyllableCount === actualSyllableCount) {
+            const expectedUnitCount = firstAnswer?.pinyin[0]?.length ?? 0;
+            const actualUnitCount = matchAllPinyinUnits(text).length;
+            if (expectedUnitCount === actualUnitCount) {
               submit();
             }
           }
@@ -245,7 +242,7 @@ const PinyinTextInputSingle = ({
 }) => {
   const [text, setText] = useState(``);
 
-  const suggestions = disabled ? null : pinyinSyllableSuggestions(text);
+  const suggestions = disabled ? null : pinyinUnitSuggestions(text);
 
   const updateText = (text: string) => {
     setText(text);
@@ -254,7 +251,7 @@ const PinyinTextInputSingle = ({
 
   const handleChangeText = (text: string) => {
     if (suggestions !== null) {
-      for (const option of suggestions.syllables) {
+      for (const option of suggestions.units) {
         if (text.endsWith(option.tone.toString())) {
           acceptSuggestion(suggestions, option);
           return;
@@ -266,12 +263,12 @@ const PinyinTextInputSingle = ({
   };
 
   const acceptSuggestion = (
-    suggestions: DeepReadonly<PinyinSyllableSuggestions>,
-    syllable: PinyinSyllableSuggestion,
+    suggestions: DeepReadonly<PinyinUnitSuggestions>,
+    unit: PinyinUnitSuggestion,
   ) => {
     const newText =
       text.slice(0, suggestions.from) +
-      syllable.pinyinSyllable +
+      unit.pinyinUnit +
       text.slice(suggestions.to) +
       // Trailing space ensures "autoSubmit" works.
       ` `;
@@ -305,17 +302,17 @@ const PinyinTextInputSingle = ({
               <Text className="pyly-body-caption">{hintText}</Text>
             )
           ) : (
-            suggestions.syllables.map((syllable) => (
+            suggestions.units.map((unit) => (
               <Reanimated.View
-                key={`${syllable.pinyinSyllable}-${syllable.tone}`}
+                key={`${unit.pinyinUnit}-${unit.tone}`}
                 entering={FadeIn.duration(200)}
                 exiting={FadeOut.duration(100)}
               >
                 <PinyinOptionButton
-                  pinyin={syllable.pinyinSyllable}
-                  shortcutKey={syllable.tone.toString()}
+                  pinyin={unit.pinyinUnit}
+                  shortcutKey={unit.tone.toString()}
                   onPress={() => {
-                    acceptSuggestion(suggestions, syllable);
+                    acceptSuggestion(suggestions, unit);
                   }}
                 />
               </Reanimated.View>

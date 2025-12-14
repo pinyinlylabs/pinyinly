@@ -1,22 +1,22 @@
 import { useReplicache } from "@/client/hooks/useReplicache";
 import { useRizzleQueryPaged } from "@/client/hooks/useRizzleQueryPaged";
 import { pinyinSoundsQuery } from "@/client/query";
-import type { HanziText, PinyinSyllable } from "@/data/model";
-import { splitPinyinSyllable } from "@/data/pinyin";
+import type { HanziText, PinyinUnit } from "@/data/model";
+import { splitPinyinUnit } from "@/data/pinyin";
 import type { ReactNode } from "react";
 import { Text, View } from "react-native";
 import { ThreeSplitLinesDown } from "./ThreeSplitLinesDown";
 
 export function WikiHanziCharacterPronunciation({
   hanzi,
-  pinyinSyllable,
+  pinyinUnit,
   gloss,
 }: {
   gloss: string;
   hanzi: HanziText;
-  pinyinSyllable: PinyinSyllable;
+  pinyinUnit: PinyinUnit;
 }) {
-  const splitPinyin = splitPinyinSyllable(pinyinSyllable);
+  const splitPinyin = splitPinyinUnit(pinyinUnit);
   const r = useReplicache();
   const { data: pinyinSounds } = useRizzleQueryPaged(pinyinSoundsQuery(r));
 
@@ -38,7 +38,7 @@ export function WikiHanziCharacterPronunciation({
           <Text className="pyly-body">
             <Text className="pyly-bold">{hanzi}</Text> is pronounced
             {` `}
-            <Text className="pyly-bold">{pinyinSyllable}</Text>.
+            <Text className="pyly-bold">{pinyinUnit}</Text>.
           </Text>
 
           <Text className="pyly-body">
@@ -46,7 +46,7 @@ export function WikiHanziCharacterPronunciation({
             <Text className="pyly-bold">{gloss}</Text>
             &rdquo; to remember the initial, the final, and the tone of
             {` `}
-            <Text className="pyly-bold">{pinyinSyllable}</Text>.
+            <Text className="pyly-bold">{pinyinUnit}</Text>.
           </Text>
         </View>
 
@@ -54,7 +54,7 @@ export function WikiHanziCharacterPronunciation({
           <View className="gap-4 p-4">
             <View className="">
               <Text className="pyly-body text-center">
-                <Text className="pyly-bold">{pinyinSyllable}</Text>
+                <Text className="pyly-bold">{pinyinUnit}</Text>
               </Text>
               <View className="px-[15%] py-2">
                 <ThreeSplitLinesDown className="h-[10px] w-full" />

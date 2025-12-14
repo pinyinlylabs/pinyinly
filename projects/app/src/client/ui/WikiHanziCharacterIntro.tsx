@@ -1,5 +1,5 @@
 import { isHanziCharacter } from "@/data/hanzi";
-import type { PinyinSyllable, WikiCharacterData } from "@/data/model";
+import type { PinyinUnit, WikiCharacterData } from "@/data/model";
 import type { HanziWordWithMeaning } from "@/dictionary";
 import { hanziFromHanziWord, loadDictionary } from "@/dictionary";
 import { use } from "react";
@@ -59,14 +59,14 @@ function OnePronunciation({
 
   const primaryPinyin =
     isHanziCharacter(hanzi) && meaning.pinyin?.[0] != null
-      ? (meaning.pinyin[0] as PinyinSyllable)
+      ? (meaning.pinyin[0] as PinyinUnit)
       : null;
 
   return gloss == null || primaryPinyin == null ? null : (
     <WikiHanziCharacterPronunciation
       gloss={gloss}
       hanzi={hanzi}
-      pinyinSyllable={primaryPinyin}
+      pinyinUnit={primaryPinyin}
     />
   );
 }

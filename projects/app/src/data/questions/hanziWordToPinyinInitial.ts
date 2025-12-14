@@ -1,14 +1,11 @@
-import {
-  normalizePinyinSyllable,
-  splitPinyinSyllableOrThrow,
-} from "@/data/pinyin";
+import { normalizePinyinUnit, splitPinyinUnitOrThrow } from "@/data/pinyin";
 import {
   allHanziCharacterPronunciationsForHanzi,
   allHanziCharacters,
   hanziFromHanziWord,
   loadDictionary,
   loadPinyinWords,
-  oneSyllablePinyinOrNull,
+  oneUnitPinyinOrNull,
   pinyinOrThrow,
 } from "@/dictionary";
 import {
@@ -25,13 +22,13 @@ import type {
   OneCorrectPairQuestion,
   OneCorrectPairQuestionAnswer,
   OneCorrectPairQuestionChoice,
-  PinyinSyllable,
+  PinyinUnit,
   QuestionFlagType,
 } from "../model";
 import { QuestionKind } from "../model";
 import { hanziWordFromSkill } from "../skills";
 import {
-  hanziOrPinyinSyllableCount,
+  hanziOrPinyinUnitCount,
   oneCorrectPairQuestionInvariant,
 } from "./oneCorrectPair";
 
@@ -89,9 +86,9 @@ interface QuestionContext {
    * could be a pair of "wrong choices" that have overlapping pinyin and if
    * picked would be marked incorrect.
    */
-  usedPinyin: Set<PinyinSyllable>;
+  usedPinyin: Set<PinyinUnit>;
 
-  pinyinDistractors: PinyinSyllable[];
+  pinyinDistractors: PinyinUnit[];
   hanziDistractors: HanziText[];
 }
 
@@ -106,11 +103,11 @@ export async function makeQuestionContext(
     correctAnswer,
   );
   const pinyin = nonNullable(
-    oneSyllablePinyinOrNull(meaning),
-    `expected single-syllable for %s`,
+    oneUnitPinyinOrNull(meaning),
+    `expected single-unit for %s`,
     correctAnswer,
   );
-  const pinyinParts = splitPinyinSyllableOrThrow(pinyin);
+  const pinyinParts = splitPinyinUnitOrThrow(pinyin);
 
   const ctx: QuestionContext = {
     answerPinyinFinal: pinyinParts.finalSoundId,
@@ -148,9 +145,9 @@ export async function tryHanziDistractor(
 
 export function tryPinyinDistractor(
   ctx: QuestionContext,
-  pinyin: PinyinSyllable,
+  pinyin: PinyinUnit,
 ): boolean {
-  const pinyinParts = splitPinyinSyllableOrThrow(pinyin);
+  const pinyinParts = splitPinyinUnitOrThrow(pinyin);
 
   if (ctx.answerPinyinFinal !== pinyinParts.finalSoundId) {
     return false;
@@ -179,7 +176,7 @@ async function addDistractors(
   // they don't conflict.
   const pinyinWords = shuffle(await loadPinyinWords());
   for (const tonelessPinyin of pinyinWords) {
-    const pinyin = normalizePinyinSyllable(
+    const pinyin = normalizePinyinUnit(
       `${tonelessPinyin}${ctx.answerPinyinTone}`,
     );
 
@@ -218,17 +215,17 @@ function validQuestionInvariant(question: OneCorrectPairQuestion) {
 
   // Ensure all choices are the same length.
   identicalInvariant([
-    ...question.groupA.map((x) => hanziOrPinyinSyllableCount(x)),
-    ...question.groupB.map((x) => hanziOrPinyinSyllableCount(x)),
+    ...question.groupA.map((x) => hanziOrPinyinUnitCount(x)),
+    ...question.groupB.map((x) => hanziOrPinyinUnitCount(x)),
   ]);
   // Ensure all pinyin have the same final and tone.
   identicalInvariant(
     question.groupB.map((x) => {
       invariant(x.kind === `pinyin`);
-      invariant(hanziOrPinyinSyllableCount(x) === 1);
+      invariant(hanziOrPinyinUnitCount(x) === 1);
 
-      const { finalSoundId: final, tone } = splitPinyinSyllableOrThrow(
-        x.value as PinyinSyllable,
+      const { finalSoundId: final, tone } = splitPinyinUnitOrThrow(
+        x.value as PinyinUnit,
       );
       return `${final}-${tone}`;
     }),

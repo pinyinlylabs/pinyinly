@@ -1,14 +1,11 @@
-import {
-  normalizePinyinSyllable,
-  splitPinyinSyllableOrThrow,
-} from "@/data/pinyin";
+import { normalizePinyinUnit, splitPinyinUnitOrThrow } from "@/data/pinyin";
 import {
   allHanziCharacterPronunciationsForHanzi,
   allHanziCharacters,
   hanziFromHanziWord,
   loadDictionary,
   loadPinyinWords,
-  oneSyllablePinyinOrNull,
+  oneUnitPinyinOrNull,
   pinyinOrThrow,
 } from "@/dictionary";
 import {
@@ -25,14 +22,14 @@ import type {
   OneCorrectPairQuestion,
   OneCorrectPairQuestionAnswer,
   OneCorrectPairQuestionChoice,
-  PinyinSyllable,
+  PinyinUnit,
   Question,
   QuestionFlagType,
 } from "../model";
 import { QuestionKind } from "../model";
 import { hanziWordFromSkill } from "../skills";
 import {
-  hanziOrPinyinSyllableCount,
+  hanziOrPinyinUnitCount,
   oneCorrectPairQuestionInvariant,
 } from "./oneCorrectPair";
 
@@ -92,7 +89,7 @@ interface QuestionContext {
    */
   usedPinyin: Set<string>;
 
-  pinyinDistractors: PinyinSyllable[];
+  pinyinDistractors: PinyinUnit[];
   hanziDistractors: HanziText[];
 }
 
@@ -107,11 +104,11 @@ export async function makeQuestionContext(
     correctAnswer,
   );
   const pinyin = nonNullable(
-    oneSyllablePinyinOrNull(meaning),
-    `expected single-syllable for %s`,
+    oneUnitPinyinOrNull(meaning),
+    `expected single-unit for %s`,
     correctAnswer,
   );
-  const pinyinParts = splitPinyinSyllableOrThrow(pinyin);
+  const pinyinParts = splitPinyinUnitOrThrow(pinyin);
 
   const ctx: QuestionContext = {
     answerPinyinInitial: pinyinParts.initialSoundId,
@@ -149,10 +146,10 @@ export async function tryHanziDistractor(
 
 export function tryPinyinDistractor(
   ctx: QuestionContext,
-  pinyin: PinyinSyllable,
+  pinyin: PinyinUnit,
   strict = true,
 ): boolean {
-  const pinyinParts = splitPinyinSyllableOrThrow(pinyin);
+  const pinyinParts = splitPinyinUnitOrThrow(pinyin);
 
   if (strict && ctx.answerPinyinInitial !== pinyinParts.initialSoundId) {
     return false;
@@ -191,7 +188,7 @@ async function addDistractors(
   ];
   loop: for (const strict of [true, false]) {
     for (const tonelessPinyin of pinyinWords) {
-      const pinyin = normalizePinyinSyllable(
+      const pinyin = normalizePinyinUnit(
         `${tonelessPinyin}${ctx.answerPinyinTone}`,
       );
 
@@ -231,8 +228,8 @@ function validQuestionInvariant(question: OneCorrectPairQuestion) {
 
   // Ensure all choices are the same length.
   identicalInvariant([
-    ...question.groupA.map((x) => hanziOrPinyinSyllableCount(x)),
-    ...question.groupB.map((x) => hanziOrPinyinSyllableCount(x)),
+    ...question.groupA.map((x) => hanziOrPinyinUnitCount(x)),
+    ...question.groupB.map((x) => hanziOrPinyinUnitCount(x)),
   ]);
   // Ensure all pinyin have the same-ish start (but not necessarily initial)
   // and tone. We can't guarantee they'll all have the same initial because in
@@ -241,10 +238,10 @@ function validQuestionInvariant(question: OneCorrectPairQuestion) {
   identicalInvariant(
     question.groupB.map((x) => {
       invariant(x.kind === `pinyin`);
-      invariant(hanziOrPinyinSyllableCount(x) === 1);
+      invariant(hanziOrPinyinUnitCount(x) === 1);
 
-      const { initialSoundId, tone } = splitPinyinSyllableOrThrow(
-        x.value as PinyinSyllable,
+      const { initialSoundId, tone } = splitPinyinUnitOrThrow(
+        x.value as PinyinUnit,
       );
       // This is the first letter of the sound ID (NOT the first letter of the
       // pinyin). The difference here is for the "null" initial ∅-. In this case

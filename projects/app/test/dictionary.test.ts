@@ -1,6 +1,6 @@
 import { splitHanziText } from "#data/hanzi.ts";
 import type { HanziCharacter, HanziText } from "#data/model.ts";
-import { pinyinSyllableCount } from "#data/pinyin.js";
+import { pinyinUnitCount } from "#data/pinyin.js";
 import type { Dictionary, HanziWordMeaning } from "#dictionary.ts";
 import {
   decomposeHanzi,
@@ -21,7 +21,7 @@ import {
   loadPinyinSoundThemeDetails,
   loadPinyinWords,
   meaningKeyFromHanziWord,
-  oneSyllablePinyinOrNull,
+  oneUnitPinyinOrNull,
 } from "#dictionary.ts";
 import {
   mapSetAdd,
@@ -191,10 +191,10 @@ test(`hanzi word meaning pinyin lint`, async () => {
       .not.toBe(0);
   }
 
-  // Multiple pinyin entries should have the same number of syllables
+  // Multiple pinyin entries should have the same number of units
   for (const [hanziWord, { pinyin }] of dict.allEntries) {
-    const syllableCounts = pinyin?.map((p) => pinyinSyllableCount(p)) ?? [];
-    expect.soft(new Set(syllableCounts).size, hanziWord).not.toBeGreaterThan(1);
+    const unitCounts = pinyin?.map((p) => pinyinUnitCount(p)) ?? [];
+    expect.soft(new Set(unitCounts).size, hanziWord).not.toBeGreaterThan(1);
   }
 });
 
@@ -853,9 +853,7 @@ describe(
 );
 
 describe(
-  `oneSyllablePinyinOrNull suite` satisfies HasNameOf<
-    typeof oneSyllablePinyinOrNull
-  >,
+  `oneUnitPinyinOrNull suite` satisfies HasNameOf<typeof oneUnitPinyinOrNull>,
   () => {
     const meaning: HanziWordMeaning = {
       gloss: [`test`],
@@ -872,7 +870,7 @@ describe(
     ] as [HanziWordMeaning, string | null][])(
       `%s → %s`,
       ([input, expected]) => {
-        expect(oneSyllablePinyinOrNull(input)).toBe(expected);
+        expect(oneUnitPinyinOrNull(input)).toBe(expected);
       },
     );
   },

@@ -9,8 +9,8 @@ import type {
   HanziCharacter,
   HanziText,
   HanziWord,
-  PinyinSyllable,
   PinyinText,
+  PinyinUnit,
 } from "@/data/model";
 import {
   hanziCharacterSchema,
@@ -18,7 +18,7 @@ import {
   PartOfSpeech,
   pinyinTextSchema,
 } from "@/data/model";
-import { matchAllPinyinSyllables } from "@/data/pinyin";
+import { matchAllPinyinUnits } from "@/data/pinyin";
 import {
   deepReadonly,
   emptyArray,
@@ -446,17 +446,17 @@ export function hanziFromHanziOrHanziWord(
   return hanziOrHanziWord;
 }
 
-export function oneSyllablePinyinOrNull(
+export function oneUnitPinyinOrNull(
   meaning: DeepReadonly<HanziWordMeaning> | null,
-): PinyinSyllable | null {
+): PinyinUnit | null {
   const pinyin = meaning?.pinyin?.[0];
 
   if (pinyin != null) {
-    const syllables = matchAllPinyinSyllables(pinyin);
-    if (syllables.length === 1 && syllables[0] === pinyin) {
+    const units = matchAllPinyinUnits(pinyin);
+    if (units.length === 1 && units[0] === pinyin) {
       // It's safe to cast here, because all pinyin in the dictionary are
       // already normalized.
-      return pinyin as PinyinSyllable;
+      return pinyin as PinyinUnit;
     }
   }
 
@@ -466,10 +466,10 @@ export function oneSyllablePinyinOrNull(
 export const allHanziCharacterPronunciationsForHanzi = memoize1(
   async function allHanziCharacterPronunciationsForHanzi(
     hanzi: HanziText,
-  ): Promise<Set<PinyinSyllable>> {
+  ): Promise<Set<PinyinUnit>> {
     const dictionary = await loadDictionary();
     const hanziWordMeanings = dictionary.lookupHanzi(hanzi);
-    const pronunciations = new Set<PinyinSyllable>();
+    const pronunciations = new Set<PinyinUnit>();
 
     invariant(
       isHanziCharacter(hanzi),
@@ -479,7 +479,7 @@ export const allHanziCharacterPronunciationsForHanzi = memoize1(
 
     for (const [, meaning] of hanziWordMeanings) {
       for (const pinyin of meaning.pinyin ?? emptyArray) {
-        pronunciations.add(pinyin as PinyinSyllable);
+        pronunciations.add(pinyin as PinyinUnit);
       }
     }
 

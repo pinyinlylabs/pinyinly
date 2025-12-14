@@ -10,7 +10,6 @@ import type {
   HanziWord,
   PinyinSoundGroupId,
   PinyinSoundId,
-  PinyinSyllable,
   Skill,
   SrsStateType,
 } from "./model";
@@ -84,10 +83,6 @@ const brandedString = <T extends string>() =>
 export const rHanziOrHanziWord = brandedString<HanziText | HanziWord>;
 export const rPinyinSoundId = brandedString<PinyinSoundId>;
 export const rPinyinSoundGroupId = brandedString<PinyinSoundGroupId>;
-
-export const pinyinSyllableSchema = z.custom<PinyinSyllable>(
-  (x) => typeof x === `string`,
-);
 
 export const rSpaceSeparatedString = memoize0(function rSpaceSeparatedString() {
   return RizzleCustom.create<readonly string[], string, readonly string[]>(

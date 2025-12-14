@@ -1,5 +1,5 @@
 import { isHanziCharacter } from "#data/hanzi.ts";
-import type { PinyinSyllable } from "#data/model.js";
+import type { PinyinUnit } from "#data/model.js";
 import {
   hanziWordToPinyinToneQuestionOrThrow,
   makeQuestionContext,
@@ -66,14 +66,14 @@ describe(
     test(`should omit if it is the same`, async () => {
       const ctx = await makeQuestionContext(`我:i`);
       // wǒ conflicts with wǒ
-      expect(tryPinyinDistractor(ctx, `wǒ` as PinyinSyllable)).toEqual(false);
+      expect(tryPinyinDistractor(ctx, `wǒ` as PinyinUnit)).toEqual(false);
     });
 
     test(`should add viable candidates`, async () => {
       const ctx = await makeQuestionContext(`我:i`);
       expect(ctx.usedPinyin).toEqual(new Set([`wǒ`]));
 
-      expect(tryPinyinDistractor(ctx, `wǔ` as PinyinSyllable)).toEqual(true);
+      expect(tryPinyinDistractor(ctx, `wǔ` as PinyinUnit)).toEqual(true);
       expect(ctx.pinyinDistractors).toEqual([`wǔ`]);
       expect(ctx.usedPinyin).toEqual(new Set([`wǔ`, `wǒ`]));
     });
@@ -91,7 +91,7 @@ describe(
       );
       expect(ctx.pinyinAnswers).toEqual([`wéi`]);
 
-      expect(tryPinyinDistractor(ctx, `wèi` as PinyinSyllable)).toEqual(false);
+      expect(tryPinyinDistractor(ctx, `wèi` as PinyinUnit)).toEqual(false);
       expect(ctx.pinyinDistractors).toEqual([]);
     });
   },
