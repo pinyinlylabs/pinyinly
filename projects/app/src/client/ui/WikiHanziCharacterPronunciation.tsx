@@ -1,37 +1,31 @@
 import { useReplicache } from "@/client/hooks/useReplicache";
 import { useRizzleQueryPaged } from "@/client/hooks/useRizzleQueryPaged";
 import { pinyinSoundsQuery } from "@/client/query";
-import type { HanziText, PinyinSoundId, PinyinSyllable } from "@/data/model";
-import { parsePinyinSyllable } from "@/data/pinyin";
+import type { HanziText, PinyinSyllable } from "@/data/model";
+import { splitPinyinSyllable } from "@/data/pinyin";
 import type { ReactNode } from "react";
 import { Text, View } from "react-native";
 import { ThreeSplitLinesDown } from "./ThreeSplitLinesDown";
 
 export function WikiHanziCharacterPronunciation({
   hanzi,
-  primaryPinyin: pinyin,
+  pinyinSyllable,
   gloss,
 }: {
   gloss: string;
   hanzi: HanziText;
-  primaryPinyin: PinyinSyllable;
+  pinyinSyllable: PinyinSyllable;
 }) {
-  const parsedPinyin = parsePinyinSyllable(pinyin);
+  const splitPinyin = splitPinyinSyllable(pinyinSyllable);
   const r = useReplicache();
   const { data: pinyinSounds } = useRizzleQueryPaged(pinyinSoundsQuery(r));
 
   const initialPinyinSound =
-    parsedPinyin == null
-      ? null
-      : pinyinSounds?.get(parsedPinyin.initialSoundId as PinyinSoundId);
+    splitPinyin == null ? null : pinyinSounds?.get(splitPinyin.initialSoundId);
   const finalPinyinSound =
-    parsedPinyin == null
-      ? null
-      : pinyinSounds?.get(parsedPinyin.finalSoundId as PinyinSoundId);
+    splitPinyin == null ? null : pinyinSounds?.get(splitPinyin.finalSoundId);
   const tonePinyinSound =
-    parsedPinyin == null
-      ? null
-      : pinyinSounds?.get(parsedPinyin.tone.toString() as PinyinSoundId);
+    splitPinyin == null ? null : pinyinSounds?.get(splitPinyin.toneSoundId);
 
   return (
     <View className="mt-4 gap-2">
@@ -44,7 +38,7 @@ export function WikiHanziCharacterPronunciation({
           <Text className="pyly-body">
             <Text className="pyly-bold">{hanzi}</Text> is pronounced
             {` `}
-            <Text className="pyly-bold">{pinyin}</Text>.
+            <Text className="pyly-bold">{pinyinSyllable}</Text>.
           </Text>
 
           <Text className="pyly-body">
@@ -52,15 +46,15 @@ export function WikiHanziCharacterPronunciation({
             <Text className="pyly-bold">{gloss}</Text>
             &rdquo; to remember the initial, the final, and the tone of
             {` `}
-            <Text className="pyly-bold">{pinyin}</Text>.
+            <Text className="pyly-bold">{pinyinSyllable}</Text>.
           </Text>
         </View>
 
-        {parsedPinyin == null ? null : (
+        {splitPinyin == null ? null : (
           <View className="gap-4 p-4">
             <View className="">
               <Text className="pyly-body text-center">
-                <Text className="pyly-bold">{pinyin}</Text>
+                <Text className="pyly-bold">{pinyinSyllable}</Text>
               </Text>
               <View className="px-[15%] py-2">
                 <ThreeSplitLinesDown className="h-[10px] w-full" />
@@ -68,7 +62,7 @@ export function WikiHanziCharacterPronunciation({
               <View className="flex-row gap-4">
                 <View className="flex-1 items-center gap-1 border-fg/10">
                   <Text className="pyly-body text-center text-fg/50">
-                    {parsedPinyin.initialSoundId}
+                    {splitPinyin.initialSoundId}
                   </Text>
                   {initialPinyinSound == null ? null : (
                     <ArrowToSoundName>
@@ -78,7 +72,7 @@ export function WikiHanziCharacterPronunciation({
                 </View>
                 <View className="flex-1 items-center gap-1 border-fg/10">
                   <Text className="pyly-body text-center text-fg/50">
-                    {parsedPinyin.finalSoundId}
+                    {splitPinyin.finalSoundId}
                   </Text>
                   {finalPinyinSound == null ? null : (
                     <ArrowToSoundName>{finalPinyinSound.name}</ArrowToSoundName>
@@ -86,9 +80,9 @@ export function WikiHanziCharacterPronunciation({
                 </View>
                 <View className="flex-1 items-center gap-1 border-fg/10">
                   <Text className="pyly-body text-center text-fg/50">
-                    {parsedPinyin.tone}
+                    {splitPinyin.tone}
                     <Text className="align-super text-[10px]">
-                      {ordinalSuffix(parsedPinyin.tone)}
+                      {ordinalSuffix(splitPinyin.tone)}
                     </Text>
                   </Text>
                   {tonePinyinSound == null ? null : (

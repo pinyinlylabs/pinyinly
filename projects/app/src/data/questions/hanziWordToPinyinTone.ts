@@ -1,8 +1,8 @@
 import { isHanziCharacter } from "@/data/hanzi";
 import {
-  convertPinyinWithToneNumberToToneMark,
-  parsePinyinSyllableOrThrow,
-  parsePinyinSyllableTone,
+  normalizePinyinSyllable,
+  splitPinyinSyllableOrThrow,
+  splitPinyinSyllableTone,
 } from "@/data/pinyin";
 import {
   allHanziCharacterPronunciationsForHanzi,
@@ -14,11 +14,7 @@ import {
   arrayFilterUniqueWithKey,
   emptyArray,
 } from "@pinyinly/lib/collections";
-import {
-  identicalInvariant,
-  invariant,
-  nonNullable,
-} from "@pinyinly/lib/invariant";
+import { identicalInvariant, invariant } from "@pinyinly/lib/invariant";
 import shuffle from "lodash/shuffle";
 import type {
   HanziCharacter,
@@ -114,22 +110,14 @@ export async function makeQuestionContext(
 
   const hanziAnswers = [hanzi];
   const pinyinAnswers =
-    meaning?.pinyin?.map((p) => {
-      return parsePinyinSyllableOrThrow(p).syllable;
-    }) ?? emptyArray;
+    meaning?.pinyin?.map((p) => p as PinyinSyllable) ?? emptyArray;
   invariant(
     pinyinAnswers.length > 0,
     `hanzi word ${correctAnswer} has no pinyin`,
   );
 
   const pinyinAnswersToneless = pinyinAnswers
-    .map((p) => {
-      const syllable = nonNullable(p);
-      const { tonelessSyllable: tonelessPinyin } = nonNullable(
-        parsePinyinSyllableTone(syllable),
-      );
-      return tonelessPinyin;
-    })
+    .map((p) => splitPinyinSyllableTone(p).tonelessSyllable)
     .filter(arrayFilterUniqueWithKey((x) => x));
 
   const ctx: QuestionContext = {
@@ -197,9 +185,7 @@ async function addDistractors(
 
   loop: for (const tonelessPinyin of ctx.pinyinAnswersToneless) {
     for (const tone of shuffle(toneSuffixes)) {
-      const pinyin = convertPinyinWithToneNumberToToneMark(
-        `${tonelessPinyin}${tone}`,
-      );
+      const pinyin = normalizePinyinSyllable(`${tonelessPinyin}${tone}`);
 
       tryPinyinDistractor(ctx, pinyin);
 
@@ -253,12 +239,12 @@ function validQuestionInvariant(question: OneCorrectPairQuestion) {
   // (e.g. 似:resemble is shì/sì).
   const answerPinyinParts = question.answer.bs.map((x) => {
     invariant(x.kind === `pinyin`);
-    return parsePinyinSyllableOrThrow(x.value);
+    return splitPinyinSyllableOrThrow(x.value as PinyinSyllable);
   });
   for (const b of question.groupB) {
     invariant(b.kind === `pinyin`);
     const { initialSoundId: initialChartLabel, finalSoundId: finalChartLabel } =
-      parsePinyinSyllableOrThrow(b.value);
+      splitPinyinSyllableOrThrow(b.value as PinyinSyllable);
     invariant(
       answerPinyinParts.some(
         (x) =>

@@ -1,4 +1,5 @@
 import {
+  isHanziCharacter,
   parseIds,
   splitHanziText,
   strokeCountPlaceholderOrNull,
@@ -17,7 +18,7 @@ import {
   PartOfSpeech,
   pinyinTextSchema,
 } from "@/data/model";
-import { parsePinyinSyllable } from "@/data/pinyin";
+import { matchAllPinyinSyllables } from "@/data/pinyin";
 import {
   deepReadonly,
   emptyArray,
@@ -445,17 +446,20 @@ export function hanziFromHanziOrHanziWord(
   return hanziOrHanziWord;
 }
 
-export function oneSyllablePinyinOrThrow(
-  hanziWord: HanziWord,
+export function oneSyllablePinyinOrNull(
   meaning: DeepReadonly<HanziWordMeaning> | null,
-): PinyinSyllable {
-  const pronunciation = pinyinOrThrow(hanziWord, meaning);
-  const parsed = parsePinyinSyllable(pronunciation);
-  invariant(
-    parsed != null,
-    `couldn't parse pinyin syllable "${pronunciation}" for hanzi word ${hanziWord}`,
-  );
-  return parsed.syllable;
+): PinyinSyllable | null {
+  const pinyin = meaning?.pinyin?.[0];
+
+  if (pinyin != null) {
+    const syllable = matchAllPinyinSyllables(pinyin)[0];
+    if (syllable === pinyin) {
+      // It's safe to cast here, because all pinyin in the dictionary are already normalized.
+      return syllable as PinyinSyllable;
+    }
+  }
+
+  return null;
 }
 
 export const allHanziCharacterPronunciationsForHanzi = memoize1(
@@ -466,13 +470,15 @@ export const allHanziCharacterPronunciationsForHanzi = memoize1(
     const hanziWordMeanings = dictionary.lookupHanzi(hanzi);
     const pronunciations = new Set<PinyinSyllable>();
 
+    invariant(
+      isHanziCharacter(hanzi),
+      `expected %s to be a single-character hanzi`,
+      hanzi,
+    );
+
     for (const [, meaning] of hanziWordMeanings) {
-      for (const pronunciation of meaning.pinyin ?? emptyArray) {
-        invariant(
-          parsePinyinSyllable(pronunciation) != null,
-          `couldn't parse pinyin syllable "${pronunciation}"`,
-        );
-        pronunciations.add(pronunciation as PinyinSyllable);
+      for (const pinyin of meaning.pinyin ?? emptyArray) {
+        pronunciations.add(pinyin as PinyinSyllable);
       }
     }
 

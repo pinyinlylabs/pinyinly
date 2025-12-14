@@ -2,6 +2,7 @@ import type {
   PinyinSoundGroupId,
   PinyinSoundId,
   PinyinSyllable,
+  PinyinText,
 } from "@/data/model";
 import { deepReadonly, memoize0, memoize1 } from "@pinyinly/lib/collections";
 import { invariant } from "@pinyinly/lib/invariant";
@@ -9,13 +10,38 @@ import type { DeepReadonly } from "ts-essentials";
 import z from "zod/v4";
 
 /**
+ * Converts a pinyin string to use the standard diacritic tone marks instead of
+ * numeric form.
+ * @param pinyin
+ */
+export const normalizePinyinText = (pinyin: string): PinyinText => {
+  const syllables = matchAllPinyinSyllablesWithIndexes(pinyin);
+  if (syllables.length === 0) {
+    return pinyin as PinyinText;
+  }
+
+  let result = ``;
+  let lastIndex = 0;
+  for (let i = 0; i < syllables.length; i += 2) {
+    const [index, syllable] = [syllables[i], syllables[i + 1]] as [
+      number,
+      string,
+    ];
+
+    result += pinyin.slice(lastIndex, index);
+    result += normalizePinyinSyllable(syllable);
+    lastIndex = index + syllable.length;
+  }
+  result += pinyin.slice(lastIndex);
+  return result as PinyinText;
+};
+
+/**
  * Converts a single pinyin word written with a tone number suffix to use a tone
  * mark instead (also converts v to ü).
  */
-export const convertPinyinWithToneNumberToToneMark = memoize1(
-  function convertPinyinWithToneNumberToToneMark(
-    pinyin: string,
-  ): PinyinSyllable {
+export const normalizePinyinSyllable = memoize1(
+  function normalizePinyinSyllable(pinyin: string): PinyinSyllable {
     invariant(pinyin.length > 0, `pinyin must not be empty`);
 
     // An algorithm to find the correct vowel letter (when there is more than one) is as follows:
@@ -33,11 +59,17 @@ export const convertPinyinWithToneNumberToToneMark = memoize1(
     let result = ``;
     for (let i = 0; i < pinyinLengthWithoutTone; i++) {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const char = pinyin[i]!;
+      let char = pinyin[i]!;
+      let nextChar = pinyin[i + 1];
+
+      // Handle u: → v → ü
+      if (char === `u` && nextChar === `:`) {
+        i++;
+        char = `v`;
+        nextChar = pinyin[i + 1];
+      }
 
       if (tone > 0) {
-        const nextChar = pinyin[i + 1];
-
         if (char === `a` || char === `e`) {
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           result += toneMap[char][tone]!;
@@ -87,35 +119,41 @@ const isPinyinVowel = (
 ): char is `a` | `e` | `i` | `ï` | `o` | `u` | `ü` =>
   char != null && char in toneMap;
 
-export const parsePinyinSyllableTone = memoize1(function parsePinyinTone(
-  syllable: string,
-): { tonelessSyllable: PinyinSyllable; tone: number } | null {
-  for (const [key, value] of Object.entries(toneMap)) {
-    for (let tone = 1; tone <= 4; tone++) {
-      const char = value[tone];
-      invariant(char != null);
+export const splitPinyinSyllableTone = memoize1(
+  function splitPinyinSyllableTone(syllable: PinyinSyllable): {
+    tonelessSyllable: PinyinSyllable;
+    tone: number;
+  } {
+    for (const [key, value] of Object.entries(toneMap)) {
+      for (let tone = 1; tone <= 4; tone++) {
+        const char = value[tone];
+        invariant(char != null);
 
-      const index = syllable.indexOf(char);
-      if (index !== -1) {
-        const tonelessSyllable = syllable.replace(char, key) as PinyinSyllable;
-        return { tonelessSyllable, tone };
+        const index = syllable.indexOf(char);
+        if (index !== -1) {
+          const tonelessSyllable = syllable.replace(
+            char,
+            key,
+          ) as PinyinSyllable;
+          return { tonelessSyllable, tone };
+        }
       }
     }
-  }
 
-  return { tonelessSyllable: syllable as PinyinSyllable, tone: 5 };
-});
+    return { tonelessSyllable: syllable, tone: 5 };
+  },
+);
 
 /**
  * Given a toneless pinyin (i.e. `hao` rather than `hǎo`) split into an initial
  * and final using a given chart.
  */
-export function splitTonelessPinyinSyllable(
-  pinyin: string,
+export function splitTonelessPinyinSyllableWithChart(
+  tonelessPinyin: PinyinSyllable,
   chart: DeepReadonly<PinyinChart>,
-): Pick<ParsedPinyinSyllable, `initialSoundId` | `finalSoundId`> | null {
-  const initialSoundId = chart.syllableToInitialSound[pinyin];
-  const finalSoundId = chart.syllableToFinalSound[pinyin];
+): Pick<SplitPinyinSyllable, `initialSoundId` | `finalSoundId`> | null {
+  const initialSoundId = chart.syllableToInitialSound[tonelessPinyin];
+  const finalSoundId = chart.syllableToFinalSound[tonelessPinyin];
 
   if (initialSoundId == null || finalSoundId == null) {
     return null;
@@ -124,44 +162,35 @@ export function splitTonelessPinyinSyllable(
   return { initialSoundId, finalSoundId };
 }
 
-export interface ParsedPinyinSyllable {
-  initialSoundId: string;
-  finalSoundId: string;
+export interface SplitPinyinSyllable {
+  initialSoundId: PinyinSoundId;
+  finalSoundId: PinyinSoundId;
+  toneSoundId: PinyinSoundId;
   tone: number;
   tonelessSyllable: PinyinSyllable;
-  syllable: PinyinSyllable;
 }
 
-export function parsePinyinSyllableWithChart(
-  pinyinSyllable: string,
+export function splitPinyinSyllableWithChart(
+  pinyinSyllable: PinyinSyllable,
   chart: DeepReadonly<PinyinChart>,
-): ParsedPinyinSyllable | null {
-  if (pinyinSyllable === ``) {
+): Readonly<SplitPinyinSyllable> | null {
+  const { tonelessSyllable, tone } = splitPinyinSyllableTone(pinyinSyllable);
+
+  const initialSoundId = chart.syllableToInitialSound[tonelessSyllable];
+  const finalSoundId = chart.syllableToFinalSound[tonelessSyllable];
+
+  if (initialSoundId == null || finalSoundId == null) {
     return null;
   }
 
-  const toneResult = parsePinyinSyllableTone(pinyinSyllable);
-  if (toneResult == null) {
-    return null;
-  }
-  const { tonelessSyllable, tone } = toneResult;
-
-  const initialFinalResult = splitTonelessPinyinSyllable(
-    tonelessSyllable,
-    chart,
-  );
-  if (initialFinalResult == null) {
-    return null;
-  }
-
-  const { initialSoundId, finalSoundId } = initialFinalResult;
+  const toneSoundId = `${tone}` as PinyinSoundId;
 
   return {
     initialSoundId,
     finalSoundId,
+    toneSoundId,
     tone,
     tonelessSyllable,
-    syllable: pinyinSyllable as PinyinSyllable,
   };
 }
 
@@ -198,19 +227,12 @@ export function pinyinSyllableSuggestions(
     // The last syllable is not at the end of the string, so we can't search for it.
     return null;
   }
-  const syllableWithoutNumber = lastSyllableText.at(-1)?.match(/\d/)
-    ? lastSyllableText.slice(0, -1)
-    : lastSyllableText;
-  const parsed = parsePinyinSyllable(
-    syllableWithoutNumber.replaceAll(`v`, `ü`),
-  );
-  if (parsed == null) {
-    return null;
-  }
 
-  const suggestions = toneVariationsForTonelessSyllable(
-    parsed.tonelessSyllable,
+  const { tonelessSyllable } = splitPinyinSyllableTone(
+    normalizePinyinSyllable(lastSyllableText),
   );
+
+  const suggestions = toneVariationsForTonelessSyllable(tonelessSyllable);
   return { from, to, syllables: suggestions };
 }
 
@@ -221,9 +243,7 @@ const toneVariationsForTonelessSyllable = memoize1(
     const result: PinyinSyllableSuggestion[] = [];
     for (let i = 1; i <= 5; i++) {
       result.push({
-        pinyinSyllable: convertPinyinWithToneNumberToToneMark(
-          `${tonelessSyllable}${i}`,
-        ),
+        pinyinSyllable: normalizePinyinSyllable(`${tonelessSyllable}${i}`),
         tone: i,
       });
     }
@@ -231,19 +251,30 @@ const toneVariationsForTonelessSyllable = memoize1(
   },
 );
 
-export const parsePinyinSyllable = memoize1(function parsePinyinSyllable(
-  pinyinSyllable: string,
-) {
+/**
+ * Parses a pinyin syllable using the Pinyinly pinyin chart, returning the tone,
+ * initial, final.
+ */
+export const splitPinyinSyllable = memoize1(function splitPinyinSyllable(
+  pinyinSyllable: PinyinSyllable,
+): Readonly<SplitPinyinSyllable> | null {
   const chart = loadPylyPinyinChart();
 
-  return deepReadonly(parsePinyinSyllableWithChart(pinyinSyllable, chart));
+  return splitPinyinSyllableWithChart(pinyinSyllable, chart);
 });
 
-export function parsePinyinSyllableOrThrow(pinyinSyllable: string) {
-  const parsed = parsePinyinSyllable(pinyinSyllable);
-  invariant(parsed != null, `Could not parse pinyin ${pinyinSyllable}`);
-  return parsed;
-}
+/**
+ * Convience wrapper around @see splitPinyinSyllable.
+ */
+export const splitPinyinSyllableOrThrow = memoize1(
+  function splitPinyinSyllableOrThrow(
+    pinyinSyllable: PinyinSyllable,
+  ): Readonly<SplitPinyinSyllable> {
+    const parts = splitPinyinSyllable(pinyinSyllable);
+    invariant(parts != null, `Could not split pinyin %s`, pinyinSyllable);
+    return parts;
+  },
+);
 
 export const loadPylyPinyinChart = memoize0(() =>
   buildPinyinChart({
@@ -559,23 +590,25 @@ export const pinyinSyllablePattern = (() => {
   );
 })();
 
-const matchAllPinyinRegExp = new RegExp(pinyinSyllablePattern, `g`);
+const matchAllPinyinRegExp = new RegExp(pinyinSyllablePattern, `ig`);
 
 /**
- * Find all pinyin syllables in a string.
+ * Find all pinyin syllables in a string, matches both diacritic and numeric
+ * forms.
  *
- * @returns An array of alternating index and matched syllable pairs.
+ * @returns {string[]} Intentionally returns string[] rather than
+ * {@link PinyinSyllable[]} because they might be numeric form and not normalized.
  */
 export function matchAllPinyinSyllables(input: string): string[] {
-  const tokens = [];
+  const result = [];
   for (const { 0: text } of input.matchAll(matchAllPinyinRegExp)) {
-    tokens.push(text);
+    result.push(text);
   }
-  return tokens;
+  return result;
 }
 
 /**
- * Find all pinyin syllables in a string.
+ * Find all pinyin syllables in a string. See also @see matchAllPinyinSyllables.
  *
  * @returns An array of alternating index and matched syllable pairs.
  */

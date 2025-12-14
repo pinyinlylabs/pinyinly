@@ -325,8 +325,6 @@ tasks:
     deps:
       # Lint does type-checking, so the Expo router types need to be generated first.
       - ~:codegen
-    env:
-      NODE_OPTIONS: --disable-warning=ExperimentalWarning $NODE_OPTIONS
 
 tags:
   - eslint

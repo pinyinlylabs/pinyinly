@@ -1,5 +1,6 @@
 // pyly-not-src-test
 
+import { normalizePinyinText } from "#data/pinyin.js";
 import type { HanziWordMeaning } from "#dictionary.js";
 import {
   buildHanziWord,
@@ -49,18 +50,7 @@ test(`hsk word lists match vendor data`, async () => {
     );
     const vendorHanziList = new Set(vendorList.map((item) => item.simplified));
 
-    for (const localHanzi of localHanziList) {
-      const isInVendor = vendorHanziList.has(localHanzi);
-      expect
-        .soft(
-          isInVendor,
-          `${wordListFileBaseName} local hanzi ${localHanzi} missing from vendor data`,
-        )
-        .toBe(true);
-
-      // TODO: remove from the list?
-    }
-
+    // Make sure every item in the vendor list is in the local list.
     for (const vendorItem of vendorList) {
       const vendorHanzi = vendorItem.simplified;
       const isInLocalWordList = localHanziList.has(vendorHanzi);
@@ -72,50 +62,122 @@ test(`hsk word lists match vendor data`, async () => {
         .toBe(true);
 
       const dictionaryItems = dictionary.lookupHanzi(vendorHanzi);
-      const isInDictionary = dictionaryItems.length > 0;
-      expect
-        .soft(
-          isInDictionary,
-          `${wordListFileBaseName} vendor hanzi ${vendorHanzi} missing from dictionary`,
-        )
-        .toBe(true);
 
-      if (isInDictionary) {
-        for (const [hanziWord] of dictionaryItems) {
-          await upsertHanziWordWordList(hanziWord, wordListFileBaseName);
+      // Make sure the pinyin matches
+      const vendorPinyins = vendorItem.forms.map((form) =>
+        // The dataset mixes diacritic with numeric form pinyin, but our
+        // dictionary only uses diacritic form.
+        normalizePinyinText(form.transcriptions.pinyin),
+      );
+
+      const vendorDataWithWrongPinyin = new Set([
+        `那里`,
+        `关系`,
+        `起来`,
+        `便宜`,
+        `好处`,
+        `不客气`,
+        `值得`,
+        `先生`,
+        `刚刚`,
+        `别人`,
+        `力量`,
+        `有空儿`,
+        `西方`,
+      ]);
+
+      for (const [hanziWord, meaning] of dictionaryItems) {
+        if (vendorDataWithWrongPinyin.has(vendorHanzi)) {
+          continue;
         }
-      } else {
-        const hasOneMeaning = vendorItem.forms.length === 1;
+
+        const hasAnyPinyinOverlap = meaning.pinyin?.some((pinyin) =>
+          vendorPinyins.includes(pinyin),
+        );
+
         expect
           .soft(
-            hasOneMeaning,
-            `${wordListFileBaseName} ${vendorHanzi} has multiple meanings in vendor data`,
+            hasAnyPinyinOverlap,
+            `${hanziWord} pinyin ${meaning.pinyin} missing from vendor data`,
           )
           .toBe(true);
 
-        if (hasOneMeaning) {
-          const form = vendorItem.forms[0]!;
-
-          const newDictionaryMeaningKey = toCamelCase(
-            nonNullable(form.meanings[0]),
-          );
-
-          const newHanziWord = buildHanziWord(
-            vendorHanzi,
-            newDictionaryMeaningKey,
-          );
-          const newDictionaryMeaning: HanziWordMeaning = {
-            gloss: form.meanings,
-            pinyin: [form.transcriptions.pinyin],
-          };
-
-          if (!IS_CI) {
-            const dict = await readDictionary();
-            upsertHanziWordMeaning(dict, newHanziWord, newDictionaryMeaning);
+        // Auto-update the dictionary
+        if (
+          !IS_CI &&
+          hasAnyPinyinOverlap !== true &&
+          vendorPinyins.length === 1
+        ) {
+          const dict = await readDictionary();
+          const meaning = dict.get(hanziWord);
+          if (meaning != null) {
+            meaning.pinyin = vendorPinyins;
             await writeDictionary(dict);
           }
         }
       }
+
+      // Try to add it to the local list if it's missing.
+      if (!isInLocalWordList) {
+        const isInDictionary = dictionaryItems.length > 0;
+        expect
+          .soft(
+            isInDictionary,
+            `${wordListFileBaseName} vendor hanzi ${vendorHanzi} missing from dictionary`,
+          )
+          .toBe(true);
+
+        // Autofix the local data in development.
+        if (!IS_CI) {
+          if (isInDictionary) {
+            for (const [hanziWord] of dictionaryItems) {
+              await upsertHanziWordWordList(hanziWord, wordListFileBaseName);
+            }
+          } else {
+            const hasOneMeaning = vendorItem.forms.length === 1;
+            expect
+              .soft(
+                hasOneMeaning,
+                `${wordListFileBaseName} ${vendorHanzi} has multiple meanings in vendor data`,
+              )
+              .toBe(true);
+
+            if (hasOneMeaning) {
+              const form = vendorItem.forms[0]!;
+
+              const newDictionaryMeaningKey = toCamelCase(
+                nonNullable(form.meanings[0]),
+              );
+
+              const newHanziWord = buildHanziWord(
+                vendorHanzi,
+                newDictionaryMeaningKey,
+              );
+              const newDictionaryMeaning: HanziWordMeaning = {
+                gloss: form.meanings,
+                pinyin: [form.transcriptions.pinyin],
+              };
+
+              const dict = await readDictionary();
+              upsertHanziWordMeaning(dict, newHanziWord, newDictionaryMeaning);
+              await writeDictionary(dict);
+            }
+          }
+        }
+      }
+    }
+
+    // Make sure there's no extra items in the local list that shouldn't be there.
+    for (const localHanzi of localHanziList) {
+      const isInVendor = vendorHanziList.has(localHanzi);
+      expect
+        .soft(
+          isInVendor,
+          `${wordListFileBaseName} local hanzi ${localHanzi} missing from vendor data`,
+        )
+        .toBe(true);
+
+      // TODO: remove from the list?
     }
   }
 });

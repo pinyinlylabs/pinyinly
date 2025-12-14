@@ -5,6 +5,13 @@ export class Invariant extends Error {
   }
 }
 
+/**
+ * Assert an invariant or throw.
+ *
+ * @param condition
+ * @param message An error message, allows `%s` placeholders.
+ * @param args positional arguments for `%s` message placeholders
+ */
 export function invariant(
   condition: unknown,
   message?: string,
@@ -13,11 +20,27 @@ export function invariant(
   // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
   if (!condition) {
     message ??= `Invariant failed`;
-    // Only pay the string concatenation cost if the invariant fails, rather
-    // than every time the invariant is run.
-    for (const arg of args) {
-      message += ` ${JSON.stringify(arg)}`;
+    // Replace %s placeholders with provided arguments
+    const unusedArgs: unknown[] = [];
+    let argIndex = 0;
+    message = message.replaceAll(`%s`, () => {
+      if (argIndex < args.length) {
+        const arg = args[argIndex++];
+        return typeof arg === `string` ? arg : JSON.stringify(arg);
+      }
+      return `%s`;
+    });
+
+    // Collect any unused arguments
+    for (let i = argIndex; i < args.length; i++) {
+      unusedArgs.push(args[i]);
     }
+
+    // Append unused arguments if any
+    if (unusedArgs.length > 0) {
+      message += ` (args: ${JSON.stringify(unusedArgs)})`;
+    }
+
     throw new Invariant(message);
   }
 }
@@ -50,8 +73,9 @@ export function identicalInvariant<
 export function nonNullable<T>(
   value: T | null | undefined,
   message?: string,
+  ...args: unknown[]
 ): NonNullable<T> {
   // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-  invariant(value != null, message ?? `unexpected ${value} value`);
+  invariant(value != null, message ?? `unexpected ${value} value`, ...args);
   return value;
 }
