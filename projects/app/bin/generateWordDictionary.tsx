@@ -14,6 +14,7 @@ import type {
   IdsNode,
   PinyinText,
 } from "#data/model.ts";
+import { partOfSpeechSchema } from "#data/model.ts";
 import type {
   Dictionary,
   HanziWordMeaning,
@@ -27,7 +28,6 @@ import {
   loadCharacters,
   loadDictionary,
   meaningKeyFromHanziWord,
-  partOfSpeechDictSchema,
 } from "#dictionary.ts";
 import { Alert, Select } from "@inkjs/ui";
 import {
@@ -303,7 +303,7 @@ const HanziWordEditor = ({
               const newPos =
                 newValue === ``
                   ? undefined
-                  : partOfSpeechDictSchema.parse(newValue);
+                  : partOfSpeechSchema.parse(newValue);
               mutations.push(() =>
                 saveUpsertHanziWordMeaning(hanziWord, {
                   pos: newPos,

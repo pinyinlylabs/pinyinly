@@ -5,6 +5,7 @@ import path from "node:path";
 import { vi } from "vitest";
 
 import type { HanziWord } from "#data/model.ts";
+import { rPartOfSpeech } from "#data/rizzleSchema.js";
 import type {
   Dictionary,
   HanziWordMeaning,
@@ -161,7 +162,13 @@ export function unparseDictionary(
     .map(([hanziWord, meaning]): z.input<typeof dictionarySchema>[number] => {
       return [
         hanziWord,
-        meaning satisfies z.input<typeof hanziWordMeaningSchema>,
+        {
+          ...(meaning satisfies z.input<typeof hanziWordMeaningSchema>),
+          pos:
+            meaning.pos == null
+              ? undefined
+              : rPartOfSpeech().marshal(meaning.pos),
+        },
       ];
     })
     .sort(sortComparatorString((x) => x[0]));

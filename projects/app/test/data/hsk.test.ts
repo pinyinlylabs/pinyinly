@@ -1,9 +1,9 @@
 // pyly-not-src-test
 
-import type { HanziText } from "#data/model.js";
-import { HskLevel } from "#data/model.js";
+import type { HanziText, partOfSpeechSchema } from "#data/model.js";
+import { HskLevel, PartOfSpeech } from "#data/model.js";
 import { normalizePinyinText } from "#data/pinyin.js";
-import type { HanziWordMeaning, partOfSpeechDictSchema } from "#dictionary.js";
+import type { HanziWordMeaning } from "#dictionary.js";
 import {
   buildHanziWord,
   hanziFromHanziWord,
@@ -165,86 +165,86 @@ test(`hsk word lists match vendor data`, async () => {
         formIndex: number,
         meaningKey: string,
         primaryGloss?: string,
-        pos?: string,
+        pos?: PartOfSpeech,
       ][] = [
         [`老公`, 0, `husband`, `husband`],
         [`獲`, 0, `obtain`, `to obtain`],
         [`冲`, 1, `rush`, `to rush`],
-        [`刺`, 1, `thorn`, `thorn`, `noun`],
-        [`刺`, 1, `stab`, `to stab`, `verb`],
+        [`刺`, 1, `thorn`, `thorn`, PartOfSpeech.Noun],
+        [`刺`, 1, `stab`, `to stab`, PartOfSpeech.Verb],
         [`诗`, 1, `poem`],
         [`大爷`, 1, `uncle`, `father's older brother`],
         [`尽快`, 0, `asap`, `ASAP`],
-        [`粗`, 0, `coarse`, undefined, `adjective`],
+        [`粗`, 0, `coarse`, undefined, PartOfSpeech.Adjective],
         [`大方`, 1, `generous`],
         [`冰`, 0, `ice`],
         [`网络`, 1, `network`],
         [`土地`, 0, `land`],
         [`大陆`, 1, `mainland`],
-        [`伙`, 1, `partner`, undefined, `noun`],
-        [`局`, 1, `office`, undefined, `noun`],
-        [`针`, 0, `needle`, `needle`, `noun`],
+        [`伙`, 1, `partner`, undefined, PartOfSpeech.Noun],
+        [`局`, 1, `office`, undefined, PartOfSpeech.Noun],
+        [`针`, 0, `needle`, `needle`, PartOfSpeech.Noun],
         [`却`, 1, `but`],
-        [`辣`, 1, `spicy`, undefined, `adjective`],
-        [`尺`, 1, `ruler`, `ruler`, `noun`],
+        [`辣`, 1, `spicy`, undefined, PartOfSpeech.Adjective],
+        [`尺`, 1, `ruler`, `ruler`, PartOfSpeech.Noun],
         [`树林`, 1, `woods`],
-        [`浅`, 1, `shallow`, undefined, `adjective`],
-        [`孙子`, 1, `grandson`, undefined, `noun`],
+        [`浅`, 1, `shallow`, undefined, PartOfSpeech.Adjective],
+        [`孙子`, 1, `grandson`, undefined, PartOfSpeech.Noun],
         [`薄`, 1, `thin`],
         [`戴`, 1, `toWear`, `to wear`],
-        [`盖`, 1, `lid`, `lid`, `noun`],
-        [`盖`, 1, `cover`, `to cover`, `verb`],
+        [`盖`, 1, `lid`, `lid`, PartOfSpeech.Noun],
+        [`盖`, 1, `cover`, `to cover`, PartOfSpeech.Verb],
         [`官`, 1, `official`],
         [`归`, 1, `toReturn`],
-        [`季`, 1, `season`, undefined, `noun`],
+        [`季`, 1, `season`, undefined, PartOfSpeech.Noun],
         [`江`, 1, `river`],
         [`宽`, 1, `wide`],
-        [`密`, 1, `dense`, undefined, `adjective`],
+        [`密`, 1, `dense`, undefined, PartOfSpeech.Adjective],
         [`闪`, 1, `toFlash`],
-        [`帅`, 1, `handsome`, `handsome`, `adjective`],
-        [`松`, 2, `loose`, undefined, `adjective`],
+        [`帅`, 1, `handsome`, `handsome`, PartOfSpeech.Adjective],
+        [`松`, 2, `loose`, undefined, PartOfSpeech.Adjective],
         [`咸`, 2, `salty`],
-        [`项`, 1, `item`, `item`, `noun`],
-        [`严`, 1, `strict`, undefined, `adjective`],
+        [`项`, 1, `item`, `item`, PartOfSpeech.Noun],
+        [`严`, 1, `strict`, undefined, PartOfSpeech.Adjective],
         [`摇`, 1, `toShake`],
         [`遇`, 1, `toMeet`],
-        [`刷`, 0, `toBrush`, undefined, `verb`],
+        [`刷`, 0, `toBrush`, undefined, PartOfSpeech.Verb],
         [`挑`, 0, `toChoose`],
-        [`倒车`, 0, `transfer`, undefined, `verb`],
-        [`倒车`, 1, `reverse`, undefined, `verb`],
-        [`圈`, 2, `circle`, undefined, `noun`],
-        [`圈`, 2, `surround`, undefined, `verb`],
+        [`倒车`, 0, `transfer`, undefined, PartOfSpeech.Verb],
+        [`倒车`, 1, `reverse`, undefined, PartOfSpeech.Verb],
+        [`圈`, 2, `circle`, undefined, PartOfSpeech.Noun],
+        [`圈`, 2, `surround`, undefined, PartOfSpeech.Verb],
         [`降`, 0, `fall`],
         [`摸`, 0, `feel`],
-        [`汇`, 0, `remit`, undefined, `verb`],
-        [`汇报`, 0, `report`, undefined, `verb`],
-        [`卷`, 0, `roll`, `to roll up`, `verb`],
-        [`卷`, 1, `chapter`, `chapter`, `noun`],
-        [`折`, 2, `break`, undefined, `verb`],
+        [`汇`, 0, `remit`, undefined, PartOfSpeech.Verb],
+        [`汇报`, 0, `report`, undefined, PartOfSpeech.Verb],
+        [`卷`, 0, `roll`, `to roll up`, PartOfSpeech.Verb],
+        [`卷`, 1, `chapter`, `chapter`, PartOfSpeech.Noun],
+        [`折`, 2, `break`, undefined, PartOfSpeech.Verb],
         [`扫`, 0, `sweep`],
         [`翻`, 0, `flip`],
-        [`转动`, 1, `rotate`, `to rotate`, `verb`],
-        [`了解`, 0, `understand`, undefined, `verb`],
+        [`转动`, 1, `rotate`, `to rotate`, PartOfSpeech.Verb],
+        [`了解`, 0, `understand`, undefined, PartOfSpeech.Verb],
         [`俩`, 0, `two`, `two`],
         [`伞`, 0, `umbrella`],
-        [`晒`, 1, `dry`, `to sun`, `verb`],
+        [`晒`, 1, `dry`, `to sun`, PartOfSpeech.Verb],
         [`阳台`, 1, `balcony`],
-        [`暗`, 1, `dark`, undefined, `adjective`],
-        [`宝`, 1, `treasure`, `treasure`, `noun`],
-        [`宝`, 1, `precious`, `precious`, `adjective`],
-        [`湿`, 1, `wet`, undefined, `adjective`],
-        [`恶心`, 1, `gross`, `disgusting`, `adjective`],
-        [`闹`, 1, `noisy`, `noisy`, `adjective`],
-        [`闹`, 1, `disturb`, `to make noise`, `verb`],
+        [`暗`, 1, `dark`, undefined, PartOfSpeech.Adjective],
+        [`宝`, 1, `treasure`, `treasure`, PartOfSpeech.Noun],
+        [`宝`, 1, `precious`, `precious`, PartOfSpeech.Adjective],
+        [`湿`, 1, `wet`, undefined, PartOfSpeech.Adjective],
+        [`恶心`, 1, `gross`, `disgusting`, PartOfSpeech.Adjective],
+        [`闹`, 1, `noisy`, `noisy`, PartOfSpeech.Adjective],
+        [`闹`, 1, `disturb`, `to make noise`, PartOfSpeech.Verb],
         [`获`, 0, `catch`],
-        [`收获`, 1, `harvest`, undefined, `verb`],
-        [`鲜`, 2, `fresh`, undefined, `adjective`],
+        [`收获`, 1, `harvest`, undefined, PartOfSpeech.Verb],
+        [`鲜`, 2, `fresh`, undefined, PartOfSpeech.Adjective],
         [`词汇`, 1, `vocabulary`],
-        [`大众`, 1, `people`, undefined, `noun`],
+        [`大众`, 1, `people`, undefined, PartOfSpeech.Noun],
         [`妻子`, 1, `wife`],
-        [`延长`, 1, `prolong`, undefined, `verb`],
+        [`延长`, 1, `prolong`, undefined, PartOfSpeech.Verb],
         [`资源`, 1, `resources`],
-        [`人家`, 0, `family`, undefined, `noun`],
+        [`人家`, 0, `family`, undefined, PartOfSpeech.Noun],
       ];
 
       for (const [hanziWord, meaning] of dictionaryItems) {
@@ -395,22 +395,22 @@ test(`hsk word lists match vendor data`, async () => {
 
                   function parsePos(
                     posText: string,
-                  ): z.infer<typeof partOfSpeechDictSchema> | undefined {
+                  ): z.infer<typeof partOfSpeechSchema> | undefined {
                     switch (posText) {
                       case `n`: {
-                        return `noun`;
+                        return PartOfSpeech.Noun;
                       }
                       case `v`: {
-                        return `verb`;
+                        return PartOfSpeech.Verb;
                       }
                       case `a`: {
-                        return `adjective`;
+                        return PartOfSpeech.Adjective;
                       }
                       case `d`: {
-                        return `adverb`;
+                        return PartOfSpeech.Adverb;
                       }
                       case `m`: {
-                        return `numeral`;
+                        return PartOfSpeech.Numeral;
                       }
                       default: {
                         return undefined;
@@ -418,10 +418,7 @@ test(`hsk word lists match vendor data`, async () => {
                     }
                   }
 
-                  const newPos =
-                    (explicitPos as
-                      | z.infer<typeof partOfSpeechDictSchema>
-                      | undefined) ?? parsePos(vendorPos[0]!);
+                  const newPos = explicitPos ?? parsePos(vendorPos[0]!);
                   if (newPos == null) {
                     expect
                       .soft(

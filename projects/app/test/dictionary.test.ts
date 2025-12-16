@@ -2,6 +2,7 @@ import { splitHanziText } from "#data/hanzi.ts";
 import type { HanziCharacter, HanziText, HanziWord } from "#data/model.ts";
 import { PartOfSpeech } from "#data/model.ts";
 import { pinyinUnitCount } from "#data/pinyin.js";
+import { rPartOfSpeech } from "#data/rizzleSchema.js";
 import type { Dictionary, HanziWordMeaning } from "#dictionary.ts";
 import {
   decomposeHanzi,
@@ -1186,7 +1187,7 @@ describe(
       dict.set(`你好:hello`, {
         gloss: [`hello`],
         pinyin: [拼音`ni hao`],
-        pos: `interjection`,
+        pos: PartOfSpeech.Interjection,
       });
       return dict;
     }
@@ -1201,7 +1202,7 @@ describe(
       expect(dict.get(`你好:hello`)).toEqual({
         gloss: [`hello`],
         pinyin: [拼音`nǐ hǎo`],
-        pos: `interjection`,
+        pos: PartOfSpeech.Interjection,
       });
     });
   },
@@ -1243,24 +1244,43 @@ describe(
   },
 );
 
-test.for([
-  [`noun,名,N`, PartOfSpeech.Noun],
-  [`verb,动,V`, PartOfSpeech.Verb],
-  [`adjective,形,Adj,Vs`, PartOfSpeech.Adjective],
-  [`adverb,副,Adv`, PartOfSpeech.Adverb],
-  [`pronoun,代,Pron,Det`, PartOfSpeech.Pronoun],
-  [`numeral,数,Num`, PartOfSpeech.Numeral],
-  [`measureWord,量,M`, PartOfSpeech.MeasureWord],
-  [`preposition,介,Prep`, PartOfSpeech.Preposition],
-  [`conjunction,连,Conj`, PartOfSpeech.Conjunction],
-  [`particle,助,Aux,Ptc`, PartOfSpeech.AuxiliaryWord],
-  [`interjection,叹,Int`, PartOfSpeech.Interjection],
-  [`prefix,前缀,Prefix`, PartOfSpeech.Prefix],
-  [`suffix,后缀,Suffix`, PartOfSpeech.Suffix],
-  [`phonetic,拟声,Phonetic`, PartOfSpeech.Phonetic],
-  [`radical`, null],
-] as const)(`parsePartOfSpeech fixture: %s → %s`, ([input, expected]) => {
-  for (const text of input.split(`,`)) {
-    expect.soft(parsePartOfSpeech(text), `parsing ${text}`).toBe(expected);
-  }
-});
+describe(
+  `parsePartOfSpeech suite` satisfies HasNameOf<typeof parsePartOfSpeech>,
+  () => {
+    test.for([
+      [`noun,名,N`, PartOfSpeech.Noun],
+      [`verb,动,V`, PartOfSpeech.Verb],
+      [`adjective,形,Adj,Vs`, PartOfSpeech.Adjective],
+      [`adverb,副,Adv`, PartOfSpeech.Adverb],
+      [`pronoun,代,Pron,Det`, PartOfSpeech.Pronoun],
+      [`numeral,数,Num`, PartOfSpeech.Numeral],
+      [`measureWord,量,M`, PartOfSpeech.MeasureWordOrClassifier],
+      [`preposition,介,Prep`, PartOfSpeech.Preposition],
+      [`conjunction,连,Conj`, PartOfSpeech.Conjunction],
+      [`particle,助,Aux,Ptc`, PartOfSpeech.AuxiliaryWordOrParticle],
+      [`interjection,叹,Int`, PartOfSpeech.Interjection],
+      [`prefix,前缀,Prefix`, PartOfSpeech.Prefix],
+      [`suffix,后缀,Suffix`, PartOfSpeech.Suffix],
+      [`phonetic,拟声,Phonetic`, PartOfSpeech.Phonetic],
+      [`radical`, undefined],
+    ] as const)(`fixture: %s → %s`, ([input, expected]) => {
+      for (const text of input.split(`,`)) {
+        expect.soft(parsePartOfSpeech(text), `parsing ${text}`).toBe(expected);
+      }
+    });
+
+    test(
+      `rPartOfSpeech marshaled values` satisfies HasNameOf<
+        typeof rPartOfSpeech
+      >,
+      () => {
+        for (const pos of Object.values(PartOfSpeech)) {
+          const marshaled = rPartOfSpeech().marshal(pos);
+          expect(parsePartOfSpeech(marshaled), `parsing ${marshaled}`).toBe(
+            pos,
+          );
+        }
+      },
+    );
+  },
+);

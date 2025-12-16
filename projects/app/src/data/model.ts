@@ -140,32 +140,18 @@ export const hskLevelSchema = z.enum({
 export const HskLevel = hskLevelSchema.enum;
 export type HskLevel = z.infer<typeof hskLevelSchema>;
 
-const partOfSpeechOldSchema = z.enum({
-  Noun: `debug--Noun`,
-  Verb: `debug--Verb`,
-  Adjective: `debug--Adjective`,
-  Adverb: `debug--Adverb`,
-  Pronoun: `debug--Pronoun`,
-  Preposition: `debug--Preposition`,
-  Conjunction: `debug--Conjunction`,
-  Interjection: `debug--Interjection`,
-  MeasureWord: `debug--MeasureWord`,
-  Particle: `debug--Particle`,
-});
-export const PartOfSpeechOld = partOfSpeechOldSchema.enum;
-export type PartOfSpeechOld = z.infer<typeof partOfSpeechOldSchema>;
-
-const partOfSpeechSchema = z.enum({
+// Adopted from https://github.com/ivankra/hsk30
+export const partOfSpeechSchema = z.enum({
   Noun: `debug--Noun (名)`, // noun
   Verb: `debug--Verb (动)`, // verb
   Adjective: `debug--Adjective (形)`, // adjective; usually `Vs` (state verb, 狀態動詞) in taiwanese linguistical tradition and TOCFL
   Adverb: `debug--Adverb (副)`, // adverb
   Pronoun: `debug--Pronoun (代)`, // pronoun; usually `Det` in TOCFL
   Numeral: `debug--Numeral (数)`, // numeral
-  MeasureWord: `debug--MeasureWord (量)`, // measure word/classifier
+  MeasureWordOrClassifier: `debug--MeasureWordOrClassifier (量)`, // measure word/classifier
   Preposition: `debug--Preposition (介)`, // preposition
   Conjunction: `debug--Conjunction (连)`, // conjunction
-  AuxiliaryWord: `debug--AuxiliaryWord (助)`, // auxiliary word/particle; usually `Ptc` in TOCFL
+  AuxiliaryWordOrParticle: `debug--AuxiliaryWordOrParticle (助)`, // auxiliary word/particle; usually `Ptc` in TOCFL
   Interjection: `debug--Interjection (叹)`, // interjection/exclamation/particle, e.g. 喂, 啊, 哎呀
   Prefix: `debug--Prefix (前缀)`, // prefix bound forms
   Suffix: `debug--Suffix (后缀)`, // suffix bound forms

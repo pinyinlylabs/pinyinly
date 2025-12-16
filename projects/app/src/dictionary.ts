@@ -18,7 +18,6 @@ import {
   HskLevel,
   hskLevelSchema,
   PartOfSpeech,
-  PartOfSpeechOld,
   pinyinTextSchema,
 } from "@/data/model";
 import { matchAllPinyinUnits } from "@/data/pinyin";
@@ -143,21 +142,6 @@ export const loadKangXiRadicalsHanziWords = memoize0(
   },
 );
 
-export const partOfSpeechDictSchema = z.enum([
-  `noun`,
-  `verb`,
-  `adjective`,
-  `adverb`,
-  `pronoun`,
-  `preposition`,
-  `conjunction`,
-  `interjection`,
-  `measureWord`,
-  `particle`,
-  `radical`,
-  `numeral`,
-]);
-
 const parsePosPattern = new RegExp(
   `^(?:` +
     [
@@ -167,20 +151,20 @@ const parsePosPattern = new RegExp(
       `(?<adverb>adverb|副|adv)`,
       `(?<pronoun>pronoun|代|pron|det)`,
       `(?<numeral>numeral|数|num)`,
-      `(?<measureWord>measureWord|量|m)`,
+      `(?<measureWord>measureWord|量|m|mw)`,
       `(?<preposition>preposition|介|prep)`,
       `(?<conjunction>conjunction|连|conj)`,
       `(?<auxiliaryWord>particle|助|aux|ptc)`,
       `(?<interjection>interjection|叹|int)`,
-      `(?<prefix>prefix|前缀)`,
-      `(?<suffix>suffix|后缀)`,
-      `(?<phonetic>Phonetic|拟声)`,
+      `(?<prefix>prefix|前缀|pre)`,
+      `(?<suffix>suffix|后缀|suf)`,
+      `(?<phonetic>Phonetic|拟声|pho)`,
     ].join(`|`) +
     `)$`,
   `i`,
 );
 
-export function parsePartOfSpeech(pos: string): PartOfSpeech | null {
+export function parsePartOfSpeech(pos: string): PartOfSpeech | undefined {
   const match = parsePosPattern.exec(pos);
   if (match?.groups?.[`noun`] != null) {
     return PartOfSpeech.Noun;
@@ -195,13 +179,13 @@ export function parsePartOfSpeech(pos: string): PartOfSpeech | null {
   } else if (match?.groups?.[`numeral`] != null) {
     return PartOfSpeech.Numeral;
   } else if (match?.groups?.[`measureWord`] != null) {
-    return PartOfSpeech.MeasureWord;
+    return PartOfSpeech.MeasureWordOrClassifier;
   } else if (match?.groups?.[`preposition`] != null) {
     return PartOfSpeech.Preposition;
   } else if (match?.groups?.[`conjunction`] != null) {
     return PartOfSpeech.Conjunction;
   } else if (match?.groups?.[`auxiliaryWord`] != null) {
-    return PartOfSpeech.AuxiliaryWord;
+    return PartOfSpeech.AuxiliaryWordOrParticle;
   } else if (match?.groups?.[`interjection`] != null) {
     return PartOfSpeech.Interjection;
   } else if (match?.groups?.[`prefix`] != null) {
@@ -211,7 +195,7 @@ export function parsePartOfSpeech(pos: string): PartOfSpeech | null {
   } else if (match?.groups?.[`phonetic`] != null) {
     return PartOfSpeech.Phonetic;
   }
-  return null;
+  return undefined;
 }
 
 export const hanziWordMeaningSchema = z
@@ -224,7 +208,10 @@ export const hanziWordMeaningSchema = z
       )
       .nullable()
       .optional(),
-    pos: partOfSpeechDictSchema.optional(),
+    pos: z
+      .string()
+      .transform((x) => parsePartOfSpeech(x))
+      .optional(),
     hsk: hskLevelSchema.optional(),
   })
   .strict();
@@ -395,41 +382,6 @@ export const allHanziCharacters = memoize0(async function allHanziCharacters() {
 
   return new Set([...characters].map(([char]) => char));
 });
-
-export function shorthandPartOfSpeech(pos: PartOfSpeechOld) {
-  switch (pos) {
-    case PartOfSpeechOld.Adjective: {
-      return `adj.`;
-    }
-    case PartOfSpeechOld.Adverb: {
-      return `adv.`;
-    }
-    case PartOfSpeechOld.Noun: {
-      return `noun`;
-    }
-    case PartOfSpeechOld.Verb: {
-      return `verb`;
-    }
-    case PartOfSpeechOld.Pronoun: {
-      return `pron.`;
-    }
-    case PartOfSpeechOld.Preposition: {
-      return `prep.`;
-    }
-    case PartOfSpeechOld.Conjunction: {
-      return `conj.`;
-    }
-    case PartOfSpeechOld.Interjection: {
-      return `intj.`;
-    }
-    case PartOfSpeechOld.MeasureWord: {
-      return `mw.`;
-    }
-    case PartOfSpeechOld.Particle: {
-      return `part.`;
-    }
-  }
-}
 
 export function hanziTextFromHanziCharacter(
   character: HanziCharacter,

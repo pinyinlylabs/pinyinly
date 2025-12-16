@@ -13,7 +13,7 @@ import type {
   Skill,
   SrsStateType,
 } from "./model";
-import { PartOfSpeechOld, SkillKind, SrsKind } from "./model";
+import { PartOfSpeech, SkillKind, SrsKind } from "./model";
 
 export const rSkillKind = memoize0(function rSkillKind() {
   return r.enum(SkillKind, {
@@ -36,20 +36,22 @@ export const rSkillKind = memoize0(function rSkillKind() {
   });
 });
 
-// Skill e.g. `he:好:good`
-
 export const rPartOfSpeech = memoize0(function rPartOfSpeech() {
-  return r.enum(PartOfSpeechOld, {
-    [PartOfSpeechOld.Noun]: `n`,
-    [PartOfSpeechOld.Verb]: `v`,
-    [PartOfSpeechOld.Adjective]: `adj`,
-    [PartOfSpeechOld.Adverb]: `adv`,
-    [PartOfSpeechOld.Pronoun]: `pron`,
-    [PartOfSpeechOld.Preposition]: `prep`,
-    [PartOfSpeechOld.Conjunction]: `conj`,
-    [PartOfSpeechOld.Interjection]: `int`,
-    [PartOfSpeechOld.MeasureWord]: `mw`,
-    [PartOfSpeechOld.Particle]: `part`,
+  return r.enum(PartOfSpeech, {
+    [PartOfSpeech.Noun]: `n`,
+    [PartOfSpeech.Verb]: `v`,
+    [PartOfSpeech.Adjective]: `adj`,
+    [PartOfSpeech.Adverb]: `adv`,
+    [PartOfSpeech.Pronoun]: `pron`,
+    [PartOfSpeech.Numeral]: `num`,
+    [PartOfSpeech.MeasureWordOrClassifier]: `m`,
+    [PartOfSpeech.Preposition]: `prep`,
+    [PartOfSpeech.Conjunction]: `conj`,
+    [PartOfSpeech.AuxiliaryWordOrParticle]: `aux`,
+    [PartOfSpeech.Interjection]: `int`,
+    [PartOfSpeech.Prefix]: `pre`,
+    [PartOfSpeech.Suffix]: `suf`,
+    [PartOfSpeech.Phonetic]: `pho`,
   });
 });
 
