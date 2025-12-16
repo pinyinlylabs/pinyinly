@@ -4753,7 +4753,7 @@ __metadata:
     date-fns: "npm:^4.0.0"
     debug: "npm:^4.3.7"
     drizzle-kit: "npm:^0.31.0"
-    drizzle-orm: "npm:~0.44.0"
+    drizzle-orm: "patch:drizzle-orm@npm%3A0.44.7#~/.yarn/patches/drizzle-orm-npm-0.44.7-0e87e239b7.patch"
     eslint: "npm:^9.13.0"
     eslint-plugin-drizzle: "npm:^0.2.3"
     expo: "npm:54.0.29"
@@ -10121,7 +10121,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"drizzle-orm@npm:~0.44.0":
+"drizzle-orm@npm:0.44.7":
   version: 0.44.7
   resolution: "drizzle-orm@npm:0.44.7"
   peerDependencies:
@@ -10213,6 +10213,101 @@ __metadata:
     sqlite3:
       optional: true
   checksum: 10c0/6adfe19179c83be397490c21573433e38ed7eff890bbb1c3b39157ec57d6b7420e9dcfebb8fe0e6ea534b29a53a33b2ec75c77dd2ac6b474b7055965ee7df00d
+  languageName: node
+  linkType: hard
+
+"drizzle-orm@patch:drizzle-orm@npm%3A0.44.7#~/.yarn/patches/drizzle-orm-npm-0.44.7-0e87e239b7.patch":
+  version: 0.44.7
+  resolution: "drizzle-orm@patch:drizzle-orm@npm%3A0.44.7#~/.yarn/patches/drizzle-orm-npm-0.44.7-0e87e239b7.patch::version=0.44.7&hash=4bebcf"
+  peerDependencies:
+    "@aws-sdk/client-rds-data": ">=3"
+    "@cloudflare/workers-types": ">=4"
+    "@electric-sql/pglite": ">=0.2.0"
+    "@libsql/client": ">=0.10.0"
+    "@libsql/client-wasm": ">=0.10.0"
+    "@neondatabase/serverless": ">=0.10.0"
+    "@op-engineering/op-sqlite": ">=2"
+    "@opentelemetry/api": ^1.4.1
+    "@planetscale/database": ">=1.13"
+    "@prisma/client": "*"
+    "@tidbcloud/serverless": "*"
+    "@types/better-sqlite3": "*"
+    "@types/pg": "*"
+    "@types/sql.js": "*"
+    "@upstash/redis": ">=1.34.7"
+    "@vercel/postgres": ">=0.8.0"
+    "@xata.io/client": "*"
+    better-sqlite3: ">=7"
+    bun-types: "*"
+    expo-sqlite: ">=14.0.0"
+    gel: ">=2"
+    knex: "*"
+    kysely: "*"
+    mysql2: ">=2"
+    pg: ">=8"
+    postgres: ">=3"
+    sql.js: ">=1"
+    sqlite3: ">=5"
+  peerDependenciesMeta:
+    "@aws-sdk/client-rds-data":
+      optional: true
+    "@cloudflare/workers-types":
+      optional: true
+    "@electric-sql/pglite":
+      optional: true
+    "@libsql/client":
+      optional: true
+    "@libsql/client-wasm":
+      optional: true
+    "@neondatabase/serverless":
+      optional: true
+    "@op-engineering/op-sqlite":
+      optional: true
+    "@opentelemetry/api":
+      optional: true
+    "@planetscale/database":
+      optional: true
+    "@prisma/client":
+      optional: true
+    "@tidbcloud/serverless":
+      optional: true
+    "@types/better-sqlite3":
+      optional: true
+    "@types/pg":
+      optional: true
+    "@types/sql.js":
+      optional: true
+    "@upstash/redis":
+      optional: true
+    "@vercel/postgres":
+      optional: true
+    "@xata.io/client":
+      optional: true
+    better-sqlite3:
+      optional: true
+    bun-types:
+      optional: true
+    expo-sqlite:
+      optional: true
+    gel:
+      optional: true
+    knex:
+      optional: true
+    kysely:
+      optional: true
+    mysql2:
+      optional: true
+    pg:
+      optional: true
+    postgres:
+      optional: true
+    prisma:
+      optional: true
+    sql.js:
+      optional: true
+    sqlite3:
+      optional: true
+  checksum: 10c0/4b9dec51acd46e6ab2e01e276c81ce76f8758c60ae14bde00f71de84f8d1c232298a23516d1fd73df7151b6e841ed2d87497108eeecb20e54103b9ba14010a88
   languageName: node
   linkType: hard
 

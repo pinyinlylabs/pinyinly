@@ -1,0 +1,26 @@
+diff --git a/sql/expressions/conditions.d.ts b/sql/expressions/conditions.d.ts
+index ce2333b16d9c78caa341351fe506575103655da5..709fc287af7185ee9426d1929890ff7d2cae3cc6 100644
+--- a/sql/expressions/conditions.d.ts
++++ b/sql/expressions/conditions.d.ts
+@@ -166,7 +166,7 @@ export declare const lte: BinaryOperator;
+  *
+  * @see notInArray for the inverse of this test
+  */
+-export declare function inArray<T>(column: SQL.Aliased<T>, values: (T | Placeholder)[] | SQLWrapper): SQL;
++export declare function inArray<T>(column: SQL.Aliased<T>, values: ReadonlyArray<(T | Placeholder)> | SQLWrapper): SQL;
+ export declare function inArray<TColumn extends Column>(column: TColumn, values: ReadonlyArray<GetColumnData<TColumn, 'raw'> | Placeholder> | SQLWrapper): SQL;
+ export declare function inArray<T extends SQLWrapper>(column: Exclude<T, SQL.Aliased | Column>, values: ReadonlyArray<unknown | Placeholder> | SQLWrapper): SQL;
+ /**
+@@ -184,9 +184,9 @@ export declare function inArray<T extends SQLWrapper>(column: Exclude<T, SQL.Ali
+  *
+  * @see inArray for the inverse of this test
+  */
+-export declare function notInArray<T>(column: SQL.Aliased<T>, values: (T | Placeholder)[] | SQLWrapper): SQL;
+-export declare function notInArray<TColumn extends Column>(column: TColumn, values: (GetColumnData<TColumn, 'raw'> | Placeholder)[] | SQLWrapper): SQL;
+-export declare function notInArray<T extends SQLWrapper>(column: Exclude<T, SQL.Aliased | Column>, values: (unknown | Placeholder)[] | SQLWrapper): SQL;
++export declare function notInArray<T>(column: SQL.Aliased<T>, values: ReadonlyArray<(T | Placeholder)> | SQLWrapper): SQL;
++export declare function notInArray<TColumn extends Column>(column: TColumn, values: ReadonlyArray<(GetColumnData<TColumn, 'raw'> | Placeholder)> | SQLWrapper): SQL;
++export declare function notInArray<T extends SQLWrapper>(column: Exclude<T, SQL.Aliased | Column>, values: ReadonlyArray<(unknown | Placeholder)> | SQLWrapper): SQL;
+ /**
+  * Test whether an expression is NULL. By the SQL standard,
+  * NULL is neither equal nor not equal to itself, so

@@ -51,7 +51,7 @@
     "array-from-async": "^3.0.0",
     "color": "^5.0.0",
     "date-fns": "^4.0.0",
-    "drizzle-orm": "~0.44.0",
+    "drizzle-orm": "patch:drizzle-orm@npm%3A0.44.7#~/.yarn/patches/drizzle-orm-npm-0.44.7-0e87e239b7.patch",
     "expo": "54.0.29",
     "expo-apple-authentication": "~8.0.8",
     "expo-application": "~7.0.8",
