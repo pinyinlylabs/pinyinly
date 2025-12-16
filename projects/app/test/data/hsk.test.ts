@@ -1,25 +1,25 @@
 // pyly-not-src-test
 
+import { HskLevel } from "#data/model.js";
 import { normalizePinyinText } from "#data/pinyin.js";
 import type { HanziWordMeaning, partOfSpeechSchema } from "#dictionary.js";
 import {
   buildHanziWord,
   hanziFromHanziWord,
   loadDictionary,
-  loadHsk1HanziWords,
-  loadHsk2HanziWords,
-  loadHsk3HanziWords,
-  loadHsk4HanziWords,
 } from "#dictionary.js";
 import { IS_CI } from "#util/env.js";
 import { toCamelCase } from "#util/unicode.js";
+import { memoize1 } from "@pinyinly/lib/collections";
+import { readFile } from "@pinyinly/lib/fs";
 import { nonNullable } from "@pinyinly/lib/invariant";
-import { expect, test } from "vitest";
+import path from "node:path";
+import { describe, expect, test } from "vitest";
 import type z from "zod/v4";
 import {
+  dataDir,
   readDictionary,
   upsertHanziWordMeaning,
-  upsertHanziWordWordList,
   writeDictionary,
 } from "../helpers.ts";
 import { loadCompleteHskVocabulary } from "./completeHskVocabulary.ts";
@@ -40,18 +40,34 @@ test(`hsk word lists match vendor data`, async () => {
   const vendorHsk4Items = completeHskVocabulary.filter((item) =>
     item.level.includes(`new-4`),
   );
+  const vendorHsk5Items = completeHskVocabulary.filter((item) =>
+    item.level.includes(`new-5`),
+  );
+  const vendorHsk6Items = completeHskVocabulary.filter((item) =>
+    item.level.includes(`new-6`),
+  );
+  const vendorHsk7To9Items = completeHskVocabulary.filter((item) =>
+    item.level.includes(`new-7+`),
+  );
 
-  const hsk1HanziWords = await loadHsk1HanziWords();
-  const hsk2HanziWords = await loadHsk2HanziWords();
-  const hsk3HanziWords = await loadHsk3HanziWords();
-  const hsk4HanziWords = await loadHsk4HanziWords();
-
-  for (const [wordListFileBaseName, vendorList, localList] of [
-    [`hsk1HanziWords`, vendorHsk1Items, hsk1HanziWords],
-    [`hsk2HanziWords`, vendorHsk2Items, hsk2HanziWords],
-    [`hsk3HanziWords`, vendorHsk3Items, hsk3HanziWords],
-    [`hsk4HanziWords`, vendorHsk4Items, hsk4HanziWords],
+  for (const [hskLevel, vendorList, localList] of [
+    [HskLevel[1], vendorHsk1Items, dictionary.hsk1HanziWords],
+    [HskLevel[2], vendorHsk2Items, dictionary.hsk2HanziWords],
+    [HskLevel[3], vendorHsk3Items, dictionary.hsk3HanziWords],
+    [HskLevel[4], vendorHsk4Items, dictionary.hsk4HanziWords],
+    [HskLevel[5], vendorHsk5Items, dictionary.hsk5HanziWords],
+    [HskLevel[6], vendorHsk6Items, dictionary.hsk6HanziWords],
+    [HskLevel[`7-9`], vendorHsk7To9Items, dictionary.hsk7To9HanziWords],
   ] as const) {
+    // TODO: Skip HSK 7-9 for now as we don't have local data for it yet.
+    if (
+      hskLevel === HskLevel[`7-9`] ||
+      hskLevel === HskLevel[6] ||
+      hskLevel === HskLevel[5]
+    ) {
+      continue;
+    }
+
     const localHanziList = new Set(
       localList.map((hanziWord) => hanziFromHanziWord(hanziWord)),
     );
@@ -64,7 +80,7 @@ test(`hsk word lists match vendor data`, async () => {
       expect
         .soft(
           isInLocalWordList,
-          `${wordListFileBaseName} vendor hanzi ${vendorHanzi} missing from local data`,
+          `HSK${hskLevel} vendor hanzi ${vendorHanzi} missing from local data`,
         )
         .toBe(true);
 
@@ -217,7 +233,7 @@ test(`hsk word lists match vendor data`, async () => {
         expect
           .soft(
             isInDictionary,
-            `${wordListFileBaseName} vendor hanzi ${vendorHanzi} missing from dictionary`,
+            `HSK${hskLevel} vendor hanzi ${vendorHanzi} missing from dictionary`,
           )
           .toBe(true);
 
@@ -225,7 +241,9 @@ test(`hsk word lists match vendor data`, async () => {
         if (!IS_CI) {
           if (isInDictionary) {
             for (const [hanziWord] of dictionaryItems) {
-              await upsertHanziWordWordList(hanziWord, wordListFileBaseName);
+              const dict = await readDictionary();
+              upsertHanziWordMeaning(dict, hanziWord, { hsk: hskLevel });
+              await writeDictionary(dict);
             }
           } else {
             const hasOneMeaning = vendorItem.forms.length === 1;
@@ -236,7 +254,7 @@ test(`hsk word lists match vendor data`, async () => {
               .soft(
                 hasOneMeaning ||
                   disambiguationHints.some((item) => item[0] === vendorHanzi),
-                `${wordListFileBaseName} ${vendorHanzi} has multiple meanings and no disambiguation override: [${meaningsList}]`,
+                `${hskLevel} ${vendorHanzi} has multiple meanings and no disambiguation override: [${meaningsList}]`,
               )
               .toBe(true);
 
@@ -392,7 +410,7 @@ test(`hsk word lists match vendor data`, async () => {
       expect
         .soft(
           isInVendor,
-          `${wordListFileBaseName} local hanzi ${localHanzi} missing from vendor data`,
+          `${hskLevel} local hanzi ${localHanzi} missing from vendor data`,
         )
         .toBe(true);
 
@@ -400,3 +418,91 @@ test(`hsk word lists match vendor data`, async () => {
     }
   }
 });
+
+describe(`parseHskTsv suite` satisfies HasNameOf<typeof parseHskTsv>, () => {
+  const loadData = memoize1(
+    async (filename: string) =>
+      await readFile(path.join(dataDir, filename), `utf8`),
+  );
+
+  test(`parses hsk1.tsv correctly`, async () => {
+    const tsv = await loadData(`hsk1.tsv`);
+    const entries = parseHskTsv(tsv);
+    expect(entries.length).toBe(500);
+  });
+});
+
+describe(`parseHskLine suite` satisfies HasNameOf<typeof parseHskLine>, () => {
+  test.for([
+    [
+      `489	子（桌子）	zi （ zhuō zi ）	noun suffix (table)`,
+      {
+        hanzi: `子`,
+        hanziHint: `桌子`,
+        pinyin: `zi`,
+        pinyinHint: `zhuō zi`,
+        meaning: `noun suffix`,
+        meaningHint: `table`,
+      },
+      [
+        `454	再见	zàijiàn	Bye!`,
+        {
+          hanzi: `再见`,
+          pinyin: `zàijiàn`,
+          meaning: `Bye!`,
+        },
+      ],
+      [
+        `340	老（老王）	lǎo （ lǎo wáng ）	noun prefix (Lao Wang)`,
+        {
+          hanzi: `老`,
+          hanziHint: `老王`,
+          pinyin: `lǎo`,
+          pinyinHint: `lǎo wáng`,
+          meaning: `noun prefix`,
+          meaningHint: `Lao Wang`,
+        },
+      ],
+    ],
+  ] as const)(`fixture: %s`, async ([input, expected]) => {
+    expect(parseHskLine(input)).toMatchObject(expected);
+  });
+});
+
+function parseHskTsv(tsv: string) {
+  const lines = tsv.trim().split(`\n`);
+  const entries = lines.slice(1).map((line) => {
+    return parseHskLine(line);
+  });
+
+  return entries;
+}
+
+function parseHskLine(line: string) {
+  const [num, hanziRaw, pinyinRaw, meaningRaw] = line.split(`\t`);
+
+  function extractHint(text: string) {
+    // Match Chinese parentheses （）or regular parentheses ()
+    const match = /^([^(（]*)(?:[((（]([^)）]*)[))）])?/.exec(text);
+    if (match) {
+      const main = match[1]?.trim() ?? text;
+      const hint = match[2]?.trim();
+      return { main, hint };
+    }
+    return { main: text, hint: undefined };
+  }
+
+  const { main: hanzi, hint: hanziHint } = extractHint(hanziRaw ?? ``);
+  const { main: pinyin, hint: pinyinHint } = extractHint(pinyinRaw ?? ``);
+  const { main: meaning, hint: meaningHint } = extractHint(meaningRaw ?? ``);
+
+  return {
+    num,
+    hanzi,
+    ...(hanziHint != null && { hanziHint }),
+    pinyin,
+    ...(pinyinHint != null && { pinyinHint }),
+    meaning,
+    ...(meaningHint != null && { meaningHint }),
+  };
+}

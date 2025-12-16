@@ -15,6 +15,8 @@ import type {
 import {
   hanziCharacterSchema,
   hanziWordSchema,
+  HskLevel,
+  hskLevelSchema,
   PartOfSpeech,
   pinyinTextSchema,
 } from "@/data/model";
@@ -27,6 +29,7 @@ import {
   memoize1,
 } from "@pinyinly/lib/collections";
 import { invariant } from "@pinyinly/lib/invariant";
+import { UnexpectedValueError } from "@pinyinly/lib/types";
 import type { DeepReadonly } from "ts-essentials";
 import { z } from "zod/v4";
 
@@ -139,36 +142,60 @@ export const loadKangXiRadicalsHanziWords = memoize0(
   },
 );
 
+/**
+ * @deprecated
+ */
 export const loadHsk1HanziWords = memoize0(async function loadHsk1HanziWords() {
-  return wordListSchema
-    .transform(deepReadonly)
-    .parse(
-      await import(`./data/hsk1HanziWords.asset.json`).then((x) => x.default),
-    );
+  const dictionary = await loadDictionary();
+  const hanziWordList: HanziWord[] = [];
+  for (const [hanziWord, meaning] of dictionary.allEntries) {
+    if (meaning.hsk === HskLevel[1]) {
+      hanziWordList.push(hanziWord);
+    }
+  }
+  return deepReadonly(hanziWordList);
 });
 
+/**
+ * @deprecated
+ */
 export const loadHsk2HanziWords = memoize0(async function loadHsk2HanziWords() {
-  return wordListSchema
-    .transform(deepReadonly)
-    .parse(
-      await import(`./data/hsk2HanziWords.asset.json`).then((x) => x.default),
-    );
+  const dictionary = await loadDictionary();
+  const hanziWordList: HanziWord[] = [];
+  for (const [hanziWord, meaning] of dictionary.allEntries) {
+    if (meaning.hsk === HskLevel[2]) {
+      hanziWordList.push(hanziWord);
+    }
+  }
+  return deepReadonly(hanziWordList);
 });
 
+/**
+ * @deprecated
+ */
 export const loadHsk3HanziWords = memoize0(async function loadHsk3HanziWords() {
-  return wordListSchema
-    .transform(deepReadonly)
-    .parse(
-      await import(`./data/hsk3HanziWords.asset.json`).then((x) => x.default),
-    );
+  const dictionary = await loadDictionary();
+  const hanziWordList: HanziWord[] = [];
+  for (const [hanziWord, meaning] of dictionary.allEntries) {
+    if (meaning.hsk === HskLevel[3]) {
+      hanziWordList.push(hanziWord);
+    }
+  }
+  return deepReadonly(hanziWordList);
 });
 
+/**
+ * @deprecated
+ */
 export const loadHsk4HanziWords = memoize0(async function loadHsk4HanziWords() {
-  return wordListSchema
-    .transform(deepReadonly)
-    .parse(
-      await import(`./data/hsk4HanziWords.asset.json`).then((x) => x.default),
-    );
+  const dictionary = await loadDictionary();
+  const hanziWordList: HanziWord[] = [];
+  for (const [hanziWord, meaning] of dictionary.allEntries) {
+    if (meaning.hsk === HskLevel[4]) {
+      hanziWordList.push(hanziWord);
+    }
+  }
+  return deepReadonly(hanziWordList);
 });
 
 export const partOfSpeechSchema = z.enum([
@@ -197,6 +224,7 @@ export const hanziWordMeaningSchema = z
       .nullable()
       .optional(),
     pos: partOfSpeechSchema.optional(),
+    hsk: hskLevelSchema.optional(),
   })
   .strict();
 
@@ -266,13 +294,27 @@ export const loadDictionary = memoize0(
       lookupHanzi(hanzi: HanziText): readonly HanziWordWithMeaning[];
       lookupHanziWord(hanzi: HanziWord): DeepReadonly<HanziWordMeaning> | null;
       lookupGloss(gloss: string): readonly HanziWordWithMeaning[];
-      allEntries: [HanziWord, DeepReadonly<HanziWordMeaning>][];
-      allHanziWords: HanziWord[];
+      allEntries: readonly [HanziWord, DeepReadonly<HanziWordMeaning>][];
+      allHanziWords: readonly HanziWord[];
+      hsk1HanziWords: readonly HanziWord[];
+      hsk2HanziWords: readonly HanziWord[];
+      hsk3HanziWords: readonly HanziWord[];
+      hsk4HanziWords: readonly HanziWord[];
+      hsk5HanziWords: readonly HanziWord[];
+      hsk6HanziWords: readonly HanziWord[];
+      hsk7To9HanziWords: readonly HanziWord[];
     }>
   > => {
     const hanziMap = new Map<string, HanziWordWithMeaning[]>();
     const glossMap = new Map<string, HanziWordWithMeaning[]>();
     const dictionaryJson = await loadDictionaryJson();
+    const hsk1HanziWords: HanziWord[] = [];
+    const hsk2HanziWords: HanziWord[] = [];
+    const hsk3HanziWords: HanziWord[] = [];
+    const hsk4HanziWords: HanziWord[] = [];
+    const hsk5HanziWords: HanziWord[] = [];
+    const hsk6HanziWords: HanziWord[] = [];
+    const hsk7To9HanziWords: HanziWord[] = [];
 
     for (const item of dictionaryJson) {
       const [hanziWord, meaning] = item;
@@ -281,6 +323,43 @@ export const loadDictionary = memoize0(
 
       for (const gloss of meaning.gloss) {
         mapArrayAdd(glossMap, gloss, item);
+      }
+
+      switch (meaning.hsk) {
+        case undefined: {
+          break;
+        }
+        case HskLevel[1]: {
+          hsk1HanziWords.push(hanziWord);
+          break;
+        }
+        case HskLevel[2]: {
+          hsk2HanziWords.push(hanziWord);
+          break;
+        }
+        case HskLevel[3]: {
+          hsk3HanziWords.push(hanziWord);
+          break;
+        }
+        case HskLevel[4]: {
+          hsk4HanziWords.push(hanziWord);
+          break;
+        }
+        case HskLevel[5]: {
+          hsk5HanziWords.push(hanziWord);
+          break;
+        }
+        case HskLevel[6]: {
+          hsk6HanziWords.push(hanziWord);
+          break;
+        }
+        case HskLevel[`7-9`]: {
+          hsk7To9HanziWords.push(hanziWord);
+          break;
+        }
+        default: {
+          throw new UnexpectedValueError(meaning.hsk);
+        }
       }
     }
 
@@ -296,6 +375,13 @@ export const loadDictionary = memoize0(
       },
       allEntries: [...dictionaryJson.entries()],
       allHanziWords: [...dictionaryJson.keys()],
+      hsk1HanziWords,
+      hsk2HanziWords,
+      hsk3HanziWords,
+      hsk4HanziWords,
+      hsk5HanziWords,
+      hsk6HanziWords,
+      hsk7To9HanziWords,
     };
   },
 );

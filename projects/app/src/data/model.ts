@@ -128,6 +128,18 @@ const skillKindSchema = z.enum({
 export const SkillKind = skillKindSchema.enum;
 export type SkillKind = z.infer<typeof skillKindSchema>;
 
+export const hskLevelSchema = z.enum({
+  "1": `1`,
+  "2": `2`,
+  "3": `3`,
+  "4": `4`,
+  "5": `5`,
+  "6": `6`,
+  "7-9": `7+`,
+});
+export const HskLevel = hskLevelSchema.enum;
+export type HskLevel = z.infer<typeof hskLevelSchema>;
+
 const partOfSpeechSchema = z.enum({
   Noun: `debug--Noun`,
   Verb: `debug--Verb`,

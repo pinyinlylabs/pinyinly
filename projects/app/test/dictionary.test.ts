@@ -12,10 +12,6 @@ import {
   loadCharacters,
   loadDictionary,
   loadHanziWordMigrations,
-  loadHsk1HanziWords,
-  loadHsk2HanziWords,
-  loadHsk3HanziWords,
-  loadHsk4HanziWords,
   loadKangXiRadicalsHanziWords,
   loadKangXiRadicalsStrokes,
   loadPinyinSoundNameSuggestions,
@@ -52,22 +48,12 @@ test(`radical groups have the right number of elements`, async () => {
 });
 
 test(`json data can be loaded and passes the schema validation`, async () => {
-  await loadHsk1HanziWords();
-  await loadHsk2HanziWords();
-  await loadHsk3HanziWords();
   await loadCharacters();
   await loadPinyinSoundNameSuggestions();
   await loadPinyinSoundThemeDetails();
   await loadPinyinWords();
   await loadDictionary();
 });
-
-const wordLists = [
-  loadHsk1HanziWords,
-  loadHsk2HanziWords,
-  loadHsk3HanziWords,
-  loadKangXiRadicalsHanziWords,
-];
 
 test(`hanzi word meaning-keys are not too similar`, async () => {
   const dict = await loadDictionary();
@@ -131,6 +117,136 @@ test(`hanzi word meaning-key lint`, async () => {
   );
 
   expect(violations).toEqual(new Set());
+});
+
+test(`hanzi word meaning pinyin lint`, async () => {
+  const dict = await loadDictionary();
+  const multiplePinyin = [];
+
+  for (const [hanziWord, meaning] of dict.allEntries) {
+    if (meaning.pinyin != null && meaning.pinyin.length > 1) {
+      multiplePinyin.push(hanziWord);
+    }
+  }
+
+  expect(multiplePinyin, `hanzi words with multiple pinyin`)
+    .toMatchInlineSnapshot(`
+    [
+      "似:resemble",
+      "便:convenience",
+      "兄:brother",
+      "兴:rise",
+      "具:tool",
+      "切:cut",
+      "划:row",
+      "创:begin",
+      "利:benefit",
+      "务:business",
+      "势:power",
+      "匸:hidingEnclosure",
+      "午:noon",
+      "参:participate",
+      "右边:rightSide",
+      "同:together",
+      "后面:behind",
+      "味道:taste",
+      "哥:brother",
+      "喜欢:like",
+      "回去:goBack",
+      "回来:comeBack",
+      "困难:difficult",
+      "地上:onTheGround",
+      "坐下:sitDown",
+      "基本上:basically",
+      "堂:hall",
+      "声:sound",
+      "处:place",
+      "大人:adult",
+      "大部分:majority",
+      "太阳:sun",
+      "夫:man",
+      "头发:hair",
+      "女朋友:girlfriend",
+      "姑:aunt",
+      "娘:mother",
+      "学生:student",
+      "宜:suitable",
+      "实:real",
+      "实际上:actually",
+      "害:injure",
+      "将:will",
+      "小姐:miss",
+      "小时候:childhood",
+      "尽:exhaust",
+      "展:open",
+      "巴:wish",
+      "应:should",
+      "式:style",
+      "形:form",
+      "彩:hue",
+      "态度:attitude",
+      "思:think",
+      "息:rest",
+      "情:feeling",
+      "意:thought",
+      "懂得:comprehend",
+      "打听:inquire",
+      "散:scatter",
+      "明:bright",
+      "明白:understand",
+      "晚上:evening",
+      "晨:morning",
+      "月亮:moon",
+      "有时候:sometimes",
+      "朋友:friend",
+      "服:clothes",
+      "望:gaze",
+      "材:material",
+      "格:pattern",
+      "欢:happy",
+      "氐:bottom",
+      "汉语:chineseLanguage",
+      "法:law",
+      "消息:news",
+      "清楚:clear",
+      "漂:float",
+      "烦:bother",
+      "然:yes",
+      "照顾:takeCareOf",
+      "爱人:spouse",
+      "爷:father",
+      "物:thing",
+      "理:reason",
+      "男朋友:boyfriend",
+      "相:mutual",
+      "看上去:look",
+      "看起来:seem",
+      "眼睛:eyes",
+      "睛:eyeball",
+      "视:watch",
+      "神:spirit",
+      "笑话:joke",
+      "笑话儿:joke",
+      "答:answer",
+      "经:undergo",
+      "结:knot",
+      "老太太:oldLady",
+      "老是:always",
+      "老朋友:oldFriend",
+      "落:drop",
+      "行李:luggage",
+      "衣服:clothing",
+      "觉:feel",
+      "记住:remember",
+      "识:recognize",
+      "诉:accuse",
+      "误:mistake",
+      "谢:thank",
+      "负:bear",
+      "路上:onTheRoad",
+      "还是:or",
+    ]
+  `);
 });
 
 test(`hanzi word meaning gloss lint`, async () => {
@@ -301,8 +417,8 @@ test(`hanzi words are unique on (hanzi, part-of-speech, pinyin)`, async () => {
         "家:home",
       },
       Set {
-        "局:office",
         "局:game",
+        "局:office",
       },
       Set {
         "折:discount",
@@ -350,13 +466,23 @@ test(`hanzi words are unique on (hanzi, part-of-speech, pinyin)`, async () => {
 
 test(`all word lists only reference valid hanzi words`, async () => {
   const dict = await loadDictionary();
-  for (const wordList of wordLists) {
-    for (const hanziWord of await wordList()) {
-      if (dict.lookupHanziWord(hanziWord) === null) {
-        throw new Error(
-          `missing hanzi word lookup for ${hanziWord} in word list`,
-        );
-      }
+
+  const wordList = [
+    ...(await loadKangXiRadicalsHanziWords()),
+    ...dict.hsk1HanziWords,
+    ...dict.hsk2HanziWords,
+    ...dict.hsk3HanziWords,
+    ...dict.hsk4HanziWords,
+    ...dict.hsk5HanziWords,
+    ...dict.hsk6HanziWords,
+    ...dict.hsk7To9HanziWords,
+  ];
+
+  for (const hanziWord of wordList) {
+    if (dict.lookupHanziWord(hanziWord) === null) {
+      throw new Error(
+        `missing hanzi word lookup for ${hanziWord} in word list`,
+      );
     }
   }
 });
@@ -450,16 +576,16 @@ test(`dictionary contains entries for decomposition`, async () => {
     HanziCharacter,
     /* sources */ Set<HanziCharacter>
   >();
-  const dictionaryLookup = await loadDictionary();
+  const dictionary = await loadDictionary();
   const characters = await loadCharacters();
 
-  const allHanzi = dictionaryLookup.allHanziWords.map((hanziWord) =>
+  const allHanzi = dictionary.allHanziWords.map((hanziWord) =>
     hanziFromHanziWord(hanziWord),
   );
 
   for (const hanzi of allHanzi) {
     for (const character of splitHanziText(hanzi)) {
-      const meanings = dictionaryLookup.lookupHanzi(character);
+      const meanings = dictionary.lookupHanzi(character);
       if (meanings.length === 0) {
         mapSetAdd(unknownCharacters, character, hanzi);
       }
@@ -471,7 +597,7 @@ test(`dictionary contains entries for decomposition`, async () => {
           continue;
         }
 
-        const lookup = dictionaryLookup.lookupHanzi(component);
+        const lookup = dictionary.lookupHanzi(component);
         if (lookup.length === 0) {
           mapSetAdd(unknownComponents, component, character);
         }
@@ -498,36 +624,46 @@ test(`dictionary contains entries for decomposition`, async () => {
     }
   }
 
-  const hsk1HanziWords = new Set(
-    await loadHsk1HanziWords().then((wordList) =>
-      wordList.map((hanziWord) => hanziFromHanziWord(hanziWord)),
+  const hsk1Hanzi = new Set(
+    dictionary.hsk1HanziWords.map((hanziWord) => hanziFromHanziWord(hanziWord)),
+  );
+  const hsk2Hanzi = new Set(
+    dictionary.hsk2HanziWords.map((hanziWord) => hanziFromHanziWord(hanziWord)),
+  );
+  const hsk3Hanzi = new Set(
+    dictionary.hsk3HanziWords.map((hanziWord) => hanziFromHanziWord(hanziWord)),
+  );
+  const hsk4Hanzi = new Set(
+    dictionary.hsk4HanziWords.map((hanziWord) => hanziFromHanziWord(hanziWord)),
+  );
+  const hsk5Hanzi = new Set(
+    dictionary.hsk5HanziWords.map((hanziWord) => hanziFromHanziWord(hanziWord)),
+  );
+  const hsk6Hanzi = new Set(
+    dictionary.hsk6HanziWords.map((hanziWord) => hanziFromHanziWord(hanziWord)),
+  );
+  const hsk7To9Hanzi = new Set(
+    dictionary.hsk7To9HanziWords.map((hanziWord) =>
+      hanziFromHanziWord(hanziWord),
     ),
   );
-  const hsk2HanziWords = new Set(
-    await loadHsk2HanziWords().then((wordList) =>
-      wordList.map((hanziWord) => hanziFromHanziWord(hanziWord)),
-    ),
-  );
-  const hsk3HanziWords = new Set(
-    await loadHsk3HanziWords().then((wordList) =>
-      wordList.map((hanziWord) => hanziFromHanziWord(hanziWord)),
-    ),
-  );
-  const hsk4HanziWords = new Set(
-    await loadHsk4HanziWords().then((wordList) =>
-      wordList.map((hanziWord) => hanziFromHanziWord(hanziWord)),
-    ),
-  );
+
   function hskLabel(hanzi: HanziText): string {
-    return hsk1HanziWords.has(hanzi)
+    return hsk1Hanzi.has(hanzi)
       ? `[HSK1]`
-      : hsk2HanziWords.has(hanzi)
+      : hsk2Hanzi.has(hanzi)
         ? `[HSK2]`
-        : hsk3HanziWords.has(hanzi)
+        : hsk3Hanzi.has(hanzi)
           ? `[HSK3]`
-          : hsk4HanziWords.has(hanzi)
+          : hsk4Hanzi.has(hanzi)
             ? `[HSK4]`
-            : ``;
+            : hsk5Hanzi.has(hanzi)
+              ? `[HSK5]`
+              : hsk6Hanzi.has(hanzi)
+                ? `[HSK6]`
+                : hsk7To9Hanzi.has(hanzi)
+                  ? `[HSK7-9]`
+                  : ``;
   }
 
   function prettify(map: typeof unknownCharacters): string[] {
@@ -603,6 +739,7 @@ test(`dictionary contains entries for decomposition`, async () => {
       "促 via 促使[HSK4], 促进[HSK4], 促销[HSK4]",
       "俗 via 风俗[HSK4]",
       "俞 via 输[HSK3]",
+      "偿 via 补偿",
       "允 via 充",
       "兆 via 跳[HSK3]",
       "兑 via 说[HSK1]",
@@ -624,6 +761,7 @@ test(`dictionary contains entries for decomposition`, async () => {
       "卅 via 带[HSK2]",
       "卌 via 舞",
       "卑 via 啤, 牌[HSK4]",
+      "博 via 博士, 博客, 博物馆, 博览会",
       "卬 via 迎",
       "即 via 即将[HSK4], 立即[HSK4]",
       "厃 via 危",
@@ -678,6 +816,7 @@ test(`dictionary contains entries for decomposition`, async () => {
       "孰 via 熟[HSK2]",
       "宁 via 宁静[HSK4]",
       "宛 via 碗[HSK2]",
+      "宾 via 宾馆",
       "寅 via 演[HSK3]",
       "寒 via 寒假[HSK4], 寒冷[HSK4]",
       "寻 via 寻找[HSK4]",
@@ -688,12 +827,14 @@ test(`dictionary contains entries for decomposition`, async () => {
       "尾 via 尾巴[HSK4]",
       "居 via 剧, 居住[HSK4], 居民[HSK4], 据",
       "屯 via 顿[HSK3]",
+      "岸 via 岸上",
       "川 via 训, 顺",
       "巨 via 巨大[HSK4]",
       "巩 via 恐",
       "帀 via 师",
       "席 via 主席[HSK4], 出席[HSK4]",
       "帽 via 帽子[HSK4]",
+      "幕 via 闭幕, 闭幕式",
       "幼 via 幼儿园[HSK4]",
       "庄 via 脏[HSK2]",
       "序 via 程序[HSK4], 顺序[HSK4]",
@@ -706,12 +847,16 @@ test(`dictionary contains entries for decomposition`, async () => {
       "彑 via 互",
       "彦 via 颜",
       "彻 via 彻底[HSK4]",
+      "彼 via 彼此",
       "征 via 征服[HSK4], 征求[HSK4], 特征[HSK4]",
       "律 via 一律[HSK4], 律师[HSK4], 法律[HSK4], 纪律[HSK4], 规律[HSK4]",
       "微 via 微信[HSK4], 微笑[HSK4]",
       "怀 via 怀念[HSK4], 怀疑[HSK4]",
+      "怨 via 抱怨",
       "恶 via 恶心[HSK4]",
+      "悲 via 悲伤, 悲剧",
       "惊 via 吃惊[HSK4]",
+      "慰 via 安慰",
       "戉 via 越[HSK2]",
       "戊 via 咸[HSK4], 成[HSK2]",
       "战 via 战争[HSK4], 战士[HSK4], 战斗[HSK4], 战胜[HSK4], 挑战[HSK4]",
@@ -720,15 +865,18 @@ test(`dictionary contains entries for decomposition`, async () => {
       "执 via 势, 热[HSK1]",
       "扩 via 扩大[HSK4], 扩展[HSK4]",
       "扬 via 表扬[HSK4]",
+      "扮 via 扮演",
       "承 via 承受[HSK4], 承担[HSK4], 承认[HSK4]",
       "担 via 承担[HSK4], 担任[HSK4], 担保[HSK4], 担心[HSK4], 负担[HSK4]",
       "招 via 招呼[HSK4]",
+      "拜 via 拜访",
       "择 via 选择[HSK4]",
       "括 via 包括[HSK4], 括号[HSK4], 概括[HSK4]",
       "挥 via 发挥[HSK4], 指挥[HSK4]",
       "授 via 教授[HSK4]",
       "措 via 措施[HSK4]",
       "描 via 描写[HSK4], 描述[HSK4]",
+      "摩 via 按摩",
       "操 via 体操[HSK4], 操作[HSK4], 操场[HSK4]",
       "政 via 政府[HSK4], 政治[HSK4]",
       "敌 via 敌人[HSK4]",
@@ -757,7 +905,8 @@ test(`dictionary contains entries for decomposition`, async () => {
       "植 via 植物[HSK4], 种植[HSK4]",
       "模 via 大规模[HSK4], 模型[HSK4], 模特儿[HSK4], 规模[HSK4]",
       "殊 via 特殊[HSK4]",
-      "毕 via 毕业[HSK4], 毕业生[HSK4]",
+      "毒 via 病毒",
+      "毕 via 毕业[HSK4], 毕业生[HSK4], 毕竟",
       "毫 via 毫升[HSK4], 毫米[HSK4]",
       "氾 via 范",
       "泉 via 原, 矿泉水[HSK4]",
@@ -773,6 +922,8 @@ test(`dictionary contains entries for decomposition`, async () => {
       "独 via 单独[HSK4], 独特[HSK4], 独立[HSK4], 独自[HSK4]",
       "率 via 效率[HSK4], 汇率[HSK4], 率先[HSK4]",
       "玨 via 班[HSK1]",
+      "玻 via 玻璃",
+      "璃 via 玻璃",
       "甚 via 甚至[HSK4]",
       "甬 via 痛[HSK3], 通[HSK2]",
       "甲 via 单[HSK4], 里[HSK1]",
@@ -794,7 +945,7 @@ test(`dictionary contains entries for decomposition`, async () => {
       "秘 via 神秘[HSK4], 秘书[HSK4], 秘密[HSK4]",
       "究 via 研究[HSK4], 研究生[HSK4], 究竟[HSK4], 讲究[HSK4]",
       "窗 via 窗台[HSK4], 窗子[HSK4], 窗户[HSK4]",
-      "竟 via 境, 究竟[HSK4], 竟然[HSK4]",
+      "竟 via 境, 毕竟, 究竟[HSK4], 竟然[HSK4]",
       "童 via 儿童[HSK4], 童年[HSK4], 童话[HSK4]",
       "符 via 符号[HSK4], 符合[HSK4]",
       "粮 via 粮食[HSK4]",
@@ -826,6 +977,7 @@ test(`dictionary contains entries for decomposition`, async () => {
       "袜 via 袜子[HSK4]",
       "裹 via 包裹[HSK4]",
       "覀 via 票[HSK1], 要[HSK1], 鹿",
+      "览 via 博览会",
       "觜 via 嘴[HSK2]",
       "译 via 翻译[HSK4]",
       "诚 via 诚信[HSK4], 诚实[HSK4]",
@@ -839,6 +991,7 @@ test(`dictionary contains entries for decomposition`, async () => {
       "趣 via 乐趣[HSK4], 兴趣[HSK4], 感兴趣[HSK4], 有趣[HSK4]",
       "距 via 距离[HSK4]",
       "载 via 下载[HSK4], 记载[HSK4]",
+      "辑 via 编辑",
       "辩 via 辩论[HSK4]",
       "迅 via 迅速[HSK4]",
       "迟 via 推迟[HSK4], 迟到[HSK4]",
@@ -856,7 +1009,7 @@ test(`dictionary contains entries for decomposition`, async () => {
       "锻 via 锻炼[HSK4]",
       "镜 via 眼镜[HSK4], 镜头[HSK4], 镜子[HSK4]",
       "镸 via 套[HSK2], 髟",
-      "闭 via 倒闭[HSK4], 关闭[HSK4], 封闭[HSK4]",
+      "闭 via 倒闭[HSK4], 关闭[HSK4], 封闭[HSK4], 闭幕, 闭幕式",
       "阅 via 阅读[HSK4]",
       "阶 via 台阶[HSK4], 阶段[HSK4]",
       "阻 via 阻止[HSK4]",
@@ -1046,7 +1199,7 @@ describe(
       expect(dict.get(`你好:hello`)).toEqual({
         gloss: [`hello`],
         pinyin: [拼音`nǐ hǎo`],
-        partOfSpeech: `interjection`,
+        pos: `interjection`,
       });
     });
   },
