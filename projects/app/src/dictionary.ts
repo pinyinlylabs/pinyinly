@@ -309,8 +309,8 @@ export const allHanziCharacters = memoize0(async function allHanziCharacters() {
   return new Set([...characters].map(([char]) => char));
 });
 
-export function shorthandPartOfSpeech(partOfSpeech: PartOfSpeech) {
-  switch (partOfSpeech) {
+export function shorthandPartOfSpeech(pos: PartOfSpeech) {
+  switch (pos) {
     case PartOfSpeech.Adjective: {
       return `adj.`;
     }
