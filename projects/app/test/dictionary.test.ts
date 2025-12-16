@@ -30,7 +30,11 @@ import {
   sortComparatorNumber,
   sortComparatorString,
 } from "@pinyinly/lib/collections";
-import { invariant, nonNullable } from "@pinyinly/lib/invariant";
+import {
+  invariant,
+  nonNullable,
+  uniqueInvariant,
+} from "@pinyinly/lib/invariant";
 import { describe, expect, test } from "vitest";
 import { z } from "zod/v4";
 import { 拼音, 汉 } from "./data/helpers.ts";
@@ -159,9 +163,14 @@ test(`hanzi word meaning gloss lint`, async () => {
         .soft(gloss.match(/[^\s]+/g)?.length ?? 0, `${label} word count`)
         .toBeLessThanOrEqual(maxWords);
     }
-  }
 
-  // expect(violations).toEqual(new Set());
+    // Glosses are unique
+    expect
+      .soft(() => {
+        uniqueInvariant(meaning.gloss);
+      }, hanziWord)
+      .not.toThrow();
+  }
 });
 
 test(`hanzi meaning canonicalForm`, async () => {
