@@ -368,7 +368,7 @@ test(`hsk word lists match vendor data`, async () => {
                         ? form.meanings
                         : [primaryGloss, ...form.meanings],
                     pinyin: [form.transcriptions.pinyin],
-                    partOfSpeech: newPos,
+                    pos: newPos,
                   };
 
                   const dict = await readDictionary();

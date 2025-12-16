@@ -196,7 +196,7 @@ export const hanziWordMeaningSchema = z
       )
       .nullable()
       .optional(),
-    partOfSpeech: partOfSpeechSchema.optional(),
+    pos: partOfSpeechSchema.optional(),
   })
   .strict();
 

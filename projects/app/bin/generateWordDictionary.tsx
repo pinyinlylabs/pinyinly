@@ -426,7 +426,7 @@ const HanziEditor = ({
   const options = useMemo(
     () =>
       [...(allHanziWords?.entries() ?? [])].map(([hanziWord, meaning]) => ({
-        label: `${hanziWord} ${meaning.partOfSpeech ?? ``} ${meaning.gloss.map((x) => `"${x}"`).join(`   `)}`,
+        label: `${hanziWord} ${meaning.pos ?? ``} ${meaning.gloss.map((x) => `"${x}"`).join(`   `)}`,
         value: hanziWord,
       })),
     [allHanziWords],
@@ -704,7 +704,7 @@ async function openAiHanziWordGlossHintQuery(
     hanziIds = idsNodeToString(flattenIds(parseIds(hanziIds)), (x) => x);
 
     const query = `
-I'm having trouble remembering that ${hanzi} means **${meaning.gloss.join(`/`)}** ${meaning.partOfSpeech == null ? `` : `(${meaning.partOfSpeech})`}.
+I'm having trouble remembering that ${hanzi} means **${meaning.gloss.join(`/`)}** ${meaning.pos == null ? `` : `(${meaning.pos})`}.
 
 ${hanziIds.length > 1 ? `\nI've worked out that ${hanzi} = ${hanziIds}` : ``}
 ${[...componentGlosses.entries()]
@@ -784,7 +784,7 @@ const HanziWordEditor = ({
                 {
                   id: `partOfSpeech`,
                   label: `Part of speech`,
-                  value: meaning.partOfSpeech ?? ``,
+                  value: meaning.pos ?? ``,
                 },
               ]),
         ]}
@@ -799,13 +799,13 @@ const HanziWordEditor = ({
               const newValue = edits.get(`partOfSpeech`)?.trim();
               invariant(newValue != null);
 
-              const newPartOfSpeech =
+              const newPos =
                 newValue === ``
                   ? undefined
                   : partOfSpeechSchema.parse(newValue);
               mutations.push(() =>
                 saveUpsertHanziWordMeaning(hanziWord, {
-                  partOfSpeech: newPartOfSpeech,
+                  pos: newPos,
                 }),
               );
               edits.delete(`partOfSpeech`);
@@ -1577,7 +1577,7 @@ async function generateHanziWordResults(
             meaning: {
               gloss,
               pinyin: getDongChinesePronunciation(lookup),
-              partOfSpeech: openAiResult.meaning.partOfSpeech,
+              pos: openAiResult.meaning.pos,
             },
           });
         }
@@ -2125,7 +2125,7 @@ const DictionaryHanziWordEntry = ({
               part of speech:
             </Text>
             {` `}
-            <Text italic>{meaning.partOfSpeech}</Text>
+            <Text italic>{meaning.pos}</Text>
           </Text>
         </Box>
       )}

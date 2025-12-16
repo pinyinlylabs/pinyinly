@@ -265,9 +265,9 @@ test(`hanzi words are unique on (hanzi, part-of-speech, pinyin)`, async () => {
   const dict = await loadDictionary();
 
   const byHanziAndPinyin = new Map<string, Set<string>>();
-  for (const [hanziWord, { partOfSpeech, pinyin }] of dict.allEntries) {
+  for (const [hanziWord, { pos, pinyin }] of dict.allEntries) {
     const hanzi = hanziFromHanziWord(hanziWord);
-    const key = `${hanzi}:${partOfSpeech}:${pinyin}`;
+    const key = `${hanzi}:${pos}:${pinyin}`;
     const set = byHanziAndPinyin.get(key) ?? new Set();
     set.add(hanziWord);
     byHanziAndPinyin.set(key, set);
@@ -1031,7 +1031,7 @@ describe(
       dict.set(`你好:hello`, {
         gloss: [`hello`],
         pinyin: [拼音`ni hao`],
-        partOfSpeech: `interjection`,
+        pos: `interjection`,
       });
       return dict;
     }
