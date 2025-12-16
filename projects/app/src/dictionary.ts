@@ -18,6 +18,7 @@ import {
   HskLevel,
   hskLevelSchema,
   PartOfSpeech,
+  PartOfSpeechOld,
   pinyinTextSchema,
 } from "@/data/model";
 import { matchAllPinyinUnits } from "@/data/pinyin";
@@ -142,63 +143,7 @@ export const loadKangXiRadicalsHanziWords = memoize0(
   },
 );
 
-/**
- * @deprecated
- */
-export const loadHsk1HanziWords = memoize0(async function loadHsk1HanziWords() {
-  const dictionary = await loadDictionary();
-  const hanziWordList: HanziWord[] = [];
-  for (const [hanziWord, meaning] of dictionary.allEntries) {
-    if (meaning.hsk === HskLevel[1]) {
-      hanziWordList.push(hanziWord);
-    }
-  }
-  return deepReadonly(hanziWordList);
-});
-
-/**
- * @deprecated
- */
-export const loadHsk2HanziWords = memoize0(async function loadHsk2HanziWords() {
-  const dictionary = await loadDictionary();
-  const hanziWordList: HanziWord[] = [];
-  for (const [hanziWord, meaning] of dictionary.allEntries) {
-    if (meaning.hsk === HskLevel[2]) {
-      hanziWordList.push(hanziWord);
-    }
-  }
-  return deepReadonly(hanziWordList);
-});
-
-/**
- * @deprecated
- */
-export const loadHsk3HanziWords = memoize0(async function loadHsk3HanziWords() {
-  const dictionary = await loadDictionary();
-  const hanziWordList: HanziWord[] = [];
-  for (const [hanziWord, meaning] of dictionary.allEntries) {
-    if (meaning.hsk === HskLevel[3]) {
-      hanziWordList.push(hanziWord);
-    }
-  }
-  return deepReadonly(hanziWordList);
-});
-
-/**
- * @deprecated
- */
-export const loadHsk4HanziWords = memoize0(async function loadHsk4HanziWords() {
-  const dictionary = await loadDictionary();
-  const hanziWordList: HanziWord[] = [];
-  for (const [hanziWord, meaning] of dictionary.allEntries) {
-    if (meaning.hsk === HskLevel[4]) {
-      hanziWordList.push(hanziWord);
-    }
-  }
-  return deepReadonly(hanziWordList);
-});
-
-export const partOfSpeechSchema = z.enum([
+export const partOfSpeechDictSchema = z.enum([
   `noun`,
   `verb`,
   `adjective`,
@@ -213,6 +158,62 @@ export const partOfSpeechSchema = z.enum([
   `numeral`,
 ]);
 
+const parsePosPattern = new RegExp(
+  `^(?:` +
+    [
+      `(?<noun>noun|名|n)`,
+      `(?<verb>verb|动|v)`,
+      `(?<adjective>adjective|形|adj|vs)`,
+      `(?<adverb>adverb|副|adv)`,
+      `(?<pronoun>pronoun|代|pron|det)`,
+      `(?<numeral>numeral|数|num)`,
+      `(?<measureWord>measureWord|量|m)`,
+      `(?<preposition>preposition|介|prep)`,
+      `(?<conjunction>conjunction|连|conj)`,
+      `(?<auxiliaryWord>particle|助|aux|ptc)`,
+      `(?<interjection>interjection|叹|int)`,
+      `(?<prefix>prefix|前缀)`,
+      `(?<suffix>suffix|后缀)`,
+      `(?<phonetic>Phonetic|拟声)`,
+    ].join(`|`) +
+    `)$`,
+  `i`,
+);
+
+export function parsePartOfSpeech(pos: string): PartOfSpeech | null {
+  const match = parsePosPattern.exec(pos);
+  if (match?.groups?.[`noun`] != null) {
+    return PartOfSpeech.Noun;
+  } else if (match?.groups?.[`verb`] != null) {
+    return PartOfSpeech.Verb;
+  } else if (match?.groups?.[`adjective`] != null) {
+    return PartOfSpeech.Adjective;
+  } else if (match?.groups?.[`adverb`] != null) {
+    return PartOfSpeech.Adverb;
+  } else if (match?.groups?.[`pronoun`] != null) {
+    return PartOfSpeech.Pronoun;
+  } else if (match?.groups?.[`numeral`] != null) {
+    return PartOfSpeech.Numeral;
+  } else if (match?.groups?.[`measureWord`] != null) {
+    return PartOfSpeech.MeasureWord;
+  } else if (match?.groups?.[`preposition`] != null) {
+    return PartOfSpeech.Preposition;
+  } else if (match?.groups?.[`conjunction`] != null) {
+    return PartOfSpeech.Conjunction;
+  } else if (match?.groups?.[`auxiliaryWord`] != null) {
+    return PartOfSpeech.AuxiliaryWord;
+  } else if (match?.groups?.[`interjection`] != null) {
+    return PartOfSpeech.Interjection;
+  } else if (match?.groups?.[`prefix`] != null) {
+    return PartOfSpeech.Prefix;
+  } else if (match?.groups?.[`suffix`] != null) {
+    return PartOfSpeech.Suffix;
+  } else if (match?.groups?.[`phonetic`] != null) {
+    return PartOfSpeech.Phonetic;
+  }
+  return null;
+}
+
 export const hanziWordMeaningSchema = z
   .object({
     gloss: z.array(z.string()),
@@ -223,7 +224,7 @@ export const hanziWordMeaningSchema = z
       )
       .nullable()
       .optional(),
-    pos: partOfSpeechSchema.optional(),
+    pos: partOfSpeechDictSchema.optional(),
     hsk: hskLevelSchema.optional(),
   })
   .strict();
@@ -395,36 +396,36 @@ export const allHanziCharacters = memoize0(async function allHanziCharacters() {
   return new Set([...characters].map(([char]) => char));
 });
 
-export function shorthandPartOfSpeech(pos: PartOfSpeech) {
+export function shorthandPartOfSpeech(pos: PartOfSpeechOld) {
   switch (pos) {
-    case PartOfSpeech.Adjective: {
+    case PartOfSpeechOld.Adjective: {
       return `adj.`;
     }
-    case PartOfSpeech.Adverb: {
+    case PartOfSpeechOld.Adverb: {
       return `adv.`;
     }
-    case PartOfSpeech.Noun: {
+    case PartOfSpeechOld.Noun: {
       return `noun`;
     }
-    case PartOfSpeech.Verb: {
+    case PartOfSpeechOld.Verb: {
       return `verb`;
     }
-    case PartOfSpeech.Pronoun: {
+    case PartOfSpeechOld.Pronoun: {
       return `pron.`;
     }
-    case PartOfSpeech.Preposition: {
+    case PartOfSpeechOld.Preposition: {
       return `prep.`;
     }
-    case PartOfSpeech.Conjunction: {
+    case PartOfSpeechOld.Conjunction: {
       return `conj.`;
     }
-    case PartOfSpeech.Interjection: {
+    case PartOfSpeechOld.Interjection: {
       return `intj.`;
     }
-    case PartOfSpeech.MeasureWord: {
+    case PartOfSpeechOld.MeasureWord: {
       return `mw.`;
     }
-    case PartOfSpeech.Particle: {
+    case PartOfSpeechOld.Particle: {
       return `part.`;
     }
   }

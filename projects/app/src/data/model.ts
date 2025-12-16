@@ -140,7 +140,7 @@ export const hskLevelSchema = z.enum({
 export const HskLevel = hskLevelSchema.enum;
 export type HskLevel = z.infer<typeof hskLevelSchema>;
 
-const partOfSpeechSchema = z.enum({
+const partOfSpeechOldSchema = z.enum({
   Noun: `debug--Noun`,
   Verb: `debug--Verb`,
   Adjective: `debug--Adjective`,
@@ -151,6 +151,25 @@ const partOfSpeechSchema = z.enum({
   Interjection: `debug--Interjection`,
   MeasureWord: `debug--MeasureWord`,
   Particle: `debug--Particle`,
+});
+export const PartOfSpeechOld = partOfSpeechOldSchema.enum;
+export type PartOfSpeechOld = z.infer<typeof partOfSpeechOldSchema>;
+
+const partOfSpeechSchema = z.enum({
+  Noun: `debug--Noun (名)`, // noun
+  Verb: `debug--Verb (动)`, // verb
+  Adjective: `debug--Adjective (形)`, // adjective; usually `Vs` (state verb, 狀態動詞) in taiwanese linguistical tradition and TOCFL
+  Adverb: `debug--Adverb (副)`, // adverb
+  Pronoun: `debug--Pronoun (代)`, // pronoun; usually `Det` in TOCFL
+  Numeral: `debug--Numeral (数)`, // numeral
+  MeasureWord: `debug--MeasureWord (量)`, // measure word/classifier
+  Preposition: `debug--Preposition (介)`, // preposition
+  Conjunction: `debug--Conjunction (连)`, // conjunction
+  AuxiliaryWord: `debug--AuxiliaryWord (助)`, // auxiliary word/particle; usually `Ptc` in TOCFL
+  Interjection: `debug--Interjection (叹)`, // interjection/exclamation/particle, e.g. 喂, 啊, 哎呀
+  Prefix: `debug--Prefix (前缀)`, // prefix bound forms
+  Suffix: `debug--Suffix (后缀)`, // suffix bound forms
+  Phonetic: `debug--Phonetic (拟声)`, // e.g. 哈哈 [hāhā]
 });
 export const PartOfSpeech = partOfSpeechSchema.enum;
 export type PartOfSpeech = z.infer<typeof partOfSpeechSchema>;

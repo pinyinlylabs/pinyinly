@@ -1,5 +1,6 @@
 import { splitHanziText } from "#data/hanzi.ts";
 import type { HanziCharacter, HanziText, HanziWord } from "#data/model.ts";
+import { PartOfSpeech } from "#data/model.ts";
 import { pinyinUnitCount } from "#data/pinyin.js";
 import type { Dictionary, HanziWordMeaning } from "#dictionary.ts";
 import {
@@ -19,6 +20,7 @@ import {
   loadPinyinWords,
   meaningKeyFromHanziWord,
   oneUnitPinyinOrNull,
+  parsePartOfSpeech,
 } from "#dictionary.ts";
 import {
   mapSetAdd,
@@ -1240,3 +1242,25 @@ describe(
     );
   },
 );
+
+test.for([
+  [`noun,名,N`, PartOfSpeech.Noun],
+  [`verb,动,V`, PartOfSpeech.Verb],
+  [`adjective,形,Adj,Vs`, PartOfSpeech.Adjective],
+  [`adverb,副,Adv`, PartOfSpeech.Adverb],
+  [`pronoun,代,Pron,Det`, PartOfSpeech.Pronoun],
+  [`numeral,数,Num`, PartOfSpeech.Numeral],
+  [`measureWord,量,M`, PartOfSpeech.MeasureWord],
+  [`preposition,介,Prep`, PartOfSpeech.Preposition],
+  [`conjunction,连,Conj`, PartOfSpeech.Conjunction],
+  [`particle,助,Aux,Ptc`, PartOfSpeech.AuxiliaryWord],
+  [`interjection,叹,Int`, PartOfSpeech.Interjection],
+  [`prefix,前缀,Prefix`, PartOfSpeech.Prefix],
+  [`suffix,后缀,Suffix`, PartOfSpeech.Suffix],
+  [`phonetic,拟声,Phonetic`, PartOfSpeech.Phonetic],
+  [`radical`, null],
+] as const)(`parsePartOfSpeech fixture: %s → %s`, ([input, expected]) => {
+  for (const text of input.split(`,`)) {
+    expect.soft(parsePartOfSpeech(text), `parsing ${text}`).toBe(expected);
+  }
+});

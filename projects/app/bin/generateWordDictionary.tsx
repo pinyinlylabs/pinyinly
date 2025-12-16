@@ -27,7 +27,7 @@ import {
   loadCharacters,
   loadDictionary,
   meaningKeyFromHanziWord,
-  partOfSpeechSchema,
+  partOfSpeechDictSchema,
 } from "#dictionary.ts";
 import { Alert, Select } from "@inkjs/ui";
 import {
@@ -303,7 +303,7 @@ const HanziWordEditor = ({
               const newPos =
                 newValue === ``
                   ? undefined
-                  : partOfSpeechSchema.parse(newValue);
+                  : partOfSpeechDictSchema.parse(newValue);
               mutations.push(() =>
                 saveUpsertHanziWordMeaning(hanziWord, {
                   pos: newPos,
