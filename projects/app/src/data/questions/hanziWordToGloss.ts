@@ -6,6 +6,7 @@ import {
   loadHsk1HanziWords,
   loadHsk2HanziWords,
   loadHsk3HanziWords,
+  loadHsk4HanziWords,
 } from "@/dictionary";
 import { evenHalve } from "@pinyinly/lib/collections";
 import { invariant } from "@pinyinly/lib/invariant";
@@ -160,18 +161,28 @@ async function getWrongHanziWordAnswers(
   // Don't have anything conflict with the correct answer.
   const ctx = await makeQuizContext(hanziWord);
 
-  const [hsk1HanziWords, hsk2HanziWords, hsk3HanziWords] = await Promise.all([
-    loadHsk1HanziWords(),
-    loadHsk2HanziWords(),
-    loadHsk3HanziWords(),
-  ]);
+  const [hsk1HanziWords, hsk2HanziWords, hsk3HanziWords, hsk4HanziWords] =
+    await Promise.all([
+      loadHsk1HanziWords(),
+      loadHsk2HanziWords(),
+      loadHsk3HanziWords(),
+      loadHsk4HanziWords(),
+    ]);
 
   // Use words from the same HSK word list if possible, so that they're more
   // likely to be familiar by being in a similar skill level. Otherwise fallback
   // all HSK words.
-  const allHanziWords = [hsk1HanziWords, hsk2HanziWords, hsk3HanziWords].find(
-    (words) => words.includes(hanziWord),
-  ) ?? [...hsk1HanziWords, ...hsk2HanziWords, ...hsk3HanziWords];
+  const allHanziWords = [
+    hsk1HanziWords,
+    hsk2HanziWords,
+    hsk3HanziWords,
+    hsk4HanziWords,
+  ].find((words) => words.includes(hanziWord)) ?? [
+    ...hsk1HanziWords,
+    ...hsk2HanziWords,
+    ...hsk3HanziWords,
+    ...hsk4HanziWords,
+  ];
 
   for (const x of shuffle(allHanziWords)) {
     if (!(await shouldOmitHanziWord(x, ctx))) {

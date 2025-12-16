@@ -1,8 +1,8 @@
 import { isHanziCharacter } from "@/data/hanzi";
 import {
-  normalizePinyinSyllable,
-  splitPinyinSyllableOrThrow,
-  splitPinyinSyllableTone,
+  normalizePinyinUnit,
+  splitPinyinUnitOrThrow,
+  splitPinyinUnitTone,
 } from "@/data/pinyin";
 import {
   allHanziCharacterPronunciationsForHanzi,
@@ -23,14 +23,14 @@ import type {
   OneCorrectPairQuestion,
   OneCorrectPairQuestionAnswer,
   OneCorrectPairQuestionChoice,
-  PinyinSyllable,
+  PinyinUnit,
   Question,
   QuestionFlagType,
 } from "../model";
 import { QuestionKind } from "../model";
 import { hanziWordFromSkill } from "../skills";
 import {
-  hanziOrPinyinSyllableCount,
+  hanziOrPinyinUnitCount,
   oneCorrectPairQuestionInvariant,
 } from "./oneCorrectPair";
 
@@ -87,15 +87,15 @@ interface QuestionContext {
    * could be a pair of "wrong choices" that have overlapping pinyin and if
    * picked would be marked incorrect.
    */
-  usedPinyin: Set<PinyinSyllable>;
+  usedPinyin: Set<PinyinUnit>;
 
-  pinyinDistractors: PinyinSyllable[];
-  pinyinAnswers: readonly PinyinSyllable[];
+  pinyinDistractors: PinyinUnit[];
+  pinyinAnswers: readonly PinyinUnit[];
   /**
    * The toneless version of the correct pinyins, so that distractors can have
    * the same bases and differ by tone
    */
-  pinyinAnswersToneless: readonly PinyinSyllable[];
+  pinyinAnswersToneless: readonly PinyinUnit[];
   hanziDistractors: HanziCharacter[];
   hanziAnswers: readonly HanziCharacter[];
 }
@@ -110,14 +110,14 @@ export async function makeQuestionContext(
 
   const hanziAnswers = [hanzi];
   const pinyinAnswers =
-    meaning?.pinyin?.map((p) => p as PinyinSyllable) ?? emptyArray;
+    meaning?.pinyin?.map((p) => p as PinyinUnit) ?? emptyArray;
   invariant(
     pinyinAnswers.length > 0,
     `hanzi word ${correctAnswer} has no pinyin`,
   );
 
   const pinyinAnswersToneless = pinyinAnswers
-    .map((p) => splitPinyinSyllableTone(p).tonelessSyllable)
+    .map((p) => splitPinyinUnitTone(p).tonelessUnit)
     .filter(arrayFilterUniqueWithKey((x) => x));
 
   const ctx: QuestionContext = {
@@ -157,7 +157,7 @@ export async function tryHanziDistractor(
 
 export function tryPinyinDistractor(
   ctx: QuestionContext,
-  pinyin: PinyinSyllable,
+  pinyin: PinyinUnit,
 ): boolean {
   if (ctx.usedPinyin.has(pinyin)) {
     return false;
@@ -185,7 +185,7 @@ async function addDistractors(
 
   loop: for (const tonelessPinyin of ctx.pinyinAnswersToneless) {
     for (const tone of shuffle(toneSuffixes)) {
-      const pinyin = normalizePinyinSyllable(`${tonelessPinyin}${tone}`);
+      const pinyin = normalizePinyinUnit(`${tonelessPinyin}${tone}`);
 
       tryPinyinDistractor(ctx, pinyin);
 
@@ -227,11 +227,11 @@ async function addDistractors(
 function validQuestionInvariant(question: OneCorrectPairQuestion) {
   oneCorrectPairQuestionInvariant(question);
 
-  // Ensure all choices are single syllable.
+  // Ensure all choices are single units.
   identicalInvariant([
-    1, // require 1 syllable
-    ...question.groupA.map((a) => hanziOrPinyinSyllableCount(a)),
-    ...question.groupB.map((b) => hanziOrPinyinSyllableCount(b)),
+    1, // require 1 unit
+    ...question.groupA.map((a) => hanziOrPinyinUnitCount(a)),
+    ...question.groupB.map((b) => hanziOrPinyinUnitCount(b)),
   ]);
 
   // Ensure all pinyin have the same initial and final as one of the answers.
@@ -239,12 +239,12 @@ function validQuestionInvariant(question: OneCorrectPairQuestion) {
   // (e.g. 似:resemble is shì/sì).
   const answerPinyinParts = question.answer.bs.map((x) => {
     invariant(x.kind === `pinyin`);
-    return splitPinyinSyllableOrThrow(x.value as PinyinSyllable);
+    return splitPinyinUnitOrThrow(x.value as PinyinUnit);
   });
   for (const b of question.groupB) {
     invariant(b.kind === `pinyin`);
     const { initialSoundId: initialChartLabel, finalSoundId: finalChartLabel } =
-      splitPinyinSyllableOrThrow(b.value as PinyinSyllable);
+      splitPinyinUnitOrThrow(b.value as PinyinUnit);
     invariant(
       answerPinyinParts.some(
         (x) =>

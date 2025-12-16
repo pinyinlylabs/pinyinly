@@ -13,9 +13,11 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react";
 import type { PropsWithChildren } from "react";
 import { act } from "react";
-import { afterEach, expect, test, vi } from "vitest";
+import { afterEach, test as baseTest, expect, vi } from "vitest";
 import { prettyQueue } from "../../data/helpers.ts";
-import { rizzleTest } from "../../util/rizzleHelpers.ts";
+import { rizzleFixture } from "../../util/rizzleHelpers.ts";
+
+const test = baseTest.extend(rizzleFixture);
 
 afterEach(() => {
   vi.resetAllMocks();
@@ -42,7 +44,7 @@ const testContextProviders = (opts: { rizzle: Rizzle }) =>
     );
   };
 
-rizzleTest(`returns loading state from context`, async ({ rizzle }) => {
+test(`returns loading state from context`, async ({ rizzle }) => {
   const { result, unmount } = renderHook(useSkillQueue, {
     wrapper: testContextProviders({ rizzle }),
   });
@@ -59,66 +61,63 @@ rizzleTest(`returns loading state from context`, async ({ rizzle }) => {
   unmount();
 });
 
-rizzleTest(
-  `new users are taught the simplest words first`,
-  async ({ rizzle }) => {
-    // Increase the number of queue items to 10 so we can check more than one.
-    vi.spyOn(SkillQueueProvider.mockable, `getMaxQueueItems`).mockReturnValue(
-      Infinity,
-    );
+test(`new users are taught the simplest words first`, async ({ rizzle }) => {
+  // Increase the number of queue items to 10 so we can check more than one.
+  vi.spyOn(SkillQueueProvider.mockable, `getMaxQueueItems`).mockReturnValue(
+    Infinity,
+  );
 
-    const { result, unmount } = renderHook(useSkillQueue, {
-      wrapper: testContextProviders({ rizzle }),
-    });
+  const { result, unmount } = renderHook(useSkillQueue, {
+    wrapper: testContextProviders({ rizzle }),
+  });
 
-    // Wait a little bit so to skip past initial "loading false" state.
-    await act(() => sleep(5));
-    await waitFor(
-      () => {
-        expect(result.current.loading).toBe(false);
-      },
-      { timeout: 5000 },
-    );
+  // Wait a little bit so to skip past initial "loading false" state.
+  await act(() => sleep(5));
+  await waitFor(
+    () => {
+      expect(result.current.loading).toBe(false);
+    },
+    { timeout: 5000 },
+  );
 
-    invariant(!result.current.loading, `expected skill queue to be loaded`);
+  invariant(!result.current.loading, `expected skill queue to be loaded`);
 
-    const queue = result.current.reviewQueue;
-    expect(prettyQueue(queue).slice(0, 10)).toMatchInlineSnapshot(`
-      [
-        "he:一:one (🌱 NEW SKILL)",
-        "he:人:person (🌱 NEW SKILL)",
-        "he:八:eight (🌱 NEW SKILL)",
-        "he:又:again (🌱 NEW SKILL)",
-        "he:冖:cover (🌱 NEW SKILL)",
-        "he:乙:second (🌱 NEW SKILL)",
-        "he:厂:cliff (🌱 NEW SKILL)",
-        "he:厶:private (🌱 NEW SKILL)",
-        "he:亻:person (🌱 NEW SKILL)",
-        "he:朩:rank (🌱 NEW SKILL)",
-      ]
-    `);
+  const queue = result.current.reviewQueue;
+  expect(prettyQueue(queue).slice(0, 10)).toMatchInlineSnapshot(`
+    [
+      "he:一:one (🌱 NEW SKILL)",
+      "he:人:person (🌱 NEW SKILL)",
+      "he:八:eight (🌱 NEW SKILL)",
+      "he:乙:second (🌱 NEW SKILL)",
+      "he:又:again (🌱 NEW SKILL)",
+      "he:冖:cover (🌱 NEW SKILL)",
+      "he:厂:cliff (🌱 NEW SKILL)",
+      "he:凵:box (🌱 NEW SKILL)",
+      "he:亻:person (🌱 NEW SKILL)",
+      "he:工:work (🌱 NEW SKILL)",
+    ]
+  `);
 
-    const blockedQueue = {
-      items: queue.items.filter(
-        ({ flag }) => flag?.kind === QuestionFlagKind.Blocked,
-      ),
-    };
+  const blockedQueue = {
+    items: queue.items.filter(
+      ({ flag }) => flag?.kind === QuestionFlagKind.Blocked,
+    ),
+  };
 
-    expect(prettyQueue(blockedQueue).slice(0, 10)).toMatchInlineSnapshot(`
-      [
-        "he:𠂇:hand (🟥 BLOCKED)",
-        "he:𠂉:knife (🟥 BLOCKED)",
-        "he:𠂊:hands (🟥 BLOCKED)",
-        "he:𭕄:radical (🟥 BLOCKED)",
-        "he:亅:hook (🟥 BLOCKED)",
-        "he:丶:dot (🟥 BLOCKED)",
-        "he:丿:slash (🟥 BLOCKED)",
-        "he:乚:hidden (🟥 BLOCKED)",
-        "he:丨:line (🟥 BLOCKED)",
-        "he:𠃌:radical (🟥 BLOCKED)",
-      ]
-    `);
+  expect(prettyQueue(blockedQueue).slice(0, 10)).toMatchInlineSnapshot(`
+    [
+      "he:𠂇:hand (🟥 BLOCKED)",
+      "he:𠂉:knife (🟥 BLOCKED)",
+      "he:𭕄:radical (🟥 BLOCKED)",
+      "he:𠂊:hands (🟥 BLOCKED)",
+      "he:亅:hook (🟥 BLOCKED)",
+      "he:丶:dot (🟥 BLOCKED)",
+      "he:丿:slash (🟥 BLOCKED)",
+      "he:乚:hidden (🟥 BLOCKED)",
+      "he:丨:line (🟥 BLOCKED)",
+      "he:𠃌:radical (🟥 BLOCKED)",
+    ]
+  `);
 
-    unmount();
-  },
-);
+  unmount();
+});

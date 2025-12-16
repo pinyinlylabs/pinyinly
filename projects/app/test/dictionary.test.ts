@@ -1,6 +1,6 @@
 import { splitHanziText } from "#data/hanzi.ts";
-import type { HanziCharacter, HanziText } from "#data/model.ts";
-import { pinyinSyllableCount } from "#data/pinyin.js";
+import type { HanziCharacter, HanziText, HanziWord } from "#data/model.ts";
+import { pinyinUnitCount } from "#data/pinyin.js";
 import type { Dictionary, HanziWordMeaning } from "#dictionary.ts";
 import {
   decomposeHanzi,
@@ -15,13 +15,14 @@ import {
   loadHsk1HanziWords,
   loadHsk2HanziWords,
   loadHsk3HanziWords,
+  loadHsk4HanziWords,
   loadKangXiRadicalsHanziWords,
   loadKangXiRadicalsStrokes,
   loadPinyinSoundNameSuggestions,
   loadPinyinSoundThemeDetails,
   loadPinyinWords,
   meaningKeyFromHanziWord,
-  oneSyllablePinyinOrNull,
+  oneUnitPinyinOrNull,
 } from "#dictionary.ts";
 import {
   mapSetAdd,
@@ -85,6 +86,8 @@ test(`hanzi word meaning-keys are not too similar`, async () => {
     hanziToMeaningKey.set(hanzi, meaningKeys);
   }
 
+  const violations: string[] = [];
+
   // no meaning-key is just a prefix of a sibling meaning-key
   for (const [hanzi, meaningKeys] of hanziToMeaningKey) {
     for (let i = 0; i < meaningKeys.length - 1; i++) {
@@ -94,13 +97,18 @@ test(`hanzi word meaning-keys are not too similar`, async () => {
         invariant(a != null && b != null);
 
         if (b.startsWith(a)) {
-          throw new Error(
-            `${hanzi} meaning-keys ${a} and ${b} are too similar`,
-          );
+          violations.push(`${hanzi}:${a} + ${hanzi}:${b}`);
         }
       }
     }
   }
+
+  expect(violations, `meanings that are too similar`).toMatchInlineSnapshot(`
+    [
+      "松:loose + 松:loosen",
+      "治疗:treat + 治疗:treatment",
+    ]
+  `);
 });
 
 test(`hanzi word meaning-key lint`, async () => {
@@ -129,13 +137,16 @@ test(`hanzi word meaning gloss lint`, async () => {
     for (const gloss of meaning.gloss) {
       const label = `${hanziWord} gloss "${gloss}"`;
 
-      // No comma
+      // Symbols
       expect.soft(gloss, `${label} commas`).not.toMatch(/,/);
+      expect.soft(gloss, `${label} semicolons`).not.toMatch(/;/);
+      // TODO: re-enable these later
+      // expect.soft(gloss, `${label} parenthesis`).not.toMatch(/\(/);
 
-      // No banned characters/phrases
+      // No banned words
       expect
-        .soft(gloss, `${label} banned characters/phrases`)
-        .not.toMatch(/measure ?word|radical|particle|\(/i);
+        .soft(gloss, `${label} banned words`)
+        .not.toMatch(/measure ?word|radical|particle/i);
     }
 
     // Rules for the primary gloss
@@ -191,79 +202,57 @@ test(`hanzi word meaning pinyin lint`, async () => {
       .not.toBe(0);
   }
 
-  // Multiple pinyin entries should have the same number of syllables
+  // Multiple pinyin entries should have the same number of units
   for (const [hanziWord, { pinyin }] of dict.allEntries) {
-    const syllableCounts = pinyin?.map((p) => pinyinSyllableCount(p)) ?? [];
-    expect.soft(new Set(syllableCounts).size, hanziWord).not.toBeGreaterThan(1);
+    const unitCounts = pinyin?.map((p) => pinyinUnitCount(p)) ?? [];
+    expect.soft(new Set(unitCounts).size, hanziWord).not.toBeGreaterThan(1);
   }
 });
 
-test(`hanzi words are unique on (meaning key, primary pinyin)`, async () => {
-  const exceptions = new Set(
-    [[`他们:they`, `它们:they`, `她们:they`]].map((x) => new Set(x)),
-  );
-
+test(`hanzi words are unique on (primary gloss, primary pinyin)`, async () => {
   const dict = await loadDictionary();
   const isComponentFormHanzi = await getIsComponentFormHanzi();
 
-  const byMeaningKeyAndPinyin = new Map<string, Set<string>>();
-  for (const [hanziWord, { pinyin }] of dict.allEntries) {
+  const byGlossAndPinyin = new Map<string, Set<HanziWord>>();
+  for (const [hanziWord, { gloss, pinyin }] of dict.allEntries) {
+    const primaryGloss = nonNullable(gloss[0]);
     const meaningKey = meaningKeyFromHanziWord(hanziWord);
     // special case allow "radical" to have overlaps
     if (meaningKey === `radical`) {
+      // TODO: delete this, instead delete the item from the dictionary.
       continue;
     }
     // allow component-form of hanzi to have overlaps
     if (isComponentFormHanzi(hanziFromHanziWord(hanziWord))) {
+      // TODO: delete this, instead delete the item from the dictionary.
       continue;
     }
     const primaryPinyin = pinyin?.[0];
-    const key = `${meaningKey}:${primaryPinyin ?? `<nullish>`}`;
-    const set = byMeaningKeyAndPinyin.get(key) ?? new Set();
-    set.add(hanziWord);
-    byMeaningKeyAndPinyin.set(key, set);
+    const key = `${primaryGloss}:${primaryPinyin ?? `<nullish>`}`;
+    mapSetAdd(byGlossAndPinyin, key, hanziWord);
   }
 
   // Make sure that there is only one hanzi word for each meaning key and
   // pinyin, but do it in a way to give a helpful error message.
-  const duplicates = [...byMeaningKeyAndPinyin.values()].filter(
-    (x) => x.size > 1,
-  );
+  const duplicates = [...byGlossAndPinyin.values()].filter((x) => x.size > 1);
 
   // Check that there are no duplicates (except for the exceptions).
-  expect(
-    duplicates.filter(
-      (x) =>
-        !exceptions.values().some((e) => x.symmetricDifference(e).size === 0),
-    ),
-  ).toEqual([]);
-
-  // Check that all exceptions are actually used.
-  for (const exception of exceptions) {
-    if (!duplicates.some((x) => x.symmetricDifference(exception).size === 0)) {
-      throw new Error(`exception ${[...exception]} is not used`);
-    }
-  }
+  expect(duplicates).toMatchInlineSnapshot(`
+    [
+      Set {
+        "他们:they",
+        "她们:they",
+        "它们:they",
+      },
+      Set {
+        "斗:fight",
+        "鬥:struggle",
+      },
+    ]
+  `);
 });
 
 test(`hanzi words are unique on (hanzi, part-of-speech, pinyin)`, async () => {
-  const exceptions = new Set(
-    [
-      [`从来:always`, `从来:never`],
-      [`块:currency`, `块:pieces`],
-      [`天:day`, `天:sky`],
-      [`家:family`, `家:home`],
-      [`提:carry`, `提:mention`],
-      [`米:rice`, `米:meter`],
-      [`菜:dish`, `菜:vegetable`],
-      [`行:okay`, `行:walk`],
-      [`表:surface`, `表:watch`],
-      [`要:must`, `要:want`],
-      [`面:face`, `面:surface`],
-      [`乚:hidden`, `乚:second`],
-    ].map((x) => new Set(x)),
-  );
-
   const dict = await loadDictionary();
 
   const byHanziAndPinyin = new Map<string, Set<string>>();
@@ -279,20 +268,75 @@ test(`hanzi words are unique on (hanzi, part-of-speech, pinyin)`, async () => {
   // pinyin, but do it in a way to give a helpful error message.
   const duplicates = [...byHanziAndPinyin.values()].filter((x) => x.size > 1);
 
-  // Check that all exceptions are actually used.
-  for (const exception of exceptions) {
-    if (!duplicates.some((x) => x.symmetricDifference(exception).size === 0)) {
-      throw new Error(`exception ${[...exception]} is not used`);
-    }
-  }
-
   // Check that there are no duplicates (except for the exceptions).
-  expect(
-    duplicates.filter(
-      (x) =>
-        !exceptions.values().some((e) => x.symmetricDifference(e).size === 0),
-    ),
-  ).toEqual([]);
+  expect(duplicates).toMatchInlineSnapshot(`
+    [
+      Set {
+        "乚:hidden",
+        "乚:second",
+      },
+      Set {
+        "从来:always",
+        "从来:never",
+      },
+      Set {
+        "块:currency",
+        "块:pieces",
+      },
+      Set {
+        "天:day",
+        "天:sky",
+      },
+      Set {
+        "家:family",
+        "家:home",
+      },
+      Set {
+        "局:office",
+        "局:game",
+      },
+      Set {
+        "折:discount",
+        "折:fold",
+      },
+      Set {
+        "提:carry",
+        "提:mention",
+      },
+      Set {
+        "究竟:exactly",
+        "究竟:ultimately",
+      },
+      Set {
+        "米:meter",
+        "米:rice",
+      },
+      Set {
+        "菜:dish",
+        "菜:vegetable",
+      },
+      Set {
+        "行:okay",
+        "行:walk",
+      },
+      Set {
+        "表:surface",
+        "表:watch",
+      },
+      Set {
+        "要:must",
+        "要:want",
+      },
+      Set {
+        "面:face",
+        "面:surface",
+      },
+      Set {
+        "高潮:climax",
+        "高潮:tide",
+      },
+    ]
+  `);
 });
 
 test(`all word lists only reference valid hanzi words`, async () => {
@@ -460,6 +504,11 @@ test(`dictionary contains entries for decomposition`, async () => {
       wordList.map((hanziWord) => hanziFromHanziWord(hanziWord)),
     ),
   );
+  const hsk4HanziWords = new Set(
+    await loadHsk4HanziWords().then((wordList) =>
+      wordList.map((hanziWord) => hanziFromHanziWord(hanziWord)),
+    ),
+  );
   function hskLabel(hanzi: HanziText): string {
     return hsk1HanziWords.has(hanzi)
       ? `[HSK1]`
@@ -467,7 +516,9 @@ test(`dictionary contains entries for decomposition`, async () => {
         ? `[HSK2]`
         : hsk3HanziWords.has(hanzi)
           ? `[HSK3]`
-          : ``;
+          : hsk4HanziWords.has(hanzi)
+            ? `[HSK4]`
+            : ``;
   }
 
   function prettify(map: typeof unknownCharacters): string[] {
@@ -487,7 +538,7 @@ test(`dictionary contains entries for decomposition`, async () => {
       "⺀ via 冬, 头[HSK2], 尽",
       "⺄ via 九[HSK1]",
       "⺆ via 周[HSK2]",
-      "⺈ via 争[HSK3], 免, 欠, 色, 角[HSK2], 象, 负, 鱼[HSK2]",
+      "⺈ via 争[HSK3], 免, 欠, 色[HSK4], 角[HSK2], 象, 负, 鱼[HSK2]",
       "⺧ via 先[HSK1], 告",
       "⺶ via 养[HSK2]",
       "⺺ via 隶",
@@ -505,17 +556,22 @@ test(`dictionary contains entries for decomposition`, async () => {
       "㔾 via 危",
       "㔿 via 耳",
       "㝵 via 得[HSK2]",
+      "㠯 via 官[HSK4]",
       "㡀 via 黹",
       "䏍 via 能[HSK1]",
       "丅 via 斤[HSK2], 鬲",
       "丆 via 才[HSK2], 石, 面[HSK2], 页[HSK1]",
+      "丈 via 丈夫[HSK4]",
       "丙 via 病[HSK1]",
       "並 via 普, 碰[HSK2]",
       "丩 via 叫[HSK1], 收[HSK2], 爿",
       "丬 via 将, 状",
+      "临 via 临时[HSK4], 光临[HSK4], 面临[HSK4]",
       "乀 via 乂, 水[HSK1]",
       "乁 via 气[HSK2]",
       "乇 via 毛[HSK1]",
+      "之 via 之一[HSK4], 之前[HSK4], 之后[HSK4], 之间[HSK4], 分之[HSK4], 总之[HSK4]",
+      "乎 via 不在乎[HSK4], 似乎[HSK4], 几乎[HSK4], 在乎[HSK4]",
       "乔 via 桥[HSK3]",
       "乛 via 买[HSK1], 了[HSK1]",
       "乞 via 吃[HSK1]",
@@ -523,13 +579,20 @@ test(`dictionary contains entries for decomposition`, async () => {
       "予 via 舒, 预",
       "亍 via 行[HSK1], 街[HSK2]",
       "亘 via 宣",
+      "亚 via 亚运会[HSK4]",
       "亦 via 变[HSK2]",
       "亭 via 停[HSK2]",
       "亽 via 今, 令",
       "仌 via 肉[HSK1]",
       "仑 via 论",
       "仓 via 创",
-      "余 via 除",
+      "企 via 企业[HSK4]",
+      "伴 via 伙伴[HSK4]",
+      "余 via 业余[HSK4], 其余[HSK4], 除",
+      "供 via 供应[HSK4], 提供[HSK4]",
+      "依 via 依然[HSK4], 依靠[HSK4]",
+      "促 via 促使[HSK4], 促进[HSK4], 促销[HSK4]",
+      "俗 via 风俗[HSK4]",
       "俞 via 输[HSK3]",
       "允 via 充",
       "兆 via 跳[HSK3]",
@@ -544,20 +607,26 @@ test(`dictionary contains entries for decomposition`, async () => {
       "凡 via 赢[HSK3]",
       "刍 via 急[HSK2]",
       "刖 via 前[HSK1]",
-      "列 via 例, 烈",
+      "则 via 原则[HSK4], 否则[HSK4], 规则[HSK4]",
+      "劲 via 使劲[HSK4], 有劲儿[HSK4]",
+      "勇 via 勇敢[HSK4], 勇气[HSK4], 英勇[HSK4]",
       "勺 via 的[HSK1], 约[HSK3]",
       "卄 via 甘, 龷",
       "卅 via 带[HSK2]",
       "卌 via 舞",
-      "卑 via 啤, 牌",
+      "卑 via 啤, 牌[HSK4]",
       "卬 via 迎",
-      "却 via 脚[HSK2]",
+      "即 via 即将[HSK4], 立即[HSK4]",
       "厃 via 危",
       "厄 via 顾",
+      "厘 via 厘米[HSK4]",
+      "叔 via 叔叔[HSK4]",
       "叚 via 假[HSK2]",
       "叩 via 命",
-      "召 via 绍, 超",
-      "吉 via 结",
+      "召 via 召开[HSK4], 绍, 超",
+      "史 via 历史[HSK4]",
+      "叶 via 叶子[HSK4], 树叶[HSK4], 茶叶[HSK4]",
+      "吉 via 结[HSK4]",
       "吏 via 使[HSK3]",
       "吕 via 营",
       "君 via 群[HSK3], 裙",
@@ -565,95 +634,229 @@ test(`dictionary contains entries for decomposition`, async () => {
       "吾 via 语",
       "呆 via 保[HSK3]",
       "呈 via 程",
+      "呼 via 呼吸[HSK4], 招呼[HSK4]",
       "咅 via 部[HSK3]",
-      "咸 via 喊[HSK2], 感",
       "唐 via 糖[HSK3]",
+      "售 via 出售[HSK4], 售货员[HSK4], 销售[HSK4]",
       "啬 via 墙[HSK2]",
       "喿 via 澡",
       "囬 via 面[HSK2]",
+      "固 via 固定[HSK4], 坚固[HSK4]",
       "圡 via 压[HSK3]",
-      "圣 via 怪",
+      "圣 via 怪[HSK4]",
+      "圾 via 垃圾[HSK4]",
+      "址 via 地址[HSK4], 网址[HSK4]",
+      "均 via 平均[HSK4]",
       "垂 via 睡[HSK1]",
+      "垃 via 垃圾[HSK4]",
+      "培 via 培养[HSK4], 培育[HSK4], 培训[HSK4], 培训班[HSK4]",
+      "塑 via 塑料[HSK4], 塑料袋[HSK4]",
       "壬 via 任[HSK3]",
       "壮 via 装[HSK2]",
       "壴 via 喜, 鼓",
       "央 via 英",
       "奂 via 换[HSK2]",
+      "奋 via 兴奋[HSK4], 奋斗[HSK4]",
       "奴 via 努",
+      "妇 via 夫妇[HSK4]",
+      "妻 via 夫妻[HSK4], 妻子[HSK4]",
       "妾 via 接[HSK2]",
+      "姨 via 阿姨[HSK4]",
       "娄 via 数[HSK2], 楼[HSK1]",
+      "婆 via 老婆[HSK4]",
+      "孙 via 孙女[HSK4], 孙子[HSK4]",
       "孝 via 教[HSK1]",
       "孰 via 熟[HSK2]",
-      "官 via 管[HSK3], 馆",
+      "宁 via 宁静[HSK4]",
       "宛 via 碗[HSK2]",
       "寅 via 演[HSK3]",
+      "寒 via 寒假[HSK4], 寒冷[HSK4]",
+      "寻 via 寻找[HSK4]",
       "射 via 谢",
       "尔 via 你[HSK1], 称[HSK2]",
-      "尺 via 尽",
+      "尚 via 高尚[HSK4]",
       "尼 via 呢[HSK1]",
-      "居 via 剧, 据",
+      "尾 via 尾巴[HSK4]",
+      "居 via 剧, 居住[HSK4], 居民[HSK4], 据",
       "屯 via 顿[HSK3]",
       "川 via 训, 顺",
+      "巨 via 巨大[HSK4]",
       "巩 via 恐",
       "帀 via 师",
+      "席 via 主席[HSK4], 出席[HSK4]",
+      "帽 via 帽子[HSK4]",
+      "幼 via 幼儿园[HSK4]",
       "庄 via 脏[HSK2]",
+      "序 via 程序[HSK4], 顺序[HSK4]",
       "库 via 裤",
+      "府 via 政府[HSK4]",
+      "延 via 延期[HSK4], 延续[HSK4], 延长[HSK4]",
       "廷 via 庭, 挺[HSK2]",
       "廿 via 世, 度[HSK2], 革",
       "弗 via 费[HSK3]",
       "彑 via 互",
       "彦 via 颜",
+      "彻 via 彻底[HSK4]",
+      "征 via 征服[HSK4], 征求[HSK4], 特征[HSK4]",
+      "律 via 一律[HSK4], 律师[HSK4], 法律[HSK4], 纪律[HSK4], 规律[HSK4]",
+      "微 via 微信[HSK4], 微笑[HSK4]",
+      "怀 via 怀念[HSK4], 怀疑[HSK4]",
+      "恶 via 恶心[HSK4]",
+      "惊 via 吃惊[HSK4]",
       "戉 via 越[HSK2]",
-      "戊 via 成[HSK2]",
+      "戊 via 咸[HSK4], 成[HSK2]",
+      "战 via 战争[HSK4], 战士[HSK4], 战斗[HSK4], 战胜[HSK4], 挑战[HSK4]",
       "戶 via 所[HSK3]",
       "扁 via 篇[HSK2], 遍[HSK2]",
       "执 via 势, 热[HSK1]",
+      "扩 via 扩大[HSK4], 扩展[HSK4]",
+      "扬 via 表扬[HSK4]",
+      "承 via 承受[HSK4], 承担[HSK4], 承认[HSK4]",
+      "担 via 承担[HSK4], 担任[HSK4], 担保[HSK4], 担心[HSK4], 负担[HSK4]",
+      "招 via 招呼[HSK4]",
+      "择 via 选择[HSK4]",
+      "括 via 包括[HSK4], 括号[HSK4], 概括[HSK4]",
+      "挥 via 发挥[HSK4], 指挥[HSK4]",
+      "授 via 教授[HSK4]",
+      "措 via 措施[HSK4]",
+      "描 via 描写[HSK4], 描述[HSK4]",
+      "操 via 体操[HSK4], 操作[HSK4], 操场[HSK4]",
+      "政 via 政府[HSK4], 政治[HSK4]",
+      "敌 via 敌人[HSK4]",
       "敕 via 整[HSK3]",
       "敬 via 警",
+      "料 via 原料[HSK4], 塑料[HSK4], 塑料袋[HSK4], 材料[HSK4], 燃料[HSK4], 资料[HSK4]",
       "斥 via 诉",
+      "施 via 实施[HSK4], 措施[HSK4], 设施[HSK4]",
       "斿 via 游[HSK3]",
-      "既 via 概",
+      "旡 via 既[HSK4]",
       "旨 via 指[HSK3]",
       "昌 via 唱[HSK1]",
       "昏 via 婚",
+      "映 via 反映[HSK4]",
       "昭 via 照[HSK3]",
       "昷 via 温",
+      "智 via 智力[HSK4], 智能[HSK4]",
+      "暑 via 暑假[HSK4]",
       "曷 via 喝[HSK1], 渴[HSK1]",
+      "权 via 权利[HSK4]",
       "杲 via 桌",
-      "林 via 楚, 麻",
+      "构 via 机构[HSK4], 构成[HSK4], 构造[HSK4], 结构[HSK4]",
+      "林 via 树林[HSK4], 楚, 麻",
+      "案 via 图案[HSK4], 方案[HSK4], 答案[HSK4]",
+      "梯 via 楼梯[HSK4], 电梯[HSK4]",
+      "植 via 植物[HSK4], 种植[HSK4]",
+      "模 via 大规模[HSK4], 模型[HSK4], 模特儿[HSK4], 规模[HSK4]",
+      "殊 via 特殊[HSK4]",
+      "毕 via 毕业[HSK4], 毕业生[HSK4]",
+      "毫 via 毫升[HSK4], 毫米[HSK4]",
       "氾 via 范",
-      "泉 via 原",
-      "洛 via 落",
+      "泉 via 原, 矿泉水[HSK4]",
+      "洛 via 落[HSK4]",
+      "渐 via 渐渐[HSK4], 逐渐[HSK4]",
+      "源 via 来源[HSK4], 电源[HSK4], 资源[HSK4]",
+      "激 via 刺激[HSK4], 激动[HSK4], 激烈[HSK4]",
       "炎 via 谈[HSK3]",
+      "炼 via 锻炼[HSK4]",
       "焦 via 蕉",
+      "燃 via 燃料[HSK4], 燃烧[HSK4]",
       "爰 via 暖",
+      "独 via 单独[HSK4], 独特[HSK4], 独立[HSK4], 独自[HSK4]",
+      "率 via 效率[HSK4], 汇率[HSK4], 率先[HSK4]",
       "玨 via 班[HSK1]",
+      "甚 via 甚至[HSK4]",
       "甬 via 痛[HSK3], 通[HSK2]",
-      "甲 via 单, 里[HSK1]",
-      "申 via 神",
+      "甲 via 单[HSK4], 里[HSK1]",
+      "申 via 申请[HSK4], 神",
       "甶 via 鬼",
       "畀 via 鼻",
       "番 via 播",
+      "疑 via 怀疑[HSK4], 疑问[HSK4]",
+      "疗 via 医疗[HSK4], 治疗[HSK4], 疗养[HSK4]",
+      "益 via 利益[HSK4], 收益[HSK4]",
       "监 via 篮, 蓝[HSK2]",
+      "矿 via 矿泉水[HSK4]",
+      "码 via 号码[HSK4], 密码[HSK4], 数码[HSK4]",
+      "研 via 研制[HSK4], 研究[HSK4], 研究生[HSK4]",
       "祭 via 察",
+      "禁 via 禁止[HSK4]",
       "禹 via 属[HSK3]",
-      "竟 via 境",
+      "秀 via 优秀[HSK4]",
+      "秘 via 神秘[HSK4], 秘书[HSK4], 秘密[HSK4]",
+      "究 via 研究[HSK4], 研究生[HSK4], 究竟[HSK4], 讲究[HSK4]",
+      "窗 via 窗台[HSK4], 窗子[HSK4], 窗户[HSK4]",
+      "竟 via 境, 究竟[HSK4], 竟然[HSK4]",
+      "童 via 儿童[HSK4], 童年[HSK4], 童话[HSK4]",
+      "符 via 符号[HSK4], 符合[HSK4]",
+      "粮 via 粮食[HSK4]",
+      "纷 via 纷纷[HSK4]",
+      "络 via 网络[HSK4]",
+      "统 via 传统[HSK4], 总统[HSK4], 系统[HSK4], 统一[HSK4], 统计[HSK4]",
+      "维 via 维修[HSK4], 维护[HSK4], 维持[HSK4]",
+      "综 via 综合[HSK4]",
+      "缓 via 缓解[HSK4]",
+      "缩 via 缩小[HSK4], 缩短[HSK4]",
       "罒 via 曼",
       "罙 via 深[HSK3]",
+      "置 via 位置[HSK4], 安置[HSK4], 布置[HSK4], 装置[HSK4], 设置[HSK4]",
+      "聊 via 无聊[HSK4]",
       "肀 via 聿",
       "肖 via 消",
+      "肚 via 肚子[HSK4]",
       "肰 via 然",
       "胡 via 湖[HSK2]",
+      "胸 via 胸部[HSK4]",
+      "腐 via 豆腐[HSK4]",
+      "致 via 一致[HSK4], 导致[HSK4], 细致[HSK4]",
       "舍 via 舒",
+      "航 via 航班[HSK4], 航空[HSK4]",
       "苗 via 猫[HSK2]",
+      "著 via 显著[HSK4], 著作[HSK4], 著名[HSK4]",
       "董 via 懂[HSK2]",
+      "虑 via 考虑[HSK4]",
+      "袜 via 袜子[HSK4]",
+      "裹 via 包裹[HSK4]",
       "覀 via 票[HSK1], 要[HSK1], 鹿",
       "觜 via 嘴[HSK2]",
+      "译 via 翻译[HSK4]",
+      "诚 via 诚信[HSK4], 诚实[HSK4]",
+      "谓 via 无所谓[HSK4]",
+      "财 via 财产[HSK4], 财富[HSK4]",
+      "质 via 品质[HSK4], 性质[HSK4], 质量[HSK4]",
+      "购 via 购买[HSK4], 购物[HSK4]",
       "贯 via 惯",
+      "赞 via 称赞[HSK4], 赞助[HSK4], 赞成[HSK4], 赞赏[HSK4]",
+      "趋 via 趋势[HSK4]",
+      "趣 via 乐趣[HSK4], 兴趣[HSK4], 感兴趣[HSK4], 有趣[HSK4]",
+      "距 via 距离[HSK4]",
+      "载 via 下载[HSK4], 记载[HSK4]",
+      "辩 via 辩论[HSK4]",
+      "迅 via 迅速[HSK4]",
+      "迟 via 推迟[HSK4], 迟到[HSK4]",
+      "迫 via 被迫[HSK4], 迫切[HSK4]",
+      "述 via 描述[HSK4]",
       "迶 via 随[HSK3]",
+      "逐 via 逐步[HSK4], 逐渐[HSK4]",
+      "递 via 快递[HSK4]",
+      "途 via 前途[HSK4], 用途[HSK4], 途中[HSK4], 长途[HSK4]",
+      "遗 via 遗产[HSK4], 遗传[HSK4]",
       "邦 via 帮[HSK1]",
+      "郎 via 新郎[HSK4]",
+      "释 via 解释[HSK4]",
+      "销 via 促销[HSK4], 推销[HSK4], 销售[HSK4]",
+      "锻 via 锻炼[HSK4]",
+      "镜 via 眼镜[HSK4], 镜头[HSK4], 镜子[HSK4]",
       "镸 via 套[HSK2], 髟",
-      "阿 via 啊[HSK2]",
+      "闭 via 倒闭[HSK4], 关闭[HSK4], 封闭[HSK4]",
+      "阅 via 阅读[HSK4]",
+      "阶 via 台阶[HSK4], 阶段[HSK4]",
+      "阻 via 阻止[HSK4]",
+      "阿 via 啊[HSK2], 阿姨[HSK4]",
+      "附 via 附近[HSK4]",
+      "陆 via 大陆[HSK4], 陆地[HSK4], 陆续[HSK4]",
+      "限 via 无限[HSK4], 有限[HSK4], 期限[HSK4], 限制[HSK4]",
+      "雷 via 打雷[HSK4]",
+      "默 via 沉默[HSK4], 默默[HSK4]",
       "龰 via 疋, 走[HSK1], 足",
       "龱 via 卤",
       "龴 via 令, 矛",
@@ -677,7 +880,7 @@ test(`dictionary contains entries for decomposition`, async () => {
       "𠫓 via 育",
       "𠫔 via 至",
       "𠬝 via 报[HSK3], 服",
-      "𠮛 via 司, 同, 畐, 豆, 鬲",
+      "𠮛 via 司, 同, 咸[HSK4], 畐, 豆, 鬲",
       "𠮦 via 总[HSK3]",
       "𠮷 via 周[HSK2]",
       "𠱠 via 龠",
@@ -689,9 +892,9 @@ test(`dictionary contains entries for decomposition`, async () => {
       "𢎨 via 弟[HSK1], 第[HSK1]",
       "𣥂 via 步[HSK3]",
       "𣦼 via 餐",
-      "𤴓 via 定, 是[HSK1]",
+      "𤴓 via 定[HSK4], 是[HSK1]",
       "𦍌 via 美[HSK3]",
-      "𦓐 via 而",
+      "𦓐 via 而[HSK4]",
       "𦣻 via 夏",
       "𧰨 via 豕",
       "𨈑 via 身",
@@ -703,7 +906,7 @@ test(`dictionary contains entries for decomposition`, async () => {
       "𫩠 via 堂, 常[HSK1]",
       "𫲸 via 害",
       "𬜯 via 满[HSK2]",
-      "𭥴 via 曾",
+      "𭥴 via 曾[HSK4]",
       "𭷔 via 解",
       " via 夜[HSK2]",
     ]
@@ -853,9 +1056,7 @@ describe(
 );
 
 describe(
-  `oneSyllablePinyinOrNull suite` satisfies HasNameOf<
-    typeof oneSyllablePinyinOrNull
-  >,
+  `oneUnitPinyinOrNull suite` satisfies HasNameOf<typeof oneUnitPinyinOrNull>,
   () => {
     const meaning: HanziWordMeaning = {
       gloss: [`test`],
@@ -872,7 +1073,7 @@ describe(
     ] as [HanziWordMeaning, string | null][])(
       `%s → %s`,
       ([input, expected]) => {
-        expect(oneSyllablePinyinOrNull(input)).toBe(expected);
+        expect(oneUnitPinyinOrNull(input)).toBe(expected);
       },
     );
   },

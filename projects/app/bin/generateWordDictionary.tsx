@@ -108,6 +108,7 @@ const wordListFileNames = [
   `hsk1HanziWords`,
   `hsk2HanziWords`,
   `hsk3HanziWords`,
+  `hsk4HanziWords`,
   `radicalsHanziWords`,
 ];
 
@@ -1954,6 +1955,10 @@ const App = () => {
               label: `HSK3 word list`,
             },
             {
+              value: `hsk4WordList`,
+              label: `HSK4 word list`,
+            },
+            {
               value: `editRadicalsWordList`,
               label: `Edit radicals word list`,
             },
@@ -1985,6 +1990,14 @@ const App = () => {
                 setLocation({
                   type: `wordListEditor`,
                   wordListFileBaseName: `hsk3HanziWords`,
+                });
+
+                break;
+              }
+              case `hsk4WordList`: {
+                setLocation({
+                  type: `wordListEditor`,
+                  wordListFileBaseName: `hsk4HanziWords`,
                 });
 
                 break;
@@ -2046,6 +2059,7 @@ const DictionaryHanziWordEntry = ({
   const hsk1WordList = useHanziWordList(`hsk1HanziWords`).data;
   const hsk2WordList = useHanziWordList(`hsk2HanziWords`).data;
   const hsk3WordList = useHanziWordList(`hsk3HanziWords`).data;
+  const hsk4WordList = useHanziWordList(`hsk4HanziWords`).data;
 
   const flagElement = useMemo(() => {
     const nonNullChilds = Children.map(flags, (child) => child);
@@ -2060,13 +2074,14 @@ const DictionaryHanziWordEntry = ({
       [`hsk1`, hsk1WordList],
       [`hsk2`, hsk2WordList],
       [`hsk3`, hsk3WordList],
+      [`hsk4`, hsk4WordList],
     ] as const) {
       if (wordList?.includes(hanziWord) === true) {
         refs.push(wordListName);
       }
     }
     return refs;
-  }, [hanziWord, hsk1WordList, hsk2WordList, hsk3WordList]);
+  }, [hanziWord, hsk1WordList, hsk2WordList, hsk3WordList, hsk4WordList]);
 
   return (
     <Box flexDirection="column" width="100%">

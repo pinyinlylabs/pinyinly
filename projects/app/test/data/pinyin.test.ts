@@ -1,4 +1,4 @@
-import type { PinyinSyllable } from "#data/model.js";
+import type { PinyinUnit } from "#data/model.js";
 import type { PinyinChart } from "#data/pinyin.ts";
 import {
   defaultPinyinSoundGroupNames,
@@ -10,16 +10,16 @@ import {
   loadMmPinyinChart,
   loadPylyPinyinChart,
   loadStandardPinyinChart,
-  matchAllPinyinSyllables,
-  matchAllPinyinSyllablesWithIndexes,
-  normalizePinyinSyllable,
+  matchAllPinyinUnits,
+  matchAllPinyinUnitsWithIndexes,
   normalizePinyinText,
-  pinyinSyllableCount,
-  pinyinSyllablePattern,
-  pinyinSyllableSuggestions,
-  splitPinyinSyllable,
-  splitPinyinSyllableTone,
-  splitPinyinSyllableWithChart,
+  normalizePinyinUnit,
+  pinyinUnitCount,
+  pinyinUnitPattern,
+  pinyinUnitSuggestions,
+  splitPinyinUnit,
+  splitPinyinUnitTone,
+  splitPinyinUnitWithChart,
 } from "#data/pinyin.ts";
 import { loadPinyinWords } from "#dictionary.ts";
 import { uniqueInvariant } from "@pinyinly/lib/invariant";
@@ -36,8 +36,8 @@ test(`json data can be loaded and passes the schema validation`, async () => {
 });
 
 describe(
-  `normalizePinyinSyllable fixtures` satisfies HasNameOf<
-    typeof normalizePinyinSyllable
+  `normalizePinyinUnit fixtures` satisfies HasNameOf<
+    typeof normalizePinyinUnit
   >,
   () => {
     // Rules: (from https://en.wikipedia.org/wiki/Pinyin)
@@ -132,9 +132,7 @@ describe(
       [`nǜ`, `nǜ`],
       [`nü`, `nü`],
     ] as const)(`%s → %s`, ([input, expected]) => {
-      expect(normalizePinyinSyllable(input as PinyinSyllable)).toEqual(
-        expected,
-      );
+      expect(normalizePinyinUnit(input as PinyinUnit)).toEqual(expected);
     });
   },
 );
@@ -150,9 +148,9 @@ describe(
     // 3. Otherwise, the second vowel takes the tone mark
 
     test.for([
-      // Multiple single-syllable words
+      // Multiple single-unit words
       [`hǎo hao3 nü nv nu: nǖ nv1 nu:1`, `hǎo hǎo nü nü nü nǖ nǖ nǖ`],
-      // Multiple multi-syllable words
+      // Multiple multi-unit words
       [`hǎohao3 nü nvnu: nǖ nv1nu:1hao3`, `hǎohǎo nü nünü nǖ nǖnǖhǎo`],
       // Leaves punctuation alone
       [
@@ -160,14 +158,14 @@ describe(
         `hǎohǎo. nü nünü nǖ 【nǖnǖhǎo】`,
       ],
     ] as const)(`%s → %s`, ([input, expected]) => {
-      expect(normalizePinyinText(input as PinyinSyllable)).toEqual(expected);
+      expect(normalizePinyinText(input as PinyinUnit)).toEqual(expected);
     });
   },
 );
 
 describe(
-  `splitPinyinSyllableTone fixtures` satisfies HasNameOf<
-    typeof splitPinyinSyllableTone
+  `splitPinyinUnitTone fixtures` satisfies HasNameOf<
+    typeof splitPinyinUnitTone
   >,
   () => {
     test.for([
@@ -178,9 +176,9 @@ describe(
       [`nǚ`, [`nü`, 3]],
       [`nǜ`, [`nü`, 4]],
       [`nü`, [`nü`, 5]],
-    ] as const)(`%s → %s`, ([input, [tonelessSyllable, tone]]) => {
-      expect(splitPinyinSyllableTone(input as PinyinSyllable)).toEqual({
-        tonelessSyllable,
+    ] as const)(`%s → %s`, ([input, [tonelessUnit, tone]]) => {
+      expect(splitPinyinUnitTone(input as PinyinUnit)).toEqual({
+        tonelessUnit,
         tone,
       });
     });
@@ -188,29 +186,27 @@ describe(
 );
 
 describe(
-  `splitPinyinSyllable suite` satisfies HasNameOf<typeof splitPinyinSyllable>,
+  `splitPinyinUnit suite` satisfies HasNameOf<typeof splitPinyinUnit>,
   () => {
     // For all the tests, see tests for `loadPylyPinyinChart`.
     test.for([
-      [`niú`, { tonelessSyllable: `niu`, tone: 2 }],
-      [`hǎo`, { tonelessSyllable: `hao`, tone: 3 }],
-      [`nǖ`, { tonelessSyllable: `nü`, tone: 1 }],
-      [`nǘ`, { tonelessSyllable: `nü`, tone: 2 }],
-      [`nǚ`, { tonelessSyllable: `nü`, tone: 3 }],
-      [`nǜ`, { tonelessSyllable: `nü`, tone: 4 }],
-      [`nü`, { tonelessSyllable: `nü`, tone: 5 }],
-      [`nu`, { tonelessSyllable: `nu`, tone: 5 }],
+      [`niú`, { tonelessUnit: `niu`, tone: 2 }],
+      [`hǎo`, { tonelessUnit: `hao`, tone: 3 }],
+      [`nǖ`, { tonelessUnit: `nü`, tone: 1 }],
+      [`nǘ`, { tonelessUnit: `nü`, tone: 2 }],
+      [`nǚ`, { tonelessUnit: `nü`, tone: 3 }],
+      [`nǜ`, { tonelessUnit: `nü`, tone: 4 }],
+      [`nü`, { tonelessUnit: `nü`, tone: 5 }],
+      [`nu`, { tonelessUnit: `nu`, tone: 5 }],
     ] as const)(`%s → %s`, ([input, partial]) => {
-      expect(splitPinyinSyllable(input as PinyinSyllable)).toMatchObject(
-        partial,
-      );
+      expect(splitPinyinUnit(input as PinyinUnit)).toMatchObject(partial);
     });
   },
 );
 
 describe(
-  `pinyinSyllableSuggestions suite` satisfies HasNameOf<
-    typeof pinyinSyllableSuggestions
+  `pinyinUnitSuggestions suite` satisfies HasNameOf<
+    typeof pinyinUnitSuggestions
   >,
   () => {
     test(`fixtures`, () => {
@@ -234,12 +230,12 @@ describe(
           `hǎo`,
           [`0-3:hāo:1`, `0-3:háo:2`, `0-3:hǎo:3`, `0-3:hào:4`, `0-3:hao:5`],
         ],
-        // Multiple syllables, should match the last syllable.
+        // Multiple units, should match the last unit.
         [
           `nihao`,
           [`2-5:hāo:1`, `2-5:háo:2`, `2-5:hǎo:3`, `2-5:hào:4`, `2-5:hao:5`],
         ],
-        // Multiple syllables but with trailing space, shouldn't match as the
+        // Multiple units but with trailing space, shouldn't match as the
         // space is a separator.
         [`nihao `, null],
         // v / ü
@@ -248,15 +244,15 @@ describe(
       ];
 
       for (const [query, results] of fixtures) {
-        const result = pinyinSyllableSuggestions(query);
+        const result = pinyinUnitSuggestions(query);
         expect({
           query,
           results:
             result == null
               ? null
-              : result.syllables.map(
+              : result.units.map(
                   (x) =>
-                    `${result.from}-${result.to}:${x.pinyinSyllable}:${x.tone}`,
+                    `${result.from}-${result.to}:${x.pinyinUnit}:${x.tone}`,
                 ),
         }).toEqual({
           query,
@@ -266,13 +262,13 @@ describe(
     });
 
     test(`should not throw on invalid input`, () => {
-      expect(pinyinSyllableSuggestions(`xxxx`)).toEqual(null);
+      expect(pinyinUnitSuggestions(`xxxx`)).toEqual(null);
     });
   },
 );
 
 const pinyinWithIndexesFixtures: [string, (number | string)[]][] = [
-  // Syllables
+  // Units
   [`nv`, [0, `nv`]],
   [`nv1`, [0, `nv1`]],
   [`hao`, [0, `hao`]],
@@ -301,11 +297,9 @@ const pinyinWithIndexesFixtures: [string, (number | string)[]][] = [
 ];
 
 describe(
-  `matchAllPinyinSyllables suite` satisfies HasNameOf<
-    typeof matchAllPinyinSyllables
-  >,
+  `matchAllPinyinUnits suite` satisfies HasNameOf<typeof matchAllPinyinUnits>,
   () => {
-    test(`pinyinSyllablePattern`, () => {
+    test(`pinyinUnitPattern`, () => {
       const valid = [
         `ni`,
         `ní`,
@@ -319,7 +313,7 @@ describe(
         `ni4`,
         `ni5`,
       ];
-      const regex = new RegExp(pinyinSyllablePattern);
+      const regex = new RegExp(pinyinUnitPattern);
       for (const text of valid) {
         const match = regex.exec(text);
         expect(match?.at(0)).toEqual(text);
@@ -328,7 +322,7 @@ describe(
 
     test(`fixtures`, () => {
       for (const [input, expected] of pinyinWithIndexesFixtures) {
-        const actual = matchAllPinyinSyllables(input);
+        const actual = matchAllPinyinUnits(input);
         expect([input, actual]).toEqual([
           input,
           expected
@@ -341,13 +335,13 @@ describe(
 );
 
 describe(
-  `matchAllPinyinSyllablesWithIndexes suite` satisfies HasNameOf<
-    typeof matchAllPinyinSyllablesWithIndexes
+  `matchAllPinyinUnitsWithIndexes suite` satisfies HasNameOf<
+    typeof matchAllPinyinUnitsWithIndexes
   >,
   () => {
     test(`fixtures`, () => {
       for (const [input, expected] of pinyinWithIndexesFixtures) {
-        const actual = matchAllPinyinSyllablesWithIndexes(input);
+        const actual = matchAllPinyinUnitsWithIndexes(input);
         expect([input, actual]).toEqual([input, expected]);
       }
     });
@@ -504,8 +498,8 @@ test(`hh pinyin covers kangxi pinyin`, async () => {
 test(`hmm pinyin covers kangxi pinyin`, async () => {
   const chart = await loadHmmPinyinChart();
 
-  expect(new Set(Object.values(chart.syllableToInitialSound)).size).toEqual(55);
-  expect(new Set(Object.values(chart.syllableToFinalSound)).size).toEqual(13);
+  expect(new Set(Object.values(chart.unitToInitialSound)).size).toEqual(55);
+  expect(new Set(Object.values(chart.unitToFinalSound)).size).toEqual(13);
 
   await testPinyinChart(chart, [
     [`a`, `∅-`, `-a`],
@@ -621,7 +615,7 @@ describe(`pyly pinyin chart`, async () => {
 });
 
 describe(
-  `pinyinSyllableCount suite` satisfies HasNameOf<typeof pinyinSyllableCount>,
+  `pinyinUnitCount suite` satisfies HasNameOf<typeof pinyinUnitCount>,
   () => {
     test.for([
       [拼音`hǎo`, 1],
@@ -636,7 +630,7 @@ describe(
       [拼音`bù yīhuǐ'er`, 4],
       [拼音`Bù yīhuǐ'er`, 4],
     ] as const)(`%s → %s`, ([pinyin, count]) => {
-      expect(pinyinSyllableCount(pinyin)).toBe(count);
+      expect(pinyinUnitCount(pinyin)).toBe(count);
     });
   },
 );
@@ -659,7 +653,7 @@ async function testPinyinChart(
     expectedInitialChartLabel,
     expectedFinalChartLabel,
   ] of testCases) {
-    const actual = splitPinyinSyllableWithChart(input as PinyinSyllable, chart);
+    const actual = splitPinyinUnitWithChart(input as PinyinUnit, chart);
     expect
       .soft(
         {
@@ -677,21 +671,21 @@ async function testPinyinChart(
   for (const x of pinyinWords) {
     expect(
       expectedDifferenceFromStandard.has(x) ||
-        splitPinyinSyllableWithChart(x as PinyinSyllable, chart),
+        splitPinyinUnitWithChart(x as PinyinUnit, chart),
     ).not.toEqual(null);
   }
 
   // Ensure that there are no duplicates initials or finals.
-  expect(Object.keys(chart.syllableToInitialSound).sort()).toEqual(
-    Object.keys(chart.syllableToFinalSound).sort(),
+  expect(Object.keys(chart.unitToInitialSound).sort()).toEqual(
+    Object.keys(chart.unitToFinalSound).sort(),
   );
 
-  // Ensure all the pinyin syllables in the standard chart are covered by this
+  // Ensure all the pinyin units in the standard chart are covered by this
   // chart.
   expect(
-    new Set(Object.keys(chart.syllableToInitialSound))
+    new Set(Object.keys(chart.unitToInitialSound))
       .symmetricDifference(
-        new Set(Object.keys(standardChart.syllableToInitialSound)),
+        new Set(Object.keys(standardChart.unitToInitialSound)),
       )
       .symmetricDifference(expectedDifferenceFromStandard),
   ).toEqual(new Set());
@@ -708,8 +702,8 @@ async function testPinyinChart(
     ),
   ).toEqual(
     new Set([
-      ...Object.values(chart.syllableToInitialSound),
-      ...Object.values(chart.syllableToFinalSound),
+      ...Object.values(chart.unitToInitialSound),
+      ...Object.values(chart.unitToFinalSound),
     ]),
   );
 }

@@ -1,13 +1,15 @@
+import type { Db } from "#client/query.js";
+import { makeDb } from "#client/query.js";
 import { mutators } from "#data/rizzleMutators.js";
 import type { Rizzle } from "#data/rizzleSchema.js";
 import { currentSchema } from "#data/rizzleSchema.js";
 import { r } from "#util/rizzle.ts";
+import type { Fixtures } from "@vitest/runner";
 import type {
   ReadTransaction,
   ReplicacheOptions,
   WriteTransaction,
 } from "replicache";
-import { test } from "vitest";
 
 let _testReplicacheNameId = 0;
 /**
@@ -57,7 +59,7 @@ export function makeMockTx() {
   };
 }
 
-export const rizzleTest = test.extend<{ rizzle: Rizzle }>({
+export const rizzleFixture: Fixtures<{ rizzle: Rizzle }> = {
   rizzle: [
     async ({}, use) => {
       await using rizzle = r.replicache(
@@ -69,4 +71,14 @@ export const rizzleTest = test.extend<{ rizzle: Rizzle }>({
     },
     { scope: `test` },
   ],
-});
+};
+
+export const dbFixture: Fixtures<{ db: Db }, { rizzle: Rizzle }> = {
+  db: [
+    async ({ rizzle }, use) => {
+      const db = makeDb(rizzle);
+      await use(db);
+    },
+    { scope: `test` },
+  ],
+};

@@ -155,7 +155,8 @@ export async function writeHanziWordList(
 export type WordListFileBaseName =
   | `hsk1HanziWords`
   | `hsk2HanziWords`
-  | `hsk3HanziWords`;
+  | `hsk3HanziWords`
+  | `hsk4HanziWords`;
 
 export async function upsertHanziWordWordList(
   hanziWord: HanziWord,
