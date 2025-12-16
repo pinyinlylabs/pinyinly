@@ -163,6 +163,14 @@ export const loadHsk3HanziWords = memoize0(async function loadHsk3HanziWords() {
     );
 });
 
+export const loadHsk4HanziWords = memoize0(async function loadHsk4HanziWords() {
+  return wordListSchema
+    .transform(deepReadonly)
+    .parse(
+      await import(`./data/hsk4HanziWords.asset.json`).then((x) => x.default),
+    );
+});
+
 export const partOfSpeechSchema = z.enum([
   `noun`,
   `verb`,
@@ -175,6 +183,7 @@ export const partOfSpeechSchema = z.enum([
   `measureWord`,
   `particle`,
   `radical`,
+  `numeral`,
 ]);
 
 export const hanziWordMeaningSchema = z

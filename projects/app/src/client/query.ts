@@ -21,6 +21,8 @@ import {
   loadDictionary,
   loadHsk1HanziWords,
   loadHsk2HanziWords,
+  loadHsk3HanziWords,
+  loadHsk4HanziWords,
 } from "@/dictionary";
 import { devToolsSlowQuerySleepIfEnabled } from "@/util/devtools";
 import type { Rating } from "@/util/fsrs";
@@ -316,14 +318,20 @@ export const hanziWordsByRankQuery = (r: Rizzle) =>
   );
 
 export async function getAllTargetHanziWords(): Promise<HanziWord[]> {
-  const [hsk1HanziWords, hsk2HanziWords] = await Promise.all([
-    loadHsk1HanziWords(),
-    loadHsk2HanziWords(),
-  ]);
+  const [hsk1HanziWords, hsk2HanziWords, hsk3HanziWords, hsk4HanziWords] =
+    await Promise.all([
+      loadHsk1HanziWords(),
+      loadHsk2HanziWords(),
+      loadHsk3HanziWords(),
+      loadHsk4HanziWords(),
+    ]);
 
-  return [...hsk1HanziWords, ...hsk2HanziWords].filter(
-    arrayFilterUniqueWithKey((x) => x),
-  );
+  return [
+    ...hsk1HanziWords,
+    ...hsk2HanziWords,
+    ...hsk3HanziWords,
+    ...hsk4HanziWords,
+  ].filter(arrayFilterUniqueWithKey((x) => x));
 }
 
 export async function getAllTargetSkills(): Promise<Skill[]> {
