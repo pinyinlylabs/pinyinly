@@ -49,15 +49,25 @@ test.skip(`all ivankraHsk30 items are in the dictionary`, async () => {
   }
 });
 
-test.skip.for([
-  [[`intersection`, `crossing`], `crossing`],
-  [[`It’s okay`], `okay`],
+test.for([
+  [`intersection; crossing`, [`crossing`]],
+  [`It’s okay`, [`okay`]],
+  [`move; move house`, [`move`]],
+  [`security guard; public security; ensure safety`, [`guard`]],
+  [`Preservation`, `preservation`],
+  [`back of the body; back side of an object`, [`back`]],
+  [`The Great Wall`, [`wall`]],
+  [`put to use; adopt; use; employ`, [`employ`, `use`, `adopt`]],
+  [`become; turn into; change into`, [`turn`, `become`]],
+  [`beginning; start; basis; at the beginning of`, [`start`]],
+  [`junior high school`, [`high`]],
+  [`A literary creation`, [`literary`]],
 ] as const)(
   `guessMeaningKey fixture: %s → %s` satisfies HasNameOf<
     typeof guessMeaningKey
   >,
-  async ([meanings, expectedKey]) => {
-    expect(guessMeaningKey(meanings)).toBe(expectedKey);
+  async ([meanings, expectedKeys]) => {
+    expect(expectedKeys).toContain(guessMeaningKey(meanings.split(`; `)));
   },
 );
 
@@ -731,5 +741,88 @@ function splitTsvMeanings(text: string): string[] {
 }
 
 function guessMeaningKey(meanings: readonly string[]): string {
-  return meanings[0]!;
+  const fillerWords = new Set([
+    `a`,
+    `an`,
+    `the`,
+    `of`,
+    `to`,
+    `be`,
+    `is`,
+    `are`,
+    `in`,
+    `on`,
+    `at`,
+    `for`,
+    `with`,
+    `from`,
+    `it`,
+    `its`,
+    `one`,
+    `ones`,
+    `sth`,
+    `sb`,
+    `or`,
+    `and`,
+  ]);
+
+  function cleanWord(word: string): string {
+    return word.toLowerCase().replaceAll(/[’']/g, ``).trim();
+  }
+
+  function isFillerWord(word: string): boolean {
+    return fillerWords.has(cleanWord(word));
+  }
+
+  // First pass: Collect all standalone single-word meanings (not phrases)
+  const standaloneSingleWords: string[] = [];
+  for (const meaning of meanings) {
+    const cleanMeaning = meaning.replaceAll(/\([^)]*\)/g, ``).trim();
+    const words = cleanMeaning.split(/\s+/).filter((w) => w.length > 0);
+
+    // If this meaning is a single word and not a filler, collect it
+    if (words.length === 1 && !isFillerWord(words[0]!)) {
+      standaloneSingleWords.push(cleanWord(words[0]!));
+    }
+  }
+
+  // If we found standalone single words, return the shortest one
+  if (standaloneSingleWords.length > 0) {
+    let shortestWord = standaloneSingleWords[0]!;
+    for (let i = 1; i < standaloneSingleWords.length; i++) {
+      const word = standaloneSingleWords[i]!;
+      if (word.length < shortestWord.length) {
+        shortestWord = word;
+      }
+    }
+    return toCamelCase(shortestWord);
+  }
+
+  // If no standalone words, collect all words from all meanings
+  const allWords: string[] = [];
+  for (const meaning of meanings) {
+    const cleanMeaning = meaning.replaceAll(/\([^)]*\)/g, ``).trim();
+    const words = cleanMeaning.split(/\s+/);
+    allWords.push(...words);
+  }
+
+  const meaningfulWords = allWords
+    .filter((word) => word.length > 0)
+    .map((x) => cleanWord(x))
+    .filter((word) => !fillerWords.has(word));
+
+  if (meaningfulWords.length === 0) {
+    return toCamelCase(meanings[0]!);
+  }
+
+  // Find the shortest word
+  let shortestWord = meaningfulWords[0]!;
+  for (let i = 1; i < meaningfulWords.length; i++) {
+    const word = meaningfulWords[i]!;
+    if (word.length < shortestWord.length) {
+      shortestWord = word;
+    }
+  }
+
+  return toCamelCase(shortestWord);
 }
