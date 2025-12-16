@@ -135,7 +135,7 @@ export const hskLevelSchema = z.enum({
   "4": `4`,
   "5": `5`,
   "6": `6`,
-  "7-9": `7+`,
+  "7-9": `7-9`,
 });
 export const HskLevel = hskLevelSchema.enum;
 export type HskLevel = z.infer<typeof hskLevelSchema>;

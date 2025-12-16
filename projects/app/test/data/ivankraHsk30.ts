@@ -1,3 +1,4 @@
+import { hanziTextSchema, pinyinTextSchema } from "#data/model.js";
 import { memoize0 } from "@pinyinly/lib/collections";
 import { fetchWithFsDbCache, makeFsDbCache } from "@pinyinly/lib/fs";
 import isEqual from "lodash/isEqual";
@@ -8,11 +9,19 @@ const fsDbCache = makeFsDbCache(import.meta.filename);
 export const ivankraHsk30Schema = z
   .object({
     id: z.string(),
-    simplified: z.string().min(1),
-    traditional: z.string(),
-    pinyin: z.string().min(1),
+    simplified: z.string().min(1).pipe(hanziTextSchema),
+    traditional: z.string().min(1).pipe(hanziTextSchema),
+    pinyin: z.string().min(1).pipe(pinyinTextSchema),
     pos: z.string().transform((val) => val.split(`/`)),
-    level: z.string(),
+    level: z.union([
+      z.literal(`1`),
+      z.literal(`2`),
+      z.literal(`3`),
+      z.literal(`4`),
+      z.literal(`5`),
+      z.literal(`6`),
+      z.literal(`7-9`),
+    ]),
     webNo: z.string(),
     webPinyin: z.string(),
     ocr: z.string(),
