@@ -28,14 +28,14 @@ export function HanziTile({
   progress?: number;
 }) {
   const [showWiki, setShowWiki] = useState(false);
-  const handlePress = linked
-    ? () => {
-        setShowWiki(true);
-      }
-    : undefined;
 
   return (
-    <Pressable onPress={handlePress}>
+    <Pressable
+      onPress={() => {
+        setShowWiki(true);
+      }}
+      disabled={!linked}
+    >
       <View
         className={tileClass({
           variant,

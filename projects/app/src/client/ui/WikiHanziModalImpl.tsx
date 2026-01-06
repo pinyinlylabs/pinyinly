@@ -111,14 +111,16 @@ function Header({
         </View>
       </View>
 
-      <HanziTile
-        hanzi={hanzi}
-        pinyin={pinyin}
-        gloss={gloss}
-        className="place-self-center"
-        variant={variant}
-        size="47"
-      />
+      <View className="items-center">
+        <HanziTile
+          hanzi={hanzi}
+          pinyin={pinyin}
+          gloss={gloss}
+          className="place-self-center"
+          variant={variant}
+          size="47"
+        />
+      </View>
       {/* Scroll detector */}
       <View
         className="h-0 w-full"
