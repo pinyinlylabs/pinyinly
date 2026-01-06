@@ -1,5 +1,6 @@
 // pyly-not-src-test
 
+import { sortComparatorString } from "@pinyinly/lib/collections";
 import chunk from "lodash/chunk.js";
 import { describe, expect, test } from "vitest";
 import { loadIvankraHsk30 } from "./ivankraHsk30.ts";
@@ -62,7 +63,7 @@ describe(
         `);
     });
 
-    test(`check unique key`, async () => {
+    test(`unique on hanzi+pinyin+pos+level`, async () => {
       const entries = await loadIvankraHsk30();
       const seenKeys = new Set<string>();
 
@@ -78,6 +79,27 @@ describe(
         }
         seenKeys.add(key);
       }
+    });
+
+    test(`unique on hanzi+pinyin+pos`, async () => {
+      const entries = await loadIvankraHsk30();
+      const seenKeys = new Set<string>();
+      const duplicateHanzi = new Set<string>();
+
+      for (const entry of entries) {
+        const key = `${entry.simplified}::${entry.pinyin}::${entry.pos.sort(sortComparatorString()).join(`/`)}`;
+        if (seenKeys.has(key)) {
+          duplicateHanzi.add(entry.simplified);
+        }
+        seenKeys.add(key);
+      }
+
+      // only one exception.
+      expect(duplicateHanzi).toMatchInlineSnapshot(`
+        Set {
+          "称",
+        }
+      `);
     });
 
     test(`keeps expected duplicates and uniques`, async () => {
