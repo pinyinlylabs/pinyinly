@@ -3,7 +3,7 @@ import type { HanziText } from "@/data/model";
 import { loadDictionary } from "@/dictionary";
 import type { IsExhaustedRest, PropsOf } from "@pinyinly/lib/types";
 import { use, useState } from "react";
-import { ScrollView, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import { useIntersectionObserver, useTimeout } from "usehooks-ts";
 import { CloseButton2 } from "./CloseButton2";
 import { HanziTile } from "./HanziTile";
@@ -94,17 +94,15 @@ function Header({
           <CloseButton2 onPress={onDismiss} />
 
           <View className="flex-1 content-center items-center">
-            <HanziTile
-              hanzi={hanzi}
-              gloss={gloss}
+            <Text
               className={`
-                justify-self-center transition-opacity
+                text-3xl text-fg-loud
 
-                ${showHeaderHanziTile ? `opacity-100` : `opacity-0`}
+                ${showHeaderHanziTile ? `opacity-100 transition-opacity` : `opacity-0`}
               `}
-              variant={variant}
-              size="10"
-            />
+            >
+              {hanzi}
+            </Text>
           </View>
 
           <View className="invisible">
