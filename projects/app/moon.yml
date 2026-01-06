@@ -308,6 +308,11 @@ tasks:
       # can't cache purely off local filesystem. It's important cache is
       # disabled otherwise the daily CI won't run this.
       cache: false
+      # Expo doctor checks that the latest version of dependencies are used,
+      # which means that it can start failing due to upstream Expo changes even
+      # if nothing in the repo has broken. To avoid this breaking CI and causing
+      # noise it's run in a separate Github action workflow.
+      runInCI: false
 
   test:
     deps:
