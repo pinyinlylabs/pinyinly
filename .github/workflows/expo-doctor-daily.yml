@@ -1,0 +1,22 @@
+name: Expo Doctor (daily)
+
+on:
+  schedule:
+    - cron: "0 5 * * *" # Runs at midnight EST (5 AM UTC)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  expo-doctor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🏗 Clone repo
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: ./.github/actions/setup-tools
+
+      - run: moon run app:expoDoctor --color

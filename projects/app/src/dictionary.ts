@@ -15,6 +15,8 @@ import type {
 import {
   hanziCharacterSchema,
   hanziWordSchema,
+  HskLevel,
+  hskLevelSchema,
   PartOfSpeech,
   pinyinTextSchema,
 } from "@/data/model";
@@ -27,6 +29,7 @@ import {
   memoize1,
 } from "@pinyinly/lib/collections";
 import { invariant } from "@pinyinly/lib/invariant";
+import { UnexpectedValueError } from "@pinyinly/lib/types";
 import type { DeepReadonly } from "ts-essentials";
 import { z } from "zod/v4";
 
@@ -139,52 +142,61 @@ export const loadKangXiRadicalsHanziWords = memoize0(
   },
 );
 
-export const loadHsk1HanziWords = memoize0(async function loadHsk1HanziWords() {
-  return wordListSchema
-    .transform(deepReadonly)
-    .parse(
-      await import(`./data/hsk1HanziWords.asset.json`).then((x) => x.default),
-    );
-});
+const parsePosPattern = new RegExp(
+  `^(?:` +
+    [
+      `(?<noun>noun|名|n)`,
+      `(?<verb>verb|动|v)`,
+      `(?<adjective>adjective|形|adj|vs)`,
+      `(?<adverb>adverb|副|adv)`,
+      `(?<pronoun>pronoun|代|pron|det)`,
+      `(?<numeral>numeral|数|num)`,
+      `(?<measureWord>measureWord|量|m|mw)`,
+      `(?<preposition>preposition|介|prep)`,
+      `(?<conjunction>conjunction|连|conj)`,
+      `(?<auxiliaryWord>particle|助|aux|ptc)`,
+      `(?<interjection>interjection|叹|int)`,
+      `(?<prefix>prefix|前缀|pre)`,
+      `(?<suffix>suffix|后缀|suf)`,
+      `(?<phonetic>Phonetic|拟声|pho)`,
+    ].join(`|`) +
+    `)$`,
+  `i`,
+);
 
-export const loadHsk2HanziWords = memoize0(async function loadHsk2HanziWords() {
-  return wordListSchema
-    .transform(deepReadonly)
-    .parse(
-      await import(`./data/hsk2HanziWords.asset.json`).then((x) => x.default),
-    );
-});
-
-export const loadHsk3HanziWords = memoize0(async function loadHsk3HanziWords() {
-  return wordListSchema
-    .transform(deepReadonly)
-    .parse(
-      await import(`./data/hsk3HanziWords.asset.json`).then((x) => x.default),
-    );
-});
-
-export const loadHsk4HanziWords = memoize0(async function loadHsk4HanziWords() {
-  return wordListSchema
-    .transform(deepReadonly)
-    .parse(
-      await import(`./data/hsk4HanziWords.asset.json`).then((x) => x.default),
-    );
-});
-
-export const partOfSpeechSchema = z.enum([
-  `noun`,
-  `verb`,
-  `adjective`,
-  `adverb`,
-  `pronoun`,
-  `preposition`,
-  `conjunction`,
-  `interjection`,
-  `measureWord`,
-  `particle`,
-  `radical`,
-  `numeral`,
-]);
+export function parsePartOfSpeech(pos: string): PartOfSpeech | undefined {
+  const match = parsePosPattern.exec(pos);
+  if (match?.groups?.[`noun`] != null) {
+    return PartOfSpeech.Noun;
+  } else if (match?.groups?.[`verb`] != null) {
+    return PartOfSpeech.Verb;
+  } else if (match?.groups?.[`adjective`] != null) {
+    return PartOfSpeech.Adjective;
+  } else if (match?.groups?.[`adverb`] != null) {
+    return PartOfSpeech.Adverb;
+  } else if (match?.groups?.[`pronoun`] != null) {
+    return PartOfSpeech.Pronoun;
+  } else if (match?.groups?.[`numeral`] != null) {
+    return PartOfSpeech.Numeral;
+  } else if (match?.groups?.[`measureWord`] != null) {
+    return PartOfSpeech.MeasureWordOrClassifier;
+  } else if (match?.groups?.[`preposition`] != null) {
+    return PartOfSpeech.Preposition;
+  } else if (match?.groups?.[`conjunction`] != null) {
+    return PartOfSpeech.Conjunction;
+  } else if (match?.groups?.[`auxiliaryWord`] != null) {
+    return PartOfSpeech.AuxiliaryWordOrParticle;
+  } else if (match?.groups?.[`interjection`] != null) {
+    return PartOfSpeech.Interjection;
+  } else if (match?.groups?.[`prefix`] != null) {
+    return PartOfSpeech.Prefix;
+  } else if (match?.groups?.[`suffix`] != null) {
+    return PartOfSpeech.Suffix;
+  } else if (match?.groups?.[`phonetic`] != null) {
+    return PartOfSpeech.Phonetic;
+  }
+  return undefined;
+}
 
 export const hanziWordMeaningSchema = z
   .object({
@@ -196,7 +208,11 @@ export const hanziWordMeaningSchema = z
       )
       .nullable()
       .optional(),
-    partOfSpeech: partOfSpeechSchema.optional(),
+    pos: z
+      .string()
+      .transform((x) => parsePartOfSpeech(x))
+      .optional(),
+    hsk: hskLevelSchema.optional(),
   })
   .strict();
 
@@ -266,13 +282,27 @@ export const loadDictionary = memoize0(
       lookupHanzi(hanzi: HanziText): readonly HanziWordWithMeaning[];
       lookupHanziWord(hanzi: HanziWord): DeepReadonly<HanziWordMeaning> | null;
       lookupGloss(gloss: string): readonly HanziWordWithMeaning[];
-      allEntries: [HanziWord, DeepReadonly<HanziWordMeaning>][];
-      allHanziWords: HanziWord[];
+      allEntries: readonly [HanziWord, DeepReadonly<HanziWordMeaning>][];
+      allHanziWords: readonly HanziWord[];
+      hsk1HanziWords: readonly HanziWord[];
+      hsk2HanziWords: readonly HanziWord[];
+      hsk3HanziWords: readonly HanziWord[];
+      hsk4HanziWords: readonly HanziWord[];
+      hsk5HanziWords: readonly HanziWord[];
+      hsk6HanziWords: readonly HanziWord[];
+      hsk7To9HanziWords: readonly HanziWord[];
     }>
   > => {
     const hanziMap = new Map<string, HanziWordWithMeaning[]>();
     const glossMap = new Map<string, HanziWordWithMeaning[]>();
     const dictionaryJson = await loadDictionaryJson();
+    const hsk1HanziWords: HanziWord[] = [];
+    const hsk2HanziWords: HanziWord[] = [];
+    const hsk3HanziWords: HanziWord[] = [];
+    const hsk4HanziWords: HanziWord[] = [];
+    const hsk5HanziWords: HanziWord[] = [];
+    const hsk6HanziWords: HanziWord[] = [];
+    const hsk7To9HanziWords: HanziWord[] = [];
 
     for (const item of dictionaryJson) {
       const [hanziWord, meaning] = item;
@@ -281,6 +311,43 @@ export const loadDictionary = memoize0(
 
       for (const gloss of meaning.gloss) {
         mapArrayAdd(glossMap, gloss, item);
+      }
+
+      switch (meaning.hsk) {
+        case undefined: {
+          break;
+        }
+        case HskLevel[1]: {
+          hsk1HanziWords.push(hanziWord);
+          break;
+        }
+        case HskLevel[2]: {
+          hsk2HanziWords.push(hanziWord);
+          break;
+        }
+        case HskLevel[3]: {
+          hsk3HanziWords.push(hanziWord);
+          break;
+        }
+        case HskLevel[4]: {
+          hsk4HanziWords.push(hanziWord);
+          break;
+        }
+        case HskLevel[5]: {
+          hsk5HanziWords.push(hanziWord);
+          break;
+        }
+        case HskLevel[6]: {
+          hsk6HanziWords.push(hanziWord);
+          break;
+        }
+        case HskLevel[`7-9`]: {
+          hsk7To9HanziWords.push(hanziWord);
+          break;
+        }
+        default: {
+          throw new UnexpectedValueError(meaning.hsk);
+        }
       }
     }
 
@@ -296,6 +363,13 @@ export const loadDictionary = memoize0(
       },
       allEntries: [...dictionaryJson.entries()],
       allHanziWords: [...dictionaryJson.keys()],
+      hsk1HanziWords,
+      hsk2HanziWords,
+      hsk3HanziWords,
+      hsk4HanziWords,
+      hsk5HanziWords,
+      hsk6HanziWords,
+      hsk7To9HanziWords,
     };
   },
 );
@@ -308,41 +382,6 @@ export const allHanziCharacters = memoize0(async function allHanziCharacters() {
 
   return new Set([...characters].map(([char]) => char));
 });
-
-export function shorthandPartOfSpeech(partOfSpeech: PartOfSpeech) {
-  switch (partOfSpeech) {
-    case PartOfSpeech.Adjective: {
-      return `adj.`;
-    }
-    case PartOfSpeech.Adverb: {
-      return `adv.`;
-    }
-    case PartOfSpeech.Noun: {
-      return `noun`;
-    }
-    case PartOfSpeech.Verb: {
-      return `verb`;
-    }
-    case PartOfSpeech.Pronoun: {
-      return `pron.`;
-    }
-    case PartOfSpeech.Preposition: {
-      return `prep.`;
-    }
-    case PartOfSpeech.Conjunction: {
-      return `conj.`;
-    }
-    case PartOfSpeech.Interjection: {
-      return `intj.`;
-    }
-    case PartOfSpeech.MeasureWord: {
-      return `mw.`;
-    }
-    case PartOfSpeech.Particle: {
-      return `part.`;
-    }
-  }
-}
 
 export function hanziTextFromHanziCharacter(
   character: HanziCharacter,

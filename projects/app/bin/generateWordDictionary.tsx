@@ -14,6 +14,7 @@ import type {
   IdsNode,
   PinyinText,
 } from "#data/model.ts";
+import { partOfSpeechSchema } from "#data/model.ts";
 import type {
   Dictionary,
   HanziWordMeaning,
@@ -26,13 +27,10 @@ import {
   hanziWordMeaningSchema,
   loadCharacters,
   loadDictionary,
-  loadHsk1HanziWords,
   meaningKeyFromHanziWord,
-  partOfSpeechSchema,
 } from "#dictionary.ts";
-import { Alert, MultiSelect, Select } from "@inkjs/ui";
+import { Alert, Select } from "@inkjs/ui";
 import {
-  arrayFilterUniqueWithKey,
   emptyArray,
   mapSetAdd,
   mergeSortComparators,
@@ -48,24 +46,17 @@ import {
 } from "@tanstack/react-query";
 import makeDebug from "debug";
 import { Box, render, Text, useFocus, useInput } from "ink";
-import Link from "ink-link";
 import Spinner from "ink-spinner";
 import TextInput from "ink-text-input";
-import chunk from "lodash/chunk.js";
-import isEqual from "lodash/isEqual.js";
 import type { ReactNode } from "react";
-import { Children, useCallback, useEffect, useMemo, useState } from "react";
+import { Children, useEffect, useMemo, useState } from "react";
 import type { DeepReadonly } from "ts-essentials";
 import yargs from "yargs";
 import { z } from "zod/v4";
-import type { WordListFileBaseName } from "../test/helpers.ts";
 import {
   readDictionary,
-  readHanziWordList,
   upsertHanziWordMeaning,
-  upsertHanziWordWordList,
   writeDictionary,
-  writeHanziWordList,
 } from "../test/helpers.ts";
 import {
   dongChineseData,
@@ -97,20 +88,7 @@ const fsDbCache = makeFsDbCache(
   `openai_chat_cache`,
   debug,
 );
-const archiveCache = makeFsDbCache(
-  import.meta.filename,
-  `archive_messages`,
-  debug,
-);
 const openai = makeSimpleAiClient(fsDbCache);
-
-const wordListFileNames = [
-  `hsk1HanziWords`,
-  `hsk2HanziWords`,
-  `hsk3HanziWords`,
-  `hsk4HanziWords`,
-  `radicalsHanziWords`,
-];
 
 // All root words as well as all the components of each word.
 const allWords = new Set<string>();
@@ -139,236 +117,6 @@ for (const hanzi of await allHanziCharacters()) {
   decomp(hanzi);
 }
 
-interface HanziWordCheckResult {
-  hanziWord: HanziWord;
-  isGood: boolean;
-  reason?: string;
-}
-
-interface HanziWordCheckProgress {
-  resultBatch: HanziWordCheckResult[];
-  itemsDone: number;
-  itemsTotal: number;
-}
-
-async function checkHsk1HanziWords(
-  onProgress: (progress: HanziWordCheckProgress) => void,
-  signal?: AbortSignal,
-) {
-  const hsk1HanziWords = await loadHsk1HanziWords();
-  const dictionary = await loadDictionary();
-  const results: HanziWordCheckResult[] = [];
-
-  onProgress({
-    resultBatch: [],
-    itemsDone: 0,
-    itemsTotal: hsk1HanziWords.length,
-  });
-
-  for (const wordList of chunk(hsk1HanziWords, 10)) {
-    if (signal?.aborted === true) {
-      break;
-    }
-
-    const lookupById = new Map<
-      string,
-      { hanziWord: HanziWord; meaning: DeepReadonly<HanziWordMeaning> }
-    >();
-
-    const inflated: {
-      hanziWord: HanziWord;
-      meaning: DeepReadonly<HanziWordMeaning>;
-      id: string;
-    }[] = [];
-    let i = 0;
-    for (const hanziWord of wordList) {
-      const id = `738274${i++}`;
-      const meaning = dictionary.lookupHanziWord(hanziWord);
-      invariant(meaning != null, `Missing hanzi word for ${hanziWord}`);
-      inflated.push({ hanziWord, id, meaning });
-      lookupById.set(id, { hanziWord, meaning });
-    }
-
-    const json = await openai(
-      [
-        `curriculum.instructions.md`,
-        `word-representation.instructions.md`,
-        `skill-kinds.instructions.md`,
-      ],
-      `
-Can you check my word list for HSK1 and make sure it's correct. I need to know if the gloss I have for each word is correct.
-
-There's too many to give you to check at once, so I'll give them to you in batches. Here's the first batch:
-
-${JSON.stringify(
-  inflated
-    .map(({ hanziWord, meaning, id }) => {
-      return `
-- Hanzi: ${hanziFromHanziWord(hanziWord)}
-  Gloss: ${JSON.stringify(meaning.gloss)}
-  ID: ${id}
-`;
-    })
-    .join(`\n`),
-)}
-  `,
-      z.object({
-        results: z.array(
-          z.object({
-            id: z.string(),
-            isCorrect: z.boolean(),
-            reason: z
-              .string()
-              .describe(`When the meaning isn't correct, explanation for why.`)
-              .optional(),
-          }),
-        ),
-      }),
-    );
-
-    const resultBatch: HanziWordCheckResult[] = json.results.map((x) => {
-      const res = lookupById.get(x.id);
-      invariant(res != null, `Missing lookup for id=${x.id}`);
-      return {
-        hanziWord: res.hanziWord,
-        isGood: x.isCorrect,
-        reason: x.reason,
-      };
-    });
-
-    results.push(...resultBatch);
-
-    onProgress({
-      resultBatch,
-      itemsDone: results.length,
-      itemsTotal: hsk1HanziWords.length,
-    });
-  }
-}
-
-const CheckHsk1HanziWordsApp = ({ onCancel }: { onCancel: () => void }) => {
-  const [progressItemsDone, setProgressItemsDone] = useState<number>();
-  const [progressItemsTotal, setProgressItemsTotal] = useState<number>();
-  const [results, setResults] = useState<HanziWordCheckResult[]>([]);
-
-  useEffect(() => {
-    const controller = new AbortController();
-
-    void checkHsk1HanziWords((progress) => {
-      setProgressItemsDone(progress.itemsDone);
-      setProgressItemsTotal(progress.itemsTotal);
-      setResults((results) => [...results, ...progress.resultBatch]);
-    }, controller.signal);
-
-    return () => {
-      controller.abort();
-    };
-  }, []);
-
-  const isDone =
-    progressItemsDone != null && progressItemsDone === progressItemsTotal;
-
-  const lowConfidenceItems = results
-    .filter((r) => !r.isGood)
-    .filter((r) => archiveCache.get(r.reason) == null);
-
-  const { isFocused } = useFocus({ autoFocus: true });
-
-  const [focusItem, setFocusItem] = useState<HanziWordCheckResult | null>(null);
-
-  return (
-    <Box flexDirection="column" gap={1} marginTop={1}>
-      {focusItem == null ? (
-        <>
-          <Text>
-            Status:{` `}
-            {isDone ? (
-              <Text color="green">Done</Text>
-            ) : (
-              <>
-                <Text color="green">
-                  <Spinner />
-                </Text>
-                {` `}
-                Fetching data…{` `}
-                <Text dimColor>
-                  ({progressItemsDone} / {progressItemsTotal})
-                </Text>
-              </>
-            )}
-          </Text>
-
-          {lowConfidenceItems.length > 0 ? (
-            <>
-              <Text color="yellow">
-                Low confidence items:{` `}
-                <Text dimColor>{lowConfidenceItems.length}</Text>
-              </Text>
-              <Select
-                visibleOptionCount={10}
-                options={lowConfidenceItems.map((d) => ({
-                  label: `${d.hanziWord} ${d.reason ?? ``}`,
-                  value: d.hanziWord,
-                }))}
-                onChange={(hanziWord) => {
-                  const item = lowConfidenceItems.find(
-                    (x) => x.hanziWord === hanziWord,
-                  );
-                  if (item != null) {
-                    setFocusItem(item);
-                  }
-                }}
-              />
-            </>
-          ) : null}
-          <Shortcut
-            disabled={!isFocused}
-            letter="esc"
-            label="Back"
-            action={() => {
-              onCancel();
-            }}
-          />
-        </>
-      ) : null}
-
-      {focusItem == null ? null : (
-        <Box flexDirection="column" gap={1}>
-          <Text>
-            <Text bold>Item:</Text> {focusItem.hanziWord}
-          </Text>
-
-          <Box width={90} flexDirection="column">
-            <Alert variant="warning">
-              <Text>{focusItem.reason}</Text>
-            </Alert>
-            <Box marginLeft={5}>
-              <Shortcut
-                disabled={!isFocused}
-                letter="a"
-                label="Archive message"
-                action={() => {
-                  archiveCache.set(focusItem.reason, true);
-                  setFocusItem(null);
-                }}
-              />
-            </Box>
-          </Box>
-
-          <HanziEditor
-            onCloseAction={() => {
-              setFocusItem(null);
-            }}
-            wordListFileBaseName="hsk1HanziWords"
-            hanzi={hanziFromHanziWord(focusItem.hanziWord)}
-            key={focusItem.hanziWord}
-          />
-        </Box>
-      )}
-    </Box>
-  );
-};
-
 const AfterDelay = ({
   delay,
   action,
@@ -384,253 +132,6 @@ const AfterDelay = ({
   }, [action, delay]);
 
   return null;
-};
-
-const HanziEditor = ({
-  hanzi,
-  wordListFileBaseName,
-  onCloseAction,
-}: {
-  hanzi: string;
-  wordListFileBaseName: string;
-  onCloseAction: () => void;
-}) => {
-  const [query, setQuery] = useState(``);
-
-  const dict = useDictionary().data;
-  const wordListHanziWords = useHanziWordList(wordListFileBaseName).data;
-  const allHanziWords = useMemo(
-    () =>
-      dict == null
-        ? null
-        : new Map([...dict].filter(([k]) => hanziFromHanziWord(k) === hanzi)),
-    [dict, hanzi],
-  );
-
-  const [location, setLocation] = useState<
-    | { type: `list` }
-    | { type: `create` }
-    | { type: `createQuerying` }
-    | {
-        type: `queryPickResult`;
-        results: { meaningKey: string; meaning: HanziWordMeaning }[];
-      }
-    | { type: `saved` }
-    | { type: `editList` }
-    | { type: `edit`; hanziWord: HanziWord }
-    | null
-  >({ type: `list` });
-
-  const [newHanziWordList, setNewHanziWordList] = useState<HanziWord[]>();
-
-  const options = useMemo(
-    () =>
-      [...(allHanziWords?.entries() ?? [])].map(([hanziWord, meaning]) => ({
-        label: `${hanziWord} ${meaning.partOfSpeech ?? ``} ${meaning.gloss.map((x) => `"${x}"`).join(`   `)}`,
-        value: hanziWord,
-      })),
-    [allHanziWords],
-  );
-
-  const onChangeAction = useCallback((value: string[]): void => {
-    setNewHanziWordList(value as HanziWord[]);
-  }, []);
-
-  return (
-    <Box flexDirection="column" gap={1}>
-      {allHanziWords == null || wordListHanziWords == null ? (
-        <Box gap={1}>
-          <Spinner />
-          <Text>Loading data…</Text>
-        </Box>
-      ) : location?.type === `saved` ? (
-        <Box gap={1}>
-          <Text color="green">Saved</Text>
-          <AfterDelay
-            delay={500}
-            action={() => {
-              setLocation({ type: `list` });
-            }}
-          />
-        </Box>
-      ) : location?.type === `edit` ? (
-        <HanziWordEditor
-          hanziWord={location.hanziWord}
-          onCancel={() => {
-            setLocation({ type: `editList` });
-          }}
-          onSave={() => {
-            setLocation({ type: `saved` });
-          }}
-        />
-      ) : location?.type === `editList` ? (
-        <>
-          <Text bold>Pick an item to edit:</Text>
-
-          <Select
-            options={options}
-            onChange={(value) => {
-              setLocation({ type: `edit`, hanziWord: value as HanziWord });
-            }}
-          />
-
-          <Shortcuts>
-            <Shortcut
-              letter="esc"
-              label="Back"
-              action={() => {
-                setLocation({ type: `list` });
-              }}
-            />
-          </Shortcuts>
-        </>
-      ) : location?.type === `list` ? (
-        <>
-          <Text>
-            <Text bold>
-              {wordListFileBaseName}.asset.json entries for {hanzi}
-            </Text>
-            {` `}
-            <Text dimColor>
-              (<GoogleTranslateLink hanzi={hanzi} />)
-            </Text>
-          </Text>
-
-          <MultiSelect
-            defaultValue={wordListHanziWords}
-            options={options}
-            onChange={onChangeAction}
-          />
-
-          <Shortcuts>
-            <Shortcut
-              letter="a"
-              label="Add"
-              action={() => {
-                setLocation({ type: `create` });
-              }}
-            />
-            <Shortcut
-              letter="e"
-              label="Edit"
-              action={() => {
-                setLocation({ type: `editList` });
-              }}
-            />
-            <Shortcut
-              letter="esc"
-              label="Back"
-              action={() => {
-                onCloseAction();
-              }}
-            />
-          </Shortcuts>
-        </>
-      ) : location?.type === `queryPickResult` ? (
-        <>
-          <Text>
-            <Text bold>
-              {hanzi} &quot;{query}&quot;
-            </Text>
-            {` `}
-            candidates:
-          </Text>
-
-          <Select2
-            gap={1}
-            items={location.results}
-            visibleOptionCount={3}
-            renderItem={(item) => (
-              <DictionaryHanziWordEntry
-                hanziWord={buildHanziWord(hanzi, item.meaningKey)}
-                meaning={item.meaning}
-              />
-            )}
-            onChange={(value) => {
-              void (async () => {
-                const hanziWord = buildHanziWord(hanzi, value.meaningKey);
-                await saveUpsertHanziWordMeaning(hanziWord, value.meaning);
-                setLocation({ type: `saved` });
-              })();
-            }}
-          />
-        </>
-      ) : location?.type === `createQuerying` ? (
-        <Box gap={1}>
-          <Spinner />
-          <Text>
-            Fetching meanings for {hanzi} &quot;{query}&quot;…
-          </Text>
-        </Box>
-      ) : location?.type === `create` ? (
-        <>
-          <Text bold>Create a new hanzi meaning</Text>
-          <Box>
-            <Text dimColor>Gloss</Text>
-            <TextInput
-              value={query}
-              onChange={setQuery}
-              onSubmit={() => {
-                void (async () => {
-                  setLocation({ type: `createQuerying` });
-
-                  const { results } = await openai(
-                    [
-                      `curriculum.instructions.md`,
-                      `word-representation.instructions.md`,
-                      `skill-kinds.instructions.md`,
-                    ],
-                    `
-I want to create a new HanziWord entry for ${hanzi} based on the gloss: ${query}
-
-Can you give me a few options to pick from.`,
-                    z.object({
-                      results: z.array(
-                        z.object({
-                          meaningKey: z.string(),
-                          meaning: hanziWordMeaningSchema,
-                        }),
-                      ),
-                    }),
-                  );
-
-                  setLocation({ type: `queryPickResult`, results });
-                })();
-              }}
-            />
-          </Box>
-
-          <Shortcuts>
-            <Shortcut
-              letter="esc"
-              label="Back"
-              action={() => {
-                setLocation({ type: `list` });
-              }}
-            />
-          </Shortcuts>
-        </>
-      ) : null}
-
-      {newHanziWordList == null ? null : (
-        <Shortcuts>
-          <Shortcut
-            letter="s"
-            label="Save"
-            action={() => {
-              void (async () => {
-                await writeHanziWordList(
-                  wordListFileBaseName,
-                  newHanziWordList,
-                );
-                setLocation({ type: `saved` });
-              })();
-            }}
-          />
-        </Shortcuts>
-      )}
-    </Box>
-  );
 };
 
 // @ts-expect-error keep it around for now, will be used later
@@ -704,7 +205,7 @@ async function openAiHanziWordGlossHintQuery(
     hanziIds = idsNodeToString(flattenIds(parseIds(hanziIds)), (x) => x);
 
     const query = `
-I'm having trouble remembering that ${hanzi} means **${meaning.gloss.join(`/`)}** ${meaning.partOfSpeech == null ? `` : `(${meaning.partOfSpeech})`}.
+I'm having trouble remembering that ${hanzi} means **${meaning.gloss.join(`/`)}** ${meaning.pos == null ? `` : `(${meaning.pos})`}.
 
 ${hanziIds.length > 1 ? `\nI've worked out that ${hanzi} = ${hanziIds}` : ``}
 ${[...componentGlosses.entries()]
@@ -784,7 +285,7 @@ const HanziWordEditor = ({
                 {
                   id: `partOfSpeech`,
                   label: `Part of speech`,
-                  value: meaning.partOfSpeech ?? ``,
+                  value: meaning.pos ?? ``,
                 },
               ]),
         ]}
@@ -799,13 +300,13 @@ const HanziWordEditor = ({
               const newValue = edits.get(`partOfSpeech`)?.trim();
               invariant(newValue != null);
 
-              const newPartOfSpeech =
+              const newPos =
                 newValue === ``
                   ? undefined
                   : partOfSpeechSchema.parse(newValue);
               mutations.push(() =>
                 saveUpsertHanziWordMeaning(hanziWord, {
-                  partOfSpeech: newPartOfSpeech,
+                  pos: newPos,
                 }),
               );
               edits.delete(`partOfSpeech`);
@@ -1363,111 +864,6 @@ const DongChineseHanziEntry = ({ hanzi }: { hanzi: string }) => {
   );
 };
 
-const WordListEditor = ({
-  wordListFileBaseName,
-  onCancel,
-}: {
-  wordListFileBaseName: WordListFileBaseName;
-  onCancel: () => void;
-}) => {
-  const [location, setLocation] = useState<
-    | { type: `list` }
-    | { type: `edit`; hanziWord: HanziWord }
-    | { type: `add` }
-    | null
-  >({ type: `list` });
-
-  switch (location?.type) {
-    case `list`: {
-      return (
-        <Box gap={1} flexDirection="column">
-          <WordListHanziPicker
-            wordListName={wordListFileBaseName}
-            onSubmit={(hanziWord) => {
-              setLocation({ type: `edit`, hanziWord });
-            }}
-          />
-
-          <Box flexGrow={1} />
-
-          <Shortcuts>
-            <Shortcut letter="esc" label="Back" action={onCancel} />
-            <Shortcut
-              letter="a"
-              label="Add"
-              action={() => {
-                setLocation({ type: `add` });
-              }}
-            />
-          </Shortcuts>
-        </Box>
-      );
-    }
-    case `edit`: {
-      return (
-        <HanziEditor
-          hanzi={hanziFromHanziWord(location.hanziWord)}
-          wordListFileBaseName={wordListFileBaseName}
-          onCloseAction={() => {
-            setLocation({ type: `list` });
-          }}
-        />
-      );
-    }
-    case `add`: {
-      return (
-        <DictionaryPicker
-          onSubmit={(hanziWords) => {
-            void (async () => {
-              for (const hanziWord of hanziWords) {
-                await upsertHanziWordWordListAndInvalidateCache(
-                  hanziWord,
-                  wordListFileBaseName,
-                );
-              }
-              setLocation({ type: `list` });
-            })();
-          }}
-          onCancel={() => {
-            setLocation({ type: `list` });
-          }}
-        />
-      );
-    }
-    case undefined: {
-      return null;
-    }
-  }
-};
-
-const WordListHanziPicker = ({
-  wordListName,
-  onSubmit,
-}: {
-  wordListName: string;
-  onSubmit: (hanziWord: HanziWord) => void;
-}) => {
-  const wordList = useHanziWordList(wordListName).data;
-
-  return (
-    <Box flexDirection="column" gap={1} minHeight={15}>
-      <Text bold>{wordListName}.asset.json</Text>
-
-      <Select2
-        items={wordList ?? []}
-        filter={(query, item) => item.includes(query)}
-        visibleOptionCount={10}
-        renderItem={(hanziWord, isSelected) => (
-          <Text color={isSelected ? `blueBright` : undefined}>{hanziWord}</Text>
-        )}
-        onChange={(hanziWord) => {
-          onSubmit(hanziWord);
-        }}
-      />
-    </Box>
-  );
-};
-
 interface HanziWordCreateNewResult {
   type: `new`;
   sources: (`dongChinese` | `openai`)[];
@@ -1577,7 +973,7 @@ async function generateHanziWordResults(
             meaning: {
               gloss,
               pinyin: getDongChinesePronunciation(lookup),
-              partOfSpeech: openAiResult.meaning.partOfSpeech,
+              pos: openAiResult.meaning.pos,
             },
           });
         }
@@ -1906,29 +1302,13 @@ const MultiLinePasteInput = ({
 const queryClient = new QueryClient();
 
 const App = () => {
-  const [location, setLocation] = useState<
-    | { type: `checkHsk1HanziWords` }
-    | { type: `wordListEditor`; wordListFileBaseName: WordListFileBaseName }
-    | { type: `dictionaryEditor` }
-    | null
-  >();
+  const [location, setLocation] = useState<{
+    type: `dictionaryEditor`;
+  } | null>();
 
   return (
     <QueryClientProvider client={queryClient}>
-      {location?.type === `checkHsk1HanziWords` ? (
-        <CheckHsk1HanziWordsApp
-          onCancel={() => {
-            setLocation(undefined);
-          }}
-        />
-      ) : location?.type === `wordListEditor` ? (
-        <WordListEditor
-          wordListFileBaseName={location.wordListFileBaseName}
-          onCancel={() => {
-            setLocation(undefined);
-          }}
-        />
-      ) : location?.type === `dictionaryEditor` ? (
+      {location?.type === `dictionaryEditor` ? (
         <DictionaryEditor
           onCancel={() => {
             setLocation(undefined);
@@ -1943,65 +1323,12 @@ const App = () => {
             },
             { value: `checkHsk1HanziWords`, label: `Check HSK1 hanzi words` },
             {
-              value: `hsk1WordList`,
-              label: `HSK1 word list`,
-            },
-            {
-              value: `hsk2WordList`,
-              label: `HSK2 word list`,
-            },
-            {
-              value: `hsk3WordList`,
-              label: `HSK3 word list`,
-            },
-            {
-              value: `hsk4WordList`,
-              label: `HSK4 word list`,
-            },
-            {
               value: `editRadicalsWordList`,
               label: `Edit radicals word list`,
             },
           ]}
           onChange={(value) => {
             switch (value) {
-              case `checkHsk1HanziWords`: {
-                setLocation({ type: `checkHsk1HanziWords` });
-
-                break;
-              }
-              case `hsk1WordList`: {
-                setLocation({
-                  type: `wordListEditor`,
-                  wordListFileBaseName: `hsk1HanziWords`,
-                });
-
-                break;
-              }
-              case `hsk2WordList`: {
-                setLocation({
-                  type: `wordListEditor`,
-                  wordListFileBaseName: `hsk2HanziWords`,
-                });
-
-                break;
-              }
-              case `hsk3WordList`: {
-                setLocation({
-                  type: `wordListEditor`,
-                  wordListFileBaseName: `hsk3HanziWords`,
-                });
-
-                break;
-              }
-              case `hsk4WordList`: {
-                setLocation({
-                  type: `wordListEditor`,
-                  wordListFileBaseName: `hsk4HanziWords`,
-                });
-
-                break;
-              }
               case `dictionaryEditor`: {
                 setLocation({
                   type: `dictionaryEditor`,
@@ -2056,11 +1383,6 @@ const DictionaryHanziWordEntry = ({
 
   meaning ??= res.data?.get(hanziWord);
 
-  const hsk1WordList = useHanziWordList(`hsk1HanziWords`).data;
-  const hsk2WordList = useHanziWordList(`hsk2HanziWords`).data;
-  const hsk3WordList = useHanziWordList(`hsk3HanziWords`).data;
-  const hsk4WordList = useHanziWordList(`hsk4HanziWords`).data;
-
   const flagElement = useMemo(() => {
     const nonNullChilds = Children.map(flags, (child) => child);
     return nonNullChilds == null || nonNullChilds.length === 0 ? null : (
@@ -2068,27 +1390,11 @@ const DictionaryHanziWordEntry = ({
     );
   }, [flags]);
 
-  const refs = useMemo(() => {
-    const refs: string[] = [];
-    for (const [wordListName, wordList] of [
-      [`hsk1`, hsk1WordList],
-      [`hsk2`, hsk2WordList],
-      [`hsk3`, hsk3WordList],
-      [`hsk4`, hsk4WordList],
-    ] as const) {
-      if (wordList?.includes(hanziWord) === true) {
-        refs.push(wordListName);
-      }
-    }
-    return refs;
-  }, [hanziWord, hsk1WordList, hsk2WordList, hsk3WordList, hsk4WordList]);
-
   return (
     <Box flexDirection="column" width="100%">
       <Box justifyContent="space-between">
         <Text>
           <Text color="cyan">{hanziWord}</Text>
-          {refs.length > 0 ? <Text dimColor> ({refs.join(`, `)})</Text> : ``}
         </Text>
         {flagElement}
       </Box>
@@ -2125,7 +1431,7 @@ const DictionaryHanziWordEntry = ({
               part of speech:
             </Text>
             {` `}
-            <Text italic>{meaning.partOfSpeech}</Text>
+            <Text italic>{meaning.pos}</Text>
           </Text>
         </Box>
       )}
@@ -2158,16 +1464,6 @@ async function renameHanziWord(
   dict.set(newHanziWord, meaning);
   dict.delete(oldHanziWord);
   await writeDictionaryAndInvalidateCache(dict);
-
-  for (const wordListFileName of wordListFileNames) {
-    const hanziWordList = await readHanziWordList(wordListFileName);
-    const newHanziWordList = hanziWordList.map((x) =>
-      x === oldHanziWord ? newHanziWord : x,
-    );
-    if (!isEqual(hanziWordList, newHanziWordList)) {
-      await writeHanziWordList(wordListFileName, newHanziWordList);
-    }
-  }
 }
 
 async function mergeHanziWord(
@@ -2182,15 +1478,6 @@ async function mergeHanziWord(
   dict.delete(hanziWordToRemove);
 
   await writeDictionaryAndInvalidateCache(dict);
-
-  // Update all word lists
-  for (const wordListFileName of wordListFileNames) {
-    const data = await readHanziWordList(wordListFileName);
-    const filtered = data
-      .map((x) => (x === hanziWordToRemove ? hanziWordToKeep : x))
-      .filter(arrayFilterUniqueWithKey((x) => x));
-    await writeHanziWordList(wordListFileName, filtered);
-  }
 }
 
 async function saveUpsertHanziWordMeaning(
@@ -2208,35 +1495,6 @@ async function writeDictionaryAndInvalidateCache(dict: Dictionary) {
   await writeDictionary(dict);
   await queryClient.invalidateQueries({ queryKey: [`loadDictionary`] });
 }
-
-async function upsertHanziWordWordListAndInvalidateCache(
-  hanziWord: HanziWord,
-  wordListFileBaseName: WordListFileBaseName,
-) {
-  await upsertHanziWordWordList(hanziWord, wordListFileBaseName);
-  await queryClient.invalidateQueries({
-    queryKey: [`loadHanziWordList`, wordListFileBaseName],
-  });
-}
-
-function useHanziWordList(wordListFileName: string) {
-  return useQuery({
-    queryKey: [`loadHanziWordList`, wordListFileName],
-    queryFn: async () => {
-      return await readHanziWordList(wordListFileName);
-    },
-    networkMode: `offlineFirst`,
-    structuralSharing: false,
-  });
-}
-
-const GoogleTranslateLink = ({ hanzi }: { hanzi: string }) => (
-  <Link
-    url={`https://translate.google.com/?sl=zh-CN&tl=en&text=${encodeURIComponent(hanzi)}&op=translate`}
-  >
-    Google Translate
-  </Link>
-);
 
 interface FormField {
   id: string;

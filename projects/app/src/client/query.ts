@@ -16,14 +16,7 @@ import {
   rankRules,
   skillLearningGraph,
 } from "@/data/skills";
-import {
-  getIsStructuralHanzi,
-  loadDictionary,
-  loadHsk1HanziWords,
-  loadHsk2HanziWords,
-  loadHsk3HanziWords,
-  loadHsk4HanziWords,
-} from "@/dictionary";
+import { getIsStructuralHanzi, loadDictionary } from "@/dictionary";
 import { devToolsSlowQuerySleepIfEnabled } from "@/util/devtools";
 import type { Rating } from "@/util/fsrs";
 import type { RizzleAnyEntity, RizzleEntityOutput } from "@/util/rizzle";
@@ -318,19 +311,13 @@ export const hanziWordsByRankQuery = (r: Rizzle) =>
   );
 
 export async function getAllTargetHanziWords(): Promise<HanziWord[]> {
-  const [hsk1HanziWords, hsk2HanziWords, hsk3HanziWords, hsk4HanziWords] =
-    await Promise.all([
-      loadHsk1HanziWords(),
-      loadHsk2HanziWords(),
-      loadHsk3HanziWords(),
-      loadHsk4HanziWords(),
-    ]);
+  const dictionary = await loadDictionary();
 
   return [
-    ...hsk1HanziWords,
-    ...hsk2HanziWords,
-    ...hsk3HanziWords,
-    ...hsk4HanziWords,
+    ...dictionary.hsk1HanziWords,
+    ...dictionary.hsk2HanziWords,
+    ...dictionary.hsk3HanziWords,
+    ...dictionary.hsk4HanziWords,
   ].filter(arrayFilterUniqueWithKey((x) => x));
 }
 

@@ -21,12 +21,7 @@ import {
   skillReviewQueue,
   walkSkillAndDependencies,
 } from "#data/skills.ts";
-import {
-  getIsStructuralHanzi,
-  loadHsk1HanziWords,
-  loadHsk2HanziWords,
-  loadHsk3HanziWords,
-} from "#dictionary.ts";
+import { getIsStructuralHanzi, loadDictionary } from "#dictionary.ts";
 import { Rating } from "#util/fsrs.ts";
 import { r } from "#util/rizzle.ts";
 import { invariant } from "@pinyinly/lib/invariant";
@@ -328,11 +323,12 @@ describe(
     });
 
     test(`works for hsk words`, async () => {
+      const dictionary = await loadDictionary();
       await skillLearningGraph({
         targetSkills: [
-          ...(await loadHsk1HanziWords()),
-          ...(await loadHsk2HanziWords()),
-          ...(await loadHsk3HanziWords()),
+          ...dictionary.hsk1HanziWords,
+          ...dictionary.hsk2HanziWords,
+          ...dictionary.hsk3HanziWords,
         ].map((w) => hanziWordToGloss(w)),
       });
     });

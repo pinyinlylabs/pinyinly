@@ -36,8 +36,6 @@ export const rSkillKind = memoize0(function rSkillKind() {
   });
 });
 
-// Skill e.g. `he:好:good`
-
 export const rPartOfSpeech = memoize0(function rPartOfSpeech() {
   return r.enum(PartOfSpeech, {
     [PartOfSpeech.Noun]: `n`,
@@ -45,11 +43,15 @@ export const rPartOfSpeech = memoize0(function rPartOfSpeech() {
     [PartOfSpeech.Adjective]: `adj`,
     [PartOfSpeech.Adverb]: `adv`,
     [PartOfSpeech.Pronoun]: `pron`,
+    [PartOfSpeech.Numeral]: `num`,
+    [PartOfSpeech.MeasureWordOrClassifier]: `m`,
     [PartOfSpeech.Preposition]: `prep`,
     [PartOfSpeech.Conjunction]: `conj`,
+    [PartOfSpeech.AuxiliaryWordOrParticle]: `aux`,
     [PartOfSpeech.Interjection]: `int`,
-    [PartOfSpeech.MeasureWord]: `mw`,
-    [PartOfSpeech.Particle]: `part`,
+    [PartOfSpeech.Prefix]: `pre`,
+    [PartOfSpeech.Suffix]: `suf`,
+    [PartOfSpeech.Phonetic]: `pho`,
   });
 });
 

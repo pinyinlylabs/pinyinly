@@ -54,7 +54,7 @@ function MultipleMeanings({
   meanings: readonly HanziWordWithMeaning[];
 }) {
   const pinyins = meanings
-    .map(([, meaning]) => meaning.pinyin?.[0]?.[0])
+    .map(([, meaning]) => meaning.pinyin?.[0])
     .filter((x) => x != null)
     .filter(arrayFilterUniqueWithKey((x) => x));
 

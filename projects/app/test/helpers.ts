@@ -5,12 +5,13 @@ import path from "node:path";
 import { vi } from "vitest";
 
 import type { HanziWord } from "#data/model.ts";
+import { rPartOfSpeech } from "#data/rizzleSchema.js";
 import type {
   Dictionary,
   HanziWordMeaning,
   hanziWordMeaningSchema,
 } from "#dictionary.ts";
-import { dictionarySchema, wordListSchema } from "#dictionary.ts";
+import { dictionarySchema } from "#dictionary.ts";
 import { sortComparatorString } from "@pinyinly/lib/collections";
 import { readFileWithSchema, writeJsonFileIfChanged } from "@pinyinly/lib/fs";
 import type { z } from "zod/v4";
@@ -134,42 +135,6 @@ export async function writeDictionary(dict: Dictionary) {
   await writeJsonFileIfChanged(dictionaryFilePath, unparseDictionary(dict), 1);
 }
 
-export async function readHanziWordList(name: string) {
-  return await readFileWithSchema(
-    path.join(dataDir, `${name}.asset.json`),
-    wordListSchema,
-    [],
-  );
-}
-
-export async function writeHanziWordList(
-  wordListFileName: string,
-  data: HanziWord[],
-) {
-  await writeJsonFileIfChanged(
-    path.join(dataDir, `${wordListFileName}.asset.json`),
-    data.sort(),
-  );
-}
-
-export type WordListFileBaseName =
-  | `hsk1HanziWords`
-  | `hsk2HanziWords`
-  | `hsk3HanziWords`
-  | `hsk4HanziWords`;
-
-export async function upsertHanziWordWordList(
-  hanziWord: HanziWord,
-  wordListFileBaseName: WordListFileBaseName,
-) {
-  const data = await readHanziWordList(wordListFileBaseName);
-
-  if (!data.includes(hanziWord)) {
-    data.push(hanziWord);
-    await writeHanziWordList(wordListFileBaseName, data);
-  }
-}
-
 export function upsertHanziWordMeaning(
   dict: Dictionary,
   hanziWord: HanziWord,
@@ -197,7 +162,13 @@ export function unparseDictionary(
     .map(([hanziWord, meaning]): z.input<typeof dictionarySchema>[number] => {
       return [
         hanziWord,
-        meaning satisfies z.input<typeof hanziWordMeaningSchema>,
+        {
+          ...(meaning satisfies z.input<typeof hanziWordMeaningSchema>),
+          pos:
+            meaning.pos == null
+              ? undefined
+              : rPartOfSpeech().marshal(meaning.pos),
+        },
       ];
     })
     .sort(sortComparatorString((x) => x[0]));

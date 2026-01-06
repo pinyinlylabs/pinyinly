@@ -1,4 +1,5 @@
 import type { HanziText, PinyinText } from "@/data/model";
+import { characterCount } from "@/util/unicode";
 import type { PropsOf } from "@pinyinly/lib/types";
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
@@ -44,11 +45,26 @@ export function HanziTile({
         })}
       >
         {pinyin == null ? null : (
-          <Text className={pinyinTextClass({ size })}>{pinyin}</Text>
+          <Text
+            className={pinyinTextClass({ size })}
+            style={{ "--char-count": `${characterCount(pinyin)}` }}
+          >
+            {pinyin}
+          </Text>
         )}
-        <Text className={hanziTextClass({ size })}>{hanzi}</Text>
+        <Text
+          className={hanziTextClass({ size })}
+          style={{ "--char-count": `${characterCount(hanzi)}` }}
+        >
+          {hanzi}
+        </Text>
         {gloss == null ? null : (
-          <Text className={glossTextClass({ size })}>{gloss}</Text>
+          <Text
+            className={glossTextClass({ size })}
+            style={{ "--char-count": `${characterCount(gloss)}` }}
+          >
+            {gloss}
+          </Text>
         )}
         {progress == null ? null : (
           <View
@@ -83,9 +99,9 @@ const tileClass = tv({
       true: ``,
     },
     size: {
-      "10": `h-[40px] rounded-md px-3`,
-      "20": `min-w-[80px] rounded-lg px-4 py-2`,
-      "47": `min-h-[188px] min-w-[188px] rounded-lg px-6 py-3`,
+      "10": `h-[40px] rounded-md p-2`,
+      "20": `w-[80px] rounded-lg py-2`,
+      "47": `min-h-[188px] w-[188px] rounded-lg py-3`,
     },
   },
   compoundVariants: [
@@ -98,7 +114,7 @@ const tileClass = tv({
 });
 
 const outlineClass = tv({
-  base: `absolute inset-0 z-10 select-none`,
+  base: `pointer-events-none absolute inset-0 z-10`,
   variants: {
     variant: {
       outline: ``,
@@ -141,34 +157,58 @@ const progressBarMaskClass = tv({
 });
 
 const pinyinTextClass = tv({
-  base: `text-center font-sans font-medium text-fg-loud`,
+  base: `overflow-hidden text-center font-sans font-medium text-fg-loud`,
   variants: {
     size: {
       "10": `hidden`,
-      "20": `mb-1 text-base`,
-      "47": `mb-1 text-lg/5`,
+      // Interpolate between 10px-38px based on character count. 80px is the
+      // tile width, 2px is border, 16px is the padding, 2 is glyph scale factor.
+      "20": `
+        h-[24px] px-2 text-[clamp(10px,(80px-2px-16px)/var(--char-count)*2,18px)] leading-tight
+      `,
+      // Interpolate between 10px-38px based on character count. 80px is the
+      // tile width, 2px is border, 16px is the padding, 2 is glyph scale factor.
+      "47": `
+        h-[24px] px-2 text-[clamp(10px,(188px-2px-16px)/var(--char-count)*2,18px)] leading-tight
+      `,
     },
   },
 });
 
 const hanziTextClass = tv({
-  base: `text-center font-sans font-medium text-fg-loud`,
+  base: `max-w-full content-center text-center font-sans font-medium text-fg-loud`,
   variants: {
     size: {
       "10": `text-[24px]/normal`,
-      "20": `text-[38px]/[46px]`,
-      "47": `text-[100px]/[110px]`,
+      // Interpolate between 10px-38px based on character count. 80px is the
+      // tile width, 2px is border, 8px is the padding.
+      "20": `h-12 px-1 text-[clamp(10px,(80px-2px-8px)/var(--char-count),38px)] leading-none`,
+      // Interpolate between 10px-38px based on character count. 80px is the
+      // tile width, 2px is border, 16px is the padding.
+      "47": `
+        h-[110px] px-2 text-[clamp(10px,(188px-2px-16px)/var(--char-count),100px)] leading-[110px]
+      `,
     },
   },
 });
 
 const glossTextClass = tv({
-  base: `text-center font-sans text-fg-loud`,
+  base: `max-w-full content-center text-center font-sans text-fg-loud`,
   variants: {
     size: {
       "10": `hidden`,
-      "20": `text-base font-semibold`,
-      "47": `mb-1 text-2xl/7 font-bold`,
+      // Interpolate between 12px-16px based on character count. 80px is the
+      // tile width, 2px is border, 8px is the padding, 3 is the number of lines.
+      "20": `
+        h-10 px-2 text-[clamp(10px,(80px-2px-16px)*3/var(--char-count),16px)] font-semibold
+        leading-tight
+      `,
+      // Interpolate between 12px-24px based on character count. 188px is the
+      // tile width, 24px is the padding, 3 is the number of lines.
+      "47": `
+        h-14 px-6 text-[clamp(12px,(188px-2px-24px)*3/var(--char-count),24px)] font-bold
+        leading-tight
+      `,
     },
   },
 });

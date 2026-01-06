@@ -128,17 +128,34 @@ const skillKindSchema = z.enum({
 export const SkillKind = skillKindSchema.enum;
 export type SkillKind = z.infer<typeof skillKindSchema>;
 
-const partOfSpeechSchema = z.enum({
-  Noun: `debug--Noun`,
-  Verb: `debug--Verb`,
-  Adjective: `debug--Adjective`,
-  Adverb: `debug--Adverb`,
-  Pronoun: `debug--Pronoun`,
-  Preposition: `debug--Preposition`,
-  Conjunction: `debug--Conjunction`,
-  Interjection: `debug--Interjection`,
-  MeasureWord: `debug--MeasureWord`,
-  Particle: `debug--Particle`,
+export const hskLevelSchema = z.enum({
+  "1": `1`,
+  "2": `2`,
+  "3": `3`,
+  "4": `4`,
+  "5": `5`,
+  "6": `6`,
+  "7-9": `7-9`,
+});
+export const HskLevel = hskLevelSchema.enum;
+export type HskLevel = z.infer<typeof hskLevelSchema>;
+
+// Adopted from https://github.com/ivankra/hsk30
+export const partOfSpeechSchema = z.enum({
+  Noun: `debug--Noun (名)`, // noun
+  Verb: `debug--Verb (动)`, // verb
+  Adjective: `debug--Adjective (形)`, // adjective; usually `Vs` (state verb, 狀態動詞) in taiwanese linguistical tradition and TOCFL
+  Adverb: `debug--Adverb (副)`, // adverb
+  Pronoun: `debug--Pronoun (代)`, // pronoun; usually `Det` in TOCFL
+  Numeral: `debug--Numeral (数)`, // numeral
+  MeasureWordOrClassifier: `debug--MeasureWordOrClassifier (量)`, // measure word/classifier
+  Preposition: `debug--Preposition (介)`, // preposition
+  Conjunction: `debug--Conjunction (连)`, // conjunction
+  AuxiliaryWordOrParticle: `debug--AuxiliaryWordOrParticle (助)`, // auxiliary word/particle; usually `Ptc` in TOCFL
+  Interjection: `debug--Interjection (叹)`, // interjection/exclamation/particle, e.g. 喂, 啊, 哎呀
+  Prefix: `debug--Prefix (前缀)`, // prefix bound forms
+  Suffix: `debug--Suffix (后缀)`, // suffix bound forms
+  Phonetic: `debug--Phonetic (拟声)`, // e.g. 哈哈 [hāhā]
 });
 export const PartOfSpeech = partOfSpeechSchema.enum;
 export type PartOfSpeech = z.infer<typeof partOfSpeechSchema>;
