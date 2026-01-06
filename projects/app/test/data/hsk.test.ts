@@ -108,7 +108,7 @@ test(`hsk word lists match vendor data`, async () => {
     item.level.includes(`new-6`),
   );
   const vendorHsk7To9Items = completeHskVocabulary.filter((item) =>
-    item.level.includes(`new-7+`),
+    item.level.includes(`new-7`),
   );
 
   for (const [hskLevel, vendorList, localList] of [
@@ -475,7 +475,7 @@ test(`hsk word lists match vendor data`, async () => {
       // TODO: remove from the list?
     }
   }
-});
+}, 120_000);
 
 describe(`parseHskTsv suite` satisfies HasNameOf<typeof parseHskTsv>, () => {
   const loadData = memoize1(

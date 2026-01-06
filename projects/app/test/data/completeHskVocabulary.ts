@@ -27,7 +27,7 @@ export const completeHskVocabularyItemSchema = z
         z.literal(`new-4`),
         z.literal(`new-5`),
         z.literal(`new-6`),
-        z.literal(`new-7+`),
+        z.literal(`new-7`),
       ]),
     ),
     frequency: z.number(),
