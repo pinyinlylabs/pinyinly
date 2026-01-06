@@ -1,4 +1,4 @@
-import { HanziWordTile } from "@/client/ui/HanziWordTile";
+import { GroupedHanziWordTiles } from "@/client/ui/GroupedHanziWordTiles";
 import { loadDictionary } from "@/dictionary";
 import { use } from "react";
 import { Text, View } from "react-native";
@@ -12,11 +12,7 @@ export default function SkillsHsk1Page() {
         <Text className="pyly-body-title">HSK 1</Text>
       </View>
 
-      <View className="flex-row flex-wrap gap-2">
-        {dictionary.hsk1HanziWords.map((hanziWord) => (
-          <HanziWordTile hanziWord={hanziWord} key={hanziWord} linked />
-        ))}
-      </View>
+      <GroupedHanziWordTiles hanziWords={dictionary.hsk1HanziWords} />
     </View>
   );
 }
