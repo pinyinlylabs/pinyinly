@@ -98,7 +98,7 @@ const tileClass = tv({
 });
 
 const outlineClass = tv({
-  base: `absolute inset-0 z-10 select-none`,
+  base: `pointer-events-none absolute inset-0 z-10`,
   variants: {
     variant: {
       outline: ``,
