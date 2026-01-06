@@ -157,19 +157,21 @@ const progressBarMaskClass = tv({
 });
 
 const pinyinTextClass = tv({
-  base: `overflow-hidden text-center font-sans font-medium text-fg-loud`,
+  base: `content-center overflow-hidden text-center font-sans text-fg-loud/80`,
   variants: {
     size: {
       "10": `hidden`,
-      // Interpolate between 10px-38px based on character count. 80px is the
+      // Interpolate between 10px-14px based on character count. 80px is the
       // tile width, 2px is border, 16px is the padding, 2 is glyph scale factor.
       "20": `
-        h-[24px] px-2 text-[clamp(10px,(80px-2px-16px)/var(--char-count)*2,18px)] leading-tight
+        h-[24px] px-2 text-[clamp(10px,(80px-2px-16px)/var(--char-count)*2,14px)] font-light
+        leading-none
       `,
-      // Interpolate between 10px-38px based on character count. 80px is the
+      // Interpolate between 10px-18px based on character count. 80px is the
       // tile width, 2px is border, 16px is the padding, 2 is glyph scale factor.
       "47": `
-        h-[24px] px-2 text-[clamp(10px,(188px-2px-16px)/var(--char-count)*2,18px)] leading-tight
+        h-[24px] px-2 text-[clamp(10px,(188px-2px-16px)/var(--char-count)*2,18px)] font-medium
+        leading-tight
       `,
     },
   },
@@ -193,15 +195,15 @@ const hanziTextClass = tv({
 });
 
 const glossTextClass = tv({
-  base: `max-w-full content-center text-center font-sans text-fg-loud`,
+  base: `max-w-full content-center text-center font-sans text-fg-loud/90`,
   variants: {
     size: {
       "10": `hidden`,
-      // Interpolate between 12px-16px based on character count. 80px is the
+      // Interpolate between 12px-14px based on character count. 80px is the
       // tile width, 2px is border, 8px is the padding, 3 is the number of lines.
       "20": `
-        h-10 px-2 text-[clamp(10px,(80px-2px-16px)*3/var(--char-count),16px)] font-semibold
-        leading-tight
+        h-8 px-2 text-[clamp(10px,(80px-2px-16px)*3/var(--char-count),14px)] font-semibold
+        leading-none
       `,
       // Interpolate between 12px-24px based on character count. 188px is the
       // tile width, 24px is the padding, 3 is the number of lines.
