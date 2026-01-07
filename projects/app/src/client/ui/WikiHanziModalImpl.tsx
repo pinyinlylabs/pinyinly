@@ -96,7 +96,7 @@ function Header({
           <View className="flex-1 content-center items-center">
             <Text
               className={`
-                text-3xl text-fg-loud
+                font-sans text-3xl text-fg-loud
 
                 ${showHeaderHanziTile ? `opacity-100 transition-opacity` : `opacity-0`}
               `}
