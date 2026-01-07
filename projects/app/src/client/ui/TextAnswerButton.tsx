@@ -393,7 +393,7 @@ const textClass = tv({
   // It's important to have decoration-transparent otherwise when the decoration
   // animates in it will start as white and look jarring.
   base: `
-    px-1 py-[2px] text-center font-normal decoration-transparent
+    px-1 py-[2px] text-center font-sans font-normal decoration-transparent
 
     web:transition-colors
   `,
