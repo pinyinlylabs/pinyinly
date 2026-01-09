@@ -3,19 +3,12 @@ import type { HanziText } from "@/data/model";
 import { loadDictionary } from "@/dictionary";
 import type { IsExhaustedRest, PropsOf } from "@pinyinly/lib/types";
 import { use, useState } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { useIntersectionObserver, useTimeout } from "usehooks-ts";
-import { CloseButton2 } from "./CloseButton2";
 import { HanziTile } from "./HanziTile";
 import { PylyMdxComponents } from "./PylyMdxComponents";
 
-export function WikiHanziModalImpl({
-  hanzi,
-  onDismiss,
-}: {
-  hanzi: HanziText;
-  onDismiss: () => void;
-}) {
+export function WikiHanziPageImpl({ hanzi }: { hanzi: HanziText }) {
   const dictionary = use(loadDictionary());
   const hanziWordMeanings = dictionary.lookupHanzi(hanzi);
 
@@ -23,36 +16,26 @@ export function WikiHanziModalImpl({
 
   return (
     <>
-      <ScrollView
-        className={
-          // Use a linear gradient on the background so that rubber band
-          // scrolling showing the correct color at the top and bottom.
-          `h-screen`
+      <Header
+        hanzi={hanzi}
+        pinyin={
+          hanziWordMeanings.length === 1
+            ? hanziWordMeanings[0]?.[1].pinyin?.[0]
+            : undefined
         }
-        contentContainerClassName="pb-10 min-h-full"
-      >
-        <Header
-          hanzi={hanzi}
-          pinyin={
-            hanziWordMeanings.length === 1
-              ? hanziWordMeanings[0]?.[1].pinyin?.[0]
-              : undefined
-          }
-          gloss={
-            hanziWordMeanings.length === 1
-              ? hanziWordMeanings[0]?.[1].gloss[0]
-              : undefined
-          }
-          variant={hanziWordMeanings.length === 1 ? `filled` : `outline`}
-          onDismiss={onDismiss}
-        />
+        gloss={
+          hanziWordMeanings.length === 1
+            ? hanziWordMeanings[0]?.[1].gloss[0]
+            : undefined
+        }
+        variant={hanziWordMeanings.length === 1 ? `filled` : `outline`}
+      />
 
-        <PylyMdxComponents>
-          <View className="flex-1 gap-6 bg-bg py-7">
-            {MeaningMdx == null ? null : <MeaningMdx />}
-          </View>
-        </PylyMdxComponents>
-      </ScrollView>
+      <PylyMdxComponents>
+        <View className="flex-1 gap-6 bg-bg py-7">
+          {MeaningMdx == null ? null : <MeaningMdx />}
+        </View>
+      </PylyMdxComponents>
     </>
   );
 }
@@ -91,22 +74,16 @@ function Header({
             sticky top-0 z-10 h-[56px] flex-row content-between items-center bg-bg/90 pl-4
           `}
         >
-          <CloseButton2 onPress={onDismiss} />
-
           <View className="flex-1 content-center items-center">
             <Text
               className={`
-                font-sans text-3xl text-fg-loud
+                text-3xl text-fg-loud
 
                 ${showHeaderHanziTile ? `opacity-100 transition-opacity` : `opacity-0`}
               `}
             >
               {hanzi}
             </Text>
-          </View>
-
-          <View className="invisible">
-            <CloseButton2 onPress={onDismiss} />
           </View>
         </View>
       </View>
