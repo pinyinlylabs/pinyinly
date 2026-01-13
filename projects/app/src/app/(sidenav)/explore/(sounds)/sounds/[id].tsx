@@ -126,7 +126,7 @@ export default function MnemonicIdPage() {
                   <View key={i} className="flex-row items-center gap-2">
                     <Text
                       className={`
-                        text-caption
+                        text-fg-dim
 
                         hover:text-fg
                       `}
@@ -152,7 +152,7 @@ export default function MnemonicIdPage() {
                       </Text>
 
                       {` `}
-                      <Text className="text-sm font-normal text-caption">
+                      <Text className="text-sm font-normal text-fg-dim">
                         {nameDescription}
                       </Text>
                     </Text>
@@ -167,5 +167,5 @@ export default function MnemonicIdPage() {
 }
 
 const pinyinPartBox = tv({
-  base: `size-20 justify-center gap-1 rounded-xl bg-bg-loud p-2`,
+  base: `size-20 justify-center gap-1 rounded-xl bg-bg-high p-2`,
 });

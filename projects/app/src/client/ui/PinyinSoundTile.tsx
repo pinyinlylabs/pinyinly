@@ -1,6 +1,6 @@
 import type { PinyinSoundId } from "@/data/model";
-import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import { nullIfEmpty } from "@/util/unicode";
+import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import { Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 
@@ -46,7 +46,7 @@ export function PinyinSoundTile({
         </Text>
       ) : (
         <Text
-          className="overflow-visible leading-none text-caption"
+          className="overflow-visible leading-none text-fg-dim"
           numberOfLines={1}
         >
           {name}
@@ -58,7 +58,7 @@ export function PinyinSoundTile({
 
 const tileClass = tv({
   base: `
-    size-24 items-center justify-center gap-3 rounded-xl bg-bg-loud p-2
+    size-24 items-center justify-center gap-3 rounded-xl bg-bg-high p-2
 
     hover:bg-cyan/20
   `,

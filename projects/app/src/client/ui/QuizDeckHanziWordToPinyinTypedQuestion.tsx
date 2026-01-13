@@ -87,11 +87,11 @@ export function QuizDeckHanziWordToPinyinTypedQuestion({
         grade == null ? null : (
           <View
             className={`
-              flex-1 gap-[12px] overflow-hidden bg-fg-bg10 px-4 pt-3 pb-safe-offset-[84px]
+              flex-1 gap-[12px] overflow-hidden bg-bg px-4 pt-3 pb-safe-offset-[84px]
 
               lg:mb-2 lg:rounded-xl
 
-              ${grade.correct ? `theme-success` : `theme-danger`}
+              ${grade.correct ? `theme-success-panel` : `theme-danger-panel`}
             `}
           >
             {grade.correct ? (
@@ -154,7 +154,7 @@ export function QuizDeckHanziWordToPinyinTypedQuestion({
         <View>
           {flag == null ? null : <QuizFlagText flag={flag} />}
           <View>
-            <Text className="text-xl font-bold text-ink-loud">
+            <Text className="text-xl font-bold text-fg-loud">
               {flag?.kind === QuestionFlagKind.OtherAnswer
                 ? `What is the other pronunciation?`
                 : `What sound does this make?`}
@@ -165,7 +165,7 @@ export function QuizDeckHanziWordToPinyinTypedQuestion({
           {hanziCharacters.map((hanzi, i) => {
             return (
               <View className="items-center gap-2" key={i}>
-                <Text className="text-[80px] font-medium text-ink-loud">
+                <Text className="text-[80px] font-medium text-fg-loud">
                   {hanzi}
                 </Text>
               </View>

@@ -18,23 +18,23 @@ export default () => (
     <LittlePrimaryHeader title="themes" />
 
     <View className="flex-row flex-wrap">
-      <ExampleStack title="normal" childrenClassName="gap-2">
+      <ExampleStack title="default" childrenClassName="gap-2">
         <RectButtonVariants />
       </ExampleStack>
 
-      <View className="theme-accent">
-        <ExampleStack title="accent" childrenClassName="gap-2">
+      <View className="[--color-fg:var(--color-cyanold)]">
+        <ExampleStack title="cyanold" childrenClassName="gap-2">
           <RectButtonVariants />
         </ExampleStack>
       </View>
 
-      <View className="theme-success">
+      <View className="[--color-fg:var(--color-success)]">
         <ExampleStack title="success" childrenClassName="gap-2">
           <RectButtonVariants />
         </ExampleStack>
       </View>
 
-      <View className="theme-danger">
+      <View className="[--color-fg:var(--color-danger)]">
         <ExampleStack title="danger" childrenClassName="gap-2">
           <RectButtonVariants />
         </ExampleStack>

@@ -93,7 +93,7 @@ const tileClass = tv({
   variants: {
     variant: {
       outline: `items-center justify-center border border-b-2 border-fg-loud`,
-      filled: `theme-sky items-center justify-center`,
+      filled: `theme-sky-panel items-center justify-center`,
     },
     isCharacter: {
       true: ``,
@@ -118,7 +118,7 @@ const outlineClass = tv({
   variants: {
     variant: {
       outline: ``,
-      filled: `rounded-lg outline outline-1 -outline-offset-1 outline-bg-inverted/10`,
+      filled: `rounded-lg outline outline-1 -outline-offset-1 outline-fg-loud/10`,
     },
     size: {
       "10": `rounded-md`,
@@ -130,12 +130,12 @@ const outlineClass = tv({
 
 const progressBarClass = tv({
   base: `
-    bg-[linear-gradient(to_right,_#FBBF24,_#FBBF24_var(--progress),_rgb(from_var(--color-bg-inverted)_r_g_b_/_10%)_calc(var(--progress)+0.01%))]
+    bg-[linear-gradient(to_right,_#FBBF24,_#FBBF24_var(--progress),_rgb(from_var(--color-fg-loud)_r_g_b_/_10%)_calc(var(--progress)+0.01%))]
   `,
   variants: {
     variant: {
       outline: `hidden`,
-      filled: `absolute inset-x-0 bottom-0 bg-bg-inverted/10`,
+      filled: `absolute inset-x-0 bottom-0 bg-fg-loud/10`,
     },
     size: {
       "10": `h-[7px]`,

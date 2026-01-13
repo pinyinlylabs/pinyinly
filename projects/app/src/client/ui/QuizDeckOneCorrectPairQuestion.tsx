@@ -102,9 +102,9 @@ export function QuizDeckOneCorrectPairQuestion({
         isCorrect == null ? null : (
           <View
             className={`
-              ${isCorrect ? `theme-success` : `theme-danger`}
+              ${isCorrect ? `theme-success-panel` : `theme-danger-panel`}
 
-              flex-1 gap-[12px] overflow-hidden bg-fg-bg10 px-4 pt-3 pb-safe-offset-[84px]
+              flex-1 gap-[12px] overflow-hidden bg-bg px-4 pt-3 pb-safe-offset-[84px]
 
               lg:mb-2 lg:rounded-xl
             `}
@@ -167,7 +167,7 @@ export function QuizDeckOneCorrectPairQuestion({
 
       {flag == null ? null : <QuizFlagText flag={flag} />}
       <View>
-        <Text className="text-xl font-bold text-ink-loud">{prompt}</Text>
+        <Text className="text-xl font-bold text-fg-loud">{prompt}</Text>
       </View>
       <View className="flex-1 justify-center py-4">
         <View

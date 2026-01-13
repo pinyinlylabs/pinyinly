@@ -79,7 +79,7 @@ export default function MenuLayout() {
               </Link>
             </View>
 
-            <View className="w-[200px] items-stretch rounded-xl bg-bg-loud py-3">
+            <View className="w-[200px] items-stretch rounded-xl bg-bg-high py-3">
               {navItems
                 .filter((section) => section.primary === true)
                 .map((section, sectionIndex) => (
@@ -168,9 +168,9 @@ const DesktopNavSubtleItem = customTabTrigger(
       <Pressable {...rest}>
         <Text
           className={`
-            font-sans text-sm/[32px] font-bold uppercase text-caption/90
+            font-sans text-sm/[32px] font-bold uppercase text-fg-dim
 
-            hover:text-caption-loud
+            hover:text-fg
           `}
         >
           {name}
@@ -304,7 +304,7 @@ const MobileNavGroupItem = customTabTrigger(
       <Pressable
         {...rest}
         className={`
-          flex-row bg-bg-loud py-2.5 pl-4 pr-3
+          flex-row bg-bg-high py-2.5 pl-4 pr-3
 
           hover:bg-fg/10
         `}
@@ -325,9 +325,9 @@ const MobileNavSubtleItem = customTabTrigger(({ name, isFocused, ...rest }) => {
     <Pressable {...rest}>
       <Text
         className={`
-          font-sans text-sm/[32px] font-bold uppercase text-caption/90
+          font-sans text-sm/[32px] font-bold uppercase text-fg-dim
 
-          hover:text-caption-loud
+          hover:text-fg
         `}
       >
         {name}

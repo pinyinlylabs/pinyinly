@@ -48,7 +48,11 @@ export default () => {
 
       <ExampleStack title="manual (100×50) success" showFrame>
         <ShootingStars
-          className="theme-success h-[50px] w-[100px]"
+          className={`
+            h-[50px] w-[100px]
+
+            [--color-fg:var(--color-success)]
+          `}
           play={play}
         />
       </ExampleStack>

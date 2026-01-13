@@ -29,7 +29,7 @@ export default () => {
         ))}
       </ExampleStack>
 
-      <View className="theme-success">
+      <View className="[--color-fg:var(--color-success)]">
         <ExampleStack title="success">
           {sources.map((s, i) => (
             <IconImage key={i} source={s} />
@@ -37,8 +37,8 @@ export default () => {
         </ExampleStack>
       </View>
 
-      <View className="theme-accent">
-        <ExampleStack title="accent">
+      <View className="[--color-fg:var(--color-warning)]">
+        <ExampleStack title="warning">
           {sources.map((s, i) => (
             <IconImage key={i} source={s} />
           ))}

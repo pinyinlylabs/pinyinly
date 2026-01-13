@@ -16,11 +16,25 @@ export default () => {
         {icons}
       </ExampleStack>
 
-      <ExampleStack title="success" childrenClassName="gap-8 theme-success">
+      <ExampleStack
+        title="wasabi"
+        childrenClassName={`
+          gap-8
+
+          [--color-fg:var(--color-success)]
+        `}
+      >
         {icons}
       </ExampleStack>
 
-      <ExampleStack title="danger" childrenClassName="gap-8 theme-danger">
+      <ExampleStack
+        title="brick"
+        childrenClassName={`
+          gap-8
+
+          [--color-fg:var(--color-danger)]
+        `}
+      >
         {icons}
       </ExampleStack>
     </View>

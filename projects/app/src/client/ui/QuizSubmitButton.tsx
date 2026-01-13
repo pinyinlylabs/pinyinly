@@ -71,10 +71,10 @@ const buttonClass = tv({
   base: `flex-1`,
   variants: {
     state: {
-      [QuizSubmitButtonState.Check]: `theme-success`,
-      [QuizSubmitButtonState.Correct]: `theme-success`,
+      [QuizSubmitButtonState.Check]: `[--color-fg:var(--color-success)]`,
+      [QuizSubmitButtonState.Correct]: `[--color-fg:var(--color-success)]`,
       [QuizSubmitButtonState.Disabled]: ``,
-      [QuizSubmitButtonState.Incorrect]: `theme-danger`,
+      [QuizSubmitButtonState.Incorrect]: `[--color-fg:var(--color-danger)]`,
     },
   },
 });

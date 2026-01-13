@@ -29,15 +29,15 @@ module.exports = {
       // => @media (min-width: 1536px) { ... }
     },
     colors: {
-      /* EXPERIMENTAL: named semantic colors */
       bg: {
         DEFAULT: `rgb(from var(--color-bg) r g b / calc(alpha * <alpha-value>))`,
-        loud: `rgb(from var(--color-bg-loud) r g b / calc(alpha * <alpha-value>))`,
-        inverted: `rgb(from var(--color-bg-inverted) r g b / calc(alpha * <alpha-value>))`,
+        high: `rgb(from var(--color-bg-high) r g b / calc(alpha * <alpha-value>))`,
+        higher: `rgb(from var(--color-bg-higher) r g b / calc(alpha * <alpha-value>))`,
       },
       fg: {
         DEFAULT: `rgb(from var(--color-fg) r g b / calc(alpha * <alpha-value>))`,
         loud: `rgb(from var(--color-fg-loud) r g b / calc(alpha * <alpha-value>))`,
+        dim: `rgb(from var(--color-fg-dim) r g b / calc(alpha * <alpha-value>))`,
         bg5: `rgb(from color-mix(in oklab, var(--color-fg) 5%, var(--color-bg)) r g b / calc(alpha * <alpha-value>))`,
         bg10: `rgb(from color-mix(in oklab, var(--color-fg) 10%, var(--color-bg)) r g b / calc(alpha * <alpha-value>))`,
         bg15: `rgb(from color-mix(in oklab, var(--color-fg) 15%, var(--color-bg)) r g b / calc(alpha * <alpha-value>))`,
@@ -59,15 +59,12 @@ module.exports = {
         bg95: `rgb(from color-mix(in oklab, var(--color-fg) 95%, var(--color-bg)) r g b / calc(alpha * <alpha-value>))`,
         bg100: `rgb(from color-mix(in oklab, var(--color-fg) 100%, var(--color-bg)) r g b / calc(alpha * <alpha-value>))`,
       },
-      caption: {
-        DEFAULT: `rgb(from var(--color-caption) r g b / calc(alpha * <alpha-value>))`,
-        loud: `rgb(from var(--color-caption-loud) r g b / calc(alpha * <alpha-value>))`,
+      on: {
+        fg: `rgb(from var(--color-on-fg) r g b / calc(alpha * <alpha-value>))`,
       },
+
+      // Colors
       cloud: `rgb(from var(--color-cloud) r g b / calc(alpha * <alpha-value>))`,
-      ink: {
-        DEFAULT: `rgb(from var(--color-ink) r g b / calc(alpha * <alpha-value>))`,
-        loud: `rgb(from var(--color-ink-loud) r g b / calc(alpha * <alpha-value>))`,
-      },
       red: `rgb(from var(--color-red) r g b / calc(alpha * <alpha-value>))`,
       orange: `rgb(from var(--color-orange) r g b / calc(alpha * <alpha-value>))`,
       amber: `rgb(from var(--color-amber) r g b / calc(alpha * <alpha-value>))`,
@@ -87,10 +84,7 @@ module.exports = {
       fuchsia: `rgb(from var(--color-fuchsia) r g b / calc(alpha * <alpha-value>))`,
       pink: `rgb(from var(--color-pink) r g b / calc(alpha * <alpha-value>))`,
       rose: `rgb(from var(--color-rose) r g b / calc(alpha * <alpha-value>))`,
-      brick: {
-        DEFAULT: `rgb(from var(--color-brick) r g b / calc(alpha * <alpha-value>))`,
-        loud: `rgb(from var(--color-brick-loud) r g b / calc(alpha * <alpha-value>))`,
-      },
+      brick: `rgb(from var(--color-brick) r g b / calc(alpha * <alpha-value>))`,
       slate: `rgb(from var(--color-slate) r g b / calc(alpha * <alpha-value>))`,
       gray: `rgb(from var(--color-gray) r g b / calc(alpha * <alpha-value>))`,
       zinc: `rgb(from var(--color-zinc) r g b / calc(alpha * <alpha-value>))`,
@@ -98,6 +92,12 @@ module.exports = {
       stone: `rgb(from var(--color-stone) r g b / calc(alpha * <alpha-value>))`,
 
       transparent: `transparent`,
+
+      // Color roles
+      danger: `rgb(from var(--color-danger) r g b / calc(alpha * <alpha-value>))`,
+      warning: `rgb(from var(--color-warning) r g b / calc(alpha * <alpha-value>))`,
+      success: `rgb(from var(--color-success) r g b / calc(alpha * <alpha-value>))`,
+
       // Can be used like `current` but supports alpha values, e.g.:
       // `deecoration-currentColor/50` will be `color-mix(in srgb, currentColor 50%, transparent)`
       currentColor: `color-mix(in srgb, currentColor calc(<alpha-value> * 100%), transparent)`,
