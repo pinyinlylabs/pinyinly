@@ -1,4 +1,5 @@
 import { mergeProps } from "#client/react.js";
+import type { Ref } from "react";
 import { describe, expect, test, vi } from "vitest";
 
 describe(`mergeProps suite` satisfies HasNameOf<typeof mergeProps>, () => {
@@ -51,8 +52,8 @@ describe(`mergeProps suite` satisfies HasNameOf<typeof mergeProps>, () => {
   });
 
   test(`should merge useRef objects and update .current`, () => {
-    const refOne = { current: null as unknown };
-    const refTwo = { current: null as unknown };
+    const refOne: Ref<symbol> = { current: null };
+    const refTwo: Ref<symbol> = { current: null };
     const mergedRef = mergeProps({ ref: refOne }, { ref: refTwo });
     expect(mergedRef).toBeTruthy();
 
@@ -60,12 +61,12 @@ describe(`mergeProps suite` satisfies HasNameOf<typeof mergeProps>, () => {
     expect(refTwo.current).toBeNull();
 
     const element = Symbol();
-    (mergedRef.ref as unknown as (value: unknown) => void)(element);
+    mergedRef.ref(element);
 
     expect(refOne.current).toBe(element);
     expect(refTwo.current).toBe(element);
 
-    (mergedRef.ref as unknown as (value: unknown) => void)(null);
+    mergedRef.ref(null);
 
     expect(refOne.current).toBeNull();
     expect(refTwo.current).toBeNull();

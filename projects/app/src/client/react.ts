@@ -1,8 +1,17 @@
 import type { PropsOf } from "@pinyinly/lib/types";
-import type { FunctionComponent, ReactElement, ReactNode, Ref } from "react";
+import type {
+  FunctionComponent,
+  ReactElement,
+  ReactNode,
+  Ref,
+  RefCallback,
+} from "react";
 import { Children, cloneElement, isValidElement } from "react";
 
-export function mergeRefs<T>(...refs: (Ref<T> | undefined)[]): Ref<T> {
+/**
+ * Merges multiple refs into a single ref callback that updates all of them.
+ */
+export function mergeRefs<T>(...refs: (Ref<T> | undefined)[]): RefCallback<T> {
   return (value) => {
     const cleanups: (() => void)[] = [];
 
@@ -93,11 +102,23 @@ export function intersperse<T extends ReactNode>(
  *
  * modified from: https://github.com/razorpay/blade/blob/7e457e9e63fc75ce67e6545b5626c0dd020bc023/packages/blade/src/utils/mergeProps.ts#L9
  */
+
+/**
+ * Transforms a props type to reflect that merged refs become RefCallbacks.
+ */
+type MergedProps<T> = {
+  [K in keyof T]: K extends `ref`
+    ? T[K] extends Ref<infer R> | undefined
+      ? RefCallback<R>
+      : T[K]
+    : T[K];
+};
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const mergeProps = <T extends Record<string, any>>(
   base: T,
   overrides: T,
-) => {
+): MergedProps<T> => {
   const props = { ...base };
 
   for (const key in overrides) {
@@ -131,5 +152,5 @@ export const mergeProps = <T extends Record<string, any>>(
 
     props[key] = overrideValue;
   }
-  return props;
+  return props as MergedProps<T>;
 };
