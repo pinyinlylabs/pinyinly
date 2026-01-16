@@ -87,3 +87,49 @@ export function intersperse<T extends ReactNode>(
   }
   return result;
 }
+
+/**
+ * Merges two sets of props.
+ *
+ * modified from: https://github.com/razorpay/blade/blob/7e457e9e63fc75ce67e6545b5626c0dd020bc023/packages/blade/src/utils/mergeProps.ts#L9
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const mergeProps = <T extends Record<string, any>>(
+  base: T,
+  overrides: T,
+) => {
+  const props = { ...base };
+
+  for (const key in overrides) {
+    if (!overrides.hasOwnProperty(key)) {
+      continue;
+    }
+    const overrideValue = overrides[key];
+
+    // Merge refs
+    if (key === `ref` && props[key] != null) {
+      // @ts-expect-error no overlap
+      props[key] = mergeRefs(props[key], overrideValue);
+      continue;
+    }
+
+    // Merge functions
+    if (typeof overrideValue === `function`) {
+      const baseValue = base[key];
+      if (typeof baseValue === `function`) {
+        // @ts-expect-error no overlap
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        props[key] = (...args: any[]) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-argument
+          overrideValue(...args);
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-argument
+          baseValue(...args);
+        };
+        continue;
+      }
+    }
+
+    props[key] = overrideValue;
+  }
+  return props;
+};

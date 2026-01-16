@@ -15,6 +15,7 @@
   "dependencies": {
     "@expo/html-elements": "patch:@expo/html-elements@npm%3A0.13.8#~/.yarn/patches/@expo-html-elements-npm-0.13.8-bd9c25d778.patch",
     "@expo/metro-runtime": "~6.1.2",
+    "@floating-ui/react-native": "^0.10.7",
     "@formatjs/intl-segmenter": "^11.7.12",
     "@inngest/middleware-sentry": "^0.1.1",
     "@lottiefiles/dotlottie-react": "^0.13.5",
