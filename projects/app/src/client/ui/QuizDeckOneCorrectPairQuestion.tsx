@@ -20,12 +20,10 @@ import type { ReactNode } from "react";
 import { useState } from "react";
 import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { IconImage } from "./IconImage";
 import { NewSkillModal } from "./NewSkillModal";
-import { QuizDeckToastContainer } from "./QuizDeckToastContainer";
+import { QuizDeckResultToast } from "./QuizDeckResultToast";
 import { QuizFlagText } from "./QuizFlagText";
 import { QuizSubmitButton, QuizSubmitButtonState } from "./QuizSubmitButton";
-import { SkillAnswerText } from "./SkillAnswerText";
 import type {
   TextAnswerButtonFontSize,
   TextAnswerButtonState,
@@ -100,42 +98,7 @@ export function QuizDeckOneCorrectPairQuestion({
     <Skeleton
       toast={
         isCorrect == null ? null : (
-          <View
-            className={`
-              ${isCorrect ? `theme-success-panel` : `theme-danger-panel`}
-
-              flex-1 gap-[12px] overflow-hidden bg-bg px-4 pt-3 pb-safe-offset-[84px]
-
-              lg:mb-2 lg:rounded-xl
-            `}
-          >
-            {isCorrect ? (
-              <View className="flex-row items-center gap-[8px]">
-                <IconImage
-                  size={32}
-                  source={require(`@/assets/icons/check-circled-filled.svg`)}
-                />
-                <Text className="text-2xl font-bold text-fg">Nice!</Text>
-              </View>
-            ) : (
-              <>
-                <View className="flex-row items-center gap-[8px]">
-                  <IconImage
-                    size={32}
-                    source={require(`@/assets/icons/close-circled-filled.svg`)}
-                  />
-                  <Text className="text-2xl font-bold text-fg">Incorrect</Text>
-                </View>
-                <Text className="text-xl/none font-medium text-fg">
-                  Correct answer:
-                </Text>
-
-                <Text className="text-fg">
-                  <SkillAnswerText skill={answer.skill} />
-                </Text>
-              </>
-            )}
-          </View>
+          <QuizDeckResultToast isCorrect={isCorrect} skill={answer.skill} />
         )
       }
       submitButton={
@@ -301,9 +264,7 @@ const Skeleton = ({
       >
         {children}
       </View>
-      {toast === null ? null : (
-        <QuizDeckToastContainer>{toast}</QuizDeckToastContainer>
-      )}
+      {toast}
       <View
         className="absolute inset-x-4 flex-row items-stretch"
         style={{

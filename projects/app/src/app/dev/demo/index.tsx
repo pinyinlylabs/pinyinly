@@ -45,6 +45,7 @@ export const demos: Record<string, FunctionComponent> = {
   [`PylymarkTypewriter`]: lazyDemo(() => import(`../../../client/ui/PylymarkTypewriter.demo`)),
   [`QuizDeckHanziWordToGlossTypedQuestion`]: lazyDemo(() => import(`../../../client/ui/QuizDeckHanziWordToGlossTypedQuestion.demo`)),
   [`QuizDeckHanziWordToPinyinTypedQuestion`]: lazyDemo(() => import(`../../../client/ui/QuizDeckHanziWordToPinyinTypedQuestion.demo`)),
+  [`QuizDeckResultToast`]: lazyDemo(() => import(`../../../client/ui/QuizDeckResultToast.demo`)),
   [`QuizFlagText`]: lazyDemo(() => import(`../../../client/ui/QuizFlagText.demo`)),
   [`QuizProgressBar`]: lazyDemo(() => import(`../../../client/ui/QuizProgressBar.demo`)),
   [`QuizQueueButton`]: lazyDemo(() => import(`../../../client/ui/QuizQueueButton.demo`)),
