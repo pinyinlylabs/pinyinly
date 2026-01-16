@@ -55,7 +55,7 @@ export function QuizDeckResultToast({
                 <View className="flex-row items-center gap-[8px]">
                   <IconImage
                     size={32}
-                    source={require(`@/assets/icons/frown-circled.svg`)}
+                    source={require(`@/assets/icons/meh-circled.svg`)}
                   />
                   <Text className="text-2xl font-bold text-fg">Too slow</Text>
                 </View>
