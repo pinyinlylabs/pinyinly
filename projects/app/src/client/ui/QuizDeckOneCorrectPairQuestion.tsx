@@ -10,6 +10,7 @@ import type {
   UnsavedSkillRating,
 } from "@/data/model";
 import { QuestionFlagKind } from "@/data/model";
+import type { OneCorrectPairQuestionGrade } from "@/data/questions/oneCorrectPair";
 import {
   gradeOneCorrectPairQuestion,
   oneCorrectPairChoiceText,
@@ -23,7 +24,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { NewSkillModal } from "./NewSkillModal";
 import { QuizDeckResultToast } from "./QuizDeckResultToast";
 import { QuizFlagText } from "./QuizFlagText";
-import { QuizSubmitButton, QuizSubmitButtonState } from "./QuizSubmitButton";
+import { QuizSubmitButton } from "./QuizSubmitButton";
 import type {
   TextAnswerButtonFontSize,
   TextAnswerButtonState,
@@ -55,7 +56,7 @@ export function QuizDeckOneCorrectPairQuestion({
     useState<OneCorrectPairQuestionChoice>();
   const [selectedBChoice, setSelectedBChoice] =
     useState<OneCorrectPairQuestionChoice>();
-  const [isCorrect, setIsCorrect] = useState<boolean>();
+  const [grade, setGrade] = useState<OneCorrectPairQuestionGrade>();
 
   // Setup the timer to measure how fast they answer the question.
   const timer = useMultiChoiceQuizTimer();
@@ -79,7 +80,7 @@ export function QuizDeckOneCorrectPairQuestion({
       durationMs,
     );
 
-    setIsCorrect(grade.correct);
+    setGrade(grade);
     onRating(grade.skillRatings, grade.correct ? [] : grade.mistakes);
   };
 
@@ -97,25 +98,20 @@ export function QuizDeckOneCorrectPairQuestion({
   return (
     <Skeleton
       toast={
-        isCorrect == null ? null : (
-          <QuizDeckResultToast isCorrect={isCorrect} skill={answer.skill} />
+        grade == null ? null : (
+          <QuizDeckResultToast rating={grade.rating} skill={answer.skill} />
         )
       }
       submitButton={
         <QuizSubmitButton
-          state={
+          disabled={
             selectedAChoice === undefined || selectedBChoice === undefined
-              ? QuizSubmitButtonState.Disabled
-              : isCorrect == null
-                ? QuizSubmitButtonState.Check
-                : isCorrect
-                  ? QuizSubmitButtonState.Correct
-                  : QuizSubmitButtonState.Incorrect
           }
+          rating={grade?.rating}
           onPress={() => {
             if (selectedAChoice == null || selectedBChoice == null) {
               return;
-            } else if (isCorrect == null) {
+            } else if (grade == null) {
               submitChoices(selectedAChoice, selectedBChoice);
             } else {
               onNext();
@@ -153,9 +149,9 @@ export function QuizDeckOneCorrectPairQuestion({
                   selectedAChoice === undefined
                     ? `default`
                     : a === selectedAChoice
-                      ? isCorrect == null
+                      ? grade == null
                         ? `selected`
-                        : isCorrect
+                        : grade.correct
                           ? `success`
                           : `error`
                       : selectedBChoice === undefined
@@ -163,7 +159,7 @@ export function QuizDeckOneCorrectPairQuestion({
                         : `dimmed`
                 }
                 onPress={() => {
-                  if (isCorrect == null) {
+                  if (grade == null) {
                     const newSelectedAChoice =
                       selectedAChoice === a ? undefined : a;
                     setSelectedAChoice(newSelectedAChoice);
@@ -180,7 +176,7 @@ export function QuizDeckOneCorrectPairQuestion({
                     ) {
                       submitChoices(newSelectedAChoice, selectedBChoice);
                     }
-                  } else if (isCorrect) {
+                  } else if (grade.correct) {
                     // If the answer is correct, this is a shortcut to the next
                     // question to avoid moving the mouse.
                     onNext();
@@ -200,9 +196,9 @@ export function QuizDeckOneCorrectPairQuestion({
                   selectedBChoice === undefined
                     ? `default`
                     : b === selectedBChoice
-                      ? isCorrect == null
+                      ? grade == null
                         ? `selected`
-                        : isCorrect
+                        : grade.correct
                           ? `success`
                           : `error`
                       : selectedAChoice === undefined
@@ -210,7 +206,7 @@ export function QuizDeckOneCorrectPairQuestion({
                         : `dimmed`
                 }
                 onPress={() => {
-                  if (isCorrect == null) {
+                  if (grade == null) {
                     const newSelectedBChoice =
                       selectedBChoice === b ? undefined : b;
                     setSelectedBChoice(newSelectedBChoice);
@@ -227,7 +223,7 @@ export function QuizDeckOneCorrectPairQuestion({
                     ) {
                       submitChoices(selectedAChoice, newSelectedBChoice);
                     }
-                  } else if (isCorrect) {
+                  } else if (grade.correct) {
                     // If the answer is correct, this is a shortcut to the next
                     // question to avoid moving the mouse.
                     onNext();

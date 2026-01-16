@@ -30,7 +30,7 @@ import type { DeepReadonly } from "ts-essentials";
 import { PinyinOptionButton } from "./PinyinOptionButton";
 import { QuizDeckResultToast } from "./QuizDeckResultToast";
 import { QuizFlagText } from "./QuizFlagText";
-import { QuizSubmitButton, QuizSubmitButtonState } from "./QuizSubmitButton";
+import { QuizSubmitButton } from "./QuizSubmitButton";
 import { TextInputSingle } from "./TextInputSingle";
 
 export function QuizDeckHanziWordToPinyinTypedQuestion({
@@ -83,21 +83,14 @@ export function QuizDeckHanziWordToPinyinTypedQuestion({
     <Skeleton
       toast={
         grade == null ? null : (
-          <QuizDeckResultToast skill={skill} isCorrect={grade.correct} />
+          <QuizDeckResultToast skill={skill} rating={grade.rating} />
         )
       }
       submitButton={
         <QuizSubmitButton
           autoFocus={grade != null}
-          state={
-            userAnswerEmpty
-              ? QuizSubmitButtonState.Disabled
-              : grade == null
-                ? QuizSubmitButtonState.Check
-                : grade.correct
-                  ? QuizSubmitButtonState.Correct
-                  : QuizSubmitButtonState.Incorrect
-          }
+          disabled={userAnswerEmpty}
+          rating={grade?.rating}
           onPress={() => {
             submit();
           }}

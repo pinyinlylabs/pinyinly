@@ -11,6 +11,7 @@ import type {
 import { MistakeKind } from "@/data/model";
 import { pinyinUnitCount } from "@/data/pinyin";
 import { computeSkillRating } from "@/data/skills";
+import { Rating } from "@/util/fsrs";
 import { invariant, uniqueInvariant } from "@pinyinly/lib/invariant";
 
 export function oneCorrectPairChoiceText(
@@ -74,10 +75,12 @@ export function oneCorrectPairQuestionHanziPinyinMistake(
 export type OneCorrectPairQuestionGrade =
   | {
       correct: true;
+      rating: Rating;
       skillRatings: UnsavedSkillRating[];
     }
   | {
       correct: false;
+      rating: typeof Rating.Again;
       skillRatings: UnsavedSkillRating[];
       mistakes: MistakeType[];
     };
@@ -95,18 +98,17 @@ export function gradeOneCorrectPairQuestion(
   const isCorrect = answer.as.includes(aChoice) && answer.bs.includes(bChoice);
   const correct = isCorrect;
 
-  const skillRatings: UnsavedSkillRating[] = [
-    computeSkillRating({
-      skill: answer.skill,
-      correct,
-      durationMs,
-    }),
-  ];
+  const skillRating = computeSkillRating({
+    skill: answer.skill,
+    correct,
+    durationMs,
+  });
 
   if (isCorrect) {
     return {
       correct: true,
-      skillRatings,
+      rating: skillRating.rating,
+      skillRatings: [skillRating],
     };
   }
 
@@ -135,7 +137,8 @@ export function gradeOneCorrectPairQuestion(
 
   return {
     correct: false,
-    skillRatings,
+    rating: Rating.Again,
+    skillRatings: [skillRating],
     mistakes,
   };
 }

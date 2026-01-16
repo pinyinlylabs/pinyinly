@@ -1,4 +1,5 @@
 import { hanziFromHanziWord, loadDictionary } from "@/dictionary";
+import { Rating } from "@/util/fsrs";
 import { nonNullable } from "@pinyinly/lib/invariant";
 import type { Mutable } from "@pinyinly/lib/types";
 import type {
@@ -59,10 +60,12 @@ export async function hanziWordToGlossTypedQuestionOrThrow(
 export type HanziToGlossTypedQuestionGrade =
   | {
       correct: true;
+      rating: Rating;
       skillRatings: UnsavedSkillRating[];
     }
   | {
       correct: false;
+      rating: typeof Rating.Again;
       skillRatings: UnsavedSkillRating[];
       expectedAnswer: string;
       mistakes: MistakeType[];
@@ -81,15 +84,15 @@ export function gradeHanziToGlossTypedQuestion(
   for (const { skill, glosses } of question.answers) {
     if (glosses.includes(userGloss)) {
       const correct = true;
+      const skillRating = computeSkillRating({
+        skill,
+        correct,
+        durationMs,
+      });
       return {
         correct,
-        skillRatings: [
-          computeSkillRating({
-            skill,
-            correct,
-            durationMs,
-          }),
-        ],
+        rating: skillRating.rating,
+        skillRatings: [skillRating],
       };
     }
   }
@@ -102,6 +105,7 @@ export function gradeHanziToGlossTypedQuestion(
     );
     return {
       correct,
+      rating: Rating.Again,
       skillRatings: [
         computeSkillRating({
           skill: question.skill,
