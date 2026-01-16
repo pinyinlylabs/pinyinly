@@ -10,6 +10,7 @@ import type {
   UnsavedSkillRating,
 } from "@/data/model";
 import { QuestionFlagKind } from "@/data/model";
+import type { OneCorrectPairQuestionGrade } from "@/data/questions/oneCorrectPair";
 import {
   gradeOneCorrectPairQuestion,
   oneCorrectPairChoiceText,
@@ -20,12 +21,10 @@ import type { ReactNode } from "react";
 import { useState } from "react";
 import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { IconImage } from "./IconImage";
 import { NewSkillModal } from "./NewSkillModal";
-import { QuizDeckToastContainer } from "./QuizDeckToastContainer";
+import { QuizDeckResultToast } from "./QuizDeckResultToast";
 import { QuizFlagText } from "./QuizFlagText";
-import { QuizSubmitButton, QuizSubmitButtonState } from "./QuizSubmitButton";
-import { SkillAnswerText } from "./SkillAnswerText";
+import { QuizSubmitButton } from "./QuizSubmitButton";
 import type {
   TextAnswerButtonFontSize,
   TextAnswerButtonState,
@@ -57,7 +56,7 @@ export function QuizDeckOneCorrectPairQuestion({
     useState<OneCorrectPairQuestionChoice>();
   const [selectedBChoice, setSelectedBChoice] =
     useState<OneCorrectPairQuestionChoice>();
-  const [isCorrect, setIsCorrect] = useState<boolean>();
+  const [grade, setGrade] = useState<OneCorrectPairQuestionGrade>();
 
   // Setup the timer to measure how fast they answer the question.
   const timer = useMultiChoiceQuizTimer();
@@ -81,7 +80,7 @@ export function QuizDeckOneCorrectPairQuestion({
       durationMs,
     );
 
-    setIsCorrect(grade.correct);
+    setGrade(grade);
     onRating(grade.skillRatings, grade.correct ? [] : grade.mistakes);
   };
 
@@ -99,60 +98,20 @@ export function QuizDeckOneCorrectPairQuestion({
   return (
     <Skeleton
       toast={
-        isCorrect == null ? null : (
-          <View
-            className={`
-              ${isCorrect ? `theme-success` : `theme-danger`}
-
-              flex-1 gap-[12px] overflow-hidden bg-fg-bg10 px-4 pt-3 pb-safe-offset-[84px]
-
-              lg:mb-2 lg:rounded-xl
-            `}
-          >
-            {isCorrect ? (
-              <View className="flex-row items-center gap-[8px]">
-                <IconImage
-                  size={32}
-                  source={require(`@/assets/icons/check-circled-filled.svg`)}
-                />
-                <Text className="text-2xl font-bold text-fg">Nice!</Text>
-              </View>
-            ) : (
-              <>
-                <View className="flex-row items-center gap-[8px]">
-                  <IconImage
-                    size={32}
-                    source={require(`@/assets/icons/close-circled-filled.svg`)}
-                  />
-                  <Text className="text-2xl font-bold text-fg">Incorrect</Text>
-                </View>
-                <Text className="text-xl/none font-medium text-fg">
-                  Correct answer:
-                </Text>
-
-                <Text className="text-fg">
-                  <SkillAnswerText skill={answer.skill} />
-                </Text>
-              </>
-            )}
-          </View>
+        grade == null ? null : (
+          <QuizDeckResultToast rating={grade.rating} skill={answer.skill} />
         )
       }
       submitButton={
         <QuizSubmitButton
-          state={
+          disabled={
             selectedAChoice === undefined || selectedBChoice === undefined
-              ? QuizSubmitButtonState.Disabled
-              : isCorrect == null
-                ? QuizSubmitButtonState.Check
-                : isCorrect
-                  ? QuizSubmitButtonState.Correct
-                  : QuizSubmitButtonState.Incorrect
           }
+          rating={grade?.rating}
           onPress={() => {
             if (selectedAChoice == null || selectedBChoice == null) {
               return;
-            } else if (isCorrect == null) {
+            } else if (grade == null) {
               submitChoices(selectedAChoice, selectedBChoice);
             } else {
               onNext();
@@ -167,7 +126,7 @@ export function QuizDeckOneCorrectPairQuestion({
 
       {flag == null ? null : <QuizFlagText flag={flag} />}
       <View>
-        <Text className="text-xl font-bold text-ink-loud">{prompt}</Text>
+        <Text className="text-xl font-bold text-fg-loud">{prompt}</Text>
       </View>
       <View className="flex-1 justify-center py-4">
         <View
@@ -190,9 +149,9 @@ export function QuizDeckOneCorrectPairQuestion({
                   selectedAChoice === undefined
                     ? `default`
                     : a === selectedAChoice
-                      ? isCorrect == null
+                      ? grade == null
                         ? `selected`
-                        : isCorrect
+                        : grade.correct
                           ? `success`
                           : `error`
                       : selectedBChoice === undefined
@@ -200,7 +159,7 @@ export function QuizDeckOneCorrectPairQuestion({
                         : `dimmed`
                 }
                 onPress={() => {
-                  if (isCorrect == null) {
+                  if (grade == null) {
                     const newSelectedAChoice =
                       selectedAChoice === a ? undefined : a;
                     setSelectedAChoice(newSelectedAChoice);
@@ -217,7 +176,7 @@ export function QuizDeckOneCorrectPairQuestion({
                     ) {
                       submitChoices(newSelectedAChoice, selectedBChoice);
                     }
-                  } else if (isCorrect) {
+                  } else if (grade.correct) {
                     // If the answer is correct, this is a shortcut to the next
                     // question to avoid moving the mouse.
                     onNext();
@@ -237,9 +196,9 @@ export function QuizDeckOneCorrectPairQuestion({
                   selectedBChoice === undefined
                     ? `default`
                     : b === selectedBChoice
-                      ? isCorrect == null
+                      ? grade == null
                         ? `selected`
-                        : isCorrect
+                        : grade.correct
                           ? `success`
                           : `error`
                       : selectedAChoice === undefined
@@ -247,7 +206,7 @@ export function QuizDeckOneCorrectPairQuestion({
                         : `dimmed`
                 }
                 onPress={() => {
-                  if (isCorrect == null) {
+                  if (grade == null) {
                     const newSelectedBChoice =
                       selectedBChoice === b ? undefined : b;
                     setSelectedBChoice(newSelectedBChoice);
@@ -264,7 +223,7 @@ export function QuizDeckOneCorrectPairQuestion({
                     ) {
                       submitChoices(selectedAChoice, newSelectedBChoice);
                     }
-                  } else if (isCorrect) {
+                  } else if (grade.correct) {
                     // If the answer is correct, this is a shortcut to the next
                     // question to avoid moving the mouse.
                     onNext();
@@ -301,9 +260,7 @@ const Skeleton = ({
       >
         {children}
       </View>
-      {toast === null ? null : (
-        <QuizDeckToastContainer>{toast}</QuizDeckToastContainer>
-      )}
+      {toast}
       <View
         className="absolute inset-x-4 flex-row items-stretch"
         style={{

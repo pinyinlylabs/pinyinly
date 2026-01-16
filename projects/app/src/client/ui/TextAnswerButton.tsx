@@ -245,7 +245,11 @@ export function TextAnswerButton({
       <ShootingStars
         // The theme needs to be set on this explicitly because the Rive CSS
         // variable proxy doesn't handle class changes.
-        className="theme-success pointer-events-none absolute -inset-3"
+        className={`
+          pointer-events-none absolute -inset-3
+
+          [--color-fg:var(--color-success)]
+        `}
         play={state === `success`}
       />
       {showWikiModal && renderWikiModal != null
@@ -317,8 +321,8 @@ const pressableClass = tv({
       default: ``,
       dimmed: ``,
       selected: ``,
-      success: `theme-success`,
-      error: `theme-danger`,
+      success: `[--color-fg:var(--color-success)]`,
+      error: `[--color-fg:var(--color-danger)]`,
     },
   },
 });
@@ -393,7 +397,7 @@ const textClass = tv({
   // It's important to have decoration-transparent otherwise when the decoration
   // animates in it will start as white and look jarring.
   base: `
-    px-1 py-[2px] text-center font-normal decoration-transparent
+    px-1 py-[2px] text-center font-sans font-normal decoration-transparent
 
     web:transition-colors
   `,
@@ -409,8 +413,8 @@ const textClass = tv({
       `,
     },
     state: {
-      default: `text-ink-loud`,
-      dimmed: `text-ink`,
+      default: `text-fg-loud`,
+      dimmed: `text-fg`,
       selected: `text-cyanold`,
       success: `text-fg`,
       error: `text-brick`,

@@ -1,9 +1,10 @@
 import { mergeRefs } from "@/client/react";
+import { Rating } from "@/util/fsrs";
 import type { PropsOf } from "@pinyinly/lib/types";
 import { useLayoutEffect, useRef } from "react";
 import type { View } from "react-native";
-import { tv } from "tailwind-variants";
 import z from "zod/v4";
+import { ratingToThemeClass } from "./QuizDeckResultToast";
 import { RectButton } from "./RectButton";
 
 const quizSubmitButtonStateSchema = z.enum({
@@ -19,28 +20,32 @@ export type QuizSubmitButtonState = z.infer<typeof quizSubmitButtonStateSchema>;
 interface QuizSubmitButtonProps
   extends Pick<PropsOf<typeof RectButton>, `onPress` | `ref`> {
   autoFocus?: boolean;
-  state: QuizSubmitButtonState;
+  disabled: boolean;
+  rating: Rating | null | undefined;
 }
 
 export const QuizSubmitButton = ({
   autoFocus = false,
-  state,
+  disabled,
+  rating,
   onPress,
   ref,
 }: QuizSubmitButtonProps) => {
   let text;
 
-  switch (state) {
-    case QuizSubmitButtonState.Disabled:
-    case QuizSubmitButtonState.Check: {
+  switch (rating) {
+    case undefined:
+    case null: {
       text = `Check`;
       break;
     }
-    case QuizSubmitButtonState.Correct: {
+    case Rating.Easy:
+    case Rating.Good:
+    case Rating.Hard: {
       text = `Continue`;
       break;
     }
-    case QuizSubmitButtonState.Incorrect: {
+    case Rating.Again: {
       text = `Got it`;
       break;
     }
@@ -52,29 +57,21 @@ export const QuizSubmitButton = ({
     if (autoFocus && buttonRef.current != null) {
       buttonRef.current.focus();
     }
-  }, [autoFocus, buttonRef, state]);
+  }, [autoFocus, buttonRef]);
 
   return (
     <RectButton
       variant="filled"
       ref={mergeRefs(buttonRef, ref)}
-      disabled={state === QuizSubmitButtonState.Disabled}
-      className={buttonClass({ state })}
-      onPress={state === QuizSubmitButtonState.Disabled ? undefined : onPress}
+      disabled={disabled}
+      className={`
+        flex-1
+
+        ${disabled ? `` : rating == null ? `theme-success-panel` : ratingToThemeClass(rating)}
+      `}
+      onPress={disabled ? undefined : onPress}
     >
       {text}
     </RectButton>
   );
 };
-
-const buttonClass = tv({
-  base: `flex-1`,
-  variants: {
-    state: {
-      [QuizSubmitButtonState.Check]: `theme-success`,
-      [QuizSubmitButtonState.Correct]: `theme-success`,
-      [QuizSubmitButtonState.Disabled]: ``,
-      [QuizSubmitButtonState.Incorrect]: `theme-danger`,
-    },
-  },
-});

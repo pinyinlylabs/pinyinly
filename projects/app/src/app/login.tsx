@@ -204,8 +204,8 @@ function SkillCount() {
   });
 
   return result.isPending ? (
-    <Text>Loading…</Text>
+    <Text className="text-fg">Loading…</Text>
   ) : (
-    <Text>{result.data} words</Text>
+    <Text className="text-fg">{result.data} words</Text>
   );
 }

@@ -19,7 +19,14 @@ export default function ExplorePage() {
         </Text>
 
         <Link href="/explore/sounds/" asChild>
-          <RectButton variant="filled" className="theme-accent self-start">
+          <RectButton
+            variant="filled"
+            className={`
+              self-start
+
+              [--color-fg:var(--color-cyanold)]
+            `}
+          >
             Explore sounds
           </RectButton>
         </Link>

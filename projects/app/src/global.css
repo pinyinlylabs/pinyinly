@@ -18,7 +18,7 @@
     @apply font-sans text-base/snug font-medium text-fg;
   }
   .pyly-button-option-caption {
-    @apply font-sans text-sm/snug text-caption;
+    @apply font-sans text-sm/snug text-fg-dim;
   }
   .pyly-button-bare {
     @apply font-sans text-sm/normal font-bold uppercase text-fg;
@@ -65,7 +65,7 @@
   /* --- */
 
   .pyly-body-subheading {
-    @apply font-sans text-sm/normal text-ink-loud font-bold uppercase;
+    @apply font-sans text-sm/normal text-fg-loud font-bold uppercase;
   }
   .pyly-body-subheading.pyly-ref,
   .pyly-body-subheading .pyly-ref {
@@ -101,7 +101,7 @@
   /* --- */
 
   .pyly-body {
-    @apply font-sans text-base/normal text-ink font-medium;
+    @apply font-sans text-base/normal text-fg font-medium;
   }
   .pyly-body.pyly-ref,
   .pyly-body .pyly-ref {
@@ -119,15 +119,15 @@
   /* --- */
 
   .pyly-body-caption {
-    @apply font-sans text-sm/normal font-normal text-caption;
+    @apply font-sans text-sm/normal font-normal text-fg-dim;
   }
   .pyly-body-caption.pyly-ref,
   .pyly-body-caption .pyly-ref {
-    @apply text-caption-loud font-medium pyly-ref-sm;
+    @apply text-fg font-medium pyly-ref-sm;
   }
   .pyly-body-caption.pyly-bold,
   .pyly-body-caption .pyly-bold {
-    @apply text-caption-loud font-medium;
+    @apply text-fg font-medium;
   }
   .pyly-body-caption.pyly-mark,
   .pyly-body-caption .pyly-mark {
@@ -141,7 +141,7 @@
   /* --- */
 
   .pyly-body-dt {
-    @apply font-sans text-xs/normal font-medium text-caption uppercase;
+    @apply font-sans text-xs/normal font-medium text-fg-dim uppercase;
   }
   .pyly-body-dt.pyly-ref,
   .pyly-body-dt .pyly-ref {
@@ -177,7 +177,7 @@
   /* --- */
 
   .pyly-dev-dt {
-    @apply font-mono text-xs/normal font-normal text-caption uppercase;
+    @apply font-mono text-xs/normal font-normal text-fg-dim uppercase;
   }
 
   /* www */
@@ -235,19 +235,64 @@
     --color-pink: var(--color-pink-dark);
     --color-rose: var(--color-rose-dark);
     --color-brick: var(--color-brick-dark);
-    --color-brick-loud: var(--color-brick-loud-dark);
     --color-slate: var(--color-slate-dark);
     --color-gray: var(--color-gray-dark);
     --color-zinc: var(--color-zinc-dark);
     --color-neutral: var(--color-neutral-dark);
     --color-stone: var(--color-stone-dark);
     --color-cloud: var(--color-cloud-dark);
-    --color-ink: var(--color-ink-dark);
-    --color-ink-loud: var(--color-ink-loud-dark);
 
-    --color-bg: var(--color-bg-dark);
-    --color-bg-loud: var(--color-bg-loud-dark);
-    --color-bg-inverted: #fff;
+    --color-success: var(--color-wasabi);
+    --color-danger: #f46368;
+    --color-warning: #ffb900;
+
+    --color-theme-default-bg: #1a1d1e;
+    --color-theme-default-bg-high: #2d3031;
+    --color-theme-default-bg-higher: #404243;
+    --color-theme-default-fg: #d7d8d9;
+    --color-theme-default-fg-dim: #898989;
+    --color-theme-default-fg-loud: #ffffff;
+    --color-theme-default-on-fg: #1a1d1e;
+
+    --color-theme-danger-panel-bg: #2d3031;
+    --color-theme-danger-panel-bg-high: #413435;
+    --color-theme-danger-panel-bg-higher: #543739;
+    --color-theme-danger-panel-fg: #f2555a;
+    --color-theme-danger-panel-fg-dim: #db4b4f;
+    --color-theme-danger-panel-fg-loud: #ff7377;
+    --color-theme-danger-panel-on-fg: #1a1d1e;
+
+    --color-theme-grass-panel-bg: #00c286;
+    --color-theme-grass-panel-bg-high: #19c892;
+    --color-theme-grass-panel-bg-higher: #30ce9d;
+    --color-theme-grass-panel-fg: rgb(from white r g b / 0.95);
+    --color-theme-grass-panel-fg-dim: rgb(from white r g b / 0.57);
+    --color-theme-grass-panel-fg-loud: white;
+    --color-theme-grass-panel-on-fg: #00c286;
+
+    --color-theme-sky-panel-bg: var(--color-sky);
+    --color-theme-sky-panel-bg-high: #1f6991;
+    --color-theme-sky-panel-bg-higher: #36799c;
+    --color-theme-sky-panel-fg: rgb(from white r g b / 0.95);
+    --color-theme-sky-panel-fg-dim: rgb(from white r g b / 0.57);
+    --color-theme-sky-panel-fg-loud: white;
+    --color-theme-sky-panel-on-fg: var(--color-sky);
+
+    --color-theme-success-panel-bg: #193222;
+    --color-theme-success-panel-bg-high: #184525;
+    --color-theme-success-panel-bg-higher: #185828;
+    --color-theme-success-panel-fg: #13f042;
+    --color-theme-success-panel-fg-dim: #0b9d2b;
+    --color-theme-success-panel-fg-loud: #4dff73;
+    --color-theme-success-panel-on-fg: #1a1d1e;
+
+    --color-theme-yellow-panel-bg: #432004;
+    --color-theme-yellow-panel-bg-high: #563307;
+    --color-theme-yellow-panel-bg-higher: #69460a;
+    --color-theme-yellow-panel-fg: #ffdf20;
+    --color-theme-yellow-panel-fg-dim: #c7ad1b;
+    --color-theme-yellow-panel-fg-loud: #ffe962;
+    --color-theme-yellow-panel-on-fg: #1a1d1e;
   }
 
   .pyly-color-scheme-light {
@@ -271,54 +316,64 @@
     --color-pink: var(--color-pink-light);
     --color-rose: var(--color-rose-light);
     --color-brick: var(--color-brick-light);
-    --color-brick-loud: var(--color-brick-loud-light);
     --color-slate: var(--color-slate-light);
     --color-gray: var(--color-gray-light);
     --color-zinc: var(--color-zinc-light);
     --color-neutral: var(--color-neutral-light);
     --color-stone: var(--color-stone-light);
     --color-cloud: var(--color-cloud-light);
-    --color-ink: var(--color-ink-light);
-    --color-ink-loud: var(--color-ink-loud-light);
 
-    --color-bg: var(--color-bg-light);
-    --color-bg-loud: var(--color-bg-loud-light);
-    --color-bg-inverted: #000;
-  }
+    --color-success: var(--color-wasabi);
+    --color-danger: #d8373d;
+    --color-warning: #ff8904;
 
-  .pyly-color-scheme-dark,
-  .pyly-color-scheme-light {
-    --color-theme-default-fg: var(--color-ink);
-    --color-theme-default-fg-loud: var(--color-ink-loud);
-    --color-theme-default-caption: rgb(from var(--color-fg) r g b / 0.6);
-    --color-theme-default-caption-loud: rgb(from var(--color-fg) r g b / 0.9);
+    --color-theme-default-bg: #f8f9fa;
+    --color-theme-default-bg-high: #e1e3e4;
+    --color-theme-default-bg-higher: #caccce;
+    --color-theme-default-fg: #12191d;
+    --color-theme-default-fg-dim: #6c6c6c;
+    --color-theme-default-fg-loud: #000000;
+    --color-theme-default-on-fg: #ffffff;
 
-    --color-theme-danger-fg: var(--color-brick);
-    --color-theme-danger-fg-loud: var(--color-brick-loud);
-    --color-theme-danger-caption: rgb(from var(--color-fg) r g b / 0.6);
-    --color-theme-danger-caption-loud: rgb(from var(--color-fg) r g b / 0.9);
+    --color-theme-danger-panel-bg: #e7e8e8;
+    --color-theme-danger-panel-bg-high: #e5d6d7;
+    --color-theme-danger-panel-bg-higher: #e4c5c6;
+    --color-theme-danger-panel-fg: #d8373d;
+    --color-theme-danger-panel-fg-dim: #d55f63;
+    --color-theme-danger-panel-fg-loud: #d82128;
+    --color-theme-danger-panel-on-fg: #ffffff;
 
-    --color-theme-success-fg: var(--color-wasabi);
-    --color-theme-success-fg-loud: var(--color-wasabi);
-    --color-theme-success-caption: rgb(from var(--color-fg) r g b / 0.6);
-    --color-theme-success-caption-loud: rgb(from var(--color-fg) r g b / 0.9);
+    --color-theme-grass-panel-bg: #00c286;
+    --color-theme-grass-panel-bg-high: #18c892;
+    --color-theme-grass-panel-bg-higher: #30ce9d;
+    --color-theme-grass-panel-fg: rgb(from white r g b / 0.95);
+    --color-theme-grass-panel-fg-dim: rgb(from white r g b / 0.57);
+    --color-theme-grass-panel-fg-loud: white;
+    --color-theme-grass-panel-on-fg: #00c286;
 
-    --color-theme-accent-fg: var(--color-cyanold);
-    --color-theme-accent-fg-loud: var(--color-cyanold);
-    --color-theme-accent-caption: rgb(from var(--color-fg) r g b / 0.6);
-    --color-theme-accent-caption-loud: rgb(from var(--color-fg) r g b / 0.9);
+    --color-theme-sky-panel-bg: var(--color-sky);
+    --color-theme-sky-panel-bg-high: #4e8ef7;
+    --color-theme-sky-panel-bg-higher: #609af8;
+    --color-theme-sky-panel-fg: rgb(from white r g b / 0.95);
+    --color-theme-sky-panel-fg-dim: rgb(from white r g b / 0.57);
+    --color-theme-sky-panel-fg-loud: white;
+    --color-theme-sky-panel-on-fg: var(--color-sky);
 
-    --color-theme-sky-bg: var(--color-sky);
-    --color-theme-sky-fg: rgb(from white r g b / 0.95);
-    --color-theme-sky-fg-loud: rgb(from white r g b / 1);
-    --color-theme-sky-caption: rgb(from var(--color-fg) r g b / 0.6);
-    --color-theme-sky-caption-loud: rgb(from var(--color-fg) r g b / 0.9);
+    --color-theme-success-panel-bg: #e5f9e7;
+    --color-theme-success-panel-bg-high: #cef1d0;
+    --color-theme-success-panel-bg-higher: #b7e9b9;
+    --color-theme-success-panel-fg: #00ab00;
+    --color-theme-success-panel-fg-dim: #48b948;
+    --color-theme-success-panel-fg-loud: #008e00;
+    --color-theme-success-panel-on-fg: #ffffff;
 
-    --color-theme-grass-bg: #00c286;
-    --color-theme-grass-fg: rgb(from white r g b / 0.95);
-    --color-theme-grass-fg-loud: rgb(from white r g b / 1);
-    --color-theme-grass-caption: rgb(from var(--color-fg) r g b / 0.6);
-    --color-theme-grass-caption-loud: rgb(from var(--color-fg) r g b / 0.9);
+    --color-theme-yellow-panel-bg: #fefce8;
+    --color-theme-yellow-panel-bg-high: #f9f0d1;
+    --color-theme-yellow-panel-bg-higher: #f5e5ba;
+    --color-theme-yellow-panel-fg: #d08700;
+    --color-theme-yellow-panel-fg-dim: #c3a625;
+    --color-theme-yellow-panel-fg-loud: #a65f00;
+    --color-theme-yellow-panel-on-fg: #ffffff;
   }
 
   /* declare MDX component clases */
@@ -433,54 +488,63 @@
 
   */
   .theme-default {
+    --color-bg: var(--color-theme-default-bg);
+    --color-bg-high: var(--color-theme-default-bg-high);
+    --color-bg-higher: var(--color-theme-default-bg-higher);
+    --color-on-fg: var(--color-theme-default-on-fg);
     --color-fg: var(--color-theme-default-fg);
+    --color-fg-dim: var(--color-theme-default-fg-dim);
     --color-fg-loud: var(--color-theme-default-fg-loud);
-    --color-caption: var(--color-theme-default-caption);
-    --color-caption-loud: var(--color-theme-default-caption-loud);
   }
 
-  .theme-danger {
-    --color-fg: var(--color-theme-danger-fg);
-    --color-fg-loud: var(--color-theme-danger-fg-loud);
-    --color-caption: var(--color-theme-danger-caption);
-    --color-caption-loud: var(--color-theme-danger-caption-loud);
+  .theme-danger-panel {
+    --color-bg: var(--color-theme-danger-panel-bg);
+    --color-bg-high: var(--color-theme-danger-panel-bg-high);
+    --color-bg-higher: var(--color-theme-danger-panel-bg-higher);
+    --color-on-fg: var(--color-theme-danger-panel-on-fg);
+    --color-fg: var(--color-theme-danger-panel-fg);
+    --color-fg-dim: var(--color-theme-danger-panel-fg-dim);
+    --color-fg-loud: var(--color-theme-danger-panel-fg-loud);
   }
 
-  .theme-success {
-    --color-fg: var(--color-theme-success-fg);
-    --color-fg-loud: var(--color-theme-success-fg-loud);
-    --color-caption: var(--color-theme-success-caption);
-    --color-caption-loud: var(--color-theme-success-caption-loud);
+  .theme-success-panel {
+    --color-bg: var(--color-theme-success-panel-bg);
+    --color-bg-high: var(--color-theme-success-panel-bg-high);
+    --color-bg-higher: var(--color-theme-success-panel-bg-higher);
+    --color-on-fg: var(--color-theme-success-panel-on-fg);
+    --color-fg: var(--color-theme-success-panel-fg);
+    --color-fg-dim: var(--color-theme-success-panel-fg-dim);
+    --color-fg-loud: var(--color-theme-success-panel-fg-loud);
   }
 
-  .theme-accent {
-    --color-fg: var(--color-theme-accent-fg);
-    --color-fg-loud: var(--color-theme-accent-fg-loud);
-    --color-caption: var(--color-theme-accent-caption);
-    --color-caption-loud: var(--color-theme-accent-caption-loud);
+  .theme-yellow-panel {
+    --color-bg: var(--color-theme-yellow-panel-bg);
+    --color-bg-high: var(--color-theme-yellow-panel-bg-high);
+    --color-bg-higher: var(--color-theme-yellow-panel-bg-higher);
+    --color-on-fg: var(--color-theme-yellow-panel-on-fg);
+    --color-fg: var(--color-theme-yellow-panel-fg);
+    --color-fg-dim: var(--color-theme-yellow-panel-fg-dim);
+    --color-fg-loud: var(--color-theme-yellow-panel-fg-loud);
   }
 
-  .theme-warning {
-    --color-fg: var(--color-amber);
-    --color-fg-loud: var(--color-amber);
-    --color-caption: rgb(from var(--color-fg) r g b / 0.6);
-    --color-caption-loud: rgb(from var(--color-fg) r g b / 0.9);
+  .theme-grass-panel {
+    --color-bg: var(--color-theme-grass-panel-bg);
+    --color-bg-high: var(--color-theme-grass-panel-bg-high);
+    --color-bg-higher: var(--color-theme-grass-panel-bg-higher);
+    --color-on-fg: var(--color-theme-grass-panel-on-fg);
+    --color-fg: var(--color-theme-grass-panel-fg);
+    --color-fg-dim: var(--color-theme-grass-panel-fg-dim);
+    --color-fg-loud: var(--color-theme-grass-panel-fg-loud);
   }
 
-  .theme-sky {
-    --color-bg: var(--color-theme-sky-bg);
-    --color-fg: var(--color-theme-sky-fg);
-    --color-fg-loud: var(--color-theme-sky-fg-loud);
-    --color-caption: var(--color-theme-sky-caption);
-    --color-caption-loud: var(--color-theme-sky-caption-loud);
-  }
-
-  .theme-grass {
-    --color-bg: var(--color-theme-grass-bg);
-    --color-fg: var(--color-theme-grass-fg);
-    --color-fg-loud: var(--color-theme-grass-fg-loud);
-    --color-caption: var(--color-theme-grass-caption);
-    --color-caption-loud: var(--color-theme-grass-caption-loud);
+  .theme-sky-panel {
+    --color-bg: var(--color-theme-sky-panel-bg);
+    --color-bg-high: var(--color-theme-sky-panel-bg-high);
+    --color-bg-higher: var(--color-theme-sky-panel-bg-higher);
+    --color-on-fg: var(--color-theme-sky-panel-on-fg);
+    --color-fg: var(--color-theme-sky-panel-fg);
+    --color-fg-dim: var(--color-theme-sky-panel-fg-dim);
+    --color-fg-loud: var(--color-theme-sky-panel-fg-loud);
   }
 
   /* --- */
@@ -549,14 +613,18 @@ body {
 }
 
 :root {
+  --color-cloud-light: #cdcdcd;
+  --color-cloud-dark: #d9d9d9;
+  --color-brick-light: #dc3e43;
+  --color-brick-dark: #f2555a;
   --color-red-light: #e7000b;
   --color-red-dark: #e7000b;
   --color-orange-light: #f54900;
   --color-orange-dark: #ff8904;
   --color-amber-light: #e17100;
   --color-amber-dark: #ffb900;
-  --color-yellow-light: #d08700;
-  --color-yellow-dark: #fdc700;
+  --color-yellow-light: #fcbc14;
+  --color-yellow-dark: #fcbc14;
   --color-lime-light: #5ea500;
   --color-lime-dark: #9ae600;
   --color-wasabi-light: #00c410;
@@ -844,22 +912,6 @@ body {
   --color-tw-black: #000;
   --color-tw-white: #fff;
   /* </tailwind-colors> */
-
-  --color-brick-light: #dc3e43;
-  --color-brick-dark: #f2555a;
-  --color-brick-loud-light: #d8373d;
-  --color-brick-loud-dark: #f46368;
-  --color-ink-light: #535353;
-  --color-ink-dark: #b7b7b7;
-  --color-ink-loud-light: #000000;
-  --color-ink-loud-dark: #ececec;
-  --color-cloud-light: #cdcdcd;
-  --color-cloud-dark: #d9d9d9;
-
-  --color-bg-light: #f8f9fa;
-  --color-bg-dark: #1a1d1e;
-  --color-bg-loud-light: #f1f3f5;
-  --color-bg-loud-dark: #1f292b;
 
   @apply pyly-color-scheme-light;
   @apply theme-default;

@@ -66,7 +66,7 @@ export const Section = ({
         </View>
         <View
           className={`
-            pyly-color-scheme-dark hidden flex-1 bg-bg-loud p-2
+            pyly-color-scheme-dark hidden flex-1 bg-bg-high p-2
 
             lg:flex
           `}
@@ -101,9 +101,9 @@ export const examplesStackClassName = `bg-bg lg:flex-1 lg:shrink lg:basis-1 flex
 export const LittlePrimaryHeader = ({ title }: { title: string }) => {
   return (
     <View className="mb-2 mt-4 flex-row items-center gap-2">
-      <View className="h-px grow bg-bg-loud" />
+      <View className="h-px grow bg-bg-high" />
       <Text className="pyly-dev-dt text-center">{title}</Text>
-      <View className="h-px grow bg-bg-loud" />
+      <View className="h-px grow bg-bg-high" />
     </View>
   );
 };
@@ -200,7 +200,11 @@ export function DemoHanziKnob({ hanzis }: { hanzis?: HanziText[] }) {
       {hanzis.map((hanzi) => (
         <RectButton
           key={hanzi}
-          className={hanzi === currentHanzi ? `theme-accent` : undefined}
+          className={
+            hanzi === currentHanzi
+              ? `[--color-fg:var(--color-cyanold)]`
+              : undefined
+          }
           variant="filled"
           onPressIn={() => {
             setHanzi(hanzi);
@@ -230,7 +234,9 @@ export function DemoHanziWordKnob({
         <RectButton
           key={hanziWord}
           className={
-            hanziWord === currentHanziWord ? `theme-accent` : undefined
+            hanziWord === currentHanziWord
+              ? `[--color-fg:var(--color-cyanold)]`
+              : undefined
           }
           variant="filled"
           onPressIn={() => {

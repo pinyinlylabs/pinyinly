@@ -270,7 +270,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
                     entering={FadeIn}
                     className="my-auto items-center"
                   >
-                    <Text className="font-sans text-lg text-caption">
+                    <Text className="font-sans text-lg text-fg-dim">
                       Loading
                     </Text>
                   </Reanimated.View>
@@ -297,7 +297,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
                       </Text>
                       {/* {nextNotYetDueSkillState.isLoading ||
                       nextNotYetDueSkillState.data == null ? null : (
-                        <Text className="pyly-body-caption">
+                        <Text className="pyly-body-fg-dim">
                           Next review in{` `}
                           {formatDuration(
                             intervalToDuration(

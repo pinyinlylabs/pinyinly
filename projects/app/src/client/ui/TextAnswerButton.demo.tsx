@@ -258,6 +258,15 @@ export default () => (
         </ExampleStack>
       ))}
     </View>
+
+    <LittlePrimaryHeader title="Exotic glyphs" />
+
+    <TextAnswerButton
+      state="error"
+      fontSize="lg"
+      text="𫶧"
+      renderWikiModal={() => null}
+    />
   </View>
 );
 

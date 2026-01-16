@@ -1,5 +1,6 @@
 import { matchAllPinyinUnits } from "@/data/pinyin";
 import { hanziFromHanziWord, loadDictionary } from "@/dictionary";
+import { Rating } from "@/util/fsrs";
 import { sortComparatorNumber } from "@pinyinly/lib/collections";
 import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import type { Mutable } from "@pinyinly/lib/types";
@@ -83,10 +84,12 @@ function validQuestionInvariant<T extends Question>(question: T): T {
 export type HanziToPinyinTypedQuestionGrade =
   | {
       correct: true;
+      rating: Rating;
       skillRatings: UnsavedSkillRating[];
     }
   | {
       correct: false;
+      rating: typeof Rating.Again;
       skillRatings: UnsavedSkillRating[];
       expectedAnswer: PinyinText;
       mistakes: MistakeType[];
@@ -123,15 +126,15 @@ export function gradeHanziToPinyinTypedQuestion(
 
       if (isCorrect) {
         const correct = true;
+        const skillRating = computeSkillRating({
+          skill,
+          correct,
+          durationMs,
+        });
         return {
           correct,
-          skillRatings: [
-            computeSkillRating({
-              skill,
-              correct,
-              durationMs,
-            }),
-          ],
+          rating: skillRating.rating,
+          skillRatings: [skillRating],
         };
       }
     }
@@ -145,6 +148,7 @@ export function gradeHanziToPinyinTypedQuestion(
     );
     return {
       correct,
+      rating: Rating.Again,
       skillRatings: [
         computeSkillRating({
           skill: question.skill,

@@ -15,7 +15,7 @@ export const NewSprout = ({
       className={`
         ${className ?? ``}
 
-        theme-success
+        [--color-fg:var(--color-success)]
       `}
       style={style}
     >

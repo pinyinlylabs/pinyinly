@@ -16,11 +16,25 @@ export default () => {
         {icons}
       </ExampleStack>
 
-      <ExampleStack title="success" childrenClassName="gap-8 theme-success">
+      <ExampleStack
+        title="wasabi"
+        childrenClassName={`
+          gap-8
+
+          [--color-fg:var(--color-success)]
+        `}
+      >
         {icons}
       </ExampleStack>
 
-      <ExampleStack title="danger" childrenClassName="gap-8 theme-danger">
+      <ExampleStack
+        title="brick"
+        childrenClassName={`
+          gap-8
+
+          [--color-fg:var(--color-danger)]
+        `}
+      >
         {icons}
       </ExampleStack>
     </View>
@@ -70,6 +84,7 @@ const allIcons = [
   require(`../../assets/icons/loader.svg`),
   require(`../../assets/icons/lock-filled.svg`),
   require(`../../assets/icons/medal.svg`),
+  require(`../../assets/icons/meh-circled.svg`),
   require(`../../assets/icons/menu.svg`),
   require(`../../assets/icons/message-bubble-filled.svg`),
   require(`../../assets/icons/message-text.svg`),
@@ -85,6 +100,7 @@ const allIcons = [
   require(`../../assets/icons/settings.svg`),
   require(`../../assets/icons/show.svg`),
   require(`../../assets/icons/shuffle.svg`),
+  require(`../../assets/icons/smile-circled.svg`),
   require(`../../assets/icons/speaker-2.svg`),
   require(`../../assets/icons/star-filled.svg`),
   require(`../../assets/icons/star.svg`),

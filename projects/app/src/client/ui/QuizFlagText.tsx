@@ -13,7 +13,11 @@ export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
     }
     case QuestionFlagKind.NewDifficulty: {
       return (
-        <View className={flagViewClass({ class: `theme-danger` })}>
+        <View
+          className={flagViewClass({
+            className: `[--color-fg:var(--color-danger)]`,
+          })}
+        >
           <IconImage
             className={flagIconClass()}
             source={require(`@/assets/icons/dumbbell.svg`)}
@@ -24,7 +28,11 @@ export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
     }
     case QuestionFlagKind.NewSkill: {
       return (
-        <View className={flagViewClass({ class: `theme-success` })}>
+        <View
+          className={flagViewClass({
+            className: `[--color-fg:var(--color-success)]`,
+          })}
+        >
           <IconImage
             className={flagIconClass()}
             source={require(`@/assets/icons/plant-filled.svg`)}
@@ -35,7 +43,11 @@ export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
     }
     case QuestionFlagKind.OtherAnswer: {
       return (
-        <View className={flagViewClass({ class: `theme-warning` })}>
+        <View
+          className={flagViewClass({
+            className: `[--color-fg:var(--color-warning)]`,
+          })}
+        >
           <IconImage
             className={flagIconClass()}
             source={require(`@/assets/icons/shuffle.svg`)}
@@ -46,7 +58,11 @@ export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
     }
     case QuestionFlagKind.Overdue: {
       return (
-        <View className={flagViewClass({ class: `theme-danger` })}>
+        <View
+          className={flagViewClass({
+            className: `[--color-fg:var(--color-danger)]`,
+          })}
+        >
           <IconImage
             className={flagIconClass()}
             source={require(`@/assets/icons/alarm.svg`)}
@@ -73,7 +89,11 @@ export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
     }
     case QuestionFlagKind.Retry: {
       return (
-        <View className={flagViewClass({ class: `theme-warning` })}>
+        <View
+          className={flagViewClass({
+            className: `[--color-fg:var(--color-warning)]`,
+          })}
+        >
           <IconImage
             className={flagIconClass()}
             source={require(`@/assets/icons/repeat.svg`)}
@@ -84,7 +104,11 @@ export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
     }
     case QuestionFlagKind.WeakWord: {
       return (
-        <View className={flagViewClass({ class: `theme-danger` })}>
+        <View
+          className={flagViewClass({
+            className: `[--color-fg:var(--color-danger)]`,
+          })}
+        >
           <IconImage
             className={flagIconClass()}
             source={require(`@/assets/icons/flag.svg`)}

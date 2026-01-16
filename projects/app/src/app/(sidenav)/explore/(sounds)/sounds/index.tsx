@@ -27,9 +27,9 @@ export default function MnemonicsPage() {
             <View key={id} className="gap-4">
               <View className="flex-row items-center gap-2">
                 <Text className="text-lg font-bold text-fg">{name}</Text>
-                <Text className="text-caption">({sounds.length})</Text>
+                <Text className="text-fg-dim">({sounds.length})</Text>
                 {theme === `` ? null : (
-                  <Text className="text-caption">{theme}</Text>
+                  <Text className="text-fg-dim">{theme}</Text>
                 )}
               </View>
               <View className="flex-row flex-wrap gap-3.5">
