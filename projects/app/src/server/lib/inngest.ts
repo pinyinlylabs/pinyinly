@@ -114,6 +114,30 @@ function createTrpcClient(url: string, sessionId: string) {
   });
 }
 
+/**
+ * Check if there's an internet connection by attempting a fetch.
+ * Returns false if offline, allowing sync functions to skip gracefully.
+ */
+export async function checkIsOffline(timeoutMs = 3000): Promise<boolean> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => {
+    controller.abort();
+  }, timeoutMs);
+
+  try {
+    await fetch(`https://cloudflare.com/cdn-cgi/trace`, {
+      method: `GET`,
+      signal: controller.signal,
+      cache: `no-store`,
+    });
+    return false;
+  } catch {
+    return true;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 const replicacheGarbageCollection = inngest.createFunction(
   {
     description: `Delete old replicache data no longer used to reduce DB bloat.`,
@@ -267,7 +291,17 @@ const syncRemotePush = inngest.createFunction(
     // Sync every 5 minutes
     cron: `*/5 * * * *`,
   },
-  async ({ step }) => {
+  async ({ step, logger }) => {
+    {
+      const isOffline = await step.run(`checkInternetConnection`, () =>
+        checkIsOffline(),
+      );
+      if (isOffline) {
+        logger.warn(`No internet connection, skipping`);
+        return;
+      }
+    }
+
     // Find all sync rules
     const remoteSyncs = await step.run(`findSyncRules`, async () => {
       const remoteSyncs = await withDrizzle(async (db) => {
@@ -381,7 +415,17 @@ const syncRemotePull = inngest.createFunction(
     // Sync every 5 minutes
     cron: `*/5 * * * *`,
   },
-  async ({ step }) => {
+  async ({ step, logger }) => {
+    {
+      const isOffline = await step.run(`checkInternetConnection`, () =>
+        checkIsOffline(),
+      );
+      if (isOffline) {
+        logger.warn(`No internet connection, skipping`);
+        return;
+      }
+    }
+
     // Find all sync rules
     const remoteSyncs = await step.run(
       `findSyncRules`,
