@@ -11,6 +11,7 @@ import type {
   PinyinText,
   Question,
   QuestionFlagType,
+  Skill,
   UnsavedSkillRating,
 } from "../model";
 import { MistakeKind, QuestionFlagKind, QuestionKind } from "../model";
@@ -166,4 +167,35 @@ export function gradeHanziToPinyinTypedQuestion(
       ],
     };
   }
+}
+
+/**
+ * Determine whether to "auto-submit" a pinyin typed answer based on the current
+ * text and the expected answers. If the answer ends in a space and the number
+ * of pinyin units matches the expected answer it will auto-submit.
+ *
+ * @param text
+ * @param answers @returns
+ */
+export function shouldAutoSubmitPinyinTypedAnswer(
+  text: string,
+  skill: Skill,
+  answers: HanziWordToPinyinTypedQuestion[`answers`],
+): boolean {
+  // It's important to only trigger when there's a space at the end,
+  // otherwise as soon as you type "ni" it will submit, before you've
+  // had a chance to change the tone.
+  if (!text.endsWith(` `)) {
+    return false;
+  }
+
+  const expectedAnswer = answers.find((a) => a.skill === skill)?.pinyin[0];
+  if (expectedAnswer != null) {
+    const expectedUnitCount = matchAllPinyinUnits(expectedAnswer).length;
+    const actualUnitCount = matchAllPinyinUnits(text).length;
+    if (expectedUnitCount === actualUnitCount) {
+      return true;
+    }
+  }
+  return false;
 }
