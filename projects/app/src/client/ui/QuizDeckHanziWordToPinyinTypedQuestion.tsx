@@ -37,11 +37,13 @@ export function QuizDeckHanziWordToPinyinTypedQuestion({
   noAutoFocus = true,
   question,
   onNext,
+  onUndo,
   onRating,
 }: {
   noAutoFocus?: boolean;
   question: HanziWordToPinyinTypedQuestion;
   onNext: () => void;
+  onUndo: () => void;
   onRating: (
     ratings: UnsavedSkillRating[],
     mistakes: readonly MistakeType[],
@@ -83,7 +85,11 @@ export function QuizDeckHanziWordToPinyinTypedQuestion({
     <Skeleton
       toast={
         grade == null ? null : (
-          <QuizDeckResultToast skill={skill} rating={grade.rating} />
+          <QuizDeckResultToast
+            skill={skill}
+            rating={grade.rating}
+            onUndo={onUndo}
+          />
         )
       }
       submitButton={

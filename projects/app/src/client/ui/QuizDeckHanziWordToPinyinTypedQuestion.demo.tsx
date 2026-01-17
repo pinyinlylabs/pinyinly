@@ -38,6 +38,9 @@ export default () => {
             onRating={() => {
               console.log(`onRating()`);
             }}
+            onUndo={() => {
+              console.log(`onUndo()`);
+            }}
             question={question}
           />
         )}

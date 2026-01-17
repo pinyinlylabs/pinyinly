@@ -56,6 +56,9 @@ export default () => {
                   skill={skill}
                   rating={rating}
                   disableAnimation
+                  onUndo={() => {
+                    console.log(`onUndo`);
+                  }}
                 />
                 <View
                   className="absolute inset-x-4 flex-row items-stretch"

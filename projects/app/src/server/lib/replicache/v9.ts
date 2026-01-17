@@ -31,7 +31,7 @@ import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import { startSpan } from "@sentry/core";
 import makeDebug from "debug";
 import type { SQL } from "drizzle-orm";
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 import type { SubqueryWithSelection } from "drizzle-orm/pg-core";
 import pickBy from "lodash/pickBy";
 import type { CvrEntities } from "../../pgSchema";
@@ -52,21 +52,29 @@ invariant(loggerName != null);
 const debug = makeDebug(loggerName);
 
 const mutators: RizzleDrizzleMutators<typeof schema, Drizzle> = {
-  async rateSkill(db, userId, { id, skill, rating, durationMs, now }) {
+  async rateSkill(
+    db,
+    userId,
+    { id, skill, rating, durationMs, now, reviewId },
+  ) {
     await db
       .insert(s.skillRating)
-      .values([{ id, userId, skill, rating, durationMs, createdAt: now }]);
+      .values([
+        { id, userId, skill, rating, durationMs, createdAt: now, reviewId },
+      ]);
 
     await updateSkillState(db, skill, userId);
   },
   async saveHanziGlossMistake(
     db,
     userId,
-    { id, gloss, hanziOrHanziWord, now },
+    { id, gloss, hanziOrHanziWord, now, reviewId },
   ) {
     await db
       .insert(s.hanziGlossMistake)
-      .values([{ id, userId, gloss, hanziOrHanziWord, createdAt: now }]);
+      .values([
+        { id, userId, gloss, hanziOrHanziWord, createdAt: now, reviewId },
+      ]);
 
     // Apply mistake effect to in-scope skills.
     const mistake: HanziGlossMistakeType = {
@@ -94,11 +102,13 @@ const mutators: RizzleDrizzleMutators<typeof schema, Drizzle> = {
   async saveHanziPinyinMistake(
     db,
     userId,
-    { id, pinyin, hanziOrHanziWord, now },
+    { id, pinyin, hanziOrHanziWord, now, reviewId },
   ) {
     await db
       .insert(s.hanziPinyinMistake)
-      .values([{ id, userId, pinyin, hanziOrHanziWord, createdAt: now }]);
+      .values([
+        { id, userId, pinyin, hanziOrHanziWord, createdAt: now, reviewId },
+      ]);
 
     // Apply mistake effect to in-scope skills.
     const mistake: HanziPinyinMistakeType = {
@@ -166,6 +176,73 @@ const mutators: RizzleDrizzleMutators<typeof schema, Drizzle> = {
         target: [s.userSetting.userId, s.userSetting.key],
         set: { value, updatedAt },
       });
+  },
+  async undoReview(db, userId, { reviewId, now }) {
+    const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+
+    // Find all skill ratings with this reviewId
+    const skillRatings = await db.query.skillRating.findMany({
+      where: and(
+        eq(s.skillRating.userId, userId),
+        eq(s.skillRating.reviewId, reviewId),
+      ),
+    });
+
+    // Check if any rating is too old (beyond 1-day undo window)
+    // If so, silently return without undoing
+    for (const rating of skillRatings) {
+      if (now.getTime() - rating.createdAt.getTime() > ONE_DAY_MS) {
+        return;
+      }
+    }
+
+    // Collect affected skills before marking as trashed
+    const affectedSkills = new Set(
+      skillRatings.filter((r) => r.trashedAt == null).map((r) => r.skill),
+    );
+
+    // Mark all skill ratings as trashed
+    if (skillRatings.length > 0) {
+      await db
+        .update(s.skillRating)
+        .set({ trashedAt: now })
+        .where(
+          and(
+            eq(s.skillRating.userId, userId),
+            eq(s.skillRating.reviewId, reviewId),
+            isNull(s.skillRating.trashedAt),
+          ),
+        );
+    }
+
+    // Mark all gloss mistakes with this reviewId as trashed
+    await db
+      .update(s.hanziGlossMistake)
+      .set({ trashedAt: now })
+      .where(
+        and(
+          eq(s.hanziGlossMistake.userId, userId),
+          eq(s.hanziGlossMistake.reviewId, reviewId),
+          isNull(s.hanziGlossMistake.trashedAt),
+        ),
+      );
+
+    // Mark all pinyin mistakes with this reviewId as trashed
+    await db
+      .update(s.hanziPinyinMistake)
+      .set({ trashedAt: now })
+      .where(
+        and(
+          eq(s.hanziPinyinMistake.userId, userId),
+          eq(s.hanziPinyinMistake.reviewId, reviewId),
+          isNull(s.hanziPinyinMistake.trashedAt),
+        ),
+      );
+
+    // Recalculate SRS state for all affected skills
+    for (const skill of affectedSkills) {
+      await updateSkillState(db, skill, userId);
+    }
   },
 };
 

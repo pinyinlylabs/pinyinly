@@ -55,6 +55,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
 
   const skillQueue = useSkillQueue();
 
+  const [latestReviewId, setLatestReviewId] = useState<string>();
   const [question, setQuestion] = useState<Question>();
   const [questionVersion, setQuestionVersion] = useState<number>();
 
@@ -155,11 +156,26 @@ export const QuizDeck = ({ className }: { className?: string }) => {
   // The number of questions in a row correctly answered.
   const quizProgress = useQuizProgress();
 
-  const handleNext = useEventCallback(() => {
+  const handleNext = () => {
     // Clear the current question so the next one loads when version changes
     // Keep questionVersion so we can detect when queue updates to a newer version
     setQuestion(undefined);
-  });
+  };
+
+  const handleUndo = () => {
+    if (latestReviewId != null) {
+      r.mutate
+        .undoReview({ reviewId: latestReviewId, now: Date.now() })
+        .catch((error: unknown) => {
+          console.error(`Could not undo review`, error);
+        });
+      setLatestReviewId(undefined);
+    }
+    quizProgress.undo();
+    if (question != null) {
+      setQuestion({ ...question });
+    }
+  };
 
   const handleRating = useEventCallback(
     (
@@ -177,6 +193,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
       }
 
       const now = Date.now();
+      const reviewId = nanoid();
 
       void (async () => {
         for (const { skill, rating, durationMs } of ratings) {
@@ -187,6 +204,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
               skill,
               durationMs,
               rating,
+              reviewId,
             })
             .catch((error: unknown) => {
               console.error(`Could not add skill rating`, error);
@@ -201,6 +219,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
                 now,
                 hanziOrHanziWord: mistake.hanziOrHanziWord,
                 gloss: mistake.gloss,
+                reviewId,
               });
               break;
             }
@@ -210,6 +229,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
                 now,
                 hanziOrHanziWord: mistake.hanziOrHanziWord,
                 pinyin: mistake.pinyin,
+                reviewId,
               });
               break;
             }
@@ -222,6 +242,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
         console.error(`error in async handling in handleRating`, error);
       });
 
+      setLatestReviewId(reviewId);
       quizProgress.recordAnswer(success);
     },
   );
@@ -333,6 +354,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
                         question={question}
                         onNext={handleNext}
                         onRating={handleRating}
+                        onUndo={handleUndo}
                       />
                     );
                     break;
@@ -343,6 +365,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
                         question={question}
                         onNext={handleNext}
                         onRating={handleRating}
+                        onUndo={handleUndo}
                       />
                     );
                     break;
@@ -353,6 +376,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
                         question={question}
                         onNext={handleNext}
                         onRating={handleRating}
+                        onUndo={handleUndo}
                       />
                     );
                     break;

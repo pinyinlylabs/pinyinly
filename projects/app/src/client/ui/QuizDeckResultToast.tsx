@@ -3,7 +3,10 @@ import { Rating } from "@/util/fsrs";
 import { invariant } from "@pinyinly/lib/invariant";
 import { Platform, Text, View } from "react-native";
 import Reanimated, { Easing, Keyframe } from "react-native-reanimated";
+import type { FloatingMenuModalMenuProps } from "./FloatingMenuModal";
+import { FloatingMenuModal } from "./FloatingMenuModal";
 import { IconImage } from "./IconImage";
+import { RectButton } from "./RectButton";
 import { SkillAnswerText } from "./SkillAnswerText";
 import { Suspense } from "./Suspense";
 
@@ -11,6 +14,7 @@ export function QuizDeckResultToast({
   skill,
   rating,
   disableAnimation = false,
+  onUndo,
 }: {
   skill: Skill;
   rating: Rating;
@@ -18,6 +22,7 @@ export function QuizDeckResultToast({
    * Disable the enter animation for the toast, useful for demo purposes and visual snapshotting.
    */
   disableAnimation?: boolean;
+  onUndo: () => void;
 }) {
   return (
     <Suspense fallback={null}>
@@ -74,9 +79,11 @@ export function QuizDeckResultToast({
                         `@/assets/icons/close-circled-filled.svg`,
                       )}
                     />
-                    <Text className="text-2xl font-bold text-fg">
-                      Incorrect
-                    </Text>
+                    <FloatingMenuModal menu={<IncorrectMenu onUndo={onUndo} />}>
+                      <Text className="pyly-ref pyly-ref-2xl text-2xl font-bold text-fg">
+                        Incorrect
+                      </Text>
+                    </FloatingMenuModal>
                   </View>
                   <Text className="text-xl/none font-medium text-fg">
                     Correct answer:
@@ -136,4 +143,24 @@ export function ratingToThemeClass(rating: Rating) {
       return `theme-danger-panel`;
     }
   }
+}
+
+function IncorrectMenu({
+  onUndo,
+  onRequestClose,
+}: {
+  onUndo: () => void;
+} & FloatingMenuModalMenuProps) {
+  const handleUndo = () => {
+    onUndo();
+    onRequestClose?.();
+  };
+
+  return (
+    <View className="rounded-xl bg-bg-high px-4 py-3">
+      <RectButton variant="bare" onPress={handleUndo}>
+        Undo answer
+      </RectButton>
+    </View>
+  );
 }

@@ -158,6 +158,7 @@ describe(`push suite` satisfies HasNameOf<typeof push>, () => {
         rating: Rating.Good,
         durationMs: null,
         now: new Date(),
+        reviewId: nanoid(),
       }),
       timestamp: 1,
       clientId: client.id,
@@ -659,6 +660,7 @@ describe(`pull suite` satisfies HasNameOf<typeof pull>, () => {
           skill: glossToHanziWord(`我:i`),
           rating: Rating.Good,
           createdAt: now,
+          reviewId: nanoid(),
         },
       ])
       .returning();
@@ -713,6 +715,7 @@ describe(`pull suite` satisfies HasNameOf<typeof pull>, () => {
           skill: glossToHanziWord(`我:i`),
           rating: Rating.Good,
           createdAt: now,
+          reviewId: nanoid(),
         },
       ])
       .returning();
@@ -775,6 +778,7 @@ describe(`pull suite` satisfies HasNameOf<typeof pull>, () => {
           rating: Rating.Again,
           createdAt: now,
           durationMs: 1234,
+          reviewId: nanoid(),
         },
       ])
       .returning();
@@ -802,6 +806,7 @@ describe(`pull suite` satisfies HasNameOf<typeof pull>, () => {
             rating: Rating.Again,
             createdAt: now,
             durationMs: 1234,
+            reviewId: skillRating.reviewId,
           }),
         },
       ],
@@ -888,11 +893,13 @@ describe(
               userId: user1.id,
               skill: glossToHanziWord(`我:i`),
               rating: Rating.Again,
+              reviewId: nanoid(),
             },
             {
               userId: user2.id,
               skill: glossToHanziWord(`我:i`),
               rating: Rating.Good,
+              reviewId: nanoid(),
             },
           ])
           .returning({
