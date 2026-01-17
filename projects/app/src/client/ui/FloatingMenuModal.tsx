@@ -26,8 +26,8 @@ export function FloatingMenuModal(props: {
   const [isOpen, setIsOpen] = useState(false);
 
   // To avoid flash of floating ui content at top. If the position is zero hide
-  // the floating element.This happens because measure is async and it takes few
-  // miliseconds to calculate the positions.
+  // the floating element. This happens because measure is async and it takes few
+  // milliseconds to calculate the positions.
   const isInitializing = floatingStyles.left === 0 && floatingStyles.top === 0;
 
   const toggleOpen = () => {
