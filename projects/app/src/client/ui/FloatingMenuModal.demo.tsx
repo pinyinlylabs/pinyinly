@@ -6,7 +6,7 @@ export default () => {
   return (
     <View className="gap-10">
       <FloatingMenuModal
-        floating={
+        menu={
           <View className="rounded-xl bg-bg-high px-4 py-3">
             <RectButton variant="bare">Reference</RectButton>
           </View>

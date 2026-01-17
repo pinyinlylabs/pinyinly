@@ -39,6 +39,7 @@ export function QuizDeckOneCorrectPairQuestion({
   question,
   onNext,
   onRating,
+  onUndo,
 }: {
   question: OneCorrectPairQuestion;
   onNext: () => void;
@@ -46,6 +47,7 @@ export function QuizDeckOneCorrectPairQuestion({
     ratings: readonly UnsavedSkillRating[],
     mistakes: readonly MistakeType[],
   ) => void;
+  onUndo: () => void;
 }) {
   const { prompt, answer, groupA, groupB, flag } = question;
 
@@ -99,7 +101,11 @@ export function QuizDeckOneCorrectPairQuestion({
     <Skeleton
       toast={
         grade == null ? null : (
-          <QuizDeckResultToast rating={grade.rating} skill={answer.skill} />
+          <QuizDeckResultToast
+            rating={grade.rating}
+            skill={answer.skill}
+            onUndo={onUndo}
+          />
         )
       }
       submitButton={

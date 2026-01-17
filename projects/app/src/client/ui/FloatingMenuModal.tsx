@@ -1,14 +1,19 @@
 import { mergeProps } from "@/client/react";
 import { flip, offset, shift, useFloating } from "@floating-ui/react-native";
-import type { ReactElement, ReactNode, RefAttributes } from "react";
+import type { ReactElement, RefAttributes } from "react";
 import { cloneElement, useState } from "react";
 import type { PressableProps } from "react-native";
 import { Modal, TouchableOpacity, View } from "react-native";
 
 const gap = 8;
 
+export interface FloatingMenuModalMenuProps {
+  /** Allow the menu to close the floating menu. */
+  onRequestClose?: () => void;
+}
+
 export function FloatingMenuModal(props: {
-  floating: ReactNode;
+  menu: ReactElement<FloatingMenuModalMenuProps>;
   children: ReactElement<
     Pick<PressableProps, `onTouchEnd` | `onPress`> & RefAttributes<View>
   >;
@@ -64,7 +69,12 @@ export function FloatingMenuModal(props: {
             style={floatingStyles}
             className={isInitializing ? `invisible` : undefined}
           >
-            {props.floating}
+            {cloneElement(
+              props.menu,
+              mergeProps(props.menu.props, {
+                onRequestClose: handleDismiss,
+              }),
+            )}
           </View>
         </TouchableOpacity>
       </Modal>

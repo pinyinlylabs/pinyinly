@@ -26,6 +26,7 @@ export function QuizDeckHanziWordToGlossTypedQuestion({
   question,
   onNext,
   onRating,
+  onUndo,
 }: {
   noAutoFocus?: boolean;
   question: HanziWordToGlossTypedQuestion;
@@ -34,6 +35,7 @@ export function QuizDeckHanziWordToGlossTypedQuestion({
     ratings: UnsavedSkillRating[],
     mistakes: readonly MistakeType[],
   ) => void;
+  onUndo: () => void;
 }) {
   const { skill, flag, bannedMeaningPrimaryGlossHint } = question;
 
@@ -68,7 +70,11 @@ export function QuizDeckHanziWordToGlossTypedQuestion({
     <Skeleton
       toast={
         grade == null ? null : (
-          <QuizDeckResultToast skill={skill} rating={grade.rating} />
+          <QuizDeckResultToast
+            skill={skill}
+            rating={grade.rating}
+            onUndo={onUndo}
+          />
         )
       }
       submitButton={

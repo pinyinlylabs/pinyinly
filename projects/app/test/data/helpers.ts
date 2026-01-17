@@ -399,19 +399,24 @@ export async function seedSkillReviews(
     parseHistoryCommand(command),
   );
 
+  let reviewId = nanoid();
   for (const event of historyEvents) {
     switch (event.kind) {
       case `sleep`: {
         vi.setSystemTime(add(new Date(), event.duration));
+        // Changing the time implies a new review.
+        reviewId = nanoid();
         break;
       }
       case `skillReview`: {
+        const now = new Date();
         await rizzle.mutate.rateSkill({
           id: nanoid(),
           skill: event.skill,
           rating: event.rating,
           now: new Date(),
           durationMs: null,
+          reviewId,
         });
         if (event.mistake) {
           switch (event.mistake.kind) {
@@ -423,7 +428,8 @@ export async function seedSkillReviews(
                 id: nanoid(),
                 hanziOrHanziWord: event.mistake.hanziOrHanziWord,
                 gloss: event.mistake.gloss,
-                now: new Date(),
+                now,
+                reviewId,
               });
               break;
             }
@@ -432,7 +438,8 @@ export async function seedSkillReviews(
                 id: nanoid(),
                 hanziOrHanziWord: event.mistake.hanziOrHanziWord,
                 pinyin: event.mistake.pinyin,
-                now: new Date(),
+                now,
+                reviewId,
               });
               break;
             }
@@ -447,6 +454,7 @@ export async function seedSkillReviews(
           hanziOrHanziWord: event.mistake.hanziOrHanziWord,
           gloss: event.mistake.gloss,
           now: new Date(),
+          reviewId,
         });
         break;
       }
@@ -456,6 +464,7 @@ export async function seedSkillReviews(
           hanziOrHanziWord: event.mistake.hanziOrHanziWord,
           pinyin: event.mistake.pinyin,
           now: new Date(),
+          reviewId,
         });
         break;
       }

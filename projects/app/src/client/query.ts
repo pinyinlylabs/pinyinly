@@ -29,13 +29,12 @@ import { nonNullable } from "@pinyinly/lib/invariant";
 import type { Collection, CollectionConfig } from "@tanstack/react-db";
 import {
   and,
-  concat,
   createCollection,
   createLiveQueryCollection,
   eq,
   gte,
+  isNull,
   isUndefined,
-  like,
   or,
 } from "@tanstack/react-db";
 import { queryOptions, skipToken } from "@tanstack/react-query";
@@ -46,6 +45,10 @@ import { buildDeviceStoreKey, deviceStoreGet } from "./deviceStore";
 export type WithRizzleWatchPrefixes<T> = T & {
   rizzleWatchPrefixes?: string[];
 };
+
+type ExpressionLike = Parameters<typeof isUndefined>[0];
+const isNullish = (value: ExpressionLike) =>
+  or(isUndefined(value), isNull(value));
 
 export function historyPageCollection(
   skillRatingsCollection: SkillRatingCollection,
@@ -61,49 +64,17 @@ export function historyPageCollection(
       .leftJoin(
         { hanziGlossMistake: hanziGlossMistakesCollection },
         ({ skillRating, hanziGlossMistake }) =>
-          eq(
-            concat(skillRating.createdAt, ``),
-            concat(hanziGlossMistake.createdAt, ``),
-          ),
+          eq(skillRating.reviewId, hanziGlossMistake.reviewId),
       )
       .leftJoin(
         { hanziPinyinMistake: hanziPinyinMistakesCollection },
         ({ skillRating, hanziPinyinMistake }) =>
-          eq(
-            concat(skillRating.createdAt, ``),
-            concat(hanziPinyinMistake.createdAt, ``),
-          ),
+          eq(skillRating.reviewId, hanziPinyinMistake.reviewId),
       )
-      .where(({ skillRating, hanziGlossMistake, hanziPinyinMistake }) =>
+      .where(({ skillRating }) =>
         and(
           gte(skillRating.createdAt, startDate),
-          // These are probably overkill and can be removed. They're an attempt
-          // to work around not being able to have multiple conditions on a
-          // join, because it's theoretically possible to have multiple mistakes
-          // at the same timestamp (though in practice probably would never
-          // happen).
-          or(
-            isUndefined(hanziGlossMistake),
-            like(
-              skillRating.skill,
-              concat(
-                /* skill kind */ `%:`,
-                hanziGlossMistake?.hanziOrHanziWord,
-                `%`,
-              ),
-            ),
-          ),
-          or(
-            isUndefined(hanziPinyinMistake),
-            like(
-              skillRating.skill,
-              concat(
-                /* skill kind */ `%:`,
-                hanziPinyinMistake?.hanziOrHanziWord,
-                `%`,
-              ),
-            ),
-          ),
+          isNullish(skillRating.trashedAt), // Filter out trashed items
         ),
       ),
   );
@@ -144,15 +115,13 @@ export function historyPageData(
   return sessions.map((session) => ({
     endTime: nonNullable(session[0]).skillRating.createdAt,
     startTime: nonNullable(session.at(-1)).skillRating.createdAt,
-    groups: groupRatingsBySkill2(session),
+    groups: groupRatingsBySkill(session),
   }));
 }
 
 export type HistoryPageData = ReturnType<typeof historyPageData>;
 
-function groupRatingsBySkill2(
-  items: CollectionOutput<HistoryPageCollection>[],
-) {
+function groupRatingsBySkill(items: CollectionOutput<HistoryPageCollection>[]) {
   const groups: {
     skill: Skill;
     ratings: { rating: Rating; createdAt: Date; answer?: string }[];
@@ -593,6 +562,7 @@ export const latestSkillRatingCollectionOptions = ({
 
           for (const op of ops) {
             switch (op.op) {
+              case `change`:
               case `add`: {
                 const value = entity.unmarshalValue(
                   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
@@ -603,6 +573,20 @@ export const latestSkillRatingCollectionOptions = ({
                   collection.get(value.skill) ??
                   pendingTxLatest.get(value.skill);
 
+                // Don't add trashed ratings.
+                if (value.trashedAt != null) {
+                  if (op.op === `change` && existing?.id === value.id) {
+                    // If the trashed rating was the existing latest, delete it.
+                    // This is a hack and can probably cause some quirks but it
+                    // shouldn't really matter. The more correct way would be to
+                    // re-scan all ratings for the skill to find the latest
+                    // untrashed one, but that would be async and a bit
+                    // performance intensive and probably not worth it.
+                    write({ type: `delete`, value: existing });
+                  }
+                  continue;
+                }
+
                 if (existing == null) {
                   write({ type: `insert`, value });
                   pendingTxLatest.set(value.skill, value);
@@ -612,7 +596,6 @@ export const latestSkillRatingCollectionOptions = ({
                 }
                 break;
               }
-              case `change`:
               case `del`: {
                 console.error(`unsupported op=${op.op} for latestSkillRatings`);
                 break;

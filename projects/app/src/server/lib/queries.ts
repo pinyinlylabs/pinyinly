@@ -2,8 +2,7 @@ import type { Skill, SrsStateType } from "@/data/model";
 import { SrsKind } from "@/data/model";
 import type { FsrsState } from "@/util/fsrs";
 import { nextReview } from "@/util/fsrs";
-import { invariant } from "@pinyinly/lib/invariant";
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, isNull } from "drizzle-orm";
 import * as schema from "../pgSchema";
 import type { Drizzle } from "./db";
 
@@ -16,11 +15,12 @@ export async function updateSkillState(
   // to compute the new one should be skipped and instead just the latest
   // `skillState` should be used as the starting point.
 
-  // Read all historical skill ratings.
+  // Read all historical skill ratings (excluding trashed ones).
   const skillRatings = await tx.query.skillRating.findMany({
     where: and(
       eq(schema.skillRating.skill, skill),
       eq(schema.skillRating.userId, userId),
+      isNull(schema.skillRating.trashedAt),
     ),
     orderBy: [asc(schema.skillRating.createdAt)],
   });
@@ -31,7 +31,18 @@ export async function updateSkillState(
     fsrsState = nextReview(fsrsState, rating, createdAt);
   }
 
-  invariant(fsrsState !== null);
+  if (fsrsState === null) {
+    // No ratings remain (all were undone), delete the skill state
+    await tx
+      .delete(schema.skillState)
+      .where(
+        and(
+          eq(schema.skillState.userId, userId),
+          eq(schema.skillState.skill, skill),
+        ),
+      );
+    return;
+  }
 
   // Save the new state.
   {

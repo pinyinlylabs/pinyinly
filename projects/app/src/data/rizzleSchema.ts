@@ -290,8 +290,84 @@ export const v9 = {
     `pinyinFinalAssociation`,
     `pinyinInitialAssociation`,
     `pinyinInitialGroupTheme`,
+    // Override these to add reviewId and trashedAt
+    `skillRating`,
+    `hanziGlossMistake`,
+    `hanziPinyinMistake`,
+    `rateSkill`,
+    `saveHanziGlossMistake`,
+    `saveHanziPinyinMistake`,
   ]),
   version: `9`,
+
+  //
+  // Skills (with reviewId and trashedAt for undo support)
+  //
+  skillRating: r.entity(`sr/[id]`, {
+    id: r.string().alias(`i`),
+    skill: rSkill().alias(`s`).indexed(`bySkill`),
+    createdAt: r.datetime().alias(`c`).indexed(`byCreatedAt`),
+    rating: rFsrsRating().alias(`r`),
+    durationMs: r.number().nullable().optional().alias(`d`),
+    reviewId: r.string().nullable().optional().alias(`v`),
+    trashedAt: r.datetime().nullable().optional().alias(`u`),
+  }),
+
+  //
+  // Mistakes (with reviewId and trashedAt for undo support)
+  //
+  hanziGlossMistake: r.entity(`m/hg/[id]`, {
+    id: r.string().alias(`i`),
+    hanziOrHanziWord: rHanziOrHanziWord().alias(`h`),
+    gloss: r.string().alias(`g`),
+    createdAt: r.datetime().alias(`c`).indexed(`byCreatedAt`),
+    reviewId: r.string().nullable().optional().alias(`v`),
+    trashedAt: r.datetime().nullable().optional().alias(`u`),
+  }),
+  hanziPinyinMistake: r.entity(`m/hp/[id]`, {
+    id: r.string().alias(`i`),
+    hanziOrHanziWord: rHanziOrHanziWord().alias(`h`),
+    pinyin: r.string().alias(`p`),
+    createdAt: r.datetime().alias(`c`).indexed(`byCreatedAt`),
+    reviewId: r.string().nullable().optional().alias(`v`),
+    trashedAt: r.datetime().nullable().optional().alias(`u`),
+  }),
+
+  //
+  // Mutators (with reviewId for undo support)
+  //
+  rateSkill: r
+    .mutator({
+      id: r.string().alias(`i`),
+      skill: rSkill().alias(`s`),
+      rating: rFsrsRating().alias(`r`),
+      durationMs: r.number().nullable().alias(`d`),
+      now: r.timestamp().alias(`n`),
+      reviewId: r.string().alias(`v`),
+    })
+    .alias(`reviewSkill`),
+  saveHanziGlossMistake: r
+    .mutator({
+      id: r.string().alias(`i`),
+      hanziOrHanziWord: rHanziOrHanziWord().alias(`h`),
+      gloss: r.string().alias(`g`),
+      now: r.timestamp().alias(`n`),
+      reviewId: r.string().alias(`v`),
+    })
+    .alias(`shgm`),
+  saveHanziPinyinMistake: r
+    .mutator({
+      id: r.string().alias(`i`),
+      hanziOrHanziWord: rHanziOrHanziWord().alias(`h`),
+      /**
+       * Intentionally left as strings because this is user input and might not
+       * be valid pinyin.
+       */
+      pinyin: r.string().alias(`p`),
+      now: r.timestamp().alias(`n`),
+      reviewId: r.string().alias(`v`),
+    })
+    .alias(`shpm`),
 
   // Entities
   pinyinSound: r.entity(`ps/[soundId]`, {
@@ -326,6 +402,16 @@ export const v9 = {
       now: r.timestamp().alias(`t`),
     })
     .alias(`spsg-t`),
+  /**
+   * Undo a quiz review by marking all associated ratings and mistakes as trashed.
+   * Only works within the 1-day undo window.
+   */
+  undoReview: r
+    .mutator({
+      reviewId: r.string().alias(`r`),
+      now: r.timestamp().alias(`n`),
+    })
+    .alias(`ur`),
 };
 
 export const currentSchema = v9;

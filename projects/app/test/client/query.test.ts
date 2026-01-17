@@ -91,10 +91,12 @@ describe(
       await seedSkillReviews(rizzle, [
         `❌ he:刀:knife`,
         `❌hanziGloss 刀:knife foo`,
+        `💤 5s`,
         `❌hanziGloss 我:i baz`,
         `💤 1m`,
         `❌ hpi:刀:knife`,
         `❌hanziPinyin 刀:knife pié`,
+        `💤 5s`,
         `❌hanziPinyin 我:i bǎo`,
       ]);
 
@@ -103,8 +105,8 @@ describe(
       const result = historyPageData(collection.toArray);
 
       expect(prettyData(result)).toMatchInlineSnapshot(`
-        "Session 00:00:00-00:01:00:
-        hpi:刀:knife: ❌(pié) 00:01:00
+        "Session 00:00:00-00:01:05:
+        hpi:刀:knife: ❌(pié) 00:01:05
         he:刀:knife: ❌(foo) 00:00:00"
       `);
     });
@@ -116,30 +118,35 @@ describe(
       await seedSkillReviews(rizzle, [
         // Different ordering of rows doesn't matter
         `❌ he:刀:knife`,
-        `❌hanziGloss 我 baz`,
-        `❌hanziGloss 刀狗 baz`,
         `❌hanziGloss 刀 foo`,
+        `💤 5s`,
+        `❌hanziGloss 刀狗 baz`,
+        `❌hanziGloss 我 baz`,
         `💤 1m`,
         `❌ he:刀:knife`,
-        `❌hanziGloss 刀狗 baz`,
         `❌hanziGloss 刀 foo`,
+        `💤 5s`,
+        `❌hanziGloss 刀狗 baz`,
         `❌hanziGloss 我 baz`,
         `💤 1m`,
         `❌ hpi:刀:knife`,
-        `❌hanziPinyin 我 bǎo`,
         `❌hanziPinyin 刀 pié`,
+        `💤 5s`,
+        `❌hanziPinyin 我 bǎo`,
         `❌hanziPinyin 刀狗 wǒ`,
         `💤 1m`,
         `❌ hpi:刀:knife`,
-        `❌hanziPinyin 刀狗 wǒ`,
         `❌hanziPinyin 刀 pié`,
+        `💤 5s`,
+        `❌hanziPinyin 刀狗 wǒ`,
         `❌hanziPinyin 我 bǎo`,
         `💤 1m`,
         // Supports two-character words
         `❌ he:里边:inside`,
+        `❌hanziGloss 里边 foo`,
+        `💤 5s`,
         `❌hanziGloss 我 baz`,
         `❌hanziGloss 里边狗 baz`,
-        `❌hanziGloss 里边 foo`,
       ]);
 
       await collection.preload();
@@ -147,10 +154,10 @@ describe(
       const result = historyPageData(collection.toArray);
 
       expect(prettyData(result)).toMatchInlineSnapshot(`
-        "Session 00:00:00-00:04:00:
-        he:里边:inside: ❌(foo) 00:04:00
-        hpi:刀:knife: ❌(pié) 00:03:00, ❌(pié) 00:02:00
-        he:刀:knife: ❌(foo) 00:01:00, ❌(foo) 00:00:00"
+        "Session 00:00:00-00:04:20:
+        he:里边:inside: ❌(foo) 00:04:20
+        hpi:刀:knife: ❌(pié) 00:03:15, ❌(pié) 00:02:10
+        he:刀:knife: ❌(foo) 00:01:05, ❌(foo) 00:00:00"
       `);
     });
   },

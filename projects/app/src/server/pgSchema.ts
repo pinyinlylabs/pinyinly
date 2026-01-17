@@ -119,8 +119,18 @@ export const skillRating = schema.table(
     rating: pgFsrsRating(`rating`).notNull(),
     durationMs: pg.doublePrecision(`durationMs`),
     createdAt: pg.timestamp(`timestamp`).defaultNow().notNull(),
+    /**
+     * Links together all ratings and mistakes from a single quiz answer.
+     * Used for undo functionality. Nullable for backwards compatibility with v8 clients.
+     */
+    reviewId: pg.text(`reviewId`),
+    /**
+     * When set, indicates this rating has been "trashed" and should be excluded
+     * from SRS calculations.
+     */
+    trashedAt: pg.timestamp(`trashedAt`),
   },
-  (t) => [pg.index().on(t.userId, t.skill)],
+  (t) => [pg.index().on(t.userId, t.skill), pg.index().on(t.reviewId)],
 );
 
 export const skillState = schema.table(
@@ -149,8 +159,17 @@ export const hanziGlossMistake = schema.table(
     hanziOrHanziWord: pgHanziOrHanziWord(`hanzi`).notNull(),
     gloss: pg.text(`gloss`).notNull(),
     createdAt: pg.timestamp(`timestamp`).defaultNow().notNull(),
+    /**
+     * Links together all ratings and mistakes from a single quiz answer.
+     * Used for undo functionality. Nullable for backwards compatibility with v8 clients.
+     */
+    reviewId: pg.text(`reviewId`),
+    /**
+     * When set, indicates this mistake has been "trashed" and should be excluded.
+     */
+    trashedAt: pg.timestamp(`trashedAt`),
   },
-  (t) => [pg.index().on(t.userId)],
+  (t) => [pg.index().on(t.userId), pg.index().on(t.reviewId)],
 );
 
 export const hanziPinyinMistake = schema.table(
@@ -165,8 +184,17 @@ export const hanziPinyinMistake = schema.table(
     // Intentionally left as string because it's user input.
     pinyin: pg.text(`pinyin`).notNull(),
     createdAt: pg.timestamp(`timestamp`).defaultNow().notNull(),
+    /**
+     * Links together all ratings and mistakes from a single quiz answer.
+     * Used for undo functionality. Nullable for backwards compatibility with v8 clients.
+     */
+    reviewId: pg.text(`reviewId`),
+    /**
+     * When set, indicates this mistake has been "trashed" and should be excluded.
+     */
+    trashedAt: pg.timestamp(`trashedAt`),
   },
-  (t) => [pg.index().on(t.userId)],
+  (t) => [pg.index().on(t.userId), pg.index().on(t.reviewId)],
 );
 
 export const pinyinInitialAssociation = schema.table(
