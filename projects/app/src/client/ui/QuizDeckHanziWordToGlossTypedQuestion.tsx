@@ -11,15 +11,14 @@ import { gradeHanziToGlossTypedQuestion } from "@/data/questions/hanziWordToGlos
 import { hanziWordFromSkill } from "@/data/skills";
 import { hanziFromHanziWord } from "@/dictionary";
 import { emptyArray } from "@pinyinly/lib/collections";
-import type { ReactNode, Ref } from "react";
+import type { ReactNode } from "react";
 import { useMemo, useRef, useState } from "react";
-import type { TextInput } from "react-native";
 import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { QuizDeckResultToast } from "./QuizDeckResultToast";
 import { QuizFlagText } from "./QuizFlagText";
 import { QuizSubmitButton } from "./QuizSubmitButton";
-import { TextInputSingle } from "./TextInputSingle";
+import { TextAnswerInputSingle } from "./TextAnswerInputSingle";
 
 export function QuizDeckHanziWordToGlossTypedQuestion({
   noAutoFocus = true,
@@ -126,12 +125,12 @@ export function QuizDeckHanziWordToGlossTypedQuestion({
           className="h-0"
         />
       </View>
-      <GlossTextInputSingle
+      <TextAnswerInputSingle
         autoFocus={!noAutoFocus}
         disabled={grade != null}
-        onChangeText={(text) => {
-          userAnswerRef.current = text;
-          setUserAnswerEmpty(text.length === 0);
+        onChangeValue={(text) => {
+          userAnswerRef.current = text.trim();
+          setUserAnswerEmpty(text.trim().length === 0);
         }}
         hintText={
           bannedMeaningPrimaryGlossHint.length > 0 ? (
@@ -152,69 +151,13 @@ export function QuizDeckHanziWordToGlossTypedQuestion({
           ) : undefined
         }
         onSubmit={submit}
+        state={grade == null ? `default` : grade.correct ? `success` : `error`}
+        placeholder="Type in English"
+        autoCorrect
       />
     </Skeleton>
   );
 }
-
-export const GlossTextInputSingle = ({
-  autoFocus,
-  disabled,
-  inputRef,
-  onChangeText,
-  onSubmit,
-  hintText,
-}: {
-  autoFocus: boolean;
-  disabled: boolean;
-  inputRef?: Ref<TextInput>;
-  onChangeText: (text: string) => void;
-  onSubmit: () => void;
-  hintText?: ReactNode;
-}) => {
-  const [text, setText] = useState(``);
-
-  const handleChangeText = (text: string) => {
-    setText(text);
-    onChangeText(
-      // Expose a white-space trimmed value so that consumers checking for a
-      // correct answer don't need to also trim, but internally keep the
-      // original value so that it's possible to write spaces without them
-      // instantly being trimmed.
-      text.trim(),
-    );
-  };
-
-  return (
-    <View className="items-center gap-2">
-      <TextInputSingle
-        autoFocus={autoFocus}
-        autoCapitalize="none"
-        autoCorrect={
-          // Using the system auto-correct should make writing in English
-          // faster.
-          true
-        }
-        className="self-stretch"
-        disabled={disabled}
-        onChangeText={handleChangeText}
-        onKeyPress={(e) => {
-          if (e.nativeEvent.key === `Enter`) {
-            e.preventDefault();
-            onSubmit();
-          }
-        }}
-        placeholder="Type in English"
-        textAlign="center"
-        ref={inputRef}
-        value={text}
-      />
-      {hintText == null ? null : (
-        <Text className="pyly-body-caption">{hintText}</Text>
-      )}
-    </View>
-  );
-};
 
 const Skeleton = ({
   children,

@@ -1,7 +1,4 @@
-import {
-  GlossTextInputSingle,
-  QuizDeckHanziWordToGlossTypedQuestion,
-} from "@/client/ui/QuizDeckHanziWordToGlossTypedQuestion";
+import { QuizDeckHanziWordToGlossTypedQuestion } from "@/client/ui/QuizDeckHanziWordToGlossTypedQuestion";
 import { Use } from "@/client/ui/Use";
 import { QuestionFlagKind } from "@/data/model";
 import { hanziWordToGlossTypedQuestionOrThrow } from "@/data/questions/hanziWordToGlossTyped";
@@ -9,12 +6,7 @@ import { hanziWordToGlossTyped } from "@/data/skills";
 import { hanziFromHanziWord, loadDictionary } from "@/dictionary";
 import { use } from "react";
 import { View } from "react-native";
-import {
-  DemoHanziWordKnob,
-  ExampleStack,
-  LittlePrimaryHeader,
-  useDemoHanziWordKnob,
-} from "./demo/helpers";
+import { DemoHanziWordKnob, useDemoHanziWordKnob } from "./demo/helpers";
 
 export default () => {
   const { hanziWord } = useDemoHanziWordKnob(`你好:hello`);
@@ -39,7 +31,7 @@ export default () => {
         key={skill}
         promise={questionPromise}
         render={(question) => (
-          <View>
+          <View className="pb-[150px]">
             <QuizDeckHanziWordToGlossTypedQuestion
               noAutoFocus
               onNext={() => {
@@ -56,37 +48,6 @@ export default () => {
           </View>
         )}
       />
-
-      <LittlePrimaryHeader title="GlossTextInputSingle" />
-
-      <View className="flex-row flex-wrap">
-        <ExampleStack title="Default">
-          <GlossTextInputSingle
-            autoFocus={false}
-            disabled={false}
-            onChangeText={(text) => {
-              console.log(`onChangeText`, text);
-            }}
-            onSubmit={() => {
-              console.log(`onSubmit`);
-            }}
-          />
-        </ExampleStack>
-
-        <ExampleStack title="With hint">
-          <GlossTextInputSingle
-            autoFocus={false}
-            disabled={false}
-            hintText="This is a hint."
-            onChangeText={(text) => {
-              console.log(`onChangeText`, text);
-            }}
-            onSubmit={() => {
-              console.log(`onSubmit`);
-            }}
-          />
-        </ExampleStack>
-      </View>
     </View>
   );
 };
