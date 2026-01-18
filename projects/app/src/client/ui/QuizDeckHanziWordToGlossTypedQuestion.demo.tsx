@@ -1,4 +1,7 @@
-import { QuizDeckHanziWordToGlossTypedQuestion } from "@/client/ui/QuizDeckHanziWordToGlossTypedQuestion";
+import {
+  GlossTextInputSingle,
+  QuizDeckHanziWordToGlossTypedQuestion,
+} from "@/client/ui/QuizDeckHanziWordToGlossTypedQuestion";
 import { Use } from "@/client/ui/Use";
 import { QuestionFlagKind } from "@/data/model";
 import { hanziWordToGlossTypedQuestionOrThrow } from "@/data/questions/hanziWordToGlossTyped";
@@ -6,7 +9,12 @@ import { hanziWordToGlossTyped } from "@/data/skills";
 import { hanziFromHanziWord, loadDictionary } from "@/dictionary";
 import { use } from "react";
 import { View } from "react-native";
-import { DemoHanziWordKnob, useDemoHanziWordKnob } from "./demo/helpers";
+import {
+  DemoHanziWordKnob,
+  ExampleStack,
+  LittlePrimaryHeader,
+  useDemoHanziWordKnob,
+} from "./demo/helpers";
 
 export default () => {
   const { hanziWord } = useDemoHanziWordKnob(`你好:hello`);
@@ -31,21 +39,54 @@ export default () => {
         key={skill}
         promise={questionPromise}
         render={(question) => (
-          <QuizDeckHanziWordToGlossTypedQuestion
-            noAutoFocus
-            onNext={() => {
-              console.log(`onNext()`);
-            }}
-            onRating={() => {
-              console.log(`onRating()`);
-            }}
-            onUndo={() => {
-              console.log(`onUndo()`);
-            }}
-            question={question}
-          />
+          <View>
+            <QuizDeckHanziWordToGlossTypedQuestion
+              noAutoFocus
+              onNext={() => {
+                console.log(`onNext()`);
+              }}
+              onRating={() => {
+                console.log(`onRating()`);
+              }}
+              onUndo={() => {
+                console.log(`onUndo()`);
+              }}
+              question={question}
+            />
+          </View>
         )}
       />
+
+      <LittlePrimaryHeader title="GlossTextInputSingle" />
+
+      <View className="flex-row flex-wrap">
+        <ExampleStack title="Default">
+          <GlossTextInputSingle
+            autoFocus={false}
+            disabled={false}
+            onChangeText={(text) => {
+              console.log(`onChangeText`, text);
+            }}
+            onSubmit={() => {
+              console.log(`onSubmit`);
+            }}
+          />
+        </ExampleStack>
+
+        <ExampleStack title="With hint">
+          <GlossTextInputSingle
+            autoFocus={false}
+            disabled={false}
+            hintText="This is a hint."
+            onChangeText={(text) => {
+              console.log(`onChangeText`, text);
+            }}
+            onSubmit={() => {
+              console.log(`onSubmit`);
+            }}
+          />
+        </ExampleStack>
+      </View>
     </View>
   );
 };

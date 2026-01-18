@@ -157,7 +157,7 @@ export function QuizDeckHanziWordToGlossTypedQuestion({
   );
 }
 
-const GlossTextInputSingle = ({
+export const GlossTextInputSingle = ({
   autoFocus,
   disabled,
   inputRef,
@@ -186,7 +186,7 @@ const GlossTextInputSingle = ({
   };
 
   return (
-    <View className="gap-2">
+    <View className="items-center gap-2">
       <TextInputSingle
         autoFocus={autoFocus}
         autoCapitalize="none"
@@ -195,8 +195,9 @@ const GlossTextInputSingle = ({
           // faster.
           true
         }
-        onChangeText={handleChangeText}
+        className="self-stretch"
         disabled={disabled}
+        onChangeText={handleChangeText}
         onKeyPress={(e) => {
           if (e.nativeEvent.key === `Enter`) {
             e.preventDefault();
