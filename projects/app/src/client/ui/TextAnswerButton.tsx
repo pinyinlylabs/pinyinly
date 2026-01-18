@@ -11,12 +11,16 @@ import Reanimated, {
   useSharedValue,
   withClamp,
   withSequence,
-  withSpring,
   withTiming,
 } from "react-native-reanimated";
 import { scheduleOnRN, scheduleOnUI } from "react-native-worklets";
 import { tv } from "tailwind-variants";
 import { hapticImpactIfMobile } from "../hooks/hapticImpactIfMobile";
+import {
+  quizAnimationDuration,
+  withIncorrectShakeAnimation,
+  withIncorrectWobbleAnimation,
+} from "./animations";
 import { ReanimatedPressable } from "./ReanimatedPressable";
 import { ShootingStars } from "./ShootingStars";
 
@@ -115,7 +119,7 @@ export function TextAnswerButton({
           );
           newBgOpacity = withClamp(
             { min: bgOpacitySv.get() },
-            withTiming(newBgOpacity, { duration }),
+            withTiming(newBgOpacity, { duration: quizAnimationDuration }),
           );
           newScale = withClamp({ min: 1 }, withPulseSpringAnimation(newScale));
           break;
@@ -123,7 +127,7 @@ export function TextAnswerButton({
         case `error`: {
           newBgOpacity = withClamp(
             { min: bgOpacitySv.get() },
-            withTiming(newBgOpacity, { duration }),
+            withTiming(newBgOpacity, { duration: quizAnimationDuration }),
           );
           newRotation = withIncorrectWobbleAnimation();
           break;
@@ -131,7 +135,7 @@ export function TextAnswerButton({
         case `success`: {
           newBgOpacity = withClamp(
             { min: bgOpacitySv.get() },
-            withTiming(newBgOpacity, { duration }),
+            withTiming(newBgOpacity, { duration: quizAnimationDuration }),
           );
           break;
         }
@@ -259,39 +263,18 @@ export function TextAnswerButton({
   );
 }
 
-const duration = 100;
-
 const withPulseSpringAnimation = (target: number) =>
   withSequence(
     withTiming(target * 0.5, { duration: 0 }),
     withTiming(target * 1.03, {
-      duration: 2 * duration,
+      duration: 2 * quizAnimationDuration,
       easing: Easing.inOut(Easing.quad),
     }),
     withTiming(target, {
-      duration,
+      duration: quizAnimationDuration,
       easing: Easing.out(Easing.quad),
     }),
   );
-
-const withIncorrectWobbleAnimation = () => {
-  let offset = Math.random() * 4 - 2;
-  offset += offset < 0 ? -0.5 : 0.5;
-
-  return withSpring(`${offset}deg`, { duration: 2 * duration });
-};
-
-const withIncorrectShakeAnimation = () => {
-  const delta = 3; // degrees
-  const options = { duration: 80, easing: Easing.ease };
-  return withSequence(
-    withTiming(`-${delta}deg`, options),
-    withTiming(`${delta}deg`, options),
-    withTiming(`-${delta}deg`, options),
-    withTiming(`${delta}deg`, options),
-    withTiming(`0deg`, options),
-  );
-};
 
 const bgAnimatedClass = tv({
   base: `pointer-events-none absolute inset-x-px inset-y-[2px] rounded-lg`,
