@@ -26,6 +26,7 @@ export function TextInputSingle(props: TextInputSingleProps) {
       }}
       className={inputClass({
         textAlign: props.textAlign,
+        className: props.className,
       })}
     />
   );

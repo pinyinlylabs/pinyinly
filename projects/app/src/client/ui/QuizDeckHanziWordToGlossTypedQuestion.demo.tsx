@@ -31,19 +31,21 @@ export default () => {
         key={skill}
         promise={questionPromise}
         render={(question) => (
-          <QuizDeckHanziWordToGlossTypedQuestion
-            noAutoFocus
-            onNext={() => {
-              console.log(`onNext()`);
-            }}
-            onRating={() => {
-              console.log(`onRating()`);
-            }}
-            onUndo={() => {
-              console.log(`onUndo()`);
-            }}
-            question={question}
-          />
+          <View className="pb-[150px]">
+            <QuizDeckHanziWordToGlossTypedQuestion
+              noAutoFocus
+              onNext={() => {
+                console.log(`onNext()`);
+              }}
+              onRating={() => {
+                console.log(`onRating()`);
+              }}
+              onUndo={() => {
+                console.log(`onUndo()`);
+              }}
+              question={question}
+            />
+          </View>
         )}
       />
     </View>

@@ -34,7 +34,11 @@ import { PinyinOptionButton } from "./PinyinOptionButton";
 import { QuizDeckResultToast } from "./QuizDeckResultToast";
 import { QuizFlagText } from "./QuizFlagText";
 import { QuizSubmitButton } from "./QuizSubmitButton";
-import { TextInputSingle } from "./TextInputSingle";
+import type { TextAnswerInputSingleState } from "./TextAnswerInputSingle";
+import {
+  ratingToInputState,
+  TextAnswerInputSingle,
+} from "./TextAnswerInputSingle";
 
 export function QuizDeckHanziWordToPinyinTypedQuestion({
   noAutoFocus = true,
@@ -177,6 +181,7 @@ export function QuizDeckHanziWordToPinyinTypedQuestion({
           ) : undefined
         }
         onSubmit={submit}
+        state={grade == null ? `default` : ratingToInputState(grade.rating)}
       />
     </Skeleton>
   );
@@ -189,6 +194,7 @@ const PinyinTextInputSingle = ({
   onChangeText,
   onSubmit,
   hintText,
+  state = `default`,
 }: {
   autoFocus: boolean;
   disabled: boolean;
@@ -196,27 +202,28 @@ const PinyinTextInputSingle = ({
   onChangeText: (text: string) => void;
   onSubmit: () => void;
   hintText?: ReactNode;
+  state?: TextAnswerInputSingleState;
 }) => {
   const [text, setText] = useState(``);
 
   const suggestions = disabled ? null : pinyinUnitSuggestions(text);
 
-  const updateText = (text: string) => {
-    setText(text);
-    onChangeText(text);
+  const updateText = (newText: string) => {
+    setText(newText);
+    onChangeText(newText);
   };
 
-  const handleChangeText = (text: string) => {
+  const handleChangeText = (newText: string) => {
     if (suggestions !== null) {
       for (const option of suggestions.units) {
-        if (text.endsWith(option.tone.toString())) {
+        if (newText.endsWith(option.tone.toString())) {
           acceptSuggestion(suggestions, option);
           return;
         }
       }
     }
 
-    updateText(text);
+    updateText(newText);
   };
 
   const acceptSuggestion = (
@@ -234,21 +241,14 @@ const PinyinTextInputSingle = ({
 
   return (
     <View className="gap-2">
-      <TextInputSingle
+      <TextAnswerInputSingle
         autoFocus={autoFocus}
-        autoCapitalize="none"
-        autoCorrect={false}
-        onChangeText={handleChangeText}
         disabled={disabled}
-        onKeyPress={(e) => {
-          if (e.nativeEvent.key === `Enter`) {
-            e.preventDefault();
-            onSubmit();
-          }
-        }}
+        inputRef={inputRef}
+        onChangeValue={handleChangeText}
+        onSubmit={onSubmit}
         placeholder="Type in pinyin"
-        textAlign="center"
-        ref={inputRef}
+        state={state}
         value={text}
       />
       <View className="flex-row flex-wrap justify-center gap-2">

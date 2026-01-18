@@ -8,7 +8,7 @@ export default () => {
     `theme-default`,
     `theme-danger-panel`,
     `theme-success-panel`,
-    `theme-yellow-panel`,
+    `theme-warning-panel`,
     `theme-grass-panel`,
     `theme-sky-panel`,
   ];

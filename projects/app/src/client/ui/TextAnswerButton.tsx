@@ -1,3 +1,4 @@
+import { Rating } from "@/util/fsrs";
 import { characterCount } from "@/util/unicode";
 import type { PropsOf } from "@pinyinly/lib/types";
 import type { ReactNode } from "react";
@@ -11,12 +12,16 @@ import Reanimated, {
   useSharedValue,
   withClamp,
   withSequence,
-  withSpring,
   withTiming,
 } from "react-native-reanimated";
 import { scheduleOnRN, scheduleOnUI } from "react-native-worklets";
 import { tv } from "tailwind-variants";
 import { hapticImpactIfMobile } from "../hooks/hapticImpactIfMobile";
+import {
+  quizAnimationDuration,
+  withIncorrectShakeAnimation,
+  withIncorrectWobbleAnimation,
+} from "./animations";
 import { ReanimatedPressable } from "./ReanimatedPressable";
 import { ShootingStars } from "./ShootingStars";
 
@@ -26,6 +31,7 @@ const targetBgScale: Record<TextAnswerButtonState, number> = {
   selected: 1,
   error: 1,
   success: 1,
+  warning: 1,
 };
 const targetBgOpacity: Record<TextAnswerButtonState, number> = {
   dimmed: 0,
@@ -33,6 +39,7 @@ const targetBgOpacity: Record<TextAnswerButtonState, number> = {
   selected: 1,
   error: 1,
   success: 1,
+  warning: 1,
 };
 const targetScale: Record<TextAnswerButtonState, number> = {
   dimmed: 1,
@@ -40,6 +47,7 @@ const targetScale: Record<TextAnswerButtonState, number> = {
   selected: 1,
   error: 1,
   success: 1,
+  warning: 1,
 };
 const targetRotation: Record<TextAnswerButtonState, string> = {
   dimmed: `0deg`,
@@ -47,6 +55,7 @@ const targetRotation: Record<TextAnswerButtonState, string> = {
   selected: `0deg`,
   error: `0deg`,
   success: `0deg`,
+  warning: `0deg`,
 };
 
 export type TextAnswerButtonState =
@@ -54,7 +63,26 @@ export type TextAnswerButtonState =
   | `selected`
   | `success`
   | `error`
+  | `warning`
   | `dimmed`;
+
+/**
+ * Maps a quiz rating to the corresponding button state for correct answers.
+ */
+export function ratingToButtonState(rating: Rating): TextAnswerButtonState {
+  switch (rating) {
+    case Rating.Easy:
+    case Rating.Good: {
+      return `success`;
+    }
+    case Rating.Hard: {
+      return `warning`;
+    }
+    case Rating.Again: {
+      return `error`;
+    }
+  }
+}
 
 export type TextAnswerButtonFontSize = `xs` | `sm` | `lg` | `xl`;
 
@@ -115,7 +143,7 @@ export function TextAnswerButton({
           );
           newBgOpacity = withClamp(
             { min: bgOpacitySv.get() },
-            withTiming(newBgOpacity, { duration }),
+            withTiming(newBgOpacity, { duration: quizAnimationDuration }),
           );
           newScale = withClamp({ min: 1 }, withPulseSpringAnimation(newScale));
           break;
@@ -123,15 +151,16 @@ export function TextAnswerButton({
         case `error`: {
           newBgOpacity = withClamp(
             { min: bgOpacitySv.get() },
-            withTiming(newBgOpacity, { duration }),
+            withTiming(newBgOpacity, { duration: quizAnimationDuration }),
           );
           newRotation = withIncorrectWobbleAnimation();
           break;
         }
-        case `success`: {
+        case `success`:
+        case `warning`: {
           newBgOpacity = withClamp(
             { min: bgOpacitySv.get() },
-            withTiming(newBgOpacity, { duration }),
+            withTiming(newBgOpacity, { duration: quizAnimationDuration }),
           );
           break;
         }
@@ -259,39 +288,18 @@ export function TextAnswerButton({
   );
 }
 
-const duration = 100;
-
 const withPulseSpringAnimation = (target: number) =>
   withSequence(
     withTiming(target * 0.5, { duration: 0 }),
     withTiming(target * 1.03, {
-      duration: 2 * duration,
+      duration: 2 * quizAnimationDuration,
       easing: Easing.inOut(Easing.quad),
     }),
     withTiming(target, {
-      duration,
+      duration: quizAnimationDuration,
       easing: Easing.out(Easing.quad),
     }),
   );
-
-const withIncorrectWobbleAnimation = () => {
-  let offset = Math.random() * 4 - 2;
-  offset += offset < 0 ? -0.5 : 0.5;
-
-  return withSpring(`${offset}deg`, { duration: 2 * duration });
-};
-
-const withIncorrectShakeAnimation = () => {
-  const delta = 3; // degrees
-  const options = { duration: 80, easing: Easing.ease };
-  return withSequence(
-    withTiming(`-${delta}deg`, options),
-    withTiming(`${delta}deg`, options),
-    withTiming(`-${delta}deg`, options),
-    withTiming(`${delta}deg`, options),
-    withTiming(`0deg`, options),
-  );
-};
 
 const bgAnimatedClass = tv({
   base: `pointer-events-none absolute inset-x-px inset-y-[2px] rounded-lg`,
@@ -302,6 +310,7 @@ const bgAnimatedClass = tv({
       selected: `bg-cyanold/10`,
       success: `bg-fg/10`,
       error: `bg-transparent`,
+      warning: `bg-fg/10`,
     },
   },
 });
@@ -323,6 +332,7 @@ const pressableClass = tv({
       selected: ``,
       success: `[--color-fg:var(--color-success)]`,
       error: `[--color-fg:var(--color-danger)]`,
+      warning: `[--color-fg:var(--color-warning)]`,
     },
   },
 });
@@ -352,6 +362,7 @@ const rectClass = tv({
       selected: ``,
       success: ``,
       error: ``,
+      warning: ``,
     },
   },
   compoundVariants: [
@@ -386,6 +397,11 @@ const rectClass = tv({
       filled: true,
       class: `border-brick`,
     },
+    {
+      state: `warning`,
+      filled: true,
+      class: `border-fg`,
+    },
   ],
 });
 
@@ -418,6 +434,7 @@ const textClass = tv({
       selected: `text-cyanold`,
       success: `text-fg`,
       error: `text-brick`,
+      warning: `text-fg`,
     },
     fontSize: {
       xl: `
