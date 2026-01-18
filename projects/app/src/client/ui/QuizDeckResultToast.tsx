@@ -137,7 +137,7 @@ export function ratingToThemeClass(rating: Rating) {
       return `theme-success-panel`;
     }
     case Rating.Hard: {
-      return `theme-yellow-panel`;
+      return `theme-warning-panel`;
     }
     case Rating.Again: {
       return `theme-danger-panel`;

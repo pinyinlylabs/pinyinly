@@ -48,6 +48,20 @@ export default () => {
           />
         </ExampleStack>
 
+        <ExampleStack title="Warning">
+          <TextAnswerInputSingle
+            initialValue="hello"
+            placeholder="Type your answer"
+            state="warning"
+            onChangeValue={(value) => {
+              console.log(`onChangeValue`, value);
+            }}
+            onSubmit={() => {
+              console.log(`onSubmit`);
+            }}
+          />
+        </ExampleStack>
+
         <ExampleStack title="With hint">
           <TextAnswerInputSingle
             placeholder="Type your answer"

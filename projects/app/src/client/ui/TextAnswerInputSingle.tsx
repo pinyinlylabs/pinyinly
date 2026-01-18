@@ -10,7 +10,11 @@ import { tv } from "tailwind-variants";
 import { withIncorrectWobbleAnimation } from "./animations";
 import { TextInputSingle } from "./TextInputSingle";
 
-export type TextAnswerInputSingleState = `default` | `success` | `error`;
+export type TextAnswerInputSingleState =
+  | `default`
+  | `success`
+  | `error`
+  | `warning`;
 
 export type TextAnswerInputSingleProps = {
   autoFocus?: boolean;
@@ -117,8 +121,9 @@ const wrapperClass = tv({
   variants: {
     state: {
       default: ``,
-      success: `[--color-fg:var(--color-success)]`,
-      error: `[--color-fg:var(--color-danger)]`,
+      success: `theme-success-panel`,
+      error: `theme-danger-panel`,
+      warning: `theme-warning-panel`,
     },
   },
 });
