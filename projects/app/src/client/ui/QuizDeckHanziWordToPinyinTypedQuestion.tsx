@@ -14,9 +14,12 @@ import type {
   PinyinUnitSuggestion,
   PinyinUnitSuggestions,
 } from "@/data/pinyin";
-import { matchAllPinyinUnits, pinyinUnitSuggestions } from "@/data/pinyin";
+import { pinyinUnitSuggestions } from "@/data/pinyin";
 import type { HanziToPinyinTypedQuestionGrade } from "@/data/questions/hanziWordToPinyinTyped";
-import { gradeHanziToPinyinTypedQuestion } from "@/data/questions/hanziWordToPinyinTyped";
+import {
+  gradeHanziToPinyinTypedQuestion,
+  shouldAutoSubmitPinyinTypedAnswer,
+} from "@/data/questions/hanziWordToPinyinTyped";
 import { hanziWordFromSkill } from "@/data/skills";
 import { hanziFromHanziWord } from "@/dictionary";
 import { emptyArray } from "@pinyinly/lib/collections";
@@ -150,17 +153,9 @@ export function QuizDeckHanziWordToPinyinTypedQuestion({
 
           if (
             autoCheck &&
-            // It's important to only trigger when there's a space at the end,
-            // otherwise as soon as you type "ni" it will submit, before you've
-            // had a chance to change the tone.
-            text.endsWith(` `)
+            shouldAutoSubmitPinyinTypedAnswer(text, skill, answers)
           ) {
-            const firstAnswer = answers.find((a) => a.skill === skill);
-            const expectedUnitCount = firstAnswer?.pinyin[0]?.length ?? 0;
-            const actualUnitCount = matchAllPinyinUnits(text).length;
-            if (expectedUnitCount === actualUnitCount) {
-              submit();
-            }
+            submit();
           }
         }}
         hintText={

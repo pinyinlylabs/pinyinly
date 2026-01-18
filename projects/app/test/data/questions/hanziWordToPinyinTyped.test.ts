@@ -6,11 +6,40 @@ import { MistakeKind, QuestionFlagKind, QuestionKind } from "#data/model.ts";
 import {
   gradeHanziToPinyinTypedQuestion,
   hanziWordToPinyinTypedQuestionOrThrow,
+  shouldAutoSubmitPinyinTypedAnswer,
 } from "#data/questions/hanziWordToPinyinTyped.ts";
 import { hanziWordToPinyinTyped } from "#data/skills.ts";
 import { loadDictionary } from "#dictionary.ts";
 import { describe, expect, test } from "vitest";
 import { 拼音 } from "../helpers.ts";
+
+describe(
+  `shouldAutoSubmitPinyinTypedAnswer suite` satisfies HasNameOf<
+    typeof shouldAutoSubmitPinyinTypedAnswer
+  >,
+  () => {
+    test(`should auto-submit with trailing space and matching pinyin unit count`, () => {
+      const skill = hanziWordToPinyinTyped(`你好:hello`);
+      const answers = [
+        {
+          skill,
+          pinyin: [拼音`nǐ hǎo`],
+        },
+      ];
+
+      for (const [text, expectedAutoSubmit] of [
+        [`nǐ hǎo `, true],
+        [`nǐ hǎo`, false],
+        [`nǐhǎo `, true],
+        [`nǐhǎo`, false],
+      ] as const) {
+        expect
+          .soft(shouldAutoSubmitPinyinTypedAnswer(text, skill, answers), text)
+          .toBe(expectedAutoSubmit);
+      }
+    });
+  },
+);
 
 describe(
   `hanziWordToPinyinTypedQuestionOrThrow suite` satisfies HasNameOf<
