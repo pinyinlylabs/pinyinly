@@ -894,7 +894,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/plugin-transform-private-methods@npm:^7.24.4, @babel/plugin-transform-private-methods@npm:^7.24.7":
+"@babel/plugin-transform-private-methods@npm:^7.24.7":
   version: 7.27.1
   resolution: "@babel/plugin-transform-private-methods@npm:7.27.1"
   dependencies:
@@ -4837,8 +4837,8 @@ __metadata:
     postmark: "npm:^4.0.5"
     prettier: "npm:^3.4.2"
     promise: "npm:^8.3.0"
-    react: "npm:19.1.1"
-    react-dom: "npm:19.1.1"
+    react: "npm:19.2.3"
+    react-dom: "npm:19.2.3"
     react-native: "npm:0.81.5"
     react-native-gesture-handler: "npm:~2.28.0"
     react-native-purchases: "npm:^8.5.2"
@@ -4907,7 +4907,7 @@ __metadata:
     "@react-email/components": "npm:^0.5.0"
     "@types/react": "npm:19.1.x"
     prettier: "npm:^3.4.2"
-    react: "npm:19.1.1"
+    react: "npm:19.2.3"
     react-email: "npm:^4.0.15"
   languageName: unknown
   linkType: soft
@@ -7410,20 +7410,20 @@ __metadata:
   linkType: hard
 
 "@types/react-dom@npm:19.1.x":
-  version: 19.1.9
-  resolution: "@types/react-dom@npm:19.1.9"
+  version: 19.1.11
+  resolution: "@types/react-dom@npm:19.1.11"
   peerDependencies:
     "@types/react": ^19.0.0
-  checksum: 10c0/34c8dda86c1590b3ef0e7ecd38f9663a66ba2dd69113ba74fb0adc36b83bbfb8c94c1487a2505282a5f7e5e000d2ebf36f4c0fd41b3b672f5178fd1d4f1f8f58
+  checksum: 10c0/417da6414f43ea2e416ab19666f78f8a29b349f4273ee6d8d468516606c65ee0e6f31939cd3255dfaf466a50a5cdf16b6fd988cf7e9aaf678c61d1fff81e5c20
   languageName: node
   linkType: hard
 
 "@types/react@npm:19.1.x":
-  version: 19.1.16
-  resolution: "@types/react@npm:19.1.16"
+  version: 19.1.17
+  resolution: "@types/react@npm:19.1.17"
   dependencies:
     csstype: "npm:^3.0.2"
-  checksum: 10c0/3d781f715f15f308b601d74142fae77c65679c318a3bb0a319df898f39095e738ba7ed7061cec971b19b6d33969ef9cd50fec92b034024ef3fcc25bb9a2eb3d0
+  checksum: 10c0/8a8369ea00fc961f0884be4d1da4a039b2b6445de9c8b690ed0ebe15acfb0b1f27005278fef1fe39a1722a30f4415778b790d0089e2b30019371c61355ea316f
   languageName: node
   linkType: hard
 
@@ -10992,18 +10992,16 @@ __metadata:
   linkType: hard
 
 "eslint-plugin-react-hooks@npm:^6.0.0-rc.1":
-  version: 6.0.0-rc1
-  resolution: "eslint-plugin-react-hooks@npm:6.0.0-rc1"
+  version: 6.1.1
+  resolution: "eslint-plugin-react-hooks@npm:6.1.1"
   dependencies:
     "@babel/core": "npm:^7.24.4"
     "@babel/parser": "npm:^7.24.4"
-    "@babel/plugin-transform-private-methods": "npm:^7.24.4"
-    hermes-parser: "npm:^0.25.1"
-    zod: "npm:^3.22.4"
-    zod-validation-error: "npm:^3.0.3"
+    zod: "npm:^3.22.4 || ^4.0.0"
+    zod-validation-error: "npm:^3.0.3 || ^4.0.0"
   peerDependencies:
     eslint: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0 || ^9.0.0
-  checksum: 10c0/f225fa4a5a802ae4143076e72d101325518f3e16cb3298b944ef83bc6733639d431d73ec6224b6443a10d19fbb92b43119dcedfade6fe91c02bfd7335b5c72ed
+  checksum: 10c0/579be053bc89c995a6c03996f9ee3f6bac88946b4b1c8b891b42f981e7c05a9c5de46324bbd2a33199855c0a602820c0e3eeb7f840730301b77a9ba3dc7a0ae2
   languageName: node
   linkType: hard
 
@@ -17702,14 +17700,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dom@npm:19.1.1":
-  version: 19.1.1
-  resolution: "react-dom@npm:19.1.1"
+"react-dom@npm:19.2.3":
+  version: 19.2.3
+  resolution: "react-dom@npm:19.2.3"
   dependencies:
-    scheduler: "npm:^0.26.0"
+    scheduler: "npm:^0.27.0"
   peerDependencies:
-    react: ^19.1.1
-  checksum: 10c0/8c91198510521299c56e4e8d5e3a4508b2734fb5e52f29eeac33811de64e76fe586ad32c32182e2e84e070d98df67125da346c3360013357228172dbcd20bcdd
+    react: ^19.2.3
+  checksum: 10c0/dc43f7ede06f46f3acc16ee83107c925530de9b91d1d0b3824583814746ff4c498ea64fd65cd83aba363205268adff52e2827c582634ae7b15069deaeabc4892
   languageName: node
   linkType: hard
 
@@ -17776,10 +17774,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-is@npm:^19.1.0, react-is@npm:^19.1.1":
+"react-is@npm:^19.1.0":
   version: 19.1.1
   resolution: "react-is@npm:19.1.1"
   checksum: 10c0/3dba763fcd69835ae263dcd6727d7ffcc44c1d616f04b7329e67aefdc66a567af4f8dcecdd29454c7a707c968aa1eb85083a83fb616f01675ef25e71cf082f97
+  languageName: node
+  linkType: hard
+
+"react-is@npm:^19.2.3":
+  version: 19.2.3
+  resolution: "react-is@npm:19.2.3"
+  checksum: 10c0/2b54c422c21b8dbd68a435a1cce21ecd5b6f06f48659531f7d53dd7368365da5a67e946f352fb2010d11ca40658aa67bec90995f0f1ec5556c0f71dbffe54994
   languageName: node
   linkType: hard
 
@@ -18127,21 +18132,21 @@ __metadata:
   linkType: hard
 
 "react-test-renderer@npm:19.x":
-  version: 19.1.1
-  resolution: "react-test-renderer@npm:19.1.1"
+  version: 19.2.3
+  resolution: "react-test-renderer@npm:19.2.3"
   dependencies:
-    react-is: "npm:^19.1.1"
-    scheduler: "npm:^0.26.0"
+    react-is: "npm:^19.2.3"
+    scheduler: "npm:^0.27.0"
   peerDependencies:
-    react: ^19.1.1
-  checksum: 10c0/430636d63cff6b79a15fe876d16601891fcdf1c58236471063f4cfe50de2c9fae935c6894eebe6ca5be0bf7245cb572c14ff69e1aada7761b41c73c842e2879c
+    react: ^19.2.3
+  checksum: 10c0/842b82239dbddbc536083a6260c3e1b0507c02a3400bd05879fc19160468fd0f8ab79fec5dceffa6113b131835cc7621212f8415b46ea5156ab66bbfd7e24297
   languageName: node
   linkType: hard
 
-"react@npm:19.1.1":
-  version: 19.1.1
-  resolution: "react@npm:19.1.1"
-  checksum: 10c0/8c9769a2dfd02e603af6445058325e6c8a24b47b185d0e461f66a6454765ddcaecb3f0a90184836c68bb509f3c38248359edbc42f0d07c23eb500a5c30c87b4e
+"react@npm:19.2.3":
+  version: 19.2.3
+  resolution: "react@npm:19.2.3"
+  checksum: 10c0/094220b3ba3a76c1b668f972ace1dd15509b157aead1b40391d1c8e657e720c201d9719537375eff08f5e0514748c0319063392a6f000e31303aafc4471f1436
   languageName: node
   linkType: hard
 
@@ -18861,6 +18866,13 @@ __metadata:
   dependencies:
     loose-envify: "npm:^1.1.0"
   checksum: 10c0/26383305e249651d4c58e6705d5f8425f153211aef95f15161c151f7b8de885f24751b377e4a0b3dd42cce09aad3f87a61dab7636859c0d89b7daf1a1e2a5c78
+  languageName: node
+  linkType: hard
+
+"scheduler@npm:^0.27.0":
+  version: 0.27.0
+  resolution: "scheduler@npm:0.27.0"
+  checksum: 10c0/4f03048cb05a3c8fddc45813052251eca00688f413a3cee236d984a161da28db28ba71bd11e7a3dd02f7af84ab28d39fb311431d3b3772fed557945beb00c452
   languageName: node
   linkType: hard
 
@@ -21455,6 +21467,22 @@ __metadata:
   peerDependencies:
     zod: ^3.18.0
   checksum: 10c0/aaadb0e65c834aacb12fa088663d52d9f4224b5fe6958f09b039f4ab74145fda381c8a7d470bfddf7ddd9bbb5fdfbb52739cd66958ce6d388c256a44094d1fba
+  languageName: node
+  linkType: hard
+
+"zod-validation-error@npm:^3.0.3 || ^4.0.0":
+  version: 4.0.2
+  resolution: "zod-validation-error@npm:4.0.2"
+  peerDependencies:
+    zod: ^3.25.0 || ^4.0.0
+  checksum: 10c0/0ccfec48c46de1be440b719cd02044d4abb89ed0e14c13e637cd55bf29102f67ccdba373f25def0fc7130e5f15025be4d557a7edcc95d5a3811599aade689e1b
+  languageName: node
+  linkType: hard
+
+"zod@npm:^3.22.4 || ^4.0.0":
+  version: 4.3.5
+  resolution: "zod@npm:4.3.5"
+  checksum: 10c0/5a2db7e59177a3d7e202543f5136cb87b97b047b77c8a3d824098d3fa8b80d3aa40a0a5f296965c3b82dfdccdd05dbbfacce91347f16a39c675680fd7b1ab109
   languageName: node
   linkType: hard
 
