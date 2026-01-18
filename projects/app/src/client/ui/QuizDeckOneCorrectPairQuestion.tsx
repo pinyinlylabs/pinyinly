@@ -29,7 +29,11 @@ import type {
   TextAnswerButtonFontSize,
   TextAnswerButtonState,
 } from "./TextAnswerButton";
-import { TextAnswerButton, textAnswerButtonFontSize } from "./TextAnswerButton";
+import {
+  ratingToButtonState,
+  TextAnswerButton,
+  textAnswerButtonFontSize,
+} from "./TextAnswerButton";
 import { WikiHanziModal } from "./WikiHanziModal";
 
 const buttonThickness = 4;
@@ -157,9 +161,7 @@ export function QuizDeckOneCorrectPairQuestion({
                     : a === selectedAChoice
                       ? grade == null
                         ? `selected`
-                        : grade.correct
-                          ? `success`
-                          : `error`
+                        : ratingToButtonState(grade.rating)
                       : selectedBChoice === undefined
                         ? `default`
                         : `dimmed`
@@ -204,9 +206,7 @@ export function QuizDeckOneCorrectPairQuestion({
                     : b === selectedBChoice
                       ? grade == null
                         ? `selected`
-                        : grade.correct
-                          ? `success`
-                          : `error`
+                        : ratingToButtonState(grade.rating)
                       : selectedAChoice === undefined
                         ? `default`
                         : `dimmed`

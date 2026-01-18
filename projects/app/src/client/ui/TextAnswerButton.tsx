@@ -1,3 +1,4 @@
+import { Rating } from "@/util/fsrs";
 import { characterCount } from "@/util/unicode";
 import type { PropsOf } from "@pinyinly/lib/types";
 import type { ReactNode } from "react";
@@ -30,6 +31,7 @@ const targetBgScale: Record<TextAnswerButtonState, number> = {
   selected: 1,
   error: 1,
   success: 1,
+  warning: 1,
 };
 const targetBgOpacity: Record<TextAnswerButtonState, number> = {
   dimmed: 0,
@@ -37,6 +39,7 @@ const targetBgOpacity: Record<TextAnswerButtonState, number> = {
   selected: 1,
   error: 1,
   success: 1,
+  warning: 1,
 };
 const targetScale: Record<TextAnswerButtonState, number> = {
   dimmed: 1,
@@ -44,6 +47,7 @@ const targetScale: Record<TextAnswerButtonState, number> = {
   selected: 1,
   error: 1,
   success: 1,
+  warning: 1,
 };
 const targetRotation: Record<TextAnswerButtonState, string> = {
   dimmed: `0deg`,
@@ -51,6 +55,7 @@ const targetRotation: Record<TextAnswerButtonState, string> = {
   selected: `0deg`,
   error: `0deg`,
   success: `0deg`,
+  warning: `0deg`,
 };
 
 export type TextAnswerButtonState =
@@ -58,7 +63,26 @@ export type TextAnswerButtonState =
   | `selected`
   | `success`
   | `error`
+  | `warning`
   | `dimmed`;
+
+/**
+ * Maps a quiz rating to the corresponding button state for correct answers.
+ */
+export function ratingToButtonState(rating: Rating): TextAnswerButtonState {
+  switch (rating) {
+    case Rating.Easy:
+    case Rating.Good: {
+      return `success`;
+    }
+    case Rating.Hard: {
+      return `warning`;
+    }
+    case Rating.Again: {
+      return `error`;
+    }
+  }
+}
 
 export type TextAnswerButtonFontSize = `xs` | `sm` | `lg` | `xl`;
 
@@ -132,7 +156,8 @@ export function TextAnswerButton({
           newRotation = withIncorrectWobbleAnimation();
           break;
         }
-        case `success`: {
+        case `success`:
+        case `warning`: {
           newBgOpacity = withClamp(
             { min: bgOpacitySv.get() },
             withTiming(newBgOpacity, { duration: quizAnimationDuration }),
@@ -285,6 +310,7 @@ const bgAnimatedClass = tv({
       selected: `bg-cyanold/10`,
       success: `bg-fg/10`,
       error: `bg-transparent`,
+      warning: `bg-fg/10`,
     },
   },
 });
@@ -306,6 +332,7 @@ const pressableClass = tv({
       selected: ``,
       success: `[--color-fg:var(--color-success)]`,
       error: `[--color-fg:var(--color-danger)]`,
+      warning: `[--color-fg:var(--color-warning)]`,
     },
   },
 });
@@ -335,6 +362,7 @@ const rectClass = tv({
       selected: ``,
       success: ``,
       error: ``,
+      warning: ``,
     },
   },
   compoundVariants: [
@@ -369,6 +397,11 @@ const rectClass = tv({
       filled: true,
       class: `border-brick`,
     },
+    {
+      state: `warning`,
+      filled: true,
+      class: `border-fg`,
+    },
   ],
 });
 
@@ -401,6 +434,7 @@ const textClass = tv({
       selected: `text-cyanold`,
       success: `text-fg`,
       error: `text-brick`,
+      warning: `text-fg`,
     },
     fontSize: {
       xl: `

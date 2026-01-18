@@ -35,7 +35,10 @@ import { QuizDeckResultToast } from "./QuizDeckResultToast";
 import { QuizFlagText } from "./QuizFlagText";
 import { QuizSubmitButton } from "./QuizSubmitButton";
 import type { TextAnswerInputSingleState } from "./TextAnswerInputSingle";
-import { TextAnswerInputSingle } from "./TextAnswerInputSingle";
+import {
+  ratingToInputState,
+  TextAnswerInputSingle,
+} from "./TextAnswerInputSingle";
 
 export function QuizDeckHanziWordToPinyinTypedQuestion({
   noAutoFocus = true,
@@ -178,7 +181,7 @@ export function QuizDeckHanziWordToPinyinTypedQuestion({
           ) : undefined
         }
         onSubmit={submit}
-        state={grade == null ? `default` : grade.correct ? `success` : `error`}
+        state={grade == null ? `default` : ratingToInputState(grade.rating)}
       />
     </Skeleton>
   );

@@ -18,7 +18,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { QuizDeckResultToast } from "./QuizDeckResultToast";
 import { QuizFlagText } from "./QuizFlagText";
 import { QuizSubmitButton } from "./QuizSubmitButton";
-import { TextAnswerInputSingle } from "./TextAnswerInputSingle";
+import {
+  ratingToInputState,
+  TextAnswerInputSingle,
+} from "./TextAnswerInputSingle";
 
 export function QuizDeckHanziWordToGlossTypedQuestion({
   noAutoFocus = true,
@@ -151,7 +154,7 @@ export function QuizDeckHanziWordToGlossTypedQuestion({
           ) : undefined
         }
         onSubmit={submit}
-        state={grade == null ? `default` : grade.correct ? `success` : `error`}
+        state={grade == null ? `default` : ratingToInputState(grade.rating)}
         placeholder="Type in English"
         autoCorrect
       />

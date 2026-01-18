@@ -1,3 +1,4 @@
+import { Rating } from "@/util/fsrs";
 import type { ReactNode, Ref } from "react";
 import { useEffect, useState } from "react";
 import type { TextInput } from "react-native";
@@ -15,6 +16,24 @@ export type TextAnswerInputSingleState =
   | `success`
   | `error`
   | `warning`;
+
+/**
+ * Maps a quiz rating to the corresponding input state.
+ */
+export function ratingToInputState(rating: Rating): TextAnswerInputSingleState {
+  switch (rating) {
+    case Rating.Easy:
+    case Rating.Good: {
+      return `success`;
+    }
+    case Rating.Hard: {
+      return `warning`;
+    }
+    case Rating.Again: {
+      return `error`;
+    }
+  }
+}
 
 export type TextAnswerInputSingleProps = {
   autoFocus?: boolean;
