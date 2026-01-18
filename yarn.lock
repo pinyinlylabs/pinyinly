@@ -6769,6 +6769,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@standard-schema/spec@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "@standard-schema/spec@npm:1.1.0"
+  checksum: 10c0/d90f55acde4b2deb983529c87e8025fa693de1a5e8b49ecc6eb84d1fd96328add0e03d7d551442156c7432fd78165b2c26ff561b970a9a881f046abb78d6a526
+  languageName: node
+  linkType: hard
+
 "@stylistic/eslint-plugin@npm:^5.0.0":
   version: 5.6.1
   resolution: "@stylistic/eslint-plugin@npm:5.6.1"
@@ -6806,7 +6813,32 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/db@npm:0.5.8, @tanstack/db@npm:^0.5.8":
+"@tanstack/db-ivm@npm:0.1.16":
+  version: 0.1.16
+  resolution: "@tanstack/db-ivm@npm:0.1.16"
+  dependencies:
+    fractional-indexing: "npm:^3.2.0"
+    sorted-btree: "npm:^1.8.1"
+  peerDependencies:
+    typescript: ">=4.7"
+  checksum: 10c0/95b5e506af20c827c8b6a94afe720047be711fe9504d9e6e01677b885bcb9eeba51e635e572939e7d803cc8733530d5ce79e362780beafafe091f8fe3e600f6b
+  languageName: node
+  linkType: hard
+
+"@tanstack/db@npm:0.5.20":
+  version: 0.5.20
+  resolution: "@tanstack/db@npm:0.5.20"
+  dependencies:
+    "@standard-schema/spec": "npm:^1.1.0"
+    "@tanstack/db-ivm": "npm:0.1.16"
+    "@tanstack/pacer-lite": "npm:^0.2.0"
+  peerDependencies:
+    typescript: ">=4.7"
+  checksum: 10c0/e4bb9ce2b1f252743a4f468d938b1980ab0642cc7ba88a0232316fcec8c1b8ad6f4defe55df4a43b0b5d7c27bbb6285e4a4e95d65d6239832e083e8b696d0456
+  languageName: node
+  linkType: hard
+
+"@tanstack/db@npm:^0.5.8":
   version: 0.5.8
   resolution: "@tanstack/db@npm:0.5.8"
   dependencies:
@@ -6834,6 +6866,13 @@ __metadata:
   version: 0.1.0
   resolution: "@tanstack/pacer-lite@npm:0.1.0"
   checksum: 10c0/f6495fb0a5e0b5b42851ca00ff05c73388e9b4619d3c41ccbdee942c3afa1f04a5fd4a9df017b2c6af9b77b9ffc52bffe841d6cb42a71e4a3c5a44e12f61bd09
+  languageName: node
+  linkType: hard
+
+"@tanstack/pacer-lite@npm:^0.2.0":
+  version: 0.2.1
+  resolution: "@tanstack/pacer-lite@npm:0.2.1"
+  checksum: 10c0/373f289e5a0ab890d41befcef7842103cc8f3ccdc1521379ab08cb4c96ae236fe59581b9ad7d88212003bde5aa9d8318b550123004ef6d550c6e12cdb36b4588
   languageName: node
   linkType: hard
 
@@ -6865,14 +6904,14 @@ __metadata:
   linkType: hard
 
 "@tanstack/react-db@npm:^0.1.52":
-  version: 0.1.52
-  resolution: "@tanstack/react-db@npm:0.1.52"
+  version: 0.1.64
+  resolution: "@tanstack/react-db@npm:0.1.64"
   dependencies:
-    "@tanstack/db": "npm:0.5.8"
+    "@tanstack/db": "npm:0.5.20"
     use-sync-external-store: "npm:^1.6.0"
   peerDependencies:
     react: ">=16.8.0"
-  checksum: 10c0/4757873d3c42da9752692b2808619d6be4c573547e5d77b2d7f8b0633a7cd75e6e2049bad6be203faeb22acee8b8f5d0418e2fe2bc6d4b15c30cc0af7d462955
+  checksum: 10c0/4aeb63b6956695cf267ca68189702540b2947999758d6de31fac2d3b74769b46da569126da3ecb45df32a5539ad5d9e71b8d6a95126f682025bbb6807d5ff22e
   languageName: node
   linkType: hard
 
