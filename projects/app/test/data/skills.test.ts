@@ -1581,15 +1581,13 @@ describe(
           });
           expect(prettyQueue(queue)).toMatchInlineSnapshot(`
             [
-              "he:𠃌:radical (🌱 NEW SKILL)",
-              "he:丨:line (🌱 NEW SKILL)",
-              "he:一:one (🌱 NEW SKILL)",
               "he:丶:dot (🌱 NEW SKILL)",
+              "he:丨:line (🌱 NEW SKILL)",
+              "he:口:mouth (🌱 NEW SKILL)",
               "he:乚:hidden (🌱 NEW SKILL)",
               "he:丿:slash (🌱 NEW SKILL)",
               "he:灬:fire (🌱 NEW SKILL)",
-              "he:冂:wide (🟥 BLOCKED)",
-              "he:口:mouth (🟥 BLOCKED)",
+              "he:一:one (🌱 NEW SKILL)",
               "he:卜:divine (🟥 BLOCKED)",
               "he:占:occupy (🟥 BLOCKED)",
               "he:儿:son (🟥 BLOCKED)",
