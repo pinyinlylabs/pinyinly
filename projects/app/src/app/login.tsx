@@ -106,7 +106,7 @@ export default function LoginPage() {
 
       {Platform.OS === `web` ? (
         <SignInWithAppleButton
-          clientId="how.haohao.app"
+          clientId="ly.pinyin.auth"
           onSuccess={(data) => {
             void auth.logInWithApple(data.authorization.id_token);
           }}

@@ -3,7 +3,7 @@
     "relation": ["delegate_permission/common.handle_all_urls"],
     "target": {
       "namespace": "android_app",
-      "package_name": "how.haohao.hoa",
+      "package_name": "ly.pinyin.app",
       "sha256_cert_fingerprints": [
         // Supports multiple fingerprints for different apps and keys
         "76:D0:09:B4:61:A2:81:5A:2C:7D:DF:65:A1:7A:0E:A8:D1:47:27:F2:DB:D5:BD:01:DE:14:12:E9:6A:EC:F1:DD"

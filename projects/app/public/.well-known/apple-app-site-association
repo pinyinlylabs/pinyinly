@@ -3,7 +3,7 @@
     "apps": [],
     "details": [
       {
-        "appID": "9GVZK5FM29.how.haohao.hoa",
+        "appID": "9GVZK5FM29.ly.pinyin.app",
         "components": [
           {
             "/": "/",
@@ -15,12 +15,12 @@
   },
   "activitycontinuation": {
     "apps": [
-      "9GVZK5FM29.how.haohao.hoa"
+      "9GVZK5FM29.ly.pinyin.app"
     ]
   },
   "webcredentials": {
     "apps": [
-      "9GVZK5FM29.how.haohao.hoa"
+      "9GVZK5FM29.ly.pinyin.app"
     ]
   }
 }

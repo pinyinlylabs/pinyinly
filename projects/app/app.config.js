@@ -29,7 +29,7 @@ export const expo = {
       usesNonExemptEncryption: false,
     },
     supportsTablet: true,
-    bundleIdentifier: `how.haohao.hoa`,
+    bundleIdentifier: `ly.pinyin.app`,
     associatedDomains: [
       `applinks:${prodDomain}`,
       // Development
@@ -105,7 +105,7 @@ export const expo = {
         category: [`BROWSABLE`, `DEFAULT`],
       },
     ],
-    package: `how.haohao.hoa`,
+    package: `ly.pinyin.app`,
   },
   web: {
     bundler: `metro`,
