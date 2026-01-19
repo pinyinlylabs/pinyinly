@@ -64,7 +64,7 @@ export function WikiHanziCharacterDecomposition({
 
   return (
     <View className="mx-4 gap-2">
-      <Text className="pyly-body-subheading">Recognize the meaning</Text>
+      <Text className="pyly-body-subheading">Recognize the shape</Text>
       <View className="rounded-lg bg-fg-bg5">
         <View className="gap-4 p-4 pb-0">
           {componentsElements.length > 0 ? (
