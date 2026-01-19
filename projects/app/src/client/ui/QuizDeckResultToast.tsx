@@ -62,7 +62,11 @@ export function QuizDeckResultToast({
                     size={32}
                     source={require(`@/assets/icons/meh-circled.svg`)}
                   />
-                  <Text className="text-2xl font-bold text-fg">Too slow</Text>
+                  <FloatingMenuModal menu={<UndoAnswerMenu onUndo={onUndo} />}>
+                    <Text className="pyly-ref pyly-ref-2xl text-2xl font-bold text-fg">
+                      Too slow
+                    </Text>
+                  </FloatingMenuModal>
                 </View>
                 <Text className="text-lg/none text-fg">
                   Keep practicing and you’ll get faster!
@@ -79,7 +83,9 @@ export function QuizDeckResultToast({
                         `@/assets/icons/close-circled-filled.svg`,
                       )}
                     />
-                    <FloatingMenuModal menu={<IncorrectMenu onUndo={onUndo} />}>
+                    <FloatingMenuModal
+                      menu={<UndoAnswerMenu onUndo={onUndo} />}
+                    >
                       <Text className="pyly-ref pyly-ref-2xl text-2xl font-bold text-fg">
                         Incorrect
                       </Text>
@@ -145,7 +151,7 @@ export function ratingToThemeClass(rating: Rating) {
   }
 }
 
-function IncorrectMenu({
+function UndoAnswerMenu({
   onUndo,
   onRequestClose,
 }: {
