@@ -65,7 +65,7 @@ export function QuizDeckResultToast({
                   <Text className="text-2xl font-bold text-fg">Too slow</Text>
                 </View>
                 <Text className="text-lg/none text-fg">
-                  Keep practicing to speed up.
+                  Keep practicing and you’ll get faster!
                 </Text>
               </>
             ) : (
