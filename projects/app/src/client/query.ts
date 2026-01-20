@@ -220,6 +220,18 @@ export const isStructuralHanziQuery = queryOptions({
   structuralSharing: false,
 });
 
+export const dictionaryQuery = queryOptions({
+  queryKey: [`dictionary`],
+  queryFn: async () => {
+    await devToolsSlowQuerySleepIfEnabled();
+
+    return await loadDictionary();
+  },
+  networkMode: `offlineFirst`,
+  retry: false,
+  structuralSharing: false,
+});
+
 export const skillLearningGraphQuery = queryOptions({
   queryKey: [`skillLearningGraph`],
   queryFn: async ({ client }) => {

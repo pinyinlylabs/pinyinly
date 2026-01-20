@@ -1,5 +1,6 @@
 import { useDb } from "@/client/hooks/useDb";
 import {
+  dictionaryQuery,
   isStructuralHanziQuery,
   skillLearningGraphQuery,
 } from "@/client/query";
@@ -49,6 +50,8 @@ export const SkillQueueProvider = Object.assign(
       useQuery(skillLearningGraphQuery);
     const { data: isStructuralHanzi, isLoading: isStructuralHanziLoading } =
       useQuery(isStructuralHanziQuery);
+    const { data: dictionary, isLoading: isDictionaryLoading } =
+      useQuery(dictionaryQuery);
     const {
       data: latestSkillRatingsData,
       isLoading: isLatestSkillRatingsLoading,
@@ -79,12 +82,17 @@ export const SkillQueueProvider = Object.assign(
         isLatestSkillRatingsLoading ||
         isSkillStatesLoading ||
         isSkillLearningGraphLoading ||
-        isStructuralHanziLoading
+        isStructuralHanziLoading ||
+        isDictionaryLoading
       ) {
         return;
       }
 
-      if (skillLearningGraph == null || isStructuralHanzi == null) {
+      if (
+        skillLearningGraph == null ||
+        isStructuralHanzi == null ||
+        dictionary == null
+      ) {
         return;
       }
 
@@ -95,6 +103,7 @@ export const SkillQueueProvider = Object.assign(
         latestSkillRatings,
         now: new Date(),
         isStructuralHanzi,
+        dictionary,
         maxQueueItems: mockable.getMaxQueueItems(),
       });
 
@@ -113,6 +122,8 @@ export const SkillQueueProvider = Object.assign(
       skillSrsStates,
       latestSkillRatings,
       isSkillStatesLoading,
+      isDictionaryLoading,
+      dictionary,
     ]);
 
     const [skillQueue, setSkillQueue] = useState<SkillQueueContextValue>({

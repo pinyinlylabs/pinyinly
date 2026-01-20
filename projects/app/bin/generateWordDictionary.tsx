@@ -16,7 +16,7 @@ import type {
 } from "#data/model.ts";
 import { partOfSpeechSchema } from "#data/model.ts";
 import type {
-  Dictionary,
+  DictionaryJson,
   HanziWordMeaning,
   HanziWordWithMeaning,
 } from "#dictionary.ts";
@@ -54,9 +54,9 @@ import type { DeepReadonly } from "ts-essentials";
 import yargs from "yargs";
 import { z } from "zod/v4";
 import {
-  readDictionary,
+  readDictionaryJson,
   upsertHanziWordMeaning,
-  writeDictionary,
+  writeDictionaryJson,
 } from "../test/helpers.ts";
 import {
   dongChineseData,
@@ -137,7 +137,7 @@ const AfterDelay = ({
 // @ts-expect-error keep it around for now, will be used later
 async function openAiHanziWordGlossHintQuery(
   hanziWord: HanziWord,
-  dict: Dictionary,
+  dict: DictionaryJson,
 ) {
   const meaning = dict.get(hanziWord);
   const dictionary = await loadDictionary();
@@ -1363,7 +1363,7 @@ function useDictionary() {
   return useQuery({
     queryKey: [`loadDictionary`],
     queryFn: async () => {
-      return await readDictionary();
+      return await readDictionaryJson();
     },
     networkMode: `offlineFirst`,
     structuralSharing: false,
@@ -1454,7 +1454,7 @@ async function renameHanziWord(
   oldHanziWord: HanziWord,
   newHanziWord: HanziWord,
 ) {
-  const dict = await readDictionary();
+  const dict = await readDictionaryJson();
 
   const meaning = dict.get(oldHanziWord);
   invariant(meaning != null, `missing meaning for ${oldHanziWord}`);
@@ -1470,7 +1470,7 @@ async function mergeHanziWord(
   hanziWordToRemove: HanziWord,
   hanziWordToKeep: HanziWord,
 ) {
-  const dict = await readDictionary();
+  const dict = await readDictionaryJson();
 
   invariant(dict.has(hanziWordToRemove), `the old meaning-key does not exist`);
   invariant(dict.has(hanziWordToKeep), `the new meaning-key does not exist`);
@@ -1484,15 +1484,15 @@ async function saveUpsertHanziWordMeaning(
   hanziWord: HanziWord,
   patch: Partial<HanziWordMeaning>,
 ) {
-  const dict = await readDictionary();
+  const dict = await readDictionaryJson();
 
   upsertHanziWordMeaning(dict, hanziWord, patch);
 
   await writeDictionaryAndInvalidateCache(dict);
 }
 
-async function writeDictionaryAndInvalidateCache(dict: Dictionary) {
-  await writeDictionary(dict);
+async function writeDictionaryAndInvalidateCache(dict: DictionaryJson) {
+  await writeDictionaryJson(dict);
   await queryClient.invalidateQueries({ queryKey: [`loadDictionary`] });
 }
 

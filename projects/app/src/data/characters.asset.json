@@ -1373,7 +1373,7 @@
   ],
   [
     "口",
-    {"decomposition":"⿱冂一"}
+    {"decomposition":"口"}
   ],
   [
     "𠮛",
@@ -5013,7 +5013,7 @@
   ],
   [
     "迶",
-    {"decomposition":"⿺辶有"}
+    {"decomposition":"⿺辶有","isStructural":true}
   ],
   [
     "迷",

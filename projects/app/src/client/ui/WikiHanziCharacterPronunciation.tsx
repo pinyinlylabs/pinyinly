@@ -30,7 +30,7 @@ export function WikiHanziCharacterPronunciation({
   return (
     <View className="mt-4 gap-2">
       <View className="mx-4">
-        <Text className="pyly-body-subheading">Memorize the pronunciation</Text>
+        <Text className="pyly-body-subheading">Remember the pronunciation</Text>
       </View>
 
       <View className="mx-4 rounded-lg bg-fg/5">

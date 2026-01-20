@@ -219,14 +219,14 @@ export const hanziWordMeaningSchema = z
 export type HanziWordMeaning = z.infer<typeof hanziWordMeaningSchema>;
 export type HanziWordWithMeaning = [HanziWord, HanziWordMeaning];
 
-export const dictionarySchema = z
+export const dictionaryJsonSchema = z
   .array(z.tuple([hanziWordSchema, hanziWordMeaningSchema]))
   .transform((x) => new Map(x));
 
-export type Dictionary = z.infer<typeof dictionarySchema>;
+export type DictionaryJson = z.infer<typeof dictionaryJsonSchema>;
 
 export const loadDictionaryJson = memoize0(async () =>
-  dictionarySchema
+  dictionaryJsonSchema
     .transform(deepReadonly)
     .parse(await import(`./data/dictionary.asset.json`).then((x) => x.default)),
 );
@@ -373,6 +373,11 @@ export const loadDictionary = memoize0(
     };
   },
 );
+
+/**
+ * The type of the dictionary index returned by {@link loadDictionary}.
+ */
+export type Dictionary = Awaited<ReturnType<typeof loadDictionary>>;
 
 export const lookupRadicalsByStrokes = async (strokes: number) =>
   await loadKangXiRadicalsStrokes().then((x) => x.get(strokes) ?? null);

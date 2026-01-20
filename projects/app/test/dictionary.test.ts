@@ -3,7 +3,7 @@ import type { HanziCharacter, HanziText, HanziWord } from "#data/model.ts";
 import { PartOfSpeech } from "#data/model.ts";
 import { pinyinUnitCount } from "#data/pinyin.js";
 import { rPartOfSpeech } from "#data/rizzleSchema.js";
-import type { Dictionary, HanziWordMeaning } from "#dictionary.ts";
+import type { DictionaryJson, HanziWordMeaning } from "#dictionary.ts";
 import {
   decomposeHanzi,
   getIsComponentFormHanzi,
@@ -1182,8 +1182,8 @@ describe(
     typeof upsertHanziWordMeaning
   >,
   async () => {
-    function helloDict(): Dictionary {
-      const dict: Dictionary = new Map();
+    function helloDict(): DictionaryJson {
+      const dict: DictionaryJson = new Map();
       dict.set(`你好:hello`, {
         gloss: [`hello`],
         pinyin: [拼音`ni hao`],
