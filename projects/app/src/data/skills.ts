@@ -19,10 +19,12 @@ import {
   emptySet,
   inverseSortComparator,
   memoize1,
+  mergeSortComparators,
   MinHeap,
   mutableArrayFilter,
   sortComparatorDate,
   sortComparatorNumber,
+  sortComparatorString,
   topK,
 } from "@pinyinly/lib/collections";
 import { invariant, nonNullable } from "@pinyinly/lib/invariant";
@@ -1328,7 +1330,11 @@ export const randomPickSkillsForReview = (
   return topK(
     skillStates,
     limit,
-    sortComparatorNumber(([skill]) => skillStrength.get(skill) ?? 0),
+    mergeSortComparators(
+      sortComparatorNumber(([skill]) => skillStrength.get(skill) ?? 0),
+      // Alphabetical tie-breaker for deterministic ordering when strengths are equal.
+      sortComparatorString(([skill]) => skill),
+    ),
   ).map(([skill]) => skill);
 };
 
