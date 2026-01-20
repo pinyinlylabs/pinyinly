@@ -7,11 +7,11 @@ import { vi } from "vitest";
 import type { HanziWord } from "#data/model.ts";
 import { rPartOfSpeech } from "#data/rizzleSchema.js";
 import type {
-  Dictionary,
+  DictionaryJson,
   HanziWordMeaning,
   hanziWordMeaningSchema,
 } from "#dictionary.ts";
-import { dictionarySchema } from "#dictionary.ts";
+import { dictionaryJsonSchema } from "#dictionary.ts";
 import { sortComparatorString } from "@pinyinly/lib/collections";
 import { readFileWithSchema, writeJsonFileIfChanged } from "@pinyinly/lib/fs";
 import type { z } from "zod/v4";
@@ -128,15 +128,19 @@ export function formatTimeOffset(timestamp: Date): string {
   return `${hours.toString().padStart(2, `0`)}:${minutes.toString().padStart(2, `0`)}:${seconds.toString().padStart(2, `0`)}`;
 }
 
-export const readDictionary = (): Promise<Dictionary> =>
-  readFileWithSchema(dictionaryFilePath, dictionarySchema, new Map());
+export const readDictionaryJson = (): Promise<DictionaryJson> =>
+  readFileWithSchema(dictionaryFilePath, dictionaryJsonSchema, new Map());
 
-export async function writeDictionary(dict: Dictionary) {
-  await writeJsonFileIfChanged(dictionaryFilePath, unparseDictionary(dict), 1);
+export async function writeDictionaryJson(dict: DictionaryJson) {
+  await writeJsonFileIfChanged(
+    dictionaryFilePath,
+    unparseDictionaryJson(dict),
+    1,
+  );
 }
 
 export function upsertHanziWordMeaning(
-  dict: Dictionary,
+  dict: DictionaryJson,
   hanziWord: HanziWord,
   patch: Partial<HanziWordMeaning>,
 ): void {
@@ -152,24 +156,26 @@ export function upsertHanziWordMeaning(
   }
 
   // Test the validity of the dictionary.
-  dictionarySchema.parse(unparseDictionary(dict));
+  dictionaryJsonSchema.parse(unparseDictionaryJson(dict));
 }
 
-export function unparseDictionary(
-  dict: Dictionary,
-): z.input<typeof dictionarySchema> {
+export function unparseDictionaryJson(
+  dict: DictionaryJson,
+): z.input<typeof dictionaryJsonSchema> {
   return [...dict.entries()]
-    .map(([hanziWord, meaning]): z.input<typeof dictionarySchema>[number] => {
-      return [
-        hanziWord,
-        {
-          ...(meaning satisfies z.input<typeof hanziWordMeaningSchema>),
-          pos:
-            meaning.pos == null
-              ? undefined
-              : rPartOfSpeech().marshal(meaning.pos),
-        },
-      ];
-    })
+    .map(
+      ([hanziWord, meaning]): z.input<typeof dictionaryJsonSchema>[number] => {
+        return [
+          hanziWord,
+          {
+            ...(meaning satisfies z.input<typeof hanziWordMeaningSchema>),
+            pos:
+              meaning.pos == null
+                ? undefined
+                : rPartOfSpeech().marshal(meaning.pos),
+          },
+        ];
+      },
+    )
     .sort(sortComparatorString((x) => x[0]));
 }

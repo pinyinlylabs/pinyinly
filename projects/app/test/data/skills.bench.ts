@@ -3,6 +3,7 @@ import { SkillKind } from "#data/model.ts";
 import { rSkillKind } from "#data/rizzleSchema.ts";
 import type { LatestSkillRating, SkillLearningGraph } from "#data/skills.ts";
 import { skillReviewQueue } from "#data/skills.ts";
+import { loadDictionary } from "#dictionary.ts";
 import { Rating } from "#util/fsrs.ts";
 import { invariant } from "@pinyinly/lib/invariant";
 import { bench, expect } from "vitest";
@@ -94,6 +95,9 @@ const { graph, skillSrsStates, latestSkillRatings, now } =
     ratingCount: 600,
   });
 
+// Load dictionary once at module level for benchmarks
+const dictionary = await loadDictionary();
+
 bench(
   `handles large graphs within performance budget`,
   () => {
@@ -102,6 +106,7 @@ bench(
       skillSrsStates,
       latestSkillRatings,
       isStructuralHanzi: () => false,
+      dictionary,
       now,
       maxQueueItems: graph.size,
     });

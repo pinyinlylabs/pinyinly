@@ -19,9 +19,9 @@ import { describe, expect, test } from "vitest";
 import type z from "zod/v4";
 import {
   dataDir,
-  readDictionary,
+  readDictionaryJson,
   upsertHanziWordMeaning,
-  writeDictionary,
+  writeDictionaryJson,
 } from "../helpers.ts";
 import { loadCompleteHskVocabulary } from "./completeHskVocabulary.ts";
 import { loadIvankraHsk30 } from "./ivankraHsk30.ts";
@@ -279,11 +279,11 @@ test(`hsk word lists match vendor data`, async () => {
           hasAnyPinyinOverlap !== true &&
           vendorPinyins.length === 1
         ) {
-          const dict = await readDictionary();
+          const dict = await readDictionaryJson();
           const meaning = dict.get(hanziWord);
           if (meaning != null) {
             meaning.pinyin = vendorPinyins;
-            await writeDictionary(dict);
+            await writeDictionaryJson(dict);
           }
         }
       }
@@ -302,9 +302,9 @@ test(`hsk word lists match vendor data`, async () => {
         if (!IS_CI) {
           if (isInDictionary) {
             for (const [hanziWord] of dictionaryItems) {
-              const dict = await readDictionary();
+              const dict = await readDictionaryJson();
               upsertHanziWordMeaning(dict, hanziWord, { hsk: hskLevel });
-              await writeDictionary(dict);
+              await writeDictionaryJson(dict);
             }
           } else {
             const hasOneMeaning = vendorItem.forms.length === 1;
@@ -374,9 +374,9 @@ test(`hsk word lists match vendor data`, async () => {
                 pinyin: [form.transcriptions.pinyin],
               };
 
-              const dict = await readDictionary();
+              const dict = await readDictionaryJson();
               upsertHanziWordMeaning(dict, newHanziWord, newDictionaryMeaning);
-              await writeDictionary(dict);
+              await writeDictionaryJson(dict);
             } else {
               // multiple meanings, check the hints
               for (const item of disambiguationHints) {
@@ -447,13 +447,13 @@ test(`hsk word lists match vendor data`, async () => {
                     pos: newPos,
                   };
 
-                  const dict = await readDictionary();
+                  const dict = await readDictionaryJson();
                   upsertHanziWordMeaning(
                     dict,
                     newHanziWord,
                     newDictionaryMeaning,
                   );
-                  await writeDictionary(dict);
+                  await writeDictionaryJson(dict);
                 }
               }
             }

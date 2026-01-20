@@ -1,4 +1,4 @@
-import type { HanziWordWithMeaning } from "@/dictionary";
+import type { Dictionary, HanziWordWithMeaning } from "@/dictionary";
 import {
   decomposeHanzi,
   hanziFromHanziWord,
@@ -779,6 +779,7 @@ function getReactiveHanziToPinyinTypedSkills({
   skillSrsStates,
   graph,
   now,
+  dictionary,
 }: {
   recentSkillRatingHistory: ({ skill: Skill } & Pick<
     SkillRating,
@@ -787,25 +788,26 @@ function getReactiveHanziToPinyinTypedSkills({
   skillSrsStates: ReadonlyMap<Skill, SrsStateType>;
   graph: SkillLearningGraph;
   now: Date;
+  dictionary: Dictionary;
 }): readonly SkillReviewQueueItem[] {
   let hanzi: HanziText | undefined;
-  let previousSkills: HanziWordToPinyinTypedSkill[] | undefined;
+  const previousPinyin = new Set<string>();
+  const previousHanziWords: HanziWord[] = [];
 
   // Step through the recent ratings and group together consecutive successful
-  // HanziWordToPinyinTyped ratings for the same hanzi word.
+  // HanziWordToPinyinTyped ratings for the same hanzi word, collecting pinyin.
   for (const recentSkillRating of recentSkillRatingHistory) {
     if (!isHanziWordToPinyinTypedSkill(recentSkillRating.skill)) {
       break;
     }
 
     if (recentSkillRating.rating === Rating.Again) {
-      // Avoid completing to react to skill retries.
+      // Avoid reacting to skill retries.
       break;
     }
 
-    const recentHanzi = hanziFromHanziWord(
-      hanziWordFromSkill(recentSkillRating.skill),
-    );
+    const hanziWord = hanziWordFromSkill(recentSkillRating.skill);
+    const recentHanzi = hanziFromHanziWord(hanziWord);
 
     if (hanzi == null) {
       hanzi = recentHanzi;
@@ -813,59 +815,56 @@ function getReactiveHanziToPinyinTypedSkills({
       break;
     }
 
-    previousSkills ??= [];
-    previousSkills.push(recentSkillRating.skill);
+    const pinyin = dictionary.lookupHanziWord(hanziWord)?.pinyin?.[0];
+    if (pinyin != null) {
+      previousPinyin.add(pinyin);
+    }
+    previousHanziWords.push(hanziWord);
   }
 
-  if (hanzi == null) {
+  if (hanzi == null || previousPinyin.size === 0) {
     return emptyArray;
   }
 
-  invariant(
-    previousSkills != null && previousSkills.length > 0,
-    `previousSkills must be set`,
-  );
-
-  // Pick one of the remaining hanzi word skills to learn.
-  let targetSkill: HanziWordSkill | undefined;
+  // Find a skill for the same hanzi with a different (unanswered) pinyin.
   for (const [skill] of graph) {
-    if (
-      !isHanziWordToPinyinTypedSkill(skill) ||
-      previousSkills.includes(skill)
-    ) {
+    if (!isHanziWordToPinyinTypedSkill(skill)) {
+      continue;
+    }
+
+    const hanziWord = hanziWordFromSkill(skill);
+    if (hanziFromHanziWord(hanziWord) !== hanzi) {
+      continue;
+    }
+
+    if (previousHanziWords.includes(hanziWord)) {
       continue;
     }
 
     const srsState = skillSrsStates.get(skill);
-
     if (needsToBeIntroduced(srsState, now)) {
-      // Skipping because the skill hasn't been introduced yet, and reviewing it
-      // would be too hard for the user.
+      // Skipping because the skill hasn't been introduced yet.
       continue;
     }
 
-    const skillHanzi = hanziFromHanziWord(hanziWordFromSkill(skill));
-    if (skillHanzi === hanzi) {
-      targetSkill = skill;
-      break;
+    const pinyin = dictionary.lookupHanziWord(hanziWord)?.pinyin?.[0];
+    if (pinyin == null || previousPinyin.has(pinyin)) {
+      // Skip if pinyin is missing or already answered.
+      continue;
     }
-  }
 
-  if (targetSkill == null) {
-    return emptyArray;
-  }
-
-  // At this point we've found a new hanzi word to prioritize, and we have the
-  // previous hanzi words that were already answered.
-  return [
-    {
-      skill: targetSkill,
-      flag: {
-        kind: QuestionFlagKind.OtherAnswer,
-        previousHanziWords: previousSkills.map((s) => hanziWordFromSkill(s)),
+    return [
+      {
+        skill,
+        flag: {
+          kind: QuestionFlagKind.OtherAnswer,
+          previousHanziWords,
+        },
       },
-    },
-  ];
+    ];
+  }
+
+  return emptyArray;
 }
 
 export type LatestSkillRating = Pick<
@@ -878,6 +877,7 @@ export function skillReviewQueue({
   skillSrsStates,
   latestSkillRatings,
   isStructuralHanzi,
+  dictionary,
   now = new Date(),
   maxQueueItems = Infinity,
 }: {
@@ -885,6 +885,7 @@ export function skillReviewQueue({
   skillSrsStates: ReadonlyMap<Skill, SrsStateType>;
   latestSkillRatings: ReadonlyMap<Skill, LatestSkillRating>;
   isStructuralHanzi: (hanzi: HanziText) => boolean;
+  dictionary: Dictionary;
   now?: Date;
   maxQueueItems?: number;
 }): SkillReviewQueue {
@@ -1121,6 +1122,7 @@ export function skillReviewQueue({
       skillSrsStates,
       graph,
       now,
+      dictionary,
     }),
   ];
 
