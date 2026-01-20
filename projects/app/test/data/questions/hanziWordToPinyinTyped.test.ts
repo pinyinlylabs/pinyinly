@@ -38,6 +38,50 @@ describe(
           .toBe(expectedAutoSubmit);
       }
     });
+
+    test(`should auto-submit with suggestionAccepted=true and matching pinyin unit count`, () => {
+      const skill = hanziWordToPinyinTyped(`你好:hello`);
+      const answers = [
+        {
+          skill,
+          pinyin: [拼音`nǐ hǎo`],
+        },
+      ];
+
+      // With suggestionAccepted=true, no trailing space required
+      for (const [text, expectedAutoSubmit] of [
+        [`nǐhǎo`, true],
+        [`nǐ hǎo`, true],
+        [`nǐ`, false], // wrong unit count
+        [`nǐhǎomá`, false], // wrong unit count
+      ] as const) {
+        expect
+          .soft(
+            shouldAutoSubmitPinyinTypedAnswer(text, skill, answers, true),
+            `${text} with suggestionAccepted=true`,
+          )
+          .toBe(expectedAutoSubmit);
+      }
+    });
+
+    test(`should not auto-submit without trailing space or suggestionAccepted`, () => {
+      const skill = hanziWordToPinyinTyped(`你好:hello`);
+      const answers = [
+        {
+          skill,
+          pinyin: [拼音`nǐ hǎo`],
+        },
+      ];
+
+      // Without trailing space and suggestionAccepted=false, should not auto-submit
+      // even if unit count matches
+      expect(
+        shouldAutoSubmitPinyinTypedAnswer(`nǐhǎo`, skill, answers, false),
+      ).toBe(false);
+      expect(shouldAutoSubmitPinyinTypedAnswer(`nǐhǎo`, skill, answers)).toBe(
+        false,
+      );
+    });
   },
 );
 
