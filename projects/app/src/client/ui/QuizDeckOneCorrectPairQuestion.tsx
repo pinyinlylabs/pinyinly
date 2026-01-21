@@ -155,6 +155,7 @@ export function QuizDeckOneCorrectPairQuestion({
                 key={i}
                 choice={a}
                 fontSize={groupAFontSize}
+                answered={grade != null}
                 state={
                   selectedAChoice === undefined
                     ? `default`
@@ -200,6 +201,7 @@ export function QuizDeckOneCorrectPairQuestion({
                 key={i}
                 choice={b}
                 fontSize={groupBFontSize}
+                answered={grade != null}
                 state={
                   selectedBChoice === undefined
                     ? `default`
@@ -284,15 +286,16 @@ const ChoiceButton = ({
   state,
   choice,
   fontSize,
+  answered,
   onPress,
 }: {
   state: TextAnswerButtonState;
   choice: OneCorrectPairQuestionChoice;
   fontSize: TextAnswerButtonFontSize;
+  answered: boolean;
   onPress: (choice: OneCorrectPairQuestionChoice) => void;
 }) => {
-  const shouldShowWikiModal =
-    (state === `success` || state === `error`) && choice.kind === `hanzi`;
+  const shouldShowWikiModal = answered && choice.kind === `hanzi`;
 
   return (
     <TextAnswerButton

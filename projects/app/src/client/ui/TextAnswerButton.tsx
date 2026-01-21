@@ -117,7 +117,7 @@ export function TextAnswerButton({
   const [bgFilled, setBgFilled] = useState(false);
   const [pressed, setPressed] = useState(false);
   const [hovered, setHovered] = useState(false);
-  const [showWikiModal, setWikiModal] = useState(false);
+  const [showWikiModal, setShowWikiModal] = useState(false);
 
   const scaleSv = useSharedValue(targetScale[state]);
   const rotationSv = useSharedValue(targetRotation[state]);
@@ -204,7 +204,7 @@ export function TextAnswerButton({
   const flat = pressed || disabled;
 
   const handleWikiModalDismiss = () => {
-    setWikiModal(false);
+    setShowWikiModal(false);
   };
 
   return (
@@ -230,7 +230,7 @@ export function TextAnswerButton({
       }}
       onPress={(e) => {
         if (renderWikiModal) {
-          setWikiModal(true);
+          setShowWikiModal(true);
         } else if (state === `error`) {
           // Shake the button violently if the user presses it again after they
           // already made an error.
