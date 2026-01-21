@@ -9,9 +9,10 @@ import { sentryMiddleware } from "@inngest/middleware-sentry";
 import { invariant } from "@pinyinly/lib/invariant";
 import { createTRPCClient, httpLink } from "@trpc/client";
 import { subDays } from "date-fns/subDays";
-import { inArray, lt, notInArray, sql } from "drizzle-orm";
+import { and, eq, gte, inArray, lt, notInArray, sql } from "drizzle-orm";
 import { Inngest } from "inngest";
 import * as postmark from "postmark";
+import z from "zod/v4";
 import * as s from "../pgSchema";
 import {
   pgBatchUpdate,
@@ -26,6 +27,7 @@ import {
   pushChunked,
   updateRemoteSyncClientLastMutationId,
 } from "./replicache";
+import { retryMutation as retryMutationV9 } from "./replicache/v9";
 
 const { POSTMARK_SERVER_TOKEN } = process.env;
 
@@ -692,6 +694,192 @@ const migrateHanziWords = inngest.createFunction(
   },
 );
 
+type RetryBatchResult =
+  | { succeeded: number; stopped: false }
+  | {
+      succeeded: number;
+      stopped: true;
+      failedAtMutationId: number;
+      error: string;
+      stack?: string;
+    };
+
+const retryFailedMutations = inngest.createFunction(
+  {
+    id: `retryFailedMutations`,
+    description: `Retry failed mutations starting from a specific mutation ID and continuing through all subsequent failed mutations for the same client.`,
+  },
+  { event: `replicache/retry-mutations` },
+  async ({ event, step, logger }) => {
+    const eventDataSchema = z.object({
+      startMutationId: z.string(),
+    });
+    const { startMutationId } = eventDataSchema.parse(event.data);
+
+    // Fetch the starting mutation and all subsequent failed mutations for the same client
+    const mutationChain = await step.run(`fetch-mutation-chain`, async () => {
+      return await withDrizzle(async (db) => {
+        // First, get the starting mutation to find its clientId and mutationId
+        const startMutation = await db
+          .select({
+            id: s.replicacheMutation.id,
+            clientId: s.replicacheMutation.clientId,
+            mutationId: s.replicacheMutation.mutationId,
+            success: s.replicacheMutation.success,
+            schemaVersion: s.replicacheClientGroup.schemaVersion,
+          })
+          .from(s.replicacheMutation)
+          .innerJoin(
+            s.replicacheClient,
+            eq(s.replicacheMutation.clientId, s.replicacheClient.id),
+          )
+          .innerJoin(
+            s.replicacheClientGroup,
+            eq(s.replicacheClient.clientGroupId, s.replicacheClientGroup.id),
+          )
+          .where(eq(s.replicacheMutation.id, startMutationId))
+          .limit(1)
+          .then((rows) => rows[0]);
+
+        if (startMutation == null) {
+          return { error: `Mutation record not found: ${startMutationId}` };
+        }
+
+        if (startMutation.success !== false) {
+          return {
+            error: `Starting mutation is not a failed mutation (success=${String(startMutation.success)})`,
+          };
+        }
+
+        // Now fetch all failed mutations for this client starting from the given mutationId
+        const failedMutations = await db
+          .select({
+            id: s.replicacheMutation.id,
+            mutationId: s.replicacheMutation.mutationId,
+          })
+          .from(s.replicacheMutation)
+          .where(
+            and(
+              eq(s.replicacheMutation.clientId, startMutation.clientId),
+              eq(s.replicacheMutation.success, false),
+              gte(s.replicacheMutation.mutationId, startMutation.mutationId),
+            ),
+          )
+          .orderBy(s.replicacheMutation.mutationId);
+
+        return {
+          schemaVersion: startMutation.schemaVersion,
+          mutations: failedMutations,
+        };
+      });
+    });
+
+    if (`error` in mutationChain) {
+      logger.error(mutationChain.error);
+      return {
+        success: false,
+        error: mutationChain.error,
+        totalAttempted: 0,
+        succeeded: 0,
+        failedAtMutationId: null,
+      };
+    }
+
+    const { schemaVersion, mutations } = mutationChain;
+
+    if (mutations.length === 0) {
+      return {
+        success: true,
+        totalAttempted: 0,
+        succeeded: 0,
+        failedAtMutationId: null,
+      };
+    }
+
+    logger.info(`Retrying ${mutations.length} failed mutations`);
+
+    // Process mutations in batches
+    const batchSize = 10;
+    let totalSucceeded = 0;
+    let failedAtMutationId: number | null = null;
+    let stopped = false;
+
+    for (let i = 0; i < mutations.length && !stopped; i += batchSize) {
+      const batch = mutations.slice(i, i + batchSize);
+      const batchIndex = Math.floor(i / batchSize);
+
+      const batchResult = await step.run(
+        `process-batch-${batchIndex}`,
+        async (): Promise<RetryBatchResult> => {
+          return await withDrizzle(async (db) => {
+            return await withRepeatableReadTransaction(db, async (db) => {
+              let succeeded = 0;
+
+              for (const mutationRecord of batch) {
+                // Route to the correct schema version's retryMutation
+                const result = await (async () => {
+                  switch (schemaVersion) {
+                    case `9`: {
+                      return await retryMutationV9(db, mutationRecord.id);
+                    }
+                    default: {
+                      return {
+                        success: false as const,
+                        error: `Unsupported schema version: ${schemaVersion}`,
+                        stack: undefined,
+                      };
+                    }
+                  }
+                })();
+
+                if (!result.success) {
+                  console.error(
+                    `Failed to retry mutation ${mutationRecord.mutationId}: ${result.error}`,
+                    result.stack,
+                  );
+
+                  return {
+                    succeeded,
+                    stopped: true as const,
+                    failedAtMutationId: mutationRecord.mutationId,
+                    error: result.error,
+                    stack: result.stack,
+                  };
+                }
+
+                succeeded++;
+              }
+
+              return {
+                succeeded,
+                stopped: false as const,
+              };
+            });
+          });
+        },
+      );
+
+      totalSucceeded += batchResult.succeeded;
+
+      if (batchResult.stopped) {
+        stopped = true;
+        failedAtMutationId = batchResult.failedAtMutationId;
+        logger.error(
+          `Stopped at mutation ${String(failedAtMutationId)}: ${batchResult.error}`,
+          batchResult.stack,
+        );
+      }
+    }
+
+    return {
+      success: !stopped,
+      totalAttempted: stopped ? totalSucceeded + 1 : mutations.length,
+      succeeded: totalSucceeded,
+      failedAtMutationId,
+    };
+  },
+);
+
 // Create an empty array where we'll export future Inngest functions
 export const functions = [
   dataIntegrityDictionary,
@@ -699,6 +887,7 @@ export const functions = [
   migrateHanziWords,
   pgFullVacuumGarbageCollection,
   replicacheGarbageCollection,
+  retryFailedMutations,
   syncRemotePull,
   syncRemotePush,
   devTestThrowRootError,

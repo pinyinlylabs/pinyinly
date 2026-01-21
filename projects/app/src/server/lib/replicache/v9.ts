@@ -15,7 +15,6 @@ import { v9 as schema } from "@/data/rizzleSchema";
 import type {
   ClientStateNotFoundResponse,
   Cookie,
-  MutateHandler,
   PullOkResponse,
   PullRequest,
   PushRequest,
@@ -26,7 +25,10 @@ import type {
   RizzleRawObject,
   VersionNotSupportedResponse,
 } from "@/util/rizzle";
-import { makeDrizzleMutationHandler } from "@/util/rizzle";
+import {
+  makeDrizzleMutationHandler,
+  replicacheMutationSchema,
+} from "@/util/rizzle";
 import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import { startSpan } from "@sentry/core";
 import makeDebug from "debug";
@@ -51,7 +53,7 @@ const loggerName = import.meta.filename.split(`/`).at(-1);
 invariant(loggerName != null);
 const debug = makeDebug(loggerName);
 
-const mutators: RizzleDrizzleMutators<typeof schema, Drizzle> = {
+export const mutators: RizzleDrizzleMutators<typeof schema, Drizzle> = {
   async rateSkill(
     db,
     userId,
@@ -276,7 +278,6 @@ export async function push(
         pushRequest.schemaVersion,
         mutation,
         false,
-        mutate,
       );
       success = true;
     } catch {
@@ -287,7 +288,6 @@ export async function push(
         pushRequest.schemaVersion,
         mutation,
         true,
-        mutate,
       );
       success = false;
     }
@@ -804,7 +804,6 @@ export async function processMutation(
   // 1: `let errorMode = false`. In JS, we implement this step naturally
   // as a param. In case of failure, caller will call us again with `true`.
   errorMode: boolean,
-  mutate: MutateHandler<Drizzle>,
 ): Promise<boolean> {
   return await startSpan({ name: processMutation.name }, async () => {
     // 2: beginTransaction
@@ -1010,4 +1009,76 @@ export async function computeEntitiesState(
 
     return nonNullable(result);
   });
+}
+
+export type RetryMutationResult =
+  | { success: true }
+  | { success: false; error: string; stack?: string };
+
+/**
+ * Retry a single failed mutation by its record ID.
+ * Fetches the mutation context (userId, clientGroupId, schemaVersion) from the database
+ * and attempts to re-process the mutation.
+ *
+ * @param db - Database connection (should be in a repeatable read transaction)
+ * @param mutationId - The ID from the replicacheMutation table
+ * @returns Result indicating success or failure with error message
+ */
+export async function retryMutation(
+  db: Drizzle,
+  mutationId: string,
+): Promise<RetryMutationResult> {
+  // Fetch mutation with its context
+  const record = await db
+    .select({
+      id: s.replicacheMutation.id,
+      clientId: s.replicacheMutation.clientId,
+      mutationId: s.replicacheMutation.mutationId,
+      mutation: s.replicacheMutation.mutation,
+      success: s.replicacheMutation.success,
+      clientGroupId: s.replicacheClient.clientGroupId,
+      userId: s.replicacheClientGroup.userId,
+      schemaVersion: s.replicacheClientGroup.schemaVersion,
+    })
+    .from(s.replicacheMutation)
+    .innerJoin(
+      s.replicacheClient,
+      eq(s.replicacheMutation.clientId, s.replicacheClient.id),
+    )
+    .innerJoin(
+      s.replicacheClientGroup,
+      eq(s.replicacheClient.clientGroupId, s.replicacheClientGroup.id),
+    )
+    .where(eq(s.replicacheMutation.id, mutationId))
+    .limit(1)
+    .then((rows) => rows[0]);
+
+  if (record == null) {
+    return {
+      success: false,
+      error: `Mutation record not found: ${mutationId}`,
+    };
+  }
+
+  const parsedMutation = replicacheMutationSchema.parse(record.mutation);
+
+  try {
+    // Run the mutation business logic directly, bypassing processMutation's
+    // lastMutationId checks since we're retrying a previously-recorded mutation
+    await mutate(db, record.userId, parsedMutation);
+
+    // Update the mutation record to success
+    await db
+      .update(s.replicacheMutation)
+      .set({ success: true, processedAt: new Date() })
+      .where(eq(s.replicacheMutation.id, mutationId));
+
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    };
+  }
 }
