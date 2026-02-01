@@ -32,7 +32,6 @@ module.exports = {
       bg: {
         DEFAULT: `rgb(from var(--color-bg) r g b / calc(alpha * <alpha-value>))`,
         high: `rgb(from var(--color-bg-high) r g b / calc(alpha * <alpha-value>))`,
-        higher: `rgb(from var(--color-bg-higher) r g b / calc(alpha * <alpha-value>))`,
       },
       fg: {
         DEFAULT: `rgb(from var(--color-fg) r g b / calc(alpha * <alpha-value>))`,

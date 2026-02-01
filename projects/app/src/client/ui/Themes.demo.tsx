@@ -72,13 +72,6 @@ function ThemeExamples() {
       </View>
 
       <View className="flex-row items-center gap-2">
-        <View className="size-6 bg-bg-higher" />
-        <Text className="font-mono text-[var(--color-theme-default-fg)]">
-          bg-higher
-        </Text>
-      </View>
-
-      <View className="flex-row items-center gap-2">
         <View className="size-6 bg-on-fg" />
         <Text className="font-mono text-[var(--color-theme-default-fg)]">
           on-fg
@@ -103,14 +96,6 @@ function ThemeExamples() {
           `}
         >
           BG-HIGH
-        </Text>
-        <Text
-          className={`
-            self-start rounded bg-bg-higher px-2 py-1 font-sans text-[10px] font-bold leading-normal
-            text-fg
-          `}
-        >
-          BG-HIGHER
         </Text>
         <Text
           className={`
