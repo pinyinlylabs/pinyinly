@@ -203,5 +203,8 @@ const RectButtonVariants = (props: Partial<PropsOf<typeof RectButton>>) => (
     <RectButton variant="bare" {...props}>
       Bare
     </RectButton>
+    <RectButton variant="rounded" {...props}>
+      Rounded
+    </RectButton>
   </>
 );
