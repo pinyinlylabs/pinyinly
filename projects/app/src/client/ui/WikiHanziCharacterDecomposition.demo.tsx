@@ -1,6 +1,7 @@
 import type { HanziCharacter, WikiCharacterData } from "@/data/model";
 import { View } from "react-native";
 import { WikiHanziCharacterDecomposition } from "./WikiHanziCharacterDecomposition";
+import { LittlePrimaryHeader } from "./demo/helpers";
 
 export default () => {
   return (
@@ -10,11 +11,23 @@ export default () => {
         illustrationSrc={require(`./demo/看.jpg`)}
         illustrationFit="contain"
       />
+
+      <LittlePrimaryHeader title="No mnemonic" />
+
+      <WikiHanziCharacterDecomposition
+        characterData={{
+          ...characterData,
+
+          mnemonic: {
+            components: characterData.mnemonic.components,
+          },
+        }}
+      />
     </View>
   );
 };
 
-export const characterData: WikiCharacterData = {
+export const characterData = {
   hanzi: `看` as HanziCharacter,
   mnemonic: {
     components: [
@@ -48,4 +61,4 @@ export const characterData: WikiCharacterData = {
     `M 430 127 Q 436 126 448 127 Q 530 140 590 148 Q 614 152 605 164 Q 595 179 569 183 Q 547 187 430 152 C 401 143 400 129 430 127 Z`,
     `M 420 26 Q 426 26 432 27 Q 487 39 604 46 C 634 48 652 49 640 63 Q 636 70 616 84 Q 601 93 572 86 Q 493 68 426 59 C 396 55 390 24 420 26 Z`,
   ],
-};
+} satisfies WikiCharacterData;

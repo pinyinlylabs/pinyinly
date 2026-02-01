@@ -8,6 +8,7 @@ import { use } from "react";
 import { Text, View } from "react-native";
 import { HanziCharacter, hanziCharacterColorSchema } from "./HanziCharacter";
 import { HanziLink } from "./HanziLink";
+import { IconImage } from "./IconImage";
 import { Pylymark } from "./Pylymark";
 
 interface WikiHanziCharacterDecompositionProps {
@@ -110,29 +111,55 @@ export function WikiHanziCharacterDecomposition({
           />
         )}
 
-        {characterData.mnemonic?.stories == null ? null : (
-          <View className="gap-4 p-4 pt-0">
-            <Text className="pyly-body">Then connect it to the meaning:</Text>
+        <View className="gap-4 p-4">
+          {characterData.mnemonic?.stories == null ? (
+            <NoMnemonicPlaceholder />
+          ) : (
+            <>
+              <Text className="pyly-body">Then connect it to the meaning:</Text>
 
-            <View className="gap-1">
-              {characterData.mnemonic.stories.map((mnemonic, i) => (
-                <View className="gap-1" key={i}>
-                  <View className="flex-row items-center gap-2">
-                    <View className="m-1 size-3 rounded-full border-2 border-fg-bg25" />
-                    <Text className="pyly-body">
-                      <Text className="pyly-bold">{mnemonic.gloss}</Text>
-                    </Text>
+              <View className="gap-1">
+                {characterData.mnemonic.stories.map((mnemonic, i) => (
+                  <View className="gap-1" key={i}>
+                    <View className="flex-row items-center gap-2">
+                      <View className="m-1 size-3 rounded-full border-2 border-fg-bg25" />
+                      <Text className="pyly-body">
+                        <Text className="pyly-bold">{mnemonic.gloss}</Text>
+                      </Text>
+                    </View>
+                    <View className="pl-7">
+                      <Text className="pyly-body">
+                        <Pylymark source={mnemonic.story} />
+                      </Text>
+                    </View>
                   </View>
-                  <View className="pl-7">
-                    <Text className="pyly-body">
-                      <Pylymark source={mnemonic.story} />
-                    </Text>
-                  </View>
-                </View>
-              ))}
-            </View>
-          </View>
-        )}
+                ))}
+              </View>
+            </>
+          )}
+        </View>
+      </View>
+    </View>
+  );
+}
+
+function NoMnemonicPlaceholder() {
+  return (
+    <View
+      className={`items-center gap-1 rounded-xl border-2 border-dashed border-bg-higher px-4 py-5`}
+    >
+      <IconImage
+        size={32}
+        source={require(`@/assets/icons/puzzle.svg`)}
+        className="text-fg-dim"
+      />
+      <View className="items-center">
+        <Text className="font-sans text-base font-bold text-fg-dim">
+          No mnemonic
+        </Text>
+        <Text className="pyly-body-caption opacity-80">
+          Create a mnemonic here
+        </Text>
       </View>
     </View>
   );
