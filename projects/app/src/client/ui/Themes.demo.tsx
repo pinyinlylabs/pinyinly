@@ -11,6 +11,7 @@ export default () => {
     `theme-warning-panel`,
     `theme-grass-panel`,
     `theme-sky-panel`,
+    `theme-placeholder-panel`,
   ];
 
   return (
@@ -110,6 +111,14 @@ function ThemeExamples() {
           `}
         >
           BG-HIGHER
+        </Text>
+        <Text
+          className={`
+            self-start rounded bg-fg px-2 py-1 font-sans text-[10px] font-bold leading-normal
+            text-on-fg
+          `}
+        >
+          ON-FG
         </Text>
         <Text className="pyly-body">
           Body text uses fg then{` `}

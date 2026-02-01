@@ -293,6 +293,14 @@
     --color-theme-warning-panel-fg-dim: #c7ad1b;
     --color-theme-warning-panel-fg-loud: #ffe962;
     --color-theme-warning-panel-on-fg: #1a1d1e;
+
+    --color-theme-placeholder-panel-bg: #242727;
+    --color-theme-placeholder-panel-bg-high: #2d3031;
+    --color-theme-placeholder-panel-bg-higher: #404243;
+    --color-theme-placeholder-panel-fg: #484a4b;
+    --color-theme-placeholder-panel-fg-dim: #3b3c3d;
+    --color-theme-placeholder-panel-fg-loud: #898989;
+    --color-theme-placeholder-panel-on-fg: #1a1d1e;
   }
 
   .pyly-color-scheme-light {
@@ -374,6 +382,14 @@
     --color-theme-warning-panel-fg-dim: #c3a625;
     --color-theme-warning-panel-fg-loud: #a65f00;
     --color-theme-warning-panel-on-fg: #ffffff;
+
+    --color-theme-placeholder-panel-bg: #ecedee;
+    --color-theme-placeholder-panel-bg-high: #ffffff;
+    --color-theme-placeholder-panel-bg-higher: #caccce;
+    --color-theme-placeholder-panel-fg: #c1c3c5;
+    --color-theme-placeholder-panel-fg-dim: #828282;
+    --color-theme-placeholder-panel-fg-loud: #6c6c6c;
+    --color-theme-placeholder-panel-on-fg: #ffffff;
   }
 
   /* declare MDX component clases */
@@ -545,6 +561,16 @@
     --color-fg: var(--color-theme-sky-panel-fg);
     --color-fg-dim: var(--color-theme-sky-panel-fg-dim);
     --color-fg-loud: var(--color-theme-sky-panel-fg-loud);
+  }
+
+  .theme-placeholder-panel {
+    --color-bg: var(--color-theme-placeholder-panel-bg);
+    --color-bg-high: var(--color-theme-placeholder-panel-bg-high);
+    --color-bg-higher: var(--color-theme-placeholder-panel-bg-higher);
+    --color-on-fg: var(--color-theme-placeholder-panel-on-fg);
+    --color-fg: var(--color-theme-placeholder-panel-fg);
+    --color-fg-dim: var(--color-theme-placeholder-panel-fg-dim);
+    --color-fg-loud: var(--color-theme-placeholder-panel-fg-loud);
   }
 
   /* --- */
