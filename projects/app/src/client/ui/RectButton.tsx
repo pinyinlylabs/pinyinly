@@ -107,7 +107,7 @@ const pressable = tv({
         focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1
         focus-visible:outline-sky/75
       `,
-      bare: ``,
+      bare: `transition-transform`,
       rounded: `rounded-full transition-transform`,
     },
     inFlexRowParent: {
@@ -136,6 +136,11 @@ const pressable = tv({
     },
     {
       variant: `rounded`,
+      disabled: false,
+      class: `active:scale-95`,
+    },
+    {
+      variant: `bare`,
       disabled: false,
       class: `active:scale-95`,
     },
