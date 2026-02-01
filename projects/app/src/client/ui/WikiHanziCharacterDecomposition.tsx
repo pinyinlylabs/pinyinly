@@ -146,7 +146,7 @@ export function WikiHanziCharacterDecomposition({
 function NoMnemonicPlaceholder() {
   return (
     <View
-      className={`items-center gap-1 rounded-xl border-2 border-dashed border-bg-higher px-4 py-5`}
+      className={`items-center gap-1 rounded-xl border-2 border-dashed border-fg/20 px-4 py-5`}
     >
       <IconImage
         size={32}
