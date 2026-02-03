@@ -35,6 +35,7 @@ export default function MenuLayout() {
         )}
         {/* This is needed to make the route actually work with expo-router. */}
         <TabTrigger name="wiki-hanzi" href="/wiki/好" />
+        <TabTrigger name="wiki-hint" href="/wiki/hints/好" />
       </TabList>
 
       {/* Mobile header nav */}

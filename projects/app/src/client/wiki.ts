@@ -1,5 +1,5 @@
 import type { MdxComponentType } from "@/client/ui/mdx";
-import type { HanziText } from "@/data/model";
+import type { HanziText, WikiCharacterData } from "@/data/model";
 import { devToolsSlowQuerySleepIfEnabled } from "@/util/devtools";
 import { lazy } from "react";
 
@@ -15,6 +15,13 @@ export function getWikiMdxHanziMeaning(
   hanzi: HanziText,
 ): MdxComponentType | undefined {
   return registry[hanzi];
+}
+
+export function getWikiCharacterData(
+  _hanzi: HanziText,
+): Promise<WikiCharacterData> | undefined {
+  // TODO: Re-add character data loading with better performance
+  return undefined;
 }
 
 // prettier-ignore
