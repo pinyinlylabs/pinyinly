@@ -1,5 +1,6 @@
 import * as matchers from "@testing-library/jest-dom/matchers";
 import type { Component } from "react";
+import { createElement, Fragment } from "react";
 import { View } from "react-native-web";
 import { expect, vi } from "vitest";
 
@@ -43,6 +44,15 @@ vi.mock(`expo-image`, () => {
     // SyntaxError: The requested module 'expo-image' does not provide an export
     // named 'Image'
     Image: () => null,
+  };
+});
+
+vi.mock(`expo-router`, () => {
+  return {
+    // SyntaxError: Unexpected token '<'
+    //  ❯ Object.<anonymous> ../../node_modules/expo-router/src/layouts/Stack.tsx:1:1
+    Link: ({ children }: { children: React.ReactNode }) =>
+      createElement(Fragment, null, children),
   };
 });
 

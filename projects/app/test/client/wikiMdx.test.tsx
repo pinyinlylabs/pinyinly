@@ -1,16 +1,13 @@
 // pyly-not-src-test
 // @vitest-environment happy-dom
 
+import { DeviceStoreProvider } from "#client/ui/DeviceStoreProvider.tsx";
 import { PylyMdxComponents } from "#client/ui/PylyMdxComponents.tsx";
-import { Suspense } from "#client/ui/Suspense.tsx";
 import { registry_ForTesting } from "#client/wiki.js";
 import { glob, readFileSync } from "@pinyinly/lib/fs";
-import {
-  render,
-  screen,
-  waitForElementToBeRemoved,
-} from "@testing-library/react";
+import { render, waitForElementToBeRemoved } from "@testing-library/react";
 import path from "node:path";
+import { Suspense as ReactSuspense } from "react";
 import { describe, expect, test } from "vitest";
 import { projectRoot } from "../helpers.ts";
 
@@ -33,24 +30,28 @@ describe(`mdx rendering (via registry)`, () => {
   for (const [path, Component] of entries) {
     // Test a sample of the registry entries - ensures faithful production behavior
     test(`${path} component renders correctly`, async () => {
-      const { container } = render(
-        <Suspense fallback={<div data-testid="suspense-fallback" />}>
-          <PylyMdxComponents>
-            <Component />
-          </PylyMdxComponents>
-        </Suspense>,
+      const element = (
+        <DeviceStoreProvider>
+          <ReactSuspense fallback={<div data-testid="suspense-fallback" />}>
+            <PylyMdxComponents>
+              <Component />
+            </PylyMdxComponents>
+          </ReactSuspense>
+        </DeviceStoreProvider>
       );
 
+      const { queryByTestId } = render(element);
+
       // Wait for component to load - handle race condition where fallback might not be rendered
-      const fallback = screen.queryByTestId(`suspense-fallback`);
+      const fallback = queryByTestId(`suspense-fallback`);
 
       // If fallback exists, wait for it to be removed; otherwise just wait a tick to ensure rendering is complete
       if (fallback) {
         await waitForElementToBeRemoved(fallback);
       }
 
-      // Basic checks
-      expect(container.firstChild).toBeDefined();
+      // Render again to make sure there are no errors thrown.
+      render(element);
     });
   }
 });
@@ -83,4 +84,8 @@ describe(`mdx files exist and are valid`, async () => {
       expect(relativePath).toMatch(/src\/client\/wiki\/.+\/.+\.mdx$/);
     }
   });
+});
+
+test(`test`, () => {
+  expect(true).toBe(true);
 });

@@ -127,7 +127,7 @@
     "@lottiefiles/lottie-js": "^0.4.2",
     "@tanstack/eslint-plugin-query": "^5.91.2",
     "@testing-library/dom": "^10.4.0",
-    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@testing-library/react-native": "^13.2.0",
     "@types/babel__core": "7.20.x",
