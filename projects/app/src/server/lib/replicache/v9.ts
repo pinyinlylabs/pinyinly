@@ -1021,12 +1021,12 @@ export type RetryMutationResult =
  * and attempts to re-process the mutation.
  *
  * @param db - Database connection (should be in a repeatable read transaction)
- * @param mutationId - The ID from the replicacheMutation table
+ * @param mutationRecordId - The ID from the replicacheMutation table
  * @returns Result indicating success or failure with error message
  */
 export async function retryMutation(
   db: Drizzle,
-  mutationId: string,
+  mutationRecordId: string,
 ): Promise<RetryMutationResult> {
   // Fetch mutation with its context
   const record = await db
@@ -1049,14 +1049,14 @@ export async function retryMutation(
       s.replicacheClientGroup,
       eq(s.replicacheClient.clientGroupId, s.replicacheClientGroup.id),
     )
-    .where(eq(s.replicacheMutation.id, mutationId))
+    .where(eq(s.replicacheMutation.id, mutationRecordId))
     .limit(1)
     .then((rows) => rows[0]);
 
   if (record == null) {
     return {
       success: false,
-      error: `Mutation record not found: ${mutationId}`,
+      error: `Mutation record not found: ${mutationRecordId}`,
     };
   }
 
@@ -1071,7 +1071,7 @@ export async function retryMutation(
     await db
       .update(s.replicacheMutation)
       .set({ success: true, processedAt: new Date() })
-      .where(eq(s.replicacheMutation.id, mutationId));
+      .where(eq(s.replicacheMutation.id, mutationRecordId));
 
     return { success: true };
   } catch (error) {

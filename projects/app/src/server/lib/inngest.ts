@@ -712,9 +712,9 @@ const retryFailedMutations = inngest.createFunction(
   { event: `replicache/retry-mutations` },
   async ({ event, step, logger }) => {
     const eventDataSchema = z.object({
-      startMutationId: z.string(),
+      startMutationRecordId: z.string(),
     });
-    const { startMutationId } = eventDataSchema.parse(event.data);
+    const { startMutationRecordId } = eventDataSchema.parse(event.data);
 
     // Fetch the starting mutation and all subsequent failed mutations for the same client
     const mutationChain = await step.run(`fetch-mutation-chain`, async () => {
@@ -737,12 +737,14 @@ const retryFailedMutations = inngest.createFunction(
             s.replicacheClientGroup,
             eq(s.replicacheClient.clientGroupId, s.replicacheClientGroup.id),
           )
-          .where(eq(s.replicacheMutation.id, startMutationId))
+          .where(eq(s.replicacheMutation.id, startMutationRecordId))
           .limit(1)
           .then((rows) => rows[0]);
 
         if (startMutation == null) {
-          return { error: `Mutation record not found: ${startMutationId}` };
+          return {
+            error: `Mutation record not found: ${startMutationRecordId}`,
+          };
         }
 
         if (startMutation.success !== false) {
