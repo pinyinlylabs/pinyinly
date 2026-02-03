@@ -6,21 +6,56 @@ import shuffle from "lodash/shuffle";
 import { useState } from "react";
 import { View } from "react-native";
 
+const noopWikiModal = () => null;
+
 export default () => (
   <View className="flex-1">
     <View className="flex-row flex-wrap">
-      <ExampleStack title="state">
+      <ExampleStack title="state" childrenClassName="gap-1">
         <TextAnswerButton state="default" text="default" />
         <TextAnswerButton state="error" text="error" />
         <TextAnswerButton state="selected" text="selected" />
         <TextAnswerButton state="success" text="success" />
       </ExampleStack>
 
-      <ExampleStack title="disabled">
+      <ExampleStack title="state + renderWikiModal" childrenClassName="gap-1">
+        <TextAnswerButton
+          state="default"
+          text="default"
+          renderWikiModal={noopWikiModal}
+        />
+        <TextAnswerButton
+          state="dimmed"
+          text="dimmed"
+          renderWikiModal={noopWikiModal}
+        />
+        <TextAnswerButton
+          state="selected"
+          text="selected"
+          renderWikiModal={noopWikiModal}
+        />
+        <TextAnswerButton
+          state="success"
+          text="success"
+          renderWikiModal={noopWikiModal}
+        />
+        <TextAnswerButton
+          state="error"
+          text="error"
+          renderWikiModal={noopWikiModal}
+        />
+        <TextAnswerButton
+          state="warning"
+          text="warning"
+          renderWikiModal={noopWikiModal}
+        />
+      </ExampleStack>
+
+      <ExampleStack title="disabled" childrenClassName="gap-1">
         <TextAnswerButton disabled text="Disabled" />
       </ExampleStack>
 
-      <ExampleStack title="synced">
+      <ExampleStack title="synced" childrenClassName="gap-1">
         <SyncedAnswerButtonExample />
       </ExampleStack>
 

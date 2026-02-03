@@ -171,21 +171,27 @@ export function gradeHanziToPinyinTypedQuestion(
 
 /**
  * Determine whether to "auto-submit" a pinyin typed answer based on the current
- * text and the expected answers. If the answer ends in a space and the number
- * of pinyin units matches the expected answer it will auto-submit.
+ * text and the expected answers. Auto-submit triggers when the number of pinyin
+ * units matches the expected answer AND either:
+ * - The text ends with a trailing space (manual typing), or
+ * - A pinyin suggestion was just accepted
  *
- * @param text
- * @param answers @returns
+ * @param text The current input text
+ * @param skill The skill being tested
+ * @param answers The valid answers for the question
+ * @param suggestionAccepted Whether a pinyin suggestion was just accepted
+ * @returns Whether to auto-submit the answer
  */
 export function shouldAutoSubmitPinyinTypedAnswer(
   text: string,
   skill: Skill,
   answers: HanziWordToPinyinTypedQuestion[`answers`],
+  suggestionAccepted = false,
 ): boolean {
-  // It's important to only trigger when there's a space at the end,
-  // otherwise as soon as you type "ni" it will submit, before you've
-  // had a chance to change the tone.
-  if (!text.endsWith(` `)) {
+  // Only trigger auto-submit when there's a trailing space (indicating the user
+  // finished typing) or when a suggestion was just accepted. This prevents
+  // premature submission before the user has had a chance to select a tone.
+  if (!text.endsWith(` `) && !suggestionAccepted) {
     return false;
   }
 

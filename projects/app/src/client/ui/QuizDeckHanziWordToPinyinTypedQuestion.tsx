@@ -151,13 +151,18 @@ export function QuizDeckHanziWordToPinyinTypedQuestion({
       <PinyinTextInputSingle
         autoFocus={!noAutoFocus}
         disabled={grade != null}
-        onChangeText={(text) => {
+        onChangeText={(text, suggestionAccepted) => {
           userAnswerRef.current = text;
           setUserAnswerEmpty(text.trim().length === 0);
 
           if (
             autoCheck &&
-            shouldAutoSubmitPinyinTypedAnswer(text, skill, answers)
+            shouldAutoSubmitPinyinTypedAnswer(
+              text,
+              skill,
+              answers,
+              suggestionAccepted,
+            )
           ) {
             submit();
           }
@@ -199,7 +204,7 @@ const PinyinTextInputSingle = ({
   autoFocus: boolean;
   disabled: boolean;
   inputRef?: Ref<TextInput>;
-  onChangeText: (text: string) => void;
+  onChangeText: (text: string, suggestionAccepted: boolean) => void;
   onSubmit: () => void;
   hintText?: ReactNode;
   state?: TextAnswerInputSingleState;
@@ -208,9 +213,9 @@ const PinyinTextInputSingle = ({
 
   const suggestions = disabled ? null : pinyinUnitSuggestions(text);
 
-  const updateText = (newText: string) => {
+  const updateText = (newText: string, suggestionAccepted: boolean) => {
     setText(newText);
-    onChangeText(newText);
+    onChangeText(newText, suggestionAccepted);
   };
 
   const handleChangeText = (newText: string) => {
@@ -223,7 +228,7 @@ const PinyinTextInputSingle = ({
       }
     }
 
-    updateText(newText);
+    updateText(newText, false);
   };
 
   const acceptSuggestion = (
@@ -233,10 +238,8 @@ const PinyinTextInputSingle = ({
     const newText =
       text.slice(0, suggestions.from) +
       unit.pinyinUnit +
-      text.slice(suggestions.to) +
-      // Trailing space ensures "autoSubmit" works.
-      ` `;
-    updateText(newText);
+      text.slice(suggestions.to);
+    updateText(newText, true);
   };
 
   return (

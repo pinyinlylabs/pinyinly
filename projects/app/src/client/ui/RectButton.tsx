@@ -5,7 +5,12 @@ import { Pressable, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 import { hapticImpactIfMobile } from "../hooks/hapticImpactIfMobile";
 
-export type ButtonVariant = `filled` | `outline` | `option` | `bare`;
+export type ButtonVariant =
+  | `filled`
+  | `outline`
+  | `option`
+  | `bare`
+  | `rounded`;
 
 export type RectButtonProps = {
   variant?: ButtonVariant;
@@ -53,7 +58,13 @@ export function RectButton({
         setPressed(false);
         pressableProps.onPressOut?.(e);
       }}
-      className={pressable({ flat, variant, inFlexRowParent, className })}
+      className={pressable({
+        flat,
+        variant,
+        disabled,
+        inFlexRowParent,
+        className,
+      })}
     >
       <View
         className={roundedRect({
@@ -96,10 +107,15 @@ const pressable = tv({
         focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1
         focus-visible:outline-sky/75
       `,
-      bare: ``,
+      bare: `transition-transform`,
+      rounded: `rounded-full transition-transform`,
     },
     inFlexRowParent: {
       true: `flex-row`,
+    },
+    disabled: {
+      true: ``,
+      false: ``,
     },
   },
   compoundVariants: [
@@ -118,6 +134,16 @@ const pressable = tv({
       flat: true,
       class: `pt-[2px]`,
     },
+    {
+      variant: `rounded`,
+      disabled: false,
+      class: `active:scale-95`,
+    },
+    {
+      variant: `bare`,
+      disabled: false,
+      class: `active:scale-95`,
+    },
   ],
 });
 
@@ -133,6 +159,7 @@ const roundedRect = tv({
       outline: `rounded-xl border-2 border-fg/20 px-4 py-2`,
       option: `rounded-xl border border-fg/20 px-3 py-2`,
       bare: `px-2 py-1`,
+      rounded: `rounded-full border border-fg/20 px-4 py-2`,
     },
     hoveredOrPressed: {
       true: ``,
@@ -189,6 +216,13 @@ const roundedRect = tv({
       flat: false,
       class: `border-b-[3px]`,
     },
+    // Rounded
+    {
+      variant: `rounded`,
+      disabled: false,
+      hoveredOrPressed: true,
+      class: `border-fg/30`,
+    },
   ],
 });
 
@@ -199,6 +233,7 @@ const text = tv({
       outline: `pyly-button-outline`,
       option: `pyly-button-option`,
       bare: `pyly-button-bare`,
+      rounded: `font-sans text-[13px] font-semibold uppercase text-fg`,
     },
   },
 });

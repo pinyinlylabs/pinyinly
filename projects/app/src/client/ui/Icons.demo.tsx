@@ -92,6 +92,7 @@ const allIcons = [
   require(`../../assets/icons/plant-filled.svg`),
   require(`../../assets/icons/profile-filled.svg`),
   require(`../../assets/icons/profile.svg`),
+  require(`../../assets/icons/puzzle.svg`),
   require(`../../assets/icons/redo.svg`),
   require(`../../assets/icons/repeat.svg`),
   require(`../../assets/icons/ruler.svg`),

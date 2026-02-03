@@ -248,7 +248,6 @@
 
     --color-theme-default-bg: #1a1d1e;
     --color-theme-default-bg-high: #2d3031;
-    --color-theme-default-bg-higher: #404243;
     --color-theme-default-fg: #d7d8d9;
     --color-theme-default-fg-dim: #898989;
     --color-theme-default-fg-loud: #ffffff;
@@ -256,7 +255,6 @@
 
     --color-theme-danger-panel-bg: #2d3031;
     --color-theme-danger-panel-bg-high: #413435;
-    --color-theme-danger-panel-bg-higher: #543739;
     --color-theme-danger-panel-fg: #f2555a;
     --color-theme-danger-panel-fg-dim: #db4b4f;
     --color-theme-danger-panel-fg-loud: #ff7377;
@@ -264,7 +262,6 @@
 
     --color-theme-grass-panel-bg: #00c286;
     --color-theme-grass-panel-bg-high: #19c892;
-    --color-theme-grass-panel-bg-higher: #30ce9d;
     --color-theme-grass-panel-fg: rgb(from white r g b / 0.95);
     --color-theme-grass-panel-fg-dim: rgb(from white r g b / 0.57);
     --color-theme-grass-panel-fg-loud: white;
@@ -272,7 +269,6 @@
 
     --color-theme-sky-panel-bg: var(--color-sky);
     --color-theme-sky-panel-bg-high: #1f6991;
-    --color-theme-sky-panel-bg-higher: #36799c;
     --color-theme-sky-panel-fg: rgb(from white r g b / 0.95);
     --color-theme-sky-panel-fg-dim: rgb(from white r g b / 0.57);
     --color-theme-sky-panel-fg-loud: white;
@@ -280,7 +276,6 @@
 
     --color-theme-success-panel-bg: #193222;
     --color-theme-success-panel-bg-high: #184525;
-    --color-theme-success-panel-bg-higher: #185828;
     --color-theme-success-panel-fg: #13f042;
     --color-theme-success-panel-fg-dim: #0b9d2b;
     --color-theme-success-panel-fg-loud: #4dff73;
@@ -288,11 +283,17 @@
 
     --color-theme-warning-panel-bg: #432004;
     --color-theme-warning-panel-bg-high: #563307;
-    --color-theme-warning-panel-bg-higher: #69460a;
     --color-theme-warning-panel-fg: #ffdf20;
     --color-theme-warning-panel-fg-dim: #c7ad1b;
     --color-theme-warning-panel-fg-loud: #ffe962;
     --color-theme-warning-panel-on-fg: #1a1d1e;
+
+    --color-theme-placeholder-panel-bg: #242727;
+    --color-theme-placeholder-panel-bg-high: #2d3031;
+    --color-theme-placeholder-panel-fg: #484a4b;
+    --color-theme-placeholder-panel-fg-dim: #3b3c3d;
+    --color-theme-placeholder-panel-fg-loud: #898989;
+    --color-theme-placeholder-panel-on-fg: #1a1d1e;
   }
 
   .pyly-color-scheme-light {
@@ -329,7 +330,6 @@
 
     --color-theme-default-bg: #f8f9fa;
     --color-theme-default-bg-high: #e1e3e4;
-    --color-theme-default-bg-higher: #caccce;
     --color-theme-default-fg: #12191d;
     --color-theme-default-fg-dim: #6c6c6c;
     --color-theme-default-fg-loud: #000000;
@@ -337,7 +337,6 @@
 
     --color-theme-danger-panel-bg: #e7e8e8;
     --color-theme-danger-panel-bg-high: #e5d6d7;
-    --color-theme-danger-panel-bg-higher: #e4c5c6;
     --color-theme-danger-panel-fg: #d8373d;
     --color-theme-danger-panel-fg-dim: #d55f63;
     --color-theme-danger-panel-fg-loud: #d82128;
@@ -345,7 +344,6 @@
 
     --color-theme-grass-panel-bg: #00c286;
     --color-theme-grass-panel-bg-high: #18c892;
-    --color-theme-grass-panel-bg-higher: #30ce9d;
     --color-theme-grass-panel-fg: rgb(from white r g b / 0.95);
     --color-theme-grass-panel-fg-dim: rgb(from white r g b / 0.57);
     --color-theme-grass-panel-fg-loud: white;
@@ -353,7 +351,6 @@
 
     --color-theme-sky-panel-bg: var(--color-sky);
     --color-theme-sky-panel-bg-high: #4e8ef7;
-    --color-theme-sky-panel-bg-higher: #609af8;
     --color-theme-sky-panel-fg: rgb(from white r g b / 0.95);
     --color-theme-sky-panel-fg-dim: rgb(from white r g b / 0.57);
     --color-theme-sky-panel-fg-loud: white;
@@ -361,7 +358,6 @@
 
     --color-theme-success-panel-bg: #e5f9e7;
     --color-theme-success-panel-bg-high: #cef1d0;
-    --color-theme-success-panel-bg-higher: #b7e9b9;
     --color-theme-success-panel-fg: #00ab00;
     --color-theme-success-panel-fg-dim: #48b948;
     --color-theme-success-panel-fg-loud: #008e00;
@@ -369,11 +365,17 @@
 
     --color-theme-warning-panel-bg: #fefce8;
     --color-theme-warning-panel-bg-high: #f9f0d1;
-    --color-theme-warning-panel-bg-higher: #f5e5ba;
     --color-theme-warning-panel-fg: #d08700;
     --color-theme-warning-panel-fg-dim: #c3a625;
     --color-theme-warning-panel-fg-loud: #a65f00;
     --color-theme-warning-panel-on-fg: #ffffff;
+
+    --color-theme-placeholder-panel-bg: #ecedee;
+    --color-theme-placeholder-panel-bg-high: #ffffff;
+    --color-theme-placeholder-panel-fg: #c1c3c5;
+    --color-theme-placeholder-panel-fg-dim: #828282;
+    --color-theme-placeholder-panel-fg-loud: #6c6c6c;
+    --color-theme-placeholder-panel-on-fg: #ffffff;
   }
 
   /* declare MDX component clases */
@@ -490,7 +492,6 @@
   .theme-default {
     --color-bg: var(--color-theme-default-bg);
     --color-bg-high: var(--color-theme-default-bg-high);
-    --color-bg-higher: var(--color-theme-default-bg-higher);
     --color-on-fg: var(--color-theme-default-on-fg);
     --color-fg: var(--color-theme-default-fg);
     --color-fg-dim: var(--color-theme-default-fg-dim);
@@ -500,7 +501,6 @@
   .theme-danger-panel {
     --color-bg: var(--color-theme-danger-panel-bg);
     --color-bg-high: var(--color-theme-danger-panel-bg-high);
-    --color-bg-higher: var(--color-theme-danger-panel-bg-higher);
     --color-on-fg: var(--color-theme-danger-panel-on-fg);
     --color-fg: var(--color-theme-danger-panel-fg);
     --color-fg-dim: var(--color-theme-danger-panel-fg-dim);
@@ -510,7 +510,6 @@
   .theme-success-panel {
     --color-bg: var(--color-theme-success-panel-bg);
     --color-bg-high: var(--color-theme-success-panel-bg-high);
-    --color-bg-higher: var(--color-theme-success-panel-bg-higher);
     --color-on-fg: var(--color-theme-success-panel-on-fg);
     --color-fg: var(--color-theme-success-panel-fg);
     --color-fg-dim: var(--color-theme-success-panel-fg-dim);
@@ -520,7 +519,6 @@
   .theme-warning-panel {
     --color-bg: var(--color-theme-warning-panel-bg);
     --color-bg-high: var(--color-theme-warning-panel-bg-high);
-    --color-bg-higher: var(--color-theme-warning-panel-bg-higher);
     --color-on-fg: var(--color-theme-warning-panel-on-fg);
     --color-fg: var(--color-theme-warning-panel-fg);
     --color-fg-dim: var(--color-theme-warning-panel-fg-dim);
@@ -530,7 +528,6 @@
   .theme-grass-panel {
     --color-bg: var(--color-theme-grass-panel-bg);
     --color-bg-high: var(--color-theme-grass-panel-bg-high);
-    --color-bg-higher: var(--color-theme-grass-panel-bg-higher);
     --color-on-fg: var(--color-theme-grass-panel-on-fg);
     --color-fg: var(--color-theme-grass-panel-fg);
     --color-fg-dim: var(--color-theme-grass-panel-fg-dim);
@@ -540,11 +537,19 @@
   .theme-sky-panel {
     --color-bg: var(--color-theme-sky-panel-bg);
     --color-bg-high: var(--color-theme-sky-panel-bg-high);
-    --color-bg-higher: var(--color-theme-sky-panel-bg-higher);
     --color-on-fg: var(--color-theme-sky-panel-on-fg);
     --color-fg: var(--color-theme-sky-panel-fg);
     --color-fg-dim: var(--color-theme-sky-panel-fg-dim);
     --color-fg-loud: var(--color-theme-sky-panel-fg-loud);
+  }
+
+  .theme-placeholder-panel {
+    --color-bg: var(--color-theme-placeholder-panel-bg);
+    --color-bg-high: var(--color-theme-placeholder-panel-bg-high);
+    --color-on-fg: var(--color-theme-placeholder-panel-on-fg);
+    --color-fg: var(--color-theme-placeholder-panel-fg);
+    --color-fg-dim: var(--color-theme-placeholder-panel-fg-dim);
+    --color-fg-loud: var(--color-theme-placeholder-panel-fg-loud);
   }
 
   /* --- */
