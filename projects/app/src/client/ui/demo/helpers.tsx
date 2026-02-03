@@ -1,3 +1,4 @@
+import { useBetaFeatures } from "@/client/hooks/useBetaFeatures";
 import type { HanziText, HanziWord } from "@/data/model";
 import type { Href } from "expo-router";
 import { Link, useLocalSearchParams, useRouter } from "expo-router";
@@ -6,6 +7,7 @@ import { useRef } from "react";
 import { Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 import { RectButton } from "../RectButton";
+import { ToggleButton } from "../ToggleButton";
 
 export const ExampleStack = ({
   children,
@@ -246,6 +248,26 @@ export function DemoHanziWordKnob({
           {hanziWord}
         </RectButton>
       ))}
+    </View>
+  );
+}
+
+/**
+ * A knob to toggle beta features on/off in demo pages.
+ * Uses the device store to persist the setting.
+ */
+export function DemoBetaFeaturesKnob() {
+  const { isLoading, isEnabled, setIsEnabled } = useBetaFeatures();
+
+  return (
+    <View className="flex-row items-center gap-2 border-b-4 border-fg/10 pb-2">
+      <Text className="pyly-body">Beta Features</Text>
+      <ToggleButton
+        isActive={isLoading ? null : isEnabled}
+        onPress={() => {
+          setIsEnabled(!isEnabled);
+        }}
+      />
     </View>
   );
 }

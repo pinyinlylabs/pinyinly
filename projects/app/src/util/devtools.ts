@@ -17,6 +17,10 @@ export const slowQueriesSetting = r.entity(`settings.developer.slowQueries`, {
   enabled: r.boolean(`e`),
 }) satisfies DeviceStoreToggleableEntity;
 
+export const betaFeaturesSetting = r.entity(`settings.developer.betaFeatures`, {
+  enabled: r.boolean(`e`),
+}) satisfies DeviceStoreToggleableEntity;
+
 const noOp = () => {
   // do nothing
 };

@@ -1,11 +1,12 @@
 import type { HanziCharacter, WikiCharacterData } from "@/data/model";
 import { View } from "react-native";
+import { DemoBetaFeaturesKnob, LittlePrimaryHeader } from "./demo/helpers";
 import { WikiHanziCharacterDecomposition } from "./WikiHanziCharacterDecomposition";
-import { LittlePrimaryHeader } from "./demo/helpers";
 
 export default () => {
   return (
     <View className="max-w-[500px] flex-1 gap-2">
+      <DemoBetaFeaturesKnob />
       <WikiHanziCharacterDecomposition
         characterData={characterData}
         illustrationSrc={require(`./demo/看.jpg`)}
