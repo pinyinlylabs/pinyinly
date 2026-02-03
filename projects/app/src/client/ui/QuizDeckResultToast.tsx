@@ -43,7 +43,9 @@ export function QuizDeckResultToast({
               <View className="flex-row items-center gap-[8px]">
                 <IconImage
                   size={32}
-                  source={require(`@/assets/icons/check-circled-filled.svg`)}
+                  source={require(
+                    `../../assets/icons/check-circled-filled.svg`,
+                  )}
                 />
                 <Text className="text-2xl font-bold text-fg">Perfect!</Text>
               </View>
@@ -51,7 +53,9 @@ export function QuizDeckResultToast({
               <View className="flex-row items-center gap-[8px]">
                 <IconImage
                   size={32}
-                  source={require(`@/assets/icons/check-circled-filled.svg`)}
+                  source={require(
+                    `../../assets/icons/check-circled-filled.svg`,
+                  )}
                 />
                 <Text className="text-2xl font-bold text-fg">Nice!</Text>
               </View>
@@ -60,7 +64,7 @@ export function QuizDeckResultToast({
                 <View className="flex-row items-center gap-[8px]">
                   <IconImage
                     size={32}
-                    source={require(`@/assets/icons/meh-circled.svg`)}
+                    source={require(`../../assets/icons/meh-circled.svg`)}
                   />
                   <FloatingMenuModal menu={<UndoAnswerMenu onUndo={onUndo} />}>
                     <Text className="pyly-ref pyly-ref-2xl text-2xl font-bold text-fg">

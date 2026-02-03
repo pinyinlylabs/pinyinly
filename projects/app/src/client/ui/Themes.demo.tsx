@@ -81,7 +81,7 @@ function ThemeExamples() {
       <View className="mt-2 w-[245px] gap-2 bg-bg px-3 py-2">
         <View className="flex-row items-center gap-2">
           <IconImage
-            source={require(`@/assets/icons/check-circled-filled.svg`)}
+            source={require(`../../assets/icons/check-circled-filled.svg`)}
             size={32}
             className="text-fg"
           />

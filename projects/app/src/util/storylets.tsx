@@ -14,7 +14,7 @@ export const NewWordIntro = ({ onNext: next }: { onNext: () => void }) => {
     <View className={screenClass({ class: `` })}>
       <View className="mt-auto flex-row items-end gap-4">
         <Image
-          source={require(`@/assets/illustrations/tutor.svg`)}
+          source={require(`../assets/illustrations/tutor.svg`)}
           className="h-[94px] w-[80px] animate-fadein"
         />
 

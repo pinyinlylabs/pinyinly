@@ -118,7 +118,7 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
             >
               <IconImage
                 size={32}
-                source={require(`@/assets/icons/puzzle.svg`)}
+                source={require(`../../assets/icons/puzzle.svg`)}
                 className="text-fg-dim"
               />
               <Text className="text-center text-fg-dim">
@@ -204,7 +204,7 @@ function HintOption({
             {isSelected && (
               <IconImage
                 size={12}
-                source={require(`@/assets/icons/check.svg`)}
+                source={require(`../../assets/icons/check.svg`)}
                 className="text-bg"
               />
             )}

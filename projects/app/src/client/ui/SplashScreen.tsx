@@ -32,8 +32,8 @@ export const SplashScreen = ({}: { children?: never }) => {
     [`NationalPark`]: require(
       `@/assets/fonts/NationalPark/NationalPark-VariableFont_wght.ttf`,
     ),
-    [`MiSansL3`]: require(`@/assets/fonts/MiSans/MiSansL3.subset.ttf`),
-    [`MiSans`]: require(`@/assets/fonts/MiSans/MiSansVF.subset.ttf`),
+    [`MiSansL3`]: require(`../../assets/fonts/MiSans/MiSansL3.subset.ttf`),
+    [`MiSans`]: require(`../../assets/fonts/MiSans/MiSansVF.subset.ttf`),
     [`PinyinlyComponents`]: require(
       `@/assets/fonts/PinyinlyComponentsVF.subset.ttf`,
     ),
@@ -76,7 +76,7 @@ export const SplashScreen = ({}: { children?: never }) => {
     return null;
   }
 
-  const splashSource = require(`@/assets/lottie/splash.lottie.json`);
+  const splashSource = require(`../../assets/lottie/splash.lottie.json`);
   invariant(typeof splashSource !== `number`);
 
   return (

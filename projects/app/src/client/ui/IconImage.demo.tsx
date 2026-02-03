@@ -4,10 +4,10 @@ import { View } from "react-native";
 
 export default () => {
   const sources = [
-    require(`@/assets/icons/book.svg`),
-    require(`@/assets/icons/cart.svg`),
-    require(`@/assets/icons/flag.svg`),
-    require(`@/assets/icons/home.svg`),
+    require(`../../assets/icons/book.svg`),
+    require(`../../assets/icons/cart.svg`),
+    require(`../../assets/icons/flag.svg`),
+    require(`../../assets/icons/home.svg`),
   ];
   return (
     <View className="w-full flex-row gap-2">

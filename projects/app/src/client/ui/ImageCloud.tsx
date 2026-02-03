@@ -18,9 +18,9 @@ export const ImageCloud = ({
   return (
     <View className={className} style={style}>
       <Rive
-        src={require(`@/assets/rive/image-cloud.riv`)}
+        src={require(`../../assets/rive/image-cloud.riv`)}
         artboardName="main"
-        assets={{ image: require(`@/assets/illustrations/edge.jpg`) }}
+        assets={{ image: require(`../../assets/illustrations/edge.jpg`) }}
         autoplay
         fit="layout"
         stateMachineName="main"

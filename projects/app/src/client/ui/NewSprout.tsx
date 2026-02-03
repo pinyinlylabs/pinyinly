@@ -20,7 +20,7 @@ export const NewSprout = ({
       style={style}
     >
       <Rive
-        src={require(`@/assets/rive/new-sprout.riv`)}
+        src={require(`../../assets/rive/new-sprout.riv`)}
         artboardName="main"
         autoplay
         fit="contain"

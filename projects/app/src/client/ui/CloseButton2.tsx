@@ -14,7 +14,7 @@ export function CloseButton2({ onPress }: { onPress?: () => void }) {
       `}
     >
       <IconImage
-        source={require(`@/assets/icons/close.svg`)}
+        source={require(`../../assets/icons/close.svg`)}
         size={32}
         className="text-fg-loud"
       />

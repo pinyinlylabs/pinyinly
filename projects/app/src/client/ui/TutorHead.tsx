@@ -29,7 +29,7 @@ export const TutorHead = ({
   return (
     <View className={wrapperClass({ className })} style={style}>
       <Rive
-        src={require(`@/assets/rive/tutor-head.riv`)}
+        src={require(`../../assets/rive/tutor-head.riv`)}
         artboardName="main"
         stateMachineName="main"
         autoplay

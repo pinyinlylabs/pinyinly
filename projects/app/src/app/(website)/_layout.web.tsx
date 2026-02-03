@@ -19,7 +19,7 @@ export default function WebsiteLayout() {
     initialIsIntersecting: true,
   });
 
-  const calligraphy = require(`@/assets/www/calligraphy.png`) as {
+  const calligraphy = require(`../../assets/www/calligraphy.png`) as {
     uri?: string;
   };
   invariant(calligraphy.uri != null, `Expected calligraphy.uri to be a URI`);
@@ -43,7 +43,7 @@ export default function WebsiteLayout() {
             `}
           >
             <Image
-              source={require(`@/assets/logo/logo-row.svg`)}
+              source={require(`../../assets/logo/logo-row.svg`)}
               className="h-[40px] w-[200px] shrink self-center text-fg"
               tintColor="currentColor"
               contentFit="fill"

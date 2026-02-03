@@ -24,7 +24,7 @@ export const SpeechBubble = ({
         onRiveLoad={() => {
           onLoad?.();
         }}
-        src={require(`@/assets/rive/speech-bubble.riv`)}
+        src={require(`../../assets/rive/speech-bubble.riv`)}
         stateMachineName="main"
       />
     </View>

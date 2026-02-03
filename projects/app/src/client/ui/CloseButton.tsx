@@ -12,7 +12,7 @@ export const CloseButton = () => {
       }}
     >
       <IconImage
-        source={require(`@/assets/icons/close.svg`)}
+        source={require(`../../assets/icons/close.svg`)}
         className="text-fg-bg70"
       />
     </Pressable>

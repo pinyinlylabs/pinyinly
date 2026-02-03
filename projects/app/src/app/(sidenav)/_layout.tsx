@@ -39,7 +39,7 @@ export default function SideNavLayout() {
           `}
         >
           <Image
-            source={require(`@/assets/logo/logotype.svg`)}
+            source={require(`../../assets/logo/logotype.svg`)}
             className="h-[40px] w-[140px] shrink text-fg"
             tintColor="currentColor"
             contentFit="fill"
@@ -53,8 +53,8 @@ export default function SideNavLayout() {
                 <IconImage
                   source={
                     isFocused
-                      ? require(`@/assets/icons/home-filled.svg`)
-                      : require(`@/assets/icons/home.svg`)
+                      ? require(`../../assets/icons/home-filled.svg`)
+                      : require(`../../assets/icons/home.svg`)
                   }
                   className={iconClass({ isFocused })}
                 />
@@ -72,8 +72,8 @@ export default function SideNavLayout() {
                   <IconImage
                     source={
                       isFocused
-                        ? require(`@/assets/icons/bookmark-filled.svg`)
-                        : require(`@/assets/icons/bookmark.svg`)
+                        ? require(`../../assets/icons/bookmark-filled.svg`)
+                        : require(`../../assets/icons/bookmark.svg`)
                     }
                     className={iconClass({ isFocused })}
                   />

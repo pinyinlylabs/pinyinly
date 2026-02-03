@@ -43,7 +43,10 @@ export default function MenuLayout() {
         className="sm:hidden"
         leftButton={
           <Link href="/learn">
-            <IconImage source={require(`@/assets/icons/close.svg`)} size={32} />
+            <IconImage
+              source={require(`../../assets/icons/close.svg`)}
+              size={32}
+            />
           </Link>
         }
         rightButton={<MobileNavTrigger />}
@@ -72,7 +75,7 @@ export default function MenuLayout() {
                   `}
                 >
                   <IconImage
-                    source={require(`@/assets/icons/arrow-return-left.svg`)}
+                    source={require(`../../assets/icons/arrow-return-left.svg`)}
                     size={24}
                   />
                   <Text className="pyly-button-bare">Back to practice</Text>
@@ -217,7 +220,7 @@ function MobileNavTrigger() {
           setIsOpen((prev) => !prev);
         }}
       >
-        <IconImage source={require(`@/assets/icons/menu.svg`)} size={32} />
+        <IconImage source={require(`../../assets/icons/menu.svg`)} size={32} />
       </Pressable>
       {isOpen ? (
         <Modal
@@ -237,7 +240,7 @@ function MobileNavTrigger() {
                   }}
                 >
                   <IconImage
-                    source={require(`@/assets/icons/close.svg`)}
+                    source={require(`../../assets/icons/close.svg`)}
                     size={32}
                   />
                 </Pressable>
@@ -313,7 +316,10 @@ const MobileNavGroupItem = customTabTrigger(
         <Text className="pyly-button-outline">{name}</Text>
         <View className="flex-1 items-end">
           {isFocused ? (
-            <IconImage source={require(`@/assets/icons/check.svg`)} size={24} />
+            <IconImage
+              source={require(`../../assets/icons/check.svg`)}
+              size={24}
+            />
           ) : null}
         </View>
       </Pressable>
