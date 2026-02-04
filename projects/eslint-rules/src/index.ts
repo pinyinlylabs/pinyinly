@@ -142,8 +142,6 @@ const recommended: ConfigWithExtendsArray = [
       "import/no-named-default": `error`,
       // Prohibit named exports
       "import/no-named-export": `off`, // we want everything to be a named export
-      // Forbid a module from importing itself
-      "import/no-self-import": `error`,
       // Require modules with a single export to use a default export
       "import/prefer-default-export": `off`, // we want everything to be named
 
