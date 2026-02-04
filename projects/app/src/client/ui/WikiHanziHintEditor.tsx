@@ -4,6 +4,7 @@ import { walkIdsNodeLeafs } from "@/data/hanzi";
 import type { HanziText, HanziWord } from "@/data/model";
 import {
   buildHanziWord,
+  glossOrThrow,
   hanziFromHanziWord,
   loadDictionary,
   meaningKeyFromHanziWord,
@@ -32,17 +33,17 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
   const { getHint, setHint, clearHint } = useHanziWordHint();
   const selectedHint = getHint(hanziWord);
 
-  // Get available hints (stories) for this meaning
+  // Get available hints for this meaning
   const availableHints =
-    characterData?.mnemonic?.stories?.filter(
-      (story) => story.gloss.toLowerCase() === meaningKey.toLowerCase(),
+    characterData?.mnemonic?.hints?.filter(
+      (h) => h.meaningKey.toLowerCase() === meaningKey.toLowerCase(),
     ) ?? [];
 
   // If no hints match the meaningKey exactly, show all hints
   const hintsToShow =
     availableHints.length > 0
       ? availableHints
-      : (characterData?.mnemonic?.stories ?? []);
+      : (characterData?.mnemonic?.hints ?? []);
 
   // Get components for the lozenge
   const components: { hanzi: string | undefined; label: string }[] = [];
@@ -67,7 +68,7 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
     }
   }
 
-  const primaryGloss = meaning?.gloss[0] ?? meaningKey;
+  const primaryGloss = glossOrThrow(hanziWord, meaning);
   const alternativeGlosses = meaning?.gloss.slice(1) ?? [];
 
   return (
@@ -127,20 +128,21 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
             </View>
           ) : (
             <View className="gap-2">
-              {hintsToShow.map((hint, index) => {
-                const isSelected = selectedHint === hint.story;
-                const hintMeaningKey = hint.gloss.toLowerCase();
+              {hintsToShow.map((h, index) => {
+                const isSelected = selectedHint === h.hint;
+                const hintMeaningKey = h.meaningKey.toLowerCase();
+                const hintHanziWord = buildHanziWord(hanzi, hintMeaningKey);
+                const hintMeaning = dictionary.lookupHanziWord(hintHanziWord);
+                const gloss = hintMeaning?.gloss[0] ?? h.meaningKey;
                 return (
                   <HintOption
                     key={index}
-                    gloss={hint.gloss}
-                    story={hint.story}
+                    gloss={gloss}
+                    hint={h.hint}
+                    explanation={h.explanation}
                     isSelected={isSelected}
                     onPress={() => {
-                      setHint(
-                        buildHanziWord(hanzi, hintMeaningKey),
-                        hint.story,
-                      );
+                      setHint(hintHanziWord, h.hint);
                     }}
                   />
                 );
@@ -181,12 +183,14 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
 
 function HintOption({
   gloss,
-  story,
+  hint,
+  explanation,
   isSelected,
   onPress,
 }: {
   gloss: string;
-  story: string;
+  hint: string;
+  explanation: string | undefined;
   isSelected: boolean;
   onPress: () => void;
 }) {
@@ -211,10 +215,15 @@ function HintOption({
           </View>
           <Text className="pyly-bold">{gloss}</Text>
         </View>
-        <View className="pl-7">
-          <Text className="pyly-body">
-            <Pylymark source={story} />
+        <View className="gap-1 pl-7">
+          <Text className="font-semibold text-fg">
+            <Pylymark source={hint} />
           </Text>
+          {explanation != null && (
+            <Text className="font-medium text-fg-dim">
+              <Pylymark source={explanation} />
+            </Text>
+          )}
         </View>
       </View>
     </Pressable>

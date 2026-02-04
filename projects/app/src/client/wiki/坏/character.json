@@ -11,10 +11,10 @@
       },
       { "hanzi": "不", "label": "not", "strokes": "3-6" }
     ],
-    "stories": [
+    "hints": [
       {
-        "gloss": "bad",
-        "story": "If you're growing crops, everything is good is you have good **soil (土)**, but if the soil isn't fertile that's very **bad**."
+        "meaningKey": "bad",
+        "hint": "If you're growing crops, everything is good is you have good **soil (土)**, but if the soil isn't fertile that's very **bad**."
       }
     ]
   },

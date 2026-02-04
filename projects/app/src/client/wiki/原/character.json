@@ -11,10 +11,10 @@
         "strokes": "1-9"
       }
     ],
-    "stories": [
+    "hints": [
       {
-        "gloss": "source",
-        "story": "A waterflow flowing off a cliff is the **source** of water."
+        "meaningKey": "source",
+        "hint": "A waterflow flowing off a cliff is the **source** of water."
       }
     ]
   },

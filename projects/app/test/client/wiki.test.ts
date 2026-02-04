@@ -12,6 +12,7 @@ import type { HanziText, WikiCharacterData } from "#data/model.js";
 import { wikiCharacterDataSchema } from "#data/model.js";
 import type { CharactersKey, CharactersValue } from "#dictionary.js";
 import {
+  buildHanziWord,
   getIsComponentFormHanzi,
   getIsStructuralHanzi,
   loadCharacters,
@@ -306,22 +307,40 @@ describe(`character.json files`, async () => {
     }
   });
 
-  test(`number of mnemonic stories matches number of meanings for hanzi`, async () => {
+  test(`number of mnemonic hints matches number of meanings for hanzi`, async () => {
     const dictionary = await loadDictionary();
 
     for (const { character, characterData } of characterFiles) {
-      if (characterData.mnemonic?.stories) {
+      if (characterData.mnemonic?.hints) {
         const hanziWordMeanings = dictionary.lookupHanzi(character);
 
-        const storiesCount = characterData.mnemonic.stories.length;
+        const hintsCount = characterData.mnemonic.hints.length;
         const meaningsCount = hanziWordMeanings.length;
 
         expect
           .soft(
-            storiesCount,
-            `${character} has ${storiesCount} mnemonic stories but ${meaningsCount} meanings in dictionary`,
+            hintsCount,
+            `${character} has ${hintsCount} mnemonic hints but ${meaningsCount} meanings in dictionary`,
           )
           .toBe(meaningsCount);
+      }
+    }
+  });
+
+  test(`all mnemonic hint meaningKeys are valid dictionary entries`, async () => {
+    const dictionary = await loadDictionary();
+
+    for (const { character, characterData } of characterFiles) {
+      if (characterData.mnemonic?.hints) {
+        for (const hint of characterData.mnemonic.hints) {
+          const hanziWord = buildHanziWord(character, hint.meaningKey);
+          expect
+            .soft(
+              dictionary.lookupHanziWord(hanziWord),
+              `${character} has mnemonic hint with meaningKey "${hint.meaningKey}" but no dictionary entry for ${hanziWord}`,
+            )
+            .not.toBeNull();
+        }
       }
     }
   });

@@ -6,10 +6,10 @@
       { "hanzi": "戶", "label": "door", "strokes": "0-3" },
       { "hanzi": "斤", "label": "resembles an axe", "strokes": "4-7" }
     ],
-    "stories": [
+    "hints": [
       {
-        "gloss": "place",
-        "story": "A true **place** (所) you can call your own is where you’ve put up a **door** to mark your space and keep an axe handy by the entrance for wood, work, and protection. Wherever there’s a **door** and an **axe**, that’s your PLACE (所)."
+        "meaningKey": "place",
+        "hint": "A true **place** (所) you can call your own is where you've put up a **door** to mark your space and keep an axe handy by the entrance for wood, work, and protection. Wherever there's a **door** and an **axe**, that's your PLACE (所)."
       }
     ]
   },

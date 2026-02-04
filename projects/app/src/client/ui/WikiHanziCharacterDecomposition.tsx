@@ -122,7 +122,7 @@ export function WikiHanziCharacterDecomposition({
 
         <MeaningsSection
           hanzi={characterData.hanzi}
-          mnemonicStories={characterData.mnemonic?.stories}
+          mnemonicHints={characterData.mnemonic?.hints}
         />
       </View>
     </View>
@@ -131,11 +131,11 @@ export function WikiHanziCharacterDecomposition({
 
 function MeaningsSection({
   hanzi,
-  mnemonicStories,
+  mnemonicHints,
 }: {
   hanzi: string;
-  mnemonicStories:
-    | readonly { readonly gloss: string; readonly story: string }[]
+  mnemonicHints:
+    | readonly { readonly meaningKey: string; readonly hint: string }[]
     | undefined;
 }) {
   const isBetaEnabled = useIsBetaEnabled();
@@ -159,16 +159,16 @@ function MeaningsSection({
       <View className="gap-3">
         {hanziWordMeanings.map(([hanziWord, meaning]) => {
           const meaningKey = meaningKeyFromHanziWord(hanziWord);
-          // Match mnemonic story by meaningKey (story.gloss.toLowerCase() === meaningKey)
-          const matchedStory = mnemonicStories?.find(
-            (story) => story.gloss.toLowerCase() === meaningKey,
+          // Match mnemonic hint by meaningKey
+          const matchedHint = mnemonicHints?.find(
+            (h) => h.meaningKey.toLowerCase() === meaningKey,
           );
           return (
             <MeaningItem
               key={hanziWord}
               hanziWord={hanziWord}
               meaning={meaning}
-              story={matchedStory?.story}
+              mnemonicHint={matchedHint?.hint}
             />
           );
         })}
@@ -180,11 +180,11 @@ function MeaningsSection({
 function MeaningItem({
   hanziWord,
   meaning,
-  story,
+  mnemonicHint,
 }: {
   hanziWord: HanziWord;
   meaning: HanziWordMeaning;
-  story: string | undefined;
+  mnemonicHint: string | undefined;
 }) {
   const { getHint } = useHanziWordHint();
   const meaningKey = meaningKeyFromHanziWord(hanziWord);
@@ -192,7 +192,7 @@ function MeaningItem({
 
   // Get custom hint if set
   const customHint = getHint(hanziWord);
-  const displayHint = customHint ?? story;
+  const displayHint = customHint ?? mnemonicHint;
   const hasCustomHint = customHint != null;
   const hasHint = displayHint != null;
 
