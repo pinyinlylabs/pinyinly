@@ -1,4 +1,4 @@
-/* eslint-disable import/first */
+/* oxlint-disable import/first */
 
 import { captureConsoleIntegration } from "@sentry/core";
 import * as Sentry from "@sentry/react-native";

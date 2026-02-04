@@ -1,6 +1,6 @@
 {
   "$schema": "https://oxc.rs/schemas/oxlint.json",
-  "plugins": ["unicorn"],
+  "plugins": ["import", "unicorn"],
   "categories": {
     "correctness": "off",
     "suspicious": "off",
@@ -30,7 +30,10 @@
     "no-global-assign": "deny",
     "unicorn/no-thenable": "deny",
     "unicorn/no-empty-file": "deny",
-    "unicorn/no-await-in-promise-methods": "deny"
+    "unicorn/no-await-in-promise-methods": "deny",
+
+    // disallow non-import statements appearing before import statements
+    "import/first": "deny"
   },
   "env": {
     "builtin": true
