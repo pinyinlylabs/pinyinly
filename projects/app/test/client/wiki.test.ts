@@ -64,6 +64,9 @@ describe(`/meaning.mdx files`, async () => {
     const isInDictionary = dictionary.lookupHanzi(hanzi).length > 0;
     const projectRelPath = path.relative(projectRoot, filePath);
     const hasMdx = memoize0(() => existsSync(filePath));
+    const hasCharacterData = memoize0(() =>
+      existsSync(path.join(path.dirname(filePath), `character.json`)),
+    );
     const getMdx = memoize0(() => readFileSync(filePath, `utf-8`));
 
     return {
@@ -73,6 +76,7 @@ describe(`/meaning.mdx files`, async () => {
       projectRelPath,
       hasMdx,
       getMdx,
+      hasCharacterData,
       filePath,
     };
   });
@@ -102,6 +106,26 @@ describe(`/meaning.mdx files`, async () => {
           )
           .toEqual(1);
       }
+    }
+  });
+
+  test(`should export characterData when character.json exists`, () => {
+    for (const { hanzi, hasMdx, getMdx, hasCharacterData } of data) {
+      if (!hasMdx()) {
+        continue;
+      }
+
+      if (!hasCharacterData()) {
+        continue;
+      }
+
+      const mdx = getMdx();
+      expect
+        .soft(
+          mdx,
+          `${hanzi} MDX has character.json but does not export characterData`,
+        )
+        .toMatch(/export\s*\{\s*characterData\s*\}/);
     }
   });
 });

@@ -232,6 +232,6 @@ const hintOptionClass = tv({
 });
 
 // Loader for wiki character data
-function loadWikiCharacterData(hanzi: string) {
-  return getWikiCharacterData(hanzi as HanziText) ?? Promise.resolve(null);
+async function loadWikiCharacterData(hanzi: HanziText) {
+  return (await getWikiCharacterData(hanzi)) ?? null;
 }

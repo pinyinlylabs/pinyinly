@@ -84,7 +84,7 @@ export function QuizDeckResultToast({
                     <IconImage
                       size={32}
                       source={require(
-                        `@/assets/icons/close-circled-filled.svg`,
+                        `../../assets/icons/close-circled-filled.svg`,
                       )}
                     />
                     <FloatingMenuModal

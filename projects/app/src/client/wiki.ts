@@ -3,29 +3,47 @@ import type { HanziText, WikiCharacterData } from "@/data/model";
 import { devToolsSlowQuerySleepIfEnabled } from "@/util/devtools";
 import { lazy } from "react";
 
-const lazyMdx = <Mdx extends MdxComponentType>(
-  importFn: () => Promise<{ default: Mdx }>,
-) =>
-  lazy(async () => {
+interface WikiMdxModule {
+  default: MdxComponentType;
+  // JSON imports have unbranded string types, so we use unknown and cast
+  characterData?: unknown;
+}
+
+interface WikiRegistryEntry {
+  component: MdxComponentType;
+  importFn: () => Promise<WikiMdxModule>;
+}
+
+const lazyMdx = (
+  importFn: () => Promise<WikiMdxModule>,
+): WikiRegistryEntry => ({
+  component: lazy(async () => {
     await devToolsSlowQuerySleepIfEnabled();
     return await importFn();
-  });
+  }),
+  importFn,
+});
 
 export function getWikiMdxHanziMeaning(
   hanzi: HanziText,
 ): MdxComponentType | undefined {
-  return registry[hanzi];
+  return registry[hanzi]?.component;
 }
 
-export function getWikiCharacterData(
-  _hanzi: HanziText,
-): Promise<WikiCharacterData> | undefined {
-  // TODO: Re-add character data loading with better performance
-  return undefined;
+export async function getWikiCharacterData(
+  hanzi: HanziText,
+): Promise<WikiCharacterData | undefined> {
+  const entry = registry[hanzi];
+  if (entry == null) {
+    return undefined;
+  }
+  const module = await entry.importFn();
+  // Character data from JSON is validated at build time, safe to cast
+  return module.characterData as WikiCharacterData | undefined;
 }
 
 // prettier-ignore
-const registry: Record<string, MdxComponentType> = {
+const registry: Record<string, WikiRegistryEntry> = {
   // <pyly-glob-template glob="./wiki/*/meaning.mdx" template="  \"${relpath.split('/')[0]}\": lazyMdx(() => import(`${path}`)),">
   "⺀": lazyMdx(() => import(`./wiki/⺀/meaning.mdx`)),
   "⺁": lazyMdx(() => import(`./wiki/⺁/meaning.mdx`)),

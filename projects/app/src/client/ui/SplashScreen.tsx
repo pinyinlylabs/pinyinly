@@ -30,12 +30,12 @@ if (!isExpoGo) {
 export const SplashScreen = ({}: { children?: never }) => {
   const [fontsLoaded, fontError] = useFonts({
     [`NationalPark`]: require(
-      `@/assets/fonts/NationalPark/NationalPark-VariableFont_wght.ttf`,
+      `../../assets/fonts/NationalPark/NationalPark-VariableFont_wght.ttf`,
     ),
     [`MiSansL3`]: require(`../../assets/fonts/MiSans/MiSansL3.subset.ttf`),
     [`MiSans`]: require(`../../assets/fonts/MiSans/MiSansVF.subset.ttf`),
     [`PinyinlyComponents`]: require(
-      `@/assets/fonts/PinyinlyComponentsVF.subset.ttf`,
+      `../../assets/fonts/PinyinlyComponentsVF.subset.ttf`,
     ),
   });
   const isReady = fontsLoaded || fontError != null; // (lottieLoaded || lottieError) &&
