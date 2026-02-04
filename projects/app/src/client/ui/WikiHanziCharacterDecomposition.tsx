@@ -173,7 +173,7 @@ function StoryItem({
         </Text>
         {isBetaEnabled ? (
           <Link
-            href={`/wiki/hints/${encodeURIComponent(hanziWord)}`}
+            href={`/wiki/${encodeURIComponent(hanzi)}/edit/${encodeURIComponent(gloss.toLowerCase())}`}
             asChild
             className="ml-auto"
           >
@@ -202,10 +202,9 @@ function NoMnemonicPlaceholder({ hanzi }: { hanzi: string }) {
 
   // For characters without stories, we can still link to the hint editor
   // using a default meaningKey
-  const hanziWord = buildHanziWord(hanzi, `default`);
 
   return (
-    <Link href={`/wiki/hints/${encodeURIComponent(hanziWord)}`} asChild>
+    <Link href={`/wiki/${encodeURIComponent(hanzi)}/edit/default`} asChild>
       <RectButton variant="bare">
         <View
           className={`items-center gap-1 rounded-xl border-2 border-dashed border-fg/20 px-4 py-5`}
