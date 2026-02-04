@@ -9,7 +9,8 @@
     "hints": [
       {
         "meaningKey": "place",
-        "hint": "A true **place** (所) you can call your own is where you've put up a **door** to mark your space and keep an axe handy by the entrance for wood, work, and protection. Wherever there's a **door** and an **axe**, that's your PLACE (所)."
+        "hint": "A **door** with an **axe** nearby marks your **place**.",
+        "explanation": "A true place you can call your own is where you've put up a door (戶) to mark your space and keep an axe (斤) handy by the entrance for wood, work, and protection."
       }
     ]
   },
