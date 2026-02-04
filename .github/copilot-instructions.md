@@ -18,6 +18,11 @@
 - **Emails** (`projects/emails/`): React Email templates, previewable via local dev server.
 - **ESLint Rules** (`projects/eslint-rules/`): Custom lint rules for code consistency.
 
+## CRITICAL: Verify code changes
+
+After making code changes, verify the changes by running
+`moon run :lint :test :typecheck :typecheck`. This is faster than running `moon ci`.
+
 ## CRITICAL: pre-commit checks
 
 Before committing code, always manually run `moon ci`. Only open a PR after this passes.
