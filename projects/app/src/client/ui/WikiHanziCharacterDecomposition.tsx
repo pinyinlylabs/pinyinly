@@ -161,7 +161,7 @@ function MeaningsSection({
           const meaningKey = meaningKeyFromHanziWord(hanziWord);
           // Match mnemonic hint by meaningKey
           const matchedHint = mnemonicHints?.find(
-            (h) => h.meaningKey.toLowerCase() === meaningKey,
+            (h) => h.meaningKey === meaningKey,
           );
           return (
             <MeaningItem
