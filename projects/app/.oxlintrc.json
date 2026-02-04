@@ -1,0 +1,32 @@
+{
+  "$schema": "https://oxc.rs/schemas/oxlint.json",
+  "plugins": [],
+  "categories": {
+    "correctness": "off",
+    "suspicious": "off",
+    "pedantic": "off",
+    "style": "off",
+    "nursery": "off",
+    "restriction": "off"
+  },
+  "rules": {
+    "curly": "deny",
+    "no-console": [
+      "deny",
+      {
+        "allow": ["warn", "error"]
+      }
+    ],
+    "no-debugger": "deny"
+  },
+  "env": {
+    "builtin": true
+  },
+  "ignorePatterns": [
+    "bin/**",
+    "test/**",
+    "**/*.d.ts",
+    "**/*.demo.tsx",
+    "src/app/dev/**"
+  ]
+}

@@ -65,10 +65,12 @@ const recommended: ConfigWithExtendsArray = [
       // eslint-base
       //
 
-      curly: [`error`, `all`],
+      // NOTE: The following rules are handled by Oxlint for better performance
+      curly: `off`, // handled by oxlint
+      "no-console": `off`, // handled by oxlint
+      "no-debugger": `off`, // handled by oxlint
+
       "logical-assignment-operators": `error`,
-      "no-console": [`error`, { allow: [`warn`, `error`] }],
-      "no-debugger": `error`,
       "no-else-return": `error`,
       "no-empty-function": `off`, // handled by @typescript-eslint/no-empty-function
       "no-fallthrough": [
