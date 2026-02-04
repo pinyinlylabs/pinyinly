@@ -4,6 +4,7 @@
     "editorconfig.editorconfig",
     "esbenp.prettier-vscode",
     "expo.vscode-expo-tools",
-    "dnut.rewrap-revived"
+    "dnut.rewrap-revived",
+    "oxc.oxc-vscode"
   ]
 }
