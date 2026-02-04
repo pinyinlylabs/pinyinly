@@ -73,107 +73,99 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
 
   return (
     <ScrollView className="flex-1 bg-bg">
-      <View className="gap-6 p-4">
-        {/* Header */}
-        <View className="items-center gap-2">
-          <Text className="text-6xl text-fg">{hanzi}</Text>
-          <View className="items-center gap-1">
-            <Text className="text-2xl font-bold text-fg">{primaryGloss}</Text>
-            {alternativeGlosses.length > 0 && (
-              <Text className="text-base text-fg-dim">
-                {alternativeGlosses.join(`, `)}
-              </Text>
-            )}
-          </View>
+      {/* Header */}
+      <View className="gap-3 bg-bg-high p-4">
+        <View className="flex-row items-baseline gap-2.5">
+          <Text className="text-[19px] font-semibold text-fg-loud">
+            {hanzi}
+          </Text>
+          <Text className="text-[16px] font-medium text-fg-loud">
+            {primaryGloss}
+          </Text>
+          {alternativeGlosses.map((gloss, index) => (
+            <Text
+              key={index}
+              className="text-[16px] font-medium text-fg-dim"
+            >
+              {gloss}
+            </Text>
+          ))}
         </View>
 
         {/* Components lozenge */}
         {components.length > 0 && (
-          <View className="flex-row flex-wrap items-center justify-center gap-2">
-            <View className="flex-row items-center gap-2 rounded-full bg-fg-bg10 px-3 py-1.5">
-              <Text className="text-sm font-medium text-fg-dim">
-                Components
-              </Text>
-              <Text className="text-sm text-fg">
-                {components
-                  .map((c) =>
-                    c.hanzi == null
-                      ? `(${c.label})`
-                      : `${c.hanzi} (${c.label})`,
-                  )
-                  .join(`, `)}
-              </Text>
+          <View className="flex-row flex-wrap items-center gap-2">
+            <View className="rounded-full bg-fg-bg15 px-2 py-0.5">
+              <Text className="text-[13px] text-fg">Components</Text>
             </View>
+            <Text className="text-[15px] text-fg-loud">
+              {components
+                .map((c) =>
+                  c.hanzi == null
+                    ? `(${c.label})`
+                    : `${c.hanzi} (${c.label})`,
+                )
+                .join(`, `)}
+            </Text>
+          </View>
+        )}
+      </View>
+
+      {/* Content */}
+      <View className="gap-4 p-4">
+        {/* Hints section */}
+        <View className="gap-1">
+          <Text className="pyly-body-subheading">Choose a hint</Text>
+          <Text className="text-[14px] text-fg-dim">
+            Pick a hint that works for your brain
+          </Text>
+        </View>
+
+        {hintsToShow.length === 0 ? (
+          <View className={`
+            items-center gap-2 rounded-xl border-2 border-dashed border-fg/20 px-4 py-6
+          `}>
+            <IconImage
+              size={32}
+              source={require(`../../assets/icons/puzzle.svg`)}
+              className="text-fg-dim"
+            />
+            <Text className="text-center text-fg-dim">
+              No hints available for this character
+            </Text>
+          </View>
+        ) : (
+          <View className="gap-2">
+            {hintsToShow.map((h, index) => {
+              const isSelected = selectedHint === h.hint;
+              const hintMeaningKey = h.meaningKey.toLowerCase();
+              const hintHanziWord = buildHanziWord(hanzi, hintMeaningKey);
+              return (
+                <HintOption
+                  key={index}
+                  hint={h.hint}
+                  explanation={h.explanation}
+                  isSelected={isSelected}
+                  onPress={() => {
+                    setHint(hintHanziWord, h.hint);
+                  }}
+                />
+              );
+            })}
           </View>
         )}
 
-        {/* Hints section */}
-        <View className="gap-3">
-          <Text className="pyly-body-subheading">Select a hint</Text>
-
-          {hintsToShow.length === 0 ? (
-            <View
-              className={`
-                items-center gap-2 rounded-xl border-2 border-dashed border-fg/20 px-4 py-6
-              `}
-            >
-              <IconImage
-                size={32}
-                source={require(`../../assets/icons/puzzle.svg`)}
-                className="text-fg-dim"
-              />
-              <Text className="text-center text-fg-dim">
-                No hints available for this character
-              </Text>
-            </View>
-          ) : (
-            <View className="gap-2">
-              {hintsToShow.map((h, index) => {
-                const isSelected = selectedHint === h.hint;
-                const hintMeaningKey = h.meaningKey.toLowerCase();
-                const hintHanziWord = buildHanziWord(hanzi, hintMeaningKey);
-                const hintMeaning = dictionary.lookupHanziWord(hintHanziWord);
-                const gloss = hintMeaning?.gloss[0] ?? h.meaningKey;
-                return (
-                  <HintOption
-                    key={index}
-                    gloss={gloss}
-                    hint={h.hint}
-                    explanation={h.explanation}
-                    isSelected={isSelected}
-                    onPress={() => {
-                      setHint(hintHanziWord, h.hint);
-                    }}
-                  />
-                );
-              })}
-            </View>
-          )}
-
-          {/* Clear selection button */}
-          {selectedHint != null && (
-            <View className="mt-2">
-              <RectButton
-                variant="bare"
-                onPress={() => {
-                  clearHint(hanziWord);
-                }}
-              >
-                Clear selection
-              </RectButton>
-            </View>
-          )}
-        </View>
-
-        {/* Current selection preview */}
+        {/* Clear selection button */}
         {selectedHint != null && (
-          <View className="gap-2">
-            <Text className="pyly-body-subheading">Current hint</Text>
-            <View className="rounded-lg bg-fg-bg5 p-4">
-              <Text className="pyly-body">
-                <Pylymark source={selectedHint} />
-              </Text>
-            </View>
+          <View className="mt-2">
+            <RectButton
+              variant="bare"
+              onPress={() => {
+                clearHint(hanziWord);
+              }}
+            >
+              Clear selection
+            </RectButton>
           </View>
         )}
       </View>
@@ -182,13 +174,11 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
 }
 
 function HintOption({
-  gloss,
   hint,
   explanation,
   isSelected,
   onPress,
 }: {
-  gloss: string;
   hint: string;
   explanation: string | undefined;
   isSelected: boolean;
@@ -197,34 +187,14 @@ function HintOption({
   return (
     <Pressable onPress={onPress}>
       <View className={hintOptionClass({ isSelected })}>
-        <View className="flex-row items-center gap-2">
-          <View
-            className={`
-              size-5 items-center justify-center rounded-full border-2
-
-              ${isSelected ? `border-cyan bg-cyan` : `border-fg-bg25`}
-            `}
-          >
-            {isSelected && (
-              <IconImage
-                size={12}
-                source={require(`../../assets/icons/check.svg`)}
-                className="text-bg"
-              />
-            )}
-          </View>
-          <Text className="pyly-bold">{gloss}</Text>
-        </View>
-        <View className="gap-1 pl-7">
-          <Text className="font-semibold text-fg">
-            <Pylymark source={hint} />
+        <Text className="text-[14px] font-semibold text-fg-loud">
+          <Pylymark source={hint} />
+        </Text>
+        {explanation != null && (
+          <Text className="text-[14px] text-fg">
+            <Pylymark source={explanation} />
           </Text>
-          {explanation != null && (
-            <Text className="font-medium text-fg-dim">
-              <Pylymark source={explanation} />
-            </Text>
-          )}
-        </View>
+        )}
       </View>
     </Pressable>
   );
