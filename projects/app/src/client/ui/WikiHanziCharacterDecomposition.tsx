@@ -1,8 +1,13 @@
 import { useIsBetaEnabled } from "@/client/hooks/useBetaFeatures";
 import { useHanziWordHint } from "@/client/hooks/useHanziWordHint";
 import { walkIdsNodeLeafs } from "@/data/hanzi";
-import type { WikiCharacterData } from "@/data/model";
-import { buildHanziWord, loadDictionary } from "@/dictionary";
+import type { HanziText, HanziWord, WikiCharacterData } from "@/data/model";
+import type { HanziWordMeaning } from "@/dictionary";
+import {
+  hanziFromHanziWord,
+  loadDictionary,
+  meaningKeyFromHanziWord,
+} from "@/dictionary";
 import { parseIndexRanges } from "@/util/indexRanges";
 import { Image } from "expo-image";
 import { Link } from "expo-router";
@@ -115,48 +120,85 @@ export function WikiHanziCharacterDecomposition({
           />
         )}
 
-        <View className="gap-4 p-4">
-          {characterData.mnemonic?.stories == null ? (
-            <NoMnemonicPlaceholder hanzi={characterData.hanzi} />
-          ) : (
-            <>
-              <Text className="pyly-body">Then connect it to the meaning:</Text>
-
-              <View className="gap-1">
-                {characterData.mnemonic.stories.map((mnemonic, i) => (
-                  <StoryItem
-                    key={i}
-                    hanzi={characterData.hanzi}
-                    gloss={mnemonic.gloss}
-                    story={mnemonic.story}
-                  />
-                ))}
-              </View>
-            </>
-          )}
-        </View>
+        <MeaningsSection
+          hanzi={characterData.hanzi}
+          mnemonicHints={characterData.mnemonic?.hints}
+        />
       </View>
     </View>
   );
 }
 
-function StoryItem({
+function MeaningsSection({
   hanzi,
-  gloss,
-  story,
+  mnemonicHints,
 }: {
   hanzi: string;
-  gloss: string;
-  story: string;
+  mnemonicHints:
+    | readonly { readonly meaningKey: string; readonly hint: string }[]
+    | undefined;
 }) {
   const isBetaEnabled = useIsBetaEnabled();
-  const { getHint } = useHanziWordHint();
-  const hanziWord = buildHanziWord(hanzi, gloss.toLowerCase());
+  const dictionary = use(loadDictionary());
+  const hanziWordMeanings = dictionary.lookupHanzi(hanzi as HanziText);
 
-  // Only use custom hints when beta features are enabled
-  const customHint = isBetaEnabled ? getHint(hanziWord) : undefined;
-  const displayHint = customHint ?? story;
+  // If hanzi is not in dictionary or beta is not enabled, don't show this section
+  if (!isBetaEnabled || hanziWordMeanings.length === 0) {
+    return null;
+  }
+
+  const meaningsCount = hanziWordMeanings.length;
+
+  return (
+    <View className="gap-4 p-4">
+      <Text className="pyly-body">
+        <Text className="pyly-bold">{hanzi}</Text>
+        {` `}({meaningsCount} {meaningsCount === 1 ? `meaning` : `meanings`})
+      </Text>
+
+      <View className="gap-3">
+        {hanziWordMeanings.map(([hanziWord, meaning]) => {
+          const meaningKey = meaningKeyFromHanziWord(hanziWord);
+          // Match mnemonic hint by meaningKey
+          const matchedHint = mnemonicHints?.find(
+            (h) => h.meaningKey === meaningKey,
+          );
+          return (
+            <MeaningItem
+              key={hanziWord}
+              hanziWord={hanziWord}
+              meaning={meaning}
+              mnemonicHint={matchedHint?.hint}
+            />
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
+function MeaningItem({
+  hanziWord,
+  meaning,
+  mnemonicHint,
+}: {
+  hanziWord: HanziWord;
+  meaning: HanziWordMeaning;
+  mnemonicHint: string | undefined;
+}) {
+  const { getHint } = useHanziWordHint();
+  const meaningKey = meaningKeyFromHanziWord(hanziWord);
+  const hanzi = hanziFromHanziWord(hanziWord);
+
+  // Get custom hint if set
+  const customHint = getHint(hanziWord);
+  const displayHint = customHint ?? mnemonicHint;
   const hasCustomHint = customHint != null;
+  const hasHint = displayHint != null;
+
+  // Display glosses: first one bold, rest dim and semicolon-separated
+  const primaryGloss = meaning.gloss[0];
+  const secondaryGlosses = meaning.gloss.slice(1);
 
   return (
     <View className="gap-1">
@@ -168,14 +210,16 @@ function StoryItem({
             ${hasCustomHint ? `border-cyan bg-cyan` : `border-fg-bg25`}
           `}
         />
-        <Text className="pyly-body">
-          <Text className="pyly-bold">{gloss}</Text>
+        <Text className="pyly-body flex-1">
+          <Text className="pyly-bold">{primaryGloss}</Text>
+          {secondaryGlosses.length > 0 ? (
+            <Text className="text-fg-dim">; {secondaryGlosses.join(`; `)}</Text>
+          ) : null}
         </Text>
-        {isBetaEnabled ? (
+        {hasHint ? (
           <Link
-            href={`/wiki/hints/${encodeURIComponent(hanziWord)}`}
+            href={`/wiki/${encodeURIComponent(hanzi)}/edit/${encodeURIComponent(meaningKey)}`}
             asChild
-            className="ml-auto"
           >
             <RectButton variant="bare" textClassName="text-sm text-cyan">
               {hasCustomHint ? `Edit` : `Customize`}
@@ -183,29 +227,30 @@ function StoryItem({
           </Link>
         ) : null}
       </View>
-      <View className="pl-7">
-        <Text className="pyly-body">
-          <Pylymark source={displayHint} />
-        </Text>
-      </View>
+      {hasHint ? (
+        <View className="pl-7">
+          <Text className="pyly-body">
+            <Pylymark source={displayHint} />
+          </Text>
+        </View>
+      ) : (
+        <View className="pl-7">
+          <NoHintPlaceholder hanziWord={hanziWord} />
+        </View>
+      )}
     </View>
   );
 }
 
-function NoMnemonicPlaceholder({ hanzi }: { hanzi: string }) {
-  const isBetaEnabled = useIsBetaEnabled();
-
-  // Only show placeholder when beta features are enabled
-  if (!isBetaEnabled) {
-    return null;
-  }
-
-  // For characters without stories, we can still link to the hint editor
-  // using a default meaningKey
-  const hanziWord = buildHanziWord(hanzi, `default`);
+function NoHintPlaceholder({ hanziWord }: { hanziWord: HanziWord }) {
+  const meaningKey = meaningKeyFromHanziWord(hanziWord);
+  const hanzi = hanziFromHanziWord(hanziWord);
 
   return (
-    <Link href={`/wiki/hints/${encodeURIComponent(hanziWord)}`} asChild>
+    <Link
+      href={`/wiki/${encodeURIComponent(hanzi)}/edit/${encodeURIComponent(meaningKey)}`}
+      asChild
+    >
       <RectButton variant="bare">
         <View
           className={`items-center gap-1 rounded-xl border-2 border-dashed border-fg/20 px-4 py-5`}
@@ -217,7 +262,7 @@ function NoMnemonicPlaceholder({ hanzi }: { hanzi: string }) {
           />
           <View className="items-center">
             <Text className="font-sans text-base font-bold text-fg-dim">
-              No mnemonic
+              No hint
             </Text>
             <Text className="pyly-body-caption opacity-80">
               Create a hint here

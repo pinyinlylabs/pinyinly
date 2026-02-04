@@ -23,7 +23,7 @@ export const ThreeSplitLinesDown = ({
   return (
     <View className={className} style={style}>
       <Rive
-        src={require(`@/assets/rive/three-split-lines-down.riv`)}
+        src={require(`../../assets/rive/three-split-lines-down.riv`)}
         artboardName="main"
         autoplay
         fit="layout"

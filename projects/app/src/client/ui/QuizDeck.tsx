@@ -150,7 +150,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
   }, [question]);
 
   const playSuccessSound = useSoundEffect(
-    require(`@/assets/audio/sparkle.mp3`),
+    require(`../../assets/audio/sparkle.mp3`),
   );
 
   // The number of questions in a row correctly answered.
@@ -249,8 +249,8 @@ export const QuizDeck = ({ className }: { className?: string }) => {
 
   // Prefetch images used in later screens.
   usePrefetchImages(
-    require(`@/assets/icons/check-circled-filled.svg`),
-    require(`@/assets/icons/close-circled-filled.svg`),
+    require(`../../assets/icons/check-circled-filled.svg`),
+    require(`../../assets/icons/close-circled-filled.svg`),
   );
 
   return (

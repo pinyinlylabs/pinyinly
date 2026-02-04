@@ -16,10 +16,10 @@
         "strokes": "4-12"
       }
     ],
-    "stories": [
+    "hints": [
       {
-        "gloss": "blessing",
-        "story": "If you pray, you'll be **blessed** (福) with abundance. Imagine **畐** as a crop **field (田)** and **basket (囗)** if you have a big harvest you'll be blessed with riches."
+        "meaningKey": "blessing",
+        "hint": "If you pray, you'll be **blessed** (福) with abundance. Imagine **畐** as a crop **field (田)** and **basket (囗)** if you have a big harvest you'll be blessed with riches."
       }
     ]
   },

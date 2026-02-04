@@ -44,10 +44,10 @@ export const characterData = {
         strokes: `4,5,6,7,8`,
       },
     ],
-    stories: [
+    hints: [
       {
-        gloss: `see`,
-        story: `You need to **look (看)** actively! How do you spot something far away on a sunny day? You use your **Hand (手)** to help your **Eye (目)**. When you shade your forehead or shield your face with your Hand, you can stop squinting and really **SEE!** That's why the Hand is sitting right on top—it’s helping the Eye look intently.`,
+        meaningKey: `see`,
+        hint: `You need to **look (看)** actively! How do you spot something far away on a sunny day? You use your **Hand (手)** to help your **Eye (目)**. When you shade your forehead or shield your face with your Hand, you can stop squinting and really **SEE!** That's why the Hand is sitting right on top—it's helping the Eye look intently.`,
       },
     ],
   },

@@ -1,5 +1,5 @@
 import type { PropsOf } from "@pinyinly/lib/types";
-import { useState } from "react";
+import { isValidElement, useState } from "react";
 import type { ViewProps } from "react-native";
 import { Pressable, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
@@ -75,12 +75,12 @@ export function RectButton({
           className,
         })}
       >
-        {typeof children === `string` ? (
+        {isValidElement(children) ? (
+          children
+        ) : (
           <Text className={text({ variant, class: textClassName })}>
             {children}
           </Text>
-        ) : (
-          children
         )}
       </View>
     </Pressable>

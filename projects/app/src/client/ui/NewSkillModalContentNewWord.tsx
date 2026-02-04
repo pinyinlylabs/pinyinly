@@ -59,7 +59,7 @@ export const NewSkillModalContentNewWord = ({
           <View className="flex-1 gap-2 bg-bg py-7">
             <View className="flex-row items-center gap-2 px-4">
               <IconImage
-                source={require(`@/assets/icons/note-2.svg`)}
+                source={require(`../../assets/icons/note-2.svg`)}
                 size={32}
                 className="text-[var(--color-theme-grass-panel-bg)]"
               />
@@ -111,7 +111,7 @@ function Header({
             `}
           >
             <IconImage
-              source={require(`@/assets/icons/close.svg`)}
+              source={require(`../../assets/icons/close.svg`)}
               size={32}
               className="text-fg-loud"
             />

@@ -12,10 +12,10 @@
       },
       { "color": "blue", "hanzi": "子", "label": "a child", "strokes": "5-7" }
     ],
-    "stories": [
+    "hints": [
       {
-        "gloss": "learn",
-        "story": "A child using their hand to **learn** about the world."
+        "meaningKey": "learn",
+        "hint": "A child using their hand to **learn** about the world."
       }
     ]
   },

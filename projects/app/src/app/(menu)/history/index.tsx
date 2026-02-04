@@ -57,8 +57,8 @@ export default function HistoryPage() {
                       size={16}
                       source={
                         finalRating.rating === Rating.Again
-                          ? require(`@/assets/icons/close.svg`)
-                          : require(`@/assets/icons/check.svg`)
+                          ? require(`../../../assets/icons/close.svg`)
+                          : require(`../../../assets/icons/check.svg`)
                       }
                     />
                     <Text className="pyly-body">

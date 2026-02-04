@@ -681,23 +681,12 @@ export const wikiCharacterDataSchema = z.strictObject({
        * operator, and the remaining are the components for each slot.
        */
       components: wikiCharacterDecompositionSchema,
-      stories: z
+      hints: z
         .array(
           z.strictObject({
-            gloss: z.string(),
-            story: z.string(),
-            /**
-             * If there are other stories that depend on this one to make sense,
-             * they can be nested inside their dependency.
-             */
-            children: z
-              .array(
-                z.strictObject({
-                  gloss: z.string(),
-                  story: z.string(),
-                }),
-              )
-              .optional(),
+            meaningKey: z.string(),
+            hint: z.string(),
+            explanation: z.string().optional(),
           }),
         )
         .optional(),

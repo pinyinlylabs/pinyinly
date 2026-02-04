@@ -6,13 +6,22 @@ declare global {
   type RnRequireSource = Parameters<(typeof Asset)[`fromModule`]>[0];
 
   interface NodeRequire {
+    /**
+     * @deprecated don't use `@/` alias in require statements because they
+     * cannot be resolved in vitest. Instead use relative paths or convert to
+     * module-level ESM imports.
+     */
+    (id: `@/${string}`): never;
+
     // Support for asset files. Anything that starts with a dot and ends with a
     // known extension.
+    //
+    // NOTE: these MUST be relative paths, see above.
     (
-      id: `${string}.${`ttf` | `otf` | `svg` | `png` | `jpg` | `riv` | `lottie.json`}`,
+      id: `.${string}.${`ttf` | `otf` | `svg` | `png` | `jpg` | `riv` | `lottie.json`}`,
     ): RnRequireSource;
-    (id: `${string}.mp3`): AudioSource;
-    (id: `${string}.m4a`): AudioSpriteSource | AudioSource;
+    (id: `.${string}.mp3`): AudioSource;
+    (id: `.${string}.m4a`): AudioSpriteSource | AudioSource;
   }
 
   namespace NodeJS {

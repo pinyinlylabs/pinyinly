@@ -1,0 +1,45 @@
+{
+  "$schema": "https://oxc.rs/schemas/oxlint.json",
+  "plugins": ["unicorn"],
+  "categories": {
+    "correctness": "off",
+    "suspicious": "off",
+    "pedantic": "off",
+    "style": "off",
+    "nursery": "off",
+    "restriction": "off"
+  },
+  "rules": {
+    "curly": "deny",
+    "no-console": [
+      "deny",
+      {
+        "allow": ["warn", "error"]
+      }
+    ],
+    "no-debugger": "deny",
+    "no-else-return": "deny",
+    "no-useless-rename": "deny",
+    "no-const-assign": "deny",
+    "no-dupe-class-members": "deny",
+    "no-dupe-else-if": "deny",
+    "no-dupe-keys": "deny",
+    "no-duplicate-case": "deny",
+    "no-eval": "deny",
+    "no-func-assign": "deny",
+    "no-global-assign": "deny",
+    "unicorn/no-thenable": "deny",
+    "unicorn/no-empty-file": "deny",
+    "unicorn/no-await-in-promise-methods": "deny"
+  },
+  "env": {
+    "builtin": true
+  },
+  "ignorePatterns": [
+    "bin/**",
+    "test/**",
+    "**/*.d.ts",
+    "**/*.demo.tsx",
+    "src/app/dev/**"
+  ]
+}

@@ -6,10 +6,10 @@
       { "hanzi": "龵", "label": "hand", "strokes": "0-3" },
       { "hanzi": "目", "label": "eye", "strokes": "4-8" }
     ],
-    "stories": [
+    "hints": [
       {
-        "gloss": "see",
-        "story": "You need to **look (看)** actively! How do you spot something far away on a sunny day? You use your **Hand (手)** to help your **Eye (目)**. When you shade your forehead or shield your face with your Hand, you can stop squinting and really **SEE!** That's why the Hand is sitting right on top—it’s helping the Eye look intently."
+        "meaningKey": "see",
+        "hint": "You need to **look (看)** actively! How do you spot something far away on a sunny day? You use your **Hand (手)** to help your **Eye (目)**. When you shade your forehead or shield your face with your Hand, you can stop squinting and really **SEE!** That's why the Hand is sitting right on top—it's helping the Eye look intently."
       }
     ]
   },

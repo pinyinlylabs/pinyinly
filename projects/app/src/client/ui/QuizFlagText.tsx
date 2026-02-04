@@ -20,7 +20,7 @@ export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
         >
           <IconImage
             className={flagIconClass()}
-            source={require(`@/assets/icons/dumbbell.svg`)}
+            source={require(`../../assets/icons/dumbbell.svg`)}
           />
           <Text className={flagTextClass()}>Hard question</Text>
         </View>
@@ -35,7 +35,7 @@ export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
         >
           <IconImage
             className={flagIconClass()}
-            source={require(`@/assets/icons/plant-filled.svg`)}
+            source={require(`../../assets/icons/plant-filled.svg`)}
           />
           <Text className={flagTextClass()}>New skill</Text>
         </View>
@@ -50,7 +50,7 @@ export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
         >
           <IconImage
             className={flagIconClass()}
-            source={require(`@/assets/icons/shuffle.svg`)}
+            source={require(`../../assets/icons/shuffle.svg`)}
           />
           <Text className={flagTextClass()}>Other answer</Text>
         </View>
@@ -65,7 +65,7 @@ export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
         >
           <IconImage
             className={flagIconClass()}
-            source={require(`@/assets/icons/alarm.svg`)}
+            source={require(`../../assets/icons/alarm.svg`)}
           />
           <Text className={flagTextClass()}>
             Overdue by{` `}
@@ -96,7 +96,7 @@ export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
         >
           <IconImage
             className={flagIconClass()}
-            source={require(`@/assets/icons/repeat.svg`)}
+            source={require(`../../assets/icons/repeat.svg`)}
           />
           <Text className={flagTextClass()}>Previous mistake</Text>
         </View>
@@ -111,7 +111,7 @@ export const QuizFlagText = ({ flag }: { flag: QuestionFlagType }) => {
         >
           <IconImage
             className={flagIconClass()}
-            source={require(`@/assets/icons/flag.svg`)}
+            source={require(`../../assets/icons/flag.svg`)}
           />
           <Text className={flagTextClass()}>Weak word</Text>
         </View>

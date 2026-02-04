@@ -27,7 +27,8 @@ describe(`mdx rendering (via registry)`, () => {
   // TODO: expand this to cover all .mdx files
   const entries = Object.entries(registry_ForTesting).slice(0, 10);
 
-  for (const [path, Component] of entries) {
+  for (const [path, entry] of entries) {
+    const Component = entry.component;
     // Test a sample of the registry entries - ensures faithful production behavior
     test(`${path} component renders correctly`, async () => {
       const element = (
