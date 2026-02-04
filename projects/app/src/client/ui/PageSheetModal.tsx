@@ -72,6 +72,8 @@ const WebImpl = ({
   onDismiss,
   devUiSnapshotMode,
 }: ImplProps) => {
+  "use memo";
+
   // snapshot the value so that changes to it don't cause show/dismiss
   // animations to repeat.
   const [passivePresentationSnapshot] = useState(passivePresentation);
@@ -79,14 +81,11 @@ const WebImpl = ({
   const contentAnimation = useSharedValue(0);
   const [dismissing, setDismissing] = useState(false);
 
-  const api = useMemo(
-    () => ({
-      dismiss: () => {
-        setDismissing(true);
-      },
-    }),
-    [],
-  );
+  const api = {
+    dismiss: () => {
+      setDismissing(true);
+    },
+  };
 
   const onBackgroundPress = useEventCallback<
     NonNullable<PressableProps[`onPress`]>

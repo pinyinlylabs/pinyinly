@@ -1,7 +1,7 @@
 import { useHanziWordHint } from "@/client/hooks/useHanziWordHint";
 import { getWikiCharacterData } from "@/client/wiki";
 import { walkIdsNodeLeafs } from "@/data/hanzi";
-import type { HanziText, HanziWord } from "@/data/model";
+import type { HanziWord } from "@/data/model";
 import {
   buildHanziWord,
   glossOrThrow,
@@ -13,6 +13,7 @@ import { use, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 import { AddCustomHintModal } from "./AddCustomHintModal";
+import { AllHintsModal } from "./AllHintsModal";
 import { IconImage } from "./IconImage";
 import { Pylymark } from "./Pylymark";
 import { RectButton } from "./RectButton";
@@ -29,7 +30,7 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
   const meaning = dictionary.lookupHanziWord(hanziWord);
 
   // Load character data
-  const characterData = use(loadWikiCharacterData(hanzi));
+  const characterData = use(getWikiCharacterData(hanzi)) ?? null;
 
   const {
     getHint,
@@ -46,11 +47,12 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [showAllHintsModal, setShowAllHintsModal] = useState(false);
 
   // Get available hints for this meaning
   const availableHints =
     characterData?.mnemonic?.hints?.filter(
-      (h) => h.meaningKey.toLowerCase() === meaningKey.toLowerCase(),
+      (h) => h.meaningKey === meaningKey,
     ) ?? [];
 
   // If no hints match the meaningKey exactly, show all hints
@@ -58,6 +60,20 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
     availableHints.length > 0
       ? availableHints
       : (characterData?.mnemonic?.hints ?? []);
+
+  // Limit visible hints to 3 (combined preset + custom)
+  const VISIBLE_HINT_LIMIT = 3;
+  const totalHintCount = hintsToShow.length + customHints.length;
+  const hasMoreHints = totalHintCount > VISIBLE_HINT_LIMIT;
+
+  // Calculate how many preset vs custom hints to show
+  const visiblePresetCount = Math.min(hintsToShow.length, VISIBLE_HINT_LIMIT);
+  const visibleCustomCount = Math.min(
+    customHints.length,
+    VISIBLE_HINT_LIMIT - visiblePresetCount,
+  );
+  const visiblePresetHints = hintsToShow.slice(0, visiblePresetCount);
+  const visibleCustomHints = customHints.slice(0, visibleCustomCount);
 
   // Get components for the lozenge
   const components: { hanzi: string | undefined; label: string }[] = [];
@@ -145,11 +161,10 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
           </View>
         ) : (
           <View className="gap-2">
-            {/* Preset hints */}
-            {hintsToShow.map((h, index) => {
+            {/* Preset hints (limited) */}
+            {visiblePresetHints.map((h, index) => {
               const isSelected = selectedHint === h.hint;
-              const hintMeaningKey = h.meaningKey.toLowerCase();
-              const hintHanziWord = buildHanziWord(hanzi, hintMeaningKey);
+              const hintHanziWord = buildHanziWord(hanzi, h.meaningKey);
               return (
                 <HintOption
                   key={`preset-${index}`}
@@ -163,8 +178,8 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
               );
             })}
 
-            {/* Custom hints */}
-            {customHints.map((h, index) => {
+            {/* Custom hints (limited) */}
+            {visibleCustomHints.map((h, index) => {
               const isSelected = selectedHint === h.hint;
               return (
                 <CustomHintOption
@@ -189,6 +204,18 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
                 />
               );
             })}
+
+            {/* See more button */}
+            {hasMoreHints && (
+              <RectButton
+                variant="bare"
+                onPress={() => {
+                  setShowAllHintsModal(true);
+                }}
+              >
+                See all {totalHintCount} hints
+              </RectButton>
+            )}
           </View>
         )}
 
@@ -200,7 +227,7 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
             setIsModalOpen(true);
           }}
         >
-          Create your own hint
+          <Text>Create your own hint</Text>
         </RectButton>
 
         {/* Clear selection button */}
@@ -242,6 +269,36 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
               ? undefined
               : customHints[editingIndex]?.explanation
           }
+        />
+      )}
+
+      {/* All hints modal */}
+      {showAllHintsModal && (
+        <AllHintsModal
+          hanzi={hanzi}
+          onDismiss={() => {
+            setShowAllHintsModal(false);
+          }}
+          presetHints={hintsToShow}
+          customHints={customHints}
+          selectedHint={selectedHint}
+          onSelectPresetHint={(hintHanziWord, hint) => {
+            setHint(hintHanziWord, hint);
+          }}
+          onSelectCustomHint={(hint) => {
+            setHint(hanziWord, hint);
+          }}
+          onEditCustomHint={(index) => {
+            setEditingIndex(index);
+            setIsModalOpen(true);
+          }}
+          onDeleteCustomHint={(index) => {
+            // Clear selection if this hint was selected
+            if (selectedHint === customHints[index]?.hint) {
+              clearHint(hanziWord);
+            }
+            removeCustomHint(hanziWord, index);
+          }}
         />
       )}
     </ScrollView>
@@ -350,8 +407,3 @@ const hintOptionClass = tv({
     },
   },
 });
-
-// Loader for wiki character data
-async function loadWikiCharacterData(hanzi: HanziText) {
-  return (await getWikiCharacterData(hanzi)) ?? null;
-}

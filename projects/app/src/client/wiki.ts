@@ -1,6 +1,7 @@
 import type { MdxComponentType } from "@/client/ui/mdx";
 import type { HanziText, WikiCharacterData } from "@/data/model";
 import { devToolsSlowQuerySleepIfEnabled } from "@/util/devtools";
+import { memoize1 } from "@pinyinly/lib/collections";
 import { lazy } from "react";
 
 interface WikiMdxModule {
@@ -30,17 +31,17 @@ export function getWikiMdxHanziMeaning(
   return registry[hanzi]?.component;
 }
 
-export async function getWikiCharacterData(
-  hanzi: HanziText,
-): Promise<WikiCharacterData | undefined> {
-  const entry = registry[hanzi];
-  if (entry == null) {
-    return undefined;
-  }
-  const module = await entry.importFn();
-  // Character data from JSON is validated at build time, safe to cast
-  return module.characterData as WikiCharacterData | undefined;
-}
+export const getWikiCharacterData = memoize1(
+  async (hanzi: HanziText): Promise<WikiCharacterData | undefined> => {
+    const entry = registry[hanzi];
+    if (entry == null) {
+      return undefined;
+    }
+    const module = await entry.importFn();
+    // Character data from JSON is validated at build time, safe to cast
+    return module.characterData as WikiCharacterData | undefined;
+  },
+);
 
 // prettier-ignore
 const registry: Record<string, WikiRegistryEntry> = {

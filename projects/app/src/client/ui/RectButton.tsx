@@ -75,7 +75,7 @@ export function RectButton({
           className,
         })}
       >
-        {typeof children === `string` ? (
+        {typeof children === `string` || Array.isArray(children) ? (
           <Text className={text({ variant, class: textClassName })}>
             {children}
           </Text>
