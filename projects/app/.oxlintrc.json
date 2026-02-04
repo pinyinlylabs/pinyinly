@@ -17,7 +17,9 @@
         "allow": ["warn", "error"]
       }
     ],
-    "no-debugger": "deny"
+    "no-debugger": "deny",
+    "no-else-return": "deny",
+    "no-useless-rename": "deny"
   },
   "env": {
     "builtin": true

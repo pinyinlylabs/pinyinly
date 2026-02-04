@@ -69,16 +69,15 @@ const recommended: ConfigWithExtendsArray = [
       curly: `off`, // handled by oxlint
       "no-console": `off`, // handled by oxlint
       "no-debugger": `off`, // handled by oxlint
+      "no-else-return": `off`, // handled by oxlint
+      "no-useless-rename": `off`, // handled by oxlint
 
       "logical-assignment-operators": `error`,
-      "no-else-return": `error`,
-      "no-empty-function": `off`, // handled by @typescript-eslint/no-empty-function
       "no-fallthrough": [
         `error`,
         { commentPattern: `.*intentional fallthrough.*` },
       ],
       "no-process-exit": `error`,
-      "no-useless-rename": `error`,
       "object-shorthand": `error`,
       "one-var": [`error`, `never`],
 
