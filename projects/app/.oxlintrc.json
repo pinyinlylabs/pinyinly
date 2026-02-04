@@ -33,7 +33,9 @@
     "unicorn/no-await-in-promise-methods": "deny",
 
     // disallow non-import statements appearing before import statements
-    "import/first": "deny"
+    "import/first": "deny",
+    // disallow AMD require/define
+    "import/no-amd": "deny"
   },
   "env": {
     "builtin": true

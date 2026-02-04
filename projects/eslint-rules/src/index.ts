@@ -125,8 +125,6 @@ const recommended: ConfigWithExtendsArray = [
       "import/newline-after-import": `error`,
       // Forbid import of modules using absolute paths
       "import/no-absolute-path": `error`,
-      // disallow AMD require/define
-      "import/no-amd": `error`,
       // forbid default exports - we want to standardize on named exports so that imported names are consistent
       "import/no-default-export": `error`,
       // disallow imports from duplicate paths
