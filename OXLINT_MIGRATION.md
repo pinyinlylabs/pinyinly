@@ -4,20 +4,36 @@
 Successfully integrated Oxlint into the Pinyinly codebase for improved linting performance. Oxlint now runs as the first step in the linting pipeline, providing blazing-fast feedback on common code issues.
 
 ## Performance Improvements
-- **Oxlint execution time**: 49-99ms for 231 files
+- **Oxlint execution time**: 50-99ms for 231 files
 - **Speedup**: ~50-100x faster than ESLint for the migrated rules
+- **Rules migrated**: 16 rules successfully migrated
 - **Architecture**: Oxlint runs first, then ESLint for custom rules and remaining checks
 
-## Rules Migrated to Oxlint (5 rules)
+## Rules Migrated to Oxlint (16 rules)
 
-### Phase 1 - Basic Correctness Rules
+### Phase 1 - Basic Correctness Rules (3 rules)
 1. ✅ `curly` - Enforce curly braces for all control statements
 2. ✅ `no-console` - Restrict console usage (allow warn/error only)
 3. ✅ `no-debugger` - Disallow debugger statements
 
-### Phase 2 - Additional Rules
+### Phase 2 - Additional ESLint Rules (2 rules)
 4. ✅ `no-else-return` - Disallow else blocks after return statements
 5. ✅ `no-useless-rename` - Disallow renaming import, export, and destructured assignments to the same name
+
+### Phase 3 - Correctness Rules (8 rules)
+6. ✅ `no-const-assign` - Disallow reassigning const variables
+7. ✅ `no-dupe-class-members` - Disallow duplicate class members
+8. ✅ `no-dupe-else-if` - Disallow duplicate conditions in if-else-if chains
+9. ✅ `no-dupe-keys` - Disallow duplicate keys in object literals
+10. ✅ `no-duplicate-case` - Disallow duplicate case labels
+11. ✅ `no-eval` - Disallow the use of eval()
+12. ✅ `no-func-assign` - Disallow reassigning function declarations
+13. ✅ `no-global-assign` - Disallow assignment to native objects or read-only global variables
+
+### Phase 4 - Unicorn Plugin Rules (3 rules)
+14. ✅ `unicorn/no-thenable` - Disallow objects with then method
+15. ✅ `unicorn/no-empty-file` - Disallow empty files
+16. ✅ `unicorn/no-await-in-promise-methods` - Disallow awaiting values in promise methods
 
 ## Configuration Files
 
