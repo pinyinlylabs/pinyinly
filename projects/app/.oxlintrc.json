@@ -35,7 +35,9 @@
     // disallow non-import statements appearing before import statements
     "import/first": "deny",
     // disallow AMD require/define
-    "import/no-amd": "deny"
+    "import/no-amd": "deny",
+    // disallow imports from duplicate paths
+    "import/no-duplicates": "deny"
   },
   "env": {
     "builtin": true
