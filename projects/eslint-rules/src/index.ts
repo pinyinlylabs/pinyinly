@@ -136,8 +136,6 @@ const recommended: ConfigWithExtendsArray = [
           optionalDependencies: false,
         },
       ],
-      // Forbid mutable exports
-      "import/no-mutable-exports": `error`,
       // Prevent importing the default as if it were named
       "import/no-named-default": `error`,
       // Prohibit named exports
