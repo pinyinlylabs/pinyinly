@@ -13,6 +13,7 @@ import type { SpriteManifest } from "#types.ts";
 import { invariant } from "@pinyinly/lib/invariant";
 import { vol } from "memfs";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
+import type * as FfmpegModule from "../src/ffmpeg.ts";
 
 // Mock fs to use memfs
 vi.mock(`node:fs`, async () => {
@@ -28,7 +29,7 @@ vi.mock(`node:fs/promises`, async () => {
 
 // Mock the analyzeAudioFile function to avoid running ffmpeg in tests
 vi.mock(`#ffmpeg.ts`, async (importOriginal) => {
-  const module: typeof import("../src/ffmpeg.ts") = await importOriginal();
+  const module: typeof FfmpegModule = await importOriginal();
   return {
     ...module,
     // Mock analyzeAudioFileDuration to return a fixed value and avoid calling

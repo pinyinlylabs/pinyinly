@@ -171,7 +171,6 @@ const recommended: ConfigWithExtendsArray = [
 
       // Messes up things where the difference between a type and interface is significant.
       "@typescript-eslint/consistent-type-definitions": `off`,
-      "@typescript-eslint/consistent-type-imports": `error`,
       "@typescript-eslint/no-var-requires": `off`,
       "@typescript-eslint/no-restricted-imports": [
         `error`,
@@ -307,10 +306,6 @@ const recommended: ConfigWithExtendsArray = [
       "@typescript-eslint/require-await": `off`, // this is annoying when you want a little function to return a promise
       "@typescript-eslint/return-await": `off`, // this is annoying when you want a little function to return a promise
       // It's useful to use inline type annotations for mocking.
-      "@typescript-eslint/consistent-type-imports": [
-        `error`,
-        { disallowTypeAnnotations: false },
-      ],
       "unicorn/consistent-function-scoping": `off`, // it's useful to write functions in the scope of a test
       "unicorn/no-useless-undefined": `off`, // writing undefined can be useful when writing mocks
     },
