@@ -13,7 +13,7 @@ interface ThreeSplitLinesDownProps
 export const ThreeSplitLinesDown = ({
   className,
   style,
-  prop,
+  prop: _prop,
   ...rest
 }: ThreeSplitLinesDownProps) => {
   true satisfies IsExhaustedRest<typeof rest>;

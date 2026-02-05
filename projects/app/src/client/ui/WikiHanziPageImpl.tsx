@@ -44,7 +44,7 @@ function Header({
   gloss,
   pinyin,
   hanzi,
-  onDismiss,
+  onDismiss: _onDismiss,
   variant,
   ...rest
 }: {

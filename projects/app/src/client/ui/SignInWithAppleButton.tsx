@@ -70,6 +70,8 @@ export interface SignInWithAppleButtonProps {
 /**
  * Ensures on web that the top status bar background color matches the view background.
  */
-export function SignInWithAppleButton({}: SignInWithAppleButtonProps) {
+export function SignInWithAppleButton({
+  clientId: _clientId,
+}: SignInWithAppleButtonProps) {
   return null;
 }

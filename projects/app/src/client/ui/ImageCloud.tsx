@@ -9,7 +9,7 @@ interface ImageCloudProps extends Pick<ViewProps, `className` | `style`> {
 
 export const ImageCloud = ({
   className,
-  play = true,
+  play: _play = true,
   style,
   ...rest
 }: ImageCloudProps) => {

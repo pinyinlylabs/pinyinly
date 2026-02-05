@@ -28,7 +28,7 @@ export function buildDeviceStoreKey(key: DeviceStoreEntity): string {
 
   // SecureStore keys must contain only alphanumeric characters, ".", "-", and
   // "_".
-  invariant(/^[a-zA-Z0-9\.\-\_]+$/.test(storageKey));
+  invariant(/^[a-zA-Z0-9.\-_]+$/.test(storageKey));
 
   return storageKey;
 }

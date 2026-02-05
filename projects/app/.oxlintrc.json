@@ -1,48 +1,28 @@
 {
   "$schema": "https://oxc.rs/schemas/oxlint.json",
-  "plugins": ["import", "unicorn"],
-  "categories": {
-    "correctness": "off",
-    "suspicious": "off",
-    "pedantic": "off",
-    "style": "off",
-    "nursery": "off",
-    "restriction": "off"
-  },
-  "rules": {
-    "curly": "deny",
-    "no-console": [
-      "deny",
-      {
-        "allow": ["warn", "error"]
+  "extends": ["../oxlint-rules/base.oxlintrc.json"],
+  "rules": {},
+  "overrides": [
+    {
+      "files": ["*.config.*"],
+      "rules": {
+        "import/no-default-export": "off"
       }
-    ],
-    "no-debugger": "deny",
-    "no-else-return": "deny",
-    "no-useless-rename": "deny",
-    "no-const-assign": "deny",
-    "no-dupe-class-members": "deny",
-    "no-dupe-else-if": "deny",
-    "no-dupe-keys": "deny",
-    "no-duplicate-case": "deny",
-    "no-eval": "deny",
-    "no-func-assign": "deny",
-    "no-global-assign": "deny",
-    "unicorn/no-thenable": "deny",
-    "unicorn/no-empty-file": "deny",
-    "unicorn/no-await-in-promise-methods": "deny",
-
-    // disallow non-import statements appearing before import statements
-    "import/first": "deny",
-    // disallow AMD require/define
-    "import/no-amd": "deny",
-    // disallow imports from duplicate paths
-    "import/no-duplicates": "deny",
-    // Forbid mutable exports
-    "import/no-mutable-exports": "deny",
-    // Forbid a module from importing itself
-    "import/no-self-import": "deny"
-  },
+    },
+    {
+      "files": ["src/app/**/*.ts", "src/app/**/*.tsx"],
+      "rules": {
+        // expo-router pages use a default export for the page
+        "import/no-default-export": "off"
+      }
+    },
+    {
+      "files": ["src/app/**/*+api.ts", "src/app/**/*+api.tsx"],
+      "rules": {
+        "import/no-default-export": "deny"
+      }
+    }
+  ],
   "env": {
     "builtin": true
   },

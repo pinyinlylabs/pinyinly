@@ -1,5 +1,5 @@
 tasks:
-  lint:
+  eslint:
     description: "Run ESLint and fix errors (unless in CI)."
     # Auto-fixing errors outside CI is intended to make this more AI-agent friendly.
     script: |
