@@ -2,7 +2,9 @@ tasks:
   oxlint:
     description: "Run Oxlint for fast linting"
     script: |
-      oxlint --deny-warnings --type-aware --fix .
+      [ -z ${CI:-} ] && FIX_FLAG="--fix"
+
+      oxlint --deny-warnings --type-aware ${FIX_FLAG:-} .
     inputs:
       - "**/*.{cjs,js,mjs,ts,tsx}"
       - "*.{cjs,js,mjs,ts,tsx}"
