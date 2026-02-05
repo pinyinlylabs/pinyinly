@@ -15,6 +15,7 @@
     "no-empty": "off",
     "no-var-requires": "off",
     "no-void": "off",
+    // Expo/metro stuff still uses require().
     "no-require-imports": "off",
     "explicit-function-return-type": "off",
     "no-param-reassign": "off",
@@ -61,7 +62,10 @@
     "unicorn/prevent-abbreviations": "off", // abbreviations are fine
     "unicorn/no-nested-ternary": "off", // nested ternaries are not so bad
     "unicorn/filename-case": "off", // using camelCase for filenames
+    "unicorn/prefer-string-starts-ends-with": "error",
 
+    "eslint/prefer-const": "deny",
+    "eslint/no-unused-expressions": "deny",
     "eslint/no-restricted-imports": [
       "deny",
       {
@@ -148,7 +152,12 @@
     "import/no-self-import": "deny",
     // Forbid import of modules using absolute paths
     "import/no-absolute-path": "error",
+    // enforces consistent type specifier style for named imports
+    "import/consistent-type-specifier-style": "error",
 
+    "typescript/prefer-for-of": "deny",
+    "typescript/no-dynamic-delete": "deny",
+    "typescript/no-implied-eval": "deny",
     "typescript/no-unnecessary-type-assertion": "deny",
     "typescript/no-unsafe-assignment": "deny",
     "typescript/no-unsafe-member-access": "deny",
@@ -186,9 +195,18 @@
   },
   "overrides": [
     {
-      "files": ["test/**"],
+      "files": ["test/**/*.{ts,tsx}"],
       "rules": {
         "no-non-null-assertion": "off"
+        // Backup from eslint config:
+        //
+        // "typescript/no-non-null-assertion": "off",
+        // "typescript/no-unsafe-assignment": "off",
+        // "typescript/require-await": "off", // this is annoying when you want a little function to return a promise
+        // "typescript/return-await": "off", // this is annoying when you want a little function to return a promise
+        // // It's useful to use inline type annotations for mocking.
+        // "unicorn/consistent-function-scoping": "off", // it's useful to write functions in the scope of a test
+        // "unicorn/no-useless-undefined": "off" // writing undefined can be useful when writing mocks
       }
     }
   ]

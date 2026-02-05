@@ -283,7 +283,7 @@ const rule: Rule.RuleModule = {
 
                   // First, try to replace specific generic words
                   for (let index = 0; index < words.length; index++) {
-                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    // oxlint-disable-next-line typescript/no-non-null-assertion
                     if (replaceWords.has(words[index]!.toLowerCase())) {
                       words[index] = expectedSymbolName;
                       replaced = true;
@@ -294,7 +294,7 @@ const rule: Rule.RuleModule = {
                   // If no generic word found, replace the first non-preserve word
                   if (!replaced) {
                     for (let index = 0; index < words.length; index++) {
-                      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                      // oxlint-disable-next-line typescript/no-non-null-assertion
                       if (!preserveWords.has(words[index]!.toLowerCase())) {
                         words[index] = expectedSymbolName;
                         replaced = true;

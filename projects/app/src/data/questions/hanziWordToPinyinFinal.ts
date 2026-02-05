@@ -159,7 +159,6 @@ export function tryPinyinDistractor(
     return false;
   }
 
-  // eslint-disable-next-line @typescript-eslint/prefer-string-starts-ends-with
   if (ctx.answerPinyinInitial[0] !== pinyinParts.initialSoundId[0]) {
     return false;
   }

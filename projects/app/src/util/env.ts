@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-deprecated */
+// oxlint-disable typescript/no-deprecated
 import { memoize0 } from "@pinyinly/lib/collections";
 import { nonNullable } from "@pinyinly/lib/invariant";
 

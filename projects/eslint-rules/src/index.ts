@@ -34,11 +34,6 @@ const recommended: ConfigWithExtendsArray = [
   // All files that should use TypeScript rules.
   {
     files: [`**/*.{cjs,js,mjs,ts,tsx}`],
-    languageOptions: {
-      parserOptions: {
-        projectService: true,
-      },
-    },
     linterOptions: {
       reportUnusedDisableDirectives: `error`,
     },
@@ -49,8 +44,7 @@ const recommended: ConfigWithExtendsArray = [
     },
   },
 
-  ...tseslint.configs.strictTypeChecked,
-  ...tseslint.configs.stylisticTypeChecked,
+  tseslint.configs.base,
 
   // Global
   {
@@ -62,11 +56,11 @@ const recommended: ConfigWithExtendsArray = [
       //
 
       // NOTE: The following rules are handled by Oxlint for better performance
-      curly: `off`, // handled by oxlint
-      "no-console": `off`, // handled by oxlint
-      "no-debugger": `off`, // handled by oxlint
-      "no-else-return": `off`, // handled by oxlint
-      "no-useless-rename": `off`, // handled by oxlint
+      // curly: `off`, // handled by oxlint
+      // "no-console": `off`, // handled by oxlint
+      // "no-debugger": `off`, // handled by oxlint
+      // "no-else-return": `off`, // handled by oxlint
+      // "no-useless-rename": `off`, // handled by oxlint
 
       "logical-assignment-operators": `error`,
       "no-fallthrough": [
@@ -115,8 +109,6 @@ const recommended: ConfigWithExtendsArray = [
       // eslint-plugin-import
       //
 
-      // enforces consistent type specifier style for named imports
-      "import/consistent-type-specifier-style": `error`,
       // Forbid the use of extraneous packages
       "import/no-extraneous-dependencies": [
         `error`,
@@ -138,91 +130,6 @@ const recommended: ConfigWithExtendsArray = [
       //
 
       "@stylistic/quotes": [`error`, `backtick`],
-
-      //
-      // @typescript-eslint
-      //
-
-      "@typescript-eslint/no-explicit-any": `off`,
-      // Messes up things where the difference between a type and interface is significant.
-      "@typescript-eslint/consistent-type-definitions": `off`,
-      "@typescript-eslint/no-var-requires": `off`,
-      "@typescript-eslint/no-restricted-imports": `off`,
-      "@typescript-eslint/no-unnecessary-condition": `off`,
-      "@typescript-eslint/no-unsafe-assignment": `off`,
-      "@typescript-eslint/no-unsafe-member-access": `off`,
-      "@typescript-eslint/no-unsafe-argument": `off`,
-      // Expo/metro stuff still uses require().
-      "@typescript-eslint/no-require-imports": `off`,
-      // A bit buggy when vars are only used as types, sticking with
-      // noUnusedLocals and noUnusedParameters.
-      "@typescript-eslint/no-unused-vars": `off`,
-      "@typescript-eslint/no-unnecessary-type-constraint": `off`,
-      "@typescript-eslint/no-unnecessary-type-parameters": `off`,
-      // It's broken when using generic inferred return types. Too much noise
-      // means it's often turned off even when it perhaps shouldn't be, so it's
-      // better to just disable it completely.
-      "@typescript-eslint/no-unsafe-return": `off`,
-      "@typescript-eslint/no-unsafe-call": `off`,
-      // Migrated to oxlint - see typescript/restrict-template-expressions in oxlint config
-      "@typescript-eslint/restrict-template-expressions": `off`,
-      "@typescript-eslint/switch-exhaustiveness-check": `off`,
-      "@typescript-eslint/strict-boolean-expressions": `off`,
-      // It's easier to use the debugger for async code when all promises are
-      // awaited so that the function call stack is preserved.
-      "@typescript-eslint/return-await": `off`,
-      "@typescript-eslint/require-await": `off`,
-      "@typescript-eslint/no-empty-object-type": `off`,
-    },
-  },
-
-  // config files
-  {
-    files: [`*.config.*`],
-    rules: {},
-  },
-
-  // bin scripts
-  {
-    files: [`bin/**/*.{ts,tsx}`],
-    rules: {
-      "no-console": `off`,
-    },
-  },
-
-  // test files
-  {
-    files: [`test/**/*.{ts,tsx}`],
-    ignores: [`**/lint.test-d.ts`],
-    rules: {
-      "@typescript-eslint/no-non-null-assertion": `off`,
-      "@typescript-eslint/no-unsafe-assignment": `off`,
-      "@typescript-eslint/require-await": `off`, // this is annoying when you want a little function to return a promise
-      "@typescript-eslint/return-await": `off`, // this is annoying when you want a little function to return a promise
-      // It's useful to use inline type annotations for mocking.
-      "unicorn/consistent-function-scoping": `off`, // it's useful to write functions in the scope of a test
-      "unicorn/no-useless-undefined": `off`, // writing undefined can be useful when writing mocks
-    },
-  },
-
-  // TypeScript declaration files
-  {
-    files: [`**/*.d.ts`],
-    rules: {
-      // See https://github.com/typescript-eslint/typescript-eslint/issues/7941
-      "no-var": `off`,
-      // `any` is useful in declaration files, so allow it.
-      "@typescript-eslint/no-explicit-any": `off`,
-      // Conflicts when augmenting an interface by adding ` extends …` but
-      // leaving the body empty.
-      "@typescript-eslint/no-empty-object-type": `off`,
-      // Interface merging works with interface declarations, not `Record<…>`.
-      "@typescript-eslint/consistent-indexed-object-style": `off`,
-      // When defining modules in a declaration file, some will make default
-      // exports.
-      // Allow `export {}` to turn .d.ts files into modules, and make `declare
-      // global { … }` work as intended.
-      "unicorn/require-module-specifiers": `off`,
     },
   },
 ];

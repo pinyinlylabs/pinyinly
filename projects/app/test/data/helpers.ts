@@ -279,7 +279,7 @@ export function parseHistoryCommand(
     case `🟡`:
     case `🟠`: {
       const rating = emojiToRating(op);
-      // eslint-disable-next-line prefer-const
+
       let [skill, skillArgs] = splitN(opArgs!, ` `, 1) as [Skill, string?];
       const event: HistoryEventSkillReview = {
         kind: `skillReview`,

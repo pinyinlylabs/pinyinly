@@ -122,7 +122,6 @@ vi.mock(
         store[key] = value;
       },
       removeItem: (key: string): void => {
-        // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
         delete store[key];
       },
       clear: (): void => {

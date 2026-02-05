@@ -48,7 +48,7 @@ export const normalizePinyinUnit = memoize1(function normalizePinyinUnit(
   // 2. If there is an ou, then the o takes the tone mark
   // 3. Otherwise, the second vowel takes the tone mark
 
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  // oxlint-disable-next-line typescript/no-non-null-assertion
   let tone = `012345`.indexOf(pinyinOrNumeric.at(-1)!);
 
   const pinyinLengthWithoutTone =
@@ -56,7 +56,7 @@ export const normalizePinyinUnit = memoize1(function normalizePinyinUnit(
 
   let result = ``;
   for (let i = 0; i < pinyinLengthWithoutTone; i++) {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    // oxlint-disable-next-line typescript/no-non-null-assertion
     let char = pinyinOrNumeric[i]!;
     let nextChar = pinyinOrNumeric[i + 1];
 
@@ -69,22 +69,22 @@ export const normalizePinyinUnit = memoize1(function normalizePinyinUnit(
 
     if (tone > 0) {
       if (char === `a` || char === `e`) {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        // oxlint-disable-next-line typescript/no-non-null-assertion
         result += toneMap[char][tone]!;
         tone = -1;
         continue;
       } else if (char === `o` && nextChar === `u`) {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        // oxlint-disable-next-line typescript/no-non-null-assertion
         result += toneMap[char][tone]!;
         tone = -1;
         continue;
       } else if (isPinyinVowel(char)) {
         if (isPinyinVowel(nextChar)) {
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          // oxlint-disable-next-line typescript/no-non-null-assertion
           result += toneMap[char][5]! + toneMap[nextChar][tone]!;
           i++;
         } else {
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          // oxlint-disable-next-line typescript/no-non-null-assertion
           result += toneMap[char][tone]!;
         }
         tone = -1;
@@ -92,7 +92,7 @@ export const normalizePinyinUnit = memoize1(function normalizePinyinUnit(
       }
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    // oxlint-disable-next-line typescript/no-non-null-assertion
     result += isPinyinVowel(char) ? toneMap[char][5]! : char;
   }
   return result as PinyinUnit;

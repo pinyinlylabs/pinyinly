@@ -209,7 +209,7 @@ export async function getReplicacheClientMutationsSince(
   // order by ID from the database.
   for (let i = 1; i < mutations.length; i++) {
     invariant(
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      // oxlint-disable-next-line typescript/no-non-null-assertion
       mutations[i]!.id > mutations[i - 1]!.id,
       `mutations not ordered correctly`,
     );

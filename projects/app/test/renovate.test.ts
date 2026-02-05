@@ -14,7 +14,6 @@ const configPath = path.resolve(workspaceRoot, `renovate.json5`);
  * We assume the literal is trusted (from your repo).
  */
 function evaluateJsStringLiteral(literal: string): string {
-  // eslint-disable-next-line @typescript-eslint/no-implied-eval
   const fn = new Function(`return (${literal});`);
   const val = fn() as unknown;
   if (typeof val !== `string`) {

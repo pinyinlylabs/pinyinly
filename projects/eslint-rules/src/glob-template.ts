@@ -281,7 +281,7 @@ const rule: Rule.RuleModule = {
 
                   // Create a function that evaluates the expression in the given context
                   // This is safer than using eval() directly
-                  // eslint-disable-next-line @typescript-eslint/no-implied-eval
+                  // oxlint-disable-next-line typescript/no-implied-eval
                   const evaluator = new Function(...keys, `return ${expr};`);
 
                   // Execute the function with our context variables

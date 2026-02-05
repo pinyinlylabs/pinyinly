@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-deprecated */
+// oxlint-disable typescript/no-deprecated
 const Sentry = require(`@sentry/node`);
 const { captureConsoleIntegration } = require(`@sentry/core`);
 // const { nodeProfilingIntegration } = require(`@sentry/profiling-node`);

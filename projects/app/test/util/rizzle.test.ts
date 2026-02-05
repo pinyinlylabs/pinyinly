@@ -1001,7 +1001,6 @@ typeChecks<RizzleReplicacheMutators<never>>(
       });
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     createPost;
   },
 );
@@ -1311,13 +1310,12 @@ describe(`replicache() entity()`, async () => {
   test(`.set() only exposed to mutators`, async () => {
     await using db = r.replicache(testReplicacheOptions(), schema, {
       async appendText(db) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
         db.text.set;
       },
     });
 
     // @ts-expect-error set() is not exposed on the query object
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+
     db.query.text.set;
   });
 
