@@ -244,7 +244,6 @@ const recommended: ConfigWithExtendsArray = [
           ],
         },
       ],
-      "@typescript-eslint/no-import-type-side-effects": `error`,
       "@typescript-eslint/no-unnecessary-condition": `error`,
       // Expo/metro stuff still uses require().
       "@typescript-eslint/no-require-imports": `off`,
