@@ -326,27 +326,24 @@ tasks:
     deps:
       - ~:codegen
 
-  oxlint:
-    description: "Run Oxlint for fast linting"
-    script: |
-      npx oxlint --deny-warnings .
-    inputs:
-      - "**/*.{cjs,js,mjs,ts,tsx}"
-      - "*.{cjs,js,mjs,ts,tsx}"
-      - ".oxlintrc.json"
-    deps:
-      - ~:codegen
-    toolchain: "node"
-
   lint:
     deps:
-      # Run oxlint first, then eslint
       - ~:oxlint
+      - ~:eslint
+
+  eslint:
+    deps:
+      # Lint does type-checking, so the Expo router types need to be generated first.
+      - ~:codegen
+
+  oxlint:
+    deps:
       # Lint does type-checking, so the Expo router types need to be generated first.
       - ~:codegen
 
 tags:
   - eslint
+  - oxlint
   - prettier
   - typescript
   - vercel

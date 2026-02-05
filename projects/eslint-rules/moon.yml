@@ -7,8 +7,14 @@ tasks:
     options:
       internal: true
 
+  lint:
+    deps:
+      - ~:oxlint
+      - ~:eslint
+
 tags:
   - eslint
+  - oxlint
   - prettier
   - typescript
   - vitest

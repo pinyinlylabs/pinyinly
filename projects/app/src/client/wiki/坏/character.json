@@ -14,7 +14,8 @@
     "hints": [
       {
         "meaningKey": "bad",
-        "hint": "If you're growing crops, everything is good is you have good **soil (土)**, but if the soil isn't fertile that's very **bad**."
+        "hint": "**Soil** that's **not** fertile is **bad** for crops.",
+        "explanation": "If you're growing crops, everything depends on the soil (土). When the soil isn't (不) good, that's very bad news for your harvest."
       }
     ]
   },

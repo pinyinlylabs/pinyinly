@@ -167,7 +167,7 @@ interface TabTriggerChildProps
 }
 
 const DesktopNavSubtleItem = customTabTrigger(
-  ({ name, isFocused, ...rest }) => {
+  ({ name, isFocused: _isFocused, ...rest }) => {
     return (
       <Pressable {...rest}>
         <Text
@@ -327,21 +327,23 @@ const MobileNavGroupItem = customTabTrigger(
   },
 );
 
-const MobileNavSubtleItem = customTabTrigger(({ name, isFocused, ...rest }) => {
-  return (
-    <Pressable {...rest}>
-      <Text
-        className={`
-          font-sans text-sm/[32px] font-bold uppercase text-fg-dim
+const MobileNavSubtleItem = customTabTrigger(
+  ({ name, isFocused: _isFocused, ...rest }) => {
+    return (
+      <Pressable {...rest}>
+        <Text
+          className={`
+            font-sans text-sm/[32px] font-bold uppercase text-fg-dim
 
-          hover:text-fg
-        `}
-      >
-        {name}
-      </Text>
-    </Pressable>
-  );
-});
+            hover:text-fg
+          `}
+        >
+          {name}
+        </Text>
+      </Pressable>
+    );
+  },
+);
 
 function MobileTopMenu({
   leftButton,

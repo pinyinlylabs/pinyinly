@@ -27,7 +27,7 @@ if (!isExpoGo) {
   });
 }
 
-export const SplashScreen = ({}: { children?: never }) => {
+export const SplashScreen = ({ children: _children }: { children?: never }) => {
   const [fontsLoaded, fontError] = useFonts({
     [`NationalPark`]: require(
       `../../assets/fonts/NationalPark/NationalPark-VariableFont_wght.ttf`,

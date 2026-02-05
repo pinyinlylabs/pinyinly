@@ -1,0 +1,11 @@
+tasks:
+  oxlint:
+    description: "Run Oxlint for fast linting"
+    script: |
+      oxlint --deny-warnings --type-aware .
+    inputs:
+      - "**/*.{cjs,js,mjs,ts,tsx}"
+      - "*.{cjs,js,mjs,ts,tsx}"
+      - ".oxlintrc.json"
+      - "/projects/oxlint-rules/*.oxlintrc.json"
+    toolchain: "node"

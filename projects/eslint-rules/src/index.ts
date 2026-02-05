@@ -121,18 +121,10 @@ const recommended: ConfigWithExtendsArray = [
 
       // enforces consistent type specifier style for named imports
       "import/consistent-type-specifier-style": `error`,
-      // disallow non-import statements appearing before import statements
-      "import/first": `error`,
       // Require a newline after the last import/require in a group
       "import/newline-after-import": `error`,
       // Forbid import of modules using absolute paths
       "import/no-absolute-path": `error`,
-      // disallow AMD require/define
-      "import/no-amd": `error`,
-      // forbid default exports - we want to standardize on named exports so that imported names are consistent
-      "import/no-default-export": `error`,
-      // disallow imports from duplicate paths
-      "import/no-duplicates": `error`,
       // Forbid the use of extraneous packages
       "import/no-extraneous-dependencies": [
         `error`,
@@ -142,14 +134,10 @@ const recommended: ConfigWithExtendsArray = [
           optionalDependencies: false,
         },
       ],
-      // Forbid mutable exports
-      "import/no-mutable-exports": `error`,
       // Prevent importing the default as if it were named
       "import/no-named-default": `error`,
       // Prohibit named exports
       "import/no-named-export": `off`, // we want everything to be a named export
-      // Forbid a module from importing itself
-      "import/no-self-import": `error`,
       // Require modules with a single export to use a default export
       "import/prefer-default-export": `off`, // we want everything to be named
 
@@ -264,7 +252,6 @@ const recommended: ConfigWithExtendsArray = [
       // noUnusedLocals and noUnusedParameters.
       "@typescript-eslint/no-unused-vars": `off`,
 
-      "@typescript-eslint/no-unnecessary-type-assertion": `error`,
       "@typescript-eslint/no-unnecessary-type-constraint": `error`,
       // Often only having one usage of a type parameter is fine because it's
       // the only way to use "_ extends _".
@@ -299,9 +286,7 @@ const recommended: ConfigWithExtendsArray = [
   // config files
   {
     files: [`*.config.*`],
-    rules: {
-      "import/no-default-export": `off`,
-    },
+    rules: {},
   },
 
   // bin scripts
@@ -347,7 +332,6 @@ const recommended: ConfigWithExtendsArray = [
       "@typescript-eslint/consistent-indexed-object-style": `off`,
       // When defining modules in a declaration file, some will make default
       // exports.
-      "import/no-default-export": `off`,
       // Allow `export {}` to turn .d.ts files into modules, and make `declare
       // global { … }` work as intended.
       "unicorn/require-module-specifiers": `off`,

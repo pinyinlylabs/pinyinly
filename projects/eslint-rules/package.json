@@ -30,6 +30,8 @@
   "private": true,
   "devDependencies": {
     "@typescript-eslint/parser": "^8.36.0",
+    "oxlint": "1.17.0-alpha.0",
+    "oxlint-tsgolint": "^0.11.4",
     "tsx": "^4.15.7",
     "typescript": "patch:typescript@npm%3A5.9.2#~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch",
     "vitest": "^3.2.4"

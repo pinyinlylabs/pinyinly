@@ -1,0 +1,36 @@
+{
+  "$schema": "https://oxc.rs/schemas/oxlint.json",
+  "plugins": ["typescript"],
+  "ignorePatterns": ["test/**", "**/*.d.ts"],
+  "rules": {
+    "curly": "deny",
+    "no-console": ["deny", { "allow": ["warn", "error"] }],
+    "no-debugger": "deny",
+    "no-else-return": "deny",
+    "no-useless-rename": "deny",
+    "no-const-assign": "deny",
+    "no-dupe-class-members": "deny",
+    "no-dupe-else-if": "deny",
+    "no-dupe-keys": "deny",
+    "no-duplicate-case": "deny",
+    "no-eval": "deny",
+    "no-func-assign": "deny",
+    "no-global-assign": "deny",
+    "unicorn/no-thenable": "deny",
+    "unicorn/no-empty-file": "deny",
+    "unicorn/no-await-in-promise-methods": "deny",
+    // disallow non-import statements appearing before import statements
+    "import/first": "deny",
+    // disallow AMD require/define
+    "import/no-amd": "deny",
+    // forbid default exports - we want to standardize on named exports so that imported names are consistent
+    "import/no-default-export": "deny",
+    // disallow imports from duplicate paths
+    "import/no-duplicates": "deny",
+    // Forbid mutable exports
+    "import/no-mutable-exports": "deny",
+    // Forbid a module from importing itself
+    "import/no-self-import": "deny",
+    "typescript/no-unnecessary-type-assertion": "deny"
+  }
+}
