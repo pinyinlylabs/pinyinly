@@ -1,7 +1,10 @@
 {
   "$schema": "https://oxc.rs/schemas/oxlint.json",
   "extends": ["../oxlint-rules/base.oxlintrc.json"],
-  "rules": {},
+  "jsPlugins": ["eslint-plugin-react-compiler"],
+  "rules": {
+    "react-compiler/react-compiler": "error"
+  },
   "overrides": [
     {
       "files": ["*.config.*"],

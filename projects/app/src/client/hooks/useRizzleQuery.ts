@@ -25,16 +25,11 @@ export function useRizzleQuery<T extends ReactQueryValue>(
 
   // The reference for `key` usually changes on every render because the array
   // is written inline and changes on every render.
-  //
-  // eslint-disable-next-line react-compiler/react-compiler
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // oxlint-disable-next-line react-compiler/react-compiler
   const stableKey = useMemo(() => key, key);
 
   // The reference for `query` usually changes on every render because the
   // function is written inline and the reference changes.
-  //
-  // eslint-disable-next-line react-compiler/react-compiler
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const stableQuery = useMemo(() => query, stableKey);
 
   useEffect(() => {

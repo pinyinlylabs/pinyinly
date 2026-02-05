@@ -68,7 +68,7 @@ export const txTest = test
   })
   .extend<{ tx: Transaction; pgConfig?: PgTransactionConfig }>({
     pgConfig: async ({}, use) => {
-      // eslint-disable-next-line react-hooks/rules-of-hooks
+      // oxlint-disable-next-line react-hooks/rules-of-hooks
       await use(undefined);
     },
     tx: async ({ db, pgConfig }, use) => {
@@ -93,7 +93,7 @@ export const dbTest = test.extend<{ db: TestDb }>({
     const testDb = await createTestDb(annotate);
 
     try {
-      // eslint-disable-next-line react-hooks/rules-of-hooks
+      // oxlint-disable-next-line react-hooks/rules-of-hooks
       await use(testDb);
     } finally {
       // Clean up DB after the test

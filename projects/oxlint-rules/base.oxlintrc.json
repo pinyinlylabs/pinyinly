@@ -194,6 +194,13 @@
     ]
   },
   "overrides": [
+    // Ban CommonJS globals in ESM files, use import.meta.* instead
+    {
+      "files": ["**/*.{js,mjs,ts,tsx}"],
+      "rules": {
+        "no-restricted-globals": ["error", "__dirname", "__filename"]
+      }
+    },
     {
       "files": ["test/**/*.{ts,tsx}"],
       "rules": {

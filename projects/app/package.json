@@ -150,6 +150,7 @@
     "drizzle-kit": "^0.31.0",
     "eslint": "^9.13.0",
     "eslint-plugin-drizzle": "^0.2.3",
+    "eslint-plugin-react-compiler": "rc",
     "expo-atlas": "^0.4.3",
     "fontkit": "^2.0.4",
     "globals": "^16.0.0",

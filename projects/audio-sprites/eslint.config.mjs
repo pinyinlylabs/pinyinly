@@ -5,5 +5,4 @@ export default defineConfig(
 
   // extends ...
   configs.recommended,
-  configs.esm,
 );
