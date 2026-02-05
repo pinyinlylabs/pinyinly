@@ -9,7 +9,11 @@ tasks:
       - src/**/*
     preset: watcher
 
+  fmt:
+    deps:
+      - ~:oxfmt
+
 tags:
-  - prettier
+  - oxfmt
   - typescript
   - vercel

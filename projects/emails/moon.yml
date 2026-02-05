@@ -7,6 +7,7 @@ tasks:
   dev:
     command: yarn email dev
     preset: watcher
+
   build:
     command: yarn email build
     inputs:
@@ -14,11 +15,16 @@ tasks:
     options:
       # disable until https://github.com/fb55/css-select/issues/1590 is resolved.
       runInCI: false
+
   start:
     command: yarn email start
     deps:
       - build
     preset: watcher
 
+  fmt:
+    deps:
+      - ~:oxfmt
+
 tags:
-  - prettier
+  - oxfmt

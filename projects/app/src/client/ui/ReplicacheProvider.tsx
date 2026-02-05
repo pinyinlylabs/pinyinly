@@ -20,7 +20,6 @@ export const ReplicacheProvider = Object.assign(
     serverSessionId,
   }: React.PropsWithChildren<{ dbName: string; serverSessionId?: string }>) {
     "use memo"; // Object.assign(…) wrapped components aren't inferred.
-
     // Pull out stable references to the mutate functions to avoid reinstanciating
     // replicache each time the mutation state changes (e.g. pending -> success).
     const { mutateAsync: pushMutate } = trpc.replicache.push.useMutation();

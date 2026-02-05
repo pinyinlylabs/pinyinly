@@ -12,9 +12,13 @@ tasks:
       - ~:oxlint
       - ~:eslint
 
+  fmt:
+    deps:
+      - ~:oxfmt
+
 tags:
   - eslint
+  - oxfmt
   - oxlint
-  - prettier
   - typescript
   - vitest

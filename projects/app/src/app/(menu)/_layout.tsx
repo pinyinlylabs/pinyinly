@@ -161,8 +161,10 @@ function DesktopNavGroupTitle({ name }: { name: string }) {
   );
 }
 
-interface TabTriggerChildProps
-  extends Pick<TabTriggerSlotProps, `isFocused` | `href`> {
+interface TabTriggerChildProps extends Pick<
+  TabTriggerSlotProps,
+  `isFocused` | `href`
+> {
   name: string;
 }
 

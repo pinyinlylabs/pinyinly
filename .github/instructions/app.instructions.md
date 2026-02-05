@@ -11,11 +11,11 @@ The following commands should be used to test the code:
   - Run file tests: `moon run app:test -- <filename>`
   - Update snapshots: `moon run app:test -- -u`
 
-- Lint uses eslint, so any eslint arguments can be passed after `--`:
+- Lint uses oxlint and eslint:
   - Run all lint (and fix): `moon run app:lint`
-  - Run file lint: `moon run app:lint -- <filename>`
+  - Run file lint: `moon run app:eslint -- <filename>` or `moon run app:oxlint -- <filename>`
 
-- Prettier: `moon run app:prettier`
+- Formatting uses oxfmt: `moon run app:fmt`
 
 These can be run from any directory, there's no need to `cd` to a particular directory.
 

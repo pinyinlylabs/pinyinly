@@ -224,8 +224,10 @@ export class RizzleTypeAlias<T extends RizzleType> extends RizzleType<
   };
 }
 
-interface RizzleIndexedDef<T extends RizzleType, IndexName extends string>
-  extends RizzleTypeDef {
+interface RizzleIndexedDef<
+  T extends RizzleType,
+  IndexName extends string,
+> extends RizzleTypeDef {
   innerType: T;
   indexName: IndexName;
   typeName: `indexed`;
@@ -286,8 +288,9 @@ export class RizzleIndexed<
   };
 }
 
-interface RizzleObjectDef<T extends RizzleRawObject = RizzleRawObject>
-  extends RizzleTypeDef {
+interface RizzleObjectDef<
+  T extends RizzleRawObject = RizzleRawObject,
+> extends RizzleTypeDef {
   shape: T;
   typeName: `object`;
 }
@@ -466,8 +469,10 @@ type EntityKeyType<
 
 type EntityValueType<S extends RizzleRawObject> = RizzleObject<S>;
 
-interface RizzleEntityDef<KeyPath extends string, S extends RizzleRawObject>
-  extends RizzleTypeDef {
+interface RizzleEntityDef<
+  KeyPath extends string,
+  S extends RizzleRawObject,
+> extends RizzleTypeDef {
   keyPath: KeyPath;
   valueType: EntityValueType<S>;
   interpolateKey: (

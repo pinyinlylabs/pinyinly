@@ -8,6 +8,6 @@ tasks:
     inputs:
       - "**/*.{cjs,js,mjs,ts,tsx}"
       - "*.{cjs,js,mjs,ts,tsx}"
-      - ".oxlintrc.json"
-      - "/projects/oxlint-rules/*.oxlintrc.json"
+      - ".oxlintrc.*"
+      - "/projects/oxlint-rules/*.oxlintrc.*"
     toolchain: "node"

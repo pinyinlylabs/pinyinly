@@ -9,7 +9,6 @@ const Context = createContext<Db | null>(null);
 export const DbProvider = Object.assign(
   function DbProvider({ children }: PropsWithChildren) {
     "use memo"; // Object.assign(…) wrapped components aren't inferred.
-
     const rizzle = useReplicache();
     const db = makeDb(rizzle);
 

@@ -1001,6 +1001,7 @@ typeChecks<RizzleReplicacheMutators<never>>(
       });
     };
 
+    // oxlint-disable-next-line no-unused-expressions
     createPost;
   },
 );

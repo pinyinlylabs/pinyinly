@@ -5,8 +5,10 @@ import { View } from "react-native";
 import { Rive } from "./Rive";
 import type { RiveInstance } from "./riveTypes";
 
-interface ThreeSplitLinesDownProps
-  extends Pick<ViewProps, `className` | `style`> {
+interface ThreeSplitLinesDownProps extends Pick<
+  ViewProps,
+  `className` | `style`
+> {
   prop?: never;
 }
 

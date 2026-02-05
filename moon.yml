@@ -33,6 +33,10 @@ tasks:
       - renovateCheck
       - yarnConstraints
 
+  fmt:
+    deps:
+      - ~:oxfmt
+
 tags:
-  - prettier
+  - oxfmt
   - typescript
