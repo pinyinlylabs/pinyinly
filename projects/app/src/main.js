@@ -10,5 +10,5 @@ installSymbolAsyncInteratorPolyfill();
 // `node_modules/expo-router/entry`.
 //
 // @ts-expect-error no TypeScript module definition for expo-router/entry
-// oxlint-disable-next-line typescript/no-unsafe-assignment
+// oxlint-disable-next-line typescript/no-unsafe-assignment, import/no-commonjs
 module.exports = require(`expo-router/entry`);

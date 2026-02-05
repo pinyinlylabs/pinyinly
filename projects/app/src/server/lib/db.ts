@@ -1,3 +1,4 @@
+import * as schema from "@/server/pgSchema";
 import { invariant } from "@pinyinly/lib/invariant";
 import type { GetColumnData, SQL, SQLWrapper } from "drizzle-orm";
 import { sql } from "drizzle-orm";
@@ -11,7 +12,6 @@ import type {
 } from "drizzle-orm/pg-core";
 import type { Pool as PgPool } from "pg";
 import z from "zod/v4";
-import * as schema from "../pgSchema";
 
 export type Drizzle = NodePgDatabase<typeof schema>;
 export type Transaction = Parameters<Parameters<Drizzle[`transaction`]>[0]>[0];

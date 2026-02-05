@@ -1,3 +1,4 @@
+import { hapticImpactIfMobile } from "@/client/hooks/hapticImpactIfMobile";
 import { Rating } from "@/util/fsrs";
 import { characterCount } from "@/util/unicode";
 import type { PropsOf } from "@pinyinly/lib/types";
@@ -16,7 +17,6 @@ import Reanimated, {
 } from "react-native-reanimated";
 import { scheduleOnRN, scheduleOnUI } from "react-native-worklets";
 import { tv } from "tailwind-variants";
-import { hapticImpactIfMobile } from "../hooks/hapticImpactIfMobile";
 import {
   quizAnimationDuration,
   withIncorrectShakeAnimation,

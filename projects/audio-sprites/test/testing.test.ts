@@ -1,3 +1,4 @@
+import type * as FfmpegModule from "#ffmpeg.ts";
 import { hashFileContent } from "#manifestWrite.ts";
 import {
   assertSpritesUpToDate,
@@ -11,7 +12,6 @@ import type { SpriteManifest } from "#types.ts";
 import { globSync } from "@pinyinly/lib/fs";
 import { vol } from "memfs";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
-import type * as FfmpegModule from "../src/ffmpeg.ts";
 
 // Mock fs module to use memfs
 vi.mock(`node:fs`, async () => {

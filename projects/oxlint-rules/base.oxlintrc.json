@@ -1,6 +1,6 @@
 {
   "$schema": "https://oxc.rs/schemas/oxlint.json",
-  "plugins": ["typescript"],
+  "plugins": ["typescript", "import", "eslint", "unicorn"],
   "ignorePatterns": ["test/**", "**/*.d.ts"],
   "categories": {
     "correctness": "error",
@@ -63,6 +63,8 @@
     "unicorn/no-nested-ternary": "off", // nested ternaries are not so bad
     "unicorn/filename-case": "off", // using camelCase for filenames
     "unicorn/prefer-string-starts-ends-with": "error",
+    "unicorn/no-array-callback-reference": "off",
+    "unicorn/prefer-math-trunc": "off",
 
     "eslint/prefer-const": "deny",
     "eslint/no-unused-expressions": "deny",
@@ -138,6 +140,8 @@
       }
     ],
 
+    "import/unambiguous": "off",
+    "import/max-dependencies": "off",
     // disallow non-import statements appearing before import statements
     "import/first": "deny",
     // disallow AMD require/define
@@ -199,6 +203,19 @@
       "files": ["**/*.{js,mjs,ts,tsx}"],
       "rules": {
         "no-restricted-globals": ["error", "__dirname", "__filename"]
+      }
+    },
+    {
+      "files": ["**/*.cjs", "tailwind.config.js"],
+      "rules": {
+        "import/no-commonjs": "off"
+      }
+    },
+    // Config files often export their config as default.
+    {
+      "files": ["*.config.*"],
+      "rules": {
+        "import/no-default-export": "off"
       }
     },
     {

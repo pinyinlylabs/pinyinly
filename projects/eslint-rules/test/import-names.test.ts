@@ -1,6 +1,6 @@
+import { importNames as rule } from "#import-names.ts";
 import * as typescriptParser from "@typescript-eslint/parser";
 import { RuleTester } from "eslint";
-import { importNames as rule } from "../src/import-names.js";
 
 const ruleTester = new RuleTester({
   languageOptions: {

@@ -4,7 +4,7 @@ import type {
   IsEqual,
   IsExhaustedRest,
   PartialIfUndefined,
-} from "../src/types.ts";
+} from "#types.ts";
 
 test(`IsEqual`, () => {
   true satisfies IsEqual<`a`, `a`>;

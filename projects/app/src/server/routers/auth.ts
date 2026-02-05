@@ -1,10 +1,12 @@
 import { getLucia, getOrCreateUser } from "@/server/lib/auth";
 import { withDrizzle } from "@/server/lib/db";
+import { procedure, router } from "@/server/lib/trpc";
+import * as schema from "@/server/pgSchema";
 import { passkeyTransportEnumSchema } from "@/server/pgSchemaUtil";
 import { jwtSchema, toJwtSchema } from "@/util/jwt";
 import { nanoid } from "@/util/nanoid";
-import type { IsEqual } from "@pinyinly/lib/types";
 import { invariant } from "@pinyinly/lib/invariant";
+import type { IsEqual } from "@pinyinly/lib/types";
 import type {
   PublicKeyCredentialCreationOptionsJSON,
   PublicKeyCredentialRequestOptionsJSON,
@@ -23,8 +25,6 @@ import { and, eq } from "drizzle-orm";
 import { base64url } from "jose";
 import { parseJWT } from "oslo/jwt";
 import { z } from "zod/v4";
-import { procedure, router } from "../lib/trpc";
-import * as schema from "../pgSchema";
 
 // Define RP (Relying Party) name and ID for the WebAuthn process
 const RP_NAME = `Pinyinly`;

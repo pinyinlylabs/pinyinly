@@ -1,4 +1,5 @@
 import { v8, v9 } from "@/data/rizzleSchema";
+import * as s from "@/server/pgSchema";
 import type {
   ClientStateNotFoundResponse,
   PullOkResponse,
@@ -13,7 +14,6 @@ import { startSpan } from "@sentry/core";
 import { and, eq, gt } from "drizzle-orm";
 import chunk from "lodash/chunk";
 import type { z } from "zod/v4";
-import * as s from "../pgSchema";
 import type { Drizzle } from "./db";
 import { withRepeatableReadTransaction } from "./db";
 import { pull as pullV8, push as pushV8 } from "./replicache/v8";

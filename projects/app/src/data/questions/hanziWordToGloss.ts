@@ -1,9 +1,3 @@
-import type { HanziWordMeaning } from "@/dictionary";
-import { glossOrThrow, hanziFromHanziWord, loadDictionary } from "@/dictionary";
-import { evenHalve } from "@pinyinly/lib/collections";
-import { invariant } from "@pinyinly/lib/invariant";
-import shuffle from "lodash/shuffle";
-import type { DeepReadonly } from "ts-essentials";
 import type {
   HanziWord,
   HanziWordSkill,
@@ -11,9 +5,15 @@ import type {
   OneCorrectPairQuestionChoice,
   Question,
   QuestionFlagType,
-} from "../model";
-import { QuestionKind } from "../model";
-import { hanziWordFromSkill } from "../skills";
+} from "@/data/model";
+import { QuestionKind } from "@/data/model";
+import { hanziWordFromSkill } from "@/data/skills";
+import type { HanziWordMeaning } from "@/dictionary";
+import { glossOrThrow, hanziFromHanziWord, loadDictionary } from "@/dictionary";
+import { evenHalve } from "@pinyinly/lib/collections";
+import { invariant } from "@pinyinly/lib/invariant";
+import shuffle from "lodash/shuffle";
+import type { DeepReadonly } from "ts-essentials";
 import { oneCorrectPairQuestionInvariant } from "./oneCorrectPair";
 
 export async function hanziWordToGlossQuestionOrThrow(

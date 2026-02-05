@@ -1,9 +1,9 @@
+import { hapticImpactIfMobile } from "@/client/hooks/hapticImpactIfMobile";
 import type { PropsOf } from "@pinyinly/lib/types";
 import { isValidElement, useState } from "react";
 import type { ViewProps } from "react-native";
 import { Pressable, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
-import { hapticImpactIfMobile } from "../hooks/hapticImpactIfMobile";
 
 export type ButtonVariant =
   | `filled`

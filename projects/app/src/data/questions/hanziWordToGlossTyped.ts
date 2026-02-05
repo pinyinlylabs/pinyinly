@@ -1,20 +1,20 @@
-import { hanziFromHanziWord, loadDictionary } from "@/dictionary";
-import { Rating } from "@/util/fsrs";
-import { nonNullable } from "@pinyinly/lib/invariant";
-import type { Mutable } from "@pinyinly/lib/types";
 import type {
   HanziWordToGlossTypedQuestion,
   HanziWordToGlossTypedSkill,
   MistakeType,
   QuestionFlagType,
   UnsavedSkillRating,
-} from "../model";
-import { MistakeKind, QuestionFlagKind, QuestionKind } from "../model";
+} from "@/data/model";
+import { MistakeKind, QuestionFlagKind, QuestionKind } from "@/data/model";
 import {
   computeSkillRating,
   hanziWordFromSkill,
   hanziWordToGlossTyped,
-} from "../skills";
+} from "@/data/skills";
+import { hanziFromHanziWord, loadDictionary } from "@/dictionary";
+import { Rating } from "@/util/fsrs";
+import { nonNullable } from "@pinyinly/lib/invariant";
+import type { Mutable } from "@pinyinly/lib/types";
 
 export async function hanziWordToGlossTypedQuestionOrThrow(
   skill: HanziWordToGlossTypedSkill,

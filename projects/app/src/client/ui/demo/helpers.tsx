@@ -1,4 +1,6 @@
 import { useBetaFeatures } from "@/client/hooks/useBetaFeatures";
+import { RectButton } from "@/client/ui/RectButton";
+import { ToggleButton } from "@/client/ui/ToggleButton";
 import type { HanziText, HanziWord } from "@/data/model";
 import type { Href } from "expo-router";
 import { Link, useLocalSearchParams, useRouter } from "expo-router";
@@ -6,8 +8,6 @@ import type { ReactNode } from "react";
 import { useRef } from "react";
 import { Text, View } from "react-native";
 import { tv } from "tailwind-variants";
-import { RectButton } from "../RectButton";
-import { ToggleButton } from "../ToggleButton";
 
 export const ExampleStack = ({
   children,

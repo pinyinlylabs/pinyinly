@@ -1,6 +1,6 @@
+import { nameof } from "#nameof.ts";
 import * as typescriptParser from "@typescript-eslint/parser";
 import { RuleTester } from "eslint";
-import { nameof } from "../src/nameof.js";
 
 const ruleTester = new RuleTester({
   languageOptions: {

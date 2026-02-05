@@ -1,5 +1,5 @@
+import { globTemplate } from "#glob-template.ts";
 import { RuleTester } from "eslint";
-import { globTemplate } from "../src/glob-template.js";
 
 const validCodeCustomTemplate =
   `// <pyly-glob-template glob="./glob-template.test/*.svg" template="require('\${path}');">\n` +
