@@ -37,6 +37,7 @@
     },
     "files.associations": {
       "*.css": "tailwindcss",
+      "*.oxlintrc.json": "jsonc",
     },
     "tailwindCSS.files.exclude": [
       "**/.git/**",
