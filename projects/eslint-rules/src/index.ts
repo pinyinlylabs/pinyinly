@@ -252,7 +252,6 @@ const recommended: ConfigWithExtendsArray = [
       // noUnusedLocals and noUnusedParameters.
       "@typescript-eslint/no-unused-vars": `off`,
 
-      "@typescript-eslint/no-unnecessary-type-assertion": `error`,
       "@typescript-eslint/no-unnecessary-type-constraint": `error`,
       // Often only having one usage of a type parameter is fine because it's
       // the only way to use "_ extends _".

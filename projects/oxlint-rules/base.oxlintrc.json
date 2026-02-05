@@ -1,5 +1,6 @@
 {
   "$schema": "https://oxc.rs/schemas/oxlint.json",
+  "plugins": ["typescript"],
   "ignorePatterns": ["test/**", "**/*.d.ts"],
   "rules": {
     "curly": "deny",
@@ -29,6 +30,7 @@
     // Forbid mutable exports
     "import/no-mutable-exports": "deny",
     // Forbid a module from importing itself
-    "import/no-self-import": "deny"
+    "import/no-self-import": "deny",
+    "typescript/no-unnecessary-type-assertion": "deny"
   }
 }
