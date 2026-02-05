@@ -121,8 +121,6 @@ const recommended: ConfigWithExtendsArray = [
 
       // enforces consistent type specifier style for named imports
       "import/consistent-type-specifier-style": `error`,
-      // Require a newline after the last import/require in a group
-      "import/newline-after-import": `error`,
       // Forbid import of modules using absolute paths
       "import/no-absolute-path": `error`,
       // Forbid the use of extraneous packages
