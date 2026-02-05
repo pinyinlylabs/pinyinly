@@ -33,6 +33,7 @@
     "import/no-self-import": "deny",
     "typescript/no-unnecessary-type-assertion": "deny",
     "typescript/no-import-type-side-effects": "deny",
-    "typescript/consistent-type-imports": "deny"
+    "typescript/consistent-type-imports": "deny",
+    "typescript/no-unsafe-return": "deny"
   }
 }
