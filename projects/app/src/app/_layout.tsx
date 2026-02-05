@@ -18,6 +18,7 @@ import { PostHogProvider } from "@/client/ui/PostHogProvider";
 import { PylyThemeProvider } from "@/client/ui/PylyThemeProvider";
 import { SessionStoreProvider } from "@/client/ui/SessionStoreProvider";
 import { SplashScreen } from "@/client/ui/SplashScreen";
+import "@/global.css";
 import * as Sentry from "@sentry/react-native";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import * as AppleAuthentication from "expo-apple-authentication";
@@ -28,7 +29,6 @@ import { cssInterop } from "nativewind";
 import type { PropsWithChildren } from "react";
 import { useEffect } from "react";
 import Reanimated from "react-native-reanimated";
-import "../global.css";
 
 // NativeWind adapters for third party components
 

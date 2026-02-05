@@ -19,8 +19,6 @@
     "eslint-plugin-better-tailwindcss": "^3.1.0",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-react": "^7.37.2",
-    "eslint-plugin-react-compiler": "rc",
-    "eslint-plugin-react-hooks": "^6.0.0-rc.1",
     "eslint-plugin-tailwindcss": "^3.18.0",
     "eslint-plugin-unicorn": "^60.0.0",
     "prettier": "^3.4.2",

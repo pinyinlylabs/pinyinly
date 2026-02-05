@@ -1,4 +1,4 @@
-import { router } from "../lib/trpc";
+import { router } from "@/server/lib/trpc";
 import { authRouter } from "./auth";
 import { debugRouter } from "./debug";
 import { replicacheRouter } from "./replicache";

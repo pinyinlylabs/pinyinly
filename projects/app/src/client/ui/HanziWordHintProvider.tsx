@@ -76,6 +76,7 @@ export const HanziWordHintProvider = Object.assign(
     const setHint = (hanziWord: HanziWord, hint: string): void => {
       setHints((prev) => {
         const next = new Map(prev);
+        // oxlint-disable-next-line unicorn/no-immediate-mutation
         next.set(hanziWord, hint);
         return next;
       });

@@ -1,3 +1,4 @@
+import { useRenderGuard } from "@/client/hooks/useRenderGuard";
 import type { WithRizzleWatchPrefixes } from "@/client/query";
 import type { ReactQueryValue } from "@pinyinly/lib/types";
 import type {
@@ -7,7 +8,6 @@ import type {
 } from "@tanstack/react-query";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { useRenderGuard } from "../hooks/useRenderGuard";
 import { useReplicache } from "./useReplicache";
 
 export function useRizzleQueryPaged<

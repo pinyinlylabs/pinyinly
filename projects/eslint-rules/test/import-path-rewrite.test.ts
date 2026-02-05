@@ -1,5 +1,5 @@
+import { importPathRewrite } from "#import-path-rewrite.ts";
 import { RuleTester } from "eslint";
-import { importPathRewrite } from "../src/import-path-rewrite.js";
 
 const ruleTester = new RuleTester({
   languageOptions: {

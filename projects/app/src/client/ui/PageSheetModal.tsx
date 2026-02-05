@@ -1,3 +1,4 @@
+import { useEventCallback } from "@/client/hooks/useEventCallback";
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 import type { PressableProps } from "react-native";
@@ -13,7 +14,6 @@ import Reanimated, {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
-import { useEventCallback } from "../hooks/useEventCallback";
 import { ReanimatedPressable } from "./ReanimatedPressable";
 import { Suspense } from "./Suspense";
 

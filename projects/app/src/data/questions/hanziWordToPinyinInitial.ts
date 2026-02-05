@@ -1,4 +1,17 @@
+import type {
+  HanziCharacter,
+  HanziText,
+  HanziWord,
+  HanziWordSkill,
+  OneCorrectPairQuestion,
+  OneCorrectPairQuestionAnswer,
+  OneCorrectPairQuestionChoice,
+  PinyinUnit,
+  QuestionFlagType,
+} from "@/data/model";
+import { QuestionKind } from "@/data/model";
 import { normalizePinyinUnit, splitPinyinUnitOrThrow } from "@/data/pinyin";
+import { hanziWordFromSkill } from "@/data/skills";
 import {
   allHanziCharacterPronunciationsForHanzi,
   allHanziCharacters,
@@ -14,19 +27,6 @@ import {
   nonNullable,
 } from "@pinyinly/lib/invariant";
 import shuffle from "lodash/shuffle";
-import type {
-  HanziCharacter,
-  HanziText,
-  HanziWord,
-  HanziWordSkill,
-  OneCorrectPairQuestion,
-  OneCorrectPairQuestionAnswer,
-  OneCorrectPairQuestionChoice,
-  PinyinUnit,
-  QuestionFlagType,
-} from "../model";
-import { QuestionKind } from "../model";
-import { hanziWordFromSkill } from "../skills";
 import {
   hanziOrPinyinUnitCount,
   oneCorrectPairQuestionInvariant,

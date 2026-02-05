@@ -361,6 +361,7 @@ export class RizzleObject<T extends RizzleRawObject> extends RizzleType<
   }
 
   _getIndexes(): RizzleIndexDefinitions {
+    // oxlint-disable-next-line unicorn/no-array-reduce
     return Object.entries(this._def.shape).reduce<RizzleIndexDefinitions>(
       (acc, [key, rizzleType]) => ({
         ...acc,

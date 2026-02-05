@@ -17,8 +17,8 @@ test(`lib.dom.d.ts patches`, () => {
 });
 
 test(`banned CommonJS globals, use import.meta.* instead`, () => {
-  // eslint-disable-next-line no-restricted-globals
+  // oxlint-disable-next-line no-restricted-globals
   void __dirname;
-  // eslint-disable-next-line no-restricted-globals
+  // oxlint-disable-next-line no-restricted-globals
   void __filename;
 });

@@ -2,6 +2,7 @@ import { hanziWordSkillKinds } from "@/data/model";
 import { supportedSchemas } from "@/data/rizzleSchema";
 import { hanziWordSkill } from "@/data/skills";
 import { loadDictionary, loadHanziWordMigrations } from "@/dictionary";
+import * as s from "@/server/pgSchema";
 import type { AppRouter } from "@/server/routers/_app";
 import { preflightCheckEnvVars } from "@/util/env";
 import { httpSessionHeaderTx } from "@/util/http";
@@ -13,7 +14,6 @@ import { and, eq, gte, inArray, lt, notInArray, sql } from "drizzle-orm";
 import { Inngest } from "inngest";
 import * as postmark from "postmark";
 import z from "zod/v4";
-import * as s from "../pgSchema";
 import {
   pgBatchUpdate,
   substring,

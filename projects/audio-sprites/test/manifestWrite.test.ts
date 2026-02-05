@@ -1,3 +1,4 @@
+import type * as FfmpegModule from "#ffmpeg.ts";
 import { loadManifest } from "#manifestRead.ts";
 import {
   applyRules,
@@ -17,7 +18,6 @@ import {
 import { invariant } from "@pinyinly/lib/invariant";
 import { vol } from "memfs";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
-import type * as FfmpegModule from "../src/ffmpeg.ts";
 
 // Mock fs to use memfs
 vi.mock(`node:fs`, async () => {

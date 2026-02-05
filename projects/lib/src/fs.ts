@@ -2,12 +2,11 @@
 import { readFileSync, writeFileSync } from "node:fs";
 
 // oxlint-disable-next-line no-restricted-imports
-import { readFile, writeFile } from "node:fs/promises";
+import { readFile, stat, writeFile } from "node:fs/promises";
 
 // oxlint-disable-next-line no-restricted-imports
 import { globSync } from "glob";
 
-import { stat } from "@pinyinly/lib/fs";
 import { invariant } from "@pinyinly/lib/invariant";
 import type { Debugger } from "debug";
 import isEqual from "lodash/isEqual.js";

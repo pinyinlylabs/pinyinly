@@ -201,6 +201,7 @@ const rule: Rule.RuleModule = {
         } else if (expression.type === `TemplateLiteral`) {
           // Handle template literals (backticks) - only if they have no expressions
 
+          // oxlint-disable-next-line unicorn/no-lonely-if
           if (
             // oxlint-disable-next-line typescript/no-unsafe-member-access
             expression.expressions.length === 0 &&

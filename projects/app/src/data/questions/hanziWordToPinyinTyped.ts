@@ -1,9 +1,3 @@
-import { matchAllPinyinUnits } from "@/data/pinyin";
-import { hanziFromHanziWord, loadDictionary } from "@/dictionary";
-import { Rating } from "@/util/fsrs";
-import { sortComparatorNumber } from "@pinyinly/lib/collections";
-import { invariant, nonNullable } from "@pinyinly/lib/invariant";
-import type { Mutable } from "@pinyinly/lib/types";
 import type {
   HanziWordSkill,
   HanziWordToPinyinTypedQuestion,
@@ -13,13 +7,19 @@ import type {
   QuestionFlagType,
   Skill,
   UnsavedSkillRating,
-} from "../model";
-import { MistakeKind, QuestionFlagKind, QuestionKind } from "../model";
+} from "@/data/model";
+import { MistakeKind, QuestionFlagKind, QuestionKind } from "@/data/model";
+import { matchAllPinyinUnits } from "@/data/pinyin";
 import {
   computeSkillRating,
   hanziWordFromSkill,
   hanziWordToPinyinTyped,
-} from "../skills";
+} from "@/data/skills";
+import { hanziFromHanziWord, loadDictionary } from "@/dictionary";
+import { Rating } from "@/util/fsrs";
+import { sortComparatorNumber } from "@pinyinly/lib/collections";
+import { invariant, nonNullable } from "@pinyinly/lib/invariant";
+import type { Mutable } from "@pinyinly/lib/types";
 
 export async function hanziWordToPinyinTypedQuestionOrThrow(
   skill: HanziWordSkill,

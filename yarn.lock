@@ -945,7 +945,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/plugin-transform-private-methods@npm:^7.24.4, @babel/plugin-transform-private-methods@npm:^7.24.7":
+"@babel/plugin-transform-private-methods@npm:^7.24.7":
   version: 7.27.1
   resolution: "@babel/plugin-transform-private-methods@npm:7.27.1"
   dependencies:
@@ -4949,6 +4949,7 @@ __metadata:
     drizzle-orm: "patch:drizzle-orm@npm%3A0.44.7#~/.yarn/patches/drizzle-orm-npm-0.44.7-0e87e239b7.patch"
     eslint: "npm:^9.13.0"
     eslint-plugin-drizzle: "npm:^0.2.3"
+    eslint-plugin-react-compiler: "npm:rc"
     expo: "npm:54.0.29"
     expo-apple-authentication: "npm:~8.0.8"
     expo-application: "npm:~7.0.8"
@@ -5092,8 +5093,6 @@ __metadata:
     eslint-plugin-better-tailwindcss: "npm:^3.1.0"
     eslint-plugin-import: "npm:^2.31.0"
     eslint-plugin-react: "npm:^7.37.2"
-    eslint-plugin-react-compiler: "npm:rc"
-    eslint-plugin-react-hooks: "npm:^6.0.0-rc.1"
     eslint-plugin-tailwindcss: "npm:^3.18.0"
     eslint-plugin-unicorn: "npm:^60.0.0"
     oxlint: "npm:^1.43.0"
@@ -11162,22 +11161,6 @@ __metadata:
   peerDependencies:
     eslint: ">=7"
   checksum: 10c0/7bf9a6efc6126b19005bf318dd4b0c4d1cf469f00033202a42a2ade46aba774c992b06e337eb1e8ac3b8f6972537061eed55a2dccf2092781cfb1d511c07335e
-  languageName: node
-  linkType: hard
-
-"eslint-plugin-react-hooks@npm:^6.0.0-rc.1":
-  version: 6.0.0-rc1
-  resolution: "eslint-plugin-react-hooks@npm:6.0.0-rc1"
-  dependencies:
-    "@babel/core": "npm:^7.24.4"
-    "@babel/parser": "npm:^7.24.4"
-    "@babel/plugin-transform-private-methods": "npm:^7.24.4"
-    hermes-parser: "npm:^0.25.1"
-    zod: "npm:^3.22.4"
-    zod-validation-error: "npm:^3.0.3"
-  peerDependencies:
-    eslint: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0 || ^9.0.0
-  checksum: 10c0/f225fa4a5a802ae4143076e72d101325518f3e16cb3298b944ef83bc6733639d431d73ec6224b6443a10d19fbb92b43119dcedfade6fe91c02bfd7335b5c72ed
   languageName: node
   linkType: hard
 

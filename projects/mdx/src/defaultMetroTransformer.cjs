@@ -1,4 +1,6 @@
+// oxlint-disable import/no-commonjs
 // @ts-check
+
 // This file needs to be CommonJS to work with Metro's require system
 const upstreamTransformer = require(
   `@expo/metro-config/build/babel-transformer.js`,

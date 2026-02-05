@@ -1,5 +1,5 @@
+import { noRestrictedCssClasses } from "#no-restricted-css-classes.ts";
 import { RuleTester } from "eslint";
-import { noRestrictedCssClasses } from "../src/no-restricted-css-classes.js";
 
 const ruleTester = new RuleTester({
   languageOptions: {

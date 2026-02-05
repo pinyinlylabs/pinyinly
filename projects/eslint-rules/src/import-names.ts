@@ -177,12 +177,10 @@ const rule: Rule.RuleModule = {
                   fix(fixer) {
                     const sourceCode = context.sourceCode;
                     const scope = sourceCode.getScope(node);
-                    const fixes = [];
-
-                    // For named imports, we need to update both the import specifier and all references
-                    fixes.push(
+                    const fixes = [
+                      // For named imports, we need to update both the import specifier and all references
                       fixer.replaceText(specifier.local, expectedName),
-                    );
+                    ];
 
                     // Find all references to the local variable name
                     const variable = scope.set.get(localName);

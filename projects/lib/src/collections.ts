@@ -41,6 +41,7 @@ export function readonlyMapSet<K, V>(
     return map;
   }
   const copy = new Map(map);
+  // oxlint-disable-next-line unicorn/no-immediate-mutation
   copy.set(key, value);
   return copy;
 }

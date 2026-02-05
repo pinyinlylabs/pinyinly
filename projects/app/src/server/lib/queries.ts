@@ -1,9 +1,9 @@
 import type { Skill, SrsStateType } from "@/data/model";
 import { SrsKind } from "@/data/model";
+import * as schema from "@/server/pgSchema";
 import type { FsrsState } from "@/util/fsrs";
 import { nextReview } from "@/util/fsrs";
 import { and, asc, eq, isNull } from "drizzle-orm";
-import * as schema from "../pgSchema";
 import type { Drizzle } from "./db";
 
 export async function updateSkillState(

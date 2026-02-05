@@ -4,8 +4,6 @@ import betterTailwindcssPlugin from "eslint-plugin-better-tailwindcss";
 import { getDefaultAttributes } from "eslint-plugin-better-tailwindcss/api/defaults";
 import importPlugin from "eslint-plugin-import";
 import reactPlugin from "eslint-plugin-react";
-import reactCompilerPlugin from "eslint-plugin-react-compiler";
-import reactHooksPlugin from "eslint-plugin-react-hooks";
 import tailwindPlugin from "eslint-plugin-tailwindcss";
 import unicorn from "eslint-plugin-unicorn";
 import type { defineConfig } from "eslint/config";
@@ -134,16 +132,6 @@ const recommended: ConfigWithExtendsArray = [
   },
 ];
 
-const esm: ConfigWithExtendsArray = [
-  // Ban CommonJS globals in ESM files, use import.meta.* instead
-  {
-    files: [`**/*.{js,mjs,ts,tsx}`],
-    rules: {
-      "no-restricted-globals": [`error`, `__dirname`, `__filename`],
-    },
-  },
-];
-
 const react: ConfigWithExtendsArray = [
   {
     files: [`**/*.{ts,tsx}`],
@@ -160,12 +148,6 @@ const react: ConfigWithExtendsArray = [
       "react/prop-types": `off`, // we use TypeScript for type checking
       "react/no-children-prop": [`error`, { allowFunctions: true }],
 
-      //
-      // react-compiler
-      //
-
-      "react-compiler/react-compiler": `error`,
-
       "@pinyinly/no-restricted-css-classes": [
         `error`,
         {
@@ -175,13 +157,6 @@ const react: ConfigWithExtendsArray = [
         },
       ],
     },
-  },
-
-  {
-    // Strip out `plugins` to avoid declaring it.
-    files: [`**/*.{ts,tsx}`],
-    name: reactHooksPlugin.configs[`recommended-latest`].name,
-    rules: reactHooksPlugin.configs[`recommended-latest`].rules,
   },
 ];
 
@@ -231,14 +206,12 @@ const tailwind: ConfigWithExtendsArray = [
 ];
 
 interface Configs {
-  esm: ConfigWithExtendsArray;
   react: ConfigWithExtendsArray;
   recommended: ConfigWithExtendsArray;
   tailwind: ConfigWithExtendsArray;
 }
 
 export const configs: Configs = {
-  esm,
   react,
   recommended,
   tailwind,
@@ -250,8 +223,6 @@ export const plugins = {
   [`@typescript-eslint`]: tseslint.plugin as ESLint.Plugin,
   [`better-tailwindcss`]: betterTailwindcssPlugin as ESLint.Plugin,
   [`import`]: importPlugin as ESLint.Plugin,
-  [`react-compiler`]: reactCompilerPlugin as ESLint.Plugin,
-  [`react-hooks`]: reactHooksPlugin as ESLint.Plugin,
   [`react`]: reactPlugin as ESLint.Plugin,
   [`tailwind`]: tailwindPlugin as ESLint.Plugin,
   [`unicorn`]: unicorn,

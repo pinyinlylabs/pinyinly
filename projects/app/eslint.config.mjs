@@ -34,7 +34,6 @@ export default defineConfig(
 
   // extends ...
   configs.recommended,
-  configs.esm,
   configs.react,
   configs.tailwind,
 

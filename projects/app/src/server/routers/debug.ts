@@ -1,4 +1,4 @@
-import { authedProcedure, procedure, router } from "../lib/trpc";
+import { authedProcedure, procedure, router } from "@/server/lib/trpc";
 
 export const debugRouter = router({
   anonymousThrowError: procedure.mutation(async () => {

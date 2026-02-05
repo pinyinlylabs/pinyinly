@@ -274,4 +274,5 @@ function NoHintPlaceholder({ hanziWord }: { hanziWord: HanziWord }) {
   );
 }
 
+// oxlint-disable-next-line unicorn/prefer-top-level-await
 const hanziCharacterColorSafeSchema = hanziCharacterColorSchema.catch(`fg`);

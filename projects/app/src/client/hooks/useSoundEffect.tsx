@@ -1,3 +1,4 @@
+import { useEventCallback } from "@/client/hooks/useEventCallback";
 import { AudioContextProvider } from "@/client/ui/AudioContextProvider";
 import type { PylyAudioSource } from "@pinyinly/audio-sprites/client";
 import {
@@ -7,7 +8,6 @@ import {
 import { useAudioPlayer } from "expo-audio";
 import { use } from "react";
 import { Platform } from "react-native";
-import { useEventCallback } from "../hooks/useEventCallback";
 import { useFetchAudioBuffer } from "./useFetchAudioBuffer";
 
 export type UseSoundEffect = (source: PylyAudioSource) => () => void;
