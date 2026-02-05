@@ -101,7 +101,7 @@ const rule: Rule.RuleModule = {
           let closeIdx = i + 1;
           let closeComment = null;
           while (closeIdx < comments.length) {
-            // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+             
             if (comments[closeIdx]?.value.includes(`</pyly-glob-template>`)) {
               closeComment = comments[closeIdx];
               break;

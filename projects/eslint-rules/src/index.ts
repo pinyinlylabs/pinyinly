@@ -261,7 +261,7 @@ const recommended: ConfigWithExtendsArray = [
       // Migrated to oxlint - see typescript/restrict-template-expressions in oxlint config
       "@typescript-eslint/restrict-template-expressions": `off`,
       "@typescript-eslint/switch-exhaustiveness-check": `off`,
-      "@typescript-eslint/strict-boolean-expressions": `error`,
+      "@typescript-eslint/strict-boolean-expressions": `off`,
       // It's easier to use the debugger for async code when all promises are
       // awaited so that the function call stack is preserved.
       "@typescript-eslint/return-await": [`error`, `always`],

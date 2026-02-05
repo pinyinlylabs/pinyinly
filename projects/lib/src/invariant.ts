@@ -17,7 +17,7 @@ export function invariant(
   message?: string,
   ...args: unknown[]
 ): asserts condition {
-  // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+   
   if (!condition) {
     message ??= `Invariant failed`;
     // Replace %s placeholders with provided arguments

@@ -35,6 +35,7 @@
     "typescript/no-import-type-side-effects": "deny",
     "typescript/consistent-type-imports": "deny",
     "typescript/no-unsafe-return": "deny",
+    "typescript/strict-boolean-expressions": "deny",
     "typescript/switch-exhaustiveness-check": [
       "deny",
       { "requireDefaultForNonUnion": true }
