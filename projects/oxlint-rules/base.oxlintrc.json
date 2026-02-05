@@ -3,6 +3,7 @@
   "plugins": ["typescript"],
   "ignorePatterns": ["test/**", "**/*.d.ts"],
   "categories": {
+    "correctness": "error",
     "pedantic": "error"
   },
   "rules": {
