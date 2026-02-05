@@ -63,7 +63,6 @@ const Context = createContext<HanziWordHintContextValue | null>(null);
 export const HanziWordHintProvider = Object.assign(
   function HanziWordHintProvider({ children }: PropsWithChildren) {
     "use memo"; // Object.assign(…) wrapped components aren't inferred.
-
     const [hints, setHints] = useState<Map<HanziWord, string>>(() => new Map());
     const [customHints, setCustomHints] = useState<
       Map<HanziWord, CustomHint[]>

@@ -3,12 +3,11 @@ import type { Ref } from "react";
 import { TextInput } from "react-native";
 import { tv } from "tailwind-variants";
 
-interface TextInputSingleProps
-  extends Omit<
-    PropsOf<typeof TextInput>,
-    // make `placeholder` mandatory (encourage a11y)
-    `placeholder`
-  > {
+interface TextInputSingleProps extends Omit<
+  PropsOf<typeof TextInput>,
+  // make `placeholder` mandatory (encourage a11y)
+  `placeholder`
+> {
   disabled?: boolean;
   placeholder: string | undefined;
   ref?: Ref<TextInput>;

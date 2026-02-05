@@ -1071,7 +1071,7 @@ const DictionaryPicker = ({
             const queries: GenerateHanziWordQuery[] = [];
             const dictionary = await loadDictionary();
 
-            linesLoop: for (const line of lines) {
+            for (const line of lines) {
               if (line.trim() === ``) {
                 continue;
               }

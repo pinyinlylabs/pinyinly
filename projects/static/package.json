@@ -4,7 +4,7 @@
   "devDependencies": {
     "@types/node": "22.x",
     "@types/yargs": "^17 <=17.x",
-    "prettier": "^3.4.2",
+    "oxfmt": "^0.28.0",
     "tsx": "^4.15.7",
     "typescript": "patch:typescript@npm%3A5.9.2#~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch",
     "yargs": "^18.0.0"

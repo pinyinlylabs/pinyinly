@@ -3,8 +3,10 @@ import type { ImageProps } from "expo-image";
 import { Image } from "expo-image";
 import { tv } from "tailwind-variants";
 
-export interface IconImageProps
-  extends Pick<ImageProps, `source` | `className`> {
+export interface IconImageProps extends Pick<
+  ImageProps,
+  `source` | `className`
+> {
   size?: 12 | 16 | 24 | 32;
 }
 

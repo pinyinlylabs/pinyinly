@@ -17,8 +17,10 @@ const quizSubmitButtonStateSchema = z.enum({
 export const QuizSubmitButtonState = quizSubmitButtonStateSchema.enum;
 export type QuizSubmitButtonState = z.infer<typeof quizSubmitButtonStateSchema>;
 
-interface QuizSubmitButtonProps
-  extends Pick<PropsOf<typeof RectButton>, `onPress` | `ref`> {
+interface QuizSubmitButtonProps extends Pick<
+  PropsOf<typeof RectButton>,
+  `onPress` | `ref`
+> {
   autoFocus?: boolean;
   disabled: boolean;
   rating: Rating | null | undefined;

@@ -20,9 +20,9 @@
   "devDependencies": {
     "@pinyinly/eslint-rules": "workspace:*",
     "@types/lodash": "4.17.x",
+    "oxfmt": "^0.28.0",
     "oxlint": "^1.43.0",
     "oxlint-tsgolint": "^0.11.4",
-    "prettier": "^3.4.2",
     "typescript": "patch:typescript@npm%3A5.9.2#~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch",
     "vitest": "^3.2.4"
   },

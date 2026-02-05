@@ -1,5 +1,5 @@
 {
-  "$schema": "https://oxc.rs/schemas/oxlint.json",
+  "$schema": "../../node_modules/oxlint/configuration_schema.json",
   "extends": ["../oxlint-rules/base.oxlintrc.json"],
   "rules": {}
 }

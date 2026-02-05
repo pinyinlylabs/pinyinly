@@ -767,7 +767,10 @@ function guessMeaningKey(meanings: readonly string[]): string {
   ]);
 
   function cleanWord(word: string): string {
-    return word.toLowerCase().replaceAll(/[’']/g, ``).trim();
+    return word
+      .toLowerCase()
+      .replaceAll(/[’']/g, ``)
+      .trim();
   }
 
   function isFillerWord(word: string): boolean {

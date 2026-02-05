@@ -1,0 +1,21 @@
+fileGroups:
+  config:
+    - "/.gitignore"
+    - "/.oxfmtrc.*"
+  sources:
+    - "**/*"
+    - "!dist/**"
+
+tasks:
+  oxfmt:
+    description: "Run oxfmt and fix code formatting issues (except in CI)."
+    script: |
+      [ -z ${CI:-} ] && MODE="--write" || MODE="--check"
+
+      yarn oxfmt ${MODE:-} --ignore-path .gitignore --ignore-path $workspaceRoot/.gitignore . '!projects/**'
+    inputs:
+      - "@globs(sources)"
+      - "@group(config)"
+      - "!./projects/**/*"
+      # Environment variables
+      - "$CI"

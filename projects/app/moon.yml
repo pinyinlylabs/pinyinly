@@ -341,10 +341,14 @@ tasks:
       # Lint does type-checking, so the Expo router types need to be generated first.
       - ~:codegen
 
+  fmt:
+    deps:
+      - ~:oxfmt
+
 tags:
   - eslint
+  - oxfmt
   - oxlint
-  - prettier
   - typescript
   - vercel
   - vitest

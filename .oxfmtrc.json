@@ -1,0 +1,25 @@
+{
+  "$schema": "node_modules/oxfmt/configuration_schema.json",
+  "printWidth": 80,
+  "ignorePatterns": [
+    "package.json",
+    "pnpm-lock.yaml",
+    "/.yarn/releases",
+    "/projects/app/drizzle/meta",
+    "/projects/app/.vercel",
+    "/projects/app/src/assets/**/*.svg",
+    "/projects/app/src/assets/**/*.json",
+    "/projects/*/dist",
+    "*.asset.json",
+    "*.m4a"
+  ],
+  "overrides": [
+    {
+      "files": ["*.md", "*.mdx"],
+      "options": {
+        "printWidth": 100,
+        "proseWrap": "always"
+      }
+    }
+  ]
+}

@@ -221,6 +221,10 @@
     {
       "files": ["test/**/*.{ts,tsx}"],
       "rules": {
+         // it's nice to be able to write a quick generator functions in a test without worrying about yield
+        "require-yield": "off",
+        "eslint/require-yield": "off",
+        
         "no-non-null-assertion": "off"
         // Backup from eslint config:
         //

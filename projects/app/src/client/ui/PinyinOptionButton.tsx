@@ -3,8 +3,10 @@ import { Text } from "react-native";
 import { tv } from "tailwind-variants";
 import { RectButton } from "./RectButton";
 
-interface PinyinOptionButtonProps
-  extends Omit<PropsOf<typeof RectButton>, `variant` | `children` | `onPress`> {
+interface PinyinOptionButtonProps extends Omit<
+  PropsOf<typeof RectButton>,
+  `variant` | `children` | `onPress`
+> {
   pinyin: string;
   shortcutKey: string;
   onPress?: (pinyin: string) => void;

@@ -23,7 +23,6 @@ const Context = createContext<{
 export const DeviceStoreProvider = Object.assign(
   function DeviceStoreProvider({ children }: PropsWithChildren) {
     "use memo"; // Object.assign(…) wrapped components aren't inferred.
-
     const queryClient = useNewQueryClient();
 
     return (

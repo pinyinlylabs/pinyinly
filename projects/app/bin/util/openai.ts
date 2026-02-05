@@ -28,7 +28,7 @@ export const openAiWithFsDbCache = async (
       if (typeof message.content === `string`) {
         debug(`Content:\n%s`, message.content);
       } else {
-        debug(`Content:\%O`, message.content);
+        debug(`Content:%O`, message.content);
       }
       debug(``);
     }

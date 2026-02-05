@@ -107,7 +107,8 @@ export const zodJson = <T extends z.ZodType>(name: string, schema: T) => {
       return `json`;
     },
     fromDriver(
-      this: PgCustomColumn, // hack: expose drizzle internals
+      // hack: expose drizzle internals
+      this: PgCustomColumn,
       value,
     ) {
       return (fromDriverSchemaMemo ??= schema.catch(
@@ -115,7 +116,8 @@ export const zodJson = <T extends z.ZodType>(name: string, schema: T) => {
       )).parse(value);
     },
     toDriver(
-      this: PgCustomColumn, // hack: expose drizzle internals
+      // hack: expose drizzle internals
+      this: PgCustomColumn,
       value,
     ) {
       return jsonStringifyEnhancedErrors(this, value);
@@ -151,7 +153,8 @@ export const pgZod = <
       return pgDataType;
     },
     fromDriver(
-      this: PgCustomColumn, // hack to expose column name
+      // hack to expose column name
+      this: PgCustomColumn,
       value,
     ) {
       errorFactory ??= debugFriendlyErrorFactory(this);
@@ -164,7 +167,8 @@ export const pgZod = <
       throw errorFactory(result.error.issues);
     },
     toDriver(
-      this: PgCustomColumn, // hack to expose column name
+      // hack to expose column name
+      this: PgCustomColumn,
       value: z4.output<T>,
     ) {
       errorFactory ??= debugFriendlyErrorFactory(this);
@@ -200,7 +204,8 @@ export const rizzleCustomType = <
       return pgDataType;
     },
     fromDriver(
-      this: PgCustomColumn, // hack to expose column name
+      // hack to expose column name
+      this: PgCustomColumn,
       value,
     ) {
       errorFactory ??= debugFriendlyErrorFactory(this);
@@ -213,7 +218,8 @@ export const rizzleCustomType = <
       throw errorFactory(result.error.issues);
     },
     toDriver(
-      this: PgCustomColumn, // hack to expose column name
+      // hack to expose column name
+      this: PgCustomColumn,
       value: T[`_output`],
     ) {
       errorFactory ??= debugFriendlyErrorFactory(this);
