@@ -34,6 +34,18 @@
     "typescript/no-unnecessary-type-assertion": "deny",
     "typescript/no-import-type-side-effects": "deny",
     "typescript/consistent-type-imports": "deny",
-    "typescript/no-unsafe-return": "deny"
+    "typescript/no-unsafe-return": "deny",
+    "typescript/restrict-template-expressions": [
+      "deny",
+      {
+        "allowAny": false,
+        "allowArray": false,
+        "allowBoolean": true,
+        "allowNever": false,
+        "allowNullish": false,
+        "allowNumber": true,
+        "allowRegExp": false
+      }
+    ]
   }
 }

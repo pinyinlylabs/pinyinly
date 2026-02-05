@@ -258,18 +258,8 @@ const recommended: ConfigWithExtendsArray = [
       // means it's often turned off even when it perhaps shouldn't be, so it's
       // better to just disable it completely.
       "@typescript-eslint/no-unsafe-return": `off`,
-      "@typescript-eslint/restrict-template-expressions": [
-        `error`,
-        {
-          allowAny: false,
-          allowArray: false,
-          allowBoolean: true,
-          allowNever: false,
-          allowNullish: false,
-          allowNumber: true,
-          allowRegExp: false,
-        },
-      ],
+      // Migrated to oxlint - see typescript/restrict-template-expressions in oxlint config
+      "@typescript-eslint/restrict-template-expressions": `off`,
       "@typescript-eslint/switch-exhaustiveness-check": [
         `error`,
         { requireDefaultForNonUnion: true },
@@ -302,7 +292,6 @@ const recommended: ConfigWithExtendsArray = [
     rules: {
       "@typescript-eslint/no-non-null-assertion": `off`,
       "@typescript-eslint/no-unsafe-assignment": `off`,
-      "@typescript-eslint/restrict-template-expressions": `off`,
       "@typescript-eslint/require-await": `off`, // this is annoying when you want a little function to return a promise
       "@typescript-eslint/return-await": `off`, // this is annoying when you want a little function to return a promise
       // It's useful to use inline type annotations for mocking.
