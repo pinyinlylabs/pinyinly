@@ -3,7 +3,7 @@
   "ignorePatterns": ["test/**", "**/*.d.ts"],
   "rules": {
     "curly": "deny",
-    "no-console": ["deny", { "allow": ["info", "warn", "error"] }],
+    "no-console": ["deny", { "allow": ["warn", "error"] }],
     "no-debugger": "deny",
     "no-else-return": "deny",
     "no-useless-rename": "deny",

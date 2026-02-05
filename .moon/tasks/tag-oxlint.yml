@@ -7,4 +7,5 @@ tasks:
       - "**/*.{cjs,js,mjs,ts,tsx}"
       - "*.{cjs,js,mjs,ts,tsx}"
       - ".oxlintrc.json"
+      - "/projects/oxlint-rules/*.oxlintrc.json"
     toolchain: "node"
