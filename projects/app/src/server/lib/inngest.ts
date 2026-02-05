@@ -84,7 +84,7 @@ const helloWorldEmail = inngest.createFunction(
     invariant(POSTMARK_SERVER_TOKEN != null);
     const client = new postmark.ServerClient(POSTMARK_SERVER_TOKEN);
 
-    const response = await step.run(`sendEmail`, () =>
+    const response = await step.run(`sendEmail`, async () =>
       client.sendEmail({
         From: `hello@pinyinly.com`,
         To: `brad@pinyinly.com`,
@@ -293,7 +293,7 @@ const syncRemotePush = inngest.createFunction(
   },
   async ({ step, logger }) => {
     {
-      const isOffline = await step.run(`checkInternetConnection`, () =>
+      const isOffline = await step.run(`checkInternetConnection`, async () =>
         checkIsOffline(),
       );
       if (isOffline) {
@@ -353,7 +353,7 @@ const syncRemotePush = inngest.createFunction(
             // oxlint-disable-next-line no-loop-func
             async () => {
               // Fetch mutations that need to be sent.
-              const mutationBatchToPush = await withDrizzle((db) =>
+              const mutationBatchToPush = await withDrizzle(async (db) =>
                 getReplicacheClientMutationsSince(db, {
                   clientId,
                   sinceMutationId: lastSyncedMutationId,
@@ -416,7 +416,7 @@ const syncRemotePull = inngest.createFunction(
   },
   async ({ step, logger }) => {
     {
-      const isOffline = await step.run(`checkInternetConnection`, () =>
+      const isOffline = await step.run(`checkInternetConnection`, async () =>
         checkIsOffline(),
       );
       if (isOffline) {

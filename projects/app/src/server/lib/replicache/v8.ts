@@ -486,7 +486,7 @@ function makeSyncEntity<
     rizzleEntity,
     cvrKeyToEntityKey: (cvrKey: string) =>
       cvrKeyToEntityKey(cvrKey as CvrKeyType, rizzleEntity),
-    fetchEntityPutOps: (db, ids) =>
+    fetchEntityPutOps: async (db, ids) =>
       fetchEntities(db, ids).then((rows) =>
         rows.map((row) => ({
           op: `put`,

@@ -747,7 +747,7 @@ describe(
         // Mock to prevent console output during tests
       });
 
-      await expect(() =>
+      await expect(async () =>
         syncManifestWithFilesystem(`/nonexistent/manifest.json`),
       ).rejects.toThrow(); // Just check that it throws, the specific error can vary
     });

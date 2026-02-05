@@ -1062,7 +1062,7 @@ const replicache = <
         ? [
             [
               k,
-              (options: typeof v._def.args._input) => {
+              async (options: typeof v._def.args._input) => {
                 const mutator = replicache.mutate[v._def.alias ?? k];
                 invariant(mutator != null, `mutator ${k} not found`);
                 return mutator(v._def.args.marshal(options));
@@ -1079,7 +1079,10 @@ const replicache = <
         ? [
             [
               v._def.alias ?? k,
-              (tx: WriteTransaction, options: typeof v._def.args._input) => {
+              async (
+                tx: WriteTransaction,
+                options: typeof v._def.args._input,
+              ) => {
                 const mutator = mutators[k as keyof typeof mutators];
                 invariant(
                   (mutator as unknown) != null,
@@ -1123,7 +1126,7 @@ const replicache = <
                   scan: (partialKey = {}) =>
                     withToArray(
                       scanPagedIter(
-                        (fn) => replicache.query(fn),
+                        async (fn) => replicache.query(fn),
                         e._def.interpolateKey(partialKey, true),
                         (x) =>
                           e.unmarshalValue(
@@ -1142,7 +1145,7 @@ const replicache = <
                     (indexValue?: unknown, exact = true) =>
                       withToArray(
                         indexScanPagedIter(
-                          (fn) => replicache.query(fn),
+                          async (fn) => replicache.query(fn),
                           `${k}.${indexName}`,
                           (x) =>
                             e.unmarshalValue(
@@ -1169,7 +1172,7 @@ const replicache = <
     query,
     queryPaged,
     mutate,
-    [Symbol.asyncDispose]: () => replicache.close(),
+    [Symbol.asyncDispose]: async () => replicache.close(),
   };
 };
 
@@ -1306,7 +1309,7 @@ export const makeDrizzleMutationHandler = <S extends RizzleRawSchema, Tx>(
         ? [
             [
               v._def.alias ?? k,
-              (tx: Tx, userId: string, mutation: ReplicacheMutation) => {
+              async (tx: Tx, userId: string, mutation: ReplicacheMutation) => {
                 const mutator =
                   k in mutators ? mutators[k as keyof typeof mutators] : null;
                 invariant(mutator != null, `mutator ${k} not found`);
@@ -1508,7 +1511,7 @@ export async function* indexScanPagedIter<Value>(
 function withToArray<T>(
   iter: AsyncGenerator<T>,
 ): AsyncGenerator<T> & { toArray: () => Promise<T[]> } {
-  return Object.assign(iter, { toArray: () => fromAsync(iter) });
+  return Object.assign(iter, { toArray: async () => fromAsync(iter) });
 }
 
 export async function* scanIter<Value>(

@@ -69,11 +69,11 @@ function getImpl(schemaVersion: string): Impl {
   }
 }
 
-const notSupported = () =>
-  Promise.resolve({
+const notSupported = async () =>
+  ({
     error: `VersionNotSupported`,
     versionType: `schema`,
-  } satisfies VersionNotSupportedResponse);
+  }) satisfies VersionNotSupportedResponse;
 
 export const fetchedMutationSchema = pushRequestSchema.omit({
   // `profileId` isn't stored in the DB so we can't return it.

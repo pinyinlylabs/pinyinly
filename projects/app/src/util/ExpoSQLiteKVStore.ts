@@ -50,7 +50,7 @@ export class ExpoSQLiteKVStore implements KVStore {
     this._idleDbs.length = 0;
     this._closed = true;
 
-    await Promise.all(dbs.map((x) => x.closeAsync()));
+    await Promise.all(dbs.map(async (x) => x.closeAsync()));
   }
 
   get closed(): boolean {

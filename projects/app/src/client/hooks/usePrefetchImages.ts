@@ -7,12 +7,12 @@ export function usePrefetchImages(...images: RnRequireSource[]) {
   return useQueries({
     queries: images.map((image) => ({
       queryKey: [usePrefetchImages.name, image],
-      queryFn: () => cacheImage(image),
+      queryFn: async () => cacheImage(image),
     })),
   });
 }
 
-function cacheImage(image: RnRequireSource) {
+async function cacheImage(image: RnRequireSource) {
   if (Platform.OS === `web`) {
     const uri = typeof image === `string` ? image : Asset.fromModule(image).uri;
     return Image.prefetch(uri);

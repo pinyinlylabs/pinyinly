@@ -333,7 +333,9 @@ export const fetchArrayBufferQuery = (uri: string | null) =>
         ? skipToken
         : async ({ signal }) => {
             await devToolsSlowQuerySleepIfEnabled();
-            return fetch(uri, { signal }).then((res) => res.arrayBuffer());
+            return fetch(uri, { signal }).then(async (res) =>
+              res.arrayBuffer(),
+            );
           },
     staleTime: Infinity,
   });

@@ -4,9 +4,23 @@
   "ignorePatterns": ["test/**", "**/*.d.ts"],
   "categories": {
     "correctness": "error",
+    "restriction": "error",
     "pedantic": "error"
   },
   "rules": {
+    "complexity": "off",
+    "class-methods-use-this": "off",
+    "no-bitwise": "off",
+    "default-case": "off",
+    "no-empty": "off",
+    "no-var-requires": "off",
+    "no-void": "off",
+    "no-require-imports": "off",
+    "explicit-function-return-type": "off",
+    "no-param-reassign": "off",
+    "no-undefined": "off",
+    "no-plusplus": "off",
+    "no-eq-null": "off",
     "no-inline-comments": "off",
     "array-callback-return": "off",
     "no-useless-return": "off",
@@ -127,6 +141,7 @@
     "typescript/no-unsafe-call": "deny",
     "typescript/no-unnecessary-type-constraint": "deny",
     "typescript/require-await": "off",
+    "typescript/explicit-module-boundary-types": "off",
     // Often only having one usage of a type parameter is fine because it's
     // the only way to use "_ extends _".
     "typescript/no-unnecessary-type-arguments": "deny",
@@ -149,5 +164,13 @@
         "allowRegExp": false
       }
     ]
-  }
+  },
+  "overrides": [
+    {
+      "files": ["test/**"],
+      "rules": {
+        "no-non-null-assertion": "off"
+      }
+    }
+  ]
 }

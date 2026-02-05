@@ -42,6 +42,7 @@ export function reactInvariant<P>(
   invariantFn: (props: P) => void,
 ): typeof component {
   return Object.assign(
+    // oxlint-disable-next-line typescript/promise-function-async
     (props: P) => {
       invariantFn(props);
       return component(props);
