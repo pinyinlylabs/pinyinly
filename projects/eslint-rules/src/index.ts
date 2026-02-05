@@ -260,10 +260,7 @@ const recommended: ConfigWithExtendsArray = [
       "@typescript-eslint/no-unsafe-return": `off`,
       // Migrated to oxlint - see typescript/restrict-template-expressions in oxlint config
       "@typescript-eslint/restrict-template-expressions": `off`,
-      "@typescript-eslint/switch-exhaustiveness-check": [
-        `error`,
-        { requireDefaultForNonUnion: true },
-      ],
+      "@typescript-eslint/switch-exhaustiveness-check": `off`,
       "@typescript-eslint/strict-boolean-expressions": `error`,
       // It's easier to use the debugger for async code when all promises are
       // awaited so that the function call stack is preserved.

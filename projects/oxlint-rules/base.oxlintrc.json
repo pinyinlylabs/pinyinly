@@ -35,6 +35,10 @@
     "typescript/no-import-type-side-effects": "deny",
     "typescript/consistent-type-imports": "deny",
     "typescript/no-unsafe-return": "deny",
+    "typescript/switch-exhaustiveness-check": [
+      "deny",
+      { "requireDefaultForNonUnion": true }
+    ],
     "typescript/restrict-template-expressions": [
       "deny",
       {
