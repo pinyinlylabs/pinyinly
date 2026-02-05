@@ -380,7 +380,7 @@ export const loadDictionary = memoize0(
 export type Dictionary = Awaited<ReturnType<typeof loadDictionary>>;
 
 export const lookupRadicalsByStrokes = async (strokes: number) =>
-  await loadKangXiRadicalsStrokes().then((x) => x.get(strokes) ?? null);
+  loadKangXiRadicalsStrokes().then((x) => x.get(strokes) ?? null);
 
 export const allHanziCharacters = memoize0(async function allHanziCharacters() {
   const characters = await loadCharacters();

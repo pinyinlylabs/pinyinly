@@ -7,7 +7,6 @@ test(`@typescript-eslint/return-await`, () => {
   const promiseValue = () => Promise.resolve(null);
 
   const myAsyncFunction = async () => {
-    // eslint-disable-next-line @typescript-eslint/return-await
     return promiseValue();
   };
 

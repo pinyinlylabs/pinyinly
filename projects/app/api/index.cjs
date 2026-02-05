@@ -52,7 +52,9 @@ const vercelEntrypoint = async (req, res) => {
  * @param {number} ms
  */
 async function sleep(ms) {
-  return await new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
 }
 
 async function flushSentry() {

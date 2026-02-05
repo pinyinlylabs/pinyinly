@@ -125,7 +125,7 @@ export const mergeProps = <T extends Record<string, any>>(
   const props = { ...base };
 
   for (const key in overrides) {
-    if (!overrides.hasOwnProperty(key)) {
+    if (!Object.prototype.hasOwnProperty.call(overrides, key)) {
       continue;
     }
     const overrideValue = overrides[key];

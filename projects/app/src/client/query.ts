@@ -213,7 +213,7 @@ export const isStructuralHanziQuery = queryOptions({
   queryFn: async () => {
     await devToolsSlowQuerySleepIfEnabled();
 
-    return await getIsStructuralHanzi();
+    return getIsStructuralHanzi();
   },
   networkMode: `offlineFirst`,
   retry: false,
@@ -225,7 +225,7 @@ export const dictionaryQuery = queryOptions({
   queryFn: async () => {
     await devToolsSlowQuerySleepIfEnabled();
 
-    return await loadDictionary();
+    return loadDictionary();
   },
   networkMode: `offlineFirst`,
   retry: false,
@@ -333,9 +333,7 @@ export const fetchArrayBufferQuery = (uri: string | null) =>
         ? skipToken
         : async ({ signal }) => {
             await devToolsSlowQuerySleepIfEnabled();
-            return await fetch(uri, { signal }).then((res) =>
-              res.arrayBuffer(),
-            );
+            return fetch(uri, { signal }).then((res) => res.arrayBuffer());
           },
     staleTime: Infinity,
   });
@@ -353,7 +351,7 @@ export const fetchAudioBufferQuery = (
             await devToolsSlowQuerySleepIfEnabled();
             const response = await fetch(uri);
             const arrayBuffer = await response.arrayBuffer();
-            return await audioContext.decodeAudioData(arrayBuffer);
+            return audioContext.decodeAudioData(arrayBuffer);
           },
     staleTime: Infinity,
     structuralSharing: false,
@@ -365,7 +363,7 @@ export const deviceStoreQuery = (key: DeviceStoreEntity) =>
     queryKey: [`deviceStore`, buildDeviceStoreKey(key)],
     queryFn: async () => {
       await devToolsSlowQuerySleepIfEnabled();
-      return await deviceStoreGet(key);
+      return deviceStoreGet(key);
     },
     networkMode: `offlineFirst`,
     retry: false,

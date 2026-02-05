@@ -21,27 +21,27 @@ export async function generateQuestionForSkillOrThrow(
   switch (skillKindFromSkill(skill)) {
     case SkillKind.HanziWordToGloss: {
       skill = skill as HanziWordSkill;
-      return await hanziWordToGlossQuestionOrThrow(skill, flag);
+      return hanziWordToGlossQuestionOrThrow(skill, flag);
     }
     case SkillKind.HanziWordToGlossTyped: {
       skill = skill as HanziWordToGlossTypedSkill;
-      return await hanziWordToGlossTypedQuestionOrThrow(skill, flag);
+      return hanziWordToGlossTypedQuestionOrThrow(skill, flag);
     }
     case SkillKind.HanziWordToPinyinTyped: {
       skill = skill as HanziWordSkill;
-      return await hanziWordToPinyinTypedQuestionOrThrow(skill, flag);
+      return hanziWordToPinyinTypedQuestionOrThrow(skill, flag);
     }
     case SkillKind.HanziWordToPinyinInitial: {
       skill = skill as HanziWordSkill;
-      return await hanziWordToPinyinInitialQuestionOrThrow(skill, flag);
+      return hanziWordToPinyinInitialQuestionOrThrow(skill, flag);
     }
     case SkillKind.HanziWordToPinyinFinal: {
       skill = skill as HanziWordSkill;
-      return await hanziWordToPinyinFinalQuestionOrThrow(skill, flag);
+      return hanziWordToPinyinFinalQuestionOrThrow(skill, flag);
     }
     case SkillKind.HanziWordToPinyinTone: {
       skill = skill as HanziWordSkill;
-      return await hanziWordToPinyinToneQuestionOrThrow(skill, flag);
+      return hanziWordToPinyinToneQuestionOrThrow(skill, flag);
     }
     case SkillKind.Deprecated_EnglishToRadical:
     case SkillKind.Deprecated_PinyinToRadical:

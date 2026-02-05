@@ -129,7 +129,7 @@ export async function withRepeatableReadTransaction<R>(
   tx: Transaction | Drizzle,
   body: TransactionBodyFn<R>,
 ): ReturnType<typeof body> {
-  return await withRetriableTransaction(
+  return withRetriableTransaction(
     tx,
     {
       isolationLevel: `repeatable read`,

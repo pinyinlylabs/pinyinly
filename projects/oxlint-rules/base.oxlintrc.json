@@ -2,7 +2,20 @@
   "$schema": "https://oxc.rs/schemas/oxlint.json",
   "plugins": ["typescript"],
   "ignorePatterns": ["test/**", "**/*.d.ts"],
+  "categories": {
+    "pedantic": "error"
+  },
   "rules": {
+    "no-inline-comments": "off",
+    "array-callback-return": "off",
+    "no-useless-return": "off",
+    "require-await": "off",
+    "no-warning-comments": "off",
+    "max-depth": "off",
+    "max-classes-per-file": "off",
+    "eqeqeq": "off",
+    "max-lines": "off",
+    "max-lines-per-function": "off",
     "curly": "deny",
     "no-console": ["deny", { "allow": ["warn", "error"] }],
     "no-debugger": "deny",
@@ -112,9 +125,12 @@
     "typescript/no-unsafe-return": "deny",
     "typescript/no-unsafe-call": "deny",
     "typescript/no-unnecessary-type-constraint": "deny",
+    "typescript/require-await": "off",
     // Often only having one usage of a type parameter is fine because it's
     // the only way to use "_ extends _".
     "typescript/no-unnecessary-type-arguments": "deny",
+    "typescript/return-await": "deny",
+    "typescript/no-empty-object-type": "deny",
     "typescript/strict-boolean-expressions": "deny",
     "typescript/switch-exhaustiveness-check": [
       "deny",

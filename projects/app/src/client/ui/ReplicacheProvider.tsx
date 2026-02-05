@@ -60,7 +60,7 @@ export const ReplicacheProvider = Object.assign(
                   schemaVersion: requestBody.schemaVersion,
                 });
 
-                return await trpcToReplicache(response);
+                return trpcToReplicache(response);
               }
             : undefined,
           puller: isAuthenticated
@@ -109,7 +109,7 @@ export const ReplicacheProvider = Object.assign(
                   };
                 });
 
-                return await trpcToReplicache(response);
+                return trpcToReplicache(response);
               }
             : undefined,
         },

@@ -141,7 +141,7 @@ function patchMetroSha1(
       if (mixedPath.startsWith(proxyDirPath)) {
         return { sha1: `${Date.now()}` };
       }
-      return await getOrComputeSha1(mixedPath);
+      return getOrComputeSha1(mixedPath);
     };
     graph.getOrComputeSha1.__pinyinly_patch = true;
   }

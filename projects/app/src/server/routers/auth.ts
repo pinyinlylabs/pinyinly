@@ -224,7 +224,7 @@ export const authRouter = router({
       const { credential, credentialDeviceType, credentialBackedUp } =
         verification.registrationInfo;
 
-      return await withDrizzle(async (db) => {
+      return withDrizzle(async (db) => {
         const [newUser] = await db
           .insert(schema.user)
           .values({
@@ -308,7 +308,7 @@ export const authRouter = router({
     .mutation(async (opts) => {
       const { response, cookie } = opts.input;
 
-      return await withDrizzle(async (db) => {
+      return withDrizzle(async (db) => {
         if (response.response.userHandle == null) {
           return { verified: false };
         }

@@ -196,7 +196,8 @@ const recommended: ConfigWithExtendsArray = [
       "@typescript-eslint/strict-boolean-expressions": `off`,
       // It's easier to use the debugger for async code when all promises are
       // awaited so that the function call stack is preserved.
-      "@typescript-eslint/return-await": [`error`, `always`],
+      "@typescript-eslint/return-await": `off`,
+      "@typescript-eslint/no-empty-object-type": `off`,
     },
   },
 

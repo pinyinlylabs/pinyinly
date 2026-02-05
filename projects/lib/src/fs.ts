@@ -58,7 +58,7 @@ export async function writeJsonFileIfChanged(
   content: object,
   indentLevels?: number,
 ): Promise<boolean> {
-  return await writeUtf8FileIfChanged(
+  return writeUtf8FileIfChanged(
     path,
     jsonStringifyShallowIndent(content, indentLevels),
     (a, b) => isEqual(JSON.parse(a), JSON.parse(b)),
@@ -91,7 +91,7 @@ export async function updateJsonFileKey(
   // Update the specific key
   const updatedData = { ...existingData, [key]: value };
 
-  return await writeJsonFileIfChanged(path, updatedData, indentLevels);
+  return writeJsonFileIfChanged(path, updatedData, indentLevels);
 }
 
 export async function writeUtf8FileIfChanged(

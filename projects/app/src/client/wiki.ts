@@ -20,7 +20,7 @@ const lazyMdx = (
 ): WikiRegistryEntry => ({
   component: lazy(async () => {
     await devToolsSlowQuerySleepIfEnabled();
-    return await importFn();
+    return importFn();
   }),
   importFn,
 });

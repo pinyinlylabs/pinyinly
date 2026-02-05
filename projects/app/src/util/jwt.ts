@@ -63,7 +63,7 @@ export async function jwtSign<T extends JWTPayload>(
     signJwt = signJwt.setExpirationTime(config.expirationTime);
   }
 
-  return await signJwt.sign(JWT_KEY());
+  return signJwt.sign(JWT_KEY());
 }
 
 export function toJwtSchema<T extends JWTPayload>(config?: {
@@ -81,6 +81,6 @@ export function toJwtSchema<T extends JWTPayload>(config?: {
       signJwt.setExpirationTime(config.expirationTime);
     }
 
-    return await signJwt.sign(JWT_KEY());
+    return signJwt.sign(JWT_KEY());
   });
 }

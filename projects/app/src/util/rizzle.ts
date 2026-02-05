@@ -507,7 +507,7 @@ export class RizzleEntity<
     tx: ReadTransaction,
     key: EntityKeyType<S, KeyPath>[`_input`],
   ): Promise<boolean> {
-    return await tx.has(this.marshalKey(key));
+    return tx.has(this.marshalKey(key));
   }
 
   async get(
@@ -1435,7 +1435,9 @@ function eventLoopThrottle(timeoutMs: number) {
       deadline = undefined;
     }
     if (deadline == null) {
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await new Promise((resolve) => {
+        setTimeout(resolve, 0);
+      });
       deadline ??= performance.now() + timeoutMs;
     }
   };
@@ -1471,6 +1473,7 @@ export async function* indexScanPagedIter<Value>(
     await scanPagedIterThrottle();
     try {
       page = [];
+      // oxlint-disable-next-line no-loop-func
       await query(async (tx) => {
         for await (const item of indexScanIter(
           tx,
@@ -1544,6 +1547,7 @@ export async function* scanPagedIter<V>(
     await scanPagedIterThrottle();
     try {
       page = [];
+      // oxlint-disable-next-line no-loop-func
       await query(async (tx) => {
         for await (const item of scanIter(
           tx,

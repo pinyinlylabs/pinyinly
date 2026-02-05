@@ -76,7 +76,7 @@ export async function deviceStoreGetByStorageKey(
     }
     case `ios`:
     case `android`: {
-      return await SecureStore.getItemAsync(storageKey);
+      return SecureStore.getItemAsync(storageKey);
     }
     case `macos`:
     case `windows`: {
