@@ -5,7 +5,7 @@
     "@sentry/core": "10.26.0",
     "@sentry/node": "10.26.0",
     "@sentry/profiling-node": "10.26.0",
-    "@vercel/functions": "^2.0.0"
+    "@vercel/functions": "^3.0.0"
   },
   "engines": {
     "node": "22.21.1"
