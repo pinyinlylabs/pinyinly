@@ -117,13 +117,13 @@ const invalidNoTemplate =
   `  // </pyly-glob-template>\n` +
   `];`;
 
-const invalidExtraAttr =
+const invalidExtraAttribute =
   `const allIcons = [\n` +
   `  // <pyly-glob-template glob="./glob-template.test/*.svg" template="  require('\${path}')," foo="bar">\n` +
   `  // </pyly-glob-template>\n` +
   `];`;
 
-const invalidWrongAttr =
+const invalidWrongAttribute =
   `const allIcons = [\n` +
   `  // <pyly-glob-template foo="bar">\n` +
   `  // </pyly-glob-template>\n` +
@@ -409,12 +409,12 @@ ruleTester.run(`glob-template`, globTemplate, {
       errors: [{ message: /must have glob and template attributes/ }],
     },
     {
-      code: invalidExtraAttr,
+      code: invalidExtraAttribute,
       filename,
       errors: [{ message: /must have glob and template attributes/ }],
     },
     {
-      code: invalidWrongAttr,
+      code: invalidWrongAttribute,
       filename,
       errors: [{ message: /must have glob and template attributes/ }],
     },

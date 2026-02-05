@@ -30,9 +30,6 @@ export const plugin: ESLint.Plugin = {
 
 export type ConfigWithExtendsArray = Parameters<typeof defineConfig>;
 
-// Strip out the plugin to avoid double declaring it.
-const { plugins: _, ...unicornRecommendedConfig } = unicorn.configs.recommended;
-
 const recommended: ConfigWithExtendsArray = [
   // All files that should use TypeScript rules.
   {
@@ -54,7 +51,6 @@ const recommended: ConfigWithExtendsArray = [
 
   ...tseslint.configs.strictTypeChecked,
   ...tseslint.configs.stylisticTypeChecked,
-  unicornRecommendedConfig,
 
   // Global
   {
@@ -121,8 +117,6 @@ const recommended: ConfigWithExtendsArray = [
 
       // enforces consistent type specifier style for named imports
       "import/consistent-type-specifier-style": `error`,
-      // Forbid import of modules using absolute paths
-      "import/no-absolute-path": `error`,
       // Forbid the use of extraneous packages
       "import/no-extraneous-dependencies": [
         `error`,
@@ -144,24 +138,6 @@ const recommended: ConfigWithExtendsArray = [
       //
 
       "@stylistic/quotes": [`error`, `backtick`],
-
-      //
-      // unicorn
-      //
-
-      "unicorn/no-null": `off`, // null used extensively
-      "unicorn/number-literal-case": `off`, // overwritten by prettier
-      "unicorn/numeric-separators-style": [
-        `error`,
-        {
-          onlyIfContainsSeparator: true,
-          number: { onlyIfContainsSeparator: false },
-        },
-      ],
-      "unicorn/prefer-module": `off`, // still need to use require(…) with metro
-      "unicorn/prevent-abbreviations": `off`, // abbreviations are fine
-      "unicorn/no-nested-ternary": `off`, // nested ternaries are not so bad
-      "unicorn/filename-case": `off`, // using camelCase for filenames
 
       //
       // @typescript-eslint

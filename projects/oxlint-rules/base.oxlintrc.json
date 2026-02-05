@@ -44,9 +44,24 @@
     "no-eval": "deny",
     "no-func-assign": "deny",
     "no-global-assign": "deny",
+
     "unicorn/no-thenable": "deny",
     "unicorn/no-empty-file": "deny",
     "unicorn/no-await-in-promise-methods": "deny",
+    "unicorn/numeric-separators-style": [
+      "error",
+      {
+        "onlyIfContainsSeparator": true,
+        "number": { "onlyIfContainsSeparator": false }
+      }
+    ],
+    "unicorn/no-null": "off", // null used extensively
+    "unicorn/number-literal-case": "off", // overwritten by prettier
+    "unicorn/prefer-module": "off", // still need to use require(…) with metro
+    "unicorn/prevent-abbreviations": "off", // abbreviations are fine
+    "unicorn/no-nested-ternary": "off", // nested ternaries are not so bad
+    "unicorn/filename-case": "off", // using camelCase for filenames
+
     "eslint/no-restricted-imports": [
       "deny",
       {
@@ -118,6 +133,7 @@
         ]
       }
     ],
+
     // disallow non-import statements appearing before import statements
     "import/first": "deny",
     // disallow AMD require/define
@@ -130,6 +146,9 @@
     "import/no-mutable-exports": "deny",
     // Forbid a module from importing itself
     "import/no-self-import": "deny",
+    // Forbid import of modules using absolute paths
+    "import/no-absolute-path": "error",
+
     "typescript/no-unnecessary-type-assertion": "deny",
     "typescript/no-unsafe-assignment": "deny",
     "typescript/no-unsafe-member-access": "deny",

@@ -2,10 +2,10 @@
 function splitmix64(seed: number): () => bigint {
   let state = BigInt.asUintN(64, BigInt(Math.floor(seed * 2 ** 32)));
   return () => {
-    state = (state + 0x9e3779b97f4a7c15n) & 0xffffffffffffffffn;
+    state = (state + 0x9e_37_79_b9_7f_4a_7c_15n) & 0xff_ff_ff_ff_ff_ff_ff_ffn;
     let z = state;
-    z = (z ^ (z >> 30n)) * 0xbf58476d1ce4e5b9n;
-    z = (z ^ (z >> 27n)) * 0x94d049bb133111ebn;
+    z = (z ^ (z >> 30n)) * 0xbf_58_47_6d_1c_e4_e5_b9n;
+    z = (z ^ (z >> 27n)) * 0x94_d0_49_bb_13_31_11_ebn;
     return z ^ (z >> 31n);
   };
 }
@@ -17,7 +17,7 @@ function splitmix64(seed: number): () => bigint {
 export function makePRNG(seed: number): () => number {
   // xoshiro128** PRNG — fast, high quality, returns number in [0, 1)
   const seedGen = splitmix64(seed);
-  const mask32 = 0xffffffffn;
+  const mask32 = 0xff_ff_ff_ffn;
 
   // Seed state with 4 uint32 parts from SplitMix64
   let s0 = Number(seedGen() & mask32);

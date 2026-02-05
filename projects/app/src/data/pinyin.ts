@@ -495,28 +495,28 @@ const pinyinChartSchema = pinyinChartSpecSchema.transform((x) =>
 export const loadStandardPinyinChart = memoize0(async () =>
   pinyinChartSchema
     .transform(deepReadonly)
-    // eslint-disable-next-line unicorn/no-await-expression-member
+
     .parse((await import(`./standardPinyinChart.asset.json`)).default),
 );
 
 export const loadMmPinyinChart = memoize0(async () =>
   pinyinChartSchema
     .transform(deepReadonly)
-    // eslint-disable-next-line unicorn/no-await-expression-member
+
     .parse((await import(`./mmPinyinChart.asset.json`)).default),
 );
 
 export const loadHhPinyinChart = memoize0(async () =>
   pinyinChartSchema
     .transform(deepReadonly)
-    // eslint-disable-next-line unicorn/no-await-expression-member
+
     .parse((await import(`./hhPinyinChart.asset.json`)).default),
 );
 
 export const loadHmmPinyinChart = memoize0(async () =>
   pinyinChartSchema
     .transform(deepReadonly)
-    // eslint-disable-next-line unicorn/no-await-expression-member
+
     .parse((await import(`./hmmPinyinChart.asset.json`)).default),
 );
 

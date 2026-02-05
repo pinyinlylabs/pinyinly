@@ -17,15 +17,15 @@ interface NoRestrictedCssClassesOptions {
 /**
  * Escape backticks, ${, and backslashes for template literals
  */
-function escapeLiteral(str: string): string {
-  return JSON.stringify(str).slice(1, -1);
+function escapeLiteral(string_: string): string {
+  return JSON.stringify(string_).slice(1, -1);
 }
 
 /**
  * Escape backticks, ${, and backslashes for template literals
  */
-function escapeTemplateLiteral(str: string): string {
-  return str
+function escapeTemplateLiteral(string_: string): string {
+  return string_
     .replaceAll(`\\`, `\\\\`)
     .replaceAll(`\``, `\\\``)
     .replaceAll(`\${`, `\\\${`);

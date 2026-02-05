@@ -32,7 +32,6 @@ export async function createPool(): Promise<PgPool> {
     const { default: ws } = await import(`ws`);
     neonConfig.webSocketConstructor = ws;
   } else {
-    // eslint-disable-next-line unicorn/no-await-expression-member
     Pool = (await import(`pg`)).default.Pool;
   }
 

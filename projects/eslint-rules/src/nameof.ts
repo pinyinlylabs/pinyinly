@@ -200,7 +200,7 @@ const rule: Rule.RuleModule = {
           // oxlint-disable-next-line typescript/no-unsafe-member-access
         } else if (expression.type === `TemplateLiteral`) {
           // Handle template literals (backticks) - only if they have no expressions
-          // eslint-disable-next-line unicorn/no-lonely-if
+
           if (
             // oxlint-disable-next-line typescript/no-unsafe-member-access
             expression.expressions.length === 0 &&
@@ -282,10 +282,10 @@ const rule: Rule.RuleModule = {
                   let replaced = false;
 
                   // First, try to replace specific generic words
-                  for (let i = 0; i < words.length; i++) {
+                  for (let index = 0; index < words.length; index++) {
                     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                    if (replaceWords.has(words[i]!.toLowerCase())) {
-                      words[i] = expectedSymbolName;
+                    if (replaceWords.has(words[index]!.toLowerCase())) {
+                      words[index] = expectedSymbolName;
                       replaced = true;
                       break;
                     }
@@ -293,10 +293,10 @@ const rule: Rule.RuleModule = {
 
                   // If no generic word found, replace the first non-preserve word
                   if (!replaced) {
-                    for (let i = 0; i < words.length; i++) {
+                    for (let index = 0; index < words.length; index++) {
                       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                      if (!preserveWords.has(words[i]!.toLowerCase())) {
-                        words[i] = expectedSymbolName;
+                      if (!preserveWords.has(words[index]!.toLowerCase())) {
+                        words[index] = expectedSymbolName;
                         replaced = true;
                         break;
                       }

@@ -16,13 +16,13 @@ export function isCjkUnifiedIdeograph(char: string): boolean {
   return (
     codePoint != null &&
     // CJK Unified Ideographs U+4E00 to U+9FFF
-    ((codePoint >= 0x4e00 && codePoint <= 0x9fff) ||
+    ((codePoint >= 0x4e_00 && codePoint <= 0x9f_ff) ||
       // CJK Unified Ideographs Extension A U+3400 to U+4DBF
-      (codePoint >= 0x3400 && codePoint <= 0x4dbf) ||
+      (codePoint >= 0x34_00 && codePoint <= 0x4d_bf) ||
       // CJK Unified Ideographs Extension B U+20000 to U+2A6DF
-      (codePoint >= 0x20000 && codePoint <= 0x2a6df) ||
+      (codePoint >= 0x2_00_00 && codePoint <= 0x2_a6_df) ||
       // CJK Unified Ideographs Extension F U+2CEB0 to U+2EBEF
-      (codePoint >= 0x2ceb0 && codePoint <= 0x2ebef))
+      (codePoint >= 0x2_ce_b0 && codePoint <= 0x2_eb_ef))
   );
 }
 

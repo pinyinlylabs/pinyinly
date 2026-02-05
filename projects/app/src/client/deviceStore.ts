@@ -100,7 +100,6 @@ export async function deviceStoreSetByStorageKey(
     }
     case `ios`:
     case `android`: {
-      // eslint-disable-next-line unicorn/prefer-ternary
       if (value === null) {
         await SecureStore.deleteItemAsync(storageKey);
       } else {

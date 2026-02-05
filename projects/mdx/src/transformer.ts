@@ -7,14 +7,14 @@ import remarkGfm from "remark-gfm";
 
 const debug = makeDebug(`pinyinly:mdx:transform`);
 
-export interface MetroBabelTransformerProps {
+export interface MetroBabelTransformerProperties {
   filename: string;
   src: string;
 }
 
 export type MetroBabelTransformer = (
-  props: MetroBabelTransformerProps,
-) => Promise<MetroBabelTransformerProps>;
+  properties: MetroBabelTransformerProperties,
+) => Promise<MetroBabelTransformerProperties>;
 
 /**
  * Generates template string from raw MDX string
@@ -62,7 +62,7 @@ const getTemplate = (rawMdxString: string): string => {
 /**
  * Custom recma plugin for handling src attributes in JSX elements
  */
-function jsxSrcAttributePlugin({
+function jsxSourceAttributePlugin({
   matchLocalAsset,
   matchAttributeName = (name) => /(src|source)$/i.test(name),
 }: {
@@ -150,13 +150,13 @@ function hoistRequiresPlugin() {
           node.callee.name === `require` &&
           node.arguments.length === 1
         ) {
-          const firstArg = node.arguments[0];
+          const firstArgument = node.arguments[0];
           if (
-            firstArg &&
-            firstArg.type === `Literal` &&
-            typeof firstArg.value === `string`
+            firstArgument &&
+            firstArgument.type === `Literal` &&
+            typeof firstArgument.value === `string`
           ) {
-            const modulePath = firstArg.value;
+            const modulePath = firstArgument.value;
             if (!moduleToVariable.has(modulePath)) {
               const variableName = generateVariableName(modulePath);
               moduleToVariable.set(modulePath, variableName);
@@ -175,13 +175,13 @@ function hoistRequiresPlugin() {
           node.callee.name === `require` &&
           node.arguments.length === 1
         ) {
-          const firstArg = node.arguments[0];
+          const firstArgument = node.arguments[0];
           if (
-            firstArg &&
-            firstArg.type === `Literal` &&
-            typeof firstArg.value === `string`
+            firstArgument &&
+            firstArgument.type === `Literal` &&
+            typeof firstArgument.value === `string`
           ) {
-            const modulePath = firstArg.value;
+            const modulePath = firstArgument.value;
             const variableName = moduleToVariable.get(modulePath);
             if (variableName !== undefined) {
               // Replace the entire CallExpression with an Identifier
@@ -221,9 +221,9 @@ function hoistRequiresPlugin() {
 
       // Insert imports after any existing imports but before other statements
       let insertIndex = 0;
-      for (let i = 0; i < tree.body.length; i++) {
-        if (tree.body[i]?.type === `ImportDeclaration`) {
-          insertIndex = i + 1;
+      for (let index = 0; index < tree.body.length; index++) {
+        if (tree.body[index]?.type === `ImportDeclaration`) {
+          insertIndex = index + 1;
         } else {
           break;
         }
@@ -235,8 +235,8 @@ function hoistRequiresPlugin() {
 }
 
 /** Function to determine if a file should be transformed */
-const matchFile = (props: MetroBabelTransformerProps) =>
-  /\.mdx?$/.test(props.filename);
+const matchFile = (properties: MetroBabelTransformerProperties) =>
+  /\.mdx?$/.test(properties.filename);
 
 /** Function to determine if an asset URL is local */
 const matchLocalAsset = (url: string) => /^[.@]/.test(url);
@@ -265,7 +265,7 @@ function createTransformer(): MetroBabelTransformer {
         [remarkGfm],
       ],
       recmaPlugins: [
-        [jsxSrcAttributePlugin, { matchLocalAsset }],
+        [jsxSourceAttributePlugin, { matchLocalAsset }],
         [hoistRequiresPlugin],
       ],
     });
@@ -276,20 +276,20 @@ function createTransformer(): MetroBabelTransformer {
   /**
    * Transform function for Metro bundler
    */
-  const transform: MetroBabelTransformer = async (props) => {
-    if (!matchFile(props)) {
-      return props;
+  const transform: MetroBabelTransformer = async (properties) => {
+    if (!matchFile(properties)) {
+      return properties;
     }
 
     const compiler = await createCompiler();
 
     const { value: contents } = await compiler.process({
-      value: props.src,
-      path: props.filename,
+      value: properties.src,
+      path: properties.filename,
     });
 
     const result = {
-      ...props,
+      ...properties,
       src: getTemplate(contents.toString()),
     };
 
