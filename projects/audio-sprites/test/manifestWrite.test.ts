@@ -10,6 +10,10 @@ import {
   syncManifestWithFilesystem,
 } from "#manifestWrite.ts";
 import type { SpriteManifest } from "#types.ts";
+import {
+  sortComparatorNumber,
+  sortComparatorString,
+} from "@pinyinly/lib/collections";
 import { invariant } from "@pinyinly/lib/invariant";
 import { vol } from "memfs";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
@@ -315,7 +319,7 @@ describe(
       const segmentCounts = [
         sprite0Segments.length,
         sprite1Segments.length,
-      ].sort();
+      ].sort(sortComparatorNumber());
       expect(segmentCounts).toEqual([1, 2]);
     });
 
@@ -397,7 +401,9 @@ describe(
       expect(spriteFile).toMatch(/^test-sprite-[a-f0-9]{12}\.m4a$/);
 
       // Verify files are in correct order in segments
-      const segments = Object.entries(updatedManifest.segments).sort();
+      const segments = Object.entries(updatedManifest.segments).sort(
+        sortComparatorString(([x]) => x),
+      );
       expect(segments).toHaveLength(2);
       expect(segments[0]?.[0]).toBe(`audio/test/a.m4a`); // a.m4a should be first
       expect(segments[1]?.[0]).toBe(`audio/test/z.m4a`); // z.m4a should be second

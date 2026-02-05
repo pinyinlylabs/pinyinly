@@ -408,21 +408,10 @@ export type TargetSkillsCollection = Collection<{ skill: Skill }, Skill>;
 export type LatestSkillRatingsCollection = Collection<SkillRating, Skill>;
 
 export type CollectionOutput<T> =
-  T extends Collection<
-    infer U,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    any
-  >
-    ? U
-    : never;
-export type CollectionKey<T> =
-  T extends Collection<
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    any,
-    infer K
-  >
-    ? K
-    : never;
+  // oxlint-disable-next-line typescript/no-explicit-any
+  T extends Collection<infer U, any> ? U : never;
+// oxlint-disable-next-line typescript/no-explicit-any
+export type CollectionKey<T> = T extends Collection<any, infer K> ? K : never;
 
 export const rizzleCollectionOptions = <
   RizzleEntity extends RizzleAnyEntity,
@@ -459,26 +448,20 @@ export const rizzleCollectionOptions = <
             for (const op of ops) {
               switch (op.op) {
                 case `add`: {
-                  const value = entity.unmarshalValue(
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
-                    op.newValue as any,
-                  );
+                  // oxlint-disable-next-line typescript/no-unsafe-argument, typescript/no-explicit-any
+                  const value = entity.unmarshalValue(op.newValue as any);
                   write({ type: `insert`, value });
                   break;
                 }
                 case `change`: {
-                  const value = entity.unmarshalValue(
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
-                    op.newValue as any,
-                  );
+                  // oxlint-disable-next-line typescript/no-unsafe-argument, typescript/no-explicit-any
+                  const value = entity.unmarshalValue(op.newValue as any);
                   write({ type: `update`, value });
                   break;
                 }
                 case `del`: {
-                  const value = entity.unmarshalValue(
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
-                    op.oldValue as any,
-                  );
+                  // oxlint-disable-next-line typescript/no-unsafe-argument, typescript/no-explicit-any
+                  const value = entity.unmarshalValue(op.oldValue as any);
                   write({ type: `delete`, value });
                   break;
                 }
@@ -576,10 +559,8 @@ export const latestSkillRatingCollectionOptions = ({
             switch (op.op) {
               case `change`:
               case `add`: {
-                const value = entity.unmarshalValue(
-                  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
-                  op.newValue as any,
-                );
+                // oxlint-disable-next-line typescript/no-unsafe-argument, typescript/no-explicit-any
+                const value = entity.unmarshalValue(op.newValue as any);
 
                 const existing =
                   collection.get(value.skill) ??

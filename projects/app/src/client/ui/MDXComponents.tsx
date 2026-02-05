@@ -9,7 +9,7 @@ export function MDXComponents({
   components: Record<
     string,
     // This is a workaround for the type system to allow any component type.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // oxlint-disable-next-line typescript/no-explicit-any
     any
   >;
 }>) {

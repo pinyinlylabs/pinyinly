@@ -17,7 +17,7 @@ export function invariant(
   message?: string,
   ...args: unknown[]
 ): asserts condition {
-   
+  // oxlint-disable-next-line typescript/strict-boolean-expressions
   if (!condition) {
     message ??= `Invariant failed`;
     // Replace %s placeholders with provided arguments
@@ -64,7 +64,7 @@ export function identicalInvariant<
   for (const item of items) {
     invariant(
       item === identity,
-
+      // oxlint-disable-next-line typescript/restrict-template-expressions
       `unexpected non-identical values ${item}, ${identity}`,
     );
   }
@@ -75,6 +75,7 @@ export function nonNullable<T>(
   message?: string,
   ...args: unknown[]
 ): NonNullable<T> {
+  // oxlint-disable-next-line typescript/restrict-template-expressions
   invariant(value != null, message ?? `unexpected ${value} value`, ...args);
   return value;
 }

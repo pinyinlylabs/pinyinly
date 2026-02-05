@@ -45,11 +45,11 @@ const rule: Rule.RuleModule = {
             const attrPairs = [
               ...attrs.matchAll(/([a-zA-Z0-9_-]+)\s*=\s*"((?:[^"\\]|\\.)*)"/g),
             ];
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            // oxlint-disable-next-line typescript/no-unsafe-assignment
             const attrMap = Object.fromEntries(
               attrPairs.map(([_, k, v]) => [k, v] as const),
             );
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+            // oxlint-disable-next-line typescript/no-unsafe-argument
             const keys = Object.keys(attrMap);
             // Remove all matched key="value" pairs from the string
             const cleanedAttrs = attrs
@@ -70,20 +70,20 @@ const rule: Rule.RuleModule = {
               attrError = true;
             } else {
               // Use the glob path directly
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+              // oxlint-disable-next-line typescript/no-unsafe-assignment, typescript/no-unsafe-member-access
               globPath = attrMap.glob ?? null;
 
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+              // oxlint-disable-next-line typescript/no-unsafe-assignment
               template =
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                // oxlint-disable-next-line typescript/no-unsafe-member-access
                 attrMap.template === undefined
                   ? null // Unescape dollar signs and quotes
-                  : // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+                  : // oxlint-disable-next-line typescript/no-unsafe-member-access, typescript/no-unsafe-call
                     attrMap.template
                       .replaceAll(String.raw`\$`, `$`)
-                      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                      // oxlint-disable-next-line typescript/no-unsafe-member-access
                       .replaceAll(String.raw`\"`, `"`)
-                      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                      // oxlint-disable-next-line typescript/no-unsafe-member-access
                       .replaceAll(String.raw`\'`, `'`);
             }
           } else {
@@ -101,7 +101,7 @@ const rule: Rule.RuleModule = {
           let closeIdx = i + 1;
           let closeComment = null;
           while (closeIdx < comments.length) {
-             
+            // oxlint-disable-next-line typescript/strict-boolean-expressions
             if (comments[closeIdx]?.value.includes(`</pyly-glob-template>`)) {
               closeComment = comments[closeIdx];
               break;
@@ -277,7 +277,7 @@ const rule: Rule.RuleModule = {
                   const evaluator = new Function(...keys, `return ${expr};`);
 
                   // Execute the function with our context variables
-                  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+                  // oxlint-disable-next-line typescript/no-unsafe-call
                   return evaluator(...values) as string;
                 } catch {
                   // If evaluation fails, return the original expression

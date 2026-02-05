@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-deprecated */
-import { nonNullable } from "@pinyinly/lib/invariant";
 import { memoize0 } from "@pinyinly/lib/collections";
+import { nonNullable } from "@pinyinly/lib/invariant";
 
 // true when running under the Node.js test runner.
 export const isRunningTests = `NODE_TEST_CONTEXT` in process.env;
@@ -17,8 +17,10 @@ export const preflightCheckEnvVars = truthyStrings.has(
     process.env.HHH_PREFLIGHT_CHECK_ENV_VARS,
 );
 
+// oxlint-disable-next-line typescript/no-unsafe-argument
 export const IS_CI = truthyStrings.has(process.env[`CI`]);
 
+// oxlint-disable-next-line typescript/no-unsafe-argument
 export const IS_TIMING = truthyStrings.has(process.env[`TIMING`]);
 
 export const JWT_KEY = memoize0(() => {

@@ -71,7 +71,7 @@ typeChecks(() => {
   // @ts-expect-error Array.fromAsync isn't available in hermes, so the TypeScript
   // `lib` for it should not be included.
   //
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+  // oxlint-disable-next-line typescript/no-unsafe-call
   Array.fromAsync();
 });
 

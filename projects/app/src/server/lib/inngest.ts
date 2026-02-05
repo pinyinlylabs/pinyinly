@@ -437,7 +437,6 @@ const syncRemotePull = inngest.createFunction(
 
     // Iterate over each remote sync rule and process it one by one.
     for (const remoteSync of remoteSyncs) {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       while (true) {
         const fetchedMutations = await step.run(
           // Putting the user ID in is unnecessary but it helps debugging.

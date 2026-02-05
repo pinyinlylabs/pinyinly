@@ -151,7 +151,7 @@ export async function withRepeatableReadTransaction<R>(
 function isRetryablePgError(err: unknown) {
   // TODO: use zod to decode
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+  // oxlint-disable-next-line typescript/no-explicit-any, typescript/no-unsafe-member-access
   const code = typeof err === `object` ? String((err as any).code) : null;
   return code === `40001` || code === `40P01`;
 }

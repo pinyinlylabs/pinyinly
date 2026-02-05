@@ -23,21 +23,19 @@ type PgCustomColumn = s.PgCustomColumn<
 >;
 
 function unstable__columnName(column: PgCustomColumn): string {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any
   const tableName = (column.table as any)[
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+    // oxlint-disable-next-line typescript/no-unsafe-member-access, typescript/no-explicit-any
     (Table as any).Symbol.Name as symbol
   ] as string;
 
   invariant(
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     tableName != null,
     `could not introspect table name, maybe drizzle internals changed`,
   );
 
   const columnName = column.name;
   invariant(
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     columnName != null,
     `could not introspect column name, maybe drizzle internals changed`,
   );

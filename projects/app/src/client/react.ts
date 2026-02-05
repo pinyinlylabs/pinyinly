@@ -71,7 +71,10 @@ export function pickChildren<
           picked[2] = child;
           break;
         }
-        // No default
+        default: {
+          // No default
+          return;
+        }
       }
     }
   });
@@ -114,7 +117,7 @@ type MergedProps<T> = {
     : T[K];
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// oxlint-disable-next-line typescript/no-explicit-any
 export const mergeProps = <T extends Record<string, any>>(
   base: T,
   overrides: T,
@@ -139,11 +142,11 @@ export const mergeProps = <T extends Record<string, any>>(
       const baseValue = base[key];
       if (typeof baseValue === `function`) {
         // @ts-expect-error no overlap
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // oxlint-disable-next-line typescript/no-explicit-any
         props[key] = (...args: any[]) => {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-argument
+          // oxlint-disable-next-line typescript/no-unsafe-call, typescript/no-unsafe-argument
           overrideValue(...args);
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-argument
+          // oxlint-disable-next-line typescript/no-unsafe-call, typescript/no-unsafe-argument
           baseValue(...args);
         };
         continue;

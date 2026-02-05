@@ -129,9 +129,9 @@ export function merge<T>(a: T, b: T): T {
     invariant(b instanceof Map);
     return new Map(
       [...a.keys(), ...b.keys()].map((key) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        // oxlint-disable-next-line typescript/no-unsafe-assignment
         const aVal = a.get(key);
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        // oxlint-disable-next-line typescript/no-unsafe-assignment
         const bVal = b.get(key);
         return [key, merge(aVal, bVal)] as const;
       }),

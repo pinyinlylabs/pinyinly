@@ -16,6 +16,7 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
         navigationRef,
         navigation: {
           routeToName: (name) => name,
+          // oxlint-disable-next-line typescript/no-unsafe-return
           routeToProperties: (_name, params) => params,
         },
       }}

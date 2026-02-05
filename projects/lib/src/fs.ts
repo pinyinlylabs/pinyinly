@@ -1,10 +1,10 @@
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+// oxlint-disable-next-line no-restricted-imports
 import { readFileSync, writeFileSync } from "node:fs";
 
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+// oxlint-disable-next-line no-restricted-imports
 import { readFile, writeFile } from "node:fs/promises";
 
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+// oxlint-disable-next-line no-restricted-imports
 import { globSync } from "glob";
 
 import { stat } from "@pinyinly/lib/fs";
@@ -15,7 +15,7 @@ import { DatabaseSync } from "node:sqlite";
 import type { z } from "zod/v4";
 import { jsonStringifyShallowIndent } from "./json.ts";
 
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+// oxlint-disable-next-line no-restricted-imports
 export {
   access,
   mkdir,
@@ -28,7 +28,7 @@ export {
   writeFile,
 } from "node:fs/promises";
 
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+// oxlint-disable-next-line eslint/no-restricted-imports
 export {
   createReadStream,
   existsSync,
@@ -130,7 +130,7 @@ export function writeUtf8FileIfChangedSync(
   return hasDiff;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+// oxlint-disable-next-line no-restricted-imports
 export { glob, globSync } from "glob";
 
 export function makeFsDbCache<K, V>(

@@ -72,8 +72,9 @@ const rule: Rule.RuleModule = {
   create(context: Rule.RuleContext) {
     const options = (context.options[0] ?? {}) as NoRestrictedCssClassesOptions;
     // Support both string and object for classes
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
-    const classList: ClassConfig[] = (options.classes ?? []).map((item: any) =>
+    // oxlint-disable-next-line typescript/no-unsafe-assignment
+    const classList: ClassConfig[] = (options.classes ?? []).map((item) =>
+      // oxlint-disable-next-line typescript/no-unsafe-return
       typeof item === `string` ? { name: item } : item,
     );
     const disallowedClasses = new Map(

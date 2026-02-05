@@ -169,95 +169,27 @@ const recommended: ConfigWithExtendsArray = [
       // @typescript-eslint
       //
 
+      "@typescript-eslint/no-explicit-any": `off`,
       // Messes up things where the difference between a type and interface is significant.
       "@typescript-eslint/consistent-type-definitions": `off`,
       "@typescript-eslint/no-var-requires": `off`,
-      "@typescript-eslint/no-restricted-imports": [
-        `error`,
-        {
-          paths: [
-            {
-              name: `react-native`,
-              importNames: [`SafeAreaView`],
-              message: `Please use \`useSafeAreaInsets\` from \`react-native-safe-area-context\` instead.`,
-            },
-            {
-              name: `react`,
-              importNames: [`forwardRef`, `memo`, `useContext`],
-              message: `Migrate to React 19 patterns.`,
-            },
-            {
-              name: `vitest`,
-              importNames: [`it`],
-              message: `Use \`test(…)\` instead of \`it(…)\` for consistency.`,
-            },
-            {
-              name: `hanzi`,
-              message: `Please use @/dictionary/hanzi instead.`,
-            },
-            {
-              name: `nanoid`,
-              message: `Please use @/util/nanoid instead.`,
-            },
-            {
-              name: `date-fns`,
-              message: `Please use date-fns/* instead for smaller bundle size.`,
-              allowTypeImports: true,
-            },
-            {
-              name: `lodash`,
-              message: `Please use lodash/* instead for smaller bundle size.`,
-            },
-            {
-              name: `node:assert`,
-              message: `Please use vitest instead.`,
-            },
-            {
-              name: `node:assert/strict`,
-              message: `Please use vitest instead.`,
-            },
-            {
-              name: `node:test`,
-              message: `Please use vitest instead.`,
-            },
-            {
-              name: `zod`,
-              message: `Please use zod/v4 instead.`,
-            },
-            {
-              name: `glob`,
-              message: `Please use glob from @pinyinly/lib/fs instead.`,
-            },
-            {
-              name: `node:fs/promises`,
-              message: `Please use @pinyinly/lib/fs instead.`,
-            },
-            {
-              name: `node:fs`,
-              message: `Please use @pinyinly/lib/fs instead.`,
-            },
-            {
-              name: `@bacons/mdx`,
-              message: `Please use @/client/mdx instead.`,
-            },
-          ],
-        },
-      ],
-      "@typescript-eslint/no-unnecessary-condition": `error`,
+      "@typescript-eslint/no-restricted-imports": `off`,
+      "@typescript-eslint/no-unnecessary-condition": `off`,
+      "@typescript-eslint/no-unsafe-assignment": `off`,
+      "@typescript-eslint/no-unsafe-member-access": `off`,
+      "@typescript-eslint/no-unsafe-argument": `off`,
       // Expo/metro stuff still uses require().
       "@typescript-eslint/no-require-imports": `off`,
       // A bit buggy when vars are only used as types, sticking with
       // noUnusedLocals and noUnusedParameters.
       "@typescript-eslint/no-unused-vars": `off`,
-
-      "@typescript-eslint/no-unnecessary-type-constraint": `error`,
-      // Often only having one usage of a type parameter is fine because it's
-      // the only way to use "_ extends _".
+      "@typescript-eslint/no-unnecessary-type-constraint": `off`,
       "@typescript-eslint/no-unnecessary-type-parameters": `off`,
       // It's broken when using generic inferred return types. Too much noise
       // means it's often turned off even when it perhaps shouldn't be, so it's
       // better to just disable it completely.
       "@typescript-eslint/no-unsafe-return": `off`,
+      "@typescript-eslint/no-unsafe-call": `off`,
       // Migrated to oxlint - see typescript/restrict-template-expressions in oxlint config
       "@typescript-eslint/restrict-template-expressions": `off`,
       "@typescript-eslint/switch-exhaustiveness-check": `off`,

@@ -19,6 +19,77 @@
     "unicorn/no-thenable": "deny",
     "unicorn/no-empty-file": "deny",
     "unicorn/no-await-in-promise-methods": "deny",
+    "eslint/no-restricted-imports": [
+      "deny",
+      {
+        "paths": [
+          {
+            "name": "react-native",
+            "importNames": ["SafeAreaView"],
+            "message": "Please use \"useSafeAreaInsets\" from \"react-native-safe-area-context\" instead."
+          },
+          {
+            "name": "react",
+            "importNames": ["forwardRef", "memo", "useContext"],
+            "message": "Migrate to React 19 patterns."
+          },
+          {
+            "name": "vitest",
+            "importNames": ["it"],
+            "message": "Use \"test(…)\" instead of \"it(…)\" for consistency."
+          },
+          {
+            "name": "hanzi",
+            "message": "Please use @/dictionary/hanzi instead."
+          },
+          {
+            "name": "nanoid",
+            "message": "Please use @/util/nanoid instead."
+          },
+          {
+            "name": "date-fns",
+            "message": "Please use date-fns/* instead for smaller bundle size.",
+            "allowTypeImports": true
+          },
+          {
+            "name": "lodash",
+            "message": "Please use lodash/* instead for smaller bundle size."
+          },
+          {
+            "name": "node:assert",
+            "message": "Please use vitest instead."
+          },
+          {
+            "name": "node:assert/strict",
+            "message": "Please use vitest instead."
+          },
+          {
+            "name": "node:test",
+            "message": "Please use vitest instead."
+          },
+          {
+            "name": "zod",
+            "message": "Please use zod/v4 instead."
+          },
+          {
+            "name": "glob",
+            "message": "Please use glob from @pinyinly/lib/fs instead."
+          },
+          {
+            "name": "node:fs/promises",
+            "message": "Please use @pinyinly/lib/fs instead."
+          },
+          {
+            "name": "node:fs",
+            "message": "Please use @pinyinly/lib/fs instead."
+          },
+          {
+            "name": "@bacons/mdx",
+            "message": "Please use @/client/mdx instead."
+          }
+        ]
+      }
+    ],
     // disallow non-import statements appearing before import statements
     "import/first": "deny",
     // disallow AMD require/define
@@ -32,9 +103,18 @@
     // Forbid a module from importing itself
     "import/no-self-import": "deny",
     "typescript/no-unnecessary-type-assertion": "deny",
+    "typescript/no-unsafe-assignment": "deny",
+    "typescript/no-unsafe-member-access": "deny",
+    "typescript/no-unsafe-argument": "deny",
+    "typescript/no-explicit-any": "deny",
     "typescript/no-import-type-side-effects": "deny",
     "typescript/consistent-type-imports": "deny",
     "typescript/no-unsafe-return": "deny",
+    "typescript/no-unsafe-call": "deny",
+    "typescript/no-unnecessary-type-constraint": "deny",
+    // Often only having one usage of a type parameter is fine because it's
+    // the only way to use "_ extends _".
+    "typescript/no-unnecessary-type-arguments": "deny",
     "typescript/strict-boolean-expressions": "deny",
     "typescript/switch-exhaustiveness-check": [
       "deny",

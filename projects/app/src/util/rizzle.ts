@@ -28,11 +28,11 @@ export interface RizzleTypeDef {
 
 export abstract class RizzleType<
   Def extends RizzleTypeDef = RizzleTypeDef,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any
   Input = any,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any
   Marshaled = any,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any
   Output = any,
 > {
   readonly _input!: Input;
@@ -110,10 +110,12 @@ export class RizzleNullable<T extends RizzleType> extends RizzleType<
   }
 
   marshal(input: this[`_input`]): this[`_marshaled`] {
+    // oxlint-disable-next-line typescript/no-unsafe-return
     return this.getMarshal().parse(input);
   }
 
   unmarshal(marshaled: T[`_marshaled`]): T[`_output`] {
+    // oxlint-disable-next-line typescript/no-unsafe-return
     return this.getUnmarshal().parse(marshaled);
   }
 
@@ -159,10 +161,12 @@ export class RizzleOptional<T extends RizzleType> extends RizzleType<
   }
 
   marshal(input: this[`_input`]): this[`_marshaled`] {
+    // oxlint-disable-next-line typescript/no-unsafe-return
     return this.getMarshal().parse(input);
   }
 
   unmarshal(marshaled: T[`_marshaled`]): T[`_output`] {
+    // oxlint-disable-next-line typescript/no-unsafe-return
     return this.getUnmarshal().parse(marshaled);
   }
 
@@ -198,9 +202,11 @@ export class RizzleTypeAlias<T extends RizzleType> extends RizzleType<
     return this._def.innerType.getUnmarshal();
   }
   marshal(input: T[`_input`]): T[`_marshaled`] {
+    // oxlint-disable-next-line typescript/no-unsafe-return
     return this._def.innerType.marshal(input);
   }
   unmarshal(marshaled: T[`_marshaled`]): T[`_output`] {
+    // oxlint-disable-next-line typescript/no-unsafe-return
     return this._def.innerType.unmarshal(marshaled);
   }
   _getIndexes() {
@@ -247,9 +253,11 @@ export class RizzleIndexed<
     return this._def.innerType.getUnmarshal();
   }
   marshal(input: T[`_input`]): T[`_marshaled`] {
+    // oxlint-disable-next-line typescript/no-unsafe-return
     return this._def.innerType.marshal(input);
   }
   unmarshal(marshaled: T[`_marshaled`]): T[`_output`] {
+    // oxlint-disable-next-line typescript/no-unsafe-return
     return this._def.innerType.unmarshal(marshaled);
   }
   _getIndexes(): RizzleIndexDefinitions {
@@ -447,7 +455,7 @@ abstract class RizzleRoot<Def extends RizzleTypeDef = RizzleTypeDef> {
 
 type RizzleRawSchemaForKeyPath<KeyPath extends string> = Record<
   ExtractVariableNames<KeyPath>,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any
   RizzleType<RizzleTypeDef, any, string>
 >;
 
@@ -628,9 +636,10 @@ export class RizzleMutator<P extends RizzleRawObject> extends RizzleRoot<
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// oxlint-disable-next-line typescript/no-explicit-any
 export type RizzleAnyMutator = RizzleMutator<any>;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
+// oxlint-disable-next-line typescript/no-explicit-any
 export type RizzleAnyEntity = RizzleEntity<string, any>;
 
 export type RizzleEntityInput<T extends RizzleAnyEntity> =
@@ -659,7 +668,7 @@ export type RizzleObjectOutput<T extends RizzleRawObject> = PartialIfUndefined<{
 }>;
 
 export type RizzleIndexNames<T extends RizzleType> =
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any
   T extends RizzleIndexed<any, infer IndexName>
     ? IndexName
     : T extends RizzleTypeAlias<infer Wrapped>
@@ -679,7 +688,7 @@ export type RizzleIndexTypes<T extends RizzleType> = {
 };
 
 export type RizzleIndexTypesInner<T extends RizzleType> =
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any
   T extends RizzleIndexed<any, infer IndexName>
     ? [IndexName, T[`_input`]]
     : T extends RizzleTypeAlias<infer Wrapped>
