@@ -21,9 +21,7 @@ export const replicacheRouter = router({
     .mutation(async (opts) => {
       const { userId } = opts.ctx.session;
 
-      return await withDrizzle(
-        async (db) => await pushChunked(db, userId, opts.input),
-      );
+      return withDrizzle(async (db) => pushChunked(db, userId, opts.input));
     }),
 
   pull: authedProcedure
@@ -32,12 +30,10 @@ export const replicacheRouter = router({
     .mutation(async (opts) => {
       const { userId } = opts.ctx.session;
 
-      return await withDrizzle(
-        async (db) =>
-          await withRepeatableReadTransaction(
-            db,
-            async (tx) => await pull(tx, userId, opts.input),
-          ),
+      return withDrizzle(async (db) =>
+        withRepeatableReadTransaction(db, async (tx) =>
+          pull(tx, userId, opts.input),
+        ),
       );
     }),
 
@@ -64,8 +60,6 @@ export const replicacheRouter = router({
     .mutation(async (opts) => {
       const { userId } = opts.ctx.session;
 
-      return await withDrizzle(
-        async (db) => await fetchMutations(db, userId, opts.input),
-      );
+      return withDrizzle(async (db) => fetchMutations(db, userId, opts.input));
     }),
 });

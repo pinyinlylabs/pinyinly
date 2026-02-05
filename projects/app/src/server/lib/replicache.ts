@@ -30,13 +30,10 @@ export async function push(
   pushRequest: PushRequest,
 ): Promise<PushResponse> {
   const { schemaVersion } = pushRequest;
-  return await startSpan(
-    { name: `${push.name} (${schemaVersion})` },
-    async () => {
-      const impl = getImpl(schemaVersion);
-      return await impl.push(db, userId, pushRequest);
-    },
-  );
+  return startSpan({ name: `${push.name} (${schemaVersion})` }, async () => {
+    const impl = getImpl(schemaVersion);
+    return impl.push(db, userId, pushRequest);
+  });
 }
 
 export async function pull(
@@ -47,13 +44,10 @@ export async function pull(
   PullOkResponse | VersionNotSupportedResponse | ClientStateNotFoundResponse
 > {
   const { schemaVersion } = pullRequest;
-  return await startSpan(
-    { name: `${pull.name} (${schemaVersion})` },
-    async () => {
-      const impl = getImpl(schemaVersion);
-      return await impl.pull(db, userId, pullRequest);
-    },
-  );
+  return startSpan({ name: `${pull.name} (${schemaVersion})` }, async () => {
+    const impl = getImpl(schemaVersion);
+    return impl.pull(db, userId, pullRequest);
+  });
 }
 
 function getImpl(schemaVersion: string): Impl {
@@ -75,11 +69,11 @@ function getImpl(schemaVersion: string): Impl {
   }
 }
 
-const notSupported = () =>
-  Promise.resolve({
+const notSupported = async () =>
+  ({
     error: `VersionNotSupported`,
     versionType: `schema`,
-  } satisfies VersionNotSupportedResponse);
+  }) satisfies VersionNotSupportedResponse;
 
 export const fetchedMutationSchema = pushRequestSchema.omit({
   // `profileId` isn't stored in the DB so we can't return it.
@@ -100,7 +94,7 @@ export async function fetchMutations(
     limit?: number;
   },
 ): Promise<{ mutations: FetchedMutation[] }> {
-  return await startSpan({ name: fetchMutations.name }, async () => {
+  return startSpan({ name: fetchMutations.name }, async () => {
     let remainingLimit = opts.limit ?? 100;
 
     const clientState = await getReplicacheClientStateForUser(db, userId);
@@ -167,7 +161,7 @@ export async function getReplicacheClientStateForUser(
   db: Drizzle,
   userId: string,
 ) {
-  return await db
+  return db
     .select({
       clientId: s.replicacheClient.id,
       clientGroupId: s.replicacheClient.clientGroupId,
@@ -215,7 +209,7 @@ export async function getReplicacheClientMutationsSince(
   // order by ID from the database.
   for (let i = 1; i < mutations.length; i++) {
     invariant(
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      // oxlint-disable-next-line typescript/no-non-null-assertion
       mutations[i]!.id > mutations[i - 1]!.id,
       `mutations not ordered correctly`,
     );
@@ -263,9 +257,8 @@ export async function pushChunked(
       mutations: batch,
     };
 
-    const result = await withRepeatableReadTransaction(
-      db,
-      async (db) => await push(db, userId, inputBatch),
+    const result = await withRepeatableReadTransaction(db, async (db) =>
+      push(db, userId, inputBatch),
     );
 
     // Return any errors immediately

@@ -1,8 +1,10 @@
 import { transform } from "#transformer.ts";
 import { describe, expect, test } from "vitest";
 
-function getJsxContent(src: string) {
-  const match = /function _createMdxContent\((?:.+?)return (.*?);$/ms.exec(src);
+function getJsxContent(source: string) {
+  const match = /function _createMdxContent\((?:.+?)return (.*?);$/ms.exec(
+    source,
+  );
   if (!match) {
     throw new Error(`Could not find MDXContent in source`);
   }
@@ -277,7 +279,7 @@ console.log("hello")
     );
     const lastImportLine = importLines.at(-1);
     const lastImportIndex =
-      lastImportLine == null ? -1 : lines.lastIndexOf(lastImportLine);
+      lastImportLine == undefined ? -1 : lines.lastIndexOf(lastImportLine);
 
     // All imports should come before other code
     expect(lastImportIndex).toBeLessThan(firstNonImportIndex);

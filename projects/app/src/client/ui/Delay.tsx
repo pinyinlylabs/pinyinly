@@ -18,5 +18,5 @@ export const Delay = ({
     };
   }, [action, ms]);
 
-  return elapsed ? children : null;
+  return elapsed ? <>{children}</> : null;
 };

@@ -28,11 +28,11 @@ export interface RizzleTypeDef {
 
 export abstract class RizzleType<
   Def extends RizzleTypeDef = RizzleTypeDef,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any
   Input = any,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any
   Marshaled = any,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any
   Output = any,
 > {
   readonly _input!: Input;
@@ -110,10 +110,12 @@ export class RizzleNullable<T extends RizzleType> extends RizzleType<
   }
 
   marshal(input: this[`_input`]): this[`_marshaled`] {
+    // oxlint-disable-next-line typescript/no-unsafe-return
     return this.getMarshal().parse(input);
   }
 
   unmarshal(marshaled: T[`_marshaled`]): T[`_output`] {
+    // oxlint-disable-next-line typescript/no-unsafe-return
     return this.getUnmarshal().parse(marshaled);
   }
 
@@ -159,10 +161,12 @@ export class RizzleOptional<T extends RizzleType> extends RizzleType<
   }
 
   marshal(input: this[`_input`]): this[`_marshaled`] {
+    // oxlint-disable-next-line typescript/no-unsafe-return
     return this.getMarshal().parse(input);
   }
 
   unmarshal(marshaled: T[`_marshaled`]): T[`_output`] {
+    // oxlint-disable-next-line typescript/no-unsafe-return
     return this.getUnmarshal().parse(marshaled);
   }
 
@@ -198,9 +202,11 @@ export class RizzleTypeAlias<T extends RizzleType> extends RizzleType<
     return this._def.innerType.getUnmarshal();
   }
   marshal(input: T[`_input`]): T[`_marshaled`] {
+    // oxlint-disable-next-line typescript/no-unsafe-return
     return this._def.innerType.marshal(input);
   }
   unmarshal(marshaled: T[`_marshaled`]): T[`_output`] {
+    // oxlint-disable-next-line typescript/no-unsafe-return
     return this._def.innerType.unmarshal(marshaled);
   }
   _getIndexes() {
@@ -247,9 +253,11 @@ export class RizzleIndexed<
     return this._def.innerType.getUnmarshal();
   }
   marshal(input: T[`_input`]): T[`_marshaled`] {
+    // oxlint-disable-next-line typescript/no-unsafe-return
     return this._def.innerType.marshal(input);
   }
   unmarshal(marshaled: T[`_marshaled`]): T[`_output`] {
+    // oxlint-disable-next-line typescript/no-unsafe-return
     return this._def.innerType.unmarshal(marshaled);
   }
   _getIndexes(): RizzleIndexDefinitions {
@@ -353,7 +361,6 @@ export class RizzleObject<T extends RizzleRawObject> extends RizzleType<
   }
 
   _getIndexes(): RizzleIndexDefinitions {
-    // eslint-disable-next-line unicorn/no-array-reduce
     return Object.entries(this._def.shape).reduce<RizzleIndexDefinitions>(
       (acc, [key, rizzleType]) => ({
         ...acc,
@@ -447,7 +454,7 @@ abstract class RizzleRoot<Def extends RizzleTypeDef = RizzleTypeDef> {
 
 type RizzleRawSchemaForKeyPath<KeyPath extends string> = Record<
   ExtractVariableNames<KeyPath>,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any
   RizzleType<RizzleTypeDef, any, string>
 >;
 
@@ -499,7 +506,7 @@ export class RizzleEntity<
     tx: ReadTransaction,
     key: EntityKeyType<S, KeyPath>[`_input`],
   ): Promise<boolean> {
-    return await tx.has(this.marshalKey(key));
+    return tx.has(this.marshalKey(key));
   }
 
   async get(
@@ -628,9 +635,10 @@ export class RizzleMutator<P extends RizzleRawObject> extends RizzleRoot<
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// oxlint-disable-next-line typescript/no-explicit-any
 export type RizzleAnyMutator = RizzleMutator<any>;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
+// oxlint-disable-next-line typescript/no-explicit-any
 export type RizzleAnyEntity = RizzleEntity<string, any>;
 
 export type RizzleEntityInput<T extends RizzleAnyEntity> =
@@ -659,7 +667,7 @@ export type RizzleObjectOutput<T extends RizzleRawObject> = PartialIfUndefined<{
 }>;
 
 export type RizzleIndexNames<T extends RizzleType> =
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any
   T extends RizzleIndexed<any, infer IndexName>
     ? IndexName
     : T extends RizzleTypeAlias<infer Wrapped>
@@ -679,7 +687,7 @@ export type RizzleIndexTypes<T extends RizzleType> = {
 };
 
 export type RizzleIndexTypesInner<T extends RizzleType> =
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any
   T extends RizzleIndexed<any, infer IndexName>
     ? [IndexName, T[`_input`]]
     : T extends RizzleTypeAlias<infer Wrapped>
@@ -1053,7 +1061,7 @@ const replicache = <
         ? [
             [
               k,
-              (options: typeof v._def.args._input) => {
+              async (options: typeof v._def.args._input) => {
                 const mutator = replicache.mutate[v._def.alias ?? k];
                 invariant(mutator != null, `mutator ${k} not found`);
                 return mutator(v._def.args.marshal(options));
@@ -1070,7 +1078,10 @@ const replicache = <
         ? [
             [
               v._def.alias ?? k,
-              (tx: WriteTransaction, options: typeof v._def.args._input) => {
+              async (
+                tx: WriteTransaction,
+                options: typeof v._def.args._input,
+              ) => {
                 const mutator = mutators[k as keyof typeof mutators];
                 invariant(
                   (mutator as unknown) != null,
@@ -1114,7 +1125,7 @@ const replicache = <
                   scan: (partialKey = {}) =>
                     withToArray(
                       scanPagedIter(
-                        (fn) => replicache.query(fn),
+                        async (fn) => replicache.query(fn),
                         e._def.interpolateKey(partialKey, true),
                         (x) =>
                           e.unmarshalValue(
@@ -1133,7 +1144,7 @@ const replicache = <
                     (indexValue?: unknown, exact = true) =>
                       withToArray(
                         indexScanPagedIter(
-                          (fn) => replicache.query(fn),
+                          async (fn) => replicache.query(fn),
                           `${k}.${indexName}`,
                           (x) =>
                             e.unmarshalValue(
@@ -1160,7 +1171,7 @@ const replicache = <
     query,
     queryPaged,
     mutate,
-    [Symbol.asyncDispose]: () => replicache.close(),
+    [Symbol.asyncDispose]: async () => replicache.close(),
   };
 };
 
@@ -1297,7 +1308,7 @@ export const makeDrizzleMutationHandler = <S extends RizzleRawSchema, Tx>(
         ? [
             [
               v._def.alias ?? k,
-              (tx: Tx, userId: string, mutation: ReplicacheMutation) => {
+              async (tx: Tx, userId: string, mutation: ReplicacheMutation) => {
                 const mutator =
                   k in mutators ? mutators[k as keyof typeof mutators] : null;
                 invariant(mutator != null, `mutator ${k} not found`);
@@ -1426,7 +1437,9 @@ function eventLoopThrottle(timeoutMs: number) {
       deadline = undefined;
     }
     if (deadline == null) {
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await new Promise((resolve) => {
+        setTimeout(resolve, 0);
+      });
       deadline ??= performance.now() + timeoutMs;
     }
   };
@@ -1462,6 +1475,7 @@ export async function* indexScanPagedIter<Value>(
     await scanPagedIterThrottle();
     try {
       page = [];
+      // oxlint-disable-next-line no-loop-func
       await query(async (tx) => {
         for await (const item of indexScanIter(
           tx,
@@ -1496,7 +1510,7 @@ export async function* indexScanPagedIter<Value>(
 function withToArray<T>(
   iter: AsyncGenerator<T>,
 ): AsyncGenerator<T> & { toArray: () => Promise<T[]> } {
-  return Object.assign(iter, { toArray: () => fromAsync(iter) });
+  return Object.assign(iter, { toArray: async () => fromAsync(iter) });
 }
 
 export async function* scanIter<Value>(
@@ -1535,6 +1549,7 @@ export async function* scanPagedIter<V>(
     await scanPagedIterThrottle();
     try {
       page = [];
+      // oxlint-disable-next-line no-loop-func
       await query(async (tx) => {
         for await (const item of scanIter(
           tx,

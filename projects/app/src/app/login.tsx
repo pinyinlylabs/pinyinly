@@ -120,7 +120,7 @@ export default function LoginPage() {
           buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
           cornerRadius={5}
           className="h-[44px] w-[200px]"
-          // eslint-disable-next-line @typescript-eslint/no-misused-promises
+          // oxlint-disable-next-line typescript/no-misused-promises
           onPress={async () => {
             let credential;
             try {

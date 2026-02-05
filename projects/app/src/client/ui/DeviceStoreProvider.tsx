@@ -38,4 +38,4 @@ export const DeviceStoreProvider = Object.assign(
   { Context },
 );
 
-const nullServerSessionId = memoize0(() => Promise.resolve(null));
+const nullServerSessionId = memoize0(async () => null);

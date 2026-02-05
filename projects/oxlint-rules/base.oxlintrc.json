@@ -2,7 +2,36 @@
   "$schema": "https://oxc.rs/schemas/oxlint.json",
   "plugins": ["typescript"],
   "ignorePatterns": ["test/**", "**/*.d.ts"],
+  "categories": {
+    "correctness": "error",
+    "restriction": "error",
+    "pedantic": "error"
+  },
   "rules": {
+    "complexity": "off",
+    "class-methods-use-this": "off",
+    "no-bitwise": "off",
+    "default-case": "off",
+    "no-empty": "off",
+    "no-var-requires": "off",
+    "no-void": "off",
+    // Expo/metro stuff still uses require().
+    "no-require-imports": "off",
+    "explicit-function-return-type": "off",
+    "no-param-reassign": "off",
+    "no-undefined": "off",
+    "no-plusplus": "off",
+    "no-eq-null": "off",
+    "no-inline-comments": "off",
+    "array-callback-return": "off",
+    "no-useless-return": "off",
+    "require-await": "off",
+    "no-warning-comments": "off",
+    "max-depth": "off",
+    "max-classes-per-file": "off",
+    "eqeqeq": "off",
+    "max-lines": "off",
+    "max-lines-per-function": "off",
     "curly": "deny",
     "no-console": ["deny", { "allow": ["warn", "error"] }],
     "no-debugger": "deny",
@@ -16,9 +45,99 @@
     "no-eval": "deny",
     "no-func-assign": "deny",
     "no-global-assign": "deny",
+
     "unicorn/no-thenable": "deny",
     "unicorn/no-empty-file": "deny",
     "unicorn/no-await-in-promise-methods": "deny",
+    "unicorn/numeric-separators-style": [
+      "error",
+      {
+        "onlyIfContainsSeparator": true,
+        "number": { "onlyIfContainsSeparator": false }
+      }
+    ],
+    "unicorn/no-null": "off", // null used extensively
+    "unicorn/number-literal-case": "off", // overwritten by prettier
+    "unicorn/prefer-module": "off", // still need to use require(…) with metro
+    "unicorn/prevent-abbreviations": "off", // abbreviations are fine
+    "unicorn/no-nested-ternary": "off", // nested ternaries are not so bad
+    "unicorn/filename-case": "off", // using camelCase for filenames
+    "unicorn/prefer-string-starts-ends-with": "error",
+
+    "eslint/prefer-const": "deny",
+    "eslint/no-unused-expressions": "deny",
+    "eslint/no-restricted-imports": [
+      "deny",
+      {
+        "paths": [
+          {
+            "name": "react-native",
+            "importNames": ["SafeAreaView"],
+            "message": "Please use \"useSafeAreaInsets\" from \"react-native-safe-area-context\" instead."
+          },
+          {
+            "name": "react",
+            "importNames": ["forwardRef", "memo", "useContext"],
+            "message": "Migrate to React 19 patterns."
+          },
+          {
+            "name": "vitest",
+            "importNames": ["it"],
+            "message": "Use \"test(…)\" instead of \"it(…)\" for consistency."
+          },
+          {
+            "name": "hanzi",
+            "message": "Please use @/dictionary/hanzi instead."
+          },
+          {
+            "name": "nanoid",
+            "message": "Please use @/util/nanoid instead."
+          },
+          {
+            "name": "date-fns",
+            "message": "Please use date-fns/* instead for smaller bundle size.",
+            "allowTypeImports": true
+          },
+          {
+            "name": "lodash",
+            "message": "Please use lodash/* instead for smaller bundle size."
+          },
+          {
+            "name": "node:assert",
+            "message": "Please use vitest instead."
+          },
+          {
+            "name": "node:assert/strict",
+            "message": "Please use vitest instead."
+          },
+          {
+            "name": "node:test",
+            "message": "Please use vitest instead."
+          },
+          {
+            "name": "zod",
+            "message": "Please use zod/v4 instead."
+          },
+          {
+            "name": "glob",
+            "message": "Please use glob from @pinyinly/lib/fs instead."
+          },
+          {
+            "name": "node:fs/promises",
+            "message": "Please use @pinyinly/lib/fs instead."
+          },
+          {
+            "name": "node:fs",
+            "message": "Please use @pinyinly/lib/fs instead."
+          },
+          {
+            "name": "@bacons/mdx",
+            "message": "Please use @/client/mdx instead."
+          }
+        ]
+      }
+    ],
+
     // disallow non-import statements appearing before import statements
     "import/first": "deny",
     // disallow AMD require/define
@@ -31,6 +150,64 @@
     "import/no-mutable-exports": "deny",
     // Forbid a module from importing itself
     "import/no-self-import": "deny",
-    "typescript/no-unnecessary-type-assertion": "deny"
-  }
+    // Forbid import of modules using absolute paths
+    "import/no-absolute-path": "error",
+    // enforces consistent type specifier style for named imports
+    "import/consistent-type-specifier-style": "error",
+
+    "typescript/prefer-for-of": "deny",
+    "typescript/no-dynamic-delete": "deny",
+    "typescript/no-implied-eval": "deny",
+    "typescript/no-unnecessary-type-assertion": "deny",
+    "typescript/no-unsafe-assignment": "deny",
+    "typescript/no-unsafe-member-access": "deny",
+    "typescript/no-unsafe-argument": "deny",
+    "typescript/no-explicit-any": "deny",
+    "typescript/no-import-type-side-effects": "deny",
+    "typescript/consistent-type-imports": "deny",
+    "typescript/no-unsafe-return": "deny",
+    "typescript/no-unsafe-call": "deny",
+    "typescript/no-unnecessary-type-constraint": "deny",
+    "typescript/require-await": "off",
+    "typescript/explicit-module-boundary-types": "off",
+    // Often only having one usage of a type parameter is fine because it's
+    // the only way to use "_ extends _".
+    "typescript/no-unnecessary-type-arguments": "deny",
+    "typescript/return-await": "deny",
+    "typescript/no-empty-object-type": "deny",
+    "typescript/strict-boolean-expressions": "deny",
+    "typescript/switch-exhaustiveness-check": [
+      "deny",
+      { "requireDefaultForNonUnion": true }
+    ],
+    "typescript/restrict-template-expressions": [
+      "deny",
+      {
+        "allowAny": false,
+        "allowArray": false,
+        "allowBoolean": true,
+        "allowNever": false,
+        "allowNullish": false,
+        "allowNumber": true,
+        "allowRegExp": false
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["test/**/*.{ts,tsx}"],
+      "rules": {
+        "no-non-null-assertion": "off"
+        // Backup from eslint config:
+        //
+        // "typescript/no-non-null-assertion": "off",
+        // "typescript/no-unsafe-assignment": "off",
+        // "typescript/require-await": "off", // this is annoying when you want a little function to return a promise
+        // "typescript/return-await": "off", // this is annoying when you want a little function to return a promise
+        // // It's useful to use inline type annotations for mocking.
+        // "unicorn/consistent-function-scoping": "off", // it's useful to write functions in the scope of a test
+        // "unicorn/no-useless-undefined": "off" // writing undefined can be useful when writing mocks
+      }
+    }
+  ]
 }

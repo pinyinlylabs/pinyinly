@@ -501,7 +501,7 @@ export async function testSprites(
   manifestPath: string,
   autoFix = false,
 ): Promise<ManifestCheckResult> {
-  return await verifySprites({
+  return verifySprites({
     manifestPath,
     autoRegenerate: autoFix,
     autoCleanup: autoFix,

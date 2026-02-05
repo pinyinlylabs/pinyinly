@@ -133,9 +133,12 @@ const rule: Rule.RuleModule = {
 
                 for (const variable of references) {
                   if (variable.name === badDefaultName) {
-                    for (const ref of variable.references) {
+                    for (const reference of variable.references) {
                       fixes.push(
-                        fixer.replaceText(ref.identifier, expectedDefaultName),
+                        fixer.replaceText(
+                          reference.identifier,
+                          expectedDefaultName,
+                        ),
                       );
                     }
                   }
@@ -184,10 +187,13 @@ const rule: Rule.RuleModule = {
                     // Find all references to the local variable name
                     const variable = scope.set.get(localName);
                     if (variable) {
-                      for (const ref of variable.references) {
-                        if (ref.identifier !== specifier.local) {
+                      for (const reference of variable.references) {
+                        if (reference.identifier !== specifier.local) {
                           fixes.push(
-                            fixer.replaceText(ref.identifier, expectedName),
+                            fixer.replaceText(
+                              reference.identifier,
+                              expectedName,
+                            ),
                           );
                         }
                       }

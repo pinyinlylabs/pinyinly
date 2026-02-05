@@ -134,7 +134,7 @@ export function SignInWithAppleButton({
     const scriptUrl = `https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/${locale}${suffix}`;
 
     // Remove any old scripts (e.g. if the locale changed).
-    // eslint-disable-next-line unicorn/prefer-spread
+
     const existingScripts = Array.from(document.querySelectorAll(`script`));
     const needsReset = existingScripts.some(
       (e) => e.src.endsWith(suffix) && e.src !== scriptUrl,

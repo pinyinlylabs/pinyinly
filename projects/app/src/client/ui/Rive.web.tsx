@@ -42,7 +42,7 @@ export function Rive({
       );
 
       void fetch(Asset.fromModule(expoAsset).uri)
-        .then((res) => res.arrayBuffer())
+        .then(async (res) => res.arrayBuffer())
         .then((arr) => new Uint8Array(arr))
         .then((image) => {
           asset.decode(image);

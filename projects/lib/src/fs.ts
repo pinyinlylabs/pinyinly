@@ -1,10 +1,10 @@
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+// oxlint-disable-next-line no-restricted-imports
 import { readFileSync, writeFileSync } from "node:fs";
 
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+// oxlint-disable-next-line no-restricted-imports
 import { readFile, writeFile } from "node:fs/promises";
 
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+// oxlint-disable-next-line no-restricted-imports
 import { globSync } from "glob";
 
 import { stat } from "@pinyinly/lib/fs";
@@ -15,7 +15,7 @@ import { DatabaseSync } from "node:sqlite";
 import type { z } from "zod/v4";
 import { jsonStringifyShallowIndent } from "./json.ts";
 
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+// oxlint-disable-next-line no-restricted-imports
 export {
   access,
   mkdir,
@@ -28,7 +28,7 @@ export {
   writeFile,
 } from "node:fs/promises";
 
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+// oxlint-disable-next-line eslint/no-restricted-imports
 export {
   createReadStream,
   existsSync,
@@ -58,7 +58,7 @@ export async function writeJsonFileIfChanged(
   content: object,
   indentLevels?: number,
 ): Promise<boolean> {
-  return await writeUtf8FileIfChanged(
+  return writeUtf8FileIfChanged(
     path,
     jsonStringifyShallowIndent(content, indentLevels),
     (a, b) => isEqual(JSON.parse(a), JSON.parse(b)),
@@ -91,7 +91,7 @@ export async function updateJsonFileKey(
   // Update the specific key
   const updatedData = { ...existingData, [key]: value };
 
-  return await writeJsonFileIfChanged(path, updatedData, indentLevels);
+  return writeJsonFileIfChanged(path, updatedData, indentLevels);
 }
 
 export async function writeUtf8FileIfChanged(
@@ -130,7 +130,7 @@ export function writeUtf8FileIfChangedSync(
   return hasDiff;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+// oxlint-disable-next-line no-restricted-imports
 export { glob, globSync } from "glob";
 
 export function makeFsDbCache<K, V>(

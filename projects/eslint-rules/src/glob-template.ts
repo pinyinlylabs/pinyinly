@@ -21,8 +21,8 @@ const rule: Rule.RuleModule = {
     return {
       Program() {
         const comments = sourceCode.getAllComments();
-        for (let i = 0; i < comments.length; i++) {
-          const comment = comments[i];
+        for (let index = 0; index < comments.length; index++) {
+          const comment = comments[index];
           if (comment === undefined) {
             continue;
           }
@@ -35,61 +35,66 @@ const rule: Rule.RuleModule = {
           if (!openTagMatch) {
             continue;
           }
-          const attrs = (openTagMatch[1] ?? ``).trim();
+          const attributes = (openTagMatch[1] ?? ``).trim();
           // Parse attributes (robust, any order)
           let globPath: string | null = null;
           let template: string | null = null;
-          let attrError = false;
-          if (attrs.length > 0) {
+          let attributeError = false;
+          if (attributes.length > 0) {
             // Match all key="value" pairs, handling escaped quotes
-            const attrPairs = [
-              ...attrs.matchAll(/([a-zA-Z0-9_-]+)\s*=\s*"((?:[^"\\]|\\.)*)"/g),
+            const attributePairs = [
+              ...attributes.matchAll(
+                /([a-zA-Z0-9_-]+)\s*=\s*"((?:[^"\\]|\\.)*)"/g,
+              ),
             ];
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            const attrMap = Object.fromEntries(
-              attrPairs.map(([_, k, v]) => [k, v] as const),
+            // oxlint-disable-next-line typescript/no-unsafe-assignment
+            const attributeMap = Object.fromEntries(
+              attributePairs.map(([_, k, v]) => [k, v] as const),
             );
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-            const keys = Object.keys(attrMap);
+            // oxlint-disable-next-line typescript/no-unsafe-argument
+            const keys = Object.keys(attributeMap);
             // Remove all matched key="value" pairs from the string
-            const cleanedAttrs = attrs
+            const cleanedAttributes = attributes
               .replaceAll(/([a-zA-Z0-9_-]+)\s*=\s*"((?:[^"\\]|\\.)*)"/g, ``)
               .trim();
             // Only allow glob and template attributes
-            const validAttrs = new Set([`glob`, `template`]);
-            const hasValidAttrs = keys.every((key) => validAttrs.has(key));
-            const hasGlobAttr = keys.includes(`glob`);
-            const hasTemplateAttr = keys.includes(`template`);
-            const hasRequiredAttrs = hasGlobAttr && hasTemplateAttr;
+            const validAttributes = new Set([`glob`, `template`]);
+            const hasValidAttributes = keys.every((key) =>
+              validAttributes.has(key),
+            );
+            const hasGlobAttribute = keys.includes(`glob`);
+            const hasTemplateAttribute = keys.includes(`template`);
+            const hasRequiredAttributes =
+              hasGlobAttribute && hasTemplateAttribute;
 
             if (
-              !hasRequiredAttrs ||
-              !hasValidAttrs ||
-              cleanedAttrs.length > 0
+              !hasRequiredAttributes ||
+              !hasValidAttributes ||
+              cleanedAttributes.length > 0
             ) {
-              attrError = true;
+              attributeError = true;
             } else {
               // Use the glob path directly
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-              globPath = attrMap.glob ?? null;
+              // oxlint-disable-next-line typescript/no-unsafe-assignment, typescript/no-unsafe-member-access
+              globPath = attributeMap.glob ?? null;
 
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+              // oxlint-disable-next-line typescript/no-unsafe-assignment
               template =
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                attrMap.template === undefined
+                // oxlint-disable-next-line typescript/no-unsafe-member-access
+                attributeMap.template === undefined
                   ? null // Unescape dollar signs and quotes
-                  : // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-                    attrMap.template
+                  : // oxlint-disable-next-line typescript/no-unsafe-member-access, typescript/no-unsafe-call
+                    attributeMap.template
                       .replaceAll(String.raw`\$`, `$`)
-                      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                      // oxlint-disable-next-line typescript/no-unsafe-member-access
                       .replaceAll(String.raw`\"`, `"`)
-                      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                      // oxlint-disable-next-line typescript/no-unsafe-member-access
                       .replaceAll(String.raw`\'`, `'`);
             }
           } else {
-            attrError = true;
+            attributeError = true;
           }
-          if (attrError || globPath === null || template === null) {
+          if (attributeError || globPath === null || template === null) {
             context.report({
               loc: comment.loc ?? { line: 1, column: 0 },
               message: `<pyly-glob-template> must have glob and template attributes, e.g. <pyly-glob-template glob="./icons/*.svg" template="  require('\${path}'),">. Available variables: \${path}, \${pathWithoutExt}, \${filenameWithoutExt}, \${parentDir}, \${relpath}, \${relpathWithoutExt}. You can also use JavaScript expressions like \${path.split('.')[0]} or \${relpath.replace(/-/g, '_')}`,
@@ -98,15 +103,15 @@ const rule: Rule.RuleModule = {
           }
 
           // Find the closing comment
-          let closeIdx = i + 1;
+          let closeIndex = index + 1;
           let closeComment = null;
-          while (closeIdx < comments.length) {
-            // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
-            if (comments[closeIdx]?.value.includes(`</pyly-glob-template>`)) {
-              closeComment = comments[closeIdx];
+          while (closeIndex < comments.length) {
+            // oxlint-disable-next-line typescript/strict-boolean-expressions
+            if (comments[closeIndex]?.value.includes(`</pyly-glob-template>`)) {
+              closeComment = comments[closeIndex];
               break;
             }
-            closeIdx++;
+            closeIndex++;
           }
           if (!closeComment) {
             continue;
@@ -174,18 +179,21 @@ const rule: Rule.RuleModule = {
                 globDir = globPath;
                 globPattern = `*`;
               } else {
-                const lastSepBeforeGlob = Math.max(
+                const lastSeparatorBeforeGlob = Math.max(
                   globPath.lastIndexOf(`/`, globIndex),
                   globPath.lastIndexOf(`\\`, globIndex),
                 );
 
-                if (lastSepBeforeGlob === -1) {
+                if (lastSeparatorBeforeGlob === -1) {
                   globDir = `.`;
                   globPattern = globPath;
                 } else {
-                  globDir = globPath.slice(0, Math.max(0, lastSepBeforeGlob));
+                  globDir = globPath.slice(
+                    0,
+                    Math.max(0, lastSeparatorBeforeGlob),
+                  );
                   globPattern = globPath.slice(
-                    Math.max(0, lastSepBeforeGlob + 1),
+                    Math.max(0, lastSeparatorBeforeGlob + 1),
                   );
                 }
               }
@@ -222,7 +230,7 @@ const rule: Rule.RuleModule = {
           // Build the expected lines using the template
           const generatedLines = files.map((f) => {
             let requirePath = globDir.replace(/\/$/, ``);
-            // eslint-disable-next-line unicorn/no-negated-condition
+            // oxlint-disable-next-line no-negated-condition
             requirePath = requirePath !== `` ? `${requirePath}/${f}` : f;
             // Only add ./ if not already relative (doesn't start with ./ or ../)
             if (
@@ -233,12 +241,12 @@ const rule: Rule.RuleModule = {
             }
 
             // Get filename without extension (for variable names)
-            const filenameWithoutExt = path
+            const filenameWithoutExtension = path
               .basename(f)
               .replace(/\.[^/.]+$/, ``);
 
             // Get path without extension (for $pathWithoutExt compatibility)
-            const pathWithoutExt = requirePath.replace(/\.[^/.]+$/, ``);
+            const pathWithoutExtension = requirePath.replace(/\.[^/.]+$/, ``);
 
             // Get parent directory name (last directory in the path)
             const parentDir = path.basename(path.dirname(requirePath));
@@ -251,8 +259,8 @@ const rule: Rule.RuleModule = {
 
             // Create context for evaluating expressions
             const context = {
-              filenameWithoutExt,
-              pathWithoutExt,
+              filenameWithoutExt: filenameWithoutExtension,
+              pathWithoutExt: pathWithoutExtension,
               path: requirePath,
               parentDir,
               relpath: relPath,
@@ -273,11 +281,11 @@ const rule: Rule.RuleModule = {
 
                   // Create a function that evaluates the expression in the given context
                   // This is safer than using eval() directly
-                  // eslint-disable-next-line @typescript-eslint/no-implied-eval
+                  // oxlint-disable-next-line typescript/no-implied-eval
                   const evaluator = new Function(...keys, `return ${expr};`);
 
                   // Execute the function with our context variables
-                  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+                  // oxlint-disable-next-line typescript/no-unsafe-call
                   return evaluator(...values) as string;
                 } catch {
                   // If evaluation fails, return the original expression
@@ -306,7 +314,7 @@ const rule: Rule.RuleModule = {
           const isOutOfSync =
             actualLines.length !== generatedLines.length ||
             actualLines.some(
-              (line, idx) => line !== generatedLines[idx]?.trim(),
+              (line, index) => line !== generatedLines[index]?.trim(),
             );
 
           if (isOutOfSync) {

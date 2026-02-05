@@ -103,14 +103,14 @@ function getNameOfTypeText(typeAnnotationText: string): NameOfTypeResult {
 /**
  * Determines the quote style used in an expression
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// oxlint-disable-next-line typescript/no-explicit-any
 function getQuoteStyle(expression: any, sourceCode: any): QuoteStyle {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  // oxlint-disable-next-line typescript/no-unsafe-member-access
   if (expression.type === `TemplateLiteral`) {
     return `template`;
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    // oxlint-disable-next-line typescript/no-unsafe-member-access
   } else if (expression.type === `Literal`) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+    // oxlint-disable-next-line typescript/no-unsafe-call, typescript/no-unsafe-assignment, typescript/no-unsafe-member-access
     const originalText: string = sourceCode.getText(expression);
     return originalText.startsWith(`"`) ? `double` : `single`;
   }
@@ -156,15 +156,15 @@ const rule: Rule.RuleModule = {
     const sourceCode = context.sourceCode;
 
     return {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // oxlint-disable-next-line typescript/no-explicit-any
       "TSTypeAssertion, TSAsExpression, TSSatisfiesExpression"(node: any) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        // oxlint-disable-next-line typescript/no-unsafe-member-access
         if (node.typeAnnotation === undefined) {
           return;
         }
 
         // Get the type annotation text
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+        // oxlint-disable-next-line typescript/no-unsafe-member-access, typescript/no-unsafe-argument
         const typeAnnotationText = sourceCode.getText(node.typeAnnotation);
 
         // Check if it's a NameOf or HasNameOf type
@@ -180,36 +180,38 @@ const rule: Rule.RuleModule = {
         }
 
         // Check if the expression is a string literal
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+
+        // oxlint-disable-next-line typescript/no-unsafe-assignment, typescript/no-unsafe-member-access
         const expression = node.expression;
         let actualString: string | null = null;
         let isValidStringExpr = false;
 
         if (
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          // oxlint-disable-next-line typescript/no-unsafe-member-access
           expression.type === `Literal` &&
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          // oxlint-disable-next-line typescript/no-unsafe-member-access
           typeof expression.value === `string`
         ) {
           // Handle regular string literals (single and double quotes)
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
+          // oxlint-disable-next-line typescript/no-unsafe-member-access
           actualString = expression.value as string;
           isValidStringExpr = true;
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          // oxlint-disable-next-line typescript/no-unsafe-member-access
         } else if (expression.type === `TemplateLiteral`) {
           // Handle template literals (backticks) - only if they have no expressions
-          // eslint-disable-next-line unicorn/no-lonely-if
+
           if (
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            // oxlint-disable-next-line typescript/no-unsafe-member-access
             expression.expressions.length === 0 &&
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            // oxlint-disable-next-line typescript/no-unsafe-member-access
             expression.quasis.length === 1 &&
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            // oxlint-disable-next-line typescript/no-unsafe-member-access
             expression.quasis[0] !== undefined
           ) {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+            // oxlint-disable-next-line typescript/no-unsafe-assignment, typescript/no-unsafe-member-access
             const quasi = expression.quasis[0];
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+            // oxlint-disable-next-line typescript/no-unsafe-assignment, typescript/no-unsafe-member-access
             actualString = quasi.value.cooked ?? quasi.value.raw ?? ``;
             isValidStringExpr = true;
           }
@@ -230,7 +232,7 @@ const rule: Rule.RuleModule = {
             : `mismatch`;
 
           context.report({
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            // oxlint-disable-next-line typescript/no-unsafe-assignment
             node: expression,
             messageId,
             data: {
@@ -280,10 +282,10 @@ const rule: Rule.RuleModule = {
                   let replaced = false;
 
                   // First, try to replace specific generic words
-                  for (let i = 0; i < words.length; i++) {
-                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                    if (replaceWords.has(words[i]!.toLowerCase())) {
-                      words[i] = expectedSymbolName;
+                  for (let index = 0; index < words.length; index++) {
+                    // oxlint-disable-next-line typescript/no-non-null-assertion
+                    if (replaceWords.has(words[index]!.toLowerCase())) {
+                      words[index] = expectedSymbolName;
                       replaced = true;
                       break;
                     }
@@ -291,10 +293,10 @@ const rule: Rule.RuleModule = {
 
                   // If no generic word found, replace the first non-preserve word
                   if (!replaced) {
-                    for (let i = 0; i < words.length; i++) {
-                      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                      if (!preserveWords.has(words[i]!.toLowerCase())) {
-                        words[i] = expectedSymbolName;
+                    for (let index = 0; index < words.length; index++) {
+                      // oxlint-disable-next-line typescript/no-non-null-assertion
+                      if (!preserveWords.has(words[index]!.toLowerCase())) {
+                        words[index] = expectedSymbolName;
                         replaced = true;
                         break;
                       }

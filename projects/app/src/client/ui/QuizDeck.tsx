@@ -102,7 +102,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
           );
 
           // Check if this effect was cancelled before setting state
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+
           if (abortController.signal.aborted) {
             return;
           }

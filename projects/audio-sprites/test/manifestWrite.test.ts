@@ -10,9 +10,14 @@ import {
   syncManifestWithFilesystem,
 } from "#manifestWrite.ts";
 import type { SpriteManifest } from "#types.ts";
+import {
+  sortComparatorNumber,
+  sortComparatorString,
+} from "@pinyinly/lib/collections";
 import { invariant } from "@pinyinly/lib/invariant";
 import { vol } from "memfs";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
+import type * as FfmpegModule from "../src/ffmpeg.ts";
 
 // Mock fs to use memfs
 vi.mock(`node:fs`, async () => {
@@ -28,7 +33,7 @@ vi.mock(`node:fs/promises`, async () => {
 
 // Mock the analyzeAudioFile function to avoid running ffmpeg in tests
 vi.mock(`#ffmpeg.ts`, async (importOriginal) => {
-  const module: typeof import("../src/ffmpeg.ts") = await importOriginal();
+  const module: typeof FfmpegModule = await importOriginal();
   return {
     ...module,
     // Mock analyzeAudioFileDuration to return a fixed value and avoid calling
@@ -314,7 +319,7 @@ describe(
       const segmentCounts = [
         sprite0Segments.length,
         sprite1Segments.length,
-      ].sort();
+      ].sort(sortComparatorNumber());
       expect(segmentCounts).toEqual([1, 2]);
     });
 
@@ -396,7 +401,9 @@ describe(
       expect(spriteFile).toMatch(/^test-sprite-[a-f0-9]{12}\.m4a$/);
 
       // Verify files are in correct order in segments
-      const segments = Object.entries(updatedManifest.segments).sort();
+      const segments = Object.entries(updatedManifest.segments).sort(
+        sortComparatorString(([x]) => x),
+      );
       expect(segments).toHaveLength(2);
       expect(segments[0]?.[0]).toBe(`audio/test/a.m4a`); // a.m4a should be first
       expect(segments[1]?.[0]).toBe(`audio/test/z.m4a`); // z.m4a should be second
@@ -740,7 +747,7 @@ describe(
         // Mock to prevent console output during tests
       });
 
-      await expect(() =>
+      await expect(async () =>
         syncManifestWithFilesystem(`/nonexistent/manifest.json`),
       ).rejects.toThrow(); // Just check that it throws, the specific error can vary
     });

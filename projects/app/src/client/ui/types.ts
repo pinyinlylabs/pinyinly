@@ -4,7 +4,7 @@ import type { AnyFunction } from "ts-essentials";
 
 export type StackNavigationFor<
   Stack,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any
   ScreenListenersFn = Stack extends TypedNavigator<any, any>
     ? PropsOf<Stack[`Navigator`]>[`screenListeners`]
     : never,

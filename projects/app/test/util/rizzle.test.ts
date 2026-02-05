@@ -1001,7 +1001,6 @@ typeChecks<RizzleReplicacheMutators<never>>(
       });
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     createPost;
   },
 );
@@ -1104,7 +1103,6 @@ test(`replicache()`, async () => {
     //
     using tx = makeMockTx();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.spyOn(tx, `scan`).mockImplementationOnce((options: any): any => {
       checkPoints.log(`tx.scan`);
       expect(options).toEqual({
@@ -1139,7 +1137,7 @@ test(`replicache()`, async () => {
     vi.spyOn(db.replicache, `query`).mockImplementation(async (fn) => fn(tx));
 
     vi.spyOn(tx, `scan`)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       .mockImplementationOnce((options: any): any => {
         checkPoints.log(`tx.scan 0`);
         expect(options).toEqual({
@@ -1156,7 +1154,7 @@ test(`replicache()`, async () => {
           },
         };
       })
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       .mockImplementationOnce((options: any): any => {
         checkPoints.log(`tx.scan 1`);
         expect(options).toEqual({
@@ -1312,13 +1310,12 @@ describe(`replicache() entity()`, async () => {
   test(`.set() only exposed to mutators`, async () => {
     await using db = r.replicache(testReplicacheOptions(), schema, {
       async appendText(db) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
         db.text.set;
       },
     });
 
     // @ts-expect-error set() is not exposed on the query object
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+
     db.query.text.set;
   });
 
@@ -1333,7 +1330,6 @@ describe(`replicache() entity()`, async () => {
 
     let checkPointsReached = ``;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.spyOn(tx, `scan`).mockImplementationOnce((options: any): any => {
       checkPointsReached += `1`;
       expect(options).toEqual({
@@ -1370,7 +1366,6 @@ describe(`replicache() entity()`, async () => {
 
     let checkPointsReached = 0;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.spyOn(tx, `scan`).mockImplementationOnce((options: any): any => {
       checkPointsReached++;
       expect(options).toEqual({
@@ -1429,7 +1424,7 @@ describe(`replicache() entity()`, async () => {
     const checkPoints = new CheckpointLog();
 
     vi.spyOn(tx, `scan`)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       .mockImplementationOnce((options: any): any => {
         checkPoints.log(`tx.scan 0`);
         expect(options).toEqual({
@@ -1446,7 +1441,7 @@ describe(`replicache() entity()`, async () => {
           },
         };
       })
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       .mockImplementationOnce((options: any): any => {
         checkPoints.log(`tx.scan 1`);
         expect(options).toEqual({
@@ -1489,7 +1484,7 @@ describe(`replicache() entity()`, async () => {
     const checkPoint = new CheckpointLog();
 
     vi.spyOn(tx, `scan`)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       .mockImplementationOnce((options: any): any => {
         checkPoint.log(`tx.scan 0`);
         expect(options).toEqual({
@@ -1506,7 +1501,7 @@ describe(`replicache() entity()`, async () => {
           },
         };
       })
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       .mockImplementationOnce((options: any): any => {
         checkPoint.log(`tx.scan 1`);
         expect(options).toEqual({

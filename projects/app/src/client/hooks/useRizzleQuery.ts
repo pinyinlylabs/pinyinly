@@ -38,14 +38,17 @@ export function useRizzleQuery<T extends ReactQueryValue>(
   const stableQuery = useMemo(() => query, stableKey);
 
   useEffect(() => {
-    const unsubscribe = r.replicache.subscribe((tx) => stableQuery(r, tx), {
-      onData: (data) => {
-        queryClient.setQueryData(stableKey, data);
+    const unsubscribe = r.replicache.subscribe(
+      async (tx) => stableQuery(r, tx),
+      {
+        onData: (data) => {
+          queryClient.setQueryData(stableKey, data);
+        },
+        onError: (e) => {
+          console.error(e);
+        },
       },
-      onError: (e) => {
-        console.error(e);
-      },
-    });
+    );
 
     return () => {
       unsubscribe();
@@ -54,7 +57,7 @@ export function useRizzleQuery<T extends ReactQueryValue>(
 
   const result = useQuery({
     queryKey: key,
-    queryFn: () => r.replicache.query((tx) => query(r, tx)),
+    queryFn: async () => r.replicache.query(async (tx) => query(r, tx)),
     networkMode: `offlineFirst`,
     structuralSharing: false,
   });

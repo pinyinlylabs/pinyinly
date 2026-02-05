@@ -39,10 +39,7 @@ import { Platform } from "react-native";
   // https://github.com/getsentry/sentry-react-native/issues/2851#issuecomment-1628559234.
   // The problem happened when calling `Sentry.init` as it presumably resolved
   // to an old version of 'promise'.
-  invariant(
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    Promise.allSettled != null,
-  );
+  invariant(Promise.allSettled != null);
 }
 
 // Populate the scope with Expo specific information.

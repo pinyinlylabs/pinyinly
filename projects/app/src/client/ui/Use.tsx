@@ -11,5 +11,5 @@ export const Use = <T,>({
   render: (value: T) => React.ReactNode;
 }) => {
   const value = use(promise);
-  return render(value);
+  return <>{render(value)}</>;
 };

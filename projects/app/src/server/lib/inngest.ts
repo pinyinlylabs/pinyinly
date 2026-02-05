@@ -84,7 +84,7 @@ const helloWorldEmail = inngest.createFunction(
     invariant(POSTMARK_SERVER_TOKEN != null);
     const client = new postmark.ServerClient(POSTMARK_SERVER_TOKEN);
 
-    const response = await step.run(`sendEmail`, () =>
+    const response = await step.run(`sendEmail`, async () =>
       client.sendEmail({
         From: `hello@pinyinly.com`,
         To: `brad@pinyinly.com`,
@@ -156,7 +156,7 @@ const replicacheGarbageCollection = inngest.createFunction(
       const { deletedRows } = await step.run(
         `replicacheCvr table deletes`,
         async () =>
-          await withDrizzle(async (db) => {
+          withDrizzle(async (db) => {
             const rowsToDelete = await db
               .select({ id: s.replicacheCvr.id })
               .from(s.replicacheCvr)
@@ -203,11 +203,9 @@ const pgFullVacuumGarbageCollection = inngest.createFunction(
       recommendation: `OK` | `Consider VACUUM FULL`;
     };
 
-    const bloatRows = await step.run(
-      `query bloat stats`,
-      async () =>
-        await withDrizzle(async (db) => {
-          const { rows } = await db.execute<BloatRow>(`
+    const bloatRows = await step.run(`query bloat stats`, async () =>
+      withDrizzle(async (db) => {
+        const { rows } = await db.execute<BloatRow>(`
   WITH toast_stats AS (
     SELECT 
       t.oid AS toast_oid,
@@ -258,8 +256,8 @@ const pgFullVacuumGarbageCollection = inngest.createFunction(
   LEFT JOIN toast_stats t ON p.relid = t.parent_oid
   ORDER BY recommendation DESC, table_dead_pct DESC NULLS LAST;
 `);
-          return rows;
-        }),
+        return rows;
+      }),
     );
 
     const tablesToVacuum = bloatRows.filter(
@@ -295,7 +293,7 @@ const syncRemotePush = inngest.createFunction(
   },
   async ({ step, logger }) => {
     {
-      const isOffline = await step.run(`checkInternetConnection`, () =>
+      const isOffline = await step.run(`checkInternetConnection`, async () =>
         checkIsOffline(),
       );
       if (isOffline) {
@@ -307,7 +305,7 @@ const syncRemotePush = inngest.createFunction(
     // Find all sync rules
     const remoteSyncs = await step.run(`findSyncRules`, async () => {
       const remoteSyncs = await withDrizzle(async (db) => {
-        return await db.query.remoteSync.findMany();
+        return db.query.remoteSync.findMany();
       });
       return remoteSyncs;
     });
@@ -319,9 +317,8 @@ const syncRemotePush = inngest.createFunction(
         `fetchRemoteSyncState-${remoteSync.id}-${remoteSync.userId}`,
         async () => {
           // calculate which replicache clients need to be synced
-          return await withDrizzle(
-            async (db) =>
-              await getReplicacheClientStateForUser(db, remoteSync.userId),
+          return withDrizzle(async (db) =>
+            getReplicacheClientStateForUser(db, remoteSync.userId),
           );
         },
       );
@@ -353,15 +350,15 @@ const syncRemotePush = inngest.createFunction(
         while (lastSyncedMutationId < lastMutationId) {
           const newLastSyncedMutationId = await step.run(
             `syncRemoteClient-${clientId}-${lastSyncedMutationId}`,
+            // oxlint-disable-next-line no-loop-func
             async () => {
               // Fetch mutations that need to be sent.
-              const mutationBatchToPush = await withDrizzle(
-                async (db) =>
-                  await getReplicacheClientMutationsSince(db, {
-                    clientId,
-                    sinceMutationId: lastSyncedMutationId,
-                    limit: mutationBatchSize,
-                  }),
+              const mutationBatchToPush = await withDrizzle(async (db) =>
+                getReplicacheClientMutationsSince(db, {
+                  clientId,
+                  sinceMutationId: lastSyncedMutationId,
+                  limit: mutationBatchSize,
+                }),
               );
 
               // push to server
@@ -419,7 +416,7 @@ const syncRemotePull = inngest.createFunction(
   },
   async ({ step, logger }) => {
     {
-      const isOffline = await step.run(`checkInternetConnection`, () =>
+      const isOffline = await step.run(`checkInternetConnection`, async () =>
         checkIsOffline(),
       );
       if (isOffline) {
@@ -429,23 +426,19 @@ const syncRemotePull = inngest.createFunction(
     }
 
     // Find all sync rules
-    const remoteSyncs = await step.run(
-      `findSyncRules`,
-      async () =>
-        await withDrizzle(async (db) => await db.query.remoteSync.findMany()),
+    const remoteSyncs = await step.run(`findSyncRules`, async () =>
+      withDrizzle(async (db) => db.query.remoteSync.findMany()),
     );
 
     // Iterate over each remote sync rule and process it one by one.
     for (const remoteSync of remoteSyncs) {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       while (true) {
         const fetchedMutations = await step.run(
           // Putting the user ID in is unnecessary but it helps debugging.
           `fetchMutations-${remoteSync.id}-${remoteSync.userId}`,
           async () => {
-            const clientsState = await withDrizzle(
-              async (db) =>
-                await getReplicacheClientStateForUser(db, remoteSync.userId),
+            const clientsState = await withDrizzle(async (db) =>
+              getReplicacheClientStateForUser(db, remoteSync.userId),
             );
 
             const lastMutationIds = Object.fromEntries(
@@ -457,7 +450,7 @@ const syncRemotePull = inngest.createFunction(
               remoteSync.remoteSessionId,
             );
 
-            return await trpcClient.replicache.fetchMutations.mutate({
+            return trpcClient.replicache.fetchMutations.mutate({
               schemaVersions: supportedSchemas.map((s) => s.version),
               lastMutationIds,
             });
@@ -493,15 +486,14 @@ const syncRemotePull = inngest.createFunction(
               }
 
               // Finally apply the mutations.
-              const result = await withDrizzle(
-                async (db) =>
-                  await pushChunked(db, remoteSync.userId, {
-                    schemaVersion,
-                    profileId: remoteSync.remoteProfileId,
-                    clientGroupId,
-                    pushVersion: 1,
-                    mutations,
-                  }),
+              const result = await withDrizzle(async (db) =>
+                pushChunked(db, remoteSync.userId, {
+                  schemaVersion,
+                  profileId: remoteSync.remoteProfileId,
+                  clientGroupId,
+                  pushVersion: 1,
+                  mutations,
+                }),
               );
 
               if (result != null) {
@@ -522,17 +514,16 @@ const dataIntegrityDictionary = inngest.createFunction(
     const dict = await loadDictionary();
 
     await step.run(`check skillRating.skill`, async () => {
-      const unknownSkills = await withDrizzle(
-        async (db) =>
-          await db
-            .selectDistinct({ skill: s.skillRating.skill })
-            .from(s.skillRating)
-            .where(
-              notInArray(
-                substring(s.skillRating.skill, /^\w+:(.+)$/),
-                dict.allHanziWords,
-              ),
+      const unknownSkills = await withDrizzle(async (db) =>
+        db
+          .selectDistinct({ skill: s.skillRating.skill })
+          .from(s.skillRating)
+          .where(
+            notInArray(
+              substring(s.skillRating.skill, /^\w+:(.+)$/),
+              dict.allHanziWords,
             ),
+          ),
       ).then((x) => x.map((r) => r.skill));
 
       if (unknownSkills.length > 0) {
@@ -546,17 +537,16 @@ const dataIntegrityDictionary = inngest.createFunction(
     });
 
     await step.run(`check skillState.skill`, async () => {
-      const unknownSkills = await withDrizzle(
-        async (db) =>
-          await db
-            .selectDistinct({ skill: s.skillState.skill })
-            .from(s.skillState)
-            .where(
-              notInArray(
-                substring(s.skillState.skill, /^\w+:(.+)$/),
-                dict.allHanziWords,
-              ),
+      const unknownSkills = await withDrizzle(async (db) =>
+        db
+          .selectDistinct({ skill: s.skillState.skill })
+          .from(s.skillState)
+          .where(
+            notInArray(
+              substring(s.skillState.skill, /^\w+:(.+)$/),
+              dict.allHanziWords,
             ),
+          ),
       ).then((x) => x.map((r) => r.skill));
 
       if (unknownSkills.length > 0) {
@@ -601,30 +591,25 @@ const migrateHanziWords = inngest.createFunction(
     // skillRating
     //
 
-    await step.run(
-      `skillRating.skill renames`,
-      async () =>
-        await withDrizzle(
-          async (db) =>
-            await pgBatchUpdate(db, {
-              whereColumn: s.skillRating.skill,
-              setColumn: s.skillRating.skill,
-              updates: skillRenames,
-            }),
-        ),
+    await step.run(`skillRating.skill renames`, async () =>
+      withDrizzle(async (db) =>
+        pgBatchUpdate(db, {
+          whereColumn: s.skillRating.skill,
+          setColumn: s.skillRating.skill,
+          updates: skillRenames,
+        }),
+      ),
     );
 
-    await step.run(
-      `skillRating.skill deletes`,
-      async () =>
-        await withDrizzle(async (db) => {
-          const deletedRows = await db
-            .delete(s.skillRating)
-            .where(inArray(s.skillRating.skill, skillDeletes))
-            .returning();
+    await step.run(`skillRating.skill deletes`, async () =>
+      withDrizzle(async (db) => {
+        const deletedRows = await db
+          .delete(s.skillRating)
+          .where(inArray(s.skillRating.skill, skillDeletes))
+          .returning();
 
-          return { deletedRows };
-        }),
+        return { deletedRows };
+      }),
     );
 
     //
@@ -632,8 +617,8 @@ const migrateHanziWords = inngest.createFunction(
     //
 
     await step.run(`skillState.skill renames`, async () => {
-      return await withDrizzle(async (db) => {
-        return await withRepeatableReadTransaction(db, async (db) => {
+      return withDrizzle(async (db) => {
+        return withRepeatableReadTransaction(db, async (db) => {
           const newSkills = skillRenames.map(([, newSkill]) => newSkill);
 
           const skillStatesWithNewSkill = await db.query.skillState.findMany({
@@ -679,17 +664,15 @@ const migrateHanziWords = inngest.createFunction(
       });
     });
 
-    await step.run(
-      `skillState.skill deletes`,
-      async () =>
-        await withDrizzle(async (db) => {
-          const deletedRows = await db
-            .delete(s.skillState)
-            .where(inArray(s.skillState.skill, skillDeletes))
-            .returning();
+    await step.run(`skillState.skill deletes`, async () =>
+      withDrizzle(async (db) => {
+        const deletedRows = await db
+          .delete(s.skillState)
+          .where(inArray(s.skillState.skill, skillDeletes))
+          .returning();
 
-          return { deletedRows };
-        }),
+        return { deletedRows };
+      }),
     );
   },
 );
@@ -718,7 +701,7 @@ const retryFailedMutations = inngest.createFunction(
 
     // Fetch the starting mutation and all subsequent failed mutations for the same client
     const mutationChain = await step.run(`fetch-mutation-chain`, async () => {
-      return await withDrizzle(async (db) => {
+      return withDrizzle(async (db) => {
         // First, get the starting mutation to find its clientId and mutationId
         const startMutation = await db
           .select({
@@ -813,8 +796,8 @@ const retryFailedMutations = inngest.createFunction(
       const batchResult = await step.run(
         `process-batch-${batchIndex}`,
         async (): Promise<RetryBatchResult> => {
-          return await withDrizzle(async (db) => {
-            return await withRepeatableReadTransaction(db, async (db) => {
+          return withDrizzle(async (db) => {
+            return withRepeatableReadTransaction(db, async (db) => {
               let succeeded = 0;
 
               for (const mutationRecord of batch) {
@@ -822,7 +805,7 @@ const retryFailedMutations = inngest.createFunction(
                 const result = await (async () => {
                   switch (schemaVersion) {
                     case `9`: {
-                      return await retryMutationV9(db, mutationRecord.id);
+                      return retryMutationV9(db, mutationRecord.id);
                     }
                     default: {
                       return {

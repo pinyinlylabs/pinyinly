@@ -143,7 +143,7 @@ test(`mapInvert fixtures` satisfies HasNameOf<typeof mapInvert>, () => {
   );
 });
 
-describe(`makeRange suite` satisfies HasNameOf<typeof makeRange>, async () => {
+describe(`makeRange suite` satisfies HasNameOf<typeof makeRange>, () => {
   test(`ascending range`, () => {
     expect(makeRange(0, 0)).toEqual([0]);
     expect(makeRange(0, 1)).toEqual([0, 1]);
@@ -195,7 +195,7 @@ test(
   },
 );
 
-describe(`memoize1 suite` satisfies HasNameOf<typeof memoize1>, async () => {
+describe(`memoize1 suite` satisfies HasNameOf<typeof memoize1>, () => {
   test(`fixtures`, () => {
     const fn = (x: string) => x.toUpperCase();
     const memoized = memoize1(fn);

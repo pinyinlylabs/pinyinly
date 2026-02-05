@@ -14,15 +14,10 @@ const bomSchema = z
 export const loadBillOfMaterials = memoize0(async () =>
   bomSchema.transform(deepReadonly).parse(
     Platform.select({
-      android:
-        // eslint-disable-next-line unicorn/no-await-expression-member
-        (await import(`./bom/billOfMaterials.android.asset.json`)).default,
-      ios:
-        // eslint-disable-next-line unicorn/no-await-expression-member
-        (await import(`./bom/billOfMaterials.ios.asset.json`)).default,
-      web:
-        // eslint-disable-next-line unicorn/no-await-expression-member
-        (await import(`./bom/billOfMaterials.web.asset.json`)).default,
+      android: (await import(`./bom/billOfMaterials.android.asset.json`))
+        .default,
+      ios: (await import(`./bom/billOfMaterials.ios.asset.json`)).default,
+      web: (await import(`./bom/billOfMaterials.web.asset.json`)).default,
     }),
   ),
 );

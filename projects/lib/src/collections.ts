@@ -59,9 +59,9 @@ export function readonlyMapDelete<K, V>(
 
 export function mutableArrayFilter<X>(arr: X[], predicate: (x: X) => boolean) {
   let writeIndex = 0;
-  // eslint-disable-next-line @typescript-eslint/prefer-for-of
+  // oxlint-disable-next-line typescript/prefer-for-of
   for (let readIndex = 0; readIndex < arr.length; readIndex++) {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    // oxlint-disable-next-line typescript/no-non-null-assertion
     const item = arr[readIndex]!;
     if (predicate(item)) {
       arr[writeIndex] = item;
@@ -129,9 +129,9 @@ export function merge<T>(a: T, b: T): T {
     invariant(b instanceof Map);
     return new Map(
       [...a.keys(), ...b.keys()].map((key) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        // oxlint-disable-next-line typescript/no-unsafe-assignment
         const aVal = a.get(key);
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        // oxlint-disable-next-line typescript/no-unsafe-assignment
         const bVal = b.get(key);
         return [key, merge(aVal, bVal)] as const;
       }),
@@ -249,7 +249,7 @@ export function weakMemoize1<T, R>(fn: (input: T) => R): typeof fn {
     }
 
     if (cache.has(input)) {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      // oxlint-disable-next-line typescript/no-non-null-assertion
       return cache.get(input)!;
     }
     const ret = fn.call(this, input);
@@ -267,7 +267,7 @@ export function memoize0<R>(
   let cacheSet = false;
   const memoFn = function <This>(this: This) {
     if (cacheSet) {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      // oxlint-disable-next-line typescript/no-non-null-assertion
       return cache!;
     }
     cache = fn.call(this);
@@ -298,7 +298,7 @@ export function memoize1<
   const cache = new Map<T, R>();
   const memoFn = function <This>(this: This, input: T) {
     if (cache.has(input)) {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      // oxlint-disable-next-line typescript/no-non-null-assertion
       return cache.get(input)!;
     }
     const ret = fn.call(this, input);

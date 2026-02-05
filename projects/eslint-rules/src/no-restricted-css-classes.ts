@@ -17,15 +17,15 @@ interface NoRestrictedCssClassesOptions {
 /**
  * Escape backticks, ${, and backslashes for template literals
  */
-function escapeLiteral(str: string): string {
-  return JSON.stringify(str).slice(1, -1);
+function escapeLiteral(string_: string): string {
+  return JSON.stringify(string_).slice(1, -1);
 }
 
 /**
  * Escape backticks, ${, and backslashes for template literals
  */
-function escapeTemplateLiteral(str: string): string {
-  return str
+function escapeTemplateLiteral(string_: string): string {
+  return string_
     .replaceAll(`\\`, `\\\\`)
     .replaceAll(`\``, `\\\``)
     .replaceAll(`\${`, `\\\${`);
@@ -72,8 +72,9 @@ const rule: Rule.RuleModule = {
   create(context: Rule.RuleContext) {
     const options = (context.options[0] ?? {}) as NoRestrictedCssClassesOptions;
     // Support both string and object for classes
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
-    const classList: ClassConfig[] = (options.classes ?? []).map((item: any) =>
+    // oxlint-disable-next-line typescript/no-unsafe-assignment
+    const classList: ClassConfig[] = (options.classes ?? []).map((item) =>
+      // oxlint-disable-next-line typescript/no-unsafe-return
       typeof item === `string` ? { name: item } : item,
     );
     const disallowedClasses = new Map(

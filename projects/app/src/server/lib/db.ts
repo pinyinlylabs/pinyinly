@@ -32,7 +32,6 @@ export async function createPool(): Promise<PgPool> {
     const { default: ws } = await import(`ws`);
     neonConfig.webSocketConstructor = ws;
   } else {
-    // eslint-disable-next-line unicorn/no-await-expression-member
     Pool = (await import(`pg`)).default.Pool;
   }
 
@@ -129,7 +128,7 @@ export async function withRepeatableReadTransaction<R>(
   tx: Transaction | Drizzle,
   body: TransactionBodyFn<R>,
 ): ReturnType<typeof body> {
-  return await withRetriableTransaction(
+  return withRetriableTransaction(
     tx,
     {
       isolationLevel: `repeatable read`,
@@ -151,7 +150,7 @@ export async function withRepeatableReadTransaction<R>(
 function isRetryablePgError(err: unknown) {
   // TODO: use zod to decode
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+  // oxlint-disable-next-line typescript/no-explicit-any, typescript/no-unsafe-member-access
   const code = typeof err === `object` ? String((err as any).code) : null;
   return code === `40001` || code === `40P01`;
 }

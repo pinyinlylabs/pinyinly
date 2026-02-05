@@ -114,7 +114,8 @@ function extractDuration(output: string) {
 
   return {
     fromStream:
-      astats[`Number of samples`] / Number.parseInt(inputStreamSampleRateHz),
+      astats[`Number of samples`] /
+      Number.parseInt(inputStreamSampleRateHz, 10),
     fromContainer: parseTimestampToSeconds(container.duration),
   };
 }

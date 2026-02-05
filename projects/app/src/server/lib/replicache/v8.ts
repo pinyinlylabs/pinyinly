@@ -486,7 +486,7 @@ function makeSyncEntity<
     rizzleEntity,
     cvrKeyToEntityKey: (cvrKey: string) =>
       cvrKeyToEntityKey(cvrKey as CvrKeyType, rizzleEntity),
-    fetchEntityPutOps: (db, ids) =>
+    fetchEntityPutOps: async (db, ids) =>
       fetchEntities(db, ids).then((rows) =>
         rows.map((row) => ({
           op: `put`,
@@ -798,9 +798,9 @@ export async function processMutation(
   errorMode: boolean,
   mutate: MutateHandler<Drizzle>,
 ): Promise<boolean> {
-  return await startSpan({ name: processMutation.name }, async () => {
+  return startSpan({ name: processMutation.name }, async () => {
     // 2: beginTransaction
-    return await db.transaction(async (db) => {
+    return db.transaction(async (db) => {
       debug(`Processing mutation errorMode=%o %o`, errorMode, mutation);
 
       // 3: `getClientGroup(body.clientGroupID)`
@@ -975,7 +975,7 @@ export async function computeEntitiesState(
   db: Drizzle,
   userId: string,
 ): Promise<EntitiesState> {
-  return await startSpan({ name: computeEntitiesState.name }, async () => {
+  return startSpan({ name: computeEntitiesState.name }, async () => {
     const subQueries = syncEntities.map(
       (syncEntity) =>
         [

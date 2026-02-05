@@ -12,16 +12,16 @@ async function getTransformer() {
 
 /**
  * Transform function for Metro bundler
- * @param {any} args - Metro transform arguments
+ * @param {any} arguments_ - Metro transform arguments
  */
-const transform = async (args) => {
+const transform = async (arguments_) => {
   // @ts-expect-error - upstreamTransformer module structure
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  // oxlint-disable-next-line typescript/no-unsafe-assignment
   const upstreamTransform = upstreamTransformer.transform;
   const expoMdxTransform = await getTransformer();
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-argument
-  return await upstreamTransform(await expoMdxTransform(args));
+  // oxlint-disable-next-line typescript/no-unsafe-return, typescript/no-unsafe-call, typescript/no-unsafe-argument
+  return await upstreamTransform(await expoMdxTransform(arguments_));
 };
 
 module.exports = { transform };

@@ -68,7 +68,7 @@ export const NewSkillModal = ({
       devUiSnapshotMode={devUiSnapshotMode}
       suspenseFallback={null}
     >
-      {(dismiss) => pageSheetChild(dismiss)}
+      {(dismiss) => <>{pageSheetChild(dismiss)}</>}
     </PageSheetModal>
   ) : null;
 };
