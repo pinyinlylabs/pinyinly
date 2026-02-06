@@ -53,18 +53,7 @@ const recommended: ConfigWithExtendsArray = [
       // eslint-base
       //
 
-      // NOTE: The following rules are handled by Oxlint for better performance
-      // curly: `off`, // handled by oxlint
-      // "no-console": `off`, // handled by oxlint
-      // "no-debugger": `off`, // handled by oxlint
-      // "no-else-return": `off`, // handled by oxlint
-      // "no-useless-rename": `off`, // handled by oxlint
-
       "logical-assignment-operators": `error`,
-      "no-fallthrough": [
-        `error`,
-        { commentPattern: `.*intentional fallthrough.*` },
-      ],
       "no-process-exit": `error`,
       "object-shorthand": `error`,
       "one-var": [`error`, `never`],
