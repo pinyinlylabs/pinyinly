@@ -53,7 +53,6 @@ const recommended: ConfigWithExtendsArray = [
       // eslint-base
       //
 
-      "logical-assignment-operators": `error`,
       "no-process-exit": `error`,
       "one-var": [`error`, `never`],
 
