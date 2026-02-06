@@ -1,9 +1,9 @@
 import { useRizzleQuery } from "@/client/hooks/useRizzleQuery";
-import type { v10 } from "@/data/rizzleSchema";
 import { AssetStatusKind } from "@/data/model";
+import type { v10 } from "@/data/rizzleSchema";
 import type { RizzleReplicache } from "@/util/rizzle";
-import { Image as ExpoImage } from "expo-image";
 import type { ImageProps as ExpoImageProps } from "expo-image";
+import { Image as ExpoImage } from "expo-image";
 import { useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 

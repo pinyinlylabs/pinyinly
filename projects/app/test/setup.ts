@@ -47,6 +47,12 @@ vi.mock(`expo-image`, () => {
   };
 });
 
+vi.mock(`#client/ui/IconRegistry.ts`, () => {
+  return {
+    createIconRegistry: () => ({}),
+  };
+});
+
 vi.mock(`expo-router`, () => {
   return {
     // SyntaxError: Unexpected token '<'
