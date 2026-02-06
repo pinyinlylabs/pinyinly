@@ -583,7 +583,7 @@ export const v10 = {
     .alias(`dch`),
 };
 
-export const currentSchema = __DEV__ ? v10 : v9;
+export const currentSchema = v10;
 
 export const supportedSchemas = [v8, v9, v10] as const;
 

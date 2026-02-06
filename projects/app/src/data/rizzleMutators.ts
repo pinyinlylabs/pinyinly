@@ -18,8 +18,7 @@ import type {
   Skill,
 } from "./model";
 import { AssetStatusKind, MistakeKind } from "./model";
-import type { currentSchema, v10 } from "./rizzleSchema";
-import { srsStateFromFsrsState } from "./rizzleSchema";
+import { currentSchema, srsStateFromFsrsState } from "./rizzleSchema";
 
 type Tx = RizzleReplicacheMutatorTx<typeof currentSchema>;
 
@@ -223,10 +222,6 @@ export const mutators: RizzleReplicacheMutators<typeof currentSchema> = {
       );
     }
   },
-};
-
-export const mutatorsv10: RizzleReplicacheMutators<typeof v10> = {
-  ...mutators,
   async initAsset(tx, { assetId, contentType, contentLength, now }) {
     await tx.asset.set(
       { assetId },
@@ -306,9 +301,8 @@ export const mutatorsv10: RizzleReplicacheMutators<typeof v10> = {
     );
   },
   async deleteCustomHint(tx, { customHintId, hanziWord }) {
-    await tx.customHint.set({ hanziWord, customHintId }, {
-      customHintId,
-      hanziWord,
-    } as never);
+    await tx.tx.del(
+      currentSchema.customHint.marshalKey({ hanziWord, customHintId }),
+    );
   },
 };
