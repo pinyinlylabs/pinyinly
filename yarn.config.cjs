@@ -438,6 +438,7 @@ module.exports = defineConfig({
     await enforceMoonToolchainVersion(ctx);
     await enforceConsistentAppPnpmAndYarnDependencies(ctx);
     await enforceSingleDependencyVersion(ctx, [
+      /^@aws-sdk\//,
       /^@expo\//,
       /^@sentry\//,
       /^@tanstack\//,

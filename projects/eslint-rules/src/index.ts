@@ -5,7 +5,6 @@ import { getDefaultAttributes } from "eslint-plugin-better-tailwindcss/api/defau
 import importPlugin from "eslint-plugin-import";
 import reactPlugin from "eslint-plugin-react";
 import tailwindPlugin from "eslint-plugin-tailwindcss";
-import unicorn from "eslint-plugin-unicorn";
 import type { defineConfig } from "eslint/config";
 import tseslint from "typescript-eslint";
 import { globTemplate as globTemplateRule } from "./glob-template.ts";
@@ -205,7 +204,6 @@ export const plugins = {
   [`import`]: importPlugin as ESLint.Plugin,
   [`react`]: reactPlugin as ESLint.Plugin,
   [`tailwind`]: tailwindPlugin as ESLint.Plugin,
-  [`unicorn`]: unicorn,
 };
 
 export { defineConfig } from "eslint/config";
