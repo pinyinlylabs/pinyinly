@@ -332,6 +332,57 @@ export const asset = schema.table(
 );
 
 /**
+ * User-created custom hints for remembering HanziWords.
+ *
+ * Each hint can have text, optional explanation, and optional images (via assetIds).
+ * Custom hints are mutable - users can edit or delete them.
+ */
+export const customHint = schema.table(
+  `custom_hint`,
+  {
+    id: pg.text(`id`).primaryKey().$defaultFn(nanoid),
+    userId: pg
+      .text(`userId`)
+      .references(() => user.id)
+      .notNull(),
+    /**
+     * Client-generated custom hint ID (nanoid).
+     */
+    customHintId: pg.text(`customHintId`).notNull(),
+    /**
+     * The HanziWord this hint is for (e.g. "好:good").
+     */
+    hanziWord: pg.text(`hanziWord`).notNull(),
+    /**
+     * The hint text that helps remember the word.
+     */
+    hint: pg.text(`hint`).notNull(),
+    /**
+     * Optional explanation of why this hint works.
+     */
+    explanation: pg.text(`explanation`),
+    /**
+     * Array of assetIds for images attached to this hint.
+     * Stored as JSONB array of strings.
+     */
+    assetIds: pg.jsonb(`assetIds`).$type<readonly string[] | null>(),
+    /**
+     * When the hint was created.
+     */
+    createdAt: pg.timestamp(`createdAt`).defaultNow().notNull(),
+    /**
+     * When the hint was last updated.
+     */
+    updatedAt: pg.timestamp(`updatedAt`).defaultNow().notNull(),
+  },
+  (t) => [
+    pg.unique().on(t.userId, t.customHintId),
+    pg.index().on(t.userId),
+    pg.index().on(t.userId, t.hanziWord),
+  ],
+);
+
+/**
  * A replicache "client group".
  *
  * From the docs:

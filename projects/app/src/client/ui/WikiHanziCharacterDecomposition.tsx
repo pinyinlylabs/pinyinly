@@ -255,11 +255,7 @@ function NoHintPlaceholder({ hanziWord }: { hanziWord: HanziWord }) {
         <View
           className={`items-center gap-1 rounded-xl border-2 border-dashed border-fg/20 px-4 py-5`}
         >
-          <IconImage
-            size={32}
-            source={require(`../../assets/icons/puzzle.svg`)}
-            className="text-fg-dim"
-          />
+          <IconImage size={32} icon="puzzle" className="text-fg-dim" />
           <View className="items-center">
             <Text className="font-sans text-base font-bold text-fg-dim">
               No hint

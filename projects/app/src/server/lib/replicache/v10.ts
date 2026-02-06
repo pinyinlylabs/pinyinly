@@ -276,6 +276,60 @@ export const mutators: RizzleDrizzleMutators<typeof schema, Drizzle> = {
       })
       .where(and(eq(s.asset.userId, userId), eq(s.asset.assetId, assetId)));
   },
+  async createCustomHint(
+    db,
+    userId,
+    { customHintId, hanziWord, hint, explanation, assetIds, now },
+  ) {
+    await db.insert(s.customHint).values([
+      {
+        userId,
+        customHintId,
+        hanziWord,
+        hint,
+        explanation: explanation ?? null,
+        assetIds:
+          assetIds != null && assetIds.length > 0
+            ? sql`${JSON.stringify(assetIds)}::jsonb`
+            : null,
+        createdAt: now,
+        updatedAt: now,
+      },
+    ]);
+  },
+  async updateCustomHint(
+    db,
+    userId,
+    { customHintId, hanziWord: _hanziWord, hint, explanation, assetIds, now },
+  ) {
+    await db
+      .update(s.customHint)
+      .set({
+        hint,
+        explanation: explanation ?? null,
+        assetIds:
+          assetIds != null && assetIds.length > 0
+            ? sql`${JSON.stringify(assetIds)}::jsonb`
+            : null,
+        updatedAt: now,
+      })
+      .where(
+        and(
+          eq(s.customHint.userId, userId),
+          eq(s.customHint.customHintId, customHintId),
+        ),
+      );
+  },
+  async deleteCustomHint(db, userId, { customHintId }) {
+    await db
+      .delete(s.customHint)
+      .where(
+        and(
+          eq(s.customHint.userId, userId),
+          eq(s.customHint.customHintId, customHintId),
+        ),
+      );
+  },
 };
 
 const mutate = makeDrizzleMutationHandler(schema, mutators);
@@ -498,6 +552,7 @@ export async function pull(
 
 type CvrNamespace =
   | `asset`
+  | `customHint`
   | `pinyinSound`
   | `pinyinSoundGroup`
   | `skillState`
@@ -564,6 +619,15 @@ type PatchOpsUnhydrated = Partial<
   Record<CvrNamespace, { putIds: string[]; delKeys: string[] }>
 >;
 
+const parseCustomHintCvrKey = (key: string) => {
+  const [hanziWord, customHintId] = key.split(`\t`);
+  invariant(
+    hanziWord != null && customHintId != null,
+    `Invalid custom hint key`,
+  );
+  return { hanziWord, customHintId };
+};
+
 const syncEntities = [
   makeSyncEntity(
     `asset`,
@@ -587,6 +651,32 @@ const syncEntities = [
         .from(s.asset)
         .where(eq(s.asset.userId, userId))
         .as(`assetVersions`),
+  ),
+  makeSyncEntity(
+    `customHint`,
+    schema.customHint,
+    (cvrKey, e) => {
+      const { hanziWord, customHintId } = parseCustomHintCvrKey(cvrKey);
+      return e.marshalKey({ hanziWord, customHintId });
+    },
+    (db, ids) =>
+      db.query.customHint.findMany({
+        where: (t) => inArray(t.id, ids),
+      }),
+    (db, userId) =>
+      db
+        .select({
+          map: json_agg(
+            json_build_object({
+              id: s.customHint.id,
+              key: sql<string>`concat_ws('\t', ${s.customHint.hanziWord}, ${s.customHint.customHintId})`,
+              xmin: pgXmin(s.customHint),
+            }),
+          ).as(`customHintVersions`),
+        })
+        .from(s.customHint)
+        .where(eq(s.customHint.userId, userId))
+        .as(`customHintVersions`),
   ),
   makeSyncEntity(
     `pinyinSound`,

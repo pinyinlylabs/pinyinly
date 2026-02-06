@@ -65,7 +65,7 @@ export const TutorialDialogBox = ({
         <Text className="inline-block w-[24px]"></Text>
 
         <IconImage
-          source={require(`../../assets/icons/chevron-right.svg`)}
+          icon="chevron-right"
           size={24}
           className={`
             absolute bottom-0 right-[-6px] animate-hoscillate text-fg-loud transition-opacity

@@ -269,4 +269,46 @@ export const mutatorsv10: RizzleReplicacheMutators<typeof v10> = {
       },
     );
   },
+  async createCustomHint(
+    tx,
+    { customHintId, hanziWord, hint, explanation, assetIds, now },
+  ) {
+    await tx.customHint.set(
+      { hanziWord, customHintId },
+      {
+        customHintId,
+        hanziWord,
+        hint,
+        explanation: explanation ?? null,
+        assetIds: assetIds ?? null,
+        createdAt: now,
+        updatedAt: now,
+      },
+    );
+  },
+  async updateCustomHint(
+    tx,
+    { customHintId, hanziWord, hint, explanation, assetIds, now },
+  ) {
+    const existing = await tx.customHint.get({ hanziWord, customHintId });
+    if (existing == null) {
+      return;
+    }
+    await tx.customHint.set(
+      { hanziWord, customHintId },
+      {
+        ...existing,
+        hint,
+        explanation: explanation ?? null,
+        assetIds: assetIds ?? null,
+        updatedAt: now,
+      },
+    );
+  },
+  async deleteCustomHint(tx, { customHintId, hanziWord }) {
+    await tx.customHint.set({ hanziWord, customHintId }, {
+      customHintId,
+      hanziWord,
+    } as never);
+  },
 };

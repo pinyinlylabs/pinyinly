@@ -51,11 +51,7 @@ export default function SideNavLayout() {
             {({ isFocused }) => (
               <>
                 <IconImage
-                  source={
-                    isFocused
-                      ? require(`../../assets/icons/home-filled.svg`)
-                      : require(`../../assets/icons/home.svg`)
-                  }
+                  icon={isFocused ? `home-filled` : `home`}
                   className={iconClass({ isFocused })}
                 />
                 <Text className={buttonTextClass({ isFocused })}>Learn</Text>
@@ -70,11 +66,7 @@ export default function SideNavLayout() {
               {({ isFocused }) => (
                 <>
                   <IconImage
-                    source={
-                      isFocused
-                        ? require(`../../assets/icons/bookmark-filled.svg`)
-                        : require(`../../assets/icons/bookmark.svg`)
-                    }
+                    icon={isFocused ? `bookmark-filled` : `bookmark`}
                     className={iconClass({ isFocused })}
                   />
                   <Text className={buttonTextClass({ isFocused })}>

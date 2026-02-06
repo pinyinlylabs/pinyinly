@@ -13,11 +13,7 @@ export function CloseButton2({ onPress }: { onPress?: () => void }) {
         active:scale-95
       `}
     >
-      <IconImage
-        source={require(`../../assets/icons/close.svg`)}
-        size={32}
-        className="text-fg-loud"
-      />
+      <IconImage icon="close" size={32} className="text-fg-loud" />
     </Pressable>
   );
 }

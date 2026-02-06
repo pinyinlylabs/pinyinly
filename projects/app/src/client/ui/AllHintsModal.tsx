@@ -14,8 +14,10 @@ interface PresetHint {
 }
 
 interface CustomHint {
+  customHintId: string;
   hint: string;
   explanation?: string;
+  assetIds?: readonly string[];
 }
 
 interface AllHintsModalProps {
@@ -26,8 +28,8 @@ interface AllHintsModalProps {
   selectedHint: string | undefined;
   onSelectPresetHint: (hanziWord: HanziWord, hint: string) => void;
   onSelectCustomHint: (hint: string) => void;
-  onEditCustomHint: (index: number) => void;
-  onDeleteCustomHint: (index: number) => void;
+  onEditCustomHint: (customHintId: string) => void;
+  onDeleteCustomHint: (customHintId: string) => void;
 }
 
 export function AllHintsModal({
@@ -81,11 +83,11 @@ export function AllHintsModal({
             })}
 
             {/* Custom hints */}
-            {customHints.map((h, index) => {
+            {customHints.map((h) => {
               const isSelected = selectedHint === h.hint;
               return (
                 <CustomHintOption
-                  key={`custom-${index}`}
+                  key={`custom-${h.customHintId}`}
                   hint={h.hint}
                   explanation={h.explanation}
                   isSelected={isSelected}
@@ -94,11 +96,11 @@ export function AllHintsModal({
                     dismiss();
                   }}
                   onEdit={() => {
-                    onEditCustomHint(index);
+                    onEditCustomHint(h.customHintId);
                     dismiss();
                   }}
                   onDelete={() => {
-                    onDeleteCustomHint(index);
+                    onDeleteCustomHint(h.customHintId);
                   }}
                 />
               );
@@ -170,11 +172,7 @@ function CustomHintOption({
             }}
             hitSlop={8}
           >
-            <IconImage
-              size={16}
-              source={require(`../../assets/icons/puzzle.svg`)}
-              className="text-fg-dim"
-            />
+            <IconImage size={16} icon="puzzle" className="text-fg-dim" />
           </Pressable>
           <Pressable
             onPress={(e) => {
@@ -183,11 +181,7 @@ function CustomHintOption({
             }}
             hitSlop={8}
           >
-            <IconImage
-              size={16}
-              source={require(`../../assets/icons/close.svg`)}
-              className="text-fg-dim"
-            />
+            <IconImage size={16} icon="close" className="text-fg-dim" />
           </Pressable>
         </View>
         <Text className="text-[14px] font-semibold text-fg-loud">

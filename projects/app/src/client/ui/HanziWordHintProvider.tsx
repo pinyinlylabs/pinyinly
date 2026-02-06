@@ -1,10 +1,17 @@
+import { useReplicache } from "@/client/hooks/useReplicache";
+import { useRizzleQuery } from "@/client/hooks/useRizzleQuery";
 import type { HanziWord } from "@/data/model";
+import type { v10 } from "@/data/rizzleSchema";
+import { nanoid } from "@/util/nanoid";
+import type { RizzleReplicache } from "@/util/rizzle";
 import type { PropsWithChildren } from "react";
 import { createContext, useState } from "react";
 
 export interface CustomHint {
+  customHintId: string;
   hint: string;
   explanation?: string;
+  assetIds?: readonly string[];
 }
 
 export interface HanziWordHintContextValue {
@@ -25,48 +32,50 @@ export interface HanziWordHintContextValue {
   clearHint: (hanziWord: HanziWord) => void;
 
   /**
-   * Get all custom hints created by the user for a hanziword.
-   */
-  getCustomHints: (hanziWord: HanziWord) => CustomHint[];
-
-  /**
    * Add a new custom hint for a hanziword.
    */
   addCustomHint: (
     hanziWord: HanziWord,
     hint: string,
     explanation?: string,
-  ) => void;
+    assetIds?: string[],
+  ) => Promise<void>;
 
   /**
-   * Update an existing custom hint at the given index.
+   * Update an existing custom hint.
    */
   updateCustomHint: (
+    customHintId: string,
     hanziWord: HanziWord,
-    index: number,
     hint: string,
     explanation?: string,
-  ) => void;
+    assetIds?: string[],
+  ) => Promise<void>;
 
   /**
-   * Remove a custom hint at the given index.
+   * Remove a custom hint.
    */
-  removeCustomHint: (hanziWord: HanziWord, index: number) => void;
+  removeCustomHint: (
+    customHintId: string,
+    hanziWord: HanziWord,
+  ) => Promise<void>;
 }
 
 const Context = createContext<HanziWordHintContextValue | null>(null);
 
 /**
- * Provides in-memory storage for user-selected hints per HanziWord.
- * This is a prototype implementation that does not persist across sessions.
+ * Provides hint management with persistence via Replicache.
+ * Custom hints are stored in the database and synced across devices.
+ *
+ * Use the `useCustomHints(hanziWord)` hook to query custom hints for a word.
  */
+type RizzleV10 = RizzleReplicache<typeof v10>;
+
 export const HanziWordHintProvider = Object.assign(
   function HanziWordHintProvider({ children }: PropsWithChildren) {
     "use memo"; // Object.assign(…) wrapped components aren't inferred.
+    const rep = useReplicache() as RizzleV10;
     const [hints, setHints] = useState<Map<HanziWord, string>>(() => new Map());
-    const [customHints, setCustomHints] = useState<
-      Map<HanziWord, CustomHint[]>
-    >(() => new Map());
 
     const getHint = (hanziWord: HanziWord): string | undefined => {
       return hints.get(hanziWord);
@@ -89,54 +98,47 @@ export const HanziWordHintProvider = Object.assign(
       });
     };
 
-    const getCustomHints = (hanziWord: HanziWord): CustomHint[] => {
-      return customHints.get(hanziWord) ?? [];
-    };
-
-    const addCustomHint = (
+    const addCustomHint = async (
       hanziWord: HanziWord,
       hint: string,
       explanation?: string,
-    ): void => {
-      setCustomHints((prev) => {
-        const next = new Map(prev);
-        const existing = next.get(hanziWord) ?? [];
-        next.set(hanziWord, [...existing, { hint, explanation }]);
-        return next;
+      assetIds?: string[],
+    ): Promise<void> => {
+      const customHintId = nanoid();
+      await rep.mutate.createCustomHint({
+        customHintId,
+        hanziWord,
+        hint,
+        explanation: explanation ?? null,
+        assetIds: assetIds ?? null,
+        now: new Date(),
       });
     };
 
-    const updateCustomHint = (
+    const updateCustomHint = async (
+      customHintId: string,
       hanziWord: HanziWord,
-      index: number,
       hint: string,
       explanation?: string,
-    ): void => {
-      setCustomHints((prev) => {
-        const next = new Map(prev);
-        const existing = next.get(hanziWord) ?? [];
-        if (index >= 0 && index < existing.length) {
-          const updated = [...existing];
-          updated[index] = { hint, explanation };
-          next.set(hanziWord, updated);
-        }
-        return next;
+      assetIds?: string[],
+    ): Promise<void> => {
+      await rep.mutate.updateCustomHint({
+        customHintId,
+        hanziWord,
+        hint,
+        explanation: explanation ?? null,
+        assetIds: assetIds ?? null,
+        now: new Date(),
       });
     };
 
-    const removeCustomHint = (hanziWord: HanziWord, index: number): void => {
-      setCustomHints((prev) => {
-        const next = new Map(prev);
-        const existing = next.get(hanziWord) ?? [];
-        if (index >= 0 && index < existing.length) {
-          const updated = existing.filter((_, i) => i !== index);
-          if (updated.length === 0) {
-            next.delete(hanziWord);
-          } else {
-            next.set(hanziWord, updated);
-          }
-        }
-        return next;
+    const removeCustomHint = async (
+      customHintId: string,
+      hanziWord: HanziWord,
+    ): Promise<void> => {
+      await rep.mutate.deleteCustomHint({
+        customHintId,
+        hanziWord,
       });
     };
 
@@ -146,7 +148,6 @@ export const HanziWordHintProvider = Object.assign(
           getHint,
           setHint,
           clearHint,
-          getCustomHints,
           addCustomHint,
           updateCustomHint,
           removeCustomHint,
@@ -156,5 +157,36 @@ export const HanziWordHintProvider = Object.assign(
       </Context.Provider>
     );
   },
-  { Context },
+  {
+    Context,
+  },
 );
+
+/**
+ * Hook to query custom hints for a specific HanziWord.
+ * Queries Replicache and returns an array of custom hints.
+ */
+// oxlint-disable typescript-eslint/no-unsafe-assignment, typescript-eslint/no-unsafe-call, typescript-eslint/no-unsafe-member-access, typescript-eslint/no-unsafe-return
+export function useCustomHints(hanziWord: HanziWord): CustomHint[] {
+  const result = useRizzleQuery<CustomHint[]>(
+    [`customHints`, hanziWord],
+    async (r, tx) => {
+      const r10 = r as RizzleV10;
+      const customHintQuery = r10.query.customHint;
+      const entries = await customHintQuery
+        .scan(tx, { hanziWord })
+
+        .toArray();
+
+      return entries.map(([, value]) => ({
+        customHintId: value.customHintId,
+        hint: value.hint,
+        explanation: value.explanation ?? undefined,
+        assetIds: value.assetIds ?? undefined,
+      }));
+    },
+  );
+
+  return result.data ?? [];
+}
+// oxlint-enable typescript-eslint/no-unsafe-assignment, typescript-eslint/no-unsafe-call, typescript-eslint/no-unsafe-member-access, typescript-eslint/no-unsafe-return

@@ -11,10 +11,7 @@ export const CloseButton = () => {
         router.dismiss();
       }}
     >
-      <IconImage
-        source={require(`../../assets/icons/close.svg`)}
-        className="text-fg-bg70"
-      />
+      <IconImage icon="close" className="text-fg-bg70" />
     </Pressable>
   ) : null;
 };

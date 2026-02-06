@@ -14,6 +14,7 @@ import { Pressable, ScrollView, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 import { AddCustomHintModal } from "./AddCustomHintModal";
 import { AllHintsModal } from "./AllHintsModal";
+import { useCustomHints } from "./HanziWordHintProvider";
 import { IconImage } from "./IconImage";
 import { Pylymark } from "./Pylymark";
 import { RectButton } from "./RectButton";
@@ -36,17 +37,18 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
     getHint,
     setHint,
     clearHint,
-    getCustomHints,
     addCustomHint,
     updateCustomHint,
     removeCustomHint,
   } = useHanziWordHint();
   const selectedHint = getHint(hanziWord);
-  const customHints = getCustomHints(hanziWord);
+  const customHints = useCustomHints(hanziWord);
 
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editingCustomHintId, setEditingCustomHintId] = useState<string | null>(
+    null,
+  );
   const [showAllHintsModal, setShowAllHintsModal] = useState(false);
 
   // Get available hints for this meaning
@@ -150,11 +152,7 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
           <View
             className={`items-center gap-2 rounded-xl border-2 border-dashed border-fg/20 px-4 py-6`}
           >
-            <IconImage
-              size={32}
-              source={require(`../../assets/icons/puzzle.svg`)}
-              className="text-fg-dim"
-            />
+            <IconImage size={32} icon="puzzle" className="text-fg-dim" />
             <Text className="text-center text-fg-dim">
               No hints available for this character
             </Text>
@@ -179,11 +177,11 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
             })}
 
             {/* Custom hints (limited) */}
-            {visibleCustomHints.map((h, index) => {
+            {visibleCustomHints.map((h) => {
               const isSelected = selectedHint === h.hint;
               return (
                 <CustomHintOption
-                  key={`custom-${index}`}
+                  key={`custom-${h.customHintId}`}
                   hint={h.hint}
                   explanation={h.explanation}
                   isSelected={isSelected}
@@ -191,7 +189,7 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
                     setHint(hanziWord, h.hint);
                   }}
                   onEdit={() => {
-                    setEditingIndex(index);
+                    setEditingCustomHintId(h.customHintId);
                     setIsModalOpen(true);
                   }}
                   onDelete={() => {
@@ -199,7 +197,7 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
                     if (selectedHint === h.hint) {
                       clearHint(hanziWord);
                     }
-                    removeCustomHint(hanziWord, index);
+                    void removeCustomHint(h.customHintId, hanziWord);
                   }}
                 />
               );
@@ -223,7 +221,7 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
         <RectButton
           variant="outline"
           onPress={() => {
-            setEditingIndex(null);
+            setEditingCustomHintId(null);
             setIsModalOpen(true);
           }}
         >
@@ -250,24 +248,40 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
         <AddCustomHintModal
           onDismiss={() => {
             setIsModalOpen(false);
-            setEditingIndex(null);
+            setEditingCustomHintId(null);
           }}
-          onSave={(hint, explanation) => {
-            if (editingIndex === null) {
-              addCustomHint(hanziWord, hint, explanation);
+          onSave={(hint, explanation, assetIds) => {
+            if (editingCustomHintId === null) {
+              void addCustomHint(hanziWord, hint, explanation, assetIds);
             } else {
-              updateCustomHint(hanziWord, editingIndex, hint, explanation);
+              void updateCustomHint(
+                editingCustomHintId,
+                hanziWord,
+                hint,
+                explanation,
+                assetIds,
+              );
             }
             setIsModalOpen(false);
-            setEditingIndex(null);
+            setEditingCustomHintId(null);
           }}
           initialHint={
-            editingIndex === null ? undefined : customHints[editingIndex]?.hint
+            editingCustomHintId === null
+              ? undefined
+              : customHints.find((h) => h.customHintId === editingCustomHintId)
+                  ?.hint
           }
           initialExplanation={
-            editingIndex === null
+            editingCustomHintId === null
               ? undefined
-              : customHints[editingIndex]?.explanation
+              : customHints.find((h) => h.customHintId === editingCustomHintId)
+                  ?.explanation
+          }
+          initialAssetIds={
+            editingCustomHintId === null
+              ? undefined
+              : customHints.find((h) => h.customHintId === editingCustomHintId)
+                  ?.assetIds
           }
         />
       )}
@@ -288,16 +302,19 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
           onSelectCustomHint={(hint) => {
             setHint(hanziWord, hint);
           }}
-          onEditCustomHint={(index) => {
-            setEditingIndex(index);
+          onEditCustomHint={(customHintId) => {
+            setEditingCustomHintId(customHintId);
             setIsModalOpen(true);
           }}
-          onDeleteCustomHint={(index) => {
+          onDeleteCustomHint={(customHintId) => {
             // Clear selection if this hint was selected
-            if (selectedHint === customHints[index]?.hint) {
+            const hint = customHints.find(
+              (h) => h.customHintId === customHintId,
+            );
+            if (selectedHint === hint?.hint) {
               clearHint(hanziWord);
             }
-            removeCustomHint(hanziWord, index);
+            void removeCustomHint(customHintId, hanziWord);
           }}
         />
       )}
@@ -365,11 +382,7 @@ function CustomHintOption({
             }}
             hitSlop={8}
           >
-            <IconImage
-              size={16}
-              source={require(`../../assets/icons/puzzle.svg`)}
-              className="text-fg-dim"
-            />
+            <IconImage size={16} icon="puzzle" className="text-fg-dim" />
           </Pressable>
           <Pressable
             onPress={(e) => {
@@ -378,11 +391,7 @@ function CustomHintOption({
             }}
             hitSlop={8}
           >
-            <IconImage
-              size={16}
-              source={require(`../../assets/icons/close.svg`)}
-              className="text-fg-dim"
-            />
+            <IconImage size={16} icon="close" className="text-fg-dim" />
           </Pressable>
         </View>
         <Text className="text-[14px] font-semibold text-fg-loud">

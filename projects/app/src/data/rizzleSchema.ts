@@ -93,6 +93,14 @@ export const rSpaceSeparatedString = memoize0(function rSpaceSeparatedString() {
   );
 });
 
+export const rStringArray = memoize0(function rStringArray() {
+  return RizzleCustom.create<
+    readonly string[],
+    readonly string[],
+    readonly string[]
+  >(z.array(z.string()), z.array(z.string()));
+});
+
 export const rSrsKind = memoize0(function rSrsKind() {
   return r.enum(SrsKind, {
     [SrsKind.Mock]: `0`,
@@ -499,6 +507,80 @@ export const v10 = {
       now: r.timestamp().alias(`n`),
     })
     .alias(`fau`),
+
+  //
+  // Custom Hints - user-created memory hints with optional images
+  //
+
+  /**
+   * User-created custom hints for remembering HanziWords.
+   * Each hint can have text, explanation, and optional images (via assetIds).
+   */
+  customHint: r.entity(`ch/[hanziWord]/[customHintId]`, {
+    customHintId: r.string().alias(`i`),
+    /**
+     * The HanziWord this hint is for (e.g. "好:good").
+     */
+    hanziWord: r.string().alias(`h`),
+    /**
+     * The hint text that helps remember the word.
+     */
+    hint: r.string().alias(`t`),
+    /**
+     * Optional explanation of why this hint works.
+     */
+    explanation: r.string().nullable().optional().alias(`e`),
+    /**
+     * Array of assetIds for images attached to this hint.
+     */
+    assetIds: rStringArray().nullable().optional().alias(`a`),
+    /**
+     * When the hint was created.
+     */
+    createdAt: r.datetime().alias(`c`).indexed(`byCreatedAt`),
+    /**
+     * When the hint was last updated.
+     */
+    updatedAt: r.datetime().alias(`u`),
+  }),
+
+  /**
+   * Create a new custom hint for a HanziWord.
+   */
+  createCustomHint: r
+    .mutator({
+      customHintId: r.string().alias(`i`),
+      hanziWord: r.string().alias(`h`),
+      hint: r.string().alias(`t`),
+      explanation: r.string().nullable().optional().alias(`e`),
+      assetIds: rStringArray().nullable().optional().alias(`a`),
+      now: r.timestamp().alias(`n`),
+    })
+    .alias(`cch`),
+
+  /**
+   * Update an existing custom hint.
+   */
+  updateCustomHint: r
+    .mutator({
+      customHintId: r.string().alias(`i`),
+      hanziWord: r.string().alias(`h`),
+      hint: r.string().alias(`t`),
+      explanation: r.string().nullable().optional().alias(`e`),
+      assetIds: rStringArray().nullable().optional().alias(`a`),
+      now: r.timestamp().alias(`n`),
+    })
+    .alias(`uch`),
+
+  /**
+   * Delete a custom hint.
+   */
+  deleteCustomHint: r
+    .mutator({
+      customHintId: r.string().alias(`i`),
+      hanziWord: r.string().alias(`h`),
+    })
+    .alias(`dch`),
 };
 
 export const currentSchema = __DEV__ ? v10 : v9;
