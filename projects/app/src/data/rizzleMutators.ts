@@ -17,8 +17,8 @@ import type {
   HanziPinyinMistakeType,
   Skill,
 } from "./model";
-import { MistakeKind } from "./model";
-import type { currentSchema } from "./rizzleSchema";
+import { AssetStatusKind, MistakeKind } from "./model";
+import type { currentSchema, v10 } from "./rizzleSchema";
 import { srsStateFromFsrsState } from "./rizzleSchema";
 
 type Tx = RizzleReplicacheMutatorTx<typeof currentSchema>;
@@ -222,5 +222,51 @@ export const mutators: RizzleReplicacheMutators<typeof currentSchema> = {
         { skill, srs: srsStateFromFsrsState(fsrsState) },
       );
     }
+  },
+};
+
+export const mutatorsv10: RizzleReplicacheMutators<typeof v10> = {
+  ...mutators,
+  async initAsset(tx, { assetId, contentType, contentLength, now }) {
+    await tx.asset.set(
+      { assetId },
+      {
+        assetId,
+        status: AssetStatusKind.Pending,
+        contentType,
+        contentLength,
+        createdAt: now,
+      },
+    );
+  },
+  async confirmAssetUpload(tx, { assetId, now }) {
+    const existing = await tx.asset.get({ assetId });
+    if (existing == null) {
+      // Asset record doesn't exist, create it as uploaded
+      // This can happen if the mutation was lost but upload succeeded
+      return;
+    }
+    await tx.asset.set(
+      { assetId },
+      {
+        ...existing,
+        status: AssetStatusKind.Uploaded,
+        uploadedAt: now,
+      },
+    );
+  },
+  async failAssetUpload(tx, { assetId, errorMessage, now: _now }) {
+    const existing = await tx.asset.get({ assetId });
+    if (existing == null) {
+      return;
+    }
+    await tx.asset.set(
+      { assetId },
+      {
+        ...existing,
+        status: AssetStatusKind.Failed,
+        errorMessage,
+      },
+    );
   },
 };

@@ -4,6 +4,7 @@ import { sql } from "drizzle-orm";
 import * as pg from "drizzle-orm/pg-core";
 import { z } from "zod/v4";
 import {
+  pgAssetStatusKind,
   pgBase64url,
   pgFsrsRating,
   pgHanziOrHanziWord,
@@ -282,6 +283,52 @@ export const pinyinSoundGroup = schema.table(
     createdAt: pg.timestamp(`createdAt`).defaultNow().notNull(),
   },
   (t) => [pg.unique().on(t.userId, t.soundGroupId)],
+);
+
+/**
+ * User-uploaded assets (images for mnemonics).
+ *
+ * Assets are immutable once uploaded - they cannot be modified, only created.
+ * The asset file is stored in Cloudflare R2 at path: u/{userId}/{assetId}
+ */
+export const asset = schema.table(
+  `asset`,
+  {
+    id: pg.text(`id`).primaryKey().$defaultFn(nanoid),
+    userId: pg
+      .text(`userId`)
+      .references(() => user.id)
+      .notNull(),
+    /**
+     * Client-generated asset ID (nanoid). Used as the R2 object key suffix.
+     */
+    assetId: pg.text(`assetId`).notNull(),
+    /**
+     * Upload status: pending, uploaded, or failed.
+     */
+    status: pgAssetStatusKind(`status`).notNull(),
+    /**
+     * MIME type of the asset (e.g. image/jpeg, image/png).
+     */
+    contentType: pg.text(`contentType`).notNull(),
+    /**
+     * File size in bytes.
+     */
+    contentLength: pg.integer(`contentLength`).notNull(),
+    /**
+     * When the asset record was created.
+     */
+    createdAt: pg.timestamp(`createdAt`).defaultNow().notNull(),
+    /**
+     * When the upload was confirmed (status changed to uploaded).
+     */
+    uploadedAt: pg.timestamp(`uploadedAt`),
+    /**
+     * Error message if the upload failed.
+     */
+    errorMessage: pg.text(`errorMessage`),
+  },
+  (t) => [pg.unique().on(t.userId, t.assetId), pg.index().on(t.userId)],
 );
 
 /**

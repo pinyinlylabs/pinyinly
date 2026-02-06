@@ -13,7 +13,7 @@ import type {
   Skill,
   SrsStateType,
 } from "./model";
-import { PartOfSpeech, SkillKind, SrsKind } from "./model";
+import { AssetStatusKind, PartOfSpeech, SkillKind, SrsKind } from "./model";
 
 export const rSkillKind = memoize0(function rSkillKind() {
   return r.enum(SkillKind, {
@@ -97,6 +97,14 @@ export const rSrsKind = memoize0(function rSrsKind() {
   return r.enum(SrsKind, {
     [SrsKind.Mock]: `0`,
     [SrsKind.FsrsFourPointFive]: `1`,
+  });
+});
+
+export const rAssetStatusKind = memoize0(function rAssetStatusKind() {
+  return r.enum(AssetStatusKind, {
+    [AssetStatusKind.Pending]: `p`,
+    [AssetStatusKind.Uploaded]: `u`,
+    [AssetStatusKind.Failed]: `f`,
   });
 });
 
@@ -414,9 +422,88 @@ export const v9 = {
     .alias(`ur`),
 };
 
-export const currentSchema = v9;
+export const v10 = {
+  ...omit(v9, []),
+  version: `10`,
 
-export const supportedSchemas = [v8, v9] as const;
+  //
+  // Assets - user-uploaded images for mnemonics
+  //
+
+  /**
+   * Tracks the status of user-uploaded assets.
+   *
+   * Assets are immutable once uploaded. The asset ID is generated client-side
+   * (nanoid) to enable optimistic UI updates before the upload completes.
+   */
+  asset: r.entity(`a/[assetId]`, {
+    assetId: r.string().alias(`i`),
+    /**
+     * Upload status: pending, uploaded, or failed.
+     */
+    status: rAssetStatusKind().alias(`s`),
+    /**
+     * MIME type of the asset (e.g. image/jpeg, image/png).
+     */
+    contentType: r.string().alias(`t`),
+    /**
+     * File size in bytes.
+     */
+    contentLength: r.number().alias(`l`),
+    /**
+     * When the asset record was created.
+     */
+    createdAt: r.datetime().alias(`c`).indexed(`byCreatedAt`),
+    /**
+     * When the upload was confirmed (status changed to uploaded).
+     * Null if pending or failed.
+     */
+    uploadedAt: r.datetime().nullable().optional().alias(`u`),
+    /**
+     * Error message if the upload failed.
+     */
+    errorMessage: r.string().nullable().optional().alias(`e`),
+  }),
+
+  /**
+   * Initialize an asset record when starting an upload.
+   * Called before requesting the presigned URL.
+   */
+  initAsset: r
+    .mutator({
+      assetId: r.string().alias(`i`),
+      contentType: r.string().alias(`t`),
+      contentLength: r.number().alias(`l`),
+      now: r.timestamp().alias(`n`),
+    })
+    .alias(`ia`),
+
+  /**
+   * Mark an asset as successfully uploaded.
+   * Called after the upload to R2 completes successfully.
+   */
+  confirmAssetUpload: r
+    .mutator({
+      assetId: r.string().alias(`i`),
+      now: r.timestamp().alias(`n`),
+    })
+    .alias(`cau`),
+
+  /**
+   * Mark an asset upload as failed.
+   */
+  failAssetUpload: r
+    .mutator({
+      assetId: r.string().alias(`i`),
+      errorMessage: r.string().alias(`e`),
+      now: r.timestamp().alias(`n`),
+    })
+    .alias(`fau`),
+};
+
+export const currentSchema = __DEV__ ? v10 : v9;
+
+export const supportedSchemas = [v8, v9, v10] as const;
 
 export type Rizzle = RizzleReplicache<typeof currentSchema>;
 

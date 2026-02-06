@@ -9,11 +9,21 @@ bash <(curl -fsSL https://moonrepo.dev/install/proto.sh)
 proto use
 ```
 
+Install Minio for local S3-compatible storage:
+
+```sh
+brew install minio/stable/minio
+```
+
 Now you can start the app:
 
-1. `npx inngest-cli@latest dev`
-1. `moon run app:dev`.
+1. `moon run app:dev` - Starts Expo, Inngest, and Minio together
 1. Scan the QR code on your phone.
+
+If you need to run services individually:
+
+- `moon run app:devExpo` - Just Expo
+- `moon run app:devServices` - Just Inngest + Minion
 
 # Guides
 

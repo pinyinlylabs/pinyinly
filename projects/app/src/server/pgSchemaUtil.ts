@@ -1,4 +1,5 @@
 import {
+  rAssetStatusKind,
   rFsrsRating,
   rHanziOrHanziWord,
   rPinyinSoundGroupId,
@@ -254,6 +255,7 @@ export const pgHanziOrHanziWord = rizzleCustomType(rHanziOrHanziWord(), `text`);
 export const pgJson = rizzleCustomType(r.json(), `json`);
 export const pgJsonObject = rizzleCustomType(r.jsonObject(), `json`);
 export const pgFsrsRating = rizzleCustomType(rFsrsRating(), `text`);
+export const pgAssetStatusKind = rizzleCustomType(rAssetStatusKind(), `text`);
 
 // Auth
 export const passkeyTransportEnumSchema = z.enum([

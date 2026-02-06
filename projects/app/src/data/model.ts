@@ -65,6 +65,21 @@ export const SrsKind = srsKindSchema.enum;
 export type SrsKind = z.infer<typeof srsKindSchema>;
 
 /**
+ * Asset upload status for tracking optimistic uploads.
+ *
+ * - `pending`: Asset upload has been initiated but not confirmed
+ * - `uploaded`: Asset has been successfully uploaded to storage
+ * - `failed`: Asset upload failed
+ */
+export const assetStatusKindSchema = z.enum({
+  Pending: `debug--Pending`,
+  Uploaded: `debug--Uploaded`,
+  Failed: `debug--Failed`,
+});
+export const AssetStatusKind = assetStatusKindSchema.enum;
+export type AssetStatusKind = z.infer<typeof assetStatusKindSchema>;
+
+/**
  * A placeholder to force the code to be structured to allow multiple SRS
  * algorithms. This is not used for anything.
  */

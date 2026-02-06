@@ -256,6 +256,9 @@ tasks:
   devMinio:
     command: minio server ./.minio --console-address :9001
     preset: watcher
+    env:
+      MINIO_ROOT_USER: miniodev
+      MINIO_ROOT_PASSWORD: miniodev
 
   formatAssetJson:
     command: tsx --tsconfig tsconfig.node.json ./bin/formatAssetJson.ts
