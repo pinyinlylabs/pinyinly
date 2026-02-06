@@ -50,5 +50,6 @@
       "/^moon run [\\w-]+:\\w+/": true,
     },
     "editor.fontFamily": "Menlo, Monaco, 'Courier New', monospace, 'Pinyinly Components'",
+    "oxc.typeAware": true,
   },
 }
