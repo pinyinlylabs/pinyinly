@@ -50,12 +50,6 @@ const recommended: ConfigWithExtendsArray = [
 
     rules: {
       //
-      // eslint-base
-      //
-
-      "one-var": [`error`, `never`],
-
-      //
       // @pinyinly
       //
 
