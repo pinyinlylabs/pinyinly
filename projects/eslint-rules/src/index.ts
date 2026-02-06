@@ -55,7 +55,6 @@ const recommended: ConfigWithExtendsArray = [
 
       "logical-assignment-operators": `error`,
       "no-process-exit": `error`,
-      "object-shorthand": `error`,
       "one-var": [`error`, `never`],
 
       //
