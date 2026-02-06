@@ -23,11 +23,5 @@
   "env": {
     "builtin": true
   },
-  "ignorePatterns": [
-    "bin/**",
-    "test/**",
-    "**/*.d.ts",
-    "**/*.demo.tsx",
-    "src/app/dev/**"
-  ]
+  "ignorePatterns": ["test/**", "**/*.d.ts", "**/*.demo.tsx", "src/app/dev/**"]
 }

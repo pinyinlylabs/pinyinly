@@ -24,6 +24,7 @@ import makeDebug from "debug";
 import path from "node:path";
 import yargs from "yargs";
 import { z } from "zod/v4";
+// oxlint-disable-next-line import/no-relative-parent-imports
 import { dataDir } from "../test/helpers.ts";
 import { makeSimpleAiClient } from "./util/openai.js";
 
@@ -172,7 +173,7 @@ async function saveUpdates(updates: MnemonicThemeChoices) {
 }
 
 async function readMnemonicThemeChoices() {
-  return await readFileWithSchema(
+  return readFileWithSchema(
     dataFilePath,
     pinyinSoundNameSuggestionsSchema,
     new Map(),

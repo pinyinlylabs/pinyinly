@@ -1,8 +1,5 @@
 import { intersperse } from "#client/react.ts";
 import {
-  flattenIds,
-  idsNodeToString,
-  isHanziCharacter,
   parseIds,
   strokeCountPlaceholderOrNull,
   walkIdsNodeLeafs,
@@ -32,7 +29,6 @@ import {
 import { Alert, Select } from "@inkjs/ui";
 import {
   emptyArray,
-  mapSetAdd,
   mergeSortComparators,
   sortComparatorNumber,
   sortComparatorString,
@@ -134,118 +130,6 @@ const AfterDelay = ({
   return null;
 };
 
-// @ts-expect-error keep it around for now, will be used later
-async function openAiHanziWordGlossHintQuery(
-  hanziWord: HanziWord,
-  dict: DictionaryJson,
-) {
-  const meaning = dict.get(hanziWord);
-  const dictionary = await loadDictionary();
-  invariant(meaning != null);
-  const hanzi = hanziFromHanziWord(hanziWord);
-
-  if (isHanziCharacter(hanzi)) {
-    const componentGlosses = new Map<string, Set<string>>();
-    let hanziIds: string = hanzi;
-
-    const visited = new Set<string>();
-    async function decomp(char: HanziCharacter) {
-      if (visited.has(char)) {
-        return;
-      }
-      visited.add(char);
-
-      // single character
-      const ids = charactersData.get(char)?.decomposition;
-      invariant(ids != null, `missing decomposition for ${char}`);
-      hanziIds = hanziIds.replaceAll(char, ids);
-
-      for (const leaf of walkIdsNodeLeafs(
-        parseIds(ids) as IdsNode<HanziCharacter>,
-      )) {
-        if (strokeCountPlaceholderOrNull(leaf) == null) {
-          if (leaf === char) {
-            mapSetAdd(
-              componentGlosses,
-              leaf,
-              `anything as it has no specific meaning since it's purely structural`,
-            );
-          } else {
-            const lookups = dictionary.lookupHanzi(leaf as HanziText);
-            if (lookups.length > 0) {
-              for (const [, leafMeaning] of lookups) {
-                mapSetAdd(
-                  componentGlosses,
-                  leaf,
-                  `**${leafMeaning.gloss.join(`/`)}**`,
-                );
-              }
-            } else {
-              // No definition for the character, try decomposing it further.
-              await decomp(leaf);
-            }
-          }
-        }
-      }
-    }
-
-    await decomp(hanzi);
-
-    // "dot" is not a useful concept to focus on, it's better to let the LLM
-    // imagine what it might represent
-    if (componentGlosses.has(`丶`)) {
-      componentGlosses.set(
-        `丶`,
-        new Set([
-          `almost anything small physical thing — a rain drop, a stick, a leaf, a hand, etc`,
-        ]),
-      );
-    }
-
-    hanziIds = idsNodeToString(flattenIds(parseIds(hanziIds)), (x) => x);
-
-    const query = `
-I'm having trouble remembering that ${hanzi} means **${meaning.gloss.join(`/`)}** ${meaning.pos == null ? `` : `(${meaning.pos})`}.
-
-${hanziIds.length > 1 ? `\nI've worked out that ${hanzi} = ${hanziIds}` : ``}
-${[...componentGlosses.entries()]
-  .flatMap(
-    ([hanzi, glosses]) =>
-      `${hanzi} → ${[...glosses].join(` or `)}${
-        glosses.size > 1 ? ` (${glosses.size} distinct meanings)` : ``
-      }`,
-  )
-  .map((x) => `• ${x}`)
-  .join(`\n`)}
-
-Can you come up with a few suggestions for me?
-  `;
-
-    console.log(query);
-    const { suggestions: results } = await openai(
-      [`curriculum.instructions.md`],
-      query,
-      z.object({
-        suggestions: z.array(
-          z.object({
-            // strategy: z.string(),
-            glossHint: z.string(),
-            // stepByStepLogic: z.string(),
-          }),
-        ),
-      }),
-    );
-
-    // Imagine a child under a
-
-    return results;
-  }
-  // multiple characters
-  throw new Error(
-    `multiple character gloss hint generation not implemented yet`,
-  );
-}
-
 const HanziWordEditor = ({
   hanziWord,
   onCancel,
@@ -304,7 +188,7 @@ const HanziWordEditor = ({
                 newValue === ``
                   ? undefined
                   : partOfSpeechSchema.parse(newValue);
-              mutations.push(() =>
+              mutations.push(async () =>
                 saveUpsertHanziWordMeaning(hanziWord, {
                   pos: newPos,
                 }),
@@ -322,7 +206,7 @@ const HanziWordEditor = ({
                 .filter((x) => x !== ``);
               const newGloss = newArray.length > 0 ? newArray : undefined;
 
-              mutations.push(() =>
+              mutations.push(async () =>
                 saveUpsertHanziWordMeaning(hanziWord, {
                   gloss: newGloss,
                 }),
@@ -345,7 +229,7 @@ const HanziWordEditor = ({
                 )
                 .filter((x) => x !== ``)
                 .map((x) => x as PinyinText);
-              mutations.push(() =>
+              mutations.push(async () =>
                 saveUpsertHanziWordMeaning(hanziWord, {
                   pinyin: newPinyin,
                 }),
@@ -364,7 +248,9 @@ const HanziWordEditor = ({
               // data integrity checks
               hanziFromHanziWord(newHanziWord);
               meaningKeyFromHanziWord(newHanziWord);
-              mutations.push(() => renameHanziWord(hanziWord, newHanziWord));
+              mutations.push(async () =>
+                renameHanziWord(hanziWord, newHanziWord),
+              );
               edits.delete(`hanziWord`);
             }
 
@@ -387,6 +273,7 @@ const HanziWordEditor = ({
 };
 
 const Shortcuts = ({ children }: { children: ReactNode }) => {
+  // oxlint-disable-next-line typescript/promise-function-async
   const nonNullChilds = Children.map(children, (child) => child);
   return nonNullChilds == null || nonNullChilds.length === 0 ? null : (
     <Box gap={1}>{intersperse(nonNullChilds, <Text dimColor>•</Text>)}</Box>
@@ -1336,7 +1223,9 @@ const App = () => {
 
                 break;
               }
-              // No default
+              default:
+                // No default
+                break;
             }
           }}
         />
@@ -1363,7 +1252,7 @@ function useDictionary() {
   return useQuery({
     queryKey: [`loadDictionary`],
     queryFn: async () => {
-      return await readDictionaryJson();
+      return readDictionaryJson();
     },
     networkMode: `offlineFirst`,
     structuralSharing: false,
@@ -1384,6 +1273,7 @@ const DictionaryHanziWordEntry = ({
   meaning ??= res.data?.get(hanziWord);
 
   const flagElement = useMemo(() => {
+    // oxlint-disable-next-line typescript/promise-function-async
     const nonNullChilds = Children.map(flags, (child) => child);
     return nonNullChilds == null || nonNullChilds.length === 0 ? null : (
       <Box gap={1}>{intersperse(nonNullChilds, <Text>{` `}</Text>)}</Box>

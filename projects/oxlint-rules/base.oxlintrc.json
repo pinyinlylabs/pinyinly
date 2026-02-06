@@ -209,6 +209,15 @@
         "no-restricted-globals": ["error", "__dirname", "__filename"]
       }
     },
+    // Bin scripts
+    {
+      "files": ["bin/**/*.{js,mjs,ts,tsx}"],
+      "rules": {
+        "no-console": "off",
+        // It's sometimes useful to import from `../test/` to get test helpers.
+        "import/no-relative-parent-imports": "off"
+      }
+    },
     {
       "files": ["**/*.cjs", "tailwind.config.js"],
       "rules": {
