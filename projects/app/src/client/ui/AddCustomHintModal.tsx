@@ -260,46 +260,35 @@ function AddCustomHintModalContent({
                       onPress={() => {
                         setPrimaryImageId(assetId);
                       }}
-                      className="relative"
+                      className="relative size-24"
                     >
+                      <View className="size-24 overflow-hidden rounded-lg bg-fg-bg5">
+                        <AssetImage assetId={assetId} className="size-full" />
+                      </View>
                       <View
                         className={
                           isPrimary
-                            ? `relative size-24 overflow-hidden rounded-lg border-2 border-cyan`
-                            : `relative size-24 overflow-hidden rounded-lg border border-fg/10`
+                            ? `absolute inset-0 rounded-lg border-2 border-cyan`
+                            : `absolute inset-0 rounded-lg border border-fg/10`
                         }
+                        pointerEvents="none"
+                      />
+                      {/* Remove button */}
+                      <Pressable
+                        onPress={(event) => {
+                          event.stopPropagation();
+                          const nextImageIds = imageIds.filter(
+                            (id) => id !== assetId,
+                          );
+                          setImageIds(nextImageIds);
+                          if (assetId === primaryImageId) {
+                            setPrimaryImageId(nextImageIds[0]);
+                          }
+                        }}
+                        className="absolute right-1 top-1 rounded-full bg-bg/90 p-1"
                       >
-                        <AssetImage assetId={assetId} className="size-full" />
-                        {isPrimary && (
-                          <View
-                            className={`absolute left-1 top-1 rounded-full bg-cyan/90 px-2 py-0.5`}
-                          >
-                            <Text className="text-[10px] font-semibold text-bg">
-                              Primary
-                            </Text>
-                          </View>
-                        )}
-                        {/* Remove button */}
-                        <Pressable
-                          onPress={(event) => {
-                            event.stopPropagation();
-                            const nextImageIds = imageIds.filter(
-                              (id) => id !== assetId,
-                            );
-                            setImageIds(nextImageIds);
-                            if (assetId === primaryImageId) {
-                              setPrimaryImageId(nextImageIds[0]);
-                            }
-                          }}
-                          className="absolute right-1 top-1 rounded-full bg-bg/90 p-1"
-                        >
-                          <IconImage
-                            size={16}
-                            icon="close"
-                            className="text-fg"
-                          />
-                        </Pressable>
-                      </View>
+                        <IconImage size={16} icon="close" className="text-fg" />
+                      </Pressable>
                     </Pressable>
                   );
                 })}

@@ -325,7 +325,7 @@ export const mutators: RizzleReplicacheMutators<typeof currentSchema> = {
   },
   async setHanziwordMeaningHintSelected(
     tx,
-    { hanziWord, selectedHintType, selectedHintId, now },
+    { hanziWord, selectedHintType, selectedHintId, selectedHintImageId, now },
   ) {
     const existing = await tx.hanziwordMeaningHintSelected.get({ hanziWord });
     await tx.hanziwordMeaningHintSelected.set(
@@ -334,6 +334,7 @@ export const mutators: RizzleReplicacheMutators<typeof currentSchema> = {
         hanziWord,
         selectedHintType,
         selectedHintId,
+        selectedHintImageId: selectedHintImageId ?? null,
         createdAt: existing?.createdAt ?? now,
         updatedAt: now,
       },

@@ -1,6 +1,7 @@
 import type { AudioSpriteSource } from "@pinyinly/audio-sprites/client";
 import type { Asset } from "expo-asset";
 import type { AudioSource } from "expo-audio";
+import type { ImageSource } from "expo-image";
 
 declare global {
   type RnRequireSource = Parameters<(typeof Asset)[`fromModule`]>[0];
@@ -53,6 +54,26 @@ declare global {
       SENTRY_DSN?: string;
     }
   }
+}
+
+declare module "*.jpg" {
+  const source: ImageSource;
+  export default source;
+}
+
+declare module "*.png" {
+  const source: ImageSource;
+  export default source;
+}
+
+declare module "*.webp" {
+  const source: ImageSource;
+  export default source;
+}
+
+declare module "*.gif" {
+  const source: ImageSource;
+  export default source;
 }
 
 export {};

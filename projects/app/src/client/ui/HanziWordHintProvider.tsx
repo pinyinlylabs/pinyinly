@@ -21,6 +21,13 @@ export interface SelectedHintInput {
   kind: SelectedHintKind;
   hint: string;
   customHintId?: string;
+  selectedHintImageId?: string | null;
+}
+
+export interface SelectedHintSelection {
+  kind: SelectedHintKind;
+  selectedHintId: string;
+  selectedHintImageId?: string;
 }
 
 export interface HanziWordHintContextValue {
@@ -101,6 +108,7 @@ export const HanziWordHintProvider = Object.assign(
         hanziWord,
         selectedHintType: hint.kind,
         selectedHintId,
+        selectedHintImageId: hint.selectedHintImageId ?? null,
         now: new Date(),
       });
     };
@@ -237,9 +245,36 @@ export function useSelectedHint(hanziWord: HanziWord): string | undefined {
 }
 
 /**
+ * Hook to query the selected hint row for a specific HanziWord.
+ */
+export function useSelectedHintSelection(
+  hanziWord: HanziWord,
+): SelectedHintSelection | undefined {
+  const result = useRizzleQuery<SelectedHintSelection | null>(
+    [`selectedHintSelection`, hanziWord],
+    async (r, tx) => {
+      const r10 = r as RizzleV10;
+      const selected = await r10.query.hanziwordMeaningHintSelected.get(tx, {
+        hanziWord,
+      });
+      if (selected == null) {
+        return null;
+      }
+
+      return {
+        kind: selected.selectedHintType as SelectedHintKind,
+        selectedHintId: selected.selectedHintId,
+        selectedHintImageId: selected.selectedHintImageId ?? undefined,
+      };
+    },
+  );
+
+  return result.data ?? undefined;
+}
+
+/**
  * Hook to query the primary image id for the selected hint of a HanziWord.
  */
-// oxlint-disable typescript-eslint/no-unsafe-assignment, typescript-eslint/no-unsafe-call, typescript-eslint/no-unsafe-member-access, typescript-eslint/no-unsafe-return
 export function useSelectedHintImageId(
   hanziWord: HanziWord,
 ): string | undefined {
@@ -250,26 +285,28 @@ export function useSelectedHintImageId(
       const selected = await r10.query.hanziwordMeaningHintSelected.get(tx, {
         hanziWord,
       });
-      if (selected == null || selected.selectedHintType !== `custom`) {
+      if (selected == null) {
         return null;
       }
-      const custom = await r10.query.customHint.get(tx, {
-        hanziWord,
-        customHintId: selected.selectedHintId,
-      });
-      if (custom == null) {
-        return null;
+      if (selected.selectedHintType === `custom`) {
+        const custom = await r10.query.customHint.get(tx, {
+          hanziWord,
+          customHintId: selected.selectedHintId,
+        });
+        if (custom == null) {
+          return null;
+        }
+
+        const resolved = resolvePrimaryImageId(
+          custom.imageIds ?? undefined,
+          custom.primaryImageId ?? undefined,
+        );
+        return resolved ?? null;
       }
 
-      const resolved = resolvePrimaryImageId(
-        custom.imageIds ?? undefined,
-        custom.primaryImageId ?? undefined,
-      );
-      return resolved ?? null;
+      return selected.selectedHintImageId ?? null;
     },
   );
 
   return result.data ?? undefined;
 }
-// oxlint-enable typescript-eslint/no-unsafe-assignment, typescript-eslint/no-unsafe-call, typescript-eslint/no-unsafe-member-access, typescript-eslint/no-unsafe-return
-// oxlint-enable typescript-eslint/no-unsafe-assignment, typescript-eslint/no-unsafe-call, typescript-eslint/no-unsafe-member-access, typescript-eslint/no-unsafe-return

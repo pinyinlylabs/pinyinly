@@ -702,6 +702,7 @@ export const wikiCharacterDataSchema = z.strictObject({
             meaningKey: z.string(),
             hint: z.string(),
             explanation: z.string().optional(),
+            imageAssetIds: z.array(z.string()).optional(),
           }),
         )
         .optional(),

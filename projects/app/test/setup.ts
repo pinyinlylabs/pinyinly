@@ -47,6 +47,13 @@ vi.mock(`expo-image`, () => {
   };
 });
 
+vi.mock(`@/client/assets/localImageAssets`, () => {
+  return {
+    getLocalImageAssetSource: async () => undefined,
+    isLocalImageAssetId: () => false,
+  };
+});
+
 vi.mock(`#client/ui/IconRegistry.ts`, () => {
   return {
     createIconRegistry: () => ({}),

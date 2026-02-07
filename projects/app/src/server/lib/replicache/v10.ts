@@ -356,7 +356,7 @@ export const mutators: RizzleDrizzleMutators<typeof schema, Drizzle> = {
   async setHanziwordMeaningHintSelected(
     db,
     userId,
-    { hanziWord, selectedHintType, selectedHintId, now },
+    { hanziWord, selectedHintType, selectedHintId, selectedHintImageId, now },
   ) {
     const updatedAt = now;
     const createdAt = now;
@@ -367,6 +367,7 @@ export const mutators: RizzleDrizzleMutators<typeof schema, Drizzle> = {
         hanziWord,
         selectedHintType,
         selectedHintId,
+        selectedHintImageId: selectedHintImageId ?? null,
         updatedAt,
         createdAt,
       })
@@ -375,7 +376,12 @@ export const mutators: RizzleDrizzleMutators<typeof schema, Drizzle> = {
           s.hanziwordMeaningHintSelected.userId,
           s.hanziwordMeaningHintSelected.hanziWord,
         ],
-        set: { selectedHintType, selectedHintId, updatedAt },
+        set: {
+          selectedHintType,
+          selectedHintId,
+          selectedHintImageId: selectedHintImageId ?? null,
+          updatedAt,
+        },
       });
   },
   async clearHanziwordMeaningHintSelected(db, userId, { hanziWord }) {

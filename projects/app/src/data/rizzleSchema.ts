@@ -565,6 +565,10 @@ export const v10 = {
      */
     selectedHintId: r.string().alias(`i`),
     /**
+     * Selected image asset ID for preset hints.
+     */
+    selectedHintImageId: r.string().nullable().optional().alias(`p`),
+    /**
      * When the selection was created.
      */
     createdAt: r.datetime().alias(`c`).indexed(`byCreatedAt`),
@@ -622,6 +626,7 @@ export const v10 = {
       hanziWord: rHanziWord().alias(`h`),
       selectedHintType: r.string().alias(`t`),
       selectedHintId: r.string().alias(`i`),
+      selectedHintImageId: r.string().nullable().optional().alias(`p`),
       now: r.timestamp().alias(`n`),
     })
     .alias(`smhs`),

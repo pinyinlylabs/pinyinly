@@ -411,6 +411,10 @@ export const hanziwordMeaningHintSelected = schema.table(
      */
     selectedHintId: pg.text(`selectedHintId`).notNull(),
     /**
+     * Selected image asset ID for preset hints.
+     */
+    selectedHintImageId: pg.text(`selectedHintImageId`),
+    /**
      * When the selection was created.
      */
     createdAt: pg.timestamp(`createdAt`).defaultNow().notNull(),

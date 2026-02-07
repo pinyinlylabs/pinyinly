@@ -1,3 +1,7 @@
+import {
+  getLocalImageAssetSource,
+  isLocalImageAssetId,
+} from "@/client/assets/localImageAssets";
 import { useRizzleQuery } from "@/client/hooks/useRizzleQuery";
 import { trpc } from "@/client/trpc";
 import { AssetStatusKind } from "@/data/model";
@@ -5,7 +9,7 @@ import type { v10 } from "@/data/rizzleSchema";
 import type { RizzleReplicache } from "@/util/rizzle";
 import type { ImageProps as ExpoImageProps } from "expo-image";
 import { Image as ExpoImage } from "expo-image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 
 interface AssetImageProps extends Omit<ExpoImageProps, `source`> {
@@ -46,6 +50,11 @@ export function AssetImage({
     },
   );
   const [imageError, setImageError] = useState(false);
+  const [localSource, setLocalSource] = useState<Awaited<
+    ReturnType<typeof getLocalImageAssetSource>
+  > | null>(null);
+  const [localSourceChecked, setLocalSourceChecked] = useState(false);
+  const isLocalAsset = isLocalImageAssetId(assetId);
   const shouldFetchAssetKey =
     userId == null && asset?.status === AssetStatusKind.Uploaded;
   const assetKeyQuery = trpc.asset.getAssetKey.useQuery(
@@ -54,6 +63,47 @@ export function AssetImage({
       enabled: shouldFetchAssetKey,
     },
   );
+
+  useEffect(() => {
+    let cancelled = false;
+    setLocalSource(null);
+    setLocalSourceChecked(false);
+
+    void (async () => {
+      const source = await getLocalImageAssetSource(assetId);
+      if (cancelled) {
+        return;
+      }
+      setLocalSource(source ?? null);
+      setLocalSourceChecked(true);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [assetId]);
+
+  if (localSource != null && !imageError) {
+    return (
+      <ExpoImage
+        {...imageProps}
+        source={localSource}
+        contentFit="cover"
+        transition={200}
+        onError={() => {
+          setImageError(true);
+        }}
+      />
+    );
+  }
+
+  if (isLocalAsset && !localSourceChecked) {
+    return (
+      <View className="size-full items-center justify-center bg-fg/5">
+        <ActivityIndicator size="small" className="text-fg" />
+      </View>
+    );
+  }
 
   if (asset == null) {
     // Asset not found in Replicache yet
