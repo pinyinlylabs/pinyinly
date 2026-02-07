@@ -1,24 +1,18 @@
 // oxlint-disable eslint-plugin-import/no-commonjs, eslint-plugin-import/no-relative-parent-imports, typescript-eslint/no-unsafe-assignment, typescript-eslint/no-unsafe-return
-import type { ImageSource } from "expo-image";
-import { Platform } from "react-native";
 
-type LocalImageLoader = () => Promise<ImageSource>;
+type LocalImageLoader = () => Promise<RnRequireSource>;
 
 const localImageAssetLoaders: Record<string, LocalImageLoader> = {
-  "app:illustration:edge": async () => {
-    if (Platform.OS === `web`) {
-      // @ts-expect-error asset modules are resolved by the bundler at runtime.
-      const module = (await import(`../../assets/illustrations/edge.jpg`)) as {
-        default: ImageSource;
-      };
-      return module.default;
-    }
-
-    return require(`../../assets/illustrations/edge.jpg`) as ImageSource;
-  },
+  "app:illustration:edge": async () =>
+    require(`../../assets/illustrations/edge.jpg`),
+  "wiki:学:child": async () => require(`../wiki/学/child.png`),
+  "wiki:原:meaning": async () => require(`../wiki/原/meaning.png`),
+  "wiki:坏:meaning": async () => require(`../wiki/坏/meaning.png`),
+  "wiki:看:meaning": async () => require(`../wiki/看/meaning.jpg`),
+  "wiki:福:meaning": async () => require(`../wiki/福/meaning.webp`),
 };
 
-const localImageAssetCache = new Map<string, ImageSource>();
+const localImageAssetCache = new Map<string, RnRequireSource>();
 // oxlint-enable eslint-plugin-import/no-commonjs, eslint-plugin-import/no-relative-parent-imports, typescript-eslint/no-unsafe-assignment, typescript-eslint/no-unsafe-return
 
 export type LocalImageAssetId = keyof typeof localImageAssetLoaders;
@@ -29,7 +23,7 @@ export function isLocalImageAssetId(assetId: string): boolean {
 
 export async function getLocalImageAssetSource(
   assetId: string,
-): Promise<ImageSource | undefined> {
+): Promise<RnRequireSource | undefined> {
   const loader = localImageAssetLoaders[assetId];
   if (loader == null) {
     return undefined;

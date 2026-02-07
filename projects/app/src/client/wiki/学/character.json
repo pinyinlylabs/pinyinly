@@ -15,7 +15,8 @@
     "hints": [
       {
         "meaningKey": "learn",
-        "hint": "A child using their hand to **learn** about the world."
+        "hint": "A child using their hand to **learn** about the world.",
+        "imageAssetIds": ["wiki:学:child"]
       }
     ]
   },
