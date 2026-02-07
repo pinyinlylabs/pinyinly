@@ -76,6 +76,19 @@ const Context = createContext<HanziWordHintContextValue | null>(null);
  */
 type RizzleV10 = RizzleReplicache<typeof v10>;
 
+export function resolvePrimaryImageId(
+  imageIds: readonly string[] | undefined,
+  primaryImageId: string | undefined,
+): string | undefined {
+  if (imageIds == null || imageIds.length === 0) {
+    return undefined;
+  }
+  if (primaryImageId != null && imageIds.includes(primaryImageId)) {
+    return primaryImageId;
+  }
+  return imageIds[0];
+}
+
 export const HanziWordHintProvider = Object.assign(
   function HanziWordHintProvider({ children }: PropsWithChildren) {
     "use memo"; // Object.assign(…) wrapped components aren't inferred.
@@ -222,4 +235,41 @@ export function useSelectedHint(hanziWord: HanziWord): string | undefined {
 
   return result.data ?? undefined;
 }
+
+/**
+ * Hook to query the primary image id for the selected hint of a HanziWord.
+ */
+// oxlint-disable typescript-eslint/no-unsafe-assignment, typescript-eslint/no-unsafe-call, typescript-eslint/no-unsafe-member-access, typescript-eslint/no-unsafe-return
+export function useSelectedHintImageId(
+  hanziWord: HanziWord,
+): string | undefined {
+  const result = useRizzleQuery<string | null>(
+    [`selectedHintImageId`, hanziWord],
+    async (r, tx) => {
+      const r10 = r as RizzleV10;
+      const selected = await r10.query.hanziwordMeaningHintSelected.get(tx, {
+        hanziWord,
+      });
+      if (selected == null || selected.selectedHintType !== `custom`) {
+        return null;
+      }
+      const custom = await r10.query.customHint.get(tx, {
+        hanziWord,
+        customHintId: selected.selectedHintId,
+      });
+      if (custom == null) {
+        return null;
+      }
+
+      const resolved = resolvePrimaryImageId(
+        custom.imageIds ?? undefined,
+        custom.primaryImageId ?? undefined,
+      );
+      return resolved ?? null;
+    },
+  );
+
+  return result.data ?? undefined;
+}
+// oxlint-enable typescript-eslint/no-unsafe-assignment, typescript-eslint/no-unsafe-call, typescript-eslint/no-unsafe-member-access, typescript-eslint/no-unsafe-return
 // oxlint-enable typescript-eslint/no-unsafe-assignment, typescript-eslint/no-unsafe-call, typescript-eslint/no-unsafe-member-access, typescript-eslint/no-unsafe-return

@@ -5,11 +5,7 @@ import { WikiHanziCharacterIntro } from "./WikiHanziCharacterIntro";
 export default () => {
   return (
     <View className="max-w-[500px] flex-1 gap-2">
-      <WikiHanziCharacterIntro
-        characterData={characterData}
-        illustrationSrc={require(`./demo/看.jpg`)}
-        illustrationFit="contain"
-      />
+      <WikiHanziCharacterIntro characterData={characterData} />
     </View>
   );
 };

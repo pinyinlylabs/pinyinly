@@ -1,15 +1,35 @@
 // pyly-not-src-test
 // @vitest-environment happy-dom
 
+import { useNewQueryClient } from "#client/hooks/useNewQueryClient.js";
 import { DeviceStoreProvider } from "#client/ui/DeviceStoreProvider.tsx";
 import { PylyMdxComponents } from "#client/ui/PylyMdxComponents.tsx";
+import { ReplicacheProvider } from "#client/ui/ReplicacheProvider.tsx";
 import { registry_ForTesting } from "#client/wiki.js";
+import type { Rizzle } from "#data/rizzleSchema.ts";
 import { glob, readFileSync } from "@pinyinly/lib/fs";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { render, waitForElementToBeRemoved } from "@testing-library/react";
 import path from "node:path";
+import type { PropsWithChildren } from "react";
 import { Suspense as ReactSuspense } from "react";
-import { describe, expect, test } from "vitest";
+import { test as baseTest, describe, expect } from "vitest";
 import { projectRoot } from "../helpers.ts";
+import { rizzleFixture } from "../util/rizzleHelpers.ts";
+
+const test = baseTest.extend(rizzleFixture);
+
+const testProviders = (rizzle: Rizzle) =>
+  function TestProviders({ children }: PropsWithChildren) {
+    const queryClient = useNewQueryClient();
+    return (
+      <QueryClientProvider client={queryClient}>
+        <ReplicacheProvider.Context.Provider value={rizzle}>
+          <DeviceStoreProvider>{children}</DeviceStoreProvider>
+        </ReplicacheProvider.Context.Provider>
+      </QueryClientProvider>
+    );
+  };
 
 // Registry approach - tests pre-compiled components with faithful Metro behavior
 describe(`mdx rendering (via registry)`, () => {
@@ -30,15 +50,16 @@ describe(`mdx rendering (via registry)`, () => {
   for (const [path, entry] of entries) {
     const Component = entry.component;
     // Test a sample of the registry entries - ensures faithful production behavior
-    test(`${path} component renders correctly`, async () => {
+    test(`${path} component renders correctly`, async ({ rizzle }) => {
+      const Providers = testProviders(rizzle);
       const element = (
-        <DeviceStoreProvider>
+        <Providers>
           <ReactSuspense fallback={<div data-testid="suspense-fallback" />}>
             <PylyMdxComponents>
               <Component />
             </PylyMdxComponents>
           </ReactSuspense>
-        </DeviceStoreProvider>
+        </Providers>
       );
 
       const { queryByTestId } = render(element);

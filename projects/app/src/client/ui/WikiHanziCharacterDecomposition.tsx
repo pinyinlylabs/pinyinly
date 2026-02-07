@@ -8,11 +8,11 @@ import {
   meaningKeyFromHanziWord,
 } from "@/dictionary";
 import { parseIndexRanges } from "@/util/indexRanges";
-import { Image } from "expo-image";
 import { Link } from "expo-router";
 import type { ReactNode } from "react";
 import { use } from "react";
 import { Text, View } from "react-native";
+import { AssetImage } from "./AssetImage";
 import { HanziCharacter, hanziCharacterColorSchema } from "./HanziCharacter";
 import { HanziLink } from "./HanziLink";
 import { useSelectedHint } from "./HanziWordHintProvider";
@@ -22,14 +22,12 @@ import { RectButton } from "./RectButton";
 
 interface WikiHanziCharacterDecompositionProps {
   characterData: WikiCharacterData;
-  illustrationSrc?: RnRequireSource;
-  illustrationFit?: `cover` | `contain`;
+  illustrationAssetId?: string;
 }
 
 export function WikiHanziCharacterDecomposition({
   characterData,
-  illustrationSrc,
-  illustrationFit,
+  illustrationAssetId,
 }: WikiHanziCharacterDecompositionProps) {
   const componentsElements: ReactNode[] = [];
   const dictionary = use(loadDictionary());
@@ -109,15 +107,12 @@ export function WikiHanziCharacterDecomposition({
           ) : null}
         </View>
 
-        {illustrationSrc == null ? (
+        {illustrationAssetId == null ? (
           <View className="h-4" />
         ) : (
-          <Image
-            source={illustrationSrc}
-            contentFit={illustrationFit}
-            contentPosition="top center"
-            className="my-4 h-[200px] w-full"
-          />
+          <View className="my-4 h-[200px] w-full overflow-hidden">
+            <AssetImage assetId={illustrationAssetId} className="size-full" />
+          </View>
         )}
 
         <MeaningsSection

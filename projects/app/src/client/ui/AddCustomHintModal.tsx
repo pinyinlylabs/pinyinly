@@ -272,9 +272,7 @@ function AddCustomHintModalContent({
                         <AssetImage assetId={assetId} className="size-full" />
                         {isPrimary && (
                           <View
-                            className={`
-                            absolute left-1 top-1 rounded-full bg-cyan/90 px-2 py-0.5
-                          `}
+                            className={`absolute left-1 top-1 rounded-full bg-cyan/90 px-2 py-0.5`}
                           >
                             <Text className="text-[10px] font-semibold text-bg">
                               Primary
