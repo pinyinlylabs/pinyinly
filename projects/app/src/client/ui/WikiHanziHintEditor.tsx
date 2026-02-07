@@ -9,6 +9,7 @@ import {
   loadDictionary,
   meaningKeyFromHanziWord,
 } from "@/dictionary";
+import { Link } from "expo-router";
 import { use, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
@@ -107,6 +108,13 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
     <ScrollView className="flex-1 bg-bg">
       {/* Header */}
       <View className="gap-3 bg-bg-high p-4">
+        <View className="flex-row items-center gap-2">
+          <Link href={`/wiki/${encodeURIComponent(hanzi)}`}>
+            <Text className="text-[13px] font-medium text-fg-dim">{hanzi}</Text>
+          </Link>
+          <Text className="text-[13px] text-fg-dim">/</Text>
+          <Text className="text-[13px] text-fg-dim">Edit</Text>
+        </View>
         <View className="flex-row items-baseline gap-2.5">
           <Text className="text-[19px] font-semibold text-fg-loud">
             {hanzi}
