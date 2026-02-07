@@ -15,6 +15,18 @@ export type AllowedImageType =
   | `image/webp`
   | `image/gif`;
 
+const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
+const allowedImageTypes: AllowedImageType[] = [
+  `image/jpeg`,
+  `image/png`,
+  `image/webp`,
+  `image/gif`,
+];
+
+function isAllowedImageType(value: string): value is AllowedImageType {
+  return allowedImageTypes.includes(value as AllowedImageType);
+}
+
 interface ImageUploadButtonProps {
   /**
    * Called when the upload completes successfully with the assetId.
@@ -30,6 +42,11 @@ interface ImageUploadButtonProps {
   buttonText?: string;
 }
 
+interface ImageUploaderOptions {
+  onUploadComplete: (assetId: string) => void;
+  onUploadError?: (error: string) => void;
+}
+
 /**
  * Button component for uploading images to R2 storage via presigned URLs.
  *
@@ -42,71 +59,49 @@ interface ImageUploadButtonProps {
  * 6. Verify upload on server
  * 7. Call onUploadComplete with assetId
  */
-export function ImageUploadButton({
+export function useImageUploader({
   onUploadComplete,
   onUploadError,
-  buttonText = `Upload image`,
-}: ImageUploadButtonProps) {
+}: ImageUploaderOptions) {
   const rep = useReplicache() as RizzleReplicache<typeof v10>;
   const [uploading, setUploading] = useState(false);
   const requestUploadUrl = trpc.asset.requestUploadUrl.useMutation();
   const confirmUpload = trpc.asset.confirmUpload.useMutation();
 
-  const handlePickImage = async () => {
-    // Request permission
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== `granted`) {
-      onUploadError?.(`Permission to access media library is required`);
+  const uploadImageBlob = async ({
+    blob,
+    contentType,
+  }: {
+    blob: Blob;
+    contentType?: string | null;
+  }): Promise<void> => {
+    if (uploading) {
       return;
     }
 
-    // Launch image picker
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: [`images`],
-      allowsEditing: true,
-      quality: 0.8,
-      allowsMultipleSelection: false,
-    });
-
-    if (result.canceled) {
-      return;
-    }
-
-    const asset = result.assets[0];
-    if (asset == null) {
-      return;
-    }
-
-    await uploadImage(asset);
-  };
-
-  const uploadImage = async (
-    asset: ImagePicker.ImagePickerAsset,
-  ): Promise<void> => {
     setUploading(true);
 
     try {
-      const assetId = nanoid();
+      const resolvedContentType = contentType ?? blob.type;
+      if (resolvedContentType == null || resolvedContentType.length === 0) {
+        throw new Error(`Image type is missing`);
+      }
 
-      // Get file info
-      const uri = asset.uri;
-      const contentType = (asset.mimeType ?? `image/jpeg`) as AllowedImageType;
+      if (!isAllowedImageType(resolvedContentType)) {
+        throw new Error(`Unsupported image type. Use JPEG, PNG, WebP, or GIF`);
+      }
 
-      // Fetch the file as a blob for file size
-      const response = await fetch(uri);
-      const blob = await response.blob();
       const contentLength = blob.size;
-
-      // Validate file size (5MB limit)
-      const MAX_SIZE = 5 * 1024 * 1024;
-      if (contentLength > MAX_SIZE) {
+      if (contentLength > MAX_IMAGE_SIZE_BYTES) {
         throw new Error(`Image must be smaller than 5MB`);
       }
+
+      const assetId = nanoid();
 
       // 1. Create pending asset in Replicache
       await rep.mutate.initAsset({
         assetId,
-        contentType,
+        contentType: resolvedContentType,
         contentLength,
         now: new Date(),
       });
@@ -114,7 +109,7 @@ export function ImageUploadButton({
       // 2. Get presigned upload URL
       const { uploadUrl } = await requestUploadUrl.mutateAsync({
         assetId,
-        contentType,
+        contentType: resolvedContentType,
         contentLength,
       });
 
@@ -123,7 +118,7 @@ export function ImageUploadButton({
         method: `PUT`,
         body: blob,
         headers: {
-          "Content-Type": contentType,
+          "Content-Type": resolvedContentType,
         },
       });
 
@@ -161,6 +156,56 @@ export function ImageUploadButton({
     } finally {
       setUploading(false);
     }
+  };
+
+  const uploadImagePickerAsset = async (
+    asset: ImagePicker.ImagePickerAsset,
+  ): Promise<void> => {
+    const response = await fetch(asset.uri);
+    const blob = await response.blob();
+    const contentType = asset.mimeType ?? blob.type ?? `image/jpeg`;
+    await uploadImageBlob({ blob, contentType });
+  };
+
+  return { uploading, uploadImageBlob, uploadImagePickerAsset };
+}
+
+export function ImageUploadButton({
+  onUploadComplete,
+  onUploadError,
+  buttonText = `Upload image`,
+}: ImageUploadButtonProps) {
+  const { uploading, uploadImagePickerAsset } = useImageUploader({
+    onUploadComplete,
+    onUploadError,
+  });
+
+  const handlePickImage = async () => {
+    // Request permission
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== `granted`) {
+      onUploadError?.(`Permission to access media library is required`);
+      return;
+    }
+
+    // Launch image picker
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: [`images`],
+      allowsEditing: true,
+      quality: 0.8,
+      allowsMultipleSelection: false,
+    });
+
+    if (result.canceled) {
+      return;
+    }
+
+    const asset = result.assets[0];
+    if (asset == null) {
+      return;
+    }
+
+    await uploadImagePickerAsset(asset);
   };
 
   return (

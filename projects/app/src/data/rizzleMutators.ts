@@ -266,7 +266,7 @@ export const mutators: RizzleReplicacheMutators<typeof currentSchema> = {
   },
   async createCustomHint(
     tx,
-    { customHintId, hanziWord, hint, explanation, assetIds, now },
+    { customHintId, hanziWord, hint, explanation, imageIds, now },
   ) {
     await tx.customHint.set(
       { hanziWord, customHintId },
@@ -275,7 +275,7 @@ export const mutators: RizzleReplicacheMutators<typeof currentSchema> = {
         hanziWord,
         hint,
         explanation: explanation ?? null,
-        assetIds: assetIds ?? null,
+        imageIds: imageIds ?? null,
         createdAt: now,
         updatedAt: now,
       },
@@ -283,7 +283,7 @@ export const mutators: RizzleReplicacheMutators<typeof currentSchema> = {
   },
   async updateCustomHint(
     tx,
-    { customHintId, hanziWord, hint, explanation, assetIds, now },
+    { customHintId, hanziWord, hint, explanation, imageIds, now },
   ) {
     const existing = await tx.customHint.get({ hanziWord, customHintId });
     if (existing == null) {
@@ -295,7 +295,7 @@ export const mutators: RizzleReplicacheMutators<typeof currentSchema> = {
         ...existing,
         hint,
         explanation: explanation ?? null,
-        assetIds: assetIds ?? null,
+        imageIds: imageIds ?? null,
         updatedAt: now,
       },
     );
@@ -303,6 +303,27 @@ export const mutators: RizzleReplicacheMutators<typeof currentSchema> = {
   async deleteCustomHint(tx, { customHintId, hanziWord }) {
     await tx.tx.del(
       currentSchema.customHint.marshalKey({ hanziWord, customHintId }),
+    );
+  },
+  async setHanziwordMeaningHintSelected(
+    tx,
+    { hanziWord, selectedHintType, selectedHintId, now },
+  ) {
+    const existing = await tx.hanziwordMeaningHintSelected.get({ hanziWord });
+    await tx.hanziwordMeaningHintSelected.set(
+      { hanziWord },
+      {
+        hanziWord,
+        selectedHintType,
+        selectedHintId,
+        createdAt: existing?.createdAt ?? now,
+        updatedAt: now,
+      },
+    );
+  },
+  async clearHanziwordMeaningHintSelected(tx, { hanziWord }) {
+    await tx.tx.del(
+      currentSchema.hanziwordMeaningHintSelected.marshalKey({ hanziWord }),
     );
   },
 };

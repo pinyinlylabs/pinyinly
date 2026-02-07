@@ -197,6 +197,13 @@
       "when": 1770415080101,
       "tag": "0027_sloppy_secret_warriors",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1770441413277,
+      "tag": "0028_round_iron_patriot",
+      "breakpoints": true
     }
   ]
 }

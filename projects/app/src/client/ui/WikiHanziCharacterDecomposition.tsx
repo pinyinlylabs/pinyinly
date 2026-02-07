@@ -1,5 +1,4 @@
 import { useIsBetaEnabled } from "@/client/hooks/useBetaFeatures";
-import { useHanziWordHint } from "@/client/hooks/useHanziWordHint";
 import { walkIdsNodeLeafs } from "@/data/hanzi";
 import type { HanziText, HanziWord, WikiCharacterData } from "@/data/model";
 import type { HanziWordMeaning } from "@/dictionary";
@@ -16,6 +15,7 @@ import { use } from "react";
 import { Text, View } from "react-native";
 import { HanziCharacter, hanziCharacterColorSchema } from "./HanziCharacter";
 import { HanziLink } from "./HanziLink";
+import { useSelectedHint } from "./HanziWordHintProvider";
 import { IconImage } from "./IconImage";
 import { Pylymark } from "./Pylymark";
 import { RectButton } from "./RectButton";
@@ -186,12 +186,11 @@ function MeaningItem({
   meaning: HanziWordMeaning;
   mnemonicHint: string | undefined;
 }) {
-  const { getHint } = useHanziWordHint();
   const meaningKey = meaningKeyFromHanziWord(hanziWord);
   const hanzi = hanziFromHanziWord(hanziWord);
 
   // Get custom hint if set
-  const customHint = getHint(hanziWord);
+  const customHint = useSelectedHint(hanziWord);
   const displayHint = customHint ?? mnemonicHint;
   const hasCustomHint = customHint != null;
   const hasHint = displayHint != null;

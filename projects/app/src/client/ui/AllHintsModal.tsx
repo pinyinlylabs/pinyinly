@@ -2,6 +2,7 @@ import type { HanziText, HanziWord } from "@/data/model";
 import { buildHanziWord } from "@/dictionary";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
+import { AssetImage } from "./AssetImage";
 import { IconImage } from "./IconImage";
 import { PageSheetModal } from "./PageSheetModal";
 import { Pylymark } from "./Pylymark";
@@ -17,7 +18,7 @@ interface CustomHint {
   customHintId: string;
   hint: string;
   explanation?: string;
-  assetIds?: readonly string[];
+  imageIds?: readonly string[];
 }
 
 interface AllHintsModalProps {
@@ -27,7 +28,7 @@ interface AllHintsModalProps {
   customHints: CustomHint[];
   selectedHint: string | undefined;
   onSelectPresetHint: (hanziWord: HanziWord, hint: string) => void;
-  onSelectCustomHint: (hint: string) => void;
+  onSelectCustomHint: (customHintId: string, hint: string) => void;
   onEditCustomHint: (customHintId: string) => void;
   onDeleteCustomHint: (customHintId: string) => void;
 }
@@ -90,9 +91,10 @@ export function AllHintsModal({
                   key={`custom-${h.customHintId}`}
                   hint={h.hint}
                   explanation={h.explanation}
+                  imageIds={h.imageIds}
                   isSelected={isSelected}
                   onPress={() => {
-                    onSelectCustomHint(h.hint);
+                    onSelectCustomHint(h.customHintId, h.hint);
                     dismiss();
                   }}
                   onEdit={() => {
@@ -142,6 +144,7 @@ function HintOption({
 function CustomHintOption({
   hint,
   explanation,
+  imageIds,
   isSelected,
   onPress,
   onEdit,
@@ -149,6 +152,7 @@ function CustomHintOption({
 }: {
   hint: string;
   explanation: string | undefined;
+  imageIds: readonly string[] | undefined;
   isSelected: boolean;
   onPress: () => void;
   onEdit: () => void;
@@ -191,6 +195,18 @@ function CustomHintOption({
           <Text className="text-[14px] text-fg">
             <Pylymark source={explanation} />
           </Text>
+        )}
+        {imageIds != null && imageIds.length > 0 && (
+          <View className="mt-2 flex-row flex-wrap gap-2">
+            {imageIds.slice(0, 3).map((assetId) => (
+              <View
+                key={assetId}
+                className="size-14 overflow-hidden rounded-md border border-fg/10"
+              >
+                <AssetImage assetId={assetId} className="size-full" />
+              </View>
+            ))}
+          </View>
         )}
       </View>
     </Pressable>

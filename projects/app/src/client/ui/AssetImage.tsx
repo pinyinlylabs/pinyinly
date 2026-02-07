@@ -1,4 +1,5 @@
 import { useRizzleQuery } from "@/client/hooks/useRizzleQuery";
+import { trpc } from "@/client/trpc";
 import { AssetStatusKind } from "@/data/model";
 import type { v10 } from "@/data/rizzleSchema";
 import type { RizzleReplicache } from "@/util/rizzle";
@@ -45,6 +46,14 @@ export function AssetImage({
     },
   );
   const [imageError, setImageError] = useState(false);
+  const shouldFetchAssetKey =
+    userId == null && asset?.status === AssetStatusKind.Uploaded;
+  const assetKeyQuery = trpc.asset.getAssetKey.useQuery(
+    { assetId },
+    {
+      enabled: shouldFetchAssetKey,
+    },
+  );
 
   if (asset == null) {
     // Asset not found in Replicache yet
@@ -84,11 +93,17 @@ export function AssetImage({
     );
   }
 
-  // Asset key format: u/{userId}/{assetId}
-  // Note: userId should come from the asset entity in a real implementation,
-  // but for now we'll use the Replicache pattern where userId is implicit
-  // For prototyping, we can construct it, but in production you'd want to get userId from context or asset
-  const assetKey = `u/${userId ?? `USER`}/${assetId}`;
+  const assetKey =
+    userId == null ? assetKeyQuery.data?.assetKey : `u/${userId}/${assetId}`;
+
+  if (assetKey == null) {
+    return (
+      <View className="size-full items-center justify-center bg-fg/5">
+        <ActivityIndicator size="small" className="text-fg" />
+      </View>
+    );
+  }
+
   const imageUrl = `${baseUrl}${assetKey}`;
 
   return (

@@ -14,7 +14,8 @@ import { Pressable, ScrollView, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 import { AddCustomHintModal } from "./AddCustomHintModal";
 import { AllHintsModal } from "./AllHintsModal";
-import { useCustomHints } from "./HanziWordHintProvider";
+import { AssetImage } from "./AssetImage";
+import { useCustomHints, useSelectedHint } from "./HanziWordHintProvider";
 import { IconImage } from "./IconImage";
 import { Pylymark } from "./Pylymark";
 import { RectButton } from "./RectButton";
@@ -34,14 +35,13 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
   const characterData = use(getWikiCharacterData(hanzi)) ?? null;
 
   const {
-    getHint,
     setHint,
     clearHint,
     addCustomHint,
     updateCustomHint,
     removeCustomHint,
   } = useHanziWordHint();
-  const selectedHint = getHint(hanziWord);
+  const selectedHint = useSelectedHint(hanziWord);
   const customHints = useCustomHints(hanziWord);
 
   // Modal state
@@ -170,7 +170,10 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
                   explanation={h.explanation}
                   isSelected={isSelected}
                   onPress={() => {
-                    setHint(hintHanziWord, h.hint);
+                    setHint(hintHanziWord, {
+                      kind: `preset`,
+                      hint: h.hint,
+                    });
                   }}
                 />
               );
@@ -184,9 +187,14 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
                   key={`custom-${h.customHintId}`}
                   hint={h.hint}
                   explanation={h.explanation}
+                  imageIds={h.imageIds}
                   isSelected={isSelected}
                   onPress={() => {
-                    setHint(hanziWord, h.hint);
+                    setHint(hanziWord, {
+                      kind: `custom`,
+                      hint: h.hint,
+                      customHintId: h.customHintId,
+                    });
                   }}
                   onEdit={() => {
                     setEditingCustomHintId(h.customHintId);
@@ -250,16 +258,16 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
             setIsModalOpen(false);
             setEditingCustomHintId(null);
           }}
-          onSave={(hint, explanation, assetIds) => {
+          onSave={(hint, explanation, imageIds) => {
             if (editingCustomHintId === null) {
-              void addCustomHint(hanziWord, hint, explanation, assetIds);
+              void addCustomHint(hanziWord, hint, explanation, imageIds);
             } else {
               void updateCustomHint(
                 editingCustomHintId,
                 hanziWord,
                 hint,
                 explanation,
-                assetIds,
+                imageIds,
               );
             }
             setIsModalOpen(false);
@@ -277,11 +285,11 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
               : customHints.find((h) => h.customHintId === editingCustomHintId)
                   ?.explanation
           }
-          initialAssetIds={
+          initialImageIds={
             editingCustomHintId === null
               ? undefined
               : customHints.find((h) => h.customHintId === editingCustomHintId)
-                  ?.assetIds
+                  ?.imageIds
           }
         />
       )}
@@ -297,10 +305,17 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
           customHints={customHints}
           selectedHint={selectedHint}
           onSelectPresetHint={(hintHanziWord, hint) => {
-            setHint(hintHanziWord, hint);
+            setHint(hintHanziWord, {
+              kind: `preset`,
+              hint,
+            });
           }}
-          onSelectCustomHint={(hint) => {
-            setHint(hanziWord, hint);
+          onSelectCustomHint={(customHintId, hint) => {
+            setHint(hanziWord, {
+              kind: `custom`,
+              hint,
+              customHintId,
+            });
           }}
           onEditCustomHint={(customHintId) => {
             setEditingCustomHintId(customHintId);
@@ -352,6 +367,7 @@ function HintOption({
 function CustomHintOption({
   hint,
   explanation,
+  imageIds,
   isSelected,
   onPress,
   onEdit,
@@ -359,6 +375,7 @@ function CustomHintOption({
 }: {
   hint: string;
   explanation: string | undefined;
+  imageIds: readonly string[] | undefined;
   isSelected: boolean;
   onPress: () => void;
   onEdit: () => void;
@@ -401,6 +418,18 @@ function CustomHintOption({
           <Text className="text-[14px] text-fg">
             <Pylymark source={explanation} />
           </Text>
+        )}
+        {imageIds != null && imageIds.length > 0 && (
+          <View className="mt-2 flex-row flex-wrap gap-2">
+            {imageIds.slice(0, 3).map((assetId) => (
+              <View
+                key={assetId}
+                className="size-14 overflow-hidden rounded-md border border-fg/10"
+              >
+                <AssetImage assetId={assetId} className="size-full" />
+              </View>
+            ))}
+          </View>
         )}
       </View>
     </Pressable>

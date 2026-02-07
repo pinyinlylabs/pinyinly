@@ -514,14 +514,14 @@ export const v10 = {
 
   /**
    * User-created custom hints for remembering HanziWords.
-   * Each hint can have text, explanation, and optional images (via assetIds).
+   * Each hint can have text, explanation, and optional images (via imageIds).
    */
   customHint: r.entity(`ch/[hanziWord]/[customHintId]`, {
     customHintId: r.string().alias(`i`),
     /**
      * The HanziWord this hint is for (e.g. "好:good").
      */
-    hanziWord: r.string().alias(`h`),
+    hanziWord: rHanziWord().alias(`h`),
     /**
      * The hint text that helps remember the word.
      */
@@ -531,9 +531,9 @@ export const v10 = {
      */
     explanation: r.string().nullable().optional().alias(`e`),
     /**
-     * Array of assetIds for images attached to this hint.
+     * Array of imageIds for images attached to this hint.
      */
-    assetIds: rStringArray().nullable().optional().alias(`a`),
+    imageIds: rStringArray().nullable().optional().alias(`m`),
     /**
      * When the hint was created.
      */
@@ -545,15 +545,41 @@ export const v10 = {
   }),
 
   /**
+   * The user's selected meaning hint for a HanziWord.
+   */
+  hanziwordMeaningHintSelected: r.entity(`mhs/[hanziWord]`, {
+    /**
+     * The HanziWord this selection is for (e.g. "好:good").
+     */
+    hanziWord: rHanziWord().alias(`h`),
+    /**
+     * Type of the selected hint: 'preset' or 'custom'.
+     */
+    selectedHintType: r.string().alias(`t`),
+    /**
+     * ID of the selected hint (customHintId or preset hint text).
+     */
+    selectedHintId: r.string().alias(`i`),
+    /**
+     * When the selection was created.
+     */
+    createdAt: r.datetime().alias(`c`).indexed(`byCreatedAt`),
+    /**
+     * When the selection was last updated.
+     */
+    updatedAt: r.datetime().alias(`u`),
+  }),
+
+  /**
    * Create a new custom hint for a HanziWord.
    */
   createCustomHint: r
     .mutator({
       customHintId: r.string().alias(`i`),
-      hanziWord: r.string().alias(`h`),
+      hanziWord: rHanziWord().alias(`h`),
       hint: r.string().alias(`t`),
       explanation: r.string().nullable().optional().alias(`e`),
-      assetIds: rStringArray().nullable().optional().alias(`a`),
+      imageIds: rStringArray().nullable().optional().alias(`m`),
       now: r.timestamp().alias(`n`),
     })
     .alias(`cch`),
@@ -564,10 +590,10 @@ export const v10 = {
   updateCustomHint: r
     .mutator({
       customHintId: r.string().alias(`i`),
-      hanziWord: r.string().alias(`h`),
+      hanziWord: rHanziWord().alias(`h`),
       hint: r.string().alias(`t`),
       explanation: r.string().nullable().optional().alias(`e`),
-      assetIds: rStringArray().nullable().optional().alias(`a`),
+      imageIds: rStringArray().nullable().optional().alias(`m`),
       now: r.timestamp().alias(`n`),
     })
     .alias(`uch`),
@@ -578,9 +604,30 @@ export const v10 = {
   deleteCustomHint: r
     .mutator({
       customHintId: r.string().alias(`i`),
-      hanziWord: r.string().alias(`h`),
+      hanziWord: rHanziWord().alias(`h`),
     })
     .alias(`dch`),
+
+  /**
+   * Set the selected meaning hint for a HanziWord.
+   */
+  setHanziwordMeaningHintSelected: r
+    .mutator({
+      hanziWord: rHanziWord().alias(`h`),
+      selectedHintType: r.string().alias(`t`),
+      selectedHintId: r.string().alias(`i`),
+      now: r.timestamp().alias(`n`),
+    })
+    .alias(`smhs`),
+
+  /**
+   * Clear the selected meaning hint for a HanziWord.
+   */
+  clearHanziwordMeaningHintSelected: r
+    .mutator({
+      hanziWord: rHanziWord().alias(`h`),
+    })
+    .alias(`cmhs`),
 };
 
 export const currentSchema = v10;

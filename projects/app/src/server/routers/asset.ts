@@ -12,6 +12,31 @@ export type AssetStatus = z.infer<typeof assetStatusSchema>;
 
 export const assetRouter = router({
   /**
+   * Resolve the asset key for the current user and asset ID.
+   */
+  getAssetKey: authedProcedure
+    .input(
+      z
+        .object({
+          assetId: z.string(),
+        })
+        .strict(),
+    )
+    .output(
+      z
+        .object({
+          assetKey: z.string(),
+        })
+        .strict(),
+    )
+    .query(async (opts) => {
+      const { userId } = opts.ctx.session;
+      const { assetId } = opts.input;
+      return {
+        assetKey: `u/${userId}/${assetId}`,
+      };
+    }),
+  /**
    * Request a presigned URL for uploading an asset.
    *
    * The client should:

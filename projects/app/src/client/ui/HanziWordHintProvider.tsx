@@ -5,26 +5,28 @@ import type { v10 } from "@/data/rizzleSchema";
 import { nanoid } from "@/util/nanoid";
 import type { RizzleReplicache } from "@/util/rizzle";
 import type { PropsWithChildren } from "react";
-import { createContext, useState } from "react";
+import { createContext } from "react";
 
 export interface CustomHint {
   customHintId: string;
   hint: string;
   explanation?: string;
-  assetIds?: readonly string[];
+  imageIds?: readonly string[];
+}
+
+export type SelectedHintKind = `preset` | `custom`;
+
+export interface SelectedHintInput {
+  kind: SelectedHintKind;
+  hint: string;
+  customHintId?: string;
 }
 
 export interface HanziWordHintContextValue {
   /**
-   * Get the currently selected hint for a hanziword.
-   * Returns undefined if no hint has been set.
-   */
-  getHint: (hanziWord: HanziWord) => string | undefined;
-
-  /**
    * Set a hint for a hanziword.
    */
-  setHint: (hanziWord: HanziWord, hint: string) => void;
+  setHint: (hanziWord: HanziWord, hint: SelectedHintInput) => void;
 
   /**
    * Clear the hint for a hanziword, removing any custom selection.
@@ -38,7 +40,7 @@ export interface HanziWordHintContextValue {
     hanziWord: HanziWord,
     hint: string,
     explanation?: string,
-    assetIds?: string[],
+    imageIds?: string[],
   ) => Promise<void>;
 
   /**
@@ -49,7 +51,7 @@ export interface HanziWordHintContextValue {
     hanziWord: HanziWord,
     hint: string,
     explanation?: string,
-    assetIds?: string[],
+    imageIds?: string[],
   ) => Promise<void>;
 
   /**
@@ -75,26 +77,21 @@ export const HanziWordHintProvider = Object.assign(
   function HanziWordHintProvider({ children }: PropsWithChildren) {
     "use memo"; // Object.assign(…) wrapped components aren't inferred.
     const rep = useReplicache() as RizzleV10;
-    const [hints, setHints] = useState<Map<HanziWord, string>>(() => new Map());
 
-    const getHint = (hanziWord: HanziWord): string | undefined => {
-      return hints.get(hanziWord);
-    };
-
-    const setHint = (hanziWord: HanziWord, hint: string): void => {
-      setHints((prev) => {
-        const next = new Map(prev);
-        // oxlint-disable-next-line unicorn/no-immediate-mutation
-        next.set(hanziWord, hint);
-        return next;
+    const setHint = (hanziWord: HanziWord, hint: SelectedHintInput): void => {
+      const selectedHintId =
+        hint.kind === `custom` ? (hint.customHintId ?? hint.hint) : hint.hint;
+      void rep.mutate.setHanziwordMeaningHintSelected({
+        hanziWord,
+        selectedHintType: hint.kind,
+        selectedHintId,
+        now: new Date(),
       });
     };
 
     const clearHint = (hanziWord: HanziWord): void => {
-      setHints((prev) => {
-        const next = new Map(prev);
-        next.delete(hanziWord);
-        return next;
+      void rep.mutate.clearHanziwordMeaningHintSelected({
+        hanziWord,
       });
     };
 
@@ -102,7 +99,7 @@ export const HanziWordHintProvider = Object.assign(
       hanziWord: HanziWord,
       hint: string,
       explanation?: string,
-      assetIds?: string[],
+      imageIds?: string[],
     ): Promise<void> => {
       const customHintId = nanoid();
       await rep.mutate.createCustomHint({
@@ -110,7 +107,7 @@ export const HanziWordHintProvider = Object.assign(
         hanziWord,
         hint,
         explanation: explanation ?? null,
-        assetIds: assetIds ?? null,
+        imageIds: imageIds ?? null,
         now: new Date(),
       });
     };
@@ -120,14 +117,14 @@ export const HanziWordHintProvider = Object.assign(
       hanziWord: HanziWord,
       hint: string,
       explanation?: string,
-      assetIds?: string[],
+      imageIds?: string[],
     ): Promise<void> => {
       await rep.mutate.updateCustomHint({
         customHintId,
         hanziWord,
         hint,
         explanation: explanation ?? null,
-        assetIds: assetIds ?? null,
+        imageIds: imageIds ?? null,
         now: new Date(),
       });
     };
@@ -145,7 +142,6 @@ export const HanziWordHintProvider = Object.assign(
     return (
       <Context.Provider
         value={{
-          getHint,
           setHint,
           clearHint,
           addCustomHint,
@@ -182,11 +178,40 @@ export function useCustomHints(hanziWord: HanziWord): CustomHint[] {
         customHintId: value.customHintId,
         hint: value.hint,
         explanation: value.explanation ?? undefined,
-        assetIds: value.assetIds ?? undefined,
+        imageIds: value.imageIds ?? undefined,
       }));
     },
   );
 
   return result.data ?? [];
+}
+
+/**
+ * Hook to query the selected hint for a specific HanziWord.
+ */
+// oxlint-disable typescript-eslint/no-unsafe-assignment, typescript-eslint/no-unsafe-call, typescript-eslint/no-unsafe-member-access, typescript-eslint/no-unsafe-return
+export function useSelectedHint(hanziWord: HanziWord): string | undefined {
+  const result = useRizzleQuery<string | null>(
+    [`selectedHint`, hanziWord],
+    async (r, tx) => {
+      const r10 = r as RizzleV10;
+      const selected = await r10.query.hanziwordMeaningHintSelected.get(tx, {
+        hanziWord,
+      });
+      if (selected == null) {
+        return null;
+      }
+      if (selected.selectedHintType === `custom`) {
+        const custom = await r10.query.customHint.get(tx, {
+          hanziWord,
+          customHintId: selected.selectedHintId,
+        });
+        return custom?.hint ?? selected.selectedHintId;
+      }
+      return selected.selectedHintId;
+    },
+  );
+
+  return result.data ?? undefined;
 }
 // oxlint-enable typescript-eslint/no-unsafe-assignment, typescript-eslint/no-unsafe-call, typescript-eslint/no-unsafe-member-access, typescript-eslint/no-unsafe-return
