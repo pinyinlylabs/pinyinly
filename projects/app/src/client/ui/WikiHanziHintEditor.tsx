@@ -241,7 +241,7 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
             setIsModalOpen(true);
           }}
         >
-          <Text>Create your own hint</Text>
+          <Text className="text-fg">Create your own hint</Text>
         </RectButton>
 
         {/* Clear selection button */}
