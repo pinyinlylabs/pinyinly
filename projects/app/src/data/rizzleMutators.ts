@@ -266,7 +266,15 @@ export const mutators: RizzleReplicacheMutators<typeof currentSchema> = {
   },
   async createCustomHint(
     tx,
-    { customHintId, hanziWord, hint, explanation, imageIds, now },
+    {
+      customHintId,
+      hanziWord,
+      hint,
+      explanation,
+      imageIds,
+      primaryImageId,
+      now,
+    },
   ) {
     await tx.customHint.set(
       { hanziWord, customHintId },
@@ -276,6 +284,7 @@ export const mutators: RizzleReplicacheMutators<typeof currentSchema> = {
         hint,
         explanation: explanation ?? null,
         imageIds: imageIds ?? null,
+        primaryImageId: primaryImageId ?? null,
         createdAt: now,
         updatedAt: now,
       },
@@ -283,7 +292,15 @@ export const mutators: RizzleReplicacheMutators<typeof currentSchema> = {
   },
   async updateCustomHint(
     tx,
-    { customHintId, hanziWord, hint, explanation, imageIds, now },
+    {
+      customHintId,
+      hanziWord,
+      hint,
+      explanation,
+      imageIds,
+      primaryImageId,
+      now,
+    },
   ) {
     const existing = await tx.customHint.get({ hanziWord, customHintId });
     if (existing == null) {
@@ -296,6 +313,7 @@ export const mutators: RizzleReplicacheMutators<typeof currentSchema> = {
         hint,
         explanation: explanation ?? null,
         imageIds: imageIds ?? null,
+        primaryImageId: primaryImageId ?? existing.primaryImageId ?? null,
         updatedAt: now,
       },
     );

@@ -280,7 +280,15 @@ export const mutators: RizzleDrizzleMutators<typeof schema, Drizzle> = {
   async createCustomHint(
     db,
     userId,
-    { customHintId, hanziWord, hint, explanation, imageIds, now },
+    {
+      customHintId,
+      hanziWord,
+      hint,
+      explanation,
+      imageIds,
+      primaryImageId,
+      now,
+    },
   ) {
     await db.insert(s.hanziwordMeaningHint).values({
       userId,
@@ -292,6 +300,10 @@ export const mutators: RizzleDrizzleMutators<typeof schema, Drizzle> = {
         imageIds != null && imageIds.length > 0
           ? sql`${JSON.stringify(imageIds)}::jsonb`
           : null,
+      primaryImageId:
+        imageIds != null && imageIds.length > 0
+          ? (primaryImageId ?? null)
+          : null,
       createdAt: now,
       updatedAt: now,
     });
@@ -299,7 +311,15 @@ export const mutators: RizzleDrizzleMutators<typeof schema, Drizzle> = {
   async updateCustomHint(
     db,
     userId,
-    { customHintId, hanziWord: _hanziWord, hint, explanation, imageIds, now },
+    {
+      customHintId,
+      hanziWord: _hanziWord,
+      hint,
+      explanation,
+      imageIds,
+      primaryImageId,
+      now,
+    },
   ) {
     await db
       .update(s.hanziwordMeaningHint)
@@ -309,6 +329,10 @@ export const mutators: RizzleDrizzleMutators<typeof schema, Drizzle> = {
         imageIds:
           imageIds != null && imageIds.length > 0
             ? sql`${JSON.stringify(imageIds)}::jsonb`
+            : null,
+        primaryImageId:
+          imageIds != null && imageIds.length > 0
+            ? (primaryImageId ?? null)
             : null,
         updatedAt: now,
       })

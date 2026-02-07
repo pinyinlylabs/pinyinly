@@ -204,6 +204,13 @@
       "when": 1770441413277,
       "tag": "0028_round_iron_patriot",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1770443980544,
+      "tag": "0029_condemned_hex",
+      "breakpoints": true
     }
   ]
 }

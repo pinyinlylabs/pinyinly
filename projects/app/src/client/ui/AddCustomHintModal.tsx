@@ -21,6 +21,7 @@ interface AddCustomHintModalProps {
     hint: string,
     explanation: string | undefined,
     imageIds: string[] | undefined,
+    primaryImageId: string | undefined,
   ) => void;
   /** Initial hint text when editing an existing hint */
   initialHint?: string;
@@ -28,6 +29,8 @@ interface AddCustomHintModalProps {
   initialExplanation?: string;
   /** Initial image IDs when editing an existing hint */
   initialImageIds?: readonly string[];
+  /** Initial primary image ID when editing an existing hint */
+  initialPrimaryImageId?: string;
 }
 
 export function AddCustomHintModal({
@@ -36,19 +39,21 @@ export function AddCustomHintModal({
   initialHint = ``,
   initialExplanation = ``,
   initialImageIds = [],
+  initialPrimaryImageId,
 }: AddCustomHintModalProps) {
   return (
     <PageSheetModal onDismiss={onDismiss} suspenseFallback={null}>
       {({ dismiss }) => (
         <AddCustomHintModalContent
           onDismiss={dismiss}
-          onSave={(hint, explanation, imageIds) => {
-            onSave(hint, explanation, imageIds);
+          onSave={(hint, explanation, imageIds, primaryImageId) => {
+            onSave(hint, explanation, imageIds, primaryImageId);
             dismiss();
           }}
           initialHint={initialHint}
           initialExplanation={initialExplanation}
           initialImageIds={initialImageIds}
+          initialPrimaryImageId={initialPrimaryImageId}
         />
       )}
     </PageSheetModal>
@@ -61,20 +66,26 @@ function AddCustomHintModalContent({
   initialHint,
   initialExplanation,
   initialImageIds,
+  initialPrimaryImageId,
 }: {
   onDismiss: () => void;
   onSave: (
     hint: string,
     explanation: string | undefined,
     imageIds: string[] | undefined,
+    primaryImageId: string | undefined,
   ) => void;
   initialHint: string;
   initialExplanation: string;
   initialImageIds: readonly string[];
+  initialPrimaryImageId?: string;
 }) {
   const [hint, setHint] = useState(initialHint);
   const [explanation, setExplanation] = useState(initialExplanation);
   const [imageIds, setImageIds] = useState<string[]>([...initialImageIds]);
+  const [primaryImageId, setPrimaryImageId] = useState<string | undefined>(
+    initialPrimaryImageId,
+  );
   const [showExplanation, setShowExplanation] = useState(
     initialExplanation.length > 0,
   );
@@ -94,6 +105,33 @@ function AddCustomHintModalContent({
   useEffect(() => {
     setImageIds([...initialImageIds]);
   }, [initialImageIds]);
+
+  useEffect(() => {
+    if (initialImageIds.length === 0) {
+      setPrimaryImageId(undefined);
+      return;
+    }
+    if (
+      initialPrimaryImageId != null &&
+      initialImageIds.includes(initialPrimaryImageId)
+    ) {
+      setPrimaryImageId(initialPrimaryImageId);
+      return;
+    }
+    setPrimaryImageId(initialImageIds[0]);
+  }, [initialImageIds, initialPrimaryImageId]);
+
+  useEffect(() => {
+    if (imageIds.length === 0) {
+      if (primaryImageId != null) {
+        setPrimaryImageId(undefined);
+      }
+      return;
+    }
+    if (primaryImageId == null || !imageIds.includes(primaryImageId)) {
+      setPrimaryImageId(imageIds[0]);
+    }
+  }, [imageIds, primaryImageId]);
 
   return (
     <View className="flex-1 bg-bg">
@@ -115,6 +153,7 @@ function AddCustomHintModalContent({
                   ? explanation.trim()
                   : undefined,
                 imageIds.length > 0 ? imageIds : undefined,
+                imageIds.length > 0 ? primaryImageId : undefined,
               );
             }
           }}
@@ -191,6 +230,7 @@ function AddCustomHintModalContent({
             <ImagePasteDropZone
               onUploadComplete={(assetId) => {
                 setImageIds((current) => [...current, assetId]);
+                setPrimaryImageId((current) => current ?? assetId);
               }}
               onUploadError={(error) => {
                 // TODO: Show error toast/alert
@@ -200,6 +240,7 @@ function AddCustomHintModalContent({
             <ImageUploadButton
               onUploadComplete={(assetId) => {
                 setImageIds((current) => [...current, assetId]);
+                setPrimaryImageId((current) => current ?? assetId);
               }}
               onUploadError={(error) => {
                 // TODO: Show error toast/alert
@@ -211,23 +252,59 @@ function AddCustomHintModalContent({
             {/* Display uploaded images */}
             {imageIds.length > 0 && (
               <View className="mt-2 flex-row flex-wrap gap-2">
-                {imageIds.map((assetId) => (
-                  <View
-                    key={assetId}
-                    className="relative size-24 overflow-hidden rounded-lg border border-fg/10"
-                  >
-                    <AssetImage assetId={assetId} className="size-full" />
-                    {/* Remove button */}
+                {imageIds.map((assetId) => {
+                  const isPrimary = assetId === primaryImageId;
+                  return (
                     <Pressable
+                      key={assetId}
                       onPress={() => {
-                        setImageIds(imageIds.filter((id) => id !== assetId));
+                        setPrimaryImageId(assetId);
                       }}
-                      className="absolute right-1 top-1 rounded-full bg-bg/90 p-1"
+                      className="relative"
                     >
-                      <IconImage size={16} icon="close" className="text-fg" />
+                      <View
+                        className={
+                          isPrimary
+                            ? `relative size-24 overflow-hidden rounded-lg border-2 border-cyan`
+                            : `relative size-24 overflow-hidden rounded-lg border border-fg/10`
+                        }
+                      >
+                        <AssetImage assetId={assetId} className="size-full" />
+                        {isPrimary && (
+                          <View
+                            className={`
+                            absolute left-1 top-1 rounded-full bg-cyan/90 px-2 py-0.5
+                          `}
+                          >
+                            <Text className="text-[10px] font-semibold text-bg">
+                              Primary
+                            </Text>
+                          </View>
+                        )}
+                        {/* Remove button */}
+                        <Pressable
+                          onPress={(event) => {
+                            event.stopPropagation();
+                            const nextImageIds = imageIds.filter(
+                              (id) => id !== assetId,
+                            );
+                            setImageIds(nextImageIds);
+                            if (assetId === primaryImageId) {
+                              setPrimaryImageId(nextImageIds[0]);
+                            }
+                          }}
+                          className="absolute right-1 top-1 rounded-full bg-bg/90 p-1"
+                        >
+                          <IconImage
+                            size={16}
+                            icon="close"
+                            className="text-fg"
+                          />
+                        </Pressable>
+                      </View>
                     </Pressable>
-                  </View>
-                ))}
+                  );
+                })}
               </View>
             )}
           </View>

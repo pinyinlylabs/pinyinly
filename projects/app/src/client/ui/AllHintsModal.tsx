@@ -19,6 +19,7 @@ interface CustomHint {
   hint: string;
   explanation?: string;
   imageIds?: readonly string[];
+  primaryImageId?: string;
 }
 
 interface AllHintsModalProps {
@@ -29,6 +30,10 @@ interface AllHintsModalProps {
   selectedHint: string | undefined;
   onSelectPresetHint: (hanziWord: HanziWord, hint: string) => void;
   onSelectCustomHint: (customHintId: string, hint: string) => void;
+  onSelectCustomHintPrimaryImage: (
+    customHintId: string,
+    primaryImageId: string,
+  ) => void;
   onEditCustomHint: (customHintId: string) => void;
   onDeleteCustomHint: (customHintId: string) => void;
 }
@@ -41,6 +46,7 @@ export function AllHintsModal({
   selectedHint,
   onSelectPresetHint,
   onSelectCustomHint,
+  onSelectCustomHintPrimaryImage,
   onEditCustomHint,
   onDeleteCustomHint,
 }: AllHintsModalProps) {
@@ -92,10 +98,14 @@ export function AllHintsModal({
                   hint={h.hint}
                   explanation={h.explanation}
                   imageIds={h.imageIds}
+                  primaryImageId={h.primaryImageId}
                   isSelected={isSelected}
                   onPress={() => {
                     onSelectCustomHint(h.customHintId, h.hint);
                     dismiss();
+                  }}
+                  onSelectPrimaryImage={(assetId) => {
+                    onSelectCustomHintPrimaryImage(h.customHintId, assetId);
                   }}
                   onEdit={() => {
                     onEditCustomHint(h.customHintId);
@@ -145,19 +155,27 @@ function CustomHintOption({
   hint,
   explanation,
   imageIds,
+  primaryImageId,
   isSelected,
   onPress,
+  onSelectPrimaryImage,
   onEdit,
   onDelete,
 }: {
   hint: string;
   explanation: string | undefined;
   imageIds: readonly string[] | undefined;
+  primaryImageId: string | undefined;
   isSelected: boolean;
   onPress: () => void;
+  onSelectPrimaryImage: (assetId: string) => void;
   onEdit: () => void;
   onDelete: () => void;
 }) {
+  const resolvedPrimaryImageId = resolvePrimaryImageId(
+    imageIds,
+    primaryImageId,
+  );
   return (
     <Pressable onPress={onPress}>
       <View className={hintOptionClass({ isSelected })}>
@@ -198,19 +216,54 @@ function CustomHintOption({
         )}
         {imageIds != null && imageIds.length > 0 && (
           <View className="mt-2 flex-row flex-wrap gap-2">
-            {imageIds.slice(0, 3).map((assetId) => (
-              <View
-                key={assetId}
-                className="size-14 overflow-hidden rounded-md border border-fg/10"
-              >
-                <AssetImage assetId={assetId} className="size-full" />
-              </View>
-            ))}
+            {imageIds.slice(0, 3).map((assetId) => {
+              const isPrimary = assetId === resolvedPrimaryImageId;
+              return (
+                <Pressable
+                  key={assetId}
+                  onPress={(event) => {
+                    event.stopPropagation();
+                    onSelectPrimaryImage(assetId);
+                  }}
+                  className="relative"
+                >
+                  <View
+                    className={
+                      isPrimary
+                        ? `size-14 overflow-hidden rounded-md border-2 border-cyan`
+                        : `size-14 overflow-hidden rounded-md border border-fg/10`
+                    }
+                  >
+                    <AssetImage assetId={assetId} className="size-full" />
+                    {isPrimary && (
+                      <View className="absolute left-1 top-1 rounded-full bg-cyan/90 px-1.5 py-0.5">
+                        <Text className="text-[9px] font-semibold text-bg">
+                          Primary
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                </Pressable>
+              );
+            })}
           </View>
         )}
       </View>
     </Pressable>
   );
+}
+
+function resolvePrimaryImageId(
+  imageIds: readonly string[] | undefined,
+  primaryImageId: string | undefined,
+): string | undefined {
+  if (imageIds == null || imageIds.length === 0) {
+    return undefined;
+  }
+  if (primaryImageId != null && imageIds.includes(primaryImageId)) {
+    return primaryImageId;
+  }
+  return imageIds[0];
 }
 
 const hintOptionClass = tv({

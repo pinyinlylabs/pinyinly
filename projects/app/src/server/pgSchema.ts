@@ -368,6 +368,10 @@ export const hanziwordMeaningHint = schema.table(
      */
     imageIds: pg.jsonb(`imageIds`).$type<readonly string[] | null>(),
     /**
+     * Primary image ID for this hint.
+     */
+    primaryImageId: pg.text(`primaryImageId`),
+    /**
      * When the hint was created.
      */
     createdAt: pg.timestamp(`createdAt`).defaultNow().notNull(),

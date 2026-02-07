@@ -535,6 +535,10 @@ export const v10 = {
      */
     imageIds: rStringArray().nullable().optional().alias(`m`),
     /**
+     * Primary image for this hint.
+     */
+    primaryImageId: r.string().nullable().optional().alias(`p`),
+    /**
      * When the hint was created.
      */
     createdAt: r.datetime().alias(`c`).indexed(`byCreatedAt`),
@@ -580,6 +584,7 @@ export const v10 = {
       hint: r.string().alias(`t`),
       explanation: r.string().nullable().optional().alias(`e`),
       imageIds: rStringArray().nullable().optional().alias(`m`),
+      primaryImageId: r.string().nullable().optional().alias(`p`),
       now: r.timestamp().alias(`n`),
     })
     .alias(`cch`),
@@ -594,6 +599,7 @@ export const v10 = {
       hint: r.string().alias(`t`),
       explanation: r.string().nullable().optional().alias(`e`),
       imageIds: rStringArray().nullable().optional().alias(`m`),
+      primaryImageId: r.string().nullable().optional().alias(`p`),
       now: r.timestamp().alias(`n`),
     })
     .alias(`uch`),

@@ -12,6 +12,7 @@ export interface CustomHint {
   hint: string;
   explanation?: string;
   imageIds?: readonly string[];
+  primaryImageId?: string;
 }
 
 export type SelectedHintKind = `preset` | `custom`;
@@ -41,6 +42,7 @@ export interface HanziWordHintContextValue {
     hint: string,
     explanation?: string,
     imageIds?: string[],
+    primaryImageId?: string,
   ) => Promise<void>;
 
   /**
@@ -52,6 +54,7 @@ export interface HanziWordHintContextValue {
     hint: string,
     explanation?: string,
     imageIds?: string[],
+    primaryImageId?: string,
   ) => Promise<void>;
 
   /**
@@ -100,6 +103,7 @@ export const HanziWordHintProvider = Object.assign(
       hint: string,
       explanation?: string,
       imageIds?: string[],
+      primaryImageId?: string,
     ): Promise<void> => {
       const customHintId = nanoid();
       await rep.mutate.createCustomHint({
@@ -108,6 +112,7 @@ export const HanziWordHintProvider = Object.assign(
         hint,
         explanation: explanation ?? null,
         imageIds: imageIds ?? null,
+        primaryImageId: primaryImageId ?? null,
         now: new Date(),
       });
     };
@@ -118,6 +123,7 @@ export const HanziWordHintProvider = Object.assign(
       hint: string,
       explanation?: string,
       imageIds?: string[],
+      primaryImageId?: string,
     ): Promise<void> => {
       await rep.mutate.updateCustomHint({
         customHintId,
@@ -125,6 +131,7 @@ export const HanziWordHintProvider = Object.assign(
         hint,
         explanation: explanation ?? null,
         imageIds: imageIds ?? null,
+        primaryImageId: primaryImageId ?? null,
         now: new Date(),
       });
     };
@@ -179,6 +186,7 @@ export function useCustomHints(hanziWord: HanziWord): CustomHint[] {
         hint: value.hint,
         explanation: value.explanation ?? undefined,
         imageIds: value.imageIds ?? undefined,
+        primaryImageId: value.primaryImageId ?? undefined,
       }));
     },
   );

@@ -196,6 +196,7 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
                   hint={h.hint}
                   explanation={h.explanation}
                   imageIds={h.imageIds}
+                  primaryImageId={h.primaryImageId}
                   isSelected={isSelected}
                   onPress={() => {
                     setHint(hanziWord, {
@@ -203,6 +204,19 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
                       hint: h.hint,
                       customHintId: h.customHintId,
                     });
+                  }}
+                  onSelectPrimaryImage={(assetId) => {
+                    if (h.imageIds == null || h.imageIds.length === 0) {
+                      return;
+                    }
+                    void updateCustomHint(
+                      h.customHintId,
+                      hanziWord,
+                      h.hint,
+                      h.explanation,
+                      [...h.imageIds],
+                      assetId,
+                    );
                   }}
                   onEdit={() => {
                     setEditingCustomHintId(h.customHintId);
@@ -266,9 +280,15 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
             setIsModalOpen(false);
             setEditingCustomHintId(null);
           }}
-          onSave={(hint, explanation, imageIds) => {
+          onSave={(hint, explanation, imageIds, primaryImageId) => {
             if (editingCustomHintId === null) {
-              void addCustomHint(hanziWord, hint, explanation, imageIds);
+              void addCustomHint(
+                hanziWord,
+                hint,
+                explanation,
+                imageIds,
+                primaryImageId,
+              );
             } else {
               void updateCustomHint(
                 editingCustomHintId,
@@ -276,6 +296,7 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
                 hint,
                 explanation,
                 imageIds,
+                primaryImageId,
               );
             }
             setIsModalOpen(false);
@@ -298,6 +319,12 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
               ? undefined
               : customHints.find((h) => h.customHintId === editingCustomHintId)
                   ?.imageIds
+          }
+          initialPrimaryImageId={
+            editingCustomHintId === null
+              ? undefined
+              : customHints.find((h) => h.customHintId === editingCustomHintId)
+                  ?.primaryImageId
           }
         />
       )}
@@ -324,6 +351,22 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
               hint,
               customHintId,
             });
+          }}
+          onSelectCustomHintPrimaryImage={(customHintId, primaryImageId) => {
+            const hint = customHints.find(
+              (candidate) => candidate.customHintId === customHintId,
+            );
+            if (hint?.imageIds == null || hint.imageIds.length === 0) {
+              return;
+            }
+            void updateCustomHint(
+              customHintId,
+              hanziWord,
+              hint.hint,
+              hint.explanation,
+              [...hint.imageIds],
+              primaryImageId,
+            );
           }}
           onEditCustomHint={(customHintId) => {
             setEditingCustomHintId(customHintId);
@@ -376,19 +419,27 @@ function CustomHintOption({
   hint,
   explanation,
   imageIds,
+  primaryImageId,
   isSelected,
   onPress,
+  onSelectPrimaryImage,
   onEdit,
   onDelete,
 }: {
   hint: string;
   explanation: string | undefined;
   imageIds: readonly string[] | undefined;
+  primaryImageId: string | undefined;
   isSelected: boolean;
   onPress: () => void;
+  onSelectPrimaryImage: (assetId: string) => void;
   onEdit: () => void;
   onDelete: () => void;
 }) {
+  const resolvedPrimaryImageId = resolvePrimaryImageId(
+    imageIds,
+    primaryImageId,
+  );
   return (
     <Pressable onPress={onPress}>
       <View className={hintOptionClass({ isSelected })}>
@@ -429,19 +480,54 @@ function CustomHintOption({
         )}
         {imageIds != null && imageIds.length > 0 && (
           <View className="mt-2 flex-row flex-wrap gap-2">
-            {imageIds.slice(0, 3).map((assetId) => (
-              <View
-                key={assetId}
-                className="size-14 overflow-hidden rounded-md border border-fg/10"
-              >
-                <AssetImage assetId={assetId} className="size-full" />
-              </View>
-            ))}
+            {imageIds.slice(0, 3).map((assetId) => {
+              const isPrimary = assetId === resolvedPrimaryImageId;
+              return (
+                <Pressable
+                  key={assetId}
+                  onPress={(event) => {
+                    event.stopPropagation();
+                    onSelectPrimaryImage(assetId);
+                  }}
+                  className="relative"
+                >
+                  <View
+                    className={
+                      isPrimary
+                        ? `size-14 overflow-hidden rounded-md border-2 border-cyan`
+                        : `size-14 overflow-hidden rounded-md border border-fg/10`
+                    }
+                  >
+                    <AssetImage assetId={assetId} className="size-full" />
+                    {isPrimary && (
+                      <View className="absolute left-1 top-1 rounded-full bg-cyan/90 px-1.5 py-0.5">
+                        <Text className="text-[9px] font-semibold text-bg">
+                          Primary
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                </Pressable>
+              );
+            })}
           </View>
         )}
       </View>
     </Pressable>
   );
+}
+
+function resolvePrimaryImageId(
+  imageIds: readonly string[] | undefined,
+  primaryImageId: string | undefined,
+): string | undefined {
+  if (imageIds == null || imageIds.length === 0) {
+    return undefined;
+  }
+  if (primaryImageId != null && imageIds.includes(primaryImageId)) {
+    return primaryImageId;
+  }
+  return imageIds[0];
 }
 
 const hintOptionClass = tv({
