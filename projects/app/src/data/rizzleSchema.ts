@@ -13,7 +13,7 @@ import type {
   Skill,
   SrsStateType,
 } from "./model";
-import { PartOfSpeech, SkillKind, SrsKind } from "./model";
+import { AssetStatusKind, PartOfSpeech, SkillKind, SrsKind } from "./model";
 
 export const rSkillKind = memoize0(function rSkillKind() {
   return r.enum(SkillKind, {
@@ -93,10 +93,26 @@ export const rSpaceSeparatedString = memoize0(function rSpaceSeparatedString() {
   );
 });
 
+export const rStringArray = memoize0(function rStringArray() {
+  return RizzleCustom.create<
+    readonly string[],
+    readonly string[],
+    readonly string[]
+  >(z.array(z.string()), z.array(z.string()));
+});
+
 export const rSrsKind = memoize0(function rSrsKind() {
   return r.enum(SrsKind, {
     [SrsKind.Mock]: `0`,
     [SrsKind.FsrsFourPointFive]: `1`,
+  });
+});
+
+export const rAssetStatusKind = memoize0(function rAssetStatusKind() {
+  return r.enum(AssetStatusKind, {
+    [AssetStatusKind.Pending]: `p`,
+    [AssetStatusKind.Uploaded]: `u`,
+    [AssetStatusKind.Failed]: `f`,
   });
 });
 
@@ -414,9 +430,220 @@ export const v9 = {
     .alias(`ur`),
 };
 
-export const currentSchema = v9;
+export const v10 = {
+  ...omit(v9, []),
+  version: `10`,
 
-export const supportedSchemas = [v8, v9] as const;
+  //
+  // Assets - user-uploaded images for mnemonics
+  //
+
+  /**
+   * Tracks the status of user-uploaded assets.
+   *
+   * Assets are immutable once uploaded. The asset ID is generated client-side
+   * (nanoid) to enable optimistic UI updates before the upload completes.
+   */
+  asset: r.entity(`a/[assetId]`, {
+    assetId: r.string().alias(`i`),
+    /**
+     * Upload status: pending, uploaded, or failed.
+     */
+    status: rAssetStatusKind().alias(`s`),
+    /**
+     * MIME type of the asset (e.g. image/jpeg, image/png).
+     */
+    contentType: r.string().alias(`t`),
+    /**
+     * File size in bytes.
+     */
+    contentLength: r.number().alias(`l`),
+    /**
+     * When the asset record was created.
+     */
+    createdAt: r.datetime().alias(`c`).indexed(`byCreatedAt`),
+    /**
+     * When the upload was confirmed (status changed to uploaded).
+     * Null if pending or failed.
+     */
+    uploadedAt: r.datetime().nullable().optional().alias(`u`),
+    /**
+     * Error message if the upload failed.
+     */
+    errorMessage: r.string().nullable().optional().alias(`e`),
+  }),
+
+  /**
+   * Initialize an asset record when starting an upload.
+   * Called before requesting the presigned URL.
+   */
+  initAsset: r
+    .mutator({
+      assetId: r.string().alias(`i`),
+      contentType: r.string().alias(`t`),
+      contentLength: r.number().alias(`l`),
+      now: r.timestamp().alias(`n`),
+    })
+    .alias(`ia`),
+
+  /**
+   * Mark an asset as successfully uploaded.
+   * Called after the upload to R2 completes successfully.
+   */
+  confirmAssetUpload: r
+    .mutator({
+      assetId: r.string().alias(`i`),
+      now: r.timestamp().alias(`n`),
+    })
+    .alias(`cau`),
+
+  /**
+   * Mark an asset upload as failed.
+   */
+  failAssetUpload: r
+    .mutator({
+      assetId: r.string().alias(`i`),
+      errorMessage: r.string().alias(`e`),
+      now: r.timestamp().alias(`n`),
+    })
+    .alias(`fau`),
+
+  //
+  // Custom Hints - user-created memory hints with optional images
+  //
+
+  /**
+   * User-created custom hints for remembering HanziWords.
+   * Each hint can have text, explanation, and optional images (via imageIds).
+   */
+  customHint: r.entity(`ch/[hanziWord]/[customHintId]`, {
+    customHintId: r.string().alias(`i`),
+    /**
+     * The HanziWord this hint is for (e.g. "好:good").
+     */
+    hanziWord: rHanziWord().alias(`h`),
+    /**
+     * The hint text that helps remember the word.
+     */
+    hint: r.string().alias(`t`),
+    /**
+     * Optional explanation of why this hint works.
+     */
+    explanation: r.string().nullable().optional().alias(`e`),
+    /**
+     * Array of imageIds for images attached to this hint.
+     */
+    imageIds: rStringArray().nullable().optional().alias(`m`),
+    /**
+     * Primary image for this hint.
+     */
+    primaryImageId: r.string().nullable().optional().alias(`p`),
+    /**
+     * When the hint was created.
+     */
+    createdAt: r.datetime().alias(`c`).indexed(`byCreatedAt`),
+    /**
+     * When the hint was last updated.
+     */
+    updatedAt: r.datetime().alias(`u`),
+  }),
+
+  /**
+   * The user's selected meaning hint for a HanziWord.
+   */
+  hanziwordMeaningHintSelected: r.entity(`mhs/[hanziWord]`, {
+    /**
+     * The HanziWord this selection is for (e.g. "好:good").
+     */
+    hanziWord: rHanziWord().alias(`h`),
+    /**
+     * Type of the selected hint: 'preset' or 'custom'.
+     */
+    selectedHintType: r.string().alias(`t`),
+    /**
+     * ID of the selected hint (customHintId or preset hint text).
+     */
+    selectedHintId: r.string().alias(`i`),
+    /**
+     * Selected image asset ID for preset hints.
+     */
+    selectedHintImageId: r.string().nullable().optional().alias(`p`),
+    /**
+     * When the selection was created.
+     */
+    createdAt: r.datetime().alias(`c`).indexed(`byCreatedAt`),
+    /**
+     * When the selection was last updated.
+     */
+    updatedAt: r.datetime().alias(`u`),
+  }),
+
+  /**
+   * Create a new custom hint for a HanziWord.
+   */
+  createCustomHint: r
+    .mutator({
+      customHintId: r.string().alias(`i`),
+      hanziWord: rHanziWord().alias(`h`),
+      hint: r.string().alias(`t`),
+      explanation: r.string().nullable().optional().alias(`e`),
+      imageIds: rStringArray().nullable().optional().alias(`m`),
+      primaryImageId: r.string().nullable().optional().alias(`p`),
+      now: r.timestamp().alias(`n`),
+    })
+    .alias(`cch`),
+
+  /**
+   * Update an existing custom hint.
+   */
+  updateCustomHint: r
+    .mutator({
+      customHintId: r.string().alias(`i`),
+      hanziWord: rHanziWord().alias(`h`),
+      hint: r.string().alias(`t`),
+      explanation: r.string().nullable().optional().alias(`e`),
+      imageIds: rStringArray().nullable().optional().alias(`m`),
+      primaryImageId: r.string().nullable().optional().alias(`p`),
+      now: r.timestamp().alias(`n`),
+    })
+    .alias(`uch`),
+
+  /**
+   * Delete a custom hint.
+   */
+  deleteCustomHint: r
+    .mutator({
+      customHintId: r.string().alias(`i`),
+      hanziWord: rHanziWord().alias(`h`),
+    })
+    .alias(`dch`),
+
+  /**
+   * Set the selected meaning hint for a HanziWord.
+   */
+  setHanziwordMeaningHintSelected: r
+    .mutator({
+      hanziWord: rHanziWord().alias(`h`),
+      selectedHintType: r.string().alias(`t`),
+      selectedHintId: r.string().alias(`i`),
+      selectedHintImageId: r.string().nullable().optional().alias(`p`),
+      now: r.timestamp().alias(`n`),
+    })
+    .alias(`smhs`),
+
+  /**
+   * Clear the selected meaning hint for a HanziWord.
+   */
+  clearHanziwordMeaningHintSelected: r
+    .mutator({
+      hanziWord: rHanziWord().alias(`h`),
+    })
+    .alias(`cmhs`),
+};
+
+export const currentSchema = v10;
+
+export const supportedSchemas = [v8, v9, v10] as const;
 
 export type Rizzle = RizzleReplicache<typeof currentSchema>;
 

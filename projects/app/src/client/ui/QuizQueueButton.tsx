@@ -31,7 +31,7 @@ export function QuizQueueButton({
       <IconImage
         size={32}
         className="self-center text-fg"
-        source={require(`../../assets/icons/inbox-filled.svg`)}
+        icon="inbox-filled"
       />
       {queueStats == null || queueCount == null ? null : queueCount > 0 ? (
         <CountLozenge

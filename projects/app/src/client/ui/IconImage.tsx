@@ -2,15 +2,15 @@ import { invariant } from "@pinyinly/lib/invariant";
 import type { ImageProps } from "expo-image";
 import { Image } from "expo-image";
 import { tv } from "tailwind-variants";
+import type { IconName, IconRegistry } from "./IconRegistry";
+import { createIconRegistry } from "./IconRegistry";
 
-export interface IconImageProps extends Pick<
-  ImageProps,
-  `source` | `className`
-> {
+export interface IconImageProps extends Pick<ImageProps, `className`> {
+  icon: IconName;
   size?: 12 | 16 | 24 | 32;
 }
 
-export function IconImage({ source, className, size }: IconImageProps) {
+export function IconImage({ icon, className, size }: IconImageProps) {
   if (__DEV__ && className != null) {
     classNameLintInvariant(className);
   }
@@ -18,7 +18,7 @@ export function IconImage({ source, className, size }: IconImageProps) {
   return (
     <Image
       className={imageClass({ className, size })}
-      source={source}
+      source={iconRegistry[icon]}
       tintColor={
         // Use the current text color as the tint.
         `currentColor`
@@ -56,3 +56,7 @@ export function classNameLintInvariant(className: string) {
     `use the \`size\` prop instead of passing a size- class`,
   );
 }
+
+const iconRegistry: IconRegistry = createIconRegistry();
+
+export const iconNames = Object.keys(iconRegistry) as readonly IconName[];

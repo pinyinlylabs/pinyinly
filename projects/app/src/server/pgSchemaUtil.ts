@@ -1,6 +1,8 @@
 import {
+  rAssetStatusKind,
   rFsrsRating,
   rHanziOrHanziWord,
+  rHanziWord,
   rPinyinSoundGroupId,
   rPinyinSoundId,
   rSkill,
@@ -251,9 +253,14 @@ export const pgSpaceSeparatedString = rizzleCustomType(
   `text`,
 );
 export const pgHanziOrHanziWord = rizzleCustomType(rHanziOrHanziWord(), `text`);
+const pgHanziWordBuilder = rizzleCustomType(rHanziWord(), `text`);
+export function pgHanziWord(name: string) {
+  return pgHanziWordBuilder(name);
+}
 export const pgJson = rizzleCustomType(r.json(), `json`);
 export const pgJsonObject = rizzleCustomType(r.jsonObject(), `json`);
 export const pgFsrsRating = rizzleCustomType(rFsrsRating(), `text`);
+export const pgAssetStatusKind = rizzleCustomType(rAssetStatusKind(), `text`);
 
 // Auth
 export const passkeyTransportEnumSchema = z.enum([

@@ -91,7 +91,6 @@ export default defineConfig(
       "import/no-named-default": `off`,
       "no-console": `off`,
       "react/display-name": `off`, // the display name is the filename
-      "unicorn/no-anonymous-default-export": `off`,
     },
   },
 

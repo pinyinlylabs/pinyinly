@@ -234,7 +234,7 @@ interface RizzleIndexedDef<
 }
 
 export class RizzleIndexed<
-  T extends RizzleType,
+  T extends RizzleType<RizzleTypeDef, unknown, string, unknown>,
   IndexName extends string,
 > extends RizzleType<
   RizzleIndexedDef<T, IndexName>,
@@ -276,7 +276,10 @@ export class RizzleIndexed<
     return this._def.innerType._getAlias();
   }
 
-  static create = <T extends RizzleType, IndexName extends string>(
+  static create = <
+    T extends RizzleType<RizzleTypeDef, unknown, string, unknown>,
+    IndexName extends string,
+  >(
     type: T,
     indexName: IndexName,
   ): RizzleIndexed<T, IndexName> => {

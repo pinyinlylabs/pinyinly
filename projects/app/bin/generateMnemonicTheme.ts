@@ -172,7 +172,7 @@ async function saveUpdates(updates: MnemonicThemeChoices) {
 }
 
 async function readMnemonicThemeChoices() {
-  return await readFileWithSchema(
+  return readFileWithSchema(
     dataFilePath,
     pinyinSoundNameSuggestionsSchema,
     new Map(),

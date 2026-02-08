@@ -2,6 +2,7 @@ import type { HanziText, HanziWord } from "@/data/model";
 import { buildHanziWord } from "@/dictionary";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
+import { AssetImage } from "./AssetImage";
 import { IconImage } from "./IconImage";
 import { PageSheetModal } from "./PageSheetModal";
 import { Pylymark } from "./Pylymark";
@@ -14,8 +15,11 @@ interface PresetHint {
 }
 
 interface CustomHint {
+  customHintId: string;
   hint: string;
   explanation?: string;
+  imageIds?: readonly string[];
+  primaryImageId?: string;
 }
 
 interface AllHintsModalProps {
@@ -25,9 +29,13 @@ interface AllHintsModalProps {
   customHints: CustomHint[];
   selectedHint: string | undefined;
   onSelectPresetHint: (hanziWord: HanziWord, hint: string) => void;
-  onSelectCustomHint: (hint: string) => void;
-  onEditCustomHint: (index: number) => void;
-  onDeleteCustomHint: (index: number) => void;
+  onSelectCustomHint: (customHintId: string, hint: string) => void;
+  onSelectCustomHintPrimaryImage: (
+    customHintId: string,
+    primaryImageId: string,
+  ) => void;
+  onEditCustomHint: (customHintId: string) => void;
+  onDeleteCustomHint: (customHintId: string) => void;
 }
 
 export function AllHintsModal({
@@ -38,6 +46,7 @@ export function AllHintsModal({
   selectedHint,
   onSelectPresetHint,
   onSelectCustomHint,
+  onSelectCustomHintPrimaryImage,
   onEditCustomHint,
   onDeleteCustomHint,
 }: AllHintsModalProps) {
@@ -81,24 +90,29 @@ export function AllHintsModal({
             })}
 
             {/* Custom hints */}
-            {customHints.map((h, index) => {
+            {customHints.map((h) => {
               const isSelected = selectedHint === h.hint;
               return (
                 <CustomHintOption
-                  key={`custom-${index}`}
+                  key={`custom-${h.customHintId}`}
                   hint={h.hint}
                   explanation={h.explanation}
+                  imageIds={h.imageIds}
+                  primaryImageId={h.primaryImageId}
                   isSelected={isSelected}
                   onPress={() => {
-                    onSelectCustomHint(h.hint);
+                    onSelectCustomHint(h.customHintId, h.hint);
                     dismiss();
                   }}
+                  onSelectPrimaryImage={(assetId) => {
+                    onSelectCustomHintPrimaryImage(h.customHintId, assetId);
+                  }}
                   onEdit={() => {
-                    onEditCustomHint(index);
+                    onEditCustomHint(h.customHintId);
                     dismiss();
                   }}
                   onDelete={() => {
-                    onDeleteCustomHint(index);
+                    onDeleteCustomHint(h.customHintId);
                   }}
                 />
               );
@@ -140,18 +154,28 @@ function HintOption({
 function CustomHintOption({
   hint,
   explanation,
+  imageIds,
+  primaryImageId,
   isSelected,
   onPress,
+  onSelectPrimaryImage,
   onEdit,
   onDelete,
 }: {
   hint: string;
   explanation: string | undefined;
+  imageIds: readonly string[] | undefined;
+  primaryImageId: string | undefined;
   isSelected: boolean;
   onPress: () => void;
+  onSelectPrimaryImage: (assetId: string) => void;
   onEdit: () => void;
   onDelete: () => void;
 }) {
+  const resolvedPrimaryImageId = resolvePrimaryImageId(
+    imageIds,
+    primaryImageId,
+  );
   return (
     <Pressable onPress={onPress}>
       <View className={hintOptionClass({ isSelected })}>
@@ -170,11 +194,7 @@ function CustomHintOption({
             }}
             hitSlop={8}
           >
-            <IconImage
-              size={16}
-              source={require(`../../assets/icons/puzzle.svg`)}
-              className="text-fg-dim"
-            />
+            <IconImage size={16} icon="puzzle" className="text-fg-dim" />
           </Pressable>
           <Pressable
             onPress={(e) => {
@@ -183,11 +203,7 @@ function CustomHintOption({
             }}
             hitSlop={8}
           >
-            <IconImage
-              size={16}
-              source={require(`../../assets/icons/close.svg`)}
-              className="text-fg-dim"
-            />
+            <IconImage size={16} icon="close" className="text-fg-dim" />
           </Pressable>
         </View>
         <Text className="text-[14px] font-semibold text-fg-loud">
@@ -198,9 +214,56 @@ function CustomHintOption({
             <Pylymark source={explanation} />
           </Text>
         )}
+        {imageIds != null && imageIds.length > 0 && (
+          <View className="mt-2 flex-row flex-wrap gap-2">
+            {imageIds.slice(0, 3).map((assetId) => {
+              const isPrimary = assetId === resolvedPrimaryImageId;
+              return (
+                <Pressable
+                  key={assetId}
+                  onPress={(event) => {
+                    event.stopPropagation();
+                    onSelectPrimaryImage(assetId);
+                  }}
+                  className="relative"
+                >
+                  <View
+                    className={
+                      isPrimary
+                        ? `size-14 overflow-hidden rounded-md border-2 border-cyan`
+                        : `size-14 overflow-hidden rounded-md border border-fg/10`
+                    }
+                  >
+                    <AssetImage assetId={assetId} className="size-full" />
+                    {isPrimary && (
+                      <View className="absolute left-1 top-1 rounded-full bg-cyan/90 px-1.5 py-0.5">
+                        <Text className="text-[9px] font-semibold text-bg">
+                          Primary
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                </Pressable>
+              );
+            })}
+          </View>
+        )}
       </View>
     </Pressable>
   );
+}
+
+function resolvePrimaryImageId(
+  imageIds: readonly string[] | undefined,
+  primaryImageId: string | undefined,
+): string | undefined {
+  if (imageIds == null || imageIds.length === 0) {
+    return undefined;
+  }
+  if (primaryImageId != null && imageIds.includes(primaryImageId)) {
+    return primaryImageId;
+  }
+  return imageIds[0];
 }
 
 const hintOptionClass = tv({

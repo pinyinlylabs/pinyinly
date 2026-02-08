@@ -15,7 +15,8 @@
       {
         "meaningKey": "source",
         "hint": "A **waterfall** at a **cliff** is the **source** of water.",
-        "explanation": "Picture a cliff (厂) with a waterfall (泉) cascading down from the top. Where does the water come from? This is the original source."
+        "explanation": "Picture a cliff (厂) with a waterfall (泉) cascading down from the top. Where does the water come from? This is the original source.",
+        "imageAssetIds": ["wiki:原:meaning"]
       }
     ]
   },

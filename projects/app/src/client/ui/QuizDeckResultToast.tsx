@@ -41,31 +41,18 @@ export function QuizDeckResultToast({
           >
             {rating === Rating.Easy ? (
               <View className="flex-row items-center gap-[8px]">
-                <IconImage
-                  size={32}
-                  source={require(
-                    `../../assets/icons/check-circled-filled.svg`,
-                  )}
-                />
+                <IconImage size={32} icon="check-circled-filled" />
                 <Text className="text-2xl font-bold text-fg">Perfect!</Text>
               </View>
             ) : rating === Rating.Good ? (
               <View className="flex-row items-center gap-[8px]">
-                <IconImage
-                  size={32}
-                  source={require(
-                    `../../assets/icons/check-circled-filled.svg`,
-                  )}
-                />
+                <IconImage size={32} icon="check-circled-filled" />
                 <Text className="text-2xl font-bold text-fg">Nice!</Text>
               </View>
             ) : rating === Rating.Hard ? (
               <>
                 <View className="flex-row items-center gap-[8px]">
-                  <IconImage
-                    size={32}
-                    source={require(`../../assets/icons/meh-circled.svg`)}
-                  />
+                  <IconImage size={32} icon="meh-circled" />
                   <FloatingMenuModal menu={<UndoAnswerMenu onUndo={onUndo} />}>
                     <Text className="pyly-ref pyly-ref-2xl text-2xl font-bold text-fg">
                       Too slow
@@ -81,12 +68,7 @@ export function QuizDeckResultToast({
               (
                 <>
                   <View className="flex-row items-center gap-[8px]">
-                    <IconImage
-                      size={32}
-                      source={require(
-                        `../../assets/icons/close-circled-filled.svg`,
-                      )}
-                    />
+                    <IconImage size={32} icon="close-circled-filled" />
                     <FloatingMenuModal
                       menu={<UndoAnswerMenu onUndo={onUndo} />}
                     >

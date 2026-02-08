@@ -1,5 +1,4 @@
 import { useIsBetaEnabled } from "@/client/hooks/useBetaFeatures";
-import { useHanziWordHint } from "@/client/hooks/useHanziWordHint";
 import { walkIdsNodeLeafs } from "@/data/hanzi";
 import type { HanziText, HanziWord, WikiCharacterData } from "@/data/model";
 import type { HanziWordMeaning } from "@/dictionary";
@@ -9,27 +8,26 @@ import {
   meaningKeyFromHanziWord,
 } from "@/dictionary";
 import { parseIndexRanges } from "@/util/indexRanges";
-import { Image } from "expo-image";
 import { Link } from "expo-router";
 import type { ReactNode } from "react";
 import { use } from "react";
 import { Text, View } from "react-native";
+import { AssetImage } from "./AssetImage";
 import { HanziCharacter, hanziCharacterColorSchema } from "./HanziCharacter";
 import { HanziLink } from "./HanziLink";
+import { useSelectedHint } from "./HanziWordHintProvider";
 import { IconImage } from "./IconImage";
 import { Pylymark } from "./Pylymark";
 import { RectButton } from "./RectButton";
 
 interface WikiHanziCharacterDecompositionProps {
   characterData: WikiCharacterData;
-  illustrationSrc?: RnRequireSource;
-  illustrationFit?: `cover` | `contain`;
+  illustrationAssetId?: string;
 }
 
 export function WikiHanziCharacterDecomposition({
   characterData,
-  illustrationSrc,
-  illustrationFit,
+  illustrationAssetId,
 }: WikiHanziCharacterDecompositionProps) {
   const componentsElements: ReactNode[] = [];
   const dictionary = use(loadDictionary());
@@ -109,15 +107,12 @@ export function WikiHanziCharacterDecomposition({
           ) : null}
         </View>
 
-        {illustrationSrc == null ? (
+        {illustrationAssetId == null ? (
           <View className="h-4" />
         ) : (
-          <Image
-            source={illustrationSrc}
-            contentFit={illustrationFit}
-            contentPosition="top center"
-            className="my-4 h-[200px] w-full"
-          />
+          <View className="my-4 h-[200px] w-full overflow-hidden">
+            <AssetImage assetId={illustrationAssetId} className="size-full" />
+          </View>
         )}
 
         <MeaningsSection
@@ -186,12 +181,11 @@ function MeaningItem({
   meaning: HanziWordMeaning;
   mnemonicHint: string | undefined;
 }) {
-  const { getHint } = useHanziWordHint();
   const meaningKey = meaningKeyFromHanziWord(hanziWord);
   const hanzi = hanziFromHanziWord(hanziWord);
 
   // Get custom hint if set
-  const customHint = getHint(hanziWord);
+  const customHint = useSelectedHint(hanziWord);
   const displayHint = customHint ?? mnemonicHint;
   const hasCustomHint = customHint != null;
   const hasHint = displayHint != null;
@@ -255,11 +249,7 @@ function NoHintPlaceholder({ hanziWord }: { hanziWord: HanziWord }) {
         <View
           className={`items-center gap-1 rounded-xl border-2 border-dashed border-fg/20 px-4 py-5`}
         >
-          <IconImage
-            size={32}
-            source={require(`../../assets/icons/puzzle.svg`)}
-            className="text-fg-dim"
-          />
+          <IconImage size={32} icon="puzzle" className="text-fg-dim" />
           <View className="items-center">
             <Text className="font-sans text-base font-bold text-fg-dim">
               No hint

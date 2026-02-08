@@ -56,7 +56,7 @@ export const NewSkillModalContentNewPronunciation = ({
           <View className="flex-1 gap-2 bg-bg py-7">
             <View className="flex-row items-center gap-2 px-4">
               <IconImage
-                source={require(`../../assets/icons/voice-square.svg`)}
+                icon="voice-square"
                 size={32}
                 className="text-[var(--color-theme-grass-panel-bg)]"
               />
@@ -107,11 +107,7 @@ function Header({
               active:scale-95
             `}
           >
-            <IconImage
-              source={require(`../../assets/icons/close.svg`)}
-              size={32}
-              className="text-fg-loud"
-            />
+            <IconImage icon="close" size={32} className="text-fg-loud" />
           </Pressable>
         </View>
 

@@ -17,9 +17,8 @@ import type {
   HanziPinyinMistakeType,
   Skill,
 } from "./model";
-import { MistakeKind } from "./model";
-import type { currentSchema } from "./rizzleSchema";
-import { srsStateFromFsrsState } from "./rizzleSchema";
+import { AssetStatusKind, MistakeKind } from "./model";
+import { currentSchema, srsStateFromFsrsState } from "./rizzleSchema";
 
 type Tx = RizzleReplicacheMutatorTx<typeof currentSchema>;
 
@@ -222,5 +221,128 @@ export const mutators: RizzleReplicacheMutators<typeof currentSchema> = {
         { skill, srs: srsStateFromFsrsState(fsrsState) },
       );
     }
+  },
+  async initAsset(tx, { assetId, contentType, contentLength, now }) {
+    await tx.asset.set(
+      { assetId },
+      {
+        assetId,
+        status: AssetStatusKind.Pending,
+        contentType,
+        contentLength,
+        createdAt: now,
+      },
+    );
+  },
+  async confirmAssetUpload(tx, { assetId, now }) {
+    const existing = await tx.asset.get({ assetId });
+    if (existing == null) {
+      // Asset record doesn't exist, create it as uploaded
+      // This can happen if the mutation was lost but upload succeeded
+      return;
+    }
+    await tx.asset.set(
+      { assetId },
+      {
+        ...existing,
+        status: AssetStatusKind.Uploaded,
+        uploadedAt: now,
+      },
+    );
+  },
+  async failAssetUpload(tx, { assetId, errorMessage, now: _now }) {
+    const existing = await tx.asset.get({ assetId });
+    if (existing == null) {
+      return;
+    }
+    await tx.asset.set(
+      { assetId },
+      {
+        ...existing,
+        status: AssetStatusKind.Failed,
+        errorMessage,
+      },
+    );
+  },
+  async createCustomHint(
+    tx,
+    {
+      customHintId,
+      hanziWord,
+      hint,
+      explanation,
+      imageIds,
+      primaryImageId,
+      now,
+    },
+  ) {
+    await tx.customHint.set(
+      { hanziWord, customHintId },
+      {
+        customHintId,
+        hanziWord,
+        hint,
+        explanation: explanation ?? null,
+        imageIds: imageIds ?? null,
+        primaryImageId: primaryImageId ?? null,
+        createdAt: now,
+        updatedAt: now,
+      },
+    );
+  },
+  async updateCustomHint(
+    tx,
+    {
+      customHintId,
+      hanziWord,
+      hint,
+      explanation,
+      imageIds,
+      primaryImageId,
+      now,
+    },
+  ) {
+    const existing = await tx.customHint.get({ hanziWord, customHintId });
+    if (existing == null) {
+      return;
+    }
+    await tx.customHint.set(
+      { hanziWord, customHintId },
+      {
+        ...existing,
+        hint,
+        explanation: explanation ?? null,
+        imageIds: imageIds ?? null,
+        primaryImageId: primaryImageId ?? existing.primaryImageId ?? null,
+        updatedAt: now,
+      },
+    );
+  },
+  async deleteCustomHint(tx, { customHintId, hanziWord }) {
+    await tx.tx.del(
+      currentSchema.customHint.marshalKey({ hanziWord, customHintId }),
+    );
+  },
+  async setHanziwordMeaningHintSelected(
+    tx,
+    { hanziWord, selectedHintType, selectedHintId, selectedHintImageId, now },
+  ) {
+    const existing = await tx.hanziwordMeaningHintSelected.get({ hanziWord });
+    await tx.hanziwordMeaningHintSelected.set(
+      { hanziWord },
+      {
+        hanziWord,
+        selectedHintType,
+        selectedHintId,
+        selectedHintImageId: selectedHintImageId ?? null,
+        createdAt: existing?.createdAt ?? now,
+        updatedAt: now,
+      },
+    );
+  },
+  async clearHanziwordMeaningHintSelected(tx, { hanziWord }) {
+    await tx.tx.del(
+      currentSchema.hanziwordMeaningHintSelected.marshalKey({ hanziWord }),
+    );
   },
 };

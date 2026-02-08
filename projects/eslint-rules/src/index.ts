@@ -5,7 +5,6 @@ import { getDefaultAttributes } from "eslint-plugin-better-tailwindcss/api/defau
 import importPlugin from "eslint-plugin-import";
 import reactPlugin from "eslint-plugin-react";
 import tailwindPlugin from "eslint-plugin-tailwindcss";
-import unicorn from "eslint-plugin-unicorn";
 import type { defineConfig } from "eslint/config";
 import tseslint from "typescript-eslint";
 import { globTemplate as globTemplateRule } from "./glob-template.ts";
@@ -49,26 +48,6 @@ const recommended: ConfigWithExtendsArray = [
     files: [`**/*.{cjs,js,mjs,ts,tsx}`],
 
     rules: {
-      //
-      // eslint-base
-      //
-
-      // NOTE: The following rules are handled by Oxlint for better performance
-      // curly: `off`, // handled by oxlint
-      // "no-console": `off`, // handled by oxlint
-      // "no-debugger": `off`, // handled by oxlint
-      // "no-else-return": `off`, // handled by oxlint
-      // "no-useless-rename": `off`, // handled by oxlint
-
-      "logical-assignment-operators": `error`,
-      "no-fallthrough": [
-        `error`,
-        { commentPattern: `.*intentional fallthrough.*` },
-      ],
-      "no-process-exit": `error`,
-      "object-shorthand": `error`,
-      "one-var": [`error`, `never`],
-
       //
       // @pinyinly
       //
@@ -225,7 +204,6 @@ export const plugins = {
   [`import`]: importPlugin as ESLint.Plugin,
   [`react`]: reactPlugin as ESLint.Plugin,
   [`tailwind`]: tailwindPlugin as ESLint.Plugin,
-  [`unicorn`]: unicorn,
 };
 
 export { defineConfig } from "eslint/config";

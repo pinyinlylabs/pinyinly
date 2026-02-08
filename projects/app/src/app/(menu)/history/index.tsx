@@ -55,10 +55,8 @@ export default function HistoryPage() {
                   <View key={j} className="flex-row items-center gap-2">
                     <IconImage
                       size={16}
-                      source={
-                        finalRating.rating === Rating.Again
-                          ? require(`../../../assets/icons/close.svg`)
-                          : require(`../../../assets/icons/check.svg`)
+                      icon={
+                        finalRating.rating === Rating.Again ? `close` : `check`
                       }
                     />
                     <Text className="pyly-body">

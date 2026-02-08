@@ -58,6 +58,7 @@ jobs:
         run: moon run app:deployVercel --color --affected --remote
         # if: steps.moon-deployVercel-query.target-affected
         env:
+          EXPO_PUBLIC_ASSETS_CDN_BASE_URL: ${{ secrets.EXPO_PUBLIC_ASSETS_CDN_BASE_URL }}
           EXPO_PUBLIC_POSTHOG_API_KEY: ${{ secrets.EXPO_PUBLIC_POSTHOG_API_KEY }}
           EXPO_PUBLIC_SENTRY_DSN: ${{ secrets.EXPO_PUBLIC_SENTRY_DSN }}
           PYLY_STRICT_EXPO_ENV_VARS: "true"
@@ -110,6 +111,7 @@ jobs:
         run: moon run app:deployEasUpdate --color --affected --remote
         # if: steps.moon-deployEasUpdate-query.target-affected
         env:
+          EXPO_PUBLIC_ASSETS_CDN_BASE_URL: ${{ secrets.EXPO_PUBLIC_ASSETS_CDN_BASE_URL }}
           EXPO_PUBLIC_POSTHOG_API_KEY: ${{ secrets.EXPO_PUBLIC_POSTHOG_API_KEY }}
           EXPO_PUBLIC_SENTRY_DSN: ${{ secrets.EXPO_PUBLIC_SENTRY_DSN }}
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
