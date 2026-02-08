@@ -157,7 +157,7 @@ export default {
     stroke: true,
     strokeWidth: false,
     textOpacity: false,
-    translate: false,
+    translate: true,
     visibility: true,
   },
 };

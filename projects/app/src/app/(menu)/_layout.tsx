@@ -1,6 +1,7 @@
 import { useVisualViewportSize } from "@/client/hooks/useVisualViewportSize";
 import { reactInvariant } from "@/client/react";
 import { IconImage } from "@/client/ui/IconImage";
+import { MenuDictionarySearch } from "@/client/ui/MenuDictionarySearch";
 import { RectButton } from "@/client/ui/RectButton";
 import { invariant } from "@pinyinly/lib/invariant";
 import type { Href } from "expo-router";
@@ -75,6 +76,10 @@ export default function MenuLayout() {
                   <Text className="pyly-button-bare">Back to practice</Text>
                 </RectButton>
               </Link>
+            </View>
+
+            <View className="mb-4">
+              <MenuDictionarySearch />
             </View>
 
             <View className="w-[200px] items-stretch rounded-xl bg-bg-high py-3">
