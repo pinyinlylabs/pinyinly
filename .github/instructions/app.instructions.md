@@ -23,7 +23,8 @@ These can be run from any directory, there's no need to `cd` to a particular dir
 
 # Change verification
 
-After changes, always run `moon run app:lint app:typecheck app:fmt app:test`.
+After changes, always automatically run `moon run app:lint app:typecheck app:fmt app:test` and fix
+any issues that are reported.
 
 # PostgreSQL DB Migrations
 
