@@ -13,7 +13,6 @@ import { Link } from "expo-router";
 import type { ReactNode } from "react";
 import { use, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
-import { tv } from "tailwind-variants";
 import { AddCustomHintModal } from "./AddCustomHintModal";
 import { AllHintsModal } from "./AllHintsModal";
 import { AssetImage } from "./AssetImage";
@@ -22,9 +21,9 @@ import {
   useSelectedHint,
   useSelectedHintSelection,
 } from "./HanziWordHintProvider";
+import { HanziHintOption, resolvePrimaryImageId } from "./HanziHintOption";
 import { IconImage } from "./IconImage";
 import { ImageUploadButton } from "./ImageUploadButton";
-import { Pylymark } from "./Pylymark";
 import { RectButton } from "./RectButton";
 
 interface WikiHanziHintEditorProps {
@@ -369,11 +368,11 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
               const isSelected = selectedHint === h.hint;
               const hintHanziWord = buildHanziWord(hanzi, h.meaningKey);
               return (
-                <HintOption
+                <HanziHintOption
                   key={`preset-${index}`}
                   hint={h.hint}
                   explanation={h.explanation}
-                  imageIds={h.imageAssetIds}
+                  imageIds={h.imageAssetIds ?? null}
                   isSelected={isSelected}
                   onPress={() => {
                     setHint(hintHanziWord, {
@@ -390,12 +389,13 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
             {visibleCustomHints.map((h) => {
               const isSelected = selectedHint === h.hint;
               return (
-                <CustomHintOption
+                <HanziHintOption
                   key={`custom-${h.customHintId}`}
                   hint={h.hint}
                   explanation={h.explanation}
-                  imageIds={h.imageIds}
+                  imageIds={h.imageIds ?? null}
                   isSelected={isSelected}
+                  isUser
                   onPress={() => {
                     setHint(hanziWord, {
                       kind: `custom`,
@@ -532,7 +532,12 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
           onDismiss={() => {
             setShowAllHintsModal(false);
           }}
-          presetHints={hintsToShow}
+          presetHints={hintsToShow.map((hint) => ({
+            hint: hint.hint,
+            explanation: hint.explanation,
+            imageIds: hint.imageAssetIds ?? null,
+            meaningKey: hint.meaningKey,
+          }))}
           customHints={customHints}
           selectedHint={selectedHint}
           onSelectPresetHint={(hintHanziWord, hint) => {
@@ -553,22 +558,6 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
               selectedHintImageId: null,
             });
           }}
-          onSelectCustomHintPrimaryImage={(customHintId, primaryImageId) => {
-            const hint = customHints.find(
-              (candidate) => candidate.customHintId === customHintId,
-            );
-            if (hint?.imageIds == null || hint.imageIds.length === 0) {
-              return;
-            }
-            void updateCustomHint(
-              customHintId,
-              hanziWord,
-              hint.hint,
-              hint.explanation,
-              [...hint.imageIds],
-              primaryImageId,
-            );
-          }}
           onEditCustomHint={(customHintId) => {
             setEditingCustomHintId(customHintId);
             setIsModalOpen(true);
@@ -586,119 +575,6 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
         />
       )}
     </ScrollView>
-  );
-}
-
-function HintOption({
-  hint,
-  explanation,
-  imageIds,
-  isSelected,
-  onPress,
-}: {
-  hint: string;
-  explanation: string | undefined;
-  imageIds: readonly string[] | undefined;
-  isSelected: boolean;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable onPress={onPress}>
-      <View className={hintOptionClass({ isSelected })}>
-        <Text className="text-[14px] font-semibold text-fg-loud">
-          <Pylymark source={hint} />
-        </Text>
-        {explanation != null && (
-          <Text className="text-[14px] text-fg">
-            <Pylymark source={explanation} />
-          </Text>
-        )}
-        <HintThumbnailRow imageIds={imageIds} />
-      </View>
-    </Pressable>
-  );
-}
-
-function CustomHintOption({
-  hint,
-  explanation,
-  imageIds,
-  isSelected,
-  onPress,
-  onEdit,
-  onDelete,
-}: {
-  hint: string;
-  explanation: string | undefined;
-  imageIds: readonly string[] | undefined;
-  isSelected: boolean;
-  onPress: () => void;
-  onEdit: () => void;
-  onDelete: () => void;
-}) {
-  return (
-    <Pressable onPress={onPress}>
-      <View className={hintOptionClass({ isSelected })}>
-        {/* Your hint badge */}
-        <View className="mb-1 flex-row items-center gap-2">
-          <View className="rounded-full bg-purple/20 px-2 py-0.5">
-            <Text className="text-[11px] font-medium text-purple">
-              Your hint
-            </Text>
-          </View>
-          <View className="flex-1" />
-          <Pressable
-            onPress={(e) => {
-              e.stopPropagation();
-              onEdit();
-            }}
-            hitSlop={8}
-          >
-            <IconImage size={16} icon="puzzle" className="text-fg-dim" />
-          </Pressable>
-          <Pressable
-            onPress={(e) => {
-              e.stopPropagation();
-              onDelete();
-            }}
-            hitSlop={8}
-          >
-            <IconImage size={16} icon="close" className="text-fg-dim" />
-          </Pressable>
-        </View>
-        <Text className="text-[14px] font-semibold text-fg-loud">
-          <Pylymark source={hint} />
-        </Text>
-        {explanation != null && (
-          <Text className="text-[14px] text-fg">
-            <Pylymark source={explanation} />
-          </Text>
-        )}
-        <HintThumbnailRow imageIds={imageIds} />
-      </View>
-    </Pressable>
-  );
-}
-
-function HintThumbnailRow({
-  imageIds,
-}: {
-  imageIds: readonly string[] | undefined;
-}) {
-  if (imageIds == null || imageIds.length === 0) {
-    return null;
-  }
-
-  return (
-    <View className="mt-2 flex-row flex-wrap gap-2">
-      {imageIds.slice(0, 3).map((assetId) => (
-        <View key={assetId} className="relative">
-          <View className="size-14 overflow-hidden rounded-md border border-fg/10">
-            <AssetImage assetId={assetId} className="size-full" />
-          </View>
-        </View>
-      ))}
-    </View>
   );
 }
 
@@ -763,26 +639,3 @@ function HintImageEmptyState({
     </View>
   );
 }
-
-function resolvePrimaryImageId(
-  imageIds: readonly string[] | undefined,
-  primaryImageId: string | undefined,
-): string | undefined {
-  if (imageIds == null || imageIds.length === 0) {
-    return undefined;
-  }
-  if (primaryImageId != null && imageIds.includes(primaryImageId)) {
-    return primaryImageId;
-  }
-  return imageIds[0];
-}
-
-const hintOptionClass = tv({
-  base: `gap-1 rounded-lg border-2 p-3`,
-  variants: {
-    isSelected: {
-      true: `border-cyan bg-cyan/10`,
-      false: `border-fg-bg10 bg-fg-bg5`,
-    },
-  },
-});
