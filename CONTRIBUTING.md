@@ -30,7 +30,7 @@ Now you can start the app:
 If you need to run services individually:
 
 - `moon run app:devExpo` - Just Expo
-- `moon run app:devServices` - Just Inngest + Minion
+- `moon run app:devServices` - Just Inngest + Minio
 
 # Guides
 
