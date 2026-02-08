@@ -418,7 +418,7 @@ async function readPnpmLock() {
 }
 
 /**
- * @type {import('@yarnpkg/types').defineConfig}
+ * @type {import('@yarnpkg/types').Yarn.Config}
  */
 module.exports = defineConfig({
   async constraints(ctx) {

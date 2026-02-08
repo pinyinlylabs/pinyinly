@@ -27,6 +27,7 @@
   "private": true,
   "devDependencies": {
     "@typescript-eslint/parser": "^8.36.0",
+    "@typescript/native-preview": "^7.0.0-dev.20260207.1",
     "oxlint": "^1.43.0",
     "oxlint-tsgolint": "^0.11.4",
     "tsx": "^4.15.7",
