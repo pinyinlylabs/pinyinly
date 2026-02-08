@@ -19,7 +19,11 @@ import {
 import { getIsStructuralHanzi, loadDictionary } from "@/dictionary";
 import { devToolsSlowQuerySleepIfEnabled } from "@/util/devtools";
 import type { Rating } from "@/util/fsrs";
-import type { RizzleAnyEntity, RizzleEntityOutput } from "@/util/rizzle";
+import type {
+  RizzleAnyEntity,
+  RizzleEntityMarshaled,
+  RizzleEntityOutput,
+} from "@/util/rizzle";
 import {
   arrayFilterUniqueWithKey,
   memoize0,
@@ -448,20 +452,23 @@ export const rizzleCollectionOptions = <
             for (const op of ops) {
               switch (op.op) {
                 case `add`: {
-                  // oxlint-disable-next-line typescript/no-unsafe-argument, typescript/no-explicit-any
-                  const value = entity.unmarshalValue(op.newValue as any);
+                  const value = entity.unmarshalValue(
+                    op.newValue as RizzleEntityMarshaled<typeof entity>,
+                  );
                   write({ type: `insert`, value });
                   break;
                 }
                 case `change`: {
-                  // oxlint-disable-next-line typescript/no-unsafe-argument, typescript/no-explicit-any
-                  const value = entity.unmarshalValue(op.newValue as any);
+                  const value = entity.unmarshalValue(
+                    op.newValue as RizzleEntityMarshaled<typeof entity>,
+                  );
                   write({ type: `update`, value });
                   break;
                 }
                 case `del`: {
-                  // oxlint-disable-next-line typescript/no-unsafe-argument, typescript/no-explicit-any
-                  const value = entity.unmarshalValue(op.oldValue as any);
+                  const value = entity.unmarshalValue(
+                    op.oldValue as RizzleEntityMarshaled<typeof entity>,
+                  );
                   write({ type: `delete`, value });
                   break;
                 }
@@ -559,8 +566,9 @@ export const latestSkillRatingCollectionOptions = ({
             switch (op.op) {
               case `change`:
               case `add`: {
-                // oxlint-disable-next-line typescript/no-unsafe-argument, typescript/no-explicit-any
-                const value = entity.unmarshalValue(op.newValue as any);
+                const value = entity.unmarshalValue(
+                  op.newValue as RizzleEntityMarshaled<typeof entity>,
+                );
 
                 const existing =
                   collection.get(value.skill) ??
