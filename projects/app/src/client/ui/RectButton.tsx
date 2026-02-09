@@ -142,7 +142,13 @@ const pressable = tv({
     {
       variant: `bare`,
       disabled: false,
-      class: `active:scale-95`,
+      class: `
+        opacity-75
+
+        hover:opacity-100
+
+        active:scale-95
+      `,
     },
   ],
 });
