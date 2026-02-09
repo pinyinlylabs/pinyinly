@@ -1,5 +1,5 @@
 import type { PinyinSoundGroupId, PinyinSoundId } from "#data/model.ts";
-import { v9 as schema, srsStateFromFsrsState } from "#data/rizzleSchema.ts";
+import { v11 as schema, srsStateFromFsrsState } from "#data/rizzleSchema.ts";
 import { glossToHanziWord } from "#data/skills.ts";
 import { pgXmin } from "#server/lib/db.ts";
 import {
@@ -8,7 +8,7 @@ import {
   pull,
   push,
   retryMutation,
-} from "#server/lib/replicache/v9.ts";
+} from "#server/lib/replicache/v11.ts";
 import type { CvrEntities } from "#server/pgSchema.ts";
 import * as s from "#server/pgSchema.ts";
 import { nextReview, Rating } from "#util/fsrs.ts";
@@ -823,6 +823,7 @@ describe(
 
       txTest(`works for non-existant user and client group`, async ({ tx }) => {
         await expect(computeEntitiesState(tx, `1`)).resolves.toEqual({
+          asset: [],
           hanziGlossMistake: [],
           hanziPinyinMistake: [],
           pinyinSound: [],
@@ -837,6 +838,7 @@ describe(
         const user = await createUser(tx);
 
         await expect(computeEntitiesState(tx, user.id)).resolves.toEqual({
+          asset: [],
           hanziGlossMistake: [],
           hanziPinyinMistake: [],
           pinyinSound: [],
@@ -873,6 +875,7 @@ describe(
         invariant(user1SkillState != null);
 
         await expect(computeEntitiesState(tx, user1.id)).resolves.toEqual({
+          asset: [],
           hanziGlossMistake: [],
           hanziPinyinMistake: [],
           pinyinSound: [],
@@ -910,6 +913,7 @@ describe(
         invariant(user1SkillRating != null);
 
         await expect(computeEntitiesState(tx, user1.id)).resolves.toEqual({
+          asset: [],
           hanziGlossMistake: [],
           hanziPinyinMistake: [],
           pinyinSound: [],
@@ -946,6 +950,7 @@ describe(
         invariant(user1PinyinSound != null);
 
         await expect(computeEntitiesState(tx, user1.id)).resolves.toEqual({
+          asset: [],
           hanziGlossMistake: [],
           hanziPinyinMistake: [],
           pinyinSound: [user1PinyinSound],
@@ -982,6 +987,7 @@ describe(
         invariant(user1PinyinSoundGroup != null);
 
         await expect(computeEntitiesState(tx, user1.id)).resolves.toEqual({
+          asset: [],
           hanziGlossMistake: [],
           hanziPinyinMistake: [],
           pinyinSound: [],
@@ -1000,6 +1006,7 @@ describe(`computePatch suite` satisfies HasNameOf<typeof computePatch>, () => {
 
   test(`unchanged entities are preserved`, async () => {
     const prevCvr: CvrEntities = {
+      asset: { x0: `0` },
       hanziGlossMistake: { x1: `1` },
       hanziPinyinMistake: { x2: `2` },
       pinyinSound: { x3: `3` },
@@ -1009,6 +1016,7 @@ describe(`computePatch suite` satisfies HasNameOf<typeof computePatch>, () => {
       setting: { x8: `8` },
     };
     const entitiesState: EntitiesState = {
+      asset: [{ id: `x0`, xmin: `0` }],
       hanziGlossMistake: [{ id: `x1`, xmin: `1` }],
       hanziPinyinMistake: [{ id: `x2`, xmin: `2` }],
       pinyinSound: [{ id: `x3`, xmin: `3` }],
@@ -1021,6 +1029,7 @@ describe(`computePatch suite` satisfies HasNameOf<typeof computePatch>, () => {
       nextCvrEntities: prevCvr,
       partial: false,
       patchOpsUnhydrated: {
+        asset: { delKeys: [], putIds: [] },
         hanziGlossMistake: { delKeys: [], putIds: [] },
         hanziPinyinMistake: { delKeys: [], putIds: [] },
         pinyinSound: { delKeys: [], putIds: [] },

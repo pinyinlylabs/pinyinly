@@ -12,35 +12,20 @@ interface PresetHint {
   meaningKey: string;
 }
 
-interface CustomHint {
-  customHintId: string;
-  hint: string;
-  explanation?: string;
-  imageIds?: readonly string[];
-}
-
 interface AllHintsModalProps {
   hanzi: HanziText;
   onDismiss: () => void;
   presetHints: PresetHint[];
-  customHints: CustomHint[];
   selectedHint: string | undefined;
   onSelectPresetHint: (hanziWord: HanziWord, hint: string) => void;
-  onSelectCustomHint: (customHintId: string, hint: string) => void;
-  onEditCustomHint: (customHintId: string) => void;
-  onDeleteCustomHint: (customHintId: string) => void;
 }
 
 export function AllHintsModal({
   hanzi,
   onDismiss,
   presetHints,
-  customHints,
   selectedHint,
   onSelectPresetHint,
-  onSelectCustomHint,
-  onEditCustomHint,
-  onDeleteCustomHint,
 }: AllHintsModalProps) {
   return (
     <PageSheetModal
@@ -77,32 +62,6 @@ export function AllHintsModal({
                   onPress={() => {
                     onSelectPresetHint(hintHanziWord, h.hint);
                     dismiss();
-                  }}
-                />
-              );
-            })}
-
-            {/* Custom hints */}
-            {customHints.map((h) => {
-              const isSelected = selectedHint === h.hint;
-              return (
-                <HanziHintOption
-                  key={`custom-${h.customHintId}`}
-                  hint={h.hint}
-                  explanation={h.explanation}
-                  imageIds={h.imageIds ?? null}
-                  isSelected={isSelected}
-                  isUser
-                  onPress={() => {
-                    onSelectCustomHint(h.customHintId, h.hint);
-                    dismiss();
-                  }}
-                  onEdit={() => {
-                    onEditCustomHint(h.customHintId);
-                    dismiss();
-                  }}
-                  onDelete={() => {
-                    onDeleteCustomHint(h.customHintId);
                   }}
                 />
               );

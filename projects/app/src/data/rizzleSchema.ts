@@ -641,9 +641,22 @@ export const v10 = {
     .alias(`cmhs`),
 };
 
-export const currentSchema = v10;
+export const v11 = {
+  ...omit(v10, [
+    `customHint`,
+    `hanziwordMeaningHintSelected`,
+    `createCustomHint`,
+    `updateCustomHint`,
+    `deleteCustomHint`,
+    `setHanziwordMeaningHintSelected`,
+    `clearHanziwordMeaningHintSelected`,
+  ]),
+  version: `11`,
+};
 
-export const supportedSchemas = [v8, v9, v10] as const;
+export const currentSchema = v11;
+
+export const supportedSchemas = [v8, v9, v11] as const;
 
 export type Rizzle = RizzleReplicache<typeof currentSchema>;
 

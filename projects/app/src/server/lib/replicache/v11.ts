@@ -6,13 +6,12 @@ import {
 import type {
   HanziGlossMistakeType,
   HanziPinyinMistakeType,
-  HanziWord,
   PinyinSoundGroupId,
   PinyinSoundId,
   Skill,
 } from "@/data/model";
 import { AssetStatusKind, MistakeKind } from "@/data/model";
-import { v10 as schema } from "@/data/rizzleSchema";
+import { v11 as schema } from "@/data/rizzleSchema";
 import type { Drizzle, Xmin } from "@/server/lib/db";
 import {
   assertMinimumIsolationLevel,
@@ -277,123 +276,6 @@ export const mutators: RizzleDrizzleMutators<typeof schema, Drizzle> = {
       })
       .where(and(eq(s.asset.userId, userId), eq(s.asset.assetId, assetId)));
   },
-  async createCustomHint(
-    db,
-    userId,
-    {
-      customHintId,
-      hanziWord,
-      hint,
-      explanation,
-      imageIds,
-      primaryImageId,
-      now,
-    },
-  ) {
-    await db.insert(s.hanziwordMeaningHint).values({
-      userId,
-      customHintId,
-      hanziWord,
-      hint,
-      explanation: explanation ?? null,
-      imageIds:
-        imageIds != null && imageIds.length > 0
-          ? sql`${JSON.stringify(imageIds)}::jsonb`
-          : null,
-      primaryImageId:
-        imageIds != null && imageIds.length > 0
-          ? (primaryImageId ?? null)
-          : null,
-      createdAt: now,
-      updatedAt: now,
-    });
-  },
-  async updateCustomHint(
-    db,
-    userId,
-    {
-      customHintId,
-      hanziWord: _hanziWord,
-      hint,
-      explanation,
-      imageIds,
-      primaryImageId,
-      now,
-    },
-  ) {
-    await db
-      .update(s.hanziwordMeaningHint)
-      .set({
-        hint,
-        explanation: explanation ?? null,
-        imageIds:
-          imageIds != null && imageIds.length > 0
-            ? sql`${JSON.stringify(imageIds)}::jsonb`
-            : null,
-        primaryImageId:
-          imageIds != null && imageIds.length > 0
-            ? (primaryImageId ?? null)
-            : null,
-        updatedAt: now,
-      })
-      .where(
-        and(
-          eq(s.hanziwordMeaningHint.userId, userId),
-          eq(s.hanziwordMeaningHint.customHintId, customHintId),
-        ),
-      );
-  },
-  async deleteCustomHint(db, userId, { customHintId }) {
-    await db
-      .delete(s.hanziwordMeaningHint)
-      .where(
-        and(
-          eq(s.hanziwordMeaningHint.userId, userId),
-          eq(s.hanziwordMeaningHint.customHintId, customHintId),
-        ),
-      );
-  },
-  async setHanziwordMeaningHintSelected(
-    db,
-    userId,
-    { hanziWord, selectedHintType, selectedHintId, selectedHintImageId, now },
-  ) {
-    const updatedAt = now;
-    const createdAt = now;
-    await db
-      .insert(s.hanziwordMeaningHintSelected)
-      .values({
-        userId,
-        hanziWord,
-        selectedHintType,
-        selectedHintId,
-        selectedHintImageId: selectedHintImageId ?? null,
-        updatedAt,
-        createdAt,
-      })
-      .onConflictDoUpdate({
-        target: [
-          s.hanziwordMeaningHintSelected.userId,
-          s.hanziwordMeaningHintSelected.hanziWord,
-        ],
-        set: {
-          selectedHintType,
-          selectedHintId,
-          selectedHintImageId: selectedHintImageId ?? null,
-          updatedAt,
-        },
-      });
-  },
-  async clearHanziwordMeaningHintSelected(db, userId, { hanziWord }) {
-    await db
-      .delete(s.hanziwordMeaningHintSelected)
-      .where(
-        and(
-          eq(s.hanziwordMeaningHintSelected.userId, userId),
-          eq(s.hanziwordMeaningHintSelected.hanziWord, hanziWord),
-        ),
-      );
-  },
 };
 
 const mutate = makeDrizzleMutationHandler(schema, mutators);
@@ -616,8 +498,6 @@ export async function pull(
 
 type CvrNamespace =
   | `asset`
-  | `customHint`
-  | `hanziwordMeaningHintSelected`
   | `pinyinSound`
   | `pinyinSoundGroup`
   | `skillState`
@@ -684,15 +564,6 @@ type PatchOpsUnhydrated = Partial<
   Record<CvrNamespace, { putIds: string[]; delKeys: string[] }>
 >;
 
-const parseCustomHintCvrKey = (key: string) => {
-  const [hanziWord, customHintId] = key.split(`\t`);
-  invariant(
-    hanziWord != null && customHintId != null,
-    `Invalid custom hint key`,
-  );
-  return { hanziWord: hanziWord as HanziWord, customHintId };
-};
-
 const syncEntities = [
   makeSyncEntity(
     `asset`,
@@ -716,55 +587,6 @@ const syncEntities = [
         .from(s.asset)
         .where(eq(s.asset.userId, userId))
         .as(`assetVersions`),
-  ),
-  makeSyncEntity(
-    `customHint`,
-    schema.customHint,
-    (cvrKey, e) => {
-      const { hanziWord, customHintId } = parseCustomHintCvrKey(cvrKey);
-      return e.marshalKey({ hanziWord, customHintId });
-    },
-    (db, ids) =>
-      db.query.hanziwordMeaningHint.findMany({
-        where: (t) => inArray(t.id, ids),
-      }),
-    (db, userId) =>
-      db
-        .select({
-          map: json_agg(
-            json_build_object({
-              id: s.hanziwordMeaningHint.id,
-              key: sql<string>`concat_ws('\t', ${s.hanziwordMeaningHint.hanziWord}, ${s.hanziwordMeaningHint.customHintId})`,
-              xmin: pgXmin(s.hanziwordMeaningHint),
-            }),
-          ).as(`customHintVersions`),
-        })
-        .from(s.hanziwordMeaningHint)
-        .where(eq(s.hanziwordMeaningHint.userId, userId))
-        .as(`customHintVersions`),
-  ),
-  makeSyncEntity(
-    `hanziwordMeaningHintSelected`,
-    schema.hanziwordMeaningHintSelected,
-    (hanziWord, e) => e.marshalKey({ hanziWord: hanziWord as HanziWord }),
-    (db, ids) =>
-      db.query.hanziwordMeaningHintSelected.findMany({
-        where: (t) => inArray(t.id, ids),
-      }),
-    (db, userId) =>
-      db
-        .select({
-          map: json_agg(
-            json_build_object({
-              id: s.hanziwordMeaningHintSelected.id,
-              key: s.hanziwordMeaningHintSelected.hanziWord,
-              xmin: pgXmin(s.hanziwordMeaningHintSelected),
-            }),
-          ).as(`hanziwordMeaningHintSelectedVersions`),
-        })
-        .from(s.hanziwordMeaningHintSelected)
-        .where(eq(s.hanziwordMeaningHintSelected.userId, userId))
-        .as(`hanziwordMeaningHintSelectedVersions`),
   ),
   makeSyncEntity(
     `pinyinSound`,

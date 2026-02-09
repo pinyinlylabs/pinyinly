@@ -16,12 +16,8 @@ import { Pressable, ScrollView, Text, View } from "react-native";
 import { AddCustomHintModal } from "./AddCustomHintModal";
 import { AllHintsModal } from "./AllHintsModal";
 import { AssetImage } from "./AssetImage";
-import {
-  useCustomHints,
-  useSelectedHint,
-  useSelectedHintSelection,
-} from "./HanziWordHintProvider";
-import { HanziHintOption, resolvePrimaryImageId } from "./HanziHintOption";
+import { HanziHintOption } from "./HanziHintOption";
+import { useHanziWordHintOverrides } from "./HanziWordHintProvider";
 import { IconImage } from "./IconImage";
 import { ImageUploadButton } from "./ImageUploadButton";
 import { RectButton } from "./RectButton";
@@ -40,21 +36,11 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
   // Load character data
   const characterData = use(getWikiCharacterData(hanzi)) ?? null;
 
-  const {
-    setHint,
-    clearHint,
-    addCustomHint,
-    updateCustomHint,
-    removeCustomHint,
-  } = useHanziWordHint();
-  const selectedHint = useSelectedHint(hanziWord);
-  const customHints = useCustomHints(hanziWord);
+  const { setHintOverrides, clearHintOverrides } = useHanziWordHint();
+  const hintOverrides = useHanziWordHintOverrides(hanziWord);
 
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingCustomHintId, setEditingCustomHintId] = useState<string | null>(
-    null,
-  );
   const [showAllHintsModal, setShowAllHintsModal] = useState(false);
 
   // Get available hints for this meaning
@@ -69,95 +55,35 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
       ? availableHints
       : (characterData?.mnemonic?.hints ?? []);
 
-  // Limit visible hints to 3 (combined preset + custom)
+  // Limit visible hints to 3
   const VISIBLE_HINT_LIMIT = 3;
-  const totalHintCount = hintsToShow.length + customHints.length;
+  const totalHintCount = hintsToShow.length;
   const hasMoreHints = totalHintCount > VISIBLE_HINT_LIMIT;
+  const visiblePresetHints = hintsToShow.slice(0, VISIBLE_HINT_LIMIT);
 
-  // Calculate how many preset vs custom hints to show
-  const visiblePresetCount = Math.min(hintsToShow.length, VISIBLE_HINT_LIMIT);
-  const visibleCustomCount = Math.min(
-    customHints.length,
-    VISIBLE_HINT_LIMIT - visiblePresetCount,
+  const selectedHint = hintOverrides.hint;
+  const overrideMatchesPreset =
+    selectedHint != null &&
+    hintsToShow.some((hint) => hint.hint === selectedHint);
+  const showOverrideCard = selectedHint != null && !overrideMatchesPreset;
+
+  const presetImageAssetIds = Array.from(
+    new Set(hintsToShow.flatMap((hint) => hint.imageAssetIds ?? [])),
   );
-  const visiblePresetHints = hintsToShow.slice(0, visiblePresetCount);
-  const visibleCustomHints = customHints.slice(0, visibleCustomCount);
 
-  const selectedHintSelection = useSelectedHintSelection(hanziWord);
-  const selectedPresetHint =
-    selectedHintSelection?.kind === `preset`
-      ? hintsToShow.find(
-          (hint) => hint.hint === selectedHintSelection.selectedHintId,
-        )
-      : undefined;
-  const selectedCustomHint =
-    selectedHintSelection?.kind === `custom`
-      ? customHints.find(
-          (hint) => hint.customHintId === selectedHintSelection.selectedHintId,
-        )
-      : undefined;
+  const selectedHintImageId = hintOverrides.selectedHintImageId;
+  const imageIdsToShow =
+    selectedHintImageId != null &&
+    !presetImageAssetIds.includes(selectedHintImageId)
+      ? [selectedHintImageId, ...presetImageAssetIds]
+      : presetImageAssetIds;
 
-  const selectedPresetImageId =
-    selectedPresetHint == null
-      ? undefined
-      : (selectedHintSelection?.selectedHintImageId ??
-        selectedPresetHint.imageAssetIds?.[0]);
-  const selectedCustomImageId =
-    selectedCustomHint == null
-      ? undefined
-      : resolvePrimaryImageId(
-          selectedCustomHint.imageIds,
-          selectedCustomHint.primaryImageId,
-        );
-
-  const presetImageAssetIds = selectedPresetHint?.imageAssetIds ?? [];
-  const customImageIds = selectedCustomHint?.imageIds ?? [];
-  const hasSelectedPresetHint = selectedPresetHint != null;
-  const hasSelectedCustomHint = selectedCustomHint != null;
-
-  const handleSelectPresetImage = (assetId: string) => {
-    if (selectedPresetHint == null) {
-      return;
-    }
-    const hintHanziWord = buildHanziWord(hanzi, selectedPresetHint.meaningKey);
-    setHint(hintHanziWord, {
-      kind: `preset`,
-      hint: selectedPresetHint.hint,
-      selectedHintImageId: assetId,
-    });
-  };
-
-  const handleSelectCustomPrimaryImage = (assetId: string) => {
-    if (selectedCustomHint == null) {
-      return;
-    }
-    if (selectedCustomHint.imageIds == null) {
-      return;
-    }
-    void updateCustomHint(
-      selectedCustomHint.customHintId,
-      hanziWord,
-      selectedCustomHint.hint,
-      selectedCustomHint.explanation,
-      [...selectedCustomHint.imageIds],
-      assetId,
-    );
+  const handleSelectHintImage = (assetId: string) => {
+    setHintOverrides(hanziWord, { selectedHintImageId: assetId });
   };
 
   const handleAddCustomImage = (assetId: string) => {
-    if (selectedCustomHint == null) {
-      return;
-    }
-    const nextImageIds = [...(selectedCustomHint.imageIds ?? []), assetId];
-    const nextPrimaryImageId = selectedCustomHint.primaryImageId ?? assetId;
-    void updateCustomHint(
-      selectedCustomHint.customHintId,
-      hanziWord,
-      selectedCustomHint.hint,
-      selectedCustomHint.explanation,
-      nextImageIds,
-      nextPrimaryImageId,
-    );
+    setHintOverrides(hanziWord, { selectedHintImageId: assetId });
   };
 
   // Get components for the lozenge
@@ -185,76 +111,32 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
 
   const primaryGloss = glossOrThrow(hanziWord, meaning);
   const alternativeGlosses = meaning?.gloss.slice(1) ?? [];
+  const fallbackHint = hintsToShow[0];
+  const initialHint = hintOverrides.hint ?? fallbackHint?.hint ?? ``;
+  const initialExplanation =
+    hintOverrides.explanation ?? fallbackHint?.explanation ?? ``;
 
   let imageSection: ReactNode;
-  if (selectedHintSelection == null) {
+  if (selectedHintImageId == null && imageIdsToShow.length === 0) {
     imageSection = (
       <HintImageEmptyState
-        title="Select a hint to choose an image"
-        description="Pick a hint above to see its images."
+        title="No images available"
+        description="Upload a custom image to use here."
+        action={
+          <ImageUploadButton
+            onUploadComplete={handleAddCustomImage}
+            buttonText="Add image"
+          />
+        }
       />
     );
-  } else if (hasSelectedPresetHint) {
+  } else {
     imageSection = (
       <View className="gap-3">
-        {selectedPresetImageId == null ? (
+        {selectedHintImageId == null ? (
           <HintImageEmptyState
-            title="No images for this hint"
-            description="Customize this hint to add your own image."
-            action={
-              <RectButton
-                variant="outline"
-                onPress={() => {
-                  setEditingCustomHintId(null);
-                  setIsModalOpen(true);
-                }}
-              >
-                Customize hint
-              </RectButton>
-            }
-          />
-        ) : (
-          <HintImagePreview assetId={selectedPresetImageId} />
-        )}
-
-        {presetImageAssetIds.length > 0 && (
-          <View className="flex-row flex-wrap gap-2">
-            {presetImageAssetIds.map((assetId) => {
-              const isSelected = assetId === selectedPresetImageId;
-              return (
-                <Pressable
-                  key={assetId}
-                  onPress={() => {
-                    handleSelectPresetImage(assetId);
-                  }}
-                >
-                  <HintImageTile assetId={assetId} isSelected={isSelected} />
-                </Pressable>
-              );
-            })}
-          </View>
-        )}
-
-        {presetImageAssetIds.length > 0 && (
-          <RectButton
-            variant="outline"
-            onPress={() => {
-              setEditingCustomHintId(null);
-              setIsModalOpen(true);
-            }}
-          >
-            Use your own image
-          </RectButton>
-        )}
-      </View>
-    );
-  } else if (hasSelectedCustomHint) {
-    imageSection = (
-      <View className="gap-3">
-        {selectedCustomImageId == null ? (
-          <HintImageEmptyState
-            title="No images for this hint"
-            description="Upload a custom image to use here."
+            title="Select an image"
+            description="Pick an image below or upload your own."
             action={
               <ImageUploadButton
                 onUploadComplete={handleAddCustomImage}
@@ -263,40 +145,38 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
             }
           />
         ) : (
-          <HintImagePreview assetId={selectedCustomImageId} />
+          <HintImagePreview assetId={selectedHintImageId} />
         )}
 
-        {customImageIds.length > 0 && (
+        {imageIdsToShow.length > 0 && (
           <View className="flex-row flex-wrap gap-2">
-            {customImageIds.map((assetId) => {
-              const isSelected = assetId === selectedCustomImageId;
+            {imageIdsToShow.map((assetId) => {
+              const isSelected = assetId === selectedHintImageId;
+              const isCustomImage =
+                isSelected && !presetImageAssetIds.includes(assetId);
               return (
                 <Pressable
                   key={assetId}
                   onPress={() => {
-                    handleSelectCustomPrimaryImage(assetId);
+                    handleSelectHintImage(assetId);
                   }}
                 >
-                  <HintImageTile assetId={assetId} isSelected={isSelected} />
+                  <HintImageTile
+                    assetId={assetId}
+                    isSelected={isSelected}
+                    label={isCustomImage ? `You` : undefined}
+                  />
                 </Pressable>
               );
             })}
           </View>
         )}
-        {customImageIds.length > 0 && (
-          <ImageUploadButton
-            onUploadComplete={handleAddCustomImage}
-            buttonText="Add image"
-          />
-        )}
+
+        <ImageUploadButton
+          onUploadComplete={handleAddCustomImage}
+          buttonText="Add image"
+        />
       </View>
-    );
-  } else {
-    imageSection = (
-      <HintImageEmptyState
-        title="Select a hint to choose an image"
-        description="Pick a hint above to see its images."
-      />
     );
   }
 
@@ -352,7 +232,7 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
           </Text>
         </View>
 
-        {hintsToShow.length === 0 && customHints.length === 0 ? (
+        {hintsToShow.length === 0 && !showOverrideCard ? (
           <View
             className={`items-center gap-2 rounded-xl border-2 border-dashed border-fg/20 px-4 py-6`}
           >
@@ -363,6 +243,29 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
           </View>
         ) : (
           <View className="gap-2">
+            {showOverrideCard && (
+              <HanziHintOption
+                hint={selectedHint ?? ``}
+                explanation={hintOverrides.explanation}
+                imageIds={
+                  hintOverrides.selectedHintImageId == null
+                    ? null
+                    : [hintOverrides.selectedHintImageId]
+                }
+                isSelected
+                isUser
+                onPress={() => {
+                  setIsModalOpen(true);
+                }}
+                onEdit={() => {
+                  setIsModalOpen(true);
+                }}
+                onDelete={() => {
+                  clearHintOverrides(hanziWord);
+                }}
+              />
+            )}
+
             {/* Preset hints (limited) */}
             {visiblePresetHints.map((h, index) => {
               const isSelected = selectedHint === h.hint;
@@ -375,45 +278,11 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
                   imageIds={h.imageAssetIds ?? null}
                   isSelected={isSelected}
                   onPress={() => {
-                    setHint(hintHanziWord, {
-                      kind: `preset`,
+                    setHintOverrides(hintHanziWord, {
                       hint: h.hint,
+                      explanation: h.explanation ?? null,
                       selectedHintImageId: h.imageAssetIds?.[0] ?? null,
                     });
-                  }}
-                />
-              );
-            })}
-
-            {/* Custom hints (limited) */}
-            {visibleCustomHints.map((h) => {
-              const isSelected = selectedHint === h.hint;
-              return (
-                <HanziHintOption
-                  key={`custom-${h.customHintId}`}
-                  hint={h.hint}
-                  explanation={h.explanation}
-                  imageIds={h.imageIds ?? null}
-                  isSelected={isSelected}
-                  isUser
-                  onPress={() => {
-                    setHint(hanziWord, {
-                      kind: `custom`,
-                      hint: h.hint,
-                      customHintId: h.customHintId,
-                      selectedHintImageId: null,
-                    });
-                  }}
-                  onEdit={() => {
-                    setEditingCustomHintId(h.customHintId);
-                    setIsModalOpen(true);
-                  }}
-                  onDelete={() => {
-                    // Clear selection if this hint was selected
-                    if (selectedHint === h.hint) {
-                      clearHint(hanziWord);
-                    }
-                    void removeCustomHint(h.customHintId, hanziWord);
                   }}
                 />
               );
@@ -437,23 +306,22 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
         <RectButton
           variant="outline"
           onPress={() => {
-            setEditingCustomHintId(null);
             setIsModalOpen(true);
           }}
         >
-          <Text className="text-fg">Create your own hint</Text>
+          <Text className="text-fg">Edit hint text</Text>
         </RectButton>
 
         {/* Clear selection button */}
-        {selectedHint != null && (
+        {hintOverrides.hasOverrides && (
           <View className="mt-2">
             <RectButton
               variant="bare"
               onPress={() => {
-                clearHint(hanziWord);
+                clearHintOverrides(hanziWord);
               }}
             >
-              Clear selection
+              Clear overrides
             </RectButton>
           </View>
         )}
@@ -469,59 +337,21 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
         {imageSection}
       </View>
 
-      {/* Custom hint modal */}
+      {/* Hint override modal */}
       {isModalOpen && (
         <AddCustomHintModal
           onDismiss={() => {
             setIsModalOpen(false);
-            setEditingCustomHintId(null);
           }}
-          onSave={(hint, explanation, imageIds, primaryImageId) => {
-            if (editingCustomHintId === null) {
-              void addCustomHint(
-                hanziWord,
-                hint,
-                explanation,
-                imageIds,
-                primaryImageId,
-              );
-            } else {
-              void updateCustomHint(
-                editingCustomHintId,
-                hanziWord,
-                hint,
-                explanation,
-                imageIds,
-                primaryImageId,
-              );
-            }
+          onSave={(hint, explanation) => {
+            setHintOverrides(hanziWord, {
+              hint,
+              explanation: explanation ?? null,
+            });
             setIsModalOpen(false);
-            setEditingCustomHintId(null);
           }}
-          initialHint={
-            editingCustomHintId === null
-              ? undefined
-              : customHints.find((h) => h.customHintId === editingCustomHintId)
-                  ?.hint
-          }
-          initialExplanation={
-            editingCustomHintId === null
-              ? undefined
-              : customHints.find((h) => h.customHintId === editingCustomHintId)
-                  ?.explanation
-          }
-          initialImageIds={
-            editingCustomHintId === null
-              ? undefined
-              : customHints.find((h) => h.customHintId === editingCustomHintId)
-                  ?.imageIds
-          }
-          initialPrimaryImageId={
-            editingCustomHintId === null
-              ? undefined
-              : customHints.find((h) => h.customHintId === editingCustomHintId)
-                  ?.primaryImageId
-          }
+          initialHint={initialHint}
+          initialExplanation={initialExplanation}
         />
       )}
 
@@ -538,39 +368,16 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
             imageIds: hint.imageAssetIds ?? null,
             meaningKey: hint.meaningKey,
           }))}
-          customHints={customHints}
           selectedHint={selectedHint}
           onSelectPresetHint={(hintHanziWord, hint) => {
             const presetHint = hintsToShow.find(
               (candidate) => candidate.hint === hint,
             );
-            setHint(hintHanziWord, {
-              kind: `preset`,
+            setHintOverrides(hintHanziWord, {
               hint,
+              explanation: presetHint?.explanation ?? null,
               selectedHintImageId: presetHint?.imageAssetIds?.[0] ?? null,
             });
-          }}
-          onSelectCustomHint={(customHintId, hint) => {
-            setHint(hanziWord, {
-              kind: `custom`,
-              hint,
-              customHintId,
-              selectedHintImageId: null,
-            });
-          }}
-          onEditCustomHint={(customHintId) => {
-            setEditingCustomHintId(customHintId);
-            setIsModalOpen(true);
-          }}
-          onDeleteCustomHint={(customHintId) => {
-            // Clear selection if this hint was selected
-            const hint = customHints.find(
-              (h) => h.customHintId === customHintId,
-            );
-            if (selectedHint === hint?.hint) {
-              clearHint(hanziWord);
-            }
-            void removeCustomHint(customHintId, hanziWord);
           }}
         />
       )}

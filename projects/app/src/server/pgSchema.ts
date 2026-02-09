@@ -8,7 +8,6 @@ import {
   pgBase64url,
   pgFsrsRating,
   pgHanziOrHanziWord,
-  pgHanziWord,
   pgJsonObject,
   pgMnemonicThemeId,
   pgPasskeyTransport,
@@ -330,100 +329,6 @@ export const asset = schema.table(
     errorMessage: pg.text(`errorMessage`),
   },
   (t) => [pg.unique().on(t.userId, t.assetId), pg.index().on(t.userId)],
-);
-
-/**
- * User-created meaning hints for remembering HanziWords.
- *
- * Each hint can have text, optional explanation, and optional images (via imageIds).
- * Custom hints are mutable - users can edit or delete them.
- */
-export const hanziwordMeaningHint = schema.table(
-  `hanziword_meaning_hint`,
-  {
-    id: pg.text(`id`).primaryKey().$defaultFn(nanoid),
-    userId: pg
-      .text(`userId`)
-      .references(() => user.id)
-      .notNull(),
-    /**
-     * Client-generated custom hint ID (nanoid).
-     */
-    customHintId: pg.text(`customHintId`).notNull(),
-    /**
-     * The HanziWord this hint is for (e.g. "好:good").
-     */
-    hanziWord: pgHanziWord(`hanziWord`).notNull(),
-    /**
-     * The hint text that helps remember the word.
-     */
-    hint: pg.text(`hint`).notNull(),
-    /**
-     * Optional explanation of why this hint works.
-     */
-    explanation: pg.text(`explanation`),
-    /**
-     * Array of imageIds for images attached to this hint.
-     * Stored as JSONB array of strings.
-     */
-    imageIds: pg.jsonb(`imageIds`).$type<readonly string[] | null>(),
-    /**
-     * Primary image ID for this hint.
-     */
-    primaryImageId: pg.text(`primaryImageId`),
-    /**
-     * When the hint was created.
-     */
-    createdAt: pg.timestamp(`createdAt`).defaultNow().notNull(),
-    /**
-     * When the hint was last updated.
-     */
-    updatedAt: pg.timestamp(`updatedAt`).defaultNow().notNull(),
-  },
-  (t) => [
-    pg.unique().on(t.userId, t.customHintId),
-    pg.index().on(t.userId),
-    pg.index().on(t.userId, t.hanziWord),
-  ],
-);
-
-/**
- * Tracks which meaning hint a user has selected for a given HanziWord.
- */
-export const hanziwordMeaningHintSelected = schema.table(
-  `hanziword_meaning_hint_selected`,
-  {
-    id: pg.text(`id`).primaryKey().$defaultFn(nanoid),
-    userId: pg
-      .text(`userId`)
-      .references(() => user.id)
-      .notNull(),
-    /**
-     * The HanziWord this selection is for (e.g. "好:good").
-     */
-    hanziWord: pgHanziWord(`hanziWord`).notNull(),
-    /**
-     * Type of the selected hint: 'preset' or 'custom'.
-     */
-    selectedHintType: pg.varchar(`selectedHintType`, { length: 10 }).notNull(),
-    /**
-     * ID of the selected hint.
-     */
-    selectedHintId: pg.text(`selectedHintId`).notNull(),
-    /**
-     * Selected image asset ID for preset hints.
-     */
-    selectedHintImageId: pg.text(`selectedHintImageId`),
-    /**
-     * When the selection was created.
-     */
-    createdAt: pg.timestamp(`createdAt`).defaultNow().notNull(),
-    /**
-     * When the selection was last updated.
-     */
-    updatedAt: pg.timestamp(`updatedAt`).defaultNow().notNull(),
-  },
-  (t) => [pg.unique().on(t.userId, t.hanziWord), pg.index().on(t.userId)],
 );
 
 /**

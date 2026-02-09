@@ -211,6 +211,13 @@
       "when": 1770443980544,
       "tag": "0029_condemned_hex",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1770597573988,
+      "tag": "0030_public_cobalt_man",
+      "breakpoints": true
     }
   ]
 }

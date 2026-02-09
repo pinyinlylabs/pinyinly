@@ -1,6 +1,6 @@
 import { useReplicache } from "@/client/hooks/useReplicache";
 import { trpc } from "@/client/trpc";
-import type { v10 } from "@/data/rizzleSchema";
+import type { currentSchema } from "@/data/rizzleSchema";
 import { nanoid } from "@/util/nanoid";
 import type { RizzleReplicache } from "@/util/rizzle";
 import * as ImagePicker from "expo-image-picker";
@@ -63,7 +63,7 @@ export function useImageUploader({
   onUploadComplete,
   onUploadError,
 }: ImageUploaderOptions) {
-  const rep = useReplicache() as RizzleReplicache<typeof v10>;
+  const rep = useReplicache() as RizzleReplicache<typeof currentSchema>;
   const [uploading, setUploading] = useState(false);
   const requestUploadUrl = trpc.asset.requestUploadUrl.useMutation();
   const confirmUpload = trpc.asset.confirmUpload.useMutation();

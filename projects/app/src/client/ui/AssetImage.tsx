@@ -5,7 +5,7 @@ import {
 import { useRizzleQuery } from "@/client/hooks/useRizzleQuery";
 import { trpc } from "@/client/trpc";
 import { AssetStatusKind } from "@/data/model";
-import type { v10 } from "@/data/rizzleSchema";
+import type { currentSchema } from "@/data/rizzleSchema";
 import type { RizzleReplicache } from "@/util/rizzle";
 import type { ImageProps as ExpoImageProps } from "expo-image";
 import { Image as ExpoImage } from "expo-image";
@@ -32,9 +32,9 @@ interface AssetImageProps extends Omit<ExpoImageProps, `source`> {
  * - Uploaded: Display image
  * - Failed: Error message
  */
-type RizzleV10 = RizzleReplicache<typeof v10>;
+type RizzleCurrent = RizzleReplicache<typeof currentSchema>;
 type AssetEntity = NonNullable<
-  Awaited<ReturnType<RizzleV10[`query`][`asset`][`get`]>>
+  Awaited<ReturnType<RizzleCurrent[`query`][`asset`][`get`]>>
 >;
 
 export function AssetImage({
@@ -45,8 +45,8 @@ export function AssetImage({
   const { data: asset } = useRizzleQuery<AssetEntity | null>(
     [`asset`, assetId],
     async (r, tx) => {
-      const r10 = r as RizzleV10;
-      return (await r10.query.asset.get(tx, { assetId })) ?? null;
+      const rCurrent = r as RizzleCurrent;
+      return (await rCurrent.query.asset.get(tx, { assetId })) ?? null;
     },
   );
   const [imageError, setImageError] = useState(false);

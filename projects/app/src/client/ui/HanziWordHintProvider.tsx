@@ -1,180 +1,145 @@
 import { useReplicache } from "@/client/hooks/useReplicache";
-import { useRizzleQuery } from "@/client/hooks/useRizzleQuery";
+import { useUserSetting } from "@/client/hooks/useUserSetting";
 import type { HanziWord } from "@/data/model";
-import type { v10 } from "@/data/rizzleSchema";
-import { nanoid } from "@/util/nanoid";
+import type { currentSchema } from "@/data/rizzleSchema";
+import { rHanziWord } from "@/data/rizzleSchema";
 import type { RizzleReplicache } from "@/util/rizzle";
+import { r } from "@/util/rizzle";
 import type { PropsWithChildren } from "react";
 import { createContext } from "react";
 
-export interface CustomHint {
-  customHintId: string;
-  hint: string;
-  explanation?: string;
-  imageIds?: readonly string[];
-  primaryImageId?: string;
-}
-
-export type SelectedHintKind = `preset` | `custom`;
-
-export interface SelectedHintInput {
-  kind: SelectedHintKind;
-  hint: string;
-  customHintId?: string;
+export interface HanziWordHintOverridesInput {
+  hint?: string | null;
+  explanation?: string | null;
   selectedHintImageId?: string | null;
 }
 
-export interface SelectedHintSelection {
-  kind: SelectedHintKind;
-  selectedHintId: string;
+export interface HanziWordHintOverrides {
+  hint?: string;
+  explanation?: string;
   selectedHintImageId?: string;
+  hasOverrides: boolean;
 }
 
 export interface HanziWordHintContextValue {
   /**
-   * Set a hint for a hanziword.
+   * Set overrides for a hanziword hint.
    */
-  setHint: (hanziWord: HanziWord, hint: SelectedHintInput) => void;
-
-  /**
-   * Clear the hint for a hanziword, removing any custom selection.
-   */
-  clearHint: (hanziWord: HanziWord) => void;
-
-  /**
-   * Add a new custom hint for a hanziword.
-   */
-  addCustomHint: (
+  setHintOverrides: (
     hanziWord: HanziWord,
-    hint: string,
-    explanation?: string,
-    imageIds?: string[],
-    primaryImageId?: string,
-  ) => Promise<void>;
+    overrides: HanziWordHintOverridesInput,
+  ) => void;
 
   /**
-   * Update an existing custom hint.
+   * Clear all overrides for a hanziword hint.
    */
-  updateCustomHint: (
-    customHintId: string,
-    hanziWord: HanziWord,
-    hint: string,
-    explanation?: string,
-    imageIds?: string[],
-    primaryImageId?: string,
-  ) => Promise<void>;
-
-  /**
-   * Remove a custom hint.
-   */
-  removeCustomHint: (
-    customHintId: string,
-    hanziWord: HanziWord,
-  ) => Promise<void>;
+  clearHintOverrides: (hanziWord: HanziWord) => void;
 }
 
 const Context = createContext<HanziWordHintContextValue | null>(null);
 
-/**
- * Provides hint management with persistence via Replicache.
- * Custom hints are stored in the database and synced across devices.
- *
- * Use the `useCustomHints(hanziWord)` hook to query custom hints for a word.
- */
-type RizzleV10 = RizzleReplicache<typeof v10>;
+const hanziWordMeaningHintTextSetting = r.entity(
+  `hanziWordMeaningHint.[hanziWord].hint`,
+  {
+    hanziWord: rHanziWord().alias(`h`),
+    t: r.string().alias(`t`),
+  },
+);
 
-export function resolvePrimaryImageId(
-  imageIds: readonly string[] | undefined,
-  primaryImageId: string | undefined,
-): string | undefined {
-  if (imageIds == null || imageIds.length === 0) {
-    return undefined;
-  }
-  if (primaryImageId != null && imageIds.includes(primaryImageId)) {
-    return primaryImageId;
-  }
-  return imageIds[0];
-}
+const hanziWordMeaningHintExplanationSetting = r.entity(
+  `hanziWordMeaningHint.[hanziWord].explanation`,
+  {
+    hanziWord: rHanziWord().alias(`h`),
+    t: r.string().alias(`t`),
+  },
+);
+
+const hanziWordMeaningHintImageSetting = r.entity(
+  `hanziWordMeaningHint.[hanziWord].selectedHintImageId`,
+  {
+    hanziWord: rHanziWord().alias(`h`),
+    t: r.string().alias(`t`),
+  },
+);
+
+type RizzleCurrent = RizzleReplicache<typeof currentSchema>;
 
 export const HanziWordHintProvider = Object.assign(
   function HanziWordHintProvider({ children }: PropsWithChildren) {
     "use memo"; // Object.assign(…) wrapped components aren't inferred.
-    const rep = useReplicache() as RizzleV10;
+    const rep = useReplicache() as RizzleCurrent;
 
-    const setHint = (hanziWord: HanziWord, hint: SelectedHintInput): void => {
-      const selectedHintId =
-        hint.kind === `custom` ? (hint.customHintId ?? hint.hint) : hint.hint;
-      void rep.mutate.setHanziwordMeaningHintSelected({
-        hanziWord,
-        selectedHintType: hint.kind,
-        selectedHintId,
-        selectedHintImageId: hint.selectedHintImageId ?? null,
+    const setSettingValue = (
+      entity:
+        | typeof hanziWordMeaningHintTextSetting
+        | typeof hanziWordMeaningHintExplanationSetting
+        | typeof hanziWordMeaningHintImageSetting,
+      hanziWord: HanziWord,
+      value: string | null | undefined,
+    ) => {
+      const marshaledValue =
+        value == null
+          ? null
+          : entity.marshalValue({
+              hanziWord,
+              t: value,
+            });
+      const storedValue =
+        marshaledValue == null
+          ? null
+          : Object.fromEntries(
+              Object.entries(marshaledValue as Record<string, unknown>).filter(
+                ([key]) => key !== `h`,
+              ),
+            );
+
+      void rep.mutate.setSetting({
+        key: entity.marshalKey({ hanziWord }),
+        value: storedValue,
         now: new Date(),
       });
     };
 
-    const clearHint = (hanziWord: HanziWord): void => {
-      void rep.mutate.clearHanziwordMeaningHintSelected({
-        hanziWord,
-      });
+    const setHintOverrides = (
+      hanziWord: HanziWord,
+      overrides: HanziWordHintOverridesInput,
+    ): void => {
+      if (`hint` in overrides) {
+        setSettingValue(
+          hanziWordMeaningHintTextSetting,
+          hanziWord,
+          overrides.hint,
+        );
+      }
+      if (`explanation` in overrides) {
+        setSettingValue(
+          hanziWordMeaningHintExplanationSetting,
+          hanziWord,
+          overrides.explanation,
+        );
+      }
+      if (`selectedHintImageId` in overrides) {
+        setSettingValue(
+          hanziWordMeaningHintImageSetting,
+          hanziWord,
+          overrides.selectedHintImageId,
+        );
+      }
     };
 
-    const addCustomHint = async (
-      hanziWord: HanziWord,
-      hint: string,
-      explanation?: string,
-      imageIds?: string[],
-      primaryImageId?: string,
-    ): Promise<void> => {
-      const customHintId = nanoid();
-      await rep.mutate.createCustomHint({
-        customHintId,
-        hanziWord,
-        hint,
-        explanation: explanation ?? null,
-        imageIds: imageIds ?? null,
-        primaryImageId: primaryImageId ?? null,
-        now: new Date(),
-      });
-    };
-
-    const updateCustomHint = async (
-      customHintId: string,
-      hanziWord: HanziWord,
-      hint: string,
-      explanation?: string,
-      imageIds?: string[],
-      primaryImageId?: string,
-    ): Promise<void> => {
-      await rep.mutate.updateCustomHint({
-        customHintId,
-        hanziWord,
-        hint,
-        explanation: explanation ?? null,
-        imageIds: imageIds ?? null,
-        primaryImageId: primaryImageId ?? null,
-        now: new Date(),
-      });
-    };
-
-    const removeCustomHint = async (
-      customHintId: string,
-      hanziWord: HanziWord,
-    ): Promise<void> => {
-      await rep.mutate.deleteCustomHint({
-        customHintId,
-        hanziWord,
+    const clearHintOverrides = (hanziWord: HanziWord): void => {
+      setHintOverrides(hanziWord, {
+        hint: null,
+        explanation: null,
+        selectedHintImageId: null,
       });
     };
 
     return (
       <Context.Provider
         value={{
-          setHint,
-          clearHint,
-          addCustomHint,
-          updateCustomHint,
-          removeCustomHint,
+          setHintOverrides,
+          clearHintOverrides,
         }}
       >
         {children}
@@ -186,127 +151,35 @@ export const HanziWordHintProvider = Object.assign(
   },
 );
 
-/**
- * Hook to query custom hints for a specific HanziWord.
- * Queries Replicache and returns an array of custom hints.
- */
-// oxlint-disable typescript-eslint/no-unsafe-assignment, typescript-eslint/no-unsafe-call, typescript-eslint/no-unsafe-member-access, typescript-eslint/no-unsafe-return
-export function useCustomHints(hanziWord: HanziWord): CustomHint[] {
-  const result = useRizzleQuery<CustomHint[]>(
-    [`customHints`, hanziWord],
-    async (r, tx) => {
-      const r10 = r as RizzleV10;
-      const customHintQuery = r10.query.customHint;
-      const entries = await customHintQuery
-        .scan(tx, { hanziWord })
-
-        .toArray();
-
-      return entries.map(([, value]) => ({
-        customHintId: value.customHintId,
-        hint: value.hint,
-        explanation: value.explanation ?? undefined,
-        imageIds: value.imageIds ?? undefined,
-        primaryImageId: value.primaryImageId ?? undefined,
-      }));
-    },
-  );
-
-  return result.data ?? [];
-}
-
-/**
- * Hook to query the selected hint for a specific HanziWord.
- */
-// oxlint-disable typescript-eslint/no-unsafe-assignment, typescript-eslint/no-unsafe-call, typescript-eslint/no-unsafe-member-access, typescript-eslint/no-unsafe-return
-export function useSelectedHint(hanziWord: HanziWord): string | undefined {
-  const result = useRizzleQuery<string | null>(
-    [`selectedHint`, hanziWord],
-    async (r, tx) => {
-      const r10 = r as RizzleV10;
-      const selected = await r10.query.hanziwordMeaningHintSelected.get(tx, {
-        hanziWord,
-      });
-      if (selected == null) {
-        return null;
-      }
-      if (selected.selectedHintType === `custom`) {
-        const custom = await r10.query.customHint.get(tx, {
-          hanziWord,
-          customHintId: selected.selectedHintId,
-        });
-        return custom?.hint ?? selected.selectedHintId;
-      }
-      return selected.selectedHintId;
-    },
-  );
-
-  return result.data ?? undefined;
-}
-
-/**
- * Hook to query the selected hint row for a specific HanziWord.
- */
-export function useSelectedHintSelection(
+export function useHanziWordHintOverrides(
   hanziWord: HanziWord,
-): SelectedHintSelection | undefined {
-  const result = useRizzleQuery<SelectedHintSelection | null>(
-    [`selectedHintSelection`, hanziWord],
-    async (r, tx) => {
-      const r10 = r as RizzleV10;
-      const selected = await r10.query.hanziwordMeaningHintSelected.get(tx, {
-        hanziWord,
-      });
-      if (selected == null) {
-        return null;
-      }
-
-      return {
-        kind: selected.selectedHintType as SelectedHintKind,
-        selectedHintId: selected.selectedHintId,
-        selectedHintImageId: selected.selectedHintImageId ?? undefined,
-      };
-    },
+): HanziWordHintOverrides {
+  const hintSetting = useUserSetting(hanziWordMeaningHintTextSetting, {
+    hanziWord,
+  });
+  const explanationSetting = useUserSetting(
+    hanziWordMeaningHintExplanationSetting,
+    { hanziWord },
   );
+  const imageSetting = useUserSetting(hanziWordMeaningHintImageSetting, {
+    hanziWord,
+  });
 
-  return result.data ?? undefined;
+  const hint = hintSetting.value?.t ?? undefined;
+  const explanation = explanationSetting.value?.t ?? undefined;
+  const selectedHintImageId = imageSetting.value?.t ?? undefined;
+  const hasOverrides =
+    hint != null || explanation != null || selectedHintImageId != null;
+
+  return { hint, explanation, selectedHintImageId, hasOverrides };
 }
 
-/**
- * Hook to query the primary image id for the selected hint of a HanziWord.
- */
+export function useSelectedHint(hanziWord: HanziWord): string | undefined {
+  return useHanziWordHintOverrides(hanziWord).hint;
+}
+
 export function useSelectedHintImageId(
   hanziWord: HanziWord,
 ): string | undefined {
-  const result = useRizzleQuery<string | null>(
-    [`selectedHintImageId`, hanziWord],
-    async (r, tx) => {
-      const r10 = r as RizzleV10;
-      const selected = await r10.query.hanziwordMeaningHintSelected.get(tx, {
-        hanziWord,
-      });
-      if (selected == null) {
-        return null;
-      }
-      if (selected.selectedHintType === `custom`) {
-        const custom = await r10.query.customHint.get(tx, {
-          hanziWord,
-          customHintId: selected.selectedHintId,
-        });
-        if (custom == null) {
-          return null;
-        }
-
-        const resolved = resolvePrimaryImageId(
-          custom.imageIds ?? undefined,
-          custom.primaryImageId ?? undefined,
-        );
-        return resolved ?? null;
-      }
-
-      return selected.selectedHintImageId ?? null;
-    },
-  );
-
-  return result.data ?? undefined;
+  return useHanziWordHintOverrides(hanziWord).selectedHintImageId;
 }

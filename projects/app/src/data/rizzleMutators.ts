@@ -18,7 +18,8 @@ import type {
   Skill,
 } from "./model";
 import { AssetStatusKind, MistakeKind } from "./model";
-import { currentSchema, srsStateFromFsrsState } from "./rizzleSchema";
+import type { currentSchema } from "./rizzleSchema";
+import { srsStateFromFsrsState } from "./rizzleSchema";
 
 type Tx = RizzleReplicacheMutatorTx<typeof currentSchema>;
 
@@ -262,87 +263,6 @@ export const mutators: RizzleReplicacheMutators<typeof currentSchema> = {
         status: AssetStatusKind.Failed,
         errorMessage,
       },
-    );
-  },
-  async createCustomHint(
-    tx,
-    {
-      customHintId,
-      hanziWord,
-      hint,
-      explanation,
-      imageIds,
-      primaryImageId,
-      now,
-    },
-  ) {
-    await tx.customHint.set(
-      { hanziWord, customHintId },
-      {
-        customHintId,
-        hanziWord,
-        hint,
-        explanation: explanation ?? null,
-        imageIds: imageIds ?? null,
-        primaryImageId: primaryImageId ?? null,
-        createdAt: now,
-        updatedAt: now,
-      },
-    );
-  },
-  async updateCustomHint(
-    tx,
-    {
-      customHintId,
-      hanziWord,
-      hint,
-      explanation,
-      imageIds,
-      primaryImageId,
-      now,
-    },
-  ) {
-    const existing = await tx.customHint.get({ hanziWord, customHintId });
-    if (existing == null) {
-      return;
-    }
-    await tx.customHint.set(
-      { hanziWord, customHintId },
-      {
-        ...existing,
-        hint,
-        explanation: explanation ?? null,
-        imageIds: imageIds ?? null,
-        primaryImageId: primaryImageId ?? existing.primaryImageId ?? null,
-        updatedAt: now,
-      },
-    );
-  },
-  async deleteCustomHint(tx, { customHintId, hanziWord }) {
-    await tx.tx.del(
-      currentSchema.customHint.marshalKey({ hanziWord, customHintId }),
-    );
-  },
-  async setHanziwordMeaningHintSelected(
-    tx,
-    { hanziWord, selectedHintType, selectedHintId, selectedHintImageId, now },
-  ) {
-    const existing = await tx.hanziwordMeaningHintSelected.get({ hanziWord });
-    await tx.hanziwordMeaningHintSelected.set(
-      { hanziWord },
-      {
-        hanziWord,
-        selectedHintType,
-        selectedHintId,
-        selectedHintImageId: selectedHintImageId ?? null,
-        createdAt: existing?.createdAt ?? now,
-        updatedAt: now,
-      },
-    );
-  },
-  async clearHanziwordMeaningHintSelected(tx, { hanziWord }) {
-    await tx.tx.del(
-      currentSchema.hanziwordMeaningHintSelected.marshalKey({ hanziWord }),
     );
   },
 };

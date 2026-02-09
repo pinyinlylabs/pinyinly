@@ -184,10 +184,10 @@ function MeaningItem({
   const meaningKey = meaningKeyFromHanziWord(hanziWord);
   const hanzi = hanziFromHanziWord(hanziWord);
 
-  // Get custom hint if set
-  const customHint = useSelectedHint(hanziWord);
-  const displayHint = customHint ?? mnemonicHint;
-  const hasCustomHint = customHint != null;
+  // Get hint override if set
+  const hintOverride = useSelectedHint(hanziWord);
+  const displayHint = hintOverride ?? mnemonicHint;
+  const hasOverride = hintOverride != null;
   const hasHint = displayHint != null;
 
   // Display glosses: first one bold, rest dim and semicolon-separated
@@ -201,7 +201,7 @@ function MeaningItem({
           className={`
             m-1 size-3 rounded-full border-2
 
-            ${hasCustomHint ? `border-cyan bg-cyan` : `border-fg-bg25`}
+            ${hasOverride ? `border-cyan bg-cyan` : `border-fg-bg25`}
           `}
         />
         <Text className="pyly-body flex-1">
@@ -216,7 +216,7 @@ function MeaningItem({
             asChild
           >
             <RectButton variant="bare" textClassName="text-sm text-cyan">
-              {hasCustomHint ? `Edit` : `Customize`}
+              {hasOverride ? `Edit` : `Customize`}
             </RectButton>
           </Link>
         ) : null}
