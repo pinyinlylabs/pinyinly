@@ -5,6 +5,7 @@ import type { currentSchema } from "@/data/rizzleSchema";
 import { rHanziWord } from "@/data/rizzleSchema";
 import type { RizzleReplicache } from "@/util/rizzle";
 import { r } from "@/util/rizzle";
+import { nanoid } from "@/util/nanoid";
 import type { PropsWithChildren } from "react";
 import { createContext } from "react";
 
@@ -54,7 +55,7 @@ const hanziWordMeaningHintExplanationSetting = r.entity(
   },
 );
 
-const hanziWordMeaningHintImageSetting = r.entity(
+export const hanziWordMeaningHintImageSetting = r.entity(
   `hanziWordMeaningHint.[hanziWord].selectedHintImageId`,
   {
     hanziWord: rHanziWord().alias(`h`),
@@ -97,6 +98,7 @@ export const HanziWordHintProvider = Object.assign(
         key: entity.marshalKey({ hanziWord }),
         value: storedValue,
         now: new Date(),
+        historyId: nanoid(),
       });
     };
 

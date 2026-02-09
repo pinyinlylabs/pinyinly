@@ -1,4 +1,4 @@
-import { v11, v8, v9 } from "@/data/rizzleSchema";
+import { v11, v12, v8, v9 } from "@/data/rizzleSchema";
 import * as s from "@/server/pgSchema";
 import type {
   ClientStateNotFoundResponse,
@@ -17,6 +17,7 @@ import type { z } from "zod/v4";
 import type { Drizzle } from "./db";
 import { withRepeatableReadTransaction } from "./db";
 import { pull as pullV11, push as pushV11 } from "./replicache/v11";
+import { pull as pullV12, push as pushV12 } from "./replicache/v12";
 import { pull as pullV8, push as pushV8 } from "./replicache/v8";
 import { pull as pullV9, push as pushV9 } from "./replicache/v9";
 
@@ -53,6 +54,9 @@ export async function pull(
 
 function getImpl(schemaVersion: string): Impl {
   switch (schemaVersion) {
+    case v12.version: {
+      return { pull: pullV12, push: pushV12 };
+    }
     case v11.version: {
       return { pull: pullV11, push: pushV11 };
     }

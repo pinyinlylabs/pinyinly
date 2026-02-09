@@ -218,6 +218,13 @@
       "when": 1770597573988,
       "tag": "0030_public_cobalt_man",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1770614469654,
+      "tag": "0031_lonely_centennial",
+      "breakpoints": true
     }
   ]
 }

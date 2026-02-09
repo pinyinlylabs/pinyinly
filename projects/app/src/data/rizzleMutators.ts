@@ -151,8 +151,15 @@ export const mutators: RizzleReplicacheMutators<typeof currentSchema> = {
       );
     }
   },
-  async setSetting(tx, { key, value }) {
+  async setSetting(tx, { key, value, skipHistory, historyId, now }) {
     await tx.setting.set({ key }, { key, value });
+
+    if (skipHistory !== true && historyId != null) {
+      await tx.settingHistory.set(
+        { id: historyId },
+        { id: historyId, key, value, createdAt: now },
+      );
+    }
   },
   async undoReview(tx, { reviewId, now }) {
     const ONE_DAY_MS = 24 * 60 * 60 * 1000;

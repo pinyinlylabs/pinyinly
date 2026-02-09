@@ -60,6 +60,21 @@ export const userSetting = schema.table(
   (t) => [pg.unique().on(t.userId, t.key)],
 );
 
+export const userSettingHistory = schema.table(
+  `userSettingHistory`,
+  {
+    id: pg.text(`id`).primaryKey().$defaultFn(nanoid),
+    userId: pg
+      .text(`userId`)
+      .notNull()
+      .references(() => user.id),
+    key: pg.text(`key`).notNull(),
+    value: pgJsonObject(`value`),
+    createdAt: pg.timestamp(`createdAt`).defaultNow().notNull(),
+  },
+  (t) => [pg.index().on(t.userId, t.key), pg.index().on(t.userId, t.createdAt)],
+);
+
 export const authSession = schema.table(`authSession`, {
   id: pg.text(`id`).primaryKey(),
   userId: pg

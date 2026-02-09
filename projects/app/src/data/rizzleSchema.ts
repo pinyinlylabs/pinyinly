@@ -654,9 +654,29 @@ export const v11 = {
   version: `11`,
 };
 
-export const currentSchema = v11;
+export const v12 = {
+  ...v11,
+  version: `12`,
+  settingHistory: r.entity(`settingHistory/[id]`, {
+    id: r.string().alias(`i`),
+    key: r.string().alias(`k`).indexed(`byKey`),
+    value: r.jsonObject().nullable().alias(`v`),
+    createdAt: r.datetime().alias(`c`).indexed(`byCreatedAt`),
+  }),
+  setSetting: r
+    .mutator({
+      key: r.string().alias(`k`),
+      value: r.jsonObject().nullable().alias(`v`),
+      now: r.timestamp().alias(`n`),
+      skipHistory: r.boolean().optional().alias(`s`),
+      historyId: r.string().optional().alias(`i`),
+    })
+    .alias(`ss`),
+};
 
-export const supportedSchemas = [v8, v9, v11] as const;
+export const currentSchema = v12;
+
+export const supportedSchemas = [v8, v9, v11, v12] as const;
 
 export type Rizzle = RizzleReplicache<typeof currentSchema>;
 

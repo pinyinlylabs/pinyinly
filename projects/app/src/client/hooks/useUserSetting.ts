@@ -11,6 +11,7 @@ import { keyPathVariableNames, r } from "@/util/rizzle";
 import type { Flatten } from "@pinyinly/lib/types";
 import { useReplicache } from "./useReplicache";
 import { useRizzleQuery } from "./useRizzleQuery";
+import { nanoid } from "@/util/nanoid";
 
 export type UserSettingEntity = RizzleAnyEntity;
 export type UserSettingKeyInput<T extends UserSettingEntity> = Parameters<
@@ -27,6 +28,16 @@ export interface UseUserSettingResult<T extends UserSettingEntity> {
   setValue: UseUserSettingSetValue<T>;
 }
 
+export interface UserSettingSetOptions {
+  skipHistory?: boolean;
+}
+
+export interface UserSettingHistoryEntry<T extends UserSettingEntity> {
+  id: string;
+  createdAt: Date;
+  value: UserSettingEntityOutput<T>;
+}
+
 export type UseUserSettingUpdateFn<T extends UserSettingEntity> = (
   prev: UserSettingEntityOutput<T>,
   isLoading: boolean,
@@ -34,17 +45,14 @@ export type UseUserSettingUpdateFn<T extends UserSettingEntity> = (
 
 export type UseUserSettingSetValue<T extends UserSettingEntity> = (
   value: UserSettingEntityInput<T> | UseUserSettingUpdateFn<T>,
+  options?: UserSettingSetOptions,
 ) => void;
 
-const noKeyParams = {} as const; // allow memoization inside rizzle
-export const useUserSetting = <T extends UserSettingEntity>(
+function getSettingKeyInfo<T extends UserSettingEntity>(
   userSettingEntity: T,
-  keyParams?: UserSettingKeyInput<T>,
-): UseUserSettingResult<T> => {
-  const keyInput = (keyParams ?? noKeyParams) as UserSettingKeyInput<T>;
-  const settingKey = userSettingEntity.marshalKey(keyInput);
-  const r = useReplicache();
-
+  keyParams: UserSettingKeyInput<T>,
+) {
+  const settingKey = userSettingEntity.marshalKey(keyParams);
   const valueShape = (
     userSettingEntity._def.valueType as unknown as {
       _def: { shape: Record<string, RizzleType> };
@@ -63,12 +71,27 @@ export const useUserSetting = <T extends UserSettingEntity>(
       continue;
     }
     const alias = type._getAlias() ?? name;
-    const rawValue = (keyInput as Record<string, unknown>)[name];
+    const rawValue = (keyParams as Record<string, unknown>)[name];
     if (rawValue == null) {
       continue;
     }
     keyParamMarshaled[alias] = type.marshal(rawValue) as string;
   }
+
+  return { settingKey, keyParamAliases, keyParamMarshaled, valueShape };
+}
+
+const noKeyParams = {} as const; // allow memoization inside rizzle
+export const useUserSetting = <T extends UserSettingEntity>(
+  userSettingEntity: T,
+  keyParams?: UserSettingKeyInput<T>,
+): UseUserSettingResult<T> => {
+  const keyInput = (keyParams ?? noKeyParams) as UserSettingKeyInput<T>;
+  const { settingKey, keyParamAliases, keyParamMarshaled } = getSettingKeyInfo(
+    userSettingEntity,
+    keyInput,
+  );
+  const r = useReplicache();
 
   const result = useRizzleQuery([`UserSetting`, settingKey], async (r, tx) => {
     const value = await r.query.setting.get(tx, { key: settingKey });
@@ -84,7 +107,7 @@ export const useUserSetting = <T extends UserSettingEntity>(
           ...result.data.value,
         });
 
-  const setValue: UseUserSettingSetValue<T> = (updater) => {
+  const setValue: UseUserSettingSetValue<T> = (updater, options) => {
     if (typeof updater === `function`) {
       updater = updater(value, isLoading);
     }
@@ -105,12 +128,15 @@ export const useUserSetting = <T extends UserSettingEntity>(
               ([key]) => !keyParamAliases.includes(key),
             ),
           );
+    const skipHistory = options?.skipHistory === true;
 
     void r.mutate
       .setSetting({
         key: settingKey,
         value: strippedValue ?? null,
         now: new Date(),
+        skipHistory,
+        historyId: skipHistory ? undefined : nanoid(),
       })
       .catch((error: unknown) => {
         console.error(`Failed to set user setting "${settingKey}":`, error);
@@ -119,6 +145,46 @@ export const useUserSetting = <T extends UserSettingEntity>(
 
   return { isLoading, value, setValue };
 };
+
+export function useUserSettingHistory<T extends UserSettingEntity>(
+  userSettingEntity: T,
+  keyParams?: UserSettingKeyInput<T>,
+): {
+  isLoading: boolean;
+  entries: UserSettingHistoryEntry<T>[];
+} {
+  const keyInput = (keyParams ?? noKeyParams) as UserSettingKeyInput<T>;
+  const { settingKey, keyParamMarshaled } = getSettingKeyInfo(
+    userSettingEntity,
+    keyInput,
+  );
+
+  const result = useRizzleQuery(
+    [`UserSettingHistory`, settingKey],
+    async (r, tx) => {
+      const history = await r.query.settingHistory
+        .byKey(tx, settingKey)
+        .toArray();
+      return history.map(([, entry]) => entry);
+    },
+  );
+
+  const entries = (result.data ?? [])
+    .map((entry) => ({
+      id: entry.id,
+      createdAt: entry.createdAt,
+      value:
+        entry.value == null
+          ? null
+          : userSettingEntity.unmarshalValue({
+              ...keyParamMarshaled,
+              ...(entry.value as Record<string, unknown>),
+            }),
+    }))
+    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
+  return { isLoading: result.isPending, entries };
+}
 
 export type UserSettingToggleableEntity = RizzleEntity<
   string,

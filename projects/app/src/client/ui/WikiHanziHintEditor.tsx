@@ -21,7 +21,11 @@ import {
 } from "react-native";
 import { AllHintsModal } from "./AllHintsModal";
 import { AssetImage } from "./AssetImage";
-import { useHanziWordHintOverrides } from "./HanziWordHintProvider";
+import {
+  hanziWordMeaningHintImageSetting,
+  useHanziWordHintOverrides,
+} from "./HanziWordHintProvider";
+import { useUserSettingHistory } from "@/client/hooks/useUserSetting";
 import { IconImage } from "./IconImage";
 import { ImagePasteDropZone } from "./ImagePasteDropZone";
 import { Pylymark } from "./Pylymark";
@@ -43,6 +47,10 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
 
   const { setHintOverrides } = useHanziWordHint();
   const hintOverrides = useHanziWordHintOverrides(hanziWord);
+  const hintImageHistory = useUserSettingHistory(
+    hanziWordMeaningHintImageSetting,
+    { hanziWord },
+  );
 
   const [showHintGalleryModal, setShowHintGalleryModal] = useState(false);
 
@@ -68,12 +76,28 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
     new Set(hintsToShow.flatMap((hint) => hint.imageAssetIds ?? [])),
   );
 
+  const historyImageAssetIds: string[] = [];
+  const seenHistoryImageAssetIds = new Set<string>();
+  for (const entry of [...hintImageHistory.entries].reverse()) {
+    const assetId = entry.value?.t;
+    if (typeof assetId !== `string` || assetId.length === 0) {
+      continue;
+    }
+    if (seenHistoryImageAssetIds.has(assetId)) {
+      continue;
+    }
+    seenHistoryImageAssetIds.add(assetId);
+    historyImageAssetIds.push(assetId);
+  }
+
   const selectedHintImageId = hintOverrides.selectedHintImageId;
-  const imageIdsToShow =
-    selectedHintImageId != null &&
-    !presetImageAssetIds.includes(selectedHintImageId)
-      ? [selectedHintImageId, ...presetImageAssetIds]
-      : presetImageAssetIds;
+  const imageIdsToShow = Array.from(
+    new Set([
+      ...historyImageAssetIds,
+      ...presetImageAssetIds,
+      ...(selectedHintImageId == null ? [] : [selectedHintImageId]),
+    ]),
+  );
 
   const handleSelectHintImage = (assetId: string) => {
     setHintOverrides(hanziWord, { selectedHintImageId: assetId });
