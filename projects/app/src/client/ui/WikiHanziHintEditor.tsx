@@ -53,6 +53,9 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
   );
 
   const [showHintGalleryModal, setShowHintGalleryModal] = useState(false);
+  const [hoveredHintImageId, setHoveredHintImageId] = useState<string | null>(
+    null,
+  );
 
   // Get available hints for this meaning
   const availableHints =
@@ -243,8 +246,10 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
     />
   );
 
+  const previewHintImageId = hoveredHintImageId ?? selectedHintImageId ?? null;
+
   let imageSection: ReactNode;
-  if (selectedHintImageId == null && imageIdsToShow.length === 0) {
+  if (previewHintImageId == null && imageIdsToShow.length === 0) {
     imageSection = (
       <HintImageEmptyState
         title="No images available"
@@ -254,27 +259,38 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
   } else {
     imageSection = (
       <View className="gap-3">
-        {selectedHintImageId == null ? (
+        {previewHintImageId == null ? (
           <HintImageEmptyState
             title="Select an image"
             description="Pick an image below or upload your own."
           />
         ) : (
-          <HintImagePreview assetId={selectedHintImageId} />
+          <HintImagePreview assetId={previewHintImageId} />
         )}
 
         {imageIdsToShow.length > 0 && (
           <View className="flex-row flex-wrap gap-2">
             {imageIdsToShow.map((assetId) => {
               const isSelected = assetId === selectedHintImageId;
+              const isHovered = assetId === hoveredHintImageId;
               return (
                 <Pressable
                   key={assetId}
                   onPress={() => {
                     handleSelectHintImage(assetId);
                   }}
+                  onHoverIn={() => {
+                    setHoveredHintImageId(assetId);
+                  }}
+                  onHoverOut={() => {
+                    setHoveredHintImageId(null);
+                  }}
                 >
-                  <HintImageTile assetId={assetId} isSelected={isSelected} />
+                  <HintImageTile
+                    assetId={assetId}
+                    isSelected={isSelected}
+                    isHovered={isHovered}
+                  />
                 </Pressable>
               );
             })}
@@ -555,9 +571,11 @@ function HintImagePreview({ assetId }: { assetId: string }) {
 function HintImageTile({
   assetId,
   isSelected,
+  isHovered,
 }: {
   assetId: string;
   isSelected: boolean;
+  isHovered: boolean;
 }) {
   return (
     <View className="relative size-16">
@@ -568,7 +586,9 @@ function HintImageTile({
         className={
           isSelected
             ? `absolute inset-0 rounded-md border-2 border-cyan`
-            : `absolute inset-0 rounded-md border border-fg/10`
+            : isHovered
+              ? `absolute inset-0 rounded-md border-2 border-cyan/40`
+              : `absolute inset-0 rounded-md border border-fg/10`
         }
         pointerEvents="none"
       />
