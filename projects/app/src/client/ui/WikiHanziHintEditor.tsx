@@ -10,15 +10,21 @@ import {
 } from "@/dictionary";
 import { Link } from "expo-router";
 import type { ReactNode } from "react";
-import { use, useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
-import { AddCustomHintModal } from "./AddCustomHintModal";
+import { use, useEffect, useRef, useState } from "react";
+import {
+  Alert,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import { AllHintsModal } from "./AllHintsModal";
 import { AssetImage } from "./AssetImage";
-import { HanziHintOption } from "./HanziHintOption";
 import { useHanziWordHintOverrides } from "./HanziWordHintProvider";
 import { IconImage } from "./IconImage";
 import { ImageUploadButton } from "./ImageUploadButton";
+import { Pylymark } from "./Pylymark";
 import { RectButton } from "./RectButton";
 
 interface WikiHanziHintEditorProps {
@@ -38,8 +44,6 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
   const { setHintOverrides, clearHintOverrides } = useHanziWordHint();
   const hintOverrides = useHanziWordHintOverrides(hanziWord);
 
-  // Modal state
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [showHintGalleryModal, setShowHintGalleryModal] = useState(false);
 
   // Get available hints for this meaning
@@ -107,9 +111,6 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
   const primaryGloss = glossOrThrow(hanziWord, meaning);
   const alternativeGlosses = meaning?.gloss.slice(1) ?? [];
   const fallbackHint = hintsToShow[0];
-  const initialHint = hintOverrides.hint ?? fallbackHint?.hint ?? ``;
-  const initialExplanation =
-    hintOverrides.explanation ?? fallbackHint?.explanation ?? ``;
   const currentHintText = selectedHint ?? fallbackHint?.hint ?? ``;
   let currentHintExplanation = currentPresetHint?.explanation;
   currentHintExplanation ??=
@@ -125,6 +126,89 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
   }
   const hasCurrentHint = currentHintText.length > 0;
   const canOpenGallery = hintsToShow.length > 0;
+
+  const [isEditingHint, setIsEditingHint] = useState(false);
+  const [isEditingExplanation, setIsEditingExplanation] = useState(false);
+  const [isHintHovered, setIsHintHovered] = useState(false);
+  const [isExplanationHovered, setIsExplanationHovered] = useState(false);
+  const [draftHint, setDraftHint] = useState(currentHintText);
+  const [draftExplanation, setDraftExplanation] = useState(
+    currentHintExplanation ?? ``,
+  );
+  const skipHintBlurSaveRef = useRef(false);
+  const skipExplanationBlurSaveRef = useRef(false);
+
+  useEffect(() => {
+    if (!isEditingHint) {
+      setDraftHint(currentHintText);
+    }
+  }, [currentHintText, isEditingHint]);
+
+  useEffect(() => {
+    if (!isEditingExplanation) {
+      setDraftExplanation(currentHintExplanation ?? ``);
+    }
+  }, [currentHintExplanation, isEditingExplanation]);
+
+  const handleSaveEdits = () => {
+    const nextHint = draftHint.trim();
+    const nextExplanation = draftExplanation.trim();
+    setHintOverrides(hanziWord, {
+      hint: nextHint,
+      explanation: nextExplanation.length === 0 ? null : nextExplanation,
+    });
+  };
+
+  const confirmDiscardChanges = (onDiscard: () => void) => {
+    Alert.alert(
+      `Discard changes?`,
+      `You have unsaved edits that will be lost.`,
+      [
+        {
+          text: `Keep editing`,
+          style: `cancel`,
+        },
+        {
+          text: `Discard`,
+          style: `destructive`,
+          onPress: onDiscard,
+        },
+      ],
+    );
+  };
+
+  const cancelHintEdit = () => {
+    const isDirty = draftHint !== currentHintText;
+    const discard = () => {
+      skipHintBlurSaveRef.current = true;
+      setDraftHint(currentHintText);
+      setIsEditingHint(false);
+    };
+
+    if (isDirty) {
+      confirmDiscardChanges(discard);
+      return;
+    }
+
+    discard();
+  };
+
+  const cancelExplanationEdit = () => {
+    const currentExplanation = currentHintExplanation ?? ``;
+    const isDirty = draftExplanation !== currentExplanation;
+    const discard = () => {
+      skipExplanationBlurSaveRef.current = true;
+      setDraftExplanation(currentExplanation);
+      setIsEditingExplanation(false);
+    };
+
+    if (isDirty) {
+      confirmDiscardChanges(discard);
+      return;
+    }
+
+    discard();
+  };
 
   let imageSection: ReactNode;
   if (selectedHintImageId == null && imageIdsToShow.length === 0) {
@@ -242,73 +326,194 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
           </Text>
         </View>
 
-        {hasCurrentHint ? (
-          <View className="gap-3">
-            <View className="gap-1">
-              <Text className="text-[13px] font-medium text-fg-dim">
-                Current hint
-              </Text>
-              <HanziHintOption
-                hint={currentHintText}
-                explanation={currentHintExplanation}
-                imageIds={currentHintImageIds}
-                isSelected
-                isUser={isCurrentHintCustom}
-                onPress={() => {
-                  setIsModalOpen(true);
-                }}
-                onEdit={
-                  isCurrentHintCustom
-                    ? () => {
-                        setIsModalOpen(true);
-                      }
-                    : undefined
-                }
-                onDelete={
-                  isCurrentHintCustom
-                    ? () => {
-                        clearHintOverrides(hanziWord);
-                      }
-                    : undefined
-                }
-              />
-            </View>
-
-            <RectButton
-              variant="outline"
-              onPress={() => {
-                setShowHintGalleryModal(true);
-              }}
-              disabled={!canOpenGallery}
-            >
-              <Text className="text-fg">Hint gallery</Text>
-            </RectButton>
-            {canOpenGallery ? null : (
-              <Text className="text-[13px] text-fg-dim">
-                No system hints available for this character
-              </Text>
-            )}
-          </View>
-        ) : (
-          <View
-            className={`items-center gap-2 rounded-xl border-2 border-dashed border-fg/20 px-4 py-6`}
-          >
-            <IconImage size={32} icon="puzzle" className="text-fg-dim" />
-            <Text className="text-center text-fg-dim">
-              No hints available for this character
+        <View className="gap-3">
+          <View className="gap-2">
+            <Text className="text-[13px] font-medium text-fg-dim">
+              Current hint
             </Text>
-          </View>
-        )}
+            <View className="gap-2 rounded-lg border border-fg-bg10 bg-fg-bg5 p-3">
+              {isCurrentHintCustom ? (
+                <View className="flex-row items-center gap-2">
+                  <View className="rounded-full bg-purple/20 px-2 py-0.5">
+                    <Text className="text-[11px] font-medium text-purple">
+                      Your hint
+                    </Text>
+                  </View>
+                  <View className="flex-1" />
+                  <Pressable
+                    onPress={() => {
+                      clearHintOverrides(hanziWord);
+                    }}
+                    hitSlop={8}
+                  >
+                    <IconImage size={16} icon="close" className="text-fg-dim" />
+                  </Pressable>
+                </View>
+              ) : null}
 
-        {/* Create your own button */}
-        <RectButton
-          variant="outline"
-          onPress={() => {
-            setIsModalOpen(true);
-          }}
-        >
-          <Text className="text-fg">Edit hint text</Text>
-        </RectButton>
+              {isEditingHint ? (
+                <TextInput
+                  autoFocus
+                  value={draftHint}
+                  onChangeText={setDraftHint}
+                  onBlur={() => {
+                    if (skipHintBlurSaveRef.current) {
+                      skipHintBlurSaveRef.current = false;
+                      return;
+                    }
+                    setIsEditingHint(false);
+                    handleSaveEdits();
+                  }}
+                  onKeyPress={(event) => {
+                    if (event.nativeEvent.key === `Enter`) {
+                      event.preventDefault();
+                      skipHintBlurSaveRef.current = true;
+                      setIsEditingHint(false);
+                      handleSaveEdits();
+                    }
+                    if (event.nativeEvent.key === `Escape`) {
+                      event.preventDefault();
+                      cancelHintEdit();
+                    }
+                  }}
+                  placeholder="Add a hint"
+                  className={`
+                    pyly-body-input rounded-lg bg-bg-high px-3 py-2 text-[14px] font-semibold
+                    text-fg-loud
+                  `}
+                />
+              ) : (
+                <Pressable
+                  onPress={() => {
+                    setIsEditingHint(true);
+                  }}
+                  onHoverIn={() => {
+                    setIsHintHovered(true);
+                  }}
+                  onHoverOut={() => {
+                    setIsHintHovered(false);
+                  }}
+                >
+                  <View
+                    className={
+                      isHintHovered
+                        ? `rounded-md bg-fg-bg10 px-2 py-1`
+                        : `px-2 py-1`
+                    }
+                  >
+                    <Text
+                      className={
+                        currentHintText.length > 0
+                          ? `pyly-body text-[14px] font-semibold text-fg-loud`
+                          : `pyly-body text-[14px] font-semibold text-fg-dim`
+                      }
+                    >
+                      {currentHintText.length > 0 ? (
+                        <Pylymark source={currentHintText} />
+                      ) : (
+                        `Add a hint`
+                      )}
+                    </Text>
+                  </View>
+                </Pressable>
+              )}
+
+              {isEditingExplanation ? (
+                <TextInput
+                  autoFocus
+                  multiline
+                  value={draftExplanation}
+                  onChangeText={setDraftExplanation}
+                  onBlur={() => {
+                    if (skipExplanationBlurSaveRef.current) {
+                      skipExplanationBlurSaveRef.current = false;
+                      return;
+                    }
+                    setIsEditingExplanation(false);
+                    handleSaveEdits();
+                  }}
+                  onKeyPress={(event) => {
+                    const isShiftPressed =
+                      (event.nativeEvent as { shiftKey?: boolean }).shiftKey ===
+                      true;
+                    if (
+                      event.nativeEvent.key === `Enter` &&
+                      isShiftPressed === false
+                    ) {
+                      event.preventDefault();
+                      skipExplanationBlurSaveRef.current = true;
+                      setIsEditingExplanation(false);
+                      handleSaveEdits();
+                    }
+                    if (event.nativeEvent.key === `Escape`) {
+                      event.preventDefault();
+                      cancelExplanationEdit();
+                    }
+                  }}
+                  placeholder="Add an explanation"
+                  className="rounded-lg bg-bg-high px-3 py-2 text-[14px] text-fg"
+                />
+              ) : (
+                <Pressable
+                  onPress={() => {
+                    setIsEditingExplanation(true);
+                  }}
+                  onHoverIn={() => {
+                    setIsExplanationHovered(true);
+                  }}
+                  onHoverOut={() => {
+                    setIsExplanationHovered(false);
+                  }}
+                >
+                  <View
+                    className={
+                      isExplanationHovered
+                        ? `rounded-md bg-fg-bg10 px-2 py-1`
+                        : `px-2 py-1`
+                    }
+                  >
+                    <Text
+                      className={
+                        currentHintExplanation == null ||
+                        currentHintExplanation.length === 0
+                          ? `pyly-body text-[14px] text-fg-dim`
+                          : `pyly-body text-[14px] text-fg`
+                      }
+                    >
+                      {currentHintExplanation == null ||
+                      currentHintExplanation.length === 0 ? (
+                        `Add an explanation`
+                      ) : (
+                        <Pylymark source={currentHintExplanation} />
+                      )}
+                    </Text>
+                  </View>
+                </Pressable>
+              )}
+
+              {currentHintImageIds != null && currentHintImageIds.length > 0 ? (
+                <View className="mt-2">
+                  <CurrentHintImageRow imageIds={currentHintImageIds} />
+                </View>
+              ) : null}
+            </View>
+          </View>
+
+          <RectButton
+            variant="outline"
+            onPress={() => {
+              setShowHintGalleryModal(true);
+            }}
+            disabled={!canOpenGallery}
+          >
+            <Text className="text-fg">Hint gallery</Text>
+          </RectButton>
+          {canOpenGallery ? null : (
+            <Text className="text-[13px] text-fg-dim">
+              No system hints available for this character
+            </Text>
+          )}
+        </View>
 
         {/* Clear selection button */}
         {hintOverrides.hasOverrides && (
@@ -334,24 +539,6 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
 
         {imageSection}
       </View>
-
-      {/* Hint override modal */}
-      {isModalOpen && (
-        <AddCustomHintModal
-          onDismiss={() => {
-            setIsModalOpen(false);
-          }}
-          onSave={(hint, explanation) => {
-            setHintOverrides(hanziWord, {
-              hint,
-              explanation: explanation ?? null,
-            });
-            setIsModalOpen(false);
-          }}
-          initialHint={initialHint}
-          initialExplanation={initialExplanation}
-        />
-      )}
 
       {/* All hints modal */}
       {showHintGalleryModal && (
@@ -423,6 +610,20 @@ function HintImageTile({
           <Text className="text-[9px] font-semibold text-bg">{label}</Text>
         </View>
       )}
+    </View>
+  );
+}
+
+function CurrentHintImageRow({ imageIds }: { imageIds: readonly string[] }) {
+  return (
+    <View className="flex-row flex-wrap gap-2">
+      {imageIds.slice(0, 3).map((assetId) => (
+        <View key={assetId} className="relative">
+          <View className="size-14 overflow-hidden rounded-md border border-fg/10">
+            <AssetImage assetId={assetId} className="size-full" />
+          </View>
+        </View>
+      ))}
     </View>
   );
 }
