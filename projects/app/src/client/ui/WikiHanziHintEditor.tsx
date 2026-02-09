@@ -23,7 +23,7 @@ import { AllHintsModal } from "./AllHintsModal";
 import { AssetImage } from "./AssetImage";
 import { useHanziWordHintOverrides } from "./HanziWordHintProvider";
 import { IconImage } from "./IconImage";
-import { ImageUploadButton } from "./ImageUploadButton";
+import { ImagePasteDropZone } from "./ImagePasteDropZone";
 import { Pylymark } from "./Pylymark";
 import { RectButton } from "./RectButton";
 
@@ -41,7 +41,7 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
   // Load character data
   const characterData = use(getWikiCharacterData(hanzi)) ?? null;
 
-  const { setHintOverrides, clearHintOverrides } = useHanziWordHint();
+  const { setHintOverrides } = useHanziWordHint();
   const hintOverrides = useHanziWordHintOverrides(hanziWord);
 
   const [showHintGalleryModal, setShowHintGalleryModal] = useState(false);
@@ -63,8 +63,6 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
     selectedHint == null
       ? null
       : (hintsToShow.find((hint) => hint.hint === selectedHint) ?? null);
-  const isCurrentHintCustom =
-    selectedHint == null ? false : currentPresetHint == null;
 
   const presetImageAssetIds = Array.from(
     new Set(hintsToShow.flatMap((hint) => hint.imageAssetIds ?? [])),
@@ -83,6 +81,10 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
 
   const handleAddCustomImage = (assetId: string) => {
     setHintOverrides(hanziWord, { selectedHintImageId: assetId });
+  };
+
+  const handleUploadError = (error: string) => {
+    console.error(`Upload error:`, error);
   };
 
   // Get components for the lozenge
@@ -210,18 +212,19 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
     discard();
   };
 
+  const imageUploadActions = (
+    <ImagePasteDropZone
+      onUploadComplete={handleAddCustomImage}
+      onUploadError={handleUploadError}
+    />
+  );
+
   let imageSection: ReactNode;
   if (selectedHintImageId == null && imageIdsToShow.length === 0) {
     imageSection = (
       <HintImageEmptyState
         title="No images available"
         description="Upload a custom image to use here."
-        action={
-          <ImageUploadButton
-            onUploadComplete={handleAddCustomImage}
-            buttonText="Add image"
-          />
-        }
       />
     );
   } else {
@@ -231,12 +234,6 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
           <HintImageEmptyState
             title="Select an image"
             description="Pick an image below or upload your own."
-            action={
-              <ImageUploadButton
-                onUploadComplete={handleAddCustomImage}
-                buttonText="Add image"
-              />
-            }
           />
         ) : (
           <HintImagePreview assetId={selectedHintImageId} />
@@ -246,8 +243,6 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
           <View className="flex-row flex-wrap gap-2">
             {imageIdsToShow.map((assetId) => {
               const isSelected = assetId === selectedHintImageId;
-              const isCustomImage =
-                isSelected && !presetImageAssetIds.includes(assetId);
               return (
                 <Pressable
                   key={assetId}
@@ -255,21 +250,12 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
                     handleSelectHintImage(assetId);
                   }}
                 >
-                  <HintImageTile
-                    assetId={assetId}
-                    isSelected={isSelected}
-                    label={isCustomImage ? `You` : undefined}
-                  />
+                  <HintImageTile assetId={assetId} isSelected={isSelected} />
                 </Pressable>
               );
             })}
           </View>
         )}
-
-        <ImageUploadButton
-          onUploadComplete={handleAddCustomImage}
-          buttonText="Add image"
-        />
       </View>
     );
   }
@@ -328,29 +314,7 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
 
         <View className="gap-3">
           <View className="gap-2">
-            <Text className="text-[13px] font-medium text-fg-dim">
-              Current hint
-            </Text>
             <View className="gap-2 rounded-lg border border-fg-bg10 bg-fg-bg5 p-3">
-              {isCurrentHintCustom ? (
-                <View className="flex-row items-center gap-2">
-                  <View className="rounded-full bg-purple/20 px-2 py-0.5">
-                    <Text className="text-[11px] font-medium text-purple">
-                      Your hint
-                    </Text>
-                  </View>
-                  <View className="flex-1" />
-                  <Pressable
-                    onPress={() => {
-                      clearHintOverrides(hanziWord);
-                    }}
-                    hitSlop={8}
-                  >
-                    <IconImage size={16} icon="close" className="text-fg-dim" />
-                  </Pressable>
-                </View>
-              ) : null}
-
               {isEditingHint ? (
                 <TextInput
                   autoFocus
@@ -490,23 +454,17 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
                   </View>
                 </Pressable>
               )}
-
-              {currentHintImageIds != null && currentHintImageIds.length > 0 ? (
-                <View className="mt-2">
-                  <CurrentHintImageRow imageIds={currentHintImageIds} />
-                </View>
-              ) : null}
             </View>
           </View>
 
           <RectButton
-            variant="outline"
+            variant="bare"
             onPress={() => {
               setShowHintGalleryModal(true);
             }}
             disabled={!canOpenGallery}
           >
-            <Text className="text-fg">Hint gallery</Text>
+            Browse hints
           </RectButton>
           {canOpenGallery ? null : (
             <Text className="text-[13px] text-fg-dim">
@@ -514,20 +472,6 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
             </Text>
           )}
         </View>
-
-        {/* Clear selection button */}
-        {hintOverrides.hasOverrides && (
-          <View className="mt-2">
-            <RectButton
-              variant="bare"
-              onPress={() => {
-                clearHintOverrides(hanziWord);
-              }}
-            >
-              Clear overrides
-            </RectButton>
-          </View>
-        )}
 
         {/* Image selection section */}
         <View className="gap-1 pt-2">
@@ -538,6 +482,7 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
         </View>
 
         {imageSection}
+        <View className="pt-2">{imageUploadActions}</View>
       </View>
 
       {/* All hints modal */}
@@ -586,11 +531,9 @@ function HintImagePreview({ assetId }: { assetId: string }) {
 function HintImageTile({
   assetId,
   isSelected,
-  label,
 }: {
   assetId: string;
   isSelected: boolean;
-  label?: string;
 }) {
   return (
     <View className="relative size-16">
@@ -605,25 +548,6 @@ function HintImageTile({
         }
         pointerEvents="none"
       />
-      {label != null && (
-        <View className="absolute left-1 top-1 rounded-full bg-cyan/90 px-1.5 py-0.5">
-          <Text className="text-[9px] font-semibold text-bg">{label}</Text>
-        </View>
-      )}
-    </View>
-  );
-}
-
-function CurrentHintImageRow({ imageIds }: { imageIds: readonly string[] }) {
-  return (
-    <View className="flex-row flex-wrap gap-2">
-      {imageIds.slice(0, 3).map((assetId) => (
-        <View key={assetId} className="relative">
-          <View className="size-14 overflow-hidden rounded-md border border-fg/10">
-            <AssetImage assetId={assetId} className="size-full" />
-          </View>
-        </View>
-      ))}
     </View>
   );
 }
