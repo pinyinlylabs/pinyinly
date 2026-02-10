@@ -57,24 +57,6 @@ export const mutators: RizzleReplicacheMutators<typeof currentSchema> = {
       { skill, srs: srsStateFromFsrsState(fsrsState) },
     );
   },
-  async setPinyinSoundName(tx, { soundId, name }) {
-    const existing = await tx.pinyinSound.get({ soundId });
-    await tx.pinyinSound.set({ soundId }, { ...existing, soundId, name });
-  },
-  async setPinyinSoundGroupName(tx, { soundGroupId, name }) {
-    const existing = await tx.pinyinSoundGroup.get({ soundGroupId });
-    await tx.pinyinSoundGroup.set(
-      { soundGroupId },
-      { ...existing, soundGroupId, name },
-    );
-  },
-  async setPinyinSoundGroupTheme(tx, { soundGroupId, theme }) {
-    const existing = await tx.pinyinSoundGroup.get({ soundGroupId });
-    await tx.pinyinSoundGroup.set(
-      { soundGroupId },
-      { ...existing, soundGroupId, theme },
-    );
-  },
   async saveHanziGlossMistake(
     tx,
     { id, gloss, hanziOrHanziWord, now, reviewId },

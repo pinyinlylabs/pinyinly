@@ -3,8 +3,6 @@ import {
   rFsrsRating,
   rHanziOrHanziWord,
   rHanziWord,
-  rPinyinSoundGroupId,
-  rPinyinSoundId,
   rSkill,
   rSpaceSeparatedString,
 } from "@/data/rizzleSchema";
@@ -242,12 +240,6 @@ export const rizzleCustomType = <
 // differentiate them from rizzle schema things.
 export const pgSkill = rizzleCustomType(rSkill(), `text`);
 export const pgMnemonicThemeId = rizzleCustomType(r.string(), `text`);
-export const pgPinyinSoundId = rizzleCustomType(rPinyinSoundId(), `text`);
-export const pgPinyinSoundGroupId = rizzleCustomType(
-  rPinyinSoundGroupId(),
-  `text`,
-);
-export const pgPinyinInitialGroupId = rizzleCustomType(r.string(), `text`);
 export const pgSpaceSeparatedString = rizzleCustomType(
   rSpaceSeparatedString(),
   `text`,

@@ -225,6 +225,20 @@
       "when": 1770614469654,
       "tag": "0031_lonely_centennial",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1770701794916,
+      "tag": "0032_motionless_screwball",
+      "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1770706167870,
+      "tag": "0033_many_switch",
+      "breakpoints": true
     }
   ]
 }

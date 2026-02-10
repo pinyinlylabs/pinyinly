@@ -1,6 +1,10 @@
 import { usePinyinSoundGroups } from "@/client/hooks/usePinyinSoundGroups";
 import { useReplicache } from "@/client/hooks/useReplicache";
 import { useRizzleQueryPaged } from "@/client/hooks/useRizzleQueryPaged";
+import {
+  pinyinSoundGroupThemeSettingKey,
+  pinyinSoundNameSettingKey,
+} from "@/client/hooks/useUserSetting";
 import { pinyinSoundsQuery } from "@/client/query";
 import { Pylymark } from "@/client/ui/Pylymark";
 import { RectButton } from "@/client/ui/RectButton";
@@ -109,9 +113,11 @@ export default function MnemonicIdPage() {
                     <RectButton
                       onPress={() => {
                         if (pinyinSoundGroup?.id != null) {
-                          void r.mutate.setPinyinSoundGroupTheme({
-                            soundGroupId: pinyinSoundGroup.id,
-                            theme,
+                          void r.mutate.setSetting({
+                            key: pinyinSoundGroupThemeSettingKey(
+                              pinyinSoundGroup.id,
+                            ),
+                            value: { t: theme },
                             now: new Date(),
                           });
                         }
@@ -131,9 +137,9 @@ export default function MnemonicIdPage() {
                         hover:text-fg
                       `}
                       onPress={() => {
-                        void r.mutate.setPinyinSoundName({
-                          soundId: id,
-                          name,
+                        void r.mutate.setSetting({
+                          key: pinyinSoundNameSettingKey(id),
+                          value: { t: name },
                           now: new Date(),
                         });
                       }}

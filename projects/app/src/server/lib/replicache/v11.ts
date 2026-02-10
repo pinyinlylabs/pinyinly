@@ -6,8 +6,6 @@ import {
 import type {
   HanziGlossMistakeType,
   HanziPinyinMistakeType,
-  PinyinSoundGroupId,
-  PinyinSoundId,
   Skill,
 } from "@/data/model";
 import { AssetStatusKind, MistakeKind } from "@/data/model";
@@ -138,34 +136,44 @@ export const mutators: RizzleDrizzleMutators<typeof schema, Drizzle> = {
   async setPinyinSoundName(db, userId, { soundId, name, now }) {
     const updatedAt = now;
     const createdAt = now;
+    const value = name == null ? null : { t: name };
+
     await db
-      .insert(s.pinyinSound)
-      .values([{ userId, soundId, name, updatedAt, createdAt }])
+      .insert(s.userSetting)
+      .values([{ userId, key: `psn.${soundId}`, value, updatedAt, createdAt }])
       .onConflictDoUpdate({
-        target: [s.pinyinSound.userId, s.pinyinSound.soundId],
-        set: { name, updatedAt },
+        target: [s.userSetting.userId, s.userSetting.key],
+        set: { value, updatedAt },
       });
   },
   async setPinyinSoundGroupName(db, userId, { soundGroupId, name, now }) {
     const updatedAt = now;
     const createdAt = now;
+    const value = name == null ? null : { t: name };
+
     await db
-      .insert(s.pinyinSoundGroup)
-      .values([{ userId, soundGroupId, name, updatedAt, createdAt }])
+      .insert(s.userSetting)
+      .values([
+        { userId, key: `psgn.${soundGroupId}`, value, updatedAt, createdAt },
+      ])
       .onConflictDoUpdate({
-        target: [s.pinyinSound.userId, s.pinyinSound.soundId],
-        set: { name, updatedAt },
+        target: [s.userSetting.userId, s.userSetting.key],
+        set: { value, updatedAt },
       });
   },
   async setPinyinSoundGroupTheme(db, userId, { soundGroupId, theme, now }) {
     const updatedAt = now;
     const createdAt = now;
+    const value = theme == null ? null : { t: theme };
+
     await db
-      .insert(s.pinyinSoundGroup)
-      .values([{ userId, soundGroupId, theme, updatedAt, createdAt }])
+      .insert(s.userSetting)
+      .values([
+        { userId, key: `psgt.${soundGroupId}`, value, updatedAt, createdAt },
+      ])
       .onConflictDoUpdate({
-        target: [s.pinyinSound.userId, s.pinyinSound.soundId],
-        set: { theme, updatedAt },
+        target: [s.userSetting.userId, s.userSetting.key],
+        set: { value, updatedAt },
       });
   },
   async setSetting(db, userId, { key, value, now }) {
@@ -498,8 +506,6 @@ export async function pull(
 
 type CvrNamespace =
   | `asset`
-  | `pinyinSound`
-  | `pinyinSoundGroup`
   | `skillState`
   | `skillRating`
   | `hanziGlossMistake`
@@ -587,52 +593,6 @@ const syncEntities = [
         .from(s.asset)
         .where(eq(s.asset.userId, userId))
         .as(`assetVersions`),
-  ),
-  makeSyncEntity(
-    `pinyinSound`,
-    schema.pinyinSound,
-    (key: PinyinSoundId, e) => e.marshalKey({ soundId: key }),
-    (db, ids) =>
-      db.query.pinyinSound.findMany({
-        where: (t) => inArray(t.id, ids),
-      }),
-    (db, userId) =>
-      db
-        .select({
-          map: json_agg(
-            json_build_object({
-              id: s.pinyinSound.id,
-              key: s.pinyinSound.soundId,
-              xmin: pgXmin(s.pinyinSound),
-            }),
-          ).as(`pinyinSoundVersions`),
-        })
-        .from(s.pinyinSound)
-        .where(eq(s.pinyinSound.userId, userId))
-        .as(`pinyinSoundVersions`),
-  ),
-  makeSyncEntity(
-    `pinyinSoundGroup`,
-    schema.pinyinSoundGroup,
-    (key: PinyinSoundGroupId, e) => e.marshalKey({ soundGroupId: key }),
-    (db, ids) =>
-      db.query.pinyinSoundGroup.findMany({
-        where: (t) => inArray(t.id, ids),
-      }),
-    (db, userId) =>
-      db
-        .select({
-          map: json_agg(
-            json_build_object({
-              id: s.pinyinSoundGroup.id,
-              key: s.pinyinSoundGroup.soundGroupId,
-              xmin: pgXmin(s.pinyinSoundGroup),
-            }),
-          ).as(`pinyinSoundGroupVersions`),
-        })
-        .from(s.pinyinSoundGroup)
-        .where(eq(s.pinyinSoundGroup.userId, userId))
-        .as(`pinyinSoundGroupVersions`),
   ),
   makeSyncEntity(
     `skillState`,

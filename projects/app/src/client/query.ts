@@ -8,6 +8,7 @@ import type {
 import { loadPylyPinyinChart } from "@/data/pinyin";
 import type { Rizzle, SkillRating } from "@/data/rizzleSchema";
 import { currentSchema } from "@/data/rizzleSchema";
+import { pinyinSoundNameSettingKey } from "@/client/hooks/useUserSetting";
 import type { RankedHanziWord } from "@/data/skills";
 import {
   getHanziWordRank,
@@ -178,11 +179,13 @@ export const pinyinSoundsQuery = (r: Rizzle) =>
         await r.replicache.query(async (tx) => {
           for (const group of chart.soundGroups) {
             for (const soundId of group.sounds) {
-              const userOverride = await r.query.pinyinSound.get(tx, {
-                soundId,
+              const userOverride = await r.query.setting.get(tx, {
+                key: pinyinSoundNameSettingKey(soundId),
               });
+              const nameValue =
+                (userOverride?.value as { t?: string } | null)?.t ?? null;
               sounds.set(soundId, {
-                name: userOverride?.name ?? null,
+                name: nameValue,
                 label: chart.soundToCustomLabel[soundId] ?? soundId,
               });
             }
@@ -195,7 +198,7 @@ export const pinyinSoundsQuery = (r: Rizzle) =>
       retry: false,
       structuralSharing: false,
     }),
-    [currentSchema.pinyinSound.keyPrefix],
+    [currentSchema.setting.keyPrefix],
   );
 
 export const targetSkillsQuery = () =>

@@ -27,7 +27,7 @@ import {
   pushChunked,
   updateRemoteSyncClientLastMutationId,
 } from "./replicache";
-import { retryMutation as retryMutationV9 } from "./replicache/v9";
+import { retryMutation as retryMutationV13 } from "./replicache/v12";
 
 const { POSTMARK_SERVER_TOKEN } = process.env;
 
@@ -804,8 +804,8 @@ const retryFailedMutations = inngest.createFunction(
                 // Route to the correct schema version's retryMutation
                 const result = await (async () => {
                   switch (schemaVersion) {
-                    case `9`: {
-                      return retryMutationV9(db, mutationRecord.id);
+                    case `13`: {
+                      return retryMutationV13(db, mutationRecord.id);
                     }
                     default: {
                       return {

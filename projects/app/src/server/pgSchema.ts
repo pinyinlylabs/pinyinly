@@ -9,11 +9,7 @@ import {
   pgFsrsRating,
   pgHanziOrHanziWord,
   pgJsonObject,
-  pgMnemonicThemeId,
   pgPasskeyTransport,
-  pgPinyinInitialGroupId,
-  pgPinyinSoundGroupId,
-  pgPinyinSoundId,
   pgSkill,
   rizzleCustomType,
   zodJson,
@@ -211,93 +207,6 @@ export const hanziPinyinMistake = schema.table(
     trashedAt: pg.timestamp(`trashedAt`),
   },
   (t) => [pg.index().on(t.userId), pg.index().on(t.reviewId)],
-);
-
-export const pinyinInitialAssociation = schema.table(
-  `pinyinInitialAssociation`,
-  {
-    id: pg.text(`id`).primaryKey().$defaultFn(nanoid),
-    userId: pg
-      .text(`userId`)
-      .references(() => user.id)
-      .notNull(),
-    initial: pg.text(`initial`).notNull(),
-    name: pg.text(`name`).notNull(),
-    updatedAt: pg.timestamp(`updatedAt`).defaultNow().notNull(),
-    createdAt: pg.timestamp(`createdAt`).defaultNow().notNull(),
-  },
-  (t) => [pg.unique().on(t.userId, t.initial)],
-);
-
-export const pinyinFinalAssociation = schema.table(
-  `pinyinFinalAssociation`,
-  {
-    id: pg.text(`id`).primaryKey().$defaultFn(nanoid),
-    userId: pg
-      .text(`userId`)
-      .references(() => user.id)
-      .notNull(),
-    final: pg.text(`final`).notNull(),
-    name: pg.text(`name`).notNull(),
-    updatedAt: pg.timestamp(`updatedAt`).defaultNow().notNull(),
-    createdAt: pg.timestamp(`createdAt`).defaultNow().notNull(),
-  },
-  (t) => [pg.unique().on(t.userId, t.final)],
-);
-
-export const pinyinInitialGroupTheme = schema.table(
-  `pinyinInitialGroupTheme`,
-  {
-    id: pg.text(`id`).primaryKey().$defaultFn(nanoid),
-    userId: pg
-      .text(`userId`)
-      .references(() => user.id)
-      .notNull(),
-    groupId: pgPinyinInitialGroupId(`groupId`).notNull(),
-    themeId: pgMnemonicThemeId(`themeId`).notNull(),
-    updatedAt: pg.timestamp(`updatedAt`).defaultNow().notNull(),
-    createdAt: pg.timestamp(`createdAt`).defaultNow().notNull(),
-  },
-  (t) => [pg.unique().on(t.userId, t.groupId)],
-);
-
-export const pinyinSound = schema.table(
-  `pinyinSound`,
-  {
-    id: pg.text(`id`).primaryKey().$defaultFn(nanoid),
-    userId: pg
-      .text(`userId`)
-      .references(() => user.id)
-      .notNull(),
-    soundId: pgPinyinSoundId(`soundId`).notNull(),
-    name: pg.text(`name`),
-    updatedAt: pg.timestamp(`updatedAt`).defaultNow().notNull(),
-    createdAt: pg.timestamp(`createdAt`).defaultNow().notNull(),
-  },
-  (t) => [pg.unique().on(t.userId, t.soundId)],
-);
-
-export const pinyinSoundGroup = schema.table(
-  `pinyinSoundGroup`,
-  {
-    id: pg.text(`id`).primaryKey().$defaultFn(nanoid),
-    userId: pg
-      .text(`userId`)
-      .references(() => user.id)
-      .notNull(),
-    soundGroupId: pgPinyinSoundGroupId(`soundGroupId`).notNull(),
-    /**
-     * Override the default name.
-     */
-    name: pg.text(`name`),
-    /**
-     * Override the default theme.
-     */
-    theme: pg.text(`theme`),
-    updatedAt: pg.timestamp(`updatedAt`).defaultNow().notNull(),
-    createdAt: pg.timestamp(`createdAt`).defaultNow().notNull(),
-  },
-  (t) => [pg.unique().on(t.userId, t.soundGroupId)],
 );
 
 /**

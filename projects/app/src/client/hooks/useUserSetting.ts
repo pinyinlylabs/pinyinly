@@ -8,8 +8,18 @@ import type {
   RizzleTypeAlias,
 } from "@/util/rizzle";
 import { keyPathVariableNames, r } from "@/util/rizzle";
-import type { HanziText, HanziWord, PinyinUnit } from "@/data/model";
-import { rHanziWord } from "@/data/rizzleSchema";
+import type {
+  HanziText,
+  HanziWord,
+  PinyinSoundGroupId,
+  PinyinSoundId,
+  PinyinUnit,
+} from "@/data/model";
+import {
+  rHanziWord,
+  rPinyinSoundGroupId,
+  rPinyinSoundId,
+} from "@/data/rizzleSchema";
 import { normalizePinyinUnitForHintKey } from "@/data/pinyin";
 import type { Flatten } from "@pinyinly/lib/types";
 import { useReplicache } from "./useReplicache";
@@ -201,6 +211,37 @@ export type UserSettingToggleableEntity = RizzleEntity<
 export const autoCheckUserSetting = r.entity(`autoCheck`, {
   enabled: r.boolean(`e`),
 }) satisfies UserSettingToggleableEntity;
+
+export const pinyinSoundNameSetting = r.entity(`psn.[soundId]`, {
+  soundId: rPinyinSoundId().alias(`i`),
+  name: r.string().alias(`t`),
+});
+
+export const pinyinSoundGroupNameSetting = r.entity(`psgn.[soundGroupId]`, {
+  soundGroupId: rPinyinSoundGroupId().alias(`g`),
+  name: r.string().alias(`t`),
+});
+
+export const pinyinSoundGroupThemeSetting = r.entity(`psgt.[soundGroupId]`, {
+  soundGroupId: rPinyinSoundGroupId().alias(`g`),
+  theme: r.string().alias(`t`),
+});
+
+export function pinyinSoundNameSettingKey(soundId: PinyinSoundId): string {
+  return pinyinSoundNameSetting.marshalKey({ soundId });
+}
+
+export function pinyinSoundGroupNameSettingKey(
+  soundGroupId: PinyinSoundGroupId,
+): string {
+  return pinyinSoundGroupNameSetting.marshalKey({ soundGroupId });
+}
+
+export function pinyinSoundGroupThemeSettingKey(
+  soundGroupId: PinyinSoundGroupId,
+): string {
+  return pinyinSoundGroupThemeSetting.marshalKey({ soundGroupId });
+}
 
 //
 // Hanzi hint settings

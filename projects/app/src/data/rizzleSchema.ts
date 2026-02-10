@@ -134,6 +134,10 @@ export const rSrsState = memoize0(function rSrsParams() {
 });
 
 /**
+ * # v13 change log
+ *
+ * - **Breaking**: removed pinyin sound entities/mutators in favor of user settings.
+ *
  * # v9 change log
  *
  * - **Breaking**: removed pinyin initial/final associations and groups,
@@ -529,9 +533,20 @@ export const v12 = {
     .alias(`ss`),
 };
 
-export const currentSchema = v12;
+export const v13 = {
+  ...omit(v12, [
+    `pinyinSound`,
+    `pinyinSoundGroup`,
+    `setPinyinSoundName`,
+    `setPinyinSoundGroupName`,
+    `setPinyinSoundGroupTheme`,
+  ]),
+  version: `13`,
+};
 
-export const supportedSchemas = [v8, v9, v11, v12] as const;
+export const currentSchema = v13;
+
+export const supportedSchemas = [v13] as const;
 
 export type Rizzle = RizzleReplicache<typeof currentSchema>;
 
