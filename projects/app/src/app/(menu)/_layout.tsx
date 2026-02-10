@@ -65,7 +65,7 @@ export default function MenuLayout() {
             <View className="mb-5 h-[32px] justify-center pr-4">
               <Link href="/learn" asChild>
                 <RectButton variant="bare" iconStart="arrow-return-left">
-                  <Text className="pyly-button-bare">Back to practice</Text>
+                  Back to practice
                 </RectButton>
               </Link>
             </View>
