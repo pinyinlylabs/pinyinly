@@ -21,6 +21,11 @@ The following commands should be used to test the code:
 
 These can be run from any directory, there's no need to `cd` to a particular directory.
 
+# UI Demos
+
+A storybook-inspired "demo" system is used for developing and testing UI components in isolation.
+Demos are located in `.demo.tsx` files next to the component they are demonstrating.
+
 # PostgreSQL DB Migrations
 
 Don't manually create drizzle SQL migration files, instead use the `app:dbGenerate` command which
