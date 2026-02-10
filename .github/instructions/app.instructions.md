@@ -21,11 +21,6 @@ The following commands should be used to test the code:
 
 These can be run from any directory, there's no need to `cd` to a particular directory.
 
-# Change verification
-
-After changes, always automatically run `moon run app:lint app:typecheck app:fmt app:test` and fix
-any issues that are reported.
-
 # PostgreSQL DB Migrations
 
 Don't manually create drizzle SQL migration files, instead use the `app:dbGenerate` command which
