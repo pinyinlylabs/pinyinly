@@ -1,4 +1,19 @@
 import type {
+  HanziText,
+  HanziWord,
+  PinyinSoundGroupId,
+  PinyinSoundId,
+  PinyinUnit,
+} from "@/data/model";
+import { normalizePinyinUnitForHintKey } from "@/data/pinyin";
+import {
+  rHanziWord,
+  rPinyinSoundGroupId,
+  rPinyinSoundId,
+} from "@/data/rizzleSchema";
+import { nanoid } from "@/util/nanoid";
+import { keyPathVariableNames, r } from "@/util/rizzle";
+import type {
   RizzleAnyEntity,
   RizzleBoolean,
   RizzleEntity,
@@ -6,25 +21,11 @@ import type {
   RizzleEntityOutput,
   RizzleType,
   RizzleTypeAlias,
+  RizzleTypeDef,
 } from "@/util/rizzle";
-import { keyPathVariableNames, r } from "@/util/rizzle";
-import type {
-  HanziText,
-  HanziWord,
-  PinyinSoundGroupId,
-  PinyinSoundId,
-  PinyinUnit,
-} from "@/data/model";
-import {
-  rHanziWord,
-  rPinyinSoundGroupId,
-  rPinyinSoundId,
-} from "@/data/rizzleSchema";
-import { normalizePinyinUnitForHintKey } from "@/data/pinyin";
 import type { Flatten } from "@pinyinly/lib/types";
 import { useReplicache } from "./useReplicache";
 import { useRizzleQuery } from "./useRizzleQuery";
-import { nanoid } from "@/util/nanoid";
 
 export type UserSettingEntity = RizzleAnyEntity;
 export type UserSettingKeyInput<T extends UserSettingEntity> = Parameters<
@@ -34,6 +35,12 @@ export type UserSettingEntityInput<T extends UserSettingEntity> =
   Flatten<RizzleEntityInput<T> | null>;
 export type UserSettingEntityOutput<T extends UserSettingEntity> =
   RizzleEntityOutput<T> | null;
+
+// A user setting entity that has a `text` field
+export type UserSettingTextEntity = RizzleEntity<
+  string,
+  { text: RizzleType<RizzleTypeDef, string, string, string> }
+>;
 
 export interface UseUserSettingResult<T extends UserSettingEntity> {
   isLoading: boolean;

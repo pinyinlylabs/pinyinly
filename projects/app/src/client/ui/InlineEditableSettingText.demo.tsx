@@ -1,11 +1,11 @@
-import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
 import {
   hanziWordMeaningHintExplanationSetting,
   hanziWordMeaningHintTextSetting,
 } from "@/client/hooks/useUserSetting";
+import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
+import { View } from "react-native";
 import { DemoHanziWordKnob, useDemoHanziWordKnob } from "./demo/helpers";
 import { Pylymark } from "./Pylymark";
-import { View } from "react-native";
 
 export default () => {
   const { hanziWord } = useDemoHanziWordKnob(`学:learn`);
