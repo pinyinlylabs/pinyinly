@@ -58,7 +58,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
   const [isHovered, setIsHovered] = useState(false);
   const [draft, setDraft] = useState(currentValue);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
-  const skipBlurSaveRef = useRef(false);
+  const containerRef = useRef<View>(null);
   const inputRef = useRef<TextInput>(null);
 
   useEffect(() => {
@@ -76,30 +76,71 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
     );
   };
 
-  const cancelEdit = () => {
+  const exitEditMode = () => {
     const isDirty = draft !== currentValue;
-    const discard = () => {
-      skipBlurSaveRef.current = true;
-      setDraft(currentValue);
+    if (isDirty) {
+      confirmDiscardChanges({
+        onDiscard: () => {
+          setDraft(currentValue);
+          setIsEditing(false);
+        },
+      });
+    } else {
       setIsEditing(false);
+      handleSave();
+    }
+  };
+
+  useEffect(() => {
+    if (!isEditing) {
+      return;
+    }
+
+    const isWithinModal = (element: Node): boolean => {
+      let current = element as HTMLElement | null;
+      while (current) {
+        // Check for modal indicators
+        // React Native Modal renders with role="dialog" on web
+        if (current.getAttribute?.(`role`) === `dialog`) {
+          return true;
+        }
+        // Also check for React Native Web's modal container
+        // which typically has very high z-index (9999+)
+        const zIndex = window.getComputedStyle(current).zIndex;
+        if (zIndex && Number.parseInt(zIndex, 10) >= 9999) {
+          return true;
+        }
+        current = current.parentElement;
+      }
+      return false;
     };
 
-    if (isDirty) {
-      confirmDiscardChanges({ onDiscard: discard });
-      return;
-    }
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+      const target = event.target as Node;
+      const container = containerRef.current as unknown as Node | null;
 
-    discard();
-  };
+      // Don't exit edit mode if clicking within a modal (different "layer")
+      if (isWithinModal(target)) {
+        return;
+      }
 
-  const handleBlur = () => {
-    if (skipBlurSaveRef.current) {
-      skipBlurSaveRef.current = false;
-      return;
-    }
-    setIsEditing(false);
-    handleSave();
-  };
+      if (container && !container.contains(target)) {
+        exitEditMode();
+      }
+    };
+
+    // Add slight delay to avoid triggering on the same click that opened edit mode
+    const timeoutId = setTimeout(() => {
+      document.addEventListener(`mousedown`, handleClickOutside);
+      document.addEventListener(`touchstart`, handleClickOutside);
+    }, 0);
+
+    return () => {
+      clearTimeout(timeoutId);
+      document.removeEventListener(`mousedown`, handleClickOutside);
+      document.removeEventListener(`touchstart`, handleClickOutside);
+    };
+  }, [isEditing]);
 
   const handleKeyPress = (event: {
     nativeEvent: { key: string; shiftKey?: boolean };
@@ -112,14 +153,14 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
         return;
       }
       event.preventDefault();
-      skipBlurSaveRef.current = true;
       setIsEditing(false);
       handleSave();
     }
 
     if (event.nativeEvent.key === `Escape`) {
       event.preventDefault();
-      cancelEdit();
+      setDraft(currentValue);
+      setIsEditing(false);
     }
   };
 
@@ -135,42 +176,39 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
   return (
     <View>
       {isEditing ? (
-        <View className="flex-row items-start gap-2">
+        <View ref={containerRef} className="relative">
           <TextInput
             ref={inputRef}
             autoFocus
             multiline={multiline}
             value={draft}
             onChangeText={setDraft}
-            onBlur={handleBlur}
             onKeyPress={handleKeyPress}
             placeholder={placeholder}
             className={
               inputClassName == null
-                ? `flex-1`
+                ? ``
                 : `
-                  flex-1
-
                   ${inputClassName}
                 `
             }
+            style={showHistoryButton ? { paddingRight: 32 } : undefined}
           />
           {showHistoryButton ? (
-            <Pressable
-              onPressIn={() => {
-                skipBlurSaveRef.current = true;
-              }}
-              onPress={() => {
-                setShowHistoryModal(true);
-              }}
-              className="rounded-full border border-fg/15 bg-fg-bg5 p-2"
-            >
-              <IconImage
-                icon="time-circled"
-                size={16}
-                className="text-fg-dim"
-              />
-            </Pressable>
+            <View className="absolute right-2 top-2">
+              <RectButton
+                variant="bare"
+                onPress={() => {
+                  setShowHistoryModal(true);
+                }}
+              >
+                <IconImage
+                  icon="time-circled"
+                  size={16}
+                  className="text-fg-dim"
+                />
+              </RectButton>
+            </View>
           ) : null}
         </View>
       ) : (
