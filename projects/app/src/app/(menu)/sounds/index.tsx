@@ -36,11 +36,7 @@ export default function MnemonicsPage() {
                 {sounds.map((soundId) => {
                   const sound = pinyinSounds?.get(soundId);
                   return sound == null ? null : (
-                    <Link
-                      key={soundId}
-                      href={`/explore/sounds/${soundId}`}
-                      asChild
-                    >
+                    <Link key={soundId} href={`/sounds/${soundId}`} asChild>
                       <PinyinSoundTile
                         id={soundId}
                         label={sound.label}

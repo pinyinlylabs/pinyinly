@@ -4,13 +4,13 @@ import { IconImage } from "@/client/ui/IconImage";
 import { MenuDictionarySearch } from "@/client/ui/MenuDictionarySearch";
 import { RectButton } from "@/client/ui/RectButton";
 import { invariant } from "@pinyinly/lib/invariant";
-import type { Href } from "expo-router";
 import { Link, usePathname } from "expo-router";
-import type { TabTriggerProps, TabTriggerSlotProps } from "expo-router/ui";
+import type { Href } from "expo-router";
 import { TabList, Tabs, TabSlot, TabTrigger } from "expo-router/ui";
+import type { TabTriggerProps, TabTriggerSlotProps } from "expo-router/ui";
 import { StatusBar } from "expo-status-bar";
-import type { FunctionComponent, ReactNode } from "react";
 import { Fragment, useLayoutEffect, useState } from "react";
+import type { FunctionComponent, ReactNode } from "react";
 import { Modal, Pressable, ScrollView, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 
@@ -382,6 +382,7 @@ const navItems: NavGroup[] = [
     primary: true,
     items: [
       // { name: `Overview`, href: `/overview` },
+      { name: `Sounds`, href: `/sounds` as const },
       { name: `Skills`, href: `/skills` },
       { name: `History`, href: `/history` },
       // { name: `Tutoring`, href: `/tutoring` },

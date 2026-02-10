@@ -18,7 +18,7 @@ export default function ExplorePage() {
           components—making learning intuitive and recall effortless.
         </Text>
 
-        <Link href="/explore/sounds/" asChild>
+        <Link href="/sounds" asChild>
           <RectButton
             variant="filled"
             className={`

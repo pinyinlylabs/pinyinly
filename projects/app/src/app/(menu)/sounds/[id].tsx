@@ -22,7 +22,7 @@ import { ScrollView, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 
 export default function MnemonicIdPage() {
-  const id = useLocalSearchParams<`/explore/sounds/[id]`>().id as PinyinSoundId;
+  const id = useLocalSearchParams<`/sounds/[id]`>().id as PinyinSoundId;
   const r = useReplicache();
   const chart = loadPylyPinyinChart();
 
@@ -45,9 +45,7 @@ export default function MnemonicIdPage() {
   return (
     <ScrollView
       className="bg-bg"
-      contentContainerClassName={`
-        max-w-[800px] self-center px-safe-or-4 pb-2 pt-safe-offset-4 px-safe-or-4
-      `}
+      contentContainerClassName={`max-w-[800px] self-center px-safe-or-4 pb-2 pt-safe-offset-4 px-safe-or-4`}
     >
       <View className="mb-5 flex-row items-center gap-4">
         <View className={pinyinPartBox()}>
@@ -70,7 +68,7 @@ export default function MnemonicIdPage() {
         </Text>
         <View className="flex-row flex-wrap gap-1">
           {pinyinSoundGroup?.sounds.map((siblingId) => (
-            <Link key={siblingId} href={`/explore/sounds/${siblingId}`}>
+            <Link key={siblingId} href={`/sounds/${siblingId}`}>
               <Text className={siblingId === id ? `text-fg` : `text-fg/50`}>
                 {pinyinSounds?.get(siblingId)?.label}
               </Text>
