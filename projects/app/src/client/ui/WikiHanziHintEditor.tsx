@@ -1,5 +1,10 @@
 import { useReplicache } from "@/client/hooks/useReplicache";
-import { useUserSetting } from "@/client/hooks/useUserSetting";
+import {
+  hanziWordMeaningHintExplanationSetting,
+  hanziWordMeaningHintImageSetting,
+  hanziWordMeaningHintTextSetting,
+  useUserSetting,
+} from "@/client/hooks/useUserSetting";
 import { getWikiCharacterData } from "@/client/wiki";
 import { walkIdsNodeLeafs } from "@/data/hanzi";
 import type { HanziWord } from "@/data/model";
@@ -14,11 +19,6 @@ import { use, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { AllHintsModal } from "./AllHintsModal";
 import { HintImageSettingPicker } from "./HintImageSettingPicker";
-import {
-  hanziWordMeaningHintExplanationSetting,
-  hanziWordMeaningHintImageSetting,
-  hanziWordMeaningHintTextSetting,
-} from "./HanziWordHintProvider";
 import { InlineEditableSettingText } from "./InlineEditableSettingText";
 import { Pylymark } from "./Pylymark";
 import { RectButton } from "./RectButton";
@@ -77,8 +77,7 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
     new Set(hintsToShow.flatMap((hint) => hint.imageAssetIds ?? [])),
   );
 
-  const selectedHintImageId =
-    (imageSetting.value as { t?: string } | null)?.t ?? null;
+  const imageId = (imageSetting.value as { t?: string } | null)?.t ?? null;
 
   const setHintSettingValue = (
     hintHanziWord: HanziWord,
@@ -89,7 +88,7 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
         ? null
         : hanziWordMeaningHintTextSetting.marshalValue({
             hanziWord: hintHanziWord,
-            t: value,
+            text: value,
           });
     const storedValue =
       marshaledValue == null
@@ -119,7 +118,7 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
         ? null
         : hanziWordMeaningHintExplanationSetting.marshalValue({
             hanziWord: hintHanziWord,
-            t: value,
+            text: value,
           });
     const storedValue =
       marshaledValue == null
@@ -149,7 +148,7 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
         ? null
         : hanziWordMeaningHintImageSetting.marshalValue({
             hanziWord: hintHanziWord,
-            t: value,
+            imageId: value,
           });
     const storedValue =
       marshaledValue == null
@@ -207,11 +206,11 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
   currentHintExplanation ??=
     selectedHint == null ? fallbackHint?.explanation : explanationOverride;
   let currentHintImageIds: readonly string[] | null = null;
-  if (selectedHintImageId == null) {
+  if (imageId == null) {
     currentHintImageIds =
       currentPresetHint?.imageAssetIds ?? fallbackHint?.imageAssetIds ?? null;
   } else {
-    currentHintImageIds = [selectedHintImageId];
+    currentHintImageIds = [imageId];
   }
   const hasCurrentHint = currentHintText.length > 0;
   const canOpenGallery = hintsToShow.length > 0;

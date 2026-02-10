@@ -1,16 +1,16 @@
 import { useReplicache } from "@/client/hooks/useReplicache";
 import { useRizzleQueryPaged } from "@/client/hooks/useRizzleQueryPaged";
-import { pinyinSoundsQuery } from "@/client/query";
-import type { HanziText, PinyinUnit } from "@/data/model";
-import { splitPinyinUnit } from "@/data/pinyin";
-import type { ReactNode } from "react";
-import { Text, View } from "react-native";
 import {
   getHanziPronunciationHintKeyParams,
   hanziPronunciationHintExplanationSetting,
   hanziPronunciationHintImageSetting,
   hanziPronunciationHintTextSetting,
-} from "./HanziPronunciationHintProvider";
+} from "@/client/hooks/useUserSetting";
+import { pinyinSoundsQuery } from "@/client/query";
+import type { HanziText, PinyinUnit } from "@/data/model";
+import { splitPinyinUnit } from "@/data/pinyin";
+import type { ReactNode } from "react";
+import { Text, View } from "react-native";
 import { ThreeSplitLinesDown } from "./ThreeSplitLinesDown";
 import { HintImageSettingPicker } from "./HintImageSettingPicker";
 import { InlineEditableSettingText } from "./InlineEditableSettingText";

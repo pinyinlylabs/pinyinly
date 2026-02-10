@@ -8,6 +8,9 @@ import type {
   RizzleTypeAlias,
 } from "@/util/rizzle";
 import { keyPathVariableNames, r } from "@/util/rizzle";
+import type { HanziText, HanziWord, PinyinUnit } from "@/data/model";
+import { rHanziWord } from "@/data/rizzleSchema";
+import { normalizePinyinUnitForHintKey } from "@/data/pinyin";
 import type { Flatten } from "@pinyinly/lib/types";
 import { useReplicache } from "./useReplicache";
 import { useRizzleQuery } from "./useRizzleQuery";
@@ -198,3 +201,101 @@ export type UserSettingToggleableEntity = RizzleEntity<
 export const autoCheckUserSetting = r.entity(`autoCheck`, {
   enabled: r.boolean(`e`),
 }) satisfies UserSettingToggleableEntity;
+
+//
+// Hanzi hint settings
+//
+
+export const hanziWordMeaningHintTextSetting = r.entity(
+  `hanziWordMeaningHint.[hanziWord].hint`,
+  {
+    hanziWord: rHanziWord().alias(`h`),
+    text: r.string().alias(`t`),
+  },
+);
+
+export const hanziWordMeaningHintExplanationSetting = r.entity(
+  `hanziWordMeaningHint.[hanziWord].explanation`,
+  {
+    hanziWord: rHanziWord().alias(`h`),
+    text: r.string().alias(`t`),
+  },
+);
+
+export const hanziWordMeaningHintImageSetting = r.entity(
+  `hanziWordMeaningHint.[hanziWord].selectedHintImageId`,
+  {
+    hanziWord: rHanziWord().alias(`h`),
+    imageId: r.string().alias(`t`),
+  },
+);
+
+export const hanziPronunciationHintTextSetting = r.entity(
+  `hanziPronunciationHint.[hanzi].[pinyin].hint`,
+  {
+    hanzi: r.string().alias(`h`),
+    pinyin: r.string().alias(`p`),
+    text: r.string().alias(`t`),
+  },
+);
+
+export const hanziPronunciationHintExplanationSetting = r.entity(
+  `hanziPronunciationHint.[hanzi].[pinyin].explanation`,
+  {
+    hanzi: r.string().alias(`h`),
+    pinyin: r.string().alias(`p`),
+    text: r.string().alias(`t`),
+  },
+);
+
+export const hanziPronunciationHintImageSetting = r.entity(
+  `hanziPronunciationHint.[hanzi].[pinyin].selectedHintImageId`,
+  {
+    hanzi: r.string().alias(`h`),
+    pinyin: r.string().alias(`p`),
+    imageId: r.string().alias(`t`),
+  },
+);
+
+export function getHanziPronunciationHintKeyParams(
+  hanzi: HanziText,
+  pinyinUnit: PinyinUnit,
+) {
+  return {
+    hanzi,
+    pinyin: normalizePinyinUnitForHintKey(pinyinUnit),
+  };
+}
+
+export interface HanziWordHintOverrides {
+  hint?: string;
+  explanation?: string;
+  imageId?: string;
+  hasOverrides: boolean;
+}
+
+export function useHanziWordHintOverrides(
+  hanziWord: HanziWord,
+): HanziWordHintOverrides {
+  const hintSetting = useUserSetting(hanziWordMeaningHintTextSetting, {
+    hanziWord,
+  });
+  const explanationSetting = useUserSetting(
+    hanziWordMeaningHintExplanationSetting,
+    { hanziWord },
+  );
+  const imageSetting = useUserSetting(hanziWordMeaningHintImageSetting, {
+    hanziWord,
+  });
+
+  const hint = hintSetting.value?.text ?? undefined;
+  const explanation = explanationSetting.value?.text ?? undefined;
+  const imageId = imageSetting.value?.imageId ?? undefined;
+  const hasOverrides = hint != null || explanation != null || imageId != null;
+
+  return { hint, explanation, imageId, hasOverrides };
+}
+
+export function useSelectedHint(hanziWord: HanziWord): string | undefined {
+  return useHanziWordHintOverrides(hanziWord).hint;
+}

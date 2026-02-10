@@ -15,7 +15,7 @@ import { Text, View } from "react-native";
 import { AssetImage } from "./AssetImage";
 import { HanziCharacter, hanziCharacterColorSchema } from "./HanziCharacter";
 import { HanziLink } from "./HanziLink";
-import { useSelectedHint } from "./HanziWordHintProvider";
+import { useSelectedHint } from "@/client/hooks/useUserSetting";
 import { IconImage } from "./IconImage";
 import { Pylymark } from "./Pylymark";
 import { RectButton } from "./RectButton";

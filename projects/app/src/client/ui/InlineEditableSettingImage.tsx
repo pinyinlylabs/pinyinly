@@ -37,7 +37,7 @@ export function InlineEditableSettingImage<T extends UserSettingEntity>({
 }: InlineEditableSettingImageProps<T>) {
   const { value, setValue } = useUserSetting(setting, settingKey);
   const history = useUserSettingHistory(setting, settingKey);
-  const selectedHintImageId = (value as { t?: string } | null)?.t ?? null;
+  const imageId = (value as { t?: string } | null)?.t ?? null;
   const [hoveredHintImageId, setHoveredHintImageId] = useState<string | null>(
     null,
   );
@@ -62,7 +62,7 @@ export function InlineEditableSettingImage<T extends UserSettingEntity>({
     new Set([
       ...historyImageAssetIds,
       ...presetImageIds,
-      ...(selectedHintImageId == null ? [] : [selectedHintImageId]),
+      ...(imageId == null ? [] : [imageId]),
     ]),
   );
 
@@ -74,7 +74,7 @@ export function InlineEditableSettingImage<T extends UserSettingEntity>({
     setValue({ t: assetId } as UserSettingEntityInput<T>);
   };
 
-  const previewHintImageId = hoveredHintImageId ?? selectedHintImageId ?? null;
+  const previewHintImageId = hoveredHintImageId ?? imageId ?? null;
 
   return (
     <View className={className}>
@@ -89,7 +89,7 @@ export function InlineEditableSettingImage<T extends UserSettingEntity>({
         {imageIdsToShow.length > 0 && (
           <View className="flex-row flex-wrap gap-2">
             {imageIdsToShow.map((assetId) => {
-              const isSelected = assetId === selectedHintImageId;
+              const isSelected = assetId === imageId;
               const isHovered = assetId === hoveredHintImageId;
               return (
                 <Pressable

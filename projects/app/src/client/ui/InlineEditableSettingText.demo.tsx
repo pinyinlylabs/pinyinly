@@ -2,7 +2,7 @@ import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText
 import {
   hanziWordMeaningHintExplanationSetting,
   hanziWordMeaningHintTextSetting,
-} from "@/client/ui/HanziWordHintProvider";
+} from "@/client/hooks/useUserSetting";
 import { DemoHanziWordKnob, useDemoHanziWordKnob } from "./demo/helpers";
 import { Pylymark } from "./Pylymark";
 import { View } from "react-native";

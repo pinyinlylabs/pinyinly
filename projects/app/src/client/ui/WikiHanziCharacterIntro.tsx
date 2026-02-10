@@ -4,7 +4,7 @@ import type { HanziWordWithMeaning } from "@/dictionary";
 import { hanziFromHanziWord, loadDictionary } from "@/dictionary";
 import { use } from "react";
 import { View } from "react-native";
-import { useSelectedHintImageId } from "./HanziWordHintProvider";
+import { useHanziWordHintOverrides } from "@/client/hooks/useUserSetting";
 import { WikiHanziCharacterDecomposition } from "./WikiHanziCharacterDecomposition";
 import { WikiHanziCharacterMeanings } from "./WikiHanziCharacterMeanings";
 import { WikiHanziCharacterPronunciation } from "./WikiHanziCharacterPronunciation";
@@ -20,7 +20,8 @@ export function WikiHanziCharacterIntro({
   const meanings = dictionary.lookupHanzi(characterData.hanzi);
   const primaryHanziWord =
     meanings[0]?.[0] ?? (`${characterData.hanzi}:unknown` as HanziWord);
-  const primaryHintImageId = useSelectedHintImageId(primaryHanziWord);
+  const primaryHintImageId =
+    useHanziWordHintOverrides(primaryHanziWord).imageId;
 
   return (
     <>
