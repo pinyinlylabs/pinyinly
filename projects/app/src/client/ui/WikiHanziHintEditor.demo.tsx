@@ -1,4 +1,3 @@
-import { HanziWordHintProvider } from "@/client/ui/HanziWordHintProvider";
 import { WikiHanziHintEditor } from "@/client/ui/WikiHanziHintEditor";
 import type { HanziWord } from "@/data/model";
 import { Text, View } from "react-native";
@@ -20,11 +19,9 @@ export default () => {
       <DemoHanziWordKnob hanziWords={[`学:learn`, `好:good`, `看:look`]} />
 
       <View className="h-[600] w-[400] overflow-hidden rounded-lg border border-fg/20">
-        <HanziWordHintProvider>
-          <Suspense fallback={<LoadingFallback />}>
-            <WikiHanziHintEditor hanziWord={hanziWord} />
-          </Suspense>
-        </HanziWordHintProvider>
+        <Suspense fallback={<LoadingFallback />}>
+          <WikiHanziHintEditor hanziWord={hanziWord} />
+        </Suspense>
       </View>
     </View>
   );

@@ -1,8 +1,6 @@
 import { useReplicache } from "@/client/hooks/useReplicache";
 import { useUserSetting } from "@/client/hooks/useUserSetting";
 import type { HanziText, PinyinUnit } from "@/data/model";
-import type { currentSchema } from "@/data/rizzleSchema";
-import type { RizzleReplicache } from "@/util/rizzle";
 import { r } from "@/util/rizzle";
 import { nanoid } from "@/util/nanoid";
 import { normalizePinyinUnitForHintKey } from "@/data/pinyin";
@@ -28,12 +26,27 @@ export interface HanziPronunciationHintContextValue {
     pinyinUnit: PinyinUnit,
     overrides: HanziPronunciationHintOverridesInput,
   ) => void;
+  setHintText: (
+    hanzi: HanziText,
+    pinyinUnit: PinyinUnit,
+    hint: string | null | undefined,
+  ) => void;
+  setHintExplanation: (
+    hanzi: HanziText,
+    pinyinUnit: PinyinUnit,
+    explanation: string | null | undefined,
+  ) => void;
+  setHintImageId: (
+    hanzi: HanziText,
+    pinyinUnit: PinyinUnit,
+    imageId: string | null | undefined,
+  ) => void;
   clearHintOverrides: (hanzi: HanziText, pinyinUnit: PinyinUnit) => void;
 }
 
 const Context = createContext<HanziPronunciationHintContextValue | null>(null);
 
-const hanziPronunciationHintTextSetting = r.entity(
+export const hanziPronunciationHintTextSetting = r.entity(
   `hanziPronunciationHint.[hanzi].[pinyin].hint`,
   {
     hanzi: r.string().alias(`h`),
@@ -42,7 +55,7 @@ const hanziPronunciationHintTextSetting = r.entity(
   },
 );
 
-const hanziPronunciationHintExplanationSetting = r.entity(
+export const hanziPronunciationHintExplanationSetting = r.entity(
   `hanziPronunciationHint.[hanzi].[pinyin].explanation`,
   {
     hanzi: r.string().alias(`h`),
@@ -60,9 +73,10 @@ export const hanziPronunciationHintImageSetting = r.entity(
   },
 );
 
-type RizzleCurrent = RizzleReplicache<typeof currentSchema>;
-
-function normalizeHintKey(hanzi: HanziText, pinyinUnit: PinyinUnit) {
+export function getHanziPronunciationHintKeyParams(
+  hanzi: HanziText,
+  pinyinUnit: PinyinUnit,
+) {
   return {
     hanzi,
     pinyin: normalizePinyinUnitForHintKey(pinyinUnit),
@@ -72,7 +86,7 @@ function normalizeHintKey(hanzi: HanziText, pinyinUnit: PinyinUnit) {
 export const HanziPronunciationHintProvider = Object.assign(
   function HanziPronunciationHintProvider({ children }: PropsWithChildren) {
     "use memo"; // Object.assign(…) wrapped components aren't inferred.
-    const rep = useReplicache() as RizzleCurrent;
+    const rep = useReplicache();
 
     const setSettingValue = (
       entity:
@@ -83,7 +97,7 @@ export const HanziPronunciationHintProvider = Object.assign(
       pinyinUnit: PinyinUnit,
       value: string | null | undefined,
     ) => {
-      const keyParams = normalizeHintKey(hanzi, pinyinUnit);
+      const keyParams = getHanziPronunciationHintKeyParams(hanzi, pinyinUnit);
       const marshaledValue =
         value == null
           ? null
@@ -139,6 +153,45 @@ export const HanziPronunciationHintProvider = Object.assign(
       }
     };
 
+    const setHintText = (
+      hanzi: HanziText,
+      pinyinUnit: PinyinUnit,
+      hint: string | null | undefined,
+    ) => {
+      setSettingValue(
+        hanziPronunciationHintTextSetting,
+        hanzi,
+        pinyinUnit,
+        hint,
+      );
+    };
+
+    const setHintExplanation = (
+      hanzi: HanziText,
+      pinyinUnit: PinyinUnit,
+      explanation: string | null | undefined,
+    ) => {
+      setSettingValue(
+        hanziPronunciationHintExplanationSetting,
+        hanzi,
+        pinyinUnit,
+        explanation,
+      );
+    };
+
+    const setHintImageId = (
+      hanzi: HanziText,
+      pinyinUnit: PinyinUnit,
+      imageId: string | null | undefined,
+    ) => {
+      setSettingValue(
+        hanziPronunciationHintImageSetting,
+        hanzi,
+        pinyinUnit,
+        imageId,
+      );
+    };
+
     const clearHintOverrides = (
       hanzi: HanziText,
       pinyinUnit: PinyinUnit,
@@ -154,6 +207,9 @@ export const HanziPronunciationHintProvider = Object.assign(
       <Context.Provider
         value={{
           setHintOverrides,
+          setHintText,
+          setHintExplanation,
+          setHintImageId,
           clearHintOverrides,
         }}
       >
@@ -170,7 +226,7 @@ export function useHanziPronunciationHintOverrides(
   hanzi: HanziText,
   pinyinUnit: PinyinUnit,
 ): HanziPronunciationHintOverrides {
-  const keyParams = normalizeHintKey(hanzi, pinyinUnit);
+  const keyParams = getHanziPronunciationHintKeyParams(hanzi, pinyinUnit);
 
   const hintSetting = useUserSetting(
     hanziPronunciationHintTextSetting,

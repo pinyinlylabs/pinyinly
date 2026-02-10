@@ -1,9 +1,7 @@
 import { useReplicache } from "@/client/hooks/useReplicache";
 import { useUserSetting } from "@/client/hooks/useUserSetting";
 import type { HanziWord } from "@/data/model";
-import type { currentSchema } from "@/data/rizzleSchema";
 import { rHanziWord } from "@/data/rizzleSchema";
-import type { RizzleReplicache } from "@/util/rizzle";
 import { r } from "@/util/rizzle";
 import { nanoid } from "@/util/nanoid";
 import type { PropsWithChildren } from "react";
@@ -31,6 +29,16 @@ export interface HanziWordHintContextValue {
     overrides: HanziWordHintOverridesInput,
   ) => void;
 
+  setHintText: (hanziWord: HanziWord, hint: string | null | undefined) => void;
+  setHintExplanation: (
+    hanziWord: HanziWord,
+    explanation: string | null | undefined,
+  ) => void;
+  setHintImageId: (
+    hanziWord: HanziWord,
+    imageId: string | null | undefined,
+  ) => void;
+
   /**
    * Clear all overrides for a hanziword hint.
    */
@@ -39,7 +47,7 @@ export interface HanziWordHintContextValue {
 
 const Context = createContext<HanziWordHintContextValue | null>(null);
 
-const hanziWordMeaningHintTextSetting = r.entity(
+export const hanziWordMeaningHintTextSetting = r.entity(
   `hanziWordMeaningHint.[hanziWord].hint`,
   {
     hanziWord: rHanziWord().alias(`h`),
@@ -47,7 +55,7 @@ const hanziWordMeaningHintTextSetting = r.entity(
   },
 );
 
-const hanziWordMeaningHintExplanationSetting = r.entity(
+export const hanziWordMeaningHintExplanationSetting = r.entity(
   `hanziWordMeaningHint.[hanziWord].explanation`,
   {
     hanziWord: rHanziWord().alias(`h`),
@@ -63,12 +71,10 @@ export const hanziWordMeaningHintImageSetting = r.entity(
   },
 );
 
-type RizzleCurrent = RizzleReplicache<typeof currentSchema>;
-
 export const HanziWordHintProvider = Object.assign(
   function HanziWordHintProvider({ children }: PropsWithChildren) {
     "use memo"; // Object.assign(…) wrapped components aren't inferred.
-    const rep = useReplicache() as RizzleCurrent;
+    const rep = useReplicache();
 
     const setSettingValue = (
       entity:
@@ -129,6 +135,31 @@ export const HanziWordHintProvider = Object.assign(
       }
     };
 
+    const setHintText = (
+      hanziWord: HanziWord,
+      hint: string | null | undefined,
+    ) => {
+      setSettingValue(hanziWordMeaningHintTextSetting, hanziWord, hint);
+    };
+
+    const setHintExplanation = (
+      hanziWord: HanziWord,
+      explanation: string | null | undefined,
+    ) => {
+      setSettingValue(
+        hanziWordMeaningHintExplanationSetting,
+        hanziWord,
+        explanation,
+      );
+    };
+
+    const setHintImageId = (
+      hanziWord: HanziWord,
+      imageId: string | null | undefined,
+    ) => {
+      setSettingValue(hanziWordMeaningHintImageSetting, hanziWord, imageId);
+    };
+
     const clearHintOverrides = (hanziWord: HanziWord): void => {
       setHintOverrides(hanziWord, {
         hint: null,
@@ -141,6 +172,9 @@ export const HanziWordHintProvider = Object.assign(
       <Context.Provider
         value={{
           setHintOverrides,
+          setHintText,
+          setHintExplanation,
+          setHintImageId,
           clearHintOverrides,
         }}
       >

@@ -5,8 +5,7 @@ import {
 import { useRizzleQuery } from "@/client/hooks/useRizzleQuery";
 import { trpc } from "@/client/trpc";
 import { AssetStatusKind } from "@/data/model";
-import type { currentSchema } from "@/data/rizzleSchema";
-import type { RizzleReplicache } from "@/util/rizzle";
+import type { Rizzle } from "@/data/rizzleSchema";
 import type { ImageProps as ExpoImageProps } from "expo-image";
 import { Image as ExpoImage } from "expo-image";
 import { useEffect, useState } from "react";
@@ -32,9 +31,8 @@ interface AssetImageProps extends Omit<ExpoImageProps, `source`> {
  * - Uploaded: Display image
  * - Failed: Error message
  */
-type RizzleCurrent = RizzleReplicache<typeof currentSchema>;
 type AssetEntity = NonNullable<
-  Awaited<ReturnType<RizzleCurrent[`query`][`asset`][`get`]>>
+  Awaited<ReturnType<Rizzle[`query`][`asset`][`get`]>>
 >;
 
 export function AssetImage({
@@ -44,10 +42,7 @@ export function AssetImage({
 }: AssetImageProps) {
   const { data: asset } = useRizzleQuery<AssetEntity | null>(
     [`asset`, assetId],
-    async (r, tx) => {
-      const rCurrent = r as RizzleCurrent;
-      return (await rCurrent.query.asset.get(tx, { assetId })) ?? null;
-    },
+    async (r, tx) => (await r.query.asset.get(tx, { assetId })) ?? null,
   );
   const [imageError, setImageError] = useState(false);
   const [localSource, setLocalSource] = useState<Awaited<

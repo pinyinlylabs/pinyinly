@@ -13,8 +13,6 @@ import { routingIntegration } from "@/client/sentry";
 import { useAuth } from "@/client/auth";
 import { AudioContextProvider } from "@/client/ui/AudioContextProvider";
 import { DeviceStoreProvider } from "@/client/ui/DeviceStoreProvider";
-import { HanziPronunciationHintProvider } from "@/client/ui/HanziPronunciationHintProvider";
-import { HanziWordHintProvider } from "@/client/ui/HanziWordHintProvider";
 import { PostHogProvider } from "@/client/ui/PostHogProvider";
 import { PylyThemeProvider } from "@/client/ui/PylyThemeProvider";
 import { SessionStoreProvider } from "@/client/ui/SessionStoreProvider";
@@ -61,21 +59,15 @@ function RootLayout() {
             </Head>
 
             <AudioContextProvider>
-              <HanziWordHintProvider>
-                <HanziPronunciationHintProvider>
-                  <Stack
-                    screenOptions={{ headerShown: false, animation: `fade` }}
-                  >
-                    <Stack.Screen
-                      name="login"
-                      options={{
-                        presentation: `modal`,
-                        animation: `slide_from_bottom`,
-                      }}
-                    />
-                  </Stack>
-                </HanziPronunciationHintProvider>
-              </HanziWordHintProvider>
+              <Stack screenOptions={{ headerShown: false, animation: `fade` }}>
+                <Stack.Screen
+                  name="login"
+                  options={{
+                    presentation: `modal`,
+                    animation: `slide_from_bottom`,
+                  }}
+                />
+              </Stack>
             </AudioContextProvider>
             <SplashScreen />
           </PostHogProvider>
