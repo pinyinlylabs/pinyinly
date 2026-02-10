@@ -103,6 +103,13 @@ vi.mock(`react-native-reanimated`, () => {
   };
 });
 
+vi.mock(`expo-image-picker`, () => {
+  return {
+    launchImageLibraryAsync: () => null,
+    requestMediaLibraryPermissionsAsync: () => null,
+  };
+});
+
 vi.mock(`nativewind`, () => {
   return {
     cssInterop: () => null,
