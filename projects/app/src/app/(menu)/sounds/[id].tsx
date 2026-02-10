@@ -18,7 +18,7 @@ import { nullIfEmpty } from "@/util/unicode";
 import { sortComparatorString } from "@pinyinly/lib/collections";
 import { Link, useLocalSearchParams } from "expo-router";
 import { use } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 
 export default function MnemonicIdPage() {
@@ -43,10 +43,7 @@ export default function MnemonicIdPage() {
   const label = chart.soundToCustomLabel[id] ?? id;
 
   return (
-    <ScrollView
-      className="bg-bg"
-      contentContainerClassName={`max-w-[800px] self-center px-safe-or-4 pb-2 pt-safe-offset-4 px-safe-or-4`}
-    >
+    <View className="max-w-[800px] self-center pb-2 pt-safe-offset-4">
       <View className="mb-5 flex-row items-center gap-4">
         <View className={pinyinPartBox()}>
           <Text className="text-center font-cursive text-2xl text-fg">
@@ -166,7 +163,7 @@ export default function MnemonicIdPage() {
             ))}
         </View>
       </View>
-    </ScrollView>
+    </View>
   );
 }
 

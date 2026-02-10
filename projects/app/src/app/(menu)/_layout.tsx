@@ -35,6 +35,7 @@ export default function MenuLayout() {
           )),
         )}
         {/* This is needed to make the route actually work with expo-router. */}
+        <TabTrigger name="sound" href="/sounds/[id]" />
         <TabTrigger name="wiki-hanzi" href="/wiki/[hanzi]" />
         <TabTrigger name="wiki-hint" href="/wiki/[hanzi]/edit/[meaningKey]" />
       </TabList>
