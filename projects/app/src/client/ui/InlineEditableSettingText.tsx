@@ -55,7 +55,6 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
   const currentValue: string = value?.text ?? ``;
 
   const [isEditing, setIsEditing] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
   const [draft, setDraft] = useState(currentValue);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const containerRef = useRef<View>(null);
@@ -173,6 +172,15 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
   const showHistoryButton =
     isEditing && draft.trim().length === 0 && historyEntries.length > 0;
 
+  // Use CSS :hover via Tailwind group pattern to avoid stale hover state
+  // when component unmounts/remounts during edit mode
+  const isUsingDefaultHoverStyles =
+    displayContainerClassName === `px-2 py-1` &&
+    displayHoverClassName === `rounded-md bg-fg-bg10 px-2 py-1`;
+  const displayViewClassName = isUsingDefaultHoverStyles
+    ? `px-2 py-1 group-hover:rounded-md group-hover:bg-fg-bg10`
+    : displayContainerClassName;
+
   return (
     <View>
       {isEditing ? (
@@ -213,21 +221,12 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
         </View>
       ) : (
         <Pressable
+          className="group"
           onPress={() => {
             setIsEditing(true);
           }}
-          onHoverIn={() => {
-            setIsHovered(true);
-          }}
-          onHoverOut={() => {
-            setIsHovered(false);
-          }}
         >
-          <View
-            className={
-              isHovered ? displayHoverClassName : displayContainerClassName
-            }
-          >
+          <View className={displayViewClassName}>
             <Text
               className={
                 currentValue.length === 0 ? emptyClassName : displayClassName
