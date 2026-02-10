@@ -4,6 +4,8 @@ import { isValidElement, useState } from "react";
 import type { ViewProps } from "react-native";
 import { Pressable, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
+import { IconImage } from "./IconImage";
+import type { IconName } from "./IconRegistry";
 
 export type ButtonVariant =
   | `filled`
@@ -18,6 +20,8 @@ export type RectButtonProps = {
   className?: string;
   inFlexRowParent?: boolean;
   textClassName?: string;
+  iconStart?: IconName;
+  iconEnd?: IconName;
 } & Pick<
   PropsOf<typeof Pressable>,
   keyof PropsOf<typeof Pressable> & (`on${string}` | `disabled` | `ref`)
@@ -29,6 +33,8 @@ export function RectButton({
   className,
   inFlexRowParent = false,
   textClassName,
+  iconStart,
+  iconEnd,
   ...pressableProps
 }: RectButtonProps) {
   const disabled = pressableProps.disabled === true;
@@ -75,12 +81,26 @@ export function RectButton({
           className,
         })}
       >
-        {isValidElement(children) ? (
-          children
+        {iconStart == null && iconEnd == null ? (
+          isValidElement(children) ? (
+            children
+          ) : (
+            <Text className={text({ variant, class: textClassName })}>
+              {children}
+            </Text>
+          )
         ) : (
-          <Text className={text({ variant, class: textClassName })}>
-            {children}
-          </Text>
+          <View className={iconLayout({ variant })}>
+            {iconStart == null ? null : <IconImage icon={iconStart} />}
+            {isValidElement(children) ? (
+              children
+            ) : (
+              <Text className={text({ variant, class: textClassName })}>
+                {children}
+              </Text>
+            )}
+            {iconEnd == null ? null : <IconImage icon={iconEnd} />}
+          </View>
         )}
       </View>
     </Pressable>
@@ -240,6 +260,19 @@ const text = tv({
       option: `pyly-button-option`,
       bare: `pyly-button-bare`,
       rounded: `font-sans text-[13px] font-semibold uppercase text-fg`,
+    },
+  },
+});
+
+const iconLayout = tv({
+  base: `flex-row items-center`,
+  variants: {
+    variant: {
+      bare: `gap-2`,
+      filled: ``,
+      outline: ``,
+      option: ``,
+      rounded: ``,
     },
   },
 });

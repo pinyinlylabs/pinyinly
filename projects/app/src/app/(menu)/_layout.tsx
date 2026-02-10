@@ -64,8 +64,7 @@ export default function MenuLayout() {
           <View className="sticky items-end top-safe-offset-5">
             <View className="mb-5 h-[32px] justify-center pr-4">
               <Link href="/learn" asChild>
-                <RectButton variant="bare" className={`flex-row gap-2`}>
-                  <IconImage icon="arrow-return-left" size={24} />
+                <RectButton variant="bare" iconStart="arrow-return-left">
                   <Text className="pyly-button-bare">Back to practice</Text>
                 </RectButton>
               </Link>
