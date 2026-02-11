@@ -77,7 +77,7 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
     new Set(hintsToShow.flatMap((hint) => hint.imageAssetIds ?? [])),
   );
 
-  const imageId = (imageSetting.value as { t?: string } | null)?.t ?? null;
+  const imageId = imageSetting.value?.imageId ?? null;
 
   const setHintSettingValue = (
     hintHanziWord: HanziWord,

@@ -42,6 +42,12 @@ export type UserSettingTextEntity = RizzleEntity<
   { text: RizzleType<RizzleTypeDef, string, string, string> }
 >;
 
+// A user setting entity that has an `imageId` field
+export type UserSettingImageEntity = RizzleEntity<
+  string,
+  { imageId: RizzleType<RizzleTypeDef, string, string, string> }
+>;
+
 export interface UseUserSettingResult<T extends UserSettingEntity> {
   isLoading: boolean;
   value: UserSettingEntityOutput<T>;

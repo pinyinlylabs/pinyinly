@@ -1,11 +1,11 @@
 import type {
-  UserSettingEntity,
+  UserSettingImageEntity,
   UserSettingKeyInput,
 } from "@/client/hooks/useUserSetting";
 import { Text, View } from "react-native";
 import { InlineEditableSettingImage } from "./InlineEditableSettingImage";
 
-interface HintImageSettingPickerProps<T extends UserSettingEntity> {
+interface HintImageSettingPickerProps<T extends UserSettingImageEntity> {
   setting: T;
   settingKey: UserSettingKeyInput<T>;
   title?: string;
@@ -22,7 +22,7 @@ interface HintImageSettingPickerProps<T extends UserSettingEntity> {
 
 const defaultTitle = `Choose an image`;
 
-export function HintImageSettingPicker<T extends UserSettingEntity>({
+export function HintImageSettingPicker<T extends UserSettingImageEntity>({
   setting,
   settingKey,
   title = defaultTitle,

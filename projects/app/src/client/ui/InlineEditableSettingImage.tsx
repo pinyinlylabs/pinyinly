@@ -1,18 +1,18 @@
-import type {
-  UserSettingEntity,
-  UserSettingEntityInput,
-  UserSettingKeyInput,
-} from "@/client/hooks/useUserSetting";
 import {
   useUserSetting,
   useUserSettingHistory,
+} from "@/client/hooks/useUserSetting";
+import type {
+  UserSettingEntityInput,
+  UserSettingImageEntity,
+  UserSettingKeyInput,
 } from "@/client/hooks/useUserSetting";
 import { useState } from "react";
 import { Pressable, View } from "react-native";
 import { AssetImage } from "./AssetImage";
 import { ImagePasteDropZone } from "./ImagePasteDropZone";
 
-interface InlineEditableSettingImageProps<T extends UserSettingEntity> {
+interface InlineEditableSettingImageProps<T extends UserSettingImageEntity> {
   setting: T;
   settingKey: UserSettingKeyInput<T>;
   presetImageIds?: readonly string[];
@@ -24,7 +24,7 @@ interface InlineEditableSettingImageProps<T extends UserSettingEntity> {
   className?: string;
 }
 
-export function InlineEditableSettingImage<T extends UserSettingEntity>({
+export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
   setting,
   settingKey,
   presetImageIds = [],
@@ -37,7 +37,7 @@ export function InlineEditableSettingImage<T extends UserSettingEntity>({
 }: InlineEditableSettingImageProps<T>) {
   const { value, setValue } = useUserSetting(setting, settingKey);
   const history = useUserSettingHistory(setting, settingKey);
-  const imageId = (value as { t?: string } | null)?.t ?? null;
+  const imageId = value?.imageId ?? null;
   const [hoveredHintImageId, setHoveredHintImageId] = useState<string | null>(
     null,
   );
@@ -46,7 +46,8 @@ export function InlineEditableSettingImage<T extends UserSettingEntity>({
   if (includeHistory) {
     const seenIds = new Set<string>();
     for (const entry of [...history.entries].reverse()) {
-      const assetId = (entry.value as { t?: string } | null)?.t;
+      const assetId = entry.value?.imageId;
+
       if (typeof assetId !== `string` || assetId.length === 0) {
         continue;
       }
@@ -67,11 +68,11 @@ export function InlineEditableSettingImage<T extends UserSettingEntity>({
   );
 
   const handleSelectHintImage = (assetId: string) => {
-    setValue({ t: assetId } as UserSettingEntityInput<T>);
+    setValue({ imageId: assetId } as UserSettingEntityInput<T>);
   };
 
   const handleAddCustomImage = (assetId: string) => {
-    setValue({ t: assetId } as UserSettingEntityInput<T>);
+    setValue({ imageId: assetId } as UserSettingEntityInput<T>);
   };
 
   const previewHintImageId = hoveredHintImageId ?? imageId ?? null;
