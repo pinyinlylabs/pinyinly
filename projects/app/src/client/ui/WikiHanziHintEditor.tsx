@@ -302,15 +302,17 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
             </View>
           </View>
 
-          <RectButton
-            variant="bare"
-            onPress={() => {
-              setShowHintGalleryModal(true);
-            }}
-            disabled={!canOpenGallery}
-          >
-            Browse hints
-          </RectButton>
+          <View className="items-center">
+            <RectButton
+              variant="bare"
+              onPress={() => {
+                setShowHintGalleryModal(true);
+              }}
+              disabled={!canOpenGallery}
+            >
+              Browse hints
+            </RectButton>
+          </View>
           {canOpenGallery ? null : (
             <Text className="text-[13px] text-fg-dim">
               No system hints available for this character
