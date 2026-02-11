@@ -19,7 +19,7 @@ import { Link } from "expo-router";
 import { use, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { AllHintsModal } from "./AllHintsModal";
-import { HintImageSettingPicker } from "./HintImageSettingPicker";
+import { InlineEditableSettingImage } from "./InlineEditableSettingImage";
 import { InlineEditableSettingText } from "./InlineEditableSettingText";
 import { Pylymark } from "./Pylymark";
 import { RectButton } from "./RectButton";
@@ -321,18 +321,23 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
         </View>
 
         {/* Image selection section */}
-        <HintImageSettingPicker
-          setting={hanziWordMeaningHintImageSetting}
-          settingKey={hintSettingKey}
-          title="Choose an image"
-          description="Pick the image that should appear on the wiki page"
-          presetImageIds={presetImageAssetIds}
-          previewHeight={200}
-          tileSize={64}
-          enablePasteDropZone
-          onUploadError={handleUploadError}
-          className="gap-2 pt-2"
-        />
+        <View className="gap-2 pt-2">
+          <View className="gap-1">
+            <Text className="pyly-body-subheading">Choose an image</Text>
+            <Text className="text-[14px] text-fg-dim">
+              Pick the image that should appear on the wiki page
+            </Text>
+          </View>
+          <InlineEditableSettingImage
+            setting={hanziWordMeaningHintImageSetting}
+            settingKey={hintSettingKey}
+            presetImageIds={presetImageAssetIds}
+            previewHeight={200}
+            tileSize={64}
+            enablePasteDropZone
+            onUploadError={handleUploadError}
+          />
+        </View>
       </View>
 
       {/* All hints modal */}

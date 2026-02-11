@@ -11,7 +11,7 @@ import type { HanziText, PinyinUnit } from "@/data/model";
 import { splitPinyinUnit } from "@/data/pinyin";
 import type { ReactNode } from "react";
 import { Text, View } from "react-native";
-import { HintImageSettingPicker } from "./HintImageSettingPicker";
+import { InlineEditableSettingImage } from "./InlineEditableSettingImage";
 import { InlineEditableSettingText } from "./InlineEditableSettingText";
 import { Pylymark } from "./Pylymark";
 import { ThreeSplitLinesDown } from "./ThreeSplitLinesDown";
@@ -142,16 +142,17 @@ export function WikiHanziCharacterPronunciation({
           />
         </View>
 
-        <HintImageSettingPicker
-          setting={hanziPronunciationHintImageSetting}
-          settingKey={hintSettingKey}
-          title="Choose an image"
-          previewHeight={200}
-          tileSize={64}
-          enablePasteDropZone
-          onUploadError={handleUploadError}
-          className="gap-2 pt-2"
-        />
+        <View className="gap-2 pt-2">
+          <Text className="pyly-body-subheading">Choose an image</Text>
+          <InlineEditableSettingImage
+            setting={hanziPronunciationHintImageSetting}
+            settingKey={hintSettingKey}
+            previewHeight={200}
+            tileSize={64}
+            enablePasteDropZone
+            onUploadError={handleUploadError}
+          />
+        </View>
       </View>
     </View>
   );

@@ -34,7 +34,6 @@ export const demos: Record<string, FunctionComponent> = {
   [`HanziText`]: lazyDemo(() => import(`../../../client/ui/HanziText.demo`)),
   [`HanziTile`]: lazyDemo(() => import(`../../../client/ui/HanziTile.demo`)),
   [`HanziWordTile`]: lazyDemo(() => import(`../../../client/ui/HanziWordTile.demo`)),
-  [`HintImageSettingPicker`]: lazyDemo(() => import(`../../../client/ui/HintImageSettingPicker.demo`)),
   [`IconImage`]: lazyDemo(() => import(`../../../client/ui/IconImage.demo`)),
   [`Icons`]: lazyDemo(() => import(`../../../client/ui/Icons.demo`)),
   [`ImageCloud`]: lazyDemo(() => import(`../../../client/ui/ImageCloud.demo`)),
