@@ -1,12 +1,12 @@
-import { usePinyinSoundGroups } from "@/client/hooks/usePinyinSoundGroups";
-import { useReplicache } from "@/client/hooks/useReplicache";
-import { useRizzleQueryPaged } from "@/client/hooks/useRizzleQueryPaged";
+import { pinyinSoundsQuery } from "@/client/query";
+import { usePinyinSoundGroups } from "@/client/ui/hooks/usePinyinSoundGroups";
+import { useRizzle } from "@/client/ui/hooks/useRizzle";
+import { useRizzleQueryPaged } from "@/client/ui/hooks/useRizzleQueryPaged";
 import {
   pinyinSoundGroupThemeSettingKey,
   pinyinSoundNameSetting,
   useUserSetting,
-} from "@/client/hooks/useUserSetting";
-import { pinyinSoundsQuery } from "@/client/query";
+} from "@/client/ui/hooks/useUserSetting";
 import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
 import { Pylymark } from "@/client/ui/Pylymark";
 import { RectButton } from "@/client/ui/RectButton";
@@ -25,7 +25,7 @@ import { tv } from "tailwind-variants";
 
 export default function MnemonicIdPage() {
   const id = useLocalSearchParams<`/sounds/[id]`>().id as PinyinSoundId;
-  const r = useReplicache();
+  const r = useRizzle();
   const chart = loadPylyPinyinChart();
 
   const soundNameSuggestions = use(loadPinyinSoundNameSuggestions());

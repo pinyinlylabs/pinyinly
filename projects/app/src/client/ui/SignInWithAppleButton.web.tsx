@@ -1,7 +1,7 @@
 /// <reference types="apple-signin-api" />
 
-import { documentEventListenerEffect } from "@/client/hooks/documentEventListenerEffect";
-import { useEventCallback } from "@/client/hooks/useEventCallback";
+import { documentEventListenerEffect } from "@/client/ui/hooks/documentEventListenerEffect";
+import { useEventCallback } from "@/client/ui/hooks/useEventCallback";
 import { invariant } from "@pinyinly/lib/invariant";
 import { useEffect, useMemo, useState } from "react";
 import type { SignInWithAppleButtonProps } from "./SignInWithAppleButton";

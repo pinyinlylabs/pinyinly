@@ -1,5 +1,5 @@
-import { useVisualViewportSize } from "@/client/hooks/useVisualViewportSize";
 import { reactInvariant } from "@/client/react";
+import { useVisualViewportSize } from "@/client/ui/hooks/useVisualViewportSize";
 import { IconImage } from "@/client/ui/IconImage";
 import { MenuDictionarySearch } from "@/client/ui/MenuDictionarySearch";
 import { RectButton } from "@/client/ui/RectButton";

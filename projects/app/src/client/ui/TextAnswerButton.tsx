@@ -1,4 +1,4 @@
-import { hapticImpactIfMobile } from "@/client/hooks/hapticImpactIfMobile";
+import { hapticImpactIfMobile } from "@/client/ui/hooks/hapticImpactIfMobile";
 import type { PropsOf } from "@pinyinly/lib/types";
 import { useState } from "react";
 import type { ReactNode } from "react";
@@ -22,11 +22,11 @@ import {
 } from "./animations";
 import { ReanimatedPressable } from "./ReanimatedPressable";
 import { ShootingStars } from "./ShootingStars";
+import { textAnswerButtonFontSize } from "./TextAnswerButton.utils";
 import type {
   TextAnswerButtonFontSize,
   TextAnswerButtonState,
 } from "./TextAnswerButton.utils";
-import { textAnswerButtonFontSize } from "./TextAnswerButton.utils";
 
 const targetBgScale: Record<TextAnswerButtonState, number> = {
   dimmed: 0.5,

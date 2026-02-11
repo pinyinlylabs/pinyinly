@@ -1,11 +1,11 @@
-import { useRenderGuard } from "@/client/hooks/useRenderGuard";
+import { useRenderGuard } from "@/client/ui/hooks/useRenderGuard";
 import type { Rizzle } from "@/data/rizzleSchema";
 import type { ReactQueryValue } from "@pinyinly/lib/types";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { QueryKey } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
 import type { ReadTransaction } from "replicache";
-import { useReplicache } from "./useReplicache";
+import { useRizzle } from "./useRizzle";
 
 // Work around the exhaustive-deps lint rule.
 const useMemoUnsafe = useMemo;
@@ -20,7 +20,7 @@ export function useRizzleQuery<T extends ReactQueryValue>(
   query: UseRizzleQueryFn<T>,
 ) {
   const queryClient = useQueryClient();
-  const r = useReplicache();
+  const r = useRizzle();
 
   // Improve debugging.
   useRenderGuard(useRizzleQuery.name);

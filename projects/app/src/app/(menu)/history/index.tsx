@@ -1,5 +1,5 @@
-import { useDb } from "@/client/hooks/useDb";
 import { historyPageCollection, historyPageData } from "@/client/query";
+import { useDb } from "@/client/ui/hooks/useDb";
 import { IconImage } from "@/client/ui/IconImage";
 import { SkillRefText } from "@/client/ui/SkillRefText";
 import { Suspense } from "@/client/ui/Suspense";

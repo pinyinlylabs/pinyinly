@@ -1,10 +1,10 @@
-import { useEventCallback } from "@/client/hooks/useEventCallback";
-import { usePostHog } from "@/client/hooks/usePostHog";
-import { usePrefetchImages } from "@/client/hooks/usePrefetchImages";
-import { useQuizProgress } from "@/client/hooks/useQuizProgress";
-import { useReplicache } from "@/client/hooks/useReplicache";
-import { useSkillQueue } from "@/client/hooks/useSkillQueue";
-import { useSoundEffect } from "@/client/hooks/useSoundEffect";
+import { useEventCallback } from "@/client/ui/hooks/useEventCallback";
+import { usePostHog } from "@/client/ui/hooks/usePostHog";
+import { usePrefetchImages } from "@/client/ui/hooks/usePrefetchImages";
+import { useQuizProgress } from "@/client/ui/hooks/useQuizProgress";
+import { useRizzle } from "@/client/ui/hooks/useRizzle";
+import { useSkillQueue } from "@/client/ui/hooks/useSkillQueue";
+import { useSoundEffect } from "@/client/ui/hooks/useSoundEffect";
 import type { StackNavigationFor } from "@/client/ui/types";
 import { MistakeKind, QuestionKind } from "@/data/model";
 import type { MistakeType, Question, UnsavedSkillRating } from "@/data/model";
@@ -51,7 +51,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
   const router = useRouter();
   const theme = useTheme();
   const navigationRef = useRef<Navigation>(null);
-  const r = useReplicache();
+  const r = useRizzle();
   const postHog = usePostHog();
 
   const skillQueue = useSkillQueue();

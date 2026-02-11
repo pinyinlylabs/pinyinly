@@ -1,10 +1,10 @@
-import { hapticImpactIfMobile } from "@/client/hooks/hapticImpactIfMobile";
+import { hapticImpactIfMobile } from "@/client/ui/hooks/hapticImpactIfMobile";
 import type { PropsOf } from "@pinyinly/lib/types";
 import Color from "color";
 import { Image } from "expo-image";
 import { useMemo } from "react";
-import type { ColorValue } from "react-native";
 import { Pressable, View } from "react-native";
+import type { ColorValue } from "react-native";
 
 export type CircleButtonProps = {
   thickness?: number;

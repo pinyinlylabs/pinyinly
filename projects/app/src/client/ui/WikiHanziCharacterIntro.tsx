@@ -1,4 +1,4 @@
-import { useHanziWordHintOverrides } from "@/client/hooks/useUserSetting";
+import { useHanziWordHintOverrides } from "@/client/ui/hooks/useUserSetting";
 import { isHanziCharacter } from "@/data/hanzi";
 import type { HanziWord, PinyinUnit, WikiCharacterData } from "@/data/model";
 import { hanziFromHanziWord, loadDictionary } from "@/dictionary";

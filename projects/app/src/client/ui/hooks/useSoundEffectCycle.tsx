@@ -1,7 +1,7 @@
-import { useEventCallback } from "@/client/hooks/useEventCallback";
 import { AudioContextProvider } from "@/client/ui/AudioContextProvider";
-import type { PylyAudioSource } from "@pinyinly/audio-sprites/client";
+import { useEventCallback } from "@/client/ui/hooks/useEventCallback";
 import { resolveAudioSource } from "@pinyinly/audio-sprites/client";
+import type { PylyAudioSource } from "@pinyinly/audio-sprites/client";
 import { use, useState } from "react";
 import { Platform } from "react-native";
 import { useFetchAudioBuffers } from "./useFetchAudioBuffer";

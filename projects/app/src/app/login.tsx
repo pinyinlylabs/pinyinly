@@ -1,5 +1,5 @@
 import { useAuth } from "@/client/auth";
-import { useRizzleQuery } from "@/client/hooks/useRizzleQuery";
+import { useRizzleQuery } from "@/client/ui/hooks/useRizzleQuery";
 import { RectButton } from "@/client/ui/RectButton";
 import { SessionStoreProvider } from "@/client/ui/SessionStoreProvider";
 import { SignInWithAppleButton } from "@/client/ui/SignInWithAppleButton";

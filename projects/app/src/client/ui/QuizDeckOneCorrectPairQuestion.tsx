@@ -1,8 +1,8 @@
-import { useMultiChoiceQuizTimer } from "@/client/hooks/useMultiChoiceQuizTimer";
+import { useMultiChoiceQuizTimer } from "@/client/ui/hooks/useMultiChoiceQuizTimer";
 import {
   autoCheckUserSetting,
   useUserSetting,
-} from "@/client/hooks/useUserSetting";
+} from "@/client/ui/hooks/useUserSetting";
 import { QuestionFlagKind } from "@/data/model";
 import type {
   MistakeType,
@@ -26,13 +26,13 @@ import { QuizDeckResultToast } from "./QuizDeckResultToast";
 import { QuizFlagText } from "./QuizFlagText";
 import { QuizSubmitButton } from "./QuizSubmitButton";
 import { TextAnswerButton } from "./TextAnswerButton";
-import type {
-  TextAnswerButtonFontSize,
-  TextAnswerButtonState,
-} from "./TextAnswerButton.utils";
 import {
   ratingToButtonState,
   textAnswerButtonFontSize,
+} from "./TextAnswerButton.utils";
+import type {
+  TextAnswerButtonFontSize,
+  TextAnswerButtonState,
 } from "./TextAnswerButton.utils";
 import { WikiHanziModal } from "./WikiHanziModal";
 

@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 
-import { useQuizProgress } from "#client/hooks/useQuizProgress.ts";
+import { useQuizProgress } from "#client/ui/hooks/useQuizProgress.ts";
 import { renderHook } from "@testing-library/react";
 import { act } from "react";
 import { expect, test } from "vitest";

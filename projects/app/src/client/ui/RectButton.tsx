@@ -1,4 +1,4 @@
-import { hapticImpactIfMobile } from "@/client/hooks/hapticImpactIfMobile";
+import { hapticImpactIfMobile } from "@/client/ui/hooks/hapticImpactIfMobile";
 import type { PropsOf } from "@pinyinly/lib/types";
 import { isValidElement, useState } from "react";
 import { Pressable, Text, View } from "react-native";

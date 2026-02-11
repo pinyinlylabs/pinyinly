@@ -1,12 +1,12 @@
-import { useReplicache } from "@/client/hooks/useReplicache";
-import { useRizzleQueryPaged } from "@/client/hooks/useRizzleQueryPaged";
+import { pinyinSoundsQuery } from "@/client/query";
+import { useRizzle } from "@/client/ui/hooks/useRizzle";
+import { useRizzleQueryPaged } from "@/client/ui/hooks/useRizzleQueryPaged";
 import {
   getHanziPronunciationHintKeyParams,
   hanziPronunciationHintExplanationSetting,
   hanziPronunciationHintImageSetting,
   hanziPronunciationHintTextSetting,
-} from "@/client/hooks/useUserSetting";
-import { pinyinSoundsQuery } from "@/client/query";
+} from "@/client/ui/hooks/useUserSetting";
 import type { HanziText, PinyinUnit } from "@/data/model";
 import { splitPinyinUnit } from "@/data/pinyin";
 import type { ReactNode } from "react";
@@ -26,7 +26,7 @@ export function WikiHanziCharacterPronunciation({
   pinyinUnit: PinyinUnit;
 }) {
   const splitPinyin = splitPinyinUnit(pinyinUnit);
-  const r = useReplicache();
+  const r = useRizzle();
   const { data: pinyinSounds } = useRizzleQueryPaged(pinyinSoundsQuery(r));
 
   const initialPinyinSound =

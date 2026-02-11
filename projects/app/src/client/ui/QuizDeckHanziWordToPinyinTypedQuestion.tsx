@@ -1,8 +1,8 @@
+import { intersperse } from "@/client/react";
 import {
   autoCheckUserSetting,
   useUserSetting,
-} from "@/client/hooks/useUserSetting";
-import { intersperse } from "@/client/react";
+} from "@/client/ui/hooks/useUserSetting";
 import { splitHanziText } from "@/data/hanzi";
 import { QuestionFlagKind } from "@/data/model";
 import type {
@@ -35,8 +35,8 @@ import { QuizDeckResultToast } from "./QuizDeckResultToast";
 import { QuizFlagText } from "./QuizFlagText";
 import { QuizSubmitButton } from "./QuizSubmitButton";
 import { TextAnswerInputSingle } from "./TextAnswerInputSingle";
-import type { TextAnswerInputSingleState } from "./TextAnswerInputSingle.utils";
 import { ratingToInputState } from "./TextAnswerInputSingle.utils";
+import type { TextAnswerInputSingleState } from "./TextAnswerInputSingle.utils";
 
 export function QuizDeckHanziWordToPinyinTypedQuestion({
   noAutoFocus = true,

@@ -103,10 +103,10 @@ Assets are stored in R2 with key: `u/{userId}/{assetId}`
 ```typescript
 import { nanoid } from "nanoid";
 import { trpc } from "@/client/query";
-import { useReplicache } from "@/client/hooks/useReplicache";
+import { useRizzle } from "@/client/ui/hooks/useRizzle";
 
 async function uploadImage(file: File) {
-  const rep = useReplicache();
+  const rep = useRizzle();
   const assetId = nanoid();
 
   // 1. Optimistically create pending asset
@@ -155,7 +155,7 @@ async function uploadImage(file: File) {
 ### Querying Assets
 
 ```typescript
-const rep = useReplicache();
+const rep = useRizzle();
 
 // Get a specific asset
 const asset = await rep.query((tx) => tx.asset.get({ assetId: "abc123" }));

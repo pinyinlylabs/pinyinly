@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 
-import { useMultiChoiceQuizTimer } from "#client/hooks/useMultiChoiceQuizTimer.ts";
+import { useMultiChoiceQuizTimer } from "#client/ui/hooks/useMultiChoiceQuizTimer.ts";
 import { renderHook } from "@testing-library/react";
 import { act } from "react";
 import { expect, test, vi } from "vitest";

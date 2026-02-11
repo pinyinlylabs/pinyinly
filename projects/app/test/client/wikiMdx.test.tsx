@@ -1,10 +1,10 @@
 // pyly-not-src-test
 // @vitest-environment happy-dom
 
-import { useNewQueryClient } from "#client/hooks/useNewQueryClient.js";
 import { DeviceStoreProvider } from "#client/ui/DeviceStoreProvider.tsx";
+import { useNewQueryClient } from "#client/ui/hooks/useNewQueryClient.js";
 import { PylyMdxComponents } from "#client/ui/PylyMdxComponents.tsx";
-import { ReplicacheProvider } from "#client/ui/ReplicacheProvider.tsx";
+import { RizzleProvider } from "#client/ui/RizzleProvider.tsx";
 import { registry_ForTesting } from "#client/wiki.js";
 import type { Rizzle } from "#data/rizzleSchema.ts";
 import { glob, readFileSync } from "@pinyinly/lib/fs";
@@ -24,9 +24,9 @@ const testProviders = (rizzle: Rizzle) =>
     const queryClient = useNewQueryClient();
     return (
       <QueryClientProvider client={queryClient}>
-        <ReplicacheProvider.Context.Provider value={rizzle}>
+        <RizzleProvider.Context.Provider value={rizzle}>
           <DeviceStoreProvider>{children}</DeviceStoreProvider>
-        </ReplicacheProvider.Context.Provider>
+        </RizzleProvider.Context.Provider>
       </QueryClientProvider>
     );
   };

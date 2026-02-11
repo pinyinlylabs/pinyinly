@@ -1,4 +1,4 @@
-import { useBetaFeatures } from "@/client/hooks/useBetaFeatures";
+import { useBetaFeatures } from "@/client/ui/hooks/useBetaFeatures";
 import { RectButton } from "@/client/ui/RectButton";
 import { ToggleButton } from "@/client/ui/ToggleButton";
 import type { HanziText, HanziWord } from "@/data/model";

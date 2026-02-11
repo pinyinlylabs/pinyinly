@@ -1,5 +1,5 @@
-import { useIsBetaEnabled } from "@/client/hooks/useBetaFeatures";
-import { useSelectedHint } from "@/client/hooks/useUserSetting";
+import { useIsBetaEnabled } from "@/client/ui/hooks/useBetaFeatures";
+import { useSelectedHint } from "@/client/ui/hooks/useUserSetting";
 import { walkIdsNodeLeafs } from "@/data/hanzi";
 import type { HanziText, HanziWord, WikiCharacterData } from "@/data/model";
 import {

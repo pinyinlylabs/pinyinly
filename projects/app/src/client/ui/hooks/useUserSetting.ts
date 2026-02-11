@@ -24,7 +24,7 @@ import type {
   RizzleTypeDef,
 } from "@/util/rizzle";
 import type { Flatten } from "@pinyinly/lib/types";
-import { useReplicache } from "./useReplicache";
+import { useRizzle } from "./useRizzle";
 import { useRizzleQuery } from "./useRizzleQuery";
 
 export type UserSettingEntity = RizzleAnyEntity;
@@ -117,7 +117,7 @@ export const useUserSetting = <T extends UserSettingEntity>(
     userSettingEntity,
     keyInput,
   );
-  const r = useReplicache();
+  const r = useRizzle();
 
   const result = useRizzleQuery([`UserSetting`, settingKey], async (r, tx) => {
     const value = await r.query.setting.get(tx, { key: settingKey });

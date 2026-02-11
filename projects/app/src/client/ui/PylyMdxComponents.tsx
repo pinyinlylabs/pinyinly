@@ -1,6 +1,6 @@
-import { useSoundEffect } from "@/client/hooks/useSoundEffect";
-import { useSoundEffectCycle } from "@/client/hooks/useSoundEffectCycle";
 import { pickChildren } from "@/client/react";
+import { useSoundEffect } from "@/client/ui/hooks/useSoundEffect";
+import { useSoundEffectCycle } from "@/client/ui/hooks/useSoundEffectCycle";
 import type { PylyAudioSource } from "@pinyinly/audio-sprites/client";
 import type { PropsWithChildren, ReactNode } from "react";
 import { Pressable, Text, View } from "react-native";

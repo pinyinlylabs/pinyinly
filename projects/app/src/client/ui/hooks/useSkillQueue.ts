@@ -1,4 +1,4 @@
-import type { SkillQueueContextValue } from "@/client/ui/SkillQueueProvider";
+import type { SkillQueueContextValue } from "@/client/ui/contexts";
 import { SkillQueueProvider } from "@/client/ui/SkillQueueProvider";
 import { invariant } from "@pinyinly/lib/invariant";
 import { use } from "react";

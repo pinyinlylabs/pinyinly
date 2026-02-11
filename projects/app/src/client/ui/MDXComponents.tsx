@@ -1,4 +1,4 @@
-import { useMDXComponents } from "@/client/hooks/useMDXComponents";
+import { useMDXComponents } from "@/client/ui/hooks/useMDXComponents";
 import type { PropsWithChildren } from "react";
 import { MDXComponentsContext } from "./MDXComponents.utils";
 

@@ -1,6 +1,6 @@
 import { trpc } from "@/client/trpc";
-import type { RizzleEntityOutput } from "@/util/rizzle";
 import { r } from "@/util/rizzle";
+import type { RizzleEntityOutput } from "@/util/rizzle";
 import { invariant } from "@pinyinly/lib/invariant";
 import {
   startAuthentication,
@@ -10,7 +10,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { DeepReadonly } from "ts-essentials";
 import { z } from "zod/v4";
 import { deviceStoreGet } from "./deviceStore";
-import { useDeviceStore } from "./hooks/useDeviceStore";
+import { useDeviceStore } from "./ui/hooks/useDeviceStore";
 
 /**
  * Represents a session on the client, either anonymous or authenticated.

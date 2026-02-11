@@ -1,12 +1,12 @@
 import {
   useUserSetting,
   useUserSettingHistory,
-} from "@/client/hooks/useUserSetting";
+} from "@/client/ui/hooks/useUserSetting";
 import type {
   UserSettingEntityInput,
   UserSettingImageEntity,
   UserSettingKeyInput,
-} from "@/client/hooks/useUserSetting";
+} from "@/client/ui/hooks/useUserSetting";
 import { useState } from "react";
 import { Pressable, View } from "react-native";
 import { AssetImage } from "./AssetImage";

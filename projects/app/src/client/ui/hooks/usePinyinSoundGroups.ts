@@ -1,8 +1,8 @@
-import { useRizzleQuery } from "@/client/hooks/useRizzleQuery";
+import { useRizzleQuery } from "@/client/ui/hooks/useRizzleQuery";
 import {
   pinyinSoundGroupNameSettingKey,
   pinyinSoundGroupThemeSettingKey,
-} from "@/client/hooks/useUserSetting";
+} from "@/client/ui/hooks/useUserSetting";
 import {
   defaultPinyinSoundGroupNames,
   defaultPinyinSoundGroupRanks,

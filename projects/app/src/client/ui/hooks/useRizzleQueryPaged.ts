@@ -1,14 +1,14 @@
-import { useRenderGuard } from "@/client/hooks/useRenderGuard";
 import type { WithRizzleWatchPrefixes } from "@/client/query";
+import { useRenderGuard } from "@/client/ui/hooks/useRenderGuard";
 import type { ReactQueryValue } from "@pinyinly/lib/types";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type {
   DefaultError,
   QueryKey,
   UseQueryOptions,
 } from "@tanstack/react-query";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { useReplicache } from "./useReplicache";
+import { useRizzle } from "./useRizzle";
 
 export function useRizzleQueryPaged<
   TQueryFnData = ReactQueryValue,
@@ -20,7 +20,7 @@ export function useRizzleQueryPaged<
     UseQueryOptions<TQueryFnData, TError, TData, TQueryKey>
   >,
 ) {
-  const r = useReplicache();
+  const r = useRizzle();
   const queryClient = useQueryClient();
 
   // Improve debugging.

@@ -1,20 +1,18 @@
 import { trpc } from "@/client/trpc";
 import { mutators } from "@/data/rizzleMutators";
-import type { Rizzle } from "@/data/rizzleSchema";
 import { currentSchema } from "@/data/rizzleSchema";
 import type { AppRouter } from "@/server/routers/_app";
 import { cookieSchema, r } from "@/util/rizzle";
 import { invariant } from "@pinyinly/lib/invariant";
 import * as Sentry from "@sentry/core";
 import { TRPCClientError } from "@trpc/client";
-import { createContext, useEffect, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import type { HTTPRequestInfo, PullResponseV1 } from "replicache";
+import { RizzleContext } from "./contexts";
 import { kvStore } from "./replicacheOptions";
 
-const Context = createContext<Rizzle | null>(null);
-
-export const ReplicacheProvider = Object.assign(
-  function ReplicacheProvider({
+export const RizzleProvider = Object.assign(
+  function RizzleProvider({
     children,
     dbName,
     serverSessionId,
@@ -127,9 +125,11 @@ export const ReplicacheProvider = Object.assign(
       };
     }, [rizzle]);
 
-    return <Context.Provider value={rizzle}>{children}</Context.Provider>;
+    return (
+      <RizzleContext.Provider value={rizzle}>{children}</RizzleContext.Provider>
+    );
   },
-  { Context },
+  { Context: RizzleContext },
 );
 
 async function trpcToReplicache<T>(responsePromise: Promise<T>): Promise<{

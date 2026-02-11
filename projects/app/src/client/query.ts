@@ -1,4 +1,4 @@
-import { pinyinSoundNameSettingKey } from "@/client/hooks/useUserSetting";
+import { pinyinSoundNameSettingKey } from "@/client/ui/hooks/useUserSetting";
 import type {
   HanziText,
   HanziWord,

@@ -1,14 +1,14 @@
-import { usePinyinSoundGroups } from "@/client/hooks/usePinyinSoundGroups";
-import { useReplicache } from "@/client/hooks/useReplicache";
-import { useRizzleQueryPaged } from "@/client/hooks/useRizzleQueryPaged";
 import { pinyinSoundsQuery } from "@/client/query";
+import { usePinyinSoundGroups } from "@/client/ui/hooks/usePinyinSoundGroups";
+import { useRizzle } from "@/client/ui/hooks/useRizzle";
+import { useRizzleQueryPaged } from "@/client/ui/hooks/useRizzleQueryPaged";
 import { PinyinSoundTile } from "@/client/ui/PinyinSoundTile";
 import { Link } from "expo-router";
 import { Text, View } from "react-native";
 
 export default function MnemonicsPage() {
   const pinyinSoundGroupsQuery = usePinyinSoundGroups();
-  const r = useReplicache();
+  const r = useRizzle();
 
   const { data: pinyinSounds } = useRizzleQueryPaged(pinyinSoundsQuery(r));
 

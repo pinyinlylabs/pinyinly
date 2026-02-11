@@ -1,4 +1,4 @@
-import { useDeviceStore } from "@/client/hooks/useDeviceStore";
+import { useDeviceStore } from "@/client/ui/hooks/useDeviceStore";
 import { betaFeaturesSetting } from "@/util/devtools";
 
 /**

@@ -1,9 +1,9 @@
 import { getServerSessionId } from "@/client/auth";
-import { useNewQueryClient } from "@/client/hooks/useNewQueryClient";
+import { useNewQueryClient } from "@/client/ui/hooks/useNewQueryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import type { PropsWithChildren } from "react";
 import { DbProvider } from "./DbProvider";
-import { ReplicacheProvider } from "./ReplicacheProvider";
+import { RizzleProvider } from "./RizzleProvider";
 import { SkillQueueProvider } from "./SkillQueueProvider";
 import { Suspense } from "./Suspense";
 import { TrpcProvider } from "./TrpcProvider";
@@ -15,7 +15,7 @@ import { TrpcProvider } from "./TrpcProvider";
  *   don't conflict with each other.
  * - <TrpcProvider> -- so that authentication uses the server session ID
  *   associated with the device session.
- * - <ReplicacheProvider> -- so that `useRizzleQuery()` and `useReplicache()`
+ * - <RizzleProvider> -- so that `useRizzleQuery()` and `useRizzle()`
  *   fetched data is comes from the correct device session.
  * - <SkillQueueProvider> -- so that the skill queue is computed and cached
  *   per session, with lazy computation and automatic invalidation.
@@ -39,7 +39,7 @@ export function SessionStoreProvider({
       getServerSessionId={getServerSessionId}
     >
       <QueryClientProvider client={queryClient}>
-        <ReplicacheProvider dbName={dbName} serverSessionId={serverSessionId}>
+        <RizzleProvider dbName={dbName} serverSessionId={serverSessionId}>
           <DbProvider>
             <SkillQueueProvider>
               <Suspense
@@ -51,7 +51,7 @@ export function SessionStoreProvider({
               </Suspense>
             </SkillQueueProvider>
           </DbProvider>
-        </ReplicacheProvider>
+        </RizzleProvider>
       </QueryClientProvider>
     </TrpcProvider>
   );

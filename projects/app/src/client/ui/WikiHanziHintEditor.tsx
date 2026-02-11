@@ -1,10 +1,10 @@
-import { useReplicache } from "@/client/hooks/useReplicache";
+import { useRizzle } from "@/client/ui/hooks/useRizzle";
 import {
   hanziWordMeaningHintExplanationSetting,
   hanziWordMeaningHintImageSetting,
   hanziWordMeaningHintTextSetting,
   useUserSetting,
-} from "@/client/hooks/useUserSetting";
+} from "@/client/ui/hooks/useUserSetting";
 import { getWikiCharacterData } from "@/client/wiki";
 import { walkIdsNodeLeafs } from "@/data/hanzi";
 import type { HanziWord } from "@/data/model";
@@ -38,7 +38,7 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
   // Load character data
   const characterData = use(getWikiCharacterData(hanzi)) ?? null;
 
-  const rep = useReplicache();
+  const rep = useRizzle();
   const hintSettingKey = { hanziWord };
   const hintSetting = useUserSetting(
     hanziWordMeaningHintTextSetting,

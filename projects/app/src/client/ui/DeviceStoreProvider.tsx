@@ -1,16 +1,7 @@
-import { useNewQueryClient } from "@/client/hooks/useNewQueryClient";
-import { memoize0 } from "@pinyinly/lib/collections";
-import type { QueryClient } from "@tanstack/react-query";
-import { createContext } from "react";
+import { useNewQueryClient } from "@/client/ui/hooks/useNewQueryClient";
 import type { PropsWithChildren } from "react";
 import { TrpcProvider } from "./TrpcProvider";
-
-const Context = createContext<{
-  // Use a separate query client for device store (separate from the device
-  // session query client). Because device store is global and not scoped to the
-  // logged-in state.
-  queryClient: QueryClient;
-} | null>(null);
+import { DeviceStoreContext } from "./contexts";
 
 /**
  * Provides all the state/store contexts needed to access the device store.
@@ -24,17 +15,18 @@ export const DeviceStoreProvider = Object.assign(
   function DeviceStoreProvider({ children }: PropsWithChildren) {
     "use memo"; // Object.assign(…) wrapped components aren't inferred.
     const queryClient = useNewQueryClient();
+    const nullServerSessionId = async () => null;
 
     return (
       <TrpcProvider
         queryClient={queryClient}
         getServerSessionId={nullServerSessionId}
       >
-        <Context.Provider value={{ queryClient }}>{children}</Context.Provider>
+        <DeviceStoreContext.Provider value={{ queryClient }}>
+          {children}
+        </DeviceStoreContext.Provider>
       </TrpcProvider>
     );
   },
-  { Context },
+  { Context: DeviceStoreContext },
 );
-
-const nullServerSessionId = memoize0(async () => null);

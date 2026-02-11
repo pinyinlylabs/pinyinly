@@ -1,4 +1,4 @@
-import type { UseUserSettingResult } from "#client/hooks/useUserSetting.ts";
+import type { UseUserSettingResult } from "#client/ui/hooks/useUserSetting.ts";
 import type { HanziWord } from "#data/model.ts";
 import { r } from "#util/rizzle.ts";
 import { test } from "vitest";

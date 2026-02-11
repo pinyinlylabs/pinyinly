@@ -2,12 +2,12 @@ import {
   getLocalImageAssetSource,
   isLocalImageAssetId,
 } from "@/client/assets/localImageAssets";
-import { useRizzleQuery } from "@/client/hooks/useRizzleQuery";
 import { trpc } from "@/client/trpc";
+import { useRizzleQuery } from "@/client/ui/hooks/useRizzleQuery";
 import { AssetStatusKind } from "@/data/model";
 import type { Rizzle } from "@/data/rizzleSchema";
-import type { ImageProps as ExpoImageProps } from "expo-image";
 import { Image as ExpoImage } from "expo-image";
+import type { ImageProps as ExpoImageProps } from "expo-image";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 

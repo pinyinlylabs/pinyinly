@@ -1,12 +1,12 @@
 import {
   useUserSetting,
   useUserSettingHistory,
-} from "@/client/hooks/useUserSetting";
+} from "@/client/ui/hooks/useUserSetting";
 import type {
   UserSettingEntityInput,
   UserSettingKeyInput,
   UserSettingTextEntity,
-} from "@/client/hooks/useUserSetting";
+} from "@/client/ui/hooks/useUserSetting";
 import { formatRelativeTime } from "@/util/date";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";

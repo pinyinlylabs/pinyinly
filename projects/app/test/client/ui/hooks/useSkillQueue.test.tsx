@@ -1,9 +1,9 @@
 // @vitest-environment happy-dom
 
-import { useNewQueryClient } from "#client/hooks/useNewQueryClient.js";
-import { useSkillQueue } from "#client/hooks/useSkillQueue.ts";
 import { DbProvider } from "#client/ui/DbProvider.tsx";
-import { ReplicacheProvider } from "#client/ui/ReplicacheProvider.tsx";
+import { useNewQueryClient } from "#client/ui/hooks/useNewQueryClient.js";
+import { useSkillQueue } from "#client/ui/hooks/useSkillQueue.ts";
+import { RizzleProvider } from "#client/ui/RizzleProvider.tsx";
 import { SkillQueueProvider } from "#client/ui/SkillQueueProvider.tsx";
 import { QuestionFlagKind } from "#data/model.js";
 import type { Rizzle } from "#data/rizzleSchema.ts";
@@ -11,11 +11,11 @@ import { sleep } from "#util/devtools.js";
 import { invariant } from "@pinyinly/lib/invariant";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react";
-import type { PropsWithChildren } from "react";
 import { act } from "react";
+import type { PropsWithChildren } from "react";
 import { afterEach, test as baseTest, expect, vi } from "vitest";
-import { prettyQueue } from "../../data/helpers.ts";
-import { rizzleFixture } from "../../util/rizzleHelpers.ts";
+import { prettyQueue } from "../../../data/helpers.ts";
+import { rizzleFixture } from "../../../util/rizzleHelpers.ts";
 
 const test = baseTest.extend(rizzleFixture);
 
@@ -35,11 +35,11 @@ const testContextProviders = (opts: { rizzle: Rizzle }) =>
 
     return (
       <QueryClientProvider client={queryClient}>
-        <ReplicacheProvider.Context.Provider value={opts.rizzle}>
+        <RizzleProvider.Context.Provider value={opts.rizzle}>
           <DbProvider>
             <SkillQueueProvider>{children}</SkillQueueProvider>
           </DbProvider>
-        </ReplicacheProvider.Context.Provider>
+        </RizzleProvider.Context.Provider>
       </QueryClientProvider>
     );
   };
