@@ -14,6 +14,7 @@ import {
   loadDictionary,
   meaningKeyFromHanziWord,
 } from "@/dictionary";
+import { nanoid } from "@/util/nanoid";
 import { Link } from "expo-router";
 import { use, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
@@ -22,7 +23,6 @@ import { HintImageSettingPicker } from "./HintImageSettingPicker";
 import { InlineEditableSettingText } from "./InlineEditableSettingText";
 import { Pylymark } from "./Pylymark";
 import { RectButton } from "./RectButton";
-import { nanoid } from "@/util/nanoid";
 
 interface WikiHanziHintEditorProps {
   hanziWord: HanziWord;
