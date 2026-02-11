@@ -9,6 +9,10 @@
     {
       "name": "react-hooks-js",
       "specifier": "eslint-plugin-react-hooks"
+    },
+    {
+      "name": "pinyinly",
+      "specifier": "@pinyinly/eslint-rules"
     }
   ],
   "ignorePatterns": ["test/**", "**/*.d.ts"],
@@ -223,7 +227,41 @@
 
     "react-hooks-js/exhaustive-deps": "error",
 
-    "react-compiler-js/react-compiler": "error"
+    "react-compiler-js/react-compiler": "error",
+
+    //
+    // pinyinly
+    //
+
+    "pinyinly/import-names": [
+      "error",
+      {
+        "defaultImports": {
+          "node:path": "path",
+          "react-native-reanimated": "Reanimated"
+        },
+        "namedImports": {
+          "posthog-react-native": {
+            "PostHogProvider": "RnPostHogProvider",
+            "usePostHog": "rnUsePostHog"
+          },
+          "posthog-js/react": {
+            "PostHogProvider": "WebPostHogProvider",
+            "usePostHog": "webUsePostHog"
+          },
+          "react": {
+            "Suspense": "ReactSuspense"
+          },
+          "react-native": {
+            "Animated": "RnAnimated",
+            "Easing": "RnEasing",
+            "Image": "RnImage"
+          }
+        }
+      }
+    ],
+    "pinyinly/nameof": "error",
+    "pinyinly/glob-template": "error"
   },
   "overrides": [
     // Ban CommonJS globals in ESM files, use import.meta.* instead
@@ -238,7 +276,7 @@
       "files": ["bin/**/*.{js,mjs,ts,tsx}"],
       "rules": {
         "no-console": "off",
-        // It's sometimes useful to import from `../test/` to get test helpers.
+        // It's sometimes useful to import from "../test/" to get test helpers.
         "import/no-relative-parent-imports": "off"
       }
     },

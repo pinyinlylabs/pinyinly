@@ -25,6 +25,9 @@ export const plugin: ESLint.Plugin = {
   },
 };
 
+// oxlint-disable-next-line eslint-plugin-import(no-default-export)
+export default plugin;
+
 export type ConfigWithExtendsArray = Parameters<typeof defineConfig>;
 
 const recommended: ConfigWithExtendsArray = [
@@ -48,40 +51,6 @@ const recommended: ConfigWithExtendsArray = [
     files: [`**/*.{cjs,js,mjs,ts,tsx}`],
 
     rules: {
-      //
-      // @pinyinly
-      //
-
-      "@pinyinly/import-names": [
-        `error`,
-        {
-          defaultImports: {
-            "node:path": `path`,
-            "react-native-reanimated": `Reanimated`,
-          },
-          namedImports: {
-            "posthog-react-native": {
-              PostHogProvider: `RnPostHogProvider`,
-              usePostHog: `rnUsePostHog`,
-            },
-            "posthog-js/react": {
-              PostHogProvider: `WebPostHogProvider`,
-              usePostHog: `webUsePostHog`,
-            },
-            react: {
-              Suspense: `ReactSuspense`,
-            },
-            "react-native": {
-              Animated: `RnAnimated`,
-              Easing: `RnEasing`,
-              Image: `RnImage`,
-            },
-          },
-        },
-      ],
-      "@pinyinly/nameof": `error`,
-      "@pinyinly/glob-template": `error`,
-
       //
       // eslint-plugin-import
       //
