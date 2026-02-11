@@ -227,17 +227,17 @@ export const autoCheckUserSetting = r.entity(`autoCheck`, {
 
 export const pinyinSoundNameSetting = r.entity(`psn.[soundId]`, {
   soundId: rPinyinSoundId().alias(`i`),
-  name: r.string().alias(`t`),
+  text: r.string().alias(`t`),
 });
 
 export const pinyinSoundGroupNameSetting = r.entity(`psgn.[soundGroupId]`, {
   soundGroupId: rPinyinSoundGroupId().alias(`g`),
-  name: r.string().alias(`t`),
+  text: r.string().alias(`t`),
 });
 
 export const pinyinSoundGroupThemeSetting = r.entity(`psgt.[soundGroupId]`, {
   soundGroupId: rPinyinSoundGroupId().alias(`g`),
-  theme: r.string().alias(`t`),
+  text: r.string().alias(`t`),
 });
 
 export function pinyinSoundNameSettingKey(soundId: PinyinSoundId): string {

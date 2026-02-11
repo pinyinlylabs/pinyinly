@@ -3,9 +3,11 @@ import { useReplicache } from "@/client/hooks/useReplicache";
 import { useRizzleQueryPaged } from "@/client/hooks/useRizzleQueryPaged";
 import {
   pinyinSoundGroupThemeSettingKey,
-  pinyinSoundNameSettingKey,
+  pinyinSoundNameSetting,
+  useUserSetting,
 } from "@/client/hooks/useUserSetting";
 import { pinyinSoundsQuery } from "@/client/query";
+import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
 import { Pylymark } from "@/client/ui/Pylymark";
 import { RectButton } from "@/client/ui/RectButton";
 import type { PinyinSoundId } from "@/data/model";
@@ -30,6 +32,9 @@ export default function MnemonicIdPage() {
 
   const { data: pinyinSounds } = useRizzleQueryPaged(pinyinSoundsQuery(r));
   const pinyinSoundGroups = usePinyinSoundGroups();
+  const { setValue: setSoundName } = useUserSetting(pinyinSoundNameSetting, {
+    soundId: id,
+  });
 
   const pinyinSoundGroupId = chart.soundGroups.find((g) =>
     g.sounds.includes(id),
@@ -50,13 +55,16 @@ export default function MnemonicIdPage() {
             {label}
           </Text>
         </View>
-        {nullIfEmpty(pinyinSound?.name) == null ? (
-          <Text className="select-none text-3xl text-fg/20">_________</Text>
-        ) : (
-          <Text className="text-3xl font-bold text-fg">
-            {pinyinSound?.name}
-          </Text>
-        )}
+        <InlineEditableSettingText
+          setting={pinyinSoundNameSetting}
+          settingKey={{ soundId: id }}
+          placeholder="Name this sound"
+          emptyText="_________"
+          displayClassName="text-3xl font-bold text-fg"
+          emptyClassName="select-none text-3xl text-fg/20"
+          inputClassName="text-3xl font-bold text-fg"
+          displayContainerClassName=""
+        />
       </View>
 
       <View className="gap-2">
@@ -132,11 +140,7 @@ export default function MnemonicIdPage() {
                         hover:text-fg
                       `}
                       onPress={() => {
-                        void r.mutate.setSetting({
-                          key: pinyinSoundNameSettingKey(id),
-                          value: { t: name },
-                          now: new Date(),
-                        });
+                        setSoundName({ soundId: id, text: name });
                       }}
                     >
                       Use

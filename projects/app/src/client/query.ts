@@ -1,3 +1,4 @@
+import { pinyinSoundNameSettingKey } from "@/client/hooks/useUserSetting";
 import type {
   HanziText,
   HanziWord,
@@ -6,10 +7,8 @@ import type {
   SrsStateType,
 } from "@/data/model";
 import { loadPylyPinyinChart } from "@/data/pinyin";
-import type { Rizzle, SkillRating } from "@/data/rizzleSchema";
 import { currentSchema } from "@/data/rizzleSchema";
-import { pinyinSoundNameSettingKey } from "@/client/hooks/useUserSetting";
-import type { RankedHanziWord } from "@/data/skills";
+import type { Rizzle, SkillRating } from "@/data/rizzleSchema";
 import {
   getHanziWordRank,
   hanziWordToGlossTyped,
@@ -17,6 +16,7 @@ import {
   rankRules,
   skillLearningGraph,
 } from "@/data/skills";
+import type { RankedHanziWord } from "@/data/skills";
 import { getIsStructuralHanzi, loadDictionary } from "@/dictionary";
 import { devToolsSlowQuerySleepIfEnabled } from "@/util/devtools";
 import type { Rating } from "@/util/fsrs";
@@ -31,7 +31,6 @@ import {
   sortComparatorNumber,
 } from "@pinyinly/lib/collections";
 import { nonNullable } from "@pinyinly/lib/invariant";
-import type { Collection, CollectionConfig } from "@tanstack/react-db";
 import {
   and,
   createCollection,
@@ -42,10 +41,11 @@ import {
   isUndefined,
   or,
 } from "@tanstack/react-db";
+import type { Collection, CollectionConfig } from "@tanstack/react-db";
 import { queryOptions, skipToken } from "@tanstack/react-query";
 import { subDays } from "date-fns/subDays";
-import type { DeviceStoreEntity } from "./deviceStore";
 import { buildDeviceStoreKey, deviceStoreGet } from "./deviceStore";
+import type { DeviceStoreEntity } from "./deviceStore";
 
 export type WithRizzleWatchPrefixes<T> = T & {
   rizzleWatchPrefixes?: string[];
@@ -182,8 +182,10 @@ export const pinyinSoundsQuery = (r: Rizzle) =>
               const userOverride = await r.query.setting.get(tx, {
                 key: pinyinSoundNameSettingKey(soundId),
               });
-              const nameValue =
-                (userOverride?.value as { t?: string } | null)?.t ?? null;
+              const rawValue = userOverride?.value as {
+                text?: string;
+              } | null;
+              const nameValue = rawValue?.text ?? null;
               sounds.set(soundId, {
                 name: nameValue,
                 label: chart.soundToCustomLabel[soundId] ?? soundId,
