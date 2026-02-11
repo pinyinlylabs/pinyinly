@@ -216,7 +216,7 @@ function MeaningItem({
             href={`/wiki/${encodeURIComponent(hanzi)}/edit/${encodeURIComponent(meaningKey)}`}
             asChild
           >
-            <RectButton variant="bare" textClassName="text-sm text-cyan">
+            <RectButton variant="bare" className="text-sm text-cyan">
               {hasOverride ? `Edit` : `Customize`}
             </RectButton>
           </Link>

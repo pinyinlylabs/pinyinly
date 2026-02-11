@@ -192,7 +192,7 @@ function ServerSessionIdLoginForm() {
 const GoHomeButton = () => (
   <View style={{ height: 44 }}>
     <Link dismissTo href="/learn" asChild>
-      <RectButton textClassName="font-bold text-fg text-xl">Back</RectButton>
+      <RectButton className="text-xl font-bold text-fg">Back</RectButton>
     </Link>
   </View>
 );

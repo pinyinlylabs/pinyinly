@@ -1,8 +1,8 @@
 import { hapticImpactIfMobile } from "@/client/hooks/hapticImpactIfMobile";
 import type { PropsOf } from "@pinyinly/lib/types";
 import { isValidElement, useState } from "react";
-import type { ViewProps } from "react-native";
 import { Pressable, Text, View } from "react-native";
+import type { ViewProps } from "react-native";
 import { tv } from "tailwind-variants";
 import { IconImage } from "./IconImage";
 import type { IconName } from "./IconRegistry";
@@ -19,9 +19,9 @@ export type RectButtonProps = {
   children?: ViewProps[`children`];
   className?: string;
   inFlexRowParent?: boolean;
-  textClassName?: string;
   iconStart?: IconName;
   iconEnd?: IconName;
+  iconSize?: 12 | 16 | 24 | 32;
 } & Pick<
   PropsOf<typeof Pressable>,
   keyof PropsOf<typeof Pressable> & (`on${string}` | `disabled` | `ref`)
@@ -32,9 +32,9 @@ export function RectButton({
   variant = `outline`,
   className,
   inFlexRowParent = false,
-  textClassName,
   iconStart,
   iconEnd,
+  iconSize,
   ...pressableProps
 }: RectButtonProps) {
   const disabled = pressableProps.disabled === true;
@@ -43,6 +43,13 @@ export function RectButton({
   const [hovered, setHovered] = useState(false);
 
   const flat = pressed || disabled;
+  const textClassName = extractTextClasses(className);
+  const hasChildren = children != null;
+  const textContent = isValidElement(children) ? (
+    children
+  ) : hasChildren ? (
+    <Text className={text({ variant, class: textClassName })}>{children}</Text>
+  ) : null;
 
   return (
     <Pressable
@@ -82,24 +89,24 @@ export function RectButton({
         })}
       >
         {iconStart == null && iconEnd == null ? (
-          isValidElement(children) ? (
-            children
-          ) : (
-            <Text className={text({ variant, class: textClassName })}>
-              {children}
-            </Text>
-          )
+          textContent
         ) : (
           <View className={iconLayout({ variant })}>
-            {iconStart == null ? null : <IconImage icon={iconStart} />}
-            {isValidElement(children) ? (
-              children
-            ) : (
-              <Text className={text({ variant, class: textClassName })}>
-                {children}
-              </Text>
+            {iconStart == null ? null : (
+              <IconImage
+                icon={iconStart}
+                className={textClassName}
+                size={iconSize}
+              />
             )}
-            {iconEnd == null ? null : <IconImage icon={iconEnd} />}
+            {textContent}
+            {iconEnd == null ? null : (
+              <IconImage
+                icon={iconEnd}
+                className={textClassName}
+                size={iconSize}
+              />
+            )}
           </View>
         )}
       </View>
@@ -263,6 +270,40 @@ const text = tv({
     },
   },
 });
+
+const textClassPrefixList = [
+  `text-`,
+  `font-`,
+  `leading-`,
+  `tracking-`,
+  `uppercase`,
+  `lowercase`,
+  `capitalize`,
+  `underline`,
+  `line-through`,
+  `italic`,
+  `not-italic`,
+  `tabular-nums`,
+  `lining-nums`,
+  `normal-nums`,
+  `ordinal`,
+  `slashed-zero`,
+];
+
+const extractTextClasses = (className?: string) => {
+  if (className == null || className.trim() === ``) {
+    return;
+  }
+
+  const classes = className
+    .split(/\s+/)
+    .filter((classToken) =>
+      textClassPrefixList.some((prefix) => classToken.startsWith(prefix)),
+    )
+    .join(` `);
+
+  return classes === `` ? undefined : classes;
+};
 
 const iconLayout = tv({
   base: `flex-row items-center`,

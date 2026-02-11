@@ -5,7 +5,7 @@ import type { IsExhaustedRest, PropsOf } from "@pinyinly/lib/types";
 import { use, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { useIntersectionObserver, useTimeout } from "usehooks-ts";
-import { CloseButton2 } from "./CloseButton2";
+import { CloseButton } from "./CloseButton";
 import { HanziTile } from "./HanziTile";
 import { PylyMdxComponents } from "./PylyMdxComponents";
 
@@ -63,7 +63,7 @@ function Header({
   variant,
   ...rest
 }: {
-  onDismiss?: () => void;
+  onDismiss: () => void;
 } & Pick<PropsOf<typeof HanziTile>, `gloss` | `hanzi` | `pinyin` | `variant`>) {
   true satisfies IsExhaustedRest<typeof rest>;
 
@@ -89,7 +89,7 @@ function Header({
             sticky top-0 z-10 h-[56px] flex-row content-between items-center bg-bg/90 pl-4
           `}
         >
-          <CloseButton2 onPress={onDismiss} />
+          <CloseButton onPress={onDismiss} />
 
           <View className="flex-1 content-center items-center">
             <Text
@@ -104,7 +104,7 @@ function Header({
           </View>
 
           <View className="invisible">
-            <CloseButton2 onPress={onDismiss} />
+            <CloseButton onPress={onDismiss} />
           </View>
         </View>
       </View>

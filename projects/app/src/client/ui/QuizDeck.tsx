@@ -25,7 +25,7 @@ import type {
   StackCardInterpolatedStyle,
   StackCardInterpolationProps,
 } from "@react-navigation/stack";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import { Animated as RnAnimated, Text, View } from "react-native";
 import Reanimated, { FadeIn } from "react-native-reanimated";
@@ -48,6 +48,7 @@ const Stack = createStackNavigator<{
 type Navigation = StackNavigationFor<typeof Stack>;
 
 export const QuizDeck = ({ className }: { className?: string }) => {
+  const router = useRouter();
   const theme = useTheme();
   const navigationRef = useRef<Navigation>(null);
   const r = useReplicache();
@@ -162,6 +163,12 @@ export const QuizDeck = ({ className }: { className?: string }) => {
     setQuestion(undefined);
   };
 
+  const handleClose = () => {
+    if (router.canDismiss()) {
+      router.dismiss();
+    }
+  };
+
   const handleUndo = () => {
     if (latestReviewId != null) {
       r.mutate
@@ -258,7 +265,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
       <View
         className={`mb-[20px] w-full max-w-[600px] flex-row items-center gap-3 self-center px-4`}
       >
-        <CloseButton />
+        <CloseButton onPress={handleClose} />
         <QuizProgressBar progress={quizProgress.progress} />
         {skillQueue.loading ? null : (
           <QuizQueueButton queueStats={skillQueue.reviewQueue} />
