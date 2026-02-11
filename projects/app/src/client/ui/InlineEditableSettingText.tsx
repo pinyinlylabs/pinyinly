@@ -12,8 +12,9 @@ import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { confirmDiscardChanges } from "./confirmDiscardChanges";
+import { FloatingMenuModal } from "./FloatingMenuModal";
+import type { FloatingMenuModalMenuProps } from "./FloatingMenuModal";
 import { IconImage } from "./IconImage";
-import { PageSheetModal } from "./PageSheetModal";
 import { RectButton } from "./RectButton";
 
 interface InlineEditableSettingTextProps<T extends UserSettingTextEntity> {
@@ -56,7 +57,6 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
 
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState(currentValue);
-  const [showHistoryModal, setShowHistoryModal] = useState(false);
   const containerRef = useRef<View>(null);
   const inputRef = useRef<TextInput>(null);
 
@@ -204,18 +204,25 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
           />
           {showHistoryButton ? (
             <View className="absolute right-2 top-2">
-              <RectButton
-                variant="bare"
-                onPress={() => {
-                  setShowHistoryModal(true);
-                }}
+              <FloatingMenuModal
+                menu={
+                  <InlineEditableSettingHistoryMenu
+                    entries={historyEntries}
+                    onSelect={(nextValue) => {
+                      setDraft(nextValue);
+                      inputRef.current?.focus();
+                    }}
+                  />
+                }
               >
-                <IconImage
-                  icon="time-circled"
-                  size={16}
-                  className="text-fg-dim"
-                />
-              </RectButton>
+                <RectButton variant="bare">
+                  <IconImage
+                    icon="time-circled"
+                    size={16}
+                    className="text-fg-dim"
+                  />
+                </RectButton>
+              </FloatingMenuModal>
             </View>
           ) : null}
         </View>
@@ -237,19 +244,6 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
           </View>
         </Pressable>
       )}
-      {showHistoryModal ? (
-        <InlineEditableSettingHistoryModal
-          entries={historyEntries}
-          onDismiss={() => {
-            setShowHistoryModal(false);
-          }}
-          onSelect={(nextValue) => {
-            setDraft(nextValue);
-            setShowHistoryModal(false);
-            inputRef.current?.focus();
-          }}
-        />
-      ) : null}
     </View>
   );
 }
@@ -289,48 +283,41 @@ function getHistoryEntries(
   return result;
 }
 
-function InlineEditableSettingHistoryModal({
+function InlineEditableSettingHistoryMenu({
   entries,
-  onDismiss,
   onSelect,
+  onRequestClose,
 }: {
   entries: HistoryEntry[];
-  onDismiss: () => void;
   onSelect: (value: string) => void;
-}) {
+} & FloatingMenuModalMenuProps) {
   return (
-    <PageSheetModal onDismiss={onDismiss} suspenseFallback={null}>
-      {({ dismiss }) => (
-        <View className="flex-1 bg-bg">
-          <View className="flex-row items-center justify-between border-b border-fg/10 px-4 py-3">
-            <RectButton variant="bare" onPress={dismiss}>
-              Cancel
-            </RectButton>
-            <Text className="text-[17px] font-semibold text-fg-loud">
-              History
+    <ScrollView
+      className="shadow-lg max-h-[400px] w-[300px] rounded-xl bg-bg-high"
+      contentContainerClassName="gap-1 p-2"
+    >
+      {entries.map((entry) => (
+        <Pressable
+          key={entry.id}
+          onPress={() => {
+            onSelect(entry.value);
+            onRequestClose?.();
+          }}
+        >
+          <View
+            className={`
+              gap-1 rounded-lg px-3 py-2
+
+              hover:bg-fg-bg10
+            `}
+          >
+            <Text className="text-[14px] text-fg">{entry.value}</Text>
+            <Text className="text-[12px] text-fg-dim">
+              {formatRelativeTime(entry.createdAt)}
             </Text>
-            <View className="w-[60px]" />
           </View>
-          <ScrollView className="flex-1" contentContainerClassName="gap-2 p-4">
-            {entries.map((entry) => (
-              <Pressable
-                key={entry.id}
-                onPress={() => {
-                  onSelect(entry.value);
-                  dismiss();
-                }}
-              >
-                <View className="gap-1 rounded-lg border border-fg/10 bg-fg-bg5 px-3 py-2">
-                  <Text className="text-[14px] text-fg">{entry.value}</Text>
-                  <Text className="text-[12px] text-fg-dim">
-                    {formatRelativeTime(entry.createdAt)}
-                  </Text>
-                </View>
-              </Pressable>
-            ))}
-          </ScrollView>
-        </View>
-      )}
-    </PageSheetModal>
+        </Pressable>
+      ))}
+    </ScrollView>
   );
 }
