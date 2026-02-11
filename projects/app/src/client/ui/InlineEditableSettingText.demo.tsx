@@ -4,8 +4,9 @@ import {
 } from "@/client/hooks/useUserSetting";
 import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
 import { View } from "react-native";
-import { DemoHanziWordKnob, useDemoHanziWordKnob } from "./demo/helpers";
 import { Pylymark } from "./Pylymark";
+import { DemoHanziWordKnob } from "./demo/components";
+import { useDemoHanziWordKnob } from "./demo/utils";
 
 export default () => {
   const { hanziWord } = useDemoHanziWordKnob(`学:learn`);

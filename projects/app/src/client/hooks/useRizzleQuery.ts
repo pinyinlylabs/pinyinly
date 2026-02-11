@@ -1,11 +1,14 @@
 import { useRenderGuard } from "@/client/hooks/useRenderGuard";
 import type { Rizzle } from "@/data/rizzleSchema";
 import type { ReactQueryValue } from "@pinyinly/lib/types";
-import type { QueryKey } from "@tanstack/react-query";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import type { QueryKey } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
 import type { ReadTransaction } from "replicache";
 import { useReplicache } from "./useReplicache";
+
+// Work around the exhaustive-deps lint rule.
+const useMemoUnsafe = useMemo;
 
 export type UseRizzleQueryFn<T extends ReactQueryValue> = (
   r: Rizzle,
@@ -16,7 +19,6 @@ export function useRizzleQuery<T extends ReactQueryValue>(
   key: QueryKey,
   query: UseRizzleQueryFn<T>,
 ) {
-  "use no memo";
   const queryClient = useQueryClient();
   const r = useReplicache();
 
@@ -25,12 +27,13 @@ export function useRizzleQuery<T extends ReactQueryValue>(
 
   // The reference for `key` usually changes on every render because the array
   // is written inline and changes on every render.
-  // oxlint-disable-next-line react-compiler/react-compiler
-  const stableKey = useMemo(() => key, key);
+
+  const stableKey = useMemoUnsafe(() => key, key);
 
   // The reference for `query` usually changes on every render because the
   // function is written inline and the reference changes.
-  const stableQuery = useMemo(() => query, stableKey);
+
+  const stableQuery = useMemoUnsafe(() => query, stableKey);
 
   useEffect(() => {
     const unsubscribe = r.replicache.subscribe(

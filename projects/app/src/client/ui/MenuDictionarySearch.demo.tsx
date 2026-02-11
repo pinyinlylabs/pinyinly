@@ -1,4 +1,4 @@
-import { ExampleStack } from "@/client/ui/demo/helpers";
+import { ExampleStack } from "@/client/ui/demo/components";
 import { MenuDictionarySearch } from "@/client/ui/MenuDictionarySearch";
 import { View } from "react-native";
 

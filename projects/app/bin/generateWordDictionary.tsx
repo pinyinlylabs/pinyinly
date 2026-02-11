@@ -1,9 +1,11 @@
+// oxlint-disable eslint-plugin-react(only-export-components):
 import { intersperse } from "#client/react.ts";
 import {
   parseIds,
   strokeCountPlaceholderOrNull,
   walkIdsNodeLeafs,
 } from "#data/hanzi.ts";
+import { partOfSpeechSchema } from "#data/model.ts";
 import type {
   HanziCharacter,
   HanziText,
@@ -11,12 +13,6 @@ import type {
   IdsNode,
   PinyinText,
 } from "#data/model.ts";
-import { partOfSpeechSchema } from "#data/model.ts";
-import type {
-  DictionaryJson,
-  HanziWordMeaning,
-  HanziWordWithMeaning,
-} from "#dictionary.ts";
 import {
   allHanziCharacters,
   buildHanziWord,
@@ -25,6 +21,11 @@ import {
   loadCharacters,
   loadDictionary,
   meaningKeyFromHanziWord,
+} from "#dictionary.ts";
+import type {
+  DictionaryJson,
+  HanziWordMeaning,
+  HanziWordWithMeaning,
 } from "#dictionary.ts";
 import { Alert, Select } from "@inkjs/ui";
 import {
@@ -44,8 +45,8 @@ import makeDebug from "debug";
 import { Box, render, Text, useFocus, useInput } from "ink";
 import Spinner from "ink-spinner";
 import TextInput from "ink-text-input";
-import type { ReactNode } from "react";
 import { Children, useEffect, useMemo, useState } from "react";
+import type { ReactNode } from "react";
 import type { DeepReadonly } from "ts-essentials";
 import yargs from "yargs";
 import { z } from "zod/v4";
@@ -273,8 +274,7 @@ const HanziWordEditor = ({
 };
 
 const Shortcuts = ({ children }: { children: ReactNode }) => {
-  // oxlint-disable-next-line typescript/promise-function-async
-  const nonNullChilds = Children.map(children, (child) => child);
+  const nonNullChilds = Children.map(children, (child): ReactNode => child);
   return nonNullChilds == null || nonNullChilds.length === 0 ? null : (
     <Box gap={1}>{intersperse(nonNullChilds, <Text dimColor>•</Text>)}</Box>
   );
@@ -1273,8 +1273,7 @@ const DictionaryHanziWordEntry = ({
   meaning ??= res.data?.get(hanziWord);
 
   const flagElement = useMemo(() => {
-    // oxlint-disable-next-line typescript/promise-function-async
-    const nonNullChilds = Children.map(flags, (child) => child);
+    const nonNullChilds = Children.map(flags, (child): ReactNode => child);
     return nonNullChilds == null || nonNullChilds.length === 0 ? null : (
       <Box gap={1}>{intersperse(nonNullChilds, <Text>{` `}</Text>)}</Box>
     );

@@ -1,12 +1,13 @@
 import { useEventCallback } from "@/client/hooks/useEventCallback";
+import { usePostHog } from "@/client/hooks/usePostHog";
 import { usePrefetchImages } from "@/client/hooks/usePrefetchImages";
 import { useQuizProgress } from "@/client/hooks/useQuizProgress";
 import { useReplicache } from "@/client/hooks/useReplicache";
 import { useSkillQueue } from "@/client/hooks/useSkillQueue";
 import { useSoundEffect } from "@/client/hooks/useSoundEffect";
 import type { StackNavigationFor } from "@/client/ui/types";
-import type { MistakeType, Question, UnsavedSkillRating } from "@/data/model";
 import { MistakeKind, QuestionKind } from "@/data/model";
+import type { MistakeType, Question, UnsavedSkillRating } from "@/data/model";
 import { generateQuestionForSkillOrThrow } from "@/data/questions";
 import { Rating } from "@/util/fsrs";
 import { nanoid } from "@/util/nanoid";
@@ -16,20 +17,19 @@ import {
   NavigationIndependentTree,
   useTheme,
 } from "@react-navigation/native";
-import type {
-  StackCardInterpolatedStyle,
-  StackCardInterpolationProps,
-} from "@react-navigation/stack";
 import {
   createStackNavigator,
   TransitionPresets,
+} from "@react-navigation/stack";
+import type {
+  StackCardInterpolatedStyle,
+  StackCardInterpolationProps,
 } from "@react-navigation/stack";
 import { Link } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import { Animated as RnAnimated, Text, View } from "react-native";
 import Reanimated, { FadeIn } from "react-native-reanimated";
 import { CloseButton } from "./CloseButton";
-import { usePostHog } from "./PostHogProvider";
 import { QuizDeckHanziWordToGlossTypedQuestion } from "./QuizDeckHanziWordToGlossTypedQuestion";
 import { QuizDeckHanziWordToPinyinTypedQuestion } from "./QuizDeckHanziWordToPinyinTypedQuestion";
 import { QuizDeckOneCorrectPairQuestion } from "./QuizDeckOneCorrectPairQuestion";
@@ -285,6 +285,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
           >
             <Stack.Screen
               name="loading"
+              // oxlint-disable-next-line eslint-plugin-react(no-children-prop)
               children={() => {
                 return (
                   <Reanimated.View
@@ -300,6 +301,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
             />
             <Stack.Screen
               name="chill"
+              // oxlint-disable-next-line eslint-plugin-react(no-children-prop)
               children={() => {
                 return (
                   <View className="gap-2">
@@ -340,6 +342,7 @@ export const QuizDeck = ({ className }: { className?: string }) => {
             />
             <Stack.Screen
               name="question"
+              // oxlint-disable-next-line eslint-plugin-react(no-children-prop)
               children={({
                 route: {
                   params: { question },

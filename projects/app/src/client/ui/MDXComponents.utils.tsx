@@ -1,11 +1,12 @@
-// Adaptation from https://github.com/EvanBacon/expo-mdx/blob/6f27605c23400ed42d014dcef77ba11244d08f82/packages/mdx/src/
+// eslint-disable eslint-plugin-react(only-export-components)
 
+// Adaptation from https://github.com/EvanBacon/expo-mdx/blob/6f27605c23400ed42d014dcef77ba11244d08f82/packages/mdx/src/
 import * as html from "@expo/html-elements";
 import { Image } from "expo-image";
-import type { ComponentType, JSX } from "react";
 import { createContext } from "react";
-import type { TextProps, ViewProps } from "react-native";
+import type { ComponentType, JSX } from "react";
 import { Platform, Text, View } from "react-native";
+import type { TextProps, ViewProps } from "react-native";
 
 export type MdxComponentsType = Record<string, ComponentType>;
 
@@ -13,7 +14,7 @@ export type MdxComponentType = React.FC<{
   components?: MdxComponentsType;
 }>;
 
-function Img({
+export function Img({
   src,
   style,
 }: {
@@ -27,6 +28,7 @@ function Img({
 /* Lint CSS classes */
 const ctl = (classes: string) => classes;
 
+// oxlint-disable-next-line eslint-plugin-react(only-export-components)
 export const defaultMdxComponents = {
   h1: makeHeading(1, { className: ctl(`pyly-mdx-h1`) }),
   h2: makeHeading(2, { className: ctl(`pyly-mdx-h2`) }),
@@ -80,6 +82,7 @@ function makeMdx(
   ElementType: keyof JSX.IntrinsicElements | ComponentType,
 ): React.ComponentType {
   const { className, ...otherStaticProps } = staticProps;
+  // oxlint-disable-next-line eslint-plugin-react(only-export-components)
   function MdxComponent(props: Pick<ViewProps, `className`>) {
     return (
       <ElementType

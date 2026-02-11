@@ -1,4 +1,4 @@
-import { ExampleStack } from "@/client/ui/demo/helpers";
+import { ExampleStack } from "@/client/ui/demo/components";
 import { TextInputSingle } from "@/client/ui/TextInputSingle";
 import { View } from "react-native";
 

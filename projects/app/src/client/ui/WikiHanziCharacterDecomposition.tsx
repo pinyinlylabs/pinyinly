@@ -1,21 +1,22 @@
 import { useIsBetaEnabled } from "@/client/hooks/useBetaFeatures";
+import { useSelectedHint } from "@/client/hooks/useUserSetting";
 import { walkIdsNodeLeafs } from "@/data/hanzi";
 import type { HanziText, HanziWord, WikiCharacterData } from "@/data/model";
-import type { HanziWordMeaning } from "@/dictionary";
 import {
   hanziFromHanziWord,
   loadDictionary,
   meaningKeyFromHanziWord,
 } from "@/dictionary";
+import type { HanziWordMeaning } from "@/dictionary";
 import { parseIndexRanges } from "@/util/indexRanges";
 import { Link } from "expo-router";
-import type { ReactNode } from "react";
 import { use } from "react";
+import type { ReactNode } from "react";
 import { Text, View } from "react-native";
 import { AssetImage } from "./AssetImage";
-import { HanziCharacter, hanziCharacterColorSchema } from "./HanziCharacter";
+import { HanziCharacter } from "./HanziCharacter";
+import { hanziCharacterColorSchema } from "./HanziCharacter.utils";
 import { HanziLink } from "./HanziLink";
-import { useSelectedHint } from "@/client/hooks/useUserSetting";
 import { IconImage } from "./IconImage";
 import { Pylymark } from "./Pylymark";
 import { RectButton } from "./RectButton";

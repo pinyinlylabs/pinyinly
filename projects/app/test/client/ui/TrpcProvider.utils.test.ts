@@ -1,4 +1,4 @@
-import { maybeParseVercelError } from "#client/trpc.tsx";
+import { maybeParseVercelError } from "#client/ui/TrpcProvider.utils.tsx";
 import { describe, expect, test } from "vitest";
 
 describe(

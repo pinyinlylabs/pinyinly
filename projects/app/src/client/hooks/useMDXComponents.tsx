@@ -1,4 +1,4 @@
-import { MDXComponentsContext } from "@/client/ui/mdx";
+import { MDXComponentsContext } from "@/client/ui/MDXComponents.utils";
 import { use } from "react";
 
 export function useMDXComponents() {

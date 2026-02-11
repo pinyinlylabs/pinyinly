@@ -1,6 +1,6 @@
 import { useMDXComponents } from "@/client/hooks/useMDXComponents";
 import type { PropsWithChildren } from "react";
-import { MDXComponentsContext } from "./mdx";
+import { MDXComponentsContext } from "./MDXComponents.utils";
 
 export function MDXComponents({
   children,

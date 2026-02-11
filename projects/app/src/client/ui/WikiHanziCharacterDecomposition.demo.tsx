@@ -1,7 +1,7 @@
 import type { HanziCharacter, WikiCharacterData } from "@/data/model";
 import { View } from "react-native";
-import { DemoBetaFeaturesKnob, LittlePrimaryHeader } from "./demo/helpers";
 import { WikiHanziCharacterDecomposition } from "./WikiHanziCharacterDecomposition";
+import { DemoBetaFeaturesKnob, LittlePrimaryHeader } from "./demo/components";
 
 export default () => {
   return (

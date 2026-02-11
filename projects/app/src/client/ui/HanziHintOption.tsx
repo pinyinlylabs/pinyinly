@@ -94,19 +94,6 @@ function HintThumbnailRow({ imageIds }: { imageIds: readonly string[] }) {
   );
 }
 
-export function resolvePrimaryImageId(
-  imageIds: readonly string[] | null | undefined,
-  primaryImageId: string | undefined,
-): string | undefined {
-  if (imageIds == null || imageIds.length === 0) {
-    return undefined;
-  }
-  if (primaryImageId != null && imageIds.includes(primaryImageId)) {
-    return primaryImageId;
-  }
-  return imageIds[0];
-}
-
 const hintOptionClass = tv({
   base: `gap-1 rounded-lg border-2 p-3`,
   variants: {

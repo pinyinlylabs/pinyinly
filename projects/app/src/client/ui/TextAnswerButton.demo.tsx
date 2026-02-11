@@ -1,6 +1,6 @@
-import { ExampleStack, LittlePrimaryHeader } from "@/client/ui/demo/helpers";
-import type { TextAnswerButtonState } from "@/client/ui/TextAnswerButton";
+import { ExampleStack, LittlePrimaryHeader } from "@/client/ui/demo/components";
 import { TextAnswerButton } from "@/client/ui/TextAnswerButton";
+import type { TextAnswerButtonState } from "@/client/ui/TextAnswerButton.utils";
 import type { PropsOf } from "@pinyinly/lib/types";
 import shuffle from "lodash/shuffle";
 import { useState } from "react";

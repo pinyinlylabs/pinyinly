@@ -1,6 +1,7 @@
-import { HintImageSettingPicker } from "@/client/ui/HintImageSettingPicker";
 import { hanziWordMeaningHintImageSetting } from "@/client/hooks/useUserSetting";
-import { DemoHanziWordKnob, useDemoHanziWordKnob } from "./demo/helpers";
+import { DemoHanziWordKnob } from "@/client/ui/demo/components";
+import { useDemoHanziWordKnob } from "@/client/ui/demo/utils";
+import { HintImageSettingPicker } from "@/client/ui/HintImageSettingPicker";
 import { Text, View } from "react-native";
 
 export default () => {

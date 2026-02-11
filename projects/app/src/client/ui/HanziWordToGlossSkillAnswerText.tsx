@@ -11,10 +11,8 @@ export const HanziWordToGlossSkillAnswerText = ({
   const hanziWord = hanziWordFromSkill(skill);
 
   return (
-    <>
-      <Text className="pyly-body-2xl">
-        <Pylymark source={`{${hanziWord}}`} />
-      </Text>
-    </>
+    <Text className="pyly-body-2xl">
+      <Pylymark source={`{${hanziWord}}`} />
+    </Text>
   );
 };

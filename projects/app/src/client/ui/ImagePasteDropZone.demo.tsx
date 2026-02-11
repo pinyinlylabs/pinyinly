@@ -1,4 +1,4 @@
-import { ExampleStack } from "@/client/ui/demo/helpers";
+import { ExampleStack } from "@/client/ui/demo/components";
 import { ImagePasteDropZone } from "@/client/ui/ImagePasteDropZone";
 import { useState } from "react";
 import { Text, View } from "react-native";

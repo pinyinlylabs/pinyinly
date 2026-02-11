@@ -1,12 +1,12 @@
 import { getServerSessionId } from "@/client/auth";
 import { useNewQueryClient } from "@/client/hooks/useNewQueryClient";
-import { TrpcProvider } from "@/client/trpc";
 import { QueryClientProvider } from "@tanstack/react-query";
 import type { PropsWithChildren } from "react";
 import { DbProvider } from "./DbProvider";
 import { ReplicacheProvider } from "./ReplicacheProvider";
 import { SkillQueueProvider } from "./SkillQueueProvider";
 import { Suspense } from "./Suspense";
+import { TrpcProvider } from "./TrpcProvider";
 
 /**
  * All the data/store contexts that should be scoped to a single device session.

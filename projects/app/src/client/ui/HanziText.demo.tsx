@@ -1,4 +1,4 @@
-import { ExampleStack } from "@/client/ui/demo/helpers";
+import { ExampleStack } from "@/client/ui/demo/components";
 import { HanziText } from "@/client/ui/HanziText";
 
 export default () => (

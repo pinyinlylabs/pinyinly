@@ -1,6 +1,6 @@
 import * as matchers from "@testing-library/jest-dom/matchers";
-import type { Component } from "react";
 import { createElement, Fragment } from "react";
+import type { Component } from "react";
 import { View } from "react-native-web";
 import { expect, vi } from "vitest";
 
@@ -117,6 +117,15 @@ vi.mock(`nativewind`, () => {
       createAnimatedComponent: (x: Component) => x,
       View,
     },
+  };
+});
+
+vi.mock(`@floating-ui/react-native`, () => {
+  return {
+    useFloating: () => null,
+    flip: null,
+    shift: null,
+    offset: null,
   };
 });
 

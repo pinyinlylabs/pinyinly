@@ -8,10 +8,9 @@ import type {
   UserSettingTextEntity,
 } from "@/client/hooks/useUserSetting";
 import { formatRelativeTime } from "@/util/date";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
-import { confirmDiscardChanges } from "./confirmDiscardChanges";
 import { FloatingMenuModal } from "./FloatingMenuModal";
 import type { FloatingMenuModalMenuProps } from "./FloatingMenuModal";
 import { IconImage } from "./IconImage";
@@ -50,7 +49,8 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
   displayHoverClassName = `rounded-md bg-fg-bg10 px-2 py-1`,
   renderDisplay,
   sanitizeValue = defaultSanitizeValue,
-}: InlineEditableSettingTextProps<T>) {
+}: InlineEditableSettingTextProps<T>): ReactNode {
+  "use memo";
   const { value, setValue } = useUserSetting(setting, settingKey);
   const history = useUserSettingHistory(setting, settingKey);
   const currentValue: string = value?.text ?? ``;
@@ -66,29 +66,19 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
     }
   }, [currentValue, isEditing]);
 
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
     const sanitized = sanitizeValue(draft);
     setValue(
       sanitized == null
         ? null
         : ({ text: sanitized } as UserSettingEntityInput<T>),
     );
-  };
+  }, [sanitizeValue, draft, setValue]);
 
-  const exitEditMode = () => {
-    const isDirty = draft !== currentValue;
-    if (isDirty) {
-      confirmDiscardChanges({
-        onDiscard: () => {
-          setDraft(currentValue);
-          setIsEditing(false);
-        },
-      });
-    } else {
-      setIsEditing(false);
-      handleSave();
-    }
-  };
+  const exitEditMode = useCallback(() => {
+    handleSave();
+    setIsEditing(false);
+  }, [handleSave]);
 
   useEffect(() => {
     if (!isEditing) {
@@ -139,7 +129,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
       document.removeEventListener(`mousedown`, handleClickOutside);
       document.removeEventListener(`touchstart`, handleClickOutside);
     };
-  }, [isEditing]);
+  }, [isEditing, exitEditMode]);
 
   const handleKeyPress = (event: {
     nativeEvent: { key: string; shiftKey?: boolean };

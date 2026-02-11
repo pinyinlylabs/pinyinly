@@ -1,6 +1,7 @@
-import { ExampleStack } from "@/client/ui/demo/helpers";
-import { IconImage, iconNames } from "@/client/ui/IconImage";
+import { ExampleStack } from "@/client/ui/demo/components";
+import { IconImage } from "@/client/ui/IconImage";
 import { View } from "react-native";
+import { iconNames } from "./IconImage.utils";
 
 export default () => {
   const icons = ([12, 24, 32] as const).map((size, i) => (

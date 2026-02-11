@@ -1,7 +1,7 @@
 import { Text, View } from "react-native";
-import { ExampleStack } from "./demo/helpers";
 import { IconImage } from "./IconImage";
 import { RectButton } from "./RectButton";
+import { ExampleStack } from "./demo/components";
 
 export default () => {
   const themeClasses = [

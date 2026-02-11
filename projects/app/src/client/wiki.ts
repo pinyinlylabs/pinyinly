@@ -1,8 +1,8 @@
-import type { MdxComponentType } from "@/client/ui/mdx";
 import type { HanziText, WikiCharacterData } from "@/data/model";
 import { devToolsSlowQuerySleepIfEnabled } from "@/util/devtools";
 import { memoize1 } from "@pinyinly/lib/collections";
 import { lazy } from "react";
+import type { MdxComponentType } from "./ui/MDXComponents.utils";
 
 interface WikiMdxModule {
   default: MdxComponentType;

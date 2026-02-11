@@ -1,4 +1,4 @@
-import { ExampleStack, LittlePrimaryHeader } from "@/client/ui/demo/helpers";
+import { ExampleStack, LittlePrimaryHeader } from "@/client/ui/demo/components";
 import { HanziHintOption } from "@/client/ui/HanziHintOption";
 import { RectButton } from "@/client/ui/RectButton";
 import { useState } from "react";

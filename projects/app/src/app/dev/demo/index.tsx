@@ -1,7 +1,7 @@
-import { Section } from "@/client/ui/demo/helpers";
+import { Section } from "@/client/ui/demo/components";
 import { devToolsSlowQuerySleepIfEnabled } from "@/util/devtools";
-import type { FunctionComponent } from "react";
 import { lazy } from "react";
+import type { FunctionComponent } from "react";
 
 export default function UiDemoIndexPage() {
   return (

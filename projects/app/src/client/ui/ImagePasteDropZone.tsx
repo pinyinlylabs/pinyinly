@@ -1,10 +1,10 @@
 import * as ImagePicker from "expo-image-picker";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Image as RnImage,
   Platform,
   Pressable,
+  Image as RnImage,
   Text,
   View,
 } from "react-native";
@@ -19,6 +19,8 @@ export function ImagePasteDropZone({
   onUploadComplete,
   onUploadError,
 }: ImagePasteDropZoneProps) {
+  "use memo";
+
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const hasPreview = previewUrl != null && previewUrl.length > 0;
 
@@ -32,9 +34,12 @@ export function ImagePasteDropZone({
     onUploadComplete(assetId);
   };
 
-  const handleUploadError = (error: string) => {
-    onUploadError?.(error);
-  };
+  const handleUploadError = useCallback(
+    (error: string) => {
+      onUploadError?.(error);
+    },
+    [onUploadError],
+  );
 
   const { uploading, uploadImageBlob, uploadImagePickerAsset } =
     useImageUploader({

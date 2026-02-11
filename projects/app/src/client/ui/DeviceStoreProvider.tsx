@@ -1,9 +1,9 @@
 import { useNewQueryClient } from "@/client/hooks/useNewQueryClient";
-import { TrpcProvider } from "@/client/trpc";
 import { memoize0 } from "@pinyinly/lib/collections";
 import type { QueryClient } from "@tanstack/react-query";
-import type { PropsWithChildren } from "react";
 import { createContext } from "react";
+import type { PropsWithChildren } from "react";
+import { TrpcProvider } from "./TrpcProvider";
 
 const Context = createContext<{
   // Use a separate query client for device store (separate from the device

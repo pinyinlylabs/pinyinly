@@ -1,4 +1,4 @@
-import { ExampleStack } from "@/client/ui/demo/helpers";
+import { ExampleStack } from "@/client/ui/demo/components";
 import { ImageUploadButton } from "@/client/ui/ImageUploadButton";
 import { useState } from "react";
 import { Text, View } from "react-native";

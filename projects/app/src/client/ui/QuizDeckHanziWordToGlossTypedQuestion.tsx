@@ -1,27 +1,25 @@
 import { intersperse } from "@/client/react";
 import { splitHanziText } from "@/data/hanzi";
+import { QuestionFlagKind } from "@/data/model";
 import type {
   HanziWordToGlossTypedQuestion,
   MistakeType,
   UnsavedSkillRating,
 } from "@/data/model";
-import { QuestionFlagKind } from "@/data/model";
-import type { HanziToGlossTypedQuestionGrade } from "@/data/questions/hanziWordToGlossTyped";
 import { gradeHanziToGlossTypedQuestion } from "@/data/questions/hanziWordToGlossTyped";
+import type { HanziToGlossTypedQuestionGrade } from "@/data/questions/hanziWordToGlossTyped";
 import { hanziWordFromSkill } from "@/data/skills";
 import { hanziFromHanziWord } from "@/dictionary";
 import { emptyArray } from "@pinyinly/lib/collections";
-import type { ReactNode } from "react";
 import { useMemo, useRef, useState } from "react";
+import type { ReactNode } from "react";
 import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { QuizDeckResultToast } from "./QuizDeckResultToast";
 import { QuizFlagText } from "./QuizFlagText";
 import { QuizSubmitButton } from "./QuizSubmitButton";
-import {
-  ratingToInputState,
-  TextAnswerInputSingle,
-} from "./TextAnswerInputSingle";
+import { TextAnswerInputSingle } from "./TextAnswerInputSingle";
+import { ratingToInputState } from "./TextAnswerInputSingle.utils";
 
 export function QuizDeckHanziWordToGlossTypedQuestion({
   noAutoFocus = true,

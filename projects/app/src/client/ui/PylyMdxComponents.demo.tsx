@@ -1,6 +1,6 @@
-import { PylyMdxComponents } from "./PylyMdxComponents";
-import { ExampleStack } from "./demo/helpers";
+import { ExampleStack } from "@/client/ui/demo/components";
 import Template from "./demo/mdx/template.mdx";
+import { PylyMdxComponents } from "./PylyMdxComponents";
 
 export default () => {
   return (

@@ -3,9 +3,10 @@ import { Rating } from "@/util/fsrs";
 import { invariant } from "@pinyinly/lib/invariant";
 import { Platform, Text, View } from "react-native";
 import Reanimated, { Easing, Keyframe } from "react-native-reanimated";
-import type { FloatingMenuModalMenuProps } from "./FloatingMenuModal";
 import { FloatingMenuModal } from "./FloatingMenuModal";
+import type { FloatingMenuModalMenuProps } from "./FloatingMenuModal";
 import { IconImage } from "./IconImage";
+import { ratingToThemeClass } from "./QuizDeckResultToast.utils";
 import { RectButton } from "./RectButton";
 import { SkillAnswerText } from "./SkillAnswerText";
 import { Suspense } from "./Suspense";
@@ -121,21 +122,6 @@ const entering = Platform.select({
     },
   }),
 });
-
-export function ratingToThemeClass(rating: Rating) {
-  switch (rating) {
-    case Rating.Easy:
-    case Rating.Good: {
-      return `theme-success-panel`;
-    }
-    case Rating.Hard: {
-      return `theme-warning-panel`;
-    }
-    case Rating.Again: {
-      return `theme-danger-panel`;
-    }
-  }
-}
 
 function UndoAnswerMenu({
   onUndo,

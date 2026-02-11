@@ -1,4 +1,4 @@
-import { ExampleStack } from "@/client/ui/demo/helpers";
+import { ExampleStack } from "@/client/ui/demo/components";
 import { QuizFlagText } from "@/client/ui/QuizFlagText";
 import { QuestionFlagKind } from "@/data/model";
 import { subMinutes } from "date-fns/subMinutes";

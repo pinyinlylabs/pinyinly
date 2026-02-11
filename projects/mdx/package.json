@@ -35,8 +35,8 @@
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-unicorn": "^60.0.0",
     "oxfmt": "^0.28.0",
-    "oxlint": "^1.43.0",
-    "oxlint-tsgolint": "^0.11.4",
+    "oxlint": "^1.46.0",
+    "oxlint-tsgolint": "^0.12.0",
     "ts-essentials": "^10.1.1",
     "typescript": "patch:typescript@npm%3A5.9.2#~/.yarn/patches/typescript-npm-5.9.2-d00cd8b149.patch",
     "vitest": "^3.2.4"

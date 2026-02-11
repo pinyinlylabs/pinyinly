@@ -22,38 +22,36 @@ export function WikiHanziModalImpl({
   const MeaningMdx = getWikiMdxHanziMeaning(hanzi);
 
   return (
-    <>
-      <ScrollView
-        className={
-          // Use a linear gradient on the background so that rubber band
-          // scrolling showing the correct color at the top and bottom.
-          `h-screen`
+    <ScrollView
+      className={
+        // Use a linear gradient on the background so that rubber band
+        // scrolling showing the correct color at the top and bottom.
+        `h-screen`
+      }
+      contentContainerClassName="pb-10 min-h-full"
+    >
+      <Header
+        hanzi={hanzi}
+        pinyin={
+          hanziWordMeanings.length === 1
+            ? hanziWordMeanings[0]?.[1].pinyin?.[0]
+            : undefined
         }
-        contentContainerClassName="pb-10 min-h-full"
-      >
-        <Header
-          hanzi={hanzi}
-          pinyin={
-            hanziWordMeanings.length === 1
-              ? hanziWordMeanings[0]?.[1].pinyin?.[0]
-              : undefined
-          }
-          gloss={
-            hanziWordMeanings.length === 1
-              ? hanziWordMeanings[0]?.[1].gloss[0]
-              : undefined
-          }
-          variant={hanziWordMeanings.length === 1 ? `filled` : `outline`}
-          onDismiss={onDismiss}
-        />
+        gloss={
+          hanziWordMeanings.length === 1
+            ? hanziWordMeanings[0]?.[1].gloss[0]
+            : undefined
+        }
+        variant={hanziWordMeanings.length === 1 ? `filled` : `outline`}
+        onDismiss={onDismiss}
+      />
 
-        <PylyMdxComponents>
-          <View className="flex-1 gap-6 bg-bg py-7">
-            {MeaningMdx == null ? null : <MeaningMdx />}
-          </View>
-        </PylyMdxComponents>
-      </ScrollView>
-    </>
+      <PylyMdxComponents>
+        <View className="flex-1 gap-6 bg-bg py-7">
+          {MeaningMdx == null ? null : <MeaningMdx />}
+        </View>
+      </PylyMdxComponents>
+    </ScrollView>
   );
 }
 

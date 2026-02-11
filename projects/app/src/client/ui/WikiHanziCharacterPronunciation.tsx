@@ -11,10 +11,10 @@ import type { HanziText, PinyinUnit } from "@/data/model";
 import { splitPinyinUnit } from "@/data/pinyin";
 import type { ReactNode } from "react";
 import { Text, View } from "react-native";
-import { ThreeSplitLinesDown } from "./ThreeSplitLinesDown";
 import { HintImageSettingPicker } from "./HintImageSettingPicker";
 import { InlineEditableSettingText } from "./InlineEditableSettingText";
 import { Pylymark } from "./Pylymark";
+import { ThreeSplitLinesDown } from "./ThreeSplitLinesDown";
 
 export function WikiHanziCharacterPronunciation({
   hanzi,

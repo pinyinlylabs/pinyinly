@@ -2,7 +2,7 @@ import { useSoundEffect } from "@/client/hooks/useSoundEffect";
 import { useSoundEffectCycle } from "@/client/hooks/useSoundEffectCycle";
 import { pickChildren } from "@/client/react";
 import type { PylyAudioSource } from "@pinyinly/audio-sprites/client";
-import type { PropsWithChildren } from "react";
+import type { PropsWithChildren, ReactNode } from "react";
 import { Pressable, Text, View } from "react-native";
 import { IconImage } from "./IconImage";
 import { MDXComponents } from "./MDXComponents";
@@ -104,10 +104,10 @@ const Speech = ({ srcs }: { srcs: PylyAudioSource[] }) => {
   );
 };
 
-function TranslatedComponent({ children }: PropsWithChildren) {
-  return <>{children}</>;
+function TranslatedComponent({ children }: PropsWithChildren): ReactNode {
+  return children;
 }
 
-function HanziComponent({ children }: PropsWithChildren) {
-  return <>{children}</>;
+function HanziComponent({ children }: PropsWithChildren): ReactNode {
+  return children;
 }

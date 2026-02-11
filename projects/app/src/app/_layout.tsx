@@ -25,8 +25,8 @@ import { Image } from "expo-image";
 import { Stack, useNavigationContainerRef } from "expo-router";
 import Head from "expo-router/head";
 import { cssInterop } from "nativewind";
-import type { PropsWithChildren } from "react";
 import { useEffect } from "react";
+import type { PropsWithChildren } from "react";
 import Reanimated from "react-native-reanimated";
 
 // NativeWind adapters for third party components
@@ -41,6 +41,7 @@ cssInterop(AppleAuthentication.AppleAuthenticationButton, {
   className: `style`,
 });
 
+// oxlint-disable-next-line eslint-plugin-react(only-export-components)
 function RootLayout() {
   // Capture the NavigationContainer ref and register it with the instrumentation.
   const ref = useNavigationContainerRef();
@@ -77,6 +78,7 @@ function RootLayout() {
   );
 }
 
+// oxlint-disable-next-line eslint-plugin-react(only-export-components)
 function CurrentSessionStoreProvider({ children }: PropsWithChildren) {
   const activeDeviceSession = useAuth().data?.activeDeviceSession;
 
@@ -92,4 +94,5 @@ function CurrentSessionStoreProvider({ children }: PropsWithChildren) {
 }
 
 // Wrap the Root Layout route component with `Sentry.wrap` to capture gesture info and profiling data.
+// oxlint-disable-next-line eslint-plugin-react(only-export-components)
 export default Sentry.wrap(RootLayout);

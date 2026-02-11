@@ -1,6 +1,6 @@
-import { examplesStackClassName } from "@/client/ui/demo/helpers";
-import type { Href } from "expo-router";
+import { examplesStackClassName } from "@/client/ui/demo/utils";
 import { Link, Slot, usePathname } from "expo-router";
+import type { Href } from "expo-router";
 import { StrictMode } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { demos } from ".";

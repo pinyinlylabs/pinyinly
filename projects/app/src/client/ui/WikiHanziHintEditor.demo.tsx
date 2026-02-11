@@ -1,7 +1,8 @@
+import { DemoHanziWordKnob } from "@/client/ui/demo/components";
+import { useDemoHanziWordKnob } from "@/client/ui/demo/utils";
 import { WikiHanziHintEditor } from "@/client/ui/WikiHanziHintEditor";
 import type { HanziWord } from "@/data/model";
 import { Text, View } from "react-native";
-import { DemoHanziWordKnob, useDemoHanziWordKnob } from "./demo/helpers";
 import { Suspense } from "./Suspense";
 
 /**
