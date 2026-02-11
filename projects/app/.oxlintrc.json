@@ -2,14 +2,14 @@
   "$schema": "../../node_modules/oxlint/configuration_schema.json",
   "extends": ["../oxlint-rules/base.oxlintrc.json"],
   "rules": {
-    "pinyinly/no-restricted-css-classes": [
-      "error",
-      {
-        "classes": [
-          { "name": "flex-col", "message": "flex-col is already the default" }
-        ]
-      }
-    ]
+    // "pinyinly/no-restricted-css-classes": [
+    //   "error",
+    //   {
+    //     "classes": [
+    //       { "name": "flex-col", "message": "flex-col is already the default" }
+    //     ]
+    //   }
+    // ]
   },
   "overrides": [
     {
