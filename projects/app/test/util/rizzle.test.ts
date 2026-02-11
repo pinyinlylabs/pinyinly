@@ -1,4 +1,5 @@
 import { nanoid } from "#util/nanoid.ts";
+import { keyPathVariableNames, r } from "#util/rizzle.ts";
 import type {
   ExtractVariableNames,
   RizzleCustom,
@@ -13,16 +14,15 @@ import type {
   RizzleReplicacheMutators,
   RizzleReplicacheQuery,
 } from "#util/rizzle.ts";
-import { keyPathVariableNames, r } from "#util/rizzle.ts";
 import type { IsEqual } from "@pinyinly/lib/types";
 import mapValues from "lodash/mapValues";
 import shuffle from "lodash/shuffle";
+import { Replicache } from "replicache";
 import type {
   DeepReadonly,
   ReadonlyJSONValue,
   WriteTransaction,
 } from "replicache";
-import { Replicache } from "replicache";
 import { describe, expect, test, vi } from "vitest";
 import { z } from "zod/v4";
 import { makeMockTx, testReplicacheOptions } from "./rizzleHelpers.ts";
@@ -47,9 +47,7 @@ test(`string() key and value`, async () => {
   expect(getSpy).toHaveBeenCalledWith(`foo/1`);
 
   // Check that a ReadonlyJSONValue is parsed correctly.
-  getSpy.mockImplementationOnce(() =>
-    Promise.resolve({ id: `1`, name: `foo` }),
-  );
+  getSpy.mockImplementationOnce(async () => ({ id: `1`, name: `foo` }));
   await expect(posts.get(tx, { id: `1` })).resolves.toEqual({
     id: `1`,
     name: `foo`,
@@ -229,7 +227,7 @@ test(`object()`, async () => {
     expect(getSpy.mock.calls[0]).toEqual([`foo/1`]);
 
     // Check that a ReadonlyJSONValue is parsed correctly.
-    getSpy.mockImplementationOnce(() => Promise.resolve({ id: `1`, n: `foo` }));
+    getSpy.mockImplementationOnce(async () => ({ id: `1`, n: `foo` }));
     await expect(posts.get(tx, { id: `1` })).resolves.toEqual({
       id: `1`,
       name: `foo`,
@@ -330,12 +328,10 @@ test(`timestamp()`, async () => {
       [date.getTime(), date], // timestamp as number
       [date.getTime().toString(), date], // timestamp as string
     ] as const) {
-      vi.spyOn(tx, `get`).mockImplementationOnce(() =>
-        Promise.resolve({
-          id: `1`,
-          due: marshaled,
-        }),
-      );
+      vi.spyOn(tx, `get`).mockImplementationOnce(async () => ({
+        id: `1`,
+        due: marshaled,
+      }));
 
       await expect(posts.get(tx, { id: `1` })).resolves.toEqual({
         id: `1`,
@@ -1284,11 +1280,11 @@ test(`replicache() mutator tx`, async () => {
 
   await db.mutate.incrementCounter({ id: `1` });
   await expect(
-    db.replicache.query((tx) => db.query.counter.get(tx, { id: `1` })),
+    db.replicache.query(async (tx) => db.query.counter.get(tx, { id: `1` })),
   ).resolves.toEqual({ id: `1`, count: 1 });
   await db.mutate.incrementCounter({ id: `1` });
   await expect(
-    db.replicache.query((tx) => db.query.counter.get(tx, { id: `1` })),
+    db.replicache.query(async (tx) => db.query.counter.get(tx, { id: `1` })),
   ).resolves.toEqual({ id: `1`, count: 2 });
 });
 
@@ -1311,12 +1307,13 @@ describe(`replicache() entity()`, async () => {
   test(`.set() only exposed to mutators`, async () => {
     await using db = r.replicache(testReplicacheOptions(), schema, {
       async appendText(db) {
+        // oxlint-disable-next-line eslint(no-unused-expressions)
         db.text.set;
       },
     });
 
     // @ts-expect-error set() is not exposed on the query object
-
+    // oxlint-disable-next-line eslint(no-unused-expressions)
     db.query.text.set;
   });
 

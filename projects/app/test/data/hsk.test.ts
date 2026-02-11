@@ -478,9 +478,8 @@ test(`hsk word lists match vendor data`, async () => {
 }, 120_000);
 
 describe(`parseHskTsv suite` satisfies HasNameOf<typeof parseHskTsv>, () => {
-  const loadData = memoize1(
-    async (filename: string) =>
-      await readFile(path.join(dataDir, filename), `utf8`),
+  const loadData = memoize1(async (filename: string) =>
+    readFile(path.join(dataDir, filename), `utf8`),
   );
 
   test(`parses hsk1.tsv correctly`, async () => {

@@ -45,10 +45,7 @@ export default () => (
       </ExampleStack>
     </View>
 
-    <LittlePrimaryHeader
-      // eslint-disable-next-line @pinyinly/no-restricted-css-classes
-      title="flex-col"
-    />
+    <LittlePrimaryHeader title="flex-col" />
 
     <View className="flex-row flex-wrap">
       <ExampleStack title="items-start" showFrame>
@@ -76,10 +73,7 @@ export default () => (
       </ExampleStack>
     </View>
 
-    <LittlePrimaryHeader
-      // eslint-disable-next-line @pinyinly/no-restricted-css-classes
-      title="flex-col + flex-1"
-    />
+    <LittlePrimaryHeader title="flex-col + flex-1" />
 
     <View className="flex-row flex-wrap">
       <ExampleStack

@@ -72,7 +72,7 @@ test(`new users are taught the simplest words first`, async ({ rizzle }) => {
   });
 
   // Wait a little bit so to skip past initial "loading false" state.
-  await act(() => sleep(5));
+  await act(async () => sleep(5));
   await waitFor(
     () => {
       expect(result.current.loading).toBe(false);

@@ -42,7 +42,7 @@ async function createTestDb(annotate?: TestContext[`annotate`]) {
   }
 
   return Object.assign(db, {
-    close: () => client.close(),
+    close: async () => client.close(),
   });
 }
 
@@ -68,7 +68,7 @@ export const txTest = test
   })
   .extend<{ tx: Transaction; pgConfig?: PgTransactionConfig }>({
     pgConfig: async ({}, use) => {
-      // oxlint-disable-next-line react-hooks/rules-of-hooks
+      // oxlint-disable-next-line eslint-plugin-unicorn(no-useless-undefined)
       await use(undefined);
     },
     tx: async ({ db, pgConfig }, use) => {

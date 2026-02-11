@@ -16,6 +16,7 @@ const configPath = path.resolve(workspaceRoot, `renovate.json5`);
 function evaluateJsStringLiteral(literal: string): string {
   // oxlint-disable-next-line typescript/no-implied-eval
   const fn = new Function(`return (${literal});`);
+  // oxlint-disable-next-line typescript-eslint(no-unsafe-call)
   const val = fn() as unknown;
   if (typeof val !== `string`) {
     throw new TypeError(`Expected string literal, got ${typeof val}`);

@@ -1,7 +1,16 @@
 {
   "$schema": "../../node_modules/oxlint/configuration_schema.json",
   "extends": ["../oxlint-rules/base.oxlintrc.json"],
-  "rules": {},
+  "rules": {
+    "pinyinly/no-restricted-css-classes": [
+      "error",
+      {
+        "classes": [
+          { "name": "flex-col", "message": "flex-col is already the default" }
+        ]
+      }
+    ]
+  },
   "overrides": [
     {
       "files": ["src/app/**/*.ts", "src/app/**/*.tsx"],
@@ -20,5 +29,5 @@
   "env": {
     "builtin": true
   },
-  "ignorePatterns": ["test/**", "**/*.d.ts", "**/*.demo.tsx", "src/app/dev/**"]
+  "ignorePatterns": ["**/*.d.ts", "**/*.demo.tsx", "src/app/dev/**"]
 }

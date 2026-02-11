@@ -15,7 +15,7 @@
       "specifier": "@pinyinly/eslint-rules"
     }
   ],
-  "ignorePatterns": ["test/**", "**/*.d.ts"],
+  "ignorePatterns": ["**/*.d.ts"],
   "categories": {
     "correctness": "error",
     "restriction": "error",
@@ -294,13 +294,24 @@
       }
     },
     {
-      "files": ["test/**/*.{ts,tsx}"],
+      "files": ["test/**"],
       "rules": {
         // it's nice to be able to write a quick generator functions in a test without worrying about yield
         "require-yield": "off",
-        "eslint/require-yield": "off",
+        "no-non-null-assertion": "off",
 
-        "no-non-null-assertion": "off"
+        "eslint/require-yield": "off",
+        "eslint/no-empty-function": "off",
+        "eslint/no-empty-pattern": "off",
+        "eslint/no-inner-declarations": "off",
+
+        "import/no-relative-parent-imports": "off",
+
+        "typescript/no-dynamic-delete": "off",
+        "typescript/no-explicit-any": "off",
+        "typescript/restrict-template-expressions": "off",
+
+        "react/rules-of-hooks": "off"
         // Backup from eslint config:
         //
         // "typescript/no-non-null-assertion": "off",

@@ -3,7 +3,6 @@ import type { ESLint } from "eslint";
 import betterTailwindcssPlugin from "eslint-plugin-better-tailwindcss";
 import { getDefaultAttributes } from "eslint-plugin-better-tailwindcss/api/defaults";
 import importPlugin from "eslint-plugin-import";
-import reactPlugin from "eslint-plugin-react";
 import tailwindPlugin from "eslint-plugin-tailwindcss";
 import type { defineConfig } from "eslint/config";
 import tseslint from "typescript-eslint";
@@ -36,11 +35,6 @@ const recommended: ConfigWithExtendsArray = [
     files: [`**/*.{cjs,js,mjs,ts,tsx}`],
     linterOptions: {
       reportUnusedDisableDirectives: `error`,
-    },
-    settings: {
-      react: {
-        version: `detect`,
-      },
     },
   },
 
@@ -76,34 +70,6 @@ const recommended: ConfigWithExtendsArray = [
       //
 
       "@stylistic/quotes": [`error`, `backtick`],
-    },
-  },
-];
-
-const react: ConfigWithExtendsArray = [
-  {
-    files: [`**/*.{ts,tsx}`],
-    rules: reactPlugin.configs.recommended.rules,
-  },
-
-  {
-    files: [`**/*.{ts,tsx}`],
-    rules: {
-      //
-      // react
-      //
-
-      "react/prop-types": `off`, // we use TypeScript for type checking
-      "react/no-children-prop": [`error`, { allowFunctions: true }],
-
-      "@pinyinly/no-restricted-css-classes": [
-        `error`,
-        {
-          classes: [
-            { name: `flex-col`, message: `flex-col is already the default` },
-          ],
-        },
-      ],
     },
   },
 ];
@@ -154,13 +120,11 @@ const tailwind: ConfigWithExtendsArray = [
 ];
 
 interface Configs {
-  react: ConfigWithExtendsArray;
   recommended: ConfigWithExtendsArray;
   tailwind: ConfigWithExtendsArray;
 }
 
 export const configs: Configs = {
-  react,
   recommended,
   tailwind,
 };
@@ -171,7 +135,6 @@ export const plugins = {
   [`@typescript-eslint`]: tseslint.plugin as ESLint.Plugin,
   [`better-tailwindcss`]: betterTailwindcssPlugin as ESLint.Plugin,
   [`import`]: importPlugin as ESLint.Plugin,
-  [`react`]: reactPlugin as ESLint.Plugin,
   [`tailwind`]: tailwindPlugin as ESLint.Plugin,
 };
 

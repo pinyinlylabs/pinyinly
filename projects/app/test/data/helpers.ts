@@ -280,6 +280,7 @@ export function parseHistoryCommand(
     case `🟠`: {
       const rating = emojiToRating(op);
 
+      // oxlint-disable-next-line eslint(prefer-const)
       let [skill, skillArgs] = splitN(opArgs!, ` `, 1) as [Skill, string?];
       const event: HistoryEventSkillReview = {
         kind: `skillReview`,

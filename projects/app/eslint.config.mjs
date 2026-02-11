@@ -34,7 +34,6 @@ export default defineConfig(
 
   // extends ...
   configs.recommended,
-  configs.react,
   configs.tailwind,
 
   queryPlugin.configs[`flat/recommended`],
