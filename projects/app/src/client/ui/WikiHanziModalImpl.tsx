@@ -1,4 +1,3 @@
-import { getWikiMdxHanziMeaning } from "@/client/wiki";
 import type { HanziText } from "@/data/model";
 import { loadDictionary } from "@/dictionary";
 import type { IsExhaustedRest, PropsOf } from "@pinyinly/lib/types";
@@ -8,6 +7,7 @@ import { useIntersectionObserver, useTimeout } from "usehooks-ts";
 import { CloseButton } from "./CloseButton";
 import { HanziTile } from "./HanziTile";
 import { PylyMdxComponents } from "./PylyMdxComponents";
+import { WikiMdxHanziMeaning } from "./WikiMdxHanziMeaning";
 
 export function WikiHanziModalImpl({
   hanzi,
@@ -18,8 +18,6 @@ export function WikiHanziModalImpl({
 }) {
   const dictionary = use(loadDictionary());
   const hanziWordMeanings = dictionary.lookupHanzi(hanzi);
-
-  const MeaningMdx = getWikiMdxHanziMeaning(hanzi);
 
   return (
     <ScrollView
@@ -48,7 +46,7 @@ export function WikiHanziModalImpl({
 
       <PylyMdxComponents>
         <View className="flex-1 gap-6 bg-bg py-7">
-          {MeaningMdx == null ? null : <MeaningMdx />}
+          <WikiMdxHanziMeaning hanzi={hanzi} />
         </View>
       </PylyMdxComponents>
     </ScrollView>

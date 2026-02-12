@@ -1,4 +1,3 @@
-import { getWikiMdxHanziMeaning } from "@/client/wiki";
 import type { HanziText, PinyinText } from "@/data/model";
 import { loadDictionary } from "@/dictionary";
 import { use } from "react";
@@ -6,6 +5,7 @@ import { Pressable, ScrollView, Text, View } from "react-native";
 import { useIntersectionObserver } from "usehooks-ts";
 import { IconImage } from "./IconImage";
 import { PylyMdxComponents } from "./PylyMdxComponents";
+import { WikiMdxHanziMeaning } from "./WikiMdxHanziMeaning";
 
 export const NewSkillModalContentNewWord = ({
   hanzi,
@@ -38,8 +38,6 @@ export const NewSkillModalContentNewWord = ({
       ? hanziWordMeanings[0]?.[1].gloss.join(`, `)
       : hanziWordMeanings.map(([, meaning]) => meaning.gloss[0]).join(`, `);
 
-  const MeaningMdx = getWikiMdxHanziMeaning(hanzi);
-
   return (
     <ScrollView
       className={
@@ -65,7 +63,7 @@ export const NewSkillModalContentNewWord = ({
             <Text className="pyly-body-title text-fg-loud">Meaning</Text>
           </View>
 
-          {MeaningMdx == null ? null : <MeaningMdx />}
+          <WikiMdxHanziMeaning hanzi={hanzi} />
         </View>
       </PylyMdxComponents>
     </ScrollView>
