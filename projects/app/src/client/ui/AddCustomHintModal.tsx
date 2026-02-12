@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { IconImage } from "./IconImage";
 import { PageSheetModal } from "./PageSheetModal";
@@ -56,15 +56,6 @@ function AddCustomHintModalContent({
 
   const isEditing = initialHint.length > 0;
   const canSave = hint.trim().length > 0;
-
-  useEffect(() => {
-    setHint(initialHint);
-  }, [initialHint]);
-
-  useEffect(() => {
-    setExplanation(initialExplanation);
-    setShowExplanation(initialExplanation.length > 0);
-  }, [initialExplanation]);
 
   return (
     <View className="flex-1 bg-bg">

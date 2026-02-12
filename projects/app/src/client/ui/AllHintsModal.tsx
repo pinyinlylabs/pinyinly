@@ -1,6 +1,6 @@
 import type { HanziText, HanziWord } from "@/data/model";
 import { buildHanziWord } from "@/dictionary";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { HanziHintOption } from "./HanziHintOption";
 import { PageSheetModal } from "./PageSheetModal";
@@ -42,10 +42,6 @@ export function AllHintsModal({
   const [draftHint, setDraftHint] = useState<PresetHint | null>(
     initialPresetHint,
   );
-
-  useEffect(() => {
-    setDraftHint(initialPresetHint);
-  }, [initialPresetHint]);
 
   const previewHint = draftHint ?? currentHint ?? presetHints[0] ?? null;
   const canSave = draftHint != null;

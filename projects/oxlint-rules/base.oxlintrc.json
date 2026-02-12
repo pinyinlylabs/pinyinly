@@ -255,7 +255,7 @@
     "react-hooks-js/hooks": "error",
     "react-hooks-js/invariant": "error",
     "react-hooks-js/memoized-effect-dependencies": "error",
-    // "react-hooks-js/no-deriving-state-in-effects": "error",
+    "react-hooks-js/no-deriving-state-in-effects": "error",
     "react-hooks-js/rule-suppression": "error",
     "react-hooks-js/syntax": "error",
     // "react-hooks-js/todo": "error",
