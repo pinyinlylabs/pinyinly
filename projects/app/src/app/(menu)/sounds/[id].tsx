@@ -23,7 +23,7 @@ import { use } from "react";
 import { Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 
-export default function MnemonicIdPage() {
+export default function SoundIdPage() {
   const id = useLocalSearchParams<`/sounds/[id]`>().id as PinyinSoundId;
   const r = useRizzle();
   const chart = loadPylyPinyinChart();
