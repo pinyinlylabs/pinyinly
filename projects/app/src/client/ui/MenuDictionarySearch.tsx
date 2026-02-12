@@ -19,7 +19,10 @@ export function MenuDictionarySearch() {
     ReturnType<typeof setTimeout> | undefined
   >();
 
-  const { refs, floatingStyles } = useFloating({
+  const {
+    refs: { setFloating, setReference },
+    floatingStyles,
+  } = useFloating({
     placement: `bottom`,
     sameScrollView: false,
     middleware: [shift({ padding: gap }), flip({ padding: gap }), offset(gap)],
@@ -55,7 +58,7 @@ export function MenuDictionarySearch() {
 
   return (
     <View className="w-[200px]">
-      <View ref={refs.setReference} collapsable={false}>
+      <View ref={setReference} collapsable={false}>
         <IconImage
           icon="search"
           size={16}
@@ -74,7 +77,7 @@ export function MenuDictionarySearch() {
       {showResults ? (
         <Portal>
           <View
-            ref={refs.setFloating}
+            ref={setFloating}
             collapsable={false}
             style={floatingStyles}
             className="shadow-lg overflow-hidden rounded-xl border border-fg/10 bg-bg-high"

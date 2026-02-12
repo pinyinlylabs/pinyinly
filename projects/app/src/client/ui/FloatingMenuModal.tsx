@@ -18,7 +18,10 @@ export function FloatingMenuModal(props: {
     Pick<PressableProps, `onTouchEnd` | `onPress`> & RefAttributes<View>
   >;
 }) {
-  const { refs, floatingStyles } = useFloating({
+  const {
+    refs: { setReference, setFloating },
+    floatingStyles,
+  } = useFloating({
     placement: `top`,
     sameScrollView: false,
     middleware: [shift({ padding: gap }), flip({ padding: gap }), offset(gap)],
@@ -44,7 +47,7 @@ export function FloatingMenuModal(props: {
       {cloneElement(
         props.children,
         mergeProps(props.children.props, {
-          ref: refs.setReference,
+          ref: setReference,
           // for Desktop
           onPress: toggleOpen,
           // for Mobile
@@ -64,7 +67,7 @@ export function FloatingMenuModal(props: {
           testID="tooltip-modal-backdrop"
         >
           <View
-            ref={refs.setFloating}
+            ref={setFloating}
             collapsable={false}
             style={floatingStyles}
             className={isInitializing ? `invisible` : undefined}
