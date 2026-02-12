@@ -8,15 +8,23 @@ import type {
   UserSettingTextEntity,
 } from "@/client/ui/hooks/useUserSetting";
 import { formatRelativeTime } from "@/util/date";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { tv } from "tailwind-variants";
 import { FloatingMenuModal } from "./FloatingMenuModal";
 import type { FloatingMenuModalMenuProps } from "./FloatingMenuModal";
 import { IconImage } from "./IconImage";
 import { RectButton } from "./RectButton";
 
+export type InlineEditableSettingTextVariant =
+  | `body`
+  | `hint`
+  | `hintExplanation`
+  | `title`;
+
 interface InlineEditableSettingTextProps<T extends UserSettingTextEntity> {
+  variant?: InlineEditableSettingTextVariant;
   setting: T;
   settingKey: UserSettingKeyInput<T>;
   placeholder: string;
@@ -37,6 +45,7 @@ const defaultSanitizeValue = (value: string) => {
 };
 
 export function InlineEditableSettingText<T extends UserSettingTextEntity>({
+  variant = `body`,
   setting,
   settingKey,
   placeholder,
@@ -45,8 +54,8 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
   displayClassName,
   emptyClassName,
   inputClassName,
-  displayContainerClassName = `px-2 py-1`,
-  displayHoverClassName = `rounded-md bg-fg-bg10 px-2 py-1`,
+  displayContainerClassName,
+  displayHoverClassName,
   renderDisplay,
   sanitizeValue = defaultSanitizeValue,
 }: InlineEditableSettingTextProps<T>): ReactNode {
@@ -66,24 +75,15 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
     }
   }, [currentValue, isEditing]);
 
-  const handleSave = useCallback(() => {
-    const sanitized = sanitizeValue(draft);
-    setValue(
-      sanitized == null
-        ? null
-        : ({ text: sanitized } as UserSettingEntityInput<T>),
-    );
-  }, [sanitizeValue, draft, setValue]);
-
-  const exitEditMode = useCallback(() => {
-    handleSave();
-    setIsEditing(false);
-  }, [handleSave]);
-
   useEffect(() => {
     if (!isEditing) {
       return;
     }
+
+    const exitEditMode = () => {
+      saveDraftValue(draft, sanitizeValue, setValue);
+      setIsEditing(false);
+    };
 
     const isWithinModal = (element: Node): boolean => {
       let current = element as HTMLElement | null;
@@ -129,7 +129,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
       document.removeEventListener(`mousedown`, handleClickOutside);
       document.removeEventListener(`touchstart`, handleClickOutside);
     };
-  }, [isEditing, exitEditMode]);
+  }, [draft, isEditing, sanitizeValue, setValue]);
 
   const handleKeyPress = (event: {
     nativeEvent: { key: string; shiftKey?: boolean };
@@ -143,7 +143,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
       }
       event.preventDefault();
       setIsEditing(false);
-      handleSave();
+      saveDraftValue(draft, sanitizeValue, setValue);
     }
 
     if (event.nativeEvent.key === `Escape`) {
@@ -162,14 +162,21 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
   const showHistoryButton =
     isEditing && draft.trim().length === 0 && historyEntries.length > 0;
 
-  // Use CSS :hover via Tailwind group pattern to avoid stale hover state
-  // when component unmounts/remounts during edit mode
-  const isUsingDefaultHoverStyles =
-    displayContainerClassName === `px-2 py-1` &&
-    displayHoverClassName === `rounded-md bg-fg-bg10 px-2 py-1`;
-  const displayViewClassName = isUsingDefaultHoverStyles
-    ? `px-2 py-1 group-hover:rounded-md group-hover:bg-fg-bg10`
-    : displayContainerClassName;
+  const displayViewClassName = displayContainer({
+    variant,
+    class: [displayContainerClassName, displayHoverClassName]
+      .filter(Boolean)
+      .join(` `),
+  });
+  const displayTextClassName = displayTextStyle({
+    variant,
+    class: displayClassName,
+  });
+  const emptyTextClassName = emptyTextStyle({
+    variant,
+    class: emptyClassName,
+  });
+  const inputTextClassName = inputText({ variant, class: inputClassName });
 
   return (
     <View>
@@ -183,13 +190,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
             onChangeText={setDraft}
             onKeyPress={handleKeyPress}
             placeholder={placeholder}
-            className={
-              inputClassName == null
-                ? ``
-                : `
-                  ${inputClassName}
-                `
-            }
+            className={inputTextClassName}
             style={showHistoryButton ? { paddingRight: 32 } : undefined}
           />
           {showHistoryButton ? (
@@ -218,7 +219,8 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
         </View>
       ) : (
         <Pressable
-          className="group"
+          accessibilityRole="button"
+          className={pressable()}
           onPress={() => {
             setIsEditing(true);
           }}
@@ -226,7 +228,9 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
           <View className={displayViewClassName}>
             <Text
               className={
-                currentValue.length === 0 ? emptyClassName : displayClassName
+                currentValue.length === 0
+                  ? emptyTextClassName
+                  : displayTextClassName
               }
             >
               {displayContent}
@@ -237,6 +241,90 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
     </View>
   );
 }
+
+function saveDraftValue<T extends UserSettingTextEntity>(
+  draft: string,
+  sanitizeValue: (value: string) => string | null,
+  setValue: (value: UserSettingEntityInput<T> | null) => void,
+) {
+  const sanitized = sanitizeValue(draft);
+  setValue(
+    sanitized == null
+      ? null
+      : ({ text: sanitized } as UserSettingEntityInput<T>),
+  );
+}
+
+const pressable = tv({
+  base: `
+    group
+
+    focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2
+    focus-visible:outline-fg/60
+
+    web:transition-colors
+  `,
+});
+
+const displayContainer = tv({
+  variants: {
+    variant: {
+      body: `
+        rounded-md px-2 py-1
+
+        group-hover:bg-fg-bg10
+      `,
+      hint: `
+        rounded-md px-2 py-1
+
+        group-hover:bg-fg-bg10
+      `,
+      hintExplanation: `
+        rounded-md px-2 py-1
+
+        group-hover:bg-fg-bg10
+      `,
+      title: `
+        rounded-md px-1 py-0.5
+
+        group-hover:bg-fg-bg10
+      `,
+    },
+  },
+});
+
+const displayTextStyle = tv({
+  variants: {
+    variant: {
+      body: `pyly-body text-[14px] text-fg`,
+      hint: `pyly-body text-[14px] font-semibold text-fg-loud`,
+      hintExplanation: `pyly-body text-[14px] text-fg`,
+      title: `text-3xl font-bold text-fg`,
+    },
+  },
+});
+
+const emptyTextStyle = tv({
+  variants: {
+    variant: {
+      body: `pyly-body text-[14px] text-fg-dim`,
+      hint: `pyly-body text-[14px] font-semibold text-fg-dim`,
+      hintExplanation: `pyly-body text-[14px] text-fg-dim`,
+      title: `select-none text-3xl text-fg/20`,
+    },
+  },
+});
+
+const inputText = tv({
+  variants: {
+    variant: {
+      body: `pyly-body-input rounded-md bg-bg-high px-2 py-1 text-[14px] text-fg`,
+      hint: `pyly-body-input rounded-md bg-bg-high px-2 py-1 text-[14px] font-semibold text-fg-loud`,
+      hintExplanation: `pyly-body-input rounded-md bg-bg-high px-2 py-1 text-[14px] text-fg`,
+      title: `rounded-md bg-bg-high px-1 py-0.5 text-3xl font-bold text-fg`,
+    },
+  },
+});
 
 type HistoryEntry = {
   id: string;

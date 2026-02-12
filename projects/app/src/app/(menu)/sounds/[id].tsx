@@ -56,14 +56,11 @@ export default function MnemonicIdPage() {
           </Text>
         </View>
         <InlineEditableSettingText
+          variant="title"
           setting={pinyinSoundNameSetting}
           settingKey={{ soundId: id }}
           placeholder="Name this sound"
           emptyText="_________"
-          displayClassName="text-3xl font-bold text-fg"
-          emptyClassName="select-none text-3xl text-fg/20"
-          inputClassName="text-3xl font-bold text-fg"
-          displayContainerClassName=""
         />
       </View>
 

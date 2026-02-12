@@ -28,13 +28,7 @@ export default () => {
           placeholder="Add a hint"
           emptyText="Add a hint"
           renderDisplay={(value) => <Pylymark source={value} />}
-          inputClassName={`
-            pyly-body-input rounded-lg bg-bg-high px-3 py-2 text-[14px] font-semibold text-fg-loud
-          `}
-          displayClassName="pyly-body text-[14px] font-semibold text-fg-loud"
-          emptyClassName="pyly-body text-[14px] font-semibold text-fg-dim"
-          displayContainerClassName="px-2 py-1"
-          displayHoverClassName="rounded-md bg-fg-bg10 px-2 py-1"
+          variant="hint"
         />
 
         <InlineEditableSettingText
@@ -44,11 +38,7 @@ export default () => {
           emptyText="Add an explanation"
           multiline
           renderDisplay={(value) => <Pylymark source={value} />}
-          inputClassName="rounded-lg bg-bg-high px-3 py-2 text-[14px] text-fg"
-          displayClassName="pyly-body text-[14px] text-fg"
-          emptyClassName="pyly-body text-[14px] text-fg-dim"
-          displayContainerClassName="px-2 py-1"
-          displayHoverClassName="rounded-md bg-fg-bg10 px-2 py-1"
+          variant="hintExplanation"
         />
       </View>
     </View>

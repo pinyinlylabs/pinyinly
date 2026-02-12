@@ -271,33 +271,22 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
           <View className="gap-2">
             <View className="gap-2 rounded-lg border border-fg-bg10 bg-fg-bg5 p-3">
               <InlineEditableSettingText
+                variant="hint"
                 setting={hanziWordMeaningHintTextSetting}
                 settingKey={hintSettingKey}
                 placeholder="Add a hint"
                 emptyText="Add a hint"
                 renderDisplay={(value) => <Pylymark source={value} />}
-                inputClassName={`
-                  pyly-body-input rounded-lg bg-bg-high px-3 py-2 text-[14px] font-semibold
-                  text-fg-loud
-                `}
-                displayClassName="pyly-body text-[14px] font-semibold text-fg-loud"
-                emptyClassName="pyly-body text-[14px] font-semibold text-fg-dim"
-                displayContainerClassName="px-2 py-1"
-                displayHoverClassName="rounded-md bg-fg-bg10 px-2 py-1"
               />
 
               <InlineEditableSettingText
+                variant="hintExplanation"
                 setting={hanziWordMeaningHintExplanationSetting}
                 settingKey={hintSettingKey}
                 placeholder="Add an explanation"
                 emptyText="Add an explanation"
                 multiline
                 renderDisplay={(value) => <Pylymark source={value} />}
-                inputClassName="rounded-lg bg-bg-high px-3 py-2 text-[14px] text-fg"
-                displayClassName="pyly-body text-[14px] text-fg"
-                emptyClassName="pyly-body text-[14px] text-fg-dim"
-                displayContainerClassName="px-2 py-1"
-                displayHoverClassName="rounded-md bg-fg-bg10 px-2 py-1"
               />
             </View>
           </View>
@@ -313,6 +302,7 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
               Browse hints
             </RectButton>
           </View>
+
           {canOpenGallery ? null : (
             <Text className="text-[13px] text-fg-dim">
               No system hints available for this character
