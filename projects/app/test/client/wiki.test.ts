@@ -18,6 +18,7 @@ import {
   loadDictionary,
 } from "#dictionary.js";
 import type { CharactersKey, CharactersValue } from "#dictionary.js";
+import { dataDir, getFonts, projectRoot, wikiDir } from "#test/helpers.ts";
 import { IS_CI } from "#util/env.js";
 import { normalizeIndexRanges, parseIndexRanges } from "#util/indexRanges.js";
 import { createSpeechFileTests } from "@pinyinly/audio-sprites/testing";
@@ -40,7 +41,6 @@ import {
 } from "@pinyinly/lib/invariant";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
-import { dataDir, getFonts, projectRoot, wikiDir } from "../helpers.ts";
 
 describe(`speech files`, async () => {
   await createSpeechFileTests({

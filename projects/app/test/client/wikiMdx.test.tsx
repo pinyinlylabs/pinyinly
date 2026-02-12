@@ -7,6 +7,8 @@ import { PylyMdxComponents } from "#client/ui/PylyMdxComponents.tsx";
 import { RizzleProvider } from "#client/ui/RizzleProvider.tsx";
 import { registry_ForTesting } from "#client/wiki.js";
 import type { Rizzle } from "#data/rizzleSchema.ts";
+import { projectRoot } from "#test/helpers.ts";
+import { rizzleFixture } from "#test/util/rizzleHelpers.ts";
 import { glob, readFileSync } from "@pinyinly/lib/fs";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { render, waitForElementToBeRemoved } from "@testing-library/react";
@@ -14,8 +16,6 @@ import path from "node:path";
 import { Suspense as ReactSuspense } from "react";
 import type { PropsWithChildren } from "react";
 import { test as baseTest, describe, expect } from "vitest";
-import { projectRoot } from "../helpers.ts";
-import { rizzleFixture } from "../util/rizzleHelpers.ts";
 
 const test = baseTest.extend(rizzleFixture);
 

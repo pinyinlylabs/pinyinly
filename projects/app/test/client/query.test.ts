@@ -1,6 +1,9 @@
-import type { HistoryPageCollection, HistoryPageData } from "#client/query.js";
 import { historyPageCollection, historyPageData } from "#client/query.js";
+import type { HistoryPageCollection, HistoryPageData } from "#client/query.js";
 import { loadDictionary } from "#dictionary.js";
+import { seedSkillReviews } from "#test/data/helpers.ts";
+import { formatTimeOffset, ratingToEmoji } from "#test/helpers.ts";
+import { dbFixture, rizzleFixture } from "#test/util/rizzleHelpers.ts";
 import {
   afterEach,
   test as baseTest,
@@ -10,9 +13,6 @@ import {
   expect,
   vi,
 } from "vitest";
-import { seedSkillReviews } from "../data/helpers";
-import { formatTimeOffset, ratingToEmoji } from "../helpers";
-import { dbFixture, rizzleFixture } from "../util/rizzleHelpers";
 
 beforeAll(async () => {
   // Preload the dictionary as it needs to be used synchronously during replicache

@@ -1,14 +1,20 @@
 // pyly-not-src-test
 
-import type { HanziText, partOfSpeechSchema } from "#data/model.js";
 import { HskLevel, PartOfSpeech } from "#data/model.js";
+import type { HanziText, partOfSpeechSchema } from "#data/model.js";
 import { normalizePinyinText } from "#data/pinyin.js";
-import type { HanziWordMeaning } from "#dictionary.js";
 import {
   buildHanziWord,
   hanziFromHanziWord,
   loadDictionary,
 } from "#dictionary.js";
+import type { HanziWordMeaning } from "#dictionary.js";
+import {
+  dataDir,
+  readDictionaryJson,
+  upsertHanziWordMeaning,
+  writeDictionaryJson,
+} from "#test/helpers.ts";
 import { IS_CI } from "#util/env.js";
 import { toCamelCase } from "#util/unicode.js";
 import { memoize0, memoize1 } from "@pinyinly/lib/collections";
@@ -17,12 +23,6 @@ import { nonNullable } from "@pinyinly/lib/invariant";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
 import type z from "zod/v4";
-import {
-  dataDir,
-  readDictionaryJson,
-  upsertHanziWordMeaning,
-  writeDictionaryJson,
-} from "../helpers.ts";
 import { loadCompleteHskVocabulary } from "./completeHskVocabulary.ts";
 import { loadIvankraHsk30 } from "./ivankraHsk30.ts";
 
