@@ -27,6 +27,11 @@ import type {
   HanziWordMeaning,
   HanziWordWithMeaning,
 } from "#dictionary.ts";
+import {
+  readDictionaryJson,
+  upsertHanziWordMeaning,
+  writeDictionaryJson,
+} from "#test/helpers.ts";
 import { Alert, Select } from "@inkjs/ui";
 import {
   emptyArray,
@@ -50,11 +55,6 @@ import type { ReactNode } from "react";
 import type { DeepReadonly } from "ts-essentials";
 import yargs from "yargs";
 import { z } from "zod/v4";
-import {
-  readDictionaryJson,
-  upsertHanziWordMeaning,
-  writeDictionaryJson,
-} from "../test/helpers.ts";
 import {
   dongChineseData,
   getDongChineseGloss,

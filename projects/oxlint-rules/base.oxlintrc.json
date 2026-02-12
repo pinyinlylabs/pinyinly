@@ -275,9 +275,7 @@
     {
       "files": ["bin/**/*.{js,mjs,ts,tsx}"],
       "rules": {
-        "no-console": "off",
-        // It's sometimes useful to import from "../test/" to get test helpers.
-        "import/no-relative-parent-imports": "off"
+        "no-console": "off"
       }
     },
     {

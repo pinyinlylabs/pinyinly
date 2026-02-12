@@ -4,11 +4,12 @@ import {
   defaultPinyinSoundGroupThemes,
   loadPylyPinyinChart,
 } from "#data/pinyin.js";
-import type { loadPinyinSoundNameSuggestions } from "#dictionary.js";
 import {
   loadPinyinSoundThemeDetails,
   pinyinSoundNameSuggestionsSchema,
 } from "#dictionary.js";
+import type { loadPinyinSoundNameSuggestions } from "#dictionary.js";
+import { dataDir } from "#test/helpers.ts";
 import {
   deepTransform,
   merge,
@@ -24,7 +25,6 @@ import makeDebug from "debug";
 import path from "node:path";
 import yargs from "yargs";
 import { z } from "zod/v4";
-import { dataDir } from "../test/helpers.ts";
 import { makeSimpleAiClient } from "./util/openai.js";
 
 const debug = makeDebug(`pyly`);
