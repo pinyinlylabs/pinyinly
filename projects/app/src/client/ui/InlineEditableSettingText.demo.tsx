@@ -26,7 +26,6 @@ export default () => {
           setting={hanziWordMeaningHintTextSetting}
           settingKey={hintSettingKey}
           placeholder="Add a hint"
-          emptyText="Add a hint"
           renderDisplay={(value) => <Pylymark source={value} />}
           variant="hint"
         />
@@ -35,7 +34,6 @@ export default () => {
           setting={hanziWordMeaningHintExplanationSetting}
           settingKey={hintSettingKey}
           placeholder="Add an explanation"
-          emptyText="Add an explanation"
           multiline
           renderDisplay={(value) => <Pylymark source={value} />}
           variant="hintExplanation"

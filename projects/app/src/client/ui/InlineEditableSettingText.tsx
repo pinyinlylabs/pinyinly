@@ -28,7 +28,6 @@ interface InlineEditableSettingTextProps<T extends UserSettingTextEntity> {
   setting: T;
   settingKey: UserSettingKeyInput<T>;
   placeholder: string;
-  emptyText?: string;
   multiline?: boolean;
   displayClassName?: string;
   emptyClassName?: string;
@@ -49,7 +48,6 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
   setting,
   settingKey,
   placeholder,
-  emptyText = placeholder,
   multiline = false,
   displayClassName,
   emptyClassName,
@@ -153,7 +151,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
     }
   };
 
-  const displayText = currentValue.length === 0 ? emptyText : currentValue;
+  const displayText = currentValue.length === 0 ? placeholder : currentValue;
   const displayContent =
     currentValue.length === 0
       ? displayText

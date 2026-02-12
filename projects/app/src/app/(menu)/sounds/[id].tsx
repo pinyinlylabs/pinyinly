@@ -60,7 +60,6 @@ export default function MnemonicIdPage() {
           setting={pinyinSoundNameSetting}
           settingKey={{ soundId: id }}
           placeholder="Name this sound"
-          emptyText="_________"
         />
       </View>
 
