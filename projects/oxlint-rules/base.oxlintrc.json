@@ -18,6 +18,11 @@
       "name": "drizzle-js",
       "specifier": "eslint-plugin-drizzle"
     }
+    // Crashes oxlint LSP
+    // {
+    //   "name": "stylistic-js",
+    //   "specifier": "@stylistic/eslint-plugin"
+    // }
     //   {
     //     "name": "pinyinly",
     //     "specifier": "@pinyinly/eslint-rules"
@@ -287,6 +292,8 @@
       "error",
       { "drizzleObjectName": ["db", "tx"] }
     ]
+
+    // "stylistic-js/quotes": ["error", "backtick"]
 
     //
     // pinyinly
