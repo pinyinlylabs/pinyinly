@@ -80,7 +80,9 @@ export const QuizDeck = ({ className }: { className?: string }) => {
 
     if (reviewQueue.items.length === 0) {
       // No items in queue, clear question and stay on loading screen
+      // oxlint-disable-next-line react-hooks-js/set-state-in-effect
       setQuestion(undefined);
+      // oxlint-disable-next-line react-hooks-js/set-state-in-effect
       setQuestionVersion(undefined);
       return;
     }

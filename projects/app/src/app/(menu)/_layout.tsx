@@ -199,11 +199,13 @@ function MobileNavTrigger() {
   const isSm = visualViewport != null && visualViewport.width >= 640;
   useLayoutEffect(() => {
     if (isSm) {
+      // oxlint-disable-next-line react-hooks-js/set-state-in-effect
       setIsOpen(false);
     }
   }, [isSm]);
 
   useLayoutEffect(() => {
+    // oxlint-disable-next-line react-hooks-js/set-state-in-effect
     setIsOpen(false);
   }, [pathName]);
 

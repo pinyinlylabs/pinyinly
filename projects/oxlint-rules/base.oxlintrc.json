@@ -238,7 +238,7 @@
     "react-hooks-js/preserve-manual-memoization": "error",
     "react-hooks-js/purity": "error",
     "react-hooks-js/refs": "error",
-    // "react-hooks-js/set-state-in-effect": "error",
+    "react-hooks-js/set-state-in-effect": "error",
     "react-hooks-js/set-state-in-render": "error",
     // "react-hooks-js/static-components": "error",
     "react-hooks-js/unsupported-syntax": "error",

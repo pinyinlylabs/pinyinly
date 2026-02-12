@@ -61,7 +61,9 @@ export function AssetImage({
 
   useEffect(() => {
     let cancelled = false;
+    // oxlint-disable-next-line react-hooks-js/set-state-in-effect
     setLocalSource(null);
+    // oxlint-disable-next-line react-hooks-js/set-state-in-effect
     setLocalSourceChecked(false);
 
     void (async () => {

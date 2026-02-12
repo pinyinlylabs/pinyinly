@@ -327,8 +327,10 @@ const Select2 = <T,>({
 
   useEffect(() => {
     if (selectedIndex < scrollIndexStart) {
+      // oxlint-disable-next-line react-hooks-js/set-state-in-effect
       setScrollIndexStart(selectedIndex);
     } else if (selectedIndex >= scrollIndexStart + visibleOptionCount) {
+      // oxlint-disable-next-line react-hooks-js/set-state-in-effect
       setScrollIndexStart(selectedIndex - visibleOptionCount + 1);
     }
   }, [selectedIndex, scrollIndexStart, visibleOptionCount, filteredItemCount]);
