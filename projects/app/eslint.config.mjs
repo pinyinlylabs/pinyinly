@@ -59,14 +59,6 @@ export default defineConfig(
     },
   },
 
-  // dev files
-  {
-    files: [`src/app/dev/**/*.{ts,tsx}`],
-    rules: {
-      "no-console": `off`,
-    },
-  },
-
   // Metro bundled files
   {
     files: [`**/*.{cjs,js,mjs,ts,tsx}`],
