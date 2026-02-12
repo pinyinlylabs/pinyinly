@@ -233,7 +233,7 @@
     "react-hooks-js/error-boundaries": "error",
     "react-hooks-js/gating": "error",
     "react-hooks-js/globals": "error",
-    // "react-hooks-js/immutability": "error",
+    "react-hooks-js/immutability": "error",
     "react-hooks-js/incompatible-library": "error",
     "react-hooks-js/preserve-manual-memoization": "error",
     // "react-hooks-js/purity": "error",

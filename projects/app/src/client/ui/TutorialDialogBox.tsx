@@ -79,10 +79,12 @@ export const TutorialDialogBox = ({
       <SpeechBubble
         className="absolute inset-0"
         onLoad={() => {
-          enteringTimelineSv.value = withTiming(1, {
-            easing: Easing.out(Easing.cubic),
-            duration: 500,
-          });
+          enteringTimelineSv.set(
+            withTiming(1, {
+              easing: Easing.out(Easing.cubic),
+              duration: 500,
+            }),
+          );
           setSpeechBubbleLoaded(true);
         }}
       />

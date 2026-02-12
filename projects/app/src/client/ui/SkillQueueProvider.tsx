@@ -11,8 +11,8 @@ import { useLiveQuery } from "@tanstack/react-db";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import type { PropsWithChildren } from "react";
-import type { SkillQueueContextValue } from "./contexts";
 import { SkillQueueContext } from "./contexts";
+import type { SkillQueueContextValue } from "./contexts";
 
 const mockable = {
   getMaxQueueItems: () => 1,
@@ -47,6 +47,10 @@ export const SkillQueueProvider = Object.assign(
     );
     const { data: skillStateData, isLoading: isSkillStatesLoading } =
       useLiveQuery((q) => q.from({ skillState: db.skillStateCollection }));
+
+    const [skillQueue, setSkillQueue] = useState<SkillQueueContextValue>({
+      loading: true,
+    });
 
     const skillSrsStates = useMemo(
       () =>
@@ -112,10 +116,6 @@ export const SkillQueueProvider = Object.assign(
       isDictionaryLoading,
       dictionary,
     ]);
-
-    const [skillQueue, setSkillQueue] = useState<SkillQueueContextValue>({
-      loading: true,
-    });
 
     return (
       <SkillQueueContext.Provider value={skillQueue}>
