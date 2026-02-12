@@ -2,7 +2,6 @@ import stylisticPlugin from "@stylistic/eslint-plugin";
 import type { ESLint } from "eslint";
 import betterTailwindcssPlugin from "eslint-plugin-better-tailwindcss";
 import { getDefaultAttributes } from "eslint-plugin-better-tailwindcss/api/defaults";
-import importPlugin from "eslint-plugin-import";
 import tailwindPlugin from "eslint-plugin-tailwindcss";
 import type { defineConfig } from "eslint/config";
 import tseslint from "typescript-eslint";
@@ -45,26 +44,6 @@ const recommended: ConfigWithExtendsArray = [
     files: [`**/*.{cjs,js,mjs,ts,tsx}`],
 
     rules: {
-      //
-      // eslint-plugin-import
-      //
-
-      // Forbid the use of extraneous packages
-      "import/no-extraneous-dependencies": [
-        `error`,
-        {
-          devDependencies: true,
-          peerDependencies: true,
-          optionalDependencies: false,
-        },
-      ],
-      // Prevent importing the default as if it were named
-      "import/no-named-default": `error`,
-      // Prohibit named exports
-      "import/no-named-export": `off`, // we want everything to be a named export
-      // Require modules with a single export to use a default export
-      "import/prefer-default-export": `off`, // we want everything to be named
-
       //
       // @stylistic
       //
@@ -134,7 +113,6 @@ export const plugins = {
   [`@stylistic`]: stylisticPlugin as ESLint.Plugin,
   [`@typescript-eslint`]: tseslint.plugin as ESLint.Plugin,
   [`better-tailwindcss`]: betterTailwindcssPlugin as ESLint.Plugin,
-  [`import`]: importPlugin as ESLint.Plugin,
   [`tailwind`]: tailwindPlugin as ESLint.Plugin,
 };
 

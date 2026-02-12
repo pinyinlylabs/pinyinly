@@ -9,6 +9,10 @@
     {
       "name": "react-hooks-js",
       "specifier": "eslint-plugin-react-hooks"
+    },
+    {
+      "name": "import-js",
+      "specifier": "eslint-plugin-import"
     }
     //   {
     //     "name": "pinyinly",
@@ -176,6 +180,18 @@
     "import/no-absolute-path": "error",
     // enforces consistent type specifier style for named imports
     "import/consistent-type-specifier-style": "error",
+
+    "import-js/no-extraneous-dependencies": [
+      "error",
+      {
+        "devDependencies": true,
+        "peerDependencies": true,
+        "optionalDependencies": false
+      }
+    ],
+    // Prevent importing the default as if it were named
+    "import-js/no-named-default": "error",
+    "import-js/no-anonymous-default-export": "error",
 
     "typescript/prefer-for-of": "deny",
     "typescript/no-dynamic-delete": "deny",

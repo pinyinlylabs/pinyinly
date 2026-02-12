@@ -59,37 +59,11 @@ export default defineConfig(
     },
   },
 
-  // expo-router pages
-  {
-    files: [`src/app/**/*.{ts,tsx}`],
-    ignores: [
-      `**/*+api.*`, // API routes should use named exports
-    ],
-    rules: {
-      // Ensuring that default exports are named helps improve the grepability
-      // of the codebase by encouraging the re-use of the same identifier for
-      // the module's default export at its declaration site and at its import
-      // sites.
-      "import/no-anonymous-default-export": `error`,
-    },
-  },
-
   // dev files
   {
     files: [`src/app/dev/**/*.{ts,tsx}`],
     rules: {
       "no-console": `off`,
-    },
-  },
-
-  // Demo UI files
-  {
-    files: [`src/**/*.demo.tsx`],
-    rules: {
-      "import/no-anonymous-default-export": `off`,
-      "import/no-named-default": `off`,
-      "no-console": `off`,
-      "react/display-name": `off`, // the display name is the filename
     },
   },
 
