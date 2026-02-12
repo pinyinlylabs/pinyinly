@@ -7,7 +7,6 @@ import {
   plugins,
 } from "@pinyinly/eslint-rules";
 import queryPlugin from "@tanstack/eslint-plugin-query";
-import drizzlePlugin from "eslint-plugin-drizzle";
 import { builtinModules } from "node:module";
 import { fileURLToPath } from "node:url";
 
@@ -22,7 +21,6 @@ export const pluginsConfig = {
     ...plugins,
     [`@expoCodeImports`]: plugins[`@typescript-eslint`], // an extra scope for no-restricted-imports so they don't clobber other configs
     [`@inngest`]: inngestPlugin,
-    [`drizzle`]: drizzlePlugin,
   },
 };
 
@@ -37,27 +35,7 @@ export default defineConfig(
   configs.tailwind,
 
   queryPlugin.configs[`flat/recommended`],
-  compat.config(drizzlePlugin.configs.recommended),
   compat.config(inngestPlugin.configs.recommended),
-
-  // TypeScript files
-  {
-    files: [`**/*.{ts,tsx}`],
-    rules: {
-      // Expo or react-native or metro or something handles this, so there's no
-      // need to import React.
-      "react/react-in-jsx-scope": `off`,
-
-      //
-      // drizzle
-      //
-
-      "drizzle/enforce-delete-with-where": [
-        `error`,
-        { drizzleObjectName: [`db`, `tx`] },
-      ],
-    },
-  },
 
   // Metro bundled files
   {

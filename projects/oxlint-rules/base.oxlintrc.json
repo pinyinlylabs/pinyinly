@@ -13,6 +13,10 @@
     {
       "name": "import-js",
       "specifier": "eslint-plugin-import"
+    },
+    {
+      "name": "drizzle-js",
+      "specifier": "eslint-plugin-drizzle"
     }
     //   {
     //     "name": "pinyinly",
@@ -276,7 +280,13 @@
     "react-hooks-js/syntax": "error",
     // "react-hooks-js/todo": "error",
 
-    "react-compiler-js/react-compiler": "error"
+    "react-compiler-js/react-compiler": "error",
+
+    "drizzle-js/enforce-update-with-where": "error",
+    "drizzle-js/enforce-delete-with-where": [
+      "error",
+      { "drizzleObjectName": ["db", "tx"] }
+    ]
 
     //
     // pinyinly
