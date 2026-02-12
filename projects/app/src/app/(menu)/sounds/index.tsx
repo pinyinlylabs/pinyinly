@@ -2,11 +2,16 @@ import { pinyinSoundsQuery } from "@/client/query";
 import { usePinyinSoundGroups } from "@/client/ui/hooks/usePinyinSoundGroups";
 import { useRizzle } from "@/client/ui/hooks/useRizzle";
 import { useRizzleQueryPaged } from "@/client/ui/hooks/useRizzleQueryPaged";
+import {
+  pinyinSoundGroupNameSetting,
+  pinyinSoundGroupThemeSetting,
+} from "@/client/ui/hooks/useUserSetting";
+import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
 import { PinyinSoundTile } from "@/client/ui/PinyinSoundTile";
 import { Link } from "expo-router";
 import { Text, View } from "react-native";
 
-export default function MnemonicsPage() {
+export default function SoundsPage() {
   const pinyinSoundGroupsQuery = usePinyinSoundGroups();
   const r = useRizzle();
 
@@ -22,11 +27,27 @@ export default function MnemonicsPage() {
         return (
           <View key={id} className="gap-4">
             <View className="flex-row items-center gap-2">
-              <Text className="text-lg font-bold text-fg">{name}</Text>
+              <InlineEditableSettingText
+                setting={pinyinSoundGroupNameSetting}
+                settingKey={{ soundGroupId: id }}
+                placeholder="Group name"
+                defaultValue={name}
+                displayClassName="text-lg font-bold text-fg"
+                emptyClassName="text-lg font-bold text-fg/30"
+                inputClassName="text-lg font-bold text-fg"
+                displayContainerClassName="px-0 py-0"
+              />
               <Text className="text-fg-dim">({sounds.length})</Text>
-              {theme === `` ? null : (
-                <Text className="text-fg-dim">{theme}</Text>
-              )}
+              <InlineEditableSettingText
+                setting={pinyinSoundGroupThemeSetting}
+                settingKey={{ soundGroupId: id }}
+                placeholder="Theme"
+                defaultValue={theme}
+                displayClassName="text-fg-dim"
+                emptyClassName="text-fg-dim/70"
+                inputClassName="text-fg"
+                displayContainerClassName="px-0 py-0"
+              />
             </View>
             <View className="flex-row flex-wrap gap-3.5">
               {sounds.map((soundId) => {

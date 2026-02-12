@@ -28,6 +28,7 @@ interface InlineEditableSettingTextProps<T extends UserSettingTextEntity> {
   setting: T;
   settingKey: UserSettingKeyInput<T>;
   placeholder: string;
+  defaultValue?: string;
   multiline?: boolean;
   displayClassName?: string;
   emptyClassName?: string;
@@ -48,6 +49,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
   setting,
   settingKey,
   placeholder,
+  defaultValue,
   multiline = false,
   displayClassName,
   emptyClassName,
@@ -61,17 +63,21 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
   const { value, setValue } = useUserSetting(setting, settingKey);
   const history = useUserSettingHistory(setting, settingKey);
   const currentValue: string = value?.text ?? ``;
+  const fallbackValue = defaultValue ?? ``;
+  const displayValue = currentValue.length > 0 ? currentValue : fallbackValue;
+  const hasDisplayValue = displayValue.length > 0;
+  const sanitizedDefaultValue = sanitizeValue(fallbackValue);
 
   const [isEditing, setIsEditing] = useState(false);
-  const [draft, setDraft] = useState(currentValue);
+  const [draft, setDraft] = useState(displayValue);
   const containerRef = useRef<View>(null);
   const inputRef = useRef<TextInput>(null);
 
   useEffect(() => {
     if (!isEditing) {
-      setDraft(currentValue);
+      setDraft(displayValue);
     }
-  }, [currentValue, isEditing]);
+  }, [displayValue, isEditing]);
 
   useEffect(() => {
     if (!isEditing) {
@@ -79,7 +85,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
     }
 
     const exitEditMode = () => {
-      saveDraftValue(draft, sanitizeValue, setValue);
+      saveDraftValue(draft, sanitizeValue, sanitizedDefaultValue, setValue);
       setIsEditing(false);
     };
 
@@ -127,7 +133,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
       document.removeEventListener(`mousedown`, handleClickOutside);
       document.removeEventListener(`touchstart`, handleClickOutside);
     };
-  }, [draft, isEditing, sanitizeValue, setValue]);
+  }, [draft, isEditing, sanitizeValue, sanitizedDefaultValue, setValue]);
 
   const handleKeyPress = (event: {
     nativeEvent: { key: string; shiftKey?: boolean };
@@ -141,7 +147,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
       }
       event.preventDefault();
       setIsEditing(false);
-      saveDraftValue(draft, sanitizeValue, setValue);
+      saveDraftValue(draft, sanitizeValue, sanitizedDefaultValue, setValue);
     }
 
     if (event.nativeEvent.key === `Escape`) {
@@ -151,11 +157,10 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
     }
   };
 
-  const displayText = currentValue.length === 0 ? placeholder : currentValue;
-  const displayContent =
-    currentValue.length === 0
-      ? displayText
-      : (renderDisplay?.(currentValue) ?? displayText);
+  const displayText = hasDisplayValue ? displayValue : placeholder;
+  const displayContent = hasDisplayValue
+    ? (renderDisplay?.(displayText) ?? displayText)
+    : displayText;
   const historyEntries = getHistoryEntries(history.entries, currentValue);
   const showHistoryButton =
     isEditing && draft.trim().length === 0 && historyEntries.length > 0;
@@ -226,9 +231,7 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
           <View className={displayViewClassName}>
             <Text
               className={
-                currentValue.length === 0
-                  ? emptyTextClassName
-                  : displayTextClassName
+                hasDisplayValue ? displayTextClassName : emptyTextClassName
               }
             >
               {displayContent}
@@ -243,11 +246,17 @@ export function InlineEditableSettingText<T extends UserSettingTextEntity>({
 function saveDraftValue<T extends UserSettingTextEntity>(
   draft: string,
   sanitizeValue: (value: string) => string | null,
+  sanitizedDefaultValue: string | null,
   setValue: (value: UserSettingEntityInput<T> | null) => void,
 ) {
   const sanitized = sanitizeValue(draft);
+  const isDefaultValue =
+    sanitized != null && sanitizedDefaultValue != null
+      ? sanitized === sanitizedDefaultValue
+      : sanitized == null && sanitizedDefaultValue == null;
+
   setValue(
-    sanitized == null
+    sanitized == null || isDefaultValue
       ? null
       : ({ text: sanitized } as UserSettingEntityInput<T>),
   );

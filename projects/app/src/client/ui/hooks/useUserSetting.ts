@@ -225,17 +225,17 @@ export const autoCheckUserSetting = r.entity(`autoCheck`, {
   enabled: r.boolean(`e`),
 }) satisfies UserSettingToggleableEntity;
 
-export const pinyinSoundNameSetting = r.entity(`psn.[soundId]`, {
+export const pinyinSoundNameSetting = r.entity(`psn/[soundId]`, {
   soundId: rPinyinSoundId().alias(`i`),
   text: r.string().alias(`t`),
 });
 
-export const pinyinSoundGroupNameSetting = r.entity(`psgn.[soundGroupId]`, {
+export const pinyinSoundGroupNameSetting = r.entity(`psgn/[soundGroupId]`, {
   soundGroupId: rPinyinSoundGroupId().alias(`g`),
   text: r.string().alias(`t`),
 });
 
-export const pinyinSoundGroupThemeSetting = r.entity(`psgt.[soundGroupId]`, {
+export const pinyinSoundGroupThemeSetting = r.entity(`psgt/[soundGroupId]`, {
   soundGroupId: rPinyinSoundGroupId().alias(`g`),
   text: r.string().alias(`t`),
 });
@@ -260,32 +260,26 @@ export function pinyinSoundGroupThemeSettingKey(
 // Hanzi hint settings
 //
 
-export const hanziWordMeaningHintTextSetting = r.entity(
-  `hanziWordMeaningHint.[hanziWord].hint`,
-  {
-    hanziWord: rHanziWord().alias(`h`),
-    text: r.string().alias(`t`),
-  },
-);
+export const hanziWordMeaningHintTextSetting = r.entity(`hwmht/[hanziWord]`, {
+  hanziWord: rHanziWord().alias(`h`),
+  text: r.string().alias(`t`),
+});
 
 export const hanziWordMeaningHintExplanationSetting = r.entity(
-  `hanziWordMeaningHint.[hanziWord].explanation`,
+  `hwmhe/[hanziWord]`,
   {
     hanziWord: rHanziWord().alias(`h`),
     text: r.string().alias(`t`),
   },
 );
 
-export const hanziWordMeaningHintImageSetting = r.entity(
-  `hanziWordMeaningHint.[hanziWord].selectedHintImageId`,
-  {
-    hanziWord: rHanziWord().alias(`h`),
-    imageId: r.string().alias(`t`),
-  },
-);
+export const hanziWordMeaningHintImageSetting = r.entity(`hwmhi/[hanziWord]`, {
+  hanziWord: rHanziWord().alias(`h`),
+  imageId: r.string().alias(`t`),
+});
 
 export const hanziPronunciationHintTextSetting = r.entity(
-  `hanziPronunciationHint.[hanzi].[pinyin].hint`,
+  `hpht/[hanzi]/[pinyin]`,
   {
     hanzi: r.string().alias(`h`),
     pinyin: r.string().alias(`p`),
@@ -294,7 +288,7 @@ export const hanziPronunciationHintTextSetting = r.entity(
 );
 
 export const hanziPronunciationHintExplanationSetting = r.entity(
-  `hanziPronunciationHint.[hanzi].[pinyin].explanation`,
+  `hphe/[hanzi]/[pinyin]`,
   {
     hanzi: r.string().alias(`h`),
     pinyin: r.string().alias(`p`),
@@ -303,7 +297,7 @@ export const hanziPronunciationHintExplanationSetting = r.entity(
 );
 
 export const hanziPronunciationHintImageSetting = r.entity(
-  `hanziPronunciationHint.[hanzi].[pinyin].selectedHintImageId`,
+  `hphi/[hanzi]/[pinyin]`,
   {
     hanzi: r.string().alias(`h`),
     pinyin: r.string().alias(`p`),
