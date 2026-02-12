@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 
 /**
  * A hook that measures how long it takes to answer a multi-choice question.
@@ -10,7 +10,7 @@ import { useCallback, useMemo, useState } from "react";
  * "optimistic" time is released and the full duration is measured.
  */
 export function useMultiChoiceQuizTimer() {
-  const startTime = useMemo(() => Date.now(), []);
+  const [startTime] = useState(() => Date.now());
   const [endTime, setEndTime] = useState<number>();
   const maxTimeBetweenChoices = 4000;
 

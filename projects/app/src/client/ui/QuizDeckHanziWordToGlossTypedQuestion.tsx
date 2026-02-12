@@ -11,7 +11,7 @@ import type { HanziToGlossTypedQuestionGrade } from "@/data/questions/hanziWordT
 import { hanziWordFromSkill } from "@/data/skills";
 import { hanziFromHanziWord } from "@/dictionary";
 import { emptyArray } from "@pinyinly/lib/collections";
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -43,7 +43,7 @@ export function QuizDeckHanziWordToGlossTypedQuestion({
   const [userAnswerEmpty, setUserAnswerEmpty] = useState(true);
   const [grade, setGrade] = useState<HanziToGlossTypedQuestionGrade>();
 
-  const startTime = useMemo(() => Date.now(), []);
+  const [startTime] = useState(() => Date.now());
   const hanziWord = hanziWordFromSkill(skill);
   const hanziCharacters = splitHanziText(hanziFromHanziWord(hanziWord));
 

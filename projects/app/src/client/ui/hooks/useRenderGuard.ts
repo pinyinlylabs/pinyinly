@@ -1,8 +1,9 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 function useRenderGuardImpl(debugName: string) {
   const renders = useRef(0);
-  const lastCheck = useRef(Date.now());
+  const [startTime] = useState(() => Date.now());
+  const lastCheck = useRef(startTime);
 
   useEffect(() => {
     renders.current += 1;

@@ -23,7 +23,7 @@ import type { HanziToPinyinTypedQuestionGrade } from "@/data/questions/hanziWord
 import { hanziWordFromSkill } from "@/data/skills";
 import { hanziFromHanziWord } from "@/dictionary";
 import { emptyArray } from "@pinyinly/lib/collections";
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import type { ReactNode, Ref } from "react";
 import { Text, View } from "react-native";
 import type { TextInput } from "react-native";
@@ -63,7 +63,7 @@ export function QuizDeckHanziWordToPinyinTypedQuestion({
   const [userAnswerEmpty, setUserAnswerEmpty] = useState(true);
   const [grade, setGrade] = useState<HanziToPinyinTypedQuestionGrade>();
 
-  const startTime = useMemo(() => Date.now(), []);
+  const [startTime] = useState(() => Date.now());
   const hanziCharacters = splitHanziText(
     hanziFromHanziWord(hanziWordFromSkill(skill)),
   );
