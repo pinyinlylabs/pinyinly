@@ -8,7 +8,7 @@ import type {
   UserSettingKeyInput,
 } from "@/client/ui/hooks/useUserSetting";
 import { useState } from "react";
-import { Pressable, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { AssetImage } from "./AssetImage";
 import { ImagePasteDropZone } from "./ImagePasteDropZone";
 
@@ -80,12 +80,7 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
   return (
     <View className={className}>
       <View className="gap-3">
-        {previewHintImageId == null ? null : (
-          <HintImagePreview
-            assetId={previewHintImageId}
-            height={previewHeight}
-          />
-        )}
+        <HintImagePreview assetId={previewHintImageId} height={previewHeight} />
 
         {imageIdsToShow.length > 0 && (
           <View className="flex-row flex-wrap gap-2">
@@ -133,9 +128,22 @@ function HintImagePreview({
   assetId,
   height,
 }: {
-  assetId: string;
+  assetId: string | null;
   height: number;
 }) {
+  if (assetId == null) {
+    return (
+      <View
+        className={`
+          w-full items-center justify-center rounded-lg border border-dashed border-fg/20 bg-fg-bg5
+        `}
+        style={{ height }}
+      >
+        <Text className="text-xs text-fg-dim">No image selected</Text>
+      </View>
+    );
+  }
+
   return (
     <View
       className="w-full overflow-hidden rounded-lg border border-fg/10 bg-fg-bg5"
