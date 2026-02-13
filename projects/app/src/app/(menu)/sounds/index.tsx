@@ -35,7 +35,6 @@ export default function SoundsPage() {
                 displayClassName="text-lg font-bold text-fg"
                 emptyClassName="text-lg font-bold text-fg/30"
                 inputClassName="text-lg font-bold text-fg"
-                displayContainerClassName="px-0 py-0"
               />
               <Text className="text-fg-dim">({sounds.length})</Text>
               <InlineEditableSettingText
@@ -46,7 +45,6 @@ export default function SoundsPage() {
                 displayClassName="text-fg-dim"
                 emptyClassName="text-fg-dim/70"
                 inputClassName="text-fg"
-                displayContainerClassName="px-0 py-0"
               />
             </View>
             <View className="flex-row flex-wrap gap-3.5">

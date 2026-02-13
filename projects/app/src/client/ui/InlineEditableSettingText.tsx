@@ -277,22 +277,22 @@ const displayContainer = tv({
   variants: {
     variant: {
       body: `
-        rounded-md px-2 py-1
+        -mx-2 rounded-md px-2 py-1
 
         group-hover:bg-fg-bg10
       `,
       hint: `
-        rounded-md px-2 py-1
+        -mx-2 rounded-md px-2 py-1
 
         group-hover:bg-fg-bg10
       `,
       hintExplanation: `
-        rounded-md px-2 py-1
+        -mx-2 rounded-md px-2 py-1
 
         group-hover:bg-fg-bg10
       `,
       title: `
-        rounded-md px-1 py-0.5
+        -mx-1 rounded-md px-1 py-0.5
 
         group-hover:bg-fg-bg10
       `,
