@@ -1,4 +1,3 @@
-import { useRenderGuard } from "@/client/ui/hooks/useRenderGuard";
 import type { Rizzle } from "@/data/rizzleSchema";
 import type { ReactQueryValue } from "@pinyinly/lib/types";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -23,7 +22,7 @@ export function useRizzleQuery<T extends ReactQueryValue>(
   const r = useRizzle();
 
   // Improve debugging.
-  useRenderGuard(useRizzleQuery.name);
+  // useRenderGuard(useRizzleQuery.name);
 
   // The reference for `key` usually changes on every render because the array
   // is written inline and changes on every render.

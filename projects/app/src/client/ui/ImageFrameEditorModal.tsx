@@ -1,6 +1,6 @@
 import {
-  getLocalImageAssetSource,
-  isLocalImageAssetId,
+    getLocalImageAssetSource,
+    isLocalImageAssetId,
 } from "@/client/assets/localImageAssets";
 import { trpc } from "@/client/trpc";
 import { useRizzleQuery } from "@/client/ui/hooks/useRizzleQuery";
@@ -8,28 +8,30 @@ import { AssetStatusKind } from "@/data/model";
 import type { Rizzle } from "@/data/rizzleSchema";
 import { useEffect, useRef, useState } from "react";
 import {
-  ActivityIndicator,
-  Image,
-  PanResponder,
-  Text,
-  View,
+    ActivityIndicator,
+    Image,
+    PanResponder,
+    Platform,
+    Text,
+    View,
 } from "react-native";
 import type {
-  ImageSourcePropType,
-  LayoutChangeEvent,
-  PanResponderInstance,
+    ImageSourcePropType,
+    LayoutChangeEvent,
+    PanResponderInstance,
+    ViewStyle,
 } from "react-native";
 import { PageSheetModal } from "./PageSheetModal";
 import { RectButton } from "./RectButton";
 import {
-  clampImageCropRectNormalized,
-  parseImageCrop,
-  resolveFrameAspectRatio,
+    clampImageCropRectNormalized,
+    parseImageCrop,
+    resolveFrameAspectRatio,
 } from "./imageCrop";
 import type {
-  ImageCrop,
-  ImageCropRect,
-  ImageFrameConstraintInput,
+    ImageCrop,
+    ImageCropRect,
+    ImageFrameConstraintInput,
 } from "./imageCrop";
 
 interface ImageFrameEditorModalProps {
@@ -230,9 +232,12 @@ function ImageFrameEditor({
       PanResponder.create({
         onStartShouldSetPanResponder: () => true,
         onMoveShouldSetPanResponder: () => true,
+        onStartShouldSetPanResponderCapture: () => false,
+        onMoveShouldSetPanResponderCapture: () => false,
         onPanResponderGrant: () => {
           startRectRef.current = cropRectRef.current;
         },
+        onPanResponderTerminationRequest: () => false,
         onPanResponderMove: (_event, gestureState) => {
           const startRect = startRectRef.current;
           const currentDisplaySize = displaySizeRef.current;
@@ -273,9 +278,12 @@ function ImageFrameEditor({
           responders[handle] = PanResponder.create({
             onStartShouldSetPanResponder: () => true,
             onMoveShouldSetPanResponder: () => true,
+            onStartShouldSetPanResponderCapture: () => true,
+            onMoveShouldSetPanResponderCapture: () => true,
             onPanResponderGrant: () => {
               startRectRef.current = cropRectRef.current;
             },
+            onPanResponderTerminationRequest: () => false,
             onPanResponderMove: (_event, gestureState) => {
               const startRect = startRectRef.current;
               const currentDisplaySize = displaySizeRef.current;
@@ -342,7 +350,10 @@ function ImageFrameEditor({
     >
       <View
         className={overlayClassName}
-        style={{ width: editorWidth, height: editorHeight }}
+        style={{
+          width: editorWidth,
+          height: editorHeight,
+        }}
       >
         <Image
           source={imageSource}
@@ -364,12 +375,17 @@ function ImageFrameEditor({
           />
           <View
             className={`absolute rounded-md border-2 border-cyan`}
-            style={{
-              left: overlay.x,
-              top: overlay.y,
-              width: overlay.width,
-              height: overlay.height,
-            }}
+            style={[
+              {
+                left: overlay.x,
+                top: overlay.y,
+                width: overlay.width,
+                height: overlay.height,
+              },
+              Platform.OS === `web`
+                ? ({ touchAction: `none` } as ViewStyle)
+                : null,
+            ]}
             {...(moveResponder?.panHandlers ?? {})}
           >
             {cornerHandles.map((handle) => (
@@ -424,6 +440,11 @@ function CornerHandleView({
 
         ${positionClass}
       `}
+      style={
+        Platform.OS === `web`
+          ? ({ touchAction: `none` } as ViewStyle)
+          : undefined
+      }
       {...(responder?.panHandlers ?? {})}
     />
   );
