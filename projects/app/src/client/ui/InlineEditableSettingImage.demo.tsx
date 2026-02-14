@@ -25,6 +25,7 @@ export default () => {
           previewHeight={200}
           tileSize={64}
           enablePasteDropZone
+          frameConstraint={{ aspectRatio: 2 }}
           onUploadError={(error) => {
             console.error(`Upload error:`, error);
           }}

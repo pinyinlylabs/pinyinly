@@ -38,6 +38,7 @@ type AssetEntity = NonNullable<
 export function AssetImage({
   assetId,
   userId,
+  contentFit = `cover`,
   ...imageProps
 }: AssetImageProps) {
   const { data: asset } = useRizzleQuery<AssetEntity | null>(
@@ -85,7 +86,7 @@ export function AssetImage({
       <ExpoImage
         {...imageProps}
         source={localSource}
-        contentFit="cover"
+        contentFit={contentFit}
         transition={200}
         onError={() => {
           setImageError(true);
@@ -157,7 +158,7 @@ export function AssetImage({
     <ExpoImage
       {...imageProps}
       source={{ uri: imageUrl }}
-      contentFit="cover"
+      contentFit={contentFit}
       transition={200}
       onError={() => {
         setImageError(true);

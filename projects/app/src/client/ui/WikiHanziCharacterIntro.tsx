@@ -20,8 +20,7 @@ export function WikiHanziCharacterIntro({
   const meanings = dictionary.lookupHanzi(characterData.hanzi);
   const primaryHanziWord =
     meanings[0]?.[0] ?? (`${characterData.hanzi}:unknown` as HanziWord);
-  const primaryHintImageId =
-    useHanziWordHintOverrides(primaryHanziWord).imageId;
+  const primaryHintImage = useHanziWordHintOverrides(primaryHanziWord);
 
   return (
     <>
@@ -34,7 +33,16 @@ export function WikiHanziCharacterIntro({
 
       <WikiHanziCharacterDecomposition
         characterData={characterData}
-        illustrationAssetId={primaryHintImageId}
+        illustration={
+          primaryHintImage.imageId == null
+            ? null
+            : {
+                assetId: primaryHintImage.imageId,
+                crop: primaryHintImage.imageCrop,
+                imageWidth: primaryHintImage.imageWidth,
+                imageHeight: primaryHintImage.imageHeight,
+              }
+        }
       />
 
       {meanings.length === 1 && meanings[0] != null ? (

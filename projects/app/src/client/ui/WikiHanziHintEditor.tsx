@@ -323,6 +323,7 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
             previewHeight={200}
             tileSize={64}
             enablePasteDropZone
+            frameConstraint={{ aspectRatio: 2 }}
             onUploadError={handleUploadError}
           />
         </View>

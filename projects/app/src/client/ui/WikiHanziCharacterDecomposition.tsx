@@ -13,22 +13,28 @@ import { Link } from "expo-router";
 import { use } from "react";
 import type { ReactNode } from "react";
 import { Text, View } from "react-native";
-import { AssetImage } from "./AssetImage";
 import { HanziCharacter } from "./HanziCharacter";
 import { hanziCharacterColorSchema } from "./HanziCharacter.utils";
 import { HanziLink } from "./HanziLink";
 import { IconImage } from "./IconImage";
+import { FramedAssetImage } from "./ImageFrame";
 import { Pylymark } from "./Pylymark";
 import { RectButton } from "./RectButton";
+import type { ImageCrop } from "./imageCrop";
 
 interface WikiHanziCharacterDecompositionProps {
   characterData: WikiCharacterData;
-  illustrationAssetId?: string;
+  illustration?: {
+    assetId: string;
+    crop?: ImageCrop;
+    imageWidth?: number;
+    imageHeight?: number;
+  } | null;
 }
 
 export function WikiHanziCharacterDecomposition({
   characterData,
-  illustrationAssetId,
+  illustration,
 }: WikiHanziCharacterDecompositionProps) {
   const componentsElements: ReactNode[] = [];
   const dictionary = use(loadDictionary());
@@ -108,11 +114,17 @@ export function WikiHanziCharacterDecomposition({
           ) : null}
         </View>
 
-        {illustrationAssetId == null ? (
+        {illustration?.assetId == null ? (
           <View className="h-4" />
         ) : (
           <View className="my-4 h-[200px] w-full overflow-hidden">
-            <AssetImage assetId={illustrationAssetId} className="size-full" />
+            <FramedAssetImage
+              assetId={illustration.assetId}
+              crop={illustration.crop}
+              imageWidth={illustration.imageWidth}
+              imageHeight={illustration.imageHeight}
+              className="size-full"
+            />
           </View>
         )}
 

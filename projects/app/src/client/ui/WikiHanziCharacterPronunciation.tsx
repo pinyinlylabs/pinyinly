@@ -138,6 +138,7 @@ export function WikiHanziCharacterPronunciation({
             previewHeight={200}
             tileSize={64}
             enablePasteDropZone
+            frameConstraint={{ aspectRatio: 2 }}
             onUploadError={handleUploadError}
           />
         </View>

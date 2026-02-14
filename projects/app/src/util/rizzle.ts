@@ -10,6 +10,7 @@ import fromAsync from "array-from-async";
 import mapKeys from "lodash/mapKeys";
 import mapValues from "lodash/mapValues";
 import memoize from "lodash/memoize";
+import { Replicache } from "replicache";
 import type {
   IndexDefinition,
   MutatorDefs,
@@ -18,7 +19,6 @@ import type {
   ReplicacheOptions,
   WriteTransaction,
 } from "replicache";
-import { Replicache } from "replicache";
 import type { AnyFunction } from "ts-essentials";
 import { z } from "zod/v4";
 
@@ -853,7 +853,7 @@ const _boolean = RizzleCustom.createSymmetric(z.boolean());
 const json = (alias?: string) => {
   return alias == null ? _json : _json.alias(alias);
 };
-const _json = RizzleCustom.createSymmetric(z.json());
+const _json = RizzleCustom.createSymmetric<unknown>(z.json());
 
 /**
  * Stores any JSON object.

@@ -27,14 +27,25 @@ import Head from "expo-router/head";
 import { cssInterop } from "nativewind";
 import { useEffect } from "react";
 import type { PropsWithChildren } from "react";
+import { Platform } from "react-native";
 import Reanimated from "react-native-reanimated";
 
 // NativeWind adapters for third party components
 
 // https://discord.com/channels/968718419904057416/1302346762899427390/1302486905656705045
-cssInterop(Image, {
-  className: { target: `style`, nativeStyleToProp: { color: `tintColor` } },
-});
+if (Platform.OS != `web`) {
+  // This breaks on web by having errors like:
+  //
+  // styleq: height typeof 85.83886255924172 is not "string" or "null". styleq:
+  // width typeof 128 is not "string" or "null".
+  //
+  // And passing strings through results in a broken CSS class like `85% 45%`
+  // instead of "width-[85%] height-[45%]" (but these classes wouldn't work
+  // anyway because they're dynamic and wouldn't be precompiled by tailwind).
+  cssInterop(Image, {
+    className: { target: `style`, nativeStyleToProp: { color: `tintColor` } },
+  });
+}
 cssInterop(Reanimated.View, { className: `style` });
 
 cssInterop(AppleAuthentication.AppleAuthenticationButton, {

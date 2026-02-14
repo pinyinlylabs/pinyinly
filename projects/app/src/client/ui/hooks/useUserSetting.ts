@@ -1,3 +1,4 @@
+import { parseImageCrop } from "@/client/ui/imageCrop";
 import type {
   HanziText,
   HanziWord,
@@ -45,7 +46,12 @@ export type UserSettingTextEntity = RizzleEntity<
 // A user setting entity that has an `imageId` field
 export type UserSettingImageEntity = RizzleEntity<
   string,
-  { imageId: RizzleType<RizzleTypeDef, string, string, string> }
+  {
+    imageId: RizzleType<RizzleTypeDef, string, string, string>;
+    imageCrop: RizzleType;
+    imageWidth: RizzleType;
+    imageHeight: RizzleType;
+  }
 >;
 
 export interface UseUserSettingResult<T extends UserSettingEntity> {
@@ -228,17 +234,17 @@ export const autoCheckUserSetting = r.entity(`autoCheck`, {
 export const pinyinSoundNameSetting = r.entity(`psn/[soundId]`, {
   soundId: rPinyinSoundId().alias(`i`),
   text: r.string().alias(`t`),
-});
+}) satisfies UserSettingTextEntity;
 
 export const pinyinSoundGroupNameSetting = r.entity(`psgn/[soundGroupId]`, {
   soundGroupId: rPinyinSoundGroupId().alias(`g`),
   text: r.string().alias(`t`),
-});
+}) satisfies UserSettingTextEntity;
 
 export const pinyinSoundGroupThemeSetting = r.entity(`psgt/[soundGroupId]`, {
   soundGroupId: rPinyinSoundGroupId().alias(`g`),
   text: r.string().alias(`t`),
-});
+}) satisfies UserSettingTextEntity;
 
 export function pinyinSoundNameSettingKey(soundId: PinyinSoundId): string {
   return pinyinSoundNameSetting.marshalKey({ soundId });
@@ -263,7 +269,7 @@ export function pinyinSoundGroupThemeSettingKey(
 export const hanziWordMeaningHintTextSetting = r.entity(`hwmht/[hanziWord]`, {
   hanziWord: rHanziWord().alias(`h`),
   text: r.string().alias(`t`),
-});
+}) satisfies UserSettingTextEntity;
 
 export const hanziWordMeaningHintExplanationSetting = r.entity(
   `hwmhe/[hanziWord]`,
@@ -271,12 +277,29 @@ export const hanziWordMeaningHintExplanationSetting = r.entity(
     hanziWord: rHanziWord().alias(`h`),
     text: r.string().alias(`t`),
   },
-);
+) satisfies UserSettingTextEntity;
+
+const imageSettingFields = {
+  imageId: r.string().alias(`t`),
+  imageCrop: r
+    .object({
+      x: r.number().alias(`x`),
+      y: r.number().alias(`y`),
+      width: r.number().alias(`w`),
+      height: r.number().alias(`h`),
+    })
+    .optional()
+    .alias(`c`),
+  imageWidth: r.number().optional().alias(`w`),
+  imageHeight: r.number().optional().alias(`ht`),
+} as const;
+
+export const x = r.json();
 
 export const hanziWordMeaningHintImageSetting = r.entity(`hwmhi/[hanziWord]`, {
   hanziWord: rHanziWord().alias(`h`),
-  imageId: r.string().alias(`t`),
-});
+  ...imageSettingFields,
+}) satisfies UserSettingImageEntity;
 
 export const hanziPronunciationHintTextSetting = r.entity(
   `hpht/[hanzi]/[pinyin]`,
@@ -285,7 +308,7 @@ export const hanziPronunciationHintTextSetting = r.entity(
     pinyin: r.string().alias(`p`),
     text: r.string().alias(`t`),
   },
-);
+) satisfies UserSettingTextEntity;
 
 export const hanziPronunciationHintExplanationSetting = r.entity(
   `hphe/[hanzi]/[pinyin]`,
@@ -294,16 +317,14 @@ export const hanziPronunciationHintExplanationSetting = r.entity(
     pinyin: r.string().alias(`p`),
     text: r.string().alias(`t`),
   },
-);
+) satisfies UserSettingTextEntity;
 
-export const hanziPronunciationHintImageSetting = r.entity(
-  `hphi/[hanzi]/[pinyin]`,
-  {
+export const hanziPronunciationHintImageSetting: UserSettingImageEntity =
+  r.entity(`hphi/[hanzi]/[pinyin]`, {
     hanzi: r.string().alias(`h`),
     pinyin: r.string().alias(`p`),
-    imageId: r.string().alias(`t`),
-  },
-);
+    ...imageSettingFields,
+  }) satisfies UserSettingImageEntity;
 
 export function getHanziPronunciationHintKeyParams(
   hanzi: HanziText,
@@ -319,6 +340,9 @@ export interface HanziWordHintOverrides {
   hint?: string;
   explanation?: string;
   imageId?: string;
+  imageCrop?: ReturnType<typeof parseImageCrop>;
+  imageWidth?: number;
+  imageHeight?: number;
   hasOverrides: boolean;
 }
 
@@ -339,9 +363,28 @@ export function useHanziWordHintOverrides(
   const hint = hintSetting.value?.text ?? undefined;
   const explanation = explanationSetting.value?.text ?? undefined;
   const imageId = imageSetting.value?.imageId ?? undefined;
-  const hasOverrides = hint != null || explanation != null || imageId != null;
+  const imageCrop = parseImageCrop(imageSetting.value?.imageCrop);
+  const imageWidthRaw = imageSetting.value?.imageWidth as unknown;
+  const imageHeightRaw = imageSetting.value?.imageHeight as unknown;
+  const imageWidth =
+    typeof imageWidthRaw === `number` ? imageWidthRaw : undefined;
+  const imageHeight =
+    typeof imageHeightRaw === `number` ? imageHeightRaw : undefined;
+  const hasOverrides =
+    hint != null ||
+    explanation != null ||
+    imageId != null ||
+    imageCrop.kind === `rect`;
 
-  return { hint, explanation, imageId, hasOverrides };
+  return {
+    hint,
+    explanation,
+    imageId,
+    imageCrop,
+    imageWidth,
+    imageHeight,
+    hasOverrides,
+  };
 }
 
 export function useSelectedHint(hanziWord: HanziWord): string | undefined {
