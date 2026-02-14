@@ -1,6 +1,6 @@
 import {
-    getLocalImageAssetSource,
-    isLocalImageAssetId,
+  getLocalImageAssetSource,
+  isLocalImageAssetId,
 } from "@/client/assets/localImageAssets";
 import { trpc } from "@/client/trpc";
 import { useRizzleQuery } from "@/client/ui/hooks/useRizzleQuery";
@@ -8,30 +8,31 @@ import { AssetStatusKind } from "@/data/model";
 import type { Rizzle } from "@/data/rizzleSchema";
 import { useEffect, useRef, useState } from "react";
 import {
-    ActivityIndicator,
-    Image,
-    PanResponder,
-    Platform,
-    Text,
-    View,
+  ActivityIndicator,
+  Image,
+  PanResponder,
+  Platform,
+  Text,
+  View,
 } from "react-native";
 import type {
-    ImageSourcePropType,
-    LayoutChangeEvent,
-    PanResponderInstance,
-    ViewStyle,
+  ImageSourcePropType,
+  LayoutChangeEvent,
+  PanResponderInstance,
+  ViewStyle,
 } from "react-native";
 import { PageSheetModal } from "./PageSheetModal";
 import { RectButton } from "./RectButton";
+import { confirmDiscardChanges } from "./confirmDiscardChanges";
 import {
-    clampImageCropRectNormalized,
-    parseImageCrop,
-    resolveFrameAspectRatio,
+  clampImageCropRectNormalized,
+  parseImageCrop,
+  resolveFrameAspectRatio,
 } from "./imageCrop";
 import type {
-    ImageCrop,
-    ImageCropRect,
-    ImageFrameConstraintInput,
+  ImageCrop,
+  ImageCropRect,
+  ImageFrameConstraintInput,
 } from "./imageCrop";
 
 interface ImageFrameEditorModalProps {
@@ -68,6 +69,8 @@ export function ImageFrameEditorModal({
     initialImageHeight,
   );
   const [cropRect, setCropRect] = useState<ImageCropRect | null>(null);
+  const [initialRect, setInitialRect] = useState<ImageCropRect | null>(null);
+  const initialAssetIdRef = useRef<string | null>(null);
   const defaultCropRect =
     imageMeta.imageSize == null
       ? null
@@ -83,9 +86,41 @@ export function ImageFrameEditorModal({
         })();
   const effectiveCropRect = cropRect ?? defaultCropRect;
 
+  useEffect(() => {
+    if (defaultCropRect == null) {
+      return;
+    }
+
+    if (initialAssetIdRef.current !== assetId) {
+      initialAssetIdRef.current = assetId;
+      setCropRect(null);
+      setInitialRect(defaultCropRect);
+      return;
+    }
+
+    if (initialRect == null) {
+      setInitialRect(defaultCropRect);
+    }
+  }, [assetId, defaultCropRect, initialRect]);
+
+  const isDirty =
+    initialRect != null &&
+    effectiveCropRect != null &&
+    !areRectsClose(initialRect, effectiveCropRect);
+
+  const handleDismissRequest = (dismiss: () => void) => {
+    if (!isDirty) {
+      dismiss();
+      return;
+    }
+
+    confirmDiscardChanges({ onDiscard: dismiss });
+  };
+
   return (
     <PageSheetModal
       onDismiss={onDismiss}
+      onDismissRequest={handleDismissRequest}
       suspenseFallback={<Text>Loading...</Text>}
     >
       {({ dismiss }) => (
@@ -713,6 +748,16 @@ function createCenteredCropRect(
 
   const height = imageAspectRatio / frameAspectRatio;
   return { x: 0, y: (1 - height) / 2, width: 1, height };
+}
+
+function areRectsClose(a: ImageCropRect, b: ImageCropRect) {
+  const epsilon = 0.0001;
+  return (
+    Math.abs(a.x - b.x) <= epsilon &&
+    Math.abs(a.y - b.y) <= epsilon &&
+    Math.abs(a.width - b.width) <= epsilon &&
+    Math.abs(a.height - b.height) <= epsilon
+  );
 }
 
 function rectToDisplayRect(

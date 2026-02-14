@@ -1,5 +1,5 @@
 import { useEventCallback } from "@/client/ui/hooks/useEventCallback";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { Modal, Platform, View } from "react-native";
 import type { PressableProps } from "react-native";
@@ -22,6 +22,7 @@ export type PageSheetChild = (options: { dismiss: () => void }) => ReactNode;
 interface PageSheetModalProps {
   children: PageSheetChild;
   disableBackgroundDismiss?: boolean;
+  onDismissRequest?: (dismiss: () => void) => void;
   /**
    * If `true`, the modal will be presented with a slower animation so it is not
    * as jarring.
@@ -44,6 +45,7 @@ interface PageSheetModalProps {
 export const PageSheetModal = ({
   children,
   disableBackgroundDismiss = false,
+  onDismissRequest,
   onDismiss,
   passivePresentation = false,
   devUiSnapshotMode = false,
@@ -52,6 +54,7 @@ export const PageSheetModal = ({
   return (
     <PageSheetModalImpl
       onDismiss={onDismiss}
+      onDismissRequest={onDismissRequest}
       passivePresentation={passivePresentation}
       disableBackgroundDismiss={disableBackgroundDismiss}
       devUiSnapshotMode={devUiSnapshotMode}
@@ -63,11 +66,16 @@ export const PageSheetModal = ({
   );
 };
 
-type ImplProps = Required<Omit<PageSheetModalProps, `suspenseFallback`>>;
+type ImplProps = Required<
+  Omit<PageSheetModalProps, `suspenseFallback` | `onDismissRequest`>
+> & {
+  onDismissRequest?: (dismiss: () => void) => void;
+};
 
 const WebImpl = ({
   children,
   disableBackgroundDismiss,
+  onDismissRequest,
   passivePresentation,
   onDismiss,
   devUiSnapshotMode,
@@ -80,6 +88,7 @@ const WebImpl = ({
   const backgroundAnimation = useSharedValue(0);
   const contentAnimation = useSharedValue(0);
   const [dismissing, setDismissing] = useState(false);
+  const startedOnBackgroundRef = useRef(false);
 
   const api = {
     dismiss: () => {
@@ -87,12 +96,32 @@ const WebImpl = ({
     },
   };
 
+  const requestDismiss = useEventCallback(() => {
+    if (onDismissRequest != null) {
+      onDismissRequest(api.dismiss);
+      return;
+    }
+    api.dismiss();
+  });
+
+  const onBackgroundPressIn = useEventCallback<
+    NonNullable<PressableProps[`onPressIn`]>
+  >((e) => {
+    startedOnBackgroundRef.current = e.target === e.currentTarget;
+  });
+
   const onBackgroundPress = useEventCallback<
     NonNullable<PressableProps[`onPress`]>
   >((e) => {
+    const startedOnBackground = startedOnBackgroundRef.current;
+    startedOnBackgroundRef.current = false;
     // Don't trigger on any bubbling events.
-    if (!disableBackgroundDismiss && e.target === e.currentTarget) {
-      api.dismiss();
+    if (
+      !disableBackgroundDismiss &&
+      startedOnBackground &&
+      e.target === e.currentTarget
+    ) {
+      requestDismiss();
     }
   });
 
@@ -196,7 +225,7 @@ const WebImpl = ({
     <Modal
       presentationStyle="fullScreen"
       transparent={true}
-      onRequestClose={api.dismiss}
+      onRequestClose={requestDismiss}
     >
       <ReanimatedPressable
         className={`
@@ -205,6 +234,7 @@ const WebImpl = ({
           sm:p-4
         `}
         style={[animatedBackgroundStyle]}
+        onPressIn={onBackgroundPressIn}
         onPress={onBackgroundPress}
       >
         {content}
@@ -213,7 +243,7 @@ const WebImpl = ({
   );
 };
 
-const IosImpl = ({ onDismiss, children }: ImplProps) => {
+const IosImpl = ({ onDismiss, onDismissRequest, children }: ImplProps) => {
   const api = useMemo(
     () => ({
       dismiss: onDismiss,
@@ -221,11 +251,19 @@ const IosImpl = ({ onDismiss, children }: ImplProps) => {
     [onDismiss],
   );
 
+  const requestDismiss = useEventCallback(() => {
+    if (onDismissRequest != null) {
+      onDismissRequest(api.dismiss);
+      return;
+    }
+    api.dismiss();
+  });
+
   return (
     <Modal
       animationType="slide"
       presentationStyle="pageSheet"
-      onRequestClose={api.dismiss}
+      onRequestClose={requestDismiss}
     >
       <View
         className={
@@ -249,7 +287,7 @@ const IosImpl = ({ onDismiss, children }: ImplProps) => {
   );
 };
 
-const DefaultImpl = ({ children, onDismiss }: ImplProps) => {
+const DefaultImpl = ({ children, onDismiss, onDismissRequest }: ImplProps) => {
   const api = useMemo(
     () => ({
       dismiss: onDismiss,
@@ -257,11 +295,19 @@ const DefaultImpl = ({ children, onDismiss }: ImplProps) => {
     [onDismiss],
   );
 
+  const requestDismiss = useEventCallback(() => {
+    if (onDismissRequest != null) {
+      onDismissRequest(api.dismiss);
+      return;
+    }
+    api.dismiss();
+  });
+
   return (
     <Modal
       animationType="slide"
       presentationStyle="pageSheet"
-      onRequestClose={api.dismiss}
+      onRequestClose={requestDismiss}
     >
       <View className={`flex-1 bg-bg`}>{children(api)}</View>
     </Modal>
