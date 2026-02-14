@@ -283,10 +283,10 @@ const imageSettingFields = {
   imageId: r.string().alias(`t`),
   imageCrop: r
     .object({
-      x: r.number().alias(`x`),
-      y: r.number().alias(`y`),
-      width: r.number().alias(`w`),
-      height: r.number().alias(`h`),
+      x: r.number().optional().alias(`x`),
+      y: r.number().optional().alias(`y`),
+      width: r.number().optional().alias(`w`),
+      height: r.number().optional().alias(`h`),
     })
     .optional()
     .alias(`c`),
