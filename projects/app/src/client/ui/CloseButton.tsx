@@ -1,20 +1,23 @@
-import { useRouter } from "expo-router";
-import { Pressable } from "react-native";
-import { IconImage } from "./IconImage";
+import { RectButton } from "./RectButton";
 
-export const CloseButton = () => {
-  const router = useRouter();
+export const CloseButton = ({
+  onPress,
+  className,
+}: {
+  onPress: () => void;
+  className?: string;
+}) => {
+  return (
+    <RectButton
+      variant="bare"
+      iconStart="close"
+      iconSize={32}
+      onPress={onPress}
+      className={`
+        size-8 rounded-md p-0 text-fg-loud
 
-  return router.canDismiss() ? (
-    <Pressable
-      onPressIn={() => {
-        router.dismiss();
-      }}
-    >
-      <IconImage
-        source={require(`../../assets/icons/close.svg`)}
-        className="text-fg-bg70"
-      />
-    </Pressable>
-  ) : null;
+        ${className ?? ``}
+      `}
+    />
+  );
 };

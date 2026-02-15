@@ -1,11 +1,9 @@
-import { hapticImpactIfMobile } from "@/client/hooks/hapticImpactIfMobile";
-import { Rating } from "@/util/fsrs";
-import { characterCount } from "@/util/unicode";
+import { hapticImpactIfMobile } from "@/client/ui/hooks/hapticImpactIfMobile";
 import type { PropsOf } from "@pinyinly/lib/types";
-import type { ReactNode } from "react";
 import { useState } from "react";
-import type { Pressable } from "react-native";
+import type { ReactNode } from "react";
 import { Text, View } from "react-native";
+import type { Pressable } from "react-native";
 import Reanimated, {
   Easing,
   useAnimatedReaction,
@@ -24,6 +22,11 @@ import {
 } from "./animations";
 import { ReanimatedPressable } from "./ReanimatedPressable";
 import { ShootingStars } from "./ShootingStars";
+import { textAnswerButtonFontSize } from "./TextAnswerButton.utils";
+import type {
+  TextAnswerButtonFontSize,
+  TextAnswerButtonState,
+} from "./TextAnswerButton.utils";
 
 const targetBgScale: Record<TextAnswerButtonState, number> = {
   dimmed: 0.5,
@@ -57,34 +60,6 @@ const targetRotation: Record<TextAnswerButtonState, string> = {
   success: `0deg`,
   warning: `0deg`,
 };
-
-export type TextAnswerButtonState =
-  | `default`
-  | `selected`
-  | `success`
-  | `error`
-  | `warning`
-  | `dimmed`;
-
-/**
- * Maps a quiz rating to the corresponding button state for correct answers.
- */
-export function ratingToButtonState(rating: Rating): TextAnswerButtonState {
-  switch (rating) {
-    case Rating.Easy:
-    case Rating.Good: {
-      return `success`;
-    }
-    case Rating.Hard: {
-      return `warning`;
-    }
-    case Rating.Again: {
-      return `error`;
-    }
-  }
-}
-
-export type TextAnswerButtonFontSize = `xs` | `sm` | `lg` | `xl`;
 
 export type TextAnswerButtonProps = {
   text: string;
@@ -483,16 +458,3 @@ const textClass = tv({
     },
   ],
 });
-
-export function textAnswerButtonFontSize(
-  text: string,
-): TextAnswerButtonFontSize {
-  const length = characterCount(text);
-  return length <= 10
-    ? (`xl` as const)
-    : length <= 20
-      ? (`lg` as const)
-      : length <= 40
-        ? (`sm` as const)
-        : (`xs` as const);
-}

@@ -7,7 +7,6 @@ import {
   plugins,
 } from "@pinyinly/eslint-rules";
 import queryPlugin from "@tanstack/eslint-plugin-query";
-import drizzlePlugin from "eslint-plugin-drizzle";
 import { builtinModules } from "node:module";
 import { fileURLToPath } from "node:url";
 
@@ -22,7 +21,6 @@ export const pluginsConfig = {
     ...plugins,
     [`@expoCodeImports`]: plugins[`@typescript-eslint`], // an extra scope for no-restricted-imports so they don't clobber other configs
     [`@inngest`]: inngestPlugin,
-    [`drizzle`]: drizzlePlugin,
   },
 };
 
@@ -34,66 +32,10 @@ export default defineConfig(
 
   // extends ...
   configs.recommended,
-  configs.react,
   configs.tailwind,
 
   queryPlugin.configs[`flat/recommended`],
-  compat.config(drizzlePlugin.configs.recommended),
   compat.config(inngestPlugin.configs.recommended),
-
-  // TypeScript files
-  {
-    files: [`**/*.{ts,tsx}`],
-    rules: {
-      // Expo or react-native or metro or something handles this, so there's no
-      // need to import React.
-      "react/react-in-jsx-scope": `off`,
-
-      //
-      // drizzle
-      //
-
-      "drizzle/enforce-delete-with-where": [
-        `error`,
-        { drizzleObjectName: [`db`, `tx`] },
-      ],
-    },
-  },
-
-  // expo-router pages
-  {
-    files: [`src/app/**/*.{ts,tsx}`],
-    ignores: [
-      `**/*+api.*`, // API routes should use named exports
-    ],
-    rules: {
-      // Ensuring that default exports are named helps improve the grepability
-      // of the codebase by encouraging the re-use of the same identifier for
-      // the module's default export at its declaration site and at its import
-      // sites.
-      "import/no-anonymous-default-export": `error`,
-    },
-  },
-
-  // dev files
-  {
-    files: [`src/app/dev/**/*.{ts,tsx}`],
-    rules: {
-      "no-console": `off`,
-    },
-  },
-
-  // Demo UI files
-  {
-    files: [`src/**/*.demo.tsx`],
-    rules: {
-      "import/no-anonymous-default-export": `off`,
-      "import/no-named-default": `off`,
-      "no-console": `off`,
-      "react/display-name": `off`, // the display name is the filename
-      "unicorn/no-anonymous-default-export": `off`,
-    },
-  },
 
   // Metro bundled files
   {

@@ -1,4 +1,4 @@
-import { v8, v9 } from "@/data/rizzleSchema";
+import { v13 } from "@/data/rizzleSchema";
 import * as s from "@/server/pgSchema";
 import type {
   ClientStateNotFoundResponse,
@@ -16,8 +16,7 @@ import chunk from "lodash/chunk";
 import type { z } from "zod/v4";
 import type { Drizzle } from "./db";
 import { withRepeatableReadTransaction } from "./db";
-import { pull as pullV8, push as pushV8 } from "./replicache/v8";
-import { pull as pullV9, push as pushV9 } from "./replicache/v9";
+import { pull as pullV13, push as pushV13 } from "./replicache/v12";
 
 interface Impl {
   pull: typeof pull;
@@ -52,11 +51,8 @@ export async function pull(
 
 function getImpl(schemaVersion: string): Impl {
   switch (schemaVersion) {
-    case v9.version: {
-      return { pull: pullV9, push: pushV9 };
-    }
-    case v8.version: {
-      return { pull: pullV8, push: pushV8 };
+    case v13.version: {
+      return { pull: pullV13, push: pushV13 };
     }
     default: {
       // If the schema version is not recognized, return a not supported

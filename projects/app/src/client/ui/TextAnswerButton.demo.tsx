@@ -1,6 +1,6 @@
-import { ExampleStack, LittlePrimaryHeader } from "@/client/ui/demo/helpers";
-import type { TextAnswerButtonState } from "@/client/ui/TextAnswerButton";
+import { ExampleStack, LittlePrimaryHeader } from "@/client/ui/demo/components";
 import { TextAnswerButton } from "@/client/ui/TextAnswerButton";
+import type { TextAnswerButtonState } from "@/client/ui/TextAnswerButton.utils";
 import type { PropsOf } from "@pinyinly/lib/types";
 import shuffle from "lodash/shuffle";
 import { useState } from "react";
@@ -116,10 +116,7 @@ export default () => (
       </ExampleStack>
     </View>
 
-    <LittlePrimaryHeader
-      // eslint-disable-next-line @pinyinly/no-restricted-css-classes
-      title="flex-col"
-    />
+    <LittlePrimaryHeader title="flex-col" />
 
     <View className="flex-row flex-wrap">
       <ExampleStack
@@ -155,10 +152,7 @@ export default () => (
       </ExampleStack>
     </View>
 
-    <LittlePrimaryHeader
-      // eslint-disable-next-line @pinyinly/no-restricted-css-classes
-      title="flex-col + flex-1"
-    />
+    <LittlePrimaryHeader title="flex-col + flex-1" />
 
     <View className="flex-row flex-wrap">
       <ExampleStack

@@ -1,3 +1,4 @@
+import { pinyinSoundNameSettingKey } from "@/client/userSettings";
 import type {
   HanziText,
   HanziWord,
@@ -6,9 +7,8 @@ import type {
   SrsStateType,
 } from "@/data/model";
 import { loadPylyPinyinChart } from "@/data/pinyin";
-import type { Rizzle, SkillRating } from "@/data/rizzleSchema";
 import { currentSchema } from "@/data/rizzleSchema";
-import type { RankedHanziWord } from "@/data/skills";
+import type { Rizzle, SkillRating } from "@/data/rizzleSchema";
 import {
   getHanziWordRank,
   hanziWordToGlossTyped,
@@ -16,17 +16,21 @@ import {
   rankRules,
   skillLearningGraph,
 } from "@/data/skills";
+import type { RankedHanziWord } from "@/data/skills";
 import { getIsStructuralHanzi, loadDictionary } from "@/dictionary";
 import { devToolsSlowQuerySleepIfEnabled } from "@/util/devtools";
 import type { Rating } from "@/util/fsrs";
-import type { RizzleAnyEntity, RizzleEntityOutput } from "@/util/rizzle";
+import type {
+  RizzleAnyEntity,
+  RizzleEntityMarshaled,
+  RizzleEntityOutput,
+} from "@/util/rizzle";
 import {
   arrayFilterUniqueWithKey,
   memoize0,
   sortComparatorNumber,
 } from "@pinyinly/lib/collections";
 import { nonNullable } from "@pinyinly/lib/invariant";
-import type { Collection, CollectionConfig } from "@tanstack/react-db";
 import {
   and,
   createCollection,
@@ -37,10 +41,11 @@ import {
   isUndefined,
   or,
 } from "@tanstack/react-db";
+import type { Collection, CollectionConfig } from "@tanstack/react-db";
 import { queryOptions, skipToken } from "@tanstack/react-query";
 import { subDays } from "date-fns/subDays";
-import type { DeviceStoreEntity } from "./deviceStore";
 import { buildDeviceStoreKey, deviceStoreGet } from "./deviceStore";
+import type { DeviceStoreEntity } from "./deviceStore";
 
 export type WithRizzleWatchPrefixes<T> = T & {
   rizzleWatchPrefixes?: string[];
@@ -174,11 +179,15 @@ export const pinyinSoundsQuery = (r: Rizzle) =>
         await r.replicache.query(async (tx) => {
           for (const group of chart.soundGroups) {
             for (const soundId of group.sounds) {
-              const userOverride = await r.query.pinyinSound.get(tx, {
-                soundId,
+              const userOverride = await r.query.setting.get(tx, {
+                key: pinyinSoundNameSettingKey(soundId),
               });
+
+              const nameValueData = (userOverride?.value as { t?: string })?.t;
+
+              const nameValue = nameValueData ?? null;
               sounds.set(soundId, {
-                name: userOverride?.name ?? null,
+                name: nameValue,
                 label: chart.soundToCustomLabel[soundId] ?? soundId,
               });
             }
@@ -191,7 +200,7 @@ export const pinyinSoundsQuery = (r: Rizzle) =>
       retry: false,
       structuralSharing: false,
     }),
-    [currentSchema.pinyinSound.keyPrefix],
+    [currentSchema.setting.keyPrefix],
   );
 
 export const targetSkillsQuery = () =>
@@ -407,6 +416,21 @@ export type TargetSkillsCollection = Collection<{ skill: Skill }, Skill>;
  */
 export type LatestSkillRatingsCollection = Collection<SkillRating, Skill>;
 
+export type AssetCollection = Collection<
+  RizzleEntityOutput<typeof currentSchema.asset>,
+  string
+>;
+
+export type SettingCollection = Collection<
+  RizzleEntityOutput<typeof currentSchema.setting>,
+  string
+>;
+
+export type SettingHistoryCollection = Collection<
+  RizzleEntityOutput<typeof currentSchema.settingHistory>,
+  string
+>;
+
 export type CollectionOutput<T> =
   // oxlint-disable-next-line typescript/no-explicit-any
   T extends Collection<infer U, any> ? U : never;
@@ -448,20 +472,23 @@ export const rizzleCollectionOptions = <
             for (const op of ops) {
               switch (op.op) {
                 case `add`: {
-                  // oxlint-disable-next-line typescript/no-unsafe-argument, typescript/no-explicit-any
-                  const value = entity.unmarshalValue(op.newValue as any);
+                  const value = entity.unmarshalValue(
+                    op.newValue as RizzleEntityMarshaled<typeof entity>,
+                  );
                   write({ type: `insert`, value });
                   break;
                 }
                 case `change`: {
-                  // oxlint-disable-next-line typescript/no-unsafe-argument, typescript/no-explicit-any
-                  const value = entity.unmarshalValue(op.newValue as any);
+                  const value = entity.unmarshalValue(
+                    op.newValue as RizzleEntityMarshaled<typeof entity>,
+                  );
                   write({ type: `update`, value });
                   break;
                 }
                 case `del`: {
-                  // oxlint-disable-next-line typescript/no-unsafe-argument, typescript/no-explicit-any
-                  const value = entity.unmarshalValue(op.oldValue as any);
+                  const value = entity.unmarshalValue(
+                    op.oldValue as RizzleEntityMarshaled<typeof entity>,
+                  );
                   write({ type: `delete`, value });
                   break;
                 }
@@ -559,8 +586,9 @@ export const latestSkillRatingCollectionOptions = ({
             switch (op.op) {
               case `change`:
               case `add`: {
-                // oxlint-disable-next-line typescript/no-unsafe-argument, typescript/no-explicit-any
-                const value = entity.unmarshalValue(op.newValue as any);
+                const value = entity.unmarshalValue(
+                  op.newValue as RizzleEntityMarshaled<typeof entity>,
+                );
 
                 const existing =
                   collection.get(value.skill) ??
@@ -615,6 +643,9 @@ export const latestSkillRatingCollectionOptions = ({
 });
 
 export interface Db {
+  assetCollection: AssetCollection;
+  settingCollection: SettingCollection;
+  settingHistoryCollection: SettingHistoryCollection;
   skillStateCollection: SkillStateCollection;
   skillRatingCollection: SkillRatingCollection;
   hanziGlossMistakeCollection: HanziGlossMistakeCollection;
@@ -676,12 +707,42 @@ export function makeDb(rizzle: Rizzle): Db {
   const latestSkillRatingsCollection: LatestSkillRatingsCollection =
     createCollection(latestSkillRatingCollectionOptions({ rizzle }));
 
+  const assetCollection: AssetCollection = createCollection(
+    rizzleCollectionOptions({
+      id: `asset`,
+      rizzle,
+      entity: currentSchema.asset,
+      getKey: (item) => item.assetId,
+    }),
+  );
+
+  const settingCollection: SettingCollection = createCollection(
+    rizzleCollectionOptions({
+      id: `setting`,
+      rizzle,
+      entity: currentSchema.setting,
+      getKey: (item) => item.key,
+    }),
+  );
+
+  const settingHistoryCollection: SettingHistoryCollection = createCollection(
+    rizzleCollectionOptions({
+      id: `settingHistory`,
+      rizzle,
+      entity: currentSchema.settingHistory,
+      getKey: (item) => item.id,
+    }),
+  );
+
   return {
-    latestSkillRatingsCollection,
-    skillStateCollection,
-    skillRatingCollection,
+    assetCollection,
+    settingCollection,
+    settingHistoryCollection,
     hanziGlossMistakeCollection,
     hanziPinyinMistakeCollection,
+    latestSkillRatingsCollection,
+    skillRatingCollection,
+    skillStateCollection,
     targetSkillsCollection,
   };
 }

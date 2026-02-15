@@ -1,11 +1,11 @@
-import type { PropsWithChildren } from "react";
 import { useEffect, useState } from "react";
+import type { PropsWithChildren, ReactNode } from "react";
 
 export const Delay = ({
   children,
   ms,
   action,
-}: PropsWithChildren<{ ms: number; action?: () => void }>) => {
+}: PropsWithChildren<{ ms: number; action?: () => void }>): ReactNode => {
   const [elapsed, setElapsed] = useState(false);
 
   useEffect(() => {
@@ -18,5 +18,5 @@ export const Delay = ({
     };
   }, [action, ms]);
 
-  return elapsed ? <>{children}</> : null;
+  return elapsed ? children : null;
 };

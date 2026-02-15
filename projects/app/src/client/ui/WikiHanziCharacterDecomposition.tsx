@@ -1,35 +1,40 @@
-import { useIsBetaEnabled } from "@/client/hooks/useBetaFeatures";
-import { useHanziWordHint } from "@/client/hooks/useHanziWordHint";
+import { useIsBetaEnabled } from "@/client/ui/hooks/useBetaFeatures";
+import { useSelectedHint } from "@/client/ui/hooks/useUserSetting";
 import { walkIdsNodeLeafs } from "@/data/hanzi";
 import type { HanziText, HanziWord, WikiCharacterData } from "@/data/model";
-import type { HanziWordMeaning } from "@/dictionary";
 import {
   hanziFromHanziWord,
   loadDictionary,
   meaningKeyFromHanziWord,
 } from "@/dictionary";
+import type { HanziWordMeaning } from "@/dictionary";
 import { parseIndexRanges } from "@/util/indexRanges";
-import { Image } from "expo-image";
 import { Link } from "expo-router";
-import type { ReactNode } from "react";
 import { use } from "react";
+import type { ReactNode } from "react";
 import { Text, View } from "react-native";
-import { HanziCharacter, hanziCharacterColorSchema } from "./HanziCharacter";
+import { HanziCharacter } from "./HanziCharacter";
+import { hanziCharacterColorSchema } from "./HanziCharacter.utils";
 import { HanziLink } from "./HanziLink";
 import { IconImage } from "./IconImage";
+import { FramedAssetImage } from "./ImageFrame";
 import { Pylymark } from "./Pylymark";
 import { RectButton } from "./RectButton";
+import type { ImageCrop } from "./imageCrop";
 
 interface WikiHanziCharacterDecompositionProps {
   characterData: WikiCharacterData;
-  illustrationSrc?: RnRequireSource;
-  illustrationFit?: `cover` | `contain`;
+  illustration?: {
+    assetId: string;
+    crop?: ImageCrop;
+    imageWidth?: number;
+    imageHeight?: number;
+  } | null;
 }
 
 export function WikiHanziCharacterDecomposition({
   characterData,
-  illustrationSrc,
-  illustrationFit,
+  illustration,
 }: WikiHanziCharacterDecompositionProps) {
   const componentsElements: ReactNode[] = [];
   const dictionary = use(loadDictionary());
@@ -109,15 +114,18 @@ export function WikiHanziCharacterDecomposition({
           ) : null}
         </View>
 
-        {illustrationSrc == null ? (
+        {illustration?.assetId == null ? (
           <View className="h-4" />
         ) : (
-          <Image
-            source={illustrationSrc}
-            contentFit={illustrationFit}
-            contentPosition="top center"
-            className="my-4 h-[200px] w-full"
-          />
+          <View className="my-4 h-[200px] w-full overflow-hidden">
+            <FramedAssetImage
+              assetId={illustration.assetId}
+              crop={illustration.crop}
+              imageWidth={illustration.imageWidth}
+              imageHeight={illustration.imageHeight}
+              className="size-full"
+            />
+          </View>
         )}
 
         <MeaningsSection
@@ -186,14 +194,13 @@ function MeaningItem({
   meaning: HanziWordMeaning;
   mnemonicHint: string | undefined;
 }) {
-  const { getHint } = useHanziWordHint();
   const meaningKey = meaningKeyFromHanziWord(hanziWord);
   const hanzi = hanziFromHanziWord(hanziWord);
 
-  // Get custom hint if set
-  const customHint = getHint(hanziWord);
-  const displayHint = customHint ?? mnemonicHint;
-  const hasCustomHint = customHint != null;
+  // Get hint override if set
+  const hintOverride = useSelectedHint(hanziWord);
+  const displayHint = hintOverride ?? mnemonicHint;
+  const hasOverride = hintOverride != null;
   const hasHint = displayHint != null;
 
   // Display glosses: first one bold, rest dim and semicolon-separated
@@ -207,7 +214,7 @@ function MeaningItem({
           className={`
             m-1 size-3 rounded-full border-2
 
-            ${hasCustomHint ? `border-cyan bg-cyan` : `border-fg-bg25`}
+            ${hasOverride ? `border-cyan bg-cyan` : `border-fg-bg25`}
           `}
         />
         <Text className="pyly-body flex-1">
@@ -221,8 +228,8 @@ function MeaningItem({
             href={`/wiki/${encodeURIComponent(hanzi)}/edit/${encodeURIComponent(meaningKey)}`}
             asChild
           >
-            <RectButton variant="bare" textClassName="text-sm text-cyan">
-              {hasCustomHint ? `Edit` : `Customize`}
+            <RectButton variant="bare" className="text-sm text-cyan">
+              {hasOverride ? `Edit` : `Customize`}
             </RectButton>
           </Link>
         ) : null}
@@ -255,11 +262,7 @@ function NoHintPlaceholder({ hanziWord }: { hanziWord: HanziWord }) {
         <View
           className={`items-center gap-1 rounded-xl border-2 border-dashed border-fg/20 px-4 py-5`}
         >
-          <IconImage
-            size={32}
-            source={require(`../../assets/icons/puzzle.svg`)}
-            className="text-fg-dim"
-          />
+          <IconImage size={32} icon="puzzle" className="text-fg-dim" />
           <View className="items-center">
             <Text className="font-sans text-base font-bold text-fg-dim">
               No hint

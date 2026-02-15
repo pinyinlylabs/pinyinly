@@ -98,6 +98,24 @@ export const normalizePinyinUnit = memoize1(function normalizePinyinUnit(
   return result as PinyinUnit;
 });
 
+/**
+ * Normalize a pinyin unit for pronunciation hint keying.
+ *
+ * This preserves tone marks and collapses erhua suffixes so r-variants share
+ * the same hint key.
+ */
+export const normalizePinyinUnitForHintKey = memoize1(
+  function normalizePinyinUnitForHintKey(pinyinOrNumeric: string): PinyinUnit {
+    const normalized = normalizePinyinUnit(pinyinOrNumeric);
+
+    if (normalized.length > 2 && normalized.endsWith(`r`)) {
+      return normalized.slice(0, -1) as PinyinUnit;
+    }
+
+    return normalized;
+  },
+);
+
 const toneMap = {
   a: `_āáǎàa`,
   e: `_ēéěèe`,

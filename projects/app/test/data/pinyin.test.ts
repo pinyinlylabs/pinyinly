@@ -14,6 +14,7 @@ import {
   matchAllPinyinUnitsWithIndexes,
   normalizePinyinText,
   normalizePinyinUnit,
+  normalizePinyinUnitForHintKey,
   pinyinUnitCount,
   pinyinUnitPattern,
   pinyinUnitSuggestions,
@@ -133,6 +134,24 @@ describe(
       [`nü`, `nü`],
     ] as const)(`%s → %s`, ([input, expected]) => {
       expect(normalizePinyinUnit(input as PinyinUnit)).toEqual(expected);
+    });
+  },
+);
+
+describe(
+  `normalizePinyinUnitForHintKey fixtures` satisfies HasNameOf<
+    typeof normalizePinyinUnitForHintKey
+  >,
+  () => {
+    test.for([
+      [`huar2`, `huá`],
+      [`huār`, `huā`],
+      [`chuanr4`, `chuàn`],
+      [`r`, `r`],
+      [`er2`, `ér`],
+      [`er5`, `er`],
+    ] as const)(`%s → %s`, ([input, expected]) => {
+      expect(normalizePinyinUnitForHintKey(input)).toEqual(expected);
     });
   },
 );

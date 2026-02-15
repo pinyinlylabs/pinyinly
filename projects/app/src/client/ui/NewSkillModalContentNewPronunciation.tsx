@@ -38,36 +38,32 @@ export const NewSkillModalContentNewPronunciation = ({
       : hanziWordMeanings.map(([, meaning]) => meaning.gloss[0]).join(`, `);
 
   return (
-    <>
-      <ScrollView
-        className={
-          // Use a linear gradient on the background so that rubber band
-          // scrolling showing the correct color at the top and bottom.
-          `
-            h-screen
-            bg-[linear-gradient(to_bottom,_var(--color-theme-grass-panel-bg)_0%,_var(--color-theme-grass-panel-bg)_50%,_var(--color-bg)_50%,_var(--color-bg)_100%)]
-          `
-        }
-        contentContainerClassName="pb-10 min-h-full"
-      >
-        <Header title={title} subtitle={glosses} onDismiss={onDismiss} />
+    <ScrollView
+      className={
+        // Use a linear gradient on the background so that rubber band
+        // scrolling showing the correct color at the top and bottom.
+        `
+          h-screen
+          bg-[linear-gradient(to_bottom,_var(--color-theme-grass-panel-bg)_0%,_var(--color-theme-grass-panel-bg)_50%,_var(--color-bg)_50%,_var(--color-bg)_100%)]
+        `
+      }
+      contentContainerClassName="pb-10 min-h-full"
+    >
+      <Header title={title} subtitle={glosses} onDismiss={onDismiss} />
 
-        <PylyMdxComponents>
-          <View className="flex-1 gap-2 bg-bg py-7">
-            <View className="flex-row items-center gap-2 px-4">
-              <IconImage
-                source={require(`../../assets/icons/voice-square.svg`)}
-                size={32}
-                className="text-[var(--color-theme-grass-panel-bg)]"
-              />
-              <Text className="pyly-body-title text-fg-loud">
-                Pronunciation
-              </Text>
-            </View>
+      <PylyMdxComponents>
+        <View className="flex-1 gap-2 bg-bg py-7">
+          <View className="flex-row items-center gap-2 px-4">
+            <IconImage
+              icon="voice-square"
+              size={32}
+              className="text-[var(--color-theme-grass-panel-bg)]"
+            />
+            <Text className="pyly-body-title text-fg-loud">Pronunciation</Text>
           </View>
-        </PylyMdxComponents>
-      </ScrollView>
-    </>
+        </View>
+      </PylyMdxComponents>
+    </ScrollView>
   );
 };
 
@@ -107,11 +103,7 @@ function Header({
               active:scale-95
             `}
           >
-            <IconImage
-              source={require(`../../assets/icons/close.svg`)}
-              size={32}
-              className="text-fg-loud"
-            />
+            <IconImage icon="close" size={32} className="text-fg-loud" />
           </Pressable>
         </View>
 

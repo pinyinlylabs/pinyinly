@@ -1,10 +1,6 @@
 import { useNavigationContainerRef } from "expo-router";
-import {
-  PostHogProvider as RnPostHogProvider,
-  usePostHog as rnUsePostHog,
-} from "posthog-react-native";
-import type { UsePostHog } from "./postHogOptions";
-import { apiHost, apiKey, debug } from "./postHogOptions";
+import { PostHogProvider as RnPostHogProvider } from "posthog-react-native";
+import { apiHost, apiKey, debug } from "./PostHogProvider.utils";
 
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
   const navigationRef = useNavigationContainerRef();
@@ -26,9 +22,4 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
       {children}
     </RnPostHogProvider>
   );
-}
-
-export function usePostHog(): UsePostHog {
-  const posthog = rnUsePostHog();
-  return posthog;
 }

@@ -1,5 +1,5 @@
 import type { DeviceStoreToggleableEntity } from "@/client/deviceStore";
-import { useDeviceStore } from "@/client/hooks/useDeviceStore";
+import { useDeviceStore } from "@/client/ui/hooks/useDeviceStore";
 import { ToggleButton } from "@/client/ui/ToggleButton";
 
 export function DeviceStoreToggleButton({

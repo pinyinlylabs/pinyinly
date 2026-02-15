@@ -1,10 +1,10 @@
 import { SkillKind } from "#data/model.ts";
 import { rSkill, rSkillKind } from "#data/rizzleSchema.ts";
 import { hanziWordToGloss } from "#data/skills.ts";
+import { makeMockTx } from "#test/util/rizzleHelpers.ts";
 import { r } from "#util/rizzle.ts";
 import type { DeepReadonly, ReadonlyJSONValue } from "replicache";
 import { expect, test, vi } from "vitest";
-import { makeMockTx } from "../util/rizzleHelpers.ts";
 
 test(`skill as key`, async () => {
   const posts = r.entity(`foo/[skill]`, {

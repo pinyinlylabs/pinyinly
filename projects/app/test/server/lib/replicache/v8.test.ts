@@ -818,9 +818,6 @@ describe(
         await expect(computeEntitiesState(tx, `1`)).resolves.toEqual({
           hanziGlossMistake: [],
           hanziPinyinMistake: [],
-          pinyinFinalAssociation: [],
-          pinyinInitialAssociation: [],
-          pinyinInitialGroupTheme: [],
           skillState: [],
           skillRating: [],
           setting: [],
@@ -833,9 +830,6 @@ describe(
         await expect(computeEntitiesState(tx, user.id)).resolves.toEqual({
           hanziGlossMistake: [],
           hanziPinyinMistake: [],
-          pinyinFinalAssociation: [],
-          pinyinInitialAssociation: [],
-          pinyinInitialGroupTheme: [],
           skillState: [],
           skillRating: [],
           setting: [],
@@ -870,9 +864,6 @@ describe(
         await expect(computeEntitiesState(tx, user1.id)).resolves.toEqual({
           hanziGlossMistake: [],
           hanziPinyinMistake: [],
-          pinyinFinalAssociation: [],
-          pinyinInitialAssociation: [],
-          pinyinInitialGroupTheme: [],
           skillRating: [],
           skillState: [user1SkillState],
           setting: [],
@@ -906,94 +897,11 @@ describe(
         await expect(computeEntitiesState(tx, user1.id)).resolves.toEqual({
           hanziGlossMistake: [],
           hanziPinyinMistake: [],
-          pinyinFinalAssociation: [],
-          pinyinInitialAssociation: [],
-          pinyinInitialGroupTheme: [],
           skillRating: [user1SkillRating],
           skillState: [],
           setting: [],
         });
       });
-
-      txTest(
-        `only includes pinyinFinalAssociation for the user`,
-        async ({ tx }) => {
-          const user1 = await createUser(tx);
-          const user2 = await createUser(tx);
-
-          const [user1PinyinFinalAssociation] = await tx
-            .insert(s.pinyinFinalAssociation)
-            .values([
-              {
-                userId: user1.id,
-                final: `p`,
-                name: `p1`,
-              },
-              {
-                userId: user2.id,
-                final: `p`,
-                name: `p2`,
-              },
-            ])
-            .returning({
-              id: s.pinyinFinalAssociation.id,
-              key: s.pinyinFinalAssociation.final,
-              xmin: pgXmin(s.pinyinFinalAssociation),
-            });
-          invariant(user1PinyinFinalAssociation != null);
-
-          await expect(computeEntitiesState(tx, user1.id)).resolves.toEqual({
-            hanziGlossMistake: [],
-            hanziPinyinMistake: [],
-            pinyinFinalAssociation: [user1PinyinFinalAssociation],
-            pinyinInitialAssociation: [],
-            pinyinInitialGroupTheme: [],
-            skillRating: [],
-            skillState: [],
-            setting: [],
-          });
-        },
-      );
-
-      txTest(
-        `only includes pinyinInitialAssociation for the user`,
-        async ({ tx }) => {
-          const user1 = await createUser(tx);
-          const user2 = await createUser(tx);
-
-          const [user1PinyinInitialAssociation] = await tx
-            .insert(s.pinyinInitialAssociation)
-            .values([
-              {
-                userId: user1.id,
-                initial: `p`,
-                name: `p1`,
-              },
-              {
-                userId: user2.id,
-                initial: `p`,
-                name: `p2`,
-              },
-            ])
-            .returning({
-              id: s.pinyinInitialAssociation.id,
-              key: s.pinyinInitialAssociation.initial,
-              xmin: pgXmin(s.pinyinInitialAssociation),
-            });
-          invariant(user1PinyinInitialAssociation != null);
-
-          await expect(computeEntitiesState(tx, user1.id)).resolves.toEqual({
-            hanziGlossMistake: [],
-            hanziPinyinMistake: [],
-            pinyinFinalAssociation: [],
-            pinyinInitialAssociation: [user1PinyinInitialAssociation],
-            pinyinInitialGroupTheme: [],
-            skillRating: [],
-            skillState: [],
-            setting: [],
-          });
-        },
-      );
     });
   },
 );
@@ -1005,9 +913,6 @@ describe(`computePatch suite` satisfies HasNameOf<typeof computePatch>, () => {
     const prevCvr: CvrEntities = {
       hanziGlossMistake: { x1: `1` },
       hanziPinyinMistake: { x2: `2` },
-      pinyinFinalAssociation: { x3: `3` },
-      pinyinInitialAssociation: { x4: `4` },
-      pinyinInitialGroupTheme: { x5: `5` },
       skillState: { x6: `6` },
       skillRating: { x7: `7` },
       setting: { x8: `8` },
@@ -1015,9 +920,6 @@ describe(`computePatch suite` satisfies HasNameOf<typeof computePatch>, () => {
     const entitiesState: EntitiesState = {
       hanziGlossMistake: [{ id: `x1`, xmin: `1` }],
       hanziPinyinMistake: [{ id: `x2`, xmin: `2` }],
-      pinyinFinalAssociation: [{ id: `x3`, xmin: `3` }],
-      pinyinInitialAssociation: [{ id: `x4`, xmin: `4` }],
-      pinyinInitialGroupTheme: [{ id: `x5`, xmin: `5` }],
       skillState: [{ id: `x6`, xmin: `6` }],
       skillRating: [{ id: `x7`, xmin: `7` }],
       setting: [{ id: `x8`, xmin: `8` }],
@@ -1028,9 +930,6 @@ describe(`computePatch suite` satisfies HasNameOf<typeof computePatch>, () => {
       patchOpsUnhydrated: {
         hanziGlossMistake: { delKeys: [], putIds: [] },
         hanziPinyinMistake: { delKeys: [], putIds: [] },
-        pinyinFinalAssociation: { delKeys: [], putIds: [] },
-        pinyinInitialAssociation: { delKeys: [], putIds: [] },
-        pinyinInitialGroupTheme: { delKeys: [], putIds: [] },
         skillState: { delKeys: [], putIds: [] },
         skillRating: { delKeys: [], putIds: [] },
         setting: { delKeys: [], putIds: [] },

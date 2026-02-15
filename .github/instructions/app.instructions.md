@@ -6,6 +6,8 @@ The following commands should be used to test the code:
 
 - Typechecking using TypeScript: `moon run app:typecheck`
 
+- Generate PG DB migration: `moon run app:dbGenerate`
+
 - Tests use vitest, so any vitest arguments can be passed after `--`:
   - Run all tests: `moon run app:test`
   - Run file tests: `moon run app:test -- <filename>`
@@ -19,6 +21,16 @@ The following commands should be used to test the code:
 
 These can be run from any directory, there's no need to `cd` to a particular directory.
 
+# UI Demos
+
+A storybook-inspired "demo" system is used for developing and testing UI components in isolation.
+Demos are located in `.demo.tsx` files next to the component they are demonstrating.
+
+# PostgreSQL DB Migrations
+
+Don't manually create drizzle SQL migration files, instead use the `app:dbGenerate` command which
+will automatically generate a migration file based on the current state of the drizzle schema.
+
 # Tests directory structure
 
 Test files are located in the `tests/` directory. The directory structure mirrors the `src/`
@@ -27,20 +39,6 @@ directory. For example a source file at `src/util/date.ts` would have its tests 
 
 # Wiki content structure
 
-The wiki content is stored in MDX files within the `src/client/wiki/` directory. The structure
-follows this pattern:
-
-- `src/client/wiki/{hanzi}/~{meaningKey}/meaning.mdx` - Contains the meaning/definition of a word
-  - Where `{hanzi}` is the Chinese character or word
-  - And `{meaningKey}` is the English identifier that corresponds to the concept from HanziWord in
-    the docs
-
-Example:
-
-- `src/client/wiki/一/~one/meaning.mdx` - Contains the definition for "一" when it means "one"
-
-When modifying or adding wiki content:
-
-1. Create or edit the appropriate .mdx file in the correct directory structure
-2. Ensure the content is formatted in Markdown with appropriate styling
-3. The wiki content will be automatically loaded by the application
+The wiki content is stored in MDX files within the `src/client/wiki/` directory. There is a
+directory for each HanziWord, inside of which is a `meaning.mdx` file and `character.json` for
+single-character hanzi.

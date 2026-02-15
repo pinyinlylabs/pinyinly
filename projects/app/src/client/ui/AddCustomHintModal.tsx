@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import { IconImage } from "./IconImage";
 import { PageSheetModal } from "./PageSheetModal";
 import { RectButton } from "./RectButton";
@@ -86,63 +86,65 @@ function AddCustomHintModalContent({
       </View>
 
       {/* Content */}
-      <View className="gap-4 p-4">
-        <View className="gap-2">
-          <Text className="text-[14px] font-medium text-fg">Your hint</Text>
-          <TextInputSingle
-            placeholder="Enter a hint that helps you remember..."
-            value={hint}
-            onChangeText={setHint}
-            multiline
-            numberOfLines={3}
-            className="min-h-[80px] py-3"
-            textAlignVertical="top"
-          />
-        </View>
-
-        {/* Explanation toggle/field */}
-        {showExplanation ? (
+      <ScrollView className="flex-1">
+        <View className="gap-4 p-4">
           <View className="gap-2">
-            <View className="flex-row items-center justify-between">
-              <Text className="text-[14px] font-medium text-fg">
-                Explanation (optional)
-              </Text>
-              <Pressable
-                onPress={() => {
-                  setShowExplanation(false);
-                  setExplanation(``);
-                }}
-              >
-                <IconImage
-                  size={16}
-                  source={require(`../../assets/icons/chevron-down.svg`)}
-                  className="text-fg-dim"
-                />
-              </Pressable>
-            </View>
+            <Text className="text-[14px] font-medium text-fg">Your hint</Text>
             <TextInputSingle
-              placeholder="Why does this hint work for you?"
-              value={explanation}
-              onChangeText={setExplanation}
+              placeholder="Enter a hint that helps you remember..."
+              value={hint}
+              onChangeText={setHint}
               multiline
-              numberOfLines={2}
-              className="min-h-[60px] py-3"
+              numberOfLines={3}
+              className="min-h-[80px] py-3"
               textAlignVertical="top"
             />
           </View>
-        ) : (
-          <Pressable
-            onPress={() => {
-              setShowExplanation(true);
-            }}
-            className="flex-row items-center gap-1.5"
-          >
-            <Text className="text-[14px] text-cyan">
-              Add explanation (optional)
-            </Text>
-          </Pressable>
-        )}
-      </View>
+
+          {/* Explanation toggle/field */}
+          {showExplanation ? (
+            <View className="gap-2">
+              <View className="flex-row items-center justify-between">
+                <Text className="text-[14px] font-medium text-fg">
+                  Explanation (optional)
+                </Text>
+                <Pressable
+                  onPress={() => {
+                    setShowExplanation(false);
+                    setExplanation(``);
+                  }}
+                >
+                  <IconImage
+                    size={16}
+                    icon="chevron-down"
+                    className="text-fg-dim"
+                  />
+                </Pressable>
+              </View>
+              <TextInputSingle
+                placeholder="Why does this hint work for you?"
+                value={explanation}
+                onChangeText={setExplanation}
+                multiline
+                numberOfLines={2}
+                className="min-h-[60px] py-3"
+                textAlignVertical="top"
+              />
+            </View>
+          ) : (
+            <Pressable
+              onPress={() => {
+                setShowExplanation(true);
+              }}
+              className="flex-row items-center gap-1.5"
+            >
+              <Text className="text-[14px] text-cyan">
+                Add explanation (optional)
+              </Text>
+            </Pressable>
+          )}
+        </View>
+      </ScrollView>
     </View>
   );
 }

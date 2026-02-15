@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+const config = {
   content: [`./src/**/*.{js,jsx,ts,tsx,mdx}`],
   darkMode: `class`,
   presets: [
@@ -157,7 +157,9 @@ module.exports = {
     stroke: true,
     strokeWidth: false,
     textOpacity: false,
-    translate: false,
+    translate: true,
     visibility: true,
   },
 };
+
+export default config;

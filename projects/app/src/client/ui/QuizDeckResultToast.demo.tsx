@@ -1,12 +1,9 @@
+import { DemoHanziWordKnob, ExampleStack } from "@/client/ui/demo/components";
+import { useDemoHanziWordKnob } from "@/client/ui/demo/utils";
 import { hanziWordToGlossTyped, hanziWordToPinyinTyped } from "@/data/skills";
 import { Rating } from "@/util/fsrs";
 import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import {
-  DemoHanziWordKnob,
-  ExampleStack,
-  useDemoHanziWordKnob,
-} from "./demo/helpers";
 import { QuizDeckResultToast } from "./QuizDeckResultToast";
 import { QuizSubmitButton } from "./QuizSubmitButton";
 

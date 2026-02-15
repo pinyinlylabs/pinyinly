@@ -3,7 +3,7 @@ import { Suspense as ReactSuspense, useEffect, useRef } from "react";
 
 const intervalMs = 5000;
 
-function PylyDevSuspense({
+export function PylyDevSuspense({
   children,
   ...props
 }: PropsOf<typeof ReactSuspense>) {
@@ -38,4 +38,5 @@ function RenderCounter({ counter }: { counter: React.RefObject<number> }) {
   return null;
 }
 
+// oxlint-disable-next-line eslint-plugin-react(only-export-components)
 export const Suspense = __DEV__ ? PylyDevSuspense : ReactSuspense;

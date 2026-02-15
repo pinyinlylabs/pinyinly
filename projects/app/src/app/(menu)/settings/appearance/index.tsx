@@ -1,4 +1,4 @@
-import { autoCheckUserSetting } from "@/client/hooks/useUserSetting";
+import { autoCheckUserSetting } from "@/client/ui/hooks/useUserSetting";
 import { UserSettingToggleButton } from "@/client/ui/UserSettingToggleButton";
 import { Text, View } from "react-native";
 

@@ -8,9 +8,8 @@ import {
   mapIdsNodeLeafs,
   walkIdsNodeLeafs,
 } from "#data/hanzi.js";
-import type { HanziText, WikiCharacterData } from "#data/model.js";
 import { wikiCharacterDataSchema } from "#data/model.js";
-import type { CharactersKey, CharactersValue } from "#dictionary.js";
+import type { HanziText, WikiCharacterData } from "#data/model.js";
 import {
   buildHanziWord,
   getIsComponentFormHanzi,
@@ -18,6 +17,8 @@ import {
   loadCharacters,
   loadDictionary,
 } from "#dictionary.js";
+import type { CharactersKey, CharactersValue } from "#dictionary.js";
+import { dataDir, getFonts, projectRoot, wikiDir } from "#test/helpers.ts";
 import { IS_CI } from "#util/env.js";
 import { normalizeIndexRanges, parseIndexRanges } from "#util/indexRanges.js";
 import { createSpeechFileTests } from "@pinyinly/audio-sprites/testing";
@@ -40,7 +41,6 @@ import {
 } from "@pinyinly/lib/invariant";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
-import { dataDir, getFonts, projectRoot, wikiDir } from "../helpers.ts";
 
 describe(`speech files`, async () => {
   await createSpeechFileTests({
@@ -137,7 +137,7 @@ describe(`character.json files`, async () => {
       const filePath = path.join(wikiDir, character, `character.json`);
       if (existsSync(filePath)) {
         try {
-          const json = JSON.parse(readFileSync(filePath, `utf-8`));
+          const json = JSON.parse(readFileSync(filePath, `utf-8`)) as unknown;
           return wikiCharacterDataSchema.parse(json);
         } catch (error) {
           throw new Error(`failed to read and parse ${filePath}`, {

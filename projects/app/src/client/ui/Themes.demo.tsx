@@ -1,7 +1,7 @@
 import { Text, View } from "react-native";
-import { ExampleStack } from "./demo/helpers";
 import { IconImage } from "./IconImage";
 import { RectButton } from "./RectButton";
+import { ExampleStack } from "./demo/components";
 
 export default () => {
   const themeClasses = [
@@ -81,7 +81,7 @@ function ThemeExamples() {
       <View className="mt-2 w-[245px] gap-2 bg-bg px-3 py-2">
         <View className="flex-row items-center gap-2">
           <IconImage
-            source={require(`../../assets/icons/check-circled-filled.svg`)}
+            icon="check-circled-filled"
             size={32}
             className="text-fg"
           />

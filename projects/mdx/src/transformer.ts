@@ -259,7 +259,7 @@ function createTransformer(): MetroBabelTransformer {
     const { createProcessor } = await import(`@mdx-js/mdx`);
     _compiler = createProcessor({
       jsx: true,
-      providerImportSource: `@/client/hooks/useMDXComponents`,
+      providerImportSource: `@/client/ui/hooks/useMDXComponents`,
       remarkPlugins: [
         [remarkFlexibleMarkers, { markerClassName: `pyly-mdx-mark` }],
         [remarkGfm],

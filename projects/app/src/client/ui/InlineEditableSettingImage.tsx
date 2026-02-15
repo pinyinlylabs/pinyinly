@@ -1,0 +1,327 @@
+import {
+  useUserSetting,
+  useUserSettingHistory,
+} from "@/client/ui/hooks/useUserSetting";
+import type {
+  UserSettingEntityInput,
+  UserSettingEntityOutput,
+  UserSettingImageEntity,
+  UserSettingKeyInput,
+} from "@/client/ui/hooks/useUserSetting";
+import { useState } from "react";
+import { Pressable, Text, View } from "react-native";
+import { FramedAssetImage } from "./ImageFrame";
+import { ImageFrameEditorModal } from "./ImageFrameEditorModal";
+import { ImagePasteDropZone } from "./ImagePasteDropZone";
+import { RectButton } from "./RectButton";
+import {
+  imageCropValueFromCrop,
+  parseImageCrop,
+  resolveFrameAspectRatio,
+} from "./imageCrop";
+import type { ImageCrop, ImageFrameConstraintInput } from "./imageCrop";
+
+interface InlineEditableSettingImageProps<T extends UserSettingImageEntity> {
+  setting: T;
+  settingKey: UserSettingKeyInput<T>;
+  presetImageIds?: readonly string[];
+  includeHistory?: boolean;
+  previewHeight?: number;
+  tileSize?: number;
+  enablePasteDropZone?: boolean;
+  frameConstraint?: ImageFrameConstraintInput | null;
+  onUploadError?: (error: string) => void;
+  className?: string;
+}
+
+export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
+  setting,
+  settingKey,
+  presetImageIds = [],
+  includeHistory = true,
+  previewHeight = 200,
+  tileSize = 64,
+  enablePasteDropZone = false,
+  frameConstraint,
+  onUploadError,
+  className,
+}: InlineEditableSettingImageProps<T>) {
+  const { value, setValue } = useUserSetting(setting, settingKey);
+  const history = useUserSettingHistory(setting, settingKey);
+  const imageId = value?.imageId ?? null;
+  const imageCrop = parseImageCrop(value?.imageCrop);
+  const imageWidthRaw = value?.imageWidth as unknown;
+  const imageHeightRaw = value?.imageHeight as unknown;
+  const imageWidth = typeof imageWidthRaw === `number` ? imageWidthRaw : null;
+  const imageHeight =
+    typeof imageHeightRaw === `number` ? imageHeightRaw : null;
+  const [hoveredHintImageId, setHoveredHintImageId] = useState<string | null>(
+    null,
+  );
+  const [editorAssetId, setEditorAssetId] = useState<string | null>(null);
+  const frameAspectRatio = resolveFrameAspectRatio(frameConstraint);
+
+  const historyImageAssetIds: string[] = [];
+  const imageMetaById = new Map<string, ImageMeta>();
+  if (imageId != null) {
+    imageMetaById.set(imageId, {
+      imageId,
+      crop: imageCrop,
+      imageWidth,
+      imageHeight,
+    });
+  }
+  if (includeHistory) {
+    const seenIds = new Set<string>();
+    for (const entry of [...history.entries].reverse()) {
+      const assetId = entry.value?.imageId;
+
+      if (typeof assetId !== `string` || assetId.length === 0) {
+        continue;
+      }
+      if (seenIds.has(assetId)) {
+        continue;
+      }
+      seenIds.add(assetId);
+      historyImageAssetIds.push(assetId);
+      const meta = buildImageMeta(entry.value);
+      if (meta != null && !imageMetaById.has(meta.imageId)) {
+        imageMetaById.set(meta.imageId, meta);
+      }
+    }
+  }
+  const imageIdsToShow = Array.from(
+    new Set([
+      ...historyImageAssetIds,
+      ...presetImageIds,
+      ...(imageId == null ? [] : [imageId]),
+    ]),
+  );
+
+  const handleSelectHintImage = (assetId: string) => {
+    const meta = imageMetaById.get(assetId);
+    setValue({
+      imageId: assetId,
+      imageCrop: imageCropValueFromCrop(meta?.crop),
+      imageWidth: meta?.imageWidth ?? undefined,
+      imageHeight: meta?.imageHeight ?? undefined,
+    } as UserSettingEntityInput<T>);
+  };
+
+  const handleAddCustomImage = (assetId: string) => {
+    setValue({ imageId: assetId } as UserSettingEntityInput<T>);
+    if (frameAspectRatio != null) {
+      setEditorAssetId(assetId);
+    }
+  };
+
+  const previewHintImageId = hoveredHintImageId ?? imageId ?? null;
+  const previewMeta =
+    previewHintImageId == null
+      ? null
+      : (imageMetaById.get(previewHintImageId) ?? null);
+  const editorMeta =
+    editorAssetId == null ? null : (imageMetaById.get(editorAssetId) ?? null);
+  const canEditCrop = frameAspectRatio != null && imageId != null;
+  const editorModal =
+    editorAssetId == null ? null : (
+      <ImageFrameEditorModal
+        assetId={editorAssetId}
+        frameConstraint={frameConstraint}
+        initialCrop={editorMeta?.crop}
+        initialImageWidth={editorMeta?.imageWidth ?? null}
+        initialImageHeight={editorMeta?.imageHeight ?? null}
+        onDismiss={() => {
+          setEditorAssetId(null);
+        }}
+        onSave={(result) => {
+          setValue({
+            imageId: editorAssetId,
+            imageCrop: imageCropValueFromCrop(result.crop),
+            imageWidth: result.imageWidth,
+            imageHeight: result.imageHeight,
+          } as UserSettingEntityInput<T>);
+          setEditorAssetId(null);
+        }}
+      />
+    );
+
+  return (
+    <View className={className}>
+      <View className="gap-3">
+        <View className="gap-2">
+          <HintImagePreview
+            assetId={previewHintImageId}
+            imageMeta={previewMeta}
+            height={previewHeight}
+            aspectRatio={frameAspectRatio}
+          />
+          {canEditCrop ? (
+            <View className="flex-row justify-end">
+              <RectButton
+                variant="bare"
+                onPress={() => {
+                  setEditorAssetId(imageId);
+                }}
+              >
+                Edit crop
+              </RectButton>
+            </View>
+          ) : null}
+        </View>
+
+        {imageIdsToShow.length > 0 && (
+          <View className="flex-row flex-wrap gap-2">
+            {imageIdsToShow.map((assetId) => {
+              const isSelected = assetId === imageId;
+              const isHovered = assetId === hoveredHintImageId;
+              const meta = imageMetaById.get(assetId) ?? null;
+              return (
+                <Pressable
+                  key={assetId}
+                  onPress={() => {
+                    handleSelectHintImage(assetId);
+                  }}
+                  onHoverIn={() => {
+                    setHoveredHintImageId(assetId);
+                  }}
+                  onHoverOut={() => {
+                    setHoveredHintImageId(null);
+                  }}
+                >
+                  <HintImageTile
+                    assetId={assetId}
+                    imageMeta={meta}
+                    isSelected={isSelected}
+                    isHovered={isHovered}
+                    size={tileSize}
+                  />
+                </Pressable>
+              );
+            })}
+          </View>
+        )}
+      </View>
+      {enablePasteDropZone ? (
+        <View className="pt-2">
+          <ImagePasteDropZone
+            onUploadComplete={handleAddCustomImage}
+            onUploadError={onUploadError}
+          />
+        </View>
+      ) : null}
+      {editorModal}
+    </View>
+  );
+}
+
+function HintImagePreview({
+  assetId,
+  imageMeta,
+  height,
+  aspectRatio,
+}: {
+  assetId: string | null;
+  imageMeta: ImageMeta | null;
+  height: number;
+  aspectRatio: number | null;
+}) {
+  if (assetId == null) {
+    return (
+      <View
+        className={`
+          w-full items-center justify-center rounded-lg border border-dashed border-fg/20 bg-fg-bg5
+        `}
+        style={aspectRatio == null ? { height } : { aspectRatio }}
+      >
+        <Text className="text-xs text-fg-dim">No image selected</Text>
+      </View>
+    );
+  }
+
+  return (
+    <View
+      className="w-full overflow-hidden rounded-lg border border-fg/10 bg-fg-bg5"
+      style={aspectRatio == null ? { height } : { aspectRatio }}
+    >
+      <FramedAssetImage
+        assetId={assetId}
+        crop={imageMeta?.crop}
+        imageWidth={imageMeta?.imageWidth ?? null}
+        imageHeight={imageMeta?.imageHeight ?? null}
+        className="size-full"
+      />
+    </View>
+  );
+}
+
+function HintImageTile({
+  assetId,
+  imageMeta,
+  isSelected,
+  isHovered,
+  size,
+}: {
+  assetId: string;
+  imageMeta: ImageMeta | null;
+  isSelected: boolean;
+  isHovered: boolean;
+  size: number;
+}) {
+  return (
+    <View className="relative" style={{ height: size, width: size }}>
+      <View
+        className="overflow-hidden rounded-md bg-fg-bg5"
+        style={{ height: size, width: size }}
+      >
+        <FramedAssetImage
+          assetId={assetId}
+          crop={imageMeta?.crop}
+          imageWidth={imageMeta?.imageWidth ?? null}
+          imageHeight={imageMeta?.imageHeight ?? null}
+          className="size-full"
+        />
+      </View>
+      <View
+        className={
+          isSelected
+            ? `absolute inset-0 rounded-md border-2 border-cyan`
+            : isHovered
+              ? `absolute inset-0 rounded-md border-2 border-cyan/40`
+              : `absolute inset-0 rounded-md border border-fg/10`
+        }
+        pointerEvents="none"
+      />
+    </View>
+  );
+}
+
+interface ImageMeta {
+  imageId: string;
+  crop: ImageCrop;
+  imageWidth?: number | null;
+  imageHeight?: number | null;
+}
+
+function buildImageMeta(
+  value: UserSettingEntityOutput<UserSettingImageEntity> | null,
+): ImageMeta | null {
+  const imageId = value?.imageId;
+  if (imageId == null) {
+    return null;
+  }
+
+  const crop = parseImageCrop(value?.imageCrop);
+  const imageWidthRaw = value?.imageWidth as unknown;
+  const imageHeightRaw = value?.imageHeight as unknown;
+  const imageWidth = typeof imageWidthRaw === `number` ? imageWidthRaw : null;
+  const imageHeight =
+    typeof imageHeightRaw === `number` ? imageHeightRaw : null;
+
+  return {
+    imageId,
+    crop,
+    imageWidth,
+    imageHeight,
+  };
+}

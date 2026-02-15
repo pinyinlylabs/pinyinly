@@ -1,13 +1,13 @@
-import type { Skill, SrsStateType } from "#data/model.ts";
 import { SkillKind } from "#data/model.ts";
+import type { Skill, SrsStateType } from "#data/model.ts";
 import { rSkillKind } from "#data/rizzleSchema.ts";
-import type { LatestSkillRating, SkillLearningGraph } from "#data/skills.ts";
 import { skillReviewQueue } from "#data/skills.ts";
+import type { LatestSkillRating, SkillLearningGraph } from "#data/skills.ts";
 import { loadDictionary } from "#dictionary.ts";
+import { mockSrsState } from "#test/data/helpers.ts";
 import { Rating } from "#util/fsrs.ts";
 import { invariant } from "@pinyinly/lib/invariant";
 import { bench, expect } from "vitest";
-import { mockSrsState } from "../data/helpers.ts";
 
 // Add a regression test to make sure Vitest bench mode sets the `MODE`
 // environment variable to 'benchmark'. This is assumed in other places in the

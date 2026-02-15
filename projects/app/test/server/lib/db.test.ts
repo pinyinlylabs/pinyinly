@@ -1,8 +1,8 @@
 import type { Skill } from "#data/model.ts";
 import { srsStateFromFsrsState } from "#data/rizzleSchema.ts";
 import { glossToHanziWord } from "#data/skills.ts";
-import type { Drizzle } from "#server/lib/db.ts";
 import { pgBatchUpdate, substring } from "#server/lib/db.ts";
+import type { Drizzle } from "#server/lib/db.ts";
 import * as s from "#server/pgSchema.ts";
 import { nextReview, Rating } from "#util/fsrs.ts";
 import { invariant } from "@pinyinly/lib/invariant";

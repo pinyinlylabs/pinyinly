@@ -1,4 +1,4 @@
-import { useQuizProgress } from "@/client/hooks/useQuizProgress";
+import { useQuizProgress } from "@/client/ui/hooks/useQuizProgress";
 import { QuizProgressBar } from "@/client/ui/QuizProgressBar";
 import { RectButton } from "@/client/ui/RectButton";
 import { useCallback } from "react";

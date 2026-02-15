@@ -162,43 +162,37 @@ const mutators: RizzleDrizzleMutators<typeof schema, Drizzle> = {
   async setPinyinInitialAssociation(db, userId, { initial, name, now }) {
     const updatedAt = now;
     const createdAt = now;
+    const value = name == null ? null : { t: name };
     await db
-      .insert(s.pinyinInitialAssociation)
-      .values([{ userId, initial, name, updatedAt, createdAt }])
+      .insert(s.userSetting)
+      .values([{ userId, key: `pia.${initial}`, value, updatedAt, createdAt }])
       .onConflictDoUpdate({
-        target: [
-          s.pinyinInitialAssociation.userId,
-          s.pinyinInitialAssociation.initial,
-        ],
-        set: { name, updatedAt },
+        target: [s.userSetting.userId, s.userSetting.key],
+        set: { value, updatedAt },
       });
   },
   async setPinyinFinalAssociation(db, userId, { final, name, now }) {
     const updatedAt = now;
     const createdAt = now;
+    const value = name == null ? null : { t: name };
     await db
-      .insert(s.pinyinFinalAssociation)
-      .values([{ userId, final, name, updatedAt, createdAt }])
+      .insert(s.userSetting)
+      .values([{ userId, key: `pfa.${final}`, value, updatedAt, createdAt }])
       .onConflictDoUpdate({
-        target: [
-          s.pinyinFinalAssociation.userId,
-          s.pinyinFinalAssociation.final,
-        ],
-        set: { name, updatedAt },
+        target: [s.userSetting.userId, s.userSetting.key],
+        set: { value, updatedAt },
       });
   },
   async setPinyinInitialGroupTheme(db, userId, { groupId, themeId, now }) {
     const updatedAt = now;
     const createdAt = now;
+    const value = themeId == null ? null : { t: themeId };
     await db
-      .insert(s.pinyinInitialGroupTheme)
-      .values([{ userId, groupId, themeId, updatedAt, createdAt }])
+      .insert(s.userSetting)
+      .values([{ userId, key: `pigt.${groupId}`, value, updatedAt, createdAt }])
       .onConflictDoUpdate({
-        target: [
-          s.pinyinInitialGroupTheme.userId,
-          s.pinyinInitialGroupTheme.groupId,
-        ],
-        set: { themeId, updatedAt },
+        target: [s.userSetting.userId, s.userSetting.key],
+        set: { value, updatedAt },
       });
   },
   async setSetting(db, userId, { key, value, now }) {
@@ -435,9 +429,6 @@ export async function pull(
 }
 
 type CvrNamespace =
-  | `pinyinInitialAssociation`
-  | `pinyinFinalAssociation`
-  | `pinyinInitialGroupTheme`
   | `skillState`
   | `skillRating`
   | `hanziGlossMistake`
@@ -503,75 +494,6 @@ type PatchOpsUnhydrated = Partial<
 >;
 
 const syncEntities = [
-  makeSyncEntity(
-    `pinyinFinalAssociation`,
-    schema.pinyinFinalAssociation,
-    (final, e) => e.marshalKey({ final }),
-    (db, ids) =>
-      db.query.pinyinFinalAssociation.findMany({
-        where: (t) => inArray(t.id, ids),
-      }),
-    (db, userId) =>
-      db
-        .select({
-          map: json_agg(
-            json_build_object({
-              id: s.pinyinFinalAssociation.id,
-              key: s.pinyinFinalAssociation.final,
-              xmin: pgXmin(s.pinyinFinalAssociation),
-            }),
-          ).as(`pinyinFinalAssociationVersions`),
-        })
-        .from(s.pinyinFinalAssociation)
-        .where(eq(s.pinyinFinalAssociation.userId, userId))
-        .as(`pinyinFinalAssociationVersions`),
-  ),
-  makeSyncEntity(
-    `pinyinInitialAssociation`,
-    schema.pinyinInitialAssociation,
-    (initial, e) => e.marshalKey({ initial }),
-    (db, ids) =>
-      db.query.pinyinInitialAssociation.findMany({
-        where: (t) => inArray(t.id, ids),
-      }),
-    (db, userId) =>
-      db
-        .select({
-          map: json_agg(
-            json_build_object({
-              id: s.pinyinInitialAssociation.id,
-              key: s.pinyinInitialAssociation.initial,
-              xmin: pgXmin(s.pinyinInitialAssociation),
-            }),
-          ).as(`pinyinInitialAssociationVersions`),
-        })
-        .from(s.pinyinInitialAssociation)
-        .where(eq(s.pinyinInitialAssociation.userId, userId))
-        .as(`pinyinInitialAssociationVersions`),
-  ),
-  makeSyncEntity(
-    `pinyinInitialGroupTheme`,
-    schema.pinyinInitialGroupTheme,
-    (groupId, e) => e.marshalKey({ groupId }),
-    (db, ids) =>
-      db.query.pinyinInitialGroupTheme.findMany({
-        where: (t) => inArray(t.id, ids),
-      }),
-    (db, userId) =>
-      db
-        .select({
-          map: json_agg(
-            json_build_object({
-              id: s.pinyinInitialGroupTheme.id,
-              key: s.pinyinInitialGroupTheme.groupId,
-              xmin: pgXmin(s.pinyinInitialGroupTheme),
-            }),
-          ).as(`pinyinInitialGroupThemeVersions`),
-        })
-        .from(s.pinyinInitialGroupTheme)
-        .where(eq(s.pinyinInitialGroupTheme.userId, userId))
-        .as(`pinyinInitialGroupThemeVersions`),
-  ),
   makeSyncEntity(
     `skillState`,
     schema.skillState,

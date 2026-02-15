@@ -33,7 +33,7 @@ export const testReplicacheOptions = (
  */
 export function makeMockTx() {
   const readTx: ReadTransaction = {
-    get: async () => undefined,
+    get: async (): Promise<undefined> => {},
     scan: () => null as never,
     clientID: null as never,
     environment: null as never,
@@ -44,7 +44,7 @@ export function makeMockTx() {
 
   const writeTx: WriteTransaction = {
     ...readTx,
-    set: async () => undefined,
+    set: async () => {},
     mutationID: null as never,
     reason: null as never,
     put: null as never,

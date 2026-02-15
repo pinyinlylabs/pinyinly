@@ -1,5 +1,5 @@
 import { useAuth } from "@/client/auth";
-import { useRizzleQuery } from "@/client/hooks/useRizzleQuery";
+import { useRizzleQuery } from "@/client/ui/hooks/useRizzleQuery";
 import { RectButton } from "@/client/ui/RectButton";
 import { SessionStoreProvider } from "@/client/ui/SessionStoreProvider";
 import { SignInWithAppleButton } from "@/client/ui/SignInWithAppleButton";
@@ -192,7 +192,7 @@ function ServerSessionIdLoginForm() {
 const GoHomeButton = () => (
   <View style={{ height: 44 }}>
     <Link dismissTo href="/learn" asChild>
-      <RectButton textClassName="font-bold text-fg text-xl">Back</RectButton>
+      <RectButton className="text-xl font-bold text-fg">Back</RectButton>
     </Link>
   </View>
 );

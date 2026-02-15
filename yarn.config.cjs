@@ -418,7 +418,7 @@ async function readPnpmLock() {
 }
 
 /**
- * @type {import('@yarnpkg/types').defineConfig}
+ * @type {import('@yarnpkg/types').Yarn.Config}
  */
 module.exports = defineConfig({
   async constraints(ctx) {
@@ -438,6 +438,7 @@ module.exports = defineConfig({
     await enforceMoonToolchainVersion(ctx);
     await enforceConsistentAppPnpmAndYarnDependencies(ctx);
     await enforceSingleDependencyVersion(ctx, [
+      /^@aws-sdk\//,
       /^@expo\//,
       /^@sentry\//,
       /^@tanstack\//,

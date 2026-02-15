@@ -1,4 +1,4 @@
-import { ExampleStack } from "@/client/ui/demo/helpers";
+import { ExampleStack } from "@/client/ui/demo/components";
 import { RectButton } from "@/client/ui/RectButton";
 import { ShootingStars } from "@/client/ui/ShootingStars";
 import { useState } from "react";

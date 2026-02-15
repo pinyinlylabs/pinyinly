@@ -51,6 +51,7 @@ export const SplashScreen = ({ children: _children }: { children?: never }) => {
       // If something broke with the animation, hide immediately rather than
       // getting stuck on the splash screen and locking the whole app.
       if (animationRef.current == null) {
+        // oxlint-disable-next-line react-hooks-js/set-state-in-effect
         setHide(true);
         return;
       }

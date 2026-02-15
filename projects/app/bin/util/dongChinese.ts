@@ -215,7 +215,7 @@ export function getDongChineseMeaningKey(
   record: DongChineseRecord,
 ): string | undefined {
   return getDongChineseGloss(record)?.[0]
-    ?.replace(/^a /g, ``)
+    ?.replaceAll(/^a /g, ``)
     .replaceAll(/ ([a-z])/g, (_, c: string) => c.toUpperCase());
 }
 

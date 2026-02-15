@@ -1,8 +1,7 @@
 import { makeRange } from "@pinyinly/lib/collections";
 import { useEffect, useMemo, useState } from "react";
-import type { LayoutChangeEvent, LayoutRectangle } from "react-native";
 import { View } from "react-native";
-import type { SharedValue } from "react-native-reanimated";
+import type { LayoutChangeEvent, LayoutRectangle } from "react-native";
 import Reanimated, {
   Easing,
   useAnimatedStyle,
@@ -11,8 +10,9 @@ import Reanimated, {
   withDelay,
   withTiming,
 } from "react-native-reanimated";
-import type { Transform1D } from "./animate";
+import type { SharedValue } from "react-native-reanimated";
 import { createAffineTransform } from "./animate";
+import type { Transform1D } from "./animate";
 
 const majorTickBgSize = 20;
 const barSize = 16;
@@ -92,6 +92,7 @@ export const QuizProgressBar = ({ progress }: { progress: number }) => {
         Math.trunc((progress - 1) / milestoneInterval) * milestoneInterval,
         0,
       );
+      // oxlint-disable-next-line react-hooks-js/set-state-in-effect
       setNStart(newNStart);
     }
   }, [metrics, progress, nStart]);

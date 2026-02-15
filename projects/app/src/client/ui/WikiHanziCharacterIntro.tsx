@@ -1,7 +1,8 @@
+import { useHanziWordHintOverrides } from "@/client/ui/hooks/useUserSetting";
 import { isHanziCharacter } from "@/data/hanzi";
-import type { PinyinUnit, WikiCharacterData } from "@/data/model";
-import type { HanziWordWithMeaning } from "@/dictionary";
+import type { HanziWord, PinyinUnit, WikiCharacterData } from "@/data/model";
 import { hanziFromHanziWord, loadDictionary } from "@/dictionary";
+import type { HanziWordWithMeaning } from "@/dictionary";
 import { use } from "react";
 import { View } from "react-native";
 import { WikiHanziCharacterDecomposition } from "./WikiHanziCharacterDecomposition";
@@ -10,17 +11,16 @@ import { WikiHanziCharacterPronunciation } from "./WikiHanziCharacterPronunciati
 
 interface WikiHanziCharacterIntroProps {
   characterData: WikiCharacterData;
-  illustrationSrc?: RnRequireSource;
-  illustrationFit?: `cover` | `contain`;
 }
 
 export function WikiHanziCharacterIntro({
   characterData,
-  illustrationSrc,
-  illustrationFit,
 }: WikiHanziCharacterIntroProps) {
   const dictionary = use(loadDictionary());
   const meanings = dictionary.lookupHanzi(characterData.hanzi);
+  const primaryHanziWord =
+    meanings[0]?.[0] ?? (`${characterData.hanzi}:unknown` as HanziWord);
+  const primaryHintImage = useHanziWordHintOverrides(primaryHanziWord);
 
   return (
     <>
@@ -33,8 +33,16 @@ export function WikiHanziCharacterIntro({
 
       <WikiHanziCharacterDecomposition
         characterData={characterData}
-        illustrationFit={illustrationFit}
-        illustrationSrc={illustrationSrc}
+        illustration={
+          primaryHintImage.imageId == null
+            ? null
+            : {
+                assetId: primaryHintImage.imageId,
+                crop: primaryHintImage.imageCrop,
+                imageWidth: primaryHintImage.imageWidth,
+                imageHeight: primaryHintImage.imageHeight,
+              }
+        }
       />
 
       {meanings.length === 1 && meanings[0] != null ? (

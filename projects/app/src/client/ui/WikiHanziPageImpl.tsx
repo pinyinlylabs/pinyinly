@@ -1,4 +1,3 @@
-import { getWikiMdxHanziMeaning } from "@/client/wiki";
 import type { HanziText } from "@/data/model";
 import { loadDictionary } from "@/dictionary";
 import type { IsExhaustedRest, PropsOf } from "@pinyinly/lib/types";
@@ -7,12 +6,11 @@ import { Text, View } from "react-native";
 import { useIntersectionObserver, useTimeout } from "usehooks-ts";
 import { HanziTile } from "./HanziTile";
 import { PylyMdxComponents } from "./PylyMdxComponents";
+import { WikiMdxHanziMeaning } from "./WikiMdxHanziMeaning";
 
 export function WikiHanziPageImpl({ hanzi }: { hanzi: HanziText }) {
   const dictionary = use(loadDictionary());
   const hanziWordMeanings = dictionary.lookupHanzi(hanzi);
-
-  const MeaningMdx = getWikiMdxHanziMeaning(hanzi);
 
   return (
     <>
@@ -33,7 +31,7 @@ export function WikiHanziPageImpl({ hanzi }: { hanzi: HanziText }) {
 
       <PylyMdxComponents>
         <View className="flex-1 gap-6 bg-bg py-7">
-          {MeaningMdx == null ? null : <MeaningMdx />}
+          <WikiMdxHanziMeaning hanzi={hanzi} />
         </View>
       </PylyMdxComponents>
     </>

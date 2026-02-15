@@ -20,7 +20,8 @@
       {
         "meaningKey": "blessing",
         "hint": "**Pray** for a bountiful harvest and you'll be **blessed** with riches.",
-        "explanation": "The left side shows a person praying (礻), while the right (畐) represents a field (田) with a full basket (囗). Pray for abundance and receive a blessing."
+        "explanation": "The left side shows a person praying (礻), while the right (畐) represents a field (田) with a full basket (囗). Pray for abundance and receive a blessing.",
+        "imageAssetIds": ["wiki:福:meaning"]
       }
     ]
   },

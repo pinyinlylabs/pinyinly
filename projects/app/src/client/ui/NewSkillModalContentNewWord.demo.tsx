@@ -1,7 +1,7 @@
-import { useDemoHanziKnob } from "@/client/ui/demo/helpers";
 import { NewSkillModalContentNewWord } from "@/client/ui/NewSkillModalContentNewWord";
 import type { HanziText } from "@/data/model";
 import { View } from "react-native";
+import { useDemoHanziKnob } from "./demo/utils";
 
 export default () => {
   const { hanzi } = useDemoHanziKnob(`好` as HanziText);

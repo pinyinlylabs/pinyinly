@@ -1,7 +1,8 @@
-import { DemoHanziKnob, useDemoHanziKnob } from "@/client/ui/demo/helpers";
 import { WikiHanziModal } from "@/client/ui/WikiHanziModal";
 import type { HanziText } from "@/data/model";
 import { View } from "react-native";
+import { DemoHanziKnob } from "./demo/components";
+import { useDemoHanziKnob } from "./demo/utils";
 
 export default () => {
   const { hanzi } = useDemoHanziKnob(`上` as HanziText);

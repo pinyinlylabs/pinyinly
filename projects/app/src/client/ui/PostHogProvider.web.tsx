@@ -1,10 +1,6 @@
 import { nonNullable } from "@pinyinly/lib/invariant";
-import {
-  PostHogProvider as WebPostHogProvider,
-  usePostHog as webUsePostHog,
-} from "posthog-js/react";
-import type { UsePostHog } from "./postHogOptions";
-import { apiHost, apiKey, debug } from "./postHogOptions";
+import { PostHogProvider as WebPostHogProvider } from "posthog-js/react";
+import { apiHost, apiKey, debug } from "./PostHogProvider.utils";
 
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
   return (
@@ -23,9 +19,4 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
       {children}
     </WebPostHogProvider>
   );
-}
-
-export function usePostHog(): UsePostHog {
-  const posthog = webUsePostHog();
-  return posthog;
 }

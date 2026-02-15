@@ -1,5 +1,5 @@
+import { testExpoServer } from "#test/app/api/helpers.ts";
 import { describe, expect, test } from "vitest";
-import { testExpoServer } from "../helpers.ts";
 
 describe(`API smoke tests`, { timeout: 20_000 }, () => {
   test.skip(`/api/trpc/invalid`, { timeout: 50_000 }, async () => {

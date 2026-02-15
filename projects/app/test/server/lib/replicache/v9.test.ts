@@ -1,4 +1,3 @@
-import type { PinyinSoundGroupId, PinyinSoundId } from "#data/model.ts";
 import { v9 as schema, srsStateFromFsrsState } from "#data/rizzleSchema.ts";
 import { glossToHanziWord } from "#data/skills.ts";
 import { pgXmin } from "#server/lib/db.ts";
@@ -825,8 +824,6 @@ describe(
         await expect(computeEntitiesState(tx, `1`)).resolves.toEqual({
           hanziGlossMistake: [],
           hanziPinyinMistake: [],
-          pinyinSound: [],
-          pinyinSoundGroup: [],
           skillState: [],
           skillRating: [],
           setting: [],
@@ -839,8 +836,6 @@ describe(
         await expect(computeEntitiesState(tx, user.id)).resolves.toEqual({
           hanziGlossMistake: [],
           hanziPinyinMistake: [],
-          pinyinSound: [],
-          pinyinSoundGroup: [],
           skillState: [],
           skillRating: [],
           setting: [],
@@ -875,8 +870,6 @@ describe(
         await expect(computeEntitiesState(tx, user1.id)).resolves.toEqual({
           hanziGlossMistake: [],
           hanziPinyinMistake: [],
-          pinyinSound: [],
-          pinyinSoundGroup: [],
           skillRating: [],
           skillState: [user1SkillState],
           setting: [],
@@ -912,81 +905,7 @@ describe(
         await expect(computeEntitiesState(tx, user1.id)).resolves.toEqual({
           hanziGlossMistake: [],
           hanziPinyinMistake: [],
-          pinyinSound: [],
-          pinyinSoundGroup: [],
           skillRating: [user1SkillRating],
-          skillState: [],
-          setting: [],
-        });
-      });
-
-      txTest(`only includes pinyinSound for the user`, async ({ tx }) => {
-        const user1 = await createUser(tx);
-        const user2 = await createUser(tx);
-
-        const [user1PinyinSound] = await tx
-          .insert(s.pinyinSound)
-          .values([
-            {
-              userId: user1.id,
-              soundId: `p` as PinyinSoundId,
-              name: `p1`,
-            },
-            {
-              userId: user2.id,
-              soundId: `p` as PinyinSoundId,
-              name: `p2`,
-            },
-          ])
-          .returning({
-            id: s.pinyinSound.id,
-            key: s.pinyinSound.soundId,
-            xmin: pgXmin(s.pinyinSound),
-          });
-        invariant(user1PinyinSound != null);
-
-        await expect(computeEntitiesState(tx, user1.id)).resolves.toEqual({
-          hanziGlossMistake: [],
-          hanziPinyinMistake: [],
-          pinyinSound: [user1PinyinSound],
-          pinyinSoundGroup: [],
-          skillRating: [],
-          skillState: [],
-          setting: [],
-        });
-      });
-
-      txTest(`only includes pinyinSoundGroup for the user`, async ({ tx }) => {
-        const user1 = await createUser(tx);
-        const user2 = await createUser(tx);
-
-        const [user1PinyinSoundGroup] = await tx
-          .insert(s.pinyinSoundGroup)
-          .values([
-            {
-              userId: user1.id,
-              soundGroupId: `p` as PinyinSoundGroupId,
-              theme: `p1`,
-            },
-            {
-              userId: user2.id,
-              soundGroupId: `p` as PinyinSoundGroupId,
-              theme: `p2`,
-            },
-          ])
-          .returning({
-            id: s.pinyinSoundGroup.id,
-            key: s.pinyinSoundGroup.soundGroupId,
-            xmin: pgXmin(s.pinyinSoundGroup),
-          });
-        invariant(user1PinyinSoundGroup != null);
-
-        await expect(computeEntitiesState(tx, user1.id)).resolves.toEqual({
-          hanziGlossMistake: [],
-          hanziPinyinMistake: [],
-          pinyinSound: [],
-          pinyinSoundGroup: [user1PinyinSoundGroup],
-          skillRating: [],
           skillState: [],
           setting: [],
         });
@@ -1002,8 +921,6 @@ describe(`computePatch suite` satisfies HasNameOf<typeof computePatch>, () => {
     const prevCvr: CvrEntities = {
       hanziGlossMistake: { x1: `1` },
       hanziPinyinMistake: { x2: `2` },
-      pinyinSound: { x3: `3` },
-      pinyinSoundGroup: { x4: `4` },
       skillState: { x6: `6` },
       skillRating: { x7: `7` },
       setting: { x8: `8` },
@@ -1011,8 +928,6 @@ describe(`computePatch suite` satisfies HasNameOf<typeof computePatch>, () => {
     const entitiesState: EntitiesState = {
       hanziGlossMistake: [{ id: `x1`, xmin: `1` }],
       hanziPinyinMistake: [{ id: `x2`, xmin: `2` }],
-      pinyinSound: [{ id: `x3`, xmin: `3` }],
-      pinyinSoundGroup: [{ id: `x4`, xmin: `4` }],
       skillState: [{ id: `x6`, xmin: `6` }],
       skillRating: [{ id: `x7`, xmin: `7` }],
       setting: [{ id: `x8`, xmin: `8` }],
@@ -1023,8 +938,6 @@ describe(`computePatch suite` satisfies HasNameOf<typeof computePatch>, () => {
       patchOpsUnhydrated: {
         hanziGlossMistake: { delKeys: [], putIds: [] },
         hanziPinyinMistake: { delKeys: [], putIds: [] },
-        pinyinSound: { delKeys: [], putIds: [] },
-        pinyinSoundGroup: { delKeys: [], putIds: [] },
         skillState: { delKeys: [], putIds: [] },
         skillRating: { delKeys: [], putIds: [] },
         setting: { delKeys: [], putIds: [] },

@@ -1,3 +1,5 @@
+import { DemoHanziWordKnob } from "@/client/ui/demo/components";
+import { useDemoHanziWordKnob } from "@/client/ui/demo/utils";
 import { QuizDeckHanziWordToPinyinTypedQuestion } from "@/client/ui/QuizDeckHanziWordToPinyinTypedQuestion";
 import { Use } from "@/client/ui/Use";
 import { QuestionFlagKind } from "@/data/model";
@@ -6,7 +8,6 @@ import { hanziWordToPinyinTyped } from "@/data/skills";
 import { hanziFromHanziWord, loadDictionary } from "@/dictionary";
 import { use } from "react";
 import { View } from "react-native";
-import { DemoHanziWordKnob, useDemoHanziWordKnob } from "./demo/helpers";
 
 export default () => {
   const { hanziWord } = useDemoHanziWordKnob(`你好:hello`);

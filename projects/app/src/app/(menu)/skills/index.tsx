@@ -1,16 +1,16 @@
-import { useReplicache } from "@/client/hooks/useReplicache";
-import { useRizzleQueryPaged } from "@/client/hooks/useRizzleQueryPaged";
 import { hanziWordsByRankQuery } from "@/client/query";
 import { HanziWordRefText } from "@/client/ui/HanziWordRefText";
+import { useRizzle } from "@/client/ui/hooks/useRizzle";
+import { useRizzleQueryPaged } from "@/client/ui/hooks/useRizzleQueryPaged";
 import type { HanziWord } from "@/data/model";
-import type { RankNumber } from "@/data/skills";
 import { coerceRank, rankName } from "@/data/skills";
+import type { RankNumber } from "@/data/skills";
 import { meaningKeyFromHanziWord } from "@/dictionary";
 import { Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 
 export default function SkillsPage() {
-  const r = useReplicache();
+  const r = useRizzle();
   const { data: hanziWordsByRank } = useRizzleQueryPaged(
     hanziWordsByRankQuery(r),
   );

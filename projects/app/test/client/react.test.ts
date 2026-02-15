@@ -39,7 +39,7 @@ describe(`mergeProps suite` satisfies HasNameOf<typeof mergeProps>, () => {
     expect(refOne).toHaveBeenCalledTimes(0);
     expect(refTwo).toHaveBeenCalledTimes(0);
 
-    const element = Symbol();
+    const element = Symbol(`element`);
     mergedRef.ref(element);
 
     expect(refOne).toHaveBeenCalledWith(element);
@@ -60,7 +60,7 @@ describe(`mergeProps suite` satisfies HasNameOf<typeof mergeProps>, () => {
     expect(refOne.current).toBeNull();
     expect(refTwo.current).toBeNull();
 
-    const element = Symbol();
+    const element = Symbol(`element`);
     mergedRef.ref(element);
 
     expect(refOne.current).toBe(element);

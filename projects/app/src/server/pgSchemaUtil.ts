@@ -1,8 +1,8 @@
 import {
+  rAssetStatusKind,
   rFsrsRating,
   rHanziOrHanziWord,
-  rPinyinSoundGroupId,
-  rPinyinSoundId,
+  rHanziWord,
   rSkill,
   rSpaceSeparatedString,
 } from "@/data/rizzleSchema";
@@ -240,20 +240,19 @@ export const rizzleCustomType = <
 // differentiate them from rizzle schema things.
 export const pgSkill = rizzleCustomType(rSkill(), `text`);
 export const pgMnemonicThemeId = rizzleCustomType(r.string(), `text`);
-export const pgPinyinSoundId = rizzleCustomType(rPinyinSoundId(), `text`);
-export const pgPinyinSoundGroupId = rizzleCustomType(
-  rPinyinSoundGroupId(),
-  `text`,
-);
-export const pgPinyinInitialGroupId = rizzleCustomType(r.string(), `text`);
 export const pgSpaceSeparatedString = rizzleCustomType(
   rSpaceSeparatedString(),
   `text`,
 );
 export const pgHanziOrHanziWord = rizzleCustomType(rHanziOrHanziWord(), `text`);
+const pgHanziWordBuilder = rizzleCustomType(rHanziWord(), `text`);
+export function pgHanziWord(name: string) {
+  return pgHanziWordBuilder(name);
+}
 export const pgJson = rizzleCustomType(r.json(), `json`);
 export const pgJsonObject = rizzleCustomType(r.jsonObject(), `json`);
 export const pgFsrsRating = rizzleCustomType(rFsrsRating(), `text`);
+export const pgAssetStatusKind = rizzleCustomType(rAssetStatusKind(), `text`);
 
 // Auth
 export const passkeyTransportEnumSchema = z.enum([

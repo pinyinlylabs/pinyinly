@@ -1,4 +1,4 @@
-import { ExampleStack } from "@/client/ui/demo/helpers";
+import { ExampleStack } from "@/client/ui/demo/components";
 import { ImageCloud } from "@/client/ui/ImageCloud";
 
 export default () => {

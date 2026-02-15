@@ -34,7 +34,7 @@ describe(`transform` satisfies HasNameOf<typeof transform>, () => {
     expect(result.src).toMatchInlineSnapshot(`
       "/*@jsxRuntime automatic*/
       /*@jsxImportSource react*/
-      import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+      import {useMDXComponents as _provideComponents} from "@/client/ui/hooks/useMDXComponents";
       import __mdx_import_foo_bar_0 from "./foo/bar.png";
       function _createMdxContent(props) {
         const _components = Object.assign(Object.create(_provideComponents()), props.components);
@@ -71,7 +71,7 @@ import Foo from './foo'
     expect(result.src).toMatchInlineSnapshot(`
       "/*@jsxRuntime automatic*/
       /*@jsxImportSource react*/
-      import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+      import {useMDXComponents as _provideComponents} from "@/client/ui/hooks/useMDXComponents";
       import Foo from './foo';
       function _createMdxContent(props) {
         const _components = Object.assign(Object.create(_provideComponents()), props.components);
@@ -103,7 +103,7 @@ import Foo from './foo'
     expect(result.src).toMatchInlineSnapshot(`
       "/*@jsxRuntime automatic*/
       /*@jsxImportSource react*/
-      import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+      import {useMDXComponents as _provideComponents} from "@/client/ui/hooks/useMDXComponents";
       import Foo from './foo';
       function _createMdxContent(props) {
         const _components = Object.assign(Object.create(_provideComponents()), props.components);
@@ -133,7 +133,7 @@ import Foo from './foo'
     expect(result.src).toMatchInlineSnapshot(`
       "/*@jsxRuntime automatic*/
       /*@jsxImportSource react*/
-      import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+      import {useMDXComponents as _provideComponents} from "@/client/ui/hooks/useMDXComponents";
       function _createMdxContent(props) {
         const _components = Object.assign(Object.create(_provideComponents()), props.components), {Foo} = _components;
         return <><_components.h1>{"Hello World"}</_components.h1>{"\\n"}<Foo /></>;
@@ -165,7 +165,7 @@ import Foo from './foo'
     expect(result.src).toMatchInlineSnapshot(`
       "/*@jsxRuntime automatic*/
       /*@jsxImportSource react*/
-      import {useMDXComponents as _provideComponents} from "@/client/hooks/useMDXComponents";
+      import {useMDXComponents as _provideComponents} from "@/client/ui/hooks/useMDXComponents";
       function _createMdxContent(props) {
         const _components = Object.assign(Object.create(_provideComponents()), props.components), {Foo} = _components;
         return <><_components.h1>{"Hello World"}</_components.h1>{"\\n"}<Foo>{"Some "}<_components.strong>{"bold"}</_components.strong>{" text"}</Foo></>;

@@ -1,7 +1,7 @@
 // pyly-not-src-test
 
+import { getFonts } from "#test/helpers.ts";
 import { expect, test } from "vitest";
-import { getFonts } from "../helpers.ts";
 
 test(`MiSans font weight correction`, async () => {
   const fonts = await getFonts();

@@ -1,4 +1,3 @@
-import { getWikiMdxHanziMeaning } from "@/client/wiki";
 import type { HanziText, PinyinText } from "@/data/model";
 import { loadDictionary } from "@/dictionary";
 import { use } from "react";
@@ -6,6 +5,7 @@ import { Pressable, ScrollView, Text, View } from "react-native";
 import { useIntersectionObserver } from "usehooks-ts";
 import { IconImage } from "./IconImage";
 import { PylyMdxComponents } from "./PylyMdxComponents";
+import { WikiMdxHanziMeaning } from "./WikiMdxHanziMeaning";
 
 export const NewSkillModalContentNewWord = ({
   hanzi,
@@ -38,39 +38,35 @@ export const NewSkillModalContentNewWord = ({
       ? hanziWordMeanings[0]?.[1].gloss.join(`, `)
       : hanziWordMeanings.map(([, meaning]) => meaning.gloss[0]).join(`, `);
 
-  const MeaningMdx = getWikiMdxHanziMeaning(hanzi);
-
   return (
-    <>
-      <ScrollView
-        className={
-          // Use a linear gradient on the background so that rubber band
-          // scrolling showing the correct color at the top and bottom.
-          `
-            h-screen
-            bg-[linear-gradient(to_bottom,_var(--color-theme-grass-panel-bg)_0%,_var(--color-theme-grass-panel-bg)_50%,_var(--color-bg)_50%,_var(--color-bg)_100%)]
-          `
-        }
-        contentContainerClassName="pb-10 min-h-full"
-      >
-        <Header title={title} subtitle={glosses} onDismiss={onDismiss} />
+    <ScrollView
+      className={
+        // Use a linear gradient on the background so that rubber band
+        // scrolling showing the correct color at the top and bottom.
+        `
+          h-screen
+          bg-[linear-gradient(to_bottom,_var(--color-theme-grass-panel-bg)_0%,_var(--color-theme-grass-panel-bg)_50%,_var(--color-bg)_50%,_var(--color-bg)_100%)]
+        `
+      }
+      contentContainerClassName="pb-10 min-h-full"
+    >
+      <Header title={title} subtitle={glosses} onDismiss={onDismiss} />
 
-        <PylyMdxComponents>
-          <View className="flex-1 gap-2 bg-bg py-7">
-            <View className="flex-row items-center gap-2 px-4">
-              <IconImage
-                source={require(`../../assets/icons/note-2.svg`)}
-                size={32}
-                className="text-[var(--color-theme-grass-panel-bg)]"
-              />
-              <Text className="pyly-body-title text-fg-loud">Meaning</Text>
-            </View>
-
-            {MeaningMdx == null ? null : <MeaningMdx />}
+      <PylyMdxComponents>
+        <View className="flex-1 gap-2 bg-bg py-7">
+          <View className="flex-row items-center gap-2 px-4">
+            <IconImage
+              icon="note-2"
+              size={32}
+              className="text-[var(--color-theme-grass-panel-bg)]"
+            />
+            <Text className="pyly-body-title text-fg-loud">Meaning</Text>
           </View>
-        </PylyMdxComponents>
-      </ScrollView>
-    </>
+
+          <WikiMdxHanziMeaning hanzi={hanzi} />
+        </View>
+      </PylyMdxComponents>
+    </ScrollView>
   );
 };
 
@@ -110,11 +106,7 @@ function Header({
               active:scale-95
             `}
           >
-            <IconImage
-              source={require(`../../assets/icons/close.svg`)}
-              size={32}
-              className="text-fg-loud"
-            />
+            <IconImage icon="close" size={32} className="text-fg-loud" />
           </Pressable>
         </View>
 

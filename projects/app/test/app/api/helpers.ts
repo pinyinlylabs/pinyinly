@@ -42,7 +42,7 @@ export function testExpoServer() {
   });
 
   const _fetch = async (input: string, init?: RequestInit) =>
-    await fetch(
+    fetch(
       `${SERVER_URL}${input}`,
       Object.assign(
         { ...init },

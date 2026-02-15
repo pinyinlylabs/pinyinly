@@ -1,4 +1,3 @@
-/* eslint-disable @pinyinly/no-restricted-css-classes */
 import { RectButton } from "@/client/ui/RectButton";
 import { useWebsiteStore } from "@/client/website";
 import { invariant } from "@pinyinly/lib/invariant";
@@ -83,7 +82,7 @@ export default function WebsiteLayout() {
           <div className="www-px-comfortable flex w-full max-w-www-col">
             <div
               className={`
-                w-full flex-col gap-0
+                w-full gap-0
 
                 md:flex-row md:gap-8
               `}

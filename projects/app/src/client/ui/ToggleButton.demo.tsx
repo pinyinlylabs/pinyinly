@@ -1,6 +1,6 @@
-import { ExampleStack } from "@/client/ui/demo/helpers";
 import { ToggleButton } from "@/client/ui/ToggleButton";
 import { useState } from "react";
+import { ExampleStack } from "./demo/components";
 
 export default () => {
   const [isActive1, setIsActive1] = useState(false);
