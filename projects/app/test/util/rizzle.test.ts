@@ -1982,3 +1982,139 @@ test(`marshaled types honor aliases`, () => {
     true satisfies IsEqual<Marshaled, Expected>;
   });
 });
+
+describe(`unmarshalValueSafe()`, () => {
+  test(`returns parsed output on valid data`, () => {
+    const entity = r.entity(`test/[id]`, {
+      id: r.string(),
+      name: r.string(),
+      count: r.number(),
+    });
+
+    const validData = { id: `123`, name: `test`, count: 42 };
+    const result = entity.unmarshalValueSafe(validData);
+
+    expect(result).toEqual(validData);
+  });
+
+  test(`returns null on invalid type`, () => {
+    const entity = r.entity(`test/[id]`, {
+      id: r.string(),
+      name: r.string(),
+      count: r.number(),
+    });
+
+    // Wrong type for count (should be number)
+    const invalidData = { id: `123`, name: `test`, count: `not-a-number` };
+    const result = entity.unmarshalValueSafe(invalidData);
+
+    expect(result).toBeNull();
+  });
+
+  test(`returns null on missing required field`, () => {
+    const entity = r.entity(`test/[id]`, {
+      id: r.string(),
+      name: r.string(),
+      count: r.number(),
+    });
+
+    // Missing required 'count' field
+    const incompleteData = { id: `123`, name: `test` };
+    const result = entity.unmarshalValueSafe(incompleteData);
+
+    expect(result).toBeNull();
+  });
+
+  test(`returns null on non-object input`, () => {
+    const entity = r.entity(`test/[id]`, {
+      id: r.string(),
+      name: r.string(),
+    });
+
+    expect(entity.unmarshalValueSafe(null)).toBeNull();
+    expect(entity.unmarshalValueSafe(undefined)).toBeNull();
+    expect(entity.unmarshalValueSafe(`string`)).toBeNull();
+    expect(entity.unmarshalValueSafe(123)).toBeNull();
+    expect(entity.unmarshalValueSafe([])).toBeNull();
+  });
+
+  test(`handles nested objects with aliases`, () => {
+    const entity = r.entity(`test/[id]`, {
+      id: r.string(),
+      nested: r.object({
+        value: r.string(`v`),
+        flag: r.boolean(`f`),
+      }),
+    });
+
+    // Using alias keys (as they come from storage)
+    const marshaledData = { id: `123`, nested: { v: `test`, f: true } };
+    const result = entity.unmarshalValueSafe(marshaledData);
+
+    // Unmarshal converts aliases back to original field names
+    expect(result).toEqual({
+      id: `123`,
+      nested: { value: `test`, flag: true },
+    });
+  });
+
+  test(`returns null on invalid nested data`, () => {
+    const entity = r.entity(`test/[id]`, {
+      id: r.string(),
+      nested: r.object({
+        value: r.string(`v`),
+        flag: r.boolean(`f`),
+      }),
+    });
+
+    // Invalid: flag should be boolean, not string
+    const invalidData = { id: `123`, nested: { v: `test`, f: `not-boolean` } };
+    const result = entity.unmarshalValueSafe(invalidData);
+
+    expect(result).toBeNull();
+  });
+
+  test(`with optional fields`, () => {
+    const entity = r.entity(`test/[id]`, {
+      id: r.string(),
+      name: r.string(),
+      optional: r.string().optional(),
+    });
+
+    // Without optional field
+    const dataWithoutOptional = { id: `123`, name: `test` };
+    expect(entity.unmarshalValueSafe(dataWithoutOptional)).toEqual(
+      dataWithoutOptional,
+    );
+
+    // With optional field
+    const dataWithOptional = {
+      id: `123`,
+      name: `test`,
+      optional: `present`,
+    };
+    expect(entity.unmarshalValueSafe(dataWithOptional)).toEqual(
+      dataWithOptional,
+    );
+  });
+
+  test(`with nullable fields`, () => {
+    const entity = r.entity(`test/[id]`, {
+      id: r.string(),
+      name: r.string(),
+      nullable: r.string().nullable(),
+    });
+
+    // Nullable field with null value
+    const dataWithNull = { id: `123`, name: `test`, nullable: null };
+    expect(entity.unmarshalValueSafe(dataWithNull)).toEqual(dataWithNull);
+
+    // Nullable field with string value
+    const dataWithValue = { id: `123`, name: `test`, nullable: `value` };
+    expect(entity.unmarshalValueSafe(dataWithValue)).toEqual(dataWithValue);
+
+    // Nullable field with wrong type returns null
+    const dataWithWrongType = { id: `123`, name: `test`, nullable: 123 };
+    expect(entity.unmarshalValueSafe(dataWithWrongType)).toBeNull();
+  });
+});

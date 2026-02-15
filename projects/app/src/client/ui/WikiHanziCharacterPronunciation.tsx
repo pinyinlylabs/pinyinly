@@ -9,10 +9,9 @@ import {
 } from "@/client/ui/hooks/useUserSetting";
 import type { HanziText, PinyinSoundId, PinyinUnit } from "@/data/model";
 import { loadPylyPinyinChart, splitPinyinUnit } from "@/data/pinyin";
-import type { RizzleEntityMarshaled } from "@/util/rizzle";
 import { inArray, useLiveQuery } from "@tanstack/react-db";
-import { useMemo } from "react";
 import type { ReactNode } from "react";
+import { useMemo } from "react";
 import { Text, View } from "react-native";
 import { InlineEditableSettingImage } from "./InlineEditableSettingImage";
 import { InlineEditableSettingText } from "./InlineEditableSettingText";
@@ -63,11 +62,7 @@ export function WikiHanziCharacterPronunciation({
           (s) => s.key === pinyinSoundNameSettingKey(soundId),
         );
         const nameValueData = userOverride?.value
-          ? pinyinSoundNameSetting.unmarshalValue(
-              userOverride.value as RizzleEntityMarshaled<
-                typeof pinyinSoundNameSetting
-              >,
-            )
+          ? pinyinSoundNameSetting.unmarshalValueSafe(userOverride.value)
           : null;
         const nameValue = nameValueData?.text ?? null;
         sounds.set(soundId, {

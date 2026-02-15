@@ -579,6 +579,16 @@ export class RizzleEntity<
     return this._def.valueType.unmarshal(marshaled);
   }
 
+  unmarshalValueSafe(marshaled: unknown): EntityValueType<S>[`_output`] | null {
+    try {
+      return this._def.valueType.unmarshal(
+        marshaled as EntityValueType<S>[`_marshaled`],
+      );
+    } catch {
+      return null;
+    }
+  }
+
   static create = <
     KeyPath extends string,
     S extends RizzleRawSchemaForKeyPath<KeyPath>,

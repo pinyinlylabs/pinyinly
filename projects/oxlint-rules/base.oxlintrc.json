@@ -378,7 +378,7 @@
         "typescript/no-explicit-any": "off",
         "typescript/restrict-template-expressions": "off",
 
-        "react/rules-of-hooks": "off"
+        "react/rules-of-hooks": "off",
         // Backup from eslint config:
         //
         // "typescript/no-non-null-assertion": "off",
@@ -387,7 +387,7 @@
         // "typescript/return-await": "off", // this is annoying when you want a little function to return a promise
         // // It's useful to use inline type annotations for mocking.
         // "unicorn/consistent-function-scoping": "off", // it's useful to write functions in the scope of a test
-        // "unicorn/no-useless-undefined": "off" // writing undefined can be useful when writing mocks
+        "unicorn/no-useless-undefined": "off" // writing undefined can be useful when writing mocks
       }
     }
   ]

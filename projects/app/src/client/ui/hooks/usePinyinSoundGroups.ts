@@ -11,7 +11,6 @@ import {
   defaultPinyinSoundGroupThemes,
   loadPylyPinyinChart,
 } from "@/data/pinyin";
-import type { RizzleEntityMarshaled } from "@/util/rizzle";
 import { nullIfEmpty } from "@/util/unicode";
 import { sortComparatorNumber } from "@pinyinly/lib/collections";
 import { inArray, useLiveQuery } from "@tanstack/react-db";
@@ -50,18 +49,10 @@ export function usePinyinSoundGroups() {
       const themeOverride = settings.find((s) => s.key === themeKey);
 
       const nameValueData = nameOverride?.value
-        ? pinyinSoundGroupNameSetting.unmarshalValue(
-            nameOverride.value as RizzleEntityMarshaled<
-              typeof pinyinSoundGroupNameSetting
-            >,
-          )
+        ? pinyinSoundGroupNameSetting.unmarshalValueSafe(nameOverride.value)
         : null;
       const themeValueData = themeOverride?.value
-        ? pinyinSoundGroupThemeSetting.unmarshalValue(
-            themeOverride.value as RizzleEntityMarshaled<
-              typeof pinyinSoundGroupThemeSetting
-            >,
-          )
+        ? pinyinSoundGroupThemeSetting.unmarshalValueSafe(themeOverride.value)
         : null;
 
       result.push({

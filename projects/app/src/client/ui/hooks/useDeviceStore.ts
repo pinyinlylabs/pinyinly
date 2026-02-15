@@ -6,7 +6,7 @@ import type {
 import { buildDeviceStoreKey, deviceStoreSet } from "@/client/deviceStore";
 import { deviceStoreQuery } from "@/client/query";
 import { DeviceStoreProvider } from "@/client/ui/DeviceStoreProvider";
-import type { RizzleEntityInput, RizzleEntityMarshaled } from "@/util/rizzle";
+import type { RizzleEntityInput } from "@/util/rizzle";
 import { nonNullable } from "@pinyinly/lib/invariant";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { use, useEffect } from "react";
@@ -30,14 +30,12 @@ export const useDeviceStoreQuery = (key: DeviceStoreEntity) => {
             const marshaledValue =
               event.newValue == null
                 ? null
-                : (JSON.parse(
-                    event.newValue,
-                  ) as RizzleEntityMarshaled<DeviceStoreEntity>);
+                : (JSON.parse(event.newValue) as unknown);
 
             const newValue =
               marshaledValue == null
                 ? null
-                : key.unmarshalValue(marshaledValue);
+                : key.unmarshalValueSafe(marshaledValue);
 
             queryClient.setQueryData(query.queryKey, newValue);
           } catch (error) {

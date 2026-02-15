@@ -6,20 +6,18 @@ import {
 } from "@/client/userSettings";
 import type { HanziWord } from "@/data/model";
 import { nanoid } from "@/util/nanoid";
-import { keyPathVariableNames } from "@/util/rizzle";
 import type {
   RizzleAnyEntity,
   RizzleEntityInput,
   RizzleEntityOutput,
   RizzleType,
 } from "@/util/rizzle";
+import { keyPathVariableNames } from "@/util/rizzle";
 import type { Flatten } from "@pinyinly/lib/types";
 import { eq, useLiveQuery } from "@tanstack/react-db";
 import { useDb } from "./useDb";
 import { useRizzle } from "./useRizzle";
 
-// Re-export all setting definitions from the shared module
-// Re-export all setting definitions from the shared module
 export {
   autoCheckUserSetting,
   getHanziPronunciationHintKeyParams,
@@ -210,7 +208,7 @@ export function useUserSettingHistory<T extends UserSettingEntity>(
           ? null
           : userSettingEntity.unmarshalValue({
               ...keyParamMarshaled,
-              ...(entry.value as Record<string, unknown>),
+              ...entry.value,
             }),
     }))
     .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
