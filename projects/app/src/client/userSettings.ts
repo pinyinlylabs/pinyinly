@@ -161,3 +161,29 @@ export function getHanziPronunciationHintKeyParams(
     pinyin: normalizePinyinUnitForHintKey(pinyinUnit),
   };
 }
+
+//
+// Pinyin final + tone details (mnemonic locations with tone-specific imagery)
+//
+
+export const pinyinFinalToneDescriptionSetting = r.entity(
+  `pftd/[soundId]/[tone]`,
+  {
+    soundId: rPinyinSoundId().alias(`s`),
+    tone: r.string().alias(`n`),
+    text: r.string().alias(`t`),
+  },
+) satisfies UserSettingTextEntity;
+
+export const pinyinFinalToneImageSetting = r.entity(`pfti/[soundId]/[tone]`, {
+  soundId: rPinyinSoundId().alias(`s`),
+  tone: r.string().alias(`n`),
+  ...imageSettingFields,
+}) satisfies UserSettingImageEntity;
+
+export function getPinyinFinalToneKeyParams(
+  soundId: PinyinSoundId,
+  tone: string,
+) {
+  return { soundId, tone };
+}

@@ -422,6 +422,14 @@ export const defaultPinyinSoundGroupThemes = {
   tones: `Areas`,
 } as Record<PinyinSoundGroupId, string>;
 
+export const defaultToneNames = {
+  "1": `high and level`,
+  "2": `rising and questioning`,
+  "3": `mid-level and neutral`,
+  "4": `falling and definitive`,
+  "5": `light and short`,
+} as Record<string, string>;
+
 export const defaultPinyinSoundGroupRanks = Object.fromEntries(
   [`tones`, `__u-`, `__-`, `__i-`, `__ue-`, `.-`, `-__`].map((id, index) => [
     id,

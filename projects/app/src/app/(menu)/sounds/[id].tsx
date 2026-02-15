@@ -8,6 +8,7 @@ import {
   useUserSetting,
 } from "@/client/ui/hooks/useUserSetting";
 import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
+import { PinyinFinalToneEditor } from "@/client/ui/PinyinFinalToneEditor";
 import { Pylymark } from "@/client/ui/Pylymark";
 import { RectButton } from "@/client/ui/RectButton";
 import type { PinyinSoundId } from "@/data/model";
@@ -201,6 +202,9 @@ export default function SoundIdPage() {
             ))}
         </View>
       </View>
+
+      {/* Final-tone details editor for finals */}
+      {id.startsWith(`-`) && <PinyinFinalToneEditor finalSoundId={id} />}
     </View>
   );
 }

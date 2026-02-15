@@ -21,12 +21,15 @@ import { useRizzle } from "./useRizzle";
 export {
   autoCheckUserSetting,
   getHanziPronunciationHintKeyParams,
+  getPinyinFinalToneKeyParams,
   hanziPronunciationHintExplanationSetting,
   hanziPronunciationHintImageSetting,
   hanziPronunciationHintTextSetting,
   hanziWordMeaningHintExplanationSetting,
   hanziWordMeaningHintImageSetting,
   hanziWordMeaningHintTextSetting,
+  pinyinFinalToneDescriptionSetting,
+  pinyinFinalToneImageSetting,
   pinyinSoundGroupNameSetting,
   pinyinSoundGroupNameSettingKey,
   pinyinSoundGroupThemeSetting,
@@ -133,7 +136,7 @@ export const useUserSetting = <T extends UserSettingEntity>(
   const value =
     settingData?.value == null
       ? null
-      : userSettingEntity.unmarshalValue({
+      : userSettingEntity.unmarshalValueSafe({
           ...keyParamMarshaled,
           ...settingData.value,
         });
@@ -206,7 +209,7 @@ export function useUserSettingHistory<T extends UserSettingEntity>(
       value:
         entry.value == null
           ? null
-          : userSettingEntity.unmarshalValue({
+          : userSettingEntity.unmarshalValueSafe({
               ...keyParamMarshaled,
               ...entry.value,
             }),
