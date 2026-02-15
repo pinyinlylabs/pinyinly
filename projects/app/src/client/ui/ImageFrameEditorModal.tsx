@@ -1,6 +1,6 @@
 import {
-    getLocalImageAssetSource,
-    isLocalImageAssetId,
+  getLocalImageAssetSource,
+  isLocalImageAssetId,
 } from "@/client/assets/localImageAssets";
 import { trpc } from "@/client/trpc";
 import { useDb } from "@/client/ui/hooks/useDb";
@@ -8,31 +8,31 @@ import { AssetStatusKind } from "@/data/model";
 import { eq, useLiveQuery } from "@tanstack/react-db";
 import { useEffect, useRef, useState } from "react";
 import {
-    ActivityIndicator,
-    Image,
-    PanResponder,
-    Platform,
-    Text,
-    View,
+  ActivityIndicator,
+  Image,
+  PanResponder,
+  Platform,
+  Text,
+  View,
 } from "react-native";
 import type {
-    ImageSourcePropType,
-    LayoutChangeEvent,
-    PanResponderInstance,
-    ViewStyle,
+  ImageSourcePropType,
+  LayoutChangeEvent,
+  PanResponderInstance,
+  ViewStyle,
 } from "react-native";
 import { PageSheetModal } from "./PageSheetModal";
 import { RectButton } from "./RectButton";
 import { confirmDiscardChanges } from "./confirmDiscardChanges";
 import {
-    clampImageCropRectNormalized,
-    parseImageCrop,
-    resolveFrameAspectRatio,
+  clampImageCropRectNormalized,
+  parseImageCrop,
+  resolveFrameAspectRatio,
 } from "./imageCrop";
 import type {
-    ImageCrop,
-    ImageCropRect,
-    ImageFrameConstraintInput,
+  ImageCrop,
+  ImageCropRect,
+  ImageFrameConstraintInput,
 } from "./imageCrop";
 
 interface ImageFrameEditorModalProps {

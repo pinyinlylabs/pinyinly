@@ -1,6 +1,6 @@
 import {
-    getLocalImageAssetSource,
-    isLocalImageAssetId,
+  getLocalImageAssetSource,
+  isLocalImageAssetId,
 } from "@/client/assets/localImageAssets";
 import { trpc } from "@/client/trpc";
 import { useDb } from "@/client/ui/hooks/useDb";

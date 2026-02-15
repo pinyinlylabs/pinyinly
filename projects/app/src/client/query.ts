@@ -1,4 +1,4 @@
-import { pinyinSoundNameSettingKey } from "@/client/ui/hooks/useUserSetting";
+import { pinyinSoundNameSettingKey } from "@/client/userSettings";
 import type {
   HanziText,
   HanziWord,
@@ -421,6 +421,16 @@ export type AssetCollection = Collection<
   string
 >;
 
+export type SettingCollection = Collection<
+  RizzleEntityOutput<typeof currentSchema.setting>,
+  string
+>;
+
+export type SettingHistoryCollection = Collection<
+  RizzleEntityOutput<typeof currentSchema.settingHistory>,
+  string
+>;
+
 export type CollectionOutput<T> =
   // oxlint-disable-next-line typescript/no-explicit-any
   T extends Collection<infer U, any> ? U : never;
@@ -634,6 +644,8 @@ export const latestSkillRatingCollectionOptions = ({
 
 export interface Db {
   assetCollection: AssetCollection;
+  settingCollection: SettingCollection;
+  settingHistoryCollection: SettingHistoryCollection;
   skillStateCollection: SkillStateCollection;
   skillRatingCollection: SkillRatingCollection;
   hanziGlossMistakeCollection: HanziGlossMistakeCollection;
@@ -704,8 +716,28 @@ export function makeDb(rizzle: Rizzle): Db {
     }),
   );
 
+  const settingCollection: SettingCollection = createCollection(
+    rizzleCollectionOptions({
+      id: `setting`,
+      rizzle,
+      entity: currentSchema.setting,
+      getKey: (item) => item.key,
+    }),
+  );
+
+  const settingHistoryCollection: SettingHistoryCollection = createCollection(
+    rizzleCollectionOptions({
+      id: `settingHistory`,
+      rizzle,
+      entity: currentSchema.settingHistory,
+      getKey: (item) => item.id,
+    }),
+  );
+
   return {
     assetCollection,
+    settingCollection,
+    settingHistoryCollection,
     hanziGlossMistakeCollection,
     hanziPinyinMistakeCollection,
     latestSkillRatingsCollection,

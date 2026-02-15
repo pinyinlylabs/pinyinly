@@ -1,32 +1,45 @@
 import { parseImageCrop } from "@/client/ui/imageCrop";
-import type {
-  HanziText,
-  HanziWord,
-  PinyinSoundGroupId,
-  PinyinSoundId,
-  PinyinUnit,
-} from "@/data/model";
-import { normalizePinyinUnitForHintKey } from "@/data/pinyin";
 import {
-  rHanziWord,
-  rPinyinSoundGroupId,
-  rPinyinSoundId,
-} from "@/data/rizzleSchema";
+  hanziWordMeaningHintExplanationSetting,
+  hanziWordMeaningHintImageSetting,
+  hanziWordMeaningHintTextSetting,
+} from "@/client/userSettings";
+import type { HanziWord } from "@/data/model";
 import { nanoid } from "@/util/nanoid";
-import { keyPathVariableNames, r } from "@/util/rizzle";
+import { keyPathVariableNames } from "@/util/rizzle";
 import type {
   RizzleAnyEntity,
-  RizzleBoolean,
-  RizzleEntity,
   RizzleEntityInput,
   RizzleEntityOutput,
   RizzleType,
-  RizzleTypeAlias,
-  RizzleTypeDef,
 } from "@/util/rizzle";
 import type { Flatten } from "@pinyinly/lib/types";
+import { eq, useLiveQuery } from "@tanstack/react-db";
+import { useDb } from "./useDb";
 import { useRizzle } from "./useRizzle";
-import { useRizzleQuery } from "./useRizzleQuery";
+
+// Re-export all setting definitions from the shared module
+// Re-export all setting definitions from the shared module
+export {
+  autoCheckUserSetting,
+  getHanziPronunciationHintKeyParams,
+  hanziPronunciationHintExplanationSetting,
+  hanziPronunciationHintImageSetting,
+  hanziPronunciationHintTextSetting,
+  hanziWordMeaningHintExplanationSetting,
+  hanziWordMeaningHintImageSetting,
+  hanziWordMeaningHintTextSetting,
+  pinyinSoundGroupNameSetting,
+  pinyinSoundGroupNameSettingKey,
+  pinyinSoundGroupThemeSetting,
+  pinyinSoundGroupThemeSettingKey,
+  pinyinSoundNameSetting,
+  pinyinSoundNameSettingKey,
+  x,
+  type UserSettingImageEntity,
+  type UserSettingTextEntity,
+  type UserSettingToggleableEntity,
+} from "@/client/userSettings";
 
 export type UserSettingEntity = RizzleAnyEntity;
 export type UserSettingKeyInput<T extends UserSettingEntity> = Parameters<
@@ -36,23 +49,6 @@ export type UserSettingEntityInput<T extends UserSettingEntity> =
   Flatten<RizzleEntityInput<T> | null>;
 export type UserSettingEntityOutput<T extends UserSettingEntity> =
   RizzleEntityOutput<T> | null;
-
-// A user setting entity that has a `text` field
-export type UserSettingTextEntity = RizzleEntity<
-  string,
-  { text: RizzleType<RizzleTypeDef, string, string, string> }
->;
-
-// A user setting entity that has an `imageId` field
-export type UserSettingImageEntity = RizzleEntity<
-  string,
-  {
-    imageId: RizzleType<RizzleTypeDef, string, string, string>;
-    imageCrop: RizzleType;
-    imageWidth: RizzleType;
-    imageHeight: RizzleType;
-  }
->;
 
 export interface UseUserSettingResult<T extends UserSettingEntity> {
   isLoading: boolean;
@@ -123,20 +119,23 @@ export const useUserSetting = <T extends UserSettingEntity>(
     userSettingEntity,
     keyInput,
   );
+  const db = useDb();
   const r = useRizzle();
 
-  const result = useRizzleQuery([`UserSetting`, settingKey], async (r, tx) => {
-    const value = await r.query.setting.get(tx, { key: settingKey });
-    return value ?? null;
-  });
+  const result = useLiveQuery((q) =>
+    q
+      .from({ setting: db.settingCollection })
+      .where(({ setting }) => eq(setting.key, settingKey)),
+  );
 
-  const isLoading = result.isPending;
+  const isLoading = result.isLoading;
+  const settingData = result.data[0] ?? null;
   const value =
-    result.data?.value == null
+    settingData?.value == null
       ? null
       : userSettingEntity.unmarshalValue({
           ...keyParamMarshaled,
-          ...result.data.value,
+          ...settingData.value,
         });
 
   const setValue: UseUserSettingSetValue<T> = (updater, options) => {
@@ -190,15 +189,12 @@ export function useUserSettingHistory<T extends UserSettingEntity>(
     userSettingEntity,
     keyInput,
   );
+  const db = useDb();
 
-  const result = useRizzleQuery(
-    [`UserSettingHistory`, settingKey],
-    async (r, tx) => {
-      const history = await r.query.settingHistory
-        .byKey(tx, settingKey)
-        .toArray();
-      return history.map(([, entry]) => entry);
-    },
+  const result = useLiveQuery((q) =>
+    q
+      .from({ settingHistory: db.settingHistoryCollection })
+      .where(({ settingHistory }) => eq(settingHistory.key, settingKey)),
   );
 
   const entries = (result.data ?? [])
@@ -215,125 +211,7 @@ export function useUserSettingHistory<T extends UserSettingEntity>(
     }))
     .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
-  return { isLoading: result.isPending, entries };
-}
-
-export type UserSettingToggleableEntity = RizzleEntity<
-  string,
-  { enabled: RizzleBoolean | RizzleTypeAlias<RizzleBoolean> }
->;
-
-//
-// Settings
-//
-
-export const autoCheckUserSetting = r.entity(`autoCheck`, {
-  enabled: r.boolean(`e`),
-}) satisfies UserSettingToggleableEntity;
-
-export const pinyinSoundNameSetting = r.entity(`psn/[soundId]`, {
-  soundId: rPinyinSoundId().alias(`i`),
-  text: r.string().alias(`t`),
-}) satisfies UserSettingTextEntity;
-
-export const pinyinSoundGroupNameSetting = r.entity(`psgn/[soundGroupId]`, {
-  soundGroupId: rPinyinSoundGroupId().alias(`g`),
-  text: r.string().alias(`t`),
-}) satisfies UserSettingTextEntity;
-
-export const pinyinSoundGroupThemeSetting = r.entity(`psgt/[soundGroupId]`, {
-  soundGroupId: rPinyinSoundGroupId().alias(`g`),
-  text: r.string().alias(`t`),
-}) satisfies UserSettingTextEntity;
-
-export function pinyinSoundNameSettingKey(soundId: PinyinSoundId): string {
-  return pinyinSoundNameSetting.marshalKey({ soundId });
-}
-
-export function pinyinSoundGroupNameSettingKey(
-  soundGroupId: PinyinSoundGroupId,
-): string {
-  return pinyinSoundGroupNameSetting.marshalKey({ soundGroupId });
-}
-
-export function pinyinSoundGroupThemeSettingKey(
-  soundGroupId: PinyinSoundGroupId,
-): string {
-  return pinyinSoundGroupThemeSetting.marshalKey({ soundGroupId });
-}
-
-//
-// Hanzi hint settings
-//
-
-export const hanziWordMeaningHintTextSetting = r.entity(`hwmht/[hanziWord]`, {
-  hanziWord: rHanziWord().alias(`h`),
-  text: r.string().alias(`t`),
-}) satisfies UserSettingTextEntity;
-
-export const hanziWordMeaningHintExplanationSetting = r.entity(
-  `hwmhe/[hanziWord]`,
-  {
-    hanziWord: rHanziWord().alias(`h`),
-    text: r.string().alias(`t`),
-  },
-) satisfies UserSettingTextEntity;
-
-const imageSettingFields = {
-  imageId: r.string().alias(`t`),
-  imageCrop: r
-    .object({
-      x: r.number().optional().alias(`x`),
-      y: r.number().optional().alias(`y`),
-      width: r.number().optional().alias(`w`),
-      height: r.number().optional().alias(`h`),
-    })
-    .optional()
-    .alias(`c`),
-  imageWidth: r.number().optional().alias(`w`),
-  imageHeight: r.number().optional().alias(`ht`),
-} as const;
-
-export const x = r.json();
-
-export const hanziWordMeaningHintImageSetting = r.entity(`hwmhi/[hanziWord]`, {
-  hanziWord: rHanziWord().alias(`h`),
-  ...imageSettingFields,
-}) satisfies UserSettingImageEntity;
-
-export const hanziPronunciationHintTextSetting = r.entity(
-  `hpht/[hanzi]/[pinyin]`,
-  {
-    hanzi: r.string().alias(`h`),
-    pinyin: r.string().alias(`p`),
-    text: r.string().alias(`t`),
-  },
-) satisfies UserSettingTextEntity;
-
-export const hanziPronunciationHintExplanationSetting = r.entity(
-  `hphe/[hanzi]/[pinyin]`,
-  {
-    hanzi: r.string().alias(`h`),
-    pinyin: r.string().alias(`p`),
-    text: r.string().alias(`t`),
-  },
-) satisfies UserSettingTextEntity;
-
-export const hanziPronunciationHintImageSetting: UserSettingImageEntity =
-  r.entity(`hphi/[hanzi]/[pinyin]`, {
-    hanzi: r.string().alias(`h`),
-    pinyin: r.string().alias(`p`),
-    ...imageSettingFields,
-  }) satisfies UserSettingImageEntity;
-
-export function getHanziPronunciationHintKeyParams(
-  hanzi: HanziText,
-  pinyinUnit: PinyinUnit,
-) {
-  return {
-    hanzi,
-    pinyin: normalizePinyinUnitForHintKey(pinyinUnit),
-  };
+  return { isLoading: result.isLoading, entries };
 }
 
 export interface HanziWordHintOverrides {

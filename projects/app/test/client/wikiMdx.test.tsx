@@ -1,6 +1,7 @@
 // pyly-not-src-test
 // @vitest-environment happy-dom
 
+import { DbProvider } from "#client/ui/DbProvider.tsx";
 import { DeviceStoreProvider } from "#client/ui/DeviceStoreProvider.tsx";
 import { useNewQueryClient } from "#client/ui/hooks/useNewQueryClient.js";
 import { PylyMdxComponents } from "#client/ui/PylyMdxComponents.tsx";
@@ -25,7 +26,9 @@ const testProviders = (rizzle: Rizzle) =>
     return (
       <QueryClientProvider client={queryClient}>
         <RizzleProvider.Context.Provider value={rizzle}>
-          <DeviceStoreProvider>{children}</DeviceStoreProvider>
+          <DbProvider>
+            <DeviceStoreProvider>{children}</DeviceStoreProvider>
+          </DbProvider>
         </RizzleProvider.Context.Provider>
       </QueryClientProvider>
     );
