@@ -1,11 +1,11 @@
 import { useDb } from "@/client/ui/hooks/useDb";
 import {
-    getHanziPronunciationHintKeyParams,
-    hanziPronunciationHintExplanationSetting,
-    hanziPronunciationHintImageSetting,
-    hanziPronunciationHintTextSetting,
-    pinyinSoundNameSetting,
-    pinyinSoundNameSettingKey,
+  getHanziPronunciationHintKeyParams,
+  hanziPronunciationHintExplanationSetting,
+  hanziPronunciationHintImageSetting,
+  hanziPronunciationHintTextSetting,
+  pinyinSoundNameSetting,
+  pinyinSoundNameSettingKey,
 } from "@/client/ui/hooks/useUserSetting";
 import type { HanziText, PinyinSoundId, PinyinUnit } from "@/data/model";
 import { loadPylyPinyinChart, splitPinyinUnit } from "@/data/pinyin";
@@ -43,10 +43,12 @@ export function WikiHanziCharacterPronunciation({
     return keys;
   }, [chart.soundGroups]);
 
-  const { data: settings } = useLiveQuery((q) =>
-    q
-      .from({ setting: db.settingCollection })
-      .where(({ setting }) => inArray(setting.key, relevantKeys)),
+  const { data: settings } = useLiveQuery(
+    (q) =>
+      q
+        .from({ setting: db.settingCollection })
+        .where(({ setting }) => inArray(setting.key, relevantKeys)),
+    [db.settingCollection, relevantKeys],
   );
 
   const pinyinSounds = useMemo(() => {

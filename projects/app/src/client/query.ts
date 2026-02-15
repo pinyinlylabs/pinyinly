@@ -1,12 +1,4 @@
-import { pinyinSoundNameSettingKey } from "@/client/userSettings";
-import type {
-  HanziText,
-  HanziWord,
-  PinyinSoundId,
-  Skill,
-  SrsStateType,
-} from "@/data/model";
-import { loadPylyPinyinChart } from "@/data/pinyin";
+import type { HanziText, HanziWord, Skill, SrsStateType } from "@/data/model";
 import { currentSchema } from "@/data/rizzleSchema";
 import type { Rizzle, SkillRating } from "@/data/rizzleSchema";
 import {
@@ -161,47 +153,6 @@ function groupRatingsBySkill(items: CollectionOutput<HistoryPageCollection>[]) {
 
   return groups;
 }
-
-export const pinyinSoundsQuery = (r: Rizzle) =>
-  withWatchPrefixes(
-    queryOptions({
-      queryKey: [`pinyinSounds`],
-      queryFn: async () => {
-        await devToolsSlowQuerySleepIfEnabled();
-
-        const chart = loadPylyPinyinChart();
-
-        const sounds = new Map<
-          PinyinSoundId,
-          { name: string | null; label: string }
-        >();
-
-        await r.replicache.query(async (tx) => {
-          for (const group of chart.soundGroups) {
-            for (const soundId of group.sounds) {
-              const userOverride = await r.query.setting.get(tx, {
-                key: pinyinSoundNameSettingKey(soundId),
-              });
-
-              const nameValueData = (userOverride?.value as { t?: string })?.t;
-
-              const nameValue = nameValueData ?? null;
-              sounds.set(soundId, {
-                name: nameValue,
-                label: chart.soundToCustomLabel[soundId] ?? soundId,
-              });
-            }
-          }
-        });
-
-        return sounds;
-      },
-      networkMode: `offlineFirst`,
-      retry: false,
-      structuralSharing: false,
-    }),
-    [currentSchema.setting.keyPrefix],
-  );
 
 export const targetSkillsQuery = () =>
   queryOptions({

@@ -1,10 +1,10 @@
-import { pinyinSoundsQuery } from "@/client/query";
+import { useDb } from "@/client/ui/hooks/useDb";
 import { usePinyinSoundGroups } from "@/client/ui/hooks/usePinyinSoundGroups";
 import { useRizzle } from "@/client/ui/hooks/useRizzle";
-import { useRizzleQueryPaged } from "@/client/ui/hooks/useRizzleQueryPaged";
 import {
   pinyinSoundGroupThemeSettingKey,
   pinyinSoundNameSetting,
+  pinyinSoundNameSettingKey,
   useUserSetting,
 } from "@/client/ui/hooks/useUserSetting";
 import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
@@ -18,19 +18,57 @@ import {
 import { loadPinyinSoundNameSuggestions } from "@/dictionary";
 import { nullIfEmpty } from "@/util/unicode";
 import { sortComparatorString } from "@pinyinly/lib/collections";
+import { inArray, useLiveQuery } from "@tanstack/react-db";
 import { Link, useLocalSearchParams } from "expo-router";
-import { use } from "react";
+import { use, useMemo } from "react";
 import { Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 
 export default function SoundIdPage() {
+  "use memo";
+  "mySoundIdPage";
   const id = useLocalSearchParams<`/sounds/[id]`>().id as PinyinSoundId;
   const r = useRizzle();
   const chart = loadPylyPinyinChart();
+  const db = useDb();
 
   const soundNameSuggestions = use(loadPinyinSoundNameSuggestions());
 
-  const { data: pinyinSounds } = useRizzleQueryPaged(pinyinSoundsQuery(r));
+  const relevantKeys = useMemo(
+    () => chart.soundIds.map((soundId) => pinyinSoundNameSettingKey(soundId)),
+    [chart],
+  );
+
+  const { data: settings } = useLiveQuery(
+    (q) =>
+      q
+        .from({ setting: db.settingCollection })
+        .where(({ setting }) => inArray(setting.key, relevantKeys)),
+    [db.settingCollection, relevantKeys],
+  );
+
+  const settingsByKey = new Map(
+    settings.map((setting) => [
+      setting.key,
+      setting.value as { t?: string } | null,
+    ]),
+  );
+
+  const pinyinSounds = new Map(
+    chart.soundIds.map((soundId) => {
+      const nameValueData = settingsByKey.get(
+        pinyinSoundNameSettingKey(soundId),
+      )?.t;
+
+      return [
+        soundId,
+        {
+          name: nameValueData ?? null,
+          label: chart.soundToCustomLabel[soundId] ?? soundId,
+        },
+      ];
+    }),
+  );
   const pinyinSoundGroups = usePinyinSoundGroups();
   const { setValue: setSoundName } = useUserSetting(pinyinSoundNameSetting, {
     soundId: id,
@@ -40,7 +78,7 @@ export default function SoundIdPage() {
     g.sounds.includes(id),
   )?.id;
 
-  const pinyinSound = pinyinSounds?.get(id);
+  const pinyinSound = pinyinSounds.get(id);
   const pinyinSoundGroup = pinyinSoundGroups.data?.find(
     (g) => g.id === pinyinSoundGroupId,
   );
@@ -71,7 +109,7 @@ export default function SoundIdPage() {
           {pinyinSoundGroup?.sounds.map((siblingId) => (
             <Link key={siblingId} href={`/sounds/${siblingId}`}>
               <Text className={siblingId === id ? `text-fg` : `text-fg/50`}>
-                {pinyinSounds?.get(siblingId)?.label}
+                {pinyinSounds.get(siblingId)?.label}
               </Text>
             </Link>
           ))}

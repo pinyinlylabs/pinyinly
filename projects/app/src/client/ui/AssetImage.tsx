@@ -38,10 +38,12 @@ export function AssetImage({
   ...imageProps
 }: AssetImageProps) {
   const db = useDb();
-  const { data: assetData } = useLiveQuery((q) =>
-    q
-      .from({ asset: db.assetCollection })
-      .where(({ asset }) => eq(asset.assetId, assetId)),
+  const { data: assetData } = useLiveQuery(
+    (q) =>
+      q
+        .from({ asset: db.assetCollection })
+        .where(({ asset }) => eq(asset.assetId, assetId)),
+    [db.assetCollection, assetId],
   );
   const asset = assetData[0] ?? null;
   const [imageError, setImageError] = useState(false);

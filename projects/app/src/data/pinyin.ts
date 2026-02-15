@@ -437,6 +437,7 @@ export interface PinyinChart {
   soundToCustomLabel: Record<PinyinSoundId, string>;
   soundToUnits: Record<PinyinSoundId, TonelessUnit[]>;
   soundGroups: { id: PinyinSoundGroupId; sounds: PinyinSoundId[] }[];
+  soundIds: PinyinSoundId[];
 }
 
 function buildPinyinChart(
@@ -485,6 +486,8 @@ function buildPinyinChart(
     sounds: group.items.split(` `) as PinyinSoundId[],
   }));
 
+  const soundIds = soundGroups.flatMap((group) => group.sounds);
+
   return {
     unitToInitialSound,
     unitToFinalSound,
@@ -492,6 +495,7 @@ function buildPinyinChart(
     soundGroups,
     soundToCustomLabel,
     soundToUnits,
+    soundIds,
   };
 }
 

@@ -122,10 +122,12 @@ export const useUserSetting = <T extends UserSettingEntity>(
   const db = useDb();
   const r = useRizzle();
 
-  const result = useLiveQuery((q) =>
-    q
-      .from({ setting: db.settingCollection })
-      .where(({ setting }) => eq(setting.key, settingKey)),
+  const result = useLiveQuery(
+    (q) =>
+      q
+        .from({ setting: db.settingCollection })
+        .where(({ setting }) => eq(setting.key, settingKey)),
+    [db.settingCollection, settingKey],
   );
 
   const isLoading = result.isLoading;
@@ -191,10 +193,12 @@ export function useUserSettingHistory<T extends UserSettingEntity>(
   );
   const db = useDb();
 
-  const result = useLiveQuery((q) =>
-    q
-      .from({ settingHistory: db.settingHistoryCollection })
-      .where(({ settingHistory }) => eq(settingHistory.key, settingKey)),
+  const result = useLiveQuery(
+    (q) =>
+      q
+        .from({ settingHistory: db.settingHistoryCollection })
+        .where(({ settingHistory }) => eq(settingHistory.key, settingKey)),
+    [db.settingHistoryCollection, settingKey],
   );
 
   const entries = (result.data ?? [])

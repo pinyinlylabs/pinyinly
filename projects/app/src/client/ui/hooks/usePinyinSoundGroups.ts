@@ -1,15 +1,15 @@
 import { useDb } from "@/client/ui/hooks/useDb";
 import {
-    pinyinSoundGroupNameSetting,
-    pinyinSoundGroupNameSettingKey,
-    pinyinSoundGroupThemeSetting,
-    pinyinSoundGroupThemeSettingKey,
+  pinyinSoundGroupNameSetting,
+  pinyinSoundGroupNameSettingKey,
+  pinyinSoundGroupThemeSetting,
+  pinyinSoundGroupThemeSettingKey,
 } from "@/client/ui/hooks/useUserSetting";
 import {
-    defaultPinyinSoundGroupNames,
-    defaultPinyinSoundGroupRanks,
-    defaultPinyinSoundGroupThemes,
-    loadPylyPinyinChart,
+  defaultPinyinSoundGroupNames,
+  defaultPinyinSoundGroupRanks,
+  defaultPinyinSoundGroupThemes,
+  loadPylyPinyinChart,
 } from "@/data/pinyin";
 import type { RizzleEntityMarshaled } from "@/util/rizzle";
 import { nullIfEmpty } from "@/util/unicode";
@@ -31,10 +31,12 @@ export function usePinyinSoundGroups() {
     return keys;
   }, [chart.soundGroups]);
 
-  const { data: settings, isLoading } = useLiveQuery((q) =>
-    q
-      .from({ setting: db.settingCollection })
-      .where(({ setting }) => inArray(setting.key, relevantKeys)),
+  const { data: settings, isLoading } = useLiveQuery(
+    (q) =>
+      q
+        .from({ setting: db.settingCollection })
+        .where(({ setting }) => inArray(setting.key, relevantKeys)),
+    [db.settingCollection, relevantKeys],
   );
 
   const groups = useMemo(() => {

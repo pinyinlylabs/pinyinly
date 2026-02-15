@@ -42,11 +42,15 @@ export const SkillQueueProvider = Object.assign(
     const {
       data: latestSkillRatingsData,
       isLoading: isLatestSkillRatingsLoading,
-    } = useLiveQuery((q) =>
-      q.from({ latestSkillRatings: db.latestSkillRatingsCollection }),
+    } = useLiveQuery(
+      (q) => q.from({ latestSkillRatings: db.latestSkillRatingsCollection }),
+      [db.latestSkillRatingsCollection],
     );
     const { data: skillStateData, isLoading: isSkillStatesLoading } =
-      useLiveQuery((q) => q.from({ skillState: db.skillStateCollection }));
+      useLiveQuery(
+        (q) => q.from({ skillState: db.skillStateCollection }),
+        [db.skillStateCollection],
+      );
 
     const [skillQueue, setSkillQueue] = useState<SkillQueueContextValue>({
       loading: true,
