@@ -31,6 +31,22 @@ export type UserSettingTextEntity = RizzleEntity<
 >;
 
 // A user setting entity that has an `imageId` field
+
+const imageSettingFields = {
+  imageId: r.string().alias(`t`),
+  imageCrop: r
+    .object({
+      x: r.number().optional().alias(`x`),
+      y: r.number().optional().alias(`y`),
+      width: r.number().optional().alias(`w`),
+      height: r.number().optional().alias(`h`),
+    })
+    .optional()
+    .alias(`c`),
+  imageWidth: r.number().optional().alias(`w`),
+  imageHeight: r.number().optional().alias(`ht`),
+} as const;
+
 export type UserSettingImageEntity = RizzleEntity<
   string,
   {
@@ -57,6 +73,8 @@ export const autoCheckUserSetting = r.entity(`autoCheck`, {
   enabled: r.boolean(`e`),
 }) satisfies UserSettingToggleableEntity;
 
+// Sounds
+
 export const pinyinSoundNameSetting = r.entity(`psn/[soundId]`, {
   soundId: rPinyinSoundId().alias(`i`),
   text: r.string().alias(`t`),
@@ -72,6 +90,16 @@ export const pinyinSoundGroupThemeSetting = r.entity(`psgt/[soundGroupId]`, {
   text: r.string().alias(`t`),
 }) satisfies UserSettingTextEntity;
 
+export const pinyinSoundDescriptionSetting = r.entity(`psd/[soundId]`, {
+  soundId: rPinyinSoundId().alias(`i`),
+  text: r.string().alias(`t`),
+}) satisfies UserSettingTextEntity;
+
+export const pinyinSoundImageSetting = r.entity(`psi/[soundId]`, {
+  soundId: rPinyinSoundId().alias(`i`),
+  ...imageSettingFields,
+}) satisfies UserSettingImageEntity;
+
 export function pinyinSoundNameSettingKey(soundId: PinyinSoundId): string {
   return pinyinSoundNameSetting.marshalKey({ soundId });
 }
@@ -86,6 +114,16 @@ export function pinyinSoundGroupThemeSettingKey(
   soundGroupId: PinyinSoundGroupId,
 ): string {
   return pinyinSoundGroupThemeSetting.marshalKey({ soundGroupId });
+}
+
+export function pinyinSoundDescriptionSettingKey(
+  soundId: PinyinSoundId,
+): string {
+  return pinyinSoundDescriptionSetting.marshalKey({ soundId });
+}
+
+export function pinyinSoundImageSettingKey(soundId: PinyinSoundId): string {
+  return pinyinSoundImageSetting.marshalKey({ soundId });
 }
 
 //
@@ -104,23 +142,6 @@ export const hanziWordMeaningHintExplanationSetting = r.entity(
     text: r.string().alias(`t`),
   },
 ) satisfies UserSettingTextEntity;
-
-const imageSettingFields = {
-  imageId: r.string().alias(`t`),
-  imageCrop: r
-    .object({
-      x: r.number().optional().alias(`x`),
-      y: r.number().optional().alias(`y`),
-      width: r.number().optional().alias(`w`),
-      height: r.number().optional().alias(`h`),
-    })
-    .optional()
-    .alias(`c`),
-  imageWidth: r.number().optional().alias(`w`),
-  imageHeight: r.number().optional().alias(`ht`),
-} as const;
-
-export const x = r.json();
 
 export const hanziWordMeaningHintImageSetting = r.entity(`hwmhi/[hanziWord]`, {
   hanziWord: rHanziWord().alias(`h`),

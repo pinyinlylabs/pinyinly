@@ -2,11 +2,14 @@ import { useDb } from "@/client/ui/hooks/useDb";
 import { usePinyinSoundGroups } from "@/client/ui/hooks/usePinyinSoundGroups";
 import { useRizzle } from "@/client/ui/hooks/useRizzle";
 import {
+  pinyinSoundDescriptionSetting,
   pinyinSoundGroupThemeSettingKey,
+  pinyinSoundImageSetting,
   pinyinSoundNameSetting,
   pinyinSoundNameSettingKey,
   useUserSetting,
 } from "@/client/ui/hooks/useUserSetting";
+import { InlineEditableSettingImage } from "@/client/ui/InlineEditableSettingImage";
 import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
 import { PinyinFinalToneEditor } from "@/client/ui/PinyinFinalToneEditor";
 import { Pylymark } from "@/client/ui/Pylymark";
@@ -122,6 +125,28 @@ export default function SoundIdPage() {
           <Text className="pyly-body">
             <Pylymark source={defaultPinyinSoundInstructions[id] ?? ``} />
           </Text>
+        </View>
+
+        <View className="gap-2">
+          <Text className="pyly-body-title">Description</Text>
+          <InlineEditableSettingText
+            setting={pinyinSoundDescriptionSetting}
+            settingKey={{ soundId: id }}
+            placeholder="Add a description to help with mnemonic generation…"
+            multiline
+          />
+        </View>
+
+        <View className="gap-2">
+          <Text className="pyly-body-title">Image</Text>
+          <InlineEditableSettingImage
+            setting={pinyinSoundImageSetting}
+            settingKey={{ soundId: id }}
+            previewHeight={200}
+            tileSize={64}
+            enablePasteDropZone
+            frameConstraint={{ aspectRatio: 2 }}
+          />
         </View>
 
         <View className="flex-row flex-wrap gap-1">
