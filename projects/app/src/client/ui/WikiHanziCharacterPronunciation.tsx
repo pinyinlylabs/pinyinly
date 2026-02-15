@@ -1,14 +1,17 @@
-import { pinyinSoundsQuery } from "@/client/query";
-import { useRizzle } from "@/client/ui/hooks/useRizzle";
-import { useRizzleQueryPaged } from "@/client/ui/hooks/useRizzleQueryPaged";
+import { useDb } from "@/client/ui/hooks/useDb";
 import {
-  getHanziPronunciationHintKeyParams,
-  hanziPronunciationHintExplanationSetting,
-  hanziPronunciationHintImageSetting,
-  hanziPronunciationHintTextSetting,
+    getHanziPronunciationHintKeyParams,
+    hanziPronunciationHintExplanationSetting,
+    hanziPronunciationHintImageSetting,
+    hanziPronunciationHintTextSetting,
+    pinyinSoundNameSetting,
+    pinyinSoundNameSettingKey,
 } from "@/client/ui/hooks/useUserSetting";
-import type { HanziText, PinyinUnit } from "@/data/model";
-import { splitPinyinUnit } from "@/data/pinyin";
+import type { HanziText, PinyinSoundId, PinyinUnit } from "@/data/model";
+import { loadPylyPinyinChart, splitPinyinUnit } from "@/data/pinyin";
+import type { RizzleEntityMarshaled } from "@/util/rizzle";
+import { inArray, useLiveQuery } from "@tanstack/react-db";
+import { useMemo } from "react";
 import type { ReactNode } from "react";
 import { Text, View } from "react-native";
 import { InlineEditableSettingImage } from "./InlineEditableSettingImage";
@@ -26,8 +29,54 @@ export function WikiHanziCharacterPronunciation({
   pinyinUnit: PinyinUnit;
 }) {
   const splitPinyin = splitPinyinUnit(pinyinUnit);
-  const r = useRizzle();
-  const { data: pinyinSounds } = useRizzleQueryPaged(pinyinSoundsQuery(r));
+  const db = useDb();
+  const chart = loadPylyPinyinChart();
+
+  // Collect all relevant pinyin sound setting keys
+  const relevantKeys = useMemo(() => {
+    const keys: string[] = [];
+    for (const group of chart.soundGroups) {
+      for (const soundId of group.sounds) {
+        keys.push(pinyinSoundNameSettingKey(soundId));
+      }
+    }
+    return keys;
+  }, [chart.soundGroups]);
+
+  const { data: settings } = useLiveQuery((q) =>
+    q
+      .from({ setting: db.settingCollection })
+      .where(({ setting }) => inArray(setting.key, relevantKeys)),
+  );
+
+  const pinyinSounds = useMemo(() => {
+    const sounds = new Map<
+      PinyinSoundId,
+      { name: string | null; label: string }
+    >();
+
+    for (const group of chart.soundGroups) {
+      for (const soundId of group.sounds) {
+        const userOverride = settings.find(
+          (s) => s.key === pinyinSoundNameSettingKey(soundId),
+        );
+        const nameValueData = userOverride?.value
+          ? pinyinSoundNameSetting.unmarshalValue(
+              userOverride.value as RizzleEntityMarshaled<
+                typeof pinyinSoundNameSetting
+              >,
+            )
+          : null;
+        const nameValue = nameValueData?.text ?? null;
+        sounds.set(soundId, {
+          name: nameValue,
+          label: chart.soundToCustomLabel[soundId] ?? soundId,
+        });
+      }
+    }
+
+    return sounds;
+  }, [settings, chart.soundGroups, chart.soundToCustomLabel]);
 
   const initialPinyinSound =
     splitPinyin == null ? null : pinyinSounds?.get(splitPinyin.initialSoundId);

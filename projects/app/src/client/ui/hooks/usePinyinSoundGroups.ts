@@ -1,6 +1,8 @@
 import { useDb } from "@/client/ui/hooks/useDb";
 import {
+    pinyinSoundGroupNameSetting,
     pinyinSoundGroupNameSettingKey,
+    pinyinSoundGroupThemeSetting,
     pinyinSoundGroupThemeSettingKey,
 } from "@/client/ui/hooks/useUserSetting";
 import {
@@ -9,6 +11,7 @@ import {
     defaultPinyinSoundGroupThemes,
     loadPylyPinyinChart,
 } from "@/data/pinyin";
+import type { RizzleEntityMarshaled } from "@/util/rizzle";
 import { nullIfEmpty } from "@/util/unicode";
 import { sortComparatorNumber } from "@pinyinly/lib/collections";
 import { inArray, useLiveQuery } from "@tanstack/react-db";
@@ -44,14 +47,31 @@ export function usePinyinSoundGroups() {
       const nameOverride = settings.find((s) => s.key === nameKey);
       const themeOverride = settings.find((s) => s.key === themeKey);
 
-      const nameValue = (nameOverride?.value as { t?: string } | null)?.t;
-      const themeValue = (themeOverride?.value as { t?: string } | null)?.t;
+      const nameValueData = nameOverride?.value
+        ? pinyinSoundGroupNameSetting.unmarshalValue(
+            nameOverride.value as RizzleEntityMarshaled<
+              typeof pinyinSoundGroupNameSetting
+            >,
+          )
+        : null;
+      const themeValueData = themeOverride?.value
+        ? pinyinSoundGroupThemeSetting.unmarshalValue(
+            themeOverride.value as RizzleEntityMarshaled<
+              typeof pinyinSoundGroupThemeSetting
+            >,
+          )
+        : null;
 
       result.push({
         id,
-        name: nullIfEmpty(nameValue) ?? defaultPinyinSoundGroupNames[id] ?? ``,
+        name:
+          nullIfEmpty(nameValueData?.text) ??
+          defaultPinyinSoundGroupNames[id] ??
+          ``,
         theme:
-          nullIfEmpty(themeValue) ?? defaultPinyinSoundGroupThemes[id] ?? ``,
+          nullIfEmpty(themeValueData?.text) ??
+          defaultPinyinSoundGroupThemes[id] ??
+          ``,
         sounds,
       });
     }

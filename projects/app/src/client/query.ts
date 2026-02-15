@@ -182,10 +182,10 @@ export const pinyinSoundsQuery = (r: Rizzle) =>
               const userOverride = await r.query.setting.get(tx, {
                 key: pinyinSoundNameSettingKey(soundId),
               });
-              const rawValue = userOverride?.value as {
-                text?: string;
-              } | null;
-              const nameValue = rawValue?.text ?? null;
+
+              const nameValueData = (userOverride?.value as { t?: string })?.t;
+
+              const nameValue = nameValueData ?? null;
               sounds.set(soundId, {
                 name: nameValue,
                 label: chart.soundToCustomLabel[soundId] ?? soundId,
