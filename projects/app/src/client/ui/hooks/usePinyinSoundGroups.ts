@@ -1,32 +1,53 @@
-import { useRizzleQuery } from "@/client/ui/hooks/useRizzleQuery";
+import { useDb } from "@/client/ui/hooks/useDb";
 import {
-  pinyinSoundGroupNameSettingKey,
-  pinyinSoundGroupThemeSettingKey,
+    pinyinSoundGroupNameSettingKey,
+    pinyinSoundGroupThemeSettingKey,
 } from "@/client/ui/hooks/useUserSetting";
 import {
-  defaultPinyinSoundGroupNames,
-  defaultPinyinSoundGroupRanks,
-  defaultPinyinSoundGroupThemes,
-  loadPylyPinyinChart,
+    defaultPinyinSoundGroupNames,
+    defaultPinyinSoundGroupRanks,
+    defaultPinyinSoundGroupThemes,
+    loadPylyPinyinChart,
 } from "@/data/pinyin";
 import { nullIfEmpty } from "@/util/unicode";
 import { sortComparatorNumber } from "@pinyinly/lib/collections";
+import { inArray, useLiveQuery } from "@tanstack/react-db";
+import { useMemo } from "react";
 
 export function usePinyinSoundGroups() {
   const chart = loadPylyPinyinChart();
+  const db = useDb();
 
-  return useRizzleQuery([`usePinyinSoundGroups`], async (r, tx) => {
-    const groups = [];
+  // Collect all relevant setting keys
+  const relevantKeys = useMemo(() => {
+    const keys: string[] = [];
+    for (const { id } of chart.soundGroups) {
+      keys.push(pinyinSoundGroupNameSettingKey(id));
+      keys.push(pinyinSoundGroupThemeSettingKey(id));
+    }
+    return keys;
+  }, [chart.soundGroups]);
+
+  const { data: settings, isLoading } = useLiveQuery((q) =>
+    q
+      .from({ setting: db.settingCollection })
+      .where(({ setting }) => inArray(setting.key, relevantKeys)),
+  );
+
+  const groups = useMemo(() => {
+    const result = [];
 
     for (const { id, sounds } of chart.soundGroups) {
-      const [nameOverride, themeOverride] = await Promise.all([
-        r.query.setting.get(tx, { key: pinyinSoundGroupNameSettingKey(id) }),
-        r.query.setting.get(tx, { key: pinyinSoundGroupThemeSettingKey(id) }),
-      ]);
+      const nameKey = pinyinSoundGroupNameSettingKey(id);
+      const themeKey = pinyinSoundGroupThemeSettingKey(id);
+
+      const nameOverride = settings.find((s) => s.key === nameKey);
+      const themeOverride = settings.find((s) => s.key === themeKey);
+
       const nameValue = (nameOverride?.value as { t?: string } | null)?.t;
       const themeValue = (themeOverride?.value as { t?: string } | null)?.t;
 
-      groups.push({
+      result.push({
         id,
         name: nullIfEmpty(nameValue) ?? defaultPinyinSoundGroupNames[id] ?? ``,
         theme:
@@ -35,12 +56,14 @@ export function usePinyinSoundGroups() {
       });
     }
 
-    groups.sort(
+    result.sort(
       sortComparatorNumber((g) => {
         return defaultPinyinSoundGroupRanks[g.id] ?? 100;
       }),
     );
 
-    return groups;
-  });
+    return result;
+  }, [settings, chart.soundGroups]);
+
+  return { data: groups, isLoading };
 }
