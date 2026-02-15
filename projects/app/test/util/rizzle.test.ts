@@ -1,10 +1,13 @@
 import { nanoid } from "#util/nanoid.ts";
-import { keyPathVariableNames, r } from "#util/rizzle.ts";
 import type {
   ExtractVariableNames,
+  RizzleAliasedKey,
+  RizzleAliasName,
   RizzleCustom,
+  RizzleEntityMarshaled,
   RizzleIndexed,
   RizzleIndexTypes,
+  RizzleNullable,
   RizzleObject,
   RizzleObjectInput,
   RizzleObjectMarshaled,
@@ -13,16 +16,18 @@ import type {
   RizzleReplicache,
   RizzleReplicacheMutators,
   RizzleReplicacheQuery,
+  RizzleTypeAlias,
 } from "#util/rizzle.ts";
+import { keyPathVariableNames, r } from "#util/rizzle.ts";
 import type { IsEqual } from "@pinyinly/lib/types";
 import mapValues from "lodash/mapValues";
 import shuffle from "lodash/shuffle";
-import { Replicache } from "replicache";
 import type {
   DeepReadonly,
   ReadonlyJSONValue,
   WriteTransaction,
 } from "replicache";
+import { Replicache } from "replicache";
 import { describe, expect, test, vi } from "vitest";
 import { z } from "zod/v4";
 import { makeMockTx, testReplicacheOptions } from "./rizzleHelpers.ts";
@@ -1899,6 +1904,36 @@ typeChecks<RizzleObjectOutput<never>>(() => {
   >;
 });
 
+typeChecks<RizzleAliasName<never>>(() => {
+  type StringBase = RizzleCustom<string, string>;
+  type Aliased = RizzleTypeAlias<StringBase, `a`>;
+
+  true satisfies IsEqual<RizzleAliasName<StringBase>, undefined>;
+  true satisfies IsEqual<RizzleAliasName<Aliased>, `a`>;
+  true satisfies IsEqual<RizzleAliasName<RizzleOptional<Aliased>>, `a`>;
+  true satisfies IsEqual<RizzleAliasName<RizzleNullable<Aliased>>, `a`>;
+  true satisfies IsEqual<
+    RizzleAliasName<RizzleOptional<RizzleNullable<Aliased>>>,
+    `a`
+  >;
+});
+
+typeChecks<RizzleAliasedKey<never, never>>(() => {
+  type StringBase = RizzleCustom<string, string>;
+  type Aliased = RizzleTypeAlias<StringBase, `a`>;
+
+  true satisfies IsEqual<RizzleAliasedKey<StringBase, `name`>, `name`>;
+  true satisfies IsEqual<RizzleAliasedKey<Aliased, `name`>, `a`>;
+  true satisfies IsEqual<
+    RizzleAliasedKey<RizzleOptional<Aliased>, `name`>,
+    `a`
+  >;
+  true satisfies IsEqual<
+    RizzleAliasedKey<RizzleNullable<Aliased>, `name`>,
+    `a`
+  >;
+});
+
 test(
   `keyPathVariableNames()` satisfies HasNameOf<typeof keyPathVariableNames>,
   () => {
@@ -1911,4 +1946,39 @@ typeChecks<ExtractVariableNames<never>>(() => {
   true satisfies IsEqual<ExtractVariableNames<`a[b]`>, `b`>;
   true satisfies IsEqual<ExtractVariableNames<`a[b][c]`>, `b` | `c`>;
   true satisfies IsEqual<ExtractVariableNames<`a[b][c][d]`>, `b` | `c` | `d`>;
+});
+
+test(`marshaled types honor aliases`, () => {
+  const settings = r.entity(`settings/[id]`, {
+    id: r.string(),
+    soundId: r.string(`i`),
+    text: r.string(`t`),
+    meta: r.object({
+      inner: r.number(`n`),
+      plain: r.string(),
+    }),
+    tagged: r
+      .object({
+        flag: r.boolean(`f`),
+      })
+      .alias(`m`),
+  });
+
+  typeChecks(() => {
+    type Marshaled = RizzleEntityMarshaled<typeof settings>;
+    type Expected = {
+      id: string;
+      i: string;
+      t: string;
+      meta: {
+        n: number;
+        plain: string;
+      };
+      m: {
+        f: boolean;
+      };
+    };
+
+    true satisfies IsEqual<Marshaled, Expected>;
+  });
 });

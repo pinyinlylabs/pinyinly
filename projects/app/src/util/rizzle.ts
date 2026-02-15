@@ -10,7 +10,6 @@ import fromAsync from "array-from-async";
 import mapKeys from "lodash/mapKeys";
 import mapValues from "lodash/mapValues";
 import memoize from "lodash/memoize";
-import { Replicache } from "replicache";
 import type {
   IndexDefinition,
   MutatorDefs,
@@ -19,6 +18,7 @@ import type {
   ReplicacheOptions,
   WriteTransaction,
 } from "replicache";
+import { Replicache } from "replicache";
 import type { AnyFunction } from "ts-essentials";
 import { z } from "zod/v4";
 
@@ -59,7 +59,7 @@ export abstract class RizzleType<
     this._def = def;
   }
 
-  alias(alias: string): RizzleTypeAlias<this> {
+  alias<Alias extends string>(alias: Alias): RizzleTypeAlias<this, Alias> {
     return RizzleTypeAlias.create(this, alias);
   }
 
@@ -183,14 +183,20 @@ export class RizzleOptional<T extends RizzleType> extends RizzleType<
   };
 }
 
-interface RizzleTypeAliasDef<T extends RizzleType> extends RizzleTypeDef {
+interface RizzleTypeAliasDef<
+  T extends RizzleType,
+  Alias extends string | undefined,
+> extends RizzleTypeDef {
   innerType: T;
-  alias?: string | undefined;
+  alias: Alias;
   typeName: `alias`;
 }
 
-export class RizzleTypeAlias<T extends RizzleType> extends RizzleType<
-  RizzleTypeAliasDef<T>,
+export class RizzleTypeAlias<
+  T extends RizzleType,
+  Alias extends string | undefined = string | undefined,
+> extends RizzleType<
+  RizzleTypeAliasDef<T, Alias>,
   T[`_input`],
   T[`_marshaled`],
   T[`_output`]
@@ -212,14 +218,14 @@ export class RizzleTypeAlias<T extends RizzleType> extends RizzleType<
   _getIndexes() {
     return this._def.innerType._getIndexes();
   }
-  _getAlias(): string | undefined {
+  _getAlias(): Alias {
     return this._def.alias;
   }
 
-  static create = <T extends RizzleType>(
+  static create = <T extends RizzleType, Alias extends string | undefined>(
     type: T,
-    alias: string | undefined,
-  ): RizzleTypeAlias<T> => {
+    alias: Alias,
+  ): RizzleTypeAlias<T, Alias> => {
     return new RizzleTypeAlias({ innerType: type, alias, typeName: `alias` });
   };
 }
@@ -665,10 +671,27 @@ export type RizzleObjectInput<T extends RizzleRawObject> = PartialIfUndefined<{
   [K in keyof T]: T[K][`_input`];
 }>;
 
+export type RizzleAliasName<T extends RizzleType> =
+  T extends RizzleTypeAlias<infer _Wrapped, infer Alias>
+    ? Alias
+    : T extends RizzleOptional<infer Wrapped>
+      ? RizzleAliasName<Wrapped>
+      : T extends RizzleNullable<infer Wrapped>
+        ? RizzleAliasName<Wrapped>
+        : undefined;
+
+export type RizzleAliasedKey<T extends RizzleType, K extends PropertyKey> =
+  RizzleAliasName<T> extends infer Alias
+    ? Alias extends string
+      ? string extends Alias
+        ? K
+        : Alias
+      : K
+    : K;
+
 export type RizzleObjectMarshaled<T extends RizzleRawObject> =
   PartialIfUndefined<{
-    // TODO: this is missing key aliases
-    [K in keyof T]: T[K][`_marshaled`];
+    [K in keyof T as RizzleAliasedKey<T[K], K>]: T[K][`_marshaled`];
   }>;
 
 export type RizzleObjectOutput<T extends RizzleRawObject> = PartialIfUndefined<{
@@ -679,7 +702,7 @@ export type RizzleIndexNames<T extends RizzleType> =
   // oxlint-disable-next-line typescript/no-explicit-any
   T extends RizzleIndexed<any, infer IndexName>
     ? IndexName
-    : T extends RizzleTypeAlias<infer Wrapped>
+    : T extends RizzleTypeAlias<infer Wrapped, infer _Alias>
       ? RizzleIndexNames<Wrapped>
       : T extends RizzleNullable<infer Wrapped>
         ? RizzleIndexNames<Wrapped>
@@ -699,7 +722,7 @@ export type RizzleIndexTypesInner<T extends RizzleType> =
   // oxlint-disable-next-line typescript/no-explicit-any
   T extends RizzleIndexed<any, infer IndexName>
     ? [IndexName, T[`_input`]]
-    : T extends RizzleTypeAlias<infer Wrapped>
+    : T extends RizzleTypeAlias<infer Wrapped, infer _Alias>
       ? RizzleIndexTypesInner<Wrapped>
       : T extends RizzleNullable<infer Wrapped>
         ? RizzleIndexTypesInner<Wrapped>
@@ -832,9 +855,13 @@ export type RizzleReplicachePagedQuery<S extends RizzleRawSchema> = {
 /**
  * Stores any string.
  */
-const string = (alias?: string) => {
+function string(): typeof _string;
+function string<Alias extends string>(
+  alias: Alias,
+): RizzleTypeAlias<typeof _string, Alias>;
+function string(alias?: string) {
   return alias == null ? _string : _string.alias(alias);
-};
+}
 const _string = RizzleCustom.create(z.string(), z.string());
 
 export type RizzleBoolean = RizzleCustom<boolean, boolean, boolean>;
@@ -842,33 +869,49 @@ export type RizzleBoolean = RizzleCustom<boolean, boolean, boolean>;
 /**
  * Stores a boolean value.
  */
-const boolean = (alias?: string) => {
+function boolean(): typeof _boolean;
+function boolean<Alias extends string>(
+  alias: Alias,
+): RizzleTypeAlias<typeof _boolean, Alias>;
+function boolean(alias?: string) {
   return alias == null ? _boolean : _boolean.alias(alias);
-};
+}
 const _boolean = RizzleCustom.createSymmetric(z.boolean());
 
 /**
  * Stores an arbitrary JSON value.
  */
-const json = (alias?: string) => {
+function json(): typeof _json;
+function json<Alias extends string>(
+  alias: Alias,
+): RizzleTypeAlias<typeof _json, Alias>;
+function json(alias?: string) {
   return alias == null ? _json : _json.alias(alias);
-};
+}
 const _json = RizzleCustom.createSymmetric<unknown>(z.json());
 
 /**
  * Stores any JSON object.
  */
-const jsonObject = (alias?: string) => {
+function jsonObject(): typeof _jsonObject;
+function jsonObject<Alias extends string>(
+  alias: Alias,
+): RizzleTypeAlias<typeof _jsonObject, Alias>;
+function jsonObject(alias?: string) {
   return alias == null ? _jsonObject : _jsonObject.alias(alias);
-};
+}
 const _jsonObject = RizzleCustom.createSymmetric(z.looseObject({}));
 
 /**
  * Stores any number.
  */
-const number = (alias?: string) => {
+function number(): typeof _number;
+function number<Alias extends string>(
+  alias: Alias,
+): RizzleTypeAlias<typeof _number, Alias>;
+function number(alias?: string) {
   return alias == null ? _number : _number.alias(alias);
-};
+}
 const _number = RizzleCustom.createSymmetric(z.number());
 
 /**

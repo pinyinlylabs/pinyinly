@@ -10,7 +10,6 @@ import {
   rPinyinSoundGroupId,
   rPinyinSoundId,
 } from "@/data/rizzleSchema";
-import { r } from "@/util/rizzle";
 import type {
   RizzleBoolean,
   RizzleEntity,
@@ -18,27 +17,36 @@ import type {
   RizzleTypeAlias,
   RizzleTypeDef,
 } from "@/util/rizzle";
+import { r } from "@/util/rizzle";
 
 // A user setting entity that has a `text` field
 export type UserSettingTextEntity = RizzleEntity<
   string,
-  { text: RizzleType<RizzleTypeDef, string, string, string> }
+  {
+    text: RizzleTypeAlias<
+      RizzleType<RizzleTypeDef, string, string, string>,
+      `t`
+    >;
+  }
 >;
 
 // A user setting entity that has an `imageId` field
 export type UserSettingImageEntity = RizzleEntity<
   string,
   {
-    imageId: RizzleType<RizzleTypeDef, string, string, string>;
-    imageCrop: RizzleType;
-    imageWidth: RizzleType;
-    imageHeight: RizzleType;
+    imageId: RizzleTypeAlias<
+      RizzleType<RizzleTypeDef, string, string, string>,
+      `t`
+    >;
+    imageCrop: RizzleTypeAlias<RizzleType, `c`>;
+    imageWidth: RizzleTypeAlias<RizzleType, `w`>;
+    imageHeight: RizzleTypeAlias<RizzleType, `ht`>;
   }
 >;
 
 export type UserSettingToggleableEntity = RizzleEntity<
   string,
-  { enabled: RizzleBoolean | RizzleTypeAlias<RizzleBoolean> }
+  { enabled: RizzleTypeAlias<RizzleBoolean, `e`> }
 >;
 
 //
