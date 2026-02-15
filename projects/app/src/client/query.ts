@@ -416,6 +416,11 @@ export type TargetSkillsCollection = Collection<{ skill: Skill }, Skill>;
  */
 export type LatestSkillRatingsCollection = Collection<SkillRating, Skill>;
 
+export type AssetCollection = Collection<
+  RizzleEntityOutput<typeof currentSchema.asset>,
+  string
+>;
+
 export type CollectionOutput<T> =
   // oxlint-disable-next-line typescript/no-explicit-any
   T extends Collection<infer U, any> ? U : never;
@@ -628,6 +633,7 @@ export const latestSkillRatingCollectionOptions = ({
 });
 
 export interface Db {
+  assetCollection: AssetCollection;
   skillStateCollection: SkillStateCollection;
   skillRatingCollection: SkillRatingCollection;
   hanziGlossMistakeCollection: HanziGlossMistakeCollection;
@@ -689,12 +695,22 @@ export function makeDb(rizzle: Rizzle): Db {
   const latestSkillRatingsCollection: LatestSkillRatingsCollection =
     createCollection(latestSkillRatingCollectionOptions({ rizzle }));
 
+  const assetCollection: AssetCollection = createCollection(
+    rizzleCollectionOptions({
+      id: `asset`,
+      rizzle,
+      entity: currentSchema.asset,
+      getKey: (item) => item.assetId,
+    }),
+  );
+
   return {
-    latestSkillRatingsCollection,
-    skillStateCollection,
-    skillRatingCollection,
+    assetCollection,
     hanziGlossMistakeCollection,
     hanziPinyinMistakeCollection,
+    latestSkillRatingsCollection,
+    skillRatingCollection,
+    skillStateCollection,
     targetSkillsCollection,
   };
 }

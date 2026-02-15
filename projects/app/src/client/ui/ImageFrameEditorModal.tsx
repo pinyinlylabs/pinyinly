@@ -1,38 +1,38 @@
 import {
-  getLocalImageAssetSource,
-  isLocalImageAssetId,
+    getLocalImageAssetSource,
+    isLocalImageAssetId,
 } from "@/client/assets/localImageAssets";
 import { trpc } from "@/client/trpc";
-import { useRizzleQuery } from "@/client/ui/hooks/useRizzleQuery";
+import { useDb } from "@/client/ui/hooks/useDb";
 import { AssetStatusKind } from "@/data/model";
-import type { Rizzle } from "@/data/rizzleSchema";
+import { eq, useLiveQuery } from "@tanstack/react-db";
 import { useEffect, useRef, useState } from "react";
 import {
-  ActivityIndicator,
-  Image,
-  PanResponder,
-  Platform,
-  Text,
-  View,
+    ActivityIndicator,
+    Image,
+    PanResponder,
+    Platform,
+    Text,
+    View,
 } from "react-native";
 import type {
-  ImageSourcePropType,
-  LayoutChangeEvent,
-  PanResponderInstance,
-  ViewStyle,
+    ImageSourcePropType,
+    LayoutChangeEvent,
+    PanResponderInstance,
+    ViewStyle,
 } from "react-native";
 import { PageSheetModal } from "./PageSheetModal";
 import { RectButton } from "./RectButton";
 import { confirmDiscardChanges } from "./confirmDiscardChanges";
 import {
-  clampImageCropRectNormalized,
-  parseImageCrop,
-  resolveFrameAspectRatio,
+    clampImageCropRectNormalized,
+    parseImageCrop,
+    resolveFrameAspectRatio,
 } from "./imageCrop";
 import type {
-  ImageCrop,
-  ImageCropRect,
-  ImageFrameConstraintInput,
+    ImageCrop,
+    ImageCropRect,
+    ImageFrameConstraintInput,
 } from "./imageCrop";
 
 interface ImageFrameEditorModalProps {
@@ -541,12 +541,13 @@ function useAssetImageMeta(
   imageSize: { width: number; height: number } | null;
   imageSource: EditorImageSource | null;
 } {
-  const { data: asset } = useRizzleQuery<NonNullable<
-    Awaited<ReturnType<Rizzle[`query`][`asset`][`get`]>>
-  > | null>(
-    [`asset`, assetId],
-    async (r, tx) => (await r.query.asset.get(tx, { assetId })) ?? null,
+  const db = useDb();
+  const { data: assetData } = useLiveQuery((q) =>
+    q
+      .from({ asset: db.assetCollection })
+      .where(({ asset }) => eq(asset.assetId, assetId)),
   );
+  const asset = assetData[0] ?? null;
 
   const [localSource, setLocalSource] = useState<Awaited<
     ReturnType<typeof getLocalImageAssetSource>

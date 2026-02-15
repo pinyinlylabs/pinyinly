@@ -1,11 +1,11 @@
 import {
-  getLocalImageAssetSource,
-  isLocalImageAssetId,
+    getLocalImageAssetSource,
+    isLocalImageAssetId,
 } from "@/client/assets/localImageAssets";
 import { trpc } from "@/client/trpc";
-import { useRizzleQuery } from "@/client/ui/hooks/useRizzleQuery";
+import { useDb } from "@/client/ui/hooks/useDb";
 import { AssetStatusKind } from "@/data/model";
-import type { Rizzle } from "@/data/rizzleSchema";
+import { eq, useLiveQuery } from "@tanstack/react-db";
 import { Image as ExpoImage } from "expo-image";
 import type { ImageProps as ExpoImageProps } from "expo-image";
 import { useEffect, useState } from "react";
@@ -26,25 +26,24 @@ interface AssetImageProps extends Omit<ExpoImageProps, `source`> {
  * Displays an uploaded image from R2/Minio storage.
  *
  * Constructs the CDN URL from EXPO_PUBLIC_ASSETS_CDN_BASE_URL + asset key (u/{userId}/{assetId}).
- * Queries Replicache for the asset status and shows appropriate states:
+ * Queries TanStack DB for the asset status and shows appropriate states:
  * - Pending: Loading indicator
  * - Uploaded: Display image
  * - Failed: Error message
  */
-type AssetEntity = NonNullable<
-  Awaited<ReturnType<Rizzle[`query`][`asset`][`get`]>>
->;
-
 export function AssetImage({
   assetId,
   userId,
   contentFit = `cover`,
   ...imageProps
 }: AssetImageProps) {
-  const { data: asset } = useRizzleQuery<AssetEntity | null>(
-    [`asset`, assetId],
-    async (r, tx) => (await r.query.asset.get(tx, { assetId })) ?? null,
+  const db = useDb();
+  const { data: assetData } = useLiveQuery((q) =>
+    q
+      .from({ asset: db.assetCollection })
+      .where(({ asset }) => eq(asset.assetId, assetId)),
   );
+  const asset = assetData[0] ?? null;
   const [imageError, setImageError] = useState(false);
   const [localSource, setLocalSource] = useState<Awaited<
     ReturnType<typeof getLocalImageAssetSource>
@@ -52,7 +51,9 @@ export function AssetImage({
   const [localSourceChecked, setLocalSourceChecked] = useState(false);
   const isLocalAsset = isLocalImageAssetId(assetId);
   const shouldFetchAssetKey =
-    userId == null && asset?.status === AssetStatusKind.Uploaded;
+    !isLocalAsset &&
+    userId == null &&
+    asset?.status === AssetStatusKind.Uploaded;
   const assetKeyQuery = trpc.asset.getAssetKey.useQuery(
     { assetId },
     {
@@ -104,7 +105,7 @@ export function AssetImage({
   }
 
   if (asset == null) {
-    // Asset not found in Replicache yet
+    // Asset not found in TanStack DB yet
     return (
       <View className="size-full items-center justify-center bg-fg/5">
         <ActivityIndicator size="small" className="text-fg" />
