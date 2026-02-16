@@ -1,6 +1,7 @@
 import type { HanziText, HanziWord, Skill, SrsStateType } from "@/data/model";
-import { currentSchema } from "@/data/rizzleSchema";
 import type { Rizzle, SkillRating } from "@/data/rizzleSchema";
+import { currentSchema } from "@/data/rizzleSchema";
+import type { RankedHanziWord } from "@/data/skills";
 import {
   getHanziWordRank,
   hanziWordToGlossTyped,
@@ -8,7 +9,7 @@ import {
   rankRules,
   skillLearningGraph,
 } from "@/data/skills";
-import type { RankedHanziWord } from "@/data/skills";
+import type { Dictionary } from "@/dictionary";
 import { getIsStructuralHanzi, loadDictionary } from "@/dictionary";
 import { devToolsSlowQuerySleepIfEnabled } from "@/util/devtools";
 import type { Rating } from "@/util/fsrs";
@@ -23,6 +24,7 @@ import {
   sortComparatorNumber,
 } from "@pinyinly/lib/collections";
 import { nonNullable } from "@pinyinly/lib/invariant";
+import type { Collection, CollectionConfig } from "@tanstack/react-db";
 import {
   and,
   createCollection,
@@ -33,11 +35,10 @@ import {
   isUndefined,
   or,
 } from "@tanstack/react-db";
-import type { Collection, CollectionConfig } from "@tanstack/react-db";
 import { queryOptions, skipToken } from "@tanstack/react-query";
 import { subDays } from "date-fns/subDays";
-import { buildDeviceStoreKey, deviceStoreGet } from "./deviceStore";
 import type { DeviceStoreEntity } from "./deviceStore";
+import { buildDeviceStoreKey, deviceStoreGet } from "./deviceStore";
 
 export type WithRizzleWatchPrefixes<T> = T & {
   rizzleWatchPrefixes?: string[];
@@ -207,59 +208,54 @@ export const skillLearningGraphQuery = queryOptions({
   throwOnError: true,
 });
 
-export const hanziWordsByRankQuery = (r: Rizzle) =>
-  withWatchPrefixes(
-    queryOptions({
-      queryKey: [`hanziWordsByRank`],
-      queryFn: async () => {
-        await devToolsSlowQuerySleepIfEnabled();
-
-        const skillSrsStates = new Map<Skill, SrsStateType>();
-        for await (const [, v] of r.queryPaged.skillState.scan()) {
-          skillSrsStates.set(v.skill, v.srs);
-        }
-
-        const hanziWords = await getAllTargetHanziWords();
-        const rankToHanziWords = new Map<number, RankedHanziWord[]>();
-
-        for (const hanziWord of hanziWords) {
-          const rankedHanziWord = getHanziWordRank({
-            hanziWord,
-            skillSrsStates,
-            rankRules,
-          });
-
-          const rankNumber = rankedHanziWord.rank;
-          const existing = rankToHanziWords.get(rankNumber);
-          if (existing == null) {
-            rankToHanziWords.set(rankNumber, [rankedHanziWord]);
-          } else {
-            existing.push(rankedHanziWord);
-          }
-        }
-
-        for (const unsorted of rankToHanziWords.values()) {
-          unsorted.sort(sortComparatorNumber((x) => x.completion));
-        }
-        return rankToHanziWords;
-      },
-      networkMode: `offlineFirst`,
-      retry: false,
-      structuralSharing: false,
-      throwOnError: true,
-    }),
-    [currentSchema.skillState.keyPrefix],
-  );
-
-export async function getAllTargetHanziWords(): Promise<HanziWord[]> {
-  const dictionary = await loadDictionary();
-
+export function getTargetHanziWordsFromDictionary(
+  dictionary: Dictionary,
+): HanziWord[] {
   return [
     ...dictionary.hsk1HanziWords,
     ...dictionary.hsk2HanziWords,
     ...dictionary.hsk3HanziWords,
     ...dictionary.hsk4HanziWords,
   ].filter(arrayFilterUniqueWithKey((x) => x));
+}
+
+export function hanziWordsByRankData({
+  skillStates,
+  hanziWords,
+}: {
+  skillStates: CollectionOutput<SkillStateCollection>[];
+  hanziWords: HanziWord[];
+}): Map<number, RankedHanziWord[]> {
+  const skillSrsStates = new Map<Skill, SrsStateType>(
+    skillStates.map((item) => [item.skill, item.srs]),
+  );
+  const rankToHanziWords = new Map<number, RankedHanziWord[]>();
+
+  for (const hanziWord of hanziWords) {
+    const rankedHanziWord = getHanziWordRank({
+      hanziWord,
+      skillSrsStates,
+      rankRules,
+    });
+
+    const rankNumber = rankedHanziWord.rank;
+    const existing = rankToHanziWords.get(rankNumber);
+    if (existing == null) {
+      rankToHanziWords.set(rankNumber, [rankedHanziWord]);
+    } else {
+      existing.push(rankedHanziWord);
+    }
+  }
+
+  for (const unsorted of rankToHanziWords.values()) {
+    unsorted.sort(sortComparatorNumber((x) => x.completion));
+  }
+  return rankToHanziWords;
+}
+
+export async function getAllTargetHanziWords(): Promise<HanziWord[]> {
+  const dictionary = await loadDictionary();
+  return getTargetHanziWordsFromDictionary(dictionary);
 }
 
 export async function getAllTargetSkills(): Promise<Skill[]> {
@@ -332,15 +328,6 @@ export const deviceStoreQuery = (key: DeviceStoreEntity) =>
     structuralSharing: false,
     throwOnError: true,
   });
-
-function withWatchPrefixes<T extends object>(
-  query: T,
-  rizzleWatchPrefixes: string[],
-): WithRizzleWatchPrefixes<T> {
-  return Object.assign(query, {
-    rizzleWatchPrefixes,
-  });
-}
 
 export type SkillStateCollection = Collection<
   RizzleEntityOutput<typeof currentSchema.skillState>,
