@@ -7,15 +7,15 @@ import { RizzleProvider } from "#client/ui/RizzleProvider.tsx";
 import { SkillQueueProvider } from "#client/ui/SkillQueueProvider.tsx";
 import { QuestionFlagKind } from "#data/model.js";
 import type { Rizzle } from "#data/rizzleSchema.ts";
+import { prettyQueue } from "#test/data/helpers.ts";
+import { rizzleFixture } from "#test/util/rizzleHelpers.ts";
 import { sleep } from "#util/devtools.js";
 import { invariant } from "@pinyinly/lib/invariant";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react";
-import { act } from "react";
 import type { PropsWithChildren } from "react";
+import { act } from "react";
 import { afterEach, test as baseTest, expect, vi } from "vitest";
-import { prettyQueue } from "../../../data/helpers.ts";
-import { rizzleFixture } from "../../../util/rizzleHelpers.ts";
 
 const test = baseTest.extend(rizzleFixture);
 

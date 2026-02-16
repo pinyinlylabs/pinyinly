@@ -372,8 +372,6 @@
         "eslint/no-empty-pattern": "off",
         "eslint/no-inner-declarations": "off",
 
-        "import/no-relative-parent-imports": "off",
-
         "typescript/no-dynamic-delete": "off",
         "typescript/no-explicit-any": "off",
         "typescript/restrict-template-expressions": "off",

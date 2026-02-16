@@ -1,17 +1,13 @@
-import { describe, expect, test } from "vitest";
-import type {
-    CornerHandle,
-    Rect,
-    Size,
-} from "../../../src/client/ui/imageCropCalc";
+import type { CornerHandle, Rect, Size } from "#client/ui/imageCropCalc.ts";
 import {
-    applyCornerDelta,
-    clamp,
-    clampRectPx,
-    enforceAspectRatio,
-    getMinCropSizePx,
-    resizeRectPx,
-} from "../../../src/client/ui/imageCropCalc";
+  applyCornerDelta,
+  clamp,
+  clampRectPx,
+  enforceAspectRatio,
+  getMinCropSizePx,
+  resizeRectPx,
+} from "#client/ui/imageCropCalc.ts";
+import { describe, expect, test } from "vitest";
 
 const imageSize: Size = { width: 1000, height: 800 };
 const minSize = getMinCropSizePx(imageSize);
