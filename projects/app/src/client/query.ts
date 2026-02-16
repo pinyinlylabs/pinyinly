@@ -3,37 +3,37 @@ import type { Rizzle, SkillRating } from "@/data/rizzleSchema";
 import { currentSchema } from "@/data/rizzleSchema";
 import type { RankedHanziWord } from "@/data/skills";
 import {
-    getHanziWordRank,
-    hanziWordToGlossTyped,
-    hanziWordToPinyinTyped,
-    rankRules,
-    skillLearningGraph,
+  getHanziWordRank,
+  hanziWordToGlossTyped,
+  hanziWordToPinyinTyped,
+  rankRules,
+  skillLearningGraph,
 } from "@/data/skills";
 import type { Dictionary } from "@/dictionary";
 import { getIsStructuralHanzi, loadDictionary } from "@/dictionary";
 import { devToolsSlowQuerySleepIfEnabled } from "@/util/devtools";
 import type { Rating } from "@/util/fsrs";
 import type {
-    RizzleAnyEntity,
-    RizzleEntityMarshaled,
-    RizzleEntityOutput,
+  RizzleAnyEntity,
+  RizzleEntityMarshaled,
+  RizzleEntityOutput,
 } from "@/util/rizzle";
 import {
-    arrayFilterUniqueWithKey,
-    memoize0,
-    sortComparatorNumber,
+  arrayFilterUniqueWithKey,
+  memoize0,
+  sortComparatorNumber,
 } from "@pinyinly/lib/collections";
 import { nonNullable } from "@pinyinly/lib/invariant";
 import type { Collection, CollectionConfig } from "@tanstack/react-db";
 import {
-    and,
-    createCollection,
-    createLiveQueryCollection,
-    eq,
-    gte,
-    isNull,
-    isUndefined,
-    or,
+  and,
+  createCollection,
+  createLiveQueryCollection,
+  eq,
+  gte,
+  isNull,
+  isUndefined,
+  or,
 } from "@tanstack/react-db";
 import { queryOptions, skipToken } from "@tanstack/react-query";
 import { subDays } from "date-fns/subDays";

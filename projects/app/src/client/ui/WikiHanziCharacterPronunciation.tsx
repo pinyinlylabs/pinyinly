@@ -1,17 +1,14 @@
-import { useDb } from "@/client/ui/hooks/useDb";
 import {
   getHanziPronunciationHintKeyParams,
   hanziPronunciationHintExplanationSetting,
   hanziPronunciationHintImageSetting,
   hanziPronunciationHintTextSetting,
   pinyinSoundNameSetting,
-  pinyinSoundNameSettingKey,
+  useUserSetting,
 } from "@/client/ui/hooks/useUserSetting";
-import type { HanziText, PinyinSoundId, PinyinUnit } from "@/data/model";
-import { loadPylyPinyinChart, splitPinyinUnit } from "@/data/pinyin";
-import { inArray, useLiveQuery } from "@tanstack/react-db";
+import type { HanziText, PinyinUnit } from "@/data/model";
+import { splitPinyinUnit } from "@/data/pinyin";
 import type { ReactNode } from "react";
-import { useMemo } from "react";
 import { Text, View } from "react-native";
 import { InlineEditableSettingImage } from "./InlineEditableSettingImage";
 import { InlineEditableSettingText } from "./InlineEditableSettingText";
@@ -28,59 +25,26 @@ export function WikiHanziCharacterPronunciation({
   pinyinUnit: PinyinUnit;
 }) {
   const splitPinyin = splitPinyinUnit(pinyinUnit);
-  const db = useDb();
-  const chart = loadPylyPinyinChart();
+  const skipSoundSettings = splitPinyin == null;
 
-  // Collect all relevant pinyin sound setting keys
-  const relevantKeys = useMemo(() => {
-    const keys: string[] = [];
-    for (const group of chart.soundGroups) {
-      for (const soundId of group.sounds) {
-        keys.push(pinyinSoundNameSettingKey(soundId));
-      }
-    }
-    return keys;
-  }, [chart.soundGroups]);
-
-  const { data: settings } = useLiveQuery(
-    (q) =>
-      q
-        .from({ setting: db.settingCollection })
-        .where(({ setting }) => inArray(setting.key, relevantKeys)),
-    [db.settingCollection, relevantKeys],
+  const initialPinyinSound2 = useUserSetting(
+    pinyinSoundNameSetting,
+    skipSoundSettings
+      ? { skip: true }
+      : { soundId: splitPinyin.initialSoundId },
+  );
+  const finalPinyinSound2 = useUserSetting(
+    pinyinSoundNameSetting,
+    skipSoundSettings ? { skip: true } : { soundId: splitPinyin.finalSoundId },
+  );
+  const tonePinyinSound2 = useUserSetting(
+    pinyinSoundNameSetting,
+    skipSoundSettings ? { skip: true } : { soundId: splitPinyin.toneSoundId },
   );
 
-  const pinyinSounds = useMemo(() => {
-    const sounds = new Map<
-      PinyinSoundId,
-      { name: string | null; label: string }
-    >();
-
-    for (const group of chart.soundGroups) {
-      for (const soundId of group.sounds) {
-        const userOverride = settings.find(
-          (s) => s.key === pinyinSoundNameSettingKey(soundId),
-        );
-        const nameValueData = userOverride?.value
-          ? pinyinSoundNameSetting.unmarshalValueSafe(userOverride.value)
-          : null;
-        const nameValue = nameValueData?.text ?? null;
-        sounds.set(soundId, {
-          name: nameValue,
-          label: chart.soundToCustomLabel[soundId] ?? soundId,
-        });
-      }
-    }
-
-    return sounds;
-  }, [settings, chart.soundGroups, chart.soundToCustomLabel]);
-
-  const initialPinyinSound =
-    splitPinyin == null ? null : pinyinSounds?.get(splitPinyin.initialSoundId);
-  const finalPinyinSound =
-    splitPinyin == null ? null : pinyinSounds?.get(splitPinyin.finalSoundId);
-  const tonePinyinSound =
-    splitPinyin == null ? null : pinyinSounds?.get(splitPinyin.toneSoundId);
+  const initialPinyinSoundName = initialPinyinSound2?.value?.text;
+  const finalPinyinSoundName = finalPinyinSound2?.value?.text;
+  const tonePinyinSoundName = tonePinyinSound2?.value?.text;
 
   const hintSettingKey = getHanziPronunciationHintKeyParams(hanzi, pinyinUnit);
 
@@ -123,9 +87,9 @@ export function WikiHanziCharacterPronunciation({
                   <Text className="pyly-body text-center text-fg/50">
                     {splitPinyin.initialSoundId}
                   </Text>
-                  {initialPinyinSound == null ? null : (
+                  {initialPinyinSoundName == null ? null : (
                     <ArrowToSoundName>
-                      {initialPinyinSound.name}
+                      {initialPinyinSoundName}
                     </ArrowToSoundName>
                   )}
                 </View>
@@ -133,8 +97,8 @@ export function WikiHanziCharacterPronunciation({
                   <Text className="pyly-body text-center text-fg/50">
                     {splitPinyin.finalSoundId}
                   </Text>
-                  {finalPinyinSound == null ? null : (
-                    <ArrowToSoundName>{finalPinyinSound.name}</ArrowToSoundName>
+                  {finalPinyinSoundName == null ? null : (
+                    <ArrowToSoundName>{finalPinyinSoundName}</ArrowToSoundName>
                   )}
                 </View>
                 <View className="flex-1 items-center gap-1 border-fg/10">
@@ -144,8 +108,8 @@ export function WikiHanziCharacterPronunciation({
                       {ordinalSuffix(splitPinyin.tone)}
                     </Text>
                   </Text>
-                  {tonePinyinSound == null ? null : (
-                    <ArrowToSoundName>{tonePinyinSound.name}</ArrowToSoundName>
+                  {tonePinyinSoundName == null ? null : (
+                    <ArrowToSoundName>{tonePinyinSoundName}</ArrowToSoundName>
                   )}
                 </View>
               </View>

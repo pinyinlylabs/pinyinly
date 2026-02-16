@@ -114,28 +114,65 @@ function getSettingKeyInfo<T extends UserSettingEntity>(
 }
 
 const noKeyParams = {} as const; // allow memoization inside rizzle
-export const useUserSetting = <T extends UserSettingEntity>(
+const skippedSettingKeyInfo = {
+  settingKey: ``,
+  keyParamAliases: [] as string[],
+  keyParamMarshaled: {} as Record<string, string>,
+};
+
+type UserSettingKeyParamsNoSkip<T extends UserSettingEntity> =
+  UserSettingKeyInput<T> & { skip?: never };
+type UserSettingKeyParamsSkip<T extends UserSettingEntity> = {
+  skip: true;
+} & Partial<UserSettingKeyInput<T>>;
+
+export function useUserSetting<T extends UserSettingEntity>(
   userSettingEntity: T,
-  keyParams?: UserSettingKeyInput<T>,
-): UseUserSettingResult<T> => {
-  const keyInput = (keyParams ?? noKeyParams) as UserSettingKeyInput<T>;
-  const { settingKey, keyParamAliases, keyParamMarshaled } = getSettingKeyInfo(
-    userSettingEntity,
-    keyInput,
-  );
+  keyParams: UserSettingKeyParamsNoSkip<T>,
+): UseUserSettingResult<T>;
+export function useUserSetting<T extends UserSettingEntity>(
+  userSettingEntity: T,
+  keyParams: UserSettingKeyParamsSkip<T>,
+): null;
+export function useUserSetting<T extends UserSettingEntity>(
+  userSettingEntity: T,
+): UseUserSettingResult<T>;
+export function useUserSetting<T extends UserSettingEntity>(
+  userSettingEntity: T,
+  keyParams: UserSettingKeyParamsNoSkip<T> | UserSettingKeyParamsSkip<T>,
+): UseUserSettingResult<T> | null;
+export function useUserSetting<T extends UserSettingEntity>(
+  userSettingEntity: T,
+  keyParamsOrOptions?: UserSettingKeyInput<T> | UserSettingKeyParamsSkip<T>,
+): UseUserSettingResult<T> | null {
+  const hasOptions =
+    keyParamsOrOptions != null &&
+    typeof keyParamsOrOptions === `object` &&
+    `skip` in keyParamsOrOptions;
+  const options = hasOptions ? keyParamsOrOptions : undefined;
+  const skip = options?.skip === true;
+
+  const keyParams = skip ? null : keyParamsOrOptions;
   const db = useDb();
   const r = useRizzle();
 
+  const keyInput = (keyParams ?? noKeyParams) as UserSettingKeyInput<T>;
+  const { settingKey, keyParamAliases, keyParamMarshaled } = skip
+    ? skippedSettingKeyInfo
+    : getSettingKeyInfo(userSettingEntity, keyInput);
+
   const result = useLiveQuery(
     (q) =>
-      q
-        .from({ setting: db.settingCollection })
-        .where(({ setting }) => eq(setting.key, settingKey)),
-    [db.settingCollection, settingKey],
+      skip
+        ? null
+        : q
+            .from({ setting: db.settingCollection })
+            .where(({ setting }) => eq(setting.key, settingKey)),
+    [db.settingCollection, skip, settingKey],
   );
 
   const isLoading = result.isLoading;
-  const settingData = result.data[0] ?? null;
+  const settingData = result.data?.[0] ?? null;
   const value =
     settingData?.value == null
       ? null
@@ -145,6 +182,9 @@ export const useUserSetting = <T extends UserSettingEntity>(
         });
 
   const setValue: UseUserSettingSetValue<T> = (updater, options) => {
+    if (skip) {
+      return;
+    }
     if (typeof updater === `function`) {
       updater = updater(value, isLoading);
     }
@@ -180,8 +220,12 @@ export const useUserSetting = <T extends UserSettingEntity>(
       });
   };
 
+  if (skip) {
+    return null;
+  }
+
   return { isLoading, value, setValue };
-};
+}
 
 export function useUserSettingHistory<T extends UserSettingEntity>(
   userSettingEntity: T,
