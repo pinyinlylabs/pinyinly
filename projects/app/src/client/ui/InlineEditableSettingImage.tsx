@@ -1,12 +1,12 @@
-import {
-  useUserSetting,
-  useUserSettingHistory,
-} from "@/client/ui/hooks/useUserSetting";
 import type {
   UserSettingEntityInput,
   UserSettingEntityOutput,
   UserSettingImageEntity,
   UserSettingKeyInput,
+} from "@/client/ui/hooks/useUserSetting";
+import {
+  useUserSetting,
+  useUserSettingHistory,
 } from "@/client/ui/hooks/useUserSetting";
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
@@ -14,12 +14,12 @@ import { FramedAssetImage } from "./ImageFrame";
 import { ImageFrameEditorModal } from "./ImageFrameEditorModal";
 import { ImagePasteDropZone } from "./ImagePasteDropZone";
 import { RectButton } from "./RectButton";
+import type { ImageCrop, ImageFrameConstraintInput } from "./imageCrop";
 import {
   imageCropValueFromCrop,
   parseImageCrop,
   resolveFrameAspectRatio,
 } from "./imageCrop";
-import type { ImageCrop, ImageFrameConstraintInput } from "./imageCrop";
 
 interface InlineEditableSettingImageProps<T extends UserSettingImageEntity> {
   setting: T;
@@ -59,6 +59,7 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
     null,
   );
   const [editorAssetId, setEditorAssetId] = useState<string | null>(null);
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
   const frameAspectRatio = resolveFrameAspectRatio(frameConstraint);
 
   const historyImageAssetIds: string[] = [];
@@ -106,6 +107,7 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
       imageWidth: meta?.imageWidth ?? undefined,
       imageHeight: meta?.imageHeight ?? undefined,
     } as UserSettingEntityInput<T>);
+    setIsPickerOpen(false);
   };
 
   const handleAddCustomImage = (assetId: string) => {
@@ -113,6 +115,7 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
     if (frameAspectRatio != null) {
       setEditorAssetId(assetId);
     }
+    setIsPickerOpen(false);
   };
 
   const previewHintImageId = hoveredHintImageId ?? imageId ?? null;
@@ -123,6 +126,7 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
   const editorMeta =
     editorAssetId == null ? null : (imageMetaById.get(editorAssetId) ?? null);
   const canEditCrop = frameAspectRatio != null && imageId != null;
+  const shouldShowPickerPanel = isPickerOpen;
   const editorModal =
     editorAssetId == null ? null : (
       <ImageFrameEditorModal
@@ -148,68 +152,78 @@ export function InlineEditableSettingImage<T extends UserSettingImageEntity>({
 
   return (
     <View className={className}>
-      <View className="gap-3">
-        <View className="gap-2">
+      <View className="gap-2">
+        <View className="relative">
           <HintImagePreview
             assetId={previewHintImageId}
             imageMeta={previewMeta}
             height={previewHeight}
             aspectRatio={frameAspectRatio}
           />
-          {canEditCrop ? (
-            <View className="flex-row justify-end">
+          <View className="absolute inset-x-3 bottom-3 flex-row items-center justify-end gap-2">
+            <RectButton
+              variant="bare"
+              onPress={() => {
+                setIsPickerOpen((current) => !current);
+              }}
+            >
+              Change
+            </RectButton>
+            {canEditCrop ? (
               <RectButton
                 variant="bare"
                 onPress={() => {
                   setEditorAssetId(imageId);
                 }}
               >
-                Edit crop
+                Reposition
               </RectButton>
-            </View>
-          ) : null}
+            ) : null}
+          </View>
         </View>
 
-        {imageIdsToShow.length > 0 && (
-          <View className="flex-row flex-wrap gap-2">
-            {imageIdsToShow.map((assetId) => {
-              const isSelected = assetId === imageId;
-              const isHovered = assetId === hoveredHintImageId;
-              const meta = imageMetaById.get(assetId) ?? null;
-              return (
-                <Pressable
-                  key={assetId}
-                  onPress={() => {
-                    handleSelectHintImage(assetId);
-                  }}
-                  onHoverIn={() => {
-                    setHoveredHintImageId(assetId);
-                  }}
-                  onHoverOut={() => {
-                    setHoveredHintImageId(null);
-                  }}
-                >
-                  <HintImageTile
-                    assetId={assetId}
-                    imageMeta={meta}
-                    isSelected={isSelected}
-                    isHovered={isHovered}
-                    size={tileSize}
-                  />
-                </Pressable>
-              );
-            })}
+        {shouldShowPickerPanel ? (
+          <View className="gap-3 rounded-lg border border-fg/10 bg-fg/5 p-3">
+            {imageIdsToShow.length > 0 ? (
+              <View className="flex-row flex-wrap gap-2">
+                {imageIdsToShow.map((assetId) => {
+                  const isSelected = assetId === imageId;
+                  const isHovered = assetId === hoveredHintImageId;
+                  const meta = imageMetaById.get(assetId) ?? null;
+                  return (
+                    <Pressable
+                      key={assetId}
+                      onPress={() => {
+                        handleSelectHintImage(assetId);
+                      }}
+                      onHoverIn={() => {
+                        setHoveredHintImageId(assetId);
+                      }}
+                      onHoverOut={() => {
+                        setHoveredHintImageId(null);
+                      }}
+                    >
+                      <HintImageTile
+                        assetId={assetId}
+                        imageMeta={meta}
+                        isSelected={isSelected}
+                        isHovered={isHovered}
+                        size={tileSize}
+                      />
+                    </Pressable>
+                  );
+                })}
+              </View>
+            ) : null}
+            {enablePasteDropZone ? (
+              <ImagePasteDropZone
+                onUploadComplete={handleAddCustomImage}
+                onUploadError={onUploadError}
+              />
+            ) : null}
           </View>
-        )}
+        ) : null}
       </View>
-      {enablePasteDropZone ? (
-        <View className="pt-2">
-          <ImagePasteDropZone
-            onUploadComplete={handleAddCustomImage}
-            onUploadError={onUploadError}
-          />
-        </View>
-      ) : null}
       {editorModal}
     </View>
   );
