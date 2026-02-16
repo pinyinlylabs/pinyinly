@@ -1,10 +1,11 @@
 import { useAuth } from "@/client/auth";
-import { useRizzleQuery } from "@/client/ui/hooks/useRizzleQuery";
+import { useDb } from "@/client/ui/hooks/useDb";
 import { RectButton } from "@/client/ui/RectButton";
 import { SessionStoreProvider } from "@/client/ui/SessionStoreProvider";
 import { SignInWithAppleButton } from "@/client/ui/SignInWithAppleButton";
 import { TextInputSingle } from "@/client/ui/TextInputSingle";
 import { invariant } from "@pinyinly/lib/invariant";
+import { useLiveQuery } from "@tanstack/react-db";
 import * as AppleAuthentication from "expo-apple-authentication";
 import { Link } from "expo-router";
 import { useState } from "react";
@@ -198,14 +199,16 @@ const GoHomeButton = () => (
 );
 
 function SkillCount() {
-  const result = useRizzleQuery([`wordCount`], async (r, tx) => {
-    const skillStates = await r.query.skillState.scan(tx).toArray();
-    return skillStates.length;
-  });
+  const db = useDb();
+  const result = useLiveQuery(
+    (q) => q.from({ skillState: db.skillStateCollection }),
+    [db.skillStateCollection],
+  );
+  const count = result.data.length;
 
-  return result.isPending ? (
+  return result.isLoading ? (
     <Text className="text-fg">Loading…</Text>
   ) : (
-    <Text className="text-fg">{result.data} words</Text>
+    <Text className="text-fg">{count} words</Text>
   );
 }
