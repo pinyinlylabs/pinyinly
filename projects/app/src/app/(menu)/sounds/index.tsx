@@ -3,8 +3,10 @@ import { usePinyinSoundGroups } from "@/client/ui/hooks/usePinyinSoundGroups";
 import {
   pinyinSoundGroupNameSetting,
   pinyinSoundGroupThemeSetting,
+  pinyinSoundImageSettingKey,
   pinyinSoundNameSettingKey,
 } from "@/client/ui/hooks/useUserSetting";
+import { parseImageCrop } from "@/client/ui/imageCrop";
 import { InlineEditableSettingText } from "@/client/ui/InlineEditableSettingText";
 import { PinyinSoundTile } from "@/client/ui/PinyinSoundTile";
 import { loadPylyPinyinChart } from "@/data/pinyin";
@@ -19,9 +21,17 @@ export default function SoundsPage() {
   const chart = loadPylyPinyinChart();
   const db = useDb();
 
-  const relevantKeys = useMemo(
+  const nameSettingKeys = useMemo(
     () => chart.soundIds.map((soundId) => pinyinSoundNameSettingKey(soundId)),
-    [chart],
+    [chart.soundIds],
+  );
+  const imageSettingKeys = useMemo(
+    () => chart.soundIds.map((soundId) => pinyinSoundImageSettingKey(soundId)),
+    [chart.soundIds],
+  );
+  const relevantKeys = useMemo(
+    () => [...nameSettingKeys, ...imageSettingKeys],
+    [nameSettingKeys, imageSettingKeys],
   );
 
   const { data: settings } = useLiveQuery(
@@ -35,7 +45,12 @@ export default function SoundsPage() {
   const settingsByKey = new Map(
     settings.map((setting) => [
       setting.key,
-      setting.value as { t?: string } | null,
+      setting.value as {
+        t?: string;
+        c?: unknown;
+        w?: number;
+        ht?: number;
+      } | null,
     ]),
   );
 
@@ -44,12 +59,25 @@ export default function SoundsPage() {
       const nameValueData = settingsByKey.get(
         pinyinSoundNameSettingKey(soundId),
       )?.t;
+      const imageValueData = settingsByKey.get(
+        pinyinSoundImageSettingKey(soundId),
+      );
+      const imageId = imageValueData?.t ?? null;
 
       return [
         soundId,
         {
           name: nameValueData ?? null,
           label: chart.soundToCustomLabel[soundId] ?? soundId,
+          image:
+            imageId == null
+              ? null
+              : {
+                  assetId: imageId,
+                  crop: parseImageCrop(imageValueData?.c),
+                  imageWidth: imageValueData?.w ?? null,
+                  imageHeight: imageValueData?.ht ?? null,
+                },
         },
       ];
     }),
@@ -94,6 +122,7 @@ export default function SoundsPage() {
                       id={soundId}
                       label={sound.label}
                       name={sound.name}
+                      image={sound.image}
                     />
                   </Link>
                 );

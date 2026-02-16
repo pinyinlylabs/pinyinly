@@ -3,17 +3,26 @@ import { nullIfEmpty } from "@/util/unicode";
 import type { IsExhaustedRest } from "@pinyinly/lib/types";
 import { Text, View } from "react-native";
 import { tv } from "tailwind-variants";
+import { FramedAssetImage } from "./ImageFrame";
+import type { ImageCrop } from "./imageCrop";
 
 interface PinyinSoundProps {
   id: PinyinSoundId;
   label: string;
   name: string | null;
+  image: {
+    assetId: string;
+    crop: ImageCrop;
+    imageWidth: number | null;
+    imageHeight: number | null;
+  } | null;
 }
 
 export function PinyinSoundTile({
   id,
   name,
   label,
+  image,
   ...props
 }: PinyinSoundProps) {
   true satisfies IsExhaustedRest<typeof props>;
@@ -27,6 +36,18 @@ export function PinyinSoundTile({
         hasAssociation: nullIfEmpty(name) != null,
       })}
     >
+      {image == null ? null : (
+        <View className="absolute inset-0">
+          <FramedAssetImage
+            assetId={image.assetId}
+            crop={image.crop}
+            imageWidth={image.imageWidth}
+            imageHeight={image.imageHeight}
+            className="size-full"
+          />
+          <View className="absolute inset-0 bg-bg-high/70" />
+        </View>
+      )}
       <View className="items-center">
         {decoration == null ? null : (
           <Text
@@ -58,7 +79,7 @@ export function PinyinSoundTile({
 
 const tileClass = tv({
   base: `
-    size-24 items-center justify-center gap-3 rounded-xl bg-bg-high p-2
+    relative h-28 w-24 items-center justify-center gap-3 overflow-hidden rounded-xl bg-bg-high p-2
 
     hover:bg-cyan/20
   `,
