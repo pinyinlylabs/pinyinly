@@ -7,6 +7,12 @@ import { useDb } from "@/client/ui/hooks/useDb";
 import { AssetStatusKind } from "@/data/model";
 import { eq, useLiveQuery } from "@tanstack/react-db";
 import { useEffect, useRef, useState } from "react";
+import type {
+  ImageSourcePropType,
+  LayoutChangeEvent,
+  PanResponderInstance,
+  ViewStyle,
+} from "react-native";
 import {
   ActivityIndicator,
   Image,
@@ -15,25 +21,21 @@ import {
   Text,
   View,
 } from "react-native";
-import type {
-  ImageSourcePropType,
-  LayoutChangeEvent,
-  PanResponderInstance,
-  ViewStyle,
-} from "react-native";
 import { PageSheetModal } from "./PageSheetModal";
 import { RectButton } from "./RectButton";
 import { confirmDiscardChanges } from "./confirmDiscardChanges";
-import {
-  clampImageCropRectNormalized,
-  parseImageCrop,
-  resolveFrameAspectRatio,
-} from "./imageCrop";
 import type {
   ImageCrop,
   ImageCropRect,
   ImageFrameConstraintInput,
 } from "./imageCrop";
+import {
+  clampImageCropRectNormalized,
+  parseImageCrop,
+  resolveFrameAspectRatio,
+} from "./imageCrop";
+import type { CornerHandle } from "./imageCropCalc";
+import { clampRectPx, getMinCropSizePx, resizeRectPx } from "./imageCropCalc";
 
 interface ImageFrameEditorModalProps {
   assetId: string;
@@ -340,7 +342,6 @@ function ImageFrameEditor({
                 currentImageSize.height;
               const startPx = rectToPx(startRect, currentImageSize);
 
-              const minSizePx = getMinCropSizePx(currentImageSize);
               const nextPx = resizeRectPx(
                 startPx,
                 handle,
@@ -348,7 +349,7 @@ function ImageFrameEditor({
                 dyPx,
                 currentAspectRatio,
                 currentImageSize,
-                minSizePx,
+                Platform.OS === `web`,
               );
 
               onCropRectChange(rectFromPx(nextPx, currentImageSize));
@@ -449,8 +450,6 @@ function ImageFrameEditor({
     </View>
   );
 }
-
-type CornerHandle = `topLeft` | `topRight` | `bottomLeft` | `bottomRight`;
 
 function CornerHandleView({
   position,
@@ -799,80 +798,4 @@ function rectFromPx(
     width: rectPx.width / imageSize.width,
     height: rectPx.height / imageSize.height,
   });
-}
-
-function clampRectPx(
-  rectPx: { x: number; y: number; width: number; height: number },
-  imageSize: { width: number; height: number },
-  minSizePx: number,
-) {
-  const width = clamp(rectPx.width, minSizePx, imageSize.width);
-  const height = clamp(rectPx.height, minSizePx, imageSize.height);
-  const x = clamp(rectPx.x, 0, imageSize.width - width);
-  const y = clamp(rectPx.y, 0, imageSize.height - height);
-
-  return { x, y, width, height };
-}
-
-function resizeRectPx(
-  rectPx: { x: number; y: number; width: number; height: number },
-  handle: CornerHandle,
-  dxPx: number,
-  dyPx: number,
-  frameAspectRatio: number | null,
-  imageSize: { width: number; height: number },
-  minSizePx: number,
-) {
-  let x = rectPx.x;
-  let y = rectPx.y;
-  let width = rectPx.width;
-  let height = rectPx.height;
-
-  if (handle === `topLeft` || handle === `bottomLeft`) {
-    x += dxPx;
-    width -= dxPx;
-  } else {
-    width += dxPx;
-  }
-
-  if (handle === `topLeft` || handle === `topRight`) {
-    y += dyPx;
-    height -= dyPx;
-  } else {
-    height += dyPx;
-  }
-
-  if (frameAspectRatio != null) {
-    const useWidth = Math.abs(dxPx) >= Math.abs(dyPx);
-    if (useWidth) {
-      width = clamp(width, minSizePx, imageSize.width);
-      height = width / frameAspectRatio;
-    } else {
-      height = clamp(height, minSizePx, imageSize.height);
-      width = height * frameAspectRatio;
-    }
-
-    if (handle === `topLeft` || handle === `bottomLeft`) {
-      x = rectPx.x + (rectPx.width - width);
-    }
-    if (handle === `topLeft` || handle === `topRight`) {
-      y = rectPx.y + (rectPx.height - height);
-    }
-  }
-
-  return clampRectPx({ x, y, width, height }, imageSize, minSizePx);
-}
-
-function clamp(value: number, min: number, max: number) {
-  if (value < min) {
-    return min;
-  }
-  if (value > max) {
-    return max;
-  }
-  return value;
-}
-
-function getMinCropSizePx(imageSize: { width: number; height: number }) {
-  return Math.max(40, Math.min(imageSize.width, imageSize.height) * 0.05);
 }
