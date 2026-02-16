@@ -15,8 +15,8 @@ import { TrpcProvider } from "./TrpcProvider";
  *   don't conflict with each other.
  * - <TrpcProvider> -- so that authentication uses the server session ID
  *   associated with the device session.
- * - <RizzleProvider> -- so that `useRizzleQuery()` and `useRizzle()`
- *   fetched data is comes from the correct device session.
+ * - <RizzleProvider> -- so that `useRizzle()` fetched data comes from the
+ *   correct device session.
  * - <SkillQueueProvider> -- so that the skill queue is computed and cached
  *   per session, with lazy computation and automatic invalidation.
  */

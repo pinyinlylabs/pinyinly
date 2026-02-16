@@ -1,48 +1,44 @@
-import type { HanziText, HanziWord, Skill, SrsStateType } from "@/data/model";
+import type { HanziWord, Skill, SrsStateType } from "@/data/model";
 import type { Rizzle, SkillRating } from "@/data/rizzleSchema";
 import { currentSchema } from "@/data/rizzleSchema";
 import type { RankedHanziWord } from "@/data/skills";
 import {
-  getHanziWordRank,
-  hanziWordToGlossTyped,
-  hanziWordToPinyinTyped,
-  rankRules,
-  skillLearningGraph,
+    getHanziWordRank,
+    hanziWordToGlossTyped,
+    hanziWordToPinyinTyped,
+    rankRules,
+    skillLearningGraph,
 } from "@/data/skills";
 import type { Dictionary } from "@/dictionary";
 import { getIsStructuralHanzi, loadDictionary } from "@/dictionary";
 import { devToolsSlowQuerySleepIfEnabled } from "@/util/devtools";
 import type { Rating } from "@/util/fsrs";
 import type {
-  RizzleAnyEntity,
-  RizzleEntityMarshaled,
-  RizzleEntityOutput,
+    RizzleAnyEntity,
+    RizzleEntityMarshaled,
+    RizzleEntityOutput,
 } from "@/util/rizzle";
 import {
-  arrayFilterUniqueWithKey,
-  memoize0,
-  sortComparatorNumber,
+    arrayFilterUniqueWithKey,
+    memoize0,
+    sortComparatorNumber,
 } from "@pinyinly/lib/collections";
 import { nonNullable } from "@pinyinly/lib/invariant";
 import type { Collection, CollectionConfig } from "@tanstack/react-db";
 import {
-  and,
-  createCollection,
-  createLiveQueryCollection,
-  eq,
-  gte,
-  isNull,
-  isUndefined,
-  or,
+    and,
+    createCollection,
+    createLiveQueryCollection,
+    eq,
+    gte,
+    isNull,
+    isUndefined,
+    or,
 } from "@tanstack/react-db";
 import { queryOptions, skipToken } from "@tanstack/react-query";
 import { subDays } from "date-fns/subDays";
 import type { DeviceStoreEntity } from "./deviceStore";
 import { buildDeviceStoreKey, deviceStoreGet } from "./deviceStore";
-
-export type WithRizzleWatchPrefixes<T> = T & {
-  rizzleWatchPrefixes?: string[];
-};
 
 type ExpressionLike = Parameters<typeof isUndefined>[0];
 const isNullish = (value: ExpressionLike) =>
@@ -265,21 +261,6 @@ export async function getAllTargetSkills(): Promise<Skill[]> {
     hanziWordToPinyinTyped(w),
   ]);
 }
-
-export const hanziMeaningsQuery = (hanzi: HanziText) =>
-  queryOptions({
-    queryKey: [`hanziMeanings`, hanzi],
-    queryFn: async () => {
-      await devToolsSlowQuerySleepIfEnabled();
-      const dictionary = await loadDictionary();
-      return dictionary.lookupHanzi(hanzi);
-    },
-    networkMode: `offlineFirst`,
-    retry: false,
-    structuralSharing: false,
-    staleTime: Infinity,
-    throwOnError: true,
-  });
 
 export const fetchArrayBufferQuery = (uri: string | null) =>
   queryOptions({

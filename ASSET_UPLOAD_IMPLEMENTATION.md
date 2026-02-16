@@ -106,11 +106,11 @@ import { trpc } from "@/client/query";
 import { useRizzle } from "@/client/ui/hooks/useRizzle";
 
 async function uploadImage(file: File) {
-  const rep = useRizzle();
+  const r = useRizzle();
   const assetId = nanoid();
 
   // 1. Optimistically create pending asset
-  await rep.mutate.initAsset({
+  await r.mutate.initAsset({
     assetId,
     contentType: file.type,
     contentLength: file.size,
@@ -132,7 +132,7 @@ async function uploadImage(file: File) {
   });
 
   // 4. Confirm upload
-  await rep.mutate.confirmAssetUpload({
+  await r.mutate.confirmAssetUpload({
     assetId,
     now: new Date(),
   });
@@ -141,7 +141,7 @@ async function uploadImage(file: File) {
   const { success } = await trpc.asset.confirmUpload.mutate({ assetId });
 
   if (!success) {
-    await rep.mutate.failAssetUpload({
+    await r.mutate.failAssetUpload({
       assetId,
       errorMessage: "Upload verification failed",
       now: new Date(),
@@ -155,13 +155,13 @@ async function uploadImage(file: File) {
 ### Querying Assets
 
 ```typescript
-const rep = useRizzle();
+const r = useRizzle();
 
 // Get a specific asset
-const asset = await rep.query((tx) => tx.asset.get({ assetId: "abc123" }));
+const asset = await r.query((tx) => tx.asset.get({ assetId: "abc123" }));
 
 // Get all assets
-const assets = await rep.query((tx) => tx.asset.scan({}).toArray());
+const assets = await r.query((tx) => tx.asset.scan({}).toArray());
 
 // Get pending uploads
 const pending = assets.filter(([, a]) => a.status === AssetStatusKind.Pending);

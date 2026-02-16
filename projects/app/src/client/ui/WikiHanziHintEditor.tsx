@@ -38,7 +38,7 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
   // Load character data
   const characterData = use(getWikiCharacterData(hanzi)) ?? null;
 
-  const rep = useRizzle();
+  const r = useRizzle();
   const hintSettingKey = { hanziWord };
   const hintSetting = useUserSetting(
     hanziWordMeaningHintTextSetting,
@@ -99,7 +99,7 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
             ),
           );
 
-    void rep.mutate.setSetting({
+    void r.mutate.setSetting({
       key: hanziWordMeaningHintTextSetting.marshalKey({
         hanziWord: hintHanziWord,
       }),
@@ -129,7 +129,7 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
             ),
           );
 
-    void rep.mutate.setSetting({
+    void r.mutate.setSetting({
       key: hanziWordMeaningHintExplanationSetting.marshalKey({
         hanziWord: hintHanziWord,
       }),
@@ -159,7 +159,7 @@ export function WikiHanziHintEditor({ hanziWord }: WikiHanziHintEditorProps) {
             ),
           );
 
-    void rep.mutate.setSetting({
+    void r.mutate.setSetting({
       key: hanziWordMeaningHintImageSetting.marshalKey({
         hanziWord: hintHanziWord,
       }),
