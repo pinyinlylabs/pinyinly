@@ -405,8 +405,9 @@ const navItems: NavGroup[] = [
     title: `Settings`,
     primary: true,
     items: [
-      { name: `Appearance`, href: `/settings/appearance` },
       { name: `Profile`, href: `/settings/profile` },
+      { name: `Accounts`, href: `/settings/accounts` },
+      { name: `Appearance`, href: `/settings/appearance` },
       // { name: `Courses`, href: `/settings/courses` },
       // { name: `Notifications`, href: `/settings/notifications` },
       // { name: `Billing`, href: `/settings/billing` },

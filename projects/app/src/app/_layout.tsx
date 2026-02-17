@@ -25,8 +25,8 @@ import { Image } from "expo-image";
 import { Stack, useNavigationContainerRef } from "expo-router";
 import Head from "expo-router/head";
 import { cssInterop } from "nativewind";
-import { useEffect } from "react";
 import type { PropsWithChildren } from "react";
+import { useEffect } from "react";
 import { Platform } from "react-native";
 import Reanimated from "react-native-reanimated";
 

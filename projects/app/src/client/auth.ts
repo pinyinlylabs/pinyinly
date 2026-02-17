@@ -1,6 +1,6 @@
 import { trpc } from "@/client/trpc";
-import { r } from "@/util/rizzle";
 import type { RizzleEntityOutput } from "@/util/rizzle";
+import { r } from "@/util/rizzle";
 import { invariant } from "@pinyinly/lib/invariant";
 import {
   startAuthentication,
@@ -29,6 +29,11 @@ const deviceSessionSchema = z.object({
   serverSessionId: z.string().optional(),
   userId: z.string().optional(),
   userName: z.string().optional(),
+  /**
+   * Authentication method used for this session.
+   * Undefined for anonymous sessions.
+   */
+  authMethod: z.enum([`apple`, `passkey`]).optional(),
 });
 
 type DeviceSession = z.infer<typeof deviceSessionSchema>;
@@ -61,7 +66,10 @@ type AuthApi = {
    * This is useful for local development on a phone when you can't use OAuth2
    * sign-in providers because the URL doesn't match.
    */
-  logInWithServerSessionId: (serverSessionId: string) => void;
+  logInWithServerSessionId: (
+    serverSessionId: string,
+    authMethod?: `apple` | `passkey`,
+  ) => void;
   logInToExistingDeviceSession: (
     predicate: (deviceSession: DeviceSession) => boolean,
   ) => boolean;
@@ -145,7 +153,7 @@ export function useAuth(): AuthApi {
 
     if (res2.verified) {
       const { session } = res2;
-      signInWithServerSessionId(session.id);
+      signInWithServerSessionId(session.id, `passkey`);
     } else {
       console.error(`Passkey authentication failed`, res2);
     }
@@ -164,7 +172,7 @@ export function useAuth(): AuthApi {
 
     if (res2.verified) {
       const { session } = res2;
-      signInWithServerSessionId(session.id);
+      signInWithServerSessionId(session.id, `passkey`);
     } else {
       console.error(`Passkey authentication failed`, res2);
     }
@@ -186,6 +194,7 @@ export function useAuth(): AuthApi {
         existingSession ??
         makeDeviceSession({
           serverSessionId: session.id,
+          authMethod: `apple`,
           // userId: session.userId, // TODO: implement
           // userName: session.userName, // TODO: implement
         });
@@ -231,7 +240,7 @@ export function useAuth(): AuthApi {
   const signInWithServerSessionId = useCallback<
     AuthApi[`logInWithServerSessionId`]
   >(
-    (serverSessionId: string) => {
+    (serverSessionId: string, authMethod?: `apple` | `passkey`) => {
       invariant(data != null, `expected auth state to be initialized`);
 
       // Try activating an existing session first.
@@ -242,7 +251,7 @@ export function useAuth(): AuthApi {
         return;
       }
 
-      const newSession = makeDeviceSession({ serverSessionId });
+      const newSession = makeDeviceSession({ serverSessionId, authMethod });
       authState.setValue({
         deviceSessions: [newSession, ...data.allDeviceSessions],
       });
@@ -282,7 +291,7 @@ export function useAuth(): AuthApi {
 }
 
 function makeDeviceSession(
-  opts?: Pick<DeviceSession, `serverSessionId`>,
+  opts?: Pick<DeviceSession, `serverSessionId` | `authMethod`>,
 ): DeviceSession {
   return {
     ...opts,
