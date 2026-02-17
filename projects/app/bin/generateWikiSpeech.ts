@@ -151,16 +151,18 @@ async function generateWikiSpeech(
     console.log(`Base filename: ${baseFileName}`);
   }
 
-  // Check if OPENAI_API_KEY is set
+  // Check if PYLY_OPENAI_API_KEY is set
   if (
-    process.env[`OPENAI_API_KEY`] == null ||
-    process.env[`OPENAI_API_KEY`] === ``
+    process.env[`PYLY_OPENAI_API_KEY`] == null ||
+    process.env[`PYLY_OPENAI_API_KEY`] === ``
   ) {
-    console.error(`Error: OPENAI_API_KEY environment variable is not set.`);
     console.error(
-      `Please set your OpenAI API key: export OPENAI_API_KEY='your-api-key'`,
+      `Error: PYLY_OPENAI_API_KEY environment variable is not set.`,
     );
-    throw new Error(`OPENAI_API_KEY environment variable is not set`);
+    console.error(
+      `Please set your OpenAI API key: export PYLY_OPENAI_API_KEY='your-api-key'`,
+    );
+    throw new Error(`PYLY_OPENAI_API_KEY environment variable is not set`);
   }
 
   const openai = new OpenAI();

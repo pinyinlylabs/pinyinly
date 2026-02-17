@@ -1,7 +1,7 @@
 import { Section } from "@/client/ui/demo/components";
 import { devToolsSlowQuerySleepIfEnabled } from "@/util/devtools";
-import { lazy } from "react";
 import type { FunctionComponent } from "react";
+import { lazy } from "react";
 
 export default function UiDemoIndexPage() {
   return (
@@ -26,6 +26,7 @@ const lazyDemo = <Demo extends FunctionComponent>(
 // prettier-ignore
 export const demos: Record<string, FunctionComponent> = {
   // <pyly-glob-template glob="../../../**/*.demo.tsx" template="  [`${filenameWithoutExt.split('.')[0]}`]: lazyDemo(() => import(`${pathWithoutExt}`)),">
+  [`AiPronunciationHintModal`]: lazyDemo(() => import(`../../../client/ui/AiPronunciationHintModal.demo`)),
   [`CloseButton`]: lazyDemo(() => import(`../../../client/ui/CloseButton.demo`)),
   [`Colors`]: lazyDemo(() => import(`../../../client/ui/Colors.demo`)),
   [`FloatingMenuModal`]: lazyDemo(() => import(`../../../client/ui/FloatingMenuModal.demo`)),

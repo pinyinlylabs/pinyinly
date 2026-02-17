@@ -1,18 +1,24 @@
 import {
   getHanziPronunciationHintKeyParams,
+  getPinyinFinalToneKeyParams,
   hanziPronunciationHintExplanationSetting,
   hanziPronunciationHintImageSetting,
   hanziPronunciationHintTextSetting,
+  pinyinFinalToneDescriptionSetting,
+  pinyinSoundDescriptionSetting,
   pinyinSoundNameSetting,
   useUserSetting,
 } from "@/client/ui/hooks/useUserSetting";
 import type { HanziText, PinyinUnit } from "@/data/model";
 import { splitPinyinUnit } from "@/data/pinyin";
 import type { ReactNode } from "react";
+import { useState } from "react";
 import { Text, View } from "react-native";
+import { AiPronunciationHintModal } from "./AiPronunciationHintModal";
 import { InlineEditableSettingImage } from "./InlineEditableSettingImage";
 import { InlineEditableSettingText } from "./InlineEditableSettingText";
 import { Pylymark } from "./Pylymark";
+import { RectButton } from "./RectButton";
 import { ThreeSplitLinesDown } from "./ThreeSplitLinesDown";
 
 export function WikiHanziCharacterPronunciation({
@@ -42,11 +48,51 @@ export function WikiHanziCharacterPronunciation({
     skipSoundSettings ? { skip: true } : { soundId: splitPinyin.toneSoundId },
   );
 
+  const initialDescriptionSetting = useUserSetting(
+    pinyinSoundDescriptionSetting,
+    skipSoundSettings
+      ? { skip: true }
+      : { soundId: splitPinyin.initialSoundId },
+  );
+  const finalDescriptionSetting = useUserSetting(
+    pinyinSoundDescriptionSetting,
+    skipSoundSettings ? { skip: true } : { soundId: splitPinyin.finalSoundId },
+  );
+  const toneDescriptionSetting = useUserSetting(
+    pinyinSoundDescriptionSetting,
+    skipSoundSettings ? { skip: true } : { soundId: splitPinyin.toneSoundId },
+  );
+  const finalToneDescriptionSetting = useUserSetting(
+    pinyinFinalToneDescriptionSetting,
+    skipSoundSettings
+      ? { skip: true }
+      : getPinyinFinalToneKeyParams(
+          splitPinyin.finalSoundId,
+          String(splitPinyin.tone),
+        ),
+  );
+
   const initialPinyinSoundName = initialPinyinSound2?.value?.text;
   const finalPinyinSoundName = finalPinyinSound2?.value?.text;
   const tonePinyinSoundName = tonePinyinSound2?.value?.text;
 
+  const initialSoundDescription =
+    initialDescriptionSetting?.value?.text ?? null;
+  const finalSoundDescription = finalDescriptionSetting?.value?.text ?? null;
+  const toneSoundDescription = toneDescriptionSetting?.value?.text ?? null;
+  const finalToneSceneDescription =
+    finalToneDescriptionSetting?.value?.text ?? null;
+
   const hintSettingKey = getHanziPronunciationHintKeyParams(hanzi, pinyinUnit);
+  const hintTextSetting = useUserSetting(
+    hanziPronunciationHintTextSetting,
+    hintSettingKey,
+  );
+  const hintExplanationSetting = useUserSetting(
+    hanziPronunciationHintExplanationSetting,
+    hintSettingKey,
+  );
+  const [showAiModal, setShowAiModal] = useState(false);
 
   const handleUploadError = (error: string) => {
     console.error(`Upload error:`, error);
@@ -140,6 +186,21 @@ export function WikiHanziCharacterPronunciation({
           />
         </View>
 
+        <View className="flex-row items-center justify-between">
+          <Text className="text-[13px] text-fg-dim">
+            Want help brainstorming a hint?
+          </Text>
+          <RectButton
+            variant="bare"
+            onPress={() => {
+              setShowAiModal(true);
+            }}
+            disabled={splitPinyin == null}
+          >
+            Use AI
+          </RectButton>
+        </View>
+
         <View className="gap-2 pt-2">
           <Text className="pyly-body-subheading">Choose an image</Text>
           <InlineEditableSettingImage
@@ -153,6 +214,48 @@ export function WikiHanziCharacterPronunciation({
           />
         </View>
       </View>
+
+      {showAiModal && splitPinyin != null ? (
+        <AiPronunciationHintModal
+          hanzi={hanzi}
+          pinyinUnit={pinyinUnit}
+          gloss={gloss}
+          initial={{
+            soundId: splitPinyin.initialSoundId,
+            name: initialPinyinSoundName ?? null,
+            description: initialSoundDescription,
+          }}
+          final={{
+            soundId: splitPinyin.finalSoundId,
+            name: finalPinyinSoundName ?? null,
+            description: finalSoundDescription,
+          }}
+          tone={{
+            soundId: splitPinyin.toneSoundId,
+            name: tonePinyinSoundName ?? null,
+            description: toneSoundDescription,
+          }}
+          toneNumber={splitPinyin.tone}
+          finalToneScene={{ description: finalToneSceneDescription }}
+          onApplyHint={({ text, explanation }) => {
+            hintTextSetting.setValue({
+              hanzi,
+              pinyin: hintSettingKey.pinyin,
+              text,
+            });
+            if (explanation != null && explanation.length > 0) {
+              hintExplanationSetting.setValue({
+                hanzi,
+                pinyin: hintSettingKey.pinyin,
+                text: explanation,
+              });
+            }
+          }}
+          onDismiss={() => {
+            setShowAiModal(false);
+          }}
+        />
+      ) : null}
     </View>
   );
 }
