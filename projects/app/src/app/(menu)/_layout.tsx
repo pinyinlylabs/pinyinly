@@ -4,13 +4,13 @@ import { IconImage } from "@/client/ui/IconImage";
 import { MenuDictionarySearch } from "@/client/ui/MenuDictionarySearch";
 import { RectButton } from "@/client/ui/RectButton";
 import { invariant } from "@pinyinly/lib/invariant";
-import { Link, usePathname } from "expo-router";
 import type { Href } from "expo-router";
-import { TabList, Tabs, TabSlot, TabTrigger } from "expo-router/ui";
+import { Link, usePathname } from "expo-router";
 import type { TabTriggerProps, TabTriggerSlotProps } from "expo-router/ui";
+import { TabList, Tabs, TabSlot, TabTrigger } from "expo-router/ui";
 import { StatusBar } from "expo-status-bar";
-import { Fragment, useLayoutEffect, useState } from "react";
 import type { FunctionComponent, ReactNode } from "react";
+import { Fragment, useLayoutEffect, useState } from "react";
 import { Modal, Pressable, ScrollView, Text, View } from "react-native";
 import { tv } from "tailwind-variants";
 
@@ -406,7 +406,7 @@ const navItems: NavGroup[] = [
     primary: true,
     items: [
       { name: `Appearance`, href: `/settings/appearance` },
-      // { name: `Profile`, href: `/settings/profile` },
+      { name: `Profile`, href: `/settings/profile` },
       // { name: `Courses`, href: `/settings/courses` },
       // { name: `Notifications`, href: `/settings/notifications` },
       // { name: `Billing`, href: `/settings/billing` },

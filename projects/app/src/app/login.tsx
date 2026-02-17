@@ -4,22 +4,160 @@ import { RectButton } from "@/client/ui/RectButton";
 import { SessionStoreProvider } from "@/client/ui/SessionStoreProvider";
 import { SignInWithAppleButton } from "@/client/ui/SignInWithAppleButton";
 import { TextInputSingle } from "@/client/ui/TextInputSingle";
-import { invariant } from "@pinyinly/lib/invariant";
 import { useLiveQuery } from "@tanstack/react-db";
-import * as AppleAuthentication from "expo-apple-authentication";
 import { Link } from "expo-router";
 import { useState } from "react";
-import { Platform, Text, View } from "react-native";
-import z from "zod/v4";
+import { Platform, ScrollView, Text, View } from "react-native";
 
 export default function LoginPage() {
   const auth = useAuth();
 
-  const [name, setName] = useState(``);
+  const [passkeyName, setPasskeyName] = useState(``);
+  const [showDevTools, setShowDevTools] = useState(false);
+  // Web: Show friendly user-facing sign-up/log-in interface
+  if (Platform.OS === `web`) {
+    return (
+      <ScrollView className="flex-1 bg-bg">
+        <View className="items-center justify-center gap-8 px-6 py-12">
+          {/* Header */}
+          <View className="max-w-lg gap-2 text-center">
+            <Text className="text-3xl font-bold text-fg">
+              Welcome to Pinyinly
+            </Text>
+            <Text className="text-base text-fg-dim">
+              Learn to read, write, and speak Mandarin Chinese with spaced
+              repetition.
+            </Text>
+          </View>
 
+          {/* Sign Up Section */}
+          <View
+            className={`w-full max-w-lg gap-4 rounded-lg border bg-bg-high p-6`}
+          >
+            <View className="gap-2">
+              <Text className="text-lg font-semibold text-fg">New here?</Text>
+              <Text className="text-sm text-fg-dim">
+                Create an account to start learning.
+              </Text>
+            </View>
+
+            {/* Apple Sign-Up */}
+            <View className="gap-3">
+              <SignInWithAppleButton
+                clientId="ly.pinyin.auth"
+                onSuccess={(data) => {
+                  void auth.logInWithApple(data.authorization.id_token);
+                }}
+                redirectUri={`https://${location.hostname}/api/auth/login/apple/callback`}
+              />
+              <Text className="text-center text-xs text-fg-dim">
+                Sign up with your Apple ID
+              </Text>
+            </View>
+
+            {/* Passkey Sign-Up */}
+            <View className="gap-3">
+              <View className="gap-2">
+                <TextInputSingle
+                  placeholder={`Your name`}
+                  onChangeText={(text) => {
+                    setPasskeyName(text);
+                  }}
+                  value={passkeyName}
+                />
+              </View>
+              <RectButton
+                onPressIn={() => {
+                  auth
+                    .signUpWithPasskey({ name: passkeyName })
+                    .catch((error: unknown) => {
+                      console.error(`failed to sign up with passkey`, error);
+                    });
+                }}
+              >
+                Create account with Passkey
+              </RectButton>
+              <Text className="text-center text-xs text-fg-dim">
+                Or use a passkey (fingerprint, face, or security key)
+              </Text>
+            </View>
+          </View>
+
+          {/* Log In Section */}
+          <View
+            className={`w-full max-w-lg gap-4 rounded-lg border bg-bg-high p-6`}
+          >
+            <View className="gap-2">
+              <Text className="text-lg font-semibold text-fg">
+                Already have an account?
+              </Text>
+              <Text className="text-sm text-fg-dim">
+                Sign in to continue learning.
+              </Text>
+            </View>
+
+            {/* Passkey Log In */}
+            <View className="gap-3">
+              <RectButton
+                onPressIn={() => {
+                  auth.logInWithPasskey().catch((error: unknown) => {
+                    console.error(`failed to log in with passkey`, error);
+                  });
+                }}
+              >
+                Log in with Passkey
+              </RectButton>
+              <Text className="text-center text-xs text-fg-dim">
+                Use your saved passkey to sign in
+              </Text>
+            </View>
+          </View>
+
+          {/* Footer */}
+          <View className="mt-4 gap-2" style={{ width: `100%`, maxWidth: 448 }}>
+            <DevToolsSection
+              collapsible
+              isOpen={showDevTools}
+              onToggle={() => {
+                setShowDevTools(!showDevTools);
+              }}
+              styled
+            />
+            <GoHomeButton />
+          </View>
+        </View>
+      </ScrollView>
+    );
+  }
+
+  // iOS and other platforms: Return to original focused UI
   return (
     <View className="flex-1 items-center justify-center gap-[10px] bg-bg">
-      <Text className="font-bold text-fg">Passkey</Text>
+      <Text className="font-bold text-fg">Sign up</Text>
+      <View className="gap-2">
+        <View className="flex-row gap-2 border-y">
+          <TextInputSingle
+            placeholder={`Name`}
+            onChangeText={(text) => {
+              setPasskeyName(text);
+            }}
+            value={passkeyName}
+          />
+          <RectButton
+            onPressIn={() => {
+              auth
+                .signUpWithPasskey({ name: passkeyName })
+                .catch((error: unknown) => {
+                  console.error(`failed to sign up with passkey`, error);
+                });
+            }}
+          >
+            Create Passkey
+          </RectButton>
+        </View>
+      </View>
+
+      <Text className="font-bold text-fg">Log in</Text>
       <View className="gap-2">
         <View className="flex-row gap-2 border-y">
           <RectButton
@@ -32,69 +170,9 @@ export default function LoginPage() {
             Log in with Passkey
           </RectButton>
         </View>
-        <View className="flex-row gap-2 border-y">
-          <RectButton
-            onPressIn={() => {
-              auth.logInWithPasskey().catch((error: unknown) => {
-                console.error(`failed to log in with passkey`, error);
-              });
-            }}
-          >
-            Log in with Passkey (conditional UI)
-          </RectButton>
-          <input type="button" autoComplete="webauthn" />
-        </View>
-        <View className="flex-row gap-2 border-y">
-          <TextInputSingle
-            placeholder={`Name`}
-            onChangeText={(text) => {
-              setName(text);
-            }}
-            value={name}
-          />
-          <RectButton
-            onPressIn={() => {
-              auth.signUpWithPasskey({ name }).catch((error: unknown) => {
-                console.error(`failed to log in with passkey`, error);
-              });
-            }}
-          >
-            Sign up with Passkey
-          </RectButton>
-        </View>
       </View>
 
-      <Text className="font-bold text-fg">Login</Text>
-      <View className="gap-2">
-        {auth.data?.allDeviceSessions.map((x, i) => (
-          <SessionStoreProvider key={i} dbName={x.replicacheDbName}>
-            <View key={i} className="flex-row gap-2 border-y">
-              <View className="flex-1">
-                <Text className="text-fg">
-                  Skill count: <SkillCount />
-                </Text>
-                <Text className="text-fg">Session ID: {x.serverSessionId}</Text>
-                <Text className="text-fg">DB name: {x.replicacheDbName}</Text>
-              </View>
-              <RectButton
-                onPressIn={() => {
-                  auth.logInToExistingDeviceSession(
-                    (s) => s.replicacheDbName === x.replicacheDbName,
-                  );
-                }}
-              >
-                Log in
-              </RectButton>
-            </View>
-          </SessionStoreProvider>
-        ))}
-      </View>
-      <Text className="text-fg">
-        Session ID: {auth.data?.activeDeviceSession.serverSessionId}
-      </Text>
-      <Text className="text-fg">
-        DB name: {auth.data?.activeDeviceSession.replicacheDbName}
-      </Text>
+      <DevToolsSection />
 
       <RectButton
         onPressIn={() => {
@@ -103,66 +181,6 @@ export default function LoginPage() {
       >
         Logout
       </RectButton>
-      {__DEV__ ? <ServerSessionIdLoginForm /> : null}
-
-      {Platform.OS === `web` ? (
-        <SignInWithAppleButton
-          clientId="ly.pinyin.auth"
-          onSuccess={(data) => {
-            void auth.logInWithApple(data.authorization.id_token);
-          }}
-          redirectUri={`https://${location.hostname}/api/auth/login/apple/callback`}
-        />
-      ) : null}
-
-      {Platform.OS === `ios` ? (
-        <AppleAuthentication.AppleAuthenticationButton
-          buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
-          buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
-          cornerRadius={5}
-          className="h-[44px] w-[200px]"
-          // oxlint-disable-next-line typescript/no-misused-promises
-          onPress={async () => {
-            let credential;
-            try {
-              credential = await AppleAuthentication.signInAsync({
-                requestedScopes: [
-                  AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
-                  AppleAuthentication.AppleAuthenticationScope.EMAIL,
-                ],
-              });
-            } catch (error) {
-              const err = z.object({ code: z.string() }).safeParse(error);
-              if (err.success) {
-                switch (err.data.code) {
-                  case `ERR_REQUEST_CANCELED`: {
-                    // handle that the user canceled the sign-in flow
-                    console.error(`request canceled`);
-                    break;
-                  }
-                  default: {
-                    console.error(
-                      `unknown error code=${err.data.code}, error=`,
-                      err.data,
-                    );
-                  }
-                }
-              } else {
-                console.error(`unknown error (no code), error=`, error);
-              }
-
-              return;
-            }
-
-            invariant(credential.identityToken != null);
-
-            void auth.logInWithApple(credential.identityToken);
-          }}
-        />
-      ) : null}
-      <Link href="/dev/demo" asChild>
-        <RectButton variant="filled">Dev demo</RectButton>
-      </Link>
 
       <GoHomeButton />
     </View>
@@ -211,4 +229,92 @@ function SkillCount() {
   ) : (
     <Text className="text-fg">{count} words</Text>
   );
+}
+
+interface DevToolsSectionProps {
+  /** If true, shows a toggle button to reveal dev tools (web behavior) */
+  collapsible?: boolean;
+  isOpen?: boolean;
+  onToggle?: () => void;
+  /** If true, wraps in a styled container (web behavior) */
+  styled?: boolean;
+}
+
+function DevToolsSection({
+  collapsible = false,
+  isOpen = false,
+  onToggle,
+  styled = false,
+}: DevToolsSectionProps) {
+  const auth = useAuth();
+
+  if (!__DEV__) {
+    return null;
+  }
+
+  const content = (
+    <>
+      <Text className="font-bold text-fg">Dev: Session List</Text>
+      <View className="gap-2">
+        {auth.data?.allDeviceSessions.map((x, i) => (
+          <SessionStoreProvider key={i} dbName={x.replicacheDbName}>
+            <View
+              key={i}
+              className={
+                styled ? `gap-1 border-y p-2` : `flex-row gap-2 border-y`
+              }
+            >
+              <View className={styled ? undefined : `flex-1`}>
+                <Text className={styled ? `text-sm text-fg` : `text-fg`}>
+                  Skill count: <SkillCount />
+                </Text>
+                <Text className={styled ? `text-sm text-fg` : `text-fg`}>
+                  Session ID: {x.serverSessionId}
+                </Text>
+                <Text className={styled ? `text-sm text-fg` : `text-fg`}>
+                  DB name: {x.replicacheDbName}
+                </Text>
+              </View>
+              <RectButton
+                onPressIn={() => {
+                  auth.logInToExistingDeviceSession(
+                    (s) => s.replicacheDbName === x.replicacheDbName,
+                  );
+                }}
+              >
+                Log in
+              </RectButton>
+            </View>
+          </SessionStoreProvider>
+        ))}
+      </View>
+      <Text className={styled ? `text-sm text-fg` : `text-fg`}>
+        Active Session ID: {auth.data?.activeDeviceSession.serverSessionId}
+      </Text>
+      <Text className={styled ? `text-sm text-fg` : `text-fg`}>
+        Active DB name: {auth.data?.activeDeviceSession.replicacheDbName}
+      </Text>
+      <ServerSessionIdLoginForm />
+      <Link href="/dev/demo" asChild>
+        <RectButton variant="filled">Dev demo</RectButton>
+      </Link>
+    </>
+  );
+
+  if (collapsible && onToggle) {
+    return (
+      <>
+        <RectButton onPressIn={onToggle} variant="filled">
+          {isOpen ? `Hide` : `Show`} Dev Tools
+        </RectButton>
+        {isOpen ? (
+          <View className="gap-3 rounded-lg border bg-bg-high p-4">
+            {content}
+          </View>
+        ) : null}
+      </>
+    );
+  }
+
+  return content;
 }
