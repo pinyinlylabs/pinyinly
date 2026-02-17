@@ -5,12 +5,21 @@ import {
   hanziPronunciationHintImageSetting,
   hanziPronunciationHintTextSetting,
   pinyinFinalToneDescriptionSetting,
+  pinyinFinalToneNameSetting,
   pinyinSoundDescriptionSetting,
   pinyinSoundNameSetting,
   useUserSetting,
 } from "@/client/ui/hooks/useUserSetting";
 import type { HanziText, PinyinUnit } from "@/data/model";
-import { splitPinyinUnit } from "@/data/pinyin";
+import {
+  defaultPinyinSoundInstructions,
+  defaultToneNames,
+  getDefaultFinalToneName,
+  loadPylyPinyinChart,
+  splitPinyinUnit,
+} from "@/data/pinyin";
+import type { RelativePathString } from "expo-router";
+import { Link } from "expo-router";
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { Text, View } from "react-native";
@@ -32,6 +41,7 @@ export function WikiHanziCharacterPronunciation({
 }) {
   const splitPinyin = splitPinyinUnit(pinyinUnit);
   const skipSoundSettings = splitPinyin == null;
+  const chart = loadPylyPinyinChart();
 
   const initialPinyinSound2 = useUserSetting(
     pinyinSoundNameSetting,
@@ -71,6 +81,15 @@ export function WikiHanziCharacterPronunciation({
           String(splitPinyin.tone),
         ),
   );
+  const finalToneNameSetting = useUserSetting(
+    pinyinFinalToneNameSetting,
+    skipSoundSettings
+      ? { skip: true }
+      : getPinyinFinalToneKeyParams(
+          splitPinyin.finalSoundId,
+          String(splitPinyin.tone),
+        ),
+  );
 
   const initialPinyinSoundName = initialPinyinSound2?.value?.text;
   const finalPinyinSoundName = finalPinyinSound2?.value?.text;
@@ -82,6 +101,31 @@ export function WikiHanziCharacterPronunciation({
   const toneSoundDescription = toneDescriptionSetting?.value?.text ?? null;
   const finalToneSceneDescription =
     finalToneDescriptionSetting?.value?.text ?? null;
+
+  const initialLabel =
+    splitPinyin == null
+      ? ``
+      : (chart.soundToCustomLabel[splitPinyin.initialSoundId] ??
+        splitPinyin.initialSoundId);
+  const finalLabel =
+    splitPinyin == null
+      ? ``
+      : (chart.soundToCustomLabel[splitPinyin.finalSoundId] ??
+        splitPinyin.finalSoundId);
+  const toneDefaultName =
+    splitPinyin == null
+      ? ``
+      : (defaultToneNames[String(splitPinyin.tone)] ??
+        defaultPinyinSoundInstructions[splitPinyin.toneSoundId] ??
+        String(splitPinyin.tone));
+  const finalDisplayName = finalPinyinSoundName ?? finalLabel;
+  const toneDisplayName = tonePinyinSoundName ?? toneDefaultName;
+  const defaultFinalToneName = getDefaultFinalToneName({
+    finalName: finalDisplayName,
+    toneName: toneDisplayName,
+  });
+  const finalToneName =
+    finalToneNameSetting?.value?.text ?? defaultFinalToneName;
 
   const hintSettingKey = getHanziPronunciationHintKeyParams(hanzi, pinyinUnit);
   const hintTextSetting = useUserSetting(
@@ -130,34 +174,46 @@ export function WikiHanziCharacterPronunciation({
               </View>
               <View className="flex-row gap-4">
                 <View className="flex-1 items-center gap-1 border-fg/10">
-                  <Text className="pyly-body text-center text-fg/50">
-                    {splitPinyin.initialSoundId}
-                  </Text>
-                  {initialPinyinSoundName == null ? null : (
-                    <ArrowToSoundName>
-                      {initialPinyinSoundName}
-                    </ArrowToSoundName>
-                  )}
+                  <SoundLinkBlock
+                    href={`/sounds/${splitPinyin.initialSoundId}`}
+                    label={initialLabel}
+                    name={initialPinyinSoundName ?? null}
+                  />
                 </View>
                 <View className="flex-1 items-center gap-1 border-fg/10">
-                  <Text className="pyly-body text-center text-fg/50">
-                    {splitPinyin.finalSoundId}
-                  </Text>
-                  {finalPinyinSoundName == null ? null : (
-                    <ArrowToSoundName>{finalPinyinSoundName}</ArrowToSoundName>
-                  )}
+                  <SoundLinkBlock
+                    href={`/sounds/${splitPinyin.finalSoundId}`}
+                    label={finalLabel}
+                    name={null}
+                  />
                 </View>
                 <View className="flex-1 items-center gap-1 border-fg/10">
-                  <Text className="pyly-body text-center text-fg/50">
-                    {splitPinyin.tone}
-                    <Text className="align-super text-[10px]">
-                      {ordinalSuffix(splitPinyin.tone)}
-                    </Text>
-                  </Text>
-                  {tonePinyinSoundName == null ? null : (
-                    <ArrowToSoundName>{tonePinyinSoundName}</ArrowToSoundName>
-                  )}
+                  <SoundLinkBlock
+                    href={`/sounds/${splitPinyin.toneSoundId}`}
+                    label={
+                      <>
+                        {splitPinyin.tone}
+                        <Text className="align-super text-[10px]">
+                          {ordinalSuffix(splitPinyin.tone)}
+                        </Text>
+                      </>
+                    }
+                    name={null}
+                  />
                 </View>
+              </View>
+              <View className="mt-3 items-center gap-2">
+                <FinalToneForkedArrow />
+                <Link
+                  href={
+                    `/sounds/${splitPinyin.finalSoundId}?tone=${splitPinyin.tone}` as RelativePathString
+                  }
+                  asChild
+                >
+                  <RectButton variant="bare" className="items-center">
+                    <SoundNameLabel>{finalToneName}</SoundNameLabel>
+                  </RectButton>
+                </Link>
               </View>
             </View>
           </View>
@@ -260,12 +316,66 @@ export function WikiHanziCharacterPronunciation({
   );
 }
 
-function ArrowToSoundName({ children }: { children: ReactNode }) {
+function SoundLinkBlock({
+  href,
+  label,
+  name,
+}: {
+  href: string;
+  label: ReactNode;
+  name: string | null;
+}) {
   return (
-    <>
-      <DownArrow />
-      <Text className="pyly-body pyly-ref text-center">{children}</Text>
-    </>
+    <View className="w-full items-center gap-1">
+      <Link href={href as RelativePathString} asChild>
+        <RectButton variant="bare">
+          <Text className="pyly-body pyly-ref text-center text-fg/50">
+            {label}
+          </Text>
+        </RectButton>
+      </Link>
+      {name == null ? null : (
+        <>
+          <DownArrow />
+          <Link href={href as RelativePathString} asChild>
+            <RectButton variant="bare">
+              <SoundNameLabel>{name}</SoundNameLabel>
+            </RectButton>
+          </Link>
+        </>
+      )}
+    </View>
+  );
+}
+
+function SoundNameLabel({ children }: { children: ReactNode }) {
+  return <Text className="pyly-body pyly-ref text-center">{children}</Text>;
+}
+
+function FinalToneForkedArrow() {
+  return (
+    <View className="w-full gap-1">
+      {/* TODO: Swap in a responsive Rive animation when available. */}
+      <View className="flex-row gap-4">
+        <View className="flex-1" />
+        <View className="flex-1 items-center">
+          <DownArrow />
+        </View>
+        <View className="flex-1 items-center">
+          <DownArrow />
+        </View>
+      </View>
+      <View className="flex-row gap-4">
+        <View className="flex-1" />
+        <View className="flex-1 items-center">
+          <Text className="pyly-body text-fg/40">\\ /</Text>
+        </View>
+        <View className="flex-1" />
+      </View>
+      <View className="items-center">
+        <DownArrow />
+      </View>
+    </View>
   );
 }
 

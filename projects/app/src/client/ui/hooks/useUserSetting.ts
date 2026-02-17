@@ -30,6 +30,7 @@ export {
   hanziWordMeaningHintTextSetting,
   pinyinFinalToneDescriptionSetting,
   pinyinFinalToneImageSetting,
+  pinyinFinalToneNameSetting,
   pinyinSoundDescriptionSetting,
   pinyinSoundDescriptionSettingKey,
   pinyinSoundGroupNameSetting,

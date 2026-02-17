@@ -187,6 +187,12 @@ export function getHanziPronunciationHintKeyParams(
 // Pinyin final + tone details (mnemonic locations with tone-specific imagery)
 //
 
+export const pinyinFinalToneNameSetting = r.entity(`pftn/[soundId]/[tone]`, {
+  soundId: rPinyinSoundId().alias(`s`),
+  tone: r.string().alias(`n`),
+  text: r.string().alias(`t`),
+}) satisfies UserSettingTextEntity;
+
 export const pinyinFinalToneDescriptionSetting = r.entity(
   `pftd/[soundId]/[tone]`,
   {

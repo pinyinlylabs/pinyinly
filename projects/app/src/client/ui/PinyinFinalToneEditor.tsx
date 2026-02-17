@@ -6,6 +6,7 @@ import {
   getPinyinFinalToneKeyParams,
   pinyinFinalToneDescriptionSetting,
   pinyinFinalToneImageSetting,
+  pinyinFinalToneNameSetting,
   pinyinSoundNameSetting,
   useUserSetting,
 } from "@/client/ui/hooks/useUserSetting";
@@ -15,6 +16,8 @@ import type { PinyinSoundId } from "@/data/model";
 import {
   defaultPinyinSoundInstructions,
   defaultToneNames,
+  getDefaultFinalToneName,
+  loadPylyPinyinChart,
 } from "@/data/pinyin";
 import { Text, View } from "react-native";
 
@@ -22,6 +25,8 @@ const TONE_IDS = [`1`, `2`, `3`, `4`, `5`] as const;
 
 interface PinyinFinalToneEditorProps {
   finalSoundId: PinyinSoundId;
+  focusedTone?: string | null;
+  onToneLayout?: (tone: string, layoutY: number) => void;
 }
 
 /**
@@ -30,7 +35,16 @@ interface PinyinFinalToneEditorProps {
  */
 export function PinyinFinalToneEditor({
   finalSoundId,
+  focusedTone,
+  onToneLayout,
 }: PinyinFinalToneEditorProps) {
+  const chart = loadPylyPinyinChart();
+  const finalLabel = chart.soundToCustomLabel[finalSoundId] ?? finalSoundId;
+  const finalNameSetting = useUserSetting(pinyinSoundNameSetting, {
+    soundId: finalSoundId,
+  });
+  const finalName = finalNameSetting.value?.text ?? finalLabel;
+
   return (
     <View className="space-y-8">
       <View>
@@ -42,7 +56,14 @@ export function PinyinFinalToneEditor({
 
       <View className="space-y-6">
         {TONE_IDS.map((tone) => (
-          <ToneTileEditor key={tone} finalSoundId={finalSoundId} tone={tone} />
+          <ToneTileEditor
+            key={tone}
+            finalSoundId={finalSoundId}
+            finalName={finalName}
+            tone={tone}
+            isFocused={focusedTone === tone}
+            onToneLayout={onToneLayout}
+          />
         ))}
       </View>
     </View>
@@ -51,10 +72,19 @@ export function PinyinFinalToneEditor({
 
 interface ToneTileEditorProps {
   finalSoundId: PinyinSoundId;
+  finalName: string;
   tone: string;
+  isFocused: boolean;
+  onToneLayout?: (tone: string, layoutY: number) => void;
 }
 
-function ToneTileEditor({ finalSoundId, tone }: ToneTileEditorProps) {
+function ToneTileEditor({
+  finalSoundId,
+  finalName,
+  tone,
+  isFocused,
+  onToneLayout,
+}: ToneTileEditorProps) {
   const toneSoundId = tone as PinyinSoundId;
 
   // Get user-set tone name, fallback to default
@@ -67,6 +97,11 @@ function ToneTileEditor({ finalSoundId, tone }: ToneTileEditorProps) {
     defaultPinyinSoundInstructions[toneSoundId] ??
     tone;
 
+  const defaultFinalToneName = getDefaultFinalToneName({
+    finalName,
+    toneName,
+  });
+
   const descriptionSettingKey = getPinyinFinalToneKeyParams(finalSoundId, tone);
   const imageSettingKey = getPinyinFinalToneKeyParams(finalSoundId, tone);
   const descriptionSetting =
@@ -75,11 +110,28 @@ function ToneTileEditor({ finalSoundId, tone }: ToneTileEditorProps) {
     pinyinFinalToneImageSetting as unknown as UserSettingImageEntity;
 
   return (
-    <View className="rounded-lg border bg-fg-bg5 p-4">
-      <View className="mb-4 flex items-baseline justify-between">
-        <Text className="text-base font-medium text-fg">
-          Tone {tone}: {toneName}
-        </Text>
+    <View
+      className={`
+        rounded-lg border bg-fg-bg5 p-4
+
+        ${isFocused ? `border-cyan` : `border-fg-bg10`}
+      `}
+      onLayout={(event) => {
+        onToneLayout?.(tone, event.nativeEvent.layout.y);
+      }}
+    >
+      <View className="mb-4 flex-row flex-wrap items-baseline gap-2">
+        <Text className="text-base font-medium text-fg">Tone {tone}:</Text>
+        <InlineEditableSettingText
+          variant="body"
+          setting={pinyinFinalToneNameSetting}
+          settingKey={descriptionSettingKey}
+          placeholder="Name this tone location"
+          defaultValue={defaultFinalToneName}
+          displayClassName="text-base font-medium text-fg"
+          emptyClassName="text-base font-medium text-fg-dim"
+          inputClassName="text-base font-medium text-fg"
+        />
       </View>
 
       <View className="space-y-4">

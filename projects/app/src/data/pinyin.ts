@@ -430,6 +430,26 @@ export const defaultToneNames = {
   "5": `light and short`,
 } as Record<string, string>;
 
+export function getDefaultFinalToneName({
+  finalName,
+  toneName,
+}: {
+  finalName: string;
+  toneName: string;
+}): string {
+  const trimmedFinal = finalName.trim();
+  const trimmedTone = toneName.trim();
+
+  if (trimmedFinal.length === 0) {
+    return trimmedTone;
+  }
+  if (trimmedTone.length === 0) {
+    return trimmedFinal;
+  }
+
+  return `${trimmedTone} the ${trimmedFinal}`;
+}
+
 export const defaultPinyinSoundGroupRanks = Object.fromEntries(
   [`tones`, `__u-`, `__-`, `__i-`, `__ue-`, `.-`, `-__`].map((id, index) => [
     id,
