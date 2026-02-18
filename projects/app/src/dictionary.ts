@@ -1,32 +1,19 @@
 import {
-  isHanziCharacter,
-  parseIds,
-  splitHanziText,
-  strokeCountPlaceholderOrNull,
-  walkIdsNodeLeafs,
+    isHanziCharacter,
+    parseIds,
+    splitHanziText,
+    strokeCountPlaceholderOrNull,
+    walkIdsNodeLeafs,
 } from "@/data/hanzi";
-import type {
-  HanziCharacter,
-  HanziText,
-  HanziWord,
-  PinyinText,
-  PinyinUnit,
-} from "@/data/model";
-import {
-  hanziCharacterSchema,
-  hanziWordSchema,
-  HskLevel,
-  hskLevelSchema,
-  PartOfSpeech,
-  pinyinTextSchema,
-} from "@/data/model";
+import type { HanziCharacter, HanziText, HanziWord, PinyinText, PinyinUnit } from '@/data/model';
+import { hanziCharacterSchema, hanziWordSchema, HskLevel, hskLevelSchema, PartOfSpeech, pinyinSoundIdSchema, pinyinTextSchema } from '@/data/model';
 import { matchAllPinyinUnits } from "@/data/pinyin";
 import {
-  deepReadonly,
-  emptyArray,
-  mapArrayAdd,
-  memoize0,
-  memoize1,
+    deepReadonly,
+    emptyArray,
+    mapArrayAdd,
+    memoize0,
+    memoize1,
 } from "@pinyinly/lib/collections";
 import { invariant } from "@pinyinly/lib/invariant";
 import { UnexpectedValueError } from "@pinyinly/lib/types";
@@ -65,10 +52,7 @@ export const loadPinyinSoundThemeDetails = memoize0(
 export const pinyinSoundNameSuggestionsSchema = z
   .record(
     z.string(), // theme name
-    z.record(
-      z.string(), // PinyinSoundId
-      z.record(z.string(), z.string()),
-    ),
+    z.record(pinyinSoundIdSchema, z.record(z.string(), z.string())),
   )
   .transform(
     (x) =>
@@ -91,6 +75,32 @@ export const loadPinyinSoundNameSuggestions = memoize0(
       .transform(deepReadonly)
       .parse(
         await import(`./data/pinyinSoundNameSuggestions.asset.json`).then(
+          (x) => x.default,
+        ),
+      );
+  },
+);
+
+export const loadFinalToneFrequencies = memoize0(
+  async function loadFinalToneFrequencies() {
+    return z
+      .record(
+        pinyinSoundIdSchema, // (final)
+        z.record(pinyinSoundIdSchema, z.number()), // tone (as string) -> count
+      )
+      .transform((x) => {
+        const result = new Map<string, Map<number, number>>();
+        for (const [finalId, toneMap] of Object.entries(x)) {
+          result.set(
+            finalId,
+            new Map(Object.entries(toneMap).map(([t, c]) => [Number(t), c])),
+          );
+        }
+        return result;
+      })
+      .transform(deepReadonly)
+      .parse(
+        await import(`./data/finalToneFrequencies.asset.json`).then(
           (x) => x.default,
         ),
       );
